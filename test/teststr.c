@@ -184,11 +184,15 @@ static void snprintf_int64(CuTest *tc)
 static void string_error(CuTest *tc)
 {
      char buf[128], *rv;
-     
+
+     buf[0] = '\0';
      rv = apr_strerror(APR_ENOENT, buf, sizeof buf);
      CuAssertPtrEquals(tc, buf, rv);
-     /* ### relax this comparison. */
-     CuAssertStrEquals(tc, "No such file or directory", buf);
+     CuAssertTrue(tc, strlen(buf) > 0);
+
+     rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
+     CuAssertPtrEquals(tc, buf, rv);
+     CuAssertStrEquals(tc, "The timeout specified has expired", buf);
 }
 
 CuSuite *teststr(void)
