@@ -39,8 +39,7 @@ TARGETS = $(TARGET_LIB) export_vars.c apr.exp
 @INCLUDE_RULES@
 @INCLUDE_OUTPUTS@
 
-CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs \
-	$(APR_PCFILE)
+CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
 	libtool apr-config build/apr_rules.mk apr.pc
@@ -58,11 +57,7 @@ installbuilddir=@installbuilddir@
 apr-config.out: apr-config
 	sed 's,^\(location=\).*$$,\1installed,' < apr-config > $@
 
-$(APR_PCFILE): apr.pc
-	@rm -f $@
-	cp apr.pc $@
-
-install: $(TARGET_LIB) apr-config.out $(APR_PCFILE)
+install: $(TARGET_LIB) apr-config.out
 	if [ ! -d $(DESTDIR)$(includedir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(includedir); \
 	fi;
@@ -79,7 +74,7 @@ install: $(TARGET_LIB) apr-config.out $(APR_PCFILE)
 	if [ ! -d $(DESTDIR)$(libdir)/pkgconfig ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(libdir)/pkgconfig; \
 	fi;
-	cp -p $(APR_PCFILE) $(DESTDIR)$(libdir)/pkgconfig
+	cp -p apr.pc $(DESTDIR)$(libdir)/pkgconfig/$(APR_PCFILE)
 	if [ ! -d $(DESTDIR)$(installbuilddir) ]; then \
 	   	$(top_srcdir)/build/mkdir.sh $(DESTDIR)$(installbuilddir); \
 	fi; 
