@@ -56,7 +56,6 @@
 #include "apr_private.h"
 
 #include "apr_portable.h" /* for get_os_proc */
-#include "apr_thread_proc.h" /* for getpid */
 #include "apr_strings.h"
 #include "apr_general.h"
 #include "apr_pools.h"
@@ -71,6 +70,10 @@
 #include <stdlib.h>     /* for malloc, free and abort */
 #endif
 
+#if APR_HAVE_UNISTD_H
+#include <unistd.h>     /* for getpid */
+#endif
+ 
 
 /*
  * Debug level
@@ -1467,7 +1470,7 @@ static apr_size_t pool_num_bytes(apr_pool_t *pool)
 
     while (node) {
         for (index = 0; index < node->index; index++) {
-            size += node->endp[index] - node->beginp[index];
+            size += (char *)node->endp[index] - (char *)node->beginp[index];
         }
 
         node = node->next;
