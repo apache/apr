@@ -203,13 +203,11 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
      * Format the result.
      */
     tp = tmp;
-    for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
+    for (i = 0; i < (IN6ADDRSZ / INT16SZ);) {
         /* Are we inside the best run of 0x00's? */
-        if (best.base != -1 && i >= best.base &&
-            i < (best.base + best.len)) {
-            if (i == best.base) {
-                *tp++ = ':';
-            }
+        if (i == best.base) {
+            *tp++ = ':';
+            i += best.len;
             continue;
         }
         /* Are we following an initial run of 0x00s or any real hex? */
@@ -226,6 +224,7 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
             break;
         }
         tp += apr_snprintf(tp, sizeof tmp - (tp - tmp), "%x", words[i]);
+        i++;
     }
     /* Was it a trailing run of 0x00's? */
     if (best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ)) {
