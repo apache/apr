@@ -245,6 +245,9 @@ AC_SUBST(apr_inaddr_none)
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(gmtime_r localtime_r)
 AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
+if test "$iconv" = "1"; then
+  APR_CHECK_ICONV_INBUF
+fi
 AC_CHECK_FUNCS(mmap, [ mmap="1" ], [ mmap="0" ])
 if test "$native_mmap_emul" = "1"; then
     mmap="1"

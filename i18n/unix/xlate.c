@@ -80,6 +80,12 @@
 #include <iconv.h>
 #endif
 
+#ifdef APR_ICONV_INBUF_CONST
+#define ICONV_INBUF_TYPE const char **
+#else
+#define ICONV_INBUF_TYPE char **
+#endif
+
 #ifndef min
 #define min(x,y) ((x) <= (y) ? (x) : (y))
 #endif
@@ -194,7 +200,7 @@ static void check_sbcs(apr_xlate_t *convset)
     }
 
     inbytes_left = outbytes_left = sizeof(inbuf);
-    translated = iconv(convset->ich, &inbufptr, 
+    translated = iconv(convset->ich, (ICONV_INBUF_TYPE)&inbufptr, 
                        &inbytes_left, &outbufptr, &outbytes_left);
     if (translated != (size_t) -1 &&
         inbytes_left == 0 &&
@@ -285,10 +291,10 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
     size_t translated;
 
     if (convset->ich != (iconv_t)-1) {
-        char *inbufptr = (char *)inbuf;
+        const char *inbufptr = inbuf;
         char *outbufptr = outbuf;
         
-        translated = iconv(convset->ich, &inbufptr, 
+        translated = iconv(convset->ich, (ICONV_INBUF_TYPE)&inbufptr, 
                            inbytes_left, &outbufptr, outbytes_left);
         /* If everything went fine but we ran out of buffer, don't
          * report it as an error.  Caller needs to look at the two
