@@ -133,7 +133,7 @@ APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
                                                  ap_bucket_brigade *a, 
                                                  ap_iol *iol);
 
-APR_EXPORT(int) ap_brigade_vputs(ap_bucket_brigade *b, ...);
+APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va);
 
 /*   ******  Bucket List Functions  *****  */
 

@@ -130,7 +130,7 @@ APR_EXPORT(ap_bucket_list *) ap_bucket_list_create(void)
 {
     ap_bucket_list *b;
     
-    b = malloc(sizeof(*b));
+    b = calloc(1, sizeof(*b));
     return b;
 }
 
@@ -262,7 +262,8 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
     int j, k, rv;
     ap_ssize_t i;
 
-    if (b->tail->bucket->color == AP_BUCKET_rwmem) {
+    if (b->tail && b->tail->bucket && 
+        b->tail->bucket->color == AP_BUCKET_rwmem) {
         ap_bucket_rwmem *rw;
         rw = b->tail->bucket->data;
         /* I have no idea if this is a good idea or not.  Probably not.
@@ -291,10 +292,15 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
         /* This really requires an API.  Basically we are just adding
          * a bucket to a bucket list.
          */
-        b->tail->next = ap_bucket_list_create();
-        b->tail->next->prev = b->tail->next;
-        b->tail = b->tail->next;
-        b->tail->bucket = r;
+        if (b->tail->bucket == NULL) {
+            b->tail->bucket = r;
+        }
+        else {
+            b->tail->next = ap_bucket_list_create();
+            b->tail->next->prev = b->tail->next;
+            b->tail = b->tail->next;
+            b->tail->bucket = r;
+        }
     }
 
     return k;
