@@ -1,5 +1,12 @@
 Changes with APR b1  
 
+  *) Updated APR to pass the thread worker_function prototype 
+     (apr_thread_start_t) two parameters, the apr private data 
+     (apr_thread_t*) and the application private data (void*).  
+     Applications' worker_thread() routines may use apr_thread_pool_get
+     to access the pool (implemented using APR_POOL_*_ACCESSOR() macros.)
+     [Aaron Bannert <aaron@ebuilt.com>]
+
   *) Add Solaris 8's sendfilev() support.  This requires the following 
      patches from Sun: 111297 (Sparc), 111298 (x86).  You'll need the
      other patches listed in the patch description.  [Justin Erenkrantz]

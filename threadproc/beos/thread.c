@@ -88,6 +88,12 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
 	return APR_NOTDETACH;
 }
 
+void *dummy_worker(void *opaque)
+{
+    apr_thread_t *thd = (apr_thread_t*)opaque;
+    return thd->func(thd, thd->data);
+}
+
 apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
                              apr_thread_start_t func, void *data,
                              apr_pool_t *cont)
@@ -101,6 +107,8 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
     }
 
     (*new)->cntxt = cont;
+    (*new)->data = data;
+    (*new)->func = func;
 
     /* First we create the new thread...*/
 	if (attr)
@@ -113,7 +121,7 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
         return stat;
     }
 
-    (*new)->td = spawn_thread((thread_func)func, "apr thread", temp, data);
+    (*new)->td = spawn_thread((thread_func)dummy_func, "apr thread", temp, (*new));
     /* Now we try to run it...*/
     if (resume_thread((*new)->td) == B_NO_ERROR) {
         return APR_SUCCESS;
@@ -191,3 +199,5 @@ apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd,
     (*thd)->td = *thethd;
     return APR_SUCCESS;
 }
+
+APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
