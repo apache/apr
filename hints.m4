@@ -8,8 +8,13 @@ dnl  Generally, we force the setting of CC, and add flags
 dnl  to CFLAGS, LIBS and LDFLAGS. 
 dnl
 AC_DEFUN(APR_PRELOAD, [
-if test "$DID_APR_PRELOAD" != "yes" ; then
-    DID_APR_PRELOAD="yes"; export DID_APR_PRELOAD
+if test "$DID_APR_PRELOAD" = "yes" ; then
+
+  echo "APR hints file rules for $host already applied"
+
+else
+
+  DID_APR_PRELOAD="yes"; export DID_APR_PRELOAD
 
   echo "Applying APR hints file rules for $host"
 
