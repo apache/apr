@@ -96,6 +96,15 @@ VERSION		= 1,0,0
 VERSION_STR	= 1.0.0
 endif
 
+ifeq "$(words $(strip $(TARGET_nlm)))" "1"
+INCLUDE_BLDCMDS=1
+endif
+
+ifeq "$(words $(strip $(TARGET_lib)))" "1"
+INCLUDE_BLDCMDS=1
+endif
+
+ifeq "$(INCLUDE_BLDCMDS)" "1"
 
 $(OBJDIR)/%.o: %.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
@@ -149,6 +158,8 @@ endif
 ifneq "$(strip $(XDEFINES))" ""
 	@echo $(XDEFINES) >> $@
 endif
+
+endif # one target nlm
 
 #
 # Rules to build libraries
