@@ -69,13 +69,13 @@ ap_status_t ap_create_context(ap_context_t *cont, void *data, ap_context_t **new
     ap_pool_t *pool;
 
     if (cont) {
-        ap_context_t = ap_make_sub_pool(cont->pool);
+        pool = ap_make_sub_pool(cont->pool);
     }
     else {
-        ap_context_t = ap_init_alloc();;
+        pool = ap_init_alloc();;
     }
         
-    if (ap_context_t == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     
@@ -100,6 +100,34 @@ ap_status_t ap_create_context(ap_context_t *cont, void *data, ap_context_t **new
 
 ap_status_t ap_destroy_context(ap_context_t *cont)
 {
-    ap_destroy_pool(cont->pool);
+    ap_destroy_pool(cont);
     return APR_SUCCESS;
 }
+
+ap_status_t ap_set_userdata(struct context_t *cont, void *data)
+{
+    if (cont) { 
+        cont->prog_data = data;
+        return APR_SUCCESS;
+    }
+    return APR_ENOCONT;
+}
+
+ap_status_t ap_get_userdata(struct context_t *cont, void **data)
+{
+    if (cont) { 
+        (*data) = cont->prog_data;
+        return APR_SUCCESS;
+    }
+    return APR_ENOCONT;
+}
+
+ap_status_t ap_initialize(void)
+{
+    sigset_t sigset;
+
+    sigfillset(&sigset);
+    sigprocmask(SIG_BLOCK, &sigset, NULL);
+    return APR_SUCCESS;
+}
+ 

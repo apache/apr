@@ -178,3 +178,55 @@ ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_in
     return APR_SUCCESS;
 }
 
+ap_status_t ap_remove_poll_socket(struct pollfd_t *aprset, 
+                                  struct socket_t *sock, ap_int16_t events)
+{
+    if (events & APR_POLLIN) {
+        FD_CLR(sock->socketdes, aprset->read);
+    }
+    if (events & APR_POLLPRI) {
+        FD_CLR(sock->socketdes, aprset->read);
+    }
+    if (events & APR_POLLOUT) {
+        FD_CLR(sock->socketdes, aprset->write);
+    }
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_clear_poll_sockets(struct pollfd_t *aprset, ap_int16_t event)
+{
+    if (event & APR_POLLIN) {
+        FD_ZERO(aprset->read);
+    }
+    if (event & APR_POLLPRI) {
+        FD_ZERO(aprset->read);
+    }
+    if (event & APR_POLLOUT) {
+        FD_ZERO(aprset->write);
+    }
+    aprset->highsock = 0;
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_get_polldata(struct pollfd_t *pollfd, void *data)
+{
+    if (pollfd != NULL) {
+        return ap_get_userdata(pollfd->cntxt, &data);
+    }
+    else {
+        data = NULL;
+        return APR_ENOFILE;
+    }
+}
+
+ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data)
+{
+    if (pollfd != NULL) {
+        return ap_set_userdata(pollfd->cntxt, data);
+    }
+    else {
+        data = NULL;
+        return APR_ENOFILE;
+    }
+}
+

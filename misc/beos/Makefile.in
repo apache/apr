@@ -15,7 +15,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
 
 LIB=libmisc.a
 
-OBJS=start.o \
+OBJS=start.o getopt.o \
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
@@ -50,7 +50,3 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-start.o: start.c $(INCDIR)/apr_config.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- $(INCDIR)/apr_pools.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/hsregex.h

@@ -50,11 +50,3 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-access.o: access.c atime.h ../../include/apr_time.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- $(INCDIR)/apr_lib.h $(INCDIR)/apr_config.h \
- $(INCDIR)/hsregex.h
-time.o: time.c atime.h ../../include/apr_time.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- $(INCDIR)/apr_lib.h $(INCDIR)/apr_config.h \
- $(INCDIR)/hsregex.h

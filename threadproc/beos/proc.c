@@ -124,6 +124,12 @@ ap_status_t ap_setprocattr_cmdtype(struct procattr_t *attr,
     return APR_SUCCESS;
 }
 
+ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t detach) 
+{
+    attr->detached = detach;
+    return APR_SUCCESS;
+}
+
 ap_status_t ap_fork(ap_context_t *cont, struct proc_t **proc)
 {
     int pid;

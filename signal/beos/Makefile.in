@@ -14,7 +14,7 @@ INCDIR1=../../../include
 INCDIR2=../../file_io/beos
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
 
-LIB=../libsig.a
+LIB=libsig.a
 
 OBJS=signal.o \
 
@@ -51,5 +51,3 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-signal.o: signal.c ../../../include/apr_general.h \
- $(INCDIR)/apr_config.h ../../../include/apr_errno.h

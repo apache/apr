@@ -60,7 +60,7 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 
-ap_status_t ap_read(const struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
 

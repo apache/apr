@@ -57,9 +57,11 @@
 #include "apr_time.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_portable.h"
 #include <time.h>
 #include <errno.h>
 #include <string.h>
+
 ap_status_t ap_make_time(ap_context_t *cont, struct atime_t **new)
 {
     (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
@@ -70,40 +72,41 @@ ap_status_t ap_make_time(ap_context_t *cont, struct atime_t **new)
 
     (*new)->cntxt = cont;
     (*new)->explodedtime = NULL;
+    (*new)->currtime = NULL;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_current_time(struct atime_t *new)
 {
-    if (time(&new->currtime) == -1) {
-        return errno;
-    }
+    struct timeval newtime;
+    new->currtime = ap_palloc(new->cntxt, sizeof(struct timeval));
+    gettimeofday(new->currtime, NULL);
     return APR_SUCCESS; 
 }       
 
-ap_status_t ap_explode_time(struct atime_t *time, ap_timetype_e type)
+ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
 {
     switch (type) {
     case APR_LOCALTIME: {
-        time->explodedtime = localtime(&time->currtime);
+        atime->explodedtime = localtime(&atime->currtime->tv_sec);
         break;
     }
     case APR_UTCTIME: {
-        time->explodedtime = gmtime(&time->currtime);
+        atime->explodedtime = gmtime(&atime->currtime->tv_sec);
         break;
     }
     }
     return APR_SUCCESS;
 }
 
-ap_status_t ap_implode_time(struct atime_t *time)
+ap_status_t ap_implode_time(struct atime_t *atime)
 {
     int year;
     time_t days;
     static const int dayoffset[12] =
     {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
 
-    year = time->explodedtime->tm_year;
+    year = atime->explodedtime->tm_year;
 
     if (year < 70 || ((sizeof(time_t) <= 4) && (year >= 138))) {
         return APR_EBADDATE;
@@ -111,22 +114,63 @@ ap_status_t ap_implode_time(struct atime_t *time)
 
     /* shift new year to 1st March in order to make leap year calc easy */
 
-    if (time->explodedtime->tm_mon < 2)
+    if (atime->explodedtime->tm_mon < 2)
         year--;
 
     /* Find number of days since 1st March 1900 (in the Gregorian calendar). */
 
     days = year * 365 + year / 4 - year / 100 + (year / 100 + 3) / 4;
-    days += dayoffset[time->explodedtime->tm_mon] + 
-            time->explodedtime->tm_mday - 1;
+    days += dayoffset[atime->explodedtime->tm_mon] + 
+            atime->explodedtime->tm_mday - 1;
     days -= 25508;              /* 1 jan 1970 is 25508 days since 1 mar 1900 */
 
-    days = ((days * 24 + time->explodedtime->tm_hour) * 60 + 
-             time->explodedtime->tm_min) * 60 + time->explodedtime->tm_sec;
+    days = ((days * 24 + atime->explodedtime->tm_hour) * 60 + 
+             atime->explodedtime->tm_min) * 60 + atime->explodedtime->tm_sec;
 
     if (days < 0) {
         return APR_EBADDATE;
     }
-    time->currtime = days;            /* must be a valid time */
+    atime->currtime = ap_palloc(atime->cntxt, sizeof(struct timeval));
+    atime->currtime->tv_sec = days;            /* must be a valid time */
+    atime->currtime->tv_usec = 0;
     return APR_SUCCESS;
 }
+
+ap_status_t ap_get_os_time(struct atime_t *thetime, ap_os_time_t **atime)
+{
+    if (thetime == NULL) {
+        return APR_ENOTIME;
+    }
+    if (thetime->currtime == NULL) {
+        ap_implode_time(thetime); 
+    }
+    atime = &(thetime->currtime);
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_put_os_time(ap_context_t *cont, struct atime_t **thetime, 
+                           ap_os_time_t *atime)
+{
+    if (cont == NULL) {
+        return APR_ENOCONT;
+    }
+    if (thetime == NULL) {
+        (*thetime) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
+        (*thetime)->cntxt = cont;
+    }
+    (*thetime)->currtime = atime;
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_timediff(struct atime_t *a, struct atime_t *b, ap_int32_t *rv)
+{
+    register int us, s;
+
+    us = a->currtime->tv_usec - b->currtime->tv_usec;
+    us /= 1000;
+    s = a->currtime->tv_sec - b->currtime->tv_sec;
+    s *= 1000;
+    *rv = s + us;
+    return APR_SUCCESS;
+} 
+

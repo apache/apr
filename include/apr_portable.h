@@ -108,6 +108,27 @@ typedef PID                   ap_os_proc_t;
 typedef PULONG                ap_os_threadkey_t; 
 typedef struct timeval        ap_os_time_t;
 
+#elif defined(BEOS)
+#include <kernel/OS.h>
+
+struct os_lock_t {
+	/* Inter proc */
+	sem_id sem_interproc;
+	int32  ben_interproc;
+	/* Intra Proc */
+	sem_id sem_intraproc;
+	int32  ben_intraproc;
+};
+
+typedef int                   ap_os_file_t;
+typedef DIR                   ap_os_dir_t;
+typedef int                   ap_os_sock_t;
+typedef struct os_lock_t      ap_os_lock_t;
+typedef thread_id             ap_os_thread_t;
+typedef pid_t                 ap_os_proc_t;
+typedef int                   ap_os_threadkey_t;
+typedef struct timeval        ap_os_time_t;
+
 #else
 /* Any other OS should go above this one.  This is the lowest common
  * denominator typedefs for  all UNIX-like systems.  :)
