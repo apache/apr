@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Get apr_sendfile() working on HP-UX.  This gets APR to build on
+     HP-UX without having to turn off APR_HAS_SENDFILE.  [Jeff Trawick]
+
   *) Force FreeBSD to compile without threads by default.  To enable
      threads, use --enable-threads on the configure line.
      [Ryan Bloom]
