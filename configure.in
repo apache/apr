@@ -192,6 +192,7 @@ case "$host:$CC" in
 	;;
 esac
 LOCAL_MM_LIB="../shmem/unix/mm/libmm.la"
+config_subdirs="none"
 case $host in
    i386-ibm-aix* | *-ibm-aix[1-2].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
        OSDIR="aix"
