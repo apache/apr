@@ -12,7 +12,7 @@ $(TARGET): Makefile
 	$(MAKE) /nologo /f Makefile $(TARGET)
 
 Makefile: Makefile.in MakeWin32Make.pl
-	perl MakeWin32Make.pl
+	awk -f MakeWin32Make.awk <Makefile.in >Makefile
 
 clean:
-        del makefile *.obj *.exe *.idb *.pdb
+        del Makefile *.obj *.exe *.idb *.pdb
