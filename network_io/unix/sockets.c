@@ -230,6 +230,12 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
         (*new)->local_port_unknown = 1;
     }
 
+#if APR_TCP_NODELAY_INHERITED
+    if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) == 1) {
+        apr_set_option(&(*new)->netmask, APR_TCP_NODELAY, 1);
+    }
+#endif /* TCP_NODELAY_INHERITED */
+
     if (sock->local_interface_unknown ||
         /* XXX IPv6 issue */
         sock->local_addr->sa.sin.sin_addr.s_addr == 0) {

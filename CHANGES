@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Recognize systems where the TCP_NODELAY setting is inherited from
+     the listening socket, and optimize apr_setsockopt(APR_TCP_NODELAY)
+     accordingly.  [Jeff Trawick]
+
+  *) Recognize the presence of getnameinfo() on Tru64.  [David Reid]
+
   *) Allow APR to be installed. [Ryan Bloom]
 
   *) Generate config.nice for easy re-run of configure. [Roy Fielding]
