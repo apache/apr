@@ -1,4 +1,6 @@
 Changes with APR b1  
+  *) Win32: apr_sendfile() should return APR_ENOTIMPL if
+     oslevel < WINNT. [Bill Stoddard]
 
   *) Put new pools code in place which allows applications to
      switch off locking on pools operations in case a pool is
