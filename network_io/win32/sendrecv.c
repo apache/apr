@@ -332,9 +332,16 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                 if (rv == WAIT_OBJECT_0)
                     status = APR_SUCCESS;
                 else if (rv == WAIT_TIMEOUT)
-                    status = WAIT_TIMEOUT;
-                else if (rv == WAIT_ABANDONED)
-                    status = WAIT_ABANDONED;
+                    status = APR_FROM_OS_ERROR(WAIT_TIMEOUT);
+                else if (rv == WAIT_ABANDONED) {
+                    /* Hummm... WAIT_ABANDONDED is not an error code. It is
+                     * a return specific to the Win32 WAIT functions that
+                     * indicates that a thread exited while holding a
+                     * mutex. Should consider triggering an assert
+                     * to detect the condition...
+                     */
+                    status = APR_FROM_OS_ERROR(WAIT_TIMEOUT);
+                }
                 else
                     status = apr_get_os_error();
             }
