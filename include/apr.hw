@@ -199,11 +199,13 @@
 
 /* Typedefs that APR needs. */
 
-typedef  short           apr_int16_t;
-typedef  unsigned short  apr_uint16_t;
+typedef  unsigned char     apr_byte_t;
+
+typedef  short             apr_int16_t;
+typedef  unsigned short    apr_uint16_t;
                                                
-typedef  int           apr_int32_t;
-typedef  unsigned int  apr_uint32_t;
+typedef  int               apr_int32_t;
+typedef  unsigned int      apr_uint32_t;
                                                
 typedef  __int64           apr_int64_t;
 typedef  unsigned __int64  apr_uint64_t;
