@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Add a with-sendfile option, so that people on platforms without a
+     sendfile implementation for APR can easily disable it from the 
+     configure line.  [Ryan Bloom]
+
   *) Change the check for netinet/tcp.h to work around an issue with
      that header file on IRIX 6.5 which prevented it from being
      detected.  PR #6459  [Jeff Trawick]
