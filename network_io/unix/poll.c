@@ -176,7 +176,7 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
     pollset = (struct pollfd *)ap_palloc(aprset->cntxt, 
                                          sizeof(struct pollfd) * (*nsds));
 
-    for (i = 0; i < (*nsds); i++) {
+    for (i = 0; i < aprset->curpos; i++) {
         pollset[i].fd = aprset->sock[i];
         pollset[i].events = aprset->events[i];
     }
@@ -185,10 +185,10 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
         timeout *= 1000;
     }
 
-    rv = poll(pollset, (*nsds), timeout);
+    rv = poll(pollset, aprset->curpos, timeout);
     (*nsds) = rv;
     
-    for (i = 0; i < (*nsds); i++) {
+    for (i = 0; i < aprset->curpos; i++) {
         aprset->revents[i] = get_revent(pollset[i].revents);
     }
     
