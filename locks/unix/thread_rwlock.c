@@ -59,12 +59,13 @@
 
 #ifdef HAVE_PTHREAD_RWLOCK_INIT
 
+/* The rwlock must be initialized but not locked by any thread when
+ * cleanup is called. */
 static apr_status_t thread_rwlock_cleanup(void *data)
 {
     apr_thread_rwlock_t *rwlock = (apr_thread_rwlock_t *)data;
     apr_status_t stat;
 
-    pthread_rwlock_unlock(rwlock->rwlock);
     stat = pthread_rwlock_destroy(rwlock->rwlock);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
@@ -99,7 +100,6 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        thread_rwlock_cleanup(new_rwlock);
         return stat;
     }
 
@@ -184,11 +184,8 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 {
-    apr_status_t stat;
-    if ((stat = thread_rwlock_cleanup(rwlock)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(rwlock->pool, rwlock, thread_rwlock_cleanup);
-        return APR_SUCCESS;
-    }
+    apr_status_t stat = thread_rwlock_cleanup(rwlock);
+    apr_pool_cleanup_kill(rwlock->pool, rwlock, thread_rwlock_cleanup);
     return stat;
 }
 
