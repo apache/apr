@@ -59,8 +59,8 @@
 
 #if APR_HAS_DSO
 
-apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path, 
-                        apr_pool_t *ctx)
+APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle, 
+                                       const char *path, apr_pool_t *ctx)
 {
     HINSTANCE os_handle;
     UINT em;
@@ -114,7 +114,7 @@ apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path
     return APR_SUCCESS;
 }
     
-apr_status_t apr_dso_unload(struct apr_dso_handle_t *handle)
+APR_DECLARE(apr_status_t) apr_dso_unload(struct apr_dso_handle_t *handle)
 {
     if (!FreeLibrary(handle->handle)) {
         return apr_get_os_error();
@@ -122,7 +122,7 @@ apr_status_t apr_dso_unload(struct apr_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
                          struct apr_dso_handle_t *handle, 
                          const char *symname)
 {
@@ -136,7 +136,7 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym,
     return APR_SUCCESS;
 }
 
-const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize)
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize)
 {
     return apr_strerror(dso->load_error, buf, bufsize);
 }

@@ -56,7 +56,7 @@
 
 #if APR_HAS_DSO
 
-apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
               apr_pool_t *ctx)
 {
     image_id newid;
@@ -70,7 +70,7 @@ apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
+APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
     if(unload_add_on(handle->handle) < B_NO_ERROR)
       return APR_EINIT;
@@ -78,7 +78,7 @@ apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
                const char *symname)
 {
     int err;
@@ -95,7 +95,7 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
     return APR_SUCCESS;
 }
 
-const char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
     strncpy(strerror(errno), buffer, buflen);
     return buffer;

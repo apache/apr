@@ -87,14 +87,14 @@ typedef void *                        apr_dso_handle_sym_t;
  * @param path Path to the DSO library
  * @param ctx Pool to use. 
  */
-apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, 
-                        apr_pool_t *ctx);
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+                                       const char *path, apr_pool_t *ctx);
 
 /**
  * Close a DSO library.
  * @param handle handle to close.
  */
-apr_status_t apr_dso_unload(apr_dso_handle_t *handle);
+APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle);
 
 /**
  * Load a symbol from a DSO handle.
@@ -102,16 +102,18 @@ apr_status_t apr_dso_unload(apr_dso_handle_t *handle);
  * @param handle handle to load the symbol from.
  * @param symname Name of the symbol to load.
  */
-apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
-                       const char *symname);
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+                                      apr_dso_handle_t *handle,
+                                      const char *symname);
 
 /**
  * Report more information when a DSO function fails.
  * @param dso The dso handle that has been opened
  * @param buf Location to store the dso error
  * @param bufsize The size of the provided buffer
+ * @deffunc const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize)
  */
-const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize);
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize);
 
 #endif /* APR_HAS_DSO */
 
