@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 00:30:59 $]
+Last modified at [$Date: 2002/07/12 00:53:43 $]
 
 Release:
 
@@ -120,13 +120,7 @@ CURRENT VOTES:
        Saying that apr_time_t doesn't imply seconds is to ignore the
        fact that all of those httpd functions used to create APR were
        defined in terms of seconds and make no use of microseconds.]
-
-      [wrowe: read code.]
-
-        [fielding: I read it.  I know exactly which functions from httpd
-         that I wrote were subsequently broken when they were moved into APR.]
-
-      [fielding: Meanwhile, the only reason we have this stupid debate is 
+       Meanwhile, the only reason we have this stupid debate is 
        because wrowe insists that time_t is 32 bits and therefore dies in 2038.
        In fact, time_t is 64 bits on 64bit NT, Linux, OSF, and probably
        others that I haven't checked.  In any case, since we use the
