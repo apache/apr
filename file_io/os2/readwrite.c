@@ -328,8 +328,10 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
         
         if (str[i] == '\r' || str[i] == '\x1A')
             i--;
-        else if (str[i] == '\n')
+        else if (str[i] == '\n') {
+            i++;
             break;
+        }
     }
     str[i] = 0;
     return rv;
