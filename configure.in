@@ -220,7 +220,7 @@ if test "$native_mmap_emul" = "1"; then
 fi
 AC_CHECK_FUNCS(hstrerror)
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
-AC_CHECK_FUNCS(bcopy, [ have_bcopy="1" ], [ have_bcopy="0"] )
+AC_CHECK_FUNCS(bzero, [ have_bzero="1" ], [ have_bzero="0"] )
 
 AC_SUBST(sendfile)
 AC_SUBST(fork)
