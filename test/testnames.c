@@ -100,6 +100,7 @@ int main(void)
 {
     char rootpath[256];
     char addpath[256];
+    char *eos;
 
     if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Couldn't initialize.");
@@ -117,9 +118,15 @@ int main(void)
         fprintf(stdout, "\nEnter a root path$ ");
         if (!fgets(rootpath, 256, stdin))
             exit(0);
+        for (eos = strchr(rootpath, '\0'); --eos >= rootpath; )
+            if (isspace(*eos))
+                *eos = '\0';
         fprintf(stdout, "Enter an add path$ ");
         if (!fgets(addpath, 256, stdin))
             exit(0);
+        for (eos = strchr(addpath, '\0'); --eos >= addpath; )
+            if (isspace(*eos))
+                *eos = '\0';
         merge_result(rootpath, addpath, 0);
         merge_result(rootpath, addpath, APR_FILEPATH_NOTABOVEROOT);
         merge_result(rootpath, addpath, APR_FILEPATH_SECUREROOT);
