@@ -82,7 +82,7 @@ static apr_status_t wait_for_io_or_timeout(apr_file_t *file, int for_read)
         else {
             tvptr = NULL;
         }
-        srv = select(FD_SETSIZE,
+        srv = select(file->filedes + 1,
             for_read ? &fdset : NULL,
             for_read ? NULL : &fdset,
             NULL,

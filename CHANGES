@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fix select() argument call when waiting for IO.  PR 9674.
+     [David MacKenzie <djm@pix.net>]
+
   *) Add a new lock API (apr_global_mutex_t) to provide guaranteed
      cross-process AND cross-thread mutual exclusion.  [Aaron Bannert]
 
