@@ -6,9 +6,26 @@ as part of the server until we agree on a solution.
 Design Rationale
 ----------------
 
-   [Roy is collecting these from his mail archives]
-   layered-IO-1998.txt
-   bucket_brigades.txt
+   doc_SFmtg.txt
+      -- notes from the 1998 design meeting in SF
+
+   doc_stacked_io.txt
+      -- Ed and Alexei's vision of stacked-io with layer caching
+
+   doc_page_io.txt
+      -- Dean's comments on performance considerations
+
+   doc_dean_iol.txt
+      -- Rationale behind the IOL stuff that is now in APR
+
+   doc_bucket_brigades.txt
+      -- Roy's ramblings about the bucket brigades design
+
+   doc_wishes.txt
+      -- Everyone's requirements for layered-IO and filters
+
+   doc_greg_filters.txt
+      -- Greg's initial filter design rationale
 
 Bachelor #1
 -----------
