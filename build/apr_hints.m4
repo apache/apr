@@ -131,6 +131,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         ;;
     *-openbsd*)
 	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREADS])
+        # binding to an ephemeral port fails on OpenBSD so override
+        # the test for O_NONBLOCK inheritance across accept().
+        APR_SETIFNULL(ac_cv_o_nonblock_inherited, [yes])
 	;;
     *-netbsd*)
 	APR_ADDTO(CPPFLAGS, [-DNETBSD])
