@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/13 04:58:44 $]
+Last modified at [$Date: 2002/01/14 10:05:15 $]
 
 Release:
 
@@ -45,6 +45,14 @@ RELEASE SHOWSTOPPERS:
              apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * Implement apr_pool_join and apr_pool_lock.  Those functions
+      are noops at the moment.
+
+    * Add stats to the pools code.  We already have basic stats
+      in debug mode.  Stats that tell us about wasted memory
+      in the production code require more thought.
+        Status: Sander Striker is looking into this (low priority)
 
     * Deal with largefiles properly on those platforms that support it.
 
