@@ -320,7 +320,7 @@ apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
     }
 }
 
-apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
+apr_status_t apr_get_dir_filename(const char **new, apr_dir_t *thedir)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -333,7 +333,7 @@ apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
     }
     else
 #endif
-        (*new) = apr_pstrdup(thedir->cntxt, thedir->n.entry->cFileName);
+        (*new) = thedir->n.entry->cFileName;
     return APR_SUCCESS;
 }
 

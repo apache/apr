@@ -745,7 +745,7 @@ apr_status_t apr_get_filename(const char **new_path, apr_file_t *thefile);
  * @param new_path the file name of the directory entry. 
  * @param thedir the currently open directory.
  */                        
-apr_status_t apr_get_dir_filename(char **new_path, apr_dir_t *thedir);
+apr_status_t apr_get_dir_filename(const char **new_path, apr_dir_t *thedir);
 
 /**
  * Return the data associated with the current file.
