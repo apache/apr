@@ -98,6 +98,10 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_pool_tag(pool, "apr_initialize");
 
+    if ((status = apr_atomic_init(pool)) != APR_SUCCESS) {
+        return status;
+    }
+
     apr_signal_init(pool);
 
     return APR_SUCCESS;
