@@ -133,7 +133,7 @@ typedef void (Sigfunc)(int);
 #define API_EXPORT(x)            x
 #define API_EXPORT_NONSTD(x)     x
 #define API_THREAD_FUNC __stdcall
-#define API_VAR_IMPORT _declspec(dllimport)
+#define API_VAR_IMPORT extern _declspec(dllimport)
 
 #define strcasecmp(s1, s2)       stricmp(s1, s2)
 #define sleep(t)                 Sleep(t * 1000)
