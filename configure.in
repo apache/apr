@@ -489,7 +489,7 @@ AC_ARG_ENABLE(dso,
     fi
     if test "$tempdso" = "no"; then
         case $OS in
-            *os390)
+            *os390|*-os2*)
                 tempdso="yes"
                 ;;
         esac
