@@ -71,7 +71,7 @@
 
 struct apr_thread_rwlock_t {
     apr_pool_t *pool;
-    pthread_rwlock_t *rwlock;
+    pthread_rwlock_t rwlock;
 };
 
 #else

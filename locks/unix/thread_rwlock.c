@@ -66,7 +66,7 @@ static apr_status_t thread_rwlock_cleanup(void *data)
     apr_thread_rwlock_t *rwlock = (apr_thread_rwlock_t *)data;
     apr_status_t stat;
 
-    stat = pthread_rwlock_destroy(rwlock->rwlock);
+    stat = pthread_rwlock_destroy(&rwlock->rwlock);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
         stat = errno;
@@ -81,22 +81,10 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
     apr_thread_rwlock_t *new_rwlock;
     apr_status_t stat;
 
-    new_rwlock = (apr_thread_rwlock_t *)apr_pcalloc(pool,
-                                                  sizeof(apr_thread_rwlock_t));
-
-    if (new_rwlock == NULL) {
-        return APR_ENOMEM;
-    }
-
+    new_rwlock = apr_palloc(pool, sizeof(apr_thread_rwlock_t));
     new_rwlock->pool = pool;
-    new_rwlock->rwlock = (pthread_rwlock_t *)apr_palloc(pool, 
-                                                     sizeof(pthread_rwlock_t));
 
-    if (new_rwlock->rwlock == NULL) {
-        return APR_ENOMEM;
-    }
-
-    if ((stat = pthread_rwlock_init(new_rwlock->rwlock, NULL))) {
+    if ((stat = pthread_rwlock_init(&new_rwlock->rwlock, NULL))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
@@ -115,7 +103,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_rdlock(apr_thread_rwlock_t *rwlock)
 {
     apr_status_t stat;
 
-    stat = pthread_rwlock_rdlock(rwlock->rwlock);
+    stat = pthread_rwlock_rdlock(&rwlock->rwlock);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
         stat = errno;
@@ -128,7 +116,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwloc
 {
     apr_status_t stat;
 
-    stat = pthread_rwlock_tryrdlock(rwlock->rwlock);
+    stat = pthread_rwlock_tryrdlock(&rwlock->rwlock);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
         stat = errno;
@@ -144,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock)
 {
     apr_status_t stat;
 
-    stat = pthread_rwlock_wrlock(rwlock->rwlock);
+    stat = pthread_rwlock_wrlock(&rwlock->rwlock);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
         stat = errno;
@@ -157,7 +145,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwloc
 {
     apr_status_t stat;
 
-    stat = pthread_rwlock_trywrlock(rwlock->rwlock);
+    stat = pthread_rwlock_trywrlock(&rwlock->rwlock);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
         stat = errno;
@@ -173,7 +161,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 {
     apr_status_t stat;
 
-    stat = pthread_rwlock_unlock(rwlock->rwlock);
+    stat = pthread_rwlock_unlock(&rwlock->rwlock);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
         stat = errno;
