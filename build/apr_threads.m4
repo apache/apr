@@ -110,7 +110,7 @@ AC_DEFUN(APR_PTHREADS_CHECK,[
 
 AC_CACHE_CHECK([for CFLAGS needed for pthreads], [apr_cv_pthreads_cflags],
 [apr_ptc_cflags=$CFLAGS
- for flag in none -kthread -pthread -pthreads -mthreads -Kthread -threads; do 
+ for flag in none -kthread -pthread -pthreads -mt -mthreads -Kthread -threads; do 
     CFLAGS=$apr_ptc_cflags
     test "x$flag" != "xnone" && CFLAGS="$CFLAGS $flag"
     APR_PTHREADS_TRY_RUN([
