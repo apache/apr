@@ -123,7 +123,8 @@ ap_status_t ap_mmap_create(struct mmap_t **new, const char *fname,
     (*new)->size = st.st_size;
     (*new)->area = aid;
     (*new)->cntxt = cont;
-           
+    (*new)->statted = 1;
+               
     /* register the cleanup... */ 
     ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
              ap_null_cleanup);
@@ -145,7 +146,7 @@ ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file,
     if (file->filedes == -1)
         /* there isn't a file handle so how can we mmap?? */
         return APR_EBADF;
-    (*new) = (struct mmap_t*)ap_palloc(file->cntxt, sizeof(struct mmap_t));
+    (*new) = (struct mmap_t*)ap_palloc(cont, sizeof(struct mmap_t));
     
     if (!file->stated) {
         /* hmmmm... we need to stat the file now */
@@ -180,6 +181,48 @@ ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file,
     (*new)->size = file->size;
     (*new)->area = aid;
     (*new)->cntxt = cont;
+    (*new)->statted = 1;
+    
+    /* register the cleanup... */ 
+    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
+             ap_null_cleanup);
+
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_mmap_size_create(ap_mmap_t **new, ap_file_t *file, ap_size_t mmapsize,
+                                ap_context_t *cont)
+{
+    char *mm;
+    area_id aid = -1;
+    char *areaname = "apr_mmap\0";
+    uint32 size;           
+    
+    if (file->buffered)
+        return APR_EBADF;
+    if (file->filedes == -1)
+        return APR_EBADF;
+    (*new) = (struct mmap_t*)ap_palloc(cont, sizeof(struct mmap_t));
+      
+    size = ((mmapsize -1) / B_PAGE_SIZE) + 1;
+
+    aid = create_area(areaname, (void*)&mm, B_ANY_ADDRESS, size * B_PAGE_SIZE, 
+        B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
+    free(areaname);
+    
+    if (aid < B_OK) {
+        /* we failed to get an mmap'd file... */
+        return APR_ENOMEM;
+    }  
+    if (aid >= B_OK)
+        read(file->filedes, mm, mmapsize);    
+
+    (*new)->filename = ap_pstrdup(cont, file->fname);
+    (*new)->mm = mm;
+    (*new)->size = mmapsize;
+    (*new)->area = aid;
+    (*new)->cntxt = cont;
+    (*new)->statted = 0;
 
     /* register the cleanup... */ 
     ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,

@@ -69,6 +69,7 @@ struct mmap_t {
     area_id area;
     void *mm;
     size_t size;
+    ap_int32_t statted;
 };
 
 ap_status_t mmap_cleanup(void *);
