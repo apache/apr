@@ -70,6 +70,33 @@
 
 #endif /* HAVE_SENDFILE */
 
+static ap_status_t wait_for_io_or_timeout(struct socket_t *sock, int for_read)
+{
+    struct timeval tv;
+    fd_set fdset;
+    int srv;
+
+    do {
+	FD_ZERO(&fdset);
+	FD_SET(sock->socketdes, &fdset);
+	tv.tv_sec = sock->timeout;
+	tv.tv_usec = 0;
+	srv = select(FD_SETSIZE,
+	    for_read ? &fdset : NULL,
+	    for_read ? NULL : &fdset,
+	    NULL,
+	    sock->timeout < 0 ? NULL : &tv);
+    } while (srv == -1 && errno == EINTR);
+
+    if (srv == 0) {
+	return APR_TIMEUP;
+    }
+    else if (srv < 0) {
+	return errno;
+    }
+    return APR_SUCCESS;
+}
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *, time_t)
  *    Send data over a network.
@@ -89,44 +116,21 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
-        struct timeval *tv;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout < 0) {
-                tv = NULL;
-            }
-            else {
-		/* XXX:  BUHHH? wow, what a memory leak! */
-                tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-                tv->tv_sec  = sock->timeout;
-                tv->tv_usec = 0;
-            }
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-            (*len) = 0;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-            (*len) = 0;
-            return errno;
-        }
+	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+	if (arv != APR_SUCCESS) {
+	    *len = 0;
+	    return arv;
+	}
         else {
             do {
                 rv = write(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
-            if (rv == -1) {
-                (*len) = 0;
-                return errno;
-            }
         }
     }
-    /* XXX: if rv == -1 this is wrong. */
+    if (rv == -1) {
+	*len = 0;
+	return errno;
+    }
     (*len) = rv;
     return APR_SUCCESS;
 }
@@ -150,49 +154,21 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
-        struct timeval *tv;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout < 0) {
-                tv = NULL;
-            }
-            else {
-		/* XXX:  BUHHH? wow, what a memory leak! */
-                tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-                tv->tv_sec  = sock->timeout;
-                tv->tv_usec = 0;
-            }
-
-            srv = select(FD_SETSIZE, &fdset, NULL, NULL, tv);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-            (*len) = -1;
-            return errno;
-        }
+	ap_status_t arv = wait_for_io_or_timeout(sock, 1);
+	if (arv != APR_SUCCESS) {
+	    *len = 0;
+	    return arv;
+	}
         else {
             do {
                 rv = read(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
-            if (rv == -1) {
-                (*len) = 0;
-                return errno;
-            }
         }
     }
-    else if (rv == -1 && errno == EAGAIN && sock->timeout == 0) {
+    if (rv == -1) {
         (*len) = 0;
         return errno;
     }
-    /* XXX: if rv == -1 this is wrong. */
     (*len) = rv;
     return APR_SUCCESS;
 }
@@ -209,7 +185,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
  *        The number of bytes actually sent is stored in argument 3.
  */
 ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
-                     ap_int32_t nvec, ap_int32_t * nbytes)
+                     ap_int32_t nvec, ap_int32_t * len)
 {
     ssize_t rv;
 
@@ -218,41 +194,22 @@ ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
-        struct timeval *tv;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout < 0) {
-        	tv = NULL;
-            }
-            else {
-		/* XXX:  BUHHH? wow, what a memory leak! */
-        	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-        	tv->tv_sec = sock->timeout;
-        	tv->tv_usec = 0;
-            }
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-            (*nbytes) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-            (*nbytes) = -1;
-            return errno;
-        }
+	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+	if (arv != APR_SUCCESS) {
+	    *len = 0;
+	    return arv;
+	}
         else {
             do {
         	rv = writev(sock->socketdes, vec, nvec);
             } while (rv == -1 && errno == EINTR);
         }
     }
-    /* XXX: if rv == -1 this is wrong. */
-    (*nbytes) = rv;
+    if (rv == -1) {
+	*len = 0;
+	return errno;
+    }
+    (*len) = rv;
     return APR_SUCCESS;
 }
 
@@ -270,7 +227,7 @@ ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
  * arg 6) OS-specific flags to pass to sendfile()
  * NOTE:  This functions acts like a blocking write by default.  To change 
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
- *        The number of bytes actually sent is stored in argument 4.
+ *        The number of bytes actually sent is stored in argument 5.
  */
 
  /* TODO: Verify that all platforms handle the fd the same way 
@@ -286,19 +243,21 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     off_t off = *offset;
     int corkflag = 1;
     int rv, nbytes = 0;
+    ap_status_t arv;
 
     /* TCP_CORK keeps us from sending partial frames when we shouldn't */
     rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
         	    (const void *) &corkflag, sizeof(corkflag));
     if (rv == -1) {
+	*len = 0;
         return errno;
     }
 
     /* Now write the headers */
     if (hdtr->numheaders > 0) {
         ap_int32_t hdrbytes;
-        rv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
-        if (rv != APR_SUCCESS) {
+        arv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
+        if (arv != APR_SUCCESS) {
 	    *len = 0;
             return errno;
         }
@@ -314,34 +273,11 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
-        struct timeval *tv;
-        fd_set fdset;
-        int srv;
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout < 0) {
-        	tv = NULL;
-            }
-            else {
-		/* XXX:  BUHHH? wow, what a memory leak! */
-        	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-        	tv->tv_sec = sock->timeout;
-        	tv->tv_usec = 0;
-            }
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-	    /* XXX: -1 bytes sent?  that's wrong */
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-	    /* XXX: -1 bytes sent?  that's wrong */
-            (*len) = -1;
-            return errno;
-        }
+	arv = wait_for_io_or_timeout(sock, 0);
+	if (arv != APR_SUCCESS) {
+	    *len = 0;
+	    return arv;
+	}
         else {
             do {
         	rv = sendfile(sock->socketdes,	/* socket */
@@ -362,9 +298,9 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     /* Now write the footers */
     if (hdtr->numtrailers > 0) {
         ap_int32_t trbytes;
-        rv = ap_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trbytes);
+        arv = ap_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trbytes);
         nbytes += trbytes;
-        if (rv == -1) {
+        if (arv != APR_SUCCESS) {
 	    *len = nbytes;
             return errno;
         }
@@ -376,8 +312,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                     (const void *) &corkflag, sizeof(corkflag));
 
     (*len) = nbytes;
-    /* XXX: this is wrong if rv == -1 */
-    return APR_SUCCESS;
+    return rv < 0 ? errno : APR_SUCCESS;
 }
 
 /* These are just demos of how the code for the other OSes.
@@ -386,6 +321,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
  */
 
 #elif defined(__FreeBSD__)
+
 /* Release 3.1 or greater */
 ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
@@ -414,35 +350,11 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
-        struct timeval *tv;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout < 0) {
-        	tv = NULL;
-            }
-            else {
-		/* XXX:  BUHHH? wow, what a memory leak! */
-        	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-        	tv->tv_sec = sock->timeout;
-        	tv->tv_usec = 0;
-            }
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-	    /* XXX: -1 is wrong */
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-	    /* XXX: -1 is wrong */
-            (*len) = -1;
-            return errno;
-        }
+	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+	if (arv != APR_SUCCESS) {
+	    *len = 0;
+	    return arv;
+	}
         else {
             do {
         	rv = sendfile(file->filedes,	/* open file descriptor of the file to be sent */
@@ -465,6 +377,8 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 }
 
 #elif defined(__HPUX__)
+
+#error "there's no way this ap_sendfile implementation works -djg"
 
 /* HP-UX Version 10.30 or greater */
 ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
