@@ -345,6 +345,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
     if (extension == NULL || strchr(extension, '/') || strchr(extension, '\\'))
         extension = "";
 
+    /* ### how to handle APR_PROGRAM_ENV and APR_PROGRAM_PATH? */
+
     if (attr->cmdtype == APR_SHELLCMD || strcasecmp(extension, ".cmd") == 0) {
         strcpy(interpreter, "#!" SHELL_PATH);
         extra_arg = "/C";
