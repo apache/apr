@@ -92,7 +92,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
 #endif
-        thread_mutex_cleanup(new_mutex);
         return rv;
     }
 
