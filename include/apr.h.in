@@ -34,6 +34,7 @@
 #define APR_HAVE_LIMITS_H       @limitsh@
 #define APR_HAVE_NETDB_H        @netdbh@
 #define APR_HAVE_NETINET_IN_H   @netinet_inh@
+#define APR_HAVE_NETINET_TCP_H  @netinet_tcph@
 #define APR_HAVE_PTHREAD_H      @pthreadh@
 #define APR_HAVE_STDARG_H       @stdargh@
 #define APR_HAVE_STDIO_H        @stdioh@
@@ -44,6 +45,7 @@
 #define APR_HAVE_SYS_SIGNAL_H   @sys_signalh@
 #define APR_HAVE_SYS_SOCKET_H   @sys_socketh@
 #define APR_HAVE_SYS_SYSLIMITS_H @sys_syslimitsh@
+#define APR_HAVE_SYS_TIME_H    @sys_timeh@
 #define APR_HAVE_SYS_TYPES_H    @sys_typesh@
 #define APR_HAVE_SYS_UIO_H      @sys_uioh@
 #define APR_HAVE_SYS_WAIT_H     @sys_waith@
