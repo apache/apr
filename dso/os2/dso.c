@@ -60,12 +60,6 @@
 
 #if APR_HAS_DSO
 
-ap_status_t ap_dso_init() 
-{
-    return APR_SUCCESS;
-}
-
-
 static ap_status_t dso_cleanup(void *thedso)
 {
     ap_dso_handle_t *dso = thedso;
