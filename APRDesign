@@ -5,13 +5,13 @@ interface to low level routines across any platform.  The original goal of APR
 was to combine all code in Apache to one common code base.  This is not the
 correct approach however, so the goal of APR has changed.  
 
-There are places, where common code is not a good thing.  For example, how to
-map requests to either threads or processes, should be platform specific. 
-APR's place, is now to combine any code that can be safely combined, without
+There are places where common code is not a good thing.  For example, how to
+map requests to either threads or processes should be platform specific. 
+APR's place is now to combine any code that can be safely combined without
 sacrificing performance.
 
-To this end, we have created a set of operations that are required for cross
-platfrom development.  There may be other types that are desired, and those
+To this end we have created a set of operations that are required for cross
+platfrom development.  There may be other types that are desired and those
 will be implemented in the future.  The first version of APR will focus on
 what Apache 2.0 needs.  Of course, anything that is submitted will be
 considered for inclusion.
