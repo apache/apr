@@ -77,9 +77,6 @@ extern "C" {
  * @ingroup APR
  * @{
  */
-/*
- * @package APR File handling
- */
 
 typedef enum {
     APR_NOFILE = 0,     /**< the file exists, but APR doesn't know its type */
