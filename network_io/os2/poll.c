@@ -129,28 +129,26 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
 {
     int i;
     int rv = 0;
-    apr_time_t starttime = apr_time_now();
 
-    do {
+    for (i=0; i<pollfdset->num_total; i++) {
+        pollfdset->r_socket_list[i] = pollfdset->socket_list[i];
+    }
+
+    rv = select(pollfdset->r_socket_list,
+                pollfdset->num_read,
+                pollfdset->num_write,
+                pollfdset->num_except,
+                timeout >= 0 ? timeout / 1000 : -1);
+
+    /* select() doesn't wipe the socket list in the case of a timeout or
+     * interrupt. This prevents false positives from revents_get
+     */
+    if (rv == 0) {
         for (i=0; i<pollfdset->num_total; i++) {
-            pollfdset->r_socket_list[i] = pollfdset->socket_list[i];
+            pollfdset->r_socket_list[i] = -1;
         }
-        
-        rv = select(pollfdset->r_socket_list, 
-                    pollfdset->num_read, 
-                    pollfdset->num_write, 
-                    pollfdset->num_except, 
-                    timeout >= 0 ? timeout / 1000 : -1);
-
-        if (rv < 0 && sock_errno() == SOCEINTR && timeout >= 0 ) {
-            apr_interval_time_t elapsed = apr_time_now() - starttime;
-
-            if (timeout <= elapsed)
-                break;
-
-            timeout -= elapsed;
-        }
-    } while ( rv < 0 && sock_errno() == SOCEINTR );
+        return APR_TIMEUP;
+    }
 
     (*nsds) = rv;
     return rv < 0 ? APR_OS2_STATUS(sock_errno()) : APR_SUCCESS;
