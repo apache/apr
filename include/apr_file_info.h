@@ -160,8 +160,6 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_PROT   0x00700000  /*  all protections */
 #define APR_FINFO_NORM   0x0073b170  /*  the expected unix results */
 
-typedef struct apr_file_t apr_file_t;
-
 /**
  * The file information structure.  This is analogous to the POSIX
  * stat structure.
@@ -203,7 +201,7 @@ struct apr_finfo_t {
     /** The file's name alone, in filesystem case */
     char *fcase;
     /** The file's handle, if accessed (can be submitted to apr_duphandle) */
-    apr_file_t *filehand;
+    struct apr_file_t *filehand;
 };
 
 /**
