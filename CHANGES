@@ -1,4 +1,8 @@
 Changes with APR b1  
+
+  *) Add apr_sockaddr_equal() for comparing APR sockaddrs.
+     [Jeff Trawick]
+
   *) Win32: apr_sendfile() should return APR_ENOTIMPL if
      oslevel < WINNT. [Bill Stoddard]
 
