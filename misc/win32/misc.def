@@ -11,12 +11,12 @@ EXPORTS
 	ap_destroy_context   @6
 	WinTimeToUnixTime   @7
 	ap_get_oslevel   @8
-    	ap_get_userdata   @9
-    	ap_set_userdata   @10
-    	ap_initialize   @11
+    ap_get_userdata   @9
+    ap_set_userdata   @10
+    ap_initialize   @11
 	ap_getopt    @12
-	opterr   @13 DATA
-	optind   @14 DATA
-	optopt   @15 DATA
-	optreset   @16 DATA
-	optarg   @17 DATA
+	ap_opterr   @13 DATA
+	ap_optind   @14 DATA
+	ap_optopt   @15 DATA
+	ap_optreset   @16 DATA
+	ap_optarg   @17 DATA

@@ -29,17 +29,18 @@ EXPORTS
 	ap_read   @22
 	ap_write   @23
 	ap_seek   @24
-    	ap_get_filedata   @25
-    	ap_set_filedata   @26
-    	ap_get_os_file   @27
+    ap_get_filedata   @25
+    ap_set_filedata   @26
+    ap_get_os_file   @27
 	ap_put_os_file @28
-    	ap_get_os_dir   @29
-    	ap_putc   @30
-    	ap_getc   @31
+    ap_get_os_dir   @29
+    ap_putc   @30
+    ap_getc   @31
 	ap_puts @32
 	ap_fgets @33
 	ap_flush @34
-    	ap_fprintf   @35
-    	ap_eof   @36
+    ap_fprintf   @35
+    ap_eof   @36
 	ap_get_filetype @37
 	ap_writev @38
+    ap_open_stderr   @39
