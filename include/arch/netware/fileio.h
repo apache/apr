@@ -101,9 +101,6 @@
 #if APR_HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#ifdef BEOS
-#include <kernel/OS.h>
-#endif
 
 /* End System headers */
 
@@ -128,7 +125,7 @@ struct apr_file_t {
     int direction;            /* buffer being used for 0 = read, 1 = write */
     unsigned long filePtr;    /* position in file of handle */
 #if APR_HAS_THREADS
-    struct apr_lock_t *thlock;
+    struct apr_thread_mutex_t *thlock;
 #endif
 };
 
