@@ -68,6 +68,9 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     new->cntxt = cont;
     new->type  = type;
     new->scope = scope;
+    switch (new->type)
+    {
+    case APR_MUTEX:
 #if (APR_USE_FCNTL_SERIALIZE) || (APR_USE_FLOCK_SERIALIZE)
     /* file-based serialization primitives */
     if (scope != APR_INTRAPROCESS) {
@@ -97,6 +100,18 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
             return stat;
         }
     }
+    break;
+    case APR_READWRITE:
+#ifdef HAVE_PTHREAD_RWLOCK_INIT
+    if (scope != APR_INTRAPROCESS)
+        return APR_ENOTIMPL;
+    pthread_rwlock_init(&new->rwlock, NULL);
+    break;
+#else
+    return APR_ENOTIMPL;
+#endif
+    }
+
     *lock = new;
     return APR_SUCCESS;
 }
@@ -104,6 +119,10 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
 apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
+
+    switch (lock->type)
+    {
+    case APR_MUTEX:
 #if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
     if (lock->scope == APR_INTRAPROCESS) {
 #else
@@ -122,13 +141,49 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
             return stat;
         }
     }
+    break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
+    }
+
     return APR_SUCCESS;
+}
+
+apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
+{
+    apr_status_t stat = APR_SUCCESS;
+
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        return APR_ENOTIMPL;
+    case APR_READWRITE:
+#ifdef HAVE_PTHREAD_RWLOCK_INIT
+        switch (e)
+        {
+        case APR_READER:
+            stat = pthread_rwlock_rdlock(&lock->rwlock);
+            break;
+        case APR_WRITER:
+            stat = pthread_rwlock_wrlock(&lock->rwlock);
+            break;
+        }
+        break;
+#else
+        return APR_ENOTIMPL;
+#endif
+    }
+
+    return stat;
 }
 
 apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     apr_status_t stat;
 
+    switch (lock->type)
+    {
+    case APR_MUTEX:
 #if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
     if (lock->scope == APR_INTRAPROCESS) {
 #else
@@ -147,12 +202,27 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
             return stat;
         }
     }
+    break;
+    case APR_READWRITE:
+#ifdef HAVE_PTHREAD_RWLOCK_INIT
+        if ((stat = pthread_rwlock_unlock(&lock->rwlock)) != 0)
+            return stat;
+        break;
+#else
+        return APR_ENOTIMPL;
+#endif
+    }
+    
     return APR_SUCCESS;
 }
 
 apr_status_t apr_lock_destroy(apr_lock_t *lock)
 {
     apr_status_t stat;
+
+    switch (lock->type)
+    {
+    case APR_MUTEX:
 #if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
     if (lock->scope == APR_INTRAPROCESS) {
 #else
@@ -172,6 +242,16 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
         if ((stat = apr_unix_destroy_inter_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
+    }
+    break;
+    case APR_READWRITE:
+#ifdef HAVE_PTHREAD_RWLOCK_INIT
+    if ((stat = pthread_rwlock_destroy(&lock->rwlock)) != 0)
+        return stat;
+    break;
+#else
+    return APR_ENOTIMPL;
+#endif
     }
     return APR_SUCCESS;
 }

@@ -62,7 +62,11 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
 {
     apr_lock_t *new;
     apr_status_t stat;
-    
+  
+    /* FIXME: Remove when read write locks implemented. */ 
+    if (type == APR_READWRITE)
+        return APR_ENOTIMPL; 
+
     new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
     if (new == NULL){
         return APR_ENOMEM;
@@ -89,49 +93,95 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
 apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
-    
-    if (lock->scope != APR_CROSS_PROCESS) {
-        if ((stat = lock_intra(lock)) != APR_SUCCESS) {
-            return stat;
+
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->scope != APR_CROSS_PROCESS) {
+            if ((stat = lock_intra(lock)) != APR_SUCCESS) {
+                return stat;
+            }
         }
-    }
-    if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = lock_inter(lock)) != APR_SUCCESS) {
-            return stat;
+        if (lock->scope != APR_INTRAPROCESS) {
+            if ((stat = lock_inter(lock)) != APR_SUCCESS) {
+                return stat;
+            }
         }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
+
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
+{
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        return APR_ENOTIMPL;
+    case APR_READWRITE:
+        switch (e)
+        {
+        case APR_READER:
+            break;
+        case APR_WRITER:
+            break;
+        }
+        return APR_ENOTIMPL;
+    }
+
     return APR_SUCCESS;
 }
 
 apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     apr_status_t stat;
-    if (lock->scope != APR_CROSS_PROCESS) {
-        if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
-            return stat;
+
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->scope != APR_CROSS_PROCESS) {
+            if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
+                return stat;
+            }
         }
-    }
-    if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = unlock_inter(lock)) != APR_SUCCESS) {
-            return stat;
+        if (lock->scope != APR_INTRAPROCESS) {
+            if ((stat = unlock_inter(lock)) != APR_SUCCESS) {
+                return stat;
+            }
         }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
+
     return APR_SUCCESS;
 }
 
 apr_status_t apr_lock_destroy(apr_lock_t *lock)
 {
     apr_status_t stat; 
-    if (lock->scope != APR_CROSS_PROCESS) {
-        if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
-            return stat;
+
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->scope != APR_CROSS_PROCESS) {
+            if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
+                return stat;
+            }
         }
-    }
-    if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = destroy_inter_lock(lock)) != APR_SUCCESS) {
-            return stat;
+        if (lock->scope != APR_INTRAPROCESS) {
+            if ((stat = destroy_inter_lock(lock)) != APR_SUCCESS) {
+                return stat;
+            }
         }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
+
     return APR_SUCCESS;
 }
 

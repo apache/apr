@@ -130,9 +130,12 @@ struct apr_lock_t {
 #if APR_USE_PTHREAD_SERIALIZE
     pthread_mutex_t *intraproc;
 #endif
+#ifdef HAVE_PTHREAD_RWLOCK_INIT
+    pthread_rwlock_t rwlock;
+#endif
 #endif
     /* At some point, we should do a scope for both inter and intra process
-     *  locking here.  Something like pthread_mutex with PTHREAD_PROCESS_SHARED
+     * locking here.  Something like pthread_mutex with PTHREAD_PROCESS_SHARED
      */    
 };
 
@@ -149,8 +152,8 @@ apr_status_t apr_unix_lock_inter(struct apr_lock_t *lock);
 apr_status_t apr_unix_unlock_inter(struct apr_lock_t *lock);
 apr_status_t apr_unix_destroy_inter_lock(struct apr_lock_t *lock);
 
-apr_status_t apr_unix_child_init_lock(struct apr_lock_t **lock, apr_pool_t *cont, 
-                            const char *fname);
+apr_status_t apr_unix_child_init_lock(struct apr_lock_t **lock, 
+                                      apr_pool_t *cont, const char *fname);
 
 #endif  /* LOCKS_H */
 

@@ -39,3 +39,4 @@ mod_test.dll
 testnames
 *.dbg
 testmem
+testlock

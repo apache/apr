@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Implement APR_READWRITE locks on Unix with POSIX rwlocks.
+     Introduce new apr_lock_acquire_rw() function which takes in 
+     APR_READER or APR_WRITER.  [Justin Erenkrantz]
+
   *) Add apr_open_stdin.  This mirrors apr_open_stderr, except it works
      on stdin.  [Aaron Bannert <abannert@ebuilt.com>]
 

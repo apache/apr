@@ -71,13 +71,18 @@ static apr_status_t lock_cleanup(void *thelock)
 
 
 
-apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, 
-			   const char *fname, apr_pool_t *cont)
+apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
+                             apr_lockscope_e scope, const char *fname, 
+                             apr_pool_t *cont)
 {
     apr_lock_t *new;
     ULONG rc;
     char *semname;
     PIB *ppib;
+
+    /* FIXME: Remove when read write locks implemented. */
+    if (type == APR_READWRITE)
+        return APR_ENOTIMPL;
 
     new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
     new->cntxt = cont;
@@ -131,27 +136,58 @@ apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname,
 apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     ULONG rc;
-    
-    rc = DosRequestMutexSem(lock->hMutex, SEM_INDEFINITE_WAIT);
 
-    if (rc == 0) {
-        lock->owner = CurrentTid;
-        lock->lock_count++;
+    switch (lock->type)
+    {
+    case APR_MUTEX: 
+        rc = DosRequestMutexSem(lock->hMutex, SEM_INDEFINITE_WAIT);
+
+        if (rc == 0) {
+            lock->owner = CurrentTid;
+            lock->lock_count++;
+        }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
 
     return APR_OS2_STATUS(rc);
 }
 
-
+apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
+{
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        return APR_ENOTIMPL;
+    case APR_READWRITE:
+        switch (e)
+        {
+        case APR_READER:
+            break;
+        case APR_WRITER:
+            break;
+        }
+        return APR_ENOTIMPL;
+    }
+    return APR_SUCCESS;
+}
 
 apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     ULONG rc;
     
-    if (lock->owner == CurrentTid && lock->lock_count > 0) {
-        lock->lock_count--;
-        rc = DosReleaseMutexSem(lock->hMutex);
-        return APR_OS2_STATUS(rc);
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->owner == CurrentTid && lock->lock_count > 0) {
+            lock->lock_count--;
+            rc = DosReleaseMutexSem(lock->hMutex);
+            return APR_OS2_STATUS(rc);
+        }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
     }
     
     return APR_SUCCESS;
@@ -164,21 +200,27 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
     ULONG rc;
     apr_status_t stat = APR_SUCCESS;
 
-    if (lock->owner == CurrentTid) {
-        while (lock->lock_count > 0 && stat == APR_SUCCESS)
-            stat = apr_lock_release(lock);
-    }
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->owner == CurrentTid) {
+            while (lock->lock_count > 0 && stat == APR_SUCCESS)
+                stat = apr_lock_release(lock);
 
-    if (stat != APR_SUCCESS)
-        return stat;
+        if (stat != APR_SUCCESS)
+            return stat;
         
-    if (lock->hMutex == 0)
-        return APR_SUCCESS;
+        if (lock->hMutex == 0)
+            return APR_SUCCESS;
 
-    rc = DosCloseMutexSem(lock->hMutex);
+        rc = DosCloseMutexSem(lock->hMutex);
     
-    if (!rc)
-        lock->hMutex = 0;
+        if (!rc)
+            lock->hMutex = 0;
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
+    }
         
     return APR_OS2_STATUS(rc);
 }

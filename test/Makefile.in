@@ -9,6 +9,7 @@ PROGRAMS = \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testthread@EXEEXT@ \
+	testlock@EXEEXT@ \
 	testtime@EXEEXT@ \
 	testargs@EXEEXT@ \
 	testcontext@EXEEXT@ \
@@ -72,6 +73,9 @@ testproc@EXEEXT@: testproc.lo $(LOCAL_LIBS)
 
 testthread@EXEEXT@: testthread.lo $(LOCAL_LIBS)
 	$(LINK) testthread.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testlock@EXEEXT@: testlock.lo $(LOCAL_LIBS)
+	$(LINK) testlock.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testsock.lo $(LOCAL_LIBS) $(ALL_LIBS)
