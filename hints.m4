@@ -32,9 +32,9 @@ dnl
 dnl Preload various ENV/makefile paramsm such as CC, CFLAGS, etc
 dnl based on outside knowledge
 AC_DEFUN(APR_PRELOAD, [
-echo "Applying hints file rules"
 PLAT=`$ac_config_guess`
 PLAT=`$ac_config_sub $PLAT`
+echo "Applying hints file rules for $PLAT"
 
 case "$PLAT" in
     *mint)
