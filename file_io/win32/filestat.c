@@ -409,7 +409,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     int isroot = 0;
     apr_status_t ident_rv = 0;
     apr_status_t rv;
-#ifdef APR_HAS_UNICODE_FS
+#if APR_HAS_UNICODE_FS
     apr_wchar_t wfname[APR_PATH_MAX];
 
 #endif
@@ -448,7 +448,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             wanted &= ~finfo->valid;
     }
 
-#ifdef APR_HAS_UNICODE_FS
+#if APR_HAS_UNICODE_FS
     if (os_level >= APR_WIN_NT) {
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                             / sizeof(apr_wchar_t), fname))
@@ -530,7 +530,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * so go ask for the full path.
              */
             if (os_level >= APR_WIN_NT) {
-#ifdef APR_HAS_UNICODE_FS
+#if APR_HAS_UNICODE_FS
                 apr_wchar_t tmpname[APR_FILE_MAX];
                 apr_wchar_t *tmpoff;
                 if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
@@ -562,7 +562,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 
     if (wanted &= ~finfo->valid) {
         /* Caller wants more than APR_FINFO_MIN | APR_FINFO_NAME */
-#ifdef APR_HAS_UNICODE_FS
+#if APR_HAS_UNICODE_FS
         if (os_level >= APR_WIN_NT)
             return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC, os_level);
 #endif
