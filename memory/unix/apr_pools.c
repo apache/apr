@@ -1114,10 +1114,10 @@ static void free_proc_chain(struct process_chain *procs)
      * finished with the proc_t.
      */
     {
-        for (p = procs; p; p = p->next) {
-            if (p->pid->hproc) {
-                CloseHandle(p->pid->hproc);
-                p->pid->hproc = NULL;
+        for (pc = procs; pc; pc = pc->next) {
+            if (pc->pid->hproc) {
+                CloseHandle(pc->pid->hproc);
+                pc->pid->hproc = NULL;
             }
         }
     }
