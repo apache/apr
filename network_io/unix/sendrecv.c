@@ -752,10 +752,10 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         		apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
         		apr_int32_t flags)
 {
-    apr_status_t rv;
+    apr_status_t rv, arv;
     size_t nbytes;
     sendfilevec_t *sfv;
-    int vecs, curvec, i;
+    int vecs, curvec, i, repeat;
 
     if (!hdtr) {
         hdtr = &no_hdtr;
@@ -799,42 +799,49 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         sfv[curvec].sfv_len = hdtr->trailers[i].iov_len;
     }
  
-    /* Actually do the sendfilev */
+    /* Actually do the sendfilev
+     *
+     * Solaris may return -1/EAGAIN even if it sent bytes on a non-block sock.
+     *
+     * If no bytes were originally sent (nbytes == 0) and we are on a TIMEOUT 
+     * socket (which as far as the OS is concerned is a non-blocking socket), 
+     * we want to retry after waiting for the other side to read the data (as 
+     * determined by poll).  Once it is clear to send, we want to retry
+     * sending the sendfilevec_t once more.
+     */
+    arv = 0;
     do {
+        /* Clear out the repeat */
+        repeat = 0;
+
         /* socket, vecs, number of vecs, bytes written */
         rv = sendfilev(sock->socketdes, sfv, vecs, &nbytes);
-    } while (rv == -1 && errno == EINTR);
 
-    /* Solaris returns EAGAIN even though it sent bytes on a non-block sock.
-     * However, if we are on a TIMEOUT socket, we want to block until the 
-     * other side has read the data. 
-     */
-    if (rv == -1)
-    {
-        if (errno == EAGAIN) {
-            if (apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1)
+        if (rv == -1 && errno == EAGAIN)
+        {
+            if (nbytes)
+                rv = 0; 
+            else if (!arv &&
+                     apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1)
             {
-                /* If the wait fails for some reason, we're going to lie to our
-                 * caller and say that we didn't write any bytes.  That's 
-                 * untrue.
-                 */
-                rv = apr_wait_for_io_or_timeout(sock, 0);
+                apr_status_t t = apr_wait_for_io_or_timeout(sock, 0);
 
-                /* Indicate that we sent zero bytes.  */
-                if (rv != APR_SUCCESS)
+                if (t != APR_SUCCESS)
                 {
                     *len = 0;
-                    return rv;
+                    return t;
                 }
+
+                arv = 1; 
+                repeat = 1;
             }
         }
-        else
-        {
-            /* Indicate that we sent zero bytes.  */
-            rv = errno;
-            *len = 0;
-            return rv;
-        }
+    } while ((rv == -1 && errno == EINTR) || repeat);
+
+    if (rv == -1)
+    {
+        *len = 0;
+        return errno;
     }
 
     /* Update how much we sent */
