@@ -47,7 +47,7 @@ testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 
 ### why the export-dynamic?
 testdso@EXEEXT@: testdso.lo mod_test.so $(LOCAL_LIBS)
-	$(LINK) --export-dynamic testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK) -export-dynamic testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testoc@EXEEXT@: testoc.lo $(LOCAL_LIBS)
 	$(LINK) testoc.lo $(LOCAL_LIBS) $(ALL_LIBS)
