@@ -225,6 +225,13 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     if (fd == -1) {
         return errno;
     }
+    /* XXX: We must reset several flags values as passed-in, since
+     * mkstemp didn't subscribe to our preference flags.
+     *
+     * We either have to unset the flags, or fix up the fd and other
+     * xthread and inherit bits appropriately.  Since gettemp() above
+     * calls apr_file_open, our flags are respected in that code path.
+     */
     apr_os_file_put(fp, &fd, flags, p);
     (*fp)->fname = apr_pstrdup(p, template);
 
