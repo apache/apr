@@ -342,7 +342,7 @@ typedef  int         apr_socklen_t;
 #define APR_SIZEOF_VOIDP   4
 #endif
 
-#define DWORD_MAX 4294967295
+#define APR_DWORD_MAX 4294967295
 
 /* XXX These simply don't belong here, perhaps in apr_portable.h
  * based on some APR_HAVE_PID/GID/UID?

@@ -443,8 +443,8 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
             bytesleft = thefile->bufpos;           
 
             do {
-                if (bytesleft > DWORD_MAX) {
-                    numbytes = DWORD_MAX;
+                if (bytesleft > APR_DWORD_MAX) {
+                    numbytes = APR_DWORD_MAX;
                 }
                 else {
                     numbytes = (DWORD)bytesleft;
