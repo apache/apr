@@ -32,7 +32,8 @@ PROGRAMS = \
 	testuser@EXEEXT@ \
         testsockets@EXEEXT@ \
 	testprocmutex@EXEEXT@ \
-	testvsn@EXEEXT@
+	testvsn@EXEEXT@ \
+	testsleep@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -152,5 +153,8 @@ testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
 
 testvsn@EXEEXT@: testvsn.lo $(LOCAL_LIBS)
 	$(LINK) testvsn.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testsleep@EXEEXT@: testsleep.lo $(LOCAL_LIBS)
+	$(LINK) testsleep.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
