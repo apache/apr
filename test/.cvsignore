@@ -47,3 +47,4 @@ testlockperf
 testsockets
 testuser
 test.fil
+testprocmutex
