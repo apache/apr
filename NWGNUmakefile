@@ -368,9 +368,9 @@ $(OBJDIR)/%.o: threadproc/netware/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
 	$(CC) threadproc\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
-$(OBJDIR)/%.o: dso/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: dso/netware/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
-	$(CC) dso\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) dso\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
 $(OBJDIR)/%.o: memory/unix/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
