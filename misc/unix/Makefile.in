@@ -1,30 +1,14 @@
-RM=@RM@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = \
+	start.lo getopt.lo otherchild.lo errorcodes.lo rand.lo \
+	uuid.lo getuuid.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 OSDIR=$(INCDIR)/arch/@OSDIR@
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
-MKDEP=../../helpers/mkdep.sh
-
-OBJS=start.o getopt.o otherchild.o errorcodes.o rand.o \
-	uuid.o getuuid.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(OBJS)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

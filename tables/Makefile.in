@@ -1,30 +1,11 @@
-CC=@CC@
-RANLIB=@RANLIB@
-AR=@AR@
-RM=@RM@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = apr_tables.lo apr_hash.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCDIR=../include
 INCLUDES=-I$(INCDIR) -I$(DEFOSDIR)
-MKDEP=../helpers/mkdep.sh
-
-OBJS=apr_tables.o \
-	apr_hash.o 
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(OBJS)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

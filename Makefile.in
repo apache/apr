@@ -1,21 +1,7 @@
 #
 # APR (Apache Portable Runtime) library Makefile.
 #
-SHELL=@SH@
 
-#
-# Macros for compilation commands
-#
-@SET_MAKE@
-MFLAGS_STATIC=
-RM=@RM@
-CC=@CC@
-AWK=@AWK@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
-AR=@AR@
-RANLIB=@RANLIB@
 #
 # Macros for supporting directories
 #
@@ -30,81 +16,33 @@ MODULES=@MODULES@
 SUBDIRS=@SUBDIRS@
 #shmem/@OSDIR@
 
-LIBAPR = @LIBPREFIX@apr.a
+LIBAPR = @LIBPREFIX@apr.la
 
 TARGET_EXPORTS = apr.exports
-
-#
-# Rules for turning inputs into outputs
-#
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
 
 #
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-all: Makefile $(LIBAPR) delete-exports $(TARGET_EXPORTS)
+TARGETS = $(LIBAPR) delete-exports $(TARGET_EXPORTS)
 
-$(LIBAPR): $(MODULES) subdirs
-	@rm -rf objs
-	@mkdir objs
-	@rm -f $@
-	for i in $(SUBDIRS); do cp $$i/*.o objs ; done;
-	$(AR) cr $@ objs/*.o
-	$(RANLIB) $@
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
 
-clean: subdirs_clean
-	$(RM) -f *.o *.a *.so objs/*.o apr.exports
+CLEAN_TARGETS = $(TARGET_EXPORTS)
+DISTCLEAN_TARGETS = config.cache config.log config.status \
+	include/apr.h include/arch/unix/apr_private.h \
+	APRVARS
+EXTRACLEAN_TARGETS = configure libtool aclocal.m4 \
+	include/arch/unix/apr_private.h.in
 
-depend: subdirs_depend
+### fix this up at some point (install location)
+libdir = /usr/local/lib
 
-distclean: subdirs_distclean
-	-$(RM) -f include/apr.h include/arch/unix/apr_private.h
-	-$(RM) -f *.o *.a *.so
-	-$(RM) -f config.cache config.status config.log
-	-$(RM) -f Makefile
-	-$(RM) -f APRVARS
-	-$(RM) -rf objs
-	cd test; $(MAKE) distclean; cd ..
-
-extraclean: distclean
-	-$(RM) -f configure include/arch/unix/apr_private.h.in
-
-subdirs:
-	@for i in $(SUBDIRS); do \
-	    echo "===> $(SDP)lib/apr/$$i"; \
-	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' \
-		CC='$(CC)' AUX_CFLAGS='$(AUX_CFLAGS)' RANLIB='$(RANLIB)' ) \
-		|| exit 1; \
-	    echo "<=== $(SDP)lib/apr/$$i"; \
-	done;
-
-subdirs_depend:
-	@for i in $(SUBDIRS); do \
-	    echo "===> $(SDP)lib/apr/$$i"; \
-	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' depend ) \
-		|| exit 1; \
-	    echo "<=== $(SDP)lib/apr/$$i"; \
-	done;
-
-subdirs_clean:
-	@for i in $(SUBDIRS); do \
-	    echo "===> $(SDP)lib/apr/$$i"; \
-	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' clean ) \
-		|| exit 1; \
-	    echo "<=== $(SDP)lib/apr/$$i"; \
-	done;
-
-subdirs_distclean:
-	@for i in $(SUBDIRS); do \
-	    echo "===> $(SDP)lib/apr/$$i"; \
-	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' distclean ) \
-		|| exit 1; \
-	    echo "<=== $(SDP)lib/apr/$$i"; \
-	done;
-
-install: all
+$(LIBAPR): $(MODULES)
+	@for i in $(SUBDIRS); do objects="$$objects $$i/*.lo"; done ; \
+	    echo $(LINK) -rpath $(libdir) $$objects ; \
+	    $(LINK) -rpath $(libdir) $$objects
 
 delete-exports:
 	@if test -f $(TARGET_EXPORTS); then \

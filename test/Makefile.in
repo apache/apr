@@ -1,15 +1,6 @@
-RM=@RM@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=-g @CFLAGS@ @OPTIM@
-LIBS=../libapr.a @LIBS@ 
-LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../include
-INCLUDES=-I$(INCDIR)
-MKDEP=../helpers/mkdep.sh
-SO_LDFLAG=@SO_LDFLAG@
 
-TARGETS= client@EXEEXT@ \
+TARGETS = \
+	client@EXEEXT@ \
 	sendfile@EXEEXT@ \
 	server@EXEEXT@ \
 	testfile@EXEEXT@ \
@@ -29,90 +20,75 @@ TARGETS= client@EXEEXT@ \
 	occhild.so \
 	mod_test.so
 
-OBJS= testfile.o \
-	testflock.o \
-	testproc.o \
-	testsock.o \
-	testthread.o \
-	testtime.o \
-        testargs.o \
-        testcontext.o \
-	testmmap.o \
-	testdso.o \
-	testoc.o \
-	testuuid.o \
-	occhild.o \
-	mod_test.o
+LIBS=../libapr.a @LIBS@ 
 
-.c.o:
-	$(CC) -c $(CFLAGS) $(INCLUDES) $<
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
 
-all: $(TARGETS) 
+CLEAN_TARGETS = testfile.tmp
 
-testfile@EXEEXT@: testfile.o
-	$(CC) $(CFLAGS) -o testfile@EXEEXT@ testfile.o $(LDFLAGS) 
+CFLAGS = -g @CFLAGS@ @OPTIM@
 
-testflock@EXEEXT@: testflock.o
-	$(CC) $(CFLAGS) -o testflock@EXEEXT@ testflock.o $(LDFLAGS) 
+INCDIR=../include
+INCLUDES=-I$(INCDIR)
 
-testdso@EXEEXT@: testdso.o
-	$(CC) $(CFLAGS) --export-dynamic -fPIC testdso.o -o testdso@EXEEXT@ $(LDFLAGS) 
 
-testoc@EXEEXT@: testoc.o
-	$(CC) $(CFLAGS) -o testoc@EXEEXT@ testoc.o $(LDFLAGS) 
+testfile@EXEEXT@: testfile.lo
+	$(LINK) testfile.lo
 
-occhild.so: occhild.o
-	$(CC) $(SO_LDFLAG) occhild.o -o occhild.so 
+testflock@EXEEXT@: testflock.lo
+	$(LINK) testflock.lo
 
-mod_test.so: mod_test.o
-	$(CC) $(SO_LDFLAG) mod_test.o -o mod_test.so 
+### why the export-dynamic?
+testdso@EXEEXT@: testdso.lo
+	$(LINK) --export-dynamic testdso.lo
 
-testargs@EXEEXT@: testargs.o
-	$(CC) $(CFLAGS) -o testargs@EXEEXT@ testargs.o $(LDFLAGS) 
+testoc@EXEEXT@: testoc.lo
+	$(LINK) testoc.lo
 
-testcontext@EXEEXT@: testcontext.o
-	$(CC) $(CFLAGS) -o testcontext@EXEEXT@ testcontext.o $(LDFLAGS) 
+occhild.so: occhild.lo
+	$(LINK) --module occhild.lo
 
-testproc@EXEEXT@: testproc.o
-	$(CC) $(CFLAGS) -o testproc@EXEEXT@ testproc.o $(LDFLAGS)
+mod_test.so: mod_test.lo
+	$(LINK) --module mod_test.lo
 
-testthread@EXEEXT@: testthread.o
-	$(CC) $(CFLAGS) -o testthread@EXEEXT@ testthread.o $(LDFLAGS)
+testargs@EXEEXT@: testargs.lo
+	$(LINK) testargs.lo
 
-testsock@EXEEXT@: testsock.o client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@
-	$(CC) $(CFLAGS) -o testsock@EXEEXT@ testsock.o $(LDFLAGS)
+testcontext@EXEEXT@: testcontext.lo
+	$(LINK) testcontext.lo
 
-client@EXEEXT@: client.o
-	$(CC) $(CFLAGS) -o client@EXEEXT@ client.o $(LDFLAGS)
+testproc@EXEEXT@: testproc.lo
+	$(LINK) testproc.lo
 
-server@EXEEXT@: server.o sendfile.o
-	$(CC) $(CFLAGS) -o server@EXEEXT@ server.o $(LDFLAGS) 
+testthread@EXEEXT@: testthread.lo
+	$(LINK) testthread.lo
 
-sendfile@EXEEXT@: sendfile.o
-	$(CC) $(CFLAGS) -o sendfile@EXEEXT@ sendfile.o $(LDFLAGS)
+testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@
+	$(LINK) testsock.lo
 
-testtime@EXEEXT@: testtime.o
-	$(CC) $(CFLAGS) -o testtime@EXEEXT@ testtime.o $(LDFLAGS)
+client@EXEEXT@: client.lo
+	$(LINK) client.lo
 
-testmmap@EXEEXT@: testmmap.o
-	$(CC) $(CFLAGS) -o testmmap@EXEEXT@ testmmap.o $(LDFLAGS)
+server@EXEEXT@: server.lo sendfile.lo
+	$(LINK) server.lo
 
-testshmem@EXEEXT@: testshmem.o
-	$(CC) $(CFLAGS) -o testshmem@EXEEXT@ testshmem.o $(LDFLAGS)
+sendfile@EXEEXT@: sendfile.lo
+	$(LINK) sendfile.lo
 
-testpipe@EXEEXT@: testpipe.o
-	$(CC) $(CFLAGS) -o testpipe@EXEEXT@ testpipe.o $(LDFLAGS)
+testtime@EXEEXT@: testtime.lo
+	$(LINK) testtime.lo
 
-testuuid@EXEEXT@: testuuid.o
-	$(CC) $(CFLAGS) -o testuuid@EXEEXT@ testuuid.o $(LDFLAGS)
+testmmap@EXEEXT@: testmmap.lo
+	$(LINK) testmmap.lo
 
-clean:
-	$(RM) -f *.o *.a $(TARGETS) testflock.tmp
+testshmem@EXEEXT@: testshmem.lo
+	$(LINK) testshmem.lo
 
-distclean: clean
-	-$(RM) -f Makefile
+testpipe@EXEEXT@: testpipe.lo
+	$(LINK) testpipe.lo
 
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
+testuuid@EXEEXT@: testuuid.lo
+	$(LINK) testuuid.lo
 
 # DO NOT REMOVE

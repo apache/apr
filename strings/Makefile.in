@@ -1,33 +1,16 @@
-CC=@CC@
-RANLIB=@RANLIB@
-AR=@AR@
-RM=@RM@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = \
+	apr_cpystrn.lo \
+	apr_snprintf.lo \
+	apr_strnatcmp.lo \
+	apr_strings.lo \
+	apr_fnmatch.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCDIR=../include
 INCLUDES=-I$(INCDIR) -I$(DEFOSDIR)
-MKDEP=../helpers/mkdep.sh
-
-OBJS=apr_cpystrn.o \
-	apr_snprintf.o \
-	apr_strnatcmp.o \
-	apr_strings.o \
-	apr_fnmatch.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(OBJS)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

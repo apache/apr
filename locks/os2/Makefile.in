@@ -1,36 +1,12 @@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = locks.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 OSDIR=$(INCDIR)/arch/@OSDIR@
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
-MKDEP=../../helpers/mkdep.sh
-
-LIB=lock.a
-
-OBJS=locks.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(LIB)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-
-$(LIB): $(OBJS)
-	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

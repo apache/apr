@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Libtool'ized APR and converted all the makefiles to share rules
+     from helpers/rules.mk. [Greg Stein]
+
   *) Remove a warning on FreeBSD.  FreeBSD defines TCP_NO_PUSH, but we
      don't actually use it.  This causes os_cork to be defined but not
      used.  This patch keeps us from defining os_cork and os_uncork on

@@ -1,4 +1,6 @@
 Makefile
+*.lo
+.libs
 testmd5
 testmmap
 htdigest
@@ -23,6 +25,5 @@ testuuid
 testsuite
 testsuite.opt
 testsuite.ncb
-testflock.tmp
 testfile.tmp
 testflock

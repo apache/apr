@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/07 00:35:37 $]
+Last modified at [$Date: 2001/01/09 11:05:33 $]
 
 Release:
 
@@ -52,13 +52,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * The MM library is built as static and shared library. This should
       be set up to build only the required version.
 
-    * use libtool
-        Status: Greg +1 (volunteers), Ryan +1(?)
-	Waiting for commentary from jimjag
-
-    * snarf rules.mk(.in) from APRUTIL to simplify makefiles
-        Status: Greg +1 (volunteers), Sascha +1, rbb -0.5
-
     * add apr_crypt() and APR_HAS_CRYPT for apps to determine whether the
       crypt() function is available, and a way to call it (whether it is
       located in libc, libcrypt, or libufc)
@@ -92,6 +85,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * use os_(un)cork in network_io/unix/sendrecv.c for FreeBSD's
       sendfile implementation.
+
+    * toss the per-Makefile setup of INCLUDES; shift to rules.mk.in
 
 
 Documentation that needs writing:

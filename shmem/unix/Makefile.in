@@ -1,41 +1,27 @@
-RM=@RM@
-CC=@CC@
-AR=@AR@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = shmem.lo build-mm
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 INCDIR1=mm
 INCLUDES=-I$(INCDIR) -I$(INCDIR1)
-MKDEP=../../helpers/mkdep.sh
 
-LIB=libshmem.a
-
-OBJS=shmem.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(LIB)
-
-clean:
-	$(RM) -f *.o *.a *.so
+x-local-clean:
 	(cd mm && $(MAKE) clean)
 
-distclean: clean
-	-$(RM) -f Makefile
+x-local-distclean:
 	(cd mm && $(MAKE) distclean)
 
+# build the MM library, then copy the objects to this dir so our top-level
+# will find them and copy them to the (top)/objs directory
+MM_OBJS = \
+	mm/mm_global.lo mm/mm_alloc.lo mm/mm_core.lo mm/mm_lib.lo \
+	mm/mm_vers.lo
 
-$(LIB): $(OBJS)
-	$(RM) -f $@
+build-mm:
 	(cd mm && $(MAKE) libmm.la)
-	cp mm/mm_global.o mm/mm_alloc.o mm/mm_core.o mm/mm_lib.o mm/mm_vers.o .
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
+	cp $(MM_OBJS) .
 
 # DO NOT REMOVE
