@@ -55,7 +55,7 @@ top_builddir="$apr_builddir"
 AC_SUBST(top_builddir)
 
 # Directory containing apr build macros, helpers, and make rules
-# NOTE: make rules (rules.mk) will be in the builddir for vpath
+# NOTE: make rules (apr_rules.mk) will be in the builddir for vpath
 #
 apr_buildout=$apr_builddir/build
 apr_builders=$apr_srcdir/build
@@ -1889,14 +1889,14 @@ case $host in
 *bsdi*)
     # Check whether they've installed GNU make
     if make --version > /dev/null 2>&1; then 
-	INCLUDE_RULES="include $apr_buildout/rules.mk"
+	INCLUDE_RULES="include $apr_buildout/apr_rules.mk"
     else
 	# BSDi make
-	INCLUDE_RULES=".include \"$apr_buildout/rules.mk\""
+	INCLUDE_RULES=".include \"$apr_buildout/apr_rules.mk\""
     fi
     ;;
 *)
-    INCLUDE_RULES="include $apr_buildout/rules.mk"
+    INCLUDE_RULES="include $apr_buildout/apr_rules.mk"
     ;;
 esac
 AC_SUBST(INCLUDE_RULES)
@@ -1913,7 +1913,7 @@ test -d $dir || $MKDIR $dir
 AC_OUTPUT([
 	$MAKEFILE1 $MAKEFILE2 $MAKEFILE3
 	include/apr.h
-	build/rules.mk
+	build/apr_rules.mk
 	apr-config
 ],[
 for i in $SAVE_FILES; do
