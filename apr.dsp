@@ -399,7 +399,7 @@ SOURCE=.\include\arch\win32\apr_arch_dso.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\apr_arch_fileio.h
+SOURCE=.\include\arch\win32\apr_arch_file_io.h
 # End Source File
 # Begin Source File
 

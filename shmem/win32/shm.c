@@ -56,7 +56,7 @@
 #include "apr_errno.h"
 #include "apr_file_io.h"
 #include "apr_shm.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 
 typedef struct memblock_t {
     apr_size_t size;

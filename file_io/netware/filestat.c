@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "fsio.h"
 #include "nks/dirio.h"
 #include "apr_file_io.h"

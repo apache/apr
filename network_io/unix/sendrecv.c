@@ -57,7 +57,7 @@
 
 #if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the apr_file_t internals. */
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #endif /* APR_HAS_SENDFILE */
 
 /* sys/sysctl.h is only needed on FreeBSD for include_hdrs_in_length() */
