@@ -128,7 +128,7 @@ struct lock_t {
 #if APR_HAS_THREADS
     /* APR doesn't have threads, no sense in having an thread lock mechanism.
      */
-#if defined (USE_PTHREAD_SERIALIZE)
+#if USE_PTHREAD_SERIALIZE
     pthread_mutex_t *intraproc;
 #endif
 #endif

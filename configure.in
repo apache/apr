@@ -153,13 +153,15 @@ AC_SUBST(sysvser)
 AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 
-AC_CHECK_LIB(pthread, pthread_mutex_init, [ 
+pthreadser="0"
+AC_CHECK_LIB(pthread, pthread_mutex_init, [
     AC_DEFINE(USE_PTHREAD_SERIALIZE)
-    pthreadser="1" ], [ pthreadser="0" ])
+    pthreadser="1" ])
 AC_CHECK_LIB(c_r, pthread_mutex_init, [ 
     AC_DEFINE(USE_PTHREAD_SERIALIZE)
-    pthreadser="1" ], [ pthreadser="0" ])
+    pthreadser="1"])
 AC_SUBST(pthreadser)
+
 ac_cv_define_READDIR_IS_THREAD_SAFE=no
 AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
 
