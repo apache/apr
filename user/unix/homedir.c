@@ -71,7 +71,7 @@ apr_status_t apr_get_home_directory(char **dirname, const char *userid, apr_pool
     char pwbuf[512];
 #endif
 
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
     if (!getpwnam_r(userid, &pwd, pwbuf, sizeof(pwbuf), &pw)) {
 #else
     if ((pw = getpwnam(userid)) != NULL) {
