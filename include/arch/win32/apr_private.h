@@ -82,6 +82,7 @@
  * not with APR itself, until some GUI-related security is introduced.]
  */
 #ifndef _WIN32_WCE
+#define HAVE_ACLAPI 1
 #ifdef __wtypes_h__
 #include <accctrl.h>
 #else
@@ -89,6 +90,8 @@
 #include <accctrl.h>
 #undef __wtypes_h__
 #endif
+#else
+#define HAVE_ACLAPI 0
 #endif
 
 #if APR_HAVE_SYS_TYPES_H
@@ -168,6 +171,11 @@ typedef void (Sigfunc)(int);
 
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
+
+#if !APR_HAVE_ERRNO_H
+APR_DECLARE_DATA int errno;
+#define ENOSPC 1
+#endif
 
 #endif  /*APR_PRIVATE_H*/
 #endif  /*WIN32*/
