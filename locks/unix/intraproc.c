@@ -126,6 +126,22 @@ static apr_status_t intra_acquire(apr_lock_t *lock)
     return stat;
 }
 
+static apr_status_t intra_tryacquire(apr_lock_t *lock)
+{
+    apr_status_t stat;
+
+    stat = pthread_mutex_trylock(lock->intraproc);
+#ifdef PTHREAD_SETS_ERRNO
+    if (stat) {
+        stat = errno;
+    }
+#endif
+    /* Normalize the return code. */
+    if (stat == EBUSY)
+        stat = APR_EBUSY;
+    return stat;
+}
+
 static apr_status_t intra_release(apr_lock_t *lock)
 {
     apr_status_t status;
@@ -156,6 +172,7 @@ const apr_unix_lock_methods_t apr_unix_intra_methods =
     0,
     intra_create,
     intra_acquire,
+    intra_tryacquire,
     NULL, /* no read lock concept */
     NULL, /* no write lock concept */
     intra_release,
@@ -200,6 +217,7 @@ const apr_unix_lock_methods_t apr_unix_rwlock_methods =
     0,
     rwlock_create,
     NULL, /* no standard acquire method; app better not call :) */
+    NULL, /* no standard tryacquire method; app better not call :) */
     rwlock_acquire_read,
     rwlock_acquire_write,
     rwlock_release,

@@ -104,6 +104,7 @@ struct apr_unix_lock_methods_t {
     unsigned int flags;
     apr_status_t (*create)(apr_lock_t *, const char *);
     apr_status_t (*acquire)(apr_lock_t *);
+    apr_status_t (*tryacquire)(apr_lock_t *);
     apr_status_t (*acquire_read)(apr_lock_t *);
     apr_status_t (*acquire_write)(apr_lock_t *);
     apr_status_t (*release)(apr_lock_t *);

@@ -120,6 +120,7 @@ static const struct apr_unix_lock_methods_t lockall_methods =
     0,
     lockall_create,
     lockall_acquire,
+    NULL, /* no tryacquire concept */
     NULL, /* no read lock concept */
     NULL, /* no write lock concept */
     lockall_release,
@@ -271,6 +272,29 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
 #endif
 
     if ((stat = lock->meth->acquire(lock)) != APR_SUCCESS) {
+        return stat;
+    }
+
+#if APR_HAS_THREADS
+    lock->owner = apr_os_thread_current();
+    lock->owner_ref = 1;
+#endif
+
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
+{
+    apr_status_t stat;
+
+#if APR_HAS_THREADS
+    if (apr_os_thread_equal(lock->owner, apr_os_thread_current())) {
+        lock->owner_ref++;
+        return APR_SUCCESS;
+    }
+#endif
+
+    if ((stat = lock->meth->tryacquire(lock)) != APR_SUCCESS) {
         return stat;
     }
 
