@@ -71,6 +71,12 @@ typedef ap_int64_t ap_time_t;
 #ifdef WIN32
 #define AP_USEC_PER_SEC ((LONGLONG) 1000000)
 #else
+/* XXX: this is wrong -- the LL is only required if int64 is implemented as
+ * a long long, it could be just a long on some platforms.  the C99
+ * correct way of doing this is to use INT64_C(1000000) which comes
+ * from stdint.h.  we'd probably be doing a Good Thing to check for
+ * INT64_C in autoconf... or otherwise define an AP_INT64_C(). -dean
+ */
 #define AP_USEC_PER_SEC (1000000LL)
 #endif
 
