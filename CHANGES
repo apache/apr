@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Cache GMT offset on platforms that don't store it in the tm struct.
+     This offset is normalized to be independent of daylight savings
+     time.  [Brian Pane <bpane@pacbell.net>]
+
   *) Initial support for cygwin.  [Stipe Tolj <tolj@wapme-systems.de>]
 
   *) Fix a problem with buffered files on Unix.  [Brian Havard]
