@@ -130,24 +130,23 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     
     *new = apr_pcalloc(cont, sizeof(apr_mmap_t));
     (*new)->pstart = (offset / memblock) * memblock;
-    (*new)->psize = (apr_size_t)(offset % memblock) + size;
     (*new)->poffset = offset - (*new)->pstart;
-    /* XXX: psize below should be the MAXIMUM size of the mmap object,
-     * (e.g. file size) not the size of the mapped region!
-     * Since apr doesn't seem to acknowledge the discrepancy (the mmap
-     * size/view/off concepts are pretty horked) this will have to wait.
+    (*new)->psize = (apr_size_t)((*new)->poffset) + size;
+    /* The size of the CreateFileMapping object is the current size
+     * of the size of the mmap object (e.g. file size), not the size 
+     * of the mapped region!
      */
 
     (*new)->mhandle = CreateFileMapping(file->filehand, NULL, fmaccess,
-                                        0, (*new)->psize, NULL);
+                                        0, 0, NULL);
     if (!(*new)->mhandle || (*new)->mhandle == INVALID_HANDLE_VALUE)
     {
         *new = NULL;
         return apr_get_os_error();
     }
 
-    offlo = (DWORD)(*new)->poffset;
-    offhi = (DWORD)((*new)->poffset << 32);
+    offlo = (DWORD)(*new)->pstart;
+    offhi = (DWORD)((*new)->pstart >> 32);
     (*new)->mv = MapViewOfFile((*new)->mhandle, mvaccess, offhi,
                                offlo, (*new)->psize);
     if (!(*new)->mv)
@@ -158,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
         return rv;
     }
 
-    (*new)->mm = (char*)((*new)->mv) + offset;
+    (*new)->mm = (char*)((*new)->mv) + (*new)->poffset;
     (*new)->size = size;
     (*new)->cntxt = cont;
     (*new)->is_owner = 1;
