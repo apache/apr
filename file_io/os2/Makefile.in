@@ -12,7 +12,8 @@ TARGETS = \
 	maperrorcode.lo \
 	fullrw.lo \
 	filepath.lo \
-	filesys.lo
+	filesys.lo \
+	mktemp.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
