@@ -85,8 +85,11 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         while (rc == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
                 rc = DosRead(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead );
-                if (thefile->dataRead == 0)
+                if (thefile->dataRead == 0) {
+                    if (rc == 0)
+                        thefile->eof_hit = TRUE;
                     break;
+                }
                 thefile->filePtr += thefile->dataRead;
                 thefile->bufpos = 0;
             }
@@ -99,15 +102,6 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
-        
-        // if an error occurred report it
-        // if we read some data but hit EOF before reading 'size' bytes, return Ok (0)
-        // if we hit EOF with no data read, return -1
-        if (size && rc == 0 && pos == (char *)buf) {
-            thefile->eof_hit = TRUE;
-            *_errno() = APR_EOF;
-            return APR_EOF;
-        }
         return os2errno(rc);
     } else {
         rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);
@@ -307,15 +301,16 @@ ap_status_t ap_flush(ap_file_t *thefile)
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     ssize_t readlen;
-    ap_status_t rv;
+    ap_status_t rv = APR_SUCCESS;
     int i;    
 
     for (i = 0; i < len-1; i++) {
         readlen = 1;
         rv = ap_read(thefile, str+i, &readlen);
-        
-        if (rv != APR_SUCCESS) {
-            return rv;
+
+        if (readlen != 1) {
+            rv = APR_EOF;
+            break;
         }
         
         if (str[i] == '\r')
@@ -324,7 +319,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
             break;
     }
     str[i] = 0;
-    return APR_SUCCESS; 
+    return rv;
 }
 
 
