@@ -134,7 +134,6 @@ void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data)
 
 int main(void)
 {
-#if APR_HAS_THREADS
     apr_thread_t *t1;
     apr_thread_t *t2;
     apr_thread_t *t3;
@@ -148,6 +147,7 @@ int main(void)
 
     fprintf(stdout, "Initializing the context......."); 
     if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
+        fflush(stdout);
         fprintf(stderr, "could not initialize\n");
         exit(-1);
     }
@@ -156,6 +156,7 @@ int main(void)
     fprintf(stdout, "Initializing the lock......."); 
     s1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
     if (s1 != APR_SUCCESS) {
+        fflush(stdout);
         fprintf(stderr, "Could not create lock\n");
         exit(-1);
     }
@@ -168,6 +169,7 @@ int main(void)
     s4 = apr_thread_create(&t4, NULL, thread_func4, NULL, context);
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
         s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
+        fflush(stdout);
         fprintf(stderr, "Error starting thread\n");
         exit(-1);
     }
@@ -178,24 +180,27 @@ int main(void)
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
-    fprintf (stdout, "OK\n");
+    fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Checking thread's returned value.......");
     if (s1 != exit_ret_val || s2 != exit_ret_val ||
         s3 != exit_ret_val || s4 != exit_ret_val) {
-        fprintf(stderr, "Invalid return value (not expected value)\n");
+        fflush(stdout);
+        fprintf(stderr, 
+                "Invalid return value %d/%d/%d/%d (not expected value %d)\n",
+                s1, s2, s3, s4, exit_ret_val);
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Checking if locks worked......."); 
     if (x != 40000) {
+        fflush(stdout);
         fprintf(stderr, "The locks didn't work????  %d\n", x);
     }
     else {
         fprintf(stdout, "Everything is working!\n");
     }
-#endif
     return 1;
 }
 
