@@ -86,6 +86,9 @@ static ap_status_t pipenonblock(struct file_t *thefile)
  */
 ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
 {
+    if(thepipe == NULL)
+        return APR_EBADARG;
+
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
         return APR_SUCCESS;
@@ -104,6 +107,12 @@ ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
 ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
 {
     int filedes[2];
+
+    if(in == NULL || out == NULL)
+        return APR_EBADARG;
+
+    if(cont == NULL)
+        return APR_ENOCONT;
 
     if (pipe(filedes) == -1) {
         return errno;
@@ -144,6 +153,9 @@ ap_status_t ap_create_namedpipe(char *filename,
 {
     mode_t mode = get_fileperms(perm);
 
+    if(cont == NULL)
+        return APR_ENOCONT;
+
     if (mkfifo(filename, mode) == -1) {
         return errno;
     }
@@ -159,6 +171,9 @@ ap_status_t ap_block_pipe(ap_file_t *thepipe)
 {
 #ifndef BEOS /* this code won't work on BeOS */
     int fd_flags;
+
+    if(thepipe == NULL)
+        return APR_EBADARG;
 
     fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
 #if defined(O_NONBLOCK)

@@ -89,8 +89,16 @@ static ap_filetype_e filetype_from_mode(int mode)
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
 {
     struct stat info;
-/* XXX: this should be the equivalent of fstat() in unix, using stat() here is wrong */
-    int rv = stat(thefile->fname, &info);
+    int rv;
+
+    if (finfo == NULL || thefile == NULL)
+        return APR_EBADARG;
+
+    if (thefile->filehand == NULL) {
+        rv = fstat(thefile->filedes, &info);
+    } else {
+        rv = stat(thefile->fname, &info);
+    }
 
     if (rv == 0) {
         finfo->protection = info.st_mode;
@@ -120,9 +128,15 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
 {
     struct stat info;
-    int rv = stat(fname, &info);
+    int rv;
 
-    if (rv == 0) {
+    if(finfo == NULL || fname == NULL)
+        return APR_EBADARG;
+
+    if(cont == NULL)
+        return APR_ENOCONT;
+
+    if ((rv = stat(fname, &info)) == 0) {
         finfo->protection = info.st_mode;
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;

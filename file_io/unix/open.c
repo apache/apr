@@ -59,6 +59,7 @@ ap_status_t file_cleanup(void *thefile)
 {
     struct file_t *file = thefile;
     int rv;
+
     if (file->buffered) {
         rv = fclose(file->filehand);
     }
@@ -96,12 +97,19 @@ ap_status_t file_cleanup(void *thefile)
  * arg 4) Access permissions for file.
  * arg 5) The context to use.
  * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
- *        called without any mode parameters.
+ *        called without any mode parameters.  *arg1 must point to a valid
+ *        file_t, or NULL (in which case it will be allocated)
  */
 ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cont)
 {
     int oflags = 0;
     char *buf_oflags;
+
+    if (new == NULL)
+        return APR_EBADARG;
+
+    if (cont == NULL)
+        return APR_ENOCONT;
 
     if ((*new) == NULL) {
         (*new) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
@@ -192,6 +200,9 @@ ap_status_t ap_close(struct file_t *file)
 {
     ap_status_t rv;
   
+    if (file == NULL)
+        return APR_EBADARG;
+
     if ((rv = file_cleanup(file)) == APR_SUCCESS) {
         ap_kill_cleanup(file->cntxt, file, file_cleanup);
         return APR_SUCCESS;
@@ -209,6 +220,9 @@ ap_status_t ap_close(struct file_t *file)
  */
 ap_status_t ap_remove_file(char *path, ap_context_t *cont)
 {
+    if (cont == NULL)
+        return APR_ENOCONT;
+
     if (unlink(path) == 0) {
         return APR_SUCCESS;
     }
@@ -227,6 +241,9 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cont)
  */
 ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
 {
+    if (thefile == NULL)
+        return APR_EBADARG;
+
     if (file == NULL) {
         return APR_ENOFILE;
     }
@@ -254,6 +271,13 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile,
                            ap_context_t *cont)
 {
     int *dafile = thefile;
+    
+    if (file == NULL || thefile == NULL)
+        return APR_EBADARG;
+
+    if (cont == NULL)
+        return APR_ENOCONT;
+
     if ((*file) == NULL) {
         (*file) = ap_pcalloc(cont, sizeof(struct file_t));
         (*file)->cntxt = cont;
@@ -277,6 +301,9 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile,
  */
 ap_status_t ap_eof(ap_file_t *fptr)
 {
+    if (fptr == NULL)
+        return APR_EBADARG;
+
     if (fptr->buffered) {
         if (feof(fptr->filehand) == 0) {
             return APR_SUCCESS;
@@ -297,6 +324,9 @@ ap_status_t ap_eof(ap_file_t *fptr)
  */
 ap_status_t ap_ferror(ap_file_t *fptr)
 {
+    if (fptr == NULL)
+        return APR_EBADARG;
+
     if (ferror(fptr->filehand)) {
         return (-1);
     }
@@ -312,6 +342,12 @@ ap_status_t ap_ferror(ap_file_t *fptr)
  */
 ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
 {
+    if (thefile == NULL)
+        return APR_EBADARG;
+
+    if (cont == NULL)
+        return APR_ENOCONT;
+
     (*thefile) = ap_pcalloc(cont, sizeof(struct file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;

@@ -69,6 +69,9 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_ssize_t rv;
 
+    if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
+        return APR_EBADARG;
+
     if (thefile->filedes < 0 && !thefile->buffered) {
         *nbytes = 0;
         return APR_EBADF;
@@ -148,6 +151,9 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
 
+    if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
+        return APR_EBADARG;
+
     if (thefile->filedes < 0 && !thefile->buffered) {
         *nbytes = 0;
         return APR_EBADF;
@@ -221,6 +227,10 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec,
                       ap_size_t nvec, ap_ssize_t *nbytes)
 {
     int bytes;
+
+    if(thefile == NULL || vec == NULL || nvec < 0 || nbytes == NULL)
+        return APR_EBADARG;
+
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
         *nbytes = 0;
         return errno;
@@ -240,6 +250,9 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec,
  */
 ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
+    if(thefile == NULL)
+        return APR_EBADARG;
+
     if (thefile->buffered) {
         if (fputc(ch, thefile->filehand) == ch) {
             return APR_SUCCESS;
@@ -260,6 +273,9 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
  */
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
+    if(thefile == NULL)
+        return APR_EBADARG;
+
     if (thefile->buffered) {
         if (ungetc(ch, thefile->filehand) == ch) {
             return APR_SUCCESS;
@@ -280,6 +296,9 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
     ssize_t rv;
     
+    if(thefile == NULL || ch == NULL)
+        return APR_EBADARG;
+
     if (thefile->buffered) {
         int r;
 
@@ -316,6 +335,9 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     ssize_t rv;
     int len;
 
+    if(thefile == NULL || str == NULL)
+        return APR_EBADARG;
+
     if (thefile->buffered) {
         if (fputs(str, thefile->filehand)) {
             return APR_SUCCESS;
@@ -337,6 +359,9 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
  */
 ap_status_t ap_flush(ap_file_t *thefile)
 {
+    if(thefile == NULL)
+        return APR_EBADARG;
+
     if (thefile->buffered) {
         if (!fflush(thefile->filehand)) {
             return APR_SUCCESS;
@@ -360,6 +385,9 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     ssize_t rv;
     int i;    
+
+    if(thefile == NULL || str == NULL || len < 0)
+        return APR_EBADARG;
 
     if (thefile->buffered) {
         if (fgets(str, len, thefile->filehand)) {
@@ -401,6 +429,9 @@ API_EXPORT(int) ap_fprintf(struct file_t *fptr, const char *format, ...)
     va_list ap;
     char *buf;
     int len;
+
+    if(fptr == NULL || format == NULL)
+        return APR_EBADARG;
 
     buf = malloc(HUGE_STRING_LEN);
     if (buf == NULL) {

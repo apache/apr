@@ -173,7 +173,7 @@ ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
                             ap_status_t (*cleanup) (void *));
 
 ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir);
-ap_status_t ap_dir_entry_mtime(time_t *mtime, ap_dir_t *thedir);
+ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir);
 ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir);
 
 #ifdef __cplusplus
