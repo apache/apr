@@ -66,6 +66,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+static const char *module_identity = "STANDARD";
+
 /*
  * standard memory system
  */
@@ -121,6 +123,7 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
     new_mem_sys->calloc_fn  = apr_sms_std_calloc;
     new_mem_sys->realloc_fn = apr_sms_std_realloc;
     new_mem_sys->free_fn    = apr_sms_std_free;
+    new_mem_sys->identity   = module_identity;
     /* as we're not a tracking memory module, i.e. we don't keep
      * track of our allocations, we don't have apr_sms_reset or
      * apr_sms_destroy functions.

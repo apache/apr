@@ -93,6 +93,7 @@ struct apr_sms_t
   apr_sms_t  *sibling_mem_sys;
   apr_sms_t **ref_mem_sys;
   apr_sms_t  *accounting_mem_sys;
+  const char *identity; /* a string identifying the module */
 
   struct apr_sms_cleanup *cleanups;
 
