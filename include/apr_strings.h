@@ -340,15 +340,15 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
  *   base 16.
  * @return The numeric value of the string.
  */
-APR_DECLARE(apr_int64_t) apr_strtoll(const char *buf, char **end, int base);
+APR_DECLARE(apr_int64_t) apr_strtoi64(const char *buf, char **end, int base);
 
 /**
  * parse a base-10 numeric string into a 64-bit numeric value.
- * Equivalent to apr_strtoll(buf, (char**)NULL, 10).
+ * Equivalent to apr_strtoi64(buf, (char**)NULL, 10).
  * @param buf The string to parse
  * @return The numeric value of the string
  */
-APR_DECLARE(apr_int64_t) apr_atoll(const char *buf);
+APR_DECLARE(apr_int64_t) apr_atoi64(const char *buf);
 
 /**
  * Format a binary size (magnitiudes are 2^10 rather than 10^3) from an apr_off_t,

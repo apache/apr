@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Renamed apr_strtoll()/apr_atoll() to follow int64 convention,
+     so these new helpers are apr_strtoi64/apr_atoi64(), since
+	 'll' (long long) is a nonportable and aspecific construct.
+     [William Rowe]
+
   *) don't perform a strlen on that name value without checking for NULL 
      first (in getopt)
      [David Waite <mass@akuma.org>, Ian Holsman]
