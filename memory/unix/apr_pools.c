@@ -1219,9 +1219,10 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
      */
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME)
     if (!apr_pool_is_child_of(pool, global_pool)) {
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
         apr_pool_log_event(pool, "LIFE",
                            __FILE__ ":apr_pool_integrity check", 0);
-
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
         abort();
     }
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME) */
@@ -1229,8 +1230,10 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_OWNER)
 #if APR_HAS_THREADS
     if (!apr_os_thread_equal(pool->owner, apr_os_thread_current())) {
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
         apr_pool_log_event(pool, "THREAD",
                            __FILE__ ":apr_pool_integrity check", 0);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
         abort();
     }
 #endif /* APR_HAS_THREADS */
