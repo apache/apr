@@ -42,6 +42,11 @@ struct apr_socket_t {
     int                 remote_addr_unknown;
     apr_int32_t         options;
     apr_int32_t         inherit;
+    /* As of 07.20.04, the overlapped structure is only used by 
+     * apr_socket_sendfile and that's where it will be allocated 
+     * and initialized.
+     */
+    OVERLAPPED         *overlapped;
     sock_userdata_t    *userdata;
 
     /* if there is a timeout set, then this pollset is used */

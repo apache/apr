@@ -206,16 +206,6 @@ static apr_status_t collapse_iovec(char **off, apr_size_t *len,
 
 #if APR_HAS_SENDFILE
 /*
- *#define WAIT_FOR_EVENT
- * Note: Waiting for the socket directly is much faster than creating a seperate
- * wait event. There are a couple of dangerous aspects to waiting directly 
- * for the socket. First, we should not wait on the socket if concurrent threads
- * can wait-on/signal the same socket. This shouldn't be happening with Apache since 
- * a socket is uniquely tied to a thread. This will change when we begin using 
- * async I/O with completion ports on the socket. 
- */
-
-/*
  * apr_status_t apr_socket_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
  *                                 apr_off_t *, apr_size_t *, apr_int32_t flags)
  *    Send a file from an open file descriptor to a socket, along with 
@@ -239,13 +229,11 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
     apr_off_t curoff = *offset;
     DWORD dwFlags = 0;
     DWORD nbytes;
-    OVERLAPPED overlapped;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
     int ptr = 0;
     int bytes_to_send;   /* Bytes to send out of the file (not including headers) */
     int disconnected = 0;
     int sendv_trailers = 0;
-    HANDLE wait_event;
     char hdtrbuf[4096];
 
     if (apr_os_level < APR_WIN_NT) {
@@ -275,14 +263,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
         return APR_SUCCESS;
     }
 
-    /* Initialize the header/trailer and overlapped structures */
     memset(&tfb, '\0', sizeof (tfb));
-    memset(&overlapped,'\0', sizeof(overlapped));
-#ifdef WAIT_FOR_EVENT
-    wait_event = overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-#else
-    wait_event = (HANDLE) sock->socketdes;
-#endif
 
     /* Collapse the headers into a single buffer */
     if (hdtr && hdtr->numheaders) {
@@ -301,6 +282,12 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
         }
     }
 
+    /* Initialize the overlapped structure used on TransmitFile
+     */
+    if (!sock->overlapped) {
+        sock->overlapped = apr_pcalloc(sock->cntxt, sizeof(OVERLAPPED));
+        sock->overlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    }
     while (bytes_to_send) {
         if (bytes_to_send > MAX_SEGMENT_SIZE) {
             nbytes = MAX_SEGMENT_SIZE;
@@ -329,16 +316,16 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
             }
         }
 
-        overlapped.Offset = (DWORD)(curoff);
+        sock->overlapped->Offset = (DWORD)(curoff);
 #if APR_HAS_LARGE_FILES
-        overlapped.OffsetHigh = (DWORD)(curoff >> 32);
+        sock->overlapped->OffsetHigh = (DWORD)(curoff >> 32);
 #endif  
         /* XXX BoundsChecker claims dwFlags must not be zero. */
         rv = TransmitFile(sock->socketdes,  /* socket */
                           file->filehand, /* open file descriptor of the file to be sent */
                           nbytes,         /* number of bytes to send. 0=send all */
                           0,              /* Number of bytes per send. 0=use default */
-                          &overlapped,    /* OVERLAPPED structure */
+                          sock->overlapped,    /* OVERLAPPED structure */
                           ptfb,           /* header and trailer buffers */
                           dwFlags);       /* flags to control various aspects of TransmitFile */
         if (!rv) {
@@ -346,17 +333,20 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
             if ((status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) ||
                 (status == APR_FROM_OS_ERROR(WSA_IO_PENDING))) 
             {
-                rv = WaitForSingleObject(wait_event, 
+                rv = WaitForSingleObject(sock->overlapped->hEvent, 
                                          (DWORD)(sock->timeout >= 0 
                                                  ? sock->timeout_ms : INFINITE));
                 if (rv == WAIT_OBJECT_0) {
                     status = APR_SUCCESS;
                     if (!disconnected) {
-                        if (!GetOverlappedResult(wait_event, &overlapped, 
-                                                 &nbytes, FALSE)) {
-                            status = apr_get_os_error();
+                        if (!WSAGetOverlappedResult(sock->socketdes,
+                                                    sock->overlapped,
+                                                    &nbytes,
+                                                    FALSE,
+                                                    &dwFlags)) {
+                            status = apr_get_netos_error();
                         }
-                        /* Ugly code alert: GetOverlappedResult returns
+                        /* Ugly code alert: WSAGetOverlappedResult returns
                          * a count of all bytes sent. This loop only
                          * tracks bytes sent out of the file.
                          */
@@ -415,9 +405,6 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
         }
     }
 
-#ifdef WAIT_FOR_EVENT
-    CloseHandle(overlapped.hEvent);
-#endif
     return status;
 }
 
