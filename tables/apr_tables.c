@@ -128,7 +128,26 @@ APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr)
         int new_size = (arr->nalloc <= 0) ? 1 : arr->nalloc * 2;
         char *new_data;
 
-        new_data = apr_pcalloc(arr->pool, arr->elt_size * new_size);
+        new_data = apr_palloc(arr->pool, arr->elt_size * new_size);
+
+        memcpy(new_data, arr->elts, arr->nalloc * arr->elt_size);
+        memset(new_data + arr->nalloc * arr->elt_size, 0,
+               arr->elt_size * (new_size - arr->nalloc));
+        arr->elts = new_data;
+        arr->nalloc = new_size;
+    }
+
+    ++arr->nelts;
+    return arr->elts + (arr->elt_size * (arr->nelts - 1));
+}
+
+static void *apr_array_push_noclear(apr_array_header_t *arr)
+{
+    if (arr->nelts == arr->nalloc) {
+        int new_size = (arr->nalloc <= 0) ? 1 : arr->nalloc * 2;
+        char *new_data;
+
+        new_data = apr_palloc(arr->pool, arr->elt_size * new_size);
 
         memcpy(new_data, arr->elts, arr->nalloc * arr->elt_size);
         arr->elts = new_data;
@@ -331,10 +350,10 @@ static apr_table_entry_t *table_push(apr_table_t *t)
     if (t->a.nelts == t->a.nalloc) {
         return NULL;
     }
-    return (apr_table_entry_t *) apr_array_push(&t->a);
+    return (apr_table_entry_t *) apr_array_push_noclear(&t->a);
 }
 #else /* MAKE_TABLE_PROFILE */
-#define table_push(t)	((apr_table_entry_t *) apr_array_push(&(t)->a))
+#define table_push(t)	((apr_table_entry_t *) apr_array_push_noclear(&(t)->a))
 #endif /* MAKE_TABLE_PROFILE */
 
 
