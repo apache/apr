@@ -76,6 +76,16 @@ APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid)
      * is therefore not only a uniqifier, but an identity (which might not
      * be appropriate in all cases.
      */
+#ifndef _WIN32_WCE
     (void) CoCreateGuid(&guid);
+#else
+    /* WCE lacks CoCreateGuid. So make something simple
+     * for now.
+     */ 
+    guid.Data1 = rand();
+    guid.Data2 = rand();
+    guid.Data3 = rand();
+    sprintf(guid.Data4, "%08X", rand());
+#endif
     memcpy(uuid->data, &guid, sizeof(uuid->data));
 }
