@@ -167,7 +167,8 @@ apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag
     (*new)->dataRead = 0;
     (*new)->direction = 0;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), apr_unix_file_cleanup,
-                        apr_pool_cleanup_null);
+                              ((*new)->flag & APR_INHERIT) ? apr_pool_cleanup_null 
+                                                           : apr_unix_file_cleanup);
     return APR_SUCCESS;
 }
 
@@ -223,6 +224,7 @@ apr_status_t apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile,
     /* buffer already NULL; 
      * don't get a lock (only for buffered files) 
      */
+    (*file)->inherit = 1;
     return APR_SUCCESS;
 }    
 
@@ -254,5 +256,9 @@ apr_status_t apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
 
     return apr_os_file_put(thefile, &fd, cont);
 }
+
+APR_IMPLEMENT_SET_INHERIT(file, flags, cntxt, apr_unix_file_cleanup)
+
+APR_IMPLEMENT_UNSET_INHERIT(file, flags, cntxt, apr_unix_file_cleanup)
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);

@@ -60,6 +60,7 @@
 #include "apr_time.h"
 #include "apr_errno.h"
 #include "apr_file_info.h"
+#include "apr_inherit.h"
 
 #define APR_WANT_STDIO          /* for SEEK_* */
 #define APR_WANT_IOVEC
@@ -89,6 +90,12 @@ extern "C" {
 #define APR_SHARELOCK  1024        /* Platform dependent support for higher
                                       level locked read/write access to support
                                       writes across process/machines */
+#ifndef APR_INHERIT
+#define APR_INHERIT    (2^24)      /* Create the file inheritable by the child
+                                      process. fork()ed implementations 
+                                      automatically register a child cleanup
+                                      in the _absense_ of this flag. */
+#endif
 
 /* flags for apr_file_seek */
 #define APR_SET SEEK_SET
@@ -96,7 +103,7 @@ extern "C" {
 #define APR_END SEEK_END
 
 /* should be same as whence type in lseek, POSIX defines this as int */
-typedef apr_int32_t       apr_seek_where_t;
+typedef int       apr_seek_where_t;
 
 /**
  * Structure for referencing files.
@@ -141,6 +148,10 @@ typedef struct apr_file_t         apr_file_t;
  *           APR_SHARELOCK        Platform dependent support for higher
  *                                level locked read/write access to support
  *                                writes across process/machines
+ *           APR_INHERIT          Create the file inheritable by the child
+ *                                processes.  fork()ed implementations 
+ *                                automatically register a child cleanup
+ *                                in the _absense_ of this flag.
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.
@@ -568,6 +579,24 @@ APR_DECLARE(apr_int32_t) apr_file_flags_get(apr_file_t *f);
  * @deffunc apr_pool_t apr_file_pool_get(apr_file_t *f)
  */
 APR_POOL_DECLARE_ACCESSOR(file);
+
+/**
+ * Set a file to be inherited by child processes.
+ * @param file The file to enable inheritance.
+ * @deffunc void apr_file_set_inherit(apr_file_t *file)
+ * @tip Same effect as passing the APR_INHERIT flag to apr_file_open(),
+ * but it is far more efficient to pass the correct value in the first place.
+ */
+APR_DECLARE_SET_INHERIT(file);
+
+/**
+ * Unset a file from being inherited by child processes.
+ * @param file The file to disable inheritance.
+ * @deffunc void apr_file_unset_inherit(apr_file_t *file)
+ * @tip Same effect as omiting the APR_INHERIT flag to apr_file_open(),
+ * but it is far more efficient to pass the correct value in the first place.
+ */
+APR_DECLARE_UNSET_INHERIT(file);
 
 #ifdef __cplusplus
 }
