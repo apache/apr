@@ -56,6 +56,7 @@
 #define APR_LIB_H
 
 #include "apr_general.h"
+#include "apr_tables.h"
 #include "apr_file_io.h"
 #include "apr_thread_proc.h"
 
@@ -75,37 +76,6 @@ extern "C" {
 /*
  * Define the structures used by the APR general-purpose library.
  */
-
-/*
- * Memory allocation stuff, like pools, arrays, and tables.  Pools
- * and tables are opaque structures to applications, but arrays are
- * published.
- */
-typedef struct ap_table_t ap_table_t;
-typedef struct ap_child_info_t ap_child_info_t;
-typedef void ap_mutex_t;
-typedef struct ap_array_header_t {
-    ap_pool_t *cont;
-    int elt_size;
-    int nelts;
-    int nalloc;
-    char *elts;
-} ap_array_header_t;
-
-typedef struct ap_table_entry_t {
-    char *key;          /* maybe NULL in future;
-                         * check when iterating thru table_elts
-                         */
-    char *val;
-} ap_table_entry_t;
-
-/* XXX: these know about the definition of struct ap_table_t in alloc.c.  That
- * definition is not here because it is supposed to be private, and by not
- * placing it here we are able to get compile-time diagnostics from modules
- * written which assume that a ap_table_t is the same as an ap_array_header_t. -djg
- */
-#define ap_table_elts(t) ((ap_array_header_t *)(t))
-#define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
 
 /*
  * Structure used by the variable-formatter routines.
@@ -139,10 +109,6 @@ APR_EXPORT_NONSTD(ap_status_t) ap_execle(const char *c, const char *a, ...);
 APR_EXPORT_NONSTD(ap_status_t) ap_execve(const char *c, const char *argv[],
 				  const char *envp[]);
 
-#define ap_create_mutex(x) (0)
-#define ap_release_mutex(x) (0)
-#define ap_acquire_mutex(x) (0)
-
 /* These macros allow correct support of 8-bit characters on systems which
  * support 8-bit characters.  Pretty dumb how the cast is required, but
  * that's legacy libc for ya.  These new macros do not support EOF like
@@ -161,9 +127,6 @@ APR_EXPORT_NONSTD(ap_status_t) ap_execve(const char *c, const char *argv[],
 #define ap_isxdigit(c) (isxdigit(((unsigned char)(c))))
 #define ap_tolower(c) (tolower(((unsigned char)(c))))
 #define ap_toupper(c) (toupper(((unsigned char)(c))))
-
-
-
 
 /*
  * Small utility macros to make things easier to read.  Not usually a
@@ -292,50 +255,6 @@ APR_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, int n);
 APR_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_pool_t *p, ...);
 APR_EXPORT(char *) ap_pvsprintf(struct ap_pool_t *p, const char *fmt, va_list ap);
 APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *p, const char *fmt, ...);
-APR_EXPORT(ap_array_header_t *) ap_make_array(struct ap_pool_t *p, int nelts,
-						int elt_size);
-APR_EXPORT(void *) ap_push_array(ap_array_header_t *arr);
-APR_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
-			       const ap_array_header_t *src);
-APR_EXPORT(ap_array_header_t *) ap_copy_array(struct ap_pool_t *p,
-						const ap_array_header_t *arr);
-APR_EXPORT(ap_array_header_t *)
-	ap_copy_array_hdr(struct ap_pool_t *p,
-			   const ap_array_header_t *arr);
-APR_EXPORT(ap_array_header_t *)
-	ap_append_arrays(struct ap_pool_t *p,
-			  const ap_array_header_t *first,
-			  const ap_array_header_t *second);
-APR_EXPORT(char *) ap_array_pstrcat(struct ap_pool_t *p,
-				     const ap_array_header_t *arr,
-				     const char sep);
-APR_EXPORT(ap_table_t *) ap_make_table(struct ap_pool_t *p, int nelts);
-APR_EXPORT(ap_table_t *) ap_copy_table(struct ap_pool_t *p, const ap_table_t *t);
-APR_EXPORT(void) ap_clear_table(ap_table_t *t);
-APR_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key);
-APR_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
-			       const char *val);
-APR_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
-				const char *val);
-APR_EXPORT(void) ap_table_unset(ap_table_t *t, const char *key);
-APR_EXPORT(void) ap_table_merge(ap_table_t *t, const char *key,
-				 const char *val);
-APR_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
-				  const char *val);
-APR_EXPORT(void) ap_table_add(ap_table_t *t, const char *key,
-			       const char *val);
-APR_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
-				const char *val);
-APR_EXPORT(ap_table_t *) ap_overlay_tables(struct ap_pool_t *p,
-					     const ap_table_t *overlay,
-					     const ap_table_t *base);
-APR_EXPORT(void)
-	ap_table_do(int (*comp) (void *, const char *, const char *),
-		     void *rec, const ap_table_t *t, ...);
-#define AP_OVERLAP_TABLES_SET   (0)
-#define AP_OVERLAP_TABLES_MERGE (1)
-APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
-				    unsigned flags);
 APR_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *));
@@ -349,12 +268,6 @@ APR_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
 APR_EXPORT(void) ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid,
 				     enum kill_conditions how);
-APR_EXPORT(int)
-	ap_spawn_child(ap_pool_t *p,
-			int (*func) (void *a, ap_child_info_t *c),
-			void *data, enum kill_conditions kill_how,
-			FILE **pipe_in, FILE **pipe_out,
-			FILE **pipe_err);
 
 APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
 
