@@ -141,8 +141,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
     egd_socket = socket(PF_UNIX, SOCK_STREAM, 0);
 
     if (egd_socket == -1) {
-        /* Does socket set errno? */
-        return APR_EGENERAL;
+        return errno;
     }
 
     rv = connect(egd_socket, (struct sockaddr*)&addr, egd_addr_len);
@@ -159,9 +158,11 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
 
         srv = write(egd_socket, req, 2);
         if (srv == -1) {
+            int bad_errno = errno;
+
             shutdown(egd_socket, SHUT_RDWR);
             close(egd_socket);
-            return errno;
+            return bad_errno;
         }
 
         if (srv != 2) {
@@ -173,9 +174,11 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
         resp_expected = req[1];
         srv = read(egd_socket, resp, resp_expected);
         if (srv == -1) {
+            int bad_errno = errno;
+
             shutdown(egd_socket, SHUT_RDWR);
             close(egd_socket);
-            return errno;
+            return bad_errno;
         }
 
         memcpy(curbuf, resp, srv);
