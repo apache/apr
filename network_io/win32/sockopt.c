@@ -157,6 +157,11 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         }
         break;
     }
+    case APR_TCP_NODELAY:
+        if (setsockopt(sock->sock, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
+            return WSAGetLastError();
+        }
+        break;
     default:
         return APR_EINVAL;
         break;

@@ -114,6 +114,11 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
     if (opt & APR_SO_TIMEOUT) {
         sock->timeout = on;
     }
+    if (opt & APR_TCP_NODELAY) {
+        if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
+            return APR_OS2_STATUS(sock_errno());
+        }
+    }
     return APR_SUCCESS;
 }
 
