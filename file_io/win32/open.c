@@ -77,23 +77,26 @@ apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p)
      * the \\?\ form doesn't allow '/' path seperators.
      *
      * Note that the \\?\ form only works for local drive paths, and
-     * not for UNC paths.
+     * \\?\UNC\ is needed UNC paths.
      */
     int srcremains = strlen(srcstr) + 1;
-    int retremains = srcremains + 4;
+    int retremains = srcremains;
     apr_wchar_t *retstr, *t;
     if (srcstr[1] == ':' && srcstr[2] == '/') {
-        retstr = apr_palloc(p, retremains * 2);
+        retstr = apr_palloc(p, (retremains + 4) * 2);
         wcscpy (retstr, L"\\\\?\\");
-        retremains -= 4;
         t = retstr + 4;
     }
-    else /* Short path: count the trailing NULL */
-    {
-        if (retremains > MAX_PATH)
-            retremains = MAX_PATH;
-        t = retstr = apr_palloc(p, retremains * 2);
+    else if (srcstr[0] == '/' && srcstr[1] == '/') {
+        /* Skip the slashes */
+        srcstr += 2;
+        retremains = (srcremains -= 2);
+        retstr = apr_palloc(p, (retremains + 8) * 2);
+        wcscpy (retstr, L"\\\\?\\UNC\\");
+        t = retstr + 8;
     }
+    else
+        t = retstr = apr_palloc(p, retremains * 2);
     if (conv_utf8_to_ucs2(srcstr, &srcremains,
                           t, &retremains) || srcremains)
         return NULL;
@@ -109,24 +112,40 @@ char *unicode_to_utf8_path(const apr_wchar_t* srcstr, apr_pool_t *p)
      * the true size of the retstr, but that's a memory over speed
      * tradeoff that isn't appropriate this early in development.
      *
-     * Skip the leading 4 characters, allocate the maximum string
+     * Skip the leading 4 characters if the path begins \\?\, or substitute
+     * // for the \\?\UNC\ path prefix, allocating the maximum string
      * length based on the remaining string, plus the trailing null.
-     * then transform \\'s back into /'s since the \\?\ form didn't
-     * allow '/' path seperators, but APR always uses '/'s.
+     * then transform \\'s back into /'s since the \\?\ form never
+     * allows '/' path seperators, and APR always uses '/'s.
      */
     int srcremains = wcslen(srcstr) + 1;
     int retremains = (srcremains - 5) * 3 + 1;
-    char *t, *retstr = apr_palloc(p, retremains);
+    char *t, *retstr;
     if (srcstr[0] == L'\\' && srcstr[1] == L'\\' && 
         srcstr[2] == L'?'  && srcstr[3] == L'\\') {
-        srcremains -= 4;
-        retremains -= 12;
-        srcstr += 4;    
+        if (srcstr[4] == L'U' && srcstr[5] == L'N' && 
+            srcstr[6] == L'C' && srcstr[7] == L'\\') {
+            srcremains -= 8;
+            retremains -= 24;
+            srcstr += 8;
+            retstr = apr_palloc(p, retremains + 2);
+            strcpy(retstr, "//");
+            t = retstr + 2;
+        }
+        else {
+            srcremains -= 4;
+            retremains -= 12;
+            srcstr += 4;
+            t = retstr = apr_palloc(p, retremains);
+        }
     }
+    else
+        t = retstr = apr_palloc(p, retremains);
+        
     if (conv_ucs2_to_utf8(srcstr, &srcremains,
-                          retstr, &retremains) || srcremains)
+                          t, &retremains) || srcremains)
         return NULL;
-    for (t = retstr; *t; ++t)
+    for (; *t; ++t)
         if (*t == L'/')
             *t = L'\\';
     return retstr;
