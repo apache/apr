@@ -77,19 +77,6 @@
 
 
 /*
- * XXX: Memory node struct, move to private header file
- */
-struct apr_memnode_t {
-    apr_memnode_t *next;
-    apr_uint32_t   index;
-    char          *first_avail;
-    char          *endp;
-};
-
-#define SIZEOF_MEMNODE_T APR_ALIGN_DEFAULT(sizeof(apr_memnode_t))
-
-
-/*
  * Magic numbers
  */
 
@@ -189,7 +176,7 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
     /* Round up the block size to the next boundary, but always
      * allocate at least a certain size (MIN_ALLOC).
      */
-    size = APR_ALIGN(size + SIZEOF_MEMNODE_T, BOUNDARY_SIZE);
+    size = APR_ALIGN(size + APR_MEMNODE_T_SIZE, BOUNDARY_SIZE);
     if (size < MIN_ALLOC)
         size = MIN_ALLOC;
 
@@ -247,7 +234,7 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
 #endif /* APR_HAS_THREADS */
 
             node->next = NULL;
-            node->first_avail = (char *)node + SIZEOF_MEMNODE_T;
+            node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
 
             return node;
         }
@@ -283,7 +270,7 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
 #endif /* APR_HAS_THREADS */
 
             node->next = NULL;
-            node->first_avail = (char *)node + SIZEOF_MEMNODE_T;
+            node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
 
             return node;
         }
@@ -302,7 +289,7 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
 
     node->next = NULL;
     node->index = index;
-    node->first_avail = (char *)node + SIZEOF_MEMNODE_T;
+    node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
     node->endp = (char *)node + size;
 
     return node;
@@ -721,7 +708,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         allocator = parent->allocator;
 
     if ((node = apr_allocator_alloc(allocator,
-                                    MIN_ALLOC - SIZEOF_MEMNODE_T)) == NULL) {
+                                    MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
