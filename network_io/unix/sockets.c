@@ -115,8 +115,12 @@ ap_status_t ap_bind(ap_socket_t *sock)
 {
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
         return errno;
-    else
+    else {
+        if (sock->local_addr->sin_port == 0) { /* no need for ntohs() when comparing w/ 0 */
+            sock->local_port_unknown = 1; /* kernel got us an ephemeral port */
+        }
         return APR_SUCCESS;
+    }
 }
 
 ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
@@ -151,9 +155,22 @@ ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connectio
         return errno;
     }
 
-    if (getsockname((*new)->socketdes, (struct sockaddr *)(*new)->local_addr, 
-                    &((*new)->addr_len)) < 0) {
-	return errno;
+    *(*new)->local_addr = *sock->local_addr;
+
+    if (sock->local_port_unknown) {
+        /* not likely for a listening socket, but theoretically possible :) */
+        (*new)->local_port_unknown = 1;
+    }
+
+    if (sock->local_interface_unknown ||
+        sock->local_addr->sin_addr.s_addr == 0) {
+        /* If the interface address inside the listening socket's local_addr wasn't 
+         * up-to-date, we don't know local interface of the connected socket either.
+         *
+         * If the listening socket was not bound to a specific interface, we
+         * don't know the local_addr of the connected socket.
+         */
+        (*new)->local_interface_unknown = 1;
     }
 
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -197,8 +214,16 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
         return errno;
     }
     else {
-        socklen_t namelen = sizeof(*sock->local_addr);
-        getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr, &namelen);
+        if (sock->local_addr->sin_port == 0) {
+            /* connect() got us an ephemeral port */
+            sock->local_port_unknown = 1;
+        }
+        if (sock->local_addr->sin_addr.s_addr == 0) {
+            /* not bound to specific local interface; connect() had to assign
+             * one for the socket
+             */
+            sock->local_interface_unknown = 1;
+        }
 #ifndef HAVE_POLL
 	sock->connected=1;
 #endif
@@ -240,11 +265,8 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
      
         (*sock)->addr_len = sizeof(*(*sock)->local_addr);
         (*sock)->timeout = -1;
-        if (getsockname(*thesock, (struct sockaddr *)(*sock)->local_addr, 
-                        &((*sock)->addr_len)) < 0) {
-            return errno;
-        }
     }
+    (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
     (*sock)->socketdes = *thesock;
     return APR_SUCCESS;
 }
