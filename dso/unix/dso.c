@@ -56,15 +56,10 @@
 
 #include "dso.h"
 
-/*
- * ap_dso_init:  Initialize the underlying DSO library
- *
- * Arguments:    errstr = Location to store error result on failure. 
- *
- * Return values:  Returns APR_SUCCESS (on success), and APR_EINIT on failure.
- *                 on failure, *errstr is valid.
+/* ***APRDOC********************************************************
+ * ap_status_t ap_dso_init(void)
+ *    Initialize the underlying DSO library.
  */
-
 ap_status_t ap_dso_init(void){
     if(lt_dlinit())
         return APR_EINIT;
@@ -72,17 +67,14 @@ ap_status_t ap_dso_init(void){
     return APR_SUCCESS;
 }
 
-/*
- * ap_dso_load:  Load a DSO library.
- *
- * Arguments:    path       = Path to the DSO library
- *               ctx        = Context to use in allocation of the handle.
- *               res_handle = Location to store new handle for the DSO
- *               errstr     = Location to store error string on failure.
- *
- * Return values:  Returns APR_SUCCESS on success, else APR_EINIT
+/* ***APRDOC********************************************************
+ * ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
+ *                         ap_context_t *ctx)
+ *    Load a DSO library.
+ * arg 1) Location to store new handle for the DSO.
+ * arg 2) Path to the DSO library
+ * arg 3) Context to use. 
  */
-
 ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path, 
                         ap_context_t *ctx)
 {
@@ -97,15 +89,11 @@ ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
     
-/*
- * ap_dso_unload:  Unload a DSO library.  
- *
- * Arguments:      handle = Handle to unload
- *                 errstr = Location to store error string on failure.
- *
- * Return values:  Returns APR_SUCCESS on success, else APR_EINIT
+/* ***APRDOC********************************************************
+ * ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
+ *    Close a DSO library.
+ * arg 1) handle to close.
  */
-
 ap_status_t ap_dso_unload(struct dso_handle_t *handle)
 {
     if(lt_dlclose(handle->handle))
@@ -114,17 +102,14 @@ ap_status_t ap_dso_unload(struct dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-/*
- * ap_dso_sym:  Load a symbol from a DSO handle.
- *
- * Arguments:   handle  = DSO handle to load from
- *              symname = Symbol name to load
- *              ressym  = Location to store pointer to the symbol
- *              errstr  = Location to store error string on failure.
- *
- * Return values:  Returns APR_SUCCESS on success, else APR_EINIT
+/* ***APRDOC********************************************************
+ * ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle
+ *                        const char *symname)
+ *    Load a symbol from a DSO handle.
+ * arg 1) Location to store the loaded symbol
+ * arg 2) handle to load from.
+ * arg 3) Name of the symbol to load.
  */
-
 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
                        struct dso_handle_t *handle, 
                        const char *symname)
