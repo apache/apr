@@ -29,6 +29,10 @@
 #undef HAVE_GMTOFF
 #undef USE_THREADS
 
+#undef DSO_USE_DLFCN
+#undef DSO_USE_SHL
+#undef DSO_USE_DYLD
+
 #undef SIZEOF_SSIZE_T
 #undef SIZEOF_SIZE_T
 #undef SIZEOF_OFF_T
