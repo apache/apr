@@ -12,6 +12,7 @@
 #undef HAVE_TRUERAND
 #undef HAVE_POLLIN
 #undef HAVE_isascii
+#undef HAVE_SO_ACCEPT_FILTER
 
 /* Cross process serialization techniques */
 #undef USE_FLOCK_SERIALIZE
