@@ -356,15 +356,16 @@ static int client(client_socket_mode_t socket_mode, char *host)
             printf("Calling apr_socket_sendfile()...\n");
             printf("Headers (%d):\n", hdtr.numheaders);
             for (i = 0; i < hdtr.numheaders; i++) {
-                printf("\t%d bytes (%c)\n",
-                       hdtr.headers[i].iov_len, *(char *)hdtr.headers[i].iov_base);
+                printf("\t%ld bytes (%c)\n",
+                       (long)hdtr.headers[i].iov_len,
+                       *(char *)hdtr.headers[i].iov_base);
             }
             printf("File: %ld bytes from offset %ld\n",
                    (long)tmplen, (long)current_file_offset);
             printf("Trailers (%d):\n", hdtr.numtrailers);
             for (i = 0; i < hdtr.numtrailers; i++) {
-                printf("\t%d bytes\n",
-                       hdtr.trailers[i].iov_len);
+                printf("\t%ld bytes\n",
+                       (long)hdtr.trailers[i].iov_len);
             }
 
             rv = apr_socket_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
