@@ -219,6 +219,10 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
     }
 }
 
+void apr_thread_yield()
+{
+}
+
 apr_status_t apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
 {
     return apr_pool_userdata_get(data, key, thread->cntxt);

@@ -190,6 +190,12 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
 
 
 
+void apr_thread_yield()
+{
+}
+
+
+
 apr_status_t apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
 {
     *thethd = &thd->tid;
