@@ -188,7 +188,7 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
                   "bne-   exit\n\t"          /* ...no, bail out       */
                   "stwcx. %2,0,%1\n\t"       /* ...yes, conditionally
                                                 store swap            */
-                  "bne-  retry\n\t"          /* start over if we lost
+                  "bne-   retry\n\t"         /* start over if we lost
                                                 the reservation       */
                   "exit:"
                   : "=&r"(prev)                        /* output      */
