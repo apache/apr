@@ -71,12 +71,72 @@
 
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
-#if !APR_HAS_HREADS
+
+static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
+{
+    apr_uint32_t oldval;
+    apr_atomic_set(&y,0);
+    printf("%-60s", "testing CAS");
+    oldval = apr_atomic_cas(&y,12,0);
+    if (oldval != 0) {
+        fprintf(stderr, "Failed\noldval =%d should be zero\n",oldval);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+    printf("debug\n y=%d\n",y);
+    printf("%-60s", "testing CAS - match non-null");
+    oldval = apr_atomic_cas(&y,23,12);
+    if (oldval != 12) {
+        fprintf(stderr, "Failed\noldval =%d should be 12 y=%d\n",
+                oldval,
+                apr_atomic_read(&y));
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+    printf("%-60s", "testing CAS - no match");
+    oldval = apr_atomic_cas(&y,23,12);
+    if (oldval != 23 ) {
+        fprintf(stderr, "Failed\noldval =%d should be 23 y=%d\n",
+                oldval, 
+                apr_atomic_read(&y));
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "testing add");
+    oldval = apr_atomic_add(&y,4);
+    if (oldval != 23) {
+        fprintf(stderr, "Failed\nAtomic Add should return the old value expecting 23 got %d\n",
+                oldval);
+        exit(-1);
+    }
+    if (apr_atomic_read(&y) != 27) {
+        fprintf(stderr, "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
+            oldval);
+        exit(-1);
+    }
+ 
+    printf("OK\n");
+    printf("%-60s", "testing add/inc");
+    apr_atomic_set(&y,0);
+    apr_atomic_add(&y,20);
+    apr_atomic_inc(&y);
+    if (apr_atomic_read(&y) != 21) {
+        fprintf(stderr, "Failed.\natomics do not add up\n");
+        return APR_EGENERAL;
+    }
+    fprintf(stdout, "OK\n");
+
+    return APR_SUCCESS;
+}
+
+#if !APR_HAS_THREADS
 int main(void)
 {
     apr_status_t rv;
+
     fprintf(stderr,
-            "This program won't work on this platform because there is no "
+            "This program won't work fully on this platform because there is no "
             "support for threads.\n");
     if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fflush(stdout);
@@ -86,17 +146,13 @@ int main(void)
     rv = apr_atomic_init(context);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "Failed.\nCould not initialize atomics\n");
+        exit(-1);
     }
-    apr_atomic_set(&y,0);
-    apr_atomic_add(&y,20);
-    apr_atomic_inc(&y);
-    if (apr_atomic_read(&y) != 21) {
-        fprintf(stderr, "Failed.\natomics do not add up\n");
+    rv = check_basic_atomics(&y);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "Failed.\n");
+        exit(-1);
     }
-    else {
-        fprintf(stdout, "no threads .. OK\n");
-    }
-
     return 0;
 }
 #else /* !APR_HAS_THREADS */
@@ -158,6 +214,7 @@ void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data)
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
 }
+
 int main(int argc, char**argv)
 {
     apr_thread_t *t1[NUM_THREADS];
@@ -190,18 +247,25 @@ int main(int argc, char**argv)
 
     apr_thread_once_init(&control, context);
 
-    printf("%-60s", "Initializing the lock"); 
-    rv = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
-                         APR_LOCK_DEFAULT, "lock.file", context); 
-    if (rv != APR_SUCCESS) {
-        fflush(stdout);
-        fprintf(stderr, "Failed\nCould not create lock\n");
-        exit(-1);
+    if (mutex==1) {
+        printf("%-60s", "Initializing the lock"); 
+        rv = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
+                             APR_LOCK_DEFAULT, "lock.file", context); 
+        if (rv != APR_SUCCESS) {
+            fflush(stdout);
+            fprintf(stderr, "Failed\nCould not create lock\n");
+            exit(-1);
+        }
+        printf("OK\n");
     }
     rv = apr_atomic_init( context);
-    apr_atomic_set(&y,0);
 
-    printf("OK\n");
+    rv = check_basic_atomics(&y);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "Failed.\n");
+        exit(-1);
+    }
+    apr_atomic_set(&y,0);
 
     printf("%-60s", "Starting all the threads"); 
     for (i=0;i<NUM_THREADS;i++) {
@@ -249,7 +313,7 @@ int main(int argc, char**argv)
             fflush(stdout);
             fprintf(stderr, 
                     "No!\nThe atomics didn't work?? y = %ld instead of %ld\n",
-                    apr_atomic_read(&y),
+                    (long)apr_atomic_read(&y),
                     (long)NUM_THREADS*NUM_ITERATIONS);
         }
         else

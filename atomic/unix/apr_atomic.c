@@ -58,9 +58,9 @@
 #include "apr_thread_mutex.h"
 #include "apr_atomic.h"
 
-#if defined(APR_ATOMIC_NEED_DEFAULT) 
-
 #if APR_HAS_THREADS
+
+#if defined(APR_ATOMIC_NEED_DEFAULT) 
 
 #define NUM_ATOMIC_HASH 7
 /* shift by 2 to get rid of alignment issues */
@@ -79,10 +79,10 @@ apr_status_t apr_atomic_init(apr_pool_t *p )
     }
     return APR_SUCCESS;
 }
-apr_uint32_t apr_atomic_add(volatile apr_atomic_t *mem, long val) 
+apr_uint32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
-    long prev;
+    apr_uint32_t prev;
        
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
         prev = *mem;
@@ -90,12 +90,13 @@ apr_uint32_t apr_atomic_add(volatile apr_atomic_t *mem, long val)
         apr_thread_mutex_unlock(lock);
         return prev;
     }
+    printf("debug no workee\n");
     return *mem;
 }
-apr_uint32_t apr_atomic_set(volatile apr_atomic_t *mem, long val) 
+apr_uint32_t apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
-    long prev;
+    apr_uint32_t prev;
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
         prev = *mem;
@@ -109,7 +110,7 @@ apr_uint32_t apr_atomic_set(volatile apr_atomic_t *mem, long val)
 apr_uint32_t apr_atomic_inc( volatile apr_uint32_t *mem) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
-    long prev;
+    apr_uint32_t prev;
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
         prev = *mem;
@@ -122,7 +123,7 @@ apr_uint32_t apr_atomic_inc( volatile apr_uint32_t *mem)
 apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
-    long prev;
+    apr_uint32_t prev;
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
         prev = *mem;
@@ -132,15 +133,13 @@ apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem)
     }
     return *mem;
 }
-#if 0
-/*
- * linux doesn't have a easy to do this 
- * so comment it out for the moment
- */
-apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem,apr_uint32_t with, apr_uint32_t cmp)
+
+#if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
+
+long apr_atomic_cas(volatile apr_atomic_t *mem,long with, long cmp)
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
-    long prev;
+    apr_uint32_t prev;
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
         prev = *mem;
@@ -152,7 +151,8 @@ apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem,apr_uint32_t with, apr_ui
     }
     return *mem;
 }
-#endif
-#endif /* APR_HAS_THREADS */
+#endif /* APR_ATOMIC_NEED_CAS_DEFAULT */
 
 #endif /* APR_ATOMIC_NEED_DEFAULT */
+
+#endif /* APR_HAS_THREADS */
