@@ -198,7 +198,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out)->blocking = BLK_ON;
     (*out)->timeout = -1;
 #if APR_HAS_THREADS
-    (*in)->thlock = NULL;
+    (*out)->thlock = NULL;
 #endif
 
     apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_unix_file_cleanup,
