@@ -101,50 +101,39 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
         return APR_EBADARG;
 
-    if (thefile->filedes < 0 && !thefile->buffered) {
-        *nbytes = 0;
-        return APR_EBADF;
-    }
-    
     if(*nbytes <= 0) {
         *nbytes = 0;
 	return APR_SUCCESS;
     }
 
-    if (thefile->buffered) {
-        rv = fread(buf, 1, *nbytes, thefile->filehand);
+    if (thefile->ungetchar != -1) {
+        used_unget = TRUE;
+        *(char *)buf++ = (char)thefile->ungetchar;
+        (*nbytes)--;
+        thefile->ungetchar == -1;
     }
-    else {
-        if(thefile->ungetchar != -1){
-	  used_unget = TRUE;
-	  *(char *)buf++ = (char)thefile->ungetchar;
-	  (*nbytes)--;
-          thefile->ungetchar == -1;
-	}
 	  
-        do {
-            rv = read(thefile->filedes, buf, *nbytes);
-        } while (rv == -1 && errno == EINTR);
+    do {
+        rv = read(thefile->filedes, buf, *nbytes);
+    } while (rv == -1 && errno == EINTR);
 
-        if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
-            ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
-            if (arv != APR_SUCCESS) {
-                *nbytes = 0;
-                return arv;
-            }
-            else {
-                do {
-                    rv = read(thefile->filedes, buf, *nbytes);
-                } while (rv == -1 && errno == EINTR);
-            }
-        }  
-    }  /* buffered? */
-
+    if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
+        ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
+        if (arv != APR_SUCCESS) {
+            *nbytes = 0;
+            return arv;
+        }
+        else {
+            do {
+                rv = read(thefile->filedes, buf, *nbytes);
+            } while (rv == -1 && errno == EINTR);
+        }
+    }  
     /* getting less data than requested does not signify an EOF when
        dealing with a pipe.
      */
     if ((*nbytes != rv) && ((errno == EPIPE && thefile->pipe == 1)
-        || (errno != EINTR && !thefile->buffered && thefile->pipe == 0 ))) {
+        || (errno != EINTR && thefile->pipe == 0 ))) {
         thefile->eof_hit = 1;
     }
     if (rv == -1) {
@@ -152,9 +141,9 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         return errno;
     }
     *nbytes = rv;
-    if(used_unget){
-      thefile->ungetchar = -1;
-      *nbytes += 1;
+    if (used_unget) {
+        thefile->ungetchar = -1;
+        *nbytes += 1;
     }
     return APR_SUCCESS;
 }
@@ -177,32 +166,22 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
         return APR_EBADARG;
 
-    if (thefile->filedes < 0 && !thefile->buffered) {
-        *nbytes = 0;
-        return APR_EBADF;
-    }
+    do {
+        rv = write(thefile->filedes, buf, *nbytes);
+    } while (rv == -1 && errno == EINTR);
 
-    if (thefile->buffered) {
-        rv = fwrite(buf, *nbytes, 1, thefile->filehand);
-    }
-    else {
-        do {
-            rv = write(thefile->filedes, buf, *nbytes);
-        } while (rv == -1 && errno == EINTR);
-
-        if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
-            ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
-            if (arv != APR_SUCCESS) {
-                *nbytes = 0;
-                return arv;
-            }
-            else {
-                do {
-                    rv = write(thefile->filedes, buf, *nbytes);
-                } while (rv == -1 && errno == EINTR);
-            }
-        }  
-    }   /* BUFFERED ?? */
+    if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
+        ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
+        if (arv != APR_SUCCESS) {
+            *nbytes = 0;
+            return arv;
+        }
+        else {
+            do {
+                rv = write(thefile->filedes, buf, *nbytes);
+            } while (rv == -1 && errno == EINTR);
+        }
+    }  
 
     if (rv == -1) {
         (*nbytes) = 0;
@@ -254,12 +233,6 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
     if(thefile == NULL)
         return APR_EBADARG;
 
-    if (thefile->buffered) {
-        if (fputc(ch, thefile->filehand) == ch) {
-            return APR_SUCCESS;
-        }
-        return errno;
-    }
     if (write(thefile->filedes, &ch, 1) != 1) {
         return errno;
     }
@@ -277,14 +250,7 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
     if(thefile == NULL)
         return APR_EBADARG;
 
-    if (thefile->buffered) {
-        if (ungetc(ch, thefile->filehand) == ch) {
-            return APR_SUCCESS;
-        }
-        return errno;
-    } else {
-        thefile->ungetchar = (unsigned char)ch;
-    }
+    thefile->ungetchar = (unsigned char)ch;
     return APR_SUCCESS; 
 }
 
@@ -301,22 +267,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
     if(thefile == NULL || ch == NULL)
         return APR_EBADARG;
 
-    if (thefile->buffered) {
-        int r;
-
-	r=fgetc(thefile->filehand);
-	if(r != EOF)
-	    {
-	    *ch=(char)r;
-	    return APR_SUCCESS;
-	    }
-        if (feof(thefile->filehand)) {
-            return APR_EOF;
-        }
-        return errno;
-    }
-    
-    if(thefile->ungetchar != -1){
+    if (thefile->ungetchar != -1) {
         *ch = (char) thefile->ungetchar;
         thefile->ungetchar = -1;
         return APR_SUCCESS;
@@ -346,12 +297,6 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     if(thefile == NULL || str == NULL)
         return APR_EBADARG;
 
-    if (thefile->buffered) {
-        if (fputs(str, thefile->filehand)) {
-            return APR_SUCCESS;
-        }
-        return errno;
-    }
     len = strlen(str);
     rv = write(thefile->filedes, str, len); 
     if (rv != len) {
@@ -367,15 +312,12 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
  */
 ap_status_t ap_flush(ap_file_t *thefile)
 {
+/* Another function to get rid of once we finish removing buffered I/O
+ * and we are sure nobody is using it.
+ */
     if(thefile == NULL)
         return APR_EBADARG;
 
-    if (thefile->buffered) {
-        if (!fflush(thefile->filehand)) {
-            return APR_SUCCESS;
-        }
-        return errno;
-    }
     /* There isn't anything to do if we aren't buffering the output
      * so just return success.
      */
@@ -399,16 +341,6 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 
     if(len <= 1)  /* as per fgets() */
         return APR_SUCCESS;
-
-    if (thefile->buffered) {
-        if (fgets(str, len, thefile->filehand)) {
-            return APR_SUCCESS;
-        }
-        if (feof(thefile->filehand)) {
-            return APR_EOF;
-        }
-        return errno;
-    }
 
     if(thefile->ungetchar != -1){
         str[0] = thefile->ungetchar;
@@ -436,8 +368,8 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         if (str[i] == '\n' || str[i] == '\r')
             break;
     }
-    if(i < len-1)
-      str[i+1] = '\0';
+    if (i < len-1)
+        str[i+1] = '\0';
     return APR_SUCCESS; 
 }
 

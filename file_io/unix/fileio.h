@@ -103,10 +103,8 @@
 struct ap_file_t {
     ap_context_t *cntxt;
     int filedes;
-    FILE *filehand;
     char * fname;
     int oflags;
-    int buffered;
     int eof_hit;
     int pipe;
     int timeout;

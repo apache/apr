@@ -80,35 +80,13 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
     }
     
     (*new_file)->cntxt = old_file->cntxt; 
-    if (old_file->buffered) {
-        switch (old_file->oflags) {
-            case O_RDONLY:
-                buf_oflags = "r";
-                break;
-            case O_WRONLY:
-                buf_oflags = "w";
-                break;
-            case O_RDWR:
-                buf_oflags = "r+";
-                break;
-	    default:
-		return APR_BADARG;
-        }
-        (*new_file)->filehand = freopen(old_file->fname, buf_oflags, 
-                                        old_file->filehand); 
-	if ((*new_file)->filehand == NULL)
-	    return errno;
+    if (have_file) {
+        dup2(old_file->filedes, (*new_file)->filedes);
     }
     else {
-        if (have_file) {
-            dup2(old_file->filedes, (*new_file)->filedes);
-        }
-        else {
-            (*new_file)->filedes = dup(old_file->filedes); 
-        }
+        (*new_file)->filedes = dup(old_file->filedes); 
     }
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
-    (*new_file)->buffered = old_file->buffered;
     ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;

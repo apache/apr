@@ -70,12 +70,7 @@
 ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     ap_off_t rv;
-    if (thefile->buffered) {
-        rv = fseek(thefile->filehand, *offset, where);
-    }
-    else {
-        rv = lseek(thefile->filedes, *offset, where);
-    }
+    rv = lseek(thefile->filedes, *offset, where);
     if (rv == -1) {
         *offset = -1;
         return errno;
