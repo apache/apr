@@ -82,6 +82,7 @@ void CuInit(int argc, char *argv[]);
 void CuTestInit(CuTest* t, char* name, TestFunction function);
 CuTest* CuTestNew(char* name, TestFunction function);
 void CuFail(CuTest* tc, char* message);
+void CuNotImpl(CuTest* tc, char* message);
 void CuAssert(CuTest* tc, char* message, int condition);
 void CuAssertTrue(CuTest* tc, int condition);
 void CuAssertStrEquals(CuTest* tc, char* expected, char* actual);
