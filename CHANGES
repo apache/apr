@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) In apr_shm_init(), check the retcode from mm_malloc().  Previously,
+     we segfaulted here if mm_malloc() failed to get a lock.  An example
+     error scenario is when the lock file lives on a filesystem which
+     doesn't support locking.  [Jeff Trawick]
+
   *) Name protected the autoconf macros defined by APR.  Moved the
      REENTRANCY_FLAGS settings into apr_hints.m4. Inlined the
      APR_PREPARE_MM_DIR macro because it could only be used once.
