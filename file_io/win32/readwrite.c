@@ -219,11 +219,16 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
     }
     for (i=0; i<len; i++) {
         if (str[i] == '\n') {
-            str[i] = '\0';
+            ++i;
+            if (i < len)
+                str[i] = '\0';
+            else
+                str [--i] = '\0';
+            SetFilePointer(thefile->filehand, (i - bread), NULL, FILE_CURRENT);
             return APR_SUCCESS;
         }
-        str[i] = '\0';
     }
+    str[i] = '\0';
     return APR_SUCCESS; 
 }
 ap_status_t ap_flush(ap_file_t *thefile)
