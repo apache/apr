@@ -88,7 +88,7 @@
  * The 'array' functions...
  */
 
-static void make_array_core(apr_array_header_t *res, apr_pool_t *c,
+static void make_array_core(apr_array_header_t *res, apr_pool_t *p,
 			    int nelts, int elt_size)
 {
     /*
@@ -99,9 +99,9 @@ static void make_array_core(apr_array_header_t *res, apr_pool_t *c,
 	nelts = 1;
     }
 
-    res->elts = apr_pcalloc(c, nelts * elt_size);
+    res->elts = apr_pcalloc(p, nelts * elt_size);
 
-    res->cont = c;
+    res->pool = p;
     res->elt_size = elt_size;
     res->nelts = 0;		/* No active elements yet... */
     res->nalloc = nelts;	/* ...but this many allocated */
@@ -123,7 +123,7 @@ APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr)
 	int new_size = (arr->nalloc <= 0) ? 1 : arr->nalloc * 2;
 	char *new_data;
 
-	new_data = apr_pcalloc(arr->cont, arr->elt_size * new_size);
+	new_data = apr_pcalloc(arr->pool, arr->elt_size * new_size);
 
 	memcpy(new_data, arr->elts, arr->nalloc * arr->elt_size);
 	arr->elts = new_data;
@@ -147,7 +147,7 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
 	    new_size *= 2;
 	}
 
-	new_data = apr_pcalloc(dst->cont, elt_size * new_size);
+	new_data = apr_pcalloc(dst->pool, elt_size * new_size);
 	memcpy(new_data, dst->elts, dst->nalloc * elt_size);
 
 	dst->elts = new_data;
@@ -192,7 +192,7 @@ APR_DECLARE(apr_array_header_t *)
     apr_array_header_t *res;
 
     res = (apr_array_header_t *) apr_palloc(p, sizeof(apr_array_header_t));
-    res->cont = p;
+    res->pool = p;
     copy_array_hdr_core(res, arr);
     return res;
 }
@@ -357,7 +357,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
     for (i = 0; i < t->a.nelts; ) {
 	if (!strcasecmp(elts[i].key, key)) {
 	    if (!done) {
-		elts[i].val = apr_pstrdup(t->a.cont, val);
+		elts[i].val = apr_pstrdup(t->a.pool, val);
 		done = 1;
 		++i;
 	    }
@@ -376,8 +376,8 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 
     if (!done) {
 	elts = (apr_table_entry_t *) table_push(t);
-	elts->key = apr_pstrdup(t->a.cont, key);
-	elts->val = apr_pstrdup(t->a.cont, val);
+	elts->key = apr_pstrdup(t->a.pool, key);
+	elts->val = apr_pstrdup(t->a.pool, val);
     }
 }
 
@@ -390,11 +390,11 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.pool)) {
 	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
 	    abort();
 	}
@@ -461,14 +461,14 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
 
     for (i = 0; i < t->a.nelts; ++i) {
 	if (!strcasecmp(elts[i].key, key)) {
-	    elts[i].val = apr_pstrcat(t->a.cont, elts[i].val, ", ", val, NULL);
+	    elts[i].val = apr_pstrcat(t->a.pool, elts[i].val, ", ", val, NULL);
 	    return;
 	}
     }
 
     elts = (apr_table_entry_t *) table_push(t);
-    elts->key = apr_pstrdup(t->a.cont, key);
-    elts->val = apr_pstrdup(t->a.cont, val);
+    elts->key = apr_pstrdup(t->a.pool, key);
+    elts->val = apr_pstrdup(t->a.pool, val);
 }
 
 APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
@@ -479,11 +479,11 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
@@ -492,7 +492,7 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
 
     for (i = 0; i < t->a.nelts; ++i) {
 	if (!strcasecmp(elts[i].key, key)) {
-	    elts[i].val = apr_pstrcat(t->a.cont, elts[i].val, ", ", val, NULL);
+	    elts[i].val = apr_pstrcat(t->a.pool, elts[i].val, ", ", val, NULL);
 	    return;
 	}
     }
@@ -508,8 +508,8 @@ APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
 
     elts = (apr_table_entry_t *) table_push(t);
-    elts->key = apr_pstrdup(t->a.cont, key);
-    elts->val = apr_pstrdup(t->a.cont, val);
+    elts->key = apr_pstrdup(t->a.pool, key);
+    elts->val = apr_pstrdup(t->a.pool, val);
 }
 
 APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
@@ -519,11 +519,11 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.pool)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
@@ -546,12 +546,12 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
      * overlay->a.pool and base->a.pool have a life span at least
      * as long as p
      */
-    if (!apr_pool_is_ancestor(overlay->a.cont, p)) {
+    if (!apr_pool_is_ancestor(overlay->a.pool, p)) {
 	fprintf(stderr,
 		"overlay_tables: overlay's pool is not an ancestor of p\n");
 	abort();
     }
-    if (!apr_pool_is_ancestor(base->a.cont, p)) {
+    if (!apr_pool_is_ancestor(base->a.pool, p)) {
 	fprintf(stderr,
 		"overlay_tables: base's pool is not an ancestor of p\n");
 	abort();
@@ -560,7 +560,7 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
 
     res = apr_palloc(p, sizeof(apr_table_t));
     /* behave like append_arrays */
-    res->a.cont = p;
+    res->a.pool = p;
     copy_array_hdr_core(&res->a, &overlay->a);
     apr_array_cat(&res->a, &base->a);
 
@@ -686,7 +686,7 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
 	/* XXX: could use scratch free space in a or b's pool instead...
 	 * which could save an allocation in b's pool.
 	 */
-	cat_keys = apr_palloc(b->a.cont, sizeof(overlap_key) * nkeys);
+	cat_keys = apr_palloc(b->a.pool, sizeof(overlap_key) * nkeys);
     }
 
     nkeys = 0;
@@ -721,7 +721,7 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
      */
     a->a.nelts = 0;
     if (a->a.nalloc < nkeys) {
-	a->a.elts = apr_palloc(a->a.cont, a->a.elt_size * nkeys * 2);
+	a->a.elts = apr_palloc(a->a.pool, a->a.elt_size * nkeys * 2);
 	a->a.nalloc = nkeys * 2;
     }
 
@@ -763,7 +763,7 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
 		} while (right < last
 			 && !strcasecmp(left->key, right->key));
 		/* right points one past the last header to merge */
-		value = apr_palloc(a->a.cont, len + 1);
+		value = apr_palloc(a->a.pool, len + 1);
 		strp = value;
 		for (;;) {
 		    memcpy(strp, left->val, left->order);
