@@ -26,6 +26,7 @@ static int curr_char;
 static int verbose = 0;
 static int exclude = 0;
 static int quiet = 0;
+static int list_tests = 0;
 
 const char **testlist = NULL;
 
@@ -42,6 +43,9 @@ static int find_test_name(const char *testname) {
 /* Determine if the test should be run at all */
 static int should_test_run(const char *testname) {
     int found = 0;
+    if (list_tests == 1) {
+        return 0;
+    }
     if (testlist == NULL) {
         return 1;
     }
@@ -101,7 +105,8 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     subsuite->num_test = 0;
     subsuite->failed = 0;
     subsuite->next = NULL;
-    /* suite_name_full may be an absolute path depending on __FILE__ expansion */
+    /* suite_name_full may be an absolute path depending on __FILE__ 
+     * expansion */
     suite_name = strrchr(suite_name_full, '/');
     if (suite_name) {
         suite_name++;
@@ -109,11 +114,18 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
         suite_name = suite_name_full;
     }
     p = strrchr(suite_name, '.');
-    if (p)
+    if (p) {
         subsuite->name = memcpy(calloc(p - suite_name + 1, 1),
                                 suite_name, p - suite_name);
-    else
+    }
+    else {
         subsuite->name = suite_name;
+    }
+
+    if (list_tests) {
+        fprintf(stdout, "%s\n", subsuite->name);
+    }
+    
     subsuite->not_run = 0;
 
     if (suite == NULL) {
@@ -363,7 +375,7 @@ int main(int argc, const char *const argv[]) {
             continue;
         }
         if (!strcmp(argv[i], "-l")) {
-            /* print the list. */
+            list_tests = 1;
             continue;
         }
         if (!strcmp(argv[i], "-q")) {
