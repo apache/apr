@@ -59,7 +59,7 @@
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include <process.h>
-
+#include "misc.h"   
 
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *cont)
@@ -175,7 +175,14 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 
 APR_DECLARE(void) apr_thread_yield()
 {
-    SwitchToThread();
+    /* SwitchToThread is not supported on Win9x, but since it's
+     * primarily a noop (entering time consuming code, therefore
+     * providing more critical threads a bit larger timeslice)
+     * we won't worry too much if it's not available.
+     */
+    if (apr_os_level >= APR_WIN_NT) {
+        SwitchToThread();
+    }
 }
 
 APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,
