@@ -72,10 +72,15 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 #include "misc.h"
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/types.h>
-#include <dirent.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <fcntl.h>
+#endif
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
