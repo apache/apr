@@ -2,11 +2,14 @@ dnl ##
 dnl ## Autoconf configuration file for APR
 dnl ##
 
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(threads.m4)
+AC_CONFIG_HEADER(include/apr_private.h)
+AC_CONFIG_AUX_DIR_DEFAULT
 
-AC_CONFIG_AUX_DIR(./helpers)
 echo "Configuring APR library"
-OS=`./config.guess`
-OS=`./config.sub $OS`
+OS=`$ac_config_guess`
+OS=`$ac_config_sub $OS`
 echo "Platform: ${OS}"
 
 dnl # Some initial steps for configuration.  We setup the default directory
@@ -16,10 +19,6 @@ dnl # and which files are to be configured.
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
 MODULES="file_io network_io threadproc misc locks time mmap shmem dso i18n"
-
-dnl Process this file with autoconf to produce a configure script.
-AC_INIT(configure.in)
-AC_CONFIG_HEADER(include/apr_private.h)
 
 # Most platforms use a prefix of 'lib' on their library files.
 LIBPREFIX='lib'
@@ -541,5 +540,10 @@ done
 MAKEFILE3="test/Makefile"
 AC_SUBST(SUBDIRS)
 AC_SUBST(MODULES)
+
+if test -n "$CPPFLAGS"; then
+  CFLAGS="$CFLAGS $CPPFLAGS"
+fi
+
 AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3 include/apr.h)
 
