@@ -467,16 +467,6 @@ APR_FLAG_HEADERS(
     sys/uio.h		\
     sys/wait.h)
 
-dnl work around unexplained problem on Tru64 where
-dnl the above invocation says it finds the header but
-dnl APR_HAVE_foo_H is 0
-APR_FLAG_HEADERS(stdio.h)
-APR_FLAG_HEADERS(errno.h)
-APR_FLAG_HEADERS(crypt.h)
-APR_FLAG_HEADERS(ctype.h)
-APR_FLAG_HEADERS(fcntl.h)
-APR_FLAG_HEADERS(netdb.h)
-
 AC_SUBST(arpa_ineth)
 AC_SUBST(conioh)
 AC_SUBST(ctypeh)
