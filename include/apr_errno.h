@@ -75,14 +75,6 @@ extern "C" {
 typedef int apr_status_t;
 
 /**
- * Convert an APR error to a canonical error
- * @param err The APR error value
- * @return The canonical error value
- * @tip see apr/APRDesgin for an explanation of why this is necessary.
- */
-int apr_canonical_error(apr_status_t err);
-
-/**
  * Return a human readable string describing the specified error.
  * @param statcode The error code the get a string for.
  * @param buf A buffer to hold the error string.
