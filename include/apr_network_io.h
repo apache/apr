@@ -457,41 +457,34 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* 
 apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock);
  
 /**
- * Associate a port with a socket.
- * @param sock The socket to set.
- * @param which Which socket do we want to set the port for?
- * @param port The local port this socket will be dealing with.
- * @tip This does not bind the two together, it is just telling apr 
- *      that this socket is going to use this port if possible.  If
- *      the port is already used, we won't find out about it here.
+ * Set the port in an APR socket address.
+ * @param sockaddr The socket address to set.
+ * @param port The port to be stored in the socket address.
  */
-apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, apr_port_t port);
+apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port);
 
 /**
- * Return the port associated with a socket.
- * @param port The local port this socket is associated with.
- * @param which Which interface are we getting the port for?
- * @param sock The socket to enquire about.
+ * Return the port in an APR socket address.
+ * @param port The port from the socket address.
+ * @param sock The socket address to reference.
  */
-apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t *sock);
+apr_status_t apr_get_port(apr_port_t *port, apr_sockaddr_t *sockaddr);
 
 /**
- * Associate a socket addr with an apr socket.
- * @param sock The socket to use 
- * @param which Which interface should we set?
+ * Set the IP address in an APR socket address.
+ * @param sockaddr The socket address to use 
  * @param addr The IP address to attach to the socket.
  *             Use APR_ANYADDR to use any IP addr on the machine.
- * @tip This does not bind the two together, it is just telling apr 
- *      that this socket is going to use this address if possible. 
  */
-apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const char *addr);
+apr_status_t apr_set_ipaddr(apr_sockaddr_t *sockaddr, const char *addr);
 
 /**
- * Return the IP address associated with an apr socket.
- * @param addr The local IP address associated with the socket.
- * @param sock The socket to use 
+ * Return the IP address (in numeric address string format) in
+ * an APR socket address.
+ * @param addr The IP address.
+ * @param sock The socket address to reference.
  */
-apr_status_t apr_get_ipaddr(char **addr, apr_interface_e which, apr_socket_t *sock);
+apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr);
 
 /**
  * Return the local socket name as a BSD style struct sockaddr_in.
