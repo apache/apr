@@ -7,6 +7,10 @@
 # Note that we use && to ensure that Makefile is not changed if an error
 # occurs during the process
 #
+if [ -z $CC ]; then
+   CC=cc
+fi
+
 sed -ne '1,/^# DO NOT REMOVE/p' Makefile > Makefile.new \
-    && gcc -MM  $* | sed -e "s/\.o:/\.lo:/" >> Makefile.new \
+    && $CC -MM  $* | sed -e "s/\.o:/\.lo:/" >> Makefile.new \
     && mv Makefile.new Makefile
