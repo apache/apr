@@ -12,6 +12,7 @@
 /apr_md5_set_xlate/{next}
 /apr_mmap_create/{next}
 /apr_mmap_delete/{next}
+/apr_mmap_dup/{next}
 /apr_mmap_offset/{next}
 /apr_os_thread_get/{next}
 /apr_os_thread_put/{next}
