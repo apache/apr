@@ -299,7 +299,7 @@ API_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
 /*
  * APR memory structure manipulators (pools, tables, and arrays).
  */
-API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p);
+API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode));
 API_EXPORT(void) ap_clear_pool(struct context_t *p);
 API_EXPORT(void) ap_destroy_pool(struct context_t *p);
 API_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p);

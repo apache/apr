@@ -201,6 +201,17 @@ union block_hdr {
     } h;
 };
 
+#define APR_ABORT(conditional, retcode, func, str) \
+    if (conditional) { \
+        if (func == NULL) { \
+            return NULL; \
+        } \
+        else { \
+            fprintf(stderr, "%s", str);
+            func(retcode); \
+        } \
+    }
+
 /*
  * Static cells for managing our internal synchronisation.
  */
@@ -250,7 +261,7 @@ static APR_INLINE void debug_verify_filled(const char *ptr, const char *endp,
  * malloc() to provide aligned memory.
  */
 
-static union block_hdr *malloc_block(int size)
+static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
 {
     union block_hdr *blok;
 
@@ -267,9 +278,8 @@ static union block_hdr *malloc_block(int size)
 #endif /* ALLOC_STATS */
 
     blok = (union block_hdr *) malloc(size + sizeof(union block_hdr));
-    if (blok == NULL) {
-        return NULL;
-    }
+    APR_ABORT(blok == NULL, APR_ENOMEM, (*apr_abort)
+              "Ouch!  malloc failed in malloc_block()\n");
     debug_fill(blok, size + sizeof(union block_hdr));
     blok->h.next = NULL;
     blok->h.first_avail = (char *) (blok + 1);
@@ -298,6 +308,7 @@ static void chk_on_blk_list(union block_hdr *blok, union block_hdr *free_blk)
 			"at the end of a block!\n");
     while (free_blk) {
 	if (free_blk == blok) {
+            fprintf(stderr, "Ouch!  Freeing free block\n");
 	    abort();
 	    exit(1);
 	}
@@ -394,7 +405,7 @@ static void free_blocks(union block_hdr *blok)
  * if necessary.  Must be called with alarms blocked.
  */
 
-static union block_hdr *new_block(int min_size)
+static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
 {
     union block_hdr **lastptr = &block_freelist;
     union block_hdr *blok = block_freelist;
@@ -422,7 +433,7 @@ static union block_hdr *new_block(int min_size)
 
     min_size += BLOCK_MINFREE;
     blok = malloc_block((min_size > BLOCK_MINALLOC)
-			? min_size : BLOCK_MINALLOC);
+			? min_size : BLOCK_MINALLOC, apr_abort);
     return blok;
 }
 
@@ -468,7 +479,7 @@ static ap_pool_t *permanent_pool;
 #define POOL_HDR_CLICKS (1 + ((sizeof(struct ap_pool_t) - 1) / CLICK_SZ))
 #define POOL_HDR_BYTES (POOL_HDR_CLICKS * CLICK_SZ)
 
-API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p)
+API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
 {
     union block_hdr *blok;
     ap_pool_t *new_pool;
@@ -477,7 +488,7 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p)
 
     ap_lock(alloc_mutex);
 
-    blok = new_block(POOL_HDR_BYTES);
+    blok = new_block(POOL_HDR_BYTES, apr_abort);
     new_pool = (ap_pool_t *) blok->h.first_avail;
     blok->h.first_avail += POOL_HDR_BYTES;
 #ifdef POOL_DEBUG
@@ -545,7 +556,7 @@ ap_pool_t *ap_init_alloc(void)
     ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
 
-    permanent_pool = ap_make_sub_pool(NULL);
+    permanent_pool = ap_make_sub_pool(NULL, NULL);
 #ifdef ALLOC_STATS
     atexit(dump_stats);
 #endif
@@ -658,7 +669,7 @@ extern char _end;
 /* Find the pool that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
-API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
+API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode))
 {
     const char *s = ts;
     union block_hdr **pb;
@@ -671,12 +682,11 @@ API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
     /* consider stuff on the stack to also be in the NULL pool...
      * XXX: there's cases where we don't want to assume this
      */
-    if ((stack_direction == -1 && is_ptr_in_range(s, &ts, known_stack_point))
-	|| (stack_direction == 1
-	    && is_ptr_in_range(s, known_stack_point, &ts))) {
-	abort();
-	return NULL;
-    }
+    APR_ABORT((stack_direction == -1 && 
+              is_ptr_in_range(s, &ts, known_stack_point)) || 
+              (stack_direction == 1 &&    
+              is_ptr_in_range(s, known_stack_point, &ts)), 1, apr_abort,
+              "Ouch!  find_pool() called on pointer in a free block\n");
     ap_block_alarms();
     /* search the global_block_list */
     for (pb = &global_block_list; *pb; pb = &b->h.global_next) {
@@ -728,14 +738,14 @@ API_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
  * instead.  This is a guarantee by the caller that sub will not
  * be destroyed before p is.
  */
-API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub)
+API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, 
+                              int (*apr_abort)(int retcode))
 {
     union block_hdr *b;
 
     /* We could handle more general cases... but this is it for now. */
-    if (sub->parent != p) {
-	abort();
-    }
+    APR_ABORT(sub->parent != p, 1, apr_abort,
+              "pool_join: p is not a parent of sub\n");
     ap_block_alarms();
     while (p->joined) {
 	p = p->joined;
@@ -830,7 +840,7 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
 
     ap_lock(alloc_mutex);
 
-    blok = new_block(size);
+    blok = new_block(size, c->apr_abort);
     a->last->h.next = blok;
     a->last = blok;
 #ifdef POOL_DEBUG
@@ -974,7 +984,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 
     /* must try another blok */
     ap_lock(alloc_mutex);
-    nblok = new_block(2 * cur_len);
+    nblok = new_block(2 * cur_len, NULL);
     ap_unlock(alloc_mutex);
     memcpy(nblok->h.first_avail, blok->h.first_avail, cur_len);
     ps->vbuff.curpos = nblok->h.first_avail + cur_len;
