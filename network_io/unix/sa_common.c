@@ -114,10 +114,10 @@ apr_status_t apr_get_ipaddr(char **addr, apr_interface_e which, apr_socket_t *so
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_inaddr(apr_in_addr *addr, char *hostname)
+apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname)
 {
     struct hostent *he;
-
+    
     if (strcmp(hostname,"*") == 0){
         addr->s_addr = htonl(INADDR_ANY);
         return APR_SUCCESS;
@@ -130,7 +130,7 @@ apr_status_t apr_get_inaddr(apr_in_addr *addr, char *hostname)
     if (!he || he->h_addrtype != AF_INET || !he->h_addr_list[0])
         return (h_errno + APR_OS_START_SYSERR);
 
-    addr = (struct in_addr*)he->h_addr_list[0];
+    *addr = *(struct in_addr*)he->h_addr_list[0];
 
     return APR_SUCCESS;
 }
