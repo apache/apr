@@ -165,10 +165,10 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 
 
 
-ap_status_t ap_dir_entry_mtime(time_t *time, struct dir_t *thedir)
+ap_status_t ap_dir_entry_mtime(ap_time_t *time, struct dir_t *thedir)
 {
     if (thedir->validentry) {
-        *time = os2date2unix(thedir->entry.fdateLastWrite, thedir->entry.ftimeLastWrite);
+        ap_os2_time_to_ap_time(time, thedir->entry.fdateLastWrite, thedir->entry.ftimeLastWrite);
         return APR_SUCCESS;
     }
 
