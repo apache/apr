@@ -89,9 +89,9 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 
 typedef struct ap_proc_t {
     pid_t pid;
-    ap_file_t *stdin;          /* Parent's side of pipe to child's stdin */
-    ap_file_t *stdout;         /* Parent's side of pipe to child's stdout */
-    ap_file_t *stderr;         /* Parent's side of pipe to child's stdouterr */
+    ap_file_t *in;          /* Parent's side of pipe to child's stdin */
+    ap_file_t *out;         /* Parent's side of pipe to child's stdout */
+    ap_file_t *err;         /* Parent's side of pipe to child's stdouterr */
 } ap_proc_t;
 
 typedef struct ap_thread_t           ap_thread_t;
