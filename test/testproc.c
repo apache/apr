@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK.\n");
 
     fprintf(stdout, "Grabbing child's stdin.......");
-    testfile = newproc.stdin;
+    testfile = newproc.in;
     fprintf(stdout, "OK.\n");
 
     length = 256;
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     else fprintf(stderr, "Write failed.\n");
 
     fprintf(stdout, "Grabbing child's stdout.......");
-    testfile = newproc.stdout;
+    testfile = newproc.out;
     fprintf(stdout, "OK.\n");
 
     length = 256;
