@@ -98,7 +98,7 @@
 #define arc4random() rand()
 #define seedrandom(a) srand(a)
 #else
-#ifdef APR_HAVE_STDINT_H
+#if APR_HAVE_STDINT_H
 #include <stdint.h>
 #endif
 #define arc4random() random()
