@@ -247,4 +247,5 @@ EXPORTS
 	ap_canonical_error @226
 	ap_strerror @227
 	ap_generate_random_bytes @228
-	strnatcmp @229
+	ap_strnatcmp @229
+	ap_strnatcasecmp @230
