@@ -46,6 +46,16 @@
 #define APR_USES_FILEBASED_SHM            @filebased_shm@
 #define APR_USES_KEYBASED_SHM             @keybased_shm@
 
+/* These look VERY similar to the macro's above.  They aren't.  The
+ * difference is in implementation.  The above macros describe how to
+ * access the shared memory, either anonymously, through a key or through
+ * a file.  The macros defined below describe actually how the shared
+ * memory is actually implemented.  Is it actually a file that has been
+ * opened by multiple processes, or it is stored in memory somehow.  This
+ * is important for some optimizations in Apache.
+ */ 
+#define APR_FILE_BASED_SHM      @file_based@
+#define APR_MEM_BASED_SHM       @mem_based@
 
 #define APR_HAVE_IN_ADDR        @have_in_addr@
 #define APR_HAVE_INET_ADDR      @inet_addr@

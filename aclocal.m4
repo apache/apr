@@ -261,5 +261,38 @@ int main(void) {
   fi
 ])
 
+AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
+  echo "configuring package in $1 now"
+  ac_popdir=`pwd`
+  cd $1
+
+  # Make the cache file name correct relative to the subdirectory.
+  case "$cache_file" in
+  /*) ac_sub_cache_file=$cache_file ;;
+  *) # Relative path.
+    ac_sub_cache_file="$ac_dots$cache_file" ;;
+  esac
+
+  case "$srcdir" in
+  .) # No --srcdir option.  We are building in place.
+    ac_sub_srcdir=$srcdir ;;
+  /*) # Absolute path.
+    ac_sub_srcdir=$srcdir/$ac_config_dir ;;
+  *) # Relative path.
+    ac_sub_srcdir=$ac_dots$srcdir/$ac_config_dir ;;
+  esac
+
+  # The eval makes quoting arguments work.
+ 
+  if eval ./configure --cache-file=$ac_sub_cache_file --srcdir=$ac_sub_srcdir
+  then :
+    echo "$1 configured properly"
+  else
+    echo "configure failed for $1"
+  fi
+
+  cd $ac_popdir
+])
+
 sinclude(threads.m4)
 sinclude(hints.m4)
