@@ -77,10 +77,10 @@
 #if APR_HAS_THREADS
 #include "apr_thread_mutex.h"
 #define pollset_lock_rings() \
-    if(pollset->flags & APR_POLLSET_THREADSAFE) \
+    if (pollset->flags & APR_POLLSET_THREADSAFE) \
         apr_thread_mutex_lock(pollset->ring_lock);
 #define pollset_unlock_rings() \
-    if(pollset->flags & APR_POLLSET_THREADSAFE) \
+    if (pollset->flags & APR_POLLSET_THREADSAFE) \
         apr_thread_mutex_unlock(pollset->ring_lock);
 #else
 #define pollset_lock_rings()
