@@ -79,6 +79,7 @@ static const struct testlist {
     {"testfileinfo", testfileinfo},
     {"testrand", testrand},
     {"testdso", testdso},
+    {"testoc", testoc},
     {"LastTest", NULL}
 };
 
