@@ -1886,16 +1886,16 @@ case $host in
     # Check whether they've installed GNU make
     if make --version > /dev/null 2>&1; then 
 	INCLUDE_RULES="include $apr_buildout/apr_rules.mk"
-	INCLUDE_OUTPUTS="include build-outputs.mk"
+	INCLUDE_OUTPUTS="include $apr_srcdir/build-outputs.mk"
     else
 	# BSDi make
 	INCLUDE_RULES=".include \"$apr_buildout/apr_rules.mk\""
-	INCLUDE_OUTPUTS=".include \"build-outputs.mk\""
+	INCLUDE_OUTPUTS=".include \"$apr_srcdir/build-outputs.mk\""
     fi
     ;;
 *)
     INCLUDE_RULES="include $apr_buildout/apr_rules.mk"
-    INCLUDE_OUTPUTS="include build-outputs.mk"
+    INCLUDE_OUTPUTS="include $apr_srcdir/build-outputs.mk"
     ;;
 esac
 AC_SUBST(INCLUDE_RULES)
