@@ -97,7 +97,7 @@ int main(void)
     atexit(closeapr);
 
     fprintf(stdout,"Creating context....................");    
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
     }
@@ -108,7 +108,7 @@ int main(void)
     strncat(file1,"/testmmap.c",11);  
 
     fprintf(stdout, "Opening file........................");
-    rv = apr_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context);
+    rv = apr_file_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context);
     if (rv != APR_SUCCESS) {
         fprintf(stderr,
                 "couldn't open file `%s': %d/%s\n",
@@ -120,7 +120,7 @@ int main(void)
     }
     
     fprintf(stderr, "Getting file size...................");
-    rv = apr_getfileinfo(&finfo, APR_FINFO_NORM, thefile);
+    rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     if (rv != APR_SUCCESS) {
         fprintf(stderr,
                 "Didn't get file information: %d/%s\n",

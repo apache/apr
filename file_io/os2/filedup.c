@@ -58,7 +58,7 @@
 #include "apr_strings.h"
 #include <string.h>
 
-apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
+apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
     int rv;
     apr_file_t *dup_file;
@@ -90,8 +90,8 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
     dup_file->pipe = old_file->pipe;
 
     if (*new_file == NULL) {
-        apr_register_cleanup(dup_file->cntxt, dup_file, apr_file_cleanup,
-                            apr_null_cleanup);
+        apr_pool_cleanup_register(dup_file->cntxt, dup_file, apr_file_cleanup,
+                            apr_pool_cleanup_null);
         *new_file = dup_file;
     }
 

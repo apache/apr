@@ -91,22 +91,22 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
     apr_md5_ctx_t context;
     unsigned char hash[MD5_DIGESTSIZE];
 
-    rv = apr_MD5Init(&context);
+    rv = apr_md5_init(&context);
     assert(!rv);
 
     if (xlate) {
 #if APR_HAS_XLATE
-        apr_MD5SetXlate(&context, xlate);
+        apr_md5_set_xlate(&context, xlate);
 #else
         fprintf(stderr,
                 "A translation handle was unexpected.\n");
 #endif
     }
     
-    rv = apr_MD5Update(&context, buf, bufLen);
+    rv = apr_md5_update(&context, buf, bufLen);
     assert(!rv);
 
-    rv = apr_MD5Final(hash, &context);
+    rv = apr_md5_final(hash, &context);
     assert(!rv);
 
     for (i = 0; i < MD5_DIGESTSIZE; i++) {
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
     assert(!rv);
     atexit(apr_terminate);
 
-    rv = apr_create_pool(&pool, NULL);
+    rv = apr_pool_create(&pool, NULL);
 
     if (src) {
 #if APR_HAS_XLATE

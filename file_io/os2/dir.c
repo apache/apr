@@ -82,7 +82,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cntx
     thedir->handle = 0;
     thedir->validentry = FALSE;
     *new = thedir;
-    apr_register_cleanup(cntxt, thedir, dir_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register(cntxt, thedir, dir_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -167,14 +167,14 @@ apr_status_t apr_dir_rewind(apr_dir_t *thedir)
 
 
 
-apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
+apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
     return APR_OS2_STATUS(DosCreateDir(path, NULL));
 }
 
 
 
-apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
+apr_status_t apr_dir_remove(const char *path, apr_pool_t *cont)
 {
     return APR_OS2_STATUS(DosDeleteDir(path));
 }

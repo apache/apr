@@ -70,7 +70,7 @@
 #include <stdlib.h>
 #endif
 
-APR_DECLARE(apr_status_t) apr_set_port(apr_sockaddr_t *sockaddr,
+APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
                                        apr_port_t port)
 {
     /* XXX IPv6: assumes sin_port and sin6_port at same offset */
@@ -79,10 +79,10 @@ APR_DECLARE(apr_status_t) apr_set_port(apr_sockaddr_t *sockaddr,
 }
 
 /* XXX assumes IPv4... I don't think this function is needed anyway
- * since we have apr_getaddrinfo(), but we need to clean up Apache's 
+ * since we have apr_sockaddr_info_get(), but we need to clean up Apache's 
  * listen.c a bit more first.
  */
-APR_DECLARE(apr_status_t) apr_set_ipaddr(apr_sockaddr_t *sockaddr,
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
                                          const char *addr)
 {
     apr_uint32_t ipaddr;
@@ -105,7 +105,7 @@ APR_DECLARE(apr_status_t) apr_set_ipaddr(apr_sockaddr_t *sockaddr,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_port(apr_port_t *port,
+APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
                                        apr_sockaddr_t *sockaddr)
 {
     /* XXX IPv6 - assumes sin_port and sin6_port at same offset */
@@ -113,7 +113,7 @@ APR_DECLARE(apr_status_t) apr_get_port(apr_port_t *port,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_ipaddr(char **addr,
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
                                          apr_sockaddr_t *sockaddr)
 {
     *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
@@ -154,7 +154,7 @@ static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_get_sockaddr(apr_sockaddr_t **sa,
+APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
                                            apr_interface_e which,
                                            apr_socket_t *sock)
 {
@@ -303,7 +303,7 @@ static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
 }
 #endif
 
-APR_DECLARE(apr_status_t) apr_getaddrinfo(apr_sockaddr_t **sa,
+APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                                           const char *hostname, 
                                           apr_int32_t family, apr_port_t port,
                                           apr_int32_t flags, apr_pool_t *p)

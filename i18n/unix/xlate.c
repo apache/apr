@@ -264,8 +264,8 @@ apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
 
     if (found) {
         *convset = new;
-        apr_register_cleanup(pool, (void *)new, apr_xlate_cleanup,
-                            apr_null_cleanup);
+        apr_pool_cleanup_register(pool, (void *)new, apr_xlate_cleanup,
+                            apr_pool_cleanup_null);
         status = APR_SUCCESS;
     }
     else {
@@ -360,7 +360,7 @@ apr_status_t apr_xlate_close(apr_xlate_t *convset)
     apr_status_t status;
 
     if ((status = apr_xlate_cleanup(convset)) == APR_SUCCESS) {
-        apr_kill_cleanup(convset->pool, convset, apr_xlate_cleanup);
+        apr_pool_cleanup_kill(convset->pool, convset, apr_xlate_cleanup);
     }
 
     return status;

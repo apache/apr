@@ -118,7 +118,7 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 #define S_IFWHT        0160000  /* Whiteout */
 #endif
 
-/* Internal Flags for apr_open */
+/* Internal Flags for apr_file_open */
 #define APR_OPENLINK      8192    /* Open a link itself, if supported */
 #define APR_READCONTROL   4096    /* Read the file's owner/perms */
 #define APR_WRITECONTROL  2048    /* Modifythe file's owner/perms */

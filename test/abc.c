@@ -11,12 +11,12 @@ int main(int argc, char *argv[])
     int status = 0;
     apr_pool_t *context;
 
-    apr_create_pool(&context, NULL); 
+    apr_pool_create(&context, NULL); 
 
-    apr_open(&fd, argv[1], APR_READ, -1, context);
+    apr_file_open(&fd, argv[1], APR_READ, -1, context);
     
     while (!status) {
-        status = apr_getc(&ch, fd);
+        status = apr_file_getc(&ch, fd);
         if (status == APR_EOF )
             fprintf(stdout, "EOF, YEAH!!!!!!!!!\n");
         else if (status == APR_SUCCESS)

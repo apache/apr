@@ -105,7 +105,7 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
      */
 }
 
-apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
+apr_status_t apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted,
                              apr_file_t *thefile)
 {
     struct stat info;
@@ -121,7 +121,7 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
     }
 }
 
-apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
+apr_status_t apr_file_perms_set(const char *fname, apr_fileperms_t perms)
 {
     mode_t mode = apr_unix_perms2mode(perms);
 

@@ -329,7 +329,7 @@ static void free_blocks(union block_hdr *blok)
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock(alloc_mutex);
+        apr_lock_aquire(alloc_mutex);
     }
 #endif
     old_free_list = block_freelist;
@@ -381,7 +381,7 @@ static void free_blocks(union block_hdr *blok)
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_unlock(alloc_mutex);
+        apr_lock_release(alloc_mutex);
     }
 #endif /* APR_HAS_THREADS */
 #endif /* ALLOC_USE_MALLOC */
@@ -466,7 +466,7 @@ static apr_pool_t *permanent_pool;
 #define POOL_HDR_CLICKS (1 + ((sizeof(struct apr_pool_t) - 1) / CLICK_SZ))
 #define POOL_HDR_BYTES (POOL_HDR_CLICKS * CLICK_SZ)
 
-APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode))
+APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p, int (*apr_abort)(int retcode))
 {
     union block_hdr *blok;
     apr_pool_t *new_pool;
@@ -474,7 +474,7 @@ APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int 
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock(alloc_mutex);
+        apr_lock_aquire(alloc_mutex);
     }
 #endif
 
@@ -500,7 +500,7 @@ APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int 
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_unlock(alloc_mutex);
+        apr_lock_release(alloc_mutex);
     }
 #endif
 
@@ -536,16 +536,16 @@ static void dump_stats(void)
 }
 #endif
 
-/* ### why do we have this, in addition to apr_make_sub_pool? */
-APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
+/* ### why do we have this, in addition to apr_pool_sub_make? */
+APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont, apr_pool_t *cont)
 {
     apr_pool_t *newpool;
 
     if (cont) {
-        newpool = apr_make_sub_pool(cont, cont->apr_abort);
+        newpool = apr_pool_sub_make(cont, cont->apr_abort);
     }
     else {
-        newpool = apr_make_sub_pool(NULL, NULL);
+        newpool = apr_pool_sub_make(NULL, NULL);
     }
         
     if (newpool == NULL) {
@@ -575,7 +575,7 @@ struct cleanup {
     struct cleanup *next;
 };
 
-APR_DECLARE(void) apr_register_cleanup(apr_pool_t *p, const void *data,
+APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
 				      apr_status_t (*plain_cleanup) (void *),
 				      apr_status_t (*child_cleanup) (void *))
 {
@@ -591,7 +591,7 @@ APR_DECLARE(void) apr_register_cleanup(apr_pool_t *p, const void *data,
     }
 }
 
-APR_DECLARE(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
+APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
                                  apr_status_t (*cleanup) (void *))
 {
     struct cleanup *c;
@@ -612,10 +612,10 @@ APR_DECLARE(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
     }
 }
 
-APR_DECLARE(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
+APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
                                        apr_status_t (*cleanup) (void *))
 {
-    apr_kill_cleanup(p, data, cleanup);
+    apr_pool_cleanup_kill(p, data, cleanup);
     return (*cleanup) (data);
 }
 
@@ -645,7 +645,7 @@ static void cleanup_pool_for_exec(apr_pool_t *p)
     }
 }
 
-APR_DECLARE(void) apr_cleanup_for_exec(void)
+APR_DECLARE(void) apr_pool_cleanup_for_exec(void)
 {
 #if !defined(WIN32) && !defined(OS2)
     /*
@@ -661,13 +661,13 @@ APR_DECLARE(void) apr_cleanup_for_exec(void)
 #endif /* ndef WIN32 */
 }
 
-APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data)
+APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data)
 {
     /* do nothing cleanup routine */
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_init_alloc(apr_pool_t *globalp)
+APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *globalp)
 {
 #if APR_HAS_THREADS
     apr_status_t status;
@@ -679,20 +679,20 @@ APR_DECLARE(apr_status_t) apr_init_alloc(apr_pool_t *globalp)
     stack_var_init(&s);
 #endif
 #if APR_HAS_THREADS
-    status = apr_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    status = apr_lock_create(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, globalp);
     if (status != APR_SUCCESS) {
-        apr_destroy_lock(alloc_mutex); 
+        apr_lock_destroy(alloc_mutex); 
         return status;
     }
-    status = apr_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    status = apr_lock_create(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, globalp);
     if (status != APR_SUCCESS) {
-        apr_destroy_lock(spawn_mutex); 
+        apr_lock_destroy(spawn_mutex); 
         return status;
     }
 #endif
-    permanent_pool = apr_make_sub_pool(globalp, NULL);
+    permanent_pool = apr_pool_sub_make(globalp, NULL);
 
 #ifdef ALLOC_STATS
     atexit(dump_stats);
@@ -701,15 +701,15 @@ APR_DECLARE(apr_status_t) apr_init_alloc(apr_pool_t *globalp)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(void) apr_term_alloc(apr_pool_t *globalp)
+APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp)
 {
 #if APR_HAS_THREADS
-    apr_destroy_lock(alloc_mutex);
-    apr_destroy_lock(spawn_mutex);
+    apr_lock_destroy(alloc_mutex);
+    apr_lock_destroy(spawn_mutex);
     alloc_mutex = NULL;
     spawn_mutex = NULL;
 #endif
-    apr_destroy_pool(globalp);
+    apr_pool_destroy(globalp);
 }
 
 /* We only want to lock the mutex if we are being called from apr_clear_pool.
@@ -721,7 +721,7 @@ APR_DECLARE(void) apr_term_alloc(apr_pool_t *globalp)
 APR_DECLARE(void) apr_clear_pool(apr_pool_t *a)
 {
     while (a->sub_pools) {
-	apr_destroy_pool(a->sub_pools);
+	apr_pool_destroy(a->sub_pools);
     }
     /*
      * Don't hold the mutex during cleanups.
@@ -753,12 +753,12 @@ APR_DECLARE(void) apr_clear_pool(apr_pool_t *a)
 #endif
 }
 
-APR_DECLARE(void) apr_destroy_pool(apr_pool_t *a)
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *a)
 {
     apr_clear_pool(a);
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock(alloc_mutex);
+        apr_lock_aquire(alloc_mutex);
     }
 #endif
 
@@ -775,17 +775,17 @@ APR_DECLARE(void) apr_destroy_pool(apr_pool_t *a)
     }
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_unlock(alloc_mutex);
+        apr_lock_release(alloc_mutex);
     }
 #endif
     free_blocks(a->first);
 }
 
-APR_DECLARE(apr_size_t) apr_bytes_in_pool(apr_pool_t *p)
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p)
 {
     return bytes_in_block_list(p->first);
 }
-APR_DECLARE(apr_size_t) apr_bytes_in_free_blocks(void)
+APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
 {
     return bytes_in_block_list(block_freelist);
 }
@@ -963,7 +963,7 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_lock(alloc_mutex);
+        apr_lock_aquire(alloc_mutex);
     }
 #endif
 
@@ -976,7 +976,7 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
-        apr_unlock(alloc_mutex);
+        apr_lock_release(alloc_mutex);
     }
 #endif
 
@@ -999,14 +999,14 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *a, apr_size_t size)
  * User data management functions
  */
 
-APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *key,
 			      apr_status_t (*cleanup) (void *),
 			      apr_pool_t *cont)
 {
     int keylen = strlen(key);
 
     if (cont->prog_data == NULL)
-        cont->prog_data = apr_make_hash(cont);
+        cont->prog_data = apr_hash_make(cont);
 
     if (apr_hash_get(cont->prog_data, key, keylen) == NULL){
         char *new_key = apr_pstrdup(cont, key);
@@ -1016,11 +1016,11 @@ APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key,
         apr_hash_set(cont->prog_data, key, keylen, data);
     }
 
-    apr_register_cleanup(cont, data, cleanup, cleanup);
+    apr_pool_cleanup_register(cont, data, cleanup, cleanup);
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key, apr_pool_t *cont)
 {
     if (cont->prog_data == NULL)
         *data = NULL;
@@ -1087,11 +1087,11 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 
     /* must try another blok */
 #if APR_HAS_THREADS
-    apr_lock(alloc_mutex);
+    apr_lock_aquire(alloc_mutex);
 #endif
     nblok = new_block(2 * cur_len, NULL);
 #if APR_HAS_THREADS
-    apr_unlock(alloc_mutex);
+    apr_lock_release(alloc_mutex);
 #endif
     memcpy(nblok->h.first_avail, blok->h.first_avail, cur_len);
     ps->vbuff.curpos = nblok->h.first_avail + cur_len;
@@ -1102,12 +1102,12 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     if (ps->got_a_new_block) {
 	debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
 #if APR_HAS_THREADS
-        apr_lock(alloc_mutex);
+        apr_lock_aquire(alloc_mutex);
 #endif
 	blok->h.next = block_freelist;
 	block_freelist = blok;
 #if APR_HAS_THREADS
-        apr_unlock(alloc_mutex);
+        apr_lock_release(alloc_mutex);
 #endif
     }
     ps->blok = nblok;
@@ -1202,7 +1202,7 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  * generic interface, but for now, it's a special case
  */
 
-APR_DECLARE(void) apr_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
+APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
                                     enum kill_conditions how)
 {
     struct process_chain *new =
@@ -1237,7 +1237,7 @@ static void free_proc_chain(struct process_chain *procs)
 #ifndef NEED_WAITPID
     /* Pick up all defunct processes */
     for (p = procs; p; p = p->next) {
-        if (apr_wait_proc(p->pid, APR_NOWAIT) == APR_CHILD_DONE) {
+        if (apr_proc_wait(p->pid, APR_NOWAIT) == APR_CHILD_DONE) {
             p->kill_how = kill_never;
         }
     }
@@ -1248,20 +1248,20 @@ static void free_proc_chain(struct process_chain *procs)
             || (p->kill_how == kill_only_once)) {
             /*
              * Subprocess may be dead already.  Only need the timeout if not.
-             * Note: apr_kill on Windows is TerminateProcess(), which is 
+             * Note: apr_proc_kill on Windows is TerminateProcess(), which is 
              * similar to a SIGKILL, so always give the process a timeout
              * under Windows before killing it.
              */
 #ifdef WIN32
             need_timeout = 1;
 #else
-	    if (apr_kill(p->pid, SIGTERM) == APR_SUCCESS) {
+	    if (apr_proc_kill(p->pid, SIGTERM) == APR_SUCCESS) {
 		need_timeout = 1;
 	    }
 #endif
 	}
 	else if (p->kill_how == kill_always) {
-	    apr_kill(p->pid, SIGKILL);
+	    apr_proc_kill(p->pid, SIGKILL);
 	}
     }
 
@@ -1276,7 +1276,7 @@ static void free_proc_chain(struct process_chain *procs)
      */
     for (p = procs; p; p = p->next) {
 	if (p->kill_how == kill_after_timeout) {
-	    apr_kill(p->pid, SIGKILL);
+	    apr_proc_kill(p->pid, SIGKILL);
 	}
     }
 #ifdef WIN32
@@ -1293,7 +1293,7 @@ static void free_proc_chain(struct process_chain *procs)
     /* Now wait for all the signaled processes to die */
     for (p = procs; p; p = p->next) {
 	if (p->kill_how != kill_never) {
-	    (void) apr_wait_proc(p->pid, APR_WAIT);
+	    (void) apr_proc_wait(p->pid, APR_WAIT);
 	}
     }
 }

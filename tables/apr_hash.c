@@ -127,7 +127,7 @@ static apr_hash_entry_t **alloc_array(apr_hash_t *ht, apr_size_t max)
    return apr_pcalloc(ht->pool, sizeof(*ht->array) * (max + 1));
 }
 
-APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool)
+APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
 {
     apr_hash_t *ht;
     ht = apr_palloc(pool, sizeof(apr_hash_t));

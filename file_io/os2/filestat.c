@@ -115,7 +115,7 @@ static apr_status_t handle_type(apr_filetype_e *ftype, HFILE file)
 
 
 
-apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted, 
+apr_status_t apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted, 
                              apr_file_t *thefile)
 {
     ULONG rc;
@@ -145,7 +145,7 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
     return APR_OS2_STATUS(rc);
 }
 
-apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
+apr_status_t apr_file_perms_set(const char *fname, apr_fileperms_t perms)
 {
     return APR_ENOTIMPL;
 }

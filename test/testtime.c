@@ -69,8 +69,8 @@ int main(void)
 
     fprintf(stdout, "Testing Time functions.\n");
 
-    fprintf(stdout, "\tapr_now.......");
-    now = apr_now();
+    fprintf(stdout, "\tapr_time_now.......");
+    now = apr_time_now();
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tapr_explode_localtime.......");

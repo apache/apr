@@ -60,7 +60,7 @@
 #include <time.h>
 
 
-APR_DECLARE(apr_status_t) apr_setup_poll(apr_pollfd_t **new, apr_int32_t num,
+APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num,
                                          apr_pool_t *cont)
 {
     (*new) = (apr_pollfd_t *)apr_palloc(cont, sizeof(apr_pollfd_t) * num);
@@ -80,7 +80,7 @@ APR_DECLARE(apr_status_t) apr_setup_poll(apr_pollfd_t **new, apr_int32_t num,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_add_poll_socket(apr_pollfd_t *aprset,
+APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset,
                                               apr_socket_t *sock,
                                               apr_int16_t event)
 {
@@ -142,7 +142,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_revents(apr_int16_t *event,
+APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
                                           apr_socket_t *sock,
                                           apr_pollfd_t *aprset)
 {
@@ -198,20 +198,20 @@ APR_DECLARE(apr_status_t) apr_get_revents(apr_int16_t *event,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_polldata(apr_pollfd_t *pollfd, 
+APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd, 
                                            const char *key, void *data)
 {
-    return apr_get_userdata(data, key, pollfd->cntxt);
+    return apr_pool_userdata_get(data, key, pollfd->cntxt);
 }
 
-APR_DECLARE(apr_status_t) apr_set_polldata(apr_pollfd_t *pollfd, void *data,
+APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data,
                                            const char *key,
                                            apr_status_t (*cleanup)(void *))
 {
-    return apr_set_userdata(data, key, cleanup, pollfd->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, pollfd->cntxt);
 }
 
-APR_DECLARE(apr_status_t) apr_mask_poll_socket(apr_pollfd_t *aprset, 
+APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset, 
                                                apr_socket_t *sock,
                                                apr_int16_t events)
 {
@@ -230,13 +230,13 @@ APR_DECLARE(apr_status_t) apr_mask_poll_socket(apr_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_remove_poll_socket(apr_pollfd_t *aprset,
+APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset,
                                                  apr_socket_t *sock)
 {
-    return apr_mask_poll_socket(aprset, sock, ~0);
+    return apr_poll_socket_mask(aprset, sock, ~0);
 }
 
-APR_DECLARE(apr_status_t) apr_clear_poll_sockets(apr_pollfd_t *aprset,
+APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset,
                                                  apr_int16_t events)
 {
     if (events & APR_POLLIN) {

@@ -59,7 +59,7 @@
 #if APR_HAS_THREADS
 
 #if APR_HAVE_PTHREAD_H
-apr_status_t apr_create_thread_private(apr_threadkey_t **key, 
+apr_status_t apr_threadkey_private_create(apr_threadkey_t **key, 
                                      void (*dest)(void *), apr_pool_t *cont)
 {
     apr_status_t stat;
@@ -77,7 +77,7 @@ apr_status_t apr_create_thread_private(apr_threadkey_t **key,
     return stat;
 }
 
-apr_status_t apr_get_thread_private(void **new, apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_get(void **new, apr_threadkey_t *key)
 {
 #ifdef PTHREAD_GETSPECIFIC_TAKES_TWO_ARGS
     if (pthread_getspecific(key->key,new))
@@ -88,7 +88,7 @@ apr_status_t apr_get_thread_private(void **new, apr_threadkey_t *key)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
 {
     apr_status_t stat;
     if ((stat = pthread_setspecific(key->key, priv)) == 0) {
@@ -100,7 +100,7 @@ apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
 }
 
 #ifdef HAVE_PTHREAD_KEY_DELETE
-apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     apr_status_t stat;
     if ((stat = pthread_key_delete(key->key)) == 0) {
@@ -110,26 +110,26 @@ apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
 }
 #endif
 
-apr_status_t apr_get_threadkeydata(void **data, const char *key,
+apr_status_t apr_threadkey_data_get(void **data, const char *key,
                                  apr_threadkey_t *threadkey)
 {
-    return apr_get_userdata(data, key, threadkey->cntxt);
+    return apr_pool_userdata_get(data, key, threadkey->cntxt);
 }
 
-apr_status_t apr_set_threadkeydata(void *data, const char *key,
+apr_status_t apr_threadkey_data_set(void *data, const char *key,
                                  apr_status_t (*cleanup) (void *),
                                  apr_threadkey_t *threadkey)
 {
-    return apr_set_userdata(data, key, cleanup, threadkey->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, threadkey->cntxt);
 }
 
-apr_status_t apr_get_os_threadkey(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
+apr_status_t apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
 {
     *thekey = key->key;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_threadkey(apr_threadkey_t **key, 
+apr_status_t apr_os_threadkey_put(apr_threadkey_t **key, 
                                 apr_os_threadkey_t *thekey, apr_pool_t *cont)
 {
     if (cont == NULL) {
@@ -146,9 +146,9 @@ apr_status_t apr_put_os_threadkey(apr_threadkey_t **key,
 #endif /* APR_HAS_THREADS */
 
 #if !APR_HAS_THREADS
-apr_status_t apr_get_os_threadkey(void); /* avoid warning for no prototype */
+apr_status_t apr_os_threadkey_get(void); /* avoid warning for no prototype */
 
-apr_status_t apr_get_os_threadkey(void)
+apr_status_t apr_os_threadkey_get(void)
 {
     return APR_ENOTIMPL;
 }

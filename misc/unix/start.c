@@ -76,7 +76,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_SUCCESS;
     }
 
-    if (apr_create_pool(&global_apr_pool, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&global_apr_pool, NULL) != APR_SUCCESS) {
         return APR_ENOPOOL;
     }
 
@@ -94,7 +94,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_EEXIST;
     }
 #endif
-    status = apr_init_alloc(global_apr_pool);
+    status = apr_pool_alloc_init(global_apr_pool);
     return status;
 }
 
@@ -104,7 +104,7 @@ APR_DECLARE(void) apr_terminate(void)
     if (initialized) {
         return;
     }
-    apr_term_alloc(global_apr_pool);
+    apr_pool_alloc_term(global_apr_pool);
 }
 
 APR_DECLARE(apr_status_t) apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)

@@ -164,7 +164,7 @@ apr_status_t file_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
+APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
                                    apr_int32_t flag, apr_fileperms_t perm,
                                    apr_pool_t *cont)
 {
@@ -266,11 +266,11 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     if (flag & APR_BUFFERED) {
         (*new)->buffered = 1;
         (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
-        rv = apr_create_lock(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
+        rv = apr_lock_create(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
 
         if (rv) {
             if (file_cleanup(*new) == APR_SUCCESS) {
-                apr_kill_cleanup(cont, *new, file_cleanup);
+                apr_pool_cleanup_kill(cont, *new, file_cleanup);
             }
             return rv;
         }
@@ -292,26 +292,26 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     (*new)->direction = 0;
     (*new)->filePtr = 0;
 
-    apr_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
-                        apr_null_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), file_cleanup,
+                        apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_close(apr_file_t *file)
+APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 {
     apr_status_t stat;
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
-        apr_kill_cleanup(file->cntxt, file, file_cleanup);
+        apr_pool_cleanup_kill(file->cntxt, file, file_cleanup);
 
         if (file->buffered)
-            apr_destroy_lock(file->mutex);
+            apr_lock_destroy(file->mutex);
 
         return APR_SUCCESS;
     }
     return stat;
 }
 
-APR_DECLARE(apr_status_t) apr_remove_file(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -333,7 +333,7 @@ APR_DECLARE(apr_status_t) apr_remove_file(const char *path, apr_pool_t *cont)
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_rename_file(const char *frompath,
+APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                           const char *topath,
                                           apr_pool_t *cont)
 {
@@ -383,7 +383,7 @@ APR_DECLARE(apr_status_t) apr_rename_file(const char *frompath,
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_get_os_file(apr_os_file_t *thefile,
+APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
                                           apr_file_t *file)
 {
     if (file == NULL) {
@@ -393,7 +393,7 @@ APR_DECLARE(apr_status_t) apr_get_os_file(apr_os_file_t *thefile,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_put_os_file(apr_file_t **file,
+APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
                                           apr_os_file_t *thefile,
                                           apr_pool_t *cont)
 {
@@ -404,7 +404,7 @@ APR_DECLARE(apr_status_t) apr_put_os_file(apr_file_t **file,
     return APR_SUCCESS;
 }    
 
-APR_DECLARE(apr_status_t) apr_eof(apr_file_t *fptr)
+APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
 {
     if (fptr->eof_hit == 1) {
         return APR_EOF;
@@ -412,7 +412,7 @@ APR_DECLARE(apr_status_t) apr_eof(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-APR_DECLARE(apr_status_t) apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
     apr_os_file_t file_handle;
 
@@ -420,10 +420,10 @@ APR_DECLARE(apr_status_t) apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont
     if (file_handle == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
 
-    return apr_put_os_file(thefile, &file_handle, cont);
+    return apr_os_file_put(thefile, &file_handle, cont);
 }
 
-APR_DECLARE(apr_status_t) apr_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
 {
     apr_os_file_t file_handle;
 
@@ -431,7 +431,7 @@ APR_DECLARE(apr_status_t) apr_open_stdout(apr_file_t **thefile, apr_pool_t *cont
     if (file_handle == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
 
-    return apr_put_os_file(thefile, &file_handle, cont);
+    return apr_os_file_put(thefile, &file_handle, cont);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);

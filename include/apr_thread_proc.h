@@ -157,26 +157,26 @@ struct process_chain {
  * Create and initialize a new threadattr variable
  * @param new_attr The newly created threadattr.
  * @param cont The pool to use
- * @deffunc apr_status_t apr_create_threadattr(apr_threadattr_t **new_attr, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_threadattr_create(apr_threadattr_t **new_attr, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_create_threadattr(apr_threadattr_t **new_attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new_attr, 
                                                 apr_pool_t *cont);
 
 /**
  * Set if newly created threads should be created in detach mode.
  * @param attr The threadattr to affect 
  * @param on Thread detach state on or off
- * @deffunc apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
+ * @deffunc apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
  */
-APR_DECLARE(apr_status_t) apr_setthreadattr_detach(apr_threadattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr, 
                                                    apr_int32_t on);
 
 /**
  * Get the detach mode for this threadattr.
  * @param attr The threadattr to reference 
- * @deffunc apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
+ * @deffunc apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
  */
-APR_DECLARE(apr_status_t) apr_getthreadattr_detach(apr_threadattr_t *attr);
+APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr);
 
 /**
  * Create a new thread of execution
@@ -185,9 +185,9 @@ APR_DECLARE(apr_status_t) apr_getthreadattr_detach(apr_threadattr_t *attr);
  * @param func The function to start the new thread in
  * @param data Any data to be passed to the starting function
  * @param cont The pool to use
- * @deffunc apr_status_t apr_create_thread(apr_thread_t **new_thread, apr_threadattr_t *attr, apr_thread_start_t func, void *data, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_thread_create(apr_thread_t **new_thread, apr_threadattr_t *attr, apr_thread_start_t func, void *data, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_create_thread(apr_thread_t **new_thread, 
+APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new_thread, 
                                             apr_threadattr_t *attr, 
                                             apr_thread_start_t func, 
                                             void *data, apr_pool_t *cont);
@@ -222,9 +222,9 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd);
  * @param data The user data associated with the thread.
  * @param key The key to associate with the data
  * @param thread The currently open thread.
- * @deffunc apr_status_t apr_get_threaddata(void **data, const char *key, apr_thread_t *thread)
+ * @deffunc apr_status_t apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
  */
-APR_DECLARE(apr_status_t) apr_get_threaddata(void **data, const char *key,
+APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,
                                              apr_thread_t *thread);
 
 /**
@@ -233,9 +233,9 @@ APR_DECLARE(apr_status_t) apr_get_threaddata(void **data, const char *key,
  * @param key The key to use for associating the data with the tread
  * @param cleanup The cleanup routine to use when the thread is destroyed.
  * @param thread The currently open thread.
- * @deffunc apr_status_t apr_set_threaddata(void *data, const char *key, apr_status_t (*cleanup) (void *), apr_thread_t *thread)
+ * @deffunc apr_status_t apr_thread_data_set(void *data, const char *key, apr_status_t (*cleanup) (void *), apr_thread_t *thread)
  */
-APR_DECLARE(apr_status_t) apr_set_threaddata(void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
                                              apr_status_t (*cleanup) (void *),
                                              apr_thread_t *thread);
 
@@ -244,9 +244,9 @@ APR_DECLARE(apr_status_t) apr_set_threaddata(void *data, const char *key,
  * @param key The thread private handle.
  * @param dest The destructor to use when freeing the private memory.
  * @param cont The pool to use
- * @deffunc apr_status_t apr_create_thread_private(apr_threadkey_t **key, void (*dest)(void *), apr_pool_t *cont)
+ * @deffunc apr_status_t apr_threadkey_private_create(apr_threadkey_t **key, void (*dest)(void *), apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_create_thread_private(apr_threadkey_t **key, 
+APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key, 
                                                     void (*dest)(void *),
                                                     apr_pool_t *cont);
 
@@ -254,35 +254,35 @@ APR_DECLARE(apr_status_t) apr_create_thread_private(apr_threadkey_t **key,
  * Get a pointer to the thread private memory
  * @param new_mem The data stored in private memory 
  * @param key The handle for the desired thread private memory 
- * @deffunc apr_status_t apr_get_thread_private(void **new_mem, apr_threadkey_t *key)
+ * @deffunc apr_status_t apr_threadkey_private_get(void **new_mem, apr_threadkey_t *key)
  */
-APR_DECLARE(apr_status_t) apr_get_thread_private(void **new_mem, 
+APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new_mem, 
                                                  apr_threadkey_t *key);
 
 /**
  * Set the data to be stored in thread private memory
  * @param priv The data to be stored in private memory 
  * @param key The handle for the desired thread private memory 
- * @deffunc apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
+ * @deffunc apr_status_t apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
  */
-APR_DECLARE(apr_status_t) apr_set_thread_private(void *priv, 
+APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, 
                                                  apr_threadkey_t *key);
 
 /**
  * Free the thread private memory
  * @param key The handle for the desired thread private memory 
- * @deffunc apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
+ * @deffunc apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
  */
-APR_DECLARE(apr_status_t) apr_delete_thread_private(apr_threadkey_t *key);
+APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key);
 
 /**
  * Return the pool associated with the current threadkey.
  * @param data The user data associated with the threadkey.
  * @param key The key associated with the data
  * @param threadkey The currently open threadkey.
- * @deffunc apr_status_t apr_get_threadkeydata(void **data, const char *key, apr_threadkey_t *threadkey)
+ * @deffunc apr_status_t apr_threadkey_data_get(void **data, const char *key, apr_threadkey_t *threadkey)
  */
-APR_DECLARE(apr_status_t) apr_get_threadkeydata(void **data, const char *key,
+APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
                                                 apr_threadkey_t *threadkey);
 
 /**
@@ -291,9 +291,9 @@ APR_DECLARE(apr_status_t) apr_get_threadkeydata(void **data, const char *key,
  * @param key The key to associate with the data.
  * @param cleanup The cleanup routine to use when the file is destroyed.
  * @param threadkey The currently open threadkey.
- * @deffunc apr_status_t apr_set_threadkeydata(void *data, const char *key, apr_status_t (*cleanup) (void *), apr_threadkey_t *threadkey)
+ * @deffunc apr_status_t apr_threadkey_data_set(void *data, const char *key, apr_status_t (*cleanup) (void *), apr_threadkey_t *threadkey)
  */
-APR_DECLARE(apr_status_t) apr_set_threadkeydata(void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
                                                 apr_status_t (*cleanup) (void *),
                                                 apr_threadkey_t *threadkey);
 
@@ -307,9 +307,9 @@ APR_DECLARE(apr_status_t) apr_set_threadkeydata(void *data, const char *key,
  * Create and initialize a new procattr variable
  * @param new_attr The newly created procattr. 
  * @param cont The pool to use
- * @deffunc apr_status_t apr_createprocattr_init(apr_procattr_t **new_attr, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_procattr_create(apr_procattr_t **new_attr, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_createprocattr_init(apr_procattr_t **new_attr,
+APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new_attr,
                                                   apr_pool_t *cont);
 
 /**
@@ -319,9 +319,9 @@ APR_DECLARE(apr_status_t) apr_createprocattr_init(apr_procattr_t **new_attr,
  * @param in Should stdin be a pipe back to the parent?
  * @param out Should stdout be a pipe back to the parent?
  * @param err Should stderr be a pipe back to the parent?
- * @deffunc apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in, apr_int32_t out, apr_int32_t err)
+ * @deffunc apr_status_t apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t in, apr_int32_t out, apr_int32_t err)
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_io(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, 
                                              apr_int32_t in, apr_int32_t out,
                                              apr_int32_t err);
 
@@ -330,7 +330,7 @@ APR_DECLARE(apr_status_t) apr_setprocattr_io(apr_procattr_t *attr,
  * @param attr The procattr we care about. 
  * @param child_in apr_file_t value to use as child_in. Must be a valid file.
  * @param parent_in apr_file_t value to use as parent_in. Must be a valid file.
- * @deffunc apr_status_t apr_setprocattr_childin(struct apr_procattr_t *attr, apr_file_t *child_in, apr_file_t *parent_in)
+ * @deffunc apr_status_t apr_procattr_child_in_set(struct apr_procattr_t *attr, apr_file_t *child_in, apr_file_t *parent_in)
  * @tip  This is NOT a required initializer function. This is
  *       useful if you have already opened a pipe (or multiple files)
  *       that you wish to use, perhaps persistently across multiple
@@ -338,7 +338,7 @@ APR_DECLARE(apr_status_t) apr_setprocattr_io(apr_procattr_t *attr,
  *       extra function calls by not creating your own pipe since this
  *       creates one in the process space for you.
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_childin(struct apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_child_in_set(struct apr_procattr_t *attr,
                                                   apr_file_t *child_in,
                                                   apr_file_t *parent_in);
 
@@ -347,13 +347,13 @@ APR_DECLARE(apr_status_t) apr_setprocattr_childin(struct apr_procattr_t *attr,
  * @param attr The procattr we care about. 
  * @param child_out apr_file_t value to use as child_out. Must be a valid file.
  * @param parent_out apr_file_t value to use as parent_out. Must be a valid file.
- * @deffunc apr_status_t apr_setprocattr_childout(struct apr_procattr_t *attr, apr_file_t *child_out, apr_file_t *parent_out)
+ * @deffunc apr_status_t apr_procattr_child_out_set(struct apr_procattr_t *attr, apr_file_t *child_out, apr_file_t *parent_out)
  * @tip This is NOT a required initializer function. This is
  *      useful if you have already opened a pipe (or multiple files)
  *      that you wish to use, perhaps persistently across multiple
  *      process invocations - such as a log file. 
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_childout(struct apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_child_out_set(struct apr_procattr_t *attr,
                                                    apr_file_t *child_out,
                                                    apr_file_t *parent_out);
 
@@ -362,13 +362,13 @@ APR_DECLARE(apr_status_t) apr_setprocattr_childout(struct apr_procattr_t *attr,
  * @param attr The procattr we care about. 
  * @param child_err apr_file_t value to use as child_err. Must be a valid file.
  * @param parent_err apr_file_t value to use as parent_err. Must be a valid file.
- * @deffunc apr_status_t apr_setprocattr_childerr(struct apr_procattr_t *attr, apr_file_t *child_err, apr_file_t *parent_err)
+ * @deffunc apr_status_t apr_procattr_child_err_set(struct apr_procattr_t *attr, apr_file_t *child_err, apr_file_t *parent_err)
  * @tip This is NOT a required initializer function. This is
  *      useful if you have already opened a pipe (or multiple files)
  *      that you wish to use, perhaps persistently across multiple
  *      process invocations - such as a log file. 
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_childerr(struct apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_child_err_set(struct apr_procattr_t *attr,
                                                    apr_file_t *child_err,
                                                    apr_file_t *parent_err);
 
@@ -378,9 +378,9 @@ APR_DECLARE(apr_status_t) apr_setprocattr_childerr(struct apr_procattr_t *attr,
  * @param dir Which dir to start in.  By default, this is the same dir as
  *            the parent currently resides in, when the createprocess call
  *            is made. 
- * @deffunc apr_status_t apr_setprocattr_dir(apr_procattr_t *attr, const char *dir)
+ * @deffunc apr_status_t apr_procattr_dir_set(apr_procattr_t *attr, const char *dir)
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_dir(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr, 
                                               const char *dir);
 
 /**
@@ -391,18 +391,18 @@ APR_DECLARE(apr_status_t) apr_setprocattr_dir(apr_procattr_t *attr,
  *            APR_SHELLCMD --  Shell script
  *            APR_PROGRAM  --  Executable program   (default) 
  * </PRE>
- * @deffunc apr_status_t apr_setprocattr_cmdtype(apr_procattr_t *attr, apr_cmdtype_e cmd)
+ * @deffunc apr_status_t apr_procattr_cmdtype_set(apr_procattr_t *attr, apr_cmdtype_e cmd)
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_cmdtype(apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
                                                   apr_cmdtype_e cmd);
 
 /**
  * Determine if the chlid should start in detached state.
  * @param attr The procattr we care about. 
  * @param detach Should the child start in detached state?  Default is no. 
- * @deffunc apr_status_t apr_setprocattr_detach(apr_procattr_t *attr, apr_int32_t detach)
+ * @deffunc apr_status_t apr_procattr_detach_set(apr_procattr_t *attr, apr_int32_t detach)
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_detach(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, 
                                                  apr_int32_t detach);
 
 #if APR_HAVE_STRUCT_RLIMIT
@@ -416,9 +416,9 @@ APR_DECLARE(apr_status_t) apr_setprocattr_detach(apr_procattr_t *attr,
  *                 APR_LIMIT_NPROC
  * </PRE>
  * @param limit Value to set the limit to.
- * @deffunc apr_status_t apr_setprocattr_limit(apr_procattr_t *attr, apr_int32_t what, apr_int32_t what, struct rlimit *limit)
+ * @deffunc apr_status_t apr_procattr_limit_set(apr_procattr_t *attr, apr_int32_t what, apr_int32_t what, struct rlimit *limit)
  */
-APR_DECLARE(apr_status_t) apr_setprocattr_limit(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr, 
                                                 apr_int32_t what,
                                                 struct rlimit *limit);
 #endif
@@ -429,9 +429,9 @@ APR_DECLARE(apr_status_t) apr_setprocattr_limit(apr_procattr_t *attr,
  * a standard unix fork.
  * @param proc The resulting process handle. 
  * @param cont The pool to use. 
- * @deffunc apr_status_t apr_fork(apr_proc_t *proc, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_fork(apr_proc_t *proc, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont);
 #endif
 
 /**
@@ -445,9 +445,9 @@ APR_DECLARE(apr_status_t) apr_fork(apr_proc_t *proc, apr_pool_t *cont);
  * @param attr the procattr we should use to determine how to create the new
  *         process
  * @param cont The pool to use. 
- * @deffunc apr_status_t apr_create_process(apr_proc_t *new_proc, const char *progname, const char * const *args, const char * const *env, apr_procattr_t *attr, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_proc_create(apr_proc_t *new_proc, const char *progname, const char * const *args, const char * const *env, apr_procattr_t *attr, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_create_process(apr_proc_t *new_proc,
+APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new_proc,
                                              const char *progname,
                                              const char * const *args,
                                              const char * const *env, 
@@ -463,14 +463,14 @@ APR_DECLARE(apr_status_t) apr_create_process(apr_proc_t *new_proc,
  *            APR_NOWAIT -- return immediately regardless of if the 
  *                          child is dead or not.
  * </PRE>
- * @deffunc apr_status_t apr_wait_proc(apr_proc_t *proc, apr_wait_how_e waithow)
+ * @deffunc apr_status_t apr_proc_wait(apr_proc_t *proc, apr_wait_how_e waithow)
  * @tip The childs status is in the return code to this process.  It is one of:
  * <PRE>
  *            APR_CHILD_DONE     -- child is no longer running.
  *            APR_CHILD_NOTDONE  -- child is still running.
  * </PRE>
  */
-APR_DECLARE(apr_status_t) apr_wait_proc(apr_proc_t *proc, 
+APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, 
                                         apr_wait_how_e waithow);
 
 /**
@@ -488,9 +488,9 @@ APR_DECLARE(apr_status_t) apr_wait_proc(apr_proc_t *proc,
  *                          child is dead or not.
  * </PRE>
  * @param p Pool to allocate child information out of.
- * @deffunc apr_status_t apr_wait_all_procs(apr_proc_t *proc, apr_wait_t *status, apr_wait_how_e waithow, apr_pool_t *p)
+ * @deffunc apr_status_t apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *status, apr_wait_how_e waithow, apr_pool_t *p)
  */
-APR_DECLARE(apr_status_t) apr_wait_all_procs(apr_proc_t *proc,
+APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                              apr_wait_t *status,
                                              apr_wait_how_e waithow,
                                              apr_pool_t *p);
@@ -498,7 +498,7 @@ APR_DECLARE(apr_status_t) apr_wait_all_procs(apr_proc_t *proc,
 /**
  * Detach the process from the controlling terminal.
  */
-apr_status_t apr_detach(void);
+apr_status_t apr_proc_detach(void);
 
 #if APR_HAS_OTHER_CHILD
 
@@ -513,9 +513,9 @@ apr_status_t apr_detach(void);
  *                 then the maintenance is invoked with reason 
  *                 OC_REASON_UNWRITABLE.
  * @param p The pool to use for allocating memory.
- * @deffunc void apr_register_other_child(apr_proc_t *pid, void (*maintenance) (int reason, void *, int status), void *data, apr_file_t *write_fd, apr_pool_t *p)
+ * @deffunc void apr_proc_other_child_register(apr_proc_t *pid, void (*maintenance) (int reason, void *, int status), void *data, apr_file_t *write_fd, apr_pool_t *p)
  */
-APR_DECLARE(void) apr_register_other_child(apr_proc_t *pid, 
+APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid, 
                                            void (*maintenance) (int reason, 
                                                                 void *, 
                                                                 int status),
@@ -526,36 +526,36 @@ APR_DECLARE(void) apr_register_other_child(apr_proc_t *pid,
  * Stop watching the specified process.
  * @param data The data to pass to the maintenance function.  This is
  *             used to find the process to unregister.
- * @deffunc void apr_unregister_other_child(void *data)
+ * @deffunc void apr_proc_other_child_unregister(void *data)
  * @tip Since this can be called by a maintenance function while we're
  *      scanning the other_children list, all scanners should protect 
  *      themself by loading ocr->next before calling any maintenance 
  *      function.
  */
-APR_DECLARE(void) apr_unregister_other_child(void *data);
+APR_DECLARE(void) apr_proc_other_child_unregister(void *data);
 
 /**
  * Check on the specified process.  If it is gone, call the maintenance 
  * function.
  * @param pid The process to check.
  * @param status The status to pass to the maintenance function.
- * @deffunc apr_status_t apr_reap_other_child(apr_proc_t *pid, int status);
+ * @deffunc apr_status_t apr_proc_other_child_read(apr_proc_t *pid, int status);
  */
-APR_DECLARE(apr_status_t) apr_reap_other_child(apr_proc_t *pid, int status);
+APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status);
 
 /**
  * Loop through all registered other_children and call the appropriate 
  * maintenance function when necessary.
- * @deffunc void apr_check_other_child();
+ * @deffunc void apr_proc_other_child_check();
  */
-APR_DECLARE(void) apr_check_other_child(void); 
+APR_DECLARE(void) apr_proc_other_child_check(void); 
 
 /**
  * Ensure all the registered write_fds are still writable, otherwise 
  * invoke the maintenance functions as appropriate.
- * @deffunc void apr_probe_writable_fds()
+ * @deffunc void apr_proc_probe_writable_fds()
  */
-APR_DECLARE(void) apr_probe_writable_fds(void);
+APR_DECLARE(void) apr_proc_probe_writable_fds(void);
 
 #endif /* APR_HAS_OTHER_CHILD */
 
@@ -563,9 +563,9 @@ APR_DECLARE(void) apr_probe_writable_fds(void);
  * Terminate a process.
  * @param proc The process to terminate.
  * @param sig How to kill the process.
- * @deffunc apr_status_t apr_kill(apr_proc_t *proc, int sig)
+ * @deffunc apr_status_t apr_proc_kill(apr_proc_t *proc, int sig)
  */
-APR_DECLARE(apr_status_t) apr_kill(apr_proc_t *proc, int sig);
+APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int sig);
 
 /**
  * Register a process to be killed when a pool dies.
@@ -579,9 +579,9 @@ APR_DECLARE(apr_status_t) apr_kill(apr_proc_t *proc, int sig);
  *         just_wait          -- wait forever for the process to complete
  *         kill_only_once     -- send SIGTERM and then wait
  * </PRE>
- * @deffunc void apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid, enum kill_conditions how)
+ * @deffunc void apr_pool_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid, enum kill_conditions how)
  */
-APR_DECLARE(void) apr_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
+APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
                                       enum kill_conditions how);
 
 #ifdef __cplusplus

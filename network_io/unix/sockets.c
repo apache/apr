@@ -121,7 +121,7 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr->pool = p;
 }
 
-apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
+apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
                                apr_pool_t *cont)
 {
     int family = ofamily;
@@ -155,8 +155,8 @@ apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
     set_socket_vars(*new, family);
 
     (*new)->timeout = -1;
-    apr_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
+                        socket_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 } 
 
@@ -165,9 +165,9 @@ apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
     return (shutdown(thesocket->socketdes, how) == -1) ? errno : APR_SUCCESS;
 }
 
-apr_status_t apr_close_socket(apr_socket_t *thesocket)
+apr_status_t apr_socket_close(apr_socket_t *thesocket)
 {
-    apr_kill_cleanup(thesocket->cntxt, thesocket, socket_cleanup);
+    apr_pool_cleanup_kill(thesocket->cntxt, thesocket, socket_cleanup);
     return socket_cleanup(thesocket);
 }
 
@@ -241,8 +241,8 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
         (*new)->local_interface_unknown = 1;
     }
 
-    apr_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
+                        socket_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -283,24 +283,24 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
 }
 
-apr_status_t apr_get_socketdata(void **data, const char *key, apr_socket_t *sock)
+apr_status_t apr_socket_data_get(void **data, const char *key, apr_socket_t *sock)
 {
-    return apr_get_userdata(data, key, sock->cntxt);
+    return apr_pool_userdata_get(data, key, sock->cntxt);
 }
 
-apr_status_t apr_set_socketdata(apr_socket_t *sock, void *data, const char *key,
+apr_status_t apr_socket_data_set(apr_socket_t *sock, void *data, const char *key,
                               apr_status_t (*cleanup) (void *))
 {
-    return apr_set_userdata(data, key, cleanup, sock->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, sock->cntxt);
 }
 
-apr_status_t apr_get_os_sock(apr_os_sock_t *thesock, apr_socket_t *sock)
+apr_status_t apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)
 {
     *thesock = sock->socketdes;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_make_os_sock(apr_socket_t **apr_sock, 
+apr_status_t apr_os_sock_make(apr_socket_t **apr_sock, 
                               apr_os_sock_info_t *os_sock_info, 
                               apr_pool_t *cont)
 {
@@ -325,13 +325,13 @@ apr_status_t apr_make_os_sock(apr_socket_t **apr_sock,
                (*apr_sock)->remote_addr->salen);
     }
         
-    apr_register_cleanup((*apr_sock)->cntxt, (void *)(*apr_sock), 
-                        socket_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register((*apr_sock)->cntxt, (void *)(*apr_sock), 
+                        socket_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, 
+apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock, 
                            apr_pool_t *cont)
 {
     if ((*sock) == NULL) {

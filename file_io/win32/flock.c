@@ -54,7 +54,7 @@
 
 #include "fileio.h"
 
-APR_DECLARE(apr_status_t) apr_lock_file(apr_file_t *thefile, int type)
+APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
 {
     OVERLAPPED offset;
     DWORD flags, len = 0xffffffff;
@@ -70,7 +70,7 @@ APR_DECLARE(apr_status_t) apr_lock_file(apr_file_t *thefile, int type)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_unlock_file(apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile)
 {
     OVERLAPPED offset;
     DWORD len = 0xffffffff;

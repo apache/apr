@@ -56,7 +56,7 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
+apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
                            apr_lockscope_e scope, const char *fname, 
                            apr_pool_t *cont)
 {
@@ -101,7 +101,7 @@ apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock(apr_lock_t *lock)
+apr_status_t apr_lock_aquire(apr_lock_t *lock)
 {
     apr_status_t stat;
 #if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
@@ -125,7 +125,7 @@ apr_status_t apr_lock(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unlock(apr_lock_t *lock)
+apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     apr_status_t stat;
 
@@ -150,7 +150,7 @@ apr_status_t apr_unlock(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_destroy_lock(apr_lock_t *lock)
+apr_status_t apr_lock_destroy(apr_lock_t *lock)
 {
     apr_status_t stat;
 #if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
@@ -176,7 +176,7 @@ apr_status_t apr_destroy_lock(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname, 
+apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, 
                                apr_pool_t *cont)
 {
     apr_status_t stat;
@@ -188,18 +188,18 @@ apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data)
+apr_status_t apr_lock_data_get(apr_lock_t *lock, const char *key, void *data)
 {
-    return apr_get_userdata(data, key, lock->cntxt);
+    return apr_pool_userdata_get(data, key, lock->cntxt);
 }
 
-apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key,
+apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
                             apr_status_t (*cleanup) (void *))
 {
-    return apr_set_userdata(data, key, cleanup, lock->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, lock->cntxt);
 }
 
-apr_status_t apr_get_os_lock(apr_os_lock_t *oslock, apr_lock_t *lock)
+apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
     oslock->crossproc = lock->interproc;
 #if APR_HAS_THREADS
@@ -211,7 +211,7 @@ apr_status_t apr_get_os_lock(apr_os_lock_t *oslock, apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_lock(apr_lock_t **lock, apr_os_lock_t *thelock, 
+apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
                            apr_pool_t *cont)
 {
     if (cont == NULL) {

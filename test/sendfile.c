@@ -110,18 +110,18 @@ static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
 
     atexit(closeapr);
 
-    rv = apr_create_pool(p, NULL);
+    rv = apr_pool_create(p, NULL);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_create_pool()->%d/%s\n",
+        fprintf(stderr, "apr_pool_create()->%d/%s\n",
                 rv,
                 apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
     *sock = NULL;
-    rv = apr_create_socket(sock, *family, SOCK_STREAM, *p);
+    rv = apr_socket_create(sock, *family, SOCK_STREAM, *p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_create_socket()->%d/%s\n",
+        fprintf(stderr, "apr_socket_create()->%d/%s\n",
                 rv,
                 apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -130,9 +130,9 @@ static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
     if (*family == APR_UNSPEC) {
         apr_sockaddr_t *localsa;
 
-        rv = apr_get_sockaddr(&localsa, APR_LOCAL, *sock);
+        rv = apr_socket_addr_get(&localsa, APR_LOCAL, *sock);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_get_sockaddr()->%d/%s\n",
+            fprintf(stderr, "apr_socket_addr_get()->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
@@ -150,11 +150,11 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     apr_finfo_t finfo;
 
     printf("Creating a test file...\n");
-    rv = apr_open(&f, fname, 
+    rv = apr_file_open(&f, fname, 
                  APR_CREATE | APR_WRITE | APR_TRUNCATE | APR_BUFFERED,
                  APR_UREAD | APR_UWRITE, p);
     if (rv) {
-        fprintf(stderr, "apr_open()->%d/%s\n",
+        fprintf(stderr, "apr_file_open()->%d/%s\n",
                 rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
@@ -162,35 +162,35 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     buf[0] = FILE_DATA_CHAR;
     buf[1] = '\0';
     for (i = 0; i < FILE_LENGTH; i++) {
-        /* exercise apr_putc() and apr_puts() on buffered files */
+        /* exercise apr_file_putc() and apr_file_puts() on buffered files */
         if ((i % 2) == 0) {
-            rv = apr_putc(buf[0], f);
+            rv = apr_file_putc(buf[0], f);
             if (rv) {
-                fprintf(stderr, "apr_putc()->%d/%s\n",
+                fprintf(stderr, "apr_file_putc()->%d/%s\n",
                         rv, apr_strerror(rv, buf, sizeof buf));
                 exit(1);
             }
         }
         else {
-            rv = apr_puts(buf, f);
+            rv = apr_file_puts(buf, f);
             if (rv) {
-                fprintf(stderr, "apr_puts()->%d/%s\n",
+                fprintf(stderr, "apr_file_puts()->%d/%s\n",
                         rv, apr_strerror(rv, buf, sizeof buf));
                 exit(1);
             }
         }
     }
 
-    rv = apr_close(f);
+    rv = apr_file_close(f);
     if (rv) {
-        fprintf(stderr, "apr_close()->%d/%s\n",
+        fprintf(stderr, "apr_file_close()->%d/%s\n",
                 rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
     rv = apr_stat(&finfo, fname, APR_FINFO_NORM, p);
     if (rv) {
-        fprintf(stderr, "apr_close()->%d/%s\n",
+        fprintf(stderr, "apr_file_close()->%d/%s\n",
                 rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
@@ -230,17 +230,17 @@ static int client(client_socket_mode_t socket_mode)
     apr_setup(&p, &sock, &family);
     create_testfile(p, TESTFILE);
 
-    rv = apr_open(&f, TESTFILE, APR_READ, 0, p);
+    rv = apr_file_open(&f, TESTFILE, APR_READ, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_open()->%d/%s\n",
+        fprintf(stderr, "apr_file_open()->%d/%s\n",
                 rv,
                 apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = apr_getaddrinfo(&destsa, "127.0.0.1", family, TESTSF_PORT, 0, p);
+    rv = apr_sockaddr_info_get(&destsa, "127.0.0.1", family, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_getaddrinfo()->%d/%s\n",
+        fprintf(stderr, "apr_sockaddr_info_get()->%d/%s\n",
                 rv,
                 apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -343,9 +343,9 @@ static int client(client_socket_mode_t socket_mode)
         apr_size_t total_bytes_sent;
 
         pfd = NULL;
-        rv = apr_setup_poll(&pfd, 1, p);
+        rv = apr_poll_setup(&pfd, 1, p);
         assert(!rv);
-        rv = apr_add_poll_socket(pfd, sock, APR_POLLOUT);
+        rv = apr_poll_socket_add(pfd, sock, APR_POLLOUT);
         assert(!rv);
 
         total_bytes_sent = 0;
@@ -456,9 +456,9 @@ static int client(client_socket_mode_t socket_mode)
     }
     
     current_file_offset = 0;
-    rv = apr_seek(f, APR_CUR, &current_file_offset);
+    rv = apr_file_seek(f, APR_CUR, &current_file_offset);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_seek()->%d/%s\n",
+        fprintf(stderr, "apr_file_seek()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -493,9 +493,9 @@ static int client(client_socket_mode_t socket_mode)
 
     printf("client: apr_sendfile() worked as expected!\n");
 
-    rv = apr_remove_file(TESTFILE, p);
+    rv = apr_file_remove(TESTFILE, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_remove_file()->%d/%s\n",
+        fprintf(stderr, "apr_file_remove()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
@@ -527,9 +527,9 @@ static int server(void)
         exit(1);
     }
 
-    rv = apr_getaddrinfo(&localsa, NULL, family, TESTSF_PORT, 0, p);
+    rv = apr_sockaddr_info_get(&localsa, NULL, family, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_getaddrinfo()->%d/%s\n",
+        fprintf(stderr, "apr_sockaddr_info_get()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);

@@ -55,7 +55,7 @@
 #include "apr_file_io.h"
 
 
-APR_DECLARE(apr_status_t) apr_full_read(apr_file_t *thefile, void *buf,
+APR_DECLARE(apr_status_t) apr_file_read_file(apr_file_t *thefile, void *buf,
                                         apr_size_t nbytes,
                                         apr_size_t *bytes_read)
 {
@@ -65,7 +65,7 @@ APR_DECLARE(apr_status_t) apr_full_read(apr_file_t *thefile, void *buf,
     do {
 	apr_size_t amt = nbytes;
 
-	status = apr_read(thefile, buf, &amt);
+	status = apr_file_read(thefile, buf, &amt);
 	buf = (char *)buf + amt;
         nbytes -= amt;
         total_read += amt;
@@ -77,7 +77,7 @@ APR_DECLARE(apr_status_t) apr_full_read(apr_file_t *thefile, void *buf,
     return status;
 }
 
-APR_DECLARE(apr_status_t) apr_full_write(apr_file_t *thefile, const void *buf,
+APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile, const void *buf,
                                          apr_size_t nbytes,
                                          apr_size_t *bytes_written)
 {
@@ -87,7 +87,7 @@ APR_DECLARE(apr_status_t) apr_full_write(apr_file_t *thefile, const void *buf,
     do {
 	apr_size_t amt = nbytes;
 
-	status = apr_write(thefile, buf, &amt);
+	status = apr_file_write(thefile, buf, &amt);
 	buf = (char *)buf + amt;
         nbytes -= amt;
         total_written += amt;

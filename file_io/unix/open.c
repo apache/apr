@@ -67,7 +67,7 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
         file->filedes = -1;
 #if APR_HAS_THREADS
         if (file->thlock) {
-            return apr_destroy_lock(file->thlock);
+            return apr_lock_destroy(file->thlock);
         }
 #endif
         return APR_SUCCESS;
@@ -78,7 +78,7 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
     }
 }
 
-apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cont)
+apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cont)
 {
     int oflags = 0;
 #if APR_HAS_THREADS
@@ -111,7 +111,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  ap
     if ((*new)->buffered) {
         (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
 #if APR_HAS_THREADS
-        rv = apr_create_lock(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, 
+        rv = apr_lock_create(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, 
                             NULL, cont);
         if (rv) {
             return rv;
@@ -163,27 +163,27 @@ apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  ap
     (*new)->bufpos = 0;
     (*new)->dataRead = 0;
     (*new)->direction = 0;
-    apr_register_cleanup((*new)->cntxt, (void *)(*new), apr_unix_file_cleanup,
-                        apr_null_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), apr_unix_file_cleanup,
+                        apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_close(apr_file_t *file)
+apr_status_t apr_file_close(apr_file_t *file)
 {
     apr_status_t flush_rv = APR_SUCCESS, rv;
 
     if (file->buffered) {
-        flush_rv = apr_flush(file);
+        flush_rv = apr_file_flush(file);
     }
 
     if ((rv = apr_unix_file_cleanup(file)) == APR_SUCCESS) {
-        apr_kill_cleanup(file->cntxt, file, apr_unix_file_cleanup);
+        apr_pool_cleanup_kill(file->cntxt, file, apr_unix_file_cleanup);
         return APR_SUCCESS;
     }
     return rv ? rv : flush_rv;
 }
 
-apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
+apr_status_t apr_file_remove(const char *path, apr_pool_t *cont)
 {
     if (unlink(path) == 0) {
         return APR_SUCCESS;
@@ -193,7 +193,7 @@ apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
     }
 }
 
-apr_status_t apr_rename_file(const char *from_path, const char *to_path,
+apr_status_t apr_file_rename(const char *from_path, const char *to_path,
                            apr_pool_t *p)
 {
     if (rename(from_path, to_path) != 0) {
@@ -202,7 +202,7 @@ apr_status_t apr_rename_file(const char *from_path, const char *to_path,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
+apr_status_t apr_os_file_get(apr_os_file_t *thefile, apr_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -212,7 +212,7 @@ apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
+apr_status_t apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile,
                              apr_pool_t *cont)
 {
     int *dafile = thefile;
@@ -231,7 +231,7 @@ apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
     return APR_SUCCESS;
 }    
 
-apr_status_t apr_eof(apr_file_t *fptr)
+apr_status_t apr_file_eof(apr_file_t *fptr)
 {
     if (fptr->eof_hit == 1) {
         return APR_EOF;
@@ -239,7 +239,7 @@ apr_status_t apr_eof(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-apr_status_t apr_ferror(apr_file_t *fptr)
+apr_status_t apr_file_error(apr_file_t *fptr)
 {
 /* This function should be removed ASAP.  It is next on my list once
  * I am sure nobody is using it.
@@ -247,18 +247,18 @@ apr_status_t apr_ferror(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+apr_status_t apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
     int fd = STDERR_FILENO;
 
-    return apr_put_os_file(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, cont);
 }
 
-apr_status_t apr_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+apr_status_t apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
 {
     int fd = STDOUT_FILENO;
 
-    return apr_put_os_file(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, cont);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);

@@ -95,13 +95,13 @@ int main(int argc, const char * const argv[])
     atexit(closeapr);
 
     fprintf(stdout, "Creating context.......");
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Could not create a context\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
-    if (apr_initopt(&opt, context, argc, argv)) {
+    if (apr_getopt_init(&opt, context, argc, argv)) {
         fprintf(stderr, "failed to initialize opts\n");
         exit(-1);
     }
@@ -125,7 +125,7 @@ int main(int argc, const char * const argv[])
          * socket we need.  We'll use the returned sockaddr later when
          * we bind.
          */
-        stat = apr_getaddrinfo(&localsa, bind_to_ipaddr, APR_UNSPEC, 8021, 0,
+        stat = apr_sockaddr_info_get(&localsa, bind_to_ipaddr, APR_UNSPEC, 8021, 0,
                                context);
         if (stat != APR_SUCCESS) {
             fprintf(stderr,
@@ -137,7 +137,7 @@ int main(int argc, const char * const argv[])
     }
 
     fprintf(stdout, "\tServer:  Creating new socket.......");
-    if (apr_create_socket(&sock, family, SOCK_STREAM, context) != APR_SUCCESS) {
+    if (apr_socket_create(&sock, family, SOCK_STREAM, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }
@@ -145,7 +145,7 @@ int main(int argc, const char * const argv[])
 
     fprintf(stdout, "\tServer:  Setting socket option NONBLOCK.......");
     if (apr_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Couldn't set socket option\n");
         exit(-1);
     }
@@ -153,20 +153,20 @@ int main(int argc, const char * const argv[])
 
     fprintf(stdout, "\tServer:  Setting socket option REUSEADDR.......");
     if (apr_setsocketopt(sock, APR_SO_REUSEADDR, 1) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Couldn't set socket option\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     if (!localsa) {
-        apr_get_sockaddr(&localsa, APR_LOCAL, sock);
-        apr_set_port(localsa, 8021);
+        apr_socket_addr_get(&localsa, APR_LOCAL, sock);
+        apr_sockaddr_port_set(localsa, 8021);
     }
 
     fprintf(stdout, "\tServer:  Binding socket to port.......");
     if ((stat = apr_bind(sock, localsa)) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Could not bind: %s\n",
                 apr_strerror(stat, buf, sizeof buf));
         exit(-1);
@@ -175,26 +175,26 @@ int main(int argc, const char * const argv[])
     
     fprintf(stdout, "\tServer:  Listening to socket.......");
     if (apr_listen(sock, 5) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Could not listen\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Setting up socket for polling.......");
-    apr_setup_poll(&sdset, 1, context);
-    apr_add_poll_socket(sdset, sock, APR_POLLIN);
+    apr_poll_setup(&sdset, 1, context);
+    apr_poll_socket_add(sdset, sock, APR_POLLIN);
     fprintf(stdout, "OK\n");
     
     fprintf(stdout, "\tServer:  Beginning to poll for socket.......");
     rv = 1; 
     if (apr_poll(sdset, &rv, -1) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Select caused an error\n");
         exit(-1);
     }
     else if (rv == 0) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "I should not return until rv == 1\n");
         exit(-1);
     }
@@ -202,31 +202,31 @@ int main(int argc, const char * const argv[])
 
     fprintf(stdout, "\tServer:  Accepting a connection.......");
     if (apr_accept(&sock2, sock, context) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Could not accept connection.\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
-    apr_get_sockaddr(&remotesa, APR_REMOTE, sock2);
-    apr_get_ipaddr(&remote_ipaddr, remotesa);
-    apr_get_port(&remote_port, remotesa);
-    apr_get_sockaddr(&localsa, APR_LOCAL, sock2);
-    apr_get_ipaddr(&local_ipaddr, localsa);
-    apr_get_port(&local_port, localsa);
+    apr_socket_addr_get(&remotesa, APR_REMOTE, sock2);
+    apr_sockaddr_ip_get(&remote_ipaddr, remotesa);
+    apr_sockaddr_port_get(&remote_port, remotesa);
+    apr_socket_addr_get(&localsa, APR_LOCAL, sock2);
+    apr_sockaddr_ip_get(&local_ipaddr, localsa);
+    apr_sockaddr_port_get(&local_port, localsa);
     fprintf(stdout, "\tServer socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     length = STRLEN;
     fprintf(stdout, "\tServer:  Trying to recv data from socket.......");
     if (apr_recv(sock2, datasend, &length) != APR_SUCCESS) {
-        apr_close_socket(sock);
-        apr_close_socket(sock2);
+        apr_socket_close(sock);
+        apr_socket_close(sock2);
         fprintf(stderr, "Problem recving data\n");
         exit(-1);
     }
     if (strcmp(datasend, "Send data test")) {
-        apr_close_socket(sock);
-        apr_close_socket(sock2);
+        apr_socket_close(sock);
+        apr_socket_close(sock2);
         fprintf(stderr, "I did not receive the correct data %s\n", datarecv);
         exit(-1);
     }
@@ -235,8 +235,8 @@ int main(int argc, const char * const argv[])
     length = STRLEN;
     fprintf(stdout, "\tServer:  Sending data over socket.......");
     if (apr_send(sock2, datarecv, &length) != APR_SUCCESS) {
-        apr_close_socket(sock);
-        apr_close_socket(sock2);
+        apr_socket_close(sock);
+        apr_socket_close(sock2);
         fprintf(stderr, "Problem sending data\n");
         exit(-1);
     }
@@ -244,23 +244,23 @@ int main(int argc, const char * const argv[])
     
     fprintf(stdout, "\tServer:  Shutting down accepted socket.......");
     if (apr_shutdown(sock2, APR_SHUTDOWN_READ) != APR_SUCCESS) {
-        apr_close_socket(sock);
-        apr_close_socket(sock2);
+        apr_socket_close(sock);
+        apr_socket_close(sock2);
         fprintf(stderr, "Problem shutting down\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  closing duplicate socket.......");
-    if (apr_close_socket(sock2) != APR_SUCCESS) {
-        apr_close_socket(sock);
+    if (apr_socket_close(sock2) != APR_SUCCESS) {
+        apr_socket_close(sock);
         fprintf(stderr, "Problem closing down\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
     
     fprintf(stdout, "\tServer:  closing original socket.......");
-    if (apr_close_socket(sock) != APR_SUCCESS) {
+    if (apr_socket_close(sock) != APR_SUCCESS) {
         fprintf(stderr, "Problem closing down\n");
         exit(-1);
     }

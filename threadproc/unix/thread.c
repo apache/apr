@@ -59,7 +59,7 @@
 #if APR_HAS_THREADS
 
 #if APR_HAVE_PTHREAD_H
-apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
+apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
 {
     apr_status_t stat;
   
@@ -82,7 +82,7 @@ apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
     return stat;
 }
 
-apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
+apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
 {
     apr_status_t stat;
 #ifdef PTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR
@@ -102,7 +102,7 @@ apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
     }
 }
 
-apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
+apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
 {
     int state;
 
@@ -116,7 +116,7 @@ apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
-apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr, 
+apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
                              apr_thread_start_t func, void *data, 
                              apr_pool_t *cont)
 {
@@ -142,7 +142,7 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
     else
         temp = NULL;
     
-    stat = apr_create_pool(&(*new)->cntxt, cont);
+    stat = apr_pool_create(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -160,7 +160,7 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
 
 apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
-    apr_destroy_pool(thd->cntxt);
+    apr_pool_destroy(thd->cntxt);
     pthread_exit(retval);
     return APR_SUCCESS;
 }
@@ -199,25 +199,25 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
     }
 }
 
-apr_status_t apr_get_threaddata(void **data, const char *key, apr_thread_t *thread)
+apr_status_t apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
 {
-    return apr_get_userdata(data, key, thread->cntxt);
+    return apr_pool_userdata_get(data, key, thread->cntxt);
 }
 
-apr_status_t apr_set_threaddata(void *data, const char *key,
+apr_status_t apr_thread_data_set(void *data, const char *key,
                               apr_status_t (*cleanup) (void *),
                               apr_thread_t *thread)
 {
-    return apr_set_userdata(data, key, cleanup, thread->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, thread->cntxt);
 }
 
-apr_status_t apr_get_os_thread(apr_os_thread_t **thethd, apr_thread_t *thd)
+apr_status_t apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
 {
     *thethd = thd->td;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd, 
+apr_status_t apr_os_thread_pupt(apr_thread_t **thd, apr_os_thread_t *thethd, 
                              apr_pool_t *cont)
 {
     if (cont == NULL) {
@@ -235,77 +235,77 @@ apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd,
 
 #if !APR_HAS_THREADS
 
-apr_status_t apr_create_thread(apr_thread_t **new_thread, apr_threadattr_t *attr, 
+apr_status_t apr_thread_create(apr_thread_t **new_thread, apr_threadattr_t *attr, 
                                apr_thread_start_t func, void *data, 
                                apr_pool_t *cont)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
+apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_create_thread_private(apr_threadkey_t **key, void (*dest)(void *),
+apr_status_t apr_threadkey_private_create(apr_threadkey_t **key, void (*dest)(void *),
                                        apr_pool_t *cont)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_get_os_thread(void); /* avoid warning for no prototype */
+apr_status_t apr_os_thread_get(void); /* avoid warning for no prototype */
 
-apr_status_t apr_get_os_thread(void) 
+apr_status_t apr_os_thread_get(void) 
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
+apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_get_threaddata(void **data, const char *key, apr_thread_t *thread)
+apr_status_t apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_get_threadkeydata(void **data, const char *key, 
+apr_status_t apr_threadkey_data_get(void **data, const char *key, 
                                    apr_threadkey_t *threadkey)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_get_thread_private(void **new_mem, apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_get(void **new_mem, apr_threadkey_t *key)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
+apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_set_threaddata(void *data, const char *key,
+apr_status_t apr_thread_data_set(void *data, const char *key,
                                 apr_status_t (*cleanup)(void *),
                                 apr_thread_t *thread) 
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_set_threadkeydata(void *data, const char *key,
+apr_status_t apr_threadkey_data_set(void *data, const char *key,
                                    apr_status_t (*cleanup) (void *), 
                                    apr_threadkey_t *threadkey)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
 {
     return APR_ENOTIMPL;
 }

@@ -74,8 +74,8 @@ static int run_basic_test(apr_pool_t *context)
     const char *args[2];
 
     fprintf(stdout, "Creating children to run network tests.......\n");
-    s1 = apr_createprocattr_init(&attr1, context);
-    s2 = apr_createprocattr_init(&attr2, context);
+    s1 = apr_procattr_create(&attr1, context);
+    s2 = apr_procattr_create(&attr2, context);
 
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
         fprintf(stderr, "Problem creating proc attrs\n");
@@ -84,30 +84,30 @@ static int run_basic_test(apr_pool_t *context)
 
     args[0] = apr_pstrdup(context, "server");
     args[1] = NULL; 
-    s1 = apr_create_process(&proc1, "./server", args, NULL, attr1, context);
+    s1 = apr_proc_create(&proc1, "./server", args, NULL, attr1, context);
 
     /* Sleep for 5 seconds to ensure the server is setup before we begin */
     apr_sleep(5000000);
     args[0] = apr_pstrdup(context, "client");
-    s2 = apr_create_process(&proc2, "./client", args, NULL, attr2, context);
+    s2 = apr_proc_create(&proc2, "./client", args, NULL, attr2, context);
 
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
         fprintf(stderr, "Problem spawning new process\n");
         exit(-1);
     }
 
-    while ((s1 = apr_wait_proc(&proc1, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
-           (s2 = apr_wait_proc(&proc2, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
+    while ((s1 = apr_proc_wait(&proc1, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
+           (s2 = apr_proc_wait(&proc2, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
         continue;
     }
 
     if (s1 == APR_SUCCESS) {
-        apr_kill(&proc2, SIGTERM);
-        while (apr_wait_proc(&proc2, APR_WAIT) == APR_CHILD_NOTDONE);
+        apr_proc_kill(&proc2, SIGTERM);
+        while (apr_proc_wait(&proc2, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     else {
-        apr_kill(&proc1, SIGTERM);
-        while (apr_wait_proc(&proc1, APR_WAIT) == APR_CHILD_NOTDONE);
+        apr_proc_kill(&proc1, SIGTERM);
+        while (apr_proc_wait(&proc1, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     fprintf(stdout, "Network test completed.\n");   
 
@@ -125,8 +125,8 @@ static int run_sendfile(apr_pool_t *context, int number)
     const char *args[3];
 
     fprintf(stdout, "Creating children to run network tests.......\n");
-    s1 = apr_createprocattr_init(&attr1, context);
-    s2 = apr_createprocattr_init(&attr2, context);
+    s1 = apr_procattr_create(&attr1, context);
+    s2 = apr_procattr_create(&attr2, context);
 
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
         fprintf(stderr, "Problem creating proc attrs\n");
@@ -136,7 +136,7 @@ static int run_sendfile(apr_pool_t *context, int number)
     args[0] = apr_pstrdup(context, "sendfile");
     args[1] = apr_pstrdup(context, "server");
     args[2] = NULL; 
-    s1 = apr_create_process(&proc1, "./sendfile", args, NULL, attr1, context);
+    s1 = apr_proc_create(&proc1, "./sendfile", args, NULL, attr1, context);
 
     /* Sleep for 5 seconds to ensure the server is setup before we begin */
     apr_sleep(5000000);
@@ -155,25 +155,25 @@ static int run_sendfile(apr_pool_t *context, int number)
             break;
         }
     }
-    s2 = apr_create_process(&proc2, "./sendfile", args, NULL, attr2, context);
+    s2 = apr_proc_create(&proc2, "./sendfile", args, NULL, attr2, context);
 
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
         fprintf(stderr, "Problem spawning new process\n");
         exit(-1);
     }
 
-    while ((s1 = apr_wait_proc(&proc1, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
-           (s2 = apr_wait_proc(&proc2, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
+    while ((s1 = apr_proc_wait(&proc1, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
+           (s2 = apr_proc_wait(&proc2, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
         continue;
     }
 
     if (s1 == APR_SUCCESS) {
-        apr_kill(&proc2, SIGTERM);
-        while (apr_wait_proc(&proc2, APR_WAIT) == APR_CHILD_NOTDONE);
+        apr_proc_kill(&proc2, SIGTERM);
+        while (apr_proc_wait(&proc2, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     else {
-        apr_kill(&proc1, SIGTERM);
-        while (apr_wait_proc(&proc1, APR_WAIT) == APR_CHILD_NOTDONE);
+        apr_proc_kill(&proc1, SIGTERM);
+        while (apr_proc_wait(&proc1, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     fprintf(stdout, "Network test completed.\n");   
 
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     atexit(closeapr);
 
     fprintf(stdout, "Creating context.......");
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Could not create context\n");
         exit(-1);
     }

@@ -63,7 +63,7 @@
 #include <sys/stat.h>
 #include "misc.h"
 
-APR_DECLARE(apr_status_t) apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
@@ -72,7 +72,7 @@ APR_DECLARE(apr_status_t) apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval
     return APR_EINVAL;
 }
 
-APR_DECLARE(apr_status_t) apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t *timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
 {
     if (thepipe->pipe == 1) {
         *timeout = thepipe->timeout;
@@ -81,7 +81,7 @@ APR_DECLARE(apr_status_t) apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval
     return APR_EINVAL;
 }
 
-APR_DECLARE(apr_status_t) apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
 {
     SECURITY_ATTRIBUTES sa;
 
@@ -117,15 +117,15 @@ APR_DECLARE(apr_status_t) apr_create_pipe(apr_file_t **in, apr_file_t **out, apr
         return apr_get_os_error();
     }
 
-    apr_register_cleanup((*in)->cntxt, (void *)(*in), file_cleanup,
-                        apr_null_cleanup);
-    apr_register_cleanup((*out)->cntxt, (void *)(*out), file_cleanup,
-                        apr_null_cleanup);
+    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), file_cleanup,
+                        apr_pool_cleanup_null);
+    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), file_cleanup,
+                        apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
 /* apr_create_nt_pipe()
- * An internal (for now) APR function created for use by apr_create_process() 
+ * An internal (for now) APR function created for use by apr_proc_create() 
  * when setting up pipes to communicate with the child process. 
  * apr_create_nt_pipe() allows setting the blocking mode of each end of 
  * the pipe when the pipe is created (rather than after the pipe is created). 
@@ -134,7 +134,7 @@ APR_DECLARE(apr_status_t) apr_create_pipe(apr_file_t **in, apr_file_t **out, apr
  *
  * In general, we don't want to enable child side pipe handles for async i/o.
  * This prevents us from enabling both ends of the pipe for async i/o in 
- * apr_create_pipe.
+ * apr_file_pipe_create.
  *
  * Why not use NamedPipes on NT which support setting pipe state to
  * non-blocking? On NT, even though you can set a pipe non-blocking, 

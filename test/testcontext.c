@@ -85,16 +85,16 @@ int main(void)
     }
     atexit(closeapr);
 
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
 
     testdata = apr_pstrdup(context, "This is a test\n");
 
-    apr_set_userdata(testdata, "TEST", string_cleanup, context);    
+    apr_pool_userdata_set(testdata, "TEST", string_cleanup, context);    
 
-    apr_get_userdata((void **)&retdata, "TEST", context);
+    apr_pool_userdata_get((void **)&retdata, "TEST", context);
 
     if (!strcmp(testdata, retdata)) {
         fprintf(stdout, "User data is working ok\n");

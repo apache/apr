@@ -61,7 +61,7 @@
 #include <string.h>
 #include <process.h>
 
-apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
+apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
 {
     ULONG filedes[2];
     ULONG rc, action;
@@ -122,7 +122,7 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->blocking = BLK_ON;
-    apr_register_cleanup(cont, *in, apr_file_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register(cont, *in, apr_file_cleanup, apr_pool_cleanup_null);
 
     (*out) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
     (*out)->cntxt = cont;
@@ -134,14 +134,14 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->blocking = BLK_ON;
-    apr_register_cleanup(cont, *out, apr_file_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register(cont, *out, apr_file_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
 
 
-apr_status_t apr_create_namedpipe(const char *filename, apr_fileperms_t perm, apr_pool_t *cont)
+apr_status_t apr_file_namedpipe_create(const char *filename, apr_fileperms_t perm, apr_pool_t *cont)
 {
     /* Not yet implemented, interface not suitable */
     return APR_ENOTIMPL;
@@ -149,7 +149,7 @@ apr_status_t apr_create_namedpipe(const char *filename, apr_fileperms_t perm, ap
 
  
 
-apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout)
+apr_status_t apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
@@ -172,7 +172,7 @@ apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeo
 
 
 
-apr_status_t apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t *timeout)
+apr_status_t apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
 {
     if (thepipe->pipe == 1) {
         *timeout = thepipe->timeout;
