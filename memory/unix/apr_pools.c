@@ -699,7 +699,9 @@ API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
 
 ap_status_t ap_init_alloc(void)
 {
+#if APR_HAS_THREADS
     ap_status_t status;
+#endif
 #ifdef POOL_DEBUG
     char s;
 
