@@ -195,7 +195,7 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
  * space at the unallocated end of a block, and doesn't actually
  * complete the allocation until apr_vformatter returns.  apr_psprintf
  * would be completely broken if apr_vformatter were to call anything
- * that used a apr_pool_t.  Similarly http_bprintf() uses the "scratch"
+ * that used this same pool.  Similarly http_bprintf() uses the "scratch"
  * space at the end of its output buffer, and doesn't actually note
  * that the space is in use until it either has to flush the buffer
  * or until apr_vformatter returns.
