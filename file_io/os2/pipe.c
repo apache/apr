@@ -169,3 +169,14 @@ apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeo
     }
     return APR_EINVAL;
 }
+
+
+
+apr_status_t apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t *timeout)
+{
+    if (thepipe->pipe == 1) {
+        *timeout = thepipe->timeout;
+        return APR_SUCCESS;
+    }
+    return APR_EINVAL;
+}
