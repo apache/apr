@@ -108,7 +108,7 @@
 //-install_name  /Users/jerenk/apache-2.0-cvs/lib/libapr.0.dylib -compatibility_version 1 -current_version 1.0
 #endif
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__FreeBSD__)
 #  define SHELL_CMD  "/bin/sh"
 #  define DYNAMIC_LIB_EXT "so"
 #  define MODULE_LIB_EXT  "so"
@@ -123,6 +123,10 @@
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #endif
 
+#ifndef SHELL_CMD
+#error Unsupported platform: Please add defines for SHELL_CMD etc. for your platform.
+#endif
+
 #ifdef __EMX__
 #include <process.h>
 #endif
@@ -130,6 +134,7 @@
 #ifndef PATH_MAX
 #define PATH_MAX 1024
 #endif
+
 
 /* We want to say we are libtool 1.4 for shlibtool compatibility. */
 #define VERSION "1.4"
