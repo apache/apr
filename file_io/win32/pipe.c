@@ -56,11 +56,17 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
+#endif
 #include <string.h>
 #include <stdio.h>
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 #include "misc.h"
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
@@ -83,6 +89,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
 
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     SECURITY_ATTRIBUTES sa;
 
     sa.nLength = sizeof(sa);
@@ -122,6 +131,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), file_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
+#endif
 }
 
 /* apr_create_nt_pipe()
@@ -148,6 +158,9 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
                                 BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
                                 apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     SECURITY_ATTRIBUTES sa;
     static unsigned long id = 0;
     DWORD dwPipeMode;
@@ -234,4 +247,5 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), file_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
+#endif /* _WIN32_WCE */
 }
