@@ -56,10 +56,11 @@
 #define PROC_MUTEX_H
 
 #include "apr_proc_mutex.h"
-#include <nks/synch.h>
+#include "apr_thread_mutex.h"
 
 struct apr_proc_mutex_t {
     apr_pool_t *pool;
+    apr_thread_mutex_t *mutex;
 };
 
 #endif  /* PROC_MUTEX_H */
