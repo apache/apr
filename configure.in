@@ -359,9 +359,40 @@ fi
 
 # Shared memory support.  Until I figure out how to do this well, we are hard
 # coding this.  I am hoping to do this more generally ASAP.
-anonymous_shm="1"
-filebased_shm="0"
-keybased_shm="0"
+  AC_ARG_ENABLE(shmem,
+    [ --enable-shmem  Enable shared memory support in APR. ],
+    [ ],
+    ac_cv_enable_shmem="mm" ) 
+
+if test "$ac_cv_enable_shmem" = "no"; then
+  sharedmem="0"
+  anonymous_shm="0"
+  filebased_shm="0"
+  keybased_shm="0"
+else 
+  if test "$ac_cv_enable_shmem" = "mm"; then
+    sharedmem="1"
+    anonymous_shm="1"
+    filebased_shm="0"
+    keybased_shm="0"
+  else 
+    if test "$ac_cv_enable_shmem" = "file"; then
+      sharedmem="1"
+      anonymous_shm="0"
+      filebased_shm="1"
+      keybased_shm="0"
+    else 
+      if test "$ac_cv_enable_shmem" = "key"; then
+        sharedmem="1"
+        anonymous_shm="0"
+        filebased_shm="0"
+        keybased_shm="1"
+      fi  
+    fi
+  fi
+fi
+
+AC_SUBST(sharedmem)
 AC_SUBST(anonymous_shm)
 AC_SUBST(filebased_shm)
 AC_SUBST(keybased_shm)
