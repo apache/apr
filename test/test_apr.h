@@ -78,6 +78,7 @@ CuSuite *testpool(void);
 CuSuite *testfmt(void);
 CuSuite *testfile(void);
 CuSuite *testdir(void);
+CuSuite *testfileinfo(void);
 
 
 
