@@ -63,7 +63,7 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
-#elif defined(OSF1) || defined(SEQUENT) ||\
+#elif defined(OSF1) || defined(SEQUENT) || defined(SNI) ||\
     (defined(__FreeBSD_version) && (__FreeBSD_version >= 220000))
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 #else
@@ -116,7 +116,7 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     retval = dlsym(handle->handle, symbol);
     free(symbol);
 
-#elif defined(SEQUENT)
+#elif defined(SEQUENT) || defined(SNI)
     void *retval = dlsym(handle->handle, (char *)symname);
 #else
     void *retval = dlsym(handle->handle, symname);
