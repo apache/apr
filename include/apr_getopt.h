@@ -57,6 +57,10 @@
 
 #include "apr_pools.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /**
  * @package APR command arguments
  */ 
@@ -165,4 +169,9 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
 APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
 					  const apr_getopt_option_t *opts,
 					  int *optch, const char **optarg);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif  /* ! APR_GETOPT_H */

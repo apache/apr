@@ -140,12 +140,14 @@ static int strnatcmp0(char const *a, char const *b, int fold_case)
 
 
 
-int apr_strnatcmp(char const *a, char const *b) {
+APR_DECLARE(int) apr_strnatcmp(char const *a, char const *b)
+{
      return strnatcmp0(a, b, 0);
 }
 
 
 /* Compare, recognizing numeric string and ignoring case. */
-int apr_strnatcasecmp(char const *a, char const *b) {
+APR_DECLARE(int) apr_strnatcasecmp(char const *a, char const *b)
+{
      return strnatcmp0(a, b, 1);
 }

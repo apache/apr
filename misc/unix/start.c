@@ -63,7 +63,7 @@
 static int initialized = 0;
 static apr_pool_t *global_apr_pool;
 
-apr_status_t apr_initialize(void)
+APR_DECLARE(apr_status_t) apr_initialize(void)
 {
     apr_status_t status;
 #if defined WIN32
@@ -98,7 +98,7 @@ apr_status_t apr_initialize(void)
     return status;
 }
 
-void apr_terminate(void)
+APR_DECLARE(void) apr_terminate(void)
 {
     initialized--;
     if (initialized) {
@@ -107,7 +107,7 @@ void apr_terminate(void)
     apr_term_alloc(global_apr_pool);
 }
 
-apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
 {
     cont->apr_abort = apr_abort;
     return APR_SUCCESS;

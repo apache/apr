@@ -91,8 +91,9 @@ static apr_status_t mmap_cleanup(void *themmap)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, apr_off_t offset, 
-                             apr_size_t size, apr_int32_t flag, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
+                                          apr_off_t offset, apr_size_t size,
+                                          apr_int32_t flag, apr_pool_t *cont)
 {
     static DWORD memblock = 0;
     DWORD fmaccess = 0, mvaccess = 0;
@@ -151,7 +152,7 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, apr_off_t offse
     return APR_SUCCESS;
 }
 
-apr_status_t apr_mmap_delete(apr_mmap_t *mmap)
+APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap)
 {
     apr_status_t rv;
 

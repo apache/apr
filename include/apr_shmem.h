@@ -87,35 +87,41 @@ typedef   struct shmem_t apr_shmem_t;
  * @param file The file to use for the shared memory on platforms 
  *        that require it.
  * @param cont The pool to use
+ * @deffunc apr_status_t apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
  */
-apr_status_t apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
+                                       const char *file, apr_pool_t *cont);
 
 /**
  * Destroy the shared memory block.
  * @param m The shared memory block to destroy. 
+ * @deffunc apr_status_t apr_shm_destroy(apr_shmem_t *m)
  */
-apr_status_t apr_shm_destroy(apr_shmem_t *m);
+APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m);
 
 /**
  * allocate memory from the block of shared memory.
  * @param c The shared memory block to destroy. 
  * @param reqsize How much memory to allocate
+ * @deffunc void *apr_shm_malloc(apr_shmem_t *c, apr_size_t reqsize)
  */
-void *apr_shm_malloc(apr_shmem_t *c, apr_size_t reqsize);
+APR_DECLARE(void *) apr_shm_malloc(apr_shmem_t *c, apr_size_t reqsize);
 
 /**
  * allocate memory from the block of shared memory and initialize it to zero.
  * @param shared The shared memory block to destroy. 
  * @param size How much memory to allocate
+ * @deffunc void *apr_shm_calloc(apr_shmem_t *shared, apr_size_t size)
  */
-void *apr_shm_calloc(apr_shmem_t *shared, apr_size_t size);
+APR_DECLARE(void *) apr_shm_calloc(apr_shmem_t *shared, apr_size_t size);
 
 /**
  * free shared memory previously allocated.
  * @param shared The shared memory block to destroy. 
  * @param entity The actual data to free. 
+ * @deffunc apr_status_t apr_shm_free(apr_shmem_t *shared, void *entity)
  */
-apr_status_t apr_shm_free(apr_shmem_t *shared, void *entity);
+APR_DECLARE(apr_status_t) apr_shm_free(apr_shmem_t *shared, void *entity);
 
 /**
  * Get the name of the shared memory segment if not using anonymous 
@@ -128,8 +134,10 @@ apr_status_t apr_shm_free(apr_shmem_t *shared, void *entity);
  *         based on file access.  APR_USES_KEYBASED_SHM if shared
  *         memory is based on a key value such as shmctl.  If the
  *         shared memory is anonymous, the name is NULL.
+ * @deffunc apr_status_t apr_get_shm_name(apr_shmem_t *c, apr_shm_name_t **name)
  */
-apr_status_t apr_get_shm_name(apr_shmem_t *c, apr_shm_name_t **name);
+APR_DECLARE(apr_status_t) apr_get_shm_name(apr_shmem_t *c,
+                                           apr_shm_name_t **name);
 
 /**
  * Set the name of the shared memory segment if not using anonymous 
@@ -141,21 +149,25 @@ apr_status_t apr_get_shm_name(apr_shmem_t *c, apr_shm_name_t **name);
  * @return APR_USES_ANONYMOUS_SHM if we are using anonymous shared
  *         memory.  APR_SUCCESS if we are using named shared memory
  *         and we were able to assign the name correctly. 
+ * @deffunc apr_status_t apr_set_shm_name(apr_shmem_t *c, apr_shm_name_t *name)
  */
-apr_status_t apr_set_shm_name(apr_shmem_t *c, apr_shm_name_t *name);
+APR_DECLARE(apr_status_t) apr_set_shm_name(apr_shmem_t *c,
+                                           apr_shm_name_t *name);
 
 /**
  * Open the shared memory block in a child process.
  * @param  The shared memory block to open in the child. 
+ * @deffunc apr_status_t apr_open_shmem(apr_shmem_t *c)
  */
-apr_status_t apr_open_shmem(apr_shmem_t *c);
+APR_DECLARE(apr_status_t) apr_open_shmem(apr_shmem_t *c);
 
 /**
  * Determine how much memory is available in the specified shared memory block
  * @param c The shared memory block to open in the child. 
  * @param avail The amount of space available in the shared memory block.
+ * @deffunc apr_status_t apr_shm_avail(apr_shmem_t *c, apr_size_t *avail)
  */
-apr_status_t apr_shm_avail(apr_shmem_t *c, apr_size_t *avail);
+APR_DECLARE(apr_status_t) apr_shm_avail(apr_shmem_t *c, apr_size_t *avail);
 
 #ifdef __cplusplus
 }

@@ -174,8 +174,6 @@ struct apr_file_t {
             char *fname;
         } n;
     };
-    apr_canon_t *canonname;
-    
     DWORD dwFileAttributes;
     int eof_hit;
     BOOLEAN buffered;          // Use buffered I/O?

@@ -70,7 +70,8 @@
 #include <stdlib.h>
 #endif
 
-apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port)
+APR_DECLARE(apr_status_t) apr_set_port(apr_sockaddr_t *sockaddr,
+                                       apr_port_t port)
 {
     /* XXX IPv6: assumes sin_port and sin6_port at same offset */
     sockaddr->sa.sin.sin_port = htons(port);
@@ -81,7 +82,8 @@ apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port)
  * since we have apr_getaddrinfo(), but we need to clean up Apache's 
  * listen.c a bit more first.
  */
-apr_status_t apr_set_ipaddr(apr_sockaddr_t *sockaddr, const char *addr)
+APR_DECLARE(apr_status_t) apr_set_ipaddr(apr_sockaddr_t *sockaddr,
+                                         const char *addr)
 {
     u_long ipaddr;
     
@@ -103,14 +105,16 @@ apr_status_t apr_set_ipaddr(apr_sockaddr_t *sockaddr, const char *addr)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_port(apr_port_t *port, apr_sockaddr_t *sockaddr)
+APR_DECLARE(apr_status_t) apr_get_port(apr_port_t *port,
+                                       apr_sockaddr_t *sockaddr)
 {
     /* XXX IPv6 - assumes sin_port and sin6_port at same offset */
     *port = ntohs(sockaddr->sa.sin.sin_port);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr)
+APR_DECLARE(apr_status_t) apr_get_ipaddr(char **addr,
+                                         apr_sockaddr_t *sockaddr)
 {
     *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
     apr_inet_ntop(sockaddr->sa.sin.sin_family,
@@ -150,7 +154,9 @@ static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
 #endif
 }
 
-apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock)
+APR_DECLARE(apr_status_t) apr_get_sockaddr(apr_sockaddr_t **sa,
+                                           apr_interface_e which,
+                                           apr_socket_t *sock)
 {
     if (which == APR_LOCAL) {
         if (sock->local_interface_unknown || sock->local_port_unknown) {
@@ -172,11 +178,11 @@ apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_so
     return APR_SUCCESS;
 }
 
-apr_status_t apr_parse_addr_port(char **addr,
-                                 char **scope_id,
-                                 apr_port_t *port,
-                                 const char *str,
-                                 apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
+                                              char **scope_id,
+                                              apr_port_t *port,
+                                              const char *str,
+                                              apr_pool_t *p)
 {
     const char *ch, *lastchar;
     int big_port;
@@ -297,9 +303,10 @@ static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
 }
 #endif
 
-apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname, 
-                             apr_int32_t family, apr_port_t port,
-                             apr_int32_t flags, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_getaddrinfo(apr_sockaddr_t **sa,
+                                          const char *hostname, 
+                                          apr_int32_t family, apr_port_t port,
+                                          apr_int32_t flags, apr_pool_t *p)
 {
     (*sa) = (apr_sockaddr_t *)apr_pcalloc(p, sizeof(apr_sockaddr_t));
     if ((*sa) == NULL)
@@ -417,8 +424,9 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_getnameinfo(char **hostname, apr_sockaddr_t *sockaddr, 
-                             apr_int32_t flags)
+APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
+                                          apr_sockaddr_t *sockaddr,
+                                          apr_int32_t flags)
 {
 #if defined(HAVE_GETNAMEINFO) && APR_HAVE_IPV6
     int rc;
@@ -472,7 +480,8 @@ apr_status_t apr_getnameinfo(char **hostname, apr_sockaddr_t *sockaddr,
 #endif
 }
 
-apr_status_t apr_getservbyname(apr_sockaddr_t *sockaddr, const char *servname)
+APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr,
+                                            const char *servname)
 {
     struct servent *se;
 

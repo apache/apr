@@ -163,8 +163,9 @@ apr_status_t file_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_open(apr_file_t **new, const char *fname, 
-                      apr_int32_t flag, apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
+                                   apr_int32_t flag, apr_fileperms_t perm,
+                                   apr_pool_t *cont)
 {
     DWORD oflags = 0;
     DWORD createflags = 0;
@@ -281,7 +282,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_close(apr_file_t *file)
+APR_DECLARE(apr_status_t) apr_close(apr_file_t *file)
 {
     apr_status_t stat;
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
@@ -295,7 +296,7 @@ apr_status_t apr_close(apr_file_t *file)
     return stat;
 }
 
-apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_remove_file(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -314,8 +315,9 @@ apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
     return apr_get_os_error();
 }
 
-apr_status_t apr_rename_file(const char *from_path, const char *to_path,
-                             apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_rename_file(const char *from_path,
+                                          const char *to_path,
+                                          apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -337,7 +339,8 @@ apr_status_t apr_rename_file(const char *from_path, const char *to_path,
     return apr_get_os_error();
 }
 
-apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
+APR_DECLARE(apr_status_t) apr_get_os_file(apr_os_file_t *thefile,
+                                          apr_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -346,8 +349,9 @@ apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, 
-                             apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_put_os_file(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *cont)
 {
     if ((*file) == NULL) {
         if (cont == NULL) {
@@ -361,7 +365,7 @@ apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
     return APR_SUCCESS;
 }    
 
-apr_status_t apr_eof(apr_file_t *fptr)
+APR_DECLARE(apr_status_t) apr_eof(apr_file_t *fptr)
 {
     if (fptr->eof_hit == 1) {
         return APR_EOF;
@@ -369,7 +373,7 @@ apr_status_t apr_eof(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
     (*thefile) = apr_pcalloc(cont, sizeof(apr_file_t));
     if ((*thefile) == NULL) {

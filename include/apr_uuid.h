@@ -58,6 +58,10 @@
 #include "apr.h"
 #include "apr_errno.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 /**
  * @package APR UUID Handling
  */
@@ -76,7 +80,7 @@ typedef struct {
  * @param uuid The resulting UUID
  * @deffunc void apr_get_uuid(apr_uuid_t *uuid)
  */ 
-void apr_get_uuid(apr_uuid_t *uuid);
+APR_DECLARE(void) apr_get_uuid(apr_uuid_t *uuid);
 
 /**
  * Format a UUID into a string, following the standard format
@@ -84,9 +88,9 @@ void apr_get_uuid(apr_uuid_t *uuid);
  *               be at least APR_UUID_FORMATTED_LENGTH + 1 bytes long to hold
  *               the formatted UUID and a null terminator
  * @param uuid The UUID to format
- * @deffunc void apr_format_uuid(apr_pool_t *p, const apr_uuid_t *uuid)
+ * @deffunc void apr_format_uuid(char *buffer, const apr_uuid_t *uuid)
  */ 
-void apr_format_uuid(char *buffer, const apr_uuid_t *uuid);
+APR_DECLARE(void) apr_format_uuid(char *buffer, const apr_uuid_t *uuid);
 
 /**
  * Parse a standard-format string into a UUID
@@ -94,6 +98,10 @@ void apr_format_uuid(char *buffer, const apr_uuid_t *uuid);
  * @param uuid_str The formatted UUID
  * @deffunc apr_status_t apr_parse_uuid(apr_uuid_t *uuid, const char *uuid_str)
  */ 
-apr_status_t apr_parse_uuid(apr_uuid_t *uuid, const char *uuid_str);
+APR_DECLARE(apr_status_t) apr_parse_uuid(apr_uuid_t *uuid, const char *uuid_str);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* APR_UUID_H */

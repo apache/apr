@@ -131,8 +131,8 @@ APR_DECLARE(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context);
  * @deffunc apr_status_t apr_MD5SetXlate(apr_md5_ctx_t *context, apr_xlate_t *xlate)
  */
 #if APR_HAS_XLATE
-APR_DECLARE(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context, 
-                                         apr_xlate_t *xlate);
+APR_DECLARE(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context,
+                                          apr_xlate_t *xlate);
 #else
 #define apr_MD5SetXlate(context, xlate) APR_ENOTIMPL
 #endif
@@ -146,8 +146,8 @@ APR_DECLARE(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context,
  * @deffunc apr_status_t apr_MD5Update(apr_md5_ctx_t *context, const unsigned char *input, unsigned int inputLen)
  */
 APR_DECLARE(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
-                                       const unsigned char *input,
-                                       unsigned int inputLen);
+                                        const unsigned char *input,
+                                        unsigned int inputLen);
 
 /**
  * MD5 finalization.  Ends an MD5 message-digest operation, writing the 
@@ -157,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
  * @deffunc apr_status_t apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE], apr_md5_ctx_t *context)
  */
 APR_DECLARE(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
-                                      apr_md5_ctx_t *context);
+                                       apr_md5_ctx_t *context);
 
 /**
  * Encode a password using an MD5 algorithm
@@ -168,7 +168,7 @@ APR_DECLARE(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
  * @deffunc apr_status_t apr_MD5Encode(const char *password, const char *salt, char *result, size_t nbytes)
  */
 APR_DECLARE(apr_status_t) apr_MD5Encode(const char *password, const char *salt,
-                                     char *result, size_t nbytes);
+                                        char *result, size_t nbytes);
 
 #ifdef __cplusplus
 }

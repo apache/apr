@@ -68,7 +68,8 @@
 
 #if APR_HAS_MMAP || defined(BEOS)
 
-apr_status_t apr_mmap_offset(void **addr, apr_mmap_t *mmap, apr_off_t offset)
+APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mmap,
+                                          apr_off_t offset)
 {  
     if (offset < 0 || offset > mmap->size)
         return APR_EINVAL;

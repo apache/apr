@@ -179,6 +179,7 @@ struct apr_btable_entry_t {
  * @deffunc apr_array_header_t *apr_table_elts(apr_table_t *t)
  */
 #define apr_table_elts(t) ((apr_array_header_t *)(t))
+
 /**
  * Get the elements from a binary table
  * @param t The table
@@ -191,6 +192,7 @@ struct apr_btable_entry_t {
  * Determine if the table is empty
  * @param t The table to check
  * @return True if empty, Falso otherwise
+ * @deffunc int apr_is_empty_table(apr_table_t *t)
  */
 #define apr_is_empty_table(t) (((t) == NULL) \
                                || (((apr_array_header_t *)(t))->nelts == 0))
@@ -198,6 +200,7 @@ struct apr_btable_entry_t {
  * Determine if the binary table is empty
  * @param t The table to check
  * @return True if empty, Falso otherwise
+ * @deffunc int apr_is_empty_btable(apr_table_t *t)
  */
 #define apr_is_empty_btable(t) apr_is_empty_table(t)
 
@@ -207,10 +210,10 @@ struct apr_btable_entry_t {
  * @param nelts the number of elements in the initial array
  * @param elt_size The size of each element in the array.
  * @return The new array
- * #deffunc apr_array_header_t *apr_make_array(struct apr_pool_t *p, int nelts, int elt_size)
+ * @deffunc apr_array_header_t *apr_make_array(struct apr_pool_t *p, int nelts, int elt_size)
  */
 APR_DECLARE(apr_array_header_t *) apr_make_array(struct apr_pool_t *p,
-						int nelts, int elt_size);
+                                                 int nelts, int elt_size);
 
 /**
  * Add a new element to an array
@@ -230,21 +233,21 @@ APR_DECLARE(void *) apr_push_array(apr_array_header_t *arr);
  * @deffunc void apr_array_cat(apr_array_header_t *dst, const apr_array_header_t *src)
  */
 APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
-			       const apr_array_header_t *src);
+			        const apr_array_header_t *src);
 
-/* copy_array copies the *entire* array.  copy_array_hdr just copies
- * the header, and arranges for the elements to be copied if (and only
- * if) the code subsequently does a push or arraycat.
- */
 /**
  * Copy the entire array
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
  * @deffunc apr_array_header_t *apr_copy_array(apr_pool_t *p, const apr_array_header_t *arr)
+ * @tip The alternate apr_copy_array_hdr copies only the header, and arranges 
+ * for the elements to be copied if (and only if) the code subsequently does 
+ * a push or arraycat.
  */
-APR_DECLARE(apr_array_header_t *) apr_copy_array(struct apr_pool_t *p,
-						const apr_array_header_t *arr);
+APR_DECLARE(apr_array_header_t *) 
+                apr_copy_array(struct apr_pool_t *p,
+                               const apr_array_header_t *arr);
 /**
  * Copy the headers of the array, and arrange for the elements to be copied if
  * and only if the code subsequently does a push or arraycat.
@@ -252,10 +255,11 @@ APR_DECLARE(apr_array_header_t *) apr_copy_array(struct apr_pool_t *p,
  * @param arr The array to copy
  * @return An exact copy of the array passed in
  * @deffunc apr_array_header_t *apr_copy_array_hdr(apr_pool_t *p, const apr_array_header_t *arr)
+ * @tip The alternate apr_copy_array copies the *entire* array.
  */
 APR_DECLARE(apr_array_header_t *)
-	apr_copy_array_hdr(struct apr_pool_t *p,
-			   const apr_array_header_t *arr);
+                apr_copy_array_hdr(struct apr_pool_t *p,
+                                   const apr_array_header_t *arr);
 
 /**
  * Append one array to the end of another, creating a new array in the process.
@@ -266,9 +270,9 @@ APR_DECLARE(apr_array_header_t *)
  * @deffunc apr_array_header_t *apr_append_arrays(apr_pool_t *p, const apr_array_header_t *first, const apr_array_header_t *second)
 */
 APR_DECLARE(apr_array_header_t *)
-	apr_append_arrays(struct apr_pool_t *p,
-			  const apr_array_header_t *first,
-			  const apr_array_header_t *second);
+                apr_append_arrays(struct apr_pool_t *p,
+                                  const apr_array_header_t *first,
+                                  const apr_array_header_t *second);
 
 /**
  * Generates a new string from the apr_pool_t containing the concatenated 
@@ -280,11 +284,11 @@ APR_DECLARE(apr_array_header_t *)
  * @param arr The array to generate the string from
  * @param sep The separator to use
  * @return A string containing all of the data in the array.
- * @deffuncchar *apr_array_pstrcat(apr_pool_t *p, const apr_array_header_t *arr, const char sep)
+ * @deffunc char *apr_array_pstrcat(apr_pool_t *p, const apr_array_header_t *arr, const char sep)
  */
 APR_DECLARE(char *) apr_array_pstrcat(struct apr_pool_t *p,
-				     const apr_array_header_t *arr,
-				     const char sep);
+				      const apr_array_header_t *arr,
+				      const char sep);
 
 /**
  * Make a new table
@@ -310,19 +314,20 @@ APR_DECLARE(apr_btable_t *) apr_make_btable(struct apr_pool_t *p, int nelts);
  * @param p The pool to allocate the new table out of
  * @param t The table to copy
  * @return A copy of the table passed in
- * @deffunc apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
+ * @deffunc apr_table_t *apr_copy_table(apr_pool_t *p, const apr_table_t *t)
  */
 APR_DECLARE(apr_table_t *) apr_copy_table(struct apr_pool_t *p,
-					 const apr_table_t *t);
+                                          const apr_table_t *t);
+
 /**
  * Create a new binary table and copy another table into it
  * @param p The pool to allocate the new table out of
  * @param t The table to copy
  * @return A copy of the table passed in
- * @deffunc apr_table_t *) apr_copy_btable(apr_pool_t *p, const apr_btable_t *t)
+ * @deffunc apr_table_t *apr_copy_btable(apr_pool_t *p, const apr_btable_t *t)
  */
 APR_DECLARE(apr_btable_t *) apr_copy_btable(struct apr_pool_t *p,
-					   const apr_btable_t *t);
+                                            const apr_btable_t *t);
 
 /**
  * Delete all of the elements from a table
@@ -330,6 +335,7 @@ APR_DECLARE(apr_btable_t *) apr_copy_btable(struct apr_pool_t *p,
  * @deffunc void apr_clear_table(apr_table_t *t)
  */
 APR_DECLARE(void) apr_clear_table(apr_table_t *t);
+
 /**
  * Delete all of the elements from a binary table
  * @param t The table to clear
@@ -346,6 +352,7 @@ APR_DECLARE(void) apr_clear_btable(apr_btable_t *t);
  * @deffunc const char *apr_table_get(const apr_table_t *t, const char *key)
  */
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
+
 /**
  * Get the value associated with a given key from a binary table.  After this
  * call, the data is still in the table.
@@ -355,7 +362,7 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
  * @deffunc const apr_item_t *apr_btable_get(const apr_btable_t *t, const char *key)
  */
 APR_DECLARE(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
-					      const char *key);
+                                               const char *key);
 
 /**
  * Add a key/value pair to a table, if another element already exists with the
@@ -368,7 +375,8 @@ APR_DECLARE(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
  * @deffunc void apr_table_set(apr_table_t *t, const char *key, const char *val)
  */
 APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
-			       const char *val);
+                                const char *val);
+
 /**
  * Add a key/value pair to a binary table if another element already exists 
  * with the same key, this will over-write the old data.
@@ -381,7 +389,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
  * @deffunc void apr_btable_set(apr_btable_t *t, const char *key, size_t size, const void *val)
  */
 APR_DECLARE(void) apr_btable_set(apr_btable_t *t, const char *key,
-				size_t size, const void *val);
+                                 size_t size, const void *val);
 
 /**
  * Add a key/value pair to a table, if another element already exists with the
@@ -395,7 +403,7 @@ APR_DECLARE(void) apr_btable_set(apr_btable_t *t, const char *key,
  * @deffunc void apr_table_setn(apr_table_t *t, const char *key, const char *val)
  */
 APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
-				const char *val);
+                                 const char *val);
 /**
  * Add a key/value pair to a binary table if another element already exists 
  * with the same key, this will over-write the old data.
@@ -418,6 +426,7 @@ APR_DECLARE(void) apr_btable_setn(apr_btable_t *t, const char *key,
  * @deffunc void apr_table_unset(apr_table_t *t, const char *key)
  */
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
+
 /**
  * Remove data from a binary table
  * @param t The table to remove data from
@@ -436,7 +445,8 @@ APR_DECLARE(void) apr_btable_unset(apr_btable_t *t, const char *key);
  * @deffunc void apr_table_merge(apr_table_t *t, const char *key, const char *val)
  */
 APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
-				 const char *val);
+                                  const char *val);
+
 /**
  * Add data to a table by merging the value with data that has already been 
  * stored
@@ -447,7 +457,7 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
  * @deffunc void apr_table_mergen(apr_table_t *t, const char *key, const char *val)
  */
 APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
-				  const char *val);
+                                   const char *val);
 
 /**
  * Add data to a table, regardless of whether there is another element with the
@@ -460,7 +470,8 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
  * @deffunc void apr_table_add(apr_table_t *t, const char *key, const char *val)
  */
 APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
-			       const char *val);
+                                const char *val);
+
 /**
  * Add data to a binary table, regardless of whether there is another element 
  * with the same key.
@@ -473,7 +484,7 @@ APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
  * @deffunc void apr_btable_add(apr_btable_t *t, const char *key, size_t size, const char *val)
  */
 APR_DECLARE(void) apr_btable_add(apr_btable_t *t, const char *key,
-				size_t size, const void *val);
+                                 size_t size, const void *val);
 
 /**
  * Add data to a table, regardless of whether there is another element with the
@@ -487,7 +498,8 @@ APR_DECLARE(void) apr_btable_add(apr_btable_t *t, const char *key,
  * @deffunc void apr_table_addn(apr_table_t *t, const char *key, const char *val)
  */
 APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
-				const char *val);
+                                 const char *val);
+
 /**
  * Add data to a binary table, regardless of whether there is another element 
  * with the same key.
@@ -501,7 +513,7 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
  * @deffunc void apr_btable_addn(apr_btable_t *t, const char *key, size_t size, const char *val)
  */
 APR_DECLARE(void) apr_btable_addn(apr_btable_t *t, const char *key,
-				 size_t size, const void *val);
+                                  size_t size, const void *val);
 
 /**
  * Merge two tables into one new table
@@ -512,8 +524,8 @@ APR_DECLARE(void) apr_btable_addn(apr_btable_t *t, const char *key,
  * @deffunc apr_table_t *apr_overlay_tables(apr_pool_t *p, const apr_table_t *overlay, const apr_table_t *base);
  */
 APR_DECLARE(apr_table_t *) apr_overlay_tables(struct apr_pool_t *p,
-					     const apr_table_t *overlay,
-					     const apr_table_t *base);
+                                              const apr_table_t *overlay,
+                                              const apr_table_t *base);
 /**
  * Merge two binary tables into one new table
  * @param p The pool to use for the new table
@@ -523,8 +535,8 @@ APR_DECLARE(apr_table_t *) apr_overlay_tables(struct apr_pool_t *p,
  * @deffunc apr_btable_t *apr_overlay_tables(apr_pool_t *p, const apr_btable_t *overlay, const apr_btable_t *base);
  */
 APR_DECLARE(apr_btable_t *) apr_overlay_btables(struct apr_pool_t *p,
-					       const apr_btable_t *overlay,
-					       const apr_btable_t *base);
+                                                const apr_btable_t *overlay,
+                                                const apr_btable_t *base);
 
 /** 
  * Iterate over a table running the provided function once for every
@@ -540,9 +552,9 @@ APR_DECLARE(apr_btable_t *) apr_overlay_btables(struct apr_pool_t *p,
  *            are run.
  * @deffunc void apr_table_do(int (*comp) (void *, const char *, const char *), void *rec, const apr_table_t *t, ...)
  */
-APR_DECLARE(void)
-	apr_table_do(int (*comp) (void *, const char *, const char *),
-		     void *rec, const apr_table_t *t, ...);
+APR_DECLARE_NONSTD(void)
+                apr_table_do(int (*comp) (void *, const char *, const char *),
+                             void *rec, const apr_table_t *t, ...);
 
 /** 
  * Iterate over a table running the provided function once for every
@@ -559,8 +571,8 @@ APR_DECLARE(void)
  * @deffunc void apr_table_vdo(int (*comp) (void *, const char *, const char *), void *rec, const apr_table_t *t, va_list vp)
  */
 APR_DECLARE(void)
-        apr_table_vdo(int (*comp) (void *, const char *, const char *),
-                     void *rec, const apr_table_t *t, va_list);                  
+                apr_table_vdo(int (*comp) (void *, const char *, const char *),
+                              void *rec, const apr_table_t *t, va_list);                  
 
 /* Conceptually, apr_overlap_tables does this:
  *
@@ -599,7 +611,7 @@ APR_DECLARE(void)
  * @deffunc void apr_overlap_tables(apr_table_t *a, const apr_table_t *b, unsigned flags)
  */
 APR_DECLARE(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
-				    unsigned flags);
+                                     unsigned flags);
 
 #ifdef __cplusplus
 }

@@ -73,8 +73,8 @@ extern "C" {
  * Instead, we maintain pools, and allocate items (both memory and I/O
  * handlers) from the pools --- currently there are two, one for per
  * transaction info, and one for config info.  When a transaction is over,
- * we can delete everything in the per-transaction apr_pool_t without fear, and
- * without thinking too hard about it either.
+ * we can delete everything in the per-transaction apr_pool_t without fear, 
+ * and without thinking too hard about it either.
  *
  * rst
  */
@@ -139,9 +139,10 @@ struct apr_pool_t {
     struct apr_pool_t *joined;
 #endif
     /** A function to control how pools behave when they receive ENOMEM
-     *  @deffunc int apr_abort(int retcode) */
+     * @deffunc int (*apr_abort)(int retcode) */
     int (*apr_abort)(int retcode);
-    /** A place to hold user data associated with this pool 
+    /**
+     * A place to hold user data associated with this pool 
      *  @defvar apr_hash_t *prog_data */
     struct apr_hash_t *prog_data;
 };
@@ -240,7 +241,8 @@ APR_DECLARE(void) apr_term_alloc(apr_pool_t *globalp);
  *        be a sub-pool.
  * @deffunc apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont,
+                                          apr_pool_t *cont);
 
 /**
  * Set the data associated with the current pool
@@ -256,11 +258,11 @@ APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont
  *      data by choosing a key that another part of the program is using
  *      It is advised that steps are taken to ensure that a unique
  *      key is used at all times.
- * @deffunc apr_status_t apr_set_userdata(const void *data, const char *key, apr_status_t (*cleanup) (void *), apr_pool_t *cont)
+ * @deffunc apr_status_t apr_set_userdata(const void *data, const char *key, apr_status_t (*cleanup)(void *), apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key, 
-                            apr_status_t (*cleanup) (void *), 
-                            apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key,
+                                           apr_status_t (*cleanup)(void *),
+                                           apr_pool_t *cont);
 
 /**
  * Return the data associated with the current pool.
@@ -269,7 +271,8 @@ APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key,
  * @param cont The current pool.
  * @deffunc apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key,
+                                           apr_pool_t *cont);
 
 /**
  * make a sub pool from the current pool
@@ -280,7 +283,8 @@ APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key, apr_poo
  *      machine is out of memory.  By default, APR will return on error.
  * @deffunc apr_pool_t *apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode))
  */
-APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode));
+APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p,
+                                            int (*apr_abort)(int retcode));
 
 /**
  * clear all memory in the pool
@@ -339,31 +343,31 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
  * @param plain_cleanup The function to call when the pool is cleared 
  *                      or destroyed
  * @param child_cleanup The function to call when a child process is created 
- * @deffunc void apr_register_cleanup(apr_pool_t *p, const void *data, apr_status_t (*plain_cleanup) (void *), apr_status_t (*child_cleanup) (void *))
+ * @deffunc void apr_register_cleanup(apr_pool_t *p, const void *data, apr_status_t (*plain_cleanup)(void *), apr_status_t (*child_cleanup)(void *))
  */
 APR_DECLARE(void) apr_register_cleanup(apr_pool_t *p, const void *data,
-                                     apr_status_t (*plain_cleanup) (void *),
-                                     apr_status_t (*child_cleanup) (void *));
+                                       apr_status_t (*plain_cleanup)(void *),
+                                       apr_status_t (*child_cleanup)(void *));
 
 /**
  * remove a previously registered cleanup function
  * @param p The pool remove the cleanup from 
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
- * @deffunc void apr_kill_cleanup(apr_pool_t *p, const void *data, apr_status_t (*cleanup) (void *))
+ * @deffunc void apr_kill_cleanup(apr_pool_t *p, const void *data, apr_status_t (*cleanup)(void *))
  */
 APR_DECLARE(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
-                                 apr_status_t (*cleanup) (void *));
+                                   apr_status_t (*cleanup)(void *));
 
 /**
  * Run the specified cleanup function immediately and unregister it
  * @param p The pool remove the cleanup from 
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
- * @deffunc apr_status_t apr_run_cleanup(apr_pool_t *p, void *data, apr_status_t (*cleanup) (void *))
+ * @deffunc apr_status_t apr_run_cleanup(apr_pool_t *p, void *data, apr_status_t (*cleanup)(void *))
  */
 APR_DECLARE(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
-                                       apr_status_t (*cleanup) (void *));
+                                          apr_status_t (*cleanup)(void *));
 
 /* Preparing for exec() --- close files, etc., but *don't* flush I/O
  * buffers, *don't* wait for subprocesses, and *don't* free any memory.
@@ -382,9 +386,8 @@ APR_DECLARE(void) apr_cleanup_for_exec(void);
  */
 APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data);
 
-
-/* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t will not be
- * destroyed before the parent pool
+/* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t
+ * will not be destroyed before the parent pool
  */
 #ifndef APR_POOL_DEBUG
 #ifdef apr_pool_join

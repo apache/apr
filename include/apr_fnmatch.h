@@ -69,8 +69,8 @@ extern "C" {
  * @deffunc apr_status_t apr_fnmatch(const char *pattern, const char *strings, int flags)
  */
 
-APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, const char *strings,
-			    int flags);
+APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, 
+                                      const char *strings, int flags);
 
 /**
  * Determine if the given pattern is a regular expression.

@@ -53,7 +53,7 @@
  */
 
 /* 
- * Note: This is a Windows specific version of apr.h. It is renamed to
+ * Note: This is a Windows specific version of apr.h. It is copied as
  * apr.h at the start of a Windows build.
  */
 
