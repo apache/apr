@@ -1,4 +1,8 @@
 Changes with APR b1  
+
+  *) Add --with-efence to allow usage of Electric Fence.
+     [Justin Erenkrantz]
+
   *) Updated the pools debug code.  Check if a pool is still
      valid on the most common apr_pool_xxx functions.
      Fix the way APR_POOL_DEBUG_VERBOSE was using stderr.
