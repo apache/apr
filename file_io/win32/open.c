@@ -64,22 +64,66 @@
 #include <sys/stat.h>
 #include "misc.h"
 
+#if APR_HAS_UNICODE_FS
 apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p)
 {
     /* TODO: The computations could preconvert the string to determine
      * the true size of the retstr, but that's a memory over speed
      * tradeoff that isn't appropriate this early in development.
+     *
+     * Allocate the maximum string length based on leading 4 
+     * characters of \\?\ (allowing nearly unlimited path lengths) 
+     * plus the trailing null, then transform /'s into \\'s since
+     * the \\?\ form doesn't allow '/' path seperators.
+     *
+     * Note that the \\?\ form only works for local drive paths, and
+     * not for UNC paths.
      */
     int srcremains = strlen(srcstr) + 1;
     int retremains = srcremains + 4;
-    apr_wchar_t *retstr = apr_palloc(p, retremains * 2);
-    wcscpy (retstr, L"//?/");
+    apr_wchar_t *retstr = apr_palloc(p, retremains * 2), *t = retstr;
+    if (srcstr[1] == ':' && srcstr[2] == '/') {
+        wcscpy (retstr, L"\\\\?\\");
+        t += 4;
+    }
     if (conv_utf8_to_ucs2(srcstr, &srcremains,
-                          retstr + 4, &retremains) || srcremains)
+                          t, &retremains) || srcremains)
         return NULL;
-    else
-        return retstr;
+    for (; *t; ++t)
+        if (*t == L'/')
+            *t = L'\\';
+    return retstr;
 }
+
+char *unicode_to_utf8_path(const apr_wchar_t* srcstr, apr_pool_t *p)
+{
+    /* TODO: The computations could preconvert the string to determine
+     * the true size of the retstr, but that's a memory over speed
+     * tradeoff that isn't appropriate this early in development.
+     *
+     * Skip the leading 4 characters, allocate the maximum string
+     * length based on the remaining string, plus the trailing null.
+     * then transform \\'s back into /'s since the \\?\ form didn't
+     * allow '/' path seperators, but APR always uses '/'s.
+     */
+    int srcremains = wcslen(srcstr) + 1;
+    int retremains = (srcremains - 5) * 3 + 1;
+    char *t, *retstr = apr_palloc(p, retremains);
+    if (srcstr[0] == L'\\' && srcstr[1] == L'\\' && 
+        srcstr[2] == L'?'  && srcstr[3] == L'\\') {
+        srcremains -= 4;
+        retremains -= 12;
+        srcstr += 4;    
+    }
+    if (conv_ucs2_to_utf8(srcstr, &srcremains,
+                          retstr, &retremains) || srcremains)
+        return NULL;
+    for (t = retstr; *t; ++t)
+        if (*t == L'/')
+            *t = L'\\';
+    return retstr;
+}
+#endif
 
 apr_status_t file_cleanup(void *thefile)
 {

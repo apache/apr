@@ -78,14 +78,8 @@ apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thefile->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
-        apr_status_t rv;
-        int len = wcslen(thefile->w.fname) + 1;
-        int dremains = MAX_PATH;
-        *fname = apr_palloc(thefile->cntxt, len * 2);
-        if ((rv = conv_ucs2_to_utf8(thefile->w.fname, &len,
-                                    *fname, &dremains)))
-            return rv;
-        if (len)
+        *fname = unicode_to_utf8_path(thefile->w.fname, thefile->cntxt);
+        if (!*fname)
             return APR_ENAMETOOLONG;
     }
     else
@@ -93,7 +87,7 @@ apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
         *fname = apr_pstrdup(thefile->cntxt, thefile->n.fname);
 
 #else /* !def Win32 */
-        *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
+    *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
 #endif 
     return APR_SUCCESS;
 }
