@@ -66,7 +66,7 @@ extern "C" {
  * This symbol is defined for internal, "development" copies of APR.
  * This symbol should be #undef'd for releases.
  */
-#define APR_IS_DEV_VERSION
+/* #define APR_IS_DEV_VERSION */
 
 /** The formatted string of APR's version */
 #define APR_VERSION_STRING \
