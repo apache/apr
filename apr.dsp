@@ -198,6 +198,11 @@ SOURCE=.\memory\unix\apr_pools.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\misc\win32\apr_app.c
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
 SOURCE=.\misc\unix\errorcodes.c
 # End Source File
 # Begin Source File
