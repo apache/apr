@@ -117,7 +117,9 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         rv = read(thefile->filedes, buf, *nbytes);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        thefile->timeout != 0) {
         ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
         if (arv != APR_SUCCESS) {
             *nbytes = 0;
@@ -170,7 +172,9 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         rv = write(thefile->filedes, buf, *nbytes);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        thefile->timeout != 0) {
         ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
         if (arv != APR_SUCCESS) {
             *nbytes = 0;

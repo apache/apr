@@ -112,7 +112,9 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
         rv = write(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        sock->timeout != 0) {
 	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -150,7 +152,9 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
         rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        sock->timeout != 0) {
 	ap_status_t arv = wait_for_io_or_timeout(sock, 1);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -191,7 +195,9 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
         rv = writev(sock->socketdes, vec, nvec);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        sock->timeout != 0) {
 	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -270,7 +276,9 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
             );
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        sock->timeout != 0) {
 	arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -347,7 +355,9 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             );
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        sock->timeout != 0) {
 	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -434,7 +444,9 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             );
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout != 0) {
+    if (rv == -1 && 
+        (errno == EAGAIN || errno == EWOULDBLOCK) && 
+        sock->timeout != 0) {
         struct timeval *tv;
         fd_set fdset;
         int srv;
