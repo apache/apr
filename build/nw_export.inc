@@ -10,11 +10,13 @@
 #undef APR_DECLARE_DATA
 
 /* Preprocess all of the standard APR headers. */
+#include "apr_allocator.h"
 #include "apr_atomic.h"
 #include "apr_compat.h"
 #include "apr_dso.h"
 #include "apr_errno.h"
 #include "apr_file_info.h"
+#include "apr_file_io.h"
 #include "apr_fnmatch.h"
 #include "apr_general.h"
 #include "apr_getopt.h"
@@ -25,6 +27,7 @@
 #include "apr_md5.h"
 #include "apr_mmap.h"
 #include "apr_network_io.h"
+#include "apr_poll.h"
 #include "apr_pools.h"
 #include "apr_portable.h"
 #include "apr_proc_mutex.h"
@@ -32,6 +35,7 @@
 #include "apr_shm.h"
 #include "apr_signal.h"
 #include "apr_strings.h"
+#include "apr_support.h"
 #include "apr_tables.h"
 #include "apr_thread_cond.h"
 #include "apr_thread_mutex.h"
@@ -54,6 +58,7 @@
 #undef APU_DECLARE_DATA
 
 /* Preprocess all of the standard APR headers. */
+#include "apr_anylock.h"
 #include "apr_base64.h"
 #include "apr_buckets.h"
 #include "apr_date.h"
@@ -65,6 +70,7 @@
 #include "apr_rmm.h"
 #include "apr_sdbm.h"
 #include "apr_sha1.h"
+#include "apr_strmatch.h"
 #include "apr_uri.h"
 #include "apr_xml.h"
 #include "apr_compat.h"

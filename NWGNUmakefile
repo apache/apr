@@ -295,6 +295,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/utf8_ucs2.o \
 	$(OBJDIR)/uuid.o \
 	$(OBJDIR)/version.o \
+	$(OBJDIR)/waitio.o \
 	$(OBJDIR)/xlate.o \
 	$(EOLIST)
 
@@ -389,6 +390,10 @@ $(OBJDIR)/%.o: network_io/win32/%.c $(OBJDIR)\cc.opt
 $(OBJDIR)/%.o: network_io/unix/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
 	$(CC) network_io\unix\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	
+$(OBJDIR)/%.o: poll/unix/%.c $(OBJDIR)\cc.opt
+	@echo Compiling $<
+	$(CC) poll\unix\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
 $(OBJDIR)/%.o: i18n/unix/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
@@ -401,6 +406,10 @@ $(OBJDIR)/%.o: file_io/os2/%.c $(OBJDIR)\cc.opt
 $(OBJDIR)/%.o: shmem/unix/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
 	$(CC) shmem\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+
+$(OBJDIR)/%.o: support/unix/%.c $(OBJDIR)\cc.opt
+	@echo Compiling $<
+	$(CC) support\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
