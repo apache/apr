@@ -64,7 +64,12 @@
 #include <unistd.h>
 #endif
 
-#if !(defined WIN32) && !(defined NETWARE)
+#if !(defined BEOS) && !(defined WIN32) && !(defined NETWARE) && !(defined __MVS__) && !(defined DARWIN)
+/* ugh... */
+#define HAVE_PTHREAD_SETCONCURRENCY
+#endif
+
+#ifdef HAVE_PTHREAD_SETCONCURRENCY
 #include <pthread.h>
 #endif
 
@@ -256,7 +261,7 @@ int main(int argc, char**argv)
     }
 
     printf("APR Atomic Test\n===============\n\n");
-#if !(defined WIN32) && !(defined NETWARE) && !(defined __MVS__) && !(defined DARWIN)
+#ifdef HAVE_PTHREAD_SETCONCURRENCY
     pthread_setconcurrency(8);
 #endif
     printf("%-60s", "Initializing the context"); 
