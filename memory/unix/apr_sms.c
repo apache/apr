@@ -200,7 +200,8 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
          * We only need to lock the parent as the only other function that
          * touches the fields we're about to mess with is apr_sms_destroy
          */
-        apr_lock_acquire(pms->sms_lock);
+        if (pms->sms_lock)
+            apr_lock_acquire(pms->sms_lock);
         
         if ((sms->sibling = pms->child) != NULL)
             sms->sibling->ref = &sms->sibling;
@@ -208,7 +209,8 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
         sms->ref = &pms->child;
         pms->child = sms;
 
-        apr_lock_release(pms->sms_lock);    
+        if (pms->sms_lock)
+            apr_lock_release(pms->sms_lock);    
     }
 
     /* Set default functions.  These should NOT be altered by an sms
@@ -336,7 +338,8 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *sms)
     if (!sms->reset_fn)
         return APR_ENOTIMPL;
 
-    apr_lock_acquire(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
     
     /* 
      * Run the cleanups of all child memory systems _including_
@@ -362,7 +365,8 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *sms)
     /* Let the memory system handle the actual reset */
     rv = sms->reset_fn(sms);
 
-    apr_lock_release(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
     
     return rv;
 }
@@ -375,7 +379,8 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup *next_cleanup;
 
-    apr_lock_acquire(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
     
     if (apr_sms_is_tracking(sms)) {
         /* 
@@ -462,7 +467,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     pms = sms->parent;
     
     /* Remove the memory system from the parent memory systems child list */
-    if (pms)
+    if (pms->sms_lock)
         apr_lock_acquire(pms->sms_lock);
         
     if (sms->sibling)
@@ -471,14 +476,15 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     if (sms->ref)
         *sms->ref = sms->sibling;
 
-    if (pms)
+    if (pms->sms_lock)
         apr_lock_release(pms->sms_lock);
         
     /* Call the pre-destroy if present */
     if (sms->pre_destroy_fn)
         sms->pre_destroy_fn(sms);
 
-    apr_lock_destroy(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_destroy(sms->sms_lock);
     
     /* XXX - This should eventually be removed */
     apr_pool_destroy(sms->pool);
@@ -561,14 +567,16 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms,
     if (!cleanup_fn)
         return APR_ENOTIMPL;
     
-    apr_lock_acquire(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
     
     cleanup = (struct apr_sms_cleanup *)
                   apr_sms_malloc(sms->accounting,
                                  sizeof(struct apr_sms_cleanup));
 
     if (!cleanup){
-        apr_lock_release(sms->sms_lock);
+        if (sms->sms_lock)
+            apr_lock_release(sms->sms_lock);
         return APR_ENOMEM;
     }
 
@@ -579,7 +587,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms,
     cleanup->next = sms->cleanups;
     sms->cleanups = cleanup;
 
-    apr_lock_release(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
     
     return APR_SUCCESS;
 }
@@ -594,7 +603,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms,
     struct apr_sms_cleanup **cleanup_ref;
     apr_status_t rv = APR_EINVAL;
     
-    apr_lock_acquire(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
     
     cleanup = sms->cleanups;
     cleanup_ref = &sms->cleanups;
@@ -615,7 +625,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms,
         }
     }
 
-    apr_lock_release(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
 
     /* The cleanup function must have been registered previously */
     return rv;
@@ -628,7 +639,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *sms,
     struct apr_sms_cleanup **cleanup_ref;
     apr_status_t rv = APR_EINVAL;
 
-    apr_lock_acquire(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
     
     cleanup = sms->cleanups;
     cleanup_ref = &sms->cleanups;
@@ -649,7 +661,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *sms,
         }
     }
 
-    apr_lock_release(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
     
     /* The cleanup function must have been registered previously */
     return rv;
@@ -677,7 +690,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms,
     struct apr_sms_cleanup **cleanup_ref;
     apr_status_t rv = APR_EINVAL;
     
-    apr_lock_acquire(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
     
     cleanup = sms->cleanups;
     cleanup_ref = &sms->cleanups;
@@ -700,7 +714,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms,
         }
     }
 
-    apr_lock_release(sms->sms_lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
 
     /* The cleanup function should have been registered previously */
     return rv;
