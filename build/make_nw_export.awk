@@ -55,14 +55,8 @@
 /apr_bucket_mmap_make/{next}
 /apr_bucket_type_mmap/{next}
 /apr_md4_set_xlate/{next}
-#/XML_ParserFree/{next}
-#/XML_ParserCreate/{next}
-#/XML_SetUserData/{next}
-#/XML_SetElementHandler/{next}
-#/XML_SetCharacterDataHandler/{next}
-#/XML_Parse/{next}
-#/XML_GetErrorCode/{next}
-#/XML_ErrorString/{next}
+/apr_os_proc_mutex_get/{next}
+/apr_os_proc_mutex_put/{next}
 
 
 function add_symbol (sym_name) {
