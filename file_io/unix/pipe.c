@@ -56,6 +56,8 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
+#include "apr_arch_inherit.h"
+
 /* Figure out how to get pipe block/nonblock on BeOS...
  * Basically, BONE7 changed things again so that ioctl didn't work,
  * but now fcntl does, hence we need to do this extra checking.
@@ -208,6 +210,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->blocking = BLK_ON;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
+    (*in)->flags = APR_INHERIT;
 #if APR_HAS_THREADS
     (*in)->thlock = NULL;
 #endif
@@ -219,6 +222,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out)->fname = NULL;
     (*out)->buffered = 0;
     (*out)->blocking = BLK_ON;
+    (*out)->flags = APR_INHERIT;
     (*out)->timeout = -1;
 #if APR_HAS_THREADS
     (*out)->thlock = NULL;
