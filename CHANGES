@@ -1,4 +1,5 @@
 Changes with APR b1  
+  *) Add other child support to Win32 [Bill Stoddard]
 
   *) Other-child registrations are automatically removed when the
      associated pool is destroyed.  This avoids garbage in the list
