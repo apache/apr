@@ -263,6 +263,7 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 /* And APR_INT64_T_FMT */
 @int64_t_fmt@
+@int64_t_fmt_len@
 
 /* are we going to force the generic atomic operations */
 #define APR_FORCE_ATOMIC_GENERIC @apr_force_atomic_generic@
