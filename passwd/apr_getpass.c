@@ -113,11 +113,7 @@ static char *getpass(const char *prompt)
     static char password[MAX_STRING_LEN];
 
     fputs(prompt, stderr);
-    gets((char *) &password);
-
-    if (strlen((char *) &password) > (MAX_STRING_LEN - 1)) {
-	password[MAX_STRING_LEN - 1] = '\0';
-    }
+    fgets((char *) &password, sizeof(password), stdin);
 
     return (char *) &password;
 }
@@ -140,7 +136,7 @@ static char *getpass(const char *prompt)
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &attr) != 0)
 	    return NULL;
     while ((password[n] = getchar()) != '\n') {
-        if (password[n] >= ' ' && password[n] <= '~') {
+        if (n < sizeof(password) - 1 && password[n] >= ' ' && password[n] <= '~') {
             n++;
         } else {
             fprintf(stderr,"\n");
@@ -175,7 +171,7 @@ static char *getpass(const char *prompt)
     fputs(prompt, stderr);
     
     while ((password[n] = _getch()) != '\r') {
-        if (password[n] >= ' ' && password[n] <= '~') {
+        if (n < sizeof(password) - 1 && password[n] >= ' ' && password[n] <= '~') {
             n++;
             printf("*");
         }
@@ -211,7 +207,8 @@ static char *getpass(const char *prompt)
  *
  * Restrictions: Truncation also occurs according to the host system's
  * getpass() semantics, or at position 255 if our own version is used,
- * but the caller is *not* made aware of it.
+ * but the caller is *not* made aware of it unless their own buffer is
+ * smaller than our own.
  */
 
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, size_t *bufsiz)
