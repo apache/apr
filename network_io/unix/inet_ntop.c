@@ -99,15 +99,32 @@ apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size)
 static const char *
 inet_ntop4(const unsigned char *src, char *dst, apr_size_t size)
 {
-	static const char fmt[] = "%u.%u.%u.%u";
-	char tmp[sizeof "255.255.255.255"];
+	const int MIN_SIZE = 16; /* space for 255.255.255.255\0 */
+	int n = 0;
+	char *next = dst;
 
-	if (apr_snprintf(tmp, sizeof tmp, fmt, src[0], src[1], src[2], src[3]) > (int)size) {
-		errno = ENOSPC;
-		return (NULL);
+	if (size < MIN_SIZE) {
+	    errno = ENOSPC;
+	    return NULL;
 	}
-	strcpy(dst, tmp);
-	return (dst);
+	do {
+	    unsigned char u = *src++;
+	    if (u > 99) {
+		*next++ = '0' + u/100;
+		u %= 100;
+		*next++ = '0' + u/10;
+		u %= 10;
+	    }
+	    else if (u > 9) {
+		*next++ = '0' + u/10;
+		u %= 10;
+	    }
+	    *next++ = '0' + u;
+	    *next++ = '.';
+	    n++;
+	} while (n < 4);
+	*--next = 0;
+	return dst;
 }
 
 #if APR_HAVE_IPV6
