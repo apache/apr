@@ -112,8 +112,19 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
                                                         sizeof(apr_sockaddr_t));
 }
 
-apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
+apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
+                               apr_pool_t *cont)
 {
+    int family = ofamily;
+
+    if (family == AF_UNSPEC) {
+#if APR_HAVE_IPV6
+        family = AF_INET6;
+#else
+        family = AF_INET;
+#endif
+    }
+
     alloc_socket(new, cont);
 
     if ((*new) == NULL) {
@@ -127,6 +138,13 @@ apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
     (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#if APR_HAVE_IPV6
+    if ((*new)->sock == INVALID_SOCKET && ofamily == AF_UNSPEC) {
+        family = AF_INET;
+        (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    }
+#endif
+
     if ((*new)->sock == INVALID_SOCKET) {
         return apr_get_netos_error();
     }
@@ -140,6 +158,11 @@ apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
 
     return APR_SUCCESS;
 } 
+
+apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
+{
+    return apr_create_socket(new, AF_INET, SOCK_STREAM, cont);
+}
 
 apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
 {
