@@ -102,6 +102,9 @@
 #if APR_HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#if APR_HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif
