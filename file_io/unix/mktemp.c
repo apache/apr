@@ -32,6 +32,7 @@
  */
 
 #include "apr_private.h"
+#include "fileio.h" /* prototype of apr_mkstemp() */
 
 #if !defined(HAVE_MKSTEMP)
 
@@ -92,9 +93,7 @@ mkstemps(path, slen)
 }
 #endif /* APR_STARTS_USING_IT */
 
-int
-mkstemp(path)
-	char *path;
+int apr_mkstemp(char *path)
 {
 	int fd;
 
@@ -218,6 +217,20 @@ _gettemp(path, doopen, domkdir, slen)
 		}
 	}
 	/*NOTREACHED*/
+}
+
+#else
+
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h> /* for mkstemp() - Single Unix */
+#endif
+#if APR_HAVE_UNISTD_H
+#include <unistd.h> /* for mkstemp() - FreeBSD */
+#endif
+
+int apr_mkstemp(char *template)
+{
+    return mkstemp(template);
 }
 
 #endif /* !defined(HAVE_MKSTEMP) */

@@ -55,6 +55,7 @@
 #include "apr.h"
 #include "apr_strings.h"
 #include "locks.h"
+#include "fileio.h" /* for apr_mkstemp() */
 
 #if APR_USE_SYSVSEM_SERIALIZE  
 
@@ -305,7 +306,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
     }
     else {
         new->fname = apr_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
-        new->interproc = mkstemp(new->fname);
+        new->interproc = apr_mkstemp(new->fname);
     }
 
     if (new->interproc < 0) {
@@ -387,7 +388,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
     }
     else {
         new->fname = apr_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
-        new->interproc = mkstemp(new->fname);
+        new->interproc = apr_mkstemp(new->fname);
     }
 
     if (new->interproc < 0) {
