@@ -55,6 +55,7 @@
 #include "apr_time.h"
 #include "apr_errno.h"
 #include "apr_general.h"
+#include "apr_lib.h"
 #include <errno.h>
 #include <stdio.h>
 #ifdef BEOS
@@ -66,28 +67,36 @@ int main(void)
     apr_time_t now;
     apr_exploded_time_t xt;
     apr_time_t imp;
+    apr_pool_t *p;
+    char *str;
+    apr_size_t sz;
 
     fprintf(stdout, "Testing Time functions.\n");
 
-    fprintf(stdout, "\tapr_time_now.......");
+    if (apr_pool_create(&p, NULL) != APR_SUCCESS){
+        printf("Failed to create a context!\n");
+        exit (-1);
+    }
+
+    fprintf(stdout, "\tapr_time_now..................");
     now = apr_time_now();
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tapr_explode_localtime.......");
+    fprintf(stdout, "\tapr_explode_localtime.........");
     if (apr_explode_localtime(&xt, now) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't explode the time\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
     
-    fprintf(stdout, "\tapr_explode_gmt.......");
+    fprintf(stdout, "\tapr_explode_gmt...............");
     if (apr_explode_gmt(&xt, now) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't explode the time\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tapr_implode_time........");
+    fprintf(stdout, "\tapr_implode_time..............");
     if (apr_implode_time(&imp, &xt) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't implode the time\n");
         exit(-1);
@@ -102,6 +111,18 @@ int main(void)
     }
     fprintf(stdout, "OK\n");
 
+    printf("\tapr_strftime..................");
+    str = (char*) apr_pcalloc(p, sizeof(char) * 30);
+    if (str == NULL){
+        printf("Couldn't allocate memory.\n");
+        exit (-1);
+    } 
+    if (apr_strftime(str, &sz, 30, "%R %A %d %B %Y", &xt) !=
+         APR_SUCCESS){
+        printf("Failed!");
+    }
+    printf("%s\n", str);
+ 
     return 1;
 }    
 
