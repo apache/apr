@@ -156,7 +156,7 @@ else
 fi
 ])dnl
 
-AC_DEFUN(APACHE_CHECK_SIGWAIT_ONE_ARG,[
+AC_DEFUN(APR_CHECK_SIGWAIT_ONE_ARG,[
   AC_CACHE_CHECK(whether sigwait takes one argument,ac_cv_sigwait_one_arg,[
   AC_TRY_COMPILE([
 #ifdef __NETBSD__
