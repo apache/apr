@@ -210,6 +210,7 @@ AC_CHECK_LIB(socket,socket)
 AC_CHECK_LIB(crypt,crypt)
 AC_CHECK_LIB(ufc,crypt)
 AC_CHECK_LIB(truerand,main)
+AC_CHECK_LIB(iconv,iconv)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
@@ -226,7 +227,7 @@ APR_CHECK_INET_ADDR
 APR_CHECK_INET_NETWORK
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(gmtime_r localtime_r)
-AC_CHECK_FUNCS(iconv, [ iconv="1" LIBS="$LIBS -liconv" ], [ iconv="0" ])
+AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
 AC_CHECK_FUNCS(mmap, [ mmap="1" ], [ mmap="0" ])
 if test "$native_mmap_emul" = "1"; then
     mmap="1"
