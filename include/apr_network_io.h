@@ -131,11 +131,17 @@ typedef struct in_addr      apr_in_addr;
 /* Define flags passed in on apr_sendfile() */
 #define APR_SENDFILE_DISCONNECT_SOCKET      1
 
-/* A structure to encapsulate headers and trailers for apr_sendfile */
+/** A structure to encapsulate headers and trailers for apr_sendfile */
 struct apr_hdtr_t {
+    /** An iovec to store the headers sent before the file. 
+     *  @defvar iovec *headers */
     struct iovec* headers;
+    /** number of headers in the iovec */
     int numheaders;
+    /** An iovec to store the trailers sent before the file. 
+     *  @defvar iovec *trailers */
     struct iovec* trailers;
+    /** number of trailers in the iovec */
     int numtrailers;
 };
 #endif

@@ -75,12 +75,17 @@ typedef struct apr_mmap_t            apr_mmap_t;
  * sense to keep it private, and opening it up makes some stuff easier in
  * Apache.
  */
+/** The MMAP structure */
 struct apr_mmap_t {
+    /** The pool the mmap structure was allocated out of. */
     apr_pool_t *cntxt;
 #ifdef BEOS
+    /** An area ID.  Only valid on BeOS */
     area_id area;
 #endif
+    /** The start of the memory mapped area */
     void *mm;
+    /** The amount of data in the mmap */
     size_t size;
 };
 
