@@ -70,11 +70,12 @@ fi
 
 
 dnl
-dnl APR_PTHREADS_CHECK_COMPILE
+dnl APR_PTHREADS_TRY_RUN(actions-if-success)
 dnl
-dnl Check whether the current setup can use POSIX threads calls
+dnl Try running a program which uses pthreads, executing the
+dnl actions-if-success commands on success.
 dnl
-AC_DEFUN(APR_PTHREADS_CHECK_COMPILE, [
+AC_DEFUN(APR_PTHREADS_TRY_RUN, [
 AC_TRY_RUN( [
 #include <pthread.h>
 #include <stddef.h>
@@ -90,70 +91,65 @@ int main() {
     int data = 1;
     pthread_mutexattr_init(&mattr);
     return pthread_create(&thd, NULL, thread_routine, &data);
-} ], [ 
-  pthreads_working="yes"
-  ], [
-  pthreads_working="no"
-  ], pthreads_working="no" )
+} ], [apr_p_t_r=yes], [apr_p_t_r=no], [apr_p_t_r=no])
+
+if test $apr_p_t_r = yes; then
+  $1
+fi
+
 ])dnl
 
 
 dnl
 dnl APR_PTHREADS_CHECK()
 dnl
-dnl Try to find a way to enable POSIX threads
+dnl Try to find a way to enable POSIX threads.  Sets the 
+dnl pthreads_working variable to "yes" on success.
 dnl
 AC_DEFUN(APR_PTHREADS_CHECK,[
-if test -n "$ac_cv_pthreads_lib"; then
-  LIBS="$LIBS -l$ac_cv_pthreads_lib"
-fi
 
-if test -n "$ac_cv_pthreads_cflags"; then
-  CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
-fi
-
-APR_PTHREADS_CHECK_COMPILE
-
-AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
-ac_cv_pthreads_cflags=""
-if test "$pthreads_working" != "yes"; then
-  for flag in -kthread -pthread -pthreads -mthreads -Kthread -threads; do 
-    ac_save="$CFLAGS"
-    CFLAGS="$CFLAGS $flag"
-    APR_PTHREADS_CHECK_COMPILE
-    if test "$pthreads_working" = "yes"; then
-      ac_cv_pthreads_cflags="$flag"
+AC_CACHE_CHECK([for CFLAGS needed for pthreads], [apr_cv_pthreads_cflags],
+[apr_ptc_cflags=$CFLAGS
+ for flag in none -kthread -pthread -pthreads -mthreads -Kthread -threads; do 
+    CFLAGS=$apr_ptc_cflags
+    test "x$flag" != "xnone" && CFLAGS="$CFLAGS $flag"
+    APR_PTHREADS_TRY_RUN([
+      apr_cv_pthreads_cflags="$flag"
       break
-    fi
-    CFLAGS="$ac_save"
-  done
-fi
+    ])
+ done
+ CFLAGS=$apr_ptc_cflags
 ])
 
-# Some versions of libtool do not pass -pthread through
-# to the compiler when given in a --mode=link line.  Some
-# versions of gcc ignore -pthread when linking a shared
-# object.  Hence, if using -pthread, always add -lpthread on
-# the link line, to ensure that libapr depends on libpthread.
-if test "x$ac_cv_pthreads_cflags" = "x-pthread"; then
-   APR_ADDTO(LIBS,[-lpthread])
+if test -n "$apr_cv_pthreads_cflags"; then
+   pthreads_working=yes
+   if test "x$apr_cv_pthreads_cflags" != "xnone"; then
+     APR_ADDTO(CFLAGS,[$apr_cv_pthreads_cflags])
+   fi
 fi
 
-AC_CACHE_CHECK(for pthreads_lib, ac_cv_pthreads_lib,[
-ac_cv_pthreads_lib=""
-if test "$pthreads_working" != "yes"; then
-  for lib in pthread pthreads c_r; do
-    ac_save="$LIBS"
-    LIBS="$LIBS -l$lib"
-    APR_PTHREADS_CHECK_COMPILE
-    if test "$pthreads_working" = "yes"; then
-      ac_cv_pthreads_lib="$lib"
+# The CFLAGS may or may not be sufficient to ensure that libapr
+# depends on the pthreads library: some versions of libtool
+# drop -pthread when passed on the link line; some versions of
+# gcc ignore -pthread when linking a shared object.  So always
+# try and add the relevant library to LIBS too.
+
+AC_CACHE_CHECK([for LIBS needed for pthreads], [apr_cv_pthreads_lib], [
+  apr_ptc_libs=$LIBS
+  for lib in -lpthread -lpthreads -lc_r; do
+    LIBS="$apr_ptc_libs $lib"
+    APR_PTHREADS_TRY_RUN([
+      apr_cv_pthreads_lib=$lib
       break
-    fi
-    LIBS="$ac_save"
+    ])
   done
-fi
+  LIBS=$apr_ptc_libs
 ])
+
+if test -n "$apr_cv_pthreads_lib"; then
+   pthreads_working=yes
+   APR_ADDTO(LIBS,[$apr_cv_pthreads_lib])
+fi
 
 if test "$pthreads_working" = "yes"; then
   threads_result="POSIX Threads found"
