@@ -52,39 +52,73 @@
  * <http://www.apache.org/>.
  */
 
-#include <stdio.h>
-
+#include "test_apr.h"
 #include "apr.h"
 #include "apr_portable.h"
 
-int main(int argc, char *argv[])
+
+static void ssize_t_fmt(CuTest *tc)
 {
     char buf[100];
-    
-    {
-        apr_ssize_t var = 0;
-        sprintf(buf, "%" APR_SSIZE_T_FMT, var);
-    }
+    apr_ssize_t var = 0;
 
-    {
-        apr_size_t var = 0;
-        sprintf(buf, "%" APR_SIZE_T_FMT, var);
-    }
-
-    {
-        apr_off_t var = 0;
-        sprintf(buf, "%" APR_OFF_T_FMT, var);
-    }
-
-    {
-        pid_t var = 0;
-        sprintf(buf, "%" APR_PID_T_FMT, var);
-    }
-
-    {
-        apr_int64_t var = 0;
-        sprintf(buf, "%" APR_INT64_T_FMT, var);
-    }
-    
-    return 0;
+    sprintf(buf, "%" APR_SSIZE_T_FMT, var);
+    CuAssertStrEquals(tc, buf, "0");
 }
+
+static void size_t_fmt(CuTest *tc)
+{
+    char buf[100];
+    apr_size_t var = 0;
+
+    sprintf(buf, "%" APR_SIZE_T_FMT, var);
+    CuAssertStrEquals(tc, buf, "0");
+}
+
+static void off_t_fmt(CuTest *tc)
+{
+    char buf[100];
+    apr_off_t var = 0;
+
+    sprintf(buf, "%" APR_OFF_T_FMT, var);
+    CuAssertStrEquals(tc, buf, "0");
+}
+
+static void pid_t_fmt(CuTest *tc)
+{
+    char buf[100];
+    pid_t var = 0;
+
+    sprintf(buf, "%" APR_PID_T_FMT, var);
+    CuAssertStrEquals(tc, buf, "0");
+}
+
+static void int64_t_fmt(CuTest *tc)
+{
+    char buf[100];
+    apr_int64_t var = 0;
+
+    sprintf(buf, "%" APR_INT64_T_FMT, var);
+    CuAssertStrEquals(tc, buf, "0");
+}
+
+CuSuite *testfmt(void)
+{
+    CuSuite *suite = CuSuiteNew("Test Formats");
+
+    SUITE_ADD_TEST(suite, ssize_t_fmt);
+    SUITE_ADD_TEST(suite, size_t_fmt);
+    SUITE_ADD_TEST(suite, off_t_fmt);
+    SUITE_ADD_TEST(suite, pid_t_fmt);
+    SUITE_ADD_TEST(suite, int64_t_fmt);
+
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return testfmt();
+}
+#endif
+
