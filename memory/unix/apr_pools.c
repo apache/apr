@@ -926,7 +926,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
      * in reusing a block that can't even hold the NUL byte.
      */
     if (size < APR_PSPRINTF_MIN_STRINGSIZE)
-	size = APR_PSPRINTF_MIN_STRINGSIZE;
+        size = APR_PSPRINTF_MIN_STRINGSIZE;
 
     node = active->next;
     if (!ps->got_a_new_node && node->first_avail + size < node->endp) {
@@ -1006,13 +1006,13 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
      * room to hold the NUL terminator.
      */
     if (ps.node->first_avail == ps.node->endp) {
-	if (psprintf_flush(&ps.vbuff) == -1) {
-	    if (pool->abort_fn) {
-		pool->abort_fn(APR_ENOMEM);
-	    }
+        if (psprintf_flush(&ps.vbuff) == -1) {
+            if (pool->abort_fn) {
+                pool->abort_fn(APR_ENOMEM);
+            }
 
-	    return NULL;
-	}
+            return NULL;
+        }
     }
 
     if (apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap) == -1) {
