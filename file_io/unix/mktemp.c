@@ -94,7 +94,9 @@
 
 #if defined(SVR4) || defined(WIN32) || defined(NETWARE)
 #ifdef SVR4
+#if HAVE_INTTYPES_H
 #include <inttypes.h>
+#endif
 #endif
 #define arc4random() rand()
 #define seedrandom(a) srand(a)
