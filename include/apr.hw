@@ -342,6 +342,14 @@ extern "C" {
  */
 #define APR_CHARSET_EBCDIC        0
 
+/* Is the TCP_NODELAY socket option inherited from listening sockets?
+ */
+#define APR_TCP_NODELAY_INHERITED 1
+
+/* Is the O_NONBLOCK flag inherited from listening sockets?
+ */
+#define APR_O_NONBLOCK_INHERITED  1
+
 /* Typedefs that APR needs. */
 
 typedef  unsigned char     apr_byte_t;
