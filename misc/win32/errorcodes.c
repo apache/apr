@@ -132,9 +132,33 @@ static const char *apr_error_string(ap_status_t statcode)
     }
 }
 
-static char *ap_os_format_message(ap_status_t code, char *buf, size_t bufsize)
+static char *ap_os_format_message(ap_status_t errcode, char *buf, size_t bufsize)
 {
-    strcpy(buf, "Not implemented");
+    DWORD len;
+    DWORD i;
+
+    buf = "";
+
+    len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+                        NULL,
+                        errcode,
+                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default language */
+                        (LPTSTR) buf,
+                        bufsize,
+                        NULL);
+
+    /* FormatMessage put the message in the buffer, but it may
+     * have embedded a newline (\r\n), and possible more than one.
+     * Remove the newlines replacing them with a space. This is not 
+     * as visually perfect as moving all the remaining message over, 
+     * but more efficient.
+     */
+    i = len;
+    while (i) {
+        i--;
+        if ((buf[i] == '\r') || (buf[i] == '\n'))
+            buf[i] = ' ';
+    }
     return buf;
 }
 
