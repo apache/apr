@@ -1,4 +1,6 @@
 Makefile
+Debug
+Release
 *.lo
 *.swp
 .libs
