@@ -173,14 +173,14 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(LDFLAGS, [-posix])
 	APR_ADDTO(LIBS, [-linet])
 	;;
-    *-sco3*)
+    *-sco3.2v[234]*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
 	APR_ADDTO(CFLAGS, [-Oacgiltz])
 	APR_ADDTO(LIBS, [-lPW -lmalloc _i])
 	;;
-    *-sco5*)
+    *-sco3.2v5*)
 	APR_ADDTO(CPPFLAGS, [-DSCO5 -D_REENTRANT])
-	APR_ADDTO(LIBS, [-lmalloc -lprot -ltinfo -lx])
+	APR_ADDTO(LIBS, [-lprot])
 	;;
     *-sco_sv*|*-SCO_SV*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
