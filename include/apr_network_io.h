@@ -226,7 +226,7 @@ B<Accept a new connection request>
 
 =cut
  */
-ap_status_t ap_accept(ap_socket_t **new_sock, const ap_socket_t *sock, 
+ap_status_t ap_accept(ap_socket_t **new_sock, ap_socket_t *sock, 
                       ap_pool_t *connection_pool);
 
 /*
@@ -540,7 +540,7 @@ ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr);
 
 /*
 
-=head1 ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
+=head1 ap_status_t ap_get_local_ipaddr(char **addr, ap_socket_t *sock)
 
 B<Return the local IP address associated with an apr socket.>
 
@@ -549,11 +549,11 @@ B<Return the local IP address associated with an apr socket.>
 
 =cut
  */
-ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock);
+ap_status_t ap_get_local_ipaddr(char **addr, ap_socket_t *sock);
 
 /*
 
-=head1 ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock)
+=head1 ap_status_t ap_get_remote_ipaddr(char **addr, ap_socket_t *sock)
 
 B<Return the remote IP address associated with an apr socket.>
 
@@ -562,11 +562,11 @@ B<Return the remote IP address associated with an apr socket.>
 
 =cut
  */
-ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock);
+ap_status_t ap_get_remote_ipaddr(char **addr, ap_socket_t *sock);
 
 /*
 
-=head1 ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock)
+=head1 ap_status_t ap_get_local_name(struct sockaddr_in **name, ap_socket_t *sock)
 
 B<Return the local socket name as a BSD style struct sockaddr_in.>
 
@@ -575,11 +575,11 @@ B<Return the local socket name as a BSD style struct sockaddr_in.>
 
 =cut
  */
-ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock);
+ap_status_t ap_get_local_name(struct sockaddr_in **name, ap_socket_t *sock);
 
 /*
 
-=head1 ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock)
+=head1 ap_status_t ap_get_remote_name(struct sockaddr_in **name, ap_socket_t *sock)
 
 B<Return the remote socket name as a BSD style struct sockaddr_in.>
 
@@ -588,7 +588,7 @@ B<Return the remote socket name as a BSD style struct sockaddr_in.>
 
 =cut
  */
-ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock);
+ap_status_t ap_get_remote_name(struct sockaddr_in **name, ap_socket_t *sock);
 
 /*
 
