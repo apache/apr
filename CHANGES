@@ -1,4 +1,7 @@
 Changes with APR b1
+  
+  *) FreeBSD: change apr_sendfile to accomodate a 4.6 kernel patch.
+     [Greg Ames]
 
   *) Faster code for the apr_table get/set functions  [Brian Pane]
 
