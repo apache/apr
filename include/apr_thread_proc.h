@@ -218,7 +218,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr);
 /**
  * Set the stack size of newly created threads.
  * @param attr The threadattr to affect 
- * @param on The stack size in bytes
+ * @param stacksize The stack size in bytes
  */
 APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
                                                        apr_size_t stacksize);
