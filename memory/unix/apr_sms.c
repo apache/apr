@@ -85,7 +85,7 @@ struct apr_sms_cleanup
 {
     struct apr_sms_cleanup *next;
     apr_int32_t type;
-    void *data;
+    const void *data;
     apr_status_t (*cleanup_fn)(void *);
 };
 
@@ -399,7 +399,7 @@ static void apr_sms_do_cleanups(struct apr_sms_cleanup *c)
 {
     while (c) {
         if (c->type == APR_ALL_CLEANUPS || c->type == APR_GENERAL_CLEANUP) {
-            c->cleanup_fn(c->data);
+            c->cleanup_fn((void*)c->data);
         }
         c = c->next;
     }
@@ -566,7 +566,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
 
             while (cleanup) {
                 if (cleanup->type == APR_GENERAL_CLEANUP)
-                    cleanup->cleanup_fn(cleanup->data);
+                    cleanup->cleanup_fn((void*)cleanup->data);
 
                 next_cleanup = cleanup->next;
                 apr_sms_free(sms->accounting, cleanup);
@@ -679,7 +679,7 @@ APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *sms)
 
 APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms, 
                                                    apr_int32_t type,
-                                                   void *data,
+                                                   const void *data,
                                                    apr_status_t
                                                        (*cleanup_fn)(void *))
 {
@@ -715,7 +715,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms,
 
 APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms,
                                                      apr_int32_t type,
-                                                     void *data,
+                                                     const void *data,
                                                      apr_status_t
                                                          (*cleanup_fn)(void *))
 {
@@ -791,7 +791,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *sms,
 
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms,
                                               apr_int32_t type,
-                                              void *data, 
+                                              const void *data, 
                                               apr_status_t
                                                   (*cleanup_fn)(void *))
 {
@@ -801,7 +801,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms,
                                          data, cleanup_fn)) != APR_SUCCESS)
         return rv;
 
-    return cleanup_fn(data);
+    return cleanup_fn((void*)data);
 }
 
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms, 
@@ -821,7 +821,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms,
         if (type == APR_ALL_CLEANUPS || cleanup->type == type) {
             *cleanup_ref = cleanup->next;
 
-            cleanup->cleanup_fn(cleanup->data);
+            cleanup->cleanup_fn((void*)cleanup->data);
             
             if (sms->free_fn)
                 apr_sms_free(sms, cleanup);

@@ -291,10 +291,12 @@ APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms);
  * @param cleanup_fn The function to call when the memory system is reset or
  *        destroyed
  * @deffunc void apr_sms_cleanup_register(apr_sms_t *sms, apr_int32_t type,
- *                   void *data, apr_status_t (*cleanup_fn)(void *));
+ *                                        const void *data, 
+ *                                        apr_status_t (*cleanup_fn)(void *));
  */
-APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms, apr_int32_t type,
-                                                   void *data, 
+APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms, 
+                                                   apr_int32_t type,
+                                                   const void *data, 
                                                    apr_status_t (*cleanup_fn)(void *));
 
 /**
@@ -302,13 +304,17 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms, apr_int32_t t
  * @param sms The memory system the cleanup function is registered
  *        with
  * @param type The type of the cleanup to unregister
+ * @param type The type of cleanup to run
  * @param data The data associated with the cleanup function
  * @param cleanup_fn The registered cleanup function
  * @deffunc void apr_sms_cleanup_unregister(apr_sms_t *sms,
- *                   void *data, apr_status_t (*cleanup_fn)(void *));
+ *                                          apr_int32_t type,
+ *                                          const void *data, 
+ *                                          apr_status_t (*cleanup_fn)(void *));
  */
-APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms, apr_int32_t type,
-                                                     void *data,
+APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms, 
+                                                     apr_int32_t type,
+                                                     const void *data,
                                                      apr_status_t (*cleanup)(void *));
 
 /**
@@ -331,10 +337,13 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *sms,
  * @param data The data associated with the cleanup function
  * @param cleanup The registered cleanup function
  * @deffunc apr_status_t apr_sms_cleanup_run(apr_sms_t *sms, 
- *                 apr_int32_t type, void *data, apr_status_t (*cleanup)(void *));
+ *                                           apr_int32_t type, 
+ *                                           const void *data, 
+ *                                           apr_status_t (*cleanup)(void *));
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms, 
-                                              apr_int32_t type, void *data,
+                                              apr_int32_t type, 
+                                              const void *data,
                                               apr_status_t (*cleanup)(void *));
 
 /**
