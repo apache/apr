@@ -271,7 +271,7 @@ const char *apr_signal_get_description(int signum)
 static void *signal_thread_func(void *signal_handler)
 {
     sigset_t sig_mask;
-    int (*sig_func)(int signum) = signal_handler;
+    int (*sig_func)(int signum) = (int (*)(int))signal_handler;
 
     /* This thread will be the one responsible for handling signals */
     sigfillset(&sig_mask);
@@ -341,7 +341,7 @@ APR_DECLARE(apr_status_t) apr_create_signal_thread(apr_thread_t **td,
                                               int (*signal_handler)(int signum),
                                                    apr_pool_t *p)
 {
-    return apr_thread_create(td, tattr, signal_thread_func, signal_handler, p);
+    return apr_thread_create(td, tattr, signal_thread_func, (void *)signal_handler, p);
 }
 
 #endif
