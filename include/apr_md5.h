@@ -100,10 +100,10 @@ extern "C" {
 
 /* UINT4 defines a four byte word */
 typedef unsigned int UINT4;
-typedef struct ap_md5_ctx_t ap_md5_ctx_t;
+typedef struct apr_md5_ctx_t apr_md5_ctx_t;
 
 /** MD5 context. */
-struct ap_md5_ctx_t {
+struct apr_md5_ctx_t {
     /** state (ABCD) */
     UINT4 state[4];
     /** number of bits, modulo 2^64 (lsb first) */
@@ -119,21 +119,22 @@ struct ap_md5_ctx_t {
 /**
  * MD5 Initialize.  Begins an MD5 operation, writing a new context.
  * @param context The MD5 context to initialize.
- * @deffunc apr_status_t apr_MD5Init(ap_md5_ctx_t *context)
+ * @deffunc apr_status_t apr_MD5Init(apr_md5_ctx_t *context)
  */
-APR_EXPORT(apr_status_t) apr_MD5Init(ap_md5_ctx_t *context);
+APR_EXPORT(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context);
 
 /**
  * MD5 translation setup.  Provides the APR translation handle to be used 
  * for translating the content before calculating the digest.
  * @param context The MD5 content to set the translation for.
  * @param xlate The translation handle to use for this MD5 context 
- * @deffunc apr_status_t ap_MD5SetXlate(ap_md5_ctx_t *context, apr_xlate_t *xlate)
+ * @deffunc apr_status_t apr_MD5SetXlate(apr_md5_ctx_t *context, apr_xlate_t *xlate)
  */
 #if APR_HAS_XLATE
-APR_EXPORT(apr_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, apr_xlate_t *xlate);
+APR_EXPORT(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context, 
+                                         apr_xlate_t *xlate);
 #else
-#define ap_MD5SetXlate(context, xlate) APR_ENOTIMPL
+#define apr_MD5SetXlate(context, xlate) APR_ENOTIMPL
 #endif
 
 /**
@@ -142,21 +143,21 @@ APR_EXPORT(apr_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, apr_xlate_t *xlat
  * @param context The MD5 content to update.
  * @param input next message block to update
  * @param inputLen The length of the next message block
- * @deffunc apr_status_t apr_MD5Update(ap_md5_ctx_t *context, const unsigned char *input, unsigned int inputLen)
+ * @deffunc apr_status_t apr_MD5Update(apr_md5_ctx_t *context, const unsigned char *input, unsigned int inputLen)
  */
-APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
-                                     const unsigned char *input,
-                                     unsigned int inputLen);
+APR_EXPORT(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
+                                       const unsigned char *input,
+                                       unsigned int inputLen);
 
 /**
  * MD5 finalization.  Ends an MD5 message-digest operation, writing the 
  * message digest and zeroing the context
  * @param digest The final MD5 digest
  * @param context The MD5 content we are finalizing.
- * @deffunc apr_status_t apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE], ap_md5_ctx_t *context)
+ * @deffunc apr_status_t apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE], apr_md5_ctx_t *context)
  */
 APR_EXPORT(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
-                                    ap_md5_ctx_t *context);
+                                      apr_md5_ctx_t *context);
 
 /**
  * Encode a password using an MD5 algorithm

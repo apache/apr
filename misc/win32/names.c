@@ -82,7 +82,7 @@ static BOOL OnlyDots(char *pString)
  * is present on the existing path.  This routine also
  * converts alias names to long names.
  */
-APR_EXPORT(char *) ap_os_systemcase_filename(apr_pool_t *pCont, 
+APR_EXPORT(char *) apr_os_systemcase_filename(apr_pool_t *pCont, 
                                              const char *szFile)
 {
     char buf[HUGE_STRING_LEN];
@@ -271,10 +271,10 @@ char * canonical_filename(apr_pool_t *pCont, const char *szFile)
         char *pConvertedName, *pQstr, *pPstr;
         char buf[HUGE_STRING_LEN];
         /* We potentially have a short name.  Call 
-         * ap_os_systemcase_filename to examine the filesystem
+         * apr_os_systemcase_filename to examine the filesystem
          * and possibly extract the long name.
          */
-        pConvertedName = ap_os_systemcase_filename(pCont, pNewStr);
+        pConvertedName = apr_os_systemcase_filename(pCont, pNewStr);
 
         /* Since we want to preserve the incoming case as much
          * as we can, compare for differences in the string and

@@ -132,8 +132,8 @@ struct apr_table_entry_t {
  * placing it here we are able to get compile-time diagnostics from modules
  * written which assume that a apr_table_t is the same as an apr_array_header_t. -djg
  */
-#define ap_table_elts(t) ((apr_array_header_t *)(t))
-#define ap_is_empty_table(t) (((t) == NULL)||(((apr_array_header_t *)(t))->nelts == 0))
+#define apr_table_elts(t) ((apr_array_header_t *)(t))
+#define apr_is_empty_table(t) (((t) == NULL)||(((apr_array_header_t *)(t))->nelts == 0))
 
 APR_EXPORT(apr_array_header_t *) apr_make_array(struct apr_pool_t *p, int nelts,
 						int elt_size);
@@ -193,12 +193,12 @@ APR_EXPORT(void)
 
 /* Conceptually, apr_overlap_tables does this:
 
-    apr_array_header_t *barr = ap_table_elts(b);
+    apr_array_header_t *barr = apr_table_elts(b);
     apr_table_entry_t *belt = (apr_table_entry_t *)barr->elts;
     int i;
 
     for (i = 0; i < barr->nelts; ++i) {
-        if (flags & ap_OVERLAP_TABLES_MERGE) {
+        if (flags & apr_OVERLAP_TABLES_MERGE) {
             apr_table_mergen(a, belt[i].key, belt[i].val);
         }
         else {
@@ -213,8 +213,8 @@ APR_EXPORT(void)
     in an ancestor of a's pool.  In practice b and a are usually from
     the same pool.
 */
-#define AP_OVERLAP_TABLES_SET   (0)
-#define AP_OVERLAP_TABLES_MERGE (1)
+#define APR_OVERLAP_TABLES_SET   (0)
+#define APR_OVERLAP_TABLES_MERGE (1)
 APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags);
 

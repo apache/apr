@@ -55,7 +55,7 @@
 #include "apr_private.h"
 #include "misc.h"
 
-apr_status_t ap_get_oslevel(apr_pool_t *cont, ap_oslevel_e *level)
+apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
 {
     static OSVERSIONINFO oslev;
     static unsigned int servpack = 0;
@@ -123,7 +123,7 @@ static const char* const lateDllName[DLL_defined] = {
 static HMODULE lateDllHandle[DLL_defined] = {
     NULL,       NULL,       NULL,       NULL      };
 
-FARPROC ap_load_dll_func(ap_dlltoken_e fnLib, char* fnName, int ordinal)
+FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
     if (!lateDllHandle[fnLib]) { 
         lateDllHandle[fnLib] = LoadLibrary(lateDllName[fnLib]);

@@ -80,10 +80,10 @@
  * isn't too bad given that pools have a low allocation overhead.
  */
 
-typedef struct ap_hash_entry_t ap_hash_entry_t;
+typedef struct apr_hash_entry_t apr_hash_entry_t;
 
-struct ap_hash_entry_t {
-    ap_hash_entry_t	*next;
+struct apr_hash_entry_t {
+    apr_hash_entry_t	*next;
     int			 hash;
     const void		*key;
     size_t		 klen;
@@ -98,9 +98,9 @@ struct ap_hash_entry_t {
  * collision rate.
  */
 struct apr_hash_t {
-    apr_pool_t		 *pool;
-    ap_hash_entry_t	**array;
-    size_t		  count, max;
+    apr_pool_t		*pool;
+    apr_hash_entry_t   **array;
+    size_t		 count, max;
 };
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
 
@@ -112,9 +112,9 @@ struct apr_hash_t {
  * apr_hash_next().
  */
 struct apr_hash_index_t {
-    apr_hash_t		*ht;
-    ap_hash_entry_t	*this, *next;
-    int			 index;
+    apr_hash_t	       *ht;
+    apr_hash_entry_t   *this, *next;
+    size_t		index;
 };
 
 
@@ -122,7 +122,7 @@ struct apr_hash_index_t {
  * Hash creation functions.
  */
 
-static ap_hash_entry_t **alloc_array(apr_hash_t *ht)
+static apr_hash_entry_t **alloc_array(apr_hash_t *ht)
 {
    return apr_pcalloc(ht->pool, sizeof(*ht->array) * (ht->max + 1));
 }
@@ -167,9 +167,9 @@ APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
 }
 
 APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi,
-			      const void **key,
-			      size_t *klen,
-			      void **val)
+			       const void **key,
+			       size_t *klen,
+			       void **val)
 {
     if (key)  *key  = hi->this->key;
     if (klen) *klen = hi->this->klen;
@@ -184,7 +184,7 @@ APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi,
 static void resize_array(apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
-    ap_hash_entry_t **new_array;
+    apr_hash_entry_t **new_array;
     int i;
 
     new_array = alloc_array(ht);
@@ -205,12 +205,12 @@ static void resize_array(apr_hash_t *ht)
  * that hash entries can be removed.
  */
 
-static ap_hash_entry_t **find_entry(apr_hash_t *ht,
+static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 				    const void *key,
 				    size_t klen,
 				    const void *val)
 {
-    ap_hash_entry_t **hep, *he;
+    apr_hash_entry_t **hep, *he;
     const unsigned char *p;
     int hash;
     int i;
@@ -284,7 +284,7 @@ APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
 			       const void *key,
 			       size_t klen)
 {
-    ap_hash_entry_t *he;
+    apr_hash_entry_t *he;
     he = *find_entry(ht, key, klen, NULL);
     if (he)
 	return (void *)he->val;
@@ -297,7 +297,7 @@ APR_EXPORT(void) apr_hash_set(apr_hash_t *ht,
 			     size_t klen,
 			     const void *val)
 {
-    ap_hash_entry_t **hep;
+    apr_hash_entry_t **hep;
     hep = find_entry(ht, key, klen, val);
     if (*hep) {
         if (!val) {

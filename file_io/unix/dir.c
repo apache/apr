@@ -200,11 +200,11 @@ apr_status_t apr_dir_entry_mtime(apr_time_t *mtime, apr_dir_t *thedir)
         return errno;
     }
     
-    apr_ansi_time_to_ap_time(mtime, filestat.st_mtime);
+    apr_ansi_time_to_apr_time(mtime, filestat.st_mtime);
     return APR_SUCCESS;
 }
  
-apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir)
+apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;

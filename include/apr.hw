@@ -109,7 +109,7 @@
 #include <signal.h>
 #include <stdlib.h>
 
-#define ap_inline
+#define apr_inline
 #define __attribute__(__x)
 #define ENUM_BITFIELD(e,n,w)  signed int n : w
 
@@ -199,7 +199,7 @@ typedef  int         gid_t;
 
 #define apr_signal(a,b) signal(a,b)
 
-typedef int ap_wait_t;
+typedef int apr_wait_t;
 
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {

@@ -115,7 +115,7 @@ typedef enum {
         APR_WIN_NT_4_SP4 = 16,
         APR_WIN_NT_4_SP6 = 18,
         APR_WIN_2000 = 24
-} ap_oslevel_e;
+} apr_oslevel_e;
 
 
 typedef enum {
@@ -124,25 +124,26 @@ typedef enum {
     DLL_WINSOCKAPI = 2,    // mswsock  From WinSock.h
     DLL_WINSOCK2API = 3,   // ws2_32   From WinSock2.h
     DLL_defined = 4        // must define as last idx_ + 1
-} ap_dlltoken_e;
+} apr_dlltoken_e;
 
-FARPROC ap_load_dll_func(ap_dlltoken_e fnLib, char *fnName, int ordinal);
+FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
 
-/* The ap_load_dll_func call WILL fault if the function cannot be loaded */
+/* The apr_load_dll_func call WILL fault if the function cannot be loaded */
 
-#define AP_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
-    typedef rettype (calltype *ap_winapi_fpt_##fn) args; \
-    static ap_winapi_fpt_##fn ap_winapi_pfn_##fn = NULL; \
-    __inline rettype ap_winapi_##fn args \
-    {   if (!ap_winapi_pfn_##fn) \
-            ap_winapi_pfn_##fn = (ap_winapi_fpt_##fn) ap_load_dll_func(lib, #fn, ord); \
-        return (*(ap_winapi_pfn_##fn)) names; }; \
+#define APR_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
+    typedef rettype (calltype *apr_winapi_fpt_##fn) args; \
+    static apr_winapi_fpt_##fn apr_winapi_pfn_##fn = NULL; \
+    __inline rettype apr_winapi_##fn args \
+    {   if (!apr_winapi_pfn_##fn) \
+            apr_winapi_pfn_##fn = (apr_winapi_fpt_##fn) \
+                                      apr_load_dll_func(lib, #fn, ord); \
+        return (*(apr_winapi_pfn_##fn)) names; }; \
 
 /* Provide late bound declarations of every API function missing from
  * one or more supported releases of the Win32 API
  *
- * lib is the enumerated token from ap_dlltoken_e, and must correspond
- * to the string table entry in start.c used by the ap_load_dll_func().
+ * lib is the enumerated token from apr_dlltoken_e, and must correspond
+ * to the string table entry in start.c used by the apr_load_dll_func().
  * Token names (attempt to) follow Windows.h declarations prefixed by DLL_
  * in order to facilitate comparison.  Use the exact declaration syntax
  * and names from Windows.h to prevent ambigutity and bugs.
@@ -157,20 +158,20 @@ FARPROC ap_load_dll_func(ap_dlltoken_e fnLib, char *fnName, int ordinal);
  * In the case of non-text functions, simply #define the original name
  */
 
-AP_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
     IN LPCSTR lpFileName,
     IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
     OUT LPVOID lpFileInformation),
     (lpFileName, fInfoLevelId, lpFileInformation));
 #undef GetFileAttributesEx
-#define GetFileAttributesEx ap_winapi_GetFileAttributesExA
+#define GetFileAttributesEx apr_winapi_GetFileAttributesExA
 
-AP_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
     IN HANDLE hFile),
     (hFile));
-#define CancelIo ap_winapi_CancelIo
+#define CancelIo apr_winapi_CancelIo
 
-apr_status_t ap_get_oslevel(struct apr_pool_t *, ap_oslevel_e *);
+apr_status_t apr_get_oslevel(struct apr_pool_t *, apr_oslevel_e *);
 #endif /* WIN32 */
 
 #endif  /* ! MISC_H */

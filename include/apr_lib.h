@@ -114,20 +114,20 @@ APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname);
  * that's legacy libc for ya.  These new macros do not support EOF like
  * the standard macros do.  Tough.
  */
-#define ap_isalnum(c) (isalnum(((unsigned char)(c))))
-#define ap_isalpha(c) (isalpha(((unsigned char)(c))))
-#define ap_iscntrl(c) (iscntrl(((unsigned char)(c))))
-#define ap_isdigit(c) (isdigit(((unsigned char)(c))))
-#define ap_isgraph(c) (isgraph(((unsigned char)(c))))
-#define ap_islower(c) (islower(((unsigned char)(c))))
-#define ap_isascii(c) (isascii(((unsigned char)(c))))
-#define ap_isprint(c) (isprint(((unsigned char)(c))))
-#define ap_ispunct(c) (ispunct(((unsigned char)(c))))
-#define ap_isspace(c) (isspace(((unsigned char)(c))))
-#define ap_isupper(c) (isupper(((unsigned char)(c))))
-#define ap_isxdigit(c) (isxdigit(((unsigned char)(c))))
-#define ap_tolower(c) (tolower(((unsigned char)(c))))
-#define ap_toupper(c) (toupper(((unsigned char)(c))))
+#define apr_isalnum(c) (isalnum(((unsigned char)(c))))
+#define apr_isalpha(c) (isalpha(((unsigned char)(c))))
+#define apr_iscntrl(c) (iscntrl(((unsigned char)(c))))
+#define apr_isdigit(c) (isdigit(((unsigned char)(c))))
+#define apr_isgraph(c) (isgraph(((unsigned char)(c))))
+#define apr_islower(c) (islower(((unsigned char)(c))))
+#define apr_isascii(c) (isascii(((unsigned char)(c))))
+#define apr_isprint(c) (isprint(((unsigned char)(c))))
+#define apr_ispunct(c) (ispunct(((unsigned char)(c))))
+#define apr_isspace(c) (isspace(((unsigned char)(c))))
+#define apr_isupper(c) (isupper(((unsigned char)(c))))
+#define apr_isxdigit(c) (isxdigit(((unsigned char)(c))))
+#define apr_tolower(c) (tolower(((unsigned char)(c))))
+#define apr_toupper(c) (toupper(((unsigned char)(c))))
 
 /*
  * Small utility macros to make things easier to read.  Not usually a
@@ -135,12 +135,12 @@ APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname);
  */
 
 #ifdef WIN32
-#define ap_killpg(x, y)
+#define apr_killpg(x, y)
 #else /* WIN32 */
 #ifdef NO_KILLPG
-#define ap_killpg(x, y)		(kill (-(x), (y)))
+#define apr_killpg(x, y)        (kill (-(x), (y)))
 #else /* NO_KILLPG */
-#define ap_killpg(x, y)		(killpg ((x), (y)))
+#define apr_killpg(x, y)        (killpg ((x), (y)))
 #endif /* NO_KILLPG */
 #endif /* WIN32 */
 
@@ -166,9 +166,9 @@ APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname);
  * for the increased robustness of having printf-warnings work.
  *
  * Additionally, apr_vformatter allows for arbitrary output methods
- * using the ap_vformatter_buff and flush_func.
+ * using the apr_vformatter_buff and flush_func.
  *
- * The ap_vformatter_buff has two elements curpos and endpos.
+ * The apr_vformatter_buff has two elements curpos and endpos.
  * curpos is where apr_vformatter will write the next byte of output.
  * It proceeds writing output to curpos, and updating curpos, until
  * either the end of output is reached, or curpos == endpos (i.e. the

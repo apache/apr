@@ -68,18 +68,18 @@
 #endif
 /* End System Headers */
 
-APR_VAR_EXPORT const char ap_month_snames[12][4] =
+APR_VAR_EXPORT const char apr_month_snames[12][4] =
 {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
-APR_VAR_EXPORT const char ap_day_snames[7][4] =
+APR_VAR_EXPORT const char apr_day_snames[7][4] =
 {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
 apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
 {
-    ap_exploded_time_t xt;
+    apr_exploded_time_t xt;
     const char *s;
     int real_year;
 
@@ -88,7 +88,7 @@ apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
     /* example: "Sat, 08 Jan 2000 18:31:41 GMT" */
     /*           12345678901234567890123456789  */
 
-    s = &ap_day_snames[xt.tm_wday][0];
+    s = &apr_day_snames[xt.tm_wday][0];
     *date_str++ = *s++;
     *date_str++ = *s++;
     *date_str++ = *s++;
@@ -97,7 +97,7 @@ apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
     *date_str++ = xt.tm_mday / 10 + '0';
     *date_str++ = xt.tm_mday % 10 + '0';
     *date_str++ = ' ';
-    s = &ap_month_snames[xt.tm_mon][0];
+    s = &apr_month_snames[xt.tm_mon][0];
     *date_str++ = *s++;
     *date_str++ = *s++;
     *date_str++ = *s++;
@@ -127,7 +127,7 @@ apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
 
 apr_status_t apr_ctime(char *date_str, apr_time_t t)
 {
-    ap_exploded_time_t xt;
+    apr_exploded_time_t xt;
     const char *s;
     int real_year;
 
@@ -135,12 +135,12 @@ apr_status_t apr_ctime(char *date_str, apr_time_t t)
     /*           123456789012345678901234  */
 
     apr_explode_localtime(&xt, t);
-    s = &ap_day_snames[xt.tm_wday][0];
+    s = &apr_day_snames[xt.tm_wday][0];
     *date_str++ = *s++;
     *date_str++ = *s++;
     *date_str++ = *s++;
     *date_str++ = ' ';
-    s = &ap_month_snames[xt.tm_mon][0];
+    s = &apr_month_snames[xt.tm_mon][0];
     *date_str++ = *s++;
     *date_str++ = *s++;
     *date_str++ = *s++;
@@ -168,7 +168,7 @@ apr_status_t apr_ctime(char *date_str, apr_time_t t)
 }
 
 apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, 
-                        const char *format, ap_exploded_time_t *xt)
+                        const char *format, apr_exploded_time_t *xt)
 {
     struct tm tm;
 

@@ -56,12 +56,12 @@
 #define APR_GETOPT_H
 
 APR_VAR_IMPORT int
-    ap_opterr,                          /* if error message should be printed */
-    ap_optind,                          /* index into parent argv vector */
-    ap_optopt,                          /* character checked for validity */
-    ap_optreset;                        /* reset getopt */
+    apr_opterr,                          /* if error message should be printed */
+    apr_optind,                          /* index into parent argv vector */
+    apr_optopt,                          /* character checked for validity */
+    apr_optreset;                        /* reset getopt */
 APR_VAR_IMPORT char *
-    ap_optarg;                          /* argument associated with option */
+    apr_optarg;                          /* argument associated with option */
 
 /**
  * Parse the command line options passed to the program.

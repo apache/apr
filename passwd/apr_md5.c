@@ -186,7 +186,7 @@ static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_MD5Encode() */
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-APR_EXPORT(apr_status_t) apr_MD5Init(ap_md5_ctx_t *context)
+APR_EXPORT(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
     /* Load magic initialization constants. */
@@ -205,14 +205,15 @@ APR_EXPORT(apr_status_t) apr_MD5Init(ap_md5_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-APR_EXPORT(apr_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, apr_xlate_t *xlate)
+APR_EXPORT(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context, 
+                                         apr_xlate_t *xlate)
 {
     apr_status_t rv;
     int is_sb;
 
     /* TODO: remove the single-byte-only restriction from this code
      */
-    rv = ap_xlate_get_sb(xlate, &is_sb);
+    rv = apr_xlate_get_sb(xlate, &is_sb);
     if (rv != APR_SUCCESS) {
         return rv;
     }
@@ -228,7 +229,7 @@ APR_EXPORT(apr_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, apr_xlate_t *xlat
    operation, processing another message block, and updating the
    context.
  */
-APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
+APR_EXPORT(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen)
 {
@@ -241,7 +242,8 @@ APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
     idx = (unsigned int) ((context->count[0] >> 3) & 0x3F);
 
     /* Update number of bits */
-    if ((context->count[0] += ((UINT4) inputLen << 3)) < ((UINT4) inputLen << 3))
+    if ((context->count[0] += ((UINT4) inputLen << 3)) 
+            < ((UINT4) inputLen << 3))
 	context->count[1]++;
     context->count[1] += (UINT4) inputLen >> 29;
 
@@ -267,7 +269,7 @@ APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
     if (inputLen >= partLen) {
         if (context->xlate) {
             inbytes_left = outbytes_left = partLen;
-            ap_xlate_conv_buffer(context->xlate, input, &inbytes_left,
+            apr_xlate_conv_buffer(context->xlate, input, &inbytes_left,
                                  &context->buffer[idx],&outbytes_left);
         }
         else {
@@ -279,7 +281,7 @@ APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
             if (context->xlate) {
                 unsigned char inp_tmp[64];
                 inbytes_left = outbytes_left = 64;
-                ap_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
+                apr_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
                                      inp_tmp, &outbytes_left);
                 MD5Transform(context->state, inp_tmp);
             }
@@ -296,7 +298,7 @@ APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
     /* Buffer remaining input */
     if (context->xlate) {
         inbytes_left = outbytes_left = inputLen - i;
-        ap_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
+        apr_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
                              &context->buffer[idx], &outbytes_left);
     }
     else {
@@ -310,7 +312,7 @@ APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
    the message digest and zeroizing the context.
  */
 APR_EXPORT(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
-                                    ap_md5_ctx_t *context)
+                                      apr_md5_ctx_t *context)
 {
     unsigned char bits[8];
     unsigned int idx, padLen;
@@ -459,7 +461,7 @@ static void Decode(UINT4 *output, const unsigned char *input, unsigned int len)
 }
 
 #ifdef CHARSET_EBCDIC
-APR_EXPORT(apr_status_t) ap_MD5InitEBCDIC(apr_xlate_t *xlate)
+APR_EXPORT(apr_status_t) apr_MD5InitEBCDIC(apr_xlate_t *xlate)
 {
     xlate_ebcdic_to_ascii = xlate;
     return APR_SUCCESS;
@@ -502,7 +504,7 @@ APR_EXPORT(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
     const char *sp, *ep;
     unsigned char final[MD5_DIGESTSIZE];
     int sl, pl, i;
-    ap_md5_ctx_t ctx, ctx1;
+    apr_md5_ctx_t ctx, ctx1;
     unsigned long l;
 
     /* 
@@ -536,7 +538,7 @@ APR_EXPORT(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
      */
     apr_MD5Init(&ctx);
 #ifdef CHARSET_EBCDIC
-    ap_MD5SetXlate(&ctx, xlate_ebcdic_to_ascii);
+    apr_MD5SetXlate(&ctx, xlate_ebcdic_to_ascii);
 #endif
     
     /*
@@ -563,7 +565,8 @@ APR_EXPORT(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
     apr_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
     apr_MD5Final(final, &ctx1);
     for (pl = strlen(pw); pl > 0; pl -= MD5_DIGESTSIZE) {
-	apr_MD5Update(&ctx, final, (pl > MD5_DIGESTSIZE) ? MD5_DIGESTSIZE : pl);
+        apr_MD5Update(&ctx, final, 
+                      (pl > MD5_DIGESTSIZE) ? MD5_DIGESTSIZE : pl);
     }
 
     /*
@@ -649,7 +652,8 @@ APR_EXPORT(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
  * APR_EMISMATCH if they don't.
  */
 
-APR_EXPORT(apr_status_t) apr_validate_password(const char *passwd, const char *hash)
+APR_EXPORT(apr_status_t) apr_validate_password(const char *passwd, 
+                                               const char *hash)
 {
     char sample[120];
 #if !defined(WIN32) && !defined(BEOS)

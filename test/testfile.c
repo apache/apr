@@ -278,7 +278,7 @@ int testdirs(apr_pool_t *context)
     apr_dir_t *temp;  
     apr_file_t *file = NULL;
     apr_ssize_t bytes;
-    ap_filetype_e type;
+    apr_filetype_e type;
     char *fname;
 
     fprintf(stdout, "Testing Directory functions.\n");

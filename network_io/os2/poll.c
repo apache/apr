@@ -134,7 +134,7 @@ apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
     time_t starttime;
     struct timeval tv;
 
-    timeout /= AP_USEC_PER_SEC; /* TODO: rework for microseconds and axe this */
+    timeout /= APR_USEC_PER_SEC; /* TODO: rework for microseconds and axe this */
 
     tv.tv_sec = timeout;
     tv.tv_usec = 0;

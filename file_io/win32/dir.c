@@ -179,7 +179,7 @@ apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
     return APR_SUCCESS;
 }
  
-apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir)
+apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
 {
     switch(thedir->entry->dwFileAttributes) {
     case FILE_ATTRIBUTE_DIRECTORY: {

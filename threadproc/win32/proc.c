@@ -110,9 +110,9 @@ apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in,
             bAsyncRead = TRUE;
             bAsyncWrite = TRUE;
         }        
-        if ((stat = ap_create_nt_pipe(&attr->child_in, &attr->parent_in, 
-                                      bAsyncRead, bAsyncWrite,
-                                      attr->cntxt)) != APR_SUCCESS) {
+        if ((stat = apr_create_nt_pipe(&attr->child_in, &attr->parent_in, 
+                                       bAsyncRead, bAsyncWrite,
+                                       attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -133,9 +133,9 @@ apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in,
             bAsyncRead = TRUE;
             bAsyncWrite = TRUE;
         }        
-        if ((stat = ap_create_nt_pipe(&attr->parent_out, &attr->child_out,
-                                      bAsyncRead, bAsyncWrite,
-                                      attr->cntxt)) != APR_SUCCESS) {
+        if ((stat = apr_create_nt_pipe(&attr->parent_out, &attr->child_out,
+                                       bAsyncRead, bAsyncWrite,
+                                       attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -156,9 +156,9 @@ apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in,
             bAsyncRead = TRUE;
             bAsyncWrite = TRUE;
         }        
-        if ((stat = ap_create_nt_pipe(&attr->parent_err, &attr->child_err,
-                                      bAsyncRead, bAsyncWrite,
-                                      attr->cntxt)) != APR_SUCCESS) {
+        if ((stat = apr_create_nt_pipe(&attr->parent_err, &attr->child_err,
+                                       bAsyncRead, bAsyncWrite,
+                                       attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
@@ -432,7 +432,8 @@ apr_status_t apr_wait_proc(apr_proc_t *proc, apr_wait_how_e wait)
     if (!proc)
         return APR_ENOPROC;
     if (wait == APR_WAIT) {
-        if ((stat = WaitForSingleObject(proc->pid, INFINITE)) == WAIT_OBJECT_0) {
+        if ((stat = WaitForSingleObject((HANDLE)proc->pid, 
+                                        INFINITE)) == WAIT_OBJECT_0) {
             return APR_CHILD_DONE;
         }
         else if (stat == WAIT_TIMEOUT) {
@@ -440,7 +441,7 @@ apr_status_t apr_wait_proc(apr_proc_t *proc, apr_wait_how_e wait)
         }
         return GetLastError();
     }
-    if ((stat = WaitForSingleObject(proc->pid, 0)) == WAIT_OBJECT_0) {
+    if ((stat = WaitForSingleObject((HANDLE)proc->pid, 0)) == WAIT_OBJECT_0) {
         return APR_CHILD_DONE;
     }
     else if (stat == WAIT_TIMEOUT) {

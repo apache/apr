@@ -90,12 +90,12 @@ typedef enum {
 #ifndef TRUE
 #define TRUE			1
 #endif
-#ifndef AP_LONGEST_LONG
-#define AP_LONGEST_LONG		long
+#ifndef APR_LONGEST_LONG
+#define APR_LONGEST_LONG	long
 #endif
 #define NUL			'\0'
 #define WIDE_INT		long
-#define WIDEST_INT		AP_LONGEST_LONG
+#define WIDEST_INT		APR_LONGEST_LONG
 
 typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
@@ -127,7 +127,7 @@ typedef int bool_int;
  */
 
 /*
- *    ap_ecvt converts to decimal
+ *    apr_ecvt converts to decimal
  *      the number of digits is specified by ndigit
  *      decpt is set to the position of the decimal point
  *      sign is set to 0 for positive, 1 for negative
@@ -136,7 +136,8 @@ typedef int bool_int;
 #define	NDIG	80
 
 /* buf must have at least NDIG bytes */
-static char *ap_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, char *buf)
+static char *apr_cvt(double arg, int ndigits, int *decpt, int *sign, 
+                     int eflag, char *buf)
 {
     register int r2;
     double fi, fj;
@@ -209,29 +210,29 @@ static char *ap_cvt(double arg, int ndigits, int *decpt, int *sign, int eflag, c
     return (buf);
 }
 
-static char *ap_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
+static char *apr_ecvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
 {
-    return (ap_cvt(arg, ndigits, decpt, sign, 1, buf));
+    return (apr_cvt(arg, ndigits, decpt, sign, 1, buf));
 }
 
-static char *ap_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
+static char *apr_fcvt(double arg, int ndigits, int *decpt, int *sign, char *buf)
 {
-    return (ap_cvt(arg, ndigits, decpt, sign, 0, buf));
+    return (apr_cvt(arg, ndigits, decpt, sign, 0, buf));
 }
 
 /*
- * ap_gcvt  - Floating output conversion to
+ * apr_gcvt  - Floating output conversion to
  * minimal length string
  */
 
-static char *ap_gcvt(double number, int ndigit, char *buf, boolean_e altform)
+static char *apr_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 {
     int sign, decpt;
     register char *p1, *p2;
     register int i;
     char buf1[NDIG];
 
-    p1 = ap_ecvt(number, ndigit, &decpt, &sign, buf1);
+    p1 = apr_ecvt(number, ndigit, &decpt, &sign, buf1);
     p2 = buf;
     if (sign)
 	*p2++ = '-';
@@ -310,7 +311,7 @@ static char *ap_gcvt(double number, int ndigit, char *buf, boolean_e altform)
 
 #define STR_TO_DEC( str, num )		\
     num = NUM( *str++ ) ;		\
-    while ( ap_isdigit( *str ) )		\
+    while ( apr_isdigit( *str ) )		\
     {					\
 	num *= 10 ;			\
 	num += NUM( *str++ ) ;		\
@@ -523,14 +524,14 @@ static char *conv_fp(register char format, register double num,
     char buf1[NDIG];
 
     if (format == 'f')
-	p = ap_fcvt(num, precision, &decimal_point, is_negative, buf1);
+	p = apr_fcvt(num, precision, &decimal_point, is_negative, buf1);
     else			/* either e or E format */
-	p = ap_ecvt(num, precision + 1, &decimal_point, is_negative, buf1);
+	p = apr_ecvt(num, precision + 1, &decimal_point, is_negative, buf1);
 
     /*
      * Check for Infinity and NaN
      */
-    if (ap_isalpha(*p)) {
+    if (apr_isalpha(*p)) {
 	*len = strlen(strcpy(buf, p));
 	*is_negative = FALSE;
 	return (buf);
@@ -721,7 +722,7 @@ APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 	    /*
 	     * Try to avoid checking for flags, width or precision
 	     */
-	    if (!ap_islower(*fmt)) {
+	    if (!apr_islower(*fmt)) {
 		/*
 		 * Recognize flags: -, #, BLANK, +
 		 */
@@ -743,7 +744,7 @@ APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 		/*
 		 * Check if a width was specified
 		 */
-		if (ap_isdigit(*fmt)) {
+		if (apr_isdigit(*fmt)) {
 		    STR_TO_DEC(fmt, min_width);
 		    adjust_width = YES;
 		}
@@ -769,7 +770,7 @@ APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 		if (*fmt == '.') {
 		    adjust_precision = YES;
 		    fmt++;
-		    if (ap_isdigit(*fmt)) {
+		    if (apr_isdigit(*fmt)) {
 			STR_TO_DEC(fmt, precision);
 		    }
 		    else if (*fmt == '*') {
@@ -958,7 +959,7 @@ APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 		/*
 		 * * We use &num_buf[ 1 ], so that we have room for the sign
 		 */
-		s = ap_gcvt(va_arg(ap, double), precision, &num_buf[1],
+		s = apr_gcvt(va_arg(ap, double), precision, &num_buf[1],
 		            alternate_form);
 		if (*s == '-')
 		    prefix_char = *s++;
@@ -1018,7 +1019,7 @@ APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 		     * don't handle "%p".
 		     */
 		case 'p':
-#ifdef AP_VOID_P_IS_QUAD
+#ifdef APR_VOID_P_IS_QUAD
 		    if (sizeof(void *) <= sizeof(u_widest_int)) {
 		    	ui_quad = (u_widest_int) va_arg(ap, void *);
 			s = conv_p2_quad(ui_quad, 4, 'x',

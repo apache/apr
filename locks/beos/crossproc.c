@@ -73,7 +73,7 @@ apr_status_t create_inter_lock(apr_lock_t *new)
     new->sem_interproc = (sem_id)apr_palloc(new->cntxt, sizeof(sem_id));
     new->ben_interproc = (int32)apr_palloc(new->cntxt, sizeof(int32));
 
-    if ((stat = create_sem(0, "ap_interproc")) < B_NO_ERROR) {
+    if ((stat = create_sem(0, "apr_interproc")) < B_NO_ERROR) {
         lock_inter_cleanup(new);
         return stat;
     }

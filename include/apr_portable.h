@@ -218,7 +218,8 @@ apr_status_t apr_get_os_lock(apr_os_lock_t *oslock, apr_lock_t *lock);
  * @param ostime the native time format
  * @param aprtime the time to convert
  */
-apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, ap_exploded_time_t *aprtime);
+apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, 
+                                 apr_exploded_time_t *aprtime);
 
 /**
  * Get the imploded time in the platforms native format.
@@ -252,7 +253,7 @@ apr_status_t apr_get_os_threadkey(apr_os_threadkey_t *thekey, apr_threadkey_t *k
  *      an apr file type.
  */
 apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, 
-                           apr_pool_t *cont); 
+                             apr_pool_t *cont); 
 
 /**
  * convert the dir from os specific type to apr type.
@@ -261,7 +262,7 @@ apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
  * @param cont The pool to use when creating to apr directory.
  */
 apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir, 
-                          apr_pool_t *cont); 
+                            apr_pool_t *cont); 
 
 /**
  * Convert a socket from the os specific type to the apr type
@@ -270,7 +271,7 @@ apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir,
  * @param cont The socket we are converting to an apr type.
  */
 apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, 
-                           apr_pool_t *cont);
+                             apr_pool_t *cont);
 
 /**
  * Convert the lock from os specific type to apr type
@@ -279,7 +280,7 @@ apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock,
  * @param cont The pool to use if it is needed.
  */
 apr_status_t apr_put_os_lock(apr_lock_t **lock, apr_os_lock_t *thelock, 
-                           apr_pool_t *cont); 
+                             apr_pool_t *cont); 
 
 /**
  * Put the imploded time in the APR format.
@@ -287,7 +288,8 @@ apr_status_t apr_put_os_lock(apr_lock_t **lock, apr_os_lock_t *thelock,
  * @param ostime the time to convert
  * @param cont the pool to use if necessary
  */
-apr_status_t apr_put_os_imp_time(apr_time_t *aprtime, apr_os_imp_time_t **ostime, apr_pool_t *cont); 
+apr_status_t apr_put_os_imp_time(apr_time_t *aprtime, apr_os_imp_time_t **ostime, 
+                                 apr_pool_t *cont); 
 
 /**
  * Put the exploded time in the APR format.
@@ -295,7 +297,8 @@ apr_status_t apr_put_os_imp_time(apr_time_t *aprtime, apr_os_imp_time_t **ostime
  * @param ostime the time to convert
  * @param cont the pool to use if necessary
  */
-apr_status_t apr_put_os_exp_time(ap_exploded_time_t *aprtime, apr_os_exp_time_t **ostime, apr_pool_t *cont); 
+apr_status_t apr_put_os_exp_time(apr_exploded_time_t *aprtime, 
+                                 apr_os_exp_time_t **ostime, apr_pool_t *cont); 
 
 #if APR_HAS_THREADS
 /**
@@ -305,7 +308,7 @@ apr_status_t apr_put_os_exp_time(ap_exploded_time_t *aprtime, apr_os_exp_time_t 
  * @param cont The pool to use if it is needed.
  */
 apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd, 
-                             apr_pool_t *cont);
+                               apr_pool_t *cont);
 
 /**
  * convert the thread private memory key from os specific type to apr type.
@@ -313,8 +316,9 @@ apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd,
  * @param thekey The os specific handle to convert
  * @param cont The pool to use if it is needed.
  */
-apr_status_t apr_put_os_threadkey(apr_threadkey_t **key, apr_os_threadkey_t *thekey, 
-                                apr_pool_t *cont);
+apr_status_t apr_put_os_threadkey(apr_threadkey_t **key,
+                                  apr_os_threadkey_t *thekey, 
+                                  apr_pool_t *cont);
 #endif
 
 #ifdef __cplusplus

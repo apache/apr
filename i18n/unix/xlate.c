@@ -156,7 +156,7 @@ static const char *handle_special_names(const char *page)
     }
 }
 
-static apr_status_t ap_xlate_cleanup(void *convset)
+static apr_status_t apr_xlate_cleanup(void *convset)
 {
 #ifdef HAVE_ICONV
     apr_xlate_t *old = convset;
@@ -203,8 +203,8 @@ static void check_sbcs(apr_xlate_t *convset)
 }
 #endif /* HAVE_ICONV */
 
-apr_status_t ap_xlate_open(apr_xlate_t **convset, const char *topage,
-                          const char *frompage, apr_pool_t *pool)
+apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
+                            const char *frompage, apr_pool_t *pool)
 {
     apr_status_t status;
     apr_xlate_t *new;
@@ -248,7 +248,7 @@ apr_status_t ap_xlate_open(apr_xlate_t **convset, const char *topage,
 
     if (found) {
         *convset = new;
-        apr_register_cleanup(pool, (void *)new, ap_xlate_cleanup,
+        apr_register_cleanup(pool, (void *)new, apr_xlate_cleanup,
                             apr_null_cleanup);
         status = APR_SUCCESS;
     }
@@ -260,15 +260,15 @@ apr_status_t ap_xlate_open(apr_xlate_t **convset, const char *topage,
     return status;
 }
 
-apr_status_t ap_xlate_get_sb(apr_xlate_t *convset, int *onoff)
+apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
 {
     *onoff = convset->sbcs_table != NULL;
     return APR_SUCCESS;
 } 
 
-apr_status_t ap_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
-                                 apr_size_t *inbytes_left, char *outbuf,
-                                 apr_size_t *outbytes_left)
+apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
+                                   apr_size_t *inbytes_left, char *outbuf,
+                                   apr_size_t *outbytes_left)
 {
     apr_status_t status = APR_SUCCESS;
 #ifdef HAVE_ICONV
@@ -329,7 +329,7 @@ apr_status_t ap_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
     return status;
 }
 
-apr_int32_t ap_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar)
+apr_int32_t apr_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar)
 {
     if (convset->sbcs_table) {
         return convset->sbcs_table[inchar];
@@ -339,12 +339,12 @@ apr_int32_t ap_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar)
     }
 }
 
-apr_status_t ap_xlate_close(apr_xlate_t *convset)
+apr_status_t apr_xlate_close(apr_xlate_t *convset)
 {
     apr_status_t status;
 
-    if ((status = ap_xlate_cleanup(convset)) == APR_SUCCESS) {
-        apr_kill_cleanup(convset->pool, convset, ap_xlate_cleanup);
+    if ((status = apr_xlate_cleanup(convset)) == APR_SUCCESS) {
+        apr_kill_cleanup(convset->pool, convset, apr_xlate_cleanup);
     }
 
     return status;

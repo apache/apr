@@ -101,7 +101,7 @@ extern "C" {
 #define APR_POLLNVAL  0x040
 
 typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE, 
-	      APR_SHUTDOWN_READWRITE} ap_shutdown_how_e;
+	      APR_SHUTDOWN_READWRITE} apr_shutdown_how_e;
 
 /* We need to make sure we always have an in_addr type, so APR will just
  * define it ourselves, if the platform doesn't provide it.
@@ -112,14 +112,14 @@ struct in_addr {
 }
 #endif
 
-/* I guess not everybody uses inet_addr.  This defines ap_inet_addr
+/* I guess not everybody uses inet_addr.  This defines apr_inet_addr
  * appropriately.
  */
 
 #if APR_HAVE_INET_ADDR
-#define ap_inet_addr    inet_addr
+#define apr_inet_addr    inet_addr
 #elif APR_HAVE_INET_NETWORK        /* only DGUX, as far as I know */
-#define ap_inet_addr    inet_network
+#define apr_inet_addr    inet_network
 #endif
 
 typedef struct apr_socket_t     apr_socket_t;
@@ -167,7 +167,7 @@ apr_status_t apr_create_tcp_socket(apr_socket_t **new_sock, apr_pool_t *cont);
  * @tip This does not actually close the socket descriptor, it just
  *      controls which calls are still valid on the socket.
  */
-apr_status_t apr_shutdown(apr_socket_t *thesocket, ap_shutdown_how_e how);
+apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how);
 
 /**
  * Close a tcp socket.

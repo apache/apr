@@ -80,5 +80,5 @@ Sigfunc *apr_signal(int signo, Sigfunc * func)
 }
 #else
 /* need some function in this file, otherwise the linker on NeXT bitches */
-void ap_signal_is_not_here(void) {}
+void apr_signal_is_not_here(void) {}
 #endif

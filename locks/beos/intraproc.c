@@ -75,7 +75,7 @@ apr_status_t create_intra_lock(apr_lock_t *new)
     new->ben_intraproc = (int32)apr_palloc(new->cntxt, sizeof(int32));
     
     
-    if ((stat = create_sem(0, "ap_intraproc")) < B_NO_ERROR){
+    if ((stat = create_sem(0, "apr_intraproc")) < B_NO_ERROR){
     	lock_intra_cleanup(new);
         return stat;
     }

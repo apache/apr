@@ -277,7 +277,7 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_wait_all_procs(apr_proc_t *proc, ap_wait_t *status,
+apr_status_t apr_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
                               apr_wait_how_e waithow, apr_pool_t *p)
 {
     int waitpid_options = WUNTRACED;

@@ -172,7 +172,8 @@ apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
 apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
 {
     if (thedir->validentry) {
-        ap_os2_time_to_ap_time(time, thedir->entry.fdateLastWrite, thedir->entry.ftimeLastWrite);
+        apr_os2_time_to_apr_time(time, thedir->entry.fdateLastWrite, 
+                                 thedir->entry.ftimeLastWrite);
         return APR_SUCCESS;
     }
 
@@ -181,12 +182,12 @@ apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
 
 
 
-apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir)
+apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
 {
     int rc;
     HFILE hFile;
     ULONG action, Type, Attr;
-    ap_filetype_e typemap[8] = { APR_REG, APR_CHR, APR_PIPE };
+    apr_filetype_e typemap[8] = { APR_REG, APR_CHR, APR_PIPE };
 
     if (thedir->validentry) {
         if (thedir->entry.attrFile & FILE_DIRECTORY) {

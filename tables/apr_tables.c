@@ -313,7 +313,7 @@ APR_EXPORT(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
     /* we don't copy keys and values, so it's necessary that t->a.pool
      * have a life span at least as long as p
      */
-    if (!ap_pool_is_ancestor(t->a.cont, p)) {
+    if (!apr_pool_is_ancestor(t->a.cont, p)) {
 	fprintf(stderr, "copy_table: t's pool is not an ancestor of p\n");
 	abort();
     }
@@ -390,11 +390,11 @@ APR_EXPORT(void) apr_table_setn(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
 	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
 	    abort();
 	}
@@ -479,11 +479,11 @@ APR_EXPORT(void) apr_table_mergen(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
@@ -519,11 +519,11 @@ APR_EXPORT(void) apr_table_addn(apr_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.cont)) {
+	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
@@ -546,12 +546,12 @@ APR_EXPORT(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
      * overlay->a.pool and base->a.pool have a life span at least
      * as long as p
      */
-    if (!ap_pool_is_ancestor(overlay->a.cont, p)) {
+    if (!apr_pool_is_ancestor(overlay->a.cont, p)) {
 	fprintf(stderr,
 		"overlay_tables: overlay's pool is not an ancestor of p\n");
 	abort();
     }
-    if (!ap_pool_is_ancestor(base->a.cont, p)) {
+    if (!apr_pool_is_ancestor(base->a.cont, p)) {
 	fprintf(stderr,
 		"overlay_tables: base's pool is not an ancestor of p\n");
 	abort();
@@ -593,19 +593,19 @@ APR_EXPORT(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
  * 
  * The caching api will allow a user to walk the header values:
  *
- * apr_status_t ap_cache_el_header_walk(ap_cache_el *el, 
+ * apr_status_t apr_cache_el_header_walk(apr_cache_el *el, 
  *    int (*comp)(void *, const char *, const char *), void *rec, ...);
  *
  * So it can be ..., however from there I use a  callback that use a va_list:
  *
- * apr_status_t (*cache_el_header_walk)(ap_cache_el *el, 
+ * apr_status_t (*cache_el_header_walk)(apr_cache_el *el, 
  *    int (*comp)(void *, const char *, const char *), void *rec, va_list);
  *
  * To pass those ...'s on down to the actual module that will handle walking
- * their headers, in the file case this is actually just an ap_table - and
+ * their headers, in the file case this is actually just an apr_table - and
  * rather than reimplementing apr_table_do (which IMHO would be bad) I just
  * called it with the va_list. For mod_shmem_cache I don't need it since I
- * can't use ap_table's, but mod_file_cache should (though a good hash would
+ * can't use apr_table's, but mod_file_cache should (though a good hash would
  * be better, but that's a different issue :). 
  *
  * So to make mod_file_cache easier to maintain, it's a good thing
@@ -662,14 +662,14 @@ static int sort_overlap(const void *va, const void *vb)
 }
 
 /* prefer to use the stack for temp storage for overlaps smaller than this */
-#ifndef ap_OVERLAP_TABLES_ON_STACK
-#define ap_OVERLAP_TABLES_ON_STACK	(512)
+#ifndef APR_OVERLAP_TABLES_ON_STACK
+#define APR_OVERLAP_TABLES_ON_STACK	(512)
 #endif
 
 APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags)
 {
-    overlap_key cat_keys_buf[ap_OVERLAP_TABLES_ON_STACK];
+    overlap_key cat_keys_buf[APR_OVERLAP_TABLES_ON_STACK];
     overlap_key *cat_keys;
     int nkeys;
     apr_table_entry_t *e;
@@ -679,7 +679,7 @@ APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
     overlap_key *last;
 
     nkeys = a->a.nelts + b->a.nelts;
-    if (nkeys < ap_OVERLAP_TABLES_ON_STACK) {
+    if (nkeys < APR_OVERLAP_TABLES_ON_STACK) {
 	cat_keys = cat_keys_buf;
     }
     else {
@@ -736,7 +736,7 @@ APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
      * appropriate.
      */
 
-    if (flags & AP_OVERLAP_TABLES_MERGE) {
+    if (flags & APR_OVERLAP_TABLES_MERGE) {
 	left = cat_keys;
 	last = left + nkeys;
 	while (left < last) {
