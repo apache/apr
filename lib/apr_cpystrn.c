@@ -200,17 +200,39 @@ API_EXPORT(int) ap_tokenize_to_argv(ap_pool_t *token_context,
  *   "/foo/bar/gum/" -> ""
  *   "gum" -> "gum"
  *   "wi\\n32\\stuff" -> "stuff
+ *
+ * Corrected Win32 to accept "a/b\\stuff", "a:stuff"
  */
 
 const char *ap_filename_of_pathname(const char *pathname)
 {
-#ifdef WIN32
-    const char path_separator = '\\';
-#else
     const char path_separator = '/';
-#endif
     const char *s = strrchr(pathname, path_separator);
+
+#ifdef WIN32
+    const char path_separator_win = '\\';
+    const char drive_separator_win = ':';
+    const char *s2 = strrchr(pathname, path_separator_win);
+
+    if (s2 > s) s = s2;
+
+    if (!s) s = strrchr(pathname, drive_separator_win);
+#endif
 
     return s ? ++s : pathname;
 }
 
+/* length of dest assumed >= length of src
+ * collapse in place (src == dest) is legal.
+ * returns terminating null ptr to dest string.
+ */
+API_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src)
+{
+    while (*src) {
+        if (!ap_isspace(*src)) 
+            *dest++ = *src;
+        ++src;
+    }
+    *dest = 0;
+    return (dest);
+}

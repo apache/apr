@@ -241,3 +241,4 @@ EXPORTS
         ap_dso_unload @220
         ap_dso_sym @221
         ap_dso_init @222
+        ap_collapse_spaces @223
