@@ -66,9 +66,7 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
 {
     BOOLEAN isStdHandle = FALSE;
     HANDLE hCurrentProcess = GetCurrentProcess();
-#if APR_HAS_UNICODE_FS
-    int len = wcslen(old_file->fname) + 1;
-#endif
+    apr_oslevel_e os_level;
 
     if ((*new_file) == NULL) {
         if (p == NULL) {
@@ -111,11 +109,16 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
 
     (*new_file)->cntxt = old_file->cntxt;
 #if APR_HAS_UNICODE_FS
-    (*new_file)->fname = apr_palloc(old_file->cntxt, len * 2);
-    wcscpy((*new_file)->fname, old_file->fname);
-#else
-    (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
+    if (!apr_get_oslevel(old_file->cntxt, &os_level) && os_level >= APR_WIN_NT)
+    {
+        int len = wcslen(old_file->w.fname) + 1;
+        (*new_file)->w.fname = apr_palloc(old_file->cntxt, len * 2);
+        wcscpy((*new_file)->w.fname, old_file->w.fname);
+    }
+    else
 #endif
+        (*new_file)->n.fname = apr_pstrdup(old_file->cntxt, old_file->n.fname);
+
 /*    (*new_file)->demonfname = apr_pstrdup(old_file->cntxt, old_file->demonfname);
  *    (*new_file)->lowerdemonfname = apr_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
  */

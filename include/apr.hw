@@ -155,12 +155,10 @@
 #define APR_HAS_XLATE          0
 
 /*
- * XXX: Problem - while this may be an NT build - if we share binaries,
- * this is actually a run time decision
- * Until tested and validated - back to 'future' status (feel free to toggle
- * to 1 and experiment.
+ * XXX: Problem - while this may be an NT build - so we are experimenting
+ * but if we have problems, please feel free to revert to 0.
  */
-#define APR_HAS_UNICODE_FS     0
+#define APR_HAS_UNICODE_FS     1
 
 /* Typedefs that APR needs. */
 

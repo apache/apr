@@ -89,29 +89,40 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
     int len = strlen(dirname);
 #if APR_HAS_UNICODE_FS
-    apr_status_t rv;
-    int lremains = len;
-    int dremains = (len + 3) * 2;
-    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
-    (*new)->entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-    (*new)->dirname = apr_palloc(cont, dremains);
-    if ((rv = conv_utf8_to_ucs2(dirname, &lremains,
-                                 (*new)->dirname, &dremains)))
-        return rv;
-    if (lremains)
-        return APR_ENAMETOOLONG;
-    len = (len + 3) * 2 - dremains;
-#else
-    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
-    (*new)->entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATA));
-    (*new)->dirname = apr_palloc(cont, len + 3);
-    memcpy((*new)->dirname, dirname, len);
-#endif
-    if (len && dirname[len - 1] != '/') {
-    	(*new)->dirname[len++] = '/';
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_status_t rv;
+        int lremains = len;
+        int dremains = (len + 3) * 2;
+        (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+        (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
+        (*new)->w.dirname = apr_palloc(cont, dremains);
+        if ((rv = conv_utf8_to_ucs2(dirname, &lremains,
+                                     (*new)->w.dirname, &dremains)))
+            return rv;
+        if (lremains)
+            return APR_ENAMETOOLONG;
+        len = (len + 3) * 2 - dremains;
+        if (len && (*new)->w.dirname[len - 1] != '/') {
+    	    (*new)->w.dirname[len++] = '/';
+        }
+        (*new)->w.dirname[len++] = '*';
+        (*new)->w.dirname[len] = '\0';
     }
-    (*new)->dirname[len++] = '*';
-    (*new)->dirname[len] = '\0';
+    else
+#endif
+    {
+        (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+        (*new)->n.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATA));
+        (*new)->n.dirname = apr_palloc(cont, len + 3);
+        memcpy((*new)->n.dirname, dirname, len);
+        if (len && (*new)->n.dirname[len - 1] != '/') {
+    	    (*new)->n.dirname[len++] = '/';
+        }
+        (*new)->n.dirname[len++] = '*';
+        (*new)->n.dirname[len] = '\0';
+    }
     (*new)->cntxt = cont;
     (*new)->dirhand = INVALID_HANDLE_VALUE;
     apr_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
@@ -131,26 +142,32 @@ apr_status_t apr_closedir(apr_dir_t *dir)
 apr_status_t apr_readdir(apr_dir_t *thedir)
 {
 #if APR_HAS_UNICODE_FS
-    if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-        thedir->dirhand = FindFirstFileW(thedir->dirname, thedir->entry);
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
+    {
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+            thedir->dirhand = FindFirstFileW(thedir->w.dirname, thedir->w.entry);
+            if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+                return apr_get_os_error();
+            }
+        }
+        else if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
             return apr_get_os_error();
         }
     }
-    else if (!FindNextFileW(thedir->dirhand, thedir->entry)) {
-        return apr_get_os_error();
-    }
-#else
-    if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-        thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
-        if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-            return apr_get_os_error();
-        }
-    }
-    else if (!FindNextFile(thedir->dirhand, thedir->entry)) {
-        return apr_get_os_error();
-    }
+    else
 #endif
+    {
+        if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+            thedir->dirhand = FindFirstFile(thedir->n.dirname, thedir->n.entry);
+            if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+                return apr_get_os_error();
+            }
+        }
+        else if (!FindNextFile(thedir->dirhand, thedir->n.entry)) {
+            return apr_get_os_error();
+        }
+    }
     return APR_SUCCESS;
 }
 
@@ -182,56 +199,60 @@ apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 
 apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
 {
-    if (thedir == NULL || thedir->entry == NULL) {
+    if (thedir == NULL || thedir->n.entry == NULL) {
         return APR_ENODIR;
     }
-    (*size) = (thedir->entry->nFileSizeHigh * MAXDWORD) + 
-        thedir->entry->nFileSizeLow;
+    (*size) = (thedir->n.entry->nFileSizeHigh * MAXDWORD) + 
+        thedir->n.entry->nFileSizeLow;
     return APR_SUCCESS;
 }
 
 apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
 {
-    if (thedir == NULL || thedir->entry == NULL) {
+    if (thedir == NULL || thedir->n.entry == NULL) {
         return APR_ENODIR;
     }
-    FileTimeToAprTime(time, &thedir->entry->ftLastWriteTime);
+    FileTimeToAprTime(time, &thedir->n.entry->ftLastWriteTime);
     return APR_SUCCESS;
 }
  
 apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
 {
-    switch(thedir->entry->dwFileAttributes) {
-    case FILE_ATTRIBUTE_DIRECTORY: {
-        (*type) = APR_DIR;
-        return APR_SUCCESS;
-    }
-    case FILE_ATTRIBUTE_NORMAL: {
-        (*type) = APR_REG;
-        return APR_SUCCESS;
-    }
-    default: {
-        (*type) = APR_REG;     /* As valid as anything else.*/
-        return APR_SUCCESS;
-    }
+    switch(thedir->n.entry->dwFileAttributes) {
+        case FILE_ATTRIBUTE_DIRECTORY: {
+            (*type) = APR_DIR;
+            return APR_SUCCESS;
+        }
+        case FILE_ATTRIBUTE_NORMAL: {
+            (*type) = APR_REG;
+            return APR_SUCCESS;
+        }
+        default: {
+            (*type) = APR_REG;     /* As valid as anything else.*/
+            return APR_SUCCESS;
+        }
     }
 }
 
 apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
 {
 #if APR_HAS_UNICODE_FS
-    apr_status_t rv;
-    int len = wcslen(thedir->entry->cFileName) + 1;
-    int dremains = MAX_PATH;
-    (*new) = apr_palloc(thedir->cntxt, len * 2);
-    if ((rv = conv_ucs2_to_utf8(thedir->entry->cFileName, &len,
-                                *new, &dremains)))
-        return rv;
-    if (len)
-        return APR_ENAMETOOLONG;
-#else
-    (*new) = apr_pstrdup(thedir->cntxt, thedir->entry->cFileName);
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_status_t rv;
+        int len = wcslen(thedir->w.entry->cFileName) + 1;
+        int dremains = MAX_PATH;
+        (*new) = apr_palloc(thedir->cntxt, len * 2);
+        if ((rv = conv_ucs2_to_utf8(thedir->w.entry->cFileName, &len,
+                                    *new, &dremains)))
+            return rv;
+        if (len)
+            return APR_ENAMETOOLONG;
+    }
+    else
 #endif
+        (*new) = apr_pstrdup(thedir->cntxt, thedir->n.entry->cFileName);
     return APR_SUCCESS;
 }
 

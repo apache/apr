@@ -76,19 +76,23 @@
 
 apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
 {
-#if APR_HAS_UNICODE_FS
-    apr_status_t rv;
-    int len = wcslen(thefile->fname) + 1;
-    int dremains = MAX_PATH;
-    *fname = apr_palloc(thefile->cntxt, len * 2);
-    if ((rv = conv_ucs2_to_utf8(thefile->fname, &len,
-                                *fname, &dremains)))
-        return rv;
-    if (len)
-        return APR_ENAMETOOLONG;
-#else
-    *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
+#if defined(WIN32) && APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(thefile->cntxt, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_status_t rv;
+        int len = wcslen(thefile->w.fname) + 1;
+        int dremains = MAX_PATH;
+        *fname = apr_palloc(thefile->cntxt, len * 2);
+        if ((rv = conv_ucs2_to_utf8(thefile->w.fname, &len,
+                                    *fname, &dremains)))
+            return rv;
+        if (len)
+            return APR_ENAMETOOLONG;
+    }
+    else
 #endif
+        *fname = apr_pstrdup(thefile->cntxt, thefile->n.fname);
     return APR_SUCCESS;
 }
 

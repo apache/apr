@@ -140,11 +140,16 @@ struct apr_file_t {
     apr_interval_time_t timeout;
 
     /* File specific info */
+    union {
 #if APR_HAS_UNICODE_FS
-    apr_wchar_t *fname;
-#else
-    char *fname;
+        struct {
+            apr_wchar_t *fname;
+        } w;
 #endif
+        struct {
+            char *fname;
+        } n;
+    };
     apr_canon_t *canonname;
     
     DWORD dwFileAttributes;
@@ -172,13 +177,18 @@ struct apr_file_t {
 struct apr_dir_t {
     apr_pool_t *cntxt;
     HANDLE dirhand;
+    union {
 #if APR_HAS_UNICODE_FS
-    apr_wchar_t *dirname;
-    WIN32_FIND_DATAW *entry;
-#else
-    char *dirname;
-    WIN32_FIND_DATA *entry;
+        struct {
+            apr_wchar_t *dirname;
+            WIN32_FIND_DATAW *entry;
+        } w;
 #endif
+        struct {
+            char *dirname;
+            WIN32_FIND_DATA *entry;
+        } n;
+    };
 };
 
 apr_status_t file_cleanup(void *);
