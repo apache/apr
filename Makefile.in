@@ -28,6 +28,7 @@ INSTALL_SUBDIRS=@INSTALL_SUBDIRS@
 
 TARGET_LIB = lib@APR_LIBNAME@.la
 APR_PCFILE = apr-$(APR_MAJOR_VERSION).pc
+APR_CONFIG = apr-$(APR_MAJOR_VERSION)-config
 
 #
 # Rules for building specific targets, starting with 'all' for
@@ -97,7 +98,8 @@ install: $(TARGET_LIB) apr-config.out build/apr_rules.out
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
 	fi;
 	$(LIBTOOL) --mode=install cp apr-config.out $(DESTDIR)$(bindir)/apr-config
-	chmod 755 $(DESTDIR)$(bindir)/apr-config
+	$(LIBTOOL) --mode=install cp apr-config.out $(DESTDIR)$(bindir)/$(APR_CONFIG)
+	chmod 755 $(DESTDIR)$(bindir)/apr-config $(DESTDIR)$(bindir)/$(APR_CONFIG)
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
 	        ( cd $$i ; $(MAKE) DESTDIR=$(DESTDIR) install ); \
