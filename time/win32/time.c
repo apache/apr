@@ -131,7 +131,13 @@ APR_DECLARE(apr_time_t) apr_time_now(void)
 {
     LONGLONG aprtime = 0;
     FILETIME time;
+#ifndef _WIN32_WCE
     GetSystemTimeAsFileTime(&time);
+#else
+    SYSTEMTIME st;
+    GetSystemTime(&st);
+    SystemTimeToFileTime(&st, &time);
+#endif
     FileTimeToAprTime(&aprtime, &time);
     return aprtime; 
 }
