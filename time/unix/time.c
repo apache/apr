@@ -251,7 +251,7 @@ ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
     return APR_SUCCESS;
 }
 
-void ap_sleep(ap_time_t t)
+void ap_sleep(ap_interval_time_t t)
 {
     struct timeval tv;
     tv.tv_usec = t % AP_USEC_PER_SEC;

@@ -165,7 +165,7 @@ ap_status_t ap_implode_time(ap_time_t *result, ap_exploded_time_t *input);
 
 /*
 
-=head1 void ap_sleep(ap_time_t t)
+=head1 void ap_sleep(ap_interval_time_t t)
 
 B<Sleep for the specified number of micro-seconds.>
 
@@ -175,7 +175,7 @@ B<NOTE>:  May sleep for longer than the specified time.
 
 =cut
  */
-void ap_sleep(ap_time_t t);
+void ap_sleep(ap_interval_time_t t);
 
 /* ap_rfc822_date formats dates in the RFC822
    format in an efficient manner.  it is a fixed length
