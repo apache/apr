@@ -1336,12 +1336,17 @@ AC_CHECK_FUNCS(strcasecmp, have_strcasecmp="1", have_strcasecmp="0")
 AC_CHECK_FUNCS(strdup, have_strdup="1", have_strdup="0")
 AC_CHECK_FUNCS(strstr, have_strstr="1", have_strstr="0")
 AC_CHECK_FUNCS(memchr, have_memchr="1", have_memchr="0")
-AC_CHECK_FUNCS($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
+AC_CHECK_FUNC($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
 
 dnl ----------------------------- We have a fallback position
 if test "$have_int64_strfn" = "0" && test "$int64_strfn" = "strtoll"; then
     int64_strfn="strtoq"
-    AC_CHECK_FUNCS($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
+    AC_CHECK_FUNC(strtoq, [have_int64_strfn=1], [have_int64_strfn=0])
+fi
+
+if test "$have_int64_strfn" = "1"; then
+  AC_DEFINE_UNQUOTED(APR_INT64_STRFN, [$int64_strfn],
+      [Define as function which can be used for conversion of strings to apr_int64_t])
 fi
 
 AC_SUBST(have_strnicmp)
@@ -1351,8 +1356,7 @@ AC_SUBST(have_strcasecmp)
 AC_SUBST(have_strdup)
 AC_SUBST(have_strstr)
 AC_SUBST(have_memchr)
-AC_SUBST(have_int64_strfn)
-AC_SUBST(int64_strfn)
+
 if test "$off_t_strfn" = "apr_strtoi64" && test "$have_int64_strfn" = "1"; then
     off_t_strfn=$int64_strfn
 fi
