@@ -73,6 +73,7 @@ CuSuite *testipsub(void);
 CuSuite *testmmap(void);
 CuSuite *testud(void);
 CuSuite *testtable(void);
+CuSuite *testhash(void);
 CuSuite *testsleep(void);
 CuSuite *testpool(void);
 CuSuite *testfmt(void);
