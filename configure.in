@@ -1351,7 +1351,7 @@ fi
 
 # See which lock mechanisms we can support on this system.
 APR_IFALLYES(header:semaphore.h func:sem_open func:sem_close dnl
-             func_sem_unlink func:sem_post func:sem_wait,
+             func:sem_unlink func:sem_post func:sem_wait,
              hasposixser="1", hasposixser="0")
 APR_IFALLYES(func:semget func:semctl define:SEM_UNDO, hassysvser="1", 
              hassysvser="0")
