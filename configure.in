@@ -600,6 +600,9 @@ AC_SUBST(sendfile)
 
 AC_CHECK_FUNCS(poll)
 
+dnl #----------------------------- Checking for missing POSIX thread functions
+AC_CHECK_FUNCS(getpwnam_r)
+
 dnl #----------------------------- Checking for Processes
 echo $ac_n "${nl}Checking for Processes...${nl}"
 
