@@ -121,8 +121,8 @@ EXPORTS
 	ap_os_systemcase_filename   @112
 	canonical_filename   @113
 	ap_create_pool   @114
-	ap_destroy_pool   @115
-;	WinTimeToUnixTime   @116
+	ap_clear_pool   @115
+	ap_destroy_pool   @116
 ;	ap_get_oslevel   @117
 	ap_get_userdata   @118
 	ap_set_userdata   @119
@@ -180,8 +180,8 @@ EXPORTS
 	ap_validate_password   @159
 	ap_make_sub_pool   @160
 	ap_init_alloc   @161
-	ap_clear_pool   @162
-	ap_destroy_pool   @163
+;	ap_clear_pool   @162
+;	ap_destroy_pool   @163
 	ap_bytes_in_pool   @164
 	ap_bytes_in_free_blocks   @165
 	ap_palloc   @166
@@ -216,7 +216,7 @@ EXPORTS
 	ap_cleanup_for_exec   @195
 	ap_null_cleanup   @196
 	ap_note_subprocess   @197
-;	ap_slack   @198
+;
 	ap_vformatter   @199
 	ap_snprintf   @200
 	ap_vsnprintf   @201
