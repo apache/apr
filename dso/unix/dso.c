@@ -119,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *pool)
 {
 #if defined(DSO_USE_SHL)
-    shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
+    shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_NOSTART, 0L);
 
 #elif defined(DSO_USE_DYLD)
     NSObjectFileImage image;
