@@ -118,9 +118,7 @@ all-recursive depend-recursive clean-recursive distclean-recursive \
 	    made_local=n/a; \
 	fi; \
 	if test -z "$$made_local"; then \
-	    if test "$$otarget" != "depend" || test `pwd` != "$(top_builddir)"; then \
-	        $(MAKE) "local-$$otarget" || exit 1; \
-	    fi; \
+	    $(MAKE) "local-$$otarget" || exit 1; \
 	fi
 
 local-clean: x-local-clean
@@ -139,7 +137,10 @@ local-extraclean: local-distclean
 local-all: $(TARGETS)
 
 local-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
+	@if test -n "`ls *.c 2> /dev/null`"; then \
+	    echo $(MKDEP) $(INCLUDES) $(CFLAGS) *.c ; \
+	    $(MKDEP) $(INCLUDES) $(CFLAGS) *.c ; \
+	fi
 
 # to be filled in by the actual Makefile
 x-local-clean x-local-distclean:
