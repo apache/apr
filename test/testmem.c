@@ -149,7 +149,7 @@ int main(void)
     printf("OK\n");
 
     do_test(ams2);
-    printf("\tAbout to reset the tracking memory..................\n");
+    printf("\tAbout to reset the tracking memory..................");
     if (apr_memory_system_reset(ams2) != APR_SUCCESS){
         printf("Failed.\n");
         exit(-1);
