@@ -68,9 +68,6 @@ static ap_status_t dir_cleanup(void *thedir)
 
 ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
 {
-    if (new == NULL)
-        return APR_EBADARG;
-
     (*new) = (ap_dir_t *)ap_palloc(cont, sizeof(ap_dir_t));
 
     (*new)->cntxt = cont;
@@ -92,9 +89,6 @@ ap_status_t ap_closedir(ap_dir_t *thedir)
 {
     ap_status_t rv;
 
-    if (thedir == NULL)
-        return APR_EBADARG;
-
     if ((rv = dir_cleanup(thedir)) == APR_SUCCESS) {
         ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
         return APR_SUCCESS;
@@ -108,9 +102,6 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
     && !defined(READDIR_IS_THREAD_SAFE)
     ap_status_t ret;
 #endif
-
-    if (thedir == NULL)
-        return APR_EBADARG;
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
     && !defined(READDIR_IS_THREAD_SAFE)
@@ -136,9 +127,6 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
 
 ap_status_t ap_rewinddir(ap_dir_t *thedir)
 {
-    if (thedir == NULL)
-        return APR_EBADARG;
-
     rewinddir(thedir->dirstruct);
     return APR_SUCCESS;
 }
@@ -170,9 +158,6 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
     struct stat filestat;
     char *fname = NULL;    
 
-    if (size == NULL || thedir == NULL)
-        return APR_EBADARG;
-
     if (thedir->entry == NULL) {
         *size = -1;
         return APR_ENOFILE;
@@ -192,9 +177,6 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
-
-    if (mtime == NULL || thedir == NULL)
-        return APR_EBADARG;
 
     if (thedir->entry == NULL) {
         *mtime = -1;
@@ -216,9 +198,6 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
-
-    if (type == NULL || thedir == NULL)
-        return APR_EBADARG;
 
     if (thedir->entry == NULL) {
         *type = APR_REG;
@@ -253,9 +232,6 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
 
 ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir)
 {
-    if (new == NULL)
-        return APR_EBADARG;
-
     /* Detect End-Of-File */
     if (thedir == NULL || thedir->entry == NULL) {
         *new = NULL;

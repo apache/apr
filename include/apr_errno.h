@@ -105,7 +105,6 @@ int ap_canonical_error(ap_status_t err);
 /* empty slot: +17 */
 /* empty slot: +18 */
 #define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
-#define APR_EBADARG        (APR_OS_START_ERROR + 20)
 
 /* APR STATUS VALUES */
 #define APR_INCHILD        (APR_OS_START_STATUS + 1)

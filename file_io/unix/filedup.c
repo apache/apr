@@ -59,9 +59,6 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
 {
     int have_file = 0;
 
-    if (new_file == NULL || old_file == NULL)
-        return APR_EBADARG;
-
     if ((*new_file) == NULL) {
         (*new_file) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
         if ((*new_file) == NULL) {
