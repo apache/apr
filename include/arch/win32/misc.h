@@ -64,14 +64,9 @@
 #include "apr_file_io.h"
 #include "apr_errno.h"
 #include "apr_getopt.h"
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
+
 #if APR_HAVE_STDIO_H
 #include <stdio.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
 #endif
 #if APR_HAVE_SIGNAL_H
 #include <signal.h>
@@ -79,16 +74,18 @@
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+
+/* ### create APR_HAVE_* macros for these? */
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+
 #ifdef BEOS
 #include <kernel/OS.h>
 #endif
- 
-typedef struct datastruct {
-    const void *data;
-    const char *key;
-    struct datastruct *next;
-    struct datastruct *prev;
-} datastruct;
 
 struct apr_other_child_rec_t {
     struct apr_other_child_rec_t *next;
