@@ -447,7 +447,6 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
 # define apr_pool_join(a,b)
 #endif /* APR_POOL_DEBUG */
 
-
 #ifdef APR_POOLS_ARE_SMS
 /* Add a number of defines where the sms equivalent is 1 to 1 */
 #define apr_pool_get_abort(p)                apr_sms_get_abort(p)
