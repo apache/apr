@@ -58,7 +58,12 @@
 
 #include "apr_general.h"
 #include "apr_errno.h"
+#ifdef HAVE_TIME_H
 #include <time.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -125,7 +130,7 @@ ap_status_t ap_flush(ap_file_t *);
 API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
-ap_status_t ap_make_iov(struct iovec_t **, struct iovec *, ap_context_t *);
+ap_status_t ap_make_iov(ap_iovec_t **, struct iovec *, ap_context_t *);
 ap_status_t ap_dupfile(ap_file_t **, ap_file_t *);
 ap_status_t ap_getfileinfo(ap_file_t *);
 ap_status_t ap_seek(ap_file_t *, ap_seek_where_t, ap_off_t *);

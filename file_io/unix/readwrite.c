@@ -158,6 +158,7 @@ ap_status_t ap_make_iov(struct iovec_t **new, struct iovec *iova, ap_context_t *
     }
     (*new)->cntxt = cntxt;
     (*new)->theiov = iova;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssize_t *iocnt)
