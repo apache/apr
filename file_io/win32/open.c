@@ -184,7 +184,7 @@ ap_status_t ap_close(ap_file_t *file)
     return stat;
 }
 
-ap_status_t ap_remove_file(char *path, ap_pool_t *cont)
+ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
 {
     char *temp = canonical_filename(cont, path);
 

@@ -180,7 +180,7 @@ ap_status_t ap_close(ap_file_t *file)
 
 
 
-ap_status_t ap_remove_file(char *path, ap_pool_t *cntxt)
+ap_status_t ap_remove_file(const char *path, ap_pool_t *cntxt)
 {
     ULONG rc = DosDelete(path);
     return APR_OS2_STATUS(rc);
