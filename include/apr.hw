@@ -166,6 +166,7 @@ typedef  unsigned __int64  apr_uint64_t;
 typedef  int         apr_size_t;
 typedef  int         apr_ssize_t;
 typedef  _off_t      apr_off_t;
+typedef  size_t      apr_socklen_t;
 typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;

@@ -73,7 +73,7 @@ apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_uint32_t port)
 
 static apr_status_t get_local_addr(apr_socket_t *sock)
 {
-    socklen_t namelen = sizeof(*sock->local_addr);
+    apr_socklen_t namelen = sizeof(*sock->local_addr);
 
     if (getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr, 
                     &namelen) < 0) {
