@@ -11,7 +11,7 @@ RCS file: /home/cvs/apache-2.0/src/ap/Makefile.in,v
 retrieving revision 1.4
 diff -u -d -b -w -u -r1.4 Makefile.in
 --- ap/Makefile.in	2000/06/12 20:41:13	1.4
-+++ ap/Makefile.in	2000/07/13 16:30:51
++++ ap/Makefile.in	2000/07/14 00:24:57
 @@ -1,5 +1,5 @@
  
  LTLIBRARY_NAME    = libap.la
@@ -25,7 +25,7 @@ RCS file: /home/cvs/apache-2.0/src/include/ap_iol.h,v
 retrieving revision 1.19
 diff -u -d -b -w -u -r1.19 ap_iol.h
 --- include/ap_iol.h	2000/05/29 04:22:02	1.19
-+++ include/ap_iol.h	2000/07/13 16:30:52
++++ include/ap_iol.h	2000/07/14 00:24:57
 @@ -58,6 +58,7 @@
  #define AP_IOL_H
  
@@ -40,7 +40,7 @@ RCS file: /home/cvs/apache-2.0/src/include/http_protocol.h,v
 retrieving revision 1.19
 diff -u -d -b -w -u -r1.19 http_protocol.h
 --- include/http_protocol.h	2000/07/11 03:48:17	1.19
-+++ include/http_protocol.h	2000/07/13 16:30:52
++++ include/http_protocol.h	2000/07/14 00:24:57
 @@ -89,8 +89,15 @@
  API_EXPORT(void) ap_basic_http_header(request_rec *r);
  
@@ -64,7 +64,7 @@ RCS file: /home/cvs/apache-2.0/src/include/httpd.h,v
 retrieving revision 1.64
 diff -u -d -b -w -u -r1.64 httpd.h
 --- include/httpd.h	2000/06/30 21:18:13	1.64
-+++ include/httpd.h	2000/07/13 16:30:52
++++ include/httpd.h	2000/07/14 00:24:57
 @@ -596,6 +596,11 @@
  				 * pointer back to the main request.
  				 */
@@ -83,7 +83,7 @@ RCS file: /home/cvs/apache-2.0/src/lib/apr/configure.in,v
 retrieving revision 1.133
 diff -u -d -b -w -u -r1.133 configure.in
 --- lib/apr/configure.in	2000/07/13 03:41:04	1.133
-+++ lib/apr/configure.in	2000/07/13 16:30:52
++++ lib/apr/configure.in	2000/07/14 00:24:58
 @@ -678,8 +678,8 @@
  AC_SUBST(EXEEXT)
  
@@ -101,7 +101,7 @@ RCS file: /home/cvs/apache-2.0/src/main/Makefile.in,v
 retrieving revision 1.16
 diff -u -d -b -w -u -r1.16 Makefile.in
 --- main/Makefile.in	2000/07/01 14:14:15	1.16
-+++ main/Makefile.in	2000/07/13 16:31:02
++++ main/Makefile.in	2000/07/14 00:25:04
 @@ -8,7 +8,7 @@
  	http_protocol.c http_request.c http_vhost.c util.c util_date.c \
  	util_script.c util_uri.c util_md5.c util_cfgtree.c util_ebcdic.c \
@@ -117,7 +117,7 @@ RCS file: /home/cvs/apache-2.0/src/main/http_core.c,v
 retrieving revision 1.88
 diff -u -d -b -w -u -r1.88 http_core.c
 --- main/http_core.c	2000/07/11 03:48:18	1.88
-+++ main/http_core.c	2000/07/13 16:31:03
++++ main/http_core.c	2000/07/14 00:25:04
 @@ -71,6 +71,8 @@
  #include "util_md5.h"
  #include "apr_fnmatch.h"
@@ -217,7 +217,7 @@ RCS file: /home/cvs/apache-2.0/src/main/http_protocol.c,v
 retrieving revision 1.96
 diff -u -d -b -w -u -r1.96 http_protocol.c
 --- main/http_protocol.c	2000/07/13 16:26:42	1.96
-+++ main/http_protocol.c	2000/07/13 16:31:03
++++ main/http_protocol.c	2000/07/14 00:25:04
 @@ -64,6 +64,8 @@
   */
  
@@ -278,7 +278,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +    bb = ap_bucket_brigade_create(r->pool);
 +    bb->head = bb->tail = ap_bucket_list_create();
 +    b = ap_bucket_new(AP_BUCKET_mmap);
-+    ap_mmap_bucket_insert((ap_bucket_mmap *)b->data, mm);
++    b->insert(b, mm, mm->size, &total_bytes_sent);
 +    bb->head->bucket = b;
 +    total_bytes_sent = ap_pass_brigade(r, f, bb);
 +
@@ -313,7 +313,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +    bb = ap_bucket_brigade_create(r->pool);
 +    bb->head = bb->tail = ap_bucket_list_create();
 +    b = ap_bucket_new(AP_BUCKET_rwmem);
-+    ap_rwmem_write(b->data, &c, 1, &written); 
++    b->insert(b, &c, 1, &written); 
 +    bb->head->bucket = b;
 +    ap_pass_brigade(r, f, bb);
 +
@@ -350,7 +350,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +    bb = ap_bucket_brigade_create(r->pool);
 +    bb->head = bb->tail = ap_bucket_list_create();
 +    b = ap_bucket_new(AP_BUCKET_rwmem);
-+    ap_rwmem_write(b->data, str, strlen(str), &written); 
++    b->insert(b, str, strlen(str), &written); 
 +    bb->head->bucket = b;
 +    ap_pass_brigade(r, f, bb);
 +
@@ -389,7 +389,7 @@ diff -u -d -b -w -u -r1.96 http_protocol.c
 +    bb = ap_bucket_brigade_create(r->pool);
 +    bb->head = bb->tail = ap_bucket_list_create();
 +    b = ap_bucket_new(AP_BUCKET_rwmem);
-+    ap_rwmem_write(b->data, buf, nbyte, &written); 
++    b->insert(b, buf, nbyte, &written); 
 +    bb->head->bucket = b;
 +    ap_pass_brigade(r, f, bb);
 +    return written;
@@ -522,7 +522,7 @@ RCS file: /home/cvs/apache-2.0/src/main/http_request.c,v
 retrieving revision 1.35
 diff -u -d -b -w -u -r1.35 http_request.c
 --- main/http_request.c	2000/06/24 17:33:57	1.35
-+++ main/http_request.c	2000/07/13 16:31:03
++++ main/http_request.c	2000/07/14 00:25:04
 @@ -1263,6 +1263,12 @@
          return;
      }
@@ -542,7 +542,7 @@ RCS file: /home/cvs/apache-2.0/src/modules/mpm/config.m4,v
 retrieving revision 1.23
 diff -u -d -b -w -u -r1.23 config.m4
 --- modules/mpm/config.m4	2000/07/11 19:00:16	1.23
-+++ modules/mpm/config.m4	2000/07/13 16:31:05
++++ modules/mpm/config.m4	2000/07/14 00:25:05
 @@ -3,7 +3,6 @@
  [  --with-mpm=MPM          Choose the process model for Apache to use.
                            MPM={dexter,mpmt_beos,mpmt_pthread,prefork,spmt_os2}],[
