@@ -711,7 +711,59 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE \
                 || (s) == APR_OS_START_SYSERR + ERROR_BROKEN_PIPE)
 
-#else /* !def OS2 || WIN32 */
+#elif defined(NETWARE) /* !def OS2 || WIN32 */
+
+#define APR_FROM_OS_ERROR(e)  (e)
+#define APR_TO_OS_ERROR(e)    (e)
+#define APR_TO_NETOS_ERROR(e)    (e-APR_OS_START_SYSERR)
+
+#define apr_get_os_error()    (errno)
+#define apr_set_os_error(e)   (errno = (e))
+
+#define apr_get_netos_error()   (WSAGetLastError()+APR_OS_START_SYSERR)
+
+#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
+
+/* APR CANONICAL ERROR TESTS */
+#define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
+#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
+#define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG)
+#define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT)
+#define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
+#define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC)
+#define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
+#define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE)
+#define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
+#define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF)
+#define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL)
+#define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE)
+
+#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
+                || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
+#define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
+                || (s) == APR_OS_START_SYSERR + WSAEINTR)
+#define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK \
+                || (s) == APR_OS_START_SYSERR + WSAENOTSOCK)
+#define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED \
+                || (s) == APR_OS_START_SYSERR + WSAECONNREFUSED)
+#define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
+                || (s) == APR_OS_START_SYSERR + WSAEINPROGRESS)
+#define APR_STATUS_IS_ECONNABORTED(s)   ((s) == APR_ECONNABORTED \
+                || (s) == APR_OS_START_SYSERR + WSAECONNABORTED)
+#define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
+                || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
+#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT) \
+                || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
+#define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
+                || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
+#define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
+                || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
+#define APR_STATUS_IS_ENETDOWN(s)       ((s) == APR_OS_START_SYSERR + WSAENETDOWN)
+
+#define APR_STATUS_IS_EFTYPE(s)          ((s) == APR_EFTYPE)
+#define APR_STATUS_IS_EPIPE(s)           ((s) == APR_EPIPE)
+#else /* endif defined(NETWARE) */
 
 /*
  *  os error codes are clib error codes
@@ -721,8 +773,32 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
+
 #ifdef NETWARE
 #define apr_get_netos_error()   (WSAGetLastError()+APR_OS_START_SYSERR)
+
+#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
+                || (s) == APR_OS_START_SYSERR + ERROR_NO_DATA \
+                || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
+#define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
+                || (s) == APR_OS_START_SYSERR + WSAEINTR)
+#define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK \
+                || (s) == APR_OS_START_SYSERR + WSAENOTSOCK)
+#define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED \
+                || (s) == APR_OS_START_SYSERR + WSAECONNREFUSED)
+#define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
+                || (s) == APR_OS_START_SYSERR + WSAEINPROGRESS)
+#define APR_STATUS_IS_ECONNABORTED(s)   ((s) == APR_ECONNABORTED \
+                || (s) == APR_OS_START_SYSERR + WSAECONNABORTED)
+#define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
+                || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
+#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT) \
+                || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
+#define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
+                || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
+#define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
+                || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
 #endif
 
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
