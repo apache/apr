@@ -109,6 +109,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     }
     
     apr_signal_init(pool);
+    setGlobalPool((void*)pool);
 
     return APR_SUCCESS;
 }
