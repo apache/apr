@@ -226,6 +226,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_EGENERAL     General failure (specific information not available)
  * APR_EBADIP       The specified IP address is invalid
  * APR_EBADMASK     The specified netmask is invalid
+ * APR_ESYMNOTFOUND Could not find the requested symbol
  * </PRE>
  *
  * <PRE>
@@ -309,6 +310,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EBADPATH       (APR_OS_START_ERROR + 24)
 /** @see APR_STATUS_IS_EPATHWILD */
 #define APR_EPATHWILD      (APR_OS_START_ERROR + 25)
+/** @see APR_STATUS_IS_ESYMNOTFOUND */
+#define APR_ESYMNOTFOUND   (APR_OS_START_ERROR + 26)
 
 /* APR ERROR VALUE TESTS */
 /** 
@@ -379,6 +382,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
 /** The given path contained wildcards. */
 #define APR_STATUS_IS_EPATHWILD(s)      ((s) == APR_EPATHWILD)
+/** Could not find the requested symbol. */
+#define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND)
 
 /* APR STATUS VALUES */
 /** @see APR_STATUS_IS_INCHILD */
