@@ -102,7 +102,7 @@ static apr_status_t wait_for_io_or_timeout(apr_file_t *file, int for_read)
 /* problems: 
  * 1) ungetchar not used for buffered files
  */
-apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 {
     apr_ssize_t rv;
     apr_size_t bytes_read;
@@ -206,7 +206,7 @@ apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
     }
 }
 
-apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_size_t rv;
 
@@ -277,8 +277,8 @@ apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nb
     }
 }
 
-apr_status_t apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
-                      apr_size_t nvec, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
+                                          apr_size_t nvec, apr_size_t *nbytes)
 {
 #ifdef HAVE_WRITEV
     int bytes;
@@ -297,34 +297,34 @@ apr_status_t apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
 #endif
 }
 
-apr_status_t apr_file_putc(char ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile)
 {
     apr_size_t nbytes = 1;
 
     return apr_file_write(thefile, &ch, &nbytes);
 }
 
-apr_status_t apr_file_ungetc(char ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile)
 {
     thefile->ungetchar = (unsigned char)ch;
     return APR_SUCCESS; 
 }
 
-apr_status_t apr_file_getc(char *ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
 {
     apr_size_t nbytes = 1;
 
     return apr_file_read(thefile, ch, &nbytes);
 }
 
-apr_status_t apr_file_puts(const char *str, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
 {
     apr_size_t nbytes = strlen(str);
 
     return apr_file_write(thefile, str, &nbytes);
 }
 
-apr_status_t apr_file_flush(apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
         apr_int64_t written = 0;
@@ -346,7 +346,7 @@ apr_status_t apr_file_flush(apr_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-apr_status_t apr_file_gets(char *str, int len, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
     apr_status_t rv = APR_SUCCESS; /* get rid of gcc warning */
     apr_size_t nbytes;

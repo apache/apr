@@ -82,7 +82,7 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
     return rv != APR_SUCCESS ? rv : flush_rv;
 }
 
-apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cont)
 {
     int oflags = 0;
 #if APR_HAS_THREADS
@@ -172,7 +172,7 @@ apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag
     return APR_SUCCESS;
 }
 
-apr_status_t apr_file_close(apr_file_t *file)
+APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 {
     apr_status_t rv;
 
@@ -183,7 +183,7 @@ apr_status_t apr_file_close(apr_file_t *file)
     return rv;
 }
 
-apr_status_t apr_file_remove(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
 {
     if (unlink(path) == 0) {
         return APR_SUCCESS;
@@ -193,8 +193,8 @@ apr_status_t apr_file_remove(const char *path, apr_pool_t *cont)
     }
 }
 
-apr_status_t apr_file_rename(const char *from_path, const char *to_path,
-                           apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path, const char *to_path,
+                                          apr_pool_t *p)
 {
     if (rename(from_path, to_path) != 0) {
         return errno;
@@ -202,14 +202,14 @@ apr_status_t apr_file_rename(const char *from_path, const char *to_path,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_file_get(apr_os_file_t *thefile, apr_file_t *file)
+APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile, apr_file_t *file)
 {
     *thefile = file->filedes;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile,
-                             apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile,
+                                          apr_pool_t *cont)
 {
     int *dafile = thefile;
     
@@ -227,7 +227,7 @@ apr_status_t apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile,
     return APR_SUCCESS;
 }    
 
-apr_status_t apr_file_eof(apr_file_t *fptr)
+APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
 {
     if (fptr->eof_hit == 1) {
         return APR_EOF;
@@ -235,21 +235,21 @@ apr_status_t apr_file_eof(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-apr_status_t apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
     int fd = STDERR_FILENO;
 
     return apr_os_file_put(thefile, &fd, cont);
 }
 
-apr_status_t apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
 {
     int fd = STDOUT_FILENO;
 
     return apr_os_file_put(thefile, &fd, cont);
 }
 
-apr_status_t apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
 {
     int fd = STDIN_FILENO;
 

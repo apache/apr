@@ -59,7 +59,7 @@
 #if APR_HAS_THREADS
 
 #if APR_HAVE_PTHREAD_H
-apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
 {
     apr_status_t stat;
   
@@ -82,7 +82,7 @@ apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
     return stat;
 }
 
-apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
+APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
 {
     apr_status_t stat;
 #ifdef PTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR
@@ -102,7 +102,7 @@ apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
     }
 }
 
-apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
+APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 {
     int state;
 
@@ -122,9 +122,9 @@ static void *dummy_worker(void *opaque)
     return thread->func(thread, thread->data);
 }
 
-apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
-                             apr_thread_start_t func, void *data, 
-                             apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
+                                            apr_thread_start_t func, void *data, 
+                                            apr_pool_t *cont)
 {
     apr_status_t stat;
     pthread_attr_t *temp;
@@ -166,24 +166,24 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
     } 
 }
 
-apr_os_thread_t apr_os_thread_current(void)
+APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
 {
     return pthread_self();
 }
 
-int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
+APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
 {
     return pthread_equal(tid1, tid2);
 }
 
-apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
+APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
     apr_pool_destroy(thd->cntxt);
     pthread_exit(retval);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
+APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
 {
     apr_status_t stat;
     apr_status_t *thread_stat;
@@ -200,7 +200,7 @@ apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
     }
 }
 
-apr_status_t apr_thread_detach(apr_thread_t *thd)
+APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
     apr_status_t stat;
 
@@ -223,25 +223,25 @@ void apr_thread_yield()
 {
 }
 
-apr_status_t apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
+APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
 {
     return apr_pool_userdata_get(data, key, thread->cntxt);
 }
 
-apr_status_t apr_thread_data_set(void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
                               apr_status_t (*cleanup) (void *),
                               apr_thread_t *thread)
 {
     return apr_pool_userdata_set(data, key, cleanup, thread->cntxt);
 }
 
-apr_status_t apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
+APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
 {
     *thethd = thd->td;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
+APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
                              apr_pool_t *cont)
 {
     if (cont == NULL) {
@@ -262,9 +262,9 @@ APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
 
 #if !APR_HAS_THREADS
 
-apr_status_t apr_os_thread_get(void); /* avoid warning for no prototype */
+APR_DECLARE(apr_status_t) apr_os_thread_get(void); /* avoid warning for no prototype */
 
-apr_status_t apr_os_thread_get(void) 
+APR_DECLARE(apr_status_t) apr_os_thread_get(void) 
 {
     return APR_ENOTIMPL;
 }

@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Wrap all functions in APR_DECLARE macro. 
+     [Sterling Hughes <sterling@designmultimedia.com>]
+
   *) Non-blocking connects shouldn't be calling connect a second
      time.  According to Single Unix, a non-blocking connect has
      succeeded when the select pops successfully.  It has failed

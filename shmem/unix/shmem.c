@@ -61,7 +61,7 @@ struct shmem_t {
     MM *mm;
 };
 
-apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
 {
     MM *newmm = mm_create(reqsize + sizeof(**m), file, MM_ALLOCATE_ENOUGH);
     if (newmm == NULL) {
@@ -78,13 +78,13 @@ apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *fi
     return APR_SUCCESS;
 }
 
-apr_status_t apr_shm_destroy(struct shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_destroy(struct shmem_t *m)
 {
     mm_destroy(m->mm);
     return APR_SUCCESS;
 }
 
-void *apr_shm_malloc(struct shmem_t *c, apr_size_t reqsize)
+APR_DECLARE(void *) apr_shm_malloc(struct shmem_t *c, apr_size_t reqsize)
 {
     if (c->mm == NULL) {
         return NULL;
@@ -92,7 +92,7 @@ void *apr_shm_malloc(struct shmem_t *c, apr_size_t reqsize)
     return mm_malloc(c->mm, reqsize);
 }
 
-void *apr_shm_calloc(struct shmem_t *shared, apr_size_t size) 
+APR_DECLARE(void *) apr_shm_calloc(struct shmem_t *shared, apr_size_t size) 
 {
     if (shared == NULL) {
         return NULL;
@@ -100,13 +100,13 @@ void *apr_shm_calloc(struct shmem_t *shared, apr_size_t size)
     return mm_calloc(shared->mm, 1, size);
 }
 
-apr_status_t apr_shm_free(struct shmem_t *shared, void *entity)
+APR_DECLARE(apr_status_t) apr_shm_free(struct shmem_t *shared, void *entity)
 {
     mm_free(shared->mm, entity);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
+APR_DECLARE(apr_status_t) apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
 {
 #if APR_USES_ANONYMOUS_SHM
     *name = NULL;
@@ -121,7 +121,7 @@ apr_status_t apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
 #endif
 }
 
-apr_status_t apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
+APR_DECLARE(apr_status_t) apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
 {
 #if APR_USES_ANONYMOUS_SHM
     return APR_ANONYMOUS;
@@ -135,7 +135,7 @@ apr_status_t apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
 #endif
 }
 
-apr_status_t apr_shm_open(struct shmem_t *c)
+APR_DECLARE(apr_status_t) apr_shm_open(struct shmem_t *c)
 {
 #if APR_USES_ANONYMOUS_SHM
 
@@ -153,7 +153,7 @@ apr_status_t apr_shm_open(struct shmem_t *c)
 #endif
 }
 
-apr_status_t apr_shm_avail(struct shmem_t *c, apr_size_t *size)
+APR_DECLARE(apr_status_t) apr_shm_avail(struct shmem_t *c, apr_size_t *size)
 {
     *size = mm_available(c);
     if (*size == 0) {

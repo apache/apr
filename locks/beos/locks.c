@@ -273,9 +273,9 @@ static apr_status_t _destroy_lock(apr_lock_t *lock)
     return stat;
 }
 
-apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
-                           apr_lockscope_e scope, const char *fname, 
-                           apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
+                                          apr_lockscope_e scope, const char *fname, 
+                                          apr_pool_t *pool)
 {
     apr_lock_t *new;
     apr_status_t stat = APR_SUCCESS;
@@ -302,7 +302,7 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_acquire(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
 
@@ -328,12 +328,12 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock)
 {
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
+APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
 {
     switch (lock->type)
     {
@@ -354,7 +354,7 @@ apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_release(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock)
 {
     apr_status_t stat = APR_SUCCESS;
 
@@ -394,7 +394,7 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_destroy(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock)
 {
     apr_status_t stat; 
 
@@ -411,32 +411,34 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, 
-			                     apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock, const char *fname, 
+			                                  apr_pool_t *pool)
 {
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_data_get(apr_lock_t *lock, const char *key, void *data)
+APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, 
+                                            const char *key, void *data)
 {
     return apr_pool_userdata_get(data, key, lock->pool);
 }
 
-apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
-                            apr_status_t (*cleanup) (void *))
+APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, 
+                                            void *data, const char *key,
+                                            apr_status_t (*cleanup) (void *))
 {
     return apr_pool_userdata_set(data, key, cleanup, lock->pool);
 }
 
-apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
     oslock->sem = lock->Lock;
     oslock->ben = lock->LockCount;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
-                             apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
+                                          apr_pool_t *pool)
 {
     if (pool == NULL) {
         return APR_ENOPOOL;
@@ -450,4 +452,4 @@ apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock,
 
     return APR_SUCCESS;
 }
-    
+

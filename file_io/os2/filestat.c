@@ -115,8 +115,8 @@ static apr_status_t handle_type(apr_filetype_e *ftype, HFILE file)
 
 
 
-apr_status_t apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted, 
-                             apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted, 
+                                   apr_file_t *thefile)
 {
     ULONG rc;
     FILESTATUS3 fstatus;
@@ -145,14 +145,14 @@ apr_status_t apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted,
     return APR_OS2_STATUS(rc);
 }
 
-apr_status_t apr_file_perms_set(const char *fname, apr_fileperms_t perms)
+APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname, apr_fileperms_t perms)
 {
     return APR_ENOTIMPL;
 }
 
 
-apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
-                      apr_int32_t wanted, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
+                              apr_int32_t wanted, apr_pool_t *cont)
 {
     ULONG rc;
     FILESTATUS3 fstatus;
@@ -177,8 +177,8 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
 
 
 
-apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname,
-                       apr_int32_t wanted, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
+                                    apr_int32_t wanted, apr_pool_t *cont)
 {
     return apr_stat(finfo, fname, wanted, cont);
 }
