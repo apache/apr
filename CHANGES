@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Add Solaris 8's sendfilev() support.  This requires the following 
+     patches from Sun: 111297 (Sparc), 111298 (x86).  You'll need the
+     other patches listed in the patch description.  [Justin Erenkrantz]
+
   *) Close file descriptor when we are done with fcntl or flock-based
      cross-process lock.  Otherwise, we leak descriptors.
      [Justin Erenkrantz]
