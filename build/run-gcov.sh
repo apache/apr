@@ -93,6 +93,8 @@ for i in `find . -name "*.gcov" -print`; do
     echo " <a href=\"$name\">$name</a><br>"  >> index.html
 done;
 
+echo "<p>Last generated `date`</p>" >> index.html
+
 cat >> index.html << EOF
 </td></tr>
 </table>
@@ -100,7 +102,7 @@ cat >> index.html << EOF
    <tr><td colspan="2"><hr noshade="noshade" size="1"/></td></tr>
    <tr><td colspan="2" align="center">
         <font size="-1">
-         <em>Copyright &#169; 1999-2003, The Apache Software Foundation</em>
+         <em>Copyright &#169; 1999-2004, The Apache Software Foundation</em>
         </font>
        </td>
    </tr>
