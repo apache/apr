@@ -64,6 +64,7 @@
  * length on a platform?
  */
 #define PATH_LEN 255
+#define TEST_STRING "This is the MMAP data file."APR_EOL_STR
 
 #if !APR_HAS_MMAP
 static void not_implemented(CuTest *tc)
@@ -77,16 +78,19 @@ static apr_mmap_t *themmap = NULL;
 static apr_file_t *thefile = NULL;
 static char *file1;
 static apr_finfo_t finfo;
+static int fsize;
 
 static void create_filename(CuTest *tc)
 {
     char *oldfileptr;
 
     apr_filepath_get(&file1, 0, p);
+#ifndef NETWARE
 #ifdef WIN32
     CuAssertTrue(tc, file1[1] == ':');
 #else
     CuAssertTrue(tc, file1[0] == '/');
+#endif
 #endif
     CuAssertTrue(tc, file1[strlen(file1) - 1] != '/');
 
@@ -115,7 +119,6 @@ static void test_file_open(CuTest *tc)
 static void test_get_filesize(CuTest *tc)
 {
     apr_status_t rv;
-    int fsize = strlen("This is the MMAP data file."APR_EOL_STR);
 
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
@@ -133,12 +136,13 @@ static void test_mmap_create(CuTest *tc)
 
 static void test_mmap_contents(CuTest *tc)
 {
-    int fsize = strlen("This is the MMAP data file."APR_EOL_STR);
     
     CuAssertPtrNotNull(tc, themmap);
     CuAssertPtrNotNull(tc, themmap->mm);
     CuAssertIntEquals(tc, fsize, themmap->size);
-    CuAssertStrEquals(tc, themmap->mm, "This is the MMAP data file."APR_EOL_STR);
+
+    /* Must use nEquals since the string is not guaranteed to be NULL terminated */
+    CuAssertStrNEquals(tc, themmap->mm, TEST_STRING, fsize);
 }
 
 static void test_mmap_delete(CuTest *tc)
@@ -157,13 +161,16 @@ static void test_mmap_offset(CuTest *tc)
 
     CuAssertPtrNotNull(tc, themmap);
     rv = apr_mmap_offset(&addr, themmap, 5);
-    CuAssertStrEquals(tc, addr, "This is the MMAP data file."APR_EOL_STR + 5);
+
+    /* Must use nEquals since the string is not guaranteed to be NULL terminated */
+    CuAssertStrNEquals(tc, addr, TEST_STRING + 5, fsize-5);
 }
 #endif
 
 CuSuite *testmmap(void)
 {
     CuSuite *suite = CuSuiteNew("MMAP");
+    fsize = strlen(TEST_STRING);
 
 #if APR_HAS_MMAP    
     SUITE_ADD_TEST(suite, create_filename);
