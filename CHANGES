@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Add apr_temp_dir_get() for getting the most suitable temp directory
+     [CMike Pilato <cmpilato@collab.net>, Thom May]
+
   *) Modify apr_sockaddr_info_get to call the resolver when we
      do not have a hostname.  Also, fix bugs in the getaddrinfo()
      implementation.
