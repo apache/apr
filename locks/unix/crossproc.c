@@ -74,7 +74,7 @@ ap_status_t lock_cleanup(void *lock_)
     struct lock_t *lock=lock_;
     union semun ick;
     
-    if (lock->curr_locked == 1) {
+    if (lock->curr_interproc != -1) {
         ick.val = 0;
         semctl(lock->interproc, 0, IPC_RMID, ick);
     }
