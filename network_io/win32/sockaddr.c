@@ -129,7 +129,7 @@ ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
+ap_status_t ap_get_local_ipaddr(char **addr, ap_socket_t *sock)
 {
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sin_addr));
     return APR_SUCCESS;
@@ -137,14 +137,14 @@ ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
 
 
 
-ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock)
+ap_status_t ap_get_remote_ipaddr(char **addr, ap_socket_t *sock)
 {
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sin_addr));
     return APR_SUCCESS;
 }
 
 
-ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock)
+ap_status_t ap_get_local_name(struct sockaddr_in **name, ap_socket_t *sock)
 {
     *name = sock->local_addr;
     return APR_SUCCESS;
@@ -152,7 +152,7 @@ ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock
 
 
 
-ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock)
+ap_status_t ap_get_remote_name(struct sockaddr_in **name, ap_socket_t *sock)
 {
     *name = sock->remote_addr;
     return APR_SUCCESS;
