@@ -749,7 +749,7 @@ APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
     c = p->cleanups;
     while (c) {
         if (c->data == data && c->plain_cleanup == plain_cleanup) {
-            c->child_cleanup == child_cleanup;
+            c->child_cleanup = child_cleanup;
             break;
         }
 
