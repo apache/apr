@@ -72,7 +72,7 @@ APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid,
 
     if (getgrgid_r(groupid, &grp, grbuf, sizeof(grbuf), &gr)) {
 #else
-    if ((gr = getgrgid(userid)) == NULL) {
+    if ((gr = getgrgid(groupid)) == NULL) {
 #endif
         return errno;
     }
