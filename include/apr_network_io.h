@@ -181,6 +181,10 @@ struct in_addr {
 #define APR_UNSPEC   0
 #endif
 #if APR_HAVE_IPV6
+/** @def APR_INET6
+* IPv6 Address Family. Not all platforms may have this defined.
+*/
+
 #define APR_INET6    AF_INET6
 #endif
 
