@@ -129,9 +129,8 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 }
 
 apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
-                               apr_int32_t inherit, apr_pool_t *cont)
+                               apr_pool_t *cont)
 {
-    /* TODO: Implement inherit flag */
     int family = ofamily;
 
     if (family == AF_UNSPEC) {
@@ -271,9 +270,8 @@ apr_status_t apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)
 
 apr_status_t apr_os_sock_make(apr_socket_t **apr_sock, 
                               apr_os_sock_info_t *os_sock_info, 
-                              apr_int32_t inherit, apr_pool_t *cont)
+                              apr_pool_t *cont)
 {
-    /* TODO: Implement inherit flag */
     alloc_socket(apr_sock, cont);
     set_socket_vars(*apr_sock, os_sock_info->family);
     (*apr_sock)->timeout = -1;
