@@ -196,6 +196,10 @@ SOURCE=.\misc\win32\apr_app.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\misc\win32\charset.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\misc\unix\errorcodes.c
 # End Source File
 # Begin Source File
