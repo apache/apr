@@ -20,7 +20,6 @@ TARGETS= testfile@EXEEXT@ \
 	testtime@EXEEXT@ \
 	testargs@EXEEXT@ \
 	testcontext@EXEEXT@ \
-	ab@EXEEXT@ \
 	htdigest@EXEEXT@ \
 	testmmap@EXEEXT@ \
 	testshmem@EXEEXT@ \
@@ -36,7 +35,6 @@ OBJS= testfile.o \
 	testtime.o \
         testargs.o \
         testcontext.o \
-	ab_apr.o \
 	htdigest.o \
 	testmmap.o \
 	testdso.o \
@@ -65,9 +63,6 @@ testargs@EXEEXT@: testargs.o
 
 testcontext@EXEEXT@: testcontext.o
 	$(CC) $(CFLAGS) testcontext.o -o testcontext@EXEEXT@ $(LDFLAGS) 
-
-ab@EXEEXT@: ab_apr.o
-	$(CC) $(CFLAGS) ab_apr.o -o ab@EXEEXT@ $(LDFLAGS)
 
 htdigest@EXEEXT@: htdigest.o
 	$(CC) $(CFLAGS) htdigest.o -o htdigest@EXEEXT@ $(LDFLAGS)
@@ -118,10 +113,6 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-ab_apr.o: ab_apr.c $(INCDIR)/apr_network_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_getopt.h
 abc.o: abc.c $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h
 client.o: client.c $(INCDIR)/apr_network_io.h \
