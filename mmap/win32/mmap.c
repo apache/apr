@@ -114,6 +114,9 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     DWORD offlo;
     DWORD offhi;
 
+    if (size == 0)
+        return APR_EINVAL;
+    
     if (flag & APR_MMAP_WRITE)
         fmaccess |= PAGE_READWRITE;
     else if (flag & APR_MMAP_READ)
