@@ -52,8 +52,9 @@
  * <http://www.apache.org/>.
  */
 
-#include <errno.h>
+#include "apr_general.h"
 #include "apr.h"
+#include <errno.h>
 
 #ifndef APR_ERRNO_H
 #define APR_ERRNO_H
@@ -61,6 +62,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+typedef int ap_status_t;
+
+int ap_canonical_error(ap_status_t err);
+
 
 /* APR_OS_START_ERROR is where the APR specific error values should start.
  * APR_OS_START_STATUS is where the APR specific status codes should start.
@@ -74,11 +80,6 @@ extern "C" {
 #define APR_OS_START_USEERR    (APR_OS_START_STATUS + 500)
 #define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)
 #define APR_OS_START_SYSERR    (APR_OS_START_CANONERR + 500)
-
-typedef int ap_status_t;
-
-int ap_canonical_error(ap_status_t err);
-const char *ap_strerror(ap_status_t err);
 
 #define APR_OS2_STATUS(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
 
