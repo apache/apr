@@ -256,6 +256,8 @@ typedef unsigned short  nuint16;
       #define LOBYTE      NGetLo8
 #endif
 
+/* PROC mutex is a GLOBAL mutex on Netware */
+#define APR_PROC_MUTEX_IS_GLOBAL      1
 
 /* Definitions that APR programs need to work properly. */
 

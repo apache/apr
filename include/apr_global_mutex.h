@@ -75,6 +75,8 @@ extern "C" {
  * @{
  */
 
+#if !APR_PROC_MUTEX_IS_GLOBAL || defined(DOXYGEN)
+
 typedef struct apr_global_mutex_t apr_global_mutex_t;
 
 /*   Function definitions */
@@ -156,6 +158,24 @@ APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex);
  * @return apr_pool_t the pool
  */
 APR_POOL_DECLARE_ACCESSOR(global_mutex);
+
+#else /* APR_PROC_MUTEX_IS_GLOBAL */
+
+/* Some platforms [e.g. Win32] have cross process locks that are truly
+ * global locks, since there isn't the concept of cross-process locks.
+ * Define these platforms in terms of an apr_proc_mutex_t.
+ */
+
+#define apr_global_mutex_t          apr_proc_mutex_t
+#define apr_global_mutex_create     apr_proc_mutex_create
+#define apr_global_mutex_child_init apr_proc_mutex_child_init
+#define apr_global_mutex_lock       apr_proc_mutex_lock
+#define apr_global_mutex_trylock    apr_proc_mutex_trylock
+#define apr_global_mutex_unlock     apr_proc_mutex_unlock
+#define apr_global_mutex_destroy    apr_proc_mutex_destroy
+#define apr_global_mutex_pool_get   apr_proc_mutex_pool_get
+
+#endif
 
 #ifdef __cplusplus
 }
