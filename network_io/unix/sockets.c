@@ -58,7 +58,11 @@
 static apr_status_t socket_cleanup(void *sock)
 {
     apr_socket_t *thesocket = sock;
+#ifndef BEOS
     if (close(thesocket->socketdes) == 0) {
+#else
+    if (closesocket(thesocket->socketdes) == 0) {
+#endif
         thesocket->socketdes = -1;
         return APR_SUCCESS;
     }
@@ -246,6 +250,7 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
             sock->local_port_unknown = 1;
         }
         /* XXX IPv6 to be handled better later... */
+#if APR_HAVE_IPV6
         if (sock->local_addr->sa.sin.sin_family == AF_INET6 ||
             sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
             /* not bound to specific local interface; connect() had to assign
@@ -253,6 +258,7 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
              */
             sock->local_interface_unknown = 1;
         }
+#endif
 #ifndef HAVE_POLL
         sock->connected=1;
 #endif
