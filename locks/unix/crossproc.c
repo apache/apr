@@ -57,12 +57,12 @@
 #include "locks.h"
 #include "fileio.h" /* for apr_mkstemp() */
 
-#if APR_USE_SYSVSEM_SERIALIZE  
+#if APR_HAS_SYSVSEM_SERIALIZE
 
 static struct sembuf op_on;
 static struct sembuf op_off;
 
-void apr_unix_setup_lock(void)
+static void sysv_setup(void)
 {
     op_on.sem_num = 0;
     op_on.sem_op = -1;
@@ -72,7 +72,7 @@ void apr_unix_setup_lock(void)
     op_off.sem_flg = SEM_UNDO;
 }
 
-static apr_status_t lock_cleanup(void *lock_)
+static apr_status_t sysv_cleanup(void *lock_)
 {
     apr_lock_t *lock=lock_;
     union semun ick;
@@ -84,28 +84,28 @@ static apr_status_t lock_cleanup(void *lock_)
     return APR_SUCCESS;
 }    
 
-apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
+static apr_status_t sysv_create(apr_lock_t *new, const char *fname)
 {
     union semun ick;
     
     new->interproc = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
 
     if (new->interproc < 0) {
-        lock_cleanup(new);
+        sysv_cleanup(new);
         return errno;
     }
     ick.val = 1;
     if (semctl(new->interproc, 0, SETVAL, ick) < 0) {
-        lock_cleanup(new);
+        sysv_cleanup(new);
         return errno;
     }
     new->curr_locked = 0;
-    apr_pool_cleanup_register(new->pool, (void *)new, lock_cleanup, 
+    apr_pool_cleanup_register(new->pool, (void *)new, sysv_cleanup, 
                               apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
+static apr_status_t sysv_acquire(apr_lock_t *lock)
 {
     int rc;
 
@@ -119,7 +119,7 @@ apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
+static apr_status_t sysv_release(apr_lock_t *lock)
 {
     int rc;
 
@@ -133,48 +133,59 @@ apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
+static apr_status_t sysv_destroy(apr_lock_t *lock)
 {
     apr_status_t stat;
 
-    if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(lock->pool, lock, lock_cleanup);
+    if ((stat = sysv_cleanup(lock)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(lock->pool, lock, sysv_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
+static apr_status_t sysv_child_init(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
 {
     return APR_SUCCESS;
 }
 
-#elif (APR_USE_PROC_PTHREAD_SERIALIZE)  
+const apr_unix_lock_methods_t apr_unix_sysv_methods =
+{
+    sysv_create,
+    sysv_acquire,
+    sysv_release,
+    sysv_destroy,
+    sysv_child_init
+};
 
-void apr_unix_setup_lock(void)
+#endif /* SysV sem implementation */
+
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+
+static void proc_pthread_setup(void)
 {
 }
 
-static apr_status_t lock_cleanup(void *lock_)
+static apr_status_t proc_pthread_cleanup(void *lock_)
 {
     apr_lock_t *lock=lock_;
     apr_status_t stat;
 
     if (lock->curr_locked == 1) {
-        if ((stat = pthread_mutex_unlock(lock->interproc))) {
+        if ((stat = pthread_mutex_unlock(lock->pthread_interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
             stat = errno;
 #endif
             return stat;
         } 
-        if (munmap((caddr_t)lock->interproc, sizeof(pthread_mutex_t))){
+        if (munmap((caddr_t)lock->pthread_interproc, sizeof(pthread_mutex_t))){
             return errno;
         }
     }
     return APR_SUCCESS;
 }    
 
-apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
+static apr_status_t proc_pthread_create(apr_lock_t *new, const char *fname)
 {
     apr_status_t stat;
     int fd;
@@ -185,10 +196,10 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
         return errno;
     }
 
-    new->interproc = (pthread_mutex_t *)mmap((caddr_t) 0, 
-                              sizeof(pthread_mutex_t), 
-                              PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); 
-    if (new->interproc == (pthread_mutex_t *) (caddr_t) -1) {
+    new->pthread_interproc = (pthread_mutex_t *)mmap((caddr_t) 0, 
+                                                     sizeof(pthread_mutex_t), 
+                                                     PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); 
+    if (new->pthread_interproc == (pthread_mutex_t *) (caddr_t) -1) {
         return errno;
     }
     close(fd);
@@ -196,22 +207,22 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        lock_cleanup(new);
+        proc_pthread_cleanup(new);
         return stat;
     }
     if ((stat = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        lock_cleanup(new);
+        proc_pthread_cleanup(new);
         return stat;
     }
 
-    if ((stat = pthread_mutex_init(new->interproc, &mattr))) {
+    if ((stat = pthread_mutex_init(new->pthread_interproc, &mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        lock_cleanup(new);
+        proc_pthread_cleanup(new);
         return stat;
     }
 
@@ -219,21 +230,21 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        lock_cleanup(new);
+        proc_pthread_cleanup(new);
         return stat;
     }
 
     new->curr_locked = 0;
-    apr_pool_register_cleanup(new->pool, (void *)new, lock_cleanup, 
+    apr_pool_cleanup_register(new->pool, (void *)new, proc_pthread_cleanup, 
                               apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
+static apr_status_t proc_pthread_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
 
-    if ((stat = pthread_mutex_lock(lock->interproc))) {
+    if ((stat = pthread_mutex_lock(lock->pthread_interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
@@ -243,11 +254,11 @@ apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
+static apr_status_t proc_pthread_release(apr_lock_t *lock)
 {
     apr_status_t stat;
 
-    if ((stat = pthread_mutex_unlock(lock->interproc))) {
+    if ((stat = pthread_mutex_unlock(lock->pthread_interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
@@ -257,27 +268,40 @@ apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
+static apr_status_t proc_pthread_destroy(apr_lock_t *lock)
 {
     apr_status_t stat;
-    if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(lock->pool, lock, lock_cleanup);
+    if ((stat = proc_pthread_cleanup(lock)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(lock->pool, lock, proc_pthread_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
+static apr_status_t proc_pthread_child_init(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
 {
     return APR_SUCCESS;
 }
 
-#elif (APR_USE_FCNTL_SERIALIZE)  
+const apr_unix_lock_methods_t apr_unix_proc_pthread_methods =
+{
+    proc_pthread_create,
+    proc_pthread_acquire,
+    proc_pthread_release,
+    proc_pthread_destroy,
+    proc_pthread_child_init
+};
+
+#endif
+
+#if APR_HAS_FCNTL_SERIALIZE
 
 static struct flock lock_it;
 static struct flock unlock_it;
 
-void apr_unix_setup_lock(void)
+static apr_status_t fcntl_release(apr_lock_t *);
+
+static void fcntl_setup(void)
 {
     lock_it.l_whence = SEEK_SET;        /* from current point */
     lock_it.l_start = 0;                /* -"- */
@@ -291,19 +315,20 @@ void apr_unix_setup_lock(void)
     unlock_it.l_pid = 0;                /* pid not actually interesting */
 }
 
-static apr_status_t lock_cleanup(void *lock_)
+static apr_status_t fcntl_cleanup(void *lock_)
 {
     apr_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        return apr_unix_unlock_inter(lock);
+        return fcntl_release(lock);
     }
     return APR_SUCCESS;
 }    
 
-apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
+static apr_status_t fcntl_create(apr_lock_t *new, const char *fname)
 {
-    if (new->fname) {
+    if (fname) {
+        new->fname = apr_pstrdup(new->pool, fname);
         new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
     }
     else {
@@ -312,18 +337,18 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
     }
 
     if (new->interproc < 0) {
-        lock_cleanup(new);
+        fcntl_cleanup(new);
         return errno;
     }
 
     new->curr_locked=0;
     unlink(new->fname);
-    apr_pool_cleanup_register(new->pool, (void*)new, lock_cleanup, 
+    apr_pool_cleanup_register(new->pool, (void*)new, fcntl_cleanup, 
                               apr_pool_cleanup_null);
     return APR_SUCCESS; 
 }
 
-apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
+static apr_status_t fcntl_acquire(apr_lock_t *lock)
 {
     int rc;
 
@@ -337,7 +362,7 @@ apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
+static apr_status_t fcntl_release(apr_lock_t *lock)
 {
     int rc;
 
@@ -351,43 +376,56 @@ apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
+static apr_status_t fcntl_destroy(apr_lock_t *lock)
 {
     apr_status_t stat;
-    if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(lock->pool, lock, lock_cleanup);
+    if ((stat = fcntl_cleanup(lock)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(lock->pool, lock, fcntl_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, 
-                                    const char *fname)
+static apr_status_t fcntl_child_init(apr_lock_t **lock, apr_pool_t *cont, 
+                                     const char *fname)
 {
     return APR_SUCCESS;
 }
 
+const apr_unix_lock_methods_t apr_unix_fcntl_methods =
+{
+    fcntl_create,
+    fcntl_acquire,
+    fcntl_release,
+    fcntl_destroy,
+    fcntl_child_init
+};
 
-#elif (APR_USE_FLOCK_SERIALIZE)
+#endif /* fcntl implementation */
 
-void apr_unix_setup_lock(void)
+#if APR_HAS_FLOCK_SERIALIZE
+
+static apr_status_t flock_release(apr_lock_t *);
+
+static void flock_setup(void)
 {
 }
 
-static apr_status_t lock_cleanup(void *lock_)
+static apr_status_t flock_cleanup(void *lock_)
 {
     apr_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        return apr_unix_unlock_inter(lock);
+        return flock_release(lock);
     }
     unlink(lock->fname);
     return APR_SUCCESS;
 }    
 
-apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
+static apr_status_t flock_create(apr_lock_t *new, const char *fname)
 {
-    if (new->fname) {
+    if (fname) {
+        new->fname = apr_pstrdup(new->pool, fname);
         new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
     }
     else {
@@ -396,16 +434,16 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
     }
 
     if (new->interproc < 0) {
-        lock_cleanup(new);
+        flock_cleanup(new);
         return errno;
     }
     new->curr_locked = 0;
-    apr_pool_cleanup_register(new->pool, (void *)new, lock_cleanup,
+    apr_pool_cleanup_register(new->pool, (void *)new, flock_cleanup,
                               apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
+static apr_status_t flock_acquire(apr_lock_t *lock)
 {
     int rc;
 
@@ -419,7 +457,7 @@ apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
+static apr_status_t flock_release(apr_lock_t *lock)
 {
     int rc;
 
@@ -433,18 +471,18 @@ apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
+static apr_status_t flock_destroy(apr_lock_t *lock)
 {
     apr_status_t stat;
-    if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(lock->new, lock, lock_cleanup);
+    if ((stat = flock_cleanup(lock)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(lock->pool, lock, flock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, 
-                            const char *fname)
+static apr_status_t flock_child_init(apr_lock_t **lock, apr_pool_t *cont, 
+                                     const char *fname)
 {
     apr_lock_t *new;
 
@@ -453,18 +491,36 @@ apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont,
     new->fname = apr_pstrdup(cont, fname);
     new->interproc = open(new->fname, O_WRONLY, 0600);
     if (new->interproc == -1) {
-        apr_unix_destroy_inter_lock(new);
+        flock_destroy(new);
         return errno;
     }
     *lock = new;
     return APR_SUCCESS;
 }
 
-#else
-/* No inter-process mutex on this platform.  Use at your own risk */
-#define create_inter_lock(x, y)
-#define lock_inter(x, y)
-#define unlock_inter(x, y)
-#define destroy_inter_lock(x, y)
-#define child_init_lock(x, y, z)
+const apr_unix_lock_methods_t apr_unix_flock_methods =
+{
+    flock_create,
+    flock_acquire,
+    flock_release,
+    flock_destroy,
+    flock_child_init
+};
+
+#endif /* flock implementation */
+
+void apr_unix_setup_lock(void)
+{
+#if APR_HAS_SYSVSEM_SERIALIZE
+    sysv_setup();
 #endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    proc_pthread_setup();
+#endif
+#if APR_HAS_FCNTL_SERIALIZE
+    fcntl_setup();
+#endif
+#if APR_HAS_FLOCK_SERIALIZE
+    flock_setup();
+#endif
+}
