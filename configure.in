@@ -261,6 +261,10 @@ case $host in
 esac
 
 dnl #----------------------------- Checks for Any required Libraries
+dnl Note: Autoconf will always append LIBS with an extra " " in AC_CHECK_LIB.
+dnl It should check for LIBS being empty and set LIBS equal to the new value 
+dnl without the extra " " in that case, but they didn't do that.  So, we
+dnl end up LIBS="-lm -lcrypt -lnsl  -ldl" which is an annoyance.
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_SEARCH_LIBS(gethostname, nsl)
 AC_CHECK_LIB(socket, socket)
