@@ -117,16 +117,34 @@ typedef gid_t                    apr_gid_t;
 typedef ino_t                    apr_ino_t;
 typedef dev_t                    apr_dev_t;
 
+/**
+ * The file information structure.  This is analogous to the POSIX
+ * stat structure.
+ */
 struct apr_finfo_t {
+    /** The access permissions of the file.  Currently this mimics Unix
+     *  access rights.
+     */
     apr_fileperms_t protection;
+    /** The type of file.  One of APR_NOFILE, APR_REG, APR_DIR, APR_CHR, 
+     *  APR_BLK, APR_PIPE, APR_LNK, APR_SOCK 
+     */
     ap_filetype_e filetype;
+    /** The user id that owns the file */
     apr_uid_t user;
+    /** The group id that owns the file */
     apr_gid_t group;
+    /** The inode of the file.  (Not portable?) */
     apr_ino_t inode;
+    /** The id of the device the file is on.  (Not portable?) */
     apr_dev_t device;
+    /** The size of the file */
     apr_off_t size;
+    /** The time the file was last accessed */
     apr_time_t atime;
+    /** The time the file was last modified */
     apr_time_t mtime;
+    /** The time the file was last changed */
     apr_time_t ctime;
 };
 

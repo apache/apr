@@ -92,23 +92,36 @@ typedef apr_int32_t apr_interval_time_t;
  */
 apr_time_t apr_now(void);
 
-/* a structure similar to ANSI struct tm with the following differences:
-   - tm_usec isn't an ANSI field
-   - tm_gmtoff isn't an ANSI field (it's a bsdism)
-*/
-typedef struct {
-    apr_int32_t tm_usec;	/* microseconds past tm_sec */
-    apr_int32_t tm_sec;	/* (0-61) seconds past tm_min */
-    apr_int32_t tm_min;  /* (0-59) minutes past tm_hour */
-    apr_int32_t tm_hour; /* (0-23) hours past midnight */
-    apr_int32_t tm_mday; /* (1-31) day of the month */
-    apr_int32_t tm_mon;  /* (0-11) month of the year */
-    apr_int32_t tm_year; /* year since 1900 */
-    apr_int32_t tm_wday; /* (0-6) days since sunday */
-    apr_int32_t tm_yday; /* (0-365) days since jan 1 */
-    apr_int32_t tm_isdst; /* daylight saving time */
-    apr_int32_t tm_gmtoff; /* seconds east of UTC */
-} ap_exploded_time_t;
+typedef struct ap_exploded_time_t ap_exploded_time_t;
+/**
+ * a structure similar to ANSI struct tm with the following differences:
+ *  - tm_usec isn't an ANSI field
+ *  - tm_gmtoff isn't an ANSI field (it's a bsdism)
+ */
+struct ap_exploded_time_t {
+    /** microseconds past tm_sec */
+    apr_int32_t tm_usec;
+    /** (0-61) seconds past tm_min */
+    apr_int32_t tm_sec;
+    /** (0-59) minutes past tm_hour */
+    apr_int32_t tm_min;
+    /** (0-23) hours past midnight */
+    apr_int32_t tm_hour;
+    /** (1-31) day of the month */
+    apr_int32_t tm_mday;
+    /** (0-11) month of the year */
+    apr_int32_t tm_mon;
+    /** year since 1900 */
+    apr_int32_t tm_year;
+    /** (0-6) days since sunday */
+    apr_int32_t tm_wday;
+    /** (0-365) days since jan 1 */
+    apr_int32_t tm_yday;
+    /** daylight saving time */
+    apr_int32_t tm_isdst;
+    /** seconds east of UTC */
+    apr_int32_t tm_gmtoff;
+};
 
 /**
  * convert an ansi time_t to an apr_time_t

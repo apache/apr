@@ -74,38 +74,58 @@ extern "C" {
  * Define the structures used by the APR general-purpose library.
  */
 
+/**
+ * @package APR Table library
+ */
+
 /*
  * Memory allocation stuff, like pools, arrays, and tables.  Pools
  * and tables are opaque structures to applications, but arrays are
  * published.
  */
 typedef struct apr_table_t apr_table_t;
-typedef struct apr_array_header_t {
-    apr_pool_t *cont;
-    int elt_size;
-    int nelts;
-    int nalloc;
-    char *elts;
-} apr_array_header_t;
+typedef struct apr_array_header_t apr_array_header_t;
 
+/** An opaque array type */
+struct apr_array_header_t {
+    /** The pool the array is allocated out of */
+    apr_pool_t *cont;
+    /** The amount of memory allocated for each element of the array */
+    int elt_size;
+    /** The number of active elements in the array */
+    int nelts;
+    /** The number of elements allocated in the array */
+    int nalloc;
+    /** The elements in the array */
+    char *elts;
+};
+
+/** The opaque table type */
 struct apr_table_t {
     /* This has to be first to promote backwards compatibility with
      * older modules which cast a apr_table_t * to an apr_array_header_t *...
      * they should use the table_elts() function for most of the
      * cases they do this for.
      */
+    /** The underlying array for the table */
     apr_array_header_t a;
 #ifdef MAKE_TABLE_PROFILE
+    /** Who created the array. */
     void *creator;
 #endif
 };
 
-typedef struct apr_table_entry_t {
+typedef struct apr_table_entry_t apr_table_entry_t;
+
+/** The type for each entry in a table */
+struct apr_table_entry_t {
+    /** The key for the current table entry */
     char *key;          /* maybe NULL in future;
                          * check when iterating thru table_elts
                          */
+    /** The value for the current table entry */
     char *val;
-} apr_table_entry_t;
+};
 
 /* XXX: these know about the definition of struct apr_table_t in alloc.c.  That
  * definition is not here because it is supposed to be private, and by not

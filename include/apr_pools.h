@@ -102,9 +102,20 @@ enum kill_conditions {
     kill_only_once              /* send SIGTERM and then wait */
 };
 
+/** A list of processes */
 struct process_chain {
+    /** The process ID */
     apr_proc_t *pid;
+    /** When the process should be sent a signal. <PRE>
+     *           kill_never   -- process is never sent any signals
+     *           kill_always  -- process is sent SIGKILL on apr_pool_t cleanup
+     *           kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
+     *           just_wait    -- wait forever for the process to complete
+     *           kill_only_once -- send SIGTERM and then wait </PRE>
+     */
     enum kill_conditions kill_how;
+    /** The next process in the list 
+     *  @defvar process_chain *next */
     struct process_chain *next;
 };
 

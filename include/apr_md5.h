@@ -100,16 +100,21 @@ extern "C" {
 
 /* UINT4 defines a four byte word */
 typedef unsigned int UINT4;
+typedef struct ap_md5_ctx_t ap_md5_ctx_t;
 
-/* MD5 context. */
-typedef struct {
-    UINT4 state[4];		/* state (ABCD) */
-    UINT4 count[2];		/* number of bits, modulo 2^64 (lsb first) */
-    unsigned char buffer[64];	/* input buffer */
+/** MD5 context. */
+struct ap_md5_ctx_t {
+    /** state (ABCD) */
+    UINT4 state[4];
+    /** number of bits, modulo 2^64 (lsb first) */
+    UINT4 count[2];
+    /** input buffer */
+    unsigned char buffer[64];
 #if APR_HAS_XLATE
-    apr_xlate_t *xlate;          /* translation handle */
+    /** translation handle */
+    apr_xlate_t *xlate;
 #endif
-} ap_md5_ctx_t;
+};
 
 /**
  * MD5 Initialize.  Begins an MD5 operation, writing a new context.
