@@ -116,6 +116,12 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
+void *dummy_worker(void *opaque)
+{
+    apr_thread_t *thread = (apr_thread_t*)opaque;
+    return thread->func(thread, thread->data);
+}
+
 apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
                              apr_thread_start_t func, void *data, 
                              apr_pool_t *cont)
@@ -136,18 +142,20 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
     }
 
     (*new)->cntxt = cont;
-
+    (*new)->data = data;
+    (*new)->func = func;
+    
     if (attr)
         temp = attr->attr;
     else
         temp = NULL;
-    
+
     stat = apr_pool_create(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }
 
-    if ((stat = pthread_create((*new)->td, temp, func, data)) == 0) {
+    if ((stat = pthread_create((*new)->td, temp, dummy_worker, (*new))) == 0) {
         return APR_SUCCESS;
     }
     else {
@@ -240,6 +248,9 @@ apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd,
     (*thd)->td = thethd;
     return APR_SUCCESS;
 }
+
+APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
+
 #endif  /* HAVE_PTHREAD_H */
 #endif  /* APR_HAS_THREADS */
 

@@ -125,7 +125,10 @@ typedef struct apr_threadkey_t        apr_threadkey_t;
 typedef struct apr_other_child_rec_t  apr_other_child_rec_t;
 #endif /* APR_HAS_OTHER_CHILD */
 
-typedef void *(APR_THREAD_FUNC *apr_thread_start_t)(void *);
+/**
+ * The prototype for any APR thread worker functions.
+ */
+typedef void *(APR_THREAD_FUNC *apr_thread_start_t)(apr_thread_t*, void*);
 
 enum kill_conditions {
     kill_never,                 /* process is never sent any signals */
@@ -599,6 +602,14 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void);
  * apr_status_t apr_signal_thread((int)(*signal_handler)(int signum))
  */
 APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum));
+
+/**
+ * Get the child-pool used by the thread from the thread info.
+ * @return apr_pool_t the pool
+ * @deffunc apr_pool_t apr_thread_info_pool_get(apr_thread_info_t *i)
+ */
+APR_POOL_DECLARE_ACCESSOR(thread);
+
 #endif /* APR_HAS_THREADS */
 
 #ifdef __cplusplus
