@@ -55,16 +55,22 @@ depend:
 # DO NOT REMOVE
 poll.o: poll.c networkio.h $(INCDIR1)/apr_network_io.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_portable.h \
+ $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_win.h $(INCDIR1)/apr_lock.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h
 sendrecv.o: sendrecv.c networkio.h $(INCDIR1)/apr_network_io.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_file_io.h
 sockets.o: sockets.c networkio.h $(INCDIR1)/apr_network_io.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h
-sockopt.o: sockopt.c networkio.h $(INCDIR1)/apr_network_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_portable.h \
+ $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_win.h $(INCDIR1)/apr_lock.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h
+sockopt.o: sockopt.c ../unix/sockopt.c ../unix/networkio.h \
+ $(INCDIR1)/apr_network_io.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_lock.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR)/apr_macro.h

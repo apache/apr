@@ -51,6 +51,10 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+default.o: default.c ../unix/getopt.c ../unix/misc.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h ../unix/start.c \
+ $(INCDIR)/apr_pools.h $(INCDIR1)/apr_lib.h
 getopt.o: getopt.c misc.h $(INCDIR1)/apr_general.h \
  $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
  $(INCDIR1)/apr_file_io.h
