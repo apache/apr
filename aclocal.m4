@@ -161,4 +161,3 @@ undefine([AC_TYPE_NAME])dnl
 undefine([AC_CV_NAME])dnl
 ])
 
-

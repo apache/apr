@@ -383,3 +383,40 @@ ap_status_t ap_set_timedata(struct atime_t *atime, void *data, char *key,
     }
 }
 
+#if defined(HAVE_GMTOFF)
+ap_status_t ap_get_gmtoff(int *tz, ap_time_t *tt, ap_context_t *cont)
+{
+    if (tt->currtime == NULL) {
+        tt->currtime = ap_pcalloc(cont, sizeof(struct timeval));
+    }
+    tt->currtime->tv_sec = time(NULL);
+    tt->explodedtime = localtime(&tt->currtime->tv_sec);
+    *tz = (int) (tt->explodedtime->tm_gmtoff / 60);
+    return APR_SUCCESS;
+}
+#else
+ap_status_t ap_get_gmtoff(int *tz, ap_time_t *tt, ap_context_t *cont)
+{
+    struct tm gmt;
+    int days, hours, minutes;
+
+    if (tt->currtime == NULL) {
+        tt->currtime = ap_pcalloc(cont, sizeof(struct timeval));
+    }
+    tt->currtime->tv_sec = time(NULL);
+
+    /* Assume we are never more than 24 hours away. */
+    /* remember gmtime/localtime return ptr to static */
+    /* buffer... so be careful */
+    gmt = *gmtime(&tt->currtime->tv_sec); 
+    tt->explodedtime = localtime(&tt->currtime->tv_sec);
+    days = tt->explodedtime->tm_yday - gmt.tm_yday;
+    hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24)
+             + tt->explodedtime->tm_hour - gmt.tm_hour);
+    minutes = hours * 60 + tt->explodedtime->tm_min - gmt.tm_min;
+    *tz = minutes;
+    return APR_SUCCESS;
+}
+#endif
+
+

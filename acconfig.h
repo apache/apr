@@ -44,6 +44,8 @@
 #undef NEED_RLIM_T
 #undef USEBCOPY
 
+#undef HAVE_GMTOFF
+
 #undef SIZEOF_SSIZE_T
 
 @BOTTOM@
