@@ -168,6 +168,9 @@ static void test_named(abts_case *tc, void *data)
 
     rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
     apr_assert_success(tc, "Error allocating shared memory block", rv);
+    if (rv != APR_SUCCESS) {
+        return;
+    }
     ABTS_PTR_NOTNULL(tc, shm);
 
     retsize = apr_shm_size_get(shm);
@@ -224,7 +227,7 @@ abts_suite *testshm(abts_suite *suite)
 #if APR_HAS_FORK
     abts_run_test(suite, test_anon, NULL);
 #endif
-   /* abts_run_test(suite, test_named, NULL); */
+    abts_run_test(suite, test_named, NULL); 
 #endif
 
     return suite;
