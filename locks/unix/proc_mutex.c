@@ -95,18 +95,18 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     sec = apr_time_sec(now);
     usec = apr_time_usec(now);
     apr_snprintf(semname, sizeof(semname), "/ApR.%lxZ%lx", sec, usec);
-    psem = sem_open((const char *) semname, O_CREAT, 0644, 1);
+    psem = sem_open(semname, O_CREAT, 0644, 1);
     if ((psem == (sem_t *)SEM_FAILED) && (errno == ENAMETOOLONG)) {
         /* Oh well, good try */
         semname[13] = '\0';
-        psem = sem_open((const char *) semname, O_CREAT, 0644, 1);
+        psem = sem_open(semname, O_CREAT, 0644, 1);
     }
 
     if (psem == (sem_t *)SEM_FAILED) {
         return errno;
     }
     /* Ahhh. The joys of Posix sems. Predelete it... */
-    sem_unlink((const char *) semname);
+    sem_unlink(semname);
     new_mutex->psem_interproc = psem;
     new_mutex->fname = apr_pstrdup(new_mutex->pool, semname);
     apr_pool_cleanup_register(new_mutex->pool, (void *)new_mutex,
