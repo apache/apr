@@ -75,7 +75,7 @@ extern "C" {
 typedef void apr_sigfunc_t(int);
 
 /* ### how to doc this? */
-apr_sigfunc_t *apr_signal(int signo, apr_sigfunc_t * func);
+APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func);
 
 #if defined(SIG_IGN) && !defined(SIG_ERR)
 #define SIG_ERR ((apr_sigfunc_t *) -1)
@@ -92,7 +92,7 @@ apr_sigfunc_t *apr_signal(int signo, apr_sigfunc_t * func);
  * @return The description of the signal
  * @deffunc const char *apr_signal_get_description(int signum)
  */
-const char *apr_signal_get_description(int signum);
+APR_DECLARE(const char *) apr_signal_get_description(int signum);
 
 /**
  * APR-private function for initializing the signal package
