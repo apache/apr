@@ -1,36 +1,11 @@
 Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
-  *) Win32: Fix bug in apr_socket_sendfile that interferred with
-     Win32 LSPs. PR 23982 [Jan Bilek, Bill Stoddard]
 
   *) Add a new PRNG. Note that the implementation of SHA-256 is a
      stop-gap pending snarfing the SHA-1 implementation from apr-util
      and upgrading it to do SHA-256. Not yet ready for prime time.
      [Ben Laurie]
 
-  *) Win32: Fix bug tracking the file pointer on a file opened for 
-     overlapped/APR_XTHREAD io. [Bill Stoddard]
-
 Changes with APR 1.0
-
-  *) Only install apr-$MAJOR-config and add appropriate detection code to
-     find_apr.m4 (APR_FIND_APR).  [Max Bowsher <maxb ukf.net>]
-
-  *) Remove APR_STATUS_IS_SUCCESS() macro.  [Justin Erenkrantz]
-
-  *) apr_proc_create() on Unix: Remove unnecessary check for read 
-     access to the working directory of the child process.
-     PR 30137.  [Jeremy Chadwick <apache jdc.parodius.com>]
-
-  *) Add jlibtool - enabled with '--enable-experimental-libtool' option.
-     [Justin Erenkrantz]
-
-  *) Add support for KQueue and sys_epoll to apr_pollset.  [Paul Querna]
-
-  *) Support threading on FreeBSD 5.x where kern.osreldate >= 502102.
-     [Craig Rodrigues <rodrigc crodrigues.org>]
-
-  *) Add an RPM spec file derived from Fedora Core.
-     [Graham Leggett, Joe Orton]
 
   *) Fix apr_threadattr_detach_set() on Mac OS X.  PR 28472.
      [INOUE Seiichiro <inoue ariel-networks.com>]

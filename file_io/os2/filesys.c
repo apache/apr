@@ -94,13 +94,12 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
 
 apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
 {
-    if (root[0] && apr_islower(root[0]) && root[1] == ':') {
-        *rootpath = apr_pstrdup(p, root);
-        (*rootpath)[0] = apr_toupper((*rootpath)[0]);
-    }
-    else {
-       *rootpath = root;
-    }
+    char path[APR_PATH_MAX];
+
+    strcpy(path, root);
+    if (path[1] == ':')
+        path[0] = apr_toupper(path[0]);
+    *rootpath = apr_pstrdup(p, path);
     return APR_SUCCESS;
 }
 
