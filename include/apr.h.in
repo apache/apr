@@ -124,12 +124,40 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 #define APR_THREAD_FUNC
 
-/* Create a set of APR_DECLARE(type), APR_DECLARE_NONSTD(type) and 
- * APR_DECLARE_DATA with appropriate export and import tags for the platform.
- * Simple case - see apr.hw for the complex example
+/**
+ * APR_DECLARE_EXPORT is defined when building the APR dynamic library,
+ * so that all public symbols are exported.
+ *
+ * APR_DECLARE_STATIC is defined when including the APR public headers,
+ * to provide static linkage when the dynamic library may be unavailable.
+ *
+ * APR_DECLARE_STATIC and APR_DECLARE_EXPORT are left undefined when
+ * including the APR public headers, to import and link the symbols from the 
+ * dynamic APR library and assure appropriate indirection and calling 
+ * conventions at compile time.
+ */
+
+/**
+ * The public APR functions are declared with APR_DECLARE(), so they may
+ * use the most appropriate calling convention.  Public APR functions with 
+ * variable arguments must use APR_DECLARE_NONSTD().
+ *
+ * @deffunc APR_DECLARE(rettype) apr_func(args);
  */
 #define APR_DECLARE(type)            type
+/**
+ * The public APR functions using variable arguments are declared with 
+ * AP_DECLARE(), as they must use the C language calling convention.
+ *
+ * @deffunc APR_DECLARE_NONSTD(rettype) apr_func(args, ...);
+ */
 #define APR_DECLARE_NONSTD(type)     type
+/**
+ * The public APR variables are declared with AP_MODULE_DECLARE_DATA.
+ * This assures the appropriate indirection is invoked at compile time.
+ *
+ * @deffunc type APR_DECLARE_DATA apr_variable;
+ */
 #define APR_DECLARE_DATA
 
 /* These need to move into apr_compat.h when the symbol rename is complete 
