@@ -166,8 +166,8 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
         tvptr = NULL;
     }
     else {
-        tv.tv_sec = timeout / APR_USEC_PER_SEC;
-        tv.tv_usec = timeout % APR_USEC_PER_SEC;
+        tv.tv_sec = apr_time_sec(timeout);
+        tv.tv_usec = apr_time_usec(timeout);
         tvptr = &tv;
     }
 
