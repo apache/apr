@@ -58,15 +58,9 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
-#include "apr_macro.h"
 #include <time.h>
 #include <errno.h>
 #include <string.h>
-
-#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
-static ap_lock_t *lock_time = NULL;
-#endif
-
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_make_time(ap_context_t *, ap_time_t *)
@@ -113,15 +107,19 @@ ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
 {
     switch (type) {
     case APR_LOCALTIME: {
-        SAFETY_LOCK(time, "timefile");
-        LOCALTIME_R(&atime->currtime->tv_sec, atime->explodedtime);
-        SAFETY_UNLOCK(time);
+#if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS
+        localtime_r(&atime->currtime->tv_sec, atime->explodedtime);
+#else
+        atime->explodedtime = localtime(&atime->currtime->tv_sec);
+#endif
         break;
     }
     case APR_UTCTIME: {
-        SAFETY_LOCK(time, "timefile");
-        GMTIME_R(&atime->currtime->tv_sec, atime->explodedtime);
-        SAFETY_UNLOCK(time);
+#if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS
+        gmtime_r(&atime->currtime->tv_sec, atime->explodedtime);
+#else
+        atime->explodedtime = gmtime(&atime->currtime->tv_sec);
+#endif
         break;
     }
     }
