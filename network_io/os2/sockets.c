@@ -278,6 +278,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
         memcpy(&(*apr_sock)->local_addr->sa.sin, 
                os_sock_info->local, 
                (*apr_sock)->local_addr->salen);
+        /* XXX IPv6 - this assumes sin_port and sin6_port at same offset */
         (*apr_sock)->local_addr->port = ntohs((*apr_sock)->local_addr->sa.sin.sin_port);
     }
     else {
@@ -287,6 +288,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
         memcpy(&(*apr_sock)->remote_addr->sa.sin, 
                os_sock_info->remote,
                (*apr_sock)->remote_addr->salen);
+        /* XXX IPv6 - this assumes sin_port and sin6_port at same offset */
         (*apr_sock)->remote_addr->port = ntohs((*apr_sock)->remote_addr->sa.sin.sin_port);
     }
         
