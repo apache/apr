@@ -97,11 +97,13 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
     }
 
     (*new)->local_addr->sin_family = AF_INET;
+    (*new)->remote_addr->sin_family = AF_INET;
 
     (*new)->addr_len = sizeof(*(*new)->local_addr);
 
     (*new)->local_addr->sin_port = 0;   
- 
+
+    (*new)->timeout = -1;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
@@ -169,6 +171,7 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *con
     memcpy((*new)->local_addr, sock->local_addr, sizeof(struct sockaddr_in));
 
     (*new)->addr_len = sizeof(struct sockaddr_in);
+    (*new)->timeout = -1;   
 
     (*new)->sock = accept(sock->sock, (struct sockaddr *)(*new)->local_addr,
                         &(*new)->addr_len);
@@ -176,7 +179,7 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *con
     if ((*new)->sock == INVALID_SOCKET) {
         return WSAGetLastError();
     }
-    
+
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;

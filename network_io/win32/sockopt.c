@@ -60,9 +60,9 @@
 
 ap_status_t soblock(SOCKET sd)
 {
-    int one = 1;
+    int zero = 0;
 
-    if (ioctlsocket(sd, FIONBIO, &one) == SOCKET_ERROR) {
+    if (ioctlsocket(sd, FIONBIO, &zero) == SOCKET_ERROR) {
         return WSAGetLastError();
     }
     return APR_SUCCESS;
@@ -70,9 +70,9 @@ ap_status_t soblock(SOCKET sd)
 
 ap_status_t sononblock(SOCKET sd)
 {
-    int zero = 0;
+    int one = 1;
 
-    if (ioctlsocket(sd, FIONBIO, &zero) == SOCKET_ERROR) {
+    if (ioctlsocket(sd, FIONBIO, &one) == SOCKET_ERROR) {
         return WSAGetLastError();
     }
     return APR_SUCCESS;
@@ -90,13 +90,40 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         one = 0;
 
     if (opt & APR_SO_TIMEOUT) {
-        int timeout;
-        sock->timeout = on;
-        timeout = on / 1000; /* Windows needs timeout in mSeconds */
-        if (setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char*) &timeout, 
-                       sizeof(timeout)) == SOCKET_ERROR) {
-            return WSAGetLastError();
+        int new_timeout;
+        if (on <= 0)
+            new_timeout = on;
+        else
+            new_timeout = on/1000;  /* Windows needs timeout in mSeconds */
+                    
+        if (new_timeout == 0) {
+            /* Set the socket non-blocking if it isn't already set to non-blocking */
+            if (sock->timeout != 0) {
+                if ((stat = sononblock(sock->sock)) != APR_SUCCESS)
+                    return stat;
+            }
         }
+        else if (new_timeout > 0) {
+            /* Set the socket to blocking if it was previously non-blocking */
+            if (sock->timeout == 0) {
+                if ((stat = soblock(sock->sock)) != APR_SUCCESS)
+                    return stat;
+            }
+            /* Reset socket timeouts if the new timeout differs from the old timeout */
+            if (sock->timeout != new_timeout) {
+                setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &new_timeout, sizeof(new_timeout));
+                setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &new_timeout, sizeof(new_timeout));
+            }
+        }
+        else if (new_timeout < 0) {
+            int zero = 0;
+            /* Set the socket to blocking with infinite timeouts */
+            if ((stat = soblock(sock->sock)) != APR_SUCCESS)
+                return stat;
+            setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &zero, sizeof(zero));
+            setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &zero, sizeof(zero));
+        }
+        sock->timeout = new_timeout;
     }
     if (opt & APR_SO_KEEPALIVE) {
         if (setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
