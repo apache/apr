@@ -133,17 +133,15 @@ testatomic@EXEEXT@: testatomic.lo $(LOCAL_LIBS)
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
-         testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
-         testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
-         testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
-         testpoll.lo CuTest.lo mod_test.la libmod_test.la occhild@EXEEXT@ \
-         proc_child@EXEEXT@ $(LOCAL_LIBS)
-	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
-	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo      \
-	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo     \
-	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo 	  \
-	testpoll.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
+	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
+	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
+	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
+	testpoll.lo
+
+testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
+	 CuTest.lo proc_child@EXEEXT@ $(LOCAL_LIBS)
+	$(LINK) $(TESTS) CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE
