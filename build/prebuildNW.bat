@@ -12,7 +12,7 @@
 copy ..\include\apr.hnw ..\include\apr.h
 
 @echo Fixing up the APR-Util headers
-copy ..\..\apr-util\include\apu.h.in ..\..\apr-util\include\apu.h
+copy ..\..\apr-util\include\apu.hnw ..\..\apr-util\include\apu.h
 copy ..\..\apr-util\include\private\apu_config.hw ..\..\apr-util\include\private\apu_config.h
 copy ..\..\apr-util\xml\expat\lib\expat.h.in ..\..\apr-util\xml\expat\lib\expat.h
 copy ..\..\apr-util\xml\expat\lib\config.hnw ..\..\apr-util\xml\expat\lib\config.h
