@@ -124,7 +124,7 @@ APR_EXPORT(ap_bucket *) ap_rwmem_create(void)
     ap_bucket *newbuf;
     ap_bucket_rwmem *b;
 
-    newbuf = malloc(sizeof(*newbuf));
+    newbuf = calloc(1, sizeof(*newbuf));
     b = malloc(sizeof(*b));
     
     b->alloc_addr = calloc(DEFAULT_RWBUF_SIZE, 1);

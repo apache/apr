@@ -100,12 +100,27 @@ APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
 APR_EXPORT(ap_status_t) ap_bucket_brigade_destroy(void *data)
 {
     ap_bucket_brigade *b = data;
-    ap_bucket_list *bl = b->head;
 
-    ap_destroy_bucket_list(bl);
+    ap_bucket_list_destroy(b->head);
+    /* The brigade itself is allocated out of a pool, so we don't actually 
+     * want to free it.  If we did, we would do that free() here.
+     */
 
     return APR_SUCCESS;
-}        
+}
+
+APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e)
+{
+    ap_bucket *cur = e;
+    ap_bucket *next;
+
+    while (cur) {
+        next = cur->next;
+        ap_bucket_destroy(cur);
+        cur = next;
+    }
+    return APR_SUCCESS;
+}
 
 APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p)
 {
@@ -120,18 +135,10 @@ APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p)
     return b;
 }
 
-APR_EXPORT(ap_bucket_list *) ap_bucket_list_create(void)
+APR_EXPORT(void) ap_bucket_brigade_append_buckets(ap_bucket_brigade *b, 
+                                                  ap_bucket *e)
 {
-    ap_bucket_list *b;
-    
-    b = calloc(1, sizeof(*b));
-    return b;
-}
-
-APR_EXPORT(void) ap_bucket_brigade_append_list(ap_bucket_brigade *b, 
-                                               ap_bucket_list *e)
-{
-    ap_bucket_list *cur = e;
+    ap_bucket *cur = e;
 
     if (b->tail) {
         b->tail->next = e;
@@ -146,37 +153,17 @@ APR_EXPORT(void) ap_bucket_brigade_append_list(ap_bucket_brigade *b,
     }
 }
 
-APR_EXPORT(void) ap_bucket_brigade_append_bucket(ap_bucket_brigade *b,
-                                                 ap_bucket *r)
-{
-    if (b->tail) {
-        if (b->tail->bucket == NULL) {
-            b->tail->bucket = r;
-        }
-        else {
-            b->tail->next = ap_bucket_list_create();
-            b->tail->next->prev = b->tail;
-            b->tail = b->tail->next;
-            b->tail->bucket = r;
-        }
-    }
-    else {
-        b->head = b->tail = ap_bucket_list_create();
-        b->tail->bucket = r;
-    }
-}
-
 APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *b, 
                                            struct iovec *vec, int nvec)
 {
-    ap_bucket_list *e;
+    ap_bucket *e;
     struct iovec *orig;
 
     orig = vec;
     e = b->head;
     while (e && nvec) {
-	vec->iov_base = (void *)ap_get_bucket_char_str(e->bucket);
-	vec->iov_len = ap_get_bucket_len(e->bucket);
+	vec->iov_base = (void *)ap_get_bucket_char_str(e);
+	vec->iov_len = ap_get_bucket_len(e);
 	e = e->next;
 	--nvec;
 	++vec;
@@ -207,12 +194,12 @@ APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec)
 
     for (i=0; i < nvec; i++) {
         if (b->head == b->tail) {
-            ap_bucket_destroy(b->head->bucket);
+            ap_bucket_destroy(b->head);
             b->head = b->tail = NULL;
             break;
         }
         b->head = b->head->next;
-        ap_bucket_destroy(b->head->prev->bucket);
+        ap_bucket_destroy(b->head->prev);
         b->head->prev = NULL;
     }
 }
@@ -241,17 +228,6 @@ APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_status_t) ap_destroy_bucket_list(ap_bucket_list *buf)
-{
-    ap_bucket_list *dptr = buf;
-   
-    while (dptr) {
-        ap_bucket_destroy(dptr->bucket);
-        dptr = dptr->next;
-    }
-    return APR_SUCCESS;
-}
-
 APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b)
 {
     if (b) {
@@ -275,10 +251,9 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
     int j, k, rv;
     ap_ssize_t i;
 
-    if (b->tail && b->tail->bucket && 
-        b->tail->bucket->color == AP_BUCKET_rwmem) {
+    if (b->tail && b->tail->color == AP_BUCKET_rwmem) {
         ap_bucket *rw;
-        rw = b->tail->bucket;
+        rw = b->tail;
         /* I have no idea if this is a good idea or not.  Probably not.
          * Basically, if the last bucket in the list is a rwmem bucket,
          * then we just add to it instead of allocating a new read only
@@ -298,7 +273,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
             }
             k += i;
 
-            ap_bucket_brigade_append_bucket(b, rw);
+            ap_bucket_brigade_append_buckets(b, rw);
         }        
     }
     
@@ -316,7 +291,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
         }
         k += i;
 
-        ap_bucket_brigade_append_bucket(b, r);
+        ap_bucket_brigade_append_buckets(b, r);
     }
 
     return k;
@@ -346,7 +321,7 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
 
     r = ap_bucket_new(AP_BUCKET_rwmem);
     res = r->insert(r, buf, strlen(buf), &i);
-    ap_bucket_brigade_append_bucket(b, r);
+    ap_bucket_brigade_append_buckets(b, r);
 
     return res;
 }
