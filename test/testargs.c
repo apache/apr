@@ -73,11 +73,6 @@ static void maybe_arg(const char *arg)
     }
 }
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 int main(int argc, const char * const argv[])
 {
     apr_pool_t *context;
@@ -86,7 +81,7 @@ int main(int argc, const char * const argv[])
     const char *optarg;
 
     apr_initialize();
-    atexit(closeapr);
+    atexit(apr_terminate);
     apr_pool_create(&context, NULL);
 
     if (apr_getopt_init(&opt, context, argc, argv))

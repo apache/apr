@@ -89,11 +89,6 @@ void test_filedel(apr_pool_t *);
 void testdirs(apr_pool_t *);
 static void test_read(apr_pool_t *);
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 int main(void)
 {
     apr_pool_t *pool;
@@ -118,7 +113,7 @@ int main(void)
     printf("APR File Functions Test\n=======================\n\n");
     
     STD_TEST_NEQ("Initializing APR", apr_initialize())
-    atexit(closeapr);
+    atexit(apr_terminate);
     STD_TEST_NEQ("Creating the main pool we'll use", 
                  apr_pool_create(&pool, NULL))
     STD_TEST_NEQ("Creating the second pool we'll use", 

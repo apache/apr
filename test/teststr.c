@@ -59,11 +59,6 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 static void test_strtok(apr_pool_t *p)
 {
     struct {
@@ -129,7 +124,7 @@ int main(int argc, const char * const argv[])
     apr_pool_t *p;
 
     apr_initialize();
-    atexit(closeapr);
+    atexit(apr_terminate);
     apr_pool_create(&p, NULL);
 
     test_strtok(p);

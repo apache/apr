@@ -70,11 +70,6 @@
 int test_filedel(void);
 int testdirs(void);
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 int main(int argc, char *argv[])
 {
     apr_pool_t *pool;
@@ -90,7 +85,7 @@ int main(int argc, char *argv[])
         printf("Failed to initialize APR\n");
         exit(-1);
     }   
-    atexit(closeapr);
+    atexit(apr_terminate);
     apr_pool_create(&pool, NULL);
 
     if (argc > 1) {
