@@ -15,33 +15,33 @@
 
 #include <stdio.h>
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_version.h"
 #include "apr_general.h"
 
 
-static void test_strings(CuTest *tc)
+static void test_strings(abts_case *tc, void *data)
 {
-    CuAssertStrEquals(tc, APR_VERSION_STRING, apr_version_string());
+    abts_str_equal(tc, APR_VERSION_STRING, apr_version_string());
 }
 
-static void test_ints(CuTest *tc)
+static void test_ints(abts_case *tc, void *data)
 {
     apr_version_t vsn;
 
     apr_version(&vsn);
 
-    CuAssertIntEquals(tc, APR_MAJOR_VERSION, vsn.major);
-    CuAssertIntEquals(tc, APR_MINOR_VERSION, vsn.minor);
-    CuAssertIntEquals(tc, APR_PATCH_VERSION, vsn.patch);
+    abts_int_equal(tc, APR_MAJOR_VERSION, vsn.major);
+    abts_int_equal(tc, APR_MINOR_VERSION, vsn.minor);
+    abts_int_equal(tc, APR_PATCH_VERSION, vsn.patch);
 }
 
-CuSuite *testvsn(void)
+abts_suite *testvsn(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Versioning");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_strings);
-    SUITE_ADD_TEST(suite, test_ints);
+    abts_run_test(suite, test_strings, NULL);
+    abts_run_test(suite, test_ints, NULL);
 
     return suite;
 }

@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_file_io.h"
 #include "apr_file_info.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
 
-static void copy_helper(CuTest *tc, const char *from, const char * to,
+static void copy_helper(abts_case *tc, const char *from, const char * to,
                         apr_fileperms_t perms, int append, apr_pool_t *p)
 {
     apr_status_t rv;
@@ -45,16 +45,16 @@ static void copy_helper(CuTest *tc, const char *from, const char * to,
     apr_assert_success(tc, "Couldn't stat copy file", rv);
 
     if (!append) {
-        CuAssertIntEquals(tc, orig.size, copy.size);
+        abts_int_equal(tc, orig.size, copy.size);
     }
     else {
-        CuAssertIntEquals(tc, 
+        abts_int_equal(tc, 
                           ((dest_rv == APR_SUCCESS) ? dest.size : 0) + orig.size,
                           copy.size);
     }
 }
 
-static void copy_short_file(CuTest *tc)
+static void copy_short_file(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
@@ -67,7 +67,7 @@ static void copy_short_file(CuTest *tc)
     apr_assert_success(tc, "Couldn't remove copy file", rv);
 }
 
-static void copy_over_existing(CuTest *tc)
+static void copy_over_existing(abts_case *tc, void *data)
 {
     apr_status_t rv;
     
@@ -88,7 +88,7 @@ static void copy_over_existing(CuTest *tc)
     apr_assert_success(tc, "Couldn't remove copy file", rv);
 }
 
-static void append_nonexist(CuTest *tc)
+static void append_nonexist(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
@@ -101,7 +101,7 @@ static void append_nonexist(CuTest *tc)
     apr_assert_success(tc, "Couldn't remove copy file", rv);
 }
 
-static void append_exist(CuTest *tc)
+static void append_exist(abts_case *tc, void *data)
 {
     apr_status_t rv;
     
@@ -122,15 +122,15 @@ static void append_exist(CuTest *tc)
     apr_assert_success(tc, "Couldn't remove copy file", rv);
 }
 
-CuSuite *testfilecopy(void)
+abts_suite *testfilecopy(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("File Copy");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, copy_short_file);
-    SUITE_ADD_TEST(suite, copy_over_existing);
+    abts_run_test(suite, copy_short_file, NULL);
+    abts_run_test(suite, copy_over_existing, NULL);
 
-    SUITE_ADD_TEST(suite, append_nonexist);
-    SUITE_ADD_TEST(suite, append_exist);
+    abts_run_test(suite, append_nonexist, NULL);
+    abts_run_test(suite, append_exist, NULL);
 
     return suite;
 }

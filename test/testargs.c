@@ -17,7 +17,7 @@
 #include "apr_general.h"
 #include "apr_getopt.h"
 #include "apr_strings.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 static void format_arg(char *str, char option, const char *arg)
 {
@@ -38,176 +38,176 @@ static void unknown_arg(void *str, const char *err, ...)
     va_end(va);
 }
 
-static void no_options_found(CuTest *tc)
+static void no_options_found(abts_case *tc, void *data)
 {
     int largc = 5;
     const char * const largv[] = {"testprog", "-a", "-b", "-c", "-d"};
     apr_getopt_t *opt;
     apr_status_t rv;
-    char data;
+    char ch;
     const char *optarg;
     char str[8196];
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
    
-    while (apr_getopt(opt, "abcd", &data, &optarg) == APR_SUCCESS) {
-        switch (data) {
+    while (apr_getopt(opt, "abcd", &ch, &optarg) == APR_SUCCESS) {
+        switch (ch) {
             case 'a':
             case 'b':
             case 'c':
             case 'd':
             default:
-                format_arg(str, data, optarg);
+                format_arg(str, ch, optarg);
         }
     }
-    CuAssertStrEquals(tc, "option: a\n"
+    abts_str_equal(tc, "option: a\n"
                           "option: b\n"
                           "option: c\n"
                           "option: d\n", str);
 }
 
-static void no_options(CuTest *tc)
+static void no_options(abts_case *tc, void *data)
 {
     int largc = 5;
     const char * const largv[] = {"testprog", "-a", "-b", "-c", "-d"};
     apr_getopt_t *opt;
     apr_status_t rv;
-    char data;
+    char ch;
     const char *optarg;
     char str[8196];
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "efgh", &data, &optarg) == APR_SUCCESS) {
-        switch (data) {
+    while (apr_getopt(opt, "efgh", &ch, &optarg) == APR_SUCCESS) {
+        switch (ch) {
             case 'a':
             case 'b':
             case 'c':
             case 'd':
-                format_arg(str, data, optarg);
+                format_arg(str, ch, optarg);
                 break;
             default:
                 break;
         }
     }
-    CuAssertStrEquals(tc, "testprog: illegal option -- a\n", str);
+    abts_str_equal(tc, "testprog: illegal option -- a\n", str);
 }
 
-static void required_option(CuTest *tc)
+static void required_option(abts_case *tc, void *data)
 {
     int largc = 3;
     const char * const largv[] = {"testprog", "-a", "foo"};
     apr_getopt_t *opt;
     apr_status_t rv;
-    char data;
+    char ch;
     const char *optarg;
     char str[8196];
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a:", &data, &optarg) == APR_SUCCESS) {
-        switch (data) {
+    while (apr_getopt(opt, "a:", &ch, &optarg) == APR_SUCCESS) {
+        switch (ch) {
             case 'a':
-                format_arg(str, data, optarg);
+                format_arg(str, ch, optarg);
                 break;
             default:
                 break;
         }
     }
-    CuAssertStrEquals(tc, "option: a with foo\n", str);
+    abts_str_equal(tc, "option: a with foo\n", str);
 }
 
-static void required_option_notgiven(CuTest *tc)
+static void required_option_notgiven(abts_case *tc, void *data)
 {
     int largc = 2;
     const char * const largv[] = {"testprog", "-a"};
     apr_getopt_t *opt;
     apr_status_t rv;
-    char data;
+    char ch;
     const char *optarg;
     char str[8196];
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a:", &data, &optarg) == APR_SUCCESS) {
-        switch (data) {
+    while (apr_getopt(opt, "a:", &ch, &optarg) == APR_SUCCESS) {
+        switch (ch) {
             case 'a':
-                format_arg(str, data, optarg);
+                format_arg(str, ch, optarg);
                 break;
             default:
                 break;
         }
     }
-    CuAssertStrEquals(tc, "testprog: option requires an argument -- a\n", str);
+    abts_str_equal(tc, "testprog: option requires an argument -- a\n", str);
 }
 
-static void optional_option(CuTest *tc)
+static void optional_option(abts_case *tc, void *data)
 {
     int largc = 3;
     const char * const largv[] = {"testprog", "-a", "foo"};
     apr_getopt_t *opt;
     apr_status_t rv;
-    char data;
+    char ch;
     const char *optarg;
     char str[8196];
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a::", &data, &optarg) == APR_SUCCESS) {
-        switch (data) {
+    while (apr_getopt(opt, "a::", &ch, &optarg) == APR_SUCCESS) {
+        switch (ch) {
             case 'a':
-                format_arg(str, data, optarg);
+                format_arg(str, ch, optarg);
                 break;
             default:
                 break;
         }
     }
-    CuAssertStrEquals(tc, "option: a with foo\n", str);
+    abts_str_equal(tc, "option: a with foo\n", str);
 }
 
-static void optional_option_notgiven(CuTest *tc)
+static void optional_option_notgiven(abts_case *tc, void *data)
 {
     int largc = 2;
     const char * const largv[] = {"testprog", "-a"};
     apr_getopt_t *opt;
     apr_status_t rv;
-    char data;
+    char ch;
     const char *optarg;
     char str[8196];
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
    
-    while (apr_getopt(opt, "a::", &data, &optarg) == APR_SUCCESS) {
-        switch (data) {
+    while (apr_getopt(opt, "a::", &ch, &optarg) == APR_SUCCESS) {
+        switch (ch) {
             case 'a':
-                format_arg(str, data, optarg);
+                format_arg(str, ch, optarg);
                 break;
             default:
                 break;
@@ -215,21 +215,21 @@ static void optional_option_notgiven(CuTest *tc)
     }
 #if 0
 /*  Our version of getopt doesn't allow for optional arguments.  */
-    CuAssertStrEquals(tc, "option: a\n", str);
+    abts_str_equal(tc, "option: a\n", str);
 #endif
-    CuAssertStrEquals(tc, "testprog: option requires an argument -- a\n", str);
+    abts_str_equal(tc, "testprog: option requires an argument -- a\n", str);
 }
 
-CuSuite *testgetopt(void)
+abts_suite *testgetopt(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Getopt");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, no_options);
-    SUITE_ADD_TEST(suite, no_options_found);
-    SUITE_ADD_TEST(suite, required_option);
-    SUITE_ADD_TEST(suite, required_option_notgiven);
-    SUITE_ADD_TEST(suite, optional_option);
-    SUITE_ADD_TEST(suite, optional_option_notgiven);
+    abts_run_test(suite, no_options, NULL);
+    abts_run_test(suite, no_options_found, NULL);
+    abts_run_test(suite, required_option, NULL);
+    abts_run_test(suite, required_option_notgiven, NULL);
+    abts_run_test(suite, optional_option, NULL);
+    abts_run_test(suite, optional_option_notgiven, NULL);
 
     return suite;
 }

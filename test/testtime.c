@@ -17,7 +17,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_strings.h"
 #include <time.h>
 
@@ -49,7 +49,7 @@ static char* print_time (apr_pool_t *pool, const apr_time_exp_t *xt)
 }
 
 
-static void test_now(CuTest *tc)
+static void test_now(abts_case *tc, void *data)
 {
     apr_time_t timediff;
     apr_time_t current;
@@ -63,25 +63,25 @@ static void test_now(CuTest *tc)
      * that the time will be slightly off, so accept anything between -1 and
      * 1 second.
      */
-    CuAssert(tc, "apr_time and OS time do not agree", 
+    abts_assert(tc, "apr_time and OS time do not agree", 
              (timediff > -2) && (timediff < 2));
 }
 
-static void test_gmtstr(CuTest *tc)
+static void test_gmtstr(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
 
     rv = apr_time_exp_gmt(&xt, now);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_time_exp_gmt");
+        abts_not_impl(tc, "apr_time_exp_gmt");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "2002-08-14 19:05:36.186711 +0000 [257 Sat]", 
+    abts_true(tc, rv == APR_SUCCESS);
+    abts_str_equal(tc, "2002-08-14 19:05:36.186711 +0000 [257 Sat]", 
                       print_time(p, &xt));
 }
 
-static void test_exp_lt(CuTest *tc)
+static void test_exp_lt(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
@@ -90,14 +90,14 @@ static void test_exp_lt(CuTest *tc)
 
     rv = apr_time_exp_lt(&xt, now);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_time_exp_lt");
+        abts_not_impl(tc, "apr_time_exp_lt");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
 
     libc_exp = localtime(&now_secs);
 
 #define CHK_FIELD(f) \
-    CuAssertIntEquals(tc, libc_exp->f, xt.f)
+    abts_int_equal(tc, libc_exp->f, xt.f)
 
     CHK_FIELD(tm_sec);
     CHK_FIELD(tm_min);
@@ -111,7 +111,7 @@ static void test_exp_lt(CuTest *tc)
 #undef CHK_FIELD
 }
 
-static void test_exp_get_gmt(CuTest *tc)
+static void test_exp_get_gmt(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
@@ -119,17 +119,17 @@ static void test_exp_get_gmt(CuTest *tc)
     apr_int64_t hr_off_64;
 
     rv = apr_time_exp_gmt(&xt, now);
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
     rv = apr_time_exp_get(&imp, &xt);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_time_exp_get");
+        abts_not_impl(tc, "apr_time_exp_get");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
     hr_off_64 = (apr_int64_t) xt.tm_gmtoff * APR_USEC_PER_SEC;
-    CuAssertTrue(tc, now + hr_off_64 == imp);
+    abts_true(tc, now + hr_off_64 == imp);
 }
 
-static void test_exp_get_lt(CuTest *tc)
+static void test_exp_get_lt(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
@@ -137,46 +137,46 @@ static void test_exp_get_lt(CuTest *tc)
     apr_int64_t hr_off_64;
 
     rv = apr_time_exp_lt(&xt, now);
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
     rv = apr_time_exp_get(&imp, &xt);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_time_exp_get");
+        abts_not_impl(tc, "apr_time_exp_get");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
     hr_off_64 = (apr_int64_t) xt.tm_gmtoff * APR_USEC_PER_SEC;
-    CuAssertTrue(tc, now + hr_off_64 == imp);
+    abts_true(tc, now + hr_off_64 == imp);
 }
 
-static void test_imp_gmt(CuTest *tc)
+static void test_imp_gmt(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
     apr_time_t imp;
 
     rv = apr_time_exp_gmt(&xt, now);
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
     rv = apr_time_exp_gmt_get(&imp, &xt);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_time_exp_gmt_get");
+        abts_not_impl(tc, "apr_time_exp_gmt_get");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertTrue(tc, now == imp);
+    abts_true(tc, rv == APR_SUCCESS);
+    abts_true(tc, now == imp);
 }
 
-static void test_rfcstr(CuTest *tc)
+static void test_rfcstr(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char str[STR_SIZE];
 
     rv = apr_rfc822_date(str, now);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_rfc822_date");
+        abts_not_impl(tc, "apr_rfc822_date");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "Sat, 14 Sep 2002 19:05:36 GMT", str);
+    abts_true(tc, rv == APR_SUCCESS);
+    abts_str_equal(tc, "Sat, 14 Sep 2002 19:05:36 GMT", str);
 }
 
-static void test_ctime(CuTest *tc)
+static void test_ctime(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char apr_str[STR_SIZE];
@@ -185,16 +185,16 @@ static void test_ctime(CuTest *tc)
 
     rv = apr_ctime(apr_str, now);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_ctime");
+        abts_not_impl(tc, "apr_ctime");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
     strcpy(libc_str, ctime(&now_sec));
     *strchr(libc_str, '\n') = '\0';
 
-    CuAssertStrEquals(tc, libc_str, apr_str);
+    abts_str_equal(tc, libc_str, apr_str);
 }
 
-static void test_strftime(CuTest *tc)
+static void test_strftime(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
@@ -205,13 +205,13 @@ static void test_strftime(CuTest *tc)
     str = apr_palloc(p, STR_SIZE + 1);
     rv = apr_strftime(str, &sz, STR_SIZE, "%R %A %d %B %Y", &xt);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_strftime");
+        abts_not_impl(tc, "apr_strftime");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "19:05 Saturday 14 September 2002", str);
+    abts_true(tc, rv == APR_SUCCESS);
+    abts_str_equal(tc, "19:05 Saturday 14 September 2002", str);
 }
 
-static void test_strftimesmall(CuTest *tc)
+static void test_strftimesmall(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
@@ -221,13 +221,13 @@ static void test_strftimesmall(CuTest *tc)
     rv = apr_time_exp_gmt(&xt, now);
     rv = apr_strftime(str, &sz, STR_SIZE, "%T", &xt);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_strftime");
+        abts_not_impl(tc, "apr_strftime");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "19:05:36", str);
+    abts_true(tc, rv == APR_SUCCESS);
+    abts_str_equal(tc, "19:05:36", str);
 }
 
-static void test_exp_tz(CuTest *tc)
+static void test_exp_tz(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
@@ -235,10 +235,10 @@ static void test_exp_tz(CuTest *tc)
 
     rv = apr_time_exp_tz(&xt, now, hr_off);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_time_exp_tz");
+        abts_not_impl(tc, "apr_time_exp_tz");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertTrue(tc, (xt.tm_usec == 186711) && 
+    abts_true(tc, rv == APR_SUCCESS);
+    abts_true(tc, (xt.tm_usec == 186711) && 
                      (xt.tm_sec == 36) &&
                      (xt.tm_min == 5) && 
                      (xt.tm_hour == 14) &&
@@ -249,7 +249,7 @@ static void test_exp_tz(CuTest *tc)
                      (xt.tm_yday == 256));
 }
 
-static void test_strftimeoffset(CuTest *tc)
+static void test_strftimeoffset(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
@@ -260,13 +260,13 @@ static void test_strftimeoffset(CuTest *tc)
     apr_time_exp_tz(&xt, now, hr_off);
     rv = apr_strftime(str, &sz, STR_SIZE, "%T", &xt);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_strftime");
+        abts_not_impl(tc, "apr_strftime");
     }
-    CuAssertTrue(tc, rv == APR_SUCCESS);
+    abts_true(tc, rv == APR_SUCCESS);
 }
 
 /* 0.9.4 and earlier rejected valid dates in 2038 */
-static void test_2038(CuTest *tc)
+static void test_2038(abts_case *tc, void *data)
 {
     apr_time_exp_t xt;
     apr_time_t t;
@@ -283,23 +283,23 @@ static void test_2038(CuTest *tc)
                        apr_time_exp_get(&t, &xt));
 }
 
-CuSuite *testtime(void)
+abts_suite *testtime(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Time");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_now);
-    SUITE_ADD_TEST(suite, test_gmtstr);
-    SUITE_ADD_TEST(suite, test_exp_lt);
-    SUITE_ADD_TEST(suite, test_exp_get_gmt);
-    SUITE_ADD_TEST(suite, test_exp_get_lt);
-    SUITE_ADD_TEST(suite, test_imp_gmt);
-    SUITE_ADD_TEST(suite, test_rfcstr);
-    SUITE_ADD_TEST(suite, test_ctime);
-    SUITE_ADD_TEST(suite, test_strftime);
-    SUITE_ADD_TEST(suite, test_strftimesmall);
-    SUITE_ADD_TEST(suite, test_exp_tz);
-    SUITE_ADD_TEST(suite, test_strftimeoffset);
-    SUITE_ADD_TEST(suite, test_2038);
+    abts_run_test(suite, test_now, NULL);
+    abts_run_test(suite, test_gmtstr, NULL);
+    abts_run_test(suite, test_exp_lt, NULL);
+    abts_run_test(suite, test_exp_get_gmt, NULL);
+    abts_run_test(suite, test_exp_get_lt, NULL);
+    abts_run_test(suite, test_imp_gmt, NULL);
+    abts_run_test(suite, test_rfcstr, NULL);
+    abts_run_test(suite, test_ctime, NULL);
+    abts_run_test(suite, test_strftime, NULL);
+    abts_run_test(suite, test_strftimesmall, NULL);
+    abts_run_test(suite, test_exp_tz, NULL);
+    abts_run_test(suite, test_strftimeoffset, NULL);
+    abts_run_test(suite, test_2038, NULL);
 
     return suite;
 }

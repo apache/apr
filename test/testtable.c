@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_general.h"
@@ -31,51 +31,51 @@
 
 static apr_table_t *t1 = NULL;
 
-static void table_make(CuTest *tc)
+static void table_make(abts_case *tc, void *data)
 {
     t1 = apr_table_make(p, 5);
-    CuAssertPtrNotNull(tc, t1);
+    abts_ptr_notnull(tc, t1);
 }
 
-static void table_get(CuTest *tc)
+static void table_get(abts_case *tc, void *data)
 {
     const char *val;
 
     apr_table_set(t1, "foo", "bar");
     val = apr_table_get(t1, "foo");
-    CuAssertStrEquals(tc, val, "bar");
+    abts_str_equal(tc, val, "bar");
 }
 
-static void table_set(CuTest *tc)
+static void table_set(abts_case *tc, void *data)
 {
     const char *val;
 
     apr_table_set(t1, "setkey", "bar");
     apr_table_set(t1, "setkey", "2ndtry");
     val = apr_table_get(t1, "setkey");
-    CuAssertStrEquals(tc, val, "2ndtry");
+    abts_str_equal(tc, val, "2ndtry");
 }
 
-static void table_getnotthere(CuTest *tc)
+static void table_getnotthere(abts_case *tc, void *data)
 {
     const char *val;
 
     val = apr_table_get(t1, "keynotthere");
-    CuAssertPtrEquals(tc, NULL, (void *)val);
+    abts_ptr_equal(tc, NULL, (void *)val);
 }
 
-static void table_add(CuTest *tc)
+static void table_add(abts_case *tc, void *data)
 {
     const char *val;
 
     apr_table_add(t1, "addkey", "bar");
     apr_table_add(t1, "addkey", "foo");
     val = apr_table_get(t1, "addkey");
-    CuAssertStrEquals(tc, val, "bar");
+    abts_str_equal(tc, val, "bar");
 
 }
 
-static void table_nelts(CuTest *tc)
+static void table_nelts(abts_case *tc, void *data)
 {
     const char *val;
     apr_table_t *t = apr_table_make(p, 1);
@@ -84,21 +84,21 @@ static void table_nelts(CuTest *tc)
     apr_table_set(t, "def", "abc");
     apr_table_set(t, "foo", "zzz");
     val = apr_table_get(t, "foo");
-    CuAssertStrEquals(tc, val, "zzz");
+    abts_str_equal(tc, val, "zzz");
     val = apr_table_get(t, "abc");
-    CuAssertStrEquals(tc, val, "def");
+    abts_str_equal(tc, val, "def");
     val = apr_table_get(t, "def");
-    CuAssertStrEquals(tc, val, "abc");
-    CuAssertIntEquals(tc, 3, apr_table_elts(t)->nelts);
+    abts_str_equal(tc, val, "abc");
+    abts_int_equal(tc, 3, apr_table_elts(t)->nelts);
 }
 
-static void table_clear(CuTest *tc)
+static void table_clear(abts_case *tc, void *data)
 {
     apr_table_clear(t1);
-    CuAssertIntEquals(tc, 0, apr_table_elts(t1)->nelts);
+    abts_int_equal(tc, 0, apr_table_elts(t1)->nelts);
 }
 
-static void table_unset(CuTest *tc)
+static void table_unset(abts_case *tc, void *data)
 {
     const char *val;
     apr_table_t *t = apr_table_make(p, 1);
@@ -106,14 +106,14 @@ static void table_unset(CuTest *tc)
     apr_table_set(t, "a", "1");
     apr_table_set(t, "b", "2");
     apr_table_unset(t, "b");
-    CuAssertIntEquals(tc, 1, apr_table_elts(t)->nelts);
+    abts_int_equal(tc, 1, apr_table_elts(t)->nelts);
     val = apr_table_get(t, "a");
-    CuAssertStrEquals(tc, val, "1");
+    abts_str_equal(tc, val, "1");
     val = apr_table_get(t, "b");
-    CuAssertPtrEquals(tc, (void *)val, (void *)NULL);
+    abts_ptr_equal(tc, (void *)val, (void *)NULL);
 }
 
-static void table_overlap(CuTest *tc)
+static void table_overlap(abts_case *tc, void *data)
 {
     const char *val;
     apr_table_t *t1 = apr_table_make(p, 1);
@@ -131,36 +131,36 @@ static void table_overlap(CuTest *tc)
     apr_table_addn(t2, "f", "6");
     apr_table_overlap(t1, t2, APR_OVERLAP_TABLES_SET);
     
-    CuAssertIntEquals(tc, apr_table_elts(t1)->nelts, 7);
+    abts_int_equal(tc, apr_table_elts(t1)->nelts, 7);
     val = apr_table_get(t1, "a");
-    CuAssertStrEquals(tc, val, "1");
+    abts_str_equal(tc, val, "1");
     val = apr_table_get(t1, "b");
-    CuAssertStrEquals(tc, val, "2.");
+    abts_str_equal(tc, val, "2.");
     val = apr_table_get(t1, "c");
-    CuAssertStrEquals(tc, val, "3");
+    abts_str_equal(tc, val, "3");
     val = apr_table_get(t1, "d");
-    CuAssertStrEquals(tc, val, "4");
+    abts_str_equal(tc, val, "4");
     val = apr_table_get(t1, "e");
-    CuAssertStrEquals(tc, val, "5");
+    abts_str_equal(tc, val, "5");
     val = apr_table_get(t1, "f");
-    CuAssertStrEquals(tc, val, "6");
+    abts_str_equal(tc, val, "6");
     val = apr_table_get(t1, "g");
-    CuAssertStrEquals(tc, val, "7");
+    abts_str_equal(tc, val, "7");
 }
 
-CuSuite *testtable(void)
+abts_suite *testtable(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Table");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, table_make);
-    SUITE_ADD_TEST(suite, table_get);
-    SUITE_ADD_TEST(suite, table_set);
-    SUITE_ADD_TEST(suite, table_getnotthere);
-    SUITE_ADD_TEST(suite, table_add);
-    SUITE_ADD_TEST(suite, table_nelts);
-    SUITE_ADD_TEST(suite, table_clear);
-    SUITE_ADD_TEST(suite, table_unset);
-    SUITE_ADD_TEST(suite, table_overlap);
+    abts_run_test(suite, table_make, NULL);
+    abts_run_test(suite, table_get, NULL);
+    abts_run_test(suite, table_set, NULL);
+    abts_run_test(suite, table_getnotthere, NULL);
+    abts_run_test(suite, table_add, NULL);
+    abts_run_test(suite, table_nelts, NULL);
+    abts_run_test(suite, table_clear, NULL);
+    abts_run_test(suite, table_unset, NULL);
+    abts_run_test(suite, table_overlap, NULL);
 
     return suite;
 }

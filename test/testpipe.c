@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -26,17 +26,17 @@
 static apr_file_t *readp = NULL;
 static apr_file_t *writep = NULL;
 
-static void create_pipe(CuTest *tc)
+static void create_pipe(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, readp);
-    CuAssertPtrNotNull(tc, writep);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, readp);
+    abts_ptr_notnull(tc, writep);
 }   
 
-static void close_pipe(CuTest *tc)
+static void close_pipe(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_size_t nbytes = 256;
@@ -44,35 +44,35 @@ static void close_pipe(CuTest *tc)
 
     rv = apr_file_close(readp);
     rv = apr_file_close(writep);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_read(readp, buf, &nbytes);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EBADF(rv));
+    abts_int_equal(tc, 1, APR_STATUS_IS_EBADF(rv));
 }   
 
-static void set_timeout(CuTest *tc)
+static void set_timeout(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_interval_time_t timeout;
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, readp);
-    CuAssertPtrNotNull(tc, writep);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, readp);
+    abts_ptr_notnull(tc, writep);
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, -1, timeout);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, -1, timeout);
 
     rv = apr_file_pipe_timeout_set(readp, apr_time_from_sec(1));
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, apr_time_from_sec(1), timeout);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, apr_time_from_sec(1), timeout);
 }
 
-static void read_write(CuTest *tc)
+static void read_write(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *buf;
@@ -82,19 +82,19 @@ static void read_write(CuTest *tc)
     buf = (char *)apr_palloc(p, nbytes + 1);
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, readp);
-    CuAssertPtrNotNull(tc, writep);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, readp);
+    abts_ptr_notnull(tc, writep);
 
     rv = apr_file_pipe_timeout_set(readp, apr_time_from_sec(1));
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_read(readp, buf, &nbytes);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
-    CuAssertIntEquals(tc, 0, nbytes);
+    abts_int_equal(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    abts_int_equal(tc, 0, nbytes);
 }
 
-static void read_write_notimeout(CuTest *tc)
+static void read_write_notimeout(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *buf = "this is a test";
@@ -104,23 +104,23 @@ static void read_write_notimeout(CuTest *tc)
     nbytes = strlen("this is a test");
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, readp);
-    CuAssertPtrNotNull(tc, writep);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, readp);
+    abts_ptr_notnull(tc, writep);
 
     rv = apr_file_write(writep, buf, &nbytes);
-    CuAssertIntEquals(tc, strlen("this is a test"), nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen("this is a test"), nbytes);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     nbytes = 256;
     input = apr_pcalloc(p, nbytes + 1);
     rv = apr_file_read(readp, input, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, strlen("this is a test"), nbytes);
-    CuAssertStrEquals(tc, "this is a test", input);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, strlen("this is a test"), nbytes);
+    abts_str_equal(tc, "this is a test", input);
 }
 
-static void test_pipe_writefull(CuTest *tc)
+static void test_pipe_writefull(abts_case *tc, void *data)
 {
     int iterations = 1000;
     int i;
@@ -136,62 +136,62 @@ static void test_pipe_writefull(CuTest *tc)
     apr_exit_why_e why;
     
     rv = apr_procattr_create(&procattr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_io_set(procattr, APR_CHILD_BLOCK, APR_CHILD_BLOCK,
                              APR_CHILD_BLOCK);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_error_check_set(procattr, 1);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     args[0] = "readchild" EXTENSION;
     args[1] = NULL;
     rv = apr_proc_create(&proc, "./readchild" EXTENSION, args, NULL, procattr, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_set(proc.in, apr_time_from_sec(10));
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_set(proc.out, apr_time_from_sec(10));
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     i = iterations;
     do {
         rv = apr_file_write_full(proc.in, buf, bytes_per_iteration, NULL);
-        CuAssertIntEquals(tc, APR_SUCCESS, rv);
+        abts_int_equal(tc, APR_SUCCESS, rv);
     } while (--i);
 
     free(buf);
 
     rv = apr_file_close(proc.in);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     
     nbytes = sizeof(responsebuf);
     rv = apr_file_read(proc.out, responsebuf, &nbytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     bytes_processed = (int)apr_strtoi64(responsebuf, NULL, 10);
-    CuAssertIntEquals(tc, iterations * bytes_per_iteration, bytes_processed);
+    abts_int_equal(tc, iterations * bytes_per_iteration, bytes_processed);
 
-    CuAssert(tc, "wait for child process",
+    abts_assert(tc, "wait for child process",
              apr_proc_wait(&proc, NULL, &why, APR_WAIT) == APR_CHILD_DONE);
     
-    CuAssert(tc, "child terminated normally", why == APR_PROC_EXIT);
+    abts_assert(tc, "child terminated normally", why == APR_PROC_EXIT);
 }
 
-CuSuite *testpipe(void)
+abts_suite *testpipe(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Pipes");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, create_pipe);
-    SUITE_ADD_TEST(suite, close_pipe);
-    SUITE_ADD_TEST(suite, set_timeout);
-    SUITE_ADD_TEST(suite, close_pipe);
-    SUITE_ADD_TEST(suite, read_write);
-    SUITE_ADD_TEST(suite, close_pipe);
-    SUITE_ADD_TEST(suite, read_write_notimeout);
-    SUITE_ADD_TEST(suite, test_pipe_writefull);
-    SUITE_ADD_TEST(suite, close_pipe);
+    abts_run_test(suite, create_pipe, NULL);
+    abts_run_test(suite, close_pipe, NULL);
+    abts_run_test(suite, set_timeout, NULL);
+    abts_run_test(suite, close_pipe, NULL);
+    abts_run_test(suite, read_write, NULL);
+    abts_run_test(suite, close_pipe, NULL);
+    abts_run_test(suite, read_write_notimeout, NULL);
+    abts_run_test(suite, test_pipe_writefull, NULL);
+    abts_run_test(suite, close_pipe, NULL);
 
     return suite;
 }

@@ -18,7 +18,7 @@
 #include "apr_general.h"
 #include "errno.h"
 #include "apr_time.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 #if APR_HAS_THREADS
 
@@ -55,76 +55,76 @@ static void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
     return NULL;
 } 
 
-static void thread_init(CuTest *tc)
+static void thread_init(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_thread_once_init(&control, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, p); 
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 }
 
-static void create_threads(CuTest *tc)
+static void create_threads(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_thread_create(&t1, NULL, thread_func1, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_thread_create(&t2, NULL, thread_func1, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_thread_create(&t3, NULL, thread_func1, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     rv = apr_thread_create(&t4, NULL, thread_func1, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 }
 
-static void join_threads(CuTest *tc)
+static void join_threads(abts_case *tc, void *data)
 {
     apr_status_t s;
 
     apr_thread_join(&s, t1);
-    CuAssertIntEquals(tc, exit_ret_val, s);
+    abts_int_equal(tc, exit_ret_val, s);
     apr_thread_join(&s, t2);
-    CuAssertIntEquals(tc, exit_ret_val, s);
+    abts_int_equal(tc, exit_ret_val, s);
     apr_thread_join(&s, t3);
-    CuAssertIntEquals(tc, exit_ret_val, s);
+    abts_int_equal(tc, exit_ret_val, s);
     apr_thread_join(&s, t4);
-    CuAssertIntEquals(tc, exit_ret_val, s);
+    abts_int_equal(tc, exit_ret_val, s);
 }
 
-static void check_locks(CuTest *tc)
+static void check_locks(abts_case *tc, void *data)
 {
-    CuAssertIntEquals(tc, 40000, x);
+    abts_int_equal(tc, 40000, x);
 }
 
-static void check_thread_once(CuTest *tc)
+static void check_thread_once(abts_case *tc, void *data)
 {
-    CuAssertIntEquals(tc, 1, value);
+    abts_int_equal(tc, 1, value);
 }
 
 #else
 
-static void threads_not_impl(CuTest *tc)
+static void threads_not_impl(abts_case *tc, void *data)
 {
-    CuNotImpl(tc, "Threads not implemented on this platform");
+    abts_not_impl(tc, "Threads not implemented on this platform");
 }
 
 #endif
 
-CuSuite *testthread(void)
+abts_suite *testthread(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Threads");
+    suite = ADD_SUITE(suite)
 
 #if !APR_HAS_THREADS
-    SUITE_ADD_TEST(suite, threads_not_impl);
+    abts_run_test(suite, threads_not_impl, NULL);
 #else
-    SUITE_ADD_TEST(suite, thread_init);
-    SUITE_ADD_TEST(suite, create_threads);
-    SUITE_ADD_TEST(suite, join_threads);
-    SUITE_ADD_TEST(suite, check_locks);
-    SUITE_ADD_TEST(suite, check_thread_once);
+    abts_run_test(suite, thread_init, NULL);
+    abts_run_test(suite, create_threads, NULL);
+    abts_run_test(suite, join_threads, NULL);
+    abts_run_test(suite, check_locks, NULL);
+    abts_run_test(suite, check_thread_once, NULL);
 #endif
 
     return suite;

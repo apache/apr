@@ -17,9 +17,9 @@
 #include "apr_thread_proc.h"
 #include "apr_global_mutex.h"
 #include "apr_errno.h"
-#include "test_apr.h"
+#include "testutil.h"
 
-static void launch_child(CuTest *tc, apr_proc_t *proc, apr_pool_t *p)
+static void launch_child(abts_case *tc, apr_proc_t *proc, apr_pool_t *p)
 {
     apr_procattr_t *procattr;
     const char *args[2];
@@ -42,19 +42,19 @@ static void launch_child(CuTest *tc, apr_proc_t *proc, apr_pool_t *p)
     apr_assert_success(tc, "Couldn't launch program", rv);
 }
 
-static int wait_child(CuTest *tc, apr_proc_t *proc)
+static int wait_child(abts_case *tc, apr_proc_t *proc)
 {
     int exitcode;
     apr_exit_why_e why;
 
-    CuAssert(tc, "Error waiting for child process",
+    abts_assert(tc, "Error waiting for child process",
             apr_proc_wait(proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
-    CuAssert(tc, "child didn't terminate normally", why == APR_PROC_EXIT);
+    abts_assert(tc, "child didn't terminate normally", why == APR_PROC_EXIT);
     return exitcode;
 }
 
-static void test_exclusive(CuTest *tc)
+static void test_exclusive(abts_case *tc, void *data)
 {
     apr_proc_t p1, p2, p3, p4;
     apr_status_t rv;
@@ -75,14 +75,14 @@ static void test_exclusive(CuTest *tc)
     x += wait_child(tc, &p3);
     x += wait_child(tc, &p4);
 
-    CuAssertIntEquals(tc, MAX_COUNTER, x);
+    abts_int_equal(tc, MAX_COUNTER, x);
 }
 
-CuSuite *testglobalmutex(void)
+abts_suite *testglobalmutex(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Global Mutex");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_exclusive);
+    abts_run_test(suite, test_exclusive, NULL);
 
     return suite;
 }

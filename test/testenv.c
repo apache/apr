@@ -15,7 +15,7 @@
 
 #include "apr_env.h"
 #include "apr_errno.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 #define TEST_ENVVAR_NAME "apr_test_envvar"
 #define TEST_ENVVAR_VALUE "Just a value that we'll check"
@@ -23,65 +23,65 @@
 static int have_env_set;
 static int have_env_get;
 
-static void test_setenv(CuTest *tc)
+static void test_setenv(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_env_set(TEST_ENVVAR_NAME, TEST_ENVVAR_VALUE, p);
     have_env_set = (rv != APR_ENOTIMPL);
     if (!have_env_set) {
-        CuNotImpl(tc, "apr_env_set");
+        abts_not_impl(tc, "apr_env_set");
     }
     apr_assert_success(tc, "set environment variable", rv);
 }
 
-static void test_getenv(CuTest *tc)
+static void test_getenv(abts_case *tc, void *data)
 {
     char *value;
     apr_status_t rv;
 
     if (!have_env_set) {
-        CuNotImpl(tc, "apr_env_set (skip test for apr_env_get)");
+        abts_not_impl(tc, "apr_env_set (skip test for apr_env_get)");
     }
 
     rv = apr_env_get(&value, TEST_ENVVAR_NAME, p);
     have_env_get = (rv != APR_ENOTIMPL);
     if (!have_env_get) {
-        CuNotImpl(tc, "apr_env_get");
+        abts_not_impl(tc, "apr_env_get");
     }
     apr_assert_success(tc, "get environment variable", rv);
-    CuAssertStrEquals(tc, TEST_ENVVAR_VALUE, value);
+    abts_str_equal(tc, TEST_ENVVAR_VALUE, value);
 }
 
-static void test_delenv(CuTest *tc)
+static void test_delenv(abts_case *tc, void *data)
 {
     char *value;
     apr_status_t rv;
 
     if (!have_env_set) {
-        CuNotImpl(tc, "apr_env_set (skip test for apr_env_delete)");
+        abts_not_impl(tc, "apr_env_set (skip test for apr_env_delete)");
     }
 
     rv = apr_env_delete(TEST_ENVVAR_NAME, p);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_env_delete");
+        abts_not_impl(tc, "apr_env_delete");
     }
     apr_assert_success(tc, "delete environment variable", rv);
 
     if (!have_env_get) {
-        CuNotImpl(tc, "apr_env_get (skip sanity check for apr_env_delete)");
+        abts_not_impl(tc, "apr_env_get (skip sanity check for apr_env_delete)");
     }
     rv = apr_env_get(&value, TEST_ENVVAR_NAME, p);
-    CuAssertIntEquals(tc, APR_ENOENT, rv);
+    abts_int_equal(tc, APR_ENOENT, rv);
 }
 
-CuSuite *testenv(void)
+abts_suite *testenv(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Environment");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_setenv);
-    SUITE_ADD_TEST(suite, test_getenv);
-    SUITE_ADD_TEST(suite, test_delenv);
+    abts_run_test(suite, test_setenv, NULL);
+    abts_run_test(suite, test_getenv, NULL);
+    abts_run_test(suite, test_delenv, NULL);
 
     return suite;
 }

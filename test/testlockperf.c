@@ -23,7 +23,7 @@
 #include "errno.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "test_apr.h"
+#include "testutil.h"
 
 #if !APR_HAS_THREADS
 int main(void)

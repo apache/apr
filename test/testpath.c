@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_file_info.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
@@ -42,7 +42,7 @@ static const char *parts_out[] = { P1, P2, P3, P4, P5 };
 static const char *path_out = P1 PSEP P2 PSEP P3 PSEP P4 PSEP P5;
 static const int  parts_out_count = sizeof(parts_out)/sizeof(*parts_out);
 
-static void list_split_multi(CuTest *tc)
+static void list_split_multi(abts_case *tc, void *data)
 {
     int i;
     apr_status_t rv;
@@ -50,14 +50,14 @@ static void list_split_multi(CuTest *tc)
 
     pathelts = NULL;
     rv = apr_filepath_list_split(&pathelts, path_in, p);
-    CuAssertPtrNotNull(tc, pathelts);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, parts_out_count, pathelts->nelts);
+    abts_ptr_notnull(tc, pathelts);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, parts_out_count, pathelts->nelts);
     for (i = 0; i < pathelts->nelts; ++i)
-        CuAssertStrEquals(tc, parts_out[i], ((char**)pathelts->elts)[i]);
+        abts_str_equal(tc, parts_out[i], ((char**)pathelts->elts)[i]);
 }
 
-static void list_split_single(CuTest *tc)
+static void list_split_single(abts_case *tc, void *data)
 {
     int i;
     apr_status_t rv;
@@ -67,19 +67,19 @@ static void list_split_single(CuTest *tc)
     {
         pathelts = NULL;
         rv = apr_filepath_list_split(&pathelts, parts_in[i], p);
-        CuAssertPtrNotNull(tc, pathelts);
-        CuAssertIntEquals(tc, APR_SUCCESS, rv);
+        abts_ptr_notnull(tc, pathelts);
+        abts_int_equal(tc, APR_SUCCESS, rv);
         if (parts_in[i][0] == '\0')
-            CuAssertIntEquals(tc, 0, pathelts->nelts);
+            abts_int_equal(tc, 0, pathelts->nelts);
         else
         {
-            CuAssertIntEquals(tc, 1, pathelts->nelts);
-            CuAssertStrEquals(tc, parts_in[i], *(char**)pathelts->elts);
+            abts_int_equal(tc, 1, pathelts->nelts);
+            abts_str_equal(tc, parts_in[i], *(char**)pathelts->elts);
         }
     }
 }
 
-static void list_merge_multi(CuTest *tc)
+static void list_merge_multi(abts_case *tc, void *data)
 {
     int i;
     char *liststr;
@@ -92,12 +92,12 @@ static void list_merge_multi(CuTest *tc)
 
     liststr = NULL;
     rv = apr_filepath_list_merge(&liststr, pathelts, p);
-    CuAssertPtrNotNull(tc, liststr);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, liststr, path_out);
+    abts_ptr_notnull(tc, liststr);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_str_equal(tc, liststr, path_out);
 }
 
-static void list_merge_single(CuTest *tc)
+static void list_merge_single(abts_case *tc, void *data)
 {
     int i;
     char *liststr;
@@ -112,25 +112,25 @@ static void list_merge_single(CuTest *tc)
         liststr = NULL;
         rv = apr_filepath_list_merge(&liststr, pathelts, p);
         if (parts_in[i][0] == '\0')
-            CuAssertPtrEquals(tc, NULL, liststr);
+            abts_ptr_equal(tc, NULL, liststr);
         else
         {
-            CuAssertPtrNotNull(tc, liststr);
-            CuAssertIntEquals(tc, APR_SUCCESS, rv);
-            CuAssertStrEquals(tc, liststr, parts_in[i]);
+            abts_ptr_notnull(tc, liststr);
+            abts_int_equal(tc, APR_SUCCESS, rv);
+            abts_str_equal(tc, liststr, parts_in[i]);
         }
     }
 }
 
 
-CuSuite *testpath(void)
+abts_suite *testpath(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Path lists");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, list_split_multi);
-    SUITE_ADD_TEST(suite, list_split_single);
-    SUITE_ADD_TEST(suite, list_merge_multi);
-    SUITE_ADD_TEST(suite, list_merge_single);
+    abts_run_test(suite, list_split_multi, NULL);
+    abts_run_test(suite, list_split_single, NULL);
+    abts_run_test(suite, list_merge_multi, NULL);
+    abts_run_test(suite, list_merge_single, NULL);
 
     return suite;
 }

@@ -21,11 +21,11 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "test_apr.h"
+#include "testutil.h"
 
 #define SLEEP_INTERVAL 5
 
-static void sleep_one(CuTest *tc)
+static void sleep_one(abts_case *tc, void *data)
 {
     time_t pretime = time(NULL);
     time_t posttime;
@@ -38,15 +38,15 @@ static void sleep_one(CuTest *tc)
      * we should just subtract that out.
      */
     timediff = posttime - pretime - SLEEP_INTERVAL;
-    CuAssertTrue(tc, timediff >= 0);
-    CuAssertTrue(tc, timediff <= 1);
+    abts_true(tc, timediff >= 0);
+    abts_true(tc, timediff <= 1);
 }
 
-CuSuite *testsleep(void)
+abts_suite *testsleep(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Sleep");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, sleep_one);
+    abts_run_test(suite, sleep_one, NULL);
 
     return suite;
 }

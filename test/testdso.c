@@ -14,7 +14,7 @@
  */
 
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -47,20 +47,20 @@
 
 static char *modname;
 
-static void test_load_module(CuTest *tc)
+static void test_load_module(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
     char errstr[256];
 
     status = apr_dso_load(&h, modname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     apr_dso_unload(h);
 }
 
-static void test_dso_sym(CuTest *tc)
+static void test_dso_sym(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
@@ -70,21 +70,21 @@ static void test_dso_sym(CuTest *tc)
     char errstr[256];
 
     status = apr_dso_load(&h, modname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     status = apr_dso_sym(&func1, h, "print_hello");
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, func1);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, func1);
 
     function = (void (*)(char *))func1;
     (*function)(teststr);
-    CuAssertStrEquals(tc, "Hello - I'm a DSO!\n", teststr);
+    abts_str_equal(tc, "Hello - I'm a DSO!\n", teststr);
 
     apr_dso_unload(h);
 }
 
-static void test_dso_sym_return_value(CuTest *tc)
+static void test_dso_sym_return_value(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
@@ -93,21 +93,21 @@ static void test_dso_sym_return_value(CuTest *tc)
     char errstr[256];
 
     status = apr_dso_load(&h, modname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     status = apr_dso_sym(&func1, h, "count_reps");
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, func1);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, func1);
 
     function = (int (*)(int))func1;
     status = (*function)(5);
-    CuAssertIntEquals(tc, 5, status);
+    abts_int_equal(tc, 5, status);
 
     apr_dso_unload(h);
 }
 
-static void test_unload_module(CuTest *tc)
+static void test_unload_module(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
@@ -115,34 +115,34 @@ static void test_unload_module(CuTest *tc)
     apr_dso_handle_sym_t func1 = NULL;
 
     status = apr_dso_load(&h, modname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     status = apr_dso_unload(h);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
 
     status = apr_dso_sym(&func1, h, "print_hello");
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ESYMNOTFOUND(status));
+    abts_int_equal(tc, 1, APR_STATUS_IS_ESYMNOTFOUND(status));
 }
 
 
 #ifdef LIB_NAME
 static char *libname;
 
-static void test_load_library(CuTest *tc)
+static void test_load_library(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
     char errstr[256];
 
     status = apr_dso_load(&h, libname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     apr_dso_unload(h);
 }
 
-static void test_dso_sym_library(CuTest *tc)
+static void test_dso_sym_library(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
@@ -152,21 +152,21 @@ static void test_dso_sym_library(CuTest *tc)
     char errstr[256];
 
     status = apr_dso_load(&h, libname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     status = apr_dso_sym(&func1, h, "print_hello");
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, func1);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, func1);
 
     function = (void (*)(char *))func1;
     (*function)(teststr);
-    CuAssertStrEquals(tc, "Hello - I'm a DSO!\n", teststr);
+    abts_str_equal(tc, "Hello - I'm a DSO!\n", teststr);
 
     apr_dso_unload(h);
 }
 
-static void test_dso_sym_return_value_library(CuTest *tc)
+static void test_dso_sym_return_value_library(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
@@ -175,21 +175,21 @@ static void test_dso_sym_return_value_library(CuTest *tc)
     char errstr[256];
 
     status = apr_dso_load(&h, libname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     status = apr_dso_sym(&func1, h, "count_reps");
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, func1);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, func1);
 
     function = (int (*)(int))func1;
     status = (*function)(5);
-    CuAssertIntEquals(tc, 5, status);
+    abts_int_equal(tc, 5, status);
 
     apr_dso_unload(h);
 }
 
-static void test_unload_library(CuTest *tc)
+static void test_unload_library(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
@@ -197,57 +197,57 @@ static void test_unload_library(CuTest *tc)
     apr_dso_handle_sym_t func1 = NULL;
 
     status = apr_dso_load(&h, libname, p);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-    CuAssertPtrNotNull(tc, h);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_ptr_notnull(tc, h);
 
     status = apr_dso_unload(h);
-    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    abts_assert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
 
     status = apr_dso_sym(&func1, h, "print_hello");
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ESYMNOTFOUND(status));
+    abts_int_equal(tc, 1, APR_STATUS_IS_ESYMNOTFOUND(status));
 }
 
 #endif /* def(LIB_NAME) */
 
-static void test_load_notthere(CuTest *tc)
+static void test_load_notthere(abts_case *tc, void *data)
 {
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
 
     status = apr_dso_load(&h, "No_File.so", p);
 
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EDSOOPEN(status));
-    CuAssertPtrNotNull(tc, h);
+    abts_int_equal(tc, 1, APR_STATUS_IS_EDSOOPEN(status));
+    abts_ptr_notnull(tc, h);
 }    
 
 #endif /* APR_HAS_DSO */
 
-CuSuite *testdso(void)
+abts_suite *testdso(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("DSO");
+    suite = ADD_SUITE(suite)
 
 #if APR_HAS_DSO
     modname = apr_pcalloc(p, 256);
     getcwd(modname, 256);
     modname = apr_pstrcat(p, modname, "/", MOD_NAME, NULL);
 
-    SUITE_ADD_TEST(suite, test_load_module);
-    SUITE_ADD_TEST(suite, test_dso_sym);
-    SUITE_ADD_TEST(suite, test_dso_sym_return_value);
-    SUITE_ADD_TEST(suite, test_unload_module);
+    abts_run_test(suite, test_load_module, NULL);
+    abts_run_test(suite, test_dso_sym, NULL);
+    abts_run_test(suite, test_dso_sym_return_value, NULL);
+    abts_run_test(suite, test_unload_module, NULL);
 
 #ifdef LIB_NAME
     libname = apr_pcalloc(p, 256);
     getcwd(libname, 256);
     libname = apr_pstrcat(p, libname, "/", LIB_NAME, NULL);
 
-    SUITE_ADD_TEST(suite, test_load_library);
-    SUITE_ADD_TEST(suite, test_dso_sym_library);
-    SUITE_ADD_TEST(suite, test_dso_sym_return_value_library);
-    SUITE_ADD_TEST(suite, test_unload_library);
+    abts_run_test(suite, test_load_library, NULL);
+    abts_run_test(suite, test_dso_sym_library, NULL);
+    abts_run_test(suite, test_dso_sym_return_value_library, NULL);
+    abts_run_test(suite, test_unload_library, NULL);
 #endif
 
-    SUITE_ADD_TEST(suite, test_load_notthere);
+    abts_run_test(suite, test_load_notthere, NULL);
 #endif /* APR_HAS_DSO */
 
     return suite;
