@@ -46,7 +46,7 @@ typedef enum {
     APR_PROGRAM,            /**< invoke the program directly, no copied env */
     APR_PROGRAM_ENV,        /**< invoke the program, replicating our environment */
     APR_PROGRAM_PATH,       /**< find program on PATH, use our environment */
-    APR_SHELLCMD_ENV,       /**< use the shell to invoke the program,
+    APR_SHELLCMD_ENV        /**< use the shell to invoke the program,
                              *   replicating our environment
                              */
 } apr_cmdtype_e;
