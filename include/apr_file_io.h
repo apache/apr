@@ -360,8 +360,9 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
  *      is reached.  If a char was put back into the stream via ungetc, 
  *      it will be the first character returned. 
  *
- *      It is not possible for both bytes to be read and an APR_EOF or other 
- *      error to be returned.
+ *      It is possible for both bytes to be written and an error to be 
+ *      returned.  And if *bytes_written is less than nbytes, an
+ *      accompanying error is _always_ returned.
  *
  *      APR_EINTR is never returned.
  */
