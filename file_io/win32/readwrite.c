@@ -60,18 +60,28 @@
 #include <malloc.h>
 #include "atime.h"
 
-#define GetFilePointer(hfile) SetFilePointer(hfile,0,NULL, FILE_CURRENT)
-
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
-    DWORD bread;
-    int rv;
+    ap_ssize_t rv;
+    DWORD bytes_read = 0;
 
     if (*nbytes <= 0) {
         *nbytes = 0;
         return APR_SUCCESS;
     }
 
+    /* Handle the ungetchar if there is one */
+    if (thefile->ungetchar != -1) {
+        bytes_read = 1;
+        *(char *)buf = (char)thefile->ungetchar;
+        buf = (char *)buf + 1;
+        (*nbytes)--;
+        thefile->ungetchar = -1;
+        if (*nbytes == 0) {
+            *nbytes = bytes_read;
+            return APR_SUCCESS;
+        }
+    }
     if (thefile->buffered) {
         char *pos = (char *)buf;
         ap_ssize_t blocksize;
@@ -90,7 +100,6 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
                 rv = ReadFile(thefile->filehand, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead, NULL ) ? 0 : GetLastError();
-
                 if (thefile->dataRead == 0) {
                     if (rv == 0) {
                         thefile->eof_hit = TRUE;
@@ -115,10 +124,12 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             rv = 0;
         }
         ap_unlock(thefile->mutex);
-    } else {
-        if (ReadFile(thefile->filehand, buf, *nbytes, &bread, NULL)) {
-            *nbytes = bread;
-            if (bread) {
+    } else {  
+        /* Unbuffered i/o */
+        DWORD dwBytesRead;
+        if (ReadFile(thefile->filehand, buf, *nbytes, &dwBytesRead, NULL)) {
+            *nbytes = bytes_read + dwBytesRead;
+            if (*nbytes) {
                 return APR_SUCCESS;
             }
             else {
@@ -223,17 +234,8 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
-    /* ungetc only makes sense when using buffered i/o */
-    if (thefile->buffered) {
-        ap_lock(thefile->mutex);        
-        if (thefile->bufpos > 0){
-            thefile->bufpos--;
-        }
-        ap_unlock(thefile->mutex);
-        return APR_SUCCESS;
-    }
-
-    return APR_ENOTIMPL;
+    thefile->ungetchar = (unsigned char) ch;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_getc(char *ch, ap_file_t *thefile)
