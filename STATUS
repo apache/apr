@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/09/02 03:49:03 $]
+Last modified at [$Date$]
 
 Releases:
 
@@ -22,10 +22,7 @@ Bundled with httpd
     2.0a1     : released March 10, 2000
 
 
-RELEASE 0.9 SHOWSTOPPERS:
-
-
-RELEASE 1.0 SHOWSTOPPERS:
+RELEASE 1.0.1 SHOWSTOPPERS:
 
 
 CURRENT VOTES:
