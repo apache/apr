@@ -278,6 +278,66 @@ static void string_strtoff(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "strtoff failed to parse 1234", off == 1234);
 }
 
+/* random-ish checks for strfsize buffer overflows */
+static void overflow_strfsize(abts_case *tc, void *data)
+{
+    apr_off_t off;
+    char buf[7];
+
+    buf[5] = '$';
+    buf[6] = '@';
+
+    for (off = -9999; off < 20000; off++) {
+        apr_strfsize(off, buf);
+    }
+    for (; off < 9999999; off += 9) {
+        apr_strfsize(off, buf);
+    }
+    for (; off < 999999999; off += 999) {
+        apr_strfsize(off, buf);
+    }
+    for (off = 1; off < LONG_MAX && off > 0; off *= 2) {
+        apr_strfsize(off, buf);
+        apr_strfsize(off + 1, buf);
+        apr_strfsize(off - 1, buf);
+    }
+
+    ABTS_ASSERT(tc, "strfsize overflowed", buf[5] == '$');
+    ABTS_ASSERT(tc, "strfsize overflowed", buf[6] == '@');
+}
+
+static void string_strfsize(abts_case *tc, void *data)
+{
+    static const struct {
+        apr_off_t size;
+        const char *buf;
+    } ts[] = {
+        { -1,   "  - " },
+        { 0,    "  0 " },
+        { 666,  "666 " },
+        { 1024, "1.0K" },
+        { 1536, "1.5K" },
+        { 2048, "2.0K" },
+        { 1293874, "1.2M" },
+        { 9999999, "9.5M" },
+        { 103809024, " 99M" },
+        { 1047527424, "1.0G" } /* "999M" would be more correct */
+    };
+    apr_size_t n;
+
+    for (n = 0; n < sizeof(ts)/sizeof(ts[0]); n++) {
+        char buf[6], *ret;
+        
+        buf[5] = '%';
+
+        ret = apr_strfsize(ts[n].size, buf);
+        ABTS_ASSERT(tc, "strfsize returned wrong buffer", ret == buf);
+        ABTS_ASSERT(tc, "strfsize overflowed", buf[5] == '%');
+
+        ABTS_STR_EQUAL(tc, ts[n].buf, ret);
+    }
+}
+
 abts_suite *teststr(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -291,6 +351,8 @@ abts_suite *teststr(abts_suite *suite)
     abts_run_test(suite, string_long, NULL);
     abts_run_test(suite, string_strtoi64, NULL);
     abts_run_test(suite, string_strtoff, NULL);
+    abts_run_test(suite, overflow_strfsize, NULL);
+    abts_run_test(suite, string_strfsize, NULL);
 
     return suite;
 }
