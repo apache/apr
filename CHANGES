@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) apr_atomic_dec now returns a zero value if the value of 
+     the atomic is zero, non-zero otherwise [Ian Holsman]
+
   *) When opening a file, only create an internal thread mutex
      if APR_XTHREAD is set.  [Brian Pane]
 

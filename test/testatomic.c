@@ -85,7 +85,18 @@ static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
 {
     apr_uint32_t oldval;
     apr_uint32_t casval=0;
-    apr_atomic_set(&y,0);
+    apr_atomic_set(&y,2);
+    printf("%-60s", "testing apr_atomic_dec");
+    if ( apr_atomic_dec(&y) == 0 ) {
+        fprintf(stderr, "Failed\noldval =%d should not be zero\n",apr_atomic_read(&y));
+        return APR_EGENERAL;
+    }
+    if ( apr_atomic_dec(&y) != 0 ) {
+        fprintf(stderr, "Failed\noldval =%d should be zero\n",apr_atomic_read(&y));
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+
     printf("%-60s", "testing CAS");
     oldval = apr_atomic_cas(&casval,12,0);
     if (oldval != 0) {
