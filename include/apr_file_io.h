@@ -575,6 +575,16 @@ APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
  */
 APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 
+/**
+ * Open a temporary file
+ * @param fp The apr file to use as a temporary file.
+ * @param template The template to use when creating a temp file.
+ * @param p The pool to allocate the file out of.
+ * @ingroup apr_file_open
+ */
+APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *tmplt,
+                                          apr_pool_t *p);
+
 #ifdef __cplusplus
 }
 #endif

@@ -77,9 +77,9 @@ static apr_status_t proc_mutex_sysv_cleanup(void *mutex_)
     apr_proc_mutex_t *mutex=mutex_;
     union semun ick;
     
-    if (mutex->interproc != -1) {
+    if (mutex->interproc->filedes != -1) {
         ick.val = 0;
-        semctl(mutex->interproc, 0, IPC_RMID, ick);
+        semctl(mutex->interproc->filedes, 0, IPC_RMID, ick);
     }
     return APR_SUCCESS;
 }    
@@ -90,15 +90,16 @@ static apr_status_t proc_mutex_sysv_create(apr_proc_mutex_t *new_mutex,
     union semun ick;
     apr_status_t stat;
     
-    new_mutex->interproc = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
+    new_mutex->interproc = apr_palloc(new_mutex->pool, sizeof(*new_mutex->interproc));
+    new_mutex->interproc->filedes = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
 
-    if (new_mutex->interproc < 0) {
+    if (new_mutex->interproc->filedes < 0) {
         stat = errno;
         proc_mutex_sysv_cleanup(new_mutex);
         return stat;
     }
     ick.val = 1;
-    if (semctl(new_mutex->interproc, 0, SETVAL, ick) < 0) {
+    if (semctl(new_mutex->interproc->filedes, 0, SETVAL, ick) < 0) {
         stat = errno;
         proc_mutex_sysv_cleanup(new_mutex);
         return stat;
@@ -115,7 +116,7 @@ static apr_status_t proc_mutex_sysv_acquire(apr_proc_mutex_t *mutex)
     int rc;
 
     do {
-        rc = semop(mutex->interproc, &proc_mutex_op_on, 1);
+        rc = semop(mutex->interproc->filedes, &proc_mutex_op_on, 1);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -129,7 +130,7 @@ static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
     int rc;
 
     do {
-        rc = semop(mutex->interproc, &proc_mutex_op_off, 1);
+        rc = semop(mutex->interproc->filedes, &proc_mutex_op_off, 1);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -376,7 +377,7 @@ static apr_status_t proc_mutex_fcntl_cleanup(void *mutex_)
         if (status != APR_SUCCESS)
             return status;
     }
-    close(mutex->interproc);
+    apr_file_close(mutex->interproc);
     
     return APR_SUCCESS;
 }    
@@ -384,23 +385,27 @@ static apr_status_t proc_mutex_fcntl_cleanup(void *mutex_)
 static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
                                             const char *fname)
 {
+    int rv;
+ 
     if (fname) {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
-        new_mutex->interproc = open(new_mutex->fname,
-                                    O_CREAT | O_WRONLY | O_EXCL, 0644);
+        rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
+                           APR_CREATE | APR_WRITE | APR_EXCL, 0644, 
+                           new_mutex->pool);
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
-        new_mutex->interproc = apr_mkstemp(new_mutex->fname);
+        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 
+                             new_mutex->pool);
     }
-
-    if (new_mutex->interproc < 0) {
+ 
+    if (rv != APR_SUCCESS) {
         proc_mutex_fcntl_cleanup(new_mutex);
         return errno;
     }
 
     new_mutex->curr_locked = 0;
-    unlink(new_mutex->fname);
+/*    unlink(new_mutex->fname); */
     apr_pool_cleanup_register(new_mutex->pool,
                               (void*)new_mutex,
                               proc_mutex_fcntl_cleanup, 
@@ -413,7 +418,7 @@ static apr_status_t proc_mutex_fcntl_acquire(apr_proc_mutex_t *mutex)
     int rc;
 
     do {
-        rc = fcntl(mutex->interproc, F_SETLKW, &proc_mutex_lock_it);
+        rc = fcntl(mutex->interproc->filedes, F_SETLKW, &proc_mutex_lock_it);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -427,7 +432,7 @@ static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
     int rc;
 
     do {
-        rc = fcntl(mutex->interproc, F_SETLKW, &proc_mutex_unlock_it);
+        rc = fcntl(mutex->interproc->filedes, F_SETLKW, &proc_mutex_unlock_it);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -488,7 +493,7 @@ static apr_status_t proc_mutex_flock_cleanup(void *mutex_)
         if (status != APR_SUCCESS)
             return status;
     }
-    close(mutex->interproc);
+    apr_file_close(mutex->interproc);
     unlink(mutex->fname);
     return APR_SUCCESS;
 }    
@@ -496,17 +501,21 @@ static apr_status_t proc_mutex_flock_cleanup(void *mutex_)
 static apr_status_t proc_mutex_flock_create(apr_proc_mutex_t *new_mutex,
                                             const char *fname)
 {
+    int rv;
+ 
     if (fname) {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
-        new_mutex->interproc = open(new_mutex->fname,
-                                    O_CREAT | O_WRONLY | O_EXCL, 0600);
+        rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
+                           APR_CREATE | APR_WRITE | APR_EXCL, 0644, 
+                           new_mutex->pool);
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
-        new_mutex->interproc = apr_mkstemp(new_mutex->fname);
+        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 
+                             new_mutex->pool);
     }
-
-    if (new_mutex->interproc < 0) {
+ 
+    if (rv != APR_SUCCESS) {
         proc_mutex_flock_cleanup(new_mutex);
         return errno;
     }
@@ -522,7 +531,7 @@ static apr_status_t proc_mutex_flock_acquire(apr_proc_mutex_t *mutex)
     int rc;
 
     do {
-        rc = flock(mutex->interproc, LOCK_EX);
+        rc = flock(mutex->interproc->filedes, LOCK_EX);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -536,7 +545,7 @@ static apr_status_t proc_mutex_flock_release(apr_proc_mutex_t *mutex)
     int rc;
 
     do {
-        rc = flock(mutex->interproc, LOCK_UN);
+        rc = flock(mutex->interproc->filedes, LOCK_UN);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -560,14 +569,16 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
                                                 const char *fname)
 {
     apr_proc_mutex_t *new_mutex;
+    int rv;
 
     new_mutex = (apr_proc_mutex_t *)apr_palloc(pool, sizeof(apr_proc_mutex_t));
 
     memcpy(new_mutex, *mutex, sizeof *new_mutex);
     new_mutex->pool = pool;
     new_mutex->fname = apr_pstrdup(pool, fname);
-    new_mutex->interproc = open(new_mutex->fname, O_WRONLY, 0600);
-    if (new_mutex->interproc == -1) {
+    rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
+                       APR_CREATE | APR_WRITE, 0600, new_mutex->pool);
+    if (rv != APR_SUCCESS) {
         proc_mutex_flock_destroy(new_mutex);
         return errno;
     }
@@ -705,7 +716,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
 
     new_mutex->pool  = pool;
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    new_mutex->interproc = -1;
+    new_mutex->interproc = NULL;
 #endif
 
     if ((stat = proc_mutex_create(new_mutex, mech, fname)) != APR_SUCCESS)

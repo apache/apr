@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Add the apr_file_mktemp function.  This creates and opens a 
+     temporary file, for use by the program.  This file is created
+     delete_on_close.  The initial implementation only works on
+     Unix, but Windows is coming soon.  [Ryan Bloom]
+
   *) Make the unix version of apr_proc_wait_all_procs a simple wrapper 
      around apr_proc_wait, and which extracts the exit code from the 
      status returned by waitpid.  
