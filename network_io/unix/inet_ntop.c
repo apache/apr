@@ -45,6 +45,10 @@
 #define __P(x) x
 #endif
 
+#if !defined(EAFNOSUPPORT) && defined(WSAEAFNOSUPPORT)
+#define EAFNOSUPPORT WSAEAFNOSUPPORT
+#endif
+
 #define SPRINTF(x) ((size_t)sprintf x)
 
 /*
