@@ -3,8 +3,8 @@ VPATH = @srcdir@
 
 TARGETS=
 INCLUDES=
-DISTCLEAN_TARGETS = rules.mk
-EXTRACLEAN_TARGETS = ltcf-c.sh
+DISTCLEAN_TARGETS = apr_rules.mk
+EXTRACLEAN_TARGETS = ltcf-c.sh ltmain.sh libtool.m4
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
