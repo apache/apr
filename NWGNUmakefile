@@ -225,6 +225,14 @@ FILES_nlm_Ximports = \
 	WSAStartupRTags \
 	WSACleanupRTag \
 	$(EOLIST)
+
+#If the LDAP support is defined then add the imports
+ifneq "$(LDAPSDK)" ""
+FILES_nlm_Ximports += \
+	@$(LDAPSDK)/imports/lldapsdk.imp \
+	@$(LDAPSDK)/imports/lldapssl.imp \
+	$(EOLIST)
+endif
  
 #   
 # Any symbols exported to here
