@@ -1774,7 +1774,6 @@ AC_SUBST(acceptfilter)
 AC_SUBST(have_sctp)
 
 AC_CHECK_FUNCS(set_h_errno)
-APR_CHECK_RESOLV_RETRANS
 
 echo "${nl}Checking for IPv6 Networking support..."
 dnl Start of checking for IPv6 support...
