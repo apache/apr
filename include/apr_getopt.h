@@ -80,7 +80,7 @@ struct apr_getopt_t {
     const char **argv;
     /** argument associated with option */
     char const* place;
-    /** set to nonzero to support interleaving */
+    /** set to nonzero to support interleaving options with regular args */
     int interleave;
     /** range of non-option arguments skipped for interleaving */
     int skip_start;
