@@ -1,5 +1,10 @@
 Changes with APR 0.9.3
 
+  *) Don't enable posixsem, at build time, on systems where sem_t *
+     won't "fit" into an int (sizeof-wise). Also, better error handling
+     when we fail to create a posixsem. PR 17186 [Scott Herod
+     <sherod@pillardata.com>, Jim Jagielski]
+
   *) Default hpux 10.x to disable threading, since if it exists at all
      the pthread implementation should not be trusted, while hpux 10 
      had its own threads implementation that is no longer supported.
