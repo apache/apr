@@ -311,13 +311,19 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
     munmap(m->base, m->realsize);
     apr_file_close(m->file);
+    /* FIXME: unlink the file */
 #elif APR_USE_SHMEM_MMAP_ANON
     munmap(m->base, m->realsize);
 #elif APR_USE_SHMEM_SHMGET || APR_USE_SHMEM_SHMGET_ANON
+    /* Indicate that the segment is to be destroyed as soon
+     * as all processes have detached. This also disallows any
+     * new attachments to the segment. */
     if (shmctl(m->shmid, IPC_RMID, NULL) == -1) {
         return errno;
     }
-    shmdt(m->base);
+    if (shmdt(m->base) == -1) {
+        return errno;
+    }
 #endif
 
     return APR_SUCCESS;
@@ -330,12 +336,9 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     apr_status_t status;
 
     if (filename == NULL) {
-#if APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_MMAP_ANON
-        /* If they want anonymous memory they shouldn't call attach. */
-        return APR_EGENERAL;
-#else
-        return APR_ENOTIMPL;
-#endif
+        /* It doesn't make sense to attach to a segment if you don't know
+         * the filename. */
+        return APR_EINVAL;
     }
     else {
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
@@ -420,7 +423,7 @@ APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
     /* FIXME: munmap the segment. */
     return APR_ENOTIMPL;
 #elif APR_USE_SHMEM_SHMGET
-    if (shmdt(m->base) < 0) {
+    if (shmdt(m->base) == -1) {
         return errno;
     }
     return APR_SUCCESS;
