@@ -62,7 +62,6 @@
 apr_status_t apr_threadkey_private_create(apr_threadkey_t **key, 
                                      void (*dest)(void *), apr_pool_t *cont)
 {
-    apr_status_t stat;
     (*key) = (apr_threadkey_t *)apr_pcalloc(cont, sizeof(apr_threadkey_t));
 
     if ((*key) == NULL) {
@@ -71,10 +70,8 @@ apr_status_t apr_threadkey_private_create(apr_threadkey_t **key,
 
     (*key)->cntxt = cont;
 
-    if ((stat = pthread_key_create(&(*key)->key, dest)) == 0) {
-        return stat;
-    }
-    return stat;
+    return pthread_key_create(&(*key)->key, dest);
+
 }
 
 apr_status_t apr_threadkey_private_get(void **new, apr_threadkey_t *key)
