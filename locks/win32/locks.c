@@ -187,7 +187,7 @@ ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
     }
 }
 
-ap_status_t ap_get_os_lock(struct lock_t *lock, ap_os_lock_t *thelock)
+ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, struct lock_t *lock)
 {
     if (lock == NULL) {
         return APR_ENOFILE;
