@@ -86,7 +86,7 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *co
     (*new) = (struct dir_t *)ap_palloc(cont, sizeof(struct dir_t));
 
     (*new)->cntxt = cont;
-    (*new)->dirname = strdup(dirname);
+    (*new)->dirname = ap_pstrdup(cont, dirname);
     (*new)->dirstruct = opendir(dirname);
     (*new)->entry = ap_pcalloc(cont, sizeof(struct dirent));
 

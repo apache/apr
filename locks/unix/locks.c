@@ -88,10 +88,10 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     new->cntxt = cont;
     new->type = type;
     if (fname != NULL) {
-        new->fname = strdup(fname);
+        new->fname = ap_pstrdup(cont, fname);
     }
     else {
-        new->fname = strdup(tempnam(NULL, NULL));
+        new->fname = ap_pstrdup(cont, tempnam(NULL, NULL));
         unlink(new->fname);
     }
 

@@ -305,7 +305,8 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
                               struct procattr_t *attr, ap_context_t *cont)
 {
     int i;
-    char **newargs;
+    typedef const char *my_stupid_string;
+    my_stupid_string *newargs;
     struct proc_t *pgrp; 
 
     (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
@@ -352,19 +353,20 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
             while (args[i]) {
                 i++;
             }
-            newargs = (char **)ap_palloc(cont, sizeof (char *) * (i + 3));
-            newargs[0] = strdup(SHELL_PATH);
-            newargs[1] = strdup("-c");
+            newargs =
+               (my_stupid_string *) ap_palloc(cont, sizeof (char *) * (i + 3));
+            newargs[0] = SHELL_PATH;
+            newargs[1] = "-c";
             i = 0;
             while (args[i]) {
-                newargs[i + 2] = strdup(args[i]); 
+                newargs[i + 2] = args[i]; 
                 i++;
             }
             newargs[i + 3] = NULL;
             if (attr->detached) {
                 ap_detach(&pgrp, attr->cntxt);
             }
-            execve(SHELL_PATH, newargs, env);
+            execve(SHELL_PATH, (char **) newargs, env);
         }
         else {
             if (attr->detached) {
