@@ -56,6 +56,7 @@
 
 APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
 {
+    apr_oslevel_e level;
     OVERLAPPED offset;
     DWORD flags, len = 0xffffffff;
 
@@ -68,22 +69,38 @@ APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
      *     the lock; something needs to be done so an APR app can
      *     recognize this as a try-again situation
      */
-    /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
-    if (!LockFileEx(thefile->filehand, flags, 0, len, len, &offset))
-        return apr_get_os_error();
+    apr_get_oslevel(NULL, &level);
+    if (level >= APR_WIN_NT) {
+        /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
+        if (!LockFileEx(thefile->filehand, flags, 0, len, len, &offset))
+            return apr_get_os_error();
+    }
+    else {
+        if (!LockFile(thefile->filehand, 0, 0, len, 0))
+            return apr_get_os_error();
+    }
 
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile)
 {
+    apr_oslevel_e level;
     OVERLAPPED offset;
     DWORD len = 0xffffffff;
 
     memset (&offset, 0, sizeof(offset));
-    /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
-    if (!UnlockFileEx(thefile->filehand, 0, len, len, &offset))
-        return apr_get_os_error();
+
+    apr_get_oslevel(NULL, &level);
+    if (level >= APR_WIN_NT) {
+        /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
+        if (!UnlockFileEx(thefile->filehand, 0, len, len, &offset))
+            return apr_get_os_error();
+    }
+    else {
+        if (!UnlockFile(thefile->filehand, 0, 0, len, 0))
+            return apr_get_os_error();
+    }
 
     return APR_SUCCESS;
 }
