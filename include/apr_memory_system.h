@@ -98,7 +98,7 @@ struct apr_sms_t
   apr_status_t (*free_fn)(apr_sms_t *mem_sys, void *memory);
   apr_status_t (*reset_fn)(apr_sms_t *mem_sys);
   void (*pre_destroy_fn)(apr_sms_t *mem_sys);
-  void (*destroy_fn)(apr_sms_t *mem_sys);
+  apr_status_t (*destroy_fn)(apr_sms_t *mem_sys);
   void (*threadsafe_lock_fn)(apr_sms_t *mem_sys);
   void (*threadsafe_unlock_fn)(apr_sms_t *mem_sys);
 };
