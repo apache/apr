@@ -214,6 +214,30 @@ apr_uint32_t apr_atomic_add_sparc(volatile apr_atomic_t *mem, apr_uint32_t add);
 apr_uint32_t apr_atomic_sub_sparc(volatile apr_atomic_t *mem, apr_uint32_t sub);
 apr_uint32_t apr_atomic_cas_sparc(volatile apr_uint32_t *mem, long with, long cmp);
 
+#elif defined(__MVS__) /* OS/390 */
+#include <stdlib.h>
+#define apr_atomic_t cs_t
+
+apr_int32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_int32_t val);
+apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem, apr_uint32_t swap, 
+                            apr_uint32_t cmp);
+
+#define apr_atomic_inc(mem)          apr_atomic_add(mem, 1)
+#define apr_atomic_dec(mem)          apr_atomic_add(mem, -1)
+#define apr_atomic_init(pool)        APR_SUCCESS
+
+/* warning: the following two operations, _read and _set, are atomic
+ * if the memory variables are aligned (the usual case).  
+ * 
+ * If you try really hard and manage to mis-align them, they are not 
+ * guaranteed to be atomic on S/390.  But then your program will blow up 
+ * with SIGBUS on a sparc, or with a S0C6 abend if you use the mis-aligned 
+ * variables with other apr_atomic_* operations on OS/390.
+ */
+
+#define apr_atomic_read(p)           *p
+#define apr_atomic_set(mem, val)     *mem= val
+
 #else
 #if APR_HAS_THREADS
 #define APR_ATOMIC_NEED_DEFAULT 1
