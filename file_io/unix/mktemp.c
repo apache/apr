@@ -31,6 +31,10 @@
  * SUCH DAMAGE.
  */
 
+#include "apr_private.h"
+
+#if !defined(HAVE_MKSTEMP)
+
 #ifndef __warn_references
 #define __warn_references(a,b) 
 #endif
@@ -215,3 +219,5 @@ _gettemp(path, doopen, domkdir, slen)
 	}
 	/*NOTREACHED*/
 }
+
+#endif /* !defined(HAVE_MKSTEMP) */
