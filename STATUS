@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/07/26 18:52:51 $]
+Last modified at [$Date: 2001/07/30 03:04:07 $]
 
 Release:
 
@@ -110,6 +110,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
              get around to it soonish...
 
     * toss the per-Makefile setup of INCLUDES; shift to rules.mk.in
+        rbb: This is a bad thing IMHO.  If we do this, then we
+             can't use these makefiles for anything else.  For example,
+             apr-util
 
     * add the rest of the pool accessor declare/impl macros.
       Justin says: Both thread and file have the accessors now.  Any others?
