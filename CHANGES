@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Add APR_PARSE_ARGUMENTS and APR_LAYOUT macros for better layout
+     support. [Thom May]
+
   *) Add parallel-apr layout which utilizes the major version number in
      directories and library names.  [Justin Erenkrantz]
 
