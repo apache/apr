@@ -247,6 +247,22 @@ B<Generate a string of random bytes.>
 ap_status_t ap_generate_random_bytes(unsigned char * buf, int length);
 #endif
 
+/* Memory allocation/Pool debugging options... 
+ *
+ * Look in ap_pools.c for definitions of what these mean/do
+ *
+ * NB These should ALL normally be commented out unless you REALLY
+ * need them!!
+ */
+ 
+/*
+#define ALLOC_DEBUG
+#define POOL_DEBUG
+#define ALLOC_USE_MALLOC
+#define MAKE_TABLE_PROFILE
+#define ALLOC_STATS
+*/
+
 typedef struct ap_pool_t {
     union block_hdr *first;
     union block_hdr *last;
@@ -261,7 +277,7 @@ typedef struct ap_pool_t {
     void *allocation_list;
 #endif
 #ifdef POOL_DEBUG
-    ap_pool_t *joined;
+    struct ap_pool_t *joined;
 #endif
     int (*apr_abort)(int retcode);
     struct datastruct *prog_data;
