@@ -10,8 +10,8 @@ AC_PREREQ(2.12)dnl
 AC_REVISION($1.0$)dnl
 
 dnl #   autoconf initialization
-AC_CONFIG_AUX_DIR(../../../helpers)
 AC_INIT(README)
+AC_CONFIG_AUX_DIR(../../../helpers)
 AC_CONFIG_HEADER(mm_conf.h)
 AC_PREFIX_DEFAULT(/usr/local)
 
