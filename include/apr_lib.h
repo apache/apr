@@ -69,6 +69,10 @@
 #include <sys/types.h>
 #endif
 
+/**
+ * @package APR general-purpose library
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -87,20 +91,18 @@ typedef struct ap_vformatter_buff_t {
     char *endpos;
 } ap_vformatter_buff_t;
 
-/*
-
-=head1 ap_status_t ap_filename_of_pathname(const char *pathname)
-
-B<return the final element of the pathname>
-
-    arg 1) The path to get the final element of
-
-B<NOTE>:  Examples:  "/foo/bar/gum"   -> "gum"
-                     "/foo/bar/gum/"  -> ""
-                     "gum"            -> "gum"
-                     "wi\\n32\\stuff" -> "stuff"
-
-=cut
+/**
+ * return the final element of the pathname
+ * @param pathname The path to get the final element of
+ * @return the final element of the path
+ * @tip Examples:  
+ * <PRE>
+ *                 "/foo/bar/gum"   -> "gum"
+ *                 "/foo/bar/gum/"  -> ""
+ *                 "gum"            -> "gum"
+ *                 "wi\\n32\\stuff" -> "stuff"
+ * </PRE>
+ * @deffunc const char * ap_filename_of_pathname(const char *pathname)
  */
 APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 
@@ -138,9 +140,16 @@ APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 #endif /* NO_KILLPG */
 #endif /* WIN32 */
 
-/*
+/**
  * ap_vformatter() is a generic printf-style formatting routine
- * with some extensions.  The extensions are:
+ * with some extensions.
+ * @param flush_func The function to call when the buffer is full
+ * @param c The buffer to write to
+ * @param fmt The format string
+ * @param ap The arguments to use to fill out the format string.
+ *
+ * @tip <PRE>
+ * The extensions are:
  *
  * %pA	takes a struct in_addr *, and prints it as a.b.c.d
  * %pI	takes a struct sockaddr_in * and prints it as a.b.c.d:port
@@ -186,40 +195,18 @@ APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
  * space at the end of its output buffer, and doesn't actually note
  * that the space is in use until it either has to flush the buffer
  * or until ap_vformatter returns.
- */
-
-/*
-
-=head1 int ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b), ap_vformatter_buff_t *c, const char *fmt, va_list ap)
-
-B<a generic printf-style formatting routine with some extensions>
-
-    arg 1) The function to call when the buffer is full
-    arg 2) The buffer to write to
-    arg 3) The format string
-    arg 4) The arguments to use to fill out the format string.
-
-B<NOTE>:  The extensions are:
-    %pA		takes a struct in_addr *, and prints it as a.b.c.d
-    %pI		takes a struct sockaddr_in * and prints it as a.b.c.d:port
-    %pp  	takes a void * and outputs it in hex
-
-=cut
+ * </PRE>
+ * @deffunc int ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b), ap_vformatter_buff_t *c, const char *fmt, va_list ap)
  */
 APR_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b),
 			       ap_vformatter_buff_t *c, const char *fmt,
 			       va_list ap);
 
-/*
-
-=head1 ap_status_t ap_validate_password(const char *passwd, const char *hash)
-
-B<Validate any password encypted with any algorithm that APR understands>
-
-    arg 1) The password to validate
-    arg 2) The password to validate against
-
-=cut
+/**
+ * Validate any password encypted with any algorithm that APR understands
+ * @param passwd The password to validate
+ * @param hash The password to validate against
+ * @deffunc ap_status_t ap_validate_password(const char *passwd, const char *hash)
  */
 APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash);
 
@@ -241,68 +228,52 @@ APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *has
  * exactly filled the buffer.
  */
 
-/*
-
-=head1 int ap_snprintf(char *buf, size_t len, const char *format, ...)
-
-B<snprintf routine based on ap_vformatter.  This means it understands the same extensions.>
-
-    arg 1) The buffer to write to
-    arg 2) The size of the buffer
-    arg 3) The format string
-    arg 4) The arguments to use to fill out the format string.
-
-=cut
+/**
+ *snprintf routine based on ap_vformatter.  This means it understands the 
+ *same extensions.>
+ * @param buf The buffer to write to
+ * @param len The size of the buffer
+ * @param format The format string
+ * @param ... The arguments to use to fill out the format string.
+ * @deffunc int ap_snprintf(char *buf, size_t len, const char *format, ...)
  */
 APR_EXPORT(int) ap_snprintf(char *buf, size_t len, const char *format, ...)
 	__attribute__((format(printf,3,4)));
 
-/*
-
-=head1 int ap_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
-
-B<vsnprintf routine based on ap_vformatter.  This means it understands the same extensions.>
-
-    arg 1) The buffer to write to
-    arg 2) The size of the buffer
-    arg 3) The format string
-    arg 4) The arguments to use to fill out the format string.
-
-=cut
+/**
+ * vsnprintf routine based on ap_vformatter.  This means it understands the 
+ * same extensions.
+ * @param buf The buffer to write to
+ * @param len The size of the buffer
+ * @param format The format string
+ * @param ap The arguments to use to fill out the format string.
+ * @deffunc int ap_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
  */
 APR_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
 			      va_list ap);
 
-/*
-
-=head1 ap_status_t ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
-
-B<Display a prompt and read in the password from stdin.>
-
-    arg 1) The prompt to display
-    arg 2) Where to store the password
-    arg 3) The length of the password string.
-
-=cut
+/**
+ * Display a prompt and read in the password from stdin.
+ * @param prompt The prompt to display
+ * @param pwbuf Where to store the password
+ * @param bufsize The length of the password string.
+ * @deffunc ap_status_t ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
  */
 APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 
-/*
-
-=head1 ap_status_t ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid, enum kill_conditions how)
-
-B<Register a process to be killed when a pool dies.>
-
-    arg 1) The pool to use to define the processes lifetime 
-    arg 2) The process to register
-    arg 3) How to kill the process, one of:
-	kill_never   	   -- process is never sent any signals
-	kill_always 	   -- process is sent SIGKILL on ap_pool_t cleanup	
-	kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
-	just_wait          -- wait forever for the process to complete
-	kill_only_once     -- send SIGTERM and then wait
-
-=cut
+/**
+ * Register a process to be killed when a pool dies.
+ * @param a The pool to use to define the processes lifetime 
+ * @param pid The process to register
+ * @param how How to kill the process, one of:
+ * <PRE>
+ *         kill_never   	   -- process is never sent any signals
+ *         kill_always 	   -- process is sent SIGKILL on ap_pool_t cleanup	
+ *         kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
+ *         just_wait          -- wait forever for the process to complete
+ *         kill_only_once     -- send SIGTERM and then wait
+ * </PRE>
+ * @deffunc void ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid, enum kill_conditions how)
  */
 APR_EXPORT(void) ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid,
 				     enum kill_conditions how);
