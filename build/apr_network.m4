@@ -632,37 +632,6 @@ else
 fi
 ])
 
-
-dnl
-dnl Check to see if this platform includes sa_len in it's
-dnl struct sockaddr.  If it does it changes the length of sa_family
-dnl which could cause us problems
-dnl
-AC_DEFUN(APR_CHECK_SOCKADDR_SA_LEN,[
-AC_CACHE_CHECK(for sockaddr sa_len, ac_cv_define_sockaddr_sa_len,[
-AC_TRY_COMPILE([
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-],[
-struct sockaddr_in sai;
-int i = sai.sin_len;
-],[
-  ac_cv_define_sockaddr_sa_len=yes
-],[
-  ac_cv_define_sockaddr_sa_len=no
-])
-])
-
-if test "$ac_cv_define_sockaddr_sa_len" = "yes"; then
-  AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1 ,[Define if we have length field in sockaddr_in])
-fi
-])
-
-
 dnl
 dnl APR_INADDR_NONE
 dnl
