@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Remove APR_WANT_SIGNAL from apr_want.h because code must include
+     apr_signal.h in order to get consistent definitions. [Roy Fielding]
+
   *) Don't try to use /dev/zero and mmap on platforms that don't
      support that (such as HP-UX).  PR 8537.  [Justin Erenkrantz]
 
