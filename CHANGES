@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Add support for QNX 6.  [J.T. Conklin <jtc@acorntoolworks.com>]
+
   *) We now create exports.c and export_vars.h, which in turn create
      exports.c.  From this we generate two more files with different
      purposes: apr.exp - list of exported symbols; and exports.lo
