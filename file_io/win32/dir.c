@@ -362,7 +362,8 @@ apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir, apr_pool_t *c
         (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
         (*dir)->cntxt = cont;
     }
-    (*dir)->dirhand = thedir;
+    else
+        (*dir)->rootlen = 0; /* We don't know, don't care */
     (*dir)->dirhand = thedir;
     return APR_SUCCESS;
 }
