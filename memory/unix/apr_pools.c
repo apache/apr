@@ -1788,6 +1788,13 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_abort_get(apr_pool_t *pool)
 
 APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool)
 {
+#ifdef NETWARE
+    /* On NetWare, don't return the global_pool, return the application pool 
+       as the top most pool */
+    if (pool->parent == global_pool)
+        return NULL;
+    else
+#endif
     return pool->parent;
 }
 
