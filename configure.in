@@ -585,7 +585,7 @@ SAVE_FILES="include/apr.h include/apr_private.h"
 for i in $SAVE_FILES; do
   if cmp -s $i $i.save 2>/dev/null; then
     mv $i.save $i
-    AC_MSG_RESULT($i is unchanged)
+    echo "$i is unchanged"
   fi
   rm -f $i.save
 done
