@@ -223,8 +223,9 @@
     libexecdir:    ${exec_prefix}/lib/apr/modules
     mandir:        ${exec_prefix}/share/man
     datadir:       ${exec_prefix}/share/apr
-    includedir:    ${exec_prefix}/include/apr
+    includedir:    ${exec_prefix}/include/apr-${APR_MAJOR_VERSION}
     localstatedir: ${prefix}/var/run
     runtimedir:    ${prefix}/var/run
     infodir:       ${exec_prefix}/share/info
+    libsuffix:    -${APR_MAJOR_VERSION}
 </Layout>
