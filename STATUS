@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/09/13 23:17:45 $]
+Last modified at [$Date: 2002/10/18 12:36:12 $]
 
 Release:
 
@@ -68,7 +68,13 @@ RELEASE SHOWSTOPPERS:
 		  runtime linker will catch new function requirements
 		  across minor rev upgrades, but will not catch new
 		  constants."
-      
+
+    * For 1.0, clean up ability to specify protocol for a socket by
+      axing apr_socket_create_ex(), adding protocol parm to 
+      apr_socket_create(), and enabling protocol field in 
+      apr_os_sock_info_t.
+
+      1.0 showstopper (not 0.9.x): trawick
 
 CURRENT VOTES:
 
