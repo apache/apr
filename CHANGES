@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) apr_array_copy speedup by removing the zero-fill [Brian Pane]
+
   *) Fix build breakage on systems with getaddrinfo() but not 
      gai_strerror() (e.g., RedHat 5.2).  [Jeff Trawick]
 

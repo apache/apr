@@ -167,10 +167,14 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
 APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
 						const apr_array_header_t *arr)
 {
-    apr_array_header_t *res = apr_array_make(p, arr->nalloc, arr->elt_size);
+    apr_array_header_t *res =
+        (apr_array_header_t *) apr_palloc(p, sizeof(apr_array_header_t));
+    make_array_core(res, p, arr->nalloc, arr->elt_size, 0);
 
     memcpy(res->elts, arr->elts, arr->elt_size * arr->nelts);
     res->nelts = arr->nelts;
+    memset(res->elts + res->elt_size * res->nelts, 0,
+           res->elt_size * (res->nalloc - res->nelts));
     return res;
 }
 
