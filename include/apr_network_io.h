@@ -122,6 +122,9 @@ typedef struct ap_hdtr_t       ap_hdtr_t;
 typedef struct in_addr      ap_in_addr;
 
 #if APR_HAS_SENDFILE
+/* Define flags passed in on ap_sendfile() */
+#define APR_SENDFILE_DISCONNECT_SOCKET      1
+
 /* A structure to encapsulate headers and trailers for ap_sendfile */
 struct ap_hdtr_t {
     struct iovec* headers;
