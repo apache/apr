@@ -66,18 +66,17 @@
 
 #ifdef NETWARE
 # define LIB_NAME "mod_test.nlm"
-#else
-# ifdef BEOS
-#  define LIB_NAME "mod_test.so"
-# else
-#  ifdef DARWIN
-#   define LIB_NAME ".libs/mod_test.so" 
-#   define LIB_NAME2 ".libs/libmod_test.dylib" 
-#  else
-#   define LIB_NAME ".libs/mod_test.so"
-#   define LIB_NAME2 ".libs/libmod_test.so"
-#  endif
-# endif
+#elif defined(BEOS)
+# define LIB_NAME "mod_test.so"
+#elif defined(DARWIN)
+# define LIB_NAME ".libs/mod_test.so" 
+# define LIB_NAME2 ".libs/libmod_test.dylib" 
+#elif defined(__hpux__)
+# define LIB_NAME ".libs/mod_test.sl"
+# define LIB_NAME2 ".libs/libmod_test.sl"
+#else /* Every other Unix */
+# define LIB_NAME ".libs/mod_test.so"
+# define LIB_NAME2 ".libs/libmod_test.so"
 #endif
 
 static char *filename;
