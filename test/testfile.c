@@ -462,11 +462,14 @@ static void test_read_guts(ap_pool_t *p, const char *fname, ap_int32_t extra_fla
                 "doesn't work yet...\n\t\t\t\t ");
     }
     else {
-        rv = ap_ungetc('z', f);
+        rv = ap_ungetc('b', f);
         assert(!rv);
-        rv = ap_ungetc('a', f);
-        assert(!rv); /* we just overwrote the previously-un-got char */
-        read_one(f, 'a');
+        /* Note: some implementations move the file ptr back;
+         *       others just save up to one char; it isn't 
+         *       portable to unget more than once.
+         */
+        /* Don't do this: rv = ap_ungetc('a', f); */
+        read_one(f, 'b');
     }
     read_one(f, 'c');
     read_one(f, '\n');
