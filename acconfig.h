@@ -24,11 +24,6 @@
 #define ENUM_BITFIELD(e,n,w)  e n : w
 #endif
 
-/* OS/2's C library is thread safe but doesn't define this */
-#ifdef OS2
-#define _POSIX_THREAD_SAFE_FUNCTIONS
-#endif
-
 @TOP@
 
 /* Various #defines we need to know about */
