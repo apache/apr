@@ -143,6 +143,8 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
 
 #ifdef APR_APP
 
+/* This symbol is _private_, although it must be exported.
+ */
 extern int APR_DECLARE_DATA apr_app_init_complete;
 
 extern int main(int argc, char **argv, char **env);
@@ -181,6 +183,8 @@ int wmain(int argc, wchar_t **wargv, wchar_t **wenv)
 
 #else
 
+/* This symbol is _private_, although it must be exported.
+ */
 int APR_DECLARE_DATA apr_app_init_complete = 0;
 
 static int warrsztoastr(char ***retarr, wchar_t *arrsz, int args)
@@ -260,11 +264,15 @@ APR_DECLARE(apr_status_t) apr_app_main(int *argc, char ***argv, char ***env)
         }
 
         sysstr = GetEnvironmentStringsW();
-        dupenv = warrsztoastr(env, sysstr, -1);
+        dupenv = warrsztoastr(&_environ, sysstr, -1);
 
-        _environ = _malloc_dbg((dupenv + 1) * sizeof (char *), 
-                               _CRT_BLOCK, __FILE__, __LINE__ );
-        memcpy(_environ, env, (dupenv + 1) * sizeof (char *));
+	if (env) {
+            env = _malloc_dbg((dupenv + 1) * sizeof (char *), 
+                              _CRT_BLOCK, __FILE__, __LINE__ );
+            memcpy(*env, _environ, (dupenv + 1) * sizeof (char *));
+        }
+        else {
+        }
 
         /* MSVCRT will attempt to maintain the wide environment calls
          * on _putenv(), which is bogus if we've passed a non-ascii

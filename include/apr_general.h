@@ -185,6 +185,16 @@ APR_DECLARE_NONSTD(void) apr_terminate(void);
  */
 APR_DECLARE(void) apr_terminate2(void);
 
+/**
+ * Set up an application with normalized argc, argv (and optionally env) in
+ * order to deal with platform-specific oddities, such as Win32 services,
+ * code pages and signals.
+ * @remark An APR program should invoke apr_app_main immediately following
+ * apr_initialize, so it behaves properly as a service on Win32 with respect
+ * to its Unicode (utf-8) code page, services and signals.
+ */
+APR_DECLARE(apr_status_t) apr_app_main(int *argc, char ***argv, char ***env);
+
 /** @} */
 
 /**
