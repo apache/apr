@@ -374,6 +374,7 @@ struct apr_pollset_t {
 #endif
 };
 
+#if defined(HAVE_KQUEUE) || defined(HAVE_EPOLL)
 static apr_status_t backend_cleanup(void *p_)
 {
     apr_pollset_t *pollset = (apr_pollset_t *)p_;
@@ -384,6 +385,7 @@ static apr_status_t backend_cleanup(void *p_)
 #endif
     return APR_SUCCESS;
 }
+#endif /* HAVE_KQUEUE || HAVE_EPOLL */
 
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
@@ -433,7 +435,11 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 
 APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset)
 {
+#if defined(HAVE_KQUEUE) || defined(HAVE_EPOLL)
     return apr_pool_cleanup_run(pollset->pool, pollset, backend_cleanup);
+#else
+    return APR_SUCCESS;
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
@@ -571,7 +577,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
 #elif defined(HAVE_EPOLL)
     struct epoll_event ev;
     int ret = -1;
-#elif defined(HAVE_POLL)
+#elif !defined(HAVE_POLL)
     apr_os_sock_t fd;
 #endif
 
