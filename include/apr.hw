@@ -91,7 +91,6 @@
 #define NOIME
 #endif
 #include <windows.h>
-#include <windows.h>
 /* 
  * Add a _very_few_ declarations missing from the restricted set of headers
  * (If this list becomes extensive, re-enable the required headers above!)
