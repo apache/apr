@@ -60,13 +60,96 @@
 #include <malloc.h>
 #include "atime.h"
 
-ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+/*
+ * read_with_timeout() 
+ * Uses async i/o to emulate unix non-blocking i/o with timeouts.
+ */
+static ap_status_t read_with_timeout(ap_file_t *file, void *buf, ap_ssize_t len, ap_ssize_t *nbytes)
+{
+    ap_status_t rv;
+    *nbytes = 0;
+
+    /* Handle the zero timeout non-blocking case */
+    if (file->timeout == 0) {
+        /* Peek at the pipe. If there is no data available, return APR_EAGAIN.
+         * If data is available, go ahead and read it.
+         */
+        if (file->pipe) {
+            char tmpbuf[5];
+            DWORD dwBytesRead;
+            DWORD dwBytesAvail;
+            DWORD dwBytesLeftThisMsg;
+            if (!PeekNamedPipe(file->filehand,         // handle to pipe to copy from
+                               &tmpbuf,                   // pointer to data buffer
+                               sizeof(tmpbuf),            // size, in bytes, of data buffer
+                               &dwBytesRead,           // pointer to number of bytes read
+                               &dwBytesAvail,          // pointer to total number of bytes available
+                               &dwBytesLeftThisMsg)) { // pointer to unread bytes in this message
+                rv = GetLastError();
+                if (rv = ERROR_BROKEN_PIPE)
+                    return APR_SUCCESS;
+            }
+            else {
+                if (dwBytesRead == 0) {
+                    return APR_EAGAIN;
+                }
+            }
+        }
+        else {
+            /* ToDo: Handle zero timeout non-blocking file i/o 
+             * This is not needed until an APR application needs to
+             * timeout file i/o (which means setting file i/o non-blocking)
+             */
+        }
+    }
+
+    rv = ReadFile(file->filehand, buf, len, nbytes, file->pOverlapped);
+
+    if (!rv) {
+        rv = GetLastError();
+        if (rv == ERROR_IO_PENDING) {
+            /* Wait for the pending i/o */
+            if (file->timeout > 0) {
+                rv = WaitForSingleObject(file->pOverlapped->hEvent, file->timeout/1000); // timeout in milliseconds...
+            }
+            else if (file->timeout == -1) {
+                rv = WaitForSingleObject(file->pOverlapped->hEvent, INFINITE);
+            }
+            switch (rv) {
+            case WAIT_OBJECT_0:
+                GetOverlappedResult(file->filehand, file->pOverlapped, nbytes, TRUE);
+                rv = APR_SUCCESS;
+                break;
+            case WAIT_TIMEOUT:
+                rv = APR_TIMEUP;
+                break;
+            case WAIT_FAILED:
+                rv = GetLastError();
+                break;
+            default:
+                break;
+            }
+            if (rv != APR_SUCCESS) {
+                CancelIo(file->filehand);
+            }
+        }
+        else if (rv == ERROR_BROKEN_PIPE) {
+            /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
+            rv = APR_SUCCESS; /* APR_EOF? */
+        }
+    } else {
+        rv = APR_SUCCESS;
+    }
+    return rv;
+}
+
+ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *len)
 {
     ap_ssize_t rv;
     DWORD bytes_read = 0;
 
-    if (*nbytes <= 0) {
-        *nbytes = 0;
+    if (*len <= 0) {
+        *len = 0;
         return APR_SUCCESS;
     }
 
@@ -75,17 +158,17 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         bytes_read = 1;
         *(char *)buf = (char)thefile->ungetchar;
         buf = (char *)buf + 1;
-        (*nbytes)--;
+        (*len)--;
         thefile->ungetchar = -1;
-        if (*nbytes == 0) {
-            *nbytes = bytes_read;
+        if (*len == 0) {
+            *len = bytes_read;
             return APR_SUCCESS;
         }
     }
     if (thefile->buffered) {
         char *pos = (char *)buf;
         ap_ssize_t blocksize;
-        ap_ssize_t size = *nbytes;
+        ap_ssize_t size = *len;
 
         ap_lock(thefile->mutex);
 
@@ -99,9 +182,10 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
-                rv = ReadFile(thefile->filehand, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead, NULL ) ? 0 : GetLastError();
+                rv = read_with_timeout(thefile, thefile->buffer, 
+                                       APR_FILE_BUFSIZE, &thefile->dataRead);
                 if (thefile->dataRead == 0) {
-                    if (rv == 0) {
+                    if (rv == APR_SUCCESS) {
                         thefile->eof_hit = TRUE;
                         rv = APR_EOF;
                     }
@@ -119,33 +203,16 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             size -= blocksize;
         }
 
-        *nbytes = pos - (char *)buf;
-        if (*nbytes) {
+        *len = pos - (char *)buf;
+        if (*len) {
             rv = 0;
         }
         ap_unlock(thefile->mutex);
     } else {  
         /* Unbuffered i/o */
-        DWORD dwBytesRead;
-        if (ReadFile(thefile->filehand, buf, *nbytes, &dwBytesRead, NULL)) {
-            *nbytes = bytes_read + dwBytesRead;
-            if (*nbytes) {
-                return APR_SUCCESS;
-            }
-            else {
-                return APR_EOF;
-            }
-        }
-
-        *nbytes = 0;
-        rv = GetLastError();
-        if (rv == ERROR_BROKEN_PIPE) {
-            /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
-            return APR_SUCCESS;
-        } else if (rv == ERROR_NO_DATA) {
-            /* Receive this error on a read to a pipe in nonblocking mode */
-            return APR_EAGAIN;
-        }
+        ap_ssize_t nbytes;
+        rv = read_with_timeout(thefile, buf, *len, &nbytes);
+        *len = nbytes;
     }
 
     return rv;

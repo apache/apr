@@ -63,62 +63,13 @@
 #include <sys/stat.h>
 #include "misc.h"
 
-static ap_status_t setpipeblockmode(ap_file_t *pipe, DWORD dwMode) {
-    if (!SetNamedPipeHandleState(pipe->filehand, &dwMode, NULL, NULL)) {
-        return GetLastError();
-    }
+ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
+{
+    thepipe->timeout = timeout;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
-{
-    ap_status_t rc = APR_SUCCESS;
-    ap_oslevel_e oslevel;
-
-    /* This code relies on the fact that anonymous pipes (which
-     * do not support nonblocking I/O) are really named pipes
-     * (which support nonblocking I/O) on Windows NT.
-     */
-    if (thepipe->pipe == 1) {
-        if (ap_get_oslevel(thepipe->cntxt, &oslevel) == APR_SUCCESS &&
-            oslevel >= APR_WIN_NT) {
-            /* Temporary hack to make CGIs work in alpha5 
-             * NT doesn't support timing out non-blocking pipes. Specifically,
-             * NT has no event notification to tell you when data has arrived
-             * on a pipe. select, WaitForSingleObject or WSASelect, et. al.
-             * do not tell you when data is available. You have to poll the read
-             * which just sucks. I will implement this using async i/o later.
-             * For now, if ap_set_pipe_timeout is set with a timeout, just make
-             * the pipe full blocking...*/
-            if (timeout > 0) {
-                setpipeblockmode(thepipe, PIPE_WAIT);
-                return APR_SUCCESS;
-            }
-            if (timeout >= 0) {
-                /* Set the pipe non-blocking if it was previously blocking */  
-                if (thepipe->timeout < 0) {
-                    rc = setpipeblockmode(thepipe, PIPE_NOWAIT);
-                }
-            }
-            else if (thepipe->timeout >= 0) {
-                rc = setpipeblockmode(thepipe, PIPE_WAIT);
-            }
-        } 
-        else {
-            /* can't make anonymous pipes non-blocking on Win9x */
-            rc = APR_ENOTIMPL;
-        }
-        thepipe->timeout = timeout;
-    }
-    else {
-        /* Timeout not valid for file i/o (yet...) */
-        rc = APR_EINVAL;
-    }
-
-    return rc;
-}
-
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
+ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *p)
 {
     SECURITY_ATTRIBUTES sa;
 
@@ -126,9 +77,9 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
-    (*in) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
-    (*in)->cntxt = cont;
-    (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*in)->cntxt = p;
+    (*in)->fname = ap_pstrdup(p, "PIPE");
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
@@ -138,9 +89,9 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->dataRead = 0;
     (*in)->direction = 0;
 
-    (*out) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
-    (*out)->cntxt = cont;
-    (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*out)->cntxt = p;
+    (*out)->fname = ap_pstrdup(p, "PIPE");
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
@@ -152,6 +103,116 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 
     if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
         return GetLastError();
+    }
+
+    return APR_SUCCESS;
+}
+
+/* ap_create_nt_pipe()
+ * An internal (for now) APR function created for use by ap_create_process() 
+ * when setting up pipes to communicate with the child process. 
+ * ap_create_nt_pipe() allows setting the blocking mode of each end of 
+ * the pipe when the pipe is created (rather than after the pipe is created). 
+ * A pipe handle must be opened in full async i/o mode in order to 
+ * emulate Unix non-blocking pipes with timeouts. 
+ *
+ * In general, we don't want to enable child side pipe handles for async i/o.
+ * This prevents us from enabling both ends of the pipe for async i/o in 
+ * ap_create_pipe.
+ *
+ * Why not use NamedPipes on NT which support setting pipe state to
+ * non-blocking? On NT, even though you can set a pipe non-blocking, 
+ * there is no clean way to set event driven non-zero timeouts (e.g select(),
+ * WaitForSinglelObject, et. al. will not detect pipe i/o). On NT, you 
+ * have to poll the pipe to detech i/o on a non-blocking pipe.
+ *
+ * wgs
+ */
+ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out, 
+                              BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
+                              ap_pool_t *p)
+{
+    ap_oslevel_e level;
+    SECURITY_ATTRIBUTES sa;
+    static unsigned long id = 0;
+    DWORD dwPipeMode;
+    DWORD dwOpenMode;
+    char name[50];
+
+    sa.nLength = sizeof(sa);
+    sa.bInheritHandle = TRUE;
+    sa.lpSecurityDescriptor = NULL;
+
+    (*in) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*in)->cntxt = p;
+    (*in)->fname = ap_pstrdup(p, "PIPE");
+    (*in)->pipe = 1;
+    (*in)->timeout = -1;
+    (*in)->ungetchar = -1;
+    (*in)->eof_hit = 0;
+    (*in)->filePtr = 0;
+    (*in)->bufpos = 0;
+    (*in)->dataRead = 0;
+    (*in)->direction = 0;
+    (*in)->pOverlapped = NULL;
+
+    (*out) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*out)->cntxt = p;
+    (*out)->fname = ap_pstrdup(p, "PIPE");
+    (*out)->pipe = 1;
+    (*out)->timeout = -1;
+    (*out)->ungetchar = -1;
+    (*out)->eof_hit = 0;
+    (*out)->filePtr = 0;
+    (*out)->bufpos = 0;
+    (*out)->dataRead = 0;
+    (*out)->direction = 0;
+    (*out)->pOverlapped = NULL;
+
+    if (ap_get_oslevel(p, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
+        /* Create the read end of the pipe */
+        dwOpenMode = PIPE_ACCESS_INBOUND;
+        if (bAsyncRead) {
+            dwOpenMode |= FILE_FLAG_OVERLAPPED;
+            (*in)->pOverlapped = (OVERLAPPED*) ap_pcalloc(p, sizeof(OVERLAPPED));
+            (*in)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+            /* register a cleanup for the event handle... */
+        }
+
+        dwPipeMode = 0;
+
+        sprintf(name, "\\\\.\\pipe\\%d.%d", getpid(), id++);
+
+        (*in)->filehand = CreateNamedPipe(name,
+                                          dwOpenMode,
+                                          dwPipeMode,
+                                          1,            //nMaxInstances,
+                                          8182,         //nOutBufferSize, 
+                                          8192,         //nInBufferSize,                   
+                                          1,            //nDefaultTimeOut,                
+                                          &sa);
+
+        /* Create the write end of the pipe */
+        dwOpenMode = FILE_ATTRIBUTE_NORMAL;
+        if (bAsyncWrite) {
+            dwOpenMode |= FILE_FLAG_OVERLAPPED;
+            (*out)->pOverlapped = (OVERLAPPED*) ap_pcalloc(p, sizeof(OVERLAPPED));
+            (*out)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        }
+        
+        (*out)->filehand = CreateFile(name,
+                                      GENERIC_WRITE,   // access mode
+                                      0,               // share mode
+                                      &sa,             // Security attributes
+                                      OPEN_EXISTING,   // dwCreationDisposition
+                                      dwOpenMode,      // Pipe attributes
+                                      NULL);           // handle to template file
+    }
+    else {
+        /* Pipes on Win9* are blocking. Live with it. */
+        if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
+            return GetLastError();
+        }
     }
 
     return APR_SUCCESS;
