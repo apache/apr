@@ -35,7 +35,7 @@ fi
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
-MODULES="file_io network_io threadproc misc locks time mmap shmem dso i18n"
+MODULES="file_io network_io threadproc misc locks time mmap shmem i18n"
 
 # Most platforms use a prefix of 'lib' on their library files.
 LIBPREFIX='lib'
@@ -468,6 +468,7 @@ if test "$tempdso" = "no"; then
     aprdso="0"
 else
     aprdso="1"
+    MODULES="$MODULES dso"
 fi
 
 AC_SUBST(aprdso)
