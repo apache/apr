@@ -4,7 +4,7 @@ VPATH = @srcdir@
 NONPORTABLE = \
 	testshm@EXEEXT@ \
 	testprocmutex@EXEEXT@ \
-	testglobalmutex@EXEEXT@ \
+	testglobalmutex@EXEEXT@
 
 PROGRAMS = \
 	client@EXEEXT@ \
