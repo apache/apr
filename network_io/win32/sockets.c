@@ -327,6 +327,7 @@ apr_status_t apr_make_os_sock(apr_socket_t **apr_sock,
         memcpy(&(*apr_sock)->local_addr->sa.sin, 
                os_sock_info->local, 
                (*apr_sock)->local_addr->salen);
+        (*apr_sock)->local_addr->pool = cont;
     }
     else {
         (*apr_sock)->local_port_unknown = (*apr_sock)->local_interface_unknown = 1;
@@ -335,6 +336,7 @@ apr_status_t apr_make_os_sock(apr_socket_t **apr_sock,
         memcpy(&(*apr_sock)->remote_addr->sa.sin, 
                os_sock_info->remote,
                (*apr_sock)->remote_addr->salen);
+        (*apr_sock)->remote_addr->pool = cont;
     }
         
     apr_register_cleanup((*apr_sock)->cntxt, (void *)(*apr_sock), 
