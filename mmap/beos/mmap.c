@@ -134,7 +134,7 @@ ap_status_t ap_mmap_create(struct mmap_t **new, const char *fname,
 ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file, 
                ap_context_t *cont)
 {
-    void *mm;
+    char *mm;
     area_id aid = -1;
     char *areaname = "apr_mmap\0";
     uint32 size;           
@@ -164,8 +164,8 @@ ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file,
     
     size = ((file->size -1) / B_PAGE_SIZE) + 1;
 
-    aid = create_area(areaname, &mm, B_ANY_ADDRESS, size * B_PAGE_SIZE, 
-        B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA);
+    aid = create_area(areaname, (void*)&mm, B_ANY_ADDRESS, size * B_PAGE_SIZE, 
+        B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
     free(areaname);
     
     if (aid < B_OK) {
@@ -180,7 +180,7 @@ ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file,
     (*new)->size = file->size;
     (*new)->area = aid;
     (*new)->cntxt = cont;
-           
+
     /* register the cleanup... */ 
     ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
              ap_null_cleanup);

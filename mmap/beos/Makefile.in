@@ -15,7 +15,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libmmap.a
 
-OBJS=mmap.o
+OBJS=mmap.o common.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
@@ -50,3 +50,18 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+common.o: common.c ../unix/common.c ../unix/../beos/mmap_h.h \
+ ../../include/apr_general.h ../../include/apr_config.h \
+ ../../include/apr_errno.h ../../include/apr_mmap.h \
+ ../../include/apr_network_io.h ../../include/apr_portable.h \
+ ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
+ ../../include/apr_win.h ../../include/apr_lock.h \
+ ../../include/apr_time.h ../../file_io/unix/fileio.h \
+ ../../include/apr_lib.h
+mmap.o: mmap.c mmap_h.h ../../include/apr_general.h \
+ ../../include/apr_config.h ../../include/apr_errno.h \
+ ../../include/apr_mmap.h ../../include/apr_network_io.h \
+ ../../include/apr_portable.h ../../include/apr_thread_proc.h \
+ ../../include/apr_file_io.h ../../include/apr_win.h \
+ ../../include/apr_lock.h ../../include/apr_time.h \
+ ../../include/apr_lib.h ../../file_io/unix/fileio.h

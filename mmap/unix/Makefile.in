@@ -15,7 +15,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libmmap.a
 
-OBJS=mmap.o
+OBJS=mmap.o common.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
