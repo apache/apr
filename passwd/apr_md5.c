@@ -680,7 +680,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
                                                const char *hash)
 {
     char sample[120];
-#if !defined(WIN32) && !defined(BEOS)
+#if !defined(WIN32) && !defined(BEOS) && !defined(NETWARE)
     char *crypt_pw;
 #endif
     if (!strncmp(hash, apr1_id, strlen(apr1_id))) {
@@ -693,7 +693,7 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
         /*
          * It's not our algorithm, so feed it to crypt() if possible.
          */
-#if defined(WIN32) || defined(BEOS)
+#if defined(WIN32) || defined(BEOS) || defined(NETWARE)
         apr_cpystrn(sample, passwd, sizeof(sample) - 1);
 #else
         crypt_pw = crypt(passwd, hash);
