@@ -53,10 +53,12 @@ int main(int argc, char *argv[])
     if (!strcmp("read", argv[1])) {
         char datarecv[STRLEN];
         apr_size_t length = STRLEN;
+        apr_status_t rv;
 
-        apr_status_t rv = apr_socket_recv(sock, datarecv, &length);
+        memset(datarecv, 0, STRLEN);
+        rv = apr_socket_recv(sock, datarecv, &length);
         apr_socket_close(sock);
-        if (rv == APR_TIMEUP) {
+        if (APR_STATUS_IS_TIMEUP(rv)) {
             exit(SOCKET_TIMEOUT); 
         }
 
