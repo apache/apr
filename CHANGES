@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Files opened on Unix with the flag APR_DELONCLOSE are now
+     not unlinked until they are actually closed, rather than as
+     soon as they're opened.  The old approach worked but made
+     handling temp files harder.  [Cliff Woolley]
+
   *) Fix potential segfault when closing a file on Unix.  If
      apr_file_close() was called and it failed, it would not
      deregister the file cleanup.  Therefore the cleanup would
