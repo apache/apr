@@ -204,7 +204,7 @@ FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char *fnName, int ordinal);
  * In the case of non-text functions, simply #define the original name
  */
 
-DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 234, (
+DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
     IN LPCSTR lpFileName,
     IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
     OUT LPVOID lpFileInformation),
