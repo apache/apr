@@ -752,6 +752,11 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
 
     /* O.K. All set up now. Let's go to town */
 
+    if (sock->netmask & APR_INCOMPLETE_WRITE) {
+        sock->netmask &= ~APR_INCOMPLETE_WRITE;
+        goto do_select;
+    }
+
     do {
         rv = send_file(&(sock->socketdes), /* socket */
                        &(parms),           /* all data */
@@ -761,6 +766,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     if (rv == -1 &&
         (errno == EAGAIN || errno == EWOULDBLOCK) &&
         sock->timeout > 0) {
+do_select:
         arv = apr_wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -786,6 +792,12 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     if (rv == -1) {
         return errno;
     }
+
+    if (sock->timeout &&
+        (parms.bytes_sent < (parms.file_bytes + parms.header_length + parms.trailer_length))) {
+        sock->netmask |= APR_INCOMPLETE_WRITE;
+    }
+
     return APR_SUCCESS;
 }
 #elif defined(__osf__) && defined (__alpha)
