@@ -61,10 +61,11 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_dso.h"
+#include "ltdl.h"
 
-struct ap_dso_handle_st {
+struct dso_handle_t {
+    ap_context_t *cont;
     lt_dlhandle handle;    /* libtool handle */
-    ap_context_t cont;
 };
 
 #endif
