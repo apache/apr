@@ -184,7 +184,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-sco3.2v5*)
 	APR_ADDTO(CPPFLAGS, [-DSCO5 -D_REENTRANT])
-	APR_ADDTO(LIBS, [-lprot])
 	;;
     *-sco_sv*|*-SCO_SV*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
