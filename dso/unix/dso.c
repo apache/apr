@@ -55,7 +55,6 @@
  */
 
 #include "dso.h"
-#include "ltdl.h"
 
 /*
  * ap_dso_init:  Initialize the underlying DSO library
@@ -84,13 +83,13 @@ ap_status_t ap_dso_init(void){
  * Return values:  Returns APR_SUCCESS on success, else APR_EINIT
  */
 
-ap_status_t ap_dso_load(const char *path, ap_context_t *ctx,
-			ap_dso_handle_t **res_handle)
+ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path, 
+                        ap_context_t *ctx)
 {
     lt_dlhandle dlhandle;
 
     if((dlhandle = lt_dlopen(path)) == NULL)
-        return APR_EINIT;
+        return APR_EDSOOPEN;
 
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = dlhandle;
@@ -107,7 +106,7 @@ ap_status_t ap_dso_load(const char *path, ap_context_t *ctx,
  * Return values:  Returns APR_SUCCESS on success, else APR_EINIT
  */
 
-ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
+ap_status_t ap_dso_unload(struct dso_handle_t *handle)
 {
     if(lt_dlclose(handle->handle))
         return APR_EINIT;
@@ -126,16 +125,22 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
  * Return values:  Returns APR_SUCCESS on success, else APR_EINIT
  */
 
-ap_status_t ap_dso_sym(ap_dso_handle_t *handle, const char *symname,
-		       ap_dso_handle_sym_t *ressym)
+ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
+                       struct dso_handle_t *handle, 
+                       const char *symname)
 {
     lt_ptr_t sym;
 
-    if (symname == NULL || ressym == NULL)
-        return APR_EINIT;
+    if (ressym == NULL) {
+        return APR_ENOFUNCPOINTER;
+    }
+    if (handle == NULL) {
+        return APR_ENODSOHANDLE;
+    }
 
-    if((sym = lt_dlsym(handle->handle, symname)) == NULL)
-        return APR_EINIT;
+    if((sym = lt_dlsym(handle->handle, symname)) == NULL) {
+        return APR_EFUNCNOTFOUND;
+    }
 
     *ressym = sym;
     return APR_SUCCESS;

@@ -15,7 +15,7 @@ dnl # and which files are to be configured.
 
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
-MODULES="file_io network_io threadproc misc locks time mmap shmem"
+MODULES="file_io network_io threadproc misc locks time mmap shmem dso"
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(configure.in)
