@@ -198,7 +198,7 @@ apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
  * need to move these to the top...
  */
 
-#if APR_HAVE_CORKABLE_TCP
+#if APR_HAVE_CORKABLE_TCP && !defined(__FreeBSD__)
 
 /* TCP_CORK & TCP_NOPUSH keep us from sending partial frames when we
  * shouldn't. They are however, mutually exclusive with TCP_NODELAY  
