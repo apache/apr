@@ -146,11 +146,11 @@ apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
 apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
 {
     time_t mango = input / APR_USEC_PER_SEC;
-    apr_int32_t offs;
+    apr_int32_t offs = 0;
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
     struct tm mangotm;
-    localtime_r(&mangotm, &mango);
+    localtime_r(&mango, &mangotm);
 /* XXX - Add support for Solaris */
 #ifdef HAVE_GMTOFF
     offs = mangotm.tm_gmtoff;
