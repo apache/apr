@@ -154,7 +154,7 @@ static char *getpass(const char *prompt)
 #else
 
 /*
- * Windows lacks getpass().  So we'll re ap_context_t mplement it here.
+ * Windows lacks getpass().  So we'll re-implement it here.
  */
 
 static char *getpass(const char *prompt)
