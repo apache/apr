@@ -680,7 +680,7 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
  * array.  
  *
  */
-APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *tmplt,
+APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template,
                                           apr_int32_t flags, apr_pool_t *p);
 
 #ifdef __cplusplus
