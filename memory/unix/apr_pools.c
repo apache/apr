@@ -1284,7 +1284,26 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *ke
         apr_hash_set(cont->prog_data, key, keylen, data);
     }
 
-    apr_pool_cleanup_register(cont, data, cleanup, cleanup);
+    if (cleanup) {
+        apr_pool_cleanup_register(cont, data, cleanup, cleanup);
+    }
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *key,
+       apr_status_t (*cleanup) (void *),
+       apr_pool_t *cont)
+{
+    apr_size_t keylen = strlen(key);
+
+    if (cont->prog_data == NULL)
+        cont->prog_data = apr_hash_make(cont);
+
+    apr_hash_set(cont->prog_data, key, keylen, data);
+
+    if (cleanup) {
+        apr_pool_cleanup_register(cont, data, cleanup, cleanup);
+    }
     return APR_SUCCESS;
 }
 
