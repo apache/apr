@@ -52,7 +52,7 @@
  * project, please see <http://www.apache.org/>.
  *
  */
-#include "apr_win.h"
+#include "apr_winconfig.h"
 #include "threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"

@@ -63,7 +63,7 @@
 #ifndef WIN32
 #include "apr_config.h"
 #else
-#include "apr_win.h"
+#include "apr_winconfig.h"
 #endif
 #include "apr_lib.h"
 #include "apr_errno.h"

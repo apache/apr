@@ -62,7 +62,7 @@
 #include "apr_config.h"
 #else
 #include <winsock2.h>
-#include "apr_win.h"
+#include "apr_winconfig.h"
 #endif
 
 #include "apr_lib.h"

@@ -53,7 +53,7 @@
  *
  */
 
-#include "apr_win.h"
+#include "apr_winconfig.h"
 #include "misc.h"
 #include "apr_general.h"
 #include "apr_errno.h"

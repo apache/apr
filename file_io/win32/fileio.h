@@ -71,10 +71,13 @@
 #ifdef HAVE_DIRENT_H
 #include <dirent.h>
 #endif
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #ifdef HAVE_UIO_H
 #include <sys/uio.h>
 #endif
-#include "apr_win.h"
+#include "apr_winconfig.h"
 #include "apr_pools.h"
 #include "apr_general.h"
 #include "apr_file_io.h"

@@ -52,106 +52,104 @@
  * project, please see <http://www.apache.org/>.
  *
  */
-#include "atime.h"
-#include "apr_time.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#include "apr_portable.h"
+
+#ifdef WIN32
+
+#ifndef APR_WINCONFIG_H
+#define APR_WINCONFIG_H
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef _WIN32_WINNT
+/* 
+ * Compile the server including all the Windows NT 4.0 header files by 
+ * default.
+ */
+#define _WIN32_WINNT 0x0400
+#endif
+#include <windows.h>
+#include <winsock2.h>
+#include <mswsock.h>
+#include <sys/types.h>
+#include <stddef.h>
+#include <stdio.h>
 #include <time.h>
-#include <errno.h>
-#include <string.h>
 
-ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
-{
-    (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
+/* Use this section to define all of the HAVE_FOO_H
+ * that are required to build properly.
+ */
+#define HAVE_CONIO_H 1
+#define HAVE_MALLOC_H 1
+#define HAVE_STDLIB_H 1
 
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
+typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
 
-    (*new)->cntxt = cont;
-    (*new)->currtime = -1;
-    (*new)->explodedtime = NULL;
-    return APR_SUCCESS;
-}
+#define SIGHUP     1
+/* 2 is used for SIGINT on windows */
+#define SIGQUIT    3
+/* 4 is used for SIGILL on windows */
+#define SIGTRAP    5
+#define SIGIOT     6
+#define SIGBUS     7
+/* 8 is used for SIGFPE on windows */
+#define SIGKILL    9
+#define SIGUSR1    10
+/* 11 is used for SIGSEGV on windows */
+#define SIGUSR2    12
+#define SIGPIPE    13
+#define SIGALRM    14
+/* 15 is used for SIGTERM on windows */
+#define SIGSTKFLT  16
+#define SIGCHLD    17 
+#define SIGCONT    18
+#define SIGSTOP    19
+#define SIGTSTP    20
+/* 21 is used for SIGBREAK on windows */
+/* 22 is used for SIGABRT on windows */
+#define SIGTTIN    23
+#define SIGTTOU    24
+#define SIGURG     25
+#define SIGXCPU    26
+#define SIGXFSZ    27
+#define SIGVTALRM  28
+#define SIGPROF    29
+#define SIGWINCH   30
+#define SIGIO      31
 
-ap_status_t ap_current_time(struct atime_t *new)
-{
-    if (!new) {
-        return APR_ENOTIME;
-    }
-    if (new->explodedtime == NULL) {
-        new->explodedtime = (SYSTEMTIME *)ap_palloc(new->cntxt, sizeof(SYSTEMTIME));
-    }
-    GetSystemTime(new->explodedtime);
-    return APR_SUCCESS; 
-}       
+#define __attribute__(__x) 
 
-ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
-{
-    if (!atime || !atime->explodedtime) {
-        return APR_ENOTIME;
-    }   
-    return APR_SUCCESS;
-}
+/* APR COMPATABILITY FUNCTIONS
+ * This section should be used to define functions and
+ * macros which are need to make Windows features look
+ * like POSIX features.
+ */
+typedef void (Sigfunc)(int);
 
-ap_status_t ap_implode_time(struct atime_t *atime)
-{
-    FILETIME temp;
-    
-    if (!atime || !atime->explodedtime) {
-        return APR_ENOTIME;
-    }
+#define strcasecmp(s1, s2)       stricmp(s1, s2)
+#define sleep(t)                 Sleep(t * 1000)
 
-    if (SystemTimeToFileTime(atime->explodedtime, &temp) == 0) {
-        return APR_EEXIST;
-    }
-    atime->currtime = WinTimeToUnixTime(&temp);
-    return APR_SUCCESS;
-}
 
-ap_status_t ap_get_os_time(ap_os_time_t **atime, struct atime_t *thetime)
-{
-    if (thetime == NULL) {
-        return APR_ENOTIME;
-    }
-    if (thetime->explodedtime == NULL) {
-        ap_explode_time(thetime, APR_LOCALTIME); 
-    }
-    *atime = thetime->explodedtime;
-    return APR_SUCCESS;
-}
+/* APR FEATURE MACROS.
+ * This section should be used to define feature macros
+ * that the windows port needs.
+ */
+#define APR_HAS_THREADS        1
 
-ap_status_t ap_put_os_time(struct atime_t **thetime, ap_os_time_t *atime, 
-                           ap_context_t *cont)
-{
-    if (cont == NULL) {
-        return APR_ENOCONT;
-    }
-    if (thetime == NULL) {
-        (*thetime) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
-        (*thetime)->cntxt = cont;
-    }
-    (*thetime)->explodedtime = atime;
-    return APR_SUCCESS;
-}
+#define SIZEOF_SHORT           2
+#define SIZEOF_INT             4
+#define SIZEOF_LONGLONG        8
+#define SIZEOF_CHAR            1
+#define SIZEOF_SSIZE_T         SIZEOF_INT
 
-ap_status_t ap_timediff(struct atime_t *a, struct atime_t *b, ap_int32_t *rv)
-{
-    FILETIME fa, fb;
-    LONGLONG ia = 0, ib = 0;
-    
-    SystemTimeToFileTime(a->explodedtime, &fa);
-    SystemTimeToFileTime(b->explodedtime, &fb);
-    
-	ia = fa.dwHighDateTime;
-	ia = ia << 32;
-	ia |= fa.dwLowDateTime;
+/* APR WINDOWS-ONLY FUNCTIONS
+ * This section should define those functions which are
+ * only found in the windows version of APR.
+ */
 
-	ib = fb.dwHighDateTime;
-	ib = ib << 32;
-	ib |= fb.dwLowDateTime;
+time_t WinTimeToUnixTime(FILETIME *);
+unsigned __stdcall SignalHandling(void *);
+int thread_ready(void);
 
-    *rv = (int)((ia - ib) / 10000);
-    return APR_SUCCESS;
-}
+#endif  /*APR_WINCONFIG_H*/
+#endif  /*WIN32*/

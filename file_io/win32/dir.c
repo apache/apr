@@ -65,7 +65,7 @@
 #include <sys/stat.h>
 #endif
 #ifdef WIN32
-#include "apr_win.h"
+#include "apr_winconfig.h"
 #include <windows.h>
 #endif
 #include "fileio.h"

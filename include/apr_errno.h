@@ -54,7 +54,11 @@
  */
 
 #include <errno.h>
+#if WIN32
+#include "apr_win.h"
+#else
 #include "apr.h"
+#endif
 
 #ifndef APR_ERRNO_H
 #define APR_ERRNO_H
