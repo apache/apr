@@ -91,6 +91,8 @@ typedef void *                        apr_dso_handle_sym_t;
  * @param res_handle Location to store new handle for the DSO.
  * @param path Path to the DSO library
  * @param ctx Pool to use.
+ * @bug We aught to provide an alternative to RTLD_GLOBAL, which
+ * is the only supported method of loading DSOs today.
  */
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
                                        const char *path, apr_pool_t *ctx);
