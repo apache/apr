@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) In apr_signal_thread() remove synchronous signals from the mask
+     passed to sigwait().  It is never valid for them to be there.
+     Some platforms silently ignore them, some return EINVAL, some
+     don't process it as desired.  [Jeff Trawick]
+
   *) Change config.nice generation to always expand variables.
      [Justin Erenkrantz]
 
