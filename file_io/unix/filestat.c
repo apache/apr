@@ -57,6 +57,9 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_errno.h"
+#if APR_HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 static apr_filetype_e filetype_from_mode(mode_t mode)
 {

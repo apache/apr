@@ -54,6 +54,9 @@
 
 #include "apr_strings.h"
 #include "fileio.h"
+#if APR_HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 /* A file to put ALL of the accessor functions for apr_file_t types. */
 
