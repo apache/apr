@@ -70,23 +70,23 @@
 #define APR_FILE_BASED_SHM      @file_based@
 #define APR_MEM_BASED_SHM       @mem_based@
 
+#define APR_HAVE_CORKABLE_TCP   @have_corkable_tcp@ 
+#define APR_HAVE_GETRLIMIT      @have_getrlimit@
 #define APR_HAVE_IN_ADDR        @have_in_addr@
 #define APR_HAVE_INET_ADDR      @have_inet_addr@
 #define APR_HAVE_INET_NETWORK   @have_inet_network@
-#define APR_HAVE_UNION_SEMUN    @have_union_semun@
-#define APR_HAVE_STRUCT_RLIMIT  @struct_rlimit@
-#define APR_HAVE_SETRLIMIT      @have_setrlimit@
-#define APR_HAVE_GETRLIMIT      @have_getrlimit@
-#define APR_HAVE_STRICMP        @have_stricmp@
-#define APR_HAVE_STRNICMP       @have_strnicmp@
-#define APR_HAVE_STRCASECMP     @have_strcasecmp@
-#define APR_HAVE_STRNCASECMP    @have_strncasecmp@
-#define APR_HAVE_STRDUP         @have_strdup@
-#define APR_HAVE_STRSTR         @have_strstr@
-#define APR_HAVE_MEMMOVE        @have_memmove@
-#define APR_HAVE_BZERO          @have_bzero@
 #define APR_HAVE_IPV6           @have_ipv6@
-#define APR_HAVE_CORKABLE_TCP   @have_corkable_tcp@ 
+#define APR_HAVE_MEMMOVE        @have_memmove@
+#define APR_HAVE_SETRLIMIT      @have_setrlimit@
+#define APR_HAVE_SIGACTION      @have_sigaction@
+#define APR_HAVE_STRCASECMP     @have_strcasecmp@
+#define APR_HAVE_STRDUP         @have_strdup@
+#define APR_HAVE_STRICMP        @have_stricmp@
+#define APR_HAVE_STRNCASECMP    @have_strncasecmp@
+#define APR_HAVE_STRNICMP       @have_strnicmp@
+#define APR_HAVE_STRSTR         @have_strstr@
+#define APR_HAVE_STRUCT_RLIMIT  @struct_rlimit@
+#define APR_HAVE_UNION_SEMUN    @have_union_semun@
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -177,6 +177,7 @@ typedef  @socklen_t_value@       apr_socklen_t;
  * @deffunc APR_DECLARE(rettype) apr_func(args);
  */
 #define APR_DECLARE(type)            type
+
 /**
  * The public APR functions using variable arguments are declared with 
  * AP_DECLARE(), as they must use the C language calling convention.
@@ -184,6 +185,7 @@ typedef  @socklen_t_value@       apr_socklen_t;
  * @deffunc APR_DECLARE_NONSTD(rettype) apr_func(args, ...);
  */
 #define APR_DECLARE_NONSTD(type)     type
+
 /**
  * The public APR variables are declared with AP_MODULE_DECLARE_DATA.
  * This assures the appropriate indirection is invoked at compile time.
@@ -212,22 +214,6 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "@eolstr@"
-
-/* Define apr_signal and related necessary definitions.
- */
-/* We are checking for HAVE_SIGACTION, but autoconf is filling this in 
- * for us automatically.
- */
-#if @have_sigaction@ && !defined(NO_USE_SIGACTION)
-typedef void Sigfunc(int);
-Sigfunc *apr_signal(int signo, Sigfunc * func);
-
-#if defined(SIG_ING) && !defined(SIG_ERR)
-#define SIG_ERR ((Sigfunc *)-1)
-#endif
-#else
-#define apr_signal(a,b) signal(a,b)
-#endif
 
 #if APR_HAVE_SYS_WAIT_H
 
