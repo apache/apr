@@ -55,8 +55,8 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
-#include "locks.h"
-#include "fileio.h"
+#include "os2/locks.h"
+#include "os2/fileio.h"
 #include <string.h>
 #define INCL_DOS
 #include <os2.h>

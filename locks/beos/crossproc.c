@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "locks.h"
+#include "beos/locks.h"
 
 apr_status_t lock_inter_cleanup(void * data)
 {

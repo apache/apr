@@ -9,9 +9,8 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR1=../../include
-INCDIR2=../../file_io/unix
-INCLUDES=-I$(INCDIR1) -I$(INCDIR2) -I.
+INCDIR=../../include
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
 
 #LIB=liblock.a
 
@@ -51,24 +50,25 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-crossproc.o: crossproc.c ../../include/apr.h \
- ../../include/apr_strings.h ../../include/apr_lib.h \
- ../../include/apr_pools.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_time.h \
- ../../include/apr_tables.h locks.h ../../include/apr_private.h \
- ../../include/apr_lock.h
-intraproc.o: intraproc.c locks.h ../../include/apr.h \
- ../../include/apr_private.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_pools.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_time.h \
- ../../include/apr_tables.h ../../include/apr_lock.h
-locks.o: locks.c locks.h ../../include/apr.h \
- ../../include/apr_private.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_pools.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_time.h \
- ../../include/apr_tables.h ../../include/apr_lock.h \
- ../../include/apr_strings.h ../../include/apr_portable.h \
- ../../include/apr_network_io.h ../../include/apr_dso.h
+crossproc.o: crossproc.c $(INCDIR)/apr.h \
+ $(INCDIR)/apr_strings.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_tables.h $(INCDIR)/arch/unix/locks.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_lock.h
+intraproc.o: intraproc.c $(INCDIR)/arch/unix/locks.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_lock.h
+locks.o: locks.c $(INCDIR)/arch/unix/locks.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_tables.h $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_strings.h $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_dso.h
