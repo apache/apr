@@ -239,6 +239,7 @@ case $host in
    *cygwin*)
        OSDIR="unix"
        APR_ADDTO(CPPFLAGS,-DCYGWIN)
+       enable_threads="no"
        eolstr="\\n"
        ;;
    *)
