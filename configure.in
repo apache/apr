@@ -1051,7 +1051,7 @@ fi
 # The first match is our preference.
 if test "$ac_cv_sizeof_int" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val)'
-    uint64_literal='#define APR_UINT64_C(val) (val)'
+    uint64_literal='#define APR_UINT64_C(val) (val##U)'
     int64_t_fmt='#define APR_INT64_T_FMT "d"'
     uint64_t_fmt='#define APR_UINT64_T_FMT "u"'
     uint64_t_hex_fmt='#define APR_UINT64_T_HEX_FMT "x"'
