@@ -82,11 +82,11 @@ case "$host" in
 	APR_SETIFNULL(CFLAGS, [-DHIUX])
 	;;
     *-hp-hpux11.*)
-	APR_SETIFNULL(CFLAGS, [-DHPUX11])
+	APR_SETIFNULL(CFLAGS, [-DHPUX11 -D_XOPEN_SOURCE_EXTENDED])
 	APR_SETIFNULL(LIBS, [-lm -lpthread])
 	;;
     *-hp-hpux10.*)
-	APR_SETIFNULL(CFLAGS, [-DHPUX10])
+	APR_SETIFNULL(CFLAGS, [-DHPUX10 -D_XOPEN_SOURCE_EXTENDED])
  	case $host in
  	  *-hp-hpux10.01)
 dnl	       # We know this is a problem in 10.01.
@@ -96,7 +96,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
  	esac
 	;;
     *-hp-hpux*)
-	APR_SETIFNULL(CFLAGS, [-DHPUX])
+	APR_SETIFNULL(CFLAGS, [-DHPUX -D_XOPEN_SOURCE_EXTENDED])
 	APR_SETIFNULL(LIBS, [-lm])
 	;;
     *-linux-*)
