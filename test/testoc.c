@@ -52,12 +52,17 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_test.h"
 #include "apr_thread_proc.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#if APR_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #if APR_HAS_OTHER_CHILD
 static void ocmaint(int reason, void *data, int status)
@@ -160,25 +165,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }    
-
-#if !APR_HAS_OTHER_CHILD
-static void oc_not_impl(CuTest *tc)
-{
-    CuNotImpl(tc, "Other child logic not implemented on this platform");
-}
-#endif
-
-CuSuite *testoc(void)
-{
-    CuSuite *suite = CuSuiteNew("Test Time");
-
-#if APR_HAS_OTHER_CHILD
-    SUITE_ADD_TEST(suite, oc_not_impl);
-#else
-
-    SUITE_ADD_TEST(suite, test_strftimeoffset);
-
-#endif
-    return suite;
-}
 
