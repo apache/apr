@@ -177,7 +177,7 @@ apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how);
 apr_status_t apr_close_socket(apr_socket_t *thesocket);
 
 /**
- * Bind the socket to it's assocaited port
+ * Bind the socket to its associated port
  * @param sock The socket to bind 
  * @tip This is where we will find out if there is any other process
  *      using the selected port.
@@ -185,7 +185,7 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket);
 apr_status_t apr_bind(apr_socket_t *sock);
 
 /**
- * Listen to a bound socketi for connections.
+ * Listen to a bound socket for connections.
  * @param sock The socket to listen on 
  * @param backlog The number of outstanding connections allowed in the sockets
  *                listen queue.  If this value is less than zero, the listen
