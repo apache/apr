@@ -46,7 +46,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     }     
     new_mutex->pool = pool;
 
-    new_mutex->mutex = NXMutexAlloc(NX_MUTEX_RECURSIVE, NULL, NULL);
+    new_mutex->mutex = NXMutexAlloc(NX_MUTEX_RECURSIVE, 0, NULL);
     
     if(new_mutex->mutex == NULL)
         return APR_ENOMEM;
