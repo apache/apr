@@ -188,6 +188,9 @@ static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_md5_encode() */
  */
 APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context)
 {
+    if (!context)
+        return APR_EINVAL;
+    
     context->count[0] = context->count[1] = 0;
     
     /* Load magic initialization constants. */
@@ -214,6 +217,9 @@ APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
     apr_status_t rv;
     int is_sb;
 
+    if (!context)
+        return APR_EINVAL;
+    
     /* TODO: remove the single-byte-only restriction from this code
      */
     rv = apr_xlate_get_sb(xlate, &is_sb);
@@ -229,8 +235,8 @@ APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
 #endif /* APR_HAS_XLATE */
 
 /* MD5 block update operation. Continues an MD5 message-digest
-   operation, processing another message block, and updating the
-   context.
+ * operation, processing another message block, and updating the
+ * context.
  */
 APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                          const unsigned char *input,
@@ -241,6 +247,9 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
     apr_size_t inbytes_left, outbytes_left;
 #endif
 
+    if (!context)
+        return APR_EINVAL;
+    
     /* Compute number of bytes mod 64 */
     idx = (unsigned int)((context->count[0] >> 3) & 0x3F);
 
@@ -312,7 +321,7 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
-   the message digest and zeroizing the context.
+ * the message digest and zeroizing the context.
  */
 APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
                                         apr_md5_ctx_t *context)
@@ -320,6 +329,9 @@ APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
     unsigned char bits[8];
     unsigned int idx, padLen;
 
+    if (!context)
+        return APR_EINVAL;
+    
     /* Save number of bits */
     Encode(bits, context->count, 8);
 
@@ -343,6 +355,23 @@ APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
     memset(context, 0, sizeof(*context));
     
     return APR_SUCCESS;
+}
+
+/* MD5 in one step (init, update, final)
+ */
+APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[MD5_DIGESTSIZE],
+                                  const unsigned char *input,
+                                  apr_size_t inputLen)
+{
+    apr_md5_ctx_t ctx;
+    apr_status_t rv;
+
+    apr_md5_init(&ctx);
+
+    if ((rv = apr_md5_update(&ctx, input, inputLen)) != APR_SUCCESS)
+        return rv;
+
+    return apr_md5_final(digest, &ctx);
 }
 
 /* MD5 basic transformation. Transforms state based on block. */
