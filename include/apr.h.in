@@ -1,6 +1,28 @@
-
 #ifndef APR_H
 #define APR_H
+
+/* So that we can use inline on some critical functions, and use
+ * GNUC attributes (such as to get -Wall warnings for printf-like
+ * functions).  Only do this in gcc 2.7 or later ... it may work
+ * on earlier stuff, but why chance it.
+ *
+ * We've since discovered that the gcc shipped with NeXT systems
+ * as "cc" is completely broken.  It claims to be __GNUC__ and so
+ * on, but it doesn't implement half of the things that __GNUC__
+ * means.  In particular it's missing inline and the __attribute__
+ * stuff.  So we hack around it.  PR#1613. -djg
+ */
+#if !defined(__GNUC__) || __GNUC__ < 2 || \
+    (__GNUC__ == 2 && __GNUC_MINOR__ < 7) ||\
+    defined(NEXT)
+#define ap_inline
+#define __attribute__(__x)
+#define ENUM_BITFIELD(e,n,w)  signed int n : w
+#else
+#define ap_inline __inline__
+#define USE_GNU_INLINE
+#define ENUM_BITFIELD(e,n,w)  e n : w
+#endif
 
 #define APR_HAVE_ERRNO_H        @errnoh@
 #define APR_HAVE_DIRENT_H       @direnth@
@@ -11,6 +33,12 @@
 #define APR_HAVE_STDIO_H        @stdioh@
 #define APR_HAVE_SYS_TYPES_H    @sys_typesh@
 #define APR_HAVE_SYS_UIO_H      @sys_uioh@
+
+#define APR_USE_FLOCK_SERIALIZE           @flockser@ 
+#define APR_USE_SYSVSEM_SERIALIZE         @sysvser@
+#define APR_USE_FCNTL_SERIALIZE           @fcntlser@
+#define APR_USE_PROC_PTHREAD_SERIALIZE    @procpthreadser@ 
+#define APR_USE_PTHREAD_SERIALIZE         @pthreadser@ 
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>

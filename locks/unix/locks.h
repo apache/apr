@@ -110,17 +110,17 @@ struct lock_t {
     ap_locktype_e type;
     int curr_locked;
     char *fname;
-#if defined (USE_SYSVSEM_SERIALIZE)
+#if USE_SYSVSEM_SERIALIZE
     int interproc;
     struct sembuf op_on;
     struct sembuf op_off;
-#elif defined (USE_FCNTL_SERIALIZE) 
+#elif USE_FCNTL_SERIALIZE
     int interproc;
     struct flock lock_it;
     struct flock unlock_it;
-#elif defined (USE_PROC_PTHREAD_SERIALIZE)
+#elif USE_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *interproc;
-#elif defined (USE_FLOCK_SERIALIZE)
+#elif USE_FLOCK_SERIALIZE
     int interproc;
 #else
     /* No Interprocess serialization.  Too bad. */
