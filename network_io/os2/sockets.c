@@ -53,6 +53,7 @@
  */
 
 #include "networkio.h"
+#include "inherit.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_portable.h"
