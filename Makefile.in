@@ -89,7 +89,7 @@ install: $(TARGET_LIB)
 	chmod 755 $(DESTDIR)$(bindir)/apr-config
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
-	        ( cd $$i ; $(MAKE) root=$(DESTDIR) install ); \
+	        ( cd $$i ; $(MAKE) DESTDIR=$(DESTDIR) install ); \
 	    done \
 	fi
 
