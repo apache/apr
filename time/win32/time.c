@@ -72,19 +72,20 @@
  */
 #define IsLeapYear(y) ((!(y % 4)) ? (((!(y % 400)) && (y % 100)) ? 1 : 0) : 0)
 
-#if APR_HAS_UNICODE_FS
-static LPTIME_ZONE_INFORMATION GetLocalTimeZone()
+static DWORD get_local_timezone(TIME_ZONE_INFORMATION **tzresult)
 {
-    static int init = 0;
     static TIME_ZONE_INFORMATION tz;
+    static DWORD result;
+    static int init = 0;
 
     if (!init) {
-        GetTimeZoneInformation(&tz);
+        result = GetTimeZoneInformation(&tz);
         init = 1;
     }
-    return &tz;
+
+    *tzresult = &tz;
+    return result;
 }
-#endif
 
 static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm)
 {
@@ -173,6 +174,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 {
     SYSTEMTIME st;
     FILETIME ft, localft;
+    TIME_ZONE_INFORMATION *tz;
 
     AprTimeToFileTime(&ft, input);
 
@@ -181,9 +183,8 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
     {
         SYSTEMTIME localst;
         apr_time_t localtime;
-        TIME_ZONE_INFORMATION *tz;
 
-        tz = GetLocalTimeZone();
+        get_local_timezone(&tz);
 
         FileTimeToSystemTime(&ft, &st);
 
@@ -218,8 +219,6 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
     {
-	TIME_ZONE_INFORMATION tz;
-
 	/* XXX: This code is simply *wrong*.  The time converted will always
          * map to the *now current* status of daylight savings time.
          */
@@ -229,25 +228,25 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
         SystemTimeToAprExpTime(result, &st);
         result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
 
-        switch (GetTimeZoneInformation(&tz)) {   
-            case TIME_ZONE_ID_UNKNOWN:   
-                result->tm_isdst = 0;   
-                /* Bias = UTC - local time in minutes   
-                 * tm_gmtoff is seconds east of UTC   
-                 */   
-                result->tm_gmtoff = tz.Bias * -60;   
-                break;   
-            case TIME_ZONE_ID_STANDARD:   
-                result->tm_isdst = 0;   
-                result->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;   
-                break;   
-            case TIME_ZONE_ID_DAYLIGHT:   
-                result->tm_isdst = 1;   
-                result->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;   
-                break;   
-            default:   
+        switch (get_local_timezone(&tz)) {
+            case TIME_ZONE_ID_UNKNOWN:
+                result->tm_isdst = 0;
+                /* Bias = UTC - local time in minutes
+                 * tm_gmtoff is seconds east of UTC
+                 */
+                result->tm_gmtoff = tz->Bias * -60;
+                break;
+            case TIME_ZONE_ID_STANDARD:
+                result->tm_isdst = 0;
+                result->tm_gmtoff = (tz->Bias + tz->StandardBias) * -60;
+                break;
+            case TIME_ZONE_ID_DAYLIGHT:
+                result->tm_isdst = 1;
+                result->tm_gmtoff = (tz->Bias + tz->DaylightBias) * -60;
+                break;
+            default:
                 /* noop */;
-        }   
+        }
     }
 #endif
 
