@@ -636,7 +636,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
                 || (s) == APR_OS_START_SYSERR + ERROR_FILE_NOT_FOUND \
                 || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
-                || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED)
+                || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED \
+                || (s) == APR_OS_START_SYSERR + ERROR_NO_MORE_FILES)
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC \
                 || (s) == APR_OS_START_SYSERR + ERROR_DISK_FULL)
