@@ -7,6 +7,7 @@ LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
 MKDEP=../helpers/mkdep.sh
+SO_LDFLAG=@SO_LDFLAG@
 
 TARGETS= client@EXEEXT@ \
 	sendfile@EXEEXT@ \
@@ -61,10 +62,10 @@ testoc@EXEEXT@: testoc.o
 	$(CC) $(CFLAGS) -o testoc@EXEEXT@ testoc.o $(LDFLAGS) 
 
 occhild.so: occhild.o
-	$(CC) -shared occhild.o -o occhild.so 
+	$(CC) $(SO_LDFLAG) occhild.o -o occhild.so 
 
 mod_test.so: mod_test.o
-	$(CC) -shared mod_test.o -o mod_test.so 
+	$(CC) $(SO_LDFLAG) mod_test.o -o mod_test.so 
 
 testargs@EXEEXT@: testargs.o
 	$(CC) $(CFLAGS) -o testargs@EXEEXT@ testargs.o $(LDFLAGS) 
