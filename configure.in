@@ -444,6 +444,9 @@ APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
              [havemmapanon="1"
               APR_DECIDE(USE_SHMEM_MMAP_ANON, 
                   [4.4BSD-style mmap() via MAP_ANON])])
+APR_IFALLYES(header:os2.h,
+             [haveos2shm="1"
+              APR_DECIDE(USE_SHMEM_OS2_ANON, [OS/2 DosAllocSharedMem()])])
 APR_IFALLYES(header:kernel/OS.h func:create_area,
              [havebeosshm="1"
               APR_DECIDE(USE_SHMEM_BEOS_ANON,
