@@ -41,13 +41,4 @@ Bachelor #1
 Bachelor #2
 -----------
 
-   ap_filter.h
-   filters.c
    greg_patch.txt
-
-Bachelor #3  --  The combination of #1 and #2 (hopefully)
------------
-
-   util_filter.h
-   util_filter.c
-   register_patch.txt
