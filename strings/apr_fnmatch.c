@@ -56,7 +56,7 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
 
 static const char *rangematch(const char *, int, int);
 
-APR_EXPORT(apr_status_t) apr_fnmatch(const char *pattern, const char *string, int flags)
+APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, const char *string, int flags)
 {
     const char *stringstart;
     char c, test;
@@ -210,7 +210,7 @@ static const char *rangematch(const char *pattern, int test, int flags)
 
 /* This function is an Apache addition */
 /* return non-zero if pattern has any glob chars in it */
-APR_EXPORT(int) apr_is_fnmatch(const char *pattern)
+APR_DECLARE(int) apr_is_fnmatch(const char *pattern)
 {
     int nesting;
 

@@ -95,7 +95,7 @@ typedef struct apr_hash_index_t apr_hash_index_t;
  * @return The hash table just created
  * @deffunc apr_hash_t *apr_make_hash(apr_pool_t *pool)
  */
-APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
+APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
 
 /**
  * Associate a value with a key in a hash table.
@@ -106,7 +106,7 @@ APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
  * @tip If the value is NULL the hash entry is deleted.
  * @deffunc void apr_hash_set(apr_hash_t *ht, const void *key, apr_size_t klen, const void *val)
  */
-APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key,
+APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
                               apr_ssize_t klen, const void *val);
 
 /**
@@ -117,7 +117,7 @@ APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key,
  * @return Returns NULL if the key is not present.
  * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_size_t klen)
  */
-APR_EXPORT(void*) apr_hash_get(apr_hash_t *ht, const void *key,
+APR_DECLARE(void*) apr_hash_get(apr_hash_t *ht, const void *key,
                                apr_ssize_t klen);
 
 /**
@@ -146,7 +146,7 @@ APR_EXPORT(void*) apr_hash_get(apr_hash_t *ht, const void *key,
  * </PRE>
  * @deffunc apr_hash_index_t * apr_hash_first(apr_hash_t *ht)
  */
-APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht);
+APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht);
 
 /**
  * Continue iterating over the entries in a hash table.
@@ -154,7 +154,7 @@ APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht);
  * @return a pointer to the updated iteration state.  NULL if there are no more  *         entries.
  * @deffunc apr_hash_index_t * apr_hash_next(apr_hash_index_t *hi)
  */
-APR_EXPORT(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
+APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
 
 /**
  * Get the current entry's details from the iteration state.
@@ -166,7 +166,7 @@ APR_EXPORT(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
  *      corresponding data, or they may be NULL if the data isn't interesting.
  * @deffunc void apr_hash_this(apr_hash_index_t *hi, const void **key, apr_size_t *klen, void **val);
  */
-APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
+APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
                                apr_size_t *klen, void **val);
 
 #ifdef __cplusplus

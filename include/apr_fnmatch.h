@@ -69,7 +69,7 @@ extern "C" {
  * @deffunc apr_status_t apr_fnmatch(const char *pattern, const char *strings, int flags)
  */
 
-APR_EXPORT(apr_status_t) apr_fnmatch(const char *pattern, const char *strings,
+APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, const char *strings,
 			    int flags);
 
 /**
@@ -78,7 +78,7 @@ APR_EXPORT(apr_status_t) apr_fnmatch(const char *pattern, const char *strings,
  * @return non-zero if pattern has any glob characters in it
  * @deffunc int apr_is_fnmatch(const char *pattern)
  */
-APR_EXPORT(int) apr_is_fnmatch(const char *pattern);
+APR_DECLARE(int) apr_is_fnmatch(const char *pattern);
 
 #ifdef __cplusplus
 }

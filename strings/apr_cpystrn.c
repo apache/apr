@@ -80,7 +80,7 @@
  * apr_cpystrn() follows the same call structure as strncpy().
  */
 
-APR_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size)
+APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size)
 {
 
     char *d, *end;
@@ -120,7 +120,7 @@ APR_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size)
  *                   pool and filled in with copies of the tokens
  *                   found during parsing of the arg_str. 
  */
-APR_EXPORT(apr_status_t) apr_tokenize_to_argv(const char *arg_str, 
+APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str, 
                                             char ***argv_out,
                                             apr_pool_t *token_context)
 {
@@ -212,7 +212,7 @@ APR_EXPORT(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
  * Corrected Win32 to accept "a/b\\stuff", "a:stuff"
  */
 
-APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname)
+APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname)
 {
     const char path_separator = '/';
     const char *s = strrchr(pathname, path_separator);
@@ -234,7 +234,7 @@ APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname)
  * collapse in place (src == dest) is legal.
  * returns terminating null ptr to dest string.
  */
-APR_EXPORT(char *) apr_collapse_spaces(char *dest, const char *src)
+APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src)
 {
     while (*src) {
         if (!apr_isspace(*src)) 

@@ -35,7 +35,7 @@
 
 #define EMSG    ""
 
-APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
+APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
                                      int argc, char *const *argv)
 {
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
@@ -48,7 +48,7 @@ APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
     return APR_SUCCESS;
 }
 
-APR_EXPORT(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
+APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
                                     char *optch, const char **optarg)
 {
     const char *p;

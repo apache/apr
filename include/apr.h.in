@@ -160,13 +160,6 @@ typedef  @socklen_t_value@       apr_socklen_t;
  */
 #define APR_DECLARE_DATA
 
-/* These need to move into apr_compat.h when the symbol rename is complete 
- */
-#define APR_EXPORT(t)         APR_DECLARE(t)
-#define APR_EXPORT_NONSTD(t)  APR_DECLARE_NONSTD(t)
-#define APR_VAR_EXPORT        APR_DECLARE_DATA
-#define APR_VAR_IMPORT        APR_DECLARE_DATA
-
 /* Define APR_SSIZE_T_FMT.  
  * If ssize_t is an integer we define it to be "d",
  * if ssize_t is a long int we define it to be "ld",

@@ -162,9 +162,9 @@ struct process_chain {
 #endif
 #define apr_pool_join(a,b)
 #else
-APR_EXPORT(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
-APR_EXPORT(apr_pool_t *) apr_find_pool(const void *ts);
-APR_EXPORT(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
+APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
+APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts);
+APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 #endif
 
 #ifdef ULTRIX_BRAIN_DEATH
@@ -201,7 +201,7 @@ void apr_term_alloc(void);        /* Tear down everything */
  *      error.
  * @deffunc apr_pool_t *apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode))
  */
-APR_EXPORT(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode));
+APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode));
 
 /**
  * clear all memory in the pool
@@ -210,7 +210,7 @@ APR_EXPORT(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int r
  *       to re-use this memory for the next allocation.
  * @deffunc void apr_clear_pool(apr_pool_t *p)
  */
-APR_EXPORT(void) apr_clear_pool(apr_pool_t *p);
+APR_DECLARE(void) apr_clear_pool(apr_pool_t *p);
 
 /**
  * destroy the pool
@@ -218,7 +218,7 @@ APR_EXPORT(void) apr_clear_pool(apr_pool_t *p);
  * @tip This will actually free the memory
  * @deffunc void apr_destroy_pool(apr_pool_t *p)
  */
-APR_EXPORT(void) apr_destroy_pool(apr_pool_t *p);
+APR_DECLARE(void) apr_destroy_pool(apr_pool_t *p);
 
 /**
  * report the number of bytes currently in the pool
@@ -226,14 +226,14 @@ APR_EXPORT(void) apr_destroy_pool(apr_pool_t *p);
  * @return The number of bytes
  * @deffunc apr_size_t apr_bytes_in_pool(apr_pool_t *p)
  */
-APR_EXPORT(apr_size_t) apr_bytes_in_pool(apr_pool_t *p);
+APR_DECLARE(apr_size_t) apr_bytes_in_pool(apr_pool_t *p);
 
 /**
  * report the number of bytes currently in the list of free blocks
  * @return The number of bytes
  * @deffunc apr_size_t apr_bytes_in_free_blocks(void)
  */
-APR_EXPORT(apr_size_t) apr_bytes_in_free_blocks(void);
+APR_DECLARE(apr_size_t) apr_bytes_in_free_blocks(void);
 
 /**
  * Determine if pool a is an ancestor of pool b
@@ -243,7 +243,7 @@ APR_EXPORT(apr_size_t) apr_bytes_in_free_blocks(void);
  *         of all pools.
  * @deffunc int apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
  */
-APR_EXPORT(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
+APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 
 /**
  * Allocate a block of memory from a pool
@@ -252,7 +252,7 @@ APR_EXPORT(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
  * @return The allocated memory
  * @deffunc void *apr_palloc(apr_pool_t *c, apr_size_t reqsize)
  */
-APR_EXPORT(void *) apr_palloc(apr_pool_t *c, apr_size_t reqsize);
+APR_DECLARE(void *) apr_palloc(apr_pool_t *c, apr_size_t reqsize);
 
 /**
  * Allocate a block of memory from a pool and set all of the memory to 0
@@ -261,7 +261,7 @@ APR_EXPORT(void *) apr_palloc(apr_pool_t *c, apr_size_t reqsize);
  * @return The allocated memory
  * @deffunc void *apr_pcalloc(apr_pool_t *p, apr_size_t size)
  */
-APR_EXPORT(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
+APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
 
 /**
  * Register a function to be called when a pool is cleared or destroyed
@@ -272,7 +272,7 @@ APR_EXPORT(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
  * @param child_cleanup The function to call when a child process is created 
  * @deffunc void apr_register_cleanup(apr_pool_t *p, const void *data, apr_status_t (*plain_cleanup) (void *), apr_status_t (*child_cleanup) (void *))
  */
-APR_EXPORT(void) apr_register_cleanup(apr_pool_t *p, const void *data,
+APR_DECLARE(void) apr_register_cleanup(apr_pool_t *p, const void *data,
                                      apr_status_t (*plain_cleanup) (void *),
                                      apr_status_t (*child_cleanup) (void *));
 
@@ -283,7 +283,7 @@ APR_EXPORT(void) apr_register_cleanup(apr_pool_t *p, const void *data,
  * @param cleanup The function to remove from cleanup
  * @deffunc void apr_kill_cleanup(apr_pool_t *p, const void *data, apr_status_t (*cleanup) (void *))
  */
-APR_EXPORT(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
+APR_DECLARE(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
                                  apr_status_t (*cleanup) (void *));
 
 /**
@@ -293,7 +293,7 @@ APR_EXPORT(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
  * @param cleanup The function to remove from cleanup
  * @deffunc apr_status_t apr_run_cleanup(apr_pool_t *p, void *data, apr_status_t (*cleanup) (void *))
  */
-APR_EXPORT(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
+APR_DECLARE(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
                                        apr_status_t (*cleanup) (void *));
 
 /* Preparing for exec() --- close files, etc., but *don't* flush I/O
@@ -304,14 +304,14 @@ APR_EXPORT(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
  * closed because we are about to exec a new program
  * @deffunc void apr_cleanup_for_exec(void)
  */
-APR_EXPORT(void) apr_cleanup_for_exec(void);
+APR_DECLARE(void) apr_cleanup_for_exec(void);
 
 /**
  * An empty cleanup function 
  * @param data The data to cleanup
  * @deffunc apr_status_t apr_null_cleanup(void *data)
  */
-APR_EXPORT_NONSTD(apr_status_t) apr_null_cleanup(void *data);
+APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data);
 
 
 /* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t will not be

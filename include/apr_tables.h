@@ -189,22 +189,22 @@ struct apr_btable_entry_t {
                                || (((apr_array_header_t *)(t))->nelts == 0))
 #define apr_is_empty_btable(t) apr_is_empty_table(t)
 
-APR_EXPORT(apr_array_header_t *) apr_make_array(struct apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_make_array(struct apr_pool_t *p,
 						int nelts, int elt_size);
-APR_EXPORT(void *) apr_push_array(apr_array_header_t *arr);
-APR_EXPORT(void) apr_array_cat(apr_array_header_t *dst,
+APR_DECLARE(void *) apr_push_array(apr_array_header_t *arr);
+APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
 			       const apr_array_header_t *src);
 
 /* copy_array copies the *entire* array.  copy_array_hdr just copies
  * the header, and arranges for the elements to be copied if (and only
  * if) the code subsequently does a push or arraycat.
  */
-APR_EXPORT(apr_array_header_t *) apr_copy_array(struct apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_copy_array(struct apr_pool_t *p,
 						const apr_array_header_t *arr);
-APR_EXPORT(apr_array_header_t *)
+APR_DECLARE(apr_array_header_t *)
 	apr_copy_array_hdr(struct apr_pool_t *p,
 			   const apr_array_header_t *arr);
-APR_EXPORT(apr_array_header_t *)
+APR_DECLARE(apr_array_header_t *)
 	apr_append_arrays(struct apr_pool_t *p,
 			  const apr_array_header_t *first,
 			  const apr_array_header_t *second);
@@ -215,52 +215,52 @@ APR_EXPORT(apr_array_header_t *)
  * or if there are no elements in the array.
  * If sep is non-NUL, it will be inserted between elements as a separator.
  */
-APR_EXPORT(char *) apr_array_pstrcat(struct apr_pool_t *p,
+APR_DECLARE(char *) apr_array_pstrcat(struct apr_pool_t *p,
 				     const apr_array_header_t *arr,
 				     const char sep);
-APR_EXPORT(apr_table_t *) apr_make_table(struct apr_pool_t *p, int nelts);
-APR_EXPORT(apr_btable_t *) apr_make_btable(struct apr_pool_t *p, int nelts);
-APR_EXPORT(apr_table_t *) apr_copy_table(struct apr_pool_t *p,
+APR_DECLARE(apr_table_t *) apr_make_table(struct apr_pool_t *p, int nelts);
+APR_DECLARE(apr_btable_t *) apr_make_btable(struct apr_pool_t *p, int nelts);
+APR_DECLARE(apr_table_t *) apr_copy_table(struct apr_pool_t *p,
 					 const apr_table_t *t);
-APR_EXPORT(apr_btable_t *) apr_copy_btable(struct apr_pool_t *p,
+APR_DECLARE(apr_btable_t *) apr_copy_btable(struct apr_pool_t *p,
 					   const apr_btable_t *t);
-APR_EXPORT(void) apr_clear_table(apr_table_t *t);
-APR_EXPORT(void) apr_clear_btable(apr_btable_t *t);
-APR_EXPORT(const char *) apr_table_get(const apr_table_t *t, const char *key);
-APR_EXPORT(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
+APR_DECLARE(void) apr_clear_table(apr_table_t *t);
+APR_DECLARE(void) apr_clear_btable(apr_btable_t *t);
+APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
+APR_DECLARE(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
 					      const char *key);
-APR_EXPORT(void) apr_table_set(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 			       const char *val);
-APR_EXPORT(void) apr_btable_set(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_set(apr_btable_t *t, const char *key,
 				size_t size, const void *val);
-APR_EXPORT(void) apr_table_setn(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 				const char *val);
-APR_EXPORT(void) apr_btable_setn(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_setn(apr_btable_t *t, const char *key,
 				 size_t size, const void *val);
-APR_EXPORT(void) apr_table_unset(apr_table_t *t, const char *key);
-APR_EXPORT(void) apr_btable_unset(apr_btable_t *t, const char *key);
-APR_EXPORT(void) apr_table_merge(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
+APR_DECLARE(void) apr_btable_unset(apr_btable_t *t, const char *key);
+APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
 				 const char *val);
-APR_EXPORT(void) apr_table_mergen(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
 				  const char *val);
-APR_EXPORT(void) apr_table_add(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
 			       const char *val);
-APR_EXPORT(void) apr_btable_add(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_add(apr_btable_t *t, const char *key,
 				size_t size, const void *val);
-APR_EXPORT(void) apr_table_addn(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 				const char *val);
-APR_EXPORT(void) apr_btable_addn(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_addn(apr_btable_t *t, const char *key,
 				 size_t size, const void *val);
-APR_EXPORT(apr_table_t *) apr_overlay_tables(struct apr_pool_t *p,
+APR_DECLARE(apr_table_t *) apr_overlay_tables(struct apr_pool_t *p,
 					     const apr_table_t *overlay,
 					     const apr_table_t *base);
-APR_EXPORT(apr_btable_t *) apr_overlay_btables(struct apr_pool_t *p,
+APR_DECLARE(apr_btable_t *) apr_overlay_btables(struct apr_pool_t *p,
 					       const apr_btable_t *overlay,
 					       const apr_btable_t *base);
-APR_EXPORT(void)
+APR_DECLARE(void)
 	apr_table_do(int (*comp) (void *, const char *, const char *),
 		     void *rec, const apr_table_t *t, ...);
-APR_EXPORT(void)
+APR_DECLARE(void)
         apr_table_vdo(int (*comp) (void *, const char *, const char *),
                      void *rec, const apr_table_t *t, va_list);                  
 
@@ -288,7 +288,7 @@ APR_EXPORT(void)
  */
 #define APR_OVERLAP_TABLES_SET   (0)
 #define APR_OVERLAP_TABLES_MERGE (1)
-APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
+APR_DECLARE(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags);
 
 #ifdef __cplusplus

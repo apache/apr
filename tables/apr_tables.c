@@ -108,7 +108,7 @@ static void make_array_core(apr_array_header_t *res, apr_pool_t *c,
     res->nalloc = nelts;	/* ...but this many allocated */
 }
 
-APR_EXPORT(apr_array_header_t *) apr_make_array(apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_make_array(apr_pool_t *p,
 						int nelts, int elt_size)
 {
     apr_array_header_t *res;
@@ -118,7 +118,7 @@ APR_EXPORT(apr_array_header_t *) apr_make_array(apr_pool_t *p,
     return res;
 }
 
-APR_EXPORT(void *) apr_push_array(apr_array_header_t *arr)
+APR_DECLARE(void *) apr_push_array(apr_array_header_t *arr)
 {
     if (arr->nelts == arr->nalloc) {
 	int new_size = (arr->nalloc <= 0) ? 1 : arr->nalloc * 2;
@@ -135,7 +135,7 @@ APR_EXPORT(void *) apr_push_array(apr_array_header_t *arr)
     return arr->elts + (arr->elt_size * (arr->nelts - 1));
 }
 
-APR_EXPORT(void) apr_array_cat(apr_array_header_t *dst,
+APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
 			       const apr_array_header_t *src)
 {
     int elt_size = dst->elt_size;
@@ -160,7 +160,7 @@ APR_EXPORT(void) apr_array_cat(apr_array_header_t *dst,
     dst->nelts += src->nelts;
 }
 
-APR_EXPORT(apr_array_header_t *) apr_copy_array(apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_copy_array(apr_pool_t *p,
 						const apr_array_header_t *arr)
 {
     apr_array_header_t *res = apr_make_array(p, arr->nalloc, arr->elt_size);
@@ -186,7 +186,7 @@ static APR_INLINE void copy_array_hdr_core(apr_array_header_t *res,
     res->nalloc = arr->nelts;	/* Force overflow on push */
 }
 
-APR_EXPORT(apr_array_header_t *)
+APR_DECLARE(apr_array_header_t *)
     apr_copy_array_hdr(apr_pool_t *p,
 		       const apr_array_header_t *arr)
 {
@@ -200,7 +200,7 @@ APR_EXPORT(apr_array_header_t *)
 
 /* The above is used here to avoid consing multiple new array bodies... */
 
-APR_EXPORT(apr_array_header_t *)
+APR_DECLARE(apr_array_header_t *)
     apr_append_arrays(apr_pool_t *p,
 		      const apr_array_header_t *first,
 		      const apr_array_header_t *second)
@@ -217,7 +217,7 @@ APR_EXPORT(apr_array_header_t *)
  * or if there are no elements in the array.
  * If sep is non-NUL, it will be inserted between elements as a separator.
  */
-APR_EXPORT(char *) apr_array_pstrcat(apr_pool_t *p,
+APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
 				     const apr_array_header_t *arr,
 				     const char sep)
 {
@@ -294,7 +294,7 @@ static apr_table_entry_t *table_push(apr_table_t *t)
 #endif /* MAKE_TABLE_PROFILE */
 
 
-APR_EXPORT(apr_table_t *) apr_make_table(apr_pool_t *p, int nelts)
+APR_DECLARE(apr_table_t *) apr_make_table(apr_pool_t *p, int nelts)
 {
     apr_table_t *t = apr_palloc(p, sizeof(apr_table_t));
 
@@ -305,7 +305,7 @@ APR_EXPORT(apr_table_t *) apr_make_table(apr_pool_t *p, int nelts)
     return t;
 }
 
-APR_EXPORT(apr_btable_t *) apr_make_btable(apr_pool_t *p, int nelts)
+APR_DECLARE(apr_btable_t *) apr_make_btable(apr_pool_t *p, int nelts)
 {
     apr_btable_t *t = apr_palloc(p, sizeof(apr_btable_t));
 
@@ -316,7 +316,7 @@ APR_EXPORT(apr_btable_t *) apr_make_btable(apr_pool_t *p, int nelts)
     return t;
 }
 
-APR_EXPORT(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
+APR_DECLARE(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
 {
     apr_table_t *new = apr_palloc(p, sizeof(apr_table_t));
 
@@ -335,7 +335,7 @@ APR_EXPORT(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
     return new;
 }
 
-APR_EXPORT(apr_btable_t *) apr_copy_btable(apr_pool_t *p,
+APR_DECLARE(apr_btable_t *) apr_copy_btable(apr_pool_t *p,
 					   const apr_btable_t *t)
 {
     apr_btable_t *new = apr_palloc(p, sizeof(apr_btable_entry_t));
@@ -355,17 +355,17 @@ APR_EXPORT(apr_btable_t *) apr_copy_btable(apr_pool_t *p,
     return new;
 }
 
-APR_EXPORT(void) apr_clear_table(apr_table_t *t)
+APR_DECLARE(void) apr_clear_table(apr_table_t *t)
 {
     t->a.nelts = 0;
 }
 
-APR_EXPORT(void) apr_clear_btable(apr_btable_t *t)
+APR_DECLARE(void) apr_clear_btable(apr_btable_t *t)
 {
     t->a.nelts = 0;
 }
 
-APR_EXPORT(const char *) apr_table_get(const apr_table_t *t, const char *key)
+APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int i;
@@ -383,7 +383,7 @@ APR_EXPORT(const char *) apr_table_get(const apr_table_t *t, const char *key)
     return NULL;
 }
 
-APR_EXPORT(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
+APR_DECLARE(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
 					      const char *key)
 {
     apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
@@ -402,7 +402,7 @@ APR_EXPORT(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
     return NULL;
 }
 
-APR_EXPORT(void) apr_table_set(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 			       const char *val)
 {
     register int i, j, k;
@@ -436,7 +436,7 @@ APR_EXPORT(void) apr_table_set(apr_table_t *t, const char *key,
     }
 }
 
-APR_EXPORT(void) apr_btable_set(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_set(apr_btable_t *t, const char *key,
 				size_t size, const void *val)
 {
     register int i, j, k;
@@ -476,7 +476,7 @@ APR_EXPORT(void) apr_btable_set(apr_btable_t *t, const char *key,
     }
 }
 
-APR_EXPORT(void) apr_table_setn(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 				const char *val)
 {
     register int i, j, k;
@@ -523,7 +523,7 @@ APR_EXPORT(void) apr_table_setn(apr_table_t *t, const char *key,
     }
 }
 
-APR_EXPORT(void) apr_btable_setn(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_setn(apr_btable_t *t, const char *key,
 				 size_t size, const void *val)
 {
     register int i, j, k;
@@ -575,7 +575,7 @@ APR_EXPORT(void) apr_btable_setn(apr_btable_t *t, const char *key,
     }
 }
 
-APR_EXPORT(void) apr_table_unset(apr_table_t *t, const char *key)
+APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 {
     register int i, j, k;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
@@ -600,7 +600,7 @@ APR_EXPORT(void) apr_table_unset(apr_table_t *t, const char *key)
     }
 }
 
-APR_EXPORT(void) apr_btable_unset(apr_btable_t *t, const char *key)
+APR_DECLARE(void) apr_btable_unset(apr_btable_t *t, const char *key)
 {
     register int i, j, k;
     apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
@@ -625,7 +625,7 @@ APR_EXPORT(void) apr_btable_unset(apr_btable_t *t, const char *key)
     }
 }
 
-APR_EXPORT(void) apr_table_merge(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
 				 const char *val)
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
@@ -643,7 +643,7 @@ APR_EXPORT(void) apr_table_merge(apr_table_t *t, const char *key,
     elts->val = apr_pstrdup(t->a.cont, val);
 }
 
-APR_EXPORT(void) apr_table_mergen(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
 				  const char *val)
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
@@ -674,7 +674,7 @@ APR_EXPORT(void) apr_table_mergen(apr_table_t *t, const char *key,
     elts->val = (char *)val;
 }
 
-APR_EXPORT(void) apr_table_add(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
 			       const char *val)
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
@@ -684,7 +684,7 @@ APR_EXPORT(void) apr_table_add(apr_table_t *t, const char *key,
     elts->val = apr_pstrdup(t->a.cont, val);
 }
 
-APR_EXPORT(void) apr_btable_add(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_add(apr_btable_t *t, const char *key,
 				size_t size, const void *val)
 {
     apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
@@ -699,7 +699,7 @@ APR_EXPORT(void) apr_btable_add(apr_btable_t *t, const char *key,
     elts->val = item;
 }
 
-APR_EXPORT(void) apr_table_addn(apr_table_t *t, const char *key,
+APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 				const char *val)
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
@@ -722,7 +722,7 @@ APR_EXPORT(void) apr_table_addn(apr_table_t *t, const char *key,
     elts->val = (char *)val;
 }
 
-APR_EXPORT(void) apr_btable_addn(apr_btable_t *t, const char *key,
+APR_DECLARE(void) apr_btable_addn(apr_btable_t *t, const char *key,
 				 size_t size, const void *val)
 {
     apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
@@ -750,7 +750,7 @@ APR_EXPORT(void) apr_btable_addn(apr_btable_t *t, const char *key,
     elts->val = item;
 }
 
-APR_EXPORT(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
+APR_DECLARE(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
 					     const apr_table_t *overlay,
 					     const apr_table_t *base)
 {
@@ -782,7 +782,7 @@ APR_EXPORT(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
     return res;
 }
 
-APR_EXPORT(apr_btable_t *) apr_overlay_btables(apr_pool_t *p,
+APR_DECLARE(apr_btable_t *) apr_overlay_btables(apr_pool_t *p,
 					       const apr_btable_t *overlay,
 					       const apr_btable_t *base)
 {
@@ -857,7 +857,7 @@ APR_EXPORT(apr_btable_t *) apr_overlay_btables(apr_pool_t *p,
  *
  * So to make mod_file_cache easier to maintain, it's a good thing
  */
-APR_EXPORT(void) apr_table_do(int (*comp) (void *, const char *, const char *),
+APR_DECLARE(void) apr_table_do(int (*comp) (void *, const char *, const char *),
 			      void *rec, const apr_table_t *t, ...)
 {
     va_list vp;
@@ -865,7 +865,7 @@ APR_EXPORT(void) apr_table_do(int (*comp) (void *, const char *, const char *),
     apr_table_vdo(comp, rec, t, vp);
     va_end(vp);  
 } 
-APR_EXPORT(void) apr_table_vdo(int (*comp) (void *, const char *, const char *),
+APR_DECLARE(void) apr_table_vdo(int (*comp) (void *, const char *, const char *),
 				void *rec, const apr_table_t *t, va_list vp)
 {
     char *argp;
@@ -913,7 +913,7 @@ static int sort_overlap(const void *va, const void *vb)
 #define APR_OVERLAP_TABLES_ON_STACK	(512)
 #endif
 
-APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
+APR_DECLARE(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags)
 {
     overlap_key cat_keys_buf[APR_OVERLAP_TABLES_ON_STACK];
