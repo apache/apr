@@ -290,6 +290,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
                                        PROT_READ | PROT_WRITE, MAP_SHARED,
                                        fd, 0); 
     if (new_mutex->pthread_interproc == (pthread_mutex_t *) (caddr_t) -1) {
+        close(fd);
         return errno;
     }
     close(fd);
