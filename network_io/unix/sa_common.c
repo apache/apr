@@ -239,7 +239,11 @@ apr_status_t apr_parse_addr_port(char **addr,
     /* now handle the hostname */
     addrlen = lastchar - str + 1;
 
-#if APR_HAVE_IPV6 /* XXX don't require this; would need to pass char[] for ipaddr and always define APR_INET6 */
+/* XXX we don't really have to require APR_HAVE_IPV6 for this; 
+ * just pass char[] for ipaddr (so we don't depend on struct in6_addr)
+ * and always define APR_INET6 
+ */
+#if APR_HAVE_IPV6
     if (*str == '[') {
         const char *end_bracket = memchr(str, ']', addrlen);
         struct in6_addr ipaddr;
@@ -253,7 +257,7 @@ apr_status_t apr_parse_addr_port(char **addr,
         /* handle scope id; this is the only context where it is allowed */
         scope_delim = memchr(str, '%', addrlen);
         if (scope_delim) {
-            if (scope_delim == end_bracket - 1) { /* '%' without scope identifier */
+            if (scope_delim == end_bracket - 1) { /* '%' without scope id */
                 *port = 0;
                 return APR_EINVAL;
             }
@@ -331,6 +335,7 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
         }
         (*sa)->sa.sin.sin_family = ai->ai_family;
         memcpy(&(*sa)->sa, ai->ai_addr, ai->ai_addrlen);
+        freeaddrinfo(ai);
     }
     else {
         if (family == APR_UNSPEC) {
@@ -343,7 +348,7 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
     set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
 #else
     if (family == APR_UNSPEC) {
-        (*sa)->sa.sin.sin_family = APR_INET; /* we don't yet support IPv6 here */
+        (*sa)->sa.sin.sin_family = APR_INET; /* we don't support IPv6 here */
     }
     else {
         (*sa)->sa.sin.sin_family = family;
@@ -397,9 +402,13 @@ apr_status_t apr_getnameinfo(char **hostname, apr_sockaddr_t *sockaddr,
 #endif
 
     h_errno = 0; /* don't know if it is portable for getnameinfo() to set h_errno */
+    /* default flags are NI_NAMREQD; otherwise, getnameinfo() will return
+     * a numeric address string if it fails to resolve the host name;
+     * that is *not* what we want here
+     */
     rc = getnameinfo((const struct sockaddr *)&sockaddr->sa, sockaddr->salen,
                      tmphostname, sizeof(tmphostname), NULL, 0,
-                     /* flags != 0 ? flags : */  NI_NAMEREQD);
+                     flags != 0 ? flags : NI_NAMEREQD);
     if (rc != 0) {
         *hostname = NULL;
         /* XXX I have no idea if this is okay.  I don't see any info
