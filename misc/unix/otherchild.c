@@ -74,7 +74,7 @@ API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
     ap_other_child_rec_t *ocr;
 
     ocr = ap_palloc(p, sizeof(*ocr));
-    ocr->pid = pid->pid;
+    ocr->id = pid->pid;
     ocr->maintenance = maintenance;
     ocr->data = data;
     if (write_fd == NULL) {
@@ -158,10 +158,10 @@ API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid, int status)
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
-        if (ocr->pid != pid->pid)
+        if (ocr->id != pid->pid)
             continue;
 
-        ocr->pid = -1;
+        ocr->id = -1;
         (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         return 0;
     }
@@ -176,12 +176,12 @@ API_EXPORT(void) ap_check_other_child(void)
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
-        if (ocr->pid == -1)
+        if (ocr->id == -1)
             continue;
 
-        waitret = waitpid(ocr->pid, &status, WNOHANG);
-        if (waitret == ocr->pid) {
-            ocr->pid = -1;
+        waitret = waitpid(ocr->id, &status, WNOHANG);
+        if (waitret == ocr->id) {
+            ocr->id = -1;
             (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         }
         else if (waitret == 0) {
@@ -189,7 +189,7 @@ API_EXPORT(void) ap_check_other_child(void)
         }
         else if (waitret == -1) {
             /* uh what the heck? they didn't call unregister? */
-            ocr->pid = -1;
+            ocr->id = -1;
             (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
         }
     }
