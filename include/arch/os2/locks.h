@@ -57,11 +57,9 @@
 
 #include "apr_lock.h"
 #include "apr_file_io.h"
-#include "apr_sms.h"
 
 struct apr_lock_t {
     apr_pool_t *pool;
-    apr_sms_t *mem_sys;
     apr_locktype_e type;
     apr_lockscope_e scope;
     char *fname;
@@ -70,10 +68,6 @@ struct apr_lock_t {
     int lock_count;
     TIB *tib;
 };
-
-apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
-                                 apr_lockscope_e scope, const char *fname,
-                                 apr_sms_t *mem_sys);
 
 #endif  /* LOCKS_H */
 

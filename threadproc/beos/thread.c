@@ -53,6 +53,7 @@
  */
 
 #include "threadproc.h"
+#include "apr_portable.h"
 
 apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
 {
@@ -120,6 +121,11 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
     else {
         return errno;
     } 
+}
+
+apr_os_thread_t apr_os_thread_current(void)
+{
+    return find_thread(NULL);
 }
 
 apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)

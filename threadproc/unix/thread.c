@@ -158,6 +158,11 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
     } 
 }
 
+apr_os_thread_t apr_os_thread_current(void)
+{
+    return pthread_self();
+}
+
 apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
     apr_pool_destroy(thd->cntxt);
