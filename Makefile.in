@@ -98,5 +98,9 @@ subdirs_distclean:
 	done;
 
 install: all
+
+docs:
+	./helpers/scandoc -i./helpers/default.pl -p./docs/ ./include/*.h
 	
 # DO NOT REMOVE
+docs: $(INCDIR)/*.h
