@@ -137,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
         return APR_SUCCESS;
 
     status = apr_stat(&finfo, fname, APR_FINFO_PROT, pool);
-    if (!APR_STATUS_IS_SUCCESS(status))
+    if (status)
         return status;
 
     /* ### TODO: should added bits be umask'd? */
@@ -187,7 +187,7 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
     apr_finfo_t finfo;
 
     status = apr_stat(&finfo, fname, APR_FINFO_ATIME, pool);
-    if (!APR_STATUS_IS_SUCCESS(status)) {
+    if (status) {
         return status;
     }
 

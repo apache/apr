@@ -53,7 +53,7 @@ static void set_debug(abts_case *tc, void *data)
     rv1 = apr_socket_opt_set(sock, APR_SO_DEBUG, 1);
     rv2 = apr_socket_opt_get(sock, APR_SO_DEBUG, &ck);
     APR_ASSERT_SUCCESS(tc, "get SO_DEBUG option", rv2);
-    if (APR_STATUS_IS_SUCCESS(rv1)) {
+    if (rv1 == APR_SUCCESS) {
         ABTS_INT_EQUAL(tc, 1, ck);
     } else {
         ABTS_INT_EQUAL(tc, 0, ck);
