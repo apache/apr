@@ -80,6 +80,7 @@
 #define BOUNDARY_INDEX 12
 #define BOUNDARY_SIZE (1 << BOUNDARY_INDEX)
 
+ 
 /*
  * Macros and defines
  */
@@ -90,11 +91,14 @@
 
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
+    
 /*
  * Structures
  */
 
 typedef struct cleanup_t cleanup_t;
+
+#if !defined(APR_POOL_DEBUG)
 typedef struct allocator_t allocator_t;
 typedef struct node_t node_t;
 
@@ -114,6 +118,24 @@ struct allocator_t {
     node_t             *free[MAX_INDEX];
 };
 
+#define SIZEOF_NODE_T       APR_ALIGN_DEFAULT(sizeof(node_t))
+#define SIZEOF_ALLOCATOR_T  APR_ALIGN_DEFAULT(sizeof(allocator_t))
+
+#else /* !defined(APR_POOL_DEBUG) */
+
+typedef struct debug_node_t debug_node_t;
+
+struct debug_node_t {
+    debug_node_t *next;
+    apr_uint32_t  index;
+    void         *beginp[64];
+    void         *endp[64];
+};
+
+#define SIZEOF_DEBUG_NODE_T APR_ALIGN_DEFAULT(sizeof(debug_node_t))
+
+#endif /* !defined(APR_POOL_DEBUG) */
+
 /* The ref field in the apr_pool_t struct holds a
  * pointer to the pointer referencing this pool.
  * It is used for parent, child, sibling management.
@@ -121,10 +143,6 @@ struct allocator_t {
  * to see how it is used.
  */
 struct apr_pool_t {
-    allocator_t          *allocator;
-    node_t               *active;
-    node_t               *self; /* The node containing the pool itself */
-    char                 *self_first_avail;
     apr_pool_t           *parent;
     apr_pool_t           *child;
     apr_pool_t           *sibling;
@@ -134,18 +152,32 @@ struct apr_pool_t {
     apr_abortfunc_t       abort_fn;
     apr_hash_t           *user_data;
     const char           *tag;
+
+#if !defined(APR_POOL_DEBUG)
+    allocator_t          *allocator;
+    node_t               *active;
+    node_t               *self; /* The node containing the pool itself */
+    char                 *self_first_avail;
+
+#else /* !defined(APR_POOL_DEBUG) */
+    debug_node_t         *nodes;
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *mutex;
+#endif
+#endif /* !defined(APR_POOL_DEBUG) */
 };
 
-#define SIZEOF_NODE_T       APR_ALIGN_DEFAULT(sizeof(node_t))
-#define SIZEOF_ALLOCATOR_T  APR_ALIGN_DEFAULT(sizeof(allocator_t))
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
+
 
 /*
  * Variables
  */
 
+static apr_byte_t   apr_pools_initialized = 0;
 static apr_pool_t  *global_pool = NULL;
-static apr_byte_t   global_allocator_initialized = 0;
+
+#if !defined(APR_POOL_DEBUG)
 static allocator_t  global_allocator = { 
     0,          /* max_index */
 #if APR_HAS_THREADS
@@ -154,6 +186,62 @@ static allocator_t  global_allocator = {
     NULL,       /* owner */
     { NULL }    /* free[0] */
 };
+#endif /* !defined(APR_POOL_DEBUG) */
+
+
+/*
+ * Local functions
+ */
+
+static void run_cleanups(cleanup_t *c);
+static void run_child_cleanups(cleanup_t *c);
+static void free_proc_chain(struct process_chain *procs);
+
+
+#if !defined(APR_POOL_DEBUG)
+/*
+ * Initialization
+ */
+
+APR_DECLARE(apr_status_t) apr_pool_initialize(void)
+{
+    apr_status_t rv;
+
+    if (apr_pools_initialized++)
+        return APR_SUCCESS;
+    
+    memset(&global_allocator, 0, SIZEOF_ALLOCATOR_T);
+
+    if ((rv = apr_pool_create_ex(&global_pool, NULL, NULL, APR_POOL_FDEFAULT)) != APR_SUCCESS) {
+        return rv;
+    }
+    
+#if APR_HAS_THREADS    
+    if ((rv = apr_thread_mutex_create(&global_allocator.mutex, 
+                  APR_THREAD_MUTEX_DEFAULT, global_pool)) != APR_SUCCESS) {
+        return rv;
+    }
+#endif
+
+    global_allocator.owner = global_pool;
+    apr_pools_initialized = 1;
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(void) apr_pool_terminate(void)
+{
+    if (!apr_pools_initialized)
+        return;
+
+    apr_pools_initialized = 0;
+    
+    apr_pool_destroy(global_pool); /* This will also destroy the mutex */
+    global_pool = NULL;
+
+    memset(&global_allocator, 0, SIZEOF_ALLOCATOR_T);
+}
+
 
 /*
  * Memory allocation
@@ -409,12 +497,10 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
     return mem;
 }
 
-/*
- * Pool management
- */
 
-static void run_cleanups(cleanup_t *c);
-static void free_proc_chain(struct process_chain *procs);
+/*
+ * Pool creation/destruction
+ */
 
 APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
 {
@@ -544,8 +630,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     if (!parent)
         parent = global_pool;
 
-    if (!abort_fn)
-        abort_fn = parent ? parent->abort_fn : NULL;
+    if (!abort_fn && parent)
+        abort_fn = parent->abort_fn;
 
     allocator = parent ? parent->allocator : &global_allocator;
     if ((node = node_malloc(allocator, MIN_ALLOC - SIZEOF_NODE_T)) == NULL) {
@@ -624,6 +710,515 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return APR_SUCCESS;
 }
 
+
+/*
+ * "Print" functions
+ */
+
+/*
+ * apr_psprintf is implemented by writing directly into the current
+ * block of the pool, starting right at first_avail.  If there's
+ * insufficient room, then a new block is allocated and the earlier
+ * output is copied over.  The new block isn't linked into the pool
+ * until all the output is done.
+ *
+ * Note that this is completely safe because nothing else can
+ * allocate in this apr_pool_t while apr_psprintf is running.  alarms are
+ * blocked, and the only thing outside of apr_pools.c that's invoked
+ * is apr_vformatter -- which was purposefully written to be
+ * self-contained with no callouts.
+ */
+
+struct psprintf_data {
+    apr_vformatter_buff_t vbuff;
+    node_t               *node;
+    allocator_t          *allocator;
+    apr_byte_t            got_a_new_node;
+    node_t               *free;
+};
+
+static int psprintf_flush(apr_vformatter_buff_t *vbuff)
+{
+    struct psprintf_data *ps = (struct psprintf_data *)vbuff;
+    node_t *node, *active;
+    apr_size_t cur_len;
+    char *strp;
+    allocator_t *allocator;
+
+    allocator = ps->allocator;
+    node = ps->node;
+    strp = ps->vbuff.curpos;
+    cur_len = strp - node->first_avail;
+
+    if ((active = node_malloc(allocator, cur_len << 1)) == NULL)
+        return -1;
+
+    memcpy(active->first_avail, node->first_avail, cur_len);
+
+    /* Reset the previous active node */
+    node->first_avail = (char *)node + SIZEOF_NODE_T;
+
+    if (ps->got_a_new_node) {
+        node->next = ps->free;
+        ps->free = node; 
+    }
+
+    ps->node = active;
+    ps->vbuff.curpos = active->first_avail + cur_len;
+    ps->vbuff.endpos = active->endp - 1; /* Save a byte for NUL terminator */
+    ps->got_a_new_node = 1;
+
+    return 0;
+}
+
+APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
+{
+    struct psprintf_data ps;
+    char *strp;
+    apr_size_t size;
+    node_t *active;
+
+    ps.node = active = pool->active;
+    ps.allocator = pool->allocator;
+    ps.vbuff.curpos  = ps.node->first_avail;
+
+    /* Save a byte for the NUL terminator */
+    ps.vbuff.endpos = ps.node->endp - 1;
+    ps.got_a_new_node = 0;
+    ps.free = NULL;
+
+    if (apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap) == -1) {
+        if (pool->abort_fn)
+            pool->abort_fn(APR_ENOMEM);
+
+        return NULL;
+    }
+
+    strp = ps.vbuff.curpos;
+    *strp++ = '\0';
+
+    size = strp - ps.node->first_avail;
+    size = APR_ALIGN_DEFAULT(size);
+    strp = ps.node->first_avail;
+    ps.node->first_avail += size;
+
+    /* 
+     * Link the node in if it's a new one 
+     */
+    if (ps.got_a_new_node) {
+        active->next = pool->active = ps.node;
+    }
+
+    if (ps.free)
+        node_free(ps.allocator, ps.free);
+
+    return strp;
+}
+
+
+#else /* !defined(APR_POOL_DEBUG) */
+/*
+ * Initialization (debug)
+ */
+
+APR_DECLARE(apr_status_t) apr_pool_initialize(void)
+{
+    apr_status_t rv;
+
+    if (apr_pools_initialized++)
+        return APR_SUCCESS;
+    
+    if ((rv = apr_pool_create_ex(&global_pool, NULL, NULL, 
+                  APR_POOL_FNEW_ALLOCATOR|APR_POOL_FLOCK)) != APR_SUCCESS) {
+        return rv;
+    }
+    
+    apr_pools_initialized = 1;
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(void) apr_pool_terminate(void)
+{
+    if (!apr_pools_initialized)
+        return;
+
+    apr_pools_initialized = 0;
+    
+    apr_pool_destroy(global_pool); /* This will also destroy the mutex */
+    global_pool = NULL;
+}
+
+
+/*
+ * Memory allocation (debug)
+ */
+
+APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
+{
+    debug_node_t *node;
+    void *mem;
+
+    if ((mem = malloc(size)) == NULL) {
+        if (pool->abort_fn)
+            pool->abort_fn(APR_ENOMEM);
+
+        return NULL;
+    }
+
+    node = pool->nodes;
+    if (node == NULL || node->index == 64) {
+        if ((node = malloc(SIZEOF_DEBUG_NODE_T)) == NULL) {
+            if (pool->abort_fn)
+                pool->abort_fn(APR_ENOMEM);
+
+            return NULL;
+        }
+
+        node->next = pool->nodes;
+        pool->nodes = node;
+        node->index = 0;
+    }
+
+    node->beginp[node->index] = mem;
+    node->endp[node->index] = (char *)mem + size;
+    node->index++;
+
+    return mem;
+}
+
+APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
+{
+    void *mem;
+   
+    mem = apr_palloc(pool, size);
+    memset(mem, 0, size);
+
+    return mem;
+}
+
+
+/*
+ * Pool creation/destruction (debug)
+ */
+
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
+{
+    debug_node_t *node;
+    apr_uint32_t index;
+
+    /* Destroy the subpools.  The subpools will detach themselves from
+     * this pool thus this loop is safe and easy.
+     */
+    while (pool->child)
+        apr_pool_destroy(pool->child);
+
+    /* Run cleanups */
+    run_cleanups(pool->cleanups);
+    pool->cleanups = NULL;
+
+    /* Free subprocesses */
+    free_proc_chain(pool->subprocesses);
+    pool->subprocesses = NULL;
+
+    /* Clear the user data. */
+    pool->user_data = NULL;
+
+    /* Free the blocks */
+    while ((node = pool->nodes) != NULL) {
+        pool->nodes = node->next;
+
+        for (index = 0; index < node->index; index++)
+            free(node->beginp[index]);
+
+        free(node);
+    }
+}
+
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
+{
+    apr_pool_clear(pool);
+
+    /* Remove the pool from the parents child list */
+    if (pool->parent) {
+#if APR_HAS_THREADS
+        apr_thread_mutex_t *mutex;
+
+        if ((mutex = pool->parent->mutex) != NULL)
+            apr_thread_mutex_lock(mutex);
+#endif
+
+        if ((*pool->ref = pool->sibling) != NULL)
+            pool->sibling->ref = pool->ref;
+
+#if APR_HAS_THREADS
+        if (mutex)
+            apr_thread_mutex_unlock(mutex);
+#endif
+    }
+
+    /* Free the pool itself */
+    free(pool);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool, 
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_uint32_t flags)
+{
+    apr_pool_t *pool;
+
+    *newpool = NULL;
+
+    if (!parent)
+        parent = global_pool;
+
+    if (!abort_fn && parent)
+        abort_fn = parent->abort_fn;
+
+    if ((pool = malloc(SIZEOF_POOL_T)) == NULL) {
+        if (abort_fn)
+            abort_fn(APR_ENOMEM);
+
+         return APR_ENOMEM;
+    }
+
+    pool->abort_fn = abort_fn;
+    pool->child = NULL;
+    pool->cleanups = NULL;
+    pool->subprocesses = NULL;
+    pool->user_data = NULL;
+    pool->tag = NULL;
+    pool->nodes = NULL;
+
+    if ((flags & APR_POOL_FNEW_ALLOCATOR) == APR_POOL_FNEW_ALLOCATOR) {
+#if APR_HAS_THREADS
+        if ((flags & APR_POOL_FLOCK) == APR_POOL_FLOCK) {
+            apr_status_t rv;
+
+            if ((rv = apr_thread_mutex_create(&pool->mutex, 
+                    APR_THREAD_MUTEX_DEFAULT, pool)) != APR_SUCCESS) {
+                free(pool);
+                return rv;
+            }
+        }
+#endif
+    }
+    else {
+        if (parent)
+            pool->mutex = parent->mutex;
+    }
+
+    if ((pool->parent = parent) != NULL) {
+#if APR_HAS_THREADS
+        if (parent->mutex)
+            apr_thread_mutex_lock(parent->mutex);
+#endif
+        if ((pool->sibling = parent->child) != NULL)
+            pool->sibling->ref = &pool->sibling;
+
+        parent->child = pool;
+        pool->ref = &parent->child;
+
+#if APR_HAS_THREADS
+        if (parent->mutex)
+            apr_thread_mutex_unlock(parent->mutex);
+#endif
+    }
+    else {
+        pool->sibling = NULL;
+        pool->ref = NULL;
+    }
+
+    *newpool = pool;
+
+    return APR_SUCCESS;
+}
+
+
+/*
+ * "Print" functions (debug)
+ */
+
+struct psprintf_data {
+    apr_vformatter_buff_t vbuff;
+    char      *mem;
+    apr_size_t size;
+};
+
+static int psprintf_flush(apr_vformatter_buff_t *vbuff)
+{
+    struct psprintf_data *ps = (struct psprintf_data *)vbuff;
+    apr_size_t size;
+
+    size = ps->vbuff.curpos - ps->mem;
+
+    ps->size <<= 1;
+    if ((ps->mem = realloc(ps->mem, ps->size)) == NULL)
+        return -1;
+
+    ps->vbuff.curpos = ps->mem + size;
+    ps->vbuff.endpos = ps->mem + ps->size - 1;
+
+    return 0;
+}
+
+APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
+{
+    struct psprintf_data ps;
+    debug_node_t *node;
+
+    ps.size = 64;
+    ps.mem = malloc(ps.size);
+    ps.vbuff.curpos  = ps.mem;
+
+    /* Save a byte for the NUL terminator */
+    ps.vbuff.endpos = ps.mem + ps.size - 1;
+
+    if (apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap) == -1) {
+        if (pool->abort_fn)
+            pool->abort_fn(APR_ENOMEM);
+
+        return NULL;
+    }
+
+    *ps.vbuff.curpos++ = '\0';
+
+    /* 
+     * Link the node in
+     */
+    node = pool->nodes;
+    if (node == NULL || node->index == 64) {
+        if ((node = malloc(SIZEOF_DEBUG_NODE_T)) == NULL) {
+            if (pool->abort_fn)
+                pool->abort_fn(APR_ENOMEM);
+
+            return NULL;
+        }
+
+        node->next = pool->nodes;
+        pool->nodes = node;
+        node->index = 0;
+    }
+
+    node->beginp[node->index] = ps.mem;
+    node->endp[node->index] = ps.mem + ps.size;
+    node->index++;
+
+    return ps.mem;
+}
+
+
+/*
+ * Debug functions
+ */
+
+APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
+{
+}
+
+static apr_pool_t *find_pool(apr_pool_t *pool, const void *mem)
+{
+    apr_pool_t *found;
+    debug_node_t *node;
+    apr_uint32_t index;
+
+    while (pool) {
+        node = pool->nodes;
+
+        while (node) {
+            for (index = 0; index < node->index; index++) {
+                if (node->beginp[index] <= mem &&
+                    node->endp[index] > mem)
+                    return pool;
+            }
+
+            node = node->next;
+        }
+
+        if ((found = find_pool(pool->child, mem)) != NULL)
+            return found;
+
+        pool = pool->sibling;
+    }
+
+    return NULL;
+}
+
+APR_DECLARE(apr_pool_t *) apr_find_pool(const void *mem)
+{
+    return find_pool(global_pool, mem);
+}
+
+static apr_size_t pool_num_bytes(apr_pool_t *pool)
+{
+    apr_size_t size = 0;
+    debug_node_t *node;
+    apr_uint32_t index;
+
+    node = pool->nodes;
+
+    while (node) {
+        for (index = 0; index < node->index; index++) {
+            size += node->endp[index] - node->beginp[index];
+        }
+
+        node = node->next;
+    }
+
+    return size;
+}
+
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *pool, int recurse)
+{
+    apr_size_t size;
+
+    size = pool_num_bytes(pool);
+
+    if (recurse) {
+        pool = pool->child;
+        
+        while (pool) {
+            size += apr_pool_num_bytes(pool, 1);
+
+            pool = pool->sibling;
+        }
+    }
+
+    return size;
+}
+
+APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
+{
+    /* This really doesn't apply with our current debug code, so: */
+    return 0;
+}
+
+APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
+{
+}
+#endif /* !defined(APR_POOL_DEBUG) */
+
+
+/*
+ * "Print" functions (common)
+ */
+
+APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
+{
+    va_list ap;
+    char *res;
+
+    va_start(ap, fmt);
+    res = apr_pvsprintf(p, fmt, ap);
+    va_end(ap);
+    return res;
+}
+
+/*
+ * Pool Properties
+ */
+
 APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abort_fn,
                                      apr_pool_t *pool)
 {
@@ -658,48 +1253,62 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
     return 0;
 }
 
+APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag)
+{
+    pool->tag = tag;
+}
+
+
 /*
- * Initialization
+ * User data management
  */
 
-APR_DECLARE(apr_status_t) apr_pool_initialize(void)
+APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *key,
+                                                apr_status_t (*cleanup) (void *),
+                                                apr_pool_t *pool)
 {
-    apr_status_t rv;
+    if (pool->user_data == NULL)
+        pool->user_data = apr_hash_make(pool);
 
-    if (global_allocator_initialized++)
-        return APR_SUCCESS;
-    
-    memset(&global_allocator, 0, SIZEOF_ALLOCATOR_T);
-
-    if ((rv = apr_pool_create_ex(&global_pool, NULL, NULL, APR_POOL_FDEFAULT)) != APR_SUCCESS) {
-        return rv;
+    if (apr_hash_get(pool->user_data, key, APR_HASH_KEY_STRING) == NULL) {
+        char *new_key = apr_pstrdup(pool, key);
+        apr_hash_set(pool->user_data, new_key, APR_HASH_KEY_STRING, data);
+    } 
+    else {
+        apr_hash_set(pool->user_data, key, APR_HASH_KEY_STRING, data);
     }
-    
-#if APR_HAS_THREADS    
-    if ((rv = apr_thread_mutex_create(&global_allocator.mutex, 
-                  APR_THREAD_MUTEX_DEFAULT, global_pool)) != APR_SUCCESS) {
-        return rv;
-    }
-#endif
 
-    global_allocator.owner = global_pool;
-    global_allocator_initialized = 1;
+    if (cleanup)
+        apr_pool_cleanup_register(pool, data, cleanup, cleanup);
+        
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *key,
+                                                 apr_status_t (*cleanup) (void *),
+                                                 apr_pool_t *pool)
+{
+    if (pool->user_data == NULL)
+        pool->user_data = apr_hash_make(pool);
+
+    apr_hash_set(pool->user_data, key, APR_HASH_KEY_STRING, data);
+
+    if (cleanup)
+        apr_pool_cleanup_register(pool, data, cleanup, cleanup);
+    
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key, apr_pool_t *pool)
+{
+    if (pool->user_data == NULL)
+        *data = NULL;
+    else
+        *data = apr_hash_get(pool->user_data, key, APR_HASH_KEY_STRING);
 
     return APR_SUCCESS;
 }
 
-APR_DECLARE(void) apr_pool_terminate(void)
-{
-    if (!global_allocator_initialized)
-        return;
-
-    global_allocator_initialized = 0;
-    
-    apr_pool_destroy(global_pool); /* This will also destroy the mutex */
-    global_pool = NULL;
-
-    memset(&global_allocator, 0, SIZEOF_ALLOCATOR_T);
-}
 
 /*
  * Cleanup
@@ -823,198 +1432,13 @@ APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data)
     return APR_SUCCESS;
 }
 
-/*
- * Debug functions
+/* Subprocesses don't use the generic cleanup interface because
+ * we don't want multiple subprocesses to result in multiple
+ * three-second pauses; the subprocesses have to be "freed" all
+ * at once.  If other resources are introduced with the same property,
+ * we might want to fold support for that into the generic interface.
+ * For now, it's a special case.
  */
-
-APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag)
-{
-    pool->tag = tag;
-}
-
-#if defined(APR_POOL_DEBUG)
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse)
-{
-    return 0;
-}
-#endif
-
-/*
- * User data management
- */
-
-APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *key,
-                                                apr_status_t (*cleanup) (void *),
-                                                apr_pool_t *pool)
-{
-    if (pool->user_data == NULL)
-        pool->user_data = apr_hash_make(pool);
-
-    if (apr_hash_get(pool->user_data, key, APR_HASH_KEY_STRING) == NULL) {
-        char *new_key = apr_pstrdup(pool, key);
-        apr_hash_set(pool->user_data, new_key, APR_HASH_KEY_STRING, data);
-    } 
-    else {
-        apr_hash_set(pool->user_data, key, APR_HASH_KEY_STRING, data);
-    }
-
-    if (cleanup)
-        apr_pool_cleanup_register(pool, data, cleanup, cleanup);
-        
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *key,
-                                                 apr_status_t (*cleanup) (void *),
-                                                 apr_pool_t *pool)
-{
-    if (pool->user_data == NULL)
-        pool->user_data = apr_hash_make(pool);
-
-    apr_hash_set(pool->user_data, key, APR_HASH_KEY_STRING, data);
-
-    if (cleanup)
-        apr_pool_cleanup_register(pool, data, cleanup, cleanup);
-    
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key, apr_pool_t *pool)
-{
-    if (pool->user_data == NULL)
-        *data = NULL;
-    else
-        *data = apr_hash_get(pool->user_data, key, APR_HASH_KEY_STRING);
-
-    return APR_SUCCESS;
-}
-
-
-/*
- * "Print" functions
- */
-
-/*
- * apr_psprintf is implemented by writing directly into the current
- * block of the pool, starting right at first_avail.  If there's
- * insufficient room, then a new block is allocated and the earlier
- * output is copied over.  The new block isn't linked into the pool
- * until all the output is done.
- *
- * Note that this is completely safe because nothing else can
- * allocate in this apr_pool_t while apr_psprintf is running.  alarms are
- * blocked, and the only thing outside of alloc.c that's invoked
- * is apr_vformatter -- which was purposefully written to be
- * self-contained with no callouts.
- */
-
-struct psprintf_data {
-    apr_vformatter_buff_t vbuff;
-    node_t               *node;
-    allocator_t          *allocator;
-    apr_byte_t            got_a_new_node;
-    node_t               *free;
-};
-
-static int psprintf_flush(apr_vformatter_buff_t *vbuff)
-{
-    struct psprintf_data *ps = (struct psprintf_data *)vbuff;
-    node_t *node, *active;
-    apr_size_t cur_len;
-    char *strp;
-    allocator_t *allocator;
-
-    allocator = ps->allocator;
-    node = ps->node;
-    strp = ps->vbuff.curpos;
-    cur_len = strp - node->first_avail;
-
-    if ((active = node_malloc(allocator, cur_len << 1)) == NULL)
-        return -1;
-
-    memcpy(active->first_avail, node->first_avail, cur_len);
-
-    /* Reset the previous active node */
-    node->first_avail = (char *)node + SIZEOF_NODE_T;
-
-    if (ps->got_a_new_node) {
-        node->next = ps->free;
-        ps->free = node; 
-    }
-
-    ps->node = active;
-    ps->vbuff.curpos = active->first_avail + cur_len;
-    ps->vbuff.endpos = active->endp - 1; /* Save a byte for NUL terminator */
-    ps->got_a_new_node = 1;
-
-    return 0;
-}
-
-APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
-{
-    struct psprintf_data ps;
-    char *strp;
-    apr_size_t size;
-    node_t *active;
-
-    ps.node = active = pool->active;
-    ps.allocator = pool->allocator;
-    ps.vbuff.curpos  = ps.node->first_avail;
-    /* Save a byte for the NUL terminator */
-    ps.vbuff.endpos = ps.node->endp - 1;
-    ps.got_a_new_node = 0;
-    ps.free = NULL;
-
-    if (apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap) == -1) {
-        if (pool->abort_fn)
-            pool->abort_fn(APR_ENOMEM);
-
-        return NULL;
-    }
-
-    strp = ps.vbuff.curpos;
-    *strp++ = '\0';
-
-    size = strp - ps.node->first_avail;
-    size = APR_ALIGN_DEFAULT(size);
-    strp = ps.node->first_avail;
-    ps.node->first_avail += size;
-
-    /* 
-     * Link the node in if it's a new one 
-     */
-    if (ps.got_a_new_node) {
-        active->next = pool->active = ps.node;
-    }
-
-    if (ps.free)
-        node_free(ps.allocator, ps.free);
-
-    return strp;
-}
-
-APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
-{
-    va_list ap;
-    char *res;
-
-    va_start(ap, fmt);
-    res = apr_pvsprintf(p, fmt, ap);
-    va_end(ap);
-    return res;
-}
-
-/*****************************************************************
- *
- * More grotty system stuff... subprocesses.  Frump.  These don't use
- * the generic cleanup interface because I don't want multiple
- * subprocesses to result in multiple three-second pauses; the
- * subprocesses have to be "freed" all at once.  If someone comes
- * along with another resource they want to allocate which has the
- * same property, we might want to fold support for that into the
- * generic interface, but for now, it's a special case
- */
-
 APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *pool, apr_proc_t *pid,
                                     enum kill_conditions how)
 {
@@ -1092,6 +1516,7 @@ static void free_proc_chain(struct process_chain *procs)
         if (pc->kill_how != kill_never)
             (void)apr_proc_wait(pc->pid, NULL, NULL, APR_WAIT);
     }
+
 #ifdef WIN32
     /* 
      * XXX: Do we need an APR function to clean-up a proc_t?
@@ -1107,6 +1532,5 @@ static void free_proc_chain(struct process_chain *procs)
             }
         }
     }
-
 #endif /* WIN32 */
 }
