@@ -849,6 +849,14 @@ AC_ARG_WITH(sendfile, [  --with-sendfile         Override decision to use sendfi
         s390-*-linux-gnu)
             sendfile="0"
             ;;
+        *aix*)
+            # compiler-independent check for 64-bit build
+            AC_CHECK_SIZEOF(void*, 4)
+            if test "x$ac_cv_sizeof_voidp" = "x8"; then
+                # sendfile not working for 64-bit build
+                sendfile="0"
+            fi
+            ;;
     esac       
     if test "$orig_sendfile" != "$sendfile"; then
       echo "sendfile support disabled to avoid system problem"

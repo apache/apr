@@ -1,5 +1,8 @@
 Changes with APR 0.9.2
 
+  *) Disable apr_socket_sendfile() on 64-bit AIX to avoid an apparent
+     system problem.  PR 11408.  [Jeff Trawick]
+
   *) Add --includedir flag to apr-config.  [Justin Erenkrantz]
 
   *) Only include sys/syslimits.h if we don't have limits.h
