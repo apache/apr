@@ -53,6 +53,7 @@ dnl the generated libtool script (not necessarily the "top" build dir).
 dnl
 top_builddir="$abs_builddir"
 AC_SUBST(top_builddir)
+AC_SUBST(abs_srcdir)
 
 dnl Directory containing apr build macros, helpers, and make rules
 dnl NOTE: make rules (rules.mk) will be in the builddir for vpath
