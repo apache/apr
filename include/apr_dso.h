@@ -59,7 +59,7 @@
 #include "apr_errno.h"
 
 /**
- * @package dso
+ * @package Dynamic Object Handling
  */
 
 #ifdef __cplusplus
