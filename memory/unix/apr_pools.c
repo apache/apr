@@ -186,6 +186,9 @@ struct apr_pool_t {
     apr_thread_mutex_t   *mutex;
 #endif /* APR_HAS_THREADS */
 #endif /* APR_POOL_DEBUG */
+#ifdef NETWARE
+    apr_os_proc_t         owner_proc;
+#endif
 };
 
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
@@ -266,6 +269,24 @@ APR_DECLARE(void) apr_pool_terminate(void)
     memset(&global_allocator, 0, SIZEOF_ALLOCATOR_T);
 }
 
+#ifdef NETWARE
+void netware_pool_proc_cleanup ()
+{
+    apr_pool_t *pool = global_pool->child;
+    apr_os_proc_t owner_proc = (apr_os_proc_t)getnlmhandle();
+
+    while (pool) {
+        if (pool->owner_proc == owner_proc) {
+            apr_pool_destroy (pool);
+            pool = global_pool->child;
+        }
+        else {
+            pool = pool->sibling;
+        }
+    }
+    return;
+}
+#endif
 
 /*
  * Memory allocation
@@ -707,6 +728,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->user_data = NULL;
         pool->tag = NULL;
     }
+#ifdef NETWARE
+    pool->owner_proc = (apr_os_proc_t)getnlmhandle();
+#endif
 
     if ((pool->parent = parent) != NULL) {
 #if APR_HAS_THREADS
