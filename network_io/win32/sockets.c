@@ -117,10 +117,9 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr->pool = p;
 }
 
-APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily,
+APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
                                             int type, apr_pool_t *cont)
 {
-    int family = ofamily;
     int downgrade = (family == AF_UNSPEC);
 
     if (family == AF_UNSPEC) {
@@ -140,18 +139,14 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily,
         return APR_ENOMEM;
     }
 
-#ifdef NETWARE
-    (*new)->sock = socket(family, type, 0);
-#else
     /* For right now, we are not using socket groups.  We may later.
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
-    (*new)->sock = socket(family, type, /* IPPROTO_TCP */ 0);
-#endif
+    (*new)->sock = socket(family, type, 0);
 #if APR_HAVE_IPV6
     if ((*new)->sock == INVALID_SOCKET && downgrade) {
         family = AF_INET;
-        (*new)->sock = socket(family, type, /* IPPROTO_TCP */ 0);
+        (*new)->sock = socket(family, type, 0);
     }
 #endif
 
