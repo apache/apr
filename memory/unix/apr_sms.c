@@ -866,7 +866,7 @@ APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms,
          */
         rv = APR_ENOTIMPL;
         if (sms->thread_register_fn)
-            sms->thread_register_fn(sms, thread);
+            rv = sms->thread_register_fn(sms, thread);
 
         apr_lock_release(sms->sms_lock);
 
