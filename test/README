@@ -185,6 +185,8 @@ library should be able to print all of the information required to debug
 a problem.
 3)  Functions should be tested with both positive and negative tests.  This
 means that you should test things that should both succeed and fail.
+4)  Just checking the return code does _NOT_ make a useful test.  You must
+check to determine that the test actually did what you expected it to do.
 
 An example test
 ---------------
