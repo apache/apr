@@ -130,10 +130,10 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr->pool = p;
 }
 
-APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily, int type,
+APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family, int type,
                                             apr_pool_t *cont)
 {
-    int family = ofamily;
+    int downgrade = (family == AF_UNSPEC);
 
     if (family == AF_UNSPEC) {
 #if APR_HAVE_IPV6
@@ -152,9 +152,9 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily, int
         return APR_ENOMEM;
     }
  
-    (*new)->socketdes = socket(AF_INET, type, 0);
+    (*new)->socketdes = socket(family, type, 0);
 #if APR_HAVE_IPV6
-    if ((*new)->socketdes < 0 && ofamily == AF_UNSPEC) {
+    if ((*new)->socketdes < 0 && downgrade) {
         family = AF_INET;
         (*new)->socketdes = socket(family, type, 0);
     }
