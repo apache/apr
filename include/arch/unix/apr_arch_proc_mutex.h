@@ -81,22 +81,6 @@ typedef struct apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_lock_metho
 /* bit values for flags field in apr_unix_lock_methods_t */
 #define APR_PROCESS_LOCK_MECH_IS_GLOBAL          1
 
-#if APR_HAS_POSIXSEM_SERIALIZE
-extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods;
-#endif
-#if APR_HAS_SYSVSEM_SERIALIZE
-extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods;
-#endif
-#if APR_HAS_FCNTL_SERIALIZE
-extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods;
-#endif
-#if APR_HAS_FLOCK_SERIALIZE
-extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_methods;
-#endif
-#if APR_HAS_PROC_PTHREAD_SERIALIZE
-extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_proc_pthread_methods;
-#endif
-
 #if !APR_HAVE_UNION_SEMUN && defined(APR_HAS_SYSVSEM_SERIALIZE)
 union semun {
     int val;

@@ -143,7 +143,7 @@ static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods =
+static const apr_proc_mutex_unix_lock_methods_t mutex_posixsem_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(POSIXSEM_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
@@ -243,7 +243,7 @@ static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods =
+static const apr_proc_mutex_unix_lock_methods_t mutex_sysv_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(SYSVSEM_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
@@ -399,7 +399,7 @@ static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_proc_pthread_methods =
+static const apr_proc_mutex_unix_lock_methods_t mutex_proc_pthread_methods =
 {
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
     proc_mutex_proc_pthread_create,
@@ -511,7 +511,7 @@ static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods =
+static const apr_proc_mutex_unix_lock_methods_t mutex_fcntl_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(FCNTL_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
@@ -632,7 +632,7 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
     return APR_SUCCESS;
 }
 
-const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_methods =
+static const apr_proc_mutex_unix_lock_methods_t mutex_flock_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(FLOCK_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
@@ -666,50 +666,50 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lo
     switch (mech) {
     case APR_LOCK_FCNTL:
 #if APR_HAS_FCNTL_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_fcntl_methods;
+        new_mutex->inter_meth = &mutex_fcntl_methods;
 #else
         return APR_ENOTIMPL;
 #endif
         break;
     case APR_LOCK_FLOCK:
 #if APR_HAS_FLOCK_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_flock_methods;
+        new_mutex->inter_meth = &mutex_flock_methods;
 #else
         return APR_ENOTIMPL;
 #endif
         break;
     case APR_LOCK_SYSVSEM:
 #if APR_HAS_SYSVSEM_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_sysv_methods;
+        new_mutex->inter_meth = &mutex_sysv_methods;
 #else
         return APR_ENOTIMPL;
 #endif
         break;
     case APR_LOCK_POSIXSEM:
 #if APR_HAS_POSIXSEM_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_posix_methods;
+        new_mutex->inter_meth = &mutex_posixsem_methods;
 #else
         return APR_ENOTIMPL;
 #endif
         break;
     case APR_LOCK_PROC_PTHREAD:
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_proc_pthread_methods;
+        new_mutex->inter_meth = &mutex_proc_pthread_methods;
 #else
         return APR_ENOTIMPL;
 #endif
         break;
     case APR_LOCK_DEFAULT:
 #if APR_USE_FLOCK_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_flock_methods;
+        new_mutex->inter_meth = &mutex_flock_methods;
 #elif APR_USE_SYSVSEM_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_sysv_methods;
+        new_mutex->inter_meth = &mutex_sysv_methods;
 #elif APR_USE_FCNTL_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_fcntl_methods;
+        new_mutex->inter_meth = &mutex_fcntl_methods;
 #elif APR_USE_PROC_PTHREAD_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_proc_pthread_methods;
+        new_mutex->inter_meth = &mutex_proc_pthread_methods;
 #elif APR_USE_POSIXSEM_SERIALIZE
-        new_mutex->inter_meth = &apr_proc_mutex_unix_posix_methods;
+        new_mutex->inter_meth = &mutex_posixsem_methods;
 #else
         return APR_ENOTIMPL;
 #endif
