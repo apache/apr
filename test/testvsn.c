@@ -85,9 +85,3 @@ CuSuite *testvsn(void)
     return suite;
 }
 
-#ifdef SINGLE_PROG
-CuSuite *getsuite(void)
-{
-    return testvsn();
-}
-#endif

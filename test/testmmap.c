@@ -165,10 +165,3 @@ CuSuite *testmmap(void)
     return suite;
 }
 
-#ifdef SINGLE_PROG
-CuSuite *getsuite(void)
-{
-    return testmmap();
-}
-#endif
-

@@ -304,9 +304,3 @@ CuSuite *testtime(void)
     return suite;
 }
 
-#ifdef SINGLE_PROG
-CuSuite *getsuite(void)
-{
-    return testtime();
-}
-#endif
