@@ -173,6 +173,8 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
         else {
         }
 
+        FreeEnvironmentStringsW(sysstr);
+
         /* MSVCRT will attempt to maintain the wide environment calls
          * on _putenv(), which is bogus if we've passed a non-ascii
          * string to _putenv(), since they use MultiByteToWideChar
