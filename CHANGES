@@ -1,5 +1,5 @@
 Changes with APR b1  
-
+   
   *) Fix the API for the apr_proc_create() call on Win32.  Several
      bad assumptions are gone, including a mismatch between unix and
      win32, where win32 was defaulting to create detached.  Also fixes
@@ -14,6 +14,12 @@ Changes with APR b1
      others (and it mirrors some of the other apr_filepath_*() calls.)
      [William Rowe]
 
+  *) Add the new thread read/write lock API to APR.
+     [Aaron Bannert <aaron@clove.org>]
+
+  *) Add the new thread mutex lock API to APR.
+     [Aaron Bannert <aaron@clove.org>]
+  
   *) Cache GMT offset on platforms that don't store it in the tm struct.
      This offset is normalized to be independent of daylight savings
      time.  [Brian Pane <bpane@pacbell.net>]
