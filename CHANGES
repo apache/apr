@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fix a compile error in the EGD support in rand.c on older Solaris
+     versions.  PR 9976  [Jim Morris <jmorris@sunflower.com>]
+
   *) Fixed apr_file_seek() to unset the eof_hit flag.  [Stas Bekman]
 
   *) Removed --disable-atomics flag and added --enable-nonportable-atomics,
