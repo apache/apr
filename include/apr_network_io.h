@@ -126,7 +126,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t, ap_int32_t);
 ap_status_t ap_setport(ap_socket_t *, ap_uint32_t);
 ap_status_t ap_setipaddr(ap_socket_t *, const char *);
 ap_status_t ap_getport(ap_socket_t *, ap_uint32_t *);
-ap_status_t ap_getipaddr(ap_socket_t *, char **);
+ap_status_t ap_getipaddr(char *buf, ap_ssize_t len, const ap_socket_t *sock);
 
 ap_status_t ap_setup_poll(ap_context_t *, ap_int32_t, ap_pollfd_t **);
 ap_status_t ap_poll(ap_pollfd_t *, ap_int32_t *, ap_int32_t);

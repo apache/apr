@@ -196,15 +196,17 @@ ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_getipaddr(ap_socket_t *, char **addr)
+ * ap_status_t ap_getipaddr(char *addr, int len, const ap_socket_t *)
  *    Return the IP address associated with an apr socket.
- * arg 1) The socket to use 
- * arg 2) The IP address associated with the socket.
+ * arg 1) A buffer for the IP address associated with the socket.
+ * arg 2) The total length of the buffer (including terminating NUL)
+ * arg 3) The socket to use 
  */
-ap_status_t ap_getipaddr(struct socket_t *sock, char **addr)
+ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
+			 const struct socket_t *sock)
 {
     char *temp = inet_ntoa(sock->addr->sin_addr);
-    *addr=temp;
+    ap_cpystrn(addr,temp,len-1);
     return APR_SUCCESS;
 }
 
