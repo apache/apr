@@ -226,8 +226,8 @@ typedef  unsigned int      apr_uint32_t;
 typedef  __int64           apr_int64_t;
 typedef  unsigned __int64  apr_uint64_t;
 
-typedef  int         apr_size_t;
-typedef  int         apr_ssize_t;
+typedef  size_t      apr_size_t;
+typedef  ptrdiff_t   apr_ssize_t;
 typedef  _off_t      apr_off_t;
 typedef  size_t      apr_socklen_t;
 typedef  int         pid_t;
