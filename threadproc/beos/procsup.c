@@ -100,7 +100,7 @@ ap_status_t ap_detach(struct proc_t **new, ap_context_t *cont)
 ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
 {
     if (proc != NULL) {
-        return ap_get_userdata(&data, key, proc->cntxt);
+        return ap_get_userdata(data, key, proc->cntxt);
     }
     else {
         data = NULL;

@@ -89,4 +89,6 @@ int main()
     else {
         fprintf(stdout, "User data is not working\n");
     } 
+    
+    return 1;
 }

@@ -106,8 +106,15 @@
 #include "apr_network_io.h"
 #include "apr_file_io.h"
 #include "apr_time.h"
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 /* ------------------- DEFINITIONS -------------------------- */
 /* maximum number of requests on a time limited test */
@@ -856,7 +863,7 @@ static int parse_url(char *url)
 static int open_postfile(char *pfile)
 {
     ap_file_t *postfd = NULL;
-    ap_fileperms_t mode;
+    ap_fileperms_t mode = APR_OS_DEFAULT;
     ap_ssize_t length;
 
     if (ap_open(&postfd, pfile, APR_READ, mode, cntxt) != APR_SUCCESS) {

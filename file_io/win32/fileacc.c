@@ -180,10 +180,10 @@ ap_status_t ap_get_filetype(ap_filetype_e *type, struct file_t *file)
         return APR_ENOFILE;
     }
 }
-ap_status_t ap_get_filedata(void *data, char *key, struct file_t *file)
+ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
 {    
     if (file != NULL) {
-        return ap_get_userdata(&data, key, file->cntxt);
+        return ap_get_userdata(data, key, file->cntxt);
     }
     else {
         data = NULL;

@@ -95,7 +95,7 @@ ap_status_t ap_thread_detach(ap_thread_t *);
 ap_status_t ap_cancel_thread(ap_thread_t *);
 ap_status_t ap_setcanceltype(ap_int32_t, ap_context_t *);
 ap_status_t ap_setcancelstate(ap_int32_t, ap_context_t *);
-ap_status_t ap_get_threaddata(void *, char *, ap_thread_t *);
+ap_status_t ap_get_threaddata(void **, char *, ap_thread_t *);
 ap_status_t ap_set_threaddata(void *, char *,
                               ap_status_t (*cleanup) (void *), ap_thread_t *);
 
@@ -104,7 +104,7 @@ ap_status_t ap_create_thread_private(ap_key_t **, void (*dest)(void *),
 ap_status_t ap_get_thread_private(void **, ap_key_t *);
 ap_status_t ap_set_thread_private(void *, ap_key_t *);
 ap_status_t ap_delete_thread_private(ap_key_t *);
-ap_status_t ap_get_threadkeydata(void *, char *, ap_key_t *);
+ap_status_t ap_get_threadkeydata(void **, char *, ap_key_t *);
 ap_status_t ap_set_threadkeydata(void *, char *,
                                  ap_status_t (*cleanup) (void *), ap_key_t *);
 

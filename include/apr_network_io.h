@@ -115,7 +115,7 @@ ap_status_t ap_connect(ap_socket_t *, char *);
 
 ap_status_t ap_get_remote_hostname(char **, ap_socket_t *);
 ap_status_t ap_gethostname(char *, int, ap_context_t *);
-ap_status_t ap_get_socketdata(void *, char *, ap_socket_t *);
+ap_status_t ap_get_socketdata(void **, char *, ap_socket_t *);
 ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
                               ap_status_t (*cleanup) (void*));
 

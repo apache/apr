@@ -318,15 +318,15 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_socketdata(void *, char *, ap_socket_t *)
+ * ap_status_t ap_get_socketdata(void **, char *, ap_socket_t *)
  *    Return the context associated with the current socket.
  * arg 1) The currently open socket.
  * arg 2) The user data associated with the socket.
  */
-ap_status_t ap_get_socketdata(void *data, char *key, struct socket_t *sock)
+ap_status_t ap_get_socketdata(void **data, char *key, struct socket_t *sock)
 {
     if (socket != NULL) {
-        return ap_get_userdata(&data, key, sock->cntxt);
+        return ap_get_userdata(data, key, sock->cntxt);
     }
     else {
         data = NULL;

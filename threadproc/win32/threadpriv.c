@@ -91,10 +91,10 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
     return APR_EEXIST;
 }
 
-ap_status_t ap_get_threadkeydata(void *data, char *key, struct threadkey_t *threadkey)
+ap_status_t ap_get_threadkeydata(void **data, char *key, struct threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
-        return ap_get_userdata(&data, key, threadkey->cntxt);
+        return ap_get_userdata(data, key, threadkey->cntxt);
     }
     else {
         data = NULL;

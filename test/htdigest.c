@@ -75,6 +75,10 @@
 #include <signal.h>
 #endif
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #ifdef WIN32
 #include <conio.h>
 #endif

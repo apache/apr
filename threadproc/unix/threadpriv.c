@@ -131,15 +131,15 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threadkeydata(void *, char *, ap_threadkey_t *)
+ * ap_status_t ap_get_threadkeydata(void **, char *, ap_threadkey_t *)
  *    Return the context associated with the current threadkey.
  * arg 1) The currently open threadkey.
  * arg 2) The user data associated with the threadkey.
  */
-ap_status_t ap_get_threadkeydata(void *data, char *key, struct threadkey_t *threadkey)
+ap_status_t ap_get_threadkeydata(void **data, char *key, struct threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
-        return ap_get_userdata(&data, key, threadkey->cntxt);
+        return ap_get_userdata(data, key, threadkey->cntxt);
     }
     else {
         data = NULL;
@@ -234,7 +234,7 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
  * arg 1) The currently open threadkey.
  * arg 2) The user data associated with the threadkey.
  */
-ap_status_t ap_get_threadkeydata(void *data, char *key, struct threadkey_t *threadkey)
+ap_status_t ap_get_threadkeydata(void **data, char *key, struct threadkey_t *threadkey)
 {
     return APR_SUCCESS;
 }

@@ -210,7 +210,7 @@ ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *
 ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
-        return ap_get_userdata(&data, key, lock->cntxt);
+        return ap_get_userdata(data, key, lock->cntxt);
     }
     else {
         data = NULL;

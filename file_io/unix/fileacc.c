@@ -251,16 +251,16 @@ ap_status_t ap_get_filetype(ap_filetype_e *type, struct file_t *file)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filedata(void *, char *key, ap_file_t *)
+ * ap_status_t ap_get_filedata(void **, char *key, ap_file_t *)
  *    Return the data associated with the current file.
  * arg 1) The currently open file.
  * arg 2) The key to use for retreiving data associated with this file.
  * arg 3) The user data associated with the file.  
  */                     
-ap_status_t ap_get_filedata(void *data, char *key, struct file_t *file)
+ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
 {    
     if (file != NULL) {
-        return ap_get_userdata(&data, key, file->cntxt);
+        return ap_get_userdata(data, key, file->cntxt);
     }
     else {
         data = NULL;
