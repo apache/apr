@@ -112,6 +112,7 @@ int register_NLM(void *NLMHandle)
         if (app_data) {
             memset (app_data, 0, sizeof(APP_DATA));
             set_app_data(gLibId, app_data);
+            app_data->gs_nlmhandle = NLMHandle;
         }
     }
 
