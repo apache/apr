@@ -74,7 +74,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     image_id newid;
 
     if((newid = load_add_on(path)) < B_NO_ERROR)
-        return APR_EINIT;
+        return APR_EDSOOPEN;
 
     *res_handle = apr_pcalloc(pool, sizeof(*res_handle));
     (*res_handle)->handle = newid;
@@ -96,13 +96,13 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_hand
     int err;
 
     if (symname == NULL)
-        return APR_EINIT;
+        return APR_ESYMNOTFOUND;
 
     err = get_image_symbol(handle->handle, symname, B_SYMBOL_TYPE_ANY, 
 			 ressym);
 
     if(err != B_OK)
-        return APR_EINIT;
+        return APR_ESYMNOTFOUND;
 
     return APR_SUCCESS;
 }
