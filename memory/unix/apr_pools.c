@@ -897,19 +897,15 @@ static int pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
     if (parent == NULL)
         return 0;
 
-#if APR_HAS_THREADS
     if (parent->mutex && parent->mutex != mutex)
         apr_thread_mutex_lock(parent->mutex);
-#endif
 
     child = parent->child;
 
     while (child) {
         if (pool == child || pool_is_child_of(pool, child, parent->mutex)) {
-#if APR_HAS_THREADS
             if (parent->mutex && parent->mutex != mutex)
                 apr_thread_mutex_unlock(parent->mutex);
-#endif
 
             return 1;
         }
@@ -917,10 +913,8 @@ static int pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
         child = child->sibling;
     }
 
-#if APR_HAS_THREADS
     if (parent->mutex && parent->mutex != mutex)
         apr_thread_mutex_unlock(parent->mutex);
-#endif
 
     return 0;
 }
