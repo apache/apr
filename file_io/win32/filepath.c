@@ -254,9 +254,9 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
 /* WinNT accepts several odd forms of a 'root' path.  Under Unicode
  * calls (ApiFunctionW) the //?/C:/foo or //?/UNC/mach/share/foo forms
  * are accepted.  Ansi and Unicode functions both accept the //./C:/foo 
- * form.  Since these forms are handled in the utf-8 to unicode 
- * translation phase, we don't want the user confused by them, so we 
- * will accept them but always return the canonical C:/ or //mach/share/
+ * form under WinNT/2K.  Since these forms are handled in the utf-8 to 
+ * unicode translation phase, we don't want the user confused by them, so 
+ * we will accept them but always return the canonical C:/ or //mach/share/
  */
 
 APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
