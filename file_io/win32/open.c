@@ -209,6 +209,32 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
     }
 }
 
+ap_status_t ap_rename_file(const char *from_path, const char *to_path,
+                           ap_pool_t *p)
+{
+    const char *from_canon = canonical_filename(p, from_path);
+    const char *to_canon = canonical_filename(p, to_path);
+    DWORD err;
+
+    /* ### would be nice to use MoveFileEx() here, but it isn't available
+       ### on Win95/98. MoveFileEx could theoretically help prevent the
+       ### case where we delete the target but don't move the file(!).
+       ### it can also copy across devices...
+    */
+
+    if (MoveFile(from_canon, to_canon)) {
+        return APR_SUCCESS;
+    }
+    err = GetLastError();
+    if (err == ERROR_FILE_EXISTS || err == ERROR_ALREADY_EXISTS) {
+        (void) DeleteFile(to_canon);
+        if (MoveFile(from_canon, to_canon))
+            return APR_SUCCESS;
+        err = GetLastError();
+    }
+    return err;
+}
+
 ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 {
     if (file == NULL) {
