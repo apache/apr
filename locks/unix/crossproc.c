@@ -141,8 +141,10 @@ ap_status_t child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fnam
 void setup_lock() {
 }
 
-ap_status_t lock_cleanup(struct lock_t *lock)
+ap_status_t lock_cleanup(void *lock_)
 {
+    struct lock_t *lock=lock_;
+
     if (lock->curr_locked == 1) {
         if (pthread_mutex_unlock(lock->interproc)) {
             return errno;
@@ -168,7 +170,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
     new->interproc = (pthread_mutex_t *)mmap((caddr_t) 0, 
                               sizeof(pthread_mutex_t), 
                               PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); 
-    if (new->interproc = (void *) (caddr_t) -1) {
+    if (new->interproc = (pthread_mutex_t *) (caddr_t) -1) {
         return errno;
     }
     close(fd);
@@ -187,7 +189,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
         return stat;
     }
 
-    if ((stat = pthread_mutex_destroy(&mattr))) {
+    if ((stat = pthread_mutexattr_destroy(&mattr))) {
         lock_cleanup(new);
         return stat;
     }
@@ -200,7 +202,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
 ap_status_t lock_inter(struct lock_t *lock)
 {
     ap_status_t stat;
-    new->curr_locked = 1;
+    lock->curr_locked = 1;
     if (stat = pthread_mutex_lock(lock->interproc)) {
         return stat;
     }
@@ -212,9 +214,9 @@ ap_status_t unlock_inter(struct lock_t *lock)
     ap_status_t stat;
 
     if (stat = pthread_mutex_unlock(lock->interproc)) {
-        returno stat;
+        return stat;
     }
-    new->curr_locked = 0;
+    lock->curr_locked = 0;
     return APR_SUCCESS;
 }
 
@@ -317,8 +319,10 @@ ap_status_t child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fnam
 void setup_lock() {
 }
 
-ap_status_t lock_cleanup(struct lock_t *lock)
+ap_status_t lock_cleanup(void *lock_)
 {
+    struct lock_t *lock=lock_;
+
     if (lock->curr_locked == 1) {
         if (flock(lock->interproc, LOCK_UN) < 0) {
             return errno;

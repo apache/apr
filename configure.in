@@ -373,7 +373,7 @@ AC_IFALLYES(header:sys/file.h define:LOCK_EX,
 AC_IFALLYES(header:fcntl.h define:F_SETLK,
             AC_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
 AC_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
-            custom:use_pthread_cross,
+            custom:with_pthread_cross,
             AC_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
 dnl AC_DECISION_FORCE(USE_FCNTL_SERIALIZE)
 AC_END_DECISION
