@@ -64,10 +64,10 @@
 
 
 static int initialized = 0;
-static apr_pool_t *global_apr_pool;
 
 APR_DECLARE(apr_status_t) apr_initialize(void)
 {
+    apr_pool_t *pool;
     apr_status_t status;
 #if defined WIN32 || defined(NETWARE)
     int iVersionRequested;
@@ -82,21 +82,31 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_SUCCESS;
     }
 
-    if (apr_pool_create(&global_apr_pool, NULL) != APR_SUCCESS) {
+#if !defined(BEOS) && !defined(OS2) && !defined(WIN32) && !defined(NETWARE)
+    apr_unix_setup_lock();
+    apr_proc_mutex_unix_setup_lock();
+    apr_unix_setup_time();
+#endif
+
+#if defined(NETWARE)
+    apr_netware_setup_time();
+#endif
+
+    if ((status = apr_pool_initialize()) != APR_SUCCESS)
+        return status;
+    
+    if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
         return APR_ENOPOOL;
     }
 
 #ifdef WIN32
     /* Initialize apr_os_level global */
-    if (apr_get_oslevel(global_apr_pool, &osver) != APR_SUCCESS) {
+    if (apr_get_oslevel(pool, &osver) != APR_SUCCESS) {
         return APR_EEXIST;
     }
 #endif
-#if !defined(BEOS) && !defined(OS2) && !defined(WIN32) && !defined(NETWARE)
-    apr_unix_setup_lock();
-    apr_proc_mutex_unix_setup_lock();
-    apr_unix_setup_time();
-#elif defined WIN32 || defined(NETWARE)
+    
+#if defined WIN32 || defined(NETWARE)
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {
@@ -108,14 +118,8 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_EEXIST;
     }
 #endif
-#if defined(NETWARE)
-    apr_netware_setup_time();
-#endif
-
-    if ((status = apr_pool_alloc_init(global_apr_pool)) != APR_SUCCESS)
-        return status;
-
-    apr_signal_init(global_apr_pool);
+    
+    apr_signal_init(pool);
 
     return APR_SUCCESS;
 }
@@ -126,7 +130,8 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
     if (initialized) {
         return;
     }
-    apr_pool_alloc_term(global_apr_pool);
+    apr_pool_terminate();
+    
 #if defined(NETWARE)
     WSACleanup();
 #endif
