@@ -181,7 +181,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
                        thedir->entry->d_name, NULL);
     if (stat(fname, &filestat) == -1) {
         *size = -1;
-        return APR_ENOSTAT;
+        return errno;
     }
     
     *size = filestat.st_size;
@@ -205,7 +205,7 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
                        thedir->entry->d_name, NULL);
     if (stat(fname, &filestat) == -1) {
         *mtime = -1;
-        return APR_ENOSTAT;
+        return errno;
     }
     
     ap_ansi_time_to_ap_time(mtime, filestat.st_mtime);
@@ -229,7 +229,7 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
                        thedir->entry->d_name, NULL);
     if (stat(fname, &filestat) == -1) {
         *type = APR_REG;
-        return APR_ENOSTAT;
+        return errno;
     }
 
     if (S_ISREG(filestat.st_mode))
