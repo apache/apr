@@ -50,7 +50,7 @@ static apr_status_t proc_mutex_posix_cleanup(void *mutex_)
     apr_status_t stat = APR_SUCCESS;
     
     if (mutex->interproc->filedes != -1) {
-        if (sem_close((sem_t *)mutex->interproc->filedes) < 0) {
+        if (sem_close(mutex->psem_interproc) < 0) {
             stat = errno;
         }
     }
@@ -113,7 +113,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     }
     /* Ahhh. The joys of Posix sems. Predelete it... */
     sem_unlink((const char *) semname);
-    new_mutex->interproc->filedes = (int)psem;	/* Ugg */
+    new_mutex->psem_interproc = psem;
     new_mutex->fname = apr_pstrdup(new_mutex->pool, semname);
     apr_pool_cleanup_register(new_mutex->pool, (void *)new_mutex,
                               apr_proc_mutex_cleanup, 
@@ -125,7 +125,7 @@ static apr_status_t proc_mutex_posix_acquire(apr_proc_mutex_t *mutex)
 {
     int rc;
 
-    if ((rc = sem_wait((sem_t *)mutex->interproc->filedes)) < 0) {
+    if ((rc = sem_wait(mutex->psem_interproc)) < 0) {
         return errno;
     }
     mutex->curr_locked = 1;
@@ -137,7 +137,7 @@ static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
     int rc;
 
     mutex->curr_locked = 0;
-    if ((rc = sem_post((sem_t *)mutex->interproc->filedes)) < 0) {
+    if ((rc = sem_post(mutex->psem_interproc)) < 0) {
         return errno;
     }
     return APR_SUCCESS;
