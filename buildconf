@@ -4,5 +4,5 @@ autoconf;autoheader
 
 (cd shmem/unix/mm && autoconf)
 
-./helpers/make_export.pl -o ./apr.exports include/*.h
+perl ./helpers/make_export.pl -o ./apr.exports include/*.h
 
