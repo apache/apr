@@ -34,65 +34,65 @@ INCDIR=../include
 INCLUDES=-I$(INCDIR)
 
 
-testfile@EXEEXT@: testfile.lo
+testfile@EXEEXT@: testfile.lo ../libapr.la
 	$(LINK) testfile.lo $(ALL_LIBS)
 
-testflock@EXEEXT@: testflock.lo
+testflock@EXEEXT@: testflock.lo ../libapr.la
 	$(LINK) testflock.lo $(ALL_LIBS)
 
 ### why the export-dynamic?
-testdso@EXEEXT@: testdso.lo
+testdso@EXEEXT@: testdso.lo ../libapr.la
 	$(LINK) --export-dynamic testdso.lo $(ALL_LIBS)
 
-testoc@EXEEXT@: testoc.lo
+testoc@EXEEXT@: testoc.lo ../libapr.la
 	$(LINK) testoc.lo $(ALL_LIBS)
 
-occhild@EXEEXT@: occhild.lo
+occhild@EXEEXT@: occhild.lo ../libapr.la
 	$(LINK) occhild.lo $(ALL_LIBS)
 
-mod_test.so: mod_test.lo
-	$(LINK) --module mod_test.lo
+mod_test.so: mod_test.lo ../libapr.la
+	$(LINK) --module mod_test.lo $(ALL_LIBS)
 
-testargs@EXEEXT@: testargs.lo
+testargs@EXEEXT@: testargs.lo ../libapr.la
 	$(LINK) testargs.lo $(ALL_LIBS)
 
-testcontext@EXEEXT@: testcontext.lo
+testcontext@EXEEXT@: testcontext.lo ../libapr.la
 	$(LINK) testcontext.lo $(ALL_LIBS)
 
-testproc@EXEEXT@: testproc.lo
+testproc@EXEEXT@: testproc.lo ../libapr.la
 	$(LINK) testproc.lo $(ALL_LIBS)
 
-testthread@EXEEXT@: testthread.lo
+testthread@EXEEXT@: testthread.lo ../libapr.la
 	$(LINK) testthread.lo $(ALL_LIBS)
 
-testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@
+testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@ ../libapr.la
 	$(LINK) testsock.lo $(ALL_LIBS)
 
-client@EXEEXT@: client.lo
+client@EXEEXT@: client.lo ../libapr.la
 	$(LINK) client.lo $(ALL_LIBS)
 
-server@EXEEXT@: server.lo sendfile.lo
+server@EXEEXT@: server.lo sendfile.lo ../libapr.la
 	$(LINK) server.lo $(ALL_LIBS)
 
-sendfile@EXEEXT@: sendfile.lo
+sendfile@EXEEXT@: sendfile.lo ../libapr.la
 	$(LINK) sendfile.lo $(ALL_LIBS)
 
-testtime@EXEEXT@: testtime.lo
+testtime@EXEEXT@: testtime.lo ../libapr.la
 	$(LINK) testtime.lo $(ALL_LIBS)
 
-testmmap@EXEEXT@: testmmap.lo
+testmmap@EXEEXT@: testmmap.lo ../libapr.la
 	$(LINK) testmmap.lo $(ALL_LIBS)
 
-testshmem@EXEEXT@: testshmem.lo
+testshmem@EXEEXT@: testshmem.lo ../libapr.la
 	$(LINK) testshmem.lo $(ALL_LIBS)
 
-testpipe@EXEEXT@: testpipe.lo
+testpipe@EXEEXT@: testpipe.lo ../libapr.la
 	$(LINK) testpipe.lo $(ALL_LIBS)
 
-testuuid@EXEEXT@: testuuid.lo
+testuuid@EXEEXT@: testuuid.lo ../libapr.la
 	$(LINK) testuuid.lo $(ALL_LIBS)
 
-testsockopt@EXEEXT@: testsockopt.lo
+testsockopt@EXEEXT@: testsockopt.lo ../libapr.la
 	$(LINK) testsockopt.lo $(ALL_LIBS)
 
 # DO NOT REMOVE
