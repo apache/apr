@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/05/31 04:10:03 $]
+Last modified at [$Date: 2001/06/05 07:56:08 $]
 
 Release:
 
@@ -160,7 +160,27 @@ Stuff waiting for code thawing after Beta 1:
         usefulness, perhaps hidden, generic read-only [immutable],
         effective current user permissions, etc.
 
-    * APR memory code
-      - Look at how we'll handle run-time loading of memory sub systems.
-      - shared memory module?
-      - decide on where we're actually going with the code...
+APR Stackable Memory Code
+=========================
+
+This is just a small list of things yet to be done, or things
+that we may want/need to consider.
+
+- add a shared memory module.
+
+- locking needs to be addressed.  The scope of the locks needs
+  to be defined and it's likely we'll need some way of
+  varying the scope when locking.
+
+- given the problems that can occur when trying to find 
+  alloc/free problems we should probably have a special debug
+  memory system that records everything it does and any
+  other information we think is useful.
+
+- in addition to the debugging system, we need to look at
+  methods of checking memory allocations to ensure we're
+  behaving when we have the ASSERT_MEMORY flag turned on.
+  The pools in 1.3 had code from dean and Roy, Greg has added
+  some special stuff for pools under Linux on 2.0, so we just
+  need some ideas
+
