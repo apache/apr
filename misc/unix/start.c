@@ -56,6 +56,8 @@
 #include "locks.h"
 #include "apr_strings.h"
 
+static int initialized=0;
+
 apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
 {
     apr_pool_t *newpool;
@@ -138,13 +140,20 @@ apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
 apr_status_t apr_initialize(void)
 {
     apr_status_t status;
-#if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
-    apr_unix_setup_lock();
-#elif defined WIN32
+#if defined WIN32
     int iVersionRequested;
     WSADATA wsaData;
     int err;
+#endif
 
+    if (initialized) {
+        return APR_SUCCESS;
+    }
+    initialized++;
+
+#if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
+    apr_unix_setup_lock();
+#elif defined WIN32
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {
@@ -162,6 +171,10 @@ apr_status_t apr_initialize(void)
 
 void apr_terminate(void)
 {
+    initialized--;
+    if (initialized) {
+        return;
+    }
     apr_term_alloc();
 }
 
