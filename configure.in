@@ -162,7 +162,7 @@ case "$OS:$CC" in
 	APR_ADDTO(CFLAGS,-Kthread)
 	;;
 esac
-
+LOCAL_MM_LIB="../shmem/unix/mm/libmm.la"
 case "$OS" in
    i386-ibm-aix* | *-ibm-aix[1-2].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
        OSDIR="aix"
@@ -175,6 +175,7 @@ case "$OS" in
        APR_ADDTO(CFLAGS,-Zmt)
        OSDIR="os2"
        enable_threads="system_threads"
+       LOCAL_MM_LIB=""
        eolstr="\\r\\n"
        file_as_socket="0"
        ;;
@@ -185,7 +186,13 @@ case "$OS" in
        native_mmap_emul="1"
        APR_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
        eolstr="\\n"
-       file_as_socket="0"
+       osver=`uname -r`
+       if test "$osver"="5.0.4"; then
+           file_as_socket="1"
+       else
+           file_as_socket="0"
+       fi
+       LOCAL_MM_LIB=""
        ;;
    *os390)
        OSDIR="os390"
@@ -227,7 +234,6 @@ if test -z "$enable_threads"; then
 fi
 
 if test "$enable_threads" = "no"; then
-echo "Don't enable threads"
     threads="0"
     pthreadh="0"
     pthreadser="0"
@@ -1121,6 +1127,7 @@ AC_SUBST(OSDIR)
 AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
+AC_SUBST(LOCAL_MM_LIB)
 
 echo "${nl}Construct Makefiles and header files."
 MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile build/Makefile"
