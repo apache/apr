@@ -386,6 +386,18 @@ SOURCE=.\mmap\unix\common.c
 SOURCE=.\mmap\win32\mmap.c
 # End Source File
 # End Group
+# Begin Group "user"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\user\win32\userinfo.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\user\win32\groupinfo.c
+# End Source File
+# End Group
 # End Group
 # Begin Group "Generated Header Files"
 
