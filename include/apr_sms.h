@@ -161,20 +161,18 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *mem_sys, void *mem);
  */
 
 /**
- * Create a memory system (actually it initialized a memory system structure)
+ * Initialize a memory system
  * @caution Call this function as soon as you have obtained a block of memory
  *          to serve as a memory system structure from your 
  *          apr_xxx_sms_create. Only use this function when you are
  *          implementing a memory system.
- * @param memory The memory to turn into a memory system
- * @warning The memory passed in should be at least of size 
- *          sizeof(apr_sms_t)
+ * @param mem_sys The memory system created
  * @param parent_mem_sys The parent memory system
- * @return The freshly initialized memory system
- * @deffunc apr_sms_t *apr_sms_create(void *memory,
- *				   apr_sms_t *parent_mem_sys)
+ * @deffunc apr_status_t apr_sms_init(apr_sms_t *sms,
+ *				      apr_sms_t *parent_mem_sys)
  */
-APR_DECLARE(apr_sms_t *) apr_sms_create(void *memory, apr_sms_t *parent_mem_sys);
+APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys, 
+                                       apr_sms_t *parent_mem_sys);
 
 /**
  * Check if a memory system is obeying all rules. 

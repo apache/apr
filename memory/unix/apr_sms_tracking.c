@@ -173,7 +173,7 @@ static apr_status_t apr_sms_tracking_free(apr_sms_t *mem_sys,
                                           void *mem)
 {
     apr_track_node_t *node;
-
+    
     assert(mem_sys);
     assert(mem);
 
@@ -192,7 +192,7 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
     apr_status_t rv;
-    
+ 
     assert(mem_sys);
 
     tms = (apr_sms_tracking_t *)mem_sys;
@@ -233,21 +233,25 @@ static apr_status_t apr_sms_tracking_destroy(apr_sms_t *mem_sys)
 APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys, 
                                                   apr_sms_t *pms)
 {
-    apr_sms_t *new_mem_sys, *tmpms;
+    apr_sms_t *new_mem_sys;
     apr_sms_tracking_t *tms;
+    apr_status_t rv;
 
     assert(mem_sys);
     assert(pms);
     
     *mem_sys = NULL;
-    /* changed this to 2 stages to make easier to follow...
-     * should we be using apr_sms_calloc now we have it? 
+    /* We're not a top level module, ie we have a parent, so
+     * we allocate the memory for the structure from our parent.
+     * This is safe as we shouldn't outlive our parent...
      */
-    tmpms = apr_sms_malloc(pms, sizeof(apr_sms_tracking_t));
-    new_mem_sys = apr_sms_create(tmpms, pms);
+    new_mem_sys = apr_sms_calloc(pms, sizeof(apr_sms_tracking_t));
 
     if (!new_mem_sys)
         return APR_ENOMEM;
+
+    if ((rv = apr_sms_init(new_mem_sys, pms)) != APR_SUCCESS)
+        return rv;
 
     new_mem_sys->malloc_fn  = apr_sms_tracking_malloc;
     new_mem_sys->calloc_fn  = apr_sms_tracking_calloc;
@@ -265,3 +269,4 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys,
     *mem_sys = new_mem_sys;
     return APR_SUCCESS;
 }
+
