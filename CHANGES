@@ -1,5 +1,11 @@
 Changes with APR 0.9.4
 
+  *) Don't require the lock file name to be passed into 
+     apr_proc_mutex_child_init() or apr_global_mutex_child_init().
+     This allows child init to work when the lock file was a temp
+     file created by APR.  (The problem only occurred with flock-
+     based mutexes.)  [Jeff Trawick]
+
   *) When using a temporary file for flock- and fcntl-based mutexes, 
      don't let the file be deleted on close.  For flock-based mutexes,
      this corrects a fatal problem, since the file would disappear 
