@@ -482,6 +482,7 @@ APR_FLAG_HEADERS(
     io.h		\
     langinfo.h		\
     limits.h		\
+    mach-o/dyld.h	\
     malloc.h		\
     memory.h		\
     netdb.h		\
