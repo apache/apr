@@ -81,9 +81,6 @@ static void test_open_noreadwrite(CuTest *tc)
     CuAssertTrue(tc, rv != APR_SUCCESS);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
     CuAssertPtrEquals(tc, NULL, thefile); 
-    if (thefile) {
-        apr_file_close(thefile);
-    }
 }
 
 static void test_open_dir_read(CuTest *tc)
@@ -97,9 +94,6 @@ static void test_open_dir_read(CuTest *tc)
     CuAssertTrue(tc, rv != APR_SUCCESS);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
     CuAssertPtrEquals(tc, NULL, thedir);
-    if (thedir) {
-        apr_file_close(thedir);
-    }
 }
 
 static void test_open_excl(CuTest *tc)
@@ -113,9 +107,6 @@ static void test_open_excl(CuTest *tc)
     CuAssertTrue(tc, rv != APR_SUCCESS);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EEXIST(rv));
     CuAssertPtrEquals(tc, NULL, thefile); 
-    if (thefile) {
-        apr_file_close(thefile);
-    }
 }
 
 static void test_open_read(CuTest *tc)
@@ -209,9 +200,7 @@ static void test_open_write(CuTest *tc)
                        APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
-    if (filetest) {
-        apr_file_close(filetest);
-    }
+    CuAssertPtrEquals(tc, NULL, filetest);
 }
 
 static void test_open_writecreate(CuTest *tc)
