@@ -120,6 +120,12 @@ case "$OS:$CC" in
 esac
 
 case "$OS" in
+   i386-ibm-aix* | *-ibm-aix[1-2].* | *-ibm-aix3.* | *-ibm-aix4.1 | *-ibm-aix4.1.* | *-ibm-aix4.2 | *-ibm-aix4.2.*)
+       OSDIR="aix"
+       config_subdirs="shmem/unix/mm"
+       USE_MM=yes
+       eolstr="\\n"
+       ;;
    *-os2*)
        CFLAGS="$CFLAGS -DOS2 -Zmt"
        OSDIR="os2"
