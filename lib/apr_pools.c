@@ -493,9 +493,6 @@ APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int 
 	}
 	p->sub_pools = new_pool;
     }
-    else {
-        permanent_pool = new_pool;
-    }
 
 #if APR_HAS_THREADS
     if (alloc_mutex) {
@@ -691,6 +688,7 @@ apr_status_t apr_init_alloc(apr_pool_t *globalp)
         return status;
     }
 #endif
+    permanent_pool = apr_make_sub_pool(pglobal);
 
 #ifdef ALLOC_STATS
     atexit(dump_stats);
