@@ -18,18 +18,22 @@
 #include "apr_fnmatch.h"
 #include "apr_tables.h"
 
+/* XXX NUM_FILES must be equal to the nummber of expected files with a
+ * .txt extension in the data directory at the time testfnmatch
+ * happens to be run (!?!). */
+
+#define NUM_FILES (3)
+
 static void test_glob(abts_case *tc, void *data)
 {
     int i;
     char **list;
     apr_array_header_t *result;
-    apr_status_t rv = apr_match_glob("data\\*.txt", &result, p);
+    
+    APR_ASSERT_SUCCESS(tc, "glob match against data/*.txt",
+                       apr_match_glob("data\\*.txt", &result, p));
 
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    /* XXX If we ever add a file that matches *.txt to data, then we need
-     * to increase this.
-     */
-    ABTS_INT_EQUAL(tc, 2, result->nelts);
+    ABTS_INT_EQUAL(tc, NUM_FILES, result->nelts);
 
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
@@ -43,15 +47,13 @@ static void test_glob_currdir(abts_case *tc, void *data)
     int i;
     char **list;
     apr_array_header_t *result;
-    apr_status_t rv;
     apr_filepath_set("data", p);
-    rv = apr_match_glob("*.txt", &result, p);
+    
+    APR_ASSERT_SUCCESS(tc, "glob match against *.txt with data as current",
+                       apr_match_glob("*.txt", &result, p));
 
-    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
-    /* XXX If we ever add a file that matches *.txt to data, then we need
-     * to increase this.
-     */
-    ABTS_INT_EQUAL(tc, 2, result->nelts);
+
+    ABTS_INT_EQUAL(tc, NUM_FILES, result->nelts);
 
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
