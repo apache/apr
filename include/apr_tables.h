@@ -111,7 +111,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
                                                  int nelts, int elt_size);
 
 /**
- * Add a new element to an array
+ * Add a new element to an array (as a first-in, last-out stack)
  * @param arr The array to add an element to.
  * @return Location for the new element in the array.
  * @remark If there are no free spots in the array, then this function will
@@ -120,7 +120,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
 APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr);
 
 /**
- * Remove an element from an array
+ * Remove an element from an array (as a first-in, last-out stack)
  * @param arr The array to remove an element from.
  * @return Location of the element in the array.
  * @remark If there are no elements in the array, NULL is returned.
