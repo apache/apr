@@ -103,7 +103,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     ap_ssize_t rv;
     ap_ssize_t bytes_read;
 
-    if(*nbytes <= 0) {
+    if (*nbytes <= 0) {
         *nbytes = 0;
 	return APR_SUCCESS;
     }
@@ -136,7 +136,8 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
                 thefile->bufpos = 0;
             }
 
-            blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;                                                            memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
+            blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;
+            memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
             thefile->bufpos += blocksize;
             pos += blocksize;
             size -= blocksize;
@@ -156,10 +157,10 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             buf = (char *)buf + 1;
             (*nbytes)--;
             thefile->ungetchar = -1;
-	if     (*nbytes == 0) {
+            if (*nbytes == 0) {
 	        *nbytes = bytes_read;
 	        return APR_SUCCESS;
-	}
+            }
         }
 
         do {
@@ -183,11 +184,11 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 #endif
         *nbytes = bytes_read;
         if (rv == 0) {
-	return     APR_EOF;
+            return APR_EOF;
         }
         if (rv > 0) {
-	*nbytes     += rv;
-	return     APR_SUCCESS;
+            *nbytes += rv;
+            return APR_SUCCESS;
         }
         return errno;
     }
@@ -224,7 +225,8 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
                         APR_FILE_BUFSIZE - thefile->bufpos : size;
-            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);                      thefile->bufpos += blocksize;
+            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);                      
+            thefile->bufpos += blocksize;
             pos += blocksize;
             size -= blocksize;
         }
@@ -357,37 +359,44 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
     ssize_t rv;
     int i, used_unget = FALSE, beg_idx;
 
-    if(len <= 1)  /* as per fgets() */
+    if (len <= 1) {  /* as per fgets() */
         return APR_SUCCESS;
+    }
 
-    if(thefile->ungetchar != -1){
+    if (thefile->ungetchar != -1) {
         str[0] = thefile->ungetchar;
 	used_unget = TRUE;
 	beg_idx = 1;
-	if(str[0] == '\n' || str[0] == '\r'){
+	if (str[0] == '\n' || str[0] == '\r') {
 	    thefile->ungetchar = -1;
 	    str[1] = '\0';
 	    return APR_SUCCESS;
 	}
-    } else
+    } 
+    else {
         beg_idx = 0;
+    }
     
     for (i = beg_idx; i < len; i++) {
         rv = read(thefile->filedes, &str[i], 1); 
         if (rv == 0) {
             thefile->eof_hit = TRUE;
-	    if(used_unget) thefile->filedes = -1;
+	    if (used_unget) {
+                thefile->filedes = -1;
+            }
 	    str[i] = '\0';
             return APR_EOF;
         }
         else if (rv != 1) {
             return errno;
         }
-        if (str[i] == '\n' || str[i] == '\r')
+        if (str[i] == '\n' || str[i] == '\r') {
             break;
+        }
     }
-    if (i < len-1)
+    if (i < len-1) {
         str[i+1] = '\0';
+    }
     return APR_SUCCESS; 
 }
 
