@@ -73,7 +73,7 @@ static void maybe_arg(const char *arg)
     }
 }
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }

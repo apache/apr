@@ -11,7 +11,7 @@
 
 #define LIB_NAME "mod_test.so"
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }

@@ -68,7 +68,7 @@ static apr_status_t string_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }

@@ -69,7 +69,7 @@
 int test_filedel(void);
 int testdirs(void);
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }

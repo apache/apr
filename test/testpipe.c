@@ -62,7 +62,7 @@
 #include <unistd.h>
 #endif
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }
