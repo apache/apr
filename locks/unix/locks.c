@@ -243,7 +243,7 @@ APR_DECLARE(apr_status_t) apr_lock_create_np(apr_lock_t **lock, apr_locktype_e t
     new->type  = type;
     new->scope = scope;
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    new->interproc = -1;
+    new->interproc = NULL;
 #endif
 
     if ((stat = create_lock(new, mech, fname)) != APR_SUCCESS)
@@ -370,7 +370,7 @@ APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, void *data, const 
 APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    oslock->crossproc = lock->interproc;
+    oslock->crossproc = lock->interproc->filedes;
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     oslock->pthread_interproc = lock->pthread_interproc;
@@ -395,7 +395,7 @@ APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thel
         (*lock)->pool = pool;
     }
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    (*lock)->interproc = thelock->crossproc;
+    apr_os_file_put(&(*lock)->interproc, &thelock->crossproc, pool);
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     (*lock)->pthread_interproc = thelock->pthread_interproc;

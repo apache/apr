@@ -31,6 +31,9 @@
  * SUCH DAMAGE.
  */
 
+#include "apr_private.h"
+#include "apr_file_io.h" /* prototype of apr_mkstemp() */
+#include "apr_strings.h" /* prototype of apr_mkstemp() */
 #include "fileio.h" /* prototype of apr_mkstemp() */
 
 #ifndef HAVE_MKSTEMP
@@ -49,13 +52,6 @@
 #endif
 #define _open(a,b,c) open(a,b,c)
 
-#if defined(LIBC_SCCS) && !defined(lint)
-#if 0
-static char sccsid[] = "@(#)mktemp.c	8.1 (Berkeley) 6/4/93";
-#endif
-static const char rcsid[] =
-  "$FreeBSD: src/lib/libc/stdio/mktemp.c,v 1.19.2.1 2001/01/20 09:35:24 kris Exp $";
-#endif /* LIBC_SCCS and not lint */
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -66,70 +62,11 @@ static const char rcsid[] =
 #include <string.h>
 #include <ctype.h>
 
-#ifdef  SVR4
-/* arrange to compile it on my machine */
-char *_mktemp(char *);
-#else
-char *_mktemp __P((char *));
-static int _gettemp (char *, int *, int, int);
-#endif
-
-
 static const unsigned char padchar[] =
 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 static uint32_t randseed=0;
 
-#ifdef APR_STARTS_USING_IT
-int
-mkstemps(path, slen)
-	char *path;
-	int slen;
-{
-	int fd;
-
-	return (_gettemp(path, &fd, 0, slen) ? fd : -1);
-}
-#endif /* APR_STARTS_USING_IT */
-
-int apr_mkstemp(char *path)
-{
-	int fd;
-
-	return (_gettemp(path, &fd, 0, 0) ? fd : -1);
-}
-
-#ifdef APR_STARTS_USING_IT
-char *
-mkdtemp(path)
-	char *path;
-{
-	return(_gettemp(path, (int *)NULL, 1, 0) ? path : (char *)NULL);
-}
-
-char *
-_mktemp(path)
-	char *path;
-{
-	return(_gettemp(path, (int *)NULL, 0, 0) ? path : (char *)NULL);
-}
-
-__warn_references(mktemp,
-    "warning: mktemp() possibly used unsafely; consider using mkstemp()");
-
-char *
-mktemp(path)
-	char *path;
-{
-	return(_mktemp(path));
-}
-#endif /* APR_STARTS_USING_IT */
-
-static int
-_gettemp(path, doopen, domkdir, slen)
-	char *path;
-	register int *doopen;
-	int domkdir;
-	int slen;
+static int gettemp(char *path, register int *doopen, int domkdir, int slen)
 {
 	register char *start, *trv, *suffp;
 	char *pad;
@@ -226,9 +163,36 @@ _gettemp(path, doopen, domkdir, slen)
 #include <unistd.h> /* for mkstemp() - FreeBSD */
 #endif
 
-int apr_mkstemp(char *template)
+apr_status_t apr_file_mktemp(apr_file_t **fp, char *template, apr_pool_t *p)
 {
-    return mkstemp(template);
+    int fd;
+#ifndef HAVE_MKSTEMP
+    int rv;
+#endif
+
+    (*fp) = apr_pcalloc(p, sizeof(**fp));
+    (*fp)->cntxt = p;
+    (*fp)->timeout = -1;
+    (*fp)->blocking = BLK_ON;
+    (*fp)->flags = APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE;
+
+#ifndef HAVE_MKSTEMP
+    rv = gettemp(path, &fd, 0, 0);
+    if (rv == 0) {
+        return errno;
+    }
+#else
+    fd = mkstemp(template);
+    if (fd == -1) {
+        return errno;
+    }
+#endif
+    (*fp)->fname = apr_pstrdup(p, template);
+    (*fp)->filedes = fd;
+    unlink((*fp)->fname);
+    apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
+                              apr_unix_file_cleanup, apr_unix_file_cleanup);
+    return APR_SUCCESS;
 }
 
 #endif /* !defined(HAVE_MKSTEMP) */
