@@ -84,6 +84,7 @@ static apr_status_t check_basic_atomics32(void)
 {
     apr_uint32_t oldval;
     apr_uint32_t casval = 0;
+    apr_uint32_t minus1 = -1;
 
     apr_atomic_set32(&y32, 2);
     printf("%-60s", "testing apr_atomic_dec32");
@@ -178,6 +179,30 @@ static apr_status_t check_basic_atomics32(void)
         return APR_EGENERAL;
     }
     fprintf(stdout, "OK\n");
+
+    printf("%-60s", "testing wrapping around zero");
+
+    apr_atomic_set32(&y32, 0);
+    if (apr_atomic_dec32(&y32) == 0) {
+        fprintf(stderr, "apr_atomic_dec32 on zero returned zero.\n");
+        return APR_EGENERAL;
+    }
+    if (apr_atomic_read32(&y32) != minus1) {
+        fprintf(stderr, "zero wrap failed: 0 - 1 = %d\n",
+                apr_atomic_read32(&y32));
+        return APR_EGENERAL;
+    }
+
+    if (apr_atomic_inc32(&y32) != minus1) {
+        fprintf(stderr, "apr_atomic_inc32 on -1 returned bad value.\n");
+        return APR_EGENERAL;
+    }
+    if (apr_atomic_read32(&y32) != 0) {
+        fprintf(stderr, "zero wrap failed: -1 + 1 = %u\n", 
+                apr_atomic_read32(&y32));
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
 
     return APR_SUCCESS;
 }
