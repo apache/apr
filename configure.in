@@ -336,7 +336,11 @@ if test "$ac_cv_sizeof_long_double" = "8"; then
     long_value="long double"
 fi
 if test "$ac_cv_sizeof_long_long" = "8"; then
-    long_value="long long"
+    if test "$ac_cv_sizeof_long_long" = "$ac_cv_sizeof_long"; then
+        long_value="long"
+    else
+        long_value="long long"
+    fi
 fi
 if test "$ac_cv_sizeof_longlong" = "8"; then
     long_value="__int64"
