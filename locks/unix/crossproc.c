@@ -59,7 +59,8 @@
 static struct sembuf op_on;
 static struct sembuf op_off;
 
-void setup_lock() {
+void ap_unix_setup_lock(void)
+{
     op_on.sem_num = 0;
     op_on.sem_op = -1;
     op_on.sem_flg = SEM_UNDO;
@@ -68,7 +69,7 @@ void setup_lock() {
     op_off.sem_flg = SEM_UNDO;
 }
 
-ap_status_t lock_cleanup(void *lock_)
+static ap_status_t lock_cleanup(void *lock_)
 {
     ap_lock_t *lock=lock_;
     union semun ick;
@@ -80,7 +81,7 @@ ap_status_t lock_cleanup(void *lock_)
     return APR_SUCCESS;
 }    
 
-ap_status_t create_inter_lock(ap_lock_t *new)
+ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 {
     union semun ick;
     
@@ -100,7 +101,7 @@ ap_status_t create_inter_lock(ap_lock_t *new)
     return APR_SUCCESS;
 }
 
-ap_status_t lock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
     lock->curr_locked = 1;
     if (semop(lock->interproc, &op_on, 1) < 0) {
@@ -109,7 +110,7 @@ ap_status_t lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t unlock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
     if (semop(lock->interproc, &op_off, 1) < 0) {
         return errno;
@@ -118,7 +119,7 @@ ap_status_t unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t destroy_inter_lock(ap_lock_t *lock)
+ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
 
@@ -129,7 +130,7 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_context_t *cont,
                             const char *fname)
 {
     return APR_SUCCESS;
@@ -137,10 +138,11 @@ ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
 
 #elif defined (USE_PROC_PTHREAD_SERIALIZE)  
 
-void setup_lock() {
+void ap_unix_setup_lock(void)
+{
 }
 
-ap_status_t lock_cleanup(void *lock_)
+static ap_status_t lock_cleanup(void *lock_)
 {
     ap_lock_t *lock=lock_;
 
@@ -155,7 +157,7 @@ ap_status_t lock_cleanup(void *lock_)
     return APR_SUCCESS;
 }    
 
-ap_status_t create_inter_lock(ap_lock_t *new)
+ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 {
     ap_status_t stat;
     int fd;
@@ -198,7 +200,7 @@ ap_status_t create_inter_lock(ap_lock_t *new)
     return APR_SUCCESS;
 }
 
-ap_status_t lock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
     ap_status_t stat;
     lock->curr_locked = 1;
@@ -208,7 +210,7 @@ ap_status_t lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t unlock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
     ap_status_t stat;
 
@@ -219,7 +221,7 @@ ap_status_t unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t destroy_inter_lock(ap_lock_t *lock)
+ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
@@ -229,7 +231,7 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_context_t *cont,
                             const char *fname)
 {
     return APR_SUCCESS;
@@ -240,7 +242,8 @@ ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
 static struct flock lock_it;
 static struct flock unlock_it;
 
-void setup_lock() {
+void ap_unix_setup_lock(void)
+{
     lock_it.l_whence = SEEK_SET;        /* from current point */
     lock_it.l_start = 0;                /* -"- */
     lock_it.l_len = 0;                  /* until end of file */
@@ -266,7 +269,7 @@ static ap_status_t lock_cleanup(void *lock_)
     return APR_SUCCESS;
 }    
 
-ap_status_t create_inter_lock(ap_lock_t *new)
+ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 {
     new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
 
@@ -281,7 +284,7 @@ ap_status_t create_inter_lock(ap_lock_t *new)
     return APR_SUCCESS; 
 }
 
-ap_status_t lock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
     lock->curr_locked=1;
     if (fcntl(lock->interproc, F_SETLKW, &lock_it) < 0) {
@@ -290,7 +293,7 @@ ap_status_t lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t unlock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
     if (fcntl(lock->interproc, F_SETLKW, &unlock_it) < 0) {
         return errno;
@@ -299,7 +302,7 @@ ap_status_t unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t destroy_inter_lock(ap_lock_t *lock)
+ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
@@ -309,7 +312,7 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_context_t *cont,
                             const char *fname)
 {
     return APR_SUCCESS;
@@ -317,10 +320,11 @@ ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
 
 #elif defined (USE_FLOCK_SERIALIZE)
 
-void setup_lock() {
+void ap_unix_setup_lock(void)
+{
 }
 
-ap_status_t lock_cleanup(void *lock_)
+static ap_status_t lock_cleanup(void *lock_)
 {
     ap_lock_t *lock=lock_;
 
@@ -334,7 +338,7 @@ ap_status_t lock_cleanup(void *lock_)
     return APR_SUCCESS;
 }    
 
-ap_status_t create_inter_lock(ap_lock_t *new)
+ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 {
     new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
 
@@ -347,7 +351,7 @@ ap_status_t create_inter_lock(ap_lock_t *new)
     return APR_SUCCESS;
 }
 
-ap_status_t lock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
     lock->curr_locked = 1;
     if (flock(lock->interproc, LOCK_EX) < 0) {
@@ -356,7 +360,7 @@ ap_status_t lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t unlock_inter(ap_lock_t *lock)
+ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
     if (flock(lock->interproc, LOCK_UN) < 0) {
         return errno;
@@ -365,7 +369,7 @@ ap_status_t unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t destroy_inter_lock(ap_lock_t *lock)
+ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
@@ -375,7 +379,7 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_context_t *cont,
                             const char *fname)
 {
     ap_lock_t *new;

@@ -138,19 +138,19 @@ struct ap_lock_t {
 };
 
 #if APR_HAS_THREADS
-ap_status_t create_intra_lock(struct ap_lock_t *new);
-ap_status_t lock_intra(struct ap_lock_t *lock);
-ap_status_t unlock_intra(struct ap_lock_t *lock);
-ap_status_t destroy_intra_lock(struct ap_lock_t *lock);
+ap_status_t ap_unix_create_intra_lock(struct ap_lock_t *new);
+ap_status_t ap_unix_lock_intra(struct ap_lock_t *lock);
+ap_status_t ap_unix_unlock_intra(struct ap_lock_t *lock);
+ap_status_t ap_unix_destroy_intra_lock(struct ap_lock_t *lock);
 #endif
 
-void setup_lock();
-ap_status_t create_inter_lock(struct ap_lock_t *new);
-ap_status_t lock_inter(struct ap_lock_t *lock);
-ap_status_t unlock_inter(struct ap_lock_t *lock);
-ap_status_t destroy_inter_lock(struct ap_lock_t *lock);
+void ap_unix_setup_lock(void);
+ap_status_t ap_unix_create_inter_lock(struct ap_lock_t *new);
+ap_status_t ap_unix_lock_inter(struct ap_lock_t *lock);
+ap_status_t ap_unix_unlock_inter(struct ap_lock_t *lock);
+ap_status_t ap_unix_destroy_inter_lock(struct ap_lock_t *lock);
 
-ap_status_t child_init_lock(struct ap_lock_t **lock, ap_context_t *cont, 
+ap_status_t ap_unix_child_init_lock(struct ap_lock_t **lock, ap_context_t *cont, 
                             const char *fname);
 
 #endif  /* LOCKS_H */
