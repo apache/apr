@@ -218,10 +218,10 @@ static void test_buffered_write_size(CuTest *tc)
     apr_size_t bytes;
 
     rv = apr_file_open(&thefile, NEWFILENAME,
-                       APR_READ | APR_WRITE | APR_CREATE | APR_EXCL
+                       APR_READ | APR_WRITE | APR_CREATE | APR_TRUNCATE
                        | APR_BUFFERED | APR_DELONCLOSE,
                        APR_OS_DEFAULT, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "open file", rv);
 
     /* A funny thing happened to me the other day: I wrote something
      * into a buffered file, then asked for its size using
@@ -230,11 +230,11 @@ static void test_buffered_write_size(CuTest *tc)
      */
     bytes = data_len;
     rv = apr_file_write(thefile, NEWFILEDATA, &bytes);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "write file contents", rv);
     CuAssertTrue(tc, data_len == bytes);
 
     rv = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "get file size", rv);
     CuAssertTrue(tc, bytes == (apr_size_t) finfo.size);
     apr_file_close(thefile);
 }
