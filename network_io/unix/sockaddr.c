@@ -431,7 +431,9 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         apr_sockaddr_vars_set(new_sa, ai->ai_family, port);
 
         if (!prev_sa) { /* first element in new list */
-            new_sa->hostname = apr_pstrdup(p, hostname);
+            if (hostname) {
+                new_sa->hostname = apr_pstrdup(p, hostname);
+            }
             *sa = new_sa;
         }
         else {
@@ -501,6 +503,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
     struct hostent hs;
     struct in_addr ipaddr;
     char *addr_list[2];
+    const char *orig_hostname = hostname;
 
     if (hostname == NULL) {
         /* if we are given a NULL hostname, assume '0.0.0.0' */
@@ -560,7 +563,9 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
         apr_sockaddr_vars_set(new_sa, AF_INET, port);
 
         if (!prev_sa) { /* first element in new list */
-            new_sa->hostname = apr_pstrdup(p, hostname);
+            if (orig_hostname) {
+                new_sa->hostname = apr_pstrdup(p, orig_hostname);
+            }
             *sa = new_sa;
         }
         else {
