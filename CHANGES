@@ -1,4 +1,8 @@
 Changes with APR a9
+  *) Allow the APR programmer to specify if the MMAP is read-only or
+     write-able.
+     [Ryan Bloom and Will Rowe]
+
   *) Check more carefully for getaddrinfo().  Accept those that
      require <netdb.h> to be included (e.g., Tru64).  Reject those that 
      fail a very basic operational test (e.g., AIX).  [Jeff Trawick]

@@ -52,6 +52,7 @@
  * <http://www.apache.org/>.
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -116,7 +117,7 @@ int main(void)
     }  
     
     fprintf(stdout,"Trying to mmap the file.............");
-    if (apr_mmap_create(&themmap, thefile, 0, finfo.size, context) != APR_SUCCESS) {
+    if (apr_mmap_create(&themmap, thefile, 0, finfo.size, APR_MMAP_READ, context) != APR_SUCCESS) {
         fprintf(stderr,"Failed!\n");
         exit(-1);
     }
