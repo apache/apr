@@ -67,11 +67,11 @@
 #ifdef NETWARE
 #define LIB_NAME "mod_test.nlm"
 #else
- #ifndef BEOS
- #define LIB_NAME ".libs/mod_test.so"
- #else
- #define LIB_NAME "mod_test.so"
- #endif
+# ifndef BEOS
+#  define LIB_NAME ".libs/mod_test.so"
+# else
+#  define LIB_NAME "mod_test.so"
+# endif
 #endif
 
 int main (int argc, char ** argv)

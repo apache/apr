@@ -107,13 +107,13 @@
 #endif
 
 #if BEOS_BONE
- #ifndef BONE7
+# ifndef BONE7
   /* prior to BONE/7 fd_set & select were defined in sys/socket.h */
-  #include <sys/socket.h>
- #else
+#  include <sys/socket.h>
+# else
   /* Be moved the fd_set stuff and also the FIONBIO definition... */
-  #include <sys/ioctl.h>
- #endif
+#  include <sys/ioctl.h>
+# endif
 #endif
 /* End System headers */
 
