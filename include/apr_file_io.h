@@ -127,7 +127,7 @@ struct ap_finfo_t {
 /*   Function definitions */
 /*
 
-=head1 ap_status_t ap_open(ap_file_t **new, char *fname, ap_int32 flag, ap_fileperms perm, ap_pool_t *cont)
+=head1 ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag, ap_fileperms_t perm, ap_pool_t *cont)
 
 B<Open the specified file.>
 
@@ -278,7 +278,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
 
 /*
 
-=head1 ap_status_t ap_writev(ap_file_t *thefile, struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes)
+=head1 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes)
 
 B<Write data from iovec array to the specified file.>
 
@@ -413,7 +413,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
 
 /*
 
-=head1 ap_status_t ap_stat(ap_finfo_t **finfo, char *fname, ap_pool_t *cont)
+=head1 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
 
 B<get the specified file's stats.  The file is specified by filename, instead of using a pre-opened file.>
 
@@ -427,7 +427,7 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
 
 /*
 
-=head1 ap_status_t ap_lstat(ap_finfo_t **finfo, char *fname, ap_pool_t *cont)
+=head1 ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
 
 B<get the specified file's stats.  The file is specified by filename, instead of using a pre-opened file.  If the file is a symlink, this function will get the stats for the symlink not the file the symlink refers to.>
 
@@ -461,7 +461,7 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where,ap_off_t *offset);
 
 /*
 
-=head1 ap_status_t ap_opendir(ap_dir_t **new, char *dirname, ap_pool_t *cont)
+=head1 ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
 
 B<Open the specified directory.>
 
@@ -570,12 +570,12 @@ ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm,
 
 /*
 
-=head1 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
+=head1 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 
 B<Set the timeout value for a pipe.>
 
     arg 1) The pipe we are setting a timeout on.
-    arg 2) The timeout value in seconds.  Values < 0 mean wait forever, 0
+    arg 2) The timeout value in microseconds.  Values < 0 mean wait forever, 0
            means do not wait at all.
 
 =cut
@@ -638,7 +638,7 @@ ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file);
 
 /*
 
-=head1 ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key, ap_status (*cleanup) (void *))
+=head1 ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key, ap_status_t (*cleanup) (void *))
 
 B<Set the data associated with the current file.>
 
