@@ -6,6 +6,7 @@ config.status
 configure
 libtool
 apr-config
+apr-*-config
 apr-config.out
 LibD
 LibR

@@ -44,7 +44,7 @@ CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.c .make.dirs \
 	build/apr_rules.out
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
-	libtool apr-config build/apr_rules.mk apr.pc
+	libtool $(APR_CONFIG) build/apr_rules.mk apr.pc
 EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in \
 	build-outputs.mk build/ltcf-c.sh build/ltmain.sh build/libtool.m4
 
@@ -56,8 +56,8 @@ includedir=@includedir@
 installbuilddir=@installbuilddir@
 
 # Create apr-config script suitable for the install tree
-apr-config.out: apr-config
-	sed 's,^\(location=\).*$$,\1installed,' < apr-config > $@
+apr-config.out: $(APR_CONFIG)
+	sed 's,^\(location=\).*$$,\1installed,' < $(APR_CONFIG) > $@
 
 # Create apr_rules.mk suitable for the install tree
 build/apr_rules.out: build/apr_rules.mk
@@ -97,9 +97,8 @@ install: $(TARGET_LIB) apr-config.out build/apr_rules.out
 	if [ ! -d $(DESTDIR)$(bindir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
 	fi;
-	$(LIBTOOL) --mode=install cp apr-config.out $(DESTDIR)$(bindir)/apr-config
 	$(LIBTOOL) --mode=install cp apr-config.out $(DESTDIR)$(bindir)/$(APR_CONFIG)
-	chmod 755 $(DESTDIR)$(bindir)/apr-config $(DESTDIR)$(bindir)/$(APR_CONFIG)
+	chmod 755 $(DESTDIR)$(bindir)/$(APR_CONFIG)
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
 	        ( cd $$i ; $(MAKE) DESTDIR=$(DESTDIR) install ); \

@@ -12,6 +12,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Only install apr-$MAJOR-config and add appropriate detection code to
+     find_apr.m4 (APR_FIND_APR).  [Max Bowsher <maxb ukf.net>]
+
   *) Remove APR_STATUS_IS_SUCCESS() macro.  [Justin Erenkrantz]
 
   *) apr_proc_create() on Unix: Remove unnecessary check for read 
