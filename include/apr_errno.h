@@ -255,7 +255,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EBADPATH       (APR_OS_START_ERROR + 24)
 #define APR_ENOCLEANUP     (APR_OS_START_ERROR + 25)
 #define APR_EMEMSYS        (APR_OS_START_ERROR + 26)
-#define APR_EMEMFUNC       (APR_OS_START_ERROR + 27)
 
 /* APR ERROR VALUE TESTS */
 #define APR_STATUS_IS_ENOSTAT(s)        ((s) == APR_ENOSTAT)
@@ -284,7 +283,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
 #define APR_STATUS_IS_ENOCLEANUP(s)     ((s) == APR_ENOCLEANUP)
 #define APR_STATUS_IS_EMEMSYS(s)        ((s) == APR_EMEMSYS)
-#define APR_STATUS_IS_EMEMFUNC(s)       ((s) == APR_EMEMFUNC)
 
 /* APR STATUS VALUES */
 #define APR_INCHILD        (APR_OS_START_STATUS + 1)
