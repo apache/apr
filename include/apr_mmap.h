@@ -67,16 +67,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+/**
+ * @file apr_mmap.h
+ * @brief APR MMAP routines
+ */
+/**
+ * @defgroup APR_MMAP MMAP (Memory Map) Routines
+ * @ingroup APR
+ * @{
+ */
 
 #define APR_MMAP_READ    1
 #define APR_MMAP_WRITE   2
 
-/**
- * @package APR MMAP library
- */
-
 typedef struct apr_mmap_t            apr_mmap_t;
-/* As far as I can tell the only really sane way to store an MMAP is as a
+/**
+ * @remark
+ * As far as I can tell the only really sane way to store an MMAP is as a
  * void * and a length.  BeOS requires this area_id, but that's just a little
  * something extra.  I am exposing this type, because it doesn't make much
  * sense to keep it private, and opening it up makes some stuff easier in
@@ -106,7 +113,7 @@ struct apr_mmap_t {
     apr_size_t size;
 };
 
-#if APR_HAS_MMAP
+#if APR_HAS_MMAP || defined(DOXYGEN)
 
 /*   Function definitions */
 
@@ -122,7 +129,6 @@ struct apr_mmap_t {
  *          APR_MMAP_WRITE      MMap opened for writing
  * </PRE>
  * @param cntxt The pool to use when creating the mmap.
- * @deffunc apr_status_t apr_mmap_create(apr_mmap_t **newmmap, apr_file_t *file, apr_off_t offset, apr_size_t size, apr_int32_t flag, apr_pool_t *cntxt)
  */
 APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **newmmap, 
                                           apr_file_t *file, apr_off_t offset,
@@ -132,7 +138,6 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **newmmap,
 /**
  * Remove a mmap'ed.
  * @param mmap The mmap'ed file.
- * @deffunc apr_status_t apr_mmap_delete(apr_mmap_t *mmap)
  */
 APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap);
 
@@ -141,13 +146,12 @@ APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap);
  * @param addr The pointer to the offset specified.
  * @param mmap The mmap'ed file.
  * @param offset The offset to move to.
- * @deffunc apr_status_t apr_mmap_offset(void **addr, apr_mmap_t *mmap, apr_off_t offset)
  */
 APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mmap, 
                                           apr_off_t offset);
 
 #endif /* APR_HAS_MMAP */
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif
