@@ -465,7 +465,8 @@ static int printf_flush(apr_vformatter_buff_t *vbuff)
     return -1;
 }
 
-APR_DECLARE(int) apr_file_printf(apr_file_t *fptr, const char *format, ...)
+APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, 
+                                        const char *format, ...)
 {
     int cc;
     va_list ap;

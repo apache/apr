@@ -393,7 +393,8 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
     return rv;
 }
 
-APR_DECLARE(int) apr_file_printf(apr_file_t *fptr, const char *format, ...)
+APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, 
+                                        const char *format, ...)
 {
     apr_status_t cc;
     va_list ap;

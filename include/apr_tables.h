@@ -349,6 +349,19 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
                                              const apr_table_t *overlay,
                                              const apr_table_t *base);
 
+/**
+ * Declaration prototype for the iterator callback function of apr_table_do()
+ * and apr_table_vdo().
+ * @param rec The data passed as the first argument to apr_table_[v]do()
+ * @param key The key from this iteration of the table
+ * @param key The value from this iteration of the table
+ * @remark Iteration continues while this callback function returns non-zero.
+ * To export the callback function for apr_table_[v]do() it must be declared 
+ * in the _NONSTD convention.
+ */
+typedef int (apr_table_do_callback_fn_t)(void *rec, const char *key, 
+                                                    const char *value);
+
 /** 
  * Iterate over a table running the provided function once for every
  * element in the table.  If there is data passed in as a vararg, then the 
@@ -361,8 +374,9 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * @param ... The vararg.  If this is NULL, then all elements in the table are
  *            run through the function, otherwise only those whose key matches
  *            are run.
+ * @see apr_table_do_callback_fn_t
  */
-APR_DECLARE_NONSTD(void) apr_table_do(int (*comp)(void *, const char *, const char *),
+APR_DECLARE_NONSTD(void) apr_table_do(apr_table_do_callback_fn_t *comp,
                              void *rec, const apr_table_t *t, ...);
 
 /** 
@@ -378,7 +392,7 @@ APR_DECLARE_NONSTD(void) apr_table_do(int (*comp)(void *, const char *, const ch
  *                table are run through the function, otherwise only those 
  *                whose key matches are run.
  */
-APR_DECLARE(void) apr_table_vdo(int (*comp)(void *, const char *, const char *),
+APR_DECLARE(void) apr_table_vdo(apr_table_do_callback_fn_t *comp,
                                 void *rec, const apr_table_t *t, va_list);
 
 /** flag for overlap to use apr_table_setn */
