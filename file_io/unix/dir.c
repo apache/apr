@@ -147,8 +147,10 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         return ret;
     }
 
-    /* What we already know */
-    /* XXX: Optimize here with d_fileno, d_type etc by platform */
+    /* What we already know - and restrict the wanted test below to stat
+     * only if stat will give us what this platform supports, and we can't
+     * get it from the platform.
+     * XXX: Optimize here with d_fileno, d_type etc by platform */
     wanted &= ~(APR_FINFO_NAME);
     if (wanted)
     {
@@ -162,15 +164,28 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         /* ??? Or lstat below?  What is it we really want? */
         ret = apr_stat(finfo, fspec, wanted, thedir->cntxt);
     }
-    if (!wanted || ret) {
+
+    if (wanted && (ret == APR_SUCCESS || ret == APR_INCOMPLETE)) {
+        wanted &= ~finfo->valid;
+        ret = APR_SUCCESS;
+    }
+    else {
+        /* We don't bail because we fail to stat, when we are only -required-
+         * to readdir... but the result will be APR_INCOMPLETE
+         */
         finfo->cntxt = thedir->cntxt;
         finfo->valid = 0;
     }
+
     /* We passed a stack name that is now gone */
     finfo->fname = NULL;
     finfo->valid |= APR_FINFO_NAME;
     /* XXX: Optimize here with d_fileno, d_type etc by platform */
     finfo->name = thedir->entry->d_name;
+
+    if (wanted)
+        return APR_INCOMPLETE;
+
     return APR_SUCCESS;
 }
 
