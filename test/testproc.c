@@ -58,7 +58,7 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include <errno.h>
-#ifndef WIN32
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdio.h>

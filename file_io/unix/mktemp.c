@@ -65,7 +65,6 @@ static const char rcsid[] =
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <unistd.h>
 
 #ifdef  SVR4
 /* arrange to compile it on my machine */
