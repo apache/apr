@@ -92,7 +92,7 @@ typedef struct apr_sms_tracking_t
 #define SIZEOF_BLOCK_T        APR_ALIGN_DEFAULT(sizeof(block_t))
 #define SIZEOF_SMS_TRACKING_T APR_ALIGN_DEFAULT(sizeof(apr_sms_tracking_t))
 
-#define BLOCK_T(sms)          ((block_t *)(mem))
+#define BLOCK_T(mem)          ((block_t *)(mem))
 #define SMS_TRACKING_T(sms)   ((apr_sms_tracking_t *)(sms))
 
 #define INSERT_BLOCK(block, tms) \
