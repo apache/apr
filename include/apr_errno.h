@@ -124,6 +124,9 @@ typedef int ap_status_t;
 #define APR_BADARG         (APR_OS_START_STATUS + 13)
 #define APR_EOF            (APR_OS_START_STATUS + 14)
 #define APR_NOTFOUND       (APR_OS_START_STATUS + 15)
+#define APR_LESS           (APR_OS_START_STATUS + 16)
+#define APR_EQUAL          (APR_OS_START_STATUS + 17)
+#define APR_MORE           (APR_OS_START_STATUS + 18)
 
 /* A simple value to be used to initialze a status variable. */
 #define APR_EINIT          (APR_OS_START_STATUS + 16)  

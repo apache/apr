@@ -176,6 +176,24 @@ ap_status_t ap_get_wday(struct atime_t *atime, ap_int32_t *rv)
 }
 
 /* ***APRDOC********************************************************
+ * ap_status_t ap_set_curtime(ap_time_t *, ap_int64_t)
+ *    Set the current time in seconds since Jan 1, 1970.
+ * arg 1) The time value we care about.
+ * arg 2) Integer to store time value in
+ */
+ap_status_t ap_set_curtime(struct atime_t *atime, ap_int64_t sec)
+{
+    if (atime) {
+        if (!atime->currtime) {
+            atime->currtime = ap_pcalloc(atime->cntxt, sizeof(struct timeval));
+        }
+        atime->currtime->tv_sec = sec;
+        return APR_SUCCESS;
+    }
+    return APR_ENOTIME;    
+}
+
+/* ***APRDOC********************************************************
  * ap_status_t ap_set_sec(ap_time_t *, ap_int64_t)
  *    Set the number of sec since the top of the minute 
  * arg 1) The time value we care about.
