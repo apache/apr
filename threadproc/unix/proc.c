@@ -355,7 +355,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
             ap_close(attr->child_err);
         }
         
-        signal(SIGCHLD, SIG_DFL); /*not sure if this is needed or not */
+        ap_signal(SIGCHLD, SIG_DFL); /*not sure if this is needed or not */
 
         if (attr->currdir != NULL) {
             if (chdir(attr->currdir) == -1) {

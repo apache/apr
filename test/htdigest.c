@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
     ap_create_context(&cntxt, NULL);
 
     tn = NULL;
-    signal(SIGINT, (void (*)(int)) interrupted);
+    ap_signal(SIGINT, (void (*)(int)) interrupted);
     if (argc == 5) {
 	if (strcmp(argv[1], "-c"))
 	    usage();
