@@ -412,7 +412,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     memset(finfo, '\0', sizeof(*finfo));
     finfo->cntxt = cont;
     finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
-                 | APR_FINFO_SIZE  | APR_FINFO_TYPE;
+        | APR_FINFO_SIZE  | APR_FINFO_TYPE; /* I.e., APR_FINFO_MIN */
 
     /* File times */
     FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
@@ -445,10 +445,20 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         finfo->filetype = APR_REG;
     }
 
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
-        finfo->protection = APR_FREADONLY;
+    /* 
+     * Hummm, should we assume the file is always executable? Is there a way
+     * to know other than guess based on the file extension or make an 
+     * expensive system call?
+     */
+    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
+        finfo->protection |= S_IREAD | S_IEXEC;
+    }
+    else {
+        finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
+    }
 
     if (wanted &= ~finfo->valid) {
+        /* Caller wants more than APR_FINFO_MIN */
 #ifdef APR_HAS_UNICODE_FS
         if (os_level >= APR_WIN_NT)
             return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC, os_level);
