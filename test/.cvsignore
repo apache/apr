@@ -2,8 +2,13 @@ Makefile
 testmmap
 htdigest
 ab
+proctest
 testcontext
 testargs
+testdso
+testoc
+testpipe
+testshmem
 testtime
 testthread
 client

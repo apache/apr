@@ -4,6 +4,7 @@
 #include "apr_errno.h"
 #include "apr_dso.h"
 #include <string.h>
+#include <stdlib.h>
 
 #define LIB_NAME "mod_test.so"
 

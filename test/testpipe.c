@@ -57,6 +57,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include <stdlib.h>
 #ifdef BEOS
 #include <unistd.h>
 #endif
@@ -69,7 +70,6 @@ int main()
     ap_context_t *context;
     ap_file_t *readp = NULL;
     ap_file_t *writep = NULL;
-    ap_status_t status = 0;
     ap_size_t nbytes;
     char *buf;
 
