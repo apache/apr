@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/05 02:06:48 $]
+Last modified at [$Date: 2002/05/07 03:35:34 $]
 
 Release:
 
@@ -50,6 +50,11 @@ RELEASE SHOWSTOPPERS:
 
     * The new apr_global_mutex_t lock type must be implemented on
       all platforms.
+
+    * Almost every API in APR depends on pools, but pool semantics
+      aren't a good match for a lot of applications.  We need to find
+      a way to support alternate allocators polymorphically without
+      a significant performance penalty.
 
 CURRENT VOTES:
 
