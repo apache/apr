@@ -516,7 +516,8 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
-        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 0,
+        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname,
+                             APR_CREATE | APR_WRITE | APR_EXCL,
                              new_mutex->pool);
     }
  
@@ -526,11 +527,6 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
     }
 
     new_mutex->curr_locked = 0;
-    /* XXX currently, apr_file_mktemp() always specifies that the file should
-     *     be removed when closed; that unlink() will fail since we're 
-     *     removing it here; we want to remove it here since we don't need
-     *     it visible and we want it cleaned up if we exit catastrophically
-     */
     unlink(new_mutex->fname);
     apr_pool_cleanup_register(new_mutex->pool,
                               (void*)new_mutex,
@@ -631,7 +627,8 @@ static apr_status_t proc_mutex_flock_create(apr_proc_mutex_t *new_mutex,
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
-        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 0,
+        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname,
+                             APR_CREATE | APR_WRITE | APR_EXCL,
                              new_mutex->pool);
     }
  

@@ -1,5 +1,15 @@
 Changes with APR 0.9.4
 
+  *) When using a temporary file for flock- and fcntl-based mutexes, 
+     don't let the file be deleted on close.  For flock-based mutexes,
+     this corrects a fatal problem, since the file would disappear 
+     when a program was spawned and cleanup-for-exec was performed, 
+     and a subsequent attempt to perform child process mutex 
+     initialization would fail.  For fcntl-based mutexes, this was a 
+     very minor issue that resulted in a failing unlink() when the 
+     file was closed, since fcntl lock initialization always removes 
+     the file immediately.  [Jeff Trawick]
+
   *) When writing to pipes with a timeout set, handle the situation
      where the kernel says the pipe is writable but an attempt to
      write <= PIPE_BUF bytes gets EAGAIN.  APR will now write whatever
