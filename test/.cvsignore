@@ -34,4 +34,4 @@ testipsub
 *.ilk
 *.pdb
 *.idb
-mod_test
+mod_test.dll
