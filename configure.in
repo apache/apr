@@ -708,8 +708,6 @@ fi
 AC_SUBST(have_in_addr)
 AC_SUBST(file_as_socket)
 
-AC_CHECK_FUNCS(inet_pton)
-AC_CHECK_FUNCS(inet_ntop)
 APR_CHECK_SOCKADDR_SA_LEN
 
 APR_CHECK_GETHOSTBYNAME_NAS
