@@ -56,7 +56,7 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
 
 static const char *rangematch(const char *, int, int);
 
-API_EXPORT(int) ap_fnmatch(const char *pattern, const char *string, int flags)
+API_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *string, int flags)
 {
     const char *stringstart;
     char c, test;
@@ -64,7 +64,7 @@ API_EXPORT(int) ap_fnmatch(const char *pattern, const char *string, int flags)
     for (stringstart = string;;) {
 	switch (c = *pattern++) {
 	case EOS:
-	    return (*string == EOS ? 0 : FNM_NOMATCH);
+	    return (*string == EOS ? APR_SUCCESS : FNM_NOMATCH);
 	case '?':
 	    if (*string == EOS) {
 		return (FNM_NOMATCH);
@@ -95,10 +95,10 @@ API_EXPORT(int) ap_fnmatch(const char *pattern, const char *string, int flags)
 	    /* Optimize for pattern with * at end or before /. */
 	    if (c == EOS) {
 		if (flags & FNM_PATHNAME) {
-		    return (strchr(string, '/') == NULL ? 0 : FNM_NOMATCH);
+		    return (strchr(string, '/') == NULL ? APR_SUCCESS : FNM_NOMATCH);
 		}
 		else {
-		    return (0);
+		    return (APR_SUCCESS);
 		}
 	    }
 	    else if (c == '/' && flags & FNM_PATHNAME) {
@@ -111,7 +111,7 @@ API_EXPORT(int) ap_fnmatch(const char *pattern, const char *string, int flags)
 	    /* General case, use recursion. */
 	    while ((test = *string) != EOS) {
 	        if (!ap_fnmatch(pattern, string, flags & ~FNM_PERIOD)) {
-		    return (0);
+		    return (APR_SUCCESS);
 		}
 		if (test == '/' && flags & FNM_PATHNAME) {
 		    break;

@@ -178,7 +178,7 @@ static unsigned char PADDING[64] =
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-API_EXPORT(void) ap_MD5Init(APR_MD5_CTX * context)
+API_EXPORT(ap_status_t) ap_MD5Init(APR_MD5_CTX * context)
 {
     context->count[0] = context->count[1] = 0;
     /* Load magic initialization constants. */
@@ -186,13 +186,14 @@ API_EXPORT(void) ap_MD5Init(APR_MD5_CTX * context)
     context->state[1] = 0xefcdab89;
     context->state[2] = 0x98badcfe;
     context->state[3] = 0x10325476;
+    return APR_SUCCESS;
 }
 
 /* MD5 block update operation. Continues an MD5 message-digest
    operation, processing another message block, and updating the
    context.
  */
-API_EXPORT(void) ap_MD5Update(APR_MD5_CTX * context, const unsigned char *input,
+API_EXPORT(ap_status_t) ap_MD5Update(APR_MD5_CTX * context, const unsigned char *input,
 			   unsigned int inputLen)
 {
     unsigned int i, idx, partLen;
@@ -242,12 +243,13 @@ API_EXPORT(void) ap_MD5Update(APR_MD5_CTX * context, const unsigned char *input,
     /* Buffer remaining input */
     ebcdic2ascii_strictly(&context->buffer[idx], &input[i], inputLen - i);
 #endif /*CHARSET_EBCDIC*/
+    return APR_SUCCESS;
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
-API_EXPORT(void) ap_MD5Final(unsigned char digest[16], APR_MD5_CTX * context)
+API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[16], APR_MD5_CTX * context)
 {
     unsigned char bits[8];
     unsigned int idx, padLen;
@@ -284,6 +286,8 @@ API_EXPORT(void) ap_MD5Final(unsigned char digest[16], APR_MD5_CTX * context)
 
     /* Zeroize sensitive information. */
     memset(context, 0, sizeof(*context));
+    
+    return APR_SUCCESS;
 }
 
 /* MD5 basic transformation. Transforms state based on block. */
@@ -426,7 +430,7 @@ static void to64(char *s, unsigned long v, int n)
     }
 }
 
-API_EXPORT(void) ap_MD5Encode(const char *pw, const char *salt,
+API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
 			      char *result, size_t nbytes)
 {
     /*
@@ -573,16 +577,17 @@ API_EXPORT(void) ap_MD5Encode(const char *pw, const char *salt,
     memset(final, 0, sizeof(final));
 
     ap_cpystrn(result, passwd, nbytes - 1);
+    return APR_SUCCESS;
 }
 
 /*
  * Validate a plaintext password against a smashed one.  Use either
  * crypt() (if available) or ap_MD5Encode(), depending upon the format
- * of the smashed input password.  Return NULL if they match, or
- * an explanatory text string if they don't.
+ * of the smashed input password.  Return APR_SUCCESS if they match, or
+ * APR_EMISMATCH if they don't.
  */
 
-API_EXPORT(char *) ap_validate_password(const char *passwd, const char *hash)
+API_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash)
 {
     char sample[120];
 #ifndef WIN32
@@ -605,5 +610,5 @@ API_EXPORT(char *) ap_validate_password(const char *passwd, const char *hash)
 	ap_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
 #endif
     }
-    return (strcmp(sample, hash) == 0) ? NULL : "password mismatch";
+    return (strcmp(sample, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
 }
