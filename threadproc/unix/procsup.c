@@ -112,3 +112,24 @@ ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont)
     }
     return APR_SUCCESS;
 }
+
+#if (!HAVE_WAITPID)
+/* From ikluft@amdahl.com
+ * this is not ideal but it works for SVR3 variants
+ * Modified by dwd@bell-labs.com to call wait3 instead of wait because
+ *   apache started to use the WNOHANG option.
+ */
+int waitpid(pid_t pid, int *statusp, int options)
+{
+    int tmp_pid;
+    if (kill(pid, 0) == -1) {
+        errno = ECHILD;
+        return -1;
+    }
+    while (((tmp_pid = wait3(statusp, options, 0)) != pid) &&
+                (tmp_pid != -1) && (tmp_pid != 0) && (pid != -1))
+        ;
+    return tmp_pid;
+}
+#endif
+
