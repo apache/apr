@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/11 19:17:29 $]
+Last modified at [$Date: 2002/07/11 19:45:10 $]
 
 Release:
 
@@ -66,19 +66,12 @@ CURRENT VOTES:
          system types, or map to system units.
          +1: rbb, wrowe, jerenkrantz, striker
          +0: brianp
-         -1: aaron [veto for reusing the apr_time_t identifier for a new use.
-                    I'm ok with apr_timeval_t.]
+         -1: aaron [veto for reusing the apr_time_t identifier for a new use]
       2) Renaming the function to get rid of apr_time_t vs time_t confusion,
-         which wrowe suggests apr_butime_t [binary microtime].
+         which brianp suggests apr_timeval_t.
          +1: fielding, aaron
          -0: wrowe, jerenkrantz, striker
          -0.5: rbb
-         -1: brianp [-1 for the apr_butime_t name specifically: let's
-                     keep the type name independent of the internal
-                     representation, so that we don't have to
-                     change the name the next time we change the
-                     implementation.  I'd prefer something like
-                     apr_timeval_t, but I can live with apr_time_t.]
 
     * For the atomics code to be efficient it depends on instructions
       in newer sparc models. Unfortunately this means that binaries
