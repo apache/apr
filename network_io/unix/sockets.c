@@ -203,6 +203,7 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 
 apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
+    static char generic_inaddr_any[16] = {0}; /* big enough for IPv4 or IPv6 */
     alloc_socket(new, connection_context);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
 
@@ -249,8 +250,9 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
 #endif /* TCP_NODELAY_INHERITED */
 
     if (sock->local_interface_unknown ||
-        /* XXX IPv6 issue */
-        sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
+        !memcmp(sock->local_addr->ipaddr_ptr,
+                generic_inaddr_any,
+                sock->local_addr->ipaddr_len)) {
         /* If the interface address inside the listening socket's local_addr wasn't 
          * up-to-date, we don't know local interface of the connected socket either.
          *
