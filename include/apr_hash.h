@@ -137,7 +137,8 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
 
 /**
  * Start iterating over the entries in a hash table.
- * @param p The pool to allocate the apr_hash_index_t iterator 
+ * @param p The pool to allocate the apr_hash_index_t iterator. If this
+ *          pool is NULL, then an internal, non-thread-safe iterator is used.
  * @param ht The hash table
  * @example
  */
