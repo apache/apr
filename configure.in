@@ -257,6 +257,18 @@ else
     ssize_t_fmt='#error Can not determine the proper size for ssize_t'
 fi
 
+AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
+
+if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
+    off_t_fmt='#define APR_OFF_T_FMT "d"'
+elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
+    off_t_fmt='#define APR_OFF_T_FMT "ld"'
+elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
+    off_t_fmt='#define APR_OFF_T_FMT "qd"'
+else
+    off_t_fmt='#error Can not determine the proper size for off_t'
+fi
+
 AC_SUBST(short_value)
 AC_SUBST(int_value)
 AC_SUBST(long_value)
@@ -264,6 +276,7 @@ AC_SUBST(off_t_value)
 AC_SUBST(size_t_value)
 AC_SUBST(ssize_t_value)
 AC_SUBST(ssize_t_fmt) 
+AC_SUBST(off_t_fmt) 
 
 dnl #----------------------------- Checking for Threads
 echo -e "\nChecking for Threads"

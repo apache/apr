@@ -95,6 +95,9 @@ typedef  @off_t_value@           ap_off_t;
  */
 @ssize_t_fmt@
 
+/* And APR_OFF_T_FMT */
+@off_t_fmt@
+
 /* Define ap_signal and related necessary definitions.
  */
 /* We are checking for HAVE_SIGACTION, but autoconf is filling this in 
