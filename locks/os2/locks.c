@@ -77,7 +77,8 @@ static ap_status_t lock_cleanup(void *thelock)
 
 
 
-ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, char *fname, ap_context_t *cont)
+ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, 
+                           const char *fname, ap_context_t *cont)
 {
     ap_lock_t *new;
     ULONG rc;
@@ -109,7 +110,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e 
 
 
 
-ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont)
+ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, ap_context_t *cont)
 {
     int rc;
     PIB *ppib;
@@ -122,7 +123,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont
     DosGetInfoBlocks(&((*lock)->tib), &ppib);
     (*lock)->owner = 0;
     (*lock)->lock_count = 0;
-    rc = DosOpenMutexSem( fname, &(*lock)->hMutex );
+    rc = DosOpenMutexSem( (char *)fname, &(*lock)->hMutex );
 
     if (!rc)
         ap_register_cleanup(cont, *lock, lock_cleanup, ap_null_cleanup);

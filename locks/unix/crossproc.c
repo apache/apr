@@ -129,7 +129,8 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont, char *fname)
+ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+                            const char *fname)
 {
     return APR_SUCCESS;
 }
@@ -228,7 +229,8 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont, char *fname)
+ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+                            const char *fname)
 {
     return APR_SUCCESS;
 }
@@ -307,7 +309,8 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont, char *fname)
+ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+                            const char *fname)
 {
     return APR_SUCCESS;
 }
@@ -372,7 +375,8 @@ ap_status_t destroy_inter_lock(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont, char *fname)
+ap_status_t child_init_lock(ap_lock_t **lock, ap_context_t *cont,
+                            const char *fname)
 {
     ap_lock_t *new;
 

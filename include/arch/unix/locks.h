@@ -151,7 +151,7 @@ ap_status_t unlock_inter(struct ap_lock_t *lock);
 ap_status_t destroy_inter_lock(struct ap_lock_t *lock);
 
 ap_status_t child_init_lock(struct ap_lock_t **lock, ap_context_t *cont, 
-                            char *fname);
+                            const char *fname);
 
 #endif  /* LOCKS_H */
 
