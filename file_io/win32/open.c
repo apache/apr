@@ -524,6 +524,22 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     if (flags & APR_APPEND)
         (*file)->append = 1;
 
+    if (flags & APR_BUFFERED) {
+        apr_status_t rv;
+
+        (*file)->buffered = 1;
+        (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        rv = apr_thread_mutex_create(&(*file)->mutex, APR_THREAD_MUTEX_DEFAULT,
+                                     pool);
+
+        if (rv) {
+            if (file_cleanup(*new) == APR_SUCCESS) {
+                apr_pool_cleanup_kill(pool, *file, file_cleanup);
+            }
+            return rv;
+        }
+    }
+
     /* XXX... we pcalloc above so all others are zeroed.
      * Should we be testing if thefile is a handle to 
      * a PIPE and set up the mechanics appropriately?
