@@ -65,8 +65,8 @@ EXPORTS
 	ap_send   @56
 	ap_recv   @57
 	ap_setsocketopt   @58
-;	ap_getport @59
-;	ap_setport   @60
+	ap_sendv @59
+	ap_sendfile  @60
 	ap_setup_poll   @61
 	ap_poll   @62
 	ap_add_poll_socket   @63

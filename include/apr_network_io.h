@@ -155,7 +155,7 @@ ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
 
 ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *);
 ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *nbytes);
-#ifdef HAVE_SENDFILE
+#if APR_HAS_SENDFILE
 ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file, ap_hdtr_t *hdtr, ap_off_t *offset, 
                          ap_size_t *len, ap_int32_t flags);
 #endif
