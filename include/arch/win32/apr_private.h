@@ -55,7 +55,7 @@
 /*
  * Note: 
  * This is the windows specific autoconf like config file
- * which is used to generate apr_config.h at build time.
+ * which is used to generate apr_private.h at build time.
  * Do not put any code into this file which depends on
  * APR include files.
  */
