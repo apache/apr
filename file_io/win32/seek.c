@@ -93,7 +93,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
 {
     apr_finfo_t finfo;
-    apr_status_t rc = APR_EINVAL;
+    apr_status_t rc = APR_SUCCESS;
 
     if (thefile->buffered) {
         switch (where) {
@@ -111,6 +111,9 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
                 if (rc == APR_SUCCESS)
                     rc = setptr(thefile, finfo.size - *offset);
                 break;
+
+            default:
+                return APR_EINVAL;
         }
 
         *offset = thefile->filePtr + thefile->bufpos;
@@ -131,6 +134,9 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
                 if (rc == APR_SUCCESS && finfo.size - *offset < 0)
                     thefile->filePtr = finfo.size - *offset;
                 break;
+
+            default:
+                return APR_EINVAL;
         }
         *offset = thefile->filePtr;
         return rc;
