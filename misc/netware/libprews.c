@@ -11,7 +11,7 @@
 #include <netware.h>
 #include <library.h>
 #include <nks/synch.h>
-#include "ws2nlm.h"
+#include "novsock2.h"
 
 #include "apr_pools.h"
 
