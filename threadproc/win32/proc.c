@@ -556,7 +556,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
         time = 0;
 
     if ((stat = WaitForSingleObject(proc->hproc, time)) == WAIT_OBJECT_0) {
-        if (GetExitCodeProcess((HANDLE)proc->pid, &stat)) {
+        if (GetExitCodeProcess(proc->hproc, &stat)) {
             if (exitcode)
                 *exitcode = (apr_wait_t)stat;
             CloseHandle(proc->hproc);
