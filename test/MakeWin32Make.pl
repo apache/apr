@@ -8,7 +8,7 @@ while ($t = <$srcfl>) {
     if ($t =~ m|\@INCLUDE_RULES\@|) {
         $t = "ALL: \$(TARGETS)\n\n"
            . "CL = cl.exe\n"
-           . "LINK = link.exe /nologo /debug /machine:I386\n\n"
+           . "LINK = link.exe /nologo /debug /machine:I386 /subsystem:console /incremental:no \n\n"
            . "CFLAGS = /nologo /c /MDd /W3 /Gm /GX /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD \n\n"
            . ".c.obj::\n"
            . "\t\$(CL) -c \$*.c \$(CFLAGS) \$(INCLUDES)\n";
@@ -17,7 +17,8 @@ while ($t = <$srcfl>) {
         $t = "";
     }
     if ($t =~ m|^LOCAL_LIBS=|) {
-        $t = "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib\n";
+        $t = "LOCAL_LIBS=\n"
+           . "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib\n\n";
     }
     if ($t =~ s|\@CFLAGS\@||) {
         $t = "";
