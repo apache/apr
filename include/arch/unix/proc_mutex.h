@@ -160,13 +160,6 @@ struct apr_proc_mutex_t {
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *pthread_interproc;
 #endif
-#if APR_HAS_THREADS
-    /* APR doesn't have threads, no sense in having a thread lock mechanism.
-     */
-
-    apr_os_thread_t owner;
-    int owner_ref;
-#endif
 };
 
 void apr_proc_mutex_unix_setup_lock(void);
