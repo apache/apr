@@ -58,19 +58,74 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_errno.h"
-/* TODO: Handle the case when the file has not been opened */
-ap_status_t ap_getfileinfo(struct file_t *thefile)
-{
-    BY_HANDLE_FILE_INFORMATION info;
-    GetFileInformationByHandle(thefile->filehand, &info);
-    thefile->dwFileAttributes = info.dwFileAttributes;
-    thefile->size = info.nFileSizeLow; /* This is broken for files > ?? */
-    thefile->atime = WinTimeToUnixTime(&info.ftLastAccessTime);
-    thefile->ctime = WinTimeToUnixTime(&info.ftCreationTime);
-    thefile->mtime = WinTimeToUnixTime(&info.ftLastWriteTime);
-    thefile->stated = 1; 
+#include <sys/stat.h>
 
-    return APR_SUCCESS;
+#define S_ISLNK(m) (0)
+#ifndef S_ISREG
+#define S_ISREG(m)      (((m)&(S_IFMT)) == (S_IFREG))
+#endif
+#ifndef S_ISDIR
+#define S_ISDIR(m) (((m) & S_IFDIR) == S_IFDIR)
+#endif
+
+static ap_filetype_e filetype_from_mode(int mode)
+{
+    ap_filetype_e type = APR_NOFILE;
+
+    if (S_ISREG(mode))
+        type = APR_REG;
+    if (S_ISDIR(mode))
+        type = APR_DIR;
+    if (S_ISLNK(mode))
+        type = APR_LNK;
+
+    return type;
 }
 
+ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
+{
+    /* TODO: 
+     * Windows should call GetFileInformationByHandle(), which is similar 
+     * to fstat(), for the best performance. Then we would need to map the 
+     * BY_HANDLE_FILE_INFORMATION to ap_finfo_t. 
+     */
+    struct stat info;
+    int rv = stat(thefile->fname, &info);
+
+    if (rv == 0) {
+        finfo->protection = info.st_mode;
+        finfo->filetype = filetype_from_mode(info.st_mode);
+        finfo->user = info.st_uid;
+        finfo->group = info.st_gid;
+        finfo->size = info.st_size;
+        finfo->inode = info.st_ino;
+        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        return APR_SUCCESS;
+    }
+    else {
+        return APR_ENOSTAT;
+    }
+}
+ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
+{
+    struct stat info;
+    int rv = stat(fname, &info);
+    if (rv == 0) {
+        finfo->protection = info.st_mode;
+        finfo->filetype = filetype_from_mode(info.st_mode);
+        finfo->user = info.st_uid;
+        finfo->group = info.st_gid;
+        finfo->size = info.st_size;
+        finfo->inode = info.st_ino;
+        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        return APR_SUCCESS;
+    }
+    else {
+        return APR_ENOSTAT;
+    }
+}
 

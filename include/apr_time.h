@@ -69,7 +69,11 @@ API_VAR_IMPORT const char ap_day_snames[7][4];
 /* number of microseconds since 00:00:00 january 1, 1970 UTC */
 typedef ap_int64_t ap_time_t;
 
+#ifdef WIN32
+#define AP_USEC_PER_SEC ((LONGLONG) 1000000)
+#else
 #define AP_USEC_PER_SEC (1000000LL)
+#endif
 
 /* the time right now */
 ap_time_t ap_now(void);
