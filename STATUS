@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/09/28 14:05:22 $]
+Last modified at [$Date: 2001/10/12 21:44:21 $]
 
 Release:
 
@@ -14,6 +14,10 @@ Release:
     2.0a1   : released March 10, 2000
 
 RELEASE SHOWSTOPPERS:
+
+    * apr_proc_wait() and apr_proc_wait_all_procs() are broken
+      w.r.t. child processes which exit due to a signal.
+      Message-ID: <m3669kedo9.fsf@rdu88-250-106.nc.rr.com>
 
     * complete the efforts started by DougM for cleaner fn naming
       conventions: see proposed name changes in renames_pending
