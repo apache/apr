@@ -191,6 +191,31 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
          : "memory"); \
     prev;})
 
+#define apr_atomic_add(mem, val)                                \
+({ register apr_atomic_t last;                                  \
+   do {                                                         \
+       last = *(mem);                                           \
+   } while (apr_atomic_cas((mem), last + (val), last) != last); \
+  })
+
+#define apr_atomic_dec(mem)                                     \
+({ register apr_atomic_t last;                                  \
+   do {                                                         \
+       last = *(mem);                                           \
+   } while (apr_atomic_cas((mem), last - 1, last) != last);     \
+  (--last != 0); })
+
+#define apr_atomic_inc(mem)                                     \
+({ register apr_atomic_t last;                                  \
+   do {                                                         \
+       last = *(mem);                                           \
+   } while (apr_atomic_cas((mem), last + 1, last) != last);     \
+  })
+
+#define apr_atomic_set(mem, val)     (*(mem) = val)
+#define apr_atomic_read(mem)        (*(mem))
+#define apr_atomic_init(pool)        APR_SUCCESS
+
 #elif (defined(__sparc__) || defined(sparc)) && !APR_FORCE_ATOMIC_GENERIC
 
 #define apr_atomic_t apr_uint32_t
