@@ -430,7 +430,12 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
             if (rv == -1 && errno == EAGAIN && nbytes) {
                 rv = 0;
             }
-        }
+            
+            /* ??? performance: if rv == 0 is the most common case, 
+             *     we may want to return here and avoid a potential 
+             *     i-cache miss.
+             */
+        }    
         else {
             /* just trailer bytes... use writev()
              */
@@ -445,55 +450,16 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                 nbytes = 0;
             }
         }
-    } while (rv == -1 && errno == EINTR);
-
     if (rv == -1 &&
         errno == EAGAIN && 
         sock->timeout > 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
-        if (arv != APR_SUCCESS) {
-            *len = 0;
-            return arv;
+            apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+            if (arv != APR_SUCCESS) {
+                *len = 0;
+                return arv;
+            }
         }
-        else {
-            do {
-                if (bytes_to_send) {
-                    /* We won't dare call sendfile() if we don't have
-                     * header or file bytes to send because bytes_to_send == 0
-                     * means send the whole file.
-                     */
-                    rv = sendfile(file->filedes, /* file to be sent */
-                                  sock->socketdes, /* socket */
-                                  *offset,       /* where in the file to start */
-                                  bytes_to_send, /* number of bytes to send */
-                                  &headerstruct, /* Headers/footers */
-                                  &nbytes,       /* number of bytes written */
-                                  flags);        /* undefined, set to 0 */
-                    /* FreeBSD's sendfile can return -1/EAGAIN even if it
-                     * sent bytes.  Sanitize the result so we get normal EAGAIN
-                     * semantics w.r.t. bytes sent.
-                     */
-                    if (rv == -1 && errno == EAGAIN && nbytes) {
-                        rv = 0;
-                    }
-                }
-                else {
-                    /* just trailer bytes... use writev()
-                     */
-                    rv = writev(sock->socketdes,
-                                hdtr->trailers,
-                                hdtr->numtrailers);
-                    if (rv > 0) {
-                        nbytes = rv;
-                        rv = 0;
-                    }
-                    else {
-                        nbytes = 0;
-                    }
-                }
-            } while (rv == -1 && errno == EINTR);
-        }
-    }
+    } while (rv == -1 && (errno == EINTR || errno == EAGAIN));
 
     (*len) = nbytes;
     if (rv == -1) {
