@@ -80,11 +80,23 @@ extern "C" {
  * alloc.c.  
  */
 
-#include "apr_lib.h"
+#include "apr.h"
+#include "apr_thread_proc.h"
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#if APR_HAVE_STDARG_H
+#include <stdarg.h>
+#endif
+
+enum kill_conditions {
+    kill_never,                 /* process is never sent any signals */
+    kill_always,                /* process is sent SIGKILL on ap_pool_t cleanup */
+    kill_after_timeout,         /* SIGTERM, wait 3 seconds, SIGKILL */
+    just_wait,                  /* wait forever for the process to complete */
+    kill_only_once              /* send SIGTERM and then wait */
+};
 
 struct process_chain {
     ap_proc_t *pid;
@@ -176,10 +188,111 @@ APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *, const char *fmt, ...)
 #define BLOCK_MINALLOC 8192
 #endif
 
-/* Finally, some accounting */
+/*
+ * APR memory structure manipulators (pools, tables, and arrays).
+ */
+/*
 
+=head1 ap_pool_t *ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
+
+B<make a sub pool from the current pool>
+
+    arg 1) The pool to use as a parent pool
+    arg 2) A function to use if the pool cannot allocate more memory.
+    return) The new sub-pool
+
+B<NOTE>:  The apr_abort function provides a way to quit the program if the
+          machine is out of memory.  By default, APR will return with an
+          error.
+
+=cut
+ */
+APR_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode));
+
+/*
+
+=head1 void ap_clear_pool(ap_pool_t *p)
+
+B<clear all memory in the pool>
+
+    arg 1) The pool to clear
+
+B<NOTE>:  This does not actually free the memory, it just allows the pool
+          to re-use this memory for the next allocation.
+
+=cut
+ */
+APR_EXPORT(void) ap_clear_pool(struct ap_pool_t *p);
+
+/*
+
+=head1 void ap_destroy_pool(ap_pool_t *p)
+
+B<destroy the pool>
+
+    arg 1) The pool to destroy
+
+B<NOTE>:  This will actually free the memory
+
+=cut
+ */
+APR_EXPORT(void) ap_destroy_pool(struct ap_pool_t *p);
+
+/*
+
+=head1 long *ap_bytes_in_pool(ap_pool_t *p)
+
+B<report the number of bytes currently in the pool>
+
+    arg 1) The pool to inspect
+    return) The number of bytes
+
+=cut
+ */
 APR_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p);
+
+/*
+
+=head1 long *ap_bytes_in_free_blocks(ap_pool_t *p)
+
+B<report the number of bytes currently in the list of free blocks>
+
+    return) The number of bytes
+
+=cut
+ */
 APR_EXPORT(long) ap_bytes_in_free_blocks(void);
+
+APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b);
+
+APR_EXPORT(void *) ap_palloc(struct ap_pool_t *c, int reqsize);
+APR_EXPORT(void *) ap_pcalloc(struct ap_pool_t *p, int size);
+APR_EXPORT(char *) ap_pstrdup(struct ap_pool_t *p, const char *s);
+APR_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, int n);
+APR_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_pool_t *p, ...);
+APR_EXPORT(char *) ap_pvsprintf(struct ap_pool_t *p, const char *fmt, va_list ap);
+APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *p, const char *fmt, ...);
+APR_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
+                                      ap_status_t (*plain_cleanup) (void *),
+                                      ap_status_t (*child_cleanup) (void *));
+APR_EXPORT(void) ap_kill_cleanup(struct ap_pool_t *p, void *data,
+                                  ap_status_t (*cleanup) (void *));
+APR_EXPORT(ap_status_t) ap_run_cleanup(struct ap_pool_t *p, void *data,
+                                 ap_status_t (*cleanup) (void *));
+APR_EXPORT(void) ap_cleanup_for_exec(void);
+APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
+APR_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
+
+
+/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t will not be
+ * destroyed before the parent pool
+ */
+#ifndef POOL_DEBUG
+#ifdef ap_pool_join
+#undef ap_pool_join
+#endif /* ap_pool_join */
+#define ap_pool_join(a,b)
+#endif /* POOL_DEBUG */
 
 #ifdef __cplusplus
 }
