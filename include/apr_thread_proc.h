@@ -71,7 +71,7 @@ extern "C" {
 #endif /* __cplusplus */
 /**
  * @file apr_thread_proc.h
- * @brief APR Thread Libraru
+ * @brief APR Thread Library
  */
 /**
  * @defgroup APR_Thread Thread Library
