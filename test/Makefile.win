@@ -3,7 +3,6 @@ LINK=link /nologo
 
 NONPORTABLE = \
 	testshm.exe \
-	testprocmutex.exe \
 	testglobalmutex.exe
 
 PROGRAMS = \
@@ -100,7 +99,7 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testdso.obj testoc.obj testdup.obj testsockets.obj testproc.obj \
 	testpoll.obj testlock.obj testsockopt.obj testpipe.obj testthread.obj \
 	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj \
-	testenv.obj
+	testenv.obj testprocmutex.obj
 
 testall.exe: $(TESTS) CuTest.obj $(LOCAL_LIBS)
 	$(LINK) /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
