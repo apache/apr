@@ -1100,7 +1100,7 @@ static void overlap_hash(overlap_key *elt,
             if (flags == APR_OVERLAP_TABLES_MERGE) {
                 /* Just link this node at the end of the list
                  * of values for the key.  It doesn't need to
-                 * be linked into the tree, becaue the node at
+                 * be linked into the tree, because the node at
                  * the head of this key's value list is in the
                  * tree already.
                  */
