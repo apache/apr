@@ -36,6 +36,11 @@ echo "Platform: $host"
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
+dnl # First, we need to enable the layout handling code, then reparse the 
+dnl # prefix-style arguments due to autoconf being a PITA.
+APR_ENABLE_LAYOUT
+APR_PARSE_ARGUMENTS
+
 dnl Set optional CC hints here in case autoconf makes an inappropriate choice.
 dnl This allows us to suggest what the compiler should be, but still
 dnl allows the user to override CC externally.

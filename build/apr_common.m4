@@ -653,3 +653,196 @@ dnl Note: this define must be on one line so that it can be properly returned
 dnl as the help string.  When using this macro with a multi-line RHS, ensure
 dnl that you surround the macro invocation with []s
 AC_DEFUN(APR_HELP_STRING,[ifelse(regexp(AC_ACVERSION, 2\.1), -1, AC_HELP_STRING([$1],[$2]),[  ][$1] substr([                       ],len($1))[$2])])
+
+dnl
+dnl APR_LAYOUT(configlayout, layoutname)
+dnl
+AC_DEFUN(APR_LAYOUT,[
+  if test ! -f $srcdir/config.layout; then
+    echo "** Error: Layout file $srcdir/config.layout not found"
+    echo "** Error: Cannot use undefined layout '$LAYOUT'"
+    exit 1
+  fi
+  pldconf=./config.pld
+  changequote({,})
+  sed -e "1,/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*/d" \
+      -e '/[ 	]*<\/Layout>[ 	]*/,$d' \
+      -e "s/^[ 	]*//g" \
+      -e "s/:[ 	]*/=\'/g" \
+      -e "s/[ 	]*$/'/g" \
+      $1 > $pldconf
+  layout_name=$2
+  . $pldconf
+  rm $pldconf
+  for var in prefix exec_prefix bindir sbindir libexecdir mandir \
+             sysconfdir datadir  \
+             includedir localstatedir runtimedir logfiledir libdir \
+             installbuilddir; do
+    eval "val=\"\$$var\""
+    case $val in
+      *+)
+        val=`echo $val | sed -e 's;\+$;;'`
+        eval "$var=\"\$val\""
+        autosuffix=yes
+        ;;
+      *)
+        autosuffix=no
+        ;;
+    esac
+    val=`echo $val | sed -e 's:\(.\)/*$:\1:'`
+    val=`echo $val | sed -e 's:[\$]\([a-z_]*\):${\1}:g'`
+    if test "$autosuffix" = "yes"; then
+      if echo $val | grep apache >/dev/null; then
+        addtarget=no
+      else
+        addtarget=yes
+      fi
+      if test "$addtarget" = "yes"; then
+        val="$val/apache2"
+      fi
+    fi
+    eval "$var='$val'"
+  done
+  changequote([,])
+])dnl
+
+dnl
+dnl APR_ENABLE_LAYOUT
+dnl
+AC_DEFUN(APR_ENABLE_LAYOUT,[
+AC_ARG_ENABLE(layout,
+[  --enable-layout=LAYOUT],[
+  LAYOUT=$enableval
+])
+
+if test -z "$LAYOUT"; then
+  LAYOUT="Apache"
+fi
+APR_LAYOUT($srcdir/config.layout, $LAYOUT)
+
+AC_MSG_CHECKING(for chosen layout)
+AC_MSG_RESULT($layout_name)
+])
+
+
+dnl
+dnl APR_PARSE_ARGUMENTS
+dnl a reimplementation of autoconf's argument parser,
+dnl used here to allow us to co-exist layouts and argument based
+dnl set ups.
+AC_DEFUN(APR_PARSE_ARGUMENTS,[
+ac_prev=
+for ac_option
+do
+  # If the previous option needs an argument, assign it.
+  if test -n "$ac_prev"; then
+    eval "$ac_prev=\$ac_option"
+    ac_prev=
+    continue
+  fi
+
+  ac_optarg=`expr "x$ac_option" : 'x[[^=]]*=\(.*\)'`
+
+  case $ac_option in
+
+  -bindir | --bindir | --bindi | --bind | --bin | --bi)
+    ac_prev=bindir ;;
+  -bindir=* | --bindir=* | --bindi=* | --bind=* | --bin=* | --bi=*)
+    bindir="$ac_optarg" ;;
+
+  -datadir | --datadir | --datadi | --datad | --data | --dat | --da)
+    ac_prev=datadir ;;
+  -datadir=* | --datadir=* | --datadi=* | --datad=* | --data=* | --dat=* \
+  | --da=*)
+    datadir="$ac_optarg" ;;
+
+  -exec-prefix | --exec_prefix | --exec-prefix | --exec-prefi \
+  | --exec-pref | --exec-pre | --exec-pr | --exec-p | --exec- \
+  | --exec | --exe | --ex)
+    ac_prev=exec_prefix ;;
+  -exec-prefix=* | --exec_prefix=* | --exec-prefix=* | --exec-prefi=* \
+  | --exec-pref=* | --exec-pre=* | --exec-pr=* | --exec-p=* | --exec-=* \
+  | --exec=* | --exe=* | --ex=*)
+    exec_prefix="$ac_optarg" ;;
+
+  -includedir | --includedir | --includedi | --included | --include \
+  | --includ | --inclu | --incl | --inc)
+    ac_prev=includedir ;;
+  -includedir=* | --includedir=* | --includedi=* | --included=* | --include=* \
+  | --includ=* | --inclu=* | --incl=* | --inc=*)
+    includedir="$ac_optarg" ;;
+
+  -infodir | --infodir | --infodi | --infod | --info | --inf)
+    ac_prev=infodir ;;
+  -infodir=* | --infodir=* | --infodi=* | --infod=* | --info=* | --inf=*)
+    infodir="$ac_optarg" ;;
+
+  -libdir | --libdir | --libdi | --libd)
+    ac_prev=libdir ;;
+  -libdir=* | --libdir=* | --libdi=* | --libd=*)
+    libdir="$ac_optarg" ;;
+
+  -libexecdir | --libexecdir | --libexecdi | --libexecd | --libexec \
+  | --libexe | --libex | --libe)
+    ac_prev=libexecdir ;;
+  -libexecdir=* | --libexecdir=* | --libexecdi=* | --libexecd=* | --libexec=* \
+  | --libexe=* | --libex=* | --libe=*)
+    libexecdir="$ac_optarg" ;;
+
+  -localstatedir | --localstatedir | --localstatedi | --localstated \
+  | --localstate | --localstat | --localsta | --localst \
+  | --locals | --local | --loca | --loc | --lo)
+    ac_prev=localstatedir ;;
+  -localstatedir=* | --localstatedir=* | --localstatedi=* | --localstated=* \
+  | --localstate=* | --localstat=* | --localsta=* | --localst=* \
+  | --locals=* | --local=* | --loca=* | --loc=* | --lo=*)
+    localstatedir="$ac_optarg" ;;
+
+  -mandir | --mandir | --mandi | --mand | --man | --ma | --m)
+    ac_prev=mandir ;;
+  -mandir=* | --mandir=* | --mandi=* | --mand=* | --man=* | --ma=* | --m=*)
+    mandir="$ac_optarg" ;;
+
+  -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
+    ac_prev=prefix ;;
+  -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
+    prefix="$ac_optarg" ;;
+
+  -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
+    ac_prev=sbindir ;;
+  -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
+  | --sbi=* | --sb=*)
+    sbindir="$ac_optarg" ;;
+
+  -sharedstatedir | --sharedstatedir | --sharedstatedi \
+  | --sharedstated | --sharedstate | --sharedstat | --sharedsta \
+  | --sharedst | --shareds | --shared | --share | --shar \
+  | --sha | --sh)
+    ac_prev=sharedstatedir ;;
+  -sharedstatedir=* | --sharedstatedir=* | --sharedstatedi=* \
+  | --sharedstated=* | --sharedstate=* | --sharedstat=* | --sharedsta=* \
+  | --sharedst=* | --shareds=* | --shared=* | --share=* | --shar=* \
+  | --sha=* | --sh=*)
+    sharedstatedir="$ac_optarg" ;;
+
+  -sysconfdir | --sysconfdir | --sysconfdi | --sysconfd | --sysconf \
+  | --syscon | --sysco | --sysc | --sys | --sy)
+    ac_prev=sysconfdir ;;
+  -sysconfdir=* | --sysconfdir=* | --sysconfdi=* | --sysconfd=* | --sysconf=* \
+  | --syscon=* | --sysco=* | --sysc=* | --sys=* | --sy=*)
+    sysconfdir="$ac_optarg" ;;
+
+  esac
+done
+
+# Be sure to have absolute paths.
+for ac_var in exec_prefix prefix
+do
+  eval ac_val=$`echo $ac_var`
+  case $ac_val in
+    [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+    *)  AC_MSG_ERROR([expected an absolute path for --$ac_var: $ac_val]);;
+  esac
+done
+
+])dnl
