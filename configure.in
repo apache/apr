@@ -762,7 +762,19 @@ APR_CHECK_WORKING_GETADDRINFO
 AC_CHECK_FUNCS(getipnodebyname)
 AC_CHECK_FUNCS(getipnodebyaddr)
 APR_CHECK_SOCKADDR_IN6
-AC_SUBST(have_sockaddr_in6)
+AC_MSG_CHECKING(if APR supports IPv6)
+have_ipv6="0"
+if test "x$have_sockaddr_in6" = "x1"; then
+    if test "x$ac_cv_working_getaddrinfo" = "xyes"; then
+        have_ipv6="1"
+        AC_MSG_RESULT("yes")
+    else
+        AC_MSG_RESULT("no -- no working getaddrinfo")
+    fi
+else
+    AC_MSG_RESULT("no -- no sockaddr_in6");
+fi
+AC_SUBST(have_ipv6)
 
 dnl #----------------------------- Construct the files
 
