@@ -56,6 +56,19 @@
 #include "locks.h"
 
 #if defined (USE_SYSVSEM_SERIALIZE)  
+
+static struct sembuf op_on;
+static struct sembuf op_off;
+
+void setup_lock() {
+    op_on.sem_num = 0;
+    op_on.sem_op = -1;
+    op_on.sem_flg = SEM_UNDO;
+    op_off.sem_num = 0;
+    op_off.sem_op = 1;
+    op_off.sem_flg = SEM_UNDO;
+}
+
 ap_status_t lock_cleanup(void *lock_)
 {
     struct lock_t *lock=lock_;
@@ -84,14 +97,6 @@ ap_status_t create_inter_lock(struct lock_t *new)
         lock_cleanup(new);
         return errno;
     }
-            /* preinitialize these */
-    new->op_on.sem_num = 0;
-    new->op_on.sem_op = -1;
-    new->op_on.sem_flg = SEM_UNDO;
-    new->op_off.sem_num = 0;
-    new->op_off.sem_op = 1;
-    new->op_off.sem_flg = SEM_UNDO;
-
     new->curr_locked = 0;
     ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
@@ -100,7 +105,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
 ap_status_t lock_inter(struct lock_t *lock)
 {
     lock->curr_locked = 1;
-    if (semop(lock->interproc, &lock->op_on, 1) < 0) {
+    if (semop(lock->interproc, &op_on, 1) < 0) {
         return errno;
     }
     return APR_SUCCESS;
@@ -108,7 +113,7 @@ ap_status_t lock_inter(struct lock_t *lock)
 
 ap_status_t unlock_inter(struct lock_t *lock)
 {
-    if (semop(lock->interproc, &lock->op_off, 1) < 0) {
+    if (semop(lock->interproc, &op_off, 1) < 0) {
         return errno;
     }
     lock->curr_locked = 0;
@@ -132,6 +137,9 @@ ap_status_t child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fnam
 }
 
 #elif defined (USE_PROC_PTHREAD_SERIALIZE)  
+
+void setup_lock() {
+}
 
 ap_status_t lock_cleanup(struct lock_t *lock)
 {
@@ -227,12 +235,28 @@ ap_status_t child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fnam
 
 #elif defined (USE_FCNTL_SERIALIZE)  
 
+static struct flock lock_it;
+static struct flock unlock_it;
+
+void setup_lock() {
+    lock_it.l_whence = SEEK_SET;        /* from current point */
+    lock_it.l_start = 0;                /* -"- */
+    lock_it.l_len = 0;                  /* until end of file */
+    lock_it.l_type = F_WRLCK;           /* set exclusive/write lock */
+    lock_it.l_pid = 0;                  /* pid not actually interesting */
+    unlock_it.l_whence = SEEK_SET;      /* from current point */
+    unlock_it.l_start = 0;              /* -"- */
+    unlock_it.l_len = 0;                /* until end of file */
+    unlock_it.l_type = F_UNLCK;         /* set exclusive/write lock */
+    unlock_it.l_pid = 0;                /* pid not actually interesting */
+}
+
 static ap_status_t lock_cleanup(void *lock_)
 {
     struct lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        if (fcntl(lock->interproc, F_SETLKW, &lock->unlock_it) < 0) {
+        if (fcntl(lock->interproc, F_SETLKW, &unlock_it) < 0) {
             return errno;
         }
         lock->curr_locked=0;
@@ -248,17 +272,6 @@ ap_status_t create_inter_lock(struct lock_t *new)
         lock_cleanup(new);
         return errno;
     }
-            /* preinitialize these */
-    new->lock_it.l_whence = SEEK_SET;        /* from current point */
-    new->lock_it.l_start = 0;                /* -"- */
-    new->lock_it.l_len = 0;                  /* until end of file */
-    new->lock_it.l_type = F_WRLCK;           /* set exclusive/write lock */
-    new->lock_it.l_pid = 0;                  /* pid not actually interesting */
-    new->unlock_it.l_whence = SEEK_SET;      /* from current point */
-    new->unlock_it.l_start = 0;              /* -"- */
-    new->unlock_it.l_len = 0;                /* until end of file */
-    new->unlock_it.l_type = F_UNLCK;         /* set exclusive/write lock */
-    new->unlock_it.l_pid = 0;                /* pid not actually interesting */
 
     new->curr_locked=0;
     unlink(new->fname);
@@ -269,7 +282,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
 ap_status_t lock_inter(struct lock_t *lock)
 {
     lock->curr_locked=1;
-    if (fcntl(lock->interproc, F_SETLKW, &lock->lock_it) < 0) {
+    if (fcntl(lock->interproc, F_SETLKW, &lock_it) < 0) {
         return errno;
     }
     return APR_SUCCESS;
@@ -277,7 +290,7 @@ ap_status_t lock_inter(struct lock_t *lock)
 
 ap_status_t unlock_inter(struct lock_t *lock)
 {
-    if (fcntl(lock->interproc, F_SETLKW, &lock->unlock_it) < 0) {
+    if (fcntl(lock->interproc, F_SETLKW, &unlock_it) < 0) {
         return errno;
     }
     lock->curr_locked=0;
@@ -300,6 +313,10 @@ ap_status_t child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fnam
 }
 
 #elif defined (USE_FLOCK_SERIALIZE)
+
+void setup_lock() {
+}
+
 ap_status_t lock_cleanup(struct lock_t *lock)
 {
     if (lock->curr_locked == 1) {

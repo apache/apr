@@ -128,6 +128,8 @@ int main()
     ap_status_t s3;
     ap_status_t s4;
 
+    ap_initialize();
+
     fprintf(stdout, "Initializing the context......."); 
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "could not initialize\n");
