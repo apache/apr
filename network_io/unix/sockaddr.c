@@ -632,10 +632,29 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
     /* don't know if it is portable for getnameinfo() to set h_errno;
      * clear it then see if it was set */
     SET_H_ERRNO(0);
+
     /* default flags are NI_NAMREQD; otherwise, getnameinfo() will return
      * a numeric address string if it fails to resolve the host name;
      * that is *not* what we want here
+     *
+     * Additionally, if we know getnameinfo() doesn't handle IPv4-mapped
+     * IPv6 addresses correctly, drop down to IPv4 before calling
+     * getnameinfo().
      */
+#ifdef GETNAMEINFO_IPV4_MAPPED_FAILS
+    if (sockaddr->family == AF_INET6 &&
+        IN6_IS_ADDR_V4MAPPED(&sockaddr->sa.sin6.sin6_addr)) {
+        struct apr_sockaddr_t tmpsa;
+        tmpsa.sa.sin.sin_family = AF_INET;
+        tmpsa.sa.sin.sin_addr.s_addr = ((uint32_t *)sockaddr->ipaddr_ptr)[3];
+
+        rc = getnameinfo((const struct sockaddr *)&tmpsa.sa,
+                         sizeof(struct sockaddr_in),
+                         tmphostname, sizeof(tmphostname), NULL, 0,
+                         flags != 0 ? flags : NI_NAMEREQD);
+    }
+    else
+#endif
     rc = getnameinfo((const struct sockaddr *)&sockaddr->sa, sockaddr->salen,
                      tmphostname, sizeof(tmphostname), NULL, 0,
                      flags != 0 ? flags : NI_NAMEREQD);
