@@ -11,7 +11,7 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../include
-INCLUDES=-I$(INCDIR) -I.
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
 
 LIB=libdso.a
 
@@ -49,7 +49,7 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-dso.o: dso.c dso.h $(INCDIR)/apr_private.h \
+dso.o: dso.c $(INCDIR)/arch/unix/dso.h $(INCDIR)/apr_private.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
