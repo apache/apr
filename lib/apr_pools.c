@@ -469,7 +469,9 @@ APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int 
 
 
 #if APR_HAS_THREADS
-    apr_lock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_lock(alloc_mutex);
+    }
 #endif
 
     blok = new_block(POOL_HDR_BYTES, apr_abort);
@@ -496,7 +498,9 @@ APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int 
     }
 
 #if APR_HAS_THREADS
-    apr_unlock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_unlock(alloc_mutex);
+    }
 #endif
 
     return new_pool;
@@ -662,7 +666,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_init_alloc(void)
+apr_status_t apr_init_alloc(apr_pool_t *globalp)
 {
 #if APR_HAS_THREADS
     apr_status_t status;
@@ -675,13 +679,13 @@ apr_status_t apr_init_alloc(void)
 #endif
 #if APR_HAS_THREADS
     status = apr_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
-                   NULL, NULL);
+                   NULL, globalp);
     if (status != APR_SUCCESS) {
         apr_destroy_lock(alloc_mutex); 
         return status;
     }
     status = apr_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
-                   NULL, NULL);
+                   NULL, globalp);
     if (status != APR_SUCCESS) {
         apr_destroy_lock(spawn_mutex); 
         return status;
@@ -695,12 +699,13 @@ apr_status_t apr_init_alloc(void)
     return APR_SUCCESS;
 }
 
-void apr_term_alloc(void)
+void apr_term_alloc(apr_pool_t *globalp)
 {
 #if APR_HAS_THREADS
     apr_destroy_lock(alloc_mutex);
     apr_destroy_lock(spawn_mutex);
 #endif
+    apr_destroy_pool(globalp);
 }
 
 /* We only want to lock the mutex if we are being called from apr_clear_pool.
@@ -748,7 +753,9 @@ APR_DECLARE(void) apr_destroy_pool(apr_pool_t *a)
 {
     apr_clear_pool(a);
 #if APR_HAS_THREADS
-    apr_lock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_lock(alloc_mutex);
+    }
 #endif
 
     if (a->parent) {
@@ -763,7 +770,9 @@ APR_DECLARE(void) apr_destroy_pool(apr_pool_t *a)
 	}
     }
 #if APR_HAS_THREADS
-    apr_unlock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_unlock(alloc_mutex);
+    }
 #endif
     free_blocks(a->first);
 }
@@ -928,14 +937,14 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
     char *first_avail;
     char *new_first_avail;
 
+    nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
+    size = nclicks * CLICK_SZ;
+
 
     if (a == NULL) {
         return malloc(reqsize);
     }
 
-
-    nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
-    size = nclicks * CLICK_SZ;
 
     /* First, see if we have space in the block most recently
      * allocated to this pool
@@ -961,7 +970,9 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
     /* Nope --- get a new one that's guaranteed to be big enough */
 
 #if APR_HAS_THREADS
-    apr_lock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_lock(alloc_mutex);
+    }
 #endif
 
     blok = new_block(size, a->apr_abort);
@@ -972,7 +983,9 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
 #endif
 
 #if APR_HAS_THREADS
-    apr_unlock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_unlock(alloc_mutex);
+    }
 #endif
 
     first_avail = blok->h.first_avail;
