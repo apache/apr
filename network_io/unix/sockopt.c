@@ -144,6 +144,7 @@ apr_status_t apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
     if (t <= 0) {
         sock->options &= ~APR_INCOMPLETE_READ;
     }
+    sock->timeout = t;
     return APR_SUCCESS;
 }
 
