@@ -53,22 +53,6 @@
 /* Make sure we have ssize_t defined to be somethine */
 #undef ssize_t
 
-/* We want this in config.h, because it is a macro that Windows requires.  This
- * way, every thread start function has this definition, and things are happy.
- */
-#define API_THREAD_FUNC
-
-#ifdef HAVE_SIGACTION
-typedef void Sigfunc(int);
-Sigfunc *ap_signal(int signo, Sigfunc * func);
-
-#if defined(SIG_ING) && !defined(SIG_ERR)
-#define SIG_ERR ((Sigfunc *)-1)
-#endif
-#else
-#define ap_signal(a,b) signal(a,b)
-#endif
-
 #if !defined(HAVE_PTHREAD_SIGMASK) && defined(_AIX)
 #define pthread_sigmask sigprocmask
 #endif

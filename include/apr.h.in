@@ -95,4 +95,20 @@ typedef  @off_t_value@           ap_off_t;
  */
 @ssize_t_fmt@
 
+/* Define ap_signal and related necessary definitions.
+ */
+/* We are checking for HAVE_SIGACTION, but autoconf is filling this in 
+ * for us automatically.
+ */
+#if @have_sigaction@
+typedef void Sigfunc(int);
+Sigfunc *ap_signal(int signo, Sigfunc * func);
+
+#if defined(SIG_ING) && !defined(SIG_ERR)
+#define SIG_ERR ((Sigfunc *)-1)
+#endif
+#else
+#define ap_signal(a,b) signal(a,b)
+#endif
+
 #endif /* APR_H */
