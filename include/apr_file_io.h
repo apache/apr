@@ -581,6 +581,13 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
  * @param template The template to use when creating a temp file.
  * @param p The pool to allocate the file out of.
  * @ingroup apr_file_open
+ * @remark   
+ * This function  generates  a unique temporary file name from template.  
+ * The last six characters of template must be XXXXXX and these are replaced 
+ * with a string that makes the filename unique. Since it will  be  modified,
+ * template must not be a string constant, but should be declared as a character
+ * array.  
+ *
  */
 APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *tmplt,
                                           apr_pool_t *p);
