@@ -180,8 +180,8 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
 #define apr_atomic_set(mem, val)     (*mem = val)
 #define apr_atomic_read(mem)         (*mem)
 #define apr_atomic_init(pool)        APR_SUCCESS
-#define apr_atomic_cas(mem,with,cmp) atomic_cmpxchg(mem,cmp,with)
-#define apr_atomic_casptr(mem,with,cmp) (void*)atomic_cmpxchg((apr_uint32_t *)(mem),(long)(cmp),(long)(with))
+#define apr_atomic_cas(mem,with,cmp) atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
+#define apr_atomic_casptr(mem,with,cmp) (void*)atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
 
 #elif defined(__FreeBSD__)
 
