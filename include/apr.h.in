@@ -310,6 +310,7 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 /* Mechanisms to properly type numeric literals */
 @int64_literal@
+@uint64_literal@
 
 /* Definitions that APR programs need to work properly. */
 

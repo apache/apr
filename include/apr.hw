@@ -388,6 +388,7 @@ typedef  int         gid_t;
 /* Mechanisms to properly type numeric literals */
 
 #define APR_INT64_C(val) (val##i64)
+#define APR_UINT64_C(val) (val##Ui64)
 
 
 #if APR_HAVE_IPV6

@@ -83,7 +83,7 @@ static void hexdump(const unsigned char *b,int n)
 
 static apr_random_t *r;
 
-typedef apr_status_t rnd_fn(apr_random_t *r,void *b,apr_size_t n);
+typedef apr_status_t APR_THREAD_FUNC rnd_fn(apr_random_t *r,void *b,apr_size_t n);
 
 static void rand_run_kat(CuTest *tc,rnd_fn *f,apr_random_t *r,
                          const unsigned char expected[128])
