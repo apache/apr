@@ -196,14 +196,15 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket)
     return socket_cleanup(thesocket);
 }
 
-apr_status_t apr_bind(apr_socket_t *sock)
+apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     if (bind(sock->sock, 
-             (struct sockaddr *)&sock->local_addr->sa, 
-             sock->local_addr->sa_len) == -1) {
+             (struct sockaddr *)&sa->sa, 
+             sa->sa_len) == -1) {
         return apr_get_netos_error();
     }
     else {
+        sock->local_addr = sa;
         if (sock->local_addr->sa.sin.sin_port == 0) {
             sock->local_port_unknown = 1; /* ephemeral port */
         }

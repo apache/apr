@@ -245,10 +245,11 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket);
 /**
  * Bind the socket to its associated port
  * @param sock The socket to bind 
- * @tip This is where we will find out if there is any other process
+ * @param sa The socket address to bind to
+ * @tip This may be where we will find out if there is any other process
  *      using the selected port.
  */
-apr_status_t apr_bind(apr_socket_t *sock);
+apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
 
 /**
  * Listen to a bound socket for connections.

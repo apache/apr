@@ -90,7 +90,7 @@ int main(void)
 
 typedef enum {BLK, NONBLK, TIMEOUT} client_socket_mode_t;
 
-static void apr_setup(apr_pool_t **p, apr_socket_t **sock)
+static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
 {
     char buf[120];
     apr_status_t rv;
@@ -114,12 +114,25 @@ static void apr_setup(apr_pool_t **p, apr_socket_t **sock)
     }
 
     *sock = NULL;
-    rv = apr_create_tcp_socket(sock, *p);
+    rv = apr_create_socket(sock, *family, SOCK_STREAM, *p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_create_tcp_socket()->%d/%s\n",
+        fprintf(stderr, "apr_create_socket()->%d/%s\n",
                 rv,
                 apr_strerror(rv, buf, sizeof buf));
         exit(1);
+    }
+
+    if (*family == APR_UNSPEC) {
+        apr_sockaddr_t *localsa;
+
+        rv = apr_get_sockaddr(&localsa, APR_LOCAL, *sock);
+        if (rv != APR_SUCCESS) {
+            fprintf(stderr, "apr_get_sockaddr()->%d/%s\n",
+                    rv,
+                    apr_strerror(rv, buf, sizeof buf));
+            exit(1);
+        }
+        *family = localsa->sa.sin.sin_family;
     }
 }
 
@@ -205,9 +218,11 @@ static int client(client_socket_mode_t socket_mode)
     apr_pollfd_t *pfd;
     apr_int32_t nsocks;
     int i;
+    int family;
     apr_sockaddr_t *destsa;
 
-    apr_setup(&p, &sock);
+    family = APR_INET;
+    apr_setup(&p, &sock, &family);
     create_testfile(p, TESTFILE);
 
     rv = apr_open(&f, TESTFILE, APR_READ, 0, p);
@@ -218,7 +233,7 @@ static int client(client_socket_mode_t socket_mode)
         exit(1);
     }
 
-    rv = apr_getaddrinfo(&destsa, "127.0.0.1", APR_INET, TESTSF_PORT, 0, p);
+    rv = apr_getaddrinfo(&destsa, "127.0.0.1", family, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_getaddrinfo()->%d/%s\n",
                 rv,
@@ -493,16 +508,11 @@ static int server(void)
     int i;
     apr_socket_t *newsock = NULL;
     apr_ssize_t bytes_read;
+    apr_sockaddr_t *localsa;
+    int family;
 
-    apr_setup(&p, &sock);
-
-    rv = apr_set_port(sock, APR_LOCAL, TESTSF_PORT);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_set_local_port()->%d/%s\n",
-                rv,
-		apr_strerror(rv, buf, sizeof buf));
-        exit(1);
-    }
+    family = APR_UNSPEC;
+    apr_setup(&p, &sock, &family);
 
     rv = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
     if (rv != APR_SUCCESS) {
@@ -512,7 +522,15 @@ static int server(void)
         exit(1);
     }
 
-    rv = apr_bind(sock);
+    rv = apr_getaddrinfo(&localsa, NULL, family, TESTSF_PORT, 0, p);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "apr_getaddrinfo()->%d/%s\n",
+                rv,
+		apr_strerror(rv, buf, sizeof buf));
+        exit(1);
+    }
+
+    rv = apr_bind(sock, localsa);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_bind()->%d/%s\n",
                 rv,
