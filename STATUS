@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/07/26 18:46:19 $]
+Last modified at [$Date: 2001/07/26 18:52:51 $]
 
 Release:
 
@@ -175,6 +175,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       threads).
       Justin says: I'm not completely sold on this, but it has been mentioned 
                    before and at least added to STATUS.
+
+    * apr_xlate.h generates a bunch of compiler warnings.
 
 Documentation that needs writing:
 
