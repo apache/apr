@@ -145,3 +145,17 @@ APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(shm)
+
+APR_DECLARE(apr_status_t) apr_os_shm_get(apr_os_shm_t *osshm,
+                                         apr_shm_t *shm)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
+                                         apr_os_shm_t *osshm,
+                                         apr_pool_t *pool)
+{
+    return APR_ENOTIMPL;
+}    
+
