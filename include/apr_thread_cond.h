@@ -127,9 +127,9 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
                                                     apr_interval_time_t timeout);
 
 /**
- * Signals a singla thread, if one exists, that is blocking on the given
+ * Signals a single thread, if one exists, that is blocking on the given
  * condition variable. That thread is then scheduled to wake up and acquire
- * the associated mutex. Although it is not required, if predictible schedule
+ * the associated mutex. Although it is not required, if predictable scheduling
  * is desired, that mutex must be locked while calling this function.
  * @param cond the condition variable on which to produce the signal.
  */
@@ -137,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond);
 
 /**
  * Signals all threads blocking on the given condition variable.
- * Each thread that was signaled is then schedule to wake up and acquire
+ * Each thread that was signaled is then scheduled to wake up and acquire
  * the associated mutex. This will happen in a serialized manner.
  * @param cond the condition variable on which to produce the broadcast.
  */
