@@ -29,6 +29,7 @@ clean:
 
 distclean: clean
 	-$(RM) -f Makefile
+	cd mm; make distclean; cd ..
 
 $(OBJS): Makefile
 
