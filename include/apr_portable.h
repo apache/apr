@@ -364,6 +364,18 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
                                           apr_int32_t flags, apr_pool_t *cont); 
 
 /**
+ * convert the file from os specific type to apr type.
+ * @param file The apr file we are converting to.
+ * @param thefile The os specific pipe to convert
+ * @param cont The pool to use if it is needed.
+ * @remark On Unix, it is only possible to put a file descriptor into
+ *         an apr file type.
+ */
+APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *cont);
+
+/**
  * convert the dir from os specific type to apr type.
  * @param dir The apr dir we are converting to.
  * @param thedir The os specific dir to convert
