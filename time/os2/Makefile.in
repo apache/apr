@@ -51,11 +51,13 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-access.o: access.c atime.h $(INCDIR1)/apr_time.h \
+access.o: access.c ../unix/access.c ../unix/atime.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_lib.h $(INCDIR1)/apr_file_io.h
+time.o: time.c ../unix/time.c ../unix/atime.h $(INCDIR1)/apr_time.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
  $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h
-time.o: time.c atime.h $(INCDIR1)/apr_time.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_portable.h \
+ $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_win.h \
+ $(INCDIR1)/apr_network_io.h $(INCDIR1)/apr_lock.h
