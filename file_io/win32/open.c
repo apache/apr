@@ -277,7 +277,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     }
     else {
         (*new)->buffered = 0;
-        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
+        (*new)->buffer = NULL;
         (*new)->mutex = NULL;
     }
 
