@@ -455,15 +455,15 @@ static int client(client_socket_mode_t socket_mode)
 
     bytes_read = 1;
     rv = apr_recv(sock, buf, &bytes_read);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_recv()->%d/%s\n",
+    if (rv != APR_EOF) {
+        fprintf(stderr, "apr_recv()->%d/%s (expected APR_EOF)\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != 0) {
-        fprintf(stderr, "We expected the EOF condition on the connected\n"
-                "socket but instead we read %ld bytes.\n",
+        fprintf(stderr, "We expected to get 0 bytes read with APR_EOF\n"
+                "but instead we read %ld bytes.\n",
                 (long int)bytes_read);
         exit(1);
     }
@@ -694,15 +694,15 @@ static int server(void)
         
     bytes_read = 1;
     rv = apr_recv(newsock, buf, &bytes_read);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_recv()->%d/%s\n",
+    if (rv != APR_EOF) {
+        fprintf(stderr, "apr_recv()->%d/%s (expected APR_EOF)\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != 0) {
-        fprintf(stderr, "We expected the EOF condition on the connected\n"
-                "socket but instead we read %ld bytes (%c).\n",
+        fprintf(stderr, "We expected to get 0 bytes read with APR_EOF\n"
+                "but instead we read %ld bytes (%c).\n",
                 (long int)bytes_read, buf[0]);
         exit(1);
     }
