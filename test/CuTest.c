@@ -309,7 +309,7 @@ void CuSuiteDetails(CuSuite* testSuite, CuString* details)
 
 	if (testSuite->failCount != 0 && verbose)
 	{
-		CuStringAppendFormat(details, "Failed tests:\n");
+		CuStringAppendFormat(details, "Failed tests in %s:\n", testSuite->name);
 		for (i = 0 ; i < testSuite->count ; ++i)
 		{
 			CuTest* testCase = testSuite->list[i];
@@ -323,7 +323,7 @@ void CuSuiteDetails(CuSuite* testSuite, CuString* details)
 	}
 	if (testSuite->notimplCount != 0 && verbose)
 	{
-		CuStringAppendFormat(details, "\nNot Implemented tests:\n");
+		CuStringAppendFormat(details, "\nNot Implemented tests in %s:\n", testSuite->name);
 		for (i = 0 ; i < testSuite->count ; ++i)
 		{
 			CuTest* testCase = testSuite->list[i];
