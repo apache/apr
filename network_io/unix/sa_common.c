@@ -65,65 +65,54 @@
 
 #include "apr.h"
 
-apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, 
-                         apr_port_t port)
+apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port)
 {
     /* XXX IPv6: assumes sin_port and sin6_port at same offset */
-    if (which == APR_LOCAL)
-        sock->local_addr->sa.sin.sin_port = htons(port);
-    else if (which == APR_REMOTE)
-        sock->remote_addr->sa.sin.sin_port = htons(port);
-    else
-        return APR_EINVAL;
+    sockaddr->sa.sin.sin_port = htons(port);
+    sockaddr->sa.sin.sin_port = htons(port);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t *sock)
+/* XXX assumes IPv4... I don't think this function is needed anyway
+ * since we have apr_getaddrinfo(), but we need to clean up Apache's 
+ * listen.c a bit more first.
+ */
+apr_status_t apr_set_ipaddr(apr_sockaddr_t *sockaddr, const char *addr)
 {
-    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
-    if (which == APR_LOCAL)
-    {
-        if (sock->local_port_unknown) {
-            apr_status_t rv = get_local_addr(sock);
-
-            if (rv != APR_SUCCESS) {
-                return rv;
-            }
-        }
-        *port = ntohs(sock->local_addr->sa.sin.sin_port);
-    } else if (which == APR_REMOTE)
-        *port = ntohs(sock->remote_addr->sa.sin.sin_port);
-    else
-        return APR_EINVAL;
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_ipaddr(char **addr, apr_interface_e which, apr_socket_t *sock)
-{
-    if (which == APR_LOCAL) {
-        if (sock->local_interface_unknown) {
-            apr_status_t rv = get_local_addr(sock);
-
-            if (rv != APR_SUCCESS) {
-                return rv;
-            }
-        }
-        *addr = apr_palloc(sock->cntxt, sock->local_addr->addr_str_len);
-        apr_inet_ntop(sock->local_addr->sa.sin.sin_family,
-                      sock->local_addr->ipaddr_ptr,
-                      *addr,
-                      sock->local_addr->addr_str_len);
-    } 
-    else if (which == APR_REMOTE) {
-        *addr = apr_palloc(sock->cntxt, sock->remote_addr->addr_str_len);
-        apr_inet_ntop(sock->remote_addr->sa.sin.sin_family,
-                      sock->remote_addr->ipaddr_ptr,
-                      *addr,
-                      sock->remote_addr->addr_str_len);
+    u_long ipaddr;
+    
+    if (!strcmp(addr, APR_ANYADDR)) {
+        sockaddr->sa.sin.sin_addr.s_addr = htonl(INADDR_ANY);
+        return APR_SUCCESS;
     }
-    else 
-        return APR_EINVAL;
+    
+    ipaddr = inet_addr(addr);
+    if (ipaddr == (u_long)-1) {
+#ifdef WIN32
+        return WSAEADDRNOTAVAIL;
+#else
+        return errno;
+#endif
+    }
+    
+    sockaddr->sa.sin.sin_addr.s_addr = ipaddr;
+    return APR_SUCCESS;
+}
 
+apr_status_t apr_get_port(apr_port_t *port, apr_sockaddr_t *sockaddr)
+{
+    /* XXX IPv6 - assumes sin_port and sin6_port at same offset */
+    *port = ntohs(sockaddr->sa.sin.sin_port);
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr)
+{
+    *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
+    apr_inet_ntop(sockaddr->sa.sin.sin_family,
+                  sockaddr->ipaddr_ptr,
+                  *addr,
+                  sockaddr->addr_str_len);
     return APR_SUCCESS;
 }
 
@@ -194,6 +183,13 @@ static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
 apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock)
 {
     if (which == APR_LOCAL) {
+        if (sock->local_interface_unknown || sock->local_port_unknown) {
+            apr_status_t rv = get_local_addr(sock);
+
+            if (rv != APR_SUCCESS) {
+                return rv;
+            }
+        }
         *sa = sock->local_addr;
     }
     else if (which == APR_REMOTE) {

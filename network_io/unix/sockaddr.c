@@ -71,34 +71,6 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
 /* included here to allow us to use local_addr */
 #include "sa_common.c"
 
-apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const char *addr)
-{
-    u_long ipaddr;
-    struct sockaddr_in *sa_ptr;
-
-    /* XXX IPv6 */
-    if (which == APR_LOCAL)
-        sa_ptr = &sock->local_addr->sa.sin;
-    else if (which == APR_REMOTE)
-        sa_ptr = &sock->remote_addr->sa.sin;
-    else
-        return APR_EINVAL;
-    
-    if (!strcmp(addr, APR_ANYADDR)) {
-        sa_ptr->sin_addr.s_addr = htonl(INADDR_ANY);
-        return APR_SUCCESS;
-    }
-    
-    ipaddr = inet_addr(addr);
-    
-    if (ipaddr == -1) {
-        return errno;
-    }
-    
-    sa_ptr->sin_addr.s_addr = ipaddr;
-    return APR_SUCCESS;
-}
-
 #if APR_HAVE_NETINET_IN_H
 /* XXX IPv6 */
 apr_status_t apr_get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
