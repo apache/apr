@@ -72,6 +72,26 @@ static int convert_error (int err)
     return err;
 }
 
+apr_status_t apr_netware_pipe_cleanup(void *thefile)
+{
+    apr_file_t *file = thefile;
+    apr_status_t rv = APR_SUCCESS;
+    int rc;
+
+	rc = NXClose(file->filedes);
+    if (rc == 0) {
+        file->filedes = -1;
+        if (file->thlock) {
+            rv = apr_thread_mutex_destroy(file->thlock);
+        }
+    }
+    else {
+        /* Are there any error conditions other than EINTR or EBADF? */
+        rv = errno;
+    }
+    return rv;
+}
+
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
 	int				err;
@@ -148,14 +168,17 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 	if (  !(err = NXFifoOpen(0, tname, NX_O_RDONLY, 0, &filedes[0]))
 		&& !(err = NXFifoOpen(0, tname, NX_O_WRONLY, 0, &filedes[1])))
 	{
+        (*in) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
+        (*out) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
+
 		(*in)->cntxt     =
 		(*out)->cntxt    = cont;
 		(*in)->filedes   = filedes[0];
 		(*out)->filedes  = filedes[1];
 		(*in)->pipe      =
 		(*out)->pipe     = 1;
-		(*out)->fname    =
-		(*in)->fname     = NULL;
+		(*out)->fname    = apr_pstrdup(cont, tname);
+		(*in)->fname     = apr_pstrdup(cont, tname);;
 		(*in)->buffered  =
 		(*out)->buffered = 0;
 		(*in)->blocking  =
@@ -175,6 +198,12 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
             return convert_error (err);
 
 	}
+
+    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), apr_netware_pipe_cleanup,
+                         apr_pool_cleanup_null);
+    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), apr_netware_pipe_cleanup,
+                         apr_pool_cleanup_null);
+
     return APR_SUCCESS;
 }
 
