@@ -662,6 +662,15 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock,
                                                  apr_interval_time_t *t);
 
 /**
+ * Query the specified socket if at the OOB/Urgent data mark
+ * @param sock The socket to query
+ * @param atmark Is set to true if socket is at the OOB/urgent mark,
+ *               otherwise is set to false.
+ */
+APR_DECLARE(apr_status_t) apr_socket_atmark(apr_socket_t *sock, 
+                                            int *atmark);
+
+/**
  * Return an apr_sockaddr_t from an apr_socket_t
  * @param sa The returned apr_sockaddr_t.
  * @param which Which interface do we want the apr_sockaddr_t for?

@@ -939,6 +939,7 @@ APR_FLAG_HEADERS(
     sys/sendfile.h	\
     sys/signal.h	\
     sys/socket.h	\
+    sys/sockio.h	\
     sys/stat.h          \
     sys/sysctl.h	\
     sys/syslimits.h	\
@@ -988,6 +989,7 @@ AC_SUBST(stringsh)
 AC_SUBST(sys_sendfileh)
 AC_SUBST(sys_signalh)
 AC_SUBST(sys_socketh)
+AC_SUBST(sys_sockioh)
 AC_SUBST(sys_typesh)
 AC_SUBST(sys_timeh)
 AC_SUBST(sys_uioh)
