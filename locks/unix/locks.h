@@ -65,9 +65,12 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
-#elif defined (USE_FLOCK_SERIALIZE) || (USE_FCNTL_SERIALIZE)
+#elif defined (USE_FLOCK_SERIALIZE)
 #include <sys/file.h>
 #include <stdio.h>
+#elif defined (USE_FCNTL_SERIALIZE)
+#include <stdio.h>
+#include <fcntl.h>
 #endif
 #include <pthread.h>
 
