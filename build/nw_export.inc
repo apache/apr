@@ -66,6 +66,7 @@
 #include "apr_md5.h"
 #include "apr_optional.h"
 #include "apr_optional_hooks.h"
+#include "apr_queue.h"
 #include "apr_reslist.h"
 #include "apr_rmm.h"
 #include "apr_sdbm.h"
