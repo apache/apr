@@ -104,3 +104,5 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return APR_ENOTIMPL;
 }
 
+APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
+
