@@ -93,6 +93,8 @@ int main(void)
                  apr_file_open(&thefile, "dir1/file1",
                                APR_READ | APR_WRITE | APR_CREATE,
                                APR_OS_DEFAULT, pool))
+    STD_TEST_NEQ("    Closing dir1/file1",
+                 apr_file_close(thefile))
 
     /* Try to remove dir1.  This should fail because it's not empty.
        However, on a platform with threads disabled (such as FreeBSD),
@@ -112,9 +114,9 @@ int main(void)
        underlying system readdir() returns NULL, the old value of
        errno shouldn't cause a false alarm.  We should get an ENOENT
        back from apr_dir_read, and *not* the old errno. */
-    TEST_NEQ("       get ENOENT on 3rd read", 
-             apr_dir_read(&finfo, finfo_flags, this_dir),
-             APR_ENOENT, "OK", "Failed")
+    TEST_STATUS("       get ENOENT on 3rd read", 
+                apr_dir_read(&finfo, finfo_flags, this_dir),
+                APR_STATUS_IS_ENOENT, "OK", "Failed")
 
     /* Cleanup */
     STD_TEST_NEQ("    Cleanup file1",
