@@ -1,5 +1,11 @@
 Changes with APR b1
 
+  *) Added 2 additional lock functions: apr_proc_mutex_name and
+     apr_proc_mutex_defname which returns the type name of the mutex
+     (eg: "sysvsem") as well as the default mutex type (APR_LOCK_DEFAULT).
+     Mostly useful under Unix were the locktypes are selectable.
+     [Jim Jagielski]
+
   *) Fixed apr_generate_random_bytes() for Win32 on Win NT or 9x by
      dropping the 0x40 bit (CRYPT_SILENT) for earlier OS'es.
      PR 9286  [William Rowe]
