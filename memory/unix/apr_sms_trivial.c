@@ -387,6 +387,26 @@ static apr_status_t apr_sms_trivial_destroy(apr_sms_t *sms)
     return APR_SUCCESS;
 }
 
+#if APR_HAS_THREADS
+APR_DECLARE(apr_status_t) apr_sms_trivial_thread_register(
+                                                      apr_sms_t *sms,
+                                                      apr_os_thread_t thread)
+{
+    if (!SMS_TRIVIAL_T(sms)->lock && sms->threads > 1)
+        return apr_lock_create(&SMS_TRIVIAL_T(sms)->lock,
+                               APR_MUTEX, APR_LOCKALL,
+                               NULL, sms->pool);
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_sms_trivial_thread_unregister(
+                                                      apr_sms_t *sms,
+                                                      apr_os_thread_t thread)
+{
+    return APR_SUCCESS;
+}
+#endif /* APR_HAS_THREADS */
 
 APR_DECLARE(apr_status_t) apr_sms_trivial_create(apr_sms_t **sms, 
                                                   apr_sms_t *pms)
@@ -422,12 +442,16 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
     if ((rv = apr_sms_init(new_sms, pms)) != APR_SUCCESS)
         return rv;
 
-    new_sms->malloc_fn      = apr_sms_trivial_malloc;
-    new_sms->free_fn        = apr_sms_trivial_free;
-    new_sms->reset_fn       = apr_sms_trivial_reset;
-    new_sms->pre_destroy_fn = apr_sms_trivial_pre_destroy;
-    new_sms->destroy_fn     = apr_sms_trivial_destroy;
-    new_sms->identity       = module_identity;
+    new_sms->malloc_fn            = apr_sms_trivial_malloc;
+    new_sms->free_fn              = apr_sms_trivial_free;
+    new_sms->reset_fn             = apr_sms_trivial_reset;
+    new_sms->pre_destroy_fn       = apr_sms_trivial_pre_destroy;
+    new_sms->destroy_fn           = apr_sms_trivial_destroy;
+#if APR_HAS_THREADS
+    new_sms->thread_register_fn   = apr_sms_trivial_thread_register;
+    new_sms->thread_unregister_fn = apr_sms_trivial_thread_unregister;
+#endif /* APR_HAS_THREADS */
+    new_sms->identity             = module_identity;
 
     node = NODE_T((char *)new_sms + SIZEOF_SMS_TRIVIAL_T);
     node->first_avail = (char *)node + SIZEOF_NODE_T;

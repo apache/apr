@@ -287,6 +287,10 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
      */
     sms->calloc_fn = apr_sms_default_calloc;
     
+#if APR_HAS_THREADS
+    sms->threads = 1;
+#endif /* APR_HAS_THREADS */
+    
     /* XXX - This should eventually be removed */
     apr_pool_create(&sms->pool, pms ? pms->pool : NULL);
 
@@ -304,10 +308,13 @@ APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms)
 
     apr_sms_assert(sms);
 
-    /* Create the sms framework lock we'll use. */
-    rv = apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_LOCKALL,
-                         NULL, sms->pool);
-
+    rv = APR_SUCCESS;
+    
+#if APR_HAS_THREADS
+    if (sms->thread_register_fn)
+        rv = sms->thread_register_fn(sms, apr_os_thread_current());
+#endif /* APR_HAS_THREADS */
+    
 #if APR_DEBUG_SHOW_FUNCTIONS
     fprintf(dbg_file, "CREATE - sms %p [%s] has been created\n", 
             sms, sms->identity);
@@ -830,6 +837,53 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms,
     /* The cleanup function should have been registered previously */
     return rv;
 }
+
+#if APR_HAS_THREADS
+APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms,
+                                                  apr_os_thread_t thread)
+{
+    do {
+        if (!sms->sms_lock) {
+            /* Create the sms framework lock we'll use. */
+            apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_LOCKALL,
+                            NULL, sms->pool);
+        }
+
+        apr_lock_acquire(sms->sms_lock);
+
+        sms->threads++;
+
+        /* let the sms know about the thread if it is
+         * interested (so it can protect its private
+         * data with its own lock)
+         */
+        if (sms->thread_register_fn)
+            sms->thread_register_fn(sms, thread);
+
+        apr_lock_release(sms->sms_lock);
+
+        sms = sms->parent;
+    } while (sms);
+
+    return APR_SUCCESS;    
+}
+
+APR_DECLARE(apr_status_t) apr_sms_thread_unregister(apr_sms_t *sms,
+                                                    apr_os_thread_t thread)
+{
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
+    
+    sms->threads--;
+
+    /* Even if the thread count hits one, we don't destroy the
+     * lock for now
+     */
+
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
+}
+#endif /* APR_HAS_THREADS */
 
 APR_DECLARE(const char*) apr_sms_identity(apr_sms_t *sms)
 {
