@@ -61,8 +61,12 @@
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include "apr_errno.h"
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
+#endif
 
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
@@ -165,6 +169,13 @@ static char *getpass(const char *prompt)
 
 static char *getpass(const char *prompt)
 {
+/* WCE lacks console. So the getpass is unsuported
+ * The only way is to use the GUI so the getpass should be implemented
+ * on per-application basis.
+*/ 
+#ifdef _WIN32_WCE
+    return NULL;
+#else
     static char password[MAX_STRING_LEN];
     int n = 0;
 
@@ -190,6 +201,7 @@ static char *getpass(const char *prompt)
     }
 
     return (char *) &password;
+#endif
 }
 
 #endif /* no getchar or _getch */
