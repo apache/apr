@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Some adjustment of hints.m4 setting flags (used to check if null
+     first) and added some verbosity. [Jim Jagielski]
+
   *) Specify APR_DECLARE to some of the APR functions.  This helps linking
      on some operating systems.  [Gregory Nicholls <gnicholls@level8.com>]
 
