@@ -57,7 +57,7 @@
 
 #include "test_apr.h"
 
-#define NUM_TESTS 4
+#define NUM_TESTS 5
 
 apr_pool_t *p;
 
@@ -67,7 +67,8 @@ testfunc *tests[NUM_TESTS] = {
     teststr,
     testtime,
     testvsn,
-    testipsub
+    testipsub,
+    testmmap
 };
 
 int main(int argc, char *argv[])

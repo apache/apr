@@ -52,22 +52,15 @@
  * <http://www.apache.org/>.
  */
 
-/* Some simple functions to make the test apps easier to write and
- * a bit more consistent...
- */
-
-/* Things to bear in mind when using these...
- *
- * If you include '\t' within the string passed in it won't be included
- * in the spacing, so use spaces instead :)
- * 
- */ 
-
 #ifndef APR_TEST_INCLUDES
 #define APR_TEST_INCLUDES
 
 #include "CuTest.h"
 #include "apr_pools.h"
+
+/* Some simple functions to make the test apps easier to write and
+ * a bit more consistent...
+ */
 
 extern apr_pool_t *p;
 
@@ -77,6 +70,7 @@ CuSuite *teststr(void);
 CuSuite *testtime(void);
 CuSuite *testvsn(void);
 CuSuite *testipsub(void);
+CuSuite *testmmap(void);
 
 
 
