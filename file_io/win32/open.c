@@ -84,20 +84,34 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
     int srcremains = strlen(srcstr) + 1;
     apr_wchar_t *t = retstr;
     apr_status_t rv;
-    if (srcstr[1] == ':' && (srcstr[2] == '/' || srcstr[2] == '\\')) {
-        wcscpy (retstr, L"\\\\?\\");
-        retlen -= 4;
-        t += 4;
-    }
-    else if ((srcstr[0] == '/' || srcstr[0] == '\\')
-          && (srcstr[1] == '/' || srcstr[1] == '\\')
-          && (srcstr[2] != '?')) {
-        /* Skip the slashes */
-        srcstr += 2;
-        srcremains -= 2;
-        wcscpy (retstr, L"\\\\?\\UNC\\");
-        retlen -= 8;
-        t += 8;
+
+    /* This is correct, we don't twist the filename if it is will
+     * definately be shorter than MAX_PATH.  It merits some 
+     * performance testing to see if this has any effect, but there
+     * seem to be applications that get confused by the resulting
+     * Unicode \\?\ style file names, especially if they use argv[0]
+     * or call the Win32 API functions such as GetModuleName, etc.
+     * Not every application is prepared to handle such names.
+     *
+     * Note that a utf-8 name can never result in more wide chars
+     * than the original number of utf-8 narrow chars.
+     */
+    if (srcremains > MAX_PATH) {
+        if (srcstr[1] == ':' && (srcstr[2] == '/' || srcstr[2] == '\\')) {
+            wcscpy (retstr, L"\\\\?\\");
+            retlen -= 4;
+            t += 4;
+        }
+        else if ((srcstr[0] == '/' || srcstr[0] == '\\')
+              && (srcstr[1] == '/' || srcstr[1] == '\\')
+              && (srcstr[2] != '?')) {
+            /* Skip the slashes */
+            srcstr += 2;
+            srcremains -= 2;
+            wcscpy (retstr, L"\\\\?\\UNC\\");
+            retlen -= 8;
+            t += 8;
+        }
     }
 
     if (rv = conv_utf8_to_ucs2(srcstr, &srcremains, t, &retlen)) {
