@@ -462,7 +462,7 @@ APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
                                                   apr_cmdtype_e cmd);
 
 /**
- * Determine if the chlid should start in detached state.
+ * Determine if the child should start in detached state.
  * @param attr The procattr we care about. 
  * @param detach Should the child start in detached state?  Default is no. 
  */
