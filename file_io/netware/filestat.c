@@ -59,9 +59,12 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_hash.h"
-#define USE_CSTAT_MUTEX
+#define USE_CSTAT_RWLOCK
 #ifdef USE_CSTAT_MUTEX
 #include "apr_thread_mutex.h"
+#endif
+#ifdef USE_CSTAT_RWLOCK
+#include "apr_thread_rwlock.h"
 #endif
 
 static apr_filetype_e filetype_from_mode(mode_t mode)
@@ -226,6 +229,9 @@ struct apr_stat_cache_t {
 #ifdef USE_CSTAT_MUTEX
     apr_thread_mutex_t *statcache_mutex;
 #endif
+#ifdef USE_CSTAT_RWLOCK
+    apr_thread_rwlock_t *statcache_mutex;
+#endif
 };
 
 int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *pool)
@@ -234,6 +240,9 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
     apr_hash_t *statCache = NULL;
 #ifdef USE_CSTAT_MUTEX
     apr_thread_mutex_t *statcache_mutex;
+#endif
+#ifdef USE_CSTAT_RWLOCK
+    apr_thread_rwlock_t *statcache_mutex;
 #endif
     apr_pool_t *gPool = (apr_pool_t *)getGlobalPool();
     apr_stat_entry_t *stat_entry;
@@ -259,7 +268,7 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
        with a new mutex lock. */
     if (statCacheData) {
         statCache = statCacheData->statCache;
-#ifdef USE_CSTAT_MUTEX
+#if defined(USE_CSTAT_MUTEX) || defined(USE_CSTAT_RWLOCK)
         statcache_mutex = statCacheData->statcache_mutex;
 #endif
     }
@@ -268,6 +277,10 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
         statCache = apr_hash_make(gPool);
 #ifdef USE_CSTAT_MUTEX
         apr_thread_mutex_create(&statcache_mutex, APR_THREAD_MUTEX_DEFAULT, gPool);
+        statCacheData->statcache_mutex = statcache_mutex;
+#endif
+#ifdef USE_CSTAT_RWLOCK
+        apr_thread_rwlock_create(&statcache_mutex, gPool);
         statCacheData->statcache_mutex = statcache_mutex;
 #endif
         statCacheData->statCache = statCache;
@@ -280,9 +293,15 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
 #ifdef USE_CSTAT_MUTEX
         apr_thread_mutex_lock(statcache_mutex);
 #endif
+#ifdef USE_CSTAT_RWLOCK
+        apr_thread_rwlock_rdlock(statcache_mutex);
+#endif
         stat_entry = (apr_stat_entry_t*) apr_hash_get(statCache, path, APR_HASH_KEY_STRING);
 #ifdef USE_CSTAT_MUTEX
         apr_thread_mutex_unlock(statcache_mutex);
+#endif
+#ifdef USE_CSTAT_RWLOCK
+        apr_thread_rwlock_unlock(statcache_mutex);
 #endif
         /* If we got an entry then check the expiration time.  If the entry
            hasn't expired yet then copy the information and return. */
@@ -303,6 +322,9 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
                 *casedName = case_filename(pool, path);
 #ifdef USE_CSTAT_MUTEX
                 apr_thread_mutex_lock(statcache_mutex);
+#endif
+#ifdef USE_CSTAT_RWLOCK
+                apr_thread_rwlock_wrlock(statcache_mutex);
 #endif
                 /* If we don't have a stat_entry then create one, copy
                    the data and add it to the hash table. */
@@ -329,6 +351,9 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
                 }
 #ifdef USE_CSTAT_MUTEX
                 apr_thread_mutex_unlock(statcache_mutex);
+#endif
+#ifdef USE_CSTAT_RWLOCK
+                apr_thread_rwlock_unlock(statcache_mutex);
 #endif
             }
             else
