@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Implement portable accessors for proc mutex. These are equivalent
+     to apr_os_lock_get/set, but they work for apr_proc_mutex_t types
+     instead.   [Aaron Bannert]
+
   *) Added a new parameter to apr_thread_mutex_init(). Now, by default,
      thread mutexes are not nested (sometimes called "recursive"). To
      enable nested mutexes, a flag must be passed to the init script.
