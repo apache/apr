@@ -109,4 +109,7 @@ testmd5@EXEEXT@: testmd5.lo $(LOCAL_LIBS)
 testpoll@EXEEXT@: testpoll.lo $(LOCAL_LIBS)
 	$(LINK) testpoll.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
+testmem@EXEEXT@: testmem.lo $(LOCAL_LIBS)
+	$(LINK) testmem.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
 # DO NOT REMOVE
