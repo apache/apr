@@ -133,6 +133,7 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms)
      */
     
     apr_sms_assert(new_sms);
+    apr_sms_post_init(new_sms);
 
     *sms = new_sms;
     return APR_SUCCESS;

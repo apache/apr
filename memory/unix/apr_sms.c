@@ -227,11 +227,20 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
     /* XXX - This should eventually be removed */
     apr_pool_create(&sms->pool, pms ? pms->pool : NULL);
 
-    /* Create the lock we'll use to protect cleanups and child lists */
-    apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_LOCKALL, NULL,
-                    sms->pool);
-
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms)
+{
+    /* We do things here as these may potentially make calls
+     * to the sms that we're creating, and if we make the calls
+     * in the sms_init phase we haven't yet added the function
+     * pointers so we'll segfault!
+     */
+
+    /* Create the sms framework lock we'll use. */
+    return apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_LOCKALL,
+                           NULL, sms->pool);
 }
 
 #ifdef APR_ASSERT_MEMORY
