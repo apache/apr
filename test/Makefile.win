@@ -87,7 +87,7 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testenv.obj testprocmutex.obj testrand2.obj testfnmatch.obj \
         testatomic.obj testflock.obj testshm.obj testsock.obj \
         testglobalmutex.obj teststrnatcmp.obj testfilecopy.obj \
-        testtemp.obj
+        testtemp.obj testlfs.obj
 
 testall.exe: $(TESTS) CuTest.obj $(LOCAL_LIBS)
 	$(LINK) /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
