@@ -42,3 +42,4 @@ testmem
 testlock
 *.core
 testsockets
+testuser
