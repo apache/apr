@@ -111,20 +111,23 @@ AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the 
 
 if test "x$use_libtool" = "xyes"; then
       lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -c $< && touch $@'
-      link='$(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) $(ALL_LDFLAGS) -o $@'
+      link='$(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) $(ALL_LDFLAGS) $(ALL_LIBS) -o $@'
       so_ext='lo'
       lib_target='-rpath $(libdir) $$objects'
+      export_lib_target='-rpath $(libdir) \$\$objects'
 else
       lt_compile='$(COMPILE) -c $<'
       link='$(AR) cr $(TARGET_LIB) $$objects; $(RANLIB) $(TARGET_LIB)'
       so_ext='o'
       lib_target=''
+      export_lib_target=''
 fi
 
 AC_SUBST(lt_compile)
 AC_SUBST(link)
 AC_SUBST(so_ext)
 AC_SUBST(lib_target)
+AC_SUBST(export_lib_target)
 AC_SUBST(LTFLAGS)
 AC_SUBST(LT_LDFLAGS)
 
