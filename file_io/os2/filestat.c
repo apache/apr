@@ -54,7 +54,7 @@
 
 #define INCL_DOS
 #define INCL_DOSERRORS
-#include "os2/fileio.h"
+#include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include <sys/time.h>

@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "unix/fileio.h"
+#include "fileio.h"
 
 static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 {
