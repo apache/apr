@@ -121,8 +121,9 @@ typedef  int         ap_ssize_t;
 typedef  _off_t      ap_off_t;
 typedef  int         pid_t;
 
-/* Definitions that APR programs need to work properly. */
 
+/* Definitions that APR programs need to work properly. */
+#define APR_SSIZE_T_FMT          "d"
 #define API_THREAD_FUNC          __stdcall
 #define API_EXPORT(type)         type
 #define API_EXPORT_NONSTD(type)  type
