@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     }
     else fprintf(stderr, "Read failed.\n");
 
-    Sleep(1000);
+    sleep(1000);
     fprintf(stdout, "Removing directory.......");
     if (ap_remove_dir("proctest", context) != APR_SUCCESS) {
         fprintf(stderr, "Could not remove directory.\n");
