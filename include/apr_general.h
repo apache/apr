@@ -173,6 +173,9 @@ int strncasecmp(const char *a, const char *b, size_t n);
  * String and memory functions
  */
 
+#define APR_STRINGIFY(n) APR_STRINGIFY_HELPER(n)
+#define APR_STRINGIFY_HELPER(n) #n
+
 #if (!APR_HAVE_MEMMOVE)
 #define memmove(a,b,c) bcopy(b,a,c)
 #endif
