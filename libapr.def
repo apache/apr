@@ -85,7 +85,6 @@ EXPORTS
         apr_get_port
 	apr_set_port
         apr_get_inaddr
-        apr_get_socket_inaddr
 
 ;
 ;
@@ -217,8 +216,6 @@ EXPORTS
 
 	apr_tokenize_to_argv
 	apr_filename_of_pathname
-	apr_get_remote_name
-	apr_get_local_name
 
 	apr_open_stderr
 	apr_get_pipe_timeout
