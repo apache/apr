@@ -65,6 +65,26 @@
 #include "atime.h"
 #include "misc.h"
 
+/* We have to assure that the file name contains no '*'s, or other
+ * wildcards when using FindFirstFile to recover the true file name.
+ */
+static apr_status_t test_safe_name(const char *name)
+{
+    /* Only accept ':' in the second position of the filename,
+     * as the drive letter delimiter:
+     */
+    if (apr_isalpha(*name) && (name[1] == ':')) {
+        name += 2;
+    }
+    while (*name) {
+        if (!IS_FNCHAR(*name) && (*name != '\\') && (*name != '/')) {
+            return APR_EBADPATH;
+        }
+        ++name;
+    }
+    return APR_SUCCESS;
+}
+
 static apr_status_t free_localheap(void *heap) {
     LocalFree(heap);
     return APR_SUCCESS;
@@ -503,10 +523,10 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * enough string to handle the longest file name.
              */
             char tmpname[APR_FILE_MAX * 3 + 1];
-            const char *name;
             HANDLE hFind;
-            if (strchr(fname, '*') || strchr(fname, '?'))
-                return APR_ENOENT;
+            if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
+                return rv;
+            }
             hFind = FindFirstFileW(wfname, &FileInfo.w);
             if (hFind == INVALID_HANDLE_VALUE)
                 return apr_get_os_error();
@@ -515,69 +535,64 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                      FileInfo.w.cFileName)) {
                 return APR_ENAMETOOLONG;
             }
-            /* If fname does not match the name returned by FindFirstFile
-             * then fname does not exist and we're done.
-             */
-            name = apr_filepath_name_get(fname);
-            if (strcasecmp(name, tmpname)) {
-                return APR_ENOENT;
-            }
             filename = apr_pstrdup(pool, tmpname);
         }
     }
 #endif
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
-      if ((apr_os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
     {
-        /* cannot use FindFile on a Win98 root, it returns \*
-         * GetFileAttributesExA is not available on Win95
-         */
-        if (!GetFileAttributesExA(fname, GetFileExInfoStandard, 
-                                 &FileInfo.i)) {
-            return apr_get_os_error();
-        }
-    }
-    else if (isroot) {
-        /* This is Win95 and we are trying to stat a root.  Lie.
-         */
-        if (GetDriveType(fname) != DRIVE_UNKNOWN) 
+        char *root = NULL;
+        char *test = fname;
+        rv = apr_filepath_root(&root, &test APR_FILEPATH_NATIVE, pool);
+        isroot = (root && *root && !(*test));
+
+        if ((apr_os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
         {
-            finfo->pool = pool;
-            finfo->filetype = 0;
-            finfo->mtime = apr_time_now();
-            finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
-            finfo->protection |= (finfo->protection << prot_scope_group) 
-                               | (finfo->protection << prot_scope_user);
-            finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_MTIME
-                         | (wanted & APR_FINFO_LINK);
-            return (wanted &= ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;            
+            /* cannot use FindFile on a Win98 root, it returns \*
+             * GetFileAttributesExA is not available on Win95
+             */
+            if (!GetFileAttributesExA(fname, GetFileExInfoStandard, 
+                                     &FileInfo.i)) {
+                return apr_get_os_error();
+            }
         }
-        else
-            return APR_FROM_OS_ERROR(ERROR_PATH_NOT_FOUND);
-    }
-    else  {
-        /* Guard against bogus wildcards and retrieve by name
-         * since we want the true name, or are stuck in Win95,
-         * or are looking for the root of a Win98 drive.
-         */
-        HANDLE hFind;
-        const char *name;
-        if (strchr(fname, '*') || strchr(fname, '?'))
-            return APR_ENOENT;
-        hFind = FindFirstFileA(fname, &FileInfo.n);
-        if (hFind == INVALID_HANDLE_VALUE) {
-            return apr_get_os_error();
-    	} 
-        FindClose(hFind);
-        /* If fname does not match the name returned by FindFirstFile
-         * then fname does not exist and we're done.
-         */
-        name = apr_filepath_name_get(fname);
-        if (strcasecmp(name, FileInfo.n.cFileName)) {
-            return APR_ENOENT;
+        else if (isroot) {
+            /* This is Win95 and we are trying to stat a root.  Lie.
+             */
+            if (GetDriveType(fname) != DRIVE_UNKNOWN) 
+            {
+                finfo->pool = pool;
+                finfo->filetype = 0;
+                finfo->mtime = apr_time_now();
+                finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
+                finfo->protection |= (finfo->protection << prot_scope_group) 
+                                   | (finfo->protection << prot_scope_user);
+                finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT 
+                              | APR_FINFO_MTIME
+                              | (wanted & APR_FINFO_LINK);
+                return (wanted &= ~finfo->valid) ? APR_INCOMPLETE 
+                                                 : APR_SUCCESS;
+            }
+            else
+                return APR_FROM_OS_ERROR(ERROR_PATH_NOT_FOUND);
         }
-        filename = apr_pstrdup(pool, FileInfo.n.cFileName);
+        else  {
+            /* Guard against bogus wildcards and retrieve by name
+             * since we want the true name, or are stuck in Win95,
+             * or are looking for the root of a Win98 drive.
+             */
+            HANDLE hFind;
+            if ((rv = test_safe_name(fname)) != APR_SUCCESS) {
+                return rv;
+            }
+            hFind = FindFirstFileA(fname, &FileInfo.n);
+            if (hFind == INVALID_HANDLE_VALUE) {
+                return apr_get_os_error();
+    	    } 
+            FindClose(hFind);
+            filename = apr_pstrdup(pool, FileInfo.n.cFileName);
+        }
     }
 #endif
 
@@ -589,28 +604,56 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * to reliably translate char devices to the path '\\.\device'
              * so go ask for the full path.
              */
-            IF_WIN_OS_IS_UNICODE
+            if (apr_os_level >= APR_WIN_NT)
             {
 #if APR_HAS_UNICODE_FS
                 apr_wchar_t tmpname[APR_FILE_MAX];
-                apr_wchar_t *tmpoff;
+                apr_wchar_t *tmpoff = NULL;
                 if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
                                      tmpname, &tmpoff))
                 {
-                    if ((tmpoff == tmpname + 4) 
-                        && !wcsncmp(tmpname, L"\\\\.\\", 4))
-                        finfo->filetype = APR_CHR;
-                }
+                    if (!wcsncmp(tmpname, L"\\\\.\\", 4)) {
 #else
+                /* Same initial logic as above, but
+                 * only for WinNT/non-UTF-8 builds of APR:
+                 */
                 char tmpname[APR_FILE_MAX];
                 char *tmpoff;
                 if (GetFullPathName(fname, sizeof(tmpname), tmpname, &tmpoff))
                 {
-                    if ((tmpoff == tmpname + 4) 
-                        && !strncmp(tmpname, "\\\\.\\", 4))
-                        finfo->filetype = APR_CHR;
-                }
+                    if (!strncmp(tmpname, "\\\\.\\", 4)) {
 #endif
+                        if (tmpoff == tmpname + 4) {
+                            finfo->filetype = APR_CHR;
+                        }
+                        /* For WHATEVER reason, CHR devices such as \\.\con 
+                         * or \\.\lpt1 *may*not* update tmpoff; in fact the
+                         * resulting tmpoff is set to NULL.  Guard against 
+                         * either case.
+                         *
+                         * This code is identical for wide and narrow chars...
+                         */
+                        else if (!tmpoff) {
+                            tmpoff = tmpname + 4;
+                            while (*tmpoff) {
+                                if (*tmpoff == '\\' || *tmpoff == '/') {
+                                    break;
+                                }
+                                ++tmpoff;
+                            }
+                            if (!*tmpoff) {
+                                finfo->filetype = APR_CHR;
+                            }
+                        }
+                    }
+                }
+                else {
+                    finfo->valid &= ~APR_FINFO_TYPE;
+                }
+
+            }
+            else {
+                finfo->valid &= ~APR_FINFO_TYPE;
             }
         }
         finfo->pool = pool;
