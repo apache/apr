@@ -100,7 +100,7 @@ int main(void)
     fprintf(stdout,"OK\n");
     
     apr_filepath_get(&file1, 0, context);
-    file1 = apr_pstrcat(context,file1,"/testmmap.c",NULL);
+    file1 = apr_pstrcat(context,file1,"/testmmap",NULL);
 
     fprintf(stdout, "Opening file........................");
     rv = apr_file_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context);
