@@ -304,9 +304,6 @@ EOF
     *:OS400:*:* | *:OS/400:*:*) 
        echo as400-ibm-os400
        exit 0 ;;
-    *:OS/2:*:*)
-       echo "i386-pc-os2_emx"
-       exit 0;;
 #
 # end Apache changes
 #########################
