@@ -62,12 +62,14 @@ static void test_open(CuTest *tc)
 
     /* 8Gb may pass rlimits or filesystem limits */
 
+    if (APR_STATUS_IS_EINVAL(rv)
 #ifdef EFBIG
-    if (rv == EFBIG) {
-        CuNotImpl(tc, "Creation of large file (limited by rlimit or fs?)");
-    } else
+        || rv == EFBIG
 #endif
-    {
+        ) {
+        CuNotImpl(tc, "Creation of large file (limited by rlimit or fs?)");
+    } 
+    else {
         apr_assert_success(tc, "truncate file to 8gb", rv);
     }
 
