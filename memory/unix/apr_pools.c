@@ -1422,7 +1422,7 @@ static void free_proc_chain(struct process_chain *procs)
 #ifndef NEED_WAITPID
     /* Pick up all defunct processes */
     for (p = procs; p; p = p->next) {
-        if (apr_proc_wait(p->pid, APR_NOWAIT) != APR_CHILD_NOTDONE) {
+        if (apr_proc_wait(p->pid, NULL, APR_NOWAIT) != APR_CHILD_NOTDONE) {
             p->kill_how = kill_never;
         }
     }
@@ -1467,7 +1467,7 @@ static void free_proc_chain(struct process_chain *procs)
     /* Now wait for all the signaled processes to die */
     for (p = procs; p; p = p->next) {
 	if (p->kill_how != kill_never) {
-	    (void) apr_proc_wait(p->pid, APR_WAIT);
+	    (void) apr_proc_wait(p->pid, NULL, APR_WAIT);
 	}
     }
 #ifdef WIN32
