@@ -1,5 +1,5 @@
 Apache 2.0 STATUS:
-Last modified at [$Date: 2000/12/08 14:30:41 $]
+Last modified at [$Date: 2000/12/12 12:01:12 $]
 
 Release:
 
@@ -48,10 +48,17 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       be set up to build only the required version.
 
     * use libtool
-        Status: Greg +1 (volunteers)
+        Status: Greg +1 (volunteers), Ryan +1(?)
+	Waiting for commentary from jimjag
 
     * snarf rules.mk(.in) from APRUTIL to simplify makefiles
         Status: Greg +1 (volunteers), Sascha +1, rbb -0.5
+
+    * add apr_crypt() and APR_HAS_CRYPT for apps to determine whether the
+      crypt() function is available, and a way to call it (whether it is
+      located in libc, libcrypt, or libufc)
+        Status: Greg +1 (volunteers)
+
 
 Documentation that needs writing:
 
