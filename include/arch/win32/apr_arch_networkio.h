@@ -41,11 +41,13 @@ struct apr_socket_t {
     int                 remote_addr_unknown;
     apr_int32_t         netmask;
     apr_int32_t         inherit;
+#if APR_HAS_SENDFILE
     /* As of 07.20.04, the overlapped structure is only used by 
      * apr_socket_sendfile and that's where it will be allocated 
      * and initialized.
      */
     OVERLAPPED         *overlapped;
+#endif
     sock_userdata_t    *userdata;
 };
 
