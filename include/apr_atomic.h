@@ -431,6 +431,11 @@ void apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val);
 #define APR_ATOMIC_NEED_DEFAULT_INIT 1
 #endif
 
+#if !defined(apr_atomic_sub32) && !defined(APR_OVERRIDE_ATOMIC_SUB32)
+void apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val);
+#define APR_ATOMIC_NEED_DEFAULT_INIT 1
+#endif
+
 #if !defined(apr_atomic_inc32) && !defined(APR_OVERRIDE_ATOMIC_INC32)
 void apr_atomic_inc32(volatile apr_uint32_t *mem);
 #define APR_ATOMIC_NEED_DEFAULT_INIT 1
