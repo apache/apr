@@ -124,6 +124,7 @@ ap_status_t ap_shm_free(struct shmem_t *m, void *entity)
 
 ap_status_t ap_get_shm_name(ap_shmem_t *c, ap_shm_name_t **name)
 {
+    *name = NULL;
     return APR_ANONYMOUS;
 }
 

@@ -103,7 +103,7 @@ ap_status_t ap_shm_free(struct shmem_t *shared, void *entity)
 ap_status_t ap_get_shm_name(ap_shmem_t *c, ap_shm_name_t **name)
 {
 #if APR_USES_ANONYMOUS_SHM
-    name = NULL;
+    *name = NULL;
     return APR_ANONYMOUS;
 /* Currently, we are not supporting name based shared memory on Unix
  * systems.  This may change in the future however, so I will leave
