@@ -104,9 +104,7 @@ typedef struct apr_pool_t apr_pool_t;
  *    APR_DECLARE(apr_pool_t *) apr_file_pool_get(apr_file_t *ob);
  *
  * In the implementation, the APR_POOL_IMPLEMENT_ACCESSOR() is used to
- * actually define the function. It assumes the field is named "pool". For
- * data types with a different field name (e.g. "cont" or "cntxt") the
- * APR_POOL_IMPLEMENT_ACCESSOR_X() macro should be used.
+ * actually define the function. It assumes the field is named "pool".
  *
  * Note: the linkage is specified for APR. It would be possible to expand
  *       the macros to support other linkages.
@@ -118,12 +116,8 @@ typedef struct apr_pool_t apr_pool_t;
 
 /** used to implement the pool accessor */
 #define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
-    APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
-
-/** used to implement the pool accessor */
-#define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
     APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-        (const apr_##typename##_t *ob) { return ob->fieldname; }
+        (const apr_##typename##_t *ob) { return ob->pool; }
 
 
 #include "apr_allocator.h"
