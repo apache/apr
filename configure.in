@@ -457,7 +457,6 @@ dnl Note: Autoconf will always append LIBS with an extra " " in AC_CHECK_LIB.
 dnl It should check for LIBS being empty and set LIBS equal to the new value 
 dnl without the extra " " in that case, but they didn't do that.  So, we
 dnl end up LIBS="-lm -lcrypt -lnsl  -ldl" which is an annoyance.
-AC_CHECK_LIB(resolv, res_init)
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_SEARCH_LIBS(gethostname, nsl)
 AC_CHECK_LIB(socket, socket)
@@ -866,7 +865,7 @@ if test "$native_mmap_emul" = "1"; then
     mmap="1"
 fi
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
-AC_CHECK_FUNCS([getpass getpassphrase gmtime_r localtime_r hstrerror mkstemp])
+AC_CHECK_FUNCS([getpass getpassphrase gmtime_r localtime_r mkstemp])
 
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
@@ -1830,6 +1829,13 @@ AC_MSG_CHECKING(if APR supports IPv6)
 AC_MSG_RESULT($ipv6_result)
 
 AC_SUBST(have_ipv6)
+
+# hstrerror is only needed if IPv6 is not enabled,
+# so getaddrinfo/gai_strerror are not used.
+if test $have_ipv6 = 0; then
+  AC_CHECK_LIB(hstrerror, resolv)
+  AC_CHECK_FUNCS(hstrerror)
+fi
 
 dnl Check for langinfo support
 
