@@ -1036,7 +1036,6 @@ AC_CHECK_SIZEOF(char, 1)
 AC_CHECK_SIZEOF(int, 4)
 AC_CHECK_SIZEOF(long, 4)
 AC_CHECK_SIZEOF(short, 2)
-AC_CHECK_SIZEOF(long double, 12)
 AC_CHECK_SIZEOF(long long, 8)
 
 if test "$ac_cv_sizeof_short" = "2"; then
