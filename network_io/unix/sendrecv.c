@@ -193,13 +193,6 @@ apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
 {
     ssize_t rv;
 
-    if (from == NULL){
-        return APR_ENOMEM;
-        /* Not sure if this is correct.  Maybe we should just allocate
-           the memory??
-         */
-    }
-
     do {
         rv = recvfrom(sock->socketdes, buf, (*len), flags, 
                       (struct sockaddr*)&from->sa, &from->salen);
@@ -224,7 +217,7 @@ apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
     }
 
     (*len) = rv;
-    if (rv == 0)
+    if (rv == 0 && sock->type == SOCK_STREAM)
         return APR_EOF;
 
     return APR_SUCCESS;
