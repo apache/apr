@@ -390,10 +390,8 @@ static apr_status_t fcntl_create(apr_lock_t *new, const char *fname)
     }
 
     if (rv != APR_SUCCESS) {
-        apr_status_t stat = errno;
-
         fcntl_cleanup(new);
-        return stat;
+        return rv;
     }
 
     new->curr_locked=0;
