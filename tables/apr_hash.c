@@ -63,10 +63,10 @@
 
 #include "apr_hash.h"
 
-#ifdef HAVE_STDLIB_H
+#if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if APR_HAVE_STDLIB_H
 #include <string.h>
 #endif
 

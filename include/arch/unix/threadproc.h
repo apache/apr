@@ -62,19 +62,19 @@
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
-#if HAVE_SYS_RESOURCE_H
+#ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
 #if APR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#if HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 #if APR_HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
-#if HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 /* End System Headers */

@@ -59,7 +59,7 @@
 #include "apr_general.h"
 #include <signal.h>
 #include <string.h>
-#ifdef HAVE_SYS_WAIT
+#if APR_HAVE_SYS_WAIT
 #include <sys/wait.h>
 #endif
 

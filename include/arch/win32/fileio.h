@@ -66,10 +66,10 @@
 #include "apr_errno.h"
 #include "misc.h"
 
-#if APR_HAVE_SYS_STAT_H
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef HAVE_SYS_TYPES_H
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_FCNTL_H
@@ -83,9 +83,6 @@
 #endif
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
-#endif
-#ifdef HAVE_UIO_H
-#include <sys/uio.h>
 #endif
 
 #if APR_HAS_UNICODE_FS

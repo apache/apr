@@ -24,6 +24,7 @@
 #endif
 
 #define APR_HAVE_ARPA_INET_H    @arpa_ineth@
+#define APR_HAVE_CONIO_H        @conioh@
 #define APR_HAVE_CRYPT_H        @crypth@
 #define APR_HAVE_CTYPE_H        @ctypeh@
 #define APR_HAVE_DIRENT_H       @direnth@
@@ -37,6 +38,7 @@
 #define APR_HAVE_STDARG_H       @stdargh@
 #define APR_HAVE_STDIO_H        @stdioh@
 #define APR_HAVE_STDLIB_H       @stdlibh@
+#define APR_HAVE_SIGNAL_H       @signalh@
 #define APR_HAVE_STRING_H       @stringh@
 #define APR_HAVE_STRINGS_H      @stringsh@
 #define APR_HAVE_SYS_SIGNAL_H   @sys_signalh@
@@ -44,7 +46,6 @@
 #define APR_HAVE_SYS_SYSLIMITS_H @sys_syslimitsh@
 #define APR_HAVE_SYS_TYPES_H    @sys_typesh@
 #define APR_HAVE_SYS_UIO_H      @sys_uioh@
-#define APR_HAVE_SIGNAL_H       @signalh@
 #define APR_HAVE_SYS_WAIT_H     @sys_waith@
 #define APR_HAVE_UNISTD_H       @unistdh@
 

@@ -17,16 +17,16 @@
 #include "apr_private.h"
 #include "networkio.h"
 
-#ifdef HAVE_SYS_TYPES_H
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if APR_HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
+#if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if APR_HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #include <string.h>
