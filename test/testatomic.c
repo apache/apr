@@ -68,15 +68,6 @@
 #include <pthread.h>
 #endif
 
-#if defined(__FreeBSD__) && (__FreeBSD__ < 5)
-
-int main(void)
-{
-    printf("atomic test skipped\n");
-}
-
-#else 
-
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
 
@@ -177,6 +168,8 @@ static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
 int main(void)
 {
     apr_status_t rv;
+
+    apr_initialize();
 
     fprintf(stderr,
             "This program won't work fully on this platform because there is no "
@@ -383,4 +376,3 @@ int main(int argc, char**argv)
 }
 
 #endif /* !APR_HAS_THREADS */
-#endif /* !(defined(__FreeBSD) && (__FreeBSD__ < 4)) */
