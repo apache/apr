@@ -130,6 +130,9 @@ APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *,
 APR_EXPORT(void) ap_bucket_brigade_catenate(ap_bucket_brigade *a, 
                                             ap_bucket_brigade *b);
 
+/* Destroy the first nvec buckets. */
+APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec);
+
 /* save the buf out to the specified iol.  This can be used to flush the
     data to the disk, or to send it out to the network. */
 APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
@@ -140,8 +143,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va);
 
 APR_EXPORT(int) ap_brigade_printf(ap_bucket_brigade *b, const char *fmt, ...);
 
-APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
-t va);
+APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_list va);
 
 /*   ******  Bucket List Functions  *****  */
 
