@@ -52,127 +52,90 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr.h"
+#include "apr_poll.h"
 #include "networkio.h"
-#include "apr_network_io.h"
-#include "apr_general.h"
-#include "apr_portable.h"
-#include "apr_lib.h"
-#include <sys/time.h>
-#include <stdlib.h>
 
-/*  OS/2 doesn't have a poll function, implement using OS/2 style select */
- 
-APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
+                      apr_int32_t *nsds, apr_interval_time_t timeout)
 {
-    *new = (apr_pollfd_t *)apr_palloc(cont, sizeof(apr_pollfd_t));
-
-    if (*new == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->socket_list = apr_palloc(cont, sizeof(int) * num);
-    
-    if ((*new)->socket_list == NULL) {
-        return APR_ENOMEM;
-    }
-    
-    (*new)->r_socket_list = apr_palloc(cont, sizeof(int) * num);
-    
-    if ((*new)->r_socket_list == NULL) {
-        return APR_ENOMEM;
-    }
-    
-    (*new)->cntxt = cont;
-    (*new)->num_total = 0;
-    (*new)->num_read = 0;
-    (*new)->num_write = 0;
-    (*new)->num_except = 0;
-    
-    return APR_SUCCESS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
-			                                  apr_socket_t *sock, apr_int16_t events)
-{
+    int *pollset;
     int i;
-    
-    if (events & APR_POLLIN) {
-        for (i=aprset->num_total; i>aprset->num_read; i--)
-            aprset->socket_list[i] = aprset->socket_list[i-1];
-        aprset->socket_list[i] = sock->socketdes;
-        aprset->num_read++;
-        aprset->num_total++;
-    }
-            
-    if (events & APR_POLLOUT) {
-        for (i=aprset->num_total; i>aprset->num_read + aprset->num_write; i--)
-            aprset->socket_list[i] = aprset->socket_list[i-1];
-        aprset->socket_list[i] = sock->socketdes;
-        aprset->num_write++;
-        aprset->num_total++;
-    }            
-        
-    if (events &APR_POLLPRI) {
-        aprset->socket_list[aprset->num_total] = sock->socketdes;
-        aprset->num_except++;
-        aprset->num_total++;
-    }
-    return APR_SUCCESS;
-}
+    int num_read = 0, num_write = 0, num_except = 0, num_total;
+    int pos_read, pos_write, pos_except;
 
-
-
-APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *pollfdset, int num,
-                                   apr_int32_t *nsds, 
-                                   apr_interval_time_t timeout)
-{
-    int i;
-    int rv = 0;
-    int num_read = 0, num_write = 0, num_except = 0;
-    int *socket_list;
-    
     for (i = 0; i < num; i++) {
-        int events = pollfdset[i].events;
-        int fd;
+        num_read += (aprset[i].reqevents & APR_POLLIN) != 0;
+        num_write += (aprset[i].reqevents & APR_POLLOUT) != 0;
+        num_except += (aprset[i].reqevents & APR_POLLPRI) != 0;
+    }
 
-        if (pollfdset[i].desc_type == APR_POLL_SOCKET) {
-            fd = pollfdset[i].desc.s->socketdes;
-        }
-        else if (pollfdset[i].desc_type == APR_POLL_FILE) {
-            fd = pollfdset[i].desc.f->filedes;
-        }
+    num_total = num_read + num_write + num_except;
+    pollset = alloca(sizeof(int) * num_total);
+    memset(pollset, 0, sizeof(int) * num_total);
 
-        if (events & APR_POLLIN) {
-            socket_list[num_read] = fd;
-            num_read++;
-        }
-            
-        if (events & APR_POLLOUT) {
-            socket_list[num_write] = fd;
-            num_write++;
-        }            
-        
-        if (events &APR_POLLPRI) {
-            socket_list[num_except] = fd;
-            num_except++;
+    pos_read = 0;
+    pos_write = num_read;
+    pos_except = pos_write + num_write;
+
+    for (i = 0; i < num; i++) {
+        if (aprset[i].desc_type == APR_POLL_SOCKET) {
+            if (aprset[i].reqevents & APR_POLLIN) {
+                pollset[pos_read++] = aprset[i].desc.s->socketdes;
+            }
+
+            if (aprset[i].reqevents & APR_POLLOUT) {
+                pollset[pos_write++] = aprset[i].desc.s->socketdes;
+            }
+
+            if (aprset[i].reqevents & APR_POLLPRI) {
+                pollset[pos_except++] = aprset[i].desc.s->socketdes;
+            }
+
+            aprset[i].rtnevents = 0;
         }
     }
 
-    rv = select(socket_list,
-                num_read,
-                num_write,
-                num_except,
-                timeout >= 0 ? timeout / 1000 : -1);
-
-    /* select() doesn't wipe the socket list in the case of a timeout or
-     * interrupt. This prevents false positives from revents_get
-     */
-    if (rv == 0) {
-        return timeout < 0 ? APR_EINTR : APR_TIMEUP;
+    if (timeout > 0) {
+        timeout /= 1000; /* convert microseconds to milliseconds */
     }
 
-    (*nsds) = rv;
-    return rv < 0 ? APR_OS2_STATUS(sock_errno()) : APR_SUCCESS;
+    i = select(pollset, num_read, num_write, num_except, timeout);
+    (*nsds) = i;
+
+    if ((*nsds) < 0) {
+        return APR_FROM_OS_ERROR(sock_errno());
+    }
+
+    if ((*nsds) == 0) {
+        return APR_TIMEUP;
+    }
+
+    pos_read = 0;
+    pos_write = num_read;
+    pos_except = pos_write + num_write;
+
+    for (i = 0; i < num; i++) {
+        if (aprset[i].desc_type == APR_POLL_SOCKET) {
+            if (aprset[i].reqevents & APR_POLLIN) {
+                if (pollset[pos_read++] > 0) {
+                    aprset[i].rtnevents |= APR_POLLIN;
+                }
+            }
+
+            if (aprset[i].reqevents & APR_POLLOUT) {
+                if (pollset[pos_write++] > 0) {
+                    aprset[i].rtnevents |= APR_POLLOUT;
+                }
+            }
+
+            if (aprset[i].reqevents & APR_POLLPRI) {
+                if (pollset[pos_except++] > 0) {
+                    aprset[i].rtnevents |= APR_POLLPRI;
+                }
+            }
+        }
+    }
+
+    return APR_SUCCESS;
 }
