@@ -155,10 +155,16 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         }
     }
     if (opt & APR_SO_TIMEOUT) {
-        sock->timeout = on;
-        if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) {
+	/* don't do the fcntl foo more than needed */
+	if (on >= 0 && sock->timeout < 0
+		&& (stat = sononblock(sock->socketdes)) != APR_SUCCESS) {
             return stat;
         }
+	else if (on < 0 && sock->timeout >= 0
+		&& (stat = soblock(sock->socketdes)) != APR_SUCCESS) {
+	    return stat;
+	}
+        sock->timeout = on;
     }
     return APR_SUCCESS;
 }         
