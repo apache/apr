@@ -165,7 +165,7 @@ typedef struct apr_file_t         apr_file_t;
  *                               level locked read/write access to support
  *                               writes across process/machines
  *         APR_FILE_NOCLEANUP    Do not register a cleanup with the pool 
- *                               passed in on the <EM>cont</EM> argument (see below).
+ *                               passed in on the <EM>pool</EM> argument (see below).
  *                               The apr_os_file_t handle in apr_file_t will not
  *                               be closed when the pool is destroyed.
  *         APR_SENDFILE_ENABLED  Open with appropriate platform semantics
@@ -173,13 +173,13 @@ typedef struct apr_file_t         apr_file_t;
  *                               apr_socket_sendfile does not check this flag.
  * </PRE>
  * @param perm Access permissions for file.
- * @param cont The pool to use.
+ * @param pool The pool to use.
  * @remark If perm is APR_OS_DEFAULT and the file is being created, appropriate 
  *      default permissions will be used.
  */
-APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new_file, const char *fname,
-                                   apr_int32_t flag, apr_fileperms_t perm,
-                                   apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **newf, const char *fname,
+                                        apr_int32_t flag, apr_fileperms_t perm,
+                                        apr_pool_t *pool);
 
 /**
  * Close the specified file.
@@ -190,10 +190,10 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file);
 /**
  * delete the specified file.
  * @param path The full path to the file (using / on all systems)
- * @param cont The pool to use.
+ * @param pool The pool to use.
  * @remark If the file is open, it won't be removed until all instances are closed.
  */
-APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool);
 
 /**
  * rename the specified file.
@@ -250,7 +250,7 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
 /**
  * open standard error as an apr file pointer.
  * @param thefile The apr file to use as stderr.
- * @param cont The pool to allocate the file out of.
+ * @param pool The pool to allocate the file out of.
  * 
  * @remark The only reason that the apr_file_open_std* functions exist
  * is that you may not always have a stderr/out/in on Windows.  This
@@ -263,12 +263,12 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
  * platforms.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
-                                          apr_pool_t *cont);
+                                               apr_pool_t *pool);
 
 /**
  * open standard output as an apr file pointer.
  * @param thefile The apr file to use as stdout.
- * @param cont The pool to allocate the file out of.
+ * @param pool The pool to allocate the file out of.
  * 
  * @remark The only reason that the apr_file_open_std* functions exist
  * is that you may not always have a stderr/out/in on Windows.  This
@@ -281,12 +281,12 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
  * platforms.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
-                                          apr_pool_t *cont);
+                                               apr_pool_t *pool);
 
 /**
  * open standard input as an apr file pointer.
  * @param thefile The apr file to use as stdin.
- * @param cont The pool to allocate the file out of.
+ * @param pool The pool to allocate the file out of.
  * 
  * @remark The only reason that the apr_file_open_std* functions exist
  * is that you may not always have a stderr/out/in on Windows.  This
@@ -299,7 +299,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
  * platforms.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
-                                              apr_pool_t *cont);
+                                              apr_pool_t *pool);
 
 /**
  * Read data from the specified file.
@@ -505,20 +505,20 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile,
  * Create an anonymous pipe.
  * @param in The file descriptor to use as input to the pipe.
  * @param out The file descriptor to use as output from the pipe.
- * @param cont The pool to operate on.
+ * @param pool The pool to operate on.
  */
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out,
-                                          apr_pool_t *cont);
+                                               apr_pool_t *pool);
 
 /**
  * Create a named pipe.
  * @param filename The filename of the named pipe
  * @param perm The permissions for the newly created pipe.
- * @param cont The pool to operate on.
+ * @param pool The pool to operate on.
  */
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
                                                apr_fileperms_t perm, 
-                                               apr_pool_t *cont);
+                                               apr_pool_t *pool);
 
 /**
  * Get the timeout value for a pipe or manipulate the blocking state.
@@ -620,7 +620,7 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
  *            APR_FILE_ATTR_HIDDEN     - make the file hidden
  * </PRE>
  * @param attr_mask Mask of valid bits in attributes.
- * @param cont the pool to use.
+ * @param pool the pool to use.
  * @remark This function should be used in preference to explict manipulation
  *      of the file permissions, because the operations to provide these
  *      attributes are platform specific and may involve more than simply
@@ -631,7 +631,7 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
 APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attributes,
                                              apr_fileattrs_t attr_mask,
-                                             apr_pool_t *cont);
+                                             apr_pool_t *pool);
 
 /**
  * Set the mtime of the specified file.
@@ -649,10 +649,10 @@ APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
  * Create a new directory on the file system.
  * @param path the path for the directory to be created.  (use / on all systems)
  * @param perm Permissions for the new direcoty.
- * @param cont the pool to use.
+ * @param pool the pool to use.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, 
-                        apr_pool_t *cont);
+                                       apr_pool_t *pool);
 
 /** Creates a new directory on the file system, but behaves like
  * 'mkdir -p'. Creates intermediate directories as required. No error
@@ -668,9 +668,9 @@ APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
 /**
  * Remove directory from the file system.
  * @param path the path for the directory to be removed.  (use / on all systems)
- * @param cont the pool to use.
+ * @param pool the pool to use.
  */                        
-APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool);
 
 /**
  * get the specified file's stats.

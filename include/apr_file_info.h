@@ -208,10 +208,10 @@ struct apr_finfo_t {
  * never touched if the call fails.
  * @param fname The name of the file to stat.
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
- * @param cont the pool to use to allocate the new file. 
+ * @param pool the pool to use to allocate the new file. 
  */ 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
-                                   apr_int32_t wanted, apr_pool_t *cont);
+                                   apr_int32_t wanted, apr_pool_t *pool);
 
 /** @} */
 /**
@@ -223,11 +223,11 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
  * Open the specified directory.
  * @param new_dir The opened directory descriptor.
  * @param dirname The full path to the directory (use / on all systems)
- * @param cont The pool to use.
+ * @param pool The pool to use.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new_dir, 
                                        const char *dirname, 
-                                       apr_pool_t *cont);
+                                       apr_pool_t *pool);
 
 /**
  * close the specified directory. 
