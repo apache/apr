@@ -180,7 +180,7 @@ B<NOTE>:  This does not actually free the memory, it just allows the pool
 
 =cut
  */
-APR_EXPORT(void) ap_clear_pool(struct ap_pool_t *p);
+APR_EXPORT(void) ap_clear_pool(ap_pool_t *p);
 
 /*
 
@@ -194,7 +194,7 @@ B<NOTE>:  This will actually free the memory
 
 =cut
  */
-APR_EXPORT(void) ap_destroy_pool(struct ap_pool_t *p);
+APR_EXPORT(void) ap_destroy_pool(ap_pool_t *p);
 
 /*
 
@@ -248,7 +248,7 @@ B<Allocate a block of memory from a pool>
 
 =cut
  */
-APR_EXPORT(void *) ap_palloc(struct ap_pool_t *c, ap_size_t reqsize);
+APR_EXPORT(void *) ap_palloc(ap_pool_t *c, ap_size_t reqsize);
 
 /*
 
@@ -262,7 +262,7 @@ B<Allocate a block of memory from a pool and set all of the memory to 0>
 
 =cut
  */
-APR_EXPORT(void *) ap_pcalloc(struct ap_pool_t *p, ap_size_t size);
+APR_EXPORT(void *) ap_pcalloc(ap_pool_t *p, ap_size_t size);
 
 /*
 
@@ -276,7 +276,7 @@ B<duplicate a string into memory allocated out of a pool>
 
 =cut
  */
-APR_EXPORT(char *) ap_pstrdup(struct ap_pool_t *p, const char *s);
+APR_EXPORT(char *) ap_pstrdup(ap_pool_t *p, const char *s);
 
 /*
 
@@ -291,7 +291,7 @@ B<duplicate the first n characters ofa string into memory allocated out of a poo
 
 =cut
  */
-APR_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, ap_size_t n);
+APR_EXPORT(char *) ap_pstrndup(ap_pool_t *p, const char *s, ap_size_t n);
 
 /*
 
@@ -305,7 +305,7 @@ B<Concatenate multiple strings, allocating memory out a pool>
 
 =cut
  */
-APR_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_pool_t *p, ...);
+APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *p, ...);
 
 /*
 
@@ -320,7 +320,7 @@ B<printf-style style printing routine.  The data is output to a string allocated
 
 =cut
  */
-APR_EXPORT(char *) ap_pvsprintf(struct ap_pool_t *p, const char *fmt, va_list ap);
+APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap);
 
 /*
 
@@ -335,11 +335,13 @@ B<printf-style style printing routine.  The data is output to a string allocated
 
 =cut
  */
-APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *p, const char *fmt, ...);
+APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...);
 
 /*
 
-=head1 void ap_register_cleanup(ap_pool_t *p, void *data, ap_status_t (*plain_cleanup(void *), ap_status_t (*child_cleanup)(void *))
+=head1 void ap_register_cleanup(ap_pool_t *p, const void *data,
+                                ap_status_t (*plain_cleanup)(void *),
+                                ap_status_t (*child_cleanup)(void *))
 
 B<Register a function to be called when a pool is cleared or destroyed>
 
@@ -350,13 +352,14 @@ B<Register a function to be called when a pool is cleared or destroyed>
 
 =cut
  */
-APR_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
+APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, const void *data,
                                      ap_status_t (*plain_cleanup) (void *),
                                      ap_status_t (*child_cleanup) (void *));
 
 /*
 
-=head1 void ap_kill_cleanup(ap_pool_t *p, void *data, ap_status_t (*cleanup(void *))
+=head1 void ap_kill_cleanup(ap_pool_t *p, const void *data,
+                            ap_status_t (*cleanup(void *))
 
 B<remove a previously registered cleanup function>
 
@@ -366,7 +369,7 @@ B<remove a previously registered cleanup function>
 
 =cut
  */
-APR_EXPORT(void) ap_kill_cleanup(struct ap_pool_t *p, void *data,
+APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, const void *data,
                                  ap_status_t (*cleanup) (void *));
 
 /*
@@ -381,7 +384,7 @@ B<Run the specified cleanup function immediately and unregister it>
 
 =cut
  */
-APR_EXPORT(ap_status_t) ap_run_cleanup(struct ap_pool_t *p, void *data,
+APR_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
                                        ap_status_t (*cleanup) (void *));
 
 /*
