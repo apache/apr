@@ -98,9 +98,6 @@ testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
 testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
 	$(LINK) testshmconsumer.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testhash@EXEEXT@: testhash.lo $(LOCAL_LIBS)
-	$(LINK) testhash.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testuser@EXEEXT@: testuser.lo $(LOCAL_LIBS)
 	$(LINK) testuser.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
