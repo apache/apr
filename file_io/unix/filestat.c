@@ -92,7 +92,7 @@ ap_status_t ap_getfileinfo(struct file_t *thefile)
  * arg 2) The name of the file to stat.
  * arg 3) the context to use to allocate the new file. 
  */ 
-ap_status_t ap_stat(struct file_t **thefile, char *fname, ap_context_t *cont)
+ap_status_t ap_stat(struct file_t **thefile, const char *fname, ap_context_t *cont)
 {
     struct stat info;
     int rv = stat(fname, &info);

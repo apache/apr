@@ -132,7 +132,7 @@ API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 ap_status_t ap_make_iov(ap_iovec_t **, struct iovec *, ap_context_t *);
 ap_status_t ap_dupfile(ap_file_t **, ap_file_t *);
 ap_status_t ap_getfileinfo(ap_file_t *);
-ap_status_t ap_stat(ap_file_t **thefile, char *fname, ap_context_t *cont);
+ap_status_t ap_stat(ap_file_t **thefile, const char *fname, ap_context_t *cont);
 ap_status_t ap_seek(ap_file_t *, ap_seek_where_t, ap_off_t *);
 
 ap_status_t ap_opendir(ap_dir_t **, const char *, ap_context_t *);

@@ -104,7 +104,9 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     int oflags = 0;
     char *buf_oflags;
 
-    (*new) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+    if ((*new) == NULL) {
+        (*new) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+    }
 
     (*new)->cntxt = cont;
     (*new)->oflags = oflags;
