@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) If we don't have sigwait() in the system, see if sigsuspend() is
+     available, and use that instead. [Wilfredo Sanchez]
+
   *) Make libtool optional at configure time.  This is done with 
      --without-libtool.  [Ryan Bloom]
 
