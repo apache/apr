@@ -62,7 +62,7 @@
 #error "not implemented yet"
 #else
 #define SYS_ERR_STRING(code, p) \
-    errstr = strerror(code);
+    if (1) errstr = strerror(code); else
 #endif
 
 static const char *apr_error_string(ap_status_t statcode)
@@ -97,9 +97,13 @@ static const char *apr_error_string(ap_status_t statcode)
     case APR_EDSOOPEN:
         return "Could not open the dso.";
     case APR_INCHILD:
-        return "Your code just forked, and you are currently executing in the child process";
+        return
+	    "Your code just forked, and you are currently executing in the "
+	    "child process";
     case APR_INPARENT:
-        return "Your code just forked, and you are currently executing in the parent process";
+        return
+	    "Your code just forked, and you are currently executing in the "
+	    "parent process";
     case APR_DETACH:
         return "The specified thread is detached";
     case APR_NOTDETACH:
@@ -125,7 +129,9 @@ static const char *apr_error_string(ap_status_t statcode)
     case APR_KEYBASED:
         return "Shared memory is implemented using a key system";
     case APR_EINIT:
-        return "There is no error, this value signifies an initialized error code";
+        return
+	    "There is no error, this value signifies an initialized "
+	    "error code";
     case APR_ENOTIMPL:
         return "This function has not been implemented on this platform";
     case APR_EMISMATCH:
@@ -149,7 +155,7 @@ const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
         return "APR does not understand this error code";
     }
     else {
-        char *errstr;
+        const char *errstr;
         SYS_ERR_STRING(statcode - APR_OS_START_SYSERR, p);
         return errstr;
     }
