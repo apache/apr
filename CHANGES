@@ -9,7 +9,11 @@ Changes with APR a9
      sempaphore functions, not by the presence of union semun.  New
      config variable apr_lock_method can override autodetection of the 
      apr_lock implementation method.  For now, hints.m4 uses it to select 
-     SysV semaphores for OS/390.  [Jeff Trawick]
+     SysV semaphores for OS/390.  New config variable 
+     apr_process_lock_is_global specifies that the selected inter-process
+     lock method is sufficient for APR_LOCKALL (i.e., it blocks all
+     threads and processes).  For now, hints.m4 turns on this flag for
+     OS/390.  [Jeff Trawick]
      
   *) Get APR_OFF_T_FMT defined properly on Solaris Sparc.
      [Jeff Trawick]

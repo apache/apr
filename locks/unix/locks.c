@@ -77,7 +77,11 @@ apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type,
     }
 #endif
 
+#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
+    if (scope == APR_INTRAPROCESS) {
+#else
     if (scope != APR_CROSS_PROCESS) {
+#endif
 #if APR_HAS_THREADS
         if ((stat = apr_unix_create_intra_lock(new)) != APR_SUCCESS) {
             return stat;
@@ -100,7 +104,11 @@ apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type,
 apr_status_t apr_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
+#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
+    if (lock->scope == APR_INTRAPROCESS) {
+#else
     if (lock->scope != APR_CROSS_PROCESS) {
+#endif
 #if APR_HAS_THREADS
         if ((stat = apr_unix_lock_intra(lock)) != APR_SUCCESS) {
             return stat;
@@ -121,7 +129,11 @@ apr_status_t apr_unlock(apr_lock_t *lock)
 {
     apr_status_t stat;
 
+#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
+    if (lock->scope == APR_INTRAPROCESS) {
+#else
     if (lock->scope != APR_CROSS_PROCESS) {
+#endif
 #if APR_HAS_THREADS
         if ((stat = apr_unix_unlock_intra(lock)) != APR_SUCCESS) {
             return stat;
@@ -141,7 +153,11 @@ apr_status_t apr_unlock(apr_lock_t *lock)
 apr_status_t apr_destroy_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
+#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
+    if (lock->scope == APR_INTRAPROCESS) {
+#else
     if (lock->scope != APR_CROSS_PROCESS) {
+#endif
 #if APR_HAS_THREADS
         if ((stat = apr_unix_destroy_intra_lock(lock)) != APR_SUCCESS) {
             return stat;

@@ -668,6 +668,17 @@ AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 AC_SUBST(pthreadser)
 
+AC_MSG_CHECKING(if interprocess lock affects threads)
+if test "x$apr_process_lock_is_global" = "xyes"; then
+    proclockglobal="1"
+    AC_MSG_RESULT(yes)
+else
+    proclockglobal="0"
+    AC_MSG_RESULT(no)
+fi
+
+AC_SUBST(proclockglobal)
+
 dnl #----------------------------- Checking for /dev/random 
 AC_MSG_CHECKING(for /dev/random)
 
