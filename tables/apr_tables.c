@@ -337,6 +337,21 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
     checksum &= CASE_MASK;                     \
 }
 
+/** The opaque string-content table type */
+struct apr_table_t {
+    /* This has to be first to promote backwards compatibility with
+     * older modules which cast a apr_table_t * to an apr_array_header_t *...
+     * they should use the table_elts() function for most of the
+     * cases they do this for.
+     */
+    /** The underlying array for the table */
+    apr_array_header_t a;
+#ifdef MAKE_TABLE_PROFILE
+    /** Who created the array. */
+    void *creator;
+#endif
+};
+
 /*
  * XXX: if you tweak this you should look at is_empty_table() and table_elts()
  * in alloc.h
