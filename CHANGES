@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Added a lightweight internal index to apr_table_t to speed up
+     table lookup operations  [Brian Pane]
+
   *) initalize handle members to invalid before calling createprocess
      on win32 [Rob Saccoccio <robs@fastcgi.com>]
 
