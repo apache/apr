@@ -1,0 +1,15 @@
+# Note:
+#
+# You may need to modify the configuration of Build - Options - Directories
+# for the Executable path to include the perl interpreter within DevStudio.
+# E.g. add c:\program files\perl\bin to the list of directories
+
+!IF "$(TARGET)" == ""
+TARGET=all
+!ENDIF 
+
+all: Makefile
+	$(MAKE) /nologo /f Makefile $(TARGET)
+
+Makefile: Makefile.in
+	perl MakeWin32Make.pl

@@ -57,7 +57,6 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/uio.h>
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
