@@ -168,6 +168,8 @@ TARGET_nlm = \
 	$(OBJDIR)/aprtest.nlm \
 	$(OBJDIR)/mod_test.nlm \
 	$(OBJDIR)/proc_child.nlm \
+	$(OBJDIR)/sockchild.nlm \
+	$(OBJDIR)/tryread.nlm \
 	$(OBJDIR)/testatmc.nlm \
 	$(EOLIST)
 #
