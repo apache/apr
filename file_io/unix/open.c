@@ -98,6 +98,11 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
         oflags |= O_BINARY;
     }
 #endif
+#ifdef O_LARGEFILE
+    if (flag & APR_LARGEFILE) {
+        oflags |= O_LARGEFILE;
+    }
+#endif
     
 #if APR_HAS_THREADS
     if ((flag & APR_BUFFERED) && (flag & APR_XTHREAD)) {

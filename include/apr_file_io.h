@@ -69,6 +69,20 @@ extern "C" {
                                         is opened */
 #define APR_SENDFILE_ENABLED 0x01000 /**< Advisory flag that this file should
                                           support apr_sendfile operation */
+#define APR_LARGEFILE   0x04000    /**< Platform dependent flag to enable large file
+                                        support; WARNING see below. */
+
+/** @warning The APR_LARGEFILE flag only has effect on some platforms
+ * where sizeof(apr_off_t) == 4.  Where implemented, it allows opening
+ * and writing to a file which exceeds the size which can be
+ * represented by apr_off_t (2 gigabytes).  When a file's size does
+ * exceed 2Gb, apr_file_info_get() will fail with an error on the
+ * descriptor, likewise apr_stat()/apr_lstat() will fail on the
+ * filename.  apr_dir_read() will fail with APR_INCOMPLETE on a
+ * directory entry for a large file depending on the particular
+ * APR_FINFO_* flags.  Generally, it is not recommended to use this
+ * flag. */
+
 /** @} */
 
 /**

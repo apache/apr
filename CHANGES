@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Add APR_LARGEFILE flag to allow opening files with the
+     O_LARGEFILE flag; not recommended for general use, see
+     include/apr_file_io.h.  [Joe Orton]
+
   *) Various build fixes: thread_rwlock.c on some Solaris platforms
      (PR 22990); filestat.c on ReliantUnix (PR 22990); config.status
      on IRIX (PR 19251).  [Various]
