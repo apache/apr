@@ -99,9 +99,10 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle,
     return APR_SUCCESS;
 }
 
-char *ap_dso_error(char *buf, int bufsize, ap_status_t errcode)
+char *ap_dso_error(ap_dso_handle_t *dso, char *buffer, ap_size_t buflen)
 {
-    return strerror(errno);
+    strncpy(strerror(errno), buffer, buflen);
+    return buffer;
 }
 
 #endif
