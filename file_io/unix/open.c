@@ -80,9 +80,6 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
 {
     int oflags = 0;
 
-    if (new == NULL)
-        return APR_EBADARG;
-
     if ((*new) == NULL) {
         (*new) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     }
@@ -162,9 +159,6 @@ ap_status_t ap_close(ap_file_t *file)
 {
     ap_status_t rv;
   
-    if (file == NULL)
-        return APR_EBADARG;
-
     if ((rv = ap_unix_file_cleanup(file)) == APR_SUCCESS) {
         ap_kill_cleanup(file->cntxt, file, ap_unix_file_cleanup);
         return APR_SUCCESS;
@@ -184,9 +178,6 @@ ap_status_t ap_remove_file(char *path, ap_pool_t *cont)
 
 ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 {
-    if (thefile == NULL)
-        return APR_EBADARG;
-
     if (file == NULL) {
         return APR_ENOFILE;
     }
@@ -200,9 +191,6 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
 {
     int *dafile = thefile;
     
-    if (file == NULL || thefile == NULL)
-        return APR_EBADARG;
-
     if ((*file) == NULL) {
         (*file) = ap_pcalloc(cont, sizeof(ap_file_t));
         (*file)->cntxt = cont;
@@ -220,9 +208,6 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
 
 ap_status_t ap_eof(ap_file_t *fptr)
 {
-    if (fptr == NULL)
-        return APR_EBADARG;
-
     if (fptr->eof_hit == 1) {
         return APR_EOF;
     }
@@ -231,20 +216,14 @@ ap_status_t ap_eof(ap_file_t *fptr)
 
 ap_status_t ap_ferror(ap_file_t *fptr)
 {
-/* Thist function should be removed ASAP.  It is next on my list once
+/* This function should be removed ASAP.  It is next on my list once
  * I am sure nobody is using it.
  */
-    if (fptr == NULL)
-        return APR_EBADARG;
-
     return APR_SUCCESS;
 }   
 
 ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
 {
-    if (thefile == NULL)
-        return APR_EBADARG;
-
     (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;

@@ -58,9 +58,6 @@
 
 ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
 {
-    if(new == NULL)
-        return APR_EBADARG;
-
     if (thefile != NULL) {
         *new = ap_pstrdup(thefile->cntxt, thefile->fname);
         return APR_SUCCESS;
@@ -101,9 +98,6 @@ mode_t ap_unix_get_fileperms(ap_fileperms_t mode)
 
 ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
 {    
-    if(data == NULL || key == NULL)
-        return APR_EBADARG;
-
     if (file != NULL) {
         return ap_get_userdata(data, key, file->cntxt);
     }
@@ -116,9 +110,6 @@ ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
 ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {    
-    if(data == NULL || key == NULL)
-        return APR_EBADARG;
-
     if (file != NULL) {
         return ap_set_userdata(data, key, cleanup, file->cntxt);
     }

@@ -78,9 +78,6 @@ static ap_status_t pipenonblock(ap_file_t *thefile)
 
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
-    if(thepipe == NULL)
-        return APR_EBADARG;
-
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
         return APR_SUCCESS;
@@ -91,9 +88,6 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 {
     int filedes[2];
-
-    if(in == NULL || out == NULL)
-        return APR_EBADARG;
 
     if (pipe(filedes) == -1) {
         return errno;
@@ -136,9 +130,6 @@ ap_status_t ap_block_pipe(ap_file_t *thepipe)
 {
 #ifndef BEOS /* this code won't work on BeOS */
     int fd_flags;
-
-    if(thepipe == NULL)
-        return APR_EBADARG;
 
     fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
 #if defined(O_NONBLOCK)

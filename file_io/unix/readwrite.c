@@ -95,9 +95,6 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     ap_ssize_t rv;
     ap_ssize_t bytes_read;
 
-    if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
-        return APR_EBADARG;
-
     if(*nbytes <= 0) {
         *nbytes = 0;
 	return APR_SUCCESS;
@@ -192,9 +189,6 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
 
-    if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
-        return APR_EBADARG;
-
     if (thefile->buffered) {
         char *pos = (char *)buf;
         int blocksize;
@@ -267,9 +261,6 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
 #ifdef HAVE_WRITEV
     int bytes;
 
-    if(thefile == NULL || vec == NULL || nvec < 0 || nbytes == NULL)
-        return APR_EBADARG;
-
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
         *nbytes = 0;
         return errno;
@@ -286,9 +277,6 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
 
 ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
-    if(thefile == NULL)
-        return APR_EBADARG;
-
     if (write(thefile->filedes, &ch, 1) != 1) {
         return errno;
     }
@@ -297,9 +285,6 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
-    if(thefile == NULL)
-        return APR_EBADARG;
-
     thefile->ungetchar = (unsigned char)ch;
     return APR_SUCCESS; 
 }
@@ -308,9 +293,6 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
     ssize_t rv;
     
-    if(thefile == NULL || ch == NULL)
-        return APR_EBADARG;
-
     if (thefile->ungetchar != -1) {
         *ch = (char) thefile->ungetchar;
         thefile->ungetchar = -1;
@@ -332,9 +314,6 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     ssize_t rv;
     int len;
 
-    if(thefile == NULL || str == NULL)
-        return APR_EBADARG;
-
     len = strlen(str);
     rv = write(thefile->filedes, str, len); 
     if (rv != len) {
@@ -345,9 +324,6 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
 
 ap_status_t ap_flush(ap_file_t *thefile)
 {
-    if(thefile == NULL)
-        return APR_EBADARG;
-
     if (thefile->buffered) {
         ap_int64_t written = 0;
         int rc = 0;
@@ -372,9 +348,6 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     ssize_t rv;
     int i, used_unget = FALSE, beg_idx;
-
-    if(thefile == NULL || str == NULL || len < 0)
-        return APR_EBADARG;
 
     if(len <= 1)  /* as per fgets() */
         return APR_SUCCESS;
@@ -426,9 +399,6 @@ API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
     va_list ap;
     char *buf;
     int len;
-
-    if(fptr == NULL || format == NULL)
-        return APR_EBADARG;
 
     buf = malloc(HUGE_STRING_LEN);
     if (buf == NULL) {

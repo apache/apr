@@ -84,9 +84,6 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 {
     struct stat info;
 
-    if (finfo == NULL || thefile == NULL)
-        return APR_EBADARG;
-
     if (fstat(thefile->filedes, &info) == 0) {
         finfo->protection = info.st_mode;
         finfo->filetype = filetype_from_mode(info.st_mode);
@@ -107,9 +104,6 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
 {
     struct stat info;
-
-    if(finfo == NULL || fname == NULL)
-        return APR_EBADARG;
 
     if (stat(fname, &info) == 0) {
         finfo->protection = info.st_mode;
