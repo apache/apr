@@ -177,6 +177,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_EDSOOPEN     APR was unable to open the dso object.  For more 
  *                  information call apr_dso_error().
  * APR_EGENERAL     General failure (specific information not available)
+ * APR_EBADIP       The specified IP address is invalid
+ * APR_EBADMASK     The specified netmask is invalid
  * </PRE>
  *
  * <PRE>
@@ -232,8 +234,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ENOTHDKEY      (APR_OS_START_ERROR + 13)
 #define APR_EGENERAL       (APR_OS_START_ERROR + 14)
 #define APR_ENOSHMAVAIL    (APR_OS_START_ERROR + 15)
-/* empty slot: +16 */
-/* empty slot: +17 */
+#define APR_EBADIP         (APR_OS_START_ERROR + 16)
+#define APR_EBADMASK       (APR_OS_START_ERROR + 17)
 /* empty slot: +18 */
 #define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
 
@@ -254,8 +256,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOTHDKEY(s)      ((s) == APR_ENOTHDKEY)
 #define APR_STATUS_IS_EGENERAL(s)       ((s) == APR_EGENERAL)
 #define APR_STATUS_IS_ENOSHMAVAIL(s)    ((s) == APR_ENOSHMAVAIL)
-/* empty slot: +16 */
-/* empty slot: +17 */
+#define APR_STATUS_IS_EBADIP(s)         ((s) == APR_EBADIP)
+#define APR_STATUS_IS_EBADMASK(s)       ((s) == APR_EBADMASK)
 /* empty slot: +18 */
 #define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN)
 

@@ -218,6 +218,19 @@ struct apr_hdtr_t {
     int numtrailers;
 };
 
+/** A structure to represent an IP subnet */
+typedef struct apr_ipsubnet_t apr_ipsubnet_t;
+struct apr_ipsubnet_t {
+    int family;
+#if APR_HAVE_IPV6
+    apr_uint32_t sub[4]; /* big enough for IPv4 and IPv6 addresses */
+    apr_uint32_t mask[4];
+#else
+    apr_uint32_t sub[1];
+    apr_uint32_t mask[1];
+#endif
+};
+
 /* function definitions */
 
 /**
@@ -753,6 +766,26 @@ APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock,
  */
 APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr, 
                                             const char *servname);
+
+/**
+ * Build an ip-subnet representation from an IP address and optional netmask or
+ * number-of-bits.
+ * @param ipsub The new ip-subnet representation
+ * @param ipstr The input IP address string
+ * @param mask_or_numbits The input netmask or number-of-bits string, or NULL
+ * @param p The pool to allocate from
+ */
+APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char *ipstr, 
+                                              const char *mask_or_numbits, apr_pool_t *p);
+
+/**
+ * Test the IP address in an apr_sockaddr_t against a pre-built ip-subnet
+ * representation.
+ * @param ipsub The ip-subnet representation
+ * @param sa The socket address to test
+ * @return non-zero if the socket address is within the subnet, 0 otherwise
+ */
+APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa);
 
 #ifdef __cplusplus
 }

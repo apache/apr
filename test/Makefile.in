@@ -18,6 +18,7 @@ PROGRAMS = \
 	testoc@EXEEXT@ \
 	testuuid@EXEEXT@ \
         testsockopt@EXEEXT@ \
+        testipsub@EXEEXT@ \
 	occhild@EXEEXT@ \
 	mod_test.so
 
@@ -96,5 +97,8 @@ testuuid@EXEEXT@: testuuid.lo ../libapr.la
 
 testsockopt@EXEEXT@: testsockopt.lo ../libapr.la
 	$(LINK) testsockopt.lo $(ALL_LIBS)
+
+testipsub@EXEEXT@: testipsub.lo ../libapr.la
+	$(LINK) testipsub.lo $(ALL_LIBS)
 
 # DO NOT REMOVE
