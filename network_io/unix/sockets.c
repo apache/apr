@@ -259,10 +259,6 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     int rc;
 
-    if ((sock->socketdes < 0) || (!sock->remote_addr)) {
-        return APR_ENOTSOCK;
-    }
-
     do {
         rc = connect(sock->socketdes,
                      (const struct sockaddr *)&sa->sa.sin,
