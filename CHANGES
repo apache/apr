@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Initial implementation of of apr_filepath (get/set/parse_root and 
+     merge) for Windows.  [William Rowe]
+
+  *) Cleaned up implementation of of apr_filepath (get/set/parse_root
+     and merge) for Unix.  [Greg Stein, William Rowe]
+
   *) Fixup the --enable-libtool option.  This allows the test directory
      to compile again.  The test directory still doesn't work when
      APR is configured without libtool.  [Ryan Bloom]
