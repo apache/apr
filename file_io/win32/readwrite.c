@@ -63,6 +63,17 @@
 
 #define GetFilePointer(hfile) SetFilePointer(hfile,0,NULL, FILE_CURRENT)
 
+ap_status_t ap_make_iov(struct iovec_t **new, const struct iovec *iova, ap_context_t *cntxt)
+{
+    (*new) = ap_palloc(cntxt, sizeof(struct iovec_t));
+    if ((*new) == NULL) {
+        return APR_ENOMEM;
+    }
+    (*new)->cntxt = cntxt;
+    (*new)->theiov = iova;
+    return APR_SUCCESS;
+}
+
 ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bread;
