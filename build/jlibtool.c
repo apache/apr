@@ -66,7 +66,7 @@
 #  define DYNAMIC_LINK_OPTS "-flat_namespace -undefined suppress"
 #  define dynamic_link_version_func darwin_dynamic_link_function
 #  define DYNAMIC_INSTALL_NAME "-install_name"
-//-install_name  /Users/jerenk/apache-2.0-cvs/lib/libapr.0.dylib -compatibility_version 1 -current_version 1.0
+/*-install_name  /Users/jerenk/apache-2.0-cvs/lib/libapr.0.dylib -compatibility_version 1 -current_version 1.0 */
 #endif
 
 #if defined(__linux__) || defined(__FreeBSD__)
@@ -745,6 +745,51 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
     return NULL;
 }
 
+/* Read the final install location and add it to runtime library search path. */
+#ifdef RPATH
+void add_rpath(count_chars *cc, const char *arg)
+{
+    FILE *f;
+    char path[256];
+    char *tmp;
+    int size=0;
+
+    f = fopen(arg,"r");
+    if (f == NULL) {
+        return;
+    }
+    fgets(path,sizeof(path), f);
+    fclose(f);
+    if (path[strlen(path)-1] == '\n') {
+        path[strlen(path)-1] = '\0';
+    }
+    /* Check that we have an absolut path.
+     * Otherwise the file could be a GNU libtool file.
+     */
+    if (path[0] != '/') {
+        return;
+    }
+#ifdef LINKER_FLAG_PREFIX
+    size = strlen(LINKER_FLAG_PREFIX);
+#endif
+    size = size + strlen(path) + strlen(RPATH) + 2;
+    tmp = malloc(size);
+    if (tmp == NULL) {
+        return;
+    }
+#ifdef LINKER_FLAG_PREFIX
+    strcpy(tmp, LINKER_FLAG_PREFIX); 
+    strcat(tmp, RPATH);
+#else
+    strcpy(tmp, RPATH);
+#endif
+    strcat(tmp, "=");
+    strcat(tmp, path);
+    
+    push_count_chars(cc, tmp);
+}
+#endif
+
 /* use -L -llibname to allow to use installed libraries */
 void add_minus_l(count_chars *cc, const char *arg)
 {
@@ -848,6 +893,11 @@ int parse_input_file_name(char *arg, command_t *cmd_data)
             }
 #else
             push_count_chars(cmd_data->shared_opts.dependencies, newarg);
+#endif
+#ifdef RPATH
+            if (libtype == type_DYNAMIC_LIB) {
+                 add_rpath(cmd_data->shared_opts.dependencies, arg);
+            }
 #endif
             break;
         case mInstall:
@@ -1488,6 +1538,27 @@ int ensure_fake_uptodate(command_t *cmd_data)
     touch_args[2] = NULL;
     return external_spawn(cmd_data, "touch", touch_args);
 }
+#ifdef RPATH
+/* Store the install path in the *.la file */
+int add_for_runtime(command_t *cmd_data)
+{
+    if (cmd_data->mode == mInstall) {
+        return 0;
+    }
+    if (cmd_data->output == otDynamicLibraryOnly ||
+        cmd_data->output == otLibrary) {
+        FILE *f=fopen(cmd_data->fake_output_name,"w");
+        if (f == NULL) {
+            return -1;
+        }
+        fprintf(f,"%s\n", cmd_data->install_path);
+        fclose(f);
+        return(0);
+    } else {
+        return(ensure_fake_uptodate(cmd_data));
+    }
+}
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -1530,7 +1601,11 @@ int main(int argc, char *argv[])
     rc = run_mode(&cmd_data);
 
     if (!rc) {
+#ifdef RPATH
+       add_for_runtime(&cmd_data); 
+#else
        ensure_fake_uptodate(&cmd_data);
+#endif
     }
 
     cleanup_tmp_dirs(&cmd_data);
