@@ -240,10 +240,11 @@ static HMODULE lateDllHandle[DLL_defined] = {
 
 FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char* fnName, int ordinal)
 {
-    if (!lateDllHandle[fnLib] && ordinal) 
+    if (!lateDllHandle[fnLib]) { 
         lateDllHandle[fnLib] = LoadLibrary(lateDllName[fnLib]);
-    if (!lateDllHandle[fnLib])
-        return NULL;
+        if (!lateDllHandle[fnLib])
+            return NULL;
+    }
     if (ordinal)
         return GetProcAddress(lateDllHandle[fnLib], (char *) ordinal);
     else
