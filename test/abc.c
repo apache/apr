@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     int status = 0;
     ap_context_t *context;
 
-    ap_create_context(NULL, NULL, &context); 
+    ap_create_context(NULL, &context); 
 
     ap_open(context, argv[1], APR_READ, -1, &fd);
     

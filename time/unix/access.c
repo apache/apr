@@ -335,15 +335,15 @@ ap_status_t ap_set_wday(struct atime_t *time, ap_int32_t value)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_timedata(ap_time_t *, void *)
+ * ap_status_t ap_get_timedata(ap_time_t *, char *, void *)
  *    Return the context associated with the current atime.
  * arg 1) The currently open atime.
  * arg 2) The user data associated with the atime.
  */
-ap_status_t ap_get_timedata(struct atime_t *atime, void *data)
+ap_status_t ap_get_timedata(struct atime_t *atime, char *key, void *data)
 {
     if (atime != NULL) {
-        return ap_get_userdata(atime->cntxt, &data);
+        return ap_get_userdata(atime->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -352,15 +352,17 @@ ap_status_t ap_get_timedata(struct atime_t *atime, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_timedata(ap_time_t *, void *)
+ * ap_status_t ap_set_timedata(ap_time_t *, void *, char *,
+                               ap_status_t (*cleanup) (void *))
  *    Set the context associated with the current atime.
  * arg 1) The currently open atime.
  * arg 2) The user data to associate with the atime.
  */
-ap_status_t ap_set_timedata(struct atime_t *atime, void *data)
+ap_status_t ap_set_timedata(struct atime_t *atime, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {
     if (atime != NULL) {
-        return ap_set_userdata(atime->cntxt, data);
+        return ap_set_userdata(atime->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;

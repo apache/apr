@@ -133,15 +133,15 @@ ap_status_t ap_detach(ap_context_t *cont, struct proc_t **new)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_procdata(ap_proc_t *, void *)
+ * ap_status_t ap_get_procdata(ap_proc_t *, char *, void *)
  *    Return the context associated with the current proc.
  * arg 1) The currently open proc.
  * arg 2) The user data associated with the proc.
  */
-ap_status_t ap_get_procdata(struct proc_t *proc, void *data)
+ap_status_t ap_get_procdata(struct proc_t *proc, char *key, void *data)
 {
     if (proc != NULL) {
-        return ap_get_userdata(proc->cntxt, &data);
+        return ap_get_userdata(proc->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -150,15 +150,17 @@ ap_status_t ap_get_procdata(struct proc_t *proc, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_procdata(ap_proc_t *, void *)
+ * ap_status_t ap_set_procdata(ap_proc_t *, void *, char *key,
+                               ap_status_t (*cleanup) (void *))
  *    Return the context associated with the current proc.
  * arg 1) The currently open proc.
  * arg 2) The user data to associate with the proc.
 */
-ap_status_t ap_set_procdata(struct proc_t *proc, void *data)
+ap_status_t ap_set_procdata(struct proc_t *proc, void *data, char *key, 
+                            ap_status_t (*cleanup) (void *))
 {
     if (proc != NULL) {
-        return ap_set_userdata(proc->cntxt, data);
+        return ap_set_userdata(proc->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;

@@ -74,8 +74,9 @@ ap_status_t ap_unlock(ap_lock_t *);
 ap_status_t ap_destroy_lock(ap_lock_t *);
 ap_status_t ap_child_init_lock(ap_context_t *, char *, ap_lock_t **);
 
-ap_status_t ap_get_lockdata(ap_lock_t *, void *);
-ap_status_t ap_set_lockdata(ap_lock_t *, void *);
+ap_status_t ap_get_lockdata(ap_lock_t *, char *, void *);
+ap_status_t ap_set_lockdata(ap_lock_t *, void *, char *,
+                            ap_status_t (*cleanup) (void *));
 
 #ifdef __cplusplus
 }

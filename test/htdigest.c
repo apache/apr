@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
     char command[MAX_STRING_LEN];
     int found;
     
-    ap_create_context(NULL, NULL, &cntxt);
+    ap_create_context(NULL, &cntxt);
 
     tn = NULL;
     signal(SIGINT, (void (*)(int)) interrupted);

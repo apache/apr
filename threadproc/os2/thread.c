@@ -117,7 +117,7 @@ ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr,
     thread->attr = attr;
     thread->func = func;
     thread->data = data;
-    stat = ap_create_context(cont, NULL, &thread->cntxt);
+    stat = ap_create_context(cont, &thread->cntxt);
     
     if (stat != APR_SUCCESS) {
         return stat;

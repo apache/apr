@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     char *args[2];
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create context\n");
         exit(-1);
     }

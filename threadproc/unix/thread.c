@@ -157,7 +157,7 @@ ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr,
     else
         temp = NULL;
     
-    stat = ap_create_context(cont, NULL, &(*new)->cntxt);
+    stat = ap_create_context(cont, &(*new)->cntxt);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -219,15 +219,15 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(ap_thread_t *, void *)
+ * ap_status_t ap_get_threaddata(ap_thread_t *, char *, void *)
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data associated with the thread.
  */
-ap_status_t ap_get_threaddata(struct thread_t *thread, void *data)
+ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
 {
     if (thread != NULL) {
-        return ap_get_userdata(thread->cntxt, &data);
+        return ap_get_userdata(thread->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -236,15 +236,17 @@ ap_status_t ap_get_threaddata(struct thread_t *thread, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_threaddata(ap_thread_t *, void *)
+ * ap_status_t ap_set_threaddata(ap_thread_t *, void *, char *key,
+                                 ap_status_t (*cleanup) (void *))
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data to associate with the thread.
  */
-ap_status_t ap_set_threaddata(struct thread_t *thread, void *data)
+ap_status_t ap_set_threaddata(struct thread_t *thread, void *data, char *key,
+                              ap_status_t (*cleanup) (void *))
 {
     if (thread != NULL) {
-        return ap_set_userdata(thread->cntxt, data);
+        return ap_set_userdata(thread->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
@@ -329,24 +331,26 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(ap_thread_t *, void *)
+ * ap_status_t ap_get_threaddata(ap_thread_t *, char *, void *)
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data associated with the thread.
  */
-ap_status_t ap_get_threaddata(struct thread_t *thread, void *data)
+ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
 {
     data = NULL;
     return APR_ENOTHREAD;
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_threaddata(ap_thread_t *, void *)
+ * ap_status_t ap_set_threaddata(ap_thread_t *, void *, char *,
+                                 ap_status_t (*cleanup) (void *))
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data to associate with the thread.
  */
-ap_status_t ap_set_threaddata(struct thread_t *thread, void *data)
+ap_status_t ap_set_threaddata(struct thread_t *thread, void *data, char *key,
+                              ap_status_t (*cleanup) (void *))
 {
     return APR_ENOTHREAD;
 }

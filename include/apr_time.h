@@ -93,8 +93,9 @@ ap_status_t ap_set_mon(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_year(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_wday(ap_time_t *, ap_int32_t);
 
-ap_status_t ap_get_timedata(ap_time_t *, void *);
-ap_status_t ap_set_timedata(ap_time_t *, void *);
+ap_status_t ap_get_timedata(ap_time_t *, char *, void *);
+ap_status_t ap_set_timedata(ap_time_t *, void *, char *,
+                            ap_status_t (*cleanup) (void *));
  
 #ifdef __cplusplus
 }

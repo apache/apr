@@ -893,7 +893,7 @@ int main(int argc, char **argv)
     trstring = "";
     tdstring = "bgcolor=white";
 
-    ap_create_context(NULL, NULL, &cntxt);
+    ap_create_context(NULL, &cntxt);
 
     ap_make_time(cntxt, &start);
     ap_make_time(cntxt, &endtime);

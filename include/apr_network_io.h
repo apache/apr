@@ -115,8 +115,9 @@ ap_status_t ap_connect(ap_socket_t *, char *);
 
 ap_status_t ap_get_remote_hostname(ap_socket_t *, char **);
 ap_status_t ap_gethostname(ap_context_t *, char *, int);
-ap_status_t ap_get_socketdata(ap_socket_t *, void *);
-ap_status_t ap_set_socketdata(ap_socket_t *, void *);
+ap_status_t ap_get_socketdata(ap_socket_t *, char *, void *);
+ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
+                              ap_status_t (*cleanup) (void*));
 
 ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *);
 ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *);
@@ -133,8 +134,9 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *, ap_socket_t *, ap_int16_t);
 ap_status_t ap_remove_poll_socket(ap_pollfd_t *, ap_socket_t *, ap_int16_t);
 ap_status_t ap_clear_poll_sockets(ap_pollfd_t *, ap_int16_t);
 ap_status_t ap_get_revents(ap_pollfd_t *, ap_socket_t *, ap_int16_t *);
-ap_status_t ap_get_polldata(ap_pollfd_t *, void *);
-ap_status_t ap_set_polldata(ap_pollfd_t *, void *);
+ap_status_t ap_get_polldata(ap_pollfd_t *, char *, void *);
+ap_status_t ap_set_polldata(ap_pollfd_t *, void *, char *,
+                            ap_status_t (*cleanup) (void *));
 
 /*  accessor functions   */
 

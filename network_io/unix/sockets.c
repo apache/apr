@@ -320,15 +320,15 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_socketdata(ap_socket_t *, void *)
+ * ap_status_t ap_get_socketdata(ap_socket_t *, char *, void *)
  *    Return the context associated with the current socket.
  * arg 1) The currently open socket.
  * arg 2) The user data associated with the socket.
  */
-ap_status_t ap_get_socketdata(struct socket_t *socket, void *data)
+ap_status_t ap_get_socketdata(struct socket_t *socket, char *key, void *data)
 {
     if (socket != NULL) {
-        return ap_get_userdata(socket->cntxt, &data);
+        return ap_get_userdata(socket->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -337,15 +337,17 @@ ap_status_t ap_get_socketdata(struct socket_t *socket, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_socketdata(ap_socket_t *, void *)
+ * ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
+                                 ap_status_t (*cleanup) (void *))
  *    Set the context associated with the current socket.
  * arg 1) The currently open socket.
  * arg 2) The user data to associate with the socket.
  */
-ap_status_t ap_set_socketdata(struct socket_t *socket, void *data)
+ap_status_t ap_set_socketdata(struct socket_t *socket, void *data, char *key,
+                              ap_status_t (*cleanup) (void *))
 {
     if (socket != NULL) {
-        return ap_set_userdata(socket->cntxt, data);
+        return ap_set_userdata(socket->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;

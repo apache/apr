@@ -70,7 +70,7 @@ int main()
     ap_int64_t t1, t2;
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
         fprintf(stderr, "could not create context\n");
         exit(-1);
     }
