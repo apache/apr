@@ -560,6 +560,13 @@ APR_DECLARE(apr_int32_t) apr_file_flags_get(apr_file_t *f);
  * Get the pool used by the file.
  * @return apr_pool_t the pool
  */
+APR_POOL_DECLARE_ACCESSOR(file);
+
+/**
+ * Set a file to be inherited by child processes.
+ * @param file The file to enable inheritance.
+ *
+ */
 APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
 
 /**
