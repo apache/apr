@@ -165,12 +165,6 @@ void netware_pool_proc_cleanup ();
 int register_NLM(void *NLMHandle);
 int unregister_NLM(void *NLMHandle);
 
-/* Application global data management */
-int setGlobalPool(void *data, int proc);
-void* getGlobalPool(int proc);
-int setStatCache(void *data, int proc);
-void* getStatCache(int proc);
-
 /* Redefine malloc to use the library malloc call so 
     that all of the memory resources will be owned
     and can be shared by the library. */
