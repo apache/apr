@@ -84,12 +84,8 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
 static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
                            apr_int32_t wanted)
 { 
-#ifdef NETWARE
-    finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK;
-#else
     finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK
                  | APR_FINFO_OWNER | APR_FINFO_PROT;
-#endif
     finfo->protection = apr_unix_mode2perms(info->st_mode);
     finfo->filetype = filetype_from_mode(info->st_mode);
     finfo->user = info->st_uid;
@@ -204,12 +200,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
         fill_out_finfo(finfo, &info, wanted);
         if (wanted & APR_FINFO_LINK)
             wanted &= ~APR_FINFO_LINK;
-#ifdef NETWARE
-        if (wanted & APR_FINFO_NAME) {
-            finfo->name = apr_pstrdup(cont, info.st_name);
-            finfo->valid |= APR_FINFO_NAME;
-        }
-#endif
         return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
     }
     else {
