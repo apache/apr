@@ -75,7 +75,7 @@ static void root_result(char *path)
     apr_status_t status;
     char errmsg[256];
     char *root = NULL;
-    status = apr_filepath_root(&root, &path, context);
+    status = apr_filepath_root(&root, &path, APR_FILEPATH_NATIVE, context);
     apr_strerror(status, errmsg, sizeof(errmsg));
     if (root)
         fprintf(stderr, "\tRoot \"%s\" Path \"%s\" (%s)\n", 
