@@ -75,6 +75,7 @@ CuSuite *getsuite(void);
 
 CuSuite *teststr(void);
 CuSuite *testtime(void);
+CuSuite *testvsn(void);
 
 
 
