@@ -53,6 +53,9 @@
  *
  */
 
+/*
+ * Note: This is the windows specific autoconf like config file (apr_config.h)
+ */
 #ifdef WIN32
 
 #ifndef APR_WINCONFIG_H
@@ -75,6 +78,9 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
+
+
+#define HAVE_SENDFILE 1
 
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.

@@ -195,13 +195,13 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         		ap_int32_t flags) 
 {
     ap_ssize_t rv;
-    OVERLAPPED Overlapped, *pOverlapped;
-    TRANSMIT_FILE_BUFFERS TFBuffs, *pTFBuffs;
+#ifdef OVERLAPPED
+    OVERLAPPED overlapped;
+#endif
+    TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
     int i, lasterror, ptr = 0;
-    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
     DWORD dwFlags = 0;
-    size_t headerlen = 0, trailerlen = 0;
-    void *headerbuf, *trailerbuf;
+    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
 
     rv = setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO,
                (char*) &timeout, sizeof(timeout));
@@ -211,50 +211,55 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     if (flags | APR_SENDFILE_CLOSE_SOCKET)
         dwFlags |= TF_DISCONNECT;
 #else
-    dwFlags = 0; // TF_DISCONNECT;TF_WRITE_BEHIND;TF_REUSE_SOCKET;
+    dwFlags = 0;
 #endif
 
     /* TransmitFile can only send one header and one footer */
-    pTFBuffs = NULL;
-    memset(&TFBuffs, '0', sizeof (TFBuffs));
+    memset(&tfb, '0', sizeof (tfb));
     if (hdtr->numheaders) {
+        ptfb = &tfb;
         for (i = 0; i < hdtr->numheaders; i++) {
-            TFBuffs.HeadLength += hdtr->headers[i].iov_len;
+            tfb.HeadLength += hdtr->headers[i].iov_len;
         }
 
-        TFBuffs.Head = ap_palloc(sock->cntxt, headerlen); /* should this be a malloc? */
+        tfb.Head = ap_palloc(sock->cntxt, tfb.HeadLength); /* Should this be a malloc? */
 
         for (i = 0; i < hdtr->numheaders; i++) {
-            memcpy(&TFBuffs.Head, hdtr->headers[i].iov_base + ptr,
+            memcpy(&tfb.Head + ptr, hdtr->headers[i].iov_base,
                    hdtr->headers[i].iov_len);
             ptr += hdtr->headers[i].iov_len;
         }
-        pTFBuffs = &TFBuffs;
     }
     if (hdtr->numtrailers) {
+        ptfb = &tfb;
         for (i = 0; i < hdtr->numtrailers; i++) {
-            TFBuffs.TailLength += hdtr->headers[i].iov_len;
+            tfb.TailLength += hdtr->headers[i].iov_len;
         }
 
-        TFBuffs.Tail = ap_palloc(sock->cntxt, trailerlen); /* Should this be a malloc */
+        tfb.Tail = ap_palloc(sock->cntxt, tfb.TailLength); /* Should this be a malloc? */
 
         for (i = 0; i < hdtr->numtrailers; i++) {
-            memcpy(&TFBuffs.Tail, hdtr->trailers[i].iov_base + ptr,
+            memcpy(&tfb.Tail + ptr, hdtr->trailers[i].iov_base,
                    hdtr->trailers[i].iov_len);
             ptr += hdtr->trailers[i].iov_len;
         }
 
-        pTFBuffs = &TFBuffs;
-    }
 
-//    memset(&overlapped,'0', sizeof(overlapped));
-    rv = TransmitFile(sock->sock, /* socket */
+    }
+#ifdef OVERLAPPED
+    memset(&overlapped,'0', sizeof(overlapped));
+#endif
+    rv = TransmitFile(sock->sock,     /* socket */
                       file->filehand, /* open file descriptor of the file to be sent */
-                      *len,    /* number of bytes to send. 0==> send all */
-                      0,          /* Number of bytes per send. 0=> use default */
-                      NULL,       /* OVERLAPPED structure */
-                      pTFBuffs,   /* header and trailer buffers */
-                      dwFlags);   /* flags to control various aspects of TransmitFIle */
+                      *len,           /* number of bytes to send. 0=send all */
+                      0,              /* Number of bytes per send. 0=use default */
+#ifdef OVERLAPPED
+                      &overlapped,
+#else
+                      NULL,           /* OVERLAPPED structure */
+#endif
+                      ptfb,           /* header and trailer buffers */
+                      dwFlags);       /* flags to control various aspects of TransmitFile */
     if (!rv) {
         lasterror = WSAGetLastError();
         printf("TransmitFile failed with error %d\n", lasterror);
