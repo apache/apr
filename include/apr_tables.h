@@ -55,15 +55,11 @@
 #ifndef APR_TABLES_H
 #define APR_TABLES_H
 
-#include "apr_general.h"
-#include "apr_file_io.h"
-#include "apr_thread_proc.h"
+#include "apr.h"
+#include "apr_pools.h"
 
 #if APR_HAVE_STDARG_H
-#include <stdarg.h>
-#endif
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#include <stdarg.h>     /* for va_list */
 #endif
 
 #ifdef __cplusplus

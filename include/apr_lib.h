@@ -56,20 +56,13 @@
 #define APR_LIB_H
 
 #include "apr.h"
-#include "apr_pools.h"
-#include "apr_general.h"
-#include "apr_tables.h"
-#include "apr_file_io.h"
-#include "apr_thread_proc.h"
+#include "apr_errno.h"
 
 #if APR_HAVE_CTYPE_H
 #include <ctype.h>
 #endif
 #if APR_HAVE_STDARG_H
 #include <stdarg.h>
-#endif
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
 #endif
 
 /**
@@ -265,23 +258,6 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
  * @deffunc apr_status_t apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
  */
 APR_DECLARE(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
-
-/**
- * Register a process to be killed when a pool dies.
- * @param a The pool to use to define the processes lifetime 
- * @param pid The process to register
- * @param how How to kill the process, one of:
- * <PRE>
- *         kill_never   	   -- process is never sent any signals
- *         kill_always 	   -- process is sent SIGKILL on apr_pool_t cleanup	
- *         kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
- *         just_wait          -- wait forever for the process to complete
- *         kill_only_once     -- send SIGTERM and then wait
- * </PRE>
- * @deffunc void apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid, enum kill_conditions how)
- */
-APR_DECLARE(void) apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid,
-				     enum kill_conditions how);
 
 #ifdef __cplusplus
 }

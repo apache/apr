@@ -56,6 +56,8 @@
 #define APR_USER_H
 
 #include "apr.h"
+#include "apr_errno.h"
+#include "apr_pools.h"
 
 #if APR_HAS_USER
 

@@ -23,9 +23,9 @@
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
 
 #include "apr_strings.h"
+#include "apr_lib.h"            /* for apr_is*() */
 
 #if defined(__GNUC__)
 #  define UNUSED __attribute__((__unused__))
