@@ -197,6 +197,10 @@ void main(void) {
     if (he == NULL) {
         exit(1);
     }
+    he = gethostbyname("255.255.255.255");
+    if (he == NULL) {
+        exit(1);
+    }
     else {
         exit(0);
     }

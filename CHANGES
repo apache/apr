@@ -1,4 +1,11 @@
 Changes with APR b1
+
+  *) Make sure gethostbyname() can handle 255.255.255.255 if we
+     are to trust it to handle numeric address strings in
+     apr_sockaddr_info_get().  This fixes a problem on HP-UX
+     which led to an assertion failure at Apache startup when
+     using vhosts.  [Jeff Trawick]
+
   *) Don't mask SIGUSR2 [Jin Hong <jinh@cnet.com>]  
 
   *) Load libraries if they not MH_BUNDLE, but if they are not, it 
