@@ -85,12 +85,12 @@ apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
         pollset.p = s->cntxt;
         timeout = s->timeout;
     }
-    pollset.events = type;
+    pollset.reqevents = type;
 
     do {
         srv = apr_poll(&pollset, 1, &n, timeout);
 
-        if (n == 1 && pollset.revents & type) {
+        if (n == 1 && pollset.rtnevents & type) {
             return APR_SUCCESS;
         }
     } while (APR_STATUS_IS_EINTR(srv));
