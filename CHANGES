@@ -1,5 +1,9 @@
 Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
+  *) The apr/test/Makefile.win is missing a target to build a
+     readchild.exe that test is depending on but is never built.
+     [Mladen Turk]
+
   *) Improve apr_file_gets() performance on buffered files. [Justin Erenkrantz]
 
   *) Win32: Fix bug in apr_socket_sendfile that interferred with

@@ -6,7 +6,8 @@ PROGRAMS = \
 	sendfile.exe \
 	proc_child.exe \
         tryread.exe \
-	occhild.exe\
+	occhild.exe \
+	readchild.exe \
 	sockchild.exe \
 	testlockperf.exe \
 	testshmproducer.exe \
@@ -39,6 +40,9 @@ tryread.exe: tryread.obj $(LOCAL_LIBS)
 
 occhild.exe: occhild.obj $(LOCAL_LIBS)
 	$(LINK) occhild.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+readchild.exe: readchild.obj $(LOCAL_LIBS)
+	$(LINK) readchild.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
 proc_child.exe: proc_child.obj $(LOCAL_LIBS)
 	$(LINK) /debug /subsystem:console /machine:I386 \
