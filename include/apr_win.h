@@ -80,12 +80,6 @@
  */
 #define HAVE_CONIO_H 1
 
-/* struct iovec is needed to emulate Unix writev */
-struct iovec {
-    char* iov_base;
-    int   iov_len;
-};
-
 typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
 
 #define SIGHUP     1
@@ -120,27 +114,52 @@ typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
 #define SIGWINCH   30
 #define SIGIO      31
 
-typedef _off_t      off_t;
-typedef int         pid_t;
-typedef void (Sigfunc)(int);
-
 #define __attribute__(__x) 
-
-#define SIZEOF_SHORT 2
-#define SIZEOF_INT 4
-#define SIZEOF_LONGLONG 8
 
 #define API_EXPORT(x)            x
 #define API_EXPORT_NONSTD(x)     x
 #define API_THREAD_FUNC __stdcall
 #define API_VAR_IMPORT extern _declspec(dllimport)
 
+/* APR COMPATABILITY FUNCTIONS
+ * This section should be used to define functions and
+ * macros which are need to make Windows features look
+ * like POSIX features.
+ */
+/* struct iovec is needed to emulate Unix writev */
+struct iovec {
+    char* iov_base;
+    int   iov_len;
+};
+
+typedef _off_t      off_t;
+typedef int         ssize_t;
+typedef int         pid_t;
+typedef void (Sigfunc)(int);
+
 #define strcasecmp(s1, s2)       stricmp(s1, s2)
 #define sleep(t)                 Sleep(t * 1000)
 
+
+/* APR FEATURE MACROS.
+ * This section should be used to define feature macros
+ * that the windows port needs.
+ */
+#define APR_HAS_THREADS        1
+
+#define SIZEOF_SHORT           2
+#define SIZEOF_INT             4
+#define SIZEOF_LONGLONG        8
+#define SIZEOF_CHAR            1
+#define SIZEOF_SSIZE_T         SIZEOF_INT
+
+/* APR WINDOWS-ONLY FUNCTIONS
+ * This section should define those functions which are
+ * only found in the windows version of APR.
+ */
+
 time_t WinTimeToUnixTime(FILETIME *);
 unsigned __stdcall SignalHandling(void *);
-
 int thread_ready(void);
 
 #endif  /*APR_WIN_H*/
