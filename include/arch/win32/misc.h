@@ -183,6 +183,73 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
     (hFile));
 #define CancelIo apr_winapi_CancelIo
 
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, TryEnterCriticalSection, 0, (
+    LPCRITICAL_SECTION lpCriticalSection),
+    (lpCriticalSection));
+#define TryEnterCriticalSection apr_winapi_TryEnterCriticalSection
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SwitchToThread, 0, (
+    void),
+    ());
+#define SwitchToThread apr_winapi_SwitchToThread
+
+#undef GetEffectiveRightsFromAcl
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetEffectiveRightsFromAclA, 0, (
+    IN PACL pacl,
+    IN PTRUSTEE_A pTrustee,
+    OUT PACCESS_MASK pAccessRights),
+    (pacl, pTrustee, pAccessRights));
+#define GetEffectiveRightsFromAclA apr_winapi_GetEffectiveRightsFromAclA
+#define GetEffectiveRightsFromAcl apr_winapi_GetEffectiveRightsFromAclA
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetEffectiveRightsFromAclW, 0, (
+    IN PACL pacl,
+    IN PTRUSTEE_W pTrustee,
+    OUT PACCESS_MASK pAccessRights),
+    (pacl, pTrustee, pAccessRights));
+#define GetEffectiveRightsFromAclW apr_winapi_GetEffectiveRightsFromAclW
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetNamedSecurityInfoW, 0, (
+    IN LPWSTR pObjectName,
+    IN SE_OBJECT_TYPE ObjectType,
+    IN SECURITY_INFORMATION SecurityInfo,
+    OUT PSID *ppsidOwner,
+    OUT PSID *ppsidGroup,
+    OUT PACL *ppDacl,
+    OUT PACL *ppSacl,
+    OUT PSECURITY_DESCRIPTOR *ppSecurityDescriptor),
+    (pObjectName, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
+	 ppDacl, ppSacl, ppSecurityDescriptor));
+#define GetNamedSecurityInfoW apr_winapi_GetNamedSecurityInfoW
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetNamedSecurityInfoA, 0, (
+    IN LPSTR pObjectName,
+    IN SE_OBJECT_TYPE ObjectType,
+    IN SECURITY_INFORMATION SecurityInfo,
+    OUT PSID *ppsidOwner,
+    OUT PSID *ppsidGroup,
+    OUT PACL *ppDacl,
+    OUT PACL *ppSacl,
+    OUT PSECURITY_DESCRIPTOR *ppSecurityDescriptor),
+    (pObjectName, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
+	 ppDacl, ppSacl, ppSecurityDescriptor));
+#define GetNamedSecurityInfoA apr_winapi_GetNamedSecurityInfoA
+#undef GetNamedSecurityInfo
+#define GetNamedSecurityInfo apr_winapi_GetNamedSecurityInfoA
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetSecurityInfo, 0, (
+    IN HANDLE handle,
+    IN SE_OBJECT_TYPE ObjectType,
+    IN SECURITY_INFORMATION SecurityInfo,
+    OUT PSID *ppsidOwner,
+    OUT PSID *ppsidGroup,
+    OUT PACL *ppDacl,
+    OUT PACL *ppSacl,
+    OUT PSECURITY_DESCRIPTOR *ppSecurityDescriptor),
+    (handle, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
+	 ppDacl, ppSacl, ppSecurityDescriptor));
+#define GetSecurityInfo apr_winapi_GetSecurityInfo
+
 apr_status_t apr_get_oslevel(struct apr_pool_t *, apr_oslevel_e *);
 #endif /* WIN32 */
 
