@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) We now create exports.c and export_vars.h, which in turn create
+     exports.c.  From this we generate two more files with different
+     purposes: apr.exp - list of exported symbols; and exports.lo
+     (exports.o) - an object file that can be linked with an executable
+     to force resolution of all apr symbols.   [Aaron Bannert]
+
   *) Add the apr_thread_cond_timedwait function to the condition
      variable API.   [Aaron Bannert]
 
