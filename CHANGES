@@ -1,4 +1,8 @@
 Changes with APR 0.9.2
+
+  *) Allow apr-config to work in symlinked install directories when
+     'realpath' is available.  [Justin Erenkrantz]
+
   *) Namespace protect the header files in include/arch
      [Thom May]
 
