@@ -396,6 +396,7 @@ typedef int ap_status_t;
 #define APR_ENOSOCKET      4011
 #define APR_ENOTHREAD      4012
 #define APR_ENOTHDKEY      4013
+#define APR_NOTTHREADSAFE  4014
 
 /*  APR STATUS VALUES */
 #define APR_INCHILD        5001

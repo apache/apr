@@ -198,6 +198,8 @@ AC_CHECK_FUNCS(sigaction writev)
 AC_CHECK_FUNCS(getpass)
 AC_CHECK_FUNC(_getch)
 
+AC_CHECK_FUNCS(gmtime_r localtime_r)
+
 dnl Start building stuff from our information
 AC_SUBST(LDLIBS)
 AC_SUBST(OPTIM)
