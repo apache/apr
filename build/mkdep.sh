@@ -7,7 +7,7 @@
 # Note that we use && to ensure that Makefile is not changed if an error
 # occurs during the process
 #
-if [ -z $CC ]; then
+if test -z "$CC"; then
    CC=cc
 fi
 
