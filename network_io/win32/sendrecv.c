@@ -325,17 +325,24 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         if (!rv) {
             status = apr_get_netos_error();
             if (status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
+                HANDLE event;
 #ifdef WAIT_FOR_EVENT
-                rv = WaitForSingleObject(overlapped.hEvent, 
-                                         (DWORD)(sock->timeout >= 0 
-                                            ? sock->timeout : INFINITE));
+                event = overlapped.hEvent;
 #else
-                rv = WaitForSingleObject((HANDLE) sock->sock, 
-                                         (DWORD)(sock->timeout >= 0 
-                                            ? sock->timeout : INFINITE));
+                event = (HANDLE) sock->sock;
 #endif
-                if (rv == WAIT_OBJECT_0)
-                    status = APR_SUCCESS;
+                rv = WaitForSingleObject(event, 
+                                         (DWORD)(sock->timeout >= 0 
+                                                 ? sock->timeout : INFINITE));
+                if (rv == WAIT_OBJECT_0) {
+                    if (!GetOverlappedResult(event, &overlapped,
+                                             &nbytes, FALSE)) {
+                        status = APR_FROM_OS_ERROR(GetLastError());
+                    }
+                    else {
+                        status = APR_SUCCESS;
+                    }
+                }
                 else if (rv == WAIT_TIMEOUT)
                     status = APR_FROM_OS_ERROR(WAIT_TIMEOUT);
                 else if (rv == WAIT_ABANDONED) {
