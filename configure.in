@@ -77,9 +77,9 @@ AC_SUBST(APR_MAJOR_VERSION)
 
 echo "APR Version: ${APR_DOTTED_VERSION}"
 
-dnl # Enable the layout handling code, then reparse the prefix-style
-dnl # arguments due to autoconf being a PITA.
-APR_ENABLE_LAYOUT
+dnl Enable the layout handling code, then reparse the prefix-style
+dnl arguments due to autoconf being a PITA.
+APR_ENABLE_LAYOUT(apr)
 APR_PARSE_ARGUMENTS
 
 dnl Set optional CC hints here in case autoconf makes an inappropriate choice.
