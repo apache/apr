@@ -32,7 +32,6 @@ PROGRAMS = \
 	testuuid@EXEEXT@ \
 	testsockopt@EXEEXT@ \
 	testipsub@EXEEXT@ \
-	testmd5@EXEEXT@ \
 	testpoll@EXEEXT@ \
 	testhash@EXEEXT@ \
 	occhild@EXEEXT@ \
@@ -152,9 +151,6 @@ testsockopt@EXEEXT@: testsockopt.lo $(LOCAL_LIBS)
 
 testipsub@EXEEXT@: testipsub.lo $(LOCAL_LIBS)
 	$(LINK) testipsub.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testmd5@EXEEXT@: testmd5.lo $(LOCAL_LIBS)
-	$(LINK) testmd5.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testpoll@EXEEXT@: testpoll.lo $(LOCAL_LIBS)
 	$(LINK) testpoll.lo $(LOCAL_LIBS) $(ALL_LIBS)
