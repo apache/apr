@@ -26,12 +26,6 @@ dnl Libtool needs this symbol
 top_builddir="$abs_builddir"
 AC_SUBST(top_builddir)
 
-dnl Get location of helpers directory
-dnl XXX This assumes that APR "lives" under Apache.
-dnl XXX We'll need to fix this when we pull it out.
-abs_helpersdir=$abs_srcdir/helpers
-MKDIR=$abs_helpersdir/mkdir.sh
-
 if test "$abs_builddir" != "$abs_srcdir"; then
   USE_VPATH=1
 fi
@@ -47,6 +41,15 @@ AC_PROG_MAKE_SET
 AC_PROG_AWK
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_TOOL(AR, ar, ar)
+
+dnl Get locations of the build helper scripts
+MKDIR=$abs_srcdir/helpers/mkdir.sh
+APR_MKEXPORT="$AWK -f $abs_srcdir/helpers/make_export.awk"
+AC_SUBST(APR_MKEXPORT)
+APR_MKDEP=$abs_srcdir/helpers/mkdep.sh
+AC_SUBST(APR_MKDEP)
+APR_SCANDOC=$abs_srcdir/helpers/scandoc
+AC_SUBST(APR_SCANDOC)
 
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
