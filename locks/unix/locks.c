@@ -53,6 +53,7 @@
  *
  */
 
+#include "apr_config.h"
 #include "apr_general.h"
 #include "apr_portable.h"
 #include "apr_lib.h"

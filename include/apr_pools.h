@@ -83,17 +83,9 @@ extern "C" {
  * alloc.c.  
  */
 
- /* Need declaration of DIR on Win32 */
-#ifdef WIN32
-/*#include "../os/win32/readdir.h"*/
-#endif
 #include "apr_lib.h"
 
 #include <sys/types.h>
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#include <signal.h>
 
 struct process_chain {
     pid_t pid;

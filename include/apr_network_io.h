@@ -62,14 +62,7 @@
 
 #include "apr_general.h"
 #include "apr_errno.h"
-#include <time.h>
-
-#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
-#endif
-#ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -54,6 +54,7 @@
  */
 
 #include "networkio.h"
+#include "apr_config.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"

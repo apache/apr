@@ -57,6 +57,9 @@
 
 #include "apr_config.h"
 #include "apr_lib.h"
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 
 #ifndef NO_USE_SIGACTION
 /*

@@ -88,14 +88,7 @@
 #ifndef APACHE_MD5_H
 #define APACHE_MD5_H
 
-#ifdef WIN32
-#include "apr_win.h"
-#endif
-
 #include "apr_lib.h"
-#ifdef HAVE_CRYPT_H
-#include <crypt.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {

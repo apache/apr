@@ -56,6 +56,7 @@
 #ifndef NETWORK_IO_H
 #define NETWORK_IO_H
 
+#include "apr_config.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_lock.h"

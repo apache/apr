@@ -53,28 +53,14 @@
  *
  */
 
+#include "apr.h"
+
 #ifdef WIN32
-#include "apr_win.h"
 #include <windows.h>
-#else
-#include "apr_config.h"
 #endif
 
-#ifdef HAVE_STDIO_H
 #include <stdio.h>
-#endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
 #include "apr_errno.h"
 
 #ifndef APR_GENERAL_H
@@ -88,34 +74,6 @@ extern "C" {
 #define FALSE 0
 
 #define MAXIMUM_WAIT_OBJECTS 64
-
-#if (SIZEOF_SHORT == 2)
-typedef short                  ap_int16_t;
-typedef unsigned short         ap_uint16_t;
-#endif
-
-#if (SIZEOF_INT == 4)
-typedef int                    ap_int32_t;
-typedef unsigned int           ap_uint32_t;
-#endif
-
-#if (SIZEOF_LONG == 8)
-typedef long                   ap_int64_t;
-typedef unsigned long          ap_uint64_t;
-#elif (SIZEOF_LONG_LONG == 8)
-typedef long long              ap_int64_t;
-typedef unsigned long long     ap_uint64_t;
-#elif (SIZEOF_LONG_DOUBLE == 8)
-typedef long double            ap_int64_t;
-typedef unsigned long double   ap_uint64_t;
-#elif (SIZEOF_LONGLONG == 8)
-typedef __int64                ap_int64_t;
-typedef unsigned __int64       ap_uint64_t;
-#endif
-
-typedef size_t                 ap_size_t;
-typedef ssize_t                ap_ssize_t;
-typedef off_t                  ap_off_t;
 
 #if SIZEOF_SSIZE_T == SIZEOF_INT
 # define APR_SSIZE_T_FMT "d"
@@ -236,10 +194,6 @@ ap_status_t ap_set_userdata(void *, char *,
                             ap_status_t (*cleanup) (void *), ap_context_t *);
 ap_status_t ap_get_userdata(void **, char *, ap_context_t *);
 ap_status_t ap_initialize(void);
-
-ap_status_t ap_create_signal(ap_signum_t, ap_context_t *);
-ap_status_t ap_send_signal(ap_signum_t, ap_context_t *);
-ap_status_t ap_setup_signal(ap_signum_t, Sigfunc *, ap_context_t *);
 
 #ifdef __cplusplus
 }
