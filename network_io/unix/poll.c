@@ -174,7 +174,7 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
     int rv;
 
     pollset = (struct pollfd *)ap_palloc(aprset->cntxt, 
-                                         sizeof(struct pollfd) * (*nsds));
+                                         sizeof(struct pollfd) * aprset->curpos);
 
     for (i = 0; i < aprset->curpos; i++) {
         pollset[i].fd = aprset->sock[i];
