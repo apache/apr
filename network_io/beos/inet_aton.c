@@ -72,6 +72,7 @@
 #if BEOS_R5 /* this isn't needed for BONE */
 
 #include "networkio.h"
+#include <ctype.h>
 
 /* BeOS doesn't yet have it's own inet_aton and Bind won't be ported
  * until R5, so this is from a Bind 8 distribution.  It's currently untested.
