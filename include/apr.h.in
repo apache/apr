@@ -96,8 +96,10 @@
 #if !defined(__GNUC__) || __GNUC__ < 2 || \
     (__GNUC__ == 2 && __GNUC_MINOR__ < 7) ||\
     defined(NEXT)
-#define APR_INLINE
+#ifndef __attribute__
 #define __attribute__(__x)
+#endif
+#define APR_INLINE
 #define APR_HAS_INLINE		0
 #else
 #define APR_INLINE __inline__
