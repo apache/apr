@@ -390,16 +390,28 @@ do_select:
 
     nbytes += rv;
 
-    /* If this was a partial write, return now with the partial byte count; 
-     * this is a non-blocking socket.
-     */
-
     if (rv < *len) {
         *len = nbytes;
-        if (sock->timeout) {
-            sock->netmask |= APR_INCOMPLETE_WRITE;
+        arv = apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+        if (rv > 0) {
+                
+            /* If this was a partial write, return now with the 
+             * partial byte count;  this is a non-blocking socket.
+             */
+
+            if (sock->timeout) {
+                sock->netmask |= APR_INCOMPLETE_WRITE;
+            }
+            return arv;
         }
-        return apr_setsocketopt(sock, APR_TCP_NOPUSH, 0);
+        else {
+            /* If the file got smaller mid-request, eventually the offset
+             * becomes equal to the new file size and the kernel returns 0.  
+             * Make this an error so the caller knows to log something and
+             * exit.
+             */
+            return APR_EOF;
+        }
     }
 
     /* Now write the footers */
