@@ -1,3 +1,4 @@
+#include <stdio.h>
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
@@ -1127,8 +1128,8 @@ APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags)
     dups_found = 0;
     sort_next = sort_array;
     sort_end = sort_array + t->a.nelts;
-    last = sort_next;
-    while (++sort_next < sort_end) {
+    last = sort_next++;
+    while (sort_next < sort_end) {
         if (((*sort_next)->key_checksum == (*last)->key_checksum) &&
             !strcasecmp((*sort_next)->key, (*last)->key)) {
             apr_table_entry_t **dup_last = sort_next + 1;
@@ -1176,7 +1177,7 @@ APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags)
             } while (++sort_next <= dup_last);
         }
         else {
-            last = sort_next;
+            last = sort_next++;
         }
     }
 
