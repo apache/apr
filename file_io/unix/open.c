@@ -107,6 +107,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
 
     (*new)->fname = ap_pstrdup(cont, fname);
 
+    (*new)->blocking = BLK_ON;
     (*new)->buffered = (flag & APR_BUFFERED) > 0;
 
     if ((*new)->buffered) {
@@ -211,6 +212,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
     }
     (*file)->eof_hit = 0;
     (*file)->buffered = 0;
+    (*file)->blocking = BLK_UNKNOWN; /* in case it is a pipe */
     (*file)->timeout = -1;
     (*file)->filedes = *dafile;
     /* buffer already NULL; 
@@ -247,6 +249,7 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
     (*thefile)->filedes = STDERR_FILENO;
     (*thefile)->cntxt = cont;
     (*thefile)->buffered = 0;
+    (*thefile)->blocking = BLK_UNKNOWN;
     (*thefile)->fname = NULL;
     (*thefile)->eof_hit = 0;
 

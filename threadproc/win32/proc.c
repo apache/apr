@@ -97,17 +97,56 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
+        switch (in) {
+        case APR_FULL_BLOCK:
+            break;
+        case APR_PARENT_BLOCK:
+            ap_set_pipe_timeout(attr->child_in, 0);
+            break;
+        case APR_CHILD_BLOCK:
+            ap_set_pipe_timeout(attr->parent_in, 0);
+            break;
+        default:
+            ap_set_pipe_timeout(attr->child_in, 0);
+            ap_set_pipe_timeout(attr->parent_in, 0);
+        }
     }
     if (out) {
         if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out, 
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
+        switch (out) {
+        case APR_FULL_BLOCK:
+            break;
+        case APR_PARENT_BLOCK:
+            ap_set_pipe_timeout(attr->child_out, 0);
+            break;
+        case APR_CHILD_BLOCK:
+            ap_set_pipe_timeout(attr->parent_out, 0);
+            break;
+        default:
+            ap_set_pipe_timeout(attr->child_out, 0);
+            ap_set_pipe_timeout(attr->parent_out, 0);
+        }
     }
     if (err) {
         if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err, 
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
+        }
+        switch (err) {
+        case APR_FULL_BLOCK:
+            break;
+        case APR_PARENT_BLOCK:
+            ap_set_pipe_timeout(attr->child_err, 0);
+            break;
+        case APR_CHILD_BLOCK:
+            ap_set_pipe_timeout(attr->parent_err, 0);
+            break;
+        default:
+            ap_set_pipe_timeout(attr->child_err, 0);
+            ap_set_pipe_timeout(attr->parent_err, 0);
         }
     } 
     return APR_SUCCESS;
