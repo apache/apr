@@ -93,16 +93,17 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
         }
         switch (in) {
         case APR_FULL_BLOCK:
+            apr_file_pipe_timeout_set(attr->child_in, -1);
+            apr_file_pipe_timeout_set(attr->parent_in, -1);
             break;
         case APR_PARENT_BLOCK:
-            apr_file_pipe_timeout_set(attr->child_in, 0);
+            apr_file_pipe_timeout_set(attr->child_in, -1);
             break;
         case APR_CHILD_BLOCK:
-            apr_file_pipe_timeout_set(attr->parent_in, 0);
+            apr_file_pipe_timeout_set(attr->parent_in, -1);
             break;
         default:
-            apr_file_pipe_timeout_set(attr->child_in, 0);
-            apr_file_pipe_timeout_set(attr->parent_in, 0);
+            break;
         }
     } 
     if (out) {
@@ -112,16 +113,17 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
         }
         switch (out) {
         case APR_FULL_BLOCK:
+            apr_file_pipe_timeout_set(attr->child_out, -1);
+            apr_file_pipe_timeout_set(attr->parent_out, -1);       
             break;
         case APR_PARENT_BLOCK:
-            apr_file_pipe_timeout_set(attr->child_out, 0);
+            apr_file_pipe_timeout_set(attr->child_out, -1);
             break;
         case APR_CHILD_BLOCK:
-            apr_file_pipe_timeout_set(attr->parent_out, 0);
+            apr_file_pipe_timeout_set(attr->parent_out, -1);
             break;
         default:
-            apr_file_pipe_timeout_set(attr->child_out, 0);
-            apr_file_pipe_timeout_set(attr->parent_out, 0);
+            break;
         }
     } 
     if (err) {
@@ -131,16 +133,17 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
         }
         switch (err) {
         case APR_FULL_BLOCK:
+            apr_file_pipe_timeout_set(attr->child_err, -1);
+            apr_file_pipe_timeout_set(attr->parent_err, -1);
             break;
         case APR_PARENT_BLOCK:
-            apr_file_pipe_timeout_set(attr->child_err, 0);
+            apr_file_pipe_timeout_set(attr->child_err, -1);
             break;
         case APR_CHILD_BLOCK:
-            apr_file_pipe_timeout_set(attr->parent_err, 0);
+            apr_file_pipe_timeout_set(attr->parent_err, -1);
             break;
         default:
-            apr_file_pipe_timeout_set(attr->child_err, 0);
-            apr_file_pipe_timeout_set(attr->parent_err, 0);
+            break;
         }
     } 
     return APR_SUCCESS;
@@ -217,9 +220,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
     new->in = attr->parent_in;
     new->err = attr->parent_err;
     new->out = attr->parent_out;
-	sp->in  = attr->child_in?attr->child_in->filedes:-1;
-	sp->out = attr->child_out?attr->child_out->filedes:-1;
-	sp->err = attr->child_err?attr->child_err->filedes:-1;
+	sp->in  = attr->child_in  ? attr->child_in->filedes  : -1;
+	sp->out = attr->child_out ? attr->child_out->filedes : -1;
+	sp->err = attr->child_err ? attr->child_err->filedes : -1;
 
     i = 0;
     while (args && args[i]) {
