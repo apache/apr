@@ -210,6 +210,17 @@ typedef int               apr_signum_t;
 #define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
 #endif
 
+/* This is a general apr type that should only ever be used in the APR_GET_POOL
+ * macro.  This is basically used to let us get the pool from any apr type
+ * that has one.
+ */
+struct apr_t {
+    apr_pool_t *pool;
+};
+
+#define APR_GET_POOL(foo) \
+	((struct apr_t *)foo)->pool
+
 /* A couple of prototypes for functions in case some platform doesn't 
  * have it
  */
