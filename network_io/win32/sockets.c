@@ -150,8 +150,12 @@ ap_status_t ap_bind(ap_socket_t *sock)
     if (bind(sock->sock, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1) {
         return WSAGetLastError();
     }
-    else
+    else {
+        if (sock->local_addr->sin_port == 0) {
+            sock->local_port_unknown = 1; /* ephemeral port */
+        }
         return APR_SUCCESS;
+    }
 }
 
 ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
@@ -183,6 +187,24 @@ ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connectio
 
     if ((*new)->sock == INVALID_SOCKET) {
         return WSAGetLastError();
+    }
+
+    *(*new)->local_addr = *sock->local_addr;
+
+    if (sock->local_port_unknown) {
+        /* not likely for a listening socket, but theoretically possible :) */
+        (*new)->local_port_unknown = 1;
+    }
+
+    if (sock->local_interface_unknown ||
+        sock->local_addr->sin_addr.s_addr == 0) {
+        /* If the interface address inside the listening socket's local_addr wasn't
+         * up-to-date, we don't know local interface of the connected socket either.
+         *
+         * If the listening socket was not bound to a specific interface, we
+         * don't know the local_addr of the connected socket.
+         */
+        (*new)->local_interface_unknown = 1;
     }
 
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -218,20 +240,27 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
     sock->remote_addr->sin_family = AF_INET;
 
     if (connect(sock->sock, (const struct sockaddr *)sock->remote_addr, 
-                sock->addr_len) == 0) {
-        return APR_SUCCESS;
-    }
-    else {
+                sock->addr_len) == SOCKET_ERROR) {
         lasterror = WSAGetLastError();
-        if (lasterror == WSAEWOULDBLOCK) {
-            FD_ZERO(&temp);
-            FD_SET(sock->sock, &temp);
-            if (select(sock->sock+1, NULL, &temp, NULL, NULL) == 1) {
-                return APR_SUCCESS;
-            }
+        if (lasterror != WSAEWOULDBLOCK) {
+            return lasterror;
         }
-        return lasterror;
+        /* wait for the connect to complete */
+        FD_ZERO(&temp);
+        FD_SET(sock->sock, &temp);
+        if (select(sock->sock+1, NULL, &temp, NULL, NULL) == SOCKET_ERROR) {
+            return WSAGetLastError();
+        }
     }
+    /* connect was OK .. amazing */
+    if (sock->local_addr->sin_port == 0) {
+        sock->local_port_unknown = 1;
+    }
+    if (sock->local_addr->sin_addr.s_addr == 0) {
+        /* must be using free-range port */
+        sock->local_interface_unknown = 1;
+    }
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_get_socketdata(void **data, const char *key, ap_socket_t *socket)
@@ -273,6 +302,7 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
         (*sock)->timeout = -1;
         (*sock)->disconnected = 0;
     }
+    (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
     (*sock)->sock = *thesock;
     return APR_SUCCESS;
 }
