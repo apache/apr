@@ -11,7 +11,6 @@
 	}
 	macro_stack[macro_no++] = macro
 	macro = substr($0, length($1)+2)
-	found++
 	count++
 	line = line macro "\n"
 	next
@@ -23,17 +22,17 @@
 		line = line "/" macro "\n"
 		macro = macro_stack[--macro_no]
 	}
-	if (found == count + 1) {
-		found--
+	if (count == 0) {
+		if (found != 0) {
+			printf("%s", line)
+		}
 		line = ""
-	} else if (found > count + 1) {
-		found = 0
 	}
 	next
 }
 
 /^[ \t]*(AP[RU]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?([A-Za-z0-9_]+)\(/ {
-	if (found) {
+	if (count) {
 		found++
 	}
 	for (i = 0; i < count; i++) {
@@ -42,6 +41,11 @@
 	sub("^[ \t]*(AP[UR]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?", "");
 	sub("[(].*", "");
 	line = line $0 "\n"
+
+	if (count == 0) {
+		printf("%s", line)
+		line = ""
+	}
 	next
 }
 
