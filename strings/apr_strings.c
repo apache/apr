@@ -326,7 +326,7 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
      * overflow.
      */
     val = 0;
-    do {
+    for ( ; ; c = *s++) {
         if (c >= '0' && c <= '9')
 	    c -= '0';
 #if (('Z' - 'A') == 25)
@@ -358,11 +358,12 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
         if ((neg && (val > acc || (val -= c) > acc))
                  || (val < acc || (val += c) < acc)) {
             any = -1;
+            break;
         } else {
             acc = val;
 	    any = 1;
         }
-    } while (any >= 0 && (c = *s++));
+    }
 
     if (any < 0) {
 	acc = neg ? INT64_MIN : INT64_MAX;
@@ -378,7 +379,7 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 
 APR_DECLARE(apr_int64_t) apr_atoi64(const char *buf)
 {
-    return apr_strtoi64(buf, NULL, 0);
+    return apr_strtoi64(buf, NULL, 10);
 }
 
 APR_DECLARE(char *) apr_itoa(apr_pool_t *p, int n)
