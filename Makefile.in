@@ -137,3 +137,6 @@ test: $(TARGET_LIB)
 
 # DO NOT REMOVE
 docs: $(INCDIR)/*.h
+
+.PHONY: delete-lib delete-exports
+.NOTPARALLEL: delete-lib delete-exports
