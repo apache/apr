@@ -1,3 +1,5 @@
+Changes with APR 0.9.5
+
 Changes with APR 0.9.4
 
   *) win32: fix apr_file_dup() and apr_file_dup2() to dup the
