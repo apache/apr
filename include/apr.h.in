@@ -304,11 +304,12 @@ typedef  @socklen_t_value@       apr_socklen_t;
 #endif
 
 /* header files for PATH_MAX, _POSIX_PATH_MAX */
+#if APR_HAVE_LIMITS_H
+#include <limits.h>
+#else
 #if APR_HAVE_SYS_SYSLIMITS_H
 #include <sys/syslimits.h>
 #endif
-#if APR_HAVE_LIMITS_H
-#include <limits.h>
 #endif
 
 #if defined(PATH_MAX)
