@@ -177,7 +177,7 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
  * Remove a mmap'ed.
  * @param mmap The mmap'ed file.
  */
-APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap);
+APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mm);
 
 /** 
  * Move the pointer into the mmap'ed file to the specified offset.
@@ -185,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap);
  * @param mmap The mmap'ed file.
  * @param offset The offset to move to.
  */
-APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mmap, 
+APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mm, 
                                           apr_off_t offset);
 
 #endif /* APR_HAS_MMAP */
