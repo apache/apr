@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Moved hints.m4, apr_common.m4, and helpers/apr-conf.m4 into the
+     new build directory as apr_hints.m4, apr_common.m4, apr_network.m4,
+     and apr_threads.m4.  [Roy Fielding]
+
   *) Get apr_sendfile() working on HP-UX.  This gets APR to build on
      HP-UX without having to turn off APR_HAS_SENDFILE.  [Jeff Trawick]
 
