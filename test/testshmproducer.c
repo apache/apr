@@ -19,29 +19,12 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include "apr_time.h"
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include "testshm.h"
 
 #if APR_HAS_SHARED_MEMORY
-
-typedef struct mbox {
-    char msg[1024]; 
-    int msgavail; 
-} mbox;
-mbox *boxes;
-
-#define N_BOXES 10
-#define SHARED_SIZE (apr_size_t)(N_BOXES * sizeof(mbox))
-#define SHARED_FILENAME "/tmp/apr.testshm.shm"
-
 static void msgput(int boxnum, char *msg)
 {
-    fprintf(stdout, "Producer: Sending message to box %d\n", boxnum);
-    apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg));
+    apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg) + 1);
     boxes[boxnum].msgavail = 1;
 }
 
@@ -51,57 +34,49 @@ int main(void)
     apr_pool_t *pool;
     apr_shm_t *shm;
     int i;
+    int sent = 0;
     char errmsg[200];
 
     apr_initialize();
     
-    printf("APR Shared Memory Test: PRODUCER\n");
-
-    printf("Initializing the pool............................"); 
     if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
-        printf("could not initialize pool\n");
         exit(-1);
     }
-    printf("OK\n");
 
-    printf("Producer attaching to name-based shared memory....");
     rv = apr_shm_attach(&shm, SHARED_FILENAME, pool);
     if (rv != APR_SUCCESS) {
-        printf("Producer unable to attach to name-based shared memory "
-               "segment: [%d] %s \n", rv,
-               apr_strerror(rv, errmsg, sizeof(errmsg)));
         exit(-2);
     }
-    printf("OK\n");
 
     boxes = apr_shm_baseaddr_get(shm);
 
-    /* produce messages on all of the boxes, in descending order */
-    for (i = N_BOXES - 1; i > 0; i--) {
-        msgput(i, "Sending a message\n");
+    /* produce messages on all of the boxes, in descending order,
+     * Yes, we could just return N_BOXES, but I want to have a double-check
+     * in this code.  The original code actually sent N_BOXES - 1 messages,
+     * so rather than rely on possibly buggy code, this way we know that we
+     * are returning the right number.
+     */
+    for (i = N_BOXES - 1, sent = 0; i >= 0; i--, sent++) {
+        msgput(i, MSG);
         apr_sleep(apr_time_from_sec(1));
     }
 
-    printf("Producer detaching from name-based shared memory....");
     rv = apr_shm_detach(shm);
     if (rv != APR_SUCCESS) {
-        printf("Producer unable to detach from name-based shared memory "
-               "segment: [%d] %s \n", rv,
-               apr_strerror(rv, errmsg, sizeof(errmsg)));
         exit(-3);
     }
-    printf("OK\n");
 
-    return 0;
+    return sent;
 }
 
 #else /* APR_HAS_SHARED_MEMORY */
 
 int main(void)
 {
-    printf("APR SHMEM test not run!\n");
-    printf("shmem is not supported on this platform\n"); 
-    return -1;
+    /* Just return, this program will never be launched, so there is no
+     * reason to print a message.
+     */
+    return 0;
 }
 
 #endif /* APR_HAS_SHARED_MEMORY */
