@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/03/07 17:57:11 $]
+Last modified at [$Date: 2001/03/15 19:31:53 $]
 
 Release:
 
@@ -23,6 +23,10 @@ RELEASE SHOWSTOPPERS:
         cleanup, toggle messy (APR_INCOMPLETE) result when appropriate.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * Unconditionally setting AI_CANONNAME flag when apr_sockaddr_info_get()
+      calls getaddrinfo() is bogus and causes undesired DNS requests.
+        Status: Jeff will look into this
 
     * Solve Win32 APR_CHR, APR_BLK, etc for Win32 apr_stat without 
         GetFileType?  How about inode/dev/nlink?
