@@ -644,8 +644,7 @@ B<Remove a socket from the poll structure.>
 
 =cut
  */
-ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock,
-                                  ap_int16_t events);
+ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock);
 
 /*
 
