@@ -70,8 +70,10 @@ static void end_suite(abts_suite *suite)
 {
     if (suite != NULL) {
         sub_suite *last = suite->tail;
-        fprintf(stdout, "\b");
-        fflush(stdout);
+        if (!quiet) {
+            fprintf(stdout, "\b");
+            fflush(stdout);
+        }
         if (last->failed == 0) {
             fprintf(stdout, "SUCCESS\n");
             fflush(stdout);
@@ -116,7 +118,8 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
     }
 
     reset_status();
-    fprintf(stdout, "%s: %c", suite_name, status[curr_char]);
+    fprintf(stdout, "%s:  ", suite_name);
+    update_status();
     fflush(stdout);
 
     return suite;
