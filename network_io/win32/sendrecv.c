@@ -121,7 +121,7 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
 
 APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
                                     const struct iovec *vec,
-                                    apr_int32_t nvec, apr_int32_t *nbytes)
+                                    apr_int32_t nvec, apr_size_t *nbytes)
 {
     apr_ssize_t rv;
     int i;
