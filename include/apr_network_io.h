@@ -650,7 +650,7 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, ap_socket_t *socket,
 
 =head1 ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock, ap_int16_t events)
 
-B<Modfify a socket in the poll structure with mask.> 
+B<Modify a socket in the poll structure with mask.> 
 
     arg 1) The poll structure we will be using. 
     arg 2) The socket to modify in poll structure. 
