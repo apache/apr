@@ -976,7 +976,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 
         if (ps->got_a_new_node) {
             active->next = ps->free;
-            ps->free = node;
+            ps->free = active;
         }
 
         ps->got_a_new_node = 1;
