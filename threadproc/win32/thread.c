@@ -61,10 +61,10 @@
 #include <process.h>
 
 
-ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
+apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
 {
-    (*new) = (ap_threadattr_t *)ap_palloc(cont, 
-              sizeof(ap_threadattr_t));
+    (*new) = (apr_threadattr_t *)apr_palloc(cont, 
+              sizeof(apr_threadattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -74,28 +74,28 @@ ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
+apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
 {
     attr->detach = on;
 	return APR_SUCCESS;
 }
 
-ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
+apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
 {
     if (attr->detach == 1)
         return APR_DETACH;
     return APR_NOTDETACH;
 }
 
-ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
-                             ap_thread_start_t func, void *data, 
-                             ap_pool_t *cont)
+apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr, 
+                             apr_thread_start_t func, void *data, 
+                             apr_pool_t *cont)
 {
-    ap_status_t stat;
+    apr_status_t stat;
 	unsigned temp;
     int lasterror;
  
-    (*new) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
+    (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -103,7 +103,7 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
 
     (*new)->cntxt = cont;
     
-    stat = ap_create_pool(&(*new)->cntxt, cont);
+    stat = apr_create_pool(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -124,16 +124,16 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
+apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
-    ap_destroy_pool(thd->cntxt);
+    apr_destroy_pool(thd->cntxt);
     _endthreadex(*retval);
 	return APR_SUCCESS;
 }
 
-ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
+apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
 {
-    ap_status_t stat;
+    apr_status_t stat;
 
     if ((stat = WaitForSingleObject(thd->td, INFINITE)) == WAIT_OBJECT_0) {
         if (GetExitCodeThread(thd->td, retval) == 0) {
@@ -146,7 +146,7 @@ ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
     }
 }
 
-ap_status_t ap_thread_detach(ap_thread_t *thd)
+apr_status_t apr_thread_detach(apr_thread_t *thd)
 {
     if (CloseHandle(thd->td)) {
         return APR_SUCCESS;
@@ -156,19 +156,19 @@ ap_status_t ap_thread_detach(ap_thread_t *thd)
     }
 }
 
-ap_status_t ap_get_threaddata(void **data, const char *key, ap_thread_t *thread)
+apr_status_t apr_get_threaddata(void **data, const char *key, apr_thread_t *thread)
 {
-    return ap_get_userdata(data, key, thread->cntxt);
+    return apr_get_userdata(data, key, thread->cntxt);
 }
 
-ap_status_t ap_set_threaddata(void *data, const char *key,
-                              ap_status_t (*cleanup) (void *),
-                              ap_thread_t *thread)
+apr_status_t apr_set_threaddata(void *data, const char *key,
+                              apr_status_t (*cleanup) (void *),
+                              apr_thread_t *thread)
 {
-    return ap_set_userdata(data, key, cleanup, thread->cntxt);
+    return apr_set_userdata(data, key, cleanup, thread->cntxt);
 }
 
-ap_status_t ap_get_os_thread(ap_os_thread_t **thethd, ap_thread_t *thd)
+apr_status_t apr_get_os_thread(apr_os_thread_t **thethd, apr_thread_t *thd)
 {
     if (thd == NULL) {
         return APR_ENOTHREAD;
@@ -177,14 +177,14 @@ ap_status_t ap_get_os_thread(ap_os_thread_t **thethd, ap_thread_t *thd)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
-                             ap_pool_t *cont)
+apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd, 
+                             apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;
     }
     if ((*thd) == NULL) {
-        (*thd) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
+        (*thd) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
         (*thd)->cntxt = cont;
     }
     (*thd)->td = thethd;

@@ -60,13 +60,13 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
+apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
     int rv;
-    ap_file_t *dup_file;
+    apr_file_t *dup_file;
 
     if (*new_file == NULL) {
-        dup_file = (ap_file_t *)ap_palloc(p, sizeof(ap_file_t));
+        dup_file = (apr_file_t *)apr_palloc(p, sizeof(apr_file_t));
 
         if (dup_file == NULL) {
             return APR_ENOMEM;
@@ -84,7 +84,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
         return APR_OS2_STATUS(rv);
     }
 
-    dup_file->fname = ap_pstrdup(dup_file->cntxt, old_file->fname);
+    dup_file->fname = apr_pstrdup(dup_file->cntxt, old_file->fname);
     dup_file->buffered = old_file->buffered;
     dup_file->isopen = old_file->isopen;
     dup_file->flags = old_file->flags;
@@ -92,8 +92,8 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
     dup_file->pipe = old_file->pipe;
 
     if (*new_file == NULL) {
-        ap_register_cleanup(dup_file->cntxt, dup_file, apr_file_cleanup,
-                            ap_null_cleanup);
+        apr_register_cleanup(dup_file->cntxt, dup_file, apr_file_cleanup,
+                            apr_null_cleanup);
         *new_file = dup_file;
     }
 

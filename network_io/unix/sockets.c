@@ -55,9 +55,9 @@
 #include "networkio.h"
 #include "apr_portable.h"
 
-static ap_status_t socket_cleanup(void *sock)
+static apr_status_t socket_cleanup(void *sock)
 {
-    ap_socket_t *thesocket = sock;
+    apr_socket_t *thesocket = sock;
     if (close(thesocket->socketdes) == 0) {
         thesocket->socketdes = -1;
         return APR_SUCCESS;
@@ -67,17 +67,17 @@ static ap_status_t socket_cleanup(void *sock)
     }
 }
 
-ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
+apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
 {
-    (*new) = (ap_socket_t *)ap_pcalloc(cont, sizeof(ap_socket_t));
+    (*new) = (apr_socket_t *)apr_pcalloc(cont, sizeof(apr_socket_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
     (*new)->cntxt = cont; 
-    (*new)->local_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt,
+    (*new)->local_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt,
                          sizeof(struct sockaddr_in));
-    (*new)->remote_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt,
+    (*new)->remote_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt,
                           sizeof(struct sockaddr_in));
 
     if ((*new)->local_addr == NULL || (*new)->remote_addr == NULL) {
@@ -95,23 +95,23 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
         return errno;
     }
     (*new)->timeout = -1;
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void *)(*new), 
+                        socket_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
+apr_status_t apr_shutdown(apr_socket_t *thesocket, ap_shutdown_how_e how)
 {
     return (shutdown(thesocket->socketdes, how) == -1) ? errno : APR_SUCCESS;
 }
 
-ap_status_t ap_close_socket(ap_socket_t *thesocket)
+apr_status_t apr_close_socket(apr_socket_t *thesocket)
 {
-    ap_kill_cleanup(thesocket->cntxt, thesocket, socket_cleanup);
+    apr_kill_cleanup(thesocket->cntxt, thesocket, socket_cleanup);
     return socket_cleanup(thesocket);
 }
 
-ap_status_t ap_bind(ap_socket_t *sock)
+apr_status_t apr_bind(apr_socket_t *sock)
 {
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
         return errno;
@@ -123,7 +123,7 @@ ap_status_t ap_bind(ap_socket_t *sock)
     }
 }
 
-ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
+apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == -1)
         return errno;
@@ -131,16 +131,16 @@ ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connection_context)
+apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
-    (*new) = (ap_socket_t *)ap_pcalloc(connection_context, 
-                            sizeof(ap_socket_t));
+    (*new) = (apr_socket_t *)apr_pcalloc(connection_context, 
+                            sizeof(apr_socket_t));
 
     (*new)->cntxt = connection_context;
-    (*new)->local_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt, 
+    (*new)->local_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
 
-    (*new)->remote_addr = (struct sockaddr_in *)ap_pcalloc((*new)->cntxt, 
+    (*new)->remote_addr = (struct sockaddr_in *)apr_pcalloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->addr_len = sizeof(struct sockaddr_in);
 #ifndef HAVE_POLL
@@ -173,12 +173,12 @@ ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connectio
         (*new)->local_interface_unknown = 1;
     }
 
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void *)(*new), 
+                        socket_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
+apr_status_t apr_connect(apr_socket_t *sock, char *hostname)
 {
     struct hostent *hp;
 
@@ -231,32 +231,32 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
     }
 }
 
-ap_status_t ap_get_socketdata(void **data, const char *key, ap_socket_t *sock)
+apr_status_t apr_get_socketdata(void **data, const char *key, apr_socket_t *sock)
 {
-    return ap_get_userdata(data, key, sock->cntxt);
+    return apr_get_userdata(data, key, sock->cntxt);
 }
 
-ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, const char *key,
-                              ap_status_t (*cleanup) (void *))
+apr_status_t apr_set_socketdata(apr_socket_t *sock, void *data, const char *key,
+                              apr_status_t (*cleanup) (void *))
 {
-    return ap_set_userdata(data, key, cleanup, sock->cntxt);
+    return apr_set_userdata(data, key, cleanup, sock->cntxt);
 }
 
-ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
+apr_status_t apr_get_os_sock(apr_os_sock_t *thesock, apr_socket_t *sock)
 {
     *thesock = sock->socketdes;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, 
-                           ap_pool_t *cont)
+apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, 
+                           apr_pool_t *cont)
 {
     if ((*sock) == NULL) {
-        (*sock) = (ap_socket_t *)ap_pcalloc(cont, sizeof(ap_socket_t));
+        (*sock) = (apr_socket_t *)apr_pcalloc(cont, sizeof(apr_socket_t));
         (*sock)->cntxt = cont;
-        (*sock)->local_addr = (struct sockaddr_in *)ap_pcalloc((*sock)->cntxt,
+        (*sock)->local_addr = (struct sockaddr_in *)apr_pcalloc((*sock)->cntxt,
                              sizeof(struct sockaddr_in));
-        (*sock)->remote_addr = (struct sockaddr_in *)ap_pcalloc((*sock)->cntxt,
+        (*sock)->remote_addr = (struct sockaddr_in *)apr_pcalloc((*sock)->cntxt,
                               sizeof(struct sockaddr_in));
 
         if ((*sock)->local_addr == NULL || (*sock)->remote_addr == NULL) {

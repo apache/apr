@@ -60,23 +60,23 @@
 #define INCL_DOS
 #include <os2.h>
 
-static ap_status_t dir_cleanup(void *thedir)
+static apr_status_t dir_cleanup(void *thedir)
 {
-    ap_dir_t *dir = thedir;
-    return ap_closedir(dir);
+    apr_dir_t *dir = thedir;
+    return apr_closedir(dir);
 }
 
 
 
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cntxt)
+apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cntxt)
 {
-    ap_dir_t *thedir = (ap_dir_t *)ap_palloc(cntxt, sizeof(ap_dir_t));
+    apr_dir_t *thedir = (apr_dir_t *)apr_palloc(cntxt, sizeof(apr_dir_t));
     
     if (thedir == NULL)
         return APR_ENOMEM;
     
     thedir->cntxt = cntxt;
-    thedir->dirname = ap_pstrdup(cntxt, dirname);
+    thedir->dirname = apr_pstrdup(cntxt, dirname);
 
     if (thedir->dirname == NULL)
         return APR_ENOMEM;
@@ -84,13 +84,13 @@ ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cntxt)
     thedir->handle = 0;
     thedir->validentry = FALSE;
     *new = thedir;
-    ap_register_cleanup(cntxt, thedir, dir_cleanup, ap_null_cleanup);
+    apr_register_cleanup(cntxt, thedir, dir_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 }
 
 
 
-ap_status_t ap_closedir(ap_dir_t *thedir)
+apr_status_t apr_closedir(apr_dir_t *thedir)
 {
     int rv = 0;
     
@@ -107,14 +107,14 @@ ap_status_t ap_closedir(ap_dir_t *thedir)
 
 
 
-ap_status_t ap_readdir(ap_dir_t *thedir)
+apr_status_t apr_readdir(apr_dir_t *thedir)
 {
     int rv;
     ULONG entries = 1;
     
     if (thedir->handle == 0) {
         thedir->handle = HDIR_CREATE;
-        rv = DosFindFirst(ap_pstrcat(thedir->cntxt, thedir->dirname, "/*", NULL), &thedir->handle, 
+        rv = DosFindFirst(apr_pstrcat(thedir->cntxt, thedir->dirname, "/*", NULL), &thedir->handle, 
                           FILE_ARCHIVED|FILE_DIRECTORY|FILE_SYSTEM|FILE_HIDDEN|FILE_READONLY, 
                           &thedir->entry, sizeof(thedir->entry), &entries, FIL_STANDARD);
     } else {
@@ -136,28 +136,28 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
 
 
 
-ap_status_t ap_rewinddir(ap_dir_t *thedir)
+apr_status_t apr_rewinddir(apr_dir_t *thedir)
 {
-    return ap_closedir(thedir);
+    return apr_closedir(thedir);
 }
 
 
 
-ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
+apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
     return APR_OS2_STATUS(DosCreateDir(path, NULL));
 }
 
 
 
-ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
+apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 {
     return APR_OS2_STATUS(DosDeleteDir(path));
 }
 
 
 
-ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
 {
     if (thedir->validentry) {
         *size = thedir->entry.cbFile;
@@ -169,7 +169,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
 
 
 
-ap_status_t ap_dir_entry_mtime(ap_time_t *time, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
 {
     if (thedir->validentry) {
         ap_os2_time_to_ap_time(time, thedir->entry.fdateLastWrite, thedir->entry.ftimeLastWrite);
@@ -181,7 +181,7 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *time, ap_dir_t *thedir)
 
 
 
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir)
 {
     int rc;
     HFILE hFile;
@@ -193,7 +193,7 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
             *type = APR_DIR;
             return APR_SUCCESS;
         } else {
-            rc = DosOpen(ap_pstrcat(thedir->cntxt, thedir->dirname, "/", thedir->entry.achName, NULL) ,
+            rc = DosOpen(apr_pstrcat(thedir->cntxt, thedir->dirname, "/", thedir->entry.achName, NULL) ,
                          &hFile, &action, 0, 0,
                          OPEN_ACTION_FAIL_IF_NEW|OPEN_ACTION_OPEN_IF_EXISTS, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY,
                          NULL);
@@ -216,7 +216,7 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
 
 
 
-ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir)
+apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
 {
     if (thedir->validentry) {
         *new = thedir->entry.achName;

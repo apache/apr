@@ -85,8 +85,8 @@
 #define DLSYM_NEEDS_UNDERSCORE
 #endif
 
-struct ap_dso_handle_t {
-    ap_pool_t  *cont;
+struct apr_dso_handle_t {
+    apr_pool_t  *cont;
     void          *handle;
     const char *errormsg;
 };

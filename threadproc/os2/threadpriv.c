@@ -59,10 +59,10 @@
 #include "apr_lib.h"
 #include "fileio.h"
 
-ap_status_t ap_create_thread_private(ap_threadkey_t **key,
-                                     void (*dest)(void *), ap_pool_t *cont)
+apr_status_t apr_create_thread_private(apr_threadkey_t **key,
+                                     void (*dest)(void *), apr_pool_t *cont)
 {
-    (*key) = (ap_threadkey_t *)ap_palloc(cont, sizeof(ap_threadkey_t));
+    (*key) = (apr_threadkey_t *)apr_palloc(cont, sizeof(apr_threadkey_t));
 
     if ((*key) == NULL) {
         return APR_ENOMEM;
@@ -72,19 +72,19 @@ ap_status_t ap_create_thread_private(ap_threadkey_t **key,
     return APR_OS2_STATUS(DosAllocThreadLocalMemory(1, &((*key)->key)));
 }
 
-ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
+apr_status_t apr_get_thread_private(void **new, apr_threadkey_t *key)
 {
     (*new) = (void *)*(key->key);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
+apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
 {
     *(key->key) = (ULONG)priv;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
+apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
 {
     return APR_OS2_STATUS(DosFreeThreadLocalMemory(key->key));
 }

@@ -66,9 +66,9 @@
 
 #if APR_HAS_DSO
 
-struct ap_dso_handle_t {
+struct apr_dso_handle_t {
     image_id       handle;    /* Handle to the DSO loaded */
-    ap_pool_t   *cont;
+    apr_pool_t   *cont;
 };
 
 #endif

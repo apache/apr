@@ -97,8 +97,8 @@ struct ap_hash_entry_t {
  * The count of hash entries may be greater depending on the chosen
  * collision rate.
  */
-struct ap_hash_t {
-    ap_pool_t		 *pool;
+struct apr_hash_t {
+    apr_pool_t		 *pool;
     ap_hash_entry_t	**array;
     size_t		  count, max;
 };
@@ -109,10 +109,10 @@ struct ap_hash_t {
  *
  * We keep a pointer to the next hash entry here to allow the current
  * hash entry to be freed or otherwise mangled between calls to
- * ap_hash_next().
+ * apr_hash_next().
  */
-struct ap_hash_index_t {
-    ap_hash_t		*ht;
+struct apr_hash_index_t {
+    apr_hash_t		*ht;
     ap_hash_entry_t	*this, *next;
     int			 index;
 };
@@ -122,15 +122,15 @@ struct ap_hash_index_t {
  * Hash creation functions.
  */
 
-static ap_hash_entry_t **alloc_array(ap_hash_t *ht)
+static ap_hash_entry_t **alloc_array(apr_hash_t *ht)
 {
-   return ap_pcalloc(ht->pool, sizeof(*ht->array) * (ht->max + 1));
+   return apr_pcalloc(ht->pool, sizeof(*ht->array) * (ht->max + 1));
 }
 
-APR_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool)
+APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool)
 {
-    ap_hash_t *ht;
-    ht = ap_palloc(pool, sizeof(ap_hash_t));
+    apr_hash_t *ht;
+    ht = apr_palloc(pool, sizeof(apr_hash_t));
     ht->pool = pool;
     ht->count = 0;
     ht->max = INITIAL_MAX;
@@ -143,7 +143,7 @@ APR_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool)
  * Hash iteration functions.
  */
 
-APR_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi)
+APR_EXPORT(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
 {
     hi->this = hi->next;
     while (!hi->this) {
@@ -155,18 +155,18 @@ APR_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi)
     return hi;
 }
 
-APR_EXPORT(ap_hash_index_t *) ap_hash_first(ap_hash_t *ht)
+APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
 {
-    ap_hash_index_t *hi;
-    hi = ap_palloc(ht->pool, sizeof(*hi));
+    apr_hash_index_t *hi;
+    hi = apr_palloc(ht->pool, sizeof(*hi));
     hi->ht = ht;
     hi->index = 0;
     hi->this = NULL;
     hi->next = NULL;
-    return ap_hash_next(hi);
+    return apr_hash_next(hi);
 }
 
-APR_EXPORT(void) ap_hash_this(ap_hash_index_t *hi,
+APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi,
 			      const void **key,
 			      size_t *klen,
 			      void **val)
@@ -181,14 +181,14 @@ APR_EXPORT(void) ap_hash_this(ap_hash_index_t *hi,
  * Resizing a hash table
  */
 
-static void resize_array(ap_hash_t *ht)
+static void resize_array(apr_hash_t *ht)
 {
-    ap_hash_index_t *hi;
+    apr_hash_index_t *hi;
     ap_hash_entry_t **new_array;
     int i;
 
     new_array = alloc_array(ht);
-    for (hi = ap_hash_first(ht); hi; hi = ap_hash_next(hi)) {
+    for (hi = apr_hash_first(ht); hi; hi = apr_hash_next(hi)) {
 	i = hi->this->hash & ht->max;
 	hi->this->next = new_array[i];
 	new_array[i] = hi->this;
@@ -205,7 +205,7 @@ static void resize_array(ap_hash_t *ht)
  * that hash entries can be removed.
  */
 
-static ap_hash_entry_t **find_entry(ap_hash_t *ht,
+static ap_hash_entry_t **find_entry(apr_hash_t *ht,
 				    const void *key,
 				    size_t klen,
 				    const void *val)
@@ -266,7 +266,7 @@ static ap_hash_entry_t **find_entry(ap_hash_t *ht,
     if (he || !val)
 	return hep;
     /* add a new entry for non-NULL values */
-    he = ap_pcalloc(ht->pool, sizeof(*he));
+    he = apr_pcalloc(ht->pool, sizeof(*he));
     he->hash = hash;
     he->key  = key;
     he->klen = klen;
@@ -280,7 +280,7 @@ static ap_hash_entry_t **find_entry(ap_hash_t *ht,
     return hep;
 }
 
-APR_EXPORT(void *) ap_hash_get(ap_hash_t *ht,
+APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
 			       const void *key,
 			       size_t klen)
 {
@@ -292,7 +292,7 @@ APR_EXPORT(void *) ap_hash_get(ap_hash_t *ht,
 	return NULL;
 }
 
-APR_EXPORT(void) ap_hash_set(ap_hash_t *ht,
+APR_EXPORT(void) apr_hash_set(apr_hash_t *ht,
 			     const void *key,
 			     size_t klen,
 			     const void *val)

@@ -62,17 +62,17 @@
 
 int main(int argc, char *argv[])
 {
-    ap_pool_t *context;
-    ap_socket_t *sock;
-    ap_ssize_t length;
-    ap_status_t stat;
+    apr_pool_t *context;
+    apr_socket_t *sock;
+    apr_ssize_t length;
+    apr_status_t stat;
     char datasend[STRLEN] = "Send data test";
     char datarecv[STRLEN];
     char msgbuf[80];
     char *local_ipaddr, *remote_ipaddr;
     char *dest = "127.0.0.1";
-    ap_uint32_t local_port, remote_port;
-    ap_interval_time_t read_timeout = -1;
+    apr_uint32_t local_port, remote_port;
+    apr_interval_time_t read_timeout = -1;
 
     setbuf(stdout, NULL);
     if (argc > 1) {
@@ -84,22 +84,22 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout, "Initializing.........");
-    if (ap_initialize() != APR_SUCCESS) {
+    if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
-    atexit(ap_terminate);
+    atexit(apr_terminate);
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Creating new socket.......");
-    if (ap_create_tcp_socket(&sock, context) != APR_SUCCESS) {
+    if (apr_create_tcp_socket(&sock, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }
@@ -107,8 +107,8 @@ int main(int argc, char *argv[])
 
     if (read_timeout == -1) {
         fprintf(stdout, "\tClient:  Setting socket option NONBLOCK.......");
-        if (ap_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
-            ap_close_socket(sock);
+        if (apr_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
+            apr_close_socket(sock);
             fprintf(stderr, "Couldn't set socket option\n");
             exit(-1);
         }
@@ -116,8 +116,8 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout, "\tClient:  Setting port for socket.......");
-    if (ap_set_remote_port(sock, 8021) != APR_SUCCESS) {
-        ap_close_socket(sock);
+    if (apr_set_remote_port(sock, 8021) != APR_SUCCESS) {
+        apr_close_socket(sock);
         fprintf(stderr, "Couldn't set the port correctly\n");
         exit(-1);
     }
@@ -125,27 +125,27 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
-    stat = ap_connect(sock, dest);
+    stat = apr_connect(sock, dest);
 
     if (stat != APR_SUCCESS) {
-        ap_close_socket(sock);
+        apr_close_socket(sock);
         fprintf(stderr, "Could not connect: %s (%d)\n", 
-		ap_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
+		apr_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
         fflush(stderr);
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
-    ap_get_remote_ipaddr(&remote_ipaddr, sock);
-    ap_get_remote_port(&remote_port, sock);
-    ap_get_local_ipaddr(&local_ipaddr, sock);
-    ap_get_local_port(&local_port, sock);
+    apr_get_remote_ipaddr(&remote_ipaddr, sock);
+    apr_get_remote_port(&remote_port, sock);
+    apr_get_local_ipaddr(&local_ipaddr, sock);
+    apr_get_local_port(&local_port, sock);
     fprintf(stdout, "\tClient socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
     length = STRLEN;
-    if (ap_send(sock, datasend, &length) != APR_SUCCESS) {
-        ap_close_socket(sock);
+    if (apr_send(sock, datasend, &length) != APR_SUCCESS) {
+        apr_close_socket(sock);
         fprintf(stderr, "Problem sending data\n");
         exit(-1);
     }
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
    
     if (read_timeout != -1) {
         fprintf(stdout, "\tClient:  Setting read timeout.......");
-        stat = ap_setsocketopt(sock, APR_SO_TIMEOUT, read_timeout);
+        stat = apr_setsocketopt(sock, APR_SO_TIMEOUT, read_timeout);
         if (stat) {
             fprintf(stderr, "Problem setting timeout: %d\n", stat);
             exit(-1);
@@ -164,29 +164,29 @@ int main(int argc, char *argv[])
     length = STRLEN; 
     fprintf(stdout, "\tClient:  Trying to receive data over socket.......");
 
-    if ((stat = ap_recv(sock, datarecv, &length)) != APR_SUCCESS) {
-        ap_close_socket(sock);
+    if ((stat = apr_recv(sock, datarecv, &length)) != APR_SUCCESS) {
+        apr_close_socket(sock);
         fprintf(stderr, "Problem receiving data: %s (%d)\n", 
-		ap_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
+		apr_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
         exit(-1);
     }
     if (strcmp(datarecv, "Recv data test")) {
-        ap_close_socket(sock);
+        apr_close_socket(sock);
         fprintf(stderr, "I did not receive the correct data %s\n", datarecv);
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Shutting down socket.......");
-    if (ap_shutdown(sock, APR_SHUTDOWN_WRITE) != APR_SUCCESS) {
-        ap_close_socket(sock);
+    if (apr_shutdown(sock, APR_SHUTDOWN_WRITE) != APR_SUCCESS) {
+        apr_close_socket(sock);
         fprintf(stderr, "Could not shutdown socket\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Closing down socket.......");
-    if (ap_close_socket(sock) != APR_SUCCESS) {
+    if (apr_close_socket(sock) != APR_SUCCESS) {
         fprintf(stderr, "Could not shutdown socket\n");
         exit(-1);
     }

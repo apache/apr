@@ -56,14 +56,14 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
-                           ap_lockscope_e scope, const char *fname, 
-                           ap_pool_t *cont)
+apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
+                           apr_lockscope_e scope, const char *fname, 
+                           apr_pool_t *cont)
 {
-    ap_lock_t *new;
-    ap_status_t stat;
+    apr_lock_t *new;
+    apr_status_t stat;
 
-    new = (ap_lock_t *)ap_pcalloc(cont, sizeof(ap_lock_t));
+    new = (apr_lock_t *)apr_pcalloc(cont, sizeof(apr_lock_t));
 
     new->cntxt = cont;
     new->type  = type;
@@ -72,14 +72,14 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     /* file-based serialization primitives */
     if (scope != APR_INTRAPROCESS) {
         if (fname != NULL) {
-            new->fname = ap_pstrdup(cont, fname);
+            new->fname = apr_pstrdup(cont, fname);
         }
     }
 #endif
 
     if (scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = ap_unix_create_intra_lock(new)) != APR_SUCCESS) {
+        if ((stat = apr_unix_create_intra_lock(new)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -87,7 +87,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
 #endif
     }
     if (scope != APR_INTRAPROCESS) {
-        if ((stat = ap_unix_create_inter_lock(new)) != APR_SUCCESS) {
+        if ((stat = apr_unix_create_inter_lock(new)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -95,12 +95,12 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_lock(ap_lock_t *lock)
+apr_status_t apr_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = ap_unix_lock_intra(lock)) != APR_SUCCESS) {
+        if ((stat = apr_unix_lock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -108,20 +108,20 @@ ap_status_t ap_lock(ap_lock_t *lock)
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = ap_unix_lock_inter(lock)) != APR_SUCCESS) {
+        if ((stat = apr_unix_lock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unlock(ap_lock_t *lock)
+apr_status_t apr_unlock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
 
     if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = ap_unix_unlock_intra(lock)) != APR_SUCCESS) {
+        if ((stat = apr_unix_unlock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -129,19 +129,19 @@ ap_status_t ap_unlock(ap_lock_t *lock)
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = ap_unix_unlock_inter(lock)) != APR_SUCCESS) {
+        if ((stat = apr_unix_unlock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
     return APR_SUCCESS;
 }
 
-ap_status_t ap_destroy_lock(ap_lock_t *lock)
+apr_status_t apr_destroy_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = ap_unix_destroy_intra_lock(lock)) != APR_SUCCESS) {
+        if ((stat = apr_unix_destroy_intra_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -149,37 +149,37 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = ap_unix_destroy_inter_lock(lock)) != APR_SUCCESS) {
+        if ((stat = apr_unix_destroy_inter_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
     return APR_SUCCESS;
 }
 
-ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, 
-                               ap_pool_t *cont)
+apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname, 
+                               apr_pool_t *cont)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((*lock)->scope != APR_INTRAPROCESS) {
-        if ((stat = ap_unix_child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
+        if ((stat = apr_unix_child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
             return stat;
         }
     }
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data)
+apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data)
 {
-    return ap_get_userdata(data, key, lock->cntxt);
+    return apr_get_userdata(data, key, lock->cntxt);
 }
 
-ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
-                            ap_status_t (*cleanup) (void *))
+apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *))
 {
-    return ap_set_userdata(data, key, cleanup, lock->cntxt);
+    return apr_set_userdata(data, key, cleanup, lock->cntxt);
 }
 
-ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
+apr_status_t apr_get_os_lock(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
     oslock->crossproc = lock->interproc;
 #if APR_HAS_THREADS
@@ -191,14 +191,14 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
-                           ap_pool_t *cont)
+apr_status_t apr_put_os_lock(apr_lock_t **lock, apr_os_lock_t *thelock, 
+                           apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;
     }
     if ((*lock) == NULL) {
-        (*lock) = (ap_lock_t *)ap_pcalloc(cont, sizeof(ap_lock_t));
+        (*lock) = (apr_lock_t *)apr_pcalloc(cont, sizeof(apr_lock_t));
         (*lock)->cntxt = cont;
     }
     (*lock)->interproc = thelock->crossproc;

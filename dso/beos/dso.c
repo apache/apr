@@ -56,21 +56,21 @@
 
 #if APR_HAS_DSO
 
-ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
-              ap_pool_t *ctx)
+apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
+              apr_pool_t *ctx)
 {
     image_id newid;
 
     if((newid = load_add_on(path)) < B_NO_ERROR)
         return APR_EINIT;
 
-    *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = newid;
     (*res_handle)->cont = ctx;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
+apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
 {
     if(unload_add_on(handle->handle) < B_NO_ERROR)
       return APR_EINIT;
@@ -78,7 +78,7 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle,
+apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
                const char *symname)
 {
     int err;
@@ -95,7 +95,7 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle,
     return APR_SUCCESS;
 }
 
-const char *ap_dso_error(ap_dso_handle_t *dso, char *buffer, ap_size_t buflen)
+const char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
     strncpy(strerror(errno), buffer, buflen);
     return buffer;

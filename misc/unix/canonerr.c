@@ -56,7 +56,7 @@
 
 #ifndef OS2
 
-int ap_canonical_error(ap_status_t errcode)
+int apr_canonical_error(apr_status_t errcode)
 {
 #if defined(EAGAIN) && defined(EWOULDBLOCK) && (EAGAIN != EWOULDBLOCK) && !defined(WIN32)
     if (errcode == EWOULDBLOCK) {

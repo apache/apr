@@ -64,9 +64,9 @@
 #include <sys/stat.h>
 #include "misc.h"
 
-ap_status_t file_cleanup(void *thefile)
+apr_status_t file_cleanup(void *thefile)
 {
-    ap_file_t *file = thefile;
+    apr_file_t *file = thefile;
     CloseHandle(file->filehand);
     file->filehand = INVALID_HANDLE_VALUE;
     if (file->pOverlapped) {
@@ -75,18 +75,18 @@ ap_status_t file_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_open(ap_file_t **new, const char *fname, 
-                    ap_int32_t flag, ap_fileperms_t perm, ap_pool_t *cont)
+apr_status_t apr_open(apr_file_t **new, const char *fname, 
+                    apr_int32_t flag, apr_fileperms_t perm, apr_pool_t *cont)
 {
     DWORD oflags = 0;
     DWORD createflags = 0;
     DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     ap_oslevel_e level;
-    ap_status_t rv;
+    apr_status_t rv;
 
     if ((*new) == NULL) {
-        (*new) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
+        (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
     }
 
     (*new)->cntxt = cont;
@@ -105,14 +105,14 @@ ap_status_t ap_open(ap_file_t **new, const char *fname,
     (*new)->buffered = (flag & APR_BUFFERED) > 0;
 
     if ((*new)->buffered) {
-        (*new)->buffer = ap_palloc(cont, APR_FILE_BUFSIZE);
-        rv = ap_create_lock(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
+        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
+        rv = apr_create_lock(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
 
         if (rv)
             return rv;
     }
 
-    (*new)->fname = ap_pstrdup(cont, fname);
+    (*new)->fname = apr_pstrdup(cont, fname);
 
     (*new)->demonfname = canonical_filename((*new)->cntxt, fname);
     (*new)->lowerdemonfname = strlwr((*new)->demonfname);
@@ -178,26 +178,26 @@ ap_status_t ap_open(ap_file_t **new, const char *fname,
     (*new)->direction = 0;
     (*new)->filePtr = 0;
 
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
-                        ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
+                        apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_close(ap_file_t *file)
+apr_status_t apr_close(apr_file_t *file)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
-        ap_kill_cleanup(file->cntxt, file, file_cleanup);
+        apr_kill_cleanup(file->cntxt, file, file_cleanup);
 
         if (file->buffered)
-            ap_destroy_lock(file->mutex);
+            apr_destroy_lock(file->mutex);
 
         return APR_SUCCESS;
     }
     return stat;
 }
 
-ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
+apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
 {
     char *temp = canonical_filename(cont, path);
 
@@ -209,8 +209,8 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
     }
 }
 
-ap_status_t ap_rename_file(const char *from_path, const char *to_path,
-                           ap_pool_t *p)
+apr_status_t apr_rename_file(const char *from_path, const char *to_path,
+                           apr_pool_t *p)
 {
     const char *from_canon = canonical_filename(p, from_path);
     const char *to_canon = canonical_filename(p, to_path);
@@ -235,7 +235,7 @@ ap_status_t ap_rename_file(const char *from_path, const char *to_path,
     return err;
 }
 
-ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
+apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -244,21 +244,21 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, 
-                           ap_pool_t *cont)
+apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, 
+                           apr_pool_t *cont)
 {
     if ((*file) == NULL) {
         if (cont == NULL) {
             return APR_ENOPOOL;
         }
-        (*file) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
+        (*file) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
         (*file)->cntxt = cont;
     }
     (*file)->filehand = *thefile;
     return APR_SUCCESS;
 }    
 
-ap_status_t ap_eof(ap_file_t *fptr)
+apr_status_t apr_eof(apr_file_t *fptr)
 {
     if (fptr->eof_hit == 1) {
         return APR_EOF;
@@ -266,9 +266,9 @@ ap_status_t ap_eof(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
+apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
-    (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
+    (*thefile) = apr_pcalloc(cont, sizeof(apr_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }

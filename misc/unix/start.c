@@ -56,15 +56,15 @@
 #include "locks.h"
 #include "apr_strings.h"
 
-ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
+apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
 {
-    ap_pool_t *newpool;
+    apr_pool_t *newpool;
 
     if (cont) {
-        newpool = ap_make_sub_pool(cont, cont->apr_abort);
+        newpool = apr_make_sub_pool(cont, cont->apr_abort);
     }
     else {
-        newpool = ap_make_sub_pool(NULL, NULL);
+        newpool = apr_make_sub_pool(NULL, NULL);
     }
         
     if (newpool == NULL) {
@@ -78,13 +78,13 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_userdata(const void *data, const char *key,
-                            ap_status_t (*cleanup) (void *),
-                            ap_pool_t *cont)
+apr_status_t apr_set_userdata(const void *data, const char *key,
+                            apr_status_t (*cleanup) (void *),
+                            apr_pool_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
 
-    /* ### replace with an ap_hash_t */
+    /* ### replace with an apr_hash_t */
 
     dptr = cont->prog_data;
     while (dptr) {
@@ -94,9 +94,9 @@ ap_status_t ap_set_userdata(const void *data, const char *key,
         dptr = dptr->next;
     }
     if (dptr == NULL) {
-        dptr = ap_pcalloc(cont, sizeof(datastruct));
+        dptr = apr_pcalloc(cont, sizeof(datastruct));
         dptr->next = dptr->prev = NULL;
-        dptr->key = ap_pstrdup(cont, key);
+        dptr->key = apr_pstrdup(cont, key);
         if (dptr2) {
             dptr2->next = dptr;
             dptr->prev = dptr2;
@@ -106,15 +106,15 @@ ap_status_t ap_set_userdata(const void *data, const char *key,
         }
     }
     dptr->data = data;
-    ap_register_cleanup(cont, dptr->data, cleanup, cleanup);
+    apr_register_cleanup(cont, dptr->data, cleanup, cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont)
+apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
 {
     datastruct *dptr = NULL;
 
-    /* ### replace with an ap_hash_t */
+    /* ### replace with an apr_hash_t */
 
     dptr = cont->prog_data;
     while (dptr) {
@@ -135,11 +135,11 @@ ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_initialize(void)
+apr_status_t apr_initialize(void)
 {
-    ap_status_t status;
+    apr_status_t status;
 #if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
-    ap_unix_setup_lock();
+    apr_unix_setup_lock();
 #elif defined WIN32
     int iVersionRequested;
     WSADATA wsaData;
@@ -156,16 +156,16 @@ ap_status_t ap_initialize(void)
         return APR_EEXIST;
     }
 #endif
-    status = ap_init_alloc();
+    status = apr_init_alloc();
     return status;
 }
 
-void ap_terminate(void)
+void apr_terminate(void)
 {
-    ap_term_alloc();
+    apr_term_alloc();
 }
 
-ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont)
+apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
 {
     cont->apr_abort = apr_abort;
     return APR_SUCCESS;

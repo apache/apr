@@ -90,8 +90,8 @@ typedef struct datastruct {
     struct datastruct *prev;
 } datastruct;
 
-struct ap_other_child_rec_t {
-    struct ap_other_child_rec_t *next;
+struct apr_other_child_rec_t {
+    struct apr_other_child_rec_t *next;
     int id;  /* This is either a pid or tid depending on the platform */
     void (*maintenance) (int, void *, int);
     void *data;
@@ -170,7 +170,7 @@ AP_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
     (hFile));
 #define CancelIo ap_winapi_CancelIo
 
-ap_status_t ap_get_oslevel(struct ap_pool_t *, ap_oslevel_e *);
+apr_status_t ap_get_oslevel(struct apr_pool_t *, ap_oslevel_e *);
 #endif /* WIN32 */
 
 #endif  /* ! MISC_H */

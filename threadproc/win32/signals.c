@@ -64,7 +64,7 @@
 #endif
 
 /* Windows only really support killing process, but that will do for now. */
-ap_status_t ap_kill(ap_proc_t *proc, int signal)
+apr_status_t apr_kill(apr_proc_t *proc, int signal)
 {
     if (TerminateProcess(proc->pid, signal) == 0) {
         return GetLastError();

@@ -55,7 +55,7 @@
 #include "apr_private.h"
 #include "misc.h"
 
-ap_status_t ap_get_oslevel(ap_pool_t *cont, ap_oslevel_e *level)
+apr_status_t ap_get_oslevel(apr_pool_t *cont, ap_oslevel_e *level)
 {
     static OSVERSIONINFO oslev;
     static unsigned int servpack = 0;

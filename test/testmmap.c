@@ -69,36 +69,36 @@
 
 int main()
 {
-    ap_pool_t *context;
-    ap_mmap_t *themmap = NULL;
-    ap_file_t *thefile = NULL;
-    ap_finfo_t finfo;
-    ap_int32_t flag = APR_READ;
+    apr_pool_t *context;
+    apr_mmap_t *themmap = NULL;
+    apr_file_t *thefile = NULL;
+    apr_finfo_t finfo;
+    apr_int32_t flag = APR_READ;
     char *file1;
     
     fprintf (stdout,"APR MMAP Test\n*************\n\n");
     
     fprintf(stdout,"Initializing........................");
-    if (ap_initialize() != APR_SUCCESS) {
+    if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
     }
     fprintf(stdout,"OK\n");
-    atexit(ap_terminate);
+    atexit(apr_terminate);
 
     fprintf(stdout,"Creating context....................");    
-    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
     }
     fprintf(stdout,"OK\n");
     
-    file1 = (char*) ap_palloc(context, sizeof(char) * PATH_LEN);
+    file1 = (char*) apr_palloc(context, sizeof(char) * PATH_LEN);
     getcwd(file1, PATH_LEN);
     strncat(file1,"/testmmap.c",11);  
 
     fprintf(stdout, "Opening file........................");
-    if (ap_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context) != APR_SUCCESS) {
+    if (apr_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context) != APR_SUCCESS) {
         perror("Didn't open file");
         exit(-1);
     }
@@ -107,7 +107,7 @@ int main()
     }
     
     fprintf(stderr, "Getting file size...................");
-    if (ap_getfileinfo(&finfo, thefile) != APR_SUCCESS) {
+    if (apr_getfileinfo(&finfo, thefile) != APR_SUCCESS) {
         perror("Didn't get file information!");
         exit(-1);
     }
@@ -116,14 +116,14 @@ int main()
     }  
     
     fprintf(stdout,"Trying to mmap the file.............");
-    if (ap_mmap_create(&themmap, thefile, 0, finfo.size, context) != APR_SUCCESS) {
+    if (apr_mmap_create(&themmap, thefile, 0, finfo.size, context) != APR_SUCCESS) {
         fprintf(stderr,"Failed!\n");
         exit(-1);
     }
     fprintf(stdout,"OK\n");
 
     fprintf(stdout,"Trying to delete the mmap file......");
-    if (ap_mmap_delete(themmap) != APR_SUCCESS) {
+    if (apr_mmap_delete(themmap) != APR_SUCCESS) {
         fprintf(stderr,"Failed!\n");
         exit (-1);
     }

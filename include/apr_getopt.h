@@ -65,7 +65,7 @@ APR_VAR_IMPORT char *
 
 /**
  * Parse the command line options passed to the program.
- * @param nargc The number of arguments passed to ap_getopt to parse
+ * @param nargc The number of arguments passed to apr_getopt to parse
  * @param nargv The array of command line options to parse
  * @param ostr A string of characters that are acceptable options to the 
  *             program.  Characters followed by ":" are required to have an 
@@ -80,11 +80,11 @@ APR_VAR_IMPORT char *
  * </PRE>
  * @param cont The pool to operate on.
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
- * @deffunc ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr, ap_int32_t *rv, ap_pool_t *cont)
+ * @deffunc apr_status_t apr_getopt(apr_int32_t nargc, char *const *nargv, const char *ostr, apr_int32_t *rv, apr_pool_t *cont)
  */
-APR_EXPORT(ap_status_t) ap_getopt(ap_int32_t nargc, char *const *nargv, 
-                                  const char *ostr, ap_int32_t *rv, 
-                                  ap_pool_t *cont);
+APR_EXPORT(apr_status_t) apr_getopt(apr_int32_t nargc, char *const *nargv, 
+                                  const char *ostr, apr_int32_t *rv, 
+                                  apr_pool_t *cont);
 
 #endif  /* ! APR_GETOPT_H */
 

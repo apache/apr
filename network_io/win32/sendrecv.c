@@ -60,9 +60,9 @@
 #include "fileio.h"
 #include <time.h>
 
-ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
+apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
 {
-    ap_ssize_t rv;
+    apr_ssize_t rv;
     WSABUF wsaData;
     int lasterror;
     DWORD dwBytes = 0;
@@ -81,9 +81,9 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len) 
+apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len) 
 {
-    ap_ssize_t rv;
+    apr_ssize_t rv;
     WSABUF wsaData;
     int lasterror;
     DWORD dwBytes = 0;
@@ -104,10 +104,10 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 
 }
 
-ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec,
-                     ap_int32_t nvec, ap_int32_t *nbytes)
+apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
+                     apr_int32_t nvec, apr_int32_t *nbytes)
 {
-    ap_ssize_t rv;
+    apr_ssize_t rv;
     int i;
     int lasterror;
     DWORD dwBytes = 0;
@@ -136,8 +136,8 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec,
 }
 #if APR_HAS_SENDFILE
 /*
- * ap_status_t ap_sendfile(ap_socket_t *, ap_file_t *, ap_hdtr_t *, 
- *                         ap_off_t *, ap_size_t *, ap_int32_t flags)
+ * apr_status_t ap_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
+ *                         apr_off_t *, apr_size_t *, apr_int32_t flags)
  *    Send a file from an open file descriptor to a socket, along with 
  *    optional headers and trailers
  * arg 1) The socket to which we're writing
@@ -147,9 +147,9 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec,
  * arg 5) Number of bytes to send 
  * arg 6) APR flags that are mapped to OS specific flags
  */
-ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
-        		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
-        		ap_int32_t flags) 
+apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+        		apr_int32_t flags) 
 {
 /*
  *#define WAIT_FOR_EVENT
@@ -162,7 +162,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
  * socket timeout code will work. I am hoping the socket will be signaled if the
  * setsockopt timeout expires. Need to verify this...
  */
-    ap_ssize_t rv;
+    apr_ssize_t rv;
     OVERLAPPED overlapped;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
     int i, ptr = 0;
@@ -188,7 +188,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             for (i = 0; i < hdtr->numheaders; i++) {
                 ptfb->HeadLength += hdtr->headers[i].iov_len;
             }
-            ptfb->Head = ap_palloc(sock->cntxt, ptfb->HeadLength); /* Should this be a malloc? */
+            ptfb->Head = apr_palloc(sock->cntxt, ptfb->HeadLength); /* Should this be a malloc? */
 
             for (i = 0; i < hdtr->numheaders; i++) {
                 memcpy((char*)ptfb->Head + ptr, hdtr->headers[i].iov_base,
@@ -209,7 +209,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                 ptfb->TailLength += hdtr->headers[i].iov_len;
             }
 
-            ptfb->Tail = ap_palloc(sock->cntxt, ptfb->TailLength); /* Should this be a malloc? */
+            ptfb->Tail = apr_palloc(sock->cntxt, ptfb->TailLength); /* Should this be a malloc? */
 
             for (i = 0; i < hdtr->numtrailers; i++) {
                 memcpy((char*)ptfb->Tail + ptr, hdtr->trailers[i].iov_base,

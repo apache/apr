@@ -66,7 +66,7 @@
 #endif
 
 #if APR_HAS_SENDFILE
-/* This file is needed to allow us access to the ap_file_t internals. */
+/* This file is needed to allow us access to the apr_file_t internals. */
 #include "../../file_io/unix/fileio.h"
 
 /* Glibc2.1.1 fails to define TCP_CORK.  This is a bug that will be 
@@ -78,7 +78,7 @@
 
 #endif /* APR_HAS_SENDFILE */
 
-static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
+static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 {
     struct timeval tv, *tvptr;
     fd_set fdset;
@@ -112,7 +112,7 @@ static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
+apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
 {
     ssize_t rv;
     
@@ -122,7 +122,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
         && sock->timeout != 0) {
-        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -141,7 +141,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
+apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
 {
     ssize_t rv;
     
@@ -152,7 +152,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout != 0) {
-	ap_status_t arv = wait_for_io_or_timeout(sock, 1);
+	apr_status_t arv = wait_for_io_or_timeout(sock, 1);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
 	    return arv;
@@ -172,10 +172,10 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 }
 
 #ifdef HAVE_WRITEV
-ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
-                     ap_int32_t nvec, ap_ssize_t *len)
+apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
+                     apr_int32_t nvec, apr_ssize_t *len)
 {
-    ap_ssize_t rv;
+    apr_ssize_t rv;
 
     do {
         rv = writev(sock->socketdes, vec, nvec);
@@ -184,7 +184,7 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout != 0) {
-	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+	apr_status_t arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
 	    return arv;
@@ -211,7 +211,7 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
   *     - Should flags be an int_32 or what?
   */
 
-static ap_hdtr_t no_hdtr; /* used below when caller passes NULL for ap_hdtr_t */
+static apr_hdtr_t no_hdtr; /* used below when caller passes NULL for apr_hdtr_t */
 
 #if defined(__linux__) && defined(HAVE_WRITEV)
 
@@ -219,14 +219,14 @@ static ap_hdtr_t no_hdtr; /* used below when caller passes NULL for ap_hdtr_t */
  * however, it is mutually exclusive w/TCP_NODELAY  
  */
 
-static int os_cork(ap_socket_t *sock)
+static int os_cork(apr_socket_t *sock)
 {
     /* Linux only for now */
 
     int nodelay_off = 0, corkflag = 1, rv, delayflag;
     socklen_t delaylen = sizeof(delayflag);
 
-    /* XXX it would be cheaper to use an ap_socket_t flag here */
+    /* XXX it would be cheaper to use an apr_socket_t flag here */
     rv = getsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
                     (void *) &delayflag, &delaylen);
     if (rv == 0) {  
@@ -245,7 +245,7 @@ static int os_cork(ap_socket_t *sock)
     return rv == 0 ? delayflag : rv;
 }   
 
-static int os_uncork(ap_socket_t *sock, int delayflag)
+static int os_uncork(apr_socket_t *sock, int delayflag)
 {
     /* Uncork to send queued frames - Linux only for now */
     
@@ -260,13 +260,13 @@ static int os_uncork(ap_socket_t *sock, int delayflag)
     return rv;
 }
 
-ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
-        		ap_hdtr_t *hdtr, ap_off_t *offset, ap_size_t *len,
-        		ap_int32_t flags)
+apr_status_t ap_sendfile(apr_socket_t *sock, apr_file_t *file,
+        		apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
+        		apr_int32_t flags)
 {
     off_t off = *offset;
     int rv, nbytes = 0, total_hdrbytes, i, delayflag = APR_EINIT, corked = 0;
-    ap_status_t arv;
+    apr_status_t arv;
 
     if (!hdtr) {
         hdtr = &no_hdtr;
@@ -276,7 +276,7 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
     flags = 0;
 
     if (hdtr->numheaders > 0) {
-        ap_int32_t hdrbytes;
+        apr_int32_t hdrbytes;
         
         /* cork before writing headers */
         rv = os_cork(sock);
@@ -287,7 +287,7 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
         corked = 1;
 
         /* Now write the headers */
-        arv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
+        arv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
         if (arv != APR_SUCCESS) {
 	    *len = 0;
             return errno;
@@ -361,8 +361,8 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
 
     /* Now write the footers */
     if (hdtr->numtrailers > 0) {
-        ap_int32_t trbytes;
-        arv = ap_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trbytes);
+        apr_int32_t trbytes;
+        arv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trbytes);
         nbytes += trbytes;
         if (arv != APR_SUCCESS) {
 	    *len = nbytes;
@@ -391,9 +391,9 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
 #elif defined(__FreeBSD__)
 
 /* Release 3.1 or greater */
-ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
-        		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
-        		ap_int32_t flags)
+apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+        		apr_int32_t flags)
 {
     off_t nbytes;
     int rv, i;
@@ -453,7 +453,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
-	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+	apr_status_t arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
 	    return arv;
@@ -484,9 +484,9 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 #error "there's no way this ap_sendfile implementation works -djg"
 
 /* HP-UX Version 10.30 or greater */
-ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
-        		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
-        		ap_int32_t flags)
+apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+        		apr_int32_t flags)
 {
     int i, ptr = 0;
     size_t nbytes = 0, headerlen = 0, trailerlen = 0;
@@ -508,7 +508,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     }
 
     /* XXX:  BUHHH? wow, what a memory leak! */
-    headerbuf = ap_palloc(sock->cntxt, headerlen);
+    headerbuf = apr_palloc(sock->cntxt, headerlen);
 
     for (i = 0; i < hdtr->numheaders; i++) {
         memcpy(headerbuf + ptr, hdtr->headers[i].iov_base,
@@ -521,7 +521,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     }
 
     /* XXX:  BUHHH? wow, what a memory leak! */
-    trailerbuf = ap_palloc(sock->cntxt, trailerlen);
+    trailerbuf = apr_palloc(sock->cntxt, trailerlen);
 
     for (i = 0; i < hdtr->numtrailers; i++) {
         memcpy(trailerbuf + ptr, hdtr->trailers[i].iov_base,
@@ -548,7 +548,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
-        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
 
         if (arv != APR_SUCCESS) {
             /* jlt: not tested, but this matches other sendfile logic */
@@ -591,13 +591,13 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
  * AIX -  version 4.3.2 with APAR IX85388, or version 4.3.3 and above
  * OS/390 - V2R7 and above
  */
-ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
-                        ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
-                        ap_int32_t flags)
+apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+                        apr_int32_t flags)
 {
     int i, ptr, rv = 0;
     void * hbuf=NULL, * tbuf=NULL;
-    ap_status_t arv;
+    apr_status_t arv;
     struct sf_parms parms;
 
     if (!hdtr) {
@@ -619,13 +619,13 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                 parms.header_length += hdtr->headers[i].iov_len;
             }
 #if 0
-            /* Keepalives make ap_palloc a bad idea */
+            /* Keepalives make apr_palloc a bad idea */
             hbuf = malloc(parms.header_length);
 #else
             /* but headers are small, so maybe we can hold on to the
              * memory for the life of the socket...
              */
-            hbuf = ap_palloc(sock->cntxt, parms.header_length);
+            hbuf = apr_palloc(sock->cntxt, parms.header_length);
 #endif
             ptr = 0;
             for (i = 0; i < hdtr->numheaders; i++) {
@@ -648,10 +648,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                 parms.trailer_length += hdtr->trailers[i].iov_len;
             }
 #if 0
-            /* Keepalives make ap_palloc a bad idea */
+            /* Keepalives make apr_palloc a bad idea */
             tbuf = malloc(parms.trailer_length);
 #else
-            tbuf = ap_palloc(sock->cntxt, parms.trailer_length);
+            tbuf = apr_palloc(sock->cntxt, parms.trailer_length);
 #endif
             ptr = 0;
             for (i = 0; i < hdtr->numtrailers; i++) {
@@ -717,16 +717,16 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
  * each and not an array as is passed into this function. In
  * addition, there is a limitation on the size of the header/trailer
  * that can be referenced ( > 4096 seems to cause an ENOMEM)
- * Rather than code these special cases in, using ap_sendv for
+ * Rather than code these special cases in, using apr_sendv for
  * all cases of the headers and trailers seems to be a good idea.
  */
-ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
-                        ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
-                        ap_int32_t flags)
+apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+                        apr_int32_t flags)
 {
     off_t nbytes = 0;
     int rv, i;
-    ap_status_t arv;
+    apr_status_t arv;
     struct iovec headerstruct[2] = {(0, 0), (0, 0)};
     size_t bytes_to_send = *len;
     
@@ -738,9 +738,9 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     flags = 0;
     
     if (hdtr->numheaders > 0) {
-        ap_ssize_t hdrbytes = 0;
+        apr_ssize_t hdrbytes = 0;
 
-        arv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
+        arv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return errno;
@@ -753,7 +753,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
          * socket.
          */
         if (sock->timeout <= 0) {
-            ap_size_t total_hdrbytes = 0;
+            apr_size_t total_hdrbytes = 0;
             for (i = 0; i < hdtr->numheaders; i++) {
                 total_hdrbytes += hdtr->headers[i].iov_len;
             }
@@ -784,7 +784,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     if (rv == -1 &&
         (errno == EAGAIN || errno == EWOULDBLOCK) &&
         sock->timeout > 0) {
-        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
 
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -806,10 +806,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         nbytes += rv;
 
         if (hdtr->numtrailers > 0) {
-            ap_ssize_t trlbytes = 0;
+            apr_ssize_t trlbytes = 0;
 
             /* send the trailers now */
-            arv = ap_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trlbytes);
+            arv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trlbytes);
             if (arv != APR_SUCCESS) {
                 *len = 0;
                 return errno;

@@ -90,80 +90,80 @@ int main(void)
 
 typedef enum {BLK, NONBLK, TIMEOUT} client_socket_mode_t;
 
-static void apr_setup(ap_pool_t **p, ap_socket_t **sock)
+static void apr_setup(apr_pool_t **p, apr_socket_t **sock)
 {
     char buf[120];
-    ap_status_t rv;
+    apr_status_t rv;
 
-    rv = ap_initialize();
+    rv = apr_initialize();
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_initialize()->%d/%s\n",
+        fprintf(stderr, "apr_initialize()->%d/%s\n",
                 rv,
-                ap_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    atexit(ap_terminate);
+    atexit(apr_terminate);
 
-    rv = ap_create_pool(p, NULL);
+    rv = apr_create_pool(p, NULL);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_create_pool()->%d/%s\n",
+        fprintf(stderr, "apr_create_pool()->%d/%s\n",
                 rv,
-                ap_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
     *sock = NULL;
-    rv = ap_create_tcp_socket(sock, *p);
+    rv = apr_create_tcp_socket(sock, *p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_create_tcp_socket()->%d/%s\n",
+        fprintf(stderr, "apr_create_tcp_socket()->%d/%s\n",
                 rv,
-                ap_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 }
 
-static void create_testfile(ap_pool_t *p, const char *fname)
+static void create_testfile(apr_pool_t *p, const char *fname)
 {
-    ap_file_t *f = NULL;
-    ap_status_t rv;
+    apr_file_t *f = NULL;
+    apr_status_t rv;
     char buf[120];
     int i;
-    ap_ssize_t nbytes;
-    ap_finfo_t finfo;
+    apr_ssize_t nbytes;
+    apr_finfo_t finfo;
 
     printf("Creating a test file...\n");
-    rv = ap_open(&f, fname, 
+    rv = apr_open(&f, fname, 
                  APR_CREATE | APR_WRITE | APR_TRUNCATE | APR_BUFFERED,
                  APR_UREAD | APR_UWRITE, p);
     if (rv) {
-        fprintf(stderr, "ap_open()->%d/%s\n",
-                rv, ap_strerror(rv, buf, sizeof buf));
+        fprintf(stderr, "apr_open()->%d/%s\n",
+                rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     
     buf[0] = FILE_DATA_CHAR;
     for (i = 0; i < FILE_LENGTH; i++) {
         nbytes = 1;
-        rv = ap_write(f, buf, &nbytes);
+        rv = apr_write(f, buf, &nbytes);
         if (rv) {
-            fprintf(stderr, "ap_write()->%d/%s\n",
-                    rv, ap_strerror(rv, buf, sizeof buf));
+            fprintf(stderr, "apr_write()->%d/%s\n",
+                    rv, apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
     }
 
-    rv = ap_close(f);
+    rv = apr_close(f);
     if (rv) {
-        fprintf(stderr, "ap_close()->%d/%s\n",
-                rv, ap_strerror(rv, buf, sizeof buf));
+        fprintf(stderr, "apr_close()->%d/%s\n",
+                rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = ap_stat(&finfo, fname, p);
+    rv = apr_stat(&finfo, fname, p);
     if (rv) {
-        fprintf(stderr, "ap_close()->%d/%s\n",
-                rv, ap_strerror(rv, buf, sizeof buf));
+        fprintf(stderr, "apr_close()->%d/%s\n",
+                rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -180,45 +180,45 @@ static void create_testfile(ap_pool_t *p, const char *fname)
 
 static int client(client_socket_mode_t socket_mode)
 {
-    ap_status_t rv, tmprv;
-    ap_socket_t *sock;
-    ap_pool_t *p;
+    apr_status_t rv, tmprv;
+    apr_socket_t *sock;
+    apr_pool_t *p;
     char buf[120];
-    ap_file_t *f = NULL;
-    ap_size_t len, expected_len;
-    ap_off_t current_file_offset;
-    ap_hdtr_t hdtr;
+    apr_file_t *f = NULL;
+    apr_size_t len, expected_len;
+    apr_off_t current_file_offset;
+    apr_hdtr_t hdtr;
     struct iovec headers[3];
     struct iovec trailers[3];
-    ap_ssize_t bytes_read;
-    ap_pollfd_t *pfd;
-    ap_int32_t nsocks;
+    apr_ssize_t bytes_read;
+    apr_pollfd_t *pfd;
+    apr_int32_t nsocks;
     int i;
 
     apr_setup(&p, &sock);
     create_testfile(p, TESTFILE);
 
-    rv = ap_open(&f, TESTFILE, APR_READ, 0, p);
+    rv = apr_open(&f, TESTFILE, APR_READ, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_open()->%d/%s\n",
+        fprintf(stderr, "apr_open()->%d/%s\n",
                 rv,
-                ap_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = ap_set_remote_port(sock, TESTSF_PORT);
+    rv = apr_set_remote_port(sock, TESTSF_PORT);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_set_remote_port()->%d/%s\n",
+        fprintf(stderr, "apr_set_remote_port()->%d/%s\n",
                 rv,
-                ap_strerror(rv, buf, sizeof buf));
+                apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = ap_connect(sock, "127.0.0.1");
+    rv = apr_connect(sock, "127.0.0.1");
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_connect()->%d/%s\n", 
+        fprintf(stderr, "apr_connect()->%d/%s\n", 
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -228,22 +228,22 @@ static int client(client_socket_mode_t socket_mode)
         break;
     case NONBLK:
         /* set it non-blocking */
-        rv = ap_setsocketopt(sock, APR_SO_NONBLOCK, 1);
+        rv = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "ap_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
+            fprintf(stderr, "apr_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
                     rv,
-                    ap_strerror(rv, buf, sizeof buf));
+                    apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         break;
     case TIMEOUT:
         /* set a timeout */
-        rv = ap_setsocketopt(sock, APR_SO_TIMEOUT, 
+        rv = apr_setsocketopt(sock, APR_SO_TIMEOUT, 
                              100 * AP_USEC_PER_SEC);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "ap_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
+            fprintf(stderr, "apr_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
                     rv,
-                    ap_strerror(rv, buf, sizeof buf));
+                    apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         break;
@@ -287,7 +287,7 @@ static int client(client_socket_mode_t socket_mode)
         if (rv != APR_SUCCESS) {
             fprintf(stderr, "ap_sendfile()->%d/%s\n",
                     rv,
-                    ap_strerror(rv, buf, sizeof buf));
+                    apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         
@@ -308,19 +308,19 @@ static int client(client_socket_mode_t socket_mode)
     }
     else {
         /* non-blocking... wooooooo */
-        ap_size_t total_bytes_sent;
+        apr_size_t total_bytes_sent;
 
         pfd = NULL;
-        rv = ap_setup_poll(&pfd, 1, p);
+        rv = apr_setup_poll(&pfd, 1, p);
         assert(!rv);
-        rv = ap_add_poll_socket(pfd, sock, APR_POLLOUT);
+        rv = apr_add_poll_socket(pfd, sock, APR_POLLOUT);
         assert(!rv);
 
         total_bytes_sent = 0;
         current_file_offset = 0;
         len = FILE_LENGTH;
         do {
-            ap_size_t tmplen;
+            apr_size_t tmplen;
 
             tmplen = len; /* bytes remaining to send from the file */
             printf("Calling ap_sendfile()...\n");
@@ -340,9 +340,9 @@ static int client(client_socket_mode_t socket_mode)
             rv = ap_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
             printf("ap_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
             if (rv) {
-                if (ap_canonical_error(rv) == APR_EAGAIN) {
+                if (apr_canonical_error(rv) == APR_EAGAIN) {
                     nsocks = 1;
-                    tmprv = ap_poll(pfd, &nsocks, -1);
+                    tmprv = apr_poll(pfd, &nsocks, -1);
                     assert(!tmprv);
                     assert(nsocks == 1);
                     /* continue; */
@@ -407,7 +407,7 @@ static int client(client_socket_mode_t socket_mode)
 
         } while (total_bytes_sent < expected_len &&
                  (rv == APR_SUCCESS || 
-                  ap_canonical_error(rv) == APR_EAGAIN));
+                  apr_canonical_error(rv) == APR_EAGAIN));
         if (total_bytes_sent != expected_len) {
             fprintf(stderr,
                     "client problem: sent %ld of %ld bytes\n",
@@ -422,11 +422,11 @@ static int client(client_socket_mode_t socket_mode)
     }
     
     current_file_offset = 0;
-    rv = ap_seek(f, APR_CUR, &current_file_offset);
+    rv = apr_seek(f, APR_CUR, &current_file_offset);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_seek()->%d/%s\n",
+        fprintf(stderr, "apr_seek()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -434,20 +434,20 @@ static int client(client_socket_mode_t socket_mode)
            "at offset %ld.\n",
            (long int)current_file_offset);
 
-    rv = ap_shutdown(sock, APR_SHUTDOWN_WRITE);
+    rv = apr_shutdown(sock, APR_SHUTDOWN_WRITE);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_shutdown()->%d/%s\n",
+        fprintf(stderr, "apr_shutdown()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
     bytes_read = 1;
-    rv = ap_recv(sock, buf, &bytes_read);
+    rv = apr_recv(sock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_recv()->%d/%s\n",
+        fprintf(stderr, "apr_recv()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != 0) {
@@ -459,11 +459,11 @@ static int client(client_socket_mode_t socket_mode)
 
     printf("client: ap_sendfile() worked as expected!\n");
 
-    rv = ap_remove_file(TESTFILE, p);
+    rv = apr_remove_file(TESTFILE, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_remove_file()->%d/%s\n",
+        fprintf(stderr, "apr_remove_file()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -472,55 +472,55 @@ static int client(client_socket_mode_t socket_mode)
 
 static int server(void)
 {
-    ap_status_t rv;
-    ap_socket_t *sock;
-    ap_pool_t *p;
+    apr_status_t rv;
+    apr_socket_t *sock;
+    apr_pool_t *p;
     char buf[120];
     int i;
-    ap_socket_t *newsock = NULL;
-    ap_ssize_t bytes_read;
+    apr_socket_t *newsock = NULL;
+    apr_ssize_t bytes_read;
 
     apr_setup(&p, &sock);
 
-    rv = ap_set_local_port(sock, TESTSF_PORT);
+    rv = apr_set_local_port(sock, TESTSF_PORT);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_set_local_port()->%d/%s\n",
+        fprintf(stderr, "apr_set_local_port()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = ap_setsocketopt(sock, APR_SO_REUSEADDR, 1);
+    rv = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_setsocketopt()->%d/%s\n",
+        fprintf(stderr, "apr_setsocketopt()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = ap_bind(sock);
+    rv = apr_bind(sock);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_bind()->%d/%s\n",
+        fprintf(stderr, "apr_bind()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = ap_listen(sock, 5);
+    rv = apr_listen(sock, 5);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_listen()->%d/%s\n",
+        fprintf(stderr, "apr_listen()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
     printf("Waiting for a client to connect...\n");
 
-    rv = ap_accept(&newsock, sock, p);
+    rv = apr_accept(&newsock, sock, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_accept()->%d/%s\n",
+        fprintf(stderr, "apr_accept()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
@@ -528,11 +528,11 @@ static int server(void)
 
     assert(sizeof buf > strlen(HDR1));
     bytes_read = strlen(HDR1);
-    rv = ap_recv(newsock, buf, &bytes_read);
+    rv = apr_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_recv()->%d/%s\n",
+        fprintf(stderr, "apr_recv()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(HDR1)) {
@@ -548,11 +548,11 @@ static int server(void)
         
     assert(sizeof buf > strlen(HDR2));
     bytes_read = strlen(HDR2);
-    rv = ap_recv(newsock, buf, &bytes_read);
+    rv = apr_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_recv()->%d/%s\n",
+        fprintf(stderr, "apr_recv()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(HDR2)) {
@@ -568,15 +568,15 @@ static int server(void)
 
     for (i = 0; i < HDR3_LEN; i++) {
         bytes_read = 1;
-        rv = ap_recv(newsock, buf, &bytes_read);
+        rv = apr_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "ap_recv()->%d/%s\n",
+            fprintf(stderr, "apr_recv()->%d/%s\n",
                     rv,
-                    ap_strerror(rv, buf, sizeof buf));
+                    apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         if (bytes_read != 1) {
-            fprintf(stderr, "ap_recv()->%ld bytes instead of 1\n",
+            fprintf(stderr, "apr_recv()->%ld bytes instead of 1\n",
                     (long int)bytes_read);
             exit(1);
         }
@@ -593,15 +593,15 @@ static int server(void)
         
     for (i = 0; i < FILE_LENGTH; i++) {
         bytes_read = 1;
-        rv = ap_recv(newsock, buf, &bytes_read);
+        rv = apr_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "ap_recv()->%d/%s\n",
+            fprintf(stderr, "apr_recv()->%d/%s\n",
                     rv,
-                    ap_strerror(rv, buf, sizeof buf));
+                    apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         if (bytes_read != 1) {
-            fprintf(stderr, "ap_recv()->%ld bytes instead of 1\n",
+            fprintf(stderr, "apr_recv()->%ld bytes instead of 1\n",
                     (long int)bytes_read);
             exit(1);
         }
@@ -618,11 +618,11 @@ static int server(void)
         
     assert(sizeof buf > strlen(TRL1));
     bytes_read = strlen(TRL1);
-    rv = ap_recv(newsock, buf, &bytes_read);
+    rv = apr_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_recv()->%d/%s\n",
+        fprintf(stderr, "apr_recv()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(TRL1)) {
@@ -638,11 +638,11 @@ static int server(void)
         
     assert(sizeof buf > strlen(TRL2));
     bytes_read = strlen(TRL2);
-    rv = ap_recv(newsock, buf, &bytes_read);
+    rv = apr_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_recv()->%d/%s\n",
+        fprintf(stderr, "apr_recv()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != strlen(TRL2)) {
@@ -658,15 +658,15 @@ static int server(void)
 
     for (i = 0; i < TRL3_LEN; i++) {
         bytes_read = 1;
-        rv = ap_recv(newsock, buf, &bytes_read);
+        rv = apr_recv(newsock, buf, &bytes_read);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "ap_recv()->%d/%s\n",
+            fprintf(stderr, "apr_recv()->%d/%s\n",
                     rv,
-                    ap_strerror(rv, buf, sizeof buf));
+                    apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         if (bytes_read != 1) {
-            fprintf(stderr, "ap_recv()->%ld bytes instead of 1\n",
+            fprintf(stderr, "apr_recv()->%ld bytes instead of 1\n",
                     (long int)bytes_read);
             exit(1);
         }
@@ -682,11 +682,11 @@ static int server(void)
     }
         
     bytes_read = 1;
-    rv = ap_recv(newsock, buf, &bytes_read);
+    rv = apr_recv(newsock, buf, &bytes_read);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "ap_recv()->%d/%s\n",
+        fprintf(stderr, "apr_recv()->%d/%s\n",
                 rv,
-		ap_strerror(rv, buf, sizeof buf));
+		apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     if (bytes_read != 0) {

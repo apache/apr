@@ -116,13 +116,13 @@
 #define POLLNVAL 32
 #endif
 
-struct ap_socket_t {
-    ap_pool_t *cntxt;
+struct apr_socket_t {
+    apr_pool_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
     socklen_t addr_len;
-    ap_interval_time_t timeout; 
+    apr_interval_time_t timeout; 
 #ifndef HAVE_POLL
     int connected;
 #endif
@@ -130,8 +130,8 @@ struct ap_socket_t {
     int local_interface_unknown;
 };
 
-struct ap_pollfd_t {
-    ap_pool_t *cntxt;
+struct apr_pollfd_t {
+    apr_pool_t *cntxt;
 #ifdef HAVE_POLL
     struct pollfd *pollset;
     int num;
@@ -142,8 +142,8 @@ struct ap_pollfd_t {
     fd_set *except;
     int highsock;
 #endif
-    ap_int16_t *events;
-    ap_int16_t *revents;
+    apr_int16_t *events;
+    apr_int16_t *revents;
 
 };
 

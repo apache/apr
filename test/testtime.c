@@ -63,32 +63,32 @@
 
 int main()
 {
-    ap_time_t now;
+    apr_time_t now;
     ap_exploded_time_t xt;
-    ap_time_t imp;
+    apr_time_t imp;
 
     fprintf(stdout, "Testing Time functions.\n");
 
-    fprintf(stdout, "\tap_now.......");
-    now = ap_now();
+    fprintf(stdout, "\tapr_now.......");
+    now = apr_now();
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tap_explode_localtime.......");
-    if (ap_explode_localtime(&xt, now) != APR_SUCCESS) {
+    fprintf(stdout, "\tapr_explode_localtime.......");
+    if (apr_explode_localtime(&xt, now) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't explode the time\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
     
-    fprintf(stdout, "\tap_explode_gmt.......");
-    if (ap_explode_gmt(&xt, now) != APR_SUCCESS) {
+    fprintf(stdout, "\tapr_explode_gmt.......");
+    if (apr_explode_gmt(&xt, now) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't explode the time\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tap_implode_time........");
-    if (ap_implode_time(&imp, &xt) != APR_SUCCESS) {
+    fprintf(stdout, "\tapr_implode_time........");
+    if (apr_implode_time(&imp, &xt) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't implode the time\n");
         exit(-1);
     }

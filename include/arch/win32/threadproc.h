@@ -61,35 +61,35 @@
 
 #define SHELL_PATH "cmd.exe"
 
-struct ap_thread_t {
-    ap_pool_t *cntxt;
+struct apr_thread_t {
+    apr_pool_t *cntxt;
     HANDLE td;
-    ap_int32_t cancel;
-    ap_int32_t cancel_how;
+    apr_int32_t cancel;
+    apr_int32_t cancel_how;
 };
 
-struct ap_threadattr_t {
-    ap_pool_t *cntxt;
-    ap_int32_t detach;
+struct apr_threadattr_t {
+    apr_pool_t *cntxt;
+    apr_int32_t detach;
 };
 
-struct ap_threadkey_t {
-    ap_pool_t *cntxt;
+struct apr_threadkey_t {
+    apr_pool_t *cntxt;
     DWORD key;
 };
 
-struct ap_procattr_t {
-    ap_pool_t *cntxt;
+struct apr_procattr_t {
+    apr_pool_t *cntxt;
     STARTUPINFO si;
-    ap_file_t *parent_in;
-    ap_file_t *child_in;
-    ap_file_t *parent_out;
-    ap_file_t *child_out;
-    ap_file_t *parent_err;
-    ap_file_t *child_err;
+    apr_file_t *parent_in;
+    apr_file_t *child_in;
+    apr_file_t *parent_out;
+    apr_file_t *child_out;
+    apr_file_t *parent_err;
+    apr_file_t *child_err;
     char *currdir;
-    ap_int32_t cmdtype;
-    ap_int32_t detached;
+    apr_int32_t cmdtype;
+    apr_int32_t detached;
 };
 
 #endif  /* ! THREAD_PROC_H */

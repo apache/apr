@@ -56,8 +56,8 @@
 
 #if APR_HAS_DSO
 
-ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
-                        ap_pool_t *ctx)
+apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, 
+                        apr_pool_t *ctx)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
@@ -68,7 +68,7 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
     void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
 #endif    
 
-    *res_handle = ap_pcalloc(ctx, sizeof(**res_handle));
+    *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
 
     if(os_handle == NULL) {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
@@ -86,7 +86,7 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
     
-ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
+apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_unload((shl_t)handle->handle);
@@ -99,8 +99,8 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
-                       ap_dso_handle_t *handle, 
+apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+                       apr_dso_handle_t *handle, 
                        const char *symname)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
@@ -141,7 +141,7 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
 #endif /* not HP-UX; use dlsym()/dlerror() */
 }
 
-const char *ap_dso_error(ap_dso_handle_t *dso, char *buffer, ap_size_t buflen)
+const char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
     if (dso->errormsg)
         return dso->errormsg;

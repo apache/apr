@@ -51,7 +51,7 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  *
- * The ap_vsnprintf/ap_snprintf functions are based on, and used with the
+ * The apr_vsnprintf/apr_snprintf functions are based on, and used with the
  * permission of, the  SIO stdio-replacement strx_* functions by Panos
  * Tsirigotis <panos@alumni.cs.colorado.edu> for xinetd.
  */
@@ -656,8 +656,8 @@ static char *conv_p2_quad(u_widest_int num, register int nbits,
 /*
  * Do format conversion placing the output in buffer
  */
-APR_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *),
-    ap_vformatter_buff_t *vbuff, const char *fmt, va_list ap)
+APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
+    apr_vformatter_buff_t *vbuff, const char *fmt, va_list ap)
 {
     register char *sp;
     register char *bep;
@@ -1149,21 +1149,21 @@ APR_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *),
 }
 
 
-static int snprintf_flush(ap_vformatter_buff_t *vbuff)
+static int snprintf_flush(apr_vformatter_buff_t *vbuff)
 {
     /* if the buffer fills we have to abort immediately, there is no way
-     * to "flush" an ap_snprintf... there's nowhere to flush it to.
+     * to "flush" an apr_snprintf... there's nowhere to flush it to.
      */
     return -1;
 }
 
 
-APR_EXPORT_NONSTD(int) ap_snprintf(char *buf, size_t len, 
+APR_EXPORT_NONSTD(int) apr_snprintf(char *buf, size_t len, 
                                    const char *format, ...)
 {
     int cc;
     va_list ap;
-    ap_vformatter_buff_t vbuff;
+    apr_vformatter_buff_t vbuff;
 
     if (len == 0)
 	return 0;
@@ -1172,18 +1172,18 @@ APR_EXPORT_NONSTD(int) ap_snprintf(char *buf, size_t len,
     vbuff.curpos = buf;
     vbuff.endpos = buf + len - 1;
     va_start(ap, format);
-    cc = ap_vformatter(snprintf_flush, &vbuff, format, ap);
+    cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
     va_end(ap);
     *vbuff.curpos = '\0';
     return (cc == -1) ? len : cc;
 }
 
 
-APR_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
+APR_EXPORT(int) apr_vsnprintf(char *buf, size_t len, const char *format,
 			     va_list ap)
 {
     int cc;
-    ap_vformatter_buff_t vbuff;
+    apr_vformatter_buff_t vbuff;
 
     if (len == 0)
 	return 0;
@@ -1191,7 +1191,7 @@ APR_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
     /* save one byte for nul terminator */
     vbuff.curpos = buf;
     vbuff.endpos = buf + len - 1;
-    cc = ap_vformatter(snprintf_flush, &vbuff, format, ap);
+    cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
     *vbuff.curpos = '\0';
     return (cc == -1) ? len : cc;
 }

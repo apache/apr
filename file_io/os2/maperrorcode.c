@@ -115,7 +115,7 @@ static int errormap[][2] = {
 
 #define MAPSIZE (sizeof(errormap)/sizeof(errormap[0]))
 
-int ap_canonical_error(ap_status_t err)
+int apr_canonical_error(apr_status_t err)
 {
     int rv = -1, index;
 
@@ -129,7 +129,7 @@ int ap_canonical_error(ap_status_t err)
     if (index<MAPSIZE)
         rv = errormap[index][1];
     else
-        fprintf(stderr, "ap_canonical_error: Unknown OS/2 error code %d\n", err );
+        fprintf(stderr, "apr_canonical_error: Unknown OS/2 error code %d\n", err );
         
     return rv;
 }

@@ -65,16 +65,16 @@
 #endif
 
 /*
- * stuffbuffer - like ap_cpystrn() but returns the address of the
+ * stuffbuffer - like apr_cpystrn() but returns the address of the
  * dest buffer instead of the address of the terminating '\0'
  */
-static char *stuffbuffer(char *buf, ap_size_t bufsize, const char *s)
+static char *stuffbuffer(char *buf, apr_size_t bufsize, const char *s)
 {
-    ap_cpystrn(buf,s,bufsize);
+    apr_cpystrn(buf,s,bufsize);
     return buf;
 }
 
-static char *apr_error_string(ap_status_t statcode)
+static char *apr_error_string(apr_status_t statcode)
 {
     switch (statcode) {
     case APR_ENOPOOL:
@@ -164,7 +164,7 @@ static char *apr_error_string(ap_status_t statcode)
 #include <os2.h>
 #include <ctype.h>
 
-static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
+static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 {
   char result[200];
   unsigned char message[HUGE_STRING_LEN];
@@ -174,7 +174,7 @@ static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
   
   if (err >= 10000 && err < 12000) {  /* socket error codes */
       return stuffbuffer(buf, bufsize,
-                         strerror(ap_canonical_error(err+APR_OS_START_SYSERR)));
+                         strerror(apr_canonical_error(err+APR_OS_START_SYSERR)));
   } 
   else if (DosGetMessage(NULL, 0, message, HUGE_STRING_LEN, err,
 			 "OSO001.MSG", &len) == 0) {
@@ -206,7 +206,7 @@ static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
 
 #elif defined(WIN32)
 
-static char *apr_os_strerror(char *buf, ap_size_t bufsize, ap_status_t errcode)
+static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode)
 {
     DWORD len;
     DWORD i;
@@ -236,7 +236,7 @@ static char *apr_os_strerror(char *buf, ap_size_t bufsize, ap_status_t errcode)
     else {
         /* Windows didn't provide us with a message.  Even stuff like                    * WSAECONNREFUSED won't get a message.
          */
-        ap_cpystrn(buf, "Unrecognized error code", bufsize);
+        apr_cpystrn(buf, "Unrecognized error code", bufsize);
     }
 
     return buf;
@@ -246,7 +246,7 @@ static char *apr_os_strerror(char *buf, ap_size_t bufsize, ap_status_t errcode)
 /* On Unix, apr_os_strerror() handles error codes from the resolver 
  * (h_errno). 
  e*/
-static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err) 
+static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err) 
 {
 #ifdef HAVE_HSTRERROR
     return stuffbuffer(buf, bufsize, hstrerror(err));
@@ -277,7 +277,7 @@ static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
 }
 #endif
 
-char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
+char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
 #ifdef WIN32

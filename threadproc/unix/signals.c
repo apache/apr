@@ -63,7 +63,7 @@
 #include <signal.h>
 #endif
 
-ap_status_t ap_kill(ap_proc_t *proc, int sig)
+apr_status_t apr_kill(apr_proc_t *proc, int sig)
 {
     if (kill(proc->pid, sig) == -1) {
         return errno;
@@ -77,7 +77,7 @@ ap_status_t ap_kill(ap_proc_t *proc, int sig)
  * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
  * (the version that does not automatically restart system calls).
  */
-Sigfunc *ap_signal(int signo, Sigfunc * func)
+Sigfunc *apr_signal(int signo, Sigfunc * func)
 {
     struct sigaction act, oact;
 

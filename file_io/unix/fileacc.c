@@ -68,16 +68,16 @@
 #else
 #include "fileio.h"
 #endif
-/* A file to put ALL of the accessor functions for ap_file_t types. */
+/* A file to put ALL of the accessor functions for apr_file_t types. */
 
-ap_status_t ap_get_filename(char **fname, ap_file_t *thefile)
+apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
 {
-    *fname = ap_pstrdup(thefile->cntxt, thefile->fname);
+    *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
     return APR_SUCCESS;
 }
 
 #if !defined(OS2) && !defined(WIN32)
-mode_t ap_unix_perms2mode(ap_fileperms_t perms)
+mode_t apr_unix_perms2mode(apr_fileperms_t perms)
 {
     mode_t mode = 0;
 
@@ -105,9 +105,9 @@ mode_t ap_unix_perms2mode(ap_fileperms_t perms)
     return mode;
 }
 
-ap_fileperms_t ap_unix_mode2perms(mode_t mode)
+apr_fileperms_t apr_unix_mode2perms(mode_t mode)
 {
-    ap_fileperms_t perms = 0;
+    apr_fileperms_t perms = 0;
 
     if (mode & S_IRUSR)
         perms |= APR_UREAD;
@@ -134,13 +134,13 @@ ap_fileperms_t ap_unix_mode2perms(mode_t mode)
 }
 #endif
 
-ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file)
+apr_status_t apr_get_filedata(void **data, const char *key, apr_file_t *file)
 {    
-    return ap_get_userdata(data, key, file->cntxt);
+    return apr_get_userdata(data, key, file->cntxt);
 }
 
-ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key,
-                            ap_status_t (*cleanup) (void *))
+apr_status_t apr_set_filedata(apr_file_t *file, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *))
 {    
-    return ap_set_userdata(data, key, cleanup, file->cntxt);
+    return apr_set_userdata(data, key, cleanup, file->cntxt);
 }

@@ -58,7 +58,7 @@
 #include "apr_strings.h"
 #include <string.h>
 
-ap_status_t soblock(SOCKET sd)
+apr_status_t soblock(SOCKET sd)
 {
     int zero = 0;
 
@@ -68,7 +68,7 @@ ap_status_t soblock(SOCKET sd)
     return APR_SUCCESS;
 }
 
-ap_status_t sononblock(SOCKET sd)
+apr_status_t sononblock(SOCKET sd)
 {
     int one = 1;
 
@@ -78,10 +78,10 @@ ap_status_t sononblock(SOCKET sd)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
+apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
 {
     int one;
-    ap_status_t stat;
+    apr_status_t stat;
 
     one = on ? 1 : 0;
 
@@ -166,7 +166,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
+apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
 {
     switch (opt) {
     case APR_SO_TIMEOUT: 
@@ -190,7 +190,7 @@ ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
 }
 
 
-ap_status_t ap_gethostname(char *buf, int len, ap_pool_t *cont)
+apr_status_t apr_gethostname(char *buf, int len, apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return WSAGetLastError();
@@ -198,7 +198,7 @@ ap_status_t ap_gethostname(char *buf, int len, ap_pool_t *cont)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
+apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
 {
     struct hostent *hptr;
 
@@ -206,7 +206,7 @@ ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
                          sizeof(struct in_addr), AF_INET);
 
     if (hptr != NULL) {
-        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
+        *name = apr_pstrdup(sock->cntxt, hptr->h_name);
         if (*name) {
             return APR_SUCCESS;
         }

@@ -59,7 +59,7 @@
 #include "apr_lib.h"
 #include <sys/time.h>
 
-ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
+apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
 {
     ssize_t rv;
     int fds, err = 0;
@@ -98,7 +98,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 
 
 
-ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
+apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
 {
     ssize_t rv;
     int fds, err = 0;
@@ -137,9 +137,9 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 
 
 
-ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *len)
+apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec, apr_int32_t nvec, apr_int32_t *len)
 {
-    ap_status_t rv;
+    apr_status_t rv;
     struct iovec *tmpvec;
     int fds, err = 0;
 

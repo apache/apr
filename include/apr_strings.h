@@ -98,7 +98,7 @@ extern "C" {
  *          this returns <0, if they are equivalent it returns 0, and if the
  *          first string is greater than second string it retuns >0.
  */
-int ap_strnatcmp(char const *a, char const *b);
+int apr_strnatcmp(char const *a, char const *b);
 
 /**
  * Do a natural order comparison of two strings ignoring the case of the 
@@ -109,16 +109,16 @@ int ap_strnatcmp(char const *a, char const *b);
  *         this returns <0, if they are equivalent it returns 0, and if the
  *         first string is greater than second string it retuns >0.
  */
-int ap_strnatcasecmp(char const *a, char const *b);
+int apr_strnatcasecmp(char const *a, char const *b);
 
 /**
  * duplicate a string into memory allocated out of a pool
  * @param p The pool to allocate out of
  * @param s The string to allocate
  * @return The new string
- * @deffunc char *ap_pstrdup(ap_pool_t *p, const char *s)
+ * @deffunc char *apr_pstrdup(apr_pool_t *p, const char *s)
  */
-APR_EXPORT(char *) ap_pstrdup(ap_pool_t *p, const char *s);
+APR_EXPORT(char *) apr_pstrdup(apr_pool_t *p, const char *s);
 
 /**
  * duplicate the first n characters ofa string into memory allocated 
@@ -127,18 +127,18 @@ APR_EXPORT(char *) ap_pstrdup(ap_pool_t *p, const char *s);
  * @param s The string to allocate
  * @param n The number of characters to duplicate
  * @return The new string
- * @deffunc char *ap_pstrndup(ap_pool_t *p, const char *s, ap_size_t n)
+ * @deffunc char *apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n)
  */
-APR_EXPORT(char *) ap_pstrndup(ap_pool_t *p, const char *s, ap_size_t n);
+APR_EXPORT(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
 
 /**
  * Concatenate multiple strings, allocating memory out a pool
  * @param p The pool to allocate out of
  * @param ... The strings to concatenate.  The final string must be NULL
  * @return The new string
- * @deffunc char *ap_pstrcat(ap_pool_t *p, ...)
+ * @deffunc char *apr_pstrcat(apr_pool_t *p, ...)
  */
-APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *p, ...);
+APR_EXPORT_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
 
 /**
  * printf-style style printing routine.  The data is output to a string 
@@ -147,9 +147,9 @@ APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *p, ...);
  * @param fmt The format of the string
  * @param ap The arguments to use while printing the data
  * @return The new string
- * @deffunc char *ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
+ * @deffunc char *apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap)
  */
-APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap);
+APR_EXPORT(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
 
 /**
  * printf-style style printing routine.  The data is output to a string 
@@ -158,9 +158,9 @@ APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap);
  * @param fmt The format of the string
  * @param ... The arguments to use while printing the data
  * @return The new string
- * @deffunc char *ap_psprintf(ap_pool_t *p, const char *fmt, ...)
+ * @deffunc char *apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  */
-APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...);
+APR_EXPORT_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...);
 
 /**
  * copy n characters from src to des>
@@ -177,18 +177,18 @@ APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...);
  *          destination string, we return a pointer to the terminating '\0'
  *          to allow us to check for truncation.
  * </PRE>
- * @deffunc char *ap_cpystrn(char *dst, const char *src, size_t dst_size)
+ * @deffunc char *apr_cpystrn(char *dst, const char *src, size_t dst_size)
  */
-APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
+APR_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size);
 
 /**
  * Strip spaces from a string
  * @param dest The destination string.  It is okay to modify the string
  *             in place.  Namely dest == src
  * @param src The string to rid the spaces from.
- * @deffunc char *ap_collapse_spaces(char *dest, const char *src)
+ * @deffunc char *apr_collapse_spaces(char *dest, const char *src)
  */
-APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src);
+APR_EXPORT(char *) apr_collapse_spaces(char *dest, const char *src);
 
 /**
  * Convert the arguments to a program from one string to an array of 
@@ -196,11 +196,11 @@ APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src);
  * @param str The arguments to convert
  * @param argv_out Output location.  This is a pointer to an array of strings.
  * @param token_context Pool to use.
- * @deffunc ap_status_t ap_tokenize_to_argv(const char *arg_str, char ***argv_out, ap_pool_t *token_context);
+ * @deffunc apr_status_t apr_tokenize_to_argv(const char *arg_str, char ***argv_out, apr_pool_t *token_context);
  */
-APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str,
+APR_EXPORT(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                             char ***argv_out,
-                                            ap_pool_t *token_context);
+                                            apr_pool_t *token_context);
 
 #ifdef __cplusplus
 }

@@ -65,9 +65,9 @@
 #include <string.h>
 #include <process.h>
 
-ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
+apr_status_t apr_createprocattr_init(apr_procattr_t **new, apr_pool_t *cont)
 {
-    (*new) = (ap_procattr_t *)ap_palloc(cont, sizeof(ap_procattr_t));
+    (*new) = (apr_procattr_t *)apr_palloc(cont, sizeof(apr_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -88,10 +88,10 @@ ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
-                              ap_int32_t out, ap_int32_t err)
+apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in, 
+                              apr_int32_t out, apr_int32_t err)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     BOOLEAN bAsyncRead, bAsyncWrite;
     if (in) {
         switch (in) {
@@ -165,39 +165,39 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
     return APR_SUCCESS;
 }
 #if 0
-ap_status_t ap_setprocattr_childin(ap_procattr_t *attr, ap_file_t *child_in,
-                                   ap_file_t *parent_in)
+apr_status_t apr_setprocattr_childin(apr_procattr_t *attr, apr_file_t *child_in,
+                                   apr_file_t *parent_in)
 {
 }
-ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, ap_file_t *child_out,
-                                    ap_file_t *parent_out)
+apr_status_t apr_setprocattr_childout(apr_procattr_t *attr, apr_file_t *child_out,
+                                    apr_file_t *parent_out)
 {
     if (attr->child_out == NULL && attr->parent_out == NULL)
-        ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
+        apr_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
 
     if (child_out != NULL)
-        ap_dupfile(&attr->child_out, child_out, attr->cntxt);
+        apr_dupfile(&attr->child_out, child_out, attr->cntxt);
 
     if (parent_out != NULL)
-        ap_dupfile(&attr->parent_out, parent_out, attr->cntxt);
+        apr_dupfile(&attr->parent_out, parent_out, attr->cntxt);
 
     return APR_SUCCESS;
 }
-ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err,
-                                   ap_file_t *parent_err)
+apr_status_t apr_setprocattr_childerr(apr_procattr_t *attr, apr_file_t *child_err,
+                                   apr_file_t *parent_err)
 {
     if (attr->child_err == NULL && attr->parent_err == NULL)
-        ap_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
+        apr_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
 
     if (child_err != NULL)
-        ap_dupfile(&attr->child_err, child_err, attr->cntxt);
+        apr_dupfile(&attr->child_err, child_err, attr->cntxt);
 
     if (parent_err != NULL)
-        ap_dupfile(&attr->parent_err, parent_err, attr->cntxt);
+        apr_dupfile(&attr->parent_err, parent_err, attr->cntxt);
     return APR_SUCCESS;
 }
 #endif
-ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, 
+apr_status_t apr_setprocattr_dir(apr_procattr_t *attr, 
                                const char *dir) 
 {
     char path[MAX_PATH];
@@ -209,10 +209,10 @@ ap_status_t ap_setprocattr_dir(ap_procattr_t *attr,
         if (length == 0 || length + strlen(dir) + 1 >= MAX_PATH)
             return APR_ENOMEM;
 
-        attr->currdir = ap_pstrcat(attr->cntxt, path, "\\", dir, NULL);
+        attr->currdir = apr_pstrcat(attr->cntxt, path, "\\", dir, NULL);
     }
     else {
-        attr->currdir = ap_pstrdup(attr->cntxt, dir);
+        attr->currdir = apr_pstrdup(attr->cntxt, dir);
     }
 
     if (attr->currdir) {
@@ -221,22 +221,22 @@ ap_status_t ap_setprocattr_dir(ap_procattr_t *attr,
     return APR_ENOMEM;
 }
 
-ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr,
-                                     ap_cmdtype_e cmd) 
+apr_status_t apr_setprocattr_cmdtype(apr_procattr_t *attr,
+                                     apr_cmdtype_e cmd) 
 {
     attr->cmdtype = cmd;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t det) 
+apr_status_t apr_setprocattr_detach(apr_procattr_t *attr, apr_int32_t det) 
 {
     attr->detached = det;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
+apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
                               char *const args[], char **env, 
-                              ap_procattr_t *attr, ap_pool_t *cont)
+                              apr_procattr_t *attr, apr_pool_t *cont)
 {
     int i, iEnvBlockLen;
     char *cmdline;
@@ -245,7 +245,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     char ppid[20];
     char *envstr;
     char *pEnvBlock, *pNext;
-    ap_status_t rv;
+    apr_status_t rv;
     PROCESS_INFORMATION pi;
 
     new->in = attr->parent_in;
@@ -282,18 +282,18 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
         }
 
         if (*ptr == '\\' || *++ptr == ':') {
-            cmdline = ap_pstrdup(cont, progname);
+            cmdline = apr_pstrdup(cont, progname);
         }
         else if (attr->currdir == NULL) {
-            cmdline = ap_pstrdup(cont, progname);
+            cmdline = apr_pstrdup(cont, progname);
         }
         else {
             char lastchar = attr->currdir[strlen(attr->currdir)-1];
             if ( lastchar == '\\' || lastchar == '/') {
-                cmdline = ap_pstrcat(cont, attr->currdir, progname, NULL);
+                cmdline = apr_pstrcat(cont, attr->currdir, progname, NULL);
             }
             else {
-                cmdline = ap_pstrcat(cont, attr->currdir, "\\", progname, NULL);
+                cmdline = apr_pstrcat(cont, attr->currdir, "\\", progname, NULL);
             }
         }
     }
@@ -301,13 +301,13 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
         char * shell_cmd = getenv("COMSPEC");
         if (!shell_cmd)
             shell_cmd = SHELL_PATH;
-        shell_cmd = ap_pstrdup(cont, shell_cmd);
-        cmdline = ap_pstrcat(cont, shell_cmd, " /C ", progname, NULL);
+        shell_cmd = apr_pstrdup(cont, shell_cmd);
+        cmdline = apr_pstrcat(cont, shell_cmd, " /C ", progname, NULL);
     }
 
     i = 1;
     while (args && args[i]) {
-        cmdline = ap_pstrcat(cont, cmdline, " ", args[i], NULL);
+        cmdline = apr_pstrcat(cont, cmdline, " ", args[i], NULL);
         i++;
     }
     /*
@@ -335,16 +335,16 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
                                                 0, FALSE, DUPLICATE_SAME_ACCESS))) {
         rv = GetLastError();
         if (attr->child_in) {
-            ap_close(attr->child_in);
-            ap_close(attr->parent_in);
+            apr_close(attr->child_in);
+            apr_close(attr->parent_in);
         }
         if (attr->child_out) {
-            ap_close(attr->child_out);
-            ap_close(attr->parent_out);
+            apr_close(attr->child_out);
+            apr_close(attr->parent_out);
         }
         if (attr->child_err) {
-            ap_close(attr->child_err);
-            ap_close(attr->parent_err);
+            apr_close(attr->child_err);
+            apr_close(attr->parent_err);
         }
         return rv;
     }
@@ -365,7 +365,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
 
     _itoa(_getpid(), ppid, 10);
     if (env) {
-        envstr = ap_pstrcat(cont, "parentpid=", ppid, NULL);
+        envstr = apr_pstrcat(cont, "parentpid=", ppid, NULL);
         /*
          * Win32's CreateProcess call requires that the environment
          * be passed in an environment block, a null terminated block of
@@ -378,7 +378,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
             i++;
         }
   
-        pEnvBlock = (char *)ap_pcalloc(cont, iEnvBlockLen + strlen(envstr));
+        pEnvBlock = (char *)apr_pcalloc(cont, iEnvBlockLen + strlen(envstr));
     
         i = 0;
         pNext = pEnvBlock;
@@ -401,7 +401,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
                       &attr->si, &pi)) {
 
         // TODO: THIS IS BADNESS
-        // The completion of the ap_proc_t type leaves us ill equiped to track both 
+        // The completion of the apr_proc_t type leaves us ill equiped to track both 
         // the pid (Process ID) and handle to the process, which are entirely
         // different things and each useful in their own rights.
         //
@@ -410,13 +410,13 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
         new->pid = (pid_t) pi.hProcess;
 
         if (attr->child_in) {
-            ap_close(attr->child_in);
+            apr_close(attr->child_in);
         }
         if (attr->child_out) {
-            ap_close(attr->child_out);
+            apr_close(attr->child_out);
         }
         if (attr->child_err) {
-            ap_close(attr->child_err);
+            apr_close(attr->child_err);
         }
         CloseHandle(pi.hThread);
 
@@ -426,7 +426,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     return GetLastError();
 }
 
-ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e wait)
+apr_status_t apr_wait_proc(apr_proc_t *proc, apr_wait_how_e wait)
 {
     DWORD stat;
     if (!proc)

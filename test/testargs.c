@@ -65,14 +65,14 @@
 
 int main(int argc, char * const argv[])
 {
-    ap_pool_t *context;
-    ap_int32_t data;
+    apr_pool_t *context;
+    apr_int32_t data;
 
-    ap_initialize();
-    atexit(ap_terminate);
-    ap_create_pool(&context, NULL);
+    apr_initialize();
+    atexit(apr_terminate);
+    apr_create_pool(&context, NULL);
 
-    while (ap_getopt(argc, argv, "abc:d::", &data, context) == APR_SUCCESS) {
+    while (apr_getopt(argc, argv, "abc:d::", &data, context) == APR_SUCCESS) {
         switch(data) {
             case 'a':
             case 'b':

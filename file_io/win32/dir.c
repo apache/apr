@@ -72,47 +72,47 @@
 #include <sys/stat.h>
 #endif
 
-ap_status_t dir_cleanup(void *thedir)
+apr_status_t dir_cleanup(void *thedir)
 {
-    ap_dir_t *dir = thedir;
+    apr_dir_t *dir = thedir;
     if (!CloseHandle(dir->dirhand)) {
         return GetLastError();
     }
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
+apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
     char * temp;
-    (*new) = ap_pcalloc(cont, sizeof(ap_dir_t));
+    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
     (*new)->cntxt = cont;
     (*new)->entry = NULL;
     temp = canonical_filename((*new)->cntxt, dirname);
     if (temp[strlen(temp)] == '/') {
-    	(*new)->dirname = ap_pstrcat(cont, dirname, "*", NULL);
+    	(*new)->dirname = apr_pstrcat(cont, dirname, "*", NULL);
     }
     else {
-        (*new)->dirname = ap_pstrcat(cont, dirname, "/*", NULL);
+        (*new)->dirname = apr_pstrcat(cont, dirname, "/*", NULL);
     }
     (*new)->dirhand = INVALID_HANDLE_VALUE;
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
-                        ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
+                        apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_closedir(ap_dir_t *thedir)
+apr_status_t apr_closedir(apr_dir_t *thedir)
 {
     if (!FindClose(thedir->dirhand)) {
         return GetLastError();   
     }
-    ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
+    apr_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_readdir(ap_dir_t *thedir)
+apr_status_t apr_readdir(apr_dir_t *thedir)
 {
     if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-        thedir->entry = ap_pcalloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
+        thedir->entry = apr_pcalloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
         thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
             return GetLastError();
@@ -125,25 +125,25 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_rewinddir(ap_dir_t *thedir)
+apr_status_t apr_rewinddir(apr_dir_t *thedir)
 {
-    ap_status_t stat;
-    ap_pool_t *cont = thedir->cntxt;
-    char *temp = ap_pstrdup(cont, thedir->dirname);
+    apr_status_t stat;
+    apr_pool_t *cont = thedir->cntxt;
+    char *temp = apr_pstrdup(cont, thedir->dirname);
     temp[strlen(temp) - 2] = '\0';   /*remove the \* at the end */
     if (thedir->dirhand == INVALID_HANDLE_VALUE) {
         return APR_SUCCESS;
     }
-    if ((stat = ap_closedir(thedir)) == APR_SUCCESS) {
-        if ((stat = ap_opendir(&thedir, temp, cont)) == APR_SUCCESS) {
-            ap_readdir(thedir);
+    if ((stat = apr_closedir(thedir)) == APR_SUCCESS) {
+        if ((stat = apr_opendir(&thedir, temp, cont)) == APR_SUCCESS) {
+            apr_readdir(thedir);
             return APR_SUCCESS;
         }
     }
     return stat;	
 }
 
-ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
+apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
     if (!CreateDirectory(path, NULL)) {
         return GetLastError();
@@ -151,7 +151,7 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
+apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 {
     char *temp = canonical_filename(cont, path);
     if (!RemoveDirectory(temp)) {
@@ -160,7 +160,7 @@ ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
         return APR_ENODIR;
@@ -170,7 +170,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dir_entry_mtime(ap_time_t *time, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
         return APR_ENODIR;
@@ -179,7 +179,7 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *time, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
  
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir)
 {
     switch(thedir->entry->dwFileAttributes) {
     case FILE_ATTRIBUTE_DIRECTORY: {
@@ -197,13 +197,13 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
     }
 }
 
-ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir)
+apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
 {
-    (*new) = ap_pstrdup(thedir->cntxt, thedir->entry->cFileName);
+    (*new) = apr_pstrdup(thedir->cntxt, thedir->entry->cFileName);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
+apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
@@ -212,13 +212,13 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, ap_pool_t *cont)
+apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir, apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;
     }
     if ((*dir) == NULL) {
-        (*dir) = (ap_dir_t *)ap_pcalloc(cont, sizeof(ap_dir_t));
+        (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
         (*dir)->cntxt = cont;
     }
     (*dir)->dirhand = thedir;

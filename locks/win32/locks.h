@@ -57,10 +57,10 @@
 
 #include "apr_lock.h"
 
-struct ap_lock_t {
-    ap_pool_t *cntxt;
-    ap_locktype_e type;
-    ap_lockscope_e scope;
+struct apr_lock_t {
+    apr_pool_t *cntxt;
+    apr_locktype_e type;
+    apr_lockscope_e scope;
     HANDLE mutex;
     CRITICAL_SECTION section;
     char *fname;

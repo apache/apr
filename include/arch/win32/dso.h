@@ -63,10 +63,10 @@
 
 #if APR_HAS_DSO
 
-struct ap_dso_handle_t {
-    ap_pool_t  *cont;
+struct apr_dso_handle_t {
+    apr_pool_t  *cont;
     void          *handle;
-    ap_status_t   load_error;
+    apr_status_t   load_error;
 };
 
 #endif

@@ -66,9 +66,9 @@
 #include <netdb.h>
 #include "os2calls.h"
 
-static ap_status_t socket_cleanup(void *sock)
+static apr_status_t socket_cleanup(void *sock)
 {
-    ap_socket_t *thesocket = sock;
+    apr_socket_t *thesocket = sock;
     if (soclose(thesocket->socketdes) == 0) {
         thesocket->socketdes = -1;
         return APR_SUCCESS;
@@ -78,17 +78,17 @@ static ap_status_t socket_cleanup(void *sock)
     }
 }
 
-ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
+apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
 {
-    (*new) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
+    (*new) = (apr_socket_t *)apr_palloc(cont, sizeof(apr_socket_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
     (*new)->cntxt = cont; 
-    (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+    (*new)->local_addr = (struct sockaddr_in *)apr_palloc((*new)->cntxt,
                          sizeof(struct sockaddr_in));
-    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+    (*new)->remote_addr = (struct sockaddr_in *)apr_palloc((*new)->cntxt,
                          sizeof(struct sockaddr_in));
 
     if ((*new)->local_addr == NULL || (*new)->remote_addr == NULL) {
@@ -107,12 +107,12 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
     }
     (*new)->timeout = -1;
     (*new)->nonblock = FALSE;
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void *)(*new), 
+                        socket_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
+apr_status_t apr_shutdown(apr_socket_t *thesocket, ap_shutdown_how_e how)
 {
     if (shutdown(thesocket->socketdes, how) == 0) {
         return APR_SUCCESS;
@@ -122,16 +122,16 @@ ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
     }
 }
 
-ap_status_t ap_close_socket(ap_socket_t *thesocket)
+apr_status_t apr_close_socket(apr_socket_t *thesocket)
 {
-    ap_kill_cleanup(thesocket->cntxt, thesocket, socket_cleanup);
+    apr_kill_cleanup(thesocket->cntxt, thesocket, socket_cleanup);
     return socket_cleanup(thesocket);
 }
 
 
 
 
-ap_status_t ap_bind(ap_socket_t *sock)
+apr_status_t apr_bind(apr_socket_t *sock)
 {
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
         return APR_OS2_STATUS(sock_errno());
@@ -139,7 +139,7 @@ ap_status_t ap_bind(ap_socket_t *sock)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
+apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == -1)
         return APR_OS2_STATUS(sock_errno());
@@ -147,13 +147,13 @@ ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connection_context)
+apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
-    (*new) = (ap_socket_t *)ap_palloc(connection_context, 
-                            sizeof(ap_socket_t));
+    (*new) = (apr_socket_t *)apr_palloc(connection_context, 
+                            sizeof(apr_socket_t));
 
     (*new)->cntxt = connection_context;
-    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+    (*new)->remote_addr = (struct sockaddr_in *)apr_palloc((*new)->cntxt,
                           sizeof(struct sockaddr_in));
     (*new)->local_addr = sock->local_addr;
     (*new)->addr_len = sizeof(struct sockaddr_in);
@@ -167,12 +167,12 @@ ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connectio
         return APR_OS2_STATUS(sock_errno());
     }
 
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void *)(*new), 
+                        socket_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
+apr_status_t apr_connect(apr_socket_t *sock, char *hostname)
 {
     struct hostent *hp;
 
@@ -206,21 +206,21 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
 
 
 
-ap_status_t ap_get_socketdata(void **data, const char *key,
-                              ap_socket_t *socket)
+apr_status_t apr_get_socketdata(void **data, const char *key,
+                              apr_socket_t *socket)
 {
-    return ap_get_userdata(data, key, socket->cntxt);
+    return apr_get_userdata(data, key, socket->cntxt);
 }
 
 
 
-ap_status_t ap_set_socketdata(ap_socket_t *socket, void *data, const char *key,
-                              ap_status_t (*cleanup) (void *))
+apr_status_t apr_set_socketdata(apr_socket_t *socket, void *data, const char *key,
+                              apr_status_t (*cleanup) (void *))
 {
-    return ap_set_userdata(data, key, cleanup, socket->cntxt);
+    return apr_set_userdata(data, key, cleanup, socket->cntxt);
 }
 
-ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
+apr_status_t apr_get_os_sock(apr_os_sock_t *thesock, apr_socket_t *sock)
 {
     *thesock = sock->socketdes;
     return APR_SUCCESS;
@@ -228,13 +228,13 @@ ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
 
 
 
-ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, ap_pool_t *cont)
+apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;
     }
     if ((*sock) == NULL) {
-        (*sock) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
+        (*sock) = (apr_socket_t *)apr_palloc(cont, sizeof(apr_socket_t));
         (*sock)->cntxt = cont;
     }
     (*sock)->socketdes = *thesock;

@@ -57,20 +57,20 @@
 #include "locks.h"
 #include "apr_portable.h"
 
-ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
-                           ap_lockscope_e scope, const char *fname, 
-                           ap_pool_t *cont)
+apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
+                           apr_lockscope_e scope, const char *fname, 
+                           apr_pool_t *cont)
 {
-    ap_lock_t *newlock;
+    apr_lock_t *newlock;
     SECURITY_ATTRIBUTES sec;
 
-    newlock = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+    newlock = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
 
     newlock->cntxt = cont;
     /* ToDo:  How to handle the case when no context is available? 
     *         How to cleanup the storage properly?
     */
-    newlock->fname = ap_pstrdup(cont, fname);
+    newlock->fname = apr_pstrdup(cont, fname);
     newlock->type = type;
     newlock->scope = scope;
     sec.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -92,18 +92,18 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, 
-                               ap_pool_t *cont)
+apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname, 
+                               apr_pool_t *cont)
 {
     /* This routine should not be called (and OpenMutex will fail if called) 
      * on a INTRAPROCESS lock
      */
-    (*lock) = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+    (*lock) = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
 
     if ((*lock) == NULL) {
         return APR_ENOMEM;
     }
-    (*lock)->fname = ap_pstrdup(cont, fname);
+    (*lock)->fname = apr_pstrdup(cont, fname);
     (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
     
     if ((*lock)->mutex == NULL) {
@@ -112,7 +112,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_lock(ap_lock_t *lock)
+apr_status_t apr_lock(apr_lock_t *lock)
 {
     DWORD rv;
     if (lock->scope == APR_INTRAPROCESS) {
@@ -128,7 +128,7 @@ ap_status_t ap_lock(ap_lock_t *lock)
     return GetLastError();
 }
 
-ap_status_t ap_unlock(ap_lock_t *lock)
+apr_status_t apr_unlock(apr_lock_t *lock)
 {
     if (lock->scope == APR_INTRAPROCESS) {
         LeaveCriticalSection(&lock->section);
@@ -141,7 +141,7 @@ ap_status_t ap_unlock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_destroy_lock(ap_lock_t *lock)
+apr_status_t apr_destroy_lock(apr_lock_t *lock)
 {
     if (lock->scope == APR_INTRAPROCESS) {
         DeleteCriticalSection(&lock->section);
@@ -154,31 +154,31 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data)
+apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data)
 {
-    return ap_get_userdata(data, key, lock->cntxt);
+    return apr_get_userdata(data, key, lock->cntxt);
 }
 
-ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
-                            ap_status_t (*cleanup) (void *))
+apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *))
 {
-    return ap_set_userdata(data, key, cleanup, lock->cntxt);
+    return apr_set_userdata(data, key, cleanup, lock->cntxt);
 }
 
-ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, ap_lock_t *lock)
+apr_status_t apr_get_os_lock(apr_os_lock_t *thelock, apr_lock_t *lock)
 {
     *thelock = lock->mutex;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
-                           ap_pool_t *cont)
+apr_status_t apr_put_os_lock(apr_lock_t **lock, apr_os_lock_t *thelock, 
+                           apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;
     }
     if ((*lock) == NULL) {
-        (*lock) = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+        (*lock) = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
         (*lock)->cntxt = cont;
     }
     (*lock)->mutex = *thelock;

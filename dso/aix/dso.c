@@ -132,21 +132,21 @@ struct dl_info {
  * add the basic "wrappers" here.
  */
 
-ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
-                        ap_pool_t *ctx)
+apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, 
+                        apr_pool_t *ctx)
 {
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 
     if(os_handle == NULL)
         return APR_EDSOOPEN;
 
-    *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
+apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
 {
     if (dlclose(handle->handle) != 0)
         return APR_EINIT;
@@ -154,8 +154,8 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
-                       ap_dso_handle_t *handle, 
+apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+                       apr_dso_handle_t *handle, 
                        const char *symname)
 {
     void *retval = dlsym(handle->handle, symname);

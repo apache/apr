@@ -79,110 +79,110 @@ extern "C" {
  * and tables are opaque structures to applications, but arrays are
  * published.
  */
-typedef struct ap_table_t ap_table_t;
-typedef struct ap_array_header_t {
-    ap_pool_t *cont;
+typedef struct apr_table_t apr_table_t;
+typedef struct apr_array_header_t {
+    apr_pool_t *cont;
     int elt_size;
     int nelts;
     int nalloc;
     char *elts;
-} ap_array_header_t;
+} apr_array_header_t;
 
-struct ap_table_t {
+struct apr_table_t {
     /* This has to be first to promote backwards compatibility with
-     * older modules which cast a ap_table_t * to an ap_array_header_t *...
+     * older modules which cast a apr_table_t * to an apr_array_header_t *...
      * they should use the table_elts() function for most of the
      * cases they do this for.
      */
-    ap_array_header_t a;
+    apr_array_header_t a;
 #ifdef MAKE_TABLE_PROFILE
     void *creator;
 #endif
 };
 
-typedef struct ap_table_entry_t {
+typedef struct apr_table_entry_t {
     char *key;          /* maybe NULL in future;
                          * check when iterating thru table_elts
                          */
     char *val;
-} ap_table_entry_t;
+} apr_table_entry_t;
 
-/* XXX: these know about the definition of struct ap_table_t in alloc.c.  That
+/* XXX: these know about the definition of struct apr_table_t in alloc.c.  That
  * definition is not here because it is supposed to be private, and by not
  * placing it here we are able to get compile-time diagnostics from modules
- * written which assume that a ap_table_t is the same as an ap_array_header_t. -djg
+ * written which assume that a apr_table_t is the same as an apr_array_header_t. -djg
  */
-#define ap_table_elts(t) ((ap_array_header_t *)(t))
-#define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
+#define ap_table_elts(t) ((apr_array_header_t *)(t))
+#define ap_is_empty_table(t) (((t) == NULL)||(((apr_array_header_t *)(t))->nelts == 0))
 
-APR_EXPORT(ap_array_header_t *) ap_make_array(struct ap_pool_t *p, int nelts,
+APR_EXPORT(apr_array_header_t *) apr_make_array(struct apr_pool_t *p, int nelts,
 						int elt_size);
-APR_EXPORT(void *) ap_push_array(ap_array_header_t *arr);
-APR_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
-			       const ap_array_header_t *src);
+APR_EXPORT(void *) apr_push_array(apr_array_header_t *arr);
+APR_EXPORT(void) apr_array_cat(apr_array_header_t *dst,
+			       const apr_array_header_t *src);
 
 /* copy_array copies the *entire* array.  copy_array_hdr just copies
  * the header, and arranges for the elements to be copied if (and only
  * if) the code subsequently does a push or arraycat.
  */
-APR_EXPORT(ap_array_header_t *) ap_copy_array(struct ap_pool_t *p,
-						const ap_array_header_t *arr);
-APR_EXPORT(ap_array_header_t *)
-	ap_copy_array_hdr(struct ap_pool_t *p,
-			   const ap_array_header_t *arr);
-APR_EXPORT(ap_array_header_t *)
-	ap_append_arrays(struct ap_pool_t *p,
-			  const ap_array_header_t *first,
-			  const ap_array_header_t *second);
+APR_EXPORT(apr_array_header_t *) apr_copy_array(struct apr_pool_t *p,
+						const apr_array_header_t *arr);
+APR_EXPORT(apr_array_header_t *)
+	apr_copy_array_hdr(struct apr_pool_t *p,
+			   const apr_array_header_t *arr);
+APR_EXPORT(apr_array_header_t *)
+	apr_append_arrays(struct apr_pool_t *p,
+			  const apr_array_header_t *first,
+			  const apr_array_header_t *second);
 
-/* ap_array_pstrcat generates a new string from the ap_pool_t containing
+/* apr_array_pstrcat generates a new string from the apr_pool_t containing
  * the concatenated sequence of substrings referenced as elements within
  * the array.  The string will be empty if all substrings are empty or null,
  * or if there are no elements in the array.
  * If sep is non-NUL, it will be inserted between elements as a separator.
  */
-APR_EXPORT(char *) ap_array_pstrcat(struct ap_pool_t *p,
-				     const ap_array_header_t *arr,
+APR_EXPORT(char *) apr_array_pstrcat(struct apr_pool_t *p,
+				     const apr_array_header_t *arr,
 				     const char sep);
-APR_EXPORT(ap_table_t *) ap_make_table(struct ap_pool_t *p, int nelts);
-APR_EXPORT(ap_table_t *) ap_copy_table(struct ap_pool_t *p, const ap_table_t *t);
-APR_EXPORT(void) ap_clear_table(ap_table_t *t);
-APR_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key);
-APR_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
+APR_EXPORT(apr_table_t *) apr_make_table(struct apr_pool_t *p, int nelts);
+APR_EXPORT(apr_table_t *) apr_copy_table(struct apr_pool_t *p, const apr_table_t *t);
+APR_EXPORT(void) apr_clear_table(apr_table_t *t);
+APR_EXPORT(const char *) apr_table_get(const apr_table_t *t, const char *key);
+APR_EXPORT(void) apr_table_set(apr_table_t *t, const char *key,
 			       const char *val);
-APR_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_setn(apr_table_t *t, const char *key,
 				const char *val);
-APR_EXPORT(void) ap_table_unset(ap_table_t *t, const char *key);
-APR_EXPORT(void) ap_table_merge(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_unset(apr_table_t *t, const char *key);
+APR_EXPORT(void) apr_table_merge(apr_table_t *t, const char *key,
 				 const char *val);
-APR_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_mergen(apr_table_t *t, const char *key,
 				  const char *val);
-APR_EXPORT(void) ap_table_add(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_add(apr_table_t *t, const char *key,
 			       const char *val);
-APR_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_addn(apr_table_t *t, const char *key,
 				const char *val);
-APR_EXPORT(ap_table_t *) ap_overlay_tables(struct ap_pool_t *p,
-					     const ap_table_t *overlay,
-					     const ap_table_t *base);
+APR_EXPORT(apr_table_t *) apr_overlay_tables(struct apr_pool_t *p,
+					     const apr_table_t *overlay,
+					     const apr_table_t *base);
 APR_EXPORT(void)
-	ap_table_do(int (*comp) (void *, const char *, const char *),
-		     void *rec, const ap_table_t *t, ...);
+	apr_table_do(int (*comp) (void *, const char *, const char *),
+		     void *rec, const apr_table_t *t, ...);
 APR_EXPORT(void)
-        ap_table_vdo(int (*comp) (void *, const char *, const char *),
-                     void *rec, const ap_table_t *t, va_list);                  
+        apr_table_vdo(int (*comp) (void *, const char *, const char *),
+                     void *rec, const apr_table_t *t, va_list);                  
 
-/* Conceptually, ap_overlap_tables does this:
+/* Conceptually, apr_overlap_tables does this:
 
-    ap_array_header_t *barr = ap_table_elts(b);
-    ap_table_entry_t *belt = (ap_table_entry_t *)barr->elts;
+    apr_array_header_t *barr = ap_table_elts(b);
+    apr_table_entry_t *belt = (apr_table_entry_t *)barr->elts;
     int i;
 
     for (i = 0; i < barr->nelts; ++i) {
         if (flags & ap_OVERLAP_TABLES_MERGE) {
-            ap_table_mergen(a, belt[i].key, belt[i].val);
+            apr_table_mergen(a, belt[i].key, belt[i].val);
         }
         else {
-            ap_table_setn(a, belt[i].key, belt[i].val);
+            apr_table_setn(a, belt[i].key, belt[i].val);
         }
     }
 
@@ -195,7 +195,7 @@ APR_EXPORT(void)
 */
 #define AP_OVERLAP_TABLES_SET   (0)
 #define AP_OVERLAP_TABLES_MERGE (1)
-APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
+APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags);
 
 #ifdef __cplusplus
