@@ -58,6 +58,9 @@
 #ifdef HAVE_SYS_SYSLIMITS_H
 #include <sys/syslimits.h>
 #endif
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 
 static apr_status_t dir_cleanup(void *thedir)
 {
