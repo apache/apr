@@ -82,11 +82,10 @@ install: $(TARGET_LIB) apr-config.out
 	fi;
 	if [ -f shlibtool ]; then \
 		$(LIBTOOL) --mode=install cp shlibtool $(DESTDIR)$(installbuilddir); \
-	fi;
-	if [ -f build/apr_rules.mk ]; then \
-		cp build/apr_rules.mk $(DESTDIR)$(installbuilddir); \
-	fi;
-
+	fi
+	for f in mkdir.sh make_exports.awk make_var_export.awk apr_rules.mk; do \
+	        test -f build/$${f} && cp build/$${f} $(DESTDIR)$(installbuilddir); \
+	done
 	if [ ! -d $(DESTDIR)$(bindir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
 	fi;
