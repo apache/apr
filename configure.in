@@ -330,10 +330,16 @@ fi
 case "$host:$CC" in
     *-hp-hpux*:cc )
 	APR_ADDTO(CFLAGS,[-Ae +Z])
-	if echo "$CFLAGS " | grep '+DA' >/dev/null; then :
-	else
-	  APR_ADDTO(CFLAGS,[+DAportable])
-	fi 
+	case $host in
+	  ia64-* )
+	    ;;
+          * )
+	    if echo "$CFLAGS " | grep '+DA' >/dev/null; then :
+	    else
+	      APR_ADDTO(CFLAGS,[+DAportable])
+	    fi 
+	    ;;
+        esac
 	;;
     powerpc-*-beos:mwcc* )
 	APR_SETVAR(CPP,[mwcc -E])
