@@ -70,8 +70,7 @@ APR_DECLARE(apr_status_t) apr_file_writev_full(apr_file_t *thefile,
     apr_size_t total = 0;
 
     do {
-        int i;
-	apr_size_t amt;
+        apr_size_t i, amt;
         status = apr_file_writev(thefile, vec, nvec, &amt);
  
        /* We assume that writev will only write complete iovec areas.
