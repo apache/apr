@@ -84,11 +84,11 @@
  * Macros and defines
  */
 
-/* ALIGN() is only to be used to align on a power of 2 boundary */
-#define ALIGN(size, boundary) \
+/* APR_ALIGN() is only to be used to align on a power of 2 boundary */
+#define APR_ALIGN(size, boundary) \
     (((size) + ((boundary) - 1)) & ~((boundary) - 1))
 
-#define ALIGN_DEFAULT(size) ALIGN(size, 8)
+#define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
 #if APR_HAS_THREADS
 #define LOCK(mutex) \
@@ -153,9 +153,9 @@ struct apr_pool_t {
 #endif
 };
 
-#define SIZEOF_NODE_T       ALIGN_DEFAULT(sizeof(node_t))
-#define SIZEOF_ALLOCATOR_T  ALIGN_DEFAULT(sizeof(allocator_t))
-#define SIZEOF_POOL_T       ALIGN_DEFAULT(sizeof(apr_pool_t))
+#define SIZEOF_NODE_T       APR_ALIGN_DEFAULT(sizeof(node_t))
+#define SIZEOF_ALLOCATOR_T  APR_ALIGN_DEFAULT(sizeof(allocator_t))
+#define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
 
 /*
  * Variables
@@ -182,7 +182,7 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
     /* Round up the block size to the next boundary, but always
      * allocate at least a certain size (MIN_ALLOC).
      */
-    size = ALIGN(size + SIZEOF_NODE_T, BOUNDARY_SIZE);
+    size = APR_ALIGN(size + SIZEOF_NODE_T, BOUNDARY_SIZE);
     if (size < MIN_ALLOC)
         size = MIN_ALLOC;
 
@@ -326,7 +326,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     void *mem;
     char *endp;
 
-    size = ALIGN_DEFAULT(size);
+    size = APR_ALIGN_DEFAULT(size);
     active = pool->active;
 
     /* If the active node has enough bytes left, use it. */
@@ -364,7 +364,7 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
     void *mem;
     char *endp;
 
-    size = ALIGN_DEFAULT(size);
+    size = APR_ALIGN_DEFAULT(size);
     active = pool->active;
 
     /* If the active node has enough bytes left, use it. */
@@ -957,7 +957,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     *strp++ = '\0';
 
     size = strp - ps.node->first_avail;
-    size = ALIGN_DEFAULT(size);
+    size = APR_ALIGN_DEFAULT(size);
     strp = ps.node->first_avail;
     ps.node->first_avail += size;
 
