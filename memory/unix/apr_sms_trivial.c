@@ -79,7 +79,7 @@ typedef struct node_t
     struct node_t  *prev;
     char           *first_avail;
     apr_size_t      avail_size;
-    apr_uint16_t    count;
+    apr_uint32_t    count;
 } node_t;
 
 typedef struct apr_sms_trivial_t
@@ -417,7 +417,7 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
     new_sms->destroy_fn     = apr_sms_trivial_destroy;
     new_sms->identity       = module_identity;
 
-    node = (node_t *)((char *)new_sms + SIZEOF_TRIVIAL_T);
+    node = NODE_T((char *)new_sms + SIZEOF_TRIVIAL_T);
     node->first_avail = (char *)node + SIZEOF_NODE_T;
     node->avail_size  = min_alloc - SIZEOF_TRIVIAL_T - SIZEOF_NODE_T;
     node->count       = 0;
