@@ -52,17 +52,17 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_mmap.h"
+#include "apr_errno.h"
+#include "apr_general.h"
+#include "apr_lib.h"
+#include "apr_file_io.h"
 #if APR_HAS_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "apr_mmap.h"
-#include "apr_errno.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#include "apr_file_io.h"
 
 /* hmmm, what is a truly portable define for the max path
  * length on a platform?
