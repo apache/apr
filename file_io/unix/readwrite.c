@@ -416,17 +416,18 @@ ap_status_t ap_file_check_read(ap_file_t *fd)
 {
     fd_set fds;
     int rv;
-    struct timeval tv;
+    struct timeval tv = { 0 };
 
     FD_ZERO(&fds);
     FD_SET(fd->filedes, &fds);
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    if (rv = select(fd->filedes + 1, &fds, NULL, NULL, &tv) == -1) {
+    if ((rv = select(fd->filedes + 1, &fds, NULL, NULL, &tv)) == -1) {
         return errno;
     }
+    else if (rv == 0) {
+        return APR_TIMEUP;
+    }
     else {
-        return rv;
+        return APR_SUCCESS;
     }
 }
 
