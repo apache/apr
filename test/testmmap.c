@@ -73,10 +73,10 @@ static void not_implemented(CuTest *tc)
 
 #else
 
-apr_mmap_t *themmap = NULL;
-apr_file_t *thefile = NULL;
-char *file1;
-apr_finfo_t finfo;
+static apr_mmap_t *themmap = NULL;
+static apr_file_t *thefile = NULL;
+static char *file1;
+static apr_finfo_t finfo;
 
 static void create_filename(CuTest *tc)
 {
