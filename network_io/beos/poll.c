@@ -67,6 +67,25 @@
  *  select for R4.5 of BeOS.  So here we use code that uses the write
  *  bits.
  */
+
+static void ck_ncks(apr_pollfd_t *pfd)
+{
+    int i;
+
+    pfd->ncks = 0;    
+    for (i=pfd->lowsock;i <= pfd->highsock;i++) {
+        if (FD_ISSET(i, pfd->read_set)) {
+            pfd->ncks++;
+        }
+        if (FD_ISSET(i, pfd->write_set)) {
+            pfd->ncks++;
+        }
+        if (FD_ISSET(i, pfd->except_set)) {
+            pfd->ncks++;
+        }
+    }
+}
+
 APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
     (*new) = (apr_pollfd_t *)apr_pcalloc(cont, sizeof(apr_pollfd_t) * num);
@@ -89,7 +108,8 @@ APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, ap
     FD_ZERO((*new)->write_set);
     FD_ZERO((*new)->except_set);
     (*new)->highsock = -1;
-
+    (*new)->ncks = 0;
+    (*new)->lowsock = -1;
     return APR_SUCCESS;
 }
 
@@ -98,15 +118,21 @@ APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset,
 {
     if (event & APR_POLLIN) {
         FD_SET(sock->socketdes, aprset->read_set);
+        aprset->ncks++;
     }
     if (event & APR_POLLPRI) {
         FD_SET(sock->socketdes, aprset->read_set);
+        aprset->ncks++;
     }
     if (event & APR_POLLOUT) {
         FD_SET(sock->socketdes, aprset->write_set);
+        aprset->ncks++;
     }
     if (sock->socketdes > aprset->highsock) {
         aprset->highsock = sock->socketdes;
+    }
+    if (sock->socketdes < aprset->lowsock || aprset->lowsock == -1) {
+        aprset->lowsock = sock->socketdes;
     }
     return APR_SUCCESS;
 }
@@ -117,12 +143,15 @@ APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
 {
     if (events & APR_POLLIN) {
         FD_CLR(sock->socketdes, aprset->read_set);
+        aprset->ncks--;
     }
     if (events & APR_POLLPRI) {
         FD_CLR(sock->socketdes, aprset->except_set);
+        aprset->ncks--;
     }
     if (events & APR_POLLOUT) {
         FD_CLR(sock->socketdes, aprset->write_set);
+        aprset->ncks--;
     }
     return APR_SUCCESS;
 }
@@ -142,13 +171,64 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
         tvptr = &tv;
     }
 
-    memcpy(aprset->read, aprset->read_set, sizeof(fd_set));
-    memcpy(aprset->write, aprset->write_set, sizeof(fd_set));
+    memcpy(aprset->read,   aprset->read_set,   sizeof(fd_set));
+    memcpy(aprset->write,  aprset->write_set,  sizeof(fd_set));
     memcpy(aprset->except, aprset->except_set, sizeof(fd_set));
 
     rv = select(aprset->highsock + 1, aprset->read, aprset->write, 
                 aprset->except, tvptr);
-    
+
+    /* Often we won't see anything beyond the first socket that's
+     * available, so here we check for any more...  Without this we 
+     * really do what we want to with this call - annoying isn't it?
+     */
+    if (rv > 0 && rv < aprset->ncks) {
+        while (1) {
+            fd_set ckr, ckw, cke;
+            int i;
+            FD_ZERO(&ckr);
+            FD_ZERO(&ckw);
+            FD_ZERO(&cke);
+            for (i=aprset->lowsock;i <= aprset->highsock;i++) {
+                if (FD_ISSET(i, aprset->read_set) &&
+                   !FD_ISSET(i, aprset->read)) {
+                    FD_SET(i, &ckr);
+                }
+                if (FD_ISSET(i, aprset->write_set) &&
+                   !FD_ISSET(i, aprset->write)) {
+                    FD_SET(i, &ckw);
+                }
+                if (FD_ISSET(i, aprset->except_set) &&
+                   !FD_ISSET(i, aprset->except)) {
+                    FD_SET(i, &cke);
+                }
+ 
+            }
+            /* set these to zero for an immeadiate return */
+            tv.tv_sec = 0;
+            tv.tv_usec = 0;
+            i = select(aprset->highsock + 1, &ckr, &ckw, &cke, tvptr);
+            if (i > 0) {
+                for (i=aprset->lowsock;i <= aprset->highsock;i++) {
+                    if (FD_ISSET(i, &ckr)) {
+                        FD_SET(i, aprset->read);
+                        rv++;
+                    }
+                    if (FD_ISSET(i, &ckw)) {
+                        FD_SET(i, aprset->write);
+                        rv++;
+                    }
+                    if (FD_ISSET(i, &cke)) {
+                        FD_SET(i, aprset->except);
+                        rv++;
+                    }
+                }
+            } else {
+                break;
+            }
+        }
+    }       
+
     (*nsds) = rv;
     if ((*nsds) == 0) {
         return APR_TIMEUP;
@@ -205,8 +285,14 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, apr_socket_t 
 
 APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
+    if (FD_ISSET(sock->socketdes, aprset->read_set))
+        aprset->ncks--;
     FD_CLR(sock->socketdes, aprset->read_set);
+    if (FD_ISSET(sock->socketdes, aprset->except_set))
+        aprset->ncks--;
     FD_CLR(sock->socketdes, aprset->except_set);
+    if (FD_ISSET(sock->socketdes, aprset->write_set))
+        aprset->ncks--;
     FD_CLR(sock->socketdes, aprset->write_set);
     return APR_SUCCESS;
 }
@@ -223,6 +309,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_
         FD_ZERO(aprset->write_set);
     }
     aprset->highsock = 0;
+    ck_ncks(aprset);
     return APR_SUCCESS;
 }
 

@@ -154,6 +154,10 @@ struct apr_pollfd_t {
     fd_set *except_set;
     apr_int16_t *events;
     apr_int16_t *revents;
+#ifdef BEOS
+    int lowsock;
+    int ncks;
+#endif
 #endif
 };
 
