@@ -345,7 +345,7 @@ APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket);
 APR_DECLARE(apr_status_t) apr_socket_bind(apr_socket_t *sock, 
                                           apr_sockaddr_t *sa);
 
-/* @deprecated @see apr_socket_bind */
+/** @deprecated @see apr_socket_bind */
 APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
 
 /**
