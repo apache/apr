@@ -60,6 +60,9 @@
 
 struct apr_proc_mutex_t {
     apr_pool_t *pool;
+    HMTX hMutex;
+    TID owner;
+    int lock_count;
 };
 
 #endif  /* PROC_MUTEX_H */
