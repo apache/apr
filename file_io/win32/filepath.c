@@ -93,8 +93,8 @@ static int is_fnchar(char ch)
 }
 
 
-static apr_status_t apr_filepath_root_test(char *path,
-                                           apr_pool_t *p)
+static apr_status_t filepath_root_test(char *path,
+                                       apr_pool_t *p)
 {
     apr_status_t rv;
 #if APR_HAS_UNICODE_FS
@@ -150,9 +150,9 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
 }
 
 
-static apr_status_t apr_filepath_drive_get(char **rootpath,
-                                           char drive,
-                                           apr_pool_t *p)
+static apr_status_t filepath_drive_get(char **rootpath,
+                                       char drive,
+                                       apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
 #if APR_HAS_UNICODE_FS
@@ -197,7 +197,7 @@ static apr_status_t apr_filepath_drive_get(char **rootpath,
 }
 
 
-static apr_status_t apr_filepath_root_case(char **rootpath,
+static apr_status_t filepath_root_case(char **rootpath,
                                            char *root,
                                            apr_pool_t *p)
 {
@@ -273,7 +273,9 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
  */
 
 APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
-                                            const char **inpath, apr_pool_t *p)
+                                            const char **inpath, 
+                                            apr_int32_t flags,
+                                            apr_pool_t *p)
 {
     const char *testpath = *inpath;
     const char *delim1;
@@ -292,7 +294,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     /* given  '//?/C: or //./C: let us try this
                      * all over again from the drive designator
                      */
-                    rv = apr_filepath_root(rootpath, &testpath, p);
+                    rv = apr_filepath_root(rootpath, &testpath, flags, p);
                     if (!rv || rv == APR_EINCOMPLETE)
                         *inpath = testpath;
                     return rv;
@@ -341,6 +343,9 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                 else
                     newpath = apr_pstrndup(p, testpath, delim2 - testpath);
 
+                /* Win32 will argue about slashed in UNC paths, so use 
+                 * backslashes till we finish testing
+                 */
                 newpath[0] = '\\';
                 newpath[1] = '\\';
                 newpath[delim1 - testpath] = '\\';
@@ -357,13 +362,14 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                  * root this designation!
                  */
                 newpath[delim2 - testpath] = '\\';
-                rv = apr_filepath_root_test(newpath, p);
-                if (rv)
-                    return rv;
-                rv = apr_filepath_root_case(&newpath, newpath, p);
-                if (rv)
-                    return rv;
-
+                if (flags & APR_FILEPATH_TRUENAME) {
+                    rv = filepath_root_test(newpath, p);
+                    if (rv)
+                        return rv;
+                    rv = filepath_root_case(&newpath, newpath, p);
+                    if (rv)
+                        return rv;
+                }
                 /* If this root included the trailing / or \ designation 
                  * then lop off multiple trailing slashes
                  */
@@ -401,10 +407,13 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
         }
 
         /* Left with a path of '/', what drive are we asking about? 
-         * The guess is left to the caller.
          */
-        *rootpath = apr_pstrndup(p, testpath, 1);
+        // ?? if (flags & APR_FILEPATH_TRUENAME) 
         *inpath = ++testpath;
+        newpath = apr_palloc(p, 2);
+        newpath[0] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
+        newpath[1] = '\0';
+        *rootpath = newpath;
         return APR_EINCOMPLETE;
     }
 
@@ -414,37 +423,37 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
         apr_status_t rv;
         /* Validate that D:\ drive exists, test must be rooted
          * Note that posix/win32 insists a drive letter is upper case,
-         * so who are we to argue with a 'feature' we might exploit.
+         * so who are we to argue with a 'feature'.
          * It is a safe fold, since only A-Z is legal, and has no
          * side effects of legal mis-mapped non-us-ascii codes.
          */
-        newpath = apr_palloc(p, 3);
-        newpath[0] = toupper(testpath[0]);
+        newpath = apr_palloc(p, 4);
+        newpath[0] = testpath[0];
         newpath[1] = ':';
-        newpath[2] = '\\';
+        newpath[2] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
         newpath[3] = '\0';
-        rv = apr_filepath_root_test(newpath, p);
-        if (rv)
-            return rv;
-
-        /* Have full 'd:/' so replace our \ with the given root char
+        if (flags & APR_FILEPATH_TRUENAME) {
+            newpath[0] = toupper(newpath[0]);
+            rv = filepath_root_test(newpath, p);
+            if (rv)
+                return rv;
+        }
+        /* Just give back the root the user handed to us.
          */
-        if (testpath[2] == '/' || testpath[2] == '\\') {
-            newpath[2] = testpath[2];
+        if (testpath[2] != '/' && testpath[2] != '\\') {
+            newpath[2] = '\0';
             *rootpath = newpath;
-            *inpath = testpath + 3;
-            while (**inpath == '/' || **inpath == '\\')
-                ++*inpath;
-            return APR_SUCCESS;
+            *inpath = testpath + 2;
+            return APR_EINCOMPLETE;
         }
 
-        /* Left with path of 'd:' from the cwd of this drive letter 
-         * so truncate the root \ we added above;
+        /* strip off remaining slashes that designate the root.
          */
-        newpath[2] = '\0';
+        *inpath = testpath + 3;
+        while (**inpath == '/' || **inpath == '\\')
+            ++*inpath;
         *rootpath = newpath;
-        *inpath = testpath + 2;
-        return APR_EINCOMPLETE;        
+        return APR_SUCCESS;
     }
 
     /* Nothing interesting */
@@ -479,7 +488,10 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         addtype = APR_ERELATIVE;
     }
     else {
-        addtype = apr_filepath_root(&addroot, &addpath, p);
+        /* This call _should_ test the path
+         */
+        addtype = apr_filepath_root(&addroot, &addpath, 
+                                    APR_FILEPATH_TRUENAME, p);
         if (addtype == APR_SUCCESS) {
             addtype = APR_EABSOLUTE;
         }
@@ -538,7 +550,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
          */
         char *getpath;
         if (addtype == APR_EINCOMPLETE && addroot[1] == ':')
-            rv = apr_filepath_drive_get(&getpath, addroot[0], p);
+            rv = filepath_drive_get(&getpath, addroot[0], p);
         else
             rv = apr_filepath_get(&getpath, p);
         if (rv != APR_SUCCESS)
@@ -547,7 +559,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     }
 
     if (!baseroot) {
-        basetype = apr_filepath_root(&baseroot, &basepath, p);
+        /* This call should _not_ test the path
+         */
+        basetype = apr_filepath_root(&baseroot, &basepath, 0, p);
         if (basetype == APR_SUCCESS) {
             basetype = APR_EABSOLUTE;
         }
@@ -836,7 +850,10 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                  * and replace our path with the canonical UNC root path
                  */
                 path[pathlen] = '\0';
-                testtype = apr_filepath_root(&testroot, &testpath, p);
+                /* This call _should_ test the path
+                 */
+                testtype = apr_filepath_root(&testroot, &testpath, 
+                                             APR_FILEPATH_TRUENAME, p);
                 if (testtype == APR_SUCCESS) {
                     rootlen = pathlen = (testpath - path);
                     memcpy(path, testroot, pathlen);

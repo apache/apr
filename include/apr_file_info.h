@@ -262,7 +262,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
  */                        
 APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 
-/* apr_filepath flags
+/* apr_filepath optional flags
  */
 
 /* Cause apr_filepath_merge to fail if addpath is above rootpath */
@@ -287,7 +287,8 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 #define APR_FILEPATH_NATIVE         0x10
 
 /* Resolve the true case of existing directories and file elements
- * of addpath, and append a proper trailing slash if a directory
+ * of addpath, (resolving any aliases on Win32) and append a proper 
+ * trailing slash if a directory
  */
 #define APR_FILEPATH_TRUENAME       0x20
 
@@ -295,13 +296,21 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * Extract the rootpath from the given filepath
  * @param rootpath the root file path returned with APR_SUCCESS or APR_EINCOMPLETE
  * @param filepath the pathname to parse for it's root component
+ * @param flags the desired rules to apply, from
+ * <PRE>
+ *      APR_FILEPATH_NATIVE    Use native path seperators (e.g. '\' on Win32)
+ *      APR_FILEPATH_TRUENAME  Tests that the root exists, and makes it proper
+ * </PRE>
  * @param p the pool to allocate the new path string from
  * @deffunc apr_status_t apr_filepath_root(const char **rootpath, const char **inpath, apr_pool_t *p)
- * @tip on return, filepath now points to the character following the root.
- * In the simplest example, given a filepath of "/foo", returns the rootpath
- * of "/" and filepath points at "foo".  This is far more complex on other 
- * platforms, which even changes alternate format of rootpath to canonical
- * form.  The function returns APR_ERELATIVE if filepath isn't rooted (an
+ * @tip on return, filepath points to the first non-root character in the
+ * given filepath.  In the simplest example, given a filepath of "/foo", 
+ * returns the rootpath of "/" and filepath points at "foo".  This is far 
+ * more complex on other platforms, which will canonicalize the root form
+ * to a consistant format, given the APR_FILEPATH_TRUENAME flag, and also
+ * test for the validity of that root (e.g., that a drive d:/ or network 
+ * share //machine/foovol/). 
+ * The function returns APR_ERELATIVE if filepath isn't rooted (an
  * error), APR_EINCOMPLETE if the root path is ambigious (but potentially
  * legitimate, e.g. "/" on Windows is incomplete because it doesn't specify
  * the drive letter), or APR_EBADPATH if the root is simply invalid.
@@ -309,6 +318,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  */
 APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
                                             const char **filepath, 
+                                            apr_int32_t flags,
                                             apr_pool_t *p);
 
 /**
