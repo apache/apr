@@ -97,8 +97,8 @@ int main(int argc, char *argv[])
     }
 
     CuSuiteListRunWithSummary(alltests);
-    CuSuiteListDetails(alltests, output);
+    i = CuSuiteListDetails(alltests, output);
     printf("%s\n", output->buffer);
-    return 0;
+    return i > 0 ? 1 : 0;
 }
 
