@@ -35,8 +35,10 @@ EXTRACLEAN_TARGETS = configure libtool aclocal.m4 \
 
 SCANDOC_TEMPLATE = -i$(apr_builders)/scandoc_template.pl
 
-### fix this up at some point (install location)
-libdir = /usr/local/lib
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
 
 delete-lib:
 	@if test -f $(TARGET_LIB); then \
@@ -47,6 +49,16 @@ delete-lib:
 		$(RM) -f $(TARGET_LIB) ; \
 	    fi \
 	fi
+
+install: $(TARGET_LIB)
+	if [ ! -d $(includedir) ]; then \
+	    ./build/mkdir.sh $(includedir); \
+	fi; \
+	cp include/*.h $(includedir); \
+	if [ ! -d $(libdir) ]; then \
+	    ./build/mkdir.sh $(libdir); \
+	fi; \
+	libtool --mode=install cp $(TARGET_LIB) $(libdir)
 
 $(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.lo"; done ; \
