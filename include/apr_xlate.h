@@ -81,6 +81,8 @@ typedef void                         ap_xlate_t;
 
 #define ap_xlate_open(convset, topage, frompage, pool) APR_ENOTIMPL
 
+#define ap_xlate_get_sb(convset, onoff) APR_ENOTIMPL
+
 #define ap_xlate_conv_buffer(convset, inbuf, inbytes_left, outbuf, \
                           outbytes_left) APR_ENOTIMPL
 
@@ -121,9 +123,24 @@ B<NOTE>:  Specify APR_DEFAULT_CHARSET for one of the charset
 =cut
  */
 ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage, 
-                       const char *frompage, ap_pool_t *pool);
+                          const char *frompage, ap_pool_t *pool);
 
 #define APR_DEFAULT_CHARSET NULL
+
+/*
+
+=head1 ap_status_t ap_xlate_get_sb(ap_xlate_t *convset, int *onoff)
+
+B<Find out whether or not the specified conversion is single-byte-only.>
+
+    arg 1) The handle allocated by ap_xlate_open, specifying the parameters
+           of conversion
+    arg 2) Output: whether or not the conversion is single-byte-only
+
+=cut
+ */
+
+ap_status_t ap_xlate_get_sb(ap_xlate_t *convset, int *onoff);
 
 /*
 
