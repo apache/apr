@@ -271,12 +271,11 @@ static apr_status_t limit_proc(apr_procattr_t *attr)
 }
 
 apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
-                              char *const args[], char **env,
+                              char *const *args, char **env,
                               apr_procattr_t *attr, apr_pool_t *cont)
 {
     int i;
-    typedef const char *my_stupid_string;
-    my_stupid_string *newargs;
+    const char **newargs;
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -323,7 +322,7 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
                 i++;
             }
             newargs =
-               (my_stupid_string *) apr_palloc(cont, sizeof (char *) * (i + 3));
+               (const char **) apr_palloc(cont, sizeof (char *) * (i + 3));
             newargs[0] = SHELL_PATH;
             newargs[1] = "-c";
             i = 0;
