@@ -93,4 +93,9 @@ CuSuite *testpipe(void);
 CuSuite *testthread(void);
 CuSuite *testgetopt(void);
 
+/* Assert that RV is an APR_SUCCESS value; else fail giving strerror
+ * for RV and CONTEXT message. */
+void apr_assert_success(CuTest* tc, const char *context, apr_status_t rv);
+
+
 #endif /* APR_TEST_INCLUDES */
