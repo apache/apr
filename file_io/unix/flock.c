@@ -84,8 +84,16 @@ APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
         while ((rc = fcntl(thefile->filedes, fc, &l)) < 0 && errno == EINTR)
             continue;
 
-        if (rc == -1)
+        if (rc == -1) {
+            /* on some Unix boxes (e.g., Tru64), we get EACCES instead
+             * of EAGAIN; we don't want APR_STATUS_IS_EAGAIN() matching EACCES
+             * since that breaks other things, so fix up the retcode here
+             */
+            if (errno == EACCES) {
+                return EAGAIN;
+            }
             return errno;
+        }
     }
 #elif defined(HAVE_SYS_FILE_H)
     {
