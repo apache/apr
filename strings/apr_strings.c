@@ -59,7 +59,7 @@
 #ifdef HAVE_STDDEF_H
 #include <stddef.h> /* NULL */
 #endif
-#ifdef HAVE_STRINGS_H
+#if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
 
