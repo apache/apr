@@ -173,7 +173,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
                                    apr_int32_t flag, apr_fileperms_t perm,
                                    apr_pool_t *cont)
 {
-    SECURITY_ATTRIBUTES sa, *psa = NULL;
     HANDLE handle = INVALID_HANDLE_VALUE;
     DWORD oflags = 0;
     DWORD createflags = 0;
@@ -233,12 +232,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
          */
         attributes |= FILE_FLAG_OVERLAPPED;
     }
-    if (flag & APR_INHERIT) {
-        sa.nLength = sizeof(sa);
-        sa.bInheritHandle = TRUE;
-        sa.lpSecurityDescriptor = NULL;
-        psa = &sa;
-    }
 
 #if APR_HAS_UNICODE_FS
     if (os_level >= APR_WIN_NT) {
@@ -247,12 +240,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
                                                / sizeof(apr_wchar_t), fname))
             return rv;
         handle = CreateFileW(wfname, oflags, sharemode,
-                             psa, createflags, attributes, 0);
+                             NULL, createflags, attributes, 0);
     }
     else
 #endif
         handle = CreateFileA(fname, oflags, sharemode,
-                             psa, createflags, attributes, 0);
+                             NULL, createflags, attributes, 0);
 
     if (handle == INVALID_HANDLE_VALUE) {
         return apr_get_os_error();
@@ -460,3 +453,11 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
+
+APR_DECLARE_SET_INHERIT(file) {
+    return;
+}
+
+APR_DECLARE_UNSET_INHERIT(file) {
+    return;
+}

@@ -143,8 +143,7 @@ apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag
     dafile->dataRead = 0;
     dafile->direction = 0;
     dafile->pipe = FALSE;
-
-    apr_pool_cleanup_register(dafile->cntxt, dafile, apr_file_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(dafile->cntxt, dafile, apr_file_cleanup, apr_file_cleanup);
     return APR_SUCCESS;
 }
 
@@ -265,3 +264,8 @@ apr_status_t apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
+
+APR_IMPLEMENT_SET_INHERIT(socket, inherit, cntxt, socket_cleanup)
+
+APR_IMPLEMENT_UNSET_INHERIT(socket, inherit, cntxt, socket_cleanup)
+
