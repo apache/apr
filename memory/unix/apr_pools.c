@@ -139,9 +139,10 @@ APR_DECLARE(apr_pool_t *) apr_allocator_owner_get(apr_allocator_t *allocator)
 }
 
 APR_DECLARE(void) apr_allocator_max_free_set(apr_allocator_t *allocator,
-                                             apr_size_t size)
+                                             apr_size_t in_size)
 {
     apr_uint32_t max_free_index;
+    apr_uint32_t size = (APR_UINT32_TRUNC_CAST)in_size;
 
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
@@ -168,7 +169,8 @@ static APR_INLINE
 apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t size)
 {
     apr_memnode_t *node, **ref;
-    apr_uint32_t i, index, max_index;
+    apr_uint32_t max_index;
+    apr_size_t i, index;
 
     /* Round up the block size to the next boundary, but always
      * allocate at least a certain size (MIN_ALLOC).
@@ -181,6 +183,10 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t size)
      * dividing its size by the boundary size
      */
     index = (size >> BOUNDARY_INDEX) - 1;
+    
+    if (index > APR_UINT32_MAX) {
+        return NULL;
+    }
 
     /* First see if there are any nodes in the area we know
      * our node will fit into.
@@ -293,7 +299,7 @@ apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t size)
         return NULL;
 
     node->next = NULL;
-    node->index = index;
+    node->index = (APR_UINT32_TRUNC_CAST)index;
     node->first_avail = (char *)node + APR_MEMNODE_T_SIZE;
     node->endp = (char *)node + size;
 
@@ -582,7 +588,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
 {
     apr_memnode_t *active, *node;
     void *mem;
-    apr_uint32_t free_index;
+    apr_size_t free_index;
 
     size = APR_ALIGN_DEFAULT(size);
     active = pool->active;
@@ -620,7 +626,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
                             BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
 
-    active->free_index = free_index;
+    active->free_index = (APR_UINT32_TRUNC_CAST)free_index;
     node = active->next;
     if (free_index >= node->free_index)
         return mem;
@@ -877,7 +883,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     apr_size_t cur_len, size;
     char *strp;
     apr_pool_t *pool;
-    apr_uint32_t free_index;
+    apr_size_t free_index;
 
     pool = ps->pool;
     active = ps->node;
@@ -907,7 +913,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
         free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
                                 BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
 
-        active->free_index = free_index;
+        active->free_index = (APR_UINT32_TRUNC_CAST)free_index;
         node = active->next;
         if (free_index < node->free_index) {
             do {
@@ -948,7 +954,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     char *strp;
     apr_size_t size;
     apr_memnode_t *active, *node;
-    apr_uint32_t free_index;
+    apr_size_t free_index;
 
     ps.node = active = pool->active;
     ps.pool = pool;
@@ -1008,7 +1014,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
                             BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
 
-    active->free_index = free_index;
+    active->free_index = (APR_UINT32_TRUNC_CAST)free_index;
     node = active->next;
 
     if (free_index >= node->free_index)

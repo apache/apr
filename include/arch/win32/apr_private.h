@@ -158,6 +158,9 @@ APR_DECLARE_DATA int errno;
 #define APR_OFF_T_STRFN         strtoi
 #endif
 
+/* used to check for DWORD overflow in 64bit compiles */
+#define APR_DWORD_MAX 0xFFFFFFFFUL
+
 /*
  * Include common private declarations.
  */

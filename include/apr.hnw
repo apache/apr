@@ -330,7 +330,6 @@ typedef int apr_wait_t;
 #define APR_UINT64_T_HEX_FMT     "llx"
 #define APR_TIME_T_FMT APR_INT64_T_FMT
 
-#define APR_DWORD_MAX 0xFFFFFFFFUL    /* 2^32*/
 /** @} */
 
 #ifdef __cplusplus
