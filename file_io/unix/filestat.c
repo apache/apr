@@ -129,7 +129,37 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
         return APR_SUCCESS;
     }
     else {
+#if !defined(ENOENT) || !defined(ENOTDIR)
+#error ENOENT || ENOTDIR not defined; please see the
+#error comments at this line in the source for a workaround.
+        /*
+         * If ENOENT || ENOTDIR is not defined in one of the your OS's
+         * include files, APR cannot report a good reason why the stat()
+         * of the file failed; there are cases where it can fail even though
+         * the file exists.  This opens holes in Apache, for example, because
+         * it becomes possible for someone to get a directory listing of a 
+         * directory even though there is an index (eg. index.html) file in 
+         * it.  If you do not have a problem with this, delete the above 
+         * #error lines and start the compile again.  If you need to do this,
+         * please submit a bug report to http://www.apache.org/bug_report.html
+         * letting us know that you needed to do this.  Please be sure to 
+         * include the operating system you are using.
+         */
+        /* WARNING: All errors will be handled as not found
+         */
+#if !defined(ENOENT) 
+        return APR_ENOENT;
+#else
+        /* WARNING: All errors but not found will be handled as not directory
+         */
+        if (errno != ENOENT)
+            return APR_ENOENT;
+        else
+            return errno;
+#endif
+#else /* All was defined well, report the usual: */
         return errno;
+#endif
     }
 }
 
