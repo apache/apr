@@ -127,6 +127,8 @@ static char *apr_error_string(ap_status_t statcode)
         return "The specified child process is not done executing";
     case APR_TIMEUP:
         return "The timeout specified has expired";
+    case APR_INCOMPLETE:
+        return "The input data is incomplete";
     case APR_BADCH:
         return "Bad character specified on command line";
     case APR_BADARG:
