@@ -195,15 +195,6 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, SwitchToThread, 0, (
     ());
 #define SwitchToThread apr_winapi_SwitchToThread
 
-#undef GetEffectiveRightsFromAcl
-APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetEffectiveRightsFromAclA, 0, (
-    IN PACL pacl,
-    IN PTRUSTEE_A pTrustee,
-    OUT PACCESS_MASK pAccessRights),
-    (pacl, pTrustee, pAccessRights));
-#define GetEffectiveRightsFromAclA apr_winapi_GetEffectiveRightsFromAclA
-#define GetEffectiveRightsFromAcl apr_winapi_GetEffectiveRightsFromAclA
-
 APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetEffectiveRightsFromAclW, 0, (
     IN PACL pacl,
     IN PTRUSTEE_W pTrustee,
