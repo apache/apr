@@ -66,6 +66,7 @@
 
 #include "apr_general.h"
 #include "apr_file_io.h"
+#include "apr_thread_proc.h"
 
 #if APR_HAVE_STDARG_H
 #include <stdarg.h>
@@ -353,7 +354,7 @@ API_EXPORT(void) ap_cleanup_for_exec(void);
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
-API_EXPORT(void) ap_note_subprocess(struct context_t *a, pid_t pid,
+API_EXPORT(void) ap_note_subprocess(struct context_t *a, ap_proc_t *pid,
 				     enum kill_conditions how);
 API_EXPORT(int)
 	ap_spawn_child(ap_context_t *p,

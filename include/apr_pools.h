@@ -90,7 +90,7 @@ extern "C" {
 #endif
 
 struct process_chain {
-    pid_t pid;
+    ap_proc_t *pid;
     enum kill_conditions kill_how;
     struct process_chain *next;
 };
@@ -241,19 +241,6 @@ extern int raise_sigstop_flags;
  */
 #define ap_table_elts(t) ((ap_array_header_t *)(t))
 #define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
-
-/* ... even child processes (which we may want to wait for,
- * or to kill outright, on unexpected termination).
- *
- * ap_spawn_child is a utility routine which handles an awful lot of
- * the rigamarole associated with spawning a child --- it arranges
- * for pipes to the child's stdin and stdout, if desired (if not,
- * set the associated args to NULL).  It takes as args a function
- * to call in the child, and an argument to be passed to the function.
- */
-
-API_EXPORT(void) ap_note_subprocess(struct context_t *a, pid_t pid,
-				    enum kill_conditions how);
 
 /* magic numbers --- min free bytes to consider a free ap_context_t block useable,
  * and the min amount to allocate if we have to go to malloc() */
