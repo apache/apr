@@ -54,6 +54,7 @@
 
 #include "dso.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 
 #if APR_HAS_DSO
 
@@ -67,6 +68,22 @@
 #if APR_HAVE_STRING_H
 #include <string.h> /* for strerror() on HP-UX */
 #endif
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
+                                                apr_os_dso_handle_t *osdso,
+                                                apr_pool_t *pool)
+{
+    *aprdso = apr_pcalloc(pool, sizeof **aprdso);
+    (*aprdso)->handle = *osdso;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *osdso,
+                                                apr_dso_handle_t *aprdso)
+{
+    *osdso = aprdso->handle;
+    return APR_SUCCESS;
+}
 
 static apr_status_t dso_cleanup(void *thedso)
 {
