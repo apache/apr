@@ -144,7 +144,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 
 #elif defined(WIN32)
 
-#define apr_atomic_t LONG
+typedef LONG apr_atomic_t;
 
 #define apr_atomic_add(mem, val)     InterlockedExchangeAdd(mem,val)
 #define apr_atomic_dec(mem)          InterlockedDecrement(mem)
