@@ -260,6 +260,13 @@ static apr_status_t limit_proc(apr_procattr_t *attr)
         }
     }
 #endif
+#ifdef RLIMIT_NOFILE
+    if (attr->limit_nofile != NULL) {
+        if ((setrlimit(RLIMIT_NOFILE, attr->limit_nofile)) != 0) {
+            return errno;
+        }
+    }
+#endif
 #if defined(RLIMIT_AS)
     if (attr->limit_mem != NULL) {
         if ((setrlimit(RLIMIT_AS, attr->limit_mem)) != 0) {
@@ -523,6 +530,14 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
         case APR_LIMIT_NPROC:
 #ifdef RLIMIT_NPROC
             attr->limit_nproc = limit;
+            break;
+#else
+            return APR_ENOTIMPL;
+#endif
+
+        case APR_LIMIT_NOFILE:
+#ifdef RLIMIT_NOFILE
+            attr->limit_nofile = limit;
             break;
 #else
             return APR_ENOTIMPL;

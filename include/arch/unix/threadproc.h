@@ -131,6 +131,9 @@ struct apr_procattr_t {
 #ifdef RLIMIT_NPROC
     struct rlimit *limit_nproc;
 #endif
+#ifdef RLIMIT_NOFILE
+    struct rlimit *limit_nofile;
+#endif
 };
 
 #endif  /* ! THREAD_PROC_H */
