@@ -115,14 +115,14 @@ apr_memory_system_realloc(apr_memory_system_t *memory_system,
     return memory_system->realloc_fn(memory_system, mem, size);
 }
 
-APR_DECLARE(void)
+APR_DECLARE(apr_status_t)
 apr_memory_system_free(apr_memory_system_t *memory_system,
                        void *mem)
 {
     assert(memory_system != NULL);
   
     if (mem == NULL)
-        return;
+        return APR_EINVAL; /* Hmm, is this an error??? */
 
     if (memory_system->free_fn != NULL)
         memory_system->free_fn(memory_system, mem);  
@@ -135,6 +135,7 @@ apr_memory_system_free(apr_memory_system_t *memory_system,
          */
     }
 #endif /* APR_MEMORY_SYSTEM_DEBUG */
+    return APR_SUCCESS;
 }
 
 /*
@@ -157,7 +158,7 @@ apr_memory_system_create(void *memory,
     apr_memory_system_t *memory_system;
 
     if (memory == NULL)
-      return NULL;
+        return NULL;
 
     /* Just typecast it, and clear it */
     memory_system = (apr_memory_system_t *)memory;
@@ -332,7 +333,7 @@ apr_memory_system_reset(apr_memory_system_t *memory_system)
     memory_system->reset_fn(memory_system);
 }
 
-APR_DECLARE(void)
+APR_DECLARE(apr_status_t)
 apr_memory_system_destroy(apr_memory_system_t *memory_system)
 {
     apr_memory_system_t *child_memory_system;
@@ -460,13 +461,14 @@ apr_memory_system_destroy(apr_memory_system_t *memory_system)
     while (memory_system)
     {
         if (apr_memory_system_is_tracking(memory_system))
-            return;
+            return APR_SUCCESS;
 
         memory_system = memory_system->parent_memory_system;
     }
 
     assert(0); /* Made the wrong assumption, so we assert */
 #endif /* APR_MEMORY_SYSTEM_DEBUG */
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t)
