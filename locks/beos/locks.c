@@ -56,6 +56,76 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
+
+/* At present we only have one implementation, so here it is :) */
+static apr_status_t _lock_cleanup(void * data)
+{
+    apr_lock_t *lock = (apr_lock_t*)data;
+    if (lock->ben != 0) {
+        /* we're still locked... */
+    	while (atomic_add(&lock->ben , -1) > 1){
+    	    /* OK we had more than one person waiting on the lock so 
+    	     * the sem is also locked. Release it until we have no more
+    	     * locks left.
+    	     */
+            release_sem (lock->sem);
+    	}
+    }
+    delete_sem(lock->sem);
+    return APR_SUCCESS;
+}    
+
+static apr_status_t _create_lock(apr_lock_t *new)
+{
+    int32 stat;
+    
+    if ((stat = create_sem(0, "apr_lock")) < B_NO_ERROR) {
+        _lock_cleanup(new);
+        return stat;
+    }
+    new->ben = 0;
+    new->sem = stat;
+    apr_pool_cleanup_register(new->pool, (void *)new, _lock_cleanup,
+                              apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}
+
+static apr_status_t _lock(apr_lock_t *lock)
+{
+    int32 stat;
+    
+	if (atomic_add(&lock->ben, 1) > 0) {
+		if ((stat = acquire_sem(lock->sem)) < B_NO_ERROR) {
+		    atomic_add(&lock->ben, -1);
+		    return stat;
+		}
+	}
+    return APR_SUCCESS;
+}
+
+static apr_status_t _unlock(apr_lock_t *lock)
+{
+    int32 stat;
+    
+	if (atomic_add(&lock->ben, -1) > 1) {
+        if ((stat = release_sem(lock->sem)) < B_NO_ERROR) {
+            atomic_add(&lock->ben, 1);
+            return stat;
+        }
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t _destroy_lock(apr_lock_t *lock)
+{
+    apr_status_t stat;
+    if ((stat = _lock_cleanup(lock)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(lock->pool, lock, _lock_cleanup);
+        return APR_SUCCESS;
+    }
+    return stat;
+}
+
 apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
                            apr_lockscope_e scope, const char *fname, 
                            apr_pool_t *pool)
@@ -76,16 +146,9 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     new->type  = type;
     new->scope = scope;
 
-    if (scope != APR_CROSS_PROCESS) {
-        if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
-    if (scope != APR_INTRAPROCESS) {
-        if ((stat = create_inter_lock(new)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
+    if ((stat = _create_lock(new)) != APR_SUCCESS)
+        return stat;
+
     (*lock) = new;
     return APR_SUCCESS;
 }
@@ -102,17 +165,10 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     switch (lock->type)
     {
     case APR_MUTEX:
-        if (lock->scope != APR_CROSS_PROCESS) {
-            if ((stat = lock_intra(lock)) != APR_SUCCESS) {
-                return stat;
-            }
-        }
-        if (lock->scope != APR_INTRAPROCESS) {
-            if ((stat = lock_inter(lock)) != APR_SUCCESS) {
-                return stat;
-            }
-        }
+        if ((stat = _lock(lock)) != APR_SUCCESS)
+            return stat;
         break;
+
     case APR_READWRITE:
         return APR_ENOTIMPL;
     }
@@ -147,7 +203,7 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     apr_status_t stat;
 
-    if (lock->owner == apr_os_thread_current()) {
+    if (lock->owner_ref > 0 && lock->owner == apr_os_thread_current()) {
         lock->owner_ref--;
         if (lock->owner_ref > 0)
             return APR_SUCCESS;
@@ -156,16 +212,8 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     switch (lock->type)
     {
     case APR_MUTEX:
-        if (lock->scope != APR_CROSS_PROCESS) {
-            if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
-                return stat;
-            }
-        }
-        if (lock->scope != APR_INTRAPROCESS) {
-            if ((stat = unlock_inter(lock)) != APR_SUCCESS) {
-                return stat;
-            }
-        }
+        if ((stat = _unlock(lock)) != APR_SUCCESS)
+            return stat;
         break;
     case APR_READWRITE:
         return APR_ENOTIMPL;
@@ -184,16 +232,8 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
     switch (lock->type)
     {
     case APR_MUTEX:
-        if (lock->scope != APR_CROSS_PROCESS) {
-            if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
-                return stat;
-            }
-        }
-        if (lock->scope != APR_INTRAPROCESS) {
-            if ((stat = destroy_inter_lock(lock)) != APR_SUCCESS) {
-                return stat;
-            }
-        }
+        if ((stat = _destroy_lock(lock)) != APR_SUCCESS)
+            return stat;
         break;
     case APR_READWRITE:
         return APR_ENOTIMPL;
@@ -203,14 +243,8 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
 }
 
 apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, 
-			       apr_pool_t *pool)
+			                     apr_pool_t *pool)
 {
-    apr_status_t stat;
-    if ((*lock)->scope != APR_CROSS_PROCESS) {
-        if ((stat = child_init_lock(lock, pool, fname)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
     return APR_SUCCESS;
 }
 
@@ -227,10 +261,8 @@ apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
 
 apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
-    oslock->sem_interproc = lock->sem_interproc;
-    oslock->sem_intraproc = lock->sem_intraproc;
-    oslock->ben_interproc = lock->ben_interproc;
-    oslock->ben_intraproc = lock->ben_intraproc;
+    oslock->sem = lock->sem;
+    oslock->ben = lock->ben;
     return APR_SUCCESS;
 }
 
@@ -244,11 +276,9 @@ apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock,
         (*lock) = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
         (*lock)->pool = pool;
     }
-    (*lock)->sem_interproc = thelock->sem_interproc;
-    (*lock)->ben_interproc = thelock->ben_interproc;
+    (*lock)->sem = thelock->sem;
+    (*lock)->ben = thelock->ben;
 
-    (*lock)->sem_intraproc = thelock->sem_intraproc;
-    (*lock)->ben_intraproc = thelock->ben_intraproc;
     return APR_SUCCESS;
 }
     
