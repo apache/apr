@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_shmem.h"
+#include "apr_shm.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_lock.h"
@@ -151,7 +151,7 @@ int main(int argc, const char * const *argv)
     apr_getopt_t *opt;
     char optchar;
     const char *optarg;
-    apr_shmem_t *shm;
+    apr_shm_t *shm;
 
     printf("APR Proc Mutex Test\n==============\n\n");
         
