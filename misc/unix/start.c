@@ -186,14 +186,13 @@ ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
  */
 ap_status_t ap_initialize(void)
 {
-#ifdef HAVE_PTHREAD_SIGMASK 
     sigset_t sigset;
 
     sigfillset(&sigset);
-    /*@@@ FIXME: This should *NOT* be called for the prefork MPM,
-     * even if HAVE_PTHREAD_SIGMASK is defined!!!!       MnKr
-     */
+#if defined(HAVE_PTHREAD_SIGMASK) && defined(USE_THREADS)
     pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+#else
+    sigprocmask(SIG_BLOCK, &sigset, NULL);
 #endif
     return APR_SUCCESS;
 }

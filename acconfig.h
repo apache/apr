@@ -45,6 +45,7 @@
 #undef USEBCOPY
 
 #undef HAVE_GMTOFF
+#undef USE_THREADS
 
 #undef SIZEOF_SSIZE_T
 
