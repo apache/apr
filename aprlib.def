@@ -209,3 +209,5 @@ thread_ready   @79
 	ap_vsnprintf   @201
 	ap_getpass   @202
 	ap_ungetc @203
+	ap_tokenize_to_argv @204
+	ap_filename_of_pathname @205
