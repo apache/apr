@@ -68,6 +68,6 @@
 
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
   
