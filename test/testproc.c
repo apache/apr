@@ -69,6 +69,11 @@
 int test_filedel(void);
 int testdirs(void);
 
+void closeapr(void)
+{
+    apr_terminate();
+}
+
 int main(int argc, char *argv[])
 {
     apr_pool_t *context;
@@ -84,7 +89,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Couldn't initialize.");
         exit(-1);
     }
-    atexit(apr_terminate);
+    atexit(closeapr);
     apr_create_pool(&context, NULL);
 
 

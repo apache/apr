@@ -11,6 +11,11 @@
 
 #define LIB_NAME "mod_test.so"
 
+void closeapr(void)
+{
+    apr_terminate();
+}
+
 int main (int argc, char ** argv)
 {
     apr_dso_handle_t *h = NULL;
@@ -28,7 +33,7 @@ int main (int argc, char ** argv)
     strcat(filename, LIB_NAME);
 
     apr_initialize();
-    atexit(apr_terminate);
+    atexit(closeapr);
         
     if (apr_create_pool(&cont, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");

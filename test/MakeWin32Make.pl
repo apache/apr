@@ -7,6 +7,12 @@ print $dstfl "LINK=link.exe\n";
 
 while ($t = <$srcfl>) {
 
+    if ($t =~ m|\@INCLUDE_RULES\@|) {
+        $t = "ALL: \$(TARGETS)\n";
+    }
+    if ($t =~ m|^ALL_LIBS=|) {
+        $t = "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib";
+    }
     if ($t =~ s|\@CFLAGS\@|\/nologo \/MDd \/W3 \/Gm \/GX \/Zi \/Od \/D "_DEBUG" \/D "WIN32" \/D APR_DECLARE_STATIC \/FD|) {
         $t =~ s|-g ||;
     }
@@ -20,7 +26,6 @@ while ($t = <$srcfl>) {
     $t =~ s|\@CC\@|cl|;
     $t =~ s|\@RANLIB\@||;
     $t =~ s|\@OPTIM\@||;
-    $t =~ s|\@LIBS\@|kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib|;
     $t =~ s|-I\$\(INCDIR\)|\/I "\$\(INCDIR\)"|;
     $t =~ s|\.\.\/libapr\.a|\.\./LibD/apr\.lib|;
     if ($t =~ s|\@EXEEXT\@|\.exe|) {
@@ -30,11 +35,12 @@ while ($t = <$srcfl>) {
         $t =~ s|--export-dynamic ||; 
         $t =~ s|-fPIC ||;
     }
-    if ($t =~ s|\$\(CC\) -shared|\$\(LINK\) \/subsystem:windows \/dll|) {
+    if ($t =~ s|--module|\/subsystem:windows \/dll|) {
         $t =~ s|-o (\S+)|\/out:\"$1\"|;
     }
     while ($t =~ s|\.a\b|\.lib|) {}
     while ($t =~ s|\.o\b|\.obj|) {}
+    while ($t =~ s|\.lo\b|\.obj|) {}
     while ($t =~ s|\.so\b|\.dll|) {}
 
     print $dstfl $t;
