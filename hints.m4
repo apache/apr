@@ -20,10 +20,9 @@ dnl
 AC_DEFUN(APR_DOEXTRA, [
   for i in CFLAGS LDFLAGS LIBS
   do
-    XYZ="APR_TMP=\$EXTRA_$i"; eval $XYZ
+    eval APR_TMP=\$EXTRA_$i
     if test -n "$APR_TMP"; then
-      XYZ="$i=\"\$$i $APR_TMP\""
-      eval $XYZ
+      eval $i=\"\$$i $APR_TMP\"
       eval export $i
       eval unset EXTRA_${i}
       eval export EXTRA_${i}
