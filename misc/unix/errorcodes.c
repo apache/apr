@@ -79,12 +79,12 @@ static char *apr_error_string(apr_status_t statcode)
     switch (statcode) {
     case APR_ENOPOOL:
         return "A new pool could not be created.";
-    case APR_ENOFILE:
-        return "No file was provided and one was required.";
     case APR_EBADDATE:
         return "An invalid date has been provided";
     case APR_EINVALSOCK:
         return "An invalid socket was returned";
+    case APR_ENOFILE:
+        return "No file was provided and one was required.";
     case APR_ENOPROC:
         return "No process was provided and one was required.";
     case APR_ENOTIME:
@@ -103,18 +103,17 @@ static char *apr_error_string(apr_status_t statcode)
         return "No thread key structure was provided and one was required.";
     case APR_ENOSHMAVAIL:
         return "No shared memory is currently available";
-#if APR_HAS_DSO
     case APR_EDSOOPEN:
-#ifdef HAVE_LIBDL
+#if APR_HAS_DSO && defined(HAVE_LIBDL)
         return dlerror();
 #else
         return "DSO load failed";
 #endif /* HAVE_LIBDL */
-#endif /* APR_HAS_DSO */
     case APR_EBADIP:
         return "The specified IP address is invalid.";
     case APR_EBADMASK:
         return "The specified network mask is invalid.";
+
     case APR_INCHILD:
         return
 	    "Your code just forked, and you are currently executing in the "
@@ -157,7 +156,17 @@ static char *apr_error_string(apr_status_t statcode)
         return "This function has not been implemented on this platform";
     case APR_EMISMATCH:
         return "passwords do not match";
-    default:
+    case APR_EABSOLUTE:
+        return "The given path is absolute";
+    case APR_ERELATIVE:
+        return "The given path is relative";
+    case APR_EINCOMPLETE:
+        return "The given path is incomplete";
+    case APR_EABOVEROOT:
+        return "The given path was above the root path";
+    case APR_EBADPATH:
+        return "The given path misformatted or contained invalid characters";
+     default:
         return "Error string not specified yet";
     }
 }
