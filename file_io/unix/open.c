@@ -250,9 +250,6 @@ ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file,
                             ap_os_file_t *thefile)
 {
     int *dafile = thefile;
-    if (cont == NULL) {
-        return APR_ENOCONT;
-    }
     if ((*file) == NULL) {
         (*file) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
         (*file)->cntxt = cont;

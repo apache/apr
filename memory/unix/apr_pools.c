@@ -772,17 +772,32 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
      * Round up requested size to an even number of alignment units
      * (core clicks)
      */
-    ap_pool_t *a = c->pool;
-    int nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
-    int size = nclicks * CLICK_SZ;
+    ap_pool_t *a;
+    int nclicks;
+    int size;
 
     /* First, see if we have space in the block most recently
      * allocated to this pool
      */
 
-    union block_hdr *blok = a->last;
-    char *first_avail = blok->h.first_avail;
+    union block_hdr *blok;
+    char *first_avail;
     char *new_first_avail;
+
+    if (c == NULL) {
+        return malloc(reqsize);
+    }
+    a = c->pool;
+    nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
+    size = nclicks * CLICK_SZ;
+
+    /* First, see if we have space in the block most recently
+     * allocated to this pool
+     */
+
+    blok = a->last;
+    first_avail = blok->h.first_avail;
+    new_first_avail;
 
     if (reqsize <= 0) {
 	return NULL;
@@ -1066,28 +1081,35 @@ API_EXPORT(void) ap_register_cleanup(struct context_t *p, void *data,
 				      ap_status_t (*child_cleanup) (void *))
 {
     struct cleanup *c;
-    c = (struct cleanup *) ap_palloc(p, sizeof(struct cleanup));
-    c->data = data;
-    c->plain_cleanup = plain_cleanup;
-    c->child_cleanup = child_cleanup;
-    c->next = p->pool->cleanups;
-    p->pool->cleanups = c;
+
+    if (p != NULL) {
+        c = (struct cleanup *) ap_palloc(p, sizeof(struct cleanup));
+        c->data = data;
+        c->plain_cleanup = plain_cleanup;
+        c->child_cleanup = child_cleanup;
+        c->next = p->pool->cleanups;
+        p->pool->cleanups = c;
+    }
 }
 
 API_EXPORT(void) ap_kill_cleanup(struct context_t *p, void *data,
 				  ap_status_t (*cleanup) (void *))
 {
-    struct cleanup *c = p->pool->cleanups;
-    struct cleanup **lastp = &p->pool->cleanups;
+    struct cleanup *c;
+    struct cleanup **lastp;
 
+    if (p == NULL)
+        return;
+    c = p->pool->cleanups;
+    lastp = &p->pool->cleanups;
     while (c) {
-	if (c->data == data && c->plain_cleanup == cleanup) {
-	    *lastp = c->next;
-	    break;
-	}
+        if (c->data == data && c->plain_cleanup == cleanup) {
+            *lastp = c->next;
+            break;
+        }
 
-	lastp = &c->next;
-	c = c->next;
+        lastp = &c->next;
+        c = c->next;
     }
 }
 
