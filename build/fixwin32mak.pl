@@ -48,5 +48,21 @@ print "Processing " . $_ . "\n";
 	else {
 	    unlink $tname;
 	}
+        $dname = $oname;
+        $dname =~ s/.mak$/.dsp/;
+	@dstat = stat($dname);
+        @ostat = stat($oname);    
+        if ($ostat[9] != $dstat[9]) {
+            @onames = ($oname);
+            utime $dstat[9], $dstat[9], @onames;
+	    print "Touched datestamp for " . $oname . " in " . $File::Find::dir . "\n"; 
+        }
+        $oname =~ s/.mak$/.dep/;
+        @ostat = stat($oname);    
+        if ($ostat[9] != $dstat[9]) {
+            @onames = ($oname);
+            utime $dstat[9], $dstat[9], @onames;
+	    print "Touched datestamp for " . $oname . " in " . $File::Find::dir . "\n"; 
+        }
     }
 }
