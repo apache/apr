@@ -71,6 +71,9 @@
 #ifdef HAVE_SYS_IPC_H
 #include <sys/ipc.h>
 #endif
+#ifdef HAVE_SYS_MUTEX_H
+#include <sys/mutex.h>
+#endif
 #ifdef HAVE_SYS_SHM_H
 #include <sys/shm.h>
 #endif
