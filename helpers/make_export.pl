@@ -18,6 +18,7 @@ while ($srcfile = shift(@ARGV)) {
     my $line;
     my $count;
     my $found;
+    my @macro_stack;
 
     open (FILE, $srcfile) || die "Can't open $srcfile\n";
 #    print STDERR "Reading \"$srcfile\"\n";
@@ -34,6 +35,7 @@ while ($srcfile = shift(@ARGV)) {
         if (/\#if(def)? (APR_.*)/) {
             $count++;
             $found++;
+            push @macro_stack, $macro;
             $macro = $2;
             $line .= "$macro\n";
             next;
@@ -54,6 +56,7 @@ while ($srcfile = shift(@ARGV)) {
             if ($count > 0) {
                 $count--;
                 $line .= "\/$macro\n";
+                $macro = pop @macro_stack;
             }
             if ($found == $count + 1) {
                 $found--;
