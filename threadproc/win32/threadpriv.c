@@ -70,17 +70,17 @@ ap_status_t ap_create_thread_private(ap_context_t *cont, void (*dest)(void *),
 ap_status_t ap_get_thread_private(struct threadkey_t *key, void **new)
 {
     if ((*new) = TlsGetValue(key->key)) {
-		return APR_SUCCESS;
-	}
-	return APR_EEXIST;
+        return APR_SUCCESS;
+    }
+    return APR_EEXIST;
 }
 
 ap_status_t ap_set_thread_private(struct threadkey_t *key, void *priv)
 {
     if (TlsSetValue(key->key, priv)) {
-		return APR_SUCCESS;
-	}
-	return APR_EEXIST;
+        return APR_SUCCESS;
+    }
+    return APR_EEXIST;
 }
 
 ap_status_t ap_delete_thread_private(struct threadkey_t *key)
@@ -91,10 +91,10 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
     return APR_EEXIST;
 }
 
-ap_status_t ap_get_threadkeydata(struct threadkey_t *threadkey, void *data)
+ap_status_t ap_get_threadkeydata(struct threadkey_t *threadkey, char *key, void *data)
 {
     if (threadkey != NULL) {
-        return ap_get_userdata(threadkey->cntxt, &data);
+        return ap_get_userdata(threadkey->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -102,10 +102,11 @@ ap_status_t ap_get_threadkeydata(struct threadkey_t *threadkey, void *data)
     }
 }
 
-ap_status_t ap_set_threadkeydata(struct threadkey_t *threadkey, void *data)
+ap_status_t ap_set_threadkeydata(struct threadkey_t *threadkey, void *data,
+                                 char *key, ap_status_t (*cleanup) (void *))
 {
     if (threadkey != NULL) {
-        return ap_set_userdata(threadkey->cntxt, data);
+        return ap_set_userdata(threadkey->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
