@@ -143,8 +143,6 @@
 #define __attribute__(__x)
 #endif
 
-#define NO_USE_SIGACTION
-
 #ifndef _WIN32_WCE
 #define APR_HAVE_ARPA_INET_H    0
 #define APR_HAVE_CONIO_H        1
