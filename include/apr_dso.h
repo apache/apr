@@ -67,16 +67,6 @@ typedef void *                        ap_dso_handle_sym_t;
 
 /*
 
-=head1 ap_status_t ap_dso_init(void)
-
-B<Initialize the underlying DSO library.>
-
-=cut
- */
-ap_status_t ap_dso_init(void);
-
-/*
-
 =head1 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, ap_pool_t *ctx)
 
 B<Load a DSO library.>

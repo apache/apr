@@ -132,10 +132,6 @@ struct dl_info {
  * add the basic "wrappers" here.
  */
 
-ap_status_t ap_dso_init(void){
-    return APR_SUCCESS;
-}
-
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
                         ap_pool_t *ctx)
 {
