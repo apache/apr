@@ -11,7 +11,6 @@ VPATH = @srcdir@
 #   or with special parameters
 
 STDTEST_PORTABLE = \
-	testsock@EXEEXT@ \
 	testlockperf@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
@@ -34,7 +33,7 @@ TARGETS = $(PROGRAMS)
 LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
 CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
-readchild@EXEEXT@ tryread@EXEEXT@
+readchild@EXEEXT@ tryread@EXEEXT@ sockchid@EXEEXT@
 CLEAN_SUBDIRS = internal
 
 INCDIR=../include
@@ -56,6 +55,9 @@ check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
+sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
+	$(LINK_PROG) sockchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
+        
 readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) readchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
         
@@ -77,15 +79,6 @@ libmod_test.la: mod_test.slo $(LOCAL_LIBS)
 
 testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testlockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@ $(LOCAL_LIBS)
-	$(LINK_PROG) testsock.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-client@EXEEXT@: client.lo $(LOCAL_LIBS)
-	$(LINK_PROG) client.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-server@EXEEXT@: server.lo $(LOCAL_LIBS)
-	$(LINK_PROG) server.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
 	$(LINK_PROG) sendfile.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -112,11 +105,11 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
 	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
-        testatomic.lo testflock.lo testshm.lo
+        testatomic.lo testflock.lo testshm.lo testsock.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 readchild@EXEEXT@ CuTest.lo proc_child@EXEEXT@ \
-         tryread@EXEEXT@ $(LOCAL_LIBS)
+         tryread@EXEEXT@ sockchild@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK_PROG) $(TESTS) CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 

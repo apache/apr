@@ -66,6 +66,7 @@ static const struct testlist {
     {"testrand2", testrand2},
     {"testsleep", testsleep},
     {"testshm", testshm},
+    {"testsock", testsock},
     {"testsockets", testsockets},
     {"testsockopt", testsockopt},
     {"teststr", teststr},
