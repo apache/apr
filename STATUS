@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/03/22 10:17:35 $]
+Last modified at [$Date: 2001/04/12 15:30:46 $]
 
 Release:
 
@@ -16,11 +16,18 @@ Release:
 RELEASE SHOWSTOPPERS:
 
     * Unix apr_stat/lstat/getfileinfo were very fast hacks, needs review.
-        Will suggests: Unix is looking pretty good.  Ignore APR_FINFO_NAME
-        issues for b1, I've noted that issue below.
+        Ignore APR_FINFO_NAME issues for b1, I've noted that issue below.
+        OtherBill asks has someone done so?
 
     * OS2 apr_stat/lstat/getfileinfo/dir_read were very fast hacks, need
         cleanup, toggle messy (APR_INCOMPLETE) result when appropriate.
+        OtherBill asks has someone done so?
+
+    * complete the efforts started by DougM for cleaner fn naming
+      conventions: see proposed name changes in renames_pending
+      and offer up any additions/vetos/clarifications.
+      DougM offered to complete the work with his nifty perl rename
+      script at the hackathon. 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -30,7 +37,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Solve Win32 APR_CHR, APR_BLK, etc for Win32 apr_stat without 
         GetFileType?  How about inode/dev/nlink?
-        Status: Will's WIP
+        Status: OtherBill's WIP
 
     * SysV semaphore support isn't usable by Apache when started as
       root because we don't have a way to allow the semaphore to be
