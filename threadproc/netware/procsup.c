@@ -54,7 +54,7 @@
 
 #include "threadproc.h"
 
-apr_status_t apr_proc_detach(void)
+apr_status_t apr_proc_detach(int daemonize)
 {
 #if 0
     int x;
