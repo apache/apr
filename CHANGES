@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fix a problem in Unix apr_file_dup() which caused 0 to be returned
+     by the first read.  [Stas Bekman <stas@stason.org>]
+
   *) Fix a buglet that caused APR_FILE_BASED_SHM to be set inadvertently 
      on some platforms (e.g., Linux, AIX).  [Jeff Trawick]
 
