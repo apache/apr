@@ -1047,7 +1047,6 @@ static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
                  * over all the remaining elements from the
                  * other block
                  */
-                apr_table_entry_t *lowest;
                 if (block1_start == block1_end) {
                     for (; block2_start < block2_end; block2_start++) {
                         *dst++ = values[block2_start];
@@ -1197,7 +1196,7 @@ APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags)
     table_reindex(t);
 }
 
-APR_DECLARE(void) apr_table_cat(apr_table_t *t, const apr_table_t *s)
+static void apr_table_cat(apr_table_t *t, const apr_table_t *s)
 {
     const int n = t->a.nelts;
     register int idx;
