@@ -258,7 +258,9 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t 
 APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
                                                apr_pool_t *p)
 {
-    (*control)->once = PTHREAD_ONCE_INIT;
+    static const pthread_once_t once_init = PTHREAD_ONCE_INIT;
+
+    (*control)->once = once_init;
     return APR_SUCCESS;
 }
 
