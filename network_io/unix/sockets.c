@@ -273,16 +273,9 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
      * socket; if called again, we can see EALREADY
      */
     if (rc == -1 && (errno == EINPROGRESS || errno == EALREADY) && sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
-        if (arv != APR_SUCCESS) {
-            return arv;
-        }
-        else {
-            do {
-                rc = connect(sock->socketdes,
-                             (const struct sockaddr *)&sa->sa.sin,
-                             sa->salen);
-            } while (rc == -1 && errno == EINTR);
+        rc = apr_wait_for_io_or_timeout(sock, 0);
+        if (rc != APR_SUCCESS) {
+            return rc;
         }
     }
 
