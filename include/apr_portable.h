@@ -74,6 +74,7 @@
 #include "apr_file_io.h"
 #include "apr_network_io.h"
 #include "apr_errno.h"
+#include "apr_global_mutex.h"
 #include "apr_proc_mutex.h"
 #include "apr_time.h"
 #include "apr_dso.h"
@@ -216,6 +217,24 @@ struct apr_os_sock_info_t {
 };
 
 typedef struct apr_os_sock_info_t apr_os_sock_info_t;
+
+#if APR_PROCESS_LOCK_IS_GLOBAL
+#define apr_os_global_mutex_t apr_os_proc_mutex_t
+#define apr_os_global_mutex_get apr_os_proc_mutex_get
+#else
+    struct apr_os_global_mutex_t {
+        apr_pool_t *pool;
+        apr_proc_mutex_t *proc_mutex;
+#if APR_HAS_THREADS
+        apr_thread_mutex_t *thread_mutex;
+#endif /* APR_HAS_THREADS */
+    };
+    typedef struct apr_os_global_mutex_t apr_os_global_mutex_t;
+
+APR_DECLARE(apr_status_t) apr_os_global_mutex_get(apr_os_global_mutex_t *ospmutex, 
+                                                apr_global_mutex_t *pmutex);
+#endif
+
 
 /**
  * convert the file from apr type to os specific type.
