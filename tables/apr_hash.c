@@ -86,7 +86,7 @@ struct apr_hash_entry_t {
     apr_hash_entry_t	*next;
     int			 hash;
     const void		*key;
-    size_t		 klen;
+    apr_size_t		 klen;
     const void		*val;
 };
 
@@ -100,7 +100,7 @@ struct apr_hash_entry_t {
 struct apr_hash_t {
     apr_pool_t		*pool;
     apr_hash_entry_t   **array;
-    size_t		 count, max;
+    apr_size_t		 count, max;
 };
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
 
@@ -114,7 +114,7 @@ struct apr_hash_t {
 struct apr_hash_index_t {
     apr_hash_t	       *ht;
     apr_hash_entry_t   *this, *next;
-    size_t		index;
+    apr_size_t		index;
 };
 
 
@@ -168,7 +168,7 @@ APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
 
 APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi,
 			       const void **key,
-			       size_t *klen,
+			       apr_size_t *klen,
 			       void **val)
 {
     if (key)  *key  = hi->this->key;
@@ -207,7 +207,7 @@ static void resize_array(apr_hash_t *ht)
 
 static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 				    const void *key,
-				    size_t klen,
+				    apr_size_t klen,
 				    const void *val)
 {
     apr_hash_entry_t **hep, *he;
@@ -282,7 +282,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 
 APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
 			       const void *key,
-			       size_t klen)
+			       apr_size_t klen)
 {
     apr_hash_entry_t *he;
     he = *find_entry(ht, key, klen, NULL);
@@ -294,7 +294,7 @@ APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
 
 APR_EXPORT(void) apr_hash_set(apr_hash_t *ht,
 			     const void *key,
-			     size_t klen,
+			     apr_size_t klen,
 			     const void *val)
 {
     apr_hash_entry_t **hep;
