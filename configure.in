@@ -636,13 +636,10 @@ AC_SUBST(threads)
 AC_SUBST(have_sigsuspend)
 AC_SUBST(have_sigwait)
 
-AC_CHECK_FUNCS(poll)
+AC_CHECK_FUNCS(poll kqueue)
 
-# Checks for the FreeBSD KQueue and Linux epoll interfaces:
-AC_CHECK_FUNC(kevent, 
-  [AC_DEFINE([HAVE_KQUEUE], 1, [Define if the KQueue interface is supported])])
-
-# epoll* may be available in libc but return ENOSYS on a pre-2.6 kernel.
+# Check for the Linux epoll interface; epoll* may be available in libc
+# but return ENOSYS on a pre-2.6 kernel, so do a run-time check.
 AC_CACHE_CHECK([for epoll support], [apr_cv_epoll],
 [AC_TRY_RUN([
 #include <sys/epoll.h>
