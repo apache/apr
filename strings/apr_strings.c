@@ -278,7 +278,7 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
     }
 
     /* The classic bsd implementation requires div/mod operators
-     * to compute a cutoff.  Benchmarking proves that iss very, very
+     * to compute a cutoff.  Benchmarking proves that is very, very
      * evil to some 32 bit processors.  Instead, look for underflow
      * in both the mult and add/sub operation.  Unlike the bsd impl,
      * we also work strictly in a signed int64 word as we haven't
@@ -319,7 +319,7 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 	val *= base;
         if ( (any < 0)	/* already noted an over/under flow - short circuit */
            || (neg && (val > acc || (val -= c) > acc)) /* underflow */
-           || (val < acc || (val += c) < acc)) {       /* overflow */
+           || (!neg && (val < acc || (val += c) < acc))) {       /* overflow */
             any = -1;	/* once noted, over/underflows never go away */
 #ifdef APR_STRTOI64_OVERFLOW_IS_BAD_CHAR
             break;
