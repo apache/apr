@@ -323,7 +323,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                              apr_procattr_t *attr,
                                              apr_pool_t *cont)
 {
-    int i, iEnvBlockLen;
+    apr_size_t i, iEnvBlockLen;
     char *cmdline;
     char ppid[20];
     char *envstr;
