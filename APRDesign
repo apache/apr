@@ -161,33 +161,29 @@ Documentation
 
 Whenever a new function is added to APR, it MUST be documented.  New 
 functions will not be committed unless there are docs to go along with them.
-The documentation should be a comment block above the function in the unix
-.c file.  This does not mean you must implement the function for Unix.  But,
-it would be nice if you submitted a file with the prototypes and the comments
-above the prototypes to be checked into the unix tree.
+The documentation should be a comment block above the function in the header
+file.
 
 The format for the comment block is:
 
-/*
-
-=head1 function prototype
-
-B<Brief description of function>
-
-    arg 1)  explanation of arg 1
-    arg 2)  explanation of arg 2
-    arg N)  explanation of arg N
-
-B<NOTE>:  Any extra information the programmer needs.
-
-=cut
+/**
+ * Brief description of the function
+ * @param parma_1_name explanation
+ * @param parma_2_name explanation
+ * @param parma_n_name explanation
+ * @tip Any extra information people should know.
+ * @deffunc function prototype if required
  */                                                                             
 
-The spacing for the documentation is VERY important, because the docs are
-processed with perldoc, and this spacing is required for the perldoc scripts
-to work properly.
+The last line is not strictly needed.  The parser in ScanDoc is not perfect
+yet, and it can not parse prototypes that are in any form other than
+	return_type program_name(type1 param1, type2 param2, ...)
+This means that any function prototype that resembles:
+	APR_EXPORT(ap_status_t) ap_foo(int f1, char *f2)
+will need the deffunc.
 
-For an actual example, look at any function in the fileio/unix directory.
+For an actual example, look at any file in the include directory (ap_tables.h
+hasn't been done yet).
 
 APR Error reporting
 
