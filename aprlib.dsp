@@ -40,7 +40,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "LibR"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
@@ -131,7 +131,7 @@ SOURCE=.\aprlib.def
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\win32\canonerr.c
+SOURCE=.\misc\unix\canonerr.c
 # End Source File
 # Begin Source File
 
@@ -143,11 +143,11 @@ SOURCE=.\dso\win32\dso.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\win32\errorcodes.c
+SOURCE=.\misc\unix\errorcodes.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\file_io\win32\fileacc.c
+SOURCE=.\file_io\unix\fileacc.c
 # End Source File
 # Begin Source File
 
@@ -159,7 +159,7 @@ SOURCE=.\file_io\win32\filestat.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\win32\getopt.c
+SOURCE=.\misc\unix\getopt.c
 # End Source File
 # Begin Source File
 
@@ -223,7 +223,7 @@ SOURCE=.\network_io\win32\sockopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\win32\start.c
+SOURCE=.\misc\unix\start.c
 # End Source File
 # Begin Source File
 

@@ -17,8 +17,10 @@ CFG=aprlibdll - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "aprlibdll - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "aprlibdll - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "aprlibdll - Win32 Release" (based on\
+ "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "aprlibdll - Win32 Debug" (based on\
+ "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -44,8 +46,8 @@ RSC=rc.exe
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -69,10 +71,10 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
-# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
-# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
+# ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
+# ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -80,7 +82,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /out:"Debug/aprlib.dll" /libpath:"LibD" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
-# ADD LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /out:"Debug/aprlib.dll" /libpath:"LibD" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
+# ADD LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"Debug/aprlib.dll" /libpath:"LibD" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
+# SUBTRACT LINK32 /incremental:no /map
 
 !ENDIF 
 
