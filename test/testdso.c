@@ -45,8 +45,10 @@ int main (int argc, char ** argv)
 
     fprintf(stdout,"Trying to get the DSO's attention..........");
     fflush(stdout);
-    if (apr_dso_sym(&func1, h, "print_hello") != APR_SUCCESS) { 
-        fprintf(stderr, "Failed!\n");
+    if ((status = apr_dso_sym(&func1, h, "print_hello")) != APR_SUCCESS) { 
+        char my_error[256];
+        apr_dso_error(h, my_error, sizeof(my_error));
+        fprintf(stderr, "%s\n", my_error);
         exit (-1);
     }        
     fprintf(stdout,"OK\n");
