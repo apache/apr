@@ -73,7 +73,10 @@ typedef enum {
     AP_BUCKET_mmap,
     AP_BUCKET_filename,
     AP_BUCKET_cached_entity,
-    AP_BUCKET_URI
+    AP_BUCKET_URI,
+    AP_BUCKET_eos        /* End-of-stream bucket.  Special case to say this is
+                          * the end of the bucket so all data should be sent
+                          * immediately. */
 } ap_bucket_color_e;
 
 typedef struct ap_bucket ap_bucket;
