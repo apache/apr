@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/14 10:43:00 $]
+Last modified at [$Date: 2001/12/27 17:04:16 $]
 
 Release:
 
@@ -209,17 +209,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
                 FreeBSD PR kern/32684:
                   http://www.freebsd.org/cgi/query-pr.cgi?pr=kern/32684
-
-    * Currently it is difficult if not impossible to return a proper
-      status code from a thread using apr_thread_exit(), since the
-      value must be a (apr_status_t*), but the pool where this would
-      normally be allocated is in that same function immediately
-      thereafter destroyed. Simply changing the type of this parameter
-      to (apr_status_t) should solve the problem (along with some
-      internal changes in apr_thread_join() to accomodate).
-        Status: "I'll probably test and commit this soonish," says Aaron,
-                "Here's the patch:"
-         http://marc.theaimsgroup.com/?l=apr-dev&m=100137033309456&q=raw
 
     * There are some optimizations that can be done to the new
       apr_proc_*() functions (on UNIX). One that may reduce pointer
