@@ -70,7 +70,7 @@ int main(int argc, char * const argv[])
 
     ap_create_context(&context, NULL);
 
-    while (ap_getopt(context, argc, argv, "abc:d::", &data) == APR_SUCCESS) {
+    while (ap_getopt(argc, argv, "abc:d::", &data, context) == APR_SUCCESS) {
         switch(data) {
             case 'a':
             case 'b':

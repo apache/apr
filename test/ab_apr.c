@@ -892,7 +892,7 @@ int main(int argc, char **argv)
     ap_create_context(&cntxt, NULL);
 
     ap_optind = 1;
-    while (ap_getopt(cntxt, argc, argv, "n:c:t:T:p:v:kVhwx:y:z:", &c) == APR_SUCCESS) {
+    while (ap_getopt(argc, argv, "n:c:t:T:p:v:kVhwx:y:z:", &c, cntxt) == APR_SUCCESS) {
         switch (c) {
         case 'n':
             requests = atoi(ap_optarg);
