@@ -94,7 +94,8 @@
  * append -- Windows doesn't support the append concept when opening files.
  *           APR needs to keep track of this, and always make sure we append
  *           correctly when writing to a file with this flag set TRUE.
- *          
+ */
+
 struct file_t {
     ap_context_t *cntxt;
     HANDLE filehand;
