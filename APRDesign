@@ -254,7 +254,7 @@ APR_OS_START_SYSERR, those codes are reserved for APR applications.
 
 To programmatically correct an error in a running application, the error codes
 need to be consistent across platforms.  This should make sense.  To get
-consistent error codes, APR provides a function ap_canonicalize_error().
+consistent error codes, APR provides a function ap_canonical_error().
 This function will take as input any ap_status_t value, and return a small
 subset of canonical APR error codes.  These codes will be equivalent to
 Unix errno's.  Why is it a small subset?  Because we don't want to try to
@@ -303,7 +303,7 @@ Using option 2:
     
     make syscall that fails
         return error code
-            convert to common error code (using ap_canonicalize_error)
+            convert to common error code (using ap_canonical_error)
             decide execution based on common error code
 
 Finally, there is one more operation on error codes.  You can get a string

@@ -64,6 +64,9 @@ extern "C" {
 
 typedef int ap_status_t;
 
+/* see lib/apr/APRDesign for why this inane function needs to be used
+ * everywhere.
+ */
 int ap_canonical_error(ap_status_t err);
 
 
