@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
             return APR_EOF;
         }
 
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     } else {
         if (thefile->pipe)
             DosResetEventSem(thefile->pipeSem, &rc);
@@ -133,7 +133,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 
         if (rc) {
             *nbytes = 0;
-            return APR_OS2_STATUS(rc);
+            return APR_FROM_OS_ERROR(rc);
         }
 
         *nbytes = bytesread;
@@ -187,7 +187,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
 
         apr_thread_mutex_unlock(thefile->mutex);
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     } else {
         if (thefile->flags & APR_APPEND) {
             FILELOCK all = { 0, 0x7fffffff };
@@ -209,7 +209,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
         if (rc) {
             *nbytes = 0;
-            return APR_OS2_STATUS(rc);
+            return APR_FROM_OS_ERROR(rc);
         }
 
         *nbytes = byteswritten;
@@ -249,7 +249,7 @@ APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile)
     rc = DosWrite(thefile->filedes, &ch, 1, &byteswritten);
 
     if (rc) {
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     }
     
     return APR_SUCCESS;
@@ -313,7 +313,7 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
                 thefile->bufpos = 0;
         }
 
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     } else {
         /* There isn't anything to do if we aren't buffering the output
          * so just return success.
@@ -385,5 +385,5 @@ apr_status_t apr_file_check_read(apr_file_t *fd)
     if (rc == ERROR_TIMEOUT)
         return APR_TIMEUP;
 
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }

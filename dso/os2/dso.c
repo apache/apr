@@ -73,7 +73,7 @@ static apr_status_t dso_cleanup(void *thedso)
     if (rc == 0)
         dso->handle = 0;
 
-    return APR_OS2_STATUS(rc);
+    return APR_FROM_OS_ERROR(rc);
 }
 
 
@@ -89,9 +89,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, const char
     (*res_handle)->failed_module = NULL;
 
     if ((rc = DosLoadModule(failed_module, sizeof(failed_module), path, &handle)) != 0) {
-        (*res_handle)->load_error = APR_OS2_STATUS(rc);
+        (*res_handle)->load_error = APR_FROM_OS_ERROR(rc);
         (*res_handle)->failed_module = apr_pstrdup(ctx, failed_module);
-        return APR_OS2_STATUS(rc);
+        return APR_FROM_OS_ERROR(rc);
     }
 
     (*res_handle)->handle  = handle;
