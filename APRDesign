@@ -332,3 +332,9 @@ return "APR doesn't understand this error value" on some platforms and
 an actual error string on others.  To deal with this, just get the
 string before canonicalizing your error code.
 
+The other problem with option 1, is that it is a lossy conversion.  For
+example, Windows and OS/2 have a couple hundred error codes, but POSIX errno
+only defines about 50 errno values.  This means that if we convert to a
+canonical error value immediately, there is no way for the programmer to
+get the actual system error.
+
