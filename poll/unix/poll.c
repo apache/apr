@@ -412,7 +412,11 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
         fd = descriptor->desc.s->socketdes;
     }
     else {
+#ifdef WIN32
+        return APR_EBADF;
+#else
         fd = descriptor->desc.f->filedes;
+#endif
     }
 
     for (i = 0; i < pollset->nelts; i++) {
