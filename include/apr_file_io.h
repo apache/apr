@@ -284,9 +284,9 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
  *      error to be returned.
  *
  *      APR_EINTR is never returned.
- * @deffunc apr_status_t apr_file_read_file(apr_file_t *thefile, void *buf, apr_size_t nbytes, apr_size_t *bytes_read)
+ * @deffunc apr_status_t apr_file_read_full(apr_file_t *thefile, void *buf, apr_size_t nbytes, apr_size_t *bytes_read)
  */
-APR_DECLARE(apr_status_t) apr_file_read_file(apr_file_t *thefile, void *buf,
+APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
                                         apr_size_t nbytes,
                                         apr_size_t *bytes_read);
 
