@@ -121,8 +121,8 @@ int apr_strnatcasecmp(char const *a, char const *b);
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *p, const char *s);
 
 /**
- * duplicate the first n characters ofa string into memory allocated 
- * out of a pool
+ * duplicate the first n characters of a string into memory allocated 
+ * out of a pool; the new string will be '\0'-terminated
  * @param p The pool to allocate out of
  * @param s The string to allocate
  * @param n The number of characters to duplicate
