@@ -34,19 +34,28 @@ struct apr_shm_t {
 
 APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m, 
                                          apr_size_t reqsize, 
-                                         const char *file, 
+                                         const char *filename, 
                                          apr_pool_t *p)
 {
     apr_size_t pagesize;
     area_id newid;
     char *addr;
+    char shname[B_OS_NAME_LENGTH];
     
     (*m) = (apr_shm_t *)apr_pcalloc(p, sizeof(apr_shm_t));
     /* we MUST allocate in pages, so calculate how big an area we need... */
     pagesize = ((reqsize + B_PAGE_SIZE - 1) / B_PAGE_SIZE) * B_PAGE_SIZE;
      
-    newid = create_area("apr_shmem", (void*)&addr, B_ANY_ADDRESS,
-                        pagesize, B_CONTIGUOUS, B_READ_AREA|B_WRITE_AREA);
+    if (!filename) {
+        int num = 0;
+        snprintf(shname, B_OS_NAME_LENGTH, "apr_shmem_%ld", find_thread(NULL));
+        while (find_area(shname) >= 0)
+            snprintf(shname, B_OS_NAME_LENGTH, "apr_shmem_%ld_%d",
+                     find_thread(NULL), num++);
+    }
+    newid = create_area(filename ? filename : shname, 
+                        (void*)&addr, B_ANY_ADDRESS,
+                        pagesize, B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA);
 
     if (newid < 0)
         return errno;
@@ -72,7 +81,13 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
                                          apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    area_id deleteme = find_area(filename);
+    
+    if (deleteme == B_NAME_NOT_FOUND)
+        return APR_EINVAL;
+
+    delete_area(deleteme);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
@@ -81,10 +96,9 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 {
     area_info ai;
     thread_info ti;
-    area_id deleteme;
     apr_shm_t *new_m;
-    
-    deleteme = find_area(filename);
+    area_id deleteme = find_area(filename);
+
     if (deleteme == B_NAME_NOT_FOUND)
         return APR_EINVAL;
 
