@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) read_with_timeout in apr/file_io/win32/readwrite.c incorrectly 
+     returned APR_SUCCESS instead of APR_EOF when PeekNamedPipe failed
+     and the result from GetLastError() was ERROR_BROKEN_PIPE. Because 
+     of this, the pipe wasn't closed as soon as it could be.
+     [Tim Costello <tim.costello@zcmgroup.com.au>]
+
   *) Fix a problem in the Win32 pipe creation code called by 
      apr_proc_create():  It didn't register cleanups for either the 
      read or the write ends of the pipe, so file handles (and event 
