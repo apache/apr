@@ -83,7 +83,11 @@ apr_atomic_t y;      /* atomic locks */
 static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
 {
     apr_atomic_t oldval;
-    apr_atomic_t casval = 0;
+    apr_uint32_t casval = 0;
+    float object1, object2;
+    void *casptr;
+    void *oldptr;
+
     apr_atomic_set(&y, 2);
     printf("%-60s", "testing apr_atomic_dec");
     if (apr_atomic_dec(&y) == 0) {
@@ -118,6 +122,29 @@ static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
     if (oldval != 23) {
         fprintf(stderr, "Failed\noldval =%d should be 23 y=%d\n",
                 oldval, casval);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "testing CAS for pointers");
+    casptr = NULL;
+    oldptr = apr_atomic_casptr(&casptr, &object1, 0);
+    if (oldptr != 0) {
+        fprintf(stderr, "Failed\noldval =%p should be zero\n", oldptr);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+    printf("%-60s", "testing CAS for pointers - match non-null");
+    oldptr = apr_atomic_casptr(&casptr, &object2, &object1);
+    if (oldptr != &object1) {
+        fprintf(stderr, "Failed\noldval =%p should be %p\n", oldptr, &object1);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+    printf("%-60s", "testing CAS - no match");
+    oldptr = apr_atomic_casptr(&casptr, &object2, &object1);
+    if (oldptr != &object2) {
+        fprintf(stderr, "Failed\noldval =%p should be %p\n", oldptr, &object2);
         return APR_EGENERAL;
     }
     printf("OK\n");
