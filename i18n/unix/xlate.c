@@ -253,9 +253,30 @@ ap_status_t ap_xlate_conv_buffer(ap_xlate_t *convset, const char *inbuf,
         /* If everything went fine but we ran out of buffer, don't
          * report it as an error.  Caller needs to look at the two
          * bytes-left values anyway.
+         *
+         * There are three expected cases where rc is -1.  In each of
+         * these cases, *inbytes_left != 0.
+         * a) the non-error condition where we ran out of output
+         *    buffer
+         * b) the non-error condition where we ran out of input (i.e.,
+         *    the last input character is incomplete)
+         * c) the error condition where the input is invalid
          */
-        if (translated == (size_t)-1 && *outbytes_left) {
-            return errno;
+        if (translated == (size_t)-1) {
+            switch (errno) {
+            case E2BIG:  /* out of space on output */
+                status = 0; /* change table lookup code below if you
+                               make this an error */
+                break;
+            case EINVAL: /* input character not complete (yet) */
+                status = APR_INCOMPLETE;
+                break;
+            case EILSEQ: /* bad input byte */
+                status = APR_EINVAL;
+                break;
+            default:
+                status = errno;
+            }
         }
     }
     else
