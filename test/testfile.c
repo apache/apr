@@ -506,6 +506,45 @@ static void test_mod_neg(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 }
 
+static void test_truncate(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *fname = "data/testtruncate.dat";
+    const char *s;
+    apr_size_t nbytes;
+    apr_finfo_t finfo;
+
+    apr_file_remove(fname, p);
+
+    rv = apr_file_open(&f, fname,
+                       APR_CREATE | APR_WRITE, APR_UREAD | APR_UWRITE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    
+    s = "some data";
+    nbytes = strlen(s);
+    rv = apr_file_write(f, s, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, strlen(s), nbytes);
+
+    rv = apr_file_close(f);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_open(&f, fname,
+                       APR_TRUNCATE | APR_WRITE, APR_UREAD | APR_UWRITE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_close(f);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_stat(&finfo, fname, APR_FINFO_SIZE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 0, finfo.size);
+
+    rv = apr_file_remove(fname, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
 CuSuite *testfile(void)
 {
     CuSuite *suite = CuSuiteNew("File I/O");
@@ -530,6 +569,7 @@ CuSuite *testfile(void)
     SUITE_ADD_TEST(suite, test_gets);
     SUITE_ADD_TEST(suite, test_bigread);
     SUITE_ADD_TEST(suite, test_mod_neg);
+    SUITE_ADD_TEST(suite, test_truncate);
 
     return suite;
 }
