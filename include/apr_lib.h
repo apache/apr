@@ -67,8 +67,12 @@
 #include "apr_general.h"
 #include "apr_file_io.h"
 
+#if APR_HAVE_STDARG_H
 #include <stdarg.h>
+#endif
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -2,7 +2,19 @@
 #ifndef APR_H
 #define APR_H
 
+#define APR_HAVE_ERRNO_H        @errnoh@
+#define APR_HAVE_DIRENT_H       @direnth@
+#define APR_HAVE_FCNTL_H        @fcntlh@
+#define APR_HAVE_NETINET_IN_H   @netinet_inh@
+#define APR_HAVE_PTHREAD_H      @pthreadh@
+#define APR_HAVE_STDARG_H       @stdargh@
+#define APR_HAVE_STDIO_H        @stdioh@
+#define APR_HAVE_SYS_TYPES_H    @sys_typesh@
+#define APR_HAVE_SYS_UIO_H      @sys_uioh@
+
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
 /*  APR Feature Macros */
 @threads@
@@ -23,13 +35,12 @@ typedef  @size_t_value@          ap_size_t;
 typedef  @ssize_t_value@         ap_ssize_t;
 typedef  @off_t_value@           ap_off_t;
 
-typedef  ap_int32_t              ap_status_t;
-
 /* Definitions that APR programs need to work properly. */
 
 #define API_THREAD_FUNC
 #define API_EXPORT(type)         type
 #define API_EXPORT_NONSTD(type)  type
 #define API_VAR_IMPORT           extern
+
 
 #endif /* APR_H */
