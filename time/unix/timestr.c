@@ -126,8 +126,10 @@ ap_status_t ap_timestr(char **date_str, struct atime_t *t, ap_timetype_e type, a
     */
 }
 
-ap_status_t ap_strftime(char *s, ap_size_t max, const char *format, struct atime_t *tm)
+ap_status_t ap_strftime(char *s, ap_int32_t *retsize, ap_size_t max, 
+                        const char *format, struct atime_t *tm)
 {
-    strftime(s, max, format, tm->explodedtime);
+    (*retsize) = strftime(s, max, format, tm->explodedtime);
+    return APR_SUCCESS;
 }
 
