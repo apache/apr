@@ -143,8 +143,7 @@ APR_DECLARE_DATA int errno;
 #define HAVE_GETNAMEINFO 1
 #endif
 
-/* Deal with atoi64 variables ... these should move to apr_private.h */
-/* MSVC 7.0 introduced _strtoui64 */
+/* MSVC 7.0 introduced _strtoi64 */
 #if _MSC_VER >= 1300 && _INTEGRAL_MAX_BITS >= 64
 #define APR_INT64_STRFN	      _strtoi64
 #endif
