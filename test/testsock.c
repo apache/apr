@@ -180,6 +180,11 @@ static int run_sendfile(apr_pool_t *context, int number)
     return 1;
 }
 
+void closeapr(void)
+{
+    apr_terminate();
+}
+
 int main(int argc, char *argv[])
 {
     apr_pool_t *context = NULL;
@@ -190,7 +195,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     fprintf(stdout, "OK\n");
-    atexit(apr_terminate);
+    atexit(closeapr);
 
     fprintf(stdout, "Creating context.......");
     if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
