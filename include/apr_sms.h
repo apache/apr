@@ -97,7 +97,8 @@ struct apr_sms_t
     const char *identity; /* a string identifying the module */
 
     apr_pool_t *pool;
-
+    apr_lock_t *sms_lock;
+    
     struct apr_sms_cleanup *cleanups;
 
     void * (*malloc_fn)            (apr_sms_t *mem_sys, apr_size_t size);
