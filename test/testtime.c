@@ -62,6 +62,23 @@
 
 #define STR_SIZE 45
 
+static const char* print_time (apr_pool_t *pool, const apr_time_exp_t *xt)
+{
+    return apr_psprintf (pool,
+                         "%04d-%02d-%02d %02d:%02d:%02d.%06d %+05d [%d %s]%s",
+                         xt->tm_year + 1900,
+                         xt->tm_mon,
+                         xt->tm_mday,
+                         xt->tm_hour,
+                         xt->tm_min,
+                         xt->tm_sec,
+                         xt->tm_usec,
+                         xt->tm_gmtoff,
+                         xt->tm_yday + 1,
+                         apr_day_snames[xt->tm_wday],
+                         (xt->tm_isdst ? " DST" : ""));
+}
+
 int main(void)
 {
     apr_time_t now;
@@ -84,20 +101,39 @@ int main(void)
     printf("OK\n");
 
     STD_TEST_NEQ("    apr_time_exp_gmt", apr_time_exp_gmt(&xt, now))
-    
+    printf("        (%s)\n", print_time(p, &xt));
+
     STD_TEST_NEQ("    apr_time_exp_lt", apr_time_exp_lt(&xt2, now))
+    printf("        (%s)\n", print_time(p, &xt2));
 
     STD_TEST_NEQ("    apr_time_exp_get (GMT)", apr_time_exp_get(&imp, &xt))
 
     printf("%-60s", "    checking GMT explode == implode");
-    if (imp != now) {
-	printf("mismatch\n"
+    hr_off_64 = (apr_int64_t) xt.tm_gmtoff * APR_USEC_PER_SEC;
+    if (imp != now + hr_off_64) {
+        printf("mismatch\n"
                 "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
                 "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
                 "\t\terror delta was          %" APR_TIME_T_FMT "\n"
-                "\t\tshould have been         0\n",
-                now, imp, imp-now);
-	exit(-1);
+                "\t\tshould have been         %" APR_INT64_T_FMT "\n",
+                now, imp, imp-now, hr_off_64);
+       exit(-1);
+    }
+    printf("OK\n");
+
+    STD_TEST_NEQ("    apr_time_exp_get (localtime)",
+                 apr_time_exp_get(&imp, &xt2))
+
+    printf("%-60s", "    checking localtime explode == implode");
+    hr_off_64 = (apr_int64_t) xt2.tm_gmtoff * APR_USEC_PER_SEC;
+    if (imp != now + hr_off_64) {
+        printf("mismatch\n"
+               "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
+               "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
+               "\t\terror delta was          %" APR_TIME_T_FMT "\n"
+               "\t\tshould have been         %" APR_INT64_T_FMT "\n",
+               now, imp, imp-now, hr_off_64);
+        exit(-1);
     }
     printf("OK\n");
 
@@ -121,13 +157,13 @@ int main(void)
 
     printf("%-60s", "    checking localtime explode == GMT implode");
     if (imp != now) {
-	printf("mismatch\n"
+        printf("mismatch\n"
                 "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
                 "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
                 "\t\terror delta was          %" APR_TIME_T_FMT "\n"
                 "\t\tshould have been         0\n",
                 now, imp, imp-now);
-	exit(-1);
+        exit(-1);
     }
     printf("OK\n");
 
@@ -178,8 +214,9 @@ int main(void)
         exit(-1);
     }
     printf("OK\n");
-    printf("        ( %lld - %lld = %lld )\n", imp, now, imp - now);
- 
+    printf("        ( %" APR_TIME_T_FMT " - %" APR_TIME_T_FMT
+           " = %" APR_INT64_T_FMT " )\n", imp, now, imp - now);
+
     printf("\nTest Complete.\n");
     return 0;
 }    

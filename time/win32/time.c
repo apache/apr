@@ -105,16 +105,19 @@ static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm, BOOL lt)
     rc = GetTimeZoneInformation(&tz);
     switch (rc) {
     case TIME_ZONE_ID_UNKNOWN:
-    case TIME_ZONE_ID_STANDARD:
         xt->tm_isdst = 0;
         /* Bias = UTC - local time in minutes 
          * tm_gmtoff is seconds east of UTC
          */
         xt->tm_gmtoff = tz.Bias * -60;
         break;
+    case TIME_ZONE_ID_STANDARD:
+        xt->tm_isdst = 0;
+        xt->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;
+        break;
     case TIME_ZONE_ID_DAYLIGHT:
         xt->tm_isdst = 1;
-        xt->tm_gmtoff = tz.Bias * -60;
+        xt->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;
         break;
     default:
         xt->tm_isdst = 0;
@@ -224,8 +227,7 @@ APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t,
 {
     apr_status_t status = apr_time_exp_get(t, xt);
     if (status == APR_SUCCESS)
-        *t -= (apr_time_t) (xt->tm_isdst * 3600 
-                          + xt->tm_gmtoff) * APR_USEC_PER_SEC;
+        *t -= (apr_time_t) xt->tm_gmtoff * APR_USEC_PER_SEC;
     return status;
 }
 
