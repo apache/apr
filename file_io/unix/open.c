@@ -65,7 +65,10 @@ ap_status_t ap_unix_file_cleanup(void *thefile)
     if (rv == 0) {
         file->filedes = -1;
 #if APR_HAS_THREADS
-        return ap_destroy_lock(file->thlock);
+        if (file->thlock) {
+            return ap_destroy_lock(file->thlock);
+        }
+        return APR_SUCCESS;
 #else
         return APR_SUCCESS;
 #endif
