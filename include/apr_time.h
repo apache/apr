@@ -101,6 +101,8 @@ ap_status_t ap_set_year(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_wday(ap_time_t *, ap_int32_t);
 ap_status_t ap_timecmp(ap_time_t *a, ap_time_t *b);
 
+ap_status_t ap_get_gmtoff(int *tz, ap_time_t *tt, ap_context_t *cont);
+
 ap_status_t ap_get_timedata(ap_time_t *, char *, void *);
 ap_status_t ap_set_timedata(ap_time_t *, void *, char *,
                             ap_status_t (*cleanup) (void *));
