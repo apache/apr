@@ -306,10 +306,6 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         if (!thefile->pipe) {
             apr_off_t offset = 0;
             apr_status_t rc;
-            if (thefile->pOverlapped) {
-                thefile->pOverlapped->Offset     = (DWORD)thefile->filePtr;
-                thefile->pOverlapped->OffsetHigh = (DWORD)(thefile->filePtr >> 32);
-            }
             if (thefile->append) {
                 apr_thread_mutex_lock(thefile->mutex);
                 if (!thefile->pOverlapped) {
@@ -324,6 +320,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                     apr_thread_mutex_unlock(thefile->mutex);
                     return rc;
                 }
+            }
+            if (thefile->pOverlapped) {
+                thefile->pOverlapped->Offset     = (DWORD)thefile->filePtr;
+                thefile->pOverlapped->OffsetHigh = (DWORD)(thefile->filePtr >> 32);
             }
             rv = WriteFile(thefile->filehand, buf, *nbytes, &bwrote,
                            thefile->pOverlapped);
