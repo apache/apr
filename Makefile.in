@@ -98,10 +98,10 @@ $(TARGET_LIB): $(OBJECTS)
 	$(LINK) @lib_target@ $(ALL_LIBS)
 
 exports.c: $(HEADERS)
-	$(AWK) -f $(top_srcdir)/build/make_exports.awk $^ > $@
+	$(AWK) -f $(top_srcdir)/build/make_exports.awk $(HEADERS) > $@
 
 export_vars.h: $(HEADERS)
-	$(AWK) -f $(top_srcdir)/build/make_var_export.awk $^ > $@
+	$(AWK) -f $(top_srcdir)/build/make_var_export.awk $(HEADERS) > $@
 
 apr.exp: exports.c export_vars.h
 	@echo "#! lib@APR_LIBNAME@.so" > $@
