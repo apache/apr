@@ -1343,7 +1343,8 @@ AC_SUBST(oc)
 AC_MSG_CHECKING(for Variable Length Arrays)
 APR_TRY_COMPILE_NO_WARNING([],
 [
-    int foo[atoi(argv[1])];
+    int foo[argc];
+    foo[0] = 0;
 ], vla_msg=yes, vla_msg=no )
 AC_MSG_RESULT([$vla_msg])
 if test "$vla_msg" = "yes"; then
