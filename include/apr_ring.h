@@ -63,7 +63,7 @@
  */
 /**
  * @file apr_ring.h
- * @brief APR-Util Rings
+ * @brief APR Rings
  */
 #ifndef APR_RING_H
 #define APR_RING_H
@@ -74,8 +74,8 @@
 #include "apr_general.h"
 
 /**
- * @defgroup APR_Util_Rings Rings
- * @ingroup APR_Util
+ * @defgroup APR_Rings Rings
+ * @ingroup APR
  * @{
  */
 
