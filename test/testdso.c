@@ -155,6 +155,9 @@ static void test_unload_module(CuTest *tc)
 
     status = apr_dso_unload(h);
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+
+    status = apr_dso_sym(&func1, h, "print_hello");
+    CuAssertIntEquals(tc, APR_EINIT, status);
 }
 
 
