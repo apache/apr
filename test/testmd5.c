@@ -86,7 +86,7 @@ struct testcase testcases[] =
      "\xd1\xa1\xc0\x97\x8a\x60\xbb\xfb\x2a\x25\x46\x9d\xa5\xae\xd0\xb0"}
 };
 
-static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
+static void try(const void *buf, apr_size_t bufLen, apr_xlate_t *xlate,
                 const void *digest)
 {
     int i;

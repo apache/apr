@@ -97,7 +97,7 @@ apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 
 APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
 	
     do {
         rv = send(sock->socketdes, buf, (*len), 0);
@@ -170,7 +170,7 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t * sock, const struct iovec *vec
 APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
                                      apr_int32_t flags, const char *buf, apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
 
     do {
         rv = sendto(sock->socketdes, buf, (*len), flags,
@@ -204,7 +204,7 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                                        apr_int32_t flags, char *buf,
                                        apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
 
     if (from == NULL){
         return APR_ENOMEM;

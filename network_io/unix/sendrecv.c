@@ -99,7 +99,7 @@ apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 
 apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
     
     if (sock->netmask & APR_INCOMPLETE_WRITE) {
         sock->netmask &= ~APR_INCOMPLETE_WRITE;
@@ -138,7 +138,7 @@ do_select:
 
 apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
     apr_status_t arv;
 
     if (sock->netmask & APR_INCOMPLETE_READ) {
@@ -181,7 +181,7 @@ do_select:
 apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
                         apr_int32_t flags, const char *buf, apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
 
     do {
         rv = sendto(sock->socketdes, buf, (*len), flags, 
@@ -215,7 +215,7 @@ apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                           apr_int32_t flags, char *buf, 
                           apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
 
     do {
         rv = recvfrom(sock->socketdes, buf, (*len), flags, 
@@ -463,7 +463,7 @@ static int include_hdrs_in_length(void)
 
     static api_e api; 
     int kernel_version;  
-    size_t kernel_version_size;
+    apr_size_t kernel_version_size;
 
     if (api != UNKNOWN) {
         return (api == OLD);
@@ -495,7 +495,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     off_t nbytes = 0;
     int rv, i;
     struct sf_hdtr headerstruct;
-    size_t bytes_to_send = *len;
+    apr_size_t bytes_to_send = *len;
 
     /* Ignore flags for now. */
     flags = 0;
@@ -625,8 +625,8 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 			  apr_int32_t flags)
 {
     int i;
-    ssize_t rc;
-    size_t nbytes = *len, headerlen, trailerlen;
+    apr_ssize_t rc;
+    apr_size_t nbytes = *len, headerlen, trailerlen;
     struct iovec hdtrarray[2];
     char *headerbuf, *trailerbuf;
 
@@ -902,7 +902,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         		apr_int32_t flags)
 {
     apr_status_t rv, arv;
-    size_t nbytes;
+    apr_size_t nbytes;
     sendfilevec_t *sfv;
     int vecs, curvec, i, repeat;
     apr_size_t requested_len = 0;

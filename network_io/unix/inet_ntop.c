@@ -235,7 +235,7 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
     /*
      * Check for overflow, copy, and we're done.
      */
-    if ((size_t)(tp - tmp) > size) {
+    if ((apr_size_t)(tp - tmp) > size) {
         errno = ENOSPC;
         return (NULL);
     }
