@@ -1182,7 +1182,7 @@ if test "$ac_cv_type_off_t" = "yes"; then
         off_t_fmt='#define APR_OFF_T_FMT APR_INT16_T_FMT'
     elif test "$ac_cv_sizeof_off_t" = "4"; then
         off_t_value='apr_int32_t'
-        off_t_fmt='#define APR_OFF_T_FMT APR_INT32_T_FMT'
+        off_t_fmt='#define APR_OFF_T_FMT "d"'
     elif test "$ac_cv_sizeof_off_t" = "8"; then
         off_t_value='apr_int64_t'
         off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
@@ -1192,7 +1192,7 @@ if test "$ac_cv_type_off_t" = "yes"; then
     fi
 else
     off_t_value='apr_int32_t'
-    off_t_fmt='#define APR_OFF_T_FMT APR_INT32_T_FMT'
+    off_t_fmt='#define APR_OFF_T_FMT "d"'
 fi
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], pid_t, 8)
