@@ -94,6 +94,7 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p)
 
 APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
                                             const char **inpath,
+                                            apr_int32_t flags,
                                             apr_pool_t *p)
 {
     if (**inpath == '/') 
