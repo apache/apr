@@ -64,7 +64,14 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package APR lock library
+ * @file apr_lock.h
+ * @brief APR Locking Routines
+ */
+
+/**
+ * @defgroup APR_Lock Locking Routines
+ * @ingroup APR
+ * @{
  */
 
 typedef enum {APR_CROSS_PROCESS, APR_INTRAPROCESS, APR_LOCKALL} apr_lockscope_e;
@@ -96,9 +103,8 @@ typedef struct apr_lock_t    apr_lock_t;
  *        argument should always be provided.  The lock code itself will
  *        determine if it should be used.
  * @param pool The pool to operate on.
- * @tip APR_CROSS_PROCESS may lock both processes and threads, but it is
- *      only guaranteed to lock processes.
- * @deffunc apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, const char *fname, apr_pool_t *pool)
+ * @warning APR_CROSS_PROCESS may lock both processes and threads, but it is
+ *          only guaranteed to lock processes.
  */
 APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
                                           apr_locktype_e type,
@@ -109,15 +115,13 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
 /**
  * Lock a protected region.
  * @param lock The lock to set.
- * @deffunc apr_status_t apr_lock_acquire(apr_lock_t *lock)
  */
 APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock);
 
 /**
  * Tries to lock a protected region.  
- * If it fails, returns APR_EBUSY.  Otherwise, it returns APR_SUCCESS.
  * @param lock The lock to set.
- * @deffunc apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
+ * @return If it fails, returns APR_EBUSY.  Otherwise, it returns APR_SUCCESS.
  */
 APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock);
 
@@ -125,7 +129,6 @@ APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock);
  * Lock a region with either a reader or writer lock.
  * @param lock The lock to set.
  * @param type The type of lock to acquire.
- * @deffunc apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e type)
  */
 APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
                                               apr_readerwriter_e type);
@@ -133,16 +136,14 @@ APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
 /**
  * Unlock a protected region.
  * @param lock The lock to reset.
- * @deffunc apr_status_t apr_lock_release(apr_lock_t *lock)
  */
 APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock);
 
 /**
  * Free the memory associated with a lock.
  * @param lock The lock to free.
- * @deffunc apr_status_t apr_lock_destroy(apr_lock_t *lock)
- * @tip  If the lock is currently active when it is destroyed, it 
- *       will be unlocked first.
+ * @remark If the lock is currently active when it is destroyed, it 
+ *         will be unlocked first.
  */
 APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock);
 
@@ -154,11 +155,10 @@ APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock);
  *              determine if it should be used.  This filename should be the 
  *              same one that was passed to apr_lock_create
  * @param pool The pool to operate on.
- * @tip This function doesn't always do something, it depends on the
- *      locking mechanism chosen for the platform, but it is a good
- *      idea to call it regardless, because it makes the code more
- *      portable. 
- * @deffunc apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, apr_pool_t *pool)
+ * @remark This function doesn't always do something, it depends on the
+ *         locking mechanism chosen for the platform, but it is a good
+ *         idea to call it regardless, because it makes the code more
+ *         portable. 
  */
 APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
                                               const char *fname,
@@ -169,7 +169,6 @@ APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
  * @param lock The currently open lock.
  * @param key The key to use when retreiving data associated with this lock
  * @param data The user data associated with the lock.
- * @deffunc apr_status_t apr_lock_data_get(apr_lock_t *lock, const char *key, void *data)
  */
 APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, const char *key,
                                            void *data);
@@ -180,7 +179,6 @@ APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, const char *key,
  * @param data The user data to associate with the lock.
  * @param key The key to use when associating data with this lock
  * @param cleanup The cleanup to use when the lock is destroyed.
- * @deffunc apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key, apr_status_t (*cleanup)(void *))
  */
 APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, void *data,
                                            const char *key,
@@ -222,9 +220,8 @@ typedef enum {APR_LOCK_FCNTL, APR_LOCK_FLOCK, APR_LOCK_SYSVSEM, APR_LOCK_PROC_PT
  *        argument should always be provided.  The lock code itself will
  *        determine if it should be used.
  * @param pool The pool to operate on.
- * @tip APR_CROSS_PROCESS may lock both processes and threads, but it is
- *      only guaranteed to lock processes.
- * @deffunc apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, const char *fname, apr_pool_t *pool)
+ * @warning APR_CROSS_PROCESS may lock both processes and threads, but it is
+ *          only guaranteed to lock processes.
  */
 APR_DECLARE(apr_status_t) apr_lock_create_np(apr_lock_t **lock,
                                              apr_locktype_e type,
@@ -233,7 +230,7 @@ APR_DECLARE(apr_status_t) apr_lock_create_np(apr_lock_t **lock,
                                              const char *fname,
                                              apr_pool_t *pool);
 #endif /* APR_HAS_LOCK_CREATE_NP */
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif
