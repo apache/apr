@@ -171,7 +171,6 @@ apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max,
                         const char *format, apr_exploded_time_t *xt)
 {
     struct tm tm;
-
     memset(&tm, 0, sizeof tm);
     tm.tm_sec  = xt->tm_sec;
     tm.tm_min  = xt->tm_min;
@@ -182,6 +181,7 @@ apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max,
     tm.tm_wday = xt->tm_wday;
     tm.tm_yday = xt->tm_yday;
     tm.tm_isdst = xt->tm_isdst;
+    tm.tm_gmtoff = xt->tm_gmtoff;
     (*retsize) = strftime(s, max, format, &tm);
     return APR_SUCCESS;
 }
