@@ -1,4 +1,5 @@
 Changes with APR b1
+  *) Rename apr_opendir to apr_dir_open.  [Ryan Bloom]
 
   *) apr_snprintf()'s %pI format string now takes apr_sockaddr_t *
      instead of sockaddr_in *.  [Jeff Trawick]
