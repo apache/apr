@@ -314,7 +314,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * Extract the rootpath from the given filepath
  * @ingroup apr_filepath
  * @param rootpath the root file path returned with APR_SUCCESS or APR_EINCOMPLETE
- * @param filepath the pathname to parse for it's root component
+ * @param filepath the pathname to parse for its root component
  * @param flags the desired rules to apply, from
  * <PRE>
  *      APR_FILEPATH_NATIVE    Use native path seperators (e.g. '\' on Win32)

@@ -492,7 +492,7 @@ static apr_status_t apr_sms_threads_pre_destroy(apr_sms_t *sms)
     /* This function WILL always be called.  However, be aware that the
      * main sms destroy function knows that it's not wise to try and destroy
      * the same piece of memory twice, so the destroy function in a child won't
-     * neccesarily be called.  To guarantee we destroy the lock it's therefore
+     * necessarily be called.  To guarantee we destroy the lock it's therefore
      * destroyed here.
      */
         
