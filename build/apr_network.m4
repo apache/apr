@@ -146,13 +146,16 @@ AC_DEFUN(APR_CHECK_RESOLV_RETRANS,[
   AC_CACHE_CHECK(for presence of retrans/retry fields in res_state/resolv.h , ac_cv_retransretry,[
   AC_TRY_RUN( [
 #include <sys/types.h>
+#if defined(__sun__)
 #include <inet/ip.h>
+#endif
 #include <resolv.h>
 /* _res is a global defined in resolv.h */
-void main(void) {
+int main(void) {
     _res.retrans = 2;
     _res.retry = 1;
     exit(0);
+    return 0;
 }
 ],[
   ac_cv_retransretry="yes"
