@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) apr_connect()on Windows: Handle timeouts and returning the proper
+     status code when a connect is in progress. [Bill Stoddard]
+
   *) apr_connect() on Unix: Handle EINTR during connect().  Handle timeouts.
      [Jeff Trawick]
 
