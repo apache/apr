@@ -64,7 +64,7 @@
 #include "apr_dso.h"
 #include <kernel/image.h>
 
-struct ap_dso_handle_st {
+struct dso_handle_t {
     image_id       handle;    /* Handle to the DSO loaded */
     ap_context_t   *cont;
 };
