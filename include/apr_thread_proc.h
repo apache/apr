@@ -112,7 +112,7 @@ ap_status_t ap_set_threadkeydata(ap_key_t *, void *, char *,
 ap_status_t ap_createprocattr_init(ap_procattr_t **, ap_context_t *);
 ap_status_t ap_setprocattr_io(ap_procattr_t *, ap_int32_t, ap_int32_t, 
                               ap_int32_t);
-ap_status_t ap_setprocattr_dir(ap_procattr_t *, char *);
+ap_status_t ap_setprocattr_dir(ap_procattr_t *, const char *);
 ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *, ap_cmdtype_e);
 ap_status_t ap_setprocattr_detach(ap_procattr_t *, ap_int32_t);
 ap_status_t ap_get_procdata(ap_proc_t *, char *, void *);
@@ -124,8 +124,8 @@ ap_status_t ap_get_childout(ap_file_t **, ap_proc_t *);
 ap_status_t ap_get_childerr(ap_file_t **, ap_proc_t *);
 
 ap_status_t ap_fork(ap_proc_t **, ap_context_t *);
-ap_status_t ap_create_process(ap_context_t *, char *, char *const [], char **, 
-                              ap_procattr_t *, ap_proc_t **);
+ap_status_t ap_create_process(ap_proc_t **, ap_context_t *, const char *, 
+                              char *const [], char **, ap_procattr_t *);
 ap_status_t ap_wait_proc(ap_proc_t *, ap_wait_how_e);
 
 ap_status_t ap_kill(ap_proc_t *, ap_int32_t);
