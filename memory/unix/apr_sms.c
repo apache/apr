@@ -842,6 +842,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms,
 APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms,
                                                   apr_os_thread_t thread)
 {
+    apr_status_t rv;
+    
     do {
         if (!sms->sms_lock) {
             /* Create the sms framework lock we'll use. */
@@ -856,11 +858,20 @@ APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms,
         /* let the sms know about the thread if it is
          * interested (so it can protect its private
          * data with its own lock)
+         *
+         * if the sms is doesn't have a thread register
+         * function, or it wasn't able to register the
+         * thread, we should bomb out!
+         * XXX - not sure how to implement the bombing out
          */
+        rv = APR_ENOTIMPL;
         if (sms->thread_register_fn)
             sms->thread_register_fn(sms, thread);
 
         apr_lock_release(sms->sms_lock);
+
+        if (rv != APR_SUCCESS)
+            return rv;
 
         sms = sms->parent;
     } while (sms);
