@@ -255,6 +255,7 @@ int main(void)
         socket_pollfd.desc_type = APR_POLL_SOCKET;
         socket_pollfd.reqevents = APR_POLLIN;
         socket_pollfd.desc.s = s[i];
+        socket_pollfd.client_data = s[i];
         if (apr_pollset_add(pollset, &socket_pollfd) != APR_SUCCESS){
             printf("Failed to add socket %d\n", i);
             exit (-1);
@@ -272,8 +273,11 @@ int main(void)
 
     printf("\nTest 2: First descriptor signalled.....\n");
     send_msg(s, sa, 0);
+    descriptors_out = NULL;
     if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out)
-         != APR_SUCCESS) || (num != 1)) {
+         != APR_SUCCESS) || (num != 1) || !descriptors_out ||
+        (descriptors_out[0].desc.s != s[0]) ||
+        (descriptors_out[0].client_data != s[0])) {
         printf("Test 2: FAILED (errno=%d, num=%d (expected 1)\n", rv, num);
         exit(-1);
     }
@@ -283,8 +287,16 @@ int main(void)
     printf("\nTest 3: Middle descriptors signalled.....\n");
     send_msg(s, sa, 2);
     send_msg(s, sa, 5);
+    descriptors_out = NULL;
+    /* note that the descriptors in the result set can be in
+     * any order, so we have to test for both permutations here
+     */
     if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out)
-         != APR_SUCCESS) || (num != 2)) {
+         != APR_SUCCESS) || (num != 2) || !descriptors_out ||
+        !(((descriptors_out[0].desc.s == s[2]) &&
+           (descriptors_out[1].desc.s == s[5])) ||
+          ((descriptors_out[0].desc.s == s[5]) &&
+           (descriptors_out[1].desc.s == s[2])))) {
         printf("Test 2: FAILED (errno=%d, num=%d (expected 2)\n", rv, num);
         exit(-1);
     }
@@ -294,8 +306,11 @@ int main(void)
 
     printf("\nTest 4: Last descriptor signalled......\n");
     send_msg(s, sa, LARGE_NUM_SOCKETS - 1);
+    descriptors_out = NULL;
     if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out) !=
-         APR_SUCCESS) || (num != 1)) {
+         APR_SUCCESS) || (num != 1) || !descriptors_out ||
+        (descriptors_out[0].desc.s != s[LARGE_NUM_SOCKETS - 1]) ||
+        (descriptors_out[0].client_data != s[LARGE_NUM_SOCKETS - 1])) {
         printf("Test 4: FAILED (errno=%d, num=%d (expected 1)\n", rv, num);
         exit(-1);
     }
