@@ -689,3 +689,8 @@ APR_DECLARE(const char*) apr_sms_identity(apr_sms_t *sms)
 {
     return sms->identity;
 }
+
+APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms)
+{
+    return sms->parent;
+}
