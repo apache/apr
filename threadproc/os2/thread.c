@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 static void apr_thread_begin(void *arg)
 {
   apr_thread_t *thread = (apr_thread_t *)arg;
-  thread->rv = thread->func(thread, thread->data);
+  thread->exitval = thread->func(thread, thread->data);
 }
 
 
