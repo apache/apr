@@ -56,6 +56,7 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
 	-@erase "$(INTDIR)\apr_sms_tracking.obj"
+	-@erase "$(INTDIR)\apr_sms_trivial.obj"
 	-@erase "$(INTDIR)\apr_snprintf.obj"
 	-@erase "$(INTDIR)\apr_strings.obj"
 	-@erase "$(INTDIR)\apr_strnatcmp.obj"
@@ -171,6 +172,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
 	"$(INTDIR)\apr_sms_tracking.obj" \
+	"$(INTDIR)\apr_sms_trivial.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
 	"$(INTDIR)\apr_strnatcmp.obj" \
@@ -254,6 +256,7 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
 	-@erase "$(INTDIR)\apr_sms_tracking.obj"
+	-@erase "$(INTDIR)\apr_sms_trivial.obj"
 	-@erase "$(INTDIR)\apr_snprintf.obj"
 	-@erase "$(INTDIR)\apr_strings.obj"
 	-@erase "$(INTDIR)\apr_strnatcmp.obj"
@@ -370,6 +373,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
 	"$(INTDIR)\apr_sms_tracking.obj" \
+	"$(INTDIR)\apr_sms_trivial.obj" \
 	"$(INTDIR)\apr_snprintf.obj" \
 	"$(INTDIR)\apr_strings.obj" \
 	"$(INTDIR)\apr_strnatcmp.obj" \
@@ -985,6 +989,34 @@ DEP_CPP_APR_SMS_=\
 	
 
 "$(INTDIR)\apr_sms_tracking.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\memory\unix\apr_sms_trivial.c
+DEP_CPP_APR_SMS_T=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_sms.h"\
+	".\include\apr_sms_trivial.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\memory\unix\sms_private.h"\
+	
+
+"$(INTDIR)\apr_sms_trivial.obj" : $(SOURCE) $(DEP_CPP_APR_SMS_T) "$(INTDIR)"\
  ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
