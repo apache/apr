@@ -482,10 +482,14 @@
 
 #ifdef APR_RING_DEBUG
 #include <stdio.h>
+#include <assert.h>
+
 #define APR_RING_CHECK_ONE(msg, ptr)					\
 	fprintf(stderr, "*** %s %p\n", msg, ptr)
+
 #define APR_RING_CHECK(hp, elem, link, msg)				\
 	APR_RING_CHECK_ELEM(APR_RING_SENTINEL(hp, elem, link), elem, link, msg)
+
 #define APR_RING_CHECK_ELEM(ep, elem, link, msg) do {			\
 	struct elem *start = (ep);					\
 	struct elem *here = start;					\
@@ -512,6 +516,17 @@
 	} while (here != start);					\
 	fprintf(stderr, "*** ring check end\n");			\
     } while (0)
+
+#define APR_RING_CHECK_CONSISTENCY(hp, elem, link) do {			\
+	struct elem *start = APR_RING_SENTINEL(hp, elem, link);		\
+	struct elem *here = start;					\
+	do {								\
+	    assert(APR_RING_PREV(APR_RING_NEXT(here, link), link) == here); \
+	    assert(APR_RING_NEXT(APR_RING_PREV(here, link), link) == here); \
+	    here = APR_RING_NEXT(here, link);				\
+	} while (here != start);					\
+    } while (0)
+
 #else
 /**
  * Print a single pointer value to STDERR
@@ -531,6 +546,16 @@
  * @param msg  Descriptive message
  */
 #define APR_RING_CHECK(hp, elem, link, msg)
+/**
+ * Loops around a ring and checks all the pointers for consistency.  Pops
+ * an assertion if any inconsistency is found.  Same idea as APR_RING_CHECK()
+ * except that it's silent if all is well.
+ *   (This is a no-op unless APR_RING_DEBUG is defined.)
+ * @param hp   Head of the ring
+ * @param elem The name of the element struct
+ * @param link The name of the APR_RING_ENTRY in the element struct
+ */
+#define APR_RING_CHECK_CONSISTENCY(hp, elem, link)
 /**
  * Dump all ring pointers to STDERR, starting with the given element and
  * looping all the way around the ring back to that element.  Aborts if
