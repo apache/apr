@@ -72,3 +72,10 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signal)
     return APR_SUCCESS;
 }
 
+void apr_signal_init(apr_pool_t *pglobal)
+{
+}
+const char *apr_signal_get_description(int signum)
+{
+    return "unknown signal (not supported)";
+}
