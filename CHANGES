@@ -1,5 +1,9 @@
 Changes with APR 0.9.6
 
+  *) Add apr_threadattr_stacksize_set() for overriding the default
+     stack size for threads created by apr_thread_create().
+     [Jeff Trawick]
+
   *) Add an RPM spec file. [Graham Leggett]
 
   *) Add a build script to create a solaris package. [Graham Leggett]

@@ -35,6 +35,7 @@ struct apr_thread_t {
 struct apr_threadattr_t {
     apr_pool_t *pool;
     apr_int32_t detach;
+    apr_size_t stacksize;
 };
 
 struct apr_threadkey_t {

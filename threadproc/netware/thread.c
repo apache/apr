@@ -50,6 +50,13 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
+APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
+                                                       apr_size_t stacksize)
+{
+    attr->stack_size = stacksize;
+    return APR_SUCCESS;
+}
+
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
