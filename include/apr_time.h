@@ -101,7 +101,8 @@ typedef apr_int32_t apr_short_interval_time_t;
 
 #define APR_TIME_FROM_SEC(sec) ((apr_time_t)(sec) * APR_USEC_PER_SEC)
 
-#define APR_TIME_MAKE(sec, usec) ((apr_time_t)(sec) * APR_USEC_PER_SEC + usec)
+#define APR_TIME_MAKE(sec, usec) ((apr_time_t)(sec) * APR_USEC_PER_SEC \
+                                + (apr_time_t)(usec))
 
 /**
  * return the current time
