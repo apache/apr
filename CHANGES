@@ -1,5 +1,12 @@
 Changes with APR b1
 
+  *) Fix bug in file_io/unix/dir.c.  There is no such thing as a dirent,
+     it must be a struct dirent.  
+     [Kevin Pilch-Bisson <kevin@pilch-bisson.net>]
+
+  *) Fix the configure script so that we can build from a different
+     directory.  [Kevin Pilch-Bisson <kevin@pilch-bisson.net>]
+
   *) Introduce the wanted flag argument to the apr_stat/lstat/getfileinfo
      family of functions.  This change allows the user to determine what
      platform-specific file information is retrieved, to optimize both
