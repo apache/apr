@@ -86,6 +86,7 @@ extern "C" {
 #define APR_SO_REUSEADDR     16
 #define APR_SO_TIMEOUT       32
 #define APR_SO_SNDBUF        64
+#define APR_SO_RCVBUF        128
 
 #define APR_POLLIN    0x001 
 #define APR_POLLPRI   0x002
@@ -412,6 +413,7 @@ B<Setup socket options for the specified socket>
                                     values < 0 mean wait forever.  0 means
                                     don't wait at all.
               APR_SO_SNDBUF     --  Set the SendBufferSize
+              APR_SO_RCVBUF     --  Set the ReceiveBufferSize
     arg 3) Are we turning the option on or off.
 
 =cut
