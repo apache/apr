@@ -52,281 +52,423 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_mmap.h"
+#include "test_apr.h"
+#include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_network_io.h"
 #include "apr_poll.h"
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-static int make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, apr_port_t port,
-                apr_pool_t *p)
+#define SMALL_NUM_SOCKETS 3
+#define LARGE_NUM_SOCKETS 64
+
+static apr_socket_t *s[LARGE_NUM_SOCKETS];
+static apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
+static apr_pollfd_t *pollarray;
+static apr_pollfd_t *pollarray_large;
+static apr_pollset_t *pollset;
+
+static void make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, 
+                        apr_port_t port, apr_pool_t *p, CuTest *tc)
 {
-    if (apr_sockaddr_info_get(sa, "127.0.0.1", APR_UNSPEC, port, 0, p)
-        != APR_SUCCESS){
-        printf("couldn't create control socket information, shutting down");
-        return 1;
-    }
-    if (apr_socket_create(sock, (*sa)->family, SOCK_DGRAM, p)
-        != APR_SUCCESS){
-        printf("couldn't create UDP socket, shutting down");
-        return 1;
-    }
-    if (apr_socket_bind((*sock), (*sa)) != APR_SUCCESS){
-        printf("couldn't bind UDP socket!");
-        return 1;
-    }
-    return 0;
+    apr_status_t rv;
+
+    rv = apr_sockaddr_info_get(sa, "127.0.0.1", APR_UNSPEC, port, 0, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_socket_create(sock, (*sa)->family, SOCK_DGRAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv =apr_socket_bind((*sock), (*sa));
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 }
 
-static int check_sockets(apr_pollfd_t *pollarray, apr_socket_t **sockarray)
+static void check_sockets(const apr_pollfd_t *pollarray, 
+                          apr_socket_t **sockarray, int which, int pollin, 
+                          CuTest *tc)
 {
-    int i = 0;
-    printf("\tSocket 0\tSocket 1\tSocket 2\n\t");
-    for (i = 0;i < 3;i++){
-        apr_int16_t event;
-        if (apr_poll_revents_get(&event, sockarray[i], pollarray) != APR_SUCCESS){
-            printf("Failed!\n");
-            exit (-1);
-        }
-        if (event & APR_POLLIN){
-            printf ("POLLIN!\t\t");
-        } else {
-            printf ("No wait\t\t");
-        }
+    apr_status_t rv;
+    apr_int16_t event;
+    char *str;
+
+    rv = apr_poll_revents_get(&event, sockarray[which], 
+                              (apr_pollfd_t *)pollarray);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    if (pollin) {
+        str = apr_psprintf(p, "Socket %d not signalled when it should be",
+                           which);
+        CuAssert(tc, str, event & APR_POLLIN);
+    } else {
+        str = apr_psprintf(p, "Socket %d signalled when it should not be",
+                           which);
+        CuAssert(tc, str, !(event & APR_POLLIN));
     }
-    printf("\n");
-    return 0;
 }
 
-static void send_msg(apr_socket_t **sockarray, apr_sockaddr_t **sas, int which)
+static void send_msg(apr_socket_t **sockarray, apr_sockaddr_t **sas, int which,
+                     CuTest *tc)
 {
     apr_size_t len = 5;
     apr_status_t rv;
-    char errmsg[120];
 
-    printf("\tSending message to socket %d............", which);
-    if ((rv = apr_socket_sendto(sockarray[which], sas[which], 0, "hello", &len)) != APR_SUCCESS){
-        apr_strerror(rv, errmsg, sizeof errmsg);
-        printf("Failed! %s\n", errmsg);
-        exit(-1);
-    }
-    printf("OK\n");
+    rv = apr_socket_sendto(sockarray[which], sas[which], 0, "hello", &len);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, strlen("hello"), len);
 }
 
-static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p)
+static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p, 
+                     CuTest *tc)
 {
     apr_size_t buflen = 5;
     char *buffer = apr_pcalloc(p, sizeof(char) * buflen);
     apr_sockaddr_t *recsa;
     apr_status_t rv;
-    char errmsg[120];
 
     apr_sockaddr_info_get(&recsa, "127.0.0.1", APR_UNSPEC, 7770, 0, p);
 
-    printf("\tTrying to get message from socket %d....", which);
-    if ((rv = apr_socket_recvfrom(recsa, sockarray[which], 0, buffer, &buflen))
-        != APR_SUCCESS){
-        apr_strerror(rv, errmsg, sizeof errmsg);
-        printf("Failed! %s\n", errmsg);
-        exit (-1);
-    }
-    printf("OK\n");
+    rv = apr_socket_recvfrom(recsa, sockarray[which], 0, buffer, &buflen);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, strlen("hello"), buflen);
+    CuAssertStrEquals(tc, "hello", buffer);
 }
 
-#define SMALL_NUM_SOCKETS 3
-#define LARGE_NUM_SOCKETS 64
-
-int main(void)
+    
+static void create_all_sockets(CuTest *tc)
 {
-    apr_pool_t *context;
-    apr_socket_t *s[LARGE_NUM_SOCKETS];
-    apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
-    apr_pollfd_t *pollarray;
-    apr_pollfd_t *pollarray_large;
-    apr_pollset_t *pollset;
-    int i = 0, srv = SMALL_NUM_SOCKETS;
-    apr_int32_t num;
-    const apr_pollfd_t *descriptors_out;
-    apr_status_t rv;
-    
-    fprintf (stdout,"APR Poll Test\n*************\n\n");
-    
-    printf("Initializing...................................");
-    if (apr_initialize() != APR_SUCCESS) {
-        printf("Failed.\n");
-        exit(-1);
-    }
-    printf("OK\n");
-    atexit(apr_terminate);
+    int i;
 
-    printf("Creating context...............................");    
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        printf("Failed.\n");
-        exit(-1);
-    }
-    printf("OK\n");
-    
-    printf("\tCreating the sockets I'll use..........");
     for (i = 0; i < LARGE_NUM_SOCKETS; i++){
-        if (make_socket(&s[i], &sa[i], 7777 + i, context) != 0){
-            exit(-1);
-        }
+        make_socket(&s[i], &sa[i], 7777 + i, p, tc);
     }
-    printf("OK\n");
+}
        
-    printf ("\tSetting up the poll arrays I'll use........");
-    if (apr_poll_setup(&pollarray, SMALL_NUM_SOCKETS, context) != APR_SUCCESS){
-        printf("Couldn't create a poll array!\n");
-        exit (-1);
-    }
-    if (apr_poll_setup(&pollarray_large, LARGE_NUM_SOCKETS, context) !=
-        APR_SUCCESS){
-        printf("Couldn't create a poll array!\n");
-        exit (-1);
-    }
+static void setup_small_poll(CuTest *tc)
+{
+    apr_status_t rv;
+    int i;
+
+    rv = apr_poll_setup(&pollarray, SMALL_NUM_SOCKETS, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    
     for (i = 0; i < SMALL_NUM_SOCKETS;i++){
-        if (apr_poll_socket_add(pollarray, s[i], APR_POLLIN) != APR_SUCCESS){
-            printf("Failed to add socket %d\n", i);
-            exit (-1);
-        }
+        CuAssertIntEquals(tc, 0, pollarray[i].reqevents);
+        CuAssertIntEquals(tc, 0, pollarray[i].rtnevents);
+
+        rv = apr_poll_socket_add(pollarray, s[i], APR_POLLIN);
+        CuAssertIntEquals(tc, APR_SUCCESS, rv);
+        CuAssertPtrEquals(tc, s[i], pollarray[i].desc.s);
     }
+}
+
+static void setup_large_poll(CuTest *tc)
+{
+    apr_status_t rv;
+    int i;
+
+    rv = apr_poll_setup(&pollarray_large, LARGE_NUM_SOCKETS, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    
     for (i = 0; i < LARGE_NUM_SOCKETS;i++){
-        if (apr_poll_socket_add(pollarray_large, s[i], APR_POLLIN) !=
-            APR_SUCCESS){
-            printf("Failed to add socket %d\n", i);
-            exit (-1);
+        CuAssertIntEquals(tc, 0, pollarray_large[i].reqevents);
+        CuAssertIntEquals(tc, 0, pollarray_large[i].rtnevents);
+
+        rv = apr_poll_socket_add(pollarray_large, s[i], APR_POLLIN);
+        CuAssertIntEquals(tc, APR_SUCCESS, rv);
+        CuAssertPtrEquals(tc, s[i], pollarray_large[i].desc.s);
+    }
+}
+
+static void nomessage(CuTest *tc)
+{
+    apr_status_t rv;
+    int srv = SMALL_NUM_SOCKETS;
+
+    rv = apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    check_sockets(pollarray, s, 0, 0, tc);
+    check_sockets(pollarray, s, 1, 0, tc);
+    check_sockets(pollarray, s, 2, 0, tc);
+}
+
+static void send_2(CuTest *tc)
+{
+    apr_status_t rv;
+    int srv = SMALL_NUM_SOCKETS;
+
+    send_msg(s, sa, 2, tc);
+
+    rv = apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    check_sockets(pollarray, s, 0, 0, tc);
+    check_sockets(pollarray, s, 1, 0, tc);
+    check_sockets(pollarray, s, 2, 1, tc);
+}
+
+static void recv_2_send_1(CuTest *tc)
+{
+    apr_status_t rv;
+    int srv = SMALL_NUM_SOCKETS;
+
+    recv_msg(s, 2, p, tc);
+    send_msg(s, sa, 1, tc);
+
+    rv = apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    check_sockets(pollarray, s, 0, 0, tc);
+    check_sockets(pollarray, s, 1, 1, tc);
+    check_sockets(pollarray, s, 2, 0, tc);
+}
+
+static void send_2_signaled_1(CuTest *tc)
+{
+    apr_status_t rv;
+    int srv = SMALL_NUM_SOCKETS;
+
+    send_msg(s, sa, 2, tc);
+
+    rv = apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    check_sockets(pollarray, s, 0, 0, tc);
+    check_sockets(pollarray, s, 1, 1, tc);
+    check_sockets(pollarray, s, 2, 1, tc);
+}
+
+static void recv_1_send_0(CuTest *tc)
+{
+    apr_status_t rv;
+    int srv = SMALL_NUM_SOCKETS;
+
+    recv_msg(s, 1, p, tc);
+    send_msg(s, sa, 0, tc);
+
+    rv = apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    check_sockets(pollarray, s, 0, 1, tc);
+    check_sockets(pollarray, s, 1, 0, tc);
+    check_sockets(pollarray, s, 2, 1, tc);
+}
+
+static void clear_all_signalled(CuTest *tc)
+{
+    apr_status_t rv;
+    int srv = SMALL_NUM_SOCKETS;
+
+    recv_msg(s, 0, p, tc);
+    recv_msg(s, 2, p, tc);
+
+    rv = apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    check_sockets(pollarray, s, 0, 0, tc);
+    check_sockets(pollarray, s, 1, 0, tc);
+    check_sockets(pollarray, s, 2, 0, tc);
+}
+
+static void send_large_pollarray(CuTest *tc)
+{
+    apr_status_t rv;
+    int lrv = LARGE_NUM_SOCKETS;
+    int i;
+
+    send_msg(s, sa, LARGE_NUM_SOCKETS - 1, tc);
+
+    rv = apr_poll(pollarray_large, LARGE_NUM_SOCKETS, &lrv, 
+                  2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    for (i = 0; i < LARGE_NUM_SOCKETS; i++) {
+        if (i == (LARGE_NUM_SOCKETS - 1)) {
+            check_sockets(pollarray_large, s, i, 1, tc);
+        }
+        else {
+            check_sockets(pollarray_large, s, i, 0, tc);
         }
     }
-    printf("OK\n");
-    printf("Starting Tests\n");
+}
 
-    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
-    check_sockets(pollarray, s);
-    
-    send_msg(s, sa, 2);
+static void recv_large_pollarray(CuTest *tc)
+{
+    apr_status_t rv;
+    int lrv = LARGE_NUM_SOCKETS;
+    int i;
 
-    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollarray, s);
+    recv_msg(s, LARGE_NUM_SOCKETS - 1, p, tc);
 
-    recv_msg(s, 2, context);
-    send_msg(s, sa, 1);
+    rv = apr_poll(pollarray_large, LARGE_NUM_SOCKETS, &lrv, 
+                  2 * APR_USEC_PER_SEC);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
 
-    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollarray, s);
-
-    send_msg(s, sa, 2);
-
-    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollarray, s);
-     
-    recv_msg(s, 1, context);
-    send_msg(s, sa, 0);
-    
-    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollarray, s);
-
-    recv_msg(s, 0, context);
-    recv_msg(s, 2, context);
-
-    send_msg(s, sa, LARGE_NUM_SOCKETS - 1);
-    apr_poll(pollarray_large, LARGE_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollarray_large, s);
-    recv_msg(s, LARGE_NUM_SOCKETS - 1, context);
-
-
-    printf("Tests completed.\n");
-
-    fprintf (stdout,"\nAPR Pollset Test\n****************\n\n");
-
-    printf ("\tSetting up pollset....................");
-    if (apr_pollset_create(&pollset, LARGE_NUM_SOCKETS, context, 0) != APR_SUCCESS){
-        printf("Couldn't create a pollset!\n");
-        exit (-1);
+    for (i = 0; i < LARGE_NUM_SOCKETS; i++) {
+        check_sockets(pollarray_large, s, i, 0, tc);
     }
+}
+
+static void setup_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    rv = apr_pollset_create(&pollset, LARGE_NUM_SOCKETS, p, 0);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+static void add_sockets_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    int i;
+
     for (i = 0; i < LARGE_NUM_SOCKETS;i++){
         apr_pollfd_t socket_pollfd;
         socket_pollfd.desc_type = APR_POLL_SOCKET;
         socket_pollfd.reqevents = APR_POLLIN;
         socket_pollfd.desc.s = s[i];
         socket_pollfd.client_data = s[i];
-        if (apr_pollset_add(pollset, &socket_pollfd) != APR_SUCCESS){
-            printf("Failed to add socket %d\n", i);
-            exit (-1);
-        }
+        rv = apr_pollset_add(pollset, &socket_pollfd);
+        CuAssertIntEquals(tc, APR_SUCCESS, rv);
     }
-    printf("OK\n");
-
-    printf("\nTest 1: No descriptors signalled.......");
-    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out) !=
-         APR_TIMEUP) || (num != 0)) {
-        printf("Test 1: FAILED (errno=%d, num=%d (expected 0)\n", rv, num);
-        exit(-1);
-    }
-    printf("Test 1: OK\n");
-
-    printf("\nTest 2: First descriptor signalled.....\n");
-    send_msg(s, sa, 0);
-    descriptors_out = NULL;
-    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out)
-         != APR_SUCCESS) || (num != 1) || !descriptors_out ||
-        (descriptors_out[0].desc.s != s[0]) ||
-        (descriptors_out[0].client_data != s[0])) {
-        printf("Test 2: FAILED (errno=%d, num=%d (expected 1)\n", rv, num);
-        exit(-1);
-    }
-    recv_msg(s, 0, context);
-    printf("Test 2: OK\n");
-
-    printf("\nTest 3: Middle descriptors signalled.....\n");
-    send_msg(s, sa, 2);
-    send_msg(s, sa, 5);
-    descriptors_out = NULL;
-    /* note that the descriptors in the result set can be in
-     * any order, so we have to test for both permutations here
-     */
-    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out)
-         != APR_SUCCESS) || (num != 2) || !descriptors_out ||
-        !(((descriptors_out[0].desc.s == s[2]) &&
-           (descriptors_out[1].desc.s == s[5])) ||
-          ((descriptors_out[0].desc.s == s[5]) &&
-           (descriptors_out[1].desc.s == s[2])))) {
-        printf("Test 2: FAILED (errno=%d, num=%d (expected 2)\n", rv, num);
-        exit(-1);
-    }
-    recv_msg(s, 2, context);
-    recv_msg(s, 5, context);
-    printf("Test 3: OK\n");
-
-    printf("\nTest 4: Last descriptor signalled......\n");
-    send_msg(s, sa, LARGE_NUM_SOCKETS - 1);
-    descriptors_out = NULL;
-    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out) !=
-         APR_SUCCESS) || (num != 1) || !descriptors_out ||
-        (descriptors_out[0].desc.s != s[LARGE_NUM_SOCKETS - 1]) ||
-        (descriptors_out[0].client_data != s[LARGE_NUM_SOCKETS - 1])) {
-        printf("Test 4: FAILED (errno=%d, num=%d (expected 1)\n", rv, num);
-        exit(-1);
-    }
-    recv_msg(s, LARGE_NUM_SOCKETS - 1, context);
-    printf("Test 4: OK\n");
-
-    printf("\nTests completed.\n");
-
-    printf("\tClosing sockets........................");
-    for (i = 0; i < LARGE_NUM_SOCKETS; i++){
-        if (apr_socket_close(s[i]) != APR_SUCCESS){
-            printf("Failed!\n");
-            exit(-1);
-        }
-    }
-    printf ("OK\n");
-
-    return 0;
 }
+
+static void nomessage_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    int lrv;
+    const apr_pollfd_t *descs = NULL;
+
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    CuAssertIntEquals(tc, 0, lrv);
+    CuAssertPtrEquals(tc, NULL, descs);
+}
+
+static void send0_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    const apr_pollfd_t *descs = NULL;
+    int num;
+    
+    send_msg(s, sa, 0, tc);
+    rv = apr_pollset_poll(pollset, 0, &num, &descs);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 1, num);
+    CuAssertPtrNotNull(tc, descs);
+
+    CuAssertPtrEquals(tc, s[0], descs[0].desc.s);
+    CuAssertPtrEquals(tc, s[0],  descs[0].client_data);
+}
+
+static void recv0_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    int lrv;
+    const apr_pollfd_t *descs = NULL;
+
+    recv_msg(s, 0, p, tc);
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    CuAssertIntEquals(tc, 0, lrv);
+    CuAssertPtrEquals(tc, NULL, descs);
+}
+
+static void send_middle_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    const apr_pollfd_t *descs = NULL;
+    int num;
+    
+    send_msg(s, sa, 2, tc);
+    send_msg(s, sa, 5, tc);
+    rv = apr_pollset_poll(pollset, 0, &num, &descs);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 2, num);
+    CuAssertPtrNotNull(tc, descs);
+
+    CuAssert(tc, "Incorrect socket in result set",
+            ((descs[0].desc.s == s[2]) && (descs[1].desc.s == s[5])) ||
+            ((descs[0].desc.s == s[5]) && (descs[1].desc.s == s[2])));
+}
+
+static void clear_middle_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    int lrv;
+    const apr_pollfd_t *descs = NULL;
+
+    recv_msg(s, 2, p, tc);
+    recv_msg(s, 5, p, tc);
+
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    CuAssertIntEquals(tc, 0, lrv);
+    CuAssertPtrEquals(tc, NULL, descs);
+}
+
+static void send_last_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    const apr_pollfd_t *descs = NULL;
+    int num;
+    
+    send_msg(s, sa, LARGE_NUM_SOCKETS - 1, tc);
+    rv = apr_pollset_poll(pollset, 0, &num, &descs);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 1, num);
+    CuAssertPtrNotNull(tc, descs);
+
+    CuAssertPtrEquals(tc, s[LARGE_NUM_SOCKETS - 1], descs[0].desc.s);
+    CuAssertPtrEquals(tc, s[LARGE_NUM_SOCKETS - 1],  descs[0].client_data);
+}
+
+static void clear_last_pollset(CuTest *tc)
+{
+    apr_status_t rv;
+    int lrv;
+    const apr_pollfd_t *descs = NULL;
+
+    recv_msg(s, LARGE_NUM_SOCKETS - 1, p, tc);
+
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    CuAssertIntEquals(tc, 0, lrv);
+    CuAssertPtrEquals(tc, NULL, descs);
+}
+
+static void close_all_sockets(CuTest *tc)
+{
+    apr_status_t rv;
+    int i;
+
+    for (i = 0; i < LARGE_NUM_SOCKETS; i++){
+        rv = apr_socket_close(s[i]);
+        CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    }
+}
+
+CuSuite *testpoll(void)
+{
+    CuSuite *suite = CuSuiteNew("Poll");
+
+    SUITE_ADD_TEST(suite, create_all_sockets);
+    SUITE_ADD_TEST(suite, setup_small_poll);
+    SUITE_ADD_TEST(suite, setup_large_poll);
+    SUITE_ADD_TEST(suite, nomessage);
+    SUITE_ADD_TEST(suite, send_2);
+    SUITE_ADD_TEST(suite, recv_2_send_1);
+    SUITE_ADD_TEST(suite, send_2_signaled_1);
+    SUITE_ADD_TEST(suite, recv_1_send_0);
+    SUITE_ADD_TEST(suite, clear_all_signalled);
+    SUITE_ADD_TEST(suite, send_large_pollarray);
+    SUITE_ADD_TEST(suite, recv_large_pollarray);
+
+    SUITE_ADD_TEST(suite, setup_pollset);
+    SUITE_ADD_TEST(suite, add_sockets_pollset);
+    SUITE_ADD_TEST(suite, nomessage_pollset);
+    SUITE_ADD_TEST(suite, send0_pollset);
+    SUITE_ADD_TEST(suite, recv0_pollset);
+    SUITE_ADD_TEST(suite, send_middle_pollset);
+    SUITE_ADD_TEST(suite, clear_middle_pollset);
+    SUITE_ADD_TEST(suite, send_last_pollset);
+    SUITE_ADD_TEST(suite, clear_last_pollset);
+
+    SUITE_ADD_TEST(suite, close_all_sockets);
+
+    return suite;
+}
+

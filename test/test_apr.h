@@ -85,5 +85,6 @@ CuSuite *testoc(void);
 CuSuite *testdup(void);
 CuSuite *testsockets(void);
 CuSuite *testproc(void);
+CuSuite *testpoll(void);
 
 #endif /* APR_TEST_INCLUDES */
