@@ -74,6 +74,7 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 
         if (rc != -1 ) {
             thefile->bufpos = thefile->dataRead = 0;
+            thefile->filePtr = pos;
             rc = 0;
         }
         else {
