@@ -107,7 +107,6 @@ extern "C" {
  * @package APR memory allocation
  */
 typedef struct apr_pool_t apr_pool_t;
-typedef struct apr_hash_t apr_hash_t;
 
 /** The memory allocation structure
  */
@@ -142,9 +141,9 @@ struct apr_pool_t {
     /** A function to control how pools behave when they receive ENOMEM
      *  @deffunc int apr_abort(int retcode) */
     int (*apr_abort)(int retcode);
-    /** A place to hand user data associated with this pool 
-     *  @defvar datastruct *prog_data */
-    apr_hash_t *prog_data;
+    /** A place to hold user data associated with this pool 
+     *  @defvar apr_hash_t *prog_data */
+    struct apr_hash_t *prog_data;
 };
 
 /* pools have nested lifetimes -- sub_pools are destroyed when the
