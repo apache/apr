@@ -71,7 +71,7 @@ int testdirs(void);
 int main(int argc, char *argv[])
 {
     ap_pool_t *context;
-    ap_proc_t *newproc;
+    ap_proc_t newproc;
     ap_procattr_t *attr;
     ap_file_t *testfile = NULL;
     ap_ssize_t length;
@@ -143,10 +143,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK.\n");
 
     fprintf(stdout, "Grabbing child's stdin.......");
-    if (ap_get_childin(&testfile, newproc) != APR_SUCCESS) {
-        fprintf(stderr, "Could not get child's stdout\n");
-        exit(-1);
-    }
+    testfile = newproc.stdin;
     fprintf(stdout, "OK.\n");
 
     length = 256;
@@ -157,10 +154,7 @@ int main(int argc, char *argv[])
     else fprintf(stderr, "Write failed.\n");
 
     fprintf(stdout, "Grabbing child's stdout.......");
-    if (ap_get_childout(&testfile, newproc) != APR_SUCCESS) {
-        fprintf(stderr, "Could not get child's stdout\n");
-        exit(-1);
-    }
+    testfile = newproc.stdout;
     fprintf(stdout, "OK.\n");
 
     length = 256;
@@ -174,7 +168,7 @@ int main(int argc, char *argv[])
     else fprintf(stderr, "Read failed.\n");
 
     fprintf(stdout, "Waiting for child to die.......");
-    if (ap_wait_proc(newproc, APR_WAIT) != APR_CHILD_DONE) {
+    if (ap_wait_proc(&newproc, APR_WAIT) != APR_CHILD_DONE) {
         fprintf(stderr, "Wait for child failed\n");
         exit(-1);
     }

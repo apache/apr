@@ -111,16 +111,10 @@ struct ap_procattr_t {
     ap_int32_t detached;
 };
 
-struct ap_proc_t {
-    ap_pool_t *cntxt;
-    pid_t pid;
-    struct ap_procattr_t *attr;
-};
-
 /*This will move to ap_threadproc.h in time, but I need to figure it out
  * on windows first.  :)
  */
-ap_status_t ap_detach(struct ap_proc_t **, ap_pool_t *);
+ap_status_t ap_detach(struct ap_proc_t *, ap_pool_t *);
 
 #endif  /* ! THREAD_PROC_H */
 

@@ -54,13 +54,9 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
+ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont)
 {
     int x;
-
-    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-    (*new)->cntxt = cont;
-    (*new)->attr = NULL;
 
     chdir("/");
 #if !defined(MPE) && !defined(OS2) && !defined(TPF) && !defined(BEOS)
@@ -76,7 +72,7 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
 /*    RAISE_SIGSTOP(DETACH);*/
 #endif
 #if HAVE_SETSID
-    if (((*new)->pid = setsid()) == -1) {
+    if ((new->pid = setsid()) == -1) {
         return errno;
     }
 #elif defined(NEXT) || defined(NEWSOS)
@@ -116,28 +112,3 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
     }
     return APR_SUCCESS;
 }
-
-ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
-{
-    if (proc != NULL) {
-        return ap_get_userdata(data, key, proc->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOPROC;
-    }
-}
-
-ap_status_t ap_set_procdata(void *data, char *key, 
-                            ap_status_t (*cleanup) (void *),
-                            ap_proc_t *proc)
-{
-    if (proc != NULL) {
-        return ap_set_userdata(data, key, cleanup, proc->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOPROC;
-    }
-}
-
