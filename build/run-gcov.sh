@@ -71,7 +71,19 @@ cat > index.html << EOF
   <tr><td>
    <blockquote>
 <p>This should give us some idea of how well our tests actually stress our
-code.</p>
+code.  To generate this data, do the following:</p>
+<menu compact="compact">
+    <li>./buildconf</li>
+    <li>CFLAGS="-fprofile-arcs -ftest-coverage ./configure</li>
+    <li>make</li>
+    <li>cd test</li>
+    <li>make</li>
+    <li>./testall</li>
+    <li>cd ..</li>
+    <li>make gcov</li>
+</menu>
+<p>Note that this will only generate test coverage data for the testall script,
+but all tests should be moving to the unified framework, so this is correct.</p>
    </blockquote>
 
 EOF
