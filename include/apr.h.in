@@ -217,7 +217,7 @@ typedef  @socklen_t_value@       apr_socklen_t;
  * This assures the appropriate indirection is invoked at compile time.
  *
  * @deffunc APR_DECLARE_DATA type apr_variable;
- * @tip extern APR_DECLARE_DATA type apr_variable; syntax is required for
+ * @tip APR_DECLARE_DATA extern type apr_variable; syntax is required for
  * declarations within headers to properly import the variable.
  */
 #define APR_DECLARE_DATA
