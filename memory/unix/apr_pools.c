@@ -86,6 +86,15 @@
 #define BOUNDARY_INDEX 12
 #define BOUNDARY_SIZE (1 << BOUNDARY_INDEX)
 
+/* 
+ * Timing constants for killing subprocesses
+ * There is a total 3-second delay between sending a SIGINT 
+ * and sending of the final SIGKILL.
+ * TIMEOUT_INTERVAL should be set to TIMEOUT_USECS / 64
+ * for the exponetial timeout alogrithm.
+ */
+#define TIMEOUT_USECS    3000000
+#define TIMEOUT_INTERVAL   46875
 
 /*
  * Allocator
@@ -2031,6 +2040,7 @@ static void free_proc_chain(struct process_chain *procs)
      */
     struct process_chain *pc;
     int need_timeout = 0;
+    apr_time_t timeout_interval;
 
     if (!procs)
         return; /* No work.  Whew! */
@@ -2071,9 +2081,32 @@ static void free_proc_chain(struct process_chain *procs)
         }
     }
 
-    /* Sleep only if we have to... */
-    if (need_timeout)
-        apr_sleep(apr_time_from_sec(3));
+    /* Sleep only if we have to. The sleep algorithm grows
+     * by a factor of two on each iteration. TIMEOUT_INTERVAL
+     * is equal to TIMEOUT_USECS / 64.
+     */
+    if (need_timeout) {
+        timeout_interval = TIMEOUT_INTERVAL;
+        apr_sleep(timeout_interval);
+    }
+    while (need_timeout) {
+        need_timeout = 0;
+        /* check the status of the subprocesses */
+        for (pc = procs; pc; pc = pc->next) {
+            if (pc->kill_how == APR_KILL_AFTER_TIMEOUT &&
+                apr_proc_wait(pc->pid, NULL, NULL, APR_NOWAIT) != APR_CHILD_NOTDONE)
+                pc->kill_how = APR_KILL_NEVER;	/* subprocess has exited */
+            else
+                need_timeout = 1;		/* subprocess is still active */
+        }
+        if (need_timeout) {
+            apr_sleep(timeout_interval);
+            timeout_interval *= 2;
+            if (timeout_interval >= TIMEOUT_USECS) {
+                break;
+            }
+        }
+    }
 
     /* OK, the scripts we just timed out for have had a chance to clean up
      * --- now, just get rid of them, and also clean up the system accounting
