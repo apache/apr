@@ -213,7 +213,8 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         fname = thedir->n.entry->cFileName;
     }
 
-    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry, 0);
+    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry, 
+                    0, wanted);
     finfo->cntxt = thedir->cntxt;
 
     finfo->valid |= APR_FINFO_NAME;
