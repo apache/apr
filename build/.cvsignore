@@ -5,6 +5,9 @@ ltmain.sh
 rules.mk
 LibD
 LibR
+Debug
+Release
+*.vcproj
 *.aps
 *.plg
 *.dep
