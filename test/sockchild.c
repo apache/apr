@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
         
     if (!strcmp("read", argv[1])) {
         char datarecv[STRLEN];
-        int length = STRLEN;
+        apr_size_t length = STRLEN;
 
         apr_status_t rv = apr_socket_recv(sock, datarecv, &length);
         apr_socket_close(sock);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         exit(length);
     }
     else if (!strcmp("write", argv[1])) {
-        int length = strlen(DATASTR);
+        apr_size_t length = strlen(DATASTR);
         apr_socket_send(sock, DATASTR, &length);
 
         apr_socket_close(sock);
