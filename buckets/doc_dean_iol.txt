@@ -84,6 +84,77 @@ So far?
 
 
 ==============================
+Date: Mon, 10 Apr 2000 14:39:48 -0700 (PDT)
+From: dean gaudet <dgaudet-list-new-httpd@arctic.org>
+To: new-httpd@apache.org
+Subject: Re: Buff should be an I/O layer
+In-Reply-To: <20000410123109.C3931@manojk.users.mindspring.com>
+Message-ID: <Pine.LNX.4.21.0004101418410.2626-100000@twinlark.arctic.org>
+
+[hope you don't mind me taking this back to new-httpd so that it's
+archived this time :)]
+
+On Mon, 10 Apr 2000, Manoj Kasichainula wrote:
+
+> On Mon, Mar 27, 2000 at 04:48:23PM -0800, Dean Gaudet wrote:
+> > On Sat, 25 Mar 2000, Manoj Kasichainula wrote:
+> > > (aside: Though my unschooled brain still sees no
+> > > problem if our chunking layer maintains a pile of 6-byte blocks that
+> > > get used in an iol_writev. I'll read the archived discussions.)
+> > 
+> > there's little in the way of archived discussions, there's just me admitting
+> > that i couldn't find a solution which was not complex.
+> 
+> OK, there's got to be something wrong with this:
+> 
+> chunk_iol->iol_write(char *buffer) {
+>     pull a 10-byte (or whatever) piece out of our local stash
+>     construct a chunk header in it
+>     set the iovec = chunk header + buffer
+>     writev(iovec)
+> }
+> 
+> But what is it?
+
+when i was doing the new apache-2.0 buffering i was focusing a lot on
+supporting non-blocking sockets so we could do the async i/o stuff -- and
+to support a partial write you need to keep more state than what your
+suggestion has.
+
+also, the real complexity comes when you consider handling a pipelined
+HTTP/1.1 connection -- consider what happens when you get 5 requests
+for /cgi-bin/printenv smack after the other.
+
+if you do that against apache-1.3 and the current apache-2.0 you get
+back maximally packed packets.  but if you make chunking a layer then
+every time you add/remove the layer you'll cause a packet boundary --
+unless you add another buffering layer... or otherwise shift around
+the buffering.
+
+as a reminder, visit
+<http://www.w3.org/Protocols/HTTP/Performance/Pipeline.html> for a
+description of how much we win on the wire from such an effort.
+
+also, at some point i worry that passing the kernel dozens of tiny
+iovecs is more expensive than an extra byte copy into a staging buffer,
+and passing it one large buffer.  but i haven't done any benchmarks to
+prove this.  (my suscipions have to do with the way that at least the
+linux kernel's copying routine is written regarding aligned copies)
+
+oh it's totally worth pointing out that at least Solaris allows at
+most 16 iovecs in a single writev()... which probably means every sysv
+derived system is similarly limited.  linux sets the limit at 1024.
+freebsd has an optimisation for up to 8, but otherwise handles 1024.
+
+i'm still doing work in this area though -- after all my ranting about
+zero-copy a few weeks back i set out to prove myself wrong by writing
+a zero-copy buffering library using every trick in my book.  i've no
+results to share yet though.
+
+-dean
+
+
+==============================
 Date: Tue, 2 May 2000 15:51:30 +0200
 From: Martin Kraemer <Martin.Kraemer@mch.sni.de>
 To: new-httpd@apache.org
