@@ -409,7 +409,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
     if (statcode < APR_OS_START_ERROR) {
         return native_strerror(statcode, buf, bufsize);
     }
-    else if (statcode < APR_OS_START_USEERR) {
+    else if (statcode < APR_OS_START_USERERR) {
         return stuffbuffer(buf, bufsize, apr_error_string(statcode));
     }
     else if (statcode < APR_OS_START_EAIERR) {

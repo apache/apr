@@ -149,29 +149,44 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_OS_START_ERROR     20000
 /**
+ * APR_OS_ERRSPACE_SIZE is the maximum number of errors you can fit
+ *    into one of the error/status ranges below -- except for
+ *    APR_OS_START_USERERR, which see.
+ */
+#define APR_OS_ERRSPACE_SIZE 50000
+/**
  * APR_OS_START_STATUS is where the APR specific status codes start.
  */
-#define APR_OS_START_STATUS    (APR_OS_START_ERROR + 500)
+#define APR_OS_START_STATUS    (APR_OS_START_ERROR + APR_OS_ERRSPACE_SIZE)
 /**
- * APR_OS_START_USEERR are reserved for applications that use APR that
- *     layer their own error codes along with APR's.
+ * APR_OS_START_USERERR are reserved for applications that use APR that
+ *     layer their own error codes along with APR's.  Note that the
+ *     error immediately following this one is set ten times farther
+ *     away than usual, so that users of apr have a lot of room in
+ *     which to declare custom error codes.
  */
-#define APR_OS_START_USEERR    (APR_OS_START_STATUS + 500)
+#define APR_OS_START_USERERR    (APR_OS_START_STATUS + APR_OS_ERRSPACE_SIZE)
+/**
+ * APR_OS_START_USEERR is obsolete, defined for compatibility only.
+ * Use APR_OS_START_USERERR instead.
+ */
+#define APR_OS_START_USEERR     APR_OS_START_USERERR
 /**
  * APR_OS_START_CANONERR is where APR versions of errno values are defined
  *     on systems which don't have the corresponding errno.
  */
-#define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)
+#define APR_OS_START_CANONERR  (APR_OS_START_USERERR \
+                                 + (APR_OS_ERRSPACE_SIZE * 10))
 /**
  * APR_OS_START_EAIERR folds EAI_ error codes from getaddrinfo() into 
  *     apr_status_t values.
  */
-#define APR_OS_START_EAIERR    (APR_OS_START_CANONERR + 500)
+#define APR_OS_START_EAIERR    (APR_OS_START_CANONERR + APR_OS_ERRSPACE_SIZE)
 /**
  * APR_OS_START_SYSERR folds platform-specific system error values into 
  *     apr_status_t values.
  */
-#define APR_OS_START_SYSERR    (APR_OS_START_EAIERR + 500)
+#define APR_OS_START_SYSERR    (APR_OS_START_EAIERR + APR_OS_ERRSPACE_SIZE)
 
 /** no error. @see APR_STATUS_IS_SUCCESS */
 #define APR_SUCCESS 0
