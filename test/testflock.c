@@ -95,12 +95,19 @@ static void test_withoutlock(CuTest *tc)
     CuAssertIntEquals(tc, SUCCESSFUL_READ, code);
 }
 
+static void remove_lockfile(CuTest *tc)
+{
+    apr_assert_success(tc, "Couldn't remove lock file.",
+                       apr_file_remove(TESTFILE, p));
+}
+    
 CuSuite *testflock(void)
 {
     CuSuite *suite = CuSuiteNew("Flock");
 
     SUITE_ADD_TEST(suite, test_withlock);
     SUITE_ADD_TEST(suite, test_withoutlock);
+    SUITE_ADD_TEST(suite, remove_lockfile);
 
     return suite;
 }

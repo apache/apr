@@ -10,8 +10,8 @@ PROGRAMS = \
 	sendfile.exe \
 	server.exe \
 	proc_child.exe \
+        tryread.exe \
 	occhild.exe\
-	testflock.exe \
 	testsock.exe \
 	testlockperf.exe \
 	testshmproducer.exe \
@@ -39,8 +39,8 @@ clean:
 .c.obj:
 	cl /nologo /c /MDd /W3 /GX /Zi /Od /DWIN32 /D_DEBUG /D_WINDOWS /DAPR_DECLARE_STATIC $(INCLUDES) $<
 
-testflock.exe: testflock.obj $(LOCAL_LIBS)
-	$(LINK) testflock.obj $(LOCAL_LIBS) $(ALL_LIBS)
+tryread.exe: tryread.obj $(LOCAL_LIBS)
+	$(LINK) tryread.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
 occhild.exe: occhild.obj $(LOCAL_LIBS)
 	$(LINK) occhild.obj $(LOCAL_LIBS) $(ALL_LIBS)
@@ -96,7 +96,7 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testpoll.obj testlock.obj testsockopt.obj testpipe.obj testthread.obj \
 	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj \
 	testenv.obj testprocmutex.obj testrand2.obj testfnmatch.obj \
-        testatomic.obj
+        testatomic.obj testflock.obj
 
 testall.exe: $(TESTS) CuTest.obj $(LOCAL_LIBS)
 	$(LINK) /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
