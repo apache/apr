@@ -165,9 +165,6 @@ APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
      */
     (*lock) = (apr_lock_t *)apr_palloc(pool, sizeof(apr_lock_t));
 
-    if ((*lock) == NULL) {
-        return APR_ENOMEM;
-    }
     if (fname) {
         if (apr_os_level >= APR_WIN_2000) {
             (*lock)->fname = apr_pstrcat(pool, "Global\\", fname, NULL);
