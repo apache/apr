@@ -58,7 +58,7 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 
-static apr_filetype_e filetype_from_mode(int mode)
+static apr_filetype_e filetype_from_mode(mode_t mode)
 {
     apr_filetype_e type = APR_NOFILE;
 
