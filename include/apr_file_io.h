@@ -458,6 +458,21 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_pool_t *p);
 
 /**
+ * move the specified file descriptor to a new pool
+ * @param new_file Pointer in which to return the new apr_file_t
+ * @param old_file The file to move
+ * @param p        The pool to which the descriptor is to be moved
+ * @remark Unlike apr_file_dup2(), this function doesn't do an
+ *         OS dup() operation on the underlying descriptor; it just
+ *         moves the descriptor's apr_file_t wrapper to a new pool.
+ * @remark The new pool need not be an ancestor of old_file's pool.
+ * @remark After calling this function, old_file may not be used
+ */
+APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
+                                            apr_file_t *old_file,
+                                            apr_pool_t *p);
+
+/**
  * Move the read/write file offset to a specified byte within a file.
  * @param thefile The file descriptor
  * @param where How to move the pointer, one of:
