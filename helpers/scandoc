@@ -187,16 +187,16 @@ sub skipBody {
   
   $nest = 1;
   
-#  for (;;) {
-#    if (&matchRBracket) { $nest++; }
-#    elsif (&matchLBracket) {
-#      $nest--;
-#      last if !$nest;
-#    }
-#    else { 
-#      last if ((($valid,) = &matchKW( "[^\{\}]")) && !$valid);
-#    }
-#  }
+  for (;;) {
+    if (&matchRBracket) { $nest++; }
+    elsif (&matchLBracket) {
+      $nest--;
+      last if !$nest;
+    }
+    else { 
+      last if ((($valid,) = &matchKW( "[^\{\}]")) && !$valid);
+    }
+  }
 }
 
 # Skip a string. (multiline)
@@ -612,6 +612,13 @@ sub parseDeclaration {
   }
   elsif ((($valid,)=&matchKW( "friend\s*class" )) && $valid) {
     &skipToSemi;
+  }
+  elsif ((($valid, $token) = &matchKW("extern\\s*\\\"C\\\"")) && $valid) {
+    &matchRBracket;
+    while (!&matchLBracket) {
+      &parseDeclaration( '' ) || die "Unmatched brace! line = $linenumber\n";
+    }
+    &matchSemi;
   }
   # elsif ($kw = &matchID) {
   #   $type = "$kw ";
