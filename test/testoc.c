@@ -142,7 +142,7 @@ static void oc_not_impl(CuTest *tc)
 
 CuSuite *testoc(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Time");
+    CuSuite *suite = CuSuiteNew("Other Child");
 
 #if !APR_HAS_OTHER_CHILD
     SUITE_ADD_TEST(suite, oc_not_impl);
