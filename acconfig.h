@@ -62,13 +62,16 @@
 
 #ifdef HAVE_SIGACTION
 typedef void Sigfunc(int);
+#define signal(s,f)    ap_signal(s, f)
+Sigfunc *signal(int signo, Sigfunc * func);
 
 #if defined(SIG_ING) && !defined(SIG_ERR)
 #define SIG_ERR ((Sigfunc *)-1)
 #endif
+#endif
 
-#define signal(s,f)    ap_signal(s, f)
-Sigfunc *signal(int signo, Sigfunc * func);
+#if !defined(HAVE_PTHREAD_SIGMASK) && defined(_AIX)
+#define pthread_sigmask sigprocmask
 #endif
 
 #if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP)
