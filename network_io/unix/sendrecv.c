@@ -816,7 +816,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     /* Actually do the sendfilev */
     do {
         /* socket, vecs, number of vecs, bytes written */
-        rv = sendfilev(sock->socketdes,	sfv, vecs, &nbytes);
+        rv = sendfilev(sock->socketdes, sfv, vecs, &nbytes);
     } while (rv == -1 && errno == EINTR);
 
     /* Solaris returns EAGAIN even though it sent bytes on a non-block sock */
