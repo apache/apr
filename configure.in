@@ -1479,8 +1479,8 @@ dnl ----------------------------- Checking for Locking Characteristics
 echo "${nl}Checking for Locking..."
 
 AC_CHECK_FUNCS(semget semctl flock)
-AC_CHECK_HEADERS(semaphore.h)
-AC_CHECK_FUNCS(sem_close sem_unlink sem_post sem_wait)
+AC_CHECK_HEADERS(semaphore.h OS.h)
+AC_CHECK_FUNCS(sem_close sem_unlink sem_post sem_wait create_sem)
 
 # Some systems return ENOSYS from sem_open.
 AC_CACHE_CHECK(for working sem_open,ac_cv_func_sem_open,[
@@ -1595,6 +1595,7 @@ APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
              func:pthread_mutexattr_setpshared dnl
              file:/dev/zero,
              hasprocpthreadser="1", hasprocpthreadser="0")
+APR_IFALLYES(header:OS.h func:create_sem, hasbeossem="1", hasbeossem="0")
 
 # See which lock mechanism we'll select by default on this system.
 # The last APR_DECIDE to execute sets the default.
@@ -1603,6 +1604,9 @@ APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
 # POSIX semaphores and cross-process pthread mutexes are not
 # used by default since they have less desirable behaviour when
 # e.g. a process holding the mutex segfaults.
+# The BEOSSEM decision doesn't require any substitutions but is
+# included here to prevent the fcntl() branch being selected
+# from the decision making.
 APR_BEGIN_DECISION([apr_lock implementation method])
 APR_IFALLYES(func:flock define:LOCK_EX,
             APR_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
@@ -1610,6 +1614,8 @@ APR_IFALLYES(header:fcntl.h define:F_SETLK,
             APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
 APR_IFALLYES(func:semget func:semctl define:SEM_UNDO,
             APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
+APR_IFALLYES(header:OS.h func:create_sem, 
+            APR_DECIDE(USE_BEOSSEM, [BeOS Semaphores])) 
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)
 fi
@@ -1636,6 +1642,9 @@ case $ac_decision in
         ;;
     USE_PROC_PTHREAD_SERIALIZE )
         procpthreadser="1"
+        ;;
+    USE_BEOSSEM )
+        beossem="1"
         ;;
 esac
 
