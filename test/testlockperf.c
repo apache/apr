@@ -64,9 +64,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "test_apr.h"
-#ifdef HAVE_SYS_TIME_h
-#include <sys/time.h> /* replace me with apr_time.h */
-#endif
 
 #if !APR_HAS_THREADS
 int main(void)
