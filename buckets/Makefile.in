@@ -17,6 +17,7 @@ INCLUDES=-I$(INCDIR) -I.
 OBJS=ap_buf.o \
 	ap_rwmem_buf.o \
 	ap_mmap_buf.o \
+	ap_rmem_buf.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
@@ -50,3 +51,32 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+ap_buf.o: ap_buf.c $(INCDIR)/apr_private.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_buf.h $(INCDIR)/apr_mmap.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h \
+ $(INCDIR)/../../../include/ap_iol.h
+ap_mmap_buf.o: ap_mmap_buf.c $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_buf.h $(INCDIR)/apr_mmap.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h \
+ $(INCDIR)/../../../include/ap_iol.h
+ap_rmem_buf.o: ap_rmem_buf.c $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_buf.h $(INCDIR)/apr_mmap.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h \
+ $(INCDIR)/../../../include/ap_iol.h
+ap_rwmem_buf.o: ap_rwmem_buf.c $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_buf.h $(INCDIR)/apr_mmap.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h \
+ $(INCDIR)/../../../include/ap_iol.h
