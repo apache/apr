@@ -223,6 +223,10 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         return errno;
     }
     resume_thread(newproc);
+    ap_close (attr->child_in);
+    ap_close (attr->child_out);
+    ap_close (attr->child_err);
+    
     send_data(newproc, 0, (void*)sp, sizeof(struct send_pipe));
     (*new)->tid = newproc;
 
