@@ -104,6 +104,7 @@
 #define APR_HAS_THREADS  1
 #define APR_HAS_SENDFILE 0
 #define APR_HAS_MMAP     0
+#define APR_HAVE_IN_ADDR
 
 /* Typedefs that APR needs. */
 
