@@ -340,7 +340,7 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
  *   base 16.
  * @return The long long value of the string.
  */
-APR_DECLARE(long long) apr_strtoll(char *buf, char **end, int base);
+APR_DECLARE(long long) apr_strtoll(const char *buf, char **end, int base);
 
 /**
  * parse a base-10 numeric string into a long long value.
@@ -348,7 +348,7 @@ APR_DECLARE(long long) apr_strtoll(char *buf, char **end, int base);
  * @param buf The string to parse
  * @return The long long value of the string
  */
-APR_DECLARE(long long) apr_atoll(char *buf);
+APR_DECLARE(long long) apr_atoll(const char *buf);
 
 /**
  * Format a binary size (magnitiudes are 2^10 rather than 10^3) from an apr_off_t,
