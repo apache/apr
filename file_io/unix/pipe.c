@@ -111,9 +111,6 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
     if(in == NULL || out == NULL)
         return APR_EBADARG;
 
-    if(cont == NULL)
-        return APR_ENOCONT;
-
     if (pipe(filedes) == -1) {
         return errno;
     }
@@ -152,9 +149,6 @@ ap_status_t ap_create_namedpipe(char *filename,
                                 ap_fileperms_t perm, ap_context_t *cont)
 {
     mode_t mode = get_fileperms(perm);
-
-    if(cont == NULL)
-        return APR_ENOCONT;
 
     if (mkfifo(filename, mode) == -1) {
         return errno;
