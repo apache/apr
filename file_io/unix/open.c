@@ -99,6 +99,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
 #endif
     
+#if APR_HAS_LARGE_FILES && defined(_LARGEFILE64_SOURCE)
+    oflags |= O_LARGEFILE;
+#endif
+
 #if APR_HAS_THREADS
     if ((flag & APR_BUFFERED) && (flag & APR_XTHREAD)) {
         rv = apr_thread_mutex_create(&thlock,

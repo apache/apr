@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Support "large files" by default on 32-bit Unix platforms which
+     implement the LFS standard.  [Joe Orton]
+
   *) Add apr_threadattr_stacksize_set() for overriding the default
      stack size for threads created by apr_thread_create().
      [Jeff Trawick]
