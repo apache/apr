@@ -265,6 +265,8 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
     DosSleep(t/1000);
 #elif defined(BEOS)
     snooze(t);
+#elif defined(NETWARE)
+    delay(t);
 #else
     struct timeval tv;
     tv.tv_usec = t % APR_USEC_PER_SEC;
