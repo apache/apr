@@ -66,6 +66,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @package APR File handling
+ */
+
 typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK, 
               APR_SOCK} ap_filetype_e; 
 
@@ -104,9 +108,9 @@ typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 /* should be same as whence type in lseek, POSIX defines this as int */
 typedef ap_int32_t       ap_seek_where_t;
 
-typedef struct ap_file_t            ap_file_t;
+typedef struct ap_file_t         ap_file_t;
 typedef struct ap_finfo_t        ap_finfo_t;
-typedef struct ap_dir_t             ap_dir_t;
+typedef struct ap_dir_t          ap_dir_t;
 typedef ap_int32_t               ap_fileperms_t;
 typedef uid_t                    ap_uid_t;
 typedef gid_t                    ap_gid_t;
@@ -127,648 +131,405 @@ struct ap_finfo_t {
 };
 
 /*   Function definitions */
-/*
 
-=head1 ap_status_t ap_open(ap_file_t **new_file, const char *fname, ap_int32_t flag, ap_fileperms_t perm, ap_pool_t *cont)
-
-B<Open the specified file.>
-
-    arg 1) The opened file descriptor.
-    arg 2) The full path to the file (using / on all systems)
-    arg 3) Or'ed value of:
-             APR_READ             open for reading
-             APR_WRITE            open for writing
-             APR_CREATE           create the file if not there
-             APR_APPEND           file ptr is set to end prior to all writes
-             APR_TRUNCATE         set length to zero if file exists
-             APR_BINARY           not a text file (This flag is ignored on 
-                                  UNIX because it has no meaning)
-             APR_BUFFERED         buffer the data.  Default is non-buffered
-             APR_EXCL             return error if APR_CREATE and file exists
-             APR_DELONCLOSE       delete the file after closing.
-    arg 4) Access permissions for file.
-    arg 5) The pool to use.
-
-B<NOTE>:  If perm is APR_OS_DEFAULT and the file is being created, appropriate
-          default permissions will be used.  *arg1 must point to a valid file_t, 
-          or NULL (in which case it will be allocated)
-
-=cut
+/**
+ * Open the specified file.
+ * @param new_file The opened file descriptor.
+ * @param fname The full path to the file (using / on all systems)
+ * @param flag Or'ed value of:
+ * <PRE>
+ *           APR_READ             open for reading
+ *           APR_WRITE            open for writing
+ *           APR_CREATE           create the file if not there
+ *           APR_APPEND           file ptr is set to end prior to all writes
+ *           APR_TRUNCATE         set length to zero if file exists
+ *           APR_BINARY           not a text file (This flag is ignored on 
+ *                                UNIX because it has no meaning)
+ *           APR_BUFFERED         buffer the data.  Default is non-buffered
+ *           APR_EXCL             return error if APR_CREATE and file exists
+ *           APR_DELONCLOSE       delete the file after closing.
+ * </PRE>
+ * @param perm Access permissions for file.
+ * @param cont The pool to use.
+ * @tip If perm is APR_OS_DEFAULT and the file is being created, appropriate 
+ *      default permissions will be used.  *arg1 must point to a valid file_t, 
+ *      or NULL (in which case it will be allocated)
  */
 ap_status_t ap_open(ap_file_t **new_file, const char *fname, ap_int32_t flag, 
                     ap_fileperms_t perm, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_close(ap_file_t *file)
-
-B<Close the specified file.>
-
-    arg 1) The file descriptor to close.
-
-=cut
+/**
+ * Close the specified file.
+ * @param file The file descriptor to close.
  */
 ap_status_t ap_close(ap_file_t *file);
 
-/*
-
-=head1 ap_status_t ap_remove_file(const char *path, ap_pool_t *cont) 
-
-B<delete the specified file.>
-
-    arg 1) The full path to the file (using / on all systems)
-    arg 2) The pool to use.
-
-B<NOTE>: If the file is open, it won't be removed until all instances are
-       closed.
-
-=cut
+/**
+ * delete the specified file.
+ * @param path The full path to the file (using / on all systems)
+ * @param cont The pool to use.
+ * @tip If the file is open, it won't be removed until all instances are closed.
  */
 ap_status_t ap_remove_file(const char *path, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_rename_file(const char *from_path, const char *to_path,
-                                  ap_pool_t *cont) 
-
-B<rename the specified file.>
-
-    arg 1) The full path to the original file (using / on all systems)
-    arg 2) The full path to the new file (using / on all systems)
-    arg 3) The pool to use.
-
-B<NOTE>: If a file exists at the new location, then it will be overwritten.
-    Moving files or directories across devices may not be possible.
-
-=cut
+/**
+ * rename the specified file.
+ * @param from_path The full path to the original file (using / on all systems)
+ * @param to_path The full path to the new file (using / on all systems)
+ * @param pool The pool to use.
+ * @tip If a file exists at the new location, then it will be overwritten.  
+ *      Moving files or directories across devices may not be possible.
  */
 ap_status_t ap_rename_file(const char *from_path, const char *to_path,
                            ap_pool_t *pool);
 
-/*
-
-=head1 ap_status_t ap_eof(ap_file_t *fptr) 
-
-B<Are we at the end of the file>
-
-    arg 1) The apr file we are testing.
-
-B<NOTE>:  Returns APR_EOF if we are at the end of file, APR_SUCCESS otherwise.
-
-=cut
+/**
+ * Are we at the end of the file
+ * @param fptr The apr file we are testing.
+ * @tip Returns APR_EOF if we are at the end of file, APR_SUCCESS otherwise.
  */
 ap_status_t ap_eof(ap_file_t *fptr);
 
-/*
-
-=head1 ap_status_t ap_ferror(ap_file_t *fptr) 
-
-B<Is there an error on the stream?>
-
-    arg 1) The apr file we are testing.
-
-B<NOTE>:  Returns -1 if the error indicator is set, APR_SUCCESS otherwise.
-
-=cut
+/**
+ * Is there an error on the stream?
+ * @param fptr The apr file we are testing.
+ * @tip Returns -1 if the error indicator is set, APR_SUCCESS otherwise.
  */
 ap_status_t ap_ferror(ap_file_t *fptr);
 
-/*
-
-=head1 ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont) 
-
-B<open standard error as an apr file pointer.>
-
-    arg 1) The apr file to use as stderr.
-    arg 2) The pool to allocate the file out of.
-
-=cut
+/**
+ * open standard error as an apr file pointer.
+ * @param thefile The apr file to use as stderr.
+ * @param cont The pool to allocate the file out of.
  */
 ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
-
-B<Read data from the specified file.>
-
-    arg 1) The file descriptor to read from.
-    arg 2) The buffer to store the data to.
-    arg 3) On entry, the number of bytes to read; on exit, the number
-           of bytes read.
-
-B<NOTE>:  ap_read will read up to the specified number of bytes, but never
-   more.  If there isn't enough data to fill that number of bytes, all of
-   the available data is read.  The third argument is modified to reflect the
-   number of bytes read.  If a char was put back into the stream via
-   ungetc, it will be the first character returned. 
-  
-   It is possible for both bytes to be read and an APR_EOF or other error
-   to be returned.
-  
-   APR_EINTR is never returned.
-
-=cut
+/**
+ * Read data from the specified file.
+ * @param thefile The file descriptor to read from.
+ * @param buf The buffer to store the data to.
+ * @param nbytes On entry, the number of bytes to read; on exit, the number of bytes read.
+ * @tip ap_read will read up to the specified number of bytes, but never 
+ *      more.  If there isn't enough data to fill that number of bytes, all 
+ *      of the available data is read.  The third argument is modified to 
+ *      reflect the number of bytes read.  If a char was put back into the 
+ *      stream via ungetc, it will be the first character returned. 
+ *
+ *      It is possible for both bytes to be read and an APR_EOF or other 
+ *      error to be returned.
+ *
+ *      APR_EINTR is never returned.
  */
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
 
-/*
-
-=head1 ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
-
-B<Write data to the specified file.>
-
-    arg 1) The file descriptor to write to.
-    arg 2) The buffer which contains the data.
-    arg 3) On entry, the number of bytes to write; on exit, the number
-           of bytes written.
-
-B<NOTE>:  ap_write will write up to the specified number of bytes, but never
-   more.  If the OS cannot write that many bytes, it will write as many as it
-   can.  The third argument is modified to reflect the * number of bytes 
-   written. 
-  
-   It is possible for both bytes to be written and an error to be
-   returned.
-  
-   APR_EINTR is never returned.
-
-=cut
+/**
+ * Write data to the specified file.
+ * @param thefile The file descriptor to write to.
+ * @param buf The buffer which contains the data.
+ * @param nbytes On entry, the number of bytes to write; on exit, the number of bytes written.
+ * @tip ap_write will write up to the specified number of bytes, but never 
+ *      more.  If the OS cannot write that many bytes, it will write as many 
+ *      as it can.  The third argument is modified to reflect the * number 
+ *      of bytes written. 
+ *
+ *      It is possible for both bytes to be written and an error to be returned.
+ *
+ *      APR_EINTR is never returned.
  */
 ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes);
 
-/*
-
-=head1 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes)
-
-B<Write data from iovec array to the specified file.>
-
-    arg 1) The file descriptor to write to.
-    arg 2) The array from which to get the data to write to the file.
-    arg 3) The number of elements in the struct iovec array. This must be
-           smaller than AP_MAX_IOVEC_SIZE.  If it isn't, the function will
-           fail with APR_EINVAL.
-    arg 4) The number of bytes written.
-  
-   It is possible for both bytes to be written and an error to be
-   returned.
-  
-   APR_EINTR is never returned.
-  
-   ap_writev is available even if the underlying operating system
-   doesn't provide writev().
-
-=cut
+/**
+ * Write data from iovec array to the specified file.
+ * @param thefile The file descriptor to write to.
+ * @param vec The array from which to get the data to write to the file.
+ * @param nvec The number of elements in the struct iovec array. This must 
+ *             be smaller than AP_MAX_IOVEC_SIZE.  If it isn't, the function 
+ *             will fail with APR_EINVAL.
+ * @param nbytes The number of bytes written.
+ * @tip It is possible for both bytes to be written and an error to be returned.
+ *      APR_EINTR is never returned.
+ *
+ *      ap_writev is available even if the underlying operating system 
+ *
+ *      doesn't provide writev().
  */
 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, 
                       ap_size_t nvec, ap_ssize_t *nbytes);
 
-/*
-
-=head1 ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes, ap_size_t *bytes_read)
-
-B<Read data from the specified file.>
-
-    arg 1) The file descriptor to read from.
-    arg 2) The buffer to store the data to.
-    arg 3) The number of bytes to read.
-    arg 4) If non-NULL, this will contain the number of bytes read.
-
-B<NOTE>:  ap_read will read up to the specified number of bytes, but never
-   more.  If there isn't enough data to fill that number of bytes, then the
-   process/thread will block until it is available or EOF is reached.  If a
-   char was put back into the stream via ungetc, it will be the first
-   character returned. 
-
-   It is possible for both bytes to be read and an APR_EOF or other error
-   to be returned.
-   
-   APR_EINTR is never returned.
-
-=cut
+/**
+ * Read data from the specified file.
+ * @param thefile The file descriptor to read from.
+ * @param buf The buffer to store the data to.
+ * @param nbytes The number of bytes to read.
+ * @param bytes_read If non-NULL, this will contain the number of bytes read.
+ * @tip ap_read will read up to the specified number of bytes, but never 
+ *      more.  If there isn't enough data to fill that number of bytes, 
+ *      then the process/thread will block until it is available or EOF 
+ *      is reached.  If a char was put back into the stream via ungetc, 
+ *      it will be the first character returned. 
+ *
+ *      It is possible for both bytes to be read and an APR_EOF or other 
+ *      error to be returned.
+ *
+ *      APR_EINTR is never returned.
  */
 ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
                          ap_size_t *bytes_read);
 
-/*
-
-=head1 ap_status_t ap_full_write(ap_file_t *thefile, const void *buf, ap_size_t nbytes, ap_size_t *bytes_written)
-
-B<Write data to the specified file.>
-
-    arg 1) The file descriptor to write to.
-    arg 2) The buffer which contains the data.
-    arg 3) The number of bytes to write.
-    arg 4) If non-NULL, this will contain the number of bytes written.
-
-B<NOTE>:  ap_write will write up to the specified number of bytes, but never
-   more.  If the OS cannot write that many bytes, the process/thread will
-   block until they can be written. Exceptional error such as "out of space"
-   or "pipe closed" will terminate with an error.
-  
-   It is possible for both bytes to be written and an error to be returned.
-  
-   APR_EINTR is never returned.
-
-=cut
+/**
+ * Write data to the specified file.
+ * @param thefile The file descriptor to write to.
+ * @param buf The buffer which contains the data.
+ * @param nbytes The number of bytes to write.
+ * @param bytes_written If non-NULL, this will contain the number of bytes written.
+ * @tip ap_write will write up to the specified number of bytes, but never 
+ *      more.  If the OS cannot write that many bytes, the process/thread 
+ *      will block until they can be written. Exceptional error such as 
+ *      "out of space" or "pipe closed" will terminate with an error.
+ *
+ *      It is possible for both bytes to be written and an error to be returned.
+ *
+ *      APR_EINTR is never returned.
  */
 ap_status_t ap_full_write(ap_file_t *thefile, const void *buf,
                           ap_size_t nbytes, ap_size_t *bytes_written);
 
-/*
-
-=head1 ap_status_t ap_putc(char ch, ap_file_t *thefile)
-
-B<put a character into the specified file.>
-
-    arg 1) The character to write.
-    arg 2) The file descriptor to write to
-
-=cut
+/**
+ * put a character into the specified file.
+ * @param ch The character to write.
+ * @param thefile The file descriptor to write to
  */
 ap_status_t ap_putc(char ch, ap_file_t *thefile);
 
-/*
-
-=head1 ap_status_t ap_getc(char *ch, ap_file_t *thefil)
-
-B<get a character from the specified file.>
-
-    arg 1) The character to write.
-    arg 2) The file descriptor to write to
-
-=cut
+/**
+ * get a character from the specified file.
+ * @param ch The character to write.
+ * @param thefile The file descriptor to write to
  */
 ap_status_t ap_getc(char *ch, ap_file_t *thefile);
 
-/*
-
-=head1 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
-
-B<put a character back onto a specified stream.>
-
-    arg 1) The character to write.
-    arg 2) The file descriptor to write to
-
-=cut
+/**
+ * put a character back onto a specified stream.
+ * @param ch The character to write.
+ * @param thefile The file descriptor to write to
  */
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile);
 
-/*
-
-=head1 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
-
-B<Get a string from a specified file.>
-
-    arg 1) The buffer to store the string in. 
-    arg 2) The length of the string
-    arg 3) The file descriptor to read from
-
-=cut
+/**
+ * Get a string from a specified file.
+ * @param str The buffer to store the string in. 
+ * @param len The length of the string
+ * @param thefile The file descriptor to read from
  */
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile);
 
-/*
-
-=head1 ap_status_t ap_puts(const char *str, ap_file_t *thefile)
-
-B<Put the string into a specified file.>
-
-    arg 1) The string to write. 
-    arg 2) The file descriptor to write to
-
-=cut
+/**
+ * Put the string into a specified file.
+ * @param str The string to write. 
+ * @param thefile The file descriptor to write to
  */
 ap_status_t ap_puts(const char *str, ap_file_t *thefile);
 
-/*
-
-=head1 ap_status_t ap_flush(ap_file_t *thefile)
-
-B<Flush the file's buffer.>
-
-    arg 1) The file descriptor to flush
-
-=cut
+/**
+ * Flush the file's buffer.
+ * @param thefile The file descriptor to flush
  */
 ap_status_t ap_flush(ap_file_t *thefile);
-APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
-        __attribute__((format(printf,2,3)));
 
-/*
-
-=head1 ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
-
-B<duplicate the specified file descriptor.>
-
-    arg 1) The structure to duplicate into. 
-    arg 2) The file to duplicate.
-    arg 3) The pool to use for the new file.
-
-B<NOTE>: *arg1 must point to a valid ap_file_t, or point to NULL
-
-=cut
+/**
+ * duplicate the specified file descriptor.
+ * @param new_file The structure to duplicate into. 
+ * @param old_file The file to duplicate.
+ * @param p The pool to use for the new file.
+ * @tip *arg1 must point to a valid ap_file_t, or point to NULL
  */         
 ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p);
 
-/*
-
-=head1 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
-
-B<get the specified file's stats.>
-
-    arg 1) Where to store the information about the file.
-    arg 2) The file to get information about.
-
-=cut
+/**
+ * get the specified file's stats.
+ * @param finfo Where to store the information about the file.
+ * @param thefile The file to get information about.
  */ 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
 
-/*
-
-=head1 ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms)
-
-B<set the specified file's permission bits.>
-
-    arg 1) The file (name) to apply the permissions to.
-    arg 2) The permission bits to apply to the file.
-
-   Some platforms may not be able to apply all of the available permission
-   bits; APR_INCOMPLETE will be returned if some permissions are specified
-   which could not be set.
-
-   Platforms which do not implement this feature will return APR_ENOTIMPL.
-=cut
+/**
+ * set the specified file's permission bits.
+ * @param fname The file (name) to apply the permissions to.
+ * @param perms The permission bits to apply to the file.
+ * @tip Some platforms may not be able to apply all of the available 
+ *      permission bits; APR_INCOMPLETE will be returned if some permissions 
+ *      are specified which could not be set.
+ *
+ *      Platforms which do not implement this feature will return APR_ENOTIMPL.
  */
 ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms);
 
-/*
-
-=head1 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
-
-B<get the specified file's stats.  The file is specified by filename, instead of using a pre-opened file.>
-
-    arg 1) Where to store the information about the file.
-    arg 2) The name of the file to stat.
-    arg 3) the pool to use to allocate the new file. 
-
-=cut
+/**
+ * get the specified file's stats.  The file is specified by filename, 
+ * instead of using a pre-opened file.
+ * @param finfo Where to store the information about the file.
+ * @param fname The name of the file to stat.
+ * @param cont the pool to use to allocate the new file. 
  */ 
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
-
-B<get the specified file's stats.  The file is specified by filename, instead of using a pre-opened file.  If the file is a symlink, this function will get the stats for the symlink not the file the symlink refers to.>
-
-    arg 1) Where to store the information about the file.
-    arg 2) The name of the file to stat.
-    arg 3) the pool to use to allocate the new file. 
-
-=cut
+/**
+ * get the specified file's stats.  The file is specified by filename, 
+ * instead of using a pre-opened file.  If the file is a symlink, this function
+ * will get the stats for the symlink not the file the symlink refers to.
+ * @param finfo Where to store the information about the file.
+ * @param fname The name of the file to stat.
+ * @param cont the pool to use to allocate the new file. 
  */ 
 ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
-
-B<Move the read/write file offset to a specified byte within a file.>
-
-    arg 1) The file descriptor
-    arg 2) How to move the pointer, one of:
-              APR_SET  --  set the offset to offset
-              APR_CUR  --  add the offset to the current position 
-              APR_END  --  add the offset to the current file size 
-    arg 3) The offset to move the pointer to.
-
-B<NOTE>:  The third argument is modified to be the offset the pointer
+/**
+ * Move the read/write file offset to a specified byte within a file.
+ * @param thefile The file descriptor
+ * @param where How to move the pointer, one of:
+ * <PRE>
+ *            APR_SET  --  set the offset to offset
+ *            APR_CUR  --  add the offset to the current position 
+ *            APR_END  --  add the offset to the current file size 
+ * @param offset The offset to move the pointer to.
+ * @tip The third argument is modified to be the offset the pointer
           was actually moved to.
-
-=cut
  */
 ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where,ap_off_t *offset);
 
-/*
-
-=head1 ap_status_t ap_opendir(ap_dir_t **new_dir, const char *dirname, ap_pool_t *cont)
-
-B<Open the specified directory.>
-
-    arg 1) The opened directory descriptor.
-    arg 2) The full path to the directory (use / on all systems)
-    arg 3) The pool to use.
-
-=cut
+/**
+ * Open the specified directory.
+ * @param new_dir The opened directory descriptor.
+ * @param dirname The full path to the directory (use / on all systems)
+ * @param cont The pool to use.
  */                        
 ap_status_t ap_opendir(ap_dir_t **new_dir, const char *dirname, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_closedir(ap_dir_t *thedir)
-
-B<close the specified directory.> 
-
-    arg 1) the directory descriptor to close.
-
-=cut
+/**
+ * close the specified directory. 
+ * @param thedir the directory descriptor to close.
  */                        
 ap_status_t ap_closedir(ap_dir_t *thedir);
 
-/*
-
-=head1 ap_status_t ap_readdir(ap_dir_t *thedir)
-
-B<Read the next entry from the specified directory.> 
-
-    arg 1) the directory descriptor to read from, and fill out.
-
-B<NOTE>: All systems return . and .. as the first two files.
-
-=cut
+/**
+ * Read the next entry from the specified directory. 
+ * @param thedir the directory descriptor to read from, and fill out.
+ * @tip All systems return . and .. as the first two files.
  */                        
 ap_status_t ap_readdir(ap_dir_t *thedir);
 
-/*
-
-=head1 ap_status_t ap_rewinddir(ap_dir_t *thedir)
-
-B<Rewind the directory to the first entry.>
-
-     arg 1) the directory descriptor to rewind.
-
-=cut
+/**
+ * Rewind the directory to the first entry.
+ * @param thedir the directory descriptor to rewind.
  */                        
 ap_status_t ap_rewinddir(ap_dir_t *thedir);
 
-/*
-
-=head1 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
-
-B<Create a new directory on the file system.>
-
-    arg 1) the path for the directory to be created.  (use / on all systems)
-    arg 2) Permissions for the new direcoty.
-    arg 3) the pool to use.
-
-=cut
+/**
+ * Create a new directory on the file system.
+ * @param path the path for the directory to be created.  (use / on all systems)
+ * @param perm Permissions for the new direcoty.
+ * @param cont the pool to use.
  */                        
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, 
                         ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
-
-B<Remove directory from the file system.>
-
-    arg 1) the path for the directory to be removed.  (use / on all systems)
-    arg 2) the pool to use.
-
-=cut
+/**
+ * Remove directory from the file system.
+ * @param path the path for the directory to be removed.  (use / on all systems)
+ * @param cont the pool to use.
  */                        
 ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
-
-B<Create an anonymous pipe.>
-
-    arg 1) The file descriptor to use as input to the pipe.
-    arg 2) The file descriptor to use as output from the pipe.
-    arg 3) The pool to operate on.
-
-=cut
+/**
+ * Create an anonymous pipe.
+ * @param in The file descriptor to use as input to the pipe.
+ * @param out The file descriptor to use as output from the pipe.
+ * @param cont The pool to operate on.
  */
 ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, ap_pool_t *cont)
-
-B<Create a named pipe.>
-
-    arg 1) The filename of the named pipe
-    arg 2) The permissions for the newly created pipe.
-    arg 3) The pool to operate on.
-
-=cut
+/**
+ * Create a named pipe.
+ * @param filename The filename of the named pipe
+ * @param perm The permissions for the newly created pipe.
+ * @param cont The pool to operate on.
  */
 ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, 
                                 ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
-
-B<Set the timeout value for a pipe or manipulate the blocking state.>
-
-    arg 1) The pipe we are setting a timeout on.
-    arg 2) The timeout value in microseconds.  Values < 0 mean wait forever, 0
-           means do not wait at all.
-
-=cut
+/**
+ * Set the timeout value for a pipe or manipulate the blocking state.
+ * @param thepipe The pipe we are setting a timeout on.
+ * @param timeoutThe timeout value in microseconds.  Values < 0 mean wait 
+ *        forever, 0 means do not wait at all.
  */
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout);
 
-/*accessor and general file_io functions. */
+/**accessor and general file_io functions. */
 
-/*
-
-=head1 ap_status_t ap_get_filename(char **new_path, ap_file_t *thefile)
-
-B<return the file name of the current file.>
-
-    arg 1) The path of the file.  
-    arg 2) The currently open file.
-
-=cut
+/**
+ * return the file name of the current file.
+ * @param new_path The path of the file.  
+ * @param thefile The currently open file.
  */                     
 ap_status_t ap_get_filename(char **new_path, ap_file_t *thefile);
 
-/*
-
-=head1 ap_status_t ap_get_dir_filename(char **new_path, ap_dir_t *thedir) 
-
-B<Get the file name of the current directory entry.>
-
-    arg 1) the file name of the directory entry. 
-    arg 2) the currently open directory.
-
-=cut
+/**
+ * Get the file name of the current directory entry.
+ * @param new_path the file name of the directory entry. 
+ * @param thedir the currently open directory.
  */                        
 ap_status_t ap_get_dir_filename(char **new_path, ap_dir_t *thedir);
 
-/*
-
-=head1 ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file)
-
-B<Return the data associated with the current file.>
-
-    arg 1) The user data associated with the file.  
-    arg 2) The key to use for retreiving data associated with this file.
-    arg 3) The currently open file.
-
-=cut
+/**
+ * Return the data associated with the current file.
+ * @param data The user data associated with the file.  
+ * @param key The key to use for retreiving data associated with this file.
+ * @param file The currently open file.
  */                     
 ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file);
 
-/*
-
-=head1 ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key, ap_status_t (*cleanup) (void *))
-
-B<Set the data associated with the current file.>
-
-    arg 1) The currently open file.
-    arg 2) The user data to associate with the file.  
-    arg 3) The key to use for assocaiteing data with the file.
-    arg 4) The cleanup routine to use when the file is destroyed.
-
-=cut
+/**
+ * Set the data associated with the current file.
+ * @param file The currently open file.
+ * @param data The user data to associate with the file.  
+ * @param key The key to use for assocaiteing data with the file.
+ * @param cleanup The cleanup routine to use when the file is destroyed.
  */                     
 ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key,
                             ap_status_t (*cleanup) (void *));
 
-/*
-
-=head1 ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
-
-B<Get the size of the current directory entry.>
-
-    arg 1) the size of the directory entry. 
-    arg 2) the currently open directory.
-
-=cut
+/**
+ * Get the size of the current directory entry.
+ * @param size the size of the directory entry. 
+ * @param thedir the currently open directory.
  */                        
 ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir);
 
-/*
-
-=head1 ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
-
-B<Get the last modified time of the current directory entry.>
-
-    arg 1) the last modified time of the directory entry. 
-    arg 2) the currently open directory.
-
-=cut
- */                        
+/**
+ * Get the last modified time of the current directory entry.
+ * @param mtime the last modified time of the directory entry. 
+ * @param thedir the currently open directory.
+ */ 
 ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir);
 
-/*
-
-=head1 ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
-
-B<Get the file type of the current directory entry.>
-
-    arg 1) the file type of the directory entry. 
-    arg 2) the currently open directory.
-
-=cut
- */                        
+/**
+ * Get the file type of the current directory entry.
+ * @param type the file type of the directory entry. 
+ * @param thedir the currently open directory.
+ */
 ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir);
+
+/**
+ * Write a string to a file using a printf format.
+ * @param fptr The file to write to.
+ * @param format The format string
+ * @param ... The values to substitute in the format string
+ * @return The number of bytes written
+ * @deffunc int ap_fprintf(ap_file_t *fptr, const char *format, ...)
+ */ 
+APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+        __attribute__((format(printf,2,3)));
 
 #ifdef __cplusplus
 }
