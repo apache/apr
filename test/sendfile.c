@@ -373,6 +373,7 @@ static int client(client_socket_mode_t socket_mode)
             printf("apr_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
             if (rv) {
                 if (APR_STATUS_IS_EAGAIN(rv)) {
+                    assert(tmplen == 0);
                     nsocks = 1;
                     tmprv = apr_poll(pfd, &nsocks, -1);
                     assert(!tmprv);
