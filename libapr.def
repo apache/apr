@@ -4,55 +4,53 @@ LIBRARY aprlib
 DESCRIPTION ''
 
 EXPORTS
-	; Add new API calls to the end of this list.
-	apr_opendir   @1
-	apr_closedir   @2
-	apr_readdir   @3
-	apr_rewinddir   @4
-	apr_make_dir   @5
-	apr_remove_dir   @6
-	apr_dir_entry_size   @7
-	apr_dir_entry_mtime   @8
-	apr_dir_entry_ftype   @9
-	apr_get_dir_filename   @10
-;	apr_get_filename   @11
-	apr_stat		  @11
-;	apr_get_filesize   @12
-;	apr_get_fileatime   @13
-;	apr_get_filectime   @14
-;	apr_make_iov   @15
-	apr_dupfile   @16
-	apr_getfileinfo   @17
-	apr_open   @18
-	apr_close   @19
-	apr_remove_file   @20
-	apr_create_pipe   @21
-	apr_read   @22
-	apr_write   @23
-	apr_seek   @24
-    	apr_get_filedata   @25
-    	apr_set_filedata   @26
-    	apr_get_os_file   @27
-	apr_put_os_file @28
-    	apr_get_os_dir   @29
-    	apr_putc   @30
-    	apr_getc   @31
-	apr_puts @32
-	apr_fgets @33
-	apr_flush @34
-    	apr_fprintf   @35
-    	apr_eof   @36
-;	apr_get_filetype @37
-	apr_writev @38
-	; locks
-	apr_create_lock   @39
-	apr_lock   @40
-	apr_unlock   @41
-	apr_destroy_lock   @42
-	apr_child_init_lock   @43
-	apr_get_lockdata   @44
-	apr_set_lockdata   @45
-	apr_get_os_lock   @46
+; Add new API calls to the end of this list.
+; apr_file_io.h
+	apr_open	@1
+	apr_close	@2
+	apr_remove_file	@3
+;	apr_rename_file @4
+    	apr_eof		@5
+	apr_read	@6
+	apr_write	@7
+	apr_writev	@8
+;       apr_full_read	@9
+;       apr_full_write	@10
+    	apr_putc	@11
+    	apr_getc	@12
+	apr_ungetc	@13
+	apr_fgets	@14
+	apr_puts	@15
+	apr_flush	@16
+	apr_dupfile	@17
+	apr_getfileinfo	@18
+;       apr_setfileperms @19
+	apr_stat	@20
+;       apr_lstat	@21
+	apr_seek	@22
+	apr_opendir	@23
+	apr_closedir	@24
+	apr_readdir	@25
+	apr_rewinddir   @26
+	apr_make_dir	@27
+	apr_remove_dir  @28
+	apr_dir_entry_size   @29
+	apr_dir_entry_mtime  @30
+	apr_dir_entry_ftype  @31
+	apr_get_dir_filename @32
+;	apr_get_filename  @33
+	apr_create_pipe   @34
+;       apr_create_namedpipe @35
+;       apr_set_pipe_timeout @36
+    	apr_get_filedata  @37
+    	apr_set_filedata  @38
+    	apr_get_os_file	  @39
+	apr_put_os_file	  @40
+    	apr_get_os_dir	  @41
+    	apr_fprintf	  @42
+
+;
+; apr_network_io.h
 	apr_create_tcp_socket   @47
 	apr_shutdown   @48
 	apr_close_socket   @49
@@ -80,21 +78,22 @@ EXPORTS
 	apr_remove_poll_socket   @71
 	apr_clear_poll_sockets   @72
 	apr_getsocketopt @73
-;	apr_getipaddr @74
-;	apr_create_signal   @75
-;	apr_setup_signal   @76
-;       SignalHandling   @77
-;	apr_send_signal    @78
-;       thread_ready   @79
+;
+;
+;
+;
+;
+;
+; apr_thread_proc.h
 	apr_createprocattr_init   @80
 	apr_setprocattr_io   @81
 	apr_setprocattr_dir   @82
 	apr_setprocattr_cmdtype   @83
 	apr_setprocattr_detach   @84
 	apr_create_process   @85
-;	apr_get_childin   @86
-;	apr_get_childout   @87
-;	apr_get_childerr   @88
+;
+;
+;
 	apr_wait_proc   @89
 	apr_kill   @90
 	apr_create_threadattr   @91
@@ -104,7 +103,7 @@ EXPORTS
 	apr_thread_exit   @95
 	apr_thread_join   @96
 	apr_thread_detach   @97
-;	apr_cancel_thread   @98
+;
 	apr_create_thread_private   @99
 	apr_get_thread_private   @100
 	apr_set_thread_private   @101
@@ -113,17 +112,17 @@ EXPORTS
 	apr_set_threaddata    @104
 	apr_get_threadkeydata    @105
 	apr_set_threadkeydata    @106
-;	apr_get_procdata    @107
-;	apr_set_procdata    @108
-;	apr_get_os_proc   @109
+;
+;
+;
 	apr_get_os_thread   @110
 	apr_get_os_threadkey   @111
 	apr_os_systemcase_filename   @112
 	canonical_filename   @113
 	apr_create_pool   @114
-	apr_clear_pool   @115
-	apr_destroy_pool   @116
-;	apr_get_oslevel   @117
+;
+;
+;
 	apr_get_userdata   @118
 	apr_set_userdata   @119
 	apr_initialize   @120
@@ -133,41 +132,28 @@ EXPORTS
 	apr_optopt   @124 DATA
 	apr_optreset   @125 DATA
 	apr_optarg   @126 DATA
-;	apr_make_time   @127
 	apr_ansi_time_to_apr_time @127
-;	apr_current_time   @128
 	apr_now		  @128
-;	apr_explode_time   @129
 	apr_explode_gmt	  @129
-;	apr_implode_time   @130
 	apr_explode_localtime @130
-;	apr_get_curtime   @131
 	apr_implode_time	 @131
-;	apr_get_sec   @132
 	apr_get_os_imp_time	@132
-;	apr_get_min   @133
 	apr_get_os_exp_time	@133
-;	apr_get_hour   @134
 	apr_put_os_imp_time	@134
-;	apr_get_mday   @135
 	apr_put_os_exp_time	@135
-;	apr_get_mon   @136
 	apr_ctime     @136
-;	apr_get_year   @137
 	apr_rfc822_date	@137
-;	apr_get_wday   @138
 	apr_strftime   @138
-;	apr_set_sec   @139
-;	apr_set_min   @140
-;	apr_set_hour   @141
-;	apr_set_mday   @142
-;	apr_set_mon   @143
-;	apr_set_year   @144
-;	apr_set_wday   @145
-;	apr_get_timedata   @146
-;	apr_set_timedata   @147
-;	apr_get_os_time   @148
-;	apr_timediff   @149
+;
+;
+;
+;
+;
+;
+;
+;
+;
+;
 	apr_MD5Final   @150
 	apr_MD5Init   @151
 	apr_MD5Update   @152
@@ -178,10 +164,12 @@ EXPORTS
 	apr_is_fnmatch   @157
 	apr_MD5Encode   @158
 	apr_validate_password   @159
+;
+; apr_pools.h
 	apr_make_sub_pool   @160
 	apr_init_alloc   @161
-;	apr_clear_pool   @162
-;	apr_destroy_pool   @163
+	apr_clear_pool   @162
+	apr_destroy_pool   @163
 	apr_bytes_in_pool   @164
 	apr_bytes_in_free_blocks   @165
 	apr_palloc   @166
@@ -191,9 +179,11 @@ EXPORTS
 	apr_pstrcat   @170
 	apr_pvsprintf   @171
 	apr_psprintf   @172
+;
+; apr_tables.h
 	apr_make_array   @173
 	apr_push_array   @174
-	apr_array_cat   @175
+	apr_array_cat    @175
 	apr_copy_array   @176
 	apr_copy_array_hdr   @177
 	apr_append_arrays   @178
@@ -211,17 +201,20 @@ EXPORTS
 	apr_table_addn   @190
 	apr_overlay_tables @191
 	apr_table_do   @192
-	apr_overlap_tables   @193
-	apr_run_cleanup   @194
-	apr_cleanup_for_exec   @195
-	apr_null_cleanup   @196
-	apr_note_subprocess   @197
+	apr_table_vdo @193
+	apr_overlap_tables   @194
+;
+;
+	apr_run_cleanup   @195
+	apr_cleanup_for_exec   @196
+	apr_null_cleanup   @197
+	apr_note_subprocess   @198
 ;
 	apr_vformatter   @199
 	apr_snprintf   @200
 	apr_vsnprintf   @201
 	apr_getpass   @202
-	apr_ungetc @203
+
 	apr_tokenize_to_argv @204
 	apr_filename_of_pathname @205
 	apr_get_remote_name @206
@@ -250,3 +243,21 @@ EXPORTS
 	apr_strnatcmp @229
 	apr_strnatcasecmp @230
         apr_dso_error @231
+;
+; apr_hash.h
+        apr_make_hash	@232
+	apr_hash_set	@233
+	apr_hash_get	@234
+	apr_hash_first	@235
+	apr_hash_next	@236
+	apr_hash_this	@237
+;
+; apr_lock.h
+	apr_create_lock  @240
+	apr_lock	 @241
+	apr_unlock	 @242
+	apr_destroy_lock @243
+	apr_child_init_lock  @244
+	apr_get_lockdata  @245
+	apr_set_lockdata  @246
+	apr_get_os_lock   @247
