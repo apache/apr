@@ -101,6 +101,8 @@ ap_status_t ap_open(struct file_t **dafile, ap_context_t *cont, const char *fnam
     }
 
     if (flag & APR_BUFFERED) {
+        (*dafile)->buffered = TRUE;
+    } else {
         (*dafile)->buffered = FALSE;
     }
     (*dafile)->fname = strdup(fname);
@@ -137,7 +139,10 @@ ap_status_t ap_open(struct file_t **dafile, ap_context_t *cont, const char *fnam
         theerror = GetLastError();
         return APR_EEXIST;
     }
+    (*dafile)->stated = 0;  /* we haven't called stat for this file yet. */
     (*dafile)->eof_hit = 0;
+    ap_register_cleanup((*dafile)->cntxt, (void *)(*dafile), file_cleanup,
+                        ap_null_cleanup);
     return APR_SUCCESS;
 }
 
@@ -156,10 +161,10 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cont)
     char *temp = canonical_filename(cont, path);
 
     if (DeleteFile(temp)) {
-		return APR_SUCCESS;
+        return APR_SUCCESS;
     }
     else {
-		return APR_EEXIST;
+        return APR_EEXIST;
     }
 }
 
