@@ -1,5 +1,12 @@
 Changes with APR b1
 
+  *) Add --disable-atomics switch to override our handcoded assembly
+     optimizations.  Note that this has no effect if your operating
+     system has a userspace atomic interface.  [Justin Erenkrantz]
+
+  *) Remove Linux atomic support since it does not have a usable
+     userspace atomic interface.  [Justin Erenkrantz]
+
   *) Don't require that the DNS can map 127.0.0.1 when checking for
      the presence/usability of getnameinfo().  PR 7642.  [Jeff Trawick]
 
