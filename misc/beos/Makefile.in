@@ -14,7 +14,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libmisc.a
 
-OBJS=start.o getopt.o \
+OBJS=start.o misc_common.o \
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
