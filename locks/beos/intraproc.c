@@ -60,9 +60,9 @@ ap_status_t lock_intra_cleanup(void *data)
     ap_lock_t *lock = (ap_lock_t *)data;
     if (lock->curr_locked == 1) {
     	if (atomic_add(&lock->ben_intraproc , -1) > 1){
-    		release_sem (lock->sem_intraproc);
+            release_sem (lock->sem_intraproc);
     	} else {
-    		return errno;
+            return errno;
     	}
     }
     return APR_SUCCESS;
@@ -74,12 +74,12 @@ ap_status_t create_intra_lock(struct lock_t *new)
     new->sem_intraproc = (sem_id)ap_palloc(new->cntxt, sizeof(sem_id));
     new->ben_intraproc = (int32)ap_palloc(new->cntxt, sizeof(int32));
     
-    new->ben_intraproc = 0;
-    stat = create_sem(0, "ap_intraproc");
-    if (stat < B_NO_ERROR){
+    
+    if ((stat = create_sem(0, "ap_intraproc")) < B_NO_ERROR){
     	lock_intra_cleanup(new);
         return stat;
     }
+    new->ben_intraproc = 0;
     new->sem_intraproc = stat;
     new->curr_locked = 0;
     ap_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup,
@@ -89,22 +89,29 @@ ap_status_t create_intra_lock(struct lock_t *new)
 
 ap_status_t lock_intra(ap_lock_t *lock)
 {
-    lock->curr_locked = 1;
-    if (atomic_add (&lock->ben_intraproc, 1) >0){
-        if (acquire_sem(lock->sem_intraproc) != B_NO_ERROR){
+    int32 stat;
+    
+    if (atomic_add (&lock->ben_intraproc, 1) > 0){
+        if ((stat = acquire_sem(lock->sem_intraproc)) != B_NO_ERROR){
             atomic_add(&lock->ben_intraproc,-1);
-	        return errno;
+	        return stat;
         }
     }
+    lock->curr_locked = 1;
     return APR_SUCCESS;
 }
 
 ap_status_t unlock_intra(ap_lock_t *lock)
 {
+    int32 stat;
+    
     if (atomic_add(&lock->ben_intraproc, -1) > 1){
-        release_sem(lock->sem_intraproc);
-        lock->curr_locked = 0;
+        if ((stat = release_sem(lock->sem_intraproc)) != B_NO_ERROR) {
+            atomic_add(&lock->ben_intraproc, 1);
+            return stat;
+        }
     }
+    lock->curr_locked = 0;
     return APR_SUCCESS;
 }
 
