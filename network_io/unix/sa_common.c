@@ -130,27 +130,6 @@ apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname)
-{
-    struct hostent *he;
-    
-    if (strcmp(hostname,"*") == 0){
-        addr->s_addr = htonl(INADDR_ANY);
-        return APR_SUCCESS;
-    }
-    if ((addr->s_addr = apr_inet_addr(hostname)) != APR_INADDR_NONE)
-        return APR_SUCCESS;
-
-    /* hmmm, it's not a numeric IP address so we need to look it up :( */
-    he = gethostbyname(hostname);
-    if (!he || he->h_addrtype != APR_INET || !he->h_addr_list[0])
-        return (h_errno + APR_OS_START_SYSERR);
-
-    *addr = *(struct in_addr*)he->h_addr_list[0];
-
-    return APR_SUCCESS;
-}
-
 static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
 {
     addr->sa.sin.sin_family = family;

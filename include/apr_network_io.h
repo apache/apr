@@ -666,13 +666,6 @@ apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file);
 #endif
 
 /**
- * Given a hostname and a port, create an apr_in_addr for it...
- * @param addr The apr_in_addr_t structure to return.
- * @param hostname The hostname to lookup.
- */
-apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname);
-
-/**
  * Given an apr_sockaddr_t and a service name, set the port for the service
  * @param sockaddr The apr_sockaddr_t that will have it's port set
  * @param servname The name of the service you wish to use
