@@ -667,6 +667,22 @@ else
 fi
 ])
 
+dnl APR_CHECK_MCAST: check for multicast interfaces
+AC_DEFUN([APR_CHECK_MCAST], [
+AC_CACHE_CHECK([for struct ip_mreq], [apr_cv_struct_ipmreq], [
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <netinet/in.h>
+], [
+    struct ip_mreq mip;
+    mip.imr_interface.s_addr = INADDR_ANY;
+], [apr_cv_struct_ipmreq=yes], [apr_cv_struct_ipmreq=no], [apr_cv_struct_ipmreq=yes])])
+
+if test $apr_cv_struct_ipmreq = yes; then
+   AC_DEFINE([HAVE_STRUCT_IPMREQ], 1, [Define if struct impreq was found])
+fi
+])
+
 dnl
 dnl APR_CHECK_H_ERRNO_FLAG
 dnl

@@ -1908,6 +1908,7 @@ else
 fi
 
 APR_CHECK_SCTP
+APR_CHECK_MCAST
 
 AC_SUBST(apr_tcp_nopush_flag)
 AC_SUBST(have_corkable_tcp)
