@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/11/15 20:08:21 $]
+Last modified at [$Date: 2003/11/17 09:56:46 $]
 
 Release:
 
@@ -56,10 +56,21 @@ CURRENT test/testall -v EXCEPTIONS:
 
     Please add any platform anomilies to the following exception list.
 
-    * All platforms fail tests in time: test_localstr and test_ctime
-        Imaginary... the tests can only succeed on machines configured
-        for the Pacific (US) timezone.  Test needs to be restructured.
-        Ignore these errors.
+    * various tests fail on Unix in VPATH builds.
+
+    * 'testsockets' will fail on some systems such as Linux where IPv6
+      can be "supported" but not "enabled", and socket(PF_INET6, ...)
+      can fail.
+
+    * 'testipsub' will tickle an Solaris 8 getaddrinfo() IPv6 bug,
+      causing the test to hang.  Configure with --disable-ipv6 if
+      using an unpatched Solaris 8 installation.
+
+    * The 'testdso' tests will not work if configured with
+      --disable-shared since the loadable modules cannot be built.
+
+    * 'testdso' fails on older versions of OpenBSD due to dlsym(NULL,
+      ...) segfaulting.
 
     * BUG: Win32 fails test in File Info: test_stat_eq_finfo
         apr_stat and apr_getfileinfo differ in protection ... wrowe
