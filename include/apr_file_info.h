@@ -94,9 +94,9 @@ typedef enum {
  * @{
  */
 
-#define APR_UREAD       0x4000 /**< Read by user */
-#define APR_UWRITE      0x2000 /**< Write by user */
-#define APR_UEXECUTE    0x1000 /**< Execute by user */
+#define APR_UREAD       0x0400 /**< Read by user */
+#define APR_UWRITE      0x0200 /**< Write by user */
+#define APR_UEXECUTE    0x0100 /**< Execute by user */
 
 #define APR_GREAD       0x0040 /**< Read by group */
 #define APR_GWRITE      0x0020 /**< Write by group */
@@ -106,7 +106,7 @@ typedef enum {
 #define APR_WWRITE      0x0002 /**< Write by others */
 #define APR_WEXECUTE    0x0001 /**< Execute by others */
 
-#define APR_OS_DEFAULT  0xFFFF /**< use OS's default permissions */
+#define APR_OS_DEFAULT  0x0FFF /**< use OS's default permissions */
 
 /* additional permission flags for apr_file_copy  and apr_file_append */
 #define APR_FILE_SOURCE_PERMS 0x1000 /**< Copy source file's permissions */
