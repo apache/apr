@@ -66,7 +66,7 @@
 #include <unistd.h> /* for _POSIX_THREAD_SAFE_FUNCTIONS */
 #endif
 
-APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_group_name_get(char **groupname, apr_gid_t groupid, apr_pool_t *p)
 {
     return APR_ENOTIMPL;
 }

@@ -218,7 +218,7 @@ int main(void)
 
     if (finfo.valid & APR_FINFO_GROUP) {
         STD_TEST_NEQ("    Getting groupname", 
-                     apr_get_groupname(&buf, finfo.group, pool))
+                     apr_group_name_get(&buf, finfo.group, pool))
         STD_TEST_NEQ("    Comparing group ID's",
                      apr_compare_groups(finfo.group, gid))
         printf("     (gid's for %s match)\n", buf);

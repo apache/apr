@@ -100,7 +100,7 @@ APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *gid,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_group_name_get(char **groupname, apr_gid_t groupid, apr_pool_t *p)
 {
     SID_NAME_USE type;
     char name[MAX_PATH], domain[MAX_PATH];
