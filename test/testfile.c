@@ -106,7 +106,13 @@ static void test_open_excl(CuTest *tc)
      */
     CuAssertPtrEquals(tc, NULL, thefile); 
 #endif
-    apr_file_close(thefile);
+    /* And this too is a bug... Win32 (correctly) does not allocate
+     * an apr_file_t, and (correctly) returns NULL.  Closing objects
+     * that failed to open is invalid.  Apparently someone is doing so.
+     */
+    if (thefile) {
+        apr_file_close(thefile);
+    }
 }
 
 static void test_open_read(CuTest *tc)
@@ -200,7 +206,9 @@ static void test_open_write(CuTest *tc)
                        APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
-    apr_file_close(filetest);
+    if (filetest) {
+        apr_file_close(filetest);
+    }
 }
 
 static void test_open_writecreate(CuTest *tc)
