@@ -248,7 +248,7 @@ AC_DEFUN(APR_CHECK_DEFINE_FILES,[
 
 
 dnl
-dnl APR_CHECK_DEFINE( symbol, header_file )
+dnl APR_CHECK_DEFINE( symbol, header_file [, description ])
 dnl
 AC_DEFUN(APR_CHECK_DEFINE,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
@@ -260,7 +260,7 @@ AC_DEFUN(APR_CHECK_DEFINE,[
     ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
   ])
   if test "$ac_cv_define_$1" = "yes"; then
-    AC_DEFINE(HAVE_$1)
+    AC_DEFINE(HAVE_$1, 1, [$3])
   fi
 ])
 
