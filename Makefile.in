@@ -7,6 +7,7 @@ SHELL=@SH@
 # Macros for compilation commands
 #
 @SET_MAKE@
+MFLAGS_STATIC=
 RM=@RM@
 CC=@CC@
 CFLAGS=@CFLAGS@ @OPTIM@
@@ -39,10 +40,9 @@ SUBDIRS=lib file_io/@OSDIR@ network_io/@OSDIR@ threadproc/@OSDIR@ \
 # building the entire package.
 #
 all: Makefile $(MODULES) subdirs
-	rm -Rf libs
-	mkdir libs
+	@rm -Rf libs
+	@mkdir libs
 	@for i in $(SUBDIRS); do cp $$i/*.a libs ; done;
-	@echo APR built.
 
 clean: subdirs_clean
 	$(RM) -f *.o *.a *.so
@@ -54,27 +54,27 @@ distclean: clean
 
 subdirs:
 	@for i in $(SUBDIRS); do \
-	    echo "===> $$i"; \
+	    echo "===> $(SDP)lib/apr/$$i"; \
 	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' \
 		CC='$(CC)' AUX_CFLAGS='$(AUX_CFLAGS)' RANLIB='$(RANLIB)' ) \
 		|| exit 1; \
-	    echo "<=== $$i"; \
+	    echo "<=== $(SDP)lib/apr/$$i"; \
 	done;
 
 subdirs_depend:
 	@for i in $(SUBDIRS); do \
-	    echo "===> $$i"; \
-	    ( cd $$i && $(MAKE) depend ) \
+	    echo "===> $(SDP)lib/apr/$$i"; \
+	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' depend ) \
 		|| exit 1; \
-	    echo "<=== $$i"; \
+	    echo "<=== $(SDP)lib/apr/$$i"; \
 	done;
 
 subdirs_clean:
 	@for i in $(SUBDIRS); do \
-	    echo "===> $$i"; \
-	    ( cd $$i && $(MAKE) clean ) \
+	    echo "===> $(SDP)lib/apr/$$i"; \
+	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' clean ) \
 		|| exit 1; \
-	    echo "<=== $$i"; \
+	    echo "<=== $(SDP)lib/apr/$$i"; \
 	done;
 
 # DO NOT REMOVE
