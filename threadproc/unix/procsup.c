@@ -76,17 +76,17 @@ ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont)
         return errno;
     }
 #elif defined(NEXT) || defined(NEWSOS)
-    if (setpgrp(0, getpid()) == -1 || ((*new)->pid = getpgrp(0)) == -1) {
+    if (setpgrp(0, getpid()) == -1 || (new->pid = getpgrp(0)) == -1) {
         return errno;
     }
 #elif defined(OS2) || defined(TPF)
     /* OS/2 don't support process group IDs */
-    (*new)->pid = getpid();
+    new->pid = getpid();
 #elif defined(MPE)
     /* MPE uses negative pid for process group */
-     (*new)->pid = -getpid();
+     new->pid = -getpid();
 #else
-    if (((*new)->pid = setpgrp(getpid(), 0)) == -1) {
+    if ((new->pid = setpgrp(getpid(), 0)) == -1) {
         return errno;
     }
 #endif
