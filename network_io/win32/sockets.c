@@ -97,7 +97,7 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
-    (void) apr_pollset_create(&(*new)->pollset, 1, cont, 0);
+    (void) apr_pollset_create(&(*new)->pollset, 1, p, 0);
 }
 
 APR_DECLARE(apr_status_t) apr_socket_protocol_get(apr_socket_t *sock,
