@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Complete the implementation of LARGEFILE support on Win32, although
+     the mmap semantics still need a touch of work.
+
+  *) Fix the APR_XTHREAD support, and apr_sendfile mechanics, so we can
+     handle cross-threaded file handles on Win32.
+
   *) Implement APR_READWRITE locks on Unix with POSIX rwlocks.
      Introduce new apr_lock_acquire_rw() function which takes in 
      APR_READER or APR_WRITER.  [Justin Erenkrantz]

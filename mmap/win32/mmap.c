@@ -96,7 +96,10 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
                                           apr_int32_t flag, apr_pool_t *cont)
 {
     static DWORD memblock = 0;
-    DWORD fmaccess = 0, mvaccess = 0;
+    DWORD fmaccess = 0;
+    DWORD mvaccess = 0;
+    DWORD offlo;
+    DWORD offhi;
 
     if (flag & APR_MMAP_WRITE)
         fmaccess |= PAGE_READWRITE;
@@ -121,19 +124,23 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     
     *new = apr_pcalloc(cont, sizeof(apr_mmap_t));
     (*new)->pstart = (offset / memblock) * memblock;
-    (*new)->psize = (offset % memblock) + size;
+    (*new)->psize = (apr_size_t)(offset % memblock) + size;
     (*new)->poffset = offset - (*new)->pstart;
+    offlo = (DWORD)(*new)->psize;
+    offhi = (DWORD)((*new)->psize << 32);
 
     (*new)->mhandle = CreateFileMapping(file->filehand, NULL, fmaccess,
-                                        0, (*new)->psize, NULL);
+                                        offhi, offlo, NULL);
     if (!(*new)->mhandle || (*new)->mhandle == INVALID_HANDLE_VALUE)
     {
         *new = NULL;
         return apr_get_os_error();
     }
 
-    (*new)->mv = MapViewOfFile((*new)->mhandle, mvaccess, 0,
-                               (*new)->poffset, (*new)->psize);
+    offlo = (DWORD)(*new)->poffset;
+    offhi = (DWORD)((*new)->poffset << 32);
+    (*new)->mv = MapViewOfFile((*new)->mhandle, mvaccess, offhi,
+                               offlo, (*new)->psize);
     if (!(*new)->mv)
     {
         apr_status_t rv = apr_get_os_error();

@@ -105,6 +105,11 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         }
     }
 
+    if (file->pOverlapped && !file->pipe) {
+        file->pOverlapped->Offset     = (DWORD)file->filePtr;
+        file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
+    }
+
     rv = ReadFile(file->filehand, buf, len, nbytes, file->pOverlapped);
 
     if (!rv) {
@@ -137,7 +142,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         }
         else if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
             /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
-            rv = APR_SUCCESS; /* APR_EOF? */
+            rv = APR_EOF;
         }
     } else {
         /* OK and 0 bytes read ==> end of file */
@@ -145,6 +150,9 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
             rv = APR_EOF;
         else
             rv = APR_SUCCESS;
+    }
+    if (rv == APR_SUCCESS && file->pOverlapped && !file->pipe) {
+        file->filePtr += *nbytes;
     }
     return rv;
 }
@@ -229,16 +237,18 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
     if (thefile->buffered) {
         char *pos = (char *)buf;
-        int blocksize;
-        int size = *nbytes;
+        apr_size_t blocksize;
+        apr_size_t size = *nbytes;
 
         apr_lock_acquire(thefile->mutex);
 
         if (thefile->direction == 0) {
             // Position file pointer for writing at the offset we are logically reading from
             apr_off_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            DWORD offlo = (DWORD)offset;
+            DWORD offhi = (DWORD)(offset >> 32);
             if (offset != thefile->filePtr)
-                SetFilePointer(thefile->filehand, offset, NULL, FILE_BEGIN);
+                SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
             thefile->bufpos = thefile->dataRead = 0;
             thefile->direction = 1;
         }
@@ -258,22 +268,50 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         apr_lock_release(thefile->mutex);
         return rv;
     } else {
-        if (!thefile->pipe && thefile->append) {
+        if (thefile->pOverlapped && !thefile->pipe) {
+            thefile->pOverlapped->Offset     = (DWORD)thefile->filePtr;
+            thefile->pOverlapped->OffsetHigh = (DWORD)(thefile->filePtr >> 32);
+        }
+        else if (!thefile->pipe && thefile->append) {
             SetFilePointer(thefile->filehand, 0, NULL, FILE_END);
         }
-        if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
+        if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, 
+                      thefile->pOverlapped)) {
             *nbytes = bwrote;
             rv = APR_SUCCESS;
         }
         else {
             (*nbytes) = 0;
             rv = apr_get_os_error();
+            if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
+                /* Wait for the pending i/o (put a timeout here?) */
+                rv = WaitForSingleObject(thefile->pOverlapped->hEvent, INFINITE);
+                switch (rv) {
+                    case WAIT_OBJECT_0:
+                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, nbytes, TRUE);
+                        rv = APR_SUCCESS;
+                        break;
+                    case WAIT_TIMEOUT:
+                        rv = APR_TIMEUP;
+                        break;
+                    case WAIT_FAILED:
+                        rv = apr_get_os_error();
+                        break;
+                    default:
+                        break;
+                }
+                if (rv != APR_SUCCESS) {
+                    CancelIo(thefile->filehand);
+                }
+            }
+        }
+        if (rv == APR_SUCCESS && thefile->pOverlapped && !thefile->pipe) {
+            thefile->filePtr += *nbytes;
         }
     }
-
     return rv;
 }
-/*
+/* ToDo: Write for it anyway and test the oslevel!
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2)
  */
 APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
