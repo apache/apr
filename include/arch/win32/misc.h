@@ -61,6 +61,7 @@
 #include "apr_pools.h"
 #include "apr_getopt.h"
 #include "apr_thread_proc.h"
+#include "apr_errno.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif

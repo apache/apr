@@ -232,7 +232,7 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
             return APR_ENOTSOCK;
         }
         if (!hp)  {
-            return status_from_res_error(h_errno);
+            return (h_errno + APR_OS_START_SYSERR);
         }
     
         memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);

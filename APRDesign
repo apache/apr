@@ -179,3 +179,147 @@ The format for the comment block is:
  */                                                                             
 
 For an actual example, look at any function in the fileio/unix directory.
+
+APR Error reporting
+
+Most APR functions should return an ap_status_t type.  The only time an
+APR function does not return an ap_status_t is if it absolutly CAN NOT
+fail.  Examples of this would be filling out an array when you know you are
+not beyond the array's range.  If it cannot fail on your platform, but it
+could conceivably fail on another platform, it should return an ap_status_t.
+Unless you are sure, return an ap_status_t.  :-)
+
+All platform return errno values unchanged.  Each platform can also have
+one system error type, which can be returned after an offset is added.  
+There are five types of error values in APR, each with it's own offset.
+
+    Name			Purpose
+0) 			This is 0 for all platforms and isn't really defined
+ 			anywhere, but it is the offset for errno values.
+			(This has no name because it isn't actually defined, 
+                        but completeness we are discussing it here).
+1) APR_OS_START_ERROR	This is platform dependant, and is the offset at which
+			APR errors start to be defined.  (Canonical error
+			values are also defined in this section.  [Canonical
+			error values are discussed later]).
+2) APR_OS_START_STATUS	This is platform dependant, and is the offset at which
+			APR status values start.
+4) APR_OS_START_USEERR	This is platform dependant, and is the offset at which
+			APR apps can begin to add their own error codes.
+3) APR_OS_START_SYSERR	This is platform dependant, and is the offset at which
+			system error values begin.
+
+All of these definitions can be found in apr_errno.h for all platforms.  When
+an error occurs in an APR function, the function must return an error code.
+If the error occurred in a system call and that system call uses errno to
+report an error, then the code is returned unchanged.  For example: 
+
+    if (open(fname, oflags, 0777) < 0)
+        return errno;
+
+
+The next place an error can occur is a system call that uses some error value
+other than the primary error value on a platform.  This can also be handled
+by APR applications.  For example:
+
+    if (CreateFile(fname, oflags, sharemod, NULL, 
+                   createflags, attributes,0) == INVALID_HANDLE_VALUE
+        return (GetLAstError() + APR_OS_START_SYSERR);
+
+These two examples implement the same function for two different platforms.
+Obviously even if the underlying problem is the same on both platforms, this
+will result in two different error codes being returned.  This is OKAY, and
+is correct for APR.  APR relies on the fact that most of the time an error
+occurs, the program logs the error and continues, it does not try to
+programatically solve the problem.  This does not mean we have not provided
+support for programmatically solving the problem, it just isn't the default
+case.  We'll get to how this problem is solved in a little while.
+
+If the error occurs in an APR function but it is not due to a system call,
+but it is actually an APR error or just a status code from APR, then the
+appropriate code should be returned.  These codes are defined in apr_errno.h
+and are self explanatory.
+
+No APR code should ever return a code between APR_OS_START_USEERR and 
+APR_OS_START_SYSERR, those codes are reserved for APR applications.
+
+To programmatically correct an error in a running application, the error codes
+need to be consistent across platforms.  This should make sense.  To get
+consistent error codes, APR provides a function ap_canonicalize_error().
+This function will take as input any ap_status_t value, and return a small
+subset of canonical APR error codes.  These codes will be equivalent to
+Unix errno's.  Why is it a small subset?  Because we don't want to try to
+convert everything in the first pass.  As more programs require that more
+error codes are converted, they will be added to this function.  
+
+Why did APR take this approach?  There are two ways to deal with error 
+codes portably.
+
+1)  return the same error code across all platforms.  2)  return platform
+specific error codes and convert them when necessary.  
+
+The problem with option number one is that it takes time to convert error 
+codes to a common code, and most of the time programs want to just output 
+an error string.  If we convert all errors to a common subset, we have four 
+steps to output an error string:
+
+    make syscall that fails
+        convert to common error code                 step 1
+        return common error code
+            check for success
+            call error output function               step 2
+                convert back to system error         step 3
+                output error string                  step 4
+
+By keeping the errors platform specific, we can output error strings in two
+steps.
+
+    make syscall that fails
+        return error code
+            check for success
+            call error output function               step 1
+                output error string                  step 2
+
+Less often, programs change their execution based on what error was returned.
+This is no more expensive using option 2 and it is using option 1, but we
+put the onus of converting the error code on the programmer themselves.
+For example, using option 1:
+
+    make syscall that fails
+        convert to common error code
+        return common error code
+            decide execution basd on common error code
+
+Using option 2:
+    
+    make syscall that fails
+        return error code
+            convert to common error code (using ap_canonicalize_error)
+            decide execution based on common error code
+
+Finally, there is one more operation on error codes.  You can get a string
+that explains in human readable form what has happened.  To do this using 
+APR, call ap_strerror().
+
+On all platforms ap_strerror takes the form:
+
+char *ap_strerror(ap_status_t err)
+{
+    if (err < APR_OS_START_ERRNO2)
+        return (platform dependant error string generator)
+    if (err < APR_OS_START_ERROR)
+        return (platform dependant error string generator for
+                supplemental error values)
+    if (err < APR_OS_SYSERR)
+        return (APR generated error or status string)
+    if (err == 0)
+        return "No error was found"
+    else
+        return "APR doesn't understand this error value"
+}
+
+Notice, this does not handle canonicalized error values well.  Those will 
+return "APR doesn't understand this error value" on some platforms and
+an actual error string on others.  To deal with this, just get the
+string before canonicalizing your error code.
+
