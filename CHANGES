@@ -1,4 +1,7 @@
 Changes with APR a9
+  *) Add APR_SIZE_T_FMT.  Get the other APR_xx_T_FMT variables
+     defined properly on AIX.  [Jeff Trawick]
+
   *) network API changes: get rid of apr_get_socket_inaddr(), 
      apr_get_remote_name(), and apr_get_local_name()  [Jeff Trawick]
 
