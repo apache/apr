@@ -437,6 +437,9 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                 nbytes = rv;
                 rv = 0;
             }
+            else {
+                nbytes = 0;
+            }
         }
     } while (rv == -1 && errno == EINTR);
 
