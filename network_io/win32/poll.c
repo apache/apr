@@ -218,15 +218,15 @@ ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
     }
 }
 
-ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, 
-                                  ap_socket_t *sock, ap_int16_t events)
+ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, 
+                                ap_socket_t *sock, ap_int16_t events)
 {
     if (events & APR_POLLIN) {
         FD_CLR(sock->sock, aprset->read);
         aprset->numread--;
     }
     if (events & APR_POLLPRI) {
-        FD_CLR(sock->sock, aprset->read);
+        FD_CLR(sock->sock, aprset->except);
         aprset->numexcept--;
     }
     if (events & APR_POLLOUT) {
@@ -234,6 +234,11 @@ ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset,
         aprset->numwrite--;
     }
     return APR_SUCCESS;
+}
+
+ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock)
+{
+    return ap_mask_poll_socket(aprset, sock, ~0);
 }
 
 ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)

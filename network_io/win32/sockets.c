@@ -87,13 +87,16 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
     (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
                           sizeof(struct sockaddr_in));
 
-    if ((*new)->local_addr == NULL) {
+    if (((*new)->local_addr == NULL) || ((*new)->remote_addr == NULL)) {
         return APR_ENOMEM;
     }
     /* For right now, we are not using socket groups.  We may later.
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
     (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if ((*new)->sock == INVALID_SOCKET) {
+        return WSAGetLastError();
+    }
 
     (*new)->local_addr->sin_family = AF_INET;
 
@@ -101,9 +104,6 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
 
     (*new)->local_addr->sin_port = 0;   
  
-    if ((*new)->sock == INVALID_SOCKET) {
-        return APR_EEXIST;
-    }
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
@@ -131,7 +131,7 @@ ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
         return APR_SUCCESS;
     }
     else {
-        return APR_EEXIST;
+        return WSAGetLastError();
     }
 }
 
@@ -144,7 +144,7 @@ ap_status_t ap_close_socket(ap_socket_t *thesocket)
 ap_status_t ap_bind(ap_socket_t *sock)
 {
     if (bind(sock->sock, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1) {
-        return errno;
+        return WSAGetLastError();
     }
     else
         return APR_SUCCESS;
@@ -153,7 +153,7 @@ ap_status_t ap_bind(ap_socket_t *sock)
 ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
 {
     if (listen(sock->sock, backlog) == SOCKET_ERROR)
-        return APR_EEXIST;
+        return WSAGetLastError();
     else
         return APR_SUCCESS;
 }
@@ -176,7 +176,7 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *con
                         &(*new)->addr_len);
 
     if ((*new)->sock == INVALID_SOCKET) {
-        return errno;
+        return WSAGetLastError();
     }
     
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -201,7 +201,7 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
     else {
         hp = gethostbyname(hostname);
         if (!hp)  {
-            return (WSAGetLastError() + APR_OS_START_SYSERR);
+            return WSAGetLastError();
         }
         memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
         sock->addr_len = sizeof(*sock->remote_addr);
@@ -228,32 +228,17 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
 
 ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *socket)
 {
-    if (socket != NULL) {
-        return ap_get_userdata(data, key, socket->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOSOCKET;
-    }
+    return ap_get_userdata(data, key, socket->cntxt);
 }
 
 ap_status_t ap_set_socketdata(ap_socket_t *socket, void *data, char *key, 
                               ap_status_t (*cleanup) (void *))
 {
-    if (socket != NULL) {
-        return ap_set_userdata(data, key, cleanup, socket->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOSOCKET;
-    }
+    return ap_set_userdata(data, key, cleanup, socket->cntxt);
 }
 
 ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
 {
-    if (sock == NULL) {
-        return APR_ENOSOCKET;
-    }
     *thesock = sock->sock;
     return APR_SUCCESS;
 }
