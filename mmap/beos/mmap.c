@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "apr_portable.h"
 #include "apr_lib.h"
+#include "fileio.h"
 #include <kernel/OS.h>
 #include <errno.h>
 #include <string.h>
@@ -82,17 +83,11 @@ ap_status_t ap_mmap_create(struct mmap_t **new, const char *fname,
      ap_context_t *cont)
 {
     struct stat st;
-    int fd;
+    int fd = -1;
     void *mm;
-    struct mmap_t *next;
-    area_id aid;
-    char *areaname;
-    uint32 size;
-    int len;               
-
-    /* We really should check to see that we haven't already mmap'd
-     * this file before.  Cycling the linked list will allow this.
-     */
+    area_id aid = -1;
+    char *areaname = "apr_mmap\0";
+    uint32 size = 0;
 
     (*new) = (struct mmap_t *)ap_palloc(cont, sizeof(struct mmap_t));
     
@@ -109,16 +104,10 @@ ap_status_t ap_mmap_create(struct mmap_t **new, const char *fname,
     if ((fd = open(fname, O_RDONLY, 0)) == -1) {
         return APR_EBADF;
     }
-
-    /* generate a unique name for this area */
-    len = strlen(fname) > 22 ? 22 : strlen(fname);
-    areaname = malloc(sizeof(char) * 32);
-    strncpy(areaname, "beos_mmap:\0", 11);
-    strncat(areaname, fname + (strlen(fname)-len), len);
-    
-    aid = create_area(areaname, mm, B_ANY_ADDRESS, size * B_PAGE_SIZE, 
+  
+    aid = create_area(areaname, &mm , B_ANY_ADDRESS, size * B_PAGE_SIZE, 
         B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
-    free(areaname);
+
     if (aid >= B_NO_ERROR)
         read(fd, mm, st.st_size);    
     
@@ -142,10 +131,67 @@ ap_status_t ap_mmap_create(struct mmap_t **new, const char *fname,
     return APR_SUCCESS;
 }
 
+ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file, 
+               ap_context_t *cont)
+{
+    void *mm;
+    area_id aid = -1;
+    char *areaname = "apr_mmap\0";
+    uint32 size;           
+    
+    if (file->buffered)
+        /* we don't yet mmap buffered files... */
+        return APR_EBADF;
+    if (file->filedes == -1)
+        /* there isn't a file handle so how can we mmap?? */
+        return APR_EBADF;
+    (*new) = (struct mmap_t*)ap_palloc(file->cntxt, sizeof(struct mmap_t));
+    
+    if (!file->stated) {
+        /* hmmmm... we need to stat the file now */
+        struct stat st;
+        if (stat(file->fname, &st) == -1) {
+            /* hmm, is this fatal?? */
+            return APR_EBADF;
+        }
+        file->stated = 1;
+        file->size = st.st_size;
+        file->atime = st.st_atime;
+        file->mtime = st.st_mtime;
+        file->ctime = st.st_ctime;
+        (*new)->sinfo = st;
+    }
+    
+    size = ((file->size -1) / B_PAGE_SIZE) + 1;
+
+    aid = create_area(areaname, &mm, B_ANY_ADDRESS, size * B_PAGE_SIZE, 
+        B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA);
+    free(areaname);
+    
+    if (aid < B_OK) {
+        /* we failed to get an mmap'd file... */
+        return APR_ENOMEM;
+    }  
+    if (aid >= B_OK)
+        read(file->filedes, mm, file->size);    
+
+    (*new)->filename = ap_pstrdup(cont, file->fname);
+    (*new)->mm = mm;
+    (*new)->size = file->size;
+    (*new)->area = aid;
+    (*new)->cntxt = cont;
+           
+    /* register the cleanup... */ 
+    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
+             ap_null_cleanup);
+
+    return APR_SUCCESS;
+}
+
 ap_status_t ap_mmap_delete(struct mmap_t *mmap)
 {
     ap_status_t rv;
-    if (mm->area == -1)
+    if (mmap->area == -1)
         return APR_ENOENT;
          
     if ((rv = mmap_cleanup(mmap)) == APR_SUCCESS) {

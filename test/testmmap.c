@@ -58,6 +58,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_file_io.h"
 
 /* hmmm, what is a truly portable define for the max path
  * length on a platform?
@@ -69,8 +70,10 @@ int main()
     ap_context_t *context;
     ap_mmap_t *themmap = NULL;
     ap_status_t status = 0;
-    char *file;
-
+    ap_file_t *thefile;
+    ap_int32_t flag = APR_READ;
+    char *file1;
+    
     fprintf (stdout,"APR MMAP Test\n*************\n\n");
     
     fprintf(stdout,"Creating context....................");    
@@ -80,14 +83,37 @@ int main()
     }
     fprintf(stdout,"OK\n");
     
-    file = (char*) malloc(sizeof(char) * PATH_LEN);
-    getcwd(file, PATH_LEN);
-    strncat(file,"/testmmap.c",11);  
-    
+    file1 = (char*) ap_palloc(context, sizeof(char) * PATH_LEN);
+    getcwd(file1, PATH_LEN);
+    strncat(file1,"/testmmap.c",11);  
+
     fprintf(stdout,"Trying to mmap file.................");
-    if (ap_mmap_create(&themmap, file, context) != APR_SUCCESS) {
+    if (ap_mmap_create(&themmap, file1, context) != APR_SUCCESS) {
         fprintf(stderr,"Failed.\n");
         exit (-1);
+    }
+    fprintf(stdout,"OK\n");
+    
+    fprintf(stdout,"Trying to delete the mmap file......");
+    if (ap_mmap_delete(themmap) != APR_SUCCESS) {
+        fprintf(stderr,"Failed!\n");
+        exit (-1);
+    }
+    fprintf(stdout,"OK\n\n");
+
+    fprintf(stdout, "Opening file........................");
+    if (ap_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context) != APR_SUCCESS) {
+        perror("Didn't open file");
+        exit(-1);
+    }
+    else {
+        fprintf(stdout, "OK\n");
+    }
+
+    fprintf(stdout,"Trying to mmap the open file........");
+    if (ap_mmap_open_create(&themmap, thefile, context) != APR_SUCCESS) {
+        fprintf(stderr,"Failed!\n");
+        exit(-1);
     }
     fprintf(stdout,"OK\n");
 
@@ -97,7 +123,8 @@ int main()
         exit (-1);
     }
     fprintf(stdout,"OK\n");
-
+    
+    
     fprintf (stdout,"\nTest Complete\n");
     
     return 1;
