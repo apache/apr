@@ -93,7 +93,11 @@ int main(void)
         exit(-1);
     }
     if (imp != now) {
-	fprintf(stderr, "implode/explode mismatch\n");
+	fprintf(stderr, "implode/explode mismatch\n"
+                "apr_explode of apr_now() %15I64d\n"
+                "apr_implode() returned   %15I64d\n"
+                "error delta was          %15I64d\n",
+                now, imp, imp-now);
 	exit(-1);
     }
     fprintf(stdout, "OK\n");
