@@ -87,7 +87,7 @@ static char *fixed_name(const char *fname, apr_pool_t *pool)
 
 
 
-static apr_status_t proc_mutex_cleanup(void *vmutex)
+APR_DECLARE(apr_status_t) apr_proc_mutex_cleanup(void *vmutex)
 {
     apr_proc_mutex_t *mutex = vmutex;
     return apr_proc_mutex_destroy(mutex);
@@ -127,7 +127,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     rc = DosCreateMutexSem(semname, &(new->hMutex), DC_SEM_SHARED, FALSE);
 
     if (!rc) {
-        apr_pool_cleanup_register(pool, new, proc_mutex_cleanup, apr_pool_cleanup_null);
+        apr_pool_cleanup_register(pool, new, apr_proc_mutex_cleanup, apr_pool_cleanup_null);
     }
 
     return APR_FROM_OS_ERROR(rc);
@@ -153,7 +153,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
     *mutex = new;
 
     if (!rc) {
-        apr_pool_cleanup_register(pool, new, proc_mutex_cleanup, apr_pool_cleanup_null);
+        apr_pool_cleanup_register(pool, new, apr_proc_mutex_cleanup, apr_pool_cleanup_null);
     }
 
     return APR_FROM_OS_ERROR(rc);
