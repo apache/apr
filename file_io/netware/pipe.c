@@ -59,6 +59,7 @@
 #include "apr_arch_file_io.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "apr_arch_inherit.h"
 
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
