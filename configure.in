@@ -1218,7 +1218,7 @@ AC_CHECK_FUNCS(memchr, have_memchr="1", have_memchr="0")
 AC_CHECK_FUNCS($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
 
 dnl #----------------------------- We have a fallback position
-if test ("$have_int64_strfn" = "0") -a ("$int64_strfn" = "strtoll"); then
+if test "$have_int64_strfn" = "0" && test "$int64_strfn" = "strtoll"; then
     int64_strfn="strtoq"
     AC_CHECK_FUNCS($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
 fi
