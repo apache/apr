@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/12 10:05:54 $]
+Last modified at [$Date: 2001/12/12 18:09:22 $]
 
 Release:
 
@@ -48,6 +48,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
         Status: There are two alternatives.  More investigation/analysis
                 needs to be done to see if they can be merged 
                 together.
+                SVN is segfaulting with Sander's pool code.  Sander
+                and Justin are investigating.
         Sander's submission:
             <JLEGKKNELMHCJPNMOKHOOECGEPAA.striker@apache.org>
         Brian's submission:
