@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Introduce the apr_pool_userdata_setn() variant that doesn't 
+     strdup the key.  Allows both the _setn() and _set() variant to 
+     accept NULL for the cleanup.  [Brian Pane <bpane@pacbell.net]
+
   *) Re-vamp the apr_proc_wait and apr_proc_wait_all functions.  We
      now return the exit code from the program and a reason that the
      program died, either normal exit or signalled.
