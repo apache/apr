@@ -378,7 +378,7 @@ ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
 }
 
 ap_status_t ap_set_procdata(void *data, char *key,
-                            ap_status_t (*cleanup) (void *)
+                            ap_status_t (*cleanup) (void *),
                             struct proc_t *proc)
 {
     if (proc != NULL) {
