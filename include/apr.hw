@@ -214,7 +214,9 @@ typedef  int         gid_t;
  * The public APR variables are declared with AP_MODULE_DECLARE_DATA.
  * This assures the appropriate indirection is invoked at compile time.
  *
- * @deffunc type APR_DECLARE_DATA apr_variable;
+ * @deffunc APR_DECLARE_DATA type apr_variable;
+ * @tip extern APR_DECLARE_DATA type apr_variable; syntax is required for
+ * declarations within headers to properly import the variable.
  */
 #define APR_DECLARE_DATA
 #elif defined(APR_DECLARE_STATIC)
