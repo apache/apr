@@ -1,0 +1,13 @@
+Apache Portable Runtime
+=======================
+
+Right now, if you are building APR, it means that you are probably a
+developer.  If you are building it as a standalone package, however,
+this means using a slightly non-standard build process.  
+
+1) ./buildconf
+2) ./configure
+3) make
+
+Currently, there is no make install step, as APR is not yet
+installable.  
