@@ -2016,7 +2016,7 @@ AC_OUTPUT([
 	$MAKEFILES
 	include/apr.h
 	build/apr_rules.mk
-	apr-config
+	apr-$APR_MAJOR_VERSION-config:apr-config.in
         apr.pc
 ],[
 for i in $SAVE_FILES; do
@@ -2026,5 +2026,7 @@ for i in $SAVE_FILES; do
   fi
   rm -f $i.save
 done
-chmod +x apr-config
+chmod +x apr-$APR_MAJOR_VERSION-config
+],[
+APR_MAJOR_VERSION=$APR_MAJOR_VERSION
 ])
