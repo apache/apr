@@ -95,8 +95,14 @@ typedef struct apr_pollset_t apr_pollset_t;
  * @param pollset  The pointer in which to return the newly created object 
  * @param size The maximum number of descriptors that this pollset can hold
  * @param p The pool from which to allocate the pollset
- * @param flags Optional flags to modify the operation of the pollset
- *              (reserved for future expansion)
+ * @param flags Optional flags to modify the operation of the pollset.
+ *
+ * @remark If flags equals APR_POLLSET_THREADSAFE, then a pollset is
+ * created on which it is safe to make concurrent calls to
+ * apr_pollset_add(), apr_pollset_remove() and apr_pollset_poll() from
+ * separate threads.  This feature is only supported on some
+ * platforms; the apr_pollset_create() call will fail with
+ * APR_ENOTIMPL on platforms where it is not supported.
  */
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
