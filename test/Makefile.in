@@ -55,7 +55,7 @@ TARGETS = $(PROGRAMS) $(NONPORTABLE)
 
 LOCAL_LIBS=../libapr.la
 
-CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.so
+CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.slo
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
@@ -76,9 +76,8 @@ testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 testfmt@EXEEXT@: testfmt.lo $(LOCAL_LIBS)
 	$(LINK) testfmt.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-### why the export-dynamic?
-testdso@EXEEXT@: testdso.lo mod_test.so $(LOCAL_LIBS)
-	$(LINK) -export-dynamic testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
+testdso@EXEEXT@: testdso.lo mod_test.la libmod_test.la $(LOCAL_LIBS)
+	$(LINK) testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testoc@EXEEXT@: testoc.lo occhild@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testoc.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -86,9 +85,16 @@ testoc@EXEEXT@: testoc.lo occhild@EXEEXT@ $(LOCAL_LIBS)
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-mod_test.so: mod_test.lo $(LOCAL_LIBS)
-	$(LINK) -shared mod_test.o $(LOCAL_LIBS) $(ALL_LIBS)
+# FIXME: -prefer-pic is only supported with libtool-1.4+
+mod_test.slo: mod_test.c
+	$(LIBTOOL) --mode=compile $(COMPILE) -prefer-pic -c $< && touch $@
 
+mod_test.la: mod_test.slo $(LOCAL_LIBS)
+	$(LINK) --mode=link $(COMPILE) -rpath $(shell pwd) -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
+
+libmod_test.la: mod_test.slo $(LOCAL_LIBS)
+	$(LINK) --mode=link $(COMPILE) -rpath $(shell pwd) -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
+	
 testargs@EXEEXT@: testargs.lo $(LOCAL_LIBS)
 	$(LINK) testargs.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
