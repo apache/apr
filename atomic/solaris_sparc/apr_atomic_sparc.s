@@ -55,8 +55,21 @@
 !*
 !*
 !*  This code is based on the UltraSPARC atomics library by Mike Bennett
-!*  The Initial Developer of the Original Code is Mike Bennett, 
+!*
+!*  The contents of this file are subject to the Mozilla Public License
+!*  Version 1.0 (the "License"); you may not use this file except in
+!*  compliance with the License. You may obtain a copy of the License at
+!*  http://www.mozilla.org/MPL/
+!*
+!*  Software distributed under the License is distributed on an "AS IS"
+!*  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+!*  License for the specific language governing rights and limitations
+!*  under the License.
+!*
+!*  The Original Code is UltraSPARC atomics library.
+!*  The Initial Developer of the Original Code is Mike Bennett,
 !*  mbennett@netcom.com, Copyright (C) 1999. All Rights Reserved.
+!*
 !*  This code is based on the sparc architecture Manual version 9
 !*  section J.11 (page 333)
 !
