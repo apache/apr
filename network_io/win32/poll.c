@@ -119,7 +119,11 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
     }
 
     if (newread == NULL && newwrite == NULL && newexcept == NULL) {
+#ifdef NETWARE
+        delay((DWORD)(timeout / 1000)); /* convert microseconds into milliseconds */
+#else
         Sleep((DWORD)(timeout / 1000)); /* convert microseconds into milliseconds */
+#endif
         return APR_TIMEUP; /* TODO - get everybody in synch with Win32 apr_status_t */
     }
     else {
@@ -149,8 +153,8 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
     apr_int16_t revents = 0;
     WSABUF data;
     char buf[256];
-    int dummy;
-    int flags = MSG_PEEK;
+    DWORD dummy;
+    DWORD flags = MSG_PEEK;
 
     /* We just want to PEEK at the data, so I am setting up a dummy WSABUF
      * variable here.
