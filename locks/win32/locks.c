@@ -124,11 +124,8 @@ ap_status_t ap_lock(ap_lock_t *lock)
         if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
             return APR_SUCCESS;
         }
-        if (rv == WAIT_TIMEOUT) {
-            return APR_TIMEUP;
-        }
     }
-    return APR_EEXIST;
+    return GetLastError();
 }
 
 ap_status_t ap_unlock(ap_lock_t *lock)
