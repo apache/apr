@@ -75,10 +75,12 @@ LDFLAGS=@LDFLAGS@
 RM=@RM@
 SHELL=@SHELL@
 
+MKEXPORT=@APR_MKEXPORT@
+MKDEP=@APR_MKDEP@
+SCANDOC=@APR_SCANDOC@
+
 ### make LTFLAGS somewhat variable?
 LTFLAGS = --silent
-
-MKDEP=$(top_builddir)/helpers/mkdep.sh
 
 #
 # Basic macro setup
