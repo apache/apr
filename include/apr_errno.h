@@ -69,6 +69,11 @@ extern "C" {
  * @file apr_errno.h
  * @brief Error Codes
  */
+/**
+ * @defgroup APR_Error_Codes Error Codes
+ * @ingroup APR
+ * @{
+ */
 
 /**
  * Type for specifying an error or status code.
@@ -80,32 +85,33 @@ typedef int apr_status_t;
  * @param statcode The error code the get a string for.
  * @param buf A buffer to hold the error string.
  * @param bufsize Size of the buffer to hold the string.
- * @deffunc char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize)
  */
 APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf, 
                                  apr_size_t bufsize);
 
 /**
+ * @def APR_FROM_OS_ERROR(os_err_type syserr)
  * Fold a platform specific error into an apr_status_t code.
+ * @return apr_status_t
  * @param syserr The platform os error code.
- * @deffunc apr_status_t APR_FROM_OS_ERROR(os_err_type syserr)
- * @tip Warning: macro implementation; the syserr argument may be evaluated
+ * @warning  macro implementation; the syserr argument may be evaluated
  *      multiple times.
  */
 
 /**
+ * @def APR_TO_OS_ERROR(apr_status_t statcode)
+ * @return os_err_type
  * Fold an apr_status_t code back to the native platform defined error.
  * @param syserr The apr_status_t folded platform os error code.
- * @deffunc os_err_type APR_TO_OS_ERROR(apr_status_t statcode)
- * @tip Warning: macro implementation; the statcode argument may be evaluated
+ * @warning  macro implementation; the statcode argument may be evaluated
  *      multiple times.  If the statcode was not created by apr_get_os_error 
  *      or APR_FROM_OS_ERROR, the results are undefined.
  */
 
 /**
- * Return the last platform error, folded into apr_status_t, on some platforms
- * @deffunc apr_status_t apr_get_os_error()
- * @tip This retrieves errno, or calls a GetLastError() style function, and
+ * @def apr_get_os_error()
+ * @return apr_status_t the last platform error, folded into apr_status_t, on some platforms
+ * @remark This retrieves errno, or calls a GetLastError() style function, and
  *      folds it with APR_FROM_OS_ERROR.  Some platforms (such as OS2) have no
  *      such mechanism, so this call may be unsupported.  Some platforms
  *      require the alternate apr_get_netos_error() to retrieve the last
@@ -768,6 +774,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #endif /* !def OS2 || WIN32 */
 
+/** @} */
 
 #ifdef __cplusplus
 }

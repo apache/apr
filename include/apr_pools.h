@@ -79,7 +79,11 @@ extern "C" {
  * we can delete everything in the per-transaction apr_pool_t without fear, 
  * and without thinking too hard about it either.
  */
-
+/** 
+ * @defgroup APR_Pool Pool Allocation Functions
+ * @ingroup APR
+ * @{ 
+ */
 #include "apr.h"
 #include "apr_errno.h"
 
@@ -489,7 +493,7 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
 #define apr_pool_destroy apr_sms_destroy
 
 #endif /* APR_POOLS_ARE_SMS */
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif
