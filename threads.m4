@@ -13,6 +13,8 @@ dnl AC_MSG_ERROR(host_alias is not set. Make sure to run config.guess)
     PTHREAD_FLAGS="-D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT";;
   *freebsd*)
     PTHREAD_FLAGS="-D_REENTRANT -D_THREAD_SAFE";;
+  *openbsd*)
+    PTHREAD_FLAGS="-D_POSIX_THREADS";;
   *linux*)
     PTHREAD_FLAGS="-D_REENTRANT";;
   *aix*)
