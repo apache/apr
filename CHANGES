@@ -1,4 +1,9 @@
 Changes with APR b1  
+  *) Updated the pools debug code.  Check if a pool is still
+     valid on the most common apr_pool_xxx functions.
+     Fix the way APR_POOL_DEBUG_VERBOSE was using stderr.
+     Make the output somewhat nicer in this debug mode. [Sander Striker]
+
   *) Add new define APR_POOL_DEBUG_VERBOSE which spits out info
      about pool creation/destruction [Ian Holsman]
 
