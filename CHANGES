@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fix a problem with the FreeBSD flavor of apr_sendfile() where we 
+     could return APR_EAGAIN+bytes_sent.  [Jeff Trawick]
+
   *) Fix a problem on unixware where clearing h_errno wouldn't work.
      Use set_h_errno() instead.  PR #7651  [Jeff Trawick]
 
