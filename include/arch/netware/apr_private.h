@@ -75,19 +75,17 @@
 #include <time.h>
 #include <library.h>
 
-//#include "memcheck.h"
-
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
  */
 #define HAVE_DLFCN_H    1
 #define HAVE_LIMITS_H   1
-//#define HAVE_MALLOC_H 1
 #define HAVE_SIGNAL_H   1
-/* #define HAVE_STDDEF_H 1 why not? */
+#define HAVE_STDDEF_H   1
 #define HAVE_STDLIB_H   1
 #define HAVE_SYS_STAT_H 1
 #define HAVE_FCNTL_H    1
+#define HAVE_ICONV_H    1
 
 #define HAVE_STRICMP    1
 #define HAVE_STRNICMP   1
@@ -96,8 +94,7 @@
 #define HAVE_MEMCHR     1
 #define HAVE_CALLOC     1
 
-#define ALLOC_USE_MALLOC
-#define DSO_USE_DLFCN
+/*#define DSO_USE_DLFCN */
 
 #ifdef NW_BUILD_IPV6
 #define HAVE_GETADDRINFO 1
