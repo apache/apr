@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) apr_connect() on Unix: Handle EINTR during connect().  Handle timeouts.
+     [Jeff Trawick]
+
   *) Handle the weird case where getpwnam() returns NULL but errno is zero.
      [Jeff Trawick]
 

@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     char *local_ipaddr, *remote_ipaddr;
     char *dest = "127.0.0.1";
     apr_port_t local_port, remote_port;
-    apr_interval_time_t read_timeout = 2 * APR_USEC_PER_SEC;
+    apr_interval_time_t timeout = 2 * APR_USEC_PER_SEC;
     apr_sockaddr_t *local_sa, *remote_sa;
 
     setbuf(stdout, NULL);
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     }
 
     if (argc > 2) {
-        read_timeout = APR_USEC_PER_SEC * atoi(argv[2]);
+        timeout = atoi(argv[2]);
     }
 
     fprintf(stdout, "Initializing.........");
@@ -117,6 +117,14 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
+    fprintf(stdout, "\tClient:  Setting socket timeout.......");
+    stat = apr_setsocketopt(sock, APR_SO_TIMEOUT, timeout);
+    if (stat) {
+        fprintf(stderr, "Problem setting timeout: %d\n", stat);
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
     stat = apr_connect(sock, remote_sa);
@@ -147,14 +155,6 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
    
-    fprintf(stdout, "\tClient:  Setting read timeout.......");
-    stat = apr_setsocketopt(sock, APR_SO_TIMEOUT, read_timeout);
-    if (stat) {
-        fprintf(stderr, "Problem setting timeout: %d\n", stat);
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
-
     length = STRLEN; 
     fprintf(stdout, "\tClient:  Trying to receive data over socket.......");
 

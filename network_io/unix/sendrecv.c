@@ -59,7 +59,7 @@
 #include "fileio.h"
 #endif /* APR_HAS_SENDFILE */
 
-static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
+apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 {
     struct timeval tv, *tvptr;
     fd_set fdset;
@@ -103,7 +103,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
       && sock->timeout != 0) {
-        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -132,7 +132,7 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
       sock->timeout != 0) {
-        apr_status_t arv = wait_for_io_or_timeout(sock, 1);
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -167,7 +167,7 @@ apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
         && sock->timeout != 0) {
-        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -200,7 +200,7 @@ apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) &&
         sock->timeout != 0) {
-        apr_status_t arv = wait_for_io_or_timeout(sock, 1);
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -235,7 +235,7 @@ apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
       sock->timeout != 0) {
-        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -324,7 +324,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
-	arv = wait_for_io_or_timeout(sock, 0);
+	arv = apr_wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
 	    return arv;
@@ -423,7 +423,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
          *      we get -1/EAGAIN/nbytes>0; AFAICT it just means extra syscalls
          *      from time to time
          */
-        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -577,7 +577,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     if (rc == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
-        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
 
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -710,7 +710,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     if (rv == -1 &&
         (errno == EAGAIN || errno == EWOULDBLOCK) &&
         sock->timeout > 0) {
-        arv = wait_for_io_or_timeout(sock, 0);
+        arv = apr_wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
