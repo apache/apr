@@ -302,12 +302,13 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
  *   character, followed by an optional '0x' prefix if base is 0 or 16,
  *   followed by numeric digits appropriate for base.
  * @param end A pointer to the end of the valid character in buf. If
- *   not nil, it is set to the first invalid character in buf.
+ *   not NULL, it is set to the first invalid character in buf.
  * @param base A numeric base in the range between 2 and 36 inclusive,
  *   or 0.  If base is zero, buf will be treated as base ten unless its
  *   digits are prefixed with '0x', in which case it will be treated as
  *   base 16.
- * @return The numeric value of the string.
+ * @return The numeric value of the string.  On overflow, errno is set
+ * to ERANGE.
  */
 APR_DECLARE(apr_int64_t) apr_strtoi64(const char *buf, char **end, int base);
 
