@@ -38,7 +38,7 @@ TARGETS = $(TARGET_LIB) export_vars.h apr.exp
 @INCLUDE_RULES@
 @INCLUDE_OUTPUTS@
 
-CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.h
+CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.h .make.dirs
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
 	libtool apr-config build/apr_rules.mk
