@@ -253,7 +253,7 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
 
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        sock->timeout != 0) {
+        sock->timeout > 0) {
 	arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -331,20 +331,37 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     headerstruct.trl_cnt = hdtr->numtrailers;
 
     /* FreeBSD can send the headers/footers as part of the system call */
+
     do {
-        rv = sendfile(file->filedes,	/* open file descriptor of the file to be sent */
-        	      sock->socketdes,	/* socket */
-        	      *offset,	/* where in the file to start */
-        	      bytes_to_send,    /* number of bytes to send */
-        	      &headerstruct,	/* Headers/footers */
-        	      &nbytes,	/* number of bytes written */
-        	      flags	/* undefined, set to 0 */
-            );
+        if (bytes_to_send) {
+            /* We won't dare call sendfile() if we don't have
+             * header or file bytes to send because bytes_to_send == 0
+             * means send the whole file.
+             */
+            rv = sendfile(file->filedes, /* file to be sent */
+                          sock->socketdes, /* socket */
+                          *offset,       /* where in the file to start */
+                          bytes_to_send, /* number of bytes to send */
+                          &headerstruct, /* Headers/footers */
+                          &nbytes,       /* number of bytes written */
+                          flags);        /* undefined, set to 0 */
+        }
+        else {
+            /* just trailer bytes... use writev()
+             */
+            rv = writev(sock->socketdes,
+                        hdtr->trailers,
+                        hdtr->numtrailers);
+            if (rv > 0) {
+                nbytes = rv;
+                rv = 0;
+            }
+        }
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        sock->timeout != 0) {
+        sock->timeout > 0) {
 	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -435,7 +452,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        sock->timeout != 0) {
+        sock->timeout > 0) {
         ap_status_t arv = wait_for_io_or_timeout(sock, 0);
 
         if (arv != APR_SUCCESS) {
@@ -564,7 +581,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 
     if (rv == -1 &&
         (errno == EAGAIN || errno == EWOULDBLOCK) &&
-        sock->timeout != 0) {
+        sock->timeout > 0) {
         arv = wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
