@@ -1,4 +1,6 @@
 Changes with APR b1  
+  *) Add new define APR_POOL_DEBUG_VERBOSE which spits out info
+     about pool creation/destruction [Ian Holsman]
 
   *) Fix GMT offset adjustments for platforms that do not have native
      GMT offset adjustments.  [Jon Travis <jtravis@covalent.net>]
