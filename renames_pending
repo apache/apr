@@ -11,12 +11,10 @@ apr_time_interval_short_t        from apr_short_interval_time_t
 apr_file_info_t                  from apr_finfo_t
 apr_file_stat                    from apr_stat
 apr_file_lstat                   from apr_lstat
-apr_file_path_root               from apr_filepath_root
-apr_file_path_merge              from apr_file_path_merge
-apr_file_path_set                from apr_filepath_set
-apr_file_path_get                from apr_filepath_get
 apr_file_attrs_t                 from apr_fileattrs_t
 apr_file_seek_where_t            from apr_seek_where_t
+
+apr_filepath_merge               from apr_file_path_merge
  
 apr_fnmatch_test                 from apr_is_fnmatch
 
