@@ -248,12 +248,17 @@ APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src)
 char *strdup(const char *str)
 {
     char *sdup;
-    if (!(sdup = (char *) malloc(strlen(str) + 1))) {
-        ap_log_error(APLOG_MARK, APLOG_STARTUP | APLOG_NOERRNO, 0, NULL, "Ouch!
- Out of memory in our strdup()!");
+    size_t len = strlen(str) + 1;
+
+    if (!(sdup = (char *) malloc(len))) {
+        /* ### whoops! we can't call Apache logging routines here... */
+#if 0
+        ap_log_error(APLOG_MARK, APLOG_STARTUP | APLOG_NOERRNO, 0, NULL,
+                     "Ouch! Out of memory in our strdup()!");
+#endif
         return NULL;
     }
-    sdup = strcpy(sdup, str);
+    memcpy(sdup, str, len);
 
     return sdup;
 }
