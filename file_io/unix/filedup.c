@@ -122,6 +122,9 @@ static apr_status_t _file_dup(apr_file_t **new_file,
      */
     (*new_file)->flags = old_file->flags & ~APR_INHERIT;
 
+    apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file),
+                              apr_unix_file_cleanup, apr_unix_file_cleanup);
+
     return APR_SUCCESS;
 }
 
@@ -131,21 +134,22 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     apr_status_t rv;
 
     rv = _file_dup(new_file, old_file, p, 1);
-    if (rv != APR_SUCCESS)
-        return rv;
-
-    /* we do this here as we don't want to double register an existing 
-     * apr_file_t for cleanup
-     */
-    apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file),
-                              apr_unix_file_cleanup, apr_unix_file_cleanup);
     return rv;
-
 }
 
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
+    apr_status_t rv;
+
+    /* an existing apr_file_t may already be closed, and therefore
+     * have no cleanup remaining; but we don't want to double-register
+     * the same cleanup in _file_dup.  Kill the existing cleanup before
+     * invoking _file_dup to the existing new_file.
+     */
+    apr_pool_cleanup_kill(new_file->pool, (void *)(new_file),
+                          apr_unix_file_cleanup);
+
     return _file_dup(&new_file, old_file, p, 2);
 }
 
