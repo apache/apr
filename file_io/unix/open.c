@@ -252,4 +252,11 @@ apr_status_t apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
     return apr_os_file_put(thefile, &fd, cont);
 }
 
+apr_status_t apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
+{
+    int fd = STDIN_FILENO;
+
+    return apr_os_file_put(thefile, &fd, cont);
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);

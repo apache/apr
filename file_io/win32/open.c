@@ -439,4 +439,15 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t 
     return apr_os_file_put(thefile, &file_handle, cont);
 }
 
+APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
+{
+    apr_os_file_t file_handle;
+
+    file_handle = GetStdHandle(STD_INPUT_HANDLE);
+    if (file_handle == INVALID_HANDLE_VALUE)
+        return apr_get_os_error();
+
+    return apr_os_file_put(thefile, &file_handle, cont);
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
