@@ -459,7 +459,7 @@ else
     fi
 fi
 
-if test "$pthreads" = "1"; then
+if test "$pthreadh" = "1"; then
     APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
     APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
 fi
