@@ -147,8 +147,6 @@ struct apr_stat_entry_t {
     NXPathCtx_t pathCtx;
 };
 
-extern apr_int32_t CpuCurrentProcessor; /* system variable */
-
 #define MAX_SERVER_NAME     64
 #define MAX_VOLUME_NAME     64
 #define MAX_PATH_NAME       256
