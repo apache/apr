@@ -63,7 +63,6 @@ static apr_status_t thread_mutex_cleanup(void *data)
     apr_thread_mutex_t *mutex = (apr_thread_mutex_t *)data;
     apr_status_t rv;
 
-    pthread_mutex_unlock(&mutex->mutex);
     rv = pthread_mutex_destroy(&mutex->mutex);
 #ifdef PTHREAD_SETS_ERRNO
     if (rv) {
