@@ -436,6 +436,27 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
                                     const struct iovec *vec,
                                     apr_int32_t nvec, apr_size_t *len);
 
+/**
+ * @param sock The socket to send from
+ * @param where The apr_sockaddr_t describing where to send the data
+ * @param data The data to send
+ * @param len  The length of the data to send
+ */
+APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
+                                     apr_int32_t flags, const char *buf, 
+                                     apr_size_t *len);
+
+/**
+ * @param from The apr_sockaddr_t to fill in the recipient info
+ * @param sock The socket to use
+ * @param buf  The buffer to use
+ * @param len  The length of the available buffer
+ */
+
+APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
+                                       apr_int32_t flags, char *buf, 
+                                       apr_size_t *len);
+ 
 #if APR_HAS_SENDFILE
 
 /**
