@@ -452,6 +452,9 @@ ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont);
  *         then the maintenance is invoked with reason OC_REASON_UNWRITABLE.
  * arg 5)  The context to use for allocating memory.
  */
+/* XXX: it's not clear how write_fd can be made portable -- i think this
+ * needs to take an ap_file_t, expecting the write_fd to be a pipe. -dean
+ */
 void ap_register_other_child(ap_proc_t *pid, 
                              void (*maintenance) (int reason, void *),
                              void *data, int write_fd, ap_context_t *p);
