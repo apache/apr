@@ -102,8 +102,10 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     if (**inpath == '/') 
     {
         *rootpath = apr_pstrdup(p, "/");
-        ++*inpath;
-        return APR_EABSOLUTE;
+        do {
+            ++(*inpath);
+        } while (*inpath == '/');
+        return APR_SUCCESS;
     }
 
     return APR_ERELATIVE;
