@@ -503,39 +503,12 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
 
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 {
-    node_t *active, *node;
     void *mem;
-    char *endp;
 
     size = APR_ALIGN_DEFAULT(size);
-    active = pool->active;
-
-    /* If the active node has enough bytes left, use it. */
-    endp = active->first_avail + size;
-    if (endp < active->endp) {
-        mem = active->first_avail;
-        active->first_avail = endp;
-
+    if ((mem = apr_palloc(pool, size)) != NULL) {
         memset(mem, 0, size);
-
-        return mem;
     }
-
-    if ((node = node_malloc(pool->allocator, size)) == NULL) {
-        active->first_avail = active->endp;
-
-        if (pool->abort_fn)
-            pool->abort_fn(APR_ENOMEM);
-
-        return NULL;
-    }
-
-    active->next = pool->active = node;
-
-    mem = node->first_avail;
-    node->first_avail += size;
-
-    memset(mem, 0, size);
 
     return mem;
 }
@@ -1427,7 +1400,7 @@ static int pool_find(apr_pool_t *pool, void *data)
 
 APR_DECLARE(apr_pool_t *) apr_pool_find(const void *mem)
 {
-    void *pool = mem;
+    void *pool = (void *)mem;
 
     if (apr_pool_walk_tree(global_pool, pool_find, &pool))
         return pool;
