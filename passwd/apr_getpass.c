@@ -220,9 +220,10 @@ APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, size
     pw_got = getpass(prompt);
     if (strlen(pw_got) > (*bufsiz - 1)) {
 	*bufsiz = ERR_OVERFLOW;
+        memset(pw_got, 0, strlen(pw_got));
         return APR_ENAMETOOLONG;
     }
     apr_cpystrn(pwbuf, pw_got, *bufsiz);
-    *bufsiz = result;
+    memset(pw_got, 0, strlen(pw_got));
     return APR_SUCCESS; 
 }
