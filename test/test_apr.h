@@ -62,7 +62,12 @@
  * in the spacing, so use spaces instead :)
  * 
  */ 
+
+#ifndef APR_TEST_INCLUDES
+#define APR_TEST_INCLUDES
+
 #include "apr_strings.h"
+#include "apr_time.h"
 
 #define TEST_EQ(str, func, value, good, bad) \
     printf("%-60s", str); \
@@ -79,7 +84,7 @@
     }
 
 #define TEST_NEQ(str, func, value, good, bad) \
-printf("%-60s", str); \
+    printf("%-60s", str); \
     { \
     apr_status_t rv; \
     if ((rv = func) != value){ \
@@ -106,4 +111,13 @@ printf("%-60s", str); \
 #define MSG_AND_EXIT(msg) \
     printf("%s\n", msg); \
     exit (-1);
+
+#define TIME_FUNCTION(time, function) \
+    { \
+        apr_time_t tt = apr_time_now(); \
+        function; \
+        time = apr_time_now() - tt; \
+    }
     
+    
+#endif /* APR_TEST_INCLUDES */
