@@ -315,14 +315,14 @@ void *mm_core_create(size_t usersize, const char *file)
 
 #if defined(MM_SEMT_IPCSEM)
     fdsem = semget(IPC_PRIVATE, 1, IPC_CREAT|IPC_EXCL|S_IRUSR|S_IWUSR);
-    if (fdsem == -1 && APR_STATUS_IS_EEXIST(errno))
+    if (fdsem == -1 && errno == EEXIST)
         fdsem = semget(IPC_PRIVATE, 1, IPC_EXCL|S_IRUSR|S_IWUSR);
         if (fdsem == -1)
             FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to acquire semaphore");
     mm_core_semctlarg.val = 0;
     semctl(fdsem, 0, SETVAL, mm_core_semctlarg);
     fdsem_rd = semget(IPC_PRIVATE, 1, IPC_CREAT|IPC_EXCL|S_IRUSR|S_IWUSR);
-    if (fdsem_rd == -1 && APR_STATUS_IS_EEXIST(errno))
+    if (fdsem_rd == -1 && errno == EEXIST)
         fdsem_rd = semget(IPC_PRIVATE, 1, IPC_EXCL|S_IRUSR|S_IWUSR);
         if (fdsem_rd == -1)
             FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to acquire semaphore");
