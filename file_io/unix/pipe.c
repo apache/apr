@@ -168,7 +168,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
     return APR_EINVAL;
 }
 
-APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *pool)
 {
     int filedes[2];
 
@@ -176,8 +176,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
         return errno;
     }
     
-    (*in) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-    (*in)->cntxt = cont;
+    (*in) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+    (*in)->pool = pool;
     (*in)->filedes = filedes[0];
     (*in)->pipe = 1;
     (*in)->fname = NULL;
@@ -189,8 +189,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->thlock = NULL;
 #endif
 
-    (*out) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-    (*out)->cntxt = cont;
+    (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+    (*out)->pool = pool;
     (*out)->filedes = filedes[1];
     (*out)->pipe = 1;
     (*out)->fname = NULL;
@@ -201,15 +201,15 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->thlock = NULL;
 #endif
 
-    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), apr_unix_file_cleanup,
+    apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
-    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), apr_unix_file_cleanup,
+    apr_pool_cleanup_register((*out)->pool, (void *)(*out), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
-                                                    apr_fileperms_t perm, apr_pool_t *cont)
+                                                    apr_fileperms_t perm, apr_pool_t *pool)
 {
     mode_t mode = apr_unix_perms2mode(perm);
 

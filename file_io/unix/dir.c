@@ -73,7 +73,7 @@ static apr_status_t dir_cleanup(void *thedir)
     }
 } 
 
-apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
+apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *pool)
 {
     /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct 
      * dirent is declared with enough storage for the name.  On other
@@ -84,18 +84,18 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont
         (sizeof((*new)->entry->d_name) > 1 ? 
          sizeof(struct dirent) : sizeof (struct dirent) + 255);
 
-    (*new) = (apr_dir_t *)apr_palloc(cont, sizeof(apr_dir_t));
+    (*new) = (apr_dir_t *)apr_palloc(pool, sizeof(apr_dir_t));
 
-    (*new)->cntxt = cont;
-    (*new)->dirname = apr_pstrdup(cont, dirname);
+    (*new)->pool = pool;
+    (*new)->dirname = apr_pstrdup(pool, dirname);
     (*new)->dirstruct = opendir(dirname);
-    (*new)->entry = apr_pcalloc(cont, dirent_size);
+    (*new)->entry = apr_pcalloc(pool, dirent_size);
 
     if ((*new)->dirstruct == NULL) {
         return errno;
     }    
     else {
-        apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), dir_cleanup,
+        apr_pool_cleanup_register((*new)->pool, (void *)(*new), dir_cleanup,
 	                    apr_pool_cleanup_null);
         return APR_SUCCESS;
     }
@@ -103,7 +103,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont
 
 apr_status_t apr_dir_close(apr_dir_t *thedir)
 {
-    return apr_pool_cleanup_run(thedir->cntxt, thedir, dir_cleanup);
+    return apr_pool_cleanup_run(thedir->pool, thedir, dir_cleanup);
 }
 
 apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
@@ -159,7 +159,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         if (fspec[off - 1] != '/')
             fspec[off++] = '/';
         apr_cpystrn(fspec + off, thedir->entry->d_name, sizeof(fspec) - off);
-        ret = apr_lstat(finfo, fspec, wanted, thedir->cntxt);
+        ret = apr_lstat(finfo, fspec, wanted, thedir->pool);
     }
 
     if (wanted && (ret == APR_SUCCESS || ret == APR_INCOMPLETE)) {
@@ -170,7 +170,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         /* We don't bail because we fail to stat, when we are only -required-
          * to readdir... but the result will be APR_INCOMPLETE
          */
-        finfo->cntxt = thedir->cntxt;
+        finfo->pool = thedir->pool;
         finfo->valid = 0;
     }
 
@@ -192,7 +192,7 @@ apr_status_t apr_dir_rewind(apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
+apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *pool)
 {
     mode_t mode = apr_unix_perms2mode(perm);
 
@@ -204,7 +204,7 @@ apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *co
     }
 }
 
-apr_status_t apr_dir_remove(const char *path, apr_pool_t *cont)
+apr_status_t apr_dir_remove(const char *path, apr_pool_t *pool)
 {
     if (rmdir(path) == 0) {
         return APR_SUCCESS;
@@ -224,11 +224,11 @@ apr_status_t apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
 }
 
 apr_status_t apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir,
-                          apr_pool_t *cont)
+                          apr_pool_t *pool)
 {
     if ((*dir) == NULL) {
-        (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
-        (*dir)->cntxt = cont;
+        (*dir) = (apr_dir_t *)apr_pcalloc(pool, sizeof(apr_dir_t));
+        (*dir)->pool = pool;
     }
     (*dir)->dirstruct = thedir;
     return APR_SUCCESS;

@@ -186,7 +186,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
  */
 
 struct apr_file_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     HANDLE filehand;
     BOOLEAN pipe;              // Is this a pipe of a file?
     OVERLAPPED *pOverlapped;
@@ -214,7 +214,7 @@ struct apr_file_t {
 };
 
 struct apr_dir_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     HANDLE dirhand;
     apr_size_t rootlen;
     char *dirname;

@@ -68,16 +68,16 @@ apr_status_t apr_file_cleanup(void *thefile)
 
 
 
-APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cntxt)
+APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *pool)
 {
     int oflags = 0;
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;
     int rv;
     ULONG action;
-    apr_file_t *dafile = (apr_file_t *)apr_palloc(cntxt, sizeof(apr_file_t));
+    apr_file_t *dafile = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
 
     *new = dafile;
-    dafile->cntxt = cntxt;
+    dafile->pool = pool;
     dafile->isopen = FALSE;
     dafile->eof_hit = FALSE;
     dafile->buffer = NULL;
@@ -98,8 +98,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->buffered = (flag & APR_BUFFERED) > 0;
 
     if (dafile->buffered) {
-        dafile->buffer = apr_palloc(cntxt, APR_FILE_BUFSIZE);
-        rv = apr_thread_mutex_create(&dafile->mutex, 0, cntxt);
+        dafile->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        rv = apr_thread_mutex_create(&dafile->mutex, 0, pool);
 
         if (rv)
             return rv;
@@ -138,7 +138,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
         return APR_OS2_STATUS(rv);
     
     dafile->isopen = TRUE;
-    dafile->fname = apr_pstrdup(cntxt, fname);
+    dafile->fname = apr_pstrdup(pool, fname);
     dafile->filePtr = 0;
     dafile->bufpos = 0;
     dafile->dataRead = 0;
@@ -146,7 +146,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->pipe = FALSE;
 
     if (!(flag & APR_FILE_NOCLEANUP)) { 
-        apr_pool_cleanup_register(dafile->cntxt, dafile, apr_file_cleanup, apr_file_cleanup);
+        apr_pool_cleanup_register(dafile->pool, dafile, apr_file_cleanup, apr_file_cleanup);
     }
     return APR_SUCCESS;
 }
@@ -182,7 +182,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 
 
 
-APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cntxt)
+APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
 {
     ULONG rc = DosDelete(path);
     return APR_OS2_STATUS(rc);
@@ -216,12 +216,12 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile, apr_file_t *fi
 
 
 
-APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile, apr_int32_t flags, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile, apr_int32_t flags, apr_pool_t *pool)
 {
     apr_os_file_t *dafile = thefile;
 
-    (*file) = apr_palloc(cont, sizeof(apr_file_t));
-    (*file)->cntxt = cont;
+    (*file) = apr_palloc(pool, sizeof(apr_file_t));
+    (*file)->pool = pool;
     (*file)->filedes = *dafile;
     (*file)->isopen = TRUE;
     (*file)->buffered = FALSE;
@@ -241,33 +241,33 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
 }   
 
 
-APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *pool)
 {
     apr_os_file_t fd = 2;
 
-    return apr_os_file_put(thefile, &fd, 0, cont);
+    return apr_os_file_put(thefile, &fd, 0, pool);
 }
 
 
 
-APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *pool)
 {
     apr_os_file_t fd = 1;
 
-    return apr_os_file_put(thefile, &fd, 0, cont);
+    return apr_os_file_put(thefile, &fd, 0, pool);
 }
 
 
-APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *pool)
 {
     apr_os_file_t fd = 0;
 
-    return apr_os_file_put(thefile, &fd, 0, cont);
+    return apr_os_file_put(thefile, &fd, 0, pool);
 }
 
-APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
+APR_POOL_IMPLEMENT_ACCESSOR(file);
 
-APR_IMPLEMENT_SET_INHERIT(file, flags, cntxt, apr_file_cleanup)
+APR_IMPLEMENT_SET_INHERIT(file, flags, pool, apr_file_cleanup)
 
-APR_IMPLEMENT_UNSET_INHERIT(file, flags, cntxt, apr_file_cleanup)
+APR_IMPLEMENT_UNSET_INHERIT(file, flags, pool, apr_file_cleanup)
 

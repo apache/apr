@@ -180,7 +180,7 @@ typedef struct apr_finfo_t        apr_finfo_t;
  */
 struct apr_finfo_t {
     /** Allocates memory and closes lingering handles in the specified pool */
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     /** The bitmask describing valid fields of this apr_finfo_t structure 
      *  including all available 'wanted' fields and potentially more */
     apr_int32_t valid;

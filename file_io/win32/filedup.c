@@ -77,12 +77,12 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     (*new_file) = (apr_file_t *) apr_pcalloc(p, sizeof(apr_file_t));
     (*new_file)->filehand = newhand;
     (*new_file)->flags = old_file->flags & ~APR_INHERIT;
-    (*new_file)->cntxt = p;
+    (*new_file)->pool = p;
     (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     (*new_file)->append = old_file->append;
     (*new_file)->buffered = FALSE;
 
-    apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
+    apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file), file_cleanup,
                         apr_pool_cleanup_null);
 
     return APR_SUCCESS;
@@ -142,7 +142,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
 
     new_file->flags = newflags;
     new_file->filehand = newhand;
-    new_file->fname = apr_pstrdup(new_file->cntxt, old_file->fname);
+    new_file->fname = apr_pstrdup(new_file->pool, old_file->fname);
     new_file->append = old_file->append;
     new_file->buffered = FALSE;
 

@@ -76,14 +76,14 @@ static apr_status_t file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_po
       dup_file = *new_file;
     }
 
-    dup_file->cntxt = p;
+    dup_file->pool = p;
     rv = DosDupHandle(old_file->filedes, &dup_file->filedes);
 
     if (rv) {
         return APR_OS2_STATUS(rv);
     }
 
-    dup_file->fname = apr_pstrdup(dup_file->cntxt, old_file->fname);
+    dup_file->fname = apr_pstrdup(dup_file->pool, old_file->fname);
     dup_file->buffered = old_file->buffered;
     dup_file->isopen = old_file->isopen;
     dup_file->flags = old_file->flags & ~APR_INHERIT;
@@ -91,7 +91,7 @@ static apr_status_t file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_po
     dup_file->pipe = old_file->pipe;
 
     if (*new_file == NULL) {
-        apr_pool_cleanup_register(dup_file->cntxt, dup_file, apr_file_cleanup,
+        apr_pool_cleanup_register(dup_file->pool, dup_file, apr_file_cleanup,
                             apr_pool_cleanup_null);
         *new_file = dup_file;
     }
