@@ -87,6 +87,8 @@
 #include <a.out.h>
 #include "dso.h"
 
+#if APR_HAS_DSO
+
 #undef FREAD
 #undef FWRITE
 #include <ldfcn.h>
@@ -704,3 +706,5 @@ static void *findMain(void)
     free(buf);
     return ret;
 }
+
+#endif

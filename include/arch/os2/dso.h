@@ -62,6 +62,9 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_dso.h"
+#include "apr.h"
+
+#if APR_HAS_DSO
 
 struct ap_dso_handle_t {
     ap_pool_t  *cont;       /* Context for returning error strings */
@@ -69,5 +72,7 @@ struct ap_dso_handle_t {
     ap_status_t   load_error;
     char          *failed_module;
 };
+
+#endif
 
 #endif

@@ -54,6 +54,7 @@
 
 #include "dso.h"
 
+#if APR_HAS_DSO
 
 ap_status_t ap_dso_init(void){
     return APR_SUCCESS;
@@ -97,3 +98,5 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle,
 
     return APR_SUCCESS;
 }
+
+#endif
