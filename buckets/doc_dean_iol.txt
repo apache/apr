@@ -81,3 +81,345 @@ So far?
     I feel like I'm not the only one who's thinking this way.
 
 - iol_unix.c implemented... should hold us for a bit
+
+
+==============================
+Date: Tue, 2 May 2000 15:51:30 +0200
+From: Martin Kraemer <Martin.Kraemer@mch.sni.de>
+To: new-httpd@apache.org
+Subject: BUFF, IOL, Chunking, and Unicode in 2.0 (long)
+Message-ID: <20000502155129.A10548@pgtm0035.mch.sni.de>
+
+Sorry for a long silence in the past weeks, I've been busy with other
+stuff.
+
+Putting the catch-words "Chunking, Unicode and 2.0" into the subject
+was on purpose: I didn't want to scare off anyone because of the word
+EBCDIC: the problems I describe here, and the proposed new buff.c
+layering, are mostly independent from the EBCDIC port.
+
+
+In the past weeks, I've been thinking about today's buff.c (and
+studied its applicability for automatic conversion stuff like in the
+russian apache, see apache.lexa.ru). I think it would be neat to be
+able to do automatic character set conversion in the server, for
+example by negotiation (when the client sends an Accept-Charset and
+the server doesn't have a document with exactly the right Charset, but
+knows how to generate it from an existing representation).
+
+IMO it is a reoccurring problem,
+
+* not only in today's russian internet environment (de facto browsers
+  support 5 different cyrillic character sets, but the server doesn't
+  want to hold every document in 5 copies, so an automatic translation
+  is performed by the russian apache, depending on information supplied
+  by the client, or by explicit configuration). One of the supported
+  character sets is Unicode (UTF-7 or UTF-8)
+
+* in japanese/chinese environments, support for 16 bit character sets
+  is an absolute requirement. (Other oriental scripts like Thai get
+  along with 8 bit: they only have 44 consonants and 16 vowels).
+  Having success on the eastern markets depends to a great deal on
+  having support for these character sets. The japanese Apache
+  community hasn't had much contact with new-httpd in the past, but
+  I'm absolutely sure that there is a "standard japanese patch" for
+  Apache which would well be worth integrating into the standard
+  distribution. (Anyone on the list to provide a pointer?)
+
+* In the future, more and more browsers will support unicode, and so
+  will the demand grow for servers supporting unicode. Why not
+  integrate ONE solution for the MANY problems worldwide?
+
+* The EBCDIC port of 1997 has been a simple solution for a rather
+  simple problem. If we would "do it right" for 2.0 and provide a
+  generic translation layer, we would solve many problems in a single
+  blow. The EBCDIC translation would be only one of them.
+
+Jeff has been digging through the EBCDIC stuff and apparently
+succeeded in porting a lot of the 1.3 stuff to 2.0 already. Jeff, I'd
+sure be interested in having a look at it. However, when I looked at
+buff.c and the new iol_* functionality, I found out that iol's are not
+the way to go: they give us no solution for any of the conversion
+problems:
+
+* iol's sit below BUFF. Therefore, they don't have enough information
+  to know which part of the written byte stream is net client data,
+  and which part is protocol information (chunks, MIME headers for
+  multipart/*).
+
+* iol's don't allow simplification of today's chunking code. It is
+  spread thruout buff.c and there's a very hairy balance between
+  efficiency and code correctness. Re-adding (EBCDIC/UTF) conversion,
+  possibly with sup[port for multi byte character sets (MBCS), would
+  make a code nightmare out of it. (buff.c in 1.3 was "almost" a
+  nightmare because we had onlu single byte translations.
+
+* Putting conversion to a hierarchy level any higher than buff.c is no
+  solution either: for chunks, as well as for multipart headers and
+  buffering boundaries, we need character set translation. Pulling it
+  to a higher level means that a lot of redundant information has to
+  be passed down and up.
+
+In my understanding, we need a layered buff.c (which I number from 0
+upwards):
+
+0) at the lowest layer, there's a "block mode" which basically
+   supports bread/bwrite/bwritev by calling the equivalent iol_*
+   routines. It doesn't know about chunking, conversion, buffering and
+   the like. All it does is read/write with error handling.
+
+1) the next layer handles chunking. It knows about the current
+   chunking state and adds chunking information into the written
+   byte stream at appropriate places. It does not need to know about
+   buffering, or what the current (ebcdic?) conversion setting is.
+
+2) this layer handles conversion. I was thinking about a concept
+   where a generic character set conversion would be possible based on
+   Unicode-to-any translation tables. This would also deal with
+   multibyte character sets, because at this layer, it would
+   be easy to convert SBCS to MBCS.
+   Note that conversion *MUST* be positioned above the chunking layer
+   and below the buffering layer. The former guarantees that chunking
+   information is not converted twice (or not at all), and the latter
+   guarantees that ap_bgets() is looking at the converted data
+   (-- otherwise it would fail to find the '\n' which indicates end-
+   of-line).
+   Using (loadable?) translation tables based on unicode definitions
+   is a very similar approach to what libiconv offers you (see
+   http://clisp.cons.org/~haible/packages-libiconv.html -- though my
+   inspiration came from the russian apache, and I only heard about
+   libiconv recently). Every character set can be defined as a list
+   of <hex code> <unicode equiv> pairs, and translations between
+   several SBCS's can be collapsed into a single 256 char table.
+   Efficiently building them once only, and finding them fast is an
+   optimization task.
+
+3) This last layer adds buffering to the byte stream of the lower
+   layers. Because chunking and translation have already been dealt
+   with, it only needs to implement efficient buffering. Code
+   complexity is reduced to simple stdio-like buffering.
+
+
+Creating a BUFF stream involves creation of the basic (layer 0) BUFF,
+and then pushing zero or more filters (in the right order) on top of
+it. Usually, this will always add the chunking layer, optionally add
+the conversion layer, and usually add the buffering layer (look for
+ap_bcreate() in the code: it almost always uses B_RD/B_WR).
+
+Here's code from a conceptual prototype I wrote:
+    BUFF *buf = ap_bcreate(NULL, B_RDWR), *chunked, *buffered;
+    chunked   = ap_bpush_filter(buf,     chunked_filter, 0);
+    buffered  = ap_bpush_filter(chunked, buffered_filter, B_RDWR);
+    ap_bputs("Data for buffered ap_bputs\n", buffered);
+
+
+Using a BUFF stream doesn't change: simply invoke the well known API
+and call ap_bputs() or ap_bwrite() as you would today. Only, these
+would be wrapper macros
+
+    #define ap_bputs(data, buf)             buf->bf_puts(data, buf)
+    #define ap_write(buf, data, max, lenp)  buf->bf_write(buf, data, max, lenp)
+
+where a BUFF struct would hold function pointers and flags for the
+various levels' input/output functions, in addition to today's BUFF
+layout.
+
+For performance improvement, the following can be added to taste:
+
+* fewer buffering (zero copy where possible) by putting the buffers
+  for buffered reading/writing down as far as possible (for SBCS: from
+  layer 3 to layer 0). By doing this, the buffer can also hold a
+  chunking prefix (used by layer 1) in front of the buffering buffer
+  to reduce the number of vectors in a writev, or the number of copies
+  between buffers. Each layer could indicate whether it needs a
+  private buffer or not.
+
+* intra-module calls can be hardcoded to call the appropriate lower
+  layer directly, instead of using the ap_bwrite() etc macros. That
+  means we don't use the function pointers all the time, but instead
+  call the lower levels directly. OTOH we have iol_* stuff which uses
+  function pointers anyway. We decided in 1.3 that we wanted to avoid
+  the C++ type stuff (esp. function pointers) for performance reasons.
+  But it would sure reduces the code complexity a lot.
+
+The resulting layering would look like this:
+
+    | Caller: using ap_bputs() | or ap_bgets/apbwrite etc.
+    +--------------------------+
+    | Layer 3: Buffered I/O    | gets/puts/getchar functionality
+    +--------------------------+
+    | Layer 2: Code Conversion | (optional conversions)
+    +--------------------------+
+    | Layer 1: Chunking Layer  | Adding chunks on writes
+    +--------------------------+
+    | Layer 0: Binary Output   | bwrite/bwritev, error handling
+    +--------------------------+
+    | iol_* functionality      | basic i/o
+    +--------------------------+
+    | apr_* functionality      |
+    ....
+
+-- 
+<Martin.Kraemer@MchP.Siemens.De>             |    Fujitsu Siemens
+Fon: +49-89-636-46021, FAX: +49-89-636-41143 | 81730  Munich,  Germany
+
+
+==============================
+Date: Tue, 2 May 2000 09:09:28 -0700 (PDT)
+From: dean gaudet <dgaudet-list-new-httpd@arctic.org>
+To: new-httpd@apache.org
+Subject: Re: BUFF, IOL, Chunking, and Unicode in 2.0 (long)
+In-Reply-To: <20000502155129.A10548@pgtm0035.mch.sni.de>
+Message-ID: <Pine.LNX.4.21.0005020847180.22518-100000@twinlark.arctic.org>
+
+On Tue, 2 May 2000, Martin Kraemer wrote:
+
+> * iol's sit below BUFF. Therefore, they don't have enough information
+>   to know which part of the written byte stream is net client data,
+>   and which part is protocol information (chunks, MIME headers for
+>   multipart/*).
+
+there's not much stopping you from writing an iol which takes a BUFF * in
+its initialiser, and then bcreating a second BUFF, and bpushing your iol.
+like:
+
+	/* this is in r->pool rather than r->connection->pool because
+	 * we expect to create & destroy this inside request boundaries
+	 * and if we stuck it in r->connection->pool the storage wouldn't
+	 * be reclaimed earlier enough on pipelined connections.
+	 *
+	 * also, no need for buffering in new_buff because the translation
+	 * layer can easily assume lower level BUFF is doing the buffering.
+	 */
+	new_buff = ap_bcreate(r->pool, B_WR);
+	ap_bpush_iol(new_buff,
+		ap_utf8_to_ebcdic(r->pool, r->connection->client));
+	r->connection->client = new_buff;
+
+main problem is that the new_buff only works for writing, and you
+potentially need a separate conversion layer for reading from the
+client.
+
+shouldn't be too hard to split up r->connection->client into a read and
+write half.
+
+think of iol as the equivalent of the low level read/write, and BUFF
+as the equivalent of FILE *.  there's a reason for both layers in
+the interface.
+
+> * iol's don't allow simplification of today's chunking code. It is
+>   spread thruout buff.c and there's a very hairy balance between
+>   efficiency and code correctness. Re-adding (EBCDIC/UTF) conversion,
+>   possibly with sup[port for multi byte character sets (MBCS), would
+>   make a code nightmare out of it. (buff.c in 1.3 was "almost" a
+>   nightmare because we had onlu single byte translations.
+
+as i've said before, i welcome anyone to do it otherwise without adding
+network packets, without adding unnecessary byte copies, and without
+making it even more complex.  until you've tried it, it's pretty easy
+to just say "this is a mess".  once you've tried it i suspect you'll
+discover why it is a mess.
+
+that said, i'm still trying to prove to myself that the zero-copy
+crud necessary to clean this up can be done in a less complex manner.
+
+> * Putting conversion to a hierarchy level any higher than buff.c is no
+>   solution either: for chunks, as well as for multipart headers and
+>   buffering boundaries, we need character set translation. Pulling it
+>   to a higher level means that a lot of redundant information has to
+>   be passed down and up.
+
+huh?  HTTP is in ASCII -- you don't need any conversion -- if a chunking
+BUFF below a converting BUFF/iol is writing those things in ascii
+it works.  no?  at least that's my understanding of the code in 1.3.
+
+you wouldn't do the extra BUFF layer above until after you've written
+the headers into the plain-text BUFF.
+
+i would expect you'd:
+
+	write headers through plain text BUFF
+	push conversion BUFF
+	run method
+	pop conversion BUFF
+	pump multipart header
+	push conversion BUFF
+	...
+	pop conversion BUFF
+
+> In my understanding, we need a layered buff.c (which I number from 0
+> upwards):
+
+you've already got it :)
+
+>     | Caller: using ap_bputs() | or ap_bgets/apbwrite etc.
+>     +--------------------------+
+>     | Layer 3: Buffered I/O    | gets/puts/getchar functionality
+>     +--------------------------+
+>     | Layer 2: Code Conversion | (optional conversions)
+>     +--------------------------+
+>     | Layer 1: Chunking Layer  | Adding chunks on writes
+>     +--------------------------+
+>     | Layer 0: Binary Output   | bwrite/bwritev, error handling
+>     +--------------------------+
+>     | iol_* functionality      | basic i/o
+>     +--------------------------+
+>     | apr_* functionality      |
+
+there are two cases you need to consider:
+
+chunking and a partial write occurs -- you need to keep track of how much
+of the chunk header/trailer was written so that on the next loop around
+(which happens in the application at the top) you continue where you
+left off.
+
+and more importantly at the moment, and easier to grasp -- consider what
+happens when you've got a pipelined connection.  a dozen requests come
+in from the client, and apache-1.3 will send back the minimal number
+of packets.  2.0-current still needs fixing in this area (specifically
+saferead needs to be implemented).
+
+for example, suppose the client sends one packet:
+
+	GET /images/a.gif HTTP/1.1
+	Host: foo
+
+	GET /images/b.gif HTTP/1.1
+	Host: foo
+
+suppose that a.gif and b.gif are small 200 byte files.
+
+apache-1.3 sends back one response packet:
+
+	HTTP/1.1 OK
+	headers
+
+	a.gif body
+	HTTP/1.1 OK
+	headers
+
+	b.gif body
+
+consider what happens with your proposal.  in between each of those
+requests you remove the buffering -- which means you have to flush a
+packet boundary.  so your proposal generates two network packets.
+
+like i've said before on this topic -- if all unixes had TCP_CORK,
+it'd be a breeze.  but only linux has TCP_CORK.
+
+you pretty much require a layer of buffering right above the iol which
+talks to the network.
+
+and once you put that layer of buffering there, you might as well merge
+chunking into it, because chunking needs buffering as well (specifically
+for the async i/o case).
+
+and then you either have to double-buffer, or you can only stack
+non-buffered layers above it.  fortunately, character-set conversion
+should be doable without any buffering.
+
+*or* you implement a zero-copy library, and hope it all works out in
+the end.
+
+-dean
+
