@@ -471,6 +471,12 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ENETUNREACH    (APR_OS_START_CANONERR + 22)
 #endif
 
+#ifdef EFTYPE
+#define APR_EFTYPE
+#else
+#define APR_EFTYPE        (APR_OS_START_CANONERR + 23)
+#endif
+
 
 #if defined(OS2)
 
@@ -582,6 +588,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + SOCEHOSTUNREACH)
 #define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
                 || (s) == APR_OS_START_SYSERR + SOCENETUNREACH)
+#define APR_STATUS_IS_EFTYPE(s)         ((s) == APR_EFTYPE)
 
 /*
     Sorry, too tired to wrap this up for OS2... feel free to
@@ -741,6 +748,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT)    
 #define APR_STATUS_IS_EHOSTUNREACH(s)    ((s) == APR_EHOSTUNREACH)
 #define APR_STATUS_IS_ENETUNREACH(s)     ((s) == APR_ENETUNREACH)
+#define APR_STATUS_IS_EFTYPE(s)          ((s) == APR_EFTYPE)
 
 #endif /* !def OS2 || WIN32 */
 
