@@ -144,6 +144,25 @@ apr_status_t apr_gethostname(char * buf, int len, apr_pool_t *cont)
 	}
 }
 
+apr_status_t apr_get_local_hostname(char **name, apr_socket_t *sock)
+{
+    struct hostent *hptr;
+    
+    hptr = gethostbyaddr((char *)&(sock->local_addr->sin_addr), 
+                         sizeof(struct in_addr), AF_INET);
+    if (hptr != NULL) {
+        *name = apr_pstrdup(sock->cntxt, hptr->h_name);
+        if (*name) {
+            return APR_SUCCESS;
+        }
+        return APR_ENOMEM;
+    }
+
+    /* XXX - Is this threadsafe? - manoj */
+    /* on BeOS h_errno is a global... */
+    return h_errno;
+}
+
 apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
 {
     struct hostent *hptr;
