@@ -618,12 +618,12 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, ap_socket_t *socket,
 
 /*
 
-=head1 ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock, ap_int16_t events)
+=head1 ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock, ap_int16_t events)
 
-B<Add a socket to the poll structure.> 
+B<Modfify a socket in the poll structure with mask.> 
 
     arg 1) The poll structure we will be using. 
-    arg 2) The socket to remove from the current poll structure. 
+    arg 2) The socket to modify in poll structure. 
     arg 3) The events to stop looking for during the poll.  One of:
               APR_POLLIN    -- signal if read will not block
               APR_POLLPRI   -- signal if prioirty data is availble to be read
@@ -631,7 +631,20 @@ B<Add a socket to the poll structure.>
 
 =cut
  */
-ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock,
+ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock,
+                                  ap_int16_t events);
+/*
+
+=head1 ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock)
+
+B<Remove a socket from the poll structure.> 
+
+    arg 1) The poll structure we will be using. 
+    arg 2) The socket to remove from the current poll structure. 
+
+=cut
+ */
+ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock,
                                   ap_int16_t events);
 
 /*
