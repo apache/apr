@@ -90,9 +90,6 @@ APR_EXPORT(int) ap_rmem_get_len(ap_bucket_rmem *b)
 APR_EXPORT(int) ap_rmem_write(ap_bucket_rmem *b, const void *buf,
                                ap_size_t nbyte, ap_ssize_t *bytes_written)
 {
-    int amt;
-    int total;
-
     if (nbyte == 0) {
         *bytes_written = 0;
         return APR_SUCCESS;
