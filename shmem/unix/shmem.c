@@ -192,6 +192,10 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     if (shmctl(new_m->file, IPC_SET, &shmbuf) == -1)
         return errno;
 
+    /* remove in future (once use count hits zero) */
+    if (shmctl(new_m->file, IPC_RMID, NULL) == -1)
+        return errno;
+
 #elif APR_USE_SHMEM_BEOS
     new_m->area_id = create_area("mm", (void*)&mem, B_ANY_ADDRESS, reqsize, 
                                  B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA);
