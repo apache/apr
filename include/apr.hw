@@ -110,7 +110,6 @@
 
 #define apr_inline
 #define __attribute__(__x)
-#define ENUM_BITFIELD(e,n,w)  signed int n : w
 
 #define NO_USE_SIGACTION
 
