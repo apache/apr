@@ -92,13 +92,13 @@ case "$OS" in
        CFLAGS="$CFLAGS -DOS2 -Zmt"
        OSDIR="os2"
        LIBPREFIX=""
-       enable_apr_threads="system_threads"
+       enable_threads="system_threads"
        eolstr="\\r\\n"
        ;;
    *beos*)
        OSDIR="beos"
        CFLAGS="$CFLAGS -DBEOS"
-       enable_apr_threads="system_threads"
+       enable_threads="system_threads"
        config_subdirs="shmem/unix/mm"
        native_mmap_emul="1"
        USE_MM=yes
@@ -120,10 +120,6 @@ case "$OS" in
 esac
 
 AC_SUBST(eolstr)
-
-if test "$enable_apr_threads" = "system_threads"; then
-   ac_cv_enable_threads="yes"
-fi
 
 dnl #----------------------------- Checking for Shared Memory Support 
 echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
@@ -476,21 +472,23 @@ AC_SUBST(aprdso)
 
 dnl #----------------------------- Checking for Threads
 echo $ac_n "${nl}Checking for Threads...${nl}"
-AC_CACHE_CHECK([for threads], ac_cv_enable_threads,
-  [ AC_ARG_ENABLE(threads,
-    [  --enable-threads        Enable threading support in APR.],
-    [ ac_cv_enable_threads=$enableval] ,
-    [ CHECK_PTHREADS_H([ ac_cv_enable_threads="pthread" ] ,
-                       [ ac_cv_enable_threads="no" ] ) ] ) ] )
 
-if test "$ac_cv_enable_threads" = "no"; then
+if test -z "$enable_threads"; then
+	AC_ARG_ENABLE(threads,
+    	[  --enable-threads        Enable threading support in APR.],
+    	[ enable_threads=$enableval] ,
+    	[ CHECK_PTHREADS_H([ enable_threads="pthread" ] ,
+        	           [ enable_threads="no" ] ) ] )
+fi
+
+if test "$enable_threads" = "no"; then
 echo "Don't enable threads"
     threads="0"
     pthreadh="0"
     pthreadser="0"
 else
     REENTRANCY_FLAGS
-    if test "$ac_cv_enable_threads" = "pthread"; then
+    if test "$enable_threads" = "pthread"; then
 # We have specified pthreads for our threading library, just make sure
 # that we have everything we need
       PTHREADS_CHECK
@@ -502,7 +500,7 @@ else
           threads="0"
           pthreadh="0"
           pthreadser="0" ] )
-    elif test "$enable_apr_threads" = "system_threads"; then
+    elif test "$enable_threads" = "system_threads"; then
         threads="1"
         pthreadh="0"
         pthreadser="0"
