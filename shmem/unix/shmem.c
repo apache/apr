@@ -63,7 +63,7 @@ struct shmem_t {
 
 apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
 {
-    MM *newmm = mm_create(reqsize, file);
+    MM *newmm = mm_create(reqsize + sizeof(*newmm), file, MM_ALLOCATE_ENOUGH);
     if (newmm == NULL) {
         return errno;
     }

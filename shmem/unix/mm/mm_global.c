@@ -53,7 +53,7 @@ int MM_create(size_t size, const char *file)
 {
     if (mm_global != NULL)
         return FALSE;
-    if ((mm_global = mm_create(size, file)) == NULL)
+    if ((mm_global = mm_create(size, file, MM_ALLOCATE_EXACT)) == NULL)
         return FALSE;
     return TRUE;
 }
