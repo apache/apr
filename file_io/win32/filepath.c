@@ -343,7 +343,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
         while (**inpath == '/' || **inpath == '\\')
             ++*inpath;
         if (!(flags & APR_FILEPATH_TRUENAME))
-            newpath[2] = testpath[0];
+            newpath[2] = testpath[2];
         *rootpath = newpath;
         return APR_SUCCESS;
     }
