@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "./include" /I "../include" /I "../inc" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "./include" /I "./inc" /I "./misc/win32" /I "./file_io/win32" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -68,7 +68,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "../include" /I "../inc" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /I "./include" /I "./inc" /I "./misc/win32" /I "./file_io/win32" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o NUL /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -91,178 +91,152 @@ LINK32=link.exe
 # PROP Default_Filter ".c"
 # Begin Source File
 
-SOURCE=..\time\win32\access.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\time\win32\access.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_cpystrn.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_cpystrn.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_execve.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_execve.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_fnmatch.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_fnmatch.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_getpass.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_getpass.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_md5.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_md5.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_pools.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_pools.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_slack.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_slack.c
+# ADD CPP /I "./misc/win32/" /I "./file_io/win32/"
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_snprintf.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_snprintf.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\apr_tables.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\lib\apr_tables.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\dir.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\dir.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\fileacc.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\fileacc.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\filedup.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\filedup.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\filestat.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\fileio.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\misc\win32\getopt.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\filestat.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\locks\win32\locks.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\misc\win32\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\misc\win32\names.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\locks\win32\locks.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\open.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\misc\win32\names.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\pipe.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\open.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\network_io\win32\poll.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\pipe.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\threadproc\win32\proc.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\network_io\win32\poll.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\readdir.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\threadproc\win32\proc.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\readwrite.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\readdir.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\seek.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\readdir.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\network_io\win32\sendrecv.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\readwrite.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\signal\win32\signal.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\file_io\win32\seek.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\threadproc\win32\signals.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\network_io\win32\sendrecv.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\network_io\win32\sockets.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\signal\win32\signal.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\network_io\win32\sockopt.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\threadproc\win32\signals.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\misc\win32\start.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\network_io\win32\sockets.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\threadproc\win32\thread.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\network_io\win32\sockopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\threadproc\win32\threadcancel.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\misc\win32\start.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\threadproc\win32\threadpriv.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\threadproc\win32\thread.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\time\win32\time.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\threadproc\win32\threadcancel.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\misc\win32\timetest.c
-# ADD CPP /I "../misc/win32" /I "../file_io/win32"
+SOURCE=.\threadproc\win32\threadpriv.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\time\win32\time.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\win32\timetest.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -270,91 +244,83 @@ SOURCE=..\misc\win32\timetest.c
 # PROP Default_Filter ".h"
 # Begin Source File
 
-SOURCE=..\include\apr_errno.h
+SOURCE=.\include\apr_errno.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_file_io.h
+SOURCE=.\include\apr_file_io.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\inc\apr_fnmatch.h
+SOURCE=.\inc\apr_fnmatch.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_general.h
+SOURCE=.\include\apr_general.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_lib.h
+SOURCE=.\include\apr_lib.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_lock.h
+SOURCE=.\include\apr_lock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_md5.h
+SOURCE=.\include\apr_md5.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_network_io.h
+SOURCE=.\include\apr_network_io.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\inc\apr_pools.h
+SOURCE=.\inc\apr_pools.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_portable.h
+SOURCE=.\include\apr_portable.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_shmem.h
+SOURCE=.\include\apr_shmem.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_signal.h
+SOURCE=.\include\apr_signal.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_thread_proc.h
+SOURCE=.\include\apr_thread_proc.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_time.h
+SOURCE=.\include\apr_time.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\apr_win.h
+SOURCE=.\include\apr_win.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\time\win32\atime.h
+SOURCE=.\time\win32\atime.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\file_io\win32\fileio.h
+SOURCE=.\locks\win32\locks.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\locks\win32\locks.h
+SOURCE=.\misc\win32\misc.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\misc\win32\misc.h
+SOURCE=.\network_io\win32\networkio.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\network_io\win32\networkio.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\file_io\win32\readdir.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\threadproc\win32\threadproc.h
+SOURCE=.\threadproc\win32\threadproc.h
 # End Source File
 # End Group
 # End Target
