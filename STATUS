@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2000/12/18 00:05:24 $]
+Last modified at [$Date: 2000/12/18 00:30:21 $]
 
 Release:
 
@@ -73,6 +73,18 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       VPATH support). This means that config.status doesn't do the
       right thing when you re-run it. We ought to revamp the makefiles 
       to do the right AC_SUBST stuff rather than depend upon rewriting.
+
+      Sascha: As the rewriter is a crude hack, I would not worry too
+              much about it.  It is designed to go away once we have
+              a proper build system in place.
+              
+              One of the perceived deficiencies of automake is that it
+              uses AC_SUBST too often, thereby slowing down the task of
+              generating Makefiles significantly, because it applies
+              dozens of substitutions to each Makefile.  And why?  Make's
+              built-in macro processing is much more powerful, and
+              combined with the include facility, generating Makefiles
+              becomes simpler and faster.
 
 
 Documentation that needs writing:
