@@ -1,6 +1,12 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
+NONPORTABLE = \
+	testshm@EXEEXT@ \
+	testprocmutex@EXEEXT@ \
+	testglobalmutex@EXEEXT@ \
+	testregex@EXEEXT@
+
 PROGRAMS = \
 	client@EXEEXT@ \
 	sendfile@EXEEXT@ \
@@ -19,7 +25,6 @@ PROGRAMS = \
 	testargs@EXEEXT@ \
 	testud@EXEEXT@ \
 	testmmap@EXEEXT@ \
-	testshm@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
 	testpipe@EXEEXT@ \
@@ -34,19 +39,16 @@ PROGRAMS = \
 	teststr@EXEEXT@ \
 	testuser@EXEEXT@ \
 	testsockets@EXEEXT@ \
-	testprocmutex@EXEEXT@ \
-	testglobalmutex@EXEEXT@ \
 	testvsn@EXEEXT@ \
 	testsleep@EXEEXT@ \
 	testrand@EXEEXT@ \
 	testdup@EXEEXT@ \
 	testatomic@EXEEXT@ \
-	testregex@EXEEXT@ \
 	testpools@EXEEXT@ \
 	testmutexscope@EXEEXT@
 
 
-TARGETS = $(PROGRAMS)
+TARGETS = $(PROGRAMS) $(NONPORTABLE)
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@

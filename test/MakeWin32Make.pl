@@ -45,9 +45,10 @@ while ($t = <$srcfl>) {
     if ($t =~ s|-shared|\/subsystem:windows \/dll|) {
         $t =~ s|-o (\S+)|\/out:\"$1\"|;
     }
-    while ($t =~ s|\.a\b|\.lib|) {}
-    while ($t =~ s|\.o\b|\.obj|) {}
-    while ($t =~ s|\.lo\b|\.obj|) {}
+    $t =~ s|\$\(NONPORTABLE\)||g;
+    $t =~ s|\.a\b|\.lib|g;
+    $t =~ s|\.o\b|\.obj|g;
+    $t =~ s|\.lo\b|\.obj|g;
 
     print $dstfl $t;
 
