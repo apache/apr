@@ -53,4 +53,96 @@
  *
  */
 
-#include "../unix/sockopt.c"
+#include "networkio.h"
+#include "apr_network_io.h"
+#include "apr_general.h"
+#include "apr_lib.h"
+#include <errno.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <sys/so_ioctl.h>
+
+
+ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on)
+{
+    int one;
+    struct linger li;
+
+    if (on)
+        one = 1;
+    else
+        one = 0;
+
+    if (opt & APR_SO_KEEPALIVE) {
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
+            return os2errno(sock_errno());
+        }
+    }
+    if (opt & APR_SO_DEBUG) {
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
+            return os2errno(sock_errno());
+        }
+    }
+    if (opt & APR_SO_REUSEADDR) {
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
+            return os2errno(sock_errno());
+        }
+    }
+    if (opt & APR_SO_SNDBUF) {
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
+            return os2errno(sock_errno());
+        }
+    }
+    if (opt & APR_SO_NONBLOCK) {
+        if (ioctl(sock->socketdes, FIONBIO, (caddr_t)&on, sizeof(on)) == -1) {
+            return os2errno(sock_errno());
+        }
+    }
+    if (opt & APR_SO_LINGER) {
+        li.l_onoff = on;
+        li.l_linger = MAX_SECS_TO_LINGER;
+        if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
+            return os2errno(sock_errno());
+        }
+    }
+    if (opt & APR_SO_TIMEOUT) {
+        sock->timeout = on;
+    }
+    return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
+{
+    if (gethostname(buf, len) == -1)
+        return os2errno(sock_errno());
+    else
+        return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
+{
+    struct hostent *hptr;
+
+    hptr = gethostbyaddr((char *)&(sock->remote_addr->sin_addr),
+                         sizeof(struct in_addr), AF_INET);
+    if (hptr != NULL) {
+        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
+        if (*name) {
+            return APR_SUCCESS;
+        }
+        return APR_ENOMEM;
+    }
+
+    /* XXX - Is this threadsafe? */
+    return h_errno;
+}
+
+

@@ -65,16 +65,17 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include "os2calls.h"
 
 ap_status_t socket_cleanup(void *sock)
 {
     struct socket_t *thesocket = sock;
-    if (close(thesocket->socketdes) == 0) {
+    if (soclose(thesocket->socketdes) == 0) {
         thesocket->socketdes = -1;
         return APR_SUCCESS;
     }
     else {
-        return errno;
+        return os2errno(sock_errno());
     }
 }
 
@@ -95,7 +96,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
         return APR_ENOMEM;
     }
  
-    (*new)->socketdes = socket(AF_INET ,SOCK_STREAM, IPPROTO_TCP);
+    (*new)->socketdes = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
     (*new)->local_addr->sin_family = AF_INET;
     (*new)->remote_addr->sin_family = AF_INET;
@@ -103,7 +104,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
     (*new)->addr_len = sizeof(*(*new)->local_addr);
     
     if ((*new)->socketdes < 0) {
-        return errno;
+        return os2errno(sock_errno());
     }
     (*new)->timeout = -1;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -117,7 +118,7 @@ ap_status_t ap_shutdown(struct socket_t *thesocket, ap_shutdown_how_e how)
         return APR_SUCCESS;
     }
     else {
-        return errno;
+        return os2errno(sock_errno());
     }
 }
 
@@ -134,7 +135,7 @@ ap_status_t ap_bind(struct socket_t *sock)
 {
     sock->local_addr->sin_addr.s_addr = INADDR_ANY;
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
-        return errno;
+        return os2errno(sock_errno());
     else
         return APR_SUCCESS;
 }
@@ -142,7 +143,7 @@ ap_status_t ap_bind(struct socket_t *sock)
 ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == -1)
-        return errno;
+        return os2errno(sock_errno());
     else
         return APR_SUCCESS;
 }
@@ -162,7 +163,7 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
                         &(*new)->addr_len);
 
     if ((*new)->socketdes < 0) {
-        return errno;
+        return os2errno(sock_errno());
     }
 
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -191,9 +192,9 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
         sock->addr_len = sizeof(*sock->remote_addr);
     }
 
-    if ((connect(sock->socketdes, (const struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) &&
-        (errno != EINPROGRESS)) {
-        return errno;
+    if ((connect(sock->socketdes, (struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) &&
+        (sock_errno() != SOCEINPROGRESS)) {
+        return os2errno(sock_errno());
     }
     else {
         int namelen = sizeof(*sock->local_addr);
