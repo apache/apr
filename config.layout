@@ -20,7 +20,7 @@
     mandir:        ${prefix}/man
     sysconfdir:    ${prefix}/conf
     datadir:       ${prefix}
-    installbuilddir: ${datadir}/build
+    installbuilddir: ${datadir}/build-${APR_MAJOR_VERSION}
     includedir:    ${prefix}/include/apr-${APR_MAJOR_VERSION}
     localstatedir: ${prefix}
     libsuffix:     -${APR_MAJOR_VERSION}
