@@ -98,7 +98,7 @@ void main(void) {
 ],[
   ac_cv_working_getnameinfo="yes"
 ])])
-if test "$ac_cv_working_getnameinfo"="yes"; then
+if test "$ac_cv_working_getnameinfo" = "yes"; then
   AC_DEFINE(HAVE_GETNAMEINFO, 1, [Define if getnameinfo exists])
 fi
 ])
