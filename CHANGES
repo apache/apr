@@ -1,5 +1,12 @@
 Changes with APR b1  
 
+  *) Added an inherit flag to apr_socket_create and other socket creation
+     functions.  This allows APR programs to specify that a socket should
+     be passed to any child processes that are created.  The inherit flag
+     is only meaningful if programs use apr_process_create().  This
+     also adds a couple of macros that allow APR types to set and unset
+     the inherit flag.  [Ryan Bloom]
+
   *) apr_connect()on Windows: Handle timeouts and returning the proper
      status code when a connect is in progress. [Bill Stoddard]
 

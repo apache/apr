@@ -63,6 +63,7 @@
 #include "apr_pools.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
+#include "apr_inherit.h" 
 
 #if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -240,12 +241,13 @@ struct apr_ipsubnet_t {
  * @param new_sock The new socket that has been set up.
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
+ * @param inherit Should this socket be inherited by child processes
  * @param cont The pool to use
  * @deffunc apr_status_t apr_socket_create(apr_socket_t **new_sock, int family, int type, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
                                             int family, int type,
-                                            apr_pool_t *cont);
+                                            int inherit, apr_pool_t *cont);
 
 /**
  * Shutdown either reading, writing, or both sides of a tcp socket.
@@ -800,6 +802,8 @@ APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa);
 apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char name[16],
                                       char args[256 - 16]);
 #endif
+
+APR_DECLARE_SET_INHERIT(socket);
 
 #ifdef __cplusplus
 }

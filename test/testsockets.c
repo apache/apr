@@ -101,20 +101,20 @@ int main(void)
     printf("Testing socket creation functions.\n");
 
     STD_TEST_NEQ("    Creating a TCP socket",
-                 apr_socket_create(&sock, APR_INET, SOCK_STREAM, pool))
+                 apr_socket_create(&sock, APR_INET, SOCK_STREAM, APR_NO_INHERIT, pool))
     close_sock(sock);
 
     STD_TEST_NEQ("    Creating UDP socket",
-                 apr_socket_create(&sock, APR_INET, SOCK_DGRAM, pool))
+                 apr_socket_create(&sock, APR_INET, SOCK_DGRAM, APR_NO_INHERIT, pool))
     close_sock(sock);
 
 #if APR_HAVE_IPV6
     STD_TEST_NEQ("    Creating an IPv6 TCP socket",
-                 apr_socket_create(&sock, APR_INET6, SOCK_STREAM, pool))
+                 apr_socket_create(&sock, APR_INET6, SOCK_STREAM, APR_NO_INHERIT, pool))
     close_sock(sock);
 
     STD_TEST_NEQ("    Creating an IPv6 UDP socket",
-                 apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, pool))
+                 apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, APR_NO_INHERIT, pool))
     close_sock(sock);
 #else
     printf("NO IPv6 support.\n");
@@ -123,9 +123,9 @@ int main(void)
     printf("Now trying sendto/recvfrom (simple tests only)\n");
 
     STD_TEST_NEQ("    Creating socket #1 for test",
-                 apr_socket_create(&sock, family, SOCK_DGRAM, pool))
+                 apr_socket_create(&sock, family, SOCK_DGRAM, APR_NO_INHERIT, pool))
     STD_TEST_NEQ("    Creating socket #2 for test",
-                 apr_socket_create(&sock2, family, SOCK_DGRAM, pool))
+                 apr_socket_create(&sock2, family, SOCK_DGRAM, APR_NO_INHERIT, pool))
 
     apr_sockaddr_info_get(&to, US, APR_UNSPEC, 7772, 0, pool);
     apr_sockaddr_info_get(&from, US, APR_UNSPEC, 7771, 0, pool);
