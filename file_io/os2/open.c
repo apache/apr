@@ -151,6 +151,7 @@ ap_status_t ap_close(ap_file_t *file)
     ULONG rc; 
     
     if (file && file->isopen) {
+        ap_flush(file);
         rc = DosClose(file->filedes);
     
         if (rc == 0) {
