@@ -12,7 +12,7 @@ ASCPP = @ASCPP@
 @INCLUDE_RULES@
 
 apr_atomic_sparc.lo: $(srcdir)/apr_atomic_sparc.s
-	$(ASCPP) $(ASCPPFLAGS) $(srcdir)/$*.s > $*.S
+	$(ASCPP) $(ASCPPFLAGS) - < $(srcdir)/$*.s > $*.S
 	$(AS) $(ASFLAGS) -o $@ $*.S
 
 
