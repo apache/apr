@@ -53,7 +53,6 @@
  */
 
 #include "util_filter.h"
-#include "apr_buf.h"
 
 /*
  * ap_filter_rec_t:
@@ -142,17 +141,6 @@ API_EXPORT(void) ap_add_filter(const char *name, void *ctx, request_rec *r)
 
             break;
         }
-    }
-}
-
-API_EXPORT(int) ap_pass_brigade(request_rec *r, ap_filter_t *filter, 
-                                 ap_bucket_brigade *bucket)
-{
-    if (filter == NULL) {
-        return APR_ENOTIMPL;
-    }
-    else {
-        return (*filter->filter_func)(r, filter->next, bucket);
     }
 }
 

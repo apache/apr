@@ -64,7 +64,6 @@ extern "C" {
 #endif
 
 #include "httpd.h"
-#include "apr_buf.h"
 #include "apr.h"
 
 /*
@@ -115,8 +114,7 @@ typedef struct ap_filter_t ap_filter_t;
  * next/prev to insert/remove/replace elements in the bucket list, but
  * the types and values of the individual buckets should not be altered.
  */
-typedef int (*ap_filter_func)(request_rec *r, ap_filter_t *filter,
-                                    ap_bucket_brigade *bucket);
+typedef ap_status_t (*ap_filter_func)();
 
 /*
  * ap_filter_type:
@@ -170,10 +168,6 @@ struct ap_filter_t {
     ap_filter_t *next;
 };
 
-API_EXPORT(int) ap_pass_brigade(request_rec *r, ap_filter_t *filter, 
-                                 ap_bucket_brigade *bucket);
-
-
 /*
  * ap_register_filter():
  *
@@ -202,6 +196,23 @@ API_EXPORT(void) ap_register_filter(const char *name,
 API_EXPORT(void) ap_add_filter(const char *name, void *ctx, request_rec *r);
 
 
+/*
+ * Things to do later:
+ * Add parameters to ap_filter_func type.  Those parameters will be something
+ *     like:
+ *         (request_rec *r, ap_filter_t *filter, ap_data_list *the_data)
+ *      obviously, the request_rec is the current request, and the filter
+ *      is the current filter stack.  The data_list is a bucket list or
+ *      bucket_brigade, but I am trying to keep this patch neutral.  (If this
+ *      comment breaks that, well sorry, but the information must be there
+ *      somewhere.  :-)
+ *
+ * Add a function like ap_pass_data.  This function will basically just
+ * call the next filter in the chain, until the current filter is NULL.  If the
+ * current filter is NULL, that means that nobody wrote to the network, and
+ * we have a HUGE bug, so we need to return an error and log it to the 
+ * log file.
+ */
 #ifdef __cplusplus
 }
 #endif
