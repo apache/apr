@@ -309,7 +309,7 @@ APR_EXPORT(ap_table_t *) ap_copy_table(ap_pool_t *p, const ap_table_t *t)
     /* we don't copy keys and values, so it's necessary that t->a.pool
      * have a life span at least as long as p
      */
-    if (!ap_pool_is_ancestor(t->a.cont->pool, p->pool)) {
+    if (!ap_pool_is_ancestor(t->a.cont, p)) {
 	fprintf(stderr, "copy_table: t's pool is not an ancestor of p\n");
 	abort();
     }
@@ -386,11 +386,11 @@ APR_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.cont->pool)) {
+	if (!ap_pool_is_ancestor(ap_find_pool(key, NULL), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.cont->pool)) {
+	if (!ap_pool_is_ancestor(ap_find_pool(val, NULL), t->a.cont)) {
 	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
 	    abort();
 	}
@@ -475,11 +475,11 @@ APR_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.cont->pool)) {
+	if (!ap_pool_is_ancestor(ap_find_pool(key, NULL), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.cont->pool)) {
+	if (!ap_pool_is_ancestor(ap_find_pool(val, NULL), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
@@ -515,11 +515,11 @@ APR_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
 
 #ifdef POOL_DEBUG
     {
-	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.cont->pool)) {
+	if (!ap_pool_is_ancestor(ap_find_pool(key, NULL), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
-	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.cont->pool)) {
+	if (!ap_pool_is_ancestor(ap_find_pool(val, NULL), t->a.cont)) {
 	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
 	    abort();
 	}
@@ -542,12 +542,12 @@ APR_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
      * overlay->a.pool and base->a.pool have a life span at least
      * as long as p
      */
-    if (!ap_pool_is_ancestor(overlay->a.cont->pool, p->pool)) {
+    if (!ap_pool_is_ancestor(overlay->a.cont, p)) {
 	fprintf(stderr,
 		"overlay_tables: overlay's pool is not an ancestor of p\n");
 	abort();
     }
-    if (!ap_pool_is_ancestor(base->a.cont->pool, p->pool)) {
+    if (!ap_pool_is_ancestor(base->a.cont, p)) {
 	fprintf(stderr,
 		"overlay_tables: base's pool is not an ancestor of p\n");
 	abort();

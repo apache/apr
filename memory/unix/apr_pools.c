@@ -150,7 +150,13 @@
  */
 /* #define ALLOC_STATS */
 
+
+/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t will not be
+ * destroyed before the parent pool
+ */
+
 #ifdef POOL_DEBUG
+/* first do some option checking... */
 #ifdef ALLOC_USE_MALLOC
 #error "sorry, no support for ALLOC_USE_MALLOC and POOL_DEBUG at the same time"
 #endif /* ALLOC_USE_MALLOC */
@@ -290,6 +296,7 @@ static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
     APR_ABORT(blok == NULL, APR_ENOMEM, apr_abort,
               "Ouch!  malloc failed in malloc_block()\n");
     debug_fill(blok, size + sizeof(union block_hdr));
+
     blok->h.next = NULL;
     blok->h.first_avail = (char *) (blok + 1);
     blok->h.endp = size + blok->h.first_avail;
@@ -313,7 +320,7 @@ static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
 static void chk_on_blk_list(union block_hdr *blok, union block_hdr *free_blk)
 {
     debug_verify_filled(blok->h.endp, blok->h.endp + CLICK_SZ,
-			"Ouch!  Someone trounced the padding "
+			"[chk_on_blk_list] Ouch!  Someone trounced the padding "
 			"at the end of a block!\n");
     while (free_blk) {
 	if (free_blk == blok) {
@@ -382,7 +389,7 @@ static void free_blocks(union block_hdr *blok)
 	chk_on_blk_list(blok, old_free_list);
 	blok->h.first_avail = (char *) (blok + 1);
 	debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
-#ifdef POOL_DEBUG
+#ifdef POOL_DEBUG 
 	blok->h.owning_pool = FREE_POOL;
 #endif /* POOL_DEBUG */
 	blok = blok->h.next;
@@ -432,7 +439,7 @@ static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
 	    *lastptr = blok->h.next;
 	    blok->h.next = NULL;
 	    debug_verify_filled(blok->h.first_avail, blok->h.endp,
-				"Ouch!  Someone trounced a block "
+				"[new_block] Ouch!  Someone trounced a block "
 				"on the free list!\n");
 	    return blok;
 	}
@@ -864,7 +871,7 @@ APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
  * instead.  This is a guarantee by the caller that sub will not
  * be destroyed before p is.
  */
-APR_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, 
+APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, 
                               int (*apr_abort)(int retcode))
 {
     union block_hdr *b;
@@ -881,6 +888,7 @@ APR_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub,
 	    b->h.owning_pool = p;
 	}
     }
+    return 0;
 }
 #endif
 
@@ -927,9 +935,11 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
     char *first_avail;
     char *new_first_avail;
 
+
     if (a == NULL) {
         return malloc(reqsize);
     }
+
 
     nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
     size = nclicks * CLICK_SZ;
@@ -949,7 +959,7 @@ void * ap_palloc(ap_pool_t *a, int reqsize)
 
     if (new_first_avail <= blok->h.endp) {
 	debug_verify_filled(first_avail, blok->h.endp,
-			    "Ouch!  Someone trounced past the end "
+			    "[ap_palloc] Ouch!  Someone trounced past the end "
 			    "of their allocation!\n");
 	blok->h.first_avail = new_first_avail;
 	return (void *) first_avail;

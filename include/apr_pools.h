@@ -95,15 +95,17 @@ struct process_chain {
 ap_status_t ap_init_alloc(void);	/* Set up everything */
 void        ap_term_alloc(void);        /* Tear down everything */
 
-/* used to guarantee to the pool debugging code that the sub pool will not be
+/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t will not be
  * destroyed before the parent pool
  */
 #ifndef POOL_DEBUG
-#ifdef ap_pool_join
-#undef ap_pool_join
-#endif /* ap_pool_join */
-#define ap_pool_join(a,b)
+APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
+#define ap_pool_join (a,b)
+#else
+APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, int (apr_abort)(int retcode));
+APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode));
 #endif /* POOL_DEBUG */
+
 
 /* Clearing out EVERYTHING in an pool... destroys any sub-pools */
 
@@ -164,14 +166,6 @@ APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *, const char *fmt, ...)
 #else
 #define ap_fdopen(d,m) fdopen((d), (m))
 #endif
-
-/* XXX - the socket functions for pools should (and will) use APR sockets.
- * This is temporary. */
-#ifndef BEOS /* this really screws up BeOS R4.5 !! */
-#define closesocket(s) close(s)
-#endif
-
-
 
 /* magic numbers --- min free bytes to consider a free ap_pool_t block useable,
  * and the min amount to allocate if we have to go to malloc() */
