@@ -14,4 +14,5 @@ int print_goodbye(int reps)
         fprintf (stdout, "Goodbye from the DSO! (%d of %d)\n", i+1, reps);
     }
     goodbyes = reps;
+    return 0;
 }
