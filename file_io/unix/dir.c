@@ -68,11 +68,11 @@ static ap_status_t dir_cleanup(void *thedir)
 } 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_opendir(ap_dir_t **, char *, ap_context_t *)
+ * ap_status_t ap_opendir(ap_dir_t **new, char *dirname, ap_context_t *cont)
  *    Open the specified directory. 
- * arg 1) The context to use.
+ * arg 1) The opened directory descriptor.
  * arg 2) The full path to the directory (use / on all systems)
- * arg 3) The opened directory descriptor.
+ * arg 3) The context to use.
  */                        
 ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
 {
@@ -94,7 +94,7 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *co
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_closedir(ap_dir_t *)
+ * ap_status_t ap_closedir(ap_dir_t *thedir)
  *    close the specified directory. 
  * arg 1) the directory descriptor to close.
  */                        
@@ -110,7 +110,7 @@ ap_status_t ap_closedir(struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_readdir(ap_dir_t *)
+ * ap_status_t ap_readdir(ap_dir_t *thedir)
  *    Read the next entry from the specified directory. 
  * arg 1) the directory descriptor to read from, and fill out.
  * NOTE: All systems return . and .. as the first two files.
@@ -140,7 +140,7 @@ ap_status_t ap_readdir(struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_rewinddir(ap_dir_t *)
+ * ap_status_t ap_rewinddir(ap_dir_t *thedir)
  *    Rewind the directory to the first entry. 
  * arg 1) the directory descriptor to rewind.
  */                        
@@ -151,11 +151,12 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_make_dir(const char *, ap_fileperms_t, ap_context_t *)
+ * ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, 
+ *                         ap_context_t *cont)
  *    Create a new directory on the file system. 
- * arg 1) the context to use.
- * arg 2) the path for the directory to be created.  (use / on all systems)
- * arg 3) Permissions for the new direcoty.
+ * arg 1) the path for the directory to be created.  (use / on all systems)
+ * arg 2) Permissions for the new direcoty.
+ * arg 3) the context to use.
  */                        
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
@@ -169,10 +170,10 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *con
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_remove_dir(const char *, ap_context_t *)
+ * ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
  *    Remove directory from the file system. 
- * arg 1) the context to use.
- * arg 2) the path for the directory to be removed.  (use / on all systems)
+ * arg 1) the path for the directory to be removed.  (use / on all systems)
+ * arg 2) the context to use.
  */                        
 ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
@@ -185,10 +186,10 @@ ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_size(ap_ssize_t *, ap_dir_t *)
+ * ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
  *    Get the size of the current directory entry. 
- * arg 1) the currently open directory.
- * arg 2) the size of the directory entry. 
+ * arg 1) the size of the directory entry. 
+ * arg 2) the currently open directory.
  */                        
 ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 {
@@ -211,10 +212,10 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_mtime(time_t *, ap_dir_t *)
+ * ap_status_t ap_dir_entry_mtime(time_t *mtime, ap_dir_t *thedir)
  *    Get the last modified time of the current directory entry. 
- * arg 1) the currently open directory.
- * arg 2) the last modified time of the directory entry. 
+ * arg 1) the last modified time of the directory entry. 
+ * arg 2) the currently open directory.
  */                        
 ap_status_t ap_dir_entry_mtime(time_t *mtime, struct dir_t *thedir)
 {
@@ -238,10 +239,10 @@ ap_status_t ap_dir_entry_mtime(time_t *mtime, struct dir_t *thedir)
 }
  
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_ftype(ap_filetype_e *, ap_dir_t *)
+ * ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
  *    Get the file type of the current directory entry. 
- * arg 1) the currently open directory.
- * arg 2) the file type of the directory entry. 
+ * arg 1) the file type of the directory entry. 
+ * arg 2) the currently open directory.
  */                        
 ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
 {
@@ -280,10 +281,10 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_dir_filename(char **, ap_dir_t *) 
+ * ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir) 
  *    Get the file name of the current directory entry. 
- * arg 1) the currently open directory.
- * arg 2) the file name of the directory entry. 
+ * arg 1) the file name of the directory entry. 
+ * arg 2) the currently open directory.
  */                        
 ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 {
@@ -297,10 +298,10 @@ ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_dir(ap_os_dir_t **, ap_dir_t *)
+ * ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
  *    convert the dir from apr type to os specific type.
- * arg 1) The apr dir to convert.
- * arg 2) The os specific dir we are converting to
+ * arg 1) The os specific dir we are converting to
+ * arg 2) The apr dir to convert.
  */   
 ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
 {
@@ -312,10 +313,12 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_dir(ap_dir_t *, ap_os_dir_t *)
+ * ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, 
+ *                           ap_context_t *cont)
  *    convert the dir from os specific type to apr type.
- * arg 1) The os specific dir to convert
- * arg 2) The apr dir we are converting to.
+ * arg 1) The apr dir we are converting to.
+ * arg 2) The os specific dir to convert
+ * arg 3) The context to use when creating to apr directory.
  */
 ap_status_t ap_put_os_dir(struct dir_t **dir, ap_os_dir_t *thedir,
                           ap_context_t *cont)

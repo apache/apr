@@ -79,10 +79,10 @@ ap_status_t file_cleanup(void *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_open(ap_context_t *, char *, ap_int32, 
- *                     ap_fileperms, ap_file_t **)
+ * ap_status_t ap_open(ap_file_t **new, char *fname, ap_int32 flag, 
+ *                     ap_fileperms perm, ap_context_t *cont)
  *    Open the specified file.
- * arg 1) The context to use.
+ * arg 1) The opened file descriptor.
  * arg 2) The full path to the file (using / on all systems)
  * arg 3) Or'ed value of:
  *          APR_READ             open for reading
@@ -95,7 +95,7 @@ ap_status_t file_cleanup(void *thefile)
  *          APR_EXCL             return error if APR_CREATE and file exists
  *          APR_DELONCLOSE       delete the file after closing.
  * arg 4) Access permissions for file.
- * arg 5) The opened file descriptor.
+ * arg 5) The context to use.
  * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
  *        called without any mode parameters.
  */
@@ -185,7 +185,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_close(ap_file_t *)
+ * ap_status_t ap_close(ap_file_t *file)
  *    Close the specified file.
  * arg 1) The file descriptor to close.
  */
@@ -201,10 +201,10 @@ ap_status_t ap_close(struct file_t *file)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_remove_file(ap_context_t *, char *) 
+ * ap_status_t ap_remove_file(char *path, ap_context_t *cont) 
  *    delete the specified file.
- * arg 1) The context to use.
- * arg 2) The full path to the file (using / on all systems)
+ * arg 1) The full path to the file (using / on all systems)
+ * arg 2) The context to use.
  * NOTE: If the file is open, it won't be removed until all instances are
  *       closed.
  */
@@ -219,10 +219,10 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_file(ap_file_t *, ap_os_file_t *) 
+ * ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file) 
  *    convert the file from apr type to os specific type.
- * arg 1) The apr file to convert.
- * arg 2) The os specific file we are converting to
+ * arg 1) The os specific file we are converting to
+ * arg 2) The apr file to convert.
  * NOTE:  On Unix, it is only possible to get a file descriptor from 
  *        an apr file type.
  */
@@ -242,11 +242,12 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_file(ap_context_t *, ap_file_t *, ap_os_file_t *) 
+ * ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
+ *                            ap_context_t *cont) 
  *    convert the file from os specific type to apr type.
- * arg 1) The context to use if it is needed.
- * arg 2) The apr file we are converting to.
- * arg 3) The os specific file to convert
+ * arg 1) The apr file we are converting to.
+ * arg 2) The os specific file to convert
+ * arg 3) The context to use if it is needed.
  * NOTE:  On Unix, it is only possible to put a file descriptor into
  *        an apr file type.
  */
@@ -270,7 +271,7 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile,
 }    
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_eof(ap_file_t *) 
+ * ap_status_t ap_eof(ap_file_t *fptr) 
  *    Are we at the end of the file
  * arg 1) The apr file we are testing.
  * NOTE:  Returns APR_EOF if we are at the end of file, APR_SUCCESS otherwise.
@@ -290,7 +291,7 @@ ap_status_t ap_eof(ap_file_t *fptr)
 }   
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_ferror(ap_file_t *) 
+ * ap_status_t ap_ferror(ap_file_t *fptr) 
  *    Is there an error on the stream?
  * arg 1) The apr file we are testing.
  * NOTE:  Returns -1 if the error indicator is set, APR_SUCCESS otherwise.
@@ -305,7 +306,7 @@ ap_status_t ap_ferror(ap_file_t *fptr)
 }   
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_open_stderr(ap_file_t **, ap_context_t *) 
+ * ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont) 
  *    open standard error as an apr file pointer.
  * arg 1) The apr file to use as stderr.
  * arg 2) The context to allocate the file out of.

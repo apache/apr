@@ -58,10 +58,10 @@
 /* A file to put ALL of the accessor functions for struct file_t types. */
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filename(char **, ap_file_t *)
+ * ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
  *    return the file name of the current file.
- * arg 1) The currently open file.
- * arg 2) The path of the file.  
+ * arg 1) The path of the file.  
+ * arg 2) The currently open file.
  */                     
 ap_status_t ap_get_filename(char **new, struct file_t *thefile)
 {
@@ -104,11 +104,11 @@ mode_t get_fileperms(ap_fileperms_t mode)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filedata(void **, char *key, ap_file_t *)
+ * ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
  *    Return the data associated with the current file.
- * arg 1) The currently open file.
+ * arg 1) The user data associated with the file.  
  * arg 2) The key to use for retreiving data associated with this file.
- * arg 3) The user data associated with the file.  
+ * arg 3) The currently open file.
  */                     
 ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
 {    
@@ -122,7 +122,7 @@ ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_filedata(ap_file_t *, void *, char *key,
+ * ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
                                ap_status (*cleanup) (void *))
  *    Set the data associated with the current file.
  * arg 1) The currently open file.

@@ -79,7 +79,7 @@ static ap_status_t pipenonblock(struct file_t *thefile)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_pipe_timeout(ap_file_t *, ap_int32_t)
+ * ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
  *    Set the timeout value for a pipe.
  * arg 1) The pipe we are setting a timeout on.
  * arg 3) The timeout value in seconds.  Values < 0 mean wait forever, 0
@@ -95,11 +95,12 @@ ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_pipe(ap_file_t **, ap_context_t *, ap_file_t **)
+ * ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, 
+ *                            ap_context_t *cont)
  *    Create an anonymous pipe.
- * arg 1) The context to operate on.
- * arg 2) The file descriptor to use as input to the pipe.
- * arg 3) The file descriptor to use as output from the pipe.
+ * arg 1) The file descriptor to use as input to the pipe.
+ * arg 2) The file descriptor to use as output from the pipe.
+ * arg 3) The context to operate on.
  */
 ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
 {
@@ -132,8 +133,8 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_namedpipe(ap_context_t *, char *, ap_fileperms_t, 
- *                                 char **)
+ * ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, 
+ *                                 ap_context_t *cont)
  *    Create a named pipe.
  * arg 1) The filename of the named pipe
  * arg 2) The permissions for the newly created pipe.
@@ -150,12 +151,17 @@ ap_status_t ap_create_namedpipe(char *filename,
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_block_pipe(ap_file_t *thefile)
+/* ***APRDOC********************************************************
+ * ap_status_t ap_block_pipe(ap_file_t *thepipe)
+ *    Set a pipe to use blocking I/O.
+ * arg 1) The pipe to operate on.
+ */
+ap_status_t ap_block_pipe(ap_file_t *thepipe)
 {
 #ifndef BEOS /* this code won't work on BeOS */
     int fd_flags;
 
-    fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
+    fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
 #if defined(O_NONBLOCK)
     fd_flags &= ~O_NONBLOCK;
 #elif defined(~O_NDELAY)
@@ -166,7 +172,7 @@ ap_status_t ap_block_pipe(ap_file_t *thefile)
     /* XXXX: this breaks things, but an alternative isn't obvious...*/
     return -1;
 #endif
-    if (fcntl(thefile->filedes, F_SETFL, fd_flags) == -1) {
+    if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
         return errno;
     }
 #endif /* !BeOS */

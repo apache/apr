@@ -126,52 +126,56 @@ struct ap_finfo_t {
 };
 
 /*   Function definitions */
-ap_status_t ap_open(ap_file_t **, const char *, ap_int32_t, ap_fileperms_t, ap_context_t *);
-ap_status_t ap_close(ap_file_t *);
-ap_status_t ap_remove_file(char *, ap_context_t *);
-ap_status_t ap_eof(ap_file_t *);
-ap_status_t ap_ferror(ap_file_t *);
+ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag, 
+                    ap_fileperms_t perm, ap_context_t *cont);
+ap_status_t ap_close(ap_file_t *file);
+ap_status_t ap_remove_file(char *path, ap_context_t *cont);
+ap_status_t ap_eof(ap_file_t *fptr);
+ap_status_t ap_ferror(ap_file_t *fptr);
 ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont);
 
-ap_status_t ap_read(ap_file_t *, void *, ap_ssize_t *);
-ap_status_t ap_write(ap_file_t *, void *, ap_ssize_t *);
-ap_status_t ap_writev(ap_file_t *, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes);
-ap_status_t ap_putc(char, ap_file_t *);
-ap_status_t ap_getc(char *, ap_file_t *);
-ap_status_t ap_ungetc(char, ap_file_t *);
-ap_status_t ap_fgets(char *, int, ap_file_t *);
-ap_status_t ap_puts(char *, ap_file_t *);
-ap_status_t ap_flush(ap_file_t *);
+ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
+ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
+ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, 
+                      ap_size_t nvec, ap_ssize_t *nbytes);
+ap_status_t ap_putc(char ch, ap_file_t *thefile);
+ap_status_t ap_getc(char *ch, ap_file_t *thefile);
+ap_status_t ap_ungetc(char ch, ap_file_t *thefile);
+ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile);
+ap_status_t ap_puts(char *str, ap_file_t *thefile);
+ap_status_t ap_flush(ap_file_t *thefile);
 API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
-ap_status_t ap_dupfile(ap_file_t **, ap_file_t *);
+ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file);
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont);
-ap_status_t ap_seek(ap_file_t *, ap_seek_where_t, ap_off_t *);
+ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where,ap_off_t *offset);
 
-ap_status_t ap_opendir(ap_dir_t **, const char *, ap_context_t *);
-ap_status_t ap_closedir(ap_dir_t *);
-ap_status_t ap_readdir(ap_dir_t *);
-ap_status_t ap_rewinddir(ap_dir_t *);
-ap_status_t ap_make_dir(const char *, ap_fileperms_t, ap_context_t *);
-ap_status_t ap_remove_dir(const char *, ap_context_t *);
+ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cont);
+ap_status_t ap_closedir(ap_dir_t *thedir);
+ap_status_t ap_readdir(ap_dir_t *thedir);
+ap_status_t ap_rewinddir(ap_dir_t *thedir);
+ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, 
+                        ap_context_t *cont);
+ap_status_t ap_remove_dir(const char *path, ap_context_t *cont);
 
-ap_status_t ap_create_pipe(ap_file_t **, ap_file_t **, ap_context_t *);
-ap_status_t ap_create_namedpipe(char *, ap_fileperms_t, ap_context_t *);
+ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont);
+ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, 
+                                ap_context_t *cont);
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout);
 ap_status_t ap_block_pipe(ap_file_t *thepipe);
 
 /*accessor and general file_io functions. */
-ap_status_t ap_get_filename(char **, ap_file_t *);
-ap_status_t ap_get_dir_filename(char **, ap_dir_t *);
-ap_status_t ap_get_filedata(void **, char *, ap_file_t *);
-ap_status_t ap_set_filedata(ap_file_t *, void *, char *,
+ap_status_t ap_get_filename(char **new, ap_file_t *thefile);
+ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir);
+ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file);
+ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
                             ap_status_t (*cleanup) (void *));
 
-ap_status_t ap_dir_entry_size(ap_ssize_t *, ap_dir_t *);
-ap_status_t ap_dir_entry_mtime(time_t *, ap_dir_t *);
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *, ap_dir_t *);
+ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir);
+ap_status_t ap_dir_entry_mtime(time_t *mtime, ap_dir_t *thedir);
+ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir);
 
 #ifdef __cplusplus
 }
