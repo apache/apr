@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Cygwin: the unix version of apr_file_open() must respect the
+     APR_BINARY flag if the underlying platform requires it (in
+     which case we assume O_BINARY is defined in fcntl.h).  PR 9185.
+     [Cliff Woolley]
+
   *) Linux, AIX: Use crypt_r() instead of crypt() because the native
      crypt() is not thread-safe.  The misuse of crypt() led to   
      intermittent failures with Apache basic authentication when crypt 
