@@ -120,7 +120,7 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem,
     if (sms->realloc_fn)
         return sms->realloc_fn(sms, mem, size);
 
-    /* XXX - shoulod we free the block passed in ??? */
+    /* XXX - should we free the block passed in ??? */
     return NULL;
 }
 
@@ -310,17 +310,21 @@ static void apr_sms_do_cleanups(struct apr_sms_cleanup *c)
  */
 static void apr_sms_do_child_cleanups(apr_sms_t *sms)
 {
-    if (!sms)
-        return;
-
-    sms = sms->child;
     while (sms) {
-        apr_sms_do_child_cleanups(sms);
+        apr_sms_do_child_cleanups(sms->child);
         apr_sms_do_cleanups(sms->cleanups);
-
+        /*
+         * We assume that all of our children & their siblings are created
+         * from memory we've allocated, and as we're about to nuke it all 
+         * we need to run the pre_destroy so things like locks can be 
+         * cleaned up so we don't leak.
+         * However, we aren't going to call destroy on a reset as we're about
+         * to nuke them when we do the reset.  This is why all "leakable"
+         * items created in an sms module MUST be cleaned up in the
+         * pre_destroy not the destroy.
+         */
         if (sms->pre_destroy_fn != NULL)
             sms->pre_destroy_fn(sms);
-
         sms = sms->sibling;
     }
 }
@@ -338,7 +342,7 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *sms)
      * Run the cleanups of all child memory systems _including_
      * the accounting memory system.
      */
-    apr_sms_do_child_cleanups(sms);
+    apr_sms_do_child_cleanups(sms->child);
 
     /* Run all cleanups, the memory will be freed by the reset */
     apr_sms_do_cleanups(sms->cleanups);
@@ -377,9 +381,10 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
         /* 
          * Run the cleanups of all child memory systems _including_
          * the accounting memory system.
+         * This also does the pre_destroy functions in the children.
          */
-        apr_sms_do_child_cleanups(sms);
-
+        apr_sms_do_child_cleanups(sms->child);
+        
         /* Run all cleanups, the memory will be freed by the destroy */
         apr_sms_do_cleanups(sms->cleanups);
     }
@@ -392,8 +397,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
              * child list (we will explicitly destroy it later in this block).
              */
             if (child->sibling != NULL)
-                child->sibling->ref =
-                    child->ref;
+                child->sibling->ref = child->ref;
 
             *child->ref = child->sibling;
 
