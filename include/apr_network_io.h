@@ -747,6 +747,63 @@ APR_DECLARE_INHERIT_SET(socket);
  */
 APR_DECLARE_INHERIT_UNSET(socket);
 
+/**
+ * @defgroup apr_mcast IP Multicast
+ * @{
+ */
+
+/**
+ * Join a Multicast Group
+ * @param sock The socket to join a multicast group
+ * @param join The address of the multicast group to join
+ * @param iface Address of the interface to use.  If NULL is passed, the 
+ *              default multicast interface will be used. (OS Dependent)
+ */
+APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
+                                         apr_sockaddr_t *join,
+                                         apr_sockaddr_t *iface);
+
+/**
+ * Leave a Multicast Group.  All arguments must be the same as
+ * apr_mcast_join.
+ * @param sock The socket to leave a multicast group
+ * @param leave The address of the multicast group to leave
+ * @param iface Address of the interface to use.  If NULL is passed, the 
+ *              default multicast interface will be used. (OS Dependent)
+ */
+APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
+                                          apr_sockaddr_t *leave,
+                                          apr_sockaddr_t *iface);
+
+/**
+ * Set the Multicast Time to Live (ttl) for a multicast transmission.
+ * @param sock The socket to set the multicast ttl
+ * @param ttl Time to live to Assign. 0-255, default=1
+ * @remark If the TTL is 0, packets will only be seen by sockets on 
+ * the local machine, and only when multicast loopback is enabled.
+ */
+APR_DECLARE(apr_status_t) apr_mcast_hops(apr_socket_t *sock,
+                                         apr_byte_t ttl);
+
+/**
+ * Toggle IP Multicast Loopback
+ * @param sock The socket to set multicast loopback
+ * @param opt 0=disable, 1=enable
+ */
+APR_DECLARE(apr_status_t) apr_mcast_loopback(apr_socket_t *sock,
+                                             apr_byte_t opt);
+
+
+/**
+ * Set the Interface to be used for outgoing Multicast Transmissions.
+ * @param sock The socket to set the multicast interface on
+ * @param iface Address of the interface to use for Multicast
+ */
+APR_DECLARE(apr_status_t) apr_mcast_interface(apr_socket_t *sock,
+                                              apr_sockaddr_t *iface);
+
+/** @} */
+
 /** @} */
 
 #ifdef __cplusplus
