@@ -424,6 +424,28 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
     return APR_SUCCESS;
 }
 
-APR_IMPLEMENT_INHERIT_SET(socket, inherit, cntxt, socket_cleanup)
 
-APR_IMPLEMENT_INHERIT_UNSET(socket, inherit, cntxt, socket_cleanup)
+/* Sockets cannot be inherited through the standard sockets
+ * inheritence.  WSADuplicateSocket must be used.
+ * This is not trivial to implement.
+ */
+
+APR_DECLARE(void) apr_socket_inherit_set(apr_socket_t *socket)    
+{    
+    return /* APR_ENOTIMPL */;
+}    
+/* Deprecated */    
+APR_DECLARE(void) apr_socket_set_inherit(apr_socket_t *socket)    
+{    
+    /* return */ apr_socket_inherit_set(socket);    
+}
+
+APR_DECLARE(void) apr_socket_inherit_unset(apr_socket_t *socket)    
+{    
+    return /* APR_ENOTIMPL */;
+}    
+/* Deprecated */    
+APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *socket)    
+{    
+    /* return */ apr_socket_inherit_unset(socket);    
+}
