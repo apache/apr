@@ -102,10 +102,18 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
     ocr->maintenance = maintenance;
     ocr->data = data;
     if (write_fd == NULL) {
-        ocr->write_fd = -1;
+        ocr->write_fd = (apr_os_file_t) -1;
     }
     else {
+#ifdef WIN32
+        /* This should either go away as part of eliminating apr_proc_probe_writable_fds
+         * or write_fd should point to an apr_file_t
+         */
+        ocr->write_fd = write_fd->filehand; 
+#else
         ocr->write_fd = write_fd->filedes;
+#endif
+
     }
     ocr->next = other_children;
     other_children = ocr;
@@ -145,7 +153,36 @@ APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status)
     }
     return APR_CHILD_NOTDONE;
 }
+#ifdef WIN32
+/*
+ * Run the list of Other Children and restart the ones that have died.
+ * ToDo: APR'ize this function so it will serve Unix and Win32.
+ * Not clear to me how to make the Win32 function behave exactly like
+ * the non-win32 branch. wgs
+ */
+APR_DECLARE(void) apr_proc_other_child_check(void)
+{
+    apr_other_child_rec_t *ocr, *nocr;
+    apr_status_t rv;
 
+    /* Todo: 
+     * Implement code to detect if a pipe is still alive on Windows.
+     */
+    if (other_children == NULL)
+        return;
+
+    for (ocr = other_children; ocr; ocr = nocr) {
+        nocr = ocr->next;
+        if (ocr->id == -1)
+            continue;
+
+        rv = WaitForSingleObject((HANDLE) ocr->id, 0);
+        if (rv != WAIT_TIMEOUT) {
+            (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
+        }
+    }
+}
+#else /* Win32 */
 APR_DECLARE(void) apr_proc_other_child_check(void)
 {
     apr_other_child_rec_t *ocr, *nocr;
@@ -172,5 +209,6 @@ APR_DECLARE(void) apr_proc_other_child_check(void)
         }
     }
 }
+#endif
 
 #endif /* APR_HAS_OTHER_CHILD */
