@@ -160,9 +160,15 @@ struct apr_proc_t {
     apr_file_t *out;
     /** Parent's side of pipe to child's stdouterr */
     apr_file_t *err;
-#ifdef WIN32
-    /** Must retain the handle as any clone may not have the
-     *  the same permissions 
+#if APR_HAS_PROC_INVOKED || defined(DOXYGEN)
+    /** Diagnositics/debugging string of the command invoked for 
+     *  this process [only present if APR_HAS_PROC_INVOKED is true]
+     */
+    char *invoked;
+#endif
+#if defined(WIN32) || defined(DOXYGEN)
+    /** Win32 specific: Must retain the creator's handle granting 
+     *  access, as a new copy may not grant the same permissions 
      */
     HANDLE hproc;
 #endif

@@ -76,15 +76,23 @@
  * Oddly, \x7f _is_ acceptable ;)
  */
 
-const char c_is_fnchar[256] =
-{/* Reject all ctrl codes...                                         */
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
- /*     "               *         /                      :   <   > ? */
-    1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0, 1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,0,
- /*                                                          \       */
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,
- /*                                                          |       */
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,
+/* apr_c_is_fnchar[] maps Win32's file name and shell escape symbols
+ *
+ *   element & 1 == valid file name character [excluding delimiters]
+ *   element & 2 == character should be shell (caret) escaped from cmd.exe
+ *
+ * this must be in-sync with Apache httpd's gen_test_char.c for cgi escaping.
+ */
+
+const char apr_c_is_fnchar[256] =
+{/* Reject all ctrl codes... Escape \n and \r (ascii 10 and 13)      */
+    0,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ /*   ! " # $ % & ' ( ) * + , - . /  0 1 2 3 4 5 6 7 8 9 : ; < = > ? */
+    1,1,2,1,3,3,3,3,3,3,2,1,1,1,1,0, 1,1,1,1,1,1,1,1,1,1,0,3,2,1,2,2,
+ /* @ A B C D E F G H I J K L M N O  P Q R S T U V W X Y Z [ \ ] ^ _ */
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,3,2,3,3,1,
+ /* ` a b c d e f g h i j k l m n o  p q r s t u v w x y z { | } ~   */
+    3,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,3,2,3,3,1,
  /* High bit codes are accepted (subject to utf-8->Unicode xlation)  */
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
