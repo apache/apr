@@ -60,6 +60,8 @@
 #include "apr_errno.h"
 #include <windows.h>
 
+#define GetFilePointer(hfile) SetFilePointer(hfile,0,NULL, FILE_CURRENT)
+
 ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bread;
@@ -131,6 +133,42 @@ ap_status_t ap_putc(ap_file_t *thefile, char ch)
     if (!WriteFile(thefile->filehand, &ch, 1, &bwrote, NULL)) {
         return APR_EEXIST;
     }
+    return APR_SUCCESS; 
+}
+
+ap_status_t ap_ungetc(ap_file_t *thefile, char ch)
+{
+    /* 
+     * Your application must provide its own serialization (locking) if
+     * it allows multiple threads to access the same file handle 
+     * concurrently.
+     *
+     * ToDo: This function does not use the char ch argument. Could add 
+     * gorpy code to read the file after the SetFilePointer() call to 
+     * make sure the character pushed back on the stream is the same as
+     * arg ch. Then, need to SetFilePointer() once more to reset the 
+     * file pointer to the point before the read. Yech... Just assume 
+     * the caller knows what he is doing.  There may be a nifty Win32 
+     * call for this I've not discovered....
+     */
+
+    /* SetFilePointer is only valid for a file device ...*/
+    if (GetFileType(thefile->filehand) != FILE_TYPE_DISK) {
+        return !APR_SUCCESS; /* is there no generic failure code? */
+    }
+    /* that's buffered... */
+    if (!thefile->buffered) {
+        return !APR_SUCCESS; /* is there no generic failure code? */
+    }
+    /* and the file pointer is not pointing to the start of the file. */
+    if (GetFilePointer(thefile->filehand)) {
+        if (SetFilePointer(thefile->filehand, -1, NULL, FILE_CURRENT) 
+            == 0xFFFFFFFF) {
+            return !APR_SUCCESS;
+        }
+    }
+
+    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
