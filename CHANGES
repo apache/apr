@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Clean up conditionals in unix DSO code so that we decide based on
+     the dynamic loading implementation, which we noticed at configure
+     time, instead of by operating system.
+     [Wilfredo Sanchez]
+
   *) Add DSO support for dyld platforms (Darwin/Mac OS and OpenStep).
      [Wilfredo Sanchez]
 
