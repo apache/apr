@@ -46,22 +46,19 @@ static apr_status_t proc_mutex_no_child_init(apr_proc_mutex_t **mutex,
 
 static apr_status_t proc_mutex_posix_cleanup(void *mutex_)
 {
-    apr_proc_mutex_t *mutex=mutex_;
-    apr_status_t stat = APR_SUCCESS;
+    apr_proc_mutex_t *mutex = mutex_;
     
-    if (mutex->interproc->filedes != -1) {
-        if (sem_close(mutex->psem_interproc) < 0) {
-            stat = errno;
-        }
+    if (sem_close(mutex->psem_interproc) < 0) {
+        return errno;
     }
-    return stat;
+
+    return APR_SUCCESS;
 }    
 
 static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
                                             const char *fname)
 {
     sem_t *psem;
-    apr_status_t stat;
     char semname[31];
     apr_time_t now;
     unsigned long sec;
@@ -69,7 +66,6 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     
     new_mutex->interproc = apr_palloc(new_mutex->pool,
                                       sizeof(*new_mutex->interproc));
-    new_mutex->interproc->filedes = -1;
     /*
      * This bogusness is to follow what appears to be the
      * lowest common denominator in Posix semaphore naming:
@@ -107,9 +103,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     }
 
     if (psem == (sem_t *)SEM_FAILED) {
-        stat = errno;
-        proc_mutex_posix_cleanup(new_mutex);
-        return stat;
+        return errno;
     }
     /* Ahhh. The joys of Posix sems. Predelete it... */
     sem_unlink((const char *) semname);
@@ -123,9 +117,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
 
 static apr_status_t proc_mutex_posix_acquire(apr_proc_mutex_t *mutex)
 {
-    int rc;
-
-    if ((rc = sem_wait(mutex->psem_interproc)) < 0) {
+    if (sem_wait(mutex->psem_interproc) < 0) {
         return errno;
     }
     mutex->curr_locked = 1;
@@ -134,12 +126,10 @@ static apr_status_t proc_mutex_posix_acquire(apr_proc_mutex_t *mutex)
 
 static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
 {
-    int rc;
-
-    mutex->curr_locked = 0;
-    if ((rc = sem_post(mutex->psem_interproc)) < 0) {
+    if (sem_post(mutex->psem_interproc) < 0) {
         return errno;
     }
+    mutex->curr_locked = 0;
     return APR_SUCCESS;
 }
 
