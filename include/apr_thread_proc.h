@@ -147,6 +147,10 @@ typedef enum {
                                            * kill the child) */
 #define APR_OC_REASON_LOST          4     /**< somehow the child exited without
                                            * us knowing ... buggy os? */
+#define APR_OC_REASON_RUNNING       5     /**< a health check is occuring, 
+                                           * for most maintainence functions
+                                           * this is a no-op.
+                                           */
 /** @} */
 #endif /* APR_HAS_OTHER_CHILD */
 
@@ -610,6 +614,8 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
  *                          child is dead or not.
  * </PRE>
  * @param p Pool to allocate child information out of.
+ * @bug Passing proc as a *proc rather than **proc was an odd choice
+ * for some platforms... this should be revisited in 1.0
  */
 APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   int *exitcode,
@@ -628,21 +634,24 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
  */
 APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize);
 
-#if APR_HAS_OTHER_CHILD
-
 /**
- * Register an other_child -- a child which must be kept track of so 
- * that the program knows when it has died or disappeared.
- * @param pid pid is the pid of the child.
+ * Register an other_child -- a child associated to its registered 
+ * maintence callback.  This callback is invoked when the process
+ * dies, is disconnected or disappears.
+ * @param proc The child process to register.
  * @param maintenance maintenance is a function that is invoked with a 
  *                    reason and the data pointer passed here.
- * @param data The data to pass to the maintenance function.
+ * @param data Opaque context data passed to the maintenance function.
  * @param write_fd An fd that is probed for writing.  If it is ever unwritable
  *                 then the maintenance is invoked with reason 
  *                 OC_REASON_UNWRITABLE.
  * @param p The pool to use for allocating memory.
+ * @bug write_fd duplicates the proc->out stream, it's really redundant
+ * and should be replaced in the APR 1.0 API with a bitflag of which
+ * proc->in/out/err handles should be health checked.
+ * @bug no platform currently tests the pipes health.
  */
-APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid, 
+APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *proc, 
                                            void (*maintenance) (int reason, 
                                                                 void *, 
                                                                 int status),
@@ -650,7 +659,7 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
                                            apr_pool_t *p);
 
 /**
- * Stop watching the specified process.
+ * Stop watching the specified other child.  
  * @param data The data to pass to the maintenance function.  This is
  *             used to find the process to unregister.
  * @warning Since this can be called by a maintenance function while we're
@@ -661,20 +670,43 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
 APR_DECLARE(void) apr_proc_other_child_unregister(void *data);
 
 /**
- * Check on the specified process.  If it is gone, call the maintenance 
- * function.
- * @param pid The process to check.
+ * Notify the maintenance callback of a registered other child process
+ * that application has detected an event, such as death.
+ * @param proc The process to check.
  * @param status The status to pass to the maintenance function.
+ * @remark An example of code using this behavior;
+ * <pre>
+ * rv = apr_proc_wait_all_procs(&proc, &exitcode, &status, APR_WAIT, p);
+ * if (APR_STATUS_IS_CHILD_DONE(rv)) {
+ * #if APR_HAS_OTHER_CHILD
+ *     if (apr_proc_other_child_alert(&proc, APR_OC_REASON_DEATH, status)
+ *             == APR_SUCCESS) {
+ *         ;  (already handled)
+ *     }
+ *     else
+ * #endif
+ *         [... handling non-otherchild processes death ...]
+ * </pre>
  */
-APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status);
+APR_DECLARE(apr_status_t) apr_proc_other_child_alert(apr_proc_t *proc, 
+                                                     int reason,
+                                                     int status);
 
-/**
- * Loop through all registered other_children and call the appropriate 
- * maintenance function when necessary.
+APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
+                                               int reason);
+
+APR_DECLARE(void) apr_proc_other_child_refresh_all(int reason);
+
+/** @deprecated 
+ * @see apr_proc_other_child_refresh_all(APR_OC_REASON_RESTART)
  */
-APR_DECLARE(void) apr_proc_other_child_check(void); 
+APR_DECLARE(void) apr_proc_other_child_check(void);
 
-#endif /* APR_HAS_OTHER_CHILD */
+/** @deprecated 
+ * @see apr_proc_other_child_alert()
+ */
+APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *proc, int status);
+
 
 /** 
  * Terminate a process.
@@ -686,7 +718,7 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int sig);
 /**
  * Register a process to be killed when a pool dies.
  * @param a The pool to use to define the processes lifetime 
- * @param pid The process to register
+ * @param proc The process to register
  * @param how How to kill the process, one of:
  * <PRE>
  *         APR_KILL_NEVER         -- process is never sent any signals
@@ -696,7 +728,7 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int sig);
  *         APR_KILL_ONLY_ONCE     -- send SIGTERM and then wait
  * </PRE>
  */
-APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
+APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *proc,
                                            apr_kill_conditions_e how);
 
 #if APR_HAS_THREADS 
