@@ -410,11 +410,10 @@ B<get the specified file's stats..>
 =cut
  */ 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
-ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
 
 /*
 
-=head1 ap_status_t ap_stat(ap_file_t **finfo, char *fname, ap_pool_t *cont)
+=head1 ap_status_t ap_stat(ap_finfo_t **finfo, char *fname, ap_pool_t *cont)
 
 B<get the specified file's stats.  The file is specified by filename, instead of using a pre-opened file.>
 
@@ -425,6 +424,20 @@ B<get the specified file's stats.  The file is specified by filename, instead of
 =cut
  */ 
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
+
+/*
+
+=head1 ap_status_t ap_lstat(ap_finfo_t **finfo, char *fname, ap_pool_t *cont)
+
+B<get the specified file's stats.  The file is specified by filename, instead of using a pre-opened file.  If the file is a symlink, this function will get the stats for the symlink not the file the symlink refers to.>
+
+    arg 1) Where to store the information about the file.
+    arg 2) The name of the file to stat.
+    arg 3) the pool to use to allocate the new file. 
+
+=cut
+ */ 
+ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
 
 /*
 
