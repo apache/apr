@@ -127,7 +127,17 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex);
  * Get the pool used by this thread_mutex.
  * @return apr_pool_t the pool
  */
-APR_POOL_DECLARE_ACCESSOR(thread_mutex);
+/*
+ * XXX: We should do:
+ *
+ * APR_POOL_DECLARE_ACCESSOR(thread_mutex);
+ *
+ * But since there is a dependency between apr_thread_mutex.h, apr_pools.h
+ * and apr_allocator.h, this won't work without lots of warnings.  Spelling
+ * it out resolves the problem.
+ */
+APR_DECLARE(apr_pool_t *) apr_thread_mutex_pool_get (const apr_thread_mutex_t *ob);
+
 
 #endif /* APR_HAS_THREADS */
 
