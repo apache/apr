@@ -317,11 +317,11 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
  */
 
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
-                                             const char *progname,
-                                             const char * const *args,
-                                             const char * const *env,
-                                             apr_procattr_t *attr,
-                                             apr_pool_t *cont)
+                                          const char *progname,
+                                          const char * const *args,
+                                          const char * const *env,
+                                          apr_procattr_t *attr,
+                                          apr_pool_t *cont)
 {
     apr_size_t i, iEnvBlockLen;
     char *cmdline;
@@ -329,6 +329,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     char *envstr;
     char *pEnvBlock, *pNext;
     PROCESS_INFORMATION pi;
+    DWORD dwCreationFlags = 0;
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -340,6 +341,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * window we are starting in.  And we had better redfine our
          * handles for STDIN, STDOUT, and STDERR.
          */
+        dwCreationFlags |= DETACHED_PROCESS;
         attr->si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
         attr->si.wShowWindow = SW_HIDE;
 
@@ -427,7 +429,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     } 
     
 
-    if (CreateProcess(NULL, cmdline, NULL, NULL, TRUE, 0, pEnvBlock, attr->currdir, 
+    if (CreateProcess(NULL, cmdline,     /* Command line */
+                      NULL, NULL,        /* Proc & thread security attributes */
+                      TRUE,              /* Inherit handles */
+                      dwCreationFlags,   /* Creation flags */
+                      pEnvBlock,         /* Environment block */
+                      attr->currdir,     /* Current directory name */
                       &attr->si, &pi)) {
 
         // TODO: THIS IS BADNESS
