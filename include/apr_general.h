@@ -262,12 +262,12 @@ APR_DECLARE(void) apr_terminate2(void);
 
 /* TODO: I'm not sure this is the best place to put this prototype...*/
 /**
- * Generate a string of random bytes.
+ * Generate random bytes.
  * @param buf Random bytes go here
- * @param length size of the buffer
+ * @param length number of bytes to read
  */
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
-                                                    int length);
+                                                    apr_size_t length);
 
 #endif
 /** @} */
