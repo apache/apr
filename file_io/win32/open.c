@@ -392,14 +392,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         (*new)->mutex = NULL;
     }
 
-    if (flag & APR_XTHREAD) {
-        /* This win32 specific feature is required to pass
-         * the current offset for an overlaped file handle.
-         */
-        (*new)->pOverlapped = (OVERLAPPED*) apr_pcalloc(cont, sizeof(OVERLAPPED));
-        (*new)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-    }
-
     (*new)->pipe = 0;
     (*new)->timeout = -1;
     (*new)->ungetchar = -1;

@@ -168,6 +168,20 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         return APR_SUCCESS;
     }
 
+    /* If the file is open for xthread support, allocate and
+     * initialize the overlapped and io completion event (hEvent). 
+     * Threads should NOT share an apr_file_t or its hEvent.
+     */
+    if ((thefile->flags & APR_XTHREAD) && !thefile->pOverlapped ) {
+        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->cntxt, 
+                                                         sizeof(OVERLAPPED));
+        thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        if (!thefile->pOverlapped->hEvent) {
+            rv = apr_get_os_error();
+            return rv;
+        }
+    }
+
     /* Handle the ungetchar if there is one */
     if (thefile->ungetchar != -1) {
         bytes_read = 1;
@@ -238,6 +252,20 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 {
     apr_status_t rv;
     DWORD bwrote;
+
+    /* If the file is open for xthread support, allocate and
+     * initialize the overlapped and io completion event (hEvent). 
+     * Threads should NOT share an apr_file_t or its hEvent.
+     */
+    if ((thefile->flags & APR_XTHREAD) && !thefile->pOverlapped ) {
+        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->cntxt, 
+                                                         sizeof(OVERLAPPED));
+        thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+        if (!thefile->pOverlapped->hEvent) {
+            rv = apr_get_os_error();
+            return rv;
+        }
+    }
 
     if (thefile->buffered) {
         char *pos = (char *)buf;
