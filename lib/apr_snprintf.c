@@ -67,6 +67,9 @@
 
 #include "apr_lib.h"
 #include <math.h>
+#ifdef HAVE_CTYPE_H
+# include <ctype.h>
+#endif
 
 typedef enum {
     NO = 0, YES = 1

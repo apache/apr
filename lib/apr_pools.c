@@ -802,7 +802,6 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
 
     blok = a->last;
     first_avail = blok->h.first_avail;
-    new_first_avail;
 
     if (reqsize <= 0) {
 	return NULL;
@@ -1174,6 +1173,7 @@ API_EXPORT(void) ap_cleanup_for_exec(void)
 API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
 {
     /* do nothing cleanup routine */
+    return APR_SUCCESS;
 }
 
 /*
