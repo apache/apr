@@ -1204,7 +1204,7 @@ static int snprintf_flush(apr_vformatter_buff_t *vbuff)
 
 
 APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len, 
-                                   const char *format, ...)
+                                     const char *format, ...)
 {
     int cc;
     va_list ap;
@@ -1225,7 +1225,7 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
 
 
 APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
-                             va_list ap)
+                               va_list ap)
 {
     int cc;
     apr_vformatter_buff_t vbuff;
