@@ -770,8 +770,12 @@ fi
 # it right.  If you find that we don't get it right for your platform, 
 # you can override our decision below.
 case "$OS" in
-   *linux* | *os2_emx)
+   *linux*)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
+       ;;
+   *os2_emx)
+       off_t_fmt='#define APR_OFF_T_FMT "ld"'
+       size_t_fmt='#define APR_SIZE_T_FMT "lu"'
        ;;
    *-solaris*)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
