@@ -53,7 +53,7 @@
  */
 
 #include "apr_thread_proc.h"
-#include "fileio.h"
+#include "../../file_io/unix/fileio.h"
 #include "apr_file_io.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
@@ -120,15 +120,6 @@ struct ap_procattr_t {
     ap_int32_t cmdtype;
     ap_int32_t detached;
 };
-
-struct ap_proc_t {
-    ap_pool_t *cntxt;
-    thread_id pid;
-    struct ap_procattr_t *attr;
-};
-
-/* we need a structure to pass off to the thread that will run any
- * new process we create */
 
 #endif  /* ! THREAD_PROC_H */
 
