@@ -249,3 +249,4 @@ EXPORTS
 	ap_generate_random_bytes @228
 	ap_strnatcmp @229
 	ap_strnatcasecmp @230
+        ap_dso_error @231
