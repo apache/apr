@@ -403,7 +403,7 @@ dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
 AC_CHECK_HEADERS(ByteOrder.h)
-AC_CHECK_HEADERS(conio.h)
+AC_CHECK_HEADERS(conio.h, conioh="1", conioh="0")
 AC_CHECK_HEADERS(crypt.h, crypth="1", crypth="0")
 AC_CHECK_HEADERS(ctype.h, ctypeh="1", ctypeh="0")
 AC_CHECK_HEADERS(dir.h)
@@ -463,6 +463,7 @@ AC_CHECK_HEADERS(dl.h)
 AC_CHECK_HEADERS(kernel/OS.h)
 
 AC_SUBST(arpa_ineth)
+AC_SUBST(conioh)
 AC_SUBST(ctypeh)
 AC_SUBST(crypth)
 AC_SUBST(errnoh)
