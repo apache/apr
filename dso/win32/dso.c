@@ -112,9 +112,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
 #ifndef _WIN32_WCE
         em = SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
-        os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+        os_handle = LoadLibraryExW(wpath, NULL, 0);
         if (!os_handle)
-            os_handle = LoadLibraryExW(wpath, NULL, 0);
+            os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
         if (!os_handle)
             rv = apr_get_os_error();
 #ifndef _WIN32_WCE
