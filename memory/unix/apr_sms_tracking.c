@@ -92,11 +92,10 @@ typedef struct apr_sms_tracking_t
     if (tms->lock) \
         apr_lock_acquire(tms->lock); \
     \
-    node->next = tms->nodes; \
-    tms->nodes = node; \
     node->ref = &tms->nodes; \
-    if (node->next) \
+    if ((node->next = tms->nodes) != NULL) \
         node->next->ref = &node->next; \
+    tms->nodes = node; \
     \
     if (tms->lock) \
         apr_lock_release(tms->lock);
@@ -106,7 +105,7 @@ typedef struct apr_sms_tracking_t
             apr_lock_acquire(tms->lock); \
         \
         *(node->ref) = node->next; \
-        if (node->next) \
+        if ((*(node->ref) = node->next) != NULL) \
             node->next->ref = node->ref; \
         \
         if (tms->lock) \
@@ -208,8 +207,7 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *sms)
     
     while (tms->nodes) {
         node = tms->nodes;
-        *(node->ref) = node->next;
-        if (node->next)
+        if ((*(node->ref) = node->next) != NULL)
             node->next->ref = node->ref;
         if ((rv = apr_sms_free(sms->parent, 
                                node)) != APR_SUCCESS) {
@@ -283,9 +281,9 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms,
     new_sms->realloc_fn     = apr_sms_tracking_realloc;
     new_sms->free_fn        = apr_sms_tracking_free;
     new_sms->reset_fn       = apr_sms_tracking_reset;
+    new_sms->pre_destroy_fn = apr_sms_tracking_pre_destroy;
     new_sms->destroy_fn     = apr_sms_tracking_destroy;
     new_sms->identity       = module_identity;
-    new_sms->pre_destroy_fn = apr_sms_tracking_pre_destroy;
     
     tms = (apr_sms_tracking_t *)new_sms;
     tms->nodes = NULL;
