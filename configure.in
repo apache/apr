@@ -435,7 +435,10 @@ case $host in
     *linux*)
         os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/'`
         ;;
-     *)
+    *darwin*)
+        os_version=`uname -r | sed -e 's/\(.\)\.\(.\).*/\1\2/'`
+        ;;
+    *)
         os_version=OS_VERSION_IS_NOT_SET
         ;;
 esac
@@ -1781,9 +1784,14 @@ AC_ARG_ENABLE(ipv6,
 case $host in
   *apple-darwin*)
     # It appears that Jaguar has all the right features, but
-    # getnameinfo() fails to find the hostname for a mapped
+    # getnameinfo() fails to find the hostname for an IPv4mapped
     # address.
-    broken_ipv6=1
+    # All signs point that 6.6 (aka Mac OS 10.2.6+) is okay.
+    if test $os_version -lt "66"; then
+      broken_ipv6=1
+    else
+      broken_ipv6=0
+    fi
     ;;
   *)
     broken_ipv6=0
