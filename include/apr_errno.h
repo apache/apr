@@ -347,16 +347,15 @@ int apr_canonical_error(apr_status_t err);
 #endif
 
 
-#if defined(OS2) /* endif !defined(WIN32) && !defined(OS2) */
+#if defined(OS2)
 
-/*  uhhh... I dunno
- */
 #define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
 #define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
 
-#define apr_get_os_error()   (APR_FROM_OS_ERROR(GetLastError()))
-#define apr_set_os_error(e)  (SetLastError(APR_TO_OS_ERROR(e)))
-
+#define INCL_DOSERRORS
+#define INCL_DOS
+#include <os2.h>
+#include "../network_io/os2/os2nerrno.h"
 /* And this needs to be greped away for good:
  */
 #define APR_OS2_STATUS(e) (APR_FROM_OS_ERROR(e))
