@@ -64,7 +64,7 @@ static apr_status_t thread_cond_cleanup(void *data)
     apr_thread_cond_t *cond = (apr_thread_cond_t *)data;
     apr_status_t rv;
 
-    rv = pthread_cond_destroy(cond->cond);
+    rv = pthread_cond_destroy(&cond->cond);
 #ifdef PTHREAD_SETS_ERRNO
     if (rv) {
         rv = errno;
@@ -79,22 +79,11 @@ APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
     apr_thread_cond_t *new_cond;
     apr_status_t rv;
 
-    new_cond = (apr_thread_cond_t *)apr_pcalloc(pool,
-                                                sizeof(apr_thread_cond_t));
-
-    if (new_cond == NULL) {
-        return APR_ENOMEM;
-    }
+    new_cond = apr_palloc(pool, sizeof(apr_thread_cond_t));
 
     new_cond->pool = pool;
-    new_cond->cond = (pthread_cond_t *)apr_palloc(pool, 
-                                                  sizeof(pthread_cond_t));
 
-    if (new_cond->cond == NULL) {
-        return APR_ENOMEM;
-    }
-
-    if ((rv = pthread_cond_init(new_cond->cond, NULL))) {
+    if ((rv = pthread_cond_init(&new_cond->cond, NULL))) {
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
 #endif
@@ -115,7 +104,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
 {
     apr_status_t rv;
 
-    rv = pthread_cond_wait(cond->cond, &mutex->mutex);
+    rv = pthread_cond_wait(&cond->cond, &mutex->mutex);
 #ifdef PTHREAD_SETS_ERRNO
     if (rv) {
         rv = errno;
@@ -136,7 +125,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
     abstime.tv_sec = apr_time_sec(then);
     abstime.tv_nsec = apr_time_usec(then) * 1000; /* nanoseconds */
 
-    rv = pthread_cond_timedwait(cond->cond, &mutex->mutex, &abstime);
+    rv = pthread_cond_timedwait(&cond->cond, &mutex->mutex, &abstime);
 #ifdef PTHREAD_SETS_ERRNO
     if (rv) {
         rv = errno;
@@ -153,7 +142,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
 {
     apr_status_t rv;
 
-    rv = pthread_cond_signal(cond->cond);
+    rv = pthread_cond_signal(&cond->cond);
 #ifdef PTHREAD_SETS_ERRNO
     if (rv) {
         rv = errno;
@@ -166,7 +155,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
 {
     apr_status_t rv;
 
-    rv = pthread_cond_broadcast(cond->cond);
+    rv = pthread_cond_broadcast(&cond->cond);
 #ifdef PTHREAD_SETS_ERRNO
     if (rv) {
         rv = errno;
