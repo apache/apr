@@ -122,9 +122,9 @@ struct apr_hash_index_t {
  * Hash creation functions.
  */
 
-static apr_hash_entry_t **alloc_array(apr_hash_t *ht)
+static apr_hash_entry_t **alloc_array(apr_hash_t *ht, apr_size_t max)
 {
-   return apr_pcalloc(ht->pool, sizeof(*ht->array) * (ht->max + 1));
+   return apr_pcalloc(ht->pool, sizeof(*ht->array) * (max + 1));
 }
 
 APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool)
@@ -134,7 +134,7 @@ APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool)
     ht->pool = pool;
     ht->count = 0;
     ht->max = INITIAL_MAX;
-    ht->array = alloc_array(ht);
+    ht->array = alloc_array(ht, ht->max);
     return ht;
 }
 
@@ -178,22 +178,25 @@ APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi,
 
 
 /*
- * Resizing a hash table
+ * Expanding a hash table
  */
 
-static void resize_array(apr_hash_t *ht)
+static void expand_array(apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
     apr_hash_entry_t **new_array;
+    apr_size_t new_max;
     int i;
 
-    new_array = alloc_array(ht);
+    new_max = ht->max * 2 + 1;
+    new_array = alloc_array(ht, new_max);
     for (hi = apr_hash_first(ht); hi; hi = apr_hash_next(hi)) {
 	i = hi->this->hash & ht->max;
 	hi->this->next = new_array[i];
 	new_array[i] = hi->this;
     }	       
     ht->array = new_array;
+    ht->max = new_max;
 }
 
 /*
@@ -274,8 +277,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     *hep = he;
     /* check that the collision rate isn't too high */
     if (++ht->count > ht->max) {
-	ht->max = ht->max * 2 + 1;
-	resize_array(ht);
+	expand_array(ht);
     }
     return hep;
 }
