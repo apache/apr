@@ -274,6 +274,29 @@ apr_status_t apr_parse_addr_port(char **addr,
     return APR_SUCCESS;
 }
 
+#if defined(HAVE_GETADDRINFO) && APR_HAVE_IPV6
+static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa, 
+                          struct addrinfo *ai, apr_port_t port)
+{
+    sa->pool = p;
+    sa->sa.sin.sin_family = ai->ai_family;
+    memcpy(&sa->sa, ai->ai_addr, ai->ai_addrlen);
+    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
+    sa->sa.sin.sin_port = htons(port);
+    set_sockaddr_vars(sa, sa->sa.sin.sin_family);
+}
+#else
+static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
+                          struct in_addr ipaddr, apr_port_t port)
+{
+    sa->pool = p;
+    sa->sa.sin.sin_family = AF_INET;
+    sa->sa.sin.sin_addr = ipaddr;
+    sa->sa.sin.sin_port = htons(port);
+    set_sockaddr_vars(sa, sa->sa.sin.sin_family);
+}
+#endif
+
 apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname, 
                              apr_int32_t family, apr_port_t port,
                              apr_int32_t flags, apr_pool_t *p)
@@ -281,12 +304,12 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
     (*sa) = (apr_sockaddr_t *)apr_pcalloc(p, sizeof(apr_sockaddr_t));
     if ((*sa) == NULL)
         return APR_ENOMEM;
-    (*sa)->pool = p;
     (*sa)->hostname = apr_pstrdup(p, hostname);
 
 #if defined(HAVE_GETADDRINFO) && APR_HAVE_IPV6
     if (hostname != NULL) {
         struct addrinfo hints, *ai;
+        apr_sockaddr_t *cursa;
         int error;
         char num[8];
 
@@ -312,8 +335,14 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
                 return error + APR_OS_START_SYSERR;
             }
         }
-        (*sa)->sa.sin.sin_family = ai->ai_family;
-        memcpy(&(*sa)->sa, ai->ai_addr, ai->ai_addrlen);
+        cursa = *sa;
+        save_addrinfo(p, cursa, ai, port);
+        while (ai->ai_next) { /* while more addresses to report */
+            cursa->next = apr_pcalloc(p, sizeof(apr_sockaddr_t));
+            ai = ai->ai_next;
+            cursa = cursa->next;
+            save_addrinfo(p, cursa, ai, port);
+        }
         freeaddrinfo(ai);
     }
     else {
@@ -323,24 +352,28 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
         else {
             (*sa)->sa.sin.sin_family = family;
         }
+        (*sa)->pool = p;
+        /* XXX IPv6: assumes sin_port and sin6_port at same offset */
+        (*sa)->sa.sin.sin_port = htons(port);
+        set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
     }
-    set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
 #else
-    if (family == APR_UNSPEC) {
-        (*sa)->sa.sin.sin_family = APR_INET; /* we don't support IPv6 here */
-    }
-    else {
-        (*sa)->sa.sin.sin_family = family;
-    }
-    set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
     if (hostname != NULL) {
         struct hostent *hp;
+        apr_sockaddr_t *cursa;
+        int curaddr;
+
+        if (family == APR_UNSPEC) {
+            family = APR_INET; /* we don't support IPv6 here */
+        }
 
 #ifndef GETHOSTBYNAME_HANDLES_NAS
         if (*hostname >= '0' && *hostname <= '9' &&
             strspn(hostname, "0123456789.") == strlen(hostname)) {
-            (*sa)->sa.sin.sin_addr.s_addr = inet_addr(hostname);
-            (*sa)->salen = sizeof(struct sockaddr_in);
+            struct in_addr ipaddr;
+
+            ipaddr.s_addr = inet_addr(hostname);
+            save_addrinfo(p, *sa, ipaddr, port);
         }
         else {
 #endif
@@ -353,19 +386,34 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
             return (h_errno + APR_OS_START_SYSERR);
 #endif
         }
-
-        memcpy((char *)&(*sa)->sa.sin.sin_addr, hp->h_addr_list[0],
-               hp->h_length);
-        (*sa)->salen = sizeof(struct sockaddr_in);
-        (*sa)->ipaddr_len = hp->h_length;
-
+        cursa = *sa;
+        curaddr = 0;
+        save_addrinfo(p, cursa, *(struct in_addr *)hp->h_addr_list[curaddr], 
+                      port);
+        ++curaddr;
+        while (hp->h_addr_list[curaddr]) {
+            cursa->next = apr_pcalloc(p, sizeof(apr_sockaddr_t));
+            cursa = cursa->next;
+            save_addrinfo(p, cursa, *(struct in_addr *)hp->h_addr_list[curaddr], 
+                          port);
+            ++curaddr;
+        }
 #ifndef GETHOSTBYNAME_HANDLES_NAS
         }
 #endif
     }
+    else {
+        if (family == APR_UNSPEC) {
+            (*sa)->sa.sin.sin_family = APR_INET;
+        }
+        else {
+            (*sa)->sa.sin.sin_family = family;
+        }
+        (*sa)->pool = p;
+        (*sa)->sa.sin.sin_port = htons(port);
+        set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
+    }
 #endif
-    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
-    (*sa)->sa.sin.sin_port = htons(port);
     return APR_SUCCESS;
 }
 
