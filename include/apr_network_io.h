@@ -215,7 +215,7 @@ apr_status_t apr_create_tcp_socket(apr_socket_t **new_sock, apr_pool_t *cont);
 /**
  * Create a socket.
  * @param new_sock The new socket that has been set up.
- * @param family The address family of the socket (e.g., AF_INET).
+ * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
  * @param cont The pool to use
  */
@@ -292,7 +292,7 @@ apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *
  * Create apr_sockaddr_t from hostname, address family, and port.
  * @param sa The new apr_sockaddr_t.
  * @param hostname The hostname or numeric address string to resolve/parse.
- * @param family The address family to use, or AF_UNSPEC if the system should 
+ * @param family The address family to use, or APR_UNSPEC if the system should 
  * decide.
  * @param port The port number.
  * @param flags Special processing flags.
@@ -454,6 +454,14 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
  */
 apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* on);
 
+/**
+ * Return an apr_sockaddr_t from an apr_socket_t
+ * @param sa The returned apr_sockaddr_t.
+ * @param which Which interface do we want the apr_sockaddr_t for?
+ * @param sock The socket to use
+ */
+apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock);
+ 
 /**
  * Associate a port with a socket.
  * @param sock The socket to set.
