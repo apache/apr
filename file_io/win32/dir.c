@@ -82,7 +82,8 @@ apr_status_t dir_cleanup(void *thedir)
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
+                                       apr_pool_t *cont)
 {
     /* Note that we won't open a directory that is greater than MAX_PATH,
      * including the trailing /* wildcard suffix.  If a * won't fit, then
@@ -173,7 +174,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont
     return APR_SUCCESS;
 }
 
-apr_status_t apr_closedir(apr_dir_t *dir)
+APR_DECLARE(apr_status_t) apr_closedir(apr_dir_t *dir)
 {
     if (dir->dirhand != INVALID_HANDLE_VALUE && !FindClose(dir->dirhand)) {
         return apr_get_os_error();
@@ -182,7 +183,7 @@ apr_status_t apr_closedir(apr_dir_t *dir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_readdir(apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir)
 {
     /* The while loops below allow us to skip all invalid file names, so that
      * we aren't reporting any files where their absolute paths are too long.
@@ -231,7 +232,7 @@ apr_status_t apr_readdir(apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_rewinddir(apr_dir_t *dir)
+APR_DECLARE(apr_status_t) apr_rewinddir(apr_dir_t *dir)
 {
     dir_cleanup(dir);
     if (!FindClose(dir->dirhand)) {
@@ -241,7 +242,8 @@ apr_status_t apr_rewinddir(apr_dir_t *dir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_make_dir(const char *path, apr_fileperms_t perm,
+                                       apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -262,7 +264,7 @@ apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *co
     return APR_SUCCESS;
 }
 
-apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -283,7 +285,8 @@ apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_dir_entry_size(apr_ssize_t *size,
+                                             apr_dir_t *thedir)
 {
     if (thedir == NULL || thedir->n.entry == NULL) {
         return APR_ENODIR;
@@ -293,7 +296,8 @@ apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_dir_entry_mtime(apr_time_t *time,
+                                              apr_dir_t *thedir)
 {
     if (thedir == NULL || thedir->n.entry == NULL) {
         return APR_ENODIR;
@@ -302,7 +306,8 @@ apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
     return APR_SUCCESS;
 }
  
-apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_dir_entry_ftype(apr_filetype_e *type,
+                                              apr_dir_t *thedir)
 {
     switch(thedir->n.entry->dwFileAttributes) {
         case FILE_ATTRIBUTE_DIRECTORY: {
@@ -320,7 +325,8 @@ apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
     }
 }
 
-apr_status_t apr_get_dir_filename(const char **new, apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_get_dir_filename(const char **new,
+                                               apr_dir_t *thedir)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -337,7 +343,8 @@ apr_status_t apr_get_dir_filename(const char **new, apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)
+APR_DECLARE(apr_status_t) apr_get_os_dir(apr_os_dir_t **thedir,
+                                         apr_dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
@@ -353,7 +360,9 @@ apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)
  * on cached info that we simply don't have our hands on when
  * we use this function.  Maybe APR_ENOTIMPL would be better?
  */
-apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_put_os_dir(apr_dir_t **dir,
+                                         apr_os_dir_t *thedir,
+                                         apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;

@@ -101,8 +101,9 @@ extern "C" {
  * @return Either <0, 0, or >0.  If the first string is less than the second
  *          this returns <0, if they are equivalent it returns 0, and if the
  *          first string is greater than second string it retuns >0.
+ * @deffunc int apr_strnatcmp(char const *a, char const *b)
  */
-int apr_strnatcmp(char const *a, char const *b);
+APR_DECLARE(int) apr_strnatcmp(char const *a, char const *b);
 
 /**
  * Do a natural order comparison of two strings ignoring the case of the 
@@ -112,8 +113,9 @@ int apr_strnatcmp(char const *a, char const *b);
  * @return Either <0, 0, or >0.  If the first string is less than the second
  *         this returns <0, if they are equivalent it returns 0, and if the
  *         first string is greater than second string it retuns >0.
+ * @deffunc int apr_strnatcasecmp(char const *a, char const *b)
  */
-int apr_strnatcasecmp(char const *a, char const *b);
+APR_DECLARE(int) apr_strnatcasecmp(char const *a, char const *b);
 
 /**
  * duplicate a string into memory allocated out of a pool
@@ -203,8 +205,8 @@ APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
  * @deffunc apr_status_t apr_tokenize_to_argv(const char *arg_str, char ***argv_out, apr_pool_t *token_context);
  */
 APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
-                                            char ***argv_out,
-                                            apr_pool_t *token_context);
+                                               char ***argv_out,
+                                               apr_pool_t *token_context);
 
 #ifdef __cplusplus
 }

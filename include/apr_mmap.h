@@ -122,24 +122,29 @@ struct apr_mmap_t {
  *          APR_MMAP_WRITE      MMap opened for writing
  * </PRE>
  * @param cntxt The pool to use when creating the mmap.
+ * @deffunc apr_status_t apr_mmap_create(apr_mmap_t **newmmap, apr_file_t *file, apr_off_t offset, apr_size_t size, apr_int32_t flag, apr_pool_t *cntxt)
  */
-apr_status_t apr_mmap_create(apr_mmap_t ** newmmap, apr_file_t *file, 
-                             apr_off_t offset, apr_size_t size, 
-                             apr_int32_t flag, apr_pool_t *cntxt);
+APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **newmmap, 
+                                          apr_file_t *file, apr_off_t offset,
+                                          apr_size_t size, apr_int32_t flag,
+                                          apr_pool_t *cntxt);
 
 /**
  * Remove a mmap'ed.
  * @param mmap The mmap'ed file.
+ * @deffunc apr_status_t apr_mmap_delete(apr_mmap_t *mmap)
  */
-apr_status_t apr_mmap_delete(apr_mmap_t *mmap);
+APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap);
 
 /** 
  * Move the pointer into the mmap'ed file to the specified offset.
  * @param addr The pointer to the offset specified.
  * @param mmap The mmap'ed file.
  * @param offset The offset to move to.
+ * @deffunc apr_status_t apr_mmap_offset(void **addr, apr_mmap_t *mmap, apr_off_t offset)
  */
-apr_status_t apr_mmap_offset(void **addr, apr_mmap_t *mmap, apr_off_t offset);
+APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mmap, 
+                                          apr_off_t offset);
 
 #endif /* APR_HAS_MMAP */
 

@@ -57,9 +57,11 @@
 #include "win32/locks.h"
 #include "apr_portable.h"
 
-apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
-                           apr_lockscope_e scope, const char *fname, 
-                           apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_create_lock(apr_lock_t **lock, 
+                                          apr_locktype_e type, 
+                                          apr_lockscope_e scope, 
+                                          const char *fname,
+                                          apr_pool_t *cont)
 {
     apr_lock_t *newlock;
     SECURITY_ATTRIBUTES sec;
@@ -92,8 +94,9 @@ apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname, 
-                               apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_child_init_lock(apr_lock_t **lock, 
+                                              const char *fname, 
+                                              apr_pool_t *cont)
 {
     /* This routine should not be called (and OpenMutex will fail if called) 
      * on a INTRAPROCESS lock
@@ -112,7 +115,7 @@ apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock(apr_lock_t *lock)
 {
     DWORD rv;
     if (lock->scope == APR_INTRAPROCESS) {
@@ -128,7 +131,7 @@ apr_status_t apr_lock(apr_lock_t *lock)
     return apr_get_os_error();
 }
 
-apr_status_t apr_unlock(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_unlock(apr_lock_t *lock)
 {
     if (lock->scope == APR_INTRAPROCESS) {
         LeaveCriticalSection(&lock->section);
@@ -141,7 +144,7 @@ apr_status_t apr_unlock(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_destroy_lock(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_destroy_lock(apr_lock_t *lock)
 {
     if (lock->scope == APR_INTRAPROCESS) {
         DeleteCriticalSection(&lock->section);
@@ -154,25 +157,29 @@ apr_status_t apr_destroy_lock(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data)
+APR_DECLARE(apr_status_t) apr_get_lockdata(apr_lock_t *lock, const char *key,
+                                           void *data)
 {
     return apr_get_userdata(data, key, lock->cntxt);
 }
 
-apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key,
-                            apr_status_t (*cleanup) (void *))
+APR_DECLARE(apr_status_t) apr_set_lockdata(apr_lock_t *lock, void *data,
+                                           const char *key,
+                                           apr_status_t (*cleanup) (void *))
 {
     return apr_set_userdata(data, key, cleanup, lock->cntxt);
 }
 
-apr_status_t apr_get_os_lock(apr_os_lock_t *thelock, apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_get_os_lock(apr_os_lock_t *thelock,
+                                          apr_lock_t *lock)
 {
     *thelock = lock->mutex;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_lock(apr_lock_t **lock, apr_os_lock_t *thelock, 
-                           apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_put_os_lock(apr_lock_t **lock,
+                                          apr_os_lock_t *thelock,
+                                          apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;

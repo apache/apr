@@ -58,7 +58,8 @@
 #include "apr_strings.h"
 #include <string.h>
 
-apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_dupfile(apr_file_t **new_file,
+                                      apr_file_t *old_file, apr_pool_t *p)
 {
     BOOLEAN isStdHandle = FALSE;
     HANDLE hCurrentProcess = GetCurrentProcess();

@@ -346,7 +346,8 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 }
 #endif
 
-char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize)
+APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
+                                 apr_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
         return stuffbuffer(buf, bufsize, strerror(statcode));

@@ -111,7 +111,7 @@ APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
  * @deffunc void apr_hash_set(apr_hash_t *ht, const void *key, apr_size_t klen, const void *val)
  */
 APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
-                              apr_ssize_t klen, const void *val);
+                               apr_ssize_t klen, const void *val);
 
 /**
  * Look up the value associated with a key in a hash table.
@@ -122,7 +122,7 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
  * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_size_t klen)
  */
 APR_DECLARE(void*) apr_hash_get(apr_hash_t *ht, const void *key,
-                               apr_ssize_t klen);
+                                apr_ssize_t klen);
 
 /**
  * Start iterating over the entries in a hash table.
@@ -171,7 +171,7 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
  * @deffunc void apr_hash_this(apr_hash_index_t *hi, const void **key, apr_size_t *klen, void **val);
  */
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
-                               apr_size_t *klen, void **val);
+                                apr_size_t *klen, void **val);
 
 /**
  * Get the number of key/value pairs in the hash table.

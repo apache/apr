@@ -96,30 +96,36 @@ typedef struct apr_lock_t           apr_lock_t;
  * @param cont The pool to operate on.
  * @tip APR_CROSS_PROCESS may lock both processes and threads, but it is
  *      only guaranteed to lock processes.
+ * @deffunc apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, const char *fname, apr_pool_t *cont)
  */
-apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
-                           apr_lockscope_e scope, const char *fname, 
-                           apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_create_lock(apr_lock_t **lock,
+                                          apr_locktype_e type,
+                                          apr_lockscope_e scope,
+                                          const char *fname,
+                                          apr_pool_t *cont);
 
 /**
  * Lock a protected region.
  * @param lock The lock to set.
+ * @deffunc apr_status_t apr_lock(apr_lock_t *lock)
  */
-apr_status_t apr_lock(apr_lock_t *lock);
+APR_DECLARE(apr_status_t) apr_lock(apr_lock_t *lock);
 
 /**
  * Unlock a protected region.
  * @param lock The lock to reset.
+ * @deffunc apr_status_t apr_unlock(apr_lock_t *lock)
  */
-apr_status_t apr_unlock(apr_lock_t *lock);
+APR_DECLARE(apr_status_t) apr_unlock(apr_lock_t *lock);
 
 /**
  * Free the memory associated with a lock.
  * @param lock The lock to free.
+ * @deffunc apr_status_t apr_destroy_lock(apr_lock_t *lock)
  * @tip  If the lock is currently active when it is destroyed, it 
  *       will be unlocked first.
  */
-apr_status_t apr_destroy_lock(apr_lock_t *lock);
+APR_DECLARE(apr_status_t) apr_destroy_lock(apr_lock_t *lock);
 
 /**
  * Re-open a lock in a child process.
@@ -133,17 +139,21 @@ apr_status_t apr_destroy_lock(apr_lock_t *lock);
  *      locking mechanism chosen for the platform, but it is a good
  *      idea to call it regardless, because it makes the code more
  *      portable. 
+ * @deffunc apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname, apr_pool_t *cont)
  */
-apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname, 
-                               apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_child_init_lock(apr_lock_t **lock,
+                                              const char *fname,
+                                              apr_pool_t *cont);
 
 /**
  * Return the pool associated with the current lock.
  * @param lock The currently open lock.
  * @param key The key to use when retreiving data associated with this lock
  * @param data The user data associated with the lock.
+ * @deffunc apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data)
  */
-apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data);
+APR_DECLARE(apr_status_t) apr_get_lockdata(apr_lock_t *lock, const char *key,
+                                           void *data);
 
 /**
  * Return the pool associated with the current lock.
@@ -151,9 +161,11 @@ apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data);
  * @param data The user data to associate with the lock.
  * @param key The key to use when associating data with this lock
  * @param cleanup The cleanup to use when the lock is destroyed.
+ * @deffunc apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key, apr_status_t (*cleanup)(void *))
  */
-apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key,
-                            apr_status_t (*cleanup) (void *));
+APR_DECLARE(apr_status_t) apr_set_lockdata(apr_lock_t *lock, void *data,
+                                           const char *key,
+                                           apr_status_t (*cleanup)(void *));
 
 #ifdef __cplusplus
 }

@@ -57,7 +57,8 @@
 
 /* A file to put ALL of the accessor functions for apr_file_t types. */
 
-apr_status_t apr_get_filename(const char **fname, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_get_filename(const char **fname,
+                                           apr_file_t *thefile)
 {
 #ifdef WIN32 /* this test is only good until some other platform trys wchar* */
 #if APR_HAS_UNICODE_FS
@@ -136,13 +137,15 @@ apr_fileperms_t apr_unix_mode2perms(mode_t mode)
 }
 #endif
 
-apr_status_t apr_get_filedata(void **data, const char *key, apr_file_t *file)
+APR_DECLARE(apr_status_t) apr_get_filedata(void **data, const char *key,
+                                           apr_file_t *file)
 {    
     return apr_get_userdata(data, key, file->cntxt);
 }
 
-apr_status_t apr_set_filedata(apr_file_t *file, void *data, const char *key,
-                            apr_status_t (*cleanup) (void *))
+APR_DECLARE(apr_status_t) apr_set_filedata(apr_file_t *file, void *data,
+                                           const char *key,
+                                           apr_status_t (*cleanup)(void *))
 {    
     return apr_set_userdata(data, key, cleanup, file->cntxt);
 }

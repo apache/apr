@@ -83,6 +83,7 @@ typedef struct apr_xlate_t            apr_xlate_t;
  * @param topage The name of the target charset
  * @param frompage The name of the source charset
  * @param pool The pool to use
+ * @deffunc apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage, const char *frompage, apr_pool_t *pool)
  * @tip
  * <PRE>
  *  Specify APR_DEFAULT_CHARSET for one of the charset
@@ -98,8 +99,10 @@ typedef struct apr_xlate_t            apr_xlate_t;
  *  names to indicate the charset of the current locale.
  * </PRE>
  */
-apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage, 
-                          const char *frompage, apr_pool_t *pool);
+APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset, 
+                                         const char *topage, 
+                                         const char *frompage, 
+                                         apr_pool_t *pool);
 
 #define APR_DEFAULT_CHARSET (const char *)0
 #define APR_LOCALE_CHARSET (const char *)1
@@ -109,9 +112,10 @@ apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
  * @param convset The handle allocated by apr_xlate_open, specifying the 
  *                parameters of conversion
  * @param onoff Output: whether or not the conversion is single-byte-only
+ * @deffunc apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
  */
 
-apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
+APR_DECLARE(apr_status_t) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
 
 /**
  * Convert a buffer of text from one codepage to another.
@@ -123,10 +127,13 @@ apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
  * @param outbuf The address of the destination buffer
  * @param outbytes_left Input: the size of the output buffer
  *                      Output: the amount of the output buffer not yet used
+ * @deffunc apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf, apr_size_t *inbytes_left, char *outbuf, apr_size_t *outbytes_left)
  */
-apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf, 
-                                   apr_size_t *inbytes_left, char *outbuf,
-                                   apr_size_t *outbytes_left);
+APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset, 
+                                                const char *inbuf, 
+                                                apr_size_t *inbytes_left, 
+                                                char *outbuf,
+                                                apr_size_t *outbytes_left);
 
 /* See the comment in apr_file_io.h about this hack */
 #ifdef APR_NOT_DONE_YET
@@ -138,8 +145,10 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
  *                parameters of conversion
  * @param inchar The character to convert
  * @param outchar The converted character
+ * @deffunc apr_status_t apr_xlate_conv_char(apr_xlate_t *convset, char inchar, char outchar)
  */
-apr_status_t apr_xlate_conv_char(apr_xlate_t *convset, char inchar, char outchar);
+APR_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset, 
+                                              char inchar, char outchar);
 #endif
 
 /**
@@ -147,16 +156,19 @@ apr_status_t apr_xlate_conv_char(apr_xlate_t *convset, char inchar, char outchar
  * @param convset The handle allocated by apr_xlate_open, specifying the 
  *                parameters of conversion
  * @param inchar The single-byte character to convert.
+ * @deffunc apr_int32_t apr_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar)
  * @tip This only works when converting between single-byte character sets.
  *      -1 will be returned if the conversion can't be performed.
  */
-apr_int32_t apr_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar);
+APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset, 
+                                             unsigned char inchar);
 
 /**
  * Close a codepage translation handle.
  * @param convset The codepage translation handle to close
+ * @deffunc apr_status_t apr_xlate_close(apr_xlate_t *convset)
  */
-apr_status_t apr_xlate_close(apr_xlate_t *convset);
+APR_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset);
 
 #else
 
