@@ -527,10 +527,15 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo,
                                           apr_int32_t wanted,
                                           apr_file_t *thefile);
 
+/**
+ * Get the pool used by the file.
+ * @return apr_pool_t the pool
+ * @deffunc apr_pool_t apr_get_file_pool(apr_file_t *f)
+ */
+APR_POOL_DECLARE_ACCESSOR(file);
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif  /* ! APR_FILE_IO_H */
-
-

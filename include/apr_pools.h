@@ -386,9 +386,39 @@ APR_DECLARE(void) apr_cleanup_for_exec(void);
  */
 APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data);
 
-/* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t
- * will not be destroyed before the parent pool
+/*
+ * Pool accessor functions.
+ *
+ * These standardized function are used by opaque (APR) data types to return
+ * the apr_pool_t that is associated with the data type.
+ *
+ * APR_POOL_DECLARE_ACCESSOR() is used in a header file to declare the
+ * accessor function. A typical usage and result would be:
+ *
+ *    APR_POOL_DECLARE_ACCESSOR(file);
+ * becomes:
+ *    APR_DECLARE(apr_pool_t *) apr_get_file_pool(apr_file_t *ob);
+ *
+ * In the implementation, the APR_POOL_IMPLEMENT_ACCESSOR() is used to
+ * actually define the function. It assumes the field is named "pool". For
+ * data types with a different field name (e.g. "cont" or "cntxt") the
+ * APR_POOL_IMPLEMENT_ACCESSOR_X() macro should be used.
+ *
+ * Note: the linkage is specified for APR. It would be possible to expand
+ *       the macros to support other linkages.
  */
+#define APR_POOL_DECLARE_ACCESSOR(typename) \
+	APR_DECLARE(apr_pool_t *) apr_get_##typename##_pool \
+		(apr_##typename##_t *ob);
+
+#define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
+	APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
+#define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
+	APR_DECLARE(apr_pool_t *) apr_get_##typename##_pool \
+		(apr_##typename##_t *ob) { return ob->fieldname; }
+
+/* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t
+ * will not be destroyed before the parent pool */
 #ifndef APR_POOL_DEBUG
 #ifdef apr_pool_join
 #undef apr_pool_join
