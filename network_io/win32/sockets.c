@@ -466,7 +466,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
         alloc_socket(sock, cont);
         /* XXX figure out the actual socket type here */
         /* *or* just decide that apr_os_sock_put() has to be told the family and type */
-        set_socket_vars(*sock, AF_INET, SOCK_STREAM, APR_PROTO_TCP);
+        set_socket_vars(*sock, AF_INET, SOCK_STREAM, 0);
         (*sock)->timeout = -1;
         (*sock)->disconnected = 0;
     }

@@ -377,7 +377,7 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
         /* XXX IPv6 figure out the family here! */
         /* XXX figure out the actual socket type here */
         /* *or* just decide that apr_os_sock_put() has to be told the family and type */
-        set_socket_vars(*sock, APR_INET, SOCK_STREAM, APR_PROTO_TCP);
+        set_socket_vars(*sock, APR_INET, SOCK_STREAM, 0);
         (*sock)->timeout = -1;
     }
     (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
