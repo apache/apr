@@ -522,8 +522,6 @@ dnl end up LIBS="-lm -lcrypt -lnsl  -ldl" which is an annoyance.
 AC_SEARCH_LIBS(gethostbyname, nsl)
 AC_SEARCH_LIBS(gethostname, nsl)
 AC_SEARCH_LIBS(socket, socket)
-dnl Search for -lbind / -lresolv only after having added -lsocket and -lnsl
-AC_SEARCH_LIBS(res_init, bind resolv)
 AC_SEARCH_LIBS(crypt, crypt ufc)
 AC_CHECK_LIB(truerand, main)
 AC_SEARCH_LIBS(modf, m)
