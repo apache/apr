@@ -100,6 +100,11 @@ extern "C" {
 #if defined(APR_POOL_DEBUG_VERBOSE) && !defined(APR_POOL_DEBUG)
 #define APR_POOL_DEBUG
 #endif    
+
+#define APR_POOL_STRINGIZE(x) APR_POOL__STRINGIZE(x)
+#define APR_POOL__STRINGIZE(x) #x
+#define APR_POOL__FILE_LINE__ __FILE__ ":" APR_POOL_STRINGIZE(__LINE__)
+    
     
 /** The fundamental pool type */
 typedef struct apr_pool_t apr_pool_t;
@@ -161,14 +166,13 @@ APR_DECLARE(void) apr_pool_terminate(void);
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_create_ex(newpool, parent, abort_fn, flag)  \
     apr_pool_create_ex_debug(newpool, parent, abort_fn, flag, \
-                             __FILE__, __LINE__)
+                             APR_POOL__FILE_LINE__)
 
 APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
                                                    apr_pool_t *parent,
                                                    apr_abortfunc_t abort_fn,
                                                    apr_uint32_t flags,
-                                                   const char *file,
-                                                   int line);
+                                                   const char *file_line);
 #else
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                              apr_pool_t *parent,
@@ -191,7 +195,7 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_create(newpool, parent) \
     apr_pool_create_ex_debug(newpool, parent, NULL, APR_POOL_FDEFAULT, \
-                             __FILE__, __LINE__)
+                             APR_POOL__FILE_LINE__)
 #else
 #define apr_pool_create(newpool, parent) \
     apr_pool_create_ex(newpool, parent, NULL, APR_POOL_FDEFAULT)
@@ -215,7 +219,7 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex_debug(newpool, parent, abort_fn, \
                                    APR_POOL_FDEFAULT, \
-                                   __FILE__, __LINE__)
+                                   APR_POOL__FILE_LINE__)
 #else
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex(newpool, parent, abort_fn, APR_POOL_FDEFAULT)
@@ -232,10 +236,10 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
  */
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_clear(p) \
-    apr_pool_clear_debug(p, __FILE__, __LINE__)
+    apr_pool_clear_debug(p, APR_POOL__FILE_LINE__)
 
 APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *p,
-                                       const char *file, int line);
+                                       const char *file_line);
 #else
 APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
 #endif
@@ -248,10 +252,10 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
  */
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_destroy(p) \
-    apr_pool_destroy_debug(p, __FILE__, __LINE__)
+    apr_pool_destroy_debug(p, APR_POOL__FILE_LINE__)
 
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
-                                         const char *file, int line);
+                                         const char *file_line);
 #else
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 #endif
