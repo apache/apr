@@ -226,8 +226,11 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     TPF)
        APR_ADDTO(CPPFLAGS, [-DTPF -D_POSIX_SOURCE])
        ;;
-    BS2000*-siemens-sysv4*)
+    bs2000*-siemens-sysv*)
+	APR_SETIFNULL(CFLAGS, [-O])
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -D_XPG_IV])
+	APR_ADDTO(LIBS, [-lsocket])
+	APR_SETIFNULL(enable_threads, [no])
 	;;
     *-siemens-sysv4*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -D_XPG_IV -DHAS_DLFCN -DUSE_MMAP_FILES -DUSE_SYSVSEM_SERIALIZED_ACCEPT])
@@ -389,7 +392,7 @@ case "$host" in
   *-apple-aux3*)
       APR_SETIFNULL(CC, [gcc])
       ;;
-  BS2000*-siemens-sysv4*)
+  bs2000*-siemens-sysv*)
       APR_SETIFNULL(CC, [c89 -XLLML -XLLMK -XL -Kno_integer_overflow])
       ;;
   *convex-v11*)
