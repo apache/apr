@@ -56,6 +56,10 @@
 
 APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
 {
+#ifdef _WIN32_WCE
+    /* The File locking is unsuported on WCE */
+    return APR_ENOTIMPL;
+#else
     const DWORD len = 0xffffffff;
     DWORD flags; 
 
@@ -80,10 +84,14 @@ APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
     }
 
     return APR_SUCCESS;
+#endif /* !defined(_WIN32_WCE) */
 }
 
 APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     DWORD len = 0xffffffff;
 
     if (apr_os_level >= APR_WIN_NT) {
@@ -99,4 +107,5 @@ APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile)
     }
 
     return APR_SUCCESS;
+#endif /* !defined(_WIN32_WCE) */
 }
