@@ -50,15 +50,15 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-time.o: time.c atime.h ../../include/apr_config.h \
- ../../include/apr_time.h ../../include/apr_general.h \
- ../../include/apr.h ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_file_io.h ../../include/apr_thread_proc.h \
- ../../include/apr_portable.h ../../include/apr_network_io.h \
- ../../include/apr_lock.h
-timestr.o: timestr.c atime.h ../../include/apr_config.h \
- ../../include/apr_time.h ../../include/apr_general.h \
- ../../include/apr.h ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_file_io.h ../../include/apr_thread_proc.h \
- ../../include/apr_portable.h ../../include/apr_network_io.h \
- ../../include/apr_lock.h
+time.o: time.c atime.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_lock.h
+timestr.o: timestr.c atime.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_lock.h
