@@ -122,6 +122,10 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
 #define apr_tolower(c) (tolower(((unsigned char)(c))))
 #define apr_toupper(c) (toupper(((unsigned char)(c))))
 
+#if BEOS && __POWER_PC__
+#define isascii(c) (((c) & ~0x7f)==0)
+#endif
+
 /*
  * Small utility macros to make things easier to read.  Not usually a
  * goal, to be sure..
