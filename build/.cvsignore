@@ -3,3 +3,9 @@ libtool.m4
 ltconfig
 ltmain.sh
 rules.mk
+LibD
+LibR
+*.aps
+*.plg
+*.dep
+*.mak
