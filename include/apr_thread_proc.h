@@ -443,7 +443,6 @@ apr_status_t apr_wait_proc(apr_proc_t *proc, apr_wait_how_e waithow);
  * </PRE>
  * @param p Pool to allocate child information out of.
  */
-
 apr_status_t apr_wait_all_procs(apr_proc_t *proc, apr_wait_t *status, 
                                 apr_wait_how_e waithow, apr_pool_t *p);
 

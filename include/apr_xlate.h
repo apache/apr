@@ -148,8 +148,8 @@ apr_status_t apr_xlate_conv_char(apr_xlate_t *convset, char inchar, char outchar
  *                parameters of conversion
  * @param inchar The single-byte character to convert.
  * @tip This only works when converting between single-byte character sets.
-        -1 will be returned if the conversion can't be performed.
-*/
+ *      -1 will be returned if the conversion can't be performed.
+ */
 apr_int32_t apr_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar);
 
 /**
