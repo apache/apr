@@ -121,7 +121,6 @@ LINK         = @link@
 
 MKEXPORT     = $(AWK) -f $(apr_builders)/make_export.awk
 MKDEP        = $(apr_builders)/mkdep.sh
-SCANDOC      = $(apr_builders)/scandoc.pl
 
 #
 # Standard build rules
