@@ -67,6 +67,13 @@
 #include <sys/so_ioctl.h>
 
 
+APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
+{
+    sock->timeout = on;
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
 {
     int one;
@@ -112,6 +119,7 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, 
         }
     }
     if (opt & APR_SO_TIMEOUT) {
+        /* XXX: To be deprecated */
         sock->timeout = on;
     }
     if (opt & APR_TCP_NODELAY) {
@@ -123,11 +131,18 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, 
 }
 
 
+APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock, apr_interval_time_t *t)
+{
+    *t = sock->timeout;
+    return APR_SUCCESS;
+}
+
 
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
     case APR_SO_TIMEOUT:
+        /* XXX: To be deprecated */
         *on = sock->timeout;
         break;
     default:
@@ -135,7 +150,6 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, 
     }
     return APR_SUCCESS;
 }
-
 
 
 APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
