@@ -357,6 +357,19 @@ B<NOTE>:  This is in for backwards compatability.  If the program using
  */
 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont);
 
+/*
+
+=head1 const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
+
+B<Return a human readable string describing the specified error.>
+
+    arg 1)  The error code the get a string for.
+    arg 2)  The pool to use to allocate memory for the string.
+
+=cut
+ */
+const char *ap_strerror(ap_status_t statcode, ap_pool_t *p);
+
 #ifdef __cplusplus
 }
 #endif
