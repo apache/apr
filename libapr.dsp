@@ -393,7 +393,7 @@ SOURCE=.\user\win32\userinfo.c
 # End Source File
 # End Group
 # End Group
-# Begin Group "Internal Header Files"
+# Begin Group "Private Header Files"
 
 # PROP Default_Filter ""
 # Begin Source File
@@ -445,7 +445,7 @@ SOURCE=.\include\arch\win32\thread_rwlock.h
 SOURCE=.\include\arch\win32\threadproc.h
 # End Source File
 # End Group
-# Begin Group "External Header Files"
+# Begin Group "Public Header Files"
 
 # PROP Default_Filter ""
 # Begin Source File
