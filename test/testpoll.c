@@ -489,10 +489,14 @@ static void pollset_remove(abts_case *tc, void *data)
     rv = apr_pollset_poll(pollset, 1000, &num, &hot_files);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 2, num);
-    ABTS_PTR_EQUAL(tc, (void *)1, hot_files[0].client_data);
-    ABTS_PTR_EQUAL(tc, s[0], hot_files[0].desc.s);
-    ABTS_PTR_EQUAL(tc, (void *)4, hot_files[1].client_data);
-    ABTS_PTR_EQUAL(tc, s[3], hot_files[1].desc.s);
+    ABTS_ASSERT(tc, "Incorrect socket in result set",
+            ((hot_files[0].desc.s == s[0]) && (hot_files[1].desc.s == s[3]))  ||
+            ((hot_files[0].desc.s == s[3]) && (hot_files[1].desc.s == s[0])));
+    ABTS_ASSERT(tc, "Incorrect client data in result set",
+            ((hot_files[0].client_data == (void *)1) &&
+             (hot_files[1].client_data == (void *)4)) ||
+            ((hot_files[0].client_data == (void *)4) &&
+             (hot_files[1].client_data == (void *)1)));
 }
 
 abts_suite *testpoll(abts_suite *suite)
