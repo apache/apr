@@ -54,6 +54,26 @@ if test "$ac_cv_pthread_getspecific_two_args" = "yes"; then
 fi
 
 ])dnl
+
+AC_DEFUN(APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG, [
+AC_CACHE_CHECK(whether pthread_attr_getdetachstate takes one argument, ac_cv_pthread_attr_getdetachstate_one_arg,[
+AC_TRY_COMPILE([
+#include <pthread.h>
+],[
+pthread_attr_t *attr;
+pthread_attr_getdetachstate(attr);
+],[
+    ac_cv_pthread_attr_getdetachstate_one_arg=yes
+],[
+    ac_cv_pthread_attr_getdetachstate_one_arg=no
+])
+])
+
+if test "$ac_cv_pthread_attr_getdetachstate_one_arg" = "yes"; then
+  AC_DEFINE(PTHREAD_ATTR_GETDETACHSTATE_TAKES_ONE_ARG, 1, [Define if pthread_attr_getdetachstate() has one arg])
+fi
+
+])dnl
 dnl
 dnl PTHREADS_CHECK_COMPILE
 dnl
