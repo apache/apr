@@ -130,6 +130,15 @@ if test "$pthreads_working" != "yes"; then
 fi
 ])
 
+# Some versions of libtool do not pass -pthread through
+# to the compiler when given in a --mode=link line.  Some
+# versions of gcc ignore -pthread when linking a shared
+# object.  Hence, if using -pthread, always add -lpthread on
+# the link line, to ensure that libapr depends on libpthread.
+if test "x$ac_cv_pthreads_cflags" = "x-pthread"; then
+   APR_ADDTO(LIBS,[-lpthread])
+fi
+
 AC_CACHE_CHECK(for pthreads_lib, ac_cv_pthreads_lib,[
 ac_cv_pthreads_lib=""
 if test "$pthreads_working" != "yes"; then
