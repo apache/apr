@@ -226,13 +226,23 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
             sinf |= GROUP_SECURITY_INFORMATION;
         if (wanted & APR_FINFO_PROT)
             sinf |= DACL_SECURITY_INFORMATION;
-        if (whatfile == MORE_OF_WFSPEC)
-            rv = GetNamedSecurityInfoW((apr_wchar_t*)ufile, 
+        if (whatfile == MORE_OF_WFSPEC) {
+            apr_wchar_t *wfile = (apr_wchar_t*) ufile;
+            int fix = 0;
+            if (wcsncmp(wfile, L"\\\\?\\", 4)) {
+                fix = 4;
+                if (wcsncmp(wfile + fix, L"UNC\\", 4))
+                    wfile[6] = L'\\', fix = 6;
+            }
+            rv = GetNamedSecurityInfoW(wfile + fix, 
                                  SE_FILE_OBJECT, sinf,
                                  ((wanted & APR_FINFO_USER) ? &user : NULL),
                                  ((wanted & APR_FINFO_GROUP) ? &grp : NULL),
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
+            if (fix == 6)
+                wfile[6] = L'C';
+        }
         else if (whatfile == MORE_OF_FSPEC)
             rv = GetNamedSecurityInfoA((char*)ufile, 
                                  SE_FILE_OBJECT, sinf,
