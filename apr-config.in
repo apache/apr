@@ -181,7 +181,7 @@ while test $# -gt 0; do
         ### avoid using -L if libdir is a "standard" location like /usr/lib
         flags="$flags -L$libdir -lapr"
     else
-        flags="$flags-L$thisdir -lapr"
+        flags="$flags -L$thisdir -lapr"
     fi
     ;;
     --apr-la-file)
