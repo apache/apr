@@ -345,7 +345,7 @@ static ap_status_t lock_cleanup(void *lock_)
 ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 {
     if (new->fname) {
-        new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
+        new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
     }
     else {
         new->fname = ap_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
