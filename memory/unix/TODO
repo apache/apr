@@ -4,10 +4,20 @@ STATUS file for APR as none of these can be considered
 showstoppers for the time being.
 david - 28 May 2001
 
+- add a shared memory module.
+
+- locking needs to be addressed.  The scope of the locks needs
+  to be defined and it's likely we'll need some way of
+  varying the scope when locking.
+
 - we need to add dynamic loading ability for memory
   systems.  As to how it should be done this needs to be
   looked at.  Some known issues include 
     o differing arguments for create functions
+    o it would be very cool to use the APR dso code, but
+      as this uses pools and we're not using pools anywhere in the
+      memory code (for obvious reasons) this is a bit of a stopper.
+      Sander says he found the same thing with using the locking code
 
   Just to clarify why this will be very cool if we can get
   it working, we give the user the ability to use 3rd party modules
@@ -27,3 +37,8 @@ david - 28 May 2001
   some special stuff for pools under Linux on 2.0, so we just
   need some ideas
 
+Possible Extras
+
+- Is there any ebenfit in adding a version number to the memory
+  systems?  This probably isn't an issue until we have dynamic 
+  loading when binary memory systems may be distributed.
