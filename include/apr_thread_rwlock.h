@@ -80,6 +80,15 @@ extern "C" {
 typedef struct apr_thread_rwlock_t apr_thread_rwlock_t;
 
 /**
+ * Note: The following operations have undefined results: unlocking a
+ * read-write lock which is not locked in the calling thread; write
+ * locking a read-write lock which is already locked by the calling
+ * thread; destroying a read-write lock more than once; clearing or
+ * destroying the pool from which a <b>locked</b> read-write lock is
+ * allocated.
+ */
+
+/**
  * Create and initialize a read-write lock that can be used to synchronize
  * threads.
  * @param rwlock the memory address where the newly created readwrite lock
@@ -97,10 +106,10 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
 APR_DECLARE(apr_status_t) apr_thread_rwlock_rdlock(apr_thread_rwlock_t *rwlock);
 
 /**
- * Attempt to acquire the shread-read lock on the given read-write lock. This
- * is the same as apr_thread_rwlock_rdlock(), only that the funtion fails
+ * Attempt to acquire the shared-read lock on the given read-write lock. This
+ * is the same as apr_thread_rwlock_rdlock(), only that the function fails
  * if there is another thread holding the write lock, or if there are any
- * write threads blocking on the lock. If the function failes for this case,
+ * write threads blocking on the lock. If the function fails for this case,
  * APR_EBUSY will be returned. Note: it is important that the
  * APR_STATUS_IS_EBUSY(s) macro be used to determine if the return value was
  * APR_EBUSY, for portability reasons.
@@ -111,7 +120,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwloc
 /**
  * Acquire an exclusive-write lock on the given read-write lock. This will
  * allow only one single thread to enter the critical sections. If there
- * are any threads currently holding thee read-lock, this thread is put to
+ * are any threads currently holding the read-lock, this thread is put to
  * sleep until it can have exclusive access to the lock.
  * @param rwlock the read-write lock on which to acquire the exclusive write.
  */
@@ -119,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock);
 
 /**
  * Attempt to acquire the exclusive-write lock on the given read-write lock. 
- * This is the same as apr_thread_rwlock_wrlock(), only that the funtion fails
+ * This is the same as apr_thread_rwlock_wrlock(), only that the function fails
  * if there is any other thread holding the lock (for reading or writing),
  * in which case the function will return APR_EBUSY. Note: it is important
  * that the APR_STATUS_IS_EBUSY(s) macro be used to determine if the return
