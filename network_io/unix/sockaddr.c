@@ -374,14 +374,6 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = family;
     hints.ai_socktype = SOCK_STREAM;
-#ifdef AI_ADDRCONFIG
-    if (family == AF_UNSPEC) {
-        /* By default, only look up addresses using address types for
-         * which a local interface is configured, i.e. no IPv6 if no
-         * IPv6 interfaces configured. */
-        hints.ai_flags = AI_ADDRCONFIG;
-    }
-#endif
     if(hostname == NULL) {
 #ifdef AI_PASSIVE 
         /* If hostname is NULL, assume we are trying to bind to all
@@ -404,13 +396,6 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         servname = apr_itoa(p, port);
     }
     error = getaddrinfo(hostname, servname, &hints, &ai_list);
-#ifdef AI_ADDRCONFIG
-    if (error == EAI_BADFLAGS && family == AF_UNSPEC) {
-        /* Retry with no flags if AI_ADDRCONFIG was rejected. */
-        hints.ai_flags = 0;
-        error = getaddrinfo(hostname, servname, &hints, &ai_list);
-    }
-#endif
     if (error) {
 #ifndef WIN32
         if (error == EAI_SYSTEM) {
