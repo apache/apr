@@ -144,6 +144,10 @@ AC_CHECK_FUNC(inet_network, [ inet_network="1" ], [ inet_network="0" ])
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(gmtime_r localtime_r)
 AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
+AC_CHECK_FUNCS(mmap, [ mmap="1" ], [ mmap="0" ])
+if test "$native_mmap_emul" = "1"; then
+    mmap="1"
+fi
 AC_CHECK_FUNCS(hstrerror)
 AC_SUBST(sendfile)
 AC_SUBST(fork)
@@ -151,7 +155,7 @@ AC_SUBST(inet_addr)
 AC_SUBST(inet_network)
 AC_SUBST(have_sigaction)
 AC_SUBST(iconv)
-
+AC_SUBST(mmap)
 
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
@@ -418,18 +422,6 @@ main()
     AC_MSG_RESULT(no) ] )
 
 AC_SUBST(struct_rlimit)
-
-dnl #----------------------------- Checking for MMAP 
-echo $ac_n "${nl}Checking for MMAP...${nl}"
-AC_FUNC_MMAP
-if test "$ac_cv_func_mmap_fixed_mapped" = "yes"; then
-    mmap="1"
-elif test "$native_mmap_emul" = "1"; then
-    mmap="1"
-else
-    mmap="0"
-fi
-AC_SUBST(mmap)
 
 dnl #----------------------------- Checking for Locking Characteristics 
 echo $ac_n "${nl}Checking for Locking..."
