@@ -66,40 +66,6 @@ typedef void Sigfunc(int);
 Sigfunc *signal(int signo, Sigfunc * func);
 #endif
 
-#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
-#define SAFETY_LOCK(func_name, cnt, name_str) \
-    { \
-    if (lock_##func_name == NULL) \
-        if (ap_create_lock(&lock_##func_name, APR_MUTEX, APR_INTRAPROCESS, name_str, cnt) != APR_SUCCESS) \
-            return APR_NOTTHREADSAFE; \
-    if (ap_lock(lock_##func_name) != APR_SUCCESS) \
-        return APR_NOTTHREADSAFE; \
-    }
-#else
-#define SAFETY_LOCK(func_name, cnt)
-#endif 
-        
-#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
-#define SAFETY_UNLOCK(func_name) \
-    if (ap_unlock(lock_##func_name) != APR_SUCCESS) { \
-        return APR_NOTTHREADSAFE; \
-    }
-#else
-#define SAFETY_UNLOCK(func_name, cnt)
-#endif 
-
-#ifdef HAVE_GMTIME_R
-#define GMTIME_R(x, y) gmtime_r(x, y)
-#else
-#define GMTIME_R(x, y) memcpy(y, gmtime(x), sizeof(y))
-#endif
-
-#ifdef HAVE_LOCALTIME_R
-#define LOCALTIME_R(x, y) localtime_r(x, y)
-#else
-#define LOCALTIME_R(x, y) memcpy(y, localtime(x), sizeof(y))
-#endif
-
 #if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP)
 #define strcasecmp(s1,s2) stricmp(s1,s2)
 #endif
