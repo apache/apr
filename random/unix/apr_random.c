@@ -70,12 +70,11 @@
 #define APR_RANDOM_DEFAULT_G_FOR_INSECURE 32
 #define APR_RANDOM_DEFAULT_G_FOR_SECURE 320
 
-typedef struct apr_random_pool_t
-    {
+typedef struct apr_random_pool_t {
     unsigned char *pool;
     int bytes;
     int pool_size;
-    } apr_random_pool_t;
+} apr_random_pool_t;
 
 #define hash_init(h)		(h)->init(h)
 #define hash_add(h,b,n)		(h)->add(h,b,n)
@@ -86,8 +85,7 @@ typedef struct apr_random_pool_t
 #define crypt_setkey(c,k)	(c)->set_key((c)->data,k)
 #define crypt_crypt(c,out,in)	(c)->crypt((c)->date,out,in)
 
-struct apr_random_t
-    {
+struct apr_random_t {
     apr_pool_t *apr_pool;
     apr_crypto_hash_t *pool_hash;
     unsigned int npools;
@@ -116,222 +114,219 @@ struct apr_random_t
     unsigned char secure_started:1;
 
     apr_random_t *next;
-    };
+};
 
 static apr_random_t *all_random;
 
 void apr_random_init(apr_random_t *g,apr_pool_t *p,
 		     apr_crypto_hash_t *pool_hash,apr_crypto_hash_t *key_hash,
 		     apr_crypto_hash_t *prng_hash)
-    {
+{
     int n;
 
-    g->apr_pool=p;
-    g->pool_hash=pool_hash;
-    g->key_hash=key_hash;
-    g->prng_hash=prng_hash;
-    g->npools=APR_RANDOM_DEFAULT_POOLS;
-    g->pools=apr_palloc(p,g->npools*sizeof *g->pools);
-    for(n=0 ; n < g->npools ; ++n)
-	{
-	g->pools[n].bytes=g->pools[n].pool_size=0;
-	g->pools[n].pool=NULL;
-	}
-    g->next_pool=0;
-    g->generation=0;
-    g->rehash_size=APR_RANDOM_DEFAULT_REHASH_SIZE;
-    /* Ensure that the rehash size is twice the size of the pool hasher */
-    g->rehash_size=((g->rehash_size+2*g->pool_hash->size-1)/g->pool_hash->size
-		    /2)*g->pool_hash->size*2;
-    g->reseed_size=APR_RANDOM_DEFAULT_RESEED_SIZE;
-    g->prng_hash=prng_hash;
-    g->H=apr_palloc(p,H_size(g));
-    g->H_waiting=apr_palloc(p,H_size(g));
-    g->randomness=apr_palloc(p,B_size(g));
-    g->random_bytes=0;
+    g->apr_pool = p;
 
-    g->g_for_insecure=APR_RANDOM_DEFAULT_G_FOR_INSECURE;
-    g->secure_base=0;
-    g->g_for_secure=APR_RANDOM_DEFAULT_G_FOR_SECURE;
-    g->secure_started=g->insecure_started=0;
+    g->pool_hash = pool_hash;
+    g->key_hash = key_hash;
+    g->prng_hash = prng_hash;
 
-    g->next=all_random;
-    all_random=g;
+    g->npools = APR_RANDOM_DEFAULT_POOLS;
+    g->pools = apr_palloc(p,g->npools*sizeof *g->pools);
+    for (n = 0; n < g->npools; ++n) {
+	g->pools[n].bytes = g->pools[n].pool_size = 0;
+	g->pools[n].pool = NULL;
     }
+    g->next_pool = 0;
+
+    g->generation = 0;
+
+    g->rehash_size = APR_RANDOM_DEFAULT_REHASH_SIZE;
+    /* Ensure that the rehash size is twice the size of the pool hasher */
+    g->rehash_size = ((g->rehash_size+2*g->pool_hash->size-1)/g->pool_hash->size
+		    /2)*g->pool_hash->size*2;
+    g->reseed_size = APR_RANDOM_DEFAULT_RESEED_SIZE;
+
+    g->H = apr_palloc(p,H_size(g));
+    g->H_waiting = apr_palloc(p,H_size(g));
+
+    g->randomness = apr_palloc(p,B_size(g));
+    g->random_bytes = 0;
+
+    g->g_for_insecure = APR_RANDOM_DEFAULT_G_FOR_INSECURE;
+    g->secure_base = 0;
+    g->g_for_secure = APR_RANDOM_DEFAULT_G_FOR_SECURE;
+    g->secure_started = g->insecure_started = 0;
+
+    g->next = all_random;
+    all_random = g;
+}
 
 static void mix_pid(apr_random_t *g,unsigned char *H,pid_t pid)
-    {
+{
     hash_init(g->key_hash);
     hash_add(g->key_hash,H,H_size(g));
     hash_add(g->key_hash,&pid,sizeof pid);
     hash_finish(g->key_hash,H);
-    }
+}
 
 static void mixer(apr_random_t *g,pid_t pid)
-    {
-    unsigned char *H=H_current(g);
+{
+    unsigned char *H = H_current(g);
 
     /* mix the PID into the current H */
     mix_pid(g,H,pid);
     /* if we are in waiting, then also mix into main H */
-    if(H != g->H)
+    if (H != g->H)
 	mix_pid(g,g->H,pid);
     /* change order of pool mixing for good measure - note that going
        backwards is much better than going forwards */
     --g->generation;
     /* blow away any lingering randomness */
-    g->random_bytes=0;
-    }
+    g->random_bytes = 0;
+}
 
 void apr_random_after_fork(apr_proc_t *proc)
-    {
+{
     apr_random_t *r;
 
-    for(r=all_random ; r ; r=r->next)
+    for (r = all_random; r; r = r->next)
 	mixer(r,proc->pid);
-    }
+}
 
 apr_random_t *apr_random_standard_new(apr_pool_t *p)
-    {
-    apr_random_t *r=apr_palloc(p,sizeof *r);
+{
+    apr_random_t *r = apr_palloc(p,sizeof *r);
     
     apr_random_init(r,p,apr_crypto_sha256_new(p),apr_crypto_sha256_new(p),
 		    apr_crypto_sha256_new(p));
     return r;
-    }
+}
 
 static void rekey(apr_random_t *g)
-    {
+{
     int n;
-    unsigned char *H=H_current(g);
+    unsigned char *H = H_current(g);
 
     hash_init(g->key_hash);
     hash_add(g->key_hash,H,H_size(g));
-    for(n=0 ; n < g->npools && (n == 0 || g->generation&(1 << (n-1)))
-	    ; ++n)
-	{
+    for (n = 0 ; n < g->npools && (n == 0 || g->generation&(1 << (n-1)))
+	    ; ++n) {
 	hash_add(g->key_hash,g->pools[n].pool,g->pools[n].bytes);
-	g->pools[n].bytes=0;
-	}
+	g->pools[n].bytes = 0;
+    }
     hash_finish(g->key_hash,H+B_size(g));
+
     ++g->generation;
-    if(!g->insecure_started && g->generation > g->g_for_insecure)
-	{
-	g->insecure_started=1;
-	if(!g->secure_started)
-	    {
+    if (!g->insecure_started && g->generation > g->g_for_insecure) {
+	g->insecure_started = 1;
+	if (!g->secure_started) {
 	    memcpy(g->H_waiting,g->H,H_size(g));
-	    g->secure_base=g->generation;
-	    }
-	}
-    if(!g->secure_started && g->generation > g->secure_base+g->g_for_secure)
-	{
-	g->secure_started=1;
-	memcpy(g->H,g->H_waiting,H_size(g));
+	    g->secure_base = g->generation;
 	}
     }
+
+    if (!g->secure_started && g->generation > g->secure_base+g->g_for_secure) {
+	g->secure_started = 1;
+	memcpy(g->H,g->H_waiting,H_size(g));
+    }
+}
 
 void apr_random_add_entropy(apr_random_t *g,const void *entropy_,
 			    apr_size_t bytes)
-    {
+{
     int n;
-    const unsigned char *entropy=entropy_;
+    const unsigned char *entropy = entropy_;
 
-    for(n=0 ; n < bytes ; ++n)
-	{
-	apr_random_pool_t *p=&g->pools[g->next_pool];
+    for (n = 0; n < bytes; ++n) {
+	apr_random_pool_t *p = &g->pools[g->next_pool];
 
-	if(++g->next_pool == g->npools)
-	    g->next_pool=0;
+	if (++g->next_pool == g->npools)
+	    g->next_pool = 0;
 
-	if(p->pool_size < p->bytes+1)
-	    {
-	    unsigned char *np=apr_palloc(g->apr_pool,(p->bytes+1)*2);
+	if (p->pool_size < p->bytes+1) {
+	    unsigned char *np = apr_palloc(g->apr_pool,(p->bytes+1)*2);
 
 	    memcpy(np,p->pool,p->bytes);
-	    p->pool=np;
-	    p->pool_size=(p->bytes+1)*2;
-	    }
-	p->pool[p->bytes++]=entropy[n];
+	    p->pool = np;
+	    p->pool_size = (p->bytes+1)*2;
+	}
+	p->pool[p->bytes++] = entropy[n];
 
-	if(p->bytes == g->rehash_size)
-	    {
+	if (p->bytes == g->rehash_size) {
 	    int r;
 
-	    for(r=0 ; r < p->bytes/2 ; r+=g->pool_hash->size)
+	    for (r = 0; r < p->bytes/2; r+=g->pool_hash->size)
 		hash(g->pool_hash,p->pool+r,p->pool+r*2,g->pool_hash->size*2);
 	    p->bytes/=2;
-	    }
-	assert(p->bytes < g->rehash_size);
 	}
-
-    if(g->pools[0].bytes >= g->reseed_size)
-	rekey(g);
+	assert(p->bytes < g->rehash_size);
     }
+
+    if (g->pools[0].bytes >= g->reseed_size)
+	rekey(g);
+}
 
 // This will give g->B_size bytes of randomness
 static void apr_random_block(apr_random_t *g,unsigned char *random)
-    {
-    // FIXME: in principle, these are different hashes
+{
+    /* FIXME: in principle, these are different hashes */
     hash(g->prng_hash,g->H,g->H,H_size(g));
     hash(g->prng_hash,random,g->H,B_size(g));
-    }
+}
 
 static void apr_random_bytes(apr_random_t *g,unsigned char *random,
 			     apr_size_t bytes)
-    {
+{
     apr_size_t n;
 
-    for(n=0 ; n < bytes ; )
-	{
+    for (n = 0; n < bytes; ) {
 	int l;
 
-	if(g->random_bytes == 0)
-	    {
+	if (g->random_bytes == 0) {
 	    apr_random_block(g,g->randomness);
-	    g->random_bytes=B_size(g);
-	    }
-	l=min(bytes-n,g->random_bytes);
+	    g->random_bytes = B_size(g);
+	}
+	l = min(bytes-n,g->random_bytes);
 	memcpy(&random[n],g->randomness+B_size(g)-g->random_bytes,l);
 	g->random_bytes-=l;
 	n+=l;
-	}
     }
+}
 
 apr_status_t apr_random_secure_bytes(apr_random_t *g,void *random,
 				     apr_size_t bytes)
-    {
-    if(!g->secure_started)
+{
+    if (!g->secure_started)
 	return APR_ENOTENOUGHENTROPY;
     apr_random_bytes(g,random,bytes);
     return APR_SUCCESS;
-    }
+}
 
 apr_status_t apr_random_insecure_bytes(apr_random_t *g,void *random,
 				       apr_size_t bytes)
-    {
-    if(!g->insecure_started)
+{
+    if (!g->insecure_started)
 	return APR_ENOTENOUGHENTROPY;
     apr_random_bytes(g,random,bytes);
     return APR_SUCCESS;
-    }
+}
 
 void apr_random_barrier(apr_random_t *g)
-    {
-    g->secure_started=0;
-    g->secure_base=g->generation;
-    }
+{
+    g->secure_started = 0;
+    g->secure_base = g->generation;
+}
 
 apr_status_t apr_random_secure_ready(apr_random_t *r)
-    {
-    if(!r->secure_started)
+{
+    if (!r->secure_started)
 	return APR_ENOTENOUGHENTROPY;
     return APR_SUCCESS;
-    }
+}
 
 apr_status_t apr_random_insecure_ready(apr_random_t *r)
-    {
-    if(!r->insecure_started)
+{
+    if (!r->insecure_started)
 	return APR_ENOTENOUGHENTROPY;
     return APR_SUCCESS;
-    }
+}
