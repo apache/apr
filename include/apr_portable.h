@@ -221,9 +221,7 @@ struct apr_os_sock_info_t {
     struct sockaddr *remote; /**< NULL if not connected */
     int family;             /**< always required (APR_INET, APR_INET6, etc.) */
     int type;               /**< always required (SOCK_STREAM, SOCK_DGRAM, etc.) */
-#ifdef APR_ENABLE_FOR_1_0   /**< enable with APR 1.0 */
     int protocol;           /**< 0 or actual protocol (APR_PROTO_SCTP, APR_PROTO_TCP, etc.) */
-#endif
 };
 
 typedef struct apr_os_sock_info_t apr_os_sock_info_t;
