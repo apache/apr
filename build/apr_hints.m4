@@ -88,7 +88,7 @@ else
           APR_ADDTO(CFLAGS, [-qHALT=E -qLANGLVL=extended])
         fi
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_THREAD_SAFE])
+	APR_ADDTO(CPPFLAGS, [-D_THREAD_SAFE])
         ;;
     *-apollo-*)
 	APR_ADDTO(CPPFLAGS, [-DAPOLLO])
@@ -103,8 +103,7 @@ else
 	APR_ADDTO(CPPFLAGS, [-DHIUX])
 	;;
     *-hp-hpux11.*)
-	APR_ADDTO(CPPFLAGS, [-DHPUX11])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
+	APR_ADDTO(CPPFLAGS, [-DHPUX11 -D_REENTRANT])
 	;;
     *-hp-hpux10.*)
  	case $host in
@@ -114,11 +113,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	       APR_ADDTO(CPPFLAGS, [-DSELECT_NEEDS_CAST])
 	       ;;	     
  	esac
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
+	APR_ADDTO(CPPFLAGS, [-D_REENTRANT])
 	;;
     *-hp-hpux*)
-	APR_ADDTO(CPPFLAGS, [-DHPUX])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
+	APR_ADDTO(CPPFLAGS, [-DHPUX -D_REENTRANT])
 	;;
     *-linux-*)
         case `uname -r` in
@@ -131,7 +129,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	    * )
 	           ;;
         esac
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
+	APR_ADDTO(CPPFLAGS, [-D_REENTRANT])
 	;;
     *-GNU*)
 	APR_ADDTO(CPPFLAGS, [-DHURD])
@@ -145,7 +143,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CFLAGS, [-m486])
 	;;
     *-openbsd*)
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_POSIX_THREADS])
+	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREADS])
 	;;
     *-netbsd*)
 	APR_ADDTO(CPPFLAGS, [-DNETBSD])
@@ -159,15 +157,15 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	esac
 	APR_ADDTO(LIBS, [-lcrypt])
 	APR_SETIFNULL(enable_threads, [no])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT -D_THREAD_SAFE])
+	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_THREAD_SAFE])
 	;;
     *-next-nextstep*)
-	APR_SETIFNULL(OPTIM, [-O])
+	APR_SETIFNULL(CFLAGS, [-O])
 	APR_ADDTO(CPPFLAGS, [-DNEXT])
 	;;
     *-next-openstep*)
 	APR_SETVAR(CC, [cc])
-	APR_SETIFNULL(OPTIM, [-O])
+	APR_SETIFNULL(CFLAGS, [-O])
 	APR_ADDTO(CPPFLAGS, [-DNEXT])
 	;;
     *-apple-rhapsody*)
@@ -196,27 +194,23 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(LIBS, [-linet])
 	;;
     *-sco3*)
-	APR_ADDTO(CPPFLAGS, [-DSCO])
+	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
 	APR_ADDTO(CFLAGS, [-Oacgiltz])
 	APR_ADDTO(LIBS, [-lPW -lsocket -lmalloc -lcrypt_i])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-sco5*)
-	APR_ADDTO(CPPFLAGS, [-DSCO5])
+	APR_ADDTO(CPPFLAGS, [-DSCO5 -D_REENTRANT])
 	APR_ADDTO(LIBS, [-lsocket -lmalloc -lprot -ltinfo -lx])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-sco_sv*|*-SCO_SV*)
-	APR_ADDTO(CPPFLAGS, [-DSCO])
+	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
 	APR_ADDTO(LIBS, [-lPW -lsocket -lmalloc -lcrypt_i])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
-	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS])
+	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
 	APR_ADDTO(LIBS, [-lsocket -lnsl])
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
 	;;
     *-sunos4*)
 	APR_ADDTO(CPPFLAGS, [-DSUNOS4 -DUSEBCOPY])
@@ -310,8 +304,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *convex-v11*)
 	APR_ADDTO(CPPFLAGS, [-DCONVEXOS11])
+	APR_SETIFNULL(CFLAGS, [-O1])
 	APR_ADDTO(CFLAGS, [-ext])
-	APR_SETIFNULL(OPTIM, [-O1])
 	APR_SETVAR(CC, [cc])
 	;;
     i860-intel-osf1)
@@ -352,11 +346,11 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-riscix)
 	APR_ADDTO(CPPFLAGS, [-DRISCIX])
-	APR_SETIFNULL(OPTIM, [-O])
+	APR_SETIFNULL(CFLAGS, [-O])
 	APR_SETIFNULL(MAKE, [make])
 	;;
     *-irix*)
-	APR_ADDTO(THREAD_CPPFLAGS, [-D_POSIX_THREAD_SAFE_FUNCTIONS])
+	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREAD_SAFE_FUNCTIONS])
 	;;
     *beos*)
         APR_ADDTO(CPPFLAGS, [-DBEOS])
@@ -393,6 +387,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
        APR_ADDTO(CPPFLAGS, [-U_NO_PROTO -DPTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR -DPTHREAD_SETS_ERRNO -DPTHREAD_DETACH_ARG1_ADDR -DSIGPROCMASK_SETS_THREAD_MASK -DTCP_NODELAY=1])
        ;;
   esac
-  APR_DOEXTRA
+
 fi
 ])
