@@ -183,30 +183,43 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     memset(&tfb, '\0', sizeof (tfb));
     if (hdtr && hdtr->numheaders) {
         ptfb = &tfb;
-        for (i = 0; i < hdtr->numheaders; i++) {
-            tfb.HeadLength += hdtr->headers[i].iov_len;
+        if (hdtr->numheaders == 1) {
+            ptfb->Head = hdtr->headers[0].iov_base;
+            ptfb->HeadLength = hdtr->headers[0].iov_len;
         }
+        else {
+            /* Need to collapse all the header fragments into one buffer */
+            for (i = 0; i < hdtr->numheaders; i++) {
+                ptfb->HeadLength += hdtr->headers[i].iov_len;
+            }
+            ptfb->Head = ap_palloc(sock->cntxt, ptfb->HeadLength); /* Should this be a malloc? */
 
-        tfb.Head = ap_palloc(sock->cntxt, tfb.HeadLength); /* Should this be a malloc? */
-
-        for (i = 0; i < hdtr->numheaders; i++) {
-            memcpy((char*)tfb.Head + ptr, hdtr->headers[i].iov_base,
-                   hdtr->headers[i].iov_len);
-            ptr += hdtr->headers[i].iov_len;
+            for (i = 0; i < hdtr->numheaders; i++) {
+                memcpy((char*)ptfb->Head + ptr, hdtr->headers[i].iov_base,
+                       hdtr->headers[i].iov_len);
+                ptr += hdtr->headers[i].iov_len;
+            }
         }
     }
     if (hdtr && hdtr->numtrailers) {
         ptfb = &tfb;
-        for (i = 0; i < hdtr->numtrailers; i++) {
-            tfb.TailLength += hdtr->headers[i].iov_len;
+        if (hdtr->numtrailers == 1) {
+            ptfb->Tail = hdtr->trailers[0].iov_base;
+            ptfb->TailLength = hdtr->trailers[0].iov_len;
         }
+        else {
+            /* Need to collapse all the trailer fragments into one buffer */
+            for (i = 0; i < hdtr->numtrailers; i++) {
+                ptfb->TailLength += hdtr->headers[i].iov_len;
+            }
 
-        tfb.Tail = ap_palloc(sock->cntxt, tfb.TailLength); /* Should this be a malloc? */
+            ptfb->Tail = ap_palloc(sock->cntxt, ptfb->TailLength); /* Should this be a malloc? */
 
-        for (i = 0; i < hdtr->numtrailers; i++) {
-            memcpy((char*)tfb.Tail + ptr, hdtr->trailers[i].iov_base,
-                   hdtr->trailers[i].iov_len);
-            ptr += hdtr->trailers[i].iov_len;
+            for (i = 0; i < hdtr->numtrailers; i++) {
+                memcpy((char*)ptfb->Tail + ptr, hdtr->trailers[i].iov_base,
+                       hdtr->trailers[i].iov_len);
+                ptr += hdtr->trailers[i].iov_len;
+            }
         }
     }
     /* Initialize the overlapped structure */
