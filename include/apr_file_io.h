@@ -281,7 +281,7 @@ B<Write data to the specified file.>
     arg 1) The file descriptor to write to.
     arg 2) The buffer which contains the data.
     arg 3) On entry, the number of bytes to write; on exit, the number
-           of bytes write.
+           of bytes written.
 
 B<NOTE>:  ap_write will write up to the specified number of bytes, but never
    more.  If the OS cannot write that many bytes, it will write as many as it
@@ -322,6 +322,58 @@ B<Write data from iovec array to the specified file.>
  */
 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, 
                       ap_size_t nvec, ap_ssize_t *nbytes);
+
+/*
+
+=head1 ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes, ap_size_t *bytes_read)
+
+B<Read data from the specified file.>
+
+    arg 1) The file descriptor to read from.
+    arg 2) The buffer to store the data to.
+    arg 3) The number of bytes to read.
+    arg 4) If non-NULL, this will contain the number of bytes read.
+
+B<NOTE>:  ap_read will read up to the specified number of bytes, but never
+   more.  If there isn't enough data to fill that number of bytes, then the
+   process/thread will block until it is available or EOF is reached.  If a
+   char was put back into the stream via ungetc, it will be the first
+   character returned. 
+
+   It is possible for both bytes to be read and an APR_EOF or other error
+   to be returned.
+   
+   APR_EINTR is never returned.
+
+=cut
+ */
+ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
+                         ap_size_t *bytes_read);
+
+/*
+
+=head1 ap_status_t ap_full_write(ap_file_t *thefile, const void *buf, ap_size_t nbytes, ap_size_t *bytes_written)
+
+B<Write data to the specified file.>
+
+    arg 1) The file descriptor to write to.
+    arg 2) The buffer which contains the data.
+    arg 3) The number of bytes to write.
+    arg 4) If non-NULL, this will contain the number of bytes written.
+
+B<NOTE>:  ap_write will write up to the specified number of bytes, but never
+   more.  If the OS cannot write that many bytes, the process/thread will
+   block until they can be written. Exceptional error such as "out of space"
+   or "pipe closed" will terminate with an error.
+  
+   It is possible for both bytes to be written and an error to be returned.
+  
+   APR_EINTR is never returned.
+
+=cut
+ */
+ap_status_t ap_full_write(ap_file_t *thefile, const void *buf,
+                          ap_size_t nbytes, ap_size_t *bytes_written);
 
 /*
 
