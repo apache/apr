@@ -93,6 +93,8 @@
 
 struct apr_allocator_t {
     apr_uint32_t        max_index;
+    apr_uint32_t        max_free_index;
+    apr_uint32_t        current_free_index;
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
 #endif /* APR_HAS_THREADS */
@@ -166,6 +168,32 @@ APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(apr_allocator_t *allocator)
     return allocator->owner;
 }
 
+APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
+                                             apr_size_t size)
+{
+    apr_uint32_t max_free_index;
+
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *mutex;
+
+    mutex = apr_allocator_get_mutex(allocator);
+    if (mutex != NULL)
+        apr_thread_mutex_lock(mutex);
+#endif /* APR_HAS_THREADS */
+
+    max_free_index = APR_ALIGN(size, BOUNDARY_SIZE) >> BOUNDARY_INDEX;
+    allocator->current_free_index += max_free_index;
+    allocator->current_free_index -= allocator->max_free_index;
+    allocator->max_free_index = max_free_index;
+    if (allocator->current_free_index > max_free_index)
+        allocator->current_free_index = max_free_index;
+
+#if APR_HAS_THREADS
+    if (mutex != NULL)
+        apr_thread_mutex_unlock(mutex);
+#endif
+}
+
 APR_INLINE
 APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
                                                  apr_size_t size)
@@ -228,6 +256,10 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
                 allocator->max_index = max_index;
             }
 
+            allocator->current_free_index += node->index;
+            if (allocator->current_free_index > allocator->max_free_index)
+                allocator->current_free_index = allocator->max_free_index;
+
 #if APR_HAS_THREADS
             if (allocator->mutex)
                 apr_thread_mutex_unlock(allocator->mutex);
@@ -264,6 +296,10 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
         if (node) {
             *ref = node->next;
 
+            allocator->current_free_index += node->index;
+            if (allocator->current_free_index > allocator->max_free_index)
+                allocator->current_free_index = allocator->max_free_index;
+
 #if APR_HAS_THREADS
             if (allocator->mutex)
                 apr_thread_mutex_unlock(allocator->mutex);
@@ -299,8 +335,9 @@ APR_INLINE
 APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                                      apr_memnode_t *node)
 {
-    apr_memnode_t *next;
+    apr_memnode_t *next, *freelist = NULL;
     apr_uint32_t index, max_index;
+    apr_uint32_t max_free_index, current_free_index;
 
 #if APR_HAS_THREADS
     if (allocator->mutex)
@@ -308,6 +345,8 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
 #endif /* APR_HAS_THREADS */
 
     max_index = allocator->max_index;
+    max_free_index = allocator->max_free_index;
+    current_free_index = allocator->current_free_index;
 
     /* Walk the list of submitted nodes and free them one by one,
      * shoving them in the right 'size' buckets as we go.
@@ -316,7 +355,11 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
         next = node->next;
         index = node->index;
 
-        if (index < MAX_INDEX) {
+        if (max_free_index != 0 && index > current_free_index) {
+            node->next = freelist;
+            freelist = node;
+        }
+        else if (index < MAX_INDEX) {
             /* Add the node to the appropiate 'size' bucket.  Adjust
              * the max_index when appropiate.
              */
@@ -325,6 +368,7 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                 max_index = index;
             }
             allocator->free[index] = node;
+            current_free_index -= index;
         }
         else {
             /* This node is too large to keep in a specific size bucket,
@@ -332,15 +376,23 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
              */
             node->next = allocator->free[0];
             allocator->free[0] = node;
+            current_free_index -= index;
         }
     } while ((node = next) != NULL);
 
     allocator->max_index = max_index;
+    allocator->current_free_index = current_free_index;
 
 #if APR_HAS_THREADS
     if (allocator->mutex)
         apr_thread_mutex_unlock(allocator->mutex);
 #endif /* APR_HAS_THREADS */
+
+    while (freelist != NULL) {
+        node = freelist;
+        freelist = node->next;
+        free(node);
+    }
 }
 
 
