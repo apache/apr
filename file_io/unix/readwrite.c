@@ -412,3 +412,21 @@ API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
     return (cc == APR_SUCCESS) ? len : -1;
 }
 
+ap_status_t ap_file_check_read(ap_file_t *fd)
+{
+    fd_set fds;
+    int rv;
+    struct timeval tv;
+
+    FD_ZERO(&fds);
+    FD_SET(fd->filedes, &fds);
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    if (rv = select(fd->filedes + 1, &fds, NULL, NULL, &tv) == -1) {
+        return errno;
+    }
+    else {
+        return rv;
+    }
+}
+

@@ -253,6 +253,18 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
 
 /*
 
+=head1 ap_status_t ap_file_check_read(ap_file_t *fd)
+
+B<Determine if the next read will block.>
+
+    arg 1) The file descriptor to check.
+
+=cut
+ */
+ap_status_t ap_file_check_read(ap_file_t *fd);
+
+/*
+
 =head1 ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
 B<Write data to the specified file.>
