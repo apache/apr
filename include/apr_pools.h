@@ -107,119 +107,19 @@ typedef struct apr_pool_t apr_pool_t;
 /** A function that is called when allocation fails. */
 typedef int (*apr_abortfunc_t)(int retcode);
 
-/**
- * @defgroup PoolDebug Pool Debugging functions.
- *
- * pools have nested lifetimes -- sub_pools are destroyed when the
- * parent pool is cleared.  We allow certain liberties with operations
- * on things such as tables (and on other structures in a more general
- * sense) where we allow the caller to insert values into a table which
- * were not allocated from the table's pool.  The table's data will
- * remain valid as long as all the pools from which its values are
- * allocated remain valid.
- *
- * For example, if B is a sub pool of A, and you build a table T in
- * pool B, then it's safe to insert data allocated in A or B into T
- * (because B lives at most as long as A does, and T is destroyed when
- * B is cleared/destroyed).  On the other hand, if S is a table in
- * pool A, it is safe to insert data allocated in A into S, but it
- * is *not safe* to insert data allocated from B into S... because
- * B can be cleared/destroyed before A is (which would leave dangling
- * pointers in T's data structures).
- *
- * In general we say that it is safe to insert data into a table T
- * if the data is allocated in any ancestor of T's pool.  This is the
- * basis on which the APR_POOL_DEBUG code works -- it tests these ancestor
- * relationships for all data inserted into tables.  APR_POOL_DEBUG also
- * provides tools (apr_find_pool, and apr_pool_is_ancestor) for other
- * folks to implement similar restrictions for their own data
- * structures.
- *
- * However, sometimes this ancestor requirement is inconvenient --
- * sometimes we're forced to create a sub pool (such as through
- * apr_sub_req_lookup_uri), and the sub pool is guaranteed to have
- * the same lifetime as the parent pool.  This is a guarantee implemented
- * by the *caller*, not by the pool code.  That is, the caller guarantees
- * they won't destroy the sub pool individually prior to destroying the
- * parent pool.
- *
- * In this case the caller must call apr_pool_join() to indicate this
- * guarantee to the APR_POOL_DEBUG code.  There are a few examples spread
- * through the standard modules.
- *
- * These functions are only implemented when #APR_POOL_DEBUG is set.
- *
- * @{
- */
-#if defined(APR_POOL_DEBUG) || defined(DOXYGEN)
-/**
- * Guarantee that a subpool has the same lifetime as the parent.
- * @param p The parent pool
- * @param sub The subpool
- */
-APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
+/** Pool creation flags */
 
-/**
- * Find a pool from something allocated in it.
- * @param ts The thing allocated in the pool
- * @return The pool it is allocated in
- */
-APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts);
-
-/**
- * Report the number of bytes currently in the pool
- * @param p The pool to inspect
- * @param recurse Recurse/include the subpools' sizes
- * @return The number of bytes
- */
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
-
-/**
- * Report the number of bytes currently in the list of free blocks
- * @return The number of bytes
- */
-APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
-
-/**
- * Lock a pool
- * @param pool The pool to lock
- * @param flag  The flag
- */
-APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
-
-/* @} */
-
-#else
-#    ifdef apr_pool_join
-#        undef apr_pool_join
-#    endif
-#    define apr_pool_join(a,b)
-
-#    ifdef apr_pool_lock
-#        undef apr_pool_lock
-#    endif
-#    define apr_pool_lock(pool, lock)
-#endif
-
-/**
- * Tag a pool (give it a name)
- * @param pool The pool to tag
- * @param tag  The tag
- */
-APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
-
-/**
- * Determine if pool a is an ancestor of pool b
- * @param a The pool to search 
- * @param b The pool to search for
- * @return True if a is an ancestor of b, NULL is considered an ancestor
- *         of all pools.
- */
-APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
+#define APR_POOL_FDEFAULT       0x0
+#define APR_POOL_FNEW_ALLOCATOR 0x1
+#define APR_POOL_FLOCK          0x2
 
 
 /*
  * APR memory structure manipulators (pools, tables, and arrays).
+ */
+
+/*
+ * Initialization
  */
 
 /**
@@ -237,12 +137,11 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void);
  * @internal
  */
 APR_DECLARE(void) apr_pool_terminate(void); 
- 
-/* pool functions */
 
-#define APR_POOL_FDEFAULT       0x0
-#define APR_POOL_FNEW_ALLOCATOR 0x1
-#define APR_POOL_FLOCK          0x2
+
+/*
+ * Pool creation/destruction
+ */
 
 /**
  * Create a new pool.
@@ -299,6 +198,19 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
 #endif
 
 /**
+ * Destroy the pool. This takes similar action as apr_pool_clear() and then
+ * frees all the memory.
+ * @param p The pool to destroy
+ * @remark This will actually free the memory
+ */
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
+
+
+/*
+ * Memory allocation
+ */
+
+/**
  * Allocate a block of memory from a pool
  * @param p The pool to allocate from 
  * @param reqsize The amount of memory to allocate 
@@ -324,12 +236,10 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
  */
 APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
 
-/**
- * Destroy the pool. This runs apr_pool_clear() and then frees all the memory.
- * @param p The pool to destroy
- * @remark This will actually free the memory
+
+/*
+ * Pool Properties
  */
-APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 
 /**
  * Set the function to be called when an allocation failure occurs.
@@ -358,6 +268,27 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
  * @deffunc apr_pool_t * apr_pool_get_parent(apr_pool_t *pool)
  */
 APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
+
+/**
+ * Determine if pool a is an ancestor of pool b
+ * @param a The pool to search 
+ * @param b The pool to search for
+ * @return True if a is an ancestor of b, NULL is considered an ancestor
+ *         of all pools.
+ */
+APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
+
+/**
+ * Tag a pool (give it a name)
+ * @param pool The pool to tag
+ * @param tag  The tag
+ */
+APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
+
+
+/*
+ * User data management
+ */
 
 /**
  * Set the data associated with the current pool
@@ -406,6 +337,11 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data,
  */
 APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
                                            apr_pool_t *pool);
+
+
+/*
+ * Cleanup
+ */
 
 /**
  * Register a function to be called when a pool is cleared or destroyed
@@ -466,6 +402,102 @@ APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
  * closed because we are about to exec a new program
  */
 APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
+
+
+/**
+ * @defgroup PoolDebug Pool Debugging functions.
+ *
+ * pools have nested lifetimes -- sub_pools are destroyed when the
+ * parent pool is cleared.  We allow certain liberties with operations
+ * on things such as tables (and on other structures in a more general
+ * sense) where we allow the caller to insert values into a table which
+ * were not allocated from the table's pool.  The table's data will
+ * remain valid as long as all the pools from which its values are
+ * allocated remain valid.
+ *
+ * For example, if B is a sub pool of A, and you build a table T in
+ * pool B, then it's safe to insert data allocated in A or B into T
+ * (because B lives at most as long as A does, and T is destroyed when
+ * B is cleared/destroyed).  On the other hand, if S is a table in
+ * pool A, it is safe to insert data allocated in A into S, but it
+ * is *not safe* to insert data allocated from B into S... because
+ * B can be cleared/destroyed before A is (which would leave dangling
+ * pointers in T's data structures).
+ *
+ * In general we say that it is safe to insert data into a table T
+ * if the data is allocated in any ancestor of T's pool.  This is the
+ * basis on which the APR_POOL_DEBUG code works -- it tests these ancestor
+ * relationships for all data inserted into tables.  APR_POOL_DEBUG also
+ * provides tools (apr_find_pool, and apr_pool_is_ancestor) for other
+ * folks to implement similar restrictions for their own data
+ * structures.
+ *
+ * However, sometimes this ancestor requirement is inconvenient --
+ * sometimes we're forced to create a sub pool (such as through
+ * apr_sub_req_lookup_uri), and the sub pool is guaranteed to have
+ * the same lifetime as the parent pool.  This is a guarantee implemented
+ * by the *caller*, not by the pool code.  That is, the caller guarantees
+ * they won't destroy the sub pool individually prior to destroying the
+ * parent pool.
+ *
+ * In this case the caller must call apr_pool_join() to indicate this
+ * guarantee to the APR_POOL_DEBUG code.  There are a few examples spread
+ * through the standard modules.
+ *
+ * These functions are only implemented when #APR_POOL_DEBUG is set.
+ *
+ * @{
+ */
+#if defined(APR_POOL_DEBUG) || defined(DOXYGEN)
+/**
+ * Guarantee that a subpool has the same lifetime as the parent.
+ * @param p The parent pool
+ * @param sub The subpool
+ */
+APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
+
+/**
+ * Find a pool from something allocated in it.
+ * @param mem The thing allocated in the pool
+ * @return The pool it is allocated in
+ */
+APR_DECLARE(apr_pool_t *) apr_find_pool(const void *mem);
+
+/**
+ * Report the number of bytes currently in the pool
+ * @param p The pool to inspect
+ * @param recurse Recurse/include the subpools' sizes
+ * @return The number of bytes
+ */
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
+
+/**
+ * Report the number of bytes currently in the list of free blocks
+ * @return The number of bytes
+ */
+APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
+
+/**
+ * Lock a pool
+ * @param pool The pool to lock
+ * @param flag  The flag
+ */
+APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
+
+/* @} */
+
+#else
+#    ifdef apr_pool_join
+#        undef apr_pool_join
+#    endif
+#    define apr_pool_join(a,b)
+
+#    ifdef apr_pool_lock
+#        undef apr_pool_lock
+#    endif
+#    define apr_pool_lock(pool, lock)
+#endif
+
 
 /*
  * Pool accessor functions.
