@@ -323,6 +323,7 @@ apr_status_t apr_socket_opt_get(apr_socket_t *sock,
 
 apr_status_t apr_socket_atmark(apr_socket_t *sock, int *atmark)
 {
+#ifndef BEOS_R5
     int oobmark;
 
     if (ioctl(sock->socketdes, SIOCATMARK, (void*) &oobmark) < 0)
@@ -331,8 +332,10 @@ apr_status_t apr_socket_atmark(apr_socket_t *sock, int *atmark)
     *atmark = (oobmark != 0);
 
     return APR_SUCCESS;
+#else /* BEOS_R5 */
+    return APR_ENOTIMPL;
+#endif
 }
-
 
 apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 {
