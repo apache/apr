@@ -91,9 +91,6 @@
 
 #ifndef HAVE_MKSTEMP
 
-#ifndef __warn_references
-#define __warn_references(a,b) 
-#endif
 #if defined(SVR4) || defined(WIN32)
 #ifdef SVR4
 #include <inttypes.h>
@@ -101,7 +98,7 @@
 #define arc4random() rand()
 #define seedrandom(a) srand(a)
 #else
-#ifdef APR_HAS_STDINT_H
+#ifdef APR_HAVE_STDINT_H
 #include <stdint.h>
 #endif
 #define arc4random() random()
@@ -111,18 +108,19 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
 
 static const unsigned char padchar[] =
 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 static apr_uint32_t randseed=0;
 
-static int gettemp(char *path, apr_file_t *doopen, int domkdir, int slen,
-                   apr_pool_t *p)
+static int gettemp(char *path, apr_file_t **doopen, apr_pool_t *p)
 {
 	register char *start, *trv, *suffp;
 	char *pad;
@@ -130,10 +128,6 @@ static int gettemp(char *path, apr_file_t *doopen, int domkdir, int slen,
     apr_status_t rv;
 	apr_uint32_t randnum;
 
-	if (doopen && domkdir) {
-		errno = EINVAL;
-		return(0);
-	}
 	if (randseed==0) {
 		randseed = time(NULL);
 		seedrandom(randseed);
@@ -141,12 +135,10 @@ static int gettemp(char *path, apr_file_t *doopen, int domkdir, int slen,
 
 	for (trv = path; *trv; ++trv)
 		;
-	trv -= slen;
 	suffp = trv;
 	--trv;
 	if (trv < path) {
-		errno = EINVAL;
-		return (0);
+		return APR_EINVAL;
 	}
 
 	/* Fill space with random characters */
@@ -159,46 +151,34 @@ static int gettemp(char *path, apr_file_t *doopen, int domkdir, int slen,
 	/*
 	 * check the target directory.
 	 */
-	if (doopen || domkdir) {
-		for (;; --trv) {
-			if (trv <= path)
-				break;
-			if (*trv == '/') {
-				*trv = '\0';
-				rv = apr_stat(&sbuf, path, APR_FINFO_TYPE, p);
-				*trv = '/';
-				if (rv != APR_SUCCESS)
-					return(0);
-				if (sbuf.filetype != APR_DIR) {
-					errno = ENOTDIR;
-					return(0);
-				}
-				break;
-			}
-		}
-	}
+    for (;; --trv) {
+        if (trv <= path)
+            break;
+        if (*trv == '/') {
+            *trv = '\0';
+            rv = apr_stat(&sbuf, path, APR_FINFO_TYPE, p);
+            *trv = '/';
+            if (rv != APR_SUCCESS)
+                return rv;
+            if (sbuf.filetype != APR_DIR) {
+                return APR_ENOTDIR;
+            }
+            break;
+        }
+    }
 
 	for (;;) {
-		errno = 0;
-		if (doopen) {
-			if ((rv = apr_file_open(&doopen, path, APR_CREATE|APR_EXCL|APR_READ|APR_WRITE, 
-                                    APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS)
-				return(1);
-			if (errno != EEXIST)
-				return(0);
-		} else if (domkdir) {
-			if (apr_dir_make(path, 
-                                APR_UREAD | APR_UWRITE | APR_UEXECUTE, p) == 0)
-				return(1);
-			if (errno != EEXIST)
-				return(0);
-		} else if ((rv = apr_lstat(&sbuf, path, APR_FINFO_TYPE, p)) != APR_SUCCESS)
-			return(rv == ENOENT ? 1 : 0);
+        if ((rv = apr_file_open(doopen, path, APR_CREATE|APR_EXCL|APR_READ|
+                                APR_WRITE|APR_DELONCLOSE, 
+                                APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS)
+            return APR_SUCCESS;
+        if (rv != APR_EEXIST)
+            return rv;
 
 		/* If we have a collision, cycle through the space of filenames */
 		for (trv = start;;) {
 			if (*trv == '\0' || trv == suffp)
-				return(0);
+                return APR_EINVAL; /* XXX: is this the correct return code? */
 			pad = strchr((char *)padchar, *trv);
 			if (pad == NULL || !*++pad)
 				*trv++ = padchar[0];
@@ -224,17 +204,9 @@ static int gettemp(char *path, apr_file_t *doopen, int domkdir, int slen,
 APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_pool_t *p)
 {
 #ifndef HAVE_MKSTEMP
-    int rv;
+    return gettemp(template, fp, p);
 #else
     int fd;
-#endif
-
-#ifndef HAVE_MKSTEMP
-    rv = gettemp(template, (*fp), 0, 0, p);
-    if (rv == 0) {
-        return errno;
-    }
-#else
     (*fp) = apr_pcalloc(p, sizeof(**fp));
     (*fp)->cntxt = p;
     (*fp)->timeout = -1;
@@ -248,14 +220,6 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_p
     (*fp)->fname = apr_pstrdup(p, template);
     (*fp)->filedes = fd;
 
-#endif
-#ifdef WIN32
-    apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
-                              file_cleanup, file_cleanup);
-#elif defined(OS2)
-    apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
-                              apr_file_cleanup, apr_file_cleanup);
-#else
     apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
                               apr_unix_file_cleanup, apr_unix_file_cleanup);
 #endif
