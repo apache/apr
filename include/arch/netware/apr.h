@@ -56,6 +56,16 @@
  * Note: This is a NetWare specific version of apr.h. It is renamed to
  * apr.h at the start of a Windows build.
  */
+/**
+ * @file apr.h
+ * @brief Basic APR header
+ */
+
+/**
+ * @defgroup APR APR Functions
+ * @{
+ */
+
 
 #ifdef NETWARE
 #ifndef APR_H
@@ -323,3 +333,5 @@ typedef int apr_wait_t;
 
 #endif /* APR_H */
 #endif /* NETWARE */
+/** @} */
+
