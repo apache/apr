@@ -12,7 +12,6 @@ PROGRAMS = \
 	server@EXEEXT@ \
 	testnames@EXEEXT@ \
 	testflock@EXEEXT@ \
-	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testthread@EXEEXT@ \
 	testlock@EXEEXT@ \
@@ -21,12 +20,10 @@ PROGRAMS = \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
 	testpipe@EXEEXT@ \
-	testoc@EXEEXT@ \
 	testsockopt@EXEEXT@ \
 	testpoll@EXEEXT@ \
 	testhash@EXEEXT@ \
 	testuser@EXEEXT@ \
-	testdup@EXEEXT@ \
 	testatomic@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
@@ -39,7 +36,7 @@ TARGETS = $(PROGRAMS) $(NONPORTABLE)
 
 LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
-CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.slo
+CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
@@ -64,11 +61,11 @@ testnames@EXEEXT@: testnames.lo $(LOCAL_LIBS)
 testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 	$(LINK) testflock.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testdso@EXEEXT@: testdso.lo mod_test.la libmod_test.la $(LOCAL_LIBS)
-	$(LINK) testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 	$(LINK) occhild.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
+	$(LINK) proc_child.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # FIXME: -prefer-pic is only supported with libtool-1.4+
 mod_test.slo: mod_test.c
@@ -82,9 +79,6 @@ libmod_test.la: mod_test.slo $(LOCAL_LIBS)
 
 testargs@EXEEXT@: testargs.lo $(LOCAL_LIBS)
 	$(LINK) testargs.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testproc@EXEEXT@: testproc.lo $(LOCAL_LIBS)
-	$(LINK) testproc.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testthread@EXEEXT@: testthread.lo $(LOCAL_LIBS)
 	$(LINK) testthread.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -140,22 +134,20 @@ testglobalmutex@EXEEXT@: testglobalmutex.lo $(LOCAL_LIBS)
 testatomic@EXEEXT@: testatomic.lo $(LOCAL_LIBS)
 	$(LINK) testatomic.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testdup@EXEEXT@: testdup.lo $(LOCAL_LIBS)
-	$(LINK) testdup.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
          testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
          testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
-         testdso.lo testoc.lo testdup.lo testsockets.lo CuTest.lo mod_test.la \
-         libmod_test.la occhild@EXEEXT@ $(LOCAL_LIBS)
+         testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
+         CuTest.lo mod_test.la libmod_test.la occhild@EXEEXT@ \
+         proc_child@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo      \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo     \
-	testdso.lo testoc.lo testdup.lo testsockets.lo CuTest.lo \
-	$(LOCAL_LIBS) $(ALL_LIBS)
+	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo 	  \
+	CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE
