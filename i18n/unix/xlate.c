@@ -357,13 +357,7 @@ apr_int32_t apr_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar)
 
 apr_status_t apr_xlate_close(apr_xlate_t *convset)
 {
-    apr_status_t status;
-
-    if ((status = apr_xlate_cleanup(convset)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(convset->pool, convset, apr_xlate_cleanup);
-    }
-
-    return status;
+    return apr_pool_cleanup_run(convset->pool, convset, apr_xlate_cleanup);
 }
 
 #endif /* APR_HAS_XLATE */

@@ -199,13 +199,7 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
 
 APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mm)
 {
-    apr_status_t rv;
-
-    if ((rv = mmap_cleanup(mm)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(mm->cntxt, mm, mmap_cleanup);
-        return APR_SUCCESS;
-    }
-    return rv;
+    return apr_pool_cleanup_run(mm->cntxt, mm, mmap_cleanup);
 }
 
 #endif

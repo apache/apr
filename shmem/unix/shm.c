@@ -418,9 +418,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 {
-    apr_status_t rv = shm_cleanup_owner(m);
-    apr_pool_cleanup_kill(m->pool, m, shm_cleanup_owner);
-    return rv;
+    return apr_pool_cleanup_run(m->pool, m, shm_cleanup_owner);
 }
 
 static apr_status_t shm_cleanup_attach(void *m_)
