@@ -75,6 +75,7 @@ ap_status_t file_cleanup(void *thefile)
 
     if (rv == 0) {
         file->filedes = -1;
+        file->filehand = NULL;
         return APR_SUCCESS;
     }
     else {
@@ -116,26 +117,29 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     (*new)->filedes = -1;
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
-        buf_oflags = strdup("r+");
+        buf_oflags = ap_pstrdup(cont, "r+");
         oflags = O_RDWR;
     }
     else if (flag & APR_READ) {
-        buf_oflags = strdup("r");
+        buf_oflags = ap_pstrdup(cont, "r");
         oflags = O_RDONLY;
     }
     else if (flag & APR_WRITE) {
-        buf_oflags = strdup("w");
+        buf_oflags = ap_pstrdup(cont, "r");
         oflags = O_WRONLY;
     }
     else {
-       (*new)->filedes = -1;
+        (*new)->filedes = -1;
         return APR_EACCES; 
     }
 
     if (flag & APR_BUFFERED) {
-       (*new)->buffered = TRUE;
+        (*new)->buffered = TRUE;
     }
-   (*new)->fname = strdup(fname);
+    else {
+        (*new)->buffered = FALSE;
+    }
+    (*new)->fname = ap_pstrdup(cont, fname);
 
     if (flag & APR_CREATE) {
         oflags |= O_CREAT; 
