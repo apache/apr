@@ -382,8 +382,7 @@ apr_status_t apr_proc_wait(apr_proc_t *proc,
                            apr_wait_how_e waithow)
 {
     pid_t status;
-    if (!proc)
-        return APR_ENOPROC;
+
     if (waithow == APR_WAIT) {
         if ((status = waitpid(proc->pid, NULL, WUNTRACED)) > 0) {
             return APR_CHILD_DONE;
