@@ -1,4 +1,5 @@
 Makefile
+testmd5
 testmmap
 htdigest
 ab
