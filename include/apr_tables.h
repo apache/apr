@@ -127,21 +127,6 @@ struct apr_table_entry_t {
 };
 
 /**
- * A transparent type for items stored in binary-content tables, and
- * possibly elsewhere.
- */
-typedef struct apr_item_t {
-    /** The key for the current table entry */
-    char *key;          /* maybe NULL in future;
-                         * check when iterating thru table_elts
-                         */
-    /** Size of the opaque block comprising the item's content. */
-    size_t size;
-    /** A pointer to the content itself. */
-    void *data;
-} apr_item_t;
-
-/**
  * Get the elements from a table
  * @param t The table
  * @return An array containing the contents of the table
