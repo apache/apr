@@ -63,6 +63,16 @@
 #include <unistd.h>
 #endif
 
+static void maybe_arg(const char *arg)
+{
+    if (arg) {
+        printf(" with %s\n", arg);
+    }
+    else {
+        printf("\n");
+    }
+}
+
 int main(int argc, char * const argv[])
 {
     apr_pool_t *context;
@@ -80,7 +90,7 @@ int main(int argc, char * const argv[])
         exit(1);
     }
     while (apr_getopt(opt, "abc:d::", &data, &optarg) == APR_SUCCESS) {
-        switch(data) {
+        switch (data) {
             case 'a':
             case 'b':
                 printf("option %c\n", data);
@@ -90,14 +100,17 @@ int main(int argc, char * const argv[])
                 break;
             case 'd':
                 printf("option %c", data);
-                if (optarg) {
-                    printf(" with %s\n", optarg);
-                }
-                else {
-                    printf("\n");
-                }
+                maybe_arg(optarg);
+                break;
+            default:
+                printf("unknown option: %c", data);
+                maybe_arg(optarg);
                 break;
         }
     }
+
+    while (opt->ind < opt->argc)
+        printf("extra arg: %s\n", opt->argv[opt->ind++]);
+
     return 1;
 }
