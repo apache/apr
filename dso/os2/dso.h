@@ -66,6 +66,7 @@
 struct ap_dso_handle_t {
     ap_pool_t  *cont;       /* Context for returning error strings */
     HMODULE       handle;     /* Handle to the DSO loaded            */
+    ap_status_t   load_error;
     char          *failed_module;
 };
 

@@ -62,13 +62,16 @@ ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path,
                         ap_pool_t *ctx)
 {
     HINSTANCE os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
+
     if(os_handle == NULL) {
-        return GetLastError();
+        (*res_handle)->load_error = GetLastError();
+        return (*res_handle)->load_error;
     }
 
-    *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
+    (*res_handle)->load_error = APR_SUCCESS;
     return APR_SUCCESS;
 }
     
@@ -94,7 +97,7 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     return APR_SUCCESS;
 }
 
-char *ap_dso_error(char *buf, int bufsize, ap_status_t errcode)
+char *ap_dso_error(ap_dso_handle_t *dso, char *buf, ap_size_t bufsize)
 {
-    return "An error occured loading a DLL.";
+    return ap_strerror(dso->load_error, buf, bufsize);
 }

@@ -70,16 +70,20 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
     void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
 #endif    
 
-    if(os_handle == NULL)
+    if(os_handle == NULL) {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+        (*res_handle)->errormsg = strerror(errno);
         return errno;
 #else
+        (*res_handle)->errormsg = dlerror();
         return APR_EDSOOPEN;
 #endif
+    }
 
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
+    (*res_handle)->errormsg = NULL;
     return APR_SUCCESS;
 }
     
@@ -134,13 +138,9 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     return APR_SUCCESS;
 }
 
-char *ap_dso_error(char *buf, int bufsize, ap_status_t errcode)
+char *ap_dso_error(ap_dso_handle_t *dso, char *buffer, ap_size_t buflen)
 {
-#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
-    return strerror(errno);
-#elif defined(HAVE_DYLD)
-    return NULL;
-#else
-    return dlerror();
-#endif
+    if (dso->errormsg)
+        return dso->errormsg;
+    return "No Error";
 }
