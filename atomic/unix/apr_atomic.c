@@ -58,36 +58,6 @@
 
 #include <stdlib.h>
 
-#if defined(__FreeBSD__) && !defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
-
-#include <machine/atomic.h>
-
-APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
-{
-    return atomic_add_int(mem, val);
-}
-#define APR_OVERRIDE_ATOMIC_ADD32
-
-APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
-{
-    return atomic_subtract_int(mem, 1);
-}
-#define APR_OVERRIDE_ATOMIC_DEC32
-
-APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
-{
-    return atomic_add_int(mem, 1);
-}
-#define APR_OVERRIDE_ATOMIC_INC32
-
-APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
-{
-    atomic_set_int(mem, val);
-}
-#define APR_OVERRIDE_ATOMIC_SET32
-
-#endif /* __FreeBSD__ && !__i386__ */
-
 #if defined(__i386__) && defined(__GNUC__) && !APR_FORCE_ATOMIC_GENERIC
 
 APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, 
