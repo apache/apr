@@ -69,11 +69,10 @@ Sigfunc *signal(int signo, Sigfunc * func);
 #ifndef _POSIX_THREAD_SAFE_FUNCTIONS
 #define SAFETY_LOCK(func_name, cnt, name_str) \
     { \
-    struct lock_t *funclock = lock_##func_name; \
-    if (funclock == NULL) \
-        if (ap_create_lock(cnt, APR_MUTEX, APR_LOCKALL, name_str, &funclock) != APR_SUCCESS) \
+    if (lock_##func_name == NULL) \
+        if (ap_create_lock(cnt, APR_MUTEX, APR_INTRAPROCESS, name_str, &lock_##func_name) != APR_SUCCESS) \
             return APR_NOTTHREADSAFE; \
-    if (ap_lock(funclock) != APR_SUCCESS) \
+    if (ap_lock(lock_##func_name) != APR_SUCCESS) \
         return APR_NOTTHREADSAFE; \
     }
 #else
