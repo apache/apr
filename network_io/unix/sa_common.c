@@ -139,8 +139,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
 APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
                                        apr_sockaddr_t *sockaddr)
 {
-    /* XXX IPv6 - assumes sin_port and sin6_port at same offset */
-    *port = ntohs(sockaddr->sa.sin.sin_port);
+    *port = sockaddr->port;
     return APR_SUCCESS;
 }
 
@@ -148,12 +147,12 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
                                          apr_sockaddr_t *sockaddr)
 {
     *addr = apr_palloc(sockaddr->pool, sockaddr->addr_str_len);
-    apr_inet_ntop(sockaddr->sa.sin.sin_family,
+    apr_inet_ntop(sockaddr->family,
                   sockaddr->ipaddr_ptr,
                   *addr,
                   sockaddr->addr_str_len);
 #if APR_HAVE_IPV6
-    if (sockaddr->sa.sin.sin_family == AF_INET6 &&
+    if (sockaddr->family == AF_INET6 &&
         IN6_IS_ADDR_V4MAPPED((struct in6_addr *)sockaddr->ipaddr_ptr)) {
         /* This is an IPv4-mapped IPv6 address; drop the leading
          * part of the address string so we're left with the familiar
@@ -165,12 +164,15 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
     return APR_SUCCESS;
 }
 
-static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
+void apr_set_sockaddr_vars(apr_sockaddr_t *addr, int family, apr_port_t port)
 {
     addr->family = family;
-    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
-    addr->port = ntohs(addr->sa.sin.sin_port);
     addr->sa.sin.sin_family = family;
+    if (port) {
+        /* XXX IPv6: assumes sin_port and sin6_port at same offset */
+        addr->sa.sin.sin_port = htons(port);
+        addr->port = port;
+    }
 
     if (family == APR_INET) {
         addr->salen = sizeof(struct sockaddr_in);
@@ -319,21 +321,16 @@ static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
                           struct addrinfo *ai, apr_port_t port)
 {
     sa->pool = p;
-    sa->sa.sin.sin_family = ai->ai_family;
     memcpy(&sa->sa, ai->ai_addr, ai->ai_addrlen);
-    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
-    sa->sa.sin.sin_port = htons(port);
-    set_sockaddr_vars(sa, sa->sa.sin.sin_family);
+    apr_set_sockaddr_vars(sa, ai->ai_family, port);
 }
 #else
 static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
                           struct in_addr ipaddr, apr_port_t port)
 {
     sa->pool = p;
-    sa->sa.sin.sin_family = AF_INET;
     sa->sa.sin.sin_addr = ipaddr;
-    sa->sa.sin.sin_port = htons(port);
-    set_sockaddr_vars(sa, sa->sa.sin.sin_family);
+    apr_set_sockaddr_vars(sa, AF_INET, port);
 }
 #endif
 
@@ -395,16 +392,10 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         freeaddrinfo(ai_list);
     }
     else {
-        if (family == APR_UNSPEC) {
-            (*sa)->sa.sin.sin_family = APR_INET;
-        }
-        else {
-            (*sa)->sa.sin.sin_family = family;
-        }
         (*sa)->pool = p;
-        /* XXX IPv6: assumes sin_port and sin6_port at same offset */
-        (*sa)->sa.sin.sin_port = htons(port);
-        set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
+        apr_set_sockaddr_vars(*sa, 
+                              family == APR_UNSPEC ? APR_INET : family,
+                              port);
     }
 #else
     if (hostname != NULL) {
@@ -488,15 +479,10 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 #endif
     }
     else {
-        if (family == APR_UNSPEC) {
-            (*sa)->sa.sin.sin_family = APR_INET;
-        }
-        else {
-            (*sa)->sa.sin.sin_family = family;
-        }
         (*sa)->pool = p;
-        (*sa)->sa.sin.sin_port = htons(port);
-        set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
+        apr_set_sockaddr_vars(*sa, 
+                              family == APR_UNSPEC ? APR_INET : family,
+                              port);
     }
 #endif
     return APR_SUCCESS;
