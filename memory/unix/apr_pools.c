@@ -903,6 +903,8 @@ struct psprintf_data {
     apr_memnode_t   *free;
 };
 
+#define APR_PSPRINTF_MIN_STRINGSIZE 32
+
 static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 {
     struct psprintf_data *ps = (struct psprintf_data *)vbuff;
@@ -917,6 +919,14 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     strp = ps->vbuff.curpos;
     cur_len = strp - active->first_avail;
     size = cur_len << 1;
+
+    /* Make sure that we don't try to use a block that has less
+     * than APR_PSPRINTF_MIN_STRINGSIZE bytes left in it.  This
+     * also catches the case where size == 0, which would result
+     * in reusing a block that can't even hold the NUL byte.
+     */
+    if (size < APR_PSPRINTF_MIN_STRINGSIZE)
+	size = APR_PSPRINTF_MIN_STRINGSIZE;
 
     node = active->next;
     if (!ps->got_a_new_node && node->first_avail + size < node->endp) {
@@ -991,6 +1001,19 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     ps.vbuff.endpos = ps.node->endp - 1;
     ps.got_a_new_node = 0;
     ps.free = NULL;
+
+    /* Make sure that the first node passed to apr_vformatter has at least
+     * room to hold the NUL terminator.
+     */
+    if (ps.node->first_avail == ps.node->endp) {
+	if (psprintf_flush(&ps.vbuff) == -1) {
+	    if (pool->abort_fn) {
+		pool->abort_fn(APR_ENOMEM);
+	    }
+
+	    return NULL;
+	}
+    }
 
     if (apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap) == -1) {
         if (pool->abort_fn)
