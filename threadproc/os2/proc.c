@@ -64,6 +64,7 @@
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include "apr_strings.h"
+#include "apr_signal.h"
 #include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
