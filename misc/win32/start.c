@@ -199,6 +199,11 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_SUCCESS;
     }
 
+    /* Initialize apr_os_level global */
+    if (apr_get_oslevel(NULL, &osver) != APR_SUCCESS) {
+        return APR_EEXIST;
+    }
+    
     if ((status = apr_pool_initialize()) != APR_SUCCESS)
         return status;
     
@@ -206,13 +211,8 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_ENOPOOL;
     }
 
-    apr_pool_tag(pool, "apr_initilialize");
+    apr_pool_tag(pool, "apr_initialize");
 
-    /* Initialize apr_os_level global */
-    if (apr_get_oslevel(pool, &osver) != APR_SUCCESS) {
-        return APR_EEXIST;
-    }
-    
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {

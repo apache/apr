@@ -143,7 +143,7 @@ typedef enum {
 
 extern APR_DECLARE_DATA apr_oslevel_e apr_os_level;
 
-apr_status_t apr_get_oslevel(struct apr_pool_t *, apr_oslevel_e *);
+apr_status_t apr_get_oslevel(apr_oslevel_e *);
 
 /* The APR_HAS_ANSI_FS symbol is PRIVATE, and internal to APR.
  * APR only supports char data for filenames.  Like most applications,
