@@ -340,7 +340,7 @@ case $host in
             apr_atomic_sparc_compile=apr_atomic_sparc.lo
             sparc_arch=`uname -m`
             is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
-            if [ -z "$is_gnu_as" ]
+            if test  -z "$is_gnu_as" 
             then
                 case "$sparc_arch" in
                  sun4c|sun4m|sun4d|sun4t|sun4)
