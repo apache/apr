@@ -126,6 +126,7 @@ AC_CHECK_LIB(truerand,main)
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions.
 AC_CHECK_FUNCS(pthread_sigmask)
+AC_CHECK_FUNCS(sigthreadmask)
 AC_CHECK_FUNCS(strcasecmp stricmp poll setsid)
 AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ]) 
 AC_CHECK_FUNCS(writev)
