@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Renamed --disable-atomics as --disable-optimized-atomics,
+     since it doesn't really disable the atomics.  [Aaron Bannert]
+
   *) Converted apr_pcalloc to a macro  [Brian Pane]
 
   *) Fixed APR_STATUS_IS_ETIMEDOUT macro.
