@@ -67,14 +67,14 @@
 #include <string.h>
 #endif
 
-static void dump_hash(apr_hash_t *h) 
+static void dump_hash(apr_pool_t *p, apr_hash_t *h) 
 {
     apr_hash_index_t *hi;
     char *val, *key;
     int len;
     int i = 0;
 
-    for (hi = apr_hash_first(h); hi; hi = apr_hash_next(hi)) {
+    for (hi = apr_hash_first(p, h); hi; hi = apr_hash_next(hi)) {
         apr_hash_this(hi,(void*) &key, &len,(void*) &val);
         fprintf(stdout, "Key %s (%d) Value %s\n",key,len,val);
         i++;
@@ -86,7 +86,7 @@ static void dump_hash(apr_hash_t *h)
         fprintf(stdout, "#entries %d \n", i);
 }
 
-static void sum_hash(apr_hash_t *h, int *pcount, int *keySum, int *valSum) 
+static void sum_hash(apr_pool_t *p, apr_hash_t *h, int *pcount, int *keySum, int *valSum) 
 {
     apr_hash_index_t *hi;
     void *val, *key;
@@ -95,7 +95,7 @@ static void sum_hash(apr_hash_t *h, int *pcount, int *keySum, int *valSum)
     *keySum = 0;
     *valSum = 0;
     *pcount = 0;
-    for (hi = apr_hash_first(h); hi; hi = apr_hash_next(hi)) {
+    for (hi = apr_hash_first(p, h); hi; hi = apr_hash_next(hi)) {
         apr_hash_this(hi, (void*)&key, NULL, &val);
         *valSum += *(int *)val;
         *keySum += *(int *)key;
@@ -161,7 +161,7 @@ int main(int argc, const char *const argv[])
         fprintf(stderr, "ERROR:apr_hash_get FOO3 = %s (should be bar3)\n",
                 result);
         
-    dump_hash(h);
+    dump_hash(cntxt, h);
 
     h2 =apr_hash_make(cntxt);
     if (h2 == NULL)  {
@@ -184,7 +184,7 @@ int main(int argc, const char *const argv[])
         apr_hash_set(h2, key, sizeof(int), val);
     }
 
-    sum_hash(h2, &i, &trySumKey, &trySumVal);
+    sum_hash(cntxt, h2, &i, &trySumKey, &trySumVal);
     if (i==100) {
        fprintf(stdout, "All keys accounted for\n");
     } else {
@@ -207,7 +207,7 @@ int main(int argc, const char *const argv[])
     } else {
       fprintf(stdout, "Delete working\n");
     }
-    sum_hash(h2, &i, &trySumKey, &trySumVal);
+    sum_hash(cntxt, h2, &i, &trySumKey, &trySumVal);
 
     sumKeys -= 891;
     sumVal -= 89;
@@ -234,14 +234,14 @@ int main(int argc, const char *const argv[])
     if (apr_hash_count(h4) != apr_hash_count(h)) {
         fprintf(stderr,
                 "ERROR: overlay not working with blank overlay as overlay\n");
-        dump_hash(h4);
+        dump_hash(cntxt, h4);
     }
 
     h4 = apr_hash_overlay(cntxt, h, h3);
     if (apr_hash_count(h4) != apr_hash_count(h)) {
         fprintf(stderr,
                 "ERROR: overlay not working with blank overlay as base\n");
-        dump_hash(h4);
+        dump_hash(cntxt, h4);
     }
 
     h4 = apr_hash_overlay(cntxt, h, h2);
@@ -253,7 +253,7 @@ int main(int argc, const char *const argv[])
     if (apr_hash_count(h4) != apr_hash_count(h))  {
         fprintf(stderr,
                 "ERROR: overlay not working when overlaying same hash\n");
-        dump_hash(h4);
+        dump_hash(cntxt, h4);
     }
         
     result = apr_hash_get(h4, "FOO2", APR_HASH_KEY_STRING);
