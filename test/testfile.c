@@ -684,6 +684,9 @@ static void test_mod_neg(apr_pool_t *p, apr_int32_t flags)
     assert(!rv);
     assert(!strcmp(buf, "end456789\n"));
 
+    rv = apr_file_close(f);
+    assert(!rv);
+
     rv = apr_file_remove(fname, p);
     assert(!rv);
 }
