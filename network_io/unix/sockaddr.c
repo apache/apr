@@ -391,6 +391,16 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         /* getaddrinfo according to RFC 2553 must have either hostname
          * or servname non-NULL.
          */
+#ifdef _AIX
+        /* But current AIX getaddrinfo() doesn't like servname = "0";
+         * the "1" won't hurt since we use the port parameter to fill
+         * in the returned socket addresses later
+         */
+        if (!port) {
+            servname = "1";
+        }
+        else
+#endif
         servname = apr_itoa(p, port);
     }
     error = getaddrinfo(hostname, servname, &hints, &ai_list);
