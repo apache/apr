@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) new error status APR_STATUS_IS_ENOTENOUGHENTROPY, Doxygen fixes
+     [Sander Temme <sander at temme dot net]
+
   *) Add apr_socket_type_get() for retrieving the type (e.g., stream)
      of the socket.  [Philippe M. Chiasson]
 
