@@ -201,10 +201,9 @@ fi
 
 dnl #----------------------------- Checks for Any required Libraries
 AC_CHECK_LIB(nsl,gethostbyname)
-AC_CHECK_LIB(nsl,gethostname)
+AC_SEARCH_LIBS(gethostname, nsl)
 AC_CHECK_LIB(socket,socket)
-AC_CHECK_LIB(crypt,crypt)
-AC_CHECK_LIB(ufc,crypt)
+AC_SEARCH_LIBS(crypt, crypt ufc)
 AC_CHECK_LIB(truerand,main)
 AC_CHECK_LIB(iconv,iconv)
 
