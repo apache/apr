@@ -1,4 +1,9 @@
 Changes with APR b1
+
+  *) Darwin/Mac OS X: Don't leave zombie processes when the app calls
+     apr_signal(SIGCHLD, SIG_IGN).  This fixes a problem with Apache's
+     mod_cgid.  PR 9168.  [Jeff Trawick]
+
   *) Win32: Fix bug where apr_sendfile() was incorrectly returning
      APR_SUCCESS on a TransmitFile call that was interrupted by
      the client closing its end of the connection. Always call 
