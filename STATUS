@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/06/29 08:00:48 $]
+Last modified at [$Date: 2001/07/16 08:06:14 $]
 
 Release:
 
@@ -143,9 +143,17 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       - decide on a better name for the code
       - reformat to APR style (think this is now done, but some tabs left)
       - test on more systems
-      - add to the default build as currently it's omitted.  Also need to
-        add testmem to the test build at that point.
       - add more detailed tests to testmem.c
+        Status: Optionally enable it with --enable-sms.  Still wildly 
+                unproven.  But, it actually works as a replacement for 
+                pools now.  (httpd works without pools.)
+                There is a current (non-fatal, but silly) flaw in 
+                the trivial SMS implementation that makes it add 4KB 
+                to each level in the allocation chain.  This is bad. 
+                Adding a child_malloc path has been discussed.  Making
+                the apr_sms_pools.c call with 0 for MIN_FREE has been
+                suggested.  As has rethinking which SMSs constitute an 
+                old-style apr_pool_t.
 
     * In line with the new SMS code is the fact that threading and pools
       just are not working together well.  This is due to the fact that
@@ -159,21 +167,16 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       to have an option for no locking (as they can't have contention
       by definition).  This would mean that the mutex and freelist
       must be moved inside of apr_pool_t.  Therefore, this is the 
-      jumping-off point into SMS.  Short-term, it is *possible* that 
-      ALLOC_USE_MALLOC would be faster than the current pool code for 
-      a threaded APR (but, I'm not sure).
-        Status: Justin volunteers
-                David and Sander are working on some stuff that 
-                should be ready Real Soon Now (TM).  Sander has
-                posted a "trivial" SMS (what a bad name) - see:
-                <JLEGKKNELMHCJPNMOKHOEEAFEBAA.striker@samba-tng.org>
-                which uses the same memory management as the current 
-                pool implementation (freelist that allocates any size).  
-                David is finishing up prototyping a replacement for 
-                apr_pool_t that is defined as an SMS (I believe it is
-                API-compatible).  Not ready for prime-time, but ready 
-                for us to start working out the kinks and actually 
-                starting to use SMS.
+      jumping-off point into SMS.  
+        Justin: The SMS code has been checked into CVS (see above).
+                To solve this problem, we want only one trivial SMS 
+                per thread which acts as the parent for all SMSs in 
+                that thread (giving us thread-local allocation).  
+                Each descendant SMS should be something along the 
+                lines of a tracking SMS.  That's how I see it anyway.
+                There are other possibilities.  Any of those probably 
+                work as well.  See the apr archives for more info.  
+                We're still debating this.
 
 Documentation that needs writing:
 
