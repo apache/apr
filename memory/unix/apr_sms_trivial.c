@@ -96,7 +96,6 @@ typedef struct apr_sms_trivial_t
     apr_size_t           min_alloc;
     apr_size_t           min_free;
     apr_size_t           max_free;
-    apr_lock_t          *lock;
 } apr_sms_trivial_t;
 
 #define SIZEOF_BLOCK_T       APR_ALIGN_DEFAULT(sizeof(block_t))
@@ -129,8 +128,8 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
     /* Round up the size to the next 8 byte boundary */
     size = APR_ALIGN_DEFAULT(size) + SIZEOF_BLOCK_T;
 
-    if (SMS_TRIVIAL_T(sms)->lock)
-        apr_lock_acquire(SMS_TRIVIAL_T(sms)->lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
     
     node = SMS_TRIVIAL_T(sms)->used_sentinel.prev;
 
@@ -140,8 +139,8 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
         node->first_avail += size;
         node->count++;
 
-        if (SMS_TRIVIAL_T(sms)->lock)
-            apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+        if (sms->sms_lock)
+            apr_lock_release(sms->sms_lock);
     
         BLOCK_T(mem)->node = node;
         mem = (char *)mem + SIZEOF_BLOCK_T;
@@ -184,8 +183,8 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
         node->first_avail += size;
         node->count = 1;
 
-        if (SMS_TRIVIAL_T(sms)->lock)
-            apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+        if (sms->sms_lock)
+            apr_lock_release(sms->sms_lock);
 
         BLOCK_T(mem)->node = node;
         mem = (char *)mem + SIZEOF_BLOCK_T;
@@ -207,8 +206,8 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
         node->first_avail += node->avail_size;
         node->avail_size   = 0;
     
-        if (SMS_TRIVIAL_T(sms)->lock)
-            apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+        if (sms->sms_lock)
+            apr_lock_release(sms->sms_lock);
         
         return NULL;
     }
@@ -225,8 +224,8 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
     node->avail_size = node_size - (node->first_avail - (char *)node);
     node->count = 1;
 
-    if (SMS_TRIVIAL_T(sms)->lock)
-        apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
 
     BLOCK_T(mem)->node = node;
     mem = (char *)mem + SIZEOF_BLOCK_T;
@@ -240,14 +239,14 @@ static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
 
     node = BLOCK_T((char *)mem - SIZEOF_BLOCK_T)->node;
 
-    if (SMS_TRIVIAL_T(sms)->lock)
-        apr_lock_acquire(SMS_TRIVIAL_T(sms)->lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
 
     node->count--;
 
     if (node->count) {
-        if (SMS_TRIVIAL_T(sms)->lock)
-            apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+        if (sms->sms_lock)
+            apr_lock_release(sms->sms_lock);
 
         return APR_SUCCESS;
     }
@@ -262,8 +261,8 @@ static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
         if (sms->parent->free_fn &&
             node->avail_size > SMS_TRIVIAL_T(sms)->max_free &&
             node != SMS_TRIVIAL_T(sms)->self) {
-            if (SMS_TRIVIAL_T(sms)->lock)
-                apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+            if (sms->sms_lock)
+                apr_lock_release(sms->sms_lock);
 
             return apr_sms_free(sms->parent, node);
         }
@@ -278,8 +277,8 @@ static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
             SMS_TRIVIAL_T(sms)->max_free -= node->avail_size;
     }
 
-    if (SMS_TRIVIAL_T(sms)->lock)
-        apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
 
     return APR_SUCCESS;
 }
@@ -324,8 +323,8 @@ static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
     
     free_list = NULL;
     
-    if (SMS_TRIVIAL_T(sms)->lock)
-        apr_lock_acquire(SMS_TRIVIAL_T(sms)->lock);
+    if (sms->sms_lock)
+        apr_lock_acquire(sms->sms_lock);
 
     /* Always reset our base node as this can't be reclaimed. */
     node = SMS_TRIVIAL_T(sms)->self;
@@ -397,8 +396,8 @@ static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
     node->next = node->prev = used_sentinel;
     used_sentinel->next = used_sentinel->prev = node;
 
-    if (SMS_TRIVIAL_T(sms)->lock)
-        apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
+    if (sms->sms_lock)
+        apr_lock_release(sms->sms_lock);
 
     while ((node = free_list) != NULL) {
         free_list = node->next;
@@ -413,16 +412,9 @@ static apr_status_t apr_sms_trivial_pre_destroy(apr_sms_t *sms)
     /* This function WILL always be called.  However, be aware that the
      * main sms destroy function knows that it's not wise to try and destroy
      * the same piece of memory twice, so the destroy function in a child won't
-     * neccesarily be called.  To guarantee we destroy the lock it's therefore
-     * destroyed here.
+     * neccesarily be called.  
      */
-        
-    if (SMS_TRIVIAL_T(sms)->lock) {
-        apr_lock_acquire(SMS_TRIVIAL_T(sms)->lock);
-        apr_lock_destroy(SMS_TRIVIAL_T(sms)->lock);
-        SMS_TRIVIAL_T(sms)->lock = NULL;
-    }
-    
+
     return APR_SUCCESS;    
 }
 
@@ -456,11 +448,6 @@ static apr_status_t apr_sms_trivial_destroy(apr_sms_t *sms)
 static apr_status_t apr_sms_trivial_thread_register(apr_sms_t *sms,
                                                     apr_os_thread_t thread)
 {
-    if (!SMS_TRIVIAL_T(sms)->lock && sms->threads > 1)
-        return apr_lock_create(&SMS_TRIVIAL_T(sms)->lock,
-                               APR_MUTEX, APR_LOCKALL,
-                               NULL, sms->pool);
-
     return APR_SUCCESS;
 }
 
@@ -483,7 +470,7 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
     apr_status_t rv;
 
     *sms = NULL;
-    
+
     min_alloc = APR_ALIGN_DEFAULT(min_alloc);
     min_free  = APR_ALIGN_DEFAULT(min_free);
     if (min_free < SIZEOF_NODE_T)
