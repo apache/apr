@@ -112,34 +112,47 @@ typedef int               apr_signum_t;
  * Finding offsets of elements within structures.
  * Taken from the X code... they've sweated portability of this stuff
  * so we don't have to.  Sigh...
+ * @param p_type pointer type name
+ * @param field  data field within the structure pointed to
+ * @return offset
  */
 
 #if defined(CRAY) || (defined(__arm) && !defined(LINUX))
 #ifdef __STDC__
-#define APR_XtOffset(p_type,field) _Offsetof(p_type,field)
+#define APR_OFFSET(p_type,field) _Offsetof(p_type,field)
 #else
 #ifdef CRAY2
-#define APR_XtOffset(p_type,field) \
+#define APR_OFFSET(p_type,field) \
         (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
 
 #else /* !CRAY2 */
 
-#define APR_XtOffset(p_type,field) ((unsigned int)&(((p_type)NULL)->field))
+#define APR_OFFSET(p_type,field) ((unsigned int)&(((p_type)NULL)->field))
 
 #endif /* !CRAY2 */
 #endif /* __STDC__ */
 #else /* ! (CRAY || __arm) */
 
-#define APR_XtOffset(p_type,field) \
+#define APR_OFFSET(p_type,field) \
         ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
 
+/**
+ * Finding offsets of elements within structures.
+ * @param s_type structure type name
+ * @param field  data field within the structure
+ * @return offset
+ */
 #ifdef offsetof
-#define APR_XtOffsetOf(s_type,field) offsetof(s_type,field)
+#define APR_OFFSETOF(s_type,field) offsetof(s_type,field)
 #else
-#define APR_XtOffsetOf(s_type,field) APR_XtOffset(s_type*,field)
+#define APR_OFFSETOF(s_type,field) APR_OFFSET(s_type*,field)
 #endif
+
+/** @deprecated */
+#define APR_XtOffset APR_OFFSET
+#define APR_XtOffsetOf APR_OFFSETOF
 
 
 /**
