@@ -186,6 +186,50 @@ undefine([AC_CV_NAME])dnl
 ])
 
 dnl
+dnl check for working getaddrinfo()
+dnl
+
+AC_DEFUN(APR_CHECK_WORKING_GETADDRINFO,[
+  AC_CACHE_CHECK(for working getaddrinfo, ac_cv_working_getaddrinfo,[
+  AC_TRY_RUN( [
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
+void main(void) {
+    struct addrinfo hints, *ai;
+    int error;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
+    if (error) {
+        exit(1);
+    }
+    else {
+        exit(0);
+    }
+}
+],[
+  ac_cv_working_getaddrinfo="yes"
+],[
+  ac_cv_working_getaddrinfo="no"
+],[
+  ac_cv_working_getaddrinfo="yes"
+])])
+if test "$ac_cv_working_getaddrinfo" = "yes"; then
+  AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if getaddrinfo exists and works well enough for APR])
+fi
+])
+
+dnl
 dnl check for gethostbyname() which handles numeric address strings
 dnl
 
