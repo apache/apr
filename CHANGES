@@ -5,6 +5,10 @@ Changes for APR 1.1.0
      and upgrading it to do SHA-256. Not yet ready for prime time.
      [Ben Laurie]
 
+  *) Added apr_os_uuid_get() support for Linux via libuuid and for modern 
+     BSDs which have uuid_create as part of their libc.
+     [Paul Querna]
+
   *) Added Solaris 10 'Event Ports' as a backend for APR Pollset.  This 
      backend also supports the APR_POLLSET_THREADSAFE flag.
      [Paul Querna]
