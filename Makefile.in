@@ -114,7 +114,7 @@ dox:
 	doxygen $(top_srcdir)/docs/doxygen.conf
 
 gcov: 
-	build/run-gcov.sh
+	@build/run-gcov.sh
 
 check: $(TARGET_LIB)
 	(cd test && $(MAKE) check)
