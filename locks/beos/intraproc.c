@@ -65,6 +65,7 @@ ap_status_t lock_intra_cleanup(void *data)
             return errno;
     	}
     }
+    delete_sem(lock->sem_intraproc);
     return APR_SUCCESS;
 }    
 
