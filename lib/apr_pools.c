@@ -206,14 +206,6 @@ static union block_hdr *global_block_list;
 #endif /* APR_POOL_DEBUG */
 
 #ifdef ALLOC_STATS
-
-typedef struct allocs {
-    char *ploc;
-    struct allocs *next;
-} allocs;
-
-static allocs *top;
-
 static unsigned long long num_free_blocks_calls;
 static unsigned long long num_blocks_freed;
 static unsigned max_blocks_in_one_free;
@@ -241,58 +233,6 @@ static APR_INLINE void debug_verify_filled(const char *ptr, const char *endp,
 #define debug_fill(a,b)
 #define debug_verify_filled(a,b,c)
 #endif /* ALLOC_DEBUG */
-
-#ifdef ALLOC_STATS
-
-static void add_alloc_stats(union block_hdr *block)
-{
-    allocs *newadd = malloc(sizeof(*newadd));
-
-    newadd->ploc = block->h.first_avail;
-fprintf(stderr, "adding:   %p\n", newadd->ploc);
-    if (top) {
-        newadd->next = top;
-    }
-    top = newadd;
-}
-
-static void remove_allocs(union block_hdr *block)
-{
-    allocs *remove = top;
-    allocs *rem2 = top;
-
-    while (remove && (remove->ploc != block->h.first_avail)) {
-        remove = remove->next;
-    }
-
-    if (!remove) {
-        fprintf(stderr, "Trying to remove memory that was never added, %p?\n", block->h.first_avail);
-        fflush(stderr);
-    }
-    else if (remove == top) {
-        top = top->next;
-        free(remove);
-    }
-    else {
-        while (rem2->next != remove) {
-            rem2 = rem2->next;
-        }
-        rem2->next = remove->next;
-        free(remove);
-    }      
-}
-
-static void dump_allocs(void)
-{
-    allocs *foo = top;
-
-    while (foo) {
-        fprintf(stderr, "%p ", foo->ploc);
-        foo = foo->next;
-    }
-    fprintf(stderr, "\n");
-}
-#endif
 
 /*
  * Get a completely new block from the system pool. Note that we rely on
@@ -333,10 +273,6 @@ static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
     global_block_list = blok;
     blok->h.owning_pool = NULL;
 #endif /* APR_POOL_DEBUG */
-
-#ifdef ALLOC_STATS
-    add_alloc_stats(blok);
-#endif
 
     return blok;
 }
@@ -439,7 +375,6 @@ static void free_blocks(union block_hdr *blok)
     }
     ++num_free_blocks_calls;
     num_blocks_freed += num_blocks;
-    remove_allocs(blok);
 #endif /* ALLOC_STATS */
 
 #if APR_HAS_THREADS
@@ -469,9 +404,6 @@ static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
 	    debug_verify_filled(blok->h.first_avail, blok->h.endp,
 				"[new_block] Ouch!  Someone trounced a block "
 				"on the free list!\n");
-#ifdef ALLOC_STATS
-            add_alloc_stats(blok);
-#endif
 	    return blok;
 	}
 	else {
@@ -597,7 +529,6 @@ static void dump_stats(void)
 	max_blocks_in_one_free,
 	num_malloc_calls,
 	num_malloc_bytes);
-    dump_allocs();
 }
 #endif
 
@@ -1360,4 +1291,3 @@ static void free_proc_chain(struct process_chain *procs)
 	}
     }
 }
-
