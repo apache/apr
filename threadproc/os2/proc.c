@@ -261,14 +261,18 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     interpreter[0] = 0;
     extension = strrchr(progname, '.');
 
-    if (extension == NULL)
+    if (extension == NULL || strchr(extension, '/') || strchr(extension, '\\'))
         extension = "";
 
     if (attr->cmdtype == APR_SHELLCMD || strcasecmp(extension, ".cmd") == 0) {
         strcpy(interpreter, "#!" SHELL_PATH);
         extra_arg = "/C";
-    } else if (stricmp(progname, ".exe") != 0) {
+    } else if (stricmp(extension, ".exe") != 0) {
         status = ap_open(&progfile, progname, APR_READ|APR_BUFFERED, 0, cont);
+
+        if (status == APR_ENOENT) {
+            progname = ap_pstrcat(cont, progname, ".exe", NULL);
+        }
 
         if (status == APR_SUCCESS) {
             status = ap_fgets(interpreter, sizeof(interpreter), progfile);
@@ -350,18 +354,21 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     }
 
     /* Create environment block from list of envariables */
-    for (env_len=1, e=0; env[e]; e++)
-        env_len += strlen(env[e]) + 1;
+    if (env) {
+        for (env_len=1, e=0; env[e]; e++)
+            env_len += strlen(env[e]) + 1;
 
-    env_block = ap_palloc(cont, env_len);
-    env_block_pos = env_block;
+        env_block = ap_palloc(cont, env_len);
+        env_block_pos = env_block;
 
-    for (e=0; env[e]; e++) {
-        strcpy(env_block_pos, env[e]);
-        env_block_pos += strlen(env_block_pos) + 1;
-    }
+        for (e=0; env[e]; e++) {
+            strcpy(env_block_pos, env[e]);
+            env_block_pos += strlen(env_block_pos) + 1;
+        }
 
-    *env_block_pos = 0; /* environment block is terminated by a double null */
+        *env_block_pos = 0; /* environment block is terminated by a double null */
+    } else
+        env_block = NULL;
 
     status = DosExecPgm(error_object, sizeof(error_object), 
                         attr->detached ? EXEC_BACKGROUND : EXEC_ASYNC, 
