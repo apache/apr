@@ -7,7 +7,6 @@
 #undef HAVE_LOCK_EX
 #undef HAVE_F_SETLK
 #undef HAVE_SEM_UNDO
-#undef HAVE_CODESET
 #undef HAVE_PTHREAD_PROCESS_SHARED
 #undef DEV_RANDOM
 #undef HAVE_EGD

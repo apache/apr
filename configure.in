@@ -793,7 +793,7 @@ AC_SUBST(sharedmem)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
-AC_CHECK_FUNCS(calloc strcasecmp stricmp setsid nl_langinfo isinf isnan)
+AC_CHECK_FUNCS(calloc strcasecmp stricmp setsid isinf isnan)
 AC_CHECK_FUNCS(setrlimit, [ have_setrlimit="1" ], [ have_setrlimit="0" ]) 
 AC_CHECK_FUNCS(getrlimit, [ have_getrlimit="1" ], [ have_getrlimit="0" ]) 
 AC_CHECK_FUNCS(writev)
@@ -887,7 +887,6 @@ APR_FLAG_HEADERS(
     fcntl.h		\
     grp.h		\
     io.h		\
-    langinfo.h		\
     limits.h		\
     mach-o/dyld.h	\
     malloc.h		\
@@ -1348,7 +1347,6 @@ dnl Checks for libraries.
 APR_CHECK_DEFINE(LOCK_EX, sys/file.h)
 APR_CHECK_DEFINE(F_SETLK, fcntl.h)
 APR_CHECK_DEFINE(SEM_UNDO, sys/sem.h)
-APR_CHECK_DEFINE(CODESET, langinfo.h)
 
 # We are assuming that if the platform doesn't have POLLIN, it doesn't have
 # any POLL definitions.
