@@ -6,7 +6,7 @@ Changes with APR 0.9.2
   *) Don't use whitespace before preprocessor directives in the configure
      logic.  Such whitespace breaks with some older preprocessors; a 
      particularly nasty break occurs on Tru64 4.0f where APR_CHECK_DEFINE 
-     will always suceed.  [Joe Orton <joe@manyfish.co.uk>]
+     will always succeed.  [Joe Orton <joe@manyfish.co.uk>]
 
   *) Add APR_IPV4_ADDR_OK flag to apr_sockaddr_info_get() to allow
      apps to avoid lookup of IPv6 address if IPv4 address is sufficient.
