@@ -82,11 +82,6 @@ extern "C" {
 #define APR_HASH_KEY_STRING     (-1)
 
 /*
- * Abstract type for hash tables.
- */
-typedef struct apr_hash_t apr_hash_t;
-
-/*
  * Abstract type for scanning hash tables.
  */
 typedef struct apr_hash_index_t apr_hash_index_t;
