@@ -158,7 +158,6 @@ APR_DECLARE(apr_status_t) apr_group_name_get(char **groupname,
                                              apr_gid_t groupid, apr_pool_t *p);
 
 /** @deprecated @see apr_group_name_get */
-#define apr_get_groupname apr_group_name_get
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, 
                                             apr_gid_t groupid, apr_pool_t *p);
 
