@@ -146,7 +146,7 @@ ap_status_t ap_flush(ap_file_t *);
 API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
-ap_status_t ap_make_iov(ap_iovec_t **, struct iovec *, ap_context_t *);
+ap_status_t ap_make_iov(ap_iovec_t **, const struct iovec *, ap_context_t *);
 ap_status_t ap_dupfile(ap_file_t **, ap_file_t *);
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont);
