@@ -182,7 +182,7 @@ typedef struct tm             ap_os_exp_time_t;
 ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file);     
 ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir);      
 ap_status_t ap_get_os_sock(ap_os_sock_t *, ap_socket_t *);
-ap_status_t ap_get_os_lock(ap_os_lock_t *, ap_lock_t *);     
+ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock);     
 ap_status_t ap_get_os_proc(ap_os_proc_t *, ap_proc_t *);     
 ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **, ap_exploded_time_t *);     
 ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *);     
@@ -196,7 +196,8 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
 ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, 
                           ap_context_t *cont); 
 ap_status_t ap_put_os_sock(ap_socket_t **, ap_os_sock_t *, ap_context_t *);
-ap_status_t ap_put_os_lock(ap_lock_t **, ap_os_lock_t *, ap_context_t *); 
+ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
+                           ap_context_t *cont); 
 ap_status_t ap_put_os_proc(ap_proc_t **, ap_os_proc_t *, ap_context_t *); 
 ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_context_t *); 
 ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_context_t *); 

@@ -57,13 +57,13 @@
 #include "../../locks/unix/locks.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_context(ap_context_t **, ap_context_t *)
+ * ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
  *    Create a new context.
- * arg 1) The parent context.  If this is NULL, the new context is a root
+ * arg 1) The context we have just created.
+ * arg 2) The parent context.  If this is NULL, the new context is a root
  *        context.  If it is non-NULL, the new context will inherit all
  *        of it's parent context's attributes, except the ap_context_t will be a
  *        sub-pool.
- * arg 2) The context we have just created.
  */
 ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont)
 {
@@ -92,7 +92,7 @@ ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_destroy_context(ap_context_t *)
+ * ap_status_t ap_destroy_context(ap_context_t *cont)
  *    Free the context and all of it's child contexts'.
  * arg 1) The context to free.
  */
@@ -103,13 +103,14 @@ ap_status_t ap_destroy_context(struct context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_userdata(ap_context_t *, void *, char *,
-                               ap_status_t (*cleanup) (void *))
+ * ap_status_t ap_set_userdata(void *data, char *key, 
+ *                             ap_status_t (*cleanup) (void *),
+ *                             ap_context_t *cont)
  *    Set the data associated with the current context.
- * arg 1) The current context.
- * arg 2) The user data associated with the context.
- * arg 3) The key to use for association
- * arg 4) The cleanup program to use to cleanup the data;
+ * arg 1) The user data associated with the context.
+ * arg 2) The key to use for association
+ * arg 3) The cleanup program to use to cleanup the data;
+ * arg 4) The current context.
  * NOTE:  The data to be attached to the context should have the same
  *        life span as the context it is being attached to.
  *        
@@ -152,11 +153,11 @@ ap_status_t ap_set_userdata(void *data, char *key,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_userdata(void **, ap_context_t *)
+ * ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
  *    Return the data associated with the current context.
- * arg 1) The current context.
- * arg 2) The key for the data to retrieve
- * arg 3) The user data associated with the context.
+ * arg 1) The key for the data to retrieve
+ * arg 2) The user data associated with the context.
+ * arg 3) The current context.
  */
 ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 {
@@ -181,7 +182,7 @@ ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_initialize()
+ * ap_status_t ap_initialize(void)
  *    Setup any APR internal data structures.  This MUST be the first
  *    function called for any APR program.
  */
@@ -191,6 +192,16 @@ ap_status_t ap_initialize(void)
     return APR_SUCCESS;
 }
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont)
+ *    Set the APR_ABORT function.
+ * NOTE:  This is in for backwards compatability.  If the program using
+ *        APR wants APR to exit on a memory allocation error, then this
+ *        function should be called to set the function to use in order
+ *        to actually exit the program.  If this function is not called,
+ *        then APR will return an error and expect the calling program to
+ *        deal with the error accordingly.
+ */
 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), struct context_t *cont)
 {
     if (cont == NULL) {

@@ -64,8 +64,8 @@ API_VAR_IMPORT int
 API_VAR_IMPORT char *
     ap_optarg;                          /* argument associated with option */
 
-ap_status_t ap_getopt(ap_context_t *, ap_int32_t, char *const *, const char *,
-                      ap_int32_t *);
+ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr,
+                      ap_int32_t *rv, ap_context_t *cont);
 
 #endif  /* ! APR_GETOPT_H */
 

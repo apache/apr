@@ -220,13 +220,15 @@ typedef int               ap_signum_t;
 
 
 /* Context functions */
-ap_status_t ap_create_context(ap_context_t **, ap_context_t *);
+ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont);
 ap_status_t ap_destroy_context(struct context_t *cont);
 ap_status_t ap_exit(ap_context_t *);
-ap_status_t ap_set_userdata(void *, char *, 
-                            ap_status_t (*cleanup) (void *), ap_context_t *);
-ap_status_t ap_get_userdata(void **, char *, ap_context_t *);
+ap_status_t ap_set_userdata(void *data, char *key, 
+                            ap_status_t (*cleanup) (void *), 
+                            ap_context_t *cont);
+ap_status_t ap_get_userdata(void **, char *key, ap_context_t *cont);
 ap_status_t ap_initialize(void);
+ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont);
 
 #ifdef __cplusplus
 }
