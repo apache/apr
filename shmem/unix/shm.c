@@ -161,7 +161,8 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
         new_m->pool = pool;
         new_m->reqsize = reqsize;
-        new_m->realsize = reqsize + sizeof(apr_size_t); /* room for metadata */
+        new_m->realsize = reqsize + 
+            APR_ALIGN_DEFAULT(sizeof(apr_size_t)); /* room for metadata */
         new_m->filename = NULL;
     
 #if APR_USE_SHMEM_MMAP_ZERO
@@ -189,7 +190,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
         /* metadata isn't usable */
-        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + APR_ALIGN_DEFAULT(sizeof(apr_size_t));
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_owner,
                                   apr_pool_cleanup_null);
@@ -206,7 +207,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
         /* metadata isn't usable */
-        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + APR_ALIGN_DEFAULT(sizeof(apr_size_t));
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_owner,
                                   apr_pool_cleanup_null);
@@ -274,7 +275,8 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         new_m->filename = apr_pstrdup(pool, filename);
 
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
-        new_m->realsize = reqsize + sizeof(apr_size_t); /* room for metadata */
+        new_m->realsize = reqsize + 
+            APR_ALIGN_DEFAULT(sizeof(apr_size_t)); /* room for metadata */
         /* FIXME: Ignore error for now. *
          * status = apr_file_remove(file, pool);*/
         status = APR_SUCCESS;
@@ -345,7 +347,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
         /* metadata isn't usable */
-        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + APR_ALIGN_DEFAULT(sizeof(apr_size_t));
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_owner,
                                   apr_pool_cleanup_null);
@@ -482,6 +484,11 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
             return status;
         }
 
+/*
+         XXX use APR_ALIGN_DEFAULT() somewhere here?
+         XXX do we need to seek() prior to the mmap()?
+*/
+
         nbytes = sizeof(new_m->realsize);
         status = apr_file_read(file, (void *)&(new_m->realsize),
                                &nbytes);
@@ -508,7 +515,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         }
 
         /* metadata isn't part of the usable segment */
-        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + APR_ALIGN_DEFAULT(sizeof(apr_size_t));
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_attach,
                                   apr_pool_cleanup_null);
