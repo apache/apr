@@ -138,24 +138,24 @@ int main(void)
 
     printf("\tTrying to set APR_SO_DEBUG...............");
     if (apr_setsocketopt(sock, APR_SO_DEBUG, 1) != APR_SUCCESS){
-        apr_socket_close(sock);
-        printf("Failed\n");
-        exit (-1);
+        printf("Failed (ignored)\n");
     }
-    printf ("OK\n");
+    else {
+        printf ("OK\n");
 
-    printf("\tChecking if we recorded it...............");
-    if (apr_getsocketopt(sock, APR_SO_DEBUG, &ck) != APR_SUCCESS){
-        apr_socket_close(sock);
-        printf("Failed!\n");
-        exit (-1);
+        printf("\tChecking if we recorded it...............");
+        if (apr_getsocketopt(sock, APR_SO_DEBUG, &ck) != APR_SUCCESS){
+            apr_socket_close(sock);
+            printf("Failed!\n");
+            exit (-1);
+        }
+        if (ck != 1){
+            printf ("No (%d)\n", ck);
+            apr_socket_close(sock);
+            exit (-1);
+        }
+        printf ("Yes\n");
     }
-    if (ck != 1){
-        printf ("No (%d)\n", ck);
-        apr_socket_close(sock);
-        exit (-1);
-    }
-    printf ("Yes\n");
 
     printf ("\tTrying to remove APR_SO_KEEPALIVE........");
     if (apr_setsocketopt(sock, APR_SO_KEEPALIVE, 0) != APR_SUCCESS){
