@@ -66,6 +66,10 @@
 #if HAVE_TIME_H
 #include <time.h>
 #endif
+#ifdef OS2
+#define INCL_DOS
+#include <os2.h>
+#endif
 /* End System Headers */
 
 
@@ -253,16 +257,17 @@ ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
 
 void ap_sleep(ap_interval_time_t t)
 {
+#ifdef OS2
+    DosSleep(t/1000);
+#else
     struct timeval tv;
     tv.tv_usec = t % AP_USEC_PER_SEC;
     tv.tv_sec = t / AP_USEC_PER_SEC;
     select(0, NULL, NULL, NULL, &tv);
+#endif
 }
 
 #ifdef OS2
-#define INCL_DOS
-#include <os2.h>
-
 ap_status_t ap_os2_time_to_ap_time(ap_time_t *result, FDATE os2date, FTIME os2time)
 {
   struct tm tmpdate;
