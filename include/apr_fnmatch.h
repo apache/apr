@@ -61,10 +61,10 @@ extern "C" {
  * @param strings The string we are trying to match
  * @param flags flags to use in the match.  Bitwise OR of:
  * <PRE>
- *              FNM_NOESCAPE   --  Disable backslash escaping
- *              FNM_PATHNAME   --  Slash must be matched by slash
- *              FNM_PERIOD     --  Period must be matched by period
- *              FNM_CASE_BLIND --  Compare characters case-insensitively.
+ *              FNM_NOESCAPE       Disable backslash escaping
+ *              FNM_PATHNAME       Slash must be matched by slash
+ *              FNM_PERIOD         Period must be matched by period
+ *              FNM_CASE_BLIND     Compare characters case-insensitively.
  * </PRE>
  * @deffunc apr_status_t apr_fnmatch(const char *pattern, const char *strings, int flags)
  */
