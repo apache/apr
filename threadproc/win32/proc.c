@@ -228,7 +228,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     }
 
     if (attr->cmdtype == APR_PROGRAM) {
-        char *ptr = progname;
+        const char *ptr = progname;
 
         if (*ptr =='"') {
             ptr++;
@@ -251,25 +251,11 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         }
     }
     else {
-        char * shell_cmd;
-        OSVERSIONINFO osver;
-        osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-
-        /*
-         * Use CMD.EXE for NT, COMMAND.COM for WIN95
-         */
-        if (GetVersionEx(&osver)) {
-            if (osver.dwPlatformId != VER_PLATFORM_WIN32_NT) {
-            shell_cmd = ap_pstrdup(cont, "COMMAND.COM /C ");
-         }
-         else {
-            shell_cmd = ap_pstrdup(cont, "CMD.EXE /C ");
-          }
-       }
-       else {
-          shell_cmd = ap_pstrdup(cont, "CMD.EXE /C ");
-       }
-       cmdline = ap_pstrcat(cont, shell_cmd, progname, NULL);
+        char * shell_cmd = getenv("COMSPEC");
+        if (!shell_cmd)
+            shell_cmd = SHELL_PATH;
+        shell_cmd = ap_pstrdup(cont, shell_cmd);
+        cmdline = ap_pstrcat(cont, shell_cmd, " /C ", progname, NULL);
     }
 
     i = 1;
