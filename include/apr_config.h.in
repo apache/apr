@@ -106,6 +106,9 @@
 /* Define if you have the poll function.  */
 #undef HAVE_POLL
 
+/* Define if you have the pthread_sigmask function.  */
+#undef HAVE_PTHREAD_SIGMASK
+
 /* Define if you have the setsid function.  */
 #undef HAVE_SETSID
 

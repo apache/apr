@@ -196,6 +196,7 @@ msg=no)
 AC_MSG_RESULT([$msg])
 
 dnl Checks for library functions.
+AC_CHECK_FUNCS(pthread_sigmask)
 AC_CHECK_FUNCS(strcasecmp stricmp poll setsid)
 AC_CHECK_FUNCS(sigaction writev)
 AC_CHECK_FUNCS(getpass)

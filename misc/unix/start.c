@@ -161,7 +161,7 @@ ap_status_t ap_get_userdata(struct context_t *cont, void **data)
  */
 ap_status_t ap_initialize(void)
 {
-#ifdef HAVE_PTHREAD_H 
+#ifdef HAVE_PTHREAD_SIGMASK 
     sigset_t sigset;
 
     sigfillset(&sigset);
