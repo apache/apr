@@ -357,12 +357,13 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         PLATOSVERS=`uname -r`
         case $PLATOSVERS in
             5.1)
-                APR_ADDTO(CPPFLAGS, [-I/boot/develop/headers/bone -DSIGPROCMASK_SETS_THREAD_MASK])
+                APR_ADDTO(CPPFLAGS, [-I/boot/develop/headers/bone])
                 APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
                 APR_ADDTO(LIBS, [-lbind -lsocket -lbe -lroot])
                 ;;
 	esac
-	;;
+	APR_ADDTO(CPPFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK])
+        ;;
     4850-*.*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -DMPRAS])
 	APR_ADDTO(LIBS, [-lsocket -lnsl -lc -L/usr/ucblib -lucb])
