@@ -183,6 +183,7 @@ static void test_pipe_writefull(CuTest *tc)
     apr_procattr_t *procattr;
     const char *args[2];
     apr_status_t rv;
+    apr_exit_why_e why;
     
     rv = apr_procattr_create(&procattr, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
@@ -221,6 +222,11 @@ static void test_pipe_writefull(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     bytes_processed = (int)apr_strtoi64(responsebuf, NULL, 10);
     CuAssertIntEquals(tc, iterations * bytes_per_iteration, bytes_processed);
+
+    CuAssert(tc, "wait for child process",
+             apr_proc_wait(&proc, NULL, &why, APR_WAIT) == APR_CHILD_DONE);
+    
+    CuAssert(tc, "child terminated normally", why == APR_PROC_EXIT);
 }
 
 CuSuite *testpipe(void)
