@@ -123,5 +123,10 @@ struct apr_procattr_t {
     apr_int32_t detached;
 };
 
+struct apr_thread_once_t {
+    sem_id sem;
+    int hit;
+};
+
 #endif  /* ! THREAD_PROC_H */
 
