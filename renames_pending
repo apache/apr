@@ -27,20 +27,20 @@ apr_socket_bind                  from apr_bind
 apr_socket_listen                from apr_listen
 apr_socket_accept                from apr_accept
 apr_socket_connect               from apr_connect
-apr_sockaddr_name_info_get       from apr_getnameinfo
 apr_socket_send                  from apr_send
 apr_socket_sendv                 from apr_sendv
 apr_socket_sendto                from apr_sendto
 apr_socket_recv_from             from apr_recvfrom
 apr_socket_file_send             from apr_sendfile
 apr_socket_recv                  from apr_recv
-apr_socket_opt_set               from apr_setsocketopt
-apr_socket_opt_get               from apr_getsocketopt
 apr_socket_file_create           from apr_socket_from_file
-apr_service_byname_get           from apr_getservbyname
 apr_socket_filter_accept         from apr_socket_accept_filter
 apr_socket_inherit_set           from apr_socket_set_inherit
 apr_socket_inherit_unset         from apr_socket_unset_inherit
+
+apr_service_byname_get           from apr_getservbyname
+
+apr_sockaddr_name_info_get       from apr_getnameinfo
 
 apr_time_exp_gmt_get             from apr_implode_gmt
 apr_time_interval_t              from apr_interval_time_t
