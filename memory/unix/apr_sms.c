@@ -192,8 +192,8 @@ APR_DECLARE(apr_sms_t *) apr_sms_create(void *memory,
     mem_sys->parent_mem_sys = parent_mem_sys;
     mem_sys->accounting_mem_sys = mem_sys;
 
-    if (parent_mem_sys != NULL){
-        if ((mem_sys->sibling_mem_sys = parent_mem_sys->child_mem_sys)){
+    if (parent_mem_sys != NULL) {
+        if ((mem_sys->sibling_mem_sys = parent_mem_sys->child_mem_sys)!=NULL) {
             mem_sys->sibling_mem_sys->ref_mem_sys = &mem_sys->sibling_mem_sys;
         }
         mem_sys->ref_mem_sys = &parent_mem_sys->child_mem_sys;
