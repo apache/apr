@@ -172,13 +172,17 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
 
 ap_status_t ap_close(ap_file_t *file)
 {
-    ap_status_t rv;
-  
+    ap_status_t flush_rv = APR_SUCCESS, rv;
+
+    if (file->buffered) {
+        flush_rv = ap_flush(file);
+    }
+
     if ((rv = ap_unix_file_cleanup(file)) == APR_SUCCESS) {
         ap_kill_cleanup(file->cntxt, file, ap_unix_file_cleanup);
         return APR_SUCCESS;
     }
-    return rv;
+    return rv ? rv : flush_rv;
 }
 
 ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
