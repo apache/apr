@@ -124,6 +124,10 @@ SOURCE=.\testflock.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testlock.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testmmap.c
 # End Source File
 # Begin Source File

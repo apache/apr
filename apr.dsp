@@ -165,6 +165,14 @@ SOURCE=.\i18n\unix\xlate.c
 SOURCE=.\locks\win32\locks.c
 # End Source File
 # End Group
+
+SOURCE=.\locks\win32\thread_mutex.c
+# End Source File
+# End Group
+
+SOURCE=.\locks\win32\thread_rwlock.c
+# End Source File
+# End Group
 # Begin Group "memory"
 
 # PROP Default_Filter ""
@@ -429,6 +437,14 @@ SOURCE=.\include\arch\win32\networkio.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\arch\win32\thread_mutex.h
+# End Source File
+# End Group
+
+SOURCE=.\include\arch\win32\thread_rwlock.h
+# End Source File
+# End Group
+
 SOURCE=.\include\arch\win32\threadproc.h
 # End Source File
 # End Group
@@ -563,7 +579,15 @@ SOURCE=.\include\apr_tables.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_thread_mutex.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_thread_proc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_thread_rwlock.h
 # End Source File
 # Begin Source File
 
