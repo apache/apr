@@ -82,7 +82,7 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
         else
             rc = APR_SUCCESS;
         if (rc == APR_SUCCESS)
-            thefile->bufpos = thefile->dataRead = 0;
+            thefile->eof_hit = thefile->bufpos = thefile->dataRead = 0;
     }
 
     return rc;
