@@ -81,6 +81,7 @@ else
           APR_ADDTO(CFLAGS, [-qHALT=E])
           APR_ADDTO(CFLAGS, [-qLANGLVL=extended])
         fi
+	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
         ;;
     *-apollo-*)
 	APR_ADDTO(CFLAGS, [-DAPOLLO])
@@ -198,6 +199,7 @@ dnl	;;
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CFLAGS, [-DSOLARIS2=$PLATOSVERS])
 	APR_ADDTO(LIBS, [-lsocket -lnsl])
+	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
 	;;
     *-sunos4*)
 	APR_ADDTO(CFLAGS, [-DSUNOS4 -DUSEBCOPY])
