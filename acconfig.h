@@ -100,4 +100,8 @@ Sigfunc *signal(int signo, Sigfunc * func);
 #define LOCALTIME_R(x, y) memcpy(y, localtime(x), sizeof(y))
 #endif
 
+#if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP)
+#define strcasecmp(s1,s2) stricmp(s1,s2)
+#endif
+
 #endif /* APR_CONFIG_H */
