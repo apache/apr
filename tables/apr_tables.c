@@ -1211,6 +1211,7 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
     int nhash;
     int i;
     apr_table_entry_t *elts;
+    apr_table_entry_t *dst_elt;
 
     max_keys = a->a.nelts + b->a.nelts;
     if (!max_keys) {
@@ -1265,6 +1266,7 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
      */
     make_array_core(&a->a, b->a.pool, max_keys, sizeof(apr_table_entry_t), 0);
     nkeys = 0;
+    dst_elt = (apr_table_entry_t *)a->a.elts;
     for (i = 0; i < max_keys; i++) {
         if (cat_keys[i].skip) {
             continue;
@@ -1301,18 +1303,19 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
                 next = next->merge_next;
             } while (next);
             *val_next = 0;
-            elt = (apr_table_entry_t *)table_push(a);
-            elt->key = cat_keys[i].elt->key;
-            elt->val = new_val;
-            elt->key_checksum = cat_keys[i].elt->key_checksum;
+            dst_elt->key = cat_keys[i].elt->key;
+            dst_elt->val = new_val;
+            dst_elt->key_checksum = cat_keys[i].elt->key_checksum;
+            dst_elt++;
         }
         else {
-            apr_table_entry_t *elt = (apr_table_entry_t *)table_push(a);
-            elt->key = cat_keys[i].elt->key;
-            elt->val = cat_keys[i].elt->val;
-            elt->key_checksum = cat_keys[i].elt->key_checksum;
+            dst_elt->key = cat_keys[i].elt->key;
+            dst_elt->val = cat_keys[i].elt->val;
+            dst_elt->key_checksum = cat_keys[i].elt->key_checksum;
+            dst_elt++;
         }
     }
+    a->a.nelts = dst_elt - (apr_table_entry_t *)a->a.elts;
     table_reindex(a);
 }
 
