@@ -349,7 +349,7 @@ ap_status_t ap_create_process(ap_proc_t *proc, const char *progname,
     } else if (stricmp(extension, ".exe") != 0) {
         status = ap_open(&progfile, progname, APR_READ|APR_BUFFERED, 0, cont);
 
-        if (status == APR_ENOENT) {
+        if (status != APR_SUCCESS && ap_canonical_error(status) == APR_ENOENT) {
             progname = ap_pstrcat(cont, progname, ".exe", NULL);
         }
 
