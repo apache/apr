@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Don't add the math library (-lm) if the modf() function
+     is already available via libc.  [Roy Fielding]
+
   *) Solaris cc: Don't use the -mt option for threaded builds.  That
      is for non-Posix threading, and the use of it prevented us from
      linking with -lpthread, which in turn caused weird problems for

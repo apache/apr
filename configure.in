@@ -487,7 +487,7 @@ AC_SEARCH_LIBS(gethostname, nsl)
 AC_CHECK_LIB(socket, socket)
 AC_SEARCH_LIBS(crypt, crypt ufc)
 AC_CHECK_LIB(truerand, main)
-AC_CHECK_LIB(m, modf)
+AC_SEARCH_LIBS(modf, m)
 
 dnl ----------------------------- Checking for Threads
 echo "${nl}Checking for Threads..."
