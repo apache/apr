@@ -96,7 +96,7 @@ case "$host_alias" in
     # Use a custom-made libtool replacement
     echo "using aplibtool"
     LIBTOOL="$srcdir/build/aplibtool"
-    gcc $CPPFLAGS $CFLAGS -o $LIBTOOL.exe $LIBTOOL.c
+    gcc $CFLAGS $CPPFLAGS -o $LIBTOOL.exe $LIBTOOL.c
     ;;
 *)  dnl libtoolize requires that the following not be indented
 AC_PROG_LIBTOOL
@@ -141,14 +141,15 @@ AC_ARG_ENABLE(debug,[  --enable-debug            Turn on debugging and compile t
 ])dnl
 
 AC_ARG_ENABLE(maintainer-mode,[  --enable-maintainer-mode  Turn on debugging and compile time warnings],
-  [APR_ADDTO(CFLAGS,-g -DAPR_ASSERT_MEMORY)
+  [APR_ADDTO(NOTEST_CPPFLAGS,-DAPR_ASSERT_MEMORY)
+   APR_ADDTO(CFLAGS,-g)
    if test "$GCC" = "yes"; then
      APR_ADDTO(CFLAGS,[-Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations])
    fi
 ])dnl
 
 AC_ARG_ENABLE(assert-memory,[ --enable-assert-memory  Turn on asserts in the APR memory code],
-  [APR_ADDTO(CFLAGS,-DAPR_ASSERT_MEMORY)
+  [APR_ADDTO(NOTEST_CPPFLAGS,-DAPR_ASSERT_MEMORY)
 ])
 
 dnl # this is the place to put specific options for platform/compiler
