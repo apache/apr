@@ -126,11 +126,38 @@ static const struct apr_unix_lock_methods_t lockall_methods =
 };
 #endif
 
-static apr_status_t create_lock(apr_lock_t *new, const char *fname)
+static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e_np mech)
 {
-    apr_status_t stat;
-
-    if (new->scope != APR_INTRAPROCESS) {
+    switch (mech) {
+    case APR_LOCK_FCNTL:
+#if APR_HAS_FCNTL_SERIALIZE
+        new->inter_meth = &apr_unix_fcntl_methods;
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
+    case APR_LOCK_FLOCK:
+#if APR_HAS_FLOCK_SERIALIZE
+        new->inter_meth = &apr_unix_flock_methods;
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
+    case APR_LOCK_SYSVSEM:
+#if APR_HAS_SYSVSEM_SERIALIZE
+        new->inter_meth = &apr_unix_sysv_methods;
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
+    case APR_LOCK_PROC_PTHREAD:
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+        new->inter_meth = &apr_unix_proc_pthread_methods;
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
+    case APR_LOCK_DEFAULT:
 #if APR_USE_FLOCK_SERIALIZE
         new->inter_meth = &apr_unix_flock_methods;
 #elif APR_USE_SYSVSEM_SERIALIZE
@@ -142,6 +169,21 @@ static apr_status_t create_lock(apr_lock_t *new, const char *fname)
 #else
         return APR_ENOTIMPL;
 #endif
+        break;
+    default:
+        return APR_ENOTIMPL;
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t create_lock(apr_lock_t *new, apr_lockmech_e_np mech, const char *fname)
+{
+    apr_status_t stat;
+
+    if (new->scope != APR_INTRAPROCESS) {
+        if ((stat = choose_method(new, mech)) != APR_SUCCESS) {
+            return stat;
+        }
     }
 
     if (new->scope != APR_CROSS_PROCESS) {
@@ -189,9 +231,9 @@ static apr_status_t create_lock(apr_lock_t *new, const char *fname)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
-                           apr_lockscope_e scope, const char *fname, 
-                           apr_pool_t *pool)
+apr_status_t apr_lock_create_np(apr_lock_t **lock, apr_locktype_e type, 
+                                apr_lockscope_e scope, apr_lockmech_e_np mech,
+                                const char *fname, apr_pool_t *pool)
 {
     apr_lock_t *new;
     apr_status_t stat;
@@ -202,11 +244,18 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     new->type  = type;
     new->scope = scope;
 
-    if ((stat = create_lock(new, fname)) != APR_SUCCESS)
+    if ((stat = create_lock(new, mech, fname)) != APR_SUCCESS)
         return stat;
 
     *lock = new;
     return APR_SUCCESS;
+}
+
+apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
+                             apr_lockscope_e scope, const char *fname, 
+                             apr_pool_t *pool)
+{
+    return apr_lock_create_np(lock, type, scope, APR_LOCK_DEFAULT, fname, pool);
 }
 
 apr_status_t apr_lock_acquire(apr_lock_t *lock)

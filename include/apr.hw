@@ -157,6 +157,8 @@
 #define APR_USE_PROC_PTHREAD_SERIALIZE    0 
 #define APR_USE_PTHREAD_SERIALIZE         0 
 
+#define APR_HAS_LOCK_CREATE_NP            0
+
 #define APR_PROCESS_LOCK_IS_GLOBAL        0
 
 #define APR_USES_ANONYMOUS_SHM            0
