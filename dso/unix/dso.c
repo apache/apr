@@ -71,7 +71,11 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
 #endif    
 
     if(os_handle == NULL)
+#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+        return errno;
+#else
         return APR_EDSOOPEN;
+#endif
 
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;

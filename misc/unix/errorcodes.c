@@ -57,6 +57,9 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+#ifdef HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
 
 /*
  * stuffbuffer - like ap_cpystrn() but returns the address of the
@@ -98,7 +101,7 @@ static char *apr_error_string(ap_status_t statcode)
     case APR_ENOSHMAVAIL:
         return "No shared memory is currently available";
     case APR_EDSOOPEN:
-        return "Could not open the dso.";
+        return dlerror();
     case APR_INCHILD:
         return
 	    "Your code just forked, and you are currently executing in the "
