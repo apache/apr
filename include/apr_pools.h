@@ -381,6 +381,15 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
                                    apr_status_t (*cleanup)(void *));
 
 /**
+ * Remove a previously registered child cleanup function
+ * @param p The pool remove the cleanup from 
+ * @param data The data to remove from cleanup
+ * @param cleanup The function to remove from cleanup
+ */
+APR_DECLARE(void) apr_pool_child_cleanup_kill(apr_pool_t *p, const void *data,
+                                              apr_status_t (*cleanup) (void *));
+
+/**
  * Run the specified cleanup function immediately and unregister it. Use
  * @a data instead of the data that was registered with the cleanup.
  * @param p The pool remove the cleanup from 
