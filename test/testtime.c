@@ -155,8 +155,8 @@ int main(void)
                  apr_strftime(str, &sz, STR_SIZE, "%T", &xt))
     printf ("        ( %s )\n", str);    
 
-    STD_TEST_NEQ("    apr_explode_time (GMT -5 hours)",
-                 apr_explode_time(&xt2, now, hr_off))
+    STD_TEST_NEQ("    apr_time_exp_tz (GMT -5 hours)",
+                 apr_time_exp_tz(&xt2, now, hr_off))
 
     STD_TEST_NEQ("    apr_strftime (offset) (HH:MM:SS)",
                  apr_strftime(str2, &sz, STR_SIZE, "%T", &xt2))
