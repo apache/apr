@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Cope with BSDi installations where the default make has been
+     replaced with GNU make.  [Joe Orton <joe@manyfish.co.uk>]
+
   *) Changed apr/helpers to apr/build to be consistent with other Apache
      source trees.  Added make variables to rules.mk.in that point to the
      builders directory and its scripts.  Updated buildconf, configure.in,
