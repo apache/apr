@@ -128,6 +128,16 @@ static void get_pseudo_node_identifier(unsigned char *node)
 
 static void get_system_time(apr_uint64_t *uuid_time)
 {
+#ifdef NETWARE
+    uint64_t sec;
+    uint64_t usec;
+    
+    NXGetTime(NX_SINCE_1970, NX_SECONDS, &sec);
+    NXGetTime(NX_SINCE_1970, NX_USECONDS, &usec);
+    *uuid_time = (sec * 10000000) + (usec * 10) +
+        0x01B21DD213814000LL;
+EnterDebugger();  /* Check to make sure that we are actually getting what we expect. */
+#else
     struct timeval tp;
 
     /* ### fix this call to be more portable? */
@@ -138,6 +148,7 @@ static void get_system_time(apr_uint64_t *uuid_time)
        Unix base time is January 1, 1970.      */
     *uuid_time = (tp.tv_sec * 10000000) + (tp.tv_usec * 10) +
         0x01B21DD213814000LL;
+#endif
 }
 
 /* true_random -- generate a crypto-quality random number. */
