@@ -445,6 +445,12 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
     }
 
     finfo->pool = thefile->pool;
+
+    /* ### The finfo lifetime may exceed the lifetime of thefile->pool
+     * but finfo's aren't managed in pools, so where on earth would
+     * we pstrdup the fname into???
+     */
+    finfo->fname = thefile->fname;
  
     /* Extra goodies known only by GetFileInformationByHandle() */
     finfo->inode  =  (apr_ino_t)FileInfo.nFileIndexLow
