@@ -123,7 +123,7 @@ dox:
 
 test: $(TARGET_LIB)
 	(cd test; make clean; make; \
-	for prog in `find . -type f -perm +u+x -name "test*" -print`; do \
+	for prog in `find . -type f -perm -u+x -name "test*" -print`; do \
 	    ./$$prog; \
 	    if [ $$? -eq 255 ]; then \
 	        echo "$$prog failed"; \
