@@ -113,11 +113,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file, apr_file_t *old_fi
 
 
 
-APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file, apr_file_t *old_file, apr_pool_t *p)
 {
-  if (*new_file == NULL) {
-      return APR_EINVAL;
-  }
-
-  return file_dup(new_file, old_file, p);
+  return file_dup(&new_file, old_file, p);
 }

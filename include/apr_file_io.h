@@ -392,13 +392,13 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 
 /**
  * duplicate the specified file descriptor and close the original
- * @param new_file The structure to duplicate into
+ * @param new_file The old file that is to be closed and reused
  * @param old_file The file to duplicate
  * @param p        The pool to use for the new file
  *
  * @remark *arg1 MUST point at a valid apr_file_t. It cannot point at NULL
  */
-APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
+APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file,
                                         apr_pool_t *p);
 
