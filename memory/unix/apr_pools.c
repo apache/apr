@@ -435,6 +435,7 @@ struct apr_pool_t {
     apr_pool_t           *sibling;
     apr_pool_t          **ref;
     cleanup_t            *cleanups;
+    cleanup_t            *free_cleanups;
     apr_allocator_t      *allocator;
     struct process_chain *subprocesses;
     apr_abortfunc_t       abort_fn;
@@ -674,6 +675,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
     pool->cleanups = NULL;
+    pool->free_cleanups = NULL;
 
     /* Free subprocesses */
     free_proc_chain(pool->subprocesses);
@@ -801,6 +803,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     pool->abort_fn = abort_fn;
     pool->child = NULL;
     pool->cleanups = NULL;
+    pool->free_cleanups = NULL;
     pool->subprocesses = NULL;
     pool->user_data = NULL;
     pool->tag = NULL;
@@ -1340,6 +1343,7 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 
     /* Run cleanups */
     run_cleanups(&pool->cleanups);
+    pool->free_cleanups = NULL;
     pool->cleanups = NULL;
 
     /* If new child pools showed up, this is a reason to raise a flag */
@@ -1886,7 +1890,13 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
 #endif /* APR_POOL_DEBUG */
 
     if (p != NULL) {
-        c = (cleanup_t *)apr_palloc(p, sizeof(cleanup_t));
+        if (p->free_cleanups) {
+            /* reuse a cleanup structure */
+            c = p->free_cleanups;
+            p->free_cleanups = c->next;
+        } else {
+            c = apr_palloc(p, sizeof(cleanup_t));
+        }
         c->data = data;
         c->plain_cleanup_fn = plain_cleanup_fn;
         c->child_cleanup_fn = child_cleanup_fn;
@@ -1912,6 +1922,9 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
     while (c) {
         if (c->data == data && c->plain_cleanup_fn == cleanup_fn) {
             *lastp = c->next;
+            /* move to freelist */
+            c->next = p->free_cleanups;
+            p->free_cleanups = c;
             break;
         }
 
