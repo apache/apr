@@ -1237,7 +1237,7 @@ static void free_proc_chain(struct process_chain *procs)
 #ifndef NEED_WAITPID
     /* Pick up all defunct processes */
     for (p = procs; p; p = p->next) {
-        if (apr_proc_wait(p->pid, APR_NOWAIT) == APR_CHILD_DONE) {
+        if (apr_proc_wait(p->pid, APR_NOWAIT) != APR_CHILD_NOTDONE) {
             p->kill_how = kill_never;
         }
     }
