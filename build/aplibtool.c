@@ -109,7 +109,7 @@ typedef struct {
 
 void parse_args(int argc, char *argv[], cmd_data_t *cmd_data);
 bool parse_long_opt(char *arg, cmd_data_t *cmd_data);
-bool parse_short_opt(char *arg, cmd_data_t *cmd_data);
+int parse_short_opt(char *arg, cmd_data_t *cmd_data);
 bool parse_input_file_name(char *arg, cmd_data_t *cmd_data);
 bool parse_output_file_name(char *arg, cmd_data_t *cmd_data);
 void post_parse_fixup(cmd_data_t *cmd_data);
@@ -162,7 +162,12 @@ void parse_args(int argc, char *argv[], cmd_data_t *cmd_data)
                 arg = argv[++a];
                 argused = parse_output_file_name(arg, cmd_data);
             } else {
-                argused = parse_short_opt(arg + 1, cmd_data);
+                int num_used = parse_short_opt(arg + 1, cmd_data);
+                argused = num_used > 0;
+
+                if (num_used > 1) {
+                    a += num_used - 1;
+                }
             }
         } else {
             argused = parse_input_file_name(arg, cmd_data);
@@ -220,33 +225,37 @@ bool parse_long_opt(char *arg, cmd_data_t *cmd_data)
 
 
 
-bool parse_short_opt(char *arg, cmd_data_t *cmd_data)
+int parse_short_opt(char *arg, cmd_data_t *cmd_data)
 {
     if (strcmp(arg, "export-dynamic") == 0) {
-        return true;
+        return 1;
     }
 
     if (strcmp(arg, "module") == 0) {
-        return true;
+        return 1;
     }
 
     if (strcmp(arg, "Zexe") == 0) {
-        return true;
+        return 1;
     }
 
     if (strcmp(arg, "avoid-version") == 0) {
-        return true;
+        return 1;
     }
 
     if (strcmp(arg, "prefer-pic") == 0) {
-        return true;
+        return 1;
     }
 
     if (strcmp(arg, "prefer-non-pic") == 0) {
-        return true;
+        return 1;
     }
 
-    return false;
+    if (strcmp(arg, "version-info") == 0 ) {
+        return 2;
+    }
+
+    return 0;
 }
 
 
