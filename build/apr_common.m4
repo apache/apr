@@ -393,7 +393,7 @@ dnl APR_FLAG_HEADERS(HEADER-FILE ... [, FLAG-TO-SET ] [, "yes" ])
 dnl  we set FLAG-TO-SET to 1 if we find HEADER-FILE, otherwise we set to 0
 dnl  if FLAG-TO-SET is null, we automagically determine it's name
 dnl  by changing all "/" to "_" in the HEADER-FILE and dropping
-dnl  all "." chars. If the 3rd parameter is "yes" then instead of
+dnl  all "." and "-" chars. If the 3rd parameter is "yes" then instead of
 dnl  setting to 1 or 0, we set FLAG-TO-SET to yes or no.
 dnl  
 AC_DEFUN(APR_FLAG_HEADERS,[
@@ -401,7 +401,7 @@ AC_CHECK_HEADERS($1)
 for aprt_i in $1
 do
     ac_safe=`echo "$aprt_i" | sed 'y%./+-%__p_%'`
-    aprt_2=`echo "$aprt_i" | sed -e 's%/%_%g' -e 's/\.//g'`
+    aprt_2=`echo "$aprt_i" | sed -e 's%/%_%g' -e 's/\.//g' -e 's/-//g'`
     if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
        eval "ifelse($2,,$aprt_2,$2)=ifelse($3,yes,yes,1)"
     else
