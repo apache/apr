@@ -119,29 +119,6 @@ struct apr_pollfd_t {
 };
 
 
-/**
- * Poll the sockets in the poll structure
- * @param aprset The poll structure we will be using. 
- * @param numsock The number of sockets we are polling
- * @param nsds The number of sockets signalled.
- * @param timeout The amount of time in microseconds to wait.  This is 
- *                a maximum, not a minimum.  If a socket is signalled, we 
- *                will wake up before this time.  A negative number means 
- *                wait until a socket is signalled.
- * @remark
- * <PRE>
- * The number of sockets signalled is returned in the second argument. 
- *
- *        This is a blocking call, and it will not return until either a 
- *        socket has been signalled, or the timeout has expired. 
- * </PRE>
- */
-/* ### is this deprecated, too? */
-APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
-                                   apr_int32_t *nsds, 
-                                   apr_interval_time_t timeout);
-
-
 /* General-purpose poll API for arbitrarily large numbers of
  * file descriptors
  */
@@ -200,29 +177,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            const apr_pollfd_t **descriptors);
 
 /** @} */
-
-
-/* These functions are deprecated. If you want doc, then go to older
-   versions of this header file.
-
-   ### should probably just be removed.
-*/
-APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll, 
-                                         apr_int32_t num,
-                                         apr_pool_t *cont);
-APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
-                                              apr_socket_t *sock,
-                                              apr_int16_t event);
-APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
-                                               apr_socket_t *sock,
-                                               apr_int16_t events);
-APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, 
-                                                 apr_socket_t *sock);
-APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, 
-                                                 apr_int16_t events);
-APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, 
-                                          apr_socket_t *sock,
-                                          apr_pollfd_t *aprset);
 
 
 #ifdef __cplusplus
