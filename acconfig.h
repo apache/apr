@@ -71,4 +71,11 @@
 typedef int socklen_t;
 #endif
 
+/* switch this on if we have a BeOS version below BONE */
+#if BEOS && !HAVE_BONE_VERSION
+#define BEOS_R5 1
+#else
+#define BEOS_BONE 1
+#endif
+
 #endif /* APR_PRIVATE_H */
