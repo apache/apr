@@ -74,7 +74,7 @@ mod_test.la: mod_test.slo $(LOCAL_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
 
 libmod_test.la: mod_test.slo $(LOCAL_LIBS)
-	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@ $(LOCAL_LIBS) $(ALL_LIBS)
 
 testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testlockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
