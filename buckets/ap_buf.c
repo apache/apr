@@ -72,7 +72,7 @@ APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_status_t) ap_bucket_brigade_destroy(void *data)
+APR_EXPORT(ap_status_t) ap_brigade_destroy(void *data)
 {
     ap_bucket_brigade *b = data;
 
@@ -97,7 +97,7 @@ APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p)
+APR_EXPORT(ap_bucket_brigade *) ap_brigade_create(ap_pool_t *p)
 {
     ap_bucket_brigade *b;
 
@@ -105,12 +105,12 @@ APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p)
     b->p = p;
     b->head = b->tail = NULL;
 
-    ap_register_cleanup(b->p, b, ap_bucket_brigade_destroy, 
-                        ap_bucket_brigade_destroy);
+    ap_register_cleanup(b->p, b, ap_brigade_destroy, 
+                        ap_brigade_destroy);
     return b;
 }
 
-APR_EXPORT(void) ap_bucket_brigade_append_buckets(ap_bucket_brigade *b, 
+APR_EXPORT(void) ap_brigade_append_buckets(ap_bucket_brigade *b, 
                                                   ap_bucket *e)
 {
     ap_bucket *cur = e;
@@ -128,7 +128,7 @@ APR_EXPORT(void) ap_bucket_brigade_append_buckets(ap_bucket_brigade *b,
     }
 }
 
-APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *b, 
+APR_EXPORT(int) ap_brigade_to_iovec(ap_bucket_brigade *b, 
                                            struct iovec *vec, int nvec)
 {
     ap_bucket *e;
@@ -146,7 +146,7 @@ APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *b,
     return vec - orig;
 }
 
-APR_EXPORT(void) ap_bucket_brigade_catenate(ap_bucket_brigade *a, 
+APR_EXPORT(void) ap_brigade_catenate(ap_bucket_brigade *a, 
                                             ap_bucket_brigade *b)
 {
     if (b->head) {
@@ -179,7 +179,7 @@ APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec)
     }
 }
 
-APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
+APR_EXPORT(ap_status_t) ap_brigade_to_iol(ap_ssize_t *total_bytes,
                                                  ap_bucket_brigade *b, 
                                                  ap_iol *iol)
 {
@@ -190,7 +190,7 @@ APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
 
     *total_bytes = 0;
     do {
-        iov_used = ap_bucket_brigade_to_iovec(b, vec, 16);
+        iov_used = ap_brigade_to_iovec(b, vec, 16);
         status = iol_writev(iol, vec, iov_used, &bytes);
 
         ap_consume_buckets(b, 16);
@@ -248,7 +248,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
             }
             k += i;
 
-            ap_bucket_brigade_append_buckets(b, rw);
+            ap_brigade_append_buckets(b, rw);
         }        
     }
     
@@ -265,7 +265,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
         }
         k += i;
 
-        ap_bucket_brigade_append_buckets(b, r);
+        ap_brigade_append_buckets(b, r);
     }
 
     return k;
@@ -294,7 +294,7 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
     res = ap_vsnprintf(buf, 4096, fmt, va);
 
     r = ap_bucket_rwmem_create(buf, strlen(buf), &i);
-    ap_bucket_brigade_append_buckets(b, r);
+    ap_brigade_append_buckets(b, r);
 
     return res;
 }

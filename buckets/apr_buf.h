@@ -194,27 +194,27 @@ struct ap_bucket_mmap {
 /*   ******  Bucket Brigade Functions  *****  */
 
 /* Create a new bucket brigade */
-APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p);
+APR_EXPORT(ap_bucket_brigade *) ap_brigade_create(ap_pool_t *p);
 
 /* destroy an enitre bucket brigade */
-APR_EXPORT(ap_status_t) ap_bucket_brigade_destroy(void *b);
+APR_EXPORT(ap_status_t) ap_brigade_destroy(void *b);
 
 /* append bucket(s) to a bucket_brigade */
-APR_EXPORT(void) ap_bucket_brigade_append_buckets(ap_bucket_brigade *b,
+APR_EXPORT(void) ap_brigade_append_buckets(ap_bucket_brigade *b,
                                                   ap_bucket *e);
 
 /* consume nbytes from beginning of b -- call ap_bucket_destroy as
     appropriate, and/or modify start on last element */
-APR_EXPORT(void) ap_bucket_brigade_consume(ap_bucket_brigade *, int nbytes);
+APR_EXPORT(void) ap_brigade_consume(ap_bucket_brigade *, int nbytes);
 
 /* create an iovec of the elements in a bucket_brigade... return number 
     of elements used */
-APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *, 
+APR_EXPORT(int) ap_brigade_to_iovec(ap_bucket_brigade *, 
                                            struct iovec *vec, int nvec);
 
 /* catenate bucket_brigade b onto bucket_brigade a, bucket_brigade b is 
     empty after this */
-APR_EXPORT(void) ap_bucket_brigade_catenate(ap_bucket_brigade *a, 
+APR_EXPORT(void) ap_brigade_catenate(ap_bucket_brigade *a, 
                                             ap_bucket_brigade *b);
 
 /* Destroy the first nvec buckets. */
@@ -222,7 +222,7 @@ APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec);
 
 /* save the buf out to the specified iol.  This can be used to flush the
     data to the disk, or to send it out to the network. */
-APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
+APR_EXPORT(ap_status_t) ap_brigade_to_iol(ap_ssize_t *total_bytes,
                                                  ap_bucket_brigade *a, 
                                                  ap_iol *iol);
 
