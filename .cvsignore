@@ -16,3 +16,4 @@ Release
 apr.exports
 .libs
 *.la
+libapr.rc
