@@ -77,7 +77,7 @@ APR_EXPORT(const char *) ap_rmem_get_char_str(ap_bucket_rmem *b)
 
 APR_EXPORT(int) ap_rmem_get_len(ap_bucket_rmem *b)
 {
-    return b->end - b->start;
+    return (char *)b->end - (char *)b->start;
 }
 
 /*
@@ -99,7 +99,7 @@ APR_EXPORT(int) ap_rmem_write(ap_bucket_rmem *b, const void *buf,
      * much memory, but that can wait for the second pass.
      */
     b->start = buf;
-    b->end = b->start + nbyte;
+    b->end = (char *)b->start + nbyte;
     *bytes_written = nbyte;
     return APR_SUCCESS;
 }

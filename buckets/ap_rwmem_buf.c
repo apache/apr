@@ -87,13 +87,13 @@ APR_EXPORT(char *) ap_rwmem_get_char_str(ap_bucket_rwmem *b)
 
 APR_EXPORT(int) ap_rwmem_get_len(ap_bucket_rwmem *b)
 {
-    return b->end - b->start;
+    return (char *)b->end - (char *)b->start;
 }
 
 /*
  * save nbyte bytes to the bucket.
- * Only returns fewer than nbyte if an error ocurred.
- * Returns -1 if no bytes were written before the error ocurred.
+ * Only returns fewer than nbyte if an error occurred.
+ * Returns -1 if no bytes were written before the error occurred.
  * It is worth noting that if an error occurs, the buffer is in an unknown
  * state.
  */
@@ -114,7 +114,7 @@ APR_EXPORT(int) ap_rwmem_write(ap_bucket_rwmem *b, const void *buf,
  * leaving that for a later pass.  The basics are presented below, but this
  * is horribly broken.
  */
-    amt = b->alloc_len - (b->end - b->start);
+    amt = b->alloc_len - ((char *)b->end - (char *)b->start);
     total = 0;
     if (nbyte > amt) {
         /* loop through and write to the disk */
@@ -122,7 +122,7 @@ APR_EXPORT(int) ap_rwmem_write(ap_bucket_rwmem *b, const void *buf,
     }
     /* now we know that nbyte < b->alloc_len */
     memcpy(b->end, buf, nbyte);
-    b->end += nbyte;
+    b->end = (char *)b->end + nbyte;
     *bytes_written = total + nbyte;
     return APR_SUCCESS;
 }
