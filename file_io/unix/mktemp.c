@@ -48,10 +48,6 @@
 #define seedrandom(a) srandom(a)
 #endif
 #define _open(a,b,c) open(a,b,c)
-#define mkdtemp ap_mkdtemp
-#define mkstemp ap_mkstemp
-#define mkstemps ap_mkstemps
-#define mktemp ap_mktemp
 
 #if defined(LIBC_SCCS) && !defined(lint)
 #if 0
@@ -84,6 +80,7 @@ static const unsigned char padchar[] =
 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 static uint32_t randseed=0;
 
+#ifdef APR_STARTS_USING_IT
 int
 mkstemps(path, slen)
 	char *path;
@@ -93,6 +90,7 @@ mkstemps(path, slen)
 
 	return (_gettemp(path, &fd, 0, slen) ? fd : -1);
 }
+#endif /* APR_STARTS_USING_IT */
 
 int
 mkstemp(path)
@@ -103,6 +101,7 @@ mkstemp(path)
 	return (_gettemp(path, &fd, 0, 0) ? fd : -1);
 }
 
+#ifdef APR_STARTS_USING_IT
 char *
 mkdtemp(path)
 	char *path;
@@ -126,6 +125,7 @@ mktemp(path)
 {
 	return(_mktemp(path));
 }
+#endif /* APR_STARTS_USING_IT */
 
 static int
 _gettemp(path, doopen, domkdir, slen)
