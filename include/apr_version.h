@@ -90,16 +90,16 @@ extern "C" {
  * programs such as structure size changes.  No binary compatibility is
  * possible across a change in the major version.
  */
-#define APR_MAJOR_VERSION       0
+#define APR_MAJOR_VERSION       1
 
 /** 
  * Minor API changes that do not cause binary compatibility problems.
  * Should be reset to 0 when upgrading APR_MAJOR_VERSION
  */
-#define APR_MINOR_VERSION       9
+#define APR_MINOR_VERSION       0
 
 /** patch level */
-#define APR_PATCH_VERSION       4
+#define APR_PATCH_VERSION       0
 
 
 /** 
