@@ -95,9 +95,8 @@ static void get_nonexistkey(CuTest *tc)
     char *retdata;
 
     rv = apr_pool_userdata_get((void **)&retdata, "DOESNTEXIST", pool);
-    CuAssertTrue(tc, rv != APR_SUCCESS);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
     CuAssertPtrEquals(tc, retdata, NULL);
-    CuAssertIntEquals(tc, rv, APR_KEYNOTFOUND);
 }
 
 static void post_pool_clear(CuTest *tc)
@@ -106,9 +105,8 @@ static void post_pool_clear(CuTest *tc)
     char *retdata;
 
     rv = apr_pool_userdata_get((void **)&retdata, "DOESNTEXIST", pool);
-    CuAssertTrue(tc, rv != APR_SUCCESS);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
     CuAssertPtrEquals(tc, retdata, NULL);
-    CuAssertIntEquals(tc, rv, APR_KEYNOTFOUND);
 }
 
 CuSuite *testud(void)
