@@ -454,11 +454,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             || (attr->child_err && attr->child_err->filehand))
         {
             si.dwFlags |= STARTF_USESTDHANDLES;
-            if (attr->child_in && attr->child_in->filehand)
+            if (attr->child_in)
                 si.hStdInput = attr->child_in->filehand;
-            if (attr->child_out && attr->child_out->filehand)
+            if (attr->child_out)
                 si.hStdOutput = attr->child_out->filehand;
-            if (attr->child_err && attr->child_err->filehand)
+            if (attr->child_err)
                 si.hStdError = attr->child_err->filehand;
         }
 
@@ -484,11 +484,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             || (attr->child_err && attr->child_err->filehand))
         {
             si.dwFlags |= STARTF_USESTDHANDLES;
-            if (attr->child_in && attr->child_in->filehand)
+            if (attr->child_in)
                 si.hStdInput = attr->child_in->filehand;
-            if (attr->child_out && attr->child_out->filehand)
+            if (attr->child_out)
                 si.hStdOutput = attr->child_out->filehand;
-            if (attr->child_err && attr->child_err->filehand)
+            if (attr->child_err)
                 si.hStdError = attr->child_err->filehand;
         }
 
