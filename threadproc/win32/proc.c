@@ -277,14 +277,14 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     hCurrentProcess = GetCurrentProcess();
     if ((attr->child_in && !DuplicateHandle(hCurrentProcess, attr->parent_in->filehand, 
                                             hCurrentProcess,
-                                            &hParentindup, 0, APR_FALSE,
+                                            &hParentindup, 0, FALSE,
                                             DUPLICATE_SAME_ACCESS))
 	|| (attr->child_out && !DuplicateHandle(hCurrentProcess, attr->parent_out->filehand,
                                                 hCurrentProcess, &hParentoutdup,
-                                                0, APR_FALSE, DUPLICATE_SAME_ACCESS))
+                                                0, FALSE, DUPLICATE_SAME_ACCESS))
 	|| (attr->child_err && !DuplicateHandle(hCurrentProcess, attr->parent_err->filehand,
                                                 hCurrentProcess, &hParenterrdup,
-                                                0, APR_FALSE, DUPLICATE_SAME_ACCESS))) {
+                                                0, FALSE, DUPLICATE_SAME_ACCESS))) {
         if (attr->child_in) {
             ap_close(attr->child_in);
             ap_close(attr->parent_in);
@@ -346,7 +346,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     } 
     
 
-    if (CreateProcess(NULL, cmdline, NULL, NULL, APR_TRUE, 0, pEnvBlock, attr->currdir, 
+    if (CreateProcess(NULL, cmdline, NULL, NULL, TRUE, 0, pEnvBlock, attr->currdir, 
                       &attr->si, &(*new)->pi)) {
         if (attr->child_in) {
             ap_close(attr->child_in);
