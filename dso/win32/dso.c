@@ -70,6 +70,13 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *osdso,
+                                                apr_dso_handle_t *aprdso)
+{
+    *osdso = aprdso->handle;
+    return APR_SUCCESS;
+}
+
 static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
