@@ -14,9 +14,6 @@ AC_DEFUN(APR_CONFIG_NICE,[
 # Created by configure
 
 EOF
-  if test -n "$MAKE"; then
-    echo "MAKE=\"$MAKE\"; export MAKE" >> $1
-  fi
   if test -n "$CFLAGS"; then
     echo "CFLAGS=\"$CFLAGS\"; export CFLAGS" >> $1
   fi
