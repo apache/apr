@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Allow LTFLAGS to be overridden by the configure command-line 
+     (default="--silent") and introduce LT_LDFLAGS.  [Roy Fielding]
+
   *) Add memory code kindly donated to APR by  
        Elrond  <elrond@samba-tng.org> 
        Luke Kenneth Casson Leighton <lkcl@samba-tng.org>
