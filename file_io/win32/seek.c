@@ -89,7 +89,6 @@ static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 }
 
 
-
 APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
 {
     apr_finfo_t finfo;
@@ -167,4 +166,27 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
             *offset = ((apr_off_t)offhi << 32) | offlo;
         return rc;
     }
+}
+
+
+APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *thefile, apr_off_t offset)
+{
+    apr_status_t rv;
+    DWORD offlo = (DWORD)offset;
+    DWORD offhi = (DWORD)(offset >> 32);
+    DWORD rc;
+
+    rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
+    if (rc == 0xFFFFFFFF)
+        if ((rv = apr_get_os_error()) != APR_SUCCESS)
+            return rv;
+
+    if (!SetEndOfFile(thefile->filehand))
+        return apr_get_os_error();
+
+    if (thefile->buffered) {
+        return setptr(thefile, offset);
+    }
+
+    return APR_SUCCESS;
 }
