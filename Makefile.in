@@ -13,6 +13,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1)
 # Macros for target determination
 #
 SUBDIRS=@SUBDIRS@
+CLEAN_SUBDIRS= . test build
 
 TARGET_LIB = libapr.la
 TARGET_EXPORTS = apr.exports
