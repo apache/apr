@@ -115,7 +115,7 @@ static void int64_t_fmt(CuTest *tc)
 static void uint64_t_fmt(CuTest *tc)
 {
     char buf[100];
-    apr_uint64_t var = 14000000;
+    apr_uint64_t var = APR_UINT64_C(14000000);
 
     sprintf(buf, "%" APR_UINT64_T_FMT, var);
     CuAssertStrEquals(tc, "14000000", buf);
@@ -126,12 +126,29 @@ static void uint64_t_fmt(CuTest *tc)
 static void uint64_t_hex_fmt(CuTest *tc)
 {
     char buf[100];
-    apr_uint64_t var = 14000000;
+    apr_uint64_t var = APR_UINT64_C(14000000);
 
     sprintf(buf, "%" APR_UINT64_T_HEX_FMT, var);
     CuAssertStrEquals(tc, "d59f80", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_UINT64_T_HEX_FMT, var);
     CuAssertStrEquals(tc, "d59f80", buf);
+}
+
+static void more_int64_fmts(CuTest *tc)
+{
+    char buf[100];
+    apr_int64_t i = APR_INT64_C(-42);
+    apr_uint64_t ui = APR_UINT64_C(42);
+    apr_uint64_t big = APR_UINT64_C(3141592653589793238);
+
+    apr_snprintf(buf, sizeof buf, "%" APR_INT64_T_FMT, i);
+    CuAssertStrEquals(tc, buf, "-42");
+
+    apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, ui);
+    CuAssertStrEquals(tc, buf, "42");
+
+    apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, big);
+    CuAssertStrEquals(tc, buf, "3141592653589793238");
 }
 
 CuSuite *testfmt(void)
@@ -145,6 +162,7 @@ CuSuite *testfmt(void)
     SUITE_ADD_TEST(suite, int64_t_fmt);
     SUITE_ADD_TEST(suite, uint64_t_fmt);
     SUITE_ADD_TEST(suite, uint64_t_hex_fmt);
+    SUITE_ADD_TEST(suite, more_int64_fmts);
 
     return suite;
 }

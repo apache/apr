@@ -164,23 +164,6 @@ static void snprintf_0nonNULL(CuTest *tc)
     CuAssert(tc, "buff unmangled", strcmp(buff, "FOOBAR") != 0);
 }
 
-static void snprintf_int64(CuTest *tc)
-{
-    char buf[100];
-    apr_int64_t i = APR_INT64_C(-42);
-    apr_uint64_t ui = APR_INT64_C(42); /* no APR_UINT64_C */
-    apr_uint64_t big = APR_INT64_C(3141592653589793238);
-
-    apr_snprintf(buf, sizeof buf, "%" APR_INT64_T_FMT, i);
-    CuAssertStrEquals(tc, buf, "-42");
-
-    apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, ui);
-    CuAssertStrEquals(tc, buf, "42");
-
-    apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, big);
-    CuAssertStrEquals(tc, buf, "3141592653589793238");
-}
-
 static void string_error(CuTest *tc)
 {
      char buf[128], *rv;
@@ -213,7 +196,6 @@ CuSuite *teststr(void)
     SUITE_ADD_TEST(suite, snprintf_0NULL);
     SUITE_ADD_TEST(suite, snprintf_0nonNULL);
     SUITE_ADD_TEST(suite, snprintf_noNULL);
-    SUITE_ADD_TEST(suite, snprintf_int64);
     SUITE_ADD_TEST(suite, test_strtok);
     SUITE_ADD_TEST(suite, string_error);
     SUITE_ADD_TEST(suite, string_long);
