@@ -66,7 +66,6 @@
 #include "apr_tables.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
-#include "unix/misc.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
