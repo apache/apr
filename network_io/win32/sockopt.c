@@ -213,7 +213,7 @@ apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *
     else
         return APR_EINVAL;
 
-    hptr = gethostbyaddr((char *)&sa_ptr), sizeof(struct in_addr), AF_INET);
+    hptr = gethostbyaddr((char *)&sa_ptr, sizeof(struct in_addr), AF_INET);
 
     if (hptr != NULL) {
         *name = apr_pstrdup(sock->cntxt, hptr->h_name);
