@@ -181,6 +181,7 @@
 #define APR_HAVE_STRNCASECMP    0
 #define APR_HAVE_STRNICMP       1
 #define APR_HAVE_STRSTR         1
+#define APR_HAVE_MEMCHR         1
 #define APR_HAVE_STRUCT_RLIMIT  0
 #define APR_HAVE_UNION_SEMUN    0
 
