@@ -94,7 +94,7 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
 ap_status_t ap_get_threadkeydata(struct threadkey_t *threadkey, char *key, void *data)
 {
     if (threadkey != NULL) {
-        return ap_get_userdata(threadkey->cntxt, key, &data);
+        return ap_get_userdata(&data, threadkey->cntxt, key);
     }
     else {
         data = NULL;
@@ -123,8 +123,8 @@ ap_status_t ap_get_os_threadkey(struct threadkey_t *key, ap_os_threadkey_t *thek
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_threadkey(ap_context_t *cont, struct threadkey_t **key,
-                                ap_os_threadkey_t *thekey)
+ap_status_t ap_put_os_threadkey(struct threadkey_t **key, 
+                                ap_os_threadkey_t *thekey, ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

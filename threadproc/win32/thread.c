@@ -159,7 +159,7 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
 {
     if (thread != NULL) {
-        return ap_get_userdata(thread->cntxt, key, &data);
+        return ap_get_userdata(&data, thread->cntxt, key);
     }
     else {
         data = NULL;
@@ -188,8 +188,8 @@ ap_status_t ap_get_os_thread(struct thread_t *thd, ap_os_thread_t *thethd)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_thread(ap_context_t *cont, struct thread_t **thd,
-                             ap_os_thread_t *thethd)
+ap_status_t ap_put_os_thread(struct thread_t **thd, ap_os_thread_t *thethd, 
+                             ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
