@@ -203,19 +203,21 @@ typedef void (apr_child_errfn_t)(apr_pool_t *proc, apr_status_t err,
 
 /** Opaque Thread structure. */
 typedef struct apr_thread_t           apr_thread_t;
+
 /** Opaque Thread attributes structure. */
 typedef struct apr_threadattr_t       apr_threadattr_t;
+
 /** Opaque Process attributes structure. */
 typedef struct apr_procattr_t         apr_procattr_t;
+
 /** Opaque control variable for one-time atomic variables.  */
 typedef struct apr_thread_once_t      apr_thread_once_t;
 
 /** Opaque thread private address space. */
 typedef struct apr_threadkey_t        apr_threadkey_t;
-#if APR_HAS_OTHER_CHILD
+
 /** Opaque record of child process. */
 typedef struct apr_other_child_rec_t  apr_other_child_rec_t;
-#endif /* APR_HAS_OTHER_CHILD */
 
 /**
  * The prototype for any APR thread worker functions.
