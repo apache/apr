@@ -1281,7 +1281,7 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
     apr_vformatter_buff_t vbuff;
 
     if (len == 0) {
-        /* See above notee */
+        /* See above note */
         vbuff.curpos = NULL;
         vbuff.endpos = NULL;
     } else {
