@@ -103,3 +103,28 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
+/* Implement OS-specific accessors defined in apr_portable.h */
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
+                                                apr_proc_mutex_t *lock)
+{
+    *ospmutex = pmutex->mutex;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
+                                                apr_os_proc_mutex_t *ospmutex,
+                                                apr_pool_t *pool)
+{
+    if (pool == NULL) {
+        return APR_ENOPOOL;
+    }
+    if ((*pmutex) == NULL) {
+        (*pmutex) = (apr_proc_mutex_t *)apr_palloc(pool,
+                                                   sizeof(apr_proc_mutex_t));
+        (*pmutex)->pool = pool;
+    }
+    (*pmutex)->mutex = *ospmutex;
+    return APR_SUCCESS;
+}
+

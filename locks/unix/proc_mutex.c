@@ -810,3 +810,38 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
+/* Implement OS-specific accessors defined in apr_portable.h */
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
+                                                apr_proc_mutex_t *pmutex)
+{
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+    ospmutex->crossproc = pmutex->interproc->filedes;
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    ospmutex->pthread_interproc = pmutex->pthread_interproc;
+#endif
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
+                                                apr_os_proc_mutex_t *ospmutex,
+                                                apr_pool_t *pool)
+{
+    if (pool == NULL) {
+        return APR_ENOPOOL;
+    }
+    if ((*pmutex) == NULL) {
+        (*pmutex) = (apr_proc_mutex_t *)apr_pcalloc(pool,
+                                                    sizeof(apr_proc_mutex_t));
+        (*pmutex)->pool = pool;
+    }
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+    apr_os_file_put(&(*pmutex)->interproc, &ospmutex->crossproc, pool);
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    (*pmutex)->pthread_interproc = ospmutex->pthread_interproc;
+#endif
+    return APR_SUCCESS;
+}
+
