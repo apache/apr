@@ -136,6 +136,10 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
         theerror = GetLastError();
         return APR_EEXIST;
     }
+    if (flag & APR_APPEND) {
+        SetFilePointer((*dafile)->filehand, 0, NULL, FILE_END);
+    }
+
     (*dafile)->stated = 0;  /* we haven't called stat for this file yet. */
     (*dafile)->eof_hit = 0;
     ap_register_cleanup((*dafile)->cntxt, (void *)(*dafile), file_cleanup,
