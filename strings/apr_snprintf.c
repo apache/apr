@@ -321,15 +321,21 @@ static char *apr_gcvt(double number, int ndigit, char *buf, boolean_e altform)
  * This macro does zero padding so that the precision
  * requirement is satisfied. The padding is done by
  * adding '0's to the left of the string that is going
- * to be printed.
+ * to be printed. We don't allow precision to be large
+ * enough that we continue past the start of s.
+ *
+ * NOTE: this makes use of the magic info that s is
+ * always based on num_buf with a size of NUM_BUF_SIZE.
  */
 #define FIX_PRECISION(adjust, precision, s, s_len)  \
-    if (adjust)                                     \
-        while (s_len < precision)                   \
+    if (adjust) {                                   \
+        int p = precision < NUM_BUF_SIZE - 1 ? precision : NUM_BUF_SIZE - 1; \
+        while (s_len < p)                           \
         {                                           \
             *--s = '0';                             \
             s_len++;                                \
-        }
+        }                                           \
+    }
 
 /*
  * Macro that does padding. The padding is done by printing
@@ -784,10 +790,6 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 
                 /*
                  * Check if a precision was specified
-                 *
-                 * XXX: an unreasonable amount of precision may be specified
-                 * resulting in overflow of num_buf. Currently we
-                 * ignore this possibility.
                  */
                 if (*fmt == '.') {
                     adjust_precision = YES;
