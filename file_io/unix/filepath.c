@@ -60,6 +60,13 @@
 #include <unistd.h>
 #endif
 
+/* Win32 malpropism that can go away once everyone believes this
+ * code is golden, and I'm not testing it anymore :-)
+ */
+#if APR_HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
 /* Any OS that requires/refuses trailing slashes should be dealt with here.
  */
 APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_pool_t *p)
@@ -105,11 +112,11 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                                              apr_int32_t flags,
                                              apr_pool_t *p)
 {
-    char path[APR_PATH_MAX];
-    apr_size_t rootlen; /* is the original rootpath len */
-    apr_size_t newseg;  /* is the path offset to the added path */
-    apr_size_t addseg;  /* is the path offset we are appending at */
-    apr_size_t endseg;  /* is the end of the current segment */
+    char path[APR_PATH_MAX]; /* isn't null term */
+    apr_size_t rootlen; /* is the length of the src rootpath */
+    apr_size_t keptlen; /* is the length of the retained rootpath */
+    apr_size_t pathlen; /* is the length of the result path */
+    apr_size_t seglen;  /* is the end of the current segment */
     apr_status_t rv;
 
     /* Treat null as an empty path.
@@ -178,11 +185,11 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
          * '/'s to a single leading '/' from the addpath,
          * and leave addpath at the first non-'/' character.
          */
-        newseg = 0;
+        keptlen = 0;
         while (addpath[0] == '/')
             ++addpath;
-        strcpy (path, "/");
-        addseg = 1;
+        path[0] = '/';
+        pathlen = 1;
     }
     else
     {
@@ -193,39 +200,38 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
         /* Base the result path on the rootpath
          */
-        newseg = rootlen;
+        keptlen = rootlen;
         if (rootlen >= sizeof(path))
             return APR_ENAMETOOLONG;
-        strcpy(path, rootpath);
+        memcpy(path, rootpath, rootlen);
         
         /* Always '/' terminate the given root path
          */
-        if (newseg && path[newseg - 1] != '/') {
-            if (newseg + 1 >= sizeof(path))
+        if (keptlen && path[keptlen - 1] != '/') {
+            if (keptlen + 1 >= sizeof(path))
                 return APR_ENAMETOOLONG;
-            path[newseg++] = '/';
-            path[newseg] = '\0';
+            path[keptlen++] = '/';
         }
-        addseg = newseg;
+        pathlen = keptlen;
     }
 
     while (*addpath) 
     {
         /* Parse each segment, find the closing '/' 
          */
-        endseg = 0;
-        while (addpath[endseg] && addpath[endseg] != '/')
-            ++endseg;
+        seglen = 0;
+        while (addpath[seglen] && addpath[seglen] != '/')
+            ++seglen;
 
-        if (endseg == 0 || (endseg == 1 && addpath[0] == '.')) 
+        if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) 
         {
             /* noop segment (/ or ./) so skip it 
              */
         }
-        else if (endseg == 2 && addpath[0] == '.' && addpath[1] == '.') 
+        else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') 
         {
             /* backpath (../) */
-            if (addseg == 1 && path[0] == '/') 
+            if (pathlen == 1 && path[0] == '/') 
             {
                 /* Attempt to move above root.  Always die if the 
                  * APR_FILEPATH_SECUREROOTTEST flag is specified.
@@ -236,10 +242,11 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 /* Otherwise this is simply a noop, above root is root.
                  * Flag that rootpath was entirely replaced.
                  */
-                newseg = 0;
+                keptlen = 0;
             }
-            else if (addseg == 0 || (addseg >= 3 
-                                  && strcmp(path + addseg - 3, "../") == 0)) 
+            else if (pathlen == 0 
+                  || (pathlen == 3 && !memcmp(path + pathlen - 3, "../", 3))
+                  || (pathlen  > 3 && !memcmp(path + pathlen - 4, "/../", 4)))
             {
                 /* Path is already backpathed or empty, if the
                  * APR_FILEPATH_SECUREROOTTEST.was given die now.
@@ -249,64 +256,64 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
                 /* Otherwise append another backpath.
                  */
-                if (addseg + 3 >= sizeof(path))
+                if (pathlen + 3 >= sizeof(path))
                     return APR_ENAMETOOLONG;
-                strcpy(path + addseg, "../");
-                addseg += 3;
+                memcpy(path + pathlen, "../", 3);
+                pathlen += 3;
             }
             else 
             {
                 /* otherwise crop the prior segment 
                  */
                 do {
-                    --addseg;
-                } while (addseg && path[addseg - 1] != '/');
-                path[addseg] = '\0';
+                    --pathlen;
+                } while (pathlen && path[pathlen - 1] != '/');
             }
 
             /* Now test if we are above where we started and back up
-             * the newseg offset to reflect the added/altered path.
+             * the keptlen offset to reflect the added/altered path.
              */
-            if (addseg < newseg) 
+            if (pathlen < keptlen) 
             {
                 if (flags & APR_FILEPATH_SECUREROOTTEST)
                     return APR_EABOVEROOT;
-                newseg = addseg;
+                keptlen = pathlen;
             }
         }
         else 
         {
             /* An actual segment, append it to the destination path
              */
-            apr_size_t i = (addpath[endseg] != '\0');
-            if (addseg + endseg + i >= sizeof(path))
+            apr_size_t i = (addpath[seglen] != '\0');
+            if (pathlen + seglen + i >= sizeof(path))
                 return APR_ENAMETOOLONG;
-            strncpy(path + addseg, addpath, endseg + i);
-            addseg += endseg + i;
+            memcpy(path + pathlen, addpath, seglen + i);
+            pathlen += seglen + i;
         }
 
         /* Skip over trailing slash to the next segment
          */
-        if (addpath[endseg])
-            ++endseg;
+        if (addpath[seglen])
+            ++seglen;
 
-        addpath += endseg;
+        addpath += seglen;
     }
-
-    /* newseg will be the rootlen unless the addpath contained
+    path[pathlen] = '\0';
+    
+    /* keptlen will be the rootlen unless the addpath contained
      * backpath elements.  If so, and APR_FILEPATH_NOTABOVEROOT
      * is specified (APR_FILEPATH_SECUREROOTTEST was caught above),
      * compare the original root to assure the result path is
      * still within given root path.
      */
-    if ((flags & APR_FILEPATH_NOTABOVEROOT) && newseg < rootlen) {
+    if ((flags & APR_FILEPATH_NOTABOVEROOT) && keptlen < rootlen) {
         if (strncmp(rootpath, path, rootlen))
             return APR_EABOVEROOT;
         if (rootpath[rootlen - 1] != '/'
                 && path[rootlen] && path[rootlen] != '/')
             return APR_EABOVEROOT;
     }
-
+    
     *newpath = apr_pstrdup(p, path);
-    return (newpath ? APR_SUCCESS : APR_ENOMEM);
+    return APR_SUCCESS;
 }
