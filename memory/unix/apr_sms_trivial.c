@@ -441,17 +441,11 @@ static apr_status_t apr_sms_trivial_thread_unregister(apr_sms_t *sms,
 }
 #endif /* APR_HAS_THREADS */
 
-APR_DECLARE(apr_status_t) apr_sms_trivial_create(apr_sms_t **sms, 
-                                                  apr_sms_t *pms)
-{
-    return apr_sms_trivial_create_ex(sms, pms, MIN_ALLOC, MIN_FREE, MAX_FREE);
-}
-
-APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms, 
-                                                    apr_sms_t *pms,
-                                                    apr_size_t min_alloc,
-                                                    apr_size_t min_free,
-                                                    apr_size_t max_free)
+static apr_status_t apr_sms_trivial_create_ex(apr_sms_t **sms, 
+                                              apr_sms_t *pms,
+                                              apr_size_t min_alloc,
+                                              apr_size_t min_free,
+                                              apr_size_t max_free)
 {
     apr_sms_t *new_sms;
     apr_sms_trivial_t *tms;
@@ -507,3 +501,11 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
     *sms = new_sms;
     return APR_SUCCESS;
 }
+
+
+APR_DECLARE(apr_status_t) apr_sms_trivial_create(apr_sms_t **sms, 
+                                                  apr_sms_t *pms)
+{
+    return apr_sms_trivial_create_ex(sms, pms, MIN_ALLOC, MIN_FREE, MAX_FREE);
+}
+
