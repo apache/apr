@@ -109,6 +109,8 @@ struct ap_file_t {
     ap_time_t atime;
     ap_time_t mtime;
     ap_time_t ctime;
+    int pipe;
+    int timeout;
 };
 
 struct ap_dir_t {

@@ -64,8 +64,29 @@
 
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
 {
-    return APR_ENOTIMPL;
+    DWORD dwMode;
+    ap_oslevel_e oslevel;
+
+    /* This code relies on the fact that anonymous pipes (which
+     * do not support nonblocking I/O) are really named pipes
+     * (which support nonblocking I/O) on Windows NT.
+     */
+    if (thepipe->pipe == 1) {
+        thepipe->timeout = timeout;
+        if (ap_get_oslevel(thepipe->cntxt, &oslevel) == APR_SUCCESS &&
+            oslevel >= APR_WIN_NT) {
+            if (timeout == 0) {
+                dwMode = PIPE_NOWAIT;
+            } else {
+                dwMode = PIPE_WAIT;
+            }
+            SetNamedPipeHandleState(thepipe->filehand, &dwMode, NULL, NULL);
+        }
+        return APR_SUCCESS;
+    }
+    return APR_EINVAL;
 }
+
 ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
 {
     SECURITY_ATTRIBUTES sa;
@@ -77,12 +98,16 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
     (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     memset(*in, '\0', sizeof(ap_file_t));
     (*in)->cntxt = cont;
+    (*in)->pipe = 1;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in)->timeout = -1;
 
     (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     memset(*out, '\0', sizeof(ap_file_t));
     (*out)->cntxt = cont;
+    (*out)->pipe = 1;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out)->timeout = -1;
 
     if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
         return GetLastError();
@@ -90,17 +115,3 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
 
     return APR_SUCCESS;
 }
-
-/*
-ap_status_t ap_create_namedpipe(char **new, char *dirpath, ap_fileperms_t perm, ap_context_t *cont)
-{
-    mode_t mode = get_fileperms(perm);
-
-    *new = tempnam(dirpath, NULL);
-    if (mkfifo((*new), mode) == -1) {
-        return errno;
-    }
-    return APR_SUCCESS;
-} 
-*/        
- 
