@@ -108,8 +108,8 @@ ALL_LDFLAGS  = $(EXTRA_LDFLAGS) $(NOTEST_LDFLAGS) $(LDFLAGS)
 ALL_LIBS     = $(LIBS) $(NOTEST_LIBS) $(EXTRA_LIBS)
 ALL_INCLUDES = $(INCLUDES) $(EXTRA_INCLUDES)
 
-### make LTFLAGS somewhat variable?
-LTFLAGS = --silent
+LTFLAGS      = @LTFLAGS@
+LT_LDFLAGS   = @LT_LDFLAGS@
 
 #
 # Basic macro setup
