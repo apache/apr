@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
  * @tip Returns APR_SUCCESS if the apr_uid_t strutures identify the same user,
  * APR_EMISMATCH if not, APR_BADARG if an apr_uid_t is invalid.
  */
-#ifdef WIN32
+#if defined(WIN32)
 APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right);
 #else
 #define apr_compare_users(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
@@ -141,7 +141,7 @@ APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid,
  * @tip Returns APR_SUCCESS if the apr_gid_t strutures identify the same group,
  * APR_EMISMATCH if not, APR_BADARG if an apr_gid_t is invalid.
  */
-#ifdef WIN32
+#if defined(WIN32)
 APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right);
 #else
 #define apr_compare_groups(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
