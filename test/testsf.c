@@ -366,7 +366,8 @@ static int client(client_socket_mode_t socket_mode)
                 }
                 else {
                     hdtr.headers[0].iov_len -= tmplen;
-                    hdtr.headers[0].iov_base += tmplen;
+                    hdtr.headers[0].iov_base = 
+			(char*) hdtr.headers[0].iov_base + tmplen;
                     tmplen = 0;
                 }
             }
@@ -398,7 +399,8 @@ static int client(client_socket_mode_t socket_mode)
                 }
                 else {
                     hdtr.trailers[0].iov_len -= tmplen;
-                    hdtr.trailers[0].iov_base += tmplen;
+                    hdtr.trailers[0].iov_base = 
+			(char *)hdtr.trailers[0].iov_base + tmplen;
                     tmplen = 0;
                 }
             }
