@@ -185,22 +185,25 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
         return errno;
     }
     close(fd);
-    if ((stat = pthread_mutexattr_init(&mattr))) {
+    if (pthread_mutexattr_init(&mattr)) {
+        stat = errno;
         lock_cleanup(new);
         return stat;
     }
-    if ((stat = pthread_mutexattr_setpshared(&mattr, 
-                                              PTHREAD_PROCESS_SHARED))) {
-        lock_cleanup(new);
-        return stat;
-    }
-
-    if ((stat = pthread_mutex_init(new->interproc, &mattr))) {
+    if (pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED)) {
+        stat = errno;
         lock_cleanup(new);
         return stat;
     }
 
-    if ((stat = pthread_mutexattr_destroy(&mattr))) {
+    if (pthread_mutex_init(new->interproc, &mattr)) {
+        stat = errno;
+        lock_cleanup(new);
+        return stat;
+    }
+
+    if (pthread_mutexattr_destroy(&mattr)) {
+        stat = errno;
         lock_cleanup(new);
         return stat;
     }
@@ -212,20 +215,17 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 
 ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
-    ap_status_t stat;
-    lock->curr_locked = 1;
-    if (stat = pthread_mutex_lock(lock->interproc)) {
-        return stat;
+    if (pthread_mutex_lock(lock->interproc)) {
+        return errno;
     }
+    lock->curr_locked = 1;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
-    ap_status_t stat;
-
-    if (stat = pthread_mutex_unlock(lock->interproc)) {
-        return stat;
+    if (pthread_mutex_unlock(lock->interproc)) {
+        return errno;
     }
     lock->curr_locked = 0;
     return APR_SUCCESS;
