@@ -5,16 +5,16 @@ DESCRIPTION ''
 
 EXPORTS
 	; Add new API calls to the end of this list.
-	apr_MD5Final   @1
-	apr_MD5Init   @2
-	apr_MD5Update   @3
-    apr_cpystrn   @4
+	ap_MD5Final   @1
+	ap_MD5Init   @2
+	ap_MD5Update   @3
+	ap_cpystrn   @4
 	ap_register_cleanup   @5
 	ap_kill_cleanup   @6
-	apr_fnmatch   @7
-	apr_is_fnmatch   @8
-	apr_MD5Encode   @9
-	apr_validate_password   @10
+	ap_fnmatch   @7
+	ap_is_fnmatch   @8
+	ap_MD5Encode   @9
+	ap_validate_password   @10
 	ap_make_sub_pool   @11
 	ap_init_alloc   @12
 	ap_clear_pool   @13
@@ -53,8 +53,10 @@ EXPORTS
 	ap_cleanup_for_exec   @49
 	ap_null_cleanup   @50
 	ap_note_subprocess   @51
-	apr_slack   @54
+	ap_slack   @54
 	ap_vformatter   @55
 	ap_snprintf   @56
 	ap_vsnprintf   @57
-    ap_getpass   @58
+	ap_getpass   @58
+
+
