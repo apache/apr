@@ -22,11 +22,6 @@ APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(void *) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
-{
-    return InterlockedCompareExchangePointer(mem, with, cmp);
-}
-
 /* 
  * Remapping function pointer type to accept apr_uint32_t's type-safely
  * as the arguments for as our apr_atomic_foo32 Functions
@@ -39,11 +34,17 @@ typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_fn)
 typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_val_fn)
     (apr_uint32_t volatile *, 
      apr_uint32_t, apr_uint32_t);
+typedef WINBASEAPI void * (WINAPI * apr_atomic_win32_ptr_ptr_ptr_fn)
+    (volatile void **, 
+     void *, const void *);
 
 APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
     return ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, val);
 }
+
+/* Of course we want the 2's compliment of the unsigned value, val */
+#pragma warning(disable: 4146)
 
 APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
@@ -75,6 +76,16 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint3
                                            apr_uint32_t cmp)
 {
     return ((apr_atomic_win32_ptr_val_val_fn)InterlockedCompareExchange)(mem, with, cmp);
+}
+
+APR_DECLARE(void *) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
+{
+#if (defined(_M_IA64) || defined(_M_AMD64)) && !defined(RC_INVOKED)
+    return InterlockedCompareExchangePointer(mem, with, cmp);
+#else
+    /* Too many VC6 users have stale win32 API files, stub this */
+    return ((apr_atomic_win32_ptr_ptr_ptr_fn)InterlockedCompareExchange)(mem, with, cmp);
+#endif
 }
 
 APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
