@@ -102,9 +102,29 @@ extern "C" {
 typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE, 
 	      APR_SHUTDOWN_READWRITE} ap_shutdown_how_e;
 
+/* We need to make sure we always have an in_addr type, so APR will just
+ * define it ourselves, if the platform doesn't provide it.
+ */
+#if !defined(APR_HAVE_IN_ADDR)
+struct in_addr {
+    ap_uint32_t  s_addr;
+}
+#endif
+
+/* I guess not everybody uses inet_addr.  This defines ap_inet_addr
+ * appropriately.
+ */
+
+#if APR_HAVE_INET_ADDR
+#define ap_inet_addr    inet_addr
+#elif APR_HAVE_INET_NETWORK        /* only DGUX, as far as I know */
+#define ap_inet_addr    inet_network
+#endif
+
 typedef struct socket_t     ap_socket_t;
-typedef struct pollfd_t    ap_pollfd_t;
-typedef struct hdtr_t		ap_hdtr_t;
+typedef struct pollfd_t     ap_pollfd_t;
+typedef struct hdtr_t       ap_hdtr_t;
+typedef struct in_addr      ap_in_addr;
 
 #if APR_HAS_SENDFILE
 /* A structure to encapsulate headers and trailers for ap_sendfile */
