@@ -131,12 +131,14 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         ;;
     *-openbsd*)
 	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREADS])
-        # binding to an ephemeral port fails on OpenBSD so override
-        # the test for O_NONBLOCK inheritance across accept().
+        # getsockname() reports the wrong address on a socket
+        # bound to an ephmeral port so the test fails.
         APR_SETIFNULL(ac_cv_o_nonblock_inherited, [yes])
 	;;
     *-netbsd*)
 	APR_ADDTO(CPPFLAGS, [-DNETBSD])
+        # fcntl() lies about O_NONBLOCK on an accept()ed socket (PR kern/26950)
+        APR_SETIFNULL(ac_cv_o_nonblock_inherited, [yes])
 	;;
     *-freebsd*)
 	case $host in
