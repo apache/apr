@@ -1272,7 +1272,7 @@ AC_SUBST(int64_strfn)
 dnl ----------------------------- Checking for DSO support
 echo $ac_n "${nl}Checking for DSO...${nl}"
 AC_ARG_ENABLE(dso,
-  [  --enable-dso            Enable dso support ],
+  [  --disable-dso           Disable DSO support ],
   [ tempdso=$enableval],
   [ 
     AC_CHECK_FUNCS(NSLinkModule, [ tempdso="dyld" ], [ tempdso="no" ])
