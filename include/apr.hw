@@ -136,7 +136,7 @@
  *   C4127: conditional expression is constant
  *   C4201: nonstandard extension nameless struct/unions
  *   C4244: int to char/short - precision loss
- * 
+ *   C4514: unreferenced inline function removed
  */
 #pragma warning(disable: 4100 4127 4201 4514; once: 4057 4075 4244)
 
