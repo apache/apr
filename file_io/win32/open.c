@@ -438,7 +438,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
 
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
-    (void) apr_pollset_create(&(*new)->pollset, 1, cont, 0);
+    (void) apr_pollset_create(&(*new)->pollset, 1, pool, 0);
 
     if (!(flag & APR_FILE_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), file_cleanup,
