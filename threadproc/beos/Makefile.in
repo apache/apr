@@ -36,7 +36,6 @@ clean:
 distclean: clean
 	-$(RM) -f Makefile
 
-$(OBJS): Makefile
 
 $(LIB): $(OBJS)
 	$(RM) -f $@
