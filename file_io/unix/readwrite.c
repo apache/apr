@@ -108,7 +108,8 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
     if (thefile->ungetchar != -1) {
         used_unget = TRUE;
-        *(char *)buf++ = (char)thefile->ungetchar;
+        *(char *)buf = (char)thefile->ungetchar;
+        buf = (char *)buf + 1;
         (*nbytes)--;
         thefile->ungetchar = -1;
     }
