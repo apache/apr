@@ -59,8 +59,8 @@ ap_status_t ap_dso_init(void){
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_load(const char *path, ap_context_t *ctx,
-			ap_dso_handle_t **res_handle)
+ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
+              ap_context_t *ctx)
 {
     image_id newid;
 
@@ -81,8 +81,8 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_sym(ap_dso_handle_t *handle, const char *symname,
-		       ap_dso_handle_sym_t *ressym)
+ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle,
+               const char *symname)
 {
     int err;
 
