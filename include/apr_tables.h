@@ -155,6 +155,9 @@ APR_EXPORT(ap_table_t *) ap_overlay_tables(struct ap_pool_t *p,
 APR_EXPORT(void)
 	ap_table_do(int (*comp) (void *, const char *, const char *),
 		     void *rec, const ap_table_t *t, ...);
+APR_EXPORT(void)
+        ap_table_vdo(int (*comp) (void *, const char *, const char *),
+                     void *rec, const ap_table_t *t, va_list);                  
 #define AP_OVERLAP_TABLES_SET   (0)
 #define AP_OVERLAP_TABLES_MERGE (1)
 APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
