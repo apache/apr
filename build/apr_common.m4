@@ -524,8 +524,8 @@ dnl
 if test "$ac_cv_crypt_r_style" = "cryptd"; then
     AC_DEFINE(CRYPT_R_CRYPTD, 1, [Define if crypt_r has uses CRYPTD])
 fi
-dnl if we don't combine these conditions, CRYPT_R_STRUCT_CRYPT_DATA
-dnl will end up defined twice
+# if we don't combine these conditions, CRYPT_R_STRUCT_CRYPT_DATA
+# will end up defined twice
 if test "$ac_cv_crypt_r_style" = "struct_crypt_data" -o \
    "$ac_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
     AC_DEFINE(CRYPT_R_STRUCT_CRYPT_DATA, 1, [Define if crypt_r uses struct crypt_data])
