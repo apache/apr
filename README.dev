@@ -10,4 +10,4 @@ this means using a slightly non-standard build process.
 3) make
 
 Currently, there is no make install step, as APR is not yet
-installable.  
+installable.
