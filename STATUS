@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/15 04:27:38 $]
+Last modified at [$Date: 2002/07/31 11:35:52 $]
 
 Release:
 
@@ -46,11 +46,6 @@ RELEASE SHOWSTOPPERS:
       since apr_proc_create didn't allocate the apr_proc_t storage.
       (Aren't transparent types swell?)  Suggestions?
 
-    * Almost every API in APR depends on pools, but pool semantics
-      aren't a good match for a lot of applications.  We need to find
-      a way to support alternate allocators polymorphically without
-      a significant performance penalty.
-
     * extract the MAJOR version from apr_version.h and pass it to
       libtool for use in applying version numbers to the shared
       libraries.
@@ -58,7 +53,13 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
-    * None
+    * Is this really a showstopper for the 1.0 release?:
+    * Almost every API in APR depends on pools, but pool semantics
+      aren't a good match for a lot of applications.  We need to find
+      a way to support alternate allocators polymorphically without
+      a significant performance penalty.
+
+      Not a showstopper: Thom
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
