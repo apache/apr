@@ -15,13 +15,6 @@
 
 #include "apr_pools.h"
 
-#define MAX_PROCESSORS         128
-
-typedef struct app_data {
-    int     initialized;
-    void*   gPool[MAX_PROCESSORS];
-    void*   statCache[MAX_PROCESSORS];
-} APP_DATA;
 
 /* library-private data...*/
 int          gLibId = -1;
@@ -216,3 +209,6 @@ void* getStatCache(int proc)
 
     return NULL;
 }
+
+
+

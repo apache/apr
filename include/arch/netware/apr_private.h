@@ -160,10 +160,6 @@ typedef void (Sigfunc)(int);
 
 void netware_pool_proc_cleanup ();
 
-// library-private data...
-extern int  gLibId;
-extern void *gLibHandle;
-
 /* NLM registration routines for managing which NLMs
     are using the library. */
 int register_NLM(void *NLMHandle);
