@@ -160,10 +160,6 @@ SOURCE=.\tables\apr_tables.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\misc\unix\canonerr.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc\unix\errorcodes.c
 # End Source File
 # Begin Source File
