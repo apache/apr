@@ -109,7 +109,7 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
     {
         int len = wcslen(old_file->w.fname) + 1;
         (*new_file)->w.fname = apr_palloc(old_file->cntxt, len * 2);
-        wcscpy((*new_file)->w.fname, old_file->w.fname);
+        memcpy((*new_file)->w.fname, old_file->w.fname, len * 2);
     }
     else
 #endif
