@@ -357,11 +357,51 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 }
 #endif
 
+#if defined(HAVE_STRERROR_R) && defined(STRERROR_R_RC_INT)
+/* AIX and Tru64 style */
+static char *native_strerror(apr_status_t statcode, char *buf,
+                             apr_size_t bufsize)
+{
+    if (strerror_r(statcode, buf, bufsize) < 0) {
+        return stuffbuffer(buf, bufsize, 
+                           "APR does not understand this error code");
+    }
+    else {
+        return buf;
+    }
+}
+#elif defined(HAVE_STRERROR_R)
+/* glibc style */
+static char *native_strerror(apr_status_t statcode, char *buf,
+                             apr_size_t bufsize)
+{
+    const char *msg;
+
+    buf[0] = '\0';
+    msg = strerror_r(statcode, buf, bufsize);
+    if (buf[0] == '\0') { /* libc didn't use our buffer */
+        return stuffbuffer(buf, bufsize, msg);
+    }
+    else {
+        return buf;
+    }
+}
+#else
+/* plain old strerror(); 
+ * thread-safe on some platforms (e.g., Solaris, OS/390)
+ */
+static char *native_strerror(apr_status_t statcode, char *buf,
+                             apr_size_t bufsize)
+{
+    return stuffbuffer(buf, bufsize, strerror(statcode));
+}
+#endif
+
 APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                                  apr_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
-        return stuffbuffer(buf, bufsize, strerror(statcode));
+        return native_strerror(statcode, buf, bufsize);
     }
     else if (statcode < APR_OS_START_USEERR) {
         return stuffbuffer(buf, bufsize, apr_error_string(statcode));

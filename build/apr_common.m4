@@ -420,7 +420,41 @@ fi
 rm -f conftest*
 ])dnl
 
-
+dnl
+dnl APR_CHECK_STRERROR_R_RC
+dnl
+dnl  Decide which style of retcode is used by this system's 
+dnl  strerror_r().  It either returns int (0 for success, -1
+dnl  for failure), or it returns a pointer to the error 
+dnl  string.
+dnl
+dnl
+AC_DEFUN(APR_CHECK_STRERROR_R_RC,[
+AC_MSG_CHECKING(for type of return code from strerror_r)
+AC_TRY_RUN([
+#include <errno.h>
+#include <stdio.h>
+main()
+{
+  char buf[1024];
+  if (strerror_r(ERANGE, buf, sizeof buf) < 1) {
+    exit(0);
+  }
+  else {
+    exit(1);
+  }
+}], [
+    ac_cv_strerror_r_rc_int=yes ], [
+    ac_cv_strerror_r_rc_int=no ], [
+    ac_cv_strerror_r_rc_int=no ] )
+if test "x$ac_cv_strerror_r_rc_int" = xyes; then
+  AC_DEFINE(STRERROR_R_RC_INT)
+  msg="int"
+else
+  msg="pointer"
+fi
+AC_MSG_RESULT([$msg])
+] )
 dnl
 dnl APR_CHECK_ICONV_INBUF
 dnl
