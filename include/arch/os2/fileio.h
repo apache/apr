@@ -62,6 +62,12 @@
 #include "apr_file_info.h"
 #include "apr_errno.h"
 
+/* We have an implementation of mkstemp but it's not very multi-threading 
+ * friendly & is part of the POSIX emulation rather than native so don't
+ * use it.
+ */
+#undef HAVE_MKSTEMP
+
 #define APR_FILE_BUFSIZE 4096
 
 struct apr_file_t {
