@@ -78,7 +78,7 @@ APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
             break;
         case AP_BUCKET_mmap:
             newbuf->data = ap_mmap_bucket_create();
-            newbuf->free = ap_mmap_bucket_destroy;
+            newbuf->free = NULL;
             break;
         case AP_BUCKET_rmem:
         case AP_BUCKET_file:
@@ -93,7 +93,9 @@ APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
 
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
 {
-    e->free(e);
+    if (e->free) {
+        e->free(e);
+    }
     free(e);
     return APR_SUCCESS;
 }

@@ -67,12 +67,6 @@ APR_EXPORT(ap_bucket_mmap *) ap_mmap_bucket_create(void)
     return newbuf;
 }
 
-APR_EXPORT(void) ap_mmap_bucket_destroy(void *e)
-{
-    ap_bucket_mmap *d = (ap_bucket_mmap *)e;
-    free(d);
-}
-
 APR_EXPORT(char *) ap_mmap_get_char_str(ap_bucket_mmap *b)
 {
     return b->data->mm;
