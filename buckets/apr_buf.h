@@ -58,6 +58,8 @@
 #include "apr_mmap.h"
 #include "apr_errno.h"
 #include "apr_private.h"
+/* Currently we need this, but when the filtering is done, the iol's should
+ * just go away all together, and so will this.  :-)  */
 #include "../../../include/ap_iol.h"
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>	/* for struct iovec */
@@ -109,6 +111,14 @@
  * easily.
  */
 
+/* The types of bucket brigades the code knows about.  We really don't need
+ * this enum.  All access to the bucket brigades can be done through function
+ * pointers in the bucket type.  However, when we start to do conversion
+ * routines, this enum will be a huge performance benefit, so we leave it
+ * alone.  As of this moment, only rwmem, rmem, mmap, and eos buckets have
+ * been implemented.  The rest will wait until the filtering design is
+ * decided upon, or until somebody gets around to them. 
+ */
 typedef enum {
     AP_BUCKET_rwmem,
     AP_BUCKET_rmem,
@@ -123,6 +133,30 @@ typedef enum {
 } ap_bucket_color_e;
 
 typedef struct ap_bucket ap_bucket;
+/*
+ * The basic bucket type.  This is an abstraction on top of all other bucket
+ * types.  This contains the type of bucket, a pointer to the bucket, and
+ * a couple of function pointers.  Doing it this way, lets us morph buckets
+ * from one type to another relatively easily.  Just change the data pointer
+ * to point to the new bucket, and replace all of the function pointers.
+ *
+ * This also allows for a very simple interface for all features of buckets
+ * for all bucket types.   (does that make any sense at all?)
+ *
+ * The current functions are:
+ * getlen   -- get the length of the data in the bucket 
+ *                                        (likely to be replaced soon)
+ * read     -- read the data in the bucket (not garaunteed to read it all)
+ * write    -- insert data into the bucket
+ * split    -- split one bucket into two buckets
+ * free     -- destroy the bucket, freeing it's memory
+ *
+ * funtions to be added:
+ * stat     -- get all of the metadata about the bucket (lifetime, type, etc.)
+ * convert  -- change one bucket type into another bucket type.
+ *
+ * There are also pointer to the next and previus buckets in the list.
+ */
 struct ap_bucket {
     ap_bucket_color_e color;              /* what type of bucket is it */
     void *data;				  /* for use by free() */
@@ -152,6 +186,16 @@ struct ap_bucket {
 };
 
 typedef struct ap_bucket_brigade ap_bucket_brigade;
+/*
+ * This is the basic bucket brigade.  That means it is a list of buckets.
+ * It has a pool out of which the buckets and the bucket brigade are allocated.
+ * That may change though, because I am leaning towards make the buckets have
+ * the same lifetime as the data they store in most cases.  It also has a
+ * pointer to the head and tail of the bucket list.  This allows us to
+ * easily remove data from the bucket list, and to easily append data at
+ * the end.  By walking the list, it is also possible to insert in the middle
+ * of the list.
+ */
 struct ap_bucket_brigade {
     ap_pool_t *p;                       /* The pool to associate this with.
                                            I do not allocate out of the pool,
@@ -165,6 +209,13 @@ struct ap_bucket_brigade {
 /*    ******  Different bucket types   *****/
 
 typedef struct ap_bucket_rmem ap_bucket_rmem;
+/*
+ * The Read only bucket type.  This is basically for memory allocated off the
+ * stack or literal strings.  It cannot be modified, and the lifetime is
+ * defined by when it was allocated.  Most likely these should be split into
+ * two different types.  This contains a pointer to the front and end of the
+ * string so that it is possible to remove characters at either end.
+ */
 struct ap_bucket_rmem {
     size_t  alloc_len;                  /* how much was allocated */
     const void    *start;               /* Where does the actual data start
@@ -173,6 +224,28 @@ struct ap_bucket_rmem {
 };
 
 typedef struct ap_bucket_rwmem ap_bucket_rwmem;
+/*
+ * The read/write memory bucket type.  This is for data that has been 
+ * allocated out of the heap.  This bucket actually starts by allocating
+ * 4K of memory.  We do this so that the bucket has room to grow.  At the
+ * bottom of the filter stack, we are likely to have to condense the buckets
+ * to as few as possible.  By allocating a big space at the beginning, we 
+ * don't have to make as many allocations at the bottom.  If the top level
+ * handlers are written correctly, we won't have to do much copying either.
+ * Of course, for legacy handlers, we will have to condense.
+ *
+ * This bucket type has a pointer to the start of the allocation.  This will
+ * never be modified.  This is used a a reference for the free call.  It also
+ * has the length of the amount allocated.  The length could probably go
+ * away.
+ *
+ * Finally, we have a pointer to the start and end of the string currently
+ * referenced by the bucket.  The end cannot be past the original allocation
+ * pointer + the allocation length.  The start cannot be before the original
+ * allocation pointer.  We keep a pointer to the start and end so that we can
+ * easily add and remove characters at either end.  Oh, the start cannot be
+ * after the end either.
+ */
 struct ap_bucket_rwmem {
     void    *alloc_addr;                /* Where does the data start */
     size_t  alloc_len;                  /* how much was allocated */
@@ -182,6 +255,13 @@ struct ap_bucket_rwmem {
 };
 
 typedef struct ap_bucket_mmap ap_bucket_mmap;
+
+/* 
+ * The mmap bucket type.  This is basically just an allocation address and a
+ * length.  This needs to be changed to a pointer to an mmap structure that
+ * has a reference count in it, and a pointer to the beginning and end of
+ * the data the bucket is referencing.
+ */
 struct ap_bucket_mmap {
     void      *alloc_addr;   /* Where does the mmap start? */
     int       len;           /* The amount of data in the mmap that we are 
@@ -193,13 +273,17 @@ struct ap_bucket_mmap {
 
 /*   ******  Bucket Brigade Functions  *****  */
 
-/* Create a new bucket brigade */
+/* Create a new bucket brigade.  The bucket brigade is originally empty. */
 APR_EXPORT(ap_bucket_brigade *) ap_brigade_create(ap_pool_t *p);
 
-/* destroy an enitre bucket brigade */
+/* destroy an enitre bucket brigade.  This includes destroying all of the
+ * buckets within the bucket brigade's bucket list. */
 APR_EXPORT(ap_status_t) ap_brigade_destroy(void *b);
 
-/* append bucket(s) to a bucket_brigade */
+/* append bucket(s) to a bucket_brigade.  This is the correct way to add
+ * buckets to the end of a bucket briagdes bucket list.  This will accept
+ * a list of buckets of any length.
+ */
 APR_EXPORT(void) ap_brigade_append_buckets(ap_bucket_brigade *b,
                                                   ap_bucket *e);
 
@@ -208,45 +292,96 @@ APR_EXPORT(void) ap_brigade_append_buckets(ap_bucket_brigade *b,
 APR_EXPORT(void) ap_brigade_consume(ap_bucket_brigade *, int nbytes);
 
 /* create an iovec of the elements in a bucket_brigade... return number 
-    of elements used */
+ * of elements used.  This is useful for writing to a file or to the
+ * network efficiently.
+ */
 APR_EXPORT(int) ap_brigade_to_iovec(ap_bucket_brigade *, 
                                            struct iovec *vec, int nvec);
 
 /* catenate bucket_brigade b onto bucket_brigade a, bucket_brigade b is 
-    empty after this */
+ * empty after this.  Neither bucket brigade can be NULL, but either one of
+ * them can be emtpy when calling this function.
+ */
 APR_EXPORT(void) ap_brigade_catenate(ap_bucket_brigade *a, 
                                             ap_bucket_brigade *b);
 
-/* Destroy the first nvec buckets. */
+/* Destroy the first nvec buckets.  This is very much like ap_brigade_consume
+ * except instead of specifying the number of bytes to consume, it consumes
+ * a specified number of buckets.  The original purpose for this function
+ * was in ap_brigade_to_iovec.  After converting the first 16 buckets to
+ * vectors, we would destroy those 16 buckets.  My gut is that this is the
+ * wrong approach.  I plan to change this soon-ish.
+ */
 APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec);
 
 /* save the buf out to the specified iol.  This can be used to flush the
-    data to the disk, or to send it out to the network. */
+ * data to the disk, or to send it out to the network.  This is a poor 
+ * function.  It never should have been implemented.  Unfortunately, it is
+ * also required.  Once filters have been finished, the whole concept of
+ * iol's can just go away, and this function can go away with it.  The
+ * correct solution, is to have the functions that are currently calling 
+ * this just call either ap_sendv or ap_writev directly.
+ */
 APR_EXPORT(ap_status_t) ap_brigade_to_iol(ap_ssize_t *total_bytes,
                                                  ap_bucket_brigade *a, 
                                                  ap_iol *iol);
 
+/*
+ * This function writes a bunch of strings into a bucket brigade.  How this
+ * works is a bit strange.  If there is already a rwmem bucket at the end of
+ * the list, we just add the next string to the end.  This requires a memcpy,
+ * but it is assumed that we will have to condense buckets at the bottom of
+ * the stack anyway, so we would have to do the memcpy anyway.  If there is no
+ * rwmem bucket, then we just allocate a new rmem bucket for each string.
+ * this avoids the memory allocation, and we hope that one of the intervening
+ * filters will be removing some of the data.  This may be a dubios
+ * optimization, I just don't know.
+ */
 APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va);
 
+/*
+ * Both of these functions evaluate the printf and put the resulting string
+ * into a bucket at the end of the bucket brigade.  The only reason there are
+ * two of them, is that the ap_r* functions needed both.  I would love to be
+ * able to remove one, but I don't think it's feasible.
+ */
 APR_EXPORT(int) ap_brigade_printf(ap_bucket_brigade *b, const char *fmt, ...);
-
 APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_list va);
 
 /*   ******  Bucket Functions  *****  */
 
-/* destroy a bucket */
+/* destroy a bucket, and remove it's memory.  This does not necessarily
+ * free the actual data.  For example, an mmap may have multiple buckets
+ * referenceing it (not currently implemented).  Those would only get freed
+ * when the bucket with the last reference is destroyed.  Rwmem buckets
+ * always have their data destroyed currently.
+ */
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e);
 
-/* destroy an entire list of buckets */
+/* destroy an entire list of buckets.  I am not sure how useful this is,
+ * because it basically duplicates some logic in the bucket_brigade section.
+ * I need to review where this is used and remove it if at all possible.
+ */
 APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e);
 
-/* Convert a bucket to a char * */
-APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b);
-
-/* get the length of the data in the bucket */
+/* get the length of the data in the bucket that is currently being
+ * referenced.  The bucket may contain more data, but if the start or end
+ * has been moved, we really don't care about it.
+ */
 APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b);
 
 /****** Functions to Create Buckets of varying type ******/
+
+/*
+ * All of these functions are responsibly for creating a bucket and filling
+ * it out with an initial value.  Some buckets can be over-written, others
+ * can't.  What should happen, is that buckets that can't be over-written,
+ * will have NULL write functions.  That is currently broken, although it is
+ * easy to fix.  The creation routines may not allocate the space for the
+ * buckets, because we may be using a free list.  Regardless, creation
+ * routines are responsible for getting space for a bucket from someplace
+ * and inserting the initial data.
+ */
 
 /* Create a read/write memory bucket */
 APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(const void *buf,
