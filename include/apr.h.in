@@ -209,7 +209,7 @@ Sigfunc *apr_signal(int signo, Sigfunc * func);
 #define apr_signal(a,b) signal(a,b)
 #endif
 
-#ifdef APR_HAVE_SYS_WAIT_H
+#if APR_HAVE_SYS_WAIT_H
 
 /* We have a POSIX wait interface */
 #include <sys/wait.h>
