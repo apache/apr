@@ -289,8 +289,8 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     }
 
     /* Collapse the headers into a single buffer */
-    memset(&tfb, '\0', sizeof (tfb));
     if (hdtr && hdtr->numheaders) {
+        memset(&tfb, '\0', sizeof (tfb));
         ptfb = &tfb;
         collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, hdtr->headers, 
                        hdtr->numheaders, sock->cntxt);
@@ -305,6 +305,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             nbytes = bytes_to_send;
             /* Collapse the trailers into a single buffer */
             if (hdtr && hdtr->numtrailers) {
+                memset(&tfb, '\0', sizeof (tfb));
                 ptfb = &tfb;
                 collapse_iovec((char**) &ptfb->Tail, &ptfb->TailLength, 
                                hdtr->trailers, hdtr->numtrailers, sock->cntxt);
@@ -332,7 +333,6 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             status = apr_get_netos_error();
             if ((status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) ||
                 (status == APR_FROM_OS_ERROR(WSA_IO_PENDING))) {
-
                 rv = WaitForSingleObject(wait_event, 
                                          (DWORD)(sock->timeout >= 0 
                                                  ? sock->timeout : INFINITE));
@@ -343,6 +343,15 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                     }
                     else {
                         status = APR_SUCCESS;
+                        /* Ugly Code Alert:
+                         * Account for the fact that GetOverlappedResult
+                         * tracks bytes sent in headers, trailers and the file 
+                         * and this loop only needs to track bytes sent out 
+                         * of the file.
+                         */
+                        if (ptfb) {
+                            nbytes -= (ptfb->HeadLength + ptfb->TailLength);
+                        }
                     }
                 }
                 else if (rv == WAIT_TIMEOUT)
@@ -363,21 +372,17 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         if (status != APR_SUCCESS)
             break;
 
-        /* Assume the headers have been sent */
-        if (ptfb != NULL) {
-            *len += ptfb->HeadLength;
-            ptfb->HeadLength = 0;
-            ptfb->Head = NULL;
-        }
         bytes_to_send -= nbytes;
-        *len += nbytes;
         curoff += nbytes;
+        *len += nbytes;
+        /* Adjust len for any headers/trailers sent */
+        if (ptfb) {
+            *len += (ptfb->HeadLength + ptfb->TailLength);
+            ptfb = NULL;
+        }
     }
 
     if (status == APR_SUCCESS) {
-        if (ptfb && ptfb->TailLength)
-            *len += ptfb->TailLength;
-
         /* Mark the socket as disconnected, but do not close it.
          * Note: The application must have stored the socket prior to making
          * the call to apr_sendfile in order to either reuse it or close it.
