@@ -112,7 +112,7 @@ struct ap_socket_t {
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
     socklen_t addr_len;
-    int timeout; 
+    ap_interval_time_t timeout; 
 #ifndef HAVE_POLL
     int connected;
 #endif

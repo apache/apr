@@ -67,7 +67,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     do {
         if (!sock->nonblock || err == SOCEWOULDBLOCK) {
             fds = sock->socketdes;
-            rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
+            rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout/1000 : -1);
 
             if (rv != 1) {
                 *len = 0;
@@ -106,7 +106,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     do {
         if (!sock->nonblock || err == SOCEWOULDBLOCK) {
             fds = sock->socketdes;
-            rv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
+            rv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout/1000 : -1);
 
             if (rv != 1) {
                 *len = 0;
@@ -149,7 +149,7 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec
     do {
         if (!sock->nonblock || err == SOCEWOULDBLOCK) {
             fds = sock->socketdes;
-            rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
+            rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout/1000 : -1);
 
             if (rv != 1) {
                 *len = 0;

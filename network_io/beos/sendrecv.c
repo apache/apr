@@ -63,7 +63,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
-        struct timeval *tv;
+        struct timeval tv, *tvptr;
         fd_set fdset;
         int srv;
 
@@ -71,14 +71,14 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
             if (sock->timeout == -1)
-                tv = NULL;
+                tvptr = NULL;
             else {
-                tv = (struct timeval *)ap_palloc(sock->cntxt, sizeof(struct timeval));
-                tv->tv_sec  = sock->timeout;
-                tv->tv_usec = 0;
+                tv.tv_sec  = sock->timeout / AP_USEC_PER_SEC;
+                tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
+                tvptr = &tv;
             }
             
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
+            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tvptr);
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {
@@ -108,7 +108,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
-        struct timeval *tv;
+        struct timeval tv, *tvptr;
         fd_set fdset;
         int srv;
 
@@ -116,14 +116,14 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
             if (sock->timeout == -1)
-                tv = NULL;
+                tvptr = NULL;
             else {
-                tv = (struct timeval *)ap_palloc(sock->cntxt, sizeof(struct timeval));
-                tv->tv_sec  = sock->timeout;
-                tv->tv_usec = 0;
+                tv.tv_sec  = sock->timeout / AP_USEC_PER_SEC;
+                tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
+                tvptr = &tv;
             }
             
-            srv = select(FD_SETSIZE, &fdset, NULL, NULL, tv);
+            srv = select(FD_SETSIZE, &fdset, NULL, NULL, tvptr);
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {

@@ -160,7 +160,7 @@ char *postdata;			/* *buffer containing data from postfile */
 ap_ssize_t postlen = 0;		/* length of data to be POSTed */
 char content_type[1024];	/* content type to put in POST header */
 int port = 80;			/* port number */
-time_t aprtimeout = 30000;	/* timeout value... */
+time_t aprtimeout = 30 * AP_USEC_PER_SEC; /* timeout value... */
 
 int use_html = 0;		/* use html in the report */
 char *tablestring;
@@ -218,7 +218,7 @@ static void write_request(struct connection *c)
 {
     ap_ssize_t len = reqlen;
     c->connect = ap_now();
-    ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, 30);
+    ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, 30 * AP_USEC_PER_SEC);
     if (ap_send(c->aprsock, request, &reqlen) != APR_SUCCESS &&
         reqlen != len) {
         printf("Send request failed!\n");

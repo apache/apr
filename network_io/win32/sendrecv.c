@@ -239,9 +239,11 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         lasterror = WSAGetLastError();
         if (lasterror == ERROR_IO_PENDING) {
 #ifdef WAIT_FOR_EVENT
-            rv = WaitForSingleObject(overlapped.hEvent, sock->timeout * 1000);
+            rv = WaitForSingleObject(overlapped.hEvent, 
+                                     sock->timeout >= 0 ? sock->timeout / 1000 : INFINITE);
 #else
-            rv = WaitForSingleObject((HANDLE) sock->sock, sock->timeout * 1000);
+            rv = WaitForSingleObject((HANDLE) sock->sock, 
+                                     sock->timeout >= 0 ? sock->timeout / 1000 : INFINITE);
 #endif
             if (rv == WAIT_OBJECT_0)
                 lasterror = APR_SUCCESS;

@@ -64,7 +64,7 @@ struct ap_socket_t {
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
     size_t addr_len;
-    int timeout;
+    ap_interval_time_t timeout;
 };
 
 struct ap_pollfd_t {

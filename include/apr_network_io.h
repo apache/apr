@@ -166,7 +166,7 @@ B<NOTE>:  This does not actually close the socket descriptor, it just
           controls which calls are still valid on the socket.
 
 =cut
-  /
+ */
 ap_status_t ap_shutdown(ap_socket_t *ithesocket, ap_shutdown_how_e how);
 
 /*
@@ -381,7 +381,7 @@ B<Read data from a network.>
     arg 3) On entry, the number of bytes to receive; on exit, the number
            of bytes received.
 
-B<NOTE>:  This functions acts like a blocking write by default.  To change 
+B<NOTE>:  This functions acts like a blocking read by default.  To change 
           this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
           The number of bytes actually sent is stored in argument 3.
   
@@ -409,7 +409,7 @@ B<Setup socket options for the specified socket>
               APR_SO_REUSEADDR  --  The rules used in validating addresses
                                     supplied to bind should allow reuse
                                     of local addresses.
-              APR_SO_TIMEOUT    --  Set the timeout value in seconds.
+              APR_SO_TIMEOUT    --  Set the timeout value in microseconds.
                                     values < 0 mean wait forever.  0 means
                                     don't wait at all.
               APR_SO_SNDBUF     --  Set the SendBufferSize
