@@ -252,7 +252,8 @@ ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
  * ap_status_t ap_get_filedata(ap_file_t *, char *key, void *)
  *    Return the data associated with the current file.
  * arg 1) The currently open file.
- * arg 2) The user data associated with the file.  
+ * arg 2) The key to use for retreiving data associated with this file.
+ * arg 3) The user data associated with the file.  
  */                     
 ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
 {    
@@ -271,6 +272,8 @@ ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
  *    Set the data associated with the current file.
  * arg 1) The currently open file.
  * arg 2) The user data to associate with the file.  
+ * arg 3) The key to use for assocaiteing data with the file.
+ * arg 4) The cleanup routine to use when the file is destroyed.
  */                     
 ap_status_t ap_set_filedata(struct file_t *file, void *data, char *key,
                             ap_status_t (*cleanup) (void *))

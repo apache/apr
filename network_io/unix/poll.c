@@ -432,7 +432,8 @@ ap_status_t ap_clear_poll_sockets(struct pollfd_t *aprset, ap_int16_t event)
  * ap_status_t ap_get_polldata(ap_pollfd_t *, char *, void *)
  *    Return the context associated with the current poll.
  * arg 1) The currently open pollfd.
- * arg 2) The user data associated with the pollfd.
+ * arg 2) The key to use for retreiving data associated with a poll struct.
+ * arg 3) The user data associated with the pollfd.
  */
 ap_status_t ap_get_polldata(struct pollfd_t *pollfd, char *key, void *data)
 {
@@ -451,6 +452,7 @@ ap_status_t ap_get_polldata(struct pollfd_t *pollfd, char *key, void *data)
  *    Return the context associated with the current poll.
  * arg 1) The currently open pollfd.
  * arg 2) The user data to associate with the pollfd.
+
  */
 ap_status_t ap_set_polldata(struct pollfd_t *pollfd, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
