@@ -64,6 +64,10 @@ Changes with APR 1.0
 
      apr_compat.h
 
+Changes with APR 0.9.5
+
+  *) Fix make_exports.awk to work with apr-iconv.  [Justin Erenkrantz]
+
 Changes with APR 0.9.4
 
   *) fix apr_file_dup() and apr_file_dup2() to dup the ungetchar

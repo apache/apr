@@ -76,8 +76,8 @@ function add_symbol(symbol) {
     }
 }
 
-/^[ \t]*AP[RU]?_(CORE_)?DECLARE[^(]*[(][^)]*[)]([^ ]* )*[^(]+[(]/ {
-    sub("[ \t]*AP[RU]?_(CORE_)?DECLARE[^(]*[(][^)]*[)][ \t]*", "")
+/^[ \t]*AP[RUI]?_(CORE_)?DECLARE[^(]*[(][^)]*[)]([^ ]* )*[^(]+[(]/ {
+    sub("[ \t]*AP[RUI]?_(CORE_)?DECLARE[^(]*[(][^)]*[)][ \t]*", "")
     sub("[(].*", "")
     sub("([^ ]* (^([ \t]*[(])))+", "")
 
