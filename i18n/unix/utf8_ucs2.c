@@ -98,8 +98,10 @@
  * apr_conv_ucs2_to_utf8 out words:sizeof(in) / 2 <= Req <= sizeof(in) * 3 / 2
  */
 
-apr_status_t apr_conv_utf8_to_ucs2(const char *in, apr_size_t *inbytes,
-                                   apr_wchar_t *out, apr_size_t *outwords)
+APR_DECLARE(apr_status_t) apr_conv_utf8_to_ucs2(const char *in, 
+                                                apr_size_t *inbytes,
+                                                apr_wchar_t *out, 
+                                                apr_size_t *outwords)
 {
     apr_int64_t newch, mask;
     apr_size_t expect, eating;
@@ -207,8 +209,10 @@ apr_status_t apr_conv_utf8_to_ucs2(const char *in, apr_size_t *inbytes,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_conv_ucs2_to_utf8(const apr_wchar_t *in, apr_size_t *inwords,
-                                   char *out, apr_size_t *outbytes)
+APR_DECLARE(apr_status_t) apr_conv_ucs2_to_utf8(const apr_wchar_t *in, 
+                                                apr_size_t *inwords,
+                                                char *out, 
+                                                apr_size_t *outbytes)
 {
     apr_int64_t newch, require;
     apr_size_t need;

@@ -71,8 +71,10 @@ typedef apr_uint16_t apr_wchar_t;
  * when the character code is invalid (in or out of context) and the later
  * when more characters were expected, but insufficient characters remain.
  */
-apr_status_t apr_conv_utf8_to_ucs2(const char *in, apr_size_t *inbytes,
-                                   apr_wchar_t *out, apr_size_t *outwords);
+APR_DECLARE(apr_status_t) apr_conv_utf8_to_ucs2(const char *in, 
+                                                apr_size_t *inbytes,
+                                                apr_wchar_t *out, 
+                                                apr_size_t *outwords);
 
 /**
  * An APR internal function for fast ucs-2 wide Unicode format conversion to 
@@ -83,7 +85,9 @@ apr_status_t apr_conv_utf8_to_ucs2(const char *in, apr_size_t *inbytes,
  * when the character code is invalid (in or out of context) and the later
  * when more words were expected, but insufficient words remain.
  */
-apr_status_t apr_conv_ucs2_to_utf8(const apr_wchar_t *in, apr_size_t *inwords,
-                                   char *out, apr_size_t *outbytes);
+APR_DECLARE(apr_status_t) apr_conv_ucs2_to_utf8(const apr_wchar_t *in, 
+                                                apr_size_t *inwords,
+                                                char *out, 
+                                                apr_size_t *outbytes);
 
 #endif /* def I18N_H */
