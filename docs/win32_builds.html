@@ -9,22 +9,16 @@
 
 <dl>
   <dt>apr/apr.dsp</dt>
-
     <dd>Builds the static apr.lib library (-D APR_DECLARE_STATIC)</dd>
   <dt>apr/libapr.dsp</dt>
-
     <dd>Builds the dynamic libapr.dll library (no define required)</dd>
   <dt>apr-util/aprutil.dsp</dt>
-
     <dd>Builds the static aprutil.lib library (-D APU_DECLARE_STATIC)</dd>
   <dt>apr-util/libaprutil.dsp</dt>
-
     <dd>Builds the dynamic libaprutil.dll library (no define required)</dd>
   <dt>apr-iconv/apriconv.dsp</dt>
-
     <dd>Builds the static apriconv.lib library (-D API_DECLARE_STATIC)</dd>
   <dt>apr-iconv/libapriconv.dsp</dt>
-
     <dd>Builds the dynamic libapriconv.dll library (no define required)</dd>
 </dl>
 
@@ -40,7 +34,7 @@
    your application needs, that workspace defines both the dynamic and static
    library dependencies.</p>
 
-<p>The APR libraries (dynamic and static) are compiled with debugging symbols,
+<p>The APR libraries (dynamic and static) are compiled with debugging symbols,
    even in Release builds.  The dynamic library symbols are always usable,
    simply keep the correspond .pdb file in the same path as the library .dll.
    (E.g. both libapr.dll and libapr.pdb should be copied to the same path.)</p>
