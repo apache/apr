@@ -134,3 +134,47 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
+
+
+ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *nbytes)
+{
+    ap_status_t rv;
+    struct iovec *tmpvec;
+
+    tmpvec = alloca(sizeof(struct iovec) * nvec);
+    memcpy(tmpvec, vec, sizeof(struct iovec) * nvec);
+
+    do {
+        rv = writev(sock->socketdes, tmpvec, nvec);
+    } while (rv == -1 && sock_errno() == SOCEINTR);
+
+    if (rv == -1 && sock_errno() == SOCEWOULDBLOCK && sock->timeout != 0) {
+        int fds;
+        int srv;
+
+        do {
+            fds = sock->socketdes;
+            srv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
+        } while (srv == -1 && sock_errno() == SOCEINTR);
+
+        if (srv == 0) {
+            return APR_TIMEUP;
+        }
+        else if (srv < 0) {
+            return os2errno(sock_errno());
+        }
+        else {
+            do {
+                rv = writev(sock->socketdes, (struct iovec *)vec, nvec);
+            } while (rv == -1 && sock_errno() == SOCEINTR);
+        }
+    }
+    
+    if (rv < 0) {
+        *nbytes = 0;
+        return os2errno(sock_errno());
+    }
+
+    *nbytes = rv;
+    return APR_SUCCESS;
+}
