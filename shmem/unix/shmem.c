@@ -57,6 +57,10 @@
 #include "apr_shmem.h"
 #include "apr_errno.h"
 
+#if BEOS
+#include <kernel/OS.h>
+#endif
+
 struct shmem_t {
     MM *mm;
 #if BEOS
