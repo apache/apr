@@ -54,6 +54,9 @@
 
 #include "fileio.h"
 #include "apr_strings.h"
+#if APR_HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 /* Figure out how to get pipe block/nonblock on BeOS...
  * Basically, BONE7 changed things again so that ioctl didn't work,
