@@ -59,6 +59,16 @@ CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.slo
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
 
+all: $(PROGRAMS) $(NONPORTABLE)
+
+check: $(PROGRAMS) $(NONPORTABLE)
+	for prog in $(PROGRAMS) $(NONPORTABLE); do \
+		./$$prog; \
+		if test $$i = 255; then \
+			echo "$$prog failed"; \
+			break; \
+		fi \
+	done
 
 testfile@EXEEXT@: testfile.lo $(LOCAL_LIBS)
 	$(LINK) testfile.lo $(LOCAL_LIBS) $(ALL_LIBS)
