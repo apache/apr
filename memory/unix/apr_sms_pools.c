@@ -73,7 +73,8 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool, apr_pool_t *p)
          */
         return apr_sms_std_create(newpool);
 
-    return apr_sms_trivial_create(newpool, p ? p : permanent_pool);
+    return apr_sms_trivial_create_ex(newpool, p ? p : permanent_pool,
+                                     0x2000, 0, 0x80000);
 }
     
 APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t * p,
@@ -118,14 +119,23 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void)
 
 APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *gp)
 {
+    apr_status_t rv;
+    
+    if ((rv = apr_sms_trivial_create_ex(&permanent_pool, gp,
+                                        0x2000, 0, 0x80000)) != APR_SUCCESS)
+        return rv;
+
     initialized = 1;
-    return apr_sms_trivial_create(&permanent_pool, gp);
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *gp)
 {
-    apr_sms_destroy(permanent_pool);
-    /* so, are we still initialized after this???? */
+    if (initialized)
+        apr_sms_destroy(permanent_pool);
+
+    initialized = 0;
 }
 
 APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
