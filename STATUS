@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/28 17:23:22 $]
+Last modified at [$Date: 2001/01/29 06:21:36 $]
 
 Release:
 
@@ -15,11 +15,18 @@ Release:
 
 RELEASE SHOWSTOPPERS:
 
+    * Unix apr_stat/lstat/getfileinfo were very fast hacks, needs review.
+        Will suggests: Unix is looking pretty good.  Ignore APR_FINFO_NAME
+        issues for b1, I've noted that issue below.
+
+    * OS2 apr_stat/lstat/getfileinfo/dir_read were very fast hacks, need
+        cleanup, toggle messy (APR_INCOMPLETE) result when appropriate.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
-    * Unix, OS2 apr_stat/lstat/getfileinfo were very fast hacks.  These
-      need to be fleshed out.
+    * Solve Win32 APR_CHR, APR_BLK, etc for Win32 apr_stat without 
+        GetFileType?  How about inode/dev/nlink?
+        Status: Will's WIP
 
     * SysV semaphore support isn't usable by Apache when started as
       root because we don't have a way to allow the semaphore to be
@@ -30,9 +37,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Build scripts do not recognise AIX 4.2.1 pthreads
 
-    * Win32: Implement ap_shm_ functions 
+    * Win32: Implement apr_shm_ functions 
 
-    * Bill says we need a new procattr, APR_CREATE_SUSPENDED (or
+    * FirstBill says we need a new procattr, APR_CREATE_SUSPENDED (or
       something similar) to direct ap_create_process to create the
       process suspended. We also need a call to wake up the suspended 
       process This may not be able to be implemented everywhere though.
@@ -111,3 +118,13 @@ Documentation that needs writing:
 
 Stuff waiting for code thawing after Beta 1:
 
+    * Implement APR_FINFO_ICASE/APR_FINFO_NAME for stat'ish calls.
+        Can wait till after b1, will be required to eliminate canonical
+        and add that functionallity in-line with directory_walk, which
+        is _not_ planned for 2.0b1, but immediately afterwards.  It's
+        required to complete Apache/WinNT's Unicode schema as well.
+        Note: Will doesn't like his original APR_FINFO_ICASE definition.
+
+    * Identify and implement those protection bits that have general 
+        usefulness, perhaps hidden, generic read-only [immutable],
+        effective current user permissions, etc.

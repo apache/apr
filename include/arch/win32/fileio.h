@@ -140,6 +140,18 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
                            | APR_FINFO_CTIME | APR_FINFO_ATIME \
                            | APR_FINFO_MTIME | APR_FINFO_SIZE)
 
+/* Sneak the Readonly bit through finfo->protection for internal use _only_ */
+#define APR_FREADONLY 0x10000000 
+
+/* Private function that extends apr_stat/lstat/getfileinfo/dir_read */
+apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
+                        apr_int32_t wanted, int whatfile, 
+                        apr_oslevel_e os_level);
+
+/* whatfile types for the ufile arg */
+#define MORE_OF_HANDLE 0
+#define MORE_OF_FSPEC  1
+#define MORE_OF_WFSPEC 2
 
 /* quick run-down of fields in windows' apr_file_t structure that may have 
  * obvious uses.

@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Implement WinNT Unix'ish permissions. [William Rowe]
+
   *) Corrected an OS2'ism of apr_get_home_directory.  OS2 now returns the
      proper directory, including the user's name.
 
