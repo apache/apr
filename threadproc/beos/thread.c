@@ -146,7 +146,7 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval
 {
     apr_pool_destroy(thd->cntxt);
     thd->exitval = retval;
-    exit_thread ((status_t)(*retval));
+    exit_thread ((status_t)(retval));
     /* This will never be reached... */
     return APR_SUCCESS;
 }
