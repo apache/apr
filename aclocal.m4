@@ -273,5 +273,55 @@ if test -n "$USE_MM" && test -n "$USE_VPATH"; then
 fi
 ])
 
+AC_DEFUN(APR_CHECK_INET_ADDR,[
+AC_CACHE_CHECK(for inet_addr, ac_cv_func_inet_addr,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+],[
+inet_addr("127.0.0.1");
+],[
+    ac_cv_func_inet_addr=yes
+],[
+    ac_cv_func_inet_addr=no
+])
+])
+
+if test "$ac_cv_func_inet_addr" = "yes"; then
+  have_inet_addr=1
+else
+  have_inet_addr=0
+fi
+])
+
+AC_DEFUN(APR_CHECK_INET_NETWORK,[
+AC_CACHE_CHECK(for inet_network, ac_cv_func_inet_network,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+],[
+inet_network("127.0.0.1");
+],[
+    ac_cv_func_inet_network=yes
+],[
+    ac_cv_func_inet_network=no
+])
+])
+
+if test "$ac_cv_func_inet_network" = "yes"; then
+  have_inet_network=1
+else
+  have_inet_network=0
+fi
+])
+
 sinclude(apr_common.m4)
 sinclude(hints.m4)
