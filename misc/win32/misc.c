@@ -61,7 +61,7 @@
 
 APR_DECLARE_DATA apr_oslevel_e apr_os_level = APR_WIN_UNK;
 
-apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
+apr_status_t apr_get_oslevel(apr_oslevel_e *level)
 {
     if (apr_os_level == APR_WIN_UNK) 
     {
