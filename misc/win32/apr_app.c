@@ -54,7 +54,7 @@
 
 /* Usage Notes:
  *
- *   this module, and the i18n/unix/ucs2_utf8.c modules must be 
+ *   this module, and the misc/win32/utf8.c modules must be 
  *   compiled APR_EXPORT_STATIC and linked to an application with
  *   the /entry:wmainCRTStartup flag.  This module becomes the true
  *   wmain entry point, and passes utf-8 reformatted argv and env
