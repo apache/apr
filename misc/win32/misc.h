@@ -133,6 +133,11 @@ DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
 #undef GetFileAttributesEx
 #define GetFileAttributesEx LateGetFileAttributesExA
 
+DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
+    IN HANDLE hFile),
+    (hFile));
+#define CancelIo LateCancelIo
+
 ap_status_t ap_get_oslevel(struct ap_pool_t *, ap_oslevel_e *);
 
 #endif  /* ! MISC_H */
