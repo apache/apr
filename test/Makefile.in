@@ -27,6 +27,7 @@ TARGETS= testmd5@EXEEXT@ \
 	testpipe@EXEEXT@ \
 	testdso@EXEEXT@ \
 	testoc@EXEEXT@ \
+	testuuid@EXEEXT@ \
 	occhild@EXEEXT@ \
 	mod_test.so
 
@@ -42,6 +43,7 @@ OBJS= testmd5.o \
 	testmmap.o \
 	testdso.o \
 	testoc.o \
+	testuuid.o \
 	occhild.o \
 	mod_test.o
 
@@ -99,6 +101,9 @@ testshmem@EXEEXT@: testshmem.o
 
 testpipe@EXEEXT@: testpipe.o
 	$(CC) $(CFLAGS) -o testpipe@EXEEXT@ testpipe.o $(LDFLAGS)
+
+testuuid@EXEEXT@: testuuid.o
+	$(CC) $(CFLAGS) -o testuuid@EXEEXT@ testuuid.o $(LDFLAGS)
 
 clean:
 	$(RM) -f *.o *.a *.so $(TARGETS)
