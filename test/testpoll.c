@@ -61,7 +61,11 @@
 #include "apr_poll.h"
 
 #define SMALL_NUM_SOCKETS 3
-#define LARGE_NUM_SOCKETS 64
+/* We can't use 64 here, because some platforms *ahem* Solaris *ahem* have
+ * a default limit of 64 open file descriptors per process.  If we use
+ * 64, the test will fail even though the code is correct.
+ */
+#define LARGE_NUM_SOCKETS 50
 
 static apr_socket_t *s[LARGE_NUM_SOCKETS];
 static apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
@@ -112,6 +116,8 @@ static void send_msg(apr_socket_t **sockarray, apr_sockaddr_t **sas, int which,
     apr_size_t len = 5;
     apr_status_t rv;
 
+    CuAssertPtrNotNull(tc, sockarray[which]);
+
     rv = apr_socket_sendto(sockarray[which], sas[which], 0, "hello", &len);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertIntEquals(tc, strlen("hello"), len);
@@ -124,6 +130,8 @@ static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p,
     char *buffer = apr_pcalloc(p, sizeof(char) * (buflen + 1));
     apr_sockaddr_t *recsa;
     apr_status_t rv;
+
+    CuAssertPtrNotNull(tc, sockarray[which]);
 
     apr_sockaddr_info_get(&recsa, "127.0.0.1", APR_UNSPEC, 7770, 0, p);
 
@@ -317,6 +325,9 @@ static void add_sockets_pollset(CuTest *tc)
 
     for (i = 0; i < LARGE_NUM_SOCKETS;i++){
         apr_pollfd_t socket_pollfd;
+
+        CuAssertPtrNotNull(tc, s[i]);
+
         socket_pollfd.desc_type = APR_POLL_SOCKET;
         socket_pollfd.reqevents = APR_POLLIN;
         socket_pollfd.desc.s = s[i];
