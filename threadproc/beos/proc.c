@@ -195,8 +195,6 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     int i=0,nargs=0;
     char **newargs = NULL;
     thread_id newproc, sender;
-    char * buffer = NULL;
-    size_t bufsize = 0;
     struct send_pipe *sp;        
 	char * dir = NULL;
 	    
@@ -234,7 +232,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     }
     newargs[nargs] = NULL;
 
-    newproc = load_image(nargs, newargs, env);
+    newproc = load_image(nargs, (const char**)newargs, (const char**)env);
 
     /* load_image copies the data so now we can free it... */
     while (--nargs >= 0)

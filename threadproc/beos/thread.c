@@ -56,8 +56,6 @@
 
 ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 {
-    ap_status_t stat;
-  
     (*new) = (ap_threadattr_t *)ap_palloc(cont, 
               sizeof(ap_threadattr_t));
     (*new)->attr = (int32)ap_palloc(cont, 
@@ -135,6 +133,7 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
 {
     ap_destroy_pool(thd->cntxt);
 	exit_thread ((status_t)retval);
+	return APR_SUCCESS;
 }
 
 ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
