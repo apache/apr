@@ -183,8 +183,15 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
                       ap_size_t nvec, ap_ssize_t *nbytes)
 {
     int bytes;
-    *nbytes = vec[0].iov_len;
-    return ap_write(thefile, vec[0].iov_base, nbytes);
+
+    if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
+        *nbytes = 0;
+        return errno;
+    }
+    else {
+        *nbytes = bytes;
+        return APR_SUCCESS;
+    }
 }
 
 ap_status_t ap_putc(char ch, ap_file_t *thefile)
