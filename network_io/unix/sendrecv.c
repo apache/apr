@@ -306,21 +306,30 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         		ap_int32_t flags)
 {
     off_t nbytes;
-    int rv;
+    int rv, i;
     struct sf_hdtr headerstruct;
+    size_t bytes_to_send = *len;
+
+    /* On FreeBSD, the number of bytes to send must include the length of
+     * the headers.  Don't look at the man page for this :(  Instead, look
+     * at the the logic in src/sys/kern/uipc_syscalls::sendfile().
+     */
+    
+    for (i = 0; i < hdtr->numheaders; i++) {
+        bytes_to_send += hdtr->headers[i].iov_len;
+    }
 
     headerstruct.headers = hdtr->headers;
     headerstruct.hdr_cnt = hdtr->numheaders;
     headerstruct.trailers = hdtr->trailers;
     headerstruct.trl_cnt = hdtr->numtrailers;
 
-
     /* FreeBSD can send the headers/footers as part of the system call */
     do {
         rv = sendfile(file->filedes,	/* open file descriptor of the file to be sent */
         	      sock->socketdes,	/* socket */
         	      *offset,	/* where in the file to start */
-        	      (size_t) * len,	/* number of bytes to send */
+        	      bytes_to_send,    /* number of bytes to send */
         	      &headerstruct,	/* Headers/footers */
         	      &nbytes,	/* number of bytes written */
         	      flags	/* undefined, set to 0 */
@@ -451,9 +460,17 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     (*len) = rv;
     return APR_SUCCESS;
 }
-#elif defined(_AIX)
-/* Need another check to make sure the dependencies are checked */
-/* AIX, version 4.3.2 with APAR IX85388, or version 4.3.3 and above */
+#elif defined(_AIX) || defined(__MVS__)
+/* AIX and OS/390 have the same send_file() interface.
+ *
+ * subtle differences:
+ *   AIX doesn't update the file ptr but OS/390 does
+ *
+ * availability (correctly determined by autoconf):
+ *
+ * AIX -  version 4.3.2 with APAR IX85388, or version 4.3.3 and above
+ * OS/390 - V2R7 and above
+ */
 ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                         ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
                         ap_int32_t flags)
