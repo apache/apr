@@ -77,23 +77,20 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
          * If data is available, go ahead and read it.
          */
         if (file->pipe) {
-            char tmpbuf[5];
-            DWORD dwBytesRead;
-            DWORD dwBytesAvail;
-            DWORD dwBytesLeftThisMsg;
-            if (!PeekNamedPipe(file->filehand,         // handle to pipe to copy from
-                               &tmpbuf,                   // pointer to data buffer
-                               sizeof(tmpbuf),            // size, in bytes, of data buffer
-                               &dwBytesRead,           // pointer to number of bytes read
-                               &dwBytesAvail,          // pointer to total number of bytes available
-                               &dwBytesLeftThisMsg)) { // pointer to unread bytes in this message
+            DWORD bytes;
+            if (!PeekNamedPipe(file->filehand, NULL, 0, NULL, &bytes, NULL)) {
                 rv = apr_get_os_error();
-                if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE))
-                    return APR_EOF;
+                if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
+                    rv = APR_EOF;
+                }
+                return rv;
             }
             else {
-                if (dwBytesRead == 0) {
+                if (bytes == 0) {
                     return APR_EAGAIN;
+                }
+                if (len > bytes) {
+                    len = bytes;
                 }
             }
         }
