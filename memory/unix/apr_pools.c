@@ -91,6 +91,14 @@
 
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
+/*
+ * This option prints out the pool creation info
+ * (and info about its children)
+ * when the pool is destroyed.
+ */
+/*
+#define APR_POOL_DEBUG_VERBOSE
+*/
     
 /*
  * Structures
@@ -161,6 +169,8 @@ struct apr_pool_t {
 
 #else /* !defined(APR_POOL_DEBUG) */
     debug_node_t         *nodes;
+    const char           *file;
+    int                   line;
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
 #endif
@@ -887,6 +897,9 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     return mem;
 }
 
+/*
+ * (debug)
+ */
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 {
     void *mem;
@@ -900,9 +913,10 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 
 /*
  * Pool creation/destruction (debug)
+ * TODO: printout a line if _VERBOSE is on
  */
 
-APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
+APR_DECLARE(void) apr_pool_clear_dbg(apr_pool_t *pool,const char*file, int line)
 {
     debug_node_t *node;
     apr_uint32_t index;
@@ -911,7 +925,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
      * this pool thus this loop is safe and easy.
      */
     while (pool->child)
-        apr_pool_destroy(pool->child);
+        apr_pool_destroy_dbg(pool->child,file,line);
 
     /* Run cleanups */
     run_cleanups(pool->cleanups);
@@ -935,9 +949,32 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     }
 }
 
-APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
+/*
+ * destroy (debug)
+ */
+APR_DECLARE(void) apr_pool_destroy_dbg(apr_pool_t *pool,const char*file, int line)
 {
-    apr_pool_clear(pool);
+#if defined APR_POOL_DEBUG_VERBOSE
+    apr_file_t *stderr_log = NULL;
+    apr_pool_t *child;
+
+    apr_file_open_stderr(&stderr_log,pool); /* XXX not sure about this one */
+    if (stderr_log) {
+        apr_file_printf(stderr_log,
+            "DEBUG: %s:%d destroy pool tagged %s created %s:%d\n",
+            file, line, pool->tag, pool->file, pool->line);
+        child= pool->child;
+        while (child) {
+            apr_file_printf(stderr_log,
+                "DEBUG:\tpool child tagged %s created %s:%d\n",
+                child->tag, child->file, child->line);
+            child = child->sibling;
+        }
+        apr_file_close(stderr_log);
+    }
+#endif
+
+    apr_pool_clear_dbg(pool,file,line);
 
     /* Remove the pool from the parents child list */
     if (pool->parent) {
@@ -961,10 +998,16 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     free(pool);
 }
 
-APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool, 
+/*
+ * create (debug)
+ * there is a macro which adds the file/line #
+ */
+APR_DECLARE(apr_status_t) apr_pool_create_ex_dbg(apr_pool_t **newpool, 
                                              apr_pool_t *parent,
                                              apr_abortfunc_t abort_fn,
-                                             apr_uint32_t flags)
+                                             apr_uint32_t flags, 
+                                             const char *file,
+                                             int line)
 {
     apr_pool_t *pool;
 
@@ -1027,6 +1070,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->sibling = NULL;
         pool->ref = NULL;
     }
+
+    pool->file = file;
+    pool->line = line;
 
     *newpool = pool;
 
