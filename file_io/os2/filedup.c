@@ -60,24 +60,24 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
+ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
 {
     int rv;
     ap_file_t *dup_file;
 
     if (*new_file == NULL) {
-        dup_file = (ap_file_t *)ap_palloc(old_file->cntxt, sizeof(ap_file_t));
+        dup_file = (ap_file_t *)ap_palloc(p, sizeof(ap_file_t));
 
         if (dup_file == NULL) {
             return APR_ENOMEM;
         }
 
         dup_file->filedes = -1;
-        dup_file->cntxt = old_file->cntxt;
     } else {
       dup_file = *new_file;
     }
 
+    dup_file->cntxt = p;
     rv = DosDupHandle(old_file->filedes, &dup_file->filedes);
 
     if (rv) {
