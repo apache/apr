@@ -58,9 +58,9 @@
 #include "apr_thread_mutex.h"
 #include "apr_arch_inherit.h"
 
-static apr_status_t _file_dup(apr_file_t **new_file, 
-                              apr_file_t *old_file, apr_pool_t *p,
-                              int which_dup)
+static apr_status_t file_dup(apr_file_t **new_file, 
+                             apr_file_t *old_file, apr_pool_t *p,
+                             int which_dup)
 {
     int rv;
     
@@ -141,13 +141,13 @@ static apr_status_t _file_dup(apr_file_t **new_file,
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
 {
-    return _file_dup(new_file, old_file, p, 1);
+    return file_dup(new_file, old_file, p, 1);
 }
 
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
-    return _file_dup(&new_file, old_file, p, 2);
+    return file_dup(&new_file, old_file, p, 2);
 }
 
 APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
