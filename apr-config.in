@@ -106,6 +106,7 @@ or when linking directly:
 An application should use the results of --cflags, --cppflags, --includes,
 and --ldflags in their build process.
 EOF
+#' close a quote from above to make emacs happy
 }
 
 if test $# -eq 0; then
