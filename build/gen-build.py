@@ -28,7 +28,10 @@ def main():
   headers = get_files(parser.get('options', 'headers'))
 
   # compute the relevant headers, along with the implied includes
-  legal_deps = map(os.path.basename, headers)
+  legal_deps = { }
+  for fname in headers:
+    legal_deps[os.path.basename(fname)] = fname
+
   h_deps = { }
   for fname in headers:
     h_deps[os.path.basename(fname)] = extract_deps(fname, legal_deps)
@@ -50,7 +53,7 @@ def main():
     for hdr in deps.keys():
       deps.update(h_deps.get(hdr, {}))
 
-    f.write('%s: %s .make.dirs include/%s\n' % (obj, file, string.join(deps.keys(), ' include/')))
+    f.write('%s: %s .make.dirs %s\n' % (obj, file, string.join(deps.values())))
 
   f.write('\nOBJECTS = %s\n\n' % string.join(objects))
   f.write('HEADERS = $(top_srcdir)/%s\n\n' % string.join(headers, ' $(top_srcdir)/'))
@@ -80,8 +83,8 @@ def extract_deps(fname, legal_deps):
     if line[:8] != '#include':
       continue
     inc = _re_include.match(line).group(1)
-    if inc in legal_deps:
-      deps[inc] = None
+    if inc in legal_deps.keys():
+      deps[inc] = legal_deps[inc]
   return deps
 _re_include = re.compile('#include *["<](.*)[">]')
 
