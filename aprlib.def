@@ -64,8 +64,8 @@ EXPORTS
 	ap_send   @56
 	ap_recv   @57
 	ap_setsocketopt   @58
-	ap_getport @59
-	ap_setport   @60
+;	ap_getport @59
+;	ap_setport   @60
 	ap_setup_poll   @61
 	ap_poll   @62
 	ap_add_poll_socket   @63
@@ -78,8 +78,8 @@ EXPORTS
 	ap_get_os_sock   @70
 	ap_remove_poll_socket   @71
 	ap_clear_poll_sockets   @72
-	ap_setipaddr @73
-	ap_getipaddr @74
+;	ap_setipaddr @73
+;	ap_getipaddr @74
 	ap_create_signal   @75
 	ap_setup_signal   @76
 SignalHandling   @77
@@ -211,3 +211,14 @@ thread_ready   @79
 	ap_ungetc @203
 	ap_tokenize_to_argv @204
 	ap_filename_of_pathname @205
+	ap_get_remote_name @206
+	ap_get_local_name @207
+	ap_get_local_ipaddr @208
+	ap_set_local_ipaddr @209
+	ap_get_remote_ipaddr @210
+	ap_set_remote_ipaddr @211
+	ap_get_local_port @212
+	ap_set_local_port @213
+	ap_get_remote_port @214
+	ap_set_remote_port @215
+

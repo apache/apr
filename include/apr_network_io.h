@@ -137,10 +137,8 @@ ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr);
 ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock);
 ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock);
 
-#ifdef HAVE_NETINET_IN_H
 ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock);
 ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock);
-#endif
 
 ap_status_t ap_setup_poll(ap_pollfd_t **, ap_int32_t, ap_context_t *);
 ap_status_t ap_poll(ap_pollfd_t *, ap_int32_t *, ap_int32_t);

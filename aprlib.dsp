@@ -212,6 +212,10 @@ SOURCE=.\threadproc\win32\signals.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\network_io\win32\sockaddr.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\network_io\win32\sockets.c
 # End Source File
 # Begin Source File
