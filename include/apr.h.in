@@ -194,6 +194,8 @@ typedef  @ssize_t_value@         apr_ssize_t;
 typedef  @off_t_value@           apr_off_t;
 typedef  @socklen_t_value@       apr_socklen_t;
 
+#define APR_SIZEOF_VOIDP @voidp_size@
+
 /* Mechanisms to properly type numeric literals */
 @int64_literal@
 
