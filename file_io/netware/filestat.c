@@ -60,6 +60,7 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_hash.h"
+#include "apr_thread_rwlock.h"
 
 static apr_filetype_e filetype_from_mode(mode_t mode)
 {
@@ -87,7 +88,8 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
 static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
                            apr_int32_t wanted)
 { 
-    finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK;
+    finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK 
+                    | APR_FINFO_OWNER | APR_FINFO_PROT;
     finfo->protection = apr_unix_mode2perms(info->st_mode);
     finfo->filetype = filetype_from_mode(info->st_mode);
     finfo->user = info->st_uid;
@@ -184,6 +186,113 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     return apr_file_perms_set(fname, finfo.protection);
 }
 
+static apr_status_t stat_cache_cleanup(void *data)
+{
+    apr_pool_t *p = (apr_pool_t *)getGlobalPool();
+    apr_hash_index_t *hi;
+    apr_hash_t *statCache = (apr_hash_t*)data;
+	char *key;
+    apr_ssize_t keylen;
+    NXPathCtx_t pathctx;
+
+    for (hi = apr_hash_first(p, statCache); hi; hi = apr_hash_next(hi)) {
+        apr_hash_this(hi, (const void**)&key, &keylen, (void**)&pathctx);
+
+        if (pathctx) {
+            NXFreePathContext(pathctx);
+        }
+    }
+
+    return APR_SUCCESS;
+}
+
+int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestmap, apr_pool_t *p)
+{
+    apr_pool_t *gPool = (apr_pool_t *)getGlobalPool();
+    apr_hash_t *statCache = NULL;
+    apr_thread_rwlock_t *rwlock = NULL;
+
+    NXPathCtx_t pathctx = 0;
+    char *ptr = NULL, *tr;
+    int len = 0, x;
+    char *ppath;
+    char *pinfo;
+
+    if (ctx == 1) {
+
+        /* If there isn't a global pool then just stat the file
+           and return */
+        if (!gPool) {
+            char poolname[50];
+    
+            if (apr_pool_create(&gPool, NULL) != APR_SUCCESS) {
+                return getstat(ctx, path, buf, requestmap);
+            }
+    
+            setGlobalPool(gPool);
+            apr_pool_tag(gPool, apr_pstrdup(gPool, "cstat_mem_pool"));
+    
+            statCache = apr_hash_make(gPool);
+            apr_pool_userdata_set ((void*)statCache, "STAT_CACHE", stat_cache_cleanup, gPool);
+
+            apr_thread_rwlock_create(&rwlock, gPool);
+            apr_pool_userdata_set ((void*)rwlock, "STAT_CACHE_LOCK", apr_pool_cleanup_null, gPool);
+        }
+        else {
+            apr_pool_userdata_get((void**)&statCache, "STAT_CACHE", gPool);
+            apr_pool_userdata_get((void**)&rwlock, "STAT_CACHE_LOCK", gPool);
+        }
+
+        if (!gPool || !statCache || !rwlock) {
+            return getstat(ctx, path, buf, requestmap);
+        }
+    
+        for (x = 0,tr = path;*tr != '\0';tr++,x++) {
+            if (*tr == '\\' || *tr == '/') {
+                ptr = tr;
+                len = x;
+            }
+            if (*tr == ':') {
+                ptr = "\\";
+                len = x;
+            }
+        }
+    
+        if (ptr) {
+            ppath = apr_pstrndup (p, path, len);
+            strlwr(ppath);
+            if (ptr[1] != '\0') {
+                ptr++;
+            }
+            pinfo = apr_pstrdup (p, ptr);
+        }
+    
+        /* If we have a statCache then try to pull the information
+           from the cache.  Otherwise just stat the file and return.*/
+        if (statCache) {
+            apr_thread_rwlock_rdlock(rwlock);
+            pathctx = (NXPathCtx_t) apr_hash_get(statCache, ppath, APR_HASH_KEY_STRING);
+            apr_thread_rwlock_unlock(rwlock);
+            if (pathctx) {
+                return getstat(pathctx, pinfo, buf, requestmap);
+            }
+            else {
+                int err;
+
+                err = NXCreatePathContext(0, ppath, 0, NULL, &pathctx);
+                if (!err) {
+                    apr_thread_rwlock_wrlock(rwlock);
+                    apr_hash_set(statCache, apr_pstrdup(gPool,ppath) , APR_HASH_KEY_STRING, (void*)pathctx);
+                    apr_thread_rwlock_unlock(rwlock);
+                    return getstat(pathctx, pinfo, buf, requestmap);
+                }
+            }
+        }
+    }
+    return getstat(ctx, path, buf, requestmap);
+}
+
+
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, 
                                    const char *fname, 
                                    apr_int32_t wanted, apr_pool_t *pool)
@@ -193,7 +302,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
     NXPathCtx_t pathCtx = 0;
 
     getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD);
-    srv = getstat(pathCtx, fname, &info, ST_STAT_BITS|ST_NAME_BIT);
+    srv = cstat(pathCtx, (char*)fname, &info, ST_STAT_BITS|ST_NAME_BIT, pool);
     errno = srv;
 
     if (srv == 0) {
