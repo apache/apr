@@ -126,6 +126,7 @@ apr_status_t apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
             if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) {
                 return stat;
             }
+            apr_set_option(&sock->netmask, APR_SO_NONBLOCK, 1);
         }
     } 
     else if (t < 0 && sock->timeout >= 0) {
@@ -133,6 +134,7 @@ apr_status_t apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
             if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) { 
                 return stat; 
             }
+            apr_set_option(&sock->netmask, APR_SO_NONBLOCK, 0);
         } 
     }
     /* must disable the incomplete read support if we change to a
