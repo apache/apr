@@ -178,6 +178,54 @@ APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, void *data,
                                            const char *key,
                                            apr_status_t (*cleanup)(void *));
 
+#if APR_HAS_LOCK_CREATE_NP
+
+typedef enum {APR_LOCK_FCNTL, APR_LOCK_FLOCK, APR_LOCK_SYSVSEM, APR_LOCK_PROC_PTHREAD,
+              APR_LOCK_DEFAULT} apr_lockmech_e_np;
+
+/**
+ * non-portable interface to apr_lock_create()
+ *
+ * Create a new instance of a lock structure.  This is like apr_lock_create()
+ * but has some non-portable parameters.  This should be used sparingly.
+ *
+ * @param lock The newly created lock structure.
+ * @param type The type of lock to create, one of:
+ * <PRE>
+ *            APR_MUTEX
+ *            APR_READWRITE
+ * </PRE>
+ * @param scope The scope of the lock to create, one of:
+ * <PRE>
+ *            APR_CROSS_PROCESS    lock processes from the protected area.
+ *            APR_INTRAPROCESS     lock threads from the protected area.
+ *            APR_LOCKALL          lock processes and threads from the
+ *                                 protected area.
+ * </PRE>
+ * @param mech The mechanism to use for the interprocess lock, if any; one of
+ * <PRE>
+ *            APR_LOCK_FCNTL
+ *            APR_LOCK_FLOCK
+ *            APR_LOCK_SYSVSEM
+ *            APR_LOCK_PROC_PTHREAD
+ *            APR_LOCK_DEFAULT     pick the default mechanism for the platform
+ * </PRE>
+ * @param fname A file name to use if the lock mechanism requires one.  This
+ *        argument should always be provided.  The lock code itself will
+ *        determine if it should be used.
+ * @param pool The pool to operate on.
+ * @tip APR_CROSS_PROCESS may lock both processes and threads, but it is
+ *      only guaranteed to lock processes.
+ * @deffunc apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, const char *fname, apr_pool_t *pool)
+ */
+APR_DECLARE(apr_status_t) apr_lock_create_np(apr_lock_t **lock,
+                                             apr_locktype_e type,
+                                             apr_lockscope_e scope,
+                                             apr_lockmech_e_np mech,
+                                             const char *fname,
+                                             apr_pool_t *pool);
+#endif /* APR_HAS_LOCK_CREATE_NP */
+
 #ifdef __cplusplus
 }
 #endif
