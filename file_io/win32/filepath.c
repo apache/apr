@@ -184,6 +184,48 @@ static apr_status_t apr_filepath_drive_get(char **rootpath,
 }
 
 
+static apr_status_t apr_filepath_root_case(char **rootpath,
+                                           char *root,
+                                           apr_pool_t *p)
+{
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t *ignored;
+        apr_wchar_t wpath[APR_PATH_MAX];
+        apr_status_t rv;
+        /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+         * as if that is useful for anything.
+         */
+        {
+            apr_wchar_t wroot[APR_PATH_MAX];
+            if (rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
+                                               / sizeof(apr_wchar_t), root))
+                return rv;
+            if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
+                return apr_get_os_error();
+        }
+        {
+            char path[APR_PATH_MAX];
+            if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
+                return rv;
+            *rootpath = apr_pstrdup(p, path);
+        }
+    }
+    else
+#endif
+    {
+        char path[APR_PATH_MAX];
+        char *ignored;
+        if (!GetFullPathName(root, sizeof(path), path, &ignored))
+            return apr_get_os_error();
+        *rootpath = apr_pstrdup(p, path);
+    }
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
                                            apr_pool_t *p)
 {
@@ -305,6 +347,9 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                 rv = apr_filepath_root_test(newpath, p);
                 if (rv)
                     return rv;
+                rv = apr_filepath_root_case(&newpath, newpath, p);
+                if (rv)
+                    return rv;
 
                 /* If this root included the trailing / or \ designation 
                  * then lop off multiple trailing slashes
@@ -409,8 +454,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     apr_size_t pathlen; /* the length of the result path */
     apr_size_t segend;  /* the end of the current segment */
     apr_size_t seglen;  /* the length of the segment (excl trailing chars) */
-    apr_status_t basetype; /* from parsing the basepath's baseroot */
-    apr_status_t addtype;  /* from parsing the addpath's addroot */
+    apr_status_t basetype = 0; /* from parsing the basepath's baseroot */
+    apr_status_t addtype;      /* from parsing the addpath's addroot */
     apr_status_t rv;
     int fixunc = 0;  /* flag to complete an incomplete UNC basepath */
     
@@ -585,12 +630,11 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 if (basetype != APR_EABSOLUTE && (flags & APR_FILEPATH_NOTRELATIVE))
                     return basetype;
                 rootlen = strlen(baseroot);
-                pathlen = baselen;
-                if (rootlen + pathlen >= sizeof(path))
+                keptlen = pathlen = rootlen + baselen;
+                if (keptlen >= sizeof(path))
                     return APR_ENAMETOOLONG;
                 memcpy(path, baseroot, rootlen);
-                memcpy(path + rootlen, basepath, pathlen);
-                pathlen += rootlen;
+                memcpy(path + rootlen, basepath, baselen);
             } 
             else {
                 if (flags & APR_FILEPATH_NOTRELATIVE)
@@ -625,24 +669,26 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         /* Base the result path on the basepath
          */
         rootlen = strlen(baseroot);
-        pathlen = baselen;
-        if (rootlen + pathlen >= sizeof(path))
+        keptlen = pathlen = rootlen + baselen;
+        if (keptlen >= sizeof(path))
             return APR_ENAMETOOLONG;
         memcpy(path, baseroot, rootlen);
-        memcpy(path + rootlen, basepath, pathlen);
-        pathlen += rootlen;
+        memcpy(path + rootlen, basepath, baselen);
     }
 
     /* '/' terminate the given root path unless it's already terminated
-     * or is an incomplete drive root.
+     * or is an incomplete drive root.  Correct the trailing slash unless
+     * we have an incomplete UNC path still to fix.
      */
-    if (pathlen && path[pathlen - 1] != '/' && path[pathlen - 1] != '\\' 
-                && path[pathlen - 1] != ':') {
-        if (pathlen + 1 >= sizeof(path))
-            return APR_ENAMETOOLONG;
+    if (pathlen && path[pathlen - 1] != ':') {
+        if (path[pathlen - 1] != '/' && path[pathlen - 1] != '\\') {
+            if (pathlen + 1 >= sizeof(path))
+                return APR_ENAMETOOLONG;
         
-        path[pathlen++] = '/';
-
+            path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
+        }
+        else if (!fixunc)
+            path[pathlen++] = ((flags & APR_FILEPATH_NATIVE) ? '\\' : '/');
     }
 
     while (*addpath) 
@@ -723,7 +769,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                  */
                 if (pathlen + 3 >= sizeof(path))
                     return APR_ENAMETOOLONG;
-                memcpy(path + pathlen, "../", 3);
+                memcpy(path + pathlen, ((flags && APR_FILEPATH_NATIVE) 
+                                          ? "..\\" : "../"), 3);
                 pathlen += 3;
             }
             else 
@@ -765,10 +812,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 
                 /* Always add the trailing slash to a UNC segment
                  */
-                if (i)
-                    path[pathlen + seglen] = addpath[segend];
-                else
-                    path[pathlen + seglen] = '\\';
+                path[pathlen + seglen] = ((flags & APR_FILEPATH_NATIVE) 
+                                             ? '\\' : '/');
                 pathlen += seglen + 1;
 
                 /* Recanonicalize the UNC root with the new UNC segment,
@@ -796,7 +841,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                     return APR_ENAMETOOLONG;
                 memcpy(path + pathlen, addpath, seglen + i);
                 if (i)
-                    path[pathlen + seglen] = addpath[segend];
+                    path[pathlen + seglen] = ((flags & APR_FILEPATH_NATIVE) 
+                                                 ? '\\' : '/');
                 pathlen += seglen + i;
             }
         }
