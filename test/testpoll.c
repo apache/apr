@@ -153,6 +153,7 @@ int main(void)
     int i = 0, srv = SMALL_NUM_SOCKETS;
     apr_int32_t num;
     const apr_pollfd_t *descriptors_out;
+    apr_status_t rv;
     
     fprintf (stdout,"APR Poll Test\n*************\n\n");
     
@@ -243,32 +244,44 @@ int main(void)
     printf("OK\n");
 
     printf("\nTest 1: No descriptors signalled.......");
-    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_TIMEUP) ||
-        (num != 0)) {
-        printf("FAILED\n");
+    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out) !=
+         APR_TIMEUP) || (num != 0)) {
+        printf("Test 1: FAILED (errno=%d, num=%d (expected 0)\n", rv, num);
         exit(-1);
     }
-    printf("OK\n");
+    printf("Test 1: OK\n");
 
     printf("\nTest 2: First descriptor signalled.....\n");
     send_msg(s, sa, 0);
-    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_SUCCESS) ||
-        (num != 1)) {
-        printf("Test 2: FAILED\n");
+    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out)
+         != APR_SUCCESS) || (num != 1)) {
+        printf("Test 2: FAILED (errno=%d, num=%d (expected 1)\n", rv, num);
         exit(-1);
     }
     recv_msg(s, 0, context);
     printf("Test 2: OK\n");
 
-    printf("\nTest 3: Last descriptor signalled......\n");
-    send_msg(s, sa, 99);
-    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_SUCCESS) ||
-        (num != 1)) {
-        printf("Test 3: FAILED\n");
+    printf("\nTest 3: Middle descriptors signalled.....\n");
+    send_msg(s, sa, 2);
+    send_msg(s, sa, 5);
+    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out)
+         != APR_SUCCESS) || (num != 2)) {
+        printf("Test 2: FAILED (errno=%d, num=%d (expected 2)\n", rv, num);
         exit(-1);
     }
-    recv_msg(s, 99, context);
+    recv_msg(s, 2, context);
+    recv_msg(s, 5, context);
     printf("Test 3: OK\n");
+
+    printf("\nTest 4: Last descriptor signalled......\n");
+    send_msg(s, sa, LARGE_NUM_SOCKETS - 1);
+    if ((rv = apr_pollset_poll(pollset, 0, &num, &descriptors_out) !=
+         APR_SUCCESS) || (num != 1)) {
+        printf("Test 4: FAILED (errno=%d, num=%d (expected 1)\n", rv, num);
+        exit(-1);
+    }
+    recv_msg(s, LARGE_NUM_SOCKETS - 1, context);
+    printf("Test 4: OK\n");
 
     printf("\nTests completed.\n");
 
