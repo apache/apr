@@ -84,6 +84,10 @@ install: $(TARGET_LIB)
 	if [ -f shlibtool ]; then \
 		$(LIBTOOL) --mode=install cp shlibtool $(DESTDIR)$(installbuilddir); \
 	fi;
+	if [ -f build/apr_rules.mk ]; then \
+		cp build/apr_rules.mk $(DESTDIR)$(installbuilddir); \
+	fi;
+
 	if [ ! -d $(DESTDIR)$(bindir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
 	fi;
