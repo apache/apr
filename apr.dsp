@@ -170,6 +170,10 @@ SOURCE=.\locks\win32\locks.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\locks\win32\proc_mutex.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\locks\win32\thread_cond.c
 # End Source File
 # Begin Source File
@@ -543,6 +547,10 @@ SOURCE=.\include\apr_portable.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_proc_mutex.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_ring.h
 # End Source File
 # Begin Source File
@@ -560,6 +568,10 @@ SOURCE=.\include\apr_strings.h
 # Begin Source File
 
 SOURCE=.\include\apr_tables.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_thread_cond.h
 # End Source File
 # Begin Source File
 
