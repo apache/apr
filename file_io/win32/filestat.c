@@ -76,12 +76,14 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted
     apr_oslevel_e os_level;
     PSID user = NULL, grp = NULL;
     PACL dacl = NULL;
+    apr_status_t rv;
 
     if (!GetFileInformationByHandle(thefile->filehand, &FileInformation)) {
         return apr_get_os_error();
     }
 
     memset(finfo, '\0', sizeof(*finfo));
+    finfo->cntxt = thefile->cntxt;
 
     FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
     FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
@@ -101,15 +103,8 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted
         finfo->size = 0x7fffffff;
 #endif
     
-    
-    /* TODO: return user and group could as * SID's, allocated in the pool.
-     * [These are variable length objects that will require a 'comparitor'
-     * and a 'get readable string of' functions.]
-     */
-    
     finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
-                 | APR_FINFO_IDENT | APR_FINFO_NLINK | APR_FINFO_SIZE 
-                 | APR_FINFO_UPROT;
+                 | APR_FINFO_IDENT | APR_FINFO_NLINK | APR_FINFO_SIZE;
 
 
     if (wanted & APR_FINFO_TYPE) 
@@ -138,26 +133,27 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted
             }
         }
     }
+    
 
     if ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
-            && apr_get_oslevel(thefile->cntxt, &os_level)
+            && !apr_get_oslevel(thefile->cntxt, &os_level)
             && os_level >= APR_WIN_NT) {
         SECURITY_INFORMATION sinf = 0;
         PSECURITY_DESCRIPTOR pdesc = NULL;
-        if (wanted & APR_FINFO_USER)
-            sinf != OWNER_SECURITY_INFORMATION;
-        if (wanted & APR_FINFO_GROUP)
-            sinf != GROUP_SECURITY_INFORMATION;
+        if (wanted & (APR_FINFO_USER | APR_FINFO_UPROT))
+            sinf |= OWNER_SECURITY_INFORMATION;
+        if (wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT))
+            sinf |= GROUP_SECURITY_INFORMATION;
         if (wanted & APR_FINFO_PROT)
-            sinf != SACL_SECURITY_INFORMATION;
-        if (!GetSecurityInfo(thefile->filehand, SE_FILE_OBJECT, sinf,
-                             (wanted & APR_FINFO_USER) ? &user : NULL,
-                             (wanted & APR_FINFO_GROUP) ? &grp : NULL,
-                             (wanted & APR_FINFO_PROT) ? &dacl : NULL,
-                             NULL, &pdesc)) {
+            sinf |= DACL_SECURITY_INFORMATION;
+        rv = GetSecurityInfo(thefile->filehand, SE_FILE_OBJECT, sinf,
+                             ((wanted & APR_FINFO_USER) ? &user : NULL),
+                             ((wanted & APR_FINFO_GROUP) ? &grp : NULL),
+                             ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
+                             NULL, &pdesc);
+        if (rv == ERROR_SUCCESS)
             apr_register_cleanup(thefile->cntxt, pdesc, free_localheap, 
                                  apr_null_cleanup);
-        }
     }
 
     if (user) {
@@ -186,6 +182,7 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted
         else {
             finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
         }
+        finfo->valid |= APR_FINFO_UPROT;
     }    
     
     if (wanted & ~finfo->valid)
@@ -282,20 +279,20 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER)) {
             SECURITY_INFORMATION sinf = 0;
             PSECURITY_DESCRIPTOR pdesc = NULL;
-            if (wanted & APR_FINFO_USER)
-                sinf != OWNER_SECURITY_INFORMATION;
-            if (wanted & APR_FINFO_GROUP)
-                sinf != GROUP_SECURITY_INFORMATION;
+            if (wanted & (APR_FINFO_USER | APR_FINFO_UPROT))
+                sinf |= OWNER_SECURITY_INFORMATION;
+            if (wanted & (APR_FINFO_GROUP | APR_FINFO_GPROT))
+                sinf |= GROUP_SECURITY_INFORMATION;
             if (wanted & APR_FINFO_PROT)
-                sinf != SACL_SECURITY_INFORMATION;
-            if (!GetNamedSecurityInfoW(wfname, SE_FILE_OBJECT, sinf,
-                                     (wanted & APR_FINFO_USER) ? &user : NULL,
-                                     (wanted & APR_FINFO_GROUP) ? &grp : NULL,
-                                     (wanted & APR_FINFO_PROT) ? &dacl : NULL,
-                                     NULL, &pdesc)) {
+                sinf |= DACL_SECURITY_INFORMATION;
+            rv = GetNamedSecurityInfoW(wfname, SE_FILE_OBJECT, sinf,
+                                 ((wanted & APR_FINFO_USER) ? &user : NULL),
+                                 ((wanted & APR_FINFO_GROUP) ? &grp : NULL),
+                                 ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
+                                 NULL, &pdesc);
+            if (rv == ERROR_SUCCESS)
                 apr_register_cleanup(cont, pdesc, free_localheap, 
                                      apr_null_cleanup);
-            }
         }
     }
 #endif
@@ -368,7 +365,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     }
 
     if (dacl) {
-        /* Retrieved the discresionary access list */
+        /* Retrieved the discresionary access list, provide some real answers
+         */
         
     }
     else {
@@ -384,7 +382,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         }
         /* Lying through our teeth */
         finfo->valid |= APR_FINFO_UPROT;
-
     }
 
     if (wanted & ~finfo->valid)
