@@ -136,13 +136,14 @@ int apr_atomic_dec(volatile apr_atomic_t *mem);
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #else /* !DOXYGEN */
 
-#if APR_FORCE_ATOMIC_GENERIC 
-#if APR_HAS_THREADS
-#define APR_ATOMIC_NEED_DEFAULT 1
-#define APR_ATOMIC_NEED_CAS_DEFAULT 1
-#endif /* APR_HAS_THREADS */
+/* The following definitions provide optimized, OS-specific
+ * implementations of the APR atomic functions on various
+ * platforms.  Any atomic operation that isn't redefined as
+ * a macro here will be declared as a function later, and
+ * apr_atomic.c will provide a mutex-based default implementation.
+ */
 
-#elif defined(WIN32)
+#if defined(WIN32)
 
 typedef LONG apr_atomic_t;
 
@@ -161,6 +162,7 @@ typedef LONG apr_atomic_t;
 
 #define apr_atomic_add(mem, val)     atomic_add(mem,val)
 APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
+#define APR_OVERRIDE_ATOMIC_DEC 1
 #define apr_atomic_inc(mem)          atomic_inc(mem)
 #define apr_atomic_set(mem, val)     (*mem = val)
 #define apr_atomic_read(mem)         (*mem)
@@ -178,9 +180,8 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
 #define apr_atomic_set(mem, val)     atomic_set_int(mem, val)
 #define apr_atomic_read(mem)         (*mem)
 
-#define APR_ATOMIC_NEED_CAS_DEFAULT 1
+#elif defined(__linux__) && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
 
-#elif defined(__linux__) && defined(__i386__)
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_cas(mem,with,cmp) \
 ({ apr_atomic_t prev; \
@@ -190,12 +191,8 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
          : "memory"); \
     prev;})
 
-#define APR_ATOMIC_NEED_DEFAULT 1
-#if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
-#undef APR_ATOMIC_NEED_CAS_DEFAULT
-#endif
+#elif defined(__sparc__) || defined(sparc) && !APR_FORCE_ATOMIC_GENERIC
 
-#elif defined(__sparc__) || defined(sparc)
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_read(p)  *p
 
@@ -217,6 +214,8 @@ apr_uint32_t apr_atomic_cas_sparc(volatile apr_uint32_t *mem, long with, long cm
 apr_int32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_int32_t val);
 apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem, apr_uint32_t swap, 
                             apr_uint32_t cmp);
+#define APR_OVERRIDE_ATOMIC_ADD 1
+#define APR_OVERRIDE_ATOMIC_CAS 1
 
 #define apr_atomic_inc(mem)          apr_atomic_add(mem, 1)
 #define apr_atomic_dec(mem)          apr_atomic_add(mem, -1)
@@ -234,30 +233,69 @@ apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem, apr_uint32_t swap,
 #define apr_atomic_read(p)           (*p)
 #define apr_atomic_set(mem, val)     (*mem = val)
 
-#else
-#if APR_HAS_THREADS
-#define APR_ATOMIC_NEED_DEFAULT 1
-#define APR_ATOMIC_NEED_CAS_DEFAULT 1
-#endif /* APR_HAS_THREADS */
+#endif /* end big if-elseif switch for platform-specifics */
 
-#endif /* !defined(WIN32) */
 
-#if defined(APR_ATOMIC_NEED_DEFAULT)
+/* Default implementation of the atomic API
+ * The definitions above may override some or all of the
+ * atomic functions with optimized, platform-specific versions.
+ * Any operation that hasn't been overridden as a macro above
+ * is declared as a function here, unless APR_OVERRIDE_ATOMIC_[OPERATION]
+ * is defined.  (The purpose of the APR_OVERRIDE_ATOMIC_* is
+ * to allow a platform to declare an apr_atomic_*() function
+ * with a different signature than the default.)
+ */
+
+#define APR_ATOMIC_NEED_DEFAULT_INIT 0
+
+#if !defined(apr_atomic_t)
 #define apr_atomic_t apr_uint32_t
+#endif
+
+#if !defined(apr_atomic_init) && !defined(APR_OVERRIDE_ATOMIC_INIT)
+apr_status_t apr_atomic_init(apr_pool_t *p);
+#endif
+
+#if !defined(apr_atomic_read) && !defined(APR_OVERRIDE_ATOMIC_READ)
 #define apr_atomic_read(p)  *p
-apr_status_t apr_atomic_init(apr_pool_t *p);
+#endif
+
+#if !defined(apr_atomic_set) && !defined(APR_OVERRIDE_ATOMIC_SET)
 void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val);
+#define APR_ATOMIC_NEED_DEFAULT_INIT 1
+#endif
+
+#if !defined(apr_atomic_add) && !defined(APR_OVERRIDE_ATOMIC_ADD)
 void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val);
+#define APR_ATOMIC_NEED_DEFAULT_INIT 1
+#endif
+
+#if !defined(apr_atomic_inc) && !defined(APR_OVERRIDE_ATOMIC_INC)
 void apr_atomic_inc(volatile apr_atomic_t *mem);
+#define APR_ATOMIC_NEED_DEFAULT_INIT 1
+#endif
+
+#if !defined(apr_atomic_dec) && !defined(APR_OVERRIDE_ATOMIC_DEC)
 int apr_atomic_dec(volatile apr_atomic_t *mem);
+#define APR_ATOMIC_NEED_DEFAULT_INIT 1
 #endif
 
-#if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
-apr_status_t apr_atomic_init(apr_pool_t *p);
+#if !defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CAS)
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
+#define APR_ATOMIC_NEED_DEFAULT_INIT 1
 #endif
 
-#endif /* DOXYGEN */
+/* If we're using the default versions of any of the atomic functions,
+ * we'll need the atomic init to set up mutexes.  If a platform-specific
+ * override above has replaced the atomic_init with a macro, it's an error.
+ */
+#if APR_ATOMIC_NEED_DEFAULT_INIT
+#if defined(apr_atomic_init) || defined(APR_OVERRIDE_ATOMIC_INIT)
+#error Platform has redefined apr_atomic_init, but other default default atomics require a default apr_atomic_init
+#endif
+#endif /* APR_ATOMIC_NEED_DEFAULT_INIT */
+
+#endif /* !DOXYGEN */
 #ifdef __cplusplus
 }
 #endif
