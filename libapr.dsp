@@ -352,10 +352,6 @@ SOURCE=.\include\arch\win32\dso.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\lib\apr_pools.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\lib\apr_signal.c
 # End Source File
 # End Group
@@ -414,7 +410,15 @@ SOURCE=.\user\win32\userinfo.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\memory\unix\apr_pools.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\memory\unix\apr_sms.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms_blocks.c
 # End Source File
 # Begin Source File
 
@@ -423,6 +427,10 @@ SOURCE=.\memory\unix\apr_sms_std.c
 # Begin Source File
 
 SOURCE=.\memory\unix\apr_sms_tracking.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms_trivial.c
 # End Source File
 # End Group
 # End Group
@@ -540,11 +548,11 @@ SOURCE=.\include\apr_portable.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_signal.h
+SOURCE=.\include\apr_shmem.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_shmem.h
+SOURCE=.\include\apr_signal.h
 # End Source File
 # Begin Source File
 
