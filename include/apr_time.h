@@ -166,7 +166,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
  * @param result the exploded time
  * @param input the time to explode
  */
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result, 
+APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result, 
                                                 apr_time_t input);
 
 /**
