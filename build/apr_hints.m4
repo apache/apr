@@ -43,7 +43,7 @@ if test "x$apr_preload_done" != "xyes" ; then
 	APR_SETVAR(SHELL, [/bin/ksh])
 	;;
     *-ibm-aix*)
-	APR_ADDTO(CPPFLAGS, [-U__STR__])
+	APR_ADDTO(CPPFLAGS, [-U__STR__ -D_THREAD_SAFE])
         dnl _USR_IRS gets us the hstrerror() proto in netdb.h
         case $host in
             *-ibm-aix4.3)
