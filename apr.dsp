@@ -580,11 +580,11 @@ SOURCE=.\include\apr_signal.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_support.h
+SOURCE=.\include\apr_strings.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_strings.h
+SOURCE=.\include\apr_support.h
 # End Source File
 # Begin Source File
 
