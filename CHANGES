@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Add APR_TCP_NODELAY_INHERITED & APR_O_NONBLOCK_INHERITED to apr.hw
+     [Allan Edwards]
+
   *) Add APR_UINT64_T_HEX_FMT.  [Jeff Trawick]
 
   *) Add parameter to APR_SUBDIR_CONFIG to drop options passed to configure
