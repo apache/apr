@@ -68,7 +68,7 @@ struct apr_lock_t {
     char *fname;
 };
 
-apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
+APR_DECLARE(apr_status_t) apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
                                  apr_lockscope_e scope, const char *fname,
                                  apr_sms_t *mem_sys);
 

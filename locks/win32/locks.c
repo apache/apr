@@ -51,7 +51,8 @@
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
  */
-
+#include "apr.h"
+#include "apr_private.h"
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "win32/locks.h"

@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fd"LibD\apr" /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /FR /Fd"LibD\apr" /FD /c
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 BSC32=bscmake.exe
@@ -401,6 +401,22 @@ SOURCE=.\user\win32\groupinfo.c
 # Begin Source File
 
 SOURCE=.\user\win32\userinfo.c
+# End Source File
+# End Group
+# Begin Group "memory"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms_std.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms_tracking.c
 # End Source File
 # End Group
 # End Group
