@@ -654,7 +654,6 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
     rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
                        APR_WRITE, 0, new_mutex->pool);
     if (rv != APR_SUCCESS) {
-        proc_mutex_flock_cleanup(new_mutex);
         return rv;
     }
     *mutex = new_mutex;
