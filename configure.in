@@ -130,6 +130,16 @@ else
       export_lib_target=''
 fi
 
+dnl On AIX, libraries need to be specified on the link of lib_target
+case $host in
+    *aix*)
+        lib_target_libs="\$(EXTRA_LIBS)";
+        ;;
+    *)
+        lib_target_libs=""
+        ;;
+esac
+
 AC_SUBST(lt_compile)
 AC_SUBST(link)
 AC_SUBST(so_ext)
@@ -138,6 +148,7 @@ AC_SUBST(export_lib_target)
 AC_SUBST(shlibpath_var)
 AC_SUBST(LTFLAGS)
 AC_SUBST(LT_LDFLAGS)
+AC_SUBST(lib_target_libs)
 
 dnl #----------------------------- Checks for compiler flags
 nl='
