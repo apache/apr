@@ -75,7 +75,7 @@ ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset)
     if (offset < 0 || offset > mmap->size)
         return APR_EINVAL;
     
-    (*addr) = mmap->mm + offset;
+    (*addr) = (char *) mmap->mm + offset;
     return APR_SUCCESS;
 }
 
