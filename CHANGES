@@ -1,5 +1,9 @@
 Changes with APR 0.9.4
 
+  *) apr_proc_wait(): Handle interrupted waitpid(2) calls by calling
+     it repeatedly until it succeeds or fails with errno other than
+     EINTR.  This hides this UNIX-specific behavior from APR clients.
+
   *) Removed the solaris-specific atomic code, due to licence
      concerns (it was MPL 1.0, and the author could not be contacted)
      [Ian Holsman]
