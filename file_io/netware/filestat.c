@@ -53,6 +53,7 @@
  */
 
 #include "fileio.h"
+#include "nks/dirio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
@@ -108,7 +109,29 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
 
 char *case_filename(apr_pool_t *pPool, const char *szFile)
 {
-    return (char*)szFile;
+    char *casedFileName = NULL;
+#ifdef WAIT_TO_IMPLEMENT
+    char buf[1024];
+    NXDirAttrWithName_t	*attrBuf;
+    int rc;
+
+    attrBuf = (NXDirAttrWithName_t *) &buf;
+    rc =NXGetAttr(NULL, szFile, NX_DELEVEL_NAME_ONLY, attrBuf, 1024, 0);
+    if (rc == 0) {
+        casedFileName = apr_pstrdup(pPool, attrBuf->deName);
+    }
+    else
+#endif
+    {
+        char *s;
+        s = strrchr(szFile, '/');
+        if (!s)
+            s = strrchr(szFile, ':');
+        if (s) {
+            casedFileName = apr_pstrdup(pPool, &s[1]);
+        }
+    }
+    return casedFileName;
 }
 
 
@@ -303,9 +326,9 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
         if (wanted & APR_FINFO_LINK)
             wanted &= ~APR_FINFO_LINK;
         if (wanted & APR_FINFO_NAME) {
-            s = strrchr(case_filename(pool, fname), '/');
+            s = case_filename(pool, fname);
             if (s) {
-                finfo->name = apr_pstrdup(pool, &s[1]);
+                finfo->name = s;
                 finfo->valid |= APR_FINFO_NAME;
             }
         }
