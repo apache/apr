@@ -1,6 +1,6 @@
 Changes for APR 1.1.0
 
-  *( rename the apr_file_permissions defines (APR_UREAD,
+  *) rename the apr_file_permissions defines (APR_UREAD,
      APR_UWRITE, etc.) to have prefix APR_FPROT_ (keeping the
      old defines) [Stas]
 
