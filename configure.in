@@ -445,6 +445,11 @@ case $host in
        OSDIR="unix"
        eolstr="\\n"
        ;;
+   *hpux10* ) 
+       enable_threads="no"
+       OSDIR="unix"
+       eolstr="\\n"
+       ;;
    *)
        OSDIR="unix"
        eolstr="\\n"
