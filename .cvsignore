@@ -5,7 +5,6 @@ config.nice
 config.status
 configure
 libtool
-APRVARS
 apr-config
 LibD
 LibR

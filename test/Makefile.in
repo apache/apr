@@ -52,7 +52,7 @@ TARGETS = $(PROGRAMS) $(NONPORTABLE)
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-LOCAL_LIBS=../libapr.la
+LOCAL_LIBS=../@APR_LIBNAME@.la
 
 CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.slo
 
