@@ -856,7 +856,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES \
                 || (s) == APR_OS_START_SYSERR + ERROR_ACCESS_DENIED \
                 || (s) == APR_OS_START_SYSERR + ERROR_SHARING_VIOLATION)
-#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
+#define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST \
+                || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED \
+                || (s) == APR_OS_START_SYSERR + ERROR_FILE_EXISTS \
+                || (s) == APR_OS_START_SYSERR + ERROR_ALREADY_EXISTS)
 #define APR_STATUS_IS_ENAMETOOLONG(s)   ((s) == APR_ENAMETOOLONG \
                 || (s) == APR_OS_START_SYSERR + ERROR_FILENAME_EXCED_RANGE \
                 || (s) == APR_OS_START_SYSERR + SOCENAMETOOLONG)
