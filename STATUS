@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/23 06:10:30 $]
+Last modified at [$Date: 2002/01/29 02:03:55 $]
 
 Release:
 
@@ -258,6 +258,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * Fix autoconf tests for strerror_r on BeOS and remove the hack in
       misc/unix/errorcodes.c to get error reporting working.  Committed as
       the solution is elusive at present.
+
+    * implement APR_PROGRAM_ENV and APR_PROGRAM_PATH on BeOS, OS/2,
+      Netware, and Win32.
 
 Documentation that needs writing:
 

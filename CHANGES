@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) added APR_PROGRAM_ENV and APR_PROGRAM_PATH options for starting
+     processes via apr_proc_create() [Greg Stein]
+
   *) Changed the apr_file_dup2() function prototype. It can only
      take and reuse an apr_file_t*, and will no longer create one
      if *new_file == NULL (use apr_file_dup() for that).  [Aaron Bannert]
