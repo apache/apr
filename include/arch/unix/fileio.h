@@ -60,6 +60,7 @@
 #include "apr_general.h"
 #include "apr_tables.h"
 #include "apr_file_io.h"
+#include "apr_file_info.h"
 #include "apr_errno.h"
 #include "apr_lib.h"
 

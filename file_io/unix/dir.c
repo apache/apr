@@ -95,7 +95,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont
     }
 }
 
-apr_status_t apr_closedir(apr_dir_t *thedir)
+apr_status_t apr_dir_close(apr_dir_t *thedir)
 {
     apr_status_t rv;
 
@@ -106,36 +106,69 @@ apr_status_t apr_closedir(apr_dir_t *thedir)
     return rv;
 }
 
-apr_status_t apr_readdir(apr_dir_t *thedir)
+apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
+                          apr_dir_t *thedir)
 {
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
-    && !defined(READDIR_IS_THREAD_SAFE)
     apr_status_t ret;
-#endif
-
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
     && !defined(READDIR_IS_THREAD_SAFE)
+    dirent *retent;
 
-    ret = readdir_r(thedir->dirstruct, thedir->entry, &thedir->entry);
+    ret = readdir_r(thedir->dirstruct, thedir->entry, &retent);
+
     /* Avoid the Linux problem where at end-of-directory thedir->entry
      * is set to NULL, but ret = APR_SUCCESS.
      */
-    return (ret == APR_SUCCESS && thedir->entry == NULL) ? APR_ENOENT : ret;
+    if(!ret || thedir->entry != retent)
+        ret = APR_ENOENT;
 #else
-
     thedir->entry = readdir(thedir->dirstruct);
     if (thedir->entry == NULL) {
         /* If NULL was returned, this can NEVER be a success. Can it?! */
         if (errno == APR_SUCCESS) {
-            return APR_ENOENT;
+            ret = APR_ENOENT;
         }
-        return errno;
+        else
+            ret = errno;
     }
-    return APR_SUCCESS;
 #endif
+
+    /* No valid bit flag to test here - do we want one? */
+    finfo->fname = NULL;
+
+    if (ret) {
+        finfo->valid = 0;
+        return ret;
+    }
+
+    /* What we already know */
+    /* XXX: Optimize here with d_fileno, d_type etc by platform */
+    wanted &= ~(APR_FINFO_NAME);
+    if (wanted)
+    {
+        char fspec[_MAXPATH];
+        int off;
+        apr_strcpyn(fspec, sizeof(fspec), thedir->dirname);
+        off = strlen(fspec);
+        if (fspec[off - 1] != '/')
+            fspec[off++] = '/';
+        apr_strcpyn(fspec + off, sizeof(fspec) - off, thedir->entry->d_name);
+        /* ??? Or lstat below?  What is it we really want? */
+        ret = apr_stat(finfo, wanted, fspec, thedir->cntxt);
+    }
+    if (!wanted || ret) {
+        finfo->cntxt = thedir->cntxt;
+        finfo->valid = 0;
+    }
+    /* We passed a stack name that is now gone */
+    finfo->fname = NULL;
+    finfo->valid |= APR_FINFO_NAME;
+    /* XXX: Optimize here with d_fileno, d_type etc by platform */
+    finfo->name = thedir->entry->d_name;
+    return APR_SUCCESS;
 }
 
-apr_status_t apr_rewinddir(apr_dir_t *thedir)
+apr_status_t apr_dir_rewind(apr_dir_t *thedir)
 {
     rewinddir(thedir->dirstruct);
     return APR_SUCCESS;
@@ -161,94 +194,6 @@ apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
     else {
         return errno;
     }
-}
-
-apr_status_t apr_dir_entry_size(apr_size_t *size, apr_dir_t *thedir)
-{
-    struct stat filestat;
-    char *fname = NULL;    
-
-    if (thedir->entry == NULL) {
-        *size = -1;
-        return APR_ENOFILE;
-    }
-    fname = apr_pstrcat(thedir->cntxt, thedir->dirname, "/", 
-                       thedir->entry->d_name, NULL);
-    if (stat(fname, &filestat) == -1) {
-        *size = 0;
-        return errno;
-    }
-    
-    *size = filestat.st_size;
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_dir_entry_mtime(apr_time_t *mtime, apr_dir_t *thedir)
-{
-    struct stat filestat;
-    char *fname = NULL;
-
-    if (thedir->entry == NULL) {
-        *mtime = -1;
-        return APR_ENOFILE;
-    }
-
-    fname = apr_pstrcat(thedir->cntxt, thedir->dirname, "/", 
-                       thedir->entry->d_name, NULL);
-    if (stat(fname, &filestat) == -1) {
-        *mtime = -1;
-        return errno;
-    }
-    
-    apr_ansi_time_to_apr_time(mtime, filestat.st_mtime);
-    return APR_SUCCESS;
-}
- 
-apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
-{
-    struct stat filestat;
-    char *fname = NULL;
-
-    if (thedir->entry == NULL) {
-        *type = APR_REG;
-        return APR_ENOFILE;
-    }
-
-    fname = apr_pstrcat(thedir->cntxt, thedir->dirname, "/", 
-                       thedir->entry->d_name, NULL);
-    if (stat(fname, &filestat) == -1) {
-        *type = APR_REG;
-        return errno;
-    }
-
-    if (S_ISREG(filestat.st_mode))
-        *type = APR_REG;    
-    if (S_ISDIR(filestat.st_mode))
-        *type = APR_DIR;    
-    if (S_ISCHR(filestat.st_mode))
-        *type = APR_CHR;    
-    if (S_ISBLK(filestat.st_mode))
-        *type = APR_BLK;    
-    if (S_ISFIFO(filestat.st_mode))
-        *type = APR_PIPE;    
-    if (S_ISLNK(filestat.st_mode))
-        *type = APR_LNK;    
-#ifndef BEOS
-    if (S_ISSOCK(filestat.st_mode))
-        *type = APR_SOCK;    
-#endif
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_dir_filename(const char **new, apr_dir_t *thedir)
-{
-    /* Detect End-Of-File */
-    if (thedir == NULL || thedir->entry == NULL) {
-        *new = NULL;
-        return APR_ENOENT;
-    }
-    (*new) = thedir->entry->d_name;
-    return APR_SUCCESS;
 }
 
 apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)

@@ -290,8 +290,7 @@ int testdirs(apr_pool_t *context)
     apr_dir_t *temp;  
     apr_file_t *file = NULL;
     apr_size_t bytes;
-    apr_filetype_e type;
-    const char *fname;
+    apr_finfo_t dirent;
 
     fprintf(stdout, "Testing Directory functions.\n");
 
@@ -322,7 +321,7 @@ int testdirs(apr_pool_t *context)
     }
 
     fprintf(stdout, "\tReading Directory.......");
-    if ((apr_readdir(temp))  != APR_SUCCESS) {
+    if ((apr_dir_read(&dirent, APR_FINFO_DIRENT, temp))  != APR_SUCCESS) {
         fprintf(stderr, "Could not read directory\n");
         return -1;
     }
@@ -336,40 +335,39 @@ int testdirs(apr_pool_t *context)
         /* Because I want the file I created, I am skipping the "." and ".."
          * files that are here. 
          */
-        if (apr_readdir(temp) != APR_SUCCESS) {
+        if (apr_dir_read(&dirent, APR_FINFO_DIRENT | APR_FINFO_TYPE
+                                | APR_FINFO_SIZE | APR_FINFO_MTIME, temp) 
+                != APR_SUCCESS) {
             fprintf(stderr, "Error reading directory testdir"); 
             return -1;
         }
-        apr_get_dir_filename(&fname, temp);
-    } while (fname[0] == '.');
-    if (strcmp(fname, "testfile")) {
-        fprintf(stderr, "Got wrong file name %s\n", fname);
+    } while (dirent.name[0] == '.');
+    if (strcmp(dirent.name, "testfile")) {
+        fprintf(stderr, "Got wrong file name %s\n", dirent.name);
         return -1;
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\t\tFile type.......");
-    apr_dir_entry_ftype(&type, temp);
-    if (type != APR_REG) {
+    if (dirent.filetype != APR_REG) {
         fprintf(stderr, "Got wrong file type\n");
         return -1;
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\t\tFile size.......");
-    apr_dir_entry_size(&bytes, temp);
-    if (bytes != strlen("Another test!!!")) {
-        fprintf(stderr, "Got wrong file size %" APR_SIZE_T_FMT "\n", bytes);
+    if (dirent.size != bytes)) {
+        fprintf(stderr, "Got wrong file size %" APR_SIZE_T_FMT "\n", dirent.size);
         return -1;
     }
     fprintf(stdout, "OK\n");
      
     fprintf(stdout, "\tRewinding directory.......");
-    apr_rewinddir(temp); 
+    apr_dir_rewind(temp); 
     fprintf(stdout, "OK\n");
     
     fprintf(stdout, "\tClosing Directory.......");
-    if (apr_closedir(temp)  != APR_SUCCESS) {
+    if (apr_dir_close(temp)  != APR_SUCCESS) {
         fprintf(stderr, "Could not close directory\n");
         return -1;
     }

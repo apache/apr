@@ -64,7 +64,7 @@
 static apr_status_t dir_cleanup(void *thedir)
 {
     apr_dir_t *dir = thedir;
-    return apr_closedir(dir);
+    return apr_dir_close(dir);
 }
 
 
@@ -91,7 +91,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cntx
 
 
 
-apr_status_t apr_closedir(apr_dir_t *thedir)
+apr_status_t apr_dir_close(apr_dir_t *thedir)
 {
     int rv = 0;
     
@@ -108,7 +108,8 @@ apr_status_t apr_closedir(apr_dir_t *thedir)
 
 
 
-apr_status_t apr_readdir(apr_dir_t *thedir)
+apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
+                          apr_dir_t *thedir)
 {
     int rv;
     ULONG entries = 1;
@@ -122,24 +123,66 @@ apr_status_t apr_readdir(apr_dir_t *thedir)
         rv = DosFindNext(thedir->handle, &thedir->entry, sizeof(thedir->entry), &entries);
     }
 
-    if (rv == 0 && entries == 1) {
+    /* No valid bit flag to test here - do we want one? */
+    finfo->cntxt = thedir->cntxt;
+    finfo->fname = NULL;
+
+    if (rv == 0 && entries == 1) 
+    {
+        /* XXX: Optimize the heck out of this case - whatever we know, report,
+         *      and then stat only if we must (e.g. wanted & APR_FINFO_TYPE)
+         */
         thedir->validentry = TRUE;
+
+        wanted &= ~(APR_FINFO_NAME | APR_FINFO_MTIME | APR_FINFO_SIZE);
+
+        if (wanted == APR_FINFO_TYPE && thedir->entry.attrFile & FILE_DIRECTORY)
+            wanted = 0;
+        
+        if (wanted)
+        {
+            char fspec[_MAXPATH];
+            int off;
+            apr_strcpyn(fspec, sizeof(fspec), thedir->dirname);
+            off = strlen(fspec);
+            if (fspec[off - 1] != '/')
+                fspec[off++] = '/';
+            apr_strcpyn(fspec + off, sizeof(fspec) - off, thedir->entry->d_name);
+            /* ??? Or lstat below?, I know, OS2 doesn't do symlinks, yet */
+            ret = apr_stat(finfo, wanted, fspec, thedir->cntxt);
+        }
+        if (!wanted || ret) {
+            finfo->cntxt = thedir->cntxt;
+            finfo->valid = 0;
+        }
+        /* We passed a name off the stack that has popped */
+        finfo->fname = NULL;
+        finfo->valid |= APR_FINFO_NAME | APR_FINFO_MTIME | APR_FINFO_SIZE;
+        finfo->size = thedir->entry.cbFile;
+        apr_os2_time_to_apr_time(finfo->mtime, thedir->entry.fdateLastWrite, 
+                                 thedir->entry.ftimeLastWrite);
+        finfo->name = thedir->entry.achName;
+        if (thedir->entry.attrFile & FILE_DIRECTORY) {
+            finfo->filetype = APR_DIR;
+            finfo->valid |= APR_FINFO_TYPE;
+        }
+        
         return APR_SUCCESS;
     }
-        
+
     thedir->validentry = FALSE;
-    
+
     if (rv)
         return APR_OS2_STATUS(rv);
-    
+
     return APR_ENOENT;
 }
 
 
 
-apr_status_t apr_rewinddir(apr_dir_t *thedir)
+apr_status_t apr_dir_rewind(apr_dir_t *thedir)
 {
-    return apr_closedir(thedir);
+    return apr_dir_close(thedir);
 }
 
 
@@ -158,72 +201,5 @@ apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 
 
 
-apr_status_t apr_dir_entry_size(apr_size_t *size, apr_dir_t *thedir)
-{
-    if (thedir->validentry) {
-        *size = thedir->entry.cbFile;
-        return APR_SUCCESS;
-    }
-    
-    return APR_ENOFILE;
-}
 
 
-
-apr_status_t apr_dir_entry_mtime(apr_time_t *time, apr_dir_t *thedir)
-{
-    if (thedir->validentry) {
-        apr_os2_time_to_apr_time(time, thedir->entry.fdateLastWrite, 
-                                 thedir->entry.ftimeLastWrite);
-        return APR_SUCCESS;
-    }
-
-    return APR_ENOFILE;
-}
-
-
-
-apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
-{
-    int rc;
-    HFILE hFile;
-    ULONG action, Type, Attr;
-    apr_filetype_e typemap[8] = { APR_REG, APR_CHR, APR_PIPE };
-
-    if (thedir->validentry) {
-        if (thedir->entry.attrFile & FILE_DIRECTORY) {
-            *type = APR_DIR;
-            return APR_SUCCESS;
-        } else {
-            rc = DosOpen(apr_pstrcat(thedir->cntxt, thedir->dirname, "/", thedir->entry.achName, NULL) ,
-                         &hFile, &action, 0, 0,
-                         OPEN_ACTION_FAIL_IF_NEW|OPEN_ACTION_OPEN_IF_EXISTS, OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY,
-                         NULL);
-
-            if ( rc == 0 ) {
-                rc = DosQueryHType( hFile, &Type, &Attr );
-
-                if ( rc == 0 ) {
-            *type = typemap[(Type & 0x0007)];
-                }
-                DosClose( hFile );
-            }
-
-            return APR_OS2_STATUS(rc);
-        }
-    }
-
-    return APR_ENOFILE;
-}
-
-
-
-apr_status_t apr_get_dir_filename(const char **new, apr_dir_t *thedir)
-{
-    if (thedir->validentry) {
-        *new = thedir->entry.achName;
-        return APR_SUCCESS;
-    }
-
-    return APR_ENOFILE;
-}

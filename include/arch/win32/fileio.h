@@ -62,6 +62,7 @@
 #include "apr_tables.h"
 #include "apr_lock.h"
 #include "apr_file_io.h"
+#include "apr_file_info.h"
 #include "apr_errno.h"
 #include "misc.h"
 
@@ -115,6 +116,17 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 #define APR_READCONTROL   4096    /* Read the file's owner/perms */
 #define APR_WRITECONTROL  2048    /* Modifythe file's owner/perms */
 
+/* Entries missing from the MSVC 5.0 Win32 SDK:
+ */
+#ifndef FILE_ATTRIBUTE_REPARSE_POINT
+#define FILE_ATTRIBUTE_REPARSE_POINT 0x00000400
+#endif
+#ifndef FILE_FLAG_OPEN_NO_RECALL
+#define FILE_FLAG_OPEN_NO_RECALL     0x00100000
+#endif
+#ifndef FILE_FLAG_OPEN_REPARSE_POINT
+#define FILE_FLAG_OPEN_REPARSE_POINT 0x00200000
+#endif
 
 
 /* quick run-down of fields in windows' apr_file_t structure that may have 
