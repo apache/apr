@@ -100,7 +100,7 @@ dnl These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
 
-apr_modules="file_io network_io threadproc misc locks time mmap shmem user memory atomic poll support"
+apr_modules="file_io network_io threadproc misc locks time mmap shmem user memory atomic poll support random"
 
 dnl Checks for programs.
 AC_PROG_MAKE_SET
@@ -1188,6 +1188,9 @@ else
     pid_t_fmt='#error Can not determine the proper size for pid_t'
 fi
 
+dnl Checks for endianness
+AC_C_BIGENDIAN([bigendian=1],[bigendian=0])
+
 # Basically, we have tried to figure out the correct format strings
 # for APR types which vary between platforms, but we don't always get 
 # it right.  If you find that we don't get it right for your platform, 
@@ -1242,6 +1245,7 @@ AC_SUBST(off_t_fmt)
 AC_SUBST(pid_t_fmt)
 AC_SUBST(int64_literal) 
 AC_SUBST(stdint) 
+AC_SUBST(bigendian)
 
 dnl ----------------------------- Checking for string functions
 AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")
