@@ -684,6 +684,11 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool)
     return pool->apr_abort;
 }
 
+APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool)
+{
+    return pool->parent;
+}
+
 /*****************************************************************
  *
  * Managing generic cleanups.  
@@ -936,10 +941,17 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *a)
     free_blocks(blok);
 }
 
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p)
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse)
 {
-    return bytes_in_block_list(p->first);
+    apr_size_t total_bytes = bytes_in_block_list(p->first);
+
+    if (recurse)
+        for (p = p->sub_pools; p != NULL; p = p->sub_next)
+            total_bytes += apr_pool_num_bytes(p, 1);
+
+    return total_bytes;
 }
+
 APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
 {
     return bytes_in_block_list(block_freelist);
