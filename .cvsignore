@@ -30,3 +30,4 @@ BuildLog.htm
 *.sto
 *.vcproj
 autom4te.cache
+ltcf-c.sh
