@@ -137,6 +137,7 @@ ap_status_t ap_readdir(struct dir_t *thedir)
         }
         return errno;
     }
+    return APR_SUCCESS;
 #endif
 }
 
