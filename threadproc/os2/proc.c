@@ -65,6 +65,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <process.h>
+#include <stdlib.h>
 #define INCL_DOS
 #include <os2.h>
 
@@ -85,6 +86,7 @@ ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
     (*new)->child_err = NULL;
     (*new)->currdir = NULL; 
     (*new)->cmdtype = APR_PROGRAM;
+    (*new)->detached = FALSE;
     return APR_SUCCESS;
 }
 
@@ -93,20 +95,20 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
 {
     ap_status_t stat;
     if (in) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->child_in, 
-                            &attr->parent_in)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->child_in, &attr->parent_in,
+                                   attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
     if (out) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_out, 
-                            &attr->child_out)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out,
+                                   attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
     if (err) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_err, 
-                            &attr->child_err)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err,
+                                   attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
@@ -127,6 +129,12 @@ ap_status_t ap_setprocattr_cmdtype(struct procattr_t *attr,
                                      ap_cmdtype_e cmd) 
 {
     attr->cmdtype = cmd;
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t detach) 
+{
+    attr->detached = detach;
     return APR_SUCCESS;
 }
 
@@ -229,9 +237,9 @@ ap_status_t ap_create_process(ap_context_t *cont, char *progname,
         }
 
         newargs[i + 3] = NULL;
-        (*new)->pid = spawnve(P_NOWAIT, SHELL_PATH, newargs, env);
+        (*new)->pid = spawnve(attr->detached ? P_DETACH : P_NOWAIT, SHELL_PATH, newargs, env);
     } else {
-        (*new)->pid = spawnve(P_NOWAIT, progname, args, env);
+        (*new)->pid = spawnve(attr->detached ? P_DETACH : P_NOWAIT, progname, args, env);
     }
     
     stat = (*new)->pid < 0 ? errno : APR_SUCCESS;
