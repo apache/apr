@@ -256,6 +256,11 @@ EXPORTS
 	apr_get_lockdata  @245
 	apr_set_lockdata  @246
 	apr_get_os_lock   @247
+;
+; apr_uuid.h
+	apr_format_uuid @248
+	apr_parse_uuid  @249
+	apr_get_uuid    @250
 
 ; Moved out of the way for Bill Stoddard's reorg
 ;
@@ -267,3 +272,4 @@ EXPORTS
 ;	apr_optopt   @124 DATA
 ;	apr_optreset   @125 DATA
 ;	apr_optarg   @126 DATA
+
