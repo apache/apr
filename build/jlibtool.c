@@ -969,6 +969,7 @@ void add_dylink_noinstall(count_chars *cc, const char *arg, int pathlen,
 /* use -L -llibname to allow to use installed libraries */
 void add_minus_l(count_chars *cc, const char *arg)
 {
+    char *newarg;
     char *name = strrchr(arg, '/');
     char *file = strrchr(arg, '.');
     char *lib  = strstr(name, "lib");
@@ -978,10 +979,13 @@ void add_minus_l(count_chars *cc, const char *arg)
         *file = '\0';
         file = name;
         file = file+4;
-        push_count_chars(cc, "-L ");
-        push_count_chars(cc, arg);
-        push_count_chars(cc, "-l");
-        push_count_chars(cc, file);
+        push_count_chars(cc, "-L");
+	push_count_chars(cc, arg);
+	/* we need one argument like -lapr-1 */
+        newarg = malloc(strlen(file) + 3);
+        strcpy(newarg, "-l");
+        strcat(newarg, file);
+        push_count_chars(cc, newarg);
     } else {
         push_count_chars(cc, arg);
     }
@@ -993,9 +997,9 @@ void add_linker_flag_prefix(count_chars *cc, const char *arg)
     push_count_chars(cc, arg);
 #else
     char *newarg;
-    newarg = (char*)malloc(strlen(arg) + sizeof(LINKER_FLAG_PREFIX));
+    newarg = (char*)malloc(strlen(arg) + sizeof(LINKER_FLAG_PREFIX) + 1);
     strcpy(newarg, LINKER_FLAG_PREFIX);
-    strcpy(newarg, arg);
+    strcat(newarg, arg);
     push_count_chars(cc, newarg);
 #endif
 }
