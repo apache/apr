@@ -125,6 +125,7 @@
 #define APR_HAVE_IN_ADDR        1
 #define APR_HAVE_INET_ADDR	1
 
+#define APR_HAVE_MEMMOVE        1
 #define APR_HAVE_STRCASECMP     0
 #define APR_HAVE_STRICMP        1
 #define APR_HAVE_STRNCASECMP    0
