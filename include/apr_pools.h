@@ -162,7 +162,8 @@ typedef struct apr_pool_t apr_pool_t;
  * </pre>
  */
 #if defined(APR_POOL_DEBUG)
-#if (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
+/* If APR_POOL_DEBUG is blank, we get 1; if it is a number, we get -1. */
+#if (APR_POOL_DEBUG - APR_POOL_DEBUG -1 == 1)
 #undef APR_POOL_DEBUG
 #define APR_POOL_DEBUG 1
 #endif
