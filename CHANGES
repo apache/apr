@@ -1,5 +1,8 @@
 Changes with APR 0.9.5
 
+  *) apr_socket_connect(): allow app to make subsequent call on 
+     non-blocking socket.  [Jeff Trawick]
+ 
   *) Add apr_os_pipe_put_ex(), which allows the caller to tell APR
      to establish a cleanup on the pipe.  [Jeff Trawick, Brad Nicholes]
 
