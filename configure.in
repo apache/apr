@@ -161,43 +161,6 @@ AC_CHECK_PROG(SH, sh, sh)
 AC_CHECK_DEFINE(LOCK_EX, sys/file.h)
 AC_CHECK_DEFINE(F_SETLK, fcntl.h)
 
-dnl Checks for libraries.
-AC_BEGIN_DECISION([lock implementation method])
-AC_IFALLYES(header:sys/file.h define:LOCK_EX,
-            AC_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
-AC_IFALLYES(header:sys/ipc.h header:sys/sem.h header:sys/file.h dnl
-            func:semget func:semctl,
-            AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
-AC_IFALLYES(header:fcntl.h define:F_SETLK,
-            AC_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
-AC_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
-            custom:use_pthread_cross,
-            AC_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
-AC_DECISION_FORCE(USE_FCNTL_SERIALIZE)
-AC_END_DECISION
-AC_DEFINE_UNQUOTED($ac_decision) 
-
-if test ".$ac_decision" = ".USE_FLOCK_SERIALIZE"; then
-    flockser="1"
-else
-    flockser="0"
-fi 
-if test ".$ac_decision" = ".USE_SYSVSEM_SERIALIZE"; then
-    sysvser="1"
-else
-    sysvser="0"
-fi
-if test ".$ac_decision" = ".USE_FCNTL_SERIALIZE"; then
-    fcntlser="1"
-else
-    fcntlser="0"
-fi
-if test ".$ac_decision" = ".USE_PROC_PTHREAD_SERIALIZE"; then
-    procpthreadser="1"
-else
-    procpthreadser="0"
-fi
-
 ac_cv_define_READDIR_IS_THREAD_SAFE=no
 AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
 
@@ -322,7 +285,7 @@ AC_TRY_COMPILE([
 ],[
 union semun arg;
 semctl(0, 0, 0, arg);
-], AC_DEFINE(HAVE_STRUCT_UNION_SEMUN)
+], [AC_DEFINE(HAVE_STRUCT_UNION_SEMUN) union_semun=yes]
 msg=yes,dnl
 msg=no)
 AC_MSG_RESULT([$msg])
@@ -352,6 +315,42 @@ AC_SUBST(inet_addr)
 AC_SUBST(inet_network)
 
 AC_CHECK_FUNCS(gmtime_r localtime_r)
+
+dnl Checks for libraries.
+AC_BEGIN_DECISION([lock implementation method])
+AC_IFALLYES(header:sys/file.h define:LOCK_EX,
+            AC_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
+AC_IFALLYES(header:fcntl.h define:F_SETLK,
+            AC_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
+AC_IFALLYES(custom:union_semun,
+            AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
+AC_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
+            custom:use_pthread_cross,
+            AC_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
+dnl AC_DECISION_FORCE(USE_FCNTL_SERIALIZE)
+AC_END_DECISION
+AC_DEFINE_UNQUOTED($ac_decision) 
+
+if test ".$ac_decision" = ".USE_FLOCK_SERIALIZE"; then
+    flockser="1"
+else
+    flockser="0"
+fi 
+if test ".$ac_decision" = ".USE_SYSVSEM_SERIALIZE"; then
+    sysvser="1"
+else
+    sysvser="0"
+fi
+if test ".$ac_decision" = ".USE_FCNTL_SERIALIZE"; then
+    fcntlser="1"
+else
+    fcntlser="0"
+fi
+if test ".$ac_decision" = ".USE_PROC_PTHREAD_SERIALIZE"; then
+    procpthreadser="1"
+else
+    procpthreadser="0"
+fi
 
 dnl Start building stuff from our information
 AC_SUBST(LDLIBS)

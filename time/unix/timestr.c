@@ -56,6 +56,8 @@
 #include "atime.h"
 #include "apr_portable.h"
 
+#include <string.h>
+
 API_VAR_EXPORT const char ap_month_snames[12][4] =
 {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -159,6 +161,7 @@ ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max,
                         const char *format, ap_exploded_time_t *xt)
 {
     struct tm tm;
+
     memset(&tm, 0, sizeof tm);
     tm.tm_sec  = xt->tm_sec;
     tm.tm_min  = xt->tm_min;

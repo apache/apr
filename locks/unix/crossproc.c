@@ -56,12 +56,14 @@
 #include "locks.h"
 
 #if defined (USE_SYSVSEM_SERIALIZE)  
-ap_status_t lock_cleanup(struct lock_t *lock)
+ap_status_t lock_cleanup(void *lock_)
 {
+    struct lock_t *lock=lock_;
     union semun ick;
+    
     if (lock->curr_locked == 1) {
         ick.val = 0;
-        semctl(new->interproc, 0, IPC_RMID, ick);
+        semctl(lock->interproc, 0, IPC_RMID, ick);
     }
     return APR_SUCCESS;
 }    
@@ -71,7 +73,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
     union semun ick;
     struct semid_ds buf;
     
-    new->interproc = semget(IPC_PRIVATE, 1, IPC_CREATE | 0600);
+    new->interproc = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
 
     if (new->interproc < 0) {
         lock_cleanup(new);
@@ -97,7 +99,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
 
 ap_status_t lock_inter(struct lock_t *lock)
 {
-    new->curr_locked = 1;
+    lock->curr_locked = 1;
     if (semop(lock->interproc, &lock->op_on, 1) < 0) {
         return errno;
     }
@@ -109,7 +111,7 @@ ap_status_t unlock_inter(struct lock_t *lock)
     if (semop(lock->interproc, &lock->op_off, 1) < 0) {
         return errno;
     }
-    new->curr_locked = 0;
+    lock->curr_locked = 0;
     return APR_SUCCESS;
 }
 

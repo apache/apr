@@ -81,6 +81,9 @@ extern "C" {
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#ifdef HAVE_STRUCT_UNION_SEMUN
+#include <sys/sem.h>
+#endif
 
 #ifdef WIN32
 /* The primitives for Windows types */
