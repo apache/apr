@@ -496,6 +496,66 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
     return status;
 }
 
+
+
+static void proces_result_codes(RESULTCODES codes, 
+                                int *exitcode, 
+                                apr_exit_why_e *exitwhy)
+{
+    int result = 0;
+    apr_exit_why_e why = APR_PROC_EXIT;
+
+    switch (codes.codeTerminate) {
+    case TC_EXIT:        /* Normal exit */
+        why = APR_PROC_EXIT;
+        result = codes.codeResult;
+        break;
+
+    case TC_HARDERROR:   /* Hard error halt */
+        why = APR_PROC_SIGNAL;
+        result = SIGSYS;
+        break;
+
+    case TC_KILLPROCESS: /* Was killed by a DosKillProcess() */
+        why = APR_PROC_SIGNAL;
+        result = SIGKILL;
+        break;
+
+    case TC_TRAP:        /* TRAP in 16 bit code */
+    case TC_EXCEPTION:   /* Threw an exception (32 bit code) */
+        why = APR_PROC_SIGNAL;
+
+        switch (codes.codeResult | XCPT_FATAL_EXCEPTION) {
+        case XCPT_ACCESS_VIOLATION:
+            result = SIGSEGV;
+            break;
+
+        case XCPT_ILLEGAL_INSTRUCTION:
+            result = SIGILL;
+            break;
+
+        case XCPT_FLOAT_DIVIDE_BY_ZERO:
+        case XCPT_INTEGER_DIVIDE_BY_ZERO:
+            result = SIGFPE;
+            break;
+
+        default:
+            result = codes.codeResult;
+            break;
+        }
+    }
+
+    if (exitcode) {
+        *exitcode = result;
+    }
+
+    if (exitwhy) {
+        *exitwhy = why;
+    }
+}
+
+
+
 APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   int *exitcode,
                                                   apr_exit_why_e *exitwhy,
@@ -509,14 +569,11 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
     if (!proc)
         return APR_ENOPROC;
 
-    rc = DosWaitChild(DCWA_PROCESSTREE, wait == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, 0);
+    rc = DosWaitChild(DCWA_PROCESSTREE, waithow == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, 0);
 
     if (rc == 0) {
         proc->pid = pid;
-
-        if (status)
-            *status = codes.codeResult;
-
+        proces_result_codes(codes, exitcode, exitwhy);
         return APR_CHILD_DONE;
     } else if (rc == ERROR_CHILD_NOT_COMPLETE) {
         return APR_CHILD_NOTDONE;
@@ -538,11 +595,10 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     if (!proc)
         return APR_ENOPROC;
 
-    rc = DosWaitChild(DCWA_PROCESS, wait == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, proc->pid);
+    rc = DosWaitChild(DCWA_PROCESS, waithow == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, proc->pid);
 
-    if (exitcode)
-        *exitcode = codes.codeResult;
     if (rc == 0) {
+        proces_result_codes(codes, exitcode, exitwhy);
         return APR_CHILD_DONE;
     } else if (rc == ERROR_CHILD_NOT_COMPLETE) {
         return APR_CHILD_NOTDONE;
