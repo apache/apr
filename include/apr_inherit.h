@@ -70,17 +70,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 /**
  * @param name Set Inheritance for this Socket/File Handle
  */
-#define APR_DECLARE_SET_INHERIT(name) \
-    APR_DECLARE(void) apr_##name##_set_inherit(apr_##name##_t *name)
+#define APR_DECLARE_INHERIT_SET(name) \
+    APR_DECLARE(void) apr_##name##_inherit_set(apr_##name##_t *name)
+
 /**
  * @param name Unset Inheritance for this Socket/File Handle
  */
-
-#define APR_DECLARE_UNSET_INHERIT(name) \
-    APR_DECLARE(void) apr_##name##_unset_inherit(apr_##name##_t *name)
+#define APR_DECLARE_INHERIT_UNSET(name) \
+    APR_DECLARE(void) apr_##name##_inherit_unset(apr_##name##_t *name)
 
 #ifdef __cplusplus
 }
