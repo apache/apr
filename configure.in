@@ -26,7 +26,7 @@ LIBPREFIX='lib'
 
 dnl # Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB
+AC_PROG_RANLIB_NC
 AC_PROG_MAKE_SET
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_PROG(AR, ar, ar)

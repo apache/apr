@@ -188,4 +188,12 @@ if test "$ac_cv_socklen_t" = "yes"; then
 fi
 ])
 
+dnl Check for ranlib but, unlike the check provided with autoconf, set
+dnl RANLIB to "true" if there is no ranlib instead of setting it to ":".
+dnl OS/390 doesn't have ranlib and the make utility doesn't parse "RANLIB=:" 
+dnl the way we might want it to.
+
+AC_DEFUN(AC_PROG_RANLIB_NC,
+[AC_CHECK_PROG(RANLIB, ranlib, ranlib, true)])
+
 sinclude(threads.m4)
