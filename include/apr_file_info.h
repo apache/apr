@@ -136,14 +136,43 @@ typedef dev_t                     apr_dev_t;
 
 typedef struct apr_finfo_t        apr_finfo_t;
 
+#define APR_FINFO_LINK   0x00000001
+#define APR_FINFO_MTIME  0x00000010
+#define APR_FINFO_CTIME  0x00000020
+#define APR_FINFO_ATIME  0x00000040
+#define APR_FINFO_SIZE   0x00000100
+#define APR_FINFO_ASIZE  0x00000200
+#define APR_FINFO_CSIZE  0x00000400
+#define APR_FINFO_DEV    0x00001000
+#define APR_FINFO_INODE  0x00002000
+#define APR_FINFO_TYPE   0x00008000
+#define APR_FINFO_USER   0x00010000 
+#define APR_FINFO_GROUP  0x00020000 
+#define APR_FINFO_UPROT  0x00100000 
+#define APR_FINFO_GPROT  0x00200000
+#define APR_FINFO_WPROT  0x00400000
+#define APR_FINFO_ICASE  0x01000000  /*  if dev is case insensitive */
+#define APR_FINFO_FCASE  0x02000000  /*  filename in proper case */
+
+#define APR_FINFO_MIN    0x00008170  /*  minimal: type, dates and size */
+#define APR_FINFO_IDENT  0x00003000  /*  dev and inode */
+#define APR_FINFO_OWNER  0x00030000  /*  user and group */
+#define APR_FINFO_PROT   0x00700000  /*  all protections */
+#define APR_FINFO_NORM   0x0073b170  /*  the expected unix results */
+
+typedef struct apr_file_t apr_file_t;
+
 /**
  * The file information structure.  This is analogous to the POSIX
  * stat structure.
  */
 struct apr_finfo_t {
-    /** The access permissions of the file.  Currently this mimics Unix
-     *  access rights.
-     */
+    /** Allocates memory and closes lingering handles in the specified pool */
+    apr_pool_t *cntxt;
+    /** The bitmask describing valid fields of this apr_finfo_t structure 
+     *  including all available 'wanted' fields and potentially more */
+    apr_int32_t valid;
+    /** The access permissions of the file.  Mimics Unix access rights. */
     apr_fileperms_t protection;
     /** The type of file.  One of APR_NOFILE, APR_REG, APR_DIR, APR_CHR, 
      *  APR_BLK, APR_PIPE, APR_LNK, APR_SOCK 
@@ -153,18 +182,28 @@ struct apr_finfo_t {
     apr_uid_t user;
     /** The group id that owns the file */
     apr_gid_t group;
-    /** The inode of the file.  (Not portable?) */
+    /** The inode of the file. */
     apr_ino_t inode;
-    /** The id of the device the file is on.  (Not portable?) */
+    /** The id of the device the file is on. */
     apr_dev_t device;
     /** The size of the file */
     apr_off_t size;
+    /** The space allocated for the file */
+    apr_off_t asize;
+    /** The storage size consumed by the file */
+    apr_off_t csize;
     /** The time the file was last accessed */
     apr_time_t atime;
     /** The time the file was last modified */
     apr_time_t mtime;
     /** The time the file was last changed */
     apr_time_t ctime;
+    /** The full pathname of the file */
+    char *fname;
+    /** The file's name alone, in filesystem case */
+    char *fcase;
+    /** The file's handle, if accessed (can be submitted to apr_duphandle) */
+    apr_file_t *filehand;
 };
 
 /**
@@ -173,11 +212,12 @@ struct apr_finfo_t {
  * @param finfo Where to store the information about the file, which is
  * never touched if the call fails.
  * @param fname The name of the file to stat.
+ * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param cont the pool to use to allocate the new file. 
- * @deffunc apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_int32_t wanted, apr_pool_t *cont)
  */ 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
-                                   apr_pool_t *cont);
+                                   apr_int32_t wanted, apr_pool_t *cont);
 
 /**
  * get the specified file's stats.  The file is specified by filename, 
@@ -186,11 +226,14 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
  * @param finfo Where to store the information about the file, which is
  * never touched if the call fails.
  * @param fname The name of the file to stat.
+ * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param cont the pool to use to allocate the new file. 
- * @deffunc apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_int32_t wanted, apr_pool_t *cont)
+ * @tip This function is depreciated, it's equivilant to calling apr_stat with 
+ * the wanted flag value APR_FINFO_LINK
  */ 
 APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
-                                    apr_pool_t *cont);
+                                    apr_int32_t wanted, apr_pool_t *cont);
 
 /**
  * Open the specified directory.
