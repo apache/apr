@@ -61,7 +61,7 @@
 
 struct atime_t {
     ap_context_t *cntxt;
-    time_t currtime;
+    struct timeval *currtime;
     struct tm *explodedtime;
 };
     

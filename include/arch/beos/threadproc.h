@@ -112,6 +112,7 @@ struct procattr_t {
     ap_file_t *child_err;
     char *currdir;
     ap_int32_t cmdtype;
+    ap_int32_t detached;
 };
 
 struct proc_t {

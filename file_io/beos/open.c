@@ -80,7 +80,7 @@ ap_status_t file_cleanup(void *thefile)
     }
 }
 
-ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
+ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
 {
     int oflags = 0;
     struct stat info;

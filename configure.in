@@ -85,6 +85,7 @@ case "$OS" in
        ;;
    *beos*)
        OSDIR="beos"
+       CFLAGS="$CFLAGS -DBEOS"
        ;;
    *)
        OSDIR="unix"
