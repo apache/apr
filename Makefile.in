@@ -70,6 +70,10 @@ install: $(TARGET_LIB) apr-config.out
 	fi;
 	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(DESTDIR)$(libdir)
 	$(LIBTOOL) --mode=install cp apr.exp $(DESTDIR)$(libdir)
+	if [ ! -d $(DESTDIR)$(libdir)/pkgconfig ]; then \
+	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(libdir)/pkgconfig; \
+	fi;
+	cp -p apr.pc  $(DESTDIR)$(libdir)/pkgconfig;
 	if [ ! -d $(DESTDIR)$(installbuilddir) ]; then \
 	   	$(top_srcdir)/build/mkdir.sh $(DESTDIR)$(installbuilddir); \
 	fi; 
