@@ -92,14 +92,14 @@ static void rand_run_kat(abts_case *tc,rnd_fn *f,apr_random_t *r,
     apr_status_t rv;
 
     rv=f(r,c,128);
-    abts_int_equal(tc,0,rv);
+    ABTS_INT_EQUAL(tc,0,rv);
     if(rv)
         return;
     if(memcmp(c,expected,128))
         {
         hexdump(c,128);
         hexdump(expected,128);
-        abts_fail(tc,"Randomness mismatch");
+        ABTS_FAIL(tc,"Randomness mismatch");
         }
     }
 
@@ -134,7 +134,7 @@ static void rand_run_seed_short(abts_case *tc,rnd_fn *f,apr_random_t *r,
     for(i=0 ; i < count ; ++i)
         rand_add_zeroes(r);
     rv=f(r,c,1);
-    abts_int_equal(tc,1,APR_STATUS_IS_ENOTENOUGHENTROPY(rv));
+    ABTS_INT_EQUAL(tc,1,APR_STATUS_IS_ENOTENOUGHENTROPY(rv));
     }
 
 static void rand_seed_short(abts_case *tc, void *data)
@@ -290,28 +290,28 @@ static void rand_fork(abts_case *tc, void *data)
         apr_proc_wait(&proc,&exitcode,&why,APR_WAIT);
         if(why != APR_PROC_EXIT)
             {
-            abts_fail(tc,"Child terminated abnormally");
+            ABTS_FAIL(tc,"Child terminated abnormally");
             return;
             }
         if(exitcode == 0)
             {
-            abts_fail(tc,"Child produced our randomness");
+            ABTS_FAIL(tc,"Child produced our randomness");
             return;
             }
         else if(exitcode == 2)
             {
-            abts_fail(tc,"Child randomness failed");
+            ABTS_FAIL(tc,"Child randomness failed");
             return;
             }
         else if(exitcode != 1)
             {
-            abts_fail(tc,"Uknown child error");
+            ABTS_FAIL(tc,"Uknown child error");
             return;
             }
         }
     else
         {
-        abts_fail(tc,"Fork failed");
+        ABTS_FAIL(tc,"Fork failed");
         return;
         }
     }

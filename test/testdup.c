@@ -35,21 +35,21 @@ static void test_file_dup(abts_case *tc, void *data)
     rv = apr_file_open(&file1, FILEPATH "testdup.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, file1);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, file1);
 
     rv = apr_file_dup(&file3, file1, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, file3);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, file3);
 
     rv = apr_file_close(file1);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     /* cleanup after ourselves */
     rv = apr_file_close(file3);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILEPATH "testdup.file", APR_FINFO_NORM, p);
-    abts_int_equal(tc, 1, APR_STATUS_IS_ENOENT(rv));
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }  
 
 static void test_file_readwrite(abts_case *tc, void *data)
@@ -66,35 +66,35 @@ static void test_file_readwrite(abts_case *tc, void *data)
     rv = apr_file_open(&file1, FILEPATH "testdup.readwrite.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, file1);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, file1);
 
     rv = apr_file_dup(&file3, file1, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, file3);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, file3);
 
     rv = apr_file_write(file3, TEST, &txtlen);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, sizeof(TEST), txtlen);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, sizeof(TEST), txtlen);
 
     fpos = 0;
     rv = apr_file_seek(file1, APR_SET, &fpos);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 0, fpos);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 0, fpos);
 
     txtlen = 50;
     rv = apr_file_read(file1, buff, &txtlen);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, TEST, buff);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, TEST, buff);
 
     /* cleanup after ourselves */
     rv = apr_file_close(file1);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_close(file3);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_stat(&finfo, FILEPATH "testdup.readwrite.file", APR_FINFO_NORM, p);
-    abts_int_equal(tc, 1, APR_STATUS_IS_ENOENT(rv));
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }  
 
 static void test_dup2(abts_case *tc, void *data)
@@ -107,26 +107,26 @@ static void test_dup2(abts_case *tc, void *data)
     rv = apr_file_open(&testfile, FILEPATH "testdup2.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, testfile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, testfile);
 
     rv = apr_file_open_stderr(&errfile, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     /* Set aside the real errfile */
     rv = apr_file_dup(&saveerr, errfile, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, saveerr);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, saveerr);
 
     rv = apr_file_dup2(errfile, testfile, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, errfile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, errfile);
 
     apr_file_close(testfile);
 
     rv = apr_file_dup2(errfile, saveerr, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, errfile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, errfile);
 }
 
 static void test_dup2_readwrite(abts_case *tc, void *data)
@@ -142,41 +142,41 @@ static void test_dup2_readwrite(abts_case *tc, void *data)
     rv = apr_file_open(&testfile, FILEPATH "testdup2.readwrite.file", 
                        APR_READ | APR_WRITE | APR_CREATE |
                        APR_DELONCLOSE, APR_OS_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, testfile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, testfile);
 
     rv = apr_file_open_stderr(&errfile, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     /* Set aside the real errfile */
     rv = apr_file_dup(&saveerr, errfile, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, saveerr);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, saveerr);
 
     rv = apr_file_dup2(errfile, testfile, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, errfile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, errfile);
 
     txtlen = sizeof(TEST2);
     rv = apr_file_write(errfile, TEST2, &txtlen);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, sizeof(TEST2), txtlen);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, sizeof(TEST2), txtlen);
 
     fpos = 0;
     rv = apr_file_seek(testfile, APR_SET, &fpos);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 0, fpos);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 0, fpos);
 
     txtlen = 50;
     rv = apr_file_read(testfile, buff, &txtlen);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, TEST2, buff);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, TEST2, buff);
       
     apr_file_close(testfile);
 
     rv = apr_file_dup2(errfile, saveerr, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, errfile);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, errfile);
 }
 
 abts_suite *testdup(abts_suite *suite)

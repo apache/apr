@@ -50,55 +50,55 @@ static const struct view_fileinfo
 static void finfo_equal(abts_case *tc, apr_finfo_t *f1, apr_finfo_t *f2)
 {
     /* Minimum supported flags across all platforms (APR_FINFO_MIN) */
-    abts_assert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_TYPE",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_TYPE",
              (f1->valid & f2->valid & APR_FINFO_TYPE));
-    abts_assert(tc, "apr_stat and apr_getfileinfo differ in filetype",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in filetype",
              f1->filetype == f2->filetype);
-    abts_assert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_SIZE",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_SIZE",
              (f1->valid & f2->valid & APR_FINFO_SIZE));
-    abts_assert(tc, "apr_stat and apr_getfileinfo differ in size",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in size",
              f1->size == f2->size);
-    abts_assert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_ATIME",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_ATIME",
              (f1->valid & f2->valid & APR_FINFO_ATIME));
-    abts_assert(tc, "apr_stat and apr_getfileinfo differ in atime",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in atime",
              f1->atime == f2->atime);
-    abts_assert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_MTIME",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_MTIME",
              (f1->valid & f2->valid & APR_FINFO_MTIME));
-    abts_assert(tc, "apr_stat and apr_getfileinfo differ in mtime",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in mtime",
              f1->mtime == f2->mtime);
-    abts_assert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_CTIME",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_CTIME",
              (f1->valid & f2->valid & APR_FINFO_CTIME));
-    abts_assert(tc, "apr_stat and apr_getfileinfo differ in ctime",
+    ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in ctime",
              f1->ctime == f2->ctime);
 
     if (f1->valid & f2->valid & APR_FINFO_NAME)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in name",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in name",
                  !strcmp(f1->name, f2->name));
     if (f1->fname && f2->fname)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in fname",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in fname",
                  !strcmp(f1->fname, f2->fname));
 
     /* Additional supported flags not supported on all platforms */
     if (f1->valid & f2->valid & APR_FINFO_USER)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in user",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in user",
                  !apr_uid_compare(f1->user, f2->user));
     if (f1->valid & f2->valid & APR_FINFO_GROUP)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in group",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in group",
                  !apr_gid_compare(f1->group, f2->group));
     if (f1->valid & f2->valid & APR_FINFO_INODE)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in inode",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in inode",
                  f1->inode == f2->inode);
     if (f1->valid & f2->valid & APR_FINFO_DEV)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in device",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in device",
                  f1->device == f2->device);
     if (f1->valid & f2->valid & APR_FINFO_NLINK)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in nlink",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in nlink",
                  f1->nlink == f2->nlink);
     if (f1->valid & f2->valid & APR_FINFO_CSIZE)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in csize",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in csize",
                  f1->csize == f2->csize);
     if (f1->valid & f2->valid & APR_FINFO_PROT)
-        abts_assert(tc, "apr_stat and apr_getfileinfo differ in protection",
+        ABTS_ASSERT(tc, "apr_stat and apr_getfileinfo differ in protection",
                  f1->protection == f2->protection);
 }
 
@@ -109,7 +109,7 @@ static void test_info_get(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_file_open(&thefile, FILENAME, APR_READ, APR_OS_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     if (rv  == APR_INCOMPLETE) {
@@ -121,9 +121,9 @@ static void test_info_get(abts_case *tc, void *data)
                 str = apr_pstrcat(p, str, vfi[i].description, " ", NULL);
             }
         }
-        abts_fail(tc, str);
+        ABTS_FAIL(tc, str);
     }
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     apr_file_close(thefile);
 }
 
@@ -142,9 +142,9 @@ static void test_stat(abts_case *tc, void *data)
                 str = apr_pstrcat(p, str, vfi[i].description, " ", NULL);
             }
         }
-        abts_fail(tc, str);
+        ABTS_FAIL(tc, str);
     }
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
 static void test_stat_eq_finfo(abts_case *tc, void *data)
@@ -155,7 +155,7 @@ static void test_stat_eq_finfo(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_file_open(&thefile, FILENAME, APR_READ, APR_OS_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
 
     /* Opening the file may have toggled the atime member (time last
@@ -163,7 +163,7 @@ static void test_stat_eq_finfo(abts_case *tc, void *data)
      * of the open file...
      */
     rv = apr_stat(&stat_finfo, FILENAME, APR_FINFO_NORM, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     apr_file_close(thefile);
 
@@ -192,11 +192,11 @@ static void test_buffered_write_size(abts_case *tc, void *data)
     bytes = data_len;
     rv = apr_file_write(thefile, NEWFILEDATA, &bytes);
     apr_assert_success(tc, "write file contents", rv);
-    abts_true(tc, data_len == bytes);
+    ABTS_TRUE(tc, data_len == bytes);
 
     rv = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
     apr_assert_success(tc, "get file size", rv);
-    abts_true(tc, bytes == (apr_size_t) finfo.size);
+    ABTS_TRUE(tc, bytes == (apr_size_t) finfo.size);
     apr_file_close(thefile);
 }
 
@@ -228,10 +228,10 @@ static void test_mtime_set(abts_case *tc, void *data)
                 str = apr_pstrcat(p, str, vfi[i].description, " ", NULL);
             }
         }
-        abts_fail(tc, str);
+        ABTS_FAIL(tc, str);
     }
     apr_assert_success(tc, "get initial mtime", rv);
-    abts_true(tc, finfo.mtime != epoch);
+    ABTS_TRUE(tc, finfo.mtime != epoch);
 
     /* Reset the mtime to the epoch and verify the result.
      * Note: we blindly assume that if the first apr_stat succeeded,
@@ -242,7 +242,7 @@ static void test_mtime_set(abts_case *tc, void *data)
 
     rv = apr_stat(&finfo, NEWFILENAME, APR_FINFO_MTIME, p);
     apr_assert_success(tc, "get modified mtime", rv);
-    abts_true(tc, finfo.mtime == epoch);
+    ABTS_TRUE(tc, finfo.mtime == epoch);
 
     apr_file_close(thefile);
 }

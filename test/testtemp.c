@@ -24,7 +24,7 @@ static void test_temp_dir(abts_case *tc, void *data)
 
     rv = apr_temp_dir_get(&tempdir, p);
     apr_assert_success(tc, "Error finding Temporary Directory", rv);
-    abts_ptr_notnull(tc, tempdir);
+    ABTS_PTR_NOTNULL(tc, tempdir);
 }
 
 static void test_mktemp(abts_case *tc, void *data)

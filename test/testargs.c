@@ -50,7 +50,7 @@ static void no_options_found(abts_case *tc, void *data)
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
    
     while (apr_getopt(opt, "abcd", &ch, &optarg) == APR_SUCCESS) {
         switch (ch) {
@@ -62,7 +62,7 @@ static void no_options_found(abts_case *tc, void *data)
                 format_arg(str, ch, optarg);
         }
     }
-    abts_str_equal(tc, "option: a\n"
+    ABTS_STR_EQUAL(tc, "option: a\n"
                           "option: b\n"
                           "option: c\n"
                           "option: d\n", str);
@@ -80,7 +80,7 @@ static void no_options(abts_case *tc, void *data)
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
@@ -97,7 +97,7 @@ static void no_options(abts_case *tc, void *data)
                 break;
         }
     }
-    abts_str_equal(tc, "testprog: illegal option -- a\n", str);
+    ABTS_STR_EQUAL(tc, "testprog: illegal option -- a\n", str);
 }
 
 static void required_option(abts_case *tc, void *data)
@@ -112,7 +112,7 @@ static void required_option(abts_case *tc, void *data)
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
@@ -126,7 +126,7 @@ static void required_option(abts_case *tc, void *data)
                 break;
         }
     }
-    abts_str_equal(tc, "option: a with foo\n", str);
+    ABTS_STR_EQUAL(tc, "option: a with foo\n", str);
 }
 
 static void required_option_notgiven(abts_case *tc, void *data)
@@ -141,7 +141,7 @@ static void required_option_notgiven(abts_case *tc, void *data)
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
@@ -155,7 +155,7 @@ static void required_option_notgiven(abts_case *tc, void *data)
                 break;
         }
     }
-    abts_str_equal(tc, "testprog: option requires an argument -- a\n", str);
+    ABTS_STR_EQUAL(tc, "testprog: option requires an argument -- a\n", str);
 }
 
 static void optional_option(abts_case *tc, void *data)
@@ -170,7 +170,7 @@ static void optional_option(abts_case *tc, void *data)
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
@@ -184,7 +184,7 @@ static void optional_option(abts_case *tc, void *data)
                 break;
         }
     }
-    abts_str_equal(tc, "option: a with foo\n", str);
+    ABTS_STR_EQUAL(tc, "option: a with foo\n", str);
 }
 
 static void optional_option_notgiven(abts_case *tc, void *data)
@@ -199,7 +199,7 @@ static void optional_option_notgiven(abts_case *tc, void *data)
 
     str[0] = '\0';
     rv = apr_getopt_init(&opt, p, largc, largv);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     opt->errfn = unknown_arg;
     opt->errarg = str;
@@ -215,9 +215,9 @@ static void optional_option_notgiven(abts_case *tc, void *data)
     }
 #if 0
 /*  Our version of getopt doesn't allow for optional arguments.  */
-    abts_str_equal(tc, "option: a\n", str);
+    ABTS_STR_EQUAL(tc, "option: a\n", str);
 #endif
-    abts_str_equal(tc, "testprog: option requires an argument -- a\n", str);
+    ABTS_STR_EQUAL(tc, "testprog: option requires an argument -- a\n", str);
 }
 
 abts_suite *testgetopt(abts_suite *suite)

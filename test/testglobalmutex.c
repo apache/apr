@@ -47,10 +47,10 @@ static int wait_child(abts_case *tc, apr_proc_t *proc)
     int exitcode;
     apr_exit_why_e why;
 
-    abts_assert(tc, "Error waiting for child process",
+    ABTS_ASSERT(tc, "Error waiting for child process",
             apr_proc_wait(proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
-    abts_assert(tc, "child didn't terminate normally", why == APR_PROC_EXIT);
+    ABTS_ASSERT(tc, "child didn't terminate normally", why == APR_PROC_EXIT);
     return exitcode;
 }
 
@@ -75,7 +75,7 @@ static void test_exclusive(abts_case *tc, void *data)
     x += wait_child(tc, &p3);
     x += wait_child(tc, &p4);
 
-    abts_int_equal(tc, MAX_COUNTER, x);
+    ABTS_INT_EQUAL(tc, MAX_COUNTER, x);
 }
 
 abts_suite *testglobalmutex(abts_suite *suite)

@@ -66,17 +66,17 @@ static void test_child_kill(abts_case *tc, void *data)
     args[2] = NULL;
 
     rv = apr_procattr_create(&procattr, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_NO_PIPE, 
                              APR_NO_PIPE);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_proc_create(&newproc, "./occhild" EXTENSION, args, NULL, procattr, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, newproc.in);
-    abts_ptr_equal(tc, NULL, newproc.out);
-    abts_ptr_equal(tc, NULL, newproc.err);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, newproc.in);
+    ABTS_PTR_EQUAL(tc, NULL, newproc.out);
+    ABTS_PTR_EQUAL(tc, NULL, newproc.err);
 
     std = newproc.in;
 
@@ -84,19 +84,19 @@ static void test_child_kill(abts_case *tc, void *data)
 
     apr_sleep(apr_time_from_sec(1));
     rv = apr_proc_kill(&newproc, SIGKILL);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     
     /* allow time for things to settle... */
     apr_sleep(apr_time_from_sec(3));
     
     apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING);
-    abts_str_equal(tc, "APR_OC_REASON_DEATH", reasonstr);
+    ABTS_STR_EQUAL(tc, "APR_OC_REASON_DEATH", reasonstr);
 }    
 #else
 
 static void oc_not_impl(abts_case *tc, void *data)
 {
-    abts_not_impl(tc, "Other child logic not implemented on this platform");
+    ABTS_NOT_IMPL(tc, "Other child logic not implemented on this platform");
 }
 #endif
 

@@ -25,16 +25,16 @@ static void test_glob(abts_case *tc, void *data)
     apr_array_header_t *result;
     apr_status_t rv = apr_match_glob("data\\*.txt", &result, p);
 
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     /* XXX If we ever add a file that matches *.txt to data, then we need
      * to increase this.
      */
-    abts_int_equal(tc, 2, result->nelts);
+    ABTS_INT_EQUAL(tc, 2, result->nelts);
 
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
         char *dot = strrchr(list[i], '.');
-        abts_str_equal(tc, dot, ".txt");
+        ABTS_STR_EQUAL(tc, dot, ".txt");
     }
 }
 
@@ -47,16 +47,16 @@ static void test_glob_currdir(abts_case *tc, void *data)
     apr_filepath_set("data", p);
     rv = apr_match_glob("*.txt", &result, p);
 
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     /* XXX If we ever add a file that matches *.txt to data, then we need
      * to increase this.
      */
-    abts_int_equal(tc, 2, result->nelts);
+    ABTS_INT_EQUAL(tc, 2, result->nelts);
 
     list = (char **)result->elts;
     for (i = 0; i < result->nelts; i++) {
         char *dot = strrchr(list[i], '.');
-        abts_str_equal(tc, dot, ".txt");
+        ABTS_STR_EQUAL(tc, dot, ".txt");
     }
     apr_filepath_set("..", p);
 }

@@ -77,7 +77,7 @@ static void make_child(abts_case *tc, apr_proc_t **proc, apr_pool_t *p)
         exit(0);
     } 
 
-    abts_assert(tc, "fork failed", rv == APR_INPARENT);
+    ABTS_ASSERT(tc, "fork failed", rv == APR_INPARENT);
 }
 
 /* Wait for a child process and check it terminated with success. */
@@ -88,7 +88,7 @@ static void await_child(abts_case *tc, apr_proc_t *proc)
     apr_status_t rv;
 
     rv = apr_proc_wait(proc, &code, &why, APR_WAIT);
-    abts_assert(tc, "child did not terminate with success",
+    ABTS_ASSERT(tc, "child did not terminate with success",
              rv == APR_CHILD_DONE && why == APR_PROC_EXIT && code == 0);
 }
 
@@ -107,7 +107,7 @@ static void test_exclusive(abts_case *tc, const char *lockname)
     for (n = 0; n < CHILDREN; n++)
         await_child(tc, child[n]);
     
-    abts_assert(tc, "Locks don't appear to work", *x == MAX_COUNTER);
+    ABTS_ASSERT(tc, "Locks don't appear to work", *x == MAX_COUNTER);
 }
 #endif
 
@@ -130,7 +130,7 @@ static void proc_mutex(abts_case *tc, void *data)
     x = apr_shm_baseaddr_get(shm);
     test_exclusive(tc, NULL);
 #else
-    abts_not_impl(tc, "APR lacks fork() support");
+    ABTS_NOT_IMPL(tc, "APR lacks fork() support");
 #endif
 }
 

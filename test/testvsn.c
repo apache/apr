@@ -22,7 +22,7 @@
 
 static void test_strings(abts_case *tc, void *data)
 {
-    abts_str_equal(tc, APR_VERSION_STRING, apr_version_string());
+    ABTS_STR_EQUAL(tc, APR_VERSION_STRING, apr_version_string());
 }
 
 static void test_ints(abts_case *tc, void *data)
@@ -31,9 +31,9 @@ static void test_ints(abts_case *tc, void *data)
 
     apr_version(&vsn);
 
-    abts_int_equal(tc, APR_MAJOR_VERSION, vsn.major);
-    abts_int_equal(tc, APR_MINOR_VERSION, vsn.minor);
-    abts_int_equal(tc, APR_PATCH_VERSION, vsn.patch);
+    ABTS_INT_EQUAL(tc, APR_MAJOR_VERSION, vsn.major);
+    ABTS_INT_EQUAL(tc, APR_MINOR_VERSION, vsn.minor);
+    ABTS_INT_EQUAL(tc, APR_PATCH_VERSION, vsn.patch);
 }
 
 abts_suite *testvsn(abts_suite *suite)

@@ -38,9 +38,9 @@ static void merge_aboveroot(abts_case *tc, void *data)
     rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo", ABS_ROOT"bar", APR_FILEPATH_NOTABOVEROOT,
                             p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
-    abts_int_equal(tc, 1, APR_STATUS_IS_EABOVEROOT(rv));
-    abts_ptr_equal(tc, NULL, dstpath);
-    abts_str_equal(tc, "The given path was above the root path", errmsg);
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EABOVEROOT(rv));
+    ABTS_PTR_EQUAL(tc, NULL, dstpath);
+    ABTS_STR_EQUAL(tc, "The given path was above the root path", errmsg);
 }
 
 static void merge_belowroot(abts_case *tc, void *data)
@@ -50,9 +50,9 @@ static void merge_belowroot(abts_case *tc, void *data)
 
     rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo", ABS_ROOT"foo/bar", 
                             APR_FILEPATH_NOTABOVEROOT, p);
-    abts_ptr_notnull(tc, dstpath);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, ABS_ROOT"foo/bar", dstpath);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, ABS_ROOT"foo/bar", dstpath);
 }
 
 static void merge_noflag(abts_case *tc, void *data)
@@ -61,9 +61,9 @@ static void merge_noflag(abts_case *tc, void *data)
     char *dstpath = NULL;
 
     rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo", ABS_ROOT"foo/bar", 0, p);
-    abts_ptr_notnull(tc, dstpath);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, ABS_ROOT"foo/bar", dstpath);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, ABS_ROOT"foo/bar", dstpath);
 }
 
 static void merge_dotdot(abts_case *tc, void *data)
@@ -72,13 +72,13 @@ static void merge_dotdot(abts_case *tc, void *data)
     char *dstpath = NULL;
 
     rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo/bar", "../baz", 0, p);
-    abts_ptr_notnull(tc, dstpath);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, ABS_ROOT"foo/baz", dstpath);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, ABS_ROOT"foo/baz", dstpath);
 
     rv = apr_filepath_merge(&dstpath, "", "../test", 0, p);
-    abts_int_equal(tc, 0, APR_SUCCESS);
-    abts_str_equal(tc, "../test", dstpath);
+    ABTS_INT_EQUAL(tc, 0, APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "../test", dstpath);
 
     /* Very dangerous assumptions here about what the cwd is.  However, let's assume
      * that the testall is invoked from within apr/test/ so the following test should
@@ -86,8 +86,8 @@ static void merge_dotdot(abts_case *tc, void *data)
      * the case of the test directory:
      */
     rv = apr_filepath_merge(&dstpath, "", "../test", APR_FILEPATH_TRUENAME, p);
-    abts_int_equal(tc, 0, APR_SUCCESS);
-    abts_str_equal(tc, "../test", dstpath);
+    ABTS_INT_EQUAL(tc, 0, APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "../test", dstpath);
 }
 
 static void merge_secure(abts_case *tc, void *data)
@@ -96,9 +96,9 @@ static void merge_secure(abts_case *tc, void *data)
     char *dstpath = NULL;
 
     rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo/bar", "../bar/baz", 0, p);
-    abts_ptr_notnull(tc, dstpath);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, ABS_ROOT"foo/bar/baz", dstpath);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, ABS_ROOT"foo/bar/baz", dstpath);
 }
 
 static void merge_notrel(abts_case *tc, void *data)
@@ -108,9 +108,9 @@ static void merge_notrel(abts_case *tc, void *data)
 
     rv = apr_filepath_merge(&dstpath, ABS_ROOT"foo/bar", "../baz",
                             APR_FILEPATH_NOTRELATIVE, p);
-    abts_ptr_notnull(tc, dstpath);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, ABS_ROOT"foo/baz", dstpath);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, ABS_ROOT"foo/baz", dstpath);
 }
 
 static void merge_notrelfail(abts_case *tc, void *data)
@@ -123,9 +123,9 @@ static void merge_notrelfail(abts_case *tc, void *data)
                             APR_FILEPATH_NOTRELATIVE, p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
 
-    abts_ptr_equal(tc, NULL, dstpath);
-    abts_int_equal(tc, 1, APR_STATUS_IS_ERELATIVE(rv));
-    abts_str_equal(tc, "The given path is relative", errmsg);
+    ABTS_PTR_EQUAL(tc, NULL, dstpath);
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ERELATIVE(rv));
+    ABTS_STR_EQUAL(tc, "The given path is relative", errmsg);
 }
 
 static void merge_notabsfail(abts_case *tc, void *data)
@@ -138,9 +138,9 @@ static void merge_notabsfail(abts_case *tc, void *data)
                             APR_FILEPATH_NOTABSOLUTE, p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
 
-    abts_ptr_equal(tc, NULL, dstpath);
-    abts_int_equal(tc, 1, APR_STATUS_IS_EABSOLUTE(rv));
-    abts_str_equal(tc, "The given path is absolute", errmsg);
+    ABTS_PTR_EQUAL(tc, NULL, dstpath);
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EABSOLUTE(rv));
+    ABTS_STR_EQUAL(tc, "The given path is absolute", errmsg);
 }
 
 static void merge_notabs(abts_case *tc, void *data)
@@ -151,9 +151,9 @@ static void merge_notabs(abts_case *tc, void *data)
     rv = apr_filepath_merge(&dstpath, "foo/bar", "../baz", 
                             APR_FILEPATH_NOTABSOLUTE, p);
 
-    abts_ptr_notnull(tc, dstpath);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, "foo/baz", dstpath);
+    ABTS_PTR_NOTNULL(tc, dstpath);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, "foo/baz", dstpath);
 }
 
 static void root_absolute(abts_case *tc, void *data)
@@ -164,9 +164,9 @@ static void root_absolute(abts_case *tc, void *data)
 
     rv = apr_filepath_root(&root, &path, 0, p);
 
-    abts_ptr_notnull(tc, root);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, ABS_ROOT, root);
+    ABTS_PTR_NOTNULL(tc, root);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, ABS_ROOT, root);
 }
 
 static void root_relative(abts_case *tc, void *data)
@@ -179,9 +179,9 @@ static void root_relative(abts_case *tc, void *data)
     rv = apr_filepath_root(&root, &path, 0, p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
 
-    abts_ptr_equal(tc, NULL, root);
-    abts_int_equal(tc, 1, APR_STATUS_IS_ERELATIVE(rv));
-    abts_str_equal(tc, "The given path is relative", errmsg);
+    ABTS_PTR_EQUAL(tc, NULL, root);
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_ERELATIVE(rv));
+    ABTS_STR_EQUAL(tc, "The given path is relative", errmsg);
 }
 
 

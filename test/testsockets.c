@@ -36,12 +36,12 @@ static void tcp_socket(abts_case *tc, void *data)
     int type;
 
     rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, sock);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, sock);
 
     rv = apr_socket_type_get(sock, &type);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, SOCK_STREAM, type);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, SOCK_STREAM, type);
 
     apr_socket_close(sock);
 }
@@ -53,12 +53,12 @@ static void udp_socket(abts_case *tc, void *data)
     int type;
 
     rv = apr_socket_create(&sock, APR_INET, SOCK_DGRAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, sock);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, sock);
 
     rv = apr_socket_type_get(sock, &type);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, SOCK_DGRAM, type);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, SOCK_DGRAM, type);
 
     apr_socket_close(sock);
 }
@@ -70,11 +70,11 @@ static void tcp6_socket(abts_case *tc, void *data)
     apr_socket_t *sock = NULL;
 
     rv = apr_socket_create(&sock, APR_INET6, SOCK_STREAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, sock);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, sock);
     apr_socket_close(sock);
 #else
-    abts_not_impl(tc, "IPv6");
+    ABTS_NOT_IMPL(tc, "IPv6");
 #endif
 }
 
@@ -85,11 +85,11 @@ static void udp6_socket(abts_case *tc, void *data)
     apr_socket_t *sock = NULL;
 
     rv = apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, sock);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, sock);
     apr_socket_close(sock);
 #else
-    abts_not_impl(tc, "IPv6");
+    ABTS_NOT_IMPL(tc, "IPv6");
 #endif
 }
 
@@ -107,35 +107,35 @@ static void sendto_receivefrom(abts_case *tc, void *data)
     apr_size_t len = 30;
 
     rv = apr_socket_create(&sock, FAMILY, SOCK_DGRAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_socket_create(&sock2, FAMILY, SOCK_DGRAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_sockaddr_info_get(&to, US, APR_UNSPEC, 7772, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_sockaddr_info_get(&from, US, APR_UNSPEC, 7771, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_bind(sock, to);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_socket_bind(sock2, from);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     len = STRLEN;
     rv = apr_socket_sendto(sock2, to, 0, sendbuf, &len);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, STRLEN, len);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, STRLEN, len);
 
     len = 80;
     rv = apr_socket_recvfrom(from, sock, 0, recvbuf, &len);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, STRLEN, len);
-    abts_str_equal(tc, "APR_INET, SOCK_DGRAM", recvbuf);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, STRLEN, len);
+    ABTS_STR_EQUAL(tc, "APR_INET, SOCK_DGRAM", recvbuf);
 
     apr_sockaddr_ip_get(&ip_addr, from);
     fromport = from->port;
-    abts_str_equal(tc, US, ip_addr);
-    abts_int_equal(tc, 7771, fromport);
+    ABTS_STR_EQUAL(tc, US, ip_addr);
+    ABTS_INT_EQUAL(tc, 7771, fromport);
 
     apr_socket_close(sock);
     apr_socket_close(sock2);
@@ -149,21 +149,21 @@ static void socket_userdata(abts_case *tc, void *data)
     const char *key = "GENERICKEY";
 
     rv = apr_socket_create(&sock1, AF_INET, SOCK_STREAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_socket_create(&sock2, AF_INET, SOCK_STREAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_data_set(sock1, "SOCK1", key, NULL);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_socket_data_set(sock2, "SOCK2", key, NULL);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_data_get((void **)&user, key, sock1);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, "SOCK1", user);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, "SOCK1", user);
     rv = apr_socket_data_get((void **)&user, key, sock2);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, "SOCK2", user);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, "SOCK2", user);
 }
 
 abts_suite *testsockets(abts_suite *suite)

@@ -31,9 +31,9 @@ static void create_pipe(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, readp);
-    abts_ptr_notnull(tc, writep);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, readp);
+    ABTS_PTR_NOTNULL(tc, writep);
 }   
 
 static void close_pipe(abts_case *tc, void *data)
@@ -44,10 +44,10 @@ static void close_pipe(abts_case *tc, void *data)
 
     rv = apr_file_close(readp);
     rv = apr_file_close(writep);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_read(readp, buf, &nbytes);
-    abts_int_equal(tc, 1, APR_STATUS_IS_EBADF(rv));
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_EBADF(rv));
 }   
 
 static void set_timeout(abts_case *tc, void *data)
@@ -56,20 +56,20 @@ static void set_timeout(abts_case *tc, void *data)
     apr_interval_time_t timeout;
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, readp);
-    abts_ptr_notnull(tc, writep);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, readp);
+    ABTS_PTR_NOTNULL(tc, writep);
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, -1, timeout);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, -1, timeout);
 
     rv = apr_file_pipe_timeout_set(readp, apr_time_from_sec(1));
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_get(readp, &timeout);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, apr_time_from_sec(1), timeout);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, apr_time_from_sec(1), timeout);
 }
 
 static void read_write(abts_case *tc, void *data)
@@ -82,16 +82,16 @@ static void read_write(abts_case *tc, void *data)
     buf = (char *)apr_palloc(p, nbytes + 1);
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, readp);
-    abts_ptr_notnull(tc, writep);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, readp);
+    ABTS_PTR_NOTNULL(tc, writep);
 
     rv = apr_file_pipe_timeout_set(readp, apr_time_from_sec(1));
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_read(readp, buf, &nbytes);
-    abts_int_equal(tc, 1, APR_STATUS_IS_TIMEUP(rv));
-    abts_int_equal(tc, 0, nbytes);
+    ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
+    ABTS_INT_EQUAL(tc, 0, nbytes);
 }
 
 static void read_write_notimeout(abts_case *tc, void *data)
@@ -104,20 +104,20 @@ static void read_write_notimeout(abts_case *tc, void *data)
     nbytes = strlen("this is a test");
 
     rv = apr_file_pipe_create(&readp, &writep, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, readp);
-    abts_ptr_notnull(tc, writep);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, readp);
+    ABTS_PTR_NOTNULL(tc, writep);
 
     rv = apr_file_write(writep, buf, &nbytes);
-    abts_int_equal(tc, strlen("this is a test"), nbytes);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, strlen("this is a test"), nbytes);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     nbytes = 256;
     input = apr_pcalloc(p, nbytes + 1);
     rv = apr_file_read(readp, input, &nbytes);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, strlen("this is a test"), nbytes);
-    abts_str_equal(tc, "this is a test", input);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, strlen("this is a test"), nbytes);
+    ABTS_STR_EQUAL(tc, "this is a test", input);
 }
 
 static void test_pipe_writefull(abts_case *tc, void *data)
@@ -136,47 +136,47 @@ static void test_pipe_writefull(abts_case *tc, void *data)
     apr_exit_why_e why;
     
     rv = apr_procattr_create(&procattr, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_io_set(procattr, APR_CHILD_BLOCK, APR_CHILD_BLOCK,
                              APR_CHILD_BLOCK);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_procattr_error_check_set(procattr, 1);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     args[0] = "readchild" EXTENSION;
     args[1] = NULL;
     rv = apr_proc_create(&proc, "./readchild" EXTENSION, args, NULL, procattr, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_set(proc.in, apr_time_from_sec(10));
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_file_pipe_timeout_set(proc.out, apr_time_from_sec(10));
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     i = iterations;
     do {
         rv = apr_file_write_full(proc.in, buf, bytes_per_iteration, NULL);
-        abts_int_equal(tc, APR_SUCCESS, rv);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     } while (--i);
 
     free(buf);
 
     rv = apr_file_close(proc.in);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     
     nbytes = sizeof(responsebuf);
     rv = apr_file_read(proc.out, responsebuf, &nbytes);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     bytes_processed = (int)apr_strtoi64(responsebuf, NULL, 10);
-    abts_int_equal(tc, iterations * bytes_per_iteration, bytes_processed);
+    ABTS_INT_EQUAL(tc, iterations * bytes_per_iteration, bytes_processed);
 
-    abts_assert(tc, "wait for child process",
+    ABTS_ASSERT(tc, "wait for child process",
              apr_proc_wait(&proc, NULL, &why, APR_WAIT) == APR_CHILD_DONE);
     
-    abts_assert(tc, "child terminated normally", why == APR_PROC_EXIT);
+    ABTS_ASSERT(tc, "child terminated normally", why == APR_PROC_EXIT);
 }
 
 abts_suite *testpipe(abts_suite *suite)
