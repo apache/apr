@@ -4,6 +4,7 @@ PROGRAMS = \
 	sendfile@EXEEXT@ \
 	server@EXEEXT@ \
 	testfile@EXEEXT@ \
+	testnames@EXEEXT@ \
 	testflock@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
@@ -41,6 +42,9 @@ INCLUDES=-I$(INCDIR)
 
 testfile@EXEEXT@: testfile.lo ../libapr.la
 	$(LINK) testfile.lo $(ALL_LIBS)
+
+testnames@EXEEXT@: testnames.lo ../libapr.la
+	$(LINK) testnames.lo $(ALL_LIBS)
 
 testflock@EXEEXT@: testflock.lo ../libapr.la
 	$(LINK) testflock.lo $(ALL_LIBS)
