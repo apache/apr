@@ -37,6 +37,7 @@ PROGRAMS = \
 	testsleep@EXEEXT@ \
 	testrand@EXEEXT@ \
 	testdup@EXEEXT@ \
+	testatomic@EXEEXT@ \
 	testpools@EXEEXT@
 
 
@@ -164,6 +165,9 @@ testvsn@EXEEXT@: testvsn.lo $(LOCAL_LIBS)
 
 testsleep@EXEEXT@: testsleep.lo $(LOCAL_LIBS)
 	$(LINK) testsleep.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testatomic@EXEEXT@: testatomic.lo $(LOCAL_LIBS)
+	$(LINK) testatomic.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testdup@EXEEXT@: testdup.lo $(LOCAL_LIBS)
 	$(LINK) testdup.lo $(LOCAL_LIBS) $(ALL_LIBS)
