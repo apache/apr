@@ -121,6 +121,7 @@
 #define APR_HAVE_ERRNO_H        1
 #define APR_HAVE_FCNTL_H        1
 #define APR_HAVE_IO_H           1
+#define APR_HAVE_LIMITS_H       0
 #define APR_HAVE_NETDB_H        0
 #define APR_HAVE_NETINET_IN_H   0
 #define APR_HAVE_PTHREAD_H      0
@@ -131,6 +132,7 @@
 #define APR_HAVE_STRINGS_H      0
 #define APR_HAVE_SYS_SIGNAL_H   0
 #define APR_HAVE_SYS_SOCKET_H   0
+#define APR_HAVE_SYS_SYSLIMITS_H 0
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      0
 #define APR_HAVE_SIGNAL_H       1
@@ -296,6 +298,13 @@ struct iovec {
 #define STDIN_FILENO  0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
+
+#if APR_HAS_UNICODE_FS
+/* An arbitrary size that is digestable. True max is a bit less than 32000 */
+#define APR_PATH_MAX 8192
+#else /* !APR_HAS_UNICODE_FS */
+#define APR_PATH_MAX MAX_PATH
+#endif
 
 #endif /* APR_H */
 #endif /* WIN32 */

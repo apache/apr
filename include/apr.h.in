@@ -31,6 +31,7 @@
 #define APR_HAVE_ERRNO_H        @errnoh@
 #define APR_HAVE_FCNTL_H        @fcntlh@
 #define APR_HAVE_IO_H           @ioh@
+#define APR_HAVE_LIMITS_H       @limitsh@
 #define APR_HAVE_NETDB_H        @netdbh@
 #define APR_HAVE_NETINET_IN_H   @netinet_inh@
 #define APR_HAVE_PTHREAD_H      @pthreadh@
@@ -41,6 +42,7 @@
 #define APR_HAVE_STRINGS_H      @stringsh@
 #define APR_HAVE_SYS_SIGNAL_H   @sys_signalh@
 #define APR_HAVE_SYS_SOCKET_H   @sys_socketh@
+#define APR_HAVE_SYS_SYSLIMITS_H @sys_syslimitsh@
 #define APR_HAVE_SYS_TYPES_H    @sys_typesh@
 #define APR_HAVE_SYS_UIO_H      @sys_uioh@
 #define APR_HAVE_SIGNAL_H       @signalh@
@@ -233,6 +235,22 @@ typedef  @socklen_t_value@       apr_socklen_t;
 #define INCL_DOS
 #define INCL_DOSERRORS
 #include <os2.h>
+#endif
+
+/* header files for PATH_MAX, _POSIX_PATH_MAX */
+#if APR_HAVE_SYS_SYSLIMITS_H
+#include <sys/syslimits.h>
+#endif
+#if APR_HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
+#if defined(PATH_MAX)
+#define APR_PATH_MAX       PATH_MAX
+#elif defined(_POSIX_PATH_MAX)
+#define APR_PATH_MAX       _POSIX_PATH_MAX
+#else
+#error no decision has been made on APR_PATH_MAX for your platform
 #endif
 
 #endif /* APR_H */
