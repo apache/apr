@@ -109,6 +109,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     (*new)->cntxt = pool;
     (*new)->data = data;
     (*new)->func = func;
+    (*new)->exitval = -1;
 
     /* First we create the new thread...*/
 	if (attr)
@@ -144,6 +145,7 @@ int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
     apr_pool_destroy(thd->cntxt);
+    thd->exitval = *retval;
     exit_thread ((status_t)(*retval));
     /* This will never be reached... */
     return APR_SUCCESS;
@@ -157,7 +159,14 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
         return APR_SUCCESS;
     }
     else {
-        return ret;
+        /* if we've missed the thread's death, did we set an exit value prior
+         * to it's demise?  If we did return that.
+         */
+        if (thd->exitval != -1) {
+            *retval = thd->exitval;
+            return APR_SUCCESS;
+        } else 
+            return ret;
     }
 }
 
