@@ -36,7 +36,7 @@
 #define EMSG    ""
 
 APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                     int argc, char const* const* argv)
+                                     int argc, char *const *argv)
 {
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
     (*os)->cont = cont;
