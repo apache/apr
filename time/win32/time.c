@@ -294,6 +294,9 @@ static apr_status_t clock_restore(void *unsetres)
 APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
 {
     ULONG newRes;
+    /* Timer resolution is stated in 100ns units.  Note that TRUE requests the
+     * new clock resolution, FALSE above releases the request.
+     */
     if (SetTimerResolution(10000, TRUE, &newRes) == 0 /* STATUS_SUCCESS */) {
         /* register the cleanup... */
         apr_pool_cleanup_register(p, (void*)10000, clock_restore,
