@@ -905,7 +905,7 @@ APR_DECLARE(apr_status_t) apr_sms_thread_unregister(apr_sms_t *sms,
 }
 #endif /* APR_HAS_THREADS */
 
-APR_DECLARE(const char*) apr_sms_identity(apr_sms_t *sms)
+APR_DECLARE(const char*) apr_sms_get_identity(apr_sms_t *sms)
 {
     return sms->identity;
 }
