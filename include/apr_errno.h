@@ -60,7 +60,7 @@
     APR_ENOPOOL        APR was not provided a pool with which to allocate memory
     APR_EBADDATE       APR was given an invalid date 
     APR_EINVALSOCK     APR was given an invalid socket
-    APR_ENOFILE        APR was not give a file structure
+    APR_ENOFILE        APR was not given a file structure
     APR_ENOPROC        APR was not given a process structure
     APR_ENOTIME        APR was not given a time structure
     APR_ENODIR         APR was not given a directory structure
