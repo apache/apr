@@ -220,8 +220,8 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
-    /* Not sure what to do in this case.  For now, return SUCCESS. */
-    return APR_SUCCESS;
+    ap_off_t offset = -1;
+    return ap_seek(thefile, APR_CUR, &offset);
 }
 
 
