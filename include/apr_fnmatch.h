@@ -33,7 +33,7 @@
  *	@(#)fnmatch.h	8.1 (Berkeley) 6/2/93
  */
 
-/* This file has been modified by the Apache Group. */
+/* This file has been modified by the Apache Software Foundation. */
 #ifndef	_APR_FNMATCH_H_
 #define	_APR_FNMATCH_H_
 
