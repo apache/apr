@@ -82,7 +82,7 @@ typedef struct datastruct {
     struct datastruct *prev;
 } datastruct;
 
-struct context_t {
+struct ap_context_t {
     struct ap_pool_t *pool;
     datastruct *prog_data;
     int (*apr_abort)(int retcode);

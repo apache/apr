@@ -58,7 +58,7 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 
-struct socket_t {
+struct ap_socket_t {
     ap_context_t *cntxt;
     SOCKET sock;
     struct sockaddr_in *local_addr;
@@ -67,7 +67,7 @@ struct socket_t {
     int timeout;
 };
 
-struct pollfd_t {
+struct ap_pollfd_t {
     ap_context_t *cntxt;
     fd_set *read;
     int numread;

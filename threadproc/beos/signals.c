@@ -54,7 +54,7 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_kill(struct proc_t *proc, int signal)
+ap_status_t ap_kill(struct ap_proc_t *proc, int signal)
 {
 /* I've changed this to use kill_thread instead of kill() as kill()
    tended to kill the whole server! This isn't as good as it ignores

@@ -65,10 +65,10 @@
 #include <string.h>
 #include <process.h>
 
-ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
+ap_status_t ap_createprocattr_init(struct ap_procattr_t **new, ap_context_t *cont)
 {
-    (*new) = (struct procattr_t *)ap_palloc(cont, 
-              sizeof(struct procattr_t));
+    (*new) = (struct ap_procattr_t *)ap_palloc(cont, 
+              sizeof(struct ap_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -89,7 +89,7 @@ ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in, 
+ap_status_t ap_setprocattr_io(struct ap_procattr_t *attr, ap_int32_t in, 
                               ap_int32_t out, ap_int32_t err)
 {
     ap_status_t stat;
@@ -114,11 +114,11 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
     return APR_SUCCESS;
 }
 #if 0
-ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
+ap_status_t ap_setprocattr_childin(struct ap_procattr_t *attr, ap_file_t *child_in,
                                    ap_file_t *parent_in)
 {
 }
-ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_out,
+ap_status_t ap_setprocattr_childout(struct ap_procattr_t *attr, ap_file_t *child_out,
                                     ap_file_t *parent_out)
 {
     if (attr->child_out == NULL && attr->parent_out == NULL)
@@ -132,7 +132,7 @@ ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_ou
 
     return APR_SUCCESS;
 }
-ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_err,
+ap_status_t ap_setprocattr_childerr(struct ap_procattr_t *attr, ap_file_t *child_err,
                                    ap_file_t *parent_err)
 {
     if (attr->child_err == NULL && attr->parent_err == NULL)
@@ -146,7 +146,7 @@ ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_er
     return APR_SUCCESS;
 }
 #endif
-ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
+ap_status_t ap_setprocattr_dir(struct ap_procattr_t *attr, 
                                const char *dir) 
 {
     char path[MAX_PATH];
@@ -170,22 +170,22 @@ ap_status_t ap_setprocattr_dir(struct procattr_t *attr,
     return APR_ENOMEM;
 }
 
-ap_status_t ap_setprocattr_cmdtype(struct procattr_t *attr,
+ap_status_t ap_setprocattr_cmdtype(struct ap_procattr_t *attr,
                                      ap_cmdtype_e cmd) 
 {
     attr->cmdtype = cmd;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t det) 
+ap_status_t ap_setprocattr_detach(struct ap_procattr_t *attr, ap_int32_t det) 
 {
     attr->detached = det;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_create_process(struct proc_t **new, const char *progname, 
+ap_status_t ap_create_process(struct ap_proc_t **new, const char *progname, 
                               char *const args[], char **env, 
-                              struct procattr_t *attr, ap_context_t *cont)
+                              struct ap_procattr_t *attr, ap_context_t *cont)
 {
     int i, iEnvBlockLen;
     char *cmdline;
@@ -195,7 +195,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     char *envstr;
     char *pEnvBlock, *pNext;
 
-    (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+    (*new) = (struct ap_proc_t *)ap_palloc(cont, sizeof(struct ap_proc_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -364,25 +364,25 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     return GetLastError();
 }
 
-ap_status_t ap_get_childin(ap_file_t **new, struct proc_t *proc)
+ap_status_t ap_get_childin(ap_file_t **new, struct ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_in;
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_get_childout(ap_file_t **new, struct proc_t *proc)
+ap_status_t ap_get_childout(ap_file_t **new, struct ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_out; 
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
+ap_status_t ap_get_childerr(ap_file_t **new, struct ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_err; 
     return APR_SUCCESS;
 }    
 
-ap_status_t ap_wait_proc(struct proc_t *proc, 
+ap_status_t ap_wait_proc(struct ap_proc_t *proc, 
                          ap_wait_how_e wait)
 {
     DWORD stat;
@@ -406,7 +406,7 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
     return GetLastError();
 }
 
-ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
+ap_status_t ap_get_procdata(char *key, void *data, struct ap_proc_t *proc)
 {
     if (proc != NULL) {
         return ap_get_userdata(data, key, proc->cntxt);
@@ -419,7 +419,7 @@ ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
 
 ap_status_t ap_set_procdata(void *data, char *key,
                             ap_status_t (*cleanup) (void *),
-                            struct proc_t *proc)
+                            struct ap_proc_t *proc)
 {
     if (proc != NULL) {
         return ap_set_userdata(data, key, cleanup, proc->cntxt);
@@ -439,14 +439,14 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_proc(struct proc_t **proc, ap_os_proc_t *theproc, 
+ap_status_t ap_put_os_proc(struct ap_proc_t **proc, ap_os_proc_t *theproc, 
                            ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*proc) == NULL) {
-        (*proc) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+        (*proc) = (struct ap_proc_t *)ap_palloc(cont, sizeof(struct ap_proc_t));
         (*proc)->cntxt = cont;
     }
     (*proc)->pi = *theproc;

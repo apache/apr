@@ -75,17 +75,17 @@
 
 ap_status_t dir_cleanup(void *thedir)
 {
-    struct dir_t *dir = thedir;
+    struct ap_dir_t *dir = thedir;
     if (!CloseHandle(dir->dirhand)) {
         return GetLastError();
     }
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
+ap_status_t ap_opendir(struct ap_dir_t **new, const char *dirname, ap_context_t *cont)
 {
     char * temp;
-    (*new) = ap_palloc(cont, sizeof(struct dir_t));
+    (*new) = ap_palloc(cont, sizeof(struct ap_dir_t));
     (*new)->cntxt = cont;
     (*new)->entry = NULL;
     temp = canonical_filename((*new)->cntxt, dirname);
@@ -101,7 +101,7 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *co
     return APR_SUCCESS;
 }
 
-ap_status_t ap_closedir(struct dir_t *thedir)
+ap_status_t ap_closedir(struct ap_dir_t *thedir)
 {
     if (!FindClose(thedir->dirhand)) {
         return GetLastError();   
@@ -110,7 +110,7 @@ ap_status_t ap_closedir(struct dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_readdir(struct dir_t *thedir)
+ap_status_t ap_readdir(struct ap_dir_t *thedir)
 {
     if (thedir->dirhand == INVALID_HANDLE_VALUE) {
         thedir->entry = ap_palloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
@@ -126,7 +126,7 @@ ap_status_t ap_readdir(struct dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_rewinddir(struct dir_t *thedir)
+ap_status_t ap_rewinddir(struct ap_dir_t *thedir)
 {
     ap_status_t stat;
     ap_context_t *cont = thedir->cntxt;
@@ -161,7 +161,7 @@ ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
+ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct ap_dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
         return APR_ENODIR;
@@ -171,7 +171,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dir_entry_mtime(time_t *time, struct dir_t *thedir)
+ap_status_t ap_dir_entry_mtime(time_t *time, struct ap_dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
         return APR_ENODIR;
@@ -180,7 +180,7 @@ ap_status_t ap_dir_entry_mtime(time_t *time, struct dir_t *thedir)
     return APR_SUCCESS;
 }
  
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
+ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct ap_dir_t *thedir)
 {
     switch(thedir->entry->dwFileAttributes) {
     case FILE_ATTRIBUTE_DIRECTORY: {
@@ -198,13 +198,13 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
     }
 }
 
-ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
+ap_status_t ap_get_dir_filename(char **new, struct ap_dir_t *thedir)
 {
     (*new) = ap_pstrdup(thedir->cntxt, thedir->entry->cFileName);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
+ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct ap_dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
@@ -213,13 +213,13 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_dir(struct dir_t **dir, ap_os_dir_t *thedir, ap_context_t *cont)
+ap_status_t ap_put_os_dir(struct ap_dir_t **dir, ap_os_dir_t *thedir, ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*dir) == NULL) {
-        (*dir) = (struct dir_t *)ap_palloc(cont, sizeof(struct dir_t));
+        (*dir) = (struct ap_dir_t *)ap_palloc(cont, sizeof(struct ap_dir_t));
         (*dir)->cntxt = cont;
     }
     (*dir)->dirhand = thedir;

@@ -60,7 +60,7 @@
 #include "fileio.h"
 #include <time.h>
 
-ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
+ap_status_t ap_send(struct ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ap_ssize_t rv;
     WSABUF wsaData;
@@ -81,7 +81,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len) 
+ap_status_t ap_recv(struct ap_socket_t *sock, char *buf, ap_ssize_t *len) 
 {
     ap_ssize_t rv;
     WSABUF wsaData;
@@ -102,7 +102,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_sendv(struct socket_t *sock, const struct iovec *vec,
+ap_status_t ap_sendv(struct ap_socket_t *sock, const struct iovec *vec,
                      ap_int32_t nvec, ap_int32_t *nbytes)
 {
     ap_ssize_t rv;

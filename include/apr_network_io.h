@@ -120,14 +120,14 @@ struct in_addr {
 #define ap_inet_addr    inet_network
 #endif
 
-typedef struct socket_t     ap_socket_t;
-typedef struct pollfd_t     ap_pollfd_t;
-typedef struct hdtr_t       ap_hdtr_t;
+typedef struct ap_socket_t     ap_socket_t;
+typedef struct ap_pollfd_t     ap_pollfd_t;
+typedef struct ap_hdtr_t       ap_hdtr_t;
 typedef struct in_addr      ap_in_addr;
 
 #if APR_HAS_SENDFILE
 /* A structure to encapsulate headers and trailers for ap_sendfile */
-struct hdtr_t {
+struct ap_hdtr_t {
     struct iovec* headers;
     int numheaders;
     struct iovec* trailers;

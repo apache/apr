@@ -67,7 +67,7 @@
 
 #endif /* HAVE_SENDFILE */
 
-static ap_status_t wait_for_io_or_timeout(struct socket_t *sock, int for_read)
+static ap_status_t wait_for_io_or_timeout(struct ap_socket_t *sock, int for_read)
 {
     struct timeval tv;
     fd_set fdset;
@@ -104,7 +104,7 @@ static ap_status_t wait_for_io_or_timeout(struct socket_t *sock, int for_read)
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
  *        The number of bytes actually sent is stored in argument 3.
  */
-ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
+ap_status_t ap_send(struct ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
     
@@ -142,7 +142,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
  *        The number of bytes actually sent is stored in argument 3.
  */
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
+ap_status_t ap_recv(struct ap_socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
     
@@ -182,7 +182,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
  *        The number of bytes actually sent is stored in argument 3.
  */
-ap_status_t ap_sendv(struct socket_t * sock, const struct iovec *vec,
+ap_status_t ap_sendv(struct ap_socket_t * sock, const struct iovec *vec,
                      ap_int32_t nvec, ap_int32_t *len)
 {
     ssize_t rv;

@@ -71,20 +71,20 @@ void setup_lock()
 
 static ap_status_t lock_cleanup(void *thelock)
 {
-    struct lock_t *lock = thelock;
+    struct ap_lock_t *lock = thelock;
     return ap_destroy_lock(lock);
 }
 
 
 
-ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, char *fname, ap_context_t *cont)
+ap_status_t ap_create_lock(struct ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, char *fname, ap_context_t *cont)
 {
-    struct lock_t *new;
+    struct ap_lock_t *new;
     ULONG rc;
     char *semname;
     PIB *ppib;
 
-    new = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
+    new = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
     new->cntxt = cont;
     new->type  = type;
     new->scope = scope;
@@ -114,7 +114,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont
     int rc;
     PIB *ppib;
 
-    *lock = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
+    *lock = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
 
     if (lock == NULL)
         return APR_ENOMEM;
@@ -132,7 +132,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont
 
 
 
-ap_status_t ap_lock(struct lock_t *lock)
+ap_status_t ap_lock(struct ap_lock_t *lock)
 {
     ULONG rc;
     
@@ -148,7 +148,7 @@ ap_status_t ap_lock(struct lock_t *lock)
 
 
 
-ap_status_t ap_unlock(struct lock_t *lock)
+ap_status_t ap_unlock(struct ap_lock_t *lock)
 {
     ULONG rc;
     
@@ -163,7 +163,7 @@ ap_status_t ap_unlock(struct lock_t *lock)
 
 
 
-ap_status_t ap_destroy_lock(struct lock_t *lock)
+ap_status_t ap_destroy_lock(struct ap_lock_t *lock)
 {
     ULONG rc;
     ap_status_t stat = APR_SUCCESS;

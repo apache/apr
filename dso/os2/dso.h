@@ -63,7 +63,7 @@
 #include "apr_pools.h"
 #include "apr_dso.h"
 
-struct dso_handle_t {
+struct ap_dso_handle_t {
     HMODULE       handle;     /* Handle to the DSO loaded            */
     ap_context_t  *cont;       /* Context for returning error strings */
 };

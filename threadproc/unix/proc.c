@@ -61,10 +61,10 @@
  * arg 1) The newly created procattr. 
  * arg 2) The context to use
  */
-ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
+ap_status_t ap_createprocattr_init(struct ap_procattr_t **new, ap_context_t *cont)
 {
-    (*new) = (struct procattr_t *)ap_palloc(cont, 
-              sizeof(struct procattr_t));
+    (*new) = (struct ap_procattr_t *)ap_palloc(cont, 
+              sizeof(struct ap_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -92,7 +92,7 @@ ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
  * arg 3) Should stdout be a pipe bnack to the parent?
  * arg 4) Should stderr be a pipe bnack to the parent?
  */
-ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in, 
+ap_status_t ap_setprocattr_io(struct ap_procattr_t *attr, ap_int32_t in, 
                                  ap_int32_t out, ap_int32_t err)
 {
     ap_status_t status;
@@ -159,7 +159,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
  * arg 2) ap_file_t value to use as child_in. Must be a valid file.
  * arg 3) ap_file_t value to use as parent_in. Must be a valid file.
  */
-ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
+ap_status_t ap_setprocattr_childin(struct ap_procattr_t *attr, ap_file_t *child_in,
                                    ap_file_t *parent_in)
 {
     if (attr->child_in == NULL && attr->parent_in == NULL)
@@ -188,7 +188,7 @@ ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
  * arg 2) ap_file_t value to use as child_out. Must be a valid file.
  * arg 3) ap_file_t value to use as parent_out. Must be a valid file.
  */
-ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_out,
+ap_status_t ap_setprocattr_childout(struct ap_procattr_t *attr, ap_file_t *child_out,
                                     ap_file_t *parent_out)
 {
     if (attr->child_out == NULL && attr->parent_out == NULL)
@@ -217,7 +217,7 @@ ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_ou
  * arg 2) ap_file_t value to use as child_err. Must be a valid file.
  * arg 3) ap_file_t value to use as parent_err. Must be a valid file.
  */
-ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_err,
+ap_status_t ap_setprocattr_childerr(struct ap_procattr_t *attr, ap_file_t *child_err,
                                    ap_file_t *parent_err)
 {
     if (attr->child_err == NULL && attr->parent_err == NULL)
@@ -241,7 +241,7 @@ ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_er
  *        the parent currently resides in, when the createprocess call
  *        is made. 
  */
-ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
+ap_status_t ap_setprocattr_dir(struct ap_procattr_t *attr, 
                                const char *dir) 
 {
     attr->currdir = ap_pstrdup(attr->cntxt, dir);
@@ -259,7 +259,7 @@ ap_status_t ap_setprocattr_dir(struct procattr_t *attr,
  *            APR_SHELLCMD --  Shell script
  *            APR_PROGRAM  --  Executable program   (default) 
  */
-ap_status_t ap_setprocattr_cmdtype(struct procattr_t *attr,
+ap_status_t ap_setprocattr_cmdtype(struct ap_procattr_t *attr,
                                      ap_cmdtype_e cmd) 
 {
     attr->cmdtype = cmd;
@@ -272,7 +272,7 @@ ap_status_t ap_setprocattr_cmdtype(struct procattr_t *attr,
  * arg 1) The procattr we care about. 
  * arg 2) Should the child start in detached state?  Default is no. 
  */
-ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t detach) 
+ap_status_t ap_setprocattr_detach(struct ap_procattr_t *attr, ap_int32_t detach) 
 {
     attr->detached = detach;
     return APR_SUCCESS;
@@ -285,11 +285,11 @@ ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t detach)
  * arg 1) The resulting process handle. 
  * arg 2) The context to use. 
  */
-ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
+ap_status_t ap_fork(struct ap_proc_t **proc, ap_context_t *cont)
 {
     int pid;
     
-    (*proc) = ap_palloc(cont, sizeof(struct proc_t));
+    (*proc) = ap_palloc(cont, sizeof(struct ap_proc_t));
 
     if ((pid = fork()) < 0) {
         return errno;
@@ -319,16 +319,16 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
  *        process
  * arg 6) The context to use. 
  */
-ap_status_t ap_create_process(struct proc_t **new, const char *progname, 
+ap_status_t ap_create_process(struct ap_proc_t **new, const char *progname, 
                               char *const args[], char **env,
-                              struct procattr_t *attr, ap_context_t *cont)
+                              struct ap_procattr_t *attr, ap_context_t *cont)
 {
     int i;
     typedef const char *my_stupid_string;
     my_stupid_string *newargs;
-    struct proc_t *pgrp; 
+    struct ap_proc_t *pgrp; 
 
-    (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+    (*new) = (struct ap_proc_t *)ap_palloc(cont, sizeof(struct ap_proc_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -417,7 +417,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
  * arg 1) The returned file handle. 
  * arg 2) The process handle that corresponds to the desired child process 
  */
-ap_status_t ap_get_childin(ap_file_t **new, struct proc_t *proc)
+ap_status_t ap_get_childin(ap_file_t **new, struct ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_in;
     return APR_SUCCESS; 
@@ -429,7 +429,7 @@ ap_status_t ap_get_childin(ap_file_t **new, struct proc_t *proc)
  * arg 1) The returned file handle. 
  * arg 2) The process handle that corresponds to the desired child process 
  */
-ap_status_t ap_get_childout(ap_file_t **new, struct proc_t *proc)
+ap_status_t ap_get_childout(ap_file_t **new, struct ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_out; 
     return APR_SUCCESS;
@@ -441,7 +441,7 @@ ap_status_t ap_get_childout(ap_file_t **new, struct proc_t *proc)
  * arg 1) The returned file handle. 
  * arg 2) The process handle that corresponds to the desired child process 
  */
-ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
+ap_status_t ap_get_childerr(ap_file_t **new, struct ap_proc_t *proc)
 {
     (*new) = proc->attr->parent_err; 
     return APR_SUCCESS;
@@ -460,7 +460,7 @@ ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
  *            APR_CHILD_DONE     -- child is no longer running.
  *            APR_CHILD_NOTDONE  -- child is still running.
  */
-ap_status_t ap_wait_proc(struct proc_t *proc, 
+ap_status_t ap_wait_proc(struct ap_proc_t *proc, 
                            ap_wait_how_e waithow)
 {
     pid_t status;
@@ -507,14 +507,14 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
  * arg 2) The os specific proc to convert
  * arg 3) The context to use if it is needed.
  */
-ap_status_t ap_put_os_proc(struct proc_t **proc, ap_os_proc_t *theproc, 
+ap_status_t ap_put_os_proc(struct ap_proc_t **proc, ap_os_proc_t *theproc, 
                            ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*proc) == NULL) {
-        (*proc) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+        (*proc) = (struct ap_proc_t *)ap_palloc(cont, sizeof(struct ap_proc_t));
         (*proc)->cntxt = cont;
     }
     (*proc)->pid = *theproc;

@@ -65,7 +65,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 
-typedef struct mmap_t            ap_mmap_t;
+typedef struct ap_mmap_t            ap_mmap_t;
 
 /*   Function definitions */
 

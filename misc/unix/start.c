@@ -64,9 +64,9 @@
  *        of it's parent context's attributes, except the ap_context_t will be a
  *        sub-pool.
  */
-ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont)
+ap_status_t ap_create_context(struct ap_context_t **newcont, struct ap_context_t *cont)
 {
-    struct context_t *new;
+    struct ap_context_t *new;
     ap_pool_t *pool;
 
     if (cont) {
@@ -80,7 +80,7 @@ ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont
         return APR_ENOPOOL;
     }   
 
-    new = (struct context_t *)ap_palloc(cont, sizeof(struct context_t));
+    new = (struct ap_context_t *)ap_palloc(cont, sizeof(struct ap_context_t));
 
     new->pool = pool;
     new->prog_data = NULL;
@@ -95,7 +95,7 @@ ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont
  *    Free the context and all of it's child contexts'.
  * arg 1) The context to free.
  */
-ap_status_t ap_destroy_context(struct context_t *cont)
+ap_status_t ap_destroy_context(struct ap_context_t *cont)
 {
     ap_destroy_pool(cont);
     return APR_SUCCESS;
@@ -121,7 +121,7 @@ ap_status_t ap_destroy_context(struct context_t *cont)
  */
 ap_status_t ap_set_userdata(void *data, char *key,
                             ap_status_t (*cleanup) (void *),
-                            struct context_t *cont)
+                            struct ap_context_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
     if (cont) { 
@@ -158,7 +158,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
  * arg 2) The user data associated with the context.
  * arg 3) The current context.
  */
-ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
+ap_status_t ap_get_userdata(void **data, char *key, struct ap_context_t *cont)
 {
     datastruct *dptr = NULL;
     if (cont) { 
@@ -215,7 +215,7 @@ void ap_terminate(void)
  *        then APR will return an error and expect the calling program to
  *        deal with the error accordingly.
  */
-ap_status_t ap_set_abort(int (*apr_abort)(int retcode), struct context_t *cont)
+ap_status_t ap_set_abort(int (*apr_abort)(int retcode), struct ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

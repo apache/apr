@@ -58,10 +58,10 @@ static struct beos_key key_table[BEOS_MAX_DATAKEYS];
 static struct beos_private_data *beos_data[BEOS_MAX_DATAKEYS];
 static sem_id lock;
 
-ap_status_t ap_create_thread_private(struct threadkey_t **key,
+ap_status_t ap_create_thread_private(struct ap_threadkey_t **key,
                                 void (*dest)(void *), ap_context_t *cont)
 {
-    (*key) = (struct threadkey_t *)ap_palloc(cont, sizeof(struct threadkey_t));
+    (*key) = (struct ap_threadkey_t *)ap_palloc(cont, sizeof(struct ap_threadkey_t));
     if ((*key) == NULL) {
         return APR_ENOMEM;
     }
@@ -82,7 +82,7 @@ ap_status_t ap_create_thread_private(struct threadkey_t **key,
     return APR_ENOMEM;
 }
 
-ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
+ap_status_t ap_get_thread_private(void **new, struct ap_threadkey_t *key)
 {
 	thread_id tid;
 	int i, index=0;
@@ -114,7 +114,7 @@ ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
 	return APR_SUCCESS;
 }
 
-ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
+ap_status_t ap_set_thread_private(void *priv, struct ap_threadkey_t *key)
 {
 	thread_id tid;
 	int i,index = 0, ret;
@@ -169,7 +169,7 @@ ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
 	return APR_ENOMEM;
 }
 
-ap_status_t ap_delete_thread_private(struct threadkey_t *key)
+ap_status_t ap_delete_thread_private(struct ap_threadkey_t *key)
 {
 	if (key->key < BEOS_MAX_DATAKEYS){
 		acquire_sem(key_table[key->key].lock);

@@ -57,7 +57,7 @@
 #include "apr_general.h"
 #include "fileio.h"
 
-ap_status_t ap_cancel_thread(struct thread_t *thd)
+ap_status_t ap_cancel_thread(struct ap_thread_t *thd)
 {
     return os2errno(DosKillThread(thd->tid));
 }

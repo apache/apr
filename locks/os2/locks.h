@@ -60,7 +60,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-struct lock_t {
+struct ap_lock_t {
     ap_context_t *cntxt;
     ap_locktype_e type;
     ap_lockscope_e scope;

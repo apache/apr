@@ -84,7 +84,7 @@
 #endif
 /* End System Headers */
 
-struct mmap_t {
+struct ap_mmap_t {
     ap_context_t *cntxt;
     void *mm;
     size_t size;

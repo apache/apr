@@ -77,19 +77,19 @@
 
 #define BEOS_MAX_DATAKEYS	128
 
-struct thread_t {
+struct ap_thread_t {
     ap_context_t *cntxt;
     thread_id td;
 };
 
-struct threadattr_t {
+struct ap_threadattr_t {
     ap_context_t *cntxt;
     int32 attr;
     int detached;
     int joinable;
 };
 
-struct threadkey_t {
+struct ap_threadkey_t {
     ap_context_t *cntxt;
 	int32  key;
 };
@@ -108,7 +108,7 @@ struct beos_key {
 	void (* destructor) ();
 };
 
-struct procattr_t {
+struct ap_procattr_t {
     ap_context_t *cntxt;
     ap_file_t *parent_in;
     ap_file_t *child_in;
@@ -121,11 +121,11 @@ struct procattr_t {
     ap_int32_t detached;
 };
 
-struct proc_t {
+struct ap_proc_t {
     ap_context_t *cntxt;
     pid_t pid;
     thread_id tid;
-    struct procattr_t *attr;
+    struct ap_procattr_t *attr;
 };
 
 /* we need a structure to pass off to the thread that will run any

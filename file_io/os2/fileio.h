@@ -82,7 +82,7 @@ struct ap_file_t {
     unsigned long filePtr;    // position in file of handle
 };
 
-struct dir_t {
+struct ap_dir_t {
     ap_context_t *cntxt;
     char *dirname;
     ULONG handle;

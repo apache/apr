@@ -82,7 +82,7 @@
 #define DLSYM_NEEDS_UNDERSCORE
 #endif
 
-struct dso_handle_t {
+struct ap_dso_handle_t {
     ap_context_t  *cont;
     void          *handle;
 };

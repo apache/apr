@@ -59,10 +59,10 @@
 #include "apr_lib.h"
 #include "fileio.h"
 
-ap_status_t ap_create_thread_private(struct threadkey_t **key,
+ap_status_t ap_create_thread_private(struct ap_threadkey_t **key,
                                      void (*dest)(void *), ap_context_t *cont)
 {
-    (*key) = (struct threadkey_t *)ap_palloc(cont, sizeof(struct threadkey_t));
+    (*key) = (struct ap_threadkey_t *)ap_palloc(cont, sizeof(struct ap_threadkey_t));
 
     if ((*key) == NULL) {
         return APR_ENOMEM;
@@ -72,19 +72,19 @@ ap_status_t ap_create_thread_private(struct threadkey_t **key,
     return os2errno(DosAllocThreadLocalMemory(1, &((*key)->key)));
 }
 
-ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
+ap_status_t ap_get_thread_private(void **new, struct ap_threadkey_t *key)
 {
     (*new) = (void *)*(key->key);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
+ap_status_t ap_set_thread_private(void *priv, struct ap_threadkey_t *key)
 {
     *(key->key) = (ULONG)priv;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_delete_thread_private(struct threadkey_t *key)
+ap_status_t ap_delete_thread_private(struct ap_threadkey_t *key)
 {
     return os2errno(DosFreeThreadLocalMemory(key->key));
 }

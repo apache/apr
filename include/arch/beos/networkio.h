@@ -85,7 +85,7 @@
 #define POLLHUP  16
 #define POLLNVAL 32
 
-struct socket_t {
+struct ap_socket_t {
     ap_context_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
@@ -95,9 +95,9 @@ struct socket_t {
     int connected;
 };
 
-struct pollfd_t {
+struct ap_pollfd_t {
     ap_context_t *cntxt;
-    struct socket_t *sock;
+    struct ap_socket_t *sock;
     fd_set *read;
     fd_set *write;
     fd_set *except;
