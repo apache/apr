@@ -651,6 +651,8 @@ APR_CHECK_DEFINE(INT64_C, stdint.h)
 if test "$ac_cv_define_INT64_C" = "yes"; then
     int64_literal='#define APR_INT64_C(val) INT64_C(val)'
     stdint=1
+else
+    stdint=0
 fi
 
 if test "$ac_cv_type_off_t" = "yes"; then
