@@ -74,6 +74,9 @@
 #elif defined(__hpux__)
 # define MOD_NAME ".libs/mod_test.sl"
 # define LIB_NAME ".libs/libmod_test.sl"
+#elif defined(_AIX)
+# define MOD_NAME ".libs/libmod_test.so"
+# define LIB_NAME ".libs/libmod_test.so"
 #else /* Every other Unix */
 # define MOD_NAME ".libs/mod_test.so"
 # define LIB_NAME ".libs/libmod_test.so"
