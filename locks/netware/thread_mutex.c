@@ -73,6 +73,11 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 {
     apr_thread_mutex_t *new_mutex = NULL;
 
+    /* XXX: Implement _UNNESTED flavor and favor _DEFAULT for performance
+     */
+    if (flags & APR_THREAD_MUTEX_UNNESTED) {
+        return APR_ENOTIMPL;
+    }
     new_mutex = (apr_thread_mutex_t *)apr_pcalloc(pool, sizeof(apr_thread_mutex_t));
 	
 	if(new_mutex ==NULL) {
@@ -80,7 +85,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     }     
     new_mutex->pool = pool;
 
-    /* FIXME: only use recursive locks if (flags & APR_THREAD_MUTEX_NESTED) */
     new_mutex->mutex = NXMutexAlloc(NX_MUTEX_RECURSIVE, NULL, NULL);
     
     if(new_mutex->mutex == NULL)
