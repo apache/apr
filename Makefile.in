@@ -39,6 +39,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 srcdir=@srcdir@
+top_srcdir=@top_srcdir@
 
 delete-lib:
 	@if test -f $(TARGET_LIB); then \
@@ -52,11 +53,11 @@ delete-lib:
 
 install: $(TARGET_LIB)
 	if [ ! -d $(includedir) ]; then \
-	    $(srcdir)/build/mkdir.sh $(includedir); \
+	    $(top_srcdir)/build/mkdir.sh $(includedir); \
 	fi; \
-	cp include/*.h $(includedir); \
+	cp $(top_srcdir)/include/*.h $(includedir); \
 	if [ ! -d $(libdir) ]; then \
-	    $(srcdir)/build/mkdir.sh $(libdir); \
+	    $(top_srcdir)/build/mkdir.sh $(libdir); \
 	fi; \
 	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
 	$(LIBTOOL) --mode=install cp APRVARS $(libdir)
@@ -81,10 +82,10 @@ delete-exports:
 	fi
 
 $(TARGET_EXPORTS):
-	$(MKEXPORT) include/*.h > $@
+	$(MKEXPORT) $(top_srcdir)/include/*.h > $@
 
 dox:
-	doxygen docs/doxygen.conf
+	doxygen $(top_srcdir)/docs/doxygen.conf
 
 test: $(TARGET_LIB)
 	(cd test; make clean; make; \
