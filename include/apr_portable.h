@@ -396,6 +396,7 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
 
 #endif /* APR_HAS_THREADS */
 
+#if APR_HAS_DSO
 /**
  * convert the dso handle from os specific to apr
  * @param dso The apr handle we are converting to
@@ -415,6 +416,8 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
  */
 APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
                                                 apr_dso_handle_t *aprdso);
+
+#endif /* APR_HAS_DSO */
 
 #ifdef __cplusplus
 }
