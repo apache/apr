@@ -68,6 +68,7 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 #include "apr_lock.h"
+#include "apr_hash.h"
 
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
@@ -530,6 +531,33 @@ static void dump_stats(void)
 }
 #endif
 
+/* ### why do we have this, in addition to apr_make_sub_pool? */
+apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
+{
+    apr_pool_t *newpool;
+
+    if (cont) {
+        newpool = apr_make_sub_pool(cont, cont->apr_abort);
+    }
+    else {
+        newpool = apr_make_sub_pool(NULL, NULL);
+    }
+        
+    if (newpool == NULL) {
+        return APR_ENOPOOL;
+    }   
+
+    newpool->prog_data = NULL;
+    if (cont) {
+        newpool->apr_abort = cont->apr_abort;
+    }
+    else {
+        newpool->apr_abort = NULL;
+    }
+    *newcont = newpool;
+    return APR_SUCCESS;
+}
+
 /*****************************************************************
  *
  * Managing generic cleanups.  
@@ -960,6 +988,46 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *a, apr_size_t size)
     memset(res, '\0', size);
     return res;
 }
+
+/*****************************************************************
+ *
+ * User data management functions
+ */
+
+apr_status_t apr_set_userdata(const void *data, const char *key,
+			      apr_status_t (*cleanup) (void *),
+			      apr_pool_t *cont)
+{
+    int keylen = strlen(key);
+
+    if (cont->prog_data == NULL)
+        cont->prog_data = apr_make_hash(cont);
+
+    if (apr_hash_get(cont->prog_data, key, keylen) == NULL){
+        char *new_key = apr_pstrdup(cont, key);
+        apr_hash_set(cont->prog_data, new_key, keylen, data);
+    } 
+    else {
+        apr_hash_set(cont->prog_data, key, keylen, data);
+    }
+
+    apr_register_cleanup(cont, data, cleanup, cleanup);
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
+{
+    if (cont->prog_data == NULL)
+        *data = NULL;
+    else
+        *data = apr_hash_get(cont->prog_data, key, strlen(key));
+    return APR_SUCCESS;
+}
+
+/*****************************************************************
+ *
+ * "Print" functions
+ */
 
 /*
  * apr_psprintf is implemented by writing directly into the current
