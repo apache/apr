@@ -133,7 +133,7 @@ apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname,
 
 
 
-apr_status_t apr_lock_aquire(apr_lock_t *lock)
+apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     ULONG rc;
     
