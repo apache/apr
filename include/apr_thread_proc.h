@@ -88,58 +88,65 @@ typedef struct threadkey_t        ap_key_t;
 typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
 
 /* Thread Function definitions */
-ap_status_t ap_create_threadattr(ap_threadattr_t **, ap_context_t *);
-ap_status_t ap_setthreadattr_detach(ap_threadattr_t *, ap_int32_t);
-ap_status_t ap_getthreadattr_detach(ap_threadattr_t *);
-ap_status_t ap_create_thread(ap_thread_t **, ap_threadattr_t *, 
-                             ap_thread_start_t, void *, ap_context_t *);
-ap_status_t ap_thread_exit(ap_thread_t *, ap_status_t *);
-ap_status_t ap_thread_join(ap_status_t *, ap_thread_t *thd); 
-ap_status_t ap_thread_detach(ap_thread_t *);
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont);
+ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on);
+ap_status_t ap_getthreadattr_detach(ap_threadattr_t *iattr);
+ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
+                             ap_thread_start_t func, void *data, 
+                             ap_context_t *cont);
+ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval);
+ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd); 
+ap_status_t ap_thread_detach(ap_thread_t *thd);
 
-ap_status_t ap_cancel_thread(ap_thread_t *);
-ap_status_t ap_setcanceltype(ap_int32_t, ap_context_t *);
-ap_status_t ap_setcancelstate(ap_int32_t, ap_context_t *);
-ap_status_t ap_get_threaddata(void **, char *, ap_thread_t *);
-ap_status_t ap_set_threaddata(void *, char *,
-                              ap_status_t (*cleanup) (void *), ap_thread_t *);
+ap_status_t ap_cancel_thread(ap_thread_t *thd);
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont);
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont);
+ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread);
+ap_status_t ap_set_threaddata(void *data, char *key,
+                              ap_status_t (*cleanup) (void *), 
+                              ap_thread_t *thread);
 
-ap_status_t ap_create_thread_private(ap_key_t **, void (*dest)(void *), 
-                                     ap_context_t *);
-ap_status_t ap_get_thread_private(void **, ap_key_t *);
-ap_status_t ap_set_thread_private(void *, ap_key_t *);
-ap_status_t ap_delete_thread_private(ap_key_t *);
-ap_status_t ap_get_threadkeydata(void **, char *, ap_key_t *);
-ap_status_t ap_set_threadkeydata(void *, char *,
-                                 ap_status_t (*cleanup) (void *), ap_key_t *);
+ap_status_t ap_create_thread_private(ap_key_t **key, void (*dest)(void *), 
+                                     ap_context_t *cont);
+ap_status_t ap_get_thread_private(void **new, ap_key_t *key);
+ap_status_t ap_set_thread_private(void *priv, ap_key_t *key);
+ap_status_t ap_delete_thread_private(ap_key_t *key);
+ap_status_t ap_get_threadkeydata(void **data, char *key, ap_key_t *threadkey);
+ap_status_t ap_set_threadkeydata(void *data, char *key,
+                                 ap_status_t (*cleanup) (void *), 
+                                 ap_key_t *threadkey);
 
 /* Process Function definitions */
-ap_status_t ap_createprocattr_init(ap_procattr_t **, ap_context_t *);
-ap_status_t ap_setprocattr_io(ap_procattr_t *, ap_int32_t, ap_int32_t, 
-                              ap_int32_t);
-ap_status_t ap_setprocattr_childin(struct procattr_t *, ap_file_t *,
-                                   ap_file_t *);
-ap_status_t ap_setprocattr_childout(struct procattr_t *, ap_file_t *,
-                                    ap_file_t *);
-ap_status_t ap_setprocattr_childerr(struct procattr_t *, ap_file_t *,
-                                    ap_file_t *);
-ap_status_t ap_setprocattr_dir(ap_procattr_t *, const char *);
-ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *, ap_cmdtype_e);
-ap_status_t ap_setprocattr_detach(ap_procattr_t *, ap_int32_t);
-ap_status_t ap_get_procdata(char *, void *, ap_proc_t *);
-ap_status_t ap_set_procdata(void *, char *,
-                            ap_status_t (*cleanup) (void *), ap_proc_t *);
+ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont);
+ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
+                              ap_int32_t out, ap_int32_t err);
+ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
+                                   ap_file_t *parent_in);
+ap_status_t ap_setprocattr_childout(struct procattr_t *attr, 
+                                    ap_file_t *child_out, 
+                                    ap_file_t *parent_out);
+ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, 
+                                    ap_file_t *child_err,
+                                    ap_file_t *parent_err);
+ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, const char *dir);
+ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr, ap_cmdtype_e cmd);
+ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach);
+ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc);
+ap_status_t ap_set_procdata(void *data, char *key,
+                            ap_status_t (*cleanup) (void *), ap_proc_t *proc);
 
-ap_status_t ap_get_childin(ap_file_t **, ap_proc_t *);
-ap_status_t ap_get_childout(ap_file_t **, ap_proc_t *);
-ap_status_t ap_get_childerr(ap_file_t **, ap_proc_t *);
+ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc);
+ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc);
+ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc);
 
-ap_status_t ap_fork(ap_proc_t **, ap_context_t *);
-ap_status_t ap_create_process(ap_proc_t **, const char *, char *const [], 
-                              char **, ap_procattr_t *, ap_context_t *);
-ap_status_t ap_wait_proc(ap_proc_t *, ap_wait_how_e);
+ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont);
+ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
+                              char *const args[], char **env, 
+                              ap_procattr_t *attr, ap_context_t *cont);
+ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e waithow);
+ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont);
 
-ap_status_t ap_kill(ap_proc_t *, ap_int32_t);
+ap_status_t ap_kill(ap_proc_t *proc, int sig);
 #ifdef __cplusplus
 }
 #endif

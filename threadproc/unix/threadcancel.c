@@ -60,7 +60,7 @@
 
 #if 0 /* some platforms, e.g. FreeBSD 2.2.8, do not have pthread_cancel (they do have an undocumented pthread_kill, though) */
 /* ***APRDOC********************************************************
- * ap_status_t ap_cancel_thread(ap_thread_t *)
+ * ap_status_t ap_cancel_thread(ap_thread_t *thd)
  *    Asynchronously kill a thread
  * arg 1) The thread to kill.
  */
@@ -77,12 +77,12 @@ ap_status_t ap_cancel_thread(struct thread_t *thd)
 #endif
     
 /* ***APRDOC********************************************************
- * ap_status_t ap_setcanceltype(ap_int32_t, ap_context_t *)
+ * ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
  *    Determine how threads are cancelable.
- * arg 1) The context to operate on 
- * arg 2) how are threads cancelable.  One of:
+ * arg 1) how are threads cancelable.  One of:
  *            APR_CANCEL_ASYNCH  -- cancel it no matter where it is
  *            APR_CANCEL_DEFER   -- only cancel the thread if it is safe. 
+ * arg 2) The context to operate on 
  */
 ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 {
@@ -96,10 +96,10 @@ ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setcancelstate(ap_int32_t, ap_context_t *)
+ * ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
  *    Determine if threads will be cancelable.
- * arg 1) The context to operate on 
- * arg 2) Are threads cancelable. 
+ * arg 1) Are threads cancelable. 
+ * arg 2) The context to operate on 
  */
 ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
 {

@@ -60,10 +60,10 @@
 
 #ifdef HAVE_PTHREAD_H
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_threadattr(ap_threadattr_t **, ap_context_t *)
+ * ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
  *    Create and initialize a new threadattr variable
- * arg 1) The context to use
- * arg 2) The newly created threadattr.
+ * arg 1) The newly created threadattr.
+ * arg 2) The context to use
  */
 ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
 {
@@ -88,7 +88,7 @@ ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setthreadattr_detach(ap_threadattr_t *, ap_int32_t)
+ * ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
  *    Set if newly created threads should be created in detach mode.
  * arg 1) The threadattr to affect 
  * arg 2) Thread detach state on or off
@@ -105,10 +105,9 @@ ap_status_t ap_setthreadattr_detach(struct threadattr_t *attr, ap_int32_t on)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_getthreadattr_detach(ap_threadattr_t *, ap_int32_t *)
+ * ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
  *    Get the detach mode for this threadattr.
  * arg 1) The threadattr to reference 
- * arg 2) Thread detach state on or off
  */
 ap_status_t ap_getthreadattr_detach(struct threadattr_t *attr)
 {
@@ -121,14 +120,15 @@ ap_status_t ap_getthreadattr_detach(struct threadattr_t *attr)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_thread(ap_context_t *, ap_threadattr_t *, 
- *                              ap_thread_start_t, coid *, ap_thread_t **)
+ * ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
+ *                              ap_thread_start_t func, void *data, 
+ *                              ap_context_t *cont)
  *    Create a new thread of execution 
- * arg 1) The context to use
+ * arg 1) The newly created thread handle.
  * arg 2) The threadattr to use to determine how to create the thread
  * arg 3) The function to start the new thread in
  * arg 4) Any data to be passed to the starting function
- * arg 5) The newly created thread handle.
+ * arg 5) The context to use
  */
 ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
@@ -170,7 +170,7 @@ ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_thread_exit(ap_thread_t *, ap_status_t *)
+ * ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
  *    stop the current thread 
  * arg 1) The thread to stop
  * arg 2) The return value to pass back to any thread that cares
@@ -183,10 +183,10 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_thread_join(ap_status_t *, ap_thread_t *)
+ * ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
  *    block until the desired thread stops executing. 
- * arg 1) The thread to join
- * arg 2) The return value from the dead thread.
+ * arg 1) The return value from the dead thread.
+ * arg 2) The thread to join
  */
 ap_status_t ap_thread_join(ap_status_t *retval, struct thread_t *thd)
 {
@@ -201,7 +201,7 @@ ap_status_t ap_thread_join(ap_status_t *retval, struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_thread_detach(ap_thread_t *)
+ * ap_status_t ap_thread_detach(ap_thread_t *thd)
  *    detach a thread
  * arg 1) The thread to detach 
  */
@@ -218,10 +218,11 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(void **, char *, ap_thread_t *)
+ * ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread)
  *    Return the context associated with the current thread.
- * arg 1) The currently open thread.
- * arg 2) The user data associated with the thread.
+ * arg 1) The user data associated with the thread.
+ * arg 2) The key to associate with the data
+ * arg 3) The currently open thread.
  */
 ap_status_t ap_get_threaddata(void **data, char *key, struct thread_t *thread)
 {
@@ -235,11 +236,14 @@ ap_status_t ap_get_threaddata(void **data, char *key, struct thread_t *thread)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_threaddata(ap_thread_t *, void *, char *key,
-                                 ap_status_t (*cleanup) (void *))
+ * ap_status_t ap_set_threaddata(void *data, char *key,
+                                 ap_status_t (*cleanup) (void *),
+                                 ap_thread_t *thread)
  *    Return the context associated with the current thread.
- * arg 1) The currently open thread.
- * arg 2) The user data to associate with the thread.
+ * arg 1) The user data to associate with the thread.
+ * arg 2) The key to use for associating the data with the tread
+ * arg 3) The cleanup routine to use when the thread is destroyed.
+ * arg 4) The currently open thread.
  */
 ap_status_t ap_set_threaddata(void *data, char *key,
                               ap_status_t (*cleanup) (void *),
@@ -255,7 +259,7 @@ ap_status_t ap_set_threaddata(void *data, char *key,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_thread(ap_thread_t *, ap_os_thread_t *)
+ * ap_status_t ap_get_os_thread(ap_thread_t *thethd, ap_os_thread_t *thd)
  *    convert the thread to os specific type from apr type.
  * arg 1) The apr thread to convert
  * arg 2) The os specific thread we are converting to
@@ -270,11 +274,12 @@ ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_thread(ap_context_t *, ap_thread_t *, ap_os_thread_t *)
+ * ap_status_t ap_put_os_thread(ap_thread_t *thd, ap_os_thread_t *thethd,
+ *                              ap_context_t *cont)
  *    convert the thread from os specific type to apr type.
- * arg 1) The context to use if it is needed.
- * arg 2) The apr thread we are converting to.
- * arg 3) The os specific thread to convert
+ * arg 1) The apr thread we are converting to.
+ * arg 2) The os specific thread to convert
+ * arg 3) The context to use if it is needed.
  */
 ap_status_t ap_put_os_thread(struct thread_t **thd, ap_os_thread_t *thethd, 
                              ap_context_t *cont)
