@@ -58,9 +58,6 @@
 #if APR_HAVE_SYS_SYSLIMITS_H
 #include <sys/syslimits.h>
 #endif
-#if APR_HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #if APR_HAVE_LIMITS_H
 #include <limits.h>
 #endif

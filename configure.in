@@ -933,7 +933,6 @@ APR_FLAG_HEADERS(
     sys/sendfile.h	\
     sys/signal.h	\
     sys/socket.h	\
-    sys/stat.h		\
     sys/syslimits.h	\
     sys/time.h		\
     sys/types.h		\
