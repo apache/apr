@@ -7,10 +7,10 @@ AC_INIT(apr_common.m4)
 AC_CONFIG_HEADER(include/apr_private.h)
 AC_CONFIG_AUX_DIR(helpers)
 
+AC_CANONICAL_SYSTEM
 echo "Configuring APR library"
-OS=`$ac_config_guess`
-OS=`$ac_config_sub $OS`
-echo "Platform: ${OS}"
+OS=$host
+echo "Platform: $OS"
 
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
@@ -45,7 +45,7 @@ AC_PROG_CC
 AC_PROG_RANLIB_NC
 AC_PROG_MAKE_SET
 AC_CHECK_PROG(RM, rm, rm)
-AC_CHECK_PROG(AR, ar, ar)
+AC_CHECK_TOOL(AR, ar, ar)
 
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
