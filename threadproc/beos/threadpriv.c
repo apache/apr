@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new, apr_threadkey_t 
 APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
 {
 	thread_id tid;
-	int i,index = 0, ret;
+	int i,index = 0, ret = 0;
 
 	tid = find_thread(NULL);	
 	for (i=0; i < BEOS_MAX_DATAKEYS; i++){
