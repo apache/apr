@@ -136,7 +136,6 @@ static void test_info_get(CuTest *tc)
 
 static void test_stat(CuTest *tc)
 {
-    apr_file_t *thefile;
     apr_finfo_t finfo;
     apr_status_t rv;
 
@@ -153,7 +152,6 @@ static void test_stat(CuTest *tc)
         CuFail(tc, str);
     }
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    apr_file_close(thefile);
 }
 
 static void test_stat_eq_finfo(CuTest *tc)
