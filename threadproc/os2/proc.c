@@ -56,6 +56,7 @@
 #include "threadproc.h"
 #include "fileio.h"
 
+#include "apr_config.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
@@ -314,7 +315,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         newargs[numargs++] = "/c";
 
     newargs[numargs++] = newprogname = ap_pstrdup(cont, progname);
-    arg = 0;
+    arg = 1;
 
     while (args && args[arg]) {
         newargs[numargs++] = args[arg++];
