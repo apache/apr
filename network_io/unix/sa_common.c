@@ -204,24 +204,69 @@ apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_so
         return APR_EINVAL;
     }
     return APR_SUCCESS;
-    
 }
 
 apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname, 
                              apr_int32_t family, apr_port_t port,
                              apr_int32_t flags, apr_pool_t *p)
 {
-    struct hostent *hp;
-
     (*sa) = (apr_sockaddr_t *)apr_pcalloc(p, sizeof(apr_sockaddr_t));
     if ((*sa) == NULL)
         return APR_ENOMEM;
     (*sa)->pool = p;
-    (*sa)->sa.sin.sin_family = APR_INET; /* we don't yet support IPv6 */
-    (*sa)->sa.sin.sin_port = htons(port);
-    set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
+    (*sa)->hostname = apr_pstrdup(p, hostname);
 
+#if defined(HAVE_GETADDRINFO) && APR_HAVE_IPV6
     if (hostname != NULL) {
+        struct addrinfo hints, *ai;
+        int error;
+        char num[8];
+
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_flags = AI_CANONNAME;
+        hints.ai_family = family;
+        hints.ai_socktype = SOCK_STREAM;
+        hints.ai_protocol = 0;
+        apr_snprintf(num, sizeof(num), "%d", port);
+        error = getaddrinfo(hostname, num, &hints, &ai);
+        if (error) {
+            if (error == EAI_SYSTEM) {
+                return errno;
+            }
+            else {
+                /* XXX fixme!
+                 * no current way to represent this with APR's error
+                 * scheme... note that glibc uses negative values for these
+                 * numbers, perhaps so they don't conflict with h_errno
+                 * values...  Tru64 uses positive values which conflict
+                 * with h_errno values
+                 */
+                return error + APR_OS_START_SYSERR;
+            }
+        }
+        (*sa)->sa.sin.sin_family = ai->ai_family;
+        memcpy(&(*sa)->sa, ai->ai_addr, ai->ai_addrlen);
+    }
+    else {
+        if (family == APR_UNSPEC) {
+            (*sa)->sa.sin.sin_family = APR_INET;
+        }
+        else {
+            (*sa)->sa.sin.sin_family = family;
+        }
+    }
+    set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
+#else
+    if (family == APR_UNSPEC) {
+        (*sa)->sa.sin.sin_family = APR_INET; /* we don't yet support IPv6 here */
+    }
+    else {
+        (*sa)->sa.sin.sin_family = family;
+    }
+    set_sockaddr_vars(*sa, (*sa)->sa.sin.sin_family);
+    if (hostname != NULL) {
+        struct hostent *hp;
+
 #ifndef GETHOSTBYNAME_HANDLES_NAS
         if (*hostname >= '0' && *hostname <= '9' &&
             strspn(hostname, "0123456789.") == strlen(hostname)) {
@@ -233,7 +278,11 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
         hp = gethostbyname(hostname);
 
         if (!hp)  {
+#ifdef WIN32
+            apr_get_netos_error();
+#else
             return (h_errno + APR_OS_START_SYSERR);
+#endif
         }
 
         memcpy((char *)&(*sa)->sa.sin.sin_addr, hp->h_addr_list[0],
@@ -245,6 +294,8 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
         }
 #endif
     }
-   (*sa)->hostname = apr_pstrdup(p, hostname);
+#endif
+    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
+    (*sa)->sa.sin.sin_port = htons(port);
     return APR_SUCCESS;
 }
