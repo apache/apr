@@ -61,6 +61,7 @@
 #include <sys/types.h>
 #endif
 
+#ifndef _WIN32_WCE
 /* Internal sid binary to string translation, see MSKB Q131320.
  * Several user related operations require our SID to access
  * the registry, but in a string format.  All error handling
@@ -97,12 +98,16 @@ void get_sid_string(char *buf, int blen, apr_uid_t id)
                              *GetSidSubAuthority(id, sa));
     }
 } 
-
+#endif
 /* Query the ProfileImagePath from the version-specific branch, where the
  * regkey uses the user's name on 9x, and user's sid string on NT.
  */
 APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *username, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    *dirname = apr_pstrdup(p, "/My Documents");
+    return APR_SUCCESS;
+#else
     apr_status_t rv;
     char regkey[MAX_PATH * 2];
     char *fixch;
@@ -189,12 +194,16 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
         if (*fixch == '\\')
             *fixch = '/';
     return APR_SUCCESS;
+#endif /* _WIN32_WCE */
 }
 
 APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
                                              apr_gid_t *gid,
                                              apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     HANDLE threadtok;
     DWORD needed;
     TOKEN_USER *usr;
@@ -222,11 +231,15 @@ APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
         return apr_get_os_error();
 
     return APR_SUCCESS;
+#endif 
 }
 
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
                                          const char *username, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     SID_NAME_USE sidtype;
     char anydomain[256];
     char *domain;
@@ -265,10 +278,15 @@ APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
      */
     *gid = NULL;
     return APR_SUCCESS;
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    *username = apr_pstrdup(p, "Administrator");
+    return APR_SUCCESS;
+#else
     SID_NAME_USE type;
     char name[MAX_PATH], domain[MAX_PATH];
     DWORD cbname = sizeof(name), cbdomain = sizeof(domain);
@@ -280,15 +298,18 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
         return APR_EINVAL;
     *username = apr_pstrdup(p, name);
     return APR_SUCCESS;
+#endif
 }
   
 APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right)
 {
     if (!left || !right)
         return APR_EINVAL;
+#ifndef _WIN32_WCE
     if (!IsValidSid(left) || !IsValidSid(right))
         return APR_EINVAL;
     if (!EqualSid(left, right))
         return APR_EMISMATCH;
+#endif
     return APR_SUCCESS;
 }
