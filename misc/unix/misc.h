@@ -56,11 +56,26 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include "apr_config.h"
 #include "apr_general.h"
-#include "apr_file_io.h"
-#include "apr_errno.h"
+#include "apr_pools.h"
 #include "apr_getopt.h"
-
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+#ifdef HAVE_PTHREAD_H
+#include <pthread.h>
+#endif
+ 
 typedef struct datastruct {
     void *data;
     char *key;

@@ -55,7 +55,26 @@
 #include "apr_config.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
+#include "fileio.h"
+
+/* System headers required for thread/process library */
+#if HAVE_PTHREAD_H
 #include <pthread.h>
+#endif
+#if HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+/* End System Headers */
+
 
 #ifndef THREAD_PROC_H
 #define THREAD_PROC_H

@@ -54,11 +54,6 @@
  */
 
 #include "atime.h"
-#include "apr_time.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#include <errno.h>
-#include <string.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_curtime(ap_time_t *, ap_int64_t *)

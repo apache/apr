@@ -54,17 +54,7 @@
  */
 
 #include "threadproc.h"
-#include "fileio.h"
-
-#include "apr_thread_proc.h"
-#include "apr_file_io.h"
-#include "apr_general.h"
-#include "apr_lib.h"
 #include "apr_portable.h"
-#include <signal.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_createprocattr_init(ap_procattr_t **, ap_context_t *)
@@ -110,46 +100,46 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
     if (in != 0) {
         if ((status = ap_create_pipe(&attr->child_in, &attr->parent_in, 
                                    attr->cntxt)) != APR_SUCCESS) {
-            switch (in) {
-            case APR_FULL_BLOCK:
-                ap_block_pipe(attr->child_in);
-                ap_block_pipe(attr->parent_in);
-            case APR_PARENT_BLOCK:
-                ap_block_pipe(attr->parent_in);
-            case APR_CHILD_BLOCK:
-                ap_block_pipe(attr->child_in);
-            }
             return status;
+        }
+        switch (in) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_in);
+            ap_block_pipe(attr->parent_in);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_in);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_in);
         }
     } 
     if (out) {
         if ((status = ap_create_pipe(&attr->parent_out, &attr->child_out, 
                                    attr->cntxt)) != APR_SUCCESS) {
-            switch (out) {
-            case APR_FULL_BLOCK:
-                ap_block_pipe(attr->child_out);
-                ap_block_pipe(attr->parent_out);
-            case APR_PARENT_BLOCK:
-                ap_block_pipe(attr->parent_out);
-            case APR_CHILD_BLOCK:
-                ap_block_pipe(attr->child_out);
-            }
             return status;
+        }
+        switch (out) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_out);
+            ap_block_pipe(attr->parent_out);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_out);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_out);
         }
     } 
     if (err) {
         if ((status = ap_create_pipe(&attr->parent_err, &attr->child_err, 
                                    attr->cntxt)) != APR_SUCCESS) {
-            switch (err) {
-            case APR_FULL_BLOCK:
-                ap_block_pipe(attr->child_err);
-                ap_block_pipe(attr->parent_err);
-            case APR_PARENT_BLOCK:
-                ap_block_pipe(attr->parent_err);
-            case APR_CHILD_BLOCK:
-                ap_block_pipe(attr->child_err);
-            }
             return status;
+        }
+        switch (err) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_err);
+            ap_block_pipe(attr->parent_err);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_err);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_err);
         }
     } 
     return APR_SUCCESS;

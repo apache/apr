@@ -81,7 +81,7 @@ int main(int argc, char * const argv[])
                 break;
             case 'd':
                 printf("option %c", data);
-                if (optarg) {
+                if (ap_optarg) {
                     printf(" with %s\n", ap_optarg);
                 }
                 else {

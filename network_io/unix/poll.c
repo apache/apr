@@ -54,16 +54,6 @@
  */
 
 #include "networkio.h"
-#include "apr_config.h"
-#include "apr_network_io.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 

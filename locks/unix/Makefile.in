@@ -53,17 +53,17 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-crossproc.o: crossproc.c ../../include/apr_lock.h \
- ../../include/apr_general.h ../../include/apr_config.h \
+crossproc.o: crossproc.c locks.h ../../include/apr_config.h \
+ ../../include/apr_general.h ../../include/apr.h \
  ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_file_io.h locks.h
-intraproc.o: intraproc.c ../../include/apr_config.h \
- ../../include/apr_lock.h ../../include/apr_general.h \
+ ../../include/apr_file_io.h ../../include/apr_lock.h
+intraproc.o: intraproc.c locks.h ../../include/apr_config.h \
+ ../../include/apr_general.h ../../include/apr.h \
  ../../include/apr_errno.h ../../include/apr_lib.h \
- ../../include/apr_file_io.h locks.h
-locks.o: locks.c ../../include/apr_general.h \
- ../../include/apr_config.h ../../include/apr_errno.h \
+ ../../include/apr_file_io.h ../../include/apr_lock.h
+locks.o: locks.c locks.h ../../include/apr_config.h \
+ ../../include/apr_general.h ../../include/apr.h \
+ ../../include/apr_errno.h ../../include/apr_lib.h \
+ ../../include/apr_file_io.h ../../include/apr_lock.h \
  ../../include/apr_portable.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_win.h \
- ../../include/apr_network_io.h ../../include/apr_lock.h \
- ../../include/apr_time.h ../../include/apr_lib.h locks.h
+ ../../include/apr_network_io.h ../../include/apr_time.h

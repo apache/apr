@@ -54,15 +54,6 @@
  */
 
 #include "fileio.h"
-#include "apr_file_io.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 
 static ap_status_t pipenonblock(struct file_t *thefile)
 {

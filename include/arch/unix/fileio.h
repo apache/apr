@@ -56,19 +56,50 @@
 #ifndef FILE_IO_H
 #define FILE_IO_H
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <fcntl.h>
-#include <time.h>
-#include <dirent.h>
-#include <sys/uio.h>
-#include <stdio.h>
+#include "apr_config.h"
 #include "apr_general.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
+#include "apr_lib.h"
+
+/* System headers the file I/O library needs */
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+#if HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STDIO_H
+#include <stdio.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#if HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef BEOS
 #include <kernel/OS.h>
 #endif
+/* End System headers */
 
 struct file_t {
     ap_context_t *cntxt;

@@ -54,12 +54,6 @@
  */
 
 #include "fileio.h"
-#include "apr_file_io.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
 
 /* A file to put ALL of the accessor functions for struct file_t types. */
 

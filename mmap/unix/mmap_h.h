@@ -56,12 +56,34 @@
 #ifndef MMAP_H_H
 #define MMAP_H_H
 
+#include "apr_config.h"
 #include "apr_general.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
-#ifdef HAVE_SYS_STAT_H
+#include "fileio.h"
+#ifdef BEOS
+#include "../beos/mmap_h.h"
+#else
+#include "mmap_h.h"
+#endif
+
+/* System headers required for the mmap library */
+#ifdef BEOS
+#include <kernel/OS.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+#if HAVE_STDIO_H
+#include <stdio.h>
+#endif
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#if HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
+/* End System Headers */
 
 struct mmap_t {
     ap_context_t *cntxt;

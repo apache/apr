@@ -54,13 +54,7 @@
  */
 
 #include "atime.h"
-#include "apr_time.h"
-#include "apr_general.h"
-#include "apr_lib.h"
 #include "apr_portable.h"
-#include <time.h>
-#include <errno.h>
-#include <string.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_make_time(ap_context_t *, ap_time_t *)

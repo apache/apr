@@ -54,14 +54,7 @@
  */
 
 #include "fileio.h"
-#include "apr_file_io.h"
-#include "apr_general.h"
 #include "apr_portable.h"
-#include "apr_lib.h"
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
-#include <unistd.h>
 
 ap_status_t file_cleanup(void *thefile)
 {

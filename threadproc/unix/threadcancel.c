@@ -53,11 +53,8 @@
  *
  */
 
-#if APR_HAS_THREADS
-
 #include "threadproc.h"
-#include "apr_thread_proc.h"
-#include "apr_general.h"
+#if APR_HAS_THREADS
 
 #ifdef HAVE_PTHREAD_H
 

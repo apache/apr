@@ -59,10 +59,43 @@
 #include "apr_config.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
-#include "apr_lock.h"
-#ifdef HAVE_POLL_H
+#include "apr_lib.h"
+
+/* System headers the network I/O library needs */
+#if HAVE_POLL_H
 #include <poll.h>
 #endif
+#if HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+#if HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+/* End System Headers */
 
 struct socket_t {
     ap_context_t *cntxt;

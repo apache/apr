@@ -53,13 +53,7 @@
  *
  */
 
-#include "apr_config.h"
-#include "apr_lock.h"
-#include "apr_general.h"
-#include "apr_lib.h"
 #include "locks.h"
-#include <unistd.h>
-#include <sys/mman.h>
 
 #if defined (USE_SYSVSEM_SERIALIZE)  
 ap_status_t lock_cleanup(struct lock_t *lock)

@@ -52,24 +52,13 @@
  * project, please see <http://www.apache.org/>.
  *
  */
-
+#ifdef BEOS
+#include "../beos/mmap_h.h"
+#else
 #include "mmap_h.h"
-#include "fileio.h"
-#include "apr_mmap.h"
-#include "apr_general.h"
+#endif
+
 #include "apr_portable.h"
-#include "apr_lib.h"
-#include "apr_errno.h"
-#include "apr_config.h"
-#ifdef HAVE_SYS_MMAN_H
-#include <sys/mman.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_STDIO_H
-#include <stdio.h>
-#endif
 
 #if HAVE_MMAP
 

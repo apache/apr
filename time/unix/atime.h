@@ -56,8 +56,15 @@
 #ifndef ATIME_H
 #define ATIME_H
 
+#include "apr_config.h"
 #include "apr_time.h"
+#include "apr_lib.h"
+
+/* System Headers required for time library */
+#if HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+/* End System Headers */
 
 struct atime_t {
     ap_context_t *cntxt;

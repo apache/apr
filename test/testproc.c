@@ -81,12 +81,14 @@ int main(int argc, char *argv[])
 
     ap_create_context(&context, NULL);
 
-    teststr = ap_pstrdup(context, "Whooo Hoooo\0");
 
     if (argc > 1) {
+        teststr = ap_palloc(context, 256);
+        teststr = fgets(teststr, 256, stdin);      
         fprintf(stdout, "%s", teststr);      
         exit(1);
     }
+    teststr = ap_pstrdup(context, "Whooo Hoooo\0");
 
     fprintf(stdout, "Creating directory for later use.......");
     if (ap_make_dir("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {
@@ -103,7 +105,8 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK.\n");
 
     fprintf(stdout, "Setting attr pipes, all three.......");
-    if (ap_setprocattr_io(attr, 1, 1, 0) != APR_SUCCESS) {
+    if (ap_setprocattr_io(attr, APR_FULL_BLOCK, 
+                          APR_CHILD_BLOCK, APR_NO_PIPE) != APR_SUCCESS) {
         fprintf(stderr, "Could not set pipes attr\n");
         exit(-1);
     }
@@ -133,6 +136,20 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     fprintf(stdout, "OK.\n");
+
+    fprintf(stdout, "Grabbing child's stdin.......");
+    if (ap_get_childin(&testfile, newproc) != APR_SUCCESS) {
+        fprintf(stderr, "Could not get child's stdout\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK.\n");
+
+    length = 256;
+    fprintf(stdout, "Writing the data to child.......");
+    if (ap_write(testfile, teststr, &length) == APR_SUCCESS) {
+        fprintf(stdout,"OK\n");
+    }
+    else fprintf(stderr, "Write failed.\n");
 
     fprintf(stdout, "Grabbing child's stdout.......");
     if (ap_get_childout(&testfile, newproc) != APR_SUCCESS) {
