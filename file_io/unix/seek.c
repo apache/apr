@@ -54,19 +54,6 @@
 
 #include "fileio.h"
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, 
- *                     ap_off_t *offset)
- *    Move the read/write file offset to a specified byte within a file.
- * arg 1) The file descriptor
- * arg 2) How to move the pointer, one of:
- *            APR_SET  --  set the offset to offset
- *            APR_CUR  --  add the offset to the current position 
- *            APR_END  --  add the offset to the current file size 
- * arg 3) The offset to move the pointer to.
- * NOTE:  The third argument is modified to be the offset the pointer
- *        was actually moved to.
- */
 ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     ap_off_t rv;

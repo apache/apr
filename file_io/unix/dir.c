@@ -66,13 +66,6 @@ static ap_status_t dir_cleanup(void *thedir)
     }
 } 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_opendir(ap_dir_t **new, char *dirname, ap_context_t *cont)
- *    Open the specified directory. 
- * arg 1) The opened directory descriptor.
- * arg 2) The full path to the directory (use / on all systems)
- * arg 3) The context to use.
- */                        
 ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cont)
 {
     if (new == NULL)
@@ -95,11 +88,6 @@ ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cont)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_closedir(ap_dir_t *thedir)
- *    close the specified directory. 
- * arg 1) the directory descriptor to close.
- */                        
 ap_status_t ap_closedir(ap_dir_t *thedir)
 {
     ap_status_t rv;
@@ -114,12 +102,6 @@ ap_status_t ap_closedir(ap_dir_t *thedir)
     return rv;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_readdir(ap_dir_t *thedir)
- *    Read the next entry from the specified directory. 
- * arg 1) the directory descriptor to read from, and fill out.
- * NOTE: All systems return . and .. as the first two files.
- */                        
 ap_status_t ap_readdir(ap_dir_t *thedir)
 {
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
@@ -152,11 +134,6 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
 #endif
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_rewinddir(ap_dir_t *thedir)
- *    Rewind the directory to the first entry. 
- * arg 1) the directory descriptor to rewind.
- */                        
 ap_status_t ap_rewinddir(ap_dir_t *thedir)
 {
     if (thedir == NULL)
@@ -166,14 +143,6 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, 
- *                         ap_context_t *cont)
- *    Create a new directory on the file system. 
- * arg 1) the path for the directory to be created.  (use / on all systems)
- * arg 2) Permissions for the new direcoty.
- * arg 3) the context to use.
- */                        
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
     mode_t mode = get_fileperms(perm);
@@ -186,12 +155,6 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *con
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
- *    Remove directory from the file system. 
- * arg 1) the path for the directory to be removed.  (use / on all systems)
- * arg 2) the context to use.
- */                        
 ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
     if (rmdir(path) == 0) {
@@ -202,12 +165,6 @@ ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
- *    Get the size of the current directory entry. 
- * arg 1) the size of the directory entry. 
- * arg 2) the currently open directory.
- */                        
 ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
 {
     struct stat filestat;
@@ -231,12 +188,6 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
- *    Get the last modified time of the current directory entry. 
- * arg 1) the last modified time of the directory entry. 
- * arg 2) the currently open directory.
- */                        
 ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
 {
     struct stat filestat;
@@ -261,12 +212,6 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
  
-/* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
- *    Get the file type of the current directory entry. 
- * arg 1) the file type of the directory entry. 
- * arg 2) the currently open directory.
- */                        
 ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
 {
     struct stat filestat;
@@ -306,12 +251,6 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir) 
- *    Get the file name of the current directory entry. 
- * arg 1) the file name of the directory entry. 
- * arg 2) the currently open directory.
- */                        
 ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir)
 {
     if (new == NULL)

@@ -77,13 +77,6 @@ static ap_status_t pipenonblock(ap_file_t *thefile)
 }
 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
- *    Set the timeout value for a pipe.
- * arg 1) The pipe we are setting a timeout on.
- * arg 3) The timeout value in seconds.  Values < 0 mean wait forever, 0
- *        means do not wait at all.
- */
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
 {
     if(thepipe == NULL)
@@ -96,14 +89,6 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
     return APR_EINVAL;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, 
- *                            ap_context_t *cont)
- *    Create an anonymous pipe.
- * arg 1) The file descriptor to use as input to the pipe.
- * arg 2) The file descriptor to use as output from the pipe.
- * arg 3) The context to operate on.
- */
 ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
 {
     int filedes[2];
@@ -135,14 +120,6 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, 
- *                                 ap_context_t *cont)
- *    Create a named pipe.
- * arg 1) The filename of the named pipe
- * arg 2) The permissions for the newly created pipe.
- * arg 3) The context to operate on.
- */
 ap_status_t ap_create_namedpipe(char *filename, 
                                 ap_fileperms_t perm, ap_context_t *cont)
 {
@@ -154,11 +131,6 @@ ap_status_t ap_create_namedpipe(char *filename,
     return APR_SUCCESS;
 } 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_block_pipe(ap_file_t *thepipe)
- *    Set a pipe to use blocking I/O.
- * arg 1) The pipe to operate on.
- */
 ap_status_t ap_block_pipe(ap_file_t *thepipe)
 {
 #ifndef BEOS /* this code won't work on BeOS */
