@@ -136,7 +136,7 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
 }
 #if APR_HAS_SENDFILE
 /*
- * apr_status_t ap_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
+ * apr_status_t apr_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
  *                         apr_off_t *, apr_size_t *, apr_int32_t flags)
  *    Send a file from an open file descriptor to a socket, along with 
  *    optional headers and trailers
@@ -147,7 +147,7 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
  * arg 5) Number of bytes to send 
  * arg 6) APR flags that are mapped to OS specific flags
  */
-apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
+apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
         		apr_int32_t flags) 
 {
@@ -257,7 +257,7 @@ apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
 
     /* Mark the socket as disconnected, but do not close it.
      * Note: The application must have stored the socket prior to making
-     * the call to ap_sendfile in order to either reuse it or close it.
+     * the call to apr_sendfile in order to either reuse it or close it.
      */
     if ((lasterror == APR_SUCCESS) && (flags & APR_SENDFILE_DISCONNECT_SOCKET)) {
         sock->disconnected = 1;
