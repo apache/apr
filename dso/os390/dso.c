@@ -107,12 +107,12 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym,
     void *func_ptr;
     void *var_ptr; 
 
-    if ((func_ptr = (void *)dllqueryfn(handle->handle, symname)) != NULL) {
-        *ressym = func_ptr;
-        return APR_SUCCESS;
-    }
     if ((var_ptr = dllqueryvar(handle->handle, symname)) != NULL) {
         *ressym = var_ptr;
+        return APR_SUCCESS;
+    }
+    if ((func_ptr = (void *)dllqueryfn(handle->handle, symname)) != NULL) {
+        *ressym = func_ptr;
         return APR_SUCCESS;
     }
     handle->failing_errno = errno;
