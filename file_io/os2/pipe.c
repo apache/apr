@@ -77,7 +77,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*in)->isopen = TRUE;
     (*in)->buffered = FALSE;
     (*in)->flags = 0;
-    ap_register_cleanup(cont, *in, file_cleanup, ap_null_cleanup);
+    ap_register_cleanup(cont, *in, apr_file_cleanup, ap_null_cleanup);
 
     (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
     (*out)->cntxt = cont;
@@ -86,7 +86,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*out)->isopen = TRUE;
     (*out)->buffered = FALSE;
     (*out)->flags = 0;
-    ap_register_cleanup(cont, *out, file_cleanup, ap_null_cleanup);
+    ap_register_cleanup(cont, *out, apr_file_cleanup, ap_null_cleanup);
 
     return APR_SUCCESS;
 }

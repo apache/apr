@@ -91,7 +91,7 @@ struct dir_t {
     int validentry;
 };
 
-ap_status_t file_cleanup(void *);
+ap_status_t apr_file_cleanup(void *);
 ap_status_t ap_os2_time_to_ap_time(ap_time_t *result, FDATE os2date, FTIME os2time);
 int os2errno( ULONG oserror );
 
