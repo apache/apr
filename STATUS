@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/03/15 19:31:53 $]
+Last modified at [$Date: 2001/03/22 10:17:35 $]
 
 Release:
 
@@ -120,6 +120,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       platform. clients need to use this to construct filenames to
       pass to apr_dso_load()
 
+    * may be good to have a --disable-ipv6 configure option
 
 Documentation that needs writing:
 
