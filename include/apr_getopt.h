@@ -55,16 +55,32 @@
 #ifndef APR_GETOPT_H
 #define APR_GETOPT_H
 
-typedef struct apr_getopt_t {
-    apr_pool_t *cont;        /* context for processing */
-    int err;                 /* if error message should be printed */
-    int ind;                 /* index into parent argv vector */
-    int opt;                 /* character checked for validity */
-    int reset;               /* reset getopt */
-    int argc;                /* count of arguments */
-    char *const *argv;             /* array of pointers to arguments */
-    char const* place;       /* argument associated with option */
-} apr_getopt_t;
+/**
+ * @package APR command arguments
+ */ 
+
+typedef struct apr_getopt_t apr_getopt_t;
+/**
+ * Structure to store command line argument information.
+ */ 
+struct apr_getopt_t {
+    /** context for processing */
+    apr_pool_t *cont;
+    /** if error message should be printed */
+    int err;
+    /** index into parent argv vector */
+    int ind;
+    /** character checked for validity */
+    int opt;
+    /** reset getopt */
+    int reset;
+    /** count of arguments */
+    int argc;
+    /** array of pointers to arguments */
+    char *const *argv;
+    /** argument associated with option */
+    char const* place;
+};
 
 /**
  * Initialize the arguments for parsing by apr_getopt().
