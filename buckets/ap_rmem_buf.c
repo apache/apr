@@ -81,7 +81,7 @@ static ap_status_t rmem_split(ap_bucket *e, ap_size_t nbyte)
     ap_bucket_rmem *a = (ap_bucket_rmem *)e->data; 
     ap_bucket_rmem *b; 
 
-    newbuck = ap_bucket_new(AP_BUCKET_rmem);
+    newbuck = ap_bucket_rmem_create();
     b = (ap_bucket_rmem *)newbuck->data;
 
     b->alloc_len = a->alloc_len - nbyte;
@@ -124,7 +124,7 @@ static ap_status_t rmem_insert(ap_bucket *e, const void *buf,
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_bucket *) ap_rmem_create(void)
+APR_EXPORT(ap_bucket *) ap_bucket_rmem_create(void)
 {
     ap_bucket *newbuf;
     ap_bucket_rmem *b;

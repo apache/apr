@@ -89,7 +89,7 @@ static ap_status_t mmap_split(ap_bucket *e, ap_size_t nbyte)
     ap_bucket_mmap *a = (ap_bucket_mmap *)e->data;
     ap_bucket_mmap *b;
 
-    newbuck = ap_bucket_new(AP_BUCKET_mmap);
+    newbuck = ap_bucket_mmap_create();
     b = (ap_bucket_mmap *)newbuck->data;
     a->alloc_addr = a->alloc_addr + nbyte;
     a->len = b->len - nbyte;
@@ -103,7 +103,7 @@ static ap_status_t mmap_split(ap_bucket *e, ap_size_t nbyte)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void)
+APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(void)
 {
     ap_bucket *newbuf;
     ap_bucket_mmap *b;
