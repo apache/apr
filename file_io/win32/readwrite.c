@@ -86,7 +86,7 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
     }
     *nbytes = -1;
 
-    return APR_EEXIST;
+    return lasterror;
 }
 
 ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
@@ -112,7 +112,7 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         return APR_SUCCESS;
     }
     (*nbytes) = -1;
-    return APR_EEXIST;
+    return GetLastError();
 }
 /*
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2) 
@@ -127,7 +127,7 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssiz
     for (i = 0; i < numvec; i++) {
         if (!WriteFile(thefile->filehand,
                        vec->iov[i].iov_base, vec->iov[i].iov_len, &bwrote, NULL)) {
-            return GetLastError(); /* TODO: Yes, I know this is broken... */
+            return GetLastError();
         }
         *iocnt += bwrote;
     }
@@ -139,7 +139,7 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
     DWORD bwrote;
 
     if (!WriteFile(thefile->filehand, &ch, 1, &bwrote, NULL)) {
-        return APR_EEXIST;
+        return GetLastError();
     }
     return APR_SUCCESS; 
 }
@@ -162,17 +162,17 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 
     /* SetFilePointer is only valid for a file device ...*/
     if (GetFileType(thefile->filehand) != FILE_TYPE_DISK) {
-        return !APR_SUCCESS; /* is there no generic failure code? */
+        return GetLastError();
     }
     /* that's buffered... */
     if (!thefile->buffered) {
-        return !APR_SUCCESS; /* is there no generic failure code? */
+        return GetLastError();
     }
     /* and the file pointer is not pointing to the start of the file. */
     if (GetFilePointer(thefile->filehand)) {
         if (SetFilePointer(thefile->filehand, -1, NULL, FILE_CURRENT) 
             == 0xFFFFFFFF) {
-            return !APR_SUCCESS;
+            return GetLastError();
         }
     }
 
@@ -184,7 +184,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
     DWORD bread;
     if (!ReadFile(thefile->filehand, ch, 1, &bread, NULL)) {
-        return APR_EEXIST;
+        return GetLastError();
     }
     if (bread == 0) {
         thefile->eof_hit = TRUE;
@@ -202,7 +202,7 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     str[len] = '\n';
     if (!WriteFile(thefile->filehand, str, len+1, &bwrote, NULL)) {
         str[len] = '\0';
-        return APR_EEXIST;
+        return GetLastError();
     }
     str[len] = '\0';
 
@@ -218,7 +218,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         case ERROR_HANDLE_EOF:
             return APR_EOF;
         default:
-            return APR_EEXIST;
+            return GetLastError();
         }
     }
     if (bread == 0) {
