@@ -242,12 +242,26 @@ APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
 
 
 
+static apr_status_t thread_once_cleanup(void *vcontrol)
+{
+    apr_thread_once_t *control = (apr_thread_once_t *)vcontrol;
+
+    if (control->sem) {
+        DosCloseEventSem(control->sem);
+    }
+
+    return APR_SUCCESS;
+}
+
+
+
 APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
                                                apr_pool_t *p)
 {
     ULONG rc;
     *control = (apr_thread_once_t *)apr_pcalloc(p, sizeof(apr_thread_once_t));
     rc = DosCreateEventSem(NULL, &(*control)->sem, 0, TRUE);
+    apr_pool_cleanup_register(p, control, thread_once_cleanup, apr_pool_cleanup_null);
     return APR_FROM_OS_ERROR(rc);
 }
 
