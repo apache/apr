@@ -626,13 +626,9 @@ AC_CHECK_FUNCS([getpwnam_r getpwuid_r getgrnam_r getgrgid_r])
 dnl ----------------------------- Checking for Shared Memory Support 
 echo "${nl}Checking for Shared Memory Support..."
 
-# The POSIX function are in librt on Solaris. This will
-# also help us find sem_open when doing locking below
-case $host in
-   *-solaris*)
-       AC_CHECK_LIB(rt, shm_open)
-       ;;
-esac
+# The real-time POSIX extensions (e.g. shm_*, sem_*) may only
+# be available if linking against librt.
+AC_SEARCH_LIBS(shm_open, rt)
 
 AC_CHECK_HEADERS([sys/mman.h sys/ipc.h sys/shm.h sys/file.h kernel/OS.h os2.h])
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
