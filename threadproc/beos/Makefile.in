@@ -18,7 +18,6 @@ OBJS=proc.o \
 	thread.o \
 	threadpriv.o \
 	threadproc_common.o \
-        procsup.o \
         apr_proc_stub
 
 .c.o:
