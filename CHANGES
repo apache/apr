@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Added flag APR_FILE_ATTR_HIDDEN for manipulating the "hidden"
+     file attribute on Windows and OS/2.  [Branko Cibej]
+
   *) apr_proc_wait(): Handle interrupted waitpid(2) calls by calling
      it repeatedly until it succeeds or fails with errno other than
      EINTR.  This hides this UNIX-specific behavior from APR clients.

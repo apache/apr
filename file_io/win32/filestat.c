@@ -703,6 +703,11 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     apr_wchar_t wfname[APR_PATH_MAX];
 #endif
 
+    /* Don't do anything if we can't handle the requested attributes */
+    if (!(attr_mask & (APR_FILE_ATTR_READONLY
+                       | APR_FILE_ATTR_HIDDEN)))
+        return APR_SUCCESS;
+
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
@@ -729,6 +734,14 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
             flags |= FILE_ATTRIBUTE_READONLY;
         else
             flags &= ~FILE_ATTRIBUTE_READONLY;
+    }
+
+    if (attr_mask & APR_FILE_ATTR_HIDDEN)
+    {
+        if (attributes & APR_FILE_ATTR_HIDDEN)
+            flags |= FILE_ATTRIBUTE_HIDDEN;
+        else
+            flags &= ~FILE_ATTRIBUTE_HIDDEN;
     }
 
 #if APR_HAS_UNICODE_FS
