@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
     size = mm_maxsize();
     if (size > 1024*1024*1)
         size = 1024*1024*1;
-    mm = mm_create(size, NULL);
+    mm = mm_create(size, NULL, MM_ALLOCATE_EXACT);
     FAILED_IF(mm == NULL)
     mm_display_info(mm);
     s = mm_available(mm);

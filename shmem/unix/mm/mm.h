@@ -66,6 +66,9 @@ typedef enum {
     MM_LOCK_RD, MM_LOCK_RW
 } mm_lock_mode;
 
+#define MM_ALLOCATE_ENOUGH 1
+#define MM_ALLOCATE_EXACT  2
+
 /*
 **  ____ Private Part of the API ___________________________
 */
@@ -339,7 +342,7 @@ size_t  MM_available(void);
 char   *MM_error(void);
 
 /* Standard Malloc-Style API */
-MM     *mm_create(size_t size, const char *file);
+MM     *mm_create(size_t size, const char *file, int flag);
 int     mm_permission(MM *mm, mode_t mode, uid_t owner, gid_t group);
 void    mm_destroy(MM *mm);
 int     mm_lock(MM *mm, mm_lock_mode mode);
