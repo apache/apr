@@ -85,7 +85,7 @@ static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
                              fstatus->ftimeCreation );
     finfo->valid = APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_SIZE
                  | APR_FINFO_CSIZE | APR_FINFO_MTIME 
-                 | APR_FINFO_CTIME | APR_FINFO_ATIME;
+                 | APR_FINFO_CTIME | APR_FINFO_ATIME | APR_FINFO_LINK;
 }
 
 
