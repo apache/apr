@@ -1,7 +1,7 @@
 Changes with APR b1  
 
   *) Eliminate the APR_SIG* aliases for standard signal names,
-     since they serve no useful purpose.  [Roy Felding]
+     since they serve no useful purpose.  [Roy Fielding]
 
   *) Abstracted apr_get_username and apr_get_groupname for unix and win32.
      Modified Win32 apr_uid_t and apr_gid_t to use PSIDs, and elimintated
