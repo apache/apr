@@ -183,7 +183,7 @@ ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
 ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
 {    
     if (file != NULL) {
-        return ap_get_userdata(file->cntxt, key, &data);
+        return ap_get_userdata(&data, file->cntxt, key);
     }
     else {
         data = NULL;
