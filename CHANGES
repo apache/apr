@@ -1,5 +1,14 @@
 Changes with APR 0.9.4
 
+  *) Change the behavior of unix process 'trylock's to return
+     APR_ENOTIMPL instead of segfaulting, consistent with the
+     other lock implementations.  [William Rowe]
+
+  *) Fix a subtle race where the ownership of a unix nested
+     thread lock could be corrupted when the prior owner released
+     the lock with another thread waiting on the same lock.
+     [William Rowe]
+
   *) apr_socket_data_set(): allow the same key to be used for
      multiple sockets in the same pool.  [Jeff Trawick]
 
