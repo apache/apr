@@ -92,7 +92,7 @@ int main(void)
         exit(-1);
     }
     printf("OK\n");
-    
+
     printf("\tapr_explode_localtime...........................");
     if (apr_explode_localtime(&xt2, now) != APR_SUCCESS) {
         printf("Couldn't explode the time\n");
@@ -110,10 +110,28 @@ int main(void)
     printf("\tchecking the explode/implode (GMT)..............");
     if (imp != now) {
 	printf("mismatch\n"
-                "\tapr_now()                %lld\n"
-                "\tapr_implode() returned   %lld\n"
-                "\terror delta was          %lld\n",
+                "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
+                "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
+                "\t\terror delta was          %" APR_TIME_T_FMT "\n"
+                "\t\tshould have been         0\n",
                 now, imp, imp-now);
+	exit(-1);
+    }
+    printf("OK\n");
+
+    printf("\tchecking the explode/implode (local time).......");
+    if (apr_implode_time(&imp, &xt2) != APR_SUCCESS) {
+        printf("Couldn't implode the time\n");
+        exit(-1);
+    }
+    hr_off_64 = (apr_int64_t)xt2.tm_gmtoff * APR_USEC_PER_SEC; /* microseconds */ 
+    if (imp != now + hr_off_64) {
+	printf("mismatch\n"
+                "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
+                "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
+                "\t\terror delta was          %" APR_TIME_T_FMT "\n"
+                "\t\tshould have been         %" APR_INT64_T_FMT "\n",
+                now, imp, imp-now, hr_off_64);
 	exit(-1);
     }
     printf("OK\n");
@@ -171,7 +189,8 @@ int main(void)
 
     printf("\tComparing the created times.....................");
     if (! strcmp(str,str2)){
-        printf("Failed\n");
+        printf("Failed!\n");
+        exit(-1);
     } else {
         printf("OK\n");
     }
@@ -180,9 +199,12 @@ int main(void)
     apr_implode_time(&imp, &xt2);
     hr_off_64 = (apr_int64_t)hr_off * APR_USEC_PER_SEC; /* microseconds */ 
     if (imp != now + hr_off_64){
-        printf("Failed! :(\n");
-        printf("Difference is %" APR_TIME_T_FMT " (should be %" 
-               APR_INT64_T_FMT ")\n", imp - now, hr_off_64);
+	printf("mismatch\n"
+                "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
+                "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
+                "\t\terror delta was          %" APR_TIME_T_FMT "\n"
+                "\t\tshould have been         %" APR_INT64_T_FMT "\n",
+                now, imp, imp-now, hr_off_64);
         exit(-1);
     }
     printf("OK\n");
