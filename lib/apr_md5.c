@@ -144,6 +144,10 @@ static unsigned char PADDING[64] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+#ifdef CHARSET_EBCDIC
+static ap_xlate_t *xlate_ebcdic_to_ascii; /* used in ap_MD5Encode() */
+#endif
+
 /* F, G, H and I are basic MD5 functions.
  */
 #define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
@@ -189,8 +193,24 @@ API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
     context->state[1] = 0xefcdab89;
     context->state[2] = 0x98badcfe;
     context->state[3] = 0x10325476;
+#if APR_HAS_XLATE
+    context->xlate = NULL;
+#endif
     return APR_SUCCESS;
 }
+
+#if APR_HAS_XLATE
+/* MD5 translation setup.  Provides the APR translation handle
+ * to be used for translating the content before calculating the
+ * digest.
+ */
+
+API_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
+{
+    context->xlate = xlate;
+    return APR_SUCCESS;
+}
+#endif /* APR_HAS_XLATE */
 
 /* MD5 block update operation. Continues an MD5 message-digest
    operation, processing another message block, and updating the
@@ -201,6 +221,9 @@ API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
                                      unsigned int inputLen)
 {
     unsigned int i, idx, partLen;
+#if APR_HAS_XLATE
+    ap_size_t inbytes_left, outbytes_left;
+#endif
 
     /* Compute number of bytes mod 64 */
     idx = (unsigned int) ((context->count[0] >> 3) & 0x3F);
@@ -213,7 +236,7 @@ API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
     partLen = 64 - idx;
 
     /* Transform as many times as possible. */
-#ifndef CHARSET_EBCDIC
+#if !APR_HAS_XLATE
     if (inputLen >= partLen) {
 	memcpy(&context->buffer[idx], input, partLen);
 	MD5Transform(context->state, context->buffer);
@@ -228,15 +251,29 @@ API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
 
     /* Buffer remaining input */
     memcpy(&context->buffer[idx], &input[i], inputLen - i);
-#else /*CHARSET_EBCDIC*/
+#else /*APR_HAS_XLATE*/
     if (inputLen >= partLen) {
-	ebcdic2ascii_strictly(&context->buffer[idx], input, partLen);
+        if (context->xlate) {
+            inbytes_left = outbytes_left = partLen;
+            ap_xlate_conv_buffer(context->xlate, input, &inbytes_left,
+                                 &context->buffer[idx],&outbytes_left);
+        }
+        else {
+            memcpy(&context->buffer[idx], input, partLen);
+        }
 	MD5Transform(context->state, context->buffer);
 
 	for (i = partLen; i + 63 < inputLen; i += 64) {
-	    unsigned char inp_tmp[64];
-	    ebcdic2ascii_strictly(inp_tmp, &input[i], 64);
-	    MD5Transform(context->state, inp_tmp);
+            if (context->xlate) {
+                unsigned char inp_tmp[64];
+                inbytes_left = outbytes_left = 64;
+                ap_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
+                                     inp_tmp, &outbytes_left);
+                MD5Transform(context->state, inp_tmp);
+            }
+            else {
+                MD5Transform(context->state, &input[i]);
+            }
 	}
 
 	idx = 0;
@@ -245,8 +282,15 @@ API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
 	i = 0;
 
     /* Buffer remaining input */
-    ebcdic2ascii_strictly(&context->buffer[idx], &input[i], inputLen - i);
-#endif /*CHARSET_EBCDIC*/
+    if (context->xlate) {
+        inbytes_left = outbytes_left = inputLen - i;
+        ap_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
+                             &context->buffer[idx], &outbytes_left);
+    }
+    else {
+        memcpy(&context->buffer[idx], &input[i], inputLen - i);
+    }
+#endif /*APR_HAS_XLATE*/
     return APR_SUCCESS;
 }
 
@@ -259,24 +303,13 @@ API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
     unsigned char bits[8];
     unsigned int idx, padLen;
 
-
     /* Save number of bits */
     Encode(bits, context->count, 8);
 
-#ifdef CHARSET_EBCDIC
-    /* XXX: @@@: In order to make this no more complex than necessary,
-     * this kludge converts the bits[] array using the ascii-to-ebcdic
-     * table, because the following ap_MD5Update() re-translates
-     * its input (ebcdic-to-ascii).
-     * Otherwise, we would have to pass a "conversion" flag to ap_MD5Update()
-     */
-    ascii2ebcdic(bits,bits,8);
-
-    /* Since everything is converted to ascii within ap_MD5Update(), 
-     * the initial 0x80 (PADDING[0]) must be stored as 0x20 
-     */
-    PADDING[0] = os_toebcdic[0x80];
-#endif /*CHARSET_EBCDIC*/
+#if APR_HAS_XLATE
+    /* ap_MD5Update() should not translate for this final round. */
+    context->xlate = NULL;
+#endif /*APR_HAS_XLATE*/
 
     /* Pad out to 56 mod 64. */
     idx = (unsigned int) ((context->count[0] >> 3) & 0x3f);
@@ -413,6 +446,14 @@ static void Decode(UINT4 *output, const unsigned char *input, unsigned int len)
 	    (((UINT4) input[j + 2]) << 16) | (((UINT4) input[j + 3]) << 24);
 }
 
+#ifdef CHARSET_EBCDIC
+API_EXPORT(ap_status_t) ap_MD5InitEBCDIC(ap_xlate_t *xlate)
+{
+    xlate_ebcdic_to_ascii = xlate;
+    return APR_SUCCESS;
+}
+#endif
+
 /*
  * Define the Magic String prefix that identifies a password as being
  * hashed using our algorithm.
@@ -437,7 +478,7 @@ static void to64(char *s, unsigned long v, int n)
 }
 
 API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
-			      char *result, size_t nbytes)
+                             char *result, size_t nbytes)
 {
     /*
      * Minimum size is 8 bytes for salt, plus 1 for the trailing NUL,
@@ -482,7 +523,10 @@ API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
      * 'Time to make the doughnuts..'
      */
     ap_MD5Init(&ctx);
-
+#ifdef CHARSET_EBCDIC
+    ap_MD5SetXlate(&ctx, xlate_ebcdic_to_ascii);
+#endif
+    
     /*
      * The password first, since that is what is most unknown
      */
