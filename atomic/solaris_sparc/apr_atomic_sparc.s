@@ -71,19 +71,20 @@
 !
         ENTRY(apr_atomic_add_sparc)
 
-        ld 		[%o0], %o2 
+        ld 		[%o0], %o2                   ! set o2 to current value
 _apr_atomic_add_sparc_loop:
-        add 	%o2, %o1, %o3
-        cas 	[%o0], %o2, %o3
-        cmp 	%o2, %o3
-        bne,a 	_apr_atomic_add_sparc_loop
-        ld 		[%o0], %o2
+        add 	%o2, %o1, %o3                ! o3 = o2 + o1 
+        cas 	[%o0], %o2, %o3              ! if cur-val==o2 then cur-val=03
+        cmp 	%o2, %o3                     ! see if the CAS worked
+        bne,a 	_apr_atomic_add_sparc_loop   ! if not try again
+        ld 		[%o0], %o2                   ! return the previous value
         retl
         mov 	%o3, %o0
 
         SET_SIZE(apr_atomic_add_sparc)
 !
 !
+! 
         ENTRY(apr_atomic_sub_sparc)
 
         ld 		[%o0], %o2
@@ -96,5 +97,27 @@ _apr_atomic_sub_sparc_loop:
         retl
         mov 	%o3, %o0
 
-       SET_SIZE(apr_atomic_sub_sparc)
+        SET_SIZE(apr_atomic_sub_sparc)
+!
+!
+!       
+!     %o0  [input]   - the address of the value to compare
+!     %o1  [input]   - the new value
+!     %o2  [input]   - value to compare against
+!     %o0  [output]  - the return value
+!
+        ENTRY(apr_atomic_cas_sparc)
+        ENTRY(apr_atomic_casptr_sparc)
+
+        cas 	[%o0], %o2, %o1
+        cmp     %o1, %o2        ! if o1 == o2 values weren't swapped
+        bne,a 	_apr_atomic_cas_ne
+        mov      %o2, %o0
+        retl
+        mov      %o2, %o0
+_apr_atomic_cas_ne:
+        retl
+        mov      %o1, %o0
+        
+        SET_SIZE(apr_atomic_cas_sparc)
 
