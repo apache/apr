@@ -332,30 +332,56 @@ fi
 AC_MSG_RESULT([$msg])
 ])dnl
 
-dnl APR_FLAG_HEADERS(HEADER-FILE ... , FLAG-TO-SET)
+dnl APR_FLAG_HEADERS(HEADER-FILE ... [, FLAG-TO-SET ] [, "yes" ])
 dnl  we set FLAG-TO-SET to 1 if we find HEADER-FILE, otherwise we set to 0
+dnl  if FLAG-TO-SET is null, we automagically determine it's name
+dnl  by changing all "/" to "_" in the HEADER-FILE and dropping
+dnl  all "." chars. If the 3rd parameter is "yes" then instead of
+dnl  setting to 1 or 0, we set FLAG-TO-SET to yes or no.
+dnl  
 AC_DEFUN(APR_FLAG_HEADERS,[
-if test "x$2" != "x"; then
-    s1="$2=\"1\""
-    s0="$2=\"0\""
-else
-    s1=""
-    s0=""
-fi
-AC_CHECK_HEADERS($1, eval $s1, eval $s0)
+for aprt_i in $1
+do
+    if test "x$2" = "x"; then
+        aprt_fts="`echo $aprt_i | sed -e 's%/%_%g' -e 's/\.//g'`"
+    else
+        aprt_fts="$2"
+    fi
+    if test "x$3" = "xyes"; then
+        s1="$aprt_fts=\"yes\""
+        s0="$aprt_fts=\"no\""
+    else
+        s1="$aprt_fts=\"1\""
+        s0="$aprt_fts=\"0\""
+    fi
+    AC_CHECK_HEADERS($aprt_i, eval $s1, eval $s0)
+done
 ])
 
-dnl APR_FLAG_FUNCS(FUNC ... , FLAG-TO-SET)
-dnl  we set FLAG-TO-SET to 1 if we find FUNC, otherwise we set to 0
+dnl APR_FLAG_FUNCS(FUNC ... [, FLAG-TO-SET] [, "yes" ])
+dnl  if FLAG-TO-SET is null, we automagically determine it's name
+dnl  prepending "have_" to the function name in FUNC, otherwise
+dnl  we use what's provided as FLAG-TO-SET. If the 3rd parameter
+dnl  is "yes" then instead of setting to 1 or 0, we set FLAG-TO-SET
+dnl  to yes or no.
+dnl
 AC_DEFUN(APR_FLAG_FUNCS,[
-if test "x$2" != "x"; then
-    s1="$2=\"1\""
-    s0="$2=\"0\""
-else
-    s1=""
-    s0=""
-fi
-AC_CHECK_FUNCS($1, eval $s1, eval $s0)
+for aprt_i in $1
+do
+    if test "x$2" = "x"; then
+        aprt_fts="have_$aprt_i"
+    else
+        aprt_fts="$2"
+    fi
+    if test "x$3" = "xyes"; then
+        s1="$aprt_fts=\"yes\""
+        s0="$aprt_fts=\"no\""
+    else
+        s1="$aprt_fts=\"1\""
+        s0="$aprt_fts=\"0\""
+    fi
+    AC_CHECK_FUNCS($aprt_i, eval $s1, eval $s0)
+done
 ])
 
 
