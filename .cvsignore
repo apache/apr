@@ -17,6 +17,7 @@ apr.exp
 exports.c
 export_vars.h
 .libs
+.deps
 *.la
 libapr.rc
 *.aps
