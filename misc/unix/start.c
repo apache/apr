@@ -59,6 +59,7 @@
 
 #include "misc.h"       /* for WSAHighByte / WSALowByte */
 #include "locks.h"      /* for apr_unix_setup_lock() */
+#include "proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "internal_time.h"
 
 
@@ -84,6 +85,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
 #if !defined(BEOS) && !defined(OS2) && !defined(WIN32) && !defined(NETWARE)
     apr_unix_setup_lock();
+    apr_proc_mutex_unix_setup_lock();
     apr_unix_setup_time();
 #elif defined WIN32 || defined(NETWARE)
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
