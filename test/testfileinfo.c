@@ -125,7 +125,7 @@ static void test_info_get(CuTest *tc)
         str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
         for (i = 0; vfi[i].bits; ++i) {
             if (vfi[i].bits & ~finfo.valid) {
-                str = apr_pstrcat(p, str, vfi[i].description);
+                str = apr_pstrcat(p, str, vfi[i].description, " ", NULL);
             }
         }
         CuFail(tc, str);
@@ -146,7 +146,7 @@ static void test_stat(CuTest *tc)
         str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
         for (i = 0; vfi[i].bits; ++i) {
             if (vfi[i].bits & ~finfo.valid) {
-                str = apr_pstrcat(p, str, vfi[i].description);
+                str = apr_pstrcat(p, str, vfi[i].description, " ", NULL);
             }
         }
         CuFail(tc, str);
