@@ -97,6 +97,14 @@
 
 /*  -------------------------------------------------------------------- */
 
+#if 'A' != 0x41
+/* Hmmm... This source code isn't being compiled in ASCII.
+ * In order for data that flows over the network to make
+ * sense, we need to translate to/from ASCII.
+ */
+#define NOT_ASCII
+#endif
+
 /* affects include files on Solaris */
 #define BSD_COMP
 
@@ -104,6 +112,9 @@
 #include "apr_file_io.h"
 #include "apr_time.h"
 #include "apr_getopt.h"
+#ifdef NOT_ASCII
+#include "apr_xlate.h"
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -193,6 +204,9 @@ struct data *stats;		/* date for each request */
 ap_pool_t *cntxt;
 
 ap_pollfd_t *readbits;
+#ifdef NOT_ASCII
+ap_xlate_t *fromascii, *toascii;
+#endif
 
 /* --------------------------------------------------------- */
 
@@ -538,11 +552,19 @@ static void read_connection(struct connection *c)
         int l = 4;
         int space = CBUFFSIZE - c->cbx - 1;	/* -1 to allow for 0 terminator */
         int tocopy = (space < r) ? space : r;
-#ifndef CHARSET_EBCDIC
+#ifdef NOT_ASCII
+        ap_size_t inbytes_left = space, outbytes_left = space;
+        
+        status = ap_xlate_conv_buffer(fromascii, buffer, &inbytes_left,
+                                      c->cbuff + c->cbx, &outbytes_left);
+        if (status || inbytes_left || outbytes_left) {
+            fprintf(stderr, "only simple translation is supported (%d/%u/%u)\n",
+                    status, inbytes_left, outbytes_left);
+            exit(1);
+        }
+#else
         memcpy(c->cbuff + c->cbx, buffer, space);
-#else /*CHARSET_EBCDIC */
-        ascii2ebcdic(c->cbuff + c->cbx, buffer, space);
-#endif /*CHARSET_EBCDIC */
+#endif /*NOT_ASCII */
         c->cbx += tocopy;
         space -= tocopy;
         c->cbuff[c->cbx] = 0;	/* terminate for benefit of strstr */
@@ -671,6 +693,10 @@ static void test(void)
     ap_interval_time_t timeout;
     ap_int16_t rv;
     int i;
+#ifdef NOT_ASCII
+    ap_status_t status;
+    ap_size_t inbytes_left, outbytes_left;
+#endif
 
     if (!use_html) {
         printf("Benchmarking %s (be patient)...", hostname);
@@ -719,9 +745,16 @@ static void test(void)
 
     reqlen = strlen(request);
 
-#ifdef CHARSET_EBCDIC
-    ebcdic2ascii(request, request, reqlen);
-#endif /*CHARSET_EBCDIC */
+#ifdef NOT_ASCII
+    inbytes_left = outbytes_left = reqlen;
+    status = ap_xlate_conv_buffer(toascii, request, &inbytes_left,
+                                  request, &outbytes_left);
+    if (status || inbytes_left || outbytes_left) {
+        fprintf(stderr, "only simple translation is supported (%d/%u/%u)\n",
+                status, inbytes_left, outbytes_left);
+        exit(1);
+    }
+#endif /*NOT_ASCII */
 
     /* ok - lets start */
     start = ap_now();
@@ -886,6 +919,9 @@ static int open_postfile(char *pfile)
 int main(int argc, char **argv)
 {
     int c, r;
+#ifdef NOT_ASCII
+    ap_status_t status;
+#endif
 
     /* ap_table_t defaults  */
     tablestring = "";
@@ -896,6 +932,19 @@ int main(int argc, char **argv)
     atexit(ap_terminate);
     ap_create_pool(&cntxt, NULL);
 
+#ifdef NOT_ASCII
+    status = ap_xlate_open(&toascii, "ISO8859-1", APR_DEFAULT_CHARSET, cntxt);
+    if (status) {
+        fprintf(stderr, "ap_xlate_open(to ASCII)->%d\n", status);
+        exit(1);
+    }
+    status = ap_xlate_open(&fromascii, APR_DEFAULT_CHARSET, "ISO8859-1", cntxt);
+    if (status) {
+        fprintf(stderr, "ap_xlate_open(from ASCII)->%d\n", status);
+        exit(1);
+    }
+#endif
+    
     ap_optind = 1;
     while (ap_getopt(argc, argv, "n:c:t:T:p:v:kVhwx:y:z:", &c, cntxt) == APR_SUCCESS) {
         switch (c) {

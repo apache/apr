@@ -62,6 +62,7 @@
 #define APR_HAS_MMAP              @mmap@
 #define APR_HAS_FORK              @fork@
 #define APR_HAS_RANDOM            @rand@
+#define APR_HAS_XLATE             @iconv@
 
 /* Typedefs that APR needs. */
 
