@@ -245,10 +245,16 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 
 ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
-    DWORD bread;
-    if (!ReadFile(thefile->filehand, ch, 1, &bread, NULL)) {
-        return GetLastError();
+    ap_status_t rc;
+    int bread;
+
+    bread = 1;
+    rc = ap_read(thefile, ch, &bread);
+
+    if (rc) {
+        return rc;
     }
+    
     if (bread == 0) {
         thefile->eof_hit = TRUE;
         return APR_EOF;
