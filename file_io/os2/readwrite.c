@@ -88,12 +88,17 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 
         while (rc == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
-                rc = DosRead(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead );
-                if (thefile->dataRead == 0) {
+                ULONG bytesread;
+                rc = DosRead(thefile->filedes, thefile->buffer,
+                             APR_FILE_BUFSIZE, &bytesread);
+
+                if (bytesread == 0) {
                     if (rc == 0)
                         thefile->eof_hit = TRUE;
                     break;
                 }
+
+                thefile->dataRead = bytesread;
                 thefile->filePtr += thefile->dataRead;
                 thefile->bufpos = 0;
             }
