@@ -88,34 +88,30 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
     switch (opt) {
     case APR_SO_TIMEOUT: 
     {
-        int new_timeout;
-        if (on <= 0)
-            new_timeout = on;
-        else
-            /* Convert from APR units (microseconds) to windows units 
-             * (milliseconds) */
-            new_timeout = on/1000;
+        if (on > 0) {
+            on = on/1000;  /* Convert from APR units (uS) to windows units (mS) */ 
+        }
 
-        if (new_timeout == 0) {
+        if (on == 0) {
             /* Set the socket non-blocking if it was previously blocking */
             if (sock->timeout != 0) {
                 if ((stat = sononblock(sock->sock)) != APR_SUCCESS)
                     return stat;
             }
         }
-        else if (new_timeout > 0) {
+        else if (on > 0) {
             /* Set the socket to blocking if it was previously non-blocking */
             if (sock->timeout == 0) {
                 if ((stat = soblock(sock->sock)) != APR_SUCCESS)
                     return stat;
             }
             /* Reset socket timeouts if the new timeout differs from the old timeout */
-            if (sock->timeout != new_timeout) {
-                setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &new_timeout, sizeof(new_timeout));
-                setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &new_timeout, sizeof(new_timeout));
+            if (sock->timeout != on) {
+                setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &on, sizeof(on));
+                setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &on, sizeof(on));
             }
         }
-        else if (new_timeout < 0) {
+        else if (on < 0) {
             int zero = 0;
             /* Set the socket to blocking with infinite timeouts */
             if ((stat = soblock(sock->sock)) != APR_SUCCESS)
@@ -123,7 +119,7 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
             setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &zero, sizeof(zero));
             setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &zero, sizeof(zero));
         }
-        sock->timeout = new_timeout;
+        sock->timeout = on;
         break;
     }
     case APR_SO_KEEPALIVE:
