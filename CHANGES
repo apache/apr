@@ -1,4 +1,10 @@
 Changes with APR b1
+  *) Win32: Fix APR_XTHREAD problems in apr_file_read()
+     and apr_file_write(). Multiple threads were using the
+     same overlapped structure and io event handle created
+     in the open call, which could cause unpredictable
+     file i/o results. [Bill Stoddard]
+
   *) Win32: apr_proc_mutex_trylock and apr_proc_mutex_lock were 
      incorrectly returning APR_BUSY if the lock was previously
      held by a thread that exited before releasing the lock 
