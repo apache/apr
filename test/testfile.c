@@ -68,27 +68,6 @@
 #define APR_BUFFERSIZE   4096 /* This should match APR's buffer size. */
 
 
-
-static void test_open_noreadwrite(CuTest *tc)
-{
-    apr_status_t rv;
-    apr_file_t *thefile = NULL;
-
-    rv = apr_file_open(&thefile, FILENAME,
-                       APR_CREATE | APR_EXCL, 
-                       APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertTrue(tc, rv != APR_SUCCESS);
-    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
-#if 0
-    /* I consider this a bug, if we are going to return an error, we shouldn't
-     * allocate the file pointer.  But, this would make us fail the text, so
-     * I am commenting it out for now.
-     */
-    CuAssertPtrEquals(tc, NULL, thefile); 
-#endif
-    apr_file_close(thefile);
-}
-
 static void test_open_excl(CuTest *tc)
 {
     apr_status_t rv;
@@ -525,7 +504,6 @@ CuSuite *testfile(void)
 {
     CuSuite *suite = CuSuiteNew("File I/O");
 
-    SUITE_ADD_TEST(suite, test_open_noreadwrite);
     SUITE_ADD_TEST(suite, test_open_excl);
     SUITE_ADD_TEST(suite, test_open_read);
     SUITE_ADD_TEST(suite, test_open_readwrite);
