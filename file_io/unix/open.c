@@ -72,28 +72,6 @@ ap_status_t file_cleanup(void *thefile)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_open(ap_file_t **new, char *fname, ap_int32 flag, 
- *                     ap_fileperms perm, ap_context_t *cont)
- *    Open the specified file.
- * arg 1) The opened file descriptor.
- * arg 2) The full path to the file (using / on all systems)
- * arg 3) Or'ed value of:
- *          APR_READ             open for reading
- *          APR_WRITE            open for writing
- *          APR_CREATE           create the file if not there
- *          APR_APPEND           file ptr is set to end prior to all writes
- *          APR_TRUNCATE         set length to zero if file exists
- *          APR_BINARY           not a text file (This flag is ignored on UNIX because it has no meaning)
- *          APR_BUFFERED         buffer the data.  Default is non-buffered
- *          APR_EXCL             return error if APR_CREATE and file exists
- *          APR_DELONCLOSE       delete the file after closing.
- * arg 4) Access permissions for file.
- * arg 5) The context to use.
- * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
- *        called without any mode parameters.  *arg1 must point to a valid
- *        file_t, or NULL (in which case it will be allocated)
- */
 ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cont)
 {
     int oflags = 0;
@@ -167,11 +145,6 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_close(ap_file_t *file)
- *    Close the specified file.
- * arg 1) The file descriptor to close.
- */
 ap_status_t ap_close(ap_file_t *file)
 {
     ap_status_t rv;
@@ -186,14 +159,6 @@ ap_status_t ap_close(ap_file_t *file)
     return rv;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_remove_file(char *path, ap_context_t *cont) 
- *    delete the specified file.
- * arg 1) The full path to the file (using / on all systems)
- * arg 2) The context to use.
- * NOTE: If the file is open, it won't be removed until all instances are
- *       closed.
- */
 ap_status_t ap_remove_file(char *path, ap_context_t *cont)
 {
     if (unlink(path) == 0) {
@@ -253,12 +218,6 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
     return APR_SUCCESS;
 }    
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_eof(ap_file_t *fptr) 
- *    Are we at the end of the file
- * arg 1) The apr file we are testing.
- * NOTE:  Returns APR_EOF if we are at the end of file, APR_SUCCESS otherwise.
- */
 ap_status_t ap_eof(ap_file_t *fptr)
 {
     if (fptr == NULL)
@@ -270,12 +229,6 @@ ap_status_t ap_eof(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_ferror(ap_file_t *fptr) 
- *    Is there an error on the stream?
- * arg 1) The apr file we are testing.
- * NOTE:  Returns -1 if the error indicator is set, APR_SUCCESS otherwise.
- */
 ap_status_t ap_ferror(ap_file_t *fptr)
 {
 /* Thist function should be removed ASAP.  It is next on my list once
@@ -287,12 +240,6 @@ ap_status_t ap_ferror(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont) 
- *    open standard error as an apr file pointer.
- * arg 1) The apr file to use as stderr.
- * arg 2) The context to allocate the file out of.
- */
 ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
 {
     if (thefile == NULL)

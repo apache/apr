@@ -56,12 +56,6 @@
 
 /* A file to put ALL of the accessor functions for ap_file_t types. */
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
- *    return the file name of the current file.
- * arg 1) The path of the file.  
- * arg 2) The currently open file.
- */                     
 ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
 {
     if(new == NULL)
@@ -105,13 +99,6 @@ mode_t get_fileperms(ap_fileperms_t mode)
     return rv;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
- *    Return the data associated with the current file.
- * arg 1) The user data associated with the file.  
- * arg 2) The key to use for retreiving data associated with this file.
- * arg 3) The currently open file.
- */                     
 ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
 {    
     if(data == NULL || key == NULL)
@@ -126,15 +113,6 @@ ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
     }
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
- *                             ap_status (*cleanup) (void *))
- *    Set the data associated with the current file.
- * arg 1) The currently open file.
- * arg 2) The user data to associate with the file.  
- * arg 3) The key to use for assocaiteing data with the file.
- * arg 4) The cleanup routine to use when the file is destroyed.
- */                     
 ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {    
