@@ -93,6 +93,17 @@ APR_DECLARE(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
     return res;
 }
 
+APR_DECLARE(void *) apr_memdup(apr_pool_t *a, const void *m, apr_size_t n)
+{
+    void *res;
+
+    if(m == NULL)
+	return NULL;
+    res = apr_palloc(a, n);
+    memcpy(res, m, n);
+    return res;
+}
+
 APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 {
     char *cp, *argp, *res;

@@ -120,7 +120,7 @@ APR_DECLARE(int) apr_strnatcasecmp(char const *a, char const *b);
 /**
  * duplicate a string into memory allocated out of a pool
  * @param p The pool to allocate out of
- * @param s The string to allocate
+ * @param s The string to duplicate
  * @return The new string
  * @deffunc char *apr_pstrdup(apr_pool_t *p, const char *s)
  */
@@ -130,12 +130,22 @@ APR_DECLARE(char *) apr_pstrdup(apr_pool_t *p, const char *s);
  * duplicate the first n characters of a string into memory allocated 
  * out of a pool; the new string will be '\0'-terminated
  * @param p The pool to allocate out of
- * @param s The string to allocate
+ * @param s The string to duplicate
  * @param n The number of characters to duplicate
  * @return The new string
  * @deffunc char *apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n)
  */
 APR_DECLARE(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
+
+/**
+ * Duplicate a block of memory.
+ *
+ * @param p The pool to allocate from
+ * @param m The memory to duplicate
+ * @param n The number of bytes to duplicate
+ * @return The new block of memory
+ */
+APR_DECLARE(void *) apr_memdup(apr_pool_t *p, const void *m, apr_size_t n);
 
 /**
  * Concatenate multiple strings, allocating memory out a pool
