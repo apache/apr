@@ -180,8 +180,8 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_PROCEDURE, &symaddr);
     if (status == -1 && errno == 0) /* try TYPE_DATA instead */
         status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_DATA, &symaddr);
-    if (status = -1)
-        return APR_EINIT;
+    if (status == -1)
+        return errno;
     *ressym = symaddr;
     return APR_SUCCESS;
 
