@@ -116,7 +116,7 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
-void *dummy_worker(void *opaque)
+static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thread = (apr_thread_t*)opaque;
     return thread->func(thread, thread->data);
