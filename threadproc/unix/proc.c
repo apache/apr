@@ -343,6 +343,9 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
                 exit(-1);   /* We have big problems, the child should exit. */
             }
         }
+
+        ap_cleanup_for_exec();
+
         if (attr->cmdtype == APR_SHELLCMD) {
             i = 0;
             while (args[i]) {
@@ -470,7 +473,7 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
     if (proc == NULL) {
         return APR_ENOPROC;
     }
-    theproc = &(proc->pid);
+    *theproc = proc->pid;
     return APR_SUCCESS;
 }
 
