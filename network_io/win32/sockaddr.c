@@ -141,7 +141,7 @@ ap_status_t ap_set_local_ipaddr(ap_socket_t *sock, const char *addr)
     ipaddr = inet_addr(addr);
     
     if (ipaddr == INADDR_NONE) {
-        return APR_ENOADDRESS;
+        return WSAEADDRNOTAVAIL;
     }
     
     sock->local_addr->sin_addr.s_addr = ipaddr;
@@ -168,7 +168,7 @@ ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr)
     ipaddr = inet_addr(addr);
     
     if (ipaddr == INADDR_NONE) {
-        return APR_ENOADDRESS;
+        return WSAEADDRNOTAVAIL;
     }
     
     sock->remote_addr->sin_addr.s_addr = ipaddr;

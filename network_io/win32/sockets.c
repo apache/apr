@@ -201,7 +201,7 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
     else {
         hp = gethostbyname(hostname);
         if (!hp)  {
-            return status_from_res_error(WSAGetLastError());
+            return (WSAGetLastError() + APR_OS_START_SYSERR);
         }
         memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
         sock->addr_len = sizeof(*sock->remote_addr);
