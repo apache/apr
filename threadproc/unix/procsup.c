@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "unix/threadproc.h"
 
 apr_status_t apr_detach(void)
 {

@@ -54,7 +54,7 @@
 
 #define INCL_DOSERRORS
 #define INCL_DOS
-#include "threadproc.h"
+#include "os2/threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_lib.h"
