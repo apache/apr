@@ -62,6 +62,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define OS_START_ERROR   4000
+
 /* If this definition of APRStatus changes, then we can remove this, but right
    now, the decision was to use an errno-like implementation.
 */
@@ -383,44 +385,43 @@ typedef int ap_status_t;
 
 
 /*  APR ERROR VALUES */
-#define APR_ENOSTAT        4001
-#define APR_ENOPOOL        4002
-#define APR_ENOFILE        4003
-#define APR_EBADDATE       4004
-#define APR_ENOCONT        4005
-#define APR_ENOPROC        4006
-#define APR_ENOTIME        4007
-#define APR_ENODIR         4008
-#define APR_ENOLOCK        4009
-#define APR_ENOPOLL        4010
-#define APR_ENOSOCKET      4011
-#define APR_ENOTHREAD      4012
-#define APR_ENOTHDKEY      4013
-#define APR_NOTTHREADSAFE  4014
+#define APR_ENOSTAT        OS_START_ERROR + 1
+#define APR_ENOPOOL        OS_START_ERROR + 2
+#define APR_ENOFILE        OS_START_ERROR + 3
+#define APR_EBADDATE       OS_START_ERROR + 4
+#define APR_ENOCONT        OS_START_ERROR + 5
+#define APR_ENOPROC        OS_START_ERROR + 6
+#define APR_ENOTIME        OS_START_ERROR + 7
+#define APR_ENODIR         OS_START_ERROR + 8
+#define APR_ENOLOCK        OS_START_ERROR + 9
+#define APR_ENOPOLL        OS_START_ERROR + 10
+#define APR_ENOSOCKET      OS_START_ERROR + 11
+#define APR_ENOTHREAD      OS_START_ERROR + 12
+#define APR_ENOTHDKEY      OS_START_ERROR + 13
+#define APR_ENOTTHREADSAFE OS_START_ERROR + 14
 
 /*  APR STATUS VALUES */
-#define APR_INCHILD        5001
-#define APR_INPARENT       5002
-#define APR_DETACH         5003
-#define APR_NOTDETACH      5004
-#define APR_CHILD_DONE     5005
-#define APR_CHILD_NOTDONE  5006
-#define APR_TIMEUP         5007
-#define APR_INVALSOCK      5008
-#define APR_ALLSTD         5009
-#define APR_STDOUT         5010
-#define APR_STDERR         5011
-#define APR_BADCH          5012
-#define APR_BADARG         5013
-#define APR_EOF            5014
-#define APR_NOTFOUND       5015
-#define APR_EINIT          5016   /* A simple value to be used to initialze a
-                                   * status variable.
-                                   */ 
-#define APR_ENOTIMPL       5017   /* Not implemented either because we haven't
-                                   * gotten to it yet, or because it is not
-                                   * possible to do correctly.
-                                   */
+#define APR_INCHILD        OS_START_ERROR + 500 + 1
+#define APR_INPARENT       OS_START_ERROR + 500 + 2
+#define APR_DETACH         OS_START_ERROR + 500 + 3
+#define APR_NOTDETACH      OS_START_ERROR + 500 + 4
+#define APR_CHILD_DONE     OS_START_ERROR + 500 + 5
+#define APR_CHILD_NOTDONE  OS_START_ERROR + 500 + 6
+#define APR_TIMEUP         OS_START_ERROR + 500 + 7
+#define APR_INVALSOCK      OS_START_ERROR + 500 + 8
+#define APR_ALLSTD         OS_START_ERROR + 500 + 9
+#define APR_STDOUT         OS_START_ERROR + 500 + 10
+#define APR_STDERR         OS_START_ERROR + 500 + 11
+#define APR_BADCH          OS_START_ERROR + 500 + 12
+#define APR_BADARG         OS_START_ERROR + 500 + 13
+#define APR_EOF            OS_START_ERROR + 500 + 14
+#define APR_NOTFOUND       OS_START_ERROR + 500 + 15
+/* A simple value to be used to initialze a status variable. */
+#define APR_EINIT          OS_START_ERROR + 500 + 16   
+/* Not implemented either because we haven't gotten to it yet, or 
+ * because it is not possible to do correctly.  
+ */
+#define APR_ENOTIMPL       OS_START_ERROR + 500 + 17   
 
 #ifdef __cplusplus
 }
