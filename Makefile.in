@@ -105,6 +105,17 @@ exports:
 
 docs:
 	./helpers/scandoc -i./helpers/default.pl -p./docs/ ./include/*.h
+
+test: $(LIBAPR)
+	(cd test; make clean; make; \
+	cd test; \
+	for prog in `find . -type f -perm +u+x -name "test*" -print`; do \
+	    ./$$prog; \
+	    if [ $$? -eq 255 ]; then \
+	        echo "$$prog failed"; \
+	        break; \
+	    fi \
+	done )
 	
 # DO NOT REMOVE
 docs: $(INCDIR)/*.h
