@@ -271,22 +271,6 @@ typedef  int               apr_socklen_t;
 #define APR_INT64_C(val) (val##i64)
 #endif
 
-//srj added in here, libc c no longer takes care of these
-
-typedef unsigned char   nuint8;
-typedef unsigned short  nuint16;
-
-#define NGetLo8(a16)       ((nuint8)((nuint16)(a16) & 0xFF))
-#define NGetHi8(a16)       ((nuint8)((nuint16)(a16) >> 8))
-
-
-#if !defined( HIBYTE )
-      #define HIBYTE      NGetHi8
-   #endif
-   #if !defined( LOBYTE )
-      #define LOBYTE      NGetLo8
-#endif
-
 /* PROC mutex is a GLOBAL mutex on Netware */
 #define APR_PROC_MUTEX_IS_GLOBAL      1
 
