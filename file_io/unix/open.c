@@ -69,6 +69,9 @@ apr_status_t apr_unix_file_cleanup(void *thefile)
     rc = close(file->filedes);
     if (rc == 0) {
         file->filedes = -1;
+        if (file->flags & APR_DELONCLOSE) {
+            unlink(file->fname);
+        }
 #if APR_HAS_THREADS
         if (file->thlock) {
             rv = apr_lock_destroy(file->thlock);
@@ -156,9 +159,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
        return errno;
     }
 
-    if (flag & APR_DELONCLOSE) {
-        unlink(fname);
-    }
     (*new)->pipe = 0;
     (*new)->timeout = -1;
     (*new)->ungetchar = -1;
