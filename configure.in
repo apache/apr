@@ -338,6 +338,7 @@ case $host in
        APR_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
        eolstr="\\n"
        osver=`uname -r`
+       proc_mutex_is_global=1
        case $osver in
           5.0.4)
              file_as_socket="1"
