@@ -91,20 +91,6 @@ struct apr_hash_entry_t {
 };
 
 /*
- * The size of the array is always a power of two. We use the maximum
- * index rather than the size so that we can use bitwise-AND for
- * modular arithmetic.
- * The count of hash entries may be greater depending on the chosen
- * collision rate.
- */
-struct apr_hash_t {
-    apr_pool_t		*pool;
-    apr_hash_entry_t   **array;
-    int                  count, max;
-};
-#define INITIAL_MAX 15 /* tunable == 2^n - 1 */
-
-/*
  * Data structure for iterating through a hash table.
  *
  * We keep a pointer to the next hash entry here to allow the current
@@ -116,6 +102,21 @@ struct apr_hash_index_t {
     apr_hash_entry_t   *this, *next;
     int                 index;
 };
+
+/*
+ * The size of the array is always a power of two. We use the maximum
+ * index rather than the size so that we can use bitwise-AND for
+ * modular arithmetic.
+ * The count of hash entries may be greater depending on the chosen
+ * collision rate.
+ */
+struct apr_hash_t {
+    apr_pool_t		*pool;
+    apr_hash_entry_t   **array;
+    apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
+    int                  count, max;
+};
+#define INITIAL_MAX 15 /* tunable == 2^n - 1 */
 
 
 /*
@@ -158,7 +159,10 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
 APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
-    hi = apr_palloc(p, sizeof(*hi));
+    if (p) 
+        hi = apr_palloc(p, sizeof(*hi));
+    else
+        hi = &ht->iterator;
     hi->ht = ht;
     hi->index = 0;
     hi->this = NULL;
@@ -190,7 +194,7 @@ static void expand_array(apr_hash_t *ht)
 
     new_max = ht->max * 2 + 1;
     new_array = alloc_array(ht, new_max);
-    for (hi = apr_hash_first(ht); hi; hi = apr_hash_next(hi)) {
+    for (hi = apr_hash_first(NULL, ht); hi; hi = apr_hash_next(hi)) {
 	i = hi->this->hash & new_max;
 	hi->this->next = new_array[i];
 	new_array[i] = hi->this;
@@ -359,7 +363,7 @@ APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
     res->array = alloc_array(res, res->max);
     new_vals = apr_palloc(p, sizeof(apr_hash_entry_t) * res->count);
     j = 0;
-    for (hi = apr_hash_first((apr_hash_t*)base); hi; hi = apr_hash_next(hi)) {
+    for (hi = apr_hash_first(NULL, (apr_hash_t*)base); hi; hi = apr_hash_next(hi)) {
         i = hi->this->hash & res->max;
 
         new_vals[j].klen = hi->this->klen;
@@ -374,7 +378,7 @@ APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
     /* can't simply copy the stuff over, need to set each one so as to
      * increment the counts/array properly
      */
-    for (hi = apr_hash_first((apr_hash_t*)overlay); hi; 
+    for (hi = apr_hash_first(NULL, (apr_hash_t*)overlay); hi; 
          hi = apr_hash_next(hi)) {
         apr_hash_set(res, hi->this->key, hi->this->klen, hi->this->val);
     }
