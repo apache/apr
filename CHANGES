@@ -1,5 +1,8 @@
 Changes with APR 0.9.5
 
+  *) Fix apr_snprintf() to respect precision for small floating point
+     numbers.  PR 29621.  [Artur Zaprzala <zybi talex.pl>]
+
   *) Add command type APR_SHELLCMD_ENV for creating a process
      which is started by the shell and which inherits the parent's
      environment variables.  [Jeff Trawick]

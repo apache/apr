@@ -142,6 +142,24 @@ static void snprintf_int64(CuTest *tc)
     CuAssertStrEquals(tc, buf, "3141592653589793238");
 }
 
+static void snprintf_underflow(CuTest *tc)
+{
+    char buf[20];
+    int rv;
+
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.0001);
+    CuAssertIntEquals(tc, 4, rv);
+    CuAssertStrEquals(tc, "0.00", buf);
+    
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.001);
+    CuAssertIntEquals(tc, 4, rv);
+    CuAssertStrEquals(tc, "0.00", buf);
+    
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.01);
+    CuAssertIntEquals(tc, 4, rv);
+    CuAssertStrEquals(tc, "0.01", buf);
+}
+
 static void string_error(CuTest *tc)
 {
      char buf[128], *rv;
@@ -271,6 +289,7 @@ CuSuite *teststr(void)
     SUITE_ADD_TEST(suite, snprintf_0nonNULL);
     SUITE_ADD_TEST(suite, snprintf_noNULL);
     SUITE_ADD_TEST(suite, snprintf_int64);
+    SUITE_ADD_TEST(suite, snprintf_underflow);
     SUITE_ADD_TEST(suite, test_strtok);
     SUITE_ADD_TEST(suite, string_error);
     SUITE_ADD_TEST(suite, string_long);

@@ -132,11 +132,12 @@ static char *apr_cvt(double arg, int ndigits, int *decpt, int *sign,
     p1 = &buf[ndigits];
     if (eflag == 0)
         p1 += r2;
-    *decpt = r2;
     if (p1 < &buf[0]) {
+        *decpt = -ndigits;
         buf[0] = '\0';
         return (buf);
     }
+    *decpt = r2;
     while (p <= p1 && p < &buf[NDIG]) {
         arg *= 10;
         arg = modf(arg, &fj);
