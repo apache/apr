@@ -29,11 +29,11 @@ if test "x$apr_preload_done" != "xyes" ; then
   case "$host" in
     *mint)
 	APR_ADDTO(CPPFLAGS, [-DMINT])
-	APR_ADDTO(LIBS, [-lportlib -lsocket])
+	APR_ADDTO(LIBS, [-lportlib])
 	;;
     *MPE/iX*)
 	APR_ADDTO(CPPFLAGS, [-DMPE -D_POSIX_SOURCE -D_SOCKET_SOURCE])
-	APR_ADDTO(LIBS, [-lsocket -lsvipc -lcurses])
+	APR_ADDTO(LIBS, [-lsvipc -lcurses])
 	APR_ADDTO(LDFLAGS, [-Xlinker \"-WL,cap=ia,ba,ph;nmstack=1024000\"])
 	;;
     *-apple-aux3*)
@@ -126,11 +126,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-GNU*)
 	APR_ADDTO(CPPFLAGS, [-DHURD])
-	APR_ADDTO(LIBS, [-lcrypt])
 	;;
     *-lynx-lynxos)
 	APR_ADDTO(CPPFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])
-	APR_ADDTO(LIBS, [-lbsd -lcrypt])
+	APR_ADDTO(LIBS, [-lbsd])
 	;;
     *486-*-bsdi*)
 	APR_ADDTO(CFLAGS, [-m486])
@@ -140,7 +139,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-netbsd*)
 	APR_ADDTO(CPPFLAGS, [-DNETBSD])
-	APR_ADDTO(LIBS, [-lcrypt])
 	;;
     *-freebsd*)
 	case $host in
@@ -148,7 +146,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 		APR_ADDTO(CFLAGS, [-funsigned-char])
 		;;
 	esac
-	APR_ADDTO(LIBS, [-lcrypt])
 	APR_SETIFNULL(enable_threads, [no])
 	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_THREAD_SAFE])
 	;;
@@ -172,13 +169,13 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-qnx)
 	APR_ADDTO(CPPFLAGS, [-DQNX])
-	APR_ADDTO(LIBS, [-N128k -lsocket -lunix])
+	APR_ADDTO(LIBS, [-N128k -lunix])
 	;;
     *-qnx32)
         APR_SETVAR(CC, [cc -F])
 	APR_ADDTO(CPPFLAGS, [-DQNX])
 	APR_ADDTO(CFLAGS, [-mf -3])
-	APR_ADDTO(LIBS, [-N128k -lsocket -lunix])
+	APR_ADDTO(LIBS, [-N128k -lunix])
 	;;
     *-isc4*)
 	APR_SETVAR(CC, [gcc])
@@ -189,20 +186,19 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-sco3*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
 	APR_ADDTO(CFLAGS, [-Oacgiltz])
-	APR_ADDTO(LIBS, [-lPW -lsocket -lmalloc -lcrypt_i])
+	APR_ADDTO(LIBS, [-lPW -lmalloc _i])
 	;;
     *-sco5*)
 	APR_ADDTO(CPPFLAGS, [-DSCO5 -D_REENTRANT])
-	APR_ADDTO(LIBS, [-lsocket -lmalloc -lprot -ltinfo -lx])
+	APR_ADDTO(LIBS, [-lmalloc -lprot -ltinfo -lx])
 	;;
     *-sco_sv*|*-SCO_SV*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
-	APR_ADDTO(LIBS, [-lPW -lsocket -lmalloc -lcrypt_i])
+	APR_ADDTO(LIBS, [-lPW -lmalloc _i])
 	;;
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
-	APR_ADDTO(LIBS, [-lsocket -lnsl])
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
 	;;
     *-sunos4*)
@@ -210,31 +206,30 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-unixware1)
 	APR_ADDTO(CPPFLAGS, [-DUW=100])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lcrypt])
 	;;
     *-unixware2)
 	APR_ADDTO(CPPFLAGS, [-DUW=200])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lcrypt -lgen])
+	APR_ADDTO(LIBS, [-lgen])
 	;;
     *-unixware211)
 	APR_ADDTO(CPPFLAGS, [-DUW=211])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lcrypt -lgen])
+	APR_ADDTO(LIBS, [-lgen])
 	;;
     *-unixware212)
 	APR_ADDTO(CPPFLAGS, [-DUW=212])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lcrypt -lgen])
+	APR_ADDTO(LIBS, [-lgen])
 	;;
     *-unixware7)
 	APR_ADDTO(CPPFLAGS, [-DUW=700])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lcrypt -lgen])
+	APR_ADDTO(LIBS, [-lgen])
 	;;
     maxion-*-sysv4*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc -lgen])
+	APR_ADDTO(LIBS, [-lc -lgen])
 	;;
     *-*-powermax*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lgen])
+	APR_ADDTO(LIBS, [-lgen])
 	;;
     TPF)
        APR_SETVAR(CC, [c89])
@@ -246,27 +241,25 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-siemens-sysv4*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -D_XPG_IV -DHAS_DLFCN -DUSE_MMAP_FILES -DUSE_SYSVSEM_SERIALIZED_ACCEPT -DNEED_UNION_SEMUN])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc])
+	APR_ADDTO(LIBS, [-lc])
 	;;
     pyramid-pyramid-svr4)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -DNO_LONG_DOUBLE])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc])
+	APR_ADDTO(LIBS, [-lc])
 	;;
     DS/90\ 7000-*-sysv4*)
 	APR_ADDTO(CPPFLAGS, [-DUXPDS])
-	APR_ADDTO(LIBS, [-lsocket -lnsl])
 	;;
     *-tandem-sysv4*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4])
-	APR_ADDTO(LIBS, [-lsocket -lnsl])
 	;;
     *-ncr-sysv4)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -DMPRAS])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc -L/usr/ucblib -lucb])
+	APR_ADDTO(LIBS, [-lc -L/usr/ucblib -lucb])
 	;;
     *-sysv4*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc])
+	APR_ADDTO(LIBS, [-lc])
 	;;
     88k-encore-sysv4)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -DENCORE])
@@ -277,11 +270,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	case $PLATOSVERS in
 	    2*) APR_ADDTO(CPPFLAGS, [-DUTS21 -DUSEBCOPY])
 	        APR_ADDTO(CFLAGS, [-Xa -eft])
-	        APR_ADDTO(LIBS, [-lsocket -lbsd -la])
+	        APR_ADDTO(LIBS, [-lbsd -la])
 	        ;;
 	    *)  APR_ADDTO(CPPFLAGS, [-DSVR4])
 	        APR_ADDTO(CFLAGS, [-Xa])
-	        APR_ADDTO(LIBS, [-lsocket -lnsl])
 	        ;;
 	esac
 	;;
@@ -307,32 +299,32 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-sequent-ptx2.*.*)
 	APR_ADDTO(CPPFLAGS, [-DSEQUENT=20])
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
-	APR_ADDTO(LIBS, [-lsocket -linet -lnsl -lc -lseq])
+	APR_ADDTO(LIBS, [-linet -lc -lseq])
 	;;
     *-sequent-ptx4.0.*)
 	APR_ADDTO(CPPFLAGS, [-DSEQUENT=40])
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
-	APR_ADDTO(LIBS, [-lsocket -linet -lnsl -lc])
+	APR_ADDTO(LIBS, [-linet -lc])
 	;;
     *-sequent-ptx4.[123].*)
 	APR_ADDTO(CPPFLAGS, [-DSEQUENT=41])
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc])
+	APR_ADDTO(LIBS, [-lc])
 	;;
     *-sequent-ptx4.4.*)
 	APR_ADDTO(CPPFLAGS, [-DSEQUENT=44])
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc])
+	APR_ADDTO(LIBS, [-lc])
 	;;
     *-sequent-ptx4.5.*)
 	APR_ADDTO(CPPFLAGS, [-DSEQUENT=45])
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc])
+	APR_ADDTO(LIBS, [-lc])
 	;;
     *-sequent-ptx5.0.*)
 	APR_ADDTO(CPPFLAGS, [-DSEQUENT=50])
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc])
+	APR_ADDTO(LIBS, [-lc])
 	;;
     *NEWS-OS*)
 	APR_ADDTO(CPPFLAGS, [-DNEWSOS])
@@ -350,23 +342,23 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         case $PLATOSVERS in
             5.0.4)
                 APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
-                APR_ADDTO(LIBS, [-lbind -lsocket -lbe -lroot])
+                APR_ADDTO(LIBS, [-lbind -lbe -lroot])
                 APR_ADDTO(CPPFLAGS,[-DBONE7])
                 ;;
             5.1)
                 APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
-                APR_ADDTO(LIBS, [-lbind -lsocket -lbe -lroot])
+                APR_ADDTO(LIBS, [-lbind -lbe -lroot])
                 ;;
 	esac
 	APR_ADDTO(CPPFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK -DAP_AUTH_DBM_USE_APR])
         ;;
     4850-*.*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -DMPRAS])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc -L/usr/ucblib -lucb])
+	APR_ADDTO(LIBS, [-lc -L/usr/ucblib -lucb])
 	;;
     drs6000*)
 	APR_ADDTO(CPPFLAGS, [-DSVR4])
-	APR_ADDTO(LIBS, [-lsocket -lnsl -lc -L/usr/ucblib -lucb])
+	APR_ADDTO(LIBS, [-lc -L/usr/ucblib -lucb])
 	;;
     m88k-*-CX/SX|CYBER)
 	APR_ADDTO(CPPFLAGS, [-D_CX_SX])

@@ -264,6 +264,15 @@ case $host in
         ;;
 esac
 
+dnl #----------------------------- Checks for Any required Libraries
+AC_CHECK_LIB(nsl, gethostbyname)
+AC_SEARCH_LIBS(gethostname, nsl)
+AC_CHECK_LIB(socket, socket)
+AC_SEARCH_LIBS(crypt, crypt ufc)
+AC_CHECK_LIB(truerand, main)
+AC_CHECK_LIB(iconv, iconv)
+AC_CHECK_LIB(m, modf)
+
 dnl #----------------------------- Checking for Threads
 echo $ac_n "${nl}Checking for Threads...${nl}"
 
@@ -468,15 +477,6 @@ if test ".$SYS_SW" = ".AIX"; then
             ;;
     esac
 fi
-
-dnl #----------------------------- Checks for Any required Libraries
-AC_CHECK_LIB(nsl,gethostbyname)
-AC_SEARCH_LIBS(gethostname, nsl)
-AC_CHECK_LIB(socket,socket)
-AC_SEARCH_LIBS(crypt, crypt ufc)
-AC_CHECK_LIB(truerand,main)
-AC_CHECK_LIB(iconv,iconv)
-AC_CHECK_LIB(m,modf)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
