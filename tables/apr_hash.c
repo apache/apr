@@ -289,6 +289,41 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     return hep;
 }
 
+APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
+                                        const apr_hash_t *orig)
+{
+    apr_hash_t *ht;
+    apr_hash_entry_t *new_vals;
+    int i, j;
+
+    ht = apr_palloc(pool, sizeof(apr_hash_t) +
+                    sizeof(*ht->array) * (orig->max + 1) +
+                    sizeof(apr_hash_entry_t) * orig->count);
+    ht->pool = pool;
+    ht->count = orig->count;
+    ht->max = orig->max;
+    ht->array = (apr_hash_entry_t **)((char *)ht + sizeof(apr_hash_t));
+
+    new_vals = (apr_hash_entry_t *)((char *)(ht) + sizeof(apr_hash_t) +
+                                    sizeof(*ht->array) * (orig->max + 1));
+    j = 0;
+    for (i = 0; i <= ht->max; i++) {
+        apr_hash_entry_t **new_entry = &(ht->array[i]);
+        apr_hash_entry_t *orig_entry = orig->array[i];
+        while (orig_entry) {
+            *new_entry = &new_vals[j++];
+            (*new_entry)->hash = orig_entry->hash;
+            (*new_entry)->key = orig_entry->key;
+            (*new_entry)->klen = orig_entry->klen;
+            (*new_entry)->val = orig_entry->val;
+            new_entry = &((*new_entry)->next);
+            orig_entry = orig_entry->next;
+        }
+        *new_entry = NULL;
+    }
+    return ht;
+}
+
 APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht,
 			       const void *key,
 			       apr_ssize_t klen)
@@ -335,10 +370,25 @@ APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
                                           const apr_hash_t *overlay, 
                                           const apr_hash_t *base)
 {
+    return apr_hash_merge(p, overlay, base, NULL, NULL);
+}
+
+APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
+                                         const apr_hash_t *overlay, 
+                                         const apr_hash_t *base,
+                                         void * (*merger)(apr_pool_t *p,
+                                                     const void *key,
+                                                     apr_ssize_t klen,
+                                                     const void *h1_val,
+                                                     const void *h2_val,
+                                                     const void *data),
+                                         const void *data)
+{
     apr_hash_t *res;
-    apr_hash_index_t *hi;
     apr_hash_entry_t *new_vals;
-    int i,j;
+    apr_hash_entry_t *iter;
+    apr_hash_entry_t *ent;
+    int i,j,k;
 
 #ifdef POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that
@@ -361,27 +411,55 @@ APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
     res->pool = p;
     res->count = base->count;
     res->max = (overlay->max > base->max) ? overlay->max : base->max;
+    if (base->count + overlay->count > res->max) {
+        res->max = res->max * 2 + 1;
+    }
     res->array = alloc_array(res, res->max);
-    new_vals = apr_palloc(p, sizeof(apr_hash_entry_t) * res->count);
+    if (base->count + overlay->count) {
+        new_vals = apr_palloc(p, sizeof(apr_hash_entry_t) *
+                              (base->count + overlay->count));
+    }
     j = 0;
-    for (hi = apr_hash_first(NULL, (apr_hash_t*)base); hi; hi = apr_hash_next(hi)) {
-        i = hi->this->hash & res->max;
-
-        new_vals[j].klen = hi->this->klen;
-        new_vals[j].key = hi->this->key;
-        new_vals[j].val = hi->this->val;
-        new_vals[j].hash = hi->this->hash;
-        new_vals[j].next = res->array[i];
-        res->array[i] = &new_vals[j];
-        j++;
+    for (k = 0; k <= base->max; k++) {
+        for (iter = base->array[k]; iter; iter = iter->next) {
+            i = iter->hash & res->max;
+            new_vals[j].klen = iter->klen;
+            new_vals[j].key = iter->key;
+            new_vals[j].val = iter->val;
+            new_vals[j].hash = iter->hash;
+            new_vals[j].next = res->array[i];
+            res->array[i] = &new_vals[j];
+            j++;
+        }
     }
 
-    /* can't simply copy the stuff over, need to set each one so as to
-     * increment the counts/array properly
-     */
-    for (hi = apr_hash_first(NULL, (apr_hash_t*)overlay); hi; 
-         hi = apr_hash_next(hi)) {
-        apr_hash_set(res, hi->this->key, hi->this->klen, hi->this->val);
+    for (k = 0; k < overlay->max; k++) {
+        for (iter = overlay->array[k]; iter; iter = iter->next) {
+            i = iter->hash & res->max;
+            for (ent = res->array[i]; ent; ent = ent->next) {
+                if ((ent->klen == iter->klen) &&
+                    (memcmp(ent->key, iter->key, iter->klen) == 0)) {
+                    if (merger) {
+                        ent->val = (*merger)(p, iter->key, iter->klen,
+                                             iter->val, ent->val, data);
+                    }
+                    else {
+                        ent->val = iter->val;
+                    }
+                    break;
+                }
+            }
+            if (!ent) {
+                new_vals[j].klen = iter->klen;
+                new_vals[j].key = iter->key;
+                new_vals[j].val = iter->val;
+                new_vals[j].hash = iter->hash;
+                new_vals[j].next = res->array[i];
+                res->array[i] = &new_vals[j];
+                res->count++;
+                j++;
+            }
+        }
     }
     return res;
 }
