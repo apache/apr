@@ -487,7 +487,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                                           apr_sockaddr_t *sockaddr,
                                           apr_int32_t flags)
 {
-#if defined(HAVE_GETNAMEINFO) && APR_HAVE_IPV6
+#if defined(HAVE_GETNAMEINFO)
     int rc;
 #if defined(NI_MAXHOST)
     char tmphostname[NI_MAXHOST];
