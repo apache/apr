@@ -25,6 +25,7 @@ TARGETS= testfile@EXEEXT@ \
 	testpipe@EXEEXT@ \
 	testdso@EXEEXT@ \
 	testoc@EXEEXT@ \
+	occhild@EXEEXT@ \
 	mod_test.so
 
 OBJS= testfile.o \
@@ -37,6 +38,7 @@ OBJS= testfile.o \
 	testmmap.o \
 	testdso.o \
 	testoc.o \
+	occhild.o \
 	mod_test.o
 
 .c.o:
@@ -52,6 +54,9 @@ testdso@EXEEXT@: testdso.o
 
 testoc@EXEEXT@: testoc.o
 	$(CC) $(CFLAGS) testoc.o -o testoc@EXEEXT@ $(LDFLAGS) 
+
+occhild.so: occhild.o
+	$(CC) -shared occhild.o -o occhild.so 
 
 mod_test.so: mod_test.o
 	$(CC) -shared mod_test.o -o mod_test.so 

@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
     ap_ssize_t nbytes = 0;
     ap_proc_t *newproc = NULL;
     ap_procattr_t *procattr = NULL;
+    ap_file_t *std = NULL;
     char *args[3];
 
     if (argc > 1) {
@@ -106,7 +107,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     
-    args[0] = ap_pstrdup(context, "testoc");
+    args[0] = ap_pstrdup(context, "occhild");
     args[1] = ap_pstrdup(context, "-X");
     args[2] = NULL;
 
@@ -116,22 +117,27 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Could not create attr\n");
         exit(-1);;
     }
+    else {
+        ap_setprocattr_io(procattr, APR_FULL_BLOCK, APR_NO_PIPE, APR_NO_PIPE);
+    }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "[PARENT] Starting other child..........");
     fflush(stdout);
-    if (ap_create_process(&newproc, "../testoc", args, NULL, procattr, context) 
+    if (ap_create_process(&newproc, "./occhild", args, NULL, procattr, context) 
                           != APR_SUCCESS) {
         fprintf(stderr, "error starting other child\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
+    ap_get_childin(&std, newproc);
 
-    ap_register_other_child(newproc, ocmaint, NULL, -1, context);
+    ap_register_other_child(newproc, ocmaint, NULL, std, context);
 
     fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
     fflush(stdout);
+    sleep(1);
     if (ap_kill(newproc, SIGKILL) != APR_SUCCESS) {
         fprintf(stderr,"couldn't send the signal!\n");
         exit(-1);
@@ -139,7 +145,8 @@ int main(int argc, char *argv[])
     fprintf(stdout,"OK\n");
     
     /* allow time for things to settle... */
-    sleep(1);
+    sleep(3);
+    ap_probe_writable_fds();
     
     fprintf(stdout, "[PARENT] Checking on children..........\n");
     ap_check_other_child();
