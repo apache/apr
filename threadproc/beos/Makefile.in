@@ -19,15 +19,21 @@ OBJS=proc.o \
 	thread.o \
 	threadcancel.o \
 	threadpriv.o \
-	signals.o
+	signals.o \
+         procsup.o \
+         apr_proc_stub
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
 
 all: $(LIB)
 
+apr_proc_stub:
+	$(CC) apr_proc_stub.c \
+	&& cp apr_proc_stub /boot/home/config/bin
+
 clean:
-	$(RM) -f *.o *.a *.so
+	$(RM) -f *.o *.a *.so /boot/home/config/bin/apr_proc_stub apr_proc_stub
 
 distclean: clean
 	-$(RM) -f Makefile
@@ -54,20 +60,3 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-proc.o: proc.c threadproc.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../file_io/beos/fileio.h
-signals.o: signals.c threadproc.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../file_io/beos/fileio.h
-thread.o: thread.c threadproc.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../file_io/beos/fileio.h
-threadcancel.o: threadcancel.c threadproc.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- ../../file_io/beos/fileio.h
-threadpriv.o: threadpriv.c threadproc.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- ../../file_io/beos/fileio.h

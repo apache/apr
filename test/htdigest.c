@@ -69,10 +69,10 @@
 #include "apr_lib.h"
 #include "apr_md5.h"
 #include <sys/types.h>
-#if defined(MPE) || defined(QNX) || defined(WIN32)
-#include <signal.h>
-#else
+#ifdef HAVE_SYS_SIGNAL_H
 #include <sys/signal.h>
+#else
+#include <signal.h>
 #endif
 
 #ifdef WIN32

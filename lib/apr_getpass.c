@@ -141,8 +141,7 @@ static char *getpass(const char *prompt)
     }
  
     password[n] = '\0';
-    fprintf(stderr, "********************\n");
-
+    printf("\n");
     if (n > (MAX_STRING_LEN - 1)) {
         password[MAX_STRING_LEN - 1] = '\0';
     }

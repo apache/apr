@@ -6,7 +6,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -53,76 +53,68 @@
  *
  */
 
-#include "apr_thread_proc.h"
+#include "threadproc.h"
 #include "fileio.h"
+
+#include "apr_config.h"
+#include "apr_thread_proc.h"
 #include "apr_file_io.h"
-#include  <kernel/OS.h>
+#include "apr_general.h"
+#include "apr_lib.h"
 
-#ifndef THREAD_PROC_H
-#define THREAD_PROC_H
+ap_status_t ap_detach(ap_context_t *cont, struct proc_t **new)
+{
+    int x;
 
-#define SHELL_PATH "/bin/sh"
+    (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+    (*new)->cntxt = cont;
+    (*new)->attr = NULL;
 
-#define PTHREAD_CANCEL_AYNCHRONOUS  CANCEL_ASYNCH; 
-#define PTHREAD_CANCEL_DEFERRED     CANCEL_DEFER; 
-                                   
-#define PTHREAD_CANCEL_ENABLE       CANCEL_ENABLE; 
-#define PTHREAD_CANCEL_DISABLE      CANCEL_DISABLE; 
+    chdir("/");
 
-#define BEOS_MAX_DATAKEYS	128
+    if (((*new)->pid = setsid()) == -1) {
+        return errno;
+    }
 
-struct thread_t {
-    ap_context_t *cntxt;
-    thread_id td;
-};
+    /* close out the standard file descriptors */
+    if (freopen("/dev/null", "r", stdin) == NULL) {
+        return APR_ALLSTD;
+        /* continue anyhow -- note we can't close out descriptor 0 because we
+         * have nothing to replace it with, and if we didn't have a descriptor
+         * 0 the next file would be created with that value ... leading to
+         * havoc.
+         */
+    }
+    if (freopen("/dev/null", "w", stdout) == NULL) {
+        return APR_STDOUT;
+    }
+     /* We are going to reopen this again in a little while to the error
+      * log file, but better to do it twice and suffer a small performance
+      * hit for consistancy than not reopen it here.
+      */
+    if (freopen("/dev/null", "w", stderr) == NULL) {
+        return APR_STDERR;
+    }
+}
 
-struct threadattr_t {
-    ap_context_t *cntxt;
-    int32 attr;
-    int detached;
-    int joinable;
-};
+ap_status_t ap_get_procdata(struct proc_t *proc, void *data)
+{
+    if (proc != NULL) {
+        return ap_get_userdata(proc->cntxt, &data);
+    }
+    else {
+        data = NULL;
+        return APR_ENOPROC;
+    }
+}
 
-struct threadkey_t {
-    ap_context_t *cntxt;
-	int32  key;
-};
-
-struct beos_private_data {
-	const void ** data;
-	int count;
-	volatile thread_id  td;
-};
-
-struct beos_key {
-	int  assigned;
-	int  count;
-	sem_id  lock;
-	int32  ben_lock;
-	void (* destructor) ();
-};
-
-struct procattr_t {
-    ap_context_t *cntxt;
-    ap_file_t *parent_in;
-    ap_file_t *child_in;
-    ap_file_t *parent_out;
-    ap_file_t *child_out;
-    ap_file_t *parent_err;
-    ap_file_t *child_err;
-    char *currdir;
-    ap_int32_t cmdtype;
-    ap_int32_t detached;
-};
-
-struct proc_t {
-    ap_context_t *cntxt;
-    pid_t pid;
-    struct procattr_t *attr;
-};
-
-/* we need a structure to pass off to the thread that will run any
- * new process we create */
-
-#endif  /* ! THREAD_PROC_H */
-
+ap_status_t ap_set_procdata(struct proc_t *proc, void *data)
+{
+    if (proc != NULL) {
+        return ap_set_userdata(proc->cntxt, data);
+    }
+    else {
+        data = NULL;
+        return APR_ENOPROC;
+    }
+}

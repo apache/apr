@@ -62,6 +62,13 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 
+struct send_pipe {
+	int in;
+	int out;
+	int err;
+	char ** envp;
+};
+
 ap_status_t ap_createprocattr_init(ap_context_t *cont, struct procattr_t **new)
 {
     (*new) = (struct procattr_t *)ap_palloc(cont, 
@@ -110,7 +117,16 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
 ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
                                  char *dir) 
 {
-    attr->currdir = (char *)ap_pstrdup(attr->cntxt, dir);
+    char * cwd;
+    if (strncmp("/",dir,1) != 0 ) {
+        cwd = (char*)malloc(sizeof(char) * PATH_MAX);
+        getcwd(cwd, PATH_MAX);
+        strncat(cwd,"/\0",2);
+        strcat(cwd,dir);
+        attr->currdir = (char *)ap_pstrdup(attr->cntxt, cwd);
+    } else {
+        attr->currdir = (char *)ap_pstrdup(attr->cntxt, dir);
+    }
     if (attr->currdir) {
         return APR_SUCCESS;
     }
@@ -149,79 +165,71 @@ ap_status_t ap_fork(ap_context_t *cont, struct proc_t **proc)
     return APR_INPARENT;
 }
 
+
 ap_status_t ap_create_process(ap_context_t *cont, char *progname, 
                                char *const args[], char **env, 
                                struct procattr_t *attr, struct proc_t **new)
 {
-    int i;
-    char **newargs;
+    int i=0,nargs=0;
+    char **newargs = NULL;
+    thread_id newproc, sender;
+    char * buffer = NULL;
+    size_t bufsize = 0;
+    struct send_pipe *sp;        
+	char * dir = NULL;
+	    
     (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+	sp = (struct send_pipe *)ap_palloc(cont, sizeof(struct send_pipe));
 
     if ((*new) == NULL){
     	return APR_ENOMEM;
     }
     
     (*new)->cntxt = cont;
-    if (((*new)->pid = fork()) < 0) {
+
+	sp->in  = attr->child_in?attr->child_in->filedes:-1;
+	sp->out = attr->child_out?attr->child_out->filedes:-1;
+	sp->err = attr->child_err?attr->child_err->filedes:-1;
+	sp->envp = env;
+	
+    i = 0;
+    while (args[i]) {
+        i++;
+    }
+
+	newargs = (char**)malloc(sizeof(char *) * (i + 3));
+	newargs[0] = strdup("/boot/home/config/bin/apr_proc_stub");
+    if (attr->currdir == NULL) {
+        /* we require the directory ! */
+        dir = malloc(sizeof(char) * PATH_MAX);
+        getcwd(dir, PATH_MAX);
+        newargs[1] = strdup(dir);
+        free(dir);
+    } else {
+	    newargs[1] = attr->currdir;
+	}
+	newargs[2] = strdup(progname);
+	i=0;nargs = 3;
+	while (args[i]) {
+		newargs[nargs] = args[i];
+		i++;nargs++;
+	}
+	newargs[nargs] = NULL;
+
+    newproc = load_image(nargs, newargs, env);
+    free(newargs);    
+    if ( newproc < B_NO_ERROR) {
         return errno;
     }
-    else if ((*new)->pid == 0) { 
-        /* child process */
-        if (attr->child_in) {
-            ap_close(attr->parent_in);
-            dup2(attr->child_in->filedes, STDIN_FILENO);
-            ap_close(attr->child_in);
-        }
-        if (attr->child_out) {
-            ap_close(attr->parent_out);
-            dup2(attr->child_out->filedes, STDOUT_FILENO);
-            ap_close(attr->child_out);
-        }
-        if (attr->child_err) {
-            ap_close(attr->parent_err);
-            dup2(attr->child_err->filedes, STDERR_FILENO);
-            ap_close(attr->child_err);
-        }
-        
-        signal(SIGCHLD, SIG_DFL); /*not sure if this is needed or not */
+    resume_thread(newproc);
+    send_data(newproc, 0, (void*)sp, sizeof(struct send_pipe));
+    
+    (*new)->pid = newproc;
 
-        if (attr->currdir != NULL) {
-            if (chdir(attr->currdir) == -1) {
-                exit(-1);   /* We have big problems, the child should exit. */
-            }
-        }
-        if (attr->cmdtype == APR_SHELLCMD) {
-            i = 0;
-            while (args[i]) {
-                i++;
-            }
-            newargs = (char **)ap_palloc(cont, sizeof (char *) * (i + 3));
-            newargs[0] = strdup(SHELL_PATH);
-            newargs[1] = strdup("-c");
-            i = 0;
-            while (args[i]) {
-                newargs[i + 2] = strdup(args[i]); 
-                i++;
-            }
-            newargs[i + 3] = NULL;
-            execve(SHELL_PATH, newargs, env);
-        }
-        else {
-            execve(progname, args, env);
-        }
-        exit(-1);  /* if we get here, there is a problem, so exit with an */ 
-                   /* error code. */
-    }
-    /* Parent process */
-    if (attr->child_in) {
-        ap_close(attr->child_in);
-    }
-    if (attr->child_out) {
-        ap_close(attr->child_out);
-    }
-    if (attr->child_err) {
-        ap_close(attr->child_err);
-    }
+    /* before we go charging on we need the new process to get to a 
+     * certain point.  When it gets there it'll let us know and we
+     * can carry on. */
+    receive_data(&sender, (void*)NULL,0);
     
     (*new)->attr = attr;
     return APR_SUCCESS;
