@@ -397,43 +397,43 @@ SOURCE=.\include\arch\win32\apr_private.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\atime.h
+SOURCE=.\include\arch\win32\apr_arch_atime.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\dso.h
+SOURCE=.\include\arch\win32\apr_arch_dso.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\fileio.h
+SOURCE=.\include\arch\win32\apr_arch_fileio.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\inherit.h
+SOURCE=.\include\arch\win32\apr_arch_inherit.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\misc.h
+SOURCE=.\include\arch\win32\apr_arch_misc.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\networkio.h
+SOURCE=.\include\arch\win32\apr_arch_networkio.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\thread_mutex.h
+SOURCE=.\include\arch\win32\apr_arch_thread_mutex.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\thread_rwlock.h
+SOURCE=.\include\arch\win32\apr_arch_thread_rwlock.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\threadproc.h
+SOURCE=.\include\arch\win32\apr_arch_threadproc.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\win32\utf8.h
+SOURCE=.\include\arch\win32\apr_arch_utf8.h
 # End Source File
 # End Group
 # Begin Group "Public Header Files"
