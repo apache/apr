@@ -52,99 +52,50 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef NETWORK_IO_H
-#define NETWORK_IO_H
-
-#include "apr.h"
-#include "apr_private.h"
-#include "apr_network_io.h"
+#include "fileio.h"
+#include "networkio.h"
+#include "apr_poll.h"
 #include "apr_errno.h"
-#include "apr_general.h"
-#include "apr_lib.h"
 
-/* System headers the network I/O library needs */
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if APR_HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#if APR_HAVE_ERRNO_H
-#include <errno.h>
-#endif
-#if APR_HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if APR_HAVE_STRING_H
-#include <string.h>
-#endif
-#if APR_HAVE_NETINET_TCP_H
-#include <netinet/tcp.h>
-#endif
-#if APR_HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if APR_HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#if APR_HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if APR_HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#if APR_HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-#if APR_HAVE_SYS_SENDFILE_H
-#include <sys/sendfile.h>
-#endif
-/* End System Headers */
-
-#ifndef HAVE_POLLIN
-#define POLLIN   1
-#define POLLPRI  2
-#define POLLOUT  4
-#define POLLERR  8
-#define POLLHUP  16
-#define POLLNVAL 32
+/* The only case where we don't use wait_for_io_or_timeout is on
+ * pre-BONE BeOS, so this check should be sufficient and simpler */
+#if !BEOS_R5
+#define USE_WAIT_FOR_IO
 #endif
 
-struct apr_socket_t {
-    apr_pool_t *cntxt;
-    int socketdes;
-    int type;
-    apr_sockaddr_t *local_addr;
-    apr_sockaddr_t *remote_addr;
-    apr_interval_time_t timeout; 
-#ifndef HAVE_POLL
-    int connected;
+#ifdef USE_WAIT_FOR_IO
+apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
+                                           int for_read)
+{
+    apr_interval_time_t timeout;
+    apr_pollfd_t pollset;
+    int srv, n;
+    int type = for_read ? APR_POLLIN : APR_POLLOUT;
+
+    /* TODO - timeout should be less each time through this loop */
+    if (f) {
+        pollset.desc_type = APR_POLL_FILE;
+        pollset.desc.f = f;
+        pollset.p = f->pool;
+        timeout = f->timeout;
+    }
+    else {
+        pollset.desc_type = APR_POLL_SOCKET;
+        pollset.desc.s = s;
+        pollset.p = s->cntxt;
+        timeout = s->timeout;
+    }
+    pollset.events = type;
+
+    do {
+        srv = apr_poll(&pollset, 1, &n, timeout);
+
+        if (n == 1 && pollset.revents & type) {
+            return APR_SUCCESS;
+        }
+    } while (APR_STATUS_IS_EINTR(srv));
+
+    return srv;
+}
 #endif
-    int local_port_unknown;
-    int local_interface_unknown;
-    apr_int32_t netmask;
-    apr_int32_t inherit;
-};
-
-const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
-int apr_inet_pton(int af, const char *src, void *dst);
-void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
-
-#define apr_is_option_set(mask, option)  ((mask & option) ==option)
-
-#define apr_set_option(mask, option, on) \
-    do {                                 \
-        if (on)                          \
-            *mask |= option;             \
-        else                             \
-            *mask &= ~option;            \
-    } while (0)
-
-#endif  /* ! NETWORK_IO_H */
 
