@@ -75,12 +75,15 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
     else {
         (*new_file)->filedes = dup(old_file->filedes); 
     }
-#if APR_HAS_THREADS
-    ap_create_lock(&((*new_file)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, 
-                   p);
-#endif
     (*new_file)->fname = ap_pstrdup(p, old_file->fname);
     (*new_file)->buffered = old_file->buffered;
+    if ((*new_file)->buffered) {
+#if APR_HAS_THREADS
+        ap_create_lock(&((*new_file)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, 
+                       p);
+#endif
+        (*new_file)->buffer = ap_palloc(p, APR_FILE_BUFSIZE);
+    }
     ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), ap_unix_file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;
