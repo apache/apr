@@ -108,6 +108,11 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
     return APR_ENOLOCK;
 }
 
+APR_DECLARE(apr_status_t) apr_proc_mutex_cleanup(void *mutex)
+{
+    return apr_proc_mutex_destroy(mutex);
+}
+
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
     if (mutex)
