@@ -108,7 +108,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
-    NXUnlock(mutex->mutex);
+    if (NXMutexDepth(mutex->mutex) > 0) {
+        NXUnlock(mutex->mutex);
+    }
+
     return APR_SUCCESS;
 }
 
