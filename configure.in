@@ -122,7 +122,7 @@ AC_MINIX
 APR_EBCDIC
 
 dnl this is our library name
-APR_LIBNAME="libapr${libsuffix}"
+APR_LIBNAME="apr${libsuffix}"
 AC_SUBST(APR_LIBNAME)
 
 dnl prep libtool
