@@ -246,6 +246,20 @@ static void string_strtoi64(abts_case *tc, void *data)
     }
 }
 
+static void string_strtoff(abts_case *tc, void *data)
+{
+    apr_off_t off;
+
+    ABTS_ASSERT(tc, "strtoff fails on out-of-range integer",
+                apr_strtoff(&off, "999999999999999999999999999999",
+                            NULL, 10) != APR_SUCCESS);
+
+    ABTS_ASSERT(tc, "strtoff does not fail on 1234",
+                apr_strtoff(&off, "1234", NULL, 10) == APR_SUCCESS);
+
+    ABTS_ASSERT(tc, "strtoff parsed 1234 correctly,", off == 1234);
+}
+
 abts_suite *teststr(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -257,6 +271,7 @@ abts_suite *teststr(abts_suite *suite)
     abts_run_test(suite, string_error, NULL);
     abts_run_test(suite, string_long, NULL);
     abts_run_test(suite, string_strtoi64, NULL);
+    abts_run_test(suite, string_strtoff, NULL);
 
     return suite;
 }
