@@ -57,7 +57,12 @@
 
 ap_status_t ap_kill(struct proc_t *proc, int signal)
 {
-    if (kill(proc->pid, signal) == -1){
+/* I've changed this to use kill_thread instead of kill() as kill()
+   tended to kill the whole server! This isn't as good as it ignores
+   the signal being sent but gives more protection over what is killed.
+   I'll investiagte what was going on and hopefully fix it fully.
+*/
+    if (kill_thread(proc->tid) != B_OK){
         return errno;
     }
     return APR_SUCCESS;
