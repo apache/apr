@@ -31,12 +31,13 @@ TARGETS = delete-lib $(TARGET_LIB) delete-exports export_vars.h apr.exp
 CLEAN_TARGETS = 
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
-	APRVARS libtool apr.exp
+	APRVARS libtool apr.exp apr-config
 EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in \
 	exports.c export_vars.h
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
+bindir=@bindir@
 libdir=@libdir@
 includedir=@includedir@
 srcdir=@srcdir@
@@ -67,6 +68,8 @@ install: $(TARGET_LIB)
 	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
 	$(LIBTOOL) --mode=install cp APRVARS $(libdir)
 	$(LIBTOOL) --mode=install cp apr.exp $(libdir)
+	$(LIBTOOL) --mode=install cp apr-config $(bindir)
+	chmod 755 $(bindir)/apr-config
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
 	        ( cd $$i ; $(MAKE) install ); \
