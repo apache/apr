@@ -98,7 +98,7 @@ apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_
      */
     if (have_file && ((*new_file)->filedes >= 0) && ((*new_file)->filedes <= 2)) {
         (*new_file)->flags = old_file->flags | APR_INHERIT;
-        apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*in), 
+        apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), 
                                   apr_unix_file_cleanup, apr_pool_cleanup_null);
     }
     else {
