@@ -59,11 +59,16 @@
 
 #include <unistd.h>     /* for getpid, gethostname */
 #include <stdlib.h>     /* for rand, srand */
+#include <sys/time.h>   /* for gettimeofday */
 
 #include "apr.h"
+#include "apr_private.h"
 #include "apr_uuid.h"
 #include "apr_md5.h"
 #include "apr_general.h"
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 
 #define NODE_LENGTH 6
 
