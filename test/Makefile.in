@@ -16,7 +16,6 @@ STDTEST_PORTABLE = \
 	testlockperf@EXEEXT@ \
 	testshmproducer@EXEEXT@ \
 	testshmconsumer@EXEEXT@ \
-	testatomic@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
 
@@ -108,9 +107,6 @@ testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
 testglobalmutex@EXEEXT@: testglobalmutex.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testglobalmutex.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testatomic@EXEEXT@: testatomic.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testatomic.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -120,7 +116,8 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
-	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo
+	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
+        testatomic.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 readchild@EXEEXT@ CuTest.lo proc_child@EXEEXT@ $(LOCAL_LIBS)
