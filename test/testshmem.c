@@ -73,6 +73,11 @@ typedef struct mbox {
 apr_pool_t *context;
 mbox *boxes;
 
+#define SIZE       256
+#define CYCLES     40
+#define TESTSIZE   4096 * SIZE
+#define TEST2SIZE  CYCLES * SIZE
+
 static void msgwait(int boxnum)
 {
     volatile int test = 0;
@@ -96,25 +101,36 @@ int main(void)
 #if APR_HAS_SHARED_MEMORY
     apr_shmem_t *shm;
     pid_t pid;
-    int size;
-
+    int size, cntr;
+    char *ptrs[CYCLES];
+    apr_size_t psize[CYCLES];
+    apr_status_t rv;
+    apr_size_t cksize;    
     apr_initialize();
+    
 
-    fprintf(stdout, "Initializing the context......."); 
+    for (size = 0;size < CYCLES;size++){
+        ptrs[size] = NULL;
+        psize[size] = sizeof(mbox) * (size + 1);
+    }
+    
+    printf("APR Shared Memory Test\n");
+    printf("======================\n\n");
+    printf("Initializing the context............................"); 
     if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "could not initialize\n");
+        printf("could not initialize\n");
         exit(-1);
     }
-    fprintf(stdout, "OK\n");
+    printf("OK\n");
 
-    fprintf(stdout, "Creating shared memory block......."); 
-    if (apr_shm_init(&shm, 1048576, NULL, context) != APR_SUCCESS) { 
+    printf("Creating shared memory block (%ld bytes)........", TESTSIZE); 
+    if (apr_shm_init(&shm, TESTSIZE, NULL, context) != APR_SUCCESS) { 
         fprintf(stderr, "Error allocating shared memory block\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "Allocating shared memory......."); 
+    printf("Allocating shared mbox memory......................."); 
     size = sizeof(mbox) * 2;
     boxes = apr_shm_calloc(shm, size);
     if (boxes == NULL) { 
@@ -123,7 +139,119 @@ int main(void)
     }
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "Creating a child process\n");
+    printf("\nAbout to stress the alloc/free cycle.\n");
+    printf("Smallest allocation will be %ld bytes\n", psize[0]);
+    printf("Largest allocation will be  %ld bytes\n", psize[CYCLES -1]);
+    printf("I will be doing it in %d steps\n", CYCLES);
+    
+    printf("\tAllocating via apr_shm_malloc...............");
+    for (cntr = 0;cntr < CYCLES;cntr++){
+        ptrs[cntr] = apr_shm_malloc(shm, psize[cntr]);
+        if (ptrs[cntr] == NULL){
+            printf("Failed at step %d, %ld bytes\n", cntr, psize[cntr]);
+            exit (-1);
+        }
+    }
+    printf("OK\n\tFreeing.....................................");
+    for (cntr = 0;cntr < CYCLES;cntr++){
+        if (apr_shm_free(shm, ptrs[cntr]) != APR_SUCCESS){
+            printf("Failed at step %d, %ld bytes\n", cntr, psize[cntr]);
+            exit (-1);
+        }
+    }
+    printf("OK\n");
+
+    printf("\tAllocating via apr_shm_calloc...............");
+    for (cntr = CYCLES-1;cntr > -1;cntr--){
+        ptrs[cntr] = apr_shm_malloc(shm, psize[cntr]);
+        if (ptrs[cntr] == NULL){
+            printf("Failed at %ld bytes\n", psize[cntr]);
+            exit (-1);
+        }
+    }
+    printf("OK\n\tFreeing.....................................");
+    for (cntr = 0;cntr < CYCLES;cntr++){
+        if (apr_shm_free(shm, ptrs[cntr]) != APR_SUCCESS){
+            printf("Failed at step %d, %ld bytes\n", cntr, psize[cntr]);
+            exit (-1);
+        }
+    }
+    printf("OK\n");
+
+    printf("Checking we have all we should have remaining.......");
+    rv = apr_shm_avail(shm, &cksize);
+    if (rv == APR_ENOTIMPL){
+        printf("Not Impl.\n");
+    } else {
+        if (rv != APR_SUCCESS){
+            printf("Failed!\n");
+            exit (-1);
+        }
+        if (cksize == (TESTSIZE - size)){
+            printf ("OK\n");
+        } else {
+            printf ("Failed.\nShould have had %ld bytes, instead there are %ld bytes :(\n",
+                    TESTSIZE - size, cksize);
+            exit(-1);
+        }
+    }
+    printf("%d cycles of malloc and calloc passed.\n\n", CYCLES);
+
+    printf("Block test.\n");
+    printf("\tI am about to allocate %ld bytes..........", TEST2SIZE);
+    if ((ptrs[0] = apr_shm_malloc(shm, TEST2SIZE)) == NULL){
+        printf("Failed.\n");
+        exit (-1);
+    }
+    printf ("OK\n");
+    printf("\tFreeing the block of %ld bytes............", TEST2SIZE);
+    if ((rv = apr_shm_free(shm, ptrs[0])) != APR_SUCCESS){
+        printf("Failed!\n");
+        exit(-1);
+    }
+    printf ("OK\n");
+    
+    printf ("\tAbout to allocate %d blocks of %d bytes....", CYCLES, SIZE);
+    for (cntr = 0;cntr < CYCLES;cntr++){
+        if ((ptrs[cntr] = apr_shm_malloc(shm, SIZE)) == NULL){
+            printf("Failed.\n");
+            printf("Couldn't allocate block %d\n", cntr + 1);
+            exit (-1);
+        }
+    }
+    printf("Complete.\n");
+
+    printf ("\tAbout to free %d blocks of %d bytes........", CYCLES, SIZE);
+    for (cntr = 0;cntr < CYCLES;cntr++){
+        if ((rv = apr_shm_free(shm, ptrs[cntr])) != APR_SUCCESS){
+            printf("Failed\n");
+            printf("Counldn't free block %d\n", cntr + 1);
+            exit (-1);
+        }
+    }
+    printf("Complete.\n");
+
+    printf("Checking we have all we should have remaining.......");
+    rv = apr_shm_avail(shm, &cksize);
+    if (rv == APR_ENOTIMPL){
+        printf("Not Impl.\n");
+    } else {
+        if (rv != APR_SUCCESS){
+            printf("Failed!\n");
+            exit (-1);
+        }
+        if (cksize == (TESTSIZE - size)){
+            printf ("OK\n");
+        } else {
+            printf ("Failed.\nShould have had %ld bytes, instead there are %ld bytes :(\n",
+                    TESTSIZE - size, cksize);
+            exit(-1);
+        }
+    }
+
+    printf("Block test complete.\n\n");
+             
+    printf("Creating a child process\n");
     pid = fork();
     if (pid == 0) {
         apr_sleep(1);
@@ -142,12 +270,12 @@ int main(void)
         exit(1);
     }
     else {
-        fprintf(stderr, "Error creating a child process\n");
+        printf("Error creating a child process\n");
         exit(1);
     }
 #else
-    fprintf(stdout, "APR SHMEM test failed!\n");
-    fprintf(stdout, "shmem is not supported on this platform\n"); 
+    printf("APR SHMEM test not run!\n");
+    printf("shmem is not supported on this platform\n"); 
     return (-1);
 #endif
 }
