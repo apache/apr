@@ -100,11 +100,11 @@ ap_status_t ap_get_oslevel(ap_pool_t *cont, ap_oslevel_e *level)
 {
     static OSVERSIONINFO oslev;
     static unsigned int servpack = 0;
-    static BOOL first = TRUE;
+    static BOOL first = APR_TRUE;
     char *pservpack;
 
     if (first) {
-        first = FALSE;
+        first = APR_FALSE;
         oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
         GetVersionEx(&oslev);
         if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {

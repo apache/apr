@@ -225,7 +225,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         overlapped.Offset = *offset;
     }
 #ifdef WAIT_FOR_EVENT
-    overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    overlapped.hEvent = CreateEvent(NULL, FALSE, APR_FALSE, NULL);
 #endif
  
     rv = TransmitFile(sock->sock,     /* socket */
