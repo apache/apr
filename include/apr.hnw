@@ -52,26 +52,34 @@
  * <http://www.apache.org/>.
  */
 
-/* 
- * Note: This is a NetWare specific version of apr.h. It is renamed to
- * apr.h at the start of a Windows build.
+
+#ifndef APR_H
+#define APR_H
+
+/* GENERATED FILE WARNING!  DO NOT EDIT apr.h
+ *
+ * You must modify apr.hnw instead.
+ *
+ * And please, make an effort to stub apr.hw and apr.h.in in the process.
+ *
+ * This is the NetWare specific version of apr.h.  It is copied from
+ * apr.hnw at the start of a NetWare build by prebuildNW.bat. 
  */
-#ifdef NETWARE
+
 /**
- * @file include\apr.h
- * @brief Basic APR header for NetWare
- * @remark This is a NetWare specific version of apr.h. It is copied as
- * apr.h at the start of a NetWare build through prebuildNW.bat.
+ * @file include/apr.h
+ * @brief APR APR Main Include
+ * @remark This is a generated header generated from include/apr.h.in by
+ * ./configure, or copied from include/apr.hw or include/apr.hnw 
+ * for Win32 or Netware by those build environments, respectively.
  */
+
+#if defined(NETWARE) || defined(DOXYGEN)
 
 /**
  * @defgroup APR APR Functions
  * @{
  */
-
-
-#ifndef APR_H
-#define APR_H
 
 #include <sys/types.h>
 #include <stddef.h>
@@ -338,7 +346,8 @@ typedef int apr_wait_t;
 #define APR_HAVE_INT64_STRFN  1
 #define APR_INT64_STRFN	      strtoll
 
-#endif /* APR_H */
 /** @} */
+
 #endif /* NETWARE */
 
+#endif /* APR_H */
