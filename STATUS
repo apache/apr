@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/06/16 12:13:50 $]
+Last modified at [$Date: 2004/06/18 11:46:35 $]
 
 Release:
 
@@ -22,64 +22,10 @@ Release:
 RELEASE 0.9 SHOWSTOPPERS:
 
 
-
 RELEASE 1.0 SHOWSTOPPERS:
 
-    * apr_global_mutex_child_init and apr_proc_mutex_child_init aren't
-      portable.  There are a variety of problems with the locking API when it
-      is used with apr_create_proc instead of apr_fork.  First, _child_init
-      doesn't take a lockmech_e parameter so it causes a segfault after the
-      apr_proc_create, because the proc_mutex field hasn't been initialized.
-      When the lockmech_e parameter is added, it _still_ doesn't work, because
-      some lock mechanisms expect to inherit from the parent process.  For
-      example, sys V semaphores don't have a file to open, so the child process
-      can't reaquire the lock.
 
-      jerenkrantz says: This is not a showstopper and I believe the above
-      analysis is slightly confusing.  The real problem here is that
-      apr_*_mutex_child_init assumes a shared memory space - that is, the
-      children processes have access to the parent apr_*_mutex_t pointer.  The
-      children just call child_init on the original, inherited apr_*_mutex_t. 
-      Unlike globalmutexchild in test, apr_*_mutex_create is *not* intended to
-      be called from the child and subsequently call child_init.  Instead,
-      apr_create_proc is intended to exec separate processes with disjoint
-      memory addresses.  Currently, APR does not provide a cross-platform
-      mechanism for joining an already existing lock.  A simple
-      'apr_*_mutex_join' which is intended to be called from separate
-      processes to an already-existing lock would solve this problem. 
-      child_init is not intended to be used this way.  Even with SysV
-      semaphores, using IPC_PRIVATE should still work due to the parent-child
-      relationship.  A strawman has been posted to dev@apr:
-      Message-Id: <213031CF0406DE1AC426A411@[10.0.1.137]>
-
-    * Must namespace protect all include/apr_foo.h headers.  Jon Travis
-      has especially observed these including apr within Apache-1.3.
-        Message-ID: <20020128100116.A4288@covalent.net>
-      Deprecating the symbols in 0.9, eliminating them with 1.0.
-      (Those problems have been fixed, but it is a good example of
-      what to look for.)
-      Some headers with issues: 
-        apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD, 
-                              _POSIX_THREAD_SAFE_FUNCTIONS (?))
-
-      Not a showstopper: Justin, trawick
-
-
-    * Flush out the test suite and make sure it passes on all platforms.  
-      We currently have about 450 functions in APR and 147 tests.  That 
-      means we have a large number of functions that we can't verify are
-      actually portable.  This TODO includes finishing the migration to the
-      unified test suite, and adding more tests to make the suite 
-      comprehensive.
-
-      Not a showstopper: Justin, trawick
-
-    * Eliminate the TODO's and XXX's by using the doxygen @bug feature
-      to allow us to better track the open issues, and provide historical
-      bug lists that help porters understand what was wrong in the old
-      versions of APR that they would be upgrading from.
-
-      Not a showstopper: Justin, trawick
+RELEASE 1.1 SHOWSTOPPERS:
 
 
 CURRENT VOTES:
@@ -126,6 +72,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       See Message-Id: <E16JjZA-0007hg-00@zakath.apana.org.au> for thread
       discussing this.
         +1: BrianH, Aaron, david, jerenkrantz
+      Status: Will Rowe was working on this. 
 
     * Need some architecture/OS specific versions of the atomic operations.
 	progress: generic, solaris Sparc, FreeBSD5, linux, and OS/390 done
@@ -403,10 +350,10 @@ Documentation that needs writing:
 
     * API documentation
         Ian Says: APR Stuff in now in Doxygen format, which is the first step.
+        David says: are we planning on doing any more? I'm tempted to remove this
+                    item.
 
     * apr-site needs to be revamped with Anakia/XHTML.
-
-Stuff waiting for code thawing after Beta 1:
 
     * Identify and implement those protection bits that have general 
         usefulness, perhaps hidden, generic read-only [immutable],
@@ -432,13 +379,10 @@ Stuff waiting for code thawing after Beta 1:
         Sander Striker +1
         Greg Stein +1
         Karl Fogel +1
-      (Not sure if the negatives would stay negative given that the
-      change would now wait for the library versioning thing described
-      above, though.)
 
-      david: making the change for 1.0 should be safe. HTTPD 2.0.x will use
-             apr-0 which will have the apr_status_t return values. 
-             +1 on the change.
+      david: This was rejected for 1.0 following Ben L's comment that
+             should we ever start using any other form of md5 (e.g.
+             openssl) then errors would become a distinct possibility.
 
 Stuff for post 1.0:
 
@@ -446,4 +390,61 @@ Stuff for post 1.0:
       aren't a good match for a lot of applications.  We need to find
       a way to support alternate allocators polymorphically without
       a significant performance penalty.
+
+    * apr_global_mutex_child_init and apr_proc_mutex_child_init aren't
+      portable.  There are a variety of problems with the locking API when it
+      is used with apr_create_proc instead of apr_fork.  First, _child_init
+      doesn't take a lockmech_e parameter so it causes a segfault after the
+      apr_proc_create, because the proc_mutex field hasn't been initialized.
+      When the lockmech_e parameter is added, it _still_ doesn't work, because
+      some lock mechanisms expect to inherit from the parent process.  For
+      example, sys V semaphores don't have a file to open, so the child process
+      can't reaquire the lock.
+
+      jerenkrantz says: This is not a showstopper and I believe the above
+      analysis is slightly confusing.  The real problem here is that
+      apr_*_mutex_child_init assumes a shared memory space - that is, the
+      children processes have access to the parent apr_*_mutex_t pointer.  The
+      children just call child_init on the original, inherited apr_*_mutex_t.
+      Unlike globalmutexchild in test, apr_*_mutex_create is *not* intended to
+      be called from the child and subsequently call child_init.  Instead,
+      apr_create_proc is intended to exec separate processes with disjoint
+      memory addresses.  Currently, APR does not provide a cross-platform
+      mechanism for joining an already existing lock.  A simple
+      'apr_*_mutex_join' which is intended to be called from separate
+      processes to an already-existing lock would solve this problem.
+      child_init is not intended to be used this way.  Even with SysV
+      semaphores, using IPC_PRIVATE should still work due to the parent-child
+      relationship.  A strawman has been posted to dev@apr:
+      Message-Id: <213031CF0406DE1AC426A411@[10.0.1.137]>
+
+      This was listed as a showstopper for 1.0, but while the 2 patches above
+      exist neither was able to garner enough votes to be included in 1.0.
+      Will Rowe commented that a combination of the 2 would probably be the right
+      approach, a view that seems to have a lot of merit. Hopefully we can solve
+      this post 1.0. There were also enough people who felt that it wasn't a
+      real showstopper for it to be bumped.
+
+    * Must namespace protect all include/apr_foo.h headers.  Jon Travis
+      has especially observed these including apr within Apache-1.3.
+        Message-ID: <20020128100116.A4288@covalent.net>
+      Deprecating the symbols in 0.9, eliminating them with 1.0.
+      (Those problems have been fixed, but it is a good example of
+      what to look for.)
+      Some headers with issues:
+        apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD,
+                              _POSIX_THREAD_SAFE_FUNCTIONS (?))
+
+    * Flush out the test suite and make sure it passes on all platforms.
+      We currently have about 450 functions in APR and 147 tests.  That
+      means we have a large number of functions that we can't verify are
+      actually portable.  This TODO includes finishing the migration to the
+      unified test suite, and adding more tests to make the suite
+      comprehensive.
+
+    * Eliminate the TODO's and XXX's by using the doxygen @bug feature
+      to allow us to better track the open issues, and provide historical
+      bug lists that help porters understand what was wrong in the old
+      versions of APR that they would be upgrading from.
+
 
