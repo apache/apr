@@ -144,3 +144,12 @@ apr_status_t apr_put_os_threadkey(apr_threadkey_t **key,
 }           
 #endif /* APR_HAVE_PTHREAD_H */
 #endif /* APR_HAS_THREADS */
+
+#if !APR_HAS_THREADS
+apr_status_t apr_get_os_threadkey(void); /* avoid warning for no prototype */
+
+apr_status_t apr_get_os_threadkey(void)
+{
+    return APR_ENOTIMPL;
+}
+#endif

@@ -712,3 +712,16 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
 #error or change APR_HAS_SENDFILE in apr.h to 0. 
 #endif /* __linux__, __FreeBSD__, __HPUX__, _AIX, __MVS__, Tru64/OSF1 */
 #endif /* APR_HAS_SENDFILE */
+
+#if !APR_HAS_SENDFILE
+/* currently, exports.c includes a reference to apr_sendfile() even if 
+ * apr_sendfile() doesn't work on the platform;
+ * this dummy version is just to get exports.c to compile/link
+ */
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+                          apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
+                          apr_int32_t flags)
+{
+    return APR_ENOTIMPL;
+}
+#endif
