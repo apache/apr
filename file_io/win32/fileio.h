@@ -100,17 +100,20 @@ struct ap_file_t {
     HANDLE filehand;
     char *fname;
     DWORD dwFileAttributes;
+    int eof_hit;
+    int pipe;
+    ap_interval_time_t timeout;
+    int buffered;     /* Not currently used on Windows */
+    int ungetchar;    /* Not used. Last char provided by an unget op. (-1 = no char)*/
+
     char *demonfname; 
     char *lowerdemonfname; 
-    int stated;
     int append; 
-    int eof_hit;
+
     off_t size;
     ap_time_t atime;
     ap_time_t mtime;
     ap_time_t ctime;
-    int pipe;
-    ap_interval_time_t timeout;
 };
 
 struct ap_dir_t {

@@ -164,7 +164,6 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
         }
     }
 
-    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
