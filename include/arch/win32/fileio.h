@@ -110,6 +110,15 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 
 #endif /* APR_HAS_UNICODE_FS */
 
+/* Another Helper functions for the WinNT ApiW() functions.  We need to
+ * derive some 'resource' names (max length 255 characters, prefixed with
+ * Global/ or Local/ on WinNT) from something that looks like a filename.
+ * Since 'resource' names never contain slashes, convert these to '_'s
+ * and return the appropriate char* or wchar* for ApiA or ApiW calls.
+ */
+
+void *res_name_from_filename(const char *file, int global, apr_pool_t *pool);
+
 #define APR_FILE_MAX MAX_PATH
 
 #define APR_FILE_BUFSIZE 4096
