@@ -81,6 +81,7 @@
  * Avoid dragging in wtypes.h unless it's absolutely necessary [generally
  * not with APR itself, until some GUI-related security is introduced.]
  */
+#ifndef _WIN32_WCE
 #ifdef __wtypes_h__
 #include <accctrl.h>
 #else
@@ -88,11 +89,18 @@
 #include <accctrl.h>
 #undef __wtypes_h__
 #endif
+#endif
 
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if APR_HAVE_STDDEF_H
 #include <stddef.h>
+#endif
 #include <stdio.h>
+#if APR_HAVE_TIME_H
 #include <time.h>
+#endif
 
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
