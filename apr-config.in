@@ -134,7 +134,9 @@ fi
 # Otherwise, being in a symlinked dir may result in incorrect output.
 if test -x "`which realpath 2>/dev/null`"; then
   thisdir="`realpath $thisdir`"
-  APR_SOURCE_DIR="`realpath $APR_SOURCE_DIR`"
+  if test -d "$APR_SOURCE_DIR"; then
+    APR_SOURCE_DIR="`realpath $APR_SOURCE_DIR`"
+  fi
   if test -n $tmpbindir; then
     tmpbindir="`realpath $tmpbindir`"
   fi
