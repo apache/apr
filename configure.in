@@ -103,7 +103,7 @@ AC_ARG_WITH(libtool, [--with-libtool   use libtool to link the library],
       so_ext="lo"
       lib_target="\$(libdir) \$\$objects"
     else
-      lt_compile="\$(COMPILE) -c \$< && touch \$@"
+      lt_compile="\$(COMPILE) -c \$<"
       link="ar cr \$(TARGET_LIB) \$\$objects; ranlib \$(TARGET_LIB)"
       so_ext="o"
     fi ], [
