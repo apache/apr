@@ -209,13 +209,13 @@ static int client(client_socket_mode_t socket_mode)
     apr_pool_t *p;
     char buf[120];
     apr_file_t *f = NULL;
-    apr_ssize_t len;
+    apr_size_t len;
     apr_size_t expected_len;
     apr_off_t current_file_offset;
     apr_hdtr_t hdtr;
     struct iovec headers[3];
     struct iovec trailers[3];
-    apr_ssize_t bytes_read;
+    apr_size_t bytes_read;
     apr_pollfd_t *pfd;
     apr_int32_t nsocks;
     int i;
@@ -348,7 +348,7 @@ static int client(client_socket_mode_t socket_mode)
         current_file_offset = 0;
         len = FILE_LENGTH;
         do {
-            apr_ssize_t tmplen;
+            apr_size_t tmplen;
 
             tmplen = len; /* bytes remaining to send from the file */
             printf("Calling apr_sendfile()...\n");

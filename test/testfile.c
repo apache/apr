@@ -77,7 +77,7 @@ int main(void)
     apr_pollfd_t *sdset = NULL;
     apr_status_t status = 0;
     apr_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
-    apr_ssize_t nbytes = 0;
+    apr_size_t nbytes = 0;
     apr_int32_t rv;
     apr_off_t zer = 0;
     char *buf;
@@ -126,12 +126,12 @@ int main(void)
 
     fprintf(stdout, "\tWriting to file.......");
     
-    nbytes = (apr_ssize_t)strlen("this is a test");
+    nbytes = strlen("this is a test");
     if (apr_write(thefile, "this is a test", &nbytes) != APR_SUCCESS) {
         perror("something's wrong");
         exit(-1);
     }
-    if (nbytes != (apr_ssize_t)strlen("this is a test")) {
+    if (nbytes != strlen("this is a test")) {
         fprintf(stderr, "didn't write properly.\n");
         exit(-1);
     }
@@ -175,13 +175,13 @@ int main(void)
 
 
     fprintf(stdout, "\tReading from the file.......");
-    nbytes = (apr_ssize_t)strlen("this is a test");
+    nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(context, nbytes + 1);
     if (apr_read(thefile, buf, &nbytes) != APR_SUCCESS) {
         perror("something's wrong");
         exit(-1);
     }
-    if (nbytes != (apr_ssize_t)strlen("this is a test")) {
+    if (nbytes != strlen("this is a test")) {
         fprintf(stderr, "didn't read properly.\n");
         exit(-1);
     }
@@ -277,7 +277,7 @@ int testdirs(apr_pool_t *context)
 {
     apr_dir_t *temp;  
     apr_file_t *file = NULL;
-    apr_ssize_t bytes;
+    apr_size_t bytes;
     apr_filetype_e type;
     char *fname;
 
@@ -346,7 +346,7 @@ int testdirs(apr_pool_t *context)
 
     fprintf(stdout, "\t\tFile size.......");
     apr_dir_entry_size(&bytes, temp);
-    if (bytes != (apr_ssize_t)strlen("Another test!!!")) {
+    if (bytes != strlen("Another test!!!")) {
         fprintf(stderr, "Got wrong file size %d\n", bytes);
         return -1;
     }
@@ -394,7 +394,7 @@ static void create_testread(apr_pool_t *p, const char *fname)
     apr_file_t *f = NULL;
     apr_status_t rv;
     char buf[TESTREAD_BLKSIZE];
-    apr_ssize_t nbytes;
+    apr_size_t nbytes;
 
     /* Create a test file with known content.
      */
@@ -423,7 +423,7 @@ static char read_one(apr_file_t *f, int expected)
   char bytes[3];
   apr_status_t rv;
   static int counter = 0;
-  apr_ssize_t nbytes;
+  apr_size_t nbytes;
 
   counter += 1;
 
@@ -448,7 +448,7 @@ static void test_read_guts(apr_pool_t *p, const char *fname, apr_int32_t extra_f
 {
     apr_file_t *f = NULL;
     apr_status_t rv;
-    apr_ssize_t nbytes;
+    apr_size_t nbytes;
     char buf[1024];
     int i;
 
@@ -533,7 +533,7 @@ static void test_bigread(apr_pool_t *p, const char *fname, apr_int32_t extra_fla
     apr_file_t *f = NULL;
     apr_status_t rv;
     char buf[APR_BUFFERSIZE * 2];
-    apr_ssize_t nbytes;
+    apr_size_t nbytes;
 
     /* Create a test file with known content.
      */

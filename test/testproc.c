@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     apr_proc_t newproc;
     apr_procattr_t *attr;
     apr_file_t *testfile = NULL;
-    apr_ssize_t length;
+    apr_size_t length;
     char *buf;
     const char *args[3];
     char *teststr;
