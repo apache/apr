@@ -129,5 +129,5 @@ int main(void)
     apr_pool_destroy(pool);
 
     printf("\nAll tests passed OK\n");
-    return 1;
+    return 0;
 }

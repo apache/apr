@@ -92,6 +92,7 @@ static void ocmaint(int reason, void *data, int status)
 int main(int argc, char *argv[])
 {
 #if APR_HAS_OTHER_CHILD
+    apr_status_t rv;
     apr_pool_t *context;
     apr_proc_t newproc;
     apr_procattr_t *procattr = NULL;
@@ -143,8 +144,11 @@ int main(int argc, char *argv[])
     fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
     fflush(stdout);
     apr_sleep(1 * APR_USEC_PER_SEC);
-    if (apr_proc_kill(&newproc, SIGKILL) != APR_SUCCESS) {
-        fprintf(stderr,"couldn't send the signal!\n");
+    if ((rv = apr_proc_kill(&newproc, SIGKILL)) != APR_SUCCESS) {
+        char msgbuf[120];
+
+        fprintf(stderr,"couldn't send the signal: %d/%s!\n",
+                rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
     }
     fprintf(stdout,"OK\n");
@@ -159,6 +163,6 @@ int main(int argc, char *argv[])
     fprintf(stdout, "Other_child is not supported on this platform\n");
 #endif
 
-    return 1;
+    return 0;
 }    
 
