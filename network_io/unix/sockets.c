@@ -154,6 +154,7 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *con
 #ifndef HAVE_POLL
     (*new)->connected = 1;
 #endif
+    (*new)->timeout = -1;
 
     (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
                         &(*new)->addr_len);
