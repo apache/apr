@@ -20,13 +20,9 @@ dnl  Generally, we force the setting of CC, and add flags
 dnl  to CFLAGS, CPPFLAGS, LIBS and LDFLAGS. 
 dnl
 AC_DEFUN(APR_PRELOAD, [
-if test "$DID_APR_PRELOAD" = "yes" ; then
+if test "x$apr_preload_done" != "xyes" ; then
 
-  echo "APR hints file rules for $host already applied"
-
-else
-
-  DID_APR_PRELOAD="yes"; export DID_APR_PRELOAD
+  apr_preload_done="yes"
 
   echo "Applying APR hints file rules for $host"
 
@@ -39,7 +35,6 @@ else
 	APR_ADDTO(CPPFLAGS, [-DMPE -D_POSIX_SOURCE -D_SOCKET_SOURCE])
 	APR_ADDTO(LIBS, [-lsocket -lsvipc -lcurses])
 	APR_ADDTO(LDFLAGS, [-Xlinker \"-WL,cap=ia,ba,ph;nmstack=1024000\"])
-	APR_SETVAR(CAT, [/bin/cat])
 	;;
     *-apple-aux3*)
         APR_SETVAR(CC, [gcc])
@@ -347,7 +342,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-riscix)
 	APR_ADDTO(CPPFLAGS, [-DRISCIX])
 	APR_SETIFNULL(CFLAGS, [-O])
-	APR_SETIFNULL(MAKE, [make])
 	;;
     *-irix*)
 	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREAD_SAFE_FUNCTIONS])
