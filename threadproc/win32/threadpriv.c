@@ -63,8 +63,15 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
                                                     void (*dest)(void *),
                                                     apr_pool_t *cont)
 {
+    (*key) = (apr_threadkey_t *)apr_palloc(cont, sizeof(apr_threadkey_t));
+    if ((*key) == NULL) {
+        return APR_ENOMEM;
+    }
+
+    (*key)->cntxt = cont;
+
     if (((*key)->key = TlsAlloc()) != 0xFFFFFFFF) {
-	return APR_SUCCESS;
+        return APR_SUCCESS;
     }
     return apr_get_os_error();
 }
