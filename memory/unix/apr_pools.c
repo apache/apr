@@ -68,7 +68,6 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 #include "apr_lock.h"
-#include "misc.h"
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
