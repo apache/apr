@@ -67,19 +67,58 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     DWORD bread;
     int lasterror;
 
-    if (ReadFile(thefile->filehand, buf, *nbytes, &bread, NULL)) {
-        *nbytes = bread;
-        return APR_SUCCESS;
-    }
+    if (thefile->buffered) {
+        char *pos = (char *)buf;
+        ULONG blocksize;
+        ULONG size = *nbytes;
 
-    *nbytes = 0;
-    lasterror = GetLastError();
-    if (lasterror == ERROR_BROKEN_PIPE) {
-        /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
-        return APR_SUCCESS;
-    } else if (lasterror == ERROR_NO_DATA) {
-        /* Receive this error on a read to a pipe in nonblocking mode */
-        return APR_EAGAIN;
+        ap_lock(thefile->mutex);
+
+        if (thefile->direction == 1) {
+            ap_flush(thefile);
+            thefile->bufpos = 0;
+            thefile->direction = 0;
+            thefile->dataRead = 0;
+        }
+
+        while (lasterror == 0 && size > 0) {
+            if (thefile->bufpos >= thefile->dataRead) {
+                lasterror = ReadFile(thefile->filehand, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead, NULL ) ? 0 : GetLastError();
+
+                if (thefile->dataRead == 0) {
+                    if (lasterror == 0)
+                        thefile->eof_hit = TRUE;
+                    break;
+                }
+
+                thefile->filePtr += thefile->dataRead;
+                thefile->bufpos = 0;
+            }
+
+            blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;
+            memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
+            thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
+        *nbytes = lasterror == 0 ? pos - (char *)buf : 0;
+        ap_unlock(thefile->mutex);
+    } else {
+        if (ReadFile(thefile->filehand, buf, *nbytes, &bread, NULL)) {
+            *nbytes = bread;
+            return APR_SUCCESS;
+        }
+
+        *nbytes = 0;
+        lasterror = GetLastError();
+        if (lasterror == ERROR_BROKEN_PIPE) {
+            /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
+            return APR_SUCCESS;
+        } else if (lasterror == ERROR_NO_DATA) {
+            /* Receive this error on a read to a pipe in nonblocking mode */
+            return APR_EAGAIN;
+        }
     }
 
     return lasterror;
@@ -90,22 +129,53 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     ap_status_t rv;
     DWORD bwrote;
 
-    if (!thefile->pipe && thefile->append) {
-        SetFilePointer(thefile->filehand, 0, NULL, FILE_END);
-    }
-    if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
-        *nbytes = bwrote;
-        rv = APR_SUCCESS;
-    } 
-    else {
-        (*nbytes) = 0;
-        rv = GetLastError();
+    if (thefile->buffered) {
+        char *pos = (char *)buf;
+        int blocksize;
+        int size = *nbytes;
+
+        ap_lock(thefile->mutex);
+
+        if (thefile->direction == 0) {
+            // Position file pointer for writing at the offset we are logically reading from
+            ULONG offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            if (offset != thefile->filePtr)
+                SetFilePointer(thefile->filehand, offset, NULL, FILE_BEGIN);
+            thefile->bufpos = thefile->dataRead = 0;
+            thefile->direction = 1;
+        }
+
+        while (rv == 0 && size > 0) {
+            if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
+                rv = ap_flush(thefile);
+
+            blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? APR_FILE_BUFSIZE - thefile->bufpos : size;
+            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
+            thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
+        ap_unlock(thefile->mutex);
+        return rv;
+    } else {
+        if (!thefile->pipe && thefile->append) {
+            SetFilePointer(thefile->filehand, 0, NULL, FILE_END);
+        }
+        if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
+            *nbytes = bwrote;
+            rv = APR_SUCCESS;
+        }
+        else {
+            (*nbytes) = 0;
+            rv = GetLastError();
+        }
     }
 
     return rv;
 }
 /*
- * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2) 
+ * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2)
  */
 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, 
                       ap_ssize_t *nbytes)
@@ -155,11 +225,18 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
     if (GetFileType(thefile->filehand) != FILE_TYPE_DISK) {
         return GetLastError();
     }
-    /* and the file pointer is not pointing to the start of the file. */
-    if (GetFilePointer(thefile->filehand)) {
-        if (SetFilePointer(thefile->filehand, -1, NULL, FILE_CURRENT) 
-            == 0xFFFFFFFF) {
-            return GetLastError();
+
+    if (thefile->buffered) {
+        ap_off_t offset = -1;
+        return ap_seek(thefile, APR_CUR, &offset);
+    }
+    else {
+        /* and the file pointer is not pointing to the start of the file. */
+        if (GetFilePointer(thefile->filehand)) {
+            if (SetFilePointer(thefile->filehand, -1, NULL, FILE_CURRENT)
+                == 0xFFFFFFFF) {
+                return GetLastError();
+            }
         }
     }
 
@@ -218,8 +295,23 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 }
 ap_status_t ap_flush(ap_file_t *thefile)
 {
-    FlushFileBuffers(thefile->filehand);
-    return APR_SUCCESS; 
+    if (thefile->buffered) {
+        DWORD written = 0;
+        ap_status_t rc = 0;
+
+        if (thefile->direction == 1 && thefile->bufpos) {
+            rc = WriteFile(thefile->filehand, thefile->buffer, thefile->bufpos, &written, NULL ) ? 0 : GetLastError();
+            thefile->filePtr += written;
+
+            if (rc == 0)
+                thefile->bufpos = 0;
+        }
+
+        return rc;
+    } else {
+        FlushFileBuffers(thefile->filehand);
+        return APR_SUCCESS;
+    }
 }
 
 static int printf_flush(ap_vformatter_buff_t *vbuff)

@@ -57,33 +57,86 @@
 #include <errno.h>
 #include <string.h>
 
+static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
+{
+    long newbufpos;
+    DWORD rc;
+
+    if (thefile->direction == 1) {
+        ap_flush(thefile);
+        thefile->bufpos = thefile->direction = thefile->dataRead = 0;
+    }
+
+    newbufpos = pos - (thefile->filePtr - thefile->dataRead);
+
+    if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
+        thefile->bufpos = newbufpos;
+        rc = 0;
+    } else {
+        rc = SetFilePointer(thefile->filehand, pos, NULL, FILE_BEGIN);
+
+        if ( rc == 0xFFFFFFFF )
+            rc = GetLastError();
+        else
+            rc = thefile->bufpos = thefile->dataRead = 0;
+    }
+
+    return rc;
+}
+
+
+
 ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     DWORD howmove;
     DWORD rv;
 
-    switch(where) {
-    case APR_SET: {
-        howmove = FILE_BEGIN;
-        break;
-    }
-    case APR_CUR: {
-        howmove = FILE_CURRENT;
-        break;
-    }
-    case APR_END: {
-        howmove = FILE_END;
-        break;
-    }
-    }
+    if (thefile->buffered) {
+        int rc = APR_EINVAL;
+        ap_finfo_t finfo;
 
-    rv = SetFilePointer(thefile->filehand, *offset, NULL, howmove);
-    if (rv == -1) {
-        *offset = -1;
-        return GetLastError();
-    }
-    else {
-        *offset = rv;
-        return APR_SUCCESS;
+        switch (where) {
+        case APR_SET:
+            rc = setptr(thefile, *offset);
+            break;
+
+        case APR_CUR:
+            rc = setptr(thefile, thefile->filePtr - thefile->dataRead + thefile->bufpos + *offset);
+            break;
+
+        case APR_END:
+            rc = ap_getfileinfo(&finfo, thefile);
+            if (rc == APR_SUCCESS)
+                rc = setptr(thefile, finfo.size - *offset);
+            break;
+        }
+
+        *offset = thefile->filePtr + thefile->bufpos;
+        return rc;
+    } else {
+        switch(where) {
+        case APR_SET: {
+            howmove = FILE_BEGIN;
+            break;
+        }
+        case APR_CUR: {
+            howmove = FILE_CURRENT;
+            break;
+        }
+        case APR_END: {
+            howmove = FILE_END;
+            break;
+        }
+        }
+
+        rv = SetFilePointer(thefile->filehand, *offset, NULL, howmove);
+        if (rv == -1) {
+            *offset = -1;
+            return GetLastError();
+        }
+        else {
+            *offset = rv;
+            return APR_SUCCESS;
+        }
     }
 }

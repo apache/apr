@@ -115,6 +115,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
     (*new_file)->atime = old_file->atime;    
     (*new_file)->mtime = old_file->mtime;
     (*new_file)->ctime = old_file->ctime;
+    (*new_file)->buffered = FALSE;
 
     if (!isStdHandle) {
         ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,

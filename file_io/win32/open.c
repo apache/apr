@@ -82,6 +82,7 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
     DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     ap_oslevel_e level;
+    ap_status_t rv;
 
     (*dafile) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
 
@@ -96,6 +97,16 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
     if (!(flag & APR_READ) && !(flag & APR_WRITE)) {
         (*dafile)->filehand = INVALID_HANDLE_VALUE;
         return APR_EACCES;
+    }
+
+    (*dafile)->buffered = (flag & APR_BUFFERED) > 0;
+
+    if ((*dafile)->buffered) {
+        (*dafile)->buffer = ap_palloc(cont, APR_FILE_BUFSIZE);
+        rv = ap_create_lock(&(*dafile)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
+
+        if (rv)
+            return rv;
     }
 
     (*dafile)->fname = ap_pstrdup(cont, fname);
@@ -164,6 +175,10 @@ ap_status_t ap_close(ap_file_t *file)
     ap_status_t stat;
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
         ap_kill_cleanup(file->cntxt, file, file_cleanup);
+
+        if (file->buffered)
+            ap_destroy_lock(file->mutex);
+
         return APR_SUCCESS;
     }
     return stat;
