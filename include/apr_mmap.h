@@ -60,6 +60,10 @@
 #include "apr_errno.h"
 #include "apr_file_io.h"        /* for apr_file_t */
 
+#ifdef BEOS
+#include <kernel/OS.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
