@@ -111,6 +111,10 @@ SOURCE=.\file_io\unix\fileacc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\file_io\unix\mktemp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\win32\filedup.c
 # End Source File
 # Begin Source File
