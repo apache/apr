@@ -121,3 +121,24 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
         return errno;
     }
 }
+
+ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
+{
+    struct stat info;
+
+    if (lstat(fname, &info) == 0) {
+        finfo->protection = info.st_mode;
+        finfo->filetype = filetype_from_mode(info.st_mode);
+        finfo->user = info.st_uid;
+        finfo->group = info.st_gid;
+        finfo->size = info.st_size;
+        finfo->inode = info.st_ino;
+        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        return APR_SUCCESS;
+    }
+    else {
+        return errno;
+    }
+}
