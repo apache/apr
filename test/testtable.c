@@ -174,7 +174,7 @@ static void table_overlap(CuTest *tc)
     val = apr_table_get(t1, "a");
     CuAssertStrEquals(tc, val, "1");
     val = apr_table_get(t1, "b");
-    CuAssertStrEquals(tc, val, "2");
+    CuAssertStrEquals(tc, val, "2.");
     val = apr_table_get(t1, "c");
     CuAssertStrEquals(tc, val, "3");
     val = apr_table_get(t1, "d");
