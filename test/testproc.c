@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     ap_context_t *context;
     ap_proc_t *newproc;
     ap_procattr_t *attr;
-    ap_file_t *testfile;
+    ap_file_t *testfile = NULL;
     ap_ssize_t length;
     char *buf;
     char *args[3];

@@ -210,7 +210,7 @@ int main()
 
 int test_filedel(ap_context_t *context)
 {
-    ap_file_t *thefile;
+    ap_file_t *thefile = NULL;
     ap_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     ap_status_t stat;
   
@@ -238,7 +238,7 @@ int test_filedel(ap_context_t *context)
 int testdirs(ap_context_t *context)
 {
     ap_dir_t *temp;  
-    ap_file_t *file;
+    ap_file_t *file = NULL;
     ap_ssize_t bytes;
     ap_filetype_e type;
     char *fname;

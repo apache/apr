@@ -6,7 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-    ap_file_t *fd;
+    ap_file_t *fd = NULL;
     char ch;
     int status = 0;
     ap_context_t *context;

@@ -70,7 +70,7 @@ int main()
 {
     ap_context_t *context;
     ap_mmap_t *themmap = NULL;
-    ap_file_t *thefile;
+    ap_file_t *thefile = NULL;
     ap_int32_t flag = APR_READ;
     char *file1;
     ap_ssize_t filesize;
