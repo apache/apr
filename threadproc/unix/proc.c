@@ -289,6 +289,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
     else if (new->pid == 0) { 
         int status;
         /* child process */
+
+        /* do exec cleanup before duping pipes to fds 0-2; otherwise,
+         * any files cleaned up with those fds will hose our pipes
+         */
+        apr_pool_cleanup_for_exec();
+
         if (attr->child_in) {
             apr_file_close(attr->parent_in);
             dup2(attr->child_in->filedes, STDIN_FILENO);
@@ -312,8 +318,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
                 exit(-1);   /* We have big problems, the child should exit. */
             }
         }
-
-        apr_pool_cleanup_for_exec();
 
         if ((status = limit_proc(attr)) != APR_SUCCESS) {
             return status;
