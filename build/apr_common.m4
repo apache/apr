@@ -454,6 +454,7 @@ AC_DEFUN(APR_CHECK_STRERROR_R_RC,[
 AC_MSG_CHECKING(for type of return code from strerror_r)
 AC_TRY_RUN([
 #include <errno.h>
+#include <string.h>
 #include <stdio.h>
 main()
 {
