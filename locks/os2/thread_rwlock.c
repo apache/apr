@@ -60,39 +60,176 @@
 #include "fileio.h"
 #include <string.h>
 
+static apr_status_t thread_rwlock_cleanup(void *therwlock)
+{
+    apr_thread_rwlock_t *rwlock = therwlock;
+    return apr_thread_rwlock_destroy(rwlock);
+}
+
+
+
 APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
                                                    apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    apr_thread_rwlock_t *new_rwlock;
+    ULONG rc;
+
+    new_rwlock = (apr_thread_rwlock_t *)apr_palloc(pool, sizeof(apr_thread_rwlock_t));
+    new_rwlock->pool = pool;
+    new_rwlock->readers = 0;
+
+    rc = DosCreateMutexSem(NULL, &(new_rwlock->write_lock), 0, FALSE);
+
+    if (rc)
+        return APR_FROM_OS_ERROR(rc);
+
+    rc = DosCreateEventSem(NULL, &(new_rwlock->read_done), 0, FALSE);
+
+    if (rc)
+        return APR_FROM_OS_ERROR(rc);
+
+    *rwlock = new_rwlock;
+
+    if (!rc)
+        apr_pool_cleanup_register(pool, new_rwlock, thread_rwlock_cleanup,
+                                  apr_pool_cleanup_null);
+
+    return APR_FROM_OS_ERROR(rc);
 }
+
+
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_rdlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    ULONG rc, posts;
+
+    rc = DosRequestMutexSem(rwlock->write_lock, SEM_INDEFINITE_WAIT);
+
+    if (rc)
+        return APR_FROM_OS_ERROR(rc);
+
+    /* We've successfully acquired the writer mutex so we can't be locked
+     * for write which means it's ok to add a reader lock. The writer mutex
+     * doubles as race condition protection for the readers counter.
+     */
+    rwlock->readers++;
+    DosResetEventSem(rwlock->read_done, &posts);
+    rc = DosReleaseMutexSem(rwlock->write_lock);
+    return APR_FROM_OS_ERROR(rc);
 }
+
+
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    /* As above but with different wait time */
+    ULONG rc, posts;
+
+    rc = DosRequestMutexSem(rwlock->write_lock, SEM_IMMEDIATE_RETURN);
+
+    if (rc)
+        return APR_FROM_OS_ERROR(rc);
+
+    rwlock->readers++;
+    DosResetEventSem(rwlock->read_done, &posts);
+    rc = DosReleaseMutexSem(rwlock->write_lock);
+    return APR_FROM_OS_ERROR(rc);
 }
+
+
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    ULONG rc;
+
+    rc = DosRequestMutexSem(rwlock->write_lock, SEM_INDEFINITE_WAIT);
+
+    if (rc)
+        return APR_FROM_OS_ERROR(rc);
+
+    /* We've got the writer lock but we have to wait for all readers to
+     * unlock before it's ok to use it
+     */
+
+    if (rwlock->readers) {
+        rc = DosWaitEventSem(rwlock->read_done, SEM_INDEFINITE_WAIT);
+
+        if (rc)
+            DosReleaseMutexSem(rwlock->write_lock);
+    }
+
+    return APR_FROM_OS_ERROR(rc);
 }
+
+
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    ULONG rc;
+
+    rc = DosRequestMutexSem(rwlock->write_lock, SEM_IMMEDIATE_RETURN);
+
+    if (rc)
+        return APR_FROM_OS_ERROR(rc);
+
+    /* We've got the writer lock but we have to wait for all readers to
+     * unlock before it's ok to use it
+     */
+
+    if (rwlock->readers) {
+        /* There are readers active, give up */
+        DosReleaseMutexSem(rwlock->write_lock);
+        rc = ERROR_TIMEOUT;
+    }
+
+    return APR_FROM_OS_ERROR(rc);
 }
+
+
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    ULONG rc;
+
+    /* First, guess that we're unlocking a writer */
+    rc = DosReleaseMutexSem(rwlock->write_lock);
+
+    if (rc == ERROR_NOT_OWNER) {
+        /* Nope, we must have a read lock */
+        if (rwlock->readers) {
+            DosEnterCritSec();
+            rwlock->readers--;
+
+            if (rwlock->readers == 0) {
+                DosPostEventSem(rwlock->read_done);
+            }
+
+            DosExitCritSec();
+            rc = 0;
+        }
+    }
+
+    return APR_FROM_OS_ERROR(rc);
 }
+
+
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
-}
+    ULONG rc;
 
+    if (rwlock->write_lock == 0)
+        return APR_SUCCESS;
+
+    while (DosReleaseMutexSem(rwlock->write_lock) == 0);
+
+    rc = DosCloseMutexSem(rwlock->write_lock);
+
+    if (!rc) {
+        rwlock->write_lock = 0;
+        DosCloseEventSem(rwlock->read_done);
+        return APR_SUCCESS;
+    }
+
+    return APR_FROM_OS_ERROR(rc);
+}

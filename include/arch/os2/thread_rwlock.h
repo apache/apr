@@ -60,6 +60,9 @@
 
 struct apr_thread_rwlock_t {
     apr_pool_t *pool;
+    int readers;
+    HMTX write_lock;
+    HEV read_done;
 };
 
 #endif  /* THREAD_RWLOCK_H */
