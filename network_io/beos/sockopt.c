@@ -108,7 +108,7 @@ ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
     hptr = gethostbyaddr((char *)&(sock->addr->sin_addr), 
                          sizeof(struct in_addr), AF_INET);
     if (hptr != NULL) {
-        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
+        name = (char**)ap_pstrdup(sock->cntxt, hptr->h_name);
         if (*name) {
             return APR_SUCCESS;
         }
@@ -116,5 +116,6 @@ ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
     }
 
     /* XXX - Is this threadsafe? - manoj */
+    /* on BeOS this is a global... */
     return h_errno;
 }
