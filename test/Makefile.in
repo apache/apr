@@ -42,8 +42,6 @@ readchild@EXEEXT@
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
 
-CFLAGS=$(MY_CFLAGS)
-
 check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
 	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
 		./$$prog; \
