@@ -135,11 +135,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 		;;
 	esac
 	APR_SETIFNULL(enable_threads, [no])
-
-dnl XXX Fix me - Apache 1.3 used FLOCK serialization by default on FreeBSD, 
-dnl              but that doesn't work any more.
-
-        APR_SETIFNULL(apr_lock_method, [USE_FCNTL_SERIALIZE])
+        APR_SETIFNULL(apr_lock_method, [USE_FLOCK_SERIALIZE])
 	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_THREAD_SAFE])
 	;;
     *-next-nextstep*)
