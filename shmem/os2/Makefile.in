@@ -8,10 +8,8 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../../inc
-INCDIR1=../../include
-INCDIR2=../../file_io/os2
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
+INCDIR=../../include
+INCLUDES=-I$(INCDIR)
 
 LIB=shmem.a
 
