@@ -87,7 +87,6 @@ apr_status_t exit_ret_val = 123; /* just some made up number to check on later *
 void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
 {
     int i;
-    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
@@ -100,7 +99,6 @@ void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
 void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data)
 {
     int i;
-    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
@@ -113,7 +111,6 @@ void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data)
 void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data)
 {
     int i;
-    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
@@ -126,7 +123,6 @@ void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data)
 void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data)
 {
     int i;
-    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
