@@ -232,7 +232,16 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
     if (opt & APR_TCP_NODELAY) {
 #if defined(TCP_NODELAY)
         if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) != on) {
-            if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
+            int optlevel = IPPROTO_TCP;
+            int optname = TCP_NODELAY;
+
+#if APR_HAVE_SCTP
+            if (sock->protocol == IPPROTO_SCTP) {
+                optlevel = IPPROTO_SCTP;
+                optname = SCTP_NODELAY;
+            }
+#endif
+            if (setsockopt(sock->socketdes, optlevel, optname, (void *)&on, sizeof(int)) == -1) {
                 return errno;
             }
             apr_set_option(&sock->netmask, APR_TCP_NODELAY, on);
@@ -253,6 +262,15 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
     if (opt & APR_TCP_NOPUSH) {
 #if APR_TCP_NOPUSH_FLAG
         if (apr_is_option_set(sock->netmask, APR_TCP_NOPUSH) != on) {
+            int optlevel = IPPROTO_TCP;
+            int optname = TCP_NODELAY;
+
+#if APR_HAVE_SCTP
+            if (sock->protocol == IPPROTO_SCTP) {
+                optlevel = IPPROTO_SCTP;
+                optname = SCTP_NODELAY;
+            }
+#endif
             /* OK we're going to change some settings here... */
             /* TCP_NODELAY is mutually exclusive, so do we have it set? */
             if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) == 1 && on) {
@@ -260,7 +278,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
                  * flag set we need to switch it off...
                  */
                 int tmpflag = 0;
-                if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
+                if (setsockopt(sock->socketdes, optlevel, optname,
                                (void*)&tmpflag, sizeof(int)) == -1) {
                     return errno;
                 }
@@ -277,7 +295,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             apr_set_option(&sock->netmask, APR_TCP_NOPUSH, on);
             if (!on && apr_is_option_set(sock->netmask, APR_RESET_NODELAY)) {
                 int tmpflag = 1;
-                if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
+                if (setsockopt(sock->socketdes, optlevel, optname,
                                (void*)&tmpflag, sizeof(int)) == -1) {
                     return errno;
                 }
