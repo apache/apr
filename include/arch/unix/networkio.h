@@ -58,7 +58,9 @@
 
 #include "apr_network_io.h"
 #include "apr_general.h"
+#ifdef HAVE_POLL_H
 #include <poll.h>
+#endif
 
 struct socket_t {
     ap_context_t *cntxt;

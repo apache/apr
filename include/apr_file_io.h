@@ -96,6 +96,8 @@ typedef enum {APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 #define APR_WWRITE    0x002
 #define APR_WEXECUTE  0x001
 
+#define APR_OS_DEFAULT 0xFFF
+
 /* should be same as whence type in lseek, POSIZ defines this as int */
 typedef ap_int32_t       ap_seek_where_t;
 

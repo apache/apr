@@ -100,8 +100,8 @@ ap_status_t file_cleanup(void *thefile)
  *          APR_EXCL             return error if APR_CREATE and file exists
  * arg 4) Access permissions for file.
  * arg 5) The opened file descriptor.
- * NOTE:  If mode is -1, the system open command will be called without any
- *        mode parameters.
+ * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
+ *        called without any mode parameters.
  */
 ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag,  ap_fileperms_t perm, struct file_t **new)
 {
@@ -152,7 +152,7 @@ ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag,  ap_filepe
         oflags |= O_TRUNC;
     }
  
-    if (mode == -1) {
+    if (perm == APR_OS_DEFAULT) {
         (*new)->filedes = open(fname, oflags);
     }
     else {
