@@ -50,12 +50,28 @@ def main():
     for hdr in deps.keys():
       deps.update(h_deps.get(hdr, {}))
 
-    f.write('%s: %s include/%s\n' % (obj, file, string.join(deps.keys(), ' include/')))
+    f.write('%s: %s .make.dirs include/%s\n' % (obj, file, string.join(deps.keys(), ' include/')))
 
   f.write('\nOBJECTS = %s\n\n' % string.join(objects))
   f.write('HEADERS = $(top_srcdir)/%s\n\n' % string.join(headers, ' $(top_srcdir)/'))
   f.write('SOURCE_DIRS = %s $(EXTRA_SOURCE_DIRS)\n\n' % string.join(dirs.keys()))
 
+  # Build a list of all necessary directories in build tree
+  alldirs = { }
+  for dir in dirs:
+    d = dir
+    while d:
+      alldirs[d] = None
+      d = os.path.dirname(d)
+
+  # Sort so 'foo' is before 'foo/bar'
+  keys = alldirs.keys()
+  keys.sort()
+  f.write('BUILD_DIRS = %s\n\n' % string.join(keys))
+
+  f.write('.make.dirs: $(top_srcdir)/build-outputs.mk\n' \
+          '\t@for d in $(BUILD_DIRS); do test -d $$d || mkdir $$d; done\n' \
+          '\t@echo timestamp > $@\n')
 
 def extract_deps(fname, legal_deps):
   "Extract the headers this file includes."
