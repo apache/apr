@@ -63,7 +63,7 @@
 #define SEM_FAILED (-1)
 #endif
 
-static apr_status_t proc_mutex_destroy(apr_proc_mutex_t *mutex)
+APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
     return apr_pool_cleanup_run(mutex->pool, mutex, apr_proc_mutex_cleanup);
 }
