@@ -394,7 +394,11 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         int curaddr;
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
+#ifdef GETHOSTBYNAME_R_HOSTENT_DATA
+        struct hostent_data hd;
+#else
         char tmp[GETHOSTBYNAME_BUFLEN];
+#endif
         int hosterror;
         struct hostent hs;
 #endif
@@ -415,8 +419,19 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 #endif
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
-        hp = gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, 
+#if defined(GETHOSTBYNAME_R_HOSTENT_DATA)
+        /* AIX, HP/UX, D/UX et alia */
+        gethostbyname_r(hostname, &hs, &hd);
+        hp = &hs;
+#elif defined(GETHOSTBYNAME_R_GLIBC2)
+        /* Linux glibc2+ */
+        gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, 
+                        &hp, &hosterror);
+#else
+        /* Solaris, Irix et alia */
+        hp = gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1,
                              &hosterror);
+#endif
 #else
         hp = gethostbyname(hostname);
 #endif
@@ -426,9 +441,13 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
             apr_get_netos_error();
 #elif APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
+#ifdef GETHOSTBYNAME_R_HOSTENT_DATA
+            return (h_errno + APR_OS_START_SYSERR);
+#else
             /* If you see ERANGE, that means GETHOSBYNAME_BUFLEN needs to be
              * bumped. */
             return (hosterror + APR_OS_START_SYSERR);
+#endif
 #else
             return (h_errno + APR_OS_START_SYSERR);
 #endif
@@ -502,17 +521,48 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                                                  tmphostname);
     return APR_SUCCESS;
 #else
-    struct hostent *hptr;
+#if APR_HAS_THREADS && !defined(GETHOSTBYADDR_IS_THREAD_SAFE) && \
+    defined(HAVE_GETHOSTBYADDR_R) && !defined(BEOS)
+#ifdef GETHOSTBYNAME_R_HOSTENT_DATA
+    struct hostent_data hd;
+#else
+    char tmp[GETHOSTBYNAME_BUFLEN];
+#endif
+    int hosterror;
+    struct hostent hs, *hptr;
 
+#if defined(GETHOSTBYNAME_R_HOSTENT_DATA)
+    /* AIX, HP/UX, D/UX et alia */
+    gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
+                  sizeof(struct in_addr), AF_INET, &hs, &hd);
+    hptr = &hs;
+#elif defined(GETHOSTBYNAME_R_GLIBC2)
+    /* Linux glibc2+ */
+    gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
+                    sizeof(struct in_addr), AF_INET,
+                    &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, &hptr, &hosterror);
+#else
+    /* Solaris, Irix et alia */
+    hptr = gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
+                           sizeof(struct in_addr), AF_INET,
+                           &hs, tmp, GETHOSTBYNAME_BUFLEN, &hosterror);
+#endif
+#else
+    struct hostent *hptr;
     hptr = gethostbyaddr((char *)&sockaddr->sa.sin.sin_addr, 
-                         sizeof(struct in_addr), 
-                         AF_INET);
+                         sizeof(struct in_addr), AF_INET);
+#endif
+
     if (hptr) {
         *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, hptr->h_name);
         return APR_SUCCESS;
     }
     *hostname = NULL;
-#if defined(WIN32)
+#if APR_HAS_THREADS && !defined(GETHOSTBYADDR_IS_THREAD_SAFE) && \
+    defined(HAVE_GETHOSTBYADDR_R) && !defined(BEOS) && \
+    !defined(GETHOSTBYNAME_R_HOSTENT_DATA)
+    return hosterror + APR_OS_START_SYSERR;
+#elif defined(WIN32)
     return apr_get_netos_error();
 #elif defined(OS2)
     return h_errno;
