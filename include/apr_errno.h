@@ -62,11 +62,25 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Define four layers of status code offsets so that we don't interfere
- * with the predefined errno codes on the operating system.  Codes beyond
- * APR_OS_START_USEERR are reserved for applications that use APR that
- * layer their own error codes along with APR's.
+typedef int ap_status_t;
+
+/* Define five layers of status code offsets so that we don't interfere
+ * with the predefined errno codes on the operating system.  
+ * 
+ * For platforms such as Windows and OS/2 which have OS-specific error 
+ * codes:
+ * 
+ * Codes between APR_OS_START_USEERR and APR_OS_START_OSERR are reserved 
+ * for applications that use APR that layer their own error codes along 
+ * with APR's.
+ *
+ * For platforms such as UNIX where the system uses errno:
+ *
+ * APR_OS_START_OSERR is not used, so codes beyond APR_OS_START_USEERR are 
+ * reserved for applications that use APR that layer their own error codes 
+ * along with APR's.
  */
+
 #ifndef APR_OS_START_ERROR
 #define APR_OS_START_ERROR   4000
 #endif
@@ -79,11 +93,19 @@ extern "C" {
 #ifndef APR_OS_START_USEERR
 #define APR_OS_START_USEERR  (APR_OS_START_SYSERR + 500)
 #endif
+#ifndef APR_OS_START_OSERR      
+#define APR_OS_START_OSERR   (APR_START_USEERR + 29500)
+#endif
 
-/* If this definition of APRStatus changes, then we can remove this, but right
- * now, the decision was to use an errno-like implementation.
- */
-typedef int ap_status_t;
+#ifndef APR_STATUS_FROM_OSERR
+#define APR_STATUS_FROM_OSERR(err) \
+((err) ? (err) + APR_OS_START_OSERR : APR_SUCCESS)
+#endif
+
+#ifndef APR_OSERR_FROM_STATUS
+#define APR_OSERR_FROM_STATUS(st) \
+((st) > APR_OS_START_OSERR ? (st) - APR_OS_START_OSERR : APR_SUCCESS)
+#endif
 
 #define APR_SUCCESS 0
 
