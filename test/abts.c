@@ -88,8 +88,8 @@ static void end_suite(abts_suite *suite)
 abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
 {
     sub_suite *subsuite;
-    curr_char = 0;
     char *p;
+    curr_char = 0;
     
     /* Only end the suite if we actually ran it */
     if (suite && suite->tail &&!suite->tail->not_run) {
