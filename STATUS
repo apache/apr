@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/10 01:19:24 $]
+Last modified at [$Date: 2002/01/10 22:28:34 $]
 
 Release:
 
@@ -54,15 +54,15 @@ RELEASE SHOWSTOPPERS:
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
-    * Enable pools to have thread-specific locking in it.
-        Status: Sander's pool code has been tested with httpd, flood, 
-                and SVN.  It's in.  The debug code needs to be added.
-                
-        Comparisons/reviews:
-            Ian: <3C083414.1080208@cnet.com> (performance)
-            Brian: <3C07D792.9070301@cnet.com> (code)
-                   <3C0D6BB5.6010505@cnet.com> (performance)
-            Justin: <20011205025611.GB22835@ebuilt.com> (code)
+    * Add pool lifetime tracking/checking to the pools debug code.
+      It would be nice to generate some output on at what line(s) a
+      pool was created, cleared and/or destroyed.  Maybe introduce
+      an APR_POOL_LIFETIME_VERBOSE define for this?
+      We should check if a pool is still existent when passed into
+      any apr_pool_xxx function.  We could do this by recursively
+      checking if the pool is in a child list, starting at
+      global_pool.  If it is not, bail out and report sourcefile
+      linenumber (or cause a segv).
 
     * Get OTHER_CHILD support into Win32
         Status: Bill S. is looking into this
