@@ -160,6 +160,11 @@
  */
 #define APR_HAS_UNICODE_FS     1
 
+/* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
+ * on all platforms.
+ */
+#define APR_INADDR_NONE           INADDR_NONE
+
 /* Typedefs that APR needs. */
 
 typedef  short           apr_int16_t;
