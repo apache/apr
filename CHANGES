@@ -1,5 +1,8 @@
 Changes for APR 1.1.0
 
+  *) Remove the runtime test for Sendfile versions on FreeBSD. PR 25718.
+     [Mike Silbersack <silby silby.com>, Paul Querna]
+
   *( rename the fopen defines (APR_READ, APR_WRITE, etc.) to have
      prefix APR_FOPEN_ (keeping the old defines) [Stas]
 
