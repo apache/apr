@@ -63,7 +63,7 @@
 
 #define FILENAME "data/file_datafile.txt"
 
-struct view_fileinfo
+static const struct view_fileinfo
 {
     apr_int32_t bits;
     char *description;
@@ -84,7 +84,7 @@ struct view_fileinfo
     {0,                NULL}
 }; 
 
-int finfo_equal(apr_finfo_t f1, apr_finfo_t f2)
+static int finfo_equal(apr_finfo_t f1, apr_finfo_t f2)
 {
     return (f1.valid == f2.valid &&
             f1.protection == f2.protection &&
@@ -120,7 +120,7 @@ static void test_info_get(CuTest *tc)
 
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     if (rv  == APR_INCOMPLETE) {
-        char *str =  apr_palloc(p, 256);
+        char *str;
 	int i;
         str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
         for (i = 0; vfi[i].bits; ++i) {
@@ -141,7 +141,7 @@ static void test_stat(CuTest *tc)
 
     rv = apr_stat(&finfo, FILENAME, APR_FINFO_NORM, p);
     if (rv  == APR_INCOMPLETE) {
-        char *str =  apr_palloc(p, 256);
+        char *str;
 	int i;
         str = apr_pstrdup(p, "APR_INCOMPLETE:  Missing ");
         for (i = 0; vfi[i].bits; ++i) {
