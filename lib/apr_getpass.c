@@ -74,6 +74,10 @@
 #include <conio.h>
 #endif
 
+#if defined(HAVE_TERMIOS_H) && !defined(HAVE_GETPASS)
+#include <termios.h>
+#endif
+
 #ifndef CHARSET_EBCDIC
 #define LF 10
 #define CR 13
@@ -86,7 +90,11 @@
 
 #define ERR_OVERFLOW 5
 
-#ifdef MPE
+#ifndef HAVE_GETPASS
+
+/* MPE, Win32 and BeOS all lack a native getpass() */
+
+#if !defined(HAVE_TERMIOS_H) && !defined(WIN32)
 /*
  * MPE lacks getpass() and a way to suppress stdin echo.  So for now, just
  * issue the prompt and read the results with echo.  (Ugh).
@@ -106,9 +114,46 @@ static char *getpass(const char *prompt)
     return (char *) &password;
 }
 
-#endif
+#elif defined (HAVE_TERMIOS_H)
+static char *getpass(const char *prompt)
+{
+    struct termios attr;
+    static char password[MAX_STRING_LEN];
+    int n=0;
+    fputs(prompt, stderr);
+    fflush(stderr);
+	
+    if (tcgetattr(STDIN_FILENO, &attr) != 0)
+        return NULL;
+	attr.c_lflag &= ~(ECHO);
+    
+	if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &attr) != 0)
+		return NULL;
+    while ((password[n] = getchar()) != '\n') {
+        if (password[n] >= ' ' && password[n] <= '~') {
+            n++;
+        } else {
+            fprintf(stderr,"\n");
+            fputs(prompt, stderr);
+            fflush(stderr);
+            n = 0;
+        }
+    }
+ 
+    password[n] = '\0';
+    fprintf(stderr, "********************\n");
 
-#ifdef WIN32
+    if (n > (MAX_STRING_LEN - 1)) {
+        password[MAX_STRING_LEN - 1] = '\0';
+    }
+
+    attr.c_lflag |= ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &attr);
+    return (char*) &password;
+}
+
+#else
+
 /*
  * Windows lacks getpass().  So we'll re-implement it here.
  */
@@ -141,7 +186,10 @@ static char *getpass(const char *prompt)
 
     return (char *) &password;
 }
-#endif
+
+#endif /* no getchar or _getch */
+
+#endif /* no getpass */
 
 /*
  * Use the OS getpass() routine (or our own) to obtain a password from
