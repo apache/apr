@@ -54,6 +54,10 @@
 
 #ifndef APR_LIB_H
 #define APR_LIB_H
+/**
+ * @file apr_lib.h
+ * @brief general purpose library routines
+ */
 
 #include "apr.h"
 #include "apr_errno.h"
@@ -64,9 +68,10 @@
 #if APR_HAVE_STDARG_H
 #include <stdarg.h>
 #endif
-
 /**
- * @package APR general-purpose library
+ * @defgroup APR_General General Purpose Library Routines
+ * @ingroup APR
+ * @{
  */
 
 #ifdef __cplusplus
@@ -95,42 +100,62 @@ struct apr_vformatter_buff_t {
  * return the final element of the pathname
  * @param pathname The path to get the final element of
  * @return the final element of the path
- * @tip Examples:  
+ * @example
+ */
+/**
+ * Examples:
  * <PRE>
  *                 "/foo/bar/gum"   -> "gum"
  *                 "/foo/bar/gum/"  -> ""
  *                 "gum"            -> "gum"
  *                 "wi\\n32\\stuff" -> "stuff"
  * </PRE>
- * @deffunc const char * apr_filename_of_pathname(const char *pathname)
  */
 APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
 
-/* These macros allow correct support of 8-bit characters on systems which
+/**
+ * These macros allow correct support of 8-bit characters on systems which
  * support 8-bit characters.  Pretty dumb how the cast is required, but
  * that's legacy libc for ya.  These new macros do not support EOF like
  * the standard macros do.  Tough.
+ * @defgroup apr_ctype ctype functions
+ * @{
  */
+/** @see isalnum */
 #define apr_isalnum(c) (isalnum(((unsigned char)(c))))
+/** @see isalpha */
 #define apr_isalpha(c) (isalpha(((unsigned char)(c))))
+/** @see iscntrl */
 #define apr_iscntrl(c) (iscntrl(((unsigned char)(c))))
+/** @see isdigit */
 #define apr_isdigit(c) (isdigit(((unsigned char)(c))))
+/** @see isgraph */
 #define apr_isgraph(c) (isgraph(((unsigned char)(c))))
+/** @see islower*/
 #define apr_islower(c) (islower(((unsigned char)(c))))
+/** @see isascii */
 #ifdef isascii
 #define apr_isascii(c) (isascii(((unsigned char)(c))))
 #else
 #define apr_isascii(c) (((c) & ~0x7f)==0)
 #endif
+/** @see isprint */
 #define apr_isprint(c) (isprint(((unsigned char)(c))))
+/** @see ispunct */
 #define apr_ispunct(c) (ispunct(((unsigned char)(c))))
+/** @see isspace */
 #define apr_isspace(c) (isspace(((unsigned char)(c))))
+/** @see isupper */
 #define apr_isupper(c) (isupper(((unsigned char)(c))))
+/** @see isxdigit */
 #define apr_isxdigit(c) (isxdigit(((unsigned char)(c))))
+/** @see tolower */
 #define apr_tolower(c) (tolower(((unsigned char)(c))))
+/** @see toupper */
 #define apr_toupper(c) (toupper(((unsigned char)(c))))
-
-/*
+/** @} */
+/**
+ * apr_killpg
  * Small utility macros to make things easier to read.  Not usually a
  * goal, to be sure..
  */
@@ -153,17 +178,20 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
  * @param fmt The format string
  * @param ap The arguments to use to fill out the format string.
  *
- * @tip <PRE>
+ * @example 
+ */
+/**
+ * <PRE>
  * The extensions are:
  *
- * %pA	takes a struct in_addr *, and prints it as a.b.c.d
- * %pI	takes an apr_sockaddr_t * and prints it as a.b.c.d:port or
+ * %%pA	takes a struct in_addr *, and prints it as a.b.c.d
+ * %%pI	takes an apr_sockaddr_t * and prints it as a.b.c.d:port or
  *      [ipv6-address]:port
- * %pp  takes a void * and outputs it in hex
+ * %%pp takes a void * and outputs it in hex
  *
- * The %p hacks are to force gcc's printf warning code to skip
+ * The %%p hacks are to force gcc's printf warning code to skip
  * over a pointer argument without complaining.  This does
- * mean that the ANSI-style %p (output a void * in hex format) won't
+ * mean that the ANSI-style %%p (output a void * in hex format) won't
  * work as expected at all, but that seems to be a fair trade-off
  * for the increased robustness of having printf-warnings work.
  *
@@ -202,7 +230,6 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
  * that the space is in use until it either has to flush the buffer
  * or until apr_vformatter returns.
  * </PRE>
- * @deffunc int apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b), apr_vformatter_buff_t *c, const char *fmt, va_list ap)
  */
 APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
 			        apr_vformatter_buff_t *c, const char *fmt,
@@ -212,7 +239,6 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
  * Validate any password encypted with any algorithm that APR understands
  * @param passwd The password to validate
  * @param hash The password to validate against
- * @deffunc apr_status_t apr_password_validate(const char *passwd, const char *hash)
  */
 APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
                                                 const char *hash);
@@ -222,7 +248,6 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
  * @param prompt The prompt to display
  * @param pwbuf Buffer to store the password
  * @param bufsize The length of the password buffer.
- * @deffunc apr_status_t apr_password_get(const char *prompt, char *pwbuf, size_t *bufsize)
  */
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, 
                                            size_t *bufsize);
@@ -230,5 +255,5 @@ APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf,
 #ifdef __cplusplus
 }
 #endif
-
+/** @} */
 #endif	/* ! APR_LIB_H */

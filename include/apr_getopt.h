@@ -62,8 +62,14 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package APR command arguments
- */ 
+ * @file apr_getopt.h
+ * @brief APR Command Arguments (getopt)
+ */
+/**
+ * @defgroup APR_getopt Command Argument Parsing
+ * @ingroup APR
+ * @{
+ */
 
 typedef struct apr_getopt_t apr_getopt_t;
 /**
@@ -114,8 +120,7 @@ struct apr_getopt_option_t {
  * @param cont The pool to operate on
  * @param argc The number of arguments to parse
  * @param argv The array of arguments to parse
- * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
- * @deffunc apr_status_t apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
+ * @remark Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
  */
 APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
                                       int argc, const char * const *argv);
@@ -135,7 +140,6 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
  *             APR_BADARG   --  No argument followed @parameter:
  *             APR_SUCCESS  --  The next option was found.
  * </PRE>
- * @deffunc apr_status_t apr_getopt(apr_getopt_t *os, const char *opts, char *optch, const char **optarg)
  */
 APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
                                      char *option_ch, const char **option_arg);
@@ -164,12 +168,12 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
  * os->err is set to 0.  If os->interleave is set to nonzero, options can come
  * after arguments, and os->argv will be permuted to leave non-option arguments
  * at the end (the original argv is unaffected).
- * @deffunc apr_status_t apr_getopt_long(apr_getopt_t *os, const apr_getopt_option_t *opts, int *optch, const char **optarg)
  */
 APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
 					  const apr_getopt_option_t *opts,
 					  int *option_ch,
                                           const char **option_arg);
+/** @} */
 
 #ifdef __cplusplus
 }
