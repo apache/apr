@@ -503,6 +503,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * enough string to handle the longest file name.
              */
             char tmpname[APR_FILE_MAX * 3 + 1];
+            const char *name;
             HANDLE hFind;
             if (strchr(fname, '*') || strchr(fname, '?'))
                 return APR_ENOENT;
@@ -513,6 +514,13 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             if (unicode_to_utf8_path(tmpname, sizeof(tmpname), 
                                      FileInfo.w.cFileName)) {
                 return APR_ENAMETOOLONG;
+            }
+            /* If fname does not match the name returned by FindFirstFile
+             * then fname does not exist and we're done.
+             */
+            name = apr_filepath_name_get(fname);
+            if (strcasecmp(name, tmpname)) {
+                return APR_ENOENT;
             }
             filename = apr_pstrdup(pool, tmpname);
         }
@@ -554,6 +562,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
          * or are looking for the root of a Win98 drive.
          */
         HANDLE hFind;
+        const char *name;
         if (strchr(fname, '*') || strchr(fname, '?'))
             return APR_ENOENT;
         hFind = FindFirstFileA(fname, &FileInfo.n);
@@ -561,6 +570,13 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             return apr_get_os_error();
     	} 
         FindClose(hFind);
+        /* If fname does not match the name returned by FindFirstFile
+         * then fname does not exist and we're done.
+         */
+        name = apr_filepath_name_get(fname);
+        if (strcasecmp(name, FileInfo.n.cFileName)) {
+            return APR_ENOENT;
+        }
         filename = apr_pstrdup(pool, FileInfo.n.cFileName);
     }
 #endif
