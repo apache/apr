@@ -143,19 +143,17 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 
         mutex->owner = apr_os_thread_current();
         mutex->owner_ref = 1;
+        return rv;
     }
     else {
         rv = pthread_mutex_lock(&mutex->mutex);
-        if (rv) {
 #ifdef PTHREAD_SETS_ERRNO
+        if (rv) {
             rv = errno;
-#endif
-            return rv;
         }
-
+#endif
+        return rv;
     }
-
-    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
@@ -212,17 +210,17 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 
         memset(&mutex->owner, 0, sizeof mutex->owner);
         mutex->owner_ref = 0;
+        return status;
     }
     else {
         status = pthread_mutex_unlock(&mutex->mutex);
-        if (status) {
 #ifdef PTHREAD_SETS_ERRNO
+        if (status) {
             status = errno;
-#endif
-            return status;
         }
+#endif
+        return status;
     }
-    return status;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
