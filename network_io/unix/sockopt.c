@@ -249,7 +249,7 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
                 /* If we want to set NOPUSH then if we have the TCP_NODELAY
                  * flag set we need to switch it off...
                  */
-                int tmpflag = 1;
+                int tmpflag = 0;
                 if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY,
                                (void*)&tmpflag, sizeof(int)) == -1){
                     return errno;
