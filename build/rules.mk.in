@@ -68,8 +68,9 @@ CC=@CC@
 AWK=@AWK@
 LIBTOOL=@LIBTOOL@
 
-CFLAGS=@CFLAGS@ @OPTIM@
-CPPFLAGS=@CPPFLAGS@ $(INCLUDES)
+CFLAGS=@CFLAGS@
+OPTIM=@OPTIM@
+CPPFLAGS=@CPPFLAGS@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@
 
@@ -82,7 +83,7 @@ LTFLAGS = --silent
 #
 # Basic macro setup
 #
-COMPILE      = $(CC) $(CPPFLAGS) $(CFLAGS)
+COMPILE      = $(CC) $(CPPFLAGS) $(CFLAGS) $(OPTIM) $(INCLUDES)
 LT_COMPILE   = $(LIBTOOL) --mode=compile $(LTFLAGS) $(COMPILE) -c $< && touch $@
 
 LINK         = $(LIBTOOL) --mode=link $(LTFLAGS) $(COMPILE) $(LDFLAGS) -o $@
