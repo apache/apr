@@ -53,7 +53,7 @@
  */
 
 #include "apr_thread_proc.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_file_io.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
