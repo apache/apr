@@ -97,7 +97,6 @@
  * winsock headers were excluded by WIN32_LEAN_AND_MEAN, so include them now
  */
 #define SW_HIDE             0
-#include <wtypes.h>
 #include <winsock2.h>
 #include <mswsock.h>
 #endif /* !_WINDOWS_ */
