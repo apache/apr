@@ -126,6 +126,8 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
 {
     const char *cp;
     const char *ct;
+    char *cleaned, *dirty;
+    int escaped;
     int isquoted, numargs = 0, argnum;
 
 #define SKIP_WHITESPACE(cp) \
@@ -138,6 +140,10 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
     if (*cp == '"') { \
         isquoted = 1; \
         cp++; \
+    } \
+    else if (*cp == '\'') { \
+        isquoted = 2; \
+        cp++; \
     }
 
 /* DETERMINE_NEXTSTRING:
@@ -147,15 +153,35 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
 #define DETERMINE_NEXTSTRING(cp,isquoted) \
     for ( ; *cp != '\0'; cp++) { \
         if (   (isquoted    && (*cp     == ' ' || *cp     == '\t')) \
-            || (*cp == '\\' && (*(cp+1) == ' ' || *(cp+1) == '\t'))) { \
+            || (*cp == '\\' && (*(cp+1) == ' ' || *(cp+1) == '\t' || \
+                                *(cp+1) == '"' || *(cp+1) == '\''))) { \
             cp++; \
             continue; \
         } \
         if (   (!isquoted && (*cp == ' ' || *cp == '\t')) \
-            || (isquoted  && *cp == '"')                  ) { \
+            || (isquoted == 1 && *cp == '"') \
+            || (isquoted == 2 && *cp == '\'')                 ) { \
             break; \
         } \
     }
+ 
+/* REMOVE_ESCAPE_CHARS:
+ * Compresses the arg string to remove all of the '\' escape chars.
+ * The final argv strings should not have any extra escape chars in it.
+ */
+#define REMOVE_ESCAPE_CHARS(cleaned, dirty, escaped) \
+    escaped = 0; \
+    while(*dirty) { \
+        if (!escaped && *dirty == '\\') { \
+            escaped = 1; \
+        } \
+        else { \
+            escaped = 0; \
+            *cleaned++ = *dirty; \
+        } \
+        ++dirty; \
+    } \
+    *cleaned = 0;        /* last line of macro... */
 
     cp = arg_str;
     SKIP_WHITESPACE(cp);
@@ -187,6 +213,8 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
         cp++;
         (*argv_out)[argnum] = apr_palloc(token_context, cp - ct);
         apr_cpystrn((*argv_out)[argnum], ct, cp - ct);
+        cleaned = dirty = (*argv_out)[argnum];
+        REMOVE_ESCAPE_CHARS(cleaned, dirty, escaped);
         SKIP_WHITESPACE(cp);
     }
     (*argv_out)[argnum] = NULL;
