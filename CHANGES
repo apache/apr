@@ -1,7 +1,9 @@
 Changes with APR b1
 
   *) AIX: Global mutexes don't need an intraprocess mutex when SysV
-     sems are used for the crossprocess mutex.  [Jeff Trawick]
+     sems are used for the crossprocess mutex.
+     Darwin: The same optimization was applied for Posix sems.
+     [Jeff Trawick]
 
   *) Fix a problem with global mutexes on OS/390 when something other
      than the default mechanism (SysV sem) was used.  The mutexes didn't
