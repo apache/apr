@@ -368,6 +368,15 @@ static apr_table_entry_t *table_push(apr_table_t *t)
 #define table_push(t)	((apr_table_entry_t *) apr_array_push_noclear(&(t)->a))
 #endif /* MAKE_TABLE_PROFILE */
 
+APR_DECLARE(const apr_array_header_t *) apr_table_elts(const apr_table_t *t)
+{
+    return (const apr_array_header_t *)t;
+}
+
+APR_DECLARE(int) apr_is_empty_table(const apr_table_t *t)
+{
+    return ((t == NULL) || (t->a.nelts == 0));
+}
 
 APR_DECLARE(apr_table_t *) apr_table_make(apr_pool_t *p, int nelts)
 {
