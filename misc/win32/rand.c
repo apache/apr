@@ -59,14 +59,14 @@
 apr_status_t apr_generate_random_bytes(unsigned char * buf, int length) 
 {
     HCRYPTPROV hProv;
+    apr_status_t res = APR_SUCCESS;
 
     if (!CryptAcquireContext(&hProv,NULL,NULL,PROV_RSA_FULL,0)) {
 	return GetLastError();
     }
     if (!CryptGenRandom(hProv,length,buf)) {
-        CryptReleaseContext(hProv, 0);
-    	return GetLastError();
+    	res = GetLastError();
     }
     CryptReleaseContext(hProv, 0);
-    return APR_SUCCESS;
+    return res;
 }
