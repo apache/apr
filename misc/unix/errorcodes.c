@@ -62,8 +62,8 @@ const char *ap_os_strerror(int err, ap_pool_t *p);
 #elif BEOS    
 #error "not implemented yet"
 #else
-#define SYS_ERR_STRING(code, p) \
-    if (1) errstr = strerror(code); else
+#define SYS_ERR_STRING(code, str, p) \
+    if (1) str = strerror(code); else
 #endif
 
 static const char *apr_error_string(ap_status_t statcode)
@@ -157,7 +157,7 @@ const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
     }
     else {
         const char *errstr;
-        SYS_ERR_STRING(statcode - APR_OS_START_SYSERR, p);
+        SYS_ERR_STRING(statcode - APR_OS_START_SYSERR, errstr, p);
         return errstr;
     }
 }
