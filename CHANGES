@@ -57,6 +57,10 @@ Changes with APR 1.0
      apr_mmap_dup
      apr_socket_create
 
+     The following header files have been removed:
+
+     apr_compat.h
+
 Changes with APR 0.9.4
 
   *) Work around a bug in Darwin when calling getnameinfo() on IPv4-mapped
