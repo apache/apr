@@ -309,7 +309,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     if (flag & APR_WRITE) {
         oflags |= GENERIC_WRITE;
     }
-    
+    if (flag & APR_WRITEATTRS) {
+        oflags |= FILE_WRITE_ATTRIBUTES;
+    }
+
     if (apr_os_level >= APR_WIN_NT) 
         sharemode |= FILE_SHARE_DELETE;
 

@@ -657,6 +657,18 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_pool_t *cont);
 
 /**
+ * Set the mtime of the specified file.
+ * @param fname The full path to the file (using / on all systems)
+ * @param mtime The mtime to apply to the file.
+ * @param pool The pool to use.
+ * @warning Platforms which do not implement this feature will return
+ *      APR_ENOTIMPL.
+ */
+APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
+                                             apr_time_t mtime,
+                                             apr_pool_t *pool);
+
+/**
  * Create a new directory on the file system.
  * @param path the path for the directory to be created.  (use / on all systems)
  * @param perm Permissions for the new direcoty.
