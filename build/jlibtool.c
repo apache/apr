@@ -1349,9 +1349,6 @@ int run_mode(command_t *cmd_data)
             lib_args[2] = NULL;
             external_spawn(cmd_data, RANLIB, lib_args);
 #endif
-            if (!cmd_data->options.dry_run) {
-                //link(
-            }
         }
 
         if (cmd_data->output == otDynamicLibraryOnly ||
