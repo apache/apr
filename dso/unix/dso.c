@@ -139,7 +139,20 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 
 #else
-    void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+    int flags = RTLD_NOW | RTLD_GLOBAL;
+    void *os_handle;
+#ifdef _AIX
+    if (strchr(path + 1, '(') && path[strlen(path) - 1] == ')')
+    {
+        /* This special archive.a(dso.so) syntax is required for
+         * the way libtool likes to build shared libraries on AIX.
+         * dlopen() support for such a library requires that the
+         * RTLD_MEMBER flag be enabled.
+         */
+        flags |= RTLD_MEMBER;
+    }
+#endif
+    os_handle = dlopen(path, flags);
 #endif    
 #endif /* DSO_USE_x */
 
