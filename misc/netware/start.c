@@ -76,7 +76,6 @@ static int UnregisterAppWithWinSock (void *nlm_handle)
             WSACleanupWithNLMHandle = wsa_cleanup_with_handle;
     }
 
-    // don't know where that 'data' thing comes from...
     return (*WSACleanupWithNLMHandle)(nlm_handle);
 }
 
@@ -92,7 +91,6 @@ static int RegisterAppWithWinSock (void *nlm_handle)
             WSAStartupWithNLMHandle = wsa_startup_with_handle;
     }
 
-    // don't know where that 'data' thing comes from...
     err = (*WSAStartupWithNLMHandle)(wVersionRequested, &wsaData, nlm_handle);
 
     if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
