@@ -91,19 +91,27 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
     else
         one = 0;
 
+    if (opt & APR_SO_TIMEOUT) {
+        int timeout = on * 1000;  /* Windows needs timeout in mSeconds */
+        sock->timeout = timeout;
+        if (setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char*) &timeout, 
+                       sizeof(timeout)) == SOCKET_ERROR) {
+            return WSAGetLastError();
+        }
+    }
     if (opt & APR_SO_KEEPALIVE) {
         if (setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
-            return APR_EEXIST;
+            return WSAGetLastError();
         }
     }
     if (opt & APR_SO_DEBUG) {
         if (setsockopt(sock->sock, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
-            return APR_EEXIST;
+            return WSAGetLastError();
         }
     }
     if (opt & APR_SO_REUSEADDR) {
         if (setsockopt(sock->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
-            return APR_EEXIST;
+            return WSAGetLastError();
         }
     }
     if (opt & APR_SO_NONBLOCK) {
@@ -124,7 +132,7 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
         }
     }
     return APR_SUCCESS;
-}         
+}
 
 ap_status_t ap_gethostname(char *buf, int len, ap_context_t *cont)
 {
