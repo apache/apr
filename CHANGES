@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Added apr_compare_users() and apr_compare_groups() for more complex
+     apr_uid_t and apr_gid_t structures.  Enabled both .user and .group
+     results from WinNT/2000 stat/getfileinfo, but expect to find that 
+     .group is 'None' in most cases.  [William Rowe]
+
   *) Replace configure --with-optim option by using the environment
      variable OPTIM instead.  This is needed because configure options
      do not support multiple flags separated by spaces.  [Roy Fielding]
@@ -9,7 +14,7 @@ Changes with APR b1
 
   *) Abstracted apr_get_username and apr_get_groupname for unix and win32.
      Modified Win32 apr_uid_t and apr_gid_t to use PSIDs, and elimintated
-     the uid_t and gid_t definitions.
+     the uid_t and gid_t definitions.  [William Rowe]
 
   *) Radically refactored apr_stat/lstat/getfileinfo/dir_read for Win32
      to assure we are retrieving what we expect to retrieve, and reporting

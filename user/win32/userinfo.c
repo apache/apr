@@ -74,9 +74,19 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
         return APR_BADARG;
     if (!LookupAccountSid(NULL, userid, name, &cbname, domain, &cbdomain, &type))
         return apr_get_os_error();
-    if (type != SidTypeUser)
+    if (type != SidTypeUser && type != SidTypeAlias)
         return APR_BADARG;
     *username = apr_pstrdup(p, name);
     return APR_SUCCESS;
 }
   
+APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right)
+{
+    if (!left || !right)
+        return APR_BADARG;
+    if (!IsValidSid(left) || !IsValidSid(right))
+        return APR_BADARG;
+    if (!EqualSid(left, right))
+        return APR_EMISMATCH;
+    return APR_SUCCESS;
+}
