@@ -1,4 +1,8 @@
 Changes with APR b1  
+
+  *) Fix a problem with configure on NetBSD.  We must include sys/types.h
+     for some platforms.  [jun-ichiro hagino <itojun@kame.net>]
+
   *) Some fixes in the Win32 time support.
      (IsLeapYear): New macro for quickly figgerin' out if a given year is a 
      leap year. (SystemTimeToAprExpTime): Perform the calculation of
