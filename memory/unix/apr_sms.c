@@ -466,16 +466,22 @@ APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a,
 
 APR_DECLARE(apr_status_t) apr_sms_lock(apr_sms_t *mem_sys)
 {
+    /* If we don't have a lock_fn then we probably don't need one,
+     * so this is OK and we just return APR_SUCCESS
+     */
     if (!mem_sys->lock_fn)
-        return APR_ENOTIMPL;
+        return APR_SUCCESS;
 
     return mem_sys->lock_fn(mem_sys);
 }
 
 APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *mem_sys)
 {
+    /* If we don't have a lock_fn then we probably don't need one,
+     * so this is OK and we just return APR_SUCCESS
+     */
     if (!mem_sys->unlock_fn)
-        return APR_ENOTIMPL;
+        return APR_SUCCESS;
         
     return mem_sys->unlock_fn(mem_sys);
 }
