@@ -115,6 +115,12 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
 {
     struct stat info;
 
+    if (thefile->buffered) {
+        apr_status_t rv = apr_file_flush(thefile);
+        if (rv != APR_SUCCESS)
+            return rv;
+    }
+
     if (fstat(thefile->filedes, &info) == 0) {
         finfo->pool = thefile->pool;
         finfo->fname = thefile->fname;
