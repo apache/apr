@@ -59,6 +59,7 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_hash.h"
+#define USE_CSTAT_MUTEX
 #ifdef USE_CSTAT_MUTEX
 #include "apr_thread_mutex.h"
 #endif
@@ -246,7 +247,13 @@ int cstat (const char *path, struct stat *buf)
     if (!gPool)
         return stat(path, buf);
 
-    if (!statCacheData) {
+    if (statCacheData) {
+        statCache = statCacheData->statCache;
+#ifdef USE_CSTAT_MUTEX
+        statcache_mutex = statCacheData->statcache_mutex;
+#endif
+    }
+    else {
         statCacheData = (apr_stat_cache_t *)apr_palloc (gPool, sizeof(apr_stat_cache_t));
         statCache = apr_hash_make(gPool);
 #ifdef USE_CSTAT_MUTEX
@@ -255,12 +262,6 @@ int cstat (const char *path, struct stat *buf)
 #endif
         statCacheData->statCache = statCache;
         setStatCache((void*)statCacheData);
-    }
-    else {
-        statCache = statCacheData->statCache;
-#ifdef USE_CSTAT_MUTEX
-        statcache_mutex = statCacheData->statcache_mutex;
-#endif
     }
 
     if (statCache) {
@@ -282,16 +283,16 @@ int cstat (const char *path, struct stat *buf)
             ret = stat(path, buf);
             if (ret == 0) {
                 if (!stat_entry) {
+#ifdef USE_CSTAT_MUTEX
+		            apr_thread_mutex_lock(statcache_mutex);
+#endif
                     key = apr_pstrdup (gPool, path);
                     stat_entry = apr_palloc (gPool, sizeof(apr_stat_entry_t));
                     memcpy (&(stat_entry->info), buf, sizeof(struct stat));
                     stat_entry->expire = now;
-#ifdef USE_CSTAT_MUTEX
-                    apr_thread_mutex_lock(statcache_mutex);
-#endif
                     apr_hash_set(statCache, key, APR_HASH_KEY_STRING, stat_entry);
 #ifdef USE_CSTAT_MUTEX
-                    apr_thread_mutex_unlock(statcache_mutex);
+					apr_thread_mutex_unlock(statcache_mutex);
 #endif
                 }
                 else {
