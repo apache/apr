@@ -74,8 +74,9 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signal)
         }
         CloseHandle(proc->hproc);
         proc->hproc = NULL;
+        return APR_SUCCESS;
     }
-    return APR_SUCCESS;
+    return APR_EPROC_UNKNOWN;
 }
 
 void apr_signal_init(apr_pool_t *pglobal)
