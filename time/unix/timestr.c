@@ -52,10 +52,20 @@
  * <http://www.apache.org/>.
  */
 
-#include "atime.h"
 #include "apr_portable.h"
-
+#include "apr_time.h"
+#include "apr_lib.h"
+/* System Headers required for time library */
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#if HAVE_TIME_H
+#include <time.h>
+#endif
+#if HAVE_STRING_H
 #include <string.h>
+#endif
+/* End System Headers */
 
 APR_VAR_EXPORT const char ap_month_snames[12][4] =
 {
