@@ -214,12 +214,12 @@ ap_status_t ap_eof(ap_file_t *fptr)
     if (fptr->eof_hit == 1) {
         return APR_EOF;
     }
-    APR_SUCCESS;
+    return APR_SUCCESS;
 }   
 
 ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
 {
-    (*thefile) = ap_pcalloc(cont, sizeof(struct file_t *));
+    (*thefile) = ap_pcalloc(cont, sizeof(struct file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }
