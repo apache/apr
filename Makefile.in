@@ -62,18 +62,10 @@ delete-exports:
 	fi
 
 $(TARGET_EXPORTS):
-	if test -z "$(srcdir)"; then \
-		$(AWK) -f helpers/make_export.awk include/*.h > $@ ; \
-	else \
-		$(AWK) -f $(srcdir)helpers/make_export.awk $(srcdir)include/*.h > $@ ; \
-	fi
+	$(MKEXPORT) include/*.h > $@
 
 docs:
-	if test -z "$(srcdir)"; then \
-		helpers/scandoc -ihelpers/default.pl -p./docs/ ./include/*.h; \
-	else \
-		$(srcdir)helpers/scandoc -i$(srcdir)helpers/default.pl -p./docs/ $(srcdir)include/*.h; \
-	fi
+	$(SCANDOC) -ihelpers/default.pl -p./docs/ ./include/*.h
 
 test: $(TARGET_LIB)
 	(cd test; make clean; make; \
