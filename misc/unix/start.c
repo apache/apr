@@ -63,6 +63,20 @@
 #include "internal_time.h"
 
 
+#ifndef WIN32
+APR_DECLARE(apr_status_t) apr_app_main(int *argc, char ***argv, char ***env)
+{
+    /* An absolute noop.  At present, only Win32 requires this stub, but it's
+     * required in order to move command arguments passed through the service
+     * control manager into the process, and it's required to fix the char*
+     * data passed in from local/wide codepage into utf-8, our internal fmt.
+     *
+     * Win32 declares it's implementation in misc/win32/apr_app.c
+     */
+    return APR_SUCCESS;
+}
+#endif
+
 static int initialized = 0;
 
 APR_DECLARE(apr_status_t) apr_initialize(void)
@@ -108,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     }
 #endif
     
-#if defined WIN32 || defined(NETWARE)
+#if defined(NETWARE) || defined(WIN32)
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {
@@ -134,7 +148,7 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
     }
     apr_pool_terminate();
     
-#if defined(NETWARE)
+#if defined(NETWARE) || defined(WIN32)
     WSACleanup();
 #endif
 }
