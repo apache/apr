@@ -56,7 +56,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#include "errno.h"
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H

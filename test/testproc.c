@@ -56,7 +56,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#include "errno.h"
+#include <errno.h>
 #ifndef WIN32
 #include <unistd.h>
 #endif
