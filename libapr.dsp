@@ -502,10 +502,6 @@ SOURCE=.\include\apr_atomic.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_compat.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\include\apr_dso.h
 # End Source File
 # Begin Source File
