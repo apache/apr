@@ -153,6 +153,7 @@ AC_SUBST(iconv)
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
+AC_CHECK_HEADERS(ByteOrder.h)
 AC_CHECK_HEADERS(conio.h)
 AC_CHECK_HEADERS(crypt.h)
 AC_CHECK_HEADERS(ctype.h)
@@ -413,6 +414,10 @@ AC_SUBST(have_union_semun)
 dnl Checks for libraries.
 AC_CHECK_DEFINE(LOCK_EX, sys/file.h)
 AC_CHECK_DEFINE(F_SETLK, fcntl.h)
+AC_CHECK_DEFINE(isascii, ctype.h)
+# We are assuming that if the platform doesn't have POLLIN, it doesn't have
+# any POLL definitions.
+AC_CHECK_DEFINE(POLLIN, poll.h)
 
 pthreadser="0"
 if test "$threads" = "1"; then

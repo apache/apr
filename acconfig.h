@@ -32,6 +32,8 @@
 #undef HAVE_PTHREAD_PROCESS_SHARED
 #undef DEV_RANDOM
 #undef HAVE_TRUERAND
+#undef HAVE_POLLIN
+#undef HAVE_isascii
 
 /* Cross process serialization techniques */
 #undef USE_FLOCK_SERIALIZE
