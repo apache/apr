@@ -224,7 +224,7 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
 APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
                                                apr_pool_t *p)
 {
-    control = apr_pcalloc(p, sizeof(**control));
+    (*control) = apr_pcalloc(p, sizeof(**control));
     return APR_SUCCESS;
 }
 
