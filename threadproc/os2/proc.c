@@ -253,7 +253,7 @@ apr_status_t apr_fork(apr_proc_t *proc, apr_pool_t *cont)
 /* quotes in the string are doubled up.
  * Used to escape quotes in args passed to OS/2's cmd.exe
  */
-static char *double_quotes(apr_pool_t *cntxt, char *str)
+static char *double_quotes(apr_pool_t *cntxt, const char *str)
 {
     int num_quotes = 0;
     int len = 0;
@@ -285,7 +285,7 @@ apr_status_t apr_create_process(apr_proc_t *proc, const char *progname,
 {
     int i, arg, numargs, cmdlen;
     apr_status_t status;
-    char **newargs;
+    const char **newargs;
     char savedir[300];
     HFILE save_in, save_out, save_err, dup;
     int criticalsection = FALSE;
@@ -386,7 +386,7 @@ apr_status_t apr_create_process(apr_proc_t *proc, const char *progname,
         i++;
     }
 
-    newargs = (char **)apr_palloc(cont, sizeof (char *) * (i + 4));
+    newargs = (const char **)apr_palloc(cont, sizeof (char *) * (i + 4));
     numargs = 0;
 
     if (interpreter[0])
@@ -416,7 +416,7 @@ apr_status_t apr_create_process(apr_proc_t *proc, const char *progname,
     cmdline_pos = cmdline + strlen(cmdline);
 
     for (i=1; i<numargs; i++) {
-        char *a = newargs[i];
+        const char *a = newargs[i];
 
         if (strpbrk(a, "&|<>\" "))
             a = apr_pstrcat(cont, "\"", double_quotes(cont, a), "\"", NULL);
