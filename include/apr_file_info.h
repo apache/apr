@@ -146,7 +146,7 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_ICASE  0x01000000  /*  if dev is case insensitive */
 #define APR_FINFO_NAME   0x02000000  /*  ->name in proper case */
 
-#define APR_FINFO_MIN    0x00008170  /*  minimal: type, dates and size */
+#define APR_FINFO_MIN    0x00008170  /*  type, mtime, ctime, atime, size */
 #define APR_FINFO_IDENT  0x00003000  /*  dev and inode */
 #define APR_FINFO_OWNER  0x00030000  /*  user and group */
 #define APR_FINFO_PROT   0x00700000  /*  all protections */
