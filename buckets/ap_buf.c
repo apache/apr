@@ -84,6 +84,9 @@ APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
             newbuf->data = ap_rmem_create();
             newbuf->free = NULL;
             break;
+        case AP_BUCKET_eos:
+            newbuf->data = NULL;
+            newbuf->free = NULL;
         case AP_BUCKET_file:
         case AP_BUCKET_filename:
         case AP_BUCKET_cached_entity:
@@ -96,7 +99,7 @@ APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
 
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
 {
-    if (e->free) {
+    if (e->free != NULL) {
         e->free(e);
     }
     free(e);
@@ -174,6 +177,7 @@ APR_EXPORT(void) ap_bucket_brigade_catenate(ap_bucket_brigade *a,
         if (a->tail) {
             a->tail->next = b->head;
         }
+        b->head->prev = a->tail;
 	a->tail = b->tail;
         if (!a->head) {
             a->head = b->head;
@@ -196,6 +200,9 @@ APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
     do {
         iov_used = ap_bucket_brigade_to_iovec(b, vec, 16);
         status = iol_writev(iol, vec, iov_used, &bytes);
+
+        ap_consume_buckets(b, 16);
+
         if (status != APR_SUCCESS) {
             return status;
         }
@@ -224,6 +231,8 @@ APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b)
             return ap_mmap_get_char_str(b->data);
         case AP_BUCKET_rmem:
             return ap_rmem_get_char_str(b->data);
+        case AP_BUCKET_eos:
+            return NULL;
         case AP_BUCKET_file:
         case AP_BUCKET_filename:
         case AP_BUCKET_cached_entity:
@@ -244,6 +253,8 @@ APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b)
             return ap_mmap_get_len(b->data);
         case AP_BUCKET_rmem:
             return ap_rmem_get_len(b->data);
+        case AP_BUCKET_eos:
+            return 0;
         case AP_BUCKET_file:
         case AP_BUCKET_filename:
         case AP_BUCKET_cached_entity:
@@ -297,7 +308,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
         }
         else {
             b->tail->next = ap_bucket_list_create();
-            b->tail->next->prev = b->tail->next;
+            b->tail->next->prev = b->tail;
             b->tail = b->tail->next;
             b->tail->bucket = r;
         }
@@ -305,3 +316,4 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
 
     return k;
 }
+
