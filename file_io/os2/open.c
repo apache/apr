@@ -144,10 +144,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->direction = 0;
     dafile->pipe = FALSE;
 
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&dafile->pollset, 1, cont, 0);
-
     if (!(flag & APR_FILE_NOCLEANUP)) { 
         apr_pool_cleanup_register(dafile->pool, dafile, apr_file_cleanup, apr_file_cleanup);
     }
@@ -243,10 +239,6 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
         if (rv)
             return rv;
     }
-
-    /* Create a pollset with room for one descriptor. */
-    /* ### check return codes */
-    (void) apr_pollset_create(&(*new)->pollset, 1, cont, 0);
 
     return APR_SUCCESS;
 }    

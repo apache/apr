@@ -84,9 +84,6 @@ struct apr_file_t {
     HEV pipeSem;
     enum { BLK_UNKNOWN, BLK_OFF, BLK_ON } blocking;
 
-    /* if there is a timeout set, then this pollset is used */
-    apr_pollset_t *pollset;
-
     /* Stuff for buffered mode */
     char *buffer;
     int bufpos;               // Read/Write position in buffer
