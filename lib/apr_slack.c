@@ -60,11 +60,7 @@
  * 
  */
 
-#ifndef WIN32
 #include "apr_config.h"
-#else
-#include "apr_winconfig.h"
-#endif
 
 #ifdef APACHE
 #include "http_log.h"

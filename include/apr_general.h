@@ -55,11 +55,7 @@
 #ifndef APR_GENERAL_H
 #define APR_GENERAL_H
 
-#ifdef WIN32
-#include "apr_win.h"
-#else
 #include "apr.h"
-#endif
 
 #if APR_HAVE_STDIO_H
 #include <stdio.h>

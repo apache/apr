@@ -55,7 +55,7 @@
 #ifndef ATIME_H
 #define ATIME_H
 
-#include "apr_winconfig.h"
+#include "apr_config.h"
 #include "apr_time.h"
 #include <time.h>
 

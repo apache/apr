@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_winconfig.h"
+#include "apr_config.h"
 #include "misc.h"
 #include "apr_general.h"
 #include "apr_errno.h"

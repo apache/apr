@@ -52,12 +52,10 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef WIN32
-#include "apr_config.h"
-#else
+#ifdef WIN32
 #include <winsock2.h>
-#include "apr_winconfig.h"
 #endif
+#include "apr_config.h"
 
 #include "apr_lib.h"
 #include <math.h>
