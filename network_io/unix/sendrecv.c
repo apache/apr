@@ -316,7 +316,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                       *len);   /* number of bytes to send */
     } while (rv == -1 && errno == EINTR);
 
-    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
                    && (sock->timeout > 0)) {
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
