@@ -59,6 +59,9 @@
 
 struct shmem_t {
     MM *mm;
+#if BEOS
+    area_id id;
+#endif
 };
 
 apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
@@ -69,6 +72,9 @@ apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *fi
     }
     (*m) = mm_malloc(newmm, sizeof(struct shmem_t));
     (*m)->mm = newmm;
+#if BEOS
+    (*m)->id = area_for((*m));
+#endif
     return APR_SUCCESS;
 }
 
@@ -132,6 +138,37 @@ apr_status_t apr_set_shm_name(apr_shmem_t *c, apr_shm_name_t *name)
 apr_status_t apr_open_shmem(struct shmem_t *c)
 {
 #if APR_USES_ANONYMOUS_SHM
+
+#if BEOS
+    /* If we've forked we need a clone of the original area or we
+     * will only have access to a one time copy of the data made when
+     * the fork occurred.  This strange bit of code fixes that problem!
+     */
+    thread_info ti;
+    area_info ai;
+    area_id deleteme = area_for(c);
+    
+    /* we need to check which team we're in, so we need to get
+     * the appropriate info structures for the current thread and
+     * the area we're using.
+     */
+    get_area_info(c->id, &ai);   
+    get_thread_info(find_thread(NULL), &ti);
+
+    if (ti.team != ai.team){
+        area_id nai;
+        /* if we are in a child then we need to delete the system
+         * created area as it's a one time copy and won't be a clone
+         * which is not good.
+         */
+        delete_area(deleteme);
+        /* now we make our own clone and use that from now on! */
+        nai = clone_area(ai.name, &(ai.address), B_CLONE_ADDRESS,
+            B_READ_AREA | B_WRITE_AREA, ai.area);
+        get_area_info(nai, &ai);
+        c = ai.address;
+    }
+#endif
 /* When using MM, we don't need to open shared memory segments in child
  * segments, so just return immediately.
  */
