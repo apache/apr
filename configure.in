@@ -66,6 +66,7 @@ case "$OS" in
        CFLAGS="$CFLAGS -DOS2 -Zmt"
        OSDIR="os2"
        LIBPREFIX=""
+       enable_threads="os2"
        ;;
    *beos*)
        OSDIR="beos"
@@ -278,20 +279,24 @@ if test "$ac_cv_enable_threads" = "no"; then
     pthreadh="0"
 else
     REENTRANCY_FLAGS
-    PTHREADS_CHECK
     if test "$ac_cv_enable_threads" = "pthread"; then
 # We have specified pthreads for our threading library, just make sure
 # that we have everything we need
+      PTHREADS_CHECK
       AC_CHECK_HEADERS(pthread.h, [
           threads="1"
           pthreadh="1"
           AC_DEFINE(USE_THREADS) ], [
           threads="0"
           pthreadh="0" ] )
+    elif test "$ac_cv_enable_threads" = "os2"; then
+          threads="1"
+          pthreadh="0"
     else
 # We basically specified that we wanted threads, but not how to implement
 # them.  In this case, just look for pthreads.  In the future, we can check
 # for other threading libraries as well.
+      PTHREADS_CHECK
       AC_CHECK_HEADERS(pthread.h, [
           threads="1"
           pthreadh="1"
