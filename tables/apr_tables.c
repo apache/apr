@@ -406,8 +406,8 @@ APR_DECLARE(void) apr_table_clear(apr_table_t *t)
 
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
 {
-    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
-    int i;
+    apr_table_entry_t *next_elt = (apr_table_entry_t *) t->a.elts;
+    apr_table_entry_t *last_elt = next_elt + t->a.nelts;
     apr_uint32_t checksum;
 
     if (key == NULL) {
@@ -415,9 +415,10 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
     }
 
     COMPUTE_KEY_CHECKSUM(key, checksum);
-    for (i = 0; i < t->a.nelts; ++i) {
-	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
-	    return elts[i].val;
+    for (; next_elt < last_elt; next_elt++) {
+	if ((checksum == next_elt->key_checksum) &&
+            !strcasecmp(next_elt->key, key)) {
+	    return next_elt->val;
 	}
     }
 
