@@ -76,12 +76,20 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 
     (*new_file)->cntxt = old_file->cntxt;
     if (have_file) {
-        DuplicateHandle(hCurrentProcess, (*new_file)->filehand, hCurrentProcess, 
-                        &old_file->filehand, 0, FALSE, DUPLICATE_SAME_ACCESS); 
+        if (!DuplicateHandle(hCurrentProcess, (*new_file)->filehand, 
+                             hCurrentProcess, 
+                             &old_file->filehand, 0, FALSE, 
+                             DUPLICATE_SAME_ACCESS)) {
+            return GetLastError();
+        }
     }
     else {
-        DuplicateHandle(hCurrentProcess, old_file->filehand, hCurrentProcess, 
-                        &(*new_file)->filehand, 0, FALSE, DUPLICATE_SAME_ACCESS); 
+        if (!DuplicateHandle(hCurrentProcess, old_file->filehand, 
+                             hCurrentProcess,
+                             &(*new_file)->filehand, 0, FALSE, 
+                             DUPLICATE_SAME_ACCESS)) {
+            return GetLastError();
+        }
     }
 
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
