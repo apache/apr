@@ -266,6 +266,15 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
             return rv;
         }
     }
+    /* curr_locked is set to -1 until the mutex has been created */
+    if (mutex->curr_locked != -1) {
+        if ((rv = pthread_mutex_destroy(mutex->pthread_interproc))) {
+#ifdef PTHREAD_SETS_ERRNO
+            rv = errno;
+#endif
+            return rv;
+        }
+    }
     if (munmap((caddr_t)mutex->pthread_interproc, sizeof(pthread_mutex_t))) {
         return errno;
     }
@@ -294,6 +303,9 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return errno;
     }
     close(fd);
+
+    new_mutex->curr_locked = -1; /* until the mutex has been created */
+
     if ((rv = pthread_mutexattr_init(&mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
@@ -306,6 +318,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
+        pthread_mutexattr_destroy(&mattr);
         return rv;
     }
 
@@ -316,6 +329,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
+        pthread_mutexattr_destroy(&mattr);
         return rv;
     }
     if ((rv = pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))) {
@@ -323,6 +337,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
+        pthread_mutexattr_destroy(&mattr);
         return rv;
     }
 #endif
@@ -332,8 +347,11 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
+        pthread_mutexattr_destroy(&mattr);
         return rv;
     }
+
+    new_mutex->curr_locked = 0; /* mutex created now */
 
     if ((rv = pthread_mutexattr_destroy(&mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -343,7 +361,6 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return rv;
     }
 
-    new_mutex->curr_locked = 0;
     apr_pool_cleanup_register(new_mutex->pool,
                               (void *)new_mutex,
                               apr_proc_mutex_cleanup, 
