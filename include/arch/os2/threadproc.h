@@ -95,7 +95,5 @@ struct apr_procattr_t {
     apr_int32_t detached;
 };
 
-typedef void (*os2_thread_start_t)(void *);
-
 #endif  /* ! THREAD_PROC_H */
 

@@ -89,6 +89,12 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
+void *dummy_func(void *opaque)
+{
+    apr_thread_t *thd = (apr_thread_t *)opaque;
+    return thd->func(thd, thd->data);
+}
+
 APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
                                             apr_threadattr_t *attr,
                                             apr_thread_start_t func,
@@ -105,6 +111,8 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     }
 
     (*new)->cntxt = cont;
+    (*new)->data = data;
+    (*new)->func = func;
     
     stat = apr_pool_create(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
@@ -114,8 +122,8 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     /* Use 0 for Thread Stack Size, because that will default the stack to the
      * same size as the calling thread. 
      */
-    if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (APR_THREAD_FUNC *)(void *))func,
-                                               data, 0, &temp)) == 0) {
+    if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (APR_THREAD_FUNC *)(void *))dummy_func,
+                                               (*new), 0, &temp)) == 0) {
         lasterror = apr_get_os_error();
         return APR_EEXIST; 
         /* MSVC++ doc doesn't mention any additional error info 
@@ -207,3 +215,4 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
     return APR_SUCCESS;
 }
 
+APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
