@@ -148,6 +148,16 @@ apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
 
 
 
+apr_os_thread_t apr_os_thread_current()
+{
+    PIB *ppib;
+    TIB *ptib;
+    DosGetInfoBlocks(&ptib, &ppib);
+    return ptib->tib_ptib2->tib2_ultid;
+}
+
+
+
 apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
     thd->rv = retval;
@@ -201,6 +211,13 @@ apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd,
     }
     (*thd)->tid = *thethd;
     return APR_SUCCESS;
+}
+
+
+
+int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
+{
+    return tid1 == tid2;
 }
 
 
