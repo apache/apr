@@ -472,7 +472,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #endif
 
 #ifdef EFTYPE
-#define APR_EFTYPE
+#define APR_EFTYPE EFTYPE
 #else
 #define APR_EFTYPE        (APR_OS_START_CANONERR + 23)
 #endif
