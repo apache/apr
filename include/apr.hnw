@@ -338,20 +338,6 @@ typedef int apr_wait_t;
 #define APR_HAVE_INT64_STRFN  1
 #define APR_INT64_STRFN	      strtoll
 
-/* Application global data management */
-extern int  gLibId;
-extern void *gLibHandle;
-
-#define MAX_PROCESSORS         128
-
-typedef struct app_data {
-    int     initialized;
-    void*   gs_aHooksToSort;
-    void*   gs_phOptionalHooks;
-    void*   gs_phOptionalFunctions;
-} APP_DATA;
-
-
 #endif /* APR_H */
 /** @} */
 #endif /* NETWARE */
