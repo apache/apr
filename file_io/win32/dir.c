@@ -135,11 +135,8 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
 
 APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *dir)
 {
-    if (dir->dirhand != INVALID_HANDLE_VALUE && !FindClose(dir->dirhand)) {
-        return apr_get_os_error();
-    }
-    dir->dirhand = INVALID_HANDLE_VALUE;
-    return APR_SUCCESS;
+    apr_pool_cleanup_kill(dir->cntxt, dir, dir_cleanup);
+    return dir_cleanup(dir);
 }
 
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
