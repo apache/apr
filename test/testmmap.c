@@ -142,7 +142,7 @@ int main(void)
     
     fprintf (stdout,"\nTest Complete\n");
 
-    return 1;
+    return 0;
 #else    
     fprintf(stdout,"APR MMAP Test\n*************\n\n");
     fprintf(stdout,"Failed!  APR was not built with MMAP.\n");

@@ -308,7 +308,7 @@ int main(void)
         exit(-4);
     }
 
-    return 1;
+    return 0;
 }
 
 #endif /* !APR_HAS_THREADS */

@@ -106,5 +106,5 @@ int main(void)
              0, "OK","Failed :(")
 
     printf("\nTest complete\n");
-    return 1;
+    return 0;
 }
