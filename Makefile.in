@@ -101,7 +101,7 @@ subdirs_distclean:
 install: all
 
 exports:
-	./helpers/make_export.pl -o ./apr.exports include/*.h
+	perl ./helpers/make_export.pl -o ./apr.exports include/*.h
 
 docs:
 	./helpers/scandoc -i./helpers/default.pl -p./docs/ ./include/*.h
