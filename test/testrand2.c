@@ -54,6 +54,7 @@
 
 #include "apr_general.h"
 #include "apr_random.h"
+#include "apr_thread_proc.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -100,6 +101,20 @@ static void rand_run_kat(CuTest *tc,rnd_fn *f,apr_random_t *r,
 	hexdump(expected,128);
 	CuFail(tc,"Randomness mismatch");
 	}
+    }
+
+static int rand_check_kat(rnd_fn *f,apr_random_t *r,
+			  const unsigned char expected[128])
+    {
+    unsigned char c[128];
+    apr_status_t rv;
+
+    rv=f(r,c,128);
+    if(rv)
+	return 2;
+    if(memcmp(c,expected,128))
+	return 1;
+    return 0;
     }
 
 static void rand_add_zeroes(apr_random_t *r)
@@ -234,6 +249,73 @@ static void rand_kat4(CuTest *tc)
     rand_run_kat(tc,apr_random_secure_bytes,r,expected);
     }    
 
+static void rand_fork(CuTest *tc)
+    {
+    apr_proc_t proc;
+    apr_status_t rv;
+    unsigned char expected[128]=
+	{  0xac,0x93,0xd2,0x5c,0xc7,0xf5,0x8d,0xc2,
+	   0xd8,0x8d,0xb6,0x7a,0x94,0xe1,0x83,0x4c,
+	   0x26,0xe2,0x38,0x6d,0xf5,0xbd,0x9d,0x6e,
+	   0x91,0x77,0x3a,0x4b,0x9b,0xef,0x9b,0xa3,
+	   0x9f,0xf6,0x6d,0x0c,0xdc,0x4b,0x02,0xe9,
+	   0x5d,0x3d,0xfc,0x92,0x6b,0xdf,0xc9,0xef,
+	   0xb9,0xa8,0x74,0x09,0xa3,0xff,0x64,0x8d,
+	   0x19,0xc1,0x31,0x31,0x17,0xe1,0xb7,0x7a,
+	   0xe7,0x55,0x14,0x92,0x05,0xe3,0x1e,0xb8,
+	   0x9b,0x1b,0xdc,0xac,0x0e,0x15,0x08,0xa2,
+	   0x93,0x13,0xf6,0x04,0xc6,0x9d,0xf8,0x7f,
+	   0x26,0x32,0x68,0x43,0x2e,0x5a,0x4f,0x47,
+	   0xe8,0xf8,0x59,0xb7,0xfb,0xbe,0x30,0x04,
+	   0xb6,0x63,0x6f,0x19,0xf3,0x2c,0xd4,0xeb,
+	   0x32,0x8a,0x54,0x01,0xd0,0xaf,0x3f,0x13,
+	   0xc1,0x7f,0x10,0x2e,0x08,0x1c,0x28,0x4b, };
+
+    rv=apr_proc_fork(&proc,p);
+    if(rv == APR_INCHILD)
+	{
+	int n;
+
+	n=rand_check_kat(apr_random_secure_bytes,r,expected);
+
+	exit(n);
+	}
+    else if(rv == APR_INPARENT)
+	{
+	int exitcode;
+	apr_exit_why_e why;
+
+	rand_run_kat(tc,apr_random_secure_bytes,r,expected);
+	apr_proc_wait(&proc,&exitcode,&why,APR_WAIT);
+	if(why != APR_PROC_EXIT)
+	    {
+	    CuFail(tc,"Child terminated abnormally");
+	    return;
+	    }
+	if(exitcode == 0)
+	    {
+	    CuFail(tc,"Child produced our randomness");
+	    return;
+	    }
+	else if(exitcode == 2)
+	    {
+	    CuFail(tc,"Child randomness failed");
+	    return;
+	    }
+	else if(exitcode != 1)
+	    {
+	    CuFail(tc,"Uknown child error");
+	    return;
+	    }
+	}
+    else
+	{
+	CuFail(tc,"Fork failed");
+	return;
+	}
+    }
+    
+	
 CuSuite *testrand2(void)
     {
     CuSuite *suite = CuSuiteNew("Random2");
@@ -245,6 +327,7 @@ CuSuite *testrand2(void)
     SUITE_ADD_TEST(suite, rand_barrier);
     SUITE_ADD_TEST(suite, rand_kat3);
     SUITE_ADD_TEST(suite, rand_kat4);
+    SUITE_ADD_TEST(suite, rand_fork);
 
     return suite;
     }
