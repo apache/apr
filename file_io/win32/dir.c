@@ -103,11 +103,11 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *co
 
 ap_status_t ap_closedir(struct dir_t *thedir)
 {
-    if (FindClose(thedir->dirhand)) {
-        ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
-        return APR_SUCCESS;
+    if (!FindClose(thedir->dirhand)) {
+        return GetLastError();   
     }
-    return APR_EEXIST;
+    ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_readdir(struct dir_t *thedir)
@@ -116,14 +116,14 @@ ap_status_t ap_readdir(struct dir_t *thedir)
         thedir->entry = ap_palloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
         thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-            return APR_EEXIST;
+            return GetLastError();
         }
         return APR_SUCCESS;
     }
-    if (FindNextFile(thedir->dirhand, thedir->entry)) {
-        return APR_SUCCESS;
+    if (!FindNextFile(thedir->dirhand, thedir->entry)) {
+        return GetLastError();
     }
-    return APR_EEXIST;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_rewinddir(struct dir_t *thedir)
@@ -146,21 +146,19 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
-    if (CreateDirectory(path, NULL)) {
-        return APR_SUCCESS;
+    if (!CreateDirectory(path, NULL)) {
+        return GetLastError();
     }
-    return APR_EEXIST;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
-    DWORD huh;
     char *temp = canonical_filename(cont, path);
-    if (RemoveDirectory(temp)) {
-        return APR_SUCCESS;
+    if (!RemoveDirectory(temp)) {
+        return GetLastError();
     }
-    huh = GetLastError();
-    return APR_EEXIST;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
