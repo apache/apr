@@ -55,25 +55,22 @@
 #include "fileio.h"
 #include "apr_file_io.h"
 
-static apr_status_t
-apr_file_transfer_contents(const char *from_path, 
-                           const char *to_path,
-                           apr_int32_t flags,
-                           apr_fileperms_t to_perms,
-                           apr_pool_t *pool)
+static apr_status_t apr_file_transfer_contents(const char *from_path,
+                                               const char *to_path,
+                                               apr_int32_t flags,
+                                               apr_fileperms_t to_perms,
+                                               apr_pool_t *pool)
 {
     apr_file_t *s = NULL, *d = NULL;  /* init to null important for APR */
     apr_status_t status;
-    apr_status_t read_err, write_err;
     apr_finfo_t finfo;
     apr_fileperms_t perms;
-    char buf[BUFSIZ];
 
     /* Open source file. */
     status = apr_file_open(&s, from_path, APR_READ, APR_OS_DEFAULT, pool);
     if (status)
         return status;
-  
+
     /* Get its size. */
     if (to_perms == APR_FILE_SOURCE_PERMS) {
         status = apr_file_info_get(&finfo, APR_FINFO_PROT, s);
@@ -92,11 +89,13 @@ apr_file_transfer_contents(const char *from_path,
         apr_file_close(s);  /* toss any error */
         return status;
     }
-  
+
     /* Copy bytes till the cows come home. */
-    read_err = 0;
-    while (!APR_STATUS_IS_EOF(read_err)) {
-        apr_size_t bytes_this_time = sizeof (buf);
+    while (1) {
+        char buf[BUFSIZ];
+        apr_size_t bytes_this_time = sizeof(buf);
+        apr_status_t read_err;
+        apr_status_t write_err;
 
         /* Read 'em. */
         read_err = apr_file_read(s, buf, &bytes_this_time);
@@ -115,39 +114,37 @@ apr_file_transfer_contents(const char *from_path,
         }
 
         if (read_err && APR_STATUS_IS_EOF(read_err)) {
-            status = apr_file_close (s);
+            status = apr_file_close(s);
             if (status) {
                 apr_file_close(d);  /* toss any error */
                 return status;
             }
-          
-            status = apr_file_close (d);
-            if (status)
-                return status;
+
+            /* return the results of this close: an error, or success */
+            return apr_file_close(d);
         }
     }
-
-  return APR_SUCCESS;
+    /* NOTREACHED */
 }
 
-APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path, 
+APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path,
                                         const char *to_path,
                                         apr_fileperms_t perms,
                                         apr_pool_t *pool)
 {
-   return apr_file_transfer_contents(from_path, to_path,
-                                     (APR_WRITE | APR_CREATE | APR_TRUNCATE),
-                                     perms,
-                                     pool);
+    return apr_file_transfer_contents(from_path, to_path,
+                                      (APR_WRITE | APR_CREATE | APR_TRUNCATE),
+                                      perms,
+                                      pool);
 }
 
-APR_DECLARE(apr_status_t) apr_file_append(const char *from_path, 
+APR_DECLARE(apr_status_t) apr_file_append(const char *from_path,
                                           const char *to_path,
                                           apr_fileperms_t perms,
                                           apr_pool_t *pool)
 {
-   return apr_file_transfer_contents(from_path, to_path,
-                                     (APR_WRITE | APR_CREATE | APR_APPEND),
-                                     perms,
-                                     pool);
+    return apr_file_transfer_contents(from_path, to_path,
+                                      (APR_WRITE | APR_CREATE | APR_APPEND),
+                                      perms,
+                                      pool);
 }
