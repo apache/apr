@@ -158,7 +158,7 @@ ap_status_t ap_make_dir(const char *, ap_fileperms_t, ap_context_t *);
 ap_status_t ap_remove_dir(const char *, ap_context_t *);
 
 ap_status_t ap_create_pipe(ap_file_t **, ap_file_t **, ap_context_t *);
-ap_status_t ap_create_namedpipe(char **, char *, ap_fileperms_t, ap_context_t *);
+ap_status_t ap_create_namedpipe(char *, ap_fileperms_t, ap_context_t *);
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout);
 ap_status_t ap_block_pipe(ap_file_t *thepipe);
 
