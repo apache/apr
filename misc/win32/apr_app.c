@@ -73,7 +73,7 @@
 
 extern int main(int argc, char **argv, char **env);
 
-static int wastrtoastr(char ***retarr, int args, wchar_t **arr)
+static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
 {
     size_t elesize = 0;
     char **newarr;
