@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Remove a warning on FreeBSD.  FreeBSD defines TCP_NO_PUSH, but we
+     don't actually use it.  This causes os_cork to be defined but not
+     used.  This patch keeps us from defining os_cork and os_uncork on
+     FreeBSD.  [Ryan Bloom]
+
   *) Keep apr_terminate from seg faulting on terminate.  This is
      happening on systems that do not NULL out locks when they are
      destroyed.  To keep this from happening, we set the locks to
