@@ -82,6 +82,8 @@ extern "C" {
  */
 #include "apr.h"
 #include "apr_errno.h"
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 
 /* Memory allocation/Pool debugging options... 
  *
@@ -90,11 +92,15 @@ extern "C" {
  * NB These should ALL normally be commented out unless you REALLY
  * need them!!
  */
- 
-/*
+/* 
 #define APR_POOL_DEBUG
 */
 
+#define APR_POOL_STRINGIZE(x) APR_POOL__STRINGIZE(x)
+#define APR_POOL__STRINGIZE(x) #x
+#define APR_POOL__FILELINE__ __FILE__ ":" APR_POOL_STRINGIZE(__LINE__)
+    
+    
 /** The fundamental pool type */
 typedef struct apr_pool_t apr_pool_t;
 
@@ -174,13 +180,37 @@ APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
  */
 APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
 
+/**
+ * Tag a pool (give it a name)
+ * @param pool The pool to tag
+ * @param tag  The tag
+ */
+APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
+
+/**
+ * Lock a pool
+ * @param pool The pool to lock
+ * @param flag  The flag
+ */
+APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
+
 /* @} */
 
 #else
-# ifdef apr_pool_join
-#  undef apr_pool_join
-# endif
-# define apr_pool_join(a,b)
+#    ifdef apr_pool_join
+#        undef apr_pool_join
+#    endif
+#    define apr_pool_join(a,b)
+
+#    ifdef apr_pool_tag
+#        undef apr_pool_tag
+#    endif
+#    define apr_pool_tag(pool, tag)
+
+#    ifdef apr_pool_lock
+#        undef apr_pool_lock
+#    endif
+#    define apr_pool_lock(pool, lock)
 #endif
 
 /**
@@ -199,38 +229,112 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 
 /**
  * Setup all of the internal structures required to use pools
- * @param globalp The APR global pool, used to allocate APR structures
- *               before any other pools are created.  This pool should not
- *               ever be used outside of APR.
  * @remark Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_initialize. 
  * @internal
  */
-APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *globalp);
+APR_DECLARE(apr_status_t) apr_pool_initialize(void);
 
 /**
  * Tear down all of the internal structures required to use pools
- * @param globalp The APR global pool, used to allocate APR structures
- *               before any other pools are created.  This pool should not
- *               ever be used outside of APR.
  * @remark Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_terminate. 
  * @internal
  */
-APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp); 
+APR_DECLARE(void) apr_pool_terminate(void); 
  
 /* pool functions */
 
+#define APR_POOL_FDEFAULT       0x0
+#define APR_POOL_FNEW_ALLOCATOR 0x1
+#define APR_POOL_FLOCK          0x2
+
 /**
  * Create a new pool.
- * @param newcont The pool we have just created.
- * @param cont The parent pool.  If this is NULL, the new pool is a root
+ * @param newpool The pool we have just created.
+ * @param parent The parent pool.  If this is NULL, the new pool is a root
+ *        pool.  If it is non-NULL, the new pool will inherit all
+ *        of its parent pool's attributes, except the apr_pool_t will 
+ *        be a sub-pool.
+ * @param apr_abort A function to use if the pool cannot allocate more memory.
+ * @param flags Flags indicating how the pool should be created:
+ *        - POOL_FNEW_ALLOCATOR  will create a new allocator for the pool
+ *          instead of using the allocator of the parent.
+ *        - POOL_FLOCK will create a mutex for the newly created allocator
+ *          (this flag only makes sense in combination with POOL_FNEW_ALLOCATOR)
+ *
+ */
+APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_uint32_t flags);
+
+/**
+ * Create a new pool.
+ * @param newpool The pool we have just created.
+ * @param parent The parent pool.  If this is NULL, the new pool is a root
  *        pool.  If it is non-NULL, the new pool will inherit all
  *        of its parent pool's attributes, except the apr_pool_t will 
  *        be a sub-pool.
  */
-APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont,
-                                          apr_pool_t *cont);
+#if defined(DOXYGEN)
+APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
+                                          apr_pool_t *parent);
+#else
+#define apr_pool_create(newpool, parent) \
+    apr_pool_create_ex(newpool, parent, NULL, APR_POOL_FDEFAULT)
+#endif
+
+/**
+ * This function is deprecated.  Use apr_pool_create_ex.
+ * @param newpool The new sub-pool
+ * @param parent The pool to use as a parent pool
+ * @param apr_abort A function to use if the pool cannot allocate more memory.
+ * @deffunc void apr_pool_sub_make(apr_pool_t **p, apr_pool_t *parent, int (*apr_abort)(int retcode), const char *created)
+ * @remark The @a apr_abort function provides a way to quit the program if the
+ *      machine is out of memory.  By default, APR will return on error.
+ */
+#if defined(DOXYGEN)
+APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool, 
+                                    apr_pool_t *parent,
+                                    int (*apr_abort)(int retcode));
+#else
+#define apr_pool_sub_make(newpool, parent, abort_fn) \
+    (void)apr_pool_create_ex(newpool, parent, abort_fn, APR_POOL_FDEFAULT);
+#endif
+
+/**
+ * Allocate a block of memory from a pool
+ * @param p The pool to allocate from 
+ * @param reqsize The amount of memory to allocate 
+ * @return The allocated memory
+ */
+APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t reqsize);
+
+/**
+ * Allocate a block of memory from a pool and set all of the memory to 0
+ * @param p The pool to allocate from 
+ * @param size The amount of memory to allocate 
+ * @return The allocated memory
+ */
+APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
+
+/**
+ * Clear all memory in the pool and run all the cleanups. This also clears all
+ * subpools.
+ * @param p The pool to clear
+ * @remark  This does not actually free the memory, it just allows the pool
+ *       to re-use this memory for the next allocation.
+ * @see apr_pool_destroy()
+ */
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
+
+/**
+ * Destroy the pool. This runs apr_pool_clear() and then frees all the memory.
+ * @param p The pool to destroy
+ * @remark This will actually free the memory
+ */
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 
 /**
  * Set the function to be called when an allocation failure occurs.
@@ -265,7 +369,7 @@ APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
  * @param data The user data associated with the pool.
  * @param key The key to use for association
  * @param cleanup The cleanup program to use to cleanup the data (NULL if none)
- * @param cont The current pool
+ * @param pool The current pool
  * @warning The data to be attached to the pool should have a life span
  *          at least as long as the pool it is being attached to.
  *
@@ -277,16 +381,16 @@ APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
  * @bug Specify how to ensure this uniqueness!
  */
 APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data,
-						const char *key,
-						apr_status_t (*cleanup)(void *),
-						apr_pool_t *cont);
+                                                const char *key,
+                                                apr_status_t (*cleanup)(void *),
+                                                apr_pool_t *pool);
 
 /**
  * Set the data associated with the current pool
  * @param data The user data associated with the pool.
  * @param key The key to use for association
  * @param cleanup The cleanup program to use to cleanup the data (NULL if none)
- * @param cont The current pool
+ * @param pool The current pool
  * @note same as apr_pool_userdata_set(), except that this version doesn't
  *       make a copy of the key (this function is useful, for example, when
  *       the key is a string literal)
@@ -297,71 +401,16 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data,
 APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data,
                                                  const char *key,
                                                  apr_status_t (*cleanup)(void *),
-                                                 apr_pool_t *cont);
+                                                 apr_pool_t *pool);
 
 /**
  * Return the data associated with the current pool.
  * @param data The user data associated with the pool.
  * @param key The key for the data to retrieve
- * @param cont The current pool.
+ * @param pool The current pool.
  */
 APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
-                                           apr_pool_t *cont);
-
-/**
- * Lock the pool. All the memory is write protected against changes.
- * @param p The pool to lock
- * @param writeprotect If true the pool's memory is locked read-only,
- * otherwise the lock is released
- * @remark This is a no-op if the program isn't built with appropriate flags
- * on a platform that supports page locking.
- */
-APR_DECLARE(void) apr_pool_lock(apr_pool_t *p, int writeprotect);
-
-/**
- * Clear all memory in the pool and run all the cleanups. This also clears all
- * subpools.
- * @param p The pool to clear
- * @remark  This does not actually free the memory, it just allows the pool
- *       to re-use this memory for the next allocation.
- * @see apr_pool_destroy()
- */
-APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
-
-/**
- * Destroy the pool. This runs apr_pool_clear() and then frees all the memory.
- * @param p The pool to destroy
- * @remark This will actually free the memory
- */
-APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
-
-/**
- * Allocate a block of memory from a pool
- * @param c The pool to allocate from 
- * @param reqsize The amount of memory to allocate 
- * @return The allocated memory
- */
-APR_DECLARE(void *) apr_palloc(apr_pool_t *c, apr_size_t reqsize);
-
-/**
- * Allocate a block of memory from a pool and set all of the memory to 0
- * @param p The pool to allocate from 
- * @param size The amount of memory to allocate 
- * @return The allocated memory
- */
-APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
-
-/**
- * @param p The new sub-pool
- * @param parent The pool to use as a parent pool
- * @param apr_abort A function to use if the pool cannot allocate more memory.
- * @deffunc void apr_pool_sub_make(apr_pool_t **p, apr_pool_t *parent, int (*apr_abort)(int retcode), const char *created)
- * @remark The @a apr_abort function provides a way to quit the program if the
- *      machine is out of memory.  By default, APR will return on error.
- */
-APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **p, 
-                                            apr_pool_t *pparent,
-                                            int (*apr_abort)(int retcode));
+                                           apr_pool_t *pool);
 
 /**
  * Register a function to be called when a pool is cleared or destroyed
@@ -395,8 +444,8 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
  * @param child_cleanup The function to register as the child cleanup
  */
 APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
-                                      apr_status_t (*plain_cleanup) (void *),
-                                      apr_status_t (*child_cleanup) (void *));
+                                      apr_status_t (*plain_cleanup)(void *),
+                                      apr_status_t (*child_cleanup)(void *));
 
 /**
  * Run the specified cleanup function immediately and unregister it. Use
@@ -445,27 +494,18 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
  *       the macros to support other linkages.
  */
 #define APR_POOL_DECLARE_ACCESSOR(typename) \
-	APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-		(const apr_##typename##_t *ob)
+    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
+        (const apr_##typename##_t *ob)
 
 #define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
-	APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
+    APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
 #define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
-	APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-		(const apr_##typename##_t *ob) { return ob->fieldname; }
-
-/* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t
- * will not be destroyed before the parent pool */
-#ifndef APR_POOL_DEBUG
-# ifdef apr_pool_join
-#  undef apr_pool_join
-# endif /* apr_pool_join */
-# define apr_pool_join(a,b)
-#endif /* APR_POOL_DEBUG */
+    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
+        (const apr_##typename##_t *ob) { return ob->fieldname; }
 
 /** @} */
 #ifdef __cplusplus
 }
 #endif
 
-#endif	/* !APR_POOLS_H */
+#endif /* !APR_POOLS_H */
