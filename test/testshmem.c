@@ -59,6 +59,8 @@
 #include "apr_lib.h"
 #include "errno.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <process.h>
 #ifdef BEOS
 #include <unistd.h>
 #endif
@@ -74,6 +76,7 @@ void msgwait(int boxnum)
 {
     volatile int test = 0;
     while (test == 0) {
+        sleep(0);
         test = boxes[boxnum].msgavail;
     }    
     fprintf(stdout, "\nreceived a message in box %d, message was: %s\n", 
@@ -89,10 +92,8 @@ void msgput(int boxnum, char *msg)
 
 int main()
 {
-    ap_status_t s4;
     ap_shmem_t *shm;
     pid_t pid;
-    ap_status_t s1;
     int size;
 
     ap_initialize();
@@ -105,7 +106,7 @@ int main()
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Creating shared memory block......."); 
-    if (ap_shm_init(&shm, 1048576, NULL) != APR_SUCCESS) { 
+    if (ap_shm_init(&shm, 1048576, NULL, context) != APR_SUCCESS) { 
         fprintf(stderr, "Error allocating shared memory block\n");
         exit(-1);
     }
@@ -124,8 +125,12 @@ int main()
     pid = fork();
     if (pid == 0) {
 sleep(1);
-        msgwait(1);
-        msgput(0, "Msg received\n");
+        if (ap_open_shmem(shm) == APR_SUCCESS) {
+            msgwait(1);
+            msgput(0, "Msg received\n");
+        } else {
+            puts( "Child: unable to get access to shared memory" );
+        }
         exit(1);
     }
     else if (pid > 0) {
