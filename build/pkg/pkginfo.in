@@ -1,4 +1,4 @@
-PKG="ASFapr"
+PKG="ASFapr-0"
 NAME="apr"
 ARCH="@target_cpu@"
 VERSION="@APR_DOTTED_VERSION@"
