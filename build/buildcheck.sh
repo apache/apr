@@ -10,7 +10,7 @@ echo "           You need python installed"
 echo "           to build APR from CVS."
 exit 1
 else
-py_version=`python -V 2>&1|sed -e 's/^[^0-9]*//'`
+py_version=`python -c 'import sys; print sys.version' 2>&1|sed 's/ .*//;q'`
 echo "buildconf: python version $py_version (ok)"
 fi
 
