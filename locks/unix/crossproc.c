@@ -269,7 +269,13 @@ static ap_status_t lock_cleanup(void *lock_)
 
 ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 {
-    new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
+    if (new->fname) {
+        new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
+    }
+    else {
+        new->fname = ap_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
+        new->interproc = mkstemp(new->fname);
+    }
 
     if (new->interproc < 0) {
         lock_cleanup(new);
@@ -338,7 +344,13 @@ static ap_status_t lock_cleanup(void *lock_)
 
 ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 {
-    new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
+    if (new->fname) {
+        new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
+    }
+    else {
+        new->fname = ap_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
+        new->interproc = mkstemp(new->fname);
+    }
 
     if (new->interproc < 0) {
         lock_cleanup(new);
@@ -387,7 +399,7 @@ ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont,
     new->fname = ap_pstrdup(cont, fname);
     new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
     if (new->interproc == -1) {
-        destroy_inter_lock(new);
+        ap_unix_destroy_inter_lock(new);
         return errno;
     }
     return APR_SUCCESS;
