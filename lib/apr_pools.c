@@ -563,18 +563,12 @@ void ap_destroy_real_pool(ap_pool_t *);
  * This way, we are garaunteed that we only lock this mutex once when calling
  * either one of these functions.
  */
-static void ap_clear_real_pool(ap_pool_t *a, int clearcaller)
+static void ap_clear_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
 
-    if (clearcaller) {
-        ap_lock(alloc_mutex);
-    }
     while (a->sub_pools) {
 	ap_destroy_real_pool(a->sub_pools);
-    }
-    if (clearcaller) {
-        ap_unlock(alloc_mutex);
     }
     /*
      * Don't hold the mutex during cleanups.
@@ -608,13 +602,13 @@ static void ap_clear_real_pool(ap_pool_t *a, int clearcaller)
 
 API_EXPORT(void) ap_clear_pool(struct context_t *a)
 {
-    ap_clear_real_pool(a->pool, 1);
+    ap_clear_real_pool(a->pool);
 }
 
 API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
-    ap_clear_real_pool(a, 0);
+    ap_clear_real_pool(a);
     ap_lock(alloc_mutex);
 
     if (a->parent) {
