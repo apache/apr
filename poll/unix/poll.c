@@ -542,7 +542,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
             j++;
         }
     }
-    *descriptors = pollset->result_set;
+    if (descriptors)
+        *descriptors = pollset->result_set;
     return APR_SUCCESS;
 }
 
@@ -616,7 +617,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
         }
     }
 
-    *descriptors = pollset->result_set;
+    if (descriptors)
+        *descriptors = pollset->result_set;
     return APR_SUCCESS;
 }
 
