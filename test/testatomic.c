@@ -204,7 +204,7 @@ int value = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
 #define NUM_THREADS 50
-#define NUM_ITERATIONS 20000
+#define NUM_ITERATIONS 200000
 void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
 {
     int i;
