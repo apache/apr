@@ -425,36 +425,7 @@ InputPath=.\include\apr.hw
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_private.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_private.hw
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
-# Begin Custom Build
-InputPath=.\include\apr_private.hw
-
-".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr_private.hw .\include\apr_private.h > nul 
-	echo Created apr_private.h from apr_private.hw 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-# Begin Custom Build
-InputPath=.\include\apr_private.hw
-
-".\include\apr_private.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr_private.hw .\include\apr_private.h > nul 
-	echo Created apr_private.h from apr_private.hw 
-	
-# End Custom Build
-
-!ENDIF 
-
+SOURCE=.\include\arch\win32\apr_private.h
 # End Source File
 # End Group
 # Begin Group "External Header Files"
