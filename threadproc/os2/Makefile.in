@@ -17,7 +17,6 @@ LIB=threadproc.a
 
 OBJS=proc.o \
 	thread.o \
-	threadcancel.o \
 	threadpriv.o \
 	signals.o
 
@@ -72,11 +71,6 @@ thread.o: thread.c threadproc.h $(INCDIR1)/apr_thread_proc.h \
  $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_general.h \
  $(INCDIR1)/apr.h $(INCDIR1)/apr_errno.h \
  $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
- $(INCDIR2)/fileio.h $(INCDIR1)/apr_config.h
-threadcancel.o: threadcancel.c threadproc.h \
- $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_time.h \
  $(INCDIR2)/fileio.h $(INCDIR1)/apr_config.h
 threadpriv.o: threadpriv.c threadproc.h \
  $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \

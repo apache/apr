@@ -72,11 +72,6 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 #define APR_PARENT_BLOCK     3
 #define APR_CHILD_BLOCK      4
 
-#define APR_CANCEL_ASYNCH      1
-#define APR_CANCEL_DEFER       2
-#define APR_CANCEL_ENABLE      3
-#define APR_CANCEL_DISABLE     4
-
 #define APR_OC_REASON_DEATH         0     /* child has died, caller must call
                                            * unregister still */
 #define APR_OC_REASON_UNWRITABLE    1     /* write_fd is unwritable */
@@ -161,10 +156,6 @@ ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd);
  * arg 1) The thread to detach 
  */
 ap_status_t ap_thread_detach(ap_thread_t *thd);
-
-ap_status_t ap_cancel_thread(ap_thread_t *thd);
-ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont);
-ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread)
