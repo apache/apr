@@ -61,7 +61,7 @@
 
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
-                                                    int length)
+                                                    apr_size_t length)
 {
     HCRYPTPROV hProv;
     apr_status_t res = APR_SUCCESS;
