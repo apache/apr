@@ -85,10 +85,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
     apr_oslevel_e level;
     apr_status_t rv;
 
-    if ((*new) == NULL) {
-        (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-    }
-
+    (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
     (*new)->cntxt = cont;
 
     if (flag & APR_READ) {
