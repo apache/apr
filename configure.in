@@ -588,6 +588,10 @@ APR_CHECK_INET_NETWORK
 AC_SUBST(apr_inaddr_none)
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(gmtime_r localtime_r)
+AC_CHECK_FUNCS(strerror_r, [ strerror_r="1" ], [ strerror_r="0" ])
+if test "$strerror_r" = "1"; then
+  APR_CHECK_STRERROR_R_RC
+fi
 AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
 if test "$iconv" = "1"; then
   APR_CHECK_ICONV_INBUF
