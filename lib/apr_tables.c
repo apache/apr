@@ -75,6 +75,9 @@
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 /*****************************************************************
  * This file contains array and ap_table_t functions only.
