@@ -988,6 +988,14 @@ else
   lockcreatenp="1"
 fi
 
+case "$OS" in
+    *-os2*)
+        # The above tests detect a working flock on OS/2 
+        # but we don't want to use it when we have native locks
+        lockcreatenp="0"
+        ;;
+esac
+
 AC_SUBST(hasflockser)
 AC_SUBST(hassysvser)
 AC_SUBST(hasfcntlser)
