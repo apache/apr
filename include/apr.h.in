@@ -15,11 +15,12 @@
 #if !defined(__GNUC__) || __GNUC__ < 2 || \
     (__GNUC__ == 2 && __GNUC_MINOR__ < 7) ||\
     defined(NEXT)
-#define apr_inline
+#define APR_INLINE
 #define __attribute__(__x)
+#define APR_HAS_INLINE		0
 #else
-#define apr_inline __inline__
-#define USE_GNU_INLINE
+#define APR_INLINE __inline__
+#define APR_HAS_INLINE		1
 #endif
 
 #define APR_HAVE_ARPA_INET_H    @arpa_ineth@

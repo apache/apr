@@ -108,7 +108,8 @@
 #include <process.h>
 #include <stdlib.h>
 
-#define apr_inline
+#define APR_INLINE __inline
+#define APR_HAS_INLINE		1
 #define __attribute__(__x)
 
 #define NO_USE_SIGACTION
