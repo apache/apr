@@ -74,7 +74,7 @@ APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, ap
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_pollfd_t*) find_poll_sock(apr_pollfd_t *aprset, apr_socket_t *sock)
+static apr_pollfd_t *find_poll_sock(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
     apr_pollfd_t *curr = aprset;
     
