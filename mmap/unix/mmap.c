@@ -199,15 +199,15 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap)
+APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mm)
 {
     apr_status_t rv;
 
-    if (mmap->mm == (void *)-1)
+    if (mm->mm == (void *)-1)
         return APR_ENOENT;
       
-    if ((rv = mmap_cleanup(mmap)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(mmap->cntxt, mmap, mmap_cleanup);
+    if ((rv = mmap_cleanup(mm)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(mm->cntxt, mm, mmap_cleanup);
         return APR_SUCCESS;
     }
     return rv;
