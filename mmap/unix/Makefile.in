@@ -9,7 +9,7 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../../include 
+INCDIR=../../include
 INCDIR1=../../file_io/@OSDIR@
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
