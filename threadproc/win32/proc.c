@@ -190,19 +190,19 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
 
     if (child_in) {
         if (attr->child_in == NULL)
-            rv = apr_file_dup(&attr->child_in, child_in, attr_pool);
+            rv = apr_file_dup(&attr->child_in, child_in, attr->pool);
         else
-            rv = apr_file_dup2(attr->child_in, child_in, attr_pool);
+            rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
 
         if (rv == APR_SUCCESS)
-            rv = apr_file_inherit_set(attr->child_in);
+            apr_file_inherit_set(attr->child_in);
     }
 
     if (parent_in && rv == APR_SUCCESS) {
         if (attr->parent_in == NULL)
-            rv = apr_file_dup(&attr->parent_in, parent_in, attr_pool);
+            rv = apr_file_dup(&attr->parent_in, parent_in, attr->pool);
         else
-            rv = apr_file_dup2(attr->parent_in, parent_in, attr_pool);
+            rv = apr_file_dup2(attr->parent_in, parent_in, attr->pool);
     }
 
     return rv;
@@ -216,19 +216,19 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
 
     if (child_out) {
         if (attr->child_out == NULL)
-            rv = apr_file_dup(&attr->child_out, child_out, attr_pool);
+            rv = apr_file_dup(&attr->child_out, child_out, attr->pool);
         else
-            rv = apr_file_dup2(attr->child_out, child_out, attr_pool);
+            rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
 
         if (rv == APR_SUCCESS)
-            rv = apr_file_inherit_set(attr->child_out);
+            apr_file_inherit_set(attr->child_out);
     }
 
     if (parent_out && rv == APR_SUCCESS) {
         if (attr->parent_out == NULL)
-            rv = apr_file_dup(&attr->parent_out, parent_out, attr_pool);
+            rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
         else
-            rv = apr_file_dup2(attr->parent_out, parent_out, attr_pool);
+            rv = apr_file_dup2(attr->parent_out, parent_out, attr->pool);
     }
 
     return rv;
@@ -242,19 +242,19 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
 
     if (child_err) {
         if (attr->child_err == NULL)
-            rv = apr_file_dup(&attr->child_err, child_err, attr_pool);
+            rv = apr_file_dup(&attr->child_err, child_err, attr->pool);
         else
-            rv = apr_file_dup2(attr->child_err, child_err, attr_pool);
+            rv = apr_file_dup2(attr->child_err, child_err, attr->pool);
 
         if (rv == APR_SUCCESS)
-            rv = apr_file_inherit_set(attr->child_err);
+            apr_file_inherit_set(attr->child_err);
     }
 
     if (parent_err && rv == APR_SUCCESS) {
         if (attr->parent_err == NULL)
-            rv = apr_file_dup(&attr->parent_err, parent_err, attr_pool);
+            rv = apr_file_dup(&attr->parent_err, parent_err, attr->pool);
         else
-            rv = apr_file_dup2(attr->parent_err, parent_err, attr_pool);
+            rv = apr_file_dup2(attr->parent_err, parent_err, attr->pool);
     }
 
     return rv;
