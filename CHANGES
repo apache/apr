@@ -1,5 +1,9 @@
 Changes with APR 0.9.2
 
+  *) Only include sys/syslimits.h if we don't have limits.h
+     [Craig Rodrigues <rodrigc@attbi.com>, Garrett Rooney 
+     <rooneg@electricjellyfish.net>, Thom May]
+
   *) Allow apr-config to work in symlinked install directories when
      'realpath' is available.  [Justin Erenkrantz]
 
