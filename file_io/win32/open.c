@@ -77,8 +77,8 @@ ap_status_t file_cleanup(void *thefile)
     }
 }
 
-ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag, ap_fileperms_t perm,
-					struct file_t **dafile)
+ap_status_t ap_open(struct file_t **dafile, ap_context_t *cont, const char *fname, 
+                    ap_int32_t flag, ap_fileperms_t perm)
 {
     DWORD oflags = 0;
     DWORD createflags = 0;
@@ -172,8 +172,8 @@ ap_status_t ap_get_os_file(struct file_t *file, ap_os_file_t *thefile)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file, 
-                            ap_os_file_t *thefile)
+ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

@@ -137,7 +137,7 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 		return APR_SUCCESS;
 	}
     if ((stat = ap_closedir(thedir)) == APR_SUCCESS) {
-		if ((stat = ap_opendir(cont, temp, &thedir)) == APR_SUCCESS) {
+		if ((stat = ap_opendir(&thedir, cont, temp)) == APR_SUCCESS) {
 			ap_readdir(thedir);
 			return APR_SUCCESS;
 		}
@@ -218,8 +218,7 @@ ap_status_t ap_get_os_dir(struct dir_t *dir, ap_os_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_dir(ap_context_t *cont, struct dir_t **dir,
-                            ap_os_dir_t *thedir)
+ap_status_t ap_put_os_dir(struct dir_t **dir, ap_os_dir_t *thedir, ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
