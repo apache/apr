@@ -819,12 +819,8 @@ AC_ARG_ENABLE(dso,
     fi
     if test "$tempdso" = "no"; then
         case $OS in
-            *-os2*)
+            *os390|*-os2*)
                 tempdso="yes"
-                ;;
-            *os390)
-                tempdso="yes"
-                APR_ADDTO(CFLAGS, [-Wc,DLL,EXPORTALL])
                 ;;
         esac
     fi
