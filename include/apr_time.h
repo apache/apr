@@ -176,6 +176,16 @@ APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *result,
                                            apr_exploded_time_t *input);
 
 /**
+ * Convert time value from human readable format to a numeric apr_time_t that
+ * always represents GMT
+ * @param result the resulting imploded time
+ * @param input the input exploded time
+ * @deffunc apr_status_t apr_implode_gmt(apr_time_t *result, apr_exploded_time_t *input)
+ */
+APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *result, 
+                                          apr_exploded_time_t *input);
+
+/**
  * Sleep for the specified number of micro-seconds.
  * @param t desired amount of time to sleep.
  * @deffunc void apr_sleep(apr_interval_time_t t)
