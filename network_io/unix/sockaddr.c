@@ -293,7 +293,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     hints.ai_family = family;
     hints.ai_socktype = SOCK_STREAM;
 #ifdef HAVE_GAI_ADDRCONFIG
-    if (family == AF_UNSPEC) {
+    if (family == APR_UNSPEC) {
         /* By default, only look up addresses using address types for
          * which a local interface is configured, i.e. no IPv6 if no
          * IPv6 interfaces configured. */
@@ -335,7 +335,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     }
     error = getaddrinfo(hostname, servname, &hints, &ai_list);
 #ifdef HAVE_GAI_ADDRCONFIG
-    if (error == EAI_BADFLAGS && family == AF_UNSPEC) {
+    if (error == EAI_BADFLAGS && family == APR_UNSPEC) {
         /* Retry with no flags if AI_ADDRCONFIG was rejected. */
         hints.ai_flags = 0;
         error = getaddrinfo(hostname, servname, &hints, &ai_list);
@@ -367,7 +367,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         apr_sockaddr_t *new_sa;
 
         /* Ignore anything bogus: getaddrinfo in some old versions of
-         * glibc will return AF_UNIX entries for AF_UNSPEC+AI_PASSIVE
+         * glibc will return AF_UNIX entries for APR_UNSPEC+AI_PASSIVE
          * lookups. */
         if (ai->ai_family != AF_INET && ai->ai_family != AF_INET6) {
             ai = ai->ai_next;
@@ -543,7 +543,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 
     if ((masked = flags & (APR_IPV4_ADDR_OK | APR_IPV6_ADDR_OK))) {
         if (!hostname ||
-            family != AF_UNSPEC ||
+            family != APR_UNSPEC ||
             masked == (APR_IPV4_ADDR_OK | APR_IPV6_ADDR_OK)) {
             return APR_EINVAL;
         }
