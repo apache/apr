@@ -207,7 +207,8 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
 #ifdef HAVE_MKSTEMP
     int fd;
 #endif
-    flags = (!flags) ? APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE : flags;
+    flags = (!flags) ? APR_CREATE | APR_READ | APR_WRITE | APR_EXCL | 
+                       APR_DELONCLOSE : flags;
 #ifndef HAVE_MKSTEMP
     return gettemp(template, fp, flags, p);
 #else
