@@ -31,6 +31,6 @@
  * SUCH DAMAGE.
  */
 
-/* BeOS uses identical code so let's not hae 2 copies...*/
+/* BeOS uses identical code so let's not have 2 copies... */
 
 #include "../unix/getopt.c"
