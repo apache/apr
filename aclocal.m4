@@ -267,6 +267,11 @@ AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
   ac_abs_srcdir=`(cd $srcdir/$1 && pwd)`
   cd $1
 
+changequote(, )dnl
+      # A "../" for each directory in /$config_subdirs.
+      ac_dots=`echo $config_subdirs|sed -e 's%^\./%%' -e 's%[^/]$%&/%' -e 's%[^/]*/%../%g'`
+changequote([, ])dnl
+
   # Make the cache file name correct relative to the subdirectory.
   case "$cache_file" in
   /*) ac_sub_cache_file=$cache_file ;;
