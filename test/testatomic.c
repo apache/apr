@@ -68,12 +68,35 @@
 #ifndef WIN32
 #include <pthread.h>
 #endif
-#if !APR_HAS_THREADS
+
+apr_pool_t *context;
+apr_atomic_t y;      /* atomic locks */
+#if !APR_HAS_HREADS
 int main(void)
 {
+    apr_status_t rv;
     fprintf(stderr,
             "This program won't work on this platform because there is no "
             "support for threads.\n");
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
+        fflush(stdout);
+        fprintf(stderr, "Failed.\nCould not initialize\n");
+        exit(-1);
+    }
+    rv = apr_atomic_init(context);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "Failed.\nCould not initialize atomics\n");
+    }
+    apr_atomic_set(&y,0);
+    apr_atomic_add(&y,20);
+    apr_atomic_inc(&y);
+    if (apr_atomic_read(&y) != 21) {
+        fprintf(stderr, "Failed.\natomics do not add up\n");
+    }
+    else {
+        fprintf(stdout, "no threads .. OK\n");
+    }
+
     return 0;
 }
 #else /* !APR_HAS_THREADS */
@@ -83,10 +106,8 @@ void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data);
 
 apr_lock_t *thread_lock;
-apr_pool_t *context;
 apr_thread_once_t *control = NULL;
 volatile long x = 0; /* mutex locks */
-apr_atomic_t y;      /* atomic locks */
 volatile long z = 0; /* no locks */
 int value = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
