@@ -62,6 +62,7 @@
 #include "networkio.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
+#include "apr_lib.h"
 
 ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on)
 {
@@ -108,7 +109,7 @@ ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
     hptr = gethostbyaddr((char *)&(sock->addr->sin_addr), 
                          sizeof(struct in_addr), AF_INET);
     if (hptr != NULL) {
-        *name = (char*)ap_pstrdup(sock->cntxt, hptr->h_name);
+        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
         if (*name) {
             return APR_SUCCESS;
         }
