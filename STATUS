@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/06/04 09:38:50 $]
+Last modified at [$Date: 2004/06/15 10:27:58 $]
 
 Release:
 
@@ -119,7 +119,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       as apr_thread_exit().
       See Message-Id: <E16JjZA-0007hg-00@zakath.apana.org.au> for thread
       discussing this.
-        +1: BrianH, Aaron
+        +1: BrianH, Aaron, david
 
     * Need some architecture/OS specific versions of the atomic operations.
 	progress: generic, solaris Sparc, FreeBSD5, linux, and OS/390 done
@@ -190,6 +190,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
           in debug mode.  Stats that tell us about wasted memory
           in the production code require more thought.
             Status: Sander Striker is looking into this (low priority)
+
+        David says this is a 1.1 issue.
 
     * Deal with largefiles properly on those platforms that support it.
 
@@ -433,10 +435,10 @@ Stuff waiting for code thawing after Beta 1:
       (Not sure if the negatives would stay negative given that the
       change would now wait for the library versioning thing described
       above, though.)
-        Justin says: If you do this, please move it into apr-util where md5
-                     belongs!  You'll have to address the random issue in
-                     misc/unix/getuuid.c that forces md5 to be in APR.
-        Sander: +1 for the move.
+
+      david: making the change for 1.0 should be safe. HTTPD 2.0.x will use
+             apr-0 which will have the apr_status_t return values. 
+             +1 on the change.
 
 Stuff for post 1.0:
 
