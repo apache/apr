@@ -129,6 +129,18 @@ esac
 
 AC_SUBST(eolstr)
 
+dnl For some platforms we need a version string which allows easy numeric
+dnl comparisons.
+case "$OS" in
+    *freebsd*)
+        # 3.4-RELEASE: 340   4.1.1-RELEASE: 411
+        os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/' | sed -e 's/\(.\)\.\(.\)\-.*/\1\20/'`
+        ;;
+     *)
+        os_version=OS_VERSION_IS_NOT_SET
+        ;;
+esac
+
 dnl #----------------------------- Checking for Shared Memory Support 
 echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
 
@@ -593,7 +605,7 @@ dnl systems if we are also using threads.
 orig_sendfile=$sendfile
 case "$OS" in
     *freebsd*)
-        if test `uname -r | sed -e 's/\(.\)\.\(.\)\..*/\1\2/'` -le "41"; then
+        if test $os_version -le "410"; then
             if test "$threads" = "1"; then
                 sendfile="0"
             fi
