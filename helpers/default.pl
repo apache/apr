@@ -200,12 +200,16 @@ foreach $p (packages()) {
 ## Generate class and member index at the top of the file.
 
 foreach $c ($p->classes()) {
+  $_ = $c->url;
+  s/\s/_/g;
   >><h3><img src="$bullet1_image" width=18 height=17 align=texttop>
-    <a href="$(c.url)">$(c.fullname)</h3></a>
+    <a href="$_">$(c.fullname)</h3></a>
     <ul>
   <<
   foreach $m ($c->members()) {
-    >><li><a href="$(m.url)">$(m.longname)</a>
+    $_ = $m->url;
+    s/\s/_/g;
+    >><li><a href="$_">$(m.longname)</a>
     <<
   }
   >></ul>
@@ -259,7 +263,9 @@ foreach $c ($p->classes()) {
     foreach $b ($c->baseclasses()) {
       my $name = $b->name();
       if ($url = $b->url()) {
-        push @t, "<a href=\"$url\">$name</a>";
+        $_ = $url;
+        s/\s/_/g;
+        push @t, "<a href=\"$_\">$name</a>";
       }
       else { push @t, $name; }
     }
@@ -276,7 +282,9 @@ foreach $c ($p->classes()) {
     foreach $s ($c->subclasses()) {
       my $name = $s->name();
       if ($url = $s->url()) {
-        push @t, "<a href=\"$url\">$name</a>";
+        $_ = $url;
+        s/\s/_/g;
+        push @t, "<a href=\"$_\">$name</a>";
       }
       else { push @t, $name; }
     }
@@ -299,7 +307,9 @@ foreach $c ($p->classes()) {
     foreach $a ($c->seealso()) {
       my $name = $a->name();
       if ($url = $a->url()) {
-        push @r, "<a href=\"$url\">$name</a>";
+        $_ = $url;
+        s/\s/_/g;
+        push @r, "<a href=\"$_\">$name</a>";
       }
       else { push @r, $name; }
     }
@@ -313,7 +323,9 @@ foreach $c ($p->classes()) {
     print "<h2>Member Index</h2>\n";
     print "<ul>";
     foreach $m ($c->members()) {
-      >><li><a href="$(m.url)">$(m.fullname)</a>
+      $_ = $m->url;
+      s/\s/_/g;
+      >><li><a href="$_">$(m.fullname)</a>
 	<<
     }
     >></ul><<
@@ -431,7 +443,9 @@ sub function {
     foreach $a ($f->seealso()) {
       my $name = $a->name();
       if ($url = $a->url()) {
-	push @r, "<a href=\"$url\">$name</a>";
+        $_ = $url;
+        s/\s/_/g;
+	push @r, "<a href=\"$_\">$name</a>";
       }
       else { push @r, $name; }
     }
@@ -466,9 +480,11 @@ sub variable {
       <<
 	$comma = 0;
     foreach $a ($v->seealso()) {
+      $_ = $a->url;
+      s/\s/_/g;
       if ($comma) { print ","; }
       $comma = 1;
-      >><a href="$(a.url)">$(a.name)</a>
+      >><a href="$_">$(a.name)</a>
 	<<
     }
     >><p>
