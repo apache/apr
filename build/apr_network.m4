@@ -256,12 +256,15 @@ AC_DEFUN(APR_CHECK_TCP_NODELAY_INHERITED,[
 #ifdef HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
 int main(void) {
     int listen_s, connected_s, client_s;
     int listen_port, rc;
     struct sockaddr_in sa;
-    int sa_len;
-    int option_len;
+    socklen_t sa_len;
+    socklen_t option_len;
     int option;
 
     listen_s = socket(AF_INET, SOCK_STREAM, 0);
