@@ -3,6 +3,7 @@ VPATH = @srcdir@
 
 TARGETS = \
 	poll.lo \
+	pollset.lo \
 	pollacc.lo
 
 # bring in rules.mk for standard functionality
