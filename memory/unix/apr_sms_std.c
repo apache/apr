@@ -62,7 +62,7 @@
 
 #include "apr.h"
 #include "apr_private.h"
-#include "apr_memory_system.h"
+#include "apr_sms.h"
 #include <stdlib.h>
 #include <assert.h>
 
