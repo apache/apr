@@ -56,6 +56,56 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
+static apr_status_t create_lock(apr_lock_t *new, const char *fname)
+{
+    apr_status_t stat;
+
+    switch (new->type)
+    {
+    case APR_MUTEX:
+#if (APR_USE_FCNTL_SERIALIZE) || (APR_USE_FLOCK_SERIALIZE)
+    /* file-based serialization primitives */
+    if (new->scope != APR_INTRAPROCESS) {
+        if (fname != NULL) {
+            APR_MEM_PSTRDUP(new, new->fname, fname);
+        }
+    }
+#endif
+
+#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
+    if (new->scope == APR_INTRAPROCESS) {
+#else
+    if (new->scope != APR_CROSS_PROCESS) {
+#endif
+#if APR_HAS_THREADS
+        if ((stat = apr_unix_create_intra_lock(new)) != APR_SUCCESS) {
+            return stat;
+        }
+#else
+        if (new->scope != APR_LOCKALL) {
+            return APR_ENOTIMPL;
+        }
+#endif
+    }
+    if (new->scope != APR_INTRAPROCESS) {
+        if ((stat = apr_unix_create_inter_lock(new)) != APR_SUCCESS) {
+            return stat;
+        }
+    }
+    break;
+    case APR_READWRITE:
+#ifdef HAVE_PTHREAD_RWLOCK_INIT
+    if (new->scope != APR_INTRAPROCESS)
+        return APR_ENOTIMPL;
+    pthread_rwlock_init(&new->rwlock, NULL);
+    break;
+#else
+    return APR_ENOTIMPL;
+#endif
+    }
+    return APR_SUCCESS;
+}
+
 apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
                            apr_lockscope_e scope, const char *fname, 
                            apr_pool_t *cont)
@@ -68,49 +118,28 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     new->cntxt = cont;
     new->type  = type;
     new->scope = scope;
-    switch (new->type)
-    {
-    case APR_MUTEX:
-#if (APR_USE_FCNTL_SERIALIZE) || (APR_USE_FLOCK_SERIALIZE)
-    /* file-based serialization primitives */
-    if (scope != APR_INTRAPROCESS) {
-        if (fname != NULL) {
-            new->fname = apr_pstrdup(cont, fname);
-        }
-    }
-#endif
+    if ((stat = create_lock(new, fname)) != APR_SUCCESS)
+        return APR_SUCCESS;
 
-#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
-    if (scope == APR_INTRAPROCESS) {
-#else
-    if (scope != APR_CROSS_PROCESS) {
-#endif
-#if APR_HAS_THREADS
-        if ((stat = apr_unix_create_intra_lock(new)) != APR_SUCCESS) {
-            return stat;
-        }
-#else
-        if (scope != APR_LOCKALL) {
-            return APR_ENOTIMPL;
-        }
-#endif
-    }
-    if (scope != APR_INTRAPROCESS) {
-        if ((stat = apr_unix_create_inter_lock(new)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
-    break;
-    case APR_READWRITE:
-#ifdef HAVE_PTHREAD_RWLOCK_INIT
-    if (scope != APR_INTRAPROCESS)
-        return APR_ENOTIMPL;
-    pthread_rwlock_init(&new->rwlock, NULL);
-    break;
-#else
-    return APR_ENOTIMPL;
-#endif
-    }
+    *lock = new;
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
+                                 apr_lockscope_e scope, const char *fname,
+                                 apr_sms_t *mem_sys)
+{
+    apr_lock_t *new;
+    apr_status_t stat;
+    
+    new = (apr_lock_t *)apr_sms_calloc(mem_sys, sizeof(apr_lock_t));
+
+    new->mem_sys = mem_sys;
+    new->cntxt = NULL;
+    new->type = type;
+    new->scope = scope;
+    if ((stat = create_lock(new, fname)) != APR_SUCCESS)
+        return stat;
 
     *lock = new;
     return APR_SUCCESS;

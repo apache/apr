@@ -79,8 +79,6 @@ extern "C" {
  * @package APR memory system
  */
 
-typedef struct apr_sms_t apr_sms_t;
-
 struct apr_sms_cleanup;
 
 /**
@@ -94,6 +92,7 @@ struct apr_sms_t
   apr_sms_t **ref_mem_sys;
   apr_sms_t  *accounting_mem_sys;
   const char *identity; /* a string identifying the module */
+  apr_lock_t *lock;
 
   struct apr_sms_cleanup *cleanups;
 
