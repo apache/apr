@@ -60,6 +60,9 @@
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>
 #endif
+#if APR_HAVE_STRING_H
+#include <string.h> /* for strerror() on HP-UX */
+#endif
 
 static apr_status_t dso_cleanup(void *thedso)
 {
