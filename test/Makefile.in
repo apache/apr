@@ -121,7 +121,7 @@ abc.o: abc.c $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h
 client.o: client.c $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h $(OSDIR)/usr/include/errno.h
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h
 mod_test.o: mod_test.c
 server.o: server.c $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
@@ -149,26 +149,23 @@ testmmap.o: testmmap.c $(INCDIR)/apr_mmap.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr_lock.h $(INCDIR)/apr_lib.h
 testoc.o: testoc.c $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
- $(OSDIR)/usr/include/errno.h
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h
 testpipe.o: testpipe.c $(INCDIR)/apr_file_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
  $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
  $(INCDIR)/apr_thread_proc.h
 testproc.o: testproc.c $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
- $(OSDIR)/usr/include/errno.h
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h
 testshmem.o: testshmem.c $(INCDIR)/apr_shmem.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_lock.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_thread_proc.h $(OSDIR)/usr/include/errno.h
+ $(INCDIR)/apr_thread_proc.h
 testsock.o: testsock.c $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h
 testthread.o: testthread.c $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lock.h \
- $(OSDIR)/usr/include/errno.h
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lock.h
 testtime.o: testtime.c $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(OSDIR)/usr/include/errno.h
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h
