@@ -56,6 +56,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,9 +86,6 @@ void ocmaint(int reason, void *data, int status)
 int main(int argc, char *argv[])
 {
     ap_pool_t *context;
-    ap_pool_t *cont2;
-    ap_status_t status = 0;
-    ap_ssize_t nbytes = 0;
     ap_proc_t newproc;
     ap_procattr_t *procattr = NULL;
     ap_file_t *std = NULL;
