@@ -59,7 +59,7 @@
 #include "assert.h"
 #include "apr_lib.h"
 
-apr_oslevel_e apr_os_level = APR_WIN_UNK;
+APR_DECLARE_DATA apr_oslevel_e apr_os_level = APR_WIN_UNK;
 
 apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
 {
