@@ -276,14 +276,6 @@ void apr_terminate(void);
  */
 apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont);
 
-/**
- * Return a human readable string describing the specified error.
- * @param statcode The error code the get a string for.
- * @param buf A buffer to hold the error string.
- * @param bufsize Size of the buffer to hold the string.
- */
-char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
-
 #ifdef __cplusplus
 }
 #endif
