@@ -112,6 +112,28 @@ int main(int argc, const char *const argv[])
     }
     fprintf(stderr, "OK\n");
 
+    fprintf(stderr, "Test 4: apr_table_unset...");
+    apr_table_clear(t1);
+    apr_table_addn(t1, "a", "1");
+    apr_table_addn(t1, "b", "2");
+    apr_table_addn(t1, "c", "3");
+    apr_table_addn(t1, "b", "2");
+    apr_table_addn(t1, "d", "4");
+    apr_table_addn(t1, "e", "5");
+    apr_table_addn(t1, "b", "2");
+    apr_table_addn(t1, "f", "6");
+    apr_table_unset(t1, "b");
+    if ((apr_table_elts(t1)->nelts != 5) ||
+        !(val = apr_table_get(t1, "a")) || strcmp(val, "1") ||
+        !(val = apr_table_get(t1, "c")) || strcmp(val, "3") ||
+        !(val = apr_table_get(t1, "d")) || strcmp(val, "4") ||
+        !(val = apr_table_get(t1, "e")) || strcmp(val, "5") ||
+        !(val = apr_table_get(t1, "f")) || strcmp(val, "6") ||
+        (apr_table_get(t1, "b") != NULL)) {
+        fprintf(stderr, "ERROR\n");
+        exit(-1);
+    }
+    fprintf(stderr, "OK\n");
 
     return 0;
 }
