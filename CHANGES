@@ -1,5 +1,7 @@
 Changes for APR 1.1.0
 
+  *) Add Support for Source-Specific Multicast. [Colm MacCarthaigh]
+
   *) Add APR Multicast Functions [Paul Querna]
 
   *) Add a build script to create a solaris package. [Graham Leggett]

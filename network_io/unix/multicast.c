@@ -25,7 +25,7 @@
 #endif
 
 /* Only UDP and Raw Sockets can be used for Multicast */
-static apr_status_t mcast_check_type(apr_socket_t* sock)
+static apr_status_t mcast_check_type(apr_socket_t *sock)
 {
     int type;
     apr_status_t rv;
@@ -43,7 +43,7 @@ static apr_status_t mcast_check_type(apr_socket_t* sock)
     }
 }
 
-static void fill_mip_v4(struct ip_mreq *mip, apr_sockaddr_t *mcast, 
+static void fill_mip_v4(struct ip_mreq *mip, apr_sockaddr_t *mcast,
                         apr_sockaddr_t *iface)
 {
     mip->imr_multiaddr = mcast->sa.sin.sin_addr;
@@ -56,7 +56,7 @@ static void fill_mip_v4(struct ip_mreq *mip, apr_sockaddr_t *mcast,
 }
 
 #if APR_HAVE_IPV6
-static unsigned int find_if_index(const apr_sockaddr_t *iface) 
+static unsigned int find_if_index(const apr_sockaddr_t *iface)
 {
     unsigned int index = 0;
     struct ifaddrs *ifp, *ifs;
@@ -75,12 +75,10 @@ static unsigned int find_if_index(const apr_sockaddr_t *iface)
     }
 
     for (ifp = ifs; ifp; ifp = ifp->ifa_next) {
-        if (ifp->ifa_addr != NULL && 
-            ifp->ifa_addr->sa_family == AF_INET6) {
-            /* TODO: Is this correct? */
+        if (ifp->ifa_addr != NULL && ifp->ifa_addr->sa_family == AF_INET6) {
             if (memcmp(&iface->sa.sin6.sin6_addr,
                        &ifp->ifa_addr->sa_data[0],
-                       sizeof(ifp->ifa_addr)) == 0) {
+                       sizeof(iface->sa.sin6.sin6_addr)) == 0) {
                 index = if_nametoindex(ifp->ifa_name);
                 break;
             }
@@ -92,7 +90,7 @@ static unsigned int find_if_index(const apr_sockaddr_t *iface)
     return index;
 }
 
-static void fill_mip_v6(struct ipv6_mreq *mip, const apr_sockaddr_t *mcast, 
+static void fill_mip_v6(struct ipv6_mreq *mip, const apr_sockaddr_t *mcast,
                         const apr_sockaddr_t *iface)
 {
     memcpy(&mip->ipv6mr_multiaddr, mcast->ipaddr_ptr,
@@ -108,7 +106,7 @@ static void fill_mip_v6(struct ipv6_mreq *mip, const apr_sockaddr_t *mcast,
 
 #endif
 
-static int sock_is_ipv4(apr_socket_t* sock) 
+static int sock_is_ipv4(apr_socket_t *sock)
 {
     if (sock->local_addr->family == APR_INET)
         return 1;
@@ -116,7 +114,7 @@ static int sock_is_ipv4(apr_socket_t* sock)
 }
 
 #if APR_HAVE_IPV6
-static int sock_is_ipv6(apr_socket_t* sock)
+static int sock_is_ipv6(apr_socket_t *sock)
 {
     if (sock->local_addr->family == APR_INET6)
         return 1;
@@ -124,19 +122,19 @@ static int sock_is_ipv6(apr_socket_t* sock)
 }
 #endif
 
-static apr_status_t do_mcast(int type, apr_socket_t *sock, 
+static apr_status_t do_mcast(int type, apr_socket_t *sock,
                              apr_sockaddr_t *mcast, apr_sockaddr_t *iface,
-                             apr_sockaddr_t *ssm)
+                             apr_sockaddr_t *source)
 {
     struct ip_mreq mip4;
     apr_status_t rv = APR_SUCCESS;
 #if APR_HAVE_IPV6
     struct ipv6_mreq mip6;
 #endif
-    
-    /* We do not currently support Single Source Multicast. */
-    if (ssm != NULL)
-        return APR_ENOTIMPL;
+#if MCAST_JOIN_SOURCE_GROUP
+    struct group_source_req mip;
+    int ip_proto;
+#endif
 
     rv = mcast_check_type(sock);
 
@@ -144,37 +142,68 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
         return rv;
     }
 
-    if (sock_is_ipv4(sock)) {
-
-        fill_mip_v4(&mip4, mcast, iface);
-
-        if (setsockopt(sock->socketdes, IPPROTO_IP, type,
-                       (const void *)&mip4, sizeof(mip4)) == -1) {
-            rv = errno;
-        }
-    }
-#if APR_HAVE_IPV6
-    else if (sock_is_ipv6(sock)) {
-        if (type == IP_ADD_MEMBERSHIP) {
-            type = IPV6_JOIN_GROUP;
-        }
-        else if (type == IP_DROP_MEMBERSHIP) {
-            type = IPV6_LEAVE_GROUP;
-        }
-        else {
+    if (source != NULL) {
+#if MCAST_JOIN_SOURCE_GROUP
+        if (sock_is_ipv6(sock))
+            ip_proto = IPPROTO_IP;
+        else if (sock_is_ipv6(sock))
+            ip_proto = IPPROTO_IPV6;
+        else
             return APR_ENOTIMPL;
-        }
 
-        fill_mip_v6(&mip6, mcast, iface);
+        if (type == IP_ADD_MEMBERSHIP)
+            type = MCAST_JOIN_SOURCE_GROUP;
+        else if (type == IP_DROP_MEMBERSHIP)
+            type = MCAST_LEAVE_SOURCE_GROUP;
+        else
+            return APR_ENOTIMPL;
 
-        if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
-                       &mip6, sizeof(mip6)) == -1) {
+        mip.gsr_interface = find_if_index(iface);
+        memcpy(&mip.gsr_group, mcast->ipaddr_ptr, sizeof(mip.gsr_group));
+        memcpy(&mip.gsr_source, source->ipaddr_ptr, sizeof(mip.gsr_source));
+
+        if (setsockopt(sock->socketdes, ip_proto, type, (const void *) &mip,
+                       sizeof(mip)) == -1) {
             rv = errno;
         }
-    }
+#else
+        /* We do not support Source-Specific Multicast. */
+        return APR_ENOTIMPL;
 #endif
+    }
     else {
-        rv = APR_ENOTIMPL;
+        if (sock_is_ipv4(sock)) {
+
+            fill_mip_v4(&mip4, mcast, iface);
+
+            if (setsockopt(sock->socketdes, IPPROTO_IP, type,
+                           (const void *) &mip4, sizeof(mip4)) == -1) {
+                rv = errno;
+            }
+        }
+#if APR_HAVE_IPV6
+        else if (sock_is_ipv6(sock)) {
+            if (type == IP_ADD_MEMBERSHIP) {
+                type = IPV6_JOIN_GROUP;
+            }
+            else if (type == IP_DROP_MEMBERSHIP) {
+                type = IPV6_LEAVE_GROUP;
+            }
+            else {
+                return APR_ENOTIMPL;
+            }
+
+            fill_mip_v6(&mip6, mcast, iface);
+
+            if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
+                           &mip6, sizeof(mip6)) == -1) {
+                rv = errno;
+            }
+        }
+#endif
+        else {
+            rv = APR_ENOTIMPL;
+        }
     }
     return rv;
 }
@@ -183,7 +212,7 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
                                  apr_byte_t value)
 {
     apr_status_t rv = APR_SUCCESS;
-    
+
     rv = mcast_check_type(sock);
 
     if (rv != APR_SUCCESS) {
@@ -192,7 +221,7 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
 
     if (sock_is_ipv4(sock)) {
         if (setsockopt(sock->socketdes, IPPROTO_IP, type,
-                      (const void *)&value, sizeof(value)) == -1) {
+                       (const void *) &value, sizeof(value)) == -1) {
             rv = errno;
         }
     }
@@ -201,7 +230,7 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
         unsigned int loopopt = value;
         type = IPV6_MULTICAST_LOOP;
         if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
-                      &loopopt, sizeof(loopopt)) == -1) {
+                       &loopopt, sizeof(loopopt)) == -1) {
             rv = errno;
         }
     }
@@ -213,8 +242,8 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
             return APR_ENOTIMPL;
         }
 
-        if (setsockopt(sock->socketdes, IPPROTO_IPV6, type, 
-                      &value, sizeof(value)) == -1) {
+        if (setsockopt(sock->socketdes, IPPROTO_IPV6, type,
+                       &value, sizeof(value)) == -1) {
             rv = errno;
         }
     }
@@ -229,10 +258,10 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
 APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
                                          apr_sockaddr_t *join,
                                          apr_sockaddr_t *iface,
-                                         apr_sockaddr_t *ssm)
+                                         apr_sockaddr_t *source)
 {
 #ifdef IP_ADD_MEMBERSHIP
-    return do_mcast(IP_ADD_MEMBERSHIP, sock, join, iface, ssm);
+    return do_mcast(IP_ADD_MEMBERSHIP, sock, join, iface, source);
 #else
     return APR_ENOTIMPL;
 #endif
@@ -241,17 +270,16 @@ APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
 APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
                                           apr_sockaddr_t *leave,
                                           apr_sockaddr_t *iface,
-                                          apr_sockaddr_t *ssm)
+                                          apr_sockaddr_t *source)
 {
 #ifdef IP_DROP_MEMBERSHIP
-    return do_mcast(IP_DROP_MEMBERSHIP, sock, leave, iface, ssm);
+    return do_mcast(IP_DROP_MEMBERSHIP, sock, leave, iface, source);
 #else
     return APR_ENOTIMPL;
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_mcast_hops(apr_socket_t *sock,
-                                         apr_byte_t ttl)
+APR_DECLARE(apr_status_t) apr_mcast_hops(apr_socket_t *sock, apr_byte_t ttl)
 {
 #ifdef IP_MULTICAST_TTL
     return do_mcast_opt(IP_MULTICAST_TTL, sock, ttl);
@@ -260,7 +288,7 @@ APR_DECLARE(apr_status_t) apr_mcast_hops(apr_socket_t *sock,
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_mcast_loopback(apr_socket_t *sock,        
+APR_DECLARE(apr_status_t) apr_mcast_loopback(apr_socket_t *sock,
                                              apr_byte_t opt)
 {
 #ifdef IP_MULTICAST_LOOP
@@ -278,16 +306,16 @@ APR_DECLARE(apr_status_t) apr_mcast_interface(apr_socket_t *sock,
 
     if (sock_is_ipv4(sock)) {
         if (setsockopt(sock->socketdes, IPPROTO_IP, IP_MULTICAST_IF,
-                      (const void *)&iface->sa.sin.sin_addr,
-                      sizeof(iface->sa.sin.sin_addr)) == -1) {
+                       (const void *) &iface->sa.sin.sin_addr,
+                       sizeof(iface->sa.sin.sin_addr)) == -1) {
             rv = errno;
         }
     }
 #if APR_HAVE_IPV6
     else if (sock_is_ipv6(sock)) {
         unsigned int idx = find_if_index(iface);
-        if (setsockopt(sock->socketdes,  IPPROTO_IPV6, IPV6_MULTICAST_IF,
-                      &idx, sizeof(idx)) == -1) {
+        if (setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+                       &idx, sizeof(idx)) == -1) {
             rv = errno;
         }
     }
