@@ -100,6 +100,7 @@ case "$OS" in
        OSDIR="os2"
        enable_threads="system_threads"
        eolstr="\\r\\n"
+       file_as_socket="0"
        ;;
    *beos*)
        OSDIR="beos"
@@ -110,6 +111,7 @@ case "$OS" in
        USE_MM=yes
        AC_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
        eolstr="\\n"
+       file_as_socket="0"
        ;;
    *os390)
        OSDIR="os390"
@@ -780,8 +782,12 @@ msg=yes ] , [ have_in_addr="0"
 msg=no ])
 AC_MSG_RESULT([$msg])
 
+echo $ac_n "checking if fd == socket on this platform... "
 if test "x$file_as_socket" = "x" ; then
     file_as_socket="1";
+    echo "yes"
+else
+    echo "no"
 fi
 
 AC_SUBST(have_in_addr)
