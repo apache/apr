@@ -1070,13 +1070,15 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
     if (file_stderr) {
         apr_file_printf(file_stderr,
             "POOL DEBUG: CLEAR   [%10lu/%10lu/%10lu] "
-            "0x%08X \"%s\" [%s] (%u/%u/%u)\n",
+            "0x%08X \"%s\" [%s] (%u/%u/%u) "
+            "parent=0x%08X\n",
             (unsigned long)apr_pool_num_bytes(pool, 0),
             (unsigned long)apr_pool_num_bytes(pool, 1),
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
             (unsigned int)pool, pool->tag,
             file_line,
-            pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear);
+            pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear,
+            (unsigned int)pool->parent);
     }
 #endif
 
@@ -1092,13 +1094,15 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
     if (file_stderr) {
         apr_file_printf(file_stderr,
             "POOL DEBUG: DESTROY [%10lu/%10lu/%10lu] "
-            "0x%08X \"%s\" [%s] (%u/%u/%u)\n",
+            "0x%08X \"%s\" [%s] (%u/%u/%u) "
+            "parent=0x%08X\n",
             (unsigned long)apr_pool_num_bytes(pool, 0),
             (unsigned long)apr_pool_num_bytes(pool, 1),
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
             (unsigned int)pool, pool->tag,
             file_line,
-            pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear);
+            pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear,
+            (unsigned int)pool->parent);
     }
 #endif
 
