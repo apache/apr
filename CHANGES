@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Use strerror_r() where available, since strerror() isn't always
+     thread-safe.  Example systems where strerror() isn't thread-safe:
+     Linux+glibc, AIX  [Jeff Trawick]
+
   *) Fix some file cleanup problems in apr_proc_create() which could
      result in the pipes for stdin/stdout/stderr being closed
      immediately.  [Jeff Trawick]
