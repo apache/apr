@@ -63,10 +63,14 @@
 struct lock_t {
     ap_context_t *cntxt;
     ap_locktype_e type;
-    int curr_locked;
     char *fname;
     HMTX hMutex;
+    TID owner;
+    int lock_count;
+    TIB *tib;
 };
+
+void setup_lock();
 
 #endif  /* LOCKS_H */
 
