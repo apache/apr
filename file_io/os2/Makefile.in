@@ -50,28 +50,46 @@ $(LIB): $(OBJS)
 depend:
 	cp Makefile.in Makefile.in.bak \
 	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
+	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c | sed -e "s%\\\\\(.\)%/\\1%g" >> Makefile.new \
 	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
+	           -e '1,$$s: $(INCDIR1)/: $$(INCDIR1)/:g' \
 	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
 		> Makefile.in \
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-dir.o: dir.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h
-fileacc.o: fileacc.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h
-filedup.o: filedup.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h
-filestat.o: filestat.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h
-open.o: open.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h \
- ../include/apr_lib.h ../include/apr_config.h \
- ../include/hsregex.h
-pipe.o: pipe.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h
-readwrite.o: readwrite.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h
-seek.o: seek.c ../../include/apr_file_io.h fileio.h \
- ../../include/apr_errno.h ../../include/apr_general.h
+dir.o: dir.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h
+fileacc.o: fileacc.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h
+filedup.o: filedup.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h
+filestat.o: filestat.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h
+maperrorcode.o: maperrorcode.c $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_errno.h
+open.o: open.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h
+pipe.o: pipe.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h
+readwrite.o: readwrite.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h
+seek.o: seek.c fileio.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/hsregex.h

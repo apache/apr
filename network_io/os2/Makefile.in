@@ -45,23 +45,26 @@ $(LIB): $(OBJS)
 depend:
 	cp Makefile.in Makefile.in.bak \
 	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
+	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c | sed -e "s%\\\\\(.\)%/\\1%g" >> Makefile.new \
 	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
+                   -e '1,$$s: $(INCDIR1)/: $$(INCDIR1)/:g' \
 	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
 		> Makefile.in \
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-poll.o: poll.c ../../include/apr_network_io.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- networkio.h
-sendrecv.o: sendrecv.c ../../include/apr_errno.h \
- ../../include/apr_general.h ../../include/apr_network_io.h \
- networkio.h
-sockets.o: sockets.c ../../include/apr_network_io.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- networkio.h $(INCDIR)/apr_lib.h $(INCDIR)/apr_config.h \
- $(INCDIR)/hsregex.h
-sockopt.o: sockopt.c ../../include/apr_network_io.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- networkio.h
+poll.o: poll.c networkio.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h
+sendrecv.o: sendrecv.c networkio.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_errno.h
+sockets.o: sockets.c networkio.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h
+sockopt.o: sockopt.c networkio.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h

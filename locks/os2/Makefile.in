@@ -43,19 +43,17 @@ $(LIB): $(OBJS)
 depend:
 	cp Makefile.in Makefile.in.bak \
 	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
+	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c | sed -e "s%\\\\\(.\)%/\\1%g" >> Makefile.new \
 	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
+                   -e '1,$$s: $(INCDIR1)/: $$(INCDIR1)/:g' \
+                   -e '1,$$s: $(INCDIR2)/: $$(INCDIR2)/:g' \
 	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
 		> Makefile.in \
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-crossproc.o: crossproc.c ../../include/apr_lock.h \
- ../../include/apr_general.h ../../include/apr_errno.h locks.h \
- ../../include/apr_file_io.h ../../file_io/unix/fileio.h
-intraproc.o: intraproc.c ../../include/apr_lock.h \
- ../../include/apr_general.h ../../include/apr_errno.h locks.h \
- ../../include/apr_file_io.h ../../file_io/unix/fileio.h
-locks.o: locks.c ../../include/apr_lock.h \
- ../../include/apr_general.h ../../include/apr_errno.h locks.h \
- ../../include/apr_file_io.h ../../file_io/unix/fileio.h
+locks.o: locks.c $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_lib.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/hsregex.h locks.h $(INCDIR1)/apr_lock.h \
+ $(INCDIR2)/fileio.h
