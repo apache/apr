@@ -408,74 +408,65 @@ APR_CHECK_SIGWAIT_ONE_ARG
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
-APR_FLAG_HEADERS(
-    ByteOrder.h		\
-    conio.h		\
-    crypt.h		\
-    ctype.h		\
-    dir.h		\
-    dirent.h		\
-    dl.h		\
-    dlfcn.h		\
-    errno.h		\
-    fcntl.h		\
-    grp.h		\
-    iconv.h		\
-    io.h		\
-    langinfo.h		\
-    limits.h		\
-    malloc.h		\
-    memory.h		\
-    netdb.h		\
-    osreldate.h		\
-    poll.h		\
-    process.h		\
-    pwd.h		\
-    signal.h		\
-    stdarg.h		\
-    stddef.h		\
-    stdio.h		\
-    stdlib.h		\
-    string.h		\
-    strings.h		\
-    sysapi.h		\
-    sysgtime.h		\
-    termios.h		\
-    time.h		\
-    tpfeq.h		\
-    tpfio.h		\
-    unistd.h		\
-    unix.h		\
-    arpa/inet.h		\
-    kernel/OS.h		\
-    net/errno.h		\
-    netinet/in.h	\
-    netinet/tcp.h	\
-    sys/file.h		\
-    sys/mman.h		\
-    sys/poll.h		\
-    sys/resource.h	\
-    sys/select.h	\
-    sys/sem.h		\
-    sys/sendfile.h	\
-    sys/signal.h	\
-    sys/socket.h	\
-    sys/stat.h		\
-    sys/syslimits.h	\
-    sys/time.h		\
-    sys/types.h		\
-    sys/uio.h		\
-    sys/wait.h)
-
-dnl work around unexplained problem on Tru64 where
-dnl the above invocation says it finds the header but
-dnl APR_HAVE_foo_H is 0
-APR_FLAG_HEADERS(stdio.h)
-APR_FLAG_HEADERS(errno.h)
-APR_FLAG_HEADERS(crypt.h)
-APR_FLAG_HEADERS(ctype.h)
-APR_FLAG_HEADERS(fcntl.h)
-APR_FLAG_HEADERS(netdb.h)
+AC_CHECK_HEADERS(ByteOrder.h)
+AC_CHECK_HEADERS(conio.h, conioh="1", conioh="0")
+AC_CHECK_HEADERS(crypt.h, crypth="1", crypth="0")
+AC_CHECK_HEADERS(ctype.h, ctypeh="1", ctypeh="0")
+AC_CHECK_HEADERS(dir.h)
+AC_CHECK_HEADERS(dirent.h, direnth="1", dirent="0")
+AC_CHECK_HEADERS(errno.h, errnoh="1", errnoh="0")
+AC_CHECK_HEADERS(net/errno.h)
+AC_CHECK_HEADERS(fcntl.h, fcntlh="1", fcntl="0")
+AC_CHECK_HEADERS(grp.h)
+AC_CHECK_HEADERS(io.h, ioh="1", ioh="0")
+AC_CHECK_HEADERS(limits.h, limitsh="1", limitsh="0")
+AC_CHECK_HEADERS(malloc.h)
+AC_CHECK_HEADERS(memory.h)
+AC_CHECK_HEADERS(netdb.h, netdbh="1", netdbh="0")
+AC_CHECK_HEADERS(osreldate.h)
+AC_CHECK_HEADERS(process.h)
+AC_CHECK_HEADERS(pwd.h)
+AC_CHECK_HEADERS(sys/syslimits.h, sys_syslimitsh="1", sys_syslimitsh="0")
+AC_CHECK_HEADERS(sys/sem.h)
+AC_CHECK_HEADERS(signal.h, signalh="1", signalh="0")
+AC_CHECK_HEADERS(stdarg.h, stdargh="1", stdargh="0")
+AC_CHECK_HEADERS(stddef.h)
+AC_CHECK_HEADERS(stdio.h, stdioh="1", stdioh="0")
+AC_CHECK_HEADERS(stdlib.h, stdlibh="1", stdlibh="0")
+AC_CHECK_HEADERS(string.h, stringh="1", stringh="0")
+AC_CHECK_HEADERS(strings.h, stringsh="1", stringsh="0")
+AC_CHECK_HEADERS(sysapi.h)
+AC_CHECK_HEADERS(sysgtime.h)
+AC_CHECK_HEADERS(termios.h)
+AC_CHECK_HEADERS(time.h)
+AC_CHECK_HEADERS(sys/time.h, sys_timeh="1", sys_timeh="0")
+AC_CHECK_HEADERS(tpfeq.h)
+AC_CHECK_HEADERS(tpfio.h)
+AC_CHECK_HEADERS(sys/uio.h, sys_uioh="1", sys_uioh="0")
+AC_CHECK_HEADERS(unistd.h, unistdh="1", unistdh="0")
+AC_CHECK_HEADERS(poll.h)
+AC_CHECK_HEADERS(sys/poll.h)
+AC_CHECK_HEADERS(unix.h)
+AC_CHECK_HEADERS(arpa/inet.h, arpa_ineth="1", arpa_ineth="0")
+AC_CHECK_HEADERS(netinet/in.h, netinet_inh="1", netinet_inh="0")
+AC_CHECK_HEADERS(netinet/tcp.h, netinet_tcph="1", netinet_tcph="0")
+AC_CHECK_HEADERS(iconv.h)
+AC_CHECK_HEADERS(langinfo.h)
+ 
+AC_CHECK_HEADERS(sys/file.h)
+AC_CHECK_HEADERS(sys/mman.h)
+AC_CHECK_HEADERS(sys/resource.h)
+AC_CHECK_HEADERS(sys/select.h)
+AC_CHECK_HEADERS(sys/sendfile.h, sys_sendfileh="1", sys_sendfileh="0")
+AC_CHECK_HEADERS(sys/signal.h, sys_signalh="1", sys_signalh="0")
+AC_CHECK_HEADERS(sys/socket.h, sys_socketh="1", sys_socketh="0")
+AC_CHECK_HEADERS(sys/stat.h)
+AC_CHECK_HEADERS(sys/types.h, sys_typesh="1", sys_typesh="0")
+AC_CHECK_HEADERS(sys/wait.h, sys_waith="1", sys_waith="0")
+AC_CHECK_HEADERS(dlfcn.h)
+AC_CHECK_HEADERS(dl.h)
+ 
+AC_CHECK_HEADERS(kernel/OS.h)
 
 AC_SUBST(arpa_ineth)
 AC_SUBST(conioh)
