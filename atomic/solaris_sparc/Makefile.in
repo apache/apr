@@ -1,18 +1,18 @@
 
-TARGETS =  apr_atomic_sparc.lo
+TARGETS =  @apr_atomic_sparc_compile@
 
 ASFLAGS += @ASFLAGS@
 ASCPPFLAGS = @ASCPPFLAGS@
 AS = @AS@
 ASCPP = @ASCPP@
 
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 apr_atomic_sparc.lo: apr_atomic_sparc.s
 	$(ASCPP) $(ASCPPFLAGS) $*.s > $*.S
 	$(AS) $(ASFLAGS) -o $@ $*.S
 
-
-# bring in rules.mk for standard functionality
-@INCLUDE_RULES@
 
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCDIR=../../include
