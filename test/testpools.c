@@ -91,6 +91,53 @@ static void test_notancestor(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, 0, apr_pool_is_ancestor(pchild, pmain));
 }
 
+static apr_status_t success_cleanup(void *data)
+{
+    return APR_SUCCESS;
+}
+
+static char *checker_data = "Hello, world.";
+
+static apr_status_t checker_cleanup(void *data)
+{
+    return data == checker_data ? APR_SUCCESS : APR_EGENERAL;
+}
+
+static void test_cleanups(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    int n;
+
+    /* do this several times to test the cleanup freelist handling. */
+    for (n = 0; n < 5; n++) {
+        apr_pool_cleanup_register(pchild, NULL, success_cleanup,
+                                  success_cleanup);
+        apr_pool_cleanup_register(pchild, checker_data, checker_cleanup,
+                                  success_cleanup);
+        apr_pool_cleanup_register(pchild, NULL, checker_cleanup, 
+                                  success_cleanup);
+
+        rv = apr_pool_cleanup_run(p, NULL, success_cleanup);
+        ABTS_ASSERT(tc, "nullop cleanup run OK", rv == APR_SUCCESS);
+        rv = apr_pool_cleanup_run(p, checker_data, checker_cleanup);
+        ABTS_ASSERT(tc, "cleanup passed correct data", rv == APR_SUCCESS);
+        rv = apr_pool_cleanup_run(p, NULL, checker_cleanup);
+        ABTS_ASSERT(tc, "cleanup passed correct data", rv == APR_EGENERAL);
+
+        if (n == 2) {
+            /* clear the pool to check that works */
+            apr_pool_clear(pchild);
+        }
+
+        if (n % 2 == 0) {
+            /* throw another random cleanup into the mix */
+            apr_pool_cleanup_register(pchild, NULL,
+                                      apr_pool_cleanup_null,
+                                      apr_pool_cleanup_null);
+        }
+    }
+}
+
 abts_suite *testpool(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -101,6 +148,7 @@ abts_suite *testpool(abts_suite *suite)
     abts_run_test(suite, test_notancestor, NULL);
     abts_run_test(suite, alloc_bytes, NULL);
     abts_run_test(suite, calloc_bytes, NULL);
+    abts_run_test(suite, test_cleanups, NULL);
 
     return suite;
 }
