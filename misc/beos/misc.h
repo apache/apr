@@ -90,7 +90,10 @@ struct ap_context_t {
 
 struct ap_other_child_rec_t {
     struct ap_other_child_rec_t *next;
-    thread_id tid;
+    thread_id pid; /* this is actually a thread_id, but in order to
+                      restrict the amount of code duplication we'll use
+                      pid so that the Unix code won't have too many #ifdef's
+                   */
     void (*maintenance) (int, void *);
     void *data;
     int write_fd;

@@ -123,8 +123,7 @@ struct ap_procattr_t {
 
 struct ap_proc_t {
     ap_context_t *cntxt;
-    pid_t pid;
-    thread_id tid;
+    thread_id pid;
     struct ap_procattr_t *attr;
 };
 

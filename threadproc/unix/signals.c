@@ -52,7 +52,11 @@
  * <http://www.apache.org/>.
  */
 
+#ifndef BEOS
 #include "threadproc.h"
+#else
+#include "../beos/threadproc.h"
+#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_kill(ap_proc_t *proc, int sig)

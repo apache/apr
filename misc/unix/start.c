@@ -53,7 +53,11 @@
  */
 
 #include "misc.h"
+#ifndef BEOS
 #include "../../locks/unix/locks.h"
+#else
+#include "../../locks/beos/locks.h"
+#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
@@ -188,7 +192,9 @@ ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
 ap_status_t ap_initialize(void)
 {
     ap_status_t status;
+#ifndef BEOS
     setup_lock();
+#endif
     status = ap_init_alloc();
     return status;
 }
