@@ -106,7 +106,7 @@ APR_EXPORT(ap_bucket *) ap_rmem_create(void)
     ap_bucket *newbuf;
     ap_bucket_rmem *b;
 
-    newbuf                = malloc(sizeof(*newbuf));
+    newbuf                = calloc(1, sizeof(*newbuf));
     b                     = malloc(sizeof(*b)); 
 
     b->alloc_len          = 0;

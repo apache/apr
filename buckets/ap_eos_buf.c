@@ -73,7 +73,7 @@ APR_EXPORT(ap_bucket *) ap_eos_create(void)
 {
     ap_bucket *newbuf;
 
-    newbuf            = malloc(sizeof(*newbuf));
+    newbuf            = calloc(1, sizeof(*newbuf));
 
     newbuf->color     = AP_BUCKET_eos;
     newbuf->getstr    = eos_get_str;
