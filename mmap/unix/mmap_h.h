@@ -59,7 +59,7 @@
 #include "apr_general.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
-#include "fileio.h"
+#include "../../file_io/unix/fileio.h"
 #include "mmap_h.h"
 
 /* System headers required for the mmap library */
