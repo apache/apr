@@ -80,7 +80,7 @@ apr_status_t apr_socket_send(apr_socket_t *sock, const char *buf,
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
-      && sock->timeout != 0) {
+        && sock->timeout != 0) {
         apr_status_t arv;
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
@@ -99,7 +99,7 @@ do_select:
         return errno;
     }
     if (sock->timeout && rv < *len) {
-    sock->netmask |= APR_INCOMPLETE_WRITE;
+        sock->netmask |= APR_INCOMPLETE_WRITE;
     }
     (*len) = rv;
     return APR_SUCCESS;
@@ -111,7 +111,7 @@ apr_status_t apr_socket_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
     apr_status_t arv;
 
     if (sock->netmask & APR_INCOMPLETE_READ) {
-    sock->netmask &= ~APR_INCOMPLETE_READ;
+        sock->netmask &= ~APR_INCOMPLETE_READ;
         goto do_select;
     }
 
@@ -122,7 +122,7 @@ apr_status_t apr_socket_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
       sock->timeout != 0) {
 do_select:
-    arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
+        arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -138,7 +138,7 @@ do_select:
         return errno;
     }
     if (sock->timeout && rv < *len) {
-    sock->netmask |= APR_INCOMPLETE_READ;
+        sock->netmask |= APR_INCOMPLETE_READ;
     }
     (*len) = rv;
     if (rv == 0) {
@@ -202,7 +202,7 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
             do {
                 rv = recvfrom(sock->socketdes, buf, (*len), flags,
                               (struct sockaddr*)&from->sa, &from->salen);
-                } while (rv == -1 && errno == EINTR);
+            } while (rv == -1 && errno == EINTR);
         }
     }
     if (rv == -1) {
@@ -211,8 +211,9 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
     }
 
     (*len) = rv;
-    if (rv == 0 && sock->type == SOCK_STREAM)
+    if (rv == 0 && sock->type == SOCK_STREAM) {
         return APR_EOF;
+    }
 
     return APR_SUCCESS;
 }
@@ -239,7 +240,7 @@ apr_status_t apr_socket_sendv(apr_socket_t * sock, const struct iovec *vec,
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
-      sock->timeout != 0) {
+        sock->timeout != 0) {
         apr_status_t arv;
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
@@ -258,7 +259,7 @@ do_select:
         return errno;
     }
     if (sock->timeout && rv < requested_len) {
-    sock->netmask |= APR_INCOMPLETE_WRITE;
+        sock->netmask |= APR_INCOMPLETE_WRITE;
     }
     (*len) = rv;
     return APR_SUCCESS;
@@ -305,7 +306,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         arv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders,
                                &hdrbytes);
         if (arv != APR_SUCCESS) {
-        *len = 0;
+            *len = 0;
             return errno;
         }
         nbytes += hdrbytes;
@@ -331,33 +332,32 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     do {
         rv = sendfile(sock->socketdes,    /* socket */
-                  file->filedes,    /* open file descriptor of the file to be sent */
-                  &off,    /* where in the file to start */
-                  *len    /* number of bytes to send */
-            );
+                      file->filedes, /* open file descriptor of the file to be sent */
+                      &off,    /* where in the file to start */
+                      *len);   /* number of bytes to send */
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
 do_select:
-    arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
-    if (arv != APR_SUCCESS) {
-        *len = 0;
-        return arv;
-    }
+        arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
         else {
             do {
-            rv = sendfile(sock->socketdes,    /* socket */
-                      file->filedes,    /* open file descriptor of the file to be sent */
-                      &off,    /* where in the file to start */
-                      *len);    /* number of bytes to send */
+                rv = sendfile(sock->socketdes,    /* socket */
+                              file->filedes, /* open file descriptor of the file to be sent */
+                              &off,    /* where in the file to start */
+                              *len);    /* number of bytes to send */
             } while (rv == -1 && errno == EINTR);
         }
     }
 
     if (rv == -1) {
-    *len = nbytes;
+        *len = nbytes;
         rv = errno;
         apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
         return rv;
@@ -396,7 +396,7 @@ do_select:
                                &trbytes);
         nbytes += trbytes;
         if (arv != APR_SUCCESS) {
-        *len = nbytes;
+            *len = nbytes;
             rv = errno;
             apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
             return rv;
@@ -444,7 +444,7 @@ static int include_hdrs_in_length(void)
     kernel_version_size = sizeof(kernel_version);
     if (sysctlbyname("kern.osreldate", &kernel_version, 
                      &kernel_version_size, NULL, NULL) == 0 &&
-            kernel_version < KERNEL_WITH_SENDFILE_LENGTH_FIX) {
+        kernel_version < KERNEL_WITH_SENDFILE_LENGTH_FIX) {
         api = OLD;
         return 1;
     }
@@ -705,7 +705,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     }
 
     if (rc == -1) {
-    *len = 0;
+        *len = 0;
         return errno;
     }
 
@@ -795,7 +795,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
             parms.trailer_data = tbuf;
         }
     }
-    else parms.trailer_data = NULL;
+    else {
+        parms.trailer_data = NULL;
+    }
 
     /* Whew! Headers and trailers set up. Now for the file data */
 
@@ -913,8 +915,9 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 
         curvec++;
     }
-    else
+    else {
         vecs--;
+    }
 
     /* Add the footers */
     for (i = 0; i < hdtr->numtrailers; i++, curvec++) {
@@ -955,17 +958,15 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         /* socket, vecs, number of vecs, bytes written */
         rv = sendfilev(sock->socketdes, sfv, vecs, &nbytes);
 
-        if (rv == -1 && errno == EAGAIN)
-        {
-            if (nbytes)
-                rv = 0; 
+        if (rv == -1 && errno == EAGAIN) {
+            if (nbytes) {
+                rv = 0;
+            }
             else if (!arv &&
-                     apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1)
-            {
+                     apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1) {
                 apr_status_t t = apr_wait_for_io_or_timeout(NULL, sock, 0);
 
-                if (t != APR_SUCCESS)
-                {
+                if (t != APR_SUCCESS) {
                     *len = 0;
                     return t;
                 }
@@ -976,8 +977,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
     } while ((rv == -1 && errno == EINTR) || repeat);
 
-    if (rv == -1)
-    {
+    if (rv == -1) {
         *len = 0;
         return errno;
     }
@@ -985,7 +985,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     /* Update how much we sent */
     *len = nbytes;
     if (sock->timeout && (*len < requested_len)) {
-    sock->netmask |= APR_INCOMPLETE_WRITE;
+        sock->netmask |= APR_INCOMPLETE_WRITE;
     }
     return APR_SUCCESS;
 }
