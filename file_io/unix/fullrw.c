@@ -65,7 +65,7 @@ ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
 	ap_ssize_t amt = (ap_ssize_t)nbytes;
 
 	status = ap_read(thefile, buf, &amt);
-	buf += amt;
+	buf = (char *)buf + amt;
         nbytes -= amt;
         total_read += amt;
     } while (status == APR_SUCCESS && nbytes > 0);
@@ -86,7 +86,7 @@ ap_status_t ap_full_write(ap_file_t *thefile, const void *buf,
 	ap_ssize_t amt = (ap_ssize_t)nbytes;
 
 	status = ap_write(thefile, buf, &amt);
-	buf += amt;
+	buf = (char *)buf + amt;
         nbytes -= amt;
         total_written += amt;
     } while (status == APR_SUCCESS && nbytes > 0);
