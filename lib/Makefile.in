@@ -11,8 +11,7 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
-INCDIR1=../misc/@OSDIR@
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I../misc/unix
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch/@OSDIR@
 
 #LIB=@LIBPREFIX@apr.a
 
@@ -56,8 +55,8 @@ apr_pools.o: apr_pools.c $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
  $(INCDIR)/apr_network_io.h $(INCDIR)/apr_lock.h \
  $(INCDIR)/apr_dso.h $(INCDIR)/apr_strings.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_pools.h $(INCDIR)/apr_tables.h ../misc/unix/misc.h \
- $(INCDIR)/apr_getopt.h
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/arch/unix/misc.h $(INCDIR)/apr_getopt.h
 apr_signal.o: apr_signal.c $(INCDIR)/apr_private.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
