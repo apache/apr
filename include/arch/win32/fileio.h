@@ -84,14 +84,13 @@ struct file_t {
     ap_context_t *cntxt;
     HANDLE filehand;
     char *fname;
-    char *demonfname;
-	char *lowerdemonfname;
+    DWORD dwFileAttributes;
+    char *demonfname; /* Is this necessary */
+    char *lowerdemonfname; /* Is this necessary */
     int buffered;
-	int append;
+    int stated;
+    int append; /* is this necessary?*/
     int eof_hit;
-/*    mode_t protection;
-    uid_t user;
-    gid_t group;*/
     off_t size;
     time_t atime;
     time_t mtime;
@@ -102,12 +101,12 @@ struct dir_t {
     ap_context_t *cntxt;
     char *dirname;
     HANDLE dirhand;
-	WIN32_FIND_DATA *entry;
+    WIN32_FIND_DATA *entry;
 };
 
 struct iovec_t {
     ap_context_t *cntxt;
-    struct iovec *iovec;
+    struct iovec *iov;
 };
 
 ap_status_t file_cleanup(void *);

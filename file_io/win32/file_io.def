@@ -36,8 +36,9 @@ EXPORTS
     	ap_get_os_dir   @29
     	ap_putc   @30
     	ap_getc   @31
-    	ap_fprintf   @32
-    	ap_eof   @33
-
-	
-	
+	ap_puts @32
+	ap_gets @33
+	ap_flush @34
+    	ap_fprintf   @35
+    	ap_eof   @36
+	ap_get_filetype @37

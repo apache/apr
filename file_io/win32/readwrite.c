@@ -62,7 +62,7 @@
 
 ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
-	DWORD bread;
+    DWORD bread;
     int lasterror;
 
     if (thefile->filehand == INVALID_HANDLE_VALUE) {
@@ -71,18 +71,18 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
     }
     
     if (ReadFile(thefile->filehand, buf, *nbytes, &bread, NULL)) {
-		*nbytes = bread;
-	    return APR_SUCCESS;
-	}
-	*nbytes = -1;
+        *nbytes = bread;
+        return APR_SUCCESS;
+    }
+    *nbytes = -1;
     lasterror = GetLastError();
-	return APR_EEXIST;
+    return APR_EEXIST;
 }
 
 ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bwrote;
-	FILETIME atime, mtime, ctime;
+    FILETIME atime, mtime, ctime;
 	
     if (thefile->filehand == INVALID_HANDLE_VALUE) {
         *nbytes = -1;
@@ -90,40 +90,45 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
     }
 
     if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
-		if (strcmp(thefile->fname, "PIPE")) {
-			FlushFileBuffers(thefile->filehand);
-			thefile->size = GetFileSize(thefile->filehand, NULL);
-			GetFileTime(thefile->filehand, &ctime, &atime, &mtime);
-			thefile->atime = WinTimeToUnixTime(&atime);
-			thefile->mtime = WinTimeToUnixTime(&mtime);
-			thefile->ctime = WinTimeToUnixTime(&ctime);
-		}
-		*nbytes = bwrote;
-		return APR_SUCCESS;
-	}
-	(*nbytes) = -1;
-	return APR_EEXIST;
-}
-/*
-ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssize_t *iocnt)
-{
-    int bytes;
-    if ((bytes = writev(thefile->filedes, vec->iovec, *iocnt)) < 0) {
-        *iocnt = bytes;
-        return errno;
-    12}
-    else {
-        *iocnt = bytes;
+        if (strcmp(thefile->fname, "PIPE")) {
+            FlushFileBuffers(thefile->filehand);
+            thefile->size = GetFileSize(thefile->filehand, NULL);
+            GetFileTime(thefile->filehand, &ctime, &atime, &mtime);
+            thefile->atime = WinTimeToUnixTime(&atime);
+            thefile->mtime = WinTimeToUnixTime(&mtime);
+            thefile->ctime = WinTimeToUnixTime(&ctime);
+        }
+        *nbytes = bwrote;
         return APR_SUCCESS;
     }
+    (*nbytes) = -1;
+    return APR_EEXIST;
 }
-*/
+/*
+ * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2) 
+ */
+ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssize_t *iocnt)
+{
+    int i;
+    DWORD bwrote = 0;
+    int numvec = *iocnt;
+    *iocnt = 0;
+
+    for (i = 0; i < numvec; i++) {
+        if (!WriteFile(thefile->filehand,
+                       vec->iov[i].iov_base, vec->iov[i].iov_len, &bwrote, NULL)) {
+            return GetLastError(); /* TODO: Yes, I know this is broken... */
+        }
+        *iocnt += bwrote;
+    }
+    return APR_SUCCESS;
+}
 
 ap_status_t ap_putc(ap_file_t *thefile, char ch)
 {
     DWORD bwrote;
 
-    if (WriteFile(thefile->filehand, &ch, 1, &bwrote, NULL)) {
+    if (!WriteFile(thefile->filehand, &ch, 1, &bwrote, NULL)) {
         return APR_EEXIST;
     }
     return APR_SUCCESS; 
@@ -139,6 +144,53 @@ ap_status_t ap_getc(ap_file_t *thefile, char *ch)
         thefile->eof_hit = TRUE;
         return APR_EOF;
     }
+    return APR_SUCCESS; 
+}
+
+ap_status_t ap_puts(ap_file_t *thefile, char *str)
+{
+    DWORD bwrote;
+    int len;
+
+    len = strlen(str);
+    str[len] = '\n';
+    if (!WriteFile(thefile->filehand, str, len+1, &bwrote, NULL)) {
+        str[len] = '\0';
+        return APR_EEXIST;
+    }
+    str[len] = '\0';
+
+    return APR_SUCCESS; 
+}
+
+ap_status_t ap_gets(ap_file_t *thefile, char *str, int len)
+{
+    DWORD bread;
+    int i;
+    if (!ReadFile(thefile->filehand, str, len, &bread, NULL)) {
+        switch(GetLastError()) {
+        case ERROR_HANDLE_EOF:
+            return APR_EOF;
+        default:
+            return APR_EEXIST;
+        }
+    }
+    if (bread == 0) {
+        thefile->eof_hit = TRUE;
+        return APR_EOF;
+    }
+    for (i=0; i<len; i++) {
+        if (str[i] == '\n') {
+            str[i] = '\0';
+            return APR_SUCCESS;
+        }
+        str[i] = '\0';
+    }
+    return APR_SUCCESS; 
+}
+ap_status_t ap_flush(ap_file_t *thefile)
+{
+    FlushFileBuffers(thefile->filehand);
     return APR_SUCCESS; 
 }
 

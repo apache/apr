@@ -58,21 +58,19 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_errno.h"
-
+/* TODO: Handle the case when the file has not been opened */
 ap_status_t ap_getfileinfo(struct file_t *thefile)
 {
-	FILETIME atime, ctime, mtime;
+    BY_HANDLE_FILE_INFORMATION info;
+    GetFileInformationByHandle(thefile->filehand, &info);
+    thefile->dwFileAttributes = info.dwFileAttributes;
+    thefile->size = info.nFileSizeLow; /* This is broken for files > ?? */
+    thefile->atime = WinTimeToUnixTime(&info.ftLastAccessTime);
+    thefile->ctime = WinTimeToUnixTime(&info.ftCreationTime);
+    thefile->mtime = WinTimeToUnixTime(&info.ftLastWriteTime);
+    thefile->stated = 1; 
 
-/*        thefile->protection = info.st_mode;
-        thefile->user = info.st_uid;
-        thefile->group = info.st_gid;*/
-	thefile->size = GetFileSize(thefile->filehand, NULL);
-	GetFileTime(thefile->filehand, &ctime, &atime, &mtime);
-	thefile->atime = WinTimeToUnixTime(&atime);
-	thefile->mtime = WinTimeToUnixTime(&mtime);
-	thefile->ctime = WinTimeToUnixTime(&ctime);
     return APR_SUCCESS;
 }
-
 
 

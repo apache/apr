@@ -162,7 +162,24 @@ ap_status_t ap_get_filemtime(struct file_t *file, time_t *time)
         return APR_ENOFILE;
     }
 }
+ap_status_t ap_get_filetype(struct file_t *file, ap_filetype_e *type)
+{    
+    if (file != NULL) {
+        if (!file->stated) {
+            ap_getfileinfo(file);
+        }
+        if (file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            *type = APR_DIR;
+        else
+            *type = APR_REG;
 
+        return APR_SUCCESS;
+    }
+    else {
+        *type = APR_REG;
+        return APR_ENOFILE;
+    }
+}
 ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
 {    
     if (file != NULL) {
