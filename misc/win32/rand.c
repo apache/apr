@@ -64,7 +64,9 @@ apr_status_t apr_generate_random_bytes(unsigned char * buf, int length)
 	return GetLastError();
     }
     if (!CryptGenRandom(hProv,length,buf)) {
-	return GetLastError();
+        CryptReleaseContext(hProv, 0);
+    	return GetLastError();
     }
+    CryptReleaseContext(hProv, 0);
     return APR_SUCCESS;
 }
