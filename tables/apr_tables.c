@@ -951,19 +951,32 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
 {
     char *argp;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
-    int vdorv = 1, rv, i;
+    int vdorv = 1;
 
     argp = va_arg(vp, char *);
     do {
-        apr_uint32_t checksum = 0;
+        int rv = 1, i;
         if (argp) {
-            COMPUTE_KEY_CHECKSUM(argp, checksum);
+            /* Scan for entries that match the next key */
+            int hash = TABLE_HASH(argp);
+            if (TABLE_INDEX_IS_INITIALIZED(t, hash)) {
+                apr_uint32_t checksum;
+                COMPUTE_KEY_CHECKSUM(argp, checksum);
+                for (i = t->index_first[hash];
+                     rv && (i <= t->index_last[hash]); ++i) {
+                    if (elts[i].key && (checksum == elts[i].key_checksum) &&
+                                        !strcasecmp(elts[i].key, argp)) {
+                        rv = (*comp) (rec, elts[i].key, elts[i].val);
+                    }
+                }
+            }
         }
-        for (rv = 1, i = 0; rv && (i < t->a.nelts); ++i) {
-            if (elts[i].key && (!argp ||
-                                ((checksum == elts[i].key_checksum) &&
-                                 !strcasecmp(elts[i].key, argp)))) {
-                rv = (*comp) (rec, elts[i].key, elts[i].val);
+        else {
+            /* Scan the entire table */
+            for (i = 0; rv && (i < t->a.nelts); ++i) {
+                if (elts[i].key) {
+                    rv = (*comp) (rec, elts[i].key, elts[i].val);
+                }
             }
         }
         if (rv == 0) {
