@@ -552,7 +552,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
 /**
  * Detach the process from the controlling terminal.
  */
-apr_status_t apr_proc_detach(void);
+APR_DECLARE(apr_status_t) apr_proc_detach(void);
 
 #if APR_HAS_OTHER_CHILD
 
