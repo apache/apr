@@ -149,6 +149,8 @@ static size_t mm_core_pagesize(void)
         pagesize = getpagesize();
 #elif defined(MM_VMPS_SYSCONF)
         pagesize = sysconf(_SC_PAGESIZE);
+#elif defined(MM_VMPS_BEOS)
+        pagesize = B_PAGE_SIZE;
 #else
         pagesize = MM_CORE_DEFAULT_PAGESIZE;
 #endif
@@ -207,6 +209,9 @@ void *mm_core_create(size_t usersize, const char *file)
 #if defined(MM_SEMT_FLOCK) || defined(MM_SEMT_FCNTL)
     char semfilename[MM_MAXPATH];
 #endif
+#if defined(MM_SHMT_BEOS)
+    area_id temparea;
+#endif
     char filename[MM_MAXPATH];
 
     if (usersize <= 0 || usersize > mm_core_maxsegsize()) {
@@ -236,6 +241,11 @@ void *mm_core_create(size_t usersize, const char *file)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to memory map anonymous area");
 #endif /* MM_SHMT_MMANON */
 
+#if defined(MM_SHMT_BEOS)
+    if ((temparea = create_area("mm",(void*)&area, B_ANY_ADDRESS,
+                        size, B_LAZY_LOCK, B_READ_AREA | B_WRITE_AREA)) < 0)
+        FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to create the memory area");
+#endif /* MM_SHMT_BEOS */
 #if defined(MM_SHMT_MMPOSX)
     shm_unlink(fnmem); /* Ok when it fails */
     if ((fdmem = shm_open(fnmem, O_RDWR|O_CREAT, MM_CORE_FILEMODE)) == -1)
@@ -335,6 +345,13 @@ void *mm_core_create(size_t usersize, const char *file)
 #else
     mc->mc_fdsem    = fdsem;
 #endif
+#if defined(MM_SEMT_BEOS)
+    mc->mc_semid = create_sem(0, "mm_semid");
+    mc->mc_ben=0;
+#endif
+#if defined(MM_SHMT_BEOS)
+    mc->mc_areaid = temparea;
+#endif
 #if defined(MM_SEMT_IPCSEM)
     mc->mc_fdsem_rd = fdsem_rd;
     mc->mc_readers  = 0;
@@ -371,6 +388,13 @@ void *mm_core_create(size_t usersize, const char *file)
     if (fdmem != -1)
         shmctl(fdmem, IPC_RMID, NULL);
 #endif
+#if defined(MM_SHMT_BEOS)
+    delete_area(mc->mc_areaid);
+#endif
+#if defined(MM_SEMT_BEOS)
+    delete_sem(mc->mc_semid);
+#endif
+
 #if defined(MM_SEMT_FLOCK) || defined(MM_SEMT_FCNTL)
     if (fdsem != -1)
         close(fdsem);
@@ -529,6 +553,17 @@ int mm_core_lock(const void *core, mm_lock_mode mode)
     }
     mc->mc_lockmode = mode;
 #endif
+#if defined(MM_SEMT_BEOS)
+	rc=0;
+	if (atomic_add (&mc->mc_ben, 1) > 0){
+		/* someone already in lock..acquire sem and wait */
+		if (acquire_sem(mc->mc_semid) != B_NO_ERROR){
+			atomic_add(&mc->mc_ben,-1);
+	        rc = -1;
+    	}
+    }
+#endif
+
     if (rc < 0) {
         ERR(MM_ERR_CORE|MM_ERR_SYSTEM, "Failed to lock");
         rc = FALSE;
@@ -572,6 +607,13 @@ int mm_core_unlock(const void *core)
         while (((rc = semop(fdsem, mm_core_dounlock, 1)) < 0) && (errno == EINTR)) ;
     }
 #endif
+#if defined(MM_SEMT_BEOS)
+    rc=0;
+	if (atomic_add(&mc->mc_ben, -1) > 1){
+		release_sem(mc->mc_semid);
+    }
+#endif
+
     if (rc < 0) {
         ERR(MM_ERR_CORE|MM_ERR_SYSTEM, "Failed to unlock");
         rc = FALSE;
