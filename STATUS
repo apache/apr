@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/04/13 06:34:08 $]
+Last modified at [$Date: 2002/04/13 07:46:58 $]
 
 Release:
 
@@ -344,7 +344,7 @@ Stuff waiting for code thawing after Beta 1:
       versioned, this api change is [somewhat] painful for httpd.
       Status: Still in discussion, current leanings appear to be
         Bill Stoddard -0.5 (?)
-        Sander Striker -1 or -0.5 (?)
+        Sander Striker +1
         Greg Stein +1
         Karl Fogel +1
       (Not sure if the negatives would stay negative given that the
@@ -353,3 +353,5 @@ Stuff waiting for code thawing after Beta 1:
         Justin says: If you do this, please move it into apr-util where md5
                      belongs!  You'll have to address the random issue in
                      misc/unix/getuuid.c that forces md5 to be in APR.
+        Sander: +1 for the move.
+
