@@ -2,7 +2,7 @@
 # ====================================================================
 # The Apache Software License, Version 1.1
 #
-# Copyright (c) 2001-2003 The Apache Software Foundation.  All rights
+# Copyright (c) 2001-2004 The Apache Software Foundation.  All rights
 # reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -76,9 +76,13 @@ LIBS="@EXTRA_LIBS@"
 EXTRA_INCLUDES="@EXTRA_INCLUDES@"
 SHLIBPATH_VAR="@shlibpath_var@"
 APR_SOURCE_DIR="@apr_srcdir@"
+APR_BUILD_DIR="@apr_builddir@"
 APR_SO_EXT="@so_ext@"
 APR_LIB_TARGET="@export_lib_target@"
 APR_LIBNAME="@APR_LIBNAME@"
+
+# NOTE: the following line is modified during 'make install': alter with care!
+location=@APR_CONFIG_LOCATION@
 
 show_usage()
 {
@@ -123,36 +127,10 @@ if test $# -eq 0; then
     exit 1
 fi
 
-thisdir="`dirname $0`"
-thisdir="`cd $thisdir && pwd`"
-if test -d $bindir; then
-  tmpbindir="`cd $bindir && pwd`"
-else
-  tmpbindir=""
-fi
-# If we have the realpath program, use it to resolve symlinks
-# Otherwise, being in a symlinked dir may result in incorrect output.
-if test -x "`which realpath 2>/dev/null`"; then
-  thisdir="`realpath $thisdir`"
-  if test -d "$APR_SOURCE_DIR"; then
-    APR_SOURCE_DIR="`realpath $APR_SOURCE_DIR`"
-  fi
-  if test -n "$tmpbindir"; then
-    tmpbindir="`realpath $tmpbindir`"
-  fi
-fi
-if test "$tmpbindir" = "$thisdir"; then
-  location=installed
-elif test "$APR_SOURCE_DIR" = "$thisdir"; then
-  location=source
-else
-  location=build
-fi
-
 if test "$location" = "installed"; then
     LA_FILE="$libdir/lib${APR_LIBNAME}.la"
 else
-    LA_FILE="$thisdir/lib${APR_LIBNAME}.la"
+    LA_FILE="$APR_BUILD_DIR/lib${APR_LIBNAME}.la"
 fi
 
 flags=""
@@ -184,7 +162,7 @@ while test $# -gt 0; do
         flags="$APR_SOURCE_DIR/include"
     else
         # this is for VPATH builds
-        flags="$thisdir/include $APR_SOURCE_DIR/include"
+        flags="$APR_BUILD_DIR/include $APR_SOURCE_DIR/include"
     fi
     echo $flags
     exit 0
@@ -216,7 +194,7 @@ while test $# -gt 0; do
         flags="$flags -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
     else
         # this is for VPATH builds
-        flags="$flags -I$thisdir/include -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
+        flags="$flags -I$APR_BUILD_DIR/include -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
     fi
     ;;
     --srcdir)
@@ -230,7 +208,7 @@ while test $# -gt 0; do
         echo "$APR_SOURCE_DIR/build"
     else
         # this is for VPATH builds
-        echo "$thisdir/build"
+        echo "$APR_BUILD_DIR/build"
     fi
     exit 0
     ;;
@@ -243,7 +221,8 @@ while test $# -gt 0; do
         ### avoid using -L if libdir is a "standard" location like /usr/lib
         flags="$flags -L$libdir -l${APR_LIBNAME}"
     else
-        flags="$flags -L$thisdir -l${APR_LIBNAME}"
+        ### this surely can't work since the library is in .libs?
+        flags="$flags -L$APR_BUILD_DIR -l${APR_LIBNAME}"
     fi
     ;;
     --link-libtool)
@@ -281,7 +260,7 @@ while test $# -gt 0; do
     if test "$location" = "installed"; then
         echo "${installbuilddir}/libtool"
     else
-        echo "$thisdir/libtool"
+        echo "$APR_BUILD_DIR/libtool"
     fi
     exit 0
     ;;
