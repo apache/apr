@@ -72,6 +72,7 @@
  */
 #define IsLeapYear(y) ((!(y % 4)) ? (((!(y % 400)) && (y % 100)) ? 1 : 0) : 0)
 
+#if APR_HAS_UNICODE_FS
 static LPTIME_ZONE_INFORMATION GetLocalTimeZone()
 {
     static int init = 0;
@@ -83,6 +84,7 @@ static LPTIME_ZONE_INFORMATION GetLocalTimeZone()
     }
     return &tz;
 }
+#endif
 
 static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm)
 {
@@ -169,40 +171,85 @@ APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result,
 APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
                                           apr_time_t input)
 {
-    SYSTEMTIME st, localst;
+    SYSTEMTIME st;
     FILETIME ft, localft;
-    TIME_ZONE_INFORMATION *tz;
-    apr_time_t localtime;
 
-    tz = GetLocalTimeZone();
     AprTimeToFileTime(&ft, input);
-    FileTimeToSystemTime(&ft, &st);
 
-    /* The Platform SDK documents that SYSTEMTIME/FILETIME are
-     * generally UTC.  We use SystemTimeToTzSpecificLocalTime
-     * because FileTimeToLocalFileFime is documented that the
-     * resulting time local file time would have DST relative
-     * to the *present* date, not the date converted.
-     */
-    SystemTimeToTzSpecificLocalTime(tz, &st, &localst);
-    SystemTimeToAprExpTime(result, &localst);
-    result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+    {
+        SYSTEMTIME localst;
+        apr_time_t localtime;
+        TIME_ZONE_INFORMATION *tz;
 
-    /* Recover the resulting time as an apr time and use the
-     * delta for gmtoff in seconds (and ignore msec rounding) 
-     */
-    SystemTimeToFileTime(&localst, &localft);
-    FileTimeToAprTime(&localtime, &localft);
-    result->tm_gmtoff = (int)apr_time_sec(localtime) 
-                      - (int)apr_time_sec(input);
+        tz = GetLocalTimeZone();
 
-    /* To compute the dst flag, we compare the expected 
-     * local (standard) timezone bias to the delta.
-     * [Note, in war time or double daylight time the
-     * resulting tm_isdst is, desireably, 2 hours]
-     */
-    result->tm_isdst = (result->tm_gmtoff / 3600)
-                     - (-(tz->Bias + tz->StandardBias) / 60);
+        FileTimeToSystemTime(&ft, &st);
+
+        /* The Platform SDK documents that SYSTEMTIME/FILETIME are
+         * generally UTC.  We use SystemTimeToTzSpecificLocalTime
+         * because FileTimeToLocalFileFime is documented that the
+         * resulting time local file time would have DST relative
+         * to the *present* date, not the date converted.
+         */
+        SystemTimeToTzSpecificLocalTime(tz, &st, &localst);
+        SystemTimeToAprExpTime(result, &localst);
+        result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
+
+
+        /* Recover the resulting time as an apr time and use the
+         * delta for gmtoff in seconds (and ignore msec rounding) 
+         */
+        SystemTimeToFileTime(&localst, &localft);
+        FileTimeToAprTime(&localtime, &localft);
+        result->tm_gmtoff = (int)apr_time_sec(localtime) 
+                          - (int)apr_time_sec(input);
+
+        /* To compute the dst flag, we compare the expected 
+         * local (standard) timezone bias to the delta.
+         * [Note, in war time or double daylight time the
+         * resulting tm_isdst is, desireably, 2 hours]
+         */
+        result->tm_isdst = (result->tm_gmtoff / 3600)
+                         - (-(tz->Bias + tz->StandardBias) / 60);
+    }
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
+    {
+	TIME_ZONE_INFORMATION tz;
+
+	/* XXX: This code is simply *wrong*.  The time converted will always
+         * map to the *now current* status of daylight savings time.
+         */
+
+        FileTimeToLocalFileTime(&ft, &localft);
+        FileTimeToSystemTime(&localft, &st);
+        SystemTimeToAprExpTime(result, &st, 1);
+        result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
+
+        switch (GetTimeZoneInformation(&tz)) {   
+            case TIME_ZONE_ID_UNKNOWN:   
+                xt->tm_isdst = 0;   
+                /* Bias = UTC - local time in minutes   
+                 * tm_gmtoff is seconds east of UTC   
+                 */   
+                xt->tm_gmtoff = tz.Bias * -60;   
+                break;   
+            case TIME_ZONE_ID_STANDARD:   
+                xt->tm_isdst = 0;   
+                xt->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;   
+                break;   
+            case TIME_ZONE_ID_DAYLIGHT:   
+                xt->tm_isdst = 1;   
+                xt->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;   
+                break;   
+            default:   
+                /* noop */;
+        }   
+    }
+#endif
 
     return APR_SUCCESS;
 }
