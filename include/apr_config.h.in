@@ -247,6 +247,9 @@
 /* Define if you have the <sysgtime.h> header file.  */
 #undef HAVE_SYSGTIME_H
 
+/* Define if you have the <termios.h> header file.  */
+#undef HAVE_TERMIOS_H
+
 /* Define if you have the <time.h> header file.  */
 #undef HAVE_TIME_H
 
@@ -267,6 +270,9 @@
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
+
+/* Define if you have the kernel/OS.h header file (BEOS) */
+#undef HAVE_KERNEL_OS_H
 
 /* Define if you have the pthread library (-lpthread).  */
 #undef HAVE_LIBPTHREAD

@@ -163,7 +163,7 @@ ap_status_t ap_implode_time(struct atime_t *atime)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_time(ap_time_t *, ap_os_time_t *)
+ * ap_status_t ap_get_os_time(ap_time_t *, ap_os_time_t **)
  *    Convert from apr time type to OS specific time value
  * arg 1) The time value to convert.
  * arg 2) The OS specific value to convert to.

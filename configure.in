@@ -118,6 +118,7 @@ fi
 dnl Checks for header files.
 AC_HEADER_STDC
 
+AC_CHECK_HEADERS(conio.h)
 AC_CHECK_HEADERS(crypt.h)
 AC_CHECK_HEADERS(ctype.h)
 AC_CHECK_HEADERS(dir.h)
@@ -145,6 +146,7 @@ AC_CHECK_HEADERS(stdlib.h)
 AC_CHECK_HEADERS(string.h)
 AC_CHECK_HEADERS(sysapi.h)
 AC_CHECK_HEADERS(sysgtime.h)
+AC_CHECK_HEADERS(termios.h)
 AC_CHECK_HEADERS(time.h)
 AC_CHECK_HEADERS(sys/time.h)
 AC_CHECK_HEADERS(sys/times.h)
@@ -164,12 +166,14 @@ AC_CHECK_HEADERS(sys/mman.h)
 AC_CHECK_HEADERS(sys/param.h)
 AC_CHECK_HEADERS(sys/resource.h)
 AC_CHECK_HEADERS(sys/select.h)
+AC_CHECK_HEADERS(sys/signal.h)
 AC_CHECK_HEADERS(sys/socket.h)
 AC_CHECK_HEADERS(sys/stat.h)
 AC_CHECK_HEADERS(sys/types.h)
 AC_CHECK_HEADERS(sys/wait.h)
 
 AC_CHECK_HEADERS(pthread.h)
+AC_CHECK_HEADERS(kernel/OS.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -193,6 +197,8 @@ AC_MSG_RESULT([$msg])
 dnl Checks for library functions.
 AC_CHECK_FUNCS(strcasecmp stricmp poll setsid)
 AC_CHECK_FUNCS(sigaction writev)
+AC_CHECK_FUNC(getpass)
+AC_CHECK_FUNC(_getch)
 
 dnl Start building stuff from our information
 AC_SUBST(LDLIBS)
