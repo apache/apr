@@ -60,8 +60,8 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_global_mutex.h"
-#include "proc_mutex.h"
-#include "thread_mutex.h"
+#include "apr_arch_proc_mutex.h"
+#include "apr_arch_thread_mutex.h"
 
 struct apr_global_mutex_t {
     apr_pool_t *pool;

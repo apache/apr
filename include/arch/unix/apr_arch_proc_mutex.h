@@ -63,7 +63,7 @@
 #include "apr_pools.h"
 #include "apr_portable.h"
 #include "apr_file_io.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 
 /* System headers required by Locks library */
 #if APR_HAVE_SYS_TYPES_H
