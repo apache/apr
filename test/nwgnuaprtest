@@ -117,7 +117,7 @@ NLM_VERSION		= 1,0,0
 #
 # If this is specified, it will override the default of 64K
 #
-NLM_STACK_SIZE	= 
+NLM_STACK_SIZE	= 524288
 
 #
 # If this is specified it will be used by the link '-entry' directive
@@ -188,6 +188,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testpoll.o \
 	$(OBJDIR)/testpools.o \
 	$(OBJDIR)/testproc.o \
+	$(OBJDIR)/testprocmutex.o \
 	$(OBJDIR)/testrand.o \
 	$(OBJDIR)/testsleep.o \
 	$(OBJDIR)/testsockets.o \
