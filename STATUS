@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/15 01:25:05 $]
+Last modified at [$Date: 2002/07/15 04:27:38 $]
 
 Release:
 
@@ -58,130 +58,7 @@ RELEASE SHOWSTOPPERS:
 
 CURRENT VOTES:
 
-    * apr_time_t will change to use binary microseconds based on
-      profiling.  The last remaining question on the table is keeping
-      the apr_time_t designation, or changing the symbol name.
-
-      1) Keeping the existing apr_time_t names, in spite of confusion
-         with ANSI/C99 time_t's units, and prior decimal usec definition.
-         +1: rbb, jerenkrantz, striker, dreid, jim, jwoolley, brane
-         +0: wrowe [apr_types don't promise to map to C99/ANSI units]
-         +0: brianp
-         -1: aaron [veto for reusing the apr_time_t identifier for a new use]
-             fielding [if they don't map to system types, then don't mimic
-               the system types --- give me back all of my ap_time functions
-               that were converted to microsecond arguments even though none
-               of them do anything useful with microseconds. Confusion is
-               demonstrated by dozens of bug fixes since it was introduced.]
-             ianh [me too]
-
-      2) Renaming the function to get rid of apr_time_t vs time_t confusion,
-         but keep it ambigious and make no contract with the user about the
-         units represented.  Needs a better suggestion than apr_timeval_t.
-         +1: aaron, brianp, ianh,
-             fielding [prefers apr_utime_t and apr_utimediff_t (64bit)]
-	 +0.5: jim
-         -0: jerenkrantz, dreid
-         -0.5: rbb, jwoolley, striker, brane
-               wrowe [prefers apr_utime_t and apr_uspan_t where u==undefined]
-
-      3) Renaming the function to get rid of apr_time_t vs time_t confusion,
-         and strongly identify the type as apr_busec_t or apr_butime_t, with
-         an ongoing contract with users about the type's units.
-         +0.5: wrowe,  [prefers apr_time_busec_t and apr_span_busec_t]
-               brianp, [can live with apr_time_busec_t and apr_span_busec_t]
-               fielding [me too]
-         +0: brane
-         -0: jerenkrantz
-         -0.5: rbb, ianh, dreid, jim, jwoolley, striker
-
-      4) Using time_t and struct timeval/tm
-         +1: fielding (if apr_time is not an ADT)
-         -1: brianp, wrowe, jwoolley, brane
-
-      [fielding: Is APR time guaranteed to be a scalar quantity?  If so,
-       then we must include units as part of the definition of the
-       type in order to let developers make use of that quarantee.  
-       In that case, the units should be in the type name [e.g., apr_busec]
-
-      [brianp: I think that apr_time_t is really a "struct with an
-       compact representation that we can pass around easily and
-       add/subtract efficiently," rather than a scalar.  It's probably
-       worth noting that I look at it this way because it often is
-       populated from the struct timeval produced by gettimeofday().
-       Because I think of the scalar representation as an implementation
-       detail, rather than an feature of the time API, I'd prefer to
-       use a name that doesn't advertise the binary microseconds concept.
-       But I've changed my -1 on the binary microsecond name to a -0.5.]
-
-      [wrowe: deltas require NO definition of the scale.]
-
-        [fielding: That's nonsense. What does overflow mean?  What are you
-         going to do when you print?  How do you interface with other library
-         routines?  Scale always matters for scalars.]
-
-          [wrowe: We have apr_time formatting and math routines.
-           But I've always favored an explicit contract.]
-
-      [fielding: If not, then we should be storing time in a 
-       structure with separate fields in order to have better precision 
-       with less code.]
-
-      [wrowe: dean argued that away a very, very long time ago.  That is
-       a dead horse... compositing and breaking apart for each simple deltas 
-       (the most common case) is too costly.  Scalars are the only clean
-       answer - and you do not need to know scale to do addition/subtraction.]
-
-        [fielding: Dean argued that in general.  I argue that httpd never
-         does time arithmetic other than in seconds and second-comparisons.
-         Microseconds are therefore harmful to httpd.]
-       
-      [fielding: In any case, time_t ==> seconds because time_t is guaranteed
-       by POSIX to be a scalar quantity for arithmetic operations.
-       Saying that apr_time_t doesn't imply seconds is to ignore the
-       fact that all of those httpd functions used to create APR were
-       defined in terms of seconds and make no use of microseconds.
-       Meanwhile, the only reason we have this debate is 
-       because wrowe insists that time_t is 32 bits and therefore dies in 2038.
-       In fact, time_t is 64 bits on 64bit NT, Linux, OSF, and probably
-       others that I haven't checked.  In any case, since we use the
-       system's time_t time() function to get the time value everywhere
-       except Win32 w/SYSTEMTIME, we only ever have a resolution of
-       seconds or milliseconds.  So, why the hell are we storing usecs?
-
-           [brianp: This is incorrect.  We use gettimeofday() in place
-            of time.  It's faster than time(), and it gives us microseconds
-            in addition to seconds.  Why do you want to throw away the
-            microseconds?!!]
-
-              [fielding: Sorry, I missed them:
-                  86 calls to apr_time_now()
-                  32 calls to time()
-               +1 to making time consistent.]
-
-       We don't use them.  We don't even have display functions for them.
-       We have to do a stupid conversion every time we actually do something
-       useful with time in order to support somebody's wet dream of a
-       potentially useful feature?  That's crap!  This is exactly why
-       I hate portability libraries that aren't based on the demonstrated
-       needs of a specific application.]
-
-      [wrowe: 1. no, time_t is undefined.  Sometimes 32, sometimes 64 bits.
-       2. no, on 64 bit WinNT time_t remains 32 bits, as do all ints.
-       3. several apps include flood and ab require usec resolution.
-       4. Posix timeval structures use sec/usec resolution.]
-
-     [fielding: 1. POSIX requires it to be long, so largest native int.
-       2. Microsoft claims otherwise, but it is still vaporware anyway.
-       3. Benchmarks are meaningless unless they average over hundreds
-          of requests, which requires double floats (not time intervals).
-       4. POSIX always stores them as separate integers. +1 for that.]
-
-      [fielding; Cliff says he has a sample app.  I still don't know how
-       he uses them without making implementation assumptions about
-       apr_time_t everywhere (there is no print routine for microsecond
-       resolution), but I'll accept the need for microsecond resolution
-       in addition to second resolution.]
+    * None
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
