@@ -60,14 +60,14 @@ proc.o: proc.c threadproc.h ../../include/apr_thread_proc.h \
  ../../include/apr_file_io.h ../../include/apr_general.h \
  ../../include/apr_config.h ../../include/apr_errno.h \
  ../../include/apr_win.h ../../file_io/unix/fileio.h \
- $(INCDIR)/apr_lib.h $(INCDIR)/apr_config.h $(INCDIR)/hsregex.h \
+ ../../include/apr_lib.h ../../include/hsregex.h \
  ../../include/apr_portable.h ../../include/apr_network_io.h \
  ../../include/apr_lock.h ../../include/apr_time.h
 procsup.o: procsup.c threadproc.h ../../include/apr_thread_proc.h \
  ../../include/apr_file_io.h ../../include/apr_general.h \
  ../../include/apr_config.h ../../include/apr_errno.h \
  ../../include/apr_win.h ../../file_io/unix/fileio.h \
- $(INCDIR)/apr_config.h $(INCDIR)/apr_lib.h $(INCDIR)/hsregex.h
+ ../../include/apr_lib.h ../../include/hsregex.h
 signals.o: signals.c threadproc.h ../../include/apr_thread_proc.h \
  ../../include/apr_file_io.h ../../include/apr_general.h \
  ../../include/apr_config.h ../../include/apr_errno.h \

@@ -72,8 +72,12 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 #include "misc.h"
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 
 /*
  * Debugging support: Define this to enable code which helps detect re-use
@@ -1210,7 +1214,6 @@ API_EXPORT(int) ap_pcloseh(ap_pool_t *a, HANDLE hDevice)
  * since fclose() would flush I/O buffers, which is extremely undesirable;
  * we just close the descriptor.
  */
-/*
 static void file_cleanup(void *fpv)
 {
     fclose((FILE *) fpv);

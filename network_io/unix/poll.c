@@ -57,8 +57,12 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#ifdef HAVE_ERRNO_H
 #include <errno.h>
-#include <sys/poll.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
@@ -395,13 +399,13 @@ ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_in
 ap_status_t ap_remove_poll_socket(struct pollfd_t *aprset, 
                                   struct socket_t *sock, ap_int16_t events)
 {
-    if (event & APR_POLLIN) {
+    if (events & APR_POLLIN) {
         FD_CLR(sock->socketdes, aprset->read);
     }
-    if (event & APR_POLLPRI) {
+    if (events & APR_POLLPRI) {
         FD_CLR(sock->socketdes, aprset->read);
     }
-    if (event & APR_POLLOUT) {
+    if (events & APR_POLLOUT) {
         FD_CLR(sock->socketdes, aprset->write);
     }
     return APR_SUCCESS;

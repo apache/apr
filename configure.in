@@ -75,7 +75,7 @@ AC_DECISION_FORCE(USE_FCNTL_SERIALIZE)
 AC_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision) 
 
-AC_USE_FUNCTION(pthread_mutex_init, PTHREAD_SERIALIZE)
+AC_CHECK_LIB(pthread, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
 
 case "$OS" in
    *beos*)
@@ -144,6 +144,7 @@ AC_CHECK_HEADERS(sys/times.h)
 AC_CHECK_HEADERS(tpfeq.h)
 AC_CHECK_HEADERS(tpfio.h)
 AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(poll.h)
 AC_CHECK_HEADERS(unix.h)
 AC_CHECK_HEADERS(winsock.h)
 

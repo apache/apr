@@ -56,6 +56,5 @@ getopt.o: getopt.c misc.h ../../include/apr_general.h \
  ../../include/apr_file_io.h
 start.o: start.c ../../include/apr_general.h \
  ../../include/apr_config.h ../../include/apr_errno.h \
- ../../include/apr_pools.h $(INCDIR)/apr_lib.h \
- ../../include/apr_file_io.h $(INCDIR)/apr_config.h \
- $(INCDIR)/hsregex.h misc.h
+ $(INCDIR)/apr_pools.h ../../include/apr_lib.h \
+ ../../include/apr_file_io.h ../../include/hsregex.h misc.h
