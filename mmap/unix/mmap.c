@@ -143,6 +143,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (aid < B_NO_ERROR) {
         /* we failed to get an area we can use... */
+        *new = NULL;
         return APR_ENOMEM;
     }
 
@@ -163,6 +164,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
 
     if (mm == (void *)-1) {
         /* we failed to get an mmap'd file... */
+        *new = NULL;
         return errno;
     }
 #endif
