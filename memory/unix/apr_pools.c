@@ -1069,7 +1069,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 #if defined(APR_POOL_DEBUG_VERBOSE)
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: CLEAR  [%10lu/%10lu/%10lu] "
+            "POOL DEBUG: CLEAR   [%10lu/%10lu/%10lu] "
             "0x%08X \"%s\" [%s] (%u/%u/%u)\n",
             (unsigned long)apr_pool_num_bytes(pool, 0),
             (unsigned long)apr_pool_num_bytes(pool, 1),
@@ -1158,6 +1158,27 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->file_line = file_line;
     pool->creation_flags = flags;
 
+    if ((pool->parent = parent) != NULL) {
+#if APR_HAS_THREADS
+        if (parent->mutex)
+            apr_thread_mutex_lock(parent->mutex);
+#endif
+        if ((pool->sibling = parent->child) != NULL)
+            pool->sibling->ref = &pool->sibling;
+
+        parent->child = pool;
+        pool->ref = &parent->child;
+
+#if APR_HAS_THREADS
+        if (parent->mutex)
+            apr_thread_mutex_unlock(parent->mutex);
+#endif
+    }
+    else {
+        pool->sibling = NULL;
+        pool->ref = NULL;
+    }
+
     if ((flags & APR_POOL_FNEW_ALLOCATOR) == APR_POOL_FNEW_ALLOCATOR) {
 #if APR_HAS_THREADS
         apr_status_t rv;
@@ -1182,27 +1203,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         if (parent)
             pool->mutex = parent->mutex;
 #endif
-    }
-
-    if ((pool->parent = parent) != NULL) {
-#if APR_HAS_THREADS
-        if (parent->mutex)
-            apr_thread_mutex_lock(parent->mutex);
-#endif
-        if ((pool->sibling = parent->child) != NULL)
-            pool->sibling->ref = &pool->sibling;
-
-        parent->child = pool;
-        pool->ref = &parent->child;
-
-#if APR_HAS_THREADS
-        if (parent->mutex)
-            apr_thread_mutex_unlock(parent->mutex);
-#endif
-    }
-    else {
-        pool->sibling = NULL;
-        pool->ref = NULL;
     }
 
     *newpool = pool;
