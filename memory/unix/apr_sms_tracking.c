@@ -76,155 +76,133 @@ static const char *module_identity = "TRACKING";
  */
 
 /* INTERNALLY USED STRUCTURES */
-typedef struct apr_track_node_t
+typedef struct block_t
 {
-    struct apr_track_node_t  *next;
-    struct apr_track_node_t **ref;
-} apr_track_node_t;
+    struct block_t  *next;
+    struct block_t **ref;
+} block_t;
 
 typedef struct apr_sms_tracking_t
 {
-    apr_sms_t            header;
-    apr_track_node_t    *nodes;
-    apr_lock_t          *lock;
+    apr_sms_t   sms_hdr;
+    block_t    *blocks;
+    apr_lock_t *lock;
 } apr_sms_tracking_t;
 
-#define SMS_TRACKING_T(sms)  ((apr_sms_tracking_t *)(sms))
+#define SIZEOF_BLOCK_T        APR_ALIGN_DEFAULT(sizeof(block_t))
+#define SIZEOF_SMS_TRACKING_T APR_ALIGN_DEFAULT(sizeof(apr_sms_tracking_t))
 
-#define INSERT_NODE(node, tms) \
+#define BLOCK_T(sms)          ((block_t *)(mem))
+#define SMS_TRACKING_T(sms)   ((apr_sms_tracking_t *)(sms))
+
+#define INSERT_BLOCK(block, tms) \
     if (tms->lock) \
         apr_lock_acquire(tms->lock); \
     \
-    node->ref = &tms->nodes; \
-    if ((node->next = tms->nodes) != NULL) \
-        node->next->ref = &node->next; \
-    tms->nodes = node; \
+    block->ref = &tms->blocks; \
+    if ((block->next = tms->blocks) != NULL) \
+        block->next->ref = &block->next; \
+    tms->blocks = block; \
     \
     if (tms->lock) \
         apr_lock_release(tms->lock);
     
-#define REMOVE_NODE(node, tms) \
-        if (tms->lock) \
-            apr_lock_acquire(tms->lock); \
-        \
-        *(node->ref) = node->next; \
-        if ((*(node->ref) = node->next) != NULL) \
-            node->next->ref = node->ref; \
-        \
-        if (tms->lock) \
-            apr_lock_release(tms->lock);
+#define REMOVE_BLOCK(block, tms) \
+    if (tms->lock) \
+        apr_lock_acquire(tms->lock); \
+    \
+    *block->ref = block->next; \
+    if ((*block->ref = block->next) != NULL) \
+        block->next->ref = block->ref; \
+    \
+    if (tms->lock) \
+        apr_lock_release(tms->lock);
     
 static void *apr_sms_tracking_malloc(apr_sms_t *sms,
                                      apr_size_t size)
 {
-    apr_sms_tracking_t *tms;
-    apr_track_node_t *node;
+    void *mem;
 
-    node = apr_sms_malloc(sms->parent,
-                          size + sizeof(apr_track_node_t));
-    if (!node)
+    size = APR_ALIGN_DEFAULT(size) + SIZEOF_BLOCK_T;
+    mem = apr_sms_malloc(sms->parent, size);
+    if (!mem)
         return NULL;
 
-    tms = (apr_sms_tracking_t *)sms;
-
-    INSERT_NODE(node, tms)
+    INSERT_BLOCK(BLOCK_T(mem), SMS_TRACKING_T(sms))
     
-    node++;
+    mem = (char *)mem + SIZEOF_BLOCK_T;
 
-    return (void *)node;
+    return mem;
 }
 
 static void *apr_sms_tracking_calloc(apr_sms_t *sms, 
                                      apr_size_t size)
 {
-    apr_sms_tracking_t *tms;
-    apr_track_node_t *node;
-  
-    node = apr_sms_calloc(sms->parent,
-                          size + sizeof(apr_track_node_t));
-    if (!node)
+    void *mem;
+
+    size = APR_ALIGN_DEFAULT(size) + SIZEOF_BLOCK_T;
+    mem = apr_sms_calloc(sms->parent, size);
+    if (!mem)
         return NULL;
 
-    tms = (apr_sms_tracking_t *)sms;
+    INSERT_BLOCK(BLOCK_T(mem), SMS_TRACKING_T(sms))
+    
+    mem = (char *)mem + SIZEOF_BLOCK_T;
 
-    INSERT_NODE(node, tms)
-
-    node++;
-
-    return (void *)node;
+    return mem;
 }
 
 static void *apr_sms_tracking_realloc(apr_sms_t *sms,
                                       void *mem, apr_size_t size)
 {
-    apr_sms_tracking_t *tms;
-    apr_track_node_t *node;
+    block_t *block;
+    
+    block = BLOCK_T((char *)mem - SIZEOF_BLOCK_T);
 
-    tms = (apr_sms_tracking_t *)sms;
-    node = (apr_track_node_t *)mem;
+    REMOVE_BLOCK(block, SMS_TRACKING_T(sms))
 
-    if (node) {
-        node--;
-
-        REMOVE_NODE(node, tms)
-    }
-
-    node = apr_sms_realloc(sms->parent,
-                           node, size + sizeof(apr_track_node_t));
-    if (!node)
+    size = APR_ALIGN_DEFAULT(size) + SIZEOF_BLOCK_T;
+    mem = apr_sms_realloc(sms->parent, block, size);
+    if (!mem)
         return NULL;
 
-    INSERT_NODE(node, tms)
+    INSERT_BLOCK(BLOCK_T(mem), SMS_TRACKING_T(sms))
 
-    node++;
+    mem = (char *)mem + SIZEOF_BLOCK_T;
 
-    return (void *)node;
+    return mem;
 }
 
 static apr_status_t apr_sms_tracking_free(apr_sms_t *sms,
                                           void *mem)
 {
-    apr_track_node_t *node;
-    apr_sms_tracking_t *tms;
-   
-    node = (apr_track_node_t *)mem;
-    tms = (apr_sms_tracking_t *)sms;
+    mem = (char *)mem - SIZEOF_BLOCK_T; 
 
-    node--;
+    REMOVE_BLOCK(BLOCK_T(mem), SMS_TRACKING_T(sms));
 
-    REMOVE_NODE(node, tms);
-
-    return apr_sms_free(sms->parent, node);
+    return apr_sms_free(sms->parent, mem);
 }
 
 static apr_status_t apr_sms_tracking_reset(apr_sms_t *sms)
 {
-    apr_sms_tracking_t *tms;
-    apr_track_node_t *node;
-    apr_status_t rv;
+    block_t *block;
+    apr_status_t rv = APR_SUCCESS;
  
-    tms = (apr_sms_tracking_t *)sms;
-
-    if (tms->lock)
-        apr_lock_acquire(tms->lock);
+    if (SMS_TRACKING_T(sms)->lock)
+        apr_lock_acquire(SMS_TRACKING_T(sms)->lock);
     
-    while (tms->nodes) {
-        node = tms->nodes;
-        if ((*(node->ref) = node->next) != NULL)
-            node->next->ref = node->ref;
-        if ((rv = apr_sms_free(sms->parent, 
-                               node)) != APR_SUCCESS) {
-            if (tms->lock) {
-                apr_lock_release(tms->lock);
-            }
-            return rv;
-        }
+    while ((block = SMS_TRACKING_T(sms)->blocks) != NULL) {
+        if ((*block->ref = block->next) != NULL)
+            block->next->ref = block->ref;
+        
+        if ((rv = apr_sms_free(sms->parent, block)) != APR_SUCCESS)
+            break;
     }
     
-    if (tms->lock)
-        apr_lock_release(tms->lock);
+    if (SMS_TRACKING_T(sms)->lock)
+        apr_lock_release(SMS_TRACKING_T(sms)->lock);
 
-    return APR_SUCCESS;
+    return rv;
 }
 
 static apr_status_t apr_sms_tracking_pre_destroy(apr_sms_t *sms)
@@ -235,14 +213,11 @@ static apr_status_t apr_sms_tracking_pre_destroy(apr_sms_t *sms)
      * neccesarily be called.  To guarantee we destroy the lock it's therefore
      * destroyed here.
      */
-    apr_sms_tracking_t *tms;
  
-    tms = (apr_sms_tracking_t *)sms;
-
-    if (tms->lock) {
-        apr_lock_acquire(tms->lock);
-        apr_lock_destroy(tms->lock);
-        tms->lock = NULL;
+    if (SMS_TRACKING_T(sms)->lock) {
+        apr_lock_acquire(SMS_TRACKING_T(sms)->lock);
+        apr_lock_destroy(SMS_TRACKING_T(sms)->lock);
+        SMS_TRACKING_T(sms)->lock = NULL;
     }
     
     return APR_SUCCESS;    
@@ -281,7 +256,6 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms,
                                                   apr_sms_t *pms)
 {
     apr_sms_t *new_sms;
-    apr_sms_tracking_t *tms;
     apr_status_t rv;
 
     *sms = NULL;
@@ -289,7 +263,7 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms,
      * we allocate the memory for the structure from our parent.
      * This is safe as we shouldn't outlive our parent...
      */
-    new_sms = apr_sms_calloc(pms, sizeof(apr_sms_tracking_t));
+    new_sms = apr_sms_calloc(pms, SIZEOF_SMS_TRACKING_T);
 
     if (!new_sms)
         return APR_ENOMEM;
@@ -310,12 +284,8 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms,
 #endif /* APR_HAS_THREADS */
     new_sms->identity             = module_identity;
     
-    tms = (apr_sms_tracking_t *)new_sms;
-    tms->nodes = NULL;
-
     apr_sms_post_init(new_sms);
 
     *sms = new_sms;
     return APR_SUCCESS;
 }
-
