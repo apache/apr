@@ -126,6 +126,8 @@ struct ap_socket_t {
 #ifndef HAVE_POLL
     int connected;
 #endif
+    int local_port_unknown;
+    int local_interface_unknown;
 };
 
 struct ap_pollfd_t {
