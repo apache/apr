@@ -25,6 +25,7 @@ all: $(LIB)
 
 clean:
 	$(RM) -f *.o *.a *.so
+	cd mm; make clean; cd ..
 
 distclean: clean
 	-$(RM) -f Makefile
