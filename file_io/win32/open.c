@@ -67,14 +67,11 @@
 ap_status_t file_cleanup(void *thefile)
 {
     struct file_t *file = thefile;
-    if (CloseHandle(file->filehand)) {
-        file->filehand = INVALID_HANDLE_VALUE;
-        return APR_SUCCESS;
+    if (!CloseHandle(file->filehand)) {
+        return GetLastError();
     }
-    else {
-        return APR_EEXIST;
-	/* Are there any error conditions other than EINTR or EBADF? */
-    }
+    file->filehand = INVALID_HANDLE_VALUE;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_open(struct file_t **dafile, const char *fname, 
