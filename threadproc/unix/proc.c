@@ -362,37 +362,56 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
 }
 
 APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, 
-                                                  apr_wait_t *status,
+                                                  int *exitcode,
+                                                  apr_exit_why_e *exitwhy,
                                                   apr_wait_how_e waithow, 
                                                   apr_pool_t *p)
 {
     proc->pid = -1;
-    return apr_proc_wait(proc, status, waithow);
+    return apr_proc_wait(proc, exitcode, exitwhy, waithow);
 } 
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, 
-                                        apr_wait_t *exitcode,
+                                        int *exitcode, apr_exit_why_e *exitwhy,
                                         apr_wait_how_e waithow)
 {
     pid_t pstatus;
     int waitpid_options = WUNTRACED;
     int exit_int;
+    int ignore;
+    apr_exit_why_e ignorewhy;
+
+    if (exitcode == NULL) {
+        exitcode = &ignore;
+    }
+    if (exitwhy == NULL) {
+        exitwhy = &ignorewhy;
+    }
 
     if (waithow != APR_WAIT) {
         waitpid_options |= WNOHANG;
     }
     
     if ((pstatus = waitpid(proc->pid, &exit_int, waitpid_options)) > 0) {
-        if (proc->pid == -1) {
-            proc->pid = pstatus;
-        }
+        proc->pid = pstatus;
         if (WIFEXITED(exit_int)) {
-            if (exitcode != NULL) {
-                *exitcode = WEXITSTATUS(exit_int);
-            }
-            return APR_CHILD_DONE;
+            *exitwhy = APR_PROC_EXIT;
+            *exitcode = WEXITSTATUS(exit_int);
         }
-        return APR_CHILD_NOTDONE;
+        else if (WIFSIGNALED(exit_int)) {
+            *exitwhy = APR_PROC_SIGNAL;
+#ifdef WCOREDUMP
+            if (WCOREDUMP(exit_int)) {
+                *exitwhy |= APR_PROC_SIGNAL_CORE;
+            }
+#endif
+            *exitcode = WTERMSIG(exit_int);
+        }
+        else {
+            /* unexpected condition */
+            return APR_EGENERAL;
+        }
+        return APR_CHILD_DONE;
     }
     else if (pstatus == 0) {
         return APR_CHILD_NOTDONE;

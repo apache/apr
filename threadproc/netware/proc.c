@@ -372,8 +372,11 @@ apr_status_t apr_proc_create(apr_proc_t *new,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
-                              apr_wait_how_e waithow, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
+                                                  int *exitcode,
+                                                  apr_exit_why_e *exitwhy,
+                                                  apr_wait_how_e waithow,
+                                                  apr_pool_t *p)
 {
 #if 0
     int waitpid_options = WUNTRACED;
@@ -392,9 +395,9 @@ apr_status_t apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
     return errno;
 } 
 
-apr_status_t apr_proc_wait(apr_proc_t *proc, 
-                           apr_wait_t *exitcode,
-                           apr_wait_how_e waithow)
+APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
+                                        int *exitcode, apr_exit_why_e *exitwhy,
+                                        apr_wait_how_e waithow)
 {
 #if 0
     pid_t status;

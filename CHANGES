@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Re-vamp the apr_proc_wait and apr_proc_wait_all functions.  We
+     now return the exit code from the program and a reason that the
+     program died, either normal exit or signalled.
+     [Jeff Trawick and Ryan Bloom]
+
   *) Implement portable accessors for proc mutex. These are equivalent
      to apr_os_lock_get/set, but they work for apr_proc_mutex_t types
      instead.   [Aaron Bannert]

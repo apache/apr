@@ -81,6 +81,17 @@ extern "C" {
 
 typedef enum {APR_SHELLCMD, APR_PROGRAM} apr_cmdtype_e;
 typedef enum {APR_WAIT, APR_NOWAIT} apr_wait_how_e;
+/* I am specifically calling out the values so that the macros below make
+ * more sense.  Yes, I know I don't need to, but I am hoping this makes what
+ * I am doing more clear.  If you want to add more reasons to exit, continue
+ * to use bitmasks.
+ */
+typedef enum {APR_PROC_EXIT = 1, APR_PROC_SIGNAL = 2, 
+              APR_PROC_SIGNAL_CORE = 4} apr_exit_why_e;
+
+#define APR_PROC_CHECK_EXIT(x)        (x & APR_PROC_EXIT)
+#define APR_PROC_CHECK_SIGNALED(x)    (x & APR_PROC_SIGNAL)
+#define APR_PROC_CHECK_CORE_DUMP(x)   (x & APR_PROC_SIGNAL_CORE)
 
 #define APR_NO_PIPE          0
 #define APR_FULL_BLOCK       1
@@ -481,11 +492,17 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new_proc,
 /**
  * Wait for a child process to die
  * @param proc The process handle that corresponds to the desired child process 
- * @param exitcode The returned exit status of the child, if a child process
- *                 dies. On platforms that don't support obtaining this
- *                 information, the exitcode parameter will be returned as
- *                 APR_ENOTIMPL. This parameter may be NULL if the exit code
- *                 is not needed.
+ * @param exitcode The returned exit status of the child, if a child process 
+ *                 dies, or the signal that caused the child to die.
+ *                 On platforms that don't support obtaining this information, 
+ *                 the status parameter will be returned as APR_ENOTIMPL.
+ * @param exitwhy Why the child died, the bitwise or of:
+ * <PRE>
+ *            APR_PROC_EXIT         -- process terminated normally
+ *            APR_PROC_SIGNAL       -- process was killed by a signal
+ *            APR_PROC_SIGNAL_CORE  -- process was killed by a signal, and
+ *                                     generated a core dump.
+ * </PRE>
  * @param waithow How should we wait.  One of:
  * <PRE>
  *            APR_WAIT   -- block until the child process dies.
@@ -498,8 +515,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new_proc,
  *            APR_CHILD_NOTDONE  -- child is still running.
  * </PRE>
  */
-APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, 
-                                        apr_wait_t *exitcode,
+APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
+                                        int *exitcode, apr_exit_why_e *exitwhy,
                                         apr_wait_how_e waithow);
 
 /**
@@ -507,9 +524,17 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
  * about that child.
  * @param proc Pointer to NULL on entry, will be filled out with child's 
  *             information 
- * @param status The returned exit status of the child, if a child process dies
- *               On platforms that don't support obtaining this information, 
- *               the status parameter will be returned as APR_ENOTIMPL.
+ * @param exitcode The returned exit status of the child, if a child process 
+ *                 dies, or the signal that caused the child to die.
+ *                 On platforms that don't support obtaining this information, 
+ *                 the status parameter will be returned as APR_ENOTIMPL.
+ * @param exitwhy Why the child died, the bitwise or of:
+ * <PRE>
+ *            APR_PROC_EXIT         -- process terminated normally
+ *            APR_PROC_SIGNAL       -- process was killed by a signal
+ *            APR_PROC_SIGNAL_CORE  -- process was killed by a signal, and
+ *                                     generated a core dump.
+ * </PRE>
  * @param waithow How should we wait.  One of:
  * <PRE>
  *            APR_WAIT   -- block until the child process dies.
@@ -519,9 +544,10 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
  * @param p Pool to allocate child information out of.
  */
 APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
-                                             apr_wait_t *status,
-                                             apr_wait_how_e waithow,
-                                             apr_pool_t *p);
+                                                  int *exitcode,
+                                                  apr_exit_why_e *exitwhy,
+                                                  apr_wait_how_e waithow,
+                                                  apr_pool_t *p);
 
 /**
  * Detach the process from the controlling terminal.

@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     else printf( "Read failed.\n");
 
     TEST_NEQ("Waiting for child to die",
-             apr_proc_wait(&newproc, NULL, APR_WAIT),
+             apr_proc_wait(&newproc, NULL, NULL, APR_WAIT),
              APR_CHILD_DONE, "OK", "Failed")   
     STD_TEST_NEQ("Removing directory", apr_dir_remove("proctest", pool))
 
