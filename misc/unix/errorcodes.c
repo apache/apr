@@ -56,8 +56,9 @@
 
 #ifdef WIN32
 #error "not implemented yet"
-#elif OS/2
-#error "not implemented yet"
+#elif OS2
+const char *ap_os_strerror(int err, ap_pool_t *p);
+#define SYS_ERR_STRING(code, p) { errstr = ap_os_strerror(code, p); }
 #elif BEOS    
 #error "not implemented yet"
 #else
@@ -160,3 +161,45 @@ const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
         return errstr;
     }
 }
+
+
+
+#ifdef OS2
+#define INCL_DOS
+#include <os2.h>
+#include <ctype.h>
+
+const char *ap_os_strerror(int err, ap_pool_t *p)
+{
+  char result[200];
+  unsigned char message[HUGE_STRING_LEN];
+  ULONG len;
+  char *pos;
+  int c;
+  
+  if (err >= 10000 && err < 12000) {  /* socket error codes */
+      return strerror(ap_canonical_error(err+APR_OS_START_SYSERR));
+  } 
+  else if (DosGetMessage(NULL, 0, message, HUGE_STRING_LEN, err, "OSO001.MSG", &len) == 0) {
+      len--;
+      message[len] = 0;
+      pos = result;
+  
+      if (len >= sizeof(result))
+        len = sizeof(result-1);
+
+      for (c=0; c<len; c++) {
+          while (ap_isspace(message[c]) && ap_isspace(message[c+1])) /* skip multiple whitespace */
+              c++;
+          *(pos++) = ap_isspace(message[c]) ? ' ' : message[c];
+      }
+  
+      *pos = 0;
+  } 
+  else {
+      sprintf(result, "OS/2 error %d", err);
+  }
+  
+  return ap_pstrdup(p, result);
+}
+#endif
