@@ -434,7 +434,7 @@ static int client(client_socket_mode_t socket_mode)
 
         } while (total_bytes_sent < expected_len &&
                  (rv == APR_SUCCESS || 
-                  APR_STATUS_IS_EAGAIN(rv)));
+                 (APR_STATUS_IS_EAGAIN(rv) && socket_mode != TIMEOUT)));
         if (total_bytes_sent != expected_len) {
             fprintf(stderr,
                     "client problem: sent %ld of %ld bytes\n",
