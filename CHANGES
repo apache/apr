@@ -9,9 +9,23 @@ Changes with APR 1.0
      apr_allocator_set_mutex      -> apr_allocator_mutex_set
      apr_allocator_set_owner      -> apr_allocator_owner_set
      apr_bind                     -> apr_socket_bind
+     apr_compare_groups           -> apr_gid_compare
+     apr_compare_users            -> apr_uid_compare
      apr_connect                  -> apr_socket_connect
+     apr_current_userid           -> apr_uid_current
+     apr_explode_localtime        -> apr_time_exp_lt
+     apr_explode_time             -> apr_time_exp_tz
+     apr_filename_of_pathname     -> apr_filepath_name_get
      apr_getsocketopt             -> apr_socket_opt_get
+     apr_get_groupid              -> apr_gid_get
+     apr_get_groupname            -> apr_gid_name_get
+     apr_get_home_directory       -> apr_uid_homepath_get
+     apr_get_userid               -> apr_uid_get
+     apr_get_username             -> apr_uid_name_get
+     apr_group_name_get           -> apr_gid_name_get
+     apr_implode_gmt              -> apr_time_exp_gmt_get
      apr_listen                   -> apr_socket_listen
+     apr_lstat                    -> apr_stat
      apr_pool_get_abort           -> apr_pool_abort_get
      apr_pool_get_parent          -> apr_pool_parent_get
      apr_pool_set_abort           -> apr_pool_abort_set
@@ -28,7 +42,17 @@ Changes with APR 1.0
      apr_socket_create_ex         -> apr_socket_create
      apr_socket_set_inherit       -> apr_socket_inherit_set
      apr_socket_unset_inherit     -> apr_socket_inherit_unset
+     FNM_NOMATCH                  -> APR_FNM_NOMATCH
+     FNM_NOESCAPE                 -> APR_FNM_NOESCAPE
+     FNM_PATHNAME                 -> APR_FNM_PATHNAME
+     FNM_PERIOD                   -> APR_FNM_PERIOD
+     FNM_CASE_BLIND               -> APR_FNM_CASE_BLIND
      MAX_SECONDS_TO_LINGER        -> APR_MAX_SECONDS_TO_LINGER
+
+     The following interfaces have function argument changes:
+
+     apr_mmap_dup
+     apr_socket_create
 
 Changes with APR 0.9.4
 

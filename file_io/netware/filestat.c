@@ -383,15 +383,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
     }
 }
 
-/* Perhaps this becomes nothing but a macro?
- */
-APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
-                      apr_int32_t wanted, apr_pool_t *pool)
-{
-    return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, pool);
-}
-
-
 APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
                                               apr_time_t mtime,
                                               apr_pool_t *pool)

@@ -147,12 +147,6 @@ typedef int               apr_signum_t;
 #define APR_OFFSETOF(s_type,field) APR_OFFSET(s_type*,field)
 #endif
 
-/** @deprecated @see APR_OFFSET */
-#define APR_XtOffset APR_OFFSET
-
-/** @deprecated @see APR_OFFSETOF */
-#define APR_XtOffsetOf APR_OFFSETOF
-
 #ifndef DOXYGEN
 
 /* A couple of prototypes for functions in case some platform doesn't 

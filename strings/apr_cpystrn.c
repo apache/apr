@@ -250,12 +250,6 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname)
     return s ? ++s : pathname;
 }
 
-/* deprecated */
-APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname)
-{
-        return apr_filepath_name_get(pathname);
-}
-
 /* length of dest assumed >= length of src
  * collapse in place (src == dest) is legal.
  * returns terminating null ptr to dest string.

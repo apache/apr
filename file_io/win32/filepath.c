@@ -874,8 +874,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             }
             /* Null term for stat! */
             path[keptlen + seglen] = '\0';
-            if ((rv = apr_lstat(&finfo, path, 
-                                APR_FINFO_TYPE | APR_FINFO_NAME, p))
+            if ((rv = apr_stat(&finfo, path, 
+                               APR_FINFO_LINK | APR_FINFO_TYPE | APR_FINFO_NAME, p))
                 == APR_SUCCESS) {
                 apr_size_t namelen = strlen(finfo.name);
 
