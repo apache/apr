@@ -242,10 +242,6 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
 /**
  * Destroy a pollset object
  * @param pollset The pollset to destroy
- * @param descriptors An initial set of descriptors to add to the pollset
- *                    (may be NULL)
- * @param num The number of elements in the descriptors array
- * @param p The pool from which to allocate the pollset
  */
 APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset);
 
