@@ -38,6 +38,7 @@ LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
 CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
 readchild@EXEEXT@
+CLEAN_SUBDIRS = internal
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
