@@ -115,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
             os_handle = LoadLibraryEx(path, NULL, 0);
         SetErrorMode(em);
     }
-    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
 
     if(os_handle == NULL) {
         (*res_handle)->load_error = apr_get_os_error();
