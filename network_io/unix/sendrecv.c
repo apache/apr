@@ -100,6 +100,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
                 tv = NULL;
             }
             else {
+		/* XXX:  BUHHH? wow, what a memory leak! */
                 tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
                 tv->tv_sec  = sock->timeout;
                 tv->tv_usec = 0;
@@ -159,6 +160,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
                 tv = NULL;
             }
             else {
+		/* XXX:  BUHHH? wow, what a memory leak! */
                 tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
                 tv->tv_sec  = sock->timeout;
                 tv->tv_usec = 0;
@@ -225,6 +227,7 @@ ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
         	tv = NULL;
             }
             else {
+		/* XXX:  BUHHH? wow, what a memory leak! */
         	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
         	tv->tv_sec = sock->timeout;
         	tv->tv_usec = 0;
@@ -317,6 +320,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         	tv = NULL;
             }
             else {
+		/* XXX:  BUHHH? wow, what a memory leak! */
         	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
         	tv->tv_sec = sock->timeout;
         	tv->tv_usec = 0;
@@ -412,6 +416,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         	tv = NULL;
             }
             else {
+		/* XXX:  BUHHH? wow, what a memory leak! */
         	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
         	tv->tv_sec = sock->timeout;
         	tv->tv_usec = 0;
@@ -470,6 +475,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         headerlen += hdtr->headers[i].iov_len;
     }
 
+    /* XXX:  BUHHH? wow, what a memory leak! */
     headerbuf = ap_palloc(sock->cntxt, headerlen);
 
     for (i = 0; i < hdtr->numheaders; i++) {
@@ -482,6 +488,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         trailerlen += hdtr->headers[i].iov_len;
     }
 
+    /* XXX:  BUHHH? wow, what a memory leak! */
     trailerbuf = ap_palloc(sock->cntxt, trailerlen);
 
     for (i = 0; i < hdtr->numtrailers; i++) {
@@ -517,6 +524,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         	tv = NULL;
             }
             else {
+		/* XXX:  BUHHH? wow, what a memory leak! */
         	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
         	tv->tv_sec = sock->timeout;
         	tv->tv_usec = 0;
