@@ -186,8 +186,6 @@ APR_EXPORT(int) ap_rwmem_get_len(ap_bucket_rwmem *b);
 APR_EXPORT(int) ap_rwmem_write(ap_bucket_rwmem *b, const void *buf,
                                ap_size_t nbyte, ap_ssize_t *bytes_written);
 
-APR_EXPORT(int) ap_rwmem_vputs(ap_bucket_rwmem *b, va_list va);
-
 APR_EXPORT(int) ap_rwmem_vputstrs(ap_bucket_rwmem *b, va_list va);
 
 /*   ******  MMAP Functions  *****  */
@@ -232,8 +230,6 @@ APR_EXPORT(int) ap_rmem_get_len(ap_bucket_rmem *b);
 
 APR_EXPORT(int) ap_rmem_write(ap_bucket_rmem *b, const void *buf,
                                ap_size_t nbyte, ap_ssize_t *bytes_written);
-
-APR_EXPORT(int) ap_rmem_vputs(ap_bucket_rmem *b, va_list va);
 
 APR_EXPORT(int) ap_rmem_vputstrs(ap_bucket_rmem *b, va_list va);
 
