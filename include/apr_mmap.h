@@ -103,7 +103,7 @@ struct apr_mmap_t {
     /** The start of the memory mapped area */
     void *mm;
     /** The amount of data in the mmap */
-    apr_off_t size;
+    apr_size_t size;
 };
 
 #if APR_HAS_MMAP
