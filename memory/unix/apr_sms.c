@@ -69,13 +69,13 @@
 #ifdef APR_ASSERT_MEMORY
 #include <assert.h>
 #endif
-#if defined(APR_DEBUG_SHOW_STRUCTURE)
 #include <stdio.h>
-#endif
 
 #include <memory.h> /* strikerXXX: had to add this for windows to stop 
                      * complaining, please autoconf the include stuff
                      */
+
+FILE *dbg_file;
 
 /*
  * private structure defenitions
@@ -175,6 +175,13 @@ static int apr_sms_is_tracking(apr_sms_t *sms)
 APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms, 
                                        apr_sms_t *pms)
 {
+#if APR_DEBUG_TO_FILE
+    if (!dbg_file)
+        dbg_file = fopen(APR_DEBUG_FILE, "w");
+#else
+    dbg_file = stdout;
+#endif
+
     /* XXX - I've assumed that memory passed in will be zeroed,
      * i.e. calloc'd instead of malloc'd...
      * This may well be a bogus assumption, and if so we either need
@@ -248,12 +255,14 @@ APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms)
     /* Create the sms framework lock we'll use. */
     rv = apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_LOCKALL,
                          NULL, sms->pool);
-#if DEBUG_SHOW_FUNCTIONS
-    printf("CREATE - sms %p [%s] has been created\n", sms, sms->identity);
+
+#if APR_DEBUG_SHOW_FUNCTIONS
+    fprintf(dbg_file, "CREATE - sms %p [%s] has been created\n", 
+            sms, sms->identity);
 #endif
-#if DEBUG_SHOW_STRUCTURE
+#if APR_DEBUG_SHOW_STRUCTURE
     apr_sms_show_structure(sms, 1);
-#endif /* DEBUG_SHOW_STRUCTURE */
+#endif /* APR_DEBUG_SHOW_STRUCTURE */
 
     return rv;
 }
@@ -369,8 +378,13 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *sms)
     if (!sms->reset_fn)
         return APR_ENOTIMPL;
 
-#if DEBUG_SHOW_FUNCTIONS
-    printf("RESET - sms %p [%s] being reset\n", sms, sms->identity);
+#if APR_DEBUG_SHOW_FUNCTIONS
+# if APR_DEBUG_TAG_SMS
+    fprintf(dbg_file, "RESET - sms %p '%s' [%s] being reset\n", sms,
+            sms->tag, sms->identity);
+# else
+    fprintf(dbg_file, "RESET - sms %p [%s] being reset\n", sms, sms->identity);
+# endif
 #endif
 
     if (sms->sms_lock)
@@ -414,13 +428,14 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup *next_cleanup;
 
-#if DEBUG_SHOW_FUNCTIONS
-    printf("DESTROY - sms %p [%s] being destroyed\n", sms, sms->identity);
-#endif
-#if DEBUG_SHOW_STRUCTURE
-    printf("WARNING! Destroying this SMS will also destroy:\n");
+#if APR_DEBUG_SHOW_FUNCTIONS
+    fprintf(dbg_file, "DESTROY - sms %p [%s] being destroyed\n", 
+            sms, sms->identity);
+#endif /* APR_DEBUG_SHOW_FUNCTIONS */
+#if APR_DEBUG_SHOW_STRUCTURE
+    fprintf(dbg_file, "The following SMS will be destroyed by this action:\n");
     apr_sms_show_structure(sms, 0);
-#endif /* DEBUG_SHOW_STRUCTURE */
+#endif /* APR_DEBUG_SHOW_STRUCTURE */
 
     if (sms->sms_lock)
         apr_lock_acquire(sms->sms_lock);
@@ -775,21 +790,28 @@ APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms)
 }
 
 #if APR_DEBUG_SHOW_STRUCTURE
-static void add_sms(char *a, char *b, apr_sms_t *sms, apr_sms_t *caller,
-                    int sib)
+static void add_sms(char *a, char *b, char *c, apr_sms_t *sms, 
+                    apr_sms_t *caller, int sib)
 {
-    char tmp[20];
+    char tmp[40];
     if (sib == 1) {
         strcat(a, "=");
         strcat(b, " ");
+        strcat(c, " ");
     }
     sprintf(tmp, sms == caller ? "**%9p**" : " [%9p] ", sms);
     strcat(a, tmp);
-    sprintf(tmp, sms == caller ? " [%9s] " : " [%9s] ", sms->identity);
+#if APR_DEBUG_TAG_SMS
+    sprintf(tmp, " '%9s' ", sms->tag);
+#else
+    sprintf(tmp, "             ");
+#endif
     strcat(b, tmp);
+    sprintf(tmp, " [%9s] ", sms->identity);
+    strcat(c, tmp);
 }
 
-static void add_tab(char *a, char *b, int level, apr_sms_t *sms) 
+static void add_tab(char *a, char *b, char *c, int level, apr_sms_t *sms) 
 {
     char buffer[100];
     int i;
@@ -798,21 +820,30 @@ static void add_tab(char *a, char *b, int level, apr_sms_t *sms)
     buffer[i] = '\0';
     strcpy(a, buffer);
     strcpy(b, buffer);
+    strcpy(c, buffer);
     if (sms->parent)
-        printf("%s     |\n", buffer);
+        fprintf(dbg_file, "%s     |\n", buffer);
+    fflush(dbg_file);
 }
 
-static void print_structure(char *l1, char *l2)
+static void print_structure(char *l1, char *l2, char *l3)
 {
-    printf("%s\n%s\n", l1, l2);
+    fprintf(dbg_file, "%s\n%s\n%s\n", l1, l2, l3);
+    fflush(dbg_file);
+}
+
+static void print_depth(int levels)
+{
+    fprintf(dbg_file, "Showing %d level%s of SMS\n", levels + 1,
+            levels == 0 ? "" : "s");
 }
 
 APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction)
 {
     apr_sms_t *thesms, *sibling;
     int levels = 0, i = 0;
-    char l1[100], l2[100];
- 
+    char l1[256], l2[256], l3[256];
+    
     if (direction == 1) {
         /* we're going up! */
         thesms = sms;
@@ -820,23 +851,19 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction)
             levels++;
             thesms = thesms->parent;
         }
-        if (levels == 0) {
-            printf("The SMS is a top-level SMS.\n");
-        } else {
-            printf("The SMS is %d level(s) deep!\n", levels);
-        }
+        print_depth(levels);
         /* thesms now eqauls the top level... so start showing them! */
         while (thesms) {
-            add_tab(l1, l2, i++, thesms);
+            add_tab(l1, l2, l3, i++, thesms);
 
-            add_sms(l1, l2, thesms, sms, 0);
+            add_sms(l1, l2, l3, thesms, sms, 0);
             
             sibling = thesms->sibling;
             while (sibling) {
-                add_sms(l1, l2, sibling, NULL, 1);
+                add_sms(l1, l2, l3, sibling, NULL, 1);
                 sibling = sibling->sibling;
             }
-            print_structure(l1, l2);
+            print_structure(l1, l2, l3);
 
             thesms = thesms->child;
         }
@@ -847,25 +874,25 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction)
             levels++;
             thesms = thesms->child;
         }
-        if (levels == 0) {
-            printf("The SMS is a bottom-level SMS with no descendants\n");
-        } else {
-            printf("This SMS has %d descendants\n", levels);
-        }
+        print_depth(levels);
         thesms = sms;
         while (thesms) {
-            add_tab(l1, l2, i++, thesms);
+            add_tab(l1, l2, l3, i++, thesms);
 
             /* add the child... */
-            add_sms(l1, l2, thesms, sms, 0);
-
-            /* add siblings... */
-            sibling = thesms->sibling;
-            while (sibling != NULL) {
-                add_sms(l1, l2, sibling, sms, 1);
-                sibling = sibling->sibling;
+            add_sms(l1, l2, l3, thesms, sms, 0);
+            /* If we're destroying a sibling, then we won't be destroying
+             * the other siblings, just descendants of this SMS, so
+             * make sure what we show makes sense!
+             */
+            if (thesms != sms && thesms->sibling) {
+                sibling = thesms->sibling;
+                while (sibling) {
+                    add_sms(l1, l2, l3, sibling, NULL, 1);
+                    sibling = sibling->sibling;
+                }
             }
-            print_structure(l1, l2);
+            print_structure(l1, l2, l3);
             thesms = thesms->child;
         }
     }
