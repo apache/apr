@@ -139,7 +139,16 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
 
     memset(finfo,'\0', sizeof(*finfo));
 
-    if (!ap_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
+	/* We need to catch the case where fname length == MAX_PATH since for
+	 * some strange reason GetFileAttributesEx fails with PATH_NOT_FOUND.
+	 * We would rather indicate length error than 'not found'
+	 * since in many cases the apr user is testing for 'not found' 
+	 * and this is not such a case.
+	 */
+    if (strlen(fname) >= MAX_PATH) {
+        rv = ERROR_FILENAME_EXCED_RANGE;
+    }
+    else if (!ap_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
         if (!GetFileAttributesEx(fname, GetFileExInfoStandard, 
                                  (WIN32_FILE_ATTRIBUTE_DATA*) &FileInformation)) {
             rv = GetLastError();
