@@ -91,6 +91,7 @@ Known values for OPTION are:
   --srcdir          print APR source directory
   --link-ld         print link switch(es) for linking to APR
   --link-libtool    print the libtool inputs for linking to APR
+  --shlib-path-var  print the name of the shard library path env var
   --apr-la-file     print the path to the .la file, if available
   --apr-so-ext      print the extensions of shared objects on this platform
   --apr-lib-target  print the libtool target information
@@ -197,6 +198,10 @@ while test $# -gt 0; do
     else
         flags="$flags $LA_FILE"
     fi
+    ;;
+    --shlib-path-var)
+    echo "$SHLIBPATH_VAR"
+    exit 0
     ;;
     --apr-la-file)
     if test -f "$LA_FILE"; then
