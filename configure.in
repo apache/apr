@@ -170,6 +170,17 @@ nl='
 '
 echo $ac_n "${nl}Check for compiler flags...${nl}"
 
+dnl AC_PROG_CC unconditionally sets -g in CFLAGS.
+dnl On OS/390 (at least), this causes the compiler to insert extra debugger
+dnl hook instructions.  That's fine for debug/maintainer builds, not fine
+dnl otherwise.
+
+case $host in
+    *os390)
+        APR_REMOVEFROM(CFLAGS,-g)
+        ;;
+esac
+
 AC_ARG_ENABLE(debug,[  --enable-debug          Turn on debugging and compile time warnings],
   [APR_ADDTO(CFLAGS,-g)
    if test "$GCC" = "yes"; then
