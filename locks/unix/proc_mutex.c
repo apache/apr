@@ -877,6 +877,18 @@ APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
     return mutex->meth->name;
 }
 
+APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
+{
+    /* posix sems use the fname field but don't use a file,
+     * so be careful 
+     */
+    if (!strcmp(mutex->meth->name, "flock") ||
+        !strcmp(mutex->meth->name, "fcntl")) {
+        return mutex->fname;
+    }
+    return NULL;
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 
 /* Implement OS-specific accessors defined in apr_portable.h */

@@ -171,6 +171,13 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex);
 APR_DECLARE(apr_status_t) apr_proc_mutex_cleanup(void *mutex);
 
 /**
+ * Return the name of the lockfile for the mutex, or NULL
+ * if the mutex doesn't use a lock file
+ */
+
+APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex);
+
+/**
  * Display the name of the mutex, as it relates to the actual method used.
  * This matches the valid options for Apache's AcceptMutex directive
  * @param mutex the name of the mutex

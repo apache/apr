@@ -120,6 +120,11 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return APR_ENOLOCK;
 }
 
+APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
+{
+    return NULL;
+}
+
 APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
 {
     return "netwarethread";
