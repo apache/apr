@@ -58,12 +58,12 @@
 #include "apr.h"
 #include "apr_sms.h"
 
-#if APR_HAS_THREADS
- 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#if APR_HAS_THREADS
+ 
 /**
  * @package APR threads memory system
  */
