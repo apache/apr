@@ -127,7 +127,7 @@ struct ap_finfo_t {
 /*   Function definitions */
 /*
 
-=head1 ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag, ap_fileperms_t perm, ap_pool_t *cont)
+=head1 ap_status_t ap_open(ap_file_t **new_file, const char *fname, ap_int32_t flag, ap_fileperms_t perm, ap_pool_t *cont)
 
 B<Open the specified file.>
 
@@ -153,7 +153,7 @@ B<NOTE>:  If perm is APR_OS_DEFAULT and the file is being created, appropriate
 
 =cut
  */
-ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag, 
+ap_status_t ap_open(ap_file_t **new_file, const char *fname, ap_int32_t flag, 
                     ap_fileperms_t perm, ap_pool_t *cont);
 
 /*
@@ -461,7 +461,7 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where,ap_off_t *offset);
 
 /*
 
-=head1 ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
+=head1 ap_status_t ap_opendir(ap_dir_t **new_dir, const char *dirname, ap_pool_t *cont)
 
 B<Open the specified directory.>
 
@@ -471,7 +471,7 @@ B<Open the specified directory.>
 
 =cut
  */                        
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont);
+ap_status_t ap_opendir(ap_dir_t **new_dir, const char *dirname, ap_pool_t *cont);
 
 /*
 
@@ -598,7 +598,7 @@ ap_status_t ap_block_pipe(ap_file_t *thepipe);
 
 /*
 
-=head1 ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
+=head1 ap_status_t ap_get_filename(char **new_path, ap_file_t *thefile)
 
 B<return the file name of the current file.>
 
@@ -607,11 +607,11 @@ B<return the file name of the current file.>
 
 =cut
  */                     
-ap_status_t ap_get_filename(char **new, ap_file_t *thefile);
+ap_status_t ap_get_filename(char **new_path, ap_file_t *thefile);
 
 /*
 
-=head1 ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir) 
+=head1 ap_status_t ap_get_dir_filename(char **new_path, ap_dir_t *thedir) 
 
 B<Get the file name of the current directory entry.>
 
@@ -620,7 +620,7 @@ B<Get the file name of the current directory entry.>
 
 =cut
  */                        
-ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir);
+ap_status_t ap_get_dir_filename(char **new_path, ap_dir_t *thedir);
 
 /*
 

@@ -139,7 +139,7 @@ struct ap_hdtr_t {
 
 /*
 
-=head1 ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
+=head1 ap_status_t ap_create_tcp_socket(ap_socket_t **new_sock, ap_pool_t *cont)
 
 B<Create a socket for tcp communication.>
 
@@ -148,7 +148,7 @@ B<Create a socket for tcp communication.>
 
 =cut
  */
-ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont);
+ap_status_t ap_create_tcp_socket(ap_socket_t **new_sock, ap_pool_t *cont);
 
 /*
 
@@ -213,7 +213,7 @@ ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog);
 
 /*
 
-=head1 ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connection_pool)
+=head1 ap_status_t ap_accept(ap_socket_t **new_sock, ap_socket_t *sock, ap_pool_t *connection_pool)
 
 B<Accept a new connection request>
 
@@ -225,7 +225,7 @@ B<Accept a new connection request>
 
 =cut
  */
-ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, 
+ap_status_t ap_accept(ap_socket_t **new_sock, const ap_socket_t *sock, 
                       ap_pool_t *connection_pool);
 
 /*
@@ -591,7 +591,7 @@ ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *soc
 
 /*
 
-=head1 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
+=head1 ap_status_t ap_setup_poll(ap_pollfd_t **new_poll, ap_int32_t num, ap_pool_t *cont)
 
 B<Setup the memory required for poll to operate properly.>
 
@@ -601,7 +601,7 @@ B<Setup the memory required for poll to operate properly.>
 
 =cut
  */
-ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, 
+ap_status_t ap_setup_poll(ap_pollfd_t **new_poll, ap_int32_t num, 
                           ap_pool_t *cont);
 
 /*
