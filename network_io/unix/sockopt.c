@@ -283,13 +283,14 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
     case APR_IPV6_V6ONLY:
 #if APR_HAVE_IPV6 && defined(IPV6_V6ONLY)
         /* we don't know the initial setting of this option,
-         * so don't check/set sock->options since that optimization
+         * so don't check sock->options since that optimization
          * won't work
          */
         if (setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_V6ONLY,
                        (void *)&on, sizeof(int)) == -1) {
             return errno;
         }
+        apr_set_option(sock, APR_IPV6_V6ONLY, on);
 #else
         return APR_ENOTIMPL;
 #endif
