@@ -184,9 +184,8 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
  * for the elements to be copied if (and only if) the code subsequently does 
  * a push or arraycat.
  */
-APR_DECLARE(apr_array_header_t *) 
-                apr_array_copy(struct apr_pool_t *p,
-                               const apr_array_header_t *arr);
+APR_DECLARE(apr_array_header_t *) apr_array_copy(struct apr_pool_t *p,
+                                      const apr_array_header_t *arr);
 /**
  * Copy the headers of the array, and arrange for the elements to be copied if
  * and only if the code subsequently does a push or arraycat.
@@ -196,9 +195,8 @@ APR_DECLARE(apr_array_header_t *)
  * @deffunc apr_array_header_t *apr_array_copy_hdr(apr_pool_t *p, const apr_array_header_t *arr)
  * @tip The alternate apr_array_copy copies the *entire* array.
  */
-APR_DECLARE(apr_array_header_t *)
-                apr_array_copy_hdr(struct apr_pool_t *p,
-                                   const apr_array_header_t *arr);
+APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(struct apr_pool_t *p,
+                                      const apr_array_header_t *arr);
 
 /**
  * Append one array to the end of another, creating a new array in the process.
@@ -208,10 +206,9 @@ APR_DECLARE(apr_array_header_t *)
  * @param return A new array containing the data from the two arrays passed in.
  * @deffunc apr_array_header_t *apr_array_append(apr_pool_t *p, const apr_array_header_t *first, const apr_array_header_t *second)
 */
-APR_DECLARE(apr_array_header_t *)
-                apr_array_append(struct apr_pool_t *p,
-                                  const apr_array_header_t *first,
-                                  const apr_array_header_t *second);
+APR_DECLARE(apr_array_header_t *) apr_array_append(struct apr_pool_t *p,
+                                      const apr_array_header_t *first,
+                                      const apr_array_header_t *second);
 
 /**
  * Generates a new string from the apr_pool_t containing the concatenated 
@@ -378,8 +375,7 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(struct apr_pool_t *p,
  *            are run.
  * @deffunc void apr_table_do(int (*comp) (void *, const char *, const char *), void *rec, const apr_table_t *t, ...)
  */
-APR_DECLARE_NONSTD(void)
-                apr_table_do(int (*comp) (void *, const char *, const char *),
+APR_DECLARE_NONSTD(void) apr_table_do(int (*comp)(void *, const char *, const char *),
                              void *rec, const apr_table_t *t, ...);
 
 /** 
@@ -396,9 +392,8 @@ APR_DECLARE_NONSTD(void)
  *                whose key matches are run.
  * @deffunc void apr_table_vdo(int (*comp) (void *, const char *, const char *), void *rec, const apr_table_t *t, va_list vp)
  */
-APR_DECLARE(void)
-                apr_table_vdo(int (*comp) (void *, const char *, const char *),
-                              void *rec, const apr_table_t *t, va_list);                  
+APR_DECLARE(void) apr_table_vdo(int (*comp)(void *, const char *, const char *),
+                                void *rec, const apr_table_t *t, va_list);
 
 /* Conceptually, apr_table_overlap does this:
  *
