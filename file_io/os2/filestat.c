@@ -150,7 +150,7 @@ apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
 
 
 apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
-                      apr_int32_wanted, apr_pool_t *cont)
+                      apr_int32_t wanted, apr_pool_t *cont)
 {
     ULONG rc;
     FILESTATUS3 fstatus;
@@ -179,7 +179,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
 
 
 apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname,
-                       apr_int32_wanted, apr_pool_t *cont)
+                       apr_int32_t wanted, apr_pool_t *cont)
 {
     return apr_stat(finfo, fname, wanted, cont);
 }
