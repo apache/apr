@@ -54,17 +54,6 @@
 
 #include "networkio.h"
 
-/* BeOS needs to use send/recv for socket I/O, this allows us to do that
- * with minimal changes in the code.
- */
-#ifdef BEOS
-#define WRITE(x,y,z)  send(x,y,z,0)
-#define READ(x,y,z)   recv(x,y,z,0)
-#else
-#define WRITE(x,y,z)  write(x,y,z)
-#define READ(x,y,z)   read(x,y,z)
-#endif
-
 #if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the apr_file_t internals. */
 #include "../../file_io/unix/fileio.h"
@@ -117,11 +106,11 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
     ssize_t rv;
     
     do {
-        rv = WRITE(sock->socketdes, buf, (*len));
+        rv = write(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
-        && sock->timeout != 0) {
+      && sock->timeout != 0) {
         apr_status_t arv = wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -129,13 +118,13 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
         }
         else {
             do {
-                rv = WRITE(sock->socketdes, buf, (*len));
+                rv = write(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
         }
     }
     if (rv == -1) {
-	*len = 0;
-	return errno;
+        *len = 0;
+        return errno;
     }
     (*len) = rv;
     return APR_SUCCESS;
@@ -146,20 +135,19 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
     ssize_t rv;
     
     do {
-        rv = READ(sock->socketdes, buf, (*len));
+        rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && 
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        sock->timeout != 0) {
-	apr_status_t arv = wait_for_io_or_timeout(sock, 1);
-	if (arv != APR_SUCCESS) {
-	    *len = 0;
-	    return arv;
-	}
+    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
+      sock->timeout != 0) {
+        apr_status_t arv = wait_for_io_or_timeout(sock, 1);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
         else {
             do {
-                rv = READ(sock->socketdes, buf, (*len));
+                rv = read(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
         }
     }
@@ -181,23 +169,22 @@ apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
         rv = writev(sock->socketdes, vec, nvec);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && 
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        sock->timeout != 0) {
-	apr_status_t arv = wait_for_io_or_timeout(sock, 0);
-	if (arv != APR_SUCCESS) {
-	    *len = 0;
-	    return arv;
-	}
+    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
+      sock->timeout != 0) {
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
         else {
             do {
-        	rv = writev(sock->socketdes, vec, nvec);
+                rv = writev(sock->socketdes, vec, nvec);
             } while (rv == -1 && errno == EINTR);
         }
     }
     if (rv == -1) {
-	*len = 0;
-	return errno;
+        *len = 0;
+        return errno;
     }
     (*len) = rv;
     return APR_SUCCESS;
