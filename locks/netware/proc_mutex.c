@@ -54,44 +54,65 @@
 
 #include "apr.h"
 #include "apr_private.h"
-#include "apr_general.h"
-#include "apr_strings.h"
-#include "proc_mutex.h"
 #include "apr_portable.h"
+#include "proc_mutex.h"
+#include "thread_mutex.h"
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 const char *fname,
                                                 apr_lockmech_e mech,
                                                 apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    apr_status_t ret;
+    apr_proc_mutex_t *new_mutex = NULL;
+    new_mutex = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
+	
+	if(new_mutex ==NULL) {
+        return APR_ENOMEM;
+    }     
+    
+    new_mutex->pool = pool;
+    ret = apr_thread_mutex_create(&(new_mutex->mutex), APR_THREAD_MUTEX_DEFAULT, pool);
+
+    if (ret == APR_SUCCESS)
+        *mutex = new_mutex;
+
+    return ret;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
                                                     const char *fname,
                                                     apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    return APR_SUCCESS;
 }
     
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    if (mutex)
+        return apr_thread_mutex_lock(mutex->mutex);
+    return APR_ENOLOCK;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    if (mutex)
+        return apr_thread_mutex_trylock(mutex->mutex);
+    return APR_ENOLOCK;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    if (mutex)
+        return apr_thread_mutex_unlock(mutex->mutex);
+    return APR_ENOLOCK;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    if (mutex)
+        return apr_thread_mutex_destroy(mutex->mutex);
+    return APR_ENOLOCK;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
@@ -101,7 +122,9 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 apr_status_t apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
                                    apr_proc_mutex_t *pmutex)
 {
-    return APR_ENOTIMPL;
+    if (pmutex)
+        ospmutex = pmutex->mutex->mutex;
+    return APR_ENOLOCK;
 }
 
 apr_status_t apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
