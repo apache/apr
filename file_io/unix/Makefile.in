@@ -14,6 +14,7 @@ OBJS=dir.o \
 	fileacc.o \
 	filedup.o \
 	filestat.o \
+	flock.o \
 	fullrw.o \
 	open.o \
 	pipe.o \
