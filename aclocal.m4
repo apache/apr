@@ -273,6 +273,5 @@ if test -n "$USE_MM" && test -n "$USE_VPATH"; then
 fi
 ])
 
-sinclude(threads.m4)
 sinclude(apr_common.m4)
 sinclude(hints.m4)
