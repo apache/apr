@@ -197,7 +197,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         return APR_SUCCESS;
 
 #elif APR_USE_SHMEM_MMAP_ANON
-        new_m->base = mmap(NULL, reqsize, PROT_READ|PROT_WRITE,
+        new_m->base = mmap(NULL, new_m->realsize, PROT_READ|PROT_WRITE,
                            MAP_ANON|MAP_SHARED, -1, 0);
         if (new_m->base == MAP_FAILED) {
             return errno;
