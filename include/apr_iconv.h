@@ -70,7 +70,7 @@ typedef void                         ap_iconv_t;
 /* For platforms where we don't bother with translating between codepages
  */
 
-#define ap_codepage_open(convset, topage, frompage, context) 
+#define ap_codepage_open(convset, topage, frompage, pool) 
 #define ap_translate_codepage(convset, inbuf, inbytes_left, outbuf, \
                               outbytes_left) outbuf=inbuf;
 /* The purpose of ap_translate char is to translate one character
@@ -85,7 +85,7 @@ typedef void                         ap_iconv_t;
 typedef struct ap_iconv_t            ap_iconv_t;
 
 void ap_codepage_open(ap_iconv_t **convset, const char *topage, 
-                         const char *frompage, ap_pool_t *context); 
+                         const char *frompage, ap_pool_t *pool); 
 void ap_translate_codepage(ap_iconv_t *convset, const char *inbuf, 
                               ap_size_t inbytes_left, const char *outbuf,
                               ap_size_t outbytes_left);

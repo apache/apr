@@ -212,13 +212,18 @@ typedef int               ap_signum_t;
 #endif
 
 #if APR_HAS_RANDOM
-/* ***APRDOC********************************************************
- * TODO: I'm not sure this is the best place to put this prototype...
- * ap_status_t ap_generate_random_bytes(unsigned char * buf, int length)
- *    Generate a string of random bytes.
- * arg 1) Random bytes go here
- * arg 2) size of the buffer
+/*
+
+=head1 ap_status_t ap_generate_random_bytes(unsigned char * buf, int length)
+
+B<Generate a string of random bytes.>
+
+    arg 1) Random bytes go here
+    arg 2) size of the buffer
+
+=cut
  */
+/* TODO: I'm not sure this is the best place to put this prototype...*/
 ap_status_t ap_generate_random_bytes(unsigned char * buf, int length);
 #endif
 
@@ -242,83 +247,113 @@ typedef struct ap_pool_t {
     struct datastruct *prog_data;
 }ap_pool_t;
  
-/* Context functions */
-/* ***APRDOC********************************************************
- * ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
- *    Create a new context.
- * arg 1) The context we have just created.
- * arg 2) The parent context.  If this is NULL, the new context is a root
- *        context.  If it is non-NULL, the new context will inherit all
- *        of it's parent context's attributes, except the ap_context_t will be a
- *        sub-pool.
+/* pool functions */
+/*
+
+=head1 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
+
+B<Create a new pool.>
+
+    arg 1) The pool we have just created.
+    arg 2) The parent pool.  If this is NULL, the new pool is a root
+           pool.  If it is non-NULL, the new pool will inherit all
+           of it's parent pool's attributes, except the ap_pool_t will 
+           be a sub-pool.
+
+=cut
  */
 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_destroy_context(ap_context_t *cont)
- *    Free the context and all of it's child contexts'.
- * arg 1) The context to free.
+/*
+
+=head1 ap_status_t ap_destroy_pool(ap_pool_t *cont)
+
+B<Free the pool and all of it's child pools'.>
+
+    arg 1) The pool to free.
+
+=cut
  */
-ap_status_t ap_destroy_context(ap_pool_t *cont);
 
 ap_status_t ap_exit(ap_pool_t *);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_userdata(void *data, char *key, 
- *                             ap_status_t (*cleanup) (void *),
- *                             ap_context_t *cont)
- *    Set the data associated with the current context.
- * arg 1) The user data associated with the context.
- * arg 2) The key to use for association
- * arg 3) The cleanup program to use to cleanup the data;
- * arg 4) The current context.
- * NOTE:  The data to be attached to the context should have the same
- *        life span as the context it is being attached to.
- *        
- *        Users of APR must take EXTREME care when choosing a key to
- *        use for their data.  It is possible to accidentally overwrite
- *        data by choosing a key that another part of the program is using
- *        It is advised that steps are taken to ensure that a unique
- *        key is used at all times.
+/*
+
+=head1 ap_status_t ap_set_userdata(void *data, char *key, ap_status_t (*cleanup) (void *), ap_pool_t *cont)
+
+B<Set the data associated with the current pool>.
+
+    arg 1) The user data associated with the pool.
+    arg 2) The key to use for association
+    arg 3) The cleanup program to use to cleanup the data;
+    arg 4) The current pool.
+
+B<NOTE>:  The data to be attached to the pool should have the same
+          life span as the pool it is being attached to.
+          
+          Users of APR must take EXTREME care when choosing a key to
+          use for their data.  It is possible to accidentally overwrite
+          data by choosing a key that another part of the program is using
+          It is advised that steps are taken to ensure that a unique
+          key is used at all times.
+
+=cut
  */
 ap_status_t ap_set_userdata(void *data, char *key, 
                             ap_status_t (*cleanup) (void *), 
                             ap_pool_t *cont);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
- *    Return the data associated with the current context.
- * arg 1) The key for the data to retrieve
- * arg 2) The user data associated with the context.
- * arg 3) The current context.
+/*
+
+=head1 ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
+
+B<Return the data associated with the current pool.>
+
+    arg 1) The key for the data to retrieve
+    arg 2) The user data associated with the pool.
+    arg 3) The current pool.
+
+=cut
  */
 ap_status_t ap_get_userdata(void **, char *key, ap_pool_t *cont);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_initialize(void)
- *    Setup any APR internal data structures.  This MUST be the first
- *    function called for any APR program.
+/*
+
+=head1 ap_status_t ap_initialize(void)
+
+B<Setup any APR internal data structures.  This MUST be the first function called for any APR program.>
+
+=cut
  */
 ap_status_t ap_initialize(void);
 
-/* ***APRDOC*******************************************************
- * void ap_terminate(void)
- *    Tear down any APR internal data structures which aren't
- *    torn down automatically.  An APR program must call this
- *    function at termination once it has stopped using APR
- *    services.
+/*
+
+=head1 void ap_terminate(void)
+
+B<Tear down any APR internal data structures which aren't torn down automatically.>
+
+B<NOTE>:  An APR program must call this function at termination once it 
+          has stopped using APR services.
+
+=cut
  */
 void ap_terminate(void);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont)
- *    Set the APR_ABORT function.
- * NOTE:  This is in for backwards compatability.  If the program using
- *        APR wants APR to exit on a memory allocation error, then this
- *        function should be called to set the function to use in order
- *        to actually exit the program.  If this function is not called,
- *        then APR will return an error and expect the calling program to
- *        deal with the error accordingly.
+/*
+
+=head1 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont)
+
+B<Set the APR_ABORT function.>
+
+B<NOTE>:  This is in for backwards compatability.  If the program using
+          APR wants APR to exit on a memory allocation error, then this
+          function should be called to set the function to use in order
+          to actually exit the program.  If this function is not called,
+          then APR will return an error and expect the calling program to
+          deal with the error accordingly.
+
+=cut
  */
 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont);
 
