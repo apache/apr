@@ -611,3 +611,10 @@ APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
 {
     return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, cont);
 }
+
+APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
+                                             apr_fileattrs_t attributes,
+                                             apr_pool_t *cont)
+{
+   return APR_ENOTIMPL;
+}
