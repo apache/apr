@@ -277,23 +277,17 @@ YES_IS_DEFINED
     ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
 ])
 
-define(APR_CHECK_FILE,[
-ac_safe=`echo "$1" | sed 'y%./+-%__p_%'`
-AC_MSG_CHECKING([for $1])
-AC_CACHE_VAL(ac_cv_file_$ac_safe, [
-  if test -r $1; then
-    eval "ac_cv_file_$ac_safe=yes"
-  else
-    eval "ac_cv_file_$ac_safe=no"
-  fi
-])dnl
-if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
-  AC_MSG_RESULT(yes)
-  ifelse([$2], , :, [$2])
-else
-  AC_MSG_RESULT(no)
-ifelse([$3], , , [$3])
-fi
+dnl APR_CHECK_FILE(filename); set ac_cv_file_filename to
+dnl "yes" if 'filename' is readable, else "no".
+AC_DEFUN([APR_CHECK_FILE], [
+dnl Pick a safe variable name
+define([apr_cvname], ac_cv_file_[]translit([$1], [./+-], [__p_]))
+AC_CACHE_CHECK([for $1], [apr_cvname],
+[if test -r $1; then
+   apr_cvname=yes
+ else
+   apr_cvname=no
+ fi])
 ])
 
 define(APR_IFALLYES,[dnl
