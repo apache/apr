@@ -1,7 +1,7 @@
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2000-2003 The Apache Software Foundation.  All rights
+ * Copyright (c) 2000-2004 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@
 
 #if APR_HAS_THREADS
 
-#ifdef HAVE_PTHREAD_RWLOCK_INIT
+#ifdef HAVE_PTHREAD_RWLOCKS
 
 static apr_status_t thread_rwlock_cleanup(void *data)
 {
@@ -192,7 +192,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
     return stat;
 }
 
-#else  /* HAVE_PTHREAD_RWLOCK_INIT */
+#else  /* HAVE_PTHREAD_RWLOCKS */
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
                                                    apr_pool_t *pool)
@@ -230,7 +230,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
     return APR_ENOTIMPL;
 }
 
-#endif /* HAVE_PTHREAD_RWLOCK_INIT */
+#endif /* HAVE_PTHREAD_RWLOCKS */
 APR_POOL_IMPLEMENT_ACCESSOR(thread_rwlock)
 
 #endif /* APR_HAS_THREADS */
