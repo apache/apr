@@ -68,6 +68,7 @@ struct socket_t {
     char *remote_hostname;
     struct sockaddr_in *addr;
     size_t addr_len;
+    int timeout; 
 };
 
 struct pollfd_t {
