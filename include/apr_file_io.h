@@ -509,7 +509,8 @@ apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms);
 /**
  * get the specified file's stats.  The file is specified by filename, 
  * instead of using a pre-opened file.
- * @param finfo Where to store the information about the file.
+ * @param finfo Where to store the information about the file, which is
+ * never touched if the call fails.
  * @param fname The name of the file to stat.
  * @param cont the pool to use to allocate the new file. 
  */ 
@@ -519,7 +520,8 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont);
  * get the specified file's stats.  The file is specified by filename, 
  * instead of using a pre-opened file.  If the file is a symlink, this function
  * will get the stats for the symlink not the file the symlink refers to.
- * @param finfo Where to store the information about the file.
+ * @param finfo Where to store the information about the file, which is
+ * never touched if the call fails.
  * @param fname The name of the file to stat.
  * @param cont the pool to use to allocate the new file. 
  */ 
