@@ -60,13 +60,19 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 
+#if WIN32
+#define ABS_ROOT "C:"
+#else
+#define ABS_ROOT
+#endif
+
 static void merge_aboveroot(CuTest *tc)
 {
     apr_status_t rv;
     char *dstpath = NULL;
     char errmsg[256];
 
-    rv = apr_filepath_merge(&dstpath, "/foo", "/bar", APR_FILEPATH_NOTABOVEROOT,
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"/foo", ABS_ROOT"/bar", APR_FILEPATH_NOTABOVEROOT,
                             p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
     CuAssertPtrEquals(tc, NULL, dstpath);
@@ -79,11 +85,11 @@ static void merge_belowroot(CuTest *tc)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, "/foo", "/foo/bar", 
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"/foo", ABS_ROOT"/foo/bar", 
                             APR_FILEPATH_NOTABOVEROOT, p);
     CuAssertPtrNotNull(tc, dstpath);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "/foo/bar", dstpath);
+    CuAssertStrEquals(tc, ABS_ROOT"/foo/bar", dstpath);
 }
 
 static void merge_noflag(CuTest *tc)
@@ -91,10 +97,10 @@ static void merge_noflag(CuTest *tc)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, "/foo", "/foo/bar", 0, p);
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"/foo", ABS_ROOT"/foo/bar", 0, p);
     CuAssertPtrNotNull(tc, dstpath);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "/foo/bar", dstpath);
+    CuAssertStrEquals(tc, ABS_ROOT"/foo/bar", dstpath);
 }
 
 static void merge_dotdot(CuTest *tc)
@@ -102,10 +108,10 @@ static void merge_dotdot(CuTest *tc)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, "/foo/bar", "../baz", 0, p);
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"/foo/bar", "../baz", 0, p);
     CuAssertPtrNotNull(tc, dstpath);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "/foo/baz", dstpath);
+    CuAssertStrEquals(tc, ABS_ROOT"/foo/baz", dstpath);
 }
 
 static void merge_secure(CuTest *tc)
@@ -113,10 +119,10 @@ static void merge_secure(CuTest *tc)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, "/foo/bar", "../bar/baz", 0, p);
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"/foo/bar", "../bar/baz", 0, p);
     CuAssertPtrNotNull(tc, dstpath);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "/foo/bar/baz", dstpath);
+    CuAssertStrEquals(tc, ABS_ROOT"/foo/bar/baz", dstpath);
 }
 
 static void merge_notrel(CuTest *tc)
@@ -124,11 +130,11 @@ static void merge_notrel(CuTest *tc)
     apr_status_t rv;
     char *dstpath = NULL;
 
-    rv = apr_filepath_merge(&dstpath, "/foo/bar", "../baz",
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"/foo/bar", "../baz",
                             APR_FILEPATH_NOTRELATIVE, p);
     CuAssertPtrNotNull(tc, dstpath);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "/foo/baz", dstpath);
+    CuAssertStrEquals(tc, ABS_ROOT"/foo/baz", dstpath);
 }
 
 static void merge_notrelfail(CuTest *tc)
@@ -152,7 +158,7 @@ static void merge_notabsfail(CuTest *tc)
     char *dstpath = NULL;
     char errmsg[256];
 
-    rv = apr_filepath_merge(&dstpath, "/foo/bar", "../baz", 
+    rv = apr_filepath_merge(&dstpath, ABS_ROOT"/foo/bar", "../baz", 
                             APR_FILEPATH_NOTABSOLUTE, p);
     apr_strerror(rv, errmsg, sizeof(errmsg));
 
@@ -178,13 +184,13 @@ static void root_absolute(CuTest *tc)
 {
     apr_status_t rv;
     const char *root = NULL;
-    const char *path = "/foo/bar";
+    const char *path = ABS_ROOT"/foo/bar";
 
     rv = apr_filepath_root(&root, &path, 0, p);
 
     CuAssertPtrNotNull(tc, root);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "/", root);
+    CuAssertStrEquals(tc, ABS_ROOT"/", root);
 }
 
 static void root_relative(CuTest *tc)
