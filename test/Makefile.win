@@ -21,11 +21,14 @@ TARGETS = $(PROGRAMS) $(NONPORTABLE) client.exe sendfile.exe \
 
 LOCAL_LIBS=..\LibD\apr.lib 
 
-CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child.exe occhild.exe \
+CLEAN_TARGETS = mod_test.slo proc_child.exe occhild.exe \
 	        testprocmutex.exe testglobalmutex.exe testshm.exe
 
 INCDIR=../include
 INCLUDES=/I "$(INCDIR)"
+
+clean:
+	del $(CLEAN_TARGETS) $(PROGRAMS) *.obj
 
 .c.obj:
 	cl /nologo /c /MDd /W3 /GX /Zi /Od /DWIN32 /D_DEBUG /D_WINDOWS /DAPR_DECLARE_STATIC $(INCLUDES) $<
