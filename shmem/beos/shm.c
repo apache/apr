@@ -65,12 +65,15 @@ struct apr_shm_t {
     apr_pool_t *p;
     void *memblock;
     void *ptr;
+    apr_size_t reqsize;
     apr_size_t avail;
     area_id aid;
 };
 
-APR_DECLARE(apr_status_t) apr_shm_init(apr_shm_t **m, apr_size_t reqsize, const char *file, 
-                                       apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m, 
+                                         apr_size_t reqsize, 
+                                         const char *file, 
+                                         apr_pool_t *p)
 {
     apr_size_t pagesize;
     area_id newid;
@@ -91,6 +94,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shm_t **m, apr_size_t reqsize, const 
     (*m)->memblock = addr;
     (*m)->ptr = (void*)addr;
     (*m)->avail = pagesize; /* record how big an area we actually created... */
+    (*m)->reqsize = reqsize;
 
     return APR_SUCCESS;
 }
@@ -118,11 +122,11 @@ APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
 
 APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m)
 {
-    return APR_ENOTIMPL;
+    return m->memblock;
 }
 
 APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
 {
-    return APR_ENOTIMPL;
+    return m->reqsize;
 }
 
