@@ -65,6 +65,9 @@
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>
 #endif
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h> /* malloc(), free() */
+#endif
 #if APR_HAVE_STRING_H
 #include <string.h> /* for strerror() on HP-UX */
 #endif
@@ -205,7 +208,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
         handle->errormsg = "cannot resolve symbol";
 	return APR_EINIT;
     }
-
+    return APR_SUCCESS;
 #elif defined(DSO_USE_DLFCN)
 
 #if defined(DLSYM_NEEDS_UNDERSCORE)
