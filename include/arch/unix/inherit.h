@@ -59,6 +59,7 @@
 
 #define APR_INHERIT    (2^24)    /* Must not conflicts with other bits */
 
+#ifndef APR_POOLS_ARE_SMS
 #define APR_IMPLEMENT_SET_INHERIT(name, flag, pool, cleanup)        \
 void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 {                                                                   \
@@ -68,7 +69,19 @@ void apr_##name##_set_inherit(apr_##name##_t *name)                 \
                                    cleanup, apr_pool_cleanup_null); \
     }                                                               \
 }
+#else
+#define APR_IMPLEMENT_SET_INHERIT(name, flag, pool, cleanup)        \
+void apr_##name##_set_inherit(apr_##name##_t *name)                 \
+{                                                                   \
+    if (!(name->flag & APR_INHERIT)) {                              \
+        name->flag |= APR_INHERIT;                                  \
+        apr_sms_cleanup_unregister(name->pool, APR_CHILD_CLEANUP,   \
+                                   (void *)name, cleanup);          \
+    }                                                               \
+}
+#endif
 
+#ifndef APR_POOLS_ARE_SMS
 #define APR_IMPLEMENT_UNSET_INHERIT(name, flag, pool, cleanup)      \
 void apr_##name##_unset_inherit(apr_##name##_t *name)               \
 {                                                                   \
@@ -78,5 +91,16 @@ void apr_##name##_unset_inherit(apr_##name##_t *name)               \
                                    cleanup, cleanup);               \
     }                                                               \
 }
+#else
+#define APR_IMPLEMENT_UNSET_INHERIT(name, flag, pool, cleanup)      \
+void apr_##name##_unset_inherit(apr_##name##_t *name)               \
+{                                                                   \
+    if (name->flag & APR_INHERIT) {                                 \
+        name->flag &= ~APR_INHERIT;                                 \
+        apr_sms_cleanup_register(name->pool, APR_CHILD_CLEANUP,     \
+                                 (void *)name, cleanup);            \
+    }                                                               \
+}
+#endif
 
 #endif	/* ! INHERIT_H */
