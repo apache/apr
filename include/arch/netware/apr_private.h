@@ -87,6 +87,7 @@
 #define HAVE_SYS_MMAN_H 1
 #define HAVE_FCNTL_H    1
 #define HAVE_ICONV_H    1
+#define HAVE_UTIME_H    1
 
 #define HAVE_STRICMP    1
 #define HAVE_STRNICMP   1
@@ -94,6 +95,7 @@
 #define HAVE_STRSTR     1
 #define HAVE_MEMCHR     1
 #define HAVE_CALLOC     1
+#define HAVE_UTIME      1
 
 /*#define DSO_USE_DLFCN */
 
