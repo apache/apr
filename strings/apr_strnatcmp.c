@@ -24,10 +24,6 @@
 #include <string.h>
 #include "apr_strings.h"
 #include "apr_lib.h"            /* for apr_is*() */
-#if APR_HAVE_ERRNO_H
-/* Do we realy need the assert here ? */
-#include <assert.h>
-#endif
 
 #if defined(__GNUC__)
 #  define UNUSED __attribute__((__unused__))
@@ -94,9 +90,6 @@ static int strnatcmp0(char const *a, char const *b, int fold_case)
      int ai, bi;
      char ca, cb;
      int fractional, result;
-#if APR_HAVE_ERRNO_H     
-     assert(a && b);
-#endif
      ai = bi = 0;
      while (1) {
 	  ca = a[ai]; cb = b[bi];
