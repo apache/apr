@@ -60,10 +60,6 @@
 #include <unistd.h>     /* for getpid, gethostname */
 #include <stdlib.h>     /* for rand, srand */
 
-#ifdef APR_HAVE_SYS_TIME
-#include <sys/time.h>   /* for gettimeofday */
-#endif
-
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_uuid.h"
@@ -77,6 +73,9 @@
 #endif
 #if APR_HAVE_NETDB_H
 #include <netdb.h>
+#endif
+#if APR_HAVE_SYS_TIME_H
+#include <sys/time.h>   /* for gettimeofday */
 #endif
 
 #define NODE_LENGTH 6
