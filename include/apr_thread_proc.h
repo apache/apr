@@ -518,7 +518,7 @@ APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
  * Determine if the child should start in its own address space or using the 
  * current one from its parent
  * @param attr The procattr we care about. 
- * @param addrspace Should the child start in ouw address space?  Default is no. 
+ * @param addrspace Should the child start in its own address space?  Default is no. 
  */
 APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
                                                        apr_int32_t addrspace);
