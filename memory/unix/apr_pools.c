@@ -124,7 +124,11 @@ struct node_t {
 
 struct allocator_t {
     apr_uint32_t        max_index;
+#if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
+#else
+    void               *mutex;
+#endif
     apr_pool_t         *owner;
     node_t             *free[MAX_INDEX];
 };
@@ -449,7 +453,11 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 {
     node_t *node, *active, **ref;
     allocator_t *allocator;
+#if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
+#else
+    void *mutex;
+#endif
     apr_uint32_t index;
 
     /* Destroy the subpools.  The subpools will detach themselve from 
@@ -524,7 +532,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     apr_pool_t *pool;
     node_t *node;
     allocator_t *allocator, *new_allocator;
-    apr_status_t rv;
 
     *newpool = NULL;
 
@@ -560,6 +567,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 
 #if APR_HAS_THREADS
         if ((flags & APR_POOL_FLOCK) == APR_POOL_FLOCK) {
+            apr_status_t rv;
             if ((rv = apr_thread_mutex_create(&allocator->mutex, 
                     APR_THREAD_MUTEX_DEFAULT, pool)) != APR_SUCCESS) {
                 node_free(allocator, node);
