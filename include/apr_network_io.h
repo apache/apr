@@ -200,6 +200,16 @@ struct apr_hdtr_t {
 apr_status_t apr_create_tcp_socket(apr_socket_t **new_sock, apr_pool_t *cont);
 
 /**
+ * Create a socket.
+ * @param new_sock The new socket that has been set up.
+ * @param family The address family of the socket (e.g., AF_INET).
+ * @param type The type of the socket (e.g., SOCK_STREAM).
+ * @param cont The pool to use
+ */
+apr_status_t apr_create_socket(apr_socket_t **new_sock, int family,
+                               int type, apr_pool_t *cont);
+
+/**
  * Shutdown either reading, writing, or both sides of a tcp socket.
  * @param thesocket The socket to close 
  * @param how How to shutdown the socket.  One of:
