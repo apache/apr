@@ -575,26 +575,6 @@ struct cleanup {
     struct cleanup *next;
 };
 
-static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int retcode));
-
-#if 0
-static void ap_register_pool_cleanup(struct ap_pool_t *p, void *data,
-				      ap_status_t (*plain_cleanup) (void *),
-				      ap_status_t (*child_cleanup) (void *))
-{
-    struct cleanup *c;
-
-    if (p != NULL) {
-        c = (struct cleanup *) ap_pool_palloc(p, sizeof(struct cleanup), NULL);
-        c->data = data;
-        c->plain_cleanup = plain_cleanup;
-        c->child_cleanup = child_cleanup;
-        c->next = p->cleanups;
-        p->cleanups = c;
-    }
-}
-#endif
-
 API_EXPORT(void) ap_register_cleanup(ap_pool_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *))
