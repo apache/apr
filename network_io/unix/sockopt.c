@@ -199,6 +199,21 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         return APR_ENOTIMPL;
 #endif
         break;
+    case APR_TCP_DEFER_ACCEPT:
+#if defined(TCP_DEFER_ACCEPT)
+        if (apr_is_option_set(sock, APR_TCP_DEFER_ACCEPT) != on) {
+            int optlevel = IPPROTO_TCP;
+            int optname = TCP_DEFER_ACCEPT;
+
+            if (setsockopt(sock->socketdes, optlevel, optname, 
+                           (void *)&on, sizeof(int)) == -1) {
+                return errno;
+            }
+            apr_set_option(sock, APR_TCP_DEFER_ACCEPT, on);
+        }
+#else
+        return APR_ENOTIMPL;
+#endif
     case APR_TCP_NODELAY:
 #if defined(TCP_NODELAY)
         if (apr_is_option_set(sock, APR_TCP_NODELAY) != on) {
