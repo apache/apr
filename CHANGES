@@ -1,4 +1,11 @@
 Changes with APR a8
+  *) apr_set_port(), apr_get_port(), apr_set_ipaddr(), and apr_get_ipaddr()
+     now take apr_sockaddr_t as a parameter instead of apr_socket_t +
+     apr_interface_e.  This will allow the same routines to be used with
+     datagram APIs to be added later.  Note that code which calls 
+     apr_set_ipaddr() should probably be changed to call apr_getaddrinfo()
+     for protocol independence.  [Jeff Trawick]
+
   *) apr_create_tcp_socket() has been removed.  Use apr_create_socket()
      instead.  [Jeff Trawick]
 
