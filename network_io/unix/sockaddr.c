@@ -437,6 +437,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
             *sa = new_sa;
         }
         else {
+            new_sa->hostname = prev_sa->hostname;
             prev_sa->next = new_sa;
         }
 
@@ -569,6 +570,7 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
             *sa = new_sa;
         }
         else {
+            new_sa->hostname = prev_sa->hostname;
             prev_sa->next = new_sa;
         }
 
