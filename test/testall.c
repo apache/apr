@@ -52,6 +52,9 @@
  * <http://www.apache.org/>.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "test_apr.h"
 
 #define NUM_TESTS 2
@@ -86,6 +89,6 @@ int main(int argc, char *argv[])
     CuSuiteListSummary(alltests, output);
     CuSuiteListDetails(alltests, output);
     printf("%s\n", output->buffer);
-
+    return 0;
 }
 
