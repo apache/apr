@@ -1,5 +1,8 @@
 Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
+  *) Moved repository to SVN
+     [Hackathon]
+
   *) jlibtool: Ignore '-export-symbols-regexp' option.
      [Justin Erenkrantz]
 
