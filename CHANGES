@@ -8,7 +8,7 @@ Changes with APR 0.9.2
      close that system handle wherever an apr function would invoke the
      final waitpid() against a zombie process on Unix.  [William Rowe]
 
-  *) APR_MAX_SECONDS_TO_LINGER and APR_FNM_* #defines replace their
+  *) APR_MAX_SECONDS_TO_LINGER and APR_FNM_* #defines replace their
      old undecorated names (missing APR_ prefix).  The old names will
      disappear with APR 1.0.0.
      [Craig Rodrigues <rodrigc@attbi.com>, William Rowe]
