@@ -17,6 +17,7 @@ TARGETS= testmd5@EXEEXT@ \
 	testfile@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
+	testsf@EXEEXT@ \
 	testthread@EXEEXT@ \
 	testtime@EXEEXT@ \
 	testargs@EXEEXT@ \
@@ -33,6 +34,7 @@ OBJS= testmd5.o \
 	testfile.o \
 	testproc.o \
 	testsock.o \
+	testsf.o \
 	testthread.o \
 	testtime.o \
         testargs.o \
@@ -82,6 +84,9 @@ testsock@EXEEXT@: testsock.o client.o server.o
 	$(CC) $(CFLAGS) -o testsock@EXEEXT@ testsock.o $(LDFLAGS)
 	$(CC) $(CFLAGS) -o server@EXEEXT@ server.o $(LDFLAGS) 
 	$(CC) $(CFLAGS) -o client@EXEEXT@ client.o $(LDFLAGS)
+
+testsf@EXEEXT@: testsf.o
+	$(CC) $(CFLAGS) -o testsf@EXEEXT@ testsf.o $(LDFLAGS)
 
 testtime@EXEEXT@: testtime.o
 	$(CC) $(CFLAGS) -o testtime@EXEEXT@ testtime.o $(LDFLAGS)
