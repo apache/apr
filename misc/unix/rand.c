@@ -124,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
     apr_socklen_t egd_addr_len;
     size_t resp_expected;
     unsigned char req[2], resp[255];
-    char *curbuf = buf;
+    unsigned char *curbuf = buf;
 
     egd_path_len = strlen(STR(EGD_DEFAULT_SOCKET));
 
