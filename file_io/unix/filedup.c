@@ -69,15 +69,7 @@ static apr_status_t _file_dup(apr_file_t **new_file,
             /* We can't dup2 unless we have a valid new_file */
             return APR_EINVAL;
         }
-#ifdef NETWARE
-        /* Apparently Netware doesn't support dup2... instead
-         * close() then dup()
-         */
-        close((*new_file)->filedes);
-        rv = ((*new_file)->filedes = dup(old_file->filedes)); 
-#else
         rv = dup2(old_file->filedes, (*new_file)->filedes);
-#endif
     } else {
         rv = dup(old_file->filedes);
     }
