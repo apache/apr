@@ -796,6 +796,15 @@ have_corkable_tcp="0"
 if test "x$ac_cv_define_TCP_CORK" = "xyes"; then
     apr_tcp_nopush_flag="TCP_CORK"
     have_corkable_tcp="1"
+else
+    case $OS in
+        *linux*)
+            apr_tcp_nopush_flag="3"
+            have_corkable_tcp="1"
+            ;;
+        *)
+            ;;
+    esac
 fi
 if test "x$ac_cv_define_TCP_NOPUSH" = "xyes"; then
     apr_tcp_nopush_flag="TCP_NOPUSH"
