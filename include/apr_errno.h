@@ -1043,14 +1043,15 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #elif defined(NETWARE) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
 
-#define APR_FROM_OS_ERROR(e)  (e)
-#define APR_TO_OS_ERROR(e)    (e)
+#define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
+#define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
 
-#define apr_get_netos_error()   (WSAGetLastError()+APR_OS_START_SYSERR)
-#define apr_set_netos_error(e)   (WSASetLastError((e)-APR_OS_START_SYSERR))
+/* A special case, only socket calls require this: */
+#define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
+#define apr_set_netos_error(e)  (WSASetLastError(APR_TO_OS_ERROR(e)))
 
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
 
