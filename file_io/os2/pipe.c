@@ -61,7 +61,7 @@
 #include <string.h>
 #include <process.h>
 
-apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
 {
     ULONG filedes[2];
     ULONG rc, action;
@@ -141,7 +141,7 @@ apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t 
 
 
 
-apr_status_t apr_file_namedpipe_create(const char *filename, apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, apr_fileperms_t perm, apr_pool_t *cont)
 {
     /* Not yet implemented, interface not suitable */
     return APR_ENOTIMPL;
@@ -149,7 +149,7 @@ apr_status_t apr_file_namedpipe_create(const char *filename, apr_fileperms_t per
 
  
 
-apr_status_t apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
@@ -172,7 +172,7 @@ apr_status_t apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t 
 
 
 
-apr_status_t apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
 {
     if (thepipe->pipe == 1) {
         *timeout = thepipe->timeout;

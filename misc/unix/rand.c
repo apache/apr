@@ -65,7 +65,8 @@
 #define	XSTR(x)	#x
 #define	STR(x)	XSTR(x)
 
-apr_status_t apr_generate_random_bytes(unsigned char * buf, int length) 
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
+                                                    int length) 
 {
 #ifdef	DEV_RANDOM
 

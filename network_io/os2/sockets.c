@@ -130,8 +130,8 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr->pool = p;
 }
 
-apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
-                               apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily, int type,
+                                            apr_pool_t *cont)
 {
     int family = ofamily;
 
@@ -172,7 +172,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
+APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
 {
     if (shutdown(thesocket->socketdes, how) == 0) {
         return APR_SUCCESS;
@@ -182,16 +182,13 @@ apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
     }
 }
 
-apr_status_t apr_socket_close(apr_socket_t *thesocket)
+APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket)
 {
     apr_pool_cleanup_kill(thesocket->cntxt, thesocket, socket_cleanup);
     return socket_cleanup(thesocket);
 }
 
-
-
-
-apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
+APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     if (bind(sock->socketdes, 
              (struct sockaddr *)&sa->sa,
@@ -203,7 +200,7 @@ apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
 }
 
-apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
+APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == -1)
         return APR_OS2_STATUS(sock_errno());
@@ -211,7 +208,7 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
         return APR_SUCCESS;
 }
 
-apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
+APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
     alloc_socket(new, connection_context);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
@@ -232,7 +229,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     return APR_SUCCESS;
 }
 
-apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
+APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     if ((connect(sock->socketdes, (struct sockaddr *)&sa->sa.sin, 
                  sa->salen) < 0) &&
@@ -249,30 +246,29 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 }
 
 
-
-apr_status_t apr_socket_data_get(void **data, const char *key,
-                              apr_socket_t *socket)
+APR_DECLARE(apr_status_t) apr_socket_data_get(void **data, const char *key,
+                                     apr_socket_t *socket)
 {
     return apr_pool_userdata_get(data, key, socket->cntxt);
 }
 
 
 
-apr_status_t apr_socket_data_set(apr_socket_t *socket, void *data, const char *key,
-                              apr_status_t (*cleanup) (void *))
+APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *socket, void *data, const char *key,
+                                     apr_status_t (*cleanup) (void *))
 {
     return apr_pool_userdata_set(data, key, cleanup, socket->cntxt);
 }
 
-apr_status_t apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)
+APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)
 {
     *thesock = sock->socketdes;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_sock_make(apr_socket_t **apr_sock, 
-                              apr_os_sock_info_t *os_sock_info, 
-                              apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock, 
+                                           apr_os_sock_info_t *os_sock_info, 
+                                           apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
     set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type);
@@ -298,7 +294,7 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock, apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;

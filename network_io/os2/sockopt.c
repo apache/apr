@@ -67,7 +67,7 @@
 #include <sys/so_ioctl.h>
 
 
-apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
+APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
 {
     int one;
     struct linger li;
@@ -124,7 +124,7 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
 
 
 
-apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
+APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
     case APR_SO_TIMEOUT:
@@ -138,7 +138,7 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *
 
 
 
-apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return APR_OS2_STATUS(sock_errno());

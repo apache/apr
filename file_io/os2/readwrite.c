@@ -62,7 +62,7 @@
 
 #include <malloc.h>
 
-apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 {
     ULONG rc = 0;
     ULONG bytesread;
@@ -144,7 +144,7 @@ apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 
 
 
-apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     ULONG rc = 0;
     ULONG byteswritten;
@@ -200,7 +200,7 @@ apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nb
 
 #ifdef HAVE_WRITEV
 
-apr_status_t apr_file_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, apr_size_t *nbytes)
+APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, apr_size_t *nbytes)
 {
     int bytes;
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
@@ -216,7 +216,7 @@ apr_status_t apr_file_writev(apr_file_t *thefile, const struct iovec *vec, apr_s
 
 
 
-apr_status_t apr_file_putc(char ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile)
 {
     ULONG rc;
     ULONG byteswritten;
@@ -236,15 +236,14 @@ apr_status_t apr_file_putc(char ch, apr_file_t *thefile)
 
 
 
-apr_status_t apr_file_ungetc(char ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile)
 {
     apr_off_t offset = -1;
     return apr_file_seek(thefile, APR_CUR, &offset);
 }
 
 
-
-apr_status_t apr_file_getc(char *ch, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
 {
     ULONG rc;
     apr_size_t bytesread;
@@ -270,7 +269,7 @@ apr_status_t apr_file_getc(char *ch, apr_file_t *thefile)
 
 
 
-apr_status_t apr_file_puts(const char *str, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
 {
     apr_size_t len;
 
@@ -279,8 +278,7 @@ apr_status_t apr_file_puts(const char *str, apr_file_t *thefile)
 }
 
 
-
-apr_status_t apr_file_flush(apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
         ULONG written = 0;
@@ -304,8 +302,7 @@ apr_status_t apr_file_flush(apr_file_t *thefile)
 }
 
 
-
-apr_status_t apr_file_gets(char *str, int len, apr_file_t *thefile)
+APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
     size_t readlen;
     apr_status_t rv = APR_SUCCESS;

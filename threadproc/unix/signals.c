@@ -67,7 +67,7 @@
 #include <pthread.h>
 #endif
 
-apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
+APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signum)
 {
 #ifdef OS2
     /* SIGTERM's don't work too well in OS/2 (only affects other EMX
@@ -95,7 +95,7 @@ apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
  * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
  * (the version that does not automatically restart system calls).
  */
-apr_sigfunc_t *apr_signal(int signo, apr_sigfunc_t * func)
+APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
 {
     struct sigaction act, oact;
 

@@ -126,7 +126,7 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
@@ -145,7 +145,7 @@ apr_status_t apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t 
     return APR_EINVAL;
 }
 
-apr_status_t apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
+APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
 {
     if (thepipe->pipe == 1) {
         *timeout = thepipe->timeout;
@@ -154,7 +154,7 @@ apr_status_t apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t 
     return APR_EINVAL;
 }
 
-apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
 {
     int filedes[2];
 
@@ -194,8 +194,8 @@ apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t 
     return APR_SUCCESS;
 }
 
-apr_status_t apr_file_namedpipe_create(const char *filename, 
-                                apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
+                                                    apr_fileperms_t perm, apr_pool_t *cont)
 {
     mode_t mode = apr_unix_perms2mode(perm);
 
