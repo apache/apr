@@ -317,38 +317,3 @@ APR_DECLARE(apr_status_t) apr_uid_compare(apr_uid_t left, apr_uid_t right)
     return APR_SUCCESS;
 }
 
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, 
-                                                 const char *username, 
-                                                 apr_pool_t *p)
-{
-    return apr_uid_homepath_get(dirname, username, p);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
-                                         const char *username, apr_pool_t *p)
-{
-    return apr_uid_get(uid, gid, username, p);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
-                                             apr_gid_t *gid,
-                                             apr_pool_t *p)
-{
-    return apr_uid_current(uid, gid, p);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right)
-{
-    return apr_uid_compare(left, right);
-}
-
-/* deprecated */
-APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid,
-                                           apr_pool_t *p)
-{
-    return apr_uid_name_get(username, userid, p);
-}

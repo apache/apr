@@ -180,8 +180,7 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 
 APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
                                        apr_mmap_t *old_mmap,
-                                       apr_pool_t *p,
-                                       int transfer_ownership)
+                                       apr_pool_t *p)
 {
     *new_mmap = (apr_mmap_t *)apr_pmemdup(p, old_mmap, sizeof(apr_mmap_t));
     (*new_mmap)->cntxt = p;

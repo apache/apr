@@ -118,9 +118,6 @@ struct apr_mmap_t {
     void *mm;
     /** The amount of data in the mmap */
     apr_size_t size;
-    /** @deprecated this field is no longer used and will be removed
-     * in APR 1.0 */
-    int unused;
     /** ring of apr_mmap_t's that reference the same
      * mmap'ed region; acts in place of a reference count */
     APR_RING_ENTRY(apr_mmap_t) link;
@@ -181,13 +178,10 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **newmmap,
  * @param new_mmap The structure to duplicate into. 
  * @param old_mmap The mmap to duplicate.
  * @param p The pool to use for new_mmap.
- * @param transfer_ownership DEPRECATED: this param is now ignored
- *  and should be removed prior to APR 1.0
  */         
 APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
                                        apr_mmap_t *old_mmap,
-                                       apr_pool_t *p,
-                                       int transfer_ownership);
+                                       apr_pool_t *p);
 
 #if defined(DOXYGEN)
 /**
@@ -195,7 +189,6 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
  * @param new_mmap The structure to duplicate into.
  * @param old_mmap The file to transfer.
  * @param p The pool to use for new_mmap.
- * @deprecated Just use apr_mmap_dup().  The transfer_ownership flag will
  *  go away soon anyway.
  */
 APR_DECLARE(apr_status_t) apr_mmap_setaside(apr_mmap_t **new_mmap,

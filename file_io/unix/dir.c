@@ -244,7 +244,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         if ((fspec[off - 1] != '/') && (off + 1 < sizeof(fspec)))
             fspec[off++] = '/';
         apr_cpystrn(fspec + off, thedir->entry->d_name, sizeof(fspec) - off);
-        ret = apr_lstat(finfo, fspec, wanted, thedir->pool);
+        ret = apr_stat(finfo, fspec, APR_FINFO_LINK | wanted, thedir->pool);
         /* We passed a stack name that will disappear */
         finfo->fname = NULL;
     }
