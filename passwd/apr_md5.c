@@ -346,7 +346,7 @@ APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
 }
 
 /* MD5 basic transformation. Transforms state based on block. */
-static void MD5Transform(UINT4 state[4], const unsigned char block[64])
+static void MD5Transform(apr_uint32_t state[4], const unsigned char block[64])
 {
     apr_uint32_t a = state[0], b = state[1], c = state[2], d = state[3],
                  x[MD5_DIGESTSIZE];
