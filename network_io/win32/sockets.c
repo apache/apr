@@ -109,13 +109,6 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
 
     alloc_socket(new, cont);
 
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-    if (((*new)->local_addr == NULL) || ((*new)->remote_addr == NULL)) {
-        return APR_ENOMEM;
-    }
-
     /* For right now, we are not using socket groups.  We may later.
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
