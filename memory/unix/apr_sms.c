@@ -113,7 +113,6 @@ APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *sms,
     }
     
     return sms->calloc_fn(sms, size);
-
 }
 
 APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem,
@@ -203,11 +202,11 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
 
     /* XXX - This should eventually be removed */
     apr_pool_create(&sms->pool, pms ? pms->pool : NULL);
-    
+
     /* Create the lock we'll use to protect cleanups and child lists */
     apr_lock_create(&sms->sms_lock, APR_MUTEX, APR_LOCKALL, NULL,
                     sms->pool);
-                        
+
     return APR_SUCCESS;
 }
 
@@ -273,14 +272,11 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *sms)
  *
  * Call all the cleanup routines registered with a memory system.
  */
-static void apr_sms_do_cleanups(apr_sms_t *sms)
+static void apr_sms_do_cleanups(struct apr_sms_cleanup *c)
 {
-    struct apr_sms_cleanup *cleanup;
-
-    cleanup = sms->cleanups;
-    while (cleanup) {
-        cleanup->cleanup_fn(cleanup->data);
-        cleanup = cleanup->next;
+    while (c) {
+        c->cleanup_fn(c->data);
+        c = c->next;
     }
 }
 
@@ -299,7 +295,7 @@ static void apr_sms_do_child_cleanups(apr_sms_t *sms)
     sms = sms->child;
     while (sms) {
         apr_sms_do_child_cleanups(sms);
-        apr_sms_do_cleanups(sms);
+        apr_sms_do_cleanups(sms->cleanups);
 
         if (sms->pre_destroy_fn != NULL)
             sms->pre_destroy_fn(sms);
@@ -324,7 +320,7 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *sms)
     apr_sms_do_child_cleanups(sms);
 
     /* Run all cleanups, the memory will be freed by the reset */
-    apr_sms_do_cleanups(sms);
+    apr_sms_do_cleanups(sms->cleanups);
     sms->cleanups = NULL;
 
     /* We don't have any child memory systems after the reset */
@@ -364,7 +360,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
         apr_sms_do_child_cleanups(sms);
 
         /* Run all cleanups, the memory will be freed by the destroy */
-        apr_sms_do_cleanups(sms);
+        apr_sms_do_cleanups(sms->cleanups);
     }
     else {
         if (sms->accounting != sms) {
@@ -403,7 +399,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
              * Run all cleanups, the memory will be freed by the destroying
              * of the accounting memory system.
              */
-            apr_sms_do_cleanups(sms);
+            apr_sms_do_cleanups(sms->cleanups);
 
             /* Destroy the accounting memory system */
             apr_sms_destroy(sms->accounting);
@@ -461,7 +457,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     
     /* XXX - This should eventually be removed */
     apr_pool_destroy(sms->pool);
-    
+
     /* 1 - If we have a self destruct, use it */
     if (sms->destroy_fn)
         return sms->destroy_fn(sms);
