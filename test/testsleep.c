@@ -100,8 +100,10 @@ void * APR_THREAD_FUNC time_a_thread(apr_thread_t *thd, void *data)
 int main(void)
 {
     apr_pool_t *p;
+#if APR_HAS_THREADS
     apr_thread_t *t1, *t2, *t3;
     apr_status_t rv;
+#endif
 
     apr_initialize();
 
