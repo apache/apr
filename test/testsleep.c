@@ -83,12 +83,17 @@ static void do_sleep(int howlong)
     }
 }
 
+#if APR_HAS_THREADS
 void * APR_THREAD_FUNC time_a_thread(apr_thread_t *thd, void *data)
 {
     do_sleep(15);
 
     return NULL;
 }
+#define OUTPUT_LINES 8
+#else
+#define OUTPUT_LINES 2
+#endif /* APR_HAS_THREADS */
 
 int main(void)
 {
@@ -102,16 +107,21 @@ int main(void)
 
     STD_TEST_NEQ("Creating a pool to use", apr_pool_create(&p, NULL))
 
+#if APR_HAS_THREADS
     printf("\nI will now start 3 threads, each of which should sleep for\n"
-           "15 seconds, then exit. The main thread will sleep for a\n"
-           "45 seconds then wake up.\n"
-           "All tests will check how long they've been in the land of nod.\n\n");
-    printf("If all is working you should see 8 lines below within 45 seconds.\n\n");
+           "15 seconds, then exit.\n");
+#endif
 
+    printf("The main app will sleep for 45 seconds then wake up.\n");
+    printf("All tests will check how long they've been in the land of nod.\n\n");
+    printf("If all is working you should see %d lines below within 45 seconds.\n\n",
+           OUTPUT_LINES);
+
+#if APR_HAS_THREADS
     rv = apr_thread_create(&t1, NULL, time_a_thread, NULL, p);
     rv = apr_thread_create(&t2, NULL, time_a_thread, NULL, p);
     rv = apr_thread_create(&t3, NULL, time_a_thread, NULL, p);
-
+#endif
 
     do_sleep(45);
 
