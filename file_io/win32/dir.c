@@ -84,6 +84,12 @@ apr_status_t dir_cleanup(void *thedir)
 
 apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
+    /* Note that we won't open a directory that is greater than MAX_PATH,
+     * including the trailing /* wildcard suffix.  If a * won't fit, then
+     * neither will any other file name within the directory.
+     * The length not including the trailing '*' is stored as rootlen, to
+     * skip over all paths which are too long.
+     */
     int len = strlen(dirname);
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -92,24 +98,42 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
         /* While there is now a generic accessor to convert to Unicode,
          * we do something special here to provide a few extra wchars
          * for the /* (really \*) suffix
+         *
+         * Note that the \\?\ form only works for local drive paths, and
+         * not for UNC paths.
          */
         int srcremains = len;
         int dirremains = len;
         apr_wchar_t *wch;
         (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        (*new)->w.dirname = apr_palloc(cont, (dirremains + 7) * 2);
-        wcscpy((*new)->w.dirname, L"\\\\?\\");
-        if (conv_utf8_to_ucs2(dirname, &srcremains,
-                              (*new)->w.dirname + 4, &dirremains) || srcremains)
-            return APR_ENAMETOOLONG;
-        len = 4 + len -  dirremains;
-        if (len && (*new)->w.dirname[len - 1] != '/') {
-    	    (*new)->w.dirname[len++] = '/';
+        wch = (*new)->w.dirname = apr_palloc(cont, (dirremains + 7) * 2);
+        if (dirname[1] == ':' && dirname[2] == '/') {
+            wcscpy((*new)->w.dirname, L"\\\\?\\");
+            wch += 4;
         }
-        (*new)->w.dirname[len++] = '*';
-        (*new)->w.dirname[len] = '\0';
-        for (wch = (*new)->w.dirname + 4; *wch; ++wch)
+        if (conv_utf8_to_ucs2(dirname, &srcremains,
+                              wch, &dirremains) || srcremains) {
+            (*new) = NULL;
+            return APR_ENAMETOOLONG;
+        }
+        len -= dirremains;
+        if (len && wch[len - 1] != '/') {
+    	    wch[len++] = L'/';
+        }
+        wch[len++] = L'*';
+        wch[len] = L'\0';
+        if (wch != (*new)->w.dirname)
+        {
+            if (len >= MAX_PATH ) {
+                (*new) = NULL;
+                return APR_ENAMETOOLONG;
+            }
+            (*new)->rootlen = len - 1;
+        }
+        else /* we don't care, since the path isn't limited in length */
+            (*new)->rootlen = 0;
+        for (; *wch; ++wch)
             if (*wch == L'/')
                 *wch = L'\\';
     }
@@ -125,6 +149,11 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
         }
         (*new)->n.dirname[len++] = '*';
         (*new)->n.dirname[len] = '\0';
+        (*new)->rootlen = len - 1;
+        if (len >= MAX_PATH ){
+            (*new) = NULL;
+            return APR_ENAMETOOLONG;
+        }
     }
     (*new)->cntxt = cont;
     (*new)->dirhand = INVALID_HANDLE_VALUE;
@@ -144,6 +173,9 @@ apr_status_t apr_closedir(apr_dir_t *dir)
 
 apr_status_t apr_readdir(apr_dir_t *thedir)
 {
+    /* The while loops below allow us to skip all invalid file names, so that
+     * we aren't reporting any files where their absolute paths are too long.
+     */
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
@@ -157,6 +189,13 @@ apr_status_t apr_readdir(apr_dir_t *thedir)
         else if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
             return apr_get_os_error();
         }
+        while (thedir->rootlen &&
+               thedir->rootlen + wcslen(thedir->w.entry->cFileName) >= MAX_PATH)
+        {
+            if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
+                return apr_get_os_error();
+            }
+        }
     }
     else
 #endif
@@ -169,6 +208,13 @@ apr_status_t apr_readdir(apr_dir_t *thedir)
         }
         else if (!FindNextFile(thedir->dirhand, thedir->n.entry)) {
             return apr_get_os_error();
+        }
+        while (thedir->rootlen &&
+               thedir->rootlen + strlen(thedir->n.entry->cFileName) >= MAX_PATH)
+        {
+            if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
+                return apr_get_os_error();
+            }
         }
     }
     return APR_SUCCESS;
