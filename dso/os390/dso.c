@@ -62,7 +62,19 @@
 static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
-    return apr_dso_unload(dso);
+    int rc;
+
+    if (dso->handle == 0)
+        return APR_SUCCESS;
+       
+    rc = dllfree(dso->handle);
+
+    if (rc == 0) {
+        dso->handle = 0;
+        return APR_SUCCESS;
+    }
+    dso->failing_errno = errno;
+    return errno;
 }
 
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
@@ -85,19 +97,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
-    int rc;
-
-    if (handle->handle == 0)
-        return APR_SUCCESS;
-       
-    rc = dllfree(handle->handle);
-
-    if (rc == 0) {
-        handle->handle = 0;
-        return APR_SUCCESS;
-    }
-    handle->failing_errno = errno;
-    return errno;
+    return apr_run_cleanup(handle->pool, handle, dso_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 

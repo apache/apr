@@ -69,6 +69,7 @@ struct apr_dso_handle_t {
     dllhandle  *handle;     /* Handle to the DSO loaded            */
     int failing_errno;      /* Don't save the buffer returned by
                                strerror(); it gets reused          */
+    apr_pool_t *pool;
 };
 
 #endif
