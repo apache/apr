@@ -117,6 +117,22 @@ struct apr_mmap_t {
 
 #if APR_HAS_MMAP || defined(DOXYGEN)
 
+/* Files have to be at least this big before they're mmap()d.  This is to deal
+ * with systems where the expense of doing an mmap() and an munmap() outweighs
+ * the benefit for small files.  It shouldn't be set lower than 1.
+ */
+#ifndef MMAP_THRESHOLD
+#  ifdef SUNOS4
+#    define MMAP_THRESHOLD                (8*1024)
+#  else
+#    define MMAP_THRESHOLD                1
+#  endif /* SUNOS4 */
+#endif /* MMAP_THRESHOLD */
+
+#ifndef MMAP_LIMIT
+#  define MMAP_LIMIT                      (4*1024*1024)
+#endif /* MMAP_LIMIT */
+
 /*   Function definitions */
 
 /** 
