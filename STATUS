@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/01/23 16:46:36 $]
+Last modified at [$Date: 2003/01/27 17:09:09 $]
 
 Release:
 
@@ -30,9 +30,7 @@ RELEASE SHOWSTOPPERS:
         apr_md5.h             (MD5_DIGESTSIZE)
         apr_network_io.h      (MAX_SECONDS_TO_LINGER)
         apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD, 
-                              _POSIX_THREAD_SAFE_FUNCTIONS (?),
-                              nuint8, nuint16, NGetLo8, NGetHi8,
-                              HIBYTE, LOBYTE)
+                              _POSIX_THREAD_SAFE_FUNCTIONS (?))
         apr.hw                (NO_USE_SIGACTION)
 
       1.0 showstopper (not 0.9.x): gstein
