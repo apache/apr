@@ -123,7 +123,6 @@
 
 #define HAVE_STRICMP  1
 #define HAVE_STRNICMP 1
-#define HAVE_STRNICMP 1
 #define HAVE_STRDUP   1
 #define HAVE_STRSTR   1
 
