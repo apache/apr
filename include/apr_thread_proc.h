@@ -587,7 +587,7 @@ APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
 
 #if APR_HAS_THREADS 
 
-#if !defined(OS2) && APR_HAVE_SIGWAIT
+#if APR_HAVE_SIGWAIT && !defined(OS2)
 
 /**
  * Setup the process for a single thread to be used for all signal handling.
