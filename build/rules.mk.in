@@ -176,9 +176,12 @@ clean-recursive distclean-recursive extraclean-recursive:
 	    $(MAKE) "local-$$otarget"; \
 	fi
 
+# autoconf 2.5x is creating a 'autom4te.cache' directory
+# In case someone ran autoconf by hand, get rid of that directory
+# aswell.
 local-clean: x-local-clean
 	$(RM) -f *.o *.lo *.a *.la *.so *.obj $(CLEAN_TARGETS) $(PROGRAMS)
-	$(RM) -rf .libs
+	$(RM) -rf .libs autom4te.cache
 
 local-distclean: local-clean x-local-distclean
 	$(RM) -f Makefile $(DISTCLEAN_TARGETS)

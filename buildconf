@@ -104,4 +104,7 @@ echo "Creating configure ..."
 ### do some work to toss config.cache?
 autoconf
 
+# Remove autoconf 2.5x's cache directory
+rm -rf autom4te.cache
+
 exit 0
