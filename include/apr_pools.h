@@ -73,13 +73,13 @@ extern "C" {
  * Instead, we maintain pools, and allocate items (both memory and I/O
  * handlers) from the pools --- currently there are two, one for per
  * transaction info, and one for config info.  When a transaction is over,
- * we can delete everything in the per-transaction apr_pool_t without fear, 
+ * we can delete everything in the per-transaction apr_pool_t without fear,
  * and without thinking too hard about it either.
  */
-/** 
+/**
  * @defgroup APR_Pool Pool Allocation Functions
  * @ingroup APR
- * @{ 
+ * @{
  */
 #include "apr.h"
 #include "apr_errno.h"
@@ -153,7 +153,7 @@ typedef int (*apr_abortfunc_t)(int retcode);
 /**
  * Setup all of the internal structures required to use pools
  * @remark Programs do NOT need to call this directly.  APR will call this
- *      automatically from apr_initialize. 
+ *      automatically from apr_initialize.
  * @internal
  */
 APR_DECLARE(apr_status_t) apr_pool_initialize(void);
@@ -161,10 +161,10 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void);
 /**
  * Tear down all of the internal structures required to use pools
  * @remark Programs do NOT need to call this directly.  APR will call this
- *      automatically from apr_terminate. 
+ *      automatically from apr_terminate.
  * @internal
  */
-APR_DECLARE(void) apr_pool_terminate(void); 
+APR_DECLARE(void) apr_pool_terminate(void);
 
 
 /*
@@ -176,7 +176,7 @@ APR_DECLARE(void) apr_pool_terminate(void);
  * @param newpool The pool we have just created.
  * @param parent The parent pool.  If this is NULL, the new pool is a root
  *        pool.  If it is non-NULL, the new pool will inherit all
- *        of its parent pool's attributes, except the apr_pool_t will 
+ *        of its parent pool's attributes, except the apr_pool_t will
  *        be a sub-pool.
  * @param apr_abort A function to use if the pool cannot allocate more memory.
  * @param flags Flags indicating how the pool should be created:
@@ -224,7 +224,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
  * @param newpool The pool we have just created.
  * @param parent The parent pool.  If this is NULL, the new pool is a root
  *        pool.  If it is non-NULL, the new pool will inherit all
- *        of its parent pool's attributes, except the apr_pool_t will 
+ *        of its parent pool's attributes, except the apr_pool_t will
  *        be a sub-pool.
  */
 #if defined(DOXYGEN)
@@ -263,8 +263,8 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
  * Clear all memory in the pool and run all the cleanups. This also destroys all
  * subpools.
  * @param p The pool to clear
- * @remark  This does not actually free the memory, it just allows the pool
- *       to re-use this memory for the next allocation.
+ * @remark This does not actually free the memory, it just allows the pool
+ *         to re-use this memory for the next allocation.
  * @see apr_pool_destroy()
  */
 APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
@@ -326,19 +326,19 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
 
 /**
  * Allocate a block of memory from a pool
- * @param p The pool to allocate from 
- * @param size The amount of memory to allocate 
+ * @param p The pool to allocate from
+ * @param size The amount of memory to allocate
  * @return The allocated memory
  */
 APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t size);
 
 /**
  * Debug version of apr_palloc
- * @param p See: apr_palloc 
- * @param size See: apr_palloc 
+ * @param p See: apr_palloc
+ * @param size See: apr_palloc
  * @param file_line Where the function is called from.
  *        This is usually APR_POOL__FILE_LINE__.
- * @return See: apr_palloc 
+ * @return See: apr_palloc
  */
 APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *p, apr_size_t size,
                                      const char *file_line);
@@ -347,22 +347,22 @@ APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *p, apr_size_t size,
 #define apr_palloc(p, size) \
     apr_palloc_debug(p, size, APR_POOL__FILE_LINE__)
 #endif
-    
+
 /**
  * Allocate a block of memory from a pool and set all of the memory to 0
- * @param p The pool to allocate from 
- * @param size The amount of memory to allocate 
+ * @param p The pool to allocate from
+ * @param size The amount of memory to allocate
  * @return The allocated memory
  */
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
 
 /**
  * Debug version of apr_pcalloc
- * @param p See: apr_pcalloc 
- * @param size See: apr_pcalloc 
+ * @param p See: apr_pcalloc
+ * @param size See: apr_pcalloc
  * @param file_line Where the function is called from.
  *        This is usually APR_POOL__FILE_LINE__.
- * @return See: apr_pcalloc 
+ * @return See: apr_pcalloc
  */
 APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *p, apr_size_t size,
                                       const char *file_line);
@@ -404,7 +404,7 @@ APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
 
 /**
  * Determine if pool a is an ancestor of pool b
- * @param a The pool to search 
+ * @param a The pool to search
  * @param b The pool to search for
  * @return True if a is an ancestor of b, NULL is considered an ancestor
  *         of all pools.
@@ -480,9 +480,9 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
 
 /**
  * Register a function to be called when a pool is cleared or destroyed
- * @param p The pool register the cleanup with 
+ * @param p The pool register the cleanup with
  * @param data The data to pass to the cleanup function.
- * @param plain_cleanup The function to call when the pool is cleared 
+ * @param plain_cleanup The function to call when the pool is cleared
  *                      or destroyed
  * @param child_cleanup The function to call when a child process is created -
  *                      this function is called in the child, obviously!
@@ -495,7 +495,7 @@ APR_DECLARE(void) apr_pool_cleanup_register(
 
 /**
  * Remove a previously registered cleanup function
- * @param p The pool remove the cleanup from 
+ * @param p The pool remove the cleanup from
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
  * @remarks For some strange reason only the plain_cleanup is handled by this
@@ -520,7 +520,7 @@ APR_DECLARE(void) apr_pool_child_cleanup_set(
 /**
  * Run the specified cleanup function immediately and unregister it. Use
  * @a data instead of the data that was registered with the cleanup.
- * @param p The pool remove the cleanup from 
+ * @param p The pool remove the cleanup from
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
  */
@@ -530,7 +530,7 @@ APR_DECLARE(apr_status_t) apr_pool_cleanup_run(
     apr_status_t (*cleanup)(void *));
 
 /**
- * An empty cleanup function 
+ * An empty cleanup function
  * @param data The data to cleanup
  */
 APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
@@ -539,7 +539,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
  * buffers, *don't* wait for subprocesses, and *don't* free any memory.
  */
 /**
- * Run all of the child_cleanups, so that any unnecessary files are 
+ * Run all of the child_cleanups, so that any unnecessary files are
  * closed because we are about to exec a new program
  */
 APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
