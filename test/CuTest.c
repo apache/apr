@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "CuTest.h"
 
@@ -203,7 +204,7 @@ void CuAssertPtrEquals(CuTest* tc, void* expected, void* actual)
 {
 	char buf[STRING_MAX];
 	if (expected == actual) return;
-	sprintf(buf, "expected pointer <0x%X> but was <0x%X>", expected, actual);
+	sprintf(buf, "expected pointer <%p> but was <%p>", expected, actual);
 	CuFail(tc, buf);
 }
 
@@ -211,7 +212,7 @@ void CuAssertPtrNotNull(CuTest* tc, void* pointer)
 {
 	char buf[STRING_MAX];
 	if (pointer != NULL ) return;
-	sprintf(buf, "null pointer unexpected", pointer);
+	sprintf(buf, "null pointer unexpected, but was <%p>", pointer);
 	CuFail(tc, buf);
 }
 
@@ -290,11 +291,6 @@ void CuSuiteSummary(CuSuite* testSuite, CuString* summary)
 
 void CuSuiteOverView(CuSuite* testSuite, CuString* details)
 {
-	int i;
-	int failCount = 0;
-	int notImpleCount = 0;
-	int passCount = testSuite->count - testSuite->failCount;
-
 	CuStringAppendFormat(details, "%d %s run:  %d passed, %d failed, "
 			     "%d not implemented.\n",
 			     testSuite->count, 
@@ -308,9 +304,6 @@ void CuSuiteDetails(CuSuite* testSuite, CuString* details)
 {
 	int i;
 	int failCount = 0;
-	int notImpleCount = 0;
-	int passCount = testSuite->count - testSuite->failCount;
-	char* testWord = passCount == 1 ? "test" : "tests";
 
 	if (testSuite->failCount != 0 && verbose)
 	{
@@ -391,9 +384,7 @@ void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details)
 	int i;
 	int failCount = 0;
 	int notImplCount = 0;
-	int passCount = 0;
 	int count = 0;
-	char *testWord = passCount == 1 ? "test" : "tests";
 
 	for (i = 0 ; i < testSuite->count ; ++i)
 	{
