@@ -56,38 +56,43 @@
 # buildconf: Build the support scripts needed to compile from a
 #            checked-out version of the source code.
 
-# Verify that the builder has the right config tools installed
-#
-build/buildcheck.sh || exit 1
+osname=`build/config.guess`
+case "$osname" in
+    *os2_emx*)
+        echo "Using OS/2-specific aplibtool"
+        cp -f build/os2_libtool.m4 aclocal.m4
+        ;;
+    *)
+        # Verify that the builder has the right config tools installed
+        #
+        build/buildcheck.sh || exit 1
 
-libtoolize=`build/PrintPath glibtoolize libtoolize`
-if [ "x$libtoolize" = "x" ]; then
-    echo "libtoolize not found in path"
-    exit 1
-fi
+        libtoolize=`build/PrintPath glibtoolize libtoolize`
+        if [ "x$libtoolize" = "x" ]; then
+            echo "libtoolize not found in path"
+            exit 1
+        fi
 
-# Create the libtool helper files
-#
-# Note: we copy (rather than link) them to simplify distribution.
-# Note: APR supplies its own config.guess and config.sub -- we do not
-#       rely on libtool's versions
-#
-echo "Copying libtool helper files ..."
+        # Create the libtool helper files
+        #
+        # Note: we copy (rather than link) them to simplify distribution.
+        # Note: APR supplies its own config.guess and config.sub -- we do not
+        #       rely on libtool's versions
+        #
+        echo "Copying libtool helper files ..."
 
-$libtoolize --copy --automake
+        $libtoolize --copy --automake
 
-ltpath=`dirname $libtoolize`
-ltfile=`cd $ltpath/../share/aclocal ; pwd`/libtool.m4
+        ltpath=`dirname $libtoolize`
+        ltfile=`cd $ltpath/../share/aclocal ; pwd`/libtool.m4
 
-if [ ! -f $ltfile ]; then
-    echo "$ltfile not found"
-    exit 1
-fi
-cp -f $ltfile build/libtool.m4
-
-# This is just temporary until people's workspaces are cleared -- remove
-# any old aclocal.m4 left over from prior build so it doesn't cause errors.
-rm -f aclocal.m4
+        if [ ! -f $ltfile ]; then
+            echo "$ltfile not found"
+            exit 1
+        fi
+        cp -f $ltfile aclocal.m4
+        ;;
+esac
 
 #
 # Generate the autoconf header and ./configure
