@@ -226,7 +226,7 @@ AC_ARG_ENABLE(maintainer-mode,[  --enable-maintainer-mode  Turn on debugging and
    if test "$GCC" = "yes"; then
      APR_ADDTO(CFLAGS,[-Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations])
    elif test "$AIX_XLC" = "yes"; then
-     APR_ADDTO(CFLAGS,-qfullpath -qinitauto=FE -qcheck=all)
+     APR_ADDTO(CFLAGS,-qfullpath -qinitauto=FE -qcheck=all -qinfo=pro)
    fi
 ])dnl
 
