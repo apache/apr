@@ -128,13 +128,13 @@ int main(void)
         if (!fgets(rootpath, 256, stdin))
             exit(0);
         for (eos = strchr(rootpath, '\0'); --eos >= rootpath; )
-            if (isspace(*eos))
+            if (apr_isspace(*eos))
                 *eos = '\0';
         fprintf(stdout, "Enter an add path$ ");
         if (!fgets(addpath, 256, stdin))
             exit(0);
         for (eos = strchr(addpath, '\0'); --eos >= addpath; )
-            if (isspace(*eos))
+            if (apr_isspace(*eos))
                 *eos = '\0';
         merge_result(rootpath, addpath, 0);
         merge_result(rootpath, addpath, APR_FILEPATH_NOTABOVEROOT);

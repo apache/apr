@@ -57,6 +57,7 @@
 #include "crtdbg.h"
 #include "fileio.h"
 #include "assert.h"
+#include "apr_lib.h"
 
 apr_oslevel_e apr_os_level = APR_WIN_UNK;
 
@@ -73,7 +74,7 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
             static unsigned int servpack = 0;
             char *pservpack;
             if (pservpack = oslev.szCSDVersion) {
-                while (*pservpack && !isdigit(*pservpack)) {
+                while (*pservpack && !apr_isdigit(*pservpack)) {
                     pservpack++;
                 }
                 if (*pservpack)
@@ -129,7 +130,7 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
         else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
             char *prevision;
             if (prevision = oslev.szCSDVersion) {
-                while (*prevision && !isupper(*prevision)) {
+                while (*prevision && !apr_isupper(*prevision)) {
                      prevision++;
                 }
             }
