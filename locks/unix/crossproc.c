@@ -376,6 +376,7 @@ ap_status_t child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fnam
 
     new = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
 
+    ap_cpystrn(new->fname, fname, strlen(fname));
     new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
     if (new->interproc == -1) {
         destroy_inter_lock(new);
