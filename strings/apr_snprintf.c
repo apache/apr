@@ -708,6 +708,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 	    /*
 	     * Default variable settings
 	     */
+            boolean_e print_something = YES;
 	    adjust = RIGHT;
 	    alternate_form = print_sign = print_blank = NO;
 	    pad_char = ' ';
@@ -1000,6 +1001,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 		    *(va_arg(ap, short *)) = cc;
 		else
 		    *(va_arg(ap, int *)) = cc;
+                print_something = NO;
 		break;
 
 		/*
@@ -1131,10 +1133,12 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 	    /*
 	     * Print the string s. 
 	     */
-	    for (i = s_len; i != 0; i--) {
-		INS_CHAR(*s, sp, bep, cc);
-		s++;
-	    }
+            if (print_something == YES) {
+                for (i = s_len; i != 0; i--) {
+  		    INS_CHAR(*s, sp, bep, cc);
+		    s++;
+                }
+            }
 
 	    if (adjust_width && adjust == LEFT && min_width > s_len)
 		PAD(min_width, s_len, pad_char);
