@@ -142,14 +142,12 @@ APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator)
 }
 
 #if APR_HAS_THREADS
-APR_INLINE
 APR_DECLARE(void) apr_allocator_set_mutex(apr_allocator_t *allocator,
                                           apr_thread_mutex_t *mutex)
 {
     allocator->mutex = mutex;
 }
 
-APR_INLINE
 APR_DECLARE(apr_thread_mutex_t *) apr_allocator_get_mutex(
                                       apr_allocator_t *allocator)
 {
@@ -194,9 +192,8 @@ APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
 #endif
 }
 
-APR_INLINE
-APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
-                                                 apr_size_t size)
+static APR_INLINE
+apr_memnode_t *allocator_alloc(apr_allocator_t *allocator, apr_size_t size)
 {
     apr_memnode_t *node, **ref;
     apr_uint32_t i, index, max_index;
@@ -331,9 +328,8 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
     return node;
 }
 
-APR_INLINE
-APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
-                                     apr_memnode_t *node)
+static APR_INLINE
+void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
 {
     apr_memnode_t *next, *freelist = NULL;
     apr_uint32_t index, max_index;
@@ -393,6 +389,18 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
         freelist = node->next;
         free(node);
     }
+}
+
+APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
+                                                 apr_size_t size)
+{
+    return allocator_alloc(allocator, size);
+}
+
+APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
+                                     apr_memnode_t *node)
+{
+    allocator_free(allocator, node);
 }
 
 
@@ -617,7 +625,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
         node->next->ref = node->ref;
     }
     else {
-        if ((node = apr_allocator_alloc(pool->allocator, size)) == NULL) {
+        if ((node = allocator_alloc(pool->allocator, size)) == NULL) {
             if (pool->abort_fn)
                 pool->abort_fn(APR_ENOMEM);
 
@@ -719,7 +727,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
         return;
 
     *active->ref = NULL;
-    apr_allocator_free(pool->allocator, active->next);
+    allocator_free(pool->allocator, active->next);
     active->next = active;
     active->ref = &active->next;
 }
@@ -778,7 +786,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     /* Free all the nodes in the pool (including the node holding the
      * pool struct), by giving them back to the allocator.
      */
-    apr_allocator_free(allocator, active);
+    allocator_free(allocator, active);
 
     /* If this pool happens to be the owner of the allocator, free
      * everything in the allocator (that includes the pool struct
@@ -809,8 +817,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     if (allocator == NULL)
         allocator = parent->allocator;
 
-    if ((node = apr_allocator_alloc(allocator,
-                                    MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
+    if ((node = allocator_alloc(allocator,
+                                MIN_ALLOC - APR_MEMNODE_T_SIZE)) == NULL) {
         if (abort_fn)
             abort_fn(APR_ENOMEM);
 
@@ -944,7 +952,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
         node = pool->active;
     }
     else {
-        if ((node = apr_allocator_alloc(pool->allocator, size)) == NULL)
+        if ((node = allocator_alloc(pool->allocator, size)) == NULL)
             return -1;
 
         if (ps->got_a_new_node) {
@@ -996,8 +1004,8 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     strp = ps.node->first_avail;
     ps.node->first_avail += size;
 
-   if (ps.free)
-        apr_allocator_free(pool->allocator, ps.free);
+    if (ps.free)
+        allocator_free(pool->allocator, ps.free);
 
     /*
      * Link the node in if it's a new one
