@@ -157,3 +157,26 @@ When creating a new function, please try to adhere to these rules.
 2)  If a function needs a context, it should be the last argument.
 3)  These rules are flexible, especially if it makes the code easier
     to understand because it mimics a standard function.
+
+Documentation
+
+Whenever a new function is added to APR, it MUST be documented.  New 
+functions will not be committed unless there are docs to go along with them.
+The documentation should be a comment block above the function in the unix
+.c file.  This does not mean you must implement the function for Unix.  But,
+it would be nice if you submitted a file with the prototypes and the comments
+above the prototypes to be checked into the unix tree.
+
+The format for the comment block is:
+
+/* ***APRDOC********************************************************
+ * Function prototype with variable names
+ *    A one or two line description of what the function does.
+ * arg 1) A brief description of the first argument.
+ * ...
+ * arg N) A brief description of the Nth argument.
+ * NOTE:  This is optional.  If there is anything programmers need to
+ *        know about your function, add it here. 
+ */                                                                             
+
+For an actual example, look at any function in the fileio/unix directory.
