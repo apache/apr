@@ -511,7 +511,7 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
 
 APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
                                           apr_os_file_t *thefile,
-					                      apr_int32_t flags,
+                                          apr_int32_t flags,
                                           apr_pool_t *cont)
 {
     (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
