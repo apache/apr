@@ -255,7 +255,6 @@ static void test_atomics_threaded(CuTest *tc)
     }
 
     for (i = 0; i < NUM_THREADS; i++) {
-        char *str;
         apr_thread_join(&s1[i], t1[i]);
         apr_thread_join(&s2[i], t2[i]);
         apr_thread_join(&s3[i], t3[i]);
