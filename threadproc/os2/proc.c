@@ -247,7 +247,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         DosSetFHState(attr->parent_err->filedes, OPEN_FLAGS_NOINHERIT);
     }
 
-    signal(SIGCHLD, SIG_DFL); /*not sure if this is needed or not */
+    ap_signal(SIGCHLD, SIG_DFL); /*not sure if this is needed or not */
 
     if (attr->currdir != NULL) {
         _getcwd2(savedir, sizeof(savedir));

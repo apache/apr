@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
     int args_left = 2;
 
     tempfilename = NULL;
-    signal(SIGINT, (void (*)(int)) interrupted);
+    ap_signal(SIGINT, (void (*)(int)) interrupted);
 
     /*
      * Preliminary check to make sure they provided at least

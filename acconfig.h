@@ -61,12 +61,13 @@
 
 #ifdef HAVE_SIGACTION
 typedef void Sigfunc(int);
-#define signal(s,f)    ap_signal(s, f)
-Sigfunc *signal(int signo, Sigfunc * func);
+Sigfunc *ap_signal(int signo, Sigfunc * func);
 
 #if defined(SIG_ING) && !defined(SIG_ERR)
 #define SIG_ERR ((Sigfunc *)-1)
 #endif
+#else
+#define ap_signal(a,b) signal(a,b)
 #endif
 
 #if !defined(HAVE_PTHREAD_SIGMASK) && defined(_AIX)
