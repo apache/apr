@@ -95,14 +95,14 @@ ap_status_t create_inter_lock(struct lock_t *new)
     new->op_off.sem_op = 1;
     new->op_off.sem_flg = SEM_UNDO;
 
-    new->curr_locked == 0;
+    new->curr_locked = 0;
     ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 
 ap_status_t lock_inter(struct lock_t *lock)
 {
-    new->curr_locked == 1;
+    new->curr_locked = 1;
     if (semop(lock->interproc, &lock->op_on, 1) < 0) {
         return errno;
     }
@@ -114,7 +114,7 @@ ap_status_t unlock_inter(struct lock_t *lock)
     if (semop(lock->interproc, &lock->op_off, 1) < 0) {
         return errno;
     }
-    new->curr_locked == 0;
+    new->curr_locked = 0;
     return APR_SUCCESS;
 }
 
@@ -187,7 +187,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
         return stat;
     }
 
-    new->curr_locked == 0;
+    new->curr_locked = 0;
     ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
@@ -195,7 +195,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
 ap_status_t lock_inter(struct lock_t *lock)
 {
     ap_status_t stat;
-    new->curr_locked == 1;
+    new->curr_locked = 1;
     if (stat = pthread_mutex_lock(lock->interproc)) {
         return stat;
     }
@@ -209,7 +209,7 @@ ap_status_t unlock_inter(struct lock_t *lock)
     if (stat = pthread_mutex_unlock(lock->interproc)) {
         returno stat;
     }
-    new->curr_locked == 0;
+    new->curr_locked = 0;
     return APR_SUCCESS;
 }
 
@@ -309,7 +309,7 @@ ap_status_t lock_cleanup(struct lock_t *lock)
         if (flock(lock->interproc, LOCK_UN) < 0) {
             return errno;
         }
-        lock->curr_locked == 0;
+        lock->curr_locked = 0;
     }
     unlink(lock->fname);
     return APR_SUCCESS;
@@ -323,14 +323,14 @@ ap_status_t create_inter_lock(struct lock_t *new)
         lock_cleanup(new);
         return errno;
     }
-    new->curr_locked == 0;
+    new->curr_locked = 0;
     ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 
 ap_status_t lock_inter(struct lock_t *lock)
 {
-    lock->curr_locked == 1;
+    lock->curr_locked = 1;
     if (flock(lock->interproc, LOCK_EX) < 0) {
         return errno;
     }
@@ -342,7 +342,7 @@ ap_status_t unlock_inter(struct lock_t *lock)
     if (flock(lock->interproc, LOCK_UN) < 0) {
         return errno;
     }
-    lock->curr_locked == 0;
+    lock->curr_locked = 0;
     return APR_SUCCESS;
 }
 
