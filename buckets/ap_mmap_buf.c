@@ -77,7 +77,7 @@ static ap_status_t mmap_bucket_insert(ap_bucket *e, const void *buf,
     ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
     ap_mmap_t *mm = (ap_mmap_t *)buf;
 
-    b->alloc_addr = mm->mm;;
+    b->alloc_addr = mm->mm;
     b->len = nbytes;
     *w = nbytes;
     return APR_SUCCESS;
