@@ -78,7 +78,12 @@ ap_status_t ap_create_thread_private(ap_threadkey_t **key,
 
 ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
 {
+#ifdef PTHREAD_GETSPECIFIC_TAKES_TWO_ARGS
+    if (pthread_getspecific(key->key,new))
+       *new = NULL;
+#else  
     (*new) = pthread_getspecific(key->key);
+#endif
     return APR_SUCCESS;
 }
 
