@@ -43,6 +43,10 @@
 extern "C" {
 #endif
 
+/**
+ * @package Fnmatch functions 
+ */
+
 #define	FNM_NOMATCH	1	/* Match failed. */
 
 #define	FNM_NOESCAPE	0x01	/* Disable backslash escaping. */
@@ -51,35 +55,28 @@ extern "C" {
 /* This flag is an Apache addition */
 #define FNM_CASE_BLIND  0x08    /* Compare characters case-insensitively. */
 
-/*
-
-=head1 ap_status_t ap_fnmatch(const char *pattern, const char *strings, int flags)
-
-B<Try to match the string to the given pattern.>
-
-    arg 1) The pattern to match to
-    arg 2) The string we are trying to match
-    arg 3) flags to use in the match.  Bitwise OR of:
-                FNM_NOESCAPE   --  Disable backslash escaping
-                FNM_PATHNAME   --  Slash must be matched by slash
-                FNM_PERIOD     --  Period must be matched by period
-                FNM_CASE_BLIND --  Compare characters case-insensitively.
-
-=cut
+/**
+ * Try to match the string to the given pattern.
+ * @param pattern The pattern to match to
+ * @param strings The string we are trying to match
+ * @param flags flags to use in the match.  Bitwise OR of:
+ * <PRE>
+ *              FNM_NOESCAPE   --  Disable backslash escaping
+ *              FNM_PATHNAME   --  Slash must be matched by slash
+ *              FNM_PERIOD     --  Period must be matched by period
+ *              FNM_CASE_BLIND --  Compare characters case-insensitively.
+ * </PRE>
+ * @deffunc ap_status_t ap_fnmatch(const char *pattern, const char *strings, int flags)
  */
 
 APR_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
 			    int flags);
 
-/*
-
-=head1 ap_status_t ap_is_fnmatch(const char *pattern)
-
-B<Determine if the given pattern is a regular expression.>
-
-    arg 1) The pattern to search for glob characters.
-
-=cut
+/**
+ * Determine if the given pattern is a regular expression.
+ * @param pattern The pattern to search for glob characters.
+ * @return non-zero if pattern has any glob characters in it
+ * @deffunc int ap_is_fnmatch(const char *pattern)
  */
 APR_EXPORT(int) ap_is_fnmatch(const char *pattern);
 
