@@ -285,3 +285,36 @@ AC_DEFUN(APR_ADDTO,[
   $1="$$1 $2"; export $1
 ])
 
+dnl
+dnl APR_CHECK_ICONV_INBUF
+dnl
+dnl  Decide whether or not the inbuf parameter to iconv() is const.
+dnl
+dnl  We try to compile something without const.  If it fails to 
+dnl  compile, we assume that the system's iconv() has const.  
+dnl  Unfortunately, we won't realize when there was a compile
+dnl  warning, so we allow a variable -- apr_iconv_inbuf_const -- to
+dnl  be set in hints.m4 to specify whether or not iconv() has const
+dnl  on this parameter.
+dnl
+AC_DEFUN(APR_CHECK_ICONV_INBUF,[
+AC_MSG_CHECKING(for type of inbuf parameter to iconv)
+if test "x$apr_iconv_inbuf_const" = "x"; then
+    AC_TRY_COMPILE([
+    #include <stddef.h>
+    #include <iconv.h>
+    ],[
+    #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR < 2
+    #error We know this version of glibc has const char **, so fail this compile
+    #endif
+    iconv(0,(char **)0,(size_t *)0,(char **)0,(size_t *)0);
+    ], apr_iconv_inbuf_const="0", apr_iconv_inbuf_const="1")
+fi
+if test "$apr_iconv_inbuf_const" = "1"; then
+    AC_DEFINE(APR_ICONV_INBUF_CONST, 1, [Define if the inbuf parm to iconv() is const char **])
+    msg="const char **"
+else
+    msg="char **"
+fi
+AC_MSG_RESULT([$msg])
+])
