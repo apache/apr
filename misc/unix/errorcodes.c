@@ -206,12 +206,68 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 
 #elif defined(WIN32)
 
+static struct {
+    apr_status_t code;
+    char *msg;
+} gaErrorList[] = {
+    WSAEINTR,           "Interrupted system call",
+    WSAEBADF,           "Bad file number",
+    WSAEACCES,          "Permission denied",
+    WSAEFAULT,          "Bad address",
+    WSAEINVAL,          "Invalid argument",
+    WSAEMFILE,          "Too many open sockets",
+    WSAEWOULDBLOCK,     "Operation would block",
+    WSAEINPROGRESS,     "Operation now in progress",
+    WSAEALREADY,        "Operation already in progress",
+    WSAENOTSOCK,        "Socket operation on non-socket",
+    WSAEDESTADDRREQ,    "Destination address required",
+    WSAEMSGSIZE,        "Message too long",
+    WSAEPROTOTYPE,      "Protocol wrong type for socket",
+    WSAENOPROTOOPT,     "Bad protocol option",
+    WSAEPROTONOSUPPORT, "Protocol not supported",
+    WSAESOCKTNOSUPPORT, "Socket type not supported",
+    WSAEOPNOTSUPP,      "Operation not supported on socket",
+    WSAEPFNOSUPPORT,    "Protocol family not supported",
+    WSAEAFNOSUPPORT,    "Address family not supported",
+    WSAEADDRINUSE,      "Address already in use",
+    WSAEADDRNOTAVAIL,   "Can't assign requested address",
+    WSAENETDOWN,        "Network is down",
+    WSAENETUNREACH,     "Network is unreachable",
+    WSAENETRESET,       "Net connection reset",
+    WSAECONNABORTED,    "Software caused connection abort",
+    WSAECONNRESET,      "Connection reset by peer",
+    WSAENOBUFS,         "No buffer space available",
+    WSAEISCONN,         "Socket is already connected",
+    WSAENOTCONN,        "Socket is not connected",
+    WSAESHUTDOWN,       "Can't send after socket shutdown",
+    WSAETOOMANYREFS,    "Too many references, can't splice",
+    WSAETIMEDOUT,       "Connection timed out",
+    WSAECONNREFUSED,    "Connection refused",
+    WSAELOOP,           "Too many levels of symbolic links",
+    WSAENAMETOOLONG,    "File name too long",
+    WSAEHOSTDOWN,       "Host is down",
+    WSAEHOSTUNREACH,    "No route to host",
+    WSAENOTEMPTY,       "Directory not empty",
+    WSAEPROCLIM,        "Too many processes",
+    WSAEUSERS,          "Too many users",
+    WSAEDQUOT,          "Disc quota exceeded",
+    WSAESTALE,          "Stale NFS file handle",
+    WSAEREMOTE,         "Too many levels of remote in path",
+    WSASYSNOTREADY,     "Network system is unavailable",
+    WSAVERNOTSUPPORTED, "Winsock version out of range",
+    WSANOTINITIALISED,  "WSAStartup not yet called",
+    WSAEDISCON,         "Graceful shutdown in progress",
+    WSAHOST_NOT_FOUND,  "Host not found",
+    WSANO_DATA,         "No host data of that type was found",
+    0,                  NULL
+};
+
+
 static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode)
 {
     DWORD len;
     DWORD i;
 
-    
     len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
                         NULL,
                         errcode,
@@ -219,6 +275,16 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
                         (LPTSTR) buf,
                         bufsize,
                         NULL);
+
+    if (!len) {
+        for (i = 0; gaErrorList[i].msg; ++i) {
+            if (gaErrorList[i].code == errcode) {
+                apr_cpystrn(buf, gaErrorList[i].msg, bufsize);
+                len = strlen(buf);
+                break;
+            }
+        }
+    }
 
     if (len) {
         /* FormatMessage put the message in the buffer, but it may
