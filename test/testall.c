@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
                 }
 
                 CuSuiteListAdd(alltests, tests[j].func());
+                break;
             }
         }
     }
