@@ -78,6 +78,52 @@ apr_status_t sononblock(SOCKET sd)
     return APR_SUCCESS;
 }
 
+
+APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
+{
+    apr_status_t stat;
+
+    if (t == 0) {
+        /* Set the socket non-blocking if it was previously blocking */
+        if (sock->timeout != 0) {
+            if ((stat = sononblock(sock->sock)) != APR_SUCCESS)
+                return stat;
+        }
+    }
+    else if (t > 0) {
+        /* Set the socket to blocking if it was previously non-blocking */
+        if (sock->timeout == 0) {
+            if ((stat = soblock(sock->sock)) != APR_SUCCESS)
+                return stat;
+        }
+        /* Reset socket timeouts if the new timeout differs from the old timeout */
+        if (sock->timeout != t) 
+        {
+            /* Win32 timeouts are in msec */
+            sock->timeout_ms = apr_time_as_msec(t);
+            setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, 
+                       (char *) &sock->timeout_ms, 
+                       sizeof(sock->timeout_ms));
+            setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, 
+                       (char *) &sock->timeout_ms, 
+                       sizeof(sock->timeout_ms));
+        }
+    }
+    else if (t < 0) {
+        int zero = 0;
+        /* Set the socket to blocking with infinite timeouts */
+        if ((stat = soblock(sock->sock)) != APR_SUCCESS)
+            return stat;
+        setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, 
+                   (char *) &zero, sizeof(zero));
+        setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, 
+                   (char *) &zero, sizeof(zero));
+    }
+    sock->timeout = t;
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
                                            apr_int32_t opt, apr_int32_t on)
 {
@@ -89,10 +135,7 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
     switch (opt) {
     case APR_SO_TIMEOUT: 
     {
-        if (on > 0) {
-            on = on/1000;  /* Convert from APR units (uS) to windows units (mS) */ 
-        }
-
+        /* XXX: to be deprecated */
         if (on == 0) {
             /* Set the socket non-blocking if it was previously blocking */
             if (sock->timeout != 0) {
@@ -107,9 +150,16 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
                     return stat;
             }
             /* Reset socket timeouts if the new timeout differs from the old timeout */
-            if (sock->timeout != on) {
-                setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char *) &on, sizeof(on));
-                setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &on, sizeof(on));
+            if (sock->timeout != on) 
+            {
+                /* Win32 timeouts are in msec */
+                sock->timeout_ms = apr_time_to_msec(on);
+                setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, 
+                           (char *) &sock->timeout_ms, 
+                           sizeof(sock->timeout_ms));
+                setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, 
+                           (char *) &sock->timeout_ms, 
+                           sizeof(sock->timeout_ms));
             }
         }
         else if (on < 0) {
@@ -188,14 +238,21 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
     return APR_SUCCESS;
 }
 
+
+APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock, apr_interval_time_t *t)
+{
+    *t = sock->timeout;
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
                                            apr_int32_t opt, apr_int32_t *on)
 {
     switch (opt) {
     case APR_SO_TIMEOUT: 
-        /* Convert from milliseconds (windows units) to microseconds 
-         * (APR units) */
-        *on = (apr_int32_t)(sock->timeout * 1000);
+        /* XXX: to be deprecated */
+        *on = sock->timeout;
         break;
     case APR_SO_DISCONNECTED:
         *on = sock->disconnected;
