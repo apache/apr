@@ -52,38 +52,29 @@
  * <http://www.apache.org/>.
  */
 
+#include "test_apr.h"
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_hash.h"
-#if APR_HAVE_STDIO_H
-#include <stdio.h>
-#endif
-#if APR_HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#if APR_HAVE_STRING_H
-#include <string.h>
-#endif
 
-static void dump_hash(apr_pool_t *p, apr_hash_t *h) 
+static void dump_hash(apr_pool_t *p, apr_hash_t *h, char *str) 
 {
     apr_hash_index_t *hi;
     char *val, *key;
     apr_ssize_t len;
     int i = 0;
 
+    str[0] = '\0';
+
     for (hi = apr_hash_first(p, h); hi; hi = apr_hash_next(hi)) {
         apr_hash_this(hi,(void*) &key, &len, (void*) &val);
-        fprintf(stdout, "Key %s (%" APR_SSIZE_T_FMT ") Value %s\n", key, len, val);
+        apr_snprintf(str, 8196, "%sKey %s (%" APR_SSIZE_T_FMT ") Value %s\n", 
+                     str, key, len, val);
         i++;
     }
-    if (i != apr_hash_count(h)) 
-        fprintf(stderr, "ERROR: #entries (%d) does not match count (%d)\n",
-                i, apr_hash_count(h));
-    else 
-        fprintf(stdout, "#entries %d \n", i);
+    apr_snprintf(str, 8196, "%s#entries %d\n", str, i);
 }
 
 static void sum_hash(apr_pool_t *p, apr_hash_t *h, int *pcount, int *keySum, int *valSum) 
@@ -104,26 +95,85 @@ static void sum_hash(apr_pool_t *p, apr_hash_t *h, int *pcount, int *keySum, int
     *pcount=count;
 }
 
-int main(int argc, const char *const argv[])
+static void hash_make(CuTest *tc)
 {
-    apr_pool_t *cntxt;
-    apr_hash_t *h, *h2, *h3, *h4;
+    apr_hash_t *h = NULL;
 
-    int i, j, *val, *key;
-    char *result;
-    int sumKeys, sumVal, trySumKey, trySumVal;
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+}
 
-    apr_initialize();
-    atexit(apr_terminate);
+static void hash_set(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    char *result = NULL;
 
-    apr_pool_create(&cntxt, NULL);
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
 
-    /* table defaults  */
-    h = apr_hash_make(cntxt);
-    if (h == NULL)  {
-        fprintf(stderr, "ERROR: can not allocate HASH!\n");
-        exit(-1);
-    }
+    apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
+    result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "value", result);
+}
+
+static void hash_reset(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    char *result = NULL;
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
+    result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "value", result);
+
+    apr_hash_set(h, "key", APR_HASH_KEY_STRING, "new");
+    result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "new", result);
+}
+
+static void same_value(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    char *result = NULL;
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_hash_set(h, "same1", APR_HASH_KEY_STRING, "same");
+    result = apr_hash_get(h, "same1", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "same", result);
+
+    apr_hash_set(h, "same2", APR_HASH_KEY_STRING, "same");
+    result = apr_hash_get(h, "same2", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "same", result);
+}
+
+static void key_space(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    char *result = NULL;
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_hash_set(h, "key with space", APR_HASH_KEY_STRING, "value");
+    result = apr_hash_get(h, "key with space", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "value", result);
+}
+
+/* This is kind of a hack, but I am just keeping an existing test.  This is
+ * really testing apr_hash_first, apr_hash_next, and apr_hash_this which 
+ * should be tested in three separate tests, but this will do for now.
+ */
+static void hash_traverse(CuTest *tc)
+{
+    apr_hash_t *h;
+    char str[8196];
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
 
     apr_hash_set(h, "OVERWRITE", APR_HASH_KEY_STRING, "should not see this");
     apr_hash_set(h, "FOO3", APR_HASH_KEY_STRING, "bar3");
@@ -135,39 +185,30 @@ int main(int argc, const char *const argv[])
     apr_hash_set(h, "SAME2", APR_HASH_KEY_STRING, "same");
     apr_hash_set(h, "OVERWRITE", APR_HASH_KEY_STRING, "Overwrite key");
 
-    result = apr_hash_get(h, "FOO2", APR_HASH_KEY_STRING);
-    if (strcmp(result, "bar2"))
-        fprintf(stderr, "ERROR:apr_hash_get FOO2 = %s (should be bar2)\n",
-                result);
+    dump_hash(p, h, str);
+    CuAssertStrEquals(tc, "Key FOO1 (4) Value bar1\n"
+                          "Key FOO2 (4) Value bar2\n"
+                          "Key OVERWRITE (9) Value Overwrite key\n"
+                          "Key FOO3 (4) Value bar3\n"
+                          "Key SAME1 (5) Value same\n"
+                          "Key FOO4 (4) Value bar4\n"
+                          "Key SAME2 (5) Value same\n"
+                          "#entries 7\n", str);
+}
 
-    result = apr_hash_get(h, "SAME2", APR_HASH_KEY_STRING);
-    if (strcmp(result, "same"))
-        fprintf(stderr, "ERROR:apr_hash_get SAME2 = %s (should be same)\n",
-                result);
+/* This is kind of a hack, but I am just keeping an existing test.  This is
+ * really testing apr_hash_first, apr_hash_next, and apr_hash_this which 
+ * should be tested in three separate tests, but this will do for now.
+ */
+static void summation_test(CuTest *tc)
+{
+    apr_hash_t *h;
+    int sumKeys, sumVal, trySumKey, trySumVal;
+    int i, j, *val, *key;
 
-    result = apr_hash_get(h, "OVERWRITE", APR_HASH_KEY_STRING);
-    if (strcmp(result, "Overwrite key"))
-        fprintf(stderr, 
-             "ERROR:apr_hash_get OVERWRITE = %s (should be 'Overwrite key')\n",
-             result);
+    h =apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
 
-    result = apr_hash_get(h, "NOTTHERE", APR_HASH_KEY_STRING);
-    if (result)
-       fprintf(stderr, "ERROR:apr_hash_get NOTTHERE = %s (should be NULL)\n",
-               result);
-        
-    result=apr_hash_get(h, "FOO3", APR_HASH_KEY_STRING);
-    if (strcmp(result, "bar3"))
-        fprintf(stderr, "ERROR:apr_hash_get FOO3 = %s (should be bar3)\n",
-                result);
-        
-    dump_hash(cntxt, h);
-
-    h2 =apr_hash_make(cntxt);
-    if (h2 == NULL)  {
-        fprintf(stderr, "ERROR: can not allocate HASH!\n");
-        exit(-1);
-    }
     sumKeys = 0;
     sumVal = 0;
     trySumKey = 0;
@@ -177,117 +218,224 @@ int main(int argc, const char *const argv[])
         j = i * 10 + 1;
         sumKeys += j;
         sumVal += i;
-        key = apr_palloc(cntxt, sizeof(int));
+        key = apr_palloc(p, sizeof(int));
         *key = j;
-        val = apr_palloc(cntxt, sizeof(int));
+        val = apr_palloc(p, sizeof(int));
         *val = i;
-        apr_hash_set(h2, key, sizeof(int), val);
+        apr_hash_set(h, key, sizeof(int), val);
     }
 
-    sum_hash(cntxt, h2, &i, &trySumKey, &trySumVal);
-    if (i==100) {
-       fprintf(stdout, "All keys accounted for\n");
-    } else {
-       fprintf(stderr, "ERROR: Only got %d (out of 100)\n",i);
-    }
-    if (trySumVal != sumVal) {
-       fprintf(stderr, "ERROR:Values don't add up Got %d expected %d\n",
-               trySumVal, sumVal);
-    }
-    if (trySumKey != sumKeys) {
-       fprintf(stderr, "ERROR:Keys don't add up Got %d expected %d\n",
-               trySumKey, sumKeys);
-    }
-
-    j=891;
-    apr_hash_set(h2, &j, sizeof(int), NULL);
-    
-    if (apr_hash_get(h2, &j, sizeof(int))) {
-      fprintf(stderr, "ERROR: Delete not working\n");
-    } else {
-      fprintf(stdout, "Delete working\n");
-    }
-    sum_hash(cntxt, h2, &i, &trySumKey, &trySumVal);
-
-    sumKeys -= 891;
-    sumVal -= 89;
-
-    if (i==99) {
-       fprintf(stdout, "All keys accounted for.. Delete OK\n");
-    } else {
-       fprintf(stderr, "Only got %d (out of 99) Delete Not OK\n", i);
-    }
-    if (trySumVal != sumVal) {
-       fprintf(stderr, "ERROR:Values don't add up Got %d expected %d\n",
-               trySumVal, sumVal);
-    }
-    if (trySumKey != sumKeys) {
-       fprintf(stderr, "ERROR:Keys don't add up Got %d expected %d\n",
-               trySumKey, sumKeys);
-    }
-
-    /* test overlay */
-    h3 = apr_hash_make(cntxt);
-    /* test with blank hash tables */
-    h4 = apr_hash_overlay(cntxt, h3, h);
-    
-    if (apr_hash_count(h4) != apr_hash_count(h)) {
-        fprintf(stderr,
-                "ERROR: overlay not working with blank overlay as overlay\n");
-        dump_hash(cntxt, h4);
-    }
-
-    h4 = apr_hash_overlay(cntxt, h, h3);
-    if (apr_hash_count(h4) != apr_hash_count(h)) {
-        fprintf(stderr,
-                "ERROR: overlay not working with blank overlay as base\n");
-        dump_hash(cntxt, h4);
-    }
-
-    h4 = apr_hash_overlay(cntxt, h, h2);
-    if (apr_hash_count(h4) != (apr_hash_count(h) + apr_hash_count(h2)))
-        fprintf(stderr,
-                "ERROR: overlay not working when overlaying 2 unique hashs\n");
-
-    h4 = apr_hash_overlay(cntxt, h, h);
-    if (apr_hash_count(h4) != apr_hash_count(h))  {
-        fprintf(stderr,
-                "ERROR: overlay not working when overlaying same hash\n");
-        dump_hash(cntxt, h4);
-    }
-        
-    result = apr_hash_get(h4, "FOO2", APR_HASH_KEY_STRING);
-    if (strcmp(result, "bar2"))
-        fprintf(stderr, "ERROR:apr_hash_get FOO2 = %s (should be bar2)\n",
-                result);
-
-    result = apr_hash_get(h4, "SAME2", APR_HASH_KEY_STRING);
-    if (strcmp(result, "same"))
-        fprintf(stderr, "ERROR:apr_hash_get SAME2 = %s (should be same)\n",
-                result);
-    
-    result = apr_hash_get(h4, "OVERWRITE", APR_HASH_KEY_STRING);
-    if (strcmp(result, "Overwrite key"))
-        fprintf(stderr,
-             "ERROR:apr_hash_get OVERWRITE = %s (should be 'Overwrite key')\n",
-             result);
-
-    result = apr_hash_get(h4, "NOTTHERE", APR_HASH_KEY_STRING);
-    if (result)
-        fprintf(stderr, "ERROR:apr_hash_get NOTTHERE = %s (should be NULL)\n",
-                result);
-        
-    result = apr_hash_get(h4, "FOO3", APR_HASH_KEY_STRING);
-    if (strcmp(result, "bar3"))
-        fprintf(stderr, "ERROR:apr_hash_get FOO3 = %s (should be bar3)\n",
-                result);
-
-    apr_hash_set(h4, "FOO3", sizeof(int), NULL);              
-    result = apr_hash_get(h4, "FOO3", APR_HASH_KEY_STRING);
-    if (result)
-        fprintf(stderr,
-        "ERROR:apr_hash_get FOO3 = %s (should be NULL, we just deleted it!)\n",
-        result);
-
-    return 0;
+    sum_hash(p, h, &i, &trySumKey, &trySumVal);
+    CuAssertIntEquals(tc, 100, i);
+    CuAssertIntEquals(tc, sumVal, trySumVal);
+    CuAssertIntEquals(tc, sumKeys, trySumKey);
 }
+
+static void delete_key(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    char *result = NULL;
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
+    apr_hash_set(h, "key2", APR_HASH_KEY_STRING, "value2");
+
+    result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "value", result);
+
+    result = apr_hash_get(h, "key2", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "value2", result);
+
+    apr_hash_set(h, "key", APR_HASH_KEY_STRING, NULL);
+
+    result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
+    CuAssertPtrEquals(tc, NULL, result);
+
+    result = apr_hash_get(h, "key2", APR_HASH_KEY_STRING);
+    CuAssertStrEquals(tc, "value2", result);
+}
+
+static void hash_count_0(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    int count;
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+
+    count = apr_hash_count(h);
+    CuAssertIntEquals(tc, 0, count);
+}
+
+static void hash_count_1(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    int count;
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
+
+    count = apr_hash_count(h);
+    CuAssertIntEquals(tc, 1, count);
+}
+
+static void hash_count_5(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    int count;
+
+    h = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_hash_set(h, "key1", APR_HASH_KEY_STRING, "value1");
+    apr_hash_set(h, "key2", APR_HASH_KEY_STRING, "value2");
+    apr_hash_set(h, "key3", APR_HASH_KEY_STRING, "value3");
+    apr_hash_set(h, "key4", APR_HASH_KEY_STRING, "value4");
+    apr_hash_set(h, "key5", APR_HASH_KEY_STRING, "value5");
+
+    count = apr_hash_count(h);
+    CuAssertIntEquals(tc, 5, count);
+}
+
+static void overlay_empty(CuTest *tc)
+{
+    apr_hash_t *base = NULL;
+    apr_hash_t *overlay = NULL;
+    apr_hash_t *result = NULL;
+    int count;
+    char str[8196];
+
+    base = apr_hash_make(p);
+    overlay = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, base);
+    CuAssertPtrNotNull(tc, overlay);
+
+    apr_hash_set(base, "key1", APR_HASH_KEY_STRING, "value1");
+    apr_hash_set(base, "key2", APR_HASH_KEY_STRING, "value2");
+    apr_hash_set(base, "key3", APR_HASH_KEY_STRING, "value3");
+    apr_hash_set(base, "key4", APR_HASH_KEY_STRING, "value4");
+    apr_hash_set(base, "key5", APR_HASH_KEY_STRING, "value5");
+
+    result = apr_hash_overlay(p, overlay, base);
+
+    count = apr_hash_count(result);
+    CuAssertIntEquals(tc, 5, count);
+
+    dump_hash(p, result, str);
+    CuAssertStrEquals(tc, "Key key1 (4) Value value1\n"
+                          "Key key2 (4) Value value2\n"
+                          "Key key3 (4) Value value3\n"
+                          "Key key4 (4) Value value4\n"
+                          "Key key5 (4) Value value5\n"
+                          "#entries 5\n", str);
+}
+
+static void overlay_2unique(CuTest *tc)
+{
+    apr_hash_t *base = NULL;
+    apr_hash_t *overlay = NULL;
+    apr_hash_t *result = NULL;
+    int count;
+    char str[8196];
+
+    base = apr_hash_make(p);
+    overlay = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, base);
+    CuAssertPtrNotNull(tc, overlay);
+
+    apr_hash_set(base, "base1", APR_HASH_KEY_STRING, "value1");
+    apr_hash_set(base, "base2", APR_HASH_KEY_STRING, "value2");
+    apr_hash_set(base, "base3", APR_HASH_KEY_STRING, "value3");
+    apr_hash_set(base, "base4", APR_HASH_KEY_STRING, "value4");
+    apr_hash_set(base, "base5", APR_HASH_KEY_STRING, "value5");
+
+    apr_hash_set(overlay, "overlay1", APR_HASH_KEY_STRING, "value1");
+    apr_hash_set(overlay, "overlay2", APR_HASH_KEY_STRING, "value2");
+    apr_hash_set(overlay, "overlay3", APR_HASH_KEY_STRING, "value3");
+    apr_hash_set(overlay, "overlay4", APR_HASH_KEY_STRING, "value4");
+    apr_hash_set(overlay, "overlay5", APR_HASH_KEY_STRING, "value5");
+
+    result = apr_hash_overlay(p, overlay, base);
+
+    count = apr_hash_count(result);
+    CuAssertIntEquals(tc, 10, count);
+
+    dump_hash(p, result, str);
+    /* I don't know why these are out of order, but they are.  I would probably
+     * consider this a bug, but others should comment.
+     */
+    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n"
+                          "Key overlay1 (8) Value value1\n"
+                          "Key overlay2 (8) Value value2\n"
+                          "Key overlay3 (8) Value value3\n"
+                          "Key overlay4 (8) Value value4\n"
+                          "Key overlay5 (8) Value value5\n"
+                          "Key base1 (5) Value value1\n"
+                          "Key base2 (5) Value value2\n"
+                          "Key base3 (5) Value value3\n"
+                          "Key base4 (5) Value value4\n"
+                          "#entries 10\n", str);
+}
+
+static void overlay_same(CuTest *tc)
+{
+    apr_hash_t *base = NULL;
+    apr_hash_t *result = NULL;
+    int count;
+    char str[8196];
+
+    base = apr_hash_make(p);
+    CuAssertPtrNotNull(tc, base);
+
+    apr_hash_set(base, "base1", APR_HASH_KEY_STRING, "value1");
+    apr_hash_set(base, "base2", APR_HASH_KEY_STRING, "value2");
+    apr_hash_set(base, "base3", APR_HASH_KEY_STRING, "value3");
+    apr_hash_set(base, "base4", APR_HASH_KEY_STRING, "value4");
+    apr_hash_set(base, "base5", APR_HASH_KEY_STRING, "value5");
+
+    result = apr_hash_overlay(p, base, base);
+
+    count = apr_hash_count(result);
+    CuAssertIntEquals(tc, 5, count);
+
+    dump_hash(p, result, str);
+    /* I don't know why these are out of order, but they are.  I would probably
+     * consider this a bug, but others should comment.
+     */
+    CuAssertStrEquals(tc, "Key base5 (5) Value value5\n"
+                          "Key base1 (5) Value value1\n"
+                          "Key base2 (5) Value value2\n"
+                          "Key base3 (5) Value value3\n"
+                          "Key base4 (5) Value value4\n"
+                          "#entries 5\n", str);
+}
+        
+CuSuite *testhash(void)
+{
+    CuSuite *suite = CuSuiteNew("Hash");
+
+    SUITE_ADD_TEST(suite, hash_make);
+    SUITE_ADD_TEST(suite, hash_set);
+    SUITE_ADD_TEST(suite, hash_reset);
+    SUITE_ADD_TEST(suite, same_value);
+    SUITE_ADD_TEST(suite, key_space);
+    SUITE_ADD_TEST(suite, delete_key);
+
+    SUITE_ADD_TEST(suite, hash_count_0);
+    SUITE_ADD_TEST(suite, hash_count_1);
+    SUITE_ADD_TEST(suite, hash_count_5);
+
+    SUITE_ADD_TEST(suite, hash_traverse);
+    SUITE_ADD_TEST(suite, summation_test);
+
+    SUITE_ADD_TEST(suite, overlay_empty);
+    SUITE_ADD_TEST(suite, overlay_2unique);
+    SUITE_ADD_TEST(suite, overlay_same);
+
+    return suite;
+}
+
