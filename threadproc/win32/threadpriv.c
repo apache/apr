@@ -107,8 +107,7 @@ ap_status_t ap_set_threadkeydata(void *data, const char *key,
 
 ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key)
 {
-    /* ### this is broken. dunno if the signature is broken... */
-    thekey = &(key->key);
+    *thekey = key->key;
     return APR_SUCCESS;
 }
 
