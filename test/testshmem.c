@@ -85,7 +85,7 @@ static void msgwait(int boxnum)
         apr_sleep(0);
         test = boxes[boxnum].msgavail;
     }    
-    fprintf(stdout, "\nreceived a message in box %d, message was: %s\n", 
+    fprintf(stdout, "received a message in box %d, message was: %s\n", 
             boxnum, boxes[boxnum].msg); 
 }
 
@@ -145,7 +145,7 @@ int main(void)
     printf("Smallest allocation will be %" APR_SIZE_T_FMT " bytes\n", 
            psize[0]);
     printf("Largest allocation will be  %" APR_SIZE_T_FMT " bytes\n", 
-           psize[CYCLES -1]);
+           psize[CYCLES - 1]);
     printf("I will be doing it in %d steps\n", CYCLES);
     
     printf("\tAllocating via apr_shm_malloc...............");
@@ -167,45 +167,35 @@ int main(void)
     }
     printf("OK\n");
 
-    printf("\tAllocating via apr_shm_calloc...............");
-    for (cntr = CYCLES-1;cntr > -1;cntr--){
-        ptrs[cntr] = apr_shm_malloc(shm, psize[cntr]);
-        if (ptrs[cntr] == NULL){
-            printf("Failed at %" APR_SIZE_T_FMT" bytes\n", 
-                   psize[cntr]);
-            exit (-1);
-        }
-    }
-    printf("OK\n\tFreeing.....................................");
-    for (cntr = 0;cntr < CYCLES;cntr++){
-        if (apr_shm_free(shm, ptrs[cntr]) != APR_SUCCESS){
-            printf("Failed at step %d, %" APR_SIZE_T_FMT 
-                   " bytes\n", cntr, psize[cntr]);
-            exit (-1);
-        }
-    }
-    printf("OK\n");
-
-    printf("Checking we have all we should have remaining.......");
+    printf("\tDetermining how much space is remaining.....");
     rv = apr_shm_avail(shm, &cksize);
     if (rv == APR_ENOTIMPL){
-        printf("Not Impl.\n");
+        printf("Not Impl.");
     } else {
         if (rv != APR_SUCCESS){
             printf("Failed!\n");
             exit (-1);
         }
-        if (cksize == (TESTSIZE - size)){
-            printf ("OK\n");
-        } else {
-            printf ("Failed.\nShould have had %" APR_SIZE_T_FMT 
-                    " bytes, instead there are %"
-                    APR_SIZE_T_FMT " bytes :(\n",
-                    TESTSIZE - size, cksize);
-            exit(-1);
-        }
+        printf("%" APR_SIZE_T_FMT, cksize);
     }
-    printf("%d cycles of malloc and calloc passed.\n\n", CYCLES);
+    printf("\n\t%d cycles of malloc and calloc passed.", CYCLES);
+
+    printf("\n\nClearing shmem segment..............................");
+    rv = apr_shm_destroy(shm);
+    if (rv != APR_SUCCESS)
+    {
+        printf("Failed\n");
+        exit(-1);
+    }
+    printf("OK\n");
+
+    printf("Recreating shared memory block (%" APR_SIZE_T_FMT " bytes)......", 
+           TESTSIZE); 
+    if (apr_shm_init(&shm, TESTSIZE, NULL, context) != APR_SUCCESS) { 
+        fprintf(stderr, "Error allocating shared memory block\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
 
     printf("Block test.\n");
     printf("\tI am about to allocate %" APR_SIZE_T_FMT 
@@ -223,49 +213,24 @@ int main(void)
     }
     printf ("OK\n");
     
-    printf ("\tAbout to allocate %d blocks of %d bytes....", CYCLES, SIZE);
-    for (cntr = 0;cntr < CYCLES;cntr++){
-        if ((ptrs[cntr] = apr_shm_malloc(shm, SIZE)) == NULL){
-            printf("Failed.\n");
-            printf("Couldn't allocate block %d\n", cntr + 1);
-            exit (-1);
-        }
+    printf("Clearing shmem segment..............................");
+    rv = apr_shm_destroy(shm);
+    if (rv != APR_SUCCESS)
+    {
+        printf("Failed\n");
+        exit(-1);
     }
-    printf("Complete.\n");
+    printf("OK\n");
 
-    printf ("\tAbout to free %d blocks of %d bytes........", CYCLES, SIZE);
-    for (cntr = 0;cntr < CYCLES;cntr++){
-        if ((rv = apr_shm_free(shm, ptrs[cntr])) != APR_SUCCESS){
-            printf("Failed\n");
-            printf("Counldn't free block %d\n", cntr + 1);
-            exit (-1);
-        }
+    printf("Recreating shared memory block (%" APR_SIZE_T_FMT " bytes)......", 
+           TESTSIZE); 
+    if (apr_shm_init(&shm, TESTSIZE, NULL, context) != APR_SUCCESS) { 
+        fprintf(stderr, "Error allocating shared memory block\n");
+        exit(-1);
     }
-    printf("Complete.\n");
+    fprintf(stdout, "OK\n");
 
-    printf("Checking we have all we should have remaining.......");
-    rv = apr_shm_avail(shm, &cksize);
-    if (rv == APR_ENOTIMPL){
-        printf("Not Impl.\n");
-    } else {
-        if (rv != APR_SUCCESS){
-            printf("Failed!\n");
-            exit (-1);
-        }
-        if (cksize == (TESTSIZE - size)){
-            printf ("OK\n");
-        } else {
-            printf ("Failed.\nShould have had %"
-                    APR_SIZE_T_FMT " bytes, instead there are %"
-                    APR_SIZE_T_FMT " bytes :(\n",
-                    TESTSIZE - size, cksize);
-            exit(-1);
-        }
-    }
-
-    printf("Block test complete.\n\n");
-             
-    printf("Creating a child process\n");
+    printf("Shared Process Test (child/parent)\n");
     pid = fork();
     if (pid == 0) {
         apr_sleep(1);

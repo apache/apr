@@ -1,20 +1,10 @@
 
-TARGETS = shmem.lo build-mm
+TARGETS = shmem.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
 INCDIR=../../include
-INCDIR1=mm
-INCLUDES=-I$(INCDIR) -I$(INCDIR1)
-
-x-local-clean:
-	(cd mm && $(MAKE) clean)
-
-x-local-distclean:
-	(cd mm && $(MAKE) distclean)
-
-build-mm:
-	(cd mm && $(MAKE) libmm.la)
+INCLUDES=-I$(INCDIR)
 
 # DO NOT REMOVE

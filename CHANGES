@@ -1,4 +1,8 @@
 Changes with APR b1  
+
+  *) Move the necessary shared memory code from MM into APR and remove
+     our dependency upon MM.  [Justin Erenkrantz]
+
   *) Get apr_lock_file and apr_unlock_file working on Windows 9x.
      [Mladen Turk, Bill Stoddard]
 
