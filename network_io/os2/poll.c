@@ -177,18 +177,18 @@ ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct poll
 {
     int i;
     
-    for (i=0; i < aprset->num_total && aprset->socket_list[i] != sock->socketdes; i++);
+    *event = 0;
     
-    if (i == aprset->num_total) {
-        return APR_INVALSOCK;
-    } 
-    
-    if (i < aprset->num_read)
-        *event = APR_POLLIN;
-    else if (i < aprset->num_read + aprset->num_write)
-        *event = APR_POLLOUT;
-    else
-        *event = APR_POLLPRI;
+    for (i=0; i < aprset->num_total; i++) {
+        if (aprset->socket_list[i] == sock->socketdes && aprset->r_socket_list[i] > 0) {
+            if (i < aprset->num_read)
+                *event |= APR_POLLIN;
+            else if (i < aprset->num_read + aprset->num_write)
+                *event |= APR_POLLOUT;
+            else
+                *event |= APR_POLLPRI;
+        }
+    }
 
     return APR_SUCCESS;
 }
