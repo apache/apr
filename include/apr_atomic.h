@@ -70,7 +70,7 @@
 /* Platform includes for atomics */
 #if defined(NETWARE) || defined(__MVS__) /* OS/390 */
 #include <stdlib.h>
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) && !defined(__i386__)
 #include <machine/atomic.h>
 #endif
 
@@ -325,7 +325,7 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 #define APR_OVERRIDE_ATOMIC_DEC     1
 #define APR_OVERRIDE_ATOMIC_CAS     1
 
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) && !defined(__i386__)
 
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_add(mem, val)     atomic_add_int(mem,val)
@@ -337,10 +337,11 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 #define apr_atomic_add32(mem, val)        apr_atomic_add(mem, val)
 #define apr_atomic_dec32(mem)             apr_atomic_dec(mem)
 #define apr_atomic_inc32(mem)             apr_atomic_inc(mem)
-#define apr_atomic_set32(mem,val)         apr_atomic_set(mem,val)
+#define apr_atomic_set32(mem, val)        apr_atomic_set(mem, val)
 #define apr_atomic_read32(mem)            apr_atomic_read(mem)
 
-#elif (defined(__linux__) || defined(__EMX__)) && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
+#elif (defined(__linux__) || defined(__EMX__) || defined(__FreeBSD__)) \
+        && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
 
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_cas(mem,with,cmp) \
