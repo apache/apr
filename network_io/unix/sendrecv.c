@@ -212,29 +212,75 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
   */
 
 #if defined(__linux__) && defined(HAVE_WRITEV)
+
+/* TCP_CORK keeps us from sending partial frames when we shouldn't 
+ * however, it is mutually exclusive w/TCP_NODELAY  
+ */
+
+static int os_cork(ap_socket_t *sock)
+{
+    /* Linux only for now */
+
+    int nodelay_off = 0, corkflag = 1, rv, delayflag;
+    socklen_t delaylen = sizeof(delayflag);
+
+    /* XXX it would be cheaper to use an ap_socket_t flag here */
+    rv = getsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
+                    (void *) &delayflag, &delaylen);
+    if (rv == 0) {  
+        if (delayflag != 0) {
+            /* turn off nodelay temporarily to allow cork */
+            rv = setsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
+                            (const void *) &nodelay_off, sizeof(nodelay_off));
+            /* XXX nuke the rv checking once this is proven solid */
+            if (rv < 0) {
+                return rv;    
+            }   
+        } 
+    }
+    rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
+                    (const void *) &corkflag, sizeof(corkflag));
+    return rv == 0 ? delayflag : rv;
+}   
+
+static int os_uncork(ap_socket_t *sock, int delayflag)
+{
+    /* Uncork to send queued frames - Linux only for now */
+    
+    int corkflag = 0, rv;
+    rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
+                    (const void *) &corkflag, sizeof(corkflag));
+    if (rv == 0) {
+        /* restore TCP_NODELAY to its original setting */
+        rv = setsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
+                        (const void *) &delayflag, sizeof(delayflag));
+    }
+    return rv;
+}
+
 ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
         		ap_hdtr_t *hdtr, ap_off_t *offset, ap_size_t *len,
         		ap_int32_t flags)
 {
     off_t off = *offset;
-    int corkflag = 1;
-    int rv, nbytes = 0, total_hdrbytes, i;
+    int rv, nbytes = 0, total_hdrbytes, i, delayflag = APR_EINIT, corked = 0;
     ap_status_t arv;
 
     /* Ignore flags for now. */
     flags = 0;
 
-    /* TCP_CORK keeps us from sending partial frames when we shouldn't */
-    rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
-        	    (const void *) &corkflag, sizeof(corkflag));
-    if (rv == -1) {
-	*len = 0;
-        return errno;
-    }
-
-    /* Now write the headers */
     if (hdtr->numheaders > 0) {
         ap_int32_t hdrbytes;
+        
+        /* cork before writing headers */
+        rv = os_cork(sock);
+        if (rv < 0) {
+            return errno;
+        }
+        delayflag = rv;
+        corked = 1;
+
+        /* Now write the headers */
         arv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
         if (arv != APR_SUCCESS) {
 	    *len = 0;
@@ -253,7 +299,7 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
             }
             if (hdrbytes < total_hdrbytes) {
                 *len = hdrbytes;
-                return APR_SUCCESS;
+                return os_uncork(sock, delayflag);
             }
         }
     }
@@ -286,7 +332,11 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
 
     if (rv == -1) {
 	*len = nbytes;
-        return errno;
+        rv = errno;
+        if (corked) {
+            os_uncork(sock, delayflag);
+        }
+        return rv;
     }
 
     nbytes += rv;
@@ -297,6 +347,9 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
 
     if (rv < *len) {
         *len = nbytes;
+        if (corked) {
+            os_uncork(sock, delayflag);
+        }
         return APR_SUCCESS;
     }
 
@@ -307,14 +360,18 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
         nbytes += trbytes;
         if (arv != APR_SUCCESS) {
 	    *len = nbytes;
-            return errno;
+            rv = errno;
+            if (corked) {
+                os_uncork(sock, delayflag);
+            }
+            return rv;
         }
     }
 
-    /* Uncork to send queued frames */
-    corkflag = 0;
-    rv = setsockopt(sock->socketdes, SOL_TCP, TCP_CORK,
-                    (const void *) &corkflag, sizeof(corkflag));
+    if (corked) {
+        /* if we corked, uncork & restore TCP_NODELAY setting */
+        rv = os_uncork(sock, delayflag);
+    }
 
     (*len) = nbytes;
     return rv < 0 ? errno : APR_SUCCESS;
