@@ -85,7 +85,8 @@ typedef void *                        apr_dso_handle_sym_t;
  * Load a DSO library.
  * @param res_handle Location to store new handle for the DSO.
  * @param path Path to the DSO library
- * @param ctx Pool to use. 
+ * @param ctx Pool to use.
+ * @deffunc apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, apr_pool_t *ctx)
  */
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
                                        const char *path, apr_pool_t *ctx);
@@ -93,6 +94,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 /**
  * Close a DSO library.
  * @param handle handle to close.
+ * @deffunc apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
  */
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle);
 
@@ -101,6 +103,7 @@ APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle);
  * @param ressym Location to store the loaded symbol
  * @param handle handle to load the symbol from.
  * @param symname Name of the symbol to load.
+ * @deffunc apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle, const char *symname)
  */
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
                                       apr_dso_handle_t *handle,
