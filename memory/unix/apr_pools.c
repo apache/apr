@@ -1276,20 +1276,6 @@ API_EXPORT(void) ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid,
     a->subprocesses = new;
 }
 
-#ifdef WIN32
-#define os_pipe(fds) _pipe(fds, 512, O_BINARY | O_NOINHERIT)
-#else
-#define os_pipe(fds) pipe(fds)
-#endif /* WIN32 */
-
-/* for ap_fdopen, to get binary mode */
-#if defined (OS2) || defined (WIN32)
-#define BINMODE	"b"
-#else
-#define BINMODE
-#endif
-
-
 static void free_proc_chain(struct process_chain *procs)
 {
     /* Dispose of the subprocesses we've spawned off in the course of
