@@ -140,9 +140,9 @@ install: all-recursive
 
 all-recursive depend-recursive:
 	@otarget=`echo $@ | sed s/-recursive//`; \
-	list='$(SUBDIRS)'; \
+	list='$(SOURCE_DIRS)'; \
 	for i in $$list; do \
-	    if test -d "$$i"; then \
+	    if test -f "$$i/Makefile"; then \
 		target="$$otarget"; \
 		echo "Making $$target in $$i"; \
 		if test "$$i" = "."; then \
@@ -161,9 +161,9 @@ all-recursive depend-recursive:
 
 clean-recursive distclean-recursive extraclean-recursive:
 	@otarget=`echo $@ | sed s/-recursive//`; \
-	list='$(SUBDIRS) $(CLEAN_SUBDIRS)'; \
+	list='$(CLEAN_SUBDIRS)'; \
 	for i in $$list; do \
-	    if test -d "$$i"; then \
+	    if test -f "$$i/Makefile"; then \
 		target="$$otarget"; \
 		echo "Making $$target in $$i"; \
 		if test "$$i" = "."; then \
@@ -182,10 +182,17 @@ clean-recursive distclean-recursive extraclean-recursive:
 
 # autoconf 2.5x is creating a 'autom4te.cache' directory
 # In case someone ran autoconf by hand, get rid of that directory
-# aswell.
+# as well.
 local-clean: x-local-clean
-	$(RM) -f *.o *.lo *.a *.la *.so *.obj $(CLEAN_TARGETS) $(PROGRAMS)
-	$(RM) -rf .libs autom4te.cache
+	@list='. $(SOURCE_DIRS)'; \
+	for i in $$list; do \
+	    echo $(RM) -f $$i/*.o $$i/*.lo $$i/*.a $$i/*.la $$i/*.so $$i/*.obj; \
+	    $(RM) -f $$i/*.o $$i/*.lo $$i/*.a $$i/*.la $$i/*.so $$i/*.obj; \
+	    echo $(RM) -rf $$i/.libs; \
+	    $(RM) -rf $$i/.libs; \
+        done
+	$(RM) -f $(CLEAN_TARGETS) $(PROGRAMS)
+	$(RM) -rf autom4te.cache
 
 local-distclean: local-clean x-local-distclean
 	$(RM) -f Makefile $(DISTCLEAN_TARGETS)
