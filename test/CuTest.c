@@ -279,7 +279,6 @@ void CuSuiteRun(CuSuite* testSuite)
 void CuSuiteSummary(CuSuite* testSuite, CuString* summary)
 {
 	int i;
-	CuStringAppendFormat(summary, "%s:\t", testSuite->name);
 	for (i = 0 ; i < testSuite->count ; ++i)
 	{
 		CuTest* testCase = testSuite->list[i];
@@ -362,6 +361,25 @@ void CuSuiteListRun(CuSuiteList* testSuite)
 		CuSuite* testCase = testSuite->list[i];
 		CuSuiteRun(testCase);
 	}
+}
+
+void CuSuiteListRunWithSummary(CuSuiteList* testSuite)
+{
+	int i;
+
+	printf("%s:\n", testSuite->name);
+	for (i = 0 ; i < testSuite->count ; ++i)
+	{
+		CuSuite* testCase = testSuite->list[i];
+		CuString *str = CuStringNew();
+
+	        printf("%s:\t", testCase->name);
+		CuSuiteRun(testCase);
+		CuSuiteSummary(testCase, str);
+		printf("    %s", str->buffer);
+
+	}
+	printf("\n");
 }
 
 void CuSuiteListSummary(CuSuiteList* testSuite, CuString* summary)
