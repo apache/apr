@@ -86,6 +86,7 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
     sem_t *psem;
     apr_status_t stat;
     char semname[14];
+    apr_time_t now;
     unsigned long epoch;
     
     new_mutex->interproc = apr_palloc(new_mutex->pool,
@@ -107,7 +108,8 @@ static apr_status_t proc_mutex_posix_create(apr_proc_mutex_t *new_mutex,
      * the sem_open and the sem_unlink. Use of O_EXCL does not
      * help here however...
      */
-    epoch = apr_time_now() / APR_USEC_PER_SEC;
+    now = apr_time_now();
+    epoch = apr_time_sec(now);
     apr_snprintf(semname, sizeof(semname), "/ApR.%lx", epoch);
     psem = sem_open((const char *) semname, O_CREAT, 0644, 1);
 
