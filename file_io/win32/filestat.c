@@ -105,7 +105,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
         return APR_SUCCESS;
     }
     else {
-        return APR_ENOSTAT;
+        return errno;
     }
 }
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
@@ -125,7 +125,7 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
         return APR_SUCCESS;
     }
     else {
-        return APR_ENOSTAT;
+        return errno;
     }
 }
 
