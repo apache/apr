@@ -155,9 +155,9 @@ APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(void)
     b->end        = b->alloc_addr;
 
     newbuf->color      = AP_BUCKET_rwmem;
-    newbuf->getstr     = rwmem_get_str;
+    newbuf->read       = rwmem_get_str;
     newbuf->getlen     = rwmem_get_len;
-    newbuf->insert     = rwmem_insert;
+    newbuf->write      = rwmem_insert;
     newbuf->split      = rwmem_split;
     newbuf->free       = rwmem_destroy;
     newbuf->data       = b;

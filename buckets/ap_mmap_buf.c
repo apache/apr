@@ -115,9 +115,9 @@ APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(void)
     b->len            = 0;
 
     newbuf->color     = AP_BUCKET_mmap;
-    newbuf->getstr    = mmap_get_str;
+    newbuf->read      = mmap_get_str;
     newbuf->getlen    = mmap_get_len;
-    newbuf->insert    = mmap_bucket_insert;
+    newbuf->write     = mmap_bucket_insert;
     newbuf->split     = mmap_split;
     newbuf->free      = NULL;
     newbuf->data      = b;
