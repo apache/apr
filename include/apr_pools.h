@@ -409,7 +409,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data);
  */
 #define APR_POOL_DECLARE_ACCESSOR(typename) \
 	APR_DECLARE(apr_pool_t *) apr_get_##typename##_pool \
-		(apr_##typename##_t *ob);
+		(apr_##typename##_t *ob)
 
 #define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
 	APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
