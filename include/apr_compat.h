@@ -62,6 +62,8 @@
 #define ap_destroy_pool apr_pool_destroy
 /** @deprecated @see apr_time_exp_t */
 #define ap_exploded_time_t apr_time_exp_t
+/** @deprecated @see apr_time_exp_t */
+#define apr_exploded_time_t apr_time_exp_t
 /** @deprecated @see apr_fnmatch */
 #define ap_fnmatch apr_fnmatch
 /** @deprecated @see apr_getopt */
