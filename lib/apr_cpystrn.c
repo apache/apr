@@ -193,7 +193,6 @@ API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
         
         SKIP_WHITESPACE(cp);
     }
-    *cp++ = '\0';
 
     return(rc);
 }
