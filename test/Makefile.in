@@ -7,6 +7,7 @@ PROGRAMS = \
 	testdir@EXEEXT@ \
 	testnames@EXEEXT@ \
 	testflock@EXEEXT@ \
+	testfmt@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testthread@EXEEXT@ \
@@ -57,6 +58,9 @@ testnames@EXEEXT@: testnames.lo $(LOCAL_LIBS)
 
 testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 	$(LINK) testflock.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testfmt@EXEEXT@: testfmt.lo $(LOCAL_LIBS)
+	$(LINK) testfmt.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 ### why the export-dynamic?
 testdso@EXEEXT@: testdso.lo mod_test.so $(LOCAL_LIBS)
