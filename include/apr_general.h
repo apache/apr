@@ -242,17 +242,15 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #define bzero(a,b) memset(a,0,b)
 #endif
 
+/**
+ * package APR Random Functions
+ */
+
 #if APR_HAS_RANDOM
-/*
-
-=head1 ap_status_t ap_generate_random_bytes(unsigned char * buf, int length)
-
-B<Generate a string of random bytes.>
-
-    arg 1) Random bytes go here
-    arg 2) size of the buffer
-
-=cut
+/**
+ * Generate a string of random bytes.
+ * @param buf Random bytes go here
+ * @param length size of the buffer
  */
 /* TODO: I'm not sure this is the best place to put this prototype...*/
 ap_status_t ap_generate_random_bytes(unsigned char * buf, int length);
@@ -295,126 +293,74 @@ typedef struct ap_pool_t {
 }ap_pool_t;
  
 /* pool functions */
-/*
 
-=head1 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
-
-B<Create a new pool.>
-
-    arg 1) The pool we have just created.
-    arg 2) The parent pool.  If this is NULL, the new pool is a root
-           pool.  If it is non-NULL, the new pool will inherit all
-           of it's parent pool's attributes, except the ap_pool_t will 
-           be a sub-pool.
-
-=cut
+/**
+ * Create a new pool.
+ * @param newcont The pool we have just created.
+ * @param cont The parent pool.  If this is NULL, the new pool is a root
+ *        pool.  If it is non-NULL, the new pool will inherit all
+ *        of it's parent pool's attributes, except the ap_pool_t will 
+ *        be a sub-pool.
  */
 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_destroy_pool(ap_pool_t *cont)
-
-B<Free the pool and all of it's child pools'.>
-
-    arg 1) The pool to free.
-
-=cut
- */
-
-ap_status_t ap_exit(ap_pool_t *);
-
-/*
-
-=head1 ap_status_t ap_set_userdata(void *data, const char *key, ap_status_t (*cleanup) (void *), ap_pool_t *cont)
-
-B<Set the data associated with the current pool>.
-
-    arg 1) The user data associated with the pool.
-    arg 2) The key to use for association
-    arg 3) The cleanup program to use to cleanup the data;
-    arg 4) The current pool.
-
-B<NOTE>:  The data to be attached to the pool should have the same
-          life span as the pool it is being attached to.
-          
-          Users of APR must take EXTREME care when choosing a key to
-          use for their data.  It is possible to accidentally overwrite
-          data by choosing a key that another part of the program is using
-          It is advised that steps are taken to ensure that a unique
-          key is used at all times.
-
-=cut
+/**
+ * Set the data associated with the current pool
+ * @param data The user data associated with the pool.
+ * @param key The key to use for association
+ * @param cleanup The cleanup program to use to cleanup the data;
+ * @param cont The current pool.
+ * @tip The data to be attached to the pool should have the same
+ *      life span as the pool it is being attached to.
+ *
+ *      Users of APR must take EXTREME care when choosing a key to
+ *      use for their data.  It is possible to accidentally overwrite
+ *      data by choosing a key that another part of the program is using
+ *      It is advised that steps are taken to ensure that a unique
+ *      key is used at all times.
  */
 ap_status_t ap_set_userdata(const void *data, const char *key, 
                             ap_status_t (*cleanup) (void *), 
                             ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont)
-
-B<Return the data associated with the current pool.>
-
-    arg 1) The key for the data to retrieve
-    arg 2) The user data associated with the pool.
-    arg 3) The current pool.
-
-=cut
+/**
+ * Return the data associated with the current pool.
+ * @param data The key for the data to retrieve
+ * @param key The user data associated with the pool.
+ * @param cont The current pool.
  */
 ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_initialize(void)
-
-B<Setup any APR internal data structures.  This MUST be the first function called for any APR program.>
-
-=cut
+/**
+ * Setup any APR internal data structures.  This MUST be the first function 
+ * called for any APR program.
  */
 ap_status_t ap_initialize(void);
 
-/*
-
-=head1 void ap_terminate(void)
-
-B<Tear down any APR internal data structures which aren't torn down automatically.>
-
-B<NOTE>:  An APR program must call this function at termination once it 
-          has stopped using APR services.
-
-=cut
+/**
+ * Tear down any APR internal data structures which aren't torn down 
+ * automatically.
+ * @tip An APR program must call this function at termination once it 
+ *      has stopped using APR services.
  */
 void ap_terminate(void);
 
-/*
-
-=head1 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont)
-
-B<Set the APR_ABORT function.>
-
-B<NOTE>:  This is in for backwards compatability.  If the program using
-          APR wants APR to exit on a memory allocation error, then this
-          function should be called to set the function to use in order
-          to actually exit the program.  If this function is not called,
-          then APR will return an error and expect the calling program to
-          deal with the error accordingly.
-
-=cut
+/**
+ * Set the APR_ABORT function.
+ * @tip This is in for backwards compatability.  If the program using
+ *      APR wants APR to exit on a memory allocation error, then this
+ *      function should be called to set the function to use in order
+ *      to actually exit the program.  If this function is not called,
+ *      then APR will return an error and expect the calling program to
+ *      deal with the error accordingly.
  */
 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont);
 
-/*
-
-=head1 char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
-
-B<Return a human readable string describing the specified error.>
-
-    arg 1)  The error code the get a string for.
-    arg 2)  A buffer to hold the error string.
-    arg 3)  Size of the buffer to hold the string.
-
-=cut
+/**
+ * Return a human readable string describing the specified error.
+ * @param statcode The error code the get a string for.
+ * @param buf A buffer to hold the error string.
+ * @param bufsize Size of the buffer to hold the string.
  */
 char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize);
 
