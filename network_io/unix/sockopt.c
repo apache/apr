@@ -143,6 +143,7 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interva
     }
     sock->timeout = t; 
     apr_set_option(&sock->netmask, APR_SO_TIMEOUT, t);
+    return APR_SUCCESS;
 }
 
 
