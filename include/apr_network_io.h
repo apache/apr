@@ -818,14 +818,14 @@ apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name,
  * @param socket The socket to enable inheritance.
  * @deffunc void apr_socket_set_inherit(apr_socket_t *socket)
  */
-APR_DECLARE(void) apr_socket_set_inherit(apr_socket_t *socket);
+APR_DECLARE(void) apr_socket_set_inherit(apr_socket_t *skt);
 
 /**
  * Unset a socket from being inherited by child processes.
  * @param socket The socket to disable inheritance.
  * @deffunc void apr_socket_unset_inherit(apr_socket_t *socket)
  */
-APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *socket);
+APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *skt);
 
 #ifdef __cplusplus
 }
