@@ -198,10 +198,11 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
                                   apr_unix_file_cleanup,
                                   apr_pool_cleanup_null);
     }
-
+#ifndef WAITIO_USES_POLL
     /* Create a pollset with room for one descriptor. */
     /* ### check return codes */
     (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
+#endif
     return APR_SUCCESS;
 }
 
@@ -233,8 +234,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 #if APR_HAS_THREADS
     (*in)->thlock = NULL;
 #endif
+#ifndef WAITIO_USES_POLL
     (void) apr_pollset_create(&(*in)->pollset, 1, pool, 0);
-
+#endif
     (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
     (*out)->pool = pool;
     (*out)->filedes = filedes[1];
@@ -247,8 +249,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 #if APR_HAS_THREADS
     (*out)->thlock = NULL;
 #endif
+#ifndef WAITIO_USES_POLL
     (void) apr_pollset_create(&(*out)->pollset, 1, pool, 0);
-
+#endif
     apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
     apr_pool_cleanup_register((*out)->pool, (void *)(*out), apr_unix_file_cleanup,

@@ -1720,6 +1720,11 @@ fi
 AC_SUBST(have_in_addr)
 AC_SUBST(file_as_socket)
 
+if test "$ac_cv_func_poll $file_as_socket" = "yes 1"; then
+    AC_DEFINE(WAITIO_USES_POLL, 1,
+              [Define if apr_wait_for_io_or_timeout() uses poll(2)])
+fi
+
 # Check the types only if we have gethostbyname_r
 if test "$ac_cv_func_gethostbyname_r" = "yes"; then
     APR_CHECK_GETHOSTBYNAME_R_STYLE
