@@ -197,10 +197,14 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
             fd = aprset[i].desc.s->socketdes;
         }
         else if (aprset[i].desc_type == APR_POLL_FILE) {
+#ifdef WIN32
+            return APR_EBADF;
+#else
             fd = aprset[i].desc.f->filedes;
 #ifdef NETWARE
             is_pipe = aprset[i].desc.f->is_pipe;
-#endif
+#endif /* NETWARE */
+#endif /* !WIN32 */
         }
         if (aprset[i].reqevents & APR_POLLIN) {
             FD_SET(fd, &readset);
@@ -249,7 +253,11 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
             fd = aprset[i].desc.s->socketdes;
         }
         else {
+#ifdef WIN32
+            return EBADF;
+#else
             fd = aprset[i].desc.f->filedes;
+#endif
         }
         aprset[i].rtnevents = 0;
         if (FD_ISSET(fd, &readset)) {
@@ -509,7 +517,11 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
             fd = pollset->query_set[i].desc.s->socketdes;
         }
         else {
-            fd = pollset->query_set[i].desc.s->socketdes;
+#ifdef WIN32
+            return APR_EBADF;
+#else
+            fd = pollset->query_set[i].desc.f->filedes;
+#endif
         }
         if (FD_ISSET(fd, &readset) || FD_ISSET(fd, &writeset) ||
             FD_ISSET(fd, &exceptset)) {
