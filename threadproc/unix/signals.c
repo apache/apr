@@ -111,7 +111,7 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
     if ((signo == SIGCHLD) && (func == SIG_IGN)) {
         act.sa_flags |= SA_NOCLDWAIT;
     }
-   #endif
+#endif
     if (sigaction(signo, &act, &oact) < 0)
         return SIG_ERR;
     return oact.sa_handler;
