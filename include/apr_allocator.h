@@ -144,14 +144,14 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
  * you can make a pool an owner, but if the pool doesn't use the allocator
  * the allocator will never be destroyed.
  */
-APR_DECLARE(void) apr_allocator_set_owner(apr_allocator_t *allocator,
+APR_DECLARE(void) apr_allocator_owner_set(apr_allocator_t *allocator,
                                           apr_pool_t *pool);
 
 /**
  * Get the current owner of the allocator
  * @param allocator The allocator to get the owner from
  */
-APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(apr_allocator_t *allocator);
+APR_DECLARE(apr_pool_t *) apr_allocator_owner_get(apr_allocator_t *allocator);
 
 
 /**
@@ -171,14 +171,14 @@ APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
  * @param allocator The allocator to set the mutex for
  * @param mutex The mutex
  */
-APR_DECLARE(void) apr_allocator_set_mutex(apr_allocator_t *allocator,
+APR_DECLARE(void) apr_allocator_mutex_set(apr_allocator_t *allocator,
                                           apr_thread_mutex_t *mutex);
 
 /**
  * Get the mutex currently set for the allocator
  * @param allocator The allocator
  */
-APR_DECLARE(apr_thread_mutex_t *) apr_allocator_get_mutex(
+APR_DECLARE(apr_thread_mutex_t *) apr_allocator_mutex_get(
                                       apr_allocator_t *allocator);
 #endif /* APR_HAS_THREADS */
 

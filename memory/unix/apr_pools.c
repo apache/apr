@@ -142,26 +142,26 @@ APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator)
 }
 
 #if APR_HAS_THREADS
-APR_DECLARE(void) apr_allocator_set_mutex(apr_allocator_t *allocator,
+APR_DECLARE(void) apr_allocator_mutex_set(apr_allocator_t *allocator,
                                           apr_thread_mutex_t *mutex)
 {
     allocator->mutex = mutex;
 }
 
-APR_DECLARE(apr_thread_mutex_t *) apr_allocator_get_mutex(
+APR_DECLARE(apr_thread_mutex_t *) apr_allocator_mutex_get(
                                       apr_allocator_t *allocator)
 {
     return allocator->mutex;
 }
 #endif /* APR_HAS_THREADS */
 
-APR_DECLARE(void) apr_allocator_set_owner(apr_allocator_t *allocator,
+APR_DECLARE(void) apr_allocator_owner_set(apr_allocator_t *allocator,
                                           apr_pool_t *pool)
 {
     allocator->owner = pool;
 }
 
-APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(apr_allocator_t *allocator)
+APR_DECLARE(apr_pool_t *) apr_allocator_owner_get(apr_allocator_t *allocator)
 {
     return allocator->owner;
 }
@@ -174,7 +174,7 @@ APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
 
-    mutex = apr_allocator_get_mutex(allocator);
+    mutex = apr_allocator_mutex_get(allocator);
     if (mutex != NULL)
         apr_thread_mutex_lock(mutex);
 #endif /* APR_HAS_THREADS */
@@ -553,11 +553,11 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
             return rv;
         }
 
-        apr_allocator_set_mutex(global_allocator, mutex);
+        apr_allocator_mutex_set(global_allocator, mutex);
     }
 #endif /* APR_HAS_THREADS */
 
-    apr_allocator_set_owner(global_allocator, global_pool);
+    apr_allocator_owner_set(global_allocator, global_pool);
 
     return APR_SUCCESS;
 }
@@ -754,7 +754,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 #if APR_HAS_THREADS
         apr_thread_mutex_t *mutex;
 
-        if ((mutex = apr_allocator_get_mutex(pool->parent->allocator)) != NULL)
+        if ((mutex = apr_allocator_mutex_get(pool->parent->allocator)) != NULL)
             apr_thread_mutex_lock(mutex);
 #endif /* APR_HAS_THREADS */
 
@@ -775,11 +775,11 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
     *active->ref = NULL;
 
 #if APR_HAS_THREADS
-    if (apr_allocator_get_owner(allocator) == pool) {
+    if (apr_allocator_owner_get(allocator) == pool) {
         /* Make sure to remove the lock, since it is highly likely to
          * be invalid now.
          */
-        apr_allocator_set_mutex(allocator, NULL);
+        apr_allocator_mutex_set(allocator, NULL);
     }
 #endif /* APR_HAS_THREADS */
 
@@ -793,7 +793,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
      * and the allocator).  Don't worry about destroying the optional mutex
      * in the allocator, it will have been destroyed by the cleanup function.
      */
-    if (apr_allocator_get_owner(allocator) == pool) {
+    if (apr_allocator_owner_get(allocator) == pool) {
         apr_allocator_destroy(allocator);
     }
 }
@@ -848,7 +848,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 #if APR_HAS_THREADS
         apr_thread_mutex_t *mutex;
 
-        if ((mutex = apr_allocator_get_mutex(allocator)) != NULL)
+        if ((mutex = apr_allocator_mutex_get(allocator)) != NULL)
             apr_thread_mutex_lock(mutex);
 #endif /* APR_HAS_THREADS */
 
@@ -1421,7 +1421,7 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
     }
 
     if (pool->allocator != NULL
-        && apr_allocator_get_owner(pool->allocator) == pool) {
+        && apr_allocator_owner_get(pool->allocator) == pool) {
         apr_allocator_destroy(pool->allocator);
     }
 
