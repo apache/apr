@@ -856,6 +856,47 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
  * Debug helper functions
  */
 
+
+/*
+ * Walk the pool tree rooted at pool, depth first.  When fn returns
+ * anything other than 0, abort the traversal and return the value
+ * returned by fn.
+ */
+static int apr_pool_walk_tree(apr_pool_t *pool,
+                              int (*fn)(apr_pool_t *pool, void *data),
+                              void *data)
+{
+    int rv;
+    apr_pool_t *child;
+
+    rv = fn(pool, data);
+    if (rv)
+        return rv;
+
+#if APR_HAS_THREADS
+    if (pool->mutex) {
+        apr_thread_mutex_lock(pool->mutex);
+                        }
+#endif /* APR_HAS_THREADS */
+
+    child = pool->child;
+    while (child) {
+        rv = apr_pool_walk_tree(child, fn, data);
+        if (rv)
+            break;
+
+        child = child->sibling;
+    }
+
+#if APR_HAS_THREADS
+    if (pool->mutex) {
+        apr_thread_mutex_unlock(pool->mutex);
+    }
+#endif /* APR_HAS_THREADS */
+
+    return rv;
+}
+
 static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                                const char *file_line, int deref)
 {
@@ -912,64 +953,25 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
 }
 
-#if APR_HAS_THREADS
-static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
-                            apr_thread_mutex_t *mutex)
+static int pool_is_child_of(apr_pool_t *parent, void *data)
 {
-    apr_pool_t *child;
+    apr_pool_t *pool = (apr_pool_t *)data;
 
+    return (pool == parent);
+}
+
+static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent)
+{
     if (parent == NULL)
         return 0;
 
-    if (parent->mutex && parent->mutex != mutex)
-        apr_thread_mutex_lock(parent->mutex);
-
-    child = parent->child;
-
-    while (child) {
-        if (pool == child || apr_pool_is_child_of(pool, child, parent->mutex)) {
-            if (parent->mutex && parent->mutex != mutex)
-                apr_thread_mutex_unlock(parent->mutex);
-
-            return 1;
-        }
-
-        child = child->sibling;
-    }
-
-    if (parent->mutex && parent->mutex != mutex)
-        apr_thread_mutex_unlock(parent->mutex);
-
-    return 0;
+    return apr_pool_walk_tree(parent, pool_is_child_of, pool);
 }
-
-#else /* !APR_HAS_THREADS */
-static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
-                            void *dummy)
-{
-    apr_pool_t *child;
-
-    if (parent == NULL)
-        return 0;
-
-    child = parent->child;
-
-    while (child) {
-        if (pool == child || apr_pool_is_child_of(pool, child, NULL)) {
-            return 1;
-        }
-
-        child = child->sibling;
-    }
-
-    return 0;
-}
-#endif /* !APR_HAS_THREADS */
 
 static void apr_pool_check_integrity(apr_pool_t *pool)
 {
     /* Rule of thumb: use of the global pool is always
-     * ok, since the only user this apr_pools.c.  Unless
+     * ok, since the only user is apr_pools.c.  Unless
      * people have searched for the top level parent and
      * started to use that...
      */
@@ -982,7 +984,7 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
      * destroyed, in which case we abort().
      */
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME)
-    if (!apr_pool_is_child_of(pool, global_pool, NULL)) {
+    if (!apr_pool_is_child_of(pool, global_pool)) {
         apr_pool_log_event(pool, "LIFE",
                            __FILE__ ":apr_pool_integrity check", 0);
 
@@ -1294,7 +1296,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
          * belonging to another thread.
          */
         if ((rv = apr_thread_mutex_create(&pool->mutex,
-                APR_THREAD_MUTEX_DEFAULT, pool)) != APR_SUCCESS) {
+                APR_THREAD_MUTEX_NESTED, pool)) != APR_SUCCESS) {
             free(pool);
             return rv;
         }
@@ -1433,9 +1435,9 @@ APR_DECLARE(apr_pool_t *) apr_find_pool(const void *mem)
     return find_pool(global_pool, mem);
 }
 
-static apr_size_t pool_num_bytes(apr_pool_t *pool)
+static int pool_num_bytes(apr_pool_t *pool, void *data)
 {
-    apr_size_t size = 0;
+    apr_size_t *psize = (apr_size_t *)data;
     debug_node_t *node;
     apr_uint32_t index;
 
@@ -1443,69 +1445,28 @@ static apr_size_t pool_num_bytes(apr_pool_t *pool)
 
     while (node) {
         for (index = 0; index < node->index; index++) {
-            size += (char *)node->endp[index] - (char *)node->beginp[index];
+            *psize += (char *)node->endp[index] - (char *)node->beginp[index];
         }
 
         node = node->next;
     }
 
-    return size;
+    return 0;
 }
-
-#if APR_HAS_THREADS
-static apr_size_t pool_num_bytes_recursive(apr_pool_t *pool,
-                                           apr_thread_mutex_t *mutex)
-{
-    apr_size_t size;
-    apr_pool_t *child;
-
-    size = pool_num_bytes(pool);
-
-    if (pool->mutex && pool->mutex != mutex) {
-        apr_thread_mutex_lock(pool->mutex);
-    }
-
-    child = pool->child;
-    while (child) {
-        size += pool_num_bytes_recursive(child, pool->mutex);
-
-        child = child->sibling;
-    }
-
-    if (pool->mutex && pool->mutex != mutex) {
-        apr_thread_mutex_unlock(pool->mutex);
-    }
-
-    return size;
-}
-#else /* !APR_HAS_THREADS */
-static apr_size_t pool_num_bytes_recursive(apr_pool_t *pool)
-{
-    apr_size_t size;
-
-    size = pool_num_bytes(pool);
-
-    pool = pool->child;
-    while (pool) {
-        size += pool_num_bytes_recursive(pool);
-
-        pool = pool->sibling;
-    }
-
-    return size;
-}
-#endif /* !APR_HAS_THREADS */
 
 APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *pool, int recurse)
 {
-    if (!recurse)
-        return pool_num_bytes(pool);
+    apr_size_t size = 0;
 
-#if APR_HAS_THREADS
-    return pool_num_bytes_recursive(pool, NULL);
-#else /* !APR_HAS_THREADS */
-    return pool_num_bytes_recursive(pool);
-#endif /* !APR_HAS_THREADS */
+    if (!recurse) {
+        pool_num_bytes(pool, &size);
+
+        return size;
+    }
+
+    apr_pool_walk_tree(pool, pool_num_bytes, &size);
+
+    return size;
 }
 
 APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
