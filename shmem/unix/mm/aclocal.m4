@@ -231,6 +231,9 @@ changequote(<<, >>)dnl
 #include <sys/file.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #ifdef TEST_MMAP
 #include <sys/mman.h>
 #endif
@@ -238,6 +241,12 @@ changequote(<<, >>)dnl
 #include <sys/ipc.h>
 #ifndef _OSD_POSIX
 #include <sys/shm.h>
+#if !defined(SHM_R)
+#define SHM_R 0400
+#endif
+#if !defined(SHM_W)
+#define SHM_W 0200
+#endif     
 #else
 #define _KMEMUSER 1 /* BS2000 needs this to enable SHM_[RW] */
 #include <sys/shm.h>
