@@ -7,9 +7,6 @@ NONPORTABLE = \
 	testglobalmutex@EXEEXT@
 
 PROGRAMS = \
-	client@EXEEXT@ \
-	sendfile@EXEEXT@ \
-	server@EXEEXT@ \
 	testflock@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testlockperf@EXEEXT@ \
@@ -20,7 +17,8 @@ PROGRAMS = \
 	testall@EXEEXT@
 
 
-TARGETS = $(PROGRAMS) $(NONPORTABLE)
+TARGETS = $(PROGRAMS) $(NONPORTABLE) client@EXEEXT@ sendfile@EXEEXT@ \
+	server@EXEEXT@ 
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
