@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Fix the definition of union semun so that it is valid on systems
+     where sizeof(long) != sizeof(int).  This resolves a hang on
+     HP-UX/Itanium.  
+     [Madhusudan Mathihalli <madhusudan_mathihalli@hp.com>]
+
   *) Correct shared library support on Darwin to not fatally error out
      when a shared library does not exist.  [Justin Erenkrantz]
 
