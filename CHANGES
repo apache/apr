@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Add apr-config - a shell script to allow third-party programs
+     easy access to APR configuration parameters.  [Justin Erenkrantz]
+
+  *) Add find_apr.m4 to allow third-party programs that use APR to
+     have a standard m4 macro for detection.  [Greg Stein]
+
   *) SEGV in apr_table_overlap [Brian Pane]
 
   *) apr_array_copy speedup by removing the zero-fill [Brian Pane]

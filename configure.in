@@ -1427,6 +1427,7 @@ AC_OUTPUT([
 	include/apr.h
 	APRVARS
 	build/rules.mk
+	apr-config
 ],[
 for i in $SAVE_FILES; do
   if cmp -s $i $i.save 2>/dev/null; then
@@ -1436,6 +1437,8 @@ for i in $SAVE_FILES; do
   rm -f $i.save
 done
 ])
+
+chmod +x apr-config
 
 dnl #----------------------------- Fixup Makefiles for VPATH support
 
