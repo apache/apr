@@ -60,17 +60,17 @@
 #include <umalloc.h>
 #include <stdlib.h>
 
-struct shmem_t {
+typedef struct apr_shmem_t {
     void *memblock;
     Heap_t heap;
-};
+} apr_shmem_t;
 
 
 
-APR_DECLARE(apr_status_t) apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
 {
     int rc;
-    struct shmem_t *newm = (struct shmem_t *)apr_palloc(cont, sizeof(struct shmem_t));
+    apr_shmem_t *newm = (apr_shmem_t *)apr_palloc(cont, sizeof(apr_shmem_t));
     char *name = NULL;
     ULONG flags = PAG_COMMIT|PAG_READ|PAG_WRITE;
 
@@ -94,7 +94,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(struct shmem_t **m, apr_size_t reqsize, c
 
 
 
-APR_DECLARE(apr_status_t) apr_shm_destroy(struct shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
 {
     _uclose(m->heap);
     _udestroy(m->heap, _FORCE);
@@ -104,21 +104,21 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(struct shmem_t *m)
 
 
 
-APR_DECLARE(void *) apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
+APR_DECLARE(void *) apr_shm_malloc(apr_shmem_t *m, apr_size_t reqsize)
 {
     return _umalloc(m->heap, reqsize);
 }
 
 
 
-APR_DECLARE(void *) apr_shm_calloc(struct shmem_t *m, apr_size_t size)
+APR_DECLARE(void *) apr_shm_calloc(apr_shmem_t *m, apr_size_t size)
 {
     return _ucalloc(m->heap, size, 1);
 }
 
 
 
-APR_DECLARE(apr_status_t) apr_shm_free(struct shmem_t *m, void *entity)
+APR_DECLARE(apr_status_t) apr_shm_free(apr_shmem_t *m, void *entity)
 {
     free(entity);
     return APR_SUCCESS;
@@ -141,7 +141,7 @@ APR_DECLARE(apr_status_t) apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
 
 
 
-APR_DECLARE(apr_status_t) apr_shm_open(struct shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_open(apr_shmem_t *m)
 {
     int rc;
 
@@ -156,7 +156,7 @@ APR_DECLARE(apr_status_t) apr_shm_open(struct shmem_t *m)
 
 
 
-APR_DECLARE(apr_status_t) apr_shm_avail(struct shmem_t *c, apr_size_t *size)
+APR_DECLARE(apr_status_t) apr_shm_avail(apr_shmem_t *c, apr_size_t *size)
 {
 
     return APR_ENOTIMPL;
