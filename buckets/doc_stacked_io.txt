@@ -554,6 +554,507 @@ use.  You see, I'm envisioning a bottom layer which pulls data out of
 a database rather than reading from a file.]
 
 
+**************************************************************
+**************************************************************
+Date: Wed, 9 Sep 1998 18:55:40 -0700 (PDT)
+From: Alexei Kosut <akosut@leland.stanford.edu>
+To: new-httpd@apache.org
+Subject: A Magic Cache example
+Message-ID: <Pine.GSO.3.96.980909182642.29690A-100000@myth1.Stanford.EDU>
+
+During the drive home, I came up with a good example of how I envision the
+new module/cache/layer model thingy working. Comments please:
+
+The middle end of the server is responsible for taking the request the
+front end gives it and somehow telling the back end how to fulfill it. I
+look at it like this: The request is a URI (Uniform Resource Identifier)
+and a set of request dimensions (the request headers, the remote IP
+address, the time of day, etc...). The middle end, via its configuration,
+translates this into a request for content from a backing store module,
+plus possibly some filter modules. Since the term "filename" is too
+flat-file specific, let's call the parameter we pass to the backing store
+a SRI (Specific Resource Identifier), in a format specific to that module.
+
+Our example is similar to the one I was using earlier, with some
+additions: The request is for a URI, say "/skzb/teckla.html". The response
+is a lookup from a (slow) database. The URI maps to the mod_database SRI
+of "BOOK:0-441-7997-9" (I made that format up). We want to take that
+output and convert it from whatever charset it's in into Unicode. We then
+have a PHP script that works on a Unicode document and does things based
+on whether the browser is Netscape or not. Then we translate the document
+to the best charset that matches the characters used and the client's
+capabilities and send it.
+
+So upon request for /skzb/teckla.html, the middle end translates the
+request into the following "equation":
+
+        SRI: mod_database("BOOK:0-441-7997-9")
+    +   filter: mod_charset("Unicode")
+    +   filter: mod_php()
+    +   fllter: mod_charset("best_fit")
+ -------------------------------------------------
+        URI: /skzb/teckla.html
+
+It then constructs a stack of IO (NSPR) filters like this:
+
+mod_database -> cache-write -> mod_charset -> cache-write -> mod_php ->
+cache_write -> mod_charset -> cache-write -> client
+
+And sets it to running. Each of the cache filters is a write-through
+filter that copies its data into the cache with a tag based on what
+equation the middle end uses to get to it, plus the request dimensions it
+uses (info it gets from the modules).
+
+The database access is stored under "SRI: mod_database(BOOK:0-441-79977-9"
+with no dimensions (because it's the same for all requests). The first
+charset manipulation is stored under "SRI: mod_database(BOOK...) + filter:
+mod_charset(Unicode)", again with no dimensions. The PHP output is stored
+under "SRI: mod_database(BOOK...) + filter: mod_charset(Unicode) + filter:
+mod_php()" with dimesions of (User-Agent). The final output is stored both
+as "SRI: mod_database(BOOK...) + filter: mod_charset(Unicode) + filter:
+mod_php() + filter: mod_charset(best_fit)" and "URI: /skzb/teckla.html"
+(they're the same thing), both with dimensions of (User-Agent,
+Accept-Charset).
+
+So far so good. Now, when another request for /skzb/teckla.html comes in,
+the cache is consulted to see how much we can use. First, the URI is
+looked up. This can be done by a kernel or other streamlined part of the
+server. So "URI: /skzb/teckla.html" is looked up, and one entry pops out
+with dimensions of (User-Agent, Accept-Charset). The user-agent and
+accept-charset of the request are compared against the ones of the stored
+entiry(ies). If one matches, it can be sent directly.
+
+If not, the server proceeds to look up "SRI: mod_database(BOOK...) +
+filter: mod_charset(Unicode) + filter: mod_php()". If the request has a
+different accept-charset, but the same user-agent, then this can be
+reprocessed by mod_charset and used. Otherwise, the server proceeds back
+to "SRI: mod_database(BOOK...) + filter: mod_charset(Unicode)", which will
+match any request. There's probably some sort of cache invalidation
+(expires, etc...) that happens eventually to result in a new database
+lookup, but mostly, that very costly operation is avoided.
+
+I think I've made it out to be a bit more complicated than it is, with the
+long equation strings mixed in there. But the above reflects my
+understanding of how the new Apache 2.0 system should work.
+
+Note 1: The cache is smarter than I make it out here when it comes to
+adding new entries. It should realize that, since the translation to
+Unicode doesn't change or restrict the dimensions of the request, it
+really is pointless to cache the original database lookup, since it will
+always be translated in exactly the same manner. Knowing this, it will
+only cache the Unicode version. 
+
+Note 2: PHP probably doesn't work with Unicode. And there may not be a way
+to identify a script as only acting on the User-Agent dimension. That's
+not the point.
+
+Note 3: Ten bonus points to anyone who's read this far, and is the first
+person to answer today's trivia question: What does the skzb referred to
+in the example URI stand for? There's enough information in this mail to
+figure it out (with some help from the Net), even if you don't know
+offhand (though if you do, I'd be happier). 
+
+-- Alexei Kosut <akosut@stanford.edu> <http://www.stanford.edu/~akosut/>
+   Stanford University, Class of 2001 * Apache <http://www.apache.org> *
+
+
+**************************************************************
+Message-ID: <19980922224326.A16219@aisa.fi.muni.cz>
+Date: Tue, 22 Sep 1998 22:43:26 +0200
+From: Honza Pazdziora <adelton@informatics.muni.cz>
+To: new-httpd@apache.org
+Subject: Re: I/O Layering in next version of Apache.
+References: <19980922111627.19784.qmail@hyperreal.org> <3607D53A.1FF6D93@algroup.co.uk> <13831.55021.929560.977122@zap.ml.org>
+In-Reply-To: <13831.55021.929560.977122@zap.ml.org>; from Ben Hyde on Tue, Sep 22, 1998 at 01:04:12PM -0400
+
+> >Does anyone have a starting point for layered I/O? I know we kicked it
+
+Hello,
+
+there has been a thread on modperl mailing list recently about
+problems we have with the current architecture. Some of the points
+were: what requerements will be put on modules to be new I/O
+compliant. I believe it's the Apache::SSI vs. Apache::SSIChain
+difference between 1.3.* and 2.*. The first fetches the file _and_
+does the SSI, the second takes input from a different module that
+either gets the HTML or runs the CGI or so, and processes its output.
+Should all modules be capable of working on some other module's
+output? Probably except those that actually go to disk or database for
+the primary data.
+
+Randal's point was that output of any module could be processed, so
+that no module should make any assumption whether it's sending data
+directly to the browser or to some other module. This can be used both
+for caching, but it also one of the things to get the filtering
+transparent.
+
+Also, as Apache::GzipChain module shows, once you process the output,
+you may need to modify the headers as well. I was hit by this when I
+tried to convert between charsets, to send out those that the browsers
+would understand. The Apache::Mason module shows that you can build
+a page from pieces. Each of the pieces might have different
+characteristics (charset, for example), so with each piece of code we
+might need to have its own headers that describe it, or at least the
+difference between the final (global) header-outs and its local.
+
+Sorry for bringing so much Perl module names in, but modperl is
+currently a way to get some layered I/O done in 1.3.*, so I only have
+practical experiance with it.
+
+Yours,
+
+------------------------------------------------------------------------
+ Honza Pazdziora | adelton@fi.muni.cz | http://www.fi.muni.cz/~adelton/
+                   I can take or leave it if I please
+------------------------------------------------------------------------
+
+**************************************************************
+Date: Wed, 23 Sep 1998 10:46:47 -0700 (PDT)
+From: Dean Gaudet <dgaudet@arctic.org>
+To: new-httpd@apache.org
+Subject: Re: I/O Layering in next version of Apache.
+In-Reply-To: <36092F2D.BCC4E5C1@algroup.co.uk>
+Message-ID: <Pine.LNX.3.96dg4.980923103916.24223K-100000@twinlark.arctic.org>
+
+On Wed, 23 Sep 1998, Ben Laurie wrote:
+
+> Dean Gaudet wrote:
+> > 
+> > On Wed, 23 Sep 1998, Ben Laurie wrote:
+> > 
+> > > Is the simplest model that accomodates this actually just a stack
+> > > (tree?) of webservers? Naturally, we wouldn't talk HTTP between the
+> > > layers, but pass (header,content) pairs around (effectively).
+> > > Interesting.
+> > 
+> > We could just talk "compiled" HTTP -- using a parsed representation of
+> > everything essentially.
+> 
+> That's pretty much what I had in mind - but does it make sense? I have
+> to admit, it makes a certain amount of sense to me, but I still have
+> this nagging suspicion that there's a catch.
+
+We talked about this during the developers meeting earlier this summer... 
+while we were hiking, so I don't think there were any notes.
+
+I think it'd be a useful exercise to specify a few example applications we
+want to be able to support, and then consider methods of implementing
+those applications.  Make the set as diverse and small as possible.  I'll
+take the easiest one :)
+
+- serve static content from arbitrary backing store (e.g. file, database) 
+
+Once we flesh such a list out it may be easier to consider implementation
+variations... 
+
+I think it was Cliff who said it this way:  in a multiple layer setup he
+wants to be able to partition the layers across servers in an arbtrary
+manner.  For example, a proxy cache on one box which the world talks to,
+and which backends to various other boxes for dynamic and static content.
+Or maybe the static content is on the same server as the proxy. If this is
+something we want to support then talking (a restricted form of) HTTP
+between layers is interesting. 
+
+Now we can all start worrying about performance ;) 
+
+Dean
+
+
+**************************************************************
+Date: Wed, 23 Sep 1998 11:23:30 -0700 (PDT)
+From: Alexei Kosut <akosut@leland.stanford.edu>
+To: new-httpd@apache.org
+Subject: Re: I/O Layering in next version of Apache.
+In-Reply-To: <36092F2D.BCC4E5C1@algroup.co.uk>
+Message-ID: <Pine.GSO.3.96.980923111613.17322C-100000@myth6.Stanford.EDU>
+
+On Wed, 23 Sep 1998, Ben Laurie wrote:
+
+> > We could just talk "compiled" HTTP -- using a parsed representation of
+> > everything essentially.
+> 
+> That's pretty much what I had in mind - but does it make sense? I have
+> to admit, it makes a certain amount of sense to me, but I still have
+> this nagging suspicion that there's a catch.
+
+One important thing to note is that we want this server to be able to
+handle non-HTTP requests. So using HTTP as the internal language (as we do
+now) is not the way to go. What we talked about in SF was using a basic
+set of key/value pairs to represent the metadata of the response. Which
+would of course bear an uncanny resemblance to HTTP-style MIME headers...
+
+Certainly, and this is the point I think the originator of this thread
+raised, each module layer (see the emails I sent a few weeks ago for more
+details on how I see *that*) needs to provide both a content filter and a
+metadata filter. Certainly a module that does encoding has to be able to
+alter the headers to add a Content-Encoding, Transfer-Encoding, TE, or
+what have you. Many module that does anything to the content will
+want to add headers, and many others will need to alter the dimensions on
+which the request is served, or what the parameters to those dimensions
+are for the current request. The latter is absolutely vital for cacheing.
+
+The problem, as I see it, is this: Often, I suspect it will be the case
+that the module does not know what metadata it will be altering (and how)
+until after it has processed the request. i.e., a PHP script may not
+discover what dimensions it uses (as we discussed earlier) until after it
+has parsed the entire script. But if the module is functioning as an
+in-place filter, that can cause massive headaches if we need the metadata
+in a complete form *before* we sent the entity, as we do for HTTP.
+
+I'm not quite sure how to solve that problem. Anyone have any brilliant
+ideas?
+
+(Note that for internal caching, we don't actually need the dimension data
+until after the request, because we can alter the state of the cache at
+any time, but if we want to place nice with HTTP and send Vary: headers
+and such, we do need that information. I guess we could send Vary:
+footers...)
+
+-- Alexei Kosut <akosut@stanford.edu> <http://www.stanford.edu/~akosut/>
+   Stanford University, Class of 2001 * Apache <http://www.apache.org> *
+
+
+**************************************************************
+Date: 23 Sep 1998 20:26:58 -0000
+Message-ID: <19980923202658.25736.qmail@zap.ml.org>
+From: Ben Hyde <bhyde@pobox.com>
+To: new-httpd@apache.org
+Subject: Stacking up Response Handling
+In-Reply-To: <Pine.GSO.3.96.980923111613.17322C-100000@myth6.Stanford.EDU>
+References: <36092F2D.BCC4E5C1@algroup.co.uk>
+	<Pine.GSO.3.96.980923111613.17322C-100000@myth6.Stanford.EDU>
+
+Alexei Kosut writes:
+>The problem, as I see it, is this: Often, I suspect it will be the case
+>that the module does not know what metadata it will be altering (and how)
+>until after it has processed the request. i.e., a PHP script may not
+>discover what dimensions it uses (as we discussed earlier) until after it
+>has parsed the entire script. But if the module is functioning as an
+>in-place filter, that can cause massive headaches if we need the metadata
+>in a complete form *before* we sent the entity, as we do for HTTP.
+>
+>I'm not quite sure how to solve that problem. Anyone have any brilliant
+>ideas?
+
+This is the same as building a layout engine that incremental layout
+but simpler since I doubt we'd want to allow for reflow.
+
+Sometimes you can send output right along, sometimes you have to wait.
+I visualize the output as a tree/outline and as it is swept out a
+stack holds the path to the leave.  Handlers for the individual nodes
+wait or proceed depending on if they can.
+
+It's pretty design with the pipeline consisting of this stack of
+output transformers/generators.  Each pipeline stage accepts a stream
+of output_chunks.  I think of these output_chunks as coming in plenty
+of flavors, for example transmit_file, transmit_memory, etc.  Some
+pipeline stages might handle very symbolic chunks.  For example
+transmit_xml_tree might be handed to transform_xml_to_html stage in
+the pipeline.
+
+I'm assuming the core server would have only a few kinds of pipeline
+nodes, generate_response, generate_content_from_url_via_file_system,
+generate_via_classic_module_api.  Things like convert_char_set or
+do_cool_transfer_encoding, could easily be loaded at runtime and
+authored outside the core.  That would be nice.
+
+For typical fast responses we wouldn't push much on this stack at
+all.  It might go something like this: Push generate_response node, 
+it selects an appropriate content generator by consulting the
+module community and pushes that.  Often this is 
+generate_content_from_url_via_file_system which in turn does
+all that ugly mapping to a file name and then passes 
+transmit_file down the pipeline and pops it's self off the stack.
+generate_response once back on top again does the transmit and
+pops off.
+
+For rich complex output generation we might push all kinds of things
+(charset converters, transfer encoders, XML -> HTML rewriters, cache
+builders, old style apache module API simulators, what ever).
+
+The intra-stack element protocol get's interesting around issues
+like error handling, blocking, etc.  
+
+I particularly like how this allows simulation of the old module API,
+as well as the API of other servers, and experimenting with other
+module API which cross process or machine boundaries.
+
+In many ways this isn't that much different from what was proposed
+a year ago.  
+
+ - ben
+
+**************************************************************
+From: Ben Hyde <bhyde@pobox.com>
+Date: Wed, 23 Sep 1998 21:58:54 -0400 (EDT)
+To: new-httpd@apache.org
+Subject: Re: Core server caching
+In-Reply-To: <Pine.GSO.3.96.980923142800.14009A-100000@elaine40.Stanford.EDU>
+References: <19980923210119.25763.qmail@zap.ml.org>
+	<Pine.GSO.3.96.980923142800.14009A-100000@elaine40.Stanford.EDU>
+Message-ID: <13833.39467.942203.885143@zap.ml.org>
+
+Alexei Kosut writes:
+>On 23 Sep 1998, Ben Hyde wrote:
+>
+>> The core problem of caching seems to me to get confused by the
+>> complexity of designing a caching proxy.  If one ignores that then the
+>> core problem of caching seems quite simple.
+>
+>Actually, for an HTTP server, they're the same problem, if you want to be
+>able to cache any sort of dynamic request. And caching static requests is
+>kind of silly (Dean's flow stuff notwithstanding, making copies of static
+>files in either memory or on disk is silly, since the OS can do it better
+>than we can).
+
+I don't disagree with any of the things you said, so I guess I'm
+failing to get across where in this structure the functions your
+pointing out as necessary would reside as versus where the "chunk
+cache" mechanism I'm yearning for would fit.
+
+Well, that's not entirely true I do feel it's helpful to make this
+point.
+
+The HTTP spec's definition of proper caching is terribly constrained
+by the poverty of information available to the proxy server.  He is
+trapped in the middle between an opinionated content provider and an
+opinionated content consumer.  It was written in an attempt to keep
+people like AOL from making their opinions dominate either of those
+other two.  Proper caching by a server that is right next to the
+content generation can and ought to include both more or less
+heuristics that are tunable by the opinions of the content provider
+who presumably we are right next to.
+
+Imagine the server that has a loop that goes like so:
+
+   loop
+     r<-swallow_incomming_request
+     h<-select_response_handler(r)
+     initialize_response_pipeline()
+     push_pipeline_element(h)
+     tend_pipeline_until_done()
+   end loop
+
+In most of the web based applications I've seen the
+select_response_handler step evolves into something that looks like an
+AI expert system.  That said, what I'd like to see is in Apache2 is a
+simple dispatch along with a way to plug-in more complex dispatching
+mechanisms.  I'd very much like to avoid having that get confused with
+the suite of response_handlers.
+
+I ignored the complexity of when to you can safely select
+a cached value because I think it's in the select_response_handler
+step.  And possibly, I'll admit, not part of what I called the
+"core server"
+
+Clearly I'm a fool for using this term 'core server' since it
+doesn't mean anything.  I wanted it to mean that loop above
+and the most minimal implementations for the pipeline and
+the select_response_handler one could imagine before starting
+to pile on.  The server as shipped would have a lot more
+stuff in it!
+
+What I'm focused on is what has to be in that core versus
+what has to be, but can be outside of it.
+
+So. as i thought about the state of the pipeline just after
+the call on initialize_response_pipeline I at first thought
+it would have something much like the current buffer abstraction
+in the pipeline.  Then i got to wondering if transfer encoding,
+charset conversion, or caching ought to be in there.
+
+I think there is an argument for putting some caching functionality
+in there.  Possibly because that entire knot is what you'd move
+into the OS if you could.  Possibly because this is the bit
+that must fly.
+
+Recall that I think the pipeline takes a stream of response
+chunks with things like memory_chunk, transfer_file_chunk, etc.
+in that stream.  The question is what flavors of chunks does
+that bottom element in the pipeline take.  It's the chunks
+that fly (and nothing more?).  So I got to thinking about
+what does it mean to have a cached_chunk.
+
+A cached_chunk needs only the small operation set along
+the lines of what I mentioned.  A full caching scheme
+can build on it.  As an added benefit the caching scheme
+can be dumb, standard, extremely witty without effecting
+this portion of the design.
+
+A quick point about why I wanted the cache to handle things
+smaller than entire responses.  This isn't central I guess.
+
+I want a protocol with content generators that encourages
+them to use dynamic programming tricks to quickly generate
+portions of pages that are static over long periods.  Such
+a scheme has worked well in systems we've built.
+
+ - ben hyde
+
+**************************************************************
+From: Ben Hyde <bhyde@pobox.com>
+Date: Thu, 29 Oct 1998 23:16:37 -0500 (EST)
+To: new-httpd@apache.org
+Subject: Re: Core server caching
+In-Reply-To: <Pine.LNX.3.96dg4.981029175439.3639X-100000@twinlark.arctic.org>
+References: <Pine.WNT.4.05.9810292049480.-445955@helium.jetpen.com>
+	<Pine.LNX.3.96dg4.981029175439.3639X-100000@twinlark.arctic.org>
+Message-ID: <13881.12903.661334.819447@zap.ml.org>
+
+Dean Gaudet writes:
+>On Thu, 29 Oct 1998, Rasmus Lerdorf wrote:
+>
+>> There are also weird and wacky things you would be able to do if you could
+>> stack mod_php on top of mod_perl.
+>
+>You people scare me.
+>
+>Isn't that redundant though?
+>
+>Dean
+
+Yes it's scary, but oddly erotic, when these behemoths with their
+gigantic interpreters try to mate.
+
+It's interesting syndrome, systems as soon as they get an interpreter
+they tend to loose their bearings and grow into vast behemoths that
+lumber about slowly crushing little problems with their vast mass.
+Turing syndrome?
+
+I've heard people say modules can help avoid this, but I've rarely
+seen it.  Olde Unix kinda manages it remember being frightened by
+awk.
+
+Can we nudge alloc.c/buff.c toward a bit of connective glue that
+continues to let individual modules evolve their own gigantism while
+avoiding vile effects on the core performance of the server?  Stuff
+like this:
+
+  memory chunk alignment for optimal I/O
+  memory hand off along the pipeline
+  memory hand off crossing pool boundaries
+  memory hand off in zero copy cases
+  transmit file
+  transmit cache elements
+  insert/remove cache elements
+  leverage unique hardware and instructions
+
+That memcpy in ap_bread really bugs me.
+
+I'd be rather have routines that let me handoff chunks.  Presumably
+these would need to be able to move chunks across pool and buffer
+boundaries.  But zero copy if I don't touch the content and never a
+memcpy just to let my lex the input.
+
+I've built systems like this with the buffers exposing a emacs
+buffer style of abstraction, but with special kinds of marks
+to denote what's released for sending, and what's been accepted
+and lex'd on the input side.  It does create mean all your
+lexical and printf stuff has to be able to smoothly slide
+over chunk boundaries.
+
+ - ben
+
 *************************************************************************
 Date: Sun, 27 Dec 1998 13:08:22 -0800 (PST)
 From: Ed Korthof <ed@bitmechanic.com>
