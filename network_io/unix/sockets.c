@@ -103,6 +103,10 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
                                                         sizeof(apr_sockaddr_t));
     (*new)->remote_addr->pool = p;
+
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*new)->pollset, 1, p, 0);
 }
 
 apr_status_t apr_socket_protocol_get(apr_socket_t *sock, int *protocol)
@@ -144,6 +148,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     (*new)->inherit = 0;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
                               socket_cleanup);
+
     return APR_SUCCESS;
 } 
 

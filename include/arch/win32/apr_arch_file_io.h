@@ -65,6 +65,7 @@
 #include "apr_file_info.h"
 #include "apr_errno.h"
 #include "apr_arch_misc.h"
+#include "apr_poll.h"
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -214,6 +215,9 @@ struct apr_file_t {
     int direction;             // buffer being used for 0 = read, 1 = write
     apr_off_t filePtr;         // position in file of handle
     apr_thread_mutex_t *mutex; // mutex semaphore, must be owned to access the above fields
+
+    /* if there is a timeout set, then this pollset is used */
+    apr_pollset_t *pollset;
 
     /* Pipe specific info */    
 };

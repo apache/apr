@@ -65,38 +65,54 @@
 #endif
 
 #ifdef USE_WAIT_FOR_IO
+
 apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
-                                           int for_read)
+                                        int for_read)
 {
     apr_interval_time_t timeout;
-    apr_pollfd_t pollset;
-    int srv, n;
+    apr_pollfd_t pfd;
     int type = for_read ? APR_POLLIN : APR_POLLOUT;
+    apr_pollset_t *pollset;
+    apr_status_t status;
 
     /* TODO - timeout should be less each time through this loop */
     if (f) {
-        pollset.desc_type = APR_POLL_FILE;
-        pollset.desc.f = f;
-        pollset.p = f->pool;
+        pfd.desc_type = APR_POLL_FILE;
+        pfd.desc.f = f;
+
+        pollset = f->pollset;
         timeout = f->timeout;
     }
     else {
-        pollset.desc_type = APR_POLL_SOCKET;
-        pollset.desc.s = s;
-        pollset.p = s->cntxt;
+        pfd.desc_type = APR_POLL_SOCKET;
+        pfd.desc.s = s;
+
+        pollset = s->pollset;
         timeout = s->timeout;
     }
-    pollset.reqevents = type;
+    pfd.reqevents = type;
+
+    /* Remove the object if it was in the pollset, then add in the new
+     * object with the correct reqevents value. Ignore the status result
+     * on the remove, because it might not be in there (yet).
+     */
+    (void) apr_pollset_remove(pollset, &pfd);
+
+    /* ### check status code */
+    (void) apr_pollset_add(pollset, &pfd);
 
     do {
-        srv = apr_poll(&pollset, 1, &n, timeout);
+        int numdesc;
+        const apr_pollfd_t *pdesc;
 
-        if (n == 1 && pollset.rtnevents & type) {
+        status = apr_pollset_poll(pollset, timeout, &numdesc, &pdesc);
+
+        if (numdesc == 1 && (pdesc[0].rtnevents & type) != 0) {
             return APR_SUCCESS;
         }
-    } while (APR_STATUS_IS_EINTR(srv));
+    } while (APR_STATUS_IS_EINTR(status));
 
-    return srv;
+    return status;
 }
-#endif
 
+#endif /* USE_WAIT_FOR_IO */

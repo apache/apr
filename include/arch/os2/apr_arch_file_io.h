@@ -61,6 +61,7 @@
 #include "apr_file_io.h"
 #include "apr_file_info.h"
 #include "apr_errno.h"
+#include "apr_poll.h"
 
 /* We have an implementation of mkstemp but it's not very multi-threading 
  * friendly & is part of the POSIX emulation rather than native so don't
@@ -82,6 +83,9 @@ struct apr_file_t {
     int pipe;
     HEV pipeSem;
     enum { BLK_UNKNOWN, BLK_OFF, BLK_ON } blocking;
+
+    /* if there is a timeout set, then this pollset is used */
+    apr_pollset_t *pollset;
 
     /* Stuff for buffered mode */
     char *buffer;

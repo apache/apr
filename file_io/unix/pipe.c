@@ -198,6 +198,10 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
                                   apr_unix_file_cleanup,
                                   apr_pool_cleanup_null);
     }
+
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
     return APR_SUCCESS;
 }
 
@@ -229,6 +233,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 #if APR_HAS_THREADS
     (*in)->thlock = NULL;
 #endif
+    (void) apr_pollset_create(&(*in)->pollset, 1, pool, 0);
 
     (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
     (*out)->pool = pool;
@@ -242,6 +247,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 #if APR_HAS_THREADS
     (*out)->thlock = NULL;
 #endif
+    (void) apr_pollset_create(&(*out)->pollset, 1, pool, 0);
 
     apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
