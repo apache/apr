@@ -1,5 +1,10 @@
 Changes with APR 0.9.2
 
+  *) NetWare: implemented a file IO path context scheme to directly
+     reference directory paths and files in the file system rather
+     than having to traverse the file system on every stat() or
+     open() call. (Performance enhancement) [Brad Nicholes]
+     
   *) ReliantUnix: recognize that dlsym() is in libdl and dlopen() is in
      libc.  The check is generic so maybe this fixes some other system.
      PR 14189  [Jeff Trawick]
