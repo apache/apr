@@ -68,11 +68,11 @@
 
 #define LUMPS 10
 #define LUMP_SIZE 1024
+char *ptrs[LUMPS];
 
 static void do_test(apr_memory_system_t *ams)
 {
     int cntr,cntr2;
-    char *ptrs[LUMPS];
     
     printf("\tCreating %d lumps of memory, each %d bytes........", 
            LUMPS, LUMP_SIZE);
@@ -104,7 +104,12 @@ static void do_test(apr_memory_system_t *ams)
             }
         }
     } 
-    printf("OK\n");
+    printf("OK\n");   
+}
+
+static void do_free(apr_memory_system_t *ams)
+{
+    int cntr;
     
     printf("\tFreeing the memory we created.......................");
     for (cntr = 0;cntr < LUMPS;cntr ++){
@@ -133,7 +138,8 @@ int main(void)
     printf("OK\n");
 
     do_test(ams);
-
+    do_free(ams);
+    
     printf("Tracking Memory\n");
     printf("\tCreating the memory area............................");
     if (apr_tracking_memory_system_create(&ams2, ams) != APR_SUCCESS){
@@ -143,7 +149,15 @@ int main(void)
     printf("OK\n");
 
     do_test(ams2);
-
+    printf("\tAbout to reset the tracking memory..................\n");
+    if (apr_memory_system_reset(ams2) != APR_SUCCESS){
+        printf("Failed.\n");
+        exit(-1);
+    }
+    printf("OK\n");
+    do_test(ams2);
+    do_free(ams2);
+    
     printf("Trying to destroy the tracking memory segment...............");
     if (apr_memory_system_destroy(ams2) != APR_SUCCESS){
         printf("Failed.\n");
