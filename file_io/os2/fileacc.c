@@ -186,3 +186,37 @@ ap_status_t ap_get_filemtime(time_t *time, struct file_t *file)
     }
 }
 
+
+
+ap_status_t ap_get_filetype(ap_filetype_e *type, struct file_t *file)
+{
+    ULONG rc, filetype, fileattr;
+
+    if (file != NULL && file->isopen) {
+        rc = DosQueryHType( file->filedes, &filetype, &fileattr );
+
+        if (rc)
+            return os2errno(rc);
+
+        switch (filetype & 0xff) {
+        case 0:
+            *type = APR_REG;
+            break;
+
+        case 1:
+            *type = APR_CHR;
+            break;
+
+        case 2:
+            *type = APR_PIPE;
+            break;
+        }
+
+        return APR_SUCCESS;
+    }
+    else {
+        *type = APR_REG;
+        return APR_ENOFILE;
+    }
+}
+
