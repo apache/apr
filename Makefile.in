@@ -41,7 +41,7 @@ SUBDIRS=lib file_io/@OSDIR@ network_io/@OSDIR@ threadproc/@OSDIR@ \
 all: Makefile $(MODULES) subdirs
 	rm -Rf libs
 	mkdir libs
-	@for i in $(SUBDIRS); do cp $$i/lib*.a libs ; done;
+	@for i in $(SUBDIRS); do cp $$i/*.a libs ; done;
 	@echo APR built.
 
 clean: subdirs_clean

@@ -58,6 +58,7 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include <sys/time.h>
 
 /*  OS/2 doesn't have a poll function, implement using select */
  

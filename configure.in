@@ -78,6 +78,9 @@ AC_DEFINE_UNQUOTED($ac_decision)
 AC_CHECK_LIB(pthread, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
 
 case "$OS" in
+   *-os2*)
+       OSDIR="os2"
+       ;;
    *beos*)
        OSDIR="beos"
        ;;

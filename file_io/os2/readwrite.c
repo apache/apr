@@ -60,7 +60,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_read(const struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ULONG rc;
     ULONG bytesread;
