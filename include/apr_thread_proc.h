@@ -512,6 +512,20 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
                                                        apr_child_errfn_t *errfn);
 
+/**
+ * Specify that apr_proc_create() should do whatever it can to report
+ * failures to the caller of apr_proc_create(), rather than find out in
+ * the child.
+ * @param chk Flag to indicate whether or not extra work should be done
+ *            to try to report failures to the caller.
+ * @remark This flag only affects apr_proc_create() on platforms where
+ *         fork() is used.  This leads to extra overhead in the calling
+ *         process, but that may help the application handle such
+ *         errors more gracefully.
+ */
+APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
+                                                       apr_int32_t chk);
+
 #if APR_HAS_FORK
 /**
  * This is currently the only non-portable call in APR.  This executes 
