@@ -1,4 +1,7 @@
 Changes with APR 0.9.5
+  *) Win32: Fix bug in apr_socket_sendfile that interferred with
+     Win32 LSPs. Bug is described in Apache 2.0 bugzilla report 
+     23982 [Jan Bilek, Bill Stoddard]
 
   *) apr_proc_create() on Unix: Remove unnecessary check for read 
      access to the working directory of the child process.

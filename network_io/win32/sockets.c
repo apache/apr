@@ -35,6 +35,10 @@ static apr_status_t socket_cleanup(void *sock)
         }
         thesocket->socketdes = INVALID_SOCKET;
     }
+    if (thesocket->overlapped) {
+        CloseHandle(thesocket->overlapped->hEvent);
+        thesocket->overlapped = NULL;
+    }
     return APR_SUCCESS;
 }
 
