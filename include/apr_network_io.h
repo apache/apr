@@ -67,6 +67,9 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -124,6 +127,7 @@ ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
                               ap_status_t (*cleanup) (void*));
 
 ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *);
+ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *nbytes);
 ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *);
 
 ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t, ap_int32_t);
