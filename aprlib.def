@@ -48,6 +48,8 @@ EXPORTS
 	apr_put_os_file
     	apr_get_os_dir
     	apr_fprintf
+	apr_lock_file
+	apr_unlock_file
 
 ;
 ; apr_network_io.h
