@@ -167,15 +167,15 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
                                           apr_thread_t *thd)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
-    if ((stat = WaitForSingleObject(thd->td, INFINITE)) == WAIT_OBJECT_0) {
+    rv = WaitForSingleObject(thd->td, INFINITE);
+    if ( rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
         *retval = thd->exitval;
         return APR_SUCCESS;
     }
-    else {
-        return stat;
-    }
+    /* Wait failed */
+    return APR_FROM_OS_ERROR(GetLastError());
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
