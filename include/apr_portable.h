@@ -262,7 +262,7 @@ ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *);
 #if APR_HAS_THREADS
 /*
 
-=head1 ap_status_t ap_get_os_thread(ap_thread_t *thethd, ap_os_thread_t *thd)
+=head1 ap_status_t ap_get_os_thread(ap_thread_t **thethd, ap_os_thread_t *thd)
 
 B<convert the thread to os specific type from apr type.>
 

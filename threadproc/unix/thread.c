@@ -196,10 +196,9 @@ ap_status_t ap_set_threaddata(void *data, const char *key,
     return ap_set_userdata(data, key, cleanup, thread->cntxt);
 }
 
-ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd)
+ap_status_t ap_get_os_thread(ap_os_thread_t **thethd, ap_thread_t *thd)
 {
-    /* ### broken. is the signature broken? */
-    thethd = thd->td;
+    *thethd = thd->td;
     return APR_SUCCESS;
 }
 
