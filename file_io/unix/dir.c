@@ -124,8 +124,13 @@ ap_status_t ap_closedir(struct dir_t *thedir)
  */                        
 ap_status_t ap_readdir(struct dir_t *thedir)
 {
-#if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS 
-    return readdir_r(thedir->dirstruct, thedir->entry, &thedir->entry);
+#if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS
+    ap_status_t ret;
+    ret = readdir_r(thedir->dirstruct, thedir->entry, &thedir->entry);
+    /* Avoid the Linux problem where at end-of-directory thedir->entry
+     * is set to NULL, but ret = APR_SUCCESS.
+     */
+    return (ret == APR_SUCCESS && thedir->entry == NULL) ? APR_ENOENT : ret;
 #else
 
     thedir->entry = readdir(thedir->dirstruct);
@@ -288,6 +293,11 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
  */                        
 ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 {
+    /* Detect End-Of-File */
+    if (thedir == NULL || thedir->entry == NULL) {
+       *new = NULL;
+       return APR_ENOENT;
+    }
     (*new) = ap_pstrdup(thedir->cntxt, thedir->entry->d_name);
     return APR_SUCCESS;
 }
