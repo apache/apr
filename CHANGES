@@ -6,8 +6,6 @@ Changes with APR 0.9.2
      operations for Linux/x86 (requires a 486 or later; to enable,
      configure APR with --enable-nonportable-atomics=yes )   [Brian Pane]
 
-  *) Add --bindir option to apr-config.  [Justin Erenkrantz]
-
   *) Begin to rehash the test suite.  There is now a new test program called
      testall.  This program currently runs testtime and teststr with the
      CuTest framework.  The stand-alone programs for testtime and teststr
