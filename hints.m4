@@ -86,7 +86,7 @@ case "$host" in
 	APR_SETVAR(APACHE_MPM, [prefork])
 	;;
     *-ibm-aix*)
-        case $PLAT in
+        case $host in
         i386-ibm-aix*)
 	    APR_SETIFNULL(CFLAGS, [-U__STR__ -DUSEBCOPY])
 	    ;;
@@ -150,7 +150,7 @@ case "$host" in
 	;;
     *-hp-hpux10.*)
 	APR_SETIFNULL(CFLAGS, [-DHPUX10])
- 	case $PLAT in
+ 	case $host in
  	  *-hp-hpux10.01)
 dnl	       # We know this is a problem in 10.01.
 dnl	       # Not a problem in 10.20.  Otherwise, who knows?
@@ -185,7 +185,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_SETIFNULL(LIBS, [-lcrypt])
 	;;
     *-freebsd*)
-	case $PLAT in
+	case $host in
 	    *freebsd[2345]*)
 		APR_SETIFNULL(CFLAGS, [-funsigned-char])
 		;;
@@ -239,7 +239,7 @@ dnl	;;
 	APR_SETIFNULL(LIBS, [-lPW -lsocket -lmalloc -lcrypt_i])
 	;;
     *-solaris2*)
-    	PLATOSVERS=`echo $PLAT | sed 's/^.*solaris2.//'`
+    	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_SETIFNULL(CFLAGS, [-DSOLARIS2=$PLATOSVERS])
 	APR_SETIFNULL(LIBS, [-lsocket -lnsl])
 	;;
@@ -311,7 +311,7 @@ dnl	;;
 	APR_SETIFNULL(LIBS, [-lPW])
 	;;
     *-uts*)
-	PLATOSVERS=`echo $PLAT | sed 's/^.*,//'`
+	PLATOSVERS=`echo $host | sed 's/^.*,//'`
 	case $PLATOSVERS in
 	    2*) APR_SETIFNULL(CFLAGS, [-Xa -eft -DUTS21 -DUSEBCOPY])
 	        APR_SETIFNULL(LIBS, [-lsocket -lbsd -la])
