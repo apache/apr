@@ -34,3 +34,7 @@ autom4te.cache
 ltcf-c.sh
 build-outputs.mk
 .make.dirs
+*.bb
+*.bbg
+*.da
+coverage
