@@ -114,6 +114,10 @@ SOURCE=.\lib\apr_snprintf.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\apr_strnatcmp.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\apr_tables.c
 # End Source File
 # Begin Source File
