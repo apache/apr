@@ -799,10 +799,10 @@ if test "x$ac_cv_define_TCP_CORK" = "xyes"; then
 else
     case $OS in
         *linux*)
-            AC_EGREP_HEADER(TCP_CORK, linux/socket.h, [
-            apr_tcp_nopush_flag="3"
-            have_corkable_tcp="1"
-            ])
+            if test "x$sendfile" = "x1"; then
+                apr_tcp_nopush_flag="3"
+                have_corkable_tcp="1"
+            fi
             ;;
         *)
             ;;
