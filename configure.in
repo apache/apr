@@ -222,8 +222,8 @@ sendfile="0"
 AC_CHECK_FUNCS(sendfile send_file, [ sendfile="1" ])
 AC_CHECK_FUNCS(fork, [ fork="1" ], [ fork="0" ])
 AC_CHECK_FUNCS(getpass)
-AC_CHECK_FUNC(inet_addr, [ inet_addr="1" ], [ inet_addr="0" ])
-AC_CHECK_FUNC(inet_network, [ inet_network="1" ], [ inet_network="0" ])
+APR_CHECK_INET_ADDR
+APR_CHECK_INET_NETWORK
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(gmtime_r localtime_r)
 AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
@@ -237,8 +237,8 @@ AC_CHECK_FUNCS(bzero, [ have_bzero="1" ], [ have_bzero="0"] )
 
 AC_SUBST(sendfile)
 AC_SUBST(fork)
-AC_SUBST(inet_addr)
-AC_SUBST(inet_network)
+AC_SUBST(have_inet_addr)
+AC_SUBST(have_inet_network)
 AC_SUBST(have_sigaction)
 AC_SUBST(have_setrlimit)
 AC_SUBST(have_getrlimit)

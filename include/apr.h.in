@@ -59,8 +59,8 @@
 #define APR_MEM_BASED_SHM       @mem_based@
 
 #define APR_HAVE_IN_ADDR        @have_in_addr@
-#define APR_HAVE_INET_ADDR      @inet_addr@
-#define APR_HAVE_INET_NETWORK   @inet_network@
+#define APR_HAVE_INET_ADDR      @have_inet_addr@
+#define APR_HAVE_INET_NETWORK   @have_inet_network@
 #define APR_HAVE_UNION_SEMUN    @have_union_semun@
 #define APR_HAVE_STRUCT_RLIMIT  @struct_rlimit@
 #define APR_HAVE_SETRLIMIT      @have_setrlimit@
