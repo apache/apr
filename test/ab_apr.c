@@ -245,7 +245,7 @@ static void output_results(void)
     int timetaken;
 
     endtime = ap_now();
-    timetaken = (endtime - start) / AP_USEC_PER_SEC;
+    timetaken = (endtime - start) / 1000;
 
     printf("\r                                                                           \r");
     printf("Server Software:        %s\n", servername);
@@ -320,7 +320,7 @@ static void output_html_results(void)
     int timetaken;
 
     endtime = ap_now();
-    timetaken = (endtime - start) / AP_USEC_PER_SEC;
+    timetaken = (endtime - start) / 1000;
 
     printf("\n\n<table %s>\n", tablestring);
     printf("<tr %s><th colspan=2 %s>Server Software:</th>"
