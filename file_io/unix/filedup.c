@@ -58,54 +58,84 @@
 #include "apr_thread_mutex.h"
 #include "inherit.h"
 
-apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
+static apr_status_t _file_dup(apr_file_t **new_file, 
+                              apr_file_t *old_file, apr_pool_t *p,
+                              int which_dup)
 {
-    int have_file = 0;
-
     if ((*new_file) == NULL) {
-        (*new_file) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-        if ((*new_file) == NULL) {
-            return APR_ENOMEM;
+        if (which_dup == 1) {
+            (*new_file) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
+            if ((*new_file) == NULL) {
+                return APR_ENOMEM;
+            }
+            (*new_file)->cntxt = p;
+        } else {
+            /* We can't dup2 unless we have a valid new_file */
+            return APR_EINVAL;
         }
-    } else {
-        have_file = 1;
     }
-    
-    (*new_file)->cntxt = p; 
-    if (have_file) {
+
+    if (which_dup == 2) {
         dup2(old_file->filedes, (*new_file)->filedes);
-    }
-    else {
+    } else {
         (*new_file)->filedes = dup(old_file->filedes); 
     }
+
     (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     (*new_file)->buffered = old_file->buffered;
-    if ((*new_file)->buffered) {
+
+    /* If the existing socket in a dup2 is already buffered, we
+     * have an existing and valid (hopefully) mutex, so we don't
+     * want to create it again as we could leak!
+     */
 #if APR_HAS_THREADS
+    if ((*new_file)->buffered && !(*new_file)->thlock) {
         apr_thread_mutex_create(&((*new_file)->thlock),
                                 APR_THREAD_MUTEX_DEFAULT, p);
+    }
 #endif
+    /* As above, only create the buffer if we haven't already
+     * got one.
+     */
+    if ((*new_file)->buffered && !(*new_file)->buffer) {
         (*new_file)->buffer = apr_palloc(p, APR_FILE_BUFSIZE);
     }
+
     /* this is the way dup() works */
     (*new_file)->blocking = old_file->blocking; 
+
     /* make sure unget behavior is consistent */
     (*new_file)->ungetchar = old_file->ungetchar;
+
     /* apr_file_dup() clears the inherit attribute, user must call 
      * apr_file_set_inherit() again on the dupped handle, as necessary.
-     * If the user has dup2'ed fd 0-2 (stdin, stdout or stderr) we will
-     * never, never, never close the handle, under any circumstance.
      */
-    if (have_file && ((*new_file)->filedes >= 0) && ((*new_file)->filedes <= 2)) {
-        (*new_file)->flags = old_file->flags | APR_INHERIT;
-        apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), 
-                                  apr_pool_cleanup_null, apr_pool_cleanup_null);
-    }
-    else {
-        (*new_file)->flags = old_file->flags & ~APR_INHERIT;
-        apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), 
-                                  apr_unix_file_cleanup, apr_unix_file_cleanup);
-    }
+    (*new_file)->flags = old_file->flags & ~APR_INHERIT;
+
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
+                                       apr_file_t *old_file, apr_pool_t *p)
+{
+    apr_status_t rv;
+
+    rv = _file_dup(new_file, old_file, p, 1);
+    if (rv != APR_SUCCESS)
+        return rv;
+
+    /* we do this here as we don't want to double register an existing 
+     * apr_file_t for cleanup
+     */
+    apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file),
+                              apr_unix_file_cleanup, apr_unix_file_cleanup);
+    return rv;
+
+}
+
+APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
+                                        apr_file_t *old_file, apr_pool_t *p)
+{
+    return _file_dup(new_file, old_file, p, 2);
 }
 
