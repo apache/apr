@@ -395,7 +395,7 @@ apr_status_t test_timeoutcond(void)
     }
     printf("OK\n");
 
-    timeout = 5 * APR_USEC_PER_SEC;
+    timeout = apr_time_from_sec(5);
 
     for (i = 0; i < MAX_RETRY; i++) {
         apr_thread_mutex_lock(timeout_mutex);

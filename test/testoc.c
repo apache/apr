@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
     fflush(stdout);
-    apr_sleep(1 * APR_USEC_PER_SEC);
+    apr_sleep(apr_time_from_sec(1));
     if ((rv = apr_proc_kill(&newproc, SIGKILL)) != APR_SUCCESS) {
         char msgbuf[120];
 
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     fprintf(stdout,"OK\n");
     
     /* allow time for things to settle... */
-    apr_sleep(3 * APR_USEC_PER_SEC);
+    apr_sleep(apr_time_from_sec(3));
     
     fprintf(stdout, "[PARENT] Checking on children..........\n");
     apr_proc_other_child_check();

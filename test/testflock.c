@@ -147,7 +147,7 @@ static void do_write(void)
     printf("Lock created.\nSleeping...");
     fflush(stdout);
 
-    apr_sleep(30 * APR_USEC_PER_SEC);
+    apr_sleep(apr_time_from_sec(30));
 
     (void) apr_file_close(file);
     printf(" done.\nExiting.\n");
