@@ -36,3 +36,4 @@ testipsub
 *.idb
 mod_test.dll
 testnames
+*.dbg
