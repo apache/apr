@@ -56,12 +56,11 @@
 #include "apr_lock.h"
 #include "apr_general.h"
 #include "locks.h"
-#include <kernel/OS.h>
-#include <stdio.h>
+#include "apr_lib.h"
 
-ap_status_t lock_intra_cleanup(ap_lock_t *lock)
+ap_status_t lock_intra_cleanup(void *data)
 {
-printf ("lock_intra_cleanup\n");
+    ap_lock_t *lock = (ap_lock_t *)data;
     if (lock->curr_locked == 1) {
     	if (atomic_add(&lock->ben_intraproc , -1) > 1){
     		release_sem (lock->sem_intraproc);
@@ -85,7 +84,7 @@ ap_status_t create_intra_lock(struct lock_t *new)
         return stat;
     }
     new->sem_intraproc = stat;
-    new->curr_locked == 0;
+    new->curr_locked = 0;
     ap_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;
@@ -93,22 +92,22 @@ ap_status_t create_intra_lock(struct lock_t *new)
 
 ap_status_t lock_intra(ap_lock_t *lock)
 {
-    lock->curr_locked == 1;
-	if (atomic_add (&lock->ben_intraproc, 1) >0){
-		if (acquire_sem(lock->sem_intraproc) != B_NO_ERROR){
-			atomic_add(&lock->ben_intraproc,-1);
+    lock->curr_locked = 1;
+    if (atomic_add (&lock->ben_intraproc, 1) >0){
+        if (acquire_sem(lock->sem_intraproc) != B_NO_ERROR){
+            atomic_add(&lock->ben_intraproc,-1);
 	        return errno;
-    	}
+        }
     }
     return APR_SUCCESS;
 }
 
 ap_status_t unlock_intra(ap_lock_t *lock)
 {
-	if (atomic_add(&lock->ben_intraproc, -1) > 1){
-		release_sem(lock->sem_intraproc);
+    if (atomic_add(&lock->ben_intraproc, -1) > 1){
+        release_sem(lock->sem_intraproc);
+        lock->curr_locked = 0;
     }
-    lock->curr_locked == 0;
     return APR_SUCCESS;
 }
 
