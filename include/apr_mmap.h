@@ -64,8 +64,21 @@
 extern "C" {
 #endif /* __cplusplus */
 
-
 typedef struct ap_mmap_t            ap_mmap_t;
+/* As far as I can tell the only really sane way to store an MMAP is as a
+ * void * and a length.  BeOS requires this area_id, but that's just a little
+ * something extra.  I am exposing this type, because it doesn't make much
+ * sense to keep it private, and opening it up makes some stuff easier in
+ * Apache.
+ */
+struct ap_mmap_t {
+    ap_pool_t *cntxt;
+#ifdef BEOS
+    area_id area;
+#endif
+    void *mm;
+    size_t size;
+};
 
 /*   Function definitions */
 

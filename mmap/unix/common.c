@@ -61,7 +61,10 @@
  *
  */
 
-#include "mmap_h.h"
+#include "apr.h"
+#include "apr_private.h"
+#include "apr_mmap.h"
+#include "apr_errno.h"
 
 #if APR_HAS_MMAP || defined(BEOS)
 
