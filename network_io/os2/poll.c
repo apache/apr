@@ -57,40 +57,79 @@
 #include "networkio.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
+#include "apr_portable.h"
 #include "apr_lib.h"
 #include <sys/time.h>
+#include <stdlib.h>
+#define INCL_DOS
+#include <os2.h>
 
-/*  OS/2 doesn't have a poll function, implement using select */
+/*  OS/2 doesn't have a poll function, implement using OS/2 style select */
  
+static int os2_select_init( int *s, int noreads, int nowrites, int noexcepts, long timeout );
+static int os2_sock_errno_init();
+
+int (*os2_select)(int *, int, int, int, long) = os2_select_init;
+int (*os2_sock_errno)() = os2_sock_errno_init;
+static HMODULE hSO32DLL;
+
 ap_status_t ap_setup_poll(struct pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
-    (*new) = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t) * num);
+    *new = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t));
 
-    if ((*new) == NULL) {
+    if (*new == NULL) {
         return APR_ENOMEM;
     }
 
+    (*new)->socket_list = ap_palloc(cont, sizeof(int) * num);
+    
+    if ((*new)->socket_list == NULL) {
+        return APR_ENOMEM;
+    }
+    
+    (*new)->r_socket_list = ap_palloc(cont, sizeof(int) * num);
+    
+    if ((*new)->r_socket_list == NULL) {
+        return APR_ENOMEM;
+    }
+    
     (*new)->cntxt = cont;
-    (*new)->curpos = 0;
+    (*new)->num_total = 0;
+    (*new)->num_read = 0;
+    (*new)->num_write = 0;
+    (*new)->num_except = 0;
+    
     return APR_SUCCESS;
 }
 
 
 
 ap_status_t ap_add_poll_socket(struct pollfd_t *aprset, 
-			       struct socket_t *sock, ap_int16_t event)
+			       struct socket_t *sock, ap_int16_t events)
 {
-    int i = 0;
+    int i;
     
-    while (i < aprset->curpos && aprset[i].sock->socketdes != sock->socketdes) {
-        i++;
+    if (events & APR_POLLIN) {
+        for (i=aprset->num_total; i>aprset->num_read; i--)
+            aprset->socket_list[i] = aprset->socket_list[i-1];
+        aprset->socket_list[i] = sock->socketdes;
+        aprset->num_read++;
+        aprset->num_total++;
     }
-    if (i >= aprset->curpos) {
-        aprset->curpos++;
-    } 
-    aprset[i].sock = sock;
-    aprset[i].events = event;
-
+            
+    if (events & APR_POLLOUT) {
+        for (i=aprset->num_total; i>aprset->num_read + aprset->num_write; i--)
+            aprset->socket_list[i] = aprset->socket_list[i-1];
+        aprset->socket_list[i] = sock->socketdes;
+        aprset->num_write++;
+        aprset->num_total++;
+    }            
+        
+    if (events &APR_POLLPRI) {
+        aprset->socket_list[aprset->num_total] = sock->socketdes;
+        aprset->num_except++;
+        aprset->num_total++;
+    }
     return APR_SUCCESS;
 }
 
@@ -99,71 +138,148 @@ ap_status_t ap_add_poll_socket(struct pollfd_t *aprset,
 ap_status_t ap_poll(struct pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t timeout)
 {
     int i;
-    int rv = 0, maxfd = 0;
+    int rv = 0;
     time_t starttime;
     struct timeval tv;
-    fd_set readfds, writefds, exceptfds;
-
-    FD_ZERO(&readfds);
-    FD_ZERO(&writefds);
-    FD_ZERO(&exceptfds);
     
-    for (i = 0; i < *nsds; i++) {
-        if (pollfdset[i].sock->socketdes > maxfd)
-            maxfd = pollfdset[i].sock->socketdes;
-
-        if (pollfdset[i].events & APR_POLLIN)
-            FD_SET(pollfdset[i].sock->socketdes, &readfds);
-
-        if (pollfdset[i].events & APR_POLLOUT)
-            FD_SET(pollfdset[i].sock->socketdes, &writefds);
-
-        if (pollfdset[i].events & APR_POLLPRI)
-            FD_SET(pollfdset[i].sock->socketdes, &exceptfds);
-    }
-
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
     time(&starttime);
 
     do {
-        rv = select(maxfd + 1, &readfds, &writefds, &exceptfds, timeout >= 0 ? &tv : NULL);
+        for (i=0; i<pollfdset->num_total; i++) {
+            pollfdset->r_socket_list[i] = _getsockhandle(pollfdset->socket_list[i]);
+        }
+        
+        rv = os2_select(pollfdset->r_socket_list, 
+                        pollfdset->num_read, 
+                        pollfdset->num_write, 
+                        pollfdset->num_except, 
+                        timeout > 0 ? timeout * 1000 : -1);
 
-        if (rv < 0 && errno == EINTR && timeout >= 0 ) {
+        if (rv < 0 && os2_sock_errno() == SOCEINTR && timeout >= 0 ) {
             time_t elapsed = time(NULL) - starttime;
 
             if (timeout <= elapsed)
                 break;
 
-            tv.tv_sec = timeout - elapsed;
+            timeout -= elapsed;
         }
-    } while ( rv < 0 && errno == EINTR );
+    } while ( rv < 0 && os2_sock_errno() == SOCEINTR );
 
-    if (rv >= 0) {
-        for (i = 0; i < *nsds; i++) {
-            pollfdset[i].revents =
-                (FD_ISSET(pollfdset[i].sock->socketdes, &readfds) ? APR_POLLIN : 0) +
-                (FD_ISSET(pollfdset[i].sock->socketdes, &writefds) ? APR_POLLOUT : 0) +
-                (FD_ISSET(pollfdset[i].sock->socketdes, &exceptfds) ? APR_POLLPRI : 0);
-        }
-    }
-    
     (*nsds) = rv;
-    return rv < 0 ? errno : APR_SUCCESS;
+    return rv < 0 ? os2errno(os2_sock_errno()) : APR_SUCCESS;
 }
 
 
 
 ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct pollfd_t *aprset)
 {
-    int i = 0;
+    int i;
     
-    while (i < aprset->curpos && aprset[i].sock->socketdes != sock->socketdes) {
-        i++;
-    }
-    if (i >= aprset->curpos) {
+    for (i=0; i < aprset->num_total && aprset->socket_list[i] != sock->socketdes; i++);
+    
+    if (i == aprset->num_total) {
         return APR_INVALSOCK;
     } 
-    (*event) = aprset[i].revents;
+    
+    if (i < aprset->num_read)
+        *event = APR_POLLIN;
+    else if (i < aprset->num_read + aprset->num_write)
+        *event = APR_POLLOUT;
+    else
+        *event = APR_POLLPRI;
+
     return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_remove_poll_socket(struct pollfd_t *aprset, 
+                                  struct socket_t *sock, ap_int16_t events)
+{
+    int start, *count, pos;
+
+    while (events) {
+        if (events & APR_POLLIN) {
+            start = 0;
+            count = &aprset->num_read;
+            events -= APR_POLLIN;
+        } else if (events & APR_POLLOUT) {
+            start = aprset->num_read;
+            count = &aprset->num_write;
+            events -= APR_POLLOUT;
+        } else if (events & APR_POLLPRI) {
+            start = aprset->num_read + aprset->num_write;
+            count = &aprset->num_except;
+            events -= APR_POLLPRI;
+        } else
+            break;
+
+        for (pos=start; pos < start+(*count) && aprset->socket_list[pos] != sock->socketdes; pos++);
+
+        if (pos < start+(*count)) {
+            aprset->num_total--;
+            (*count)--;
+
+            for (;pos<aprset->num_total; pos++) {
+                aprset->socket_list[pos] = aprset->socket_list[pos+1];
+            }
+        } else {
+            return APR_NOTFOUND;
+        }
+    }
+
+    return APR_SUCCESS;
+}
+
+
+
+static int os2_fn_link()
+{
+    if (os2_select == os2_select_init || os2_select == NULL) {
+        DosEnterCritSec(); /* Stop two threads doing this at the same time */
+
+        if (os2_select == os2_select_init || os2_select == NULL) {
+            ULONG rc;
+            char errorstr[200];
+            
+            rc = DosLoadModule(errorstr, sizeof(errorstr), "SO32DLL", &hSO32DLL);
+            
+            if (rc)
+                return os2errno(rc);
+
+            rc = DosQueryProcAddr(hSO32DLL, 0, "SELECT", &os2_select);
+            
+            if (rc)
+                return os2errno(rc);
+
+            rc = DosQueryProcAddr(hSO32DLL, 0, "SOCK_ERRNO", &os2_sock_errno);
+            
+            if (rc)
+                return os2errno(rc);
+        }
+        DosExitCritSec();
+    }
+    return APR_SUCCESS;
+}   
+
+
+
+static int os2_select_init(int *s, int noreads, int nowrites, int noexcepts, long timeout)
+{
+    int rc = os2_fn_link();
+    if (rc == APR_SUCCESS)
+        return os2_select(s, noreads, nowrites, noexcepts, timeout);
+    return rc;
+}
+
+
+
+static int os2_sock_errno_init()
+{
+    int rc = os2_fn_link();
+    if (rc == APR_SUCCESS)
+        return os2_sock_errno();
+    return rc;
 }

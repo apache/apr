@@ -64,17 +64,36 @@ struct socket_t {
     int socketdes;
     struct sockaddr_in *addr;
     int addr_len;
+    int timeout; 
 };
 
 struct pollfd_t {
     ap_context_t *cntxt;
-    struct socket_t *sock;
-    ap_int16_t events;
-    ap_int16_t revents;
-    int curpos;
+    int *socket_list;
+    int *r_socket_list;
+    int num_read;
+    int num_write;
+    int num_except;
+    int num_total;
 };
 
-ap_int16_t get_event(ap_int16_t);
+/* Pointers to dynamically linked API functions */
+extern int (*os2_select)(int *, int, int, int, long);
+extern int (*os2_sock_errno)();
+
+/* Error codes returned from sock_errno() */
+#define SOCBASEERR              10000
+#define SOCEPERM                (SOCBASEERR+1)             /* Not owner */
+#define SOCESRCH                (SOCBASEERR+3)             /* No such process */
+#define SOCEINTR                (SOCBASEERR+4)             /* Interrupted system call */
+#define SOCENXIO                (SOCBASEERR+6)             /* No such device or address */
+#define SOCEBADF                (SOCBASEERR+9)             /* Bad file number */
+#define SOCEACCES               (SOCBASEERR+13)            /* Permission denied */
+#define SOCEFAULT               (SOCBASEERR+14)            /* Bad address */
+#define SOCEINVAL               (SOCBASEERR+22)            /* Invalid argument */
+#define SOCEMFILE               (SOCBASEERR+24)            /* Too many open files */
+#define SOCEPIPE                (SOCBASEERR+32)            /* Broken pipe */
+#define SOCEOS2ERR              (SOCBASEERR+100)            /* OS/2 Error */
 
 #endif  /* ! NETWORK_IO_H */
 
