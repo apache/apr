@@ -379,6 +379,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
  *            APR_SET  --  set the offset to offset
  *            APR_CUR  --  add the offset to the current position 
  *            APR_END  --  add the offset to the current file size 
+ * </PRE>
  * @param offset The offset to move the pointer to.
  * @tip The third argument is modified to be the offset the pointer
           was actually moved to.
