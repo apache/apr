@@ -54,6 +54,7 @@
 
 #include "apr.h"
 #include "apr_arch_file_io.h"
+#include "apr_arch_utf8.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include <string.h>
@@ -974,6 +975,29 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     *newpath = apr_pmemdup(p, path, pathlen + 1);
     (*newpath)[pathlen] = '\0';
     return APR_SUCCESS;
+}
+
+
+apr_status_t apr_filepath_list_split_impl(apr_array_header_t **pathelts,
+                                          const char *liststr,
+                                          char separator,
+                                          apr_pool_t *p);
+apr_status_t apr_filepath_list_merge_impl(char **liststr,
+                                          apr_array_header_t *pathelts,
+                                          char separator,
+                                          apr_pool_t *p);
+
+APR_DECLARE(apr_status_t) apr_filepath_list_split(apr_array_header_t **pathelts,
+                                                  const char *liststr,
+                                                  apr_pool_t *p)
+{
+    return apr_filepath_list_split_impl(pathelts, liststr, ';', p);
+}
+APR_DECLARE(apr_status_t) apr_filepath_list_merge(char **liststr,
+                                                  apr_array_header_t *pathelts,
+                                                  apr_pool_t *p)
+{
+    return apr_filepath_list_merge_impl(liststr, pathelts, ';', p);
 }
 
 

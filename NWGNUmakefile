@@ -255,6 +255,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/fileacc.o \
 	$(OBJDIR)/filedup.o \
 	$(OBJDIR)/filepath.o \
+	$(OBJDIR)/filepath_util.o \
 	$(OBJDIR)/filestat.o \
 	$(OBJDIR)/filesys.o \
 	$(OBJDIR)/flock.o \

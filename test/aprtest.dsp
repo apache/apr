@@ -140,6 +140,10 @@ SOURCE=.\testoc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testpath.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testpipe.c
 # End Source File
 # Begin Source File
