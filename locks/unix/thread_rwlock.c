@@ -235,8 +235,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
     return APR_ENOTIMPL;
 }
 
-APR_POOL_IMPLEMENT_ACCESSOR(thread_rwlock)
-
 #endif /* HAVE_PTHREAD_RWLOCK_INIT */
+APR_POOL_IMPLEMENT_ACCESSOR(thread_rwlock)
 
 #endif /* APR_HAS_THREADS */
