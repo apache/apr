@@ -254,8 +254,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
 #endif /* APR_USE_SHMEM_MMAP_TMP */
 #if APR_USE_SHMEM_MMAP_SHM
-        /* FIXME: Is APR_OS_DEFAULT sufficient? */
-        tmpfd = shm_open(filename, O_RDWR | O_CREAT | O_EXCL, APR_OS_DEFAULT);
+        tmpfd = shm_open(filename, O_RDWR | O_CREAT | O_EXCL, 0644);
         if (tmpfd == -1) {
             return errno;
         }
@@ -277,7 +276,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         /* FIXME: check for errors */
 
-        /* FIXME: Is it ok to close this file when using shm_open?? */
         status = apr_file_close(file);
         if (status != APR_SUCCESS) {
             return status;
@@ -462,7 +460,6 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
 
-        /* FIXME: does APR_OS_DEFAULT matter for reading? */
         status = apr_file_open(&file, filename, 
                                APR_READ, APR_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
