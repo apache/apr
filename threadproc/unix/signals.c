@@ -145,7 +145,7 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
 void apr_signal_init(apr_pool_t *pglobal)
 {
 }
-const char *apr_signal_get_description(int signum)
+const char *apr_signal_description_get(int signum)
 {
     return sys_siglist[signum];
 }
@@ -284,7 +284,7 @@ void apr_signal_init(apr_pool_t *pglobal)
             signal_description[sig] = apr_psprintf(pglobal, "signal #%d", sig);
 }
 
-const char *apr_signal_get_description(int signum)
+const char *apr_signal_description_get(int signum)
 {
     return
         signum < APR_NUMSIG
@@ -453,3 +453,9 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
 }
 
 #endif
+
+/* Deprecated */
+const char *apr_signal_get_description(int signum)
+{
+    return apr_signal_description_get(signum);
+}

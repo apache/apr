@@ -74,7 +74,7 @@ void apr_signal_init(apr_pool_t *pglobal)
 {
 }
 
-const char *apr_signal_get_description(int signum)
+const char *apr_signal_description_get(int signum)
 {
     switch (signum)
     {
@@ -109,3 +109,8 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     return rv;
 }
 
+/* Deprecated */
+const char *apr_signal_get_description(int signum)
+{
+    return apr_signal_description_get(signum);
+}
