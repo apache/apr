@@ -34,6 +34,21 @@ dnl    PTHREAD_FLAGS="-D_REENTRANT -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=199506 
   fi
 ])dnl
 
+dnl gcc issues warnings when parsing AIX 4.3.3's pthread.h
+dnl which causes autoconf to incorrectly conclude that
+dnl pthreads is not available.
+dnl Turn off warnings if we're using gcc.
+AC_DEFUN(CHECK_PTHREADS_H, [
+  if test "$GCC" = "yes"; then
+    SAVE_FL="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -w"
+    AC_CHECK_HEADERS(pthread.h, [ $1 ] , [ $2 ] )
+    CPPFLAGS="$SAVE_FL"
+  else
+    AC_CHECK_HEADERS(pthread.h, [ $1 ] , [ $2 ] )
+  fi
+])dnl
+
 AC_DEFUN(APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS, [
 AC_CACHE_CHECK(whether pthread_getspecific takes two arguments, ac_cv_pthread_getspecific_two_args,[
 AC_TRY_COMPILE([
