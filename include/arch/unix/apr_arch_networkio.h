@@ -114,6 +114,9 @@
 #if APR_HAVE_SYS_SENDFILE_H
 #include <sys/sendfile.h>
 #endif
+#if APR_HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 /* End System Headers */
 
 #ifndef HAVE_POLLIN
