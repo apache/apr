@@ -24,7 +24,7 @@ PROGRAMS = \
 
 TARGETS = $(PROGRAMS)
 
-LOCAL_LIBS=..\LibD\apr.lib 
+LOCAL_LIBS=..\LibD\apr-1.lib 
 ALL_LIBS=kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib
 
 CLEAN_TARGETS = mod_test.lib mod_test.exp
