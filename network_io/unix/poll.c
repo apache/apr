@@ -212,8 +212,8 @@ apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
     newevents = get_event(events);
 
     while (i < aprset->curpos) {
-        if (aprset->events[i] & newevents) {
-            aprset->events[i] ^= newevents;
+        if (aprset->pollset[i].events & newevents) {
+            aprset->pollset[i].events &= ~newevents;
         }
         i++;
     }
