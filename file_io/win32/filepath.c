@@ -156,9 +156,12 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
 #else /* ndef(NETWARE) */
 
-    char seperator[2] = { (flags & APR_FILEPATH_NATIVE) ? '\\' : '/', 0};
+    char seperator[2];
     const char *delim1;
     const char *delim2;
+
+    seperator[0] = (flags & APR_FILEPATH_NATIVE) ? '\\' : '/';
+    seperator[1] = 0;
 
     if (testpath[0] == '/' || testpath[0] == '\\') {
         if (testpath[1] == '/' || testpath[1] == '\\') {
