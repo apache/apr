@@ -130,7 +130,13 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms,
     if (sms->free_fn)
         return sms->free_fn(sms, mem);  
 
-    return APR_ENOTIMPL;
+    /*
+     * If there is no free_fn, this sms is a tracking memory
+     * system by definition.  In other words, it is ok
+     * to return APR_SUCCESS because the memory will be
+     * free()d by the reset or destroy.
+     */
+    return APR_SUCCESS;
 }
 
 /*
