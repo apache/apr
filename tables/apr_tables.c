@@ -124,6 +124,15 @@ APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
     return res;
 }
 
+APR_DECLARE(void *) apr_array_pop(apr_array_header_t *arr)
+{
+    if (apr_is_empty_array(arr)) {
+        return NULL;
+    }
+   
+    return arr->elts + (arr->elt_size * (--arr->nelts));
+}
+
 APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr)
 {
     if (arr->nelts == arr->nalloc) {

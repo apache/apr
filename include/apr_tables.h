@@ -161,6 +161,14 @@ APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
 APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr);
 
 /**
+ * Remove an element from an array
+ * @param arr The array to remove an element from.
+ * @return Location of the element in the array.
+ * @remark If there are no elements in the array, NULL is returned.
+ */
+APR_DECLARE(void *) apr_array_pop(apr_array_header_t *arr);
+
+/**
  * Concatenate two arrays together
  * @param dst The destination array, and the one to go first in the combined 
  *            array
