@@ -83,7 +83,12 @@ if [ ! -f $ltfile ]; then
     echo "$ltfile not found"
     exit 1
 fi
-cp -f $ltfile build/libtool.m4
+
+# Ugly. 'cp -f' isn't portable, so we work around
+if [ -f build/libtool.m4 ]; then
+    rm -f build/libtool.m4
+fi
+cp $ltfile build/libtool.m4
 
 # This is just temporary until people's workspaces are cleared -- remove
 # any old aclocal.m4 left over from prior build so it doesn't cause errors.
