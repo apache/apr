@@ -360,6 +360,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
 
             if (status == APR_SUCCESS) {
                 if (interpreter[0] == '#' && interpreter[1] == '!') {
+                    /* delete newline */
+                    if (interpreter[0]) {
+                        interpreter[strlen(interpreter) - 1] = '\0';
+                    }
+
                     if (interpreter[2] != '/' && interpreter[2] != '\\' && interpreter[3] != ':') {
                         char buffer[300];
 
