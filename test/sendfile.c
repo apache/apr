@@ -90,11 +90,6 @@ int main(void)
 
 typedef enum {BLK, NONBLK, TIMEOUT} client_socket_mode_t;
 
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
 static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
 {
     char buf[120];
@@ -108,7 +103,7 @@ static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
         exit(1);
     }
 
-    atexit(closeapr);
+    atexit(apr_terminate);
 
     rv = apr_pool_create(p, NULL);
     if (rv != APR_SUCCESS) {
