@@ -1,4 +1,12 @@
 Changes with APR b1
+  *) Win32: apr_proc_mutex_trylock and apr_proc_mutex_lock were 
+     incorrectly returning APR_BUSY if the lock was previously
+     held by a thread that exited before releasing the lock 
+     (ie, if the process holding the lock segfaults). The MSDN
+     doc says when WaitForSingleObject returns WAIT_ABANDONED,
+     the calling thread takes ownership of the mutex, so these
+     two routines should return APR_SUCCESS in this case, not
+     APR_BUSY. [Bill Stoddard]
 
   *) Added a new m4 function APR_EXPAND_VAR that will iteratively
      interpolate the contents of a variable, such as $sysconfdir,
