@@ -278,10 +278,6 @@ SOURCE=.\include\apr_network_io.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\inc\apr_pools.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\include\apr_pools.h
 # End Source File
 # Begin Source File
