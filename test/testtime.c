@@ -255,7 +255,6 @@ static void test_exp_tz(CuTest *tc)
     apr_status_t rv;
     apr_time_exp_t xt;
     char str[STR_SIZE];
-    apr_size_t sz;
     apr_int32_t hr_off = -5 * 3600; /* 5 hours in seconds */
 
     rv = apr_time_exp_tz(&xt, now, hr_off);
