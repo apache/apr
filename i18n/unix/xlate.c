@@ -99,11 +99,11 @@ struct apr_xlate_t {
 static const char *get_default_charset(void)
 {
 #ifdef __MVS__
-    #ifdef __CODESET__
+#    ifdef __CODESET__
         return __CODESET__;
-    #else
+#    else
         return "IBM-1047";
-    #endif
+#    endif
 #endif
 
     if ('}' == 0xD0) {

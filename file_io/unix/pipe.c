@@ -61,29 +61,29 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
       int fd_flags;
 
       fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
-  #if defined(O_NONBLOCK)
+#  if defined(O_NONBLOCK)
       fd_flags &= ~O_NONBLOCK;
-  #elif defined(~O_NDELAY)
+#  elif defined(~O_NDELAY)
       fd_flags &= ~O_NDELAY;
-  #elif defined(FNDELAY)
+#  elif defined(FNDELAY)
       fd_flags &= ~O_FNDELAY;
-  #else 
+#  else 
       /* XXXX: this breaks things, but an alternative isn't obvious...*/
       return APR_ENOTIMPL;
-  #endif
+#  endif
     if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
         return errno;
     }
 
 #else
 
-#if BEOS_BONE /* This only works on BONE or beyond */
+#  if BEOS_BONE /* This only works on BONE or beyond */
     int on = 0;
     if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0)
         return errno;
-#else /* BEOS_BONE */
+#  else /* BEOS_BONE */
     return APR_ENOTIMPL;
-#endif /* BEOS_BONE */
+#  endif /* BEOS_BONE */
  
 #endif /* !BEOS_R5 */
 
@@ -96,29 +96,29 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
 #if !BEOS /* this code won't work on BeOS */
       int fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
 
-  #if defined(O_NONBLOCK)
+#  if defined(O_NONBLOCK)
       fd_flags |= O_NONBLOCK;
-  #elif defined(O_NDELAY)
+#  elif defined(O_NDELAY)
       fd_flags |= O_NDELAY;
-  #elif defined(FNDELAY)
+#  elif defined(FNDELAY)
       fd_flags |= O_FNDELAY;
-  #else
+#  else
       /* XXXX: this breaks things, but an alternative isn't obvious...*/
       return APR_ENOTIMPL;
-  #endif
+#  endif
       if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
           return errno;
       }
     
 #else /* !BEOS */
 
-#if BEOS_BONE /* This only works on BONE and later...*/
+#  if BEOS_BONE /* This only works on BONE and later...*/
     int on = 1;
     if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0)
         return errno;
-#else /* BEOS_BONE */
+#  else /* BEOS_BONE */
     return APR_ENOTIMPL;
-#endif /* BEOS_BONE */
+#  endif /* BEOS_BONE */
 
 #endif /* !BEOS */
 
