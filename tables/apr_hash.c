@@ -275,10 +275,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     he->klen = klen;
     he->val  = val;
     *hep = he;
-    /* check that the collision rate isn't too high */
-    if (++ht->count > ht->max) {
-	expand_array(ht);
-    }
+    ht->count++;
     return hep;
 }
 
@@ -310,6 +307,10 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
         else {
             /* replace entry */
             (*hep)->val = val;
+            /* check that the collision rate isn't too high */
+            if (ht->count > ht->max) {
+                expand_array(ht);
+            }
         }
     }
     /* else key not present and val==NULL */
