@@ -210,9 +210,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_CHILD_DONE     The child has finished executing
  * APR_CHILD_NOTDONE  The child has not finished executing
  * APR_TIMEUP         The operation did not finish before the timeout
- * APR_INCOMPLETE     The character conversion stopped because of an 
- *                    incomplete character or shift sequence at the end 
- *                    of the input buffer.
+ * APR_INCOMPLETE     The operation was incomplete although some processing
+ *                    was performed and the results are partially valid
  * APR_BADCH          Getopt found an option not in the option string
  * APR_BADARG         Getopt found an option that is missing an argument 
  *                    and an argument was specified in the option string
