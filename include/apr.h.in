@@ -34,6 +34,7 @@
 #define APR_HAVE_SYS_TYPES_H    @sys_typesh@
 #define APR_HAVE_SYS_UIO_H      @sys_uioh@
 #define APR_HAVE_SIGNAL_H       @signalh@
+#define APR_HAVE_SYS_WAIT_H     @sys_waith@
 
 #define APR_USE_FLOCK_SERIALIZE           @flockser@ 
 #define APR_USE_SYSVSEM_SERIALIZE         @sysvser@
@@ -116,5 +117,22 @@ Sigfunc *ap_signal(int signo, Sigfunc * func);
 #else
 #define ap_signal(a,b) signal(a,b)
 #endif
+
+#ifdef APR_HAVE_SYS_WAIT_H
+
+/* We have a POSIX wait interface */
+#include <sys/wait.h>
+
+#ifdef WEXITSTATUS
+#define ap_wait_t       int
+#else
+/* We don't have a POSIX wait interface. Assume we have the old-style. Is this
+ * a bad assumption? */
+/* Yessiree bob, it was... but will this work instead? */
+#define ap_wait_t       union wait
+#define WEXITSTATUS(status)    (int)((status).w_retcode)
+#define WTERMSIG(status)       (int)((status).w_termsig)
+#endif /* !WEXITSTATUS */
+#endif /* HAVE_SYS_WAIT_H */
 
 #endif /* APR_H */

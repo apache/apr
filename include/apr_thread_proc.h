@@ -468,7 +468,7 @@ ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc);
 B<Return the pool associated with the current proc.>
 
     arg 1) The user data to associate with the file.
-    arg 2) The key to use for assocaiteing data with the file.
+    arg 2) The key to use for associating data with the file.
     arg 3) The cleanup routine to use when the file is destroyed.
     arg 4) The current process.
 
@@ -481,7 +481,7 @@ ap_status_t ap_set_procdata(void *data, char *key,
 
 =head1 ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc) 
 
-B<Get the file handle that is assocaited with a child's stdin.>
+B<Get the file handle that is associated with a child's stdin.>
 
     arg 1) The returned file handle. 
     arg 2) The process handle that corresponds to the desired child process 
@@ -494,7 +494,7 @@ ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc);
 
 =head1 ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc) 
 
-B<Get the file handle that is assocaited with a child's stdout.>
+B<Get the file handle that is associated with a child's stdout.>
 
     arg 1) The returned file handle. 
     arg 2) The process handle that corresponds to the desired child process 
@@ -507,7 +507,7 @@ ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc);
 
 =head1 ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc) 
 
-B<Get the file handle that is assocaited with a child's stderr.>
+B<Get the file handle that is associated with a child's stderr.>
 
     arg 1) The returned file handle. 
     arg 2) The process handle that corresponds to the desired child process 
@@ -577,23 +577,26 @@ ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e waithow);
 
 /*
 
-=head1 ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_how waithow, ap_pool_t *p) 
+=head1 ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_t *status, ap_wait_how waithow, ap_pool_t *p) 
 
 B<Wait for any current child process to die and return information about that child.>
 
     arg 1) Pointer to NULL on entry, will be filled out with child's 
            information 
-    arg 2) How should we wait.  One of:
+    arg 2) The returned exit status of the child, if a child process dies
+             On platforms that don't support obtaining this information, the 
+             status parameter will be returned as APR_ENOTIMPL.
+    arg 3) How should we wait.  One of:
               APR_WAIT   -- block until the child process dies.
               APR_NOWAIT -- return immediately regardless of if the 
                             child is dead or not.
-    arg 3) Pool to allocate child information out of.
+    arg 4) Pool to allocate child information out of.
 
 =cut
  */
 
-ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_how_e waithow, 
-                              ap_pool_t *p);
+ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_t *status, 
+                              ap_wait_how_e waithow, ap_pool_t *p);
 
 /*
 

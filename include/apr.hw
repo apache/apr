@@ -172,6 +172,8 @@ typedef  int         gid_t;
 
 #define ap_signal(a,b) signal(a,b)
 
+typedef int ap_wait_t;
+
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
     char* iov_base;

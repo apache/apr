@@ -209,7 +209,7 @@ AC_CHECK_HEADERS(sys/signal.h)
 AC_CHECK_HEADERS(sys/socket.h)
 AC_CHECK_HEADERS(sys/stat.h)
 AC_CHECK_HEADERS(sys/types.h, sys_typesh="1", sys_typesh="0")
-AC_CHECK_HEADERS(sys/wait.h)
+AC_CHECK_HEADERS(sys/wait.h, sys_waith="1", sys_waith="0")
 AC_CHECK_HEADERS(dlfcn.h)
 AC_CHECK_HEADERS(dl.h)
 
@@ -224,6 +224,7 @@ AC_SUBST(stdioh)
 AC_SUBST(sys_typesh)
 AC_SUBST(sys_uioh)
 AC_SUBST(signalh)
+AC_SUBST(sys_waith)
 AC_SUBST(pthreadh)
 
 dnl #----------------------------- Checks for standard typedefs
