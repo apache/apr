@@ -222,6 +222,7 @@ AC_CHECK_FUNCS(fork, [ fork="1" ], [ fork="0" ])
 AC_CHECK_FUNCS(getpass)
 APR_CHECK_INET_ADDR
 APR_CHECK_INET_NETWORK
+AC_SUBST(apr_inaddr_none)
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(gmtime_r localtime_r)
 AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
@@ -330,6 +331,8 @@ AC_TYPE_SIZE_T
 AC_FUNC_SETPGRP
 
 APR_CHECK_SOCKLEN_T
+
+APR_INADDR_NONE
 
 dnl # Checks for integer size
 AC_CHECK_SIZEOF(char, 1)
