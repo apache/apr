@@ -298,6 +298,8 @@ static void test_timeoutcond(abts_case *tc, void *data)
         break;
     }
     ABTS_ASSERT(tc, "Too many retries", i < MAX_RETRY);
+    APR_ASSERT_SUCCESS(tc, "Unable to destroy the conditional",
+                       apr_thread_cond_destroy(timeout_cond));
 }
 
 #endif /* !APR_HAS_THREADS */
