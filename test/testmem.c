@@ -87,10 +87,10 @@ static _test_ t[T_QTY];
 
 static void its_a_pool(apr_pool_t *pool, _test_ *t, char *name, int lt)
 {
-    t->malloc_fn = (void*)apr_palloc;
-    t->calloc_fn = (void*)apr_pcalloc;
+    t->malloc_fn = (void *(*)(void *, apr_size_t))apr_palloc;
+    t->calloc_fn = (void *(*)(void *, apr_size_t))apr_pcalloc;
     t->free_fn = NULL;
-    t->reset_fn = (void*)apr_pool_clear;
+    t->reset_fn = (void *(*)(void *))apr_pool_clear;
     t->memory = pool;
     t->title = name;
     t->large_tests = lt;
