@@ -13,7 +13,7 @@ TARGETS = $(PROGRAMS) $(NONPORTABLE)
 
 LOCAL_LIBS=../../lib@APR_LIBNAME@.la
 
-CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.slo
+CLEAN_TARGETS = testregex@EXEEXT@
 
 INCDIR=../../include
 INCLUDES=-I$(INCDIR)
