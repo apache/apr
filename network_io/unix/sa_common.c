@@ -342,6 +342,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         apr_sockaddr_t *cursa;
         int error;
         char num[8];
+        char *numptr;
 
         memset(&hints, 0, sizeof(hints));
         hints.ai_flags = 0; /* XXX: might need a way to turn on AI_CANONNAME */
@@ -356,8 +357,14 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
             hints.ai_family = family;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = 0;
-        apr_snprintf(num, sizeof(num), "%d", port);
-        error = getaddrinfo(hostname, num, &hints, &ai_list);
+        if (port) {
+            apr_snprintf(num, sizeof(num), "%d", port);
+            numptr = num;
+        }
+        else {
+            numptr = NULL;
+        }
+        error = getaddrinfo(hostname, numptr, &hints, &ai_list);
         if (error) {
             if (error == EAI_SYSTEM) {
                 return errno;
