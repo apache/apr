@@ -57,6 +57,7 @@
 #include "apr_errno.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <kernel/OS.h>
 
@@ -80,7 +81,9 @@ struct shmem_t {
 
 #define MIN_BLK_SIZE 128
 
+/*
 #define DEBUG_ 1
+*/
 
 void add_block(struct block_t **list, struct block_t *blk);
 void split_block(struct block_t **list, struct block_t *blk, apr_size_t size);
@@ -204,7 +207,7 @@ static void remove_block(struct block_t **list, struct block_t *blk)
 static void free_block(struct shmem_t *m, void *entity)
 {
     struct block_t *b;
-    if (b = find_block_by_addr(m->uselist, entity)){
+    if ((b = find_block_by_addr(m->uselist, entity))){
         remove_block(&(m->uselist), b);
         add_block(&(m->freelist), b);
         m->avail += b->size;
@@ -236,11 +239,8 @@ static struct block_t *alloc_block(struct shmem_t *m, apr_size_t size)
 apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, 
                           apr_pool_t *p)
 {
-    int rc;
-    int pages;
     apr_size_t pagesize;
     area_id newid;
-    char *name = NULL;
     char *addr;
 
     (*m) = (struct shmem_t *)apr_pcalloc(p, sizeof(struct shmem_t));
@@ -278,7 +278,7 @@ apr_status_t apr_shm_destroy(struct shmem_t *m)
 void *apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
 {
     struct block_t *b;
-    if (b = alloc_block(m, reqsize))
+    if ((b = alloc_block(m, reqsize)))
         return b->addr;
     return NULL;
 }
@@ -286,7 +286,7 @@ void *apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
 void *apr_shm_calloc(struct shmem_t *m, apr_size_t reqsize)
 {
     struct block_t *b; 
-    if (b = alloc_block(m, reqsize)){  
+    if ((b = alloc_block(m, reqsize))){  
         memset(b->addr, 0, reqsize);
         return b->addr;
     }
