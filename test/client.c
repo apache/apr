@@ -68,6 +68,8 @@ int main(int argc, char *argv[])
     ap_status_t stat;
     char datasend[STRLEN] = "Send data test";
     char datarecv[STRLEN];
+    char *local_ipaddr, *remote_ipaddr;
+    ap_uint32_t local_port, remote_port;
 
     fprintf(stdout, "Creating context.......");
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
@@ -92,7 +94,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Setting port for socket.......");
-    if (ap_setport(sock, 8021) != APR_SUCCESS) {
+    if (ap_set_remote_port(sock, 8021) != APR_SUCCESS) {
         ap_close_socket(sock);
         fprintf(stderr, "Couldn't set the port correctly\n");
         exit(-1);
@@ -100,9 +102,11 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");           
 
     fprintf(stdout, "\tClient:  Connecting to socket.......");
-do {
-    stat = ap_connect(sock, "127.0.0.1");
-} while (stat == APR_ECONNREFUSED);
+
+    do {
+      stat = ap_connect(sock, "127.0.0.1");
+    } while (stat == APR_ECONNREFUSED);
+
     if (stat != APR_SUCCESS) {
         ap_close_socket(sock);
         fprintf(stderr, "Could not connect  %d\n", stat);
@@ -110,6 +114,12 @@ do {
         exit(-1);
     }
     fprintf(stdout, "OK\n");
+
+    ap_get_remote_ipaddr(&remote_ipaddr, sock);
+    ap_get_remote_port(&remote_port, sock);
+    ap_get_local_ipaddr(&local_ipaddr, sock);
+    ap_get_local_port(&local_port, sock);
+    fprintf(stdout, "\tClient socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
     length = STRLEN;

@@ -97,18 +97,21 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
         return APR_ENOMEM;
     }
     (*new)->cntxt = cont; 
-    (*new)->addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
-                       sizeof(struct sockaddr_in));
+    (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+                         sizeof(struct sockaddr_in));
+    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt,
+                          sizeof(struct sockaddr_in));
 
-    if ((*new)->addr == NULL) {
+    if ((*new)->local_addr == NULL || (*new)->remote_addr == NULL) {
         return APR_ENOMEM;
     }
  
     (*new)->socketdes = socket(AF_INET ,SOCK_STREAM, IPPROTO_TCP);
 
-    (*new)->addr->sin_family = AF_INET;
+    (*new)->local_addr->sin_family = AF_INET;
+    (*new)->remote_addr->sin_family = AF_INET;
 
-    (*new)->addr_len = sizeof(*(*new)->addr);
+    (*new)->addr_len = sizeof(*(*new)->local_addr);
     
     if ((*new)->socketdes < 0) {
         return errno;
@@ -152,69 +155,6 @@ ap_status_t ap_close_socket(struct socket_t *thesocket)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setport(ap_socket_t *, ap_uint32_t)
- *    Assocaite a port with a socket.
- * arg 1) The socket use 
- * arg 2) The port this socket will be dealing with.
- * NOTE:  This does not bind the two together, it is just telling apr 
- *        that this socket is going to use this port if possible.  If
- *        the port is already used, we won't find out about it here.
- */
-ap_status_t ap_setport(struct socket_t *sock, ap_uint32_t port)
-{
-    sock->addr->sin_port = htons((short)port);
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_getport(ap_uint32_t *, ap_socket_t *)
- *    Return the port with a socket.
- * arg 1) The socket use 
- * arg 2) The port this socket will be dealing with.
- */
-ap_status_t ap_getport(ap_uint32_t *port, struct socket_t *sock)
-{
-    *port = ntohs(sock->addr->sin_port);
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_setipaddr(ap_socket_t *, cont char *addr)
- *    Assocaite a socket addr with an apr socket.
- * arg 1) The socket to use 
- * arg 2) The IP address to attach to the socket.
- *        Use APR_ANYADDR to use any IP addr on the machine.
- * NOTE:  This does not bind the two together, it is just telling apr 
- *        that this socket is going to use this address if possible. 
- */
-ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
-{
-    if (!strcmp(addr, APR_ANYADDR)) {
-        sock->addr->sin_addr.s_addr = htonl(INADDR_ANY);
-        return APR_SUCCESS;
-    }
-    if (inet_aton(addr, &sock->addr->sin_addr) == 0) {
-        return errno;
-    }
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_getipaddr(char *addr, int len, const ap_socket_t *)
- *    Return the IP address associated with an apr socket.
- * arg 1) A buffer for the IP address associated with the socket.
- * arg 2) The total length of the buffer (including terminating NUL)
- * arg 3) The socket to use 
- */
-ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
-			 const struct socket_t *sock)
-{
-    char *temp = inet_ntoa(sock->addr->sin_addr);
-    ap_cpystrn(addr, temp, len - 1);
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
  * ap_status_t ap_bind(ap_socket_t *)
  *    Bind the socket to it's assocaited port
  * arg 1) The socket to bind 
@@ -223,8 +163,8 @@ ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
  */
 ap_status_t ap_bind(struct socket_t *sock)
 {
-    sock->addr->sin_addr.s_addr = INADDR_ANY;
-    if (bind(sock->socketdes, (struct sockaddr *)sock->addr, sock->addr_len) == -1)
+    sock->local_addr->sin_addr.s_addr = INADDR_ANY;
+    if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
         return errno;
     else
         return APR_SUCCESS;
@@ -260,14 +200,16 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
                             sizeof(struct socket_t));
 
     (*new)->cntxt = sock->cntxt;
-    (*new)->addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
+    (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
+                 sizeof(struct sockaddr_in));
+    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->addr_len = sizeof(struct sockaddr_in);
 #ifndef HAVE_POLL
     (*new)->connected = 1;
 #endif
 
-    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->addr,
+    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
                         &(*new)->addr_len);
 
     if ((*new)->socketdes < 0) {
@@ -295,7 +237,7 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
     if (hostname != NULL) {
         hp = gethostbyname(hostname);
 
-        if ((sock->socketdes < 0) || (!sock->addr)) {
+        if ((sock->socketdes < 0) || (!sock->remote_addr)) {
             return APR_ENOTSOCK;
         }
         if (!hp)  {
@@ -305,16 +247,18 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
             return h_errno;
         }
     
-        memcpy((char *)&sock->addr->sin_addr, hp->h_addr_list[0], hp->h_length);
+        memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
 
-        sock->addr_len = sizeof(*sock->addr);
+        sock->addr_len = sizeof(*sock->remote_addr);
     }
 
-    if ((connect(sock->socketdes, (const struct sockaddr *)sock->addr, sock->addr_len) < 0) &&
+    if ((connect(sock->socketdes, (const struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) &&
         (errno != EINPROGRESS)) {
         return errno;
     }
     else {
+        int namelen = sizeof(*sock->local_addr);
+        getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr, &namelen);
 #ifndef HAVE_POLL
 	sock->connected=1;
 #endif

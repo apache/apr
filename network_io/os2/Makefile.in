@@ -18,6 +18,7 @@ OBJS=poll.o \
 	sendrecv.o \
 	sockets.o \
 	sockopt.o \
+	sockaddr.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
@@ -63,6 +64,11 @@ sendrecv.o: sendrecv.c networkio.h $(INCDIR1)/apr_network_io.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
  $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
  $(INCDIR1)/apr_file_io.h
+sockaddr.o: sockaddr.c ../unix/sockaddr.c ../unix/networkio.h \
+ $(INCDIR1)/apr_network_io.h $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR1)/apr_lock.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_file_io.h
 sockets.o: sockets.c networkio.h $(INCDIR1)/apr_network_io.h \
  $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
  $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_portable.h \
@@ -73,4 +79,4 @@ sockopt.o: sockopt.c ../unix/sockopt.c ../unix/networkio.h \
  $(INCDIR1)/apr_network_io.h $(INCDIR1)/apr_general.h \
  $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
  $(INCDIR1)/apr_lock.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR)/apr_macro.h
+ $(INCDIR1)/apr_file_io.h

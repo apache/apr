@@ -204,7 +204,7 @@ ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
 {
     struct hostent *hptr;
     
-    hptr = gethostbyaddr((char *)&(sock->addr->sin_addr), 
+    hptr = gethostbyaddr((char *)&(sock->remote_addr->sin_addr), 
                          sizeof(struct in_addr), AF_INET);
     if (hptr != NULL) {
         *name = ap_pstrdup(sock->cntxt, hptr->h_name);

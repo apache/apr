@@ -69,6 +69,8 @@ int main(int argc, char *argv[])
     ap_pollfd_t *sdset;
     char datasend[STRLEN];
     char datarecv[STRLEN] = "Recv data test";
+    char *local_ipaddr, *remote_ipaddr;
+    ap_uint32_t local_port, remote_port;
 
     fprintf(stdout, "Creating context.......");
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
@@ -93,7 +95,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Setting port for socket.......");
-    if (ap_setport(sock, 8021) != APR_SUCCESS) {
+    if (ap_set_local_port(sock, 8021) != APR_SUCCESS) {
         ap_close_socket(sock);
         fprintf(stderr, "Couldn't set the port correctly\n");
         exit(-1);
@@ -142,6 +144,12 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     fprintf(stdout, "OK\n");
+
+    ap_get_remote_ipaddr(&remote_ipaddr, sock2);
+    ap_get_remote_port(&remote_port, sock2);
+    ap_get_local_ipaddr(&local_ipaddr, sock2);
+    ap_get_local_port(&local_port, sock2);
+    fprintf(stdout, "\tServer socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     length = STRLEN;
     fprintf(stdout, "\tServer:  Trying to recv data from socket.......");

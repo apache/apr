@@ -453,7 +453,7 @@ static void start_connect(struct connection *c)
     if (ap_create_tcp_socket(&c->aprsock, cntxt) != APR_SUCCESS) {
         err("Socket:");
     }
-    if (ap_setport(c->aprsock, port) != APR_SUCCESS) {
+    if (ap_set_remote_port(c->aprsock, port) != APR_SUCCESS) {
         err("Port:");
     }
     ap_current_time(c->start);

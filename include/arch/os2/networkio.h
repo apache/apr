@@ -62,7 +62,8 @@
 struct socket_t {
     ap_context_t *cntxt;
     int socketdes;
-    struct sockaddr_in *addr;
+    struct sockaddr_in *local_addr;
+    struct sockaddr_in *remote_addr;
     int addr_len;
     int timeout; 
 };
