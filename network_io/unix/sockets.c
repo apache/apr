@@ -202,6 +202,8 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
     (*new)->cntxt = connection_context;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
+    memcpy((*new)->local_addr, sock->local_addr, sizeof(struct sockaddr_in));
+
     (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->addr_len = sizeof(struct sockaddr_in);
