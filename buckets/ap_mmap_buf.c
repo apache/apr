@@ -59,22 +59,35 @@
 #include "apr_buf.h"
 #include <stdlib.h>
 
-APR_EXPORT(ap_bucket_mmap *) ap_mmap_bucket_create(void)
+static const char * mmap_get_str(ap_bucket *e)
 {
-    ap_bucket_mmap *newbuf;
-    newbuf = malloc(sizeof(*newbuf));
-    newbuf->data = NULL;
-    return newbuf;
-}
-
-APR_EXPORT(char *) ap_mmap_get_char_str(ap_bucket_mmap *b)
-{
+    ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
     return b->data->mm;
 }
 
-APR_EXPORT(int) ap_mmap_get_len(ap_bucket_mmap *b)
+static int mmap_get_len(ap_bucket *e)
 {
+    ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
     return b->data->size;
+}
+
+APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void)
+{
+    ap_bucket *newbuf;
+    ap_bucket_mmap *b;
+
+    newbuf            = malloc(sizeof(*newbuf));
+    b                 = malloc(sizeof(*b));
+
+    b->data      = NULL;
+
+    newbuf->color     = AP_BUCKET_mmap;
+    newbuf->getstr    = mmap_get_str;
+    newbuf->getlen    = mmap_get_len;
+    newbuf->free      = NULL;
+    newbuf->data      = b;
+    
+    return newbuf;
 }
 
 APR_EXPORT(void) ap_mmap_bucket_insert(ap_bucket_mmap *b, ap_mmap_t *mm)
