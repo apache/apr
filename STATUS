@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/15 00:28:05 $]
+Last modified at [$Date: 2001/01/17 20:39:23 $]
 
 Release:
 
@@ -20,7 +20,7 @@ RELEASE SHOWSTOPPERS:
       has been some discussion about adding a src/ directory to apr or 
       removing it from apr-util/.  Either way, this needs to be decided.
       Those for adding apr/src/        : gstein, jim, brane
-      Those for removing apr-util/src/ : wrowe, rbb , dreid
+      Those for removing apr-util/src/ : wrowe, rbb , dreid, stoddard
 
     * Many linkage errors are gpfaulting Apache/win32 in various configs
       (load mod_dav, for example.)  Must complete the APR_DECLARES
