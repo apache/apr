@@ -94,6 +94,7 @@ case "$OS" in
        CFLAGS="$CFLAGS -DBEOS"
        enable_apr_threads="system_threads"
        config_subdirs="shmem/unix/mm"
+       native_mmap_emul="1"
        ;;
    *)
        OSDIR="unix"
@@ -406,6 +407,8 @@ dnl #----------------------------- Checking for MMAP
 echo $ac_n "${nl}Checking for MMAP...${nl}"
 AC_FUNC_MMAP
 if test "$ac_cv_func_mmap_fixed_mapped" = "yes"; then
+    mmap="1"
+elif test "$native_mmap_emul" = "1"; then
     mmap="1"
 else
     mmap="0"
