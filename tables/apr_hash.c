@@ -207,7 +207,7 @@ static void resize_array(apr_hash_t *ht)
 
 static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 				    const void *key,
-				    apr_size_t klen,
+				    apr_ssize_t klen,
 				    const void *val)
 {
     apr_hash_entry_t **hep, *he;
@@ -215,7 +215,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     int hash;
     int i;
 
-    if (klen == 0)
+    if (klen == APR_HASH_KEY_STRING)
 	klen = strlen(key) + 1;
 
     /*
@@ -282,7 +282,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 
 APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
 			       const void *key,
-			       apr_size_t klen)
+			       apr_ssize_t klen)
 {
     apr_hash_entry_t *he;
     he = *find_entry(ht, key, klen, NULL);
@@ -294,7 +294,7 @@ APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
 
 APR_EXPORT(void) apr_hash_set(apr_hash_t *ht,
 			     const void *key,
-			     apr_size_t klen,
+			     apr_ssize_t klen,
 			     const void *val)
 {
     apr_hash_entry_t **hep;
