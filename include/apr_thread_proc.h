@@ -42,9 +42,6 @@ extern "C" {
  */
 
 typedef enum {
-#ifdef NETWARE
-    APR_PROGRAM_ADDRSPACE,  /**< invoke the program in its own address space */
-#endif
     APR_SHELLCMD,           /**< use the shell to invoke the program */
     APR_PROGRAM,            /**< invoke the program directly, no copied env */
     APR_PROGRAM_ENV,        /**< invoke the program, replicating our environment */
@@ -516,6 +513,15 @@ APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
  */
 APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
                                                        apr_int32_t chk);
+
+/**
+ * Determine if the child should start in its own address space or using the 
+ * current one from its parent
+ * @param attr The procattr we care about. 
+ * @param addrspace Should the child start in ouw address space?  Default is no. 
+ */
+APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
+                                                       apr_int32_t addrspace);
 
 #if APR_HAS_FORK
 /**
