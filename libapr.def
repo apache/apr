@@ -223,12 +223,12 @@ EXPORTS
 	apr_get_remote_port @214
 	apr_set_remote_port @215
 	apr_open_stderr @216
-        apr_set_pipe_timeout   @217
-        apr_terminate @218
-        apr_dso_load @219
-        apr_dso_unload @220
-        apr_dso_sym @221
-;        apr_dso_init @222
+	apr_get_pipe_timeout @217
+        apr_set_pipe_timeout   @218
+        apr_terminate @219
+        apr_dso_load @220
+        apr_dso_unload @221
+        apr_dso_sym @222
         apr_collapse_spaces @223
 	apr_month_snames @224
 	apr_day_snames @225
