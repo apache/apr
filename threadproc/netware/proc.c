@@ -62,8 +62,14 @@
 apr_status_t apr_netware_proc_cleanup(void *theproc)
 {
     apr_proc_t *proc = theproc;
+    int exit_int;
+    int waitpid_options = WUNTRACED | WNOHANG;
 
-	NXVmDestroy(proc->pid);
+    if (proc->pid > 0) {
+        waitpid(proc->pid, &exit_int, waitpid_options);
+    }
+
+/*	NXVmDestroy(proc->pid); */
     return APR_SUCCESS;
 }
 
@@ -76,6 +82,7 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,apr_pool_t *p
     }
     (*new)->pool = pool;
     (*new)->cmdtype = APR_PROGRAM;
+/*	(*new)->detached = 1;*/
     return APR_SUCCESS;
 
 }
@@ -318,7 +325,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     /* attr->detached and PROC_DETACHED do not mean the same thing.  attr->detached means
      * start the NLM in a separate address space.  PROC_DETACHED means don't wait for the
      * NLM to unload by calling wait() or waitpid(), just clean up */
-    addr_space = (attr->detached ? 0 : PROC_CURRENT_SPACE) | PROC_LOAD_SILENT | PROC_DETACHED;
+    addr_space = PROC_LOAD_SILENT | ((attr->cmdtype == APR_PROGRAM_ENV) ? 0 : PROC_CURRENT_SPACE);
+    addr_space |= (attr->detached ? PROC_DETACHED : 0);
 
     if (attr->currdir) {
         char *fullpath = NULL;
@@ -353,8 +361,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     }
 
 
-//    apr_pool_cleanup_register(pool, (void *)newproc, apr_netware_proc_cleanup,
-//        apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, (void *)newproc, apr_netware_proc_cleanup,
+        apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
@@ -365,52 +373,70 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   apr_wait_how_e waithow,
                                                   apr_pool_t *p)
 {
-#if 0
-    int waitpid_options = WUNTRACED;
-
-    if (waithow != APR_WAIT) {
-        waitpid_options |= WNOHANG;
-    }
-
-    if ((proc->pid = waitpid(-1, status, waitpid_options)) > 0) {
-        return APR_CHILD_DONE;
-    }
-    else if (proc->pid == 0) {
-        return APR_CHILD_NOTDONE;
-    }
-    return errno;
-#else
-    return APR_ENOTIMPL;
-#endif
-} 
+    proc->pid = -1;
+    return apr_proc_wait(proc, exitcode, exitwhy, waithow);
+}
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
                                         int *exitcode, apr_exit_why_e *exitwhy,
                                         apr_wait_how_e waithow)
 {
-#if 0
-    pid_t status;
+    pid_t pstatus;
+    int waitpid_options = WUNTRACED;
+    int exit_int;
+    int ignore;
+    apr_exit_why_e ignorewhy;
 
-    if (waithow == APR_WAIT) {
-        if ((status = waitpid(proc->pid, NULL, WUNTRACED)) > 0) {
-            return APR_CHILD_DONE;
-        }
-        else if (status == 0) {
-            return APR_CHILD_NOTDONE;
-        }
-        return errno;
+    if (exitcode == NULL) {
+        exitcode = &ignore;
     }
-    if ((status = waitpid(proc->pid, NULL, WUNTRACED | WNOHANG)) > 0) {
+
+    if (exitwhy == NULL) {
+        exitwhy = &ignorewhy;
+    }
+
+    if (waithow != APR_WAIT) {
+        waitpid_options |= WNOHANG;
+    }
+
+    /* If the pid is 0 then the process was started detached. There 
+       is no need to wait since there is nothing to wait for on a 
+       detached process.  Starting a process as non-detached and
+       then calling wait or waitpid could cause the thread to hang.
+       The reason for this is because NetWare does not have a way 
+       to kill or even signal a process to be killed.  Starting 
+       all processes as detached avoids the possibility of a 
+       thread hanging. */
+    if (proc->pid == 0) {
+        *exitwhy = APR_PROC_EXIT;
+        *exitcode = 0;
         return APR_CHILD_DONE;
     }
-    else if (status == 0) {
+
+    if ((pstatus = waitpid(proc->pid, &exit_int, waitpid_options)) > 0) {
+        proc->pid = pstatus;
+
+        if (WIFEXITED(exit_int)) {
+            *exitwhy = APR_PROC_EXIT;
+            *exitcode = WEXITSTATUS(exit_int);
+        }
+        else if (WIFSIGNALED(exit_int)) {
+            *exitwhy = APR_PROC_SIGNAL;
+            *exitcode = WTERMSIG(exit_int);
+        }
+        else {
+            /* unexpected condition */
+            return APR_EGENERAL;
+        }
+
+        return APR_CHILD_DONE;
+    }
+    else if (pstatus == 0) {
         return APR_CHILD_NOTDONE;
     }
+
     return errno;
-#else
-    return APR_ENOTIMPL;
-#endif
-} 
+}
 
 APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr, apr_int32_t what, 
                           struct rlimit *limit)
