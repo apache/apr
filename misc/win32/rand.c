@@ -54,6 +54,7 @@
 
 #include "apr_private.h"
 #include "apr_general.h"
+#include "misc.h"
 #include <wincrypt.h>
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
@@ -63,9 +64,12 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
     apr_status_t res = APR_SUCCESS;
 
     /* 0x40 bit = CRYPT_SILENT, only introduced in more recent PSDKs 
+     * and will only work for Win2K and later.
      */
-    if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL,
-                             CRYPT_VERIFYCONTEXT | 0x40)) {
+    DWORD flags = CRYPT_VERIFYCONTEXT
+                | ((apr_os_level >= APR_WIN_2000) ? 0x40 : 0);
+
+    if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, flags)) {
 	return apr_get_os_error();
     }
     if (!CryptGenRandom(hProv, length, buf)) {
