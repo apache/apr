@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/12 08:33:39 $]
+Last modified at [$Date: 2001/12/12 10:05:54 $]
 
 Release:
 
@@ -274,6 +274,11 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       begin to migrate the old API to be implemented on top of the
       new one, or just decide to get rid of it altogether.
       
+    * FreeBSD returns 45 (EOPNOTSUPP) when the lockfile is on a NFS
+      partition when you call fcntl(F_SETLKW).  It may be good if we 
+      can somehow detect this and error out when creating the lock
+      rather than waiting for the error to occur when acquiring lock.
+
 Documentation that needs writing:
 
     * API documentation
