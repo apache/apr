@@ -191,46 +191,43 @@ ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont)
+ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont)
 {
     int pid;
     
-    (*proc) = ap_pcalloc(cont, sizeof(ap_proc_t));
-
     if ((pid = fork()) < 0) {
         return errno;
     }
     else if (pid == 0) {
-        (*proc)->pid = pid;
-        (*proc)->attr = NULL;
+        proc->pid = pid;
+        proc->stdin = NULL; 
+        proc->stdout = NULL; 
+        proc->stderr = NULL; 
         return APR_INCHILD;
     }
-    (*proc)->pid = pid;
-    (*proc)->attr = NULL;
+    proc->pid = pid;
+    proc->stdin = NULL; 
+    proc->stdout = NULL; 
+    proc->stderr = NULL; 
     return APR_INPARENT;
 }
 
-ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
+ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
                               char *const args[], char **env,
                               ap_procattr_t *attr, ap_pool_t *cont)
 {
     int i;
     typedef const char *my_stupid_string;
     my_stupid_string *newargs;
-    ap_proc_t *pgrp; 
+    ap_proc_t pgrp; 
 
-    (*new) = (ap_proc_t *)ap_pcalloc(cont, sizeof(ap_proc_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->cntxt = cont;
-
-    if (((*new)->pid = fork()) < 0) {
+    new->stdin = attr->parent_in;
+    new->stderr = attr->parent_err;
+    new->stdout = attr->parent_out;
+    if ((new->pid = fork()) < 0) {
         return errno;
     }
-    else if ((*new)->pid == 0) { 
+    else if (new->pid == 0) { 
         /* child process */
         if (attr->child_in) {
             ap_close(attr->parent_in);
@@ -297,49 +294,22 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     if (attr->child_err) {
         ap_close(attr->child_err);
     }
-    
-    (*new)->attr = attr;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_in;
-    return APR_SUCCESS; 
-}
-
-ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_out; 
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_err; 
-    return APR_SUCCESS;
-}    
-
-ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_t *status,
+ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status,
                               ap_wait_how_e waithow, ap_pool_t *p)
 {
-    pid_t pid;
     int waitpid_options = WUNTRACED;
 
     if (waithow != APR_WAIT) {
         waitpid_options |= WNOHANG;
     }
 
-    if ((pid = waitpid(-1, status, waitpid_options)) > 0) {
-        if (!*proc) {
-            (*proc) = ap_pcalloc(p, sizeof(ap_proc_t));
-            (*proc)->cntxt = p;
-        }
-        (*proc)->pid = pid;
+    if ((proc->pid = waitpid(-1, status, waitpid_options)) > 0) {
         return APR_CHILD_DONE;
     }
-    else if (pid == 0) {
-        (*proc) = NULL;
+    else if (proc->pid == 0) {
         return APR_CHILD_NOTDONE;
     }
     return errno;
@@ -368,27 +338,3 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
     }
     return errno;
 } 
-
-ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
-{
-    if (proc == NULL) {
-        return APR_ENOPROC;
-    }
-    *theproc = proc->pid;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
-                           ap_pool_t *cont)
-{
-    if (cont == NULL) {
-        return APR_ENOPOOL;
-    }
-    if ((*proc) == NULL) {
-        (*proc) = (ap_proc_t *)ap_pcalloc(cont, sizeof(ap_proc_t));
-        (*proc)->cntxt = cont;
-    }
-    (*proc)->pid = *theproc;
-    return APR_SUCCESS;
-}              
-

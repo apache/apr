@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
 
     ap_procattr_t *attr1 = NULL;
     ap_procattr_t *attr2 = NULL;
-    ap_proc_t *proc1 = NULL;
-    ap_proc_t *proc2 = NULL;
+    ap_proc_t proc1;
+    ap_proc_t proc2;
     ap_status_t s1;
     ap_status_t s2;
     char *args[2];
@@ -115,18 +115,18 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    while ((s1 = ap_wait_proc(proc1, APR_NOWAIT)) != APR_CHILD_DONE || 
-           (s2 = ap_wait_proc(proc2, APR_NOWAIT)) != APR_CHILD_DONE) {
+    while ((s1 = ap_wait_proc(&proc1, APR_NOWAIT)) != APR_CHILD_DONE || 
+           (s2 = ap_wait_proc(&proc2, APR_NOWAIT)) != APR_CHILD_DONE) {
         continue;
     }
 
     if (s1 == APR_SUCCESS) {
-        ap_kill(proc2, SIGTERM);
-        ap_wait_proc(proc2, APR_WAIT);
+        ap_kill(&proc2, SIGTERM);
+        ap_wait_proc(&proc2, APR_WAIT);
     }
     else {
-        ap_kill(proc1, SIGTERM);
-        ap_wait_proc(proc1, APR_WAIT);
+        ap_kill(&proc1, SIGTERM);
+        ap_wait_proc(&proc1, APR_WAIT);
     }
     fprintf(stdout, "Network test completed.\n");   
 
