@@ -104,14 +104,22 @@ extern "C" {
  * Function definitions are at the end of the file...
  */
 
+/* APR_DEBUG_TO_FILE
+ * This will put all debug output into a file, that you can name
+ * using the APR_DEBUG_FILE define.  Normally this is set to setdout
+ * and the output is simply printed there.
+ */
+#define APR_DEBUG_TO_FILE            0
+#define APR_DEBUG_FILE   "/tmp/sms_debug"
+
 /* APR_DEBUG_SHOW_STRUCTURE
  * This turns on a print of the ancestory of the SMS when
  * creating/destroying an SMS so it's place in the world can be seen.
  */
-/* #define APR_DEBUG_SHOW_STRUCTURE      1 */
+#define APR_DEBUG_SHOW_STRUCTURE      0
 
 /* APR_DEBUG_SHOW_FUNCTIONS
- * This turns on debug printing of every call to i
+ * This turns on debug printing of every call to 
  *    apr_sms_create
  *    apr_sms_destroy
  *    apr_sms_reset
@@ -119,13 +127,13 @@ extern "C" {
  * Format of output is
  *    CREATE - sms 0x0000000 [STANDARD] has been created
  */
-/*  #define APR_DEBUG_SHOW_FUNCTIONS     1 */
+#define APR_DEBUG_SHOW_FUNCTIONS      0
 
 /* APR_DEBUG_TAG_SMS
  * Turn on the ability to give an SMS a "tag" that can be used to identify
  * it.
  */
-/*  #define APR_DEBUG_TAG_SMS    1 */ 
+#define APR_DEBUG_TAG_SMS             0
 
 /**
  * @package APR memory system
