@@ -268,7 +268,7 @@ APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n)
     }
     *start = 0;
     do {
-	*--start = '0' + (n % 10);
+	*--start = (char)('0' + (n % 10));
 	n /= 10;
     } while (n);
     if (negative) {
