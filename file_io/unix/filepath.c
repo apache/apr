@@ -234,10 +234,11 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     {
         /* Parse each segment, find the closing '/' 
          */
-        seglen = 0;
-        while (addpath[seglen] && addpath[seglen] != '/') {
-            ++seglen;
+        const char *next = addpath;
+        while (*next && (*next != '/')) {
+            ++next;
         }
+        seglen = next - addpath;
 
         if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) {
             /* noop segment (/ or ./) so skip it 
@@ -300,21 +301,23 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         {
             /* An actual segment, append it to the destination path
              */
-            apr_size_t i = (addpath[seglen] != '\0');
-            if (pathlen + seglen + i >= maxlen) {
+            if (*next) {
+                seglen++;
+            }
+            if (pathlen + seglen >= maxlen) {
                 return APR_ENAMETOOLONG;
             }
-            memcpy(path + pathlen, addpath, seglen + i);
-            pathlen += seglen + i;
+            memcpy(path + pathlen, addpath, seglen);
+            pathlen += seglen;
         }
 
         /* Skip over trailing slash to the next segment
          */
-        if (addpath[seglen]) {
-            ++seglen;
+        if (*next) {
+            ++next;
         }
 
-        addpath += seglen;
+        addpath = next;
     }
     path[pathlen] = '\0';
     
