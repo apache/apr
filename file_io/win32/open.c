@@ -417,23 +417,24 @@ APR_DECLARE(apr_status_t) apr_eof(apr_file_t *fptr)
 
 APR_DECLARE(apr_status_t) apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
-    /* ### should this be rebuilt in terms of apr_put_os_file()?? their
-       ### initializations are slightly different (maybe one or both are
-       ### not init'ing properly?)
-    */
+    apr_os_file_t file_handle;
 
-    (*thefile) = apr_pcalloc(cont, sizeof(apr_file_t));
-    if ((*thefile) == NULL) {
-        return APR_ENOMEM;
-    }
-    (*thefile)->filehand = GetStdHandle(STD_ERROR_HANDLE);
-    if ((*thefile)->filehand == INVALID_HANDLE_VALUE)
+    file_handle = GetStdHandle(STD_ERROR_HANDLE);
+    if (file_handle == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
-    (*thefile)->cntxt = cont;
-    (*thefile)->fname = "\0"; // What was this??? : "STD_ERROR_HANDLE"; */
-    (*thefile)->eof_hit = 0;
 
-    return APR_SUCCESS;
+    return apr_put_os_file(thefile, &file_handle, cont);
+}
+
+APR_DECLARE(apr_status_t) apr_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+{
+    apr_os_file_t file_handle;
+
+    file_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (file_handle == INVALID_HANDLE_VALUE)
+        return apr_get_os_error();
+
+    return apr_put_os_file(thefile, &file_handle, cont);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);

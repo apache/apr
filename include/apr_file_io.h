@@ -200,6 +200,15 @@ APR_DECLARE(apr_status_t) apr_open_stderr(apr_file_t **thefile,
                                           apr_pool_t *cont);
 
 /**
+ * open standard output as an apr file pointer.
+ * @param thefile The apr file to use as stdout.
+ * @param cont The pool to allocate the file out of.
+ * @deffunc apr_status_t apr_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+ */
+APR_DECLARE(apr_status_t) apr_open_stdout(apr_file_t **thefile,
+                                          apr_pool_t *cont);
+
+/**
  * Read data from the specified file.
  * @param thefile The file descriptor to read from.
  * @param buf The buffer to store the data to.

@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Add apr_open_stdout.  This mirrors apr_open_stderr, except it works
+     on stdout.  [cmpilato@collab.net]
+
   *) Fix bug in file_io/unix/dir.c.  There is no such thing as a dirent,
      it must be a struct dirent.  
      [Kevin Pilch-Bisson <kevin@pilch-bisson.net>]
