@@ -1,5 +1,5 @@
 Apache 2.0 STATUS:
-Last modified at [$Date: 2000/12/03 03:31:11 $]
+Last modified at [$Date: 2000/12/07 13:40:11 $]
 
 Release:
 
@@ -46,6 +46,12 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * The MM library is built as static and shared library. This should
       be set up to build only the required version.
+
+    * use libtool
+        Status: Greg +1 (volunteers)
+
+    * snarf rules.mk(.in) from APRUTIL to simplify makefiles
+        Status: Greg +1 (volunteers)
 
 Documentation that needs writing:
 
