@@ -77,12 +77,15 @@ static apr_status_t sysv_cleanup(void *lock_)
 {
     apr_lock_t *lock=lock_;
     union semun ick;
+    apr_status_t stat = APR_SUCCESS;
     
     if (lock->interproc->filedes != -1) {
         ick.val = 0;
-        semctl(lock->interproc->filedes, 0, IPC_RMID, ick);
+        if (semctl(lock->interproc->filedes, 0, IPC_RMID, ick) < 0) {
+            stat = errno;
+        }
     }
-    return APR_SUCCESS;
+    return stat;
 }    
 
 static apr_status_t sysv_create(apr_lock_t *new, const char *fname)
