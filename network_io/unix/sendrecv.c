@@ -564,8 +564,8 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                           hdtrarray,            /* Headers/footers */
                           flags);               /* undefined, set to 0 */
         }
-        else {              /* we can't call sendfile() for trailers only */
-            rc = write(sock->socketdes, hdtrarray[1].iov_base, hdtrarray[1].iov_len);
+        else {              /* we can't call sendfile() with no bytes to send from the file */
+            rc = writev(sock->socketdes, hdtrarray, 2);
         }
     } while (rc == -1 && errno == EINTR);
 
@@ -588,8 +588,8 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                                   hdtrarray,          /* Headers/footers */
                                   flags);             /* undefined, set to 0 */
                 }
-                else {      /* we can't call sendfile() for trailers only */
-                    rc = write(sock->socketdes, hdtrarray[1].iov_base, hdtrarray[1].iov_len);
+                else {      /* we can't call sendfile() with no bytes to send from the file */
+                    rc = writev(sock->socketdes, hdtrarray, 2);
                 }
             } while (rc == -1 && errno == EINTR);
         }
