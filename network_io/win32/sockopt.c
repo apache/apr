@@ -55,7 +55,7 @@
 #include "networkio.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
-#include "apr_lib.h"
+#include "apr_strings.h"
 #include <string.h>
 
 ap_status_t soblock(SOCKET sd)
