@@ -293,11 +293,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
                               		apr_procattr_t *attr, 
                               		apr_pool_t *cont)
 {
-    int i, envCount;
+    int i, envCount=0;
     const char **newargs;
     char **newenv;
     NXVmId_t newVM;
     unsigned long flags = 0;
+    char **sysenv = NULL;
 
     NXNameSpec_t nameSpec;
     NXExecEnvSpec_t envSpec;
@@ -313,16 +314,20 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     envSpec.esArgc = i;
     envSpec.esArgv = (void**)args;
 
+    getenv("ENV"); /* just needs to be here for now */
+    sysenv = nxGetEnviron();
     /* Count how many environment variables there are in the
         system, add any new environment variables and place
         them in the environment. */
     for (i=0;env && env[i];i++);
-    envCount = NXGetEnvCount();
+    for (envCount=0;sysenv && sysenv[envCount];envCount++);
     if ((envCount + i) > 0) {
         newenv = (char **) NXMemAlloc(sizeof(char *) * (envCount+i+1), 0);
         if (!newenv)
             return APR_ENOMEM;
-        NXCopyEnv(newenv, envCount);
+        for (i=0;sysenv && sysenv[i];i++) {
+            newenv[i] = (char*)sysenv[i];
+        }
         for (i=0;env && env[i];i++) {
             newenv[envCount+i-1] = (char*)env[i];
         }
@@ -418,6 +423,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
         apr_pool_cleanup_register(cont, (void *)newproc, apr_netware_proc_cleanup,
                          apr_pool_cleanup_null);
     }
+    /*if (sysenv)
+        free(sysenv);
+    */
     return APR_SUCCESS;
 }
 
