@@ -615,6 +615,21 @@ void netware_pool_proc_cleanup ()
 }
 #endif /* defined(NETWARE) */
 
+/* Node list management helper macros; list_insert() inserts 'node'
+ * before 'point'. */
+#define list_insert(node, point) do {           \
+    node->ref = point->ref;                     \
+    *node->ref = node;                          \
+    node->next = point;                         \
+    point->ref = &node->next;                   \
+} while (0)
+
+/* list_remove() removes 'node' from its list. */
+#define list_remove(node) do {                  \
+    *node->ref = node->next;                    \
+    node->next->ref = node->ref;                \
+} while (0)
+
 /*
  * Memory allocation
  */
@@ -638,8 +653,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
 
     node = active->next;
     if (size < (apr_size_t)(node->endp - node->first_avail)) {
-        *node->ref = node->next;
-        node->next->ref = node->ref;
+        list_remove(node);
     }
     else {
         if ((node = allocator_alloc(pool->allocator, size)) == NULL) {
@@ -655,10 +669,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     mem = node->first_avail;
     node->first_avail += size;
 
-    node->ref = active->ref;
-    *node->ref = node;
-    node->next = active;
-    active->ref = &node->next;
+    list_insert(node, active);
 
     pool->active = node;
 
@@ -675,13 +686,8 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     }
     while (free_index < node->free_index);
 
-    *active->ref = active->next;
-    active->next->ref = active->ref;
-
-    active->ref = node->ref;
-    *active->ref = active;
-    active->next = node;
-    node->ref = &active->next;
+    list_remove(active);
+    list_insert(active, node);
 
     return mem;
 }
@@ -944,13 +950,9 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     node = active->next;
     if (!ps->got_a_new_node
         && size < (apr_size_t)(node->endp - node->first_avail)) {
-        *node->ref = node->next;
-        node->next->ref = node->ref;
 
-        node->ref = active->ref;
-        *node->ref = node;
-        node->next = active;
-        active->ref = &node->next;
+        list_remove(node);
+        list_insert(node, active);
 
         node->free_index = 0;
 
@@ -967,13 +969,8 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
             }
             while (free_index < node->free_index);
 
-            *active->ref = active->next;
-            active->next->ref = active->ref;
-
-            active->ref = node->ref;
-            *active->ref = active;
-            active->next = node;
-            node->ref = &active->next;
+            list_remove(active);
+            list_insert(active, node);
         }
 
         node = pool->active;
@@ -1058,10 +1055,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 
     node->free_index = 0;
 
-    node->ref = active->ref;
-    *node->ref = node;
-    node->next = active;
-    active->ref = &node->next;
+    list_insert(node, active);
 
     pool->active = node;
 
@@ -1079,13 +1073,8 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     }
     while (free_index < node->free_index);
 
-    *active->ref = active->next;
-    active->next->ref = active->ref;
-
-    active->ref = node->ref;
-    *active->ref = active;
-    active->next = node;
-    node->ref = &active->next;
+    list_remove(active);
+    list_insert(active, node);
 
     return strp;
 }
