@@ -122,7 +122,11 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
         return stat;
     }
 
-    (*new)->td = spawn_thread((thread_func)dummy_worker, "apr thread", temp, (*new));
+    (*new)->td = spawn_thread((thread_func)dummy_worker, 
+                              "apr thread", 
+                              temp, 
+                              (*new));
+
     /* Now we try to run it...*/
     if (resume_thread((*new)->td) == B_NO_ERROR) {
         return APR_SUCCESS;
@@ -154,7 +158,8 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
 {
     status_t rv = 0, ret;
-    if ((ret = wait_for_thread(thd->td, &rv)) == B_NO_ERROR) {
+    ret = wait_for_thread(thd->td, &rv);
+    if (ret == B_NO_ERROR) {
         *retval = rv;
         return APR_SUCCESS;
     }
@@ -235,9 +240,9 @@ APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
     *control = (apr_thread_once_t *)apr_pcalloc(p, sizeof(apr_thread_once_t));
     (*control)->hit = 0; /* we haven't done it yet... */
     rc = ((*control)->sem = create_sem(1, "thread_once"));
-    if (rc != 0) {
+    if (rc < 0)
         return rc;
-    }
+
     apr_pool_cleanup_register(p, control, thread_once_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
