@@ -1,6 +1,11 @@
 #ifndef APR_H
 #define APR_H
 
+/**
+ * @file apr.h
+ * @brief Basic APR header
+ */
+
 /* So that we can use inline on some critical functions, and use
  * GNUC attributes (such as to get -Wall warnings for printf-like
  * functions).  Only do this in gcc 2.7 or later ... it may work
