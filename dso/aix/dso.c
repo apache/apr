@@ -85,7 +85,8 @@
 #include <sys/types.h>
 #include <sys/ldr.h>
 #include <a.out.h>
-#include "aix/dso.h"
+#include "dso.h"
+#include "apr_portable.h"
 
 #if APR_HAS_DSO
 
@@ -132,6 +133,23 @@ struct dl_info {
  * add the basic "wrappers" here.
  */
 
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
+                                                apr_os_dso_handle_t osdso,
+                                                apr_pool_t *pool)
+{
+    *aprdso = apr_pcalloc(pool, sizeof **aprdso);
+    (*aprdso)->handle = osdso;
+    (*aprdso)->pool = pool;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *osdso,
+                                                apr_dso_handle_t *aprdso)
+{
+    *osdso = aprdso->handle;
+    return APR_SUCCESS;
+}
+
 static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
@@ -148,14 +166,16 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 {
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 
+    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
+
     if(os_handle == NULL) {
         (*res_handle)->errormsg = dlerror();       
         return APR_EDSOOPEN;
     }
 
-    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;
-    (*res_handle)->cont = ctx;
+    (*res_handle)->pool = ctx;
+    (*res_handle)->errormsg = NULL;
 
     apr_pool_cleanup_register(ctx, *res_handle, dso_cleanup, apr_pool_cleanup_null);
 
@@ -164,7 +184,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
-    return apr_pool_cleanup_run(handle->cont, handle, dso_cleanup);
+    return apr_pool_cleanup_run(handle->pool, handle, dso_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 

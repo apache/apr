@@ -69,7 +69,7 @@ const char *dlerror(void);
 int dlclose(void *handle);
 
 struct apr_dso_handle_t {
-    apr_pool_t  *cont;
+    apr_pool_t  *pool;
     void          *handle;
     const char *errormsg;
 };
