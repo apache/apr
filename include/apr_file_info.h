@@ -58,6 +58,7 @@
 #include "apr.h"
 #include "apr_user.h"
 #include "apr_pools.h"
+#include "apr_tables.h"
 #include "apr_time.h"
 #include "apr_errno.h"
 
@@ -384,6 +385,36 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                                              const char *addpath, 
                                              apr_int32_t flags,
                                              apr_pool_t *p);
+
+/**
+ * Split a search path into separate components
+ * @ingroup apr_filepath
+ * @param pathelts the returned components of the search path
+ * @param liststr the search path (e.g., <tt>getenv("PATH")</tt>)
+ * @param p the pool to allocate the array and path components from
+ * @deffunc apr_status_t apr_filepath_list_split(apr_array_header_t **pathelts, const char *liststr, apr_pool_t *p)
+ * @remark empty path componenta do not become part of @a pathelts.
+ * @remark the path separator in @a liststr is system specific;
+ * e.g., ':' on Unix, ';' on Windows, etc.
+ */
+APR_DECLARE(apr_status_t) apr_filepath_list_split(apr_array_header_t **pathelts,
+                                                  const char *liststr,
+                                                  apr_pool_t *p);
+
+/**
+ * Merge a list of search path components into a single search path
+ * @ingroup apr_filepath
+ * @param liststr the returned search path; may be NULL if @a pathelts is empty
+ * @param pathelts the components of the search path
+ * @param p the pool to allocate the search path from
+ * @deffunc apr_status_t apr_filepath_list_merge(char **liststr, apr_array_header_t *pathelts, apr_pool_t *p)
+ * @remark emtpy strings in the source array are ignored.
+ * @remark the path separator in @a liststr is system specific;
+ * e.g., ':' on Unix, ';' on Windows, etc.
+ */
+APR_DECLARE(apr_status_t) apr_filepath_list_merge(char **liststr,
+                                                  apr_array_header_t *pathelts,
+                                                  apr_pool_t *p);
 
 /**
  * Return the default file path (for relative file names)

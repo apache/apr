@@ -52,108 +52,96 @@
  * <http://www.apache.org/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "test_apr.h"
+#define APR_WANT_STRFUNC
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 
-/* Top-level pool which can be used by tests. */
-apr_pool_t *p;
+#include "apr_errno.h"
+#include "apr_pools.h"
+#include "apr_strings.h"
+#include "apr_tables.h"
 
-void apr_assert_success(CuTest* tc, const char* context, apr_status_t rv)
+
+apr_status_t apr_filepath_list_split_impl(apr_array_header_t **pathelts,
+                                          const char *liststr,
+                                          char separator,
+                                          apr_pool_t *p)
 {
-    if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, context);
+    char *path, *part, *ptr;
+    char separator_string[2] = { separator, '\0' };
+    apr_array_header_t *elts;
+    int nelts;
+
+    /* Count the number of path elements. We know there'll be at least
+       one even if path is an empty string. */
+    path = apr_pstrdup(p, liststr);
+    for (nelts = 0, ptr = path; ptr != NULL; ++nelts)
+    {
+        ptr = strchr(ptr, separator);
+        if (ptr)
+            ++ptr;
     }
 
-    if (rv != APR_SUCCESS) {
-        char buf[STRING_MAX], ebuf[128];
-        sprintf(buf, "%s (%d): %s\n", context, rv,
-                apr_strerror(rv, ebuf, sizeof ebuf));
-        CuFail(tc, buf);
-    }
-}
-
-static const struct testlist {
-    const char *testname;
-    CuSuite *(*func)(void);
-} tests[] = {
-    {"teststr", teststr},
-    {"testtime", testtime},
-    {"testvsn", testvsn},
-    {"testipsub", testipsub},
-    {"testmmap", testmmap},
-    {"testud", testud},
-    {"testtable", testtable},
-    {"testhash", testhash},
-    {"testsleep", testsleep},
-    {"testpool", testpool},
-    {"testfmt", testfmt},
-    {"testfile", testfile},
-    {"testfileinfo", testfileinfo},
-    {"testpipe", testpipe},
-    {"testdup", testdup},
-    {"testdir", testdir},
-    {"testrand", testrand},
-    {"testdso", testdso},
-    {"testoc", testoc},
-    {"testsockets", testsockets},
-    {"testsockopt", testsockopt},
-    {"testproc", testproc},
-    {"testpoll", testpoll},
-    {"testlock", testlock},
-    {"testthread", testthread},
-    {"testargs", testgetopt},
-    {"testnames", testnames},
-    {"testuser", testuser},
-    {"testpath", testpath},
-    {"LastTest", NULL}
-};
-
-int main(int argc, char *argv[])
-{
-    CuSuiteList *alltests = NULL;
-    CuString *output = CuStringNew();
-    int i;
-    int partial = 0;
-
-    apr_initialize();
-    atexit(apr_terminate);
-
-    CuInit(argc, argv);
-
-    apr_pool_create(&p, NULL);
-
-    /* build the list of tests to run */
-    for (i = 1; i < argc; i++) {
-        int j;
-        if (!strcmp(argv[i], "-v")) {
+    /* Split the path into the array. */
+    elts = apr_array_make(p, nelts, sizeof(char*));
+    while ((part = apr_strtok(path, separator_string, &ptr)) != NULL)
+    {
+        if (*part == '\0')      /* Ignore empty path components. */
             continue;
-        }
-        for (j = 0; tests[j].func != NULL; j++) {
-            if (!strcmp(argv[i], tests[j].testname)) {
-                if (!partial) {
-                    alltests = CuSuiteListNew("Partial APR Tests");
-                    partial = 1;
-                }
 
-                CuSuiteListAdd(alltests, tests[j].func());
-                break;
-            }
-        }
+        *(char**)apr_array_push(elts) = part;
+        path = NULL;            /* For the next call to apr_strtok */
     }
 
-    if (!partial) {
-        alltests = CuSuiteListNew("All APR Tests");
-        for (i = 0; tests[i].func != NULL; i++) {
-            CuSuiteListAdd(alltests, tests[i].func());
-        }
-    }
-
-    CuSuiteListRunWithSummary(alltests);
-    i = CuSuiteListDetails(alltests, output);
-    printf("%s\n", output->buffer);
-
-    return i > 0 ? 1 : 0;
+    *pathelts = elts;
+    return APR_SUCCESS;
 }
 
+
+apr_status_t apr_filepath_list_merge_impl(char **liststr,
+                                          apr_array_header_t *pathelts,
+                                          char separator,
+                                          apr_pool_t *p)
+{
+    apr_size_t path_size = 0;
+    char *path;
+    int i;
+
+    /* This test isn't 100% certain, but it'll catch at least some
+       invalid uses... */
+    if (pathelts->elt_size != sizeof(char*))
+        return APR_EINVAL;
+
+    /* Calculate the size of the merged path */
+    for (i = 0; i < pathelts->nelts; ++i)
+        path_size += strlen(((char**)pathelts->elts)[i]);
+
+    if (path_size == 0)
+    {
+        *liststr = NULL;
+        return APR_SUCCESS;
+    }
+
+    if (i > 0)                  /* Add space for the separators */
+        path_size += (i - 1);
+
+    /* Merge the path components */
+    path = *liststr = apr_palloc(p, path_size + 1);
+    for (i = 0; i < pathelts->nelts; ++i)
+    {
+        /* ### Hmmmm. Calling strlen twice on the same string. Yuck.
+               But is is better than reallocation in apr_pstrcat? */
+        const char *part = ((char**)pathelts->elts)[i];
+        apr_size_t part_size = strlen(part);
+        if (part_size == 0)     /* Ignore empty path components. */
+            continue;
+
+        if (i > 0)
+            *path++ = separator;
+        memcpy(path, part, part_size);
+        path += part_size;
+    }
+    *path = '\0';
+    return APR_SUCCESS;
+}
