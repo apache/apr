@@ -199,12 +199,9 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     int len;
 
     len = strlen(str);
-    str[len] = '\n';
-    if (!WriteFile(thefile->filehand, str, len+1, &bwrote, NULL)) {
-        str[len] = '\0';
+    if (!WriteFile(thefile->filehand, str, len, &bwrote, NULL)) {
         return GetLastError();
     }
-    str[len] = '\0';
 
     return APR_SUCCESS; 
 }
