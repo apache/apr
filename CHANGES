@@ -1,17 +1,16 @@
 Changes with APR b1  
-  *)  Speed up apr_table operations by using a cache/checksum and a
-      red-black tree in the overlay
-      [Brian Pane <bpane@pacbell.net>, Cliff Woolley]
+  *) Speed up apr_table operations by using a cache/checksum and a
+     red-black tree in the overlay.
+     [Brian Pane <bpane@pacbell.net>, Cliff Woolley]
 
-  *)  Speed up apr_pool_userdata_set[n] by letting hash_set figure out
-      the strings length
-      [Brian Pane <bpane@pacbell.net>]
+  *) Speed up apr_pool_userdata_set[n] by letting hash_set figure out
+     the strings length.  [Brian Pane <bpane@pacbell.net>]
 
-  *)  New function apr_mmap_dup. This is called in the mmap_setaside 
-      [Brian Pane <bpane@pacbell.net>]
+  *) New function apr_mmap_dup. This is called in the mmap_setaside.
+     [Brian Pane <bpane@pacbell.net>]
 
-  *)  speed up the apr_hash_t implementation's handling of APR_HASH_KEY_STRING.
-      [Brian Pane <bpane@pacbell.net>]
+  *) Speed up the apr_hash_t implementation's handling of APR_HASH_KEY_STRING.
+     [Brian Pane <bpane@pacbell.net>]
 
   *) Tweak apr_gethostname() so that it detects truncation of the
      name and returns an error.  [Jeff Trawick]
