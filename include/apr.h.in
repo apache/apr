@@ -1,0 +1,23 @@
+/*  APR Feature Macros */
+@apr_has_threads@
+@apr_has_mmap@
+
+/* Typedefs that APR needs. */
+
+typedef  @short_value@           ap_int16_t     
+typedef  unsigned @short_value@  ap_uint16_t   
+                                               
+typedef  @int_value@             ap_int32_t    
+typedef  unsigned @int_value@    ap_uint32_t   
+                                               
+typedef  @long_value@            ap_int64_t    
+typedef  unsigned @long_value@   ap_uint64_t   
+
+
+/* Definitions that APR programs need to work properly. */
+
+#undef API_THREAD_FUNC
+#undef API_EXPORT(type)
+#undef API_VAR_IMPORT
+
+
