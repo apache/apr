@@ -101,7 +101,7 @@ AC_ARG_WITH(libtool, [--with-libtool   use libtool to link the library],
 
 echo "FOOBAR:::::  $use_libtool"
 if test "x$use_libtool" = "xyes"; then
-      lt_compile="\$(LIBTOOL) --mode=compile \$(LTFLAGS) \$(COMPILE) -c \$< && touch $@"
+      lt_compile="\$(LIBTOOL) --mode=compile \$(LTFLAGS) \$(COMPILE) -c \$< && touch \$@"
       link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@ -rpath \$(libdir) \$\$objects"
       so_ext="lo"
       lib_target="\$(libdir) \$\$objects"
