@@ -259,9 +259,9 @@ static int client(client_socket_mode_t socket_mode, char *host)
         break;
     case NONBLK:
         /* set it non-blocking */
-        rv = apr_setsocketopt(sock, APR_SO_NONBLOCK, 1);
+        rv = apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
+            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n", 
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
@@ -269,10 +269,9 @@ static int client(client_socket_mode_t socket_mode, char *host)
         break;
     case TIMEOUT:
         /* set a timeout */
-        rv = apr_setsocketopt(sock, APR_SO_TIMEOUT, 
-                             100 * APR_USEC_PER_SEC);
+        rv = apr_socket_timeout_set(sock, 100 * APR_USEC_PER_SEC);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
+            fprintf(stderr, "apr_socket_opt_set(APR_SO_NONBLOCK)->%d/%s\n", 
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
@@ -519,9 +518,9 @@ static int server(void)
     family = APR_UNSPEC;
     apr_setup(&p, &sock, &family);
 
-    rv = apr_setsocketopt(sock, APR_SO_REUSEADDR, 1);
+    rv = apr_socket_opt_set(sock, APR_SO_REUSEADDR, 1);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_setsocketopt()->%d/%s\n",
+        fprintf(stderr, "apr_socket_opt_set()->%d/%s\n",
                 rv,
 		apr_strerror(rv, buf, sizeof buf));
         exit(1);
