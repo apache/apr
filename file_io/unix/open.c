@@ -176,7 +176,8 @@ ap_status_t ap_open(struct file_t **new, ap_context_t *cont, const char *fname, 
 
     (*new)->stated = 0;  /* we haven't called stat for this file yet. */
     (*new)->eof_hit = 0;
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup, NULL);
+    ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
+                        ap_null_cleanup);
     return APR_SUCCESS;
 }
 

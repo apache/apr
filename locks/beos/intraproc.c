@@ -86,7 +86,8 @@ ap_status_t create_intra_lock(struct lock_t *new)
     }
     new->sem_intraproc = stat;
     new->curr_locked == 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup, NULL);
+    ap_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup,
+                        ap_null_cleanup);
     return APR_SUCCESS;
 }
 

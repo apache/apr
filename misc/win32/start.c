@@ -108,7 +108,7 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
         return APR_EEXIST;
     }
 
-    ap_register_cleanup(new, NULL, clean_cont, NULL);
+    ap_register_cleanup(new, NULL, clean_cont, ap_null_cleanup);
 
     *newcont = new;
     return APR_SUCCESS;

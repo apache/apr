@@ -96,7 +96,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
     new->op_off.sem_flg = SEM_UNDO;
 
     new->curr_locked == 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, NULL);
+    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 
@@ -188,7 +188,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
     }
 
     new->curr_locked == 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, NULL);
+    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 
@@ -265,7 +265,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
 
     new->curr_locked=0;
     unlink(new->fname);
-    ap_register_cleanup(new->cntxt, new, lock_cleanup, NULL);
+    ap_register_cleanup(new->cntxt, new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS; 
 }
 
@@ -324,7 +324,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
         return errno;
     }
     new->curr_locked == 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, NULL);
+    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 

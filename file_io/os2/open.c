@@ -128,7 +128,7 @@ ap_status_t ap_open(struct file_t **new, ap_context_t *cntxt, const char *fname,
     
     dafile->isopen = TRUE;
     dafile->fname = ap_pstrdup(cntxt, fname);
-    ap_register_cleanup(dafile->cntxt, dafile, file_cleanup, NULL);
+    ap_register_cleanup(dafile->cntxt, dafile, file_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 

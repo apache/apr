@@ -98,7 +98,8 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *co
         (*new)->dirname = ap_pstrcat(cont, dirname, "/*", NULL);
 	}
 	(*new)->dirhand = INVALID_HANDLE_VALUE;
-	ap_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup, NULL);
+	ap_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
+	                    ap_null_cleanup);
     return APR_SUCCESS;
 }
 

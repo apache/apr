@@ -79,7 +79,8 @@ ap_status_t create_inter_lock(ap_lock_t *new)
         return errno;
     }
     new->curr_locked == 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_inter_cleanup, NULL);
+    ap_register_cleanup(new->cntxt, (void *)new, lock_inter_cleanup,
+                        ap_null_cleanup);
     return APR_SUCCESS;
 }
 

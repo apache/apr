@@ -83,6 +83,7 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
     dup_file->status = old_file->status;
     dup_file->isopen = old_file->isopen;
     *new_file = dup_file;
-    ap_register_cleanup(dup_file->cntxt, dup_file, file_cleanup, NULL);
+    ap_register_cleanup(dup_file->cntxt, dup_file, file_cleanup,
+                        ap_null_cleanup);
     return APR_SUCCESS;
 }
