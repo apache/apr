@@ -154,25 +154,6 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define apr_atomic_cas(mem,with,cmp) InterlockedCompareExchange(mem,with,cmp)
 #define apr_atomic_init(pool)        APR_SUCCESS
 
-#elif defined(__linux)
-
-#include <stdlib.h>
-#include <asm/atomic.h>
-#include <asm/system.h>
-#define apr_atomic_t atomic_t
-
-#define apr_atomic_add(mem, val)     atomic_add(val,mem)
-#define apr_atomic_dec(mem)          !atomic_dec_and_test(mem)
-#define apr_atomic_inc(mem)          atomic_inc(mem)
-#define apr_atomic_set(mem, val)     atomic_set(mem, val)
-#define apr_atomic_read(mem)         atomic_read(mem)
-#if defined(cmpxchg)
-#define apr_atomic_init(pool)        APR_SUCCESS
-#define apr_atomic_cas(mem,with,cmp) cmpxchg(mem,cmp,with)
-#else
-#define APR_ATOMIC_NEED_CAS_DEFAULT 1
-#endif
-
 #elif defined(NETWARE)
 
 #include <stdlib.h>
