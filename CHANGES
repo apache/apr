@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Renamed APR_XtOffset -> APR_OFFSET and APR_XtOffsetOf -> APR_OFFSETOF.
+     [Cliff Woolley]
+
   *) Cygwin: the unix version of apr_file_open() must respect the
      APR_BINARY flag if the underlying platform requires it (in
      which case we assume O_BINARY is defined).  PR 9185.
