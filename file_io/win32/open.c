@@ -77,17 +77,17 @@ ap_status_t file_cleanup(void *thefile)
     }
 }
 
-ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag, ap_fileperms_t perm,
+ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag, ap_fileperms_t perm,
 					struct file_t **dafile)
 {
     DWORD oflags = 0;
-	DWORD createflags = 0;
+    DWORD createflags = 0;
     DWORD theerror;
     /*mode_t mode = get_fileperms(perm);*/
 
     (*dafile) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
 
-	(*dafile)->cntxt = cont;
+    (*dafile)->cntxt = cont;
 
     if (flag & APR_READ) {
         oflags |= GENERIC_READ;
@@ -105,14 +105,14 @@ ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag, ap_fileper
     }
     (*dafile)->fname = strdup(fname);
 
-	(*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
-	(*dafile)->lowerdemonfname = strlwr((*dafile)->demonfname);
+    (*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
+    (*dafile)->lowerdemonfname = strlwr((*dafile)->demonfname);
     
     createflags = OPEN_ALWAYS;     
     if (flag & APR_CREATE) {
         if (flag & APR_EXCL) {
-			createflags = CREATE_NEW;
-		}
+            createflags = CREATE_NEW;
+        }
     }
     if ((flag & APR_EXCL) && !(flag & APR_CREATE)) {
         (*dafile)->filehand = INVALID_HANDLE_VALUE;
@@ -122,16 +122,16 @@ ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag, ap_fileper
     if (flag & APR_APPEND) {
         (*dafile)->append = 1;
     }
-	else {
-		(*dafile)->append = 0;
-	}
+    else {
+        (*dafile)->append = 0;
+    }
 
     if (flag & APR_TRUNCATE) {
         createflags = TRUNCATE_EXISTING;
     }
  
     (*dafile)->filehand = CreateFile(fname, oflags, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-						   NULL, createflags, FILE_ATTRIBUTE_NORMAL, 0);
+                                     NULL, createflags, FILE_ATTRIBUTE_NORMAL, 0);
 
     if ((*dafile)->filehand == INVALID_HANDLE_VALUE) {
         theerror = GetLastError();
@@ -143,7 +143,7 @@ ap_status_t ap_open(ap_context_t *cont, char *fname, ap_int32_t flag, ap_fileper
 
 ap_status_t ap_close(struct file_t *file)
 {
-	ap_status_t stat;
+    ap_status_t stat;
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
         ap_kill_cleanup(file->cntxt, file, file_cleanup);
         return APR_SUCCESS;

@@ -163,10 +163,10 @@ ap_status_t ap_get_filemtime(struct file_t *file, time_t *time)
     }
 }
 
-ap_status_t ap_get_filedata(struct file_t *file, void *data)
+ap_status_t ap_get_filedata(struct file_t *file, char *key, void *data)
 {    
     if (file != NULL) {
-        return ap_get_userdata(file->cntxt, &data);
+        return ap_get_userdata(file->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -174,10 +174,11 @@ ap_status_t ap_get_filedata(struct file_t *file, void *data)
     }
 }
                    
-ap_status_t ap_set_filedata(struct file_t *file, void *data)
+ap_status_t ap_set_filedata(struct file_t *file, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {    
     if (file != NULL) {
-        return ap_set_userdata(file->cntxt, data);
+        return ap_set_userdata(file->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
