@@ -168,9 +168,6 @@ static char *apr_error_string(apr_status_t statcode)
         return "The given path misformatted or contained invalid characters";
     case APR_EMEMSYS:
         return "The memory system passed does not exist";
-    case APR_EMEMFUNC:
-        return "The function requested is not available in the memory "
-               "system used";
     case APR_ENOCLEANUP:
         return "The requested cleanup function does not exist";
     default:
