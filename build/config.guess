@@ -437,7 +437,8 @@ EOF
 		echo rs6000-ibm-aix3.2
 	fi
 	exit 0 ;;
-    *:AIX:*:4)
+    # next stanza updated from autoconf 2.52 to get support for 5L
+    *:AIX:*:[45])
 	IBM_CPU_ID=`/usr/sbin/lsdev -C -c processor -S available | head -1 | awk '{ print $1 }'`
 	if /usr/sbin/lsattr -EHl ${IBM_CPU_ID} | grep POWER >/dev/null 2>&1; then
 		IBM_ARCH=rs6000
@@ -447,7 +448,7 @@ EOF
 	if [ -x /usr/bin/oslevel ] ; then
 		IBM_REV=`/usr/bin/oslevel`
 	else
-		IBM_REV=4.${UNAME_RELEASE}
+		IBM_REV=${UNAME_VERSION}.${UNAME_RELEASE}
 	fi
 	echo ${IBM_ARCH}-ibm-aix${IBM_REV}
 	exit 0 ;;

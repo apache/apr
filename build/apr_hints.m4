@@ -69,6 +69,9 @@ if test "x$apr_preload_done" != "xyes" ; then
         *-ibm-aix4.3)
 	    APR_ADDTO(CPPFLAGS, [-D_USE_IRS -U__STR__])
 	    ;;
+        *-ibm-aix5*)
+	    APR_ADDTO(CPPFLAGS, [-D_USE_IRS -U__STR__])
+	    ;;
         *-ibm-aix4.3.*)
             APR_ADDTO(CPPFLAGS, [-D_USE_IRS -U__STR__])
             ;;
