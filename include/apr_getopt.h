@@ -84,13 +84,17 @@ struct apr_getopt_t {
     char const* place;
     /** set to nonzero to support interleaving options with regular args */
     int interleave;
-    /** range of non-option arguments skipped for interleaving */
+    /** start of non-option arguments skipped for interleaving */
     int skip_start;
+    /** end of non-option arguments skipped for interleaving */
     int skip_end;
 };
 
 typedef struct apr_getopt_option_t apr_getopt_option_t;
 
+/**
+ * Structure used to describe options that getopt should search for.
+ */
 struct apr_getopt_option_t {
     /** long option name, or NULL if option has no long name */
     const char *name;
@@ -102,8 +106,8 @@ struct apr_getopt_option_t {
 
 /**
  * Initialize the arguments for parsing by apr_getopt().
- * @param cont The pool to operate on
  * @param os   The options structure created for apr_getopt()
+ * @param cont The pool to operate on
  * @param argc The number of arguments to parse
  * @param argv The array of arguments to parse
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
@@ -120,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
  *               option associated
  * @param optch  The next option character parsed
  * @param optarg The argument following the option character:
- * @tip There are four potential status values on exit. They are:
+ * @return There are four potential status values on exit. They are:
  * <PRE>
  *             APR_EOF      --  No more options to parse
  *             APR_BADCH    --  Found a bad option character
@@ -144,7 +148,7 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
  * @param optch  Receives the value of "optch" from the apr_getopt_option_t
  *               structure corresponding to the next option matched.
  * @param optarg Receives the argument following the option, if any.
- * @tip There are four potential status values on exit.   They are:
+ * @return There are four potential status values on exit.   They are:
  * <PRE>
  *             APR_EOF      --  No more options to parse
  *             APR_BADCH    --  Found a bad option character
