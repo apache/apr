@@ -169,7 +169,7 @@ ap_status_t ap_close(ap_file_t *file)
     return rv;
 }
 
-ap_status_t ap_remove_file(char *path, ap_pool_t *cont)
+ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
 {
     if (unlink(path) == 0) {
         return APR_SUCCESS;

@@ -170,7 +170,7 @@ ap_status_t ap_close(ap_file_t *file);
 
 /*
 
-=head1 ap_status_t ap_remove_file(char *path, ap_pool_t *cont) 
+=head1 ap_status_t ap_remove_file(const char *path, ap_pool_t *cont) 
 
 B<delete the specified file.>
 
@@ -182,7 +182,7 @@ B<NOTE>: If the file is open, it won't be removed until all instances are
 
 =cut
  */
-ap_status_t ap_remove_file(char *path, ap_pool_t *cont);
+ap_status_t ap_remove_file(const char *path, ap_pool_t *cont);
 
 /*
 
