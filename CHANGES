@@ -1,3 +1,8 @@
+Changes for APR 1.1.1
+
+  *) find_apr.m4: Try installed APR before bundled copy if --with-apr not
+     passed to configure.  [Justin Erenkrantz]
+
 Changes for APR 1.1.0
 
   *) Added apr_procattr_user_set and apr_procattr_group_set
