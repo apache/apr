@@ -31,6 +31,8 @@ SUBDIRS=@SUBDIRS@
 
 LIBAPR = @LIBPREFIX@apr.a
 
+TARGET_EXPORTS = apr.exports
+
 #
 # Rules for turning inputs into outputs
 #
@@ -41,7 +43,7 @@ LIBAPR = @LIBPREFIX@apr.a
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-all: Makefile $(LIBAPR)
+all: Makefile $(LIBAPR) delete-exports $(TARGET_EXPORTS)
 
 $(LIBAPR): $(MODULES) subdirs
 	@rm -rf objs
@@ -52,18 +54,21 @@ $(LIBAPR): $(MODULES) subdirs
 	$(RANLIB) $@
 
 clean: subdirs_clean
-	$(RM) -f *.o *.a *.so objs/*.o
+	$(RM) -f *.o *.a *.so objs/*.o apr.exports
 
 depend: subdirs_depend
 
 distclean: subdirs_distclean
-	-$(RM) -f include/apr.h include/apr_private.h include/apr_private.h.in
+	-$(RM) -f include/apr.h include/arch/unix/apr_private.h
 	-$(RM) -f *.o *.a *.so
-	-$(RM) -f config.cache config.status config.log configure apr.exports
+	-$(RM) -f config.cache config.status config.log
 	-$(RM) -f Makefile
 	-$(RM) -f APRVARS
 	-$(RM) -rf objs
 	cd test; $(MAKE) distclean; cd ..
+
+extraclean: distclean
+	-$(RM) -f configure include/arch/unix/apr_private.h.in
 
 subdirs:
 	@for i in $(SUBDIRS); do \
@@ -100,8 +105,18 @@ subdirs_distclean:
 
 install: all
 
-exports:
-	perl ./helpers/make_export.pl -o ./apr.exports include/*.h
+delete-exports:
+	@if test -f $(TARGET_EXPORTS); then \
+	    headers="`find include/*.h -maxdepth 0 -newer $(TARGET_EXPORTS)`" ; \
+	    if test -n "$$headers"; then \
+		echo Found newer headers. Will rebuild $(TARGET_EXPORTS). ; \
+		echo $(RM) -f $(TARGET_EXPORTS) ; \
+		$(RM) -f $(TARGET_EXPORTS) ; \
+	    fi \
+	fi
+
+$(TARGET_EXPORTS):
+	perl ./helpers/make_export.pl -o $@ include/*.h
 
 docs:
 	./helpers/scandoc -i./helpers/default.pl -p./docs/ ./include/*.h
@@ -116,6 +131,6 @@ test: $(LIBAPR)
 	        break; \
 	    fi \
 	done )
-	
+
 # DO NOT REMOVE
 docs: $(INCDIR)/*.h
