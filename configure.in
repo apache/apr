@@ -1112,7 +1112,7 @@ YES_IS_DEFINED
 
 if test "$apr_cv_define_INT64_C" = "yes"; then
     int64_literal='#define APR_INT64_C(val) INT64_C(val)'
-    uint64_literal='#define APR_UINT64_C(val) UINT64_C(val##U)'
+    uint64_literal='#define APR_UINT64_C(val) UINT64_C(val)'
     stdint=1
 else
     stdint=0
