@@ -5,7 +5,7 @@ dnl ##
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(apr_common.m4)
 AC_CONFIG_HEADER(include/apr_private.h)
-AC_CONFIG_AUX_DIR_DEFAULT
+AC_CONFIG_AUX_DIR(helpers)
 
 echo "Configuring APR library"
 OS=`$ac_config_guess`
