@@ -103,6 +103,11 @@ struct apr_threadkey_t {
     apr_pool_t *cntxt;
     pthread_key_t key;
 };
+
+struct apr_thread_once_t {
+    pthread_once_t once;
+};
+
 #endif
 
 struct apr_procattr_t {
