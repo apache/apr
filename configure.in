@@ -223,7 +223,7 @@ MAKEFILE1="Makefile lib/Makefile "
 SUBDIRS="lib "
 for dir in $MODULES
 do
-    if test -d $dir/$OSDIR; then
+    if test -f $dir/$OSDIR/Makefile.in; then
         MAKEFILE2="$MAKEFILE2 $dir/$OSDIR/Makefile "
         SUBDIRS="$SUBDIRS $dir/$OSDIR "
     else
