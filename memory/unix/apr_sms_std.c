@@ -71,13 +71,13 @@ static const char *module_identity = "STANDARD";
  * standard memory system
  */
 
-static void *apr_sms_std_malloc(apr_sms_t *mem_sys,
+static void *apr_sms_std_malloc(apr_sms_t *sms,
                                 apr_size_t size)
 {
     return malloc(size);
 }
 
-static void *apr_sms_std_calloc(apr_sms_t *mem_sys,
+static void *apr_sms_std_calloc(apr_sms_t *sms,
                                 apr_size_t size)
 {
 #if HAVE_CALLOC
@@ -91,50 +91,50 @@ static void *apr_sms_std_calloc(apr_sms_t *mem_sys,
 }
 
 
-static void *apr_sms_std_realloc(apr_sms_t *mem_sys,
+static void *apr_sms_std_realloc(apr_sms_t *sms,
                                  void *mem, apr_size_t size)
 {
     return realloc(mem, size);
 }
 
-static apr_status_t apr_sms_std_free(apr_sms_t *mem_sys,
+static apr_status_t apr_sms_std_free(apr_sms_t *sms,
                                      void *mem)
 {
     free(mem);
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
+APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms)
 {
-    apr_sms_t *new_mem_sys;
+    apr_sms_t *new_sms;
     apr_status_t rv;
 
-    *mem_sys = NULL;
+    *sms = NULL;
     /* We don't have a parent so we allocate the memory
      * for the structure ourselves...
      */
-    new_mem_sys = apr_sms_std_calloc(NULL, sizeof(apr_sms_t));
+    new_sms = apr_sms_std_calloc(NULL, sizeof(apr_sms_t));
 
-    if (!new_mem_sys)
+    if (!new_sms)
         return APR_ENOMEM;
 
-    if ((rv = apr_sms_init(new_mem_sys, NULL)) != APR_SUCCESS)
+    if ((rv = apr_sms_init(new_sms, NULL)) != APR_SUCCESS)
         return rv;
 
-    new_mem_sys->malloc_fn  = apr_sms_std_malloc;
-    new_mem_sys->calloc_fn  = apr_sms_std_calloc;
-    new_mem_sys->realloc_fn = apr_sms_std_realloc;
-    new_mem_sys->free_fn    = apr_sms_std_free;
-    new_mem_sys->identity   = module_identity;
+    new_sms->malloc_fn  = apr_sms_std_malloc;
+    new_sms->calloc_fn  = apr_sms_std_calloc;
+    new_sms->realloc_fn = apr_sms_std_realloc;
+    new_sms->free_fn    = apr_sms_std_free;
+    new_sms->identity   = module_identity;
 
     /* as we're not a tracking memory module, i.e. we don't keep
      * track of our allocations, we don't have apr_sms_reset or
      * apr_sms_destroy functions.
      */
     
-    apr_sms_assert(new_mem_sys);
+    apr_sms_assert(new_sms);
 
-    *mem_sys = new_mem_sys;
+    *sms = new_sms;
     return APR_SUCCESS;
 }
 
