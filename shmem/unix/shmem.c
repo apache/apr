@@ -78,6 +78,12 @@
 #elif APR_USE_SHMEM_SHMGET
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#if !defined(SHM_R)
+#define SHM_R 0400
+#endif
+#if !defined(SHM_W)
+#define SHM_W 0200
+#endif
 #include <sys/file.h>
 #elif APR_USE_SHMEM_BEOS
 #include <kernel/OS.h>
