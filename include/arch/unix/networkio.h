@@ -122,9 +122,8 @@
 struct apr_socket_t {
     apr_pool_t *cntxt;
     int socketdes;
-    struct sockaddr_in *local_addr;
-    struct sockaddr_in *remote_addr;
-    apr_socklen_t addr_len;
+    apr_sockaddr_t *local_addr;
+    apr_sockaddr_t *remote_addr;
     apr_interval_time_t timeout; 
 #ifndef HAVE_POLL
     int connected;

@@ -68,10 +68,11 @@
 apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, 
                          apr_port_t port)
 {
+        /* XXX IPv6 */
     if (which == APR_LOCAL)
-        sock->local_addr->sin_port = htons(port);
+        sock->local_addr->sa.sin.sin_port = htons(port);
     else if (which == APR_REMOTE)
-        sock->remote_addr->sin_port = htons(port);
+        sock->remote_addr->sa.sin.sin_port = htons(port);
     else
         return APR_EINVAL;
     return APR_SUCCESS;
@@ -89,9 +90,10 @@ apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t 
             }
         }
 
-        *port = ntohs(sock->local_addr->sin_port);
+        /* XXX IPv6 */
+        *port = ntohs(sock->local_addr->sa.sin.sin_port);
     } else if (which == APR_REMOTE)
-        *port = ntohs(sock->remote_addr->sin_port);
+        *port = ntohs(sock->remote_addr->sa.sin.sin_port);
     else
         return APR_EINVAL;
     return APR_SUCCESS;
@@ -107,9 +109,11 @@ apr_status_t apr_get_ipaddr(char **addr, apr_interface_e which, apr_socket_t *so
                 return rv;
             }
         }
-        *addr = apr_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sin_addr));
+        /* XXX IPv6 */
+        *addr = apr_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sa.sin.sin_addr));
     } else if (which == APR_REMOTE)
-        *addr = apr_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sin_addr));
+        /* XXX IPv6 */
+        *addr = apr_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sa.sin.sin_addr));
     else 
         return APR_EINVAL;
 
@@ -149,9 +153,11 @@ apr_status_t apr_get_socket_inaddr(apr_in_addr_t *addr, apr_interface_e which,
             }
         }
 
-        *addr = *(apr_in_addr_t*)&sock->local_addr->sin_addr;
+        /* XXX IPv6 */
+        *addr = *(apr_in_addr_t *)&sock->local_addr->sa.sin.sin_addr;
     } else if (which == APR_REMOTE) {
-        *addr = *(apr_in_addr_t*)&sock->remote_addr->sin_addr;
+        /* XXX IPv6 */
+        *addr = *(apr_in_addr_t *)&sock->remote_addr->sa.sin.sin_addr;
     } else {
         return APR_EINVAL;
     }

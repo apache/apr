@@ -208,9 +208,9 @@ apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *
     apr_in_addr_t sa_ptr;
 
     if (which == APR_LOCAL)
-        sa_ptr = sock->local_addr->sin_addr;
+        sa_ptr = sock->local_addr->sa.sin.sin_addr;
     else if (which == APR_REMOTE)
-        sa_ptr = sock->remote_addr->sin_addr;
+        sa_ptr = sock->remote_addr->sa.sin.sin_addr;
     else
         return APR_EINVAL;
 

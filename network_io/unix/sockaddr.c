@@ -75,12 +75,13 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
 apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const char *addr)
 {
     u_long ipaddr;
-    struct sockaddr_in* sa_ptr;
-    
+    struct sockaddr_in *sa_ptr;
+
+    /* XXX IPv6 */
     if (which == APR_LOCAL)
-        sa_ptr = sock->local_addr;
+        sa_ptr = &sock->local_addr->sa.sin;
     else if (which == APR_REMOTE)
-        sa_ptr = sock->remote_addr;
+        sa_ptr = &sock->remote_addr->sa.sin;
     else
         return APR_EINVAL;
     
@@ -100,6 +101,7 @@ apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const cha
 }
 
 #if APR_HAVE_NETINET_IN_H
+/* XXX IPv6 */
 apr_status_t apr_get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
 {
     if (sock->local_port_unknown || sock->local_interface_unknown) {
@@ -110,15 +112,15 @@ apr_status_t apr_get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
         }
     }
 
-    *name = sock->local_addr;
+    *name = &sock->local_addr->sa.sin;
     return APR_SUCCESS;
 }
 
 
-
+/* XXX IPv6 */
 apr_status_t apr_get_remote_name(struct sockaddr_in **name, apr_socket_t *sock)
 {
-    *name = sock->remote_addr;
+    *name = &sock->remote_addr->sa.sin;
     return APR_SUCCESS;
 }
 #endif

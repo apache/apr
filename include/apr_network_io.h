@@ -158,11 +158,14 @@ typedef struct apr_sockaddr_t {
 #endif
     } sa;
     apr_socklen_t sa_len;          /* How big is the sockaddr we're using? */
+    int ipaddr_len;                /* How big is the ip address structure
+                                    * we're using? 
+                                    */
     int addr_str_len;              /* How big should the address buffer be?
                                     * 16 for v4 or 46 for v6
                                     * used in inet_ntop...
                                     */
-     void *ipaddr_ptr;              /* This points to the IP address
+    void *ipaddr_ptr;              /* This points to the IP address
                                     * structure within the appropriate
                                     * sockaddr structure.
                                     */
