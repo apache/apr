@@ -94,5 +94,9 @@ struct apr_procattr_t {
     apr_int32_t detached;
 };
 
+struct apr_thread_once_t {
+    long value;
+};
+
 #endif  /* ! THREAD_PROC_H */
 
