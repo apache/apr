@@ -85,6 +85,10 @@ if [ ! -f $ltfile ]; then
 fi
 cp -f $ltfile build/libtool.m4
 
+# This is just temporary until people's workspaces are cleared -- remove
+# any old aclocal.m4 left over from prior build so it doesn't cause errors.
+rm -f aclocal.m4
+
 #
 # Generate the autoconf header and ./configure
 #
