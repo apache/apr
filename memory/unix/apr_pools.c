@@ -1018,26 +1018,6 @@ APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts)
     return NULL;
 }
 
-/* return TRUE iff a is an ancestor of b
- * NULL is considered an ancestor of all pools
- */
-APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
-{
-    if (a == NULL) {
-	return 1;
-    }
-    while (a->joined) {
-	a = a->joined;
-    }
-    while (b) {
-	if (a == b) {
-	    return 1;
-	}
-	b = b->parent;
-    }
-    return 0;
-}
-
 /*
  * All blocks belonging to sub will be changed to point to p
  * instead.  This is a guarantee by the caller that sub will not
@@ -1063,6 +1043,28 @@ APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
     }
 }
 #endif
+
+/* return TRUE iff a is an ancestor of b
+ * NULL is considered an ancestor of all pools
+ */
+APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
+{
+    if (a == NULL) {
+	return 1;
+    }
+#ifdef APR_POOL_DEBUG
+    while (a->joined) {
+	a = a->joined;
+    }
+#endif
+    while (b) {
+	if (a == b) {
+	    return 1;
+	}
+	b = b->parent;
+    }
+    return 0;
+}
 
 /*****************************************************************
  *
