@@ -115,10 +115,3 @@ CuSuite *testfmt(void)
     return suite;
 }
 
-#ifdef SINGLE_PROG
-CuSuite *getsuite(void)
-{
-    return testfmt();
-}
-#endif
-
