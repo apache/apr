@@ -117,6 +117,9 @@ Changes with APR 1.0
 
 Changes with APR 0.9.5
 
+  *) Fix apr_time_exp_get() for dates in 2038.  
+     [Philip Martin <philip codematters.co.uk>]
+
   *) Various build fixes: thread_rwlock.c on some Solaris platforms
      (PR 22990); filestat.c on ReliantUnix (PR 22990); config.status
      on IRIX (PR 19251).  [Various]
