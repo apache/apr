@@ -114,8 +114,207 @@ static apr_int16_t get_revent(apr_int16_t event)
     return rv;
 }        
 
-#endif /* HAVE_POLL */
+#define SMALL_POLLSET_LIMIT  8
 
+APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
+                      apr_int32_t *nsds, apr_interval_time_t timeout)
+{
+    int i, num_to_poll;
+#ifdef HAVE_VLA
+    /* XXX: I trust that this is a segv when insufficient stack exists? */
+    struct pollfd pollset[num];
+#elif defined(HAVE_ALLOCA)
+    struct pollfd *pollset = alloca(sizeof(struct pollfd) * num);
+    if (!pollset)
+        return APR_ENOMEM;
+#else
+    struct pollfd tmp_pollset[SMALL_POLLSET_LIMIT];
+    struct pollfd *pollset;
+
+    if (num <= SMALL_POLLSET_LIMIT) {
+        pollset = tmp_pollset;
+    }
+    else {
+        /* This does require O(n) to copy the descriptors to the internal
+         * mapping.
+         */
+        pollset = malloc(sizeof(struct pollfd) * num);
+        /* The other option is adding an apr_pool_abort() fn to invoke
+         * the pool's out of memory handler
+         */
+        if (!pollset)
+            return APR_ENOMEM;
+    }
+#endif
+    for (i = 0; i < num; i++) {
+        if (aprset[i].desc_type == APR_POLL_SOCKET) {
+            pollset[i].fd = aprset[i].desc.s->socketdes;
+        }
+        else if (aprset[i].desc_type == APR_POLL_FILE) {
+            pollset[i].fd = aprset[i].desc.f->filedes;
+        }
+        else {
+            break;
+        }
+        pollset[i].events = get_event(aprset[i].reqevents);
+    }
+    num_to_poll = i;
+
+    if (timeout > 0) {
+        timeout /= 1000; /* convert microseconds to milliseconds */
+    }
+
+    i = poll(pollset, num_to_poll, timeout);
+    (*nsds) = i;
+
+    for (i = 0; i < num; i++) {
+        aprset[i].rtnevents = get_revent(pollset[i].revents);
+    }
+    
+#if !defined(HAVE_VLA) && !defined(HAVE_ALLOCA)
+    if (num > SMALL_POLLSET_LIMIT) {
+        free(pollset);
+    }
+#endif
+
+    if ((*nsds) < 0) {
+        return apr_get_netos_error();
+    }
+    if ((*nsds) == 0) {
+        return APR_TIMEUP;
+    }
+    return APR_SUCCESS;
+}
+
+
+#else    /* Use select to mimic poll */
+
+APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *nsds, 
+		    apr_interval_time_t timeout)
+{
+    fd_set readset, writeset, exceptset;
+    int rv, i;
+    int maxfd = -1;
+    struct timeval tv, *tvptr;
+#ifdef NETWARE
+    apr_datatype_e set_type = APR_NO_DESC;
+#endif
+
+    if (timeout < 0) {
+        tvptr = NULL;
+    }
+    else {
+        tv.tv_sec = (long)apr_time_sec(timeout);
+        tv.tv_usec = (long)apr_time_usec(timeout);
+        tvptr = &tv;
+    }
+
+    FD_ZERO(&readset);
+    FD_ZERO(&writeset);
+    FD_ZERO(&exceptset);
+
+    for (i = 0; i < num; i++) {
+        apr_os_sock_t fd;
+
+        aprset[i].rtnevents = 0;
+
+        if (aprset[i].desc_type == APR_POLL_SOCKET) {
+#ifdef NETWARE
+            if (HAS_PIPES(set_type)) {
+                return APR_EBADF;
+            }
+            else {
+                set_type = APR_POLL_SOCKET;
+            }
+#endif
+            fd = aprset[i].desc.s->socketdes;
+        }
+        else if (aprset[i].desc_type == APR_POLL_FILE) {
+#if !APR_FILES_AS_SOCKETS
+            return APR_EBADF;
+#else
+#ifdef NETWARE
+            if (aprset[i].desc.f->is_pipe && !HAS_SOCKETS(set_type)) {
+                set_type = APR_POLL_FILE;
+            }
+            else
+                return APR_EBADF;
+#endif /* NETWARE */
+
+            fd = aprset[i].desc.f->filedes;
+
+#endif /* APR_FILES_AS_SOCKETS */
+        }
+        else {
+            break;
+        }
+        if (aprset[i].reqevents & APR_POLLIN) {
+            FD_SET(fd, &readset);
+        }
+        if (aprset[i].reqevents & APR_POLLOUT) {
+            FD_SET(fd, &writeset);
+        }
+        if (aprset[i].reqevents & 
+            (APR_POLLPRI | APR_POLLERR | APR_POLLHUP | APR_POLLNVAL)) {
+            FD_SET(fd, &exceptset);
+        }
+        if ((int)fd > maxfd) {
+            maxfd = (int)fd;
+        }
+    }
+
+#ifdef NETWARE
+    if (HAS_PIPES(set_type)) {
+        rv = pipe_select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
+    }
+    else {
+#endif
+
+    rv = select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
+
+#ifdef NETWARE
+    }
+#endif
+
+    (*nsds) = rv;
+    if ((*nsds) == 0) {
+        return APR_TIMEUP;
+    }
+    if ((*nsds) < 0) {
+        return apr_get_netos_error();
+    }
+
+    for (i = 0; i < num; i++) {
+        apr_os_sock_t fd;
+
+        if (aprset[i].desc_type == APR_POLL_SOCKET) {
+            fd = aprset[i].desc.s->socketdes;
+        }
+        else if (aprset[i].desc_type == APR_POLL_FILE) {
+#if !APR_FILES_AS_SOCKETS
+            return APR_EBADF;
+#else
+            fd = aprset[i].desc.f->filedes;
+#endif
+        }
+        else {
+            break;
+        }
+        if (FD_ISSET(fd, &readset)) {
+            aprset[i].rtnevents |= APR_POLLIN;
+        }
+        if (FD_ISSET(fd, &writeset)) {
+            aprset[i].rtnevents |= APR_POLLOUT;
+        }
+        if (FD_ISSET(fd, &exceptset)) {
+            aprset[i].rtnevents |= APR_POLLERR;
+        }
+    }
+
+    return APR_SUCCESS;
+}
+
+#endif 
 
 struct apr_pollset_t {
     apr_uint32_t nelts;
