@@ -474,12 +474,12 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
         return errno;
     }
     if ((status = waitpid(proc->pid, NULL, WUNTRACED | WNOHANG)) > 0) {
-            return APR_CHILD_DONE;
-        }
-        else if (status == 0) {
-            return APR_CHILD_NOTDONE;
-        }
-        return errno;
+        return APR_CHILD_DONE;
+    }
+    else if (status == 0) {
+        return APR_CHILD_NOTDONE;
+    }
+    return errno;
 } 
 
 /* ***APRDOC********************************************************
