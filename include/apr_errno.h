@@ -87,6 +87,8 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
  * APR_OS_START_STATUS is where the APR specific status codes should start.
  * APR_OS_START_USEERR are reserved for applications that use APR that
  *     layer their own error codes along with APR's.
+ * APR_OS_START_CANONERR is where APR versions of errno values are defined
+ *     on systems which don't have the corresponding errno.
  * APR_OS_START_SYSERR should be used for system error values on 
  *     each platform.  
  */
