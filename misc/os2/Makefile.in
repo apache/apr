@@ -43,14 +43,15 @@ $(LIB): $(OBJS)
 depend:
 	cp Makefile.in Makefile.in.bak \
 	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
+	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c | sed -e "s%\\\\\(.\)%/\\1%g" >> Makefile.new \
 	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
+                   -e '1,$$s: $(INCDIR1)/: $$(INCDIR1)/:g' \
 	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
 		> Makefile.in \
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-start.o: start.c ../../include/apr_general.h \
- ../../include/apr_errno.h ../include/apr_pools.h \
- ../include/apr_lib.h ../include/apr_config.h \
- ../include/hsregex.h
+start.o: start.c $(INCDIR1)/apr_general.h \
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
+ $(INCDIR)/apr_pools.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_file_io.h $(INCDIR1)/hsregex.h misc.h
