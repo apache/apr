@@ -125,7 +125,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     /* Avoid the Linux problem where at end-of-directory thedir->entry
      * is set to NULL, but ret = APR_SUCCESS.
      */
-    if(!ret || thedir->entry != retent)
+    if(!ret && thedir->entry != retent)
         ret = APR_ENOENT;
 #else
     thedir->entry = readdir(thedir->dirstruct);
