@@ -1,5 +1,9 @@
 Changes with APR 0.9.4
 
+  *) apr_proc_create() on Unix: Make the APR_SHELLCMD mode work
+     when there is more than one program argument passed in.
+     [Jeff Trawick]
+
   *) Add --cc and --cpp flags to apr-config.  [Jeff Trawick]
 
   *) Don't segfault trying to close a file in error paths of flock
