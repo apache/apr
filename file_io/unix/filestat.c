@@ -94,13 +94,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
     if (finfo == NULL || thefile == NULL)
         return APR_EBADARG;
 
-    if (thefile->filehand == NULL) {
-        rv = fstat(thefile->filedes, &info);
-    } else {
-        rv = stat(thefile->fname, &info);
-    }
-
-    if (rv == 0) {
+    if ((rv = fstat(thefile->filedes, &info)) == 0) {
         finfo->protection = info.st_mode;
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;

@@ -60,16 +60,10 @@ ap_status_t file_cleanup(void *thefile)
     ap_file_t *file = thefile;
     int rv;
 
-    if (file->buffered) {
-        rv = fclose(file->filehand);
-    }
-    else {
-        rv = close(file->filedes);
-    }
+    rv = close(file->filedes);
 
     if (rv == 0) {
         file->filedes = -1;
-        file->filehand = NULL;
         return APR_SUCCESS;
     }
     else {
@@ -115,31 +109,20 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     (*new)->cntxt = cont;
     (*new)->oflags = oflags;
     (*new)->filedes = -1;
-    (*new)->filehand = NULL;
-    (*new)->ungetchar = -1;
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
-        buf_oflags = ap_pstrdup(cont, "r+");
         oflags = O_RDWR;
     }
     else if (flag & APR_READ) {
-        buf_oflags = ap_pstrdup(cont, "r");
         oflags = O_RDONLY;
     }
     else if (flag & APR_WRITE) {
-        buf_oflags = ap_pstrdup(cont, "w");
         oflags = O_WRONLY;
     }
     else {
         return APR_EACCES; 
     }
 
-    if (flag & APR_BUFFERED) {
-        (*new)->buffered = TRUE;
-    }
-    else {
-        (*new)->buffered = FALSE;
-    }
     (*new)->fname = ap_pstrdup(cont, fname);
 
     if (flag & APR_CREATE) {
@@ -153,26 +136,20 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     }   
 
     if (flag & APR_APPEND) {
-        buf_oflags[0] = 'a';
         oflags |= O_APPEND;
     }
     if (flag & APR_TRUNCATE) {
         oflags |= O_TRUNC;
     }
     
-    if ((*new)->buffered) {
-        (*new)->filehand = fopen(fname, buf_oflags);
+    if (perm == APR_OS_DEFAULT) {
+        (*new)->filedes = open(fname, oflags, 0777);
     }
-    else { 
-        if (perm == APR_OS_DEFAULT) {
-            (*new)->filedes = open(fname, oflags, 0777);
-        }
-        else {
-            (*new)->filedes = open(fname, oflags, get_fileperms(perm));
-        }    
-    }
+    else {
+        (*new)->filedes = open(fname, oflags, get_fileperms(perm));
+    }    
 
-    if ((*new)->filedes < 0 && (*new)->filehand == NULL) {
+    if ((*new)->filedes < 0) {
        (*new)->filedes = -1;
        (*new)->eof_hit = 1;
        return errno;
@@ -243,12 +220,7 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
         return APR_ENOFILE;
     }
 
-    if (file->buffered) {
-        *thefile = fileno(file->filehand);
-    }
-    else {
-        *thefile = file->filedes;
-    }
+    *thefile = file->filedes;
     return APR_SUCCESS;
 }
 
@@ -274,11 +246,6 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
         (*file) = ap_pcalloc(cont, sizeof(ap_file_t));
         (*file)->cntxt = cont;
     }
-    /* if we are putting in a new file descriptor, then we don't really
-     * have any of this information.
-     * We don't allow put'ing buffered files, so we can set that value.
-     */
-    (*file)->buffered = 0;
     (*file)->eof_hit = 0;
     (*file)->timeout = -1;
     (*file)->filedes = *dafile;
@@ -296,12 +263,6 @@ ap_status_t ap_eof(ap_file_t *fptr)
     if (fptr == NULL)
         return APR_EBADARG;
 
-    if (fptr->buffered) {
-        if (feof(fptr->filehand) == 0) {
-            return APR_SUCCESS;
-        }
-        return APR_EOF;
-    }
     if (fptr->eof_hit == 1) {
         return APR_EOF;
     }
@@ -316,12 +277,11 @@ ap_status_t ap_eof(ap_file_t *fptr)
  */
 ap_status_t ap_ferror(ap_file_t *fptr)
 {
+/* Thist function should be removed ASAP.  It is next on my list once
+ * I am sure nobody is using it.
+ */
     if (fptr == NULL)
         return APR_EBADARG;
-
-    if (ferror(fptr->filehand)) {
-        return (-1);
-    }
 
     return APR_SUCCESS;
 }   
@@ -344,8 +304,6 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
     (*thefile)->filedes = STDERR_FILENO;
     (*thefile)->cntxt = cont;
     (*thefile)->fname = NULL;
-    (*thefile)->filehand = NULL;
-    (*thefile)->buffered = 0;
     (*thefile)->eof_hit = 0;
 
     return APR_SUCCESS;

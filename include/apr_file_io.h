@@ -76,8 +76,7 @@ typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 #define APR_APPEND     8           /* Append to the end of the file */
 #define APR_TRUNCATE   16          /* Open the file and truncate to 0 length */
 #define APR_BINARY     32          /* Open the file in binary mode */
-#define APR_BUFFERED   64          /* Buffer the data when reading or writing */
-#define APR_EXCL       128         /* Open should fail if APR_CREATE and file
+#define APR_EXCL       64          /* Open should fail if APR_CREATE and file
 				    exists. */
 #define APR_DELONCLOSE 256         /* Delete the file after close */
 

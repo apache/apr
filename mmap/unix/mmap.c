@@ -90,7 +90,7 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset,
 {
     caddr_t mm;
    
-    if (file == NULL || file->buffered || file->filedes == -1)
+    if (file == NULL || file->filedes == -1)
         return APR_EBADF;
 
     (*new) = (ap_mmap_t *)ap_palloc(cont, sizeof(ap_mmap_t));
