@@ -261,37 +261,6 @@ int main(void) {
   fi
 ])
 
-AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
-  echo "configuring package in $1 now"
-  ac_popdir=`pwd`
-  ac_abs_srcdir=`(cd $srcdir/$1 && pwd)`
-  apr_config_subdirs="$1"
-  cd $1
-
-changequote(, )dnl
-      # A "../" for each directory in /$config_subdirs.
-      ac_dots=`echo $apr_config_subdirs|sed -e 's%^\./%%' -e 's%[^/]$%&/%' -e 's%[^/]*/%../%g'`
-changequote([, ])dnl
-
-  # Make the cache file name correct relative to the subdirectory.
-  case "$cache_file" in
-  /*) ac_sub_cache_file=$cache_file ;;
-  *) # Relative path.
-    ac_sub_cache_file="$ac_dots$cache_file" ;;
-  esac
-
-  # The eval makes quoting arguments work.
- 
-  if eval $ac_abs_srcdir/configure $ac_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir
-  then :
-    echo "$1 configured properly"
-  else
-    echo "configure failed for $1"
-  fi
-
-  cd $ac_popdir
-])
-
 AC_DEFUN(APR_PREPARE_MM_DIR,[
 dnl #----------------------------- Prepare mm directory for VPATH support
 if test -n "$USE_MM" && test -n "$USE_VPATH"; then
@@ -305,4 +274,5 @@ fi
 ])
 
 sinclude(threads.m4)
+sinclude(apr_common.m4)
 sinclude(hints.m4)
