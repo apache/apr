@@ -771,14 +771,14 @@ APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
  * Leave a Multicast Group.  All arguments must be the same as
  * apr_mcast_join.
  * @param sock The socket to leave a multicast group
- * @param leave The address of the multicast group to leave
+ * @param addr The address of the multicast group to leave
  * @param iface Address of the interface to use.  If NULL is passed, the 
  *              default multicast interface will be used. (OS Dependent)
  * @param source Source Address to accept transmissions from (non-NULL 
  *               implies Source-Specific Multicast)
  */
 APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
-                                          apr_sockaddr_t *leave,
+                                          apr_sockaddr_t *addr,
                                           apr_sockaddr_t *iface,
                                           apr_sockaddr_t *source);
 
