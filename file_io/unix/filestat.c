@@ -61,7 +61,7 @@
 /* ***APRDOC********************************************************
  * ap_status_t ap_getfileinfo(ap_file_t *)
  *    get the specified file's stats..
- * arg 1) The full to get information about. 
+ * arg 1) The file to get information about. 
  */ 
 ap_status_t ap_getfileinfo(struct file_t *thefile)
 {
