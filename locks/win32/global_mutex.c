@@ -53,14 +53,17 @@
  */
 
 #include "apr.h"
+#include "apr_lock.h"
 #include "apr_strings.h"
+#include "apr_global_mutex.h"
+#include "proc_mutex.h"
 
 APR_DECLARE(apr_status_t) apr_global_mutex_create(apr_global_mutex_t **mutex,
                                                   const char *fname,
                                                   apr_lockmech_e mech,
                                                   apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    return apr_proc_mutex_create((apr_proc_mutex_t **) mutex, fname, mech, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_child_init(
@@ -68,28 +71,32 @@ APR_DECLARE(apr_status_t) apr_global_mutex_child_init(
                               const char *fname,
                               apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    return apr_proc_mutex_child_init((apr_proc_mutex_t**) mutex, fname, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_lock(apr_global_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    return apr_proc_mutex_lock((apr_proc_mutex_t*) mutex);
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    return apr_proc_mutex_trylock((apr_proc_mutex_t* )mutex);
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    return apr_proc_mutex_unlock((apr_proc_mutex_t*) mutex);
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    return apr_proc_mutex_destroy((apr_proc_mutex_t*) mutex);
 }
 
-APR_POOL_IMPLEMENT_ACCESSOR(global_mutex)
+APR_DECLARE(apr_pool_t*) apr_global_mutex_pool_get(const apr_global_mutex_t *mutex)
+{
+    return apr_proc_mutex_pool_get((apr_proc_mutex_t*) mutex);
+}
+
 

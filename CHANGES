@@ -1,4 +1,6 @@
 Changes with APR b1
+  *) Implement apr_global_lock_foo() on Win32
+     [Bill Stoddard]
 
   *) Fix select() argument call when waiting for IO.  PR 9674.
      [David MacKenzie <djm@pix.net>]
