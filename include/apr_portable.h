@@ -164,14 +164,17 @@ typedef void*                 apr_os_shm_t;
 /** Basic OS process mutex structure. */
 struct apr_os_proc_mutex_t {
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+    /** Value used for SYS V Semaphore, FCNTL and FLOCK serialization */
     int crossproc;
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
+    /** Value used for PTHREAD serialization */
     pthread_mutex_t *pthread_interproc;
 #endif
 #if APR_HAS_THREADS
     /* If no threads, no need for thread locks */
 #if APR_USE_PTHREAD_SERIALIZE
+    /** This value is currently unused within APR and Apache */ 
     pthread_mutex_t *intraproc;
 #endif
 #endif
