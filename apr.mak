@@ -101,7 +101,7 @@ RSC=rc.exe
 CPP=cl.exe
 CPP_PROJ=/nologo /MD /W3 /O2 /I "./include" /I "./include/arch" /I\
  "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D\
- "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\\"\
+ "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\\"\
  /Fd"$(INTDIR)\apr" /FD /c 
 CPP_OBJS=.\LibR/
 CPP_SBRS=.
@@ -273,7 +273,7 @@ RSC=rc.exe
 CPP=cl.exe
 CPP_PROJ=/nologo /MDd /W3 /GX /Zi /Od /I "./include" /I "./include/arch" /I\
  "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D\
- "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\\"\
+ "APR_DECLARE_STATIC" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\\"\
  /Fd"$(INTDIR)\apr" /FD /c 
 CPP_OBJS=.\LibD/
 CPP_SBRS=.
