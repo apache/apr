@@ -92,61 +92,74 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
                               ap_int32_t out, ap_int32_t err)
 {
     ap_status_t stat;
+    BOOLEAN bAsyncRead, bAsyncWrite;
     if (in) {
-        if ((stat = ap_create_pipe(&attr->child_in, &attr->parent_in, 
-                                   attr->cntxt)) != APR_SUCCESS) {
-            return stat;
-        }
         switch (in) {
         case APR_FULL_BLOCK:
+            bAsyncRead = bAsyncWrite = FALSE;
             break;
         case APR_PARENT_BLOCK:
-            ap_set_pipe_timeout(attr->child_in, 0);
+            bAsyncRead = FALSE;
+            bAsyncWrite = TRUE;
             break;
         case APR_CHILD_BLOCK:
-            ap_set_pipe_timeout(attr->parent_in, 0);
+            bAsyncRead = TRUE;
+            bAsyncWrite = FALSE;
             break;
         default:
-            ap_set_pipe_timeout(attr->child_in, 0);
-            ap_set_pipe_timeout(attr->parent_in, 0);
+            bAsyncRead = TRUE;
+            bAsyncWrite = TRUE;
+        }        
+        if ((stat = ap_create_nt_pipe(&attr->child_in, &attr->parent_in, 
+                                      bAsyncRead, bAsyncWrite,
+                                      attr->cntxt)) != APR_SUCCESS) {
+            return stat;
         }
     }
     if (out) {
-        if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out, 
-                                   attr->cntxt)) != APR_SUCCESS) {
-            return stat;
-        }
         switch (out) {
         case APR_FULL_BLOCK:
+            bAsyncRead = bAsyncWrite = FALSE;
             break;
         case APR_PARENT_BLOCK:
-            ap_set_pipe_timeout(attr->child_out, 0);
+            bAsyncRead = FALSE;
+            bAsyncWrite = TRUE;
             break;
         case APR_CHILD_BLOCK:
-            ap_set_pipe_timeout(attr->parent_out, 0);
+            bAsyncRead = TRUE;
+            bAsyncWrite = FALSE;
             break;
         default:
-            ap_set_pipe_timeout(attr->child_out, 0);
-            ap_set_pipe_timeout(attr->parent_out, 0);
+            bAsyncRead = TRUE;
+            bAsyncWrite = TRUE;
+        }        
+        if ((stat = ap_create_nt_pipe(&attr->parent_out, &attr->child_out,
+                                      bAsyncRead, bAsyncWrite,
+                                      attr->cntxt)) != APR_SUCCESS) {
+            return stat;
         }
     }
     if (err) {
-        if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err, 
-                                   attr->cntxt)) != APR_SUCCESS) {
-            return stat;
-        }
         switch (err) {
         case APR_FULL_BLOCK:
+            bAsyncRead = bAsyncWrite = FALSE;
             break;
         case APR_PARENT_BLOCK:
-            ap_set_pipe_timeout(attr->child_err, 0);
+            bAsyncRead = FALSE;
+            bAsyncWrite = TRUE;
             break;
         case APR_CHILD_BLOCK:
-            ap_set_pipe_timeout(attr->parent_err, 0);
+            bAsyncRead = TRUE;
+            bAsyncWrite = FALSE;
             break;
         default:
-            ap_set_pipe_timeout(attr->child_err, 0);
-            ap_set_pipe_timeout(attr->parent_err, 0);
+            bAsyncRead = TRUE;
+            bAsyncWrite = TRUE;
+        }        
+        if ((stat = ap_create_nt_pipe(&attr->parent_err, &attr->child_err,
+                                      bAsyncRead, bAsyncWrite,
+                                      attr->cntxt)) != APR_SUCCESS) {
+            return stat;
         }
     } 
     return APR_SUCCESS;
@@ -337,15 +350,15 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     }
     else {
         if (attr->child_in) {
-            ap_close(attr->parent_in);
+            CloseHandle(attr->parent_in->filehand);
             attr->parent_in->filehand = hParentindup;
         }
         if (attr->child_out) {
-            ap_close(attr->parent_out);
+            CloseHandle(attr->parent_out->filehand);
             attr->parent_out->filehand = hParentoutdup;
         }
         if (attr->child_err) {
-            ap_close(attr->parent_err);
+            CloseHandle(attr->parent_err->filehand);
             attr->parent_err->filehand = hParenterrdup;
         }
     }

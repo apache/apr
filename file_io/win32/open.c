@@ -67,10 +67,11 @@
 ap_status_t file_cleanup(void *thefile)
 {
     ap_file_t *file = thefile;
-    if (!CloseHandle(file->filehand)) {
-        return GetLastError();
-    }
+    CloseHandle(file->filehand);
     file->filehand = INVALID_HANDLE_VALUE;
+    if (file->pOverlapped) {
+        CloseHandle(file->pOverlapped->hEvent);
+    }
     return APR_SUCCESS;
 }
 
