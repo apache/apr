@@ -69,7 +69,5 @@ struct apr_lock_t {
     TIB *tib;
 };
 
-void setup_lock();
-
 #endif  /* LOCKS_H */
 
