@@ -198,7 +198,8 @@ APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
  * was created in
  * @param hash the hash table in question
  */
-APR_DECLARE(apr_pool_t *) apr_hash_pool_get(apr_hash_t *hash);
+APR_POOL_DECLARE_ACCESSOR(hash);
+
 /** @} */
 #ifdef __cplusplus
 }
