@@ -66,7 +66,9 @@
 struct apr_global_mutex_t {
     apr_pool_t *pool;
     apr_proc_mutex_t *proc_mutex;
+#if APR_HAS_THREADS
     apr_thread_mutex_t *thread_mutex;
+#endif /* APR_HAS_THREADS */
 };
 
 #endif  /* GLOBAL_MUTEX_H */
