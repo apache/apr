@@ -204,7 +204,7 @@ ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *
 ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
-        return ap_get_userdata(&data, lock->cntxt, key);
+        return ap_get_userdata(&data, key, lock->cntxt);
     }
     else {
         data = NULL;
@@ -225,7 +225,7 @@ ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {
     if (lock != NULL) {
-        return ap_set_userdata(lock->cntxt, data, key, cleanup);
+        return ap_set_userdata(data, key, cleanup, lock->cntxt);
     }
     else {
         data = NULL;

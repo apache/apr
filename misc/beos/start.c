@@ -99,8 +99,9 @@ ap_status_t ap_destroy_context(ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
-                            ap_status_t (*cleanup) (void *))
+ap_status_t ap_set_userdata(void *data, char *key,
+                            ap_status_t (*cleanup) (void *),
+                            struct context_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
     if (cont) { 
@@ -130,7 +131,7 @@ ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
     return APR_ENOCONT;
 }
 
-ap_status_t ap_get_userdata(void **data, struct context_t *cont, char *key)
+ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 {
     datastruct *dptr = NULL;
     if (cont) { 

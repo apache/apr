@@ -228,9 +228,9 @@ typedef int               ap_signum_t;
 ap_status_t ap_create_context(ap_context_t **, ap_context_t *);
 ap_status_t ap_destroy_context(struct context_t *cont);
 ap_status_t ap_exit(ap_context_t *);
-ap_status_t ap_set_userdata(ap_context_t *, void *, char *, 
-                            ap_status_t (*cleanup) (void *));
-ap_status_t ap_get_userdata(void **, ap_context_t *, char *);
+ap_status_t ap_set_userdata(void *, char *, 
+                            ap_status_t (*cleanup) (void *), ap_context_t *);
+ap_status_t ap_get_userdata(void **, char *, ap_context_t *);
 ap_status_t ap_initialize(void);
 
 ap_status_t ap_create_signal(ap_context_t *, ap_signum_t);

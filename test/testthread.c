@@ -136,7 +136,7 @@ int main()
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Initializing the lock......."); 
-    s1 = ap_create_lock(context, APR_MUTEX, APR_INTRAPROCESS, "lock.file", &thread_lock); 
+    s1 = ap_create_lock(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
     if (s1 != APR_SUCCESS) {
         fprintf(stderr, "Could not create lock\n");
         exit(-1);

@@ -267,7 +267,7 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 ap_status_t ap_get_socketdata(struct socket_t *socket, char *key, void *data)
 {
     if (socket != NULL) {
-        return ap_get_userdata(&data, socket->cntxt, key);
+        return ap_get_userdata(&data, key, socket->cntxt);
     }
     else {
         data = NULL;
@@ -279,7 +279,7 @@ ap_status_t ap_set_socketdata(struct socket_t *socket, void *data, char *key,
                               ap_status_t (*cleanup) (void *))
 {
     if (socket != NULL) {
-        return ap_set_userdata(socket->cntxt, data, key, cleanup);
+        return ap_set_userdata(data, key, cleanup, socket->cntxt);
     }
     else {
         data = NULL;

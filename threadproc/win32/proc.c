@@ -341,7 +341,7 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
 ap_status_t ap_get_procdata(struct proc_t *proc, char *key, void *data)
 {
     if (proc != NULL) {
-        return ap_get_userdata(&data, proc->cntxt, key);
+        return ap_get_userdata(&data, key, proc->cntxt);
     }
     else {
         data = NULL;
@@ -353,7 +353,7 @@ ap_status_t ap_set_procdata(struct proc_t *proc, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {
     if (proc != NULL) {
-        return ap_set_userdata(proc->cntxt, data, key, cleanup);
+        return ap_set_userdata(data, key, cleanup, proc->cntxt);
     }
     else {
         data = NULL;
