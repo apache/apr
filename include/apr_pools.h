@@ -107,6 +107,7 @@ extern "C" {
  * @package APR memory allocation
  */
 typedef struct apr_pool_t apr_pool_t;
+typedef struct apr_hash_t apr_hash_t;
 
 /** The memory allocation structure
  */
@@ -143,7 +144,7 @@ struct apr_pool_t {
     int (*apr_abort)(int retcode);
     /** A place to hand user data associated with this pool 
      *  @defvar datastruct *prog_data */
-    struct datastruct *prog_data;
+    apr_hash_t *prog_data;
 };
 
 /* pools have nested lifetimes -- sub_pools are destroyed when the
