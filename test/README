@@ -59,23 +59,6 @@ To run it, run:
 
     ./testall
 
-Caveats
--------
-
-Currently, some tests are known to fail in certain circumstances:
-
- * 'testpoll' opens 64 sockets concurrently; ensure that resource
-limits are high enough to allow this (using ulimit or limit); for
-instance, Solaris <=2.7 and HP-UX 11.00 both set the limit to <=64 by
-default
-
- * 'testipsub' will tickle the Solaris 8 getaddrinfo() IPv6
-bug, causing the test to hang.  Configure with --disable-ipv6 if using
-an unpatched Solaris 8 installation.
-
- * The 'testdso' tests will not work if configured with
---disable-shared since the loadable modules cannot be built.
-
 Running individual tests
 ---------------------------------
 
@@ -97,6 +80,8 @@ All APR Tests:
     Test Time:  ............
 
 16 tests run:  16 passed, 0 failed, 0 not implemented.
+
+Known test failures are documented in ../STATUS.
 
 There are a couple of things to look at with this.  First, if you look at the
 first function in this document, you should notice that the string passed to
