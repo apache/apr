@@ -108,6 +108,8 @@ AC_PROG_LIBTOOL
     if test "x$LTFLAGS" = "x"; then
         LTFLAGS='--silent'
     fi
+    dnl get libtool's setting of shlibpath_var
+    eval `grep "^shlibpath_var=[[A-Z_]]\+$" $srcdir/libtool`
     ;;
 esac
 
@@ -133,6 +135,7 @@ AC_SUBST(link)
 AC_SUBST(so_ext)
 AC_SUBST(lib_target)
 AC_SUBST(export_lib_target)
+AC_SUBST(shlibpath_var)
 AC_SUBST(LTFLAGS)
 AC_SUBST(LT_LDFLAGS)
 
@@ -1368,7 +1371,6 @@ AC_SUBST(OSDIR)
 AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
-AC_SUBST(shlibpath_var)
 
 echo "${nl}Construct Makefiles and header files."
 MAKEFILE1="Makefile strings/Makefile passwd/Makefile tables/Makefile build/Makefile"
