@@ -28,7 +28,7 @@
 #include "apr_portable.h"
 #include "apr_proc_mutex.h"
 #include "apr_ring.h"
-/*#include "apr_shmem.h"*/
+#include "apr_shm.h"
 #include "apr_signal.h"
 #include "apr_strings.h"
 #include "apr_tables.h"
@@ -61,6 +61,7 @@
 #include "apr_md4.h"
 #include "apr_optional.h"
 #include "apr_optional_hooks.h"
+#include "apr_rmm.h"
 #include "apr_sdbm.h"
 #include "apr_sha1.h"
 #include "apr_uri.h"
