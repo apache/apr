@@ -100,7 +100,7 @@ struct apr_hash_entry_t {
 struct apr_hash_t {
     apr_pool_t		*pool;
     apr_hash_entry_t   **array;
-    apr_size_t		 count, max;
+    int                  count, max;
 };
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
 
@@ -114,7 +114,7 @@ struct apr_hash_t {
 struct apr_hash_index_t {
     apr_hash_t	       *ht;
     apr_hash_entry_t   *this, *next;
-    apr_size_t		index;
+    int                 index;
 };
 
 
@@ -122,7 +122,7 @@ struct apr_hash_index_t {
  * Hash creation functions.
  */
 
-static apr_hash_entry_t **alloc_array(apr_hash_t *ht, apr_size_t max)
+static apr_hash_entry_t **alloc_array(apr_hash_t *ht, int max)
 {
    return apr_pcalloc(ht->pool, sizeof(*ht->array) * (max + 1));
 }
@@ -185,7 +185,7 @@ static void expand_array(apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
     apr_hash_entry_t **new_array;
-    apr_size_t new_max;
+    int new_max;
     int i;
 
     new_max = ht->max * 2 + 1;
@@ -315,7 +315,7 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
     /* else key not present and val==NULL */
 }
 
-APR_DECLARE(apr_size_t) apr_hash_count(apr_hash_t *ht)
+APR_DECLARE(int) apr_hash_count(apr_hash_t *ht)
 {
     return ht->count;
 }

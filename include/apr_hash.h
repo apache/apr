@@ -177,9 +177,9 @@ APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key,
  * Get the number of key/value pairs in the hash table.
  * @param ht The hash table
  * @return The number of key/value pairs in the hash table.
- * @deffunc void apr_hash_count(apr_hash_t *ht, apr_size_t *count);
+ * @deffunc int apr_hash_count(apr_hash_t *ht);
  */
-APR_DECLARE(apr_size_t) apr_hash_count(apr_hash_t *ht);
+APR_DECLARE(int) apr_hash_count(apr_hash_t *ht);
 
 
 #ifdef __cplusplus

@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/02/18 00:32:16 $]
+Last modified at [$Date: 2001/03/07 17:57:11 $]
 
 Release:
 
@@ -104,10 +104,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
              get around to it soonish...
 
     * toss the per-Makefile setup of INCLUDES; shift to rules.mk.in
-
-    * Change the return type of apr_hash_count() to some counter type 
-      (like "int") instead of a size type (apr_size_t).  Jeff will
-      do this Real Soon Now (so he says on 20010121).
 
     * add the rest of the pool accessor declare/impl macros.
       Status: Greg volunteers
