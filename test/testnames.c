@@ -70,6 +70,21 @@ static void closeapr(void)
     apr_terminate();
 }
 
+static void root_result(char *path)
+{
+    apr_status_t status;
+    char errmsg[256];
+    char *root = NULL;
+    status = apr_filepath_root(&root, &path, context);
+    apr_strerror(status, errmsg, sizeof(errmsg));
+    if (root)
+        fprintf(stderr, "\tRoot \"%s\" Path \"%s\" (%s)\n", 
+                root, path, errmsg);
+    else
+        fprintf(stderr, "\tPath \"%s\" Error (%s)\n", 
+                path, errmsg);
+}
+
 static void mergeresult(char *rootpath, char *addpath, apr_int32_t mergetype, char *tdesc)
 {
     char errmsg[256];
@@ -82,12 +97,6 @@ static void mergeresult(char *rootpath, char *addpath, apr_int32_t mergetype, ch
     apr_strerror(status, errmsg, sizeof(errmsg));
     if (dstpath) {
         fprintf(stderr, "%s result for %s\n\tResult Path \"%s\"\n", errmsg, tdesc, dstpath);
-        srcpath = dstpath;
-        status = apr_filepath_root(&dstpath, &srcpath, context);
-        if (srcpath != dstpath) {
-            apr_strerror(status, errmsg, sizeof(errmsg));
-            fprintf(stderr, "\tRoot of \"%s\" (%s)\n", dstpath, errmsg);
-        }
     }
     else {
         fprintf(stderr, "%s result for %s\n", errmsg, tdesc);
@@ -132,6 +141,8 @@ int main(void)
         merge_result(rootpath, addpath, APR_FILEPATH_SECUREROOT);
         merge_result(rootpath, addpath, APR_FILEPATH_NOTABSOLUTE);
         merge_result(rootpath, addpath, APR_FILEPATH_NOTRELATIVE);
+        root_result(rootpath);
+        root_result(addpath);
     }
     return (0);
 }
