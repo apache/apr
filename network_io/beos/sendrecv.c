@@ -54,7 +54,7 @@
 
 #include "networkio.h"
 
-ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
+ap_status_t ap_send(struct ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
 	
@@ -99,7 +99,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
+ap_status_t ap_recv(struct ap_socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ap_ssize_t rv;
    

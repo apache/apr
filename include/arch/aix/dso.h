@@ -65,7 +65,7 @@ void *dlsym(void *handle, const char *symbol);
 const char *dlerror(void);
 int dlclose(void *handle);
 
-struct dso_handle_t {
+struct ap_dso_handle_t {
     ap_context_t  *cont;
     void          *handle;
 };

@@ -57,7 +57,7 @@
 
 static ap_status_t dir_cleanup(void *thedir)
 {
-    struct dir_t *dir = thedir;
+    struct ap_dir_t *dir = thedir;
     if (closedir(dir->dirstruct) == 0) {
         return APR_SUCCESS;
     }
@@ -73,14 +73,14 @@ static ap_status_t dir_cleanup(void *thedir)
  * arg 2) The full path to the directory (use / on all systems)
  * arg 3) The context to use.
  */                        
-ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
+ap_status_t ap_opendir(struct ap_dir_t **new, const char *dirname, ap_context_t *cont)
 {
     if (new == NULL)
         return APR_EBADARG;
     if (cont == NULL)
         return APR_ENOCONT;
 
-    (*new) = (struct dir_t *)ap_palloc(cont, sizeof(struct dir_t));
+    (*new) = (struct ap_dir_t *)ap_palloc(cont, sizeof(struct ap_dir_t));
 
     (*new)->cntxt = cont;
     (*new)->dirname = ap_pstrdup(cont, dirname);
@@ -102,7 +102,7 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *co
  *    close the specified directory. 
  * arg 1) the directory descriptor to close.
  */                        
-ap_status_t ap_closedir(struct dir_t *thedir)
+ap_status_t ap_closedir(struct ap_dir_t *thedir)
 {
     ap_status_t rv;
 
@@ -122,7 +122,7 @@ ap_status_t ap_closedir(struct dir_t *thedir)
  * arg 1) the directory descriptor to read from, and fill out.
  * NOTE: All systems return . and .. as the first two files.
  */                        
-ap_status_t ap_readdir(struct dir_t *thedir)
+ap_status_t ap_readdir(struct ap_dir_t *thedir)
 {
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
     && !defined(READDIR_IS_THREAD_SAFE)
@@ -159,7 +159,7 @@ ap_status_t ap_readdir(struct dir_t *thedir)
  *    Rewind the directory to the first entry. 
  * arg 1) the directory descriptor to rewind.
  */                        
-ap_status_t ap_rewinddir(struct dir_t *thedir)
+ap_status_t ap_rewinddir(struct ap_dir_t *thedir)
 {
     if (thedir == NULL)
         return APR_EBADARG;
@@ -216,7 +216,7 @@ ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
  * arg 1) the size of the directory entry. 
  * arg 2) the currently open directory.
  */                        
-ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
+ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct ap_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;    
@@ -245,7 +245,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
  * arg 1) the last modified time of the directory entry. 
  * arg 2) the currently open directory.
  */                        
-ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, struct dir_t *thedir)
+ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, struct ap_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
@@ -275,7 +275,7 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, struct dir_t *thedir)
  * arg 1) the file type of the directory entry. 
  * arg 2) the currently open directory.
  */                        
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
+ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct ap_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
@@ -320,7 +320,7 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
  * arg 1) the file name of the directory entry. 
  * arg 2) the currently open directory.
  */                        
-ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
+ap_status_t ap_get_dir_filename(char **new, struct ap_dir_t *thedir)
 {
     if (new == NULL)
         return APR_EBADARG;
@@ -340,7 +340,7 @@ ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
  * arg 1) The os specific dir we are converting to
  * arg 2) The apr dir to convert.
  */   
-ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
+ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct ap_dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
@@ -357,14 +357,14 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
  * arg 2) The os specific dir to convert
  * arg 3) The context to use when creating to apr directory.
  */
-ap_status_t ap_put_os_dir(struct dir_t **dir, ap_os_dir_t *thedir,
+ap_status_t ap_put_os_dir(struct ap_dir_t **dir, ap_os_dir_t *thedir,
                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*dir) == NULL) {
-        (*dir) = (struct dir_t *)ap_palloc(cont, sizeof(struct dir_t));
+        (*dir) = (struct ap_dir_t *)ap_palloc(cont, sizeof(struct ap_dir_t));
         (*dir)->cntxt = cont;
     }
     (*dir)->dirstruct = thedir;

@@ -62,24 +62,24 @@
 
 #define SHELL_PATH "cmd.exe"
 
-struct thread_t {
+struct ap_thread_t {
     ap_context_t *cntxt;
     HANDLE td;
     ap_int32_t cancel;
     ap_int32_t cancel_how;
 };
 
-struct threadattr_t {
+struct ap_threadattr_t {
     ap_context_t *cntxt;
     ap_int32_t detach;
 };
 
-struct threadkey_t {
+struct ap_threadkey_t {
     ap_context_t *cntxt;
     DWORD key;
 };
 
-struct procattr_t {
+struct ap_procattr_t {
     ap_context_t *cntxt;
     STARTUPINFO si;
     ap_file_t *parent_in;
@@ -93,10 +93,10 @@ struct procattr_t {
     ap_int32_t detached;
 };
 
-struct proc_t {
+struct ap_proc_t {
     ap_context_t *cntxt;
     PROCESS_INFORMATION pi;
-    struct procattr_t *attr;
+    struct ap_procattr_t *attr;
 };
 
 #endif  /* ! THREAD_PROC_H */

@@ -112,7 +112,7 @@ struct ap_file_t {
     time_t ctime;
 };
 
-struct dir_t {
+struct ap_dir_t {
     ap_context_t *cntxt;
     char *dirname;
     HANDLE dirhand;
@@ -122,9 +122,9 @@ struct dir_t {
 ap_status_t file_cleanup(void *);
 /*mode_t get_fileperms(ap_fileperms_t);
 */
-API_EXPORT(char *) ap_os_systemcase_filename(struct context_t *pCont, 
+API_EXPORT(char *) ap_os_systemcase_filename(struct ap_context_t *pCont, 
                                              const char *szFile);
-char * canonical_filename(struct context_t *pCont, const char *szFile);
+char * canonical_filename(struct ap_context_t *pCont, const char *szFile);
 
 #endif  /* ! FILE_IO_H */
 

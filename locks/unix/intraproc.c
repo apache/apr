@@ -60,11 +60,11 @@
 
 ap_status_t lock_intra_cleanup(void *data)
 {
-    struct lock_t *lock = (struct lock_t *) data;
+    struct ap_lock_t *lock = (struct ap_lock_t *) data;
     return pthread_mutex_unlock(lock->intraproc);
 }    
 
-ap_status_t create_intra_lock(struct lock_t *new)
+ap_status_t create_intra_lock(struct ap_lock_t *new)
 {
     ap_status_t stat;
     pthread_mutexattr_t mattr;
@@ -95,12 +95,12 @@ ap_status_t create_intra_lock(struct lock_t *new)
     return APR_SUCCESS;
 }
 
-ap_status_t lock_intra(struct lock_t *lock)
+ap_status_t lock_intra(struct ap_lock_t *lock)
 {
     return pthread_mutex_lock(lock->intraproc);
 }
 
-ap_status_t unlock_intra(struct lock_t *lock)
+ap_status_t unlock_intra(struct ap_lock_t *lock)
 {
     ap_status_t status;
 
@@ -108,7 +108,7 @@ ap_status_t unlock_intra(struct lock_t *lock)
     return status;
 }
 
-ap_status_t destroy_intra_lock(struct lock_t *lock)
+ap_status_t destroy_intra_lock(struct ap_lock_t *lock)
 {
     ap_status_t stat;
     if ((stat = lock_intra_cleanup(lock)) == APR_SUCCESS) {

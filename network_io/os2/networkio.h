@@ -61,7 +61,7 @@
 
 int os2errno( unsigned long oserror );
 
-struct socket_t {
+struct ap_socket_t {
     ap_context_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
@@ -71,7 +71,7 @@ struct socket_t {
     int nonblock;
 };
 
-struct pollfd_t {
+struct ap_pollfd_t {
     ap_context_t *cntxt;
     int *socket_list;
     int *r_socket_list;

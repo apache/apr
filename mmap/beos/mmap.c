@@ -56,7 +56,7 @@
 
 ap_status_t mmap_cleanup(void *themmap)
 {
-    struct mmap_t *mm = themmap;
+    struct ap_mmap_t *mm = themmap;
     int rv;
     rv = delete_area(mm->area);
 
@@ -69,7 +69,7 @@ ap_status_t mmap_cleanup(void *themmap)
         return errno;
 }
 
-ap_status_t ap_mmap_create(struct mmap_t **new, ap_file_t *file, ap_off_t offset, ap_size_t size,
+ap_status_t ap_mmap_create(struct ap_mmap_t **new, ap_file_t *file, ap_off_t offset, ap_size_t size,
                 ap_context_t *cont)
 {
     void *mm;
@@ -79,7 +79,7 @@ ap_status_t ap_mmap_create(struct mmap_t **new, ap_file_t *file, ap_off_t offset
 
     if (file == NULL || file->buffered || file->filedes == -1)
         return APR_EBADF;
-    (*new) = (struct mmap_t *)ap_palloc(cont, sizeof(struct mmap_t));
+    (*new) = (struct ap_mmap_t *)ap_palloc(cont, sizeof(struct ap_mmap_t));
     
     pages = ((size -1) / B_PAGE_SIZE) + 1;
 
@@ -108,7 +108,7 @@ ap_status_t ap_mmap_create(struct mmap_t **new, ap_file_t *file, ap_off_t offset
     return APR_SUCCESS;
 }
 
-ap_status_t ap_mmap_delete(struct mmap_t *mmap)
+ap_status_t ap_mmap_delete(struct ap_mmap_t *mmap)
 {
     ap_status_t rv;
     if (mmap->area == -1)

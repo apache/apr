@@ -68,7 +68,7 @@
 #include <string.h>
 #include <stdio.h>
 
-struct mmap_t {
+struct ap_mmap_t {
     ap_context_t *cntxt;
     area_id area;
     void *mm;

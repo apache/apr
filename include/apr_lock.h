@@ -66,7 +66,7 @@ typedef enum {APR_CROSS_PROCESS, APR_INTRAPROCESS, APR_LOCKALL} ap_lockscope_e;
 
 typedef enum {APR_MUTEX, APR_READWRITE} ap_locktype_e;
 
-typedef struct lock_t           ap_lock_t;
+typedef struct ap_lock_t           ap_lock_t;
 
 /*   Function definitions */
 ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 

@@ -114,7 +114,7 @@ static ap_status_t sononblock(int sd)
  *            APR_SO_SNDBUF     --  Set the SendBufferSize
  * arg 3) Are we turning the option on or off.
  */
-ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on)
+ap_status_t ap_setsocketopt(struct ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 {
     int one;
     struct linger li;
@@ -193,7 +193,7 @@ ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
  * arg 1) A buffer to store the hostname in.
  * arg 2) The socket to examine.
  */
-ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
+ap_status_t ap_get_remote_hostname(char **name, struct ap_socket_t *sock)
 {
     struct hostent *hptr;
     

@@ -67,11 +67,11 @@
  * arg 2) The destructor to use when freeing the private memory.
  * arg 3) The context to use
  */
-ap_status_t ap_create_thread_private(struct threadkey_t **key, 
+ap_status_t ap_create_thread_private(struct ap_threadkey_t **key, 
                                      void (*dest)(void *), ap_context_t *cont)
 {
     ap_status_t stat;
-    (*key) = (struct threadkey_t *)ap_palloc(cont, sizeof(struct threadkey_t));
+    (*key) = (struct ap_threadkey_t *)ap_palloc(cont, sizeof(struct ap_threadkey_t));
 
     if ((*key) == NULL) {
         return APR_ENOMEM;
@@ -91,7 +91,7 @@ ap_status_t ap_create_thread_private(struct threadkey_t **key,
  * arg 1) The data stored in private memory 
  * arg 2) The handle for the desired thread private memory 
  */
-ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
+ap_status_t ap_get_thread_private(void **new, struct ap_threadkey_t *key)
 {
     (*new) = pthread_getspecific(key->key);
     return APR_SUCCESS;
@@ -103,7 +103,7 @@ ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
  * arg 1) The data to be stored in private memory 
  * arg 2) The handle for the desired thread private memory 
  */
-ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
+ap_status_t ap_set_thread_private(void *priv, struct ap_threadkey_t *key)
 {
     ap_status_t stat;
     if ((stat = pthread_setspecific(key->key, priv)) == 0) {
@@ -119,7 +119,7 @@ ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
  *    Free the thread private memory
  * arg 1) The handle for the desired thread private memory 
  */
-ap_status_t ap_delete_thread_private(struct threadkey_t *key)
+ap_status_t ap_delete_thread_private(struct ap_threadkey_t *key)
 {
     ap_status_t stat;
     if ((stat = pthread_key_delete(key->key)) == 0) {
@@ -136,7 +136,7 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
  * arg 2) The key associated with the data
  * arg 3) The currently open threadkey.
  */
-ap_status_t ap_get_threadkeydata(void **data, char *key, struct threadkey_t *threadkey)
+ap_status_t ap_get_threadkeydata(void **data, char *key, struct ap_threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
         return ap_get_userdata(data, key, threadkey->cntxt);
@@ -159,7 +159,7 @@ ap_status_t ap_get_threadkeydata(void **data, char *key, struct threadkey_t *thr
  */
 ap_status_t ap_set_threadkeydata(void *data,
                                  char *key, ap_status_t (*cleanup) (void *),
-                                 struct threadkey_t *threadkey)
+                                 struct ap_threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
         return ap_set_userdata(data, key, cleanup, threadkey->cntxt);
@@ -177,7 +177,7 @@ ap_status_t ap_set_threadkeydata(void *data,
  * arg 1) The apr handle we are converting from.
  * arg 2) The os specific handle we are converting to.
  */
-ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, struct threadkey_t *key)
+ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, struct ap_threadkey_t *key)
 {
     if (key == NULL) {
         return APR_ENOFILE;
@@ -194,14 +194,14 @@ ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, struct threadkey_t *k
  * arg 2) The os specific handle to convert
  * arg 3) The context to use if it is needed.
  */
-ap_status_t ap_put_os_threadkey(struct threadkey_t **key, 
+ap_status_t ap_put_os_threadkey(struct ap_threadkey_t **key, 
                                 ap_os_threadkey_t *thekey, ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*key) == NULL) {
-        (*key) = (struct threadkey_t *)ap_palloc(cont, sizeof(struct threadkey_t));
+        (*key) = (struct ap_threadkey_t *)ap_palloc(cont, sizeof(struct ap_threadkey_t));
         (*key)->cntxt = cont;
     }
     (*key)->key = *thekey;

@@ -105,7 +105,7 @@
 #endif
 /* End System Headers */
 
-struct socket_t {
+struct ap_socket_t {
     ap_context_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
@@ -117,7 +117,7 @@ struct socket_t {
 #endif
 };
 
-struct pollfd_t {
+struct ap_pollfd_t {
     ap_context_t *cntxt;
 #ifdef HAVE_POLL
     int *sock;

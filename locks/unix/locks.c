@@ -76,14 +76,14 @@
  * NOTE:  APR_CROSS_PROCESS may lock both processes and threads, but it is
  *        only guaranteed to lock processes.
  */
-ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, 
+ap_status_t ap_create_lock(struct ap_lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 
                            ap_context_t *cont)
 {
-    struct lock_t *new;
+    struct ap_lock_t *new;
     ap_status_t stat;
 
-    new = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
+    new = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
 
     new->cntxt = cont;
     new->type  = type;
@@ -124,7 +124,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
  *    Lock a protected region. 
  * arg 1) The lock to set.
  */
-ap_status_t ap_lock(struct lock_t *lock)
+ap_status_t ap_lock(struct ap_lock_t *lock)
 {
     ap_status_t stat;
     if (lock->scope != APR_CROSS_PROCESS) {
@@ -149,7 +149,7 @@ ap_status_t ap_lock(struct lock_t *lock)
  *    Unlock a protected region. 
  * arg 1) The lock to reset.
  */
-ap_status_t ap_unlock(struct lock_t *lock)
+ap_status_t ap_unlock(struct ap_lock_t *lock)
 {
     ap_status_t stat;
 
@@ -177,7 +177,7 @@ ap_status_t ap_unlock(struct lock_t *lock)
  * NOTE:  If the lock is currently active when it is destroyed, it 
  *        will be unlocked first.
  */
-ap_status_t ap_destroy_lock(struct lock_t *lock)
+ap_status_t ap_destroy_lock(struct ap_lock_t *lock)
 {
     ap_status_t stat;
     if (lock->scope != APR_CROSS_PROCESS) {
@@ -212,7 +212,7 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
  *        idea to call it regardless, because it makes the code more
  *        portable. 
  */
-ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *cont)
+ap_status_t ap_child_init_lock(struct ap_lock_t **lock, char *fname, ap_context_t *cont)
 {
     ap_status_t stat;
     if ((*lock)->scope != APR_CROSS_PROCESS) {
@@ -230,7 +230,7 @@ ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *
  * arg 2) The key to use when retreiving data associated with this lock
  * arg 3) The user data associated with the lock.
  */
-ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
+ap_status_t ap_get_lockdata(struct ap_lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
         return ap_get_userdata(data, key, lock->cntxt);
@@ -250,7 +250,7 @@ ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
  * arg 3) The key to use when associating data with this lock
  * arg 4) The cleanup to use when the lock is destroyed.
  */
-ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
+ap_status_t ap_set_lockdata(struct ap_lock_t *lock, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {
     if (lock != NULL) {
@@ -268,7 +268,7 @@ ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
  * arg 1) The os specific lock we are converting to.
  * arg 2) The apr lock to convert.
  */
-ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct lock_t *lock)
+ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct ap_lock_t *lock)
 {
     if (lock == NULL) {
         return APR_ENOLOCK;
@@ -291,14 +291,14 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct lock_t *lock)
  * arg 2) The os specific lock to convert.
  * arg 3) The context to use if it is needed.
  */
-ap_status_t ap_put_os_lock(struct lock_t **lock, ap_os_lock_t *thelock, 
+ap_status_t ap_put_os_lock(struct ap_lock_t **lock, ap_os_lock_t *thelock, 
                            ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*lock) == NULL) {
-        (*lock) = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
+        (*lock) = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
         (*lock)->cntxt = cont;
     }
     (*lock)->interproc = thelock->crossproc;

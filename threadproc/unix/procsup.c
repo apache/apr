@@ -60,11 +60,11 @@
  * arg 1) The new process handler
  * arg 2) The context to use if it is needed.
  */
-ap_status_t ap_detach(struct proc_t **new, ap_context_t *cont)
+ap_status_t ap_detach(struct ap_proc_t **new, ap_context_t *cont)
 {
     int x;
 
-    (*new) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+    (*new) = (struct ap_proc_t *)ap_palloc(cont, sizeof(struct ap_proc_t));
     (*new)->cntxt = cont;
     (*new)->attr = NULL;
 
@@ -131,7 +131,7 @@ ap_status_t ap_detach(struct proc_t **new, ap_context_t *cont)
  * arg 2) The user data associated with the proc.
  * arg 3) The currently open proc.
  */
-ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
+ap_status_t ap_get_procdata(char *key, void *data, struct ap_proc_t *proc)
 {
     if (proc != NULL) {
         return ap_get_userdata(data, key, proc->cntxt);
@@ -153,7 +153,7 @@ ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
 */
 ap_status_t ap_set_procdata(void *data, char *key, 
                             ap_status_t (*cleanup) (void *),
-                            struct proc_t *proc)
+                            struct ap_proc_t *proc)
 {
     if (proc != NULL) {
         return ap_set_userdata(data, key, cleanup, proc->cntxt);

@@ -82,23 +82,23 @@
 #define SHELL_PATH "/bin/sh"
 
 #if APR_HAS_THREADS
-struct thread_t {
+struct ap_thread_t {
     ap_context_t *cntxt;
     pthread_t *td;
 };
 
-struct threadattr_t {
+struct ap_threadattr_t {
     ap_context_t *cntxt;
     pthread_attr_t *attr;
 };
 
-struct threadkey_t {
+struct ap_threadkey_t {
     ap_context_t *cntxt;
     pthread_key_t key;
 };
 #endif
 
-struct procattr_t {
+struct ap_procattr_t {
     ap_context_t *cntxt;
     ap_file_t *parent_in;
     ap_file_t *child_in;
@@ -111,16 +111,16 @@ struct procattr_t {
     ap_int32_t detached;
 };
 
-struct proc_t {
+struct ap_proc_t {
     ap_context_t *cntxt;
     pid_t pid;
-    struct procattr_t *attr;
+    struct ap_procattr_t *attr;
 };
 
 /*This will move to ap_threadproc.h in time, but I need to figure it out
  * on windows first.  :)
  */
-ap_status_t ap_detach(struct proc_t **, ap_context_t *);
+ap_status_t ap_detach(struct ap_proc_t **, ap_context_t *);
 
 #endif  /* ! THREAD_PROC_H */
 

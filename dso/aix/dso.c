@@ -134,7 +134,7 @@ ap_status_t ap_dso_init(void){
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path, 
+ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path, 
                         ap_context_t *ctx)
 {
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
@@ -148,7 +148,7 @@ ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_unload(struct dso_handle_t *handle)
+ap_status_t ap_dso_unload(struct ap_dso_handle_t *handle)
 {
     if (dlclose(handle->handle) != 0)
         return APR_EINIT;
@@ -157,7 +157,7 @@ ap_status_t ap_dso_unload(struct dso_handle_t *handle)
 }
 
 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
-                       struct dso_handle_t *handle, 
+                       struct ap_dso_handle_t *handle, 
                        const char *symname)
 {
     void *retval = dlsym(handle->handle, symname);

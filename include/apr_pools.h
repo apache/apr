@@ -153,7 +153,7 @@ void        ap_term_alloc(void);        /* Tear down everything */
 
 /* routines to allocate memory from an pool... */
 
-API_EXPORT_NONSTD(char *) ap_psprintf(struct context_t *, const char *fmt, ...)
+API_EXPORT_NONSTD(char *) ap_psprintf(struct ap_context_t *, const char *fmt, ...)
     __attribute__((format(printf,2,3)));
 
 /* array and alist management... keeping lists of things.

@@ -64,9 +64,9 @@
 
 /*  OS/2 doesn't have a poll function, implement using OS/2 style select */
  
-ap_status_t ap_setup_poll(struct pollfd_t **new, ap_int32_t num, ap_context_t *cont)
+ap_status_t ap_setup_poll(struct ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
-    *new = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t));
+    *new = (struct ap_pollfd_t *)ap_palloc(cont, sizeof(struct ap_pollfd_t));
 
     if (*new == NULL) {
         return APR_ENOMEM;
@@ -95,8 +95,8 @@ ap_status_t ap_setup_poll(struct pollfd_t **new, ap_int32_t num, ap_context_t *c
 
 
 
-ap_status_t ap_add_poll_socket(struct pollfd_t *aprset, 
-			       struct socket_t *sock, ap_int16_t events)
+ap_status_t ap_add_poll_socket(struct ap_pollfd_t *aprset, 
+			       struct ap_socket_t *sock, ap_int16_t events)
 {
     int i;
     
@@ -126,7 +126,7 @@ ap_status_t ap_add_poll_socket(struct pollfd_t *aprset,
 
 
 
-ap_status_t ap_poll(struct pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t timeout)
+ap_status_t ap_poll(struct ap_pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t timeout)
 {
     int i;
     int rv = 0;
@@ -164,7 +164,7 @@ ap_status_t ap_poll(struct pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t tim
 
 
 
-ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct pollfd_t *aprset)
+ap_status_t ap_get_revents(ap_int16_t *event, struct ap_socket_t *sock, struct ap_pollfd_t *aprset)
 {
     int i;
     
@@ -186,8 +186,8 @@ ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct poll
 
 
 
-ap_status_t ap_remove_poll_socket(struct pollfd_t *aprset, 
-                                  struct socket_t *sock, ap_int16_t events)
+ap_status_t ap_remove_poll_socket(struct ap_pollfd_t *aprset, 
+                                  struct ap_socket_t *sock, ap_int16_t events)
 {
     int start, *count, pos;
 

@@ -598,7 +598,7 @@ static void ap_register_pool_cleanup(struct ap_pool_t *p, void *data,
 }
 #endif
 
-API_EXPORT(void) ap_register_cleanup(struct context_t *p, void *data,
+API_EXPORT(void) ap_register_cleanup(struct ap_context_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *))
 {
@@ -614,7 +614,7 @@ API_EXPORT(void) ap_register_cleanup(struct context_t *p, void *data,
     }
 }
 
-API_EXPORT(void) ap_kill_cleanup(struct context_t *p, void *data,
+API_EXPORT(void) ap_kill_cleanup(struct ap_context_t *p, void *data,
 				  ap_status_t (*cleanup) (void *))
 {
     struct cleanup *c;
@@ -635,7 +635,7 @@ API_EXPORT(void) ap_kill_cleanup(struct context_t *p, void *data,
     }
 }
 
-API_EXPORT(void) ap_run_cleanup(struct context_t *p, void *data,
+API_EXPORT(void) ap_run_cleanup(struct ap_context_t *p, void *data,
 				 ap_status_t (*cleanup) (void *))
 {
     ap_block_alarms();		/* Run cleanup only once! */
@@ -780,7 +780,7 @@ static void ap_clear_real_pool(ap_pool_t *a)
     ap_unblock_alarms();
 }
 
-API_EXPORT(void) ap_clear_pool(struct context_t *a)
+API_EXPORT(void) ap_clear_pool(struct ap_context_t *a)
 {
     ap_clear_real_pool(a->pool);
 }
@@ -811,7 +811,7 @@ API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
     ap_unblock_alarms();
 }
 
-API_EXPORT(void) ap_destroy_pool(struct context_t *a)
+API_EXPORT(void) ap_destroy_pool(struct ap_context_t *a)
 {
     ap_destroy_real_pool(a->pool);
 }
@@ -1028,7 +1028,7 @@ static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int ret
 #endif
 }
 
-API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
+API_EXPORT(void *) ap_palloc(struct ap_context_t *c, int reqsize)
 {
     if (c == NULL) {
         return malloc(reqsize);
@@ -1036,14 +1036,14 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
     return ap_pool_palloc(c->pool, reqsize, c->apr_abort);
 }
 
-API_EXPORT(void *) ap_pcalloc(struct context_t *a, int size)
+API_EXPORT(void *) ap_pcalloc(struct ap_context_t *a, int size)
 {
     void *res = ap_palloc(a, size);
     memset(res, '\0', size);
     return res;
 }
 
-API_EXPORT(char *) ap_pstrdup(struct context_t *a, const char *s)
+API_EXPORT(char *) ap_pstrdup(struct ap_context_t *a, const char *s)
 {
     char *res;
     size_t len;
@@ -1057,7 +1057,7 @@ API_EXPORT(char *) ap_pstrdup(struct context_t *a, const char *s)
     return res;
 }
 
-API_EXPORT(char *) ap_pstrndup(struct context_t *a, const char *s, int n)
+API_EXPORT(char *) ap_pstrndup(struct ap_context_t *a, const char *s, int n)
 {
     char *res;
 
@@ -1070,7 +1070,7 @@ API_EXPORT(char *) ap_pstrndup(struct context_t *a, const char *s, int n)
     return res;
 }
 
-API_EXPORT_NONSTD(char *) ap_pstrcat(struct context_t *a, ...)
+API_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_context_t *a, ...)
 {
     char *cp, *argp, *res;
 
@@ -1195,7 +1195,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 #endif
 }
 
-API_EXPORT(char *) ap_pvsprintf(struct context_t *c, const char *fmt, va_list ap)
+API_EXPORT(char *) ap_pvsprintf(struct ap_context_t *c, const char *fmt, va_list ap)
 {
 #ifdef ALLOC_USE_MALLOC
     ap_pool_t *p = c->pool;
@@ -1260,7 +1260,7 @@ API_EXPORT(char *) ap_pvsprintf(struct context_t *c, const char *fmt, va_list ap
 #endif
 }
 
-API_EXPORT_NONSTD(char *) ap_psprintf(struct context_t *p, const char *fmt, ...)
+API_EXPORT_NONSTD(char *) ap_psprintf(struct ap_context_t *p, const char *fmt, ...)
 {
     va_list ap;
     char *res;
@@ -1283,7 +1283,7 @@ API_EXPORT_NONSTD(char *) ap_psprintf(struct context_t *p, const char *fmt, ...)
  * generic interface, but for now, it's a special case
  */
 
-API_EXPORT(void) ap_note_subprocess(struct context_t *a, ap_proc_t *pid,
+API_EXPORT(void) ap_note_subprocess(struct ap_context_t *a, ap_proc_t *pid,
 				     enum kill_conditions how)
 {
     struct process_chain *new =

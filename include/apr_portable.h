@@ -112,7 +112,7 @@ typedef struct tm             ap_os_exp_time_t;
 #elif defined(BEOS)
 #include <kernel/OS.h>
 
-struct os_lock_t {
+struct ap_os_lock_t {
 	/* Inter proc */
 	sem_id sem_interproc;
 	int32  ben_interproc;
@@ -124,7 +124,7 @@ struct os_lock_t {
 typedef int                   ap_os_file_t;
 typedef DIR                   ap_os_dir_t;
 typedef int                   ap_os_sock_t;
-typedef struct os_lock_t      ap_os_lock_t;
+typedef struct ap_os_lock_t      ap_os_lock_t;
 typedef thread_id             ap_os_thread_t;
 typedef thread_id             ap_os_proc_t;
 typedef int                   ap_os_threadkey_t;
@@ -145,7 +145,7 @@ union semun {
 };
 #endif
 
-struct os_lock_t {
+struct ap_os_lock_t {
 #if APR_USE_SYSVSEM_SERIALIZE
     int crossproc;
 #elif APR_USE_FCNTL_SERIALIZE
@@ -168,7 +168,7 @@ struct os_lock_t {
 typedef int                   ap_os_file_t;
 typedef DIR                   ap_os_dir_t;
 typedef int                   ap_os_sock_t;
-typedef struct os_lock_t      ap_os_lock_t;
+typedef struct ap_os_lock_t      ap_os_lock_t;
 #if APR_HAS_THREADS && APR_HAVE_PTHREAD_H 
 typedef pthread_t             ap_os_thread_t;
 typedef pthread_key_t         ap_os_threadkey_t;

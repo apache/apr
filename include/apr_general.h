@@ -81,7 +81,7 @@ extern "C" {
 
 #define MAXIMUM_WAIT_OBJECTS 64
 
-typedef struct context_t  ap_context_t;
+typedef struct ap_context_t  ap_context_t;
 typedef int               ap_signum_t;
 
 #ifdef SIGHUP
@@ -220,7 +220,7 @@ typedef int               ap_signum_t;
 
 /* Context functions */
 ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont);
-ap_status_t ap_destroy_context(struct context_t *cont);
+ap_status_t ap_destroy_context(struct ap_context_t *cont);
 ap_status_t ap_exit(ap_context_t *);
 ap_status_t ap_set_userdata(void *data, char *key, 
                             ap_status_t (*cleanup) (void *), 

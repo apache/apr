@@ -63,26 +63,26 @@
 #define SHELL_PATH "cmd.exe"
 #define APR_THREAD_STACKSIZE 65536
 
-struct threadattr_t {
+struct ap_threadattr_t {
     ap_context_t *cntxt;
     unsigned long attr;
 };
 
-struct thread_t {
+struct ap_thread_t {
     ap_context_t *cntxt;
-    struct threadattr_t *attr;
+    struct ap_threadattr_t *attr;
     unsigned long tid;
     ap_thread_start_t func;
     void *data;
     void *rv;
 };
 
-struct threadkey_t {
+struct ap_threadkey_t {
     ap_context_t *cntxt;
     unsigned long *key;
 };
 
-struct procattr_t {
+struct ap_procattr_t {
     ap_context_t *cntxt;
     ap_file_t *parent_in;
     ap_file_t *child_in;
@@ -95,10 +95,10 @@ struct procattr_t {
     ap_int32_t detached;
 };
 
-struct proc_t {
+struct ap_proc_t {
     ap_context_t *cntxt;
     pid_t pid;
-    struct procattr_t *attr;
+    struct ap_procattr_t *attr;
     int running;
 };
 

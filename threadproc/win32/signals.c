@@ -64,7 +64,7 @@
 #endif
 
 /* Windows only really support killing process, but that will do for now. */
-ap_status_t ap_kill(struct proc_t *proc, int signal)
+ap_status_t ap_kill(struct ap_proc_t *proc, int signal)
 {
     if (TerminateProcess(proc->pi.hProcess, signal) == 0) {
         return errno;

@@ -77,12 +77,12 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 #define APR_CANCEL_ENABLE      3
 #define APR_CANCEL_DISABLE     4
 
-typedef struct thread_t           ap_thread_t;
-typedef struct threadattr_t       ap_threadattr_t;
-typedef struct proc_t		  ap_proc_t;
-typedef struct procattr_t         ap_procattr_t;
+typedef struct ap_thread_t           ap_thread_t;
+typedef struct ap_threadattr_t       ap_threadattr_t;
+typedef struct ap_proc_t		  ap_proc_t;
+typedef struct ap_procattr_t         ap_procattr_t;
 
-typedef struct threadkey_t        ap_key_t;
+typedef struct ap_threadkey_t        ap_key_t;
 
 typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
 
@@ -119,12 +119,12 @@ ap_status_t ap_set_threadkeydata(void *data, char *key,
 ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont);
 ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
                               ap_int32_t out, ap_int32_t err);
-ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
+ap_status_t ap_setprocattr_childin(struct ap_procattr_t *attr, ap_file_t *child_in,
                                    ap_file_t *parent_in);
-ap_status_t ap_setprocattr_childout(struct procattr_t *attr, 
+ap_status_t ap_setprocattr_childout(struct ap_procattr_t *attr, 
                                     ap_file_t *child_out, 
                                     ap_file_t *parent_out);
-ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, 
+ap_status_t ap_setprocattr_childerr(struct ap_procattr_t *attr, 
                                     ap_file_t *child_err,
                                     ap_file_t *parent_err);
 ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, const char *dir);
