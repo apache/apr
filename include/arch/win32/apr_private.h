@@ -54,16 +54,14 @@
 
 /*
  * Note: 
- * This is the windows specific autoconf like config file
- * which is used to generate apr_private.h at build time.
- * Do not put any code into this file which depends on
- * APR include files.
+ * This is the windows specific autoconf-like config file
+ * which unix would create at build time.
  */
 
 #ifdef WIN32
 
-#ifndef APR_CONFIG_H
-#define APR_CONFIG_H
+#ifndef APR_PRIVATE_H
+#define APR_PRIVATE_H
 
 /* Has windows.h already been included?  If so, our preferences don't matter,
  * but we will still need the winsock things no matter what was included.
@@ -177,5 +175,5 @@ typedef void (Sigfunc)(int);
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
 
-#endif  /*APR_CONFIG_H*/
+#endif  /*APR_PRIVATE_H*/
 #endif  /*WIN32*/
