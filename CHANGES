@@ -1,4 +1,5 @@
 Changes with APR b1
+  *) Don't mask SIGUSR2 [Jin Hong <jinh@cnet.com>]  
 
   *) Load libraries if they not MH_BUNDLE, but if they are not, it 
      just attempts to link them as shared libs.
