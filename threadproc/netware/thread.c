@@ -233,15 +233,13 @@ apr_status_t apr_thread_data_set(void *data, const char *key,
     }
 }
 
-
-/*SRJ Need to resolve
- APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
+APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
                                             apr_thread_t *thd)
 {
     if (thd == NULL) {
         return APR_ENOTHREAD;
     }
-    *thethd = thd->td;
+    *thethd = &(thd->td);
     return APR_SUCCESS;
 }
 
@@ -256,8 +254,22 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
         (*thd) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
         (*thd)->cntxt = cont;
     }
-    (*thd)->td = thethd;
+    (*thd)->td = *thethd;
     return APR_SUCCESS;
 }
 
-*/
+APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
+                                               apr_pool_t *p)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
+                                          void (*func)(void))
+{
+    return APR_ENOTIMPL;
+}
+
+APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
+
+
