@@ -70,6 +70,9 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
     }else {
         one = 0;
 	}
+	if (opt & APR_SO_SNDBUF) 
+	    return APR_ENOTIMPL;
+
     if (opt & APR_SO_DEBUG) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, &one, sizeof(one)) == -1) {
             return errno;

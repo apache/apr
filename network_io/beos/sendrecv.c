@@ -59,40 +59,49 @@
 #include <socket.h>
 #include <netdb.h>
 #include "networkio.h"
+#include "fileio.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_network_io.h"
 
-ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, time_t sec)
+ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
-	int sendlen = *len;
 	
     do {
-        rv = send(sock->socketdes, buf, sendlen,0);
+        rv = send(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sec > 0) {
-        struct timeval tv;
+    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
+        struct timeval *tv;
         fd_set fdset;
         int srv;
 
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            tv.tv_sec  = sec;
-            tv.tv_usec = 0;
-
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, &tv);
+            if (sock->timeout == -1)
+                tv = NULL;
+            else {
+                tv = (struct timeval *)ap_palloc(sock->cntxt, sizeof(struct timeval));
+                tv->tv_sec  = sock->timeout;
+                tv->tv_usec = 0;
+            }
+            
+            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
         } while (srv == -1 && errno == EINTR);
 
+        if (srv == 0) {
+            (*len) = -1;
+            return APR_TIMEUP;
+        }
         if (srv < 1) {
             (*len) = -1;
             return errno;
         }
         else {
             do {
-                rv = send(sock->socketdes, buf, sendlen,0);
+                rv = send(sock->socketdes, buf, (*len),0);
             } while (rv == -1 && errno == EINTR);
         }
     }
@@ -100,36 +109,44 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t sec)
+ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ap_ssize_t rv;
-    int recvlen = *len;
-    
+   
     do {
-        rv = recv(sock->socketdes, buf, recvlen,0);
+        rv = recv(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sec > 0) {
-        struct timeval tv;
+    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
+        struct timeval *tv;
         fd_set fdset;
         int srv;
 
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            tv.tv_sec  = sec;
-            tv.tv_usec = 0;
-
-            srv = select(FD_SETSIZE, &fdset, NULL, NULL, &tv);
+            if (sock->timeout == -1)
+                tv = NULL;
+            else {
+                tv = (struct timeval *)ap_palloc(sock->cntxt, sizeof(struct timeval));
+                tv->tv_sec  = sock->timeout;
+                tv->tv_usec = 0;
+            }
+            
+            srv = select(FD_SETSIZE, &fdset, NULL, NULL, tv);
         } while (srv == -1 && errno == EINTR);
 
+        if (srv == 0) {
+            (*len) = -1;
+            return APR_TIMEUP;
+        }
         if (srv < 1) {
             (*len) = -1;
             return errno;
         }
         else {
             do {
-                rv = recv(sock->socketdes, buf, recvlen,0);
+                rv = recv(sock->socketdes, buf, (*len), 0);
             } while (rv == -1 && errno == EINTR);
         }
     }
