@@ -77,27 +77,39 @@
 #if APR_HAS_RANDOM
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
-                                                    int length) 
+                                                    apr_size_t length)
 {
 #ifdef DEV_RANDOM
 
-    int rnd, rc;
-    apr_size_t got, tot;
+    int fd = -1;
 
-    if ((rnd = open(DEV_RANDOM, O_RDONLY)) == -1) 
-	return errno;
+    /* On BSD/OS 4.1, /dev/random gives out 8 bytes at a time, then
+     * gives EOF, so reading 'length' bytes may require opening the
+     * device several times. */
+    do {
+        apr_ssize_t rc;
 
-    for (tot=0; tot<length; tot += got) {
-        if ((rc = read(rnd, buf+tot, length-tot)) < 0) {
-	    return errno;
+        if (fd == -1)
+            if ((fd = open(DEV_RANDOM, O_RDONLY)) == -1)
+                return errno;
+        
+        rc = read(fd, buf, length);
+        if (rc < 0) {
+            int errnum = errno;
+            close(fd);
+            return errnum;
+        }
+        else if (rc == 0) {
+            close(fd);
+            fd = -1; /* force open() again */
         }
         else {
-            got = rc;
+            buf += rc;
+            length -= rc;
         }
-    }
-
-    close(rnd);
-
+    } while (length > 0);
+    
+    close(fd);
 #elif defined(OS2)
     static UCHAR randbyte();
     unsigned int idx;
