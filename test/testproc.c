@@ -94,7 +94,7 @@ static void test_create_proc(CuTest *tc)
     rv = apr_procattr_cmdtype_set(attr, APR_PROGRAM);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    args[0] = "proc_child";
+    args[0] = "proc_child" EXTENSION;
     args[1] = NULL;
     
     rv = apr_proc_create(&newproc, "../proc_child" EXTENSION, args, NULL, 
