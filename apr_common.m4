@@ -36,7 +36,6 @@ dnl
 AC_DEFUN(REENTRANCY_FLAGS,[
   if test -z "$host_alias"; then
     host_alias=`$ac_config_guess`
-dnl AC_MSG_ERROR(host_alias is not set. Make sure to run config.guess)
   fi
   case "$host_alias" in
   *solaris*)
