@@ -65,10 +65,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <memory.h> /* strikerXXX: had to add this for windows to stop 
-                     * complaining, please autoconf the include stuff
-		     */
-
 /*
  * standard memory system
  */
@@ -78,7 +74,7 @@ void *
 apr_standard_memory_system_malloc(apr_memory_system_t *memory_system,
                                   size_t size)
 {
-  return malloc(size);
+    return malloc(size);
 }
 
 static 
@@ -87,37 +83,38 @@ apr_standard_memory_system_realloc(apr_memory_system_t *memory_system,
                                    void *mem,
                                    size_t size)
 {
-  return realloc(mem, size);
+    return realloc(mem, size);
 }
 
 static 
-void
+apr_status_t
 apr_standard_memory_system_free(apr_memory_system_t *memory_system,
                                 void *mem)
 {
-  free(mem);
+    free(mem);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t)
 apr_standard_memory_system_create(apr_memory_system_t **memory_system)
 {
-  apr_memory_system_t *new_memory_system;
+    apr_memory_system_t *new_memory_system;
 
-  assert(memory_system != NULL);
+    assert(memory_system != NULL);
 
-  *memory_system = NULL;
-  new_memory_system = apr_memory_system_create(
-    malloc(sizeof(apr_memory_system_t)), NULL);
+    *memory_system = NULL;
+    new_memory_system = apr_memory_system_create(
+        malloc(sizeof(apr_memory_system_t)), NULL);
 
-  if (new_memory_system == NULL)
-    return APR_ENOMEM;
+    if (new_memory_system == NULL)
+        return APR_ENOMEM;
 
-  new_memory_system->malloc_fn = apr_standard_memory_system_malloc;
-  new_memory_system->realloc_fn = apr_standard_memory_system_realloc;
-  new_memory_system->free_fn = apr_standard_memory_system_free;
+    new_memory_system->malloc_fn = apr_standard_memory_system_malloc;
+    new_memory_system->realloc_fn = apr_standard_memory_system_realloc;
+    new_memory_system->free_fn = apr_standard_memory_system_free;
 
-  apr_memory_system_assert(new_memory_system);
+    apr_memory_system_assert(new_memory_system);
 
-  *memory_system = new_memory_system;
-  return APR_SUCCESS;
+    *memory_system = new_memory_system;
+    return APR_SUCCESS;
 }
