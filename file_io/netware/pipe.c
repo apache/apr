@@ -149,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
-    (*file)->flags = 0;
+    (*file)->flags = APR_FILE_NOCLEANUP;
     (*file)->buffered = 0;
 #if APR_HAS_THREADS
     (*file)->thlock = NULL;
@@ -173,6 +173,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out)->pool    = pool;
     (*in)->filedes   = filedes[0];
     (*out)->filedes  = filedes[1];
+    (*in)->flags     = APR_INHERIT;
+    (*out)->flags    = APR_INHERIT;
     (*in)->is_pipe      =
     (*out)->is_pipe     = 1;
     (*out)->fname    = 
