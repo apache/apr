@@ -55,6 +55,7 @@
 #include <nks/fsio.h>
 #include "fileio.h"
 
+/*#define NEW_API */
 
 apr_status_t apr_file_lock(apr_file_t *thefile, int type)
 {
@@ -62,7 +63,12 @@ apr_status_t apr_file_lock(apr_file_t *thefile, int type)
 
 	fc = (type & APR_FLOCK_NONBLOCK) ? NX_RANGE_LOCK_TRYLOCK : NX_RANGE_LOCK_CHECK;
 
+/* Remove this #ifdef once the next NDK ships */
+#ifdef NEW_API
+    if(NXFileRangeLock(thefile->filedes,fc, 0, 0, NX_LOCK_RANGE_FORWARD) == -1)
+#else
     if(NXFileRangeLock(thefile->filedes,fc, 0, 0) == -1)
+#endif
 		return errno;
             
     return APR_SUCCESS;
@@ -70,7 +76,11 @@ apr_status_t apr_file_lock(apr_file_t *thefile, int type)
 
 apr_status_t apr_file_unlock(apr_file_t *thefile)
 {
+#ifdef NEW_API
+    if(NXFileRangeUnlock(thefile->filedes,NX_RANGE_LOCK_CANCEL,0 , 0, NX_LOCK_RANGE_FORWARD) == -1)
+#else
     if(NXFileRangeUnlock(thefile->filedes,NX_RANGE_LOCK_CANCEL,0 , 0) == -1)
+#endif
 		return errno;
    
     return APR_SUCCESS;
