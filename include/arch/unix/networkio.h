@@ -159,8 +159,16 @@ struct apr_pollfd_t {
 
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 int apr_inet_pton(int af, const char *src, void *dst);
-int apr_is_option_set(apr_int32_t, apr_int32_t);
-void apr_set_option(apr_int32_t *, apr_int32_t, int);
+
+#define apr_is_option_set(mask, option)  ((mask & option) ==option)
+
+#define apr_set_option(mask, option, on) \
+    do {                                 \
+        if (on)                          \
+            *mask |= option;             \
+        else                             \
+            *mask &= ~option;            \
+    } while (0)
 
 #endif  /* ! NETWORK_IO_H */
 
