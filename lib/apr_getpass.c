@@ -58,6 +58,7 @@
  * use one we define ourselves.
  */
 #include "apr_private.h"
+#include "apr_strings.h"
 #include "apr_lib.h"
 #include "apr_errno.h"
 #include <sys/types.h>

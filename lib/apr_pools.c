@@ -63,6 +63,7 @@
 #include "apr_private.h"
 
 #include "apr_portable.h" /* for get_os_proc */
+#include "apr_strings.h"
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_lib.h"
@@ -950,72 +951,6 @@ APR_EXPORT(void *) ap_pcalloc(ap_pool_t *a, ap_size_t size)
 {
     void *res = ap_palloc(a, size);
     memset(res, '\0', size);
-    return res;
-}
-
-APR_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
-{
-    char *res;
-    size_t len;
-
-    if (s == NULL) {
-	return NULL;
-    }
-    len = strlen(s) + 1;
-    res = ap_palloc(a, len);
-    memcpy(res, s, len);
-    return res;
-}
-
-APR_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, ap_size_t n)
-{
-    char *res;
-
-    if (s == NULL) {
-	return NULL;
-    }
-    res = ap_palloc(a, n + 1);
-    memcpy(res, s, n);
-    res[n] = '\0';
-    return res;
-}
-
-APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
-{
-    char *cp, *argp, *res;
-
-    /* Pass one --- find length of required string */
-
-    ap_size_t len = 0;
-    va_list adummy;
-
-    va_start(adummy, a);
-
-    while ((cp = va_arg(adummy, char *)) != NULL) {
-	len += strlen(cp);
-    }
-
-    va_end(adummy);
-
-    /* Allocate the required string */
-
-    res = (char *) ap_palloc(a, len + 1);
-    cp = res;
-    *cp = '\0';
-
-    /* Pass two --- copy the argument strings into the result space */
-
-    va_start(adummy, a);
-
-    while ((argp = va_arg(adummy, char *)) != NULL) {
-	strcpy(cp, argp);
-	cp += strlen(argp);
-    }
-
-    va_end(adummy);
-
-    /* Return the result string */
-
     return res;
 }
 

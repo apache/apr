@@ -54,6 +54,7 @@
 
 #include "misc.h"
 #include "locks.h"
+#include "apr_strings.h"
 
 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
 {

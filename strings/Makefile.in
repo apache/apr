@@ -16,14 +16,10 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I../misc/unix
 
 #LIB=@LIBPREFIX@apr.a
 
-OBJS=apr_fnmatch.o \
-	apr_execve.o \
-	apr_md5.o \
-	apr_pools.o \
-	apr_signal.o \
-	apr_tables.o \
-	apr_hash.o \
-	apr_getpass.o
+OBJS=apr_cpystrn.o \
+	apr_snprintf.o \
+	apr_strnatcmp.o \
+	apr_strings.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<

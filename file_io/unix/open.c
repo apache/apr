@@ -53,6 +53,7 @@
  */
 
 #include "fileio.h"
+#include "apr_strings.h"
 #include "apr_portable.h"
 
 ap_status_t ap_unix_file_cleanup(void *thefile)

@@ -98,6 +98,7 @@
 #ifndef WIN32
 #include "apr_private.h"
 #endif
+#include "apr_strings.h"
 #include "apr_md5.h"
 #include "apr_lib.h"
 

@@ -53,6 +53,7 @@
  */
 
 #include "locks.h"
+#include "apr_strings.h"
 #include "apr_portable.h"
 
 ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
