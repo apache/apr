@@ -60,7 +60,8 @@
 #include "fileio.h"
 #endif /* APR_HAS_SENDFILE */
 
-#ifdef HAVE_SYS_SYSCTL_H
+/* sys/sysctl.h is only needed on FreeBSD for include_hdrs_in_length() */
+#if defined(__FreeBSD__) && defined(HAVE_SYS_SYSCTL_H)
 #include <sys/sysctl.h>
 #endif
 
