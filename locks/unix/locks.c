@@ -131,7 +131,7 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     apr_status_t stat;
 
 #if APR_HAS_THREADS
-    if (lock->owner == apr_os_thread_current()){
+    if (apr_os_thread_equal(lock->owner, apr_os_thread_current())) {
         lock->owner_ref++;
         return APR_SUCCESS;
     }
@@ -204,7 +204,7 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     apr_status_t stat;
 
 #if APR_HAS_THREADS
-    if (lock->owner == apr_os_thread_current()) {
+    if (apr_os_thread_equal(lock->owner, apr_os_thread_current())) {
         lock->owner_ref--;
         if (lock->owner_ref > 0)
             return APR_SUCCESS;
@@ -244,7 +244,7 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     }
 
 #if APR_HAS_THREADS
-    lock->owner = 0;
+    memset(&lock->owner, 0, sizeof lock->owner);
     lock->owner_ref = 0;
 #endif
     

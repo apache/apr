@@ -416,6 +416,7 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
 
 #if APR_HAS_THREADS
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void);
+APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2);
 #endif
 
 #endif /* APR_HAS_DSO */
