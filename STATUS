@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/14 13:45:19 $]
+Last modified at [$Date: 2002/01/23 06:10:30 $]
 
 Release:
 
@@ -45,6 +45,21 @@ RELEASE SHOWSTOPPERS:
              apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * Using reentrant libraries with non-threaded APR
+        - Anecdotal evidence exists that suggests it is bad to
+          mix reentrant and non-reentrant libraries and therefore
+          we should always use the reentrant versions.
+        - Unfortunately, on some platforms (AIX 4.2.1) defining
+          the reentrant flag (-D_THREAD_SAFE) causes builds to fail,
+          and so one would expect --disable-threads to fix this.
+          Although this has been fixed for that particular version
+          of AIX, it may be useful to only enable the reentrant
+          versions when threads are enabled.
+        How will we deal with this issue once APR becomes a standalone
+        library? It is perfectly legitimate to have apps needing
+        both versions (threaded/reentrant and non-threaded/non-reentrant)
+        on the same machine.
 
     * Pools debugging
         - Find a way to do check if a pool is used in multiple
