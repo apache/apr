@@ -77,6 +77,7 @@ void FileTimeToAprTime(apr_time_t *result, FILETIME *input)
     *result -= APR_DELTA_EPOCH_IN_USEC;  /* Convert from Windows epoch to Unix epoch */
     return;
 }
+
 void AprTimeToFileTime(LPFILETIME pft, apr_time_t t)
 {
     LONGLONG ll;
@@ -87,10 +88,17 @@ void AprTimeToFileTime(LPFILETIME pft, apr_time_t t)
     return;
 }
 
+/* Leap year is any year divisible by four, but not by 100 unless also
+ * divisible by 400
+ */
+#define IsLeapYear(y) ((!(y % 4)) ? (((!(y % 400)) && (y % 100)) ? 1 : 0) : 0)
+
 void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm)
 {
     TIME_ZONE_INFORMATION tz;
     DWORD rc;
+    static const int dayoffset[12] =
+    {0, 31, 59, 90, 120, 151, 182, 212, 243, 273, 304, 334};
 
     xt->tm_usec = tm->wMilliseconds * 1000;
     xt->tm_sec  = tm->wSecond;
@@ -100,7 +108,13 @@ void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm)
     xt->tm_mon  = tm->wMonth - 1;
     xt->tm_year = tm->wYear - 1900;
     xt->tm_wday = tm->wDayOfWeek;
-    xt->tm_yday = 0; /* ToDo: need to compute this */
+    xt->tm_yday = dayoffset[xt->tm_mon] + (tm->wDay - 1);
+
+    /* If this is a leap year, and we're past the 28th of Feb. (the
+     * 58th day after Jan. 1), we'll increment our tm_yday by one.
+     */
+    if (IsLeapYear(tm->wYear) && (xt->tm_yday > 58))
+        xt->tm_yday++;
 
     rc = GetTimeZoneInformation(&tz);
     switch (rc) {
@@ -110,11 +124,11 @@ void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm)
         /* Bias = UTC - local time in minutes 
          * tm_gmtoff is seconds east of UTC
          */
-        xt->tm_gmtoff = tz.Bias * 60;
+        xt->tm_gmtoff = tz.Bias * -60;
         break;
     case TIME_ZONE_ID_DAYLIGHT:
         xt->tm_isdst = 1;
-        xt->tm_gmtoff = tz.Bias * 60;
+        xt->tm_gmtoff = tz.Bias * -60;
         break;
     default:
         xt->tm_isdst = 0;
