@@ -62,6 +62,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @package APR lock library
+ */
+
 typedef enum {APR_CROSS_PROCESS, APR_INTRAPROCESS, APR_LOCKALL} ap_lockscope_e;
 
 typedef enum {APR_MUTEX, APR_READWRITE} ap_locktype_e;
@@ -69,123 +73,83 @@ typedef enum {APR_MUTEX, APR_READWRITE} ap_locktype_e;
 typedef struct ap_lock_t           ap_lock_t;
 
 /*   Function definitions */
-/*
 
-=head1 ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, const char *fname, ap_pool_t *cont)
-
-B<Create a new instance of a lock structure.>
-
-    arg 1) The newly created lock structure.
-    arg 2) The type of lock to create, one of:
-              APR_MUTEX
-              APR_READWRITE
-    arg 3) The scope of the lock to create, one of:
-              APR_CROSS_PROCESS -- lock processes from the protected area.
-              APR_INTRAPROCESS  -- lock threads from the protected area.
-              APR_LOCKALL       -- lock processes and threads from the
-                                   protected area.
-    arg 4) A file name to use if the lock mechanism requires one.  This
-          argument should always be provided.  The lock code itself will
-          determine if it should be used.
-    arg 5) The pool to operate on.
-
-B<NOTE>:  APR_CROSS_PROCESS may lock both processes and threads, but it is
-          only guaranteed to lock processes.
-
-=cut
+/**
+ * Create a new instance of a lock structure.
+ * @param lock The newly created lock structure.
+ * @param type The type of lock to create, one of:
+ * <PRE>
+ *            APR_MUTEX
+ *            APR_READWRITE
+ * </PRE>
+ * @param scope The scope of the lock to create, one of:
+ * <PRE>
+ *            APR_CROSS_PROCESS -- lock processes from the protected area.
+ *            APR_INTRAPROCESS  -- lock threads from the protected area.
+ *            APR_LOCKALL       -- lock processes and threads from the
+ *                                 protected area.
+ * </PRE>
+ * @param fname A file name to use if the lock mechanism requires one.  This
+ *        argument should always be provided.  The lock code itself will
+ *        determine if it should be used.
+ * @param cont The pool to operate on.
+ * @tip APR_CROSS_PROCESS may lock both processes and threads, but it is
+ *      only guaranteed to lock processes.
  */
 ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, const char *fname, 
                            ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_lock(ap_lock_t *lock)
-
-B<Lock a protected region.>
-
-    arg 1) The lock to set.
-
-=cut
+/**
+ * Lock a protected region.
+ * @param lock The lock to set.
  */
 ap_status_t ap_lock(ap_lock_t *lock);
 
-/*
-
-=head1 ap_status_t ap_unlock(ap_lock_t *lock)
-
-B<Unlock a protected region.>
- 
-    arg 1) The lock to reset.
-
-=cut
+/**
+ * Unlock a protected region.
+ * @param lock The lock to reset.
  */
 ap_status_t ap_unlock(ap_lock_t *lock);
 
-/*
-
-=head1 ap_status_t ap_destroy_lock(ap_lock_t *lock)
-
-B<Free the memory associated with a lock.>
- 
-    arg 1) The lock to free.
-
-B<NOTE>:  If the lock is currently active when it is destroyed, it 
-          will be unlocked first.
-
-=cut
+/**
+ * Free the memory associated with a lock.
+ * @param lock The lock to free.
+ * @tip  If the lock is currently active when it is destroyed, it 
+ *       will be unlocked first.
  */
 ap_status_t ap_destroy_lock(ap_lock_t *lock);
 
-/*
-
-=head1 ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, ap_pool_t *cont)
-
-B<Re-open a lock in a child process.>
-
-    arg 1) The newly re-opened lock structure.
-    arg 2) A file name to use if the lock mechanism requires one.  This
-           argument should always be provided.  The lock code itself will
-           determine if it should be used.  This filename should be the same
-           one that was passed to ap_create_lock
-    arg 3) The pool to operate on.
-
-B<NOTE>:  This function doesn't always do something, it depends on the
-           locking mechanism chosen for the platform, but it is a good
-           idea to call it regardless, because it makes the code more
-           portable. 
-
-=cut
+/**
+ * Re-open a lock in a child process.
+ * @param lock The newly re-opened lock structure.
+ * @param fname A file name to use if the lock mechanism requires one.  This
+ *              argument should always be provided.  The lock code itself will
+ *              determine if it should be used.  This filename should be the 
+ *              same one that was passed to ap_create_lock
+ * @param cont The pool to operate on.
+ * @tip This function doesn't always do something, it depends on the
+ *      locking mechanism chosen for the platform, but it is a good
+ *      idea to call it regardless, because it makes the code more
+ *      portable. 
  */
 ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, 
                                ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data)
-
-B<Return the pool associated with the current lock.>
-
-    arg 1) The currently open lock.
-    arg 2) The key to use when retreiving data associated with this lock
-    arg 3) The user data associated with the lock.
-
-=cut
+/**
+ * Return the pool associated with the current lock.
+ * @param lock The currently open lock.
+ * @param key The key to use when retreiving data associated with this lock
+ * @param data The user data associated with the lock.
  */
 ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data);
 
-/*
-
-=head1 ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key, ap_status_t (*cleanup) (void *))
-
-B<Return the pool associated with the current lock.>
-
-    arg 1) The currently open lock.
-    arg 2) The user data to associate with the lock.
-    arg 3) The key to use when associating data with this lock
-    arg 4) The cleanup to use when the lock is destroyed.
-
-=cut
+/**
+ * Return the pool associated with the current lock.
+ * @param lock The currently open lock.
+ * @param data The user data to associate with the lock.
+ * @param key The key to use when associating data with this lock
+ * @param cleanup The cleanup to use when the lock is destroyed.
  */
 ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
                             ap_status_t (*cleanup) (void *));
