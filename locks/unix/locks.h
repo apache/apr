@@ -88,6 +88,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
 
 #if APR_HAS_THREADS
 #if HAVE_PTHREAD_H
