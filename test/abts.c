@@ -89,6 +89,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
 {
     sub_suite *subsuite;
     curr_char = 0;
+    char *p;
     
     /* Only end the suite if we actually ran it */
     if (suite && suite->tail &&!suite->tail->not_run) {
@@ -99,7 +100,11 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
     subsuite->num_test = 0;
     subsuite->failed = 0;
     subsuite->next = NULL;
-    subsuite->name = suite_name;
+    p = strchr(suite_name, '.');
+    if (p)
+        subsuite->name = strndup(suite_name, p - suite_name);
+    else
+        subsuite->name = suite_name;
     subsuite->not_run = 0;
 
     if (suite == NULL) {
@@ -112,13 +117,13 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
         suite->tail = subsuite;
     }
 
-    if (!should_test_run(suite_name)) {
+    if (!should_test_run(subsuite->name)) {
         subsuite->not_run = 1;
         return suite;
     }
 
     reset_status();
-    fprintf(stdout, "%s:  ", suite_name);
+    fprintf(stdout, "%s:  ", subsuite->name);
     update_status();
     fflush(stdout);
 
