@@ -189,8 +189,8 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     }
 
     rv = apr_stat(&finfo, fname, APR_FINFO_NORM, p);
-    if (rv) {
-        fprintf(stderr, "apr_file_close()->%d/%s\n",
+    if (rv != APR_SUCCESS && rv != APR_INCOMPLETE) {
+        fprintf(stderr, "apr_stat()->%d/%s\n",
                 rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
