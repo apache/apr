@@ -162,6 +162,7 @@ struct apr_pool_t {
 #else /* !defined(APR_POOL_DEBUG) */
     debug_node_t         *nodes;
     const char           *file_line;
+    apr_uint32_t          creation_flags;
     unsigned int          stat_alloc;
     unsigned int          stat_total_alloc;
     unsigned int          stat_clear;
@@ -1068,7 +1069,8 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 #if defined(APR_POOL_DEBUG_VERBOSE)
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: CLEAR  [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s] (%u/%u/%u)\n",
+            "POOL DEBUG: CLEAR  [%10lu/%10lu/%10lu] "
+            "0x%08X \"%s\" [%s] (%u/%u/%u)\n",
             (unsigned long)apr_pool_num_bytes(pool, 0),
             (unsigned long)apr_pool_num_bytes(pool, 1),
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
@@ -1089,7 +1091,8 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
 #if defined(APR_POOL_DEBUG_VERBOSE)
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: DESTROY [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s] (%u/%u/%u)\n",
+            "POOL DEBUG: DESTROY [%10lu/%10lu/%10lu] "
+            "0x%08X \"%s\" [%s] (%u/%u/%u)\n",
             (unsigned long)apr_pool_num_bytes(pool, 0),
             (unsigned long)apr_pool_num_bytes(pool, 1),
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
@@ -1153,17 +1156,24 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->abort_fn = abort_fn;
     pool->tag = file_line;
     pool->file_line = file_line;
+    pool->creation_flags = flags;
 
     if ((flags & APR_POOL_FNEW_ALLOCATOR) == APR_POOL_FNEW_ALLOCATOR) {
 #if APR_HAS_THREADS
-        if ((flags & APR_POOL_FLOCK) == APR_POOL_FLOCK) {
-            apr_status_t rv;
+        apr_status_t rv;
 
-            if ((rv = apr_thread_mutex_create(&pool->mutex, 
-                    APR_THREAD_MUTEX_DEFAULT, pool)) != APR_SUCCESS) {
-                free(pool);
-                return rv;
-            }
+        /* No matter what the creation flags say, always create
+         * a lock.  Without it integrity_check and apr_pool_num_bytes
+         * blow up (because they traverse pools child lists that
+         * possibly belong to another thread, in combination with
+         * the pool having no lock).  However, this might actually
+         * hide problems like creating a child pool of a pool
+         * belonging to another thread.
+         */
+        if ((rv = apr_thread_mutex_create(&pool->mutex, 
+                APR_THREAD_MUTEX_DEFAULT, pool)) != APR_SUCCESS) {
+            free(pool);
+            return rv;
         }
 #endif
     }
@@ -1200,12 +1210,14 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 #if defined(APR_POOL_DEBUG_VERBOSE)
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: CREATE  [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s] parent: 0x%08X \"%s\"\n",
+            "POOL DEBUG: CREATE  [%10lu/%10lu/%10lu] "
+            "0x%08X \"%s\" [%s] flags=0x%X, parent=0x%08X \"%s\"\n",
             (unsigned long)0,
             (unsigned long)0,
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
             (unsigned int)pool, pool->tag, 
             file_line,
+            flags,
             (unsigned int)parent, parent ? parent->tag : "<null>");
     }
 #endif
