@@ -17,11 +17,9 @@
     defined(NEXT)
 #define apr_inline
 #define __attribute__(__x)
-#define ENUM_BITFIELD(e,n,w)  signed int n : w
 #else
 #define apr_inline __inline__
 #define USE_GNU_INLINE
-#define ENUM_BITFIELD(e,n,w)  e n : w
 #endif
 
 #define APR_HAVE_ARPA_INET_H    @arpa_ineth@
