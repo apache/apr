@@ -56,6 +56,7 @@
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
+#include "apr_portable.h"
 #include <string.h>
 
 #define INCL_DOS
@@ -69,7 +70,7 @@ ap_status_t file_cleanup(void *thefile)
 
 
 
-ap_status_t ap_open(struct file_t **new, ap_context_t *cntxt, char *fname, ap_int32_t flag,  ap_fileperms_t perm)
+ap_status_t ap_open(struct file_t **new, ap_context_t *cntxt, const char *fname, ap_int32_t flag,  ap_fileperms_t perm)
 {
     int oflags = 0;
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;
@@ -158,4 +159,29 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cntxt)
     ULONG rc = DosDelete(path);
     return os2errno(rc);
 }
+
+
+
+ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
+{
+    if (file == NULL) {
+        return APR_ENOFILE;
+    }
+
+    *thefile = file->filedes;
+    return APR_SUCCESS;
+}
+
+
+
+ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, ap_context_t *cont)
+{
+    ap_os_file_t *dafile = thefile;
+    if ((*file) == NULL) {
+        (*file) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+        (*file)->cntxt = cont;
+    }
+    (*file)->filedes = *dafile;
+    return APR_SUCCESS;
+}    
 
