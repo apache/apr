@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    rv = apr_get_groupname(&groupname, groupid, p);
+    rv = apr_group_name_get(&groupname, groupid, p);
     if (rv != APR_SUCCESS)
         groupname = "(none)";
 
