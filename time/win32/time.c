@@ -226,24 +226,24 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 
         FileTimeToLocalFileTime(&ft, &localft);
         FileTimeToSystemTime(&localft, &st);
-        SystemTimeToAprExpTime(result, &st, 1);
+        SystemTimeToAprExpTime(result, &st);
         result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
 
         switch (GetTimeZoneInformation(&tz)) {   
             case TIME_ZONE_ID_UNKNOWN:   
-                xt->tm_isdst = 0;   
+                result->tm_isdst = 0;   
                 /* Bias = UTC - local time in minutes   
                  * tm_gmtoff is seconds east of UTC   
                  */   
-                xt->tm_gmtoff = tz.Bias * -60;   
+                result->tm_gmtoff = tz.Bias * -60;   
                 break;   
             case TIME_ZONE_ID_STANDARD:   
-                xt->tm_isdst = 0;   
-                xt->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;   
+                result->tm_isdst = 0;   
+                result->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;   
                 break;   
             case TIME_ZONE_ID_DAYLIGHT:   
-                xt->tm_isdst = 1;   
-                xt->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;   
+                result->tm_isdst = 1;   
+                result->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;   
                 break;   
             default:   
                 /* noop */;
