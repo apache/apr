@@ -118,12 +118,16 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
     if (!file) {
         /* Do Anonymous, which will be an inherited handle */
+#ifndef _WIN32_WCE
         hFile = INVALID_HANDLE_VALUE;
         sec.nLength = sizeof(SECURITY_ATTRIBUTES);
         sec.lpSecurityDescriptor = NULL;
         sec.bInheritHandle = TRUE;
-        mapkey = NULL;
         psec = &sec;
+#else
+        psec = NULL;
+#endif
+        mapkey = NULL;
     }
     else {
         /* Do file backed, which is not an inherited handle 
@@ -218,7 +222,15 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
+#ifndef _WIN32_WCE
         hMap = OpenFileMappingW(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, mapkey);
+#else
+        /* The WCE 3.0 lacks OpenFileMapping. So we emulate one with
+         * opening the existing shmem and reading its size from the header 
+         */
+        hMap = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, 
+                                  PAGE_READWRITE, 0, sizeof(apr_shm_t), mapkey);
+#endif
     }
 #endif
 #if APR_HAS_ANSI_FS
@@ -240,13 +252,28 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     
     *m = (apr_shm_t *) apr_palloc(pool, sizeof(apr_shm_t));
     (*m)->pool = pool;
-    (*m)->hMap = hMap;
     (*m)->memblk = base;
-    (*m)->usrmem = (char*)base + sizeof(memblock_t);
     /* Real (*m)->mem->size could be recovered with VirtualQuery */
     (*m)->size = (*m)->memblk->size;
-    (*m)->length = (*m)->memblk->length;
+#if _WIN32_WCE
+    /* Reopen with real size  */
+    UnmapViewOfFile(base);
+    CloseHandle(hMap);
 
+    hMap = CreateFileMappingW(INVALID_HANDLE_VALUE, NULL, 
+                              PAGE_READWRITE, 0, (*m)->size, mapkey);
+    if (!hMap) {
+        return apr_get_os_error();
+    }
+    base = MapViewOfFile(hMap, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
+    if (!base) {
+        CloseHandle(hMap);
+        return apr_get_os_error();
+    }    
+#endif
+    (*m)->hMap = hMap;
+    (*m)->length = (*m)->memblk->length;
+    (*m)->usrmem = (char*)base + sizeof(memblock_t);
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
