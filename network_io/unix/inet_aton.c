@@ -69,7 +69,7 @@
  */
 
 #include "apr_private.h"
-#ifndef HAVE_NETINET_TCP_H
+#if !APR_HAVE_NETINET_TCP_H
 
 #include "networkio.h"
 

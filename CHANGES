@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Change the check for netinet/tcp.h to work around an issue with
+     that header file on IRIX 6.5 which prevented it from being
+     detected.  PR #6459  [Jeff Trawick]
+
   *) Introduce apr_get_userid to return a named user's apr_uid_t and
      apr_gid_t across platforms [Cliff Woolley, William Rowe]
 
