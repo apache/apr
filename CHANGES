@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) On socket write functions (apr_sendfile, apr_send, apr_sendv),
+     added a select to wait for writability on the socket if the
+     previous write was incomplete.  [Jeff Trawick, Brian Pane]
+
   *) Deprecated the apr_lock.h API. Please see the following files
      for the improved thread and process locking and signaling:
      apr_proc_mutex.h, apr_thread_mutex.h, apr_thread_rwlock.h,
