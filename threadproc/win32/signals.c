@@ -66,8 +66,8 @@
 /* Windows only really support killing process, but that will do for now. */
 ap_status_t ap_kill(ap_proc_t *proc, int signal)
 {
-    if (TerminateProcess(proc->pi.hProcess, signal) == 0) {
-        return errno;
+    if (TerminateProcess(proc->pid, signal) == 0) {
+        return GetLastError();
     }
     return APR_SUCCESS;
 }
