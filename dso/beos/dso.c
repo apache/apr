@@ -108,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_hand
 
 APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
-    strncpy(strerror(errno), buffer, buflen);
+    strncpy(buffer, strerror(errno), buflen);
     return buffer;
 }
 
