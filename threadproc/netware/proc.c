@@ -210,7 +210,7 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
                                      apr_cmdtype_e cmd) 
 {
-    if (cmd != APR_PROGRAM)
+    if ((cmd != APR_PROGRAM) && (cmd != APR_PROGRAM_ENV))
         return APR_ENOTIMPL;
     attr->cmdtype = cmd;
     return APR_SUCCESS;
