@@ -29,7 +29,8 @@ PROGRAMS = \
 	occhild@EXEEXT@ \
 	teststr@EXEEXT@ \
 	testuser@EXEEXT@ \
-        testsockets@EXEEXT@
+        testsockets@EXEEXT@ \
+	testprocmutex@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -140,5 +141,8 @@ testsockets@EXEEXT@: testsockets.lo $(LOCAL_LIBS)
 
 testuser@EXEEXT@: testuser.lo $(LOCAL_LIBS)
 	$(LINK) testuser.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
+	$(LINK) testprocmutex.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
