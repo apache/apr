@@ -57,6 +57,7 @@
 #include "global_mutex.h"
 #include "apr_proc_mutex.h"
 #include "apr_thread_mutex.h"
+#include "apr_portable.h"
 
 static apr_status_t global_mutex_cleanup(void *data)
 {
@@ -175,6 +176,17 @@ APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex)
         }
     }
 #endif /* APR_HAS_THREADS */
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_global_mutex_get(apr_os_global_mutex_t *ospmutex,
+                                                apr_global_mutex_t *pmutex)
+{
+    ospmutex->pool = pmutex->pool;
+    ospmutex->proc_mutex = pmutex->proc_mutex;
+#if APR_HAS_THREADS
+    ospmutex->thread_mutex = pmutex->thread_mutex;
+#endif
     return APR_SUCCESS;
 }
 
