@@ -35,6 +35,8 @@ mode_t apr_unix_perms2mode(apr_fileperms_t perms)
 {
     mode_t mode = 0;
 
+    if (perms & APR_USETID)
+        mode |= S_ISUID;
     if (perms & APR_UREAD)
         mode |= S_IRUSR;
     if (perms & APR_UWRITE)
@@ -42,6 +44,8 @@ mode_t apr_unix_perms2mode(apr_fileperms_t perms)
     if (perms & APR_UEXECUTE)
         mode |= S_IXUSR;
 
+    if (perms & APR_GSETID)
+        mode |= S_ISGID;
     if (perms & APR_GREAD)
         mode |= S_IRGRP;
     if (perms & APR_GWRITE)
@@ -49,6 +53,10 @@ mode_t apr_unix_perms2mode(apr_fileperms_t perms)
     if (perms & APR_GEXECUTE)
         mode |= S_IXGRP;
 
+#ifdef S_ISVTX
+    if (perms & APR_WSTICKY)
+        mode |= S_ISVTX;
+#endif
     if (perms & APR_WREAD)
         mode |= S_IROTH;
     if (perms & APR_WWRITE)
@@ -63,6 +71,8 @@ apr_fileperms_t apr_unix_mode2perms(mode_t mode)
 {
     apr_fileperms_t perms = 0;
 
+    if (mode & S_ISUID)
+        perms |= APR_USETID;
     if (mode & S_IRUSR)
         perms |= APR_UREAD;
     if (mode & S_IWUSR)
@@ -70,6 +80,8 @@ apr_fileperms_t apr_unix_mode2perms(mode_t mode)
     if (mode & S_IXUSR)
         perms |= APR_UEXECUTE;
 
+    if (mode & S_ISGID)
+        perms |= APR_GSETID;
     if (mode & S_IRGRP)
         perms |= APR_GREAD;
     if (mode & S_IWGRP)
@@ -77,6 +89,10 @@ apr_fileperms_t apr_unix_mode2perms(mode_t mode)
     if (mode & S_IXGRP)
         perms |= APR_GEXECUTE;
 
+#ifdef S_ISVTX
+    if (mode & S_ISVTX)
+        perms |= APR_WSTICKY;
+#endif
     if (mode & S_IROTH)
         perms |= APR_WREAD;
     if (mode & S_IWOTH)
