@@ -179,7 +179,7 @@ FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char *fnName, int ordinal);
 
 #define DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
     typedef rettype (calltype *fpt##fn) args; \
-    static fpt##fn pfn##fn; \
+    static fpt##fn pfn##fn = NULL; \
     __inline rettype Late##fn args \
     {   if (!pfn##fn) \
             pfn##fn = (fpt##fn) LoadLateDllFunc(lib, #fn, ord); \

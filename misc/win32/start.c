@@ -233,7 +233,7 @@ ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
  * missing from one or more releases of the Win32 API
  */
 
-static char *lateDllName[DLL_defined] = {
+static const char* const lateDllName[DLL_defined] = {
     "kernel32", "advapi32", "mswsock",  "ws2_32"  };
 static HMODULE lateDllHandle[DLL_defined] = {
     NULL,       NULL,       NULL,       NULL      };
