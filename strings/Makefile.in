@@ -75,4 +75,8 @@ apr_strings.o: apr_strings.c $(INCDIR)/apr.h $(INCDIR)/apr_strings.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
  $(INCDIR)/apr_tables.h $(INCDIR)/apr_private.h
-apr_strnatcmp.o: apr_strnatcmp.c $(INCDIR)/apr_strnatcmp.h
+apr_strnatcmp.o: apr_strnatcmp.c $(INCDIR)/apr_strings.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_tables.h
