@@ -55,6 +55,9 @@
 #include "fileio.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#ifdef HAVE_SYS_SYSLIMITS_H
+#include <sys/syslimits.h>
+#endif
 
 static apr_status_t dir_cleanup(void *thedir)
 {
