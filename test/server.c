@@ -58,6 +58,7 @@
 #include <stdlib.h>
 #include "apr_network_io.h"
 #include "apr_getopt.h"
+#include "apr_poll.h"
 
 #define STRLEN 15
 
@@ -138,7 +139,7 @@ int main(int argc, const char * const argv[])
     
     pollres = 1; 
     APR_TEST_BEGIN(rv, "Polling for socket",
-        apr_poll(sdset, &pollres, -1))
+        apr_poll(sdset, 1, &pollres, -1))
 
     if (pollres == 0) {
         fprintf(stdout, "Failed\n");

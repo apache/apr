@@ -55,48 +55,12 @@
 #include "fileio.h"
 #include "apr_strings.h"
 #include "apr_thread_mutex.h"
+#include "apr_support.h"
 
 /* The only case where we don't use wait_for_io_or_timeout is on
  * pre-BONE BeOS, so this check should be sufficient and simpler */
 #if !BEOS_R5
 #define USE_WAIT_FOR_IO
-#endif
-
-#ifdef USE_WAIT_FOR_IO
-static apr_status_t wait_for_io_or_timeout(apr_file_t *file, int for_read)
-{
-    struct timeval tv, *tvptr;
-    fd_set fdset;
-    int srv;
-
-    /* TODO - timeout should be less each time through this loop */
-
-    do {
-        FD_ZERO(&fdset);
-        FD_SET(file->filedes, &fdset);
-        if (file->timeout >= 0) {
-            tv.tv_sec = apr_time_sec(file->timeout);
-            tv.tv_usec = apr_time_usec(file->timeout);
-            tvptr = &tv;
-        }
-        else {
-            tvptr = NULL;
-        }
-        srv = select(file->filedes + 1,
-            for_read ? &fdset : NULL,
-            for_read ? NULL : &fdset,
-            NULL,
-            tvptr);
-    } while (srv == -1 && errno == EINTR);
-
-    if (srv == 0) {
-        return APR_TIMEUP;
-    }
-    else if (srv < 0) {
-        return errno;
-    }
-    return APR_SUCCESS;
-}
 #endif
 
 /* problems: 
@@ -193,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         if (rv == -1 && 
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
-            apr_status_t arv = wait_for_io_or_timeout(thefile, 1);
+            apr_status_t arv = apr_wait_for_io_or_timeout(thefile, NULL, 1);
             if (arv != APR_SUCCESS) {
                 *nbytes = bytes_read;
                 return arv;
@@ -272,7 +236,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         if (rv == (apr_size_t)-1 &&
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
-            apr_status_t arv = wait_for_io_or_timeout(thefile, 0);
+            apr_status_t arv = apr_wait_for_io_or_timeout(thefile, NULL, 0);
             if (arv != APR_SUCCESS) {
                 *nbytes = 0;
                 return arv;

@@ -1,4 +1,9 @@
 Changes with APR b1
+
+  *) Re-write apr_poll() on Unix.  This improves the performance by
+     giving the user back control over the memory in the pollset.
+     [Ryan Bloom]
+
   *) Added APR_LIMIT_NOFILE option to apr_procattr_limit_set() to
      control the file descriptor limit on platforms that support
      RLIMIT_NOFILE.  [Brian Pane]

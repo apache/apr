@@ -61,6 +61,7 @@
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
+#include "apr_poll.h"
 #include "apr_lib.h"
 #include "test_apr.h"
 
@@ -157,7 +158,7 @@ int main(void)
     apr_poll_socket_add(sdset, testsock, APR_POLLIN);
     num = 1;
     STD_TEST_NEQ("        Checking for incoming data",
-                 apr_poll(sdset, &num, apr_time_from_sec(1)));
+                 apr_poll(sdset, 1, &num, apr_time_from_sec(1)));
     if (num == 0) {
         printf("** This platform doesn't return readability on a regular file.**\n");
     }
