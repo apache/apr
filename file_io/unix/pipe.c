@@ -76,7 +76,7 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
       fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
 #  if defined(O_NONBLOCK)
       fd_flags &= ~O_NONBLOCK;
-#  elif defined(~O_NDELAY)
+#  elif defined(O_NDELAY)
       fd_flags &= ~O_NDELAY;
 #  elif defined(FNDELAY)
       fd_flags &= ~O_FNDELAY;
