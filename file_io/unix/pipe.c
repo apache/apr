@@ -123,7 +123,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
 ap_status_t ap_create_namedpipe(char *filename, 
                                 ap_fileperms_t perm, ap_context_t *cont)
 {
-    mode_t mode = get_fileperms(perm);
+    mode_t mode = ap_unix_get_fileperms(perm);
 
     if (mkfifo(filename, mode) == -1) {
         return errno;

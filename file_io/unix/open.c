@@ -55,7 +55,7 @@
 #include "fileio.h"
 #include "apr_portable.h"
 
-ap_status_t file_cleanup(void *thefile)
+ap_status_t ap_unix_file_cleanup(void *thefile)
 {
     ap_file_t *file = thefile;
     int rv;
@@ -75,7 +75,6 @@ ap_status_t file_cleanup(void *thefile)
 ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cont)
 {
     int oflags = 0;
-    char *buf_oflags;
 
     if (new == NULL)
         return APR_EBADARG;
@@ -124,7 +123,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
         (*new)->filedes = open(fname, oflags, 0777);
     }
     else {
-        (*new)->filedes = open(fname, oflags, get_fileperms(perm));
+        (*new)->filedes = open(fname, oflags, ap_unix_get_fileperms(perm));
     }    
 
     if ((*new)->filedes < 0) {
@@ -140,7 +139,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     (*new)->timeout = -1;
     (*new)->ungetchar = -1;
     (*new)->eof_hit = 0;
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
+    ap_register_cleanup((*new)->cntxt, (void *)(*new), ap_unix_file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;
 }
@@ -152,8 +151,8 @@ ap_status_t ap_close(ap_file_t *file)
     if (file == NULL)
         return APR_EBADARG;
 
-    if ((rv = file_cleanup(file)) == APR_SUCCESS) {
-        ap_kill_cleanup(file->cntxt, file, file_cleanup);
+    if ((rv = ap_unix_file_cleanup(file)) == APR_SUCCESS) {
+        ap_kill_cleanup(file->cntxt, file, ap_unix_file_cleanup);
         return APR_SUCCESS;
     }
     return rv;
