@@ -718,6 +718,32 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return APR_SUCCESS;
 }
 
+/*
+ * Pool creation/destruction stubs, for people who are running 
+ * mixed release/debug enviroments.
+ */
+
+APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
+                                       const char *file_line)
+{
+    apr_pool_clear(pool);
+}
+
+APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
+                                         const char *file_line)
+{
+    apr_pool_destroy(pool);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
+                                                   apr_pool_t *parent,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_uint32_t flags,
+                                                   const char *file_line)
+{
+    return apr_pool_create_ex(newpool, parent, abort_fn, flags);
+}
+
 
 /*
  * "Print" functions
