@@ -173,6 +173,11 @@ static void test_seek(CuTest *tc)
                        apr_file_open(&fh, TESTFN, APR_WRITE, 
                                      APR_OS_DEFAULT, p));
 
+    pos = 0;
+    apr_assert_success(tc, "relative seek to end", 
+                       apr_file_seek(fh, APR_END, &pos));
+    CuAssert(tc, "seek to END gave 8Gb", pos == eightGb);
+    
     pos = eightGb;
     apr_assert_success(tc, "seek to 8Gb", apr_file_seek(fh, APR_SET, &pos));
     CuAssert(tc, "seek gave 8Gb offset", pos == eightGb);
@@ -264,8 +269,8 @@ CuSuite *testlfs(void)
     SUITE_ADD_TEST(suite, test_reopen);
     SUITE_ADD_TEST(suite, test_stat);
     SUITE_ADD_TEST(suite, test_readdir);
-    SUITE_ADD_TEST(suite, test_append);
     SUITE_ADD_TEST(suite, test_seek);
+    SUITE_ADD_TEST(suite, test_append);
     SUITE_ADD_TEST(suite, test_write);
 #if APR_HAS_MMAP
     SUITE_ADD_TEST(suite, test_mmap);
