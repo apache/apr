@@ -131,9 +131,7 @@ APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
  */
 APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
 
-/**
- * Deprecated: Use apr_xlate_sb_get()
- */
+/** @deprecated @see apr_xlate_sb_get */
 APR_DECLARE(void) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
 
 /**
