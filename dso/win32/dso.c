@@ -93,3 +93,8 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     
     return APR_SUCCESS;
 }
+
+char *ap_dso_error(void)
+{
+    return "An error occured loading a DLL.";
+}
