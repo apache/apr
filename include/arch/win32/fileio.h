@@ -62,6 +62,7 @@
 #include "apr_lock.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
+#include "misc.h"
 
 #if APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
