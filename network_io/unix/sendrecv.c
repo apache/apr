@@ -211,6 +211,8 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
   *     - Should flags be an int_32 or what?
   */
 
+static ap_hdtr_t no_hdtr; /* used below when caller passes NULL for ap_hdtr_t */
+
 #if defined(__linux__) && defined(HAVE_WRITEV)
 
 /* TCP_CORK keeps us from sending partial frames when we shouldn't 
@@ -265,6 +267,10 @@ ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
     off_t off = *offset;
     int rv, nbytes = 0, total_hdrbytes, i, delayflag = APR_EINIT, corked = 0;
     ap_status_t arv;
+
+    if (!hdtr) {
+        hdtr = &no_hdtr;
+    }
 
     /* Ignore flags for now. */
     flags = 0;
@@ -394,6 +400,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     struct sf_hdtr headerstruct;
     size_t bytes_to_send = *len;
 
+    if (!hdtr) {
+        hdtr = &no_hdtr;
+    }
+
     /* Ignore flags for now. */
     flags = 0;
 
@@ -483,6 +493,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     struct sf_hdtr headerstruct;
     struct iovec hdtrarray[2];
     void *headerbuf, *trailerbuf;
+
+    if (!hdtr) {
+        hdtr = &no_hdtr;
+    }
 
     /* Ignore flags for now. */
     flags = 0;
@@ -585,6 +599,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     void * hbuf=NULL, * tbuf=NULL;
     ap_status_t arv;
     struct sf_parms parms;
+
+    if (!hdtr) {
+        hdtr = &no_hdtr;
+    }
 
     /* Ignore flags for now. */
     flags = 0;
@@ -712,6 +730,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     struct iovec headerstruct[2] = {(0, 0), (0, 0)};
     size_t bytes_to_send = *len;
     
+    if (!hdtr) {
+        hdtr = &no_hdtr;
+    }
+
     /* Ignore flags for now. */
     flags = 0;
     
