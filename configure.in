@@ -390,7 +390,7 @@ AC_CHECK_LIB(m,modf)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
-AC_CHECK_FUNCS(strcasecmp stricmp setsid nl_langinfo)
+AC_CHECK_FUNCS(strcasecmp stricmp setsid nl_langinfo isinf isnan)
 AC_CHECK_FUNCS(setrlimit, [ have_setrlimit="1" ], [ have_setrlimit="0" ]) 
 AC_CHECK_FUNCS(getrlimit, [ have_getrlimit="1" ], [ have_getrlimit="0" ]) 
 AC_CHECK_FUNCS(writev)
