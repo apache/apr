@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "apr_thread_mutex.h"
 #include <errno.h>
 #include <winbase.h>
 #include <string.h>
@@ -268,7 +269,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     if (flag & APR_BUFFERED) {
         (*new)->buffered = 1;
         (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
-        rv = apr_lock_create(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
+        rv = apr_thread_mutex_create(&(*new)->mutex, APR_THREAD_MUTEX_DEFAULT,
+                                     cont);
 
         if (rv) {
             if (file_cleanup(*new) == APR_SUCCESS) {
@@ -314,7 +316,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
         apr_pool_cleanup_kill(file->cntxt, file, file_cleanup);
 
         if (file->buffered)
-            apr_lock_destroy(file->mutex);
+            apr_thread_mutex_destroy(file->mutex);
 
         return APR_SUCCESS;
     }
