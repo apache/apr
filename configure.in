@@ -1845,7 +1845,7 @@ do
 done
 
 if test -d $srcdir/test; then
-    MAKEFILE3="test/Makefile"
+    MAKEFILE3="test/Makefile test/internal/Makefile"
 fi
 AC_SUBST(SUBDIRS)
 
