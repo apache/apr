@@ -57,10 +57,11 @@
 #include "apr_portable.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_lock(ap_context_t *, ap_locktype_e,
- *                            ap_lockscope_e scope, char *, ap_lock_t **)
+ * ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
+ *                            ap_lockscope_e scope, char *fname, 
+ *                            ap_context_t *cont)
  *    Create a new instance of a lock structure. 
- * arg 1) The context to operate on.
+ * arg 1) The newly created lock structure.
  * arg 2) The type of lock to create, one of:
  *            APR_MUTEX
  *            APR_READWRITE
@@ -72,7 +73,7 @@
  * arg 4) A file name to use if the lock mechanism requires one.  This
  *        argument should always be provided.  The lock code itself will
  *        determine if it should be used.
- * arg 5) The newly created lock structure.
+ * arg 5) The context to operate on.
  * NOTE:  APR_CROSS_PROCESS may lock both processes and threads, but it is
  *        only guaranteed to lock processes.
  */
@@ -120,7 +121,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_lock(ap_lock_t *)
+ * ap_status_t ap_lock(ap_lock_t *lock)
  *    Lock a protected region. 
  * arg 1) The lock to set.
  */
@@ -145,7 +146,7 @@ ap_status_t ap_lock(struct lock_t *lock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_unlock(ap_lock_t *)
+ * ap_status_t ap_unlock(ap_lock_t *lock)
  *    Unlock a protected region. 
  * arg 1) The lock to reset.
  */
@@ -171,7 +172,7 @@ ap_status_t ap_unlock(struct lock_t *lock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_destroy_lock(ap_lock_t *)
+ * ap_status_t ap_destroy_lock(ap_lock_t *lock)
  *    Free the memory associated with a lock. 
  * arg 1) The lock to free.
  * NOTE:  If the lock is currently active when it is destroyed, it 
@@ -198,14 +199,15 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_child_init_lock(ap_lock_t **, ap_context_t *, char *)
+ * ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, 
+ *                                ap_context_t *cont)
  *    Re-open a lock in a child process. 
- * arg 1) The context to operate on.
+ * arg 1) The newly re-opened lock structure.
  * arg 2) A file name to use if the lock mechanism requires one.  This
  *        argument should always be provided.  The lock code itself will
  *        determine if it should be used.  This filename should be the same
  *        one that was passed to ap_create_lock
- * arg 1) The newly re-opened lock structure.
+ * arg 3) The context to operate on.
  * NOTE:  This function doesn't always do something, it depends on the
  *        locking mechanism chosen for the platform, but it is a good
  *        idea to call it regardless, because it makes the code more
@@ -223,7 +225,7 @@ ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_lockdata(ap_lock_t *, char *key, void *)
+ * ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
  *    Return the context associated with the current lock.
  * arg 1) The currently open lock.
  * arg 2) The key to use when retreiving data associated with this lock
@@ -241,7 +243,7 @@ ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_lockdata(ap_lock_t *, void *, char *,
+ * ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
                                ap_status_t (*cleanup) (void *))
  *    Return the context associated with the current lock.
  * arg 1) The currently open lock.
@@ -262,10 +264,10 @@ ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_lock(ap_os_lock_t *, ap_lock_t **)
+ * ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
  *    onvert the lock from os specific type to apr type
- * arg 1) The apr lock to convert.
- * arg 2) The os specific lock we are converting to.
+ * arg 1) The os specific lock we are converting to.
+ * arg 2) The apr lock to convert.
  */
 ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct lock_t *lock)
 {
@@ -283,11 +285,12 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct lock_t *lock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_lock(ap_lock_t **, ap_os_lock_t *, ap_context_t *)
+ * ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *,
+ *                            ap_context_t *cont)
  *    onvert the lock from os specific type to apr type
- * arg 1) The context to use if it is needed.
- * arg 2) The apr lock we are converting to.
- * arg 3) The os specific lock to convert.
+ * arg 1) The apr lock we are converting to.
+ * arg 2) The os specific lock to convert.
+ * arg 3) The context to use if it is needed.
  */
 ap_status_t ap_put_os_lock(struct lock_t **lock, ap_os_lock_t *thelock, 
                            ap_context_t *cont)
