@@ -51,9 +51,6 @@ check: $(PROGRAMS) $(NONPORTABLE)
 		fi \
 	done
 
-testdir@EXEEXT@: testdir.lo $(LOCAL_LIBS)
-	$(LINK) testdir.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testnames@EXEEXT@: testnames.lo $(LOCAL_LIBS)
 	$(LINK) testnames.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
