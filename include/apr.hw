@@ -70,6 +70,12 @@
 #ifndef APR_H
 #define APR_H
 
+/* Ignore most warnings (back down to /W3) for poorly constructed headers
+ */
+#if defined(_MSC_VER) && _MSC_VER >= 1200
+#pragma warning(push, 3)
+#endif
+
 /* Has windows.h already been included?  If so, our preferences don't matter,
  * but we will still need the winsock things no matter what was included.
  * If not, include a restricted set of windows headers to our tastes.
@@ -117,6 +123,12 @@
 #include <process.h>
 #include <stdlib.h>
 
+/* Done with badly written headers
+ */
+#if defined(_MSC_VER) && _MSC_VER >= 1200
+#pragma warning(pop)
+#endif
+
 /* disable or reduce the frequency of...
  *   C4057: indirection to slightly different base types
  *   C4075: slight indirection changes (unsigned short* vs short[])
@@ -126,7 +138,7 @@
  *   C4244: int to char/short - precision loss
  * 
  */
-#pragma warning(disable: 4100 4127 4201; once: 4057 4075 4244)
+#pragma warning(disable: 4100 4127 4201 4514; once: 4057 4075 4244)
 
 #define APR_INLINE __inline
 #define APR_HAS_INLINE		1
