@@ -163,7 +163,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     }
     else { 
         if (perm == APR_OS_DEFAULT) {
-            (*new)->filedes = open(fname, oflags);
+            (*new)->filedes = open(fname, oflags, 0777);
         }
         else {
             (*new)->filedes = open(fname, oflags, get_fileperms(perm));
