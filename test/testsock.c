@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     args[1] = NULL; 
     s1 = apr_create_process(&proc1, "./server", args, NULL, attr1, context);
 
-    /* Sleep for 30 seconds to ensure the server is setup before we begin */
+    /* Sleep for 10 seconds to ensure the server is setup before we begin */
     apr_sleep(10000000);
     args[0] = apr_pstrdup(context, "client");
     s2 = apr_create_process(&proc2, "./client", args, NULL, attr2, context);
