@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fix apr_tokenize_to_argv() to remove the escape character
+     (backslash) from the argument tokens. PR 11793 [Paul J. Reder]
+
   *) Add APR_PARSE_ARGUMENTS and APR_LAYOUT macros for better layout
      support. [Thom May]
 
