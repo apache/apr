@@ -17,9 +17,9 @@
 #endif
 
 /*  APR Feature Macros */
-@threads@
-@sendfile@
-@mmap@
+#define APR_HAS_THREADS  @threads@
+#define APR_HAS_SENDFILE @sendfile@
+#define APR_HAS_MMAP     @mmap@
 
 /* Typedefs that APR needs. */
 

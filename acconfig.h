@@ -45,8 +45,6 @@
 #undef USEBCOPY
 
 #undef SIZEOF_SSIZE_T
-#undef APR_HAS_THREADS
-#undef APR_HAS_SENDFILE
 
 @BOTTOM@
 

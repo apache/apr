@@ -106,7 +106,7 @@ typedef struct socket_t     ap_socket_t;
 typedef struct pollfd_t    ap_pollfd_t;
 typedef struct hdtr_t		ap_hdtr_t;
 
-#ifdef APR_HAS_SENDFILE
+#if APR_HAS_SENDFILE
 /* A structure to encapsulate headers and trailers for ap_sendfile */
 struct hdtr_t {
     struct iovec* headers;

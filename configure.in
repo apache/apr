@@ -238,10 +238,10 @@ AC_FUNC_MMAP
 AC_FUNC_SETPGRP
 
 if test "$ac_cv_func_mmap_fixed_mapped" = "yes"; then 
-    mmap="#define APR_HAS_MMAP 1"
+    mmap="1"
     AC_SUBST(mmap)
 else
-    mmap="#define APR_HAS_MMAP 0"
+    mmap="0"
     AC_SUBST(mmap)
 fi
 
@@ -262,7 +262,7 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(pthread_sigmask)
 AC_CHECK_FUNCS(strcasecmp stricmp poll setsid)
 AC_CHECK_FUNCS(sigaction writev)
-AC_CHECK_FUNCS(sendfile, [ sendfile="#define APR_HAS_SENDFILE 1" ], [ sendfile="APR_HAS_SENDFILE 0" ]) 
+AC_CHECK_FUNCS(sendfile, [ sendfile="1" ], [ sendfile="0" ]) 
 AC_CHECK_FUNCS(getpass)
 AC_CHECK_FUNC(_getch)
 AC_SUBST(sendfile)
@@ -274,7 +274,7 @@ AC_ARG_ENABLE(threads,
 [  --enable-threads  Enable threading support in APR.],
 [
   if test "$enableval" = "no"; then 
-    threads="#define APR_HAS_THREADS 0"
+    threads="0"
     pthreadh="0"
     AC_SUBST(threads)
     AC_SUBST(pthreadh)
@@ -282,11 +282,11 @@ AC_ARG_ENABLE(threads,
   else
     if test "$enableval" = "pthread"; then
       AC_CHECK_HEADERS(pthread.h, [ 
-          threads="#define APR_HAS_THREADS 1"
+          threads="1"
           pthreadh="1"
           AC_SUBST(pthreadh)
           AC_SUBST(threads) ], [
-          threads="#define APR_HAS_THREADS 0"
+          threads="0"
           pthreadh="0"
           AC_SUBST(pthreadh)
           AC_SUBST(threads) ] )
@@ -298,11 +298,11 @@ AC_ARG_ENABLE(threads,
 ],
 [
   AC_CHECK_HEADERS(pthread.h, [
-          threads="#define APR_HAS_THREADS 1"
+          threads="1"
           pthreadh="1"
           AC_SUBST(pthreadh)
           AC_SUBST(threads) ], [
-          threads="#define APR_HAS_THREADS 0"
+          threads="0"
           pthreadh="0"
           AC_SUBST(pthreadh)
           AC_SUBST(threads) ] )
