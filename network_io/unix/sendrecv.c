@@ -449,7 +449,7 @@ static int include_hdrs_in_length(void)
      */
     api = NEW;
     return 0;
-#elif
+#else
     /* the build system's kernel is older than 3.4.  Use the old API */
     return 1;
 #endif
