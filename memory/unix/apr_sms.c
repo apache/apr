@@ -564,7 +564,9 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
             cleanup = sms->cleanups;
 
             while (cleanup) {
-                cleanup->cleanup_fn(cleanup->data);
+                if (cleanup->type == APR_GENERAL_CLEANUP)
+                    cleanup->cleanup_fn(cleanup->data);
+
                 next_cleanup = cleanup->next;
                 apr_sms_free(sms->accounting, cleanup);
                 cleanup = next_cleanup;
@@ -688,13 +690,12 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms,
     if (sms->sms_lock)
         apr_lock_acquire(sms->sms_lock);
     
-    cleanup = (struct apr_sms_cleanup *)
-                  apr_sms_malloc(sms->accounting,
-                                 sizeof(struct apr_sms_cleanup));
+    cleanup = apr_sms_malloc(sms->accounting, sizeof(struct apr_sms_cleanup));
 
-    if (!cleanup){
+    if (!cleanup) {
         if (sms->sms_lock)
             apr_lock_release(sms->sms_lock);
+        
         return APR_ENOMEM;
     }
 
@@ -1021,7 +1022,7 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction)
 #endif /* APR_DEBUG_SHOW_STRUCTURE */
 
 #if APR_DEBUG_TAG_SMS
-APR_DECLARE(void) apr_sms_tag(const char *tag, apr_sms_t *sms)
+APR_DECLARE(void) apr_sms_tag(apr_sms_t *sms, const char *tag)
 {
     sms->tag = tag;
 }
