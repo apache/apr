@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stdout,"\tClient:  Making socket address...............");
-    if (apr_getaddrinfo(&destsa, dest, AF_INET, 8021, 0, context) != APR_SUCCESS) {
+    if (apr_getaddrinfo(&destsa, dest, APR_INET, 8021, 0, context) != APR_SUCCESS) {
         apr_close_socket(sock);
         fprintf(stdout, "Failed!\n");
         fprintf(stdout, "Couldn't create a socket address structure for %s\n", dest);

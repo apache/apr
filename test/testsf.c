@@ -218,7 +218,7 @@ static int client(client_socket_mode_t socket_mode)
         exit(1);
     }
 
-    rv = apr_getaddrinfo(&destsa, "127.0.0.1", AF_INET, TESTSF_PORT, 0, p);
+    rv = apr_getaddrinfo(&destsa, "127.0.0.1", APR_INET, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_getaddrinfo()->%d/%s\n",
                 rv,

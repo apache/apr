@@ -113,6 +113,19 @@ struct in_addr {
 }
 #endif
 
+/* Not all platforms have these defined, so we'll define them here
+ * The default values come from FreeBSD 4.1.1
+ */
+#define APR_INET     AF_INET
+#ifdef AF_UNSPEC
+#define APR_UNSPEC   AF_UNSPEC
+#else
+#define APR_UNSPEC   0
+#endif
+#if APR_HAVE_IPV6
+#define APR_INET6    AF_INET6
+#endif
+
 /* Enum to tell us if we're interested in remote or local socket */
 typedef enum {
     APR_LOCAL,
