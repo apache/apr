@@ -24,9 +24,8 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1)
 #
 # Macros for target determination
 #
-MODULES=lib file_io network_io threadproc locks misc time signal
-SUBDIRS=lib file_io/@OSDIR@ network_io/@OSDIR@ threadproc/@OSDIR@ \
-        locks/@OSDIR@ misc/@OSDIR@ time/@OSDIR@ signal/@OSDIR@ 
+MODULES=@MODULES@
+SUBDIRS=@SUBDIRS@
 #shmem/@OSDIR@
 
 #
