@@ -138,13 +138,17 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-freebsd*)
         APR_SETIFNULL(apr_lock_method, [USE_FLOCK_SERIALIZE])
         os_version=`sysctl -n kern.osreldate`
-        dnl 502102 is when libc_r switched to libpthread (aka libkse).
+        # 502102 is when libc_r switched to libpthread (aka libkse).
         if test $os_version -ge "502102"; then
           apr_cv_pthreads_cflags="none"
           apr_cv_pthreads_lib="-lpthread"
         else
           apr_cv_pthreads_cflags="-D_THREAD_SAFE -D_REENTRANT"
           APR_SETIFNULL(enable_threads, [no])
+        fi
+        # prevent use of KQueue before FreeBSD 4.8
+        if test $os_version -lt "480000"; then
+          APR_SETIFNULL(ac_cv_func_kqueue, no)
         fi
 	;;
     *-next-nextstep*)
