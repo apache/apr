@@ -936,7 +936,7 @@ APR_DECLARE(apr_status_t) apr_sms_userdata_set(const void *data,
         sms->prog_data = apr_hash_make(sms->pool);
 
     if (apr_hash_get(sms->prog_data, key, keylen) == NULL) {
-        char *new_key = apr_pstrdup((apr_pool_t*)sms->pool, key);
+        char *new_key = apr_pstrdup(sms->pool, key);
         apr_hash_set(sms->prog_data, new_key, keylen, data);
     } else {
         apr_hash_set(sms->prog_data, key, keylen, data);
