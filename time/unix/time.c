@@ -95,7 +95,7 @@ static void set_xt_gmtoff_from_tm(apr_exploded_time_t *xt, struct tm *tm,
     {
         struct tm t;
         int days = 0, hours = 0, minutes = 0;
-#ifdef HAVE_GMTIME_R
+#if APR_HAS_THREADS && defined (_POSIX_THREAD_SAFE_FUNCTIONS)
         gmtime_r(tt, &t);
 #else
         t = *gmtime(tt);
@@ -109,35 +109,41 @@ static void set_xt_gmtoff_from_tm(apr_exploded_time_t *xt, struct tm *tm,
 #endif
 }
 
-static void tm_to_exp(apr_exploded_time_t *xt, struct tm *tm, time_t *tt)
+static void explode_time(apr_exploded_time_t *xt, apr_time_t t,
+                         apr_int32_t offset, int use_localtime)
 {
-    xt->tm_sec  = tm->tm_sec;
-    xt->tm_min  = tm->tm_min;
-    xt->tm_hour = tm->tm_hour;
-    xt->tm_mday = tm->tm_mday;
-    xt->tm_mon  = tm->tm_mon;
-    xt->tm_year = tm->tm_year;
-    xt->tm_wday = tm->tm_wday;
-    xt->tm_yday = tm->tm_yday;
-    xt->tm_isdst = tm->tm_isdst;
-    set_xt_gmtoff_from_tm(xt,tm,tt);
+    struct tm tm;
+    time_t tt = (t / APR_USEC_PER_SEC) + offset;
+    xt->tm_usec = t % APR_USEC_PER_SEC;
+
+#if APR_HAS_THREADS && defined (_POSIX_THREAD_SAFE_FUNCTIONS)
+    if (use_localtime)
+        localtime_r(&tt, &tm);
+    else
+        gmtime_r(&tt, &tm);
+#else
+    if (use_localtime)
+        tm = *localtime(&tt);
+    else
+        tm = *gmtime(&tt);
+#endif
+
+    xt->tm_sec  = tm.tm_sec;
+    xt->tm_min  = tm.tm_min;
+    xt->tm_hour = tm.tm_hour;
+    xt->tm_mday = tm.tm_mday;
+    xt->tm_mon  = tm.tm_mon;
+    xt->tm_year = tm.tm_year;
+    xt->tm_wday = tm.tm_wday;
+    xt->tm_yday = tm.tm_yday;
+    xt->tm_isdst = tm.tm_isdst;
+    set_xt_gmtoff_from_tm(xt,&tm,&tt);
 }
 
 apr_status_t apr_explode_time(apr_exploded_time_t *result, apr_time_t input,
                               apr_int32_t offs)
 {
-    time_t t = (input / APR_USEC_PER_SEC) + offs;
-    result->tm_usec = input % APR_USEC_PER_SEC;
-
-#if APR_HAS_THREADS && defined (_POSIX_THREAD_SAFE_FUNCTIONS)
-    {
-        struct tm apple;
-        gmtime_r(&t, &apple);
-        tm_to_exp(result, &apple, &t);
-    }
-#else
-    tm_to_exp(result, gmtime(&t), &t);
-#endif
+    explode_time(result, input, offs, 0);
     result->tm_gmtoff = offs;
     return APR_SUCCESS;
 }
@@ -153,17 +159,7 @@ apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input
     /* EMX gcc (OS/2) has a timezone global we can use */
     return apr_explode_time(result, input, -timezone);
 #else
-    time_t mango = input / APR_USEC_PER_SEC;
-
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-    struct tm mangotm;
-    localtime_r(&mango, &mangotm);
-#else /* !APR_HAS_THREADS */
-    struct tm mangotm;
-    mangotm = *localtime(&mango);
-#endif
-    tm_to_exp(result, &mangotm, &mango);
-    result->tm_usec = input % APR_USEC_PER_SEC;
+    explode_time(result, input, 0, 1);
     return APR_SUCCESS;
 #endif /* __EMX__ */
 }
