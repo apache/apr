@@ -115,7 +115,7 @@ static void apr_setup(apr_pool_t **p, apr_socket_t **sock, int *family)
     }
 
     *sock = NULL;
-    rv = apr_socket_create(sock, *family, SOCK_STREAM, *p);
+    rv = apr_socket_create(sock, *family, SOCK_STREAM, 0, *p);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_socket_create()->%d/%s\n",
                 rv,

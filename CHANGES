@@ -1,3 +1,15 @@
+Changes with APR 1.0
+
+  *) The following deprecated interfaces have been removed:
+
+     apr_accept                   -> apr_socket_accept
+     apr_bind                     -> apr_socket_bind
+     apr_connect                  -> apr_socket_connect
+     apr_listen                   -> apr_socket_listen
+     apr_shutdown                 -> apr_socket_shutdown
+     apr_socket_create_ex         -> apr_socket_create
+     MAX_SECONDS_TO_LINGER        -> APR_MAX_SECONDS_TO_LINGER
+
 Changes with APR 0.9.4
 
   *) Work around a bug in Darwin when calling getnameinfo() on IPv4-mapped
