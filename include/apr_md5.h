@@ -143,11 +143,11 @@ APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
  * @param context The MD5 content to update.
  * @param input next message block to update
  * @param inputLen The length of the next message block
- * @deffunc apr_status_t apr_md5_update(apr_md5_ctx_t *context, const unsigned char *input, unsigned int inputLen)
+ * @deffunc apr_status_t apr_md5_update(apr_md5_ctx_t *context, apr_size_t char *input, unsigned int inputLen)
  */
 APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                         const unsigned char *input,
-                                        unsigned int inputLen);
+                                        apr_size_t inputLen);
 
 /**
  * MD5 finalization.  Ends an MD5 message-digest operation, writing the 
