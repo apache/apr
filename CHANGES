@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) The whole codebase was relicensed and is now available under
+     the Apache License, Version 2.0 (http://www.apache.org/licenses).
+     [Apache Software Foundation]
+
   *) Define apr_off_t as apr_intX_t rather than as off_t to prevent
      incompatibility with packages such as Perl which redefine the
      size of off_t via _FILE_OFFSET_BITS on some platforms.
