@@ -17,7 +17,7 @@ INCLUDES=-I$(INCDIR1) -I$(INCDIR2) -I$(INCDIR3) -I$(INCDIR4) -I.
 
 #LIB=libmisc.a
 
-OBJS=start.o getopt.o otherchild.o errorcodes.o rand.o
+OBJS=start.o getopt.o otherchild.o errorcodes.o rand.o canonerr.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
