@@ -1474,7 +1474,7 @@ AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 AC_SUBST(pthreadser)
 
-AC_MSG_CHECKING(if interprocess lock affects threads)
+AC_MSG_CHECKING(if all interprocess locks affect threads)
 if test "x$apr_process_lock_is_global" = "xyes"; then
     proclockglobal="1"
     AC_MSG_RESULT(yes)
@@ -1484,6 +1484,38 @@ else
 fi
 
 AC_SUBST(proclockglobal)
+
+AC_MSG_CHECKING(if Posix sems affect threads in the same process)
+if test "x$apr_posixsem_is_global" = "xyes"; then
+  AC_DEFINE(POSIXSEM_IS_GLOBAL)
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(if SysV sems affect threads in the same process)
+if test "x$apr_sysvsem_is_global" = "xyes"; then
+  AC_DEFINE(SYSVSEM_IS_GLOBAL)
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(if fcntl locks affect threads in the same process)
+if test "x$apr_fcntl_is_global" = "xyes"; then
+  AC_DEFINE(FCNTL_IS_GLOBAL)
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+AC_MSG_CHECKING(if flock locks affect threads in the same process)
+if test "x$apr_flock_is_global" = "xyes"; then
+  AC_DEFINE(FLOCK_IS_GLOBAL)
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
 
 dnl #----------------------------- Checking for /dev/random 
 AC_MSG_CHECKING(for /dev/random)

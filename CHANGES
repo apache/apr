@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Fix a problem with global mutexes on OS/390 when something other
+     than the default mechanism (fcntl) was used.  The mutexes didn't
+     necessarily block out other threads in the same process.
+     [Jeff Trawick]
+
   *) Fixed apr_strfsize formatting of values over 1 gig
      [Matsuzaki Yoshinobu <maz@iij.ad.jp>]
 
