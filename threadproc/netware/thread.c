@@ -110,7 +110,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         strncpy (threadName, attr->thread_name, NX_MAX_OBJECT_NAME_LEN);
     }
     else {
-	    sprintf(threadName, "APR_thread %0004ld", ++thread_count);
+	    sprintf(threadName, "APR_thread %04ld", ++thread_count);
     }
 
     /* An original stack size of 0 will allow NXCreateThread() to
