@@ -533,7 +533,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
                                      pool);
 
         if (rv) {
-            if (file_cleanup(*new) == APR_SUCCESS) {
+            if (file_cleanup(*file) == APR_SUCCESS) {
                 apr_pool_cleanup_kill(pool, *file, file_cleanup);
             }
             return rv;
