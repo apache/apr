@@ -63,8 +63,11 @@
 extern "C" {
 #endif
 
-#include "apr_pools.h"
+/**
+ * package Hash Tables
+ */
 
+#include "apr_pools.h"
 
 /*
  * Abstract type for hash tables.
@@ -76,126 +79,79 @@ typedef struct ap_hash_t ap_hash_t;
  */
 typedef struct ap_hash_index_t ap_hash_index_t;
 
-/*
-
-=head1 ap_hash_t *ap_make_hash(ap_pool_t *pool)
-
-B<Create a hash table within a pool.>
-
-=cut
-*/
+/**
+ * Create a hash table within a pool.
+ * @param pool The pool to allocate the hash table out of
+ * @return The hash table just created
+ */
 ap_hash_t *ap_make_hash(ap_pool_t *pool);
 
-/*
-
-=head1 void ap_hash_set(ap_hash_t *ht, const void *key, size_t klen,
-                        const void *val)
-
-B<Associate a value with a key in a hash table.>
-
-    arg 1) The hash table
-    arg 2) Pointer to the key
-    arg 3) Length of the key
-           If the length is 0 it is assumed to be strlen(key)+1
-    arg 4) Value to associate with the key
-
-If the value is NULL the hash entry is deleted.
-
-=cut
-*/
+/**
+ * Associate a value with a key in a hash table.
+ * @param ht The hash table
+ * @param key Pointer to the key
+ * @param klen Length of the key 
+ *             If the length is 0 it is assumed to be strlen(key)+1
+ * @param val Value to associate with the key
+ * @tip If the value is NULL the hash entry is deleted.
+ */
 void ap_hash_set(ap_hash_t *ht, const void *key, size_t klen, const void *val);
 
-/*
-
-=head1 void *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen)
-
-B<Look up the value associated with a key in a hash table.>
-
-    arg 1) The hash table
-    arg 2) Pointer to the key
-    arg 3) Length of the key
-           If the length is 0 it is assumed to be strlen(key)+1
-
-Returns NULL if the key is not present.
-
-=cut
-*/
+/**
+ * Look up the value associated with a key in a hash table.
+ * @param ht The hash table
+ * @param key Pointer to the key
+ * @param klen Length of the key
+ *         If the length is 0 it is assumed to be strlen(key)+1
+ * @return Returns NULL if the key is not present.
+ */
 void *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
 
-/*
-
-=head1 ap_hash_index_t *ap_hash_first(ap_hash_t *ht)
-
-B<Start iterating over the entries in a hash table.>
-
-    arg 1) The hash table
-
-Returns a pointer to the iteration state, or NULL if there are no
-entries.
-
-=cut
-*/
+/**
+ * Start iterating over the entries in a hash table.
+ * @param ht The hash table
+ * @return a pointer to the iteration state, or NULL if there are no entries.
+ * @tip Example:
+ * <PRE>
+ * 
+ *     int sum_values(ap_hash_t *ht)
+ *     {
+ *         ap_hash_index_t *hi;
+ * 	   void *val;
+ * 	   int sum = 0;
+ * 	   for (hi = ap_hash_first(ht); hi; hi = ap_hash_next(hi)) {
+ * 	       ap_hash_this(hi, NULL, NULL, &val);
+ * 	       sum += *(int *)val;
+ * 	   }
+ * 	   return sum;
+ *     }
+ * 
+ * There is no restriction on adding or deleting hash entries during an
+ * iteration (although the results may be unpredictable unless all you do
+ * is delete the current entry) and multiple iterations can be in
+ * progress at the same time.
+ * </PRE>
+ */
 ap_hash_index_t *ap_hash_first(ap_hash_t *ht);
 
-/*
-
-=head1 ap_hash_index_t *ap_hash_next(ap_hash_index_t *hi)
-
-B<Continue iterating over the entries in a hash table.>
-
-    arg 1) The iteration state
-
-Returns a pointer to the updated iteration state, or NULL if there are
-no more entries.
-
-*/
+/**
+ * Continue iterating over the entries in a hash table.
+ * @param hi The iteration state
+ * @return a pointer to the updated iteration state.  NULL if there are no more  *         entries.
+ */
 ap_hash_index_t *ap_hash_next(ap_hash_index_t *hi);
 
-/*
-
-=head1 void ap_hash_this(ap_hash_index_t *hi, const void **key, size_t *klen,
-                         void **val)
-
-B<Get the current entry's details from the iteration state.>
-
-    arg 1) The iteration state
-    arg 2) Return pointer for the pointer to the key.
-    arg 3) Return pointer for the key length.
-    arg 4) Return pointer for the associated value.
-
-The return pointers should point to a variable that will be set to the
-corresponding data, or they may be NULL if the data isn't interesting.
-
-=cut
-*/
+/**
+ * Get the current entry's details from the iteration state.
+ * @param hi The iteration state
+ * @param key Return pointer for the pointer to the key.
+ * @param klen Return pointer for the key length.
+ * @param val Return pointer for the associated value.
+ * @tip The return pointers should point to a variable that will be set to the
+ *      corresponding data, or they may be NULL if the data isn't interesting.
+ */
 void ap_hash_this(ap_hash_index_t *hi, const void **key, size_t *klen,
                   void **val);
-
-/*
-
-=head2 Using the iteration functions
-
-Example:
-
-    int sum_values(ap_hash_t *ht)
-    {
-        ap_hash_index_t *hi;
-	void *val;
-	int sum = 0;
-	for (hi = ap_hash_first(ht); hi; hi = ap_hash_next(hi)) {
-	    ap_hash_this(hi, NULL, NULL, &val);
-	    sum += *(int *)val;
-	}
-	return sum;
-    }
-
-There is no restriction on adding or deleting hash entries during an
-iteration (although the results may be unpredictable unless all you do
-is delete the current entry) and multiple iterations can be in
-progress at the same time.
-
-=cut
-*/
 
 #ifdef __cplusplus
 }
