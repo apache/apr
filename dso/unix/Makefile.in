@@ -13,7 +13,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libdso.a
 
-OBJS=dso.o \
+OBJS=dso.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
