@@ -167,25 +167,33 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     apr_status_t rv;
 
 #if APR_HAS_THREADS
-    if (mutex->nested && apr_os_thread_equal(mutex->owner,
-                                             apr_os_thread_current())) {
-        mutex->owner_ref++;
-        return APR_SUCCESS;
-    }
-#endif
-
-    rv = pthread_mutex_trylock(&mutex->mutex);
-    if (rv) {
-#ifdef PTHREAD_SETS_ERRNO
-        rv = errno;
-#endif
-        return (rv == EBUSY) ? APR_EBUSY : rv;
-    }
-
-#if APR_HAS_THREADS
     if (mutex->nested) {
+        if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
+            mutex->owner_ref++;
+            return APR_SUCCESS;
+        }
+
+        rv = pthread_mutex_trylock(&mutex->mutex);
+        if (rv) {
+#ifdef PTHREAD_SETS_ERRNO
+            rv = errno;
+#endif
+            return (rv == EBUSY) ? APR_EBUSY : rv;
+        }
+
         mutex->owner = apr_os_thread_current();
         mutex->owner_ref = 1;
+    }
+    else {
+#endif
+        rv = pthread_mutex_trylock(&mutex->mutex);
+        if (rv) {
+#ifdef PTHREAD_SETS_ERRNO
+            rv = errno;
+#endif
+            return (rv == EBUSY) ? APR_EBUSY : rv;
+        }
+#if APR_HAS_THREADS
     }
 #endif
 
