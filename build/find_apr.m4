@@ -55,6 +55,7 @@ AC_DEFUN(APR_FIND_APR, [
 
   preserve_LIBS="$LIBS"
   preserve_LDFLAGS="$LDFLAGS"
+  preserve_CFLAGS="$CFLAGS"
 
   AC_MSG_CHECKING(for APR)
   AC_ARG_WITH(apr,
@@ -64,6 +65,11 @@ AC_DEFUN(APR_FIND_APR, [
       AC_MSG_ERROR([--with-apr requires a directory to be provided])
     fi
 
+    if test -x $withval/bin/apr-config; then
+       CFLAGS="$CFLAGS `$withval/bin/apr-config --cflags`"
+       LIBS="$LIBS `$withval/bin/apr-config --libs`"
+       LDFLAGS="$LDFLAGS `$withval/bin/apr-config --ldflags`"
+    fi
     LIBS="$LIBS -lapr"
     LDFLAGS="$preserve_LDFLAGS -L$withval/lib"
     AC_TRY_LINK_FUNC(apr_initialize, [
@@ -119,6 +125,8 @@ APR, nor an APR build directory.])
     fi
   fi
 
+  AC_MSG_RESULT($apr_found)
+  CFLAGS="$preserve_CFLAGS"
   LIBS="$preserve_LIBS"
   LDFLAGS="$preserve_LDFLAGS"
 ])
