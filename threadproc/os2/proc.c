@@ -333,7 +333,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
 
     /* ### how to handle APR_PROGRAM_ENV and APR_PROGRAM_PATH? */
 
-    if (attr->cmdtype == APR_SHELLCMD || strcasecmp(extension, ".cmd") == 0) {
+    if (attr->cmdtype == APR_SHELLCMD ||
+        attr->cmdtype == APR_SHELLCMD_ENV ||
+        strcasecmp(extension, ".cmd") == 0) {
         strcpy(interpreter, "#!" SHELL_PATH);
         extra_arg = "/C";
     } else if (stricmp(extension, ".exe") != 0) {
