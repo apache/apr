@@ -83,7 +83,9 @@ apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type,
             return stat;
         }
 #else
-        return APR_ENOTIMPL;
+        if (scope != APR_LOCKALL) {
+            return APR_ENOTIMPL;
+        }
 #endif
     }
     if (scope != APR_INTRAPROCESS) {
@@ -104,7 +106,7 @@ apr_status_t apr_lock(apr_lock_t *lock)
             return stat;
         }
 #else
-        return APR_ENOTIMPL;
+        /* must be APR_LOCKALL */
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
@@ -125,7 +127,7 @@ apr_status_t apr_unlock(apr_lock_t *lock)
             return stat;
         }
 #else
-        return APR_ENOTIMPL;
+        /* must be APR_LOCKALL */
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
@@ -145,7 +147,9 @@ apr_status_t apr_destroy_lock(apr_lock_t *lock)
             return stat;
         }
 #else
-        return APR_ENOTIMPL;
+        if (lock->scope != APR_LOCKALL) {
+            return APR_ENOTIMPL;
+        }
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
