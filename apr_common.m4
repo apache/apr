@@ -70,6 +70,7 @@ dnl    PTHREAD_FLAGS="-D_REENTRANT -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=199506 
 
   if test -n "$PTHREAD_FLAGS"; then
     CPPFLAGS="$CPPFLAGS $PTHREAD_FLAGS"
+    THREAD_CPPFLAGS="$THREAD_CPPFLAGS $PTHREAD_FLAGS"
   fi
 ])dnl
 
@@ -165,6 +166,7 @@ fi
 
 if test -n "$ac_cv_pthreads_cflags"; then
   CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
+  THREAD_CFLAGS="$THREAD_CFLAGS $ac_cv_pthreads_cflags"
 fi
 
 PTHREADS_CHECK_COMPILE

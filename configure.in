@@ -715,6 +715,8 @@ AC_SUBST(OSDIR)
 AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(LIBPREFIX)
 AC_SUBST(EXEEXT)
+AC_SUBST(THREAD_CPPFLAGS)
+AC_SUBST(THREAD_CFLAGS)
 
 echo "Construct Makefiles and header files."
 MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile"
