@@ -1,9 +1,9 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/03/20 16:36:51 $]
+Last modified at [$Date: 2003/03/22 03:24:33 $]
 
 Release:
 
-    0.9.2   : candidate tagged WAR_0_9_2_RC2, slated for release March 20
+    0.9.2   : tagged March 21, 2003
     0.9.1   : released September 11, 2002
     0.9.0   : released August 28, 2002
 
