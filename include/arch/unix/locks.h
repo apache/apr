@@ -92,11 +92,8 @@
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
-
-#if APR_HAS_THREADS
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
-#endif
 #endif
 /* End System Headers */
 
