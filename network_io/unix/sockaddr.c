@@ -767,19 +767,6 @@ static apr_status_t parse_network(apr_ipsubnet_t *ipsub, const char *network)
         if (shift < 0) {
             return APR_EBADIP;
         }
-/*@@@ WARNING: BEWARE:
-The man page for inet_pton()/inet_aton() et.al. says:
-     All numbers supplied as ``parts'' in a `.' notation may be decimal,
-     octal, or hexadecimal, as specified in the C language (i.e., a leading 0x
-     or 0X implies hexadecimal; otherwise, a leading 0 implies octal; other-
-     wise, the number is interpreted as decimal).
-OTOH, "man atoi" says:
-     The atoi() function [...] is equivalent to:
-           (int)strtol(nptr, (char **)NULL, 10);
-which forces interpretation as _decimal_. As a result, this routine will
-interpret a string 0177.0000.0000.0001 as 177.0.0.1, while inet_pton()
-will interpret it as 127.0.0.1!
-@@@*/
         octet = atoi(s);
         if (octet < 0 || octet > 255) {
             return APR_EBADIP;
