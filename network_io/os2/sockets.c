@@ -84,8 +84,9 @@ static apr_status_t socket_cleanup(void *sock)
     }
 }
 
-static void set_socket_vars(apr_socket_t *sock, int family)
+static void set_socket_vars(apr_socket_t *sock, int family, int type)
 {
+    sock->type = type;
     sock->local_addr->family = family;
     sock->local_addr->sa.sin.sin_family = family;
     sock->remote_addr->family = family;
@@ -151,7 +152,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
         return APR_ENOMEM;
     }
  
-    (*new)->socketdes = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    (*new)->socketdes = socket(AF_INET, type, 0);
 #if APR_HAVE_IPV6
     if ((*new)->socketdes < 0 && ofamily == AF_UNSPEC) {
         family = AF_INET;
@@ -162,7 +163,7 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     if ((*new)->socketdes < 0) {
         return APR_OS2_STATUS(sock_errno());
     }
-    set_socket_vars(*new, family);
+    set_socket_vars(*new, family, type);
 
     (*new)->timeout = -1;
     (*new)->nonblock = FALSE;
@@ -213,7 +214,7 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
     alloc_socket(new, connection_context);
-    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family);
+    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
 
     (*new)->timeout = -1;
     (*new)->nonblock = FALSE;
@@ -274,7 +275,7 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
                               apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
-    set_socket_vars(*apr_sock, os_sock_info->family);
+    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type);
     (*apr_sock)->timeout = -1;
     (*apr_sock)->socketdes = *os_sock_info->os_sock;
     if (os_sock_info->local) {
@@ -304,7 +305,7 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock, apr_po
     }
     if ((*sock) == NULL) {
         alloc_socket(sock, cont);
-        set_socket_vars(*sock, AF_INET);
+        set_socket_vars(*sock, AF_INET, SOCK_STREAM);
     }
     (*sock)->socketdes = *thesock;
     return APR_SUCCESS;
