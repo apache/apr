@@ -173,8 +173,7 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
                                      apr_cmdtype_e cmd) 
 {
-    if (cmd == APR_PROGRAM_ADDRSPACE)
-        attr->cmdtype = cmd;
+    /* won't ever be called on this platform, so don't save the function pointer */
     return APR_SUCCESS;
 }
 
@@ -266,6 +265,13 @@ APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
+                                                       apr_int32_t addrspace)
+{
+    attr->addrspace = addrspace;
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
 									const char *progname, 
 									const char * const *args, 
@@ -287,7 +293,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     /* attr->detached and PROC_DETACHED do not mean the same thing.  attr->detached means
      * start the NLM in a separate address space.  PROC_DETACHED means don't wait for the
      * NLM to unload by calling wait() or waitpid(), just clean up */
-    addr_space = PROC_LOAD_SILENT | ((attr->cmdtype == APR_PROGRAM_ADDRSPACE) ? 0 : PROC_CURRENT_SPACE);
+    addr_space = PROC_LOAD_SILENT | (attr->addrspace ? 0 : PROC_CURRENT_SPACE);
     addr_space |= (attr->detached ? PROC_DETACHED : 0);
 
     if (attr->currdir) {
