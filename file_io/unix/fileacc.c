@@ -54,6 +54,10 @@
 
 #ifdef OS2
 #include "../os2/fileio.h"
+#elif defined(WIN32)
+#include "../win32/fileio.h"
+#endif
+#if defined(OS2) || defined(WIN32)
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
@@ -77,7 +81,7 @@ ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
     }
 }
 
-#ifndef (OS2)
+#if !defined(OS2) && !defined(WIN32)
 mode_t ap_unix_get_fileperms(ap_fileperms_t mode)
 {
     mode_t rv = 0;
