@@ -522,6 +522,8 @@ dnl end up LIBS="-lm -lcrypt -lnsl  -ldl" which is an annoyance.
 AC_SEARCH_LIBS(gethostbyname, nsl)
 AC_SEARCH_LIBS(gethostname, nsl)
 AC_SEARCH_LIBS(socket, socket)
+dnl Search for -lbind / -lresolv only after having added -lsocket and -lnsl
+AC_SEARCH_LIBS(res_init, bind resolv)
 AC_SEARCH_LIBS(crypt, crypt ufc)
 AC_CHECK_LIB(truerand, main)
 AC_SEARCH_LIBS(modf, m)
@@ -656,7 +658,7 @@ case $host in
 #endif";;
 esac
 
-AC_CHECK_HEADERS([sys/mman.h sys/ipc.h sys/mutex.h sys/shm.h sys/file.h kernel/OS.h os2.h])
+AC_CHECK_HEADERS([sys/types.h sys/mman.h sys/ipc.h sys/mutex.h sys/shm.h sys/file.h kernel/OS.h os2.h])
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
                 create_area])
 APR_CHECK_DEFINE(MAP_ANON, sys/mman.h)
@@ -1944,6 +1946,7 @@ AC_SUBST(NOTEST_INCLUDES)
 dnl ----------------------------- Construct the files
 
 AC_SUBST(LDLIBS)
+AC_SUBST(INCLUDES)
 AC_SUBST(AR)
 AC_SUBST(RM)
 AC_SUBST(OSDIR)
