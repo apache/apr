@@ -118,6 +118,9 @@ int main(void)
                 apr_dir_read(&finfo, finfo_flags, this_dir),
                 APR_STATUS_IS_ENOENT, "OK", "Failed")
 
+    STD_TEST_NEQ("       closing dir",
+		 apr_dir_close(this_dir));
+		 
     /* Cleanup */
     STD_TEST_NEQ("    Cleanup file1",
                  apr_file_remove("dir1/file1", pool))
