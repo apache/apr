@@ -80,7 +80,7 @@ apr_status_t apr_socket_send(apr_socket_t *sock, const char *buf,
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
-        && apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+                 && (sock->timeout > 0)) {
         apr_status_t arv;
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
@@ -98,7 +98,7 @@ do_select:
         *len = 0;
         return errno;
     }
-    if (apr_is_option_set(sock, APR_SO_TIMEOUT) && rv < *len) {
+    if ((sock->timeout > 0) && (rv < *len)) {
         sock->options |= APR_INCOMPLETE_WRITE;
     }
     (*len) = rv;
@@ -119,8 +119,8 @@ apr_status_t apr_socket_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
         rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
+                   && (sock->timeout > 0)) {
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
         if (arv != APR_SUCCESS) {
@@ -137,7 +137,7 @@ do_select:
         (*len) = 0;
         return errno;
     }
-    if (apr_is_option_set(sock, APR_SO_TIMEOUT) && rv < *len) {
+    if ((sock->timeout > 0) && (rv < *len)) {
         sock->options |= APR_INCOMPLETE_READ;
     }
     (*len) = rv;
@@ -159,8 +159,8 @@ apr_status_t apr_socket_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
                     where->salen);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
-        && apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
+                   && (sock->timeout > 0)) {
         apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -192,8 +192,8 @@ apr_status_t apr_socket_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                       (struct sockaddr*)&from->sa, &from->salen);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) &&
-        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK)
+                   && (sock->timeout > 0)) {
         apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -239,8 +239,8 @@ apr_status_t apr_socket_sendv(apr_socket_t * sock, const struct iovec *vec,
         rv = writev(sock->socketdes, vec, nvec);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+                   && (sock->timeout > 0)) {
         apr_status_t arv;
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
@@ -258,8 +258,7 @@ do_select:
         *len = 0;
         return errno;
     }
-    if (apr_is_option_set(sock, APR_SO_TIMEOUT) &&
-        rv < requested_len) {
+    if ((sock->timeout > 0) && (rv < requested_len)) {
         sock->options |= APR_INCOMPLETE_WRITE;
     }
     (*len) = rv;
@@ -338,9 +337,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                       *len);   /* number of bytes to send */
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && 
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+                   && (sock->timeout > 0)) {
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
@@ -375,7 +373,7 @@ do_select:
              * partial byte count;  this is a non-blocking socket.
              */
 
-            if (apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+            if (sock->timeout > 0) {
                 sock->options |= APR_INCOMPLETE_WRITE;
             }
             return arv;
@@ -523,7 +521,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
 
             if (rv == -1) {
                 if (errno == EAGAIN) {
-                    if (apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+                    if (sock->timeout > 0) {
                         sock->options |= APR_INCOMPLETE_WRITE;
                     }
                     /* FreeBSD's sendfile can return -1/EAGAIN even if it
@@ -561,9 +559,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                 nbytes = 0;
             }
         }
-        if (rv == -1 &&
-            errno == EAGAIN && 
-            apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+        if ((rv == -1) && (errno == EAGAIN) 
+                       && (sock->timeout > 0)) {
             apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
             if (arv != APR_SUCCESS) {
                 *len = 0;
@@ -679,9 +676,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
     } while (rc == -1 && errno == EINTR);
 
-    if (rc == -1 && 
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rc == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+                   && (sock->timeout > 0)) {
         apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
 
         if (arv != APR_SUCCESS) {
@@ -827,9 +823,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
                        flags);             /* flags */
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 &&
-        (errno == EAGAIN || errno == EWOULDBLOCK) &&
-        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rv == -1) && (errno == EAGAIN || errno == EWOULDBLOCK) 
+                   && (sock->timeout > 0)) {
 do_select:
         arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
@@ -857,8 +852,9 @@ do_select:
         return errno;
     }
 
-    if (apr_is_option_set(sock, APR_SO_TIMEOUT) &&
-        (parms.bytes_sent < (parms.file_bytes + parms.header_length + parms.trailer_length))) {
+    if ((sock->timeout > 0)
+          && (parms.bytes_sent 
+                < (parms.file_bytes + parms.header_length + parms.trailer_length))) {
         sock->options |= APR_INCOMPLETE_WRITE;
     }
 
@@ -971,8 +967,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
             if (nbytes) {
                 rv = 0;
             }
-            else if (!arv &&
-                     apr_is_option_set(sock, APR_SO_TIMEOUT) == 1) {
+            else if (!arv && (sock->timeout > 0)) {
                 apr_status_t t = apr_wait_for_io_or_timeout(NULL, sock, 0);
 
                 if (t != APR_SUCCESS) {
@@ -993,8 +988,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     /* Update how much we sent */
     *len = nbytes;
-    if (apr_is_option_set(sock, APR_SO_TIMEOUT) &&
-        (*len < requested_len)) {
+    if ((sock->timeout > 0) && (*len < requested_len)) {
         sock->options |= APR_INCOMPLETE_WRITE;
     }
     return APR_SUCCESS;

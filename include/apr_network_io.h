@@ -103,7 +103,6 @@ extern "C" {
 #define APR_SO_DEBUG         4    /**< Debug */
 #define APR_SO_NONBLOCK      8    /**< Non-blocking IO */
 #define APR_SO_REUSEADDR     16   /**< Reuse addresses */
-#define APR_SO_TIMEOUT       32   /**< Timeout */
 #define APR_SO_SNDBUF        64   /**< Send buffer */
 #define APR_SO_RCVBUF        128  /**< Receive buffer */
 #define APR_SO_DISCONNECTED  256  /**< Disconnected */
@@ -728,23 +727,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
 APR_DECLARE(int) apr_sockaddr_equal(const apr_sockaddr_t *addr1,
                                     const apr_sockaddr_t *addr2);
 
-
-#if APR_FILES_AS_SOCKETS || defined(DOXYGEN)
-
-/**
- * Convert a File type to a socket so that it can be used in a poll operation.
- * @param newsock the newly created socket which represents a file.
- * @param file the file to mask as a socket.
- * @warning This is not available on all platforms.  Platforms that have the
- *      ability to poll files for data to be read/written/exceptions will
- *      have the APR_FILES_AS_SOCKETS macro defined as true.
- * @deprecated This function has been deprecated, because of the new poll
- *             implementation.
- */
-APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock,
-                                               apr_file_t *file);
-
-#endif /* APR_FILES_AS_SOCKETS */
 
 /**
  * Given an apr_sockaddr_t and a service name, set the port for the service
