@@ -60,7 +60,6 @@ extern "C" {
 #endif
 
 
-    
 /**
  * @file apr_pools.h
  * @brief APR memory allocation
@@ -112,10 +111,6 @@ extern "C" {
  */
 #if defined(APR_POOL_DEBUG)
 #    if (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
-#        undef APR_POOL_DEBUG
-#        define APR_POOL_DEBUG 1
-#    endif
-#    if APR_POOL_DEBUG == 0
 #        undef APR_POOL_DEBUG
 #        define APR_POOL_DEBUG 1
 #    endif
