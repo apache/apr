@@ -123,8 +123,13 @@ typedef struct apr_canon_t        apr_canon_t;
 typedef apr_int32_t               apr_fileperms_t;
 typedef uid_t                    apr_uid_t;
 typedef gid_t                    apr_gid_t;
+#ifdef WIN32
+typedef apr_uint64_t             apr_ino_t;
+typedef apr_uint32_t             apr_dev_t;
+#else
 typedef ino_t                    apr_ino_t;
 typedef dev_t                    apr_dev_t;
+#endif
 
 /**
  * The file information structure.  This is analogous to the POSIX

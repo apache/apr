@@ -68,9 +68,6 @@
 #else
 #include "fileio.h"
 #endif
-#if APR_HAS_UNICODE_FS
-#include "i18n.h"
-#endif
 
 /* A file to put ALL of the accessor functions for apr_file_t types. */
 
@@ -92,9 +89,9 @@ apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
             return APR_ENAMETOOLONG;
     }
     else
-#else /* !APR_HAS_UNICODE_FS */
+#endif /* !APR_HAS_UNICODE_FS */
         *fname = apr_pstrdup(thefile->cntxt, thefile->n.fname);
-#endif
+
 #else /* !def Win32 */
         *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
 #endif 
