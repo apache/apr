@@ -407,7 +407,7 @@ APR_DECLARE(void)
  *  int i;
  *
  *  for (i = 0; i < barr->nelts; ++i) {
- *      if (flags & apr_OVERLAP_TABLES_MERGE) {
+ *      if (flags & APR_OVERLAP_TABLES_MERGE) {
  *          apr_table_mergen(a, belt[i].key, belt[i].val);
  *      }
  *      else {
@@ -426,7 +426,7 @@ APR_DECLARE(void)
 #define APR_OVERLAP_TABLES_MERGE (1)
 /**
  * For each element in table b, either use setn or mergen to add the data
- * to table a.  Wich method is used is determined by the flags passed in.
+ * to table a.  Which method is used is determined by the flags passed in.
  * @param a The table to add the data to.
  * @param b The table to iterate over, adding it's data to table a
  * @param flags How to add the table to table a.  One of:
