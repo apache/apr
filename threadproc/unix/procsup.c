@@ -97,7 +97,7 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
 
     /* close out the standard file descriptors */
     if (freopen("/dev/null", "r", stdin) == NULL) {
-        return APR_ALLSTD;
+        return errno;
         /* continue anyhow -- note we can't close out descriptor 0 because we
          * have nothing to replace it with, and if we didn't have a descriptor
          * 0 the next file would be created with that value ... leading to
@@ -105,14 +105,14 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
          */
     }
     if (freopen("/dev/null", "w", stdout) == NULL) {
-        return APR_STDOUT;
+        return errno;
     }
      /* We are going to reopen this again in a little while to the error
       * log file, but better to do it twice and suffer a small performance
       * hit for consistancy than not reopen it here.
       */
     if (freopen("/dev/null", "w", stderr) == NULL) {
-        return APR_STDERR;
+        return errno;
     }
 
     return APR_SUCCESS;

@@ -89,6 +89,7 @@ const char *ap_strerror(ap_status_t err);
 #define APR_ENOPOOL        (APR_OS_START_ERROR + 2)
 #define APR_ENOFILE        (APR_OS_START_ERROR + 3)
 #define APR_EBADDATE       (APR_OS_START_ERROR + 4)
+#define APR_EINVALSOCK     (APR_OS_START_ERROR + 5)
 #define APR_ENOPROC        (APR_OS_START_ERROR + 6)
 #define APR_ENOTIME        (APR_OS_START_ERROR + 7)
 #define APR_ENODIR         (APR_OS_START_ERROR + 8)
@@ -97,11 +98,7 @@ const char *ap_strerror(ap_status_t err);
 #define APR_ENOSOCKET      (APR_OS_START_ERROR + 11)
 #define APR_ENOTHREAD      (APR_OS_START_ERROR + 12)
 #define APR_ENOTHDKEY      (APR_OS_START_ERROR + 13)
-#define APR_ENOTTHREADSAFE (APR_OS_START_ERROR + 14)
-#define APR_ESHMLOCK       (APR_OS_START_ERROR + 15)
-#define APR_EFUNCNOTFOUND  (APR_OS_START_ERROR + 16)
-#define APR_ENOFUNCPOINTER (APR_OS_START_ERROR + 17)
-#define APR_ENODSOHANDLE   (APR_OS_START_ERROR + 18)
+#define APR_ENOSHMAVAIL    (APR_OS_START_ERROR + 15)
 #define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
 #define APR_EBADARG        (APR_OS_START_ERROR + 20)
 
@@ -113,32 +110,25 @@ const char *ap_strerror(ap_status_t err);
 #define APR_CHILD_DONE     (APR_OS_START_STATUS + 5)
 #define APR_CHILD_NOTDONE  (APR_OS_START_STATUS + 6)
 #define APR_TIMEUP         (APR_OS_START_STATUS + 7)
-#define APR_INVALSOCK      (APR_OS_START_STATUS + 8)
-#define APR_ALLSTD         (APR_OS_START_STATUS + 9)
-#define APR_STDOUT         (APR_OS_START_STATUS + 10)
-#define APR_STDERR         (APR_OS_START_STATUS + 11)
 #define APR_BADCH          (APR_OS_START_STATUS + 12)
 #define APR_BADARG         (APR_OS_START_STATUS + 13)
 #define APR_EOF            (APR_OS_START_STATUS + 14)
 #define APR_NOTFOUND       (APR_OS_START_STATUS + 15)
-#define APR_LESS           (APR_OS_START_STATUS + 16)
-#define APR_EQUAL          (APR_OS_START_STATUS + 17)
-#define APR_MORE           (APR_OS_START_STATUS + 18)
 #define APR_ANONYMOUS      (APR_OS_START_STATUS + 19)
 #define APR_FILEBASED      (APR_OS_START_STATUS + 20)
 #define APR_KEYBASED       (APR_OS_START_STATUS + 21)
 
 /* A simple value to be used to initialze a status variable. */
-#define APR_EINIT          (APR_OS_START_STATUS + 16)  
+#define APR_EINIT          (APR_OS_START_STATUS + 22)  
 
 /* Not implemented either because we haven't gotten to it yet, or 
  * because it is not possible to do correctly.  
  */
-#define APR_ENOTIMPL       (APR_OS_START_STATUS + 17)
+#define APR_ENOTIMPL       (APR_OS_START_STATUS + 23)
 
 /* Passwords do not match.
  */
-#define APR_EMISMATCH      (APR_OS_START_STATUS + 18)
+#define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
 
 #ifdef EACCES
 #define APR_EACCES EACCES

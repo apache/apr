@@ -150,7 +150,7 @@ ap_status_t ap_shm_avail(struct shmem_t *c, ap_size_t *size)
 {
     *size = mm_available(c);
     if (*size == 0) {
-        return APR_ESHMLOCK;
+        return APR_ENOSHMAVAIL;
     }
     return APR_SUCCESS;
 }
