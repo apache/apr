@@ -62,37 +62,33 @@
 #include "apr_lock.h"
 
 /* System headers required by Locks library */
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if HAVE_STRING_H
-#include <string.h>
-#endif
-#if HAVE_USLOCKS_H
-#include <uslocks.h>
-#endif
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#if HAVE_SYS_IPC_H
-#include <sys/ipc.h>
-#endif
-#if HAVE_SYS_SEM_H
-#include <sys/sem.h>
-#endif
-#if HAVE_SYS_FILE_H
-#include <sys/file.h>
 #endif
 #if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
-#if HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 #if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_SYS_MMAN_H
+
+/* ### create APR_HAVE_* macros for these? */
+#ifdef HAVE_SYS_SEM_H
+#include <sys/sem.h>
+#endif
+#ifdef HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 
