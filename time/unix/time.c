@@ -240,7 +240,7 @@ apr_status_t apr_os_imp_time_put(apr_time_t *aprtime, apr_os_imp_time_t **ostime
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_exp_time_pupt(apr_exploded_time_t *aprtime,
+apr_status_t apr_os_exp_time_put(apr_exploded_time_t *aprtime,
                                  apr_os_exp_time_t **ostime, apr_pool_t *cont)
 {
     aprtime->tm_sec = (*ostime)->tm_sec;
