@@ -168,6 +168,31 @@ static void sendto_receivefrom(CuTest *tc)
     apr_socket_close(sock2);
 }
 
+static void socket_userdata(CuTest *tc)
+{
+    apr_socket_t *sock1, *sock2;
+    apr_status_t rv;
+    char *data;
+    const char *key = "GENERICKEY";
+
+    rv = apr_socket_create(&sock1, AF_INET, SOCK_STREAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_socket_create(&sock2, AF_INET, SOCK_STREAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_socket_data_set(sock1, "SOCK1", key, NULL);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_socket_data_set(sock2, "SOCK2", key, NULL);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_socket_data_get((void **)&data, key, sock1);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, "SOCK1", data);
+    rv = apr_socket_data_get((void **)&data, key, sock2);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, "SOCK2", data);
+}
+
 CuSuite *testsockets(void)
 {
     CuSuite *suite = CuSuiteNew("Socket Creation");
@@ -179,6 +204,9 @@ CuSuite *testsockets(void)
     SUITE_ADD_TEST(suite, udp6_socket);
 
     SUITE_ADD_TEST(suite, sendto_receivefrom);
+
+    SUITE_ADD_TEST(suite, socket_userdata);
+    
     return suite;
 }
 

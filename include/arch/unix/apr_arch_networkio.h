@@ -122,6 +122,13 @@
 #define POLLNVAL 32
 #endif
 
+typedef struct sock_userdata_t sock_userdata_t;
+struct sock_userdata_t {
+    sock_userdata_t *next;
+    const char *key;
+    void *data;
+};
+
 struct apr_socket_t {
     apr_pool_t *cntxt;
     int socketdes;
@@ -138,6 +145,7 @@ struct apr_socket_t {
     int remote_addr_unknown;
     apr_int32_t netmask;
     apr_int32_t inherit;
+    sock_userdata_t *userdata;
 };
 
 const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
