@@ -357,7 +357,7 @@ typedef  int         apr_socklen_t;
 #define APR_SIZEOF_VOIDP   4
 #endif
 
-/* XXX These simply don't belong here, perhaps in apr_portabile.h
+/* XXX These simply don't belong here, perhaps in apr_portable.h
  * based on some APR_HAVE_PID/GID/UID?
  */
 typedef  int         pid_t;
