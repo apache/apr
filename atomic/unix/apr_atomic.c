@@ -58,7 +58,8 @@
 
 #include <stdlib.h>
 
-#if defined(__i386__) && defined(__GNUC__) && !APR_FORCE_ATOMIC_GENERIC
+#if (defined(__i386__) || defined(__x86_64__)) \
+    && defined(__GNUC__) && !APR_FORCE_ATOMIC_GENERIC
 
 APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, 
                                            apr_uint32_t with,
