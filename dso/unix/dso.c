@@ -126,18 +126,10 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     NSModule os_handle = NULL;
     char* err_msg = NULL;
     if (NSCreateObjectFileImageFromFile(path, &image) == NSObjectFileImageSuccess) {
-
-/*
- * Under Darwin, we want/need to place dynamically loaded extensions'
- * public symbols into the global symbol table. As long as modules
- * don't have overlapping symbols, we're golden.
- */
-#if defined(NSLINKMODULE_OPTION_NONE)
-        os_handle = NSLinkModule(image, path,
-                                 NSLINKMODULE_OPTION_NONE |
-                                 NSLINKMODULE_OPTION_RETURN_ON_ERROR);
+#if defined(NSLINKMODULE_OPTION_RETURN_ON_ERROR)
+        handle = NSLinkModule(image, path, NSLINKMODULE_OPTION_RETURN_ON_ERROR);
 #else
-        os_handle = NSLinkModule(image, path, FALSE);
+        handle = NSLinkModule(image, path, FALSE);
 #endif
         NSDestroyObjectFileImage(image);
     }
