@@ -119,7 +119,12 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
     }
 
     if (scope == APR_INTRAPROCESS) {
-        newlock->fname = apr_pstrdup(pool, fname);
+        if (fname) {
+            newlock->fname = apr_pstrdup(pool, fname);
+        }
+        else {
+            newlock->fname = NULL;
+        }
         InitializeCriticalSection(&newlock->section);
     } else {
         /* With Win2000 Terminal Services, the Mutex name can have a 
@@ -128,10 +133,17 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
          * running on Win2000, Global\ and Local\ are ignored.  These
          * prefixes are only valid on Win2000+
          */
-        if (apr_os_level >= APR_WIN_2000)
-            newlock->fname = apr_pstrcat(pool, "Global\\", fname, NULL);
-        else
-            newlock->fname = apr_pstrdup(pool, fname);
+        if (fname) {
+            if (apr_os_level >= APR_WIN_2000) {
+                newlock->fname = apr_pstrcat(pool, "Global\\", fname, NULL);
+            }
+            else {
+                newlock->fname = apr_pstrdup(pool, fname);
+            }
+        }
+        else {
+            newlock->fname = NULL;
+        }
 
         newlock->mutex = CreateMutex(&sec, FALSE, newlock->fname);
         if (!newlock->mutex) {
@@ -156,7 +168,18 @@ APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
     if ((*lock) == NULL) {
         return APR_ENOMEM;
     }
-    (*lock)->fname = apr_pstrdup(pool, fname);
+    if (fname) {
+        if (apr_os_level >= APR_WIN_2000) {
+            (*lock)->fname = apr_pstrcat(pool, "Global\\", fname, NULL);
+        }
+        else {
+            (*lock)->fname = apr_pstrdup(pool, fname);
+        }
+    }
+    else {
+        return APR_EINVAL;
+    }
+
     (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
     
     if ((*lock)->mutex == NULL) {
