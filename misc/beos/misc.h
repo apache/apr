@@ -59,6 +59,7 @@
 #include "apr_general.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
+#include "apr_getopt.h"
 
 typedef struct datastruct {
     void *data;

@@ -6,7 +6,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -53,18 +53,28 @@
  *
  */
 
-#ifndef MISC_H
-#define MISC_H
+#ifndef APR_GETOPT_H
+#define APR_GETOPT_H
 
-#include "apr_general.h"
-#include "apr_file_io.h"
-#include "apr_errno.h"
-#include "apr_getopt.h"
+/* Rename all interfaces to prevent a name clash with system libraries */
+#define opterr   apr_opterr
+#define optind   apr_optind
+#define optopt   apr_optopt
+#define optreset apr_optreset
+#define optarg   apr_optarg
+#define getopt   apr_getopt
 
-struct context_t {
-    struct ap_pool_t *pool;
-    void *prog_data;
-};
+extern int
+    opterr,                          /* if error message should be printed */
+    optind,                          /* index into parent argv vector */
+    optopt,                          /* character checked for validity */
+    optreset;                        /* reset getopt */
+extern char *
+    optarg;                          /* argument associated with option */
 
-#endif  /* ! MISC_H */
+extern int
+    getopt(int _argc, char *const _argv[], const char *_opts);
+
+#endif  /* ! APR_GETOPT_H */
+
 

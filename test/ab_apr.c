@@ -106,6 +106,7 @@
 #include "apr_network_io.h"
 #include "apr_file_io.h"
 #include "apr_time.h"
+#include "apr_getopt.h"
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
