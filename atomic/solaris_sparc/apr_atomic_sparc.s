@@ -110,12 +110,6 @@ _apr_atomic_sub_sparc_loop:
         ENTRY(apr_atomic_casptr_sparc)
 
         cas 	[%o0], %o2, %o1
-        cmp     %o1, %o2        ! if o1 == o2 values weren't swapped
-        bne,a 	_apr_atomic_cas_ne
-        mov      %o2, %o0
-        retl
-        mov      %o2, %o0
-_apr_atomic_cas_ne:
         retl
         mov      %o1, %o0
         
