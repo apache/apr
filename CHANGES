@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Make the unix version of apr_proc_wait_all_procs a simple wrapper 
+     around apr_proc_wait, and which extracts the exit code from the 
+     status returned by waitpid.  
+     [Kevin Pilch-Bisson <kevin@pilch-bisson.net>]
+
   *) Add process locking API to APR. [Aaron Bannert <aaron@clove.org>]
 
   *) Add condition variables for Windows.  [Ryan Bloom]
