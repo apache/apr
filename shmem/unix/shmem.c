@@ -107,6 +107,8 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     void *mem;
 #if APR_USE_SHMEM_SHMGET
     struct shmid_ds shmbuf;
+    apr_uid_t uid;
+    apr_gid_t gid;
 #endif
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
     apr_status_t status;
@@ -145,7 +147,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     if (tmpfd == -1)
         return errno + APR_OS_START_SYSERR;
 
-    apr_os_file_put(new_m->file, &tmpfd, pool); 
+    apr_os_file_put(&new_m->file, &tmpfd, pool); 
     status = apr_file_trunc(new_m->file, reqsize);
     if (status != APR_SUCCESS)
     {
@@ -153,8 +155,8 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
         return APR_EGENERAL;
     }
 #elif APR_USE_SHMEM_MMAP_ZERO
-    status = apr_file_open(new_m->file, "/dev/zero", APR_READ | APR_WRITE, 
-                         APR_OS_DEFAULT);
+    status = apr_file_open(&new_m->file, "/dev/zero", APR_READ | APR_WRITE, 
+                         APR_OS_DEFAULT, pool);
     if (status != APR_SUCCESS)
         return APR_EGENERAL;
     status = apr_os_file_get(&tmpfd, new_m->file);
@@ -177,7 +179,9 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     if (shmctl(new_m->file, IPC_STAT, &shmbuf) == -1)
         return errno + APR_OS_START_SYSERR;
 
-    apr_current_userid(&shmbuf.shm_perm.uid, &shmbuf.shm_perm.gid, pool);
+    apr_current_userid(&uid, &gid, pool);
+    shmbuf.shm_perm.uid = uid;
+    shmbuf.shm_perm.gid = gid;
 
     if (shmctl(new_m->file, IPC_SET, &shmbuf) == -1)
         return errno + APR_OS_START_SYSERR;
