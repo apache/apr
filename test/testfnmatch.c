@@ -63,6 +63,7 @@ static void test_glob_currdir(CuTest *tc)
         char *dot = strrchr(list[i], '.');
         CuAssertStrEquals(tc, dot, ".txt");
     }
+    apr_filepath_set("..", p);
 }
 
 CuSuite *testfnmatch(void)
