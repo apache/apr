@@ -98,6 +98,9 @@ struct apr_proc_mutex_t {
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
     apr_file_t *interproc;
 #endif
+#if APR_HAS_POSIXSEM_SERIALIZE
+    sem_t *psem_interproc;
+#endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *pthread_interproc;
 #endif
