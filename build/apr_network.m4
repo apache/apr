@@ -395,6 +395,119 @@ else
 fi
 ])
 
+dnl
+dnl see if O_NONBLOCK setting is inherited from listening sockets
+dnl
+AC_DEFUN(APR_CHECK_O_NONBLOCK_INHERITED,[
+  AC_CACHE_CHECK(if O_NONBLOCK setting is inherited from listening sockets, ac_cv_o_nonblock_inherited,[
+  AC_TRY_RUN( [
+#include <stdio.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+#ifndef HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+int main(void) {
+    int listen_s, connected_s, client_s;
+    int listen_port, rc;
+    struct sockaddr_in sa;
+    socklen_t sa_len;
+
+    listen_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (listen_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
+    /* leave port 0 to get ephemeral */
+    rc = bind(listen_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("bind for ephemeral port");
+        exit(1);
+    }
+    /* find ephemeral port */
+    sa_len = sizeof(sa);
+    rc = getsockname(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (rc < 0) {
+        perror("getsockname");
+        exit(1);
+    }
+    listen_port = sa.sin_port;
+    rc = listen(listen_s, 5);
+    if (rc < 0) {
+        perror("listen");
+        exit(1);
+    }
+    rc = fcntl(listen_s, F_SETFL, O_NONBLOCK);
+    if (rc < 0) {
+        perror("fcntl(F_SETFL)");
+        exit(1);
+    }
+    client_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+    sa.sin_port   = listen_port;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
+    /* leave sin_addr all zeros to use loopback */
+    rc = connect(client_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("connect");
+        exit(1);
+    }
+    sa_len = sizeof sa;
+    connected_s = accept(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (connected_s < 0) {
+        perror("accept");
+        exit(1);
+    }
+    rc = fcntl(connected_s, F_GETFL, 0);
+    if (rc < 0) {
+        perror("fcntl(F_GETFL)");
+        exit(1);
+    }
+    if (!(rc & O_NONBLOCK)) {
+        fprintf(stderr, "O_NONBLOCK is not set in the child.\n");
+        exit(1);
+    }
+    return 0;
+}
+],[
+    ac_cv_o_nonblock_inherited="yes"
+],[
+    ac_cv_o_nonblock_inherited="no"
+],[
+    ac_cv_o_nonblock_inherited="yes"
+])])
+if test "$ac_cv_o_nonblock_inherited" = "yes"; then
+    o_nonblock_inherited=1
+else
+    o_nonblock_inherited=0
+fi
+])
+
 dnl 
 dnl check for socklen_t, fall back to unsigned int
 dnl
