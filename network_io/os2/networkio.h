@@ -58,6 +58,9 @@
 
 #include "apr_network_io.h"
 #include "apr_general.h"
+#include "os2calls.h"
+
+int os2errno( unsigned long oserror );
 
 struct socket_t {
     ap_context_t *cntxt;
@@ -77,10 +80,6 @@ struct pollfd_t {
     int num_except;
     int num_total;
 };
-
-/* Pointers to dynamically linked API functions */
-extern int (*os2_select)(int *, int, int, int, long);
-extern int (*os2_sock_errno)();
 
 /* Error codes returned from sock_errno() */
 #define SOCBASEERR              10000

@@ -66,13 +66,6 @@
 
 /*  OS/2 doesn't have a poll function, implement using OS/2 style select */
  
-static int os2_select_init( int *s, int noreads, int nowrites, int noexcepts, long timeout );
-static int os2_sock_errno_init();
-
-int (*os2_select)(int *, int, int, int, long) = os2_select_init;
-int (*os2_sock_errno)() = os2_sock_errno_init;
-static HMODULE hSO32DLL;
-
 ap_status_t ap_setup_poll(struct pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
     *new = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t));
@@ -148,16 +141,16 @@ ap_status_t ap_poll(struct pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t tim
 
     do {
         for (i=0; i<pollfdset->num_total; i++) {
-            pollfdset->r_socket_list[i] = _getsockhandle(pollfdset->socket_list[i]);
+            pollfdset->r_socket_list[i] = pollfdset->socket_list[i];
         }
         
-        rv = os2_select(pollfdset->r_socket_list, 
-                        pollfdset->num_read, 
-                        pollfdset->num_write, 
-                        pollfdset->num_except, 
-                        timeout > 0 ? timeout * 1000 : -1);
+        rv = select(pollfdset->r_socket_list, 
+                    pollfdset->num_read, 
+                    pollfdset->num_write, 
+                    pollfdset->num_except, 
+                    timeout >= 0 ? timeout * 1000 : -1);
 
-        if (rv < 0 && os2_sock_errno() == SOCEINTR && timeout >= 0 ) {
+        if (rv < 0 && sock_errno() == SOCEINTR && timeout >= 0 ) {
             time_t elapsed = time(NULL) - starttime;
 
             if (timeout <= elapsed)
@@ -165,10 +158,10 @@ ap_status_t ap_poll(struct pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t tim
 
             timeout -= elapsed;
         }
-    } while ( rv < 0 && os2_sock_errno() == SOCEINTR );
+    } while ( rv < 0 && sock_errno() == SOCEINTR );
 
     (*nsds) = rv;
-    return rv < 0 ? os2errno(os2_sock_errno()) : APR_SUCCESS;
+    return rv < 0 ? os2errno(sock_errno()) : APR_SUCCESS;
 }
 
 
@@ -231,55 +224,4 @@ ap_status_t ap_remove_poll_socket(struct pollfd_t *aprset,
     }
 
     return APR_SUCCESS;
-}
-
-
-
-static int os2_fn_link()
-{
-    if (os2_select == os2_select_init || os2_select == NULL) {
-        DosEnterCritSec(); /* Stop two threads doing this at the same time */
-
-        if (os2_select == os2_select_init || os2_select == NULL) {
-            ULONG rc;
-            char errorstr[200];
-            
-            rc = DosLoadModule(errorstr, sizeof(errorstr), "SO32DLL", &hSO32DLL);
-            
-            if (rc)
-                return os2errno(rc);
-
-            rc = DosQueryProcAddr(hSO32DLL, 0, "SELECT", &os2_select);
-            
-            if (rc)
-                return os2errno(rc);
-
-            rc = DosQueryProcAddr(hSO32DLL, 0, "SOCK_ERRNO", &os2_sock_errno);
-            
-            if (rc)
-                return os2errno(rc);
-        }
-        DosExitCritSec();
-    }
-    return APR_SUCCESS;
-}   
-
-
-
-static int os2_select_init(int *s, int noreads, int nowrites, int noexcepts, long timeout)
-{
-    int rc = os2_fn_link();
-    if (rc == APR_SUCCESS)
-        return os2_select(s, noreads, nowrites, noexcepts, timeout);
-    return rc;
-}
-
-
-
-static int os2_sock_errno_init()
-{
-    int rc = os2_fn_link();
-    if (rc == APR_SUCCESS)
-        return os2_sock_errno();
-    return rc;
 }

@@ -59,6 +59,7 @@
 #include <errno.h>
 #include <string.h>
 #include <os2.h>
+#include "../../network_io/os2/os2calls.h"
 
 
 int errormap[][2] = {
@@ -74,7 +75,40 @@ int errormap[][2] = {
     { ERROR_FILENAME_EXCED_RANGE, APR_ENAMETOOLONG },
     { ERROR_INVALID_FUNCTION,     APR_EINVAL       },
     { ERROR_INVALID_HANDLE,       APR_EBADF        },
-    { ERROR_NEGATIVE_SEEK,        APR_ESPIPE       }
+    { ERROR_NEGATIVE_SEEK,        APR_ESPIPE       },
+    { SOCEWOULDBLOCK,           EWOULDBLOCK     },
+    { SOCEINPROGRESS,           EINPROGRESS     },
+    { SOCEALREADY,              EALREADY        },
+    { SOCENOTSOCK,              ENOTSOCK        },
+    { SOCEDESTADDRREQ,          EDESTADDRREQ    },
+    { SOCEMSGSIZE,              EMSGSIZE        },
+    { SOCEPROTOTYPE,            EPROTOTYPE      },
+    { SOCENOPROTOOPT,           ENOPROTOOPT     },
+    { SOCEPROTONOSUPPORT,       EPROTONOSUPPORT },
+    { SOCESOCKTNOSUPPORT,       ESOCKTNOSUPPORT },
+    { SOCEOPNOTSUPP,            EOPNOTSUPP      },
+    { SOCEPFNOSUPPORT,          EPFNOSUPPORT    },
+    { SOCEAFNOSUPPORT,          EAFNOSUPPORT    },
+    { SOCEADDRINUSE,            EADDRINUSE      },
+    { SOCEADDRNOTAVAIL,         EADDRNOTAVAIL   },
+    { SOCENETDOWN,              ENETDOWN        },
+    { SOCENETUNREACH,           ENETUNREACH     },
+    { SOCENETRESET,             ENETRESET       },
+    { SOCECONNABORTED,          ECONNABORTED    },
+    { SOCECONNRESET,            ECONNRESET      },
+    { SOCENOBUFS,               ENOBUFS         },
+    { SOCEISCONN,               EISCONN         },
+    { SOCENOTCONN,              ENOTCONN        },
+    { SOCESHUTDOWN,             ESHUTDOWN       },
+    { SOCETOOMANYREFS,          ETOOMANYREFS    },
+    { SOCETIMEDOUT,             ETIMEDOUT       },
+    { SOCECONNREFUSED,          ECONNREFUSED    },
+    { SOCELOOP,                 ELOOP           },
+    { SOCENAMETOOLONG,          ENAMETOOLONG    },
+    { SOCEHOSTDOWN,             EHOSTDOWN       },
+    { SOCEHOSTUNREACH,          EHOSTUNREACH    },
+    { SOCENOTEMPTY,             ENOTEMPTY       },
+    { SOCEPIPE,                 EPIPE           }
 };
 
 #define MAPSIZE (sizeof(errormap)/sizeof(errormap[0]))

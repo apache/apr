@@ -18,7 +18,8 @@ OBJS=poll.o \
 	sendrecv.o \
 	sockets.o \
 	sockopt.o \
-	sockaddr.o
+	sockaddr.o \
+	os2calls.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
