@@ -135,6 +135,11 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 #define FILE_FLAG_OPEN_REPARSE_POINT 0x00200000
 #endif
 
+/* Information bits available from the WIN32 FindFirstFile function */
+#define APR_FINFO_WIN32_DIR (APR_FINFO_NAME  | APR_FINFO_TYPE \
+                           | APR_FINFO_CTIME | APR_FINFO_ATIME \
+                           | APR_FINFO_MTIME | APR_FINFO_SIZE)
+
 
 /* quick run-down of fields in windows' apr_file_t structure that may have 
  * obvious uses.

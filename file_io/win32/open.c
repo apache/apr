@@ -175,7 +175,7 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     HANDLE handle = INVALID_HANDLE_VALUE;
     DWORD oflags = 0;
     DWORD createflags = 0;
-    DWORD attributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN;
+    DWORD attributes = 0 /* FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN*/;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     apr_oslevel_e os_level;
     apr_status_t rv;
@@ -189,8 +189,6 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
         sharemode |= FILE_SHARE_DELETE;
-    else
-        os_level = 0;
 
     if (flag & APR_CREATE) {
         if (flag & APR_EXCL) {
@@ -218,15 +216,14 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
     if (flag & APR_DELONCLOSE) {
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
     }
-    if (flag & APR_OPENLINK) {
-        attributes |= FILE_FLAG_OPEN_REPARSE_POINT;
+   if (flag & APR_OPENLINK) {
+       attributes |= FILE_FLAG_OPEN_REPARSE_POINT;
     }
     if (!(flag & (APR_READ | APR_WRITE)) && (os_level >= APR_WIN_NT)) {
         /* We once failed here, but this is how one opens 
-         * a directory as a file under winnt.  Accelerate
-         * further by not hitting storage, we don't need to.
+         * a directory as a file under winnt
          */
-        attributes |= FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_NO_RECALL;
+        attributes |= FILE_FLAG_BACKUP_SEMANTICS;
     }
     if (flag & APR_XTHREAD) {
         /* This win32 specific feature is required 
