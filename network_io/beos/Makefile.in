@@ -3,18 +3,17 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../../include -I../../file_io/unix
-INCLUDES=-I$(INCDIR) -I.
+INCDIR=../../include
+OSDIR=$(INCDIR)/arch/@OSDIR@
+DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
+INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
 MKDEP=../../helpers/mkdep.sh
 
 LIB=libnetwork.a
 
 OBJS=poll.o \
 	sendrecv.o \
-	sockets.o \
-	sockopt.o \
-        inet_aton.o \
-        sockaddr.o
+	socketcommon.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
