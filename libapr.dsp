@@ -53,8 +53,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /machine:I386 /out:"Release/aprlib.dll" /libpath:"LibR" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /subsystem:windows /dll /map /machine:I386 /out:"Release/aprlib.dll" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
+# ADD BASE LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /machine:I386 /out:"Release/aprlib.dll" /libpath:"LibR" /base:0x6EE0000
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /subsystem:windows /dll /map /machine:I386 /out:"Release/aprlib.dll" /base:0x6EE0000
 
 !ELSEIF  "$(CFG)" == "aprlibdll - Win32 Debug"
 
@@ -80,8 +80,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /out:"Debug/aprlib.dll" /libpath:"LibD" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"Debug/aprlib.dll" /base:@"..\..\os\win32\BaseAddr.ref",aprlib
+# ADD BASE LINK32 apr.lib kernel32.lib advapi32.lib ws2_32.lib mswsock.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /out:"Debug/aprlib.dll" /libpath:"LibD" /base:0x6EE0000
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /out:"Debug/aprlib.dll" /base:0x6EE00000
 # SUBTRACT LINK32 /incremental:no /map
 
 !ENDIF 
