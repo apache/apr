@@ -77,6 +77,15 @@
 #define SET_H_ERRNO(newval) h_errno = (newval)
 #endif
 
+#if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
+    defined(HAVE_GETHOSTBYNAME_R)
+/* This is the maximum size that may be returned from the reentrant
+ * gethostbyname_r function.  If the system tries to use more, it
+ * should return ERANGE.
+ */
+#define GETHOSTBYNAME_BUFLEN 512
+#endif
+
 APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
                                        apr_port_t port)
 {
@@ -380,6 +389,12 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         struct hostent *hp;
         apr_sockaddr_t *cursa;
         int curaddr;
+#if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
+    defined(HAVE_GETHOSTBYNAME_R)
+        char tmp[GETHOSTBYNAME_BUFLEN];
+        int hosterror;
+        struct hostent hs;
+#endif
 
         if (family == APR_UNSPEC) {
             family = APR_INET; /* we don't support IPv6 here */
@@ -395,11 +410,22 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         }
         else {
 #endif
+#if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
+    defined(HAVE_GETHOSTBYNAME_R)
+        hp = gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, 
+                             &hosterror);
+#else
         hp = gethostbyname(hostname);
+#endif
 
         if (!hp)  {
 #ifdef WIN32
             apr_get_netos_error();
+#elif APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
+    defined(HAVE_GETHOSTBYNAME_R)
+            /* If you see ERANGE, that means GETHOSBYNAME_BUFLEN needs to be
+             * bumped. */
+            return (hosterror + APR_OS_START_SYSERR);
 #else
             return (h_errno + APR_OS_START_SYSERR);
 #endif
