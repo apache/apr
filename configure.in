@@ -158,6 +158,12 @@ AC_ARG_ENABLE(assert-memory,[  --enable-assert-memory  Turn on asserts in the AP
 AC_ARG_ENABLE(profile,[  --enable-profile        Turn on profiling for the build (GCC)],
   if test "$GCC" = "yes"; then
     APR_ADDTO(CFLAGS, -pg)
+    APR_REMOVEFROM(CFLAGS, -g)
+    if test "$host" = "i586-pc-beos"; then
+        APR_REMOVEFROM(CFLAGS, -O2)
+        APR_ADDTO(CFLAGS, -O1)
+        APR_ADDTO(LDFLAGS, -p)
+    fi
   fi
 )dnl
 
