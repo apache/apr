@@ -84,3 +84,38 @@ ap_status_t ap_getfileinfo(struct file_t *thefile)
     }
 }
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_stat(ap_file_t **, char *, ap_context_t *)
+ *    get the specified file's stats.  The file is specified by filename,
+ *    instead of using a pre-opened file.
+ * arg 1) Where to store the information about the file.
+ * arg 2) The name of the file to stat.
+ * arg 3) the context to use to allocate the new file. 
+ */ 
+ap_status_t ap_stat(struct file_t **thefile, char *fname, ap_context_t *cont)
+{
+    struct stat info;
+    int rv = stat(fname, &info);
+
+    if (rv == 0) {
+        (*thefile) = ap_pcalloc(cont, sizeof(struct file_t));
+        if ((*thefile) == NULL) {
+            return APR_ENOMEM;
+        }
+        (*thefile)->fname = ap_pstrdup(cont, fname);
+        (*thefile)->filehand = NULL;
+        (*thefile)->filedes = -1;
+        (*thefile)->protection = info.st_mode;
+        (*thefile)->user = info.st_uid;
+        (*thefile)->group = info.st_gid;
+        (*thefile)->size = info.st_size;
+        (*thefile)->atime = info.st_atime;
+        (*thefile)->mtime = info.st_mtime;
+        (*thefile)->ctime = info.st_ctime;
+        (*thefile)->stated = 1; 
+        return APR_SUCCESS;
+    }
+    else {
+        return APR_ENOSTAT;
+    }
+}
