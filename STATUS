@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 21:37:14 $]
+Last modified at [$Date: 2002/07/12 21:40:20 $]
 
 Release:
 
@@ -67,7 +67,6 @@ CURRENT VOTES:
          +1: rbb, jerenkrantz, striker, dreid
          +0: wrowe [apr_types don't promise to map to C99/ANSI units]
          +0: brianp
-         -0.5: jwoolley
          -1: aaron [veto for reusing the apr_time_t identifier for a new use]
              fielding [if they don't map to system types, then don't mimic
                the system types --- give me back all of my ap_time functions
@@ -79,7 +78,7 @@ CURRENT VOTES:
       2) Renaming the function to get rid of apr_time_t vs time_t confusion,
          but keep it ambigious and make no contract with the user about the
          units represented.  Needs a better suggestion than apr_timeval_t.
-         +1: aaron, jwoolley, brianp, ianh
+         +1: aaron, brianp, ianh
          -0: jerenkrantz, striker, dreid
          -0.5: rbb, wrowe
 
@@ -87,7 +86,6 @@ CURRENT VOTES:
          and strongly identify the type as apr_busec_t or apr_butime_t, with
          an ongoing contract with users about the type's units.
          +1: fielding  [prefers apr_busec or simple time_t / struct tm]
-         +1: jwoolley
          +0.5: wrowe,  [prefers apr_butime_t but isn't going to fight that]
                brianp
          -0: striker, jerenkrantz
