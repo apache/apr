@@ -69,6 +69,9 @@ extern "C" {
  * @package Error Codes
  */
 
+/**
+ * Type for specifying an error or status code.
+ */
 typedef int apr_status_t;
 
 /**
@@ -150,6 +153,10 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
  *                    platform, either because nobody has gotten to it yet, 
  *                    or the function is impossible on this platform.
  * APR_EMISMATCH      Two passwords do not match.
+ * 
+ * @tip Error codes can be checked with APR_STATUS_IS_FOO, where foo is the
+ *      error code.  For example, APR_EOF can be checked for with 
+ *      APR_STATUS_IS_EOF.
  * </PRE>
  */
 

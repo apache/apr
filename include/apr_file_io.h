@@ -122,19 +122,51 @@ typedef enum {
 /* should be same as whence type in lseek, POSIX defines this as int */
 typedef apr_int32_t       apr_seek_where_t;
 
+/**
+ * Structure for referencing files.
+ * @defvar apr_file_t
+ */
 typedef struct apr_file_t         apr_file_t;
 typedef struct apr_finfo_t        apr_finfo_t;
+/**
+ * Structure for referencing directories.
+ * @defvar apr_dir_t
+ */
 typedef struct apr_dir_t          apr_dir_t;
+/**
+ * Structure for determining canonical filenames.
+ * @defvar apr_canon_t
+ */
 typedef struct apr_canon_t        apr_canon_t;
+/**
+ * Structure for determining file permissions.
+ * @defvar apr_fileperms_t
+ */
 typedef apr_int32_t               apr_fileperms_t;
-typedef uid_t                    apr_uid_t;
-typedef gid_t                    apr_gid_t;
+/**
+ * Structure for determining file owner.
+ * @defvar apr_uid_t
+ */
+typedef uid_t                     apr_uid_t;
+/**
+ * Structure for determining the group that owns the file.
+ * @defvar apr_gid_t
+ */
+typedef gid_t                     apr_gid_t;
 #ifdef WIN32
-typedef apr_uint64_t             apr_ino_t;
-typedef apr_uint32_t             apr_dev_t;
+/**
+ * Structure for determining the inode of the file.
+ * @defvar apr_ino_t
+ */
+typedef apr_uint64_t              apr_ino_t;
+/**
+ * Structure for determining the device the file is on.
+ * @defvar apr_dev_t
+ */
+typedef apr_uint32_t              apr_dev_t;
 #else
-typedef ino_t                    apr_ino_t;
-typedef dev_t                    apr_dev_t;
+typedef ino_t                     apr_ino_t;
+typedef dev_t                     apr_dev_t;
 #endif
 
 /**
@@ -186,70 +218,14 @@ struct apr_finfo_t {
 
 
 /*   Make and Merge Canonical Name Options */
-
-/**
- * Require the trusted_name+child_name result is an absolute product 
- * or fail with error for the make and merge canonical name functions.
- */
 #define APR_CANON_ONLY_ABSOLUTE   0
-/**
- * Allow that the trusted_name+child_name result may be a relative result
- * for the make and merge canonical name functions.
- */
 #define APR_CANON_ALLOW_RELATIVE  2
-
-/**
- * Require the trusted_name+child_name result is not an absolute path
- * or fail with error for the make and merge canonical name functions.
- */
 #define APR_CANON_ONLY_RELATIVE   3
-
-/**
- * Require the trusted_name+child_name result is a child of trusted_name 
- * or fail with error for the make and merge canonical name functions.
- */
 #define APR_CANON_CHILD_OF_TRUSTED  4
-
-/**
- * If file path elements exist (can stat) then fold the element's name 
- * to lowercase for the make and merge canonical name functions.
- */
 #define APR_CANON_LOWERCASE 
-
-/**
- * If file path elements exist (can readdir) then fold the element's name 
- * to the true case lowercase for the make and merge canonical name functions.
- */
 #define APR_CANON_TRUECASE 
 
-/**
- * Canonicalize the path and name.
- *
- * @param new_name The newly allocated canonicalized trusted+child name
- * @param trusted_name Already canonical parent path; may be NULL.
- * @param child_name An absolute path or path relative to trusted_name.
- * @param options See the APR_CANON_ bit flags documentation for options
- * @param pool The context in which to allocate the new_name apr_canon_t
- *
- * @tip A canonical name is a name stipped of embedded backrefs "../", 
- * thisrefs "./", successive slashes (//), or any other ambigious file
- * name element.  Absolute canonical names referencing the same file must 
- * strcmp() identically, excluding symlinks or inconsistent use of the
- * APR_CANON_LOWERCASE or APR_CANON_TRUECASE options.
- * 
- * If the name does not exist, or resolves to a relative name the given case
- * is preserved.  Insignificant elements are eliminated.  For example, on Win32 this 
- * function removes trailing dots (which are allowed, but not stored in 
- * the file system), and "/../" under Unix is resolved to "/".  The relative 
- * canonical name may contain leading backrefs "../", but will never contain 
- * any other prohibited element.
- */
 
-/*
- * @param trusted_name May be null
- * @param child_name May be absolute, in which case trusted_name is ignored
- * unless APR_CHILD_RELATIVE is tested.
- */
 /* This is a hack, because none of these functions actually exist yet.  The
  * problem is that we generate our exports from the header files, so we are
  * trying to export these functions, but they don't exist, so we can't link.
@@ -257,49 +233,136 @@ struct apr_finfo_t {
  * they actually exist.
  */
 #ifdef APR_NOT_DONE_YET
+/**
+ * Canonicalize the path and name.
+ * @param new_name The newly allocated canonicalized trusted+child name
+ * @param trusted_name Already canonical parent path; may be NULL.
+ * @param child_name An absolute path or path relative to trusted_name.
+ * @param options Bit-wise of:
+ * <PRE>
+ *   APR_CANON_ONLY_ABSOLUTE     Require the trusted_name+child_name result is 
+ *                               an absolute product or fail with error for the 
+ *                               make and merge canonical name functions.
+ *   APR_CANON_ALLOW_RELATIVE    Allow that the trusted_name+child_name result 
+ *                               may be a relative result for the make and 
+ *                               merge canonical name functions.
+ *   APR_CANON_ONLY_RELATIVE     Require the trusted_name+child_name result is 
+ *                               not an absolute path or fail with error for 
+ *                               the make and merge canonical name functions.
+ *   APR_CANON_CHILD_OF_TRUSTED  Require the trusted_name+child_name result is 
+ *                               a child of trusted_name or fail with error for
+ *                               the make and merge canonical name functions.
+ *   APR_CANON_LOWERCASE         If file path elements exist (can stat) then 
+ *                               fold the element's name to lowercase for the 
+ *                               make and merge canonical name functions.
+ *   APR_CANON_TRUECASE          If file path elements exist (can readdir) then
+ *                               fold the element's name to the true case 
+ *                               lowercase for the make and merge canonical 
+ *                               name functions.
+ * </PRE>
+ * @param pool The pool in which to allocate the new_name apr_canon_t
+ *
+ * @tip A canonical name is a name stripped of embedded backrefs "../", 
+ * thisrefs "./", successive slashes (//), or any other ambigious file
+ * name element.  Absolute canonical names referencing the same file must 
+ * strcmp() identically, excluding symlinks or inconsistent use of the
+ * APR_CANON_LOWERCASE or APR_CANON_TRUECASE options.
+ * 
+ * If the name does not exist, or resolves to a relative name the given case
+ * is preserved.  Insignificant elements are eliminated.  For example, on Win32 
+ * this function removes trailing dots (which are allowed, but not stored in 
+ * the file system), and "/../" under Unix is resolved to "/".  The relative 
+ * canonical name may contain leading backrefs "../", but will never contain 
+ * any other prohibited element.
+ */
 apr_status_t apr_make_canonical_name(apr_canon_t **new_name, 
                                      const apr_canon_t *trusted_name, 
                                      const char *child_name, 
                                      int options,
                                      apr_pool_t *pool);
 
+/**
+ * Merge two canonical names into a single canonical name.
+ * @param new_name The newly allocated canonicalized trusted+child name
+ * @param trusted_name Already canonical parent path; may be NULL.
+ * @param child_name An already canonical absolute path or path relative to 
+ *                   trusted_name.
+ * @param options See apr_make_canonical_name for options 
+ * @param pool The pool to allocate the new_name out of.
+ * @see apr_make_canonical_name
+ */
 apr_status_t apr_merge_canonical_name(apr_canon_t **new_name,
                                       const apr_canon_t *trusted_name,
                                       const apr_canon_t *child_name,
                                       int options,
                                       apr_pool_t *pool);
 
+/**
+ * Get the canonical path in a character string
+ * @param path A location to store the canocical name
+ * @param trusted_name An already canonicalized file path
+ * @param pool The pool to allocate the path out of.
+ */
 apr_status_t apr_get_canonical_name(char **path, 
                                     const apr_canon_t *trusted_name, 
                                     apr_pool_t *pool);
 
+/**
+ * Count the number of elements in a canonical name.
+ * @param trusted_name An already canonicalized file path
+ * @return The number of elements in the name
+ */
 int apr_count_canonical_elements(const apr_canon_t *trusted_name);
 
+/**
+ * Query the length of some elements of the canonical name
+ * @param trusted_name An already canonicalized file path
+ * @param firstelement The numerical position of the element to start the 
+ *        length at.
+ * @param lastelement The numerical position of the element to end the
+ *        length at.
+ * @return The length of requested elements.
+ */
 int apr_get_canonical_elements_length(const apr_canon_t *trusted_name,
                                       int firstelement, int lastelement);
 
+/**
+ * Get the requested elements of a canonical name in a character string
+ * @param path_elements A location to store the path elements.
+ * @param trusted_name An already canonicalized file path
+ * @param firstelement The numerical position of the element to start the 
+ *        length at.
+ * @param lastelement The numerical position of the element to end the
+ *        length at.
+ * @param pool The pool to allocate the path out of.
+ */
 apr_status_t apr_get_canonical_elements(char **path_elements,
                                         const apr_canon_t *trusted_name,
                                         int firstelement, int lastelement,
                                         apr_pool_t *pool);
 
 /**
- *  Returns APR_SUCCESS if canon_name is absolute.  Do not trust
- *  !apr_is_absolute to determine if the path is relative.  Also,
- *  test apr_is_virtualroot to avoid non-filesystem pseudo roots.
+ * Determine if a canonical name is absolute.
+ * @param path The canonical name to check
+ * @warning Do not trust !apr_is_absolute to determine if the path is 
+ *          relative.  Also, test apr_is_virtualroot to avoid non-filesystem 
+ *          pseudo roots.
  */
 apr_status_t apr_is_absolute(apr_canon_t **path);
 
 /**
- *  Returns APR_SUCCESS if canon_name is absolute.  Do not trust
- *  !apr_is_relative to determine if the path is absolute.
+ * Determine if a canonical name is relative
+ * @param path The canonical name to check
+ * @warning Do not trust !apr_is_relative to determine if the path is absolute
  */
 apr_status_t apr_is_relative(apr_canon_t **path);
 
 /**
- *  Returns APR_SUCCESS if the elements 0..elements resolves to a
- *  platform's non-physical root, e.g. the //machine/ name that 
- *  isn't an adaquately complete root for UNC paths.
+ * Determine if the elements 0..elements resolves to a platform's non-physical 
+ * root, e.g. the //machine/ name that isn't an adaquately complete root for 
+ * UNC paths.
+ * @param path The canonical name to check
+ * @param elements The number of elements to check.
  */
 apr_status_t apr_is_virtualroot(apr_canon_t **path, int elements);
 #endif
@@ -398,7 +461,8 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes);
  * Write data to the specified file.
  * @param thefile The file descriptor to write to.
  * @param buf The buffer which contains the data.
- * @param nbytes On entry, the number of bytes to write; on exit, the number of bytes written.
+ * @param nbytes On entry, the number of bytes to write; on exit, the number 
+ *               of bytes written.
  * @tip apr_write will write up to the specified number of bytes, but never 
  *      more.  If the OS cannot write that many bytes, it will write as many 
  *      as it can.  The third argument is modified to reflect the * number 
@@ -429,7 +493,8 @@ apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec,
                       apr_size_t nvec, apr_size_t *nbytes);
 
 /**
- * Read data from the specified file.
+ * Read data from the specified file, ensuring that the buffer is filled
+ * before returning.
  * @param thefile The file descriptor to read from.
  * @param buf The buffer to store the data to.
  * @param nbytes The number of bytes to read.
@@ -449,7 +514,8 @@ apr_status_t apr_full_read(apr_file_t *thefile, void *buf, apr_size_t nbytes,
                          apr_size_t *bytes_read);
 
 /**
- * Write data to the specified file.
+ * Write data to the specified file, ensuring that all of the data is
+ * written before returning.
  * @param thefile The file descriptor to write to.
  * @param buf The buffer which contains the data.
  * @param nbytes The number of bytes to write.
