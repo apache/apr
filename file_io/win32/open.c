@@ -521,7 +521,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->flags = flags;
     if (flags & APR_APPEND)
-	(*file)->append = 1;
+        (*file)->append = 1;
 
     /* XXX... we pcalloc above so all others are zeroed.
      * Should we be testing if thefile is a handle to 
