@@ -81,7 +81,7 @@ void apr_get_uuid(apr_uuid_t *uuid);
 /**
  * Format a UUID into a string, following the standard format
  * @param buffer The buffer to place the formatted UUID string into. It must
- *               be at least APR_UUID_FORMATTED_LENGTH + 1bytes long to hold
+ *               be at least APR_UUID_FORMATTED_LENGTH + 1 bytes long to hold
  *               the formatted UUID and a null terminator
  * @param uuid The UUID to format
  * @deffunc int apr_format_uuid(apr_pool_t *p, const apr_uuid_t *uuid)
