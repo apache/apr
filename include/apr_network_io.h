@@ -141,7 +141,7 @@ typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE,
  */
 struct in_addr {
     apr_uint32_t  s_addr; /**< storage to hold the IP# */
-}
+};
 #endif
 
 /**
