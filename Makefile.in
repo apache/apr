@@ -29,9 +29,8 @@ TARGETS = delete-lib $(TARGET_LIB) delete-exports $(TARGET_EXPORTS)
 CLEAN_TARGETS = $(TARGET_EXPORTS)
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
-	APRVARS
-EXTRACLEAN_TARGETS = configure libtool aclocal.m4 \
-	include/arch/unix/apr_private.h.in
+	APRVARS libtool build/rules.mk
+EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in
 
 SCANDOC_TEMPLATE = -i$(apr_builders)/scandoc_template.pl
 
