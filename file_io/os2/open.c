@@ -188,6 +188,19 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cntxt)
 
 
 
+ap_status_t ap_rename_file(const char *from_path, const char *to_path,
+                           ap_pool_t *p)
+{
+    /* ### use an OS/2 specific function and error handling here... */
+    if (rename(from_path, to_path) != 0) {
+        /* ### wrong error code, but we don't have APR_ERROR */
+        return APR_EINVAL;
+    }
+    return APR_SUCCESS;
+}
+
+
+
 ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 {
     if (file == NULL) {
