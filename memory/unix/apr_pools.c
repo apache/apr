@@ -941,6 +941,12 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *a)
     free_blocks(blok);
 }
 
+
+/*****************************************************************
+ * APR_POOL_DEBUG support
+ */
+#ifdef APR_POOL_DEBUG
+
 APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse)
 {
     apr_size_t total_bytes = bytes_in_block_list(p->first);
@@ -956,11 +962,6 @@ APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
 {
     return bytes_in_block_list(block_freelist);
 }
-
-/*****************************************************************
- * APR_POOL_DEBUG support
- */
-#ifdef APR_POOL_DEBUG
 
 /* the unix linker defines this symbol as the last byte + 1 of
  * the executable... so it includes TEXT, BSS, and DATA
