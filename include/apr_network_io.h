@@ -239,15 +239,6 @@ struct apr_sockaddr_t {
     apr_port_t port;
     /** The family */
     apr_int32_t family;
-    /** Union of either IPv4 or IPv6 sockaddr. */
-    union {
-        /** IPv4 sockaddr structure */
-        struct sockaddr_in sin;
-#if APR_HAVE_IPV6
-        /** IPv6 sockaddr structure */
-        struct sockaddr_in6 sin6;
-#endif
-    } sa;
     /** How big is the sockaddr we're using? */
     apr_socklen_t salen;
     /** How big is the ip address structure we're using? */
@@ -261,6 +252,15 @@ struct apr_sockaddr_t {
     /** If multiple addresses were found by apr_sockaddr_info_get(), this 
      *  points to a representation of the next address. */
     apr_sockaddr_t *next;
+    /** Union of either IPv4 or IPv6 sockaddr. */
+    union {
+        /** IPv4 sockaddr structure */
+        struct sockaddr_in sin;
+#if APR_HAVE_IPV6
+        /** IPv6 sockaddr structure */
+        struct sockaddr_in6 sin6;
+#endif
+    } sa;
 };
 
 #if APR_HAS_SENDFILE
