@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     char *local_ipaddr, *remote_ipaddr;
     char *dest = "127.0.0.1";
     apr_port_t local_port, remote_port;
-    apr_interval_time_t timeout = 2 * APR_USEC_PER_SEC;
+    apr_interval_time_t timeout = apr_time_from_sec(2);
     apr_sockaddr_t *local_sa, *remote_sa;
 
     setbuf(stdout, NULL);
