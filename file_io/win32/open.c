@@ -179,7 +179,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     DWORD createflags = 0;
     DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
-    apr_oslevel_e os_level;
     apr_status_t rv;
 
     if (flag & APR_READ) {
@@ -189,7 +188,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         oflags |= GENERIC_WRITE;
     }
     
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    if (apr_os_level >= APR_WIN_NT) 
         sharemode |= FILE_SHARE_DELETE;
 
     if (flag & APR_CREATE) {
@@ -221,7 +220,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     if (flag & APR_OPENLINK) {
        attributes |= FILE_FLAG_OPEN_REPARSE_POINT;
     }
-    if (!(flag & (APR_READ | APR_WRITE)) && (os_level >= APR_WIN_NT)) {
+    if (!(flag & (APR_READ | APR_WRITE)) && (apr_os_level >= APR_WIN_NT)) {
         /* We once failed here, but this is how one opens 
          * a directory as a file under winnt
          */
@@ -235,7 +234,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     }
 
 #if APR_HAS_UNICODE_FS
-    if (os_level >= APR_WIN_NT) {
+    if (apr_os_level >= APR_WIN_NT) {
         apr_wchar_t wfname[APR_PATH_MAX];
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                                / sizeof(apr_wchar_t), fname))
@@ -326,8 +325,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    if (apr_os_level >= APR_WIN_NT) 
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -349,8 +347,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                           const char *topath,
                                           apr_pool_t *cont)
 {
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
+    if (apr_os_level >= APR_WIN_NT) 
     {
 #if APR_HAS_UNICODE_FS
         apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];

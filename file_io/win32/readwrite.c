@@ -137,8 +137,8 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
                 break;
             }
             if (rv != APR_SUCCESS) {
-                /* XXX CancelIo is not available on Win95 */
-                CancelIo(file->filehand);
+                if (apr_os_level >= APR_WIN_98)
+                    CancelIo(file->filehand);
             }
         }
         else if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
@@ -305,8 +305,8 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                         break;
                 }
                 if (rv != APR_SUCCESS) {
-                    /* XXX CancelIo is not available on Win95 */
-                    CancelIo(thefile->filehand);
+                    if (apr_os_level >= APR_WIN_98)
+                        CancelIo(thefile->filehand);
                 }
             }
         }

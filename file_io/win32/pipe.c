@@ -148,7 +148,6 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
                                 BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
                                 apr_pool_t *p)
 {
-    apr_oslevel_e level;
     SECURITY_ATTRIBUTES sa;
     static unsigned long id = 0;
     DWORD dwPipeMode;
@@ -185,7 +184,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     (*out)->direction = 0;
     (*out)->pOverlapped = NULL;
 
-    if (apr_get_oslevel(p, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
+    if (apr_os_level >= APR_WIN_NT) {
         /* Create the read end of the pipe */
         dwOpenMode = PIPE_ACCESS_INBOUND;
         if (bAsyncRead) {

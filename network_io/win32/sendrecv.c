@@ -253,9 +253,8 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
     int ptr = 0;
     int bytes_to_send = *len;   /* Bytes to send out of the file (not including headers) */
-    apr_oslevel_e os_level;
 
-    if (!apr_get_oslevel(NULL, &os_level) && os_level < APR_WIN_NT) {
+    if (apr_os_level < APR_WIN_NT) {
         return APR_ENOTIMPL;
     }
 
