@@ -278,7 +278,8 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     if (he || !val)
 	return hep;
     /* add a new entry for non-NULL values */
-    he = apr_pcalloc(ht->pool, sizeof(*he));
+    he = apr_palloc(ht->pool, sizeof(*he));
+    he->next = NULL;
     he->hash = hash;
     he->key  = key;
     he->klen = klen;
