@@ -1,0 +1,15 @@
+Makefile
+config.cache
+config.log
+config.status
+configure
+APRVARS
+objs
+.deps
+LibD
+LibR
+Debug
+Release
+*.mak
+*.opt
+*.plg
