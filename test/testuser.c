@@ -60,29 +60,25 @@
 #if APR_HAS_USER
 static void uid_current(CuTest *tc)
 {
-    apr_uid_t uid = -1;
-    apr_gid_t gid = -1;
+    apr_uid_t uid;
+    apr_gid_t gid;
     apr_status_t rv;
 
     rv = apr_uid_current(&uid, &gid, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssert(tc, "uid not modified", uid != -1);
-    CuAssert(tc, "gid not modified", gid != -1);
 }
 
 static void username(CuTest *tc)
 {
-    apr_uid_t uid = -1;
-    apr_gid_t gid = -1;
-    apr_uid_t retreived_uid = -1;
-    apr_gid_t retreived_gid = -1;
+    apr_uid_t uid;
+    apr_gid_t gid;
+    apr_uid_t retreived_uid;
+    apr_gid_t retreived_gid;
     apr_status_t rv;
     char *uname = NULL;
 
     rv = apr_uid_current(&uid, &gid, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssert(tc, "uid not modified", uid != -1);
-    CuAssert(tc, "gid not modified", gid != -1);
 
     rv = apr_uid_name_get(&uname, uid, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
@@ -91,22 +87,20 @@ static void username(CuTest *tc)
     rv = apr_uid_get(&retreived_uid, &retreived_gid, uname, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    CuAssertIntEquals(tc, uid, retreived_uid);
-    CuAssertIntEquals(tc, gid, retreived_gid);
+    CuAssertIntEquals(tc, APR_SUCCESS, apr_uid_compare(uid, retreived_uid));
+    CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
 }
 
 static void groupname(CuTest *tc)
 {
-    apr_uid_t uid = -1;
-    apr_gid_t gid = -1;
-    apr_gid_t retreived_gid = -1;
+    apr_uid_t uid;
+    apr_gid_t gid;
+    apr_gid_t retreived_gid;
     apr_status_t rv;
     char *gname = NULL;
 
     rv = apr_uid_current(&uid, &gid, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssert(tc, "uid not modified", uid != -1);
-    CuAssert(tc, "gid not modified", gid != -1);
 
     rv = apr_gid_name_get(&gname, gid, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
@@ -115,10 +109,10 @@ static void groupname(CuTest *tc)
     rv = apr_gid_get(&retreived_gid, gname, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    CuAssertIntEquals(tc, gid, retreived_gid);
+    CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
 }
 #else
-static void threads_not_impl(CuTest *tc)
+static void users_not_impl(CuTest *tc)
 {
     CuNotImpl(tc, "Users not implemented on this platform");
 }
