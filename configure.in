@@ -3,7 +3,7 @@ dnl ## Autoconf configuration file for APR
 dnl ##
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(threads.m4)
+AC_INIT(apr_common.m4)
 AC_CONFIG_HEADER(include/apr_private.h)
 AC_CONFIG_AUX_DIR_DEFAULT
 
