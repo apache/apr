@@ -268,12 +268,12 @@ APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
 }
 
 APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
-                                          apr_sockaddr_t *leave,
+                                          apr_sockaddr_t *addr,
                                           apr_sockaddr_t *iface,
                                           apr_sockaddr_t *source)
 {
 #ifdef IP_DROP_MEMBERSHIP
-    return do_mcast(IP_DROP_MEMBERSHIP, sock, leave, iface, source);
+    return do_mcast(IP_DROP_MEMBERSHIP, sock, addr, iface, source);
 #else
     return APR_ENOTIMPL;
 #endif
