@@ -76,40 +76,28 @@ extern "C" {
  * compiled against a different version of APR by use of the compile-time
  * constants and the use of the run-time query function.
  *
- * ### we have not defined source/binary compatibility guidelines yet and
- * ### how those map against these (release) version numbers. a strawman
- * ### would be the following text:
+ * APR version numbering follows the guidelines specified in:
  *
- * APR is binary-compatible (an app compiled against one version does not
- * need to be recompiled to work against another version) for the same
- * MAJOR and MINOR versions.
- *
- * APR is source-compatible (an app needs to be recompiled, but will work
- * the same) for the same MAJOR version.
- *
- * If the MAJOR version changes, then an application may need source changes.
- *
- * Note that APR is defined to be forward compatible only, meaning that a
- * given application will be compatible with APR releases moving forward in
- * time. An application may not be compatible with earlier versions of an
- * APR library (even if the major and minor versions match). This restriction
- * is because a later version of APR can introduce new APIs.
+ *     http://apr.apache.org/versioning.html
  */
 
 /* The numeric compile-time version constants. These constants are the
  * authoritative version numbers for APR. 
  */
+
 /** major version 
- * Major API changes that could cause compatibility problems for older programs 
- * such as structure size changes.  No binary compatibility is possible across
- * a change in the major version.
+ * Major API changes that could cause compatibility problems for older
+ * programs such as structure size changes.  No binary compatibility is
+ * possible across a change in the major version.
  */
 #define APR_MAJOR_VERSION       0
+
 /** 
  * Minor API changes that do not cause binary compatibility problems.
  * Should be reset to 0 when upgrading APR_MAJOR_VERSION
  */
 #define APR_MINOR_VERSION       9
+
 /** patch level */
 #define APR_PATCH_VERSION       0
 
