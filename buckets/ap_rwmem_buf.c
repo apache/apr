@@ -78,7 +78,6 @@ APR_EXPORT(void) ap_rwmem_destroy(void *e)
 {
     ap_bucket_rwmem *d = (ap_bucket_rwmem *)e;
     free(d->alloc_addr);
-    free(d);
 }
 
 APR_EXPORT(char *) ap_rwmem_get_char_str(ap_bucket_rwmem *b)
