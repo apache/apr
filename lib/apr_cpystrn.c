@@ -136,6 +136,10 @@ API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
         cp++; \
     }
 
+/* DETERMINE_NEXTSTRING:
+ * At exit, cp will point to one of the following:  NULL, SPACE, TAB or QUOTE.
+ * NULL implies the argument string has been fully traversed.
+ */
 #define DETERMINE_NEXTSTRING(cp,isquoted) \
     for ( ; *cp != '\0'; cp++) { \
         if (   (isquoted    && (*cp     == ' ' || *cp     == '\t')) \
@@ -175,9 +179,18 @@ API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
         CHECK_QUOTATION(cp, isquoted);
         tmpCnt = cp;
         DETERMINE_NEXTSTRING(cp, isquoted);
-        *cp++ = '\0';
-        (*argv_out)[numargs] = ap_pstrdup(token_context, tmpCnt);
-
+        if (*cp == '\0') {
+            (*argv_out)[numargs] = ap_pstrdup(token_context, tmpCnt);
+            numargs++;
+            (*argv_out)[numargs] = '\0';
+            break;
+        }
+        else {
+            *cp++ = '\0';
+            (*argv_out)[numargs] = ap_pstrdup(token_context, tmpCnt);
+            numargs++;
+        }
+        
         SKIP_WHITESPACE(cp);
     }
     *cp++ = '\0';
