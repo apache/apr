@@ -73,7 +73,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
             rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
 
             if (rv != 1) {
-                *len = -1;
+                *len = 0;
                 err = sock_errno();
 
                 if (rv == 0)
@@ -91,7 +91,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
     } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
 
     if (err) {
-        *len = -1;
+        *len = 0;
         return os2errno(err);
     }
 
@@ -112,7 +112,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
             rv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
 
             if (rv != 1) {
-                *len = -1;
+                *len = 0;
                 err = sock_errno();
 
                 if (rv == 0)
@@ -130,7 +130,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
     } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
 
     if (err) {
-        *len = -1;
+        *len = 0;
         return os2errno(err);
     }
 
@@ -155,7 +155,7 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec
             rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
 
             if (rv != 1) {
-                *len = -1;
+                *len = 0;
                 err = sock_errno();
 
                 if (rv == 0)
@@ -173,7 +173,7 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec
     } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
 
     if (err) {
-        *len = -1;
+        *len = 0;
         return os2errno(err);
     }
 
