@@ -230,3 +230,7 @@ apr_status_t apr_put_os_exp_time(apr_exploded_time_t *aprtime,
     return APR_SUCCESS;
 }
 
+void apr_sleep(apr_interval_time_t t)
+{
+    Sleep(t/1000);
+}
