@@ -57,7 +57,6 @@
 APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
 {
     int x;
-    pid_t pgrp;
 
     chdir("/");
 #if !defined(MPE) && !defined(OS2) && !defined(TPF) && !defined(BEOS)
@@ -77,21 +76,17 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
 #endif
 
 #ifdef HAVE_SETSID
-    if ((pgrp = setsid()) == -1) {
+    if (setsid() == -1) {
         return errno;
     }
 #elif defined(NEXT) || defined(NEWSOS)
-    if (setpgrp(0, getpid()) == -1 || (pgrp = getpgrp(0)) == -1) {
+    if (setpgrp(0, getpid()) == -1) {
         return errno;
     }
-#elif defined(OS2) || defined(TPF)
-    /* OS/2 don't support process group IDs */
-    pgrp = getpid();
-#elif defined(MPE)
-    /* MPE uses negative pid for process group */
-    pgrp = -getpid();
+#elif defined(OS2) || defined(TPF) || defined(MPE)
+    /* do nothing */
 #else
-    if ((pgrp = setpgid(0, 0)) == -1) {
+    if (setpgid(0, 0) == -1) {
         return errno;
     }
 #endif
