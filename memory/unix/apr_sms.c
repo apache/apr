@@ -912,6 +912,16 @@ APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms)
     return sms->parent;
 }
 
+APR_DECLARE(void) apr_sms_set_abort(apr_abortfunc_t abort, apr_sms_t *sms)
+{
+    sms->apr_abort = abort;
+}
+
+APR_DECLARE(apr_abortfunc_t) apr_sms_get_abort(apr_sms_t *sms)
+{
+    return sms->apr_abort;
+}
+
 #if APR_DEBUG_SHOW_STRUCTURE
 static void add_sms(char *a, char *b, char *c, apr_sms_t *sms, 
                     apr_sms_t *caller, int sib)

@@ -166,7 +166,6 @@ typedef struct apr_sms_t    apr_sms_t;
  * @param size The (minimal required) size of the block to be allocated
  * @return pointer to a newly allocated block of memory, NULL if insufficient
  *         memory available
- * @deffunc void *apr_sms_malloc(apr_sms_t *sms, apr_size_t size)
  */
 APR_DECLARE(void *) apr_sms_malloc(apr_sms_t *sms, apr_size_t size);
 
@@ -176,7 +175,6 @@ APR_DECLARE(void *) apr_sms_malloc(apr_sms_t *sms, apr_size_t size);
  * @param size The (minimal required) size of the block to be allocated
  * @return pointer to a newly allocated block of memory, NULL if insufficient
  *         memory available
- * @deffunc void *apr_sms_calloc(apr_sms_t *sms, apr_size_t size)
  */
 APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *sms, apr_size_t size);
 
@@ -189,7 +187,6 @@ APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *sms, apr_size_t size);
  * @param size The (minimal required) size of the block to be allocated
  * @return pointer to a newly allocated block of memory, NULL if insufficient
  *         memory available
- * @deffunc void *apr_sms_realloc(apr_sms_t *sms, void *mem, apr_size_t size)
  */
 APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem, apr_size_t size);
 
@@ -198,7 +195,6 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem, apr_size_t size);
  * @param sms The memory system to use (should be the same as the
  *        one that returned the block)
  * @param mem The block of memory to be freed
- * @deffunc void apr_sms_free(apr_sms_t *sms, void *mem)
  */
 APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms, void *mem);
 
@@ -212,7 +208,6 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms, void *mem);
  * Check if a memory system is obeying all rules. 
  * @caution Call this function as the last statement before returning a new
  *          memory system from your apr_xxx_sms_create.
- * @deffunc void apr_sms_validate(apr_sms_t *sms)
  */
 APR_DECLARE(void) apr_sms_assert(apr_sms_t *sms);
 #else
@@ -229,7 +224,6 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *sms);
  *          for the given memory system (i.e. the memory system is non-
  *          tracking).
  * @param sms The memory system to be reset
- * @deffunc apr_status_t apr_sms_reset(apr_sms_t *sms)
  */
 APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *sms);
 
@@ -239,7 +233,6 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *sms);
  * @caution Be carefull when using this function with a non-tracking memory
  *          system
  * @param sms The memory system to be destroyed
- * @deffunc apr_status_t apr_sms_destroy(apr_sms_t *sms)
  */
 APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms);
 
@@ -261,23 +254,40 @@ APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *sms);
  * @param a The memory system to search
  * @param b The memory system to search for
  * @return APR_SUCCESS if a is an ancestor of b, 1 if it isn't
- * @deffunc apr_status_t apr_sms_is_ancestor(apr_sms_t *a,
- *                                           apr_sms_t *b)
  */
 APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a, apr_sms_t *b);
 
 /** 
  * Get the memory_system identity
- * @param sms The memory system to use
- * @deffunc const char * apr_sms_identity(apr_sms_t *sms);
+ * @param sms The memory system to identify
  */
-APR_DECLARE(const char *) apr_sms_identity(apr_sms_t *sms);
+APR_DECLARE(const char *) apr_sms_get_identity(apr_sms_t *sms);
 
 /**
  * Get the parent sms
  * @param sms the memory system to get the parent from
  */
 APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms);
+
+/**
+ * Set the abort function.  This is called when we fail to
+ * fulfil an allocation request.
+ * @tip If an app wants APR to exit on a memory allocation error
+ *      then this function can be called to set the callback to 
+ *      use.  If this function is not called then APR will return an error
+ *      and expect the app to deal with it.
+ * @param abortfunc The function to call
+ * @param sms The sms to register the function with
+ */
+APR_DECLARE(void) apr_sms_set_abort(apr_abortfunc_t abortfunc,
+                                    apr_sms_t *sms);
+
+/**
+ * Get the abort function registered with the sms.
+ * @param sms The sms to get the function for
+ * @return The abort function registered
+ */
+APR_DECLARE(apr_abortfunc_t) apr_sms_get_abort(apr_sms_t *sms);
 
 /*
  * memory system cleanup management functions
@@ -290,9 +300,6 @@ APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms);
  * @param data The data to pass to the cleanup function
  * @param cleanup_fn The function to call when the memory system is reset or
  *        destroyed
- * @deffunc void apr_sms_cleanup_register(apr_sms_t *sms, apr_int32_t type,
- *                                        const void *data, 
- *                                        apr_status_t (*cleanup_fn)(void *));
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms, 
                                                    apr_int32_t type,
@@ -307,10 +314,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms,
  * @param type The type of cleanup to run
  * @param data The data associated with the cleanup function
  * @param cleanup_fn The registered cleanup function
- * @deffunc void apr_sms_cleanup_unregister(apr_sms_t *sms,
- *                                          apr_int32_t type,
- *                                          const void *data, 
- *                                          apr_status_t (*cleanup_fn)(void *));
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms, 
                                                      apr_int32_t type,
@@ -322,8 +325,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms,
  * @param sms The memory system the cleanup functions are registered with
  * @param type The type associated with the cleanup function. Pass 0 to 
  *        unregister all cleanup functions.
- * @deffunc apr_status_t apr_sms_cleanup_unregister_type(apr_sms_t *sms,
- *                 apr_int32_t type);
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *sms,
                                                            apr_int32_t type);
@@ -336,10 +337,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *sms,
  * @param type The type associated with the cleanup function. Pass 0 to ignore type.
  * @param data The data associated with the cleanup function
  * @param cleanup The registered cleanup function
- * @deffunc apr_status_t apr_sms_cleanup_run(apr_sms_t *sms, 
- *                                           apr_int32_t type, 
- *                                           const void *data, 
- *                                           apr_status_t (*cleanup)(void *));
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms, 
                                               apr_int32_t type, 
@@ -351,8 +348,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms,
  * @param sms The memory system the cleanup functions are registered with
  * @param type The category of cleanup functions to run. Pass 0 to run all
  *        cleanup functions.
- * @deffunc apr_status_t apr_sms_cleanup_run_type(apr_sms_t *sms,
- *                                                apr_int32_t type);
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms, 
                                                    apr_int32_t type);
@@ -364,7 +359,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms,
 /**
  * Create a standard malloc/realloc/free memory system
  * @param sms A pointer to the created apr_sms_t*
- * @deffunc apr_status_t apr_sms_std_create(apr_sms_t **sms);
  */
 APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms);
 

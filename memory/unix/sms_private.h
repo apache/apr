@@ -93,6 +93,8 @@ struct apr_sms_t
     apr_status_t (*lock_fn)        (apr_sms_t *sms);
     apr_status_t (*unlock_fn)      (apr_sms_t *sms);
 
+    apr_status_t (*apr_abort)(int retcode);
+
 #if APR_HAS_THREADS    
     apr_status_t (*thread_register_fn)   (apr_sms_t *sms, 
                                           apr_os_thread_t thread);
