@@ -543,8 +543,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     ELSE_WIN_OS_IS_ANSI
     {
         char *root = NULL;
-        char *test = fname;
-        rv = apr_filepath_root(&root, &test APR_FILEPATH_NATIVE, pool);
+        const char *test = fname;
+        rv = apr_filepath_root(&root, &test, APR_FILEPATH_NATIVE, pool);
         isroot = (root && *root && !(*test));
 
         if ((apr_os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
