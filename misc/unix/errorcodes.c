@@ -164,6 +164,8 @@ static char *apr_error_string(apr_status_t statcode)
         return "The given path was above the root path";
     case APR_EBADPATH:
         return "The given path misformatted or contained invalid characters";
+    case APR_EPATHWILD:
+        return "The given path contained wildcard characters";
     case APR_EPROC_UNKNOWN:
         return "The process is not recognized.";
     default:
