@@ -85,7 +85,8 @@ static apr_socket_t *setup_socket(abts_case *tc)
     
     rv = apr_socket_bind(sock, sa);
     apr_assert_success(tc, "Problem binding to port", rv);
-    
+    if (rv) return NULL;
+                
     rv = apr_socket_listen(sock, 5);
     apr_assert_success(tc, "Problem listening on socket", rv);
 
@@ -97,7 +98,9 @@ static void test_create_bind_listen(abts_case *tc, void *data)
     apr_status_t rv;
     apr_socket_t *sock = setup_socket(tc);
     
-    rv = apr_socket_close(sock) ;
+    if (!sock) return;
+    
+    rv = apr_socket_close(sock);
     apr_assert_success(tc, "Problem closing socket", rv);
 }
 
@@ -111,6 +114,7 @@ static void test_send(abts_case *tc, void *data)
     apr_size_t length;
 
     sock = setup_socket(tc);
+    if (!sock) return;
 
     launch_child(tc, &proc, "read", p);
     
@@ -143,6 +147,7 @@ static void test_recv(abts_case *tc, void *data)
     char datastr[STRLEN];
     
     sock = setup_socket(tc);
+    if (!sock) return;
 
     launch_child(tc, &proc, "write", p);
     
@@ -175,6 +180,7 @@ static void test_timeout(abts_case *tc, void *data)
     int exit;
     
     sock = setup_socket(tc);
+    if (!sock) return;
 
     launch_child(tc, &proc, "read", p);
     
