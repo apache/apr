@@ -39,6 +39,37 @@
 #define SHUT_RDWR 2
 #endif
 
+#if HAVE_UUID_CREATE
+
+#include <uuid.h>
+
+APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
+{
+    uuid_t g;
+
+    uuid_create(&g, NULL);
+
+    memcpy( (void*)uuid_data, (const void *)&g, sizeof( uuid_t ) );
+
+    return APR_SUCCESS;
+}
+
+#elif HAVE_LIBUUID
+
+#include <uuid/uuid.h>
+
+APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
+{
+    uuid_t g;
+
+    uuid_generate(g);
+
+    memcpy((void*)uuid_data, (const void *)g, sizeof( uuid_t ) );
+
+    return APR_SUCCESS;
+}
+#endif 
+
 #if APR_HAS_RANDOM
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 

@@ -1790,6 +1790,19 @@ if test "$rand" != "1"; then
 fi
 
 AC_SUBST(rand)
+
+dnl ----------------------------- Checking for UUID Support 
+echo "${nl}Checking for OS UUID Support..."
+osuuid="0"
+AC_CHECK_FUNCS(uuid_create, [osuuid="1"
+    AC_DEFINE([HAVE_UUID_CREATE], 1, [Define if libc has uuid_create])], [])
+AC_CHECK_LIB(uuid, uuid_generate, 
+    [osuuid="1"
+     APR_ADDTO(LIBS,-luuid)
+     AC_DEFINE([HAVE_LIBUUID], 1, [Define if libuuid is present])], [])
+AC_SUBST(osuuid)
+
+
 dnl ----------------------------- Checking for Time Support 
 echo "${nl}Checking for Time Support..."
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
