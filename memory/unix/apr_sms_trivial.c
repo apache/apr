@@ -229,8 +229,9 @@ static void *apr_sms_trivial_realloc(apr_sms_t *sms, void *mem, apr_size_t reqsi
     char *endp;
 
     reqsize = APR_ALIGN_DEFAULT(reqsize);
-    
+
     new_mem = apr_sms_trivial_malloc(sms, reqsize);
+ 
     if (new_mem) {
         node = BLOCK_T((char *)mem - SIZEOF_NODE_T)->node;
 
@@ -441,11 +442,11 @@ static apr_status_t apr_sms_trivial_thread_unregister(apr_sms_t *sms,
 }
 #endif /* APR_HAS_THREADS */
 
-static apr_status_t apr_sms_trivial_create_ex(apr_sms_t **sms, 
-                                              apr_sms_t *pms,
-                                              apr_size_t min_alloc,
-                                              apr_size_t min_free,
-                                              apr_size_t max_free)
+APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms, 
+                                                    apr_sms_t *pms,
+                                                    apr_size_t min_alloc,
+                                                    apr_size_t min_free,
+                                                    apr_size_t max_free)
 {
     apr_sms_t *new_sms;
     apr_sms_trivial_t *tms;
