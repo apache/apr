@@ -105,9 +105,9 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
 
 APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    asm volatile ("lock; xadd %1, (%2)"                              
+    asm volatile ("lock; xaddl %1, (%2)"                              
                   : "=r"(val)          /* output, same as 1st input */
-                  : "r"(val), "r"(mem) /* inputs */
+                  : "0"(val), "r"(mem) /* inputs */
                   : "%1","memory");    /* tell gcc they are clobbered */
     return val;
 }
@@ -141,9 +141,9 @@ APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
     apr_uint32_t val = 1;
 
-    asm volatile ("lock; xadd %1, (%2)"                              
+    asm volatile ("lock; xaddl %1, (%2)"                              
                   : "=r"(val)          /* output, same as 1st input */
-                  : "r"(val), "r"(mem) /* inputs */
+                  : "0"(val), "r"(mem) /* inputs */
                   : "%1","memory");    /* tell gcc they are clobbered */
     return val;
 }
