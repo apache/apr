@@ -637,7 +637,7 @@ AC_SUBST(threads)
 AC_SUBST(have_sigsuspend)
 AC_SUBST(have_sigwait)
 
-AC_CHECK_FUNCS(poll kqueue)
+AC_CHECK_FUNCS(poll kqueue port_create)
 
 # Check for the Linux epoll interface; epoll* may be available in libc
 # but return ENOSYS on a pre-2.6 kernel, so do a run-time check.
