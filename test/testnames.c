@@ -114,6 +114,19 @@ static void merge_dotdot(CuTest *tc)
     CuAssertPtrNotNull(tc, dstpath);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, ABS_ROOT"foo/baz", dstpath);
+
+    rv = apr_filepath_merge(&dstpath, "", "../test", 0, p);
+    CuAssertIntEquals(tc, 0, APR_SUCCESS);
+    CuAssertStrEquals(tc, "../test", dstpath);
+
+    /* Very dangerous assumptions here about what the cwd is.  However, let's assume
+     * that the testall is invoked from within apr/test/ so the following test should
+     * return ../test unless a previously fixed bug remains or the developer changes
+     * the case of the test directory:
+     */
+    rv = apr_filepath_merge(&dstpath, "", "../test", APR_FILEPATH_TRUENAME, p);
+    CuAssertIntEquals(tc, 0, APR_SUCCESS);
+    CuAssertStrEquals(tc, "../test", dstpath);
 }
 
 static void merge_secure(CuTest *tc)

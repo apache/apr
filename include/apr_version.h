@@ -99,7 +99,7 @@ extern "C" {
 #define APR_MINOR_VERSION       9
 
 /** patch level */
-#define APR_PATCH_VERSION       4
+#define APR_PATCH_VERSION       5
 
 
 /** 

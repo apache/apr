@@ -23,8 +23,8 @@ function add_symbol (sym_name) {
 	}
 }
 
-/^[ \t]*AP[RU]?_DECLARE[^(]*[(][^)]*[)]([^ ]* )*[^(]+[(]/ {
-    sub("[ \t]*AP[RU]?_DECLARE[^(]*[(][^)]*[)][ \t]*", "")
+/^[ \t]*AP[RUI]?_DECLARE[^(]*[(][^)]*[)]([^ ]* )*[^(]+[(]/ {
+    sub("[ \t]*AP[RUI]?_DECLARE[^(]*[(][^)]*[)][ \t]*", "")
     sub("[(].*", "")
     sub("([^ ]* (^([ \t]*[(])))+", "")
 
@@ -65,7 +65,7 @@ function add_symbol (sym_name) {
     next
 }
 
-/^[ \t]*AP[RU]?_DECLARE_DATA .*;$/ {
+/^[ \t]*AP[RUI]?_DECLARE_DATA .*;$/ {
        varname = $NF;
        gsub( /[*;]/, "", varname);
        gsub( /\[.*\]/, "", varname);

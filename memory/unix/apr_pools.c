@@ -55,6 +55,7 @@
 #include "apr.h"
 #include "apr_private.h"
 
+#include "apr_atomic.h"
 #include "apr_portable.h" /* for get_os_proc */
 #include "apr_strings.h"
 #include "apr_general.h"
@@ -554,6 +555,13 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     }
 
     apr_pool_tag(global_pool, "apr_global_pool");
+
+    /* This has to happen here because mutexes might be backed by
+     * atomics.  It used to be snug and safe in apr_initialize().
+     */
+    if ((rv = apr_atomic_init(global_pool)) != APR_SUCCESS) {
+        return rv;
+    }
 
 #if APR_HAS_THREADS
     {
@@ -1265,6 +1273,13 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     apr_pool_tag(global_pool, "APR global pool");
 
     apr_pools_initialized = 1;
+
+    /* This has to happen here because mutexes might be backed by
+     * atomics.  It used to be snug and safe in apr_initialize().
+     */
+    if ((rv = apr_atomic_init(global_pool)) != APR_SUCCESS) {
+        return rv;
+    }
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
     apr_file_open_stderr(&file_stderr, global_pool);

@@ -170,6 +170,20 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
 }
                                            
 
+APR_DECLARE(apr_status_t) apr_socket_atmark(apr_socket_t *sock, int *atmark)
+{
+    int oobmark;
+
+    if (ioctl(sock->socketdes, SIOCATMARK, (void*)&oobmark, sizeof(oobmark)) < 0) {
+        return APR_OS2_STATUS(sock_errno());
+    }
+
+    *atmark = (oobmark != 0);
+
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(apr_status_t) apr_gethostname(char *buf, apr_int32_t len, 
                                           apr_pool_t *cont)
 {
