@@ -441,6 +441,9 @@ AC_DEFUN(APR_H_ERRNO_COMPILE_CHECK,[
     CFLAGS="-D$1 $CFLAGS"
   fi
   AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
