@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/11 00:44:22 $]
+Last modified at [$Date: 2001/12/12 08:33:39 $]
 
 Release:
 
@@ -244,21 +244,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       FreeBSD.
 
       MsgID: <20010828091959.D17570@ebuilt.com>
-        Status: Justin has tracked down a FreeBSD kernel hacker 
-                (alfred@freebsd.org) and we've isolated some issues
-                within src/lib/libc_r/uthread/uthread_sendfile.c.  There
-                are some problems in FreeBSD between libc_r and the
-                kernel implementation of sendfile.  We've made some 
-                progress (we now send the headers correctly, but we seem 
-                to send the file twice now!).  At this point, we are unsure
-                if we are seeing an APR bug or a FreeBSD bug.  Alfred has 
-                requested some time to look at the sendfile(2) code with
-                APR's test suite.  Justin has gained enough knowledge in
-                his conversations that he may be able to continue this
-                work if no feedback comes.
+        Status: Fixed in -CURRENT.  MFC in about a week.  Continuing
+                testing with threads on FreeBSD.
 
-                We have a preliminary patch at:
-                  http://people.freebsd.org/~alfred/uthread_sf.diff
                 FreeBSD PR kern/32684:
                   http://www.freebsd.org/cgi/query-pr.cgi?pr=kern/32684
 
