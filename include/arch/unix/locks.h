@@ -101,13 +101,19 @@
 /* End System Headers */
 
 struct apr_unix_lock_methods_t {
+    unsigned int flags;
     apr_status_t (*create)(apr_lock_t *, const char *);
     apr_status_t (*acquire)(apr_lock_t *);
+    apr_status_t (*acquire_read)(apr_lock_t *);
+    apr_status_t (*acquire_write)(apr_lock_t *);
     apr_status_t (*release)(apr_lock_t *);
     apr_status_t (*destroy)(apr_lock_t *);
     apr_status_t (*child_init)(apr_lock_t **, apr_pool_t *, const char *);
 };
 typedef struct apr_unix_lock_methods_t apr_unix_lock_methods_t;
+
+/* bit values for flags field in apr_unix_lock_methods_t */
+#define APR_PROCESS_LOCK_MECH_IS_GLOBAL          1
 
 #if APR_HAS_SYSVSEM_SERIALIZE
 extern const apr_unix_lock_methods_t apr_unix_sysv_methods;

@@ -56,7 +56,6 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-#if !APR_PROCESS_LOCK_IS_GLOBAL && APR_HAS_THREADS
 static apr_status_t lockall_create(apr_lock_t *new, const char *fname)
 {
     apr_status_t rv;
@@ -118,13 +117,15 @@ static apr_status_t lockall_child_init(apr_lock_t **lock, apr_pool_t *pool,
 
 static const struct apr_unix_lock_methods_t lockall_methods =
 {
+    0,
     lockall_create,
     lockall_acquire,
+    NULL, /* no read lock concept */
+    NULL, /* no write lock concept */
     lockall_release,
     lockall_destroy,
     lockall_child_init
 };
-#endif
 
 static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e_np mech)
 {
@@ -207,15 +208,12 @@ static apr_status_t create_lock(apr_lock_t *new, apr_lockmech_e_np mech, const c
 
     switch (new->scope) {
     case APR_LOCKALL:
-#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
-        /* XXX but how do we know that this particular mechanism has this
-         * property?  for now we assume all mechanisms on this system have
-         * the property
-         */
-        new->meth = new->inter_meth;
-#else
-        new->meth = &lockall_methods;
-#endif
+        if (new->inter_meth->flags & APR_PROCESS_LOCK_MECH_IS_GLOBAL) {
+            new->meth = new->inter_meth;
+        }
+        else {
+            new->meth = &lockall_methods;
+        }
         break;
     case APR_CROSS_PROCESS:
         new->meth = new->inter_meth;
@@ -283,30 +281,14 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
 
 apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
 {
-    apr_status_t stat = APR_SUCCESS;
-
-    switch (lock->type)
+    switch (e)
     {
-    case APR_MUTEX:
-        return APR_ENOTIMPL;
-    case APR_READWRITE:
-#ifdef HAVE_PTHREAD_RWLOCK_INIT
-        switch (e)
-        {
-        case APR_READER:
-            stat = pthread_rwlock_rdlock(&lock->rwlock);
-            break;
-        case APR_WRITER:
-            stat = pthread_rwlock_wrlock(&lock->rwlock);
-            break;
-        }
-        break;
-#else
-        return APR_ENOTIMPL;
-#endif
+    case APR_READER:
+        return lock->meth->acquire_read(lock);
+    case APR_WRITER:
+        return lock->meth->acquire_write(lock);
     }
-
-    return stat;
+    return APR_ENOTIMPL;
 }
 
 apr_status_t apr_lock_release(apr_lock_t *lock)
