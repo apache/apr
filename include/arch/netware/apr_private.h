@@ -63,6 +63,8 @@
 #define HAVE_SETENV     1
 #define HAVE_UNSETENV   1
 
+#define HAVE_WRITEV     1
+
 /* 64-bit integer conversion function */
 #define APR_INT64_STRFN	      strtoll
 
