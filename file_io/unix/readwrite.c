@@ -217,9 +217,14 @@ ap_status_t ap_getc(ap_file_t *thefile, char *ch)
     ssize_t rv;
     
     if (thefile->buffered) {
-        if ((*ch) = fgetc(thefile->filehand)) {
-            return APR_SUCCESS;
-        }
+        int r;
+
+	r=fgetc(thefile->filehand);
+	if(r != EOF)
+	    {
+	    *ch=(char)r;
+	    return APR_SUCCESS;
+	    }
         if (feof(thefile->filehand)) {
             return APR_EOF;
         }
@@ -245,7 +250,6 @@ ap_status_t ap_getc(ap_file_t *thefile, char *ch)
 ap_status_t ap_puts(ap_file_t *thefile, char *str)
 {
     ssize_t rv;
-    int i = 0;    
     int len;
 
     if (thefile->buffered) {
@@ -320,6 +324,7 @@ ap_status_t ap_gets(ap_file_t *thefile, char *str, int len)
     return APR_SUCCESS; 
 }
 
+#if 0 /* not currently used */
 static int printf_flush(ap_vformatter_buff_t *vbuff)
 {
     /* I would love to print this stuff out to the file, but I will
@@ -327,6 +332,7 @@ static int printf_flush(ap_vformatter_buff_t *vbuff)
      */
     return -1;
 }
+#endif
 
 API_EXPORT(int) ap_fprintf(struct file_t *fptr, const char *format, ...)
 {
