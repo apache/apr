@@ -1,5 +1,5 @@
 
-TARGETS = userinfo.lo
+TARGETS = userinfo.lo groupinfo.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@

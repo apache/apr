@@ -52,77 +52,31 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef APR_USER_H
-#define APR_USER_H
-
-#include "apr.h"
-#include "apr_errno.h"
-#include "apr_pools.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-/**
- * @package APR user id services
- */
-
-/**
- * Structure for determining user ownership.
- * @defvar apr_uid_t
- */
-#ifdef WIN32
-typedef PSID                      apr_uid_t;
-#else
-typedef uid_t                     apr_uid_t;
+#include "apr_strings.h"
+#include "apr_portable.h"
+#include "apr_user.h"
+#include "apr_private.h"
+#ifdef HAVE_GRP_H
+#include <grp.h>
+#endif
+#if APR_HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
 
-/**
- * Structure for determining group ownership.
- * @defvar apr_gid_t
- */
-#ifdef WIN32
-typedef PSID                      apr_gid_t;
-#else
-typedef gid_t                     apr_gid_t;
-#endif
-
-#if APR_HAS_USER
-
-/***
- * Get the user name for a specified userid
- * @param dirname Pointer to new string containing user name (on output)
- * @param userid The userid
- * @param p The pool from which to allocate the string
- * @deffunc apr_status_t apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
- * @tip This function is available only if APR_HAS_USER is defined.
- */
-APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p);
-
-/***
- * Get the home directory for the named user
- * @param dirname Pointer to new string containing directory name (on output)
- * @param userid The named user
- * @param p The pool from which to allocate the string
- * @deffunc apr_status_t apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p)
- * @tip This function is available only if APR_HAS_USER is defined.
- */
-APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p);
-
-/***
- * Get the group name for a specified groupid
- * @param dirname Pointer to new string containing group name (on output)
- * @param userid The groupid
- * @param p The pool from which to allocate the string
- * @deffunc apr_status_t apr_get_groupname(char **groupname, apr_gid_t userid, apr_pool_t *p)
- * @tip This function is available only if APR_HAS_USER is defined.
- */
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
+{
+    struct group *gr;
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRGID_R)
+    struct group grp;
+    char grbuf[512];
 
-#endif  /* ! APR_HAS_USER */
-
-#ifdef __cplusplus
-}
+    if (getgrgid_r(groupid, &grp, grbuf, sizeof(grbuf), &gr)) {
+#else
+    if ((gr = getgrgid(userid)) == NULL) {
 #endif
-
-#endif  /* ! APR_USER_H */
+        return errno;
+    }
+    *groupname = apr_pstrdup(p, gr->gr_name);
+    return APR_SUCCESS;
+}
+  
