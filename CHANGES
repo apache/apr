@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) The apr/test/Makefile.win is missing a target to build a
+     readchild.exe that test is depending on but is never built.
+     [Mladen Turk]
+ 
   *) Fix build issues in paths containing symlinks.  PR 8867.
      [Joe Orton]
 
