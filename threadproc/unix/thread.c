@@ -93,7 +93,11 @@ ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
 {
     int state;
 
+#ifdef PTHREAD_ATTR_GETDETACHSTATE_TAKES_ONE_ARG
+    state = pthread_attr_getdetachstate(attr->attr);
+#else
     pthread_attr_getdetachstate(attr->attr, &state);
+#endif
     if (state == 1)
         return APR_DETACH;
     return APR_NOTDETACH;
