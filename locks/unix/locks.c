@@ -157,7 +157,9 @@ static apr_status_t create_lock(apr_lock_t *new, const char *fname)
             new->intra_meth = &apr_unix_intra_methods;
         }
 #else
-        return APR_ENOTIMPL; /* 'cause we don't have threads */
+        if (new->scope == APR_INTRAPROCESS) {
+            return APR_ENOTIMPL; /* 'cause we don't have threads */
+        }
 #endif
     }
 
@@ -201,7 +203,7 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     new->scope = scope;
 
     if ((stat = create_lock(new, fname)) != APR_SUCCESS)
-        return APR_SUCCESS;
+        return stat;
 
     *lock = new;
     return APR_SUCCESS;

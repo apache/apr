@@ -486,8 +486,14 @@ static apr_status_t flock_child_init(apr_lock_t **lock, apr_pool_t *cont,
 {
     apr_lock_t *new;
 
-    new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
+    new = (apr_lock_t *)apr_pcalloc(cont, sizeof(apr_lock_t));
 
+    new->pool = cont;
+    new->meth = (*lock)->meth;
+    new->inter_meth = (*lock)->inter_meth;
+    new->intra_meth = NULL;
+    new->type = (*lock)->type;
+    new->scope = (*lock)->scope;
     new->fname = apr_pstrdup(cont, fname);
     new->interproc = open(new->fname, O_WRONLY, 0600);
     if (new->interproc == -1) {
