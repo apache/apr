@@ -486,6 +486,17 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EPIPE         (APR_OS_START_CANONERR + 24)
 #endif
 
+#ifdef EXDEV
+#define APR_EXDEV EXDEV
+#else
+#define APR_EXDEV         (APR_OS_START_CANONERR + 25)
+#endif
+
+#ifdef EPIPE
+#define APR_ENOTEMPTY ENOTEMPTY
+#else
+#define APR_ENOTEMPTY     (APR_OS_START_CANONERR + 26)
+#endif
 
 #if defined(OS2)
 
@@ -602,6 +613,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE \
                 || (s) == APR_OS_START_SYSERR + ERROR_BROKEN_PIPE \
                 || (s) == APR_OS_START_SYSERR + SOCEPIPE)
+#define APR_STATUS_IS_EXDEV(s)          ((s) == APR_EXDEV \
+                || (s) == APR_OS_START_SYSERR + ERROR_NOT_SAME_DEVICE)
+#define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY \
+                || (s) == APR_OS_START_SYSERR + ERROR_DIR_NOT_EMPTY)
 
 /*
     Sorry, too tired to wrap this up for OS2... feel free to
@@ -651,6 +666,14 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /* APR CANONICAL ERROR TESTS */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES \
                 || (s) == APR_OS_START_SYSERR + ERROR_ACCESS_DENIED \
+                || (s) == APR_OS_START_SYSERR + ERROR_CANNOT_MAKE \
+                || (s) == APR_OS_START_SYSERR + ERROR_CURRENT_DIRECTORY \
+                || (s) == APR_OS_START_SYSERR + ERROR_DRIVE_LOCKED \
+                || (s) == APR_OS_START_SYSERR + ERROR_FAIL_I24 \
+                || (s) == APR_OS_START_SYSERR + ERROR_LOCK_VIOLATION \
+                || (s) == APR_OS_START_SYSERR + ERROR_LOCK_FAILED \
+                || (s) == APR_OS_START_SYSERR + ERROR_NOT_LOCKED \
+                || (s) == APR_OS_START_SYSERR + ERROR_NETWORK_ACCESS_DENIED \
                 || (s) == APR_OS_START_SYSERR + ERROR_SHARING_VIOLATION)
 #define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST \
                 || (s) == APR_OS_START_SYSERR + ERROR_FILE_EXISTS \
@@ -660,26 +683,43 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAENAMETOOLONG)
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
                 || (s) == APR_OS_START_SYSERR + ERROR_FILE_NOT_FOUND \
-                || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
                 || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED \
                 || (s) == APR_OS_START_SYSERR + ERROR_NO_MORE_FILES)
-#define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
+#define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR \
+                || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_BAD_NETPATH \
+                || (s) == APR_OS_START_SYSERR + ERROR_BAD_NET_NAME \
+                || (s) == APR_OS_START_SYSERR + ERROR_BAD_PATHNAME \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_DRIVE)
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC \
                 || (s) == APR_OS_START_SYSERR + ERROR_DISK_FULL)
-#define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
+#define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM \
+                || (s) == APR_OS_START_SYSERR + ERROR_ARENA_TRASHED \
+                || (s) == APR_OS_START_SYSERR + ERROR_NOT_ENOUGH_MEMORY \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_BLOCK \
+                || (s) == APR_OS_START_SYSERR + ERROR_NOT_ENOUGH_QUOTA \
+                || (s) == APR_OS_START_SYSERR + ERROR_OUTOFMEMORY)
 #define APR_STATUS_IS_EMFILE(s)         ((s) == APR_EMFILE \
                 || (s) == APR_OS_START_SYSERR + ERROR_TOO_MANY_OPEN_FILES)
 #define APR_STATUS_IS_ENFILE(s)         ((s) == APR_ENFILE)
 #define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF \
-                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_HANDLE)
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_HANDLE \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_TARGET_HANDLE)
 #define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_ACCESS \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_DATA \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_FUNCTION \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_HANDLE \
                 || (s) == APR_OS_START_SYSERR + ERROR_INVALID_PARAMETER \
-                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_FUNCTION)
+                || (s) == APR_OS_START_SYSERR + ERROR_NEGATIVE_SEEK)
 #define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE \
                 || (s) == APR_OS_START_SYSERR + ERROR_SEEK_ON_DEVICE \
                 || (s) == APR_OS_START_SYSERR + ERROR_NEGATIVE_SEEK)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
                 || (s) == APR_OS_START_SYSERR + ERROR_NO_DATA \
+                || (s) == APR_OS_START_SYSERR + ERROR_NO_PROC_SLOTS \
+                || (s) == APR_OS_START_SYSERR + ERROR_NESTING_NOT_ALLOWED \
+                || (s) == APR_OS_START_SYSERR + ERROR_MAX_THRDS_REACHED \
                 || (s) == APR_OS_START_SYSERR + WSAEWOULDBLOCK)
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
                 || (s) == APR_OS_START_SYSERR + WSAEINTR)
@@ -710,6 +750,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + ERROR_BAD_FORMAT)
 #define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE \
                 || (s) == APR_OS_START_SYSERR + ERROR_BROKEN_PIPE)
+#define APR_STATUS_IS_EXDEV(s)          ((s) == APR_EXDEV \
+                || (s) == APR_OS_START_SYSERR + ERROR_NOT_SAME_DEVICE)
+#define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY \
+                || (s) == APR_OS_START_SYSERR + ERROR_DIR_NOT_EMPTY)
 
 #elif defined(NETWARE) /* !def OS2 || WIN32 */
 
@@ -760,9 +804,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
                 || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
 #define APR_STATUS_IS_ENETDOWN(s)       ((s) == APR_OS_START_SYSERR + WSAENETDOWN)
+#define APR_STATUS_IS_EFTYPE(s)         ((s) == APR_EFTYPE)
+#define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE)
+#define APR_STATUS_IS_EXDEV(s)          ((s) == APR_EXDEV)
+#define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY)
 
-#define APR_STATUS_IS_EFTYPE(s)          ((s) == APR_EFTYPE)
-#define APR_STATUS_IS_EPIPE(s)           ((s) == APR_EPIPE)
 #else /* endif defined(NETWARE) */
 
 /*
@@ -852,6 +898,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENETUNREACH(s)     ((s) == APR_ENETUNREACH)
 #define APR_STATUS_IS_EFTYPE(s)          ((s) == APR_EFTYPE)
 #define APR_STATUS_IS_EPIPE(s)           ((s) == APR_EPIPE)
+#define APR_STATUS_IS_EXDEV(s)           ((s) == APR_EXDEV)
+#define APR_STATUS_IS_ENOTEMPTY(s)       ((s) == APR_ENOTEMPTY)
 
 #endif /* !def OS2 || WIN32 */
 
