@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/02/17 15:06:57 $]
+Last modified at [$Date: 2002/02/17 20:51:58 $]
 
 Release:
 
@@ -45,8 +45,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       as apr_thread_exit().
       See Message-Id: <E16JjZA-0007hg-00@zakath.apana.org.au> for thread
       discussing this.
-        +1: BrianH
-        -0: Aaron
+        +1: BrianH, Aaron
 
     * Need some architecture/OS specific versions of the atomic operations.
         Ian Volunteers for the x86 & sparc versions
