@@ -4,7 +4,8 @@ TARGETS = apr_sms.lo \
           apr_sms_tracking.lo \
           apr_sms_blocks.lo \
           apr_sms_trivial.lo \
-          apr_pools.lo
+          apr_sms_threads.lo \
+          @POOLS_TARGET@
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
