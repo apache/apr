@@ -145,7 +145,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
         (*new)->filedes = open(fname, oflags, 0666);
     }
     else {
-        (*new)->filedes = open(fname, oflags, ap_unix_get_fileperms(perm));
+        (*new)->filedes = open(fname, oflags, ap_unix_perms2mode(perm));
     }    
 
     if ((*new)->filedes < 0) {

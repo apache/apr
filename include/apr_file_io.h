@@ -111,6 +111,7 @@ typedef ap_int32_t               ap_fileperms_t;
 typedef uid_t                    ap_uid_t;
 typedef gid_t                    ap_gid_t;
 typedef ino_t                    ap_ino_t;
+typedef dev_t                    ap_dev_t;
 
 struct ap_finfo_t {
     ap_fileperms_t protection;
@@ -118,6 +119,7 @@ struct ap_finfo_t {
     ap_uid_t user;
     ap_gid_t group;
     ap_ino_t inode;
+    ap_dev_t device;
     ap_off_t size;
     ap_time_t atime;
     ap_time_t mtime;
@@ -362,7 +364,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile);
 B<Put the string into a specified file.>
 
     arg 1) The string to write. 
-    arg 2) The file descriptor to write to from
+    arg 2) The file descriptor to write to
 
 =cut
  */
@@ -402,14 +404,32 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p);
 
 =head1 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 
-B<get the specified file's stats..>
+B<get the specified file's stats.>
 
     arg 1) Where to store the information about the file.
-    arg 2) The file to get information about. 
+    arg 2) The file to get information about.
 
 =cut
  */ 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
+
+/*
+
+=head1 ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms)
+
+B<set the specified file's permission bits.>
+
+    arg 1) The file (name) to apply the permissions to.
+    arg 2) The permission bits to apply to the file.
+
+   Some platforms may not be able to apply all of the available permission
+   bits; APR_INCOMPLETE will be returned if some permissions are specified
+   which could not be set.
+
+   Platforms which do not implement this feature will return APR_ENOTIMPL.
+=cut
+ */
+ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms);
 
 /*
 

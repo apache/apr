@@ -130,6 +130,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
     finfo->user = 0;
     finfo->group = 0;
     finfo->inode = 0;
+    finfo->device = 0;  /* ### use drive letter - 'A' ? */
 
     /* Filetype - Directory or file: this case _will_ never happen */
     if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
@@ -179,6 +180,11 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
     finfo->size = FileInformation.nFileSizeLow;
 
     return APR_SUCCESS;
+}
+
+ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms)
+{
+    return APR_ENOTIMPL;
 }
 
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
