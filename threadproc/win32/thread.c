@@ -63,6 +63,9 @@
 #endif
 #include "misc.h"   
 
+/* Chosen for us in apr_initialize */
+DWORD tls_apr_thread = 0;
+
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *pool)
 {
@@ -94,6 +97,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
+    TlsSetValue(tls_apr_thread, thd);
     return thd->func(thd, thd->data);
 }
 
@@ -214,7 +218,8 @@ APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
 {
-    return GetCurrentThread();
+    apr_thread_t *thd = (apr_thread_t *)TlsGetValue(tls_apr_thread);
+    return thd->td;
 }
 
 APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
@@ -256,6 +261,16 @@ APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
         func();
     }
     return APR_SUCCESS;
+}
+
+APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1,
+                                     apr_os_thread_t tid2)
+{
+    /* Since the only tid's we support our are own, and
+     * apr_os_thread_current returns the identical handle
+     * to the one we created initially, the test is simple.
+     */
+    return (tid1 == tid2);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread)
