@@ -132,8 +132,8 @@ struct dl_info {
  * add the basic "wrappers" here.
  */
 
-apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, 
-                        apr_pool_t *ctx)
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+                                       const char *path, apr_pool_t *ctx)
 {
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 
@@ -146,7 +146,7 @@ apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
+APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
     if (dlclose(handle->handle) != 0)
         return APR_EINIT;
@@ -154,9 +154,9 @@ apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                       apr_dso_handle_t *handle, 
-                       const char *symname)
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+                                      apr_dso_handle_t *handle, 
+                                      const char *symname)
 {
     void *retval = dlsym(handle->handle, symname);
 
