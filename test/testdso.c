@@ -65,22 +65,27 @@
 #endif
 
 #ifdef NETWARE
-#define LIB_NAME "mod_test.nlm"
+# define LIB_NAME "mod_test.nlm"
 #else
-# ifndef BEOS
-#  define LIB_NAME ".libs/mod_test.so"
-# else
+# ifdef BEOS
 #  define LIB_NAME "mod_test.so"
+# else
+#  ifdef DARWIN
+#   define LIB_NAME ".libs/mod_test.so" 
+#   define LIB_NAME2 ".libs/libmod_test.dylib" 
+#  else
+#   define LIB_NAME ".libs/mod_test.so"
+#   define LIB_NAME2 ".libs/libmod_test.so"
+#  endif
 # endif
 #endif
 
-int main (int argc, char ** argv)
+void test_shared_library(const char *libname, apr_pool_t *pool)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
     apr_dso_handle_sym_t func2 = NULL;
     apr_status_t status;
-    apr_pool_t *cont;
     void (*function)(void);
     void (*function1)(int);
     int *retval;
@@ -88,19 +93,11 @@ int main (int argc, char ** argv)
 
     getcwd(filename, 256);
     strcat(filename, "/");
-    strcat(filename, LIB_NAME);
-
-    apr_initialize();
-    atexit(apr_terminate);
-        
-    if (apr_pool_create(&cont, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
+    strcat(filename, libname);
 
     fprintf(stdout,"Trying to load DSO now.....................");
     fflush(stdout);
-    if ((status = apr_dso_load(&h, filename, cont)) != APR_SUCCESS){
+    if ((status = apr_dso_load(&h, filename, pool)) != APR_SUCCESS){
         char my_error[256];
         apr_strerror(status, my_error, sizeof(my_error));
         fprintf(stderr, "%s!\n", my_error);
@@ -161,6 +158,26 @@ int main (int argc, char ** argv)
         exit (-1);
     }        
     fprintf(stdout,"OK\n");
-    
+}
+
+int main (int argc, char ** argv)
+{
+    apr_pool_t *pool;
+
+    apr_initialize();
+    atexit(apr_terminate);
+        
+    if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't allocate context.");
+        exit(-1);
+    }
+
+    fprintf(stdout,"=== Checking module library ===\n");
+    test_shared_library(LIB_NAME, pool);
+#ifdef LIB_NAME2
+    fprintf(stdout,"=== Checking non-module library ===\n");
+    test_shared_library(LIB_NAME2, pool);
+#endif
+
     return 0;
 }
