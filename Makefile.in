@@ -118,16 +118,16 @@ delete-exports:
 
 $(TARGET_EXPORTS):
 	if test -z "$(srcdir)"; then \
-		$(AWK) -f $(srcdir)helpers/make_export.awk include/*.h > $@ ; \
+		$(AWK) -f helpers/make_export.awk include/*.h > $@ ; \
 	else \
-		$(AWK) -f $(srcdir)helpers/make_export.awk include/*.h $(srcdir)include/*.h > $@ ; \
+		$(AWK) -f $(srcdir)helpers/make_export.awk $(srcdir)include/*.h > $@ ; \
 	fi
 
 docs:
 	if test -z "$(srcdir)"; then \
-		$(srcdir)helpers/scandoc -i$(srcdir)helpers/default.pl -p./docs/ ./include/*.h; \
+		helpers/scandoc -ihelpers/default.pl -p./docs/ ./include/*.h; \
 	else \
-		$(srcdir)helpers/scandoc -i$(srcdir)helpers/default.pl -p./docs/ ./include/*.h $(srcdir)include/*.h; \
+		$(srcdir)helpers/scandoc -i$(srcdir)helpers/default.pl -p./docs/ $(srcdir)include/*.h; \
 	fi
 
 test: $(LIBAPR)
