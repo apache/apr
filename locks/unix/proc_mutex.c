@@ -454,10 +454,8 @@ static apr_status_t proc_mutex_fcntl_cleanup(void *mutex_)
         if (status != APR_SUCCESS)
             return status;
     }
-    if (mutex->interproc) { /* if it was opened successfully */
-        apr_file_close(mutex->interproc);
-    }
-    return APR_SUCCESS;
+        
+    return apr_file_close(mutex->interproc);
 }    
 
 static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
@@ -480,7 +478,6 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
     }
  
     if (rv != APR_SUCCESS) {
-        proc_mutex_fcntl_cleanup(new_mutex);
         return rv;
     }
 
