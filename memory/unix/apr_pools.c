@@ -727,6 +727,8 @@ API_EXPORT(void) ap_clear_pool(ap_pool_t *a)
     free_blocks(a->first->h.next);
     a->first->h.next = NULL;
 
+    a->prog_data = NULL;
+
     a->last = a->first;
     a->first->h.first_avail = a->free_first_avail;
     debug_fill(a->first->h.first_avail,
