@@ -923,10 +923,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAENAMETOOLONG)
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
                 || (s) == APR_OS_START_SYSERR + ERROR_FILE_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
                 || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED \
                 || (s) == APR_OS_START_SYSERR + ERROR_NO_MORE_FILES)
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR \
-                || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
                 || (s) == APR_OS_START_SYSERR + ERROR_BAD_NETPATH \
                 || (s) == APR_OS_START_SYSERR + ERROR_BAD_NET_NAME \
                 || (s) == APR_OS_START_SYSERR + ERROR_BAD_PATHNAME \
