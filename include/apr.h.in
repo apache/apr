@@ -24,6 +24,7 @@
 #define ENUM_BITFIELD(e,n,w)  e n : w
 #endif
 
+#define APR_HAVE_CTYPE_H        @ctypeh@
 #define APR_HAVE_ERRNO_H        @errnoh@
 #define APR_HAVE_DIRENT_H       @direnth@
 #define APR_HAVE_FCNTL_H        @fcntlh@
