@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/01/22 17:50:29 $]
+Last modified at [$Date: 2003/01/23 04:07:21 $]
 
 Release:
 
@@ -75,6 +75,26 @@ RELEASE SHOWSTOPPERS:
       1.0 showstopper (not 0.9.x): trawick
 
 CURRENT VOTES:
+
+
+CURRENT test/testall -v EXCEPTIONS:
+
+    Please add any platform anomilies to the following exception list.
+
+    * All platforms fail tests in time: test_localstr and test_ctime
+        Imaginary... the tests can only succeed on machines configured
+        for the Pacific (US) timezone.  Test needs to be restructured.
+        Ignore these errors.
+
+    * BUG: Win32 fails test in File Info: test_stat_eq_finfo
+        apr_stat and apr_getfileinfo differ in protection ... wrowe
+        guesses that we are checking the handle objects' permissions
+        rather than the filesystem objects' permissions.
+
+    * Win32 Not Implemented tests 
+        Socket Creation: tcp6_socket and udp6_socket (at least by default)
+        Socket Options: corkable: TCP isn't corkable
+        Users: username: Groups from apr_uid_get not implemented
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
