@@ -79,7 +79,7 @@ APR_DECLARE_DATA const char apr_day_snames[7][4] =
 
 apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
 {
-    apr_exploded_time_t xt;
+    apr_time_exp_t xt;
     const char *s;
     int real_year;
 
@@ -127,7 +127,7 @@ apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
 
 apr_status_t apr_ctime(char *date_str, apr_time_t t)
 {
-    apr_exploded_time_t xt;
+    apr_time_exp_t xt;
     const char *s;
     int real_year;
 
@@ -168,7 +168,7 @@ apr_status_t apr_ctime(char *date_str, apr_time_t t)
 }
 
 apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, 
-                        const char *format, apr_exploded_time_t *xt)
+                        const char *format, apr_time_exp_t *xt)
 {
     struct tm tm;
     memset(&tm, 0, sizeof tm);

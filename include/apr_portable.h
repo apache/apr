@@ -276,7 +276,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
  * @param aprtime the time to convert
  */
 APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
-                                 apr_exploded_time_t *aprtime);
+                                 apr_time_exp_t *aprtime);
 
 /**
  * Get the imploded time in the platforms native format.
@@ -433,7 +433,7 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
  * @param ostime the time to convert
  * @param cont the pool to use if necessary
  */
-APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
+APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
                                               apr_os_exp_time_t **ostime,
                                               apr_pool_t *cont); 
 

@@ -106,9 +106,9 @@ APR_DECLARE(apr_time_t) apr_time_now(void);
  *  - tm_usec isn't an ANSI field
  *  - tm_gmtoff isn't an ANSI field (it's a bsdism)
  */
-typedef struct apr_exploded_time_t apr_exploded_time_t;
+typedef struct apr_time_exp_t apr_time_exp_t;
 
-struct apr_exploded_time_t {
+struct apr_time_exp_t {
     /** microseconds past tm_sec */
     apr_int32_t tm_usec;
     /** (0-61) seconds past tm_min */
@@ -138,7 +138,7 @@ struct apr_exploded_time_t {
  * @param result the resulting apr_time_t
  * @param input the time_t to convert
  */
-APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result, 
+APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result, 
                                                     time_t input);
 
 /**
@@ -149,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result,
  * @param offs the number of seconds offset to apply
  * @param zone the zone description
  */
-APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result,
+APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
                                            apr_time_t input,
                                            apr_int32_t offs);
 
@@ -158,7 +158,7 @@ APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result,
  * @param result the exploded time
  * @param input the time to explode
  */
-APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result, 
+APR_DECLARE(apr_status_t) apr_explode_gmt(apr_time_exp_t *result, 
                                           apr_time_t input);
 
 /**
@@ -166,7 +166,7 @@ APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result,
  * @param result the exploded time
  * @param input the time to explode
  */
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result, 
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result, 
                                                 apr_time_t input);
 
 /**
@@ -176,7 +176,7 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
  * @param input the input exploded time
  */
 APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *result, 
-                                           apr_exploded_time_t *input);
+                                           apr_time_exp_t *input);
 
 /**
  * Convert time value from human readable format to a numeric apr_time_t that
@@ -185,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *result,
  * @param input the input exploded time
  */
 APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *result, 
-                                          apr_exploded_time_t *input);
+                                          apr_time_exp_t *input);
 
 /**
  * Sleep for the specified number of micro-seconds.
@@ -230,7 +230,7 @@ APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t);
  */
 APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize, 
                                        apr_size_t max, const char *format, 
-                                       apr_exploded_time_t *tm);
+                                       apr_time_exp_t *tm);
 
 #ifdef __cplusplus
 }
