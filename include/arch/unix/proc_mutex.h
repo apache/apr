@@ -131,11 +131,10 @@ extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_rwlock_metho
 
 
 #if !APR_HAVE_UNION_SEMUN && defined(APR_HAS_SYSVSEM_SERIALIZE)
-/* it makes no sense, but this isn't defined on solaris */
 union semun {
     long val;
     struct semid_ds *buf;
-    ushort *array;
+    unsigned short *array;
 };
 #endif
 

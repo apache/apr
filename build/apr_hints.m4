@@ -168,6 +168,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-dec-osf*)
 	APR_ADDTO(CPPFLAGS, [-DOSF1])
 	;;
+    *-nto-qnx*)
+	;;
     *-qnx)
 	APR_ADDTO(CPPFLAGS, [-DQNX])
 	APR_ADDTO(LIBS, [-N128k -lunix])
