@@ -168,7 +168,7 @@ if test "$ac_cv_enable_shmem" = "mm"; then
   sharedmem="1"
   anonymous_shm="1"
   AC_MSG_RESULT(anonymous)
-  LIBTOOL_LIBS="$abs_srcdir/shmem/unix/mm/libmm.la"
+  LIBTOOL_LIBS="$abs_builddir/shmem/unix/mm/libmm.la"
 elif test "$ac_cv_enable_shmem" = "file"; then
   sharedmem="1"
   filebased_shm="1"
