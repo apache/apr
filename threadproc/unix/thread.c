@@ -58,7 +58,7 @@
 
 #if APR_HAS_THREADS
 
-#ifdef APR_HAVE_PTHREAD_H
+#if APR_HAVE_PTHREAD_H
 ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 {
     ap_status_t stat;

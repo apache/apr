@@ -63,7 +63,7 @@
 #include "apr_file_io.h"
 #include "apr_errno.h"
 
-#ifdef APR_HAVE_SYS_STAT_H
+#if APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 #ifdef HAVE_SYS_TYPES_H
@@ -75,7 +75,7 @@
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
-#ifdef APR_HAVE_DIRENT_H
+#if APR_HAVE_DIRENT_H
 #include <dirent.h>
 #endif
 #ifdef HAVE_MALLOC_H

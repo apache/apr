@@ -58,7 +58,7 @@
 
 #if APR_HAS_THREADS
 
-#ifdef APR_HAVE_PTHREAD_H
+#if APR_HAVE_PTHREAD_H
 ap_status_t ap_create_thread_private(ap_threadkey_t **key, 
                                      void (*dest)(void *), ap_pool_t *cont)
 {
