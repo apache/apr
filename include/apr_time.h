@@ -76,7 +76,7 @@ ap_status_t ap_current_time(ap_time_t *);
 ap_status_t ap_explode_time(ap_time_t *, ap_timetype_e);
 ap_status_t ap_implode_time(ap_time_t *);
 
-ap_status_t ap_gm_timestr_822(char **date_str, struct atime_t *t, ap_context_t *p);
+ap_status_t ap_timestr(char **date_str, struct atime_t *t, ap_timetype_e type, ap_context_t *p);
 ap_status_t ap_strftime(char *s, ap_size_t max, const char *format, ap_time_t *tm);
 
 /* accessor functions */
