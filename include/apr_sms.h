@@ -180,14 +180,14 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys,
  *          memory system from your apr_xxx_sms_create.
  * @deffunc void apr_sms_validate(apr_sms_t *mem_sys)
  */
-#ifdef APR_MEMORY_ASSERT
+#ifdef APR_ASSERT_MEMORY
 APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys);
 #else
 #ifdef apr_sms_assert
 #undef apr_sms_assert
 #endif
 #define apr_sms_assert(mem_sys)
-#endif /* APR_MEMORY_ASSERT */
+#endif /* APR_ASSERT_MEMORY */
 
 /**
  * Reset a memory system so it can be reused. 

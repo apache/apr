@@ -64,7 +64,10 @@
 #include "apr_general.h"
 #include "apr_sms.h"
 #include <stdlib.h>
+
+#ifdef APR_ASSERT_MEMORY
 #include <assert.h>
+#endif
 
 #include <memory.h> /* strikerXXX: had to add this for windows to stop 
                      * complaining, please autoconf the include stuff
@@ -88,14 +91,6 @@ struct apr_sms_cleanup
 APR_DECLARE(void *) apr_sms_malloc(apr_sms_t *mem_sys,
                                    apr_size_t size)
 {
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys);
-    assert(mem_sys->malloc_fn);
-#endif
-
-    if (!mem_sys || !mem_sys->malloc_fn)
-        return NULL;
-
     if (size == 0)
         return NULL;
 
@@ -105,11 +100,6 @@ APR_DECLARE(void *) apr_sms_malloc(apr_sms_t *mem_sys,
 APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *mem_sys,
                                    apr_size_t size)
 {
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys);
-    assert(mem_sys->malloc_fn);
-#endif
-
     if (size == 0)
         return NULL;
 
@@ -129,11 +119,6 @@ APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *mem_sys,
 APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *mem_sys, void *mem,
                                     apr_size_t size)
 {
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys);
-    assert(mem_sys->realloc_fn);
-#endif
-   
     if (!mem)
         return apr_sms_malloc(mem_sys, size);
 
@@ -148,16 +133,6 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *mem_sys, void *mem,
 APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *mem_sys,
                                        void *mem)
 {
-    if (!mem_sys)
-        return APR_EMEMSYS;
-       
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys->free_fn);
-#endif
-
-    if (!mem)
-        return APR_EINVAL;
-
     if (mem_sys->free_fn)
         return mem_sys->free_fn(mem_sys, mem);  
 
@@ -188,9 +163,6 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys,
      * an assumption to make as it sounds :)
      */
 
-    if (!mem_sys)
-        return APR_EINVAL;
-
     mem_sys->parent_mem_sys = parent_mem_sys;
     mem_sys->accounting_mem_sys = mem_sys;
     mem_sys->child_mem_sys = NULL;
@@ -213,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys,
     return APR_SUCCESS;
 }
 
-#ifdef APR_MEMORY_ASSERT
+#ifdef APR_ASSERT_MEMORY
 APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys)
 {
     apr_sms_t *parent;
@@ -249,10 +221,7 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys)
      * tracking ancestors, but in that specific case we issue a
      * warning.
      */
-    if (!mem_sys->parent_mem_sys)
-        return;
-
-    parent = mem_sys
+    parent = mem_sys->parent_mem_sys;
     while (parent) {
         if (apr_sms_is_tracking(parent))
             return; /* Tracking memory system found, return satisfied ;-) */
@@ -265,7 +234,7 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys)
      * parent.
      */
 }
-#endif /* APR_MEMORY_ASSERT */
+#endif /* APR_ASSERT_MEMORY */
 
 /*
  * LOCAL FUNCTION used in:
@@ -312,9 +281,6 @@ static void apr_sms_do_child_cleanups(apr_sms_t *mem_sys)
 
 APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *mem_sys)
 {
-    if (!mem_sys)
-        return APR_EMEMSYS;
-
     if (!mem_sys->reset_fn)
         return APR_ENOTIMPL;
 
@@ -349,9 +315,6 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
     apr_sms_t *sibling_mem_sys;
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup *next_cleanup;
-
-    if (!mem_sys)
-        return APR_EMEMSYS;
 
     if (apr_sms_is_tracking(mem_sys)) {
         /* 
@@ -468,7 +431,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
         mem_sys = mem_sys->parent_mem_sys;
     }
     assert(0); /* Made the wrong assumption, so we assert */
-#endif /* APR_MEMORY_ASSERT */
+#endif /* APR_ASSERT_MEMORY */
     
     return APR_SUCCESS;
 }
@@ -476,9 +439,6 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
 APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a,
                                               apr_sms_t *b)
 {
-    if (!b)
-        return APR_EMEMSYS;
-
 #ifdef APR_ASSERT_MEMORY
     assert(a);
 #endif
@@ -492,30 +452,18 @@ APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a,
 
 APR_DECLARE(apr_status_t) apr_sms_lock(apr_sms_t *mem_sys)
 {
-    if (!mem_sys)
-        return APR_EMEMSYS;       
-
     if (!mem_sys->lock_fn)
         return APR_ENOTIMPL;
 
-    if (mem_sys->lock_fn)
-        return mem_sys->lock_fn(mem_sys);
-
-    return APR_SUCCESS;
+    return mem_sys->lock_fn(mem_sys);
 }
 
 APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *mem_sys)
 {
-    if (!mem_sys)
-        return APR_EMEMSYS;
-
     if (!mem_sys->unlock_fn)
         return APR_ENOTIMPL;
         
-    if (mem_sys->unlock_fn)
-        return mem_sys->unlock_fn(mem_sys);
-
-    return APR_SUCCESS;
+    return mem_sys->unlock_fn(mem_sys);
 }
 
 /*
@@ -530,13 +478,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *mem_sys,
 {
     struct apr_sms_cleanup *cleanup;
 
-    if (!mem_sys)
-        return APR_EMEMSYS;
-
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys->accounting_mem_sys);
-#endif
-    
     if (!cleanup_fn)
         return APR_ENOTIMPL;
 
@@ -565,13 +506,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *mem_sys,
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup **cleanup_ref;
 
-    if (!mem_sys)
-        return APR_EMEMSYS;
-
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys->accounting_mem_sys);
-#endif
-        
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     while (cleanup) {
@@ -591,8 +525,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *mem_sys,
         cleanup = cleanup->next;
     }
 
-    /* The cleanup function should have been registered previously */
-    return APR_ENOCLEANUP;
+    /* The cleanup function must have been registered previously */
+    return APR_EINVAL;
 }
 
 APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys, 
@@ -600,15 +534,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys,
 {
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup **cleanup_ref;
-    apr_status_t rv = APR_ENOCLEANUP;
+    apr_status_t rv = APR_EINVAL;
 
-    if (!mem_sys)
-        return APR_EMEMSYS;
-        
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys->accounting_mem_sys);
-#endif
-    
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     mem_sys = mem_sys->accounting_mem_sys;
@@ -628,7 +555,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys,
         }
     }
 
-    /* The cleanup function should have been registered previously */
+    /* The cleanup function must have been registered previously */
     return rv;
 }
 
@@ -640,14 +567,11 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *mem_sys,
 {
     apr_status_t rv;
 
-    if (!mem_sys)
-        return APR_EMEMSYS;
-
     if ((rv = apr_sms_cleanup_unregister(mem_sys, type,
                                          data, cleanup_fn)) != APR_SUCCESS)
         return rv;
 
-     return cleanup_fn(data);
+    return cleanup_fn(data);
 }
 
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys, 
@@ -655,15 +579,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys,
 {
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup **cleanup_ref;
-    apr_status_t rv = APR_ENOCLEANUP;
+    apr_status_t rv = APR_ENOTIMPL;
 
-    if (!mem_sys)
-        return APR_EMEMSYS;
-        
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys->accounting_mem_sys);
-#endif
-    
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     mem_sys = mem_sys->accounting_mem_sys;
