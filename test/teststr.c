@@ -131,7 +131,6 @@ static void snprintf_noNULL(CuTest *tc)
 {
     char buff[100];
     char *testing = apr_palloc(p, 10);
-    int rv;
 
     testing[0] = 't';
     testing[1] = 'e';
