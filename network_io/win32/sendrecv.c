@@ -114,8 +114,7 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
     }
 
     *len = dwBytes;
-    return APR_SUCCESS;
-
+    return dwBytes == 0 ? APR_EOF : APR_SUCCESS;
 }
 
 
