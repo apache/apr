@@ -128,6 +128,20 @@ APR_DECLARE(int) apr_strnatcasecmp(char const *a, char const *b);
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *p, const char *s);
 
 /**
+ * Create a null-terminated string by making a copy of a sequence
+ * of characters and appending a null byte
+ * @param p The pool to allocate out of
+ * @param s The block of characters to duplicate
+ * @param n The number of characters to duplicate
+ * @return The new string
+ * @remark This is a faster alternative to apr_pstrndup, for use
+ *         when you know that the string being duplicated really
+ *         has 'n' or more characters.  If the string might contain
+ *         fewer characters, use apr_pstrndup.
+ */
+APR_DECLARE(char *) apr_pstrmemdup(apr_pool_t *p, const char *s, apr_size_t n);
+
+/**
  * duplicate the first n characters of a string into memory allocated 
  * out of a pool; the new string will be '\0'-terminated
  * @param p The pool to allocate out of
