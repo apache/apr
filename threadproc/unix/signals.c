@@ -271,7 +271,9 @@ const char *apr_signal_get_description(int signum)
 APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
 {
     sigset_t sig_mask;
+#if APR_HAVE_SIGWAIT
     int (*sig_func)(int signum) = (int (*)(int))signal_handler;
+#endif
 
     /* This thread will be the one responsible for handling signals */
     sigfillset(&sig_mask);
