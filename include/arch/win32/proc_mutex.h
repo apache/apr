@@ -59,6 +59,8 @@
 
 struct apr_proc_mutex_t {
     apr_pool_t *pool;
+    HANDLE handle;
+    const char *fname;
 };
 
 #endif  /* PROC_MUTEX_H */
