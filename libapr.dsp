@@ -473,23 +473,21 @@ SOURCE=.\include\apr.hw
 
 !IF  "$(CFG)" == "libapr - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build - Creating apr.h from apr.hw 
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr.hw .\include\apr.h > nul 
-	echo Created apr.h from apr.hw 
+	type .\include\apr.hw > .\include\apr.h
 	
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build - Creating apr.h from apr.hw 
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr.hw .\include\apr.h > nul 
-	echo Created apr.h from apr.hw 
+	type .\include\apr.hw > .\include\apr.h
 	
 # End Custom Build
 
