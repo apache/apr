@@ -31,22 +31,32 @@
 	next
 }
 
-/^[ \t]*(AP[RU]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?([A-Za-z0-9_]+)\(/ {
+function add_symbol (sym_name) {
 	if (count) {
 		found++
 	}
 	for (i = 0; i < count; i++) {
 		line = line "\t"
 	}
-	sub("^[ \t]*(AP[UR]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?", "");
-	sub("[(].*", "");
-	line = line $0 "\n"
+	line = line sym_name "\n"
 
 	if (count == 0) {
 		printf("%s", line)
 		line = ""
 	}
+}
+
+/^[ \t]*(AP[RU]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?([A-Za-z0-9_]+)\(/ {
+	sub("^[ \t]*(AP[UR]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?", "");
+	sub("[(].*", "");
+	add_symbol($0);
 	next
+}
+
+/^[ \t]*AP_DECLARE_HOOK[(][^,]+,[a-z_]+,.+[)]$/ {
+	split($0, args, ",");
+	add_symbol("ap_hook_" args[2]);
+	add_symbol("ap_run_" args[2]);
 }
 
 END {
