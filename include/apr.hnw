@@ -108,6 +108,8 @@
 #define APR_HAVE_LIMITS_H       1
 #define APR_HAVE_NETDB_H        0
 #define APR_HAVE_NETINET_IN_H   0
+#define APR_HAVE_NETINET_SCTP_H 0
+#define APR_HAVE_NETINET_SCTP_UIO_H 0
 #define APR_HAVE_NETINET_TCP_H  0
 #define APR_HAVE_PTHREAD_H      0
 #define APR_HAVE_SIGNAL_H       1
@@ -189,7 +191,7 @@
 #define APR_HAVE_STRSTR         1
 #define APR_HAVE_STRUCT_RLIMIT  0
 #define APR_HAVE_UNION_SEMUN    0
-
+#define APR_HAVE_SCTP           0
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -255,6 +257,11 @@ typedef  ssize_t           apr_ssize_t;
 typedef  off_t             apr_off_t;
 typedef  int               apr_socklen_t;
 
+#ifdef UNKNOWN_NETWARE_64BIT_FLAG_NEEDED
+#define APR_SIZEOF_VOIDP   8
+#else
+#define APR_SIZEOF_VOIDP   4
+#endif
 
 /* Mechanisms to properly type numeric literals */
 

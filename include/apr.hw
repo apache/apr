@@ -108,6 +108,8 @@ extern "C" {
 #define APR_HAVE_LIMITS_H       1
 #define APR_HAVE_NETDB_H        0
 #define APR_HAVE_NETINET_IN_H   0
+#define APR_HAVE_NETINET_SCTP_H 0
+#define APR_HAVE_NETINET_SCTP_UIO_H 0
 #define APR_HAVE_NETINET_TCP_H  0
 #define APR_HAVE_PTHREAD_H      0
 #define APR_HAVE_SIGNAL_H       1
@@ -193,7 +195,7 @@ extern "C" {
 #define APR_HAVE_IN_ADDR        1
 #define APR_HAVE_INET_ADDR      1
 #define APR_HAVE_INET_NETWORK   0
-#define APR_HAVE_IPV6           0
+#define APR_HAVE_IPV6           1
 #define APR_HAVE_MEMMOVE        1
 #define APR_HAVE_SETRLIMIT      0
 #define APR_HAVE_SIGACTION      0
@@ -206,6 +208,7 @@ extern "C" {
 #define APR_HAVE_MEMCHR         1
 #define APR_HAVE_STRUCT_RLIMIT  0
 #define APR_HAVE_UNION_SEMUN    0
+#define APR_HAVE_SCTP           0
 
 #ifndef _WIN32_WCE
 #define APR_HAVE_STRICMP        1
@@ -334,6 +337,16 @@ typedef  __int64     apr_off_t;
 typedef  int         apr_off_t;
 #endif
 typedef  int         apr_socklen_t;
+
+#ifdef WIN64
+#define APR_SIZEOF_VOIDP   8
+#else
+#define APR_SIZEOF_VOIDP   4
+#endif
+
+/* XXX These simply don't belong here, perhaps in apr_portabile.h
+ * based on some APR_HAVE_PID/GID/UID?
+ */
 typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;
