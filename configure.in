@@ -304,12 +304,12 @@ dnl we are using for the more up to date cpu/OS
 dnl  (ie.. old sparcs)
 apr_force_atomic_generic=0
 proc_mutex_is_global=0
-user_disabled_atomics=0
+user_disabled_optimized_atomics=0
 
 AC_ARG_ENABLE(atomics,
-  [  --disable-atomics            Turn off optimized atomic code],
+  [  --disable-optimized-atomics  Turn off optimized atomic code],
   [ if test "$enableval" = "no"; then
-        user_disabled_atomics=1
+        user_disabled_optimized_atomics=1
     fi ] )
 
 config_subdirs="none"
@@ -367,7 +367,7 @@ case $host in
          *sparc*)
             OSDIR="solaris_sparc"
             eolstr="\\n"
-            if test "$user_disabled_atomics" = 0; then
+            if test "$user_disabled_optimized_atomics" = 0; then
               apr_atomic_sparc_compile=apr_atomic_sparc.lo
               sparc_arch=`uname -m`
               is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
