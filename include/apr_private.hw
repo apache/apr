@@ -65,19 +65,46 @@
 #ifndef APR_CONFIG_H
 #define APR_CONFIG_H
 
+/* Has windows.h already been included?  If so, our preferences don't matter,
+ * but we will still need the winsock things no matter what was included.
+ * If not, include a restricted set of windows headers to our tastes.
+ */
+#ifndef _WINDOWS_
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef _WIN32_WINNT
-/* 
- * Compile the server including all the Windows NT 4.0 header files by 
- * default.
+
+/* Restrict the server to a subset of Windows NT 4.0 header files by default
  */
 #define _WIN32_WINNT 0x0400
 #endif
+#ifndef NOUSER
+#define NOUSER
+#endif
+#ifndef NOGDI
+#define NOGDI
+#endif
+#ifndef NONLS
+#define NONLS
+#endif
+#ifndef NOMCX
+#define NOMCX
+#endif
+#ifndef NOIME
+#define NOIME
+#endif
 #include <windows.h>
+/* 
+ * Add a _very_few_ declarations missing from the restricted set of headers
+ * (If this list becomes extensive, re-enable the required headers above!)
+ * winsock headers were excluded by WIN32_LEAN_AND_MEAN, so include them now
+ */
+#define SW_HIDE             0
 #include <winsock2.h>
 #include <mswsock.h>
+#endif /* !_WINDOWS_ */
+
 #include <sys/types.h>
 #include <stddef.h>
 #include <stdio.h>

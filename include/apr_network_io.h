@@ -55,10 +55,6 @@
 #ifndef APR_NETWORK_IO_H
 #define APR_NETWORK_IO_H
 
-#ifdef WIN32
-#include <winsock2.h>
-#endif
-
 #include "apr_general.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
