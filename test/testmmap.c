@@ -52,100 +52,119 @@
  * <http://www.apache.org/>.
  */
 
+#include "test_apr.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_file_io.h"
 #include "apr_strings.h"
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /* hmmm, what is a truly portable define for the max path
  * length on a platform?
  */
 #define PATH_LEN 255
 
-int main(void)
+#if !APR_HAS_MMAP
+static void not_implemented(CuTest *tc)
 {
-#if APR_HAS_MMAP    
-    apr_pool_t *context;
-    apr_mmap_t *themmap = NULL;
-    apr_file_t *thefile = NULL;
-    apr_finfo_t finfo;
-    apr_int32_t flag = APR_READ;
-    apr_status_t rv;
-    char *file1;
-    char errmsg[120];
-    
-    fprintf (stdout,"APR MMAP Test\n*************\n\n");
-    
-    fprintf(stdout,"Initializing........................");
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Failed.\n");
-        exit(-1);
-    }
-    fprintf(stdout,"OK\n");
-    atexit(apr_terminate);
-
-    fprintf(stdout,"Creating context....................");    
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Failed.\n");
-        exit(-1);
-    }
-    fprintf(stdout,"OK\n");
-    
-    apr_filepath_get(&file1, 0, context);
-    file1 = apr_pstrcat(context,file1,"/testmmap",NULL);
-
-    fprintf(stdout, "Opening file........................");
-    rv = apr_file_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr,
-                "couldn't open file `%s': %d/%s\n",
-                file1, rv, apr_strerror(rv, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
-    
-    fprintf(stderr, "Getting file size...................");
-    rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr,
-                "Didn't get file information: %d/%s\n",
-                rv, apr_strerror(rv, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-    else {
-        fprintf(stdout, "%d bytes\n", (int)finfo.size);
-    }  
-    
-    fprintf(stdout,"Trying to mmap the file.............");
-    if (apr_mmap_create(&themmap, thefile, 0, finfo.size, APR_MMAP_READ, context) != APR_SUCCESS) {
-        fprintf(stderr,"Failed!\n");
-        exit(-1);
-    }
-    fprintf(stdout,"OK\n");
-
-    fprintf(stdout,"Trying to delete the mmap file......");
-    if (apr_mmap_delete(themmap) != APR_SUCCESS) {
-        fprintf(stderr,"Failed!\n");
-        exit (-1);
-    }
-    fprintf(stdout,"OK\n");
-    
-    fprintf (stdout,"\nTest Complete\n");
-
-    return 0;
-#else    
-    fprintf(stdout,"APR MMAP Test\n*************\n\n");
-    fprintf(stdout,"Failed!  APR was not built with MMAP.\n");
-    return -1;
-#endif
+    CuNotImpl(tc, "User functions");
 }
+
+#else
+
+apr_mmap_t *themmap = NULL;
+apr_file_t *thefile = NULL;
+char *file1;
+apr_finfo_t finfo;
+
+static void create_filename(CuTest *tc)
+{
+    char *oldfileptr;
+
+    apr_filepath_get(&file1, 0, p);
+    CuAssertTrue(tc, file1[0] == '/');
+    CuAssertTrue(tc, file1[strlen(file1) - 1] != '/');
+
+    oldfileptr = file1;
+    file1 = apr_pstrcat(p, file1,"/data/mmap_datafile.txt" ,NULL);
+    CuAssertTrue(tc, oldfileptr != file1);
+}
+
+static void test_file_open(CuTest *tc)
+{
+    apr_status_t rv;
+
+    rv = apr_file_open(&thefile, file1, APR_READ, APR_UREAD | APR_GREAD, p);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertPtrNotNull(tc, thefile);
+}
+   
+static void test_get_filesize(CuTest *tc)
+{
+    apr_status_t rv;
+
+    rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertIntEquals(tc, finfo.size, 28);
+}
+
+static void test_mmap_create(CuTest *tc)
+{
+    apr_status_t rv;
+
+    rv = apr_mmap_create(&themmap, thefile, 0, finfo.size, APR_MMAP_READ, p);
+    CuAssertPtrNotNull(tc, themmap);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+}
+
+static void test_mmap_contents(CuTest *tc)
+{
+    CuAssertPtrNotNull(tc, themmap->mm);
+    CuAssertIntEquals(tc, themmap->size, 28);
+    CuAssertStrEquals(tc, themmap->mm, "This is the MMAP data file.\n");
+}
+
+static void test_mmap_delete(CuTest *tc)
+{
+    apr_status_t rv;
+    rv = apr_mmap_delete(themmap);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+}
+
+static void test_mmap_offset(CuTest *tc)
+{
+    apr_status_t rv;
+    void *addr;
+
+    rv = apr_mmap_offset(&addr, themmap, 5);
+    CuAssertStrEquals(tc, addr, "This is the MMAP data file.\n" + 5);
+}
+#endif
+
+CuSuite *testmmap(void)
+{
+    CuSuite *suite = CuSuiteNew("Test MMAP");
+
+#if APR_HAS_MMAP    
+    SUITE_ADD_TEST(suite, create_filename);
+    SUITE_ADD_TEST(suite, test_file_open);
+    SUITE_ADD_TEST(suite, test_get_filesize);
+    SUITE_ADD_TEST(suite, test_mmap_create);
+    SUITE_ADD_TEST(suite, test_mmap_contents);
+    SUITE_ADD_TEST(suite, test_mmap_offset);
+    SUITE_ADD_TEST(suite, test_mmap_delete);
+#else
+    SUITE_ADD_TEST(suite, not_implemented);
+#endif
+
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return testmmap();
+}
+#endif
+
