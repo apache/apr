@@ -91,6 +91,10 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
     char *cwd;
     int i;
 
+    /* If we have a cached temp dir, use it. */
+    if (global_temp_dir[0])
+      goto end;
+
     /* Our goal is to find a temporary directory suitable for writing
        into.  We'll only pay the price once if we're successful -- we
        cache our successful find.  Here's the order in which we'll try
