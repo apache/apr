@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Make libtool optional at configure time.  This is done with 
+     --without-libtool.  [Ryan Bloom]
+
   *) Recognize systems where the TCP_NODELAY setting is inherited from
      the listening socket, and optimize apr_setsockopt(APR_TCP_NODELAY)
      accordingly.  [Jeff Trawick]
