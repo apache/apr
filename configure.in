@@ -1227,8 +1227,8 @@ AC_SUBST(LIBTOOL_LIBS)
 AC_SUBST(LOCAL_MM_LIB)
 
 echo "${nl}Construct Makefiles and header files."
-MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile build/Makefile"
-SUBDIRS="lib strings passwd tables "
+MAKEFILE1="Makefile strings/Makefile passwd/Makefile tables/Makefile build/Makefile"
+SUBDIRS="strings passwd tables "
 for dir in $apr_modules
 do
     test -d $dir || $MKDIR $dir
