@@ -88,6 +88,9 @@ static void username(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     CuAssertIntEquals(tc, APR_SUCCESS, apr_uid_compare(uid, retreived_uid));
+#ifdef WIN32
+    /* ### this fudge was added for Win32 but makes the test return NotImpl
+     * on Unix if run as root, when !gid is also true. */
     if (!gid || !retreived_gid) {
         /* The function had no way to recover the gid (this would have been
          * an ENOTIMPL if apr_uid_ functions didn't try to double-up and
@@ -101,8 +104,11 @@ static void username(CuTest *tc)
         }        
     }
     else {
+#endif
         CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
+#ifdef WIN32
     }
+#endif
 }
 
 static void groupname(CuTest *tc)
