@@ -509,8 +509,8 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                                                 apr_int32_t family, apr_port_t port,
                                                 apr_int32_t flags, apr_pool_t *p)
 {
-    *sa = NULL;
     apr_int32_t masked;
+    *sa = NULL;
 
     if ((masked = flags & (APR_IPV4_ADDR_OK | APR_IPV6_ADDR_OK))) {
         if (!hostname ||
