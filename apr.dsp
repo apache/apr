@@ -443,6 +443,10 @@ SOURCE=.\include\apr_errno.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_file_info.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_file_io.h
 # End Source File
 # Begin Source File
