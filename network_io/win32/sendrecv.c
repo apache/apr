@@ -107,9 +107,9 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
     for (i = 0; i < in_vec; i++) {
         cur_len = vec[i].iov_len;
         nvec++;
-        while (cur_len > DWORD_MAX) {
+        while (cur_len > APR_DWORD_MAX) {
             nvec++;
-            cur_len -= DWORD_MAX;
+            cur_len -= APR_DWORD_MAX;
         } 
     }
 
@@ -123,11 +123,11 @@ APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
         cur_len = vec[i].iov_len;
         
         do {
-            if (cur_len > DWORD_MAX) {
+            if (cur_len > APR_DWORD_MAX) {
                 pWsaBuf[j].buf = base;
-                pWsaBuf[j].len = DWORD_MAX;
-                cur_len -= DWORD_MAX;
-                base += DWORD_MAX;
+                pWsaBuf[j].len = APR_DWORD_MAX;
+                cur_len -= APR_DWORD_MAX;
+                base += APR_DWORD_MAX;
             }
             else {
                 pWsaBuf[j].buf = base;
