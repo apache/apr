@@ -77,6 +77,8 @@ int (*apr_os2_setsockopt)(int, int, int, char *, int) = NULL;
 int (*apr_os2_shutdown)(int, int) = NULL;
 int (*apr_os2_soclose)(int) = NULL;
 int (*apr_os2_writev)(int, struct iovec *, int) = NULL;
+int (*apr_os2_sendto)(int, const char *, int, int, const struct sockaddr *, int);
+int (*apr_os2_recvfrom)(int, char *, int, int, struct sockaddr *, int *);
 
 static HMODULE hSO32DLL;
 
@@ -142,6 +144,12 @@ static int os2_fn_link()
 
         if (!rc)
             rc = DosQueryProcAddr(hSO32DLL, 0, "WRITEV", &apr_os2_writev);
+
+        if (!rc)
+            rc = DosQueryProcAddr(hSO32DLL, 0, "SENDTO", &apr_os2_sendto);
+
+        if (!rc)
+            rc = DosQueryProcAddr(hSO32DLL, 0, "RECVFROM", &apr_os2_recvfrom);
 
         if (rc)
             return APR_OS2_STATUS(rc);
