@@ -64,7 +64,7 @@
  * in the file system, except by a very obscure bug where any file
  * that is created with a trailing space or period, followed by the 
  * ':' stream designator on an NTFS volume can never be accessed again.
- * In other words, don't ever accept them if designating a stream!
+ * In other words, don't ever accept them when designating a stream!
  *
  * An interesting side effect is that two or three periods are both 
  * treated as the parent directory, although the fourth and on are
@@ -93,6 +93,30 @@ static int is_fnchar(char ch)
 }
 
 
+static apr_status_t apr_filepath_root_test(char *path,
+                                           apr_pool_t *p)
+{
+    apr_status_t rv;
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t wpath[APR_PATH_MAX];
+        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                           / sizeof(apr_wchar_t), path))
+            return rv;
+        rv = GetDriveTypeW(wpath);
+    }
+    else
+#endif
+        rv = GetDriveType(path);
+
+    if (rv == DRIVE_UNKNOWN || rv == DRIVE_NO_ROOT_DIR)
+        return APR_EBADPATH;
+    return APR_SUCCESS;
+}
+
+
 APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
                                            apr_pool_t *p)
 {
@@ -115,6 +139,47 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
             return apr_get_os_error();
     }
     *rootpath = apr_pstrdup(p, path);
+    return APR_SUCCESS;
+}
+
+
+static apr_status_t apr_filepath_drive_get(char **rootpath,
+                                           char drive,
+                                           apr_pool_t *p)
+{
+    char path[APR_PATH_MAX];
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t *ignored;
+        apr_wchar_t wdrive[8];
+        apr_wchar_t wpath[APR_PATH_MAX];
+        apr_status_t rv;
+        /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+         * as if that is useful for anything.
+         */
+        wcscpy(wdrive, L"D:.");
+        wdrive[0] = (apr_wchar_t)(unsigned char)drive;
+        if (!GetFullPathNameW(wdrive, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
+            return apr_get_os_error();
+        if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
+            return rv;
+        *rootpath = apr_pstrdup(p, path);
+    }
+    else
+#endif
+    {
+        char *ignored;
+        char drivestr[4];
+        drivestr[0] = drive;
+        drivestr[1] = ':';
+        drivestr[2] = '.';;
+        drivestr[3] = '\0';
+        if (!GetFullPathName(drivestr, sizeof(path), path, &ignored))
+            return apr_get_os_error();
+        *rootpath = apr_pstrdup(p, path);
+    }
     return APR_SUCCESS;
 }
 
@@ -203,41 +268,73 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
             } while (*delim1 && *delim1 != '/' && *delim1 != '\\');
 
             if (*delim1) {
+                apr_status_t rv;
                 delim2 = delim1 + 1;
-                do {
+                while (*delim2 && *delim2 != '/' && *delim2 != '\\') {
                     /* Protect against //machine/X/ where X is illegal */
-                    if (*delim2 && !is_fnchar(*(delim2++)))
+                    if (!is_fnchar(*(delim2++)))
                         return APR_EBADPATH;
-                } while (*delim2 && *delim2 != '/' && *delim2 != '\\');
+                } 
 
-                if (delim2) {
-                    /* Have path of '//machine/share/[whatnot]' */
-                    newpath = apr_pstrndup(p, testpath, delim2 - testpath);
-                    newpath[0] = '\\';
-                    newpath[1] = '\\';
-                    newpath[delim1 - testpath] = '\\';
-                    newpath[delim2 - testpath] = '\\';
-                    *rootpath = newpath;
-                    *inpath = delim2 + 1;
-                    while (**inpath == '/' || **inpath == '\\')
-                        ++*inpath;
-                    return APR_SUCCESS;
+                if (!*delim2) {
+                /* Have path of '//machine/[share]' so we must have
+                 * an extra byte for the trailing slash
+                 */
+                    newpath = apr_pstrndup(p, testpath, delim2 - testpath + 1);
+                    newpath[delim2 - testpath + 1] = '\0';
                 }
+                else
+                    newpath = apr_pstrndup(p, testpath, delim2 - testpath);
 
-                /* Have path of '//machine/[share]' */
-                delim2 = strchr(delim1, '\0');
-                newpath = apr_pstrndup(p, testpath, delim2 - testpath);
                 newpath[0] = '\\';
                 newpath[1] = '\\';
                 newpath[delim1 - testpath] = '\\';
+
+                if (delim2 == delim1 + 1) {
+                    /* We simply \\machine\, so give up already
+                     */
+                    *rootpath = newpath;
+                    *inpath = delim2;
+                    return APR_EINCOMPLETE;
+                }
+
+                /* Validate the \\Machine\Share\ designation, must
+                 * root this designation!
+                 */
+                newpath[delim2 - testpath] = '\\';
+                rv = apr_filepath_root_test(newpath, p);
+                if (rv)
+                    return rv;
+
+                /* If this root included the trailing / or \ designation 
+                 * then lop off multiple trailing slashes
+                 */
+                if (*delim2) {
+                    *inpath = delim2 + 1;
+                    while (**inpath == '/' || **inpath == '\\')
+                        ++*inpath;
+                    /* Give back the caller's own trailing delimiter
+                     */
+                    newpath[delim2 - testpath] = *delim2;
+                }
+                else
+                    *inpath = delim2;
+                
                 *rootpath = newpath;
-                *inpath = delim2;
-                return APR_EINCOMPLETE;
+                return APR_SUCCESS;
             }
             
-            /* Have path of '//[machine]' */
+            /* Have path of '\\[machine]', if the machine is given,
+             * append the trailing \
+             */
             delim1 = strchr(testpath, '\0');
-            newpath = apr_pstrndup(p, testpath, delim1 - testpath);
+            if (delim1 > testpath + 2) {
+                newpath = apr_pstrndup(p, testpath, delim1 - testpath + 1);
+                newpath[delim1 - testpath] = '\\';
+                newpath[delim1 - testpath + 1] = '\0';
+            }
+            else
+                newpath = apr_pstrndup(p, testpath, delim1 - testpath);
             newpath[0] = '\\';
             newpath[1] = '\\';
             *rootpath = newpath;
@@ -245,24 +342,43 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
             return APR_EINCOMPLETE;
         }
 
-        /* Left with a path of '/', what drive are we asking about? */
-        *rootpath = apr_pstrdup(p, "/");
+        /* Left with a path of '/', what drive are we asking about? 
+         * The guess is left to the caller.
+         */
+        *rootpath = apr_pstrndup(p, testpath, 1);
         *inpath = ++testpath;
         return APR_EINCOMPLETE;
     }
 
     /* Evaluate path of 'd:[/]' */
-    if (is_fnchar(*testpath) && testpath[1] == ':') {
+    if (is_fnchar(*testpath) && testpath[1] == ':') 
+    {
+        apr_status_t rv;
+        /* Validate that d:\ drive exists, test must be rooted
+         */
+        newpath = apr_pstrndup(p, testpath, 3);
+        newpath[2] = '\\';
+        newpath[3] = '\0';
+        rv = apr_filepath_root_test(newpath, p);
+        if (rv)
+            return rv;
+
+        /* Have full 'd:/' so replace our \ with the given root char
+         */
         if (testpath[2] == '/' || testpath[2] == '\\') {
-            *rootpath = apr_pstrndup(p, testpath, 3);
+            newpath[2] = testpath[2];
+            *rootpath = newpath;
             *inpath = testpath + 3;
             while (**inpath == '/' || **inpath == '\\')
                 ++*inpath;
             return APR_SUCCESS;
         }
 
-        /* Left with path of 'd:' from the cwd of this drive letter */
-        *rootpath = apr_pstrndup(p, testpath, 2);
+        /* Left with path of 'd:' from the cwd of this drive letter 
+         * so truncate the root \ we added above;
+         */
+        newpath[2] = '\0';
+        *rootpath = newpath;
         *inpath = testpath + 2;
         return APR_EINCOMPLETE;        
     }
@@ -273,112 +389,254 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
 
 APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
-                                             const char *rootpath, 
+                                             const char *basepath, 
                                              const char *addpath, 
                                              apr_int32_t flags,
                                              apr_pool_t *p)
 {
     char path[APR_PATH_MAX]; /* isn't null term */
-    apr_size_t rootlen; /* is the length of the src rootpath */
-    apr_size_t keptlen; /* is the length of the retained rootpath */
-    apr_size_t pathlen; /* is the length of the result path */
-    apr_size_t seglen;  /* is the end of the current segment */
+    char *baseroot = NULL;
+    char *addroot;
+    apr_size_t rootlen; /* the length of the root portion of path, d:/ is 3 */
+    apr_size_t baselen; /* the length of basepath (excluding baseroot) */
+    apr_size_t keptlen; /* the length of the retained basepath (incl root) */
+    apr_size_t pathlen; /* the length of the result path */
+    apr_size_t segend;  /* the end of the current segment */
+    apr_size_t seglen;  /* the length of the segment (excl trailing chars) */
+    apr_status_t basetype; /* from parsing the basepath's baseroot */
+    apr_status_t addtype;  /* from parsing the addpath's addroot */
     apr_status_t rv;
-
-    /* Treat null as an empty path.
+    int fixunc = 0;  /* flag to complete an incomplete UNC basepath */
+    
+    /* Treat null as an empty path, otherwise split addroot from the addpath
      */
-    if (!addpath)
-        addpath = "";
+    if (!addpath) {
+        addpath = addroot = "";
+        addtype = APR_ERELATIVE;
+    }
+    else {
+        addtype = apr_filepath_root(&addroot, &addpath, p);
+        if (addtype == APR_SUCCESS) {
+            addtype = APR_EABSOLUTE;
+        }
+        else if (addtype == APR_ERELATIVE) {
+            addroot = "";
+        }
+        else if (addtype != APR_EINCOMPLETE) {
+            /* apr_filepath_root was incomprehensible so fail already
+             */
+            return addtype;
+        }
+    }
 
-    if (addpath[0] == '/') 
+    /* If addpath is (even partially) rooted, then basepath is
+     * unused.  Ths violates any APR_FILEPATH_SECUREROOTTEST 
+     * and APR_FILEPATH_NOTABSOLUTE flags specified.
+     */
+    if (addtype == APR_EABSOLUTE || addtype == APR_EINCOMPLETE)
     {
-        /* If addpath is rooted, then rootpath is unused.
-         * Ths violates any APR_FILEPATH_SECUREROOTTEST and
-         * APR_FILEPATH_NOTABSOLUTE flags specified.
-         */
         if (flags & APR_FILEPATH_SECUREROOTTEST)
             return APR_EABOVEROOT;
         if (flags & APR_FILEPATH_NOTABSOLUTE)
-            return APR_EABSOLUTE;
+            return addtype;
+    }
+
+    /* Optimized tests before we query the current working path
+     */
+    if (!basepath) {
 
         /* If APR_FILEPATH_NOTABOVEROOT wasn't specified,
          * we won't test the root again, it's ignored.
          * Waste no CPU retrieving the working path.
          */
-        if (!rootpath && !(flags & APR_FILEPATH_NOTABOVEROOT))
-            rootpath = "";
-    }
-    else 
-    {
+        if (addtype == APR_EABSOLUTE && !(flags & APR_FILEPATH_NOTABOVEROOT)) {
+            basepath = baseroot = "";
+            basetype = APR_ERELATIVE;
+        }
+
         /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller 
-         * requires a relative result.  If the rootpath is
-         * ommitted, we do not retrieve the working path,
-         * if rootpath was supplied as absolute then fail.
+         * requires an absolutely relative result, So do not retrieve 
+         * the working path.
          */
-        if (flags & APR_FILEPATH_NOTABSOLUTE) 
-        {
-            if (!rootpath)
-                rootpath = "";
-            else if (rootpath[0] == '/')
-                return APR_EABSOLUTE;
+        if (addtype == APR_ERELATIVE && (flags & APR_FILEPATH_NOTABSOLUTE)) {
+            basepath = baseroot = "";
+            basetype = APR_ERELATIVE;
         }
     }
 
-    if (!rootpath) 
+    if (!basepath) 
     {
         /* Start with the current working path.  This is bass akwards,
          * but required since the compiler (at least vc) doesn't like
          * passing the address of a char const* for a char** arg.
+         * We must grab the current path of the designated drive 
+         * if addroot is given in drive-relative form (e.g. d:foo)
          */
         char *getpath;
-        rv = apr_filepath_get(&getpath, p);
-        rootpath = getpath;
+        if (addtype == APR_EINCOMPLETE && addroot[1] == ':')
+            rv = apr_filepath_drive_get(&getpath, addroot[0], p);
+        else
+            rv = apr_filepath_get(&getpath, p);
         if (rv != APR_SUCCESS)
-            return errno;
-    
-        /* XXX: Any kernel subject to goofy, uncanonical results
-         * must run the rootpath against the user's given flags.
-         * Simplest would be a recursive call to apr_filepath_merge
-         * with an empty (not null) rootpath and addpath of the cwd.
-         */
+            return rv;
+        basepath = getpath;
     }
 
-    rootlen = strlen(rootpath);
+    if (!baseroot) {
+        basetype = apr_filepath_root(&baseroot, &basepath, p);
+        if (basetype == APR_SUCCESS) {
+            basetype = APR_EABSOLUTE;
+        }
+        else if (basetype == APR_ERELATIVE) {
+            baseroot = "";
+        }
+        else if (basetype != APR_EINCOMPLETE) {
+            /* apr_filepath_root was incomprehensible so fail already
+             */
+            return basetype;
+        }
+    }
+    baselen = strlen(basepath);
 
-    if (addpath[0] == '/') 
+    /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller 
+     * requires an absolutely relative result.  If the given 
+     * basepath is not relative then fail.
+     */
+    if ((flags & APR_FILEPATH_NOTABSOLUTE) && basetype != APR_ERELATIVE)
+        return basetype;
+
+    /* The Win32 nightmare on unc street... start combining for
+     * many possible root combinations.
+     */
+    if (addtype == APR_EABSOLUTE)
     {
-        /* Ignore the given root path, strip off leading 
-         * '/'s to a single leading '/' from the addpath,
-         * and leave addpath at the first non-'/' character.
+        /* Ignore the given root path, and start with the addroot
          */
+        if ((flags & APR_FILEPATH_NOTABOVEROOT) 
+                && strncmp(baseroot, addroot, strlen(baseroot)))
+            return APR_EABOVEROOT;
         keptlen = 0;
-        while (addpath[0] == '/')
-            ++addpath;
-        path[0] = '/';
-        pathlen = 1;
+        rootlen = pathlen = strlen(addroot);
+        memcpy(path, addroot, pathlen);
     }
-    else
+    else if (addtype == APR_EINCOMPLETE)
     {
+        /* There are several types of incomplete paths, 
+         *     incomplete UNC paths         (//foo/ or //),
+         *     drives without rooted paths  (d: as in d:foo), 
+         * and simple roots                 (/ as in /foo).
+         * Deal with these in significantly different manners...
+         */
+        if ((addroot[0] == '/' || addroot[0] == '\\') &&
+            (addroot[1] == '/' || addroot[1] == '\\')) 
+        {
+            /* Ignore the given root path if the incomplete addpath is UNC,
+             * (note that the final result will be incomplete).
+             */
+            if (flags & APR_FILEPATH_NOTRELATIVE)
+                return addtype;
+            if ((flags & APR_FILEPATH_NOTABOVEROOT) 
+                    && strncmp(baseroot, addroot, strlen(baseroot)))
+                return APR_EABOVEROOT;
+            fixunc = 1;
+            keptlen = 0;
+            rootlen = pathlen = strlen(addroot);
+            memcpy(path, addroot, pathlen);
+        }
+        else if ((addroot[0] == '/' || addroot[0] == '\\') && !addroot[1]) 
+        {
+            /* Bring together the drive or UNC root from the baseroot
+             * if the addpath is a simple root and basepath is rooted,
+             * otherwise disregard the basepath entirely.
+             */
+            if (basetype != APR_EABSOLUTE && (flags & APR_FILEPATH_NOTRELATIVE))
+                return basetype;
+            if (basetype != APR_ERELATIVE) {
+                if (basetype == APR_INCOMPLETE 
+                        && (baseroot[0] == '/' || baseroot[0] == '\\')
+                        && (baseroot[1] == '/' || baseroot[1] == '\\'))
+                    fixunc = 1;
+                keptlen = rootlen = pathlen = strlen(baseroot);
+                memcpy(path, baseroot, pathlen);
+            }
+            else {
+                if (flags & APR_FILEPATH_NOTABOVEROOT)
+                    return APR_EABOVEROOT;
+                keptlen = 0;
+                rootlen = pathlen = strlen(addroot);
+                memcpy(path, addroot, pathlen);
+            }
+        }
+        else if (addroot[0] && addroot[1] == ':' && !addroot[2]) 
+        {
+            /* If the addroot is a drive (without a volume root)
+             * use the basepath _if_ it matches this drive letter!
+             * Otherwise we must discard the basepath.
+             */
+            if (addroot[0] == baseroot[0] && baseroot[1] == ':') {
+                /* Base the result path on the basepath
+                 */
+                if (basetype != APR_EABSOLUTE && (flags & APR_FILEPATH_NOTRELATIVE))
+                    return basetype;
+                rootlen = strlen(baseroot);
+                pathlen = baselen;
+                if (rootlen + pathlen >= sizeof(path))
+                    return APR_ENAMETOOLONG;
+                memcpy(path, baseroot, rootlen);
+                memcpy(path + rootlen, basepath, pathlen);
+                pathlen += rootlen;
+            } 
+            else {
+                if (flags & APR_FILEPATH_NOTRELATIVE)
+                    return addtype;
+                if (flags & APR_FILEPATH_NOTABOVEROOT)
+                    return APR_EABOVEROOT;
+                keptlen = 0;
+                rootlen = pathlen = strlen(addroot);
+                memcpy(path, addroot, pathlen);
+            }
+        }
+        else {
+            /* Now this is unexpected, we aren't aware of any other
+             * incomplete path forms!  Fail now.
+             */
+            return APR_EBADPATH;
+        }
+    }
+    else { /* addtype == APR_ERELATIVE */
         /* If both paths are relative, fail early
          */
-        if (rootpath[0] != '/' && (flags & APR_FILEPATH_NOTRELATIVE))
-                return APR_ERELATIVE;
+        if (basetype != APR_EABSOLUTE && (flags & APR_FILEPATH_NOTRELATIVE))
+            return basetype;
 
-        /* Base the result path on the rootpath
+        /* An incomplete UNC path must be completed
          */
-        keptlen = rootlen;
-        if (rootlen >= sizeof(path))
+        if (basetype == APR_INCOMPLETE 
+                && (baseroot[0] == '/' || baseroot[0] == '\\')
+                && (baseroot[1] == '/' || baseroot[1] == '\\'))
+            fixunc = 1;
+
+        /* Base the result path on the basepath
+         */
+        rootlen = strlen(baseroot);
+        pathlen = baselen;
+        if (rootlen + pathlen >= sizeof(path))
             return APR_ENAMETOOLONG;
-        memcpy(path, rootpath, rootlen);
+        memcpy(path, baseroot, rootlen);
+        memcpy(path + rootlen, basepath, pathlen);
+        pathlen += rootlen;
+    }
+
+    /* '/' terminate the given root path unless it's already terminated
+     * or is an incomplete drive root.
+     */
+    if (pathlen && path[pathlen - 1] != '/' && path[pathlen - 1] != '\\' 
+                && path[pathlen - 1] != ':') {
+        if (pathlen + 1 >= sizeof(path))
+            return APR_ENAMETOOLONG;
         
-        /* Always '/' terminate the given root path
-         */
-        if (keptlen && path[keptlen - 1] != '/') {
-            if (keptlen + 1 >= sizeof(path))
-                return APR_ENAMETOOLONG;
-            path[keptlen++] = '/';
-        }
-        pathlen = keptlen;
+        path[pathlen++] = '/';
+
     }
 
     while (*addpath) 
@@ -386,18 +644,51 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         /* Parse each segment, find the closing '/' 
          */
         seglen = 0;
-        while (addpath[seglen] && addpath[seglen] != '/')
+        while (addpath[seglen] && addpath[seglen] != '/'
+                               && addpath[seglen] != '\\')
             ++seglen;
+
+        /* Truncate all trailing spaces and all but the first two dots */
+        segend = seglen;
+        while (seglen && (addpath[seglen - 1] == ' ' 
+                       || addpath[seglen - 1] == '.')) {
+            if (seglen > 2 || addpath[seglen - 1] != '.' || addpath[0] != '.')
+                --seglen;
+            else
+                break;
+        }
 
         if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) 
         {
-            /* noop segment (/ or ./) so skip it 
+            /* NOTE: win32 _hates_ '/ /' and '/. /' (yes, with spaces in there)
+             * so eliminate all preconceptions that it is valid.
+             */
+            if (seglen < segend)
+                return APR_EBADPATH;
+
+            /* This isn't legal unless the unc path is completed
+             */
+            if (fixunc)
+                return APR_EBADPATH;
+
+            /* Otherwise, this is a noop segment (/ or ./) so ignore it 
              */
         }
         else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') 
         {
+            /* NOTE: win32 _hates_ '/.. /' (yes, with a space in there) and
+             * '/..../' so eliminate all preconceptions that they are valid.
+             */
+            if (seglen < segend && (seglen != 3 || addpath[2] != '.'))
+                return APR_EBADPATH;
+
+            /* This isn't legal unless the unc path is completed
+             */
+            if (fixunc)
+                return APR_EBADPATH;
+
             /* backpath (../) */
-            if (pathlen == 1 && path[0] == '/') 
+            if (pathlen <= rootlen) 
             {
                 /* Attempt to move above root.  Always die if the 
                  * APR_FILEPATH_SECUREROOTTEST flag is specified.
@@ -406,13 +697,15 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                     return APR_EABOVEROOT;
                 
                 /* Otherwise this is simply a noop, above root is root.
-                 * Flag that rootpath was entirely replaced.
                  */
-                keptlen = 0;
             }
-            else if (pathlen == 0 
-                  || (pathlen == 3 && !memcmp(path + pathlen - 3, "../", 3))
-                  || (pathlen  > 3 && !memcmp(path + pathlen - 4, "/../", 4)))
+            else if (pathlen == 0 ||
+                     (pathlen >= 3 && (pathlen == 3
+                                    || path[pathlen - 4] == ':')
+                                   &&  path[pathlen - 3] == '.' 
+                                   &&  path[pathlen - 2] == '.' 
+                                   && (path[pathlen - 1] == '/' 
+                                    || path[pathlen - 1] == '\\')))
             {
                 /* Path is already backpathed or empty, if the
                  * APR_FILEPATH_SECUREROOTTEST.was given die now.
@@ -433,7 +726,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                  */
                 do {
                     --pathlen;
-                } while (pathlen && path[pathlen - 1] != '/');
+                } while (pathlen && path[pathlen - 1] != '/'
+                                 && path[pathlen - 1] != '\\');
             }
 
             /* Now test if we are above where we started and back up
@@ -446,42 +740,91 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 keptlen = pathlen;
             }
         }
-        else 
+        else /* not empty or dots */
         {
-            /* An actual segment, append it to the destination path
-             */
-            apr_size_t i = (addpath[seglen] != '\0');
-            if (pathlen + seglen + i >= sizeof(path))
-                return APR_ENAMETOOLONG;
-            memcpy(path + pathlen, addpath, seglen + i);
-            pathlen += seglen + i;
+            if (fixunc) {
+                char *testpath = path;
+                char *testroot;
+                apr_status_t testtype;
+                apr_size_t i = (addpath[segend] != '\0');
+                
+
+                /* This isn't legal unless the unc path is complete!
+                 */
+                if (seglen < segend)
+                    return APR_EBADPATH;
+                if (pathlen + seglen + 1 >= sizeof(path))
+                    return APR_ENAMETOOLONG;
+                memcpy(path + pathlen, addpath, seglen + i);
+                
+                /* Always add the trailing slash to a UNC segment
+                 */
+                if (i)
+                    path[pathlen + seglen] = addpath[segend];
+                else
+                    path[pathlen + seglen] = '\\';
+                pathlen += seglen + 1;
+
+                /* Recanonicalize the UNC root with the new UNC segment,
+                 * and if we succeed, reset this test and the rootlen,
+                 * and replace our path with the canonical UNC root path
+                 */
+                path[pathlen] = '\0';
+                testtype = apr_filepath_root(&testroot, &testpath, p);
+                if (testtype == APR_SUCCESS) {
+                    rootlen = pathlen = (testpath - path);
+                    memcpy(path, testroot, pathlen);
+                    fixunc = 0;
+                }
+                else if (testtype != APR_EINCOMPLETE) {
+                    /* apr_filepath_root was very unexpected so fail already
+                     */
+                    return testtype;
+                }
+            }
+            else {
+                /* An actual segment, append it to the destination path
+                 */
+                apr_size_t i = (addpath[segend] != '\0');
+                if (pathlen + seglen + i >= sizeof(path))
+                    return APR_ENAMETOOLONG;
+                memcpy(path + pathlen, addpath, seglen + i);
+                if (i)
+                    path[pathlen + seglen] = addpath[segend];
+                pathlen += seglen + i;
+            }
         }
 
         /* Skip over trailing slash to the next segment
          */
-        if (addpath[seglen])
-            ++seglen;
+        if (addpath[segend])
+            ++segend;
 
-        addpath += seglen;
+        addpath += segend;
     }
     path[pathlen] = '\0';
     
-    /* keptlen will be the rootlen unless the addpath contained
+    /* keptlen will be the baselen unless the addpath contained
      * backpath elements.  If so, and APR_FILEPATH_NOTABOVEROOT
      * is specified (APR_FILEPATH_SECUREROOTTEST was caught above),
-     * compare the original root to assure the result path is
-     * still within given root path.
+     * compare the string beyond the root to assure the result path 
+     * is still within given basepath.  Note that the root path 
+     * segment is thoroughly tested prior to path parsing.
      */
-    if ((flags & APR_FILEPATH_NOTABOVEROOT) && keptlen < rootlen) {
-        if (strncmp(rootpath, path, rootlen))
+    if (flags & APR_FILEPATH_NOTABOVEROOT && (keptlen - rootlen) < baselen) {
+        if (strncmp(basepath, path + rootlen, baselen))
             return APR_EABOVEROOT;
-        if (rootpath[rootlen - 1] != '/'
-                && path[rootlen] && path[rootlen] != '/')
+
+        /* Ahem... if we weren't given a trailing slash on the basepath,
+         * we better be sure that /foo wasn't replaced with /foobar!
+         */
+        if (basepath[baselen - 1] != '/' && basepath[baselen - 1] != '\\'
+             && path[baselen] && path[baselen] != '/' && path[baselen] != '\\')
             return APR_EABOVEROOT;
     }
 
 #if 0
-    /* Just an idea - don't know where it's headed yet */
+    /* Just an idea - still don't know where it's headed */
     if (addpath && addpath[endseg - 1] != '/' 
                 && (flags & APR_FILEPATH_TRUECASE)) {
         apr_finfo_t finfo;
