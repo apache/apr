@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Don't assume getnameinfo() can handle IPv4-mapped IPv6 addresses
+     on any platforms.
+     [Jeff Trawick, Joe Orton, Colm MacCárthaigh <colm stdlib.net>]
+
   *) Support setuid, setgid and sticky file permissions bits on Unix.
      [André Malo]
 
