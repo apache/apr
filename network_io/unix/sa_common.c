@@ -376,12 +376,44 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     return APR_SUCCESS;
 }
 
+static apr_status_t find_addresses(apr_sockaddr_t **sa, 
+                                   const char *hostname, apr_int32_t family,
+                                   apr_port_t port, apr_int32_t flags, 
+                                   apr_pool_t *p)
+{
+    if (flags & APR_IPV4_ADDR_OK) {
+        apr_status_t error = call_resolver(sa, hostname, AF_INET, port, flags, p);
+
+#if APR_HAVE_IPV6
+        if (error) {
+            family = AF_INET6; /* try again */
+        }
+        else
+#endif
+        return error;
+    }
+#if APR_HAVE_IPV6
+    else if (flags & APR_IPV6_ADDR_OK) {
+        apr_status_t error = call_resolver(sa, hostname, AF_INET6, port, flags, p);
+
+        if (error) {
+            family = AF_INET; /* try again */
+        }
+        else {
+            return APR_SUCCESS;
+        }
+    }
+#endif
+
+    return call_resolver(sa, hostname, family, port, flags, p);
+}
+
 #else /* end of HAVE_GETADDRINFO code */
 
-static apr_status_t call_resolver(apr_sockaddr_t **sa, 
-                                  const char *hostname, apr_int32_t family,
-                                  apr_port_t port, apr_int32_t flags, 
-                                  apr_pool_t *p)
+static apr_status_t find_addresses(apr_sockaddr_t **sa, 
+                                   const char *hostname, apr_int32_t family,
+                                   apr_port_t port, apr_int32_t flags, 
+                                   apr_pool_t *p)
 {
     struct hostent *hp;
     apr_sockaddr_t *prev_sa;
@@ -478,14 +510,28 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                                                 apr_int32_t flags, apr_pool_t *p)
 {
     *sa = NULL;
+    apr_int32_t masked;
 
+    if ((masked = flags & (APR_IPV4_ADDR_OK | APR_IPV6_ADDR_OK))) {
+        if (!hostname ||
+            family != AF_UNSPEC ||
+            masked == (APR_IPV4_ADDR_OK | APR_IPV6_ADDR_OK)) {
+            return APR_EINVAL;
+        }
+#if !APR_HAVE_IPV6
+        if (flags & APR_IPV6_ADDR_OK) {
+            return APR_ENOTIMPL;
+        }
+#endif
+    }
+    
     if (hostname) {
 #if !APR_HAVE_IPV6
         if (family == APR_UNSPEC) {
             family = APR_INET;
         }
 #endif
-        return call_resolver(sa, hostname, family, port, flags, p);
+        return find_addresses(sa, hostname, family, port, flags, p);
     }
 
     *sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
