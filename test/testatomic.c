@@ -265,7 +265,7 @@ int main(int argc, char**argv)
     }
 
     printf("APR Atomic Test\n===============\n\n");
-#if !(defined WIN32) && !(defined NETWARE) && !(defined __MVS__)
+#if !(defined WIN32) && !(defined NETWARE) && !(defined __MVS__) && !(defined DARWIN)
     pthread_setconcurrency(8);
 #endif
     printf("%-60s", "Initializing the context"); 
