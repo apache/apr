@@ -210,10 +210,6 @@ SOURCE=.\misc\win32\misc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\win32\names.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc\unix\otherchild.c
 # End Source File
 # Begin Source File
