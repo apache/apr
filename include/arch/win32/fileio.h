@@ -172,6 +172,7 @@ struct apr_file_t {
     BOOLEAN pipe;              // Is this a pipe of a file?
     OVERLAPPED *pOverlapped;
     apr_interval_time_t timeout;
+    apr_int32_t flags;
 
     /* File specific info */
     apr_finfo_t *finfo;

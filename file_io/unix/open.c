@@ -90,7 +90,7 @@ apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag
 
     (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
     (*new)->cntxt = cont;
-    (*new)->oflags = oflags;
+    (*new)->flags = flag;
     (*new)->filedes = -1;
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {

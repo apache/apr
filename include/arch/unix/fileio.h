@@ -122,7 +122,7 @@ struct apr_file_t {
     apr_pool_t *cntxt;
     int filedes;
     char *fname;
-    int oflags;
+    apr_int32_t flags;
     int eof_hit;
     int pipe;
     apr_interval_time_t timeout;

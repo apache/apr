@@ -64,6 +64,11 @@ APR_DECLARE(apr_status_t) apr_file_name_get(const char **fname,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_int32_t) apr_file_flags_get(apr_file_t *f)
+{
+    return f->flags;
+}
+
 #if !defined(OS2) && !defined(WIN32)
 mode_t apr_unix_perms2mode(apr_fileperms_t perms)
 {
