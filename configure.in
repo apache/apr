@@ -1599,7 +1599,7 @@ APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
 # See which lock mechanism we'll select by default on this system.
 # The last APR_DECIDE to execute sets the default.
 # At this stage, we match the ordering in Apache 1.3
-# which is (highest to lowest): posixsem -> sysvsem -> fcntl -> flock
+# which is (highest to lowest): pthread -> posixsem -> sysvsem -> fcntl -> flock
 #
 APR_BEGIN_DECISION([apr_lock implementation method])
 APR_IFALLYES(func:flock define:LOCK_EX,
@@ -1611,6 +1611,11 @@ APR_IFALLYES(func:semget func:semctl define:SEM_UNDO,
 APR_IFALLYES(header:semaphore.h func:sem_open func_sem_close dnl
              func_sem_unlink func:sem_post func_sem_wait,
              APR_DECIDE(USE_POSIXSEM_SERIALIZE, [POSIX sem_open()]))
+# note: the current APR use of shared mutex requires /dev/zero
+APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
+            func:pthread_mutexattr_setpshared dnl
+            file:/dev/zero,
+            APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)
 fi
