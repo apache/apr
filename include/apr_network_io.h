@@ -131,6 +131,7 @@ typedef struct in_addr      apr_in_addr;
 #if APR_HAS_SENDFILE
 /* Define flags passed in on apr_sendfile() */
 #define APR_SENDFILE_DISCONNECT_SOCKET      1
+#endif
 
 /** A structure to encapsulate headers and trailers for apr_sendfile */
 struct apr_hdtr_t {
@@ -145,16 +146,6 @@ struct apr_hdtr_t {
     /** number of trailers in the iovec */
     int numtrailers;
 };
-#else
-/* 
- * we need to define something for non-sendfile systems, since
- * we don't abtract out function calls (eg: send_the_file in http_core.c))
- * depending on sendfile existance
- */
-struct apr_hdtr_t {
-    int dummy;
-};
-#endif
 
 /* function definitions */
 
