@@ -1466,11 +1466,15 @@ static void free_proc_chain(struct process_chain *procs)
     }
 #ifdef WIN32
     /* 
-     * Do we need an APR function to clean-up a proc_t?
+     * XXX: Do we need an APR function to clean-up a proc_t?
+     * Well ... yeah ... but we can't since it's scope is ill defined.
      */
     {
         for (p = procs; p; p = p->next) {
-            CloseHandle((HANDLE)p->pid->pid);
+            if (p->pid->hproc) {
+                CloseHandle(p->pid->hproc);
+                p->pid->hproc = NULL;
+            }
         }
     }
 #endif /* WIN32 */

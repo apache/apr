@@ -355,7 +355,18 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         else if (strchr(shellcmd, ' '))
             shellcmd = apr_pstrcat(cont, "\"", shellcmd, "\"", NULL);
         cmdline = apr_pstrcat(cont, shellcmd, " /C \"", cmdline, "\"", NULL);
+    } 
+    else {
+        /* Win32 is _different_ than unix.  While unix will find the given
+         * program since it's already chdir'ed, Win32 cannot since the parent
+         * attempts to open the program with it's own path.
+         * ###: This solution isn't much better - it may defeat path searching
+         * when the path search was desired.  Open to further discussion.
+         */
+        apr_filepath_merge(&progname, attr->currdir, progname, 
+                           APR_FILEPATH_NATIVE, cont);
     }
+
 
     if (!env) 
         pEnvBlock = NULL;
@@ -420,27 +431,29 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     if (os_level >= APR_WIN_NT)
     {
         STARTUPINFOW si;
-        apr_wchar_t wprg[APR_PATH_MAX];
+        apr_size_t nprg = strlen(progname) + 1;
+        apr_size_t nwprg = nprg + 6;
+        apr_wchar_t *wprg = apr_palloc(cont, nwprg * sizeof(wprg[0]));
         apr_size_t ncmd = strlen(cmdline) + 1, nwcmd = ncmd;
+        apr_wchar_t *wcmd = apr_palloc(cont, nwcmd * sizeof(wcmd[0]));
         apr_size_t ncwd = 0, nwcwd = 0;
-        apr_wchar_t *wcmd = apr_palloc(cont, ncmd * sizeof(wcmd[0]));
         apr_wchar_t *wcwd = NULL;
+
+        if (((rv = utf8_to_unicode_path(wprg, nwprg, progname))
+                 != APR_SUCCESS)
+         || ((rv = conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
+                 != APR_SUCCESS)) {
+            return rv;
+        }
 
         if (attr->currdir)
         {
             ncwd = nwcwd = strlen(attr->currdir) + 1;
             wcwd = apr_palloc(cont, ncwd * sizeof(wcwd[0]));
-        }
-
-        if (((rv = utf8_to_unicode_path(wprg, sizeof(wprg)/sizeof(wprg[0]),
-                                        progname))
-                    != APR_SUCCESS)
-         || ((rv = conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd)) 
-                    != APR_SUCCESS)
-         || (attr->currdir &&
-             (rv = conv_utf8_to_ucs2(attr->currdir, &ncwd, wcwd, &nwcwd)) 
-                    != APR_SUCCESS)) {
-            return rv;
+            if ((rv = conv_utf8_to_ucs2(attr->currdir, &ncwd, wcwd, &nwcwd))
+                    != APR_SUCCESS) {
+                return rv;
+            }
         }
 
         memset(&si, 0, sizeof(si));
@@ -462,12 +475,12 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                 si.hStdError = attr->child_err->filehand;
         }
 
-        rv = CreateProcessW(wprg, wcmd,        /* Command line */
+        rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
                             TRUE,              /* Inherit handles */
                             dwCreationFlags,   /* Creation flags */
                             pEnvBlock,         /* Environment block */
-                            wcwd,     /* Current directory name */
+                            wcwd,              /* Current directory name */
                             &si, &pi);
     }
     else {
