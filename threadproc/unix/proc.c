@@ -320,6 +320,40 @@ ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc)
     return APR_SUCCESS;
 }    
 
+ap_status_t ap_wait_all_procs(ap_proc_t **proc, 
+                              ap_wait_how_e waithow, ap_pool_t *p)
+{
+    pid_t status;
+    if (waithow == APR_WAIT) {
+        if ((status = waitpid(-1, NULL, WUNTRACED)) > 0) {
+            if (!*proc) {
+                (*proc) = ap_pcalloc(p, sizeof(ap_proc_t));
+                (*proc)->cntxt = p;
+            }
+            (*proc)->pid = status;
+            return APR_CHILD_DONE;
+        }
+        else if (status == 0) {
+            (*proc) = NULL;
+            return APR_CHILD_NOTDONE;
+        }
+        return errno;
+    }
+    if ((status = waitpid(-1, NULL, WUNTRACED | WNOHANG)) > 0) {
+        if (!*proc) {
+            (*proc) = ap_pcalloc(p, sizeof(ap_proc_t));
+            (*proc)->cntxt = p;
+        }
+        (*proc)->pid = status;
+        return APR_CHILD_DONE;
+    }
+    else if (status == 0) {
+        (*proc) = NULL;
+        return APR_CHILD_NOTDONE;
+    }
+    return errno;
+} 
+
 ap_status_t ap_wait_proc(ap_proc_t *proc, 
                            ap_wait_how_e waithow)
 {
