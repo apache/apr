@@ -76,6 +76,10 @@ extern "C" {
 #define APRMAXHOSTLEN 256
 #endif
 
+#ifndef APR_ANYADDR
+#define APR_ANYADDR "ANY_IPADDR"
+#endif
+
 /* Socket option definitions */
 #define APR_SO_LINGER        1
 #define APR_SO_KEEPALIVE     2
@@ -83,6 +87,7 @@ extern "C" {
 #define APR_SO_NONBLOCK      8
 #define APR_SO_REUSEADDR     16
 #define APR_SO_TIMEOUT       32
+#define APR_SO_SNDBUF        64
 
 #define APR_POLLIN    0x001 
 #define APR_POLLPRI   0x002
@@ -120,6 +125,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t, ap_int32_t);
 ap_status_t ap_setport(ap_socket_t *, ap_uint32_t);
 ap_status_t ap_setipaddr(ap_socket_t *, const char *);
 ap_status_t ap_getport(ap_socket_t *, ap_uint32_t *);
+ap_status_t ap_getipaddr(ap_socket_t *, char **);
 
 ap_status_t ap_setup_poll(ap_context_t *, ap_int32_t, ap_pollfd_t **);
 ap_status_t ap_poll(ap_pollfd_t *, ap_int32_t *, ap_int32_t);

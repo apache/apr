@@ -63,6 +63,7 @@
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 
 ap_status_t socket_cleanup(void *sock)
@@ -174,18 +175,36 @@ ap_status_t ap_getport(struct socket_t *sock, ap_uint32_t *port)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setipaddr(ap_socket_t *, apr_uint32_t addr)
+ * ap_status_t ap_setipaddr(ap_socket_t *, cont char *addr)
  *    Assocaite a socket addr with an apr socket.
  * arg 1) The socket to use 
  * arg 2) The IP address to attach to the socket.
+ *        Use APR_ANYADDR to use any IP addr on the machine.
  * NOTE:  This does not bind the two together, it is just telling apr 
  *        that this socket is going to use this address if possible. 
  */
 ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
 {
-    if (inet_aton(addr, &sock->addr->sin_addr.s_addr) == 0) {
+    if (!strcmp(addr, APR_ANYADDR)) {
+        sock->addr->sin_addr.s_addr = htonl(INADDR_ANY);
+        return APR_SUCCESS;
+    }
+    if (inet_aton(addr, &sock->addr->sin_addr) == 0) {
         return errno;
     }
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_getipaddr(ap_socket_t *, char *addr)
+ *    Return the IP address associated with an apr socket.
+ * arg 1) The socket to use 
+ * arg 2) The IP address associated with the socket.
+ */
+ap_status_t ap_getipaddr(struct socket_t *sock, char **addr)
+{
+    char *temp = inet_ntoa(sock->addr->sin_addr);
+    strcpy(*addr, temp);
     return APR_SUCCESS;
 }
 
