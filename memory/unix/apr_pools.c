@@ -494,6 +494,8 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
         return rv;
     }
 
+    apr_pool_tag(global_pool, "apr_global_pool");
+
 #if APR_HAS_THREADS
     {
         apr_thread_mutex_t *mutex;
