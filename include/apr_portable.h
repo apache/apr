@@ -120,12 +120,8 @@ typedef HMODULE               apr_os_dso_handle_t;
 #include <kernel/image.h>
 
 struct apr_os_lock_t {
-	/* Inter proc */
-	sem_id sem_interproc;
-	int32  ben_interproc;
-	/* Intra Proc */
-	sem_id sem_intraproc;
-	int32  ben_intraproc;
+	sem_id sem;
+	int32  ben;
 };
 
 typedef int                   apr_os_file_t;
