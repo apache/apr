@@ -59,10 +59,10 @@
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
     (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t));
-    (*new)->sock = ap_palloc(cont, sizeof(ap_socket_t) * num);
-    (*new)->events = ap_palloc(cont, sizeof(ap_int16_t) * num);
-    (*new)->revents = ap_palloc(cont, sizeof(ap_int16_t) * num);
+    (*new)->pollset = (struct pollfd *)ap_palloc(cont, 
+                                         sizeof(struct pollfd) * num);
 
+    (*new)->num = num;
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
@@ -116,14 +116,17 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
 {
     int i = 0;
     
-    while (i < aprset->curpos && aprset->sock[i] != sock->socketdes) {
+    while (i < aprset->curpos && aprset->pollset[i].fd != sock->socketdes) {
         i++;
     }
     if (i >= aprset->curpos) {
+        if(aprset->curpos == aprset->num) {
+            return APR_ENOMEM;
+        }
         aprset->curpos++;
     } 
-    aprset->sock[i] = sock->socketdes;
-    aprset->events[i] = get_event(event);
+    aprset->pollset[i].fd = sock->socketdes;
+    aprset->pollset[i].events = get_event(event);
 
     return APR_SUCCESS;
 }
@@ -132,27 +135,14 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,
 		    ap_interval_time_t timeout)
 {
     int i;
-    struct pollfd *pollset;
     int rv;
-
-    pollset = (struct pollfd *)ap_palloc(aprset->cntxt, 
-                                         sizeof(struct pollfd) * aprset->curpos);
-
-    for (i = 0; i < aprset->curpos; i++) {
-        pollset[i].fd = aprset->sock[i];
-        pollset[i].events = aprset->events[i];
-    }
 
     if (timeout > 0) {
         timeout /= 1000; /* convert microseconds to milliseconds */
     }
 
-    rv = poll(pollset, aprset->curpos, timeout);
+    rv = poll(aprset->pollset, aprset->curpos, timeout);
     (*nsds) = rv;
-    
-    for (i = 0; i < aprset->curpos; i++) {
-        aprset->revents[i] = get_revent(pollset[i].revents);
-    }
     
     if ((*nsds) < 0) {
         return errno;
@@ -164,23 +154,23 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
 {
     int i = 0;
     
-    while (i < aprset->curpos && aprset->sock[i] != sock->socketdes) {
+    while (i < aprset->curpos && aprset->pollset[i].fd != sock->socketdes) {
         i++;
     }
     if (i >= aprset->curpos) {
         return APR_EINVALSOCK;
     } 
-    (*event) = aprset->revents[i];
+    (*event) = aprset->pollset[i].revents;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, 
+ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, 
                                   ap_socket_t *sock, ap_int16_t events)
 {
     ap_int16_t newevents;
     int i = 0;
     
-    while (i < aprset->curpos && aprset->sock[i] != sock->socketdes) {
+    while (i < aprset->curpos && aprset->pollset[i].fd != sock->socketdes) {
         i++;
     }
     if (i >= aprset->curpos) {
@@ -191,6 +181,23 @@ ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset,
         aprset->events[i] ^= newevents;
     }
 
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock)
+{
+    int i = 0;
+    while(i < aprset->curpos && aprset->pollset[i].fd != sock->socketdes) {
+	i++;
+    }
+    if(i >= aprset->curpos) {
+	return APR_NOTFOUND;
+    }
+    while(++i < aprset->curpos) {
+	aprset->pollset[i-1].fd = aprset->pollset[i].fd;
+	aprset->pollset[i-1].events = aprset->pollset[i].events;
+    }
+    --aprset->curpos;
     return APR_SUCCESS;
 }
 

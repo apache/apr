@@ -121,7 +121,8 @@ struct ap_socket_t {
 struct ap_pollfd_t {
     ap_pool_t *cntxt;
 #ifdef HAVE_POLL
-    int *sock;
+    struct pollfd *pollset;
+    int num;
     int curpos;
 #else
     fd_set *read;
