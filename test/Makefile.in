@@ -20,31 +20,31 @@ TARGETS = \
 	occhild.so \
 	mod_test.so
 
-LIBS=../libapr.a @LIBS@ 
-
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
+ALL_LIBS=../libapr.la ../shmem/unix/mm/libmm.la $(LIBS)
+
 CLEAN_TARGETS = testfile.tmp
 
-CFLAGS = -g @CFLAGS@ @OPTIM@
+CFLAGS = -g @CFLAGS@ @OPTIM@ $(INCLUDES)
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
 
 
 testfile@EXEEXT@: testfile.lo
-	$(LINK) testfile.lo
+	$(LINK) testfile.lo $(ALL_LIBS)
 
 testflock@EXEEXT@: testflock.lo
-	$(LINK) testflock.lo
+	$(LINK) testflock.lo $(ALL_LIBS)
 
 ### why the export-dynamic?
 testdso@EXEEXT@: testdso.lo
 	$(LINK) --export-dynamic testdso.lo
 
 testoc@EXEEXT@: testoc.lo
-	$(LINK) testoc.lo
+	$(LINK) testoc.lo $(ALL_LIBS)
 
 occhild.so: occhild.lo
 	$(LINK) --module occhild.lo
@@ -53,42 +53,42 @@ mod_test.so: mod_test.lo
 	$(LINK) --module mod_test.lo
 
 testargs@EXEEXT@: testargs.lo
-	$(LINK) testargs.lo
+	$(LINK) testargs.lo $(ALL_LIBS)
 
 testcontext@EXEEXT@: testcontext.lo
-	$(LINK) testcontext.lo
+	$(LINK) testcontext.lo $(ALL_LIBS)
 
 testproc@EXEEXT@: testproc.lo
-	$(LINK) testproc.lo
+	$(LINK) testproc.lo $(ALL_LIBS)
 
 testthread@EXEEXT@: testthread.lo
-	$(LINK) testthread.lo
+	$(LINK) testthread.lo $(ALL_LIBS)
 
 testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@
-	$(LINK) testsock.lo
+	$(LINK) testsock.lo $(ALL_LIBS)
 
 client@EXEEXT@: client.lo
-	$(LINK) client.lo
+	$(LINK) client.lo $(ALL_LIBS)
 
 server@EXEEXT@: server.lo sendfile.lo
-	$(LINK) server.lo
+	$(LINK) server.lo $(ALL_LIBS)
 
 sendfile@EXEEXT@: sendfile.lo
-	$(LINK) sendfile.lo
+	$(LINK) sendfile.lo $(ALL_LIBS)
 
 testtime@EXEEXT@: testtime.lo
-	$(LINK) testtime.lo
+	$(LINK) testtime.lo $(ALL_LIBS)
 
 testmmap@EXEEXT@: testmmap.lo
-	$(LINK) testmmap.lo
+	$(LINK) testmmap.lo $(ALL_LIBS)
 
 testshmem@EXEEXT@: testshmem.lo
-	$(LINK) testshmem.lo
+	$(LINK) testshmem.lo $(ALL_LIBS)
 
 testpipe@EXEEXT@: testpipe.lo
-	$(LINK) testpipe.lo
+	$(LINK) testpipe.lo $(ALL_LIBS)
 
 testuuid@EXEEXT@: testuuid.lo
-	$(LINK) testuuid.lo
+	$(LINK) testuuid.lo $(ALL_LIBS)
 
 # DO NOT REMOVE
