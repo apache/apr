@@ -77,6 +77,10 @@
 #define SW_HIDE             0
 #endif
 
+/* For the misc.h late-loaded dynamic symbols, we need some obscure types 
+ */
+#include <accctrl.h>
+
 #include <sys/types.h>
 #include <stddef.h>
 #include <stdio.h>
