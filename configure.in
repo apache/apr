@@ -113,7 +113,7 @@ if test "x$use_libtool" = "xyes"; then
       lib_target="-rpath \$(libdir) \$\$objects"
 else
       lt_compile="\$(COMPILE) -c \$<"
-      link="ar cr \$(TARGET_LIB) \$\$objects; ranlib \$(TARGET_LIB)"
+      link="\$(AR) cr \$(TARGET_LIB) \$\$objects; \$(RANLIB) \$(TARGET_LIB)"
       so_ext="o"
       lib_target=""
 fi
@@ -126,7 +126,7 @@ AC_SUBST(lib_target)
 dnl #----------------------------- Checks for compiler flags
 nl='
 '
-echo $ac_n "${nl}Check for compiler flags..."
+echo $ac_n "${nl}Check for compiler flags...${nl}"
 
 AC_ARG_ENABLE(debug,[  --enable-debug            Turn on debugging and compile time warnings],
   [APR_ADDTO(CFLAGS,-g)
