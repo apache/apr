@@ -399,9 +399,6 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
 APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
                                           apr_file_t *file)
 {
-    if (file == NULL) {
-        return APR_ENOFILE;
-    }
     *thefile = file->filehand;
     return APR_SUCCESS;
 }
