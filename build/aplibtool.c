@@ -384,7 +384,7 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
     if (strcmp(ext, "lo") == 0) {
         cmd_data->stub_name = arg;
         cmd_data->output_type = otObject;
-        newarg = (char *)malloc(strlen(newarg) + 2);
+        newarg = (char *)malloc(strlen(arg) + 2);
         strcpy(newarg, arg);
         ext = strrchr(newarg, '.') + 1;
         strcpy(ext, OBJECT_EXT);
