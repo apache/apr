@@ -64,6 +64,10 @@
 #include <stdio.h>      /* for SEEK_* */
 #endif
 
+#if APR_HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
