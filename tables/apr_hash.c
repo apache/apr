@@ -66,7 +66,7 @@
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if APR_HAVE_STDLIB_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 
