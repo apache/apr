@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Replace configure --with-optim option by using the environment
+     variable OPTIM instead.  This is needed because configure options
+     do not support multiple flags separated by spaces.  [Roy Fielding]
+
   *) Eliminate the APR_SIG* aliases for standard signal names,
      since they serve no useful purpose.  [Roy Fielding]
 
