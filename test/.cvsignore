@@ -62,3 +62,4 @@ testprocmutex
 testglobalmutex
 testvsn
 testregex
+testmutexscope
