@@ -307,22 +307,32 @@ APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset)
 APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor)
 {
+#ifndef HAVE_POLL
     int fd;
+#endif
+
     if (pollset->nelts == pollset->nalloc) {
         return APR_ENOMEM;
     }
 
     pollset->query_set[pollset->nelts] = *descriptor;
+#ifdef HAVE_POLL
+
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        pollset->pollset[pollset->nelts].fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        pollset->pollset[pollset->nelts].fd = descriptor->desc.f->filedes;
+    }
+
+    pollset->pollset[pollset->nelts].events = get_event(descriptor->reqevents);
+#else
     if (descriptor->desc_type == APR_POLL_SOCKET) {
         fd = descriptor->desc.s->socketdes;
     }
     else {
         fd = descriptor->desc.f->filedes;
     }
-#ifdef HAVE_POLL
-    pollset->pollset[pollset->nelts].fd = fd;
-    pollset->pollset[pollset->nelts].events = get_event(descriptor->reqevents);
-#else
     if (descriptor->reqevents & APR_POLLIN) {
         FD_SET(fd, &(pollset->readset));
     }
@@ -345,24 +355,19 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                                              const apr_pollfd_t *descriptor)
 {
     apr_uint32_t i;
+#ifndef HAVE_POLL
     int fd;
-
-    if (descriptor->desc_type == APR_POLL_SOCKET) {
-        fd = descriptor->desc.s->socketdes;
-    }
-    else {
-        fd = descriptor->desc.f->filedes;
-    }
+#endif
 
 #ifdef HAVE_POLL
     for (i = 0; i < pollset->nelts; i++) {
-        if (fd == pollset->pollset[i].fd) {
+        if (descriptor->desc.s == pollset->query_set[i].desc.s) {
             /* Found an instance of the fd: remove this and any other copies */
             apr_uint32_t dst = i;
             apr_uint32_t old_nelts = pollset->nelts;
             pollset->nelts--;
             for (i++; i < old_nelts; i++) {
-                if (fd == pollset->pollset[i].fd) {
+                if (descriptor->desc.s == pollset->query_set[i].desc.s) {
                     pollset->nelts--;
                 }
                 else {
@@ -375,20 +380,21 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
     }
 
 #else /* no poll */
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        fd = descriptor->desc.f->filedes;
+    }
+
     for (i = 0; i < pollset->nelts; i++) {
-        if (((pollset->query_set[i].desc_type == APR_POLL_SOCKET) &&
-             (fd == pollset->query_set[i].desc.s->socketdes)) ||
-            ((pollset->query_set[i].desc_type == APR_POLL_FILE) &&
-             (fd == pollset->query_set[i].desc.f->filedes))) {
+        if (descriptor->desc.s == pollset->query_set[i].desc.s) {
             /* Found an instance of the fd: remove this and any other copies */
             apr_uint32_t dst = i;
             apr_uint32_t old_nelts = pollset->nelts;
             pollset->nelts--;
             for (i++; i < old_nelts; i++) {
-                if (((pollset->query_set[i].desc_type == APR_POLL_SOCKET) &&
-                     (fd == pollset->query_set[i].desc.s->socketdes)) ||
-                    ((pollset->query_set[i].desc_type == APR_POLL_FILE) &&
-                     (fd == pollset->query_set[i].desc.f->filedes))) {
+                if (descriptor->desc.s == pollset->query_set[i].desc.s) {
                     pollset->nelts--;
                 }
                 else {
