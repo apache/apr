@@ -90,6 +90,14 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
+# Begin Group "atomic"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\atomic\win32\apr_atomic.c
+# End Source File
+# End Group
 # Begin Group "dso"
 
 # PROP Default_Filter ""
