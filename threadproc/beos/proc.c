@@ -166,27 +166,29 @@ ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont)
+ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont)
 {
     int pid;
     
-    (*proc) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-
     if ((pid = fork()) < 0) {
         return errno;
     }
     else if (pid == 0) {
-        (*proc)->pid = pid;
-        (*proc)->attr = NULL;
+        proc->pid = pid;
+        proc->in = NULL; 
+        proc->out = NULL; 
+        proc->err = NULL; 
         return APR_INCHILD;
     }
-    (*proc)->pid = pid;
-    (*proc)->attr = NULL;
+    proc->pid = pid;
+    proc->in = NULL; 
+    proc->out = NULL; 
+    proc->err = NULL; 
     return APR_INPARENT;
 }
 
 
-ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
+ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
                               char *const args[], char **env, 
                               ap_procattr_t *attr, ap_pool_t *cont)
 {
@@ -198,15 +200,11 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     struct send_pipe *sp;        
 	char * dir = NULL;
 	    
-    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
 	sp = (struct send_pipe *)ap_palloc(cont, sizeof(struct send_pipe));
 
-    if ((*new) == NULL){
-    	return APR_ENOMEM;
-    }
-    
-    (*new)->cntxt = cont;
-
+    new->in = attr->parent_in;
+    new->err = attr->parent_err;
+    new->out = attr->parent_out;
 	sp->in  = attr->child_in?attr->child_in->filedes:-1;
 	sp->out = attr->child_out?attr->child_out->filedes:-1;
 	sp->err = attr->child_err?attr->child_err->filedes:-1;
@@ -259,34 +257,15 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     }
 
     send_data(newproc, 0, (void*)sp, sizeof(struct send_pipe));
-    (*new)->pid = newproc;
+    new->pid = newproc;
 
     /* before we go charging on we need the new process to get to a 
      * certain point.  When it gets there it'll let us know and we
      * can carry on. */
     receive_data(&sender, (void*)NULL,0);
     
-    (*new)->attr = attr;
     return APR_SUCCESS;
 }
-
-ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_in; 
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_out;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_err; 
-    return APR_SUCCESS;
-}    
 
 ap_status_t ap_wait_proc(ap_proc_t *proc, 
                            ap_wait_how_e wait)
@@ -357,27 +336,4 @@ ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err,
 
     return APR_SUCCESS;
 }
-
-ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
-{
-    if (proc == NULL) {
-        return APR_ENOPROC;
-    }
-    *theproc = proc->pid;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
-                           ap_pool_t *cont)
-{
-    if (cont == NULL) {
-        return APR_ENOPOOL;
-    }
-    if ((*proc) == NULL) {
-        (*proc) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-        (*proc)->cntxt = cont;
-    }
-    (*proc)->pid = *theproc;
-    return APR_SUCCESS;
-}              
 
