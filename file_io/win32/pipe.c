@@ -72,10 +72,12 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     sa.lpSecurityDescriptor = NULL;
 
     (*in) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+    memset(*in, '\0', sizeof(struct file_t));
     (*in)->cntxt = cont;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
 
     (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+    memset(*out, '\0', sizeof(struct file_t));
     (*out)->cntxt = cont;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
 

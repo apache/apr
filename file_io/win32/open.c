@@ -80,8 +80,6 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
 {
     DWORD oflags = 0;
     DWORD createflags = 0;
-    DWORD theerror;
-    /*mode_t mode = get_fileperms(perm);*/
 
     (*dafile) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
 
@@ -206,7 +204,7 @@ ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }
-
+    memset(*thefile, '\0', sizeof(struct file_t));
     (*thefile)->filehand = GetStdHandle(STD_ERROR_HANDLE);
     (*thefile)->cntxt = cont;
     (*thefile)->fname = NULL;

@@ -61,16 +61,29 @@
 
 ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
+    int have_file = 0;
     HANDLE hCurrentProcess = GetCurrentProcess();
-    (*new_file) = (struct file_t *)ap_palloc(old_file->cntxt,
-                               sizeof(struct file_t));
-    
+
     if ((*new_file) == NULL) {
-        return APR_ENOMEM;
+        (*new_file) = (struct file_t *)ap_pcalloc(old_file->cntxt,
+                                                  sizeof(struct file_t));
+        if ((*new_file) == NULL) {
+            return APR_ENOMEM;
+        }
+    } else {
+        have_file = 1;
     }
+
     (*new_file)->cntxt = old_file->cntxt;
-    DuplicateHandle(hCurrentProcess, old_file->filehand, hCurrentProcess, 
-                   &(*new_file)->filehand, 0, FALSE, DUPLICATE_SAME_ACCESS); 
+    if (have_file) {
+        DuplicateHandle(hCurrentProcess, (*new_file)->filehand, hCurrentProcess, 
+                        &old_file->filehand, 0, FALSE, DUPLICATE_SAME_ACCESS); 
+    }
+    else {
+        DuplicateHandle(hCurrentProcess, old_file->filehand, hCurrentProcess, 
+                        &(*new_file)->filehand, 0, FALSE, DUPLICATE_SAME_ACCESS); 
+    }
+
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->demonfname = ap_pstrdup(old_file->cntxt, old_file->demonfname);
     (*new_file)->lowerdemonfname = ap_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
