@@ -324,3 +324,10 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     *newpath = path;
     return APR_SUCCESS;
 }
+
+
+APR_DECLARE(apr_status_t) apr_filepath_encoding(int *style, apr_pool_t *p)
+{
+    *style = APR_FILEPATH_ENCODING_LOCALE;
+    return APR_SUCCESS;
+}

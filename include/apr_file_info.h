@@ -406,6 +406,32 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **path, apr_int32_t flags,
  */
 APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p);
 
+/**
+ * @defgroup apr_filepath_encoding FilePath Character encoding
+ * @{
+ */
+
+/** The FilePath character encoding is unknown */
+#define APR_FILEPATH_ENCODING_UNKNOWN  0
+
+/** The FilePath character encoding is locale-dependent */
+#define APR_FILEPATH_ENCODING_LOCALE   1
+
+/** The FilePath character encoding is UTF-8 */
+#define APR_FILEPATH_ENCODING_UTF8     2
+/** @} */
+/**
+ * Determine the encoding used internally by the FilePath functions
+ * @ingroup apr_filepath_encoding
+ * @param style points to a variable which receives the encoding style flag
+ * @param p the pool to allocate any working storage
+ * @deffunc apr_status_t apr_filepath_encoding(int *style, apr_pool_t *p)
+ * @remark Use @c apr_os_locale_encoding and/or @c apr_os_default_encoding
+ * to get the name of the path encoding if it's not UTF-8.
+ */
+APR_DECLARE(apr_status_t) apr_filepath_encoding(int *style, apr_pool_t *p);
+
+
 /** @} */
 
 #ifdef __cplusplus

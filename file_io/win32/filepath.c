@@ -977,3 +977,18 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     (*newpath)[pathlen] = '\0';
     return APR_SUCCESS;
 }
+
+
+APR_DECLARE(apr_status_t) apr_filepath_encoding(int *style, apr_pool_t *p)
+{
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+    {
+        *style = APR_FILEPATH_ENCODING_UTF8;
+        return APR_SUCCESS;
+    }
+#endif
+
+    *style = APR_FILEPATH_ENCODING_LOCALE;
+    return APR_SUCCESS;
+}
