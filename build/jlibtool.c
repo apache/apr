@@ -1095,7 +1095,7 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
     char *arg;
     int argused;
 
-    for (a=1; a < argc; a++) {
+    for (a = 1; a < argc; a++) {
         arg = argv[a];
         argused = 1;
 
@@ -1120,6 +1120,10 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                 } else if (strcmp(arg+1, "version-info") == 0) {
                     /* Store for later deciphering */
                     cmd_data->version_info = argv[++a];
+                    argused = 1;
+                } else if (strcmp(arg+1, "export-symbols-regex") == 0) {
+                    /* Skip the argument. */
+                    ++a;
                     argused = 1;
                 }
             }
