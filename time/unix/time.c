@@ -82,13 +82,13 @@ static apr_int32_t get_offset(struct tm *tm)
         time_t t1 = time(0), t2 = 0;
         struct tm t;
 
-# if APR_HAS_THREADS && defined (_POSIX_THREAD_SAFE_FUNCTIONS)
-        gmtime_r(tt, &t);
-# else
-        t = *gmtime(tt);
-# endif
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+        gmtime_r(&t1, &t);
+#else
+        t = *gmtime(&t1);
+#endif
         t2 = mktime(&t);
-        return (apr_int32_t) difftime(t1,t2);
+        return (apr_int32_t) difftime(t1, t2);
     }
 #endif
 }
@@ -214,7 +214,7 @@ apr_status_t apr_os_exp_time_get(apr_os_exp_time_t **ostime,
     (*ostime)->tm_isdst = aprtime->tm_isdst;
 #if HAVE_GMTOFF
     (*ostime)->tm_gmtoff = aprtime->tm_gmtoff;
-#else if defined(HAVE__OFFSET)
+#elif defined(HAVE__OFFSET)
     (*ostime)->__tm_gmtoff = aprtime->tm_gmtoff;
 #endif
     return APR_SUCCESS;
@@ -241,7 +241,7 @@ apr_status_t apr_os_exp_time_put(apr_exploded_time_t *aprtime,
     aprtime->tm_isdst = (*ostime)->tm_isdst;
 #if HAVE_GMTOFF
     aprtime->tm_gmtoff = (*ostime)->tm_gmtoff;
-#else if defined(HAVE__OFFSET)
+#elif defined(HAVE__OFFSET)
     aprtime->tm_gmtoff = (*ostime)->__tm_gmtoff;
 #endif
     return APR_SUCCESS;
