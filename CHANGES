@@ -1,4 +1,12 @@
 Changes with APR 0.9.0
+
+  *) Printing a string with apr_snprintf can seg fault, if a precision is
+     specified for the string, and the string being printed doesn't have a
+     trailing '\0'.  Fix that seg fault by not calling strlen if a precision
+     is specified when printing a string.  Also add a test to the test suite
+     for this case.
+     [R Samuel Klatchko <rsk@brightmail.com>]
+
   *) handle leak related to threads on Windows2000/XP 
      [INOUE Seiichiro <inoue@ariel-networks.com>]
 
