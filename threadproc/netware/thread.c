@@ -89,6 +89,12 @@ apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
+static void *dummy_worker(void *opaque)
+{
+    apr_thread_t *thd = (apr_thread_t *)opaque;
+    return thd->func(thd, thd->data);
+}
+
 apr_status_t apr_thread_create(apr_thread_t **new,
  											apr_threadattr_t *attr, 
                              				apr_thread_start_t func,
@@ -123,6 +129,9 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     }
     
     (*new)->cntxt = cont;
+    (*new)->data = data;
+    (*new)->func = func;
+    (*new)->thread_name = (char*)apr_pstrdup(cont, threadName);
     
     stat = apr_pool_create(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
@@ -134,8 +143,8 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     }
     
     (*new)->ctx = NXContextAlloc(
-    	/* void(*start_routine)(void *arg)*/(void (*)(void *)) func,
-     	/* void *arg */										   data,
+    	/* void(*start_routine)(void *arg)*/(void (*)(void *)) dummy_worker,
+     	/* void *arg */										   (*new),
      	/* int priority */ 									   NX_PRIO_MED,
      	/* NXSize_t stackSize */							   stack_size,
      	/* long flags */									   NX_CTX_NORMAL,
