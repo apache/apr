@@ -10,6 +10,7 @@ MKDEP=../helpers/mkdep.sh
 
 TARGETS= testmd5@EXEEXT@ \
 	testfile@EXEEXT@ \
+	testflock@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testsf@EXEEXT@ \
@@ -28,6 +29,7 @@ TARGETS= testmd5@EXEEXT@ \
 
 OBJS= testmd5.o \
 	testfile.o \
+	testflock.o \
 	testproc.o \
 	testsock.o \
 	testsf.o \
@@ -52,6 +54,9 @@ testmd5@EXEEXT@: testmd5.o
 
 testfile@EXEEXT@: testfile.o
 	$(CC) $(CFLAGS) -o testfile@EXEEXT@ testfile.o $(LDFLAGS) 
+
+testflock@EXEEXT@: testflock.o
+	$(CC) $(CFLAGS) -o testflock@EXEEXT@ testflock.o $(LDFLAGS) 
 
 testdso@EXEEXT@: testdso.o
 	$(CC) $(CFLAGS) --export-dynamic -fPIC testdso.o -o testdso@EXEEXT@ $(LDFLAGS) 
@@ -101,7 +106,7 @@ testuuid@EXEEXT@: testuuid.o
 	$(CC) $(CFLAGS) -o testuuid@EXEEXT@ testuuid.o $(LDFLAGS)
 
 clean:
-	$(RM) -f *.o *.a *.so $(TARGETS)
+	$(RM) -f *.o *.a *.so $(TARGETS) testflock.tmp
 
 distclean: clean
 	-$(RM) -f Makefile

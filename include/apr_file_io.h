@@ -59,8 +59,9 @@
 #include "apr_pools.h"
 #include "apr_time.h"
 #include "apr_errno.h"
+
 #if APR_HAVE_STDIO_H
-#include <stdio.h>
+#include <stdio.h>      /* for SEEK_* */
 #endif
 
 #ifdef __cplusplus
@@ -162,6 +163,23 @@ struct apr_finfo_t {
     /** The time the file was last changed */
     apr_time_t ctime;
 };
+
+/** File lock types/flags */
+#define APR_FLOCK_SHARED        1       /* Shared lock. More than one process
+                                           or thread can hold a shared lock
+                                           at any given time. Essentially,
+                                           this is a "read lock", preventing
+                                           writers from establishing an
+                                           exclusive lock. */
+#define APR_FLOCK_EXCLUSIVE     2       /* Exclusive lock. Only one process
+                                           may hold an exclusive lock at any
+                                           given time. This is analogous to
+                                           a "write lock". */
+
+#define APR_FLOCK_TYPEMASK      0x000F  /* mask to extract lock type */
+#define APR_FLOCK_NONBLOCK      0x0010  /* do not block while acquiring the
+                                           file lock */
+
 
 /*   Make and Merge Canonical Name Options */
 
@@ -616,6 +634,25 @@ apr_status_t apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t *time
  *        forever, 0 means do not wait at all.
  */
 apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout);
+
+/** file (un)locking functions. */
+
+/**
+ * Establish a lock on the specified, open file. The lock may be advisory
+ * or mandatory, at the discretion of the platform. The lock applies to
+ * the file as a whole, rather than a specific range. Locks are established
+ * on a per-thread/process basis; a second lock by the same thread will not
+ * block.
+ * @param thefile The file to lock.
+ * @param type The type of lock to establish on the file.
+ */
+apr_status_t apr_lock_file(apr_file_t *thefile, int type);
+
+/**
+ * Remove any outstanding locks on the file.
+ * @param thefile The file to unlock.
+ */
+apr_status_t apr_unlock_file(apr_file_t *thefile);
 
 /**accessor and general file_io functions. */
 
