@@ -222,11 +222,17 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 	klen = strlen(key);
 
     /*
-     * This is Daniel J. Bernstein's popular `times 33' hash function
-     * as posted by him years ago on comp.lang.c and used by perl.
-     * This is one of the best known hash functions for strings
-     * because it is both computed very fast and distributes very
-     * well.
+     * This is the popular `times 33' hash algorithm which is used by
+     * perl and also appears in Berkeley DB. This is one of the best
+     * known hash functions for strings because it is both computed
+     * very fast and distributes very well.
+     *
+     * The originator may be Dan Bernstein but the code in Berkeley DB
+     * cites Chris Torek as the source. The best citation I have found
+     * is "Chris Torek, Hash function for text in C, Usenet message
+     * <27038@mimsy.umd.edu> in comp.lang.c , October, 1990." in Rich
+     * Salz's USENIX 1992 paper about INN which can be found at
+     * <http://citeseer.nj.nec.com/salz92internetnews.html>.
      *
      * The magic of number 33, i.e. why it works better than many other
      * constants, prime or not, has never been adequately explained by
@@ -248,9 +254,8 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
      * operation can be replaced by a faster operation based on just one
      * shift plus either a single addition or subtraction operation. And
      * because a hash function has to both distribute good _and_ has to
-     * be very fast to compute, those few numbers should be preferred
-     * and seems to be the reason why Daniel J. Bernstein also preferred
-     * it.
+     * be very fast to compute, those few numbers should be preferred.
+     *
      *                  -- Ralf S. Engelschall <rse@engelschall.com>
      */
     hash = 0;
