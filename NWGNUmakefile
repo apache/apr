@@ -4,7 +4,7 @@
 
 SUBDIRS = \
 		build \
-		..\apr-util \
+		$(APU_WORK) \
 		$(EOLIST) 
 
 #
@@ -26,11 +26,11 @@ include $(APR_WORK)\build\NWGNUhead.inc
 # INCDIRS
 #
 XINCDIRS	+= \
-			$(APR_WORK)/include \
-			$(APR_WORK)/include/arch/NetWare \
-			$(APR_WORK)/include/arch/unix \
-			$(APR_WORK)/memory/unix \
-			$(APR_WORK)/random/unix \
+			$(APR)/include \
+			$(APR)/include/arch/NetWare \
+			$(APR)/include/arch/unix \
+			$(APR)/memory/unix \
+			$(APR)/random/unix \
 			$(APRUTIL)/xml \
 			$(EOLIST)
 

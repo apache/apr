@@ -16,8 +16,8 @@ endif
 # INCDIRS
 #
 XINCDIRS	+= \
-			$(APR_WORK)/include \
-			$(APR_WORK)/include/arch/NetWare \
+			$(APR)/include \
+			$(APR)/include/arch/NetWare \
 			$(EOLIST)
 
 #
