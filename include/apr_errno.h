@@ -74,7 +74,7 @@ int ap_canonical_error(ap_status_t err);
  * APR_OS_START_SYSERR should be used for system error values on 
  *     each platform.  
  */
-#define APR_OS_START_ERROR     1000
+#define APR_OS_START_ERROR     20000
 #define APR_OS_START_STATUS    (APR_OS_START_ERROR + 500)
 #define APR_OS_START_USEERR    (APR_OS_START_STATUS + 500)
 #define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)

@@ -55,17 +55,12 @@
 #include "misc.h"
 
 /*
- * stuffbuffer - Stuff contents of string 's' into buffer 'buf' 
- * w/o overflowing 'buf' then NULL terminate.
+ * stuffbuffer - like ap_cpystrn() but returns the address of the
+ * dest buffer instead of the address of the terminating '\0'
  */
 static char *stuffbuffer(char *buf, ap_size_t bufsize, const char *s)
 {
-    ap_size_t len = strlen(s);
-    if (len > bufsize)
-        len = bufsize;
-    memcpy(buf, s, len);
-    if (len)
-        buf[len-1] = '\0';
+    ap_cpystrn(buf,s,bufsize);
     return buf;
 }
 
@@ -209,6 +204,9 @@ char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
         return stuffbuffer(buf, bufsize, "APR does not understand this error code");
     }
     else {
+        /* TODO - recognize when the system has hstrerror() and call it here for
+         * Unix since on Unix this would be a resolver error code
+         */
 	return apr_os_strerror(buf, bufsize, statcode - APR_OS_START_SYSERR);
     }
 }
