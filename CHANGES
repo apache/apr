@@ -20,10 +20,6 @@ Changes with APR 1.0
 
   *) Switch to a single, top-level make. [Greg Stein]
 
-  *) Return an error instead of silently failing when apr_poll() is
-     used with file descriptors >= FD_SETSIZE.  (Unix systems with
-     no native poll())  [Jeff Trawick, Brad Nicholes]
-
   *) new error status APR_STATUS_IS_ENOTENOUGHENTROPY, Doxygen fixes
      [Sander Temme <sander at temme dot net]
 
@@ -119,6 +115,10 @@ Changes with APR 1.0
      apr_compat.h
 
 Changes with APR 0.9.5
+
+  *) Return an error instead of silently failing when apr_poll() is
+     used with file descriptors >= FD_SETSIZE.  (Unix systems with
+     no native poll())  [Jeff Trawick, Brad Nicholes]
 
   *) Fix handling of negative numbers in apr_strtoi64() on platforms
      without strtoll.  [Joe Orton]
