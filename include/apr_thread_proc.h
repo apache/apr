@@ -715,20 +715,6 @@ APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
  */
 APR_DECLARE(void) apr_proc_other_child_refresh_all(int reason);
 
-/** @deprecated @see apr_proc_other_child_refresh_all
- * @remark Call apr_proc_other_child_refresh_all(APR_OC_REASON_RESTART)
- * or apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING) instead.
- * @bug The differing implementations of this function on Win32 (_RUNNING checks) 
- * and Unix (used only for _RESTART) are the reason it will be dropped with APR 1.0.
- */
-APR_DECLARE(void) apr_proc_other_child_check(void);
-
-/** @deprecated @see apr_proc_other_child_alert
- * @bug This function's name had nothing to do with it's purpose
- */
-APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *proc, int status);
-
-
 /** 
  * Terminate a process.
  * @param proc The process to terminate.

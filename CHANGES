@@ -7,6 +7,13 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Removed deprecated interface apr_proc_other_child_check() 
+     that behaved differently between win32 and unix.
+     The unix behavor is now accomplished with
+         apr_proc_other_child_refresh_all(APR_OC_REASON_RESTART)
+     The win32 behavor is now accomplished with
+         apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING)
+
   *) Removed apr_socket_opt_{get|set}(..., APR_SO_TIMEOUT) which
      was deprecated in favor of apr_socket_timeout_{get|set}().
 
@@ -56,6 +63,7 @@ Changes with APR 1.0
      apr_pool_get_parent          -> apr_pool_parent_get
      apr_pool_set_abort           -> apr_pool_abort_set
      apr_pool_sub_make            -> apr_pool_create_ex
+     apr_proc_other_child_read    -> apr_proc_other_child_alert
      apr_recv                     -> apr_socket_recv
      apr_recvfrom                 -> apr_socket_recvfrom
      apr_send                     -> apr_socket_send
