@@ -1,5 +1,10 @@
 Changes with APR 0.9.4
 
+  *) Fix some problems with non-blocking socket handling on unix
+     that resulted in infinite timeouts being used for non-blocking
+     sockets with apr_socket_connect() and some read/write calls.
+     [Jeff Trawick]
+
   *) Fix a bug in socket timeout handling on unix that left the
      socket non-blocking after disabling the timeout.
      [Jacob Craig Lewallen <jlewalle@cs.ucr.edu>]
