@@ -215,7 +215,7 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     }
     cmdline = ap_pstrdup(cont, progname);
     i = 0;
-    while (args[i]) {
+    while (args && args[i]) {
         cmdline = ap_pstrcat(cont, cmdline, " ", args[i], NULL);
         i++;
     }
