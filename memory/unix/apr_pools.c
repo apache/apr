@@ -985,7 +985,9 @@ APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
 /* the unix linker defines this symbol as the last byte + 1 of
  * the executable... so it includes TEXT, BSS, and DATA
  */
+#ifdef HAVE__END
 extern char _end;
+#endif
 
 /* is ptr in the range [lo,hi) */
 #define is_ptr_in_range(ptr, lo, hi) \
@@ -1001,16 +1003,20 @@ APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts)
     union block_hdr **pb;
     union block_hdr *b;
 
+#ifdef HAVE__END
     /* short-circuit stuff which is in TEXT, BSS, or DATA */
     if (is_ptr_in_range(s, 0, &_end)) {
 	return NULL;
     }
+#endif
     /* consider stuff on the stack to also be in the NULL pool...
      * XXX: there's cases where we don't want to assume this
      */
     if ((stack_direction == -1 && is_ptr_in_range(s, &ts, known_stack_point))
 	|| (stack_direction == 1 && is_ptr_in_range(s, known_stack_point, &ts))) {
-	abort();
+#ifdef HAVE__END
+        abort();
+#endif
 	return NULL;
     }
     /* search the global_block_list */
@@ -1073,7 +1079,7 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
 	return 1;
     }
 #ifdef APR_POOL_DEBUG
-    while (a->joined) {
+    while (a && a->joined) {
 	a = a->joined;
     }
 #endif
