@@ -55,6 +55,7 @@
 #include "apr.h"
 #include "apr_private.h"
 
+#include "apr_pools.h"
 #include "apr_portable.h" /* for get_os_proc */
 #include "apr_strings.h"
 #include "apr_general.h"
