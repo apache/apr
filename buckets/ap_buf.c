@@ -255,12 +255,11 @@ APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b)
     return 0;
 }    
 
-APR_EXPORT(int) ap_brigade_vputs(ap_bucket_brigade *b, ...)
+APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
 {
     ap_bucket *r;
-    va_list va;
     const char *x;
-    int n, j, k, rv;
+    int j, k, rv;
     ap_ssize_t i;
 
     if (b->tail->bucket->color == AP_BUCKET_rwmem) {
@@ -272,12 +271,9 @@ APR_EXPORT(int) ap_brigade_vputs(ap_bucket_brigade *b, ...)
          * bucket.  This is incredibly easy to take out if it is a bad 
          * idea.  RBB
          */
-        va_start(va, b);
         ap_rwmem_vputstrs(rw, va);
-        va_end(va);
     }
     
-    va_start(va, b);
     for (k = 0;;) {
         r = ap_bucket_new(AP_BUCKET_rmem);
         x = va_arg(va, const char *);
@@ -300,7 +296,6 @@ APR_EXPORT(int) ap_brigade_vputs(ap_bucket_brigade *b, ...)
         b->tail = b->tail->next;
         b->tail->bucket = r;
     }
-    va_end(v);
 
-    return n;
+    return k;
 }
