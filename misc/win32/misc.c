@@ -236,7 +236,7 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
 
     if (!nh) {
         (sprintf)(sbuf, "%08x %08x %08x %s() %s:%d\n",
-                  ha, seq, GetCurrentThreadId(), fn, fl, ln);
+                  (DWORD)ha, seq, GetCurrentThreadId(), fn, fl, ln);
         (EnterCriticalSection)(&cs);
         (WriteFile)(fh, sbuf, strlen(sbuf), &wrote, NULL);
         (LeaveCriticalSection)(&cs);
@@ -248,8 +248,22 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
         do {
             HANDLE *hv = va_arg(a, HANDLE*);
             char *dsc = va_arg(a, char*);
+            if (strcmp(dsc, "Signaled") == 0) {
+                if ((DWORD)ha >= STATUS_WAIT_0 
+                       && (DWORD)ha < STATUS_ABANDONED_WAIT_0) {
+                    hv += (DWORD)ha;
+                }
+                else if ((DWORD)ha >= STATUS_ABANDONED_WAIT_0
+                            && (DWORD)ha < STATUS_USER_APC) {
+                    hv += (DWORD)ha - STATUS_ABANDONED_WAIT_0;
+                    dsc = "Abandoned";
+                }
+                else if ((DWORD)ha == WAIT_TIMEOUT) {
+                    dsc = "Timed Out";
+                }
+            }
             (sprintf)(sbuf, "%08x %08x %08x %s(%s) %s:%d\n",
-                      *hv, seq, GetCurrentThreadId(), 
+                      (DWORD*)*hv, seq, GetCurrentThreadId(), 
                       fn, dsc, fl, ln);
             (WriteFile)(fh, sbuf, strlen(sbuf), &wrote, NULL);
         } while (--nh);
