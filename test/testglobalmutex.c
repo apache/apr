@@ -78,6 +78,8 @@ static void test_exclusive(abts_case *tc, void *data)
     apr_status_t rv;
     apr_global_mutex_t *global_lock;
     int x = 0;
+    abts_log_message("lock mechanism is: ");
+    abts_log_message(mutexname(mech));
  
     rv = apr_global_mutex_create(&global_lock, LOCKNAME, mech, p);
     APR_ASSERT_SUCCESS(tc, "Error creating mutex", rv);
