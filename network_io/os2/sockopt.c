@@ -148,12 +148,20 @@ apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 
 
 
-apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
+apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *sock)
 {
     struct hostent *hptr;
+    apr_in_addr_t sa_ptr;
 
-    hptr = gethostbyaddr((char *)&(sock->remote_addr->sin_addr),
-                         sizeof(struct in_addr), AF_INET);
+    if (which == APR_LOCAL)
+        sa_ptr = sock->local_addr->sin_addr;
+    else if (which == APR_REMOTE)
+        sa_ptr = sock->remote_addr->sin_addr;
+    else
+        return APR_EINVAL;
+
+    hptr = gethostbyaddr((char *)&sa_ptr, sizeof(struct in_addr), AF_INET);
+
     if (hptr != NULL) {
         *name = apr_pstrdup(sock->cntxt, hptr->h_name);
         if (*name) {
@@ -165,5 +173,3 @@ apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
     /* XXX - Is this threadsafe? */
     return h_errno;
 }
-
-
