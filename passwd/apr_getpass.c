@@ -78,13 +78,13 @@
 #include <termios.h>
 #endif
 
-#ifndef AP_CHARSET_EBCDIC
+#if !APR_CHARSET_EBCDIC
 #define LF 10
 #define CR 13
-#else /* AP_CHARSET_EBCDIC */
+#else /* APR_CHARSET_EBCDIC */
 #define LF '\n'
 #define CR '\r'
-#endif /* AP_CHARSET_EBCDIC */
+#endif /* APR_CHARSET_EBCDIC */
 
 #define MAX_STRING_LEN 256
 
