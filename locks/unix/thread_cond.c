@@ -87,7 +87,6 @@ APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
 #endif
-        thread_cond_cleanup(new_cond);
         return rv;
     }
 
@@ -166,12 +165,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
 
 APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond)
 {
-    apr_status_t rv;
-    if ((rv = thread_cond_cleanup(cond)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(cond->pool, cond, thread_cond_cleanup);
-        return APR_SUCCESS;
-    }
-    return rv;
+    return apr_pool_cleanup_run(cond->pool, cond, thread_cond_cleanup);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_cond)

@@ -82,6 +82,12 @@ extern "C" {
 typedef struct apr_thread_cond_t apr_thread_cond_t;
 
 /**
+ * Note: destroying a condition variable (or likewise, destroying or
+ * clearing the pool from which a condition variable was allocated) if
+ * any threads are blocked waiting on it gives undefined results.
+ */
+
+/**
  * Create and initialize a condition variable that can be used to signal
  * and schedule threads in a single process.
  * @param cond the memory address where the newly created condition variable
