@@ -6,6 +6,7 @@ config.status
 configure
 libtool
 apr-config
+apr-*-config
 apr-config.out
 LibD
 LibR
@@ -38,4 +39,5 @@ build-outputs.mk
 *.bbg
 *.da
 coverage
-apr.pc
+apr*.pc
+apr.spec

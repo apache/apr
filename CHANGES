@@ -1,3 +1,37 @@
+Changes for APR 1.0.1
+
+  *) Fix HUP return codes in pollset when using KQueue.
+     [Paul Querna]
+
+  *) Prevent unbounded memory use during repeated operations on a hash table.
+     [Julian Foad <julianfoad btopenworld.com>
+
+  *) Moved repository to SVN
+     [Hackathon]
+
+  *) jlibtool: Ignore '-export-symbols-regexp' option.
+     [Justin Erenkrantz]
+
+  *) fix apr_file_dup and apr_file_dup2 win32 implementations
+     to create a mutex [Steve Hay <steve.hay uk.radan.com>]
+
+  *) Makes the threads to behave like on posix. If the thread is created
+     without APR_DETACH expect that the thread_join will be called, so don't
+     close the handle in advance, if the thread has already finished.
+     [Mladen Turk]
+
+  *) The apr/test/Makefile.win is missing a target to build a
+     readchild.exe that test is depending on but is never built.
+     [Mladen Turk]
+
+  *) Improve apr_file_gets() performance on buffered files. [Justin Erenkrantz]
+
+  *) Win32: Fix bug in apr_socket_sendfile that interferred with
+     Win32 LSPs. PR 23982 [Jan Bilek, Bill Stoddard]
+
+  *) Win32: Fix bug tracking the file pointer on a file opened for 
+     overlapped/APR_XTHREAD io. [Bill Stoddard]
+
 Changes with APR 1.0
 
   *) Only install apr-$MAJOR-config and add appropriate detection code to

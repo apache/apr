@@ -374,7 +374,13 @@ static char *native_strerror(apr_status_t statcode, char *buf,
     sprintf(err, "Native Error #%d", statcode);
     return stuffbuffer(buf, bufsize, err);
 #else
-    return stuffbuffer(buf, bufsize, strerror(statcode));
+    const char *err = strerror(statcode);
+    if (err) {
+        return stuffbuffer(buf, bufsize, err);
+    } else {
+        return stuffbuffer(buf, bufsize, 
+                           "APR does not understand this error code");
+    }
 #endif
 }
 #endif

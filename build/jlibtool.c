@@ -66,7 +66,8 @@
 #  define DYNAMIC_LINK_OPTS "-flat_namespace -undefined suppress"
 #  define dynamic_link_version_func darwin_dynamic_link_function
 #  define DYNAMIC_INSTALL_NAME "-install_name"
-//-install_name  /Users/jerenk/apache-2.0-cvs/lib/libapr.0.dylib -compatibility_version 1 -current_version 1.0
+/*-install_name  /Users/jerenk/apache-2.0-cvs/lib/libapr.0.dylib -compatibility_version 1 -current_version 1.0 */
+#  define LD_LIBRARY_PATH "DYLD_LIBRARY_PATH"
 #endif
 
 #if defined(__linux__) || defined(__FreeBSD__)
@@ -80,8 +81,13 @@
 #  define RANLIB "ranlib"
 #  define PIC_FLAG "-fPIC"
 #  define RPATH "-rpath"
-#  define DYNAMIC_LINK_OPTS "-shared"
+#  define SHARED_OPTS "-shared"
+#  define MODULE_OPTS "-shared"
+#  define DYNAMIC_LINK_OPTS "-export-dynamic"
 #  define LINKER_FLAG_PREFIX "-Wl,"
+#  define ADD_MINUS_L
+#  define LD_RUN_PATH "LD_RUN_PATH"
+#  define LD_LIBRARY_PATH "LD_LIBRARY_PATH"
 #endif
 
 #if defined(_OSD_POSIX)
@@ -92,9 +98,28 @@
 #  define OBJECT_EXT     "o"
 #  define LIBRARIAN      "ar"
 #  define LIBRARIAN_OPTS "cr"
-#  define DYNAMIC_LINK_OPTS "-G"
+#  define SHARED_OPTS "-G"
+#  define MODULE_OPTS "-G"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #  define NEED_SNPRINTF
+#endif
+
+#if defined(sinix) && defined(mips) && defined(__SNI_TARG_UNIX)
+#  define SHELL_CMD  "/usr/bin/sh"
+#  define DYNAMIC_LIB_EXT "so"
+#  define MODULE_LIB_EXT  "so"
+#  define STATIC_LIB_EXT "a"
+#  define OBJECT_EXT     "o"
+#  define LIBRARIAN      "ar"
+#  define LIBRARIAN_OPTS "cr"
+#  define RPATH "-Brpath"
+#  define SHARED_OPTS "-G"
+#  define MODULE_OPTS "-G"
+#  define DYNAMIC_LINK_OPTS "-Wl,-Blargedynsym"
+#  define LINKER_FLAG_PREFIX "-Wl,"
+#  define NEED_SNPRINTF
+#  define LD_RUN_PATH "LD_RUN_PATH"
+#  define LD_LIBRARY_PATH "LD_LIBRARY_PATH"
 #endif
 
 #ifndef SHELL_CMD
@@ -138,6 +163,14 @@ enum pic_mode_e {
     pic_UNKNOWN,
     pic_PREFER,
     pic_AVOID,
+};
+
+enum lib_type {
+    type_UNKNOWN,
+    type_DYNAMIC_LIB,
+    type_STATIC_LIB,
+    type_MODULE_LIB,
+    type_OBJECT,
 };
 
 typedef struct {
@@ -383,6 +416,23 @@ int run_command(command_t *cmd_data, count_chars *cc)
     return external_spawn(cmd_data, spawn_args[0], (const char**)spawn_args);
 }
 
+/*
+ * print configuration
+ * shlibpath_var is used in configure.
+ */
+void print_config()
+{
+#ifdef LD_RUN_PATH
+    printf("runpath_var=%s\n", LD_RUN_PATH);
+#endif
+#ifdef LD_LIBRARY_PATH
+    printf("shlibpath_var=%s\n", LD_LIBRARY_PATH);
+#endif
+#ifdef SHELL_CMD
+    printf("SHELL=\"%s\"\n", SHELL_CMD);
+#endif
+}
+
 int parse_long_opt(char *arg, command_t *cmd_data)
 {
     char *equal_pos = strchr(arg, '=');
@@ -427,6 +477,8 @@ int parse_long_opt(char *arg, command_t *cmd_data)
         printf("Version " VERSION "\n");
     } else if (strcmp(var, "help") == 0) {
         printf("Sorry.  No help available.\n");
+    } else if (strcmp(var, "config") == 0) {
+        print_config();
     } else {
         return 0;
     }
@@ -651,7 +703,7 @@ char *check_object_exists(command_t *cmd, const char *arg, int arglen)
         } 
 
         if (!cmd->options.silent) {
-            printf("Checking: %s\n", newarg);
+            printf("Checking (obj): %s\n", newarg);
         }
         rv = stat(newarg, &sb);
     }
@@ -672,7 +724,7 @@ char *check_object_exists(command_t *cmd, const char *arg, int arglen)
  * 1 - .libs suffix
  */
 char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
-                           int libdircheck)
+                           int libdircheck, enum lib_type *libtype)
 {
     char *newarg, *ext;
     int pass, rv, newpathlen;
@@ -699,24 +751,29 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
         case 0:
             if (cmd->options.pic_mode != pic_AVOID || cmd->options.shared) {
                 strcpy(ext, DYNAMIC_LIB_EXT);
+                *libtype = type_DYNAMIC_LIB;
                 break;
             }
             pass = 1;
         case 1:
             strcpy(ext, STATIC_LIB_EXT);
+            *libtype = type_STATIC_LIB;
             break;
         case 2:
             strcpy(ext, MODULE_LIB_EXT);
+            *libtype = type_MODULE_LIB;
             break;
         case 3:
             strcpy(ext, OBJECT_EXT);
+            *libtype = type_OBJECT;
             break;
         default:
+            *libtype = type_UNKNOWN;
             break;
         } 
 
         if (!cmd->options.silent) {
-            printf("Checking: %s\n", newarg);
+            printf("Checking (lib): %s\n", newarg);
         }
         rv = stat(newarg, &sb);
     }
@@ -727,6 +784,72 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
     }
 
     return NULL;
+}
+
+/* Read the final install location and add it to runtime library search path. */
+#ifdef RPATH
+void add_rpath(count_chars *cc, const char *arg)
+{
+    FILE *f;
+    char path[256];
+    char *tmp;
+    int size=0;
+
+    f = fopen(arg,"r");
+    if (f == NULL) {
+        return;
+    }
+    fgets(path,sizeof(path), f);
+    fclose(f);
+    if (path[strlen(path)-1] == '\n') {
+        path[strlen(path)-1] = '\0';
+    }
+    /* Check that we have an absolut path.
+     * Otherwise the file could be a GNU libtool file.
+     */
+    if (path[0] != '/') {
+        return;
+    }
+#ifdef LINKER_FLAG_PREFIX
+    size = strlen(LINKER_FLAG_PREFIX);
+#endif
+    size = size + strlen(path) + strlen(RPATH) + 2;
+    tmp = malloc(size);
+    if (tmp == NULL) {
+        return;
+    }
+#ifdef LINKER_FLAG_PREFIX
+    strcpy(tmp, LINKER_FLAG_PREFIX); 
+    strcat(tmp, RPATH);
+#else
+    strcpy(tmp, RPATH);
+#endif
+    strcat(tmp, "=");
+    strcat(tmp, path);
+    
+    push_count_chars(cc, tmp);
+}
+#endif
+
+/* use -L -llibname to allow to use installed libraries */
+void add_minus_l(count_chars *cc, const char *arg)
+{
+    char *name = strrchr(arg, '/');
+    char *file = strrchr(arg, '.');
+    char *lib  = strstr(name, "lib");
+
+    if (name !=NULL && file != NULL && lib == name+1) {
+        *name = '\0';
+        *file = '\0';
+        file = name;
+        file = file+4;
+        push_count_chars(cc, "-L ");
+        push_count_chars(cc, arg);
+        push_count_chars(cc, "-l");
+        push_count_chars(cc, file);
+    } else {
+        push_count_chars(cc, arg);
+    }
 }
 
 void add_linker_flag_prefix(count_chars *cc, const char *arg)
@@ -747,6 +870,7 @@ int parse_input_file_name(char *arg, command_t *cmd_data)
     char *ext = strrchr(arg, '.');
     char *name = strrchr(arg, '/');
     int pathlen;
+    enum lib_type libtype;
     char *newarg;
 
     if (!ext) {
@@ -788,22 +912,34 @@ int parse_input_file_name(char *arg, command_t *cmd_data)
         switch (cmd_data->mode) {
         case mLink:
             /* Try the .libs dir first! */
-            newarg = check_library_exists(cmd_data, arg, pathlen, 1);
+            newarg = check_library_exists(cmd_data, arg, pathlen, 1, &libtype);
             if (!newarg) {
                 /* Try the normal dir next. */
-                newarg = check_library_exists(cmd_data, arg, pathlen, 0);
+                newarg = check_library_exists(cmd_data, arg, pathlen, 0, &libtype);
                 if (!newarg) {
                     printf("Can not find suitable library for %s\n", arg);
                     exit(1);
                 }
             }
 
-            if (cmd_data->mode != mLink) {
-                push_count_chars(cmd_data->arglist, newarg);
+            /* It is not ok to just add the file: a library may added with:
+               1 - -L path library_name. (For *.so in Linux).
+               2 - library_name.
+             */
+#ifdef ADD_MINUS_L
+            if (libtype == type_DYNAMIC_LIB) {
+                 add_minus_l(cmd_data->shared_opts.dependencies, newarg);
+            } else {
+                 push_count_chars(cmd_data->shared_opts.dependencies, newarg);
             }
-            else {
-                push_count_chars(cmd_data->shared_opts.dependencies, newarg);
+#else
+            push_count_chars(cmd_data->shared_opts.dependencies, newarg);
+#endif
+#ifdef RPATH
+            if (libtype == type_DYNAMIC_LIB) {
+                 add_rpath(cmd_data->shared_opts.dependencies, arg);
             }
+#endif
             break;
         case mInstall:
             /* If we've already recorded a library to install, we're most
@@ -959,7 +1095,7 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
     char *arg;
     int argused;
 
-    for (a=1; a < argc; a++) {
+    for (a = 1; a < argc; a++) {
         arg = argv[a];
         argused = 1;
 
@@ -984,6 +1120,10 @@ void parse_args(int argc, char *argv[], command_t *cmd_data)
                 } else if (strcmp(arg+1, "version-info") == 0) {
                     /* Store for later deciphering */
                     cmd_data->version_info = argv[++a];
+                    argused = 1;
+                } else if (strcmp(arg+1, "export-symbols-regex") == 0) {
+                    /* Skip the argument. */
+                    ++a;
                     argused = 1;
                 }
             }
@@ -1349,9 +1489,6 @@ int run_mode(command_t *cmd_data)
             lib_args[2] = NULL;
             external_spawn(cmd_data, RANLIB, lib_args);
 #endif
-            if (!cmd_data->options.dry_run) {
-                //link(
-            }
         }
 
         if (cmd_data->output == otDynamicLibraryOnly ||
@@ -1446,6 +1583,27 @@ int ensure_fake_uptodate(command_t *cmd_data)
     touch_args[2] = NULL;
     return external_spawn(cmd_data, "touch", touch_args);
 }
+#ifdef RPATH
+/* Store the install path in the *.la file */
+int add_for_runtime(command_t *cmd_data)
+{
+    if (cmd_data->mode == mInstall) {
+        return 0;
+    }
+    if (cmd_data->output == otDynamicLibraryOnly ||
+        cmd_data->output == otLibrary) {
+        FILE *f=fopen(cmd_data->fake_output_name,"w");
+        if (f == NULL) {
+            return -1;
+        }
+        fprintf(f,"%s\n", cmd_data->install_path);
+        fclose(f);
+        return(0);
+    } else {
+        return(ensure_fake_uptodate(cmd_data));
+    }
+}
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -1488,7 +1646,11 @@ int main(int argc, char *argv[])
     rc = run_mode(&cmd_data);
 
     if (!rc) {
+#ifdef RPATH
+       add_for_runtime(&cmd_data); 
+#else
        ensure_fake_uptodate(&cmd_data);
+#endif
     }
 
     cleanup_tmp_dirs(&cmd_data);

@@ -150,6 +150,7 @@ static void snprintf_underflow(abts_case *tc, void *data)
 static void string_error(abts_case *tc, void *data)
 {
      char buf[128], *rv;
+     apr_status_t n;
 
      buf[0] = '\0';
      rv = apr_strerror(APR_ENOENT, buf, sizeof buf);
@@ -159,6 +160,11 @@ static void string_error(abts_case *tc, void *data)
      rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
      ABTS_PTR_EQUAL(tc, buf, rv);
      ABTS_STR_EQUAL(tc, "The timeout specified has expired", buf);
+     
+     /* throw some randomish numbers at it to check for robustness */
+     for (n = 1; n < 1000000; n *= 2) {
+         apr_strerror(n, buf, sizeof buf);
+     }
 }
 
 #define SIZE 180000

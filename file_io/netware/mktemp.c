@@ -27,7 +27,7 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_i
     apr_status_t rv;
 
     flags = (!flags) ? APR_CREATE | APR_READ | APR_WRITE |  
-                       APR_DELONCLOSE : flags;
+                       APR_DELONCLOSE : flags & ~APR_EXCL;
 
     fd = mkstemp(template);
     if (fd == -1) {
