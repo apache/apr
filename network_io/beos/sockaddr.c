@@ -58,39 +58,29 @@
 #else
 #include "networkio.h"
 
-apr_status_t apr_set_local_port(apr_socket_t *sock, apr_port_t port)
+apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, apr_port_t port)
 {
-    if (!sock) {
+    if (!sock) 
         return APR_EBADF;
-    }
-    sock->local_addr->sin_port = htons(port);
+    if (which == APR_LOCAL) 
+        sock->local_addr->sin_port = htons(port);
+    else if (APR == APR_REMOTE)
+        sock->remote_addr->sin_port = htons(port);
+    else
+        return APR_EINVAL;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_port_t port)
+apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t *sock)
 {
-    if (!sock) {
+    if (!sock)
         return APR_EBADF;
-    }
-    sock->remote_addr->sin_port = htons(port);
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_local_port(apr_port_t *port, apr_socket_t *sock)
-{
-    if (!sock) {
-        return APR_EBADF;
-    }
-    *port = ntohs(sock->local_addr->sin_port);
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_remote_port(apr_port_t *port, apr_socket_t *sock)
-{
-    if (!sock) {
-        return APR_EBADF;
-    }
-    *port = ntohs(sock->remote_addr->sin_port);
+    if (which == APR_LOCAL)
+        *port = ntohs(sock->local_addr->sin_port);
+    else if (which == APR_REMOTE)
+        *port = ntohs(sock->remote_addr->sin_port);
+    else
+        return APR_EINVAL;
     return APR_SUCCESS;
 }
 
