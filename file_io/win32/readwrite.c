@@ -88,7 +88,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
                                &dwBytesAvail,          // pointer to total number of bytes available
                                &dwBytesLeftThisMsg)) { // pointer to unread bytes in this message
                 rv = apr_get_os_error();
-                if (rv = APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE))
+                if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE))
                     return APR_SUCCESS;
             }
             else {
