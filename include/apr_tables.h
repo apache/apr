@@ -102,21 +102,6 @@ struct apr_array_header_t {
     char *elts;
 };
 
-/** The opaque string-content table type */
-struct apr_table_t {
-    /* This has to be first to promote backwards compatibility with
-     * older modules which cast a apr_table_t * to an apr_array_header_t *...
-     * they should use the table_elts() function for most of the
-     * cases they do this for.
-     */
-    /** The underlying array for the table */
-    apr_array_header_t a;
-#ifdef MAKE_TABLE_PROFILE
-    /** Who created the array. */
-    void *creator;
-#endif
-};
-
 /**
  * The (opaque) structure for string-content tables.
  */
