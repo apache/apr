@@ -82,7 +82,6 @@ struct apr_threadkey_t {
 
 struct apr_procattr_t {
     apr_pool_t *cntxt;
-    STARTUPINFO si;
     apr_file_t *parent_in;
     apr_file_t *child_in;
     apr_file_t *parent_out;

@@ -74,24 +74,9 @@
 APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,
                                                   apr_pool_t *cont)
 {
-    (*new) = (apr_procattr_t *)apr_palloc(cont, sizeof(apr_procattr_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
+    (*new) = (apr_procattr_t *)apr_pcalloc(cont, sizeof(apr_procattr_t));
     (*new)->cntxt = cont;
-    (*new)->parent_in = NULL;
-    (*new)->child_in = NULL;
-    (*new)->parent_out = NULL;
-    (*new)->child_out = NULL;
-    (*new)->parent_err = NULL;
-    (*new)->child_err = NULL;
-    (*new)->currdir = NULL; 
     (*new)->cmdtype = APR_PROGRAM;
-    (*new)->detached = TRUE;
-
-    memset(&(*new)->si, 0, sizeof((*new)->si));
-
     return APR_SUCCESS;
 }
 
@@ -127,7 +112,7 @@ static apr_status_t open_nt_process_pipe(apr_file_t **read, apr_file_t **write,
 
 static apr_status_t make_handle_private(apr_file_t *file)
 {
-    HANDLE pid = GetCurrentProcess();
+    HANDLE hproc = GetCurrentProcess();
     HANDLE filehand = file->filehand;
 
     /* Create new non-inheritable versions of handles that
@@ -135,8 +120,8 @@ static apr_status_t make_handle_private(apr_file_t *file)
      * inherits these handles; resulting in non-closeable handles
      * to the respective pipes.
      */
-    if (!DuplicateHandle(pid, filehand,
-                         pid, &file->filehand, 0,
+    if (!DuplicateHandle(hproc, filehand,
+                         hproc, &file->filehand, 0,
                          FALSE, DUPLICATE_SAME_ACCESS))
         return apr_get_os_error();
     /* 
@@ -160,9 +145,9 @@ static apr_status_t make_inheritable_duplicate(apr_file_t *original,
         return apr_get_os_error();
     else
     {
-        HANDLE pid = GetCurrentProcess();
-        if (!DuplicateHandle(pid, original->filehand, 
-                             pid, &duplicate->filehand, 0,
+        HANDLE hproc = GetCurrentProcess();
+        if (!DuplicateHandle(hproc, original->filehand, 
+                             hproc, &duplicate->filehand, 0,
                              TRUE, DUPLICATE_SAME_ACCESS))
             return apr_get_os_error();
     }
@@ -276,25 +261,11 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
                                               const char *dir) 
 {
-    char path[MAX_PATH];
-    int length;
-
-    if (dir[0] != '\\' && dir[0] != '/' && dir[1] != ':') { 
-        length = GetCurrentDirectory(MAX_PATH, path);
-
-        if (length == 0 || length + strlen(dir) + 1 >= MAX_PATH)
-            return APR_ENOMEM;
-
-        attr->currdir = apr_pstrcat(attr->cntxt, path, "\\", dir, NULL);
-    }
-    else {
-        attr->currdir = apr_pstrdup(attr->cntxt, dir);
-    }
-
-    if (attr->currdir) {
-        return APR_SUCCESS;
-    }
-    return APR_ENOMEM;
+    /* curr dir must be in native format, there are all sorts of bugs in
+     * the NT library loading code that flunk the '/' parsing test.
+     */
+    return apr_filepath_merge(&attr->currdir, NULL, dir, 
+                              APR_FILEPATH_NATIVE, attr->cntxt);
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
@@ -311,11 +282,6 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
-/* TODO:  
- *   apr_proc_create with APR_SHELLCMD on Win9x won't work due to MS KB:
- *   Q150956
- */
-
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
                                           const char * const *args,
@@ -323,11 +289,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           apr_procattr_t *attr,
                                           apr_pool_t *cont)
 {
-    apr_size_t i, iEnvBlockLen;
+    apr_status_t rv;
+    apr_oslevel_e os_level;
+    apr_size_t i;
     char *cmdline;
-    char ppid[20];
-    char *envstr;
-    char *pEnvBlock, *pNext;
+    char *pEnvBlock;
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = 0;
 
@@ -335,7 +301,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     new->err = attr->parent_err;
     new->out = attr->parent_out;
 
-    attr->si.cb = sizeof(attr->si);
+    (void) apr_get_oslevel(cont, &os_level);
+
     if (attr->detached) {
         /* If we are creating ourselves detached, Then we should hide the
          * window we are starting in.  And we had better redfine our
@@ -344,68 +311,56 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * not manage the stdio handles properly when running old 16
          * bit executables if the detached attribute is set.
          */
-        apr_oslevel_e os_level;
-        if (apr_get_oslevel(cont, &os_level) == APR_SUCCESS) {
-            if (os_level >= APR_WIN_NT) {
-                dwCreationFlags |= DETACHED_PROCESS;
-            }
-        }
-        attr->si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-        attr->si.wShowWindow = SW_HIDE;
-
-        if (attr->child_in) {
-            attr->si.hStdInput = attr->child_in->filehand;
-        }
-
-        if (attr->child_out) {
-            attr->si.hStdOutput = attr->child_out->filehand;
-        }
-
-        if (attr->child_err) {
-            attr->si.hStdError = attr->child_err->filehand;
+        if (os_level >= APR_WIN_NT) {
+            /* 
+             * XXX DETACHED_PROCESS won't on Win9x at all; on NT/W2K 
+             * 16 bit executables fail (MS KB: Q150956)
+             */
+            dwCreationFlags |= DETACHED_PROCESS;
         }
     }
 
-    if (attr->cmdtype == APR_PROGRAM) {
-        const char *ptr = progname;
-
-        if (*ptr =='"') {
-            ptr++;
-        }
-
-        if (*ptr == '\\' || *ptr == '/' || *++ptr == ':') {
-            cmdline = apr_pstrdup(cont, progname);
-        }
-        else if (attr->currdir == NULL) {
-            cmdline = apr_pstrdup(cont, progname);
-        }
-        else {
-            char lastchar = attr->currdir[strlen(attr->currdir)-1];
-            if ( lastchar == '\\' || lastchar == '/') {
-                cmdline = apr_pstrcat(cont, attr->currdir, progname, NULL);
-            }
-            else {
-                cmdline = apr_pstrcat(cont, attr->currdir, "\\", progname, NULL);
-            }
-        }
+    /* progname must be the unquoted, actual name, or NULL if this is
+     * a 16 bit app running in the VDM or WOW context.
+     */
+    if (progname[0] == '\"') {
+        progname = apr_pstrndup(cont, progname + 1, strlen(progname) - 2);
     }
-    else {
-        char * shell_cmd = getenv("COMSPEC");
-        if (!shell_cmd)
-            shell_cmd = SHELL_PATH;
-        shell_cmd = apr_pstrdup(cont, shell_cmd);
-        cmdline = apr_pstrcat(cont, shell_cmd, " /C ", progname, NULL);
-    }
+    
+    /* progname must be unquoted, in native format, as there are all sorts 
+     * of bugs in the NT library loader code that fault when parsing '/'.
+     * We do not directly manipulate cmdline, and it will become a copy,
+     * so we've casted past the constness issue.
+     */
+    if (strchr(progname, ' '))
+        cmdline = apr_pstrcat(cont, "\"", progname, "\"", NULL);
+    else
+        cmdline = (char*)progname;
 
     i = 1;
     while (args && args[i]) {
-        cmdline = apr_pstrcat(cont, cmdline, " ", args[i], NULL);
+        if (strchr(args[i], ' '))
+            cmdline = apr_pstrcat(cont, cmdline, " \"", args[i], "\"", NULL);
+        else
+            cmdline = apr_pstrcat(cont, cmdline, " ", args[i], NULL);
         i++;
     }
 
-    _itoa(_getpid(), ppid, 10);
-    if (env) {
-        envstr = apr_pstrcat(cont, "parentpid=", ppid, NULL);
+    if (attr->cmdtype == APR_SHELLCMD) {
+        char *shellcmd = getenv("COMSPEC");
+        if (!shellcmd)
+            shellcmd = SHELL_PATH;
+        if (shellcmd[0] == '"')
+            progname = apr_pstrndup(cont, shellcmd + 1, strlen(shellcmd) - 1);
+        else if (strchr(shellcmd, ' '))
+            shellcmd = apr_pstrcat(cont, "\"", shellcmd, "\"", NULL);
+        cmdline = apr_pstrcat(cont, shellcmd, " /C \"", cmdline, "\"", NULL);
+    }
+
+    if (!env) 
+        pEnvBlock = NULL;
+    else {
+        apr_size_t iEnvBlockLen;
         /*
          * Win32's CreateProcess call requires that the environment
          * be passed in an environment block, a null terminated block of
@@ -417,58 +372,139 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             iEnvBlockLen += strlen(env[i]) + 1;
             i++;
         }
-  
-        pEnvBlock = (char *)apr_pcalloc(cont, iEnvBlockLen + strlen(envstr));
-    
-        i = 0;
-        pNext = pEnvBlock;
-        while (env[i]) {
-            strcpy(pNext, env[i]);
-            pNext = pNext + strlen(pNext) + 1;
-            i++;
+        if (!i) 
+            ++iEnvBlockLen;
+
+#if APR_HAS_UNICODE_FS
+        if (os_level >= APR_WIN_NT) {
+            apr_wchar_t *pNext;
+            pEnvBlock = (char *)apr_palloc(cont, iEnvBlockLen * 2);
+            dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
+
+            i = 0;
+            pNext = (apr_wchar_t*)pEnvBlock;
+            while (env[i]) {
+                apr_size_t in = strlen(env[i]) + 1;
+                if ((rv = conv_utf8_to_ucs2(env[i], &in, 
+                                            pNext, &iEnvBlockLen)) 
+                        != APR_SUCCESS) {
+                    return rv;
+                }
+                pNext = wcschr(pNext, L'\0') + 1;
+                i++;
+            }
+	    if (!i)
+                *(pNext++) = L'\0';
+	    *pNext = L'\0';
         }
-        strcpy(pNext, envstr); 
-	pNext = pNext + strlen(pNext) + 1;
-	*pNext = '\0';
+        else 
+#endif /* APR_HAS_UNICODE_FS */
+        {
+            char *pNext;
+            pEnvBlock = (char *)apr_palloc(cont, iEnvBlockLen);
+    
+            i = 0;
+            pNext = pEnvBlock;
+            while (env[i]) {
+                strcpy(pNext, env[i]);
+                pNext = strchr(pNext, '\0') + 1;
+                i++;
+            }
+	    if (!i)
+                *(pNext++) = '\0';
+	    *pNext = '\0';
+        }
+    } 
+
+#if APR_HAS_UNICODE_FS
+    if (os_level >= APR_WIN_NT)
+    {
+        STARTUPINFOW si;
+        apr_size_t nprg = strlen(progname) + 1;
+        apr_size_t ncmd = strlen(cmdline) + 1, nwcmd = ncmd;
+        apr_size_t ncwd = strlen(attr->currdir) + 1, nwcwd = ncwd;
+        apr_wchar_t *wprg = apr_palloc(cont, nprg * 2);
+        apr_wchar_t *wcmd = apr_palloc(cont, ncmd * 2);
+        apr_wchar_t *wcwd = apr_palloc(cont, ncwd * 2);
+
+        if (((rv = utf8_to_unicode_path(wprg, &nprg, progname)) 
+                    != APR_SUCCESS)
+         || ((rv = conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd)) 
+                    != APR_SUCCESS)
+         || ((rv = conv_utf8_to_ucs2(attr->currdir, &ncwd, wcwd, &nwcwd)) 
+                    != APR_SUCCESS)) {
+            return rv;
+        }
+
+        memset(&si, 0, sizeof(si));
+        si.cb = sizeof(si);
+        if (attr->detached) {
+            si.dwFlags |= STARTF_USESHOWWINDOW;
+            si.wShowWindow = SW_HIDE;
+        }
+        if (attr->child_in->filehand || attr->child_out->filehand
+                                     || attr->child_err->filehand) {
+            si.dwFlags |= STARTF_USESTDHANDLES;
+            si.hStdInput = attr->child_in->filehand;
+            si.hStdOutput = attr->child_out->filehand;
+            si.hStdError = attr->child_err->filehand;
+        }
+        rv = CreateProcessW(wprg, wcmd,        /* Command line */
+                            NULL, NULL,        /* Proc & thread security attributes */
+                            TRUE,              /* Inherit handles */
+                            dwCreationFlags,   /* Creation flags */
+                            pEnvBlock,         /* Environment block */
+                            wcwd,     /* Current directory name */
+                            &si, &pi);
     }
     else {
-        SetEnvironmentVariable("parentpid", ppid);
-        pEnvBlock = NULL;
-    } 
-    
-
-    if (CreateProcess(NULL, cmdline,     /* Command line */
-                      NULL, NULL,        /* Proc & thread security attributes */
-                      TRUE,              /* Inherit handles */
-                      dwCreationFlags,   /* Creation flags */
-                      pEnvBlock,         /* Environment block */
-                      attr->currdir,     /* Current directory name */
-                      &attr->si, &pi)) {
-
-        // TODO: THIS IS BADNESS
-        // The completion of the apr_proc_t type leaves us ill equiped to track both 
-        // the pid (Process ID) and handle to the process, which are entirely
-        // different things and each useful in their own rights.
-        //
-        // Signals are broken since the hProcess varies from process to process, 
-        // while the true process ID would not.
-        new->pid = (pid_t) pi.hProcess;
-
-        if (attr->child_in) {
-            apr_file_close(attr->child_in);
+#endif /* APR_HAS_UNICODE_FS */
+        STARTUPINFOA si;
+        memset(&si, 0, sizeof(si));
+        si.cb = sizeof(si);
+        if (attr->detached) {
+            si.dwFlags |= STARTF_USESHOWWINDOW;
+            si.wShowWindow = SW_HIDE;
         }
-        if (attr->child_out) {
-            apr_file_close(attr->child_out);
+        if (attr->child_in->filehand || attr->child_out->filehand
+                                     || attr->child_err->filehand) {
+            si.dwFlags |= STARTF_USESTDHANDLES;
+            si.hStdInput = attr->child_in->filehand;
+            si.hStdOutput = attr->child_out->filehand;
+            si.hStdError = attr->child_err->filehand;
         }
-        if (attr->child_err) {
-            apr_file_close(attr->child_err);
-        }
-        CloseHandle(pi.hThread);
 
-        return APR_SUCCESS;
+        rv = CreateProcessA(progname, cmdline, /* Command line */
+                            NULL, NULL,        /* Proc & thread security attributes */
+                            TRUE,              /* Inherit handles */
+                            dwCreationFlags,   /* Creation flags */
+                            pEnvBlock,         /* Environment block */
+                            attr->currdir,     /* Current directory name */
+                            &si, &pi);
     }
 
-    return apr_get_os_error();
+    /* Check CreateProcess result 
+     */
+    if (!rv)
+        return apr_get_os_error();
+
+    /* XXX Orphaned handle warning - no fix due to broken apr_proc_t api.
+     */
+    new->hproc = pi.hProcess;
+    new->pid = pi.dwProcessId;
+
+    if (attr->child_in) {
+        apr_file_close(attr->child_in);
+    }
+    if (attr->child_out) {
+        apr_file_close(attr->child_out);
+    }
+    if (attr->child_err) {
+        apr_file_close(attr->child_err);
+    }
+    CloseHandle(pi.hThread);
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, apr_wait_how_e wait)
@@ -477,21 +513,24 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, apr_wait_how_e wait)
     if (!proc)
         return APR_ENOPROC;
     if (wait == APR_WAIT) {
-        if ((stat = WaitForSingleObject((HANDLE)proc->pid, 
+        if ((stat = WaitForSingleObject(proc->hproc, 
                                         INFINITE)) == WAIT_OBJECT_0) {
+            CloseHandle(proc->hproc);
+            proc->hproc = NULL;
             return APR_CHILD_DONE;
         }
         else if (stat == WAIT_TIMEOUT) {
             return APR_CHILD_NOTDONE;
         }
-        return GetLastError();
+        return apr_get_os_error();
     }
-    if ((stat = WaitForSingleObject((HANDLE)proc->pid, 0)) == WAIT_OBJECT_0) {
+    if ((stat = WaitForSingleObject((HANDLE)proc->hproc, 0)) == WAIT_OBJECT_0) {
+        CloseHandle(proc->hproc);
+        proc->hproc = NULL;
         return APR_CHILD_DONE;
     }
     else if (stat == WAIT_TIMEOUT) {
         return APR_CHILD_NOTDONE;
     }
-    return GetLastError();
+    return apr_get_os_error();
 }
-

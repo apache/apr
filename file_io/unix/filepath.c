@@ -71,7 +71,8 @@
 
 /* Any OS that requires/refuses trailing slashes should be dealt with here.
  */
-APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_int32_t flags,
+                                           apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
     if (!getcwd(path, sizeof(path))) {
@@ -170,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
          * passing the address of a char const* for a char** arg.
          */
         char *getpath;
-        rv = apr_filepath_get(&getpath, p);
+        rv = apr_filepath_get(&getpath, apr_int32_t flags, p);
         rootpath = getpath;
         if (rv != APR_SUCCESS)
             return errno;

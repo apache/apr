@@ -102,7 +102,7 @@ apr_status_t filepath_compare_drive(char *path1, char *path2, apr_pool_t *p)
     return -1;
 }
 
-APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
+APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
                                            apr_pool_t *p)
 {
     char path[APR_PATH_MAX];

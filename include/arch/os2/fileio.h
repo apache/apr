@@ -104,7 +104,8 @@ extern const char c_is_fnchar[256];
 #define IS_FNCHAR(c) c_is_fnchar[(unsigned char)c]
 
 apr_status_t filepath_root_test(char *path, apr_pool_t *p);
-apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p);
+apr_status_t filepath_drive_get(char **rootpath, char drive, 
+                                apr_int32_t flags, apr_pool_t *p);
 apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
 
 #endif  /* ! FILE_IO_H */

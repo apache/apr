@@ -100,7 +100,8 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p)
 }
 
 
-apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p)
+apr_status_t filepath_drive_get(char **rootpath, char drive, 
+                                apr_int32_t flags, apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
     char *pos;
@@ -117,12 +118,11 @@ apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p)
         return APR_FROM_OS_ERROR(rc);
     }
 
-    /* ###: We really should consider adding a flag to allow the user
-     * to have the APR_FILEPATH_NATIVE result
-     */
-    for (pos=path; *pos; pos++) {
-        if (*pos == '\\')
-            *pos = '/';
+    if (!(flags & APR_FILEPATH_NATIVE)) {
+        for (pos=path; *pos; pos++) {
+            if (*pos == '\\')
+                *pos = '/';
+        }
     }
 
     *rootpath = apr_pstrdup(p, path);
@@ -142,12 +142,14 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
 }
 
 
-APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_int32_t flags,
+                                           apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
     ULONG drive;
     ULONG drivemap;
     ULONG rv, pathlen = sizeof(path) - 3;
+    char *pos;
 
     DosQueryCurrentDisk(&drive, &drivemap);
     path[0] = '@' + drive;
@@ -155,6 +157,14 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_pool_t *p)
     rv = DosQueryCurrentDir(drive, path+3, &pathlen);
 
     *defpath = apr_pstrdup(p, path);
+
+    if (!(flags & APR_FILEPATH_NATIVE)) {
+        for (pos=*defpath; *pos; pos++) {
+            if (*pos == '\\')
+                *pos = '/';
+        }
+    }
+
     return APR_SUCCESS;
 }    
 

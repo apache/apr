@@ -357,10 +357,13 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
  * Return the default file path (for relative file names)
  * @ingroup apr_filepath
  * @param path the default path string returned
+ * @param flags optional flag APR_FILEPATH_NATIVE to retrieve the
+ *              default file path in os-native format.
  * @param p the pool to allocate the default path string from
- * @deffunc apr_status_t apr_filepath_get(char **path, apr_pool_t *p)
+ * @deffunc apr_status_t apr_filepath_get(char **path, apr_int32_t flags, apr_pool_t *p)
  */
-APR_DECLARE(apr_status_t) apr_filepath_get(char **path, apr_pool_t *p);
+APR_DECLARE(apr_status_t) apr_filepath_get(char **path, apr_int32_t flags,
+                                           apr_pool_t *p);
 
 /**
  * Set the default file path (for relative file names)
