@@ -148,7 +148,7 @@ static void test_mmap_offset(CuTest *tc)
 
 CuSuite *testmmap(void)
 {
-    CuSuite *suite = CuSuiteNew("Test MMAP");
+    CuSuite *suite = CuSuiteNew("MMAP");
 
 #if APR_HAS_MMAP    
     SUITE_ADD_TEST(suite, create_filename);

@@ -77,7 +77,7 @@ static void test_ints(CuTest *tc)
 
 CuSuite *testvsn(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Versioning");
+    CuSuite *suite = CuSuiteNew("Versioning");
 
     SUITE_ADD_TEST(suite, test_strings);
     SUITE_ADD_TEST(suite, test_ints);

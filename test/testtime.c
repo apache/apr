@@ -286,7 +286,7 @@ static void test_strftimeoffset(CuTest *tc)
 
 CuSuite *testtime(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Time");
+    CuSuite *suite = CuSuiteNew("Time");
 
     SUITE_ADD_TEST(suite, test_now);
     SUITE_ADD_TEST(suite, test_gmtstr);

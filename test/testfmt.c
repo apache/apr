@@ -104,7 +104,7 @@ static void int64_t_fmt(CuTest *tc)
 
 CuSuite *testfmt(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Formats");
+    CuSuite *suite = CuSuiteNew("Formats");
 
     SUITE_ADD_TEST(suite, ssize_t_fmt);
     SUITE_ADD_TEST(suite, size_t_fmt);

@@ -132,7 +132,7 @@ static void test_notancestor(CuTest *tc)
 
 CuSuite *testpool(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Pools");
+    CuSuite *suite = CuSuiteNew("Pools");
 
     SUITE_ADD_TEST(suite, parent_pool);
     SUITE_ADD_TEST(suite, child_pool);
