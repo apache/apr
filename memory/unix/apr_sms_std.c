@@ -64,7 +64,6 @@
 #include "apr_private.h"
 #include "apr_sms.h"
 #include <stdlib.h>
-#include <assert.h>
 
 static const char *module_identity = "STANDARD";
 
@@ -109,8 +108,6 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
 {
     apr_sms_t *new_mem_sys;
     apr_status_t rv;
-
-    assert(mem_sys);
 
     *mem_sys = NULL;
     /* We don't have a parent so we allocate the memory
