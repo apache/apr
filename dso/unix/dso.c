@@ -72,6 +72,8 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
     void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
 #endif    
 
+    *res_handle = ap_pcalloc(ctx, sizeof(**res_handle));
+
     if(os_handle == NULL) {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
         (*res_handle)->errormsg = strerror(errno);
@@ -82,7 +84,6 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path,
 #endif
     }
 
-    *res_handle = ap_pcalloc(ctx, sizeof(**res_handle));
     (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
     (*res_handle)->errormsg = NULL;
