@@ -495,6 +495,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 {
     apr_table_entry_t *next_elt;
     apr_table_entry_t *end_elt;
+    apr_table_entry_t *table_end;
     apr_uint32_t checksum;
     int hash;
 
@@ -507,6 +508,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
     }
     next_elt = ((apr_table_entry_t *) t->a.elts) + t->index_first[hash];;
     end_elt = ((apr_table_entry_t *) t->a.elts) + t->index_last[hash];
+    table_end =((apr_table_entry_t *) t->a.elts) + t->a.nelts;
 
     for (; next_elt <= end_elt; next_elt++) {
 	if ((checksum == next_elt->key_checksum) &&
@@ -540,8 +542,6 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
              * for the index)
              */
             if (dst_elt) {
-                apr_table_entry_t *table_end =
-                    ((apr_table_entry_t *) t->a.elts) + t->a.nelts;
                 for (; next_elt < table_end; next_elt++) {
                     *dst_elt++ = *next_elt;
                 }
@@ -567,6 +567,7 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 {
     apr_table_entry_t *next_elt;
     apr_table_entry_t *end_elt;
+    apr_table_entry_t *table_end;
     apr_uint32_t checksum;
     int hash;
 
@@ -579,6 +580,7 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
     }
     next_elt = ((apr_table_entry_t *) t->a.elts) + t->index_first[hash];;
     end_elt = ((apr_table_entry_t *) t->a.elts) + t->index_last[hash];
+    table_end =((apr_table_entry_t *) t->a.elts) + t->a.nelts;
 
     for (; next_elt <= end_elt; next_elt++) {
 	if ((checksum == next_elt->key_checksum) &&
@@ -612,8 +614,6 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
              * for the index)
              */
             if (dst_elt) {
-                apr_table_entry_t *table_end =
-                    ((apr_table_entry_t *) t->a.elts) + t->a.nelts;
                 for (; next_elt < table_end; next_elt++) {
                     *dst_elt++ = *next_elt;
                 }
