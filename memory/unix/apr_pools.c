@@ -712,13 +712,13 @@ APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp)
     apr_pool_destroy(globalp);
 }
 
-/* We only want to lock the mutex if we are being called from apr_clear_pool.
+/* We only want to lock the mutex if we are being called from apr_pool_clear.
  * This is because if we also call this function from apr_destroy_real_pool,
  * which also locks the same mutex, and recursive locks aren't portable.  
  * This way, we are garaunteed that we only lock this mutex once when calling
  * either one of these functions.
  */
-APR_DECLARE(void) apr_clear_pool(apr_pool_t *a)
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *a)
 {
     while (a->sub_pools) {
 	apr_pool_destroy(a->sub_pools);
@@ -755,7 +755,7 @@ APR_DECLARE(void) apr_clear_pool(apr_pool_t *a)
 
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *a)
 {
-    apr_clear_pool(a);
+    apr_pool_clear(a);
 #if APR_HAS_THREADS
     if (alloc_mutex) {
         apr_lock_acquire(alloc_mutex);

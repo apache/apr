@@ -291,9 +291,9 @@ APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
  * @param p The pool to clear
  * @tip  This does not actually free the memory, it just allows the pool
  *       to re-use this memory for the next allocation.
- * @deffunc void apr_clear_pool(apr_pool_t *p)
+ * @deffunc void apr_pool_clear(apr_pool_t *p)
  */
-APR_DECLARE(void) apr_clear_pool(apr_pool_t *p);
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
 
 /**
  * destroy the pool

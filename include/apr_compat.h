@@ -19,7 +19,7 @@
 #define ap_check_file_time apr_check_file_time
 #define ap_filetype_e apr_filetype_e
 #define ap_cleanup_for_exec apr_pool_cleanup_for_exec
-#define ap_clear_pool apr_clear_pool
+#define ap_clear_pool apr_pool_clear
 #define ap_clear_table apr_table_clear
 #define ap_copy_array apr_array_copy
 #define ap_copy_array_hdr apr_array_copy_hdr
