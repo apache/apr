@@ -851,7 +851,7 @@ AC_CHECK_FUNCS(crypt_r, [ crypt_r="1" ], [ crypt_r="0" ])
 if test "$crypt_r" = "1"; then
   APR_CHECK_CRYPT_R_STYLE
 fi
-AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
+AC_CHECK_FUNCS(iconv, [ have_iconv="1" ], [ have_iconv="0" ])
 if test "$iconv" = "1"; then
   APR_CHECK_ICONV_INBUF
 fi
@@ -871,7 +871,7 @@ AC_SUBST(have_inet_network)
 AC_SUBST(have_sigaction)
 AC_SUBST(have_setrlimit)
 AC_SUBST(have_getrlimit)
-AC_SUBST(iconv)
+AC_SUBST(have_iconv)
 AC_SUBST(mmap)
 AC_SUBST(have_memmove)
 

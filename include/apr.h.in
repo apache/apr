@@ -99,6 +99,7 @@
 
 #define APR_HAVE_CORKABLE_TCP   @have_corkable_tcp@ 
 #define APR_HAVE_GETRLIMIT      @have_getrlimit@
+#define APR_HAVE_ICONV          @have_iconv@
 #define APR_HAVE_IN_ADDR        @have_in_addr@
 #define APR_HAVE_INET_ADDR      @have_inet_addr@
 #define APR_HAVE_INET_NETWORK   @have_inet_network@
@@ -137,7 +138,6 @@
 #define APR_HAS_MMAP              @mmap@
 #define APR_HAS_FORK              @fork@
 #define APR_HAS_RANDOM            @rand@
-#define APR_HAS_XLATE             @iconv@
 #define APR_HAS_OTHER_CHILD       @oc@
 #define APR_HAS_DSO               @aprdso@
 #define APR_HAS_SO_ACCEPTFILTER   @acceptfilter@
