@@ -71,7 +71,7 @@
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
 
-static apr_status_t check_basic_atomics()
+static apr_status_t check_basic_atomics(void)
 {
     apr_atomic_t oldval;
     apr_uint32_t casval = 0;
