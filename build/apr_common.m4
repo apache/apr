@@ -387,22 +387,18 @@ dnl  we use what's provided as FLAG-TO-SET. If the 3rd parameter
 dnl  is "yes" then instead of setting to 1 or 0, we set FLAG-TO-SET
 dnl  to yes or no.
 dnl
+dnl  DON'T USE YET !!
+dnl
 AC_DEFUN(APR_FLAG_FUNCS,[
-for aprt_i in $1
+AC_CHECK_FUNCS($1)
+for aprt_j in $1
 do
-    if test "x$2" = "x"; then
-        aprt_fts="have_$aprt_i"
+    aprt_3="have_$aprt_j"
+    if eval "test \"`echo '$ac_cv_func_'$aprt_j`\" = yes"; then
+       eval "ifelse($2,,$aprt_3,$2)=ifelse($3,yes,yes,1)"
     else
-        aprt_fts="$2"
+       eval "ifelse($2,,$aprt_3,$2)=ifelse($3,yes,no,0)"
     fi
-    if test "x$3" = "xyes"; then
-        s1="$aprt_fts=\"yes\""
-        s0="$aprt_fts=\"no\""
-    else
-        s1="$aprt_fts=\"1\""
-        s0="$aprt_fts=\"0\""
-    fi
-    AC_CHECK_FUNCS($aprt_i, eval $s1, eval $s0)
 done
 ])
 
