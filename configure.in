@@ -790,6 +790,10 @@ case "$OS" in
         ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
         size_t_fmt='#define APR_SIZE_T_FMT "ld"'
         ;;
+    *apple-darwin*)
+        ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
+        size_t_fmt='#define APR_SIZE_T_FMT "lu"'
+        ;;
 esac
 
 AC_SUBST(short_value)
