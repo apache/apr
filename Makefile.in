@@ -61,7 +61,7 @@ delete-exports:
 	    fi \
 	fi
 
-$(TARGET_EXPORTS):
+$(TARGET_EXPORTS): include/*.h
 	$(MKEXPORT) include/*.h > $@
 
 docs:
