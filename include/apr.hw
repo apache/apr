@@ -186,9 +186,6 @@
 #ifndef NOGDI
 #define NOGDI
 #endif
-#ifndef NONLS
-#define NONLS
-#endif
 #ifndef NOMCX
 #define NOMCX
 #endif
