@@ -73,6 +73,7 @@ int main()
     ap_file_t *thefile;
     ap_int32_t flag = APR_READ;
     char *file1;
+    ap_ssize_t filesize;
     
     fprintf (stdout,"APR MMAP Test\n*************\n\n");
     
@@ -87,13 +88,6 @@ int main()
     getcwd(file1, PATH_LEN);
     strncat(file1,"/testmmap.c",11);  
 
-    fprintf(stdout,"Trying to delete the mmap file......");
-    if (ap_mmap_delete(themmap) != APR_SUCCESS) {
-        fprintf(stderr,"Failed!\n");
-        exit (-1);
-    }
-    fprintf(stdout,"OK\n\n");
-
     fprintf(stdout, "Opening file........................");
     if (ap_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context) != APR_SUCCESS) {
         perror("Didn't open file");
@@ -102,9 +96,18 @@ int main()
     else {
         fprintf(stdout, "OK\n");
     }
+    
+    fprintf(stderr, "Getting file size...................");
+    if (ap_get_filesize(&filesize, thefile) != APR_SUCCESS) {
+        perror("Didn't open file");
+        exit(-1);
+    }
+    else {
+        fprintf(stdout, "%d bytes\n", filesize);
+    }  
 
     fprintf(stdout,"Trying to mmap the open file........");
-    if (ap_mmap_create(&themmap, thefile, 0, 0, context) != APR_SUCCESS) {
+    if (ap_mmap_create(&themmap, thefile, 0, filesize, context) != APR_SUCCESS) {
         fprintf(stderr,"Failed!\n");
         exit(-1);
     }
