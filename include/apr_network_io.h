@@ -371,9 +371,7 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new_sock,
  * Issue a connection request to a socket either on the same machine 
  * or a different one.
  * @param sock The socket we wish to use for our side of the connection 
- * @param sa The address of the machine we wish to connect to.  If NULL,
- *           APR assumes that the sockaddr_in in the apr_socket is 
- *           completely filled out.
+ * @param sa The address of the machine we wish to connect to.
  */
 APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa);
@@ -694,15 +692,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
                                                 apr_sockaddr_t *sockaddr);
-
-/**
- * Set the IP address in an APR socket address.
- * @param sockaddr The socket address to use 
- * @param addr The IP address to attach to the socket.
- *             Use APR_ANYADDR to use any IP addr on the machine.
- */
-APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
-                                              const char *addr);
 
 /**
  * Return the IP address (in numeric address string format) in
