@@ -165,7 +165,7 @@ static apr_status_t check_basic_atomics(void)
     return APR_SUCCESS;
 }
 
-static apr_status_t check_basic_atomics32()
+static apr_status_t check_basic_atomics32(void)
 {
     apr_uint32_t oldval;
     apr_uint32_t casval = 0;
