@@ -61,7 +61,7 @@ distclean: subdirs_distclean
 	-$(RM) -f config.cache config.status config.log configure
 	-$(RM) -f Makefile
 	-$(RM) -rf objs
-	cd test; make distclean; cd ..
+	cd test; $(MAKE) distclean; cd ..
 
 subdirs:
 	@for i in $(SUBDIRS); do \
