@@ -87,8 +87,19 @@ extern "C" {
 #define apr_atomic_read(mem)         atomic_read(mem)
 #define apr_atomic_init(pool)        APR_SUCCESS
 
-#else /* !defined(WIN32) && !defined(__linux) */
+#elif defined(__sparc__not_ready_yet)
+#define apr_atomic_t apr_uint32_t
+#define apr_atomic_read(p)  *p
 
+#define apr_atomic_add(mem, val)     apr_atomic_add_sparc(mem,val)
+#define apr_atomic_dec(mem)          apr_atomic_sub_sparc(mem,1)
+#define apr_atomic_inc(mem)          apr_atomic_add_sparc(mem,1)
+#define apr_atomic_set(mem, val)     *mem= val
+#define apr_atomic_init(pool)        APR_SUCCESS
+
+apr_uint32_t apr_atomic_add_sparc( volatile apr_atomic_t* mem, apr_uint32_t add);
+apr_uint32_t apr_atomic_sub_sparc( volatile apr_atomic_t* mem, apr_uint32_t sub);
+#else
 #if APR_HAS_THREADS
 
 #define apr_atomic_t apr_uint32_t
@@ -100,6 +111,7 @@ apr_uint32_t apr_atomic_inc(volatile apr_atomic_t *mem);
 apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem);
 /*long apr_atomic_cas(volatile apr_atomic_t *mem,long with,long cmp);*/
 
+#define APR_ATOMIC_NEED_DEFAULT 1
 #endif /* APR_HAS_THREADS */
 
 #endif /* !defined(WIN32) && !defined(__linux) */
