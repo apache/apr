@@ -1543,12 +1543,13 @@ dnl #----------------------------- Checking for /dev/random
 AC_MSG_CHECKING(for entropy source)
 
 AC_ARG_WITH(egd, 
-  [  --with-egd=<path>       use egd-compatible socket],
-  [ if test "$withval" = "yes"; then
-      AC_ERROR([You must specify a default EGD socket path.])
+  [  --with-egd[[=<path>]]       use egd-compatible socket],
+  [ AC_DEFINE(HAVE_EGD)
+    if test "$withval" = "yes"; then
+        AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, ["/var/run/egd-pool","/dev/egd-pool","/etc/egd-pool","/etc/entropy"])
+    else
+        AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, ["$withval"])
     fi
-    AC_DEFINE(HAVE_EGD)
-    AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, [$withval])
     AC_MSG_RESULT(EGD-compatible daemon)
     rand="1"
   ])

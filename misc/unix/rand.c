@@ -86,7 +86,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
 #ifdef DEV_RANDOM
 
     int rnd;
-    size_t got, tot;
+    apr_size_t got, tot;
 
     if ((rnd = open(STR(DEV_RANDOM), O_RDONLY)) == -1) 
 	return errno;
@@ -119,76 +119,87 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
      * 0x04 (report PID)
      *   0xMM (length of PID string, not null-terminated) MM chars
      */
-    int egd_socket, egd_path_len, rv;
+    static const char *egd_sockets[] = { EGD_DEFAULT_SOCKET, NULL };
+    const char **egdsockname = NULL;
+
+    int egd_socket, egd_path_len, rv, bad_errno;
     struct sockaddr_un addr;
     apr_socklen_t egd_addr_len;
-    size_t resp_expected;
+    apr_size_t resp_expected;
     unsigned char req[2], resp[255];
     unsigned char *curbuf = buf;
 
-    egd_path_len = strlen(STR(EGD_DEFAULT_SOCKET));
-
-    if (egd_path_len > sizeof(addr.sun_path)) {
-        return APR_EINVAL;
-    }
-
-    memset(&addr, 0, sizeof(struct sockaddr_un));
-    addr.sun_family = AF_UNIX;
-    memcpy(addr.sun_path, STR(EGD_DEFAULT_SOCKET), egd_path_len);
-    egd_addr_len = APR_OFFSETOF(struct sockaddr_un, sun_path) + 
-                   egd_path_len; 
-
-    egd_socket = socket(PF_UNIX, SOCK_STREAM, 0);
-
-    if (egd_socket == -1) {
-        return errno;
-    }
-
-    rv = connect(egd_socket, (struct sockaddr*)&addr, egd_addr_len);
-
-    if (rv == -1) {
-        return errno;
-    }
-
-    /* EGD can only return 255 bytes of data at a time.  Silly.  */ 
-    while (length > 0) {
-        ssize_t srv;
-        req[0] = 2; /* We'll block for now. */
-        req[1] = length > 255 ? 255: length;
-
-        srv = write(egd_socket, req, 2);
-        if (srv == -1) {
-            int bad_errno = errno;
-
-            shutdown(egd_socket, SHUT_RDWR);
-            close(egd_socket);
-            return bad_errno;
+    for (egdsockname = egd_sockets; *egdsockname && length > 0; egdsockname++) {
+        egd_path_len = strlen(*egdsockname);
+        
+        if (egd_path_len > sizeof(addr.sun_path)) {
+            return APR_EINVAL;
         }
 
-        if (srv != 2) {
-            shutdown(egd_socket, SHUT_RDWR);
-            close(egd_socket);
-            return APR_EGENERAL;  /* Try again. */
+        memset(&addr, 0, sizeof(struct sockaddr_un));
+        addr.sun_family = AF_UNIX;
+        memcpy(addr.sun_path, *egdsockname, egd_path_len);
+        egd_addr_len = APR_OFFSETOF(struct sockaddr_un, sun_path) + 
+          egd_path_len; 
+
+        egd_socket = socket(PF_UNIX, SOCK_STREAM, 0);
+
+        if (egd_socket == -1) {
+            return errno;
         }
 
-        resp_expected = req[1];
-        srv = read(egd_socket, resp, resp_expected);
-        if (srv == -1) {
-            int bad_errno = errno;
+        rv = connect(egd_socket, (struct sockaddr*)&addr, egd_addr_len);
 
-            shutdown(egd_socket, SHUT_RDWR);
-            close(egd_socket);
-            return bad_errno;
+        if (rv == -1) {
+            bad_errno = errno;
+            continue;
         }
 
-        memcpy(curbuf, resp, srv);
-        curbuf += srv;
-        length -= srv;
+        /* EGD can only return 255 bytes of data at a time.  Silly.  */ 
+        while (length > 0) {
+            apr_ssize_t srv;
+            req[0] = 2; /* We'll block for now. */
+            req[1] = length > 255 ? 255: length;
+
+            srv = write(egd_socket, req, 2);
+            if (srv == -1) {
+                bad_errno = errno;
+                shutdown(egd_socket, SHUT_RDWR);
+                close(egd_socket);
+                break;
+            }
+
+            if (srv != 2) {
+                shutdown(egd_socket, SHUT_RDWR);
+                close(egd_socket);
+                return APR_EGENERAL;
+            }
+            
+            resp_expected = req[1];
+            srv = read(egd_socket, resp, resp_expected);
+            if (srv == -1) {
+                bad_errno = errno;
+                shutdown(egd_socket, SHUT_RDWR);
+                close(egd_socket);
+                return bad_errno;
+            }
+            
+            memcpy(curbuf, resp, srv);
+            curbuf += srv;
+            length -= srv;
+        }
+        
+        shutdown(egd_socket, SHUT_RDWR);
+        close(egd_socket);
     }
 
-    shutdown(egd_socket, SHUT_RDWR);
-    close(egd_socket);
-    
+    if (length > 0) {
+        /* We must have iterated through the list of sockets,
+         * and no go. Return the errno.
+         */
+        return bad_errno;
+    }
+
 #elif defined(HAVE_TRUERAND) /* use truerand */
 
     extern int randbyte(void);	/* from the truerand library */
