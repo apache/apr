@@ -8,8 +8,7 @@ INCDIR=../include
 INCLUDES=-I$(INCDIR)
 MKDEP=../helpers/mkdep.sh
 
-TARGETS= testmd5@EXEEXT@ \
-	testfile@EXEEXT@ \
+TARGETS= testfile@EXEEXT@ \
 	testflock@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
@@ -26,8 +25,7 @@ TARGETS= testmd5@EXEEXT@ \
 	occhild@EXEEXT@ \
 	mod_test.so
 
-OBJS= testmd5.o \
-	testfile.o \
+OBJS= testfile.o \
 	testflock.o \
 	testproc.o \
 	testsock.o \
@@ -46,9 +44,6 @@ OBJS= testmd5.o \
 	$(CC) -c $(CFLAGS) $(INCLUDES) $<
 
 all: $(TARGETS) 
-
-testmd5@EXEEXT@: testmd5.o
-	$(CC) $(CFLAGS) -o testmd5@EXEEXT@ testmd5.o $(LDFLAGS)
 
 testfile@EXEEXT@: testfile.o
 	$(CC) $(CFLAGS) -o testfile@EXEEXT@ testfile.o $(LDFLAGS) 
