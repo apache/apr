@@ -165,8 +165,9 @@
 
 #define APR_HAVE_CORKABLE_TCP	0
 #define APR_HAVE_GETRLIMIT      0
+#define APR_HAVE_ICONV          0
 #define APR_HAVE_IN_ADDR        1
-#define APR_HAVE_INET_ADDR		1
+#define APR_HAVE_INET_ADDR      1
 #define APR_HAVE_INET_NETWORK   0
 #define APR_HAVE_IPV6           0
 #define APR_HAVE_MEMCHR         1
@@ -200,7 +201,6 @@
 #define APR_HAS_MMAP              0
 #define APR_HAS_FORK              0
 #define APR_HAS_RANDOM            1
-#define APR_HAS_XLATE             0
 #define APR_HAS_OTHER_CHILD       0
 #define APR_HAS_DSO               1
 #define APR_HAS_SO_ACCEPTFILTER   0

@@ -24,7 +24,6 @@
 #include "apr_hash.h"
 #include "apr_inherit.h"
 #include "apr_lib.h"
-#include "apr_md5.h"
 #include "apr_mmap.h"
 #include "apr_network_io.h"
 #include "apr_poll.h"
@@ -43,10 +42,9 @@
 #include "apr_thread_rwlock.h"
 #include "apr_time.h"
 #include "apr_user.h"
-#include "apr_uuid.h"
 #include "apr_version.h"
 #include "apr_want.h"
-#include "apr_xlate.h"
+
 
 /* Must include apu.h first so that we can undefine
     the standard prototypes macros after it messes with
