@@ -131,7 +131,7 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
     }
  
     (*dafile)->filehand = CreateFile(fname, oflags, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                                     NULL, createflags, FILE_ATTRIBUTE_NORMAL, 0);
+                                     NULL, createflags, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0);
 
     if ((*dafile)->filehand == INVALID_HANDLE_VALUE) {
         theerror = GetLastError();
