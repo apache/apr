@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Improve detection of the INT64_C macro to prevent problems
+     with HP-UX's ANSI C compiler.  PR 8932.  [Justin Erenkrantz]
+
   *) Make sure gethostbyname() can handle 255.255.255.255 if we
      are to trust it to handle numeric address strings in
      apr_sockaddr_info_get().  This fixes a problem on HP-UX
