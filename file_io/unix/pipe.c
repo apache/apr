@@ -60,6 +60,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -84,6 +85,7 @@ static ap_status_t pipenonblock(struct file_t *thefile)
     return APR_SUCCESS;
 }
 
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_set_pipe_timeout(ap_file_t *, ap_int32_t)
  *    Set the timeout value for a pipe.
@@ -99,8 +101,6 @@ ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
     }
     return APR_EINVAL;
 }
-
-
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_pipe(ap_file_t **, ap_context_t *, ap_file_t **)
@@ -159,4 +159,26 @@ ap_status_t ap_create_namedpipe(char **new, char *dirpath,
     }
     return APR_SUCCESS;
 } 
+
+ap_status_t ap_block_pipe(ap_file_t *thefile)
+{
+    int fd_flags;
+
+    fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
+#if defined(O_NONBLOCK)
+    fd_flags &= ~O_NONBLOCK;
+#elif defined(~O_NDELAY)
+    fd_flags &= ~O_NDELAY;
+#elif defined(FNDELAY)
+    fd_flags &= ~O_FNDELAY;
+#else
+    /* XXXX: this breaks things, but an alternative isn't obvious...*/
+    return -1;
+#endif
+    if (fcntl(thefile->filedes, F_SETFL, fd_flags) == -1) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+    
 
