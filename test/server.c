@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
     
-    fprintf(stdout, "\tServer:  Shutting down accepte socket.......");
+    fprintf(stdout, "\tServer:  Shutting down accepted socket.......");
     if (apr_shutdown(sock2, APR_SHUTDOWN_READ) != APR_SUCCESS) {
         apr_close_socket(sock);
         apr_close_socket(sock2);
