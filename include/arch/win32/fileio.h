@@ -240,7 +240,7 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p);
 
 /* The apr_filepath_merge wants to canonicalize the cwd to the 
  * addpath if the user passes NULL as the old root path (this
- * isn't true of an empty string "", which won't be concatinated.
+ * isn't true of an empty string "", which won't be concatenated.
  *
  * But we need to figure out what the cwd of a given volume is,
  * when the user passes D:foo.  This fn will determine D:'s cwd.
