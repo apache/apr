@@ -372,6 +372,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-ibm-os390)
        APR_SETIFNULL(apr_lock_method, [USE_SYSVSEM_SERIALIZE])
        APR_SETIFNULL(apr_process_lock_is_global, [yes])
+       APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
+       APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
        APR_SETIFNULL(CC, [cc])
        APR_ADDTO(CPPFLAGS, [-U_NO_PROTO -DPTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR -DPTHREAD_SETS_ERRNO -DPTHREAD_DETACH_ARG1_ADDR -DSIGPROCMASK_SETS_THREAD_MASK -DTCP_NODELAY=1])
        ;;

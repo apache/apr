@@ -353,8 +353,18 @@ ac_cv_define_GETHOSTBYADDR_IS_THREAD_SAFE=no
 if test "$threads" = "1"; then
     echo "APR will use threads"
     AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
-    AC_CHECK_LIB(c_r, gethostbyname, AC_DEFINE(GETHOSTBYNAME_IS_THREAD_SAFE))
-    AC_CHECK_LIB(c_r, gethostbyaddr, AC_DEFINE(GETHOSTBYADDR_IS_THREAD_SAFE))
+    if test "x$apr_gethostbyname_is_thread_safe" = "x"; then
+        AC_CHECK_LIB(c_r, gethostbyname, apr_gethostbyname_is_thread_safe=yes)
+    fi
+    if test "$apr_gethostbyname_is_thread_safe" = "yes"; then
+        AC_DEFINE(GETHOSTBYNAME_IS_THREAD_SAFE)
+    fi
+    if test "x$apr_gethostbyaddr_is_thread_safe" = "x"; then
+        AC_CHECK_LIB(c_r, gethostbyaddr, apr_gethostbyaddr_is_thread_safe=yes)
+    fi
+    if test "$apr_gethostbyaddr_is_thread_safe" = "yes"; then
+        AC_DEFINE(GETHOSTBYADDR_IS_THREAD_SAFE)
+    fi
     AC_CHECK_FUNCS(gethostbyname_r gethostbyaddr_r)
 else
     echo "APR will be non-threaded"
