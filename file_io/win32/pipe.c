@@ -116,15 +116,27 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 
     (*in) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     (*in)->cntxt = cont;
-    (*in)->pipe = 1;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in)->pipe = 1;
     (*in)->timeout = -1;
+    (*in)->ungetchar = -1;
+    (*in)->eof_hit = 0;
+    (*in)->filePtr = 0;
+    (*in)->bufpos = 0;
+    (*in)->dataRead = 0;
+    (*in)->direction = 0;
 
     (*out) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     (*out)->cntxt = cont;
-    (*out)->pipe = 1;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out)->pipe = 1;
     (*out)->timeout = -1;
+    (*out)->ungetchar = -1;
+    (*out)->eof_hit = 0;
+    (*out)->filePtr = 0;
+    (*out)->bufpos = 0;
+    (*out)->dataRead = 0;
+    (*out)->direction = 0;
 
     if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
         return GetLastError();

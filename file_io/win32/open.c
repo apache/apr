@@ -74,7 +74,7 @@ ap_status_t file_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_open(ap_file_t **dafile, const char *fname, 
+ap_status_t ap_open(ap_file_t **new, const char *fname, 
                     ap_int32_t flag, ap_fileperms_t perm, ap_pool_t *cont)
 {
     DWORD oflags = 0;
@@ -84,9 +84,11 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
     ap_oslevel_e level;
     ap_status_t rv;
 
-    (*dafile) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
+    if ((*new) == NULL) {
+        (*new) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
+    }
 
-    (*dafile)->cntxt = cont;
+    (*new)->cntxt = cont;
 
     if (flag & APR_READ) {
         oflags |= GENERIC_READ;
@@ -95,24 +97,24 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
         oflags |= GENERIC_WRITE;
     }
     if (!(flag & APR_READ) && !(flag & APR_WRITE)) {
-        (*dafile)->filehand = INVALID_HANDLE_VALUE;
+        (*new)->filehand = INVALID_HANDLE_VALUE;
         return APR_EACCES;
     }
 
-    (*dafile)->buffered = (flag & APR_BUFFERED) > 0;
+    (*new)->buffered = (flag & APR_BUFFERED) > 0;
 
-    if ((*dafile)->buffered) {
-        (*dafile)->buffer = ap_palloc(cont, APR_FILE_BUFSIZE);
-        rv = ap_create_lock(&(*dafile)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
+    if ((*new)->buffered) {
+        (*new)->buffer = ap_palloc(cont, APR_FILE_BUFSIZE);
+        rv = ap_create_lock(&(*new)->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
 
         if (rv)
             return rv;
     }
 
-    (*dafile)->fname = ap_pstrdup(cont, fname);
+    (*new)->fname = ap_pstrdup(cont, fname);
 
-    (*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
-    (*dafile)->lowerdemonfname = strlwr((*dafile)->demonfname);
+    (*new)->demonfname = canonical_filename((*new)->cntxt, fname);
+    (*new)->lowerdemonfname = strlwr((*new)->demonfname);
  
     if (ap_get_oslevel(cont, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
         sharemode |= FILE_SHARE_DELETE;
@@ -138,15 +140,15 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
     }
 
     if ((flag & APR_EXCL) && !(flag & APR_CREATE)) {
-        (*dafile)->filehand = INVALID_HANDLE_VALUE;
+        (*new)->filehand = INVALID_HANDLE_VALUE;
         return APR_EACCES;
     }   
 
     if (flag & APR_APPEND) {
-        (*dafile)->append = 1;
+        (*new)->append = 1;
     }
     else {
-        (*dafile)->append = 0;
+        (*new)->append = 0;
     }
 
     attributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN;
@@ -154,18 +156,28 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
     }
 
-    (*dafile)->filehand = CreateFile(fname, oflags, sharemode,
+    (*new)->filehand = CreateFile(fname, oflags, sharemode,
                                      NULL, createflags, attributes, 0);
 
-    if ((*dafile)->filehand == INVALID_HANDLE_VALUE) {
+    if ((*new)->filehand == INVALID_HANDLE_VALUE) {
         return GetLastError();
     }
     if (flag & APR_APPEND) {
-        SetFilePointer((*dafile)->filehand, 0, NULL, FILE_END);
+        SetFilePointer((*new)->filehand, 0, NULL, FILE_END);
     }
 
-    (*dafile)->eof_hit = 0;
-    ap_register_cleanup((*dafile)->cntxt, (void *)(*dafile), file_cleanup,
+    (*new)->pipe = 0;
+    (*new)->timeout = -1;
+    (*new)->ungetchar = -1;
+    (*new)->eof_hit = 0;
+
+    /* Buffered mode fields not initialized above */
+    (*new)->bufpos = 0;
+    (*new)->dataRead = 0;
+    (*new)->direction = 0;
+    (*new)->filePtr = 0;
+
+    ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;
 }
