@@ -62,7 +62,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-/*#include <process.h>*/
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -138,7 +137,7 @@ int main(void)
     }
     else if (pid > 0) {
         msgput(1, "Sending a message\n");
-    apr_sleep(1);
+        apr_sleep(1);
         msgwait(0);
         exit(1);
     }
