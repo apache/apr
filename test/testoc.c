@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     ap_pool_t *cont2;
     ap_status_t status = 0;
     ap_ssize_t nbytes = 0;
-    ap_proc_t *newproc = NULL;
+    ap_proc_t newproc;
     ap_procattr_t *procattr = NULL;
     ap_file_t *std = NULL;
     char *args[3];
@@ -131,14 +131,14 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
-    ap_get_childin(&std, newproc);
+    std = newproc.in;
 
-    ap_register_other_child(newproc, ocmaint, NULL, std, context);
+    ap_register_other_child(&newproc, ocmaint, NULL, std, context);
 
     fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
     fflush(stdout);
     sleep(1);
-    if (ap_kill(newproc, SIGKILL) != APR_SUCCESS) {
+    if (ap_kill(&newproc, SIGKILL) != APR_SUCCESS) {
         fprintf(stderr,"couldn't send the signal!\n");
         exit(-1);
     }
