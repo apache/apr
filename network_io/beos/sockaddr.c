@@ -57,24 +57,36 @@
 
 ap_status_t ap_set_local_port(struct socket_t *sock, ap_uint32_t port)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
     sock->local_addr->sin_port = htons((short)port);
     return APR_SUCCESS;
 }
 
 ap_status_t ap_set_remote_port(struct socket_t *sock, ap_uint32_t port)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
     sock->remote_addr->sin_port = htons((short)port);
     return APR_SUCCESS;
 }
 
 ap_status_t ap_get_local_port(ap_uint32_t *port, struct socket_t *sock)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
     *port = ntohs(sock->local_addr->sin_port);
     return APR_SUCCESS;
 }
 
 ap_status_t ap_get_remote_port(ap_uint32_t *port, struct socket_t *sock)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
     *port = ntohs(sock->remote_addr->sin_port);
     return APR_SUCCESS;
 }
@@ -82,6 +94,10 @@ ap_status_t ap_get_remote_port(ap_uint32_t *port, struct socket_t *sock)
 ap_status_t ap_set_local_ipaddr(struct socket_t *sock, const char *addr)
 {
     u_long ipaddr;
+
+    if (!sock) {
+        return APR_EBADF;
+    }
     
     if (!strcmp(addr, APR_ANYADDR)) {
         sock->local_addr->sin_addr.s_addr = htonl(INADDR_ANY);
@@ -101,6 +117,10 @@ ap_status_t ap_set_local_ipaddr(struct socket_t *sock, const char *addr)
 ap_status_t ap_set_remote_ipaddr(struct socket_t *sock, const char *addr)
 {
     u_long ipaddr;
+
+    if (!sock) {
+        return APR_EBADF;
+    }
     
     if (!strcmp(addr, APR_ANYADDR)) {
         sock->remote_addr->sin_addr.s_addr = htonl(INADDR_ANY);
@@ -119,12 +139,20 @@ ap_status_t ap_set_remote_ipaddr(struct socket_t *sock, const char *addr)
 
 ap_status_t ap_get_local_ipaddr(char **addr, const struct socket_t *sock)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
+
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sin_addr));
     return APR_SUCCESS;
 }
 
 ap_status_t ap_get_remote_ipaddr(char **addr, const struct socket_t *sock)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
+
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sin_addr));
     return APR_SUCCESS;
 }
@@ -132,12 +160,20 @@ ap_status_t ap_get_remote_ipaddr(char **addr, const struct socket_t *sock)
 
 ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct socket_t *sock)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
+
     *name = sock->local_addr;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_get_remote_name(struct sockaddr_in **name, const struct socket_t *sock)
 {
+    if (!sock) {
+        return APR_EBADF;
+    }
+
     *name = sock->remote_addr;
     return APR_SUCCESS;
 }

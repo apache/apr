@@ -89,6 +89,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
 	(*new)->remote_addr->sin_family = AF_INET; 
     (*new)->addr_len = sizeof(*(*new)->local_addr);
 	memset(&(*new)->local_addr->sin_zero, 0, sizeof((*new)->local_addr->sin_zero));
+	memset(&(*new)->remote_addr->sin_zero, 0, sizeof((*new)->remote_addr->sin_zero));
 
     if ((*new)->socketdes < 0) {
         return errno;
@@ -102,12 +103,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
 
 ap_status_t ap_shutdown(struct socket_t *thesocket, ap_shutdown_how_e how)
 {
-    if (shutdown(thesocket->socketdes, how) == 0) {
-        return APR_SUCCESS;
-    }
-    else {
-        return errno;
-    }
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_close_socket(struct socket_t *thesocket)
@@ -140,16 +136,19 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
     (*new)->cntxt = connection_context;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
-    memcpy((*new)->local_addr, sock->local_addr, sizeof(struct sockaddr_in));
 
     (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->addr_len = sizeof(struct sockaddr_in);
     (*new)->connected = 1;
     
-    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->local_addr,
+    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
                         &(*new)->addr_len);
 
+    if (getsockname((*new)->socketdes, (struct sockaddr *)(*new)->local_addr,
+         &((*new)->addr_len)) < 0) {
+        return errno;
+    }
 	if ((*new)->socketdes <0){
 		return errno;
 	}
