@@ -3,6 +3,8 @@ Debug
 Release
 *.lo
 *.swp
+*.slo
+*.la
 .libs
 .deps
 testmd5
