@@ -53,18 +53,4 @@
  *
  */
 
-#ifndef MISC_H
-#define MISC_H
-
-#include "apr_general.h"
-#include "apr_file_io.h"
-#include "apr_errno.h"
-#include "apr_getopt.h"
-
-struct context_t {
-    struct ap_pool_t *pool;
-    void *prog_data;
-};
-
-#endif  /* ! MISC_H */
-
+#include "../unix/misc.h"
