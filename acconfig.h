@@ -34,6 +34,8 @@
 #undef SIZEOF_OFF_T
 #undef SIZEOF_PID_T
 
+#undef HAVE_INT64_C
+
 #undef HAVE_MM_SHMT_MMFILE
 
 /* BeOS specific flag */
