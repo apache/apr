@@ -81,18 +81,6 @@ static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
- *    Read data from the specified file.
- * arg 1) The file descriptor to read from.
- * arg 2) The buffer to store the data to.
- * arg 3) The number of bytes to read.
- * NOTE:  ap_read will read up to the specified number of bytes, but never
- * more.  If there isn't enough data to fill that number of bytes, all of
- * the available data is read.  The third argument is modified to reflect the
- * number of bytes read.  If a char was put back into the stream via
- * ungetc, it will be the first character returned. 
- */
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_ssize_t rv;
@@ -149,17 +137,6 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     return errno;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
- *    Write data to the specified file.
- * arg 1) The file descriptor to write to.
- * arg 2) The buffer which contains the data.
- * arg 3) The number of bytes to write.
- * NOTE:  ap_write will write up to the specified number of bytes, but never
- * more.  If the OS cannot write that many bytes, it will write as many as it
- * can.  The third argument is modified to reflect the * number of bytes 
- * written. 
- */
 ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
@@ -194,21 +171,10 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     return APR_SUCCESS;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_writev(ap_file_t *thefile, struct iovec *vec, ap_size_t nvec,
- *                       ap_ssize_t *nbytes)
- *    Write data from iovec array to the specified file.
- * arg 1) The file descriptor to write to.
- * arg 2) The array from which to get the data to write to the file.
- * arg 3) The number of elements in the struct iovec array. This must be
- *        smaller than AP_MAX_IOVEC_SIZE.  If it isn't, the function will
- *        fail with APR_EINVAL.
- * arg 4) The number of bytes written.
- */
-#ifdef HAVE_WRITEV
 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
                       ap_size_t nvec, ap_ssize_t *nbytes)
 {
+#ifdef HAVE_WRITEV
     int bytes;
 
     if(thefile == NULL || vec == NULL || nvec < 0 || nbytes == NULL)
@@ -222,15 +188,12 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
         *nbytes = bytes;
         return APR_SUCCESS;
     }
-}
+#else
+    *nbytes = vec[0].iov_len;
+    return ap_write(thefile, vec[0].iov_base, nbytes);
 #endif
+}
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_putc(char ch, ap_file_t *thefile)
- *    put a character into the specified file.
- * arg 1) The character to write.
- * arg 2) The file descriptor to write to
- */
 ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
     if(thefile == NULL)
@@ -242,12 +205,6 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
- *    put a character back onto a specified stream.
- * arg 1) The character to write.
- * arg 2) The file descriptor to write to
- */
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
     if(thefile == NULL)
@@ -257,12 +214,6 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_getc(char *ch, ap_file_t *thefil)
- *    get a character from the specified file.
- * arg 1) The character to write.
- * arg 2) The file descriptor to write to
- */
 ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
     ssize_t rv;
@@ -286,12 +237,6 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_puts(char *str, ap_file_t *thefile)
- *    Put the string into a specified file.
- * arg 1) The string to write. 
- * arg 2) The file descriptor to write to from
- */
 ap_status_t ap_puts(char *str, ap_file_t *thefile)
 {
     ssize_t rv;
@@ -308,11 +253,6 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_flush(ap_file_t *thefile)
- *    Flush the file's buffer.
- * arg 1) The file descriptor to flush
- */
 ap_status_t ap_flush(ap_file_t *thefile)
 {
 /* Another function to get rid of once we finish removing buffered I/O
@@ -327,13 +267,6 @@ ap_status_t ap_flush(ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
- *    Get a string from a specified file.
- * arg 1) The buffer to store the string in. 
- * arg 2) The length of the string
- * arg 3) The file descriptor to read from
- */
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     ssize_t rv;
