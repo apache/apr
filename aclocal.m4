@@ -131,8 +131,6 @@ else
 ifelse([$3], , , [  $3 
   rm -fr conftest*
 ])dnl
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat conftest.$ac_ext >&AC_FD_CC
 fi
 rm -fr conftest*])
 
