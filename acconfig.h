@@ -53,7 +53,7 @@
 
 @BOTTOM@
 
-/* Make sure we have ssize_t defined to be somethine */
+/* Make sure we have ssize_t defined to be something */
 #undef ssize_t
 
 #if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP)
