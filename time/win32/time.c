@@ -123,8 +123,8 @@ ap_status_t ap_get_os_time(ap_os_time_t **atime, struct atime_t *thetime)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_time(ap_context_t *cont, struct atime_t **thetime, 
-                           ap_os_time_t *atime)
+ap_status_t ap_put_os_time(struct atime_t **thetime, ap_os_time_t *atime, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

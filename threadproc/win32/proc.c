@@ -95,20 +95,20 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
 {
     ap_status_t stat;
     if (in) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->child_in, 
-                            &attr->parent_in)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->child_in, &attr->parent_in, 
+                                   attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
     if (out) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_out, 
-                            &attr->child_out)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out, 
+                                   attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
     if (err) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_err, 
-                            &attr->child_err)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err, 
+                                   attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
@@ -341,7 +341,7 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
 ap_status_t ap_get_procdata(struct proc_t *proc, char *key, void *data)
 {
     if (proc != NULL) {
-        return ap_get_userdata(proc->cntxt, key, &data);
+        return ap_get_userdata(&data, proc->cntxt, key);
     }
     else {
         data = NULL;
@@ -370,8 +370,8 @@ ap_status_t ap_get_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_proc(ap_context_t *cont, struct proc_t **proc,
-                           ap_os_proc_t *theproc)
+ap_status_t ap_put_os_proc(struct proc_t **proc, ap_os_proc_t *theproc, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
