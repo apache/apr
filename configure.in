@@ -1025,7 +1025,7 @@ AC_MSG_CHECKING(if APR supports IPv6)
 have_ipv6="0"
 if test "x$have_sockaddr_in6" = "x1"; then
     if test "x$ac_cv_working_getaddrinfo" = "xyes"; then
-        if test "x$ac_cv_func_getnameinfo" = "xyes"; then
+        if test "x$ac_cv_working_getnameinfo" = "xyes"; then
             have_ipv6="1"
             AC_MSG_RESULT("yes")
         else
