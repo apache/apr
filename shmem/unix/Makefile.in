@@ -16,7 +16,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -Imm -I.
 
 LIB=libshmem.a
 
-OBJS=shmem.o \
+OBJS=shmem.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
