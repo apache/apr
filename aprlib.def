@@ -89,6 +89,7 @@ EXPORTS
 	apr_set_port
         apr_get_inaddr
         apr_parse_addr_port
+        apr_getnameinfo
 
 ;
 ;
