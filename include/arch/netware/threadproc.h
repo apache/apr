@@ -73,6 +73,7 @@ struct apr_threadattr_t {
     apr_pool_t *cntxt;
     size_t stack_size;
     apr_int32_t detach;
+    char *thread_name;
 };
 
 struct apr_threadkey_t {
