@@ -87,7 +87,6 @@ Usage: apr-config [OPTION]
 
 Known values for OPTION are:
   --prefix[=DIR]    change prefix to DIR
-  --bindir          print location where binaries are installed
   --cflags          print C compiler flags
   --cppflags        print cpp flags
   --includes        print include information
@@ -156,10 +155,6 @@ while test $# -gt 0; do
     ;;
     --prefix)
     echo $prefix
-    exit 0
-    ;;
-    --bindir)
-    echo $bindir
     exit 0
     ;;
     --cflags)
