@@ -63,7 +63,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 /*#include <process.h>*/
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 typedef struct mbox {
     char msg[1024]; 
@@ -92,6 +94,7 @@ static void msgput(int boxnum, char *msg)
 
 int main(void)
 {
+#if APR_HAS_SHARED_MEMORY
     apr_shmem_t *shm;
     pid_t pid;
     int size;
@@ -143,4 +146,9 @@ int main(void)
         fprintf(stderr, "Error creating a child process\n");
         exit(1);
     }
+#else
+    fprintf(stdout, "APR SHMEM test failed!\n");
+    fprintf(stdout, "shmem is not supported on this platform\n"); 
+    return (-1);
+#endif
 }
