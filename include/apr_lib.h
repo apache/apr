@@ -113,7 +113,11 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
 #define apr_isdigit(c) (isdigit(((unsigned char)(c))))
 #define apr_isgraph(c) (isgraph(((unsigned char)(c))))
 #define apr_islower(c) (islower(((unsigned char)(c))))
+#ifdef isascii
 #define apr_isascii(c) (isascii(((unsigned char)(c))))
+#else
+#define apr_isascii(c) (((c) & ~0x7f)==0)
+#endif
 #define apr_isprint(c) (isprint(((unsigned char)(c))))
 #define apr_ispunct(c) (ispunct(((unsigned char)(c))))
 #define apr_isspace(c) (isspace(((unsigned char)(c))))
@@ -121,10 +125,6 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
 #define apr_isxdigit(c) (isxdigit(((unsigned char)(c))))
 #define apr_tolower(c) (tolower(((unsigned char)(c))))
 #define apr_toupper(c) (toupper(((unsigned char)(c))))
-
-#if BEOS && __POWER_PC__
-#define isascii(c) (((c) & ~0x7f)==0)
-#endif
 
 /*
  * Small utility macros to make things easier to read.  Not usually a
