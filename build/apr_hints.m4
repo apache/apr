@@ -175,7 +175,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-sco3.2v[234]*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
-	APR_ADDTO(CFLAGS, [-Oacgiltz])
+	if test "$GCC" = "no"; then
+	    APR_ADDTO(CFLAGS, [-Oacgiltz])
+	fi
 	APR_ADDTO(LIBS, [-lPW -lmalloc])
 	;;
     *-sco3.2v5*)
