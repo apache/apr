@@ -1,3 +1,9 @@
+
+srcdir=@srcdir@
+VPATH=@srcdir@
+top_srcdir=@apr_srcdir@
+top_blddir=@apr_builddir@
+
 #
 # APR (Apache Portable Runtime) library Makefile.
 #
@@ -10,9 +16,9 @@ APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
 # Macros for supporting directories
 #
 INCDIR=./include
-OSDIR=$(INCDIR)/arch/@OSDIR@
+OSDIR=$(top_srcdir)/include/arch/@OSDIR@
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
-INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
+INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR) -I$(top_srcdir)/include
 
 #
 # Macros for target determination
@@ -45,11 +51,6 @@ bindir=@bindir@
 libdir=@libdir@
 includedir=@includedir@
 installbuilddir=@installbuilddir@
-srcdir=@srcdir@
-VPATH=@srcdir@
-top_srcdir=@apr_srcdir@
-top_blddir=@apr_builddir@
-
 
 # Create apr-config script suitable for the install tree
 apr-config.out: apr-config
