@@ -157,6 +157,16 @@ struct in_addr {
 };
 #endif
 
+/** @def APR_INADDR_NONE
+ * Not all platforms have a real INADDR_NONE.  This macro replaces
+ * INADDR_NONE on all platforms.
+ */
+#ifdef INADDR_NONE
+#define APR_INADDR_NONE INADDR_NONE
+#else
+#define APR_INADDR_NONE ((unsigned int) 0xffffffff)
+#endif
+
 /**
  * @def APR_INET
  * Not all platforms have these defined, so we'll define them here

@@ -266,11 +266,6 @@ extern "C" {
  */
 #define APR_FILES_AS_SOCKETS      @file_as_socket@
 
-/* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
- * on all platforms.
- */
-#define APR_INADDR_NONE           @apr_inaddr_none@
-
 /* This macro indicates whether or not EBCDIC is the native character set.
  */
 #define APR_CHARSET_EBCDIC        @apr_charset_ebcdic@
