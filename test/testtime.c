@@ -129,10 +129,10 @@ static void test_localstr(CuTest *tc)
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_time_exp_lt");
     }
-    /* Force us into PST timezone.  This is the only way the test will
-     * succeed.
+    /* XXX: This test is bogus, and a good example of why one never
+     * runs tests in their own timezone.  Of course changing the delta
+     * has no impact on the resulting time, only the tm_gmtoff.
      */
-    xt.tm_gmtoff = -25200;
     CuAssertTrue(tc, rv == APR_SUCCESS);
     CuAssertStrEquals(tc, "2002-08-14 12:05:36.186711 -25200 [257 Sat] DST",
                       print_time(p, &xt));
@@ -208,6 +208,10 @@ static void test_ctime(CuTest *tc)
     apr_status_t rv;
     char str[STR_SIZE];
 
+    /* XXX: This test is bogus, and a good example of why one never
+     * runs tests in their own timezone.  Of course changing the delta
+     * has no impact on the resulting time, only the tm_gmtoff.
+     */
     rv = apr_ctime(str, now);
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_ctime");
