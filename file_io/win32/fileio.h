@@ -103,18 +103,19 @@
 struct ap_file_t {
     ap_pool_t *cntxt;
     HANDLE filehand;
-    char *fname;
-    DWORD dwFileAttributes;
-    int eof_hit;
-    int pipe;
+    BOOLEAN pipe;              // Is this a pipe of a file?
+    OVERLAPPED *pOverlapped;
     ap_interval_time_t timeout;
-    int buffered;
-    int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
 
+    /* File specific info */
+    char *fname;
     char *demonfname; 
     char *lowerdemonfname; 
+    DWORD dwFileAttributes;
+    int eof_hit;
+    BOOLEAN buffered;          // Use buffered I/O?
+    int ungetchar;             // Last char provided by an unget op. (-1 = no char)
     int append; 
-
     off_t size;
     ap_time_t atime;
     ap_time_t mtime;
@@ -127,6 +128,9 @@ struct ap_file_t {
     int direction;            // buffer being used for 0 = read, 1 = write
     ap_ssize_t filePtr;       // position in file of handle
     ap_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
+
+    /* Pipe specific info */
+    
 };
 
 struct ap_dir_t {
@@ -143,5 +147,8 @@ APR_EXPORT(char *) ap_os_systemcase_filename(struct ap_pool_t *pCont,
                                              const char *szFile);
 char * canonical_filename(struct ap_pool_t *pCont, const char *szFile);
 
+ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out, 
+                              BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
+                              ap_pool_t *p);
 #endif  /* ! FILE_IO_H */
 
