@@ -127,30 +127,29 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_writev(ap_file_t *, iovec *, ap_ssize_t *)
- *    Write data from ap_iovec array to the specified file.
+ * ap_status_t ap_writev(ap_file_t *, struct iovec *, ap_size_t, ap_ssize_t *)
+ *    Write data from iovec array to the specified file.
  * arg 1) The file descriptor to write to.
  * arg 2) The array from which to get the data to write to the file.
- * arg 3) The number of elements in the ap_iovec array.  This must be
+ * arg 3) The number of elements in the struct iovec array. This must be
  *        smaller than AP_MAX_IOVEC_SIZE.  If it isn't, the function will
  *        fail with APR_EINVAL.
- * NOTE:  The third arguement is updated with the number of bytes actually 
- *        written on function exit. 
+ * arg 4) The number of bytes written.
  */
-#ifdef HAVE_WRITEV
-ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec, ap_ssize_t *iocnt)
+
+ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec, 
+                      ap_size_t nvec, ap_ssize_t *nbytes)
 {
     int bytes;
-    if ((bytes = writev(thefile->filedes, vec, *iocnt)) < 0) {
-        *iocnt = bytes;
+    if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
+        *nbytes = 0;
         return errno;
     }
     else {
-        *iocnt = bytes;
+        *nbytes = bytes;
         return APR_SUCCESS;
     }
 }
-#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_putc(char, ap_file_t *)
