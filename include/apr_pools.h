@@ -89,46 +89,13 @@ extern "C" {
  
 /*
 #define APR_POOL_DEBUG
-#define ALLOC_USE_MALLOC
 */
 
 /** The fundamental pool type */
 typedef struct apr_pool_t apr_pool_t;
 
-/** The memory allocation structure
- */
-struct apr_pool_t {
-    /** The first block in this pool. */
-    union block_hdr *first;
-    /** The last block in this pool. */
-    union block_hdr *last;
-    /** The list of cleanups to run on pool cleanup. */
-    struct cleanup *cleanups;
-    /** A list of processes to kill when this pool is cleared */
-    struct process_chain *subprocesses;
-    /** The first sub_pool of this pool */
-    struct apr_pool_t *sub_pools;
-    /** The next sibling pool */
-    struct apr_pool_t *sub_next;
-    /** The previous sibling pool */
-    struct apr_pool_t *sub_prev;
-    /** The parent pool of this pool */
-    struct apr_pool_t *parent;
-    /** The first free byte in this pool */
-    char *free_first_avail;
-#ifdef ALLOC_USE_MALLOC
-    /** The allocation list if using malloc */
-    void *allocation_list;
-#endif
-#ifdef APR_POOL_DEBUG
-    /** a list of joined pools */
-    struct apr_pool_t *joined;
-#endif
-    /** A function to control how pools behave when they receive ENOMEM */
-    int (*apr_abort)(int retcode);
-    /** A place to hold user data associated with this pool */
-    struct apr_hash_t *prog_data;
-};
+/** A function that is called when allocation fails. */
+typedef int (*apr_abortfunc_t)(int retcode);
 
 /* pools have nested lifetimes -- sub_pools are destroyed when the
  * parent pool is cleared.  We allow certain liberties with operations
@@ -224,6 +191,25 @@ APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp);
  */
 APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont,
                                           apr_pool_t *cont);
+
+/**
+ * Set the function to be called when an allocation failure occurs.
+ * @tip If the program wants APR to exit on a memory allocation error,
+ *      then this function can be called to set the callback to use (for
+ *      performing cleanup and then exiting). If this function is not called,
+ *      then APR will return an error and expect the calling program to
+ *      deal with the error accordingly.
+ * @deffunc apr_status_t apr_pool_set_abort(apr_abortfunc_t abortfunc, apr_pool_t *pool)
+ */
+APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
+                                     apr_pool_t *pool);
+
+/**
+ * Get the abort function associated with the specified pool.
+ * @param pool The pool for retrieving the abort function.
+ * @deffunc apr_abortfunc_t apr_pool_get_abort(apr_pool_t *pool)
+ */
+APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
 
 /**
  * Set the data associated with the current pool
