@@ -214,10 +214,10 @@ EXPORTS
 	apr_filename_of_pathname @205
 	apr_get_remote_name @206
 	apr_get_local_name @207
-	apr_get_local_ipaddr @208
-	apr_set_local_ipaddr @209
-	apr_get_remote_ipaddr @210
-	apr_set_remote_ipaddr @211
+	apr_get_ipaddr @208
+	apr_set_ipaddr @209
+	
+	
 	apr_get_port @212
 	apr_set_port @213
 	
