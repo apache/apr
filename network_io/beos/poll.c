@@ -70,16 +70,18 @@
 APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
     (*new) = (apr_pollfd_t *)apr_pcalloc(cont, sizeof(apr_pollfd_t) * num);
+
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
+
     (*new)->cntxt = cont;
-    (*new)->read = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
-    (*new)->write = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
-    (*new)->except = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
-    (*new)->read_set = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
-    (*new)->write_set = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
-    (*new)->except_set = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
+    (*new)->read       = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->write      = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->except     = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->read_set   = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->write_set  = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->except_set = (fd_set *)apr_palloc(cont, sizeof(fd_set));
     FD_ZERO((*new)->read);
     FD_ZERO((*new)->write);
     FD_ZERO((*new)->except);
@@ -87,6 +89,7 @@ APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, ap
     FD_ZERO((*new)->write_set);
     FD_ZERO((*new)->except_set);
     (*new)->highsock = -1;
+
     return APR_SUCCESS;
 }
 
