@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/11/20 19:30:31 $]
+Last modified at [$Date: 2002/12/10 20:08:42 $]
 
 Release:
 
@@ -36,6 +36,10 @@ RELEASE SHOWSTOPPERS:
         apr.hw                (NO_USE_SIGACTION)
 
       1.0 showstopper (not 0.9.x): gstein
+
+    * close out the XXX's already!  (wrowe: this is "production release" 
+      quality code with that many unanswered questions?)  If they aren't
+      showstoppers, deprecate them to TODO:s.
 
     * complete the efforts started by DougM for cleaner fn naming
       conventions: see proposed name changes in renames_pending
