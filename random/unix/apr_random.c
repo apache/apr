@@ -75,8 +75,8 @@
 
 typedef struct apr_random_pool_t {
     unsigned char *pool;
-    int bytes;
-    int pool_size;
+    unsigned int bytes;
+    unsigned int pool_size;
 } apr_random_pool_t;
 
 #define hash_init(h)            (h)->init(h)
@@ -126,7 +126,7 @@ APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,
                                   apr_crypto_hash_t *key_hash,
                                   apr_crypto_hash_t *prng_hash)
 {
-    int n;
+    unsigned int n;
 
     g->apr_pool = p;
 
@@ -208,7 +208,7 @@ APR_DECLARE(apr_random_t *) apr_random_standard_new(apr_pool_t *p)
 
 static void rekey(apr_random_t *g)
 {
-    int n;
+    unsigned int n;
     unsigned char *H = H_current(g);
 
     hash_init(g->key_hash);
@@ -238,7 +238,7 @@ static void rekey(apr_random_t *g)
 APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,
                                          apr_size_t bytes)
 {
-    int n;
+    unsigned int n;
     const unsigned char *entropy = entropy_;
 
     for (n = 0; n < bytes; ++n) {
@@ -257,7 +257,7 @@ APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,
         p->pool[p->bytes++] = entropy[n];
 
         if (p->bytes == g->rehash_size) {
-            int r;
+            unsigned int r;
 
             for (r = 0; r < p->bytes/2; r+=g->pool_hash->size)
                 hash(g->pool_hash,p->pool+r,p->pool+r*2,g->pool_hash->size*2);
