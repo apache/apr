@@ -76,7 +76,7 @@ static void set_socket_vars(apr_socket_t *sock, int family)
     sock->local_addr->sa.sin.sin_family = family;
     sock->remote_addr->sa.sin.sin_family = family;
 
-    if (family == AF_INET) {
+    if (family == APR_INET) {
         sock->local_addr->sa_len = sizeof(struct sockaddr_in);
         sock->local_addr->addr_str_len = 16;
         sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin.sin_addr);
@@ -88,7 +88,7 @@ static void set_socket_vars(apr_socket_t *sock, int family)
         sock->remote_addr->ipaddr_len = sizeof(struct in_addr);
     }
 #if APR_HAVE_IPV6
-    else if (family == AF_INET6) {
+    else if (family == APR_INET6) {
         sock->local_addr->sa_len = sizeof(struct sockaddr_in6);
         sock->local_addr->addr_str_len = 46;
         sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin6.sin6_addr);
@@ -116,11 +116,11 @@ apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
 {
     int family = ofamily;
 
-    if (family == AF_UNSPEC) {
+    if (family == APR_UNSPEC) {
 #if APR_HAVE_IPV6
-        family = AF_INET6;
+        family = APR_INET6;
 #else
-        family = AF_INET;
+        family = APR_INET;
 #endif
     }
 
@@ -133,8 +133,8 @@ apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
     (*new)->socketdes = socket(family, type, 0);
 
 #if APR_HAVE_IPV6
-    if ((*new)->socketdes < 0 && ofamily == AF_UNSPEC) {
-        family = AF_INET;
+    if ((*new)->socketdes < 0 && ofamily == APR_UNSPEC) {
+        family = APR_INET;
         (*new)->socketdes = socket(family, type, 0);
     }
 #endif
@@ -152,7 +152,7 @@ apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
 
 apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
 {
-    return apr_create_socket(new, AF_INET, SOCK_STREAM, cont);
+    return apr_create_socket(new, APR_INET, SOCK_STREAM, cont);
 }
 
 apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
@@ -251,7 +251,7 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
         }
         /* XXX IPv6 to be handled better later... */
 #if APR_HAVE_IPV6
-        if (sock->local_addr->sa.sin.sin_family == AF_INET6 ||
+        if (sock->local_addr->sa.sin.sin_family == APR_INET6 ||
             sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
             /* not bound to specific local interface; connect() had to assign
              * one for the socket
@@ -289,7 +289,7 @@ apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock,
     if ((*sock) == NULL) {
         alloc_socket(sock, cont);
         /* XXX IPv6 figure out the family here! */
-        set_socket_vars(*sock, AF_INET);
+        set_socket_vars(*sock, APR_INET);
         (*sock)->timeout = -1;
     }
     (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
