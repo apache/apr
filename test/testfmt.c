@@ -24,9 +24,9 @@ static void ssize_t_fmt(abts_case *tc, void *data)
     apr_ssize_t var = 0;
 
     sprintf(buf, "%" APR_SSIZE_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_SSIZE_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
 }
 
 static void size_t_fmt(abts_case *tc, void *data)
@@ -35,9 +35,9 @@ static void size_t_fmt(abts_case *tc, void *data)
     apr_size_t var = 0;
 
     sprintf(buf, "%" APR_SIZE_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_SIZE_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
 }
 
 static void off_t_fmt(abts_case *tc, void *data)
@@ -46,9 +46,9 @@ static void off_t_fmt(abts_case *tc, void *data)
     apr_off_t var = 0;
 
     sprintf(buf, "%" APR_OFF_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_OFF_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
 }
 
 static void pid_t_fmt(abts_case *tc, void *data)
@@ -57,9 +57,9 @@ static void pid_t_fmt(abts_case *tc, void *data)
     pid_t var = 0;
 
     sprintf(buf, "%" APR_PID_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_PID_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
 }
 
 static void int64_t_fmt(abts_case *tc, void *data)
@@ -68,9 +68,9 @@ static void int64_t_fmt(abts_case *tc, void *data)
     apr_int64_t var = 0;
 
     sprintf(buf, "%" APR_INT64_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_INT64_T_FMT, var);
-    abts_str_equal(tc, "0", buf);
+    ABTS_STR_EQUAL(tc, "0", buf);
 }
 
 static void uint64_t_fmt(abts_case *tc, void *data)
@@ -79,9 +79,9 @@ static void uint64_t_fmt(abts_case *tc, void *data)
     apr_uint64_t var = APR_UINT64_C(14000000);
 
     sprintf(buf, "%" APR_UINT64_T_FMT, var);
-    abts_str_equal(tc, "14000000", buf);
+    ABTS_STR_EQUAL(tc, "14000000", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_UINT64_T_FMT, var);
-    abts_str_equal(tc, "14000000", buf);
+    ABTS_STR_EQUAL(tc, "14000000", buf);
 }
 
 static void uint64_t_hex_fmt(abts_case *tc, void *data)
@@ -90,9 +90,9 @@ static void uint64_t_hex_fmt(abts_case *tc, void *data)
     apr_uint64_t var = APR_UINT64_C(14000000);
 
     sprintf(buf, "%" APR_UINT64_T_HEX_FMT, var);
-    abts_str_equal(tc, "d59f80", buf);
+    ABTS_STR_EQUAL(tc, "d59f80", buf);
     apr_snprintf(buf, sizeof(buf), "%" APR_UINT64_T_HEX_FMT, var);
-    abts_str_equal(tc, "d59f80", buf);
+    ABTS_STR_EQUAL(tc, "d59f80", buf);
 }
 
 static void more_int64_fmts(abts_case *tc, void *data)
@@ -104,16 +104,16 @@ static void more_int64_fmts(abts_case *tc, void *data)
     apr_uint64_t big = APR_UINT64_C(3141592653589793238);
 
     apr_snprintf(buf, sizeof buf, "%" APR_INT64_T_FMT, i);
-    abts_str_equal(tc, buf, "-42");
+    ABTS_STR_EQUAL(tc, buf, "-42");
 
     apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, ui);
-    abts_str_equal(tc, buf, "42");
+    ABTS_STR_EQUAL(tc, buf, "42");
 
     apr_snprintf(buf, sizeof buf, "%" APR_UINT64_T_FMT, big);
-    abts_str_equal(tc, buf, "3141592653589793238");
+    ABTS_STR_EQUAL(tc, buf, "3141592653589793238");
 
     apr_snprintf(buf, sizeof buf, "%" APR_INT64_T_FMT, ibig);
-    abts_str_equal(tc, buf, "-314159265358979323");
+    ABTS_STR_EQUAL(tc, buf, "-314159265358979323");
 }
 
 abts_suite *testfmt(abts_suite *suite)

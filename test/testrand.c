@@ -22,7 +22,7 @@
 static void rand_exists(abts_case *tc, void *data)
 {
 #if !APR_HAS_RANDOM
-    abts_not_impl(tc, "apr_generate_random_bytes");
+    ABTS_NOT_IMPL(tc, "apr_generate_random_bytes");
 #else
     unsigned char c[42];
 

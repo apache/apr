@@ -51,10 +51,10 @@ static int wait_child(abts_case *tc, apr_proc_t *proc)
     int exitcode;
     apr_exit_why_e why;
 
-    abts_assert(tc, "Error waiting for child process",
+    ABTS_ASSERT(tc, "Error waiting for child process",
             apr_proc_wait(proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
-    abts_assert(tc, "child terminated normally", why == APR_PROC_EXIT);
+    ABTS_ASSERT(tc, "child terminated normally", why == APR_PROC_EXIT);
     return exitcode;
 }
 
@@ -68,7 +68,7 @@ static void test_addr_info(abts_case *tc, void *data)
 
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 80, 0, p);
     apr_assert_success(tc, "Problem generating sockaddr", rv);
-    abts_str_equal(tc, "127.0.0.1", sa->hostname);
+    ABTS_STR_EQUAL(tc, "127.0.0.1", sa->hostname);
 }
 
 static apr_socket_t *setup_socket(abts_case *tc)
@@ -118,13 +118,13 @@ static void test_send(abts_case *tc, void *data)
     apr_assert_success(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
-    abts_int_equal(tc, APR_PROTO_TCP, protocol);
+    ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
     
     length = strlen(DATASTR);
     apr_socket_send(sock2, DATASTR, &length);
 
     /* Make sure that the client received the data we sent */
-    abts_int_equal(tc, strlen(DATASTR), wait_child(tc, &proc));
+    ABTS_INT_EQUAL(tc, strlen(DATASTR), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     apr_assert_success(tc, "Problem closing connected socket", rv);
@@ -150,14 +150,14 @@ static void test_recv(abts_case *tc, void *data)
     apr_assert_success(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
-    abts_int_equal(tc, APR_PROTO_TCP, protocol);
+    ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
     
     memset(datastr, 0, STRLEN);
     apr_socket_recv(sock2, datastr, &length);
 
     /* Make sure that the server received the data we sent */
-    abts_str_equal(tc, DATASTR, datastr);
-    abts_int_equal(tc, strlen(datastr), wait_child(tc, &proc));
+    ABTS_STR_EQUAL(tc, DATASTR, datastr);
+    ABTS_INT_EQUAL(tc, strlen(datastr), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     apr_assert_success(tc, "Problem closing connected socket", rv);
@@ -182,10 +182,10 @@ static void test_timeout(abts_case *tc, void *data)
     apr_assert_success(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
-    abts_int_equal(tc, APR_PROTO_TCP, protocol);
+    ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
     
     exit = wait_child(tc, &proc);    
-    abts_int_equal(tc, SOCKET_TIMEOUT, exit);
+    ABTS_INT_EQUAL(tc, SOCKET_TIMEOUT, exit);
 
     /* We didn't write any data, so make sure the child program returns
      * an error.

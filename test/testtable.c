@@ -34,7 +34,7 @@ static apr_table_t *t1 = NULL;
 static void table_make(abts_case *tc, void *data)
 {
     t1 = apr_table_make(p, 5);
-    abts_ptr_notnull(tc, t1);
+    ABTS_PTR_NOTNULL(tc, t1);
 }
 
 static void table_get(abts_case *tc, void *data)
@@ -43,7 +43,7 @@ static void table_get(abts_case *tc, void *data)
 
     apr_table_set(t1, "foo", "bar");
     val = apr_table_get(t1, "foo");
-    abts_str_equal(tc, val, "bar");
+    ABTS_STR_EQUAL(tc, val, "bar");
 }
 
 static void table_set(abts_case *tc, void *data)
@@ -53,7 +53,7 @@ static void table_set(abts_case *tc, void *data)
     apr_table_set(t1, "setkey", "bar");
     apr_table_set(t1, "setkey", "2ndtry");
     val = apr_table_get(t1, "setkey");
-    abts_str_equal(tc, val, "2ndtry");
+    ABTS_STR_EQUAL(tc, val, "2ndtry");
 }
 
 static void table_getnotthere(abts_case *tc, void *data)
@@ -61,7 +61,7 @@ static void table_getnotthere(abts_case *tc, void *data)
     const char *val;
 
     val = apr_table_get(t1, "keynotthere");
-    abts_ptr_equal(tc, NULL, (void *)val);
+    ABTS_PTR_EQUAL(tc, NULL, (void *)val);
 }
 
 static void table_add(abts_case *tc, void *data)
@@ -71,7 +71,7 @@ static void table_add(abts_case *tc, void *data)
     apr_table_add(t1, "addkey", "bar");
     apr_table_add(t1, "addkey", "foo");
     val = apr_table_get(t1, "addkey");
-    abts_str_equal(tc, val, "bar");
+    ABTS_STR_EQUAL(tc, val, "bar");
 
 }
 
@@ -84,18 +84,18 @@ static void table_nelts(abts_case *tc, void *data)
     apr_table_set(t, "def", "abc");
     apr_table_set(t, "foo", "zzz");
     val = apr_table_get(t, "foo");
-    abts_str_equal(tc, val, "zzz");
+    ABTS_STR_EQUAL(tc, val, "zzz");
     val = apr_table_get(t, "abc");
-    abts_str_equal(tc, val, "def");
+    ABTS_STR_EQUAL(tc, val, "def");
     val = apr_table_get(t, "def");
-    abts_str_equal(tc, val, "abc");
-    abts_int_equal(tc, 3, apr_table_elts(t)->nelts);
+    ABTS_STR_EQUAL(tc, val, "abc");
+    ABTS_INT_EQUAL(tc, 3, apr_table_elts(t)->nelts);
 }
 
 static void table_clear(abts_case *tc, void *data)
 {
     apr_table_clear(t1);
-    abts_int_equal(tc, 0, apr_table_elts(t1)->nelts);
+    ABTS_INT_EQUAL(tc, 0, apr_table_elts(t1)->nelts);
 }
 
 static void table_unset(abts_case *tc, void *data)
@@ -106,11 +106,11 @@ static void table_unset(abts_case *tc, void *data)
     apr_table_set(t, "a", "1");
     apr_table_set(t, "b", "2");
     apr_table_unset(t, "b");
-    abts_int_equal(tc, 1, apr_table_elts(t)->nelts);
+    ABTS_INT_EQUAL(tc, 1, apr_table_elts(t)->nelts);
     val = apr_table_get(t, "a");
-    abts_str_equal(tc, val, "1");
+    ABTS_STR_EQUAL(tc, val, "1");
     val = apr_table_get(t, "b");
-    abts_ptr_equal(tc, (void *)val, (void *)NULL);
+    ABTS_PTR_EQUAL(tc, (void *)val, (void *)NULL);
 }
 
 static void table_overlap(abts_case *tc, void *data)
@@ -131,21 +131,21 @@ static void table_overlap(abts_case *tc, void *data)
     apr_table_addn(t2, "f", "6");
     apr_table_overlap(t1, t2, APR_OVERLAP_TABLES_SET);
     
-    abts_int_equal(tc, apr_table_elts(t1)->nelts, 7);
+    ABTS_INT_EQUAL(tc, apr_table_elts(t1)->nelts, 7);
     val = apr_table_get(t1, "a");
-    abts_str_equal(tc, val, "1");
+    ABTS_STR_EQUAL(tc, val, "1");
     val = apr_table_get(t1, "b");
-    abts_str_equal(tc, val, "2.");
+    ABTS_STR_EQUAL(tc, val, "2.");
     val = apr_table_get(t1, "c");
-    abts_str_equal(tc, val, "3");
+    ABTS_STR_EQUAL(tc, val, "3");
     val = apr_table_get(t1, "d");
-    abts_str_equal(tc, val, "4");
+    ABTS_STR_EQUAL(tc, val, "4");
     val = apr_table_get(t1, "e");
-    abts_str_equal(tc, val, "5");
+    ABTS_STR_EQUAL(tc, val, "5");
     val = apr_table_get(t1, "f");
-    abts_str_equal(tc, val, "6");
+    ABTS_STR_EQUAL(tc, val, "6");
     val = apr_table_get(t1, "g");
-    abts_str_equal(tc, val, "7");
+    ABTS_STR_EQUAL(tc, val, "7");
 }
 
 abts_suite *testtable(abts_suite *suite)

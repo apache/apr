@@ -77,11 +77,11 @@ static void test_strtok(abts_case *tc, void *data)
             retval2 = strtok(str2, cases[curtc].sep);
 
             if (!retval1) {
-                abts_true(tc, retval2 == NULL);
+                ABTS_TRUE(tc, retval2 == NULL);
             }
             else {
-                abts_true(tc, retval2 != NULL);
-                abts_str_equal(tc, retval2, retval1);
+                ABTS_TRUE(tc, retval2 != NULL);
+                ABTS_STR_EQUAL(tc, retval2, retval1);
             }
 
             str1 = str2 = NULL; /* make sure we pass NULL on subsequent calls */
@@ -104,7 +104,7 @@ static void snprintf_noNULL(abts_case *tc, void *data)
     
     /* If this test fails, we are going to seg fault. */
     apr_snprintf(buff, sizeof(buff), "%.*s", 7, testing);
-    abts_str_nequal(tc, buff, testing, 7);
+    ABTS_STR_NEQUAL(tc, buff, testing, 7);
 }
 
 static void snprintf_0NULL(abts_case *tc, void *data)
@@ -112,7 +112,7 @@ static void snprintf_0NULL(abts_case *tc, void *data)
     int rv;
 
     rv = apr_snprintf(NULL, 0, "%sBAR", "FOO");
-    abts_int_equal(tc, 6, rv);
+    ABTS_INT_EQUAL(tc, 6, rv);
 }
 
 static void snprintf_0nonNULL(abts_case *tc, void *data)
@@ -121,8 +121,8 @@ static void snprintf_0nonNULL(abts_case *tc, void *data)
     char *buff = "testing";
 
     rv = apr_snprintf(buff, 0, "%sBAR", "FOO");
-    abts_int_equal(tc, 6, rv);
-    abts_assert(tc, "buff unmangled", strcmp(buff, "FOOBAR") != 0);
+    ABTS_INT_EQUAL(tc, 6, rv);
+    ABTS_ASSERT(tc, "buff unmangled", strcmp(buff, "FOOBAR") != 0);
 }
 
 static void string_error(abts_case *tc, void *data)
@@ -131,12 +131,12 @@ static void string_error(abts_case *tc, void *data)
 
      buf[0] = '\0';
      rv = apr_strerror(APR_ENOENT, buf, sizeof buf);
-     abts_ptr_equal(tc, buf, rv);
-     abts_true(tc, strlen(buf) > 0);
+     ABTS_PTR_EQUAL(tc, buf, rv);
+     ABTS_TRUE(tc, strlen(buf) > 0);
 
      rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
-     abts_ptr_equal(tc, buf, rv);
-     abts_str_equal(tc, "The timeout specified has expired", buf);
+     ABTS_PTR_EQUAL(tc, buf, rv);
+     ABTS_STR_EQUAL(tc, "The timeout specified has expired", buf);
 }
 
 #define SIZE 180000
@@ -221,14 +221,14 @@ static void string_strtoi64(abts_case *tc, void *data)
         result = apr_strtoi64(ts[n].in, &end, ts[n].base);
         errnum = errno;
 
-        abts_assert(tc,
+        ABTS_ASSERT(tc,
                  apr_psprintf(p, "for '%s': result was %" APR_INT64_T_FMT 
                               " not %" APR_INT64_T_FMT, ts[n].in,
                               result, ts[n].result),
                  result == ts[n].result);
         
         if (ts[n].errnum != -1) {
-            abts_assert(tc,
+            ABTS_ASSERT(tc,
                      apr_psprintf(p, "for '%s': errno was %d not %d", ts[n].in,
                                   errnum, ts[n].errnum),
                      ts[n].errnum == errnum);
@@ -236,9 +236,9 @@ static void string_strtoi64(abts_case *tc, void *data)
 
         if (ts[n].end == NULL) {
             /* end must point to NUL terminator of .in */
-            abts_ptr_equal(tc, ts[n].in + strlen(ts[n].in), end);
+            ABTS_PTR_EQUAL(tc, ts[n].in + strlen(ts[n].in), end);
         } else if (ts[n].end != (void *)-1) {
-            abts_assert(tc,
+            ABTS_ASSERT(tc,
                      apr_psprintf(p, "for '%s', end was '%s' not '%s'",
                                   ts[n].in, end, ts[n].end),
                      strcmp(ts[n].end, end) == 0);

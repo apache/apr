@@ -60,10 +60,10 @@ static void thread_init(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_thread_once_init(&control, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, p); 
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
 static void create_threads(abts_case *tc, void *data)
@@ -71,13 +71,13 @@ static void create_threads(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_thread_create(&t1, NULL, thread_func1, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_thread_create(&t2, NULL, thread_func1, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_thread_create(&t3, NULL, thread_func1, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     rv = apr_thread_create(&t4, NULL, thread_func1, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
 static void join_threads(abts_case *tc, void *data)
@@ -85,30 +85,30 @@ static void join_threads(abts_case *tc, void *data)
     apr_status_t s;
 
     apr_thread_join(&s, t1);
-    abts_int_equal(tc, exit_ret_val, s);
+    ABTS_INT_EQUAL(tc, exit_ret_val, s);
     apr_thread_join(&s, t2);
-    abts_int_equal(tc, exit_ret_val, s);
+    ABTS_INT_EQUAL(tc, exit_ret_val, s);
     apr_thread_join(&s, t3);
-    abts_int_equal(tc, exit_ret_val, s);
+    ABTS_INT_EQUAL(tc, exit_ret_val, s);
     apr_thread_join(&s, t4);
-    abts_int_equal(tc, exit_ret_val, s);
+    ABTS_INT_EQUAL(tc, exit_ret_val, s);
 }
 
 static void check_locks(abts_case *tc, void *data)
 {
-    abts_int_equal(tc, 40000, x);
+    ABTS_INT_EQUAL(tc, 40000, x);
 }
 
 static void check_thread_once(abts_case *tc, void *data)
 {
-    abts_int_equal(tc, 1, value);
+    ABTS_INT_EQUAL(tc, 1, value);
 }
 
 #else
 
 static void threads_not_impl(abts_case *tc, void *data)
 {
-    abts_not_impl(tc, "Threads not implemented on this platform");
+    ABTS_NOT_IMPL(tc, "Threads not implemented on this platform");
 }
 
 #endif

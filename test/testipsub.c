@@ -67,7 +67,7 @@ static void test_bad_input(abts_case *tc, void *data)
 
     for (i = 0; i < (sizeof testcases / sizeof testcases[0]); i++) {
         rv = apr_ipsubnet_create(&ipsub, testcases[i].ipstr, testcases[i].mask, p);
-        abts_int_equal(tc, rv, testcases[i].expected_rv);
+        ABTS_INT_EQUAL(tc, rv, testcases[i].expected_rv);
     }
 }
 
@@ -85,16 +85,16 @@ static void test_singleton_subnets(abts_case *tc, void *data)
 
     for (i = 0; i < sizeof v4addrs / sizeof v4addrs[0]; i++) {
         rv = apr_ipsubnet_create(&ipsub, v4addrs[i], NULL, p);
-        abts_true(tc, rv == APR_SUCCESS);
+        ABTS_TRUE(tc, rv == APR_SUCCESS);
         for (j = 0; j < sizeof v4addrs / sizeof v4addrs[0]; j++) {
             rv = apr_sockaddr_info_get(&sa, v4addrs[j], APR_INET, 0, 0, p);
-            abts_true(tc, rv == APR_SUCCESS);
+            ABTS_TRUE(tc, rv == APR_SUCCESS);
             rc = apr_ipsubnet_test(ipsub, sa);
             if (!strcmp(v4addrs[i], v4addrs[j])) {
-                abts_true(tc, rc != 0);
+                ABTS_TRUE(tc, rc != 0);
             }
             else {
-                abts_true(tc, rc == 0);
+                ABTS_TRUE(tc, rc == 0);
             }
         }
     }
@@ -130,15 +130,15 @@ static void test_interesting_subnets(abts_case *tc, void *data)
 
     for (i = 0; i < sizeof testcases / sizeof testcases[0]; i++) {
         rv = apr_ipsubnet_create(&ipsub, testcases[i].ipstr, testcases[i].mask, p);
-        abts_true(tc, rv == APR_SUCCESS);
+        ABTS_TRUE(tc, rv == APR_SUCCESS);
         rv = apr_sockaddr_info_get(&sa, testcases[i].in_subnet, testcases[i].family, 0, 0, p);
-        abts_true(tc, rv == APR_SUCCESS);
+        ABTS_TRUE(tc, rv == APR_SUCCESS);
         rc = apr_ipsubnet_test(ipsub, sa);
-        abts_true(tc, rc != 0);
+        ABTS_TRUE(tc, rc != 0);
         rv = apr_sockaddr_info_get(&sa, testcases[i].not_in_subnet, testcases[i].family, 0, 0, p);
-        abts_true(tc, rv == APR_SUCCESS);
+        ABTS_TRUE(tc, rv == APR_SUCCESS);
         rc = apr_ipsubnet_test(ipsub, sa);
-        abts_true(tc, rc == 0);
+        ABTS_TRUE(tc, rc == 0);
     }
 }
 
@@ -146,7 +146,7 @@ static void test_badmask_str(abts_case *tc, void *data)
 {
     char buf[128];
 
-    abts_str_equal(tc, apr_strerror(APR_EBADMASK, buf, sizeof buf),
+    ABTS_STR_EQUAL(tc, apr_strerror(APR_EBADMASK, buf, sizeof buf),
                       "The specified network mask is invalid.");
 }
 
@@ -154,7 +154,7 @@ static void test_badip_str(abts_case *tc, void *data)
 {
     char buf[128];
 
-    abts_str_equal(tc, apr_strerror(APR_EBADIP, buf, sizeof buf),
+    ABTS_STR_EQUAL(tc, apr_strerror(APR_EBADIP, buf, sizeof buf),
                       "The specified IP address is invalid.");
 }
 

@@ -154,27 +154,27 @@ static void test_thread_mutex(abts_case *tc, void *data)
     apr_status_t s1, s2, s3, s4;
 
     s1 = apr_thread_mutex_create(&thread_mutex, APR_THREAD_MUTEX_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, s1);
-    abts_ptr_notnull(tc, thread_mutex);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s1);
+    ABTS_PTR_NOTNULL(tc, thread_mutex);
 
     i = 0;
     x = 0;
 
     s1 = apr_thread_create(&t1, NULL, thread_mutex_function, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, s1);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s1);
     s2 = apr_thread_create(&t2, NULL, thread_mutex_function, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, s2);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s2);
     s3 = apr_thread_create(&t3, NULL, thread_mutex_function, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, s3);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
     s4 = apr_thread_create(&t4, NULL, thread_mutex_function, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, s4);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
 
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
 
-    abts_int_equal(tc, MAX_ITER, x);
+    ABTS_INT_EQUAL(tc, MAX_ITER, x);
 }
 
 static void test_thread_rwlock(abts_case *tc, void *data)
@@ -184,7 +184,7 @@ static void test_thread_rwlock(abts_case *tc, void *data)
 
     s1 = apr_thread_rwlock_create(&rwlock, p);
     apr_assert_success(tc, "rwlock_create", s1);
-    abts_ptr_notnull(tc, rwlock);
+    ABTS_PTR_NOTNULL(tc, rwlock);
 
     i = 0;
     x = 0;
@@ -203,7 +203,7 @@ static void test_thread_rwlock(abts_case *tc, void *data)
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
 
-    abts_int_equal(tc, MAX_ITER, x);
+    ABTS_INT_EQUAL(tc, MAX_ITER, x);
 }
 
 static void test_cond(abts_case *tc, void *data)
@@ -216,16 +216,16 @@ static void test_cond(abts_case *tc, void *data)
     apr_assert_success(tc, "create put mutex",
                        apr_thread_mutex_create(&put.mutex, 
                                                APR_THREAD_MUTEX_DEFAULT, p));
-    abts_ptr_notnull(tc, put.mutex);
+    ABTS_PTR_NOTNULL(tc, put.mutex);
 
     apr_assert_success(tc, "create nready mutex",
                        apr_thread_mutex_create(&nready.mutex, 
                                                APR_THREAD_MUTEX_DEFAULT, p));
-    abts_ptr_notnull(tc, nready.mutex);
+    ABTS_PTR_NOTNULL(tc, nready.mutex);
 
     apr_assert_success(tc, "create condvar",
                        apr_thread_cond_create(&nready.cond, p));
-    abts_ptr_notnull(tc, nready.cond);
+    ABTS_PTR_NOTNULL(tc, nready.cond);
 
     count1 = count2 = count3 = count4 = 0;
     put.nput = put.nval = 0;
@@ -234,15 +234,15 @@ static void test_cond(abts_case *tc, void *data)
     x = 0;
 
     s0 = apr_thread_create(&p1, NULL, thread_cond_producer, &count1, p);
-    abts_int_equal(tc, APR_SUCCESS, s0);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s0);
     s1 = apr_thread_create(&p2, NULL, thread_cond_producer, &count2, p);
-    abts_int_equal(tc, APR_SUCCESS, s1);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s1);
     s2 = apr_thread_create(&p3, NULL, thread_cond_producer, &count3, p);
-    abts_int_equal(tc, APR_SUCCESS, s2);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s2);
     s3 = apr_thread_create(&p4, NULL, thread_cond_producer, &count4, p);
-    abts_int_equal(tc, APR_SUCCESS, s3);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s3);
     s4 = apr_thread_create(&c1, NULL, thread_cond_consumer, NULL, p);
-    abts_int_equal(tc, APR_SUCCESS, s4);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s4);
 
     apr_thread_join(&s0, p1);
     apr_thread_join(&s1, p2);
@@ -258,7 +258,7 @@ static void test_cond(abts_case *tc, void *data)
     printf("count1 = %d count2 = %d count3 = %d count4 = %d\n",
             count1, count2, count3, count4);
     */
-    abts_int_equal(tc, MAX_COUNTER, sum);
+    ABTS_INT_EQUAL(tc, MAX_COUNTER, sum);
 }
 
 static void test_timeoutcond(abts_case *tc, void *data)
@@ -269,12 +269,12 @@ static void test_timeoutcond(abts_case *tc, void *data)
     int i;
 
     s = apr_thread_mutex_create(&timeout_mutex, APR_THREAD_MUTEX_DEFAULT, p);
-    abts_int_equal(tc, APR_SUCCESS, s);
-    abts_ptr_notnull(tc, timeout_mutex);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s);
+    ABTS_PTR_NOTNULL(tc, timeout_mutex);
 
     s = apr_thread_cond_create(&timeout_cond, p);
-    abts_int_equal(tc, APR_SUCCESS, s);
-    abts_ptr_notnull(tc, timeout_cond);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, s);
+    ABTS_PTR_NOTNULL(tc, timeout_cond);
 
     timeout = apr_time_from_sec(5);
 
@@ -289,11 +289,11 @@ static void test_timeoutcond(abts_case *tc, void *data)
         if (s != APR_SUCCESS && !APR_STATUS_IS_TIMEUP(s)) {
             continue;
         }
-        abts_int_equal(tc, 1, APR_STATUS_IS_TIMEUP(s));
-        abts_assert(tc, "Timer returned too late", end - begin - timeout < 100000);
+        ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(s));
+        ABTS_ASSERT(tc, "Timer returned too late", end - begin - timeout < 100000);
         break;
     }
-    abts_assert(tc, "Too many retries", i < MAX_RETRY);
+    ABTS_ASSERT(tc, "Too many retries", i < MAX_RETRY);
 }
 
 #endif /* !APR_HAS_THREADS */
@@ -301,7 +301,7 @@ static void test_timeoutcond(abts_case *tc, void *data)
 #if !APR_HAS_THREADS
 static void threads_not_impl(abts_case *tc, void *data)
 {
-    abts_not_impl(tc, "Threads not implemented on this platform");
+    ABTS_NOT_IMPL(tc, "Threads not implemented on this platform");
 }
 #endif
 

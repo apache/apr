@@ -37,7 +37,7 @@ static void alloc_bytes(abts_case *tc, void *data)
     char *alloc;
     
     alloc = apr_palloc(pmain, ALLOC_BYTES);
-    abts_ptr_notnull(tc, alloc);
+    ABTS_PTR_NOTNULL(tc, alloc);
 
     for (i=0;i<ALLOC_BYTES;i++) {
         char *ptr = alloc + i;
@@ -46,7 +46,7 @@ static void alloc_bytes(abts_case *tc, void *data)
     /* This is just added to get the positive.  If this test fails, the
      * suite will seg fault.
      */
-    abts_true(tc, 1);
+    ABTS_TRUE(tc, 1);
 }
 
 static void calloc_bytes(abts_case *tc, void *data)
@@ -55,11 +55,11 @@ static void calloc_bytes(abts_case *tc, void *data)
     char *alloc;
     
     alloc = apr_pcalloc(pmain, ALLOC_BYTES);
-    abts_ptr_notnull(tc, alloc);
+    ABTS_PTR_NOTNULL(tc, alloc);
 
     for (i=0;i<ALLOC_BYTES;i++) {
         char *ptr = alloc + i;
-        abts_true(tc, *ptr == '\0');
+        ABTS_TRUE(tc, *ptr == '\0');
     }
 }
 
@@ -68,8 +68,8 @@ static void parent_pool(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_pool_create(&pmain, NULL);
-    abts_int_equal(tc, rv, APR_SUCCESS);
-    abts_ptr_notnull(tc, pmain);
+    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_PTR_NOTNULL(tc, pmain);
 }
 
 static void child_pool(abts_case *tc, void *data)
@@ -77,18 +77,18 @@ static void child_pool(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_pool_create(&pchild, pmain);
-    abts_int_equal(tc, rv, APR_SUCCESS);
-    abts_ptr_notnull(tc, pchild);
+    ABTS_INT_EQUAL(tc, rv, APR_SUCCESS);
+    ABTS_PTR_NOTNULL(tc, pchild);
 }
 
 static void test_ancestor(abts_case *tc, void *data)
 {
-    abts_int_equal(tc, 1, apr_pool_is_ancestor(pmain, pchild));
+    ABTS_INT_EQUAL(tc, 1, apr_pool_is_ancestor(pmain, pchild));
 }
 
 static void test_notancestor(abts_case *tc, void *data)
 {
-    abts_int_equal(tc, 0, apr_pool_is_ancestor(pchild, pmain));
+    ABTS_INT_EQUAL(tc, 0, apr_pool_is_ancestor(pchild, pmain));
 }
 
 abts_suite *testpool(abts_suite *suite)

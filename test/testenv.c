@@ -30,7 +30,7 @@ static void test_setenv(abts_case *tc, void *data)
     rv = apr_env_set(TEST_ENVVAR_NAME, TEST_ENVVAR_VALUE, p);
     have_env_set = (rv != APR_ENOTIMPL);
     if (!have_env_set) {
-        abts_not_impl(tc, "apr_env_set");
+        ABTS_NOT_IMPL(tc, "apr_env_set");
     }
     apr_assert_success(tc, "set environment variable", rv);
 }
@@ -41,16 +41,16 @@ static void test_getenv(abts_case *tc, void *data)
     apr_status_t rv;
 
     if (!have_env_set) {
-        abts_not_impl(tc, "apr_env_set (skip test for apr_env_get)");
+        ABTS_NOT_IMPL(tc, "apr_env_set (skip test for apr_env_get)");
     }
 
     rv = apr_env_get(&value, TEST_ENVVAR_NAME, p);
     have_env_get = (rv != APR_ENOTIMPL);
     if (!have_env_get) {
-        abts_not_impl(tc, "apr_env_get");
+        ABTS_NOT_IMPL(tc, "apr_env_get");
     }
     apr_assert_success(tc, "get environment variable", rv);
-    abts_str_equal(tc, TEST_ENVVAR_VALUE, value);
+    ABTS_STR_EQUAL(tc, TEST_ENVVAR_VALUE, value);
 }
 
 static void test_delenv(abts_case *tc, void *data)
@@ -59,20 +59,20 @@ static void test_delenv(abts_case *tc, void *data)
     apr_status_t rv;
 
     if (!have_env_set) {
-        abts_not_impl(tc, "apr_env_set (skip test for apr_env_delete)");
+        ABTS_NOT_IMPL(tc, "apr_env_set (skip test for apr_env_delete)");
     }
 
     rv = apr_env_delete(TEST_ENVVAR_NAME, p);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_env_delete");
+        ABTS_NOT_IMPL(tc, "apr_env_delete");
     }
     apr_assert_success(tc, "delete environment variable", rv);
 
     if (!have_env_get) {
-        abts_not_impl(tc, "apr_env_get (skip sanity check for apr_env_delete)");
+        ABTS_NOT_IMPL(tc, "apr_env_get (skip sanity check for apr_env_delete)");
     }
     rv = apr_env_get(&value, TEST_ENVVAR_NAME, p);
-    abts_int_equal(tc, APR_ENOENT, rv);
+    ABTS_INT_EQUAL(tc, APR_ENOENT, rv);
 }
 
 abts_suite *testenv(abts_suite *suite)

@@ -45,10 +45,10 @@ static void copy_helper(abts_case *tc, const char *from, const char * to,
     apr_assert_success(tc, "Couldn't stat copy file", rv);
 
     if (!append) {
-        abts_int_equal(tc, orig.size, copy.size);
+        ABTS_INT_EQUAL(tc, orig.size, copy.size);
     }
     else {
-        abts_int_equal(tc, 
+        ABTS_INT_EQUAL(tc, 
                           ((dest_rv == APR_SUCCESS) ? dest.size : 0) + orig.size,
                           copy.size);
     }
