@@ -133,7 +133,13 @@ void apr_atomic_dec(volatile apr_atomic_t *mem);
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #else /* !DOXYGEN */
 
-#ifdef WIN32
+#if APR_FORCE_ATOMIC_GENERIC 
+#if APR_HAS_THREADS
+#define APR_ATOMIC_NEED_DEFAULT 1
+#define APR_ATOMIC_NEED_CAS_DEFAULT 1
+#endif /* APR_HAS_THREADS */
+
+#elif defined(WIN32)
 
 #define apr_atomic_t LONG;
 
@@ -209,7 +215,13 @@ apr_uint32_t apr_atomic_cas_sparc(volatile apr_uint32_t *mem, long with, long cm
 
 #else
 #if APR_HAS_THREADS
+#define APR_ATOMIC_NEED_DEFAULT 1
+#define APR_ATOMIC_NEED_CAS_DEFAULT 1
+#endif /* APR_HAS_THREADS */
 
+#endif /* !defined(WIN32) && !defined(__linux) */
+
+#if defined(APR_ATOMIC_NEED_DEFAULT)
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_read(p)  *p
 apr_status_t apr_atomic_init(apr_pool_t *p);
@@ -217,13 +229,7 @@ void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val);
 void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val);
 void apr_atomic_inc(volatile apr_atomic_t *mem);
 void apr_atomic_dec(volatile apr_atomic_t *mem);
-
-#define APR_ATOMIC_NEED_DEFAULT 1
-#define APR_ATOMIC_NEED_CAS_DEFAULT 1
-
-#endif /* APR_HAS_THREADS */
-
-#endif /* !defined(WIN32) && !defined(__linux) */
+#endif
 
 #if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
 apr_status_t apr_atomic_init(apr_pool_t *p);
