@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/12 17:18:37 $]
+Last modified at [$Date: 2002/01/13 04:58:44 $]
 
 Release:
 
@@ -44,15 +44,13 @@ RELEASE SHOWSTOPPERS:
       Win32: apr_thread_rwlock_try*lock(), apr_thread_cond_timedwait(),
              apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
 
-    * Deal with largefiles properly on those platforms that support 
-      it.
-      Justin says: We may be able to get away with setting 
-                   FILE_OFFSET_BITS=64 on most current Unices.
-                   The other question remains if this should be turned
-                   on by default (i.e. pass O_LARGEFILE or whatnot on
-                   that platform).  I think so.
-
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * Deal with largefiles properly on those platforms that support it.
+
+      Justin says: Linux refuses to have largefile support and largefiles
+                   at the sametime.  Largefile autoconf patch:
+                   http://www.apache.org/~jerenkrantz/apr_largefile.m4
 
     * Get OTHER_CHILD support into Win32
         Status: Bill S. is looking into this
