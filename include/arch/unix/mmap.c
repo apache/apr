@@ -111,7 +111,7 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, const char * fname,
     (*new)->sinfo = st;
     (*new)->size = st.st_size;
     (*new)->cntxt = cont;
-           
+
     /* register the cleanup... */
     ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
              ap_null_cleanup);
