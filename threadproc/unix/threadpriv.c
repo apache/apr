@@ -111,33 +111,19 @@ ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
 ap_status_t ap_get_threadkeydata(void **data, const char *key,
                                  ap_threadkey_t *threadkey)
 {
-    if (threadkey != NULL) {
-        return ap_get_userdata(data, key, threadkey->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTHDKEY;
-    }
+    return ap_get_userdata(data, key, threadkey->cntxt);
 }
 
 ap_status_t ap_set_threadkeydata(void *data, const char *key,
                                  ap_status_t (*cleanup) (void *),
                                  ap_threadkey_t *threadkey)
 {
-    if (threadkey != NULL) {
-        return ap_set_userdata(data, key, cleanup, threadkey->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTHDKEY;
-    }
+    return ap_set_userdata(data, key, cleanup, threadkey->cntxt);
 }
 
 ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key)
 {
-    if (key == NULL) {
-        return APR_ENOFILE;
-    }
+    /* ### broken. is the signature broken? */
     thekey = &(key->key);
     return APR_SUCCESS;
 }
@@ -155,5 +141,5 @@ ap_status_t ap_put_os_threadkey(ap_threadkey_t **key,
     (*key)->key = *thekey;
     return APR_SUCCESS;
 }           
-#endif
-#endif
+#endif /* APR_HAVE_PTHREAD_H */
+#endif /* APR_HAS_THREADS */

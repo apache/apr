@@ -57,23 +57,23 @@
 
 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
 {
-    ap_pool_t *new;
+    ap_pool_t *newpool;
 
     if (cont) {
-        new = ap_make_sub_pool(cont, cont->apr_abort);
+        newpool = ap_make_sub_pool(cont, cont->apr_abort);
     }
     else {
-        new = ap_make_sub_pool(NULL, NULL);
+        newpool = ap_make_sub_pool(NULL, NULL);
     }
         
-    if (new == NULL) {
+    if (newpool == NULL) {
         return APR_ENOPOOL;
     }   
 
-    new->prog_data = NULL;
-    new->apr_abort = NULL;
+    newpool->prog_data = NULL;
+    newpool->apr_abort = NULL;
  
-    *newcont = new;
+    *newcont = newpool;
     return APR_SUCCESS;
 }
 
@@ -82,53 +82,53 @@ ap_status_t ap_set_userdata(void *data, const char *key,
                             ap_pool_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
-    if (cont) { 
-        dptr = cont->prog_data;
-        while (dptr) {
-            if (!strcmp(dptr->key, key))
-                break;
-            dptr2 = dptr;
-            dptr = dptr->next;
-        }
-        if (dptr == NULL) {
-            dptr = ap_pcalloc(cont, sizeof(datastruct));
-            dptr->next = dptr->prev = NULL;
-            dptr->key = ap_pstrdup(cont, key);
-            if (dptr2) {
-                dptr2->next = dptr;
-                dptr->prev = dptr2;
-            }
-            else {
-                cont->prog_data = dptr;
-            }
-        }
-        dptr->data = data;
-        ap_register_cleanup(cont, dptr->data, cleanup, cleanup);
-        return APR_SUCCESS;
+
+    /* ### replace with an ap_hash_t */
+
+    dptr = cont->prog_data;
+    while (dptr) {
+        if (!strcmp(dptr->key, key))
+            break;
+        dptr2 = dptr;
+        dptr = dptr->next;
     }
-    return APR_ENOPOOL;
+    if (dptr == NULL) {
+        dptr = ap_pcalloc(cont, sizeof(datastruct));
+        dptr->next = dptr->prev = NULL;
+        dptr->key = ap_pstrdup(cont, key);
+        if (dptr2) {
+            dptr2->next = dptr;
+            dptr->prev = dptr2;
+        }
+        else {
+            cont->prog_data = dptr;
+        }
+    }
+    dptr->data = data;
+    ap_register_cleanup(cont, dptr->data, cleanup, cleanup);
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont)
 {
     datastruct *dptr = NULL;
-    if (cont) { 
-        dptr = cont->prog_data;
-        while (dptr) {
-            if (!strcmp(dptr->key, key)) {
-                break;
-            }
-            dptr = dptr->next;
+
+    /* ### replace with an ap_hash_t */
+
+    dptr = cont->prog_data;
+    while (dptr) {
+        if (!strcmp(dptr->key, key)) {
+            break;
         }
-        if (dptr) {
-            (*data) = dptr->data;
-        }
-        else {
-            (*data) = NULL;
-        }
-        return APR_SUCCESS;
+        dptr = dptr->next;
     }
-    return APR_ENOPOOL;
+    if (dptr) {
+        (*data) = dptr->data;
+    }
+    else {
+        (*data) = NULL;
+    }
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_initialize(void)
@@ -163,12 +163,6 @@ void ap_terminate(void)
 
 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont)
 {
-    if (cont == NULL) {
-        return APR_ENOPOOL;
-    }
-    else {
-        cont->apr_abort = apr_abort;
-        return APR_SUCCESS;
-    }
+    cont->apr_abort = apr_abort;
+    return APR_SUCCESS;
 }
- 

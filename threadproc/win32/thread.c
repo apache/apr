@@ -158,26 +158,14 @@ ap_status_t ap_thread_detach(ap_thread_t *thd)
 
 ap_status_t ap_get_threaddata(void **data, const char *key, ap_thread_t *thread)
 {
-    if (thread != NULL) {
-        return ap_get_userdata(data, key, thread->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTHREAD;
-    }
+    return ap_get_userdata(data, key, thread->cntxt);
 }
 
 ap_status_t ap_set_threaddata(void *data, const char *key,
                               ap_status_t (*cleanup) (void *),
                               ap_thread_t *thread)
 {
-    if (thread != NULL) {
-        return ap_set_userdata(data, key, cleanup, thread->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTHREAD;
-    }
+    return ap_set_userdata(data, key, cleanup, thread->cntxt);
 }
 
 ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd)
@@ -185,6 +173,7 @@ ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd)
     if (thd == NULL) {
         return APR_ENOTHREAD;
     }
+    /* ### this is broken. is the signature broken? */
     thethd = thd->td;
     return APR_SUCCESS;
 }

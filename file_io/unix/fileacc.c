@@ -69,16 +69,10 @@
 #endif
 /* A file to put ALL of the accessor functions for ap_file_t types. */
 
-ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
+ap_status_t ap_get_filename(char **fname, ap_file_t *thefile)
 {
-    if (thefile != NULL) {
-        *new = ap_pstrdup(thefile->cntxt, thefile->fname);
-        return APR_SUCCESS;
-    }
-    else {
-        *new = NULL;
-        return APR_ENOFILE;
-    }
+    *fname = ap_pstrdup(thefile->cntxt, thefile->fname);
+    return APR_SUCCESS;
 }
 
 #if !defined(OS2) && !defined(WIN32)
@@ -141,22 +135,11 @@ ap_fileperms_t ap_unix_mode2perms(mode_t mode)
 
 ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file)
 {    
-    if (file != NULL) {
-        return ap_get_userdata(data, key, file->cntxt);
-    }
-    else {
-        *data = NULL;
-        return APR_ENOFILE;
-    }
+    return ap_get_userdata(data, key, file->cntxt);
 }
 
 ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key,
                             ap_status_t (*cleanup) (void *))
 {    
-    if (file != NULL) {
-        return ap_set_userdata(data, key, cleanup, file->cntxt);
-    }
-    else {
-        return APR_ENOFILE;
-    }
+    return ap_set_userdata(data, key, cleanup, file->cntxt);
 }
