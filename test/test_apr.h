@@ -19,6 +19,15 @@
 #include "CuTest.h"
 #include "apr_pools.h"
 
+/* XXX FIXME */
+#ifdef WIN32
+#define EXTENSION ".exe"
+#elif NETWARE
+#define EXTENSION ".nlm"
+#else
+#define EXTENSION
+#endif
+
 /* Some simple functions to make the test apps easier to write and
  * a bit more consistent...
  */
@@ -54,8 +63,8 @@ CuSuite *testrand(void);
 CuSuite *testrand2(void);
 CuSuite *testsleep(void);
 CuSuite *testshm(void);
-CuSuite *testsockopt(void);
 CuSuite *testsockets(void);
+CuSuite *testsockopt(void);
 CuSuite *teststr(void);
 CuSuite *testtable(void);
 CuSuite *testthread(void);
