@@ -58,7 +58,7 @@
  */
 #ifndef APR_PORTABLE_H
 #define APR_PORTABLE_H
-/*
+/**
  * @file apr_portable.h
  * @brief APR Portability Routines
  */
@@ -216,9 +216,8 @@ typedef struct apr_os_sock_info_t apr_os_sock_info_t;
  * convert the file from apr type to os specific type.
  * @param thefile The os specific file we are converting to
  * @param file The apr file to convert.
- * @deffunc apr_status_t apr_os_file_get(apr_os_file_t *thefile, apr_file_t *file)
- * @tip On Unix, it is only possible to get a file descriptor from 
- *      an apr file type.
+ * @remark On Unix, it is only possible to get a file descriptor from 
+ *         an apr file type.
  */
 APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
                                           apr_file_t *file);
@@ -227,7 +226,6 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
  * convert the dir from apr type to os specific type.
  * @param thedir The os specific dir we are converting to
  * @param dir The apr dir to convert.
- * @deffunc apr_status_t apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
  */   
 APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir, 
                                          apr_dir_t *dir);
@@ -236,7 +234,6 @@ APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir,
  * Convert the socket from an apr type to an OS specific socket
  * @param thesock The socket to convert.
  * @param sock The os specifc equivelant of the apr socket..
- * @deffunc apr_status_t apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)
  */
 APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock,
                                           apr_socket_t *sock);
@@ -245,7 +242,6 @@ APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock,
  * Convert the lock from os specific type to apr type
  * @param oslock The os specific lock we are converting to.
  * @param lock The apr lock to convert.
- * @deffunc apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
  */
 APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *oslock, 
                                           apr_lock_t *lock);
@@ -254,7 +250,6 @@ APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *oslock,
  * Get the exploded time in the platforms native format.
  * @param ostime the native time format
  * @param aprtime the time to convert
- * @deffunc apr_status_t apr_os_exp_time_get(apr_os_exp_time_t **ostime, apr_exploded_time_t *aprtime)
  */
 APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
                                  apr_exploded_time_t *aprtime);
@@ -263,18 +258,19 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
  * Get the imploded time in the platforms native format.
  * @param ostime the native time format
  * @param aprtimethe time to convert
- * @deffunc apr_status_t apr_os_imp_time_get(apr_os_imp_time_t **ostime, apr_time_t *aprtime)
  */
 APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime, 
                                               apr_time_t *aprtime);
 
-#if APR_HAS_THREADS
-
+#if APR_HAS_THREADS || defined(DOXYGEN)
+/** 
+ * @defgroup APR_PORT_Thread Thread portability Routines
+ * @{ 
+ */
 /**
  * convert the thread to os specific type from apr type.
  * @param thethd The apr thread to convert
  * @param thd The os specific thread we are converting to
- * @deffunc apr_status_t apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
  */
 APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd, 
                                             apr_thread_t *thd);
@@ -283,104 +279,15 @@ APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
  * convert the thread private memory key to os specific type from an apr type.
  * @param thekey The apr handle we are converting from.
  * @param key The os specific handle we are converting to.
- * @deffunc apr_status_t apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
  */
 APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey,
                                                apr_threadkey_t *key);
-
-#endif /* APR_HAS_THREADS */
-
-/**
- * convert the file from os specific type to apr type.
- * @param file The apr file we are converting to.
- * @param thefile The os specific file to convert
- * @param cont The pool to use if it is needed.
- * @deffunc apr_status_t apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile, apr_pool_t *cont)
- * @tip On Unix, it is only possible to put a file descriptor into
- *      an apr file type.
- */
-APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
-                                          apr_os_file_t *thefile,
-                                          apr_pool_t *cont); 
-
-/**
- * convert the dir from os specific type to apr type.
- * @param dir The apr dir we are converting to.
- * @param thedir The os specific dir to convert
- * @param cont The pool to use when creating to apr directory.
- * @deffunc apr_status_t apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir, apr_pool_t *cont)
- */
-APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir,
-                                         apr_os_dir_t *thedir,
-                                         apr_pool_t *cont); 
-
-/**
- * Convert a socket from the os specific type to the apr type
- * @param sock The pool to use.
- * @param thesock The socket to convert to.
- * @param cont The socket we are converting to an apr type.
- * @deffunc apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock, apr_pool_t *cont)
- */
-APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock, 
-                                          apr_os_sock_t *thesock, 
-                                          apr_pool_t *cont);
-
-/**
- * Create a socket from an existing descriptor and local and remote
- * socket addresses.
- * @param apr_sock The new socket that has been set up
- * @param os_sock_info The os representation of the socket handle and
- *        other characteristics of the socket
- * @param cont The pool to use
- * @deffunc apr_status_t apr_os_sock_make(apr_socket_t **apr_sock, apr_os_sock_info_t *os_sock_info, apr_pool_t *cont)
- * @tip If you only know the descriptor/handle or if it isn't really
- *      a true socket, use apr_os_sock_put() instead.
- */
-APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
-                                           apr_os_sock_info_t *os_sock_info,
-                                           apr_pool_t *cont);
-
-/**
- * Convert the lock from os specific type to apr type
- * @param lock The apr lock we are converting to.
- * @param thelock The os specific lock to convert.
- * @param cont The pool to use if it is needed.
- * @deffunc apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, apr_pool_t *cont)
- */
-APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock,
-                                          apr_os_lock_t *thelock,
-                                          apr_pool_t *cont); 
-
-/**
- * Put the imploded time in the APR format.
- * @param aprtime the APR time format
- * @param ostime the time to convert
- * @param cont the pool to use if necessary
- * @deffunc apr_status_t apr_os_imp_time_put(apr_time_t *aprtime, apr_os_imp_time_t **ostime, apr_pool_t *cont)
- */
-APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
-                                              apr_os_imp_time_t **ostime,
-                                              apr_pool_t *cont); 
-
-/**
- * Put the exploded time in the APR format.
- * @param aprtime the APR time format
- * @param ostime the time to convert
- * @param cont the pool to use if necessary
- * @deffunc apr_status_t apr_os_exp_time_put(apr_exploded_time_t *aprtime, apr_os_exp_time_t **ostime, apr_pool_t *cont)
- */
-APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
-                                              apr_os_exp_time_t **ostime,
-                                              apr_pool_t *cont); 
-
-#if APR_HAS_THREADS
 
 /**
  * convert the thread from os specific type to apr type.
  * @param thd The apr thread we are converting to.
  * @param thethd The os specific thread to convert
  * @param cont The pool to use if it is needed.
- * @deffunc apr_status_t apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd,
  */
 APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
                                             apr_os_thread_t *thethd,
@@ -391,38 +298,10 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
  * @param key The apr handle we are converting to.
  * @param thekey The os specific handle to convert
  * @param cont The pool to use if it is needed.
- * @deffunc apr_status_t apr_os_threadkey_put(apr_threadkey_t **key, apr_os_threadkey_t *thekey, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
                                                apr_os_threadkey_t *thekey,
                                                apr_pool_t *cont);
-
-#endif /* APR_HAS_THREADS */
-
-#if APR_HAS_DSO
-/**
- * convert the dso handle from os specific to apr
- * @param dso The apr handle we are converting to
- * @param thedso the os specific handle to convert
- * @param pool the pool to use if it is needed
- * @deffunc apr_status_t apr_os_dso_handle_put(apr_dso_handle_t **dso, apr_os_dso_handle_t *thedso, apr_pool_t *pool)
- */
-APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
-                                                apr_os_dso_handle_t thedso,
-                                                apr_pool_t *pool);
-
-/**
- * convert the apr dso handle into an os specific one
- * @param aprdso The apr dso handle to convert
- * @param dso The os specific dso to return
- * @deffunc apr_status_t apr_os_dso_handle_get(apr_os_dso_handle_t *dso, apr_dso_handle_t *aprdso);
- */
-APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
-                                                apr_dso_handle_t *aprdso);
-
-#endif /* APR_HAS_DSO */
-
-#if APR_HAS_THREADS
 /**
  * Get the thread ID
  */
@@ -452,7 +331,110 @@ APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms,
 APR_DECLARE(apr_status_t) apr_sms_thread_unregister(apr_sms_t *sms,
                                                     apr_os_thread_t thread);
 
+/** @} */
 #endif /* APR_HAS_THREADS */
+
+/**
+ * convert the file from os specific type to apr type.
+ * @param file The apr file we are converting to.
+ * @param thefile The os specific file to convert
+ * @param cont The pool to use if it is needed.
+ * @remark On Unix, it is only possible to put a file descriptor into
+ *         an apr file type.
+ */
+APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *cont); 
+
+/**
+ * convert the dir from os specific type to apr type.
+ * @param dir The apr dir we are converting to.
+ * @param thedir The os specific dir to convert
+ * @param cont The pool to use when creating to apr directory.
+ */
+APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir,
+                                         apr_os_dir_t *thedir,
+                                         apr_pool_t *cont); 
+
+/**
+ * Convert a socket from the os specific type to the apr type
+ * @param sock The pool to use.
+ * @param thesock The socket to convert to.
+ * @param cont The socket we are converting to an apr type.
+ */
+APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock, 
+                                          apr_os_sock_t *thesock, 
+                                          apr_pool_t *cont);
+
+/**
+ * Create a socket from an existing descriptor and local and remote
+ * socket addresses.
+ * @param apr_sock The new socket that has been set up
+ * @param os_sock_info The os representation of the socket handle and
+ *        other characteristics of the socket
+ * @param cont The pool to use
+ * @remark If you only know the descriptor/handle or if it isn't really
+ *         a true socket, use apr_os_sock_put() instead.
+ */
+APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
+                                           apr_os_sock_info_t *os_sock_info,
+                                           apr_pool_t *cont);
+
+/**
+ * Convert the lock from os specific type to apr type
+ * @param lock The apr lock we are converting to.
+ * @param thelock The os specific lock to convert.
+ * @param cont The pool to use if it is needed.
+ */
+APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock,
+                                          apr_os_lock_t *thelock,
+                                          apr_pool_t *cont); 
+
+/**
+ * Put the imploded time in the APR format.
+ * @param aprtime the APR time format
+ * @param ostime the time to convert
+ * @param cont the pool to use if necessary
+ */
+APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
+                                              apr_os_imp_time_t **ostime,
+                                              apr_pool_t *cont); 
+
+/**
+ * Put the exploded time in the APR format.
+ * @param aprtime the APR time format
+ * @param ostime the time to convert
+ * @param cont the pool to use if necessary
+ */
+APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
+                                              apr_os_exp_time_t **ostime,
+                                              apr_pool_t *cont); 
+
+
+#if APR_HAS_DSO || defined(DOXYGEN)
+/** 
+ * @defgroup apr_port_DSO DSO (Dynamic Loading) Portabiliity Routines
+ * @{
+ */
+/**
+ * convert the dso handle from os specific to apr
+ * @param dso The apr handle we are converting to
+ * @param thedso the os specific handle to convert
+ * @param pool the pool to use if it is needed
+ */
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
+                                                apr_os_dso_handle_t thedso,
+                                                apr_pool_t *pool);
+
+/**
+ * convert the apr dso handle into an os specific one
+ * @param aprdso The apr dso handle to convert
+ * @param dso The os specific dso to return
+ */
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
+                                                apr_dso_handle_t *aprdso);
+/** @} */
+#endif /* APR_HAS_DSO */
 
 #ifdef __cplusplus
 }
