@@ -243,8 +243,19 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             }
             else {
                 do {
-                    rv = write(thefile->filedes, buf, *nbytes);
-                } while (rv == (apr_size_t)-1 && errno == EINTR);
+                    do {
+                        rv = write(thefile->filedes, buf, *nbytes);
+                    } while (rv == (apr_size_t)-1 && errno == EINTR);
+                    if (rv == (apr_size_t)-1 &&
+                        (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                        *nbytes /= 2; /* yes, we'll loop if kernel lied
+                                       * and we can't even write 1 byte
+                                       */
+                    }
+                    else {
+                        break;
+                    }
+                } while (1);
             }
         }  
 #endif
