@@ -62,7 +62,7 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
 {
     apr_filetype_e type;
 
-    switch (type & S_IFMT) {
+    switch (mode & S_IFMT) {
     case S_IFREG:
         type = APR_REG;  break;
     case S_IFDIR:
@@ -87,12 +87,12 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
          * for Linux et al.
          */
 #if !defined(S_IFFIFO) && defined(S_ISFIFO)
-    	if (S_ISFIFO(type)) {
+    	if (S_ISFIFO(mode)) {
             type = APR_PIPE;
 	} else
 #endif
 #if !defined(BEOS) && !defined(S_IFSOCK) && defined(S_ISSOCK)
-    	if (S_ISSOCK(type)) {
+    	if (S_ISSOCK(mode)) {
             type = APR_SOCK;
 	} else
 #endif
