@@ -281,7 +281,7 @@ apr_status_t apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
                       apr_size_t nvec, apr_size_t *nbytes)
 {
 #ifdef HAVE_WRITEV
-     int bytes;
+    int bytes;
 
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
         *nbytes = 0;
