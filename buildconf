@@ -85,7 +85,7 @@ if [ ! -f $ltfile ]; then
 fi
 
 rm -f build/libtool.m4
-cp $ltfile build/libtool.m4
+cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
 
 # This is just temporary until people's workspaces are cleared -- remove
 # any old aclocal.m4 left over from prior build so it doesn't cause errors.
