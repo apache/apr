@@ -186,14 +186,6 @@ SOURCE=.\threadproc\win32\proc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\file_io\win32\readdir.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\win32\readdir.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\file_io\win32\readwrite.c
 # End Source File
 # Begin Source File
