@@ -298,3 +298,25 @@ ap_status_t ap_ferror(ap_file_t *fptr)
 
     return APR_SUCCESS;
 }   
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_open_stderr(ap_file_t **, ap_context_t *) 
+ *    open standard error as an apr file pointer.
+ * arg 1) The apr file to use as stderr.
+ * arg 2) The context to allocate the file out of.
+ */
+ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
+{
+    (*thefile) = ap_palloc(cont, sizeof(ap_os_file_t *));
+    if ((*thefile) == NULL) {
+        return APR_ENOMEM;
+    }
+    (*thefile)->filedes = STDERR_FILENO;
+    (*thefile)->cntxt = cont;
+    (*thefile)->filehand = NULL;
+    (*thefile)->stated = 0;
+    (*thefile)->buffered = 0;
+    (*thefile)->eof_hit = 0;
+
+    return APR_SUCCESS;
+}
