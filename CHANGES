@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Add the new thread read/write lock API to APR.
+     [Aaron Bannert <aaron@clove.org>]
+
+  *) Add the new thread mutex lock API to APR.
+     [Aaron Bannert <aaron@clove.org>]
+
   *) Cache GMT offset on platforms that don't store it in the tm struct.
      This offset is normalized to be independent of daylight savings
      time.  [Brian Pane <bpane@pacbell.net>]
