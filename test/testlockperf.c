@@ -124,8 +124,8 @@ int test_thread_mutex(void)
     mutex_counter = 0;
 
     printf("apr_thread_mutex_t Tests\n");
-    printf("%-60s", "    Initializing the apr_thread_mutex_t");
-    s1 = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, pool);
+    printf("%-60s", "    Initializing the apr_thread_mutex_t (UNNESTED)");
+    s1 = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_UNNESTED, pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
         return s1;
