@@ -105,6 +105,16 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
 #ifdef SA_INTERRUPT             /* SunOS */
     act.sa_flags |= SA_INTERRUPT;
 #endif
+#if defined(__osf__) && defined(__alpha)
+    /* XXX jeff thinks this should be enabled whenever SA_NOCLDWAIT is defined */
+
+    /* this is required on Tru64 to cause child processes to
+     * disappear gracefully - XPG4 compatible 
+     */
+    if ((signo == SIGCHLD) && (func == SIG_IGN)) {
+        act.sa_flags |= SA_NOCLDWAIT;
+    }
+   #endif
     if (sigaction(signo, &act, &oact) < 0)
         return SIG_ERR;
     return oact.sa_handler;

@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Tru64: Stop leaving zombies in APR apps like mod_cgid which
+     tell APR to ignore SIGCHLD.  
+     [Dave Hill <David.D.Hill@Compaq.com>]
+
   *) Ensure that the ATOMIC_HASH can not be negative.
      [Joe Orton <jorton@redhat.com>]
 
