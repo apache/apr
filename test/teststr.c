@@ -163,6 +163,7 @@ static void snprintf_underflow(CuTest *tc)
 static void string_error(CuTest *tc)
 {
      char buf[128], *rv;
+     apr_status_t n;
 
      buf[0] = '\0';
      rv = apr_strerror(APR_ENOENT, buf, sizeof buf);
@@ -172,6 +173,11 @@ static void string_error(CuTest *tc)
      rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
      CuAssertPtrEquals(tc, buf, rv);
      CuAssertStrEquals(tc, "The timeout specified has expired", buf);
+     
+     /* throw some randomish numbers at it to check for robustness */
+     for (n = 1; n < 1000000; n *= 2) {
+         apr_strerror(n, buf, sizeof buf);
+     }
 }
 
 #define SIZE 180000
