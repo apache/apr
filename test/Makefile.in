@@ -104,12 +104,6 @@ testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
 testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
 	$(LINK) testshmconsumer.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testpipe@EXEEXT@: testpipe.lo $(LOCAL_LIBS)
-	$(LINK) testpipe.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testsockopt@EXEEXT@: testsockopt.lo $(LOCAL_LIBS)
-	$(LINK) testsockopt.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testhash@EXEEXT@: testhash.lo $(LOCAL_LIBS)
 	$(LINK) testhash.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -132,7 +126,7 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
-	testpoll.lo testlock.lo testsockopt.lo
+	testpoll.lo testlock.lo testsockopt.lo testpipe.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 CuTest.lo proc_child@EXEEXT@ $(LOCAL_LIBS)
