@@ -104,36 +104,6 @@ B<NOTE>:  Examples:  "/foo/bar/gum"   -> "gum"
  */
 APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 
-/*
-
-=head1 ap_status_t ap_execle(const char *c, const char *a, ...)
-
-B<Replace the current process image with a new process>
-
-    arg 1) The path to the new program to run
-    arg 2) The first argument for the new program
-    ...)   The rest of the arguments for the new program. 
-
-=cut
- */
-APR_EXPORT_NONSTD(ap_status_t) ap_execle(const char *c, const char *a, ...);
-
-/*
-
-=head1 ap_status_t ap_execve(const char *c, const char *aargv[], const char *envp[])
-
-B<Replace the current process image with a new process>
-
-    arg 1) The path to the new program to run
-    arg 2) The arguments for the new program in an array of char *.
-    arg 3) The environment for the new program in an array of char * of the 
-           form key=value 
-
-=cut
- */
-APR_EXPORT_NONSTD(ap_status_t) ap_execve(const char *c, const char *argv[],
-				  const char *envp[]);
-
 /* These macros allow correct support of 8-bit characters on systems which
  * support 8-bit characters.  Pretty dumb how the cast is required, but
  * that's legacy libc for ya.  These new macros do not support EOF like
