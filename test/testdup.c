@@ -57,83 +57,154 @@
 #include "apr_pools.h"
 #include "apr_errno.h"
 #include "apr_file_io.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include "test_apr.h"
 
 #define TEST "Testing\n"
 #define TEST2 "Testing again\n"
+#define FILENAME "data/testdup.file"
 
-int main (int argc, char ** argv)
+static void test_file_dup(CuTest *tc)
 {
     apr_file_t *file1 = NULL;
-    apr_file_t *file2 = NULL;
     apr_file_t *file3 = NULL;
+    apr_status_t rv;
+    apr_finfo_t finfo;
 
-    apr_pool_t *p;
+    /* First, create a new file, empty... */
+    rv = apr_file_open(&file1, FILENAME, APR_READ | APR_WRITE | APR_CREATE|
+                       APR_DELONCLOSE, APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file1);
+
+    rv = apr_file_dup(&file3, file1, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file3);
+
+    rv = apr_file_close(file1);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    /* cleanup after ourselves */
+    rv = apr_file_close(file3);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_stat(&finfo, FILENAME, APR_FINFO_NORM, p);
+    CuAssertIntEquals(tc, APR_ENOENT, rv);
+}  
+
+static void test_file_readwrite(CuTest *tc)
+{
+    apr_file_t *file1 = NULL;
+    apr_file_t *file3 = NULL;
+    apr_status_t rv;
+    apr_finfo_t finfo;
     apr_size_t txtlen = sizeof(TEST);
     char buff[50];
     apr_off_t fpos;
 
-    apr_initialize();
-    atexit(apr_terminate);
-
-    fprintf(stdout, "APR File Duplication Test\n=========================\n\n");
-    STD_TEST_NEQ("Creating a pool", apr_pool_create(&p, NULL))
-
-    printf("\nTesting apr_file_dup\n");
     /* First, create a new file, empty... */
-    STD_TEST_NEQ("    Open a new, empty file (#1)", apr_file_open(&file1, "./testdup.file",
-                                            APR_READ | APR_WRITE | APR_CREATE,
-                                            APR_OS_DEFAULT, p))
+    rv = apr_file_open(&file1, FILENAME, APR_READ | APR_WRITE | APR_CREATE|
+                       APR_DELONCLOSE, APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file1);
 
-    STD_TEST_NEQ("    Simple dup", apr_file_dup(&file3, file1, p))
+    rv = apr_file_dup(&file3, file1, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file3);
 
-    STD_TEST_NEQ("    Write to dup'd file (#3)", apr_file_write(file3, TEST, &txtlen))
+    rv = apr_file_write(file3, TEST, &txtlen);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, sizeof(TEST), txtlen);
 
     fpos = 0;
-    STD_TEST_NEQ("    Rewind file #1 to start", apr_file_seek(file1, APR_SET, &fpos))
+    rv = apr_file_seek(file1, APR_SET, &fpos);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 0, fpos);
 
     txtlen = 50;
-    STD_TEST_NEQ("    Read from file #1", 
-                 apr_file_read(file1, buff, &txtlen))
+    rv = apr_file_read(file1, buff, &txtlen);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, TEST, buff);
 
-    TEST_NEQ("    Checking what we read from #1", strcmp(buff, TEST), 0, "OK", "Failed")
+    /* cleanup after ourselves */
+    rv = apr_file_close(file1);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
+    rv = apr_file_close(file3);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_stat(&finfo, FILENAME, APR_FINFO_NORM, p);
+    CuAssertIntEquals(tc, APR_ENOENT, rv);
+}  
 
-    printf("\nTesting apr_file_dup2\n");
-    STD_TEST_NEQ("    Open another new, empty file (#2)",
-                 apr_file_open(&file2, "./testdup2.file",
-                               APR_READ | APR_WRITE | APR_CREATE,
-                               APR_OS_DEFAULT, p))
+static void test_dup2(CuTest *tc)
+{
+    apr_file_t *file2 = NULL;
+    apr_file_t *file3 = NULL;
+    apr_status_t rv;
 
-    STD_TEST_NEQ("    Dup2 test", apr_file_dup2(file3, file2, p))
+    rv = apr_file_open(&file2, FILENAME, APR_READ | APR_WRITE | APR_CREATE |
+                       APR_DELONCLOSE, APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file2);
+
+    rv = apr_file_open_stderr(&file3, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_dup2(file3, file2, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file3);
+
+    apr_file_close(file2);
+    apr_file_close(file3);
+}
+
+static void test_dup2_readwrite(CuTest *tc)
+{
+    apr_file_t *file3 = NULL;
+    apr_file_t *file2 = NULL;
+    apr_status_t rv;
+    apr_size_t txtlen = sizeof(TEST);
+    char buff[50];
+    apr_off_t fpos;
+
+    rv = apr_file_open(&file2, FILENAME, APR_READ | APR_WRITE | APR_CREATE |
+                       APR_DELONCLOSE, APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file2);
+
+    rv = apr_file_open_stderr(&file3, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_dup2(file3, file2, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, file3);
 
     txtlen = sizeof(TEST2);
-    STD_TEST_NEQ("    Write to dup'd file #3", apr_file_write(file3, TEST2, &txtlen))
+    rv = apr_file_write(file3, TEST2, &txtlen);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, sizeof(TEST2), txtlen);
 
-    STD_TEST_NEQ("    Rewind file #2 to start", apr_file_seek(file2, APR_SET, &fpos))
+    fpos = 0;
+    rv = apr_file_seek(file2, APR_SET, &fpos);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 0, fpos);
 
     txtlen = 50;
-    STD_TEST_NEQ("    Read from file #2",
-                 apr_file_read(file2, buff, &txtlen))
-
-    TEST_NEQ("    Checking what we read from #2", strcmp(buff, TEST2), 0, "OK", "Failed")
+    rv = apr_file_read(file2, buff, &txtlen);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, TEST2, buff);
       
-    printf("\nCleaning up\n");
-    STD_TEST_NEQ("    Closing file #3", apr_file_close(file3))
-    STD_TEST_NEQ("    Closing file #2", apr_file_close(file2))
-    STD_TEST_NEQ("    Closing file #1", apr_file_close(file1))
+    apr_file_close(file2);
+    apr_file_close(file3);
+}
 
-    STD_TEST_NEQ("    Removing first test file", apr_file_remove("./testdup.file", p))
-    STD_TEST_NEQ("    Removing first test file", apr_file_remove("./testdup2.file", p))
+CuSuite *testdup(void)
+{
+    CuSuite *suite = CuSuiteNew("File duplication");
 
-    printf("\nAll Tests completed - OK!\n");
+    SUITE_ADD_TEST(suite, test_file_dup);
+    SUITE_ADD_TEST(suite, test_file_readwrite);
+    SUITE_ADD_TEST(suite, test_dup2);
+    SUITE_ADD_TEST(suite, test_dup2_readwrite);
 
-    return (0);
+    return suite;
 }
 

@@ -153,12 +153,12 @@ testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
          testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
          testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
-         testdso.lo testoc.lo CuTest.lo mod_test.la libmod_test.la \
-         occhild@EXEEXT@ $(LOCAL_LIBS)
+         testdso.lo testoc.lo testdup.lo CuTest.lo mod_test.la \
+         libmod_test.la occhild@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo      \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo     \
-	testdso.lo testoc.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	testdso.lo testoc.lo testdup.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE
