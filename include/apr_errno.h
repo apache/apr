@@ -113,24 +113,14 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 /**
  * @def apr_get_os_error()
- * @return apr_status_t the last platform error, folded into apr_status_t, on some platforms
+ * @return apr_status_t the last platform error, folded into apr_status_t, on most platforms
  * @remark This retrieves errno, or calls a GetLastError() style function, and
  *      folds it with APR_FROM_OS_ERROR.  Some platforms (such as OS2) have no
- *      such mechanism, so this call may be unsupported.  Some platforms
- *      require the alternate apr_get_netos_error() to retrieve the last
- *      socket error.
+ *      such mechanism, so this call may be unsupported.  Do NOT use this
+ *      call for socket errors from socket, send, recv etc!
  */
-#define apr_get_os_error()   (APR_FROM_OS_ERROR(GetLastError()))
+#define apr_get_os_error()
 
-/**
- * Return the last socket error, folded into apr_status_t, on some platforms
- * @deffunc apr_status_t apr_get_netos_error()
- * @tip This retrieves errno, h_errno, or calls a GetLastSocketError() style
- *      function, and folds it with APR_FROM_OS_ERROR.  Some platforms (such
- *      as OS2) have no such mechanism, so this call may be unsupported.
- */
-
-#define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
 /**
  * Reset the last platform error, unfolded from an apr_status_t, on some platforms
  * @param statcode The OS error folded in a prior call to APR_FROM_OS_ERROR()
@@ -142,8 +132,30 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *      with APR_TO_OS_ERROR.  Some platforms (such as OS2) have no such
  *      mechanism, so this call may be unsupported.
  */
-#define apr_set_os_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
-#endif
+#define apr_set_os_error(statcode)
+
+/**
+ * Return the last socket error, folded into apr_status_t, on all platforms
+ * @deffunc apr_status_t apr_get_netos_error()
+ * @tip This retrieves errno or calls a GetLastSocketError() style function,
+ *      and folds it with APR_FROM_OS_ERROR.
+ */
+#define apr_get_netos_error()
+
+/**
+ * Reset the last socket error, unfolded from an apr_status_t
+ * @param socketcode The socket error folded in a prior call to APR_FROM_OS_ERROR()
+ * @deffunc void apr_set_os_error(apr_status_t statcode)
+ * @tip Warning: macro implementation; the statcode argument may be evaluated
+ *      multiple times.  If the statcode was not created by apr_get_os_error
+ *      or APR_FROM_OS_ERROR, the results are undefined.  This macro sets
+ *      errno, or calls a WSASetLastError() style function, unfolding 
+ *      socketcode with APR_TO_OS_ERROR.
+ */
+#define apr_set_netos_error(socketcode)
+
+#endif /* defined(DOXYGEN) */
+
 /**
  * APR_OS_START_ERROR is where the APR specific error values start.
  */
@@ -780,10 +792,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * #define apr_set_os_error(e)  (SetLastError(APR_TO_OS_ERROR(e)))
  */
 
-/* A special case, only socket calls require this:
+/* A special case, only socket calls require this;
  */
-define apr_get_netos_error()   (APR_FROM_OS_ERROR(h_errno))
-define apr_set_netos_error(e)   (h_errno = APR_TO_OS_ERROR(e)))
+#define apr_get_netos_error()   (APR_FROM_OS_ERROR(errno))
+#define apr_set_netos_error(e)  (errno = APR_TO_OS_ERROR(e))
 
 /* And this needs to be greped away for good:
  */
@@ -1108,12 +1120,8 @@ define apr_set_netos_error(e)   (h_errno = APR_TO_OS_ERROR(e)))
 
 /* A special case, only socket calls require this:
  */
-#define apr_get_netos_error() (h_errno)
-#ifdef HAVE_SET_H_ERRNO
-#define apr_set_netos_error(e) set_h_errno(e)
-#else
-#define apr_set_netos_error(e) (h_errno = (e))
-#endif
+#define apr_get_netos_error() (errno)
+#define apr_set_netos_error(e) (errno = (e))
 
 /** no error */
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
