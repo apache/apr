@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Misc. Win32 fixes: Set the pool pointer in apr_sockaddr_t 
+     structures created with the apr_socket_t to prevent segfault 
+     in certain apps.  Flush unwritten buffered data when the file 
+     is closed.  [Jeff Trawick]
+
   *) Win32: Get APR to compile with MSVC 5.0 (a.k.a. VC97).
      PR #7489  [Jeff Trawick]
 
