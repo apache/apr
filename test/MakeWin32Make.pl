@@ -3,12 +3,14 @@ use IO::File;
 $srcfl = new IO::File "Makefile.in", "r" || die "failed to open .in file";
 $dstfl = new IO::File "Makefile", "w" || die "failed to create Makefile";
 
-print $dstfl "LINK=link.exe\n";
-
 while ($t = <$srcfl>) {
 
     if ($t =~ m|\@INCLUDE_RULES\@|) {
-        $t = "ALL: \$(TARGETS)\n";
+        $t = "ALL: \$(TARGETS)\n\n"
+           . "CL = cl.exe\n"
+           . "LINK = link.exe /nologo /debug /machine:I386\n\n"
+           . ".c.obj::\n"
+           . "\t\$(CL) -c \$*.c \$(CFLAGS)\n";
     }
     if ($t =~ m|^ALL_LIBS=|) {
         $t = "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib";
@@ -16,7 +18,7 @@ while ($t = <$srcfl>) {
     if ($t =~ s|\@CFLAGS\@|\/nologo \/MDd \/W3 \/Gm \/GX \/Zi \/Od \/D "_DEBUG" \/D "WIN32" \/D APR_DECLARE_STATIC \/FD|) {
         $t =~ s|-g ||;
     }
-    $t =~ s|\@LDFLAGS\@|\/nologo \/debug \/machine:I386|;
+    $t =~ s|\@LDFLAGS\@||;
 
     $t =~ s|\@RM\@|del|;
     if ($t =~ s|(\$\(RM\)) -f|$1|) {
