@@ -55,6 +55,8 @@
 #ifndef LOCKS_H
 #define LOCKS_H
 
+#define NDEBUG
+
 #include "apr_lock.h"
 #include <nks/synch.h>
 
