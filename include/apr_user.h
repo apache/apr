@@ -110,6 +110,20 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
 APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p);
 
 /***
+ * Compare two user identifiers for equality.
+ * @param left One uid to test
+ * @param right Another uid to test
+ * @deffunc apr_status_t apr_compare_users(apr_uid_t left, apr_uid_t right)
+ * @tip Returns APR_SUCCESS if the apr_uid_t strutures identify the same user,
+ * APR_EMISMATCH if not, APR_BADARG if an apr_uid_t is invalid.
+ */
+#ifdef WIN32
+APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right);
+#else
+#define apr_compare_users(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
+#endif
+
+/***
  * Get the group name for a specified groupid
  * @param dirname Pointer to new string containing group name (on output)
  * @param userid The groupid
@@ -118,6 +132,20 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
  * @tip This function is available only if APR_HAS_USER is defined.
  */
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p);
+
+/***
+ * Compare two group identifiers for equality.
+ * @param left One gid to test
+ * @param right Another gid to test
+ * @deffunc apr_status_t apr_compare_groups(apr_gid_t left, apr_gid_t right)
+ * @tip Returns APR_SUCCESS if the apr_gid_t strutures identify the same group,
+ * APR_EMISMATCH if not, APR_BADARG if an apr_gid_t is invalid.
+ */
+#ifdef WIN32
+APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right);
+#else
+#define apr_compare_groups(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
+#endif
 
 #endif  /* ! APR_HAS_USER */
 
