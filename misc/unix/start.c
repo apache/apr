@@ -61,7 +61,7 @@
 
 
 static int initialized = 0;
-
+static apr_pool_t *global_apr_pool;
 
 apr_status_t apr_initialize(void)
 {
@@ -74,6 +74,10 @@ apr_status_t apr_initialize(void)
 
     if (initialized++) {
         return APR_SUCCESS;
+    }
+
+    if (apr_create_pool(&global_apr_pool, NULL) != APR_SUCCESS) {
+        return APR_ENOPOOL;
     }
 
 #if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
@@ -90,7 +94,7 @@ apr_status_t apr_initialize(void)
         return APR_EEXIST;
     }
 #endif
-    status = apr_init_alloc();
+    status = apr_init_alloc(global_apr_pool);
     return status;
 }
 
@@ -100,7 +104,7 @@ void apr_terminate(void)
     if (initialized) {
         return;
     }
-    apr_term_alloc();
+    apr_term_alloc(global_apr_pool);
 }
 
 apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
