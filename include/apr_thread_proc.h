@@ -468,7 +468,7 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
  * @param attr The procattr we care about. 
  * @param cmd The type of command.  One of:
  * <PRE>
- *            APR_SHELLCMD     --  Shell script
+ *            APR_SHELLCMD     --  Anything that the shell can handle
  *            APR_PROGRAM      --  Executable program   (default) 
  *            APR_PROGRAM_ENV  --  Executable program, copy environment
  *            APR_PROGRAM_PATH --  Executable program on PATH, copy env
