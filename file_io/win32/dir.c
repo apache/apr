@@ -238,13 +238,13 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
      * the BLK, CHR, and other oddballs, since they should -not- occur in this
      * context.
      */
-    if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        finfo->filetype = APR_DIR;
+    if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+        finfo->filetype = APR_LNK;
         finfo->valid |= APR_FINFO_TYPE;
     }
-    else if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-        finfo->filetype = APR_LNK;
-        finfo->valid |= APR_FINFO_TYPE | APR_FINFO_LINK;
+    else if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        finfo->filetype = APR_DIR;
+        finfo->valid |= APR_FINFO_TYPE;
     }
     else {
         finfo->filetype = APR_REG;
