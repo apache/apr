@@ -228,7 +228,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
        ;;
     bs2000*-siemens-sysv*)
 	APR_SETIFNULL(CFLAGS, [-O])
-	APR_ADDTO(CPPFLAGS, [-DSVR4 -D_XPG_IV])
+	APR_ADDTO(CPPFLAGS, [-DSVR4 -D_XPG_IV -D_KMEMUSER])
 	APR_ADDTO(LIBS, [-lsocket])
 	APR_SETIFNULL(enable_threads, [no])
 	;;
