@@ -578,28 +578,26 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *mem_sys,
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     while (cleanup) {
-        if ((type == 0 || cleanup->cleanup_fn == cleanup_fn) &&
+        if ((type == 0 || cleanup->type == type) &&
             cleanup->data == data && cleanup->cleanup_fn == cleanup_fn) {
             *cleanup_ref = cleanup->next;
 
-            apr_lock_release(mem_sys->sms_lock);
-            
             mem_sys = mem_sys->accounting_mem_sys;
 
             if (mem_sys->free_fn)
                 apr_sms_free(mem_sys, cleanup);
 
             rv = APR_SUCCESS;
+        } else {
+            cleanup_ref = &cleanup->next;
+            cleanup = cleanup->next;
         }
-
-        cleanup_ref = &cleanup->next;
-        cleanup = cleanup->next;
     }
 
     apr_lock_release(mem_sys->sms_lock);
 
     /* The cleanup function must have been registered previously */
-    return APR_EINVAL;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys, 
