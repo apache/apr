@@ -66,7 +66,6 @@
 #include "apr_sms.h"
 #include "apr_sms_tracking.h"
 #include <stdlib.h>
-#include <assert.h>
 
 static const char *module_identity = "TRACKING";
 
@@ -93,8 +92,6 @@ static void *apr_sms_tracking_malloc(apr_sms_t *mem_sys,
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
   
-    assert(mem_sys);
-
     tms = (apr_sms_tracking_t *)mem_sys;
     node = apr_sms_malloc(mem_sys->parent_mem_sys,
                           size + sizeof(apr_track_node_t));
@@ -118,8 +115,6 @@ static void *apr_sms_tracking_calloc(apr_sms_t *mem_sys,
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
   
-    assert(mem_sys);
-
     tms = (apr_sms_tracking_t *)mem_sys;
     node = apr_sms_calloc(mem_sys->parent_mem_sys,
                           size + sizeof(apr_track_node_t));
@@ -142,8 +137,6 @@ static void *apr_sms_tracking_realloc(apr_sms_t *mem_sys,
 {
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
-
-    assert(mem_sys);
 
     tms = (apr_sms_tracking_t *)mem_sys;
     node = (apr_track_node_t *)mem;
@@ -174,9 +167,6 @@ static apr_status_t apr_sms_tracking_free(apr_sms_t *mem_sys,
 {
     apr_track_node_t *node;
     
-    assert(mem_sys);
-    assert(mem);
-
     node = (apr_track_node_t *)mem;
     node--;
 
@@ -193,8 +183,6 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
     apr_track_node_t *node;
     apr_status_t rv;
  
-    assert(mem_sys);
-
     tms = (apr_sms_tracking_t *)mem_sys;
 
     while (tms->nodes) {
@@ -214,16 +202,6 @@ static apr_status_t apr_sms_tracking_destroy(apr_sms_t *mem_sys)
 {
     apr_status_t rv;
     
-    /* If this is NULL we won't blow up as it should be caught at the
-     * next level down and then passed back to us...
-     */
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys->parent_mem_sys);
-#endif
-    
-    if (!mem_sys)
-        return APR_EMEMSYS;
-
     if ((rv = apr_sms_tracking_reset(mem_sys)) != APR_SUCCESS)
         return rv;
     
@@ -237,9 +215,6 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys,
     apr_sms_tracking_t *tms;
     apr_status_t rv;
 
-    assert(mem_sys);
-    assert(pms);
-    
     *mem_sys = NULL;
     /* We're not a top level module, ie we have a parent, so
      * we allocate the memory for the structure from our parent.

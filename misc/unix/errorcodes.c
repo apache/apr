@@ -166,10 +166,6 @@ static char *apr_error_string(apr_status_t statcode)
         return "The given path was above the root path";
     case APR_EBADPATH:
         return "The given path misformatted or contained invalid characters";
-    case APR_EMEMSYS:
-        return "The memory system passed does not exist";
-    case APR_ENOCLEANUP:
-        return "The requested cleanup function does not exist";
     default:
         return "Error string not specified yet";
     }

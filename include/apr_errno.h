@@ -180,11 +180,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_EGENERAL     General failure (specific information not available)
  * APR_EBADIP       The specified IP address is invalid
  * APR_EBADMASK     The specified netmask is invalid
- * APR_ENOCLEANUP   There is no memory cleanup available
- * APR_EMEMSYS      An invalid memory system was passed in to an 
- *                  apr_sms function
- * APR_EMEMFUNC     A function was called that isn't available in the
- *                  selected memory system
  * </PRE>
  *
  * <PRE>
@@ -253,8 +248,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EINCOMPLETE    (APR_OS_START_ERROR + 22)
 #define APR_EABOVEROOT     (APR_OS_START_ERROR + 23)
 #define APR_EBADPATH       (APR_OS_START_ERROR + 24)
-#define APR_ENOCLEANUP     (APR_OS_START_ERROR + 25)
-#define APR_EMEMSYS        (APR_OS_START_ERROR + 26)
 
 /* APR ERROR VALUE TESTS */
 #define APR_STATUS_IS_ENOSTAT(s)        ((s) == APR_ENOSTAT)
@@ -281,8 +274,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EINCOMPLETE(s)    ((s) == APR_EINCOMPLETE)
 #define APR_STATUS_IS_EABOVEROOT(s)     ((s) == APR_EABOVEROOT)
 #define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
-#define APR_STATUS_IS_ENOCLEANUP(s)     ((s) == APR_ENOCLEANUP)
-#define APR_STATUS_IS_EMEMSYS(s)        ((s) == APR_EMEMSYS)
 
 /* APR STATUS VALUES */
 #define APR_INCHILD        (APR_OS_START_STATUS + 1)
