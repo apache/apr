@@ -71,7 +71,7 @@
         char msgbuf[256];                                             \
         fprintf (stdout, "Failed\n");                                 \
         fprintf (stderr, "Error (%d): %s\n%s", rv, #op,               \
-                 apr_strerror(stat, msgbuf, sizeof(msgbuf)));         \
+                 apr_strerror(rv, msgbuf, sizeof(msgbuf)));           \
         exit(-1); }
 
 #define APR_TEST_END(rv, op) \
