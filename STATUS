@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/12 18:09:22 $]
+Last modified at [$Date: 2001/12/13 09:27:35 $]
 
 Release:
 
@@ -45,15 +45,12 @@ RELEASE SHOWSTOPPERS:
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Enable pools to have thread-specific locking in it.
-        Status: There are two alternatives.  More investigation/analysis
-                needs to be done to see if they can be merged 
-                together.
-                SVN is segfaulting with Sander's pool code.  Sander
-                and Justin are investigating.
-        Sander's submission:
+        Status: Sander's pool code has been tested with httpd, flood, 
+                and SVN.  It needs to be determined whether we will
+                wait for the debug code to be finished before 
+                committing.
+        Patch:
             <JLEGKKNELMHCJPNMOKHOOECGEPAA.striker@apache.org>
-        Brian's submission:
-           <3C064F49.8000908@pacbell.net>
         Comparisons/reviews:
             Ian: <3C083414.1080208@cnet.com> (performance)
             Brian: <3C07D792.9070301@cnet.com> (code)
