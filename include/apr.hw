@@ -133,7 +133,7 @@
 #define APR_HAVE_SYS_SOCKET_H   0
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      0
-#define APR_HAVE_SIGNAL_H       0
+#define APR_HAVE_SIGNAL_H       1
 #define APR_HAVE_SYS_WAIT_H     0
 #define APR_HAVE_UNISTD_H       0
 
