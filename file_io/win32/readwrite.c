@@ -201,7 +201,7 @@ ap_status_t ap_puts(ap_file_t *thefile, char *str)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_gets(ap_file_t *thefile, char *str, int len)
+ap_status_t ap_fgets(ap_file_t *thefile, char *str, int len)
 {
     DWORD bread;
     int i;
