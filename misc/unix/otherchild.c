@@ -98,7 +98,7 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
 
     ocr = apr_palloc(p, sizeof(*ocr));
     ocr->p = p;
-    ocr->id = pid->pid;
+    ocr->proc = pid;
     ocr->maintenance = maintenance;
     ocr->data = data;
     if (write_fd == NULL) {
@@ -144,10 +144,10 @@ APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status)
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
-        if (ocr->id != pid->pid)
+        if (ocr->proc->pid != pid->pid)
             continue;
 
-        ocr->id = -1;
+        ocr->proc = NULL;
         (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         return 0;
     }
@@ -173,10 +173,10 @@ APR_DECLARE(void) apr_proc_other_child_check(void)
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
-        if (ocr->id == -1)
+        if (ocr->proc == NULL)
             continue;
 
-        rv = WaitForSingleObject((HANDLE) ocr->id, 0);
+        rv = WaitForSingleObject(ocr->proc->hproc, 0);
         if (rv != WAIT_TIMEOUT) {
             (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
         }
@@ -191,12 +191,12 @@ APR_DECLARE(void) apr_proc_other_child_check(void)
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
-        if (ocr->id == -1)
+        if (ocr->proc == NULL)
             continue;
 
-        waitret = waitpid(ocr->id, &status, WNOHANG);
-        if (waitret == ocr->id) {
-            ocr->id = -1;
+        waitret = waitpid(ocr->proc, &status, WNOHANG);
+        if (waitret == ocr->proc) {
+            ocr->proc = NULL;
             (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         }
         else if (waitret == 0) {
@@ -204,7 +204,7 @@ APR_DECLARE(void) apr_proc_other_child_check(void)
         }
         else if (waitret == -1) {
             /* uh what the heck? they didn't call unregister? */
-            ocr->id = -1;
+            ocr->proc = NULL;
             (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
         }
     }
