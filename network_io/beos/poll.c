@@ -58,25 +58,25 @@
 #else
 #include "networkio.h"
 
-/*  BeOS R4 doesn't have a poll function, but R5 will have */
-/*  so for the time being we try our best with an implementaion that */
-/*  uses select.  However, select on beos isn't that hot either, so */
-/*  until R5 we have to live with a less than perfect implementation */
-
-/*  Apparently those sneaky people at Be included support for write in */
-/*  select for R4.5 of BeOS.  So here we use code that uses the write */
-/*  bits. */
-    
+/*  BeOS R4 doesn't have a poll function, but R5 will have 
+ *  so for the time being we try our best with an implementaion that 
+ *  uses select.  However, select on beos isn't that hot either, so 
+ *  until R5 we have to live with a less than perfect implementation 
+ *
+ *  Apparently those sneaky people at Be included support for write in
+ *  select for R4.5 of BeOS.  So here we use code that uses the write
+ *  bits.
+ */
 apr_status_t apr_setup_poll(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
-    (*new) = (apr_pollfd_t *)apr_palloc(cont, sizeof(apr_pollfd_t) * num);
+    (*new) = (apr_pollfd_t *)apr_pcalloc(cont, sizeof(apr_pollfd_t) * num);
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
     (*new)->cntxt = cont;
-    (*new)->read = (fd_set *)apr_palloc(cont, sizeof(fd_set));
-    (*new)->write = (fd_set *)apr_palloc(cont, sizeof(fd_set));
-    (*new)->except = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->read = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
+    (*new)->write = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
+    (*new)->except = (fd_set *)apr_pcalloc(cont, sizeof(fd_set));
     FD_ZERO((*new)->read);
     FD_ZERO((*new)->write);
     FD_ZERO((*new)->except);
@@ -114,12 +114,12 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
     else {
         tv.tv_sec = timeout / APR_USEC_PER_SEC;
         tv.tv_usec = timeout % APR_USEC_PER_SEC;
-	tvptr = &tv;
+        tvptr = &tv;
     }
 
     rv = select(aprset->highsock + 1, aprset->read, aprset->write, 
-                    NULL, tvptr);
-
+                aprset->except, tvptr);
+    
     (*nsds) = rv;
     if ((*nsds) == 0) {
         return APR_TIMEUP;
@@ -133,43 +133,42 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
 apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
 {
     apr_int16_t revents = 0;
-    char data[256];
-    int dummy = 256;
+    char data[1];
+    int flags = 0;
 
     if (FD_ISSET(sock->socketdes, aprset->read)) {
         revents |= APR_POLLIN;
-        if (recv(sock->socketdes, &data, 0, 0) == -1) {
+        if (sock->connected
+	    && recv(sock->socketdes, data, 0 /*sizeof data*/, flags) == -1) {
             switch (errno) {
                 case ECONNRESET:
                 case ECONNABORTED:
                 case ESHUTDOWN:
-                case ENETRESET: {
+                case ENETRESET:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLHUP;
                     break;
-                }
-                case ENOTSOCK: {
+                case ENOTSOCK:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLNVAL;
-                }
-                default: {
+                    break;
+                default:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLERR;
-                }
+                    break;
             }
         }
     }
     if (FD_ISSET(sock->socketdes, aprset->write)) {
         revents |= APR_POLLOUT;
     }
-
-    /* Still no support for execpt bits in BeOS R4.5 so for the time being */
-    /* we can't check this.  Hopefully the error checking above will allow */
-    /* sufficient errors to be recognised to cover this. */
-
-    /*if (FD_ISSET(sock->socketdes, aprset->except)) {
+    /* I am assuming that the except is for out of band data, not a failed
+     * connection on a non-blocking socket.  Might be a bad assumption, but
+     * it works for now. rbb.
+     */
+    if (FD_ISSET(sock->socketdes, aprset->except)) {
         revents |= APR_POLLPRI;
-    }*/
+    }
 
     (*event) = revents;
     return APR_SUCCESS;
