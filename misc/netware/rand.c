@@ -58,8 +58,6 @@ static int NXSeedRandomInternal( size_t width, void *seed )
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
                                                     apr_size_t length)
 {
-    int ret;
-     
     if (NXSeedRandom(length, buf) != 0) {
         return NXSeedRandomInternal (length, buf);
     }
