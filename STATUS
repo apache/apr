@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/05/24 08:44:37 $]
+Last modified at [$Date: 2004/06/04 09:38:50 $]
 
 Release:
 
@@ -34,6 +34,23 @@ RELEASE 1.0 SHOWSTOPPERS:
       some lock mechanisms expect to inherit from the parent process.  For
       example, sys V semaphores don't have a file to open, so the child process
       can't reaquire the lock.
+
+      jerenkrantz says: This is not a showstopper and I believe the above
+      analysis is slightly confusing.  The real problem here is that
+      apr_*_mutex_child_init assumes a shared memory space - that is, the
+      children processes have access to the parent apr_*_mutex_t pointer.  The
+      children just call child_init on the original, inherited apr_*_mutex_t. 
+      Unlike globalmutexchild in test, apr_*_mutex_create is *not* intended to
+      be called from the child and subsequently call child_init.  Instead,
+      apr_create_proc is intended to exec separate processes with disjoint
+      memory addresses.  Currently, APR does not provide a cross-platform
+      mechanism for joining an already existing lock.  A simple
+      'apr_*_mutex_join' which is intended to be called from separate
+      processes to an already-existing lock would solve this problem. 
+      child_init is not intended to be used this way.  Even with SysV
+      semaphores, using IPC_PRIVATE should still work due to the parent-child
+      relationship.  A strawman has been posted to dev@apr:
+      Message-Id: <213031CF0406DE1AC426A411@[10.0.1.137]>
 
     * Must namespace protect all include/apr_foo.h headers.  Jon Travis
       has especially observed these including apr within Apache-1.3.
