@@ -102,7 +102,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
 APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool,
                                                apr_hashfunc_t hash_func)
 {
-    ht = apr_hash_make(p);
+    apr_hash_t *ht = apr_hash_make(pool);
     ht->hash_func = hash_func;
     return ht;
 }
