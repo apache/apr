@@ -74,6 +74,9 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     WSADATA wsaData;
     int err;
 #endif
+#if defined WIN32 
+    apr_oslevel_e osver;
+#endif
 
     if (initialized++) {
         return APR_SUCCESS;
@@ -83,6 +86,12 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_ENOPOOL;
     }
 
+#ifdef WIN32
+    /* Initialize apr_os_level global */
+    if (apr_get_oslevel(global_apr_pool, &osver) != APR_SUCCESS) {
+        return APR_EEXIST;
+    }
+#endif
 #if !defined(BEOS) && !defined(OS2) && !defined(WIN32) && !defined(NETWARE)
     apr_unix_setup_lock();
     apr_proc_mutex_unix_setup_lock();
