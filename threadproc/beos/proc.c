@@ -218,28 +218,33 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         i++;
     }
 
-	newargs = (char**)malloc(sizeof(char *) * (i + 3));
-	newargs[0] = "/boot/home/config/bin/apr_proc_stub";
+	newargs = (char**)malloc(sizeof(char *) * (i + 4));
+	newargs[0] = strdup("/boot/home/config/bin/apr_proc_stub");
     if (attr->currdir == NULL) {
-        /* we require the directory ! */
+        /* we require the directory , so use a temp. variable */
         dir = malloc(sizeof(char) * PATH_MAX);
         getcwd(dir, PATH_MAX);
-        newargs[1] = dir;
+        newargs[1] = strdup(dir);
         free(dir);
     } else {
-	    newargs[1] = attr->currdir;
-	}
-	newargs[2] = progname;
-	i=0;nargs = 3;
+        newargs[1] = strdup(attr->currdir);
+    }
+    newargs[2] = strdup(progname);
+    i=0;nargs = 3;
 
-	while (args && args[i]) {
-		newargs[nargs] = args[i];
-		i++;nargs++;
-	}
-	newargs[nargs] = NULL;
+    while (args && args[i]) {
+        newargs[nargs] = strdup(args[i]);
+        i++;nargs++;
+    }
+    newargs[nargs] = NULL;
 
     newproc = load_image(nargs, newargs, env);
-    free(newargs);    
+
+    /* load_image copies the data so now we can free it... */
+    while (--nargs >= 0)
+        free (newargs[nargs]);
+    free(newargs);
+        
     if ( newproc < B_NO_ERROR) {
         return errno;
     }
@@ -306,9 +311,8 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
     if (get_thread_info(proc->tid, &tinfo) == B_BAD_VALUE) {
         return APR_CHILD_DONE;
     }
-    else {
-        return APR_CHILD_NOTDONE;
-    }
+    /* if we get this far it's still going... */
+    return APR_CHILD_NOTDONE;
 } 
 
 ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
