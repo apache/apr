@@ -811,10 +811,16 @@ APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
 {
     /* POSIX sems use the fname field but don't use a file,
      * so be careful. */
-    if (mutex->meth == &mutex_flock_methods
-        || mutex->meth == &mutex_fcntl_methods) {
+#if APR_HAS_FLOCK_SERIALIZE
+    if (mutex->meth == &mutex_flock_methods) {
         return mutex->fname;
     }
+#endif
+#if APR_HAS_FCNTL_SERIALIZE
+    if (mutex->meth == &mutex_fcntl_methods) {
+        return mutex->fname;
+    }
+#endif
     return NULL;
 }
 
