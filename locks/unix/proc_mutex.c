@@ -765,13 +765,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     apr_proc_mutex_t *new_mutex;
     apr_status_t rv;
 
-    new_mutex = (apr_proc_mutex_t *)apr_pcalloc(pool,
-                                                sizeof(apr_proc_mutex_t));
-
-    new_mutex->pool  = pool;
-#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
-    new_mutex->interproc = NULL;
-#endif
+    new_mutex = apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
+    new_mutex->pool = pool;
 
     if ((rv = proc_mutex_create(new_mutex, mech, fname)) != APR_SUCCESS)
         return rv;
