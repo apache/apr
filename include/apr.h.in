@@ -178,7 +178,6 @@ extern "C" {
 #define APR_HAS_POSIXSEM_SERIALIZE        @hasposixser@
 #define APR_HAS_FCNTL_SERIALIZE           @hasfcntlser@
 #define APR_HAS_PROC_PTHREAD_SERIALIZE    @hasprocpthreadser@
-#define APR_HAS_RWLOCK_SERIALIZE          @hasrwlockser@
 
 #define APR_PROCESS_LOCK_IS_GLOBAL        @proclockglobal@
 
