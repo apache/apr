@@ -58,12 +58,9 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 
-// for apr_poll.c;
-#define socketdes sock
-
 struct apr_socket_t {
     apr_pool_t         *cntxt;
-    SOCKET              sock;
+    SOCKET              socketdes;
     int                 type; /* SOCK_STREAM, SOCK_DGRAM */
     apr_sockaddr_t     *local_addr;
     apr_sockaddr_t     *remote_addr;
