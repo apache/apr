@@ -139,10 +139,14 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily,
         return APR_ENOMEM;
     }
 
+#ifdef NETWARE
+    (*new)->sock = socket(family, type, 0);
+#else
     /* For right now, we are not using socket groups.  We may later.
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
     (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#endif
 #if APR_HAVE_IPV6
     if ((*new)->sock == INVALID_SOCKET && ofamily == AF_UNSPEC) {
         family = AF_INET;
