@@ -168,6 +168,17 @@ AC_DEFUN(APR_CHECK_DEFINE,[
   fi
 ])
 
+dnl
+dnl APR_CHECK_APR_DEFINE( symbol, path_to_apr )
+dnl
+AC_DEFUN(APR_CHECK_APR_DEFINE,[
+    AC_EGREP_CPP(YES_IS_DEFINED, [
+    #include "$2/include/apr.h"
+    #if $1
+    YES_IS_DEFINED
+    #endif
+    ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
+])
 
 define(APR_IFALLYES,[dnl
 ac_rc=yes
