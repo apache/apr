@@ -341,9 +341,17 @@ dnl	;;
 	APR_SETIFNULL(OPTIM, [-O])
 	APR_SETIFNULL(MAKE, [make])
 	;;
-    *-beos*)
+    *beos*)
 	APR_SETIFNULL(CFLAGS, [-DBEOS])
-        APR_SETIFNULL(file_as_socket, [0])
+    APR_SETIFNULL(file_as_socket, [0])
+    PLATOSVERS=`uname -r`
+    echo $PLATOSVERS
+    case $PLATOSVERS in
+        5.1)
+            APR_ADDTO(CPPFLAGS, [-I/boot/develop/headers/bone])
+            APR_ADDTO(LDFLAGS, [-nodefaultlibs -L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket -lbe -lroot])
+            ;;
+    esac
 	;;
     4850-*.*)
 	APR_SETIFNULL(CFLAGS, [-DSVR4 -DMPRAS])
