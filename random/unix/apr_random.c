@@ -110,8 +110,8 @@ struct apr_random_t {
     unsigned int g_for_insecure;
     unsigned int g_for_secure;
     unsigned int secure_base;
-    unsigned char insecure_started:1;
-    unsigned char secure_started:1;
+    unsigned int insecure_started:1;
+    unsigned int secure_started:1;
 
     apr_random_t *next;
 };
