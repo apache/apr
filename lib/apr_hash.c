@@ -215,6 +215,9 @@ static ap_hash_entry_t **find_entry(ap_hash_t *ht,
     int hash;
     int i;
 
+    if (klen == 0)
+	klen = strlen(key) + 1;
+
     /*
      * This hash function is used by perl 5; RSE attributes it to DJB.
      * (See Message-ID: <19991013131827.A17702@engelschall.com>
