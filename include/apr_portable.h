@@ -187,7 +187,7 @@ typedef struct timeval        ap_os_time_t;
 #endif
 
 ap_status_t ap_get_os_file(ap_os_file_t *, ap_file_t *);     
-ap_status_t ap_get_os_dir(ap_os_dir_t *, ap_dir_t *);      
+ap_status_t ap_get_os_dir(ap_os_dir_t **, ap_dir_t *);      
 ap_status_t ap_get_os_sock(ap_os_sock_t *, ap_socket_t *);
 ap_status_t ap_get_os_lock(ap_os_lock_t *, ap_lock_t *);     
 ap_status_t ap_get_os_proc(ap_os_proc_t *, ap_proc_t *);     

@@ -127,13 +127,12 @@ ap_status_t ap_readdir(struct dir_t *thedir)
 #if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS 
     return readdir_r(thedir->dirstruct, thedir->entry, &thedir->entry);
 #else
-    int save_errno;
-    ap_status_t status;
 
     thedir->entry = readdir(thedir->dirstruct);
     if (thedir->entry == NULL) {
-        if (errno == save_errno) {
-            return APR_SUCCESS;
+        /* If NULL was returned, this can NEVER be a success. Can it?! */
+        if (errno == APR_SUCCESS) {
+            return APR_ENOENT;
         }
         return errno;
     }
@@ -294,17 +293,17 @@ ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_dir(ap_os_dir_t *, ap_dir_t *)
+ * ap_status_t ap_get_os_dir(ap_os_dir_t **, ap_dir_t *)
  *    convert the dir from apr type to os specific type.
  * arg 1) The apr dir to convert.
  * arg 2) The os specific dir we are converting to
  */   
-ap_status_t ap_get_os_dir(ap_os_dir_t *thedir, struct dir_t *dir)
+ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
     }
-    thedir = dir->dirstruct;
+    *thedir = dir->dirstruct;
     return APR_SUCCESS;
 }
 
