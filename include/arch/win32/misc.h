@@ -93,12 +93,18 @@ struct apr_other_child_rec_t {
     apr_os_file_t write_fd;
 };
 
-#if defined(WIN32) || defined(NETWARE)
 #define WSAHighByte 2
 #define WSALowByte 0
-#endif
 
-#ifdef WIN32
+/* start.c and apr_app.c helpers and communication within misc.c
+ *
+ * They are not for public consumption, although apr_app_init_complete
+ * must be an exported symbol to avoid reinitialization.
+ */
+extern int APR_DECLARE_DATA apr_app_init_complete;
+
+int apr_wastrtoastr(char ***retarr, const wchar_t **arr, int args);
+
 /* Platform specific designation of run time os version.
  * Gaps allow for specific service pack levels that
  * export new kernel or winsock functions or behavior.
@@ -172,7 +178,8 @@ typedef enum {
     DLL_WINSOCKAPI = 2,    // mswsock  From WinSock.h
     DLL_WINSOCK2API = 3,   // ws2_32   From WinSock2.h
     DLL_SHSTDAPI = 4,      // shell32  From ShellAPI.h
-    DLL_defined = 5        // must define as last idx_ + 1
+    DLL_NTDLL = 5,         // shell32  From our real kernel
+    DLL_defined = 6        // must define as last idx_ + 1
 } apr_dlltoken_e;
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
@@ -302,7 +309,50 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_SHSTDAPI, LPWSTR *, WINAPI, CommandLineToArgvW, 0,
 
 #endif /* !defined(_WIN32_WCE) && !defined(WINNT) */
 
-#endif /* WIN32 */
+#if !defined(_WIN32_WCE)
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryTimerResolution, 0, (
+    ULONG *pMaxRes,  /* Minimum NS Resolution */
+    ULONG *pMinRes,  /* Maximum NS Resolution */
+    ULONG *pCurRes), /* Current NS Resolution */
+    (pMaxRes, pMinRes, pCurRes));
+#define QueryTimerResolution apr_winapi_NtQueryTimerResolution
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtSetTimerResolution, 0, (
+    ULONG ReqRes,    /* Requested NS Clock Resolution */
+    BOOL  Acquire,   /* Aquire (1) or Release (0) our interest */
+    ULONG *pNewRes), /* The NS Clock Resolution granted */
+    (ReqRes, Acquire, pNewRes));
+#define SetTimerResolution apr_winapi_NtSetTimerResolution
+
+typedef struct PBI {
+    DWORD ExitStatus;
+    PVOID PebBaseAddress;
+    ULONG_PTR AffinityMask;
+    LONG  BasePriority;
+    ULONG_PTR UniqueProcessId;
+    ULONG_PTR InheritedFromUniqueProcessId;
+} PBI, *PPBI;
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryInformationProcess, 0, (
+    HANDLE hProcess,  /* Obvious */
+    INT   info,       /* Use 0 for PBI documented above */
+    PVOID pPI,        /* The PIB buffer */
+    ULONG LenPI,      /* Use sizeof(PBI) */
+    ULONG *pSizePI),  /* returns pPI buffer used (may pass NULL) */
+    (hProcess, info, pPI, LenPI, pSizePI));
+#define QueryInformationProcess apr_winapi_NtQueryInformationProcess
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_NTDLL, DWORD, WINAPI, NtQueryObject, 0, (
+    HANDLE hObject,   /* Obvious */
+    INT   info,       /* Use 0 for PBI documented above */
+    PVOID pOI,        /* The PIB buffer */
+    ULONG LenOI,      /* Use sizeof(PBI) */
+    ULONG *pSizeOI),  /* returns pPI buffer used (may pass NULL) */
+    (hObject, info, pOI, LenOI, pSizeOI));
+#define QueryObject apr_winapi_NtQueryObject
+
+#endif /* !defined(_WIN32_WCE) */
 
 #endif  /* ! MISC_H */
 
