@@ -11,8 +11,7 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
-INCDIR1=../misc/@OSDIR@
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I../misc/unix
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
 
 OBJS=apr_tables.o \
 	apr_hash.o 
@@ -58,4 +57,4 @@ apr_tables.o: apr_tables.c $(INCDIR)/apr_private.h \
  $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
  $(INCDIR)/apr_tables.h $(INCDIR)/apr_strings.h $(INCDIR)/apr_lib.h \
- ../misc/unix/misc.h $(INCDIR)/apr_getopt.h
+ $(INCDIR)/arch/unix/misc.h $(INCDIR)/apr_getopt.h
