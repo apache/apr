@@ -88,21 +88,20 @@ APR_DECLARE(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
     if (s == NULL) {
         return NULL;
     }
-    res = apr_palloc(a, n + 1);
     len = strlen(s);
-    if(len > n) {
-	memcpy(res, s, n);
-	res[n] = '\0';
-    } else
-	memcpy(res, s, len+1);
+    if (len < n)
+        n = len;
+    res = apr_palloc(a, n + 1);
+    memcpy(res, s, n);
+    res[n] = '\0';
     return res;
 }
 
-APR_DECLARE(void *) apr_memdup(apr_pool_t *a, const void *m, apr_size_t n)
+APR_DECLARE(void *) apr_pmemdup(apr_pool_t *a, const void *m, apr_size_t n)
 {
     void *res;
 
-    if(m == NULL)
+    if (m == NULL)
 	return NULL;
     res = apr_palloc(a, n);
     memcpy(res, m, n);
