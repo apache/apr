@@ -179,6 +179,6 @@ int main(void)
     printf("        ( %lld - %lld = %lld )\n", imp, now, imp - now);
  
     printf("\nTest Complete.\n");
-    return 1;
+    return 0;
 }    
 
