@@ -648,7 +648,7 @@ B<NOTE>:  Since this can be called by a maintenance function while we're
 
 =cut
  */
-void ap_unregister_other_children(void *data);
+void ap_unregister_other_child(void *data);
 
 /*
 
