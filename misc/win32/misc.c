@@ -180,9 +180,9 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
  */
 
 static const char* const lateDllName[DLL_defined] = {
-    "kernel32", "advapi32", "mswsock",  "ws2_32"  };
+    "kernel32", "advapi32", "mswsock",  "ws2_32", "shell32"  };
 static HMODULE lateDllHandle[DLL_defined] = {
-    NULL,       NULL,       NULL,       NULL      };
+     NULL,       NULL,       NULL,       NULL,     NULL      };
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 {
