@@ -42,3 +42,4 @@ EXPORTS
     	ap_fprintf   @35
     	ap_eof   @36
 	ap_get_filetype @37
+	ap_writev @38
