@@ -250,7 +250,7 @@ ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file,
 {
     int *dafile = thefile;
     if ((*file) == NULL) {
-        (*file) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+        (*file) = ap_pcalloc(cont, sizeof(struct file_t));
         (*file)->cntxt = cont;
     }
     (*file)->filedes = *dafile;
