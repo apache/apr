@@ -230,6 +230,10 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
     else if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
     {
         /* On NT this request is incredibly expensive, but accurate.
+         * Since the WinNT-only functions below are protected by the
+         * (apr_os_level < APR_WIN_NT) case above, we need no extra
+         * tests, but remember GetNamedSecurityInfo & GetSecurityInfo
+         * are not supported on 9x.
          */
         SECURITY_INFORMATION sinf = 0;
         PSECURITY_DESCRIPTOR pdesc = NULL;
