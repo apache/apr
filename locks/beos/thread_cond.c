@@ -74,6 +74,12 @@ APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
     return APR_ENOTIMPL;
 }
 
+APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
+                                                    apr_thread_mutex_t *mutex,
+                                                    apr_interval_time_t timeout){
+    return APR_ENOTIMPL;
+}
+
 APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
 {
     return APR_ENOTIMPL;

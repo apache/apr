@@ -124,6 +124,31 @@ APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
     return stat;
 }
 
+APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
+                                                    apr_thread_mutex_t *mutex,
+                                                    apr_interval_time_t timeout)
+{
+    apr_status_t stat;
+    apr_time_t then;
+    struct timespec abstime;
+
+    then = apr_time_now() + timeout;
+    abstime.tv_sec = then / APR_USEC_PER_SEC;
+    abstime.tv_nsec = (then % APR_USEC_PER_SEC) * 1000; /* nanoseconds */
+
+    stat = pthread_cond_timedwait(cond->cond, &mutex->mutex, &abstime);
+#ifdef PTHREAD_SETS_ERRNO
+    if (stat) {
+        stat = errno;
+    }
+#endif
+    if (ETIMEDOUT == stat) {
+        return APR_TIMEUP;
+    }
+    return stat;
+}
+
+
 APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
 {
     apr_status_t stat;

@@ -58,6 +58,7 @@
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
+#include "apr_time.h"
 #include "apr_thread_mutex.h"
 
 #ifdef __cplusplus
@@ -90,6 +91,7 @@ typedef struct apr_thread_cond_t apr_thread_cond_t;
  */
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
                                                  apr_pool_t *pool);
+
 /**
  * Put the active calling thread to sleep until signaled to wake up. Each
  * condition variable must be associated with a mutex, and that mutex must
@@ -105,8 +107,25 @@ APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
 APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
                                                apr_thread_mutex_t *mutex);
 
-/* XXX: Should we add apr_thread_cond_timedwait()? Can it be done on all
- *      platforms? -aaron */
+/**
+ * Put the active calling thread to sleep until signaled to wake up or
+ * the timeout is reached. Each condition variable must be associated
+ * with a mutex, and that mutex must be locked before calling this
+ * function, or the behavior will be undefined. As the calling thread
+ * is put to sleep, the given mutex will be simultaneously released;
+ * and as this thread wakes up the lock is again simultaneously acquired.
+ * @param cond the condition variable on which to block.
+ * @param mutex the mutex that must be locked upon entering this function,
+ *        is released while the thread is asleep, and is again acquired before
+ *        returning from this function.
+ * @param timeout The amount of time in microseconds to wait. This is 
+ *        a maximum, not a minimum. If the condition is signaled, we 
+ *        will wake up before this time, otherwise the error APR_TIMEUP
+ *        is returned.
+ */
+APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
+                                                    apr_thread_mutex_t *mutex,
+                                                    apr_interval_time_t timeout);
 
 /**
  * Signals a singla thread, if one exists, that is blocking on the given
@@ -116,6 +135,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
  * @param cond the condition variable on which to produce the signal.
  */
 APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond);
+
 /**
  * Signals all threads blocking on the given condition variable.
  * Each thread that was signaled is then schedule to wake up and acquire
