@@ -57,6 +57,8 @@
 #include "apr_lock.h"
 #include "apr_portable.h"
 #include "apr_errno.h"
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 
 /*
  * This is the Unix implementation of shared memory.
@@ -200,10 +202,10 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
 {
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
-    munmap(m->mem);
+    munmap(m->mem, m->length);
     apr_file_close(m->file);
 #elif APR_USE_SHMEM_MMAP_ANON
-    munmap(m->mem);
+    munmap(m->mem, m->length);
 #elif APR_USE_SHMEM_SHMGET
     shmdt(m->mem);
 #elif APR_USE_SHMEM_BEOS
