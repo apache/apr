@@ -153,14 +153,6 @@ apr_status_t apr_unix_file_cleanup(void *);
 
 mode_t apr_unix_perms2mode(apr_fileperms_t perms);
 apr_fileperms_t apr_unix_mode2perms(mode_t mode);
-apr_status_t apr_filepath_list_split_impl(apr_array_header_t **pathelts,
-                                          const char *liststr,
-                                          char separator,
-                                          apr_pool_t *p);
-apr_status_t apr_filepath_list_merge_impl(char **liststr,
-                                          apr_array_header_t *pathelts,
-                                          char separator,
-                                          apr_pool_t *p);
 
 
 #endif  /* ! FILE_IO_H */

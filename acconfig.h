@@ -42,4 +42,9 @@
 #define apr_sigwait(a,b) sigwait((a),(b))
 #endif
 
+/*
+ * Include common private declarations.
+ */
+#include "../apr_private_common.h"
+
 #endif /* APR_PRIVATE_H */
