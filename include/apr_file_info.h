@@ -189,7 +189,7 @@ struct apr_finfo_t {
     apr_time_t mtime;
     /** The time the file was last changed */
     apr_time_t ctime;
-    /** The full pathname of the file */
+    /** The full pathname of the file.  NOT YET IMPLEMENTED. */
     const char *fname;
     /** The file's name (no path) in filesystem case */
     const char *name;
