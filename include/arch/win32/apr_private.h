@@ -95,6 +95,7 @@
 #define HAVE_STRNICMP 1
 #define HAVE_STRDUP   1
 #define HAVE_STRSTR   1
+#define HAVE_MEMCHR   1
 
 #define SIGHUP     1
 /* 2 is used for SIGINT on windows */
