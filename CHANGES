@@ -1,5 +1,9 @@
 Changes with APR 0.9.4
 
+  *) Removed the solaris-specific atomic code, due to licence
+     concerns (it was MPL 1.0, and the author could not be contacted)
+     [Ian Holsman]
+
   *) apr_file_gets(): Return APR_SUCCESS if any characters are
      returned.  Any I/O errors or EOF will be reported on the
      next call.  Callers that are coded to expect returned 

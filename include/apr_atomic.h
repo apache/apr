@@ -247,22 +247,6 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 #define apr_atomic_read(mem)        (*(mem))
 #define apr_atomic_init(pool)        APR_SUCCESS
 
-#elif (defined(__sparc__) || defined(sparc)) && !APR_FORCE_ATOMIC_GENERIC
-
-#define apr_atomic_t apr_uint32_t
-#define apr_atomic_read(p)  *p
-
-#define apr_atomic_add(mem, val)     apr_atomic_add_sparc(mem,val)
-#define apr_atomic_dec(mem)          apr_atomic_sub_sparc(mem,1)
-#define apr_atomic_inc(mem)          apr_atomic_add_sparc(mem,1)
-#define apr_atomic_cas(mem,val,cond) apr_atomic_cas_sparc(mem,val,cond)
-#define apr_atomic_set(mem, val)     (*mem = val)
-#define apr_atomic_init(pool)        APR_SUCCESS
-
-apr_uint32_t apr_atomic_add_sparc(volatile apr_atomic_t *mem, apr_uint32_t add);
-apr_uint32_t apr_atomic_sub_sparc(volatile apr_atomic_t *mem, apr_uint32_t sub);
-apr_uint32_t apr_atomic_cas_sparc(volatile apr_uint32_t *mem, long with, long cmp);
-
 #elif defined(__MVS__) /* OS/390 */
 
 #define apr_atomic_t cs_t
