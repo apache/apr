@@ -59,11 +59,32 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_dso.h"
-#include "ltdl.h"
+
+#ifdef HAVE_DLFCN_H
+#include <dlfcn.h>
+#endif
+
+#ifdef HAVE_DL_H
+#include <dl.h>
+#endif
+
+#ifndef RTLD_NOW
+#define RTLD_NOW 1
+#endif
+
+#ifndef RTLD_GLOBAL
+#define RTLD_GLOBAL 0
+#endif
+
+#if (defined(__FreeBSD__) ||\
+     defined(__OpenBSD__) ||\
+     defined(__NetBSD__)     ) && !defined(__ELF__)
+#define DLSYM_NEEDS_UNDERSCORE
+#endif
 
 struct dso_handle_t {
-    ap_context_t *cont;
-    lt_dlhandle handle;    /* libtool handle */
+    ap_context_t  *cont;
+    void          *handle;
 };
 
 #endif

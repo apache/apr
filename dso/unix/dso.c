@@ -59,9 +59,6 @@
  *    Initialize the underlying DSO library.
  */
 ap_status_t ap_dso_init(void){
-    if(lt_dlinit())
-        return APR_EINIT;
-
     return APR_SUCCESS;
 }
 
@@ -76,13 +73,22 @@ ap_status_t ap_dso_init(void){
 ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path, 
                         ap_context_t *ctx)
 {
-    lt_dlhandle dlhandle;
+#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+    shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
+#elif defined(OSF1) || defined(SEQUENT) ||\
+    (defined(__FreeBSD_version) && (__FreeBSD_version >= 220000))
+    void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
+#else
+    void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+#endif    
 
-    if((dlhandle = lt_dlopen(path)) == NULL)
+    if(os_handle == NULL)
         return APR_EDSOOPEN;
 
+fprintf(stderr,"handle is %Lx\n",os_handle);
+
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
-    (*res_handle)->handle = dlhandle;
+    (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
     return APR_SUCCESS;
 }
@@ -94,8 +100,12 @@ ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path,
  */
 ap_status_t ap_dso_unload(struct dso_handle_t *handle)
 {
-    if(lt_dlclose(handle->handle))
+#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+    shl_unload((shl_t)handle);
+#else
+    if (dlclose(handle) != 0)
         return APR_EINIT;
+#endif
 
     return APR_SUCCESS;
 }
@@ -112,19 +122,36 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
                        struct dso_handle_t *handle, 
                        const char *symname)
 {
-    lt_ptr_t sym;
+#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+    void *symaddr = NULL;
+    int status;
 
-    if (ressym == NULL) {
-        return APR_ENOFUNCPOINTER;
-    }
-    if (handle == NULL) {
-        return APR_ENODSOHANDLE;
-    }
+    errno = 0;
+    status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_PROCEDURE, &symaddr);
+    if (status == -1 && errno == 0) /* try TYPE_DATA instead */
+        status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_DATA, &symaddr);
+    if (status = -1)
+        return APR_EINIT;
+    ressym = symaddr;
 
-    if((sym = lt_dlsym(handle->handle, symname)) == NULL) {
-        return APR_EFUNCNOTFOUND;
-    }
 
-    *ressym = sym;
+#elif defined(DLSYM_NEEDS_UNDERSCORE)
+    char *symbol = (char*)malloc(sizeof(char)*(strlen(symname)+2));
+    void *retval;
+    sprintf(symbol, "_%s", symname);
+    retval = dlsym(handle->handle, symbol);
+    free(symbol);
+
+#elif defined(SEQUENT)
+    void *retval = dlsym(handle->handle, (char *)symname);
+#else
+    void *retval = dlsym(handle->handle, symname);
+#endif
+
+    if (retval == NULL)
+        return APR_EINIT;
+    
+    ressym = retval;
+    
     return APR_SUCCESS;
 }
