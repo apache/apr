@@ -126,6 +126,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
             }
         }
     }
+    /* XXX: if rv == -1 this is wrong. */
     (*len) = rv;
     return APR_SUCCESS;
 }
@@ -191,6 +192,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
         (*len) = 0;
         return errno;
     }
+    /* XXX: if rv == -1 this is wrong. */
     (*len) = rv;
     return APR_SUCCESS;
 }
@@ -249,6 +251,7 @@ ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
             } while (rv == -1 && errno == EINTR);
         }
     }
+    /* XXX: if rv == -1 this is wrong. */
     (*nbytes) = rv;
     return APR_SUCCESS;
 }
@@ -296,6 +299,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         ap_int32_t hdrbytes;
         rv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
         if (rv != APR_SUCCESS) {
+	    *len = 0;
             return errno;
         }
         nbytes += hdrbytes;
@@ -329,10 +333,12 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {
+	    /* XXX: -1 bytes sent?  that's wrong */
             (*len) = -1;
             return APR_TIMEUP;
         }
         else if (srv < 0) {
+	    /* XXX: -1 bytes sent?  that's wrong */
             (*len) = -1;
             return errno;
         }
@@ -347,6 +353,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     }
 
     if (rv == -1) {
+	*len = nbytes;
         return errno;
     }
 
@@ -356,10 +363,11 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     if (hdtr->numtrailers > 0) {
         ap_int32_t trbytes;
         rv = ap_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trbytes);
+        nbytes += trbytes;
         if (rv == -1) {
+	    *len = nbytes;
             return errno;
         }
-        nbytes += trbytes;
     }
 
     /* Uncork to send queued frames */
@@ -368,6 +376,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                     (const void *) &corkflag, sizeof(corkflag));
 
     (*len) = nbytes;
+    /* XXX: this is wrong if rv == -1 */
     return APR_SUCCESS;
 }
 
@@ -425,10 +434,12 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {
+	    /* XXX: -1 is wrong */
             (*len) = -1;
             return APR_TIMEUP;
         }
         else if (srv < 0) {
+	    /* XXX: -1 is wrong */
             (*len) = -1;
             return errno;
         }
@@ -446,12 +457,10 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         }
     }
 
-
+    (*len) = nbytes;
     if (rv == -1) {
         return errno;
     }
-
-    (*len) = nbytes;
     return APR_SUCCESS;
 }
 
@@ -506,6 +515,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         rv = sendfile(sock->socketdes,	/* socket  */
         	      file->filedes,	/* file descriptor to send */
         	      *offset,	/* where in the file to start */
+		      /* XXX: as far as i can see, nbytes == 0 always here -djg */
         	      nbytes,	/* number of bytes to send */
         	      hdtrarray,	/* Headers/footers */
         	      flags	/* undefined, set to 0 */
@@ -533,10 +543,12 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {
+	    /* XXX: -1 is wrong */
             (*len) = -1;
             return APR_TIMEUP;
         }
         else if (srv < 0) {
+	    /* XXX: -1 is wrong */
             (*len) = -1;
             return errno;
         }
@@ -545,6 +557,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         	rv = sendfile(sock->socketdes,	/* socket  */
         		      file->filedes,	/* file descriptor to send */
         		      *offset,	/* where in the file to start */
+				/* XXX: as far as i can see, nbytes == 0 always here -djg */
         		      nbytes,	/* number of bytes to send */
         		      hdtrarray,	/* Headers/footers */
         		      flags	/* undefined, set to 0 */
@@ -555,6 +568,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 
 
     if (rv == -1) {
+	*len = 0;
         return errno;
     }
 
