@@ -421,8 +421,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
 /** @see APR_STATUS_IS_EBUSY */
 #define APR_EBUSY          (APR_OS_START_STATUS + 25)
-/**@see APR_STATUS_IS_KEYNOTFOUND */
-#define APR_KEYNOTFOUND    (APR_OS_START_STATUS + 26)
 
 /**
  * @defgroup aprerr_status Status Value Tests 
