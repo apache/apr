@@ -68,7 +68,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     char pipename[50];
 
     sprintf(pipename, "/pipe/%d.%d", getpid(), id++);
-    rc = DosCreateNPipe(pipename, filedes, NP_ACCESS_INBOUND, NP_NOWAIT|1, 4096, 4096, 0);
+    rc = DosCreateNPipe(pipename, filedes, NP_ACCESS_INBOUND, 1, 4096, 4096, 0);
 
     if (rc)
         return APR_OS2_STATUS(rc);
@@ -146,13 +146,13 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
+        if (thepipe->timeout == 0) {
+            return APR_OS2_STATUS(DosSetNPHState (thepipe->filedes, NP_NOWAIT));
+        }
+        else if (thepipe->timeout == -1) {
+            return APR_OS2_STATUS(DosSetNPHState (thepipe->filedes, NP_WAIT));
+        }
         return APR_SUCCESS;
     }
     return APR_EINVAL;
-}
-
-
-ap_status_t ap_block_pipe(ap_file_t *thepipe)
-{
-    return APR_OS2_STATUS(DosSetNPHState (thepipe->filedes, NP_WAIT));
 }

@@ -92,12 +92,16 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
         }
         switch (in) {
         case APR_FULL_BLOCK:
-            ap_block_pipe(attr->child_in);
-            ap_block_pipe(attr->parent_in);
+            break;
         case APR_PARENT_BLOCK:
-            ap_block_pipe(attr->parent_in);
+            ap_set_pipe_timeout(attr->child_in, 0);
+            break;
         case APR_CHILD_BLOCK:
-            ap_block_pipe(attr->child_in);
+            ap_set_pipe_timeout(attr->parent_in, 0);
+            break;
+        default:
+            ap_set_pipe_timeout(attr->child_in, 0);
+            ap_set_pipe_timeout(attr->parent_in, 0);
         }
     } 
     if (out) {
@@ -107,12 +111,16 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
         }
         switch (out) {
         case APR_FULL_BLOCK:
-            ap_block_pipe(attr->child_out);
-            ap_block_pipe(attr->parent_out);
+            break;
         case APR_PARENT_BLOCK:
-            ap_block_pipe(attr->parent_out);
+            ap_set_pipe_timeout(attr->child_out, 0);
+            break;
         case APR_CHILD_BLOCK:
-            ap_block_pipe(attr->child_out);
+            ap_set_pipe_timeout(attr->parent_out, 0);
+            break;
+        default:
+            ap_set_pipe_timeout(attr->child_out, 0);
+            ap_set_pipe_timeout(attr->parent_out, 0);
         }
     } 
     if (err) {
@@ -122,12 +130,16 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
         }
         switch (err) {
         case APR_FULL_BLOCK:
-            ap_block_pipe(attr->child_err);
-            ap_block_pipe(attr->parent_err);
+            break;
         case APR_PARENT_BLOCK:
-            ap_block_pipe(attr->parent_err);
+            ap_set_pipe_timeout(attr->child_err, 0);
+            break;
         case APR_CHILD_BLOCK:
-            ap_block_pipe(attr->child_err);
+            ap_set_pipe_timeout(attr->parent_err, 0);
+            break;
+        default:
+            ap_set_pipe_timeout(attr->child_err, 0);
+            ap_set_pipe_timeout(attr->parent_err, 0);
         }
     } 
     return APR_SUCCESS;

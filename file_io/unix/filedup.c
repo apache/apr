@@ -84,6 +84,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
 #endif
         (*new_file)->buffer = ap_palloc(p, APR_FILE_BUFSIZE);
     }
+    (*new_file)->blocking = old_file->blocking; /* this is the way dup() works */
     ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), ap_unix_file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;

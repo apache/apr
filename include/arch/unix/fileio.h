@@ -117,6 +117,7 @@ struct ap_file_t {
     int pipe;
     ap_interval_time_t timeout;
     int buffered;
+    enum {BLK_UNKNOWN, BLK_OFF, BLK_ON } blocking;
     int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
 
     /* Stuff for buffered mode */

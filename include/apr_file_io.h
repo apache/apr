@@ -572,7 +572,7 @@ ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm,
 
 =head1 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 
-B<Set the timeout value for a pipe.>
+B<Set the timeout value for a pipe or manipulate the blocking state.>
 
     arg 1) The pipe we are setting a timeout on.
     arg 2) The timeout value in microseconds.  Values < 0 mean wait forever, 0
@@ -581,18 +581,6 @@ B<Set the timeout value for a pipe.>
 =cut
  */
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout);
-
-/*
-
-=head1 ap_status_t ap_block_pipe(ap_file_t *thepipe)
-
-B<Set a pipe to use blocking I/O.>
-
-    arg 1) The pipe to operate on.
-
-=cut
- */
-ap_status_t ap_block_pipe(ap_file_t *thepipe);
 
 /*accessor and general file_io functions. */
 

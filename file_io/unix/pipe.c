@@ -54,6 +54,42 @@
 
 #include "fileio.h"
 
+static ap_status_t pipeblock(ap_file_t *thepipe)
+{
+#if !BEOS /* this code won't work on BeOS */
+      int fd_flags;
+
+      fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
+  #if defined(O_NONBLOCK)
+      fd_flags &= ~O_NONBLOCK;
+  #elif defined(~O_NDELAY)
+      fd_flags &= ~O_NDELAY;
+  #elif defined(FNDELAY)
+      fd_flags &= ~O_FNDELAY;
+  #else 
+      /* XXXX: this breaks things, but an alternative isn't obvious...*/
+      return APR_ENOTIMPL;
+  #endif
+    if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
+        return errno;
+    }
+
+#else
+
+#if BEOS_BONE /* This only works on BONE or beyond */
+    int on = 0;
+    if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0)
+        return errno;
+#else /* BEOS_BONE */
+    return APR_ENOTIMPL;
+#endif /* BEOS_BONE */
+ 
+#endif /* !BEOS_R5 */
+
+    thepipe->blocking = BLK_ON;
+    return APR_SUCCESS;
+}
+
 static ap_status_t pipenonblock(ap_file_t *thepipe)
 {
 #if !BEOS /* this code won't work on BeOS */
@@ -67,7 +103,7 @@ static ap_status_t pipenonblock(ap_file_t *thepipe)
       fd_flags |= O_FNDELAY;
   #else
       /* XXXX: this breaks things, but an alternative isn't obvious...*/
-      return -1;
+      return APR_ENOTIMPL;
   #endif
       if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
           return errno;
@@ -76,12 +112,16 @@ static ap_status_t pipenonblock(ap_file_t *thepipe)
 #else /* !BEOS */
 
 #if BEOS_BONE /* This only works on BONE and later...*/
-    int on = 0;
+    int on = 1;
     if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0)
         return errno;
+#else /* BEOS_BONE */
+    return APR_ENOTIMPL;
 #endif /* BEOS_BONE */
 
 #endif /* !BEOS */
+
+    thepipe->blocking = BLK_OFF;
     return APR_SUCCESS;
 }
 
@@ -89,6 +129,16 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
+        if (timeout >= 0) {
+            if (thepipe->blocking != BLK_OFF) { /* blocking or unknown state */
+                return pipenonblock(thepipe);
+            }
+        }
+        else {
+            if (thepipe->blocking != BLK_ON) { /* non-blocking or unknown state */
+                return pipeblock(thepipe);
+            }
+        }
         return APR_SUCCESS;
     }
     return APR_EINVAL;
@@ -108,6 +158,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->pipe = 1;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
     (*in)->buffered = 0;
+    (*in)->blocking = BLK_ON;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
 #if APR_HAS_THREADS
@@ -120,13 +171,11 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*out)->pipe = 1;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
     (*out)->buffered = 0;
+    (*out)->blocking = BLK_ON;
     (*out)->timeout = -1;
 #if APR_HAS_THREADS
     (*in)->thlock = NULL;
 #endif
-
-    pipenonblock(*in);
-    pipenonblock(*out);
 
     return APR_SUCCESS;
 }
@@ -142,36 +191,5 @@ ap_status_t ap_create_namedpipe(const char *filename,
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_block_pipe(ap_file_t *thepipe)
-{
-#if !BEOS /* this code won't work on BeOS */
-      int fd_flags;
-
-      fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
-  #if defined(O_NONBLOCK)
-      fd_flags &= ~O_NONBLOCK;
-  #elif defined(~O_NDELAY)
-      fd_flags &= ~O_NDELAY;
-  #elif defined(FNDELAY)
-      fd_flags &= ~O_FNDELAY;
-  #else 
-      /* XXXX: this breaks things, but an alternative isn't obvious...*/
-      return -1;
-  #endif
-    if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
-        return errno;
-    }
-
-#else
-
-#if BEOS_BONE /* This only works on BONE or beyond */
-    int on = 0;
-    if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0)
-        return errno;
-#endif /* BEOS_BONE */
- 
-#endif /* !BEOS_R5 */
-    return APR_SUCCESS;
-}
     
 
