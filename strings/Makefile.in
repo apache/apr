@@ -19,7 +19,8 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I../misc/unix
 OBJS=apr_cpystrn.o \
 	apr_snprintf.o \
 	apr_strnatcmp.o \
-	apr_strings.o
+	apr_strings.o \
+	apr_fnmatch.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
