@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/02/12 22:16:39 $]
+Last modified at [$Date: 2002/02/15 07:55:10 $]
 
 Release:
 
@@ -105,7 +105,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Deal with largefiles properly on those platforms that support it.
 
-      Justin says: Linux refuses to have largefile support and largefiles
+      Justin says: Linux refuses to have sendfile support and largefiles
                    at the sametime.  Largefile autoconf patch:
                    http://www.apache.org/~jerenkrantz/apr_largefile.m4
 
