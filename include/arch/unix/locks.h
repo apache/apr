@@ -60,6 +60,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_lock.h"
+#include "apr_sms.h"
 
 /* System headers required by Locks library */
 #if APR_HAVE_SYS_TYPES_H
@@ -109,6 +110,7 @@ union semun {
 
 struct apr_lock_t {
     apr_pool_t *cntxt;
+    apr_sms_t *mem_sys;
     apr_locktype_e type;
     apr_lockscope_e scope;
     int curr_locked;
@@ -154,6 +156,10 @@ apr_status_t apr_unix_destroy_inter_lock(struct apr_lock_t *lock);
 
 apr_status_t apr_unix_child_init_lock(struct apr_lock_t **lock, 
                                       apr_pool_t *cont, const char *fname);
+
+apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
+                                 apr_lockscope_e scope, const char *fname,
+                                 apr_sms_t *mem_sys);
 
 #endif  /* LOCKS_H */
 

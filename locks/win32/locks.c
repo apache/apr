@@ -98,6 +98,45 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_lock_sms_create(apr_lock_t **lock,
+                                              apr_locktype_e type,
+                                              apr_lockscope_e scope,
+                                              const char *fname,
+                                              apr_sms_t *mem_sys)
+{
+    apr_lock_t *newlock;
+    SECURITY_ATTRIBUTES sec;
+
+    if (type == APR_READWRITE)
+        return APR_ENOTIMPL;
+
+    newlock = (apr_lock_t *)apr_sms_malloc(mem_sys, sizeof(apr_lock_t));
+
+    newlock->cntxt = NULL;
+    newlock->mem_sys = mem_sys;
+
+    APR_MEM_PSTRDUP(newlock, newlock->fname, fname);
+    newlock->type = type;
+    newlock->scope = scope;
+    sec.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sec.lpSecurityDescriptor = NULL;
+
+    if (scope == APR_CROSS_PROCESS || scope == APR_LOCKALL) {
+        sec.bInheritHandle = TRUE;
+    }
+    else {
+        sec.bInheritHandle = FALSE;
+    }
+
+    if (scope == APR_INTRAPROCESS) {
+        InitializeCriticalSection(&newlock->section);
+    } else {
+        newlock->mutex = CreateMutex(&sec, FALSE, fname);
+    }
+    *lock = newlock;
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock, 
                                               const char *fname, 
                                               apr_pool_t *cont)
