@@ -106,6 +106,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
     apr_oslevel_e os_level;
     apr_status_t rv;
     char regkey[MAX_PATH * 2];
+    char *fixch;
     DWORD keylen;
     DWORD type;
     HKEY key;
@@ -149,7 +150,6 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
                                            (apr_wchar_t*)regkey)) != APR_SUCCESS)
                 return rv;
             *dirname = apr_pstrdup(p, retdir);
-            return APR_SUCCESS;
         }
         else if (type == REG_EXPAND_SZ) {
             apr_wchar_t path[MAX_PATH];
@@ -159,9 +159,9 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
                     != APR_SUCCESS)
                 return rv;
             *dirname = apr_pstrdup(p, retdir);
-            return APR_SUCCESS;
         }
-        return APR_ENOENT;
+        else
+            return APR_ENOENT;
     }
     else
 #endif APR_HAS_UNICODE_FS
@@ -174,16 +174,18 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
             return APR_FROM_OS_ERROR(rv);
         if (type == REG_SZ) {
             *dirname = apr_pstrdup(p, regkey);
-            return APR_SUCCESS;
         }
         else if (type == REG_EXPAND_SZ) {
             char path[MAX_PATH];
             ExpandEnvironmentStrings(regkey, path, sizeof(path));
             *dirname = apr_pstrdup(p, path);
-            return APR_SUCCESS;
         }
-        return APR_ENOENT;
+        else
+            return APR_ENOENT;
     }
+    for (fixch = *dirname; *fixch; ++fixch)
+        if (*fixch == '\\')
+            *fixch = '/';
 }
 
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
