@@ -143,6 +143,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     dafile->bufpos = 0;
     dafile->dataRead = 0;
     dafile->direction = 0;
+    dafile->pipe = FALSE;
 
     ap_register_cleanup(dafile->cntxt, dafile, apr_file_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
@@ -211,6 +212,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, ap_pool_t *c
     (*file)->buffered = FALSE;
     (*file)->eof_hit = FALSE;
     (*file)->flags = 0;
+    (*file)->pipe = FALSE;
     return APR_SUCCESS;
 }    
 
@@ -239,6 +241,7 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
     (*thefile)->buffered = FALSE;
     (*thefile)->eof_hit = FALSE;
     (*thefile)->flags = 0;
+    (*thefile)->pipe = FALSE;
 
     return APR_SUCCESS;
 }
