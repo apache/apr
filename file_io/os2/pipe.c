@@ -134,7 +134,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 
 
 
-ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, ap_pool_t *cont)
+ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, ap_pool_t *cont)
 {
     /* Not yet implemented, interface not suitable */
     return APR_ENOTIMPL;

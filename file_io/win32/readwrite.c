@@ -124,7 +124,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     return lasterror;
 }
 
-ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 {
     ap_status_t rv;
     DWORD bwrote;
@@ -262,7 +262,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_puts(char *str, ap_file_t *thefile)
+ap_status_t ap_puts(const char *str, ap_file_t *thefile)
 {
     DWORD len = strlen(str);
 

@@ -138,7 +138,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
 
 
-ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 {
     ULONG rc = 0;
     ULONG byteswritten;
@@ -264,7 +264,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 
 
 
-ap_status_t ap_puts(char *str, ap_file_t *thefile)
+ap_status_t ap_puts(const char *str, ap_file_t *thefile)
 {
     ap_ssize_t len;
 
