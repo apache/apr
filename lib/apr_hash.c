@@ -85,9 +85,9 @@ typedef struct ap_hash_entry_t ap_hash_entry_t;
 struct ap_hash_entry_t {
     ap_hash_entry_t	*next;
     int			 hash;
-    void		*key;
+    const void		*key;
     size_t		 klen;
-    void		*val;
+    const void		*val;
 };
 
 /*
@@ -167,13 +167,13 @@ APR_EXPORT(ap_hash_index_t *) ap_hash_first(ap_hash_t *ht)
 }
 
 APR_EXPORT(void) ap_hash_this(ap_hash_index_t *hi,
-			      void  **key,
+			      const void **key,
 			      size_t *klen,
-			      void  **val)
+			      void **val)
 {
     if (key)  *key  = hi->this->key;
     if (klen) *klen = hi->this->klen;
-    if (val)  *val  = hi->this->val;
+    if (val)  *val  = (void *)hi->this->val;
 }
 
 
@@ -206,12 +206,12 @@ static void resize_array(ap_hash_t *ht)
  */
 
 static ap_hash_entry_t **find_entry(ap_hash_t *ht,
-				    void *key,
+				    const void *key,
 				    size_t klen,
-				    void *val)
+				    const void *val)
 {
     ap_hash_entry_t **hep, *he;
-    unsigned char *p;
+    const unsigned char *p;
     int hash;
     int i;
 
@@ -254,21 +254,21 @@ static ap_hash_entry_t **find_entry(ap_hash_t *ht,
 }
 
 APR_EXPORT(void *) ap_hash_get(ap_hash_t *ht,
-			       void *key,
+			       const void *key,
 			       size_t klen)
 {
     ap_hash_entry_t *he;
     he = *find_entry(ht, key, klen, NULL);
     if (he)
-	return he->val;
+	return (void *)he->val;
     else
 	return NULL;
 }
 
 APR_EXPORT(void) ap_hash_set(ap_hash_t *ht,
-			     void *key,
+			     const void *key,
 			     size_t klen,
-			     void *val)
+			     const void *val)
 {
     ap_hash_entry_t **hep;
     hep = find_entry(ht, key, klen, val);
