@@ -297,7 +297,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     const char **newargs;
     char **newenv;
     NXVmId_t newVM;
-    unsigned long flags = 0;
+    unsigned long flags = NX_VM_SAME_ADDRSPACE;
     char **sysenv = NULL;
 
     NXNameSpec_t nameSpec;
