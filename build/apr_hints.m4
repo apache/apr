@@ -78,7 +78,6 @@ if test "x$apr_preload_done" != "xyes" ; then
         esac
         dnl Must do a check for gcc or egcs here, to get the right options  
         dnl to the compiler.
-	AC_PROG_CC
         if test "$GCC" != "yes"; then
           APR_ADDTO(CFLAGS, [-qHALT=E -qLANGLVL=extended])
         fi
