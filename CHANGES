@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Get apr_ungetc() to work with buffered files on Unix.
+     [Jeff Trawick]
+
   *) Rename XtOffset to APR_XtOffset.  This namespace protection
      is important to keep from conflicting with other packages.
      [Perl]
