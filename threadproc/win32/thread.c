@@ -102,8 +102,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 {
     apr_status_t stat;
 	unsigned temp;
-    int lasterror;
- 
+
     (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
@@ -125,11 +124,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, 
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
-        lasterror = apr_get_os_error();
-        return APR_EEXIST; 
-        /* MSVC++ doc doesn't mention any additional error info 
-         * XXX: need to check the sources
-         */
+        return APR_FROM_OS_ERROR(_doserrno);
     }
 
     if (attr && attr->detach) {
