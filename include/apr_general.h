@@ -76,6 +76,11 @@ extern "C" {
 
 #define MAXIMUM_WAIT_OBJECTS 64
 
+#define APR_ASCII_BLANK  '\040'
+#define APR_ASCII_CR     '\015'
+#define APR_ASCII_LF     '\012'
+#define APR_ASCII_TAB    '\011'
+
 typedef int               apr_signum_t;
 
 /* Finding offsets of elements within structures.
