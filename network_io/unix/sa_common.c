@@ -474,7 +474,20 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 #ifdef WIN32
             return apr_get_netos_error();
 #else
-            return (h_errno + APR_OS_START_SYSERR);
+            switch (h_errno) {
+#ifdef NETDB_INTERNAL
+                NETDB_INTERNAL:
+                    return APR_FROM_OS_ERROR(errno);
+                HOST_NOT_FOUND:
+                    return APR_EHOSTUNREACH;
+                NO_DATA:
+                    return APR_E;
+                NO_RECOVERY:
+                    return APR_EHOSTUNREACH;
+                TRY_AGAIN:
+                    return APR_EAGAIN;
+            }
+            /* return (h_errno + APR_OS_START_SYSERR); */
 #endif
         }
     }
