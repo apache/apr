@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/06/28 04:03:19 $]
+Last modified at [$Date: 2001/06/28 05:14:28 $]
 
 Release:
 
@@ -146,6 +146,23 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       - add to the default build as currently it's omitted.  Also need to
         add testmem to the test build at that point.
       - add more detailed tests to testmem.c
+
+    * In line with the new SMS code is the fact that threading and pools
+      just are not working together well.  This is due to the fact that
+      the pool code has one global mutex (alloc_mutex) and one freelist
+      (block_freelist) for all pools to share.  This means that only 
+      one worker can be allocating memory at any given time.  This is 
+      probably the reason why Apache 2.0 is faster with prefork MPM 
+      (thread-disabled APR) than threaded MPM.  The solution to this
+      is most likely to incorporate a rework of the pools to use the new
+      SMS code and allow certain pools (i.e. request pools in httpd-2.0)
+      to have an option for no locking (as they can't have contention
+      by definition).  This would mean that the mutex and freelist
+      must be moved inside of apr_pool_t.  Therefore, this is the 
+      jumping-off point into SMS.  Short-term, it is *possible* that 
+      ALLOC_USE_MALLOC would be faster than the current pool code for 
+      a threaded APR (but, I'm not sure).
+        Status: Justin volunteers
 
 Documentation that needs writing:
 
