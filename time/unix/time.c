@@ -237,10 +237,10 @@ ap_status_t ap_timediff(struct atime_t *a, struct atime_t *b, ap_int32_t *rv)
  */
 ap_status_t ap_timecmp(struct atime_t *a, struct atime_t *b)
 {
-    if (a == NULL) {
+    if (a == NULL || a->currtime == NULL) {
         return APR_LESS;
     }
-    else if (b == NULL) {
+    else if (b == NULL || b->currtime == NULL) {
         return APR_MORE;
     }
 
