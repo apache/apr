@@ -1,19 +1,19 @@
 #!/bin/sh
 
 # This file illustrates how to generate a useful TAGS file via etags
-# for emacs.  This should be invoked from the src directory i.e.:
-#   > helpers/MakeEtags
-# and will create a TAGS file in the src directory.
+# for emacs.  This should be invoked from the top source directory i.e.:
+#   > build/MakeEtags
+# and will create a TAGS file in the top source directory.
 
 # This script falls under the Apache License.
 # See http://www.apache.org/docs/LICENSE
 
-# Once you have created src/TAGS in emacs you'll need to setup
-# tag-table-alist with an entry to assure it finds the single src/TAGS
+# Once you have created ./TAGS in emacs you'll need to setup
+# tag-table-alist with an entry to assure it finds the single ./TAGS
 # file from the many source directories.  Something along these lines:
 # (setq tag-table-alist
-#	'(("/home/me/work/apache-1.3/src/" 
-#	   . "/home/me/work/apache-1.3/src/")
+#	'(("/home/me/work/httpd-2.0/" 
+#	   . "/home/me/work/httpd-2.0/")
 #	 ))
 
 # This requires a special version of etags, i.e. the
