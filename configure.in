@@ -898,6 +898,7 @@ dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
 APR_FLAG_HEADERS(
+    alloca.h            \
     ByteOrder.h		\
     conio.h		\
     crypt.h		\

@@ -64,8 +64,7 @@
 #if HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
-#if HAVE_ALLOCA && defined(__osf__)
-/* Tru64 UNIX requires this for proper alloca operation in threaded programs */
+#if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
 
