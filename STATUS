@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/11 19:45:10 $]
+Last modified at [$Date: 2002/07/11 23:00:17 $]
 
 Release:
 
@@ -66,10 +66,16 @@ CURRENT VOTES:
          system types, or map to system units.
          +1: rbb, wrowe, jerenkrantz, striker
          +0: brianp
+         -0.5: jwoolley
          -1: aaron [veto for reusing the apr_time_t identifier for a new use]
       2) Renaming the function to get rid of apr_time_t vs time_t confusion,
          which brianp suggests apr_timeval_t.
          +1: fielding, aaron
+         +1: jwoolley [but -1 to apr_timeval_t in particular as it has just
+                       as much potential for confusion as apr_time_t (there
+                       is a "struct timeval" defined by POSIX -- apr_busecs_t
+                       or apr_busec_time_t seemed okay to me, though brianp
+                       vetoed whatever that was]
          -0: wrowe, jerenkrantz, striker
          -0.5: rbb
 
