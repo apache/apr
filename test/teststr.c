@@ -120,7 +120,7 @@ static void test_strtok(apr_pool_t *p)
     }
 }
 
-void test_snprintf(apr_pool_t *p)
+static void test_snprintf(apr_pool_t *p)
 {
     char buff[100];
     char *testing = apr_palloc(p, 10);
