@@ -121,7 +121,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
      */
     int egd_socket, egd_path_len, rv;
     struct sockaddr_un addr;
-    socklen_t egd_addr_len;
+    apr_socklen_t egd_addr_len;
     size_t resp_expected;
     unsigned char req[2], resp[255];
     char *curbuf = buf;
