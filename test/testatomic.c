@@ -68,11 +68,6 @@
 #include <pthread.h>
 #endif
 
-static void foo(apr_atomic_t *bar, long xyzzy)
-{
-    apr_atomic_add(bar, xyzzy);
-}
-
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
 
