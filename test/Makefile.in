@@ -42,7 +42,8 @@ PROGRAMS = \
 	testdup@EXEEXT@ \
 	testatomic@EXEEXT@ \
 	testregex@EXEEXT@ \
-	testpools@EXEEXT@
+	testpools@EXEEXT@ \
+	testmutexscope@EXEEXT@
 
 
 TARGETS = $(PROGRAMS)
@@ -187,5 +188,8 @@ testrand@EXEEXT@: testrand.lo $(LOCAL_LIBS)
 
 testpools@EXEEXT@: testpools.lo $(LOCAL_LIBS)
 	$(LINK) testpools.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
+	$(LINK) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
