@@ -36,6 +36,12 @@ echo "Platform: $host"
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
+dnl Do the various CC checks *before* preloading values. The preload code
+dnl may need to use compiler characteristics to make decisions. This macro
+dnl can only be used once within a configure script, so this prevents a
+dnl preload section from invoking the macro to get compiler info.
+AC_PROG_CC
+
 dnl Preload
 APR_PRELOAD
 
@@ -71,7 +77,6 @@ apr_modules="file_io network_io threadproc misc locks time mmap shmem i18n user 
 
 dnl Checks for programs.
 AC_PROG_MAKE_SET
-AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_AWK
 AC_PROG_LN_S
