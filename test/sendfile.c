@@ -201,7 +201,7 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     }
 }
 
-static int client(client_socket_mode_t socket_mode)
+static int client(client_socket_mode_t socket_mode, char *host)
 {
     apr_status_t rv, tmprv;
     apr_socket_t *sock;
@@ -233,7 +233,10 @@ static int client(client_socket_mode_t socket_mode)
         exit(1);
     }
 
-    rv = apr_sockaddr_info_get(&destsa, "127.0.0.1", family, TESTSF_PORT, 0, p);
+    if (!host) {
+        host = "127.0.0.1";
+    }
+    rv = apr_sockaddr_info_get(&destsa, host, family, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_sockaddr_info_get()->%d/%s\n",
                 rv,
@@ -351,14 +354,14 @@ static int client(client_socket_mode_t socket_mode)
 
             tmplen = len; /* bytes remaining to send from the file */
             printf("Calling apr_sendfile()...\n");
-            printf("Headers:\n");
+            printf("Headers (%d):\n", hdtr.numheaders);
             for (i = 0; i < hdtr.numheaders; i++) {
-                printf("\t%d bytes\n",
-                       hdtr.headers[i].iov_len);
+                printf("\t%d bytes (%c)\n",
+                       hdtr.headers[i].iov_len, hdtr.headers[i].iov_base[0]);
             }
             printf("File: %ld bytes from offset %ld\n",
                    (long)tmplen, (long)current_file_offset);
-            printf("Trailers:\n");
+            printf("Trailers (%d):\n", hdtr.numtrailers);
             for (i = 0; i < hdtr.numtrailers; i++) {
                 printf("\t%d bytes\n",
                        hdtr.trailers[i].iov_len);
@@ -743,15 +746,19 @@ int main(int argc, char *argv[])
     /* Gee whiz this is goofy logic but I wanna drive sendfile right now, 
      * not dork around with the command line!
      */
-    if (argc == 3 && !strcmp(argv[1], "client")) {
+    if (argc >= 3 && !strcmp(argv[1], "client")) {
+        char *host = 0;
+        if (argv[3]) {
+            host = argv[3];
+        }	
         if (!strcmp(argv[2], "blocking")) {
-            return client(BLK);
+            return client(BLK, host);
         }
         else if (!strcmp(argv[2], "timeout")) {
-            return client(TIMEOUT);
+            return client(TIMEOUT, host);
         }
         else if (!strcmp(argv[2], "nonblocking")) {
-            return client(NONBLK);
+            return client(NONBLK, host);
         }
     }
     else if (argc == 2 && !strcmp(argv[1], "server")) {
