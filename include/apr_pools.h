@@ -55,10 +55,15 @@
 #ifndef APR_POOLS_H
 #define APR_POOLS_H
 
+#include "apr.h"
+#include "apr_errno.h"
+#include "apr_general.h" /* for APR_STRINGIFY */
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /**
  * @file apr_pools.h
@@ -81,11 +86,6 @@ extern "C" {
  * @ingroup APR
  * @{
  */
-#include "apr.h"
-#include "apr_errno.h"
-#include "apr_general.h" /* for APR_STRINGIFY */
-#define APR_WANT_MEMFUNC
-#include "apr_want.h"
 
 /** The fundamental pool type */
 typedef struct apr_pool_t apr_pool_t;
