@@ -246,7 +246,7 @@ int main(void)
     fprintf (stdout,"\nAPR Pollset Test\n****************\n\n");
 
     printf ("\tSetting up pollset....................");
-    if (apr_pollset_create(&pollset, LARGE_NUM_SOCKETS, context) != APR_SUCCESS){
+    if (apr_pollset_create(&pollset, LARGE_NUM_SOCKETS, context, 0) != APR_SUCCESS){
         printf("Couldn't create a pollset!\n");
         exit (-1);
     }

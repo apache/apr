@@ -323,7 +323,8 @@ struct apr_pollset_t {
 
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
                                              apr_uint32_t size,
-                                             apr_pool_t *p)
+                                             apr_pool_t *p,
+                                             apr_uint32_t flags)
 {
 #if !defined(HAVE_POLL) && defined(FD_SETSIZE)
     if (size > FD_SETSIZE) {
