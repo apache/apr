@@ -45,7 +45,8 @@ PROGRAMS = \
 	testdup@EXEEXT@ \
 	testatomic@EXEEXT@ \
 	testpools@EXEEXT@ \
-	testmutexscope@EXEEXT@
+	testmutexscope@EXEEXT@ \
+	testtable@EXEEXT@
 
 
 TARGETS = $(PROGRAMS) $(NONPORTABLE)
@@ -94,7 +95,7 @@ mod_test.la: mod_test.slo $(LOCAL_LIBS)
 
 libmod_test.la: mod_test.slo $(LOCAL_LIBS)
 	$(LINK) --mode=link $(COMPILE) -rpath $(shell pwd) -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
-	
+
 testargs@EXEEXT@: testargs.lo $(LOCAL_LIBS)
 	$(LINK) testargs.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -199,5 +200,8 @@ testpools@EXEEXT@: testpools.lo $(LOCAL_LIBS)
 
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testtable@EXEEXT@: testtable.lo $(LOCAL_LIBS)
+	$(LINK) testtable.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
