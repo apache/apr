@@ -112,7 +112,7 @@ struct apr_file_t {
     char *fname;
     apr_int32_t flags;
     int eof_hit;
-    int pipe;
+    int is_pipe;
     apr_interval_time_t timeout;
     int buffered;
     enum {BLK_UNKNOWN, BLK_OFF, BLK_ON } blocking;
