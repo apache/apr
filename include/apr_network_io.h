@@ -631,6 +631,19 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
                                          apr_sockaddr_t *sockaddr);
 
 /**
+ * See if the IP addresses in two APR socket addresses are
+ * equivalent.  Appropriate logic is present for comparing
+ * IPv4-mapped IPv6 addresses with IPv4 addresses.
+ *
+ * @param addr1 One of the APR socket addresses.
+ * @param addr2 The other APR socket address.
+ * @remark The return value will be non-zero if the addresses
+ * are equivalent.
+ */
+APR_DECLARE(int) apr_sockaddr_equal(const apr_sockaddr_t *addr1,
+                                    const apr_sockaddr_t *addr2);
+
+/**
  * Setup the memory required for poll to operate properly
  * @param new_poll The poll structure to be used. 
  * @param num The number of socket descriptors to be polled.

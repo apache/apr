@@ -606,6 +606,32 @@ APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr,
     return errno;
 }
 
+#define V4MAPPED_EQUAL(a,b)                                   \
+((a)->sa.sin.sin_family == AF_INET &&                         \
+ (b)->sa.sin.sin_family == AF_INET6 &&                        \
+ IN6_IS_ADDR_V4MAPPED((struct in6_addr *)(b)->ipaddr_ptr) &&  \
+ !memcmp((a)->ipaddr_ptr,                                     \
+         &((struct in6_addr *)(b)->ipaddr_ptr)->s6_addr[12],  \
+         (a)->ipaddr_len))
+
+APR_DECLARE(int) apr_sockaddr_equal(const apr_sockaddr_t *addr1,
+                                    const apr_sockaddr_t *addr2)
+{
+    if (addr1->ipaddr_len == addr2->ipaddr_len &&
+        !memcmp(addr1->ipaddr_ptr, addr2->ipaddr_ptr, addr1->ipaddr_len)) {
+        return 1;
+    }
+#if APR_HAVE_IPV6
+    if (V4MAPPED_EQUAL(addr1, addr2)) {
+        return 1;
+    }
+    if (V4MAPPED_EQUAL(addr2, addr1)) {
+        return 1;
+    }
+#endif
+    return 0; /* not equal */
+}
+
 static apr_status_t parse_network(apr_ipsubnet_t *ipsub, const char *network)
 {
     /* legacy syntax for ip addrs: a.b.c. ==> a.b.c.0/24 for example */
