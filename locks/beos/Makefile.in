@@ -1,8 +1,5 @@
 
-TARGETS = \
-	locks.lo \
-	crossproc.lo \
-	intraproc.lo
+TARGETS = locks.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
