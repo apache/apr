@@ -98,13 +98,18 @@ ap_status_t ap_stat(struct file_t **thefile, char *fname, ap_context_t *cont)
     int rv = stat(fname, &info);
 
     if (rv == 0) {
-        (*thefile) = ap_pcalloc(cont, sizeof(struct file_t));
         if ((*thefile) == NULL) {
-            return APR_ENOMEM;
+            /* Only allocate more space and initialize the object if it is
+             * NULL when passed in.
+             */ 
+            (*thefile) = ap_pcalloc(cont, sizeof(struct file_t));
+            if ((*thefile) == NULL) {
+                return APR_ENOMEM;
+            }
+            (*thefile)->fname = ap_pstrdup(cont, fname);
+            (*thefile)->filehand = NULL;
+            (*thefile)->filedes = -1;
         }
-        (*thefile)->fname = ap_pstrdup(cont, fname);
-        (*thefile)->filehand = NULL;
-        (*thefile)->filedes = -1;
         (*thefile)->protection = info.st_mode;
         (*thefile)->user = info.st_uid;
         (*thefile)->group = info.st_gid;
