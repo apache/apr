@@ -123,6 +123,13 @@ APR_DECLARE(apr_status_t) apr_env_delete(const char *envvar, apr_pool_t *pool)
     return APR_SUCCESS;
 
 #else
+    /* hint: some platforms allow envvars to be unset via
+     *       putenv("varname")...  that isn't Single Unix spec,
+     *       but if your platform doesn't have unsetenv() it is
+     *       worth investigating and potentially adding a
+     *       configure check to decide when to use that form of
+     *       putenv() here
+     */
     return APR_ENOTIMPL;
 #endif
 }
