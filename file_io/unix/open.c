@@ -171,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
        return errno;
     }
 
-    (*new)->pipe = 0;
+    (*new)->is_pipe = 0;
     (*new)->timeout = -1;
     (*new)->ungetchar = -1;
     (*new)->eof_hit = 0;

@@ -142,7 +142,7 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
-    if (thepipe->pipe == 1) {
+    if (thepipe->is_pipe == 1) {
         thepipe->timeout = timeout;
         if (timeout >= 0) {
             if (thepipe->blocking != BLK_OFF) { /* blocking or unknown state */
@@ -161,7 +161,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_int
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
 {
-    if (thepipe->pipe == 1) {
+    if (thepipe->is_pipe == 1) {
         *timeout = thepipe->timeout;
         return APR_SUCCESS;
     }
@@ -179,7 +179,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
     (*in)->pool = pool;
     (*in)->filedes = filedes[0];
-    (*in)->pipe = 1;
+    (*in)->is_pipe = 1;
     (*in)->fname = NULL;
     (*in)->buffered = 0;
     (*in)->blocking = BLK_ON;
@@ -192,7 +192,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
     (*out)->pool = pool;
     (*out)->filedes = filedes[1];
-    (*out)->pipe = 1;
+    (*out)->is_pipe = 1;
     (*out)->fname = NULL;
     (*out)->buffered = 0;
     (*out)->blocking = BLK_ON;
