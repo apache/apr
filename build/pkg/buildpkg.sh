@@ -52,6 +52,7 @@ fi
 ./configure --prefix=$PREFIX
 make
 make install DESTDIR=$TEMPDIR
+rm $TEMPDIR$PREFIX/lib/apr.exp
 . build/pkg/pkginfo
 cp build/pkg/pkginfo $TEMPDIR$PREFIX
 
