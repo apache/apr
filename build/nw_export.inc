@@ -31,6 +31,7 @@
 #include "apr_portable.h"
 #include "apr_proc_mutex.h"
 #include "apr_ring.h"
+#include "apr_random.h"
 #include "apr_shm.h"
 #include "apr_signal.h"
 #include "apr_strings.h"
