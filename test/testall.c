@@ -100,6 +100,7 @@ static const struct testlist {
     {"testsockets", testsockets},
     {"testsockopt", testsockopt},
     {"testproc", testproc},
+    {"testprocmutex", testprocmutex},
     {"testpoll", testpoll},
     {"testlock", testlock},
     {"testthread", testthread},

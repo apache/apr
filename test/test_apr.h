@@ -86,6 +86,7 @@ CuSuite *testoc(void);
 CuSuite *testdup(void);
 CuSuite *testsockets(void);
 CuSuite *testproc(void);
+CuSuite *testprocmutex(void);
 CuSuite *testpoll(void);
 CuSuite *testlock(void);
 CuSuite *testsockopt(void);
