@@ -63,7 +63,7 @@ static void test_now(abts_case *tc, void *data)
      * that the time will be slightly off, so accept anything between -1 and
      * 1 second.
      */
-    abts_assert(tc, "apr_time and OS time do not agree", 
+    ABTS_ASSERT(tc, "apr_time and OS time do not agree", 
              (timediff > -2) && (timediff < 2));
 }
 
@@ -74,10 +74,10 @@ static void test_gmtstr(abts_case *tc, void *data)
 
     rv = apr_time_exp_gmt(&xt, now);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_time_exp_gmt");
+        ABTS_NOT_IMPL(tc, "apr_time_exp_gmt");
     }
-    abts_true(tc, rv == APR_SUCCESS);
-    abts_str_equal(tc, "2002-08-14 19:05:36.186711 +0000 [257 Sat]", 
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "2002-08-14 19:05:36.186711 +0000 [257 Sat]", 
                       print_time(p, &xt));
 }
 
@@ -90,14 +90,14 @@ static void test_exp_lt(abts_case *tc, void *data)
 
     rv = apr_time_exp_lt(&xt, now);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_time_exp_lt");
+        ABTS_NOT_IMPL(tc, "apr_time_exp_lt");
     }
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
 
     libc_exp = localtime(&now_secs);
 
 #define CHK_FIELD(f) \
-    abts_int_equal(tc, libc_exp->f, xt.f)
+    ABTS_INT_EQUAL(tc, libc_exp->f, xt.f)
 
     CHK_FIELD(tm_sec);
     CHK_FIELD(tm_min);
@@ -119,14 +119,14 @@ static void test_exp_get_gmt(abts_case *tc, void *data)
     apr_int64_t hr_off_64;
 
     rv = apr_time_exp_gmt(&xt, now);
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
     rv = apr_time_exp_get(&imp, &xt);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_time_exp_get");
+        ABTS_NOT_IMPL(tc, "apr_time_exp_get");
     }
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
     hr_off_64 = (apr_int64_t) xt.tm_gmtoff * APR_USEC_PER_SEC;
-    abts_true(tc, now + hr_off_64 == imp);
+    ABTS_TRUE(tc, now + hr_off_64 == imp);
 }
 
 static void test_exp_get_lt(abts_case *tc, void *data)
@@ -137,14 +137,14 @@ static void test_exp_get_lt(abts_case *tc, void *data)
     apr_int64_t hr_off_64;
 
     rv = apr_time_exp_lt(&xt, now);
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
     rv = apr_time_exp_get(&imp, &xt);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_time_exp_get");
+        ABTS_NOT_IMPL(tc, "apr_time_exp_get");
     }
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
     hr_off_64 = (apr_int64_t) xt.tm_gmtoff * APR_USEC_PER_SEC;
-    abts_true(tc, now + hr_off_64 == imp);
+    ABTS_TRUE(tc, now + hr_off_64 == imp);
 }
 
 static void test_imp_gmt(abts_case *tc, void *data)
@@ -154,13 +154,13 @@ static void test_imp_gmt(abts_case *tc, void *data)
     apr_time_t imp;
 
     rv = apr_time_exp_gmt(&xt, now);
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
     rv = apr_time_exp_gmt_get(&imp, &xt);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_time_exp_gmt_get");
+        ABTS_NOT_IMPL(tc, "apr_time_exp_gmt_get");
     }
-    abts_true(tc, rv == APR_SUCCESS);
-    abts_true(tc, now == imp);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, now == imp);
 }
 
 static void test_rfcstr(abts_case *tc, void *data)
@@ -170,10 +170,10 @@ static void test_rfcstr(abts_case *tc, void *data)
 
     rv = apr_rfc822_date(str, now);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_rfc822_date");
+        ABTS_NOT_IMPL(tc, "apr_rfc822_date");
     }
-    abts_true(tc, rv == APR_SUCCESS);
-    abts_str_equal(tc, "Sat, 14 Sep 2002 19:05:36 GMT", str);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "Sat, 14 Sep 2002 19:05:36 GMT", str);
 }
 
 static void test_ctime(abts_case *tc, void *data)
@@ -185,13 +185,13 @@ static void test_ctime(abts_case *tc, void *data)
 
     rv = apr_ctime(apr_str, now);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_ctime");
+        ABTS_NOT_IMPL(tc, "apr_ctime");
     }
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
     strcpy(libc_str, ctime(&now_sec));
     *strchr(libc_str, '\n') = '\0';
 
-    abts_str_equal(tc, libc_str, apr_str);
+    ABTS_STR_EQUAL(tc, libc_str, apr_str);
 }
 
 static void test_strftime(abts_case *tc, void *data)
@@ -205,10 +205,10 @@ static void test_strftime(abts_case *tc, void *data)
     str = apr_palloc(p, STR_SIZE + 1);
     rv = apr_strftime(str, &sz, STR_SIZE, "%R %A %d %B %Y", &xt);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_strftime");
+        ABTS_NOT_IMPL(tc, "apr_strftime");
     }
-    abts_true(tc, rv == APR_SUCCESS);
-    abts_str_equal(tc, "19:05 Saturday 14 September 2002", str);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "19:05 Saturday 14 September 2002", str);
 }
 
 static void test_strftimesmall(abts_case *tc, void *data)
@@ -221,10 +221,10 @@ static void test_strftimesmall(abts_case *tc, void *data)
     rv = apr_time_exp_gmt(&xt, now);
     rv = apr_strftime(str, &sz, STR_SIZE, "%T", &xt);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_strftime");
+        ABTS_NOT_IMPL(tc, "apr_strftime");
     }
-    abts_true(tc, rv == APR_SUCCESS);
-    abts_str_equal(tc, "19:05:36", str);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
+    ABTS_STR_EQUAL(tc, "19:05:36", str);
 }
 
 static void test_exp_tz(abts_case *tc, void *data)
@@ -235,10 +235,10 @@ static void test_exp_tz(abts_case *tc, void *data)
 
     rv = apr_time_exp_tz(&xt, now, hr_off);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_time_exp_tz");
+        ABTS_NOT_IMPL(tc, "apr_time_exp_tz");
     }
-    abts_true(tc, rv == APR_SUCCESS);
-    abts_true(tc, (xt.tm_usec == 186711) && 
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, (xt.tm_usec == 186711) && 
                      (xt.tm_sec == 36) &&
                      (xt.tm_min == 5) && 
                      (xt.tm_hour == 14) &&
@@ -260,9 +260,9 @@ static void test_strftimeoffset(abts_case *tc, void *data)
     apr_time_exp_tz(&xt, now, hr_off);
     rv = apr_strftime(str, &sz, STR_SIZE, "%T", &xt);
     if (rv == APR_ENOTIMPL) {
-        abts_not_impl(tc, "apr_strftime");
+        ABTS_NOT_IMPL(tc, "apr_strftime");
     }
-    abts_true(tc, rv == APR_SUCCESS);
+    ABTS_TRUE(tc, rv == APR_SUCCESS);
 }
 
 /* 0.9.4 and earlier rejected valid dates in 2038 */

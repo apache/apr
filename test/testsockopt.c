@@ -26,8 +26,8 @@ static void create_socket(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, p);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_ptr_notnull(tc, sock);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_PTR_NOTNULL(tc, sock);
 }
 
 static void set_keepalive(abts_case *tc, void *data)
@@ -36,11 +36,11 @@ static void set_keepalive(abts_case *tc, void *data)
     apr_int32_t ck;
 
     rv = apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 1);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 1, ck);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 1, ck);
 }
 
 static void set_debug(abts_case *tc, void *data)
@@ -54,9 +54,9 @@ static void set_debug(abts_case *tc, void *data)
     rv2 = apr_socket_opt_get(sock, APR_SO_DEBUG, &ck);
     apr_assert_success(tc, "get SO_DEBUG option", rv2);
     if (APR_STATUS_IS_SUCCESS(rv1)) {
-        abts_int_equal(tc, 1, ck);
+        ABTS_INT_EQUAL(tc, 1, ck);
     } else {
-        abts_int_equal(tc, 0, ck);
+        ABTS_INT_EQUAL(tc, 0, ck);
     }
 }
 
@@ -66,49 +66,49 @@ static void remove_keepalive(abts_case *tc, void *data)
     apr_int32_t ck;
 
     rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 1, ck);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 1, ck);
 
     rv = apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 0);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 0, ck);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 0, ck);
 }
 
 static void corkable(abts_case *tc, void *data)
 {
 #if !APR_HAVE_CORKABLE_TCP
-    abts_not_impl(tc, "TCP isn't corkable");
+    ABTS_NOT_IMPL(tc, "TCP isn't corkable");
 #else
     apr_status_t rv;
     apr_int32_t ck;
 
     rv = apr_socket_opt_set(sock, APR_TCP_NODELAY, 1);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 1, ck);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 1, ck);
 
     rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 1);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_TCP_NOPUSH, &ck);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 1, ck);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 1, ck);
 
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 0, ck);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 0, ck);
 
     rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, 1, ck);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, 1, ck);
 #endif
 }
 
@@ -117,7 +117,7 @@ static void close_socket(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_socket_close(sock);
-    abts_int_equal(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
 abts_suite *testsockopt(abts_suite *suite)

@@ -50,11 +50,11 @@ static void list_split_multi(abts_case *tc, void *data)
 
     pathelts = NULL;
     rv = apr_filepath_list_split(&pathelts, path_in, p);
-    abts_ptr_notnull(tc, pathelts);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_int_equal(tc, parts_out_count, pathelts->nelts);
+    ABTS_PTR_NOTNULL(tc, pathelts);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_INT_EQUAL(tc, parts_out_count, pathelts->nelts);
     for (i = 0; i < pathelts->nelts; ++i)
-        abts_str_equal(tc, parts_out[i], ((char**)pathelts->elts)[i]);
+        ABTS_STR_EQUAL(tc, parts_out[i], ((char**)pathelts->elts)[i]);
 }
 
 static void list_split_single(abts_case *tc, void *data)
@@ -67,14 +67,14 @@ static void list_split_single(abts_case *tc, void *data)
     {
         pathelts = NULL;
         rv = apr_filepath_list_split(&pathelts, parts_in[i], p);
-        abts_ptr_notnull(tc, pathelts);
-        abts_int_equal(tc, APR_SUCCESS, rv);
+        ABTS_PTR_NOTNULL(tc, pathelts);
+        ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
         if (parts_in[i][0] == '\0')
-            abts_int_equal(tc, 0, pathelts->nelts);
+            ABTS_INT_EQUAL(tc, 0, pathelts->nelts);
         else
         {
-            abts_int_equal(tc, 1, pathelts->nelts);
-            abts_str_equal(tc, parts_in[i], *(char**)pathelts->elts);
+            ABTS_INT_EQUAL(tc, 1, pathelts->nelts);
+            ABTS_STR_EQUAL(tc, parts_in[i], *(char**)pathelts->elts);
         }
     }
 }
@@ -92,9 +92,9 @@ static void list_merge_multi(abts_case *tc, void *data)
 
     liststr = NULL;
     rv = apr_filepath_list_merge(&liststr, pathelts, p);
-    abts_ptr_notnull(tc, liststr);
-    abts_int_equal(tc, APR_SUCCESS, rv);
-    abts_str_equal(tc, liststr, path_out);
+    ABTS_PTR_NOTNULL(tc, liststr);
+    ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    ABTS_STR_EQUAL(tc, liststr, path_out);
 }
 
 static void list_merge_single(abts_case *tc, void *data)
@@ -112,12 +112,12 @@ static void list_merge_single(abts_case *tc, void *data)
         liststr = NULL;
         rv = apr_filepath_list_merge(&liststr, pathelts, p);
         if (parts_in[i][0] == '\0')
-            abts_ptr_equal(tc, NULL, liststr);
+            ABTS_PTR_EQUAL(tc, NULL, liststr);
         else
         {
-            abts_ptr_notnull(tc, liststr);
-            abts_int_equal(tc, APR_SUCCESS, rv);
-            abts_str_equal(tc, liststr, parts_in[i]);
+            ABTS_PTR_NOTNULL(tc, liststr);
+            ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+            ABTS_STR_EQUAL(tc, liststr, parts_in[i]);
         }
     }
 }

@@ -21,43 +21,43 @@
 static void less0(abts_case *tc, void *data)
 {
     int rv = apr_strnatcmp("a", "b");
-    abts_assert(tc, "didn't compare simple strings properly", rv < 0);
+    ABTS_ASSERT(tc, "didn't compare simple strings properly", rv < 0);
 }
 
 static void str_equal(abts_case *tc, void *data)
 {
     int rv = apr_strnatcmp("a", "a");
-    abts_assert(tc, "didn't compare simple strings properly", rv == 0);
+    ABTS_ASSERT(tc, "didn't compare simple strings properly", rv == 0);
 }
 
 static void more0(abts_case *tc, void *data)
 {
     int rv = apr_strnatcmp("b", "a");
-    abts_assert(tc, "didn't compare simple strings properly", rv > 0);
+    ABTS_ASSERT(tc, "didn't compare simple strings properly", rv > 0);
 }
 
 static void less_ignore_case(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("a", "B");
-    abts_assert(tc, "didn't compare simple strings properly", rv < 0);
+    ABTS_ASSERT(tc, "didn't compare simple strings properly", rv < 0);
 }
 
 static void str_equal_ignore_case(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("a", "A");
-    abts_assert(tc, "didn't compare simple strings properly", rv == 0);
+    ABTS_ASSERT(tc, "didn't compare simple strings properly", rv == 0);
 }
 
 static void more_ignore_case(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("b", "A");
-    abts_assert(tc, "didn't compare simple strings properly", rv > 0);
+    ABTS_ASSERT(tc, "didn't compare simple strings properly", rv > 0);
 }
 
 static void natcmp(abts_case *tc, void *data)
 {
     int rv = apr_strnatcasecmp("a2", "a10");
-    abts_assert(tc, "didn't compare simple strings properly", rv < 0);
+    ABTS_ASSERT(tc, "didn't compare simple strings properly", rv < 0);
 }
 
 abts_suite *teststrnatcmp(abts_suite *suite)

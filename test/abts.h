@@ -62,17 +62,29 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name);
 void abts_run_test(abts_suite *ts, test_func f, void *value);
 void abts_log_message(const char *fmt, ...);
 
-void abts_int_equal(abts_case *tc, const int expected, const int actual);
-void abts_int_nequal(abts_case *tc, const int expected, const int actual);
-void abts_str_equal(abts_case *tc, const char *expected, const char *actual);
+void abts_int_equal(abts_case *tc, const int expected, const int actual, int lineno);
+void abts_int_nequal(abts_case *tc, const int expected, const int actual, int lineno);
+void abts_str_equal(abts_case *tc, const char *expected, const char *actual, int lineno);
 void abts_str_nequal(abts_case *tc, const char *expected, const char *actual,
-                       size_t n);
-void abts_ptr_notnull(abts_case *tc, const void *ptr);
-void abts_ptr_equal(abts_case *tc, const void *expected, const void *actual);
-void abts_true(abts_case *tc, int condition);
-void abts_fail(abts_case *tc, const char *message);
-void abts_not_impl(abts_case *tc, const char *message);
-void abts_assert(abts_case *tc, const char *message, int condition);
+                       size_t n, int lineno);
+void abts_ptr_notnull(abts_case *tc, const void *ptr, int lineno);
+void abts_ptr_equal(abts_case *tc, const void *expected, const void *actual, int lineno);
+void abts_true(abts_case *tc, int condition, int lineno);
+void abts_fail(abts_case *tc, const char *message, int lineno);
+void abts_not_impl(abts_case *tc, const char *message, int lineno);
+void abts_assert(abts_case *tc, const char *message, int condition, int lineno);
+
+/* Convenience macros. Ryan hates these! */
+#define ABTS_INT_EQUAL(a, b, c)     abts_int_equal(a, b, c, __LINE__)
+#define ABTS_INT_NEQUAL(a, b, c)    abts_int_nequal(a, b, c, __LINE__)
+#define ABTS_STR_EQUAL(a, b, c)     abts_str_equal(a, b, c, __LINE__)
+#define ABTS_STR_NEQUAL(a, b, c, d) abts_str_nequal(a, b, c, d, __LINE__)
+#define ABTS_PTR_NOTNULL(a, b)      abts_ptr_notnull(a, b, __LINE__)
+#define ABTS_PTR_EQUAL(a, b, c)     abts_ptr_equal(a, b, c, __LINE__)
+#define ABTS_TRUE(a, b)             abts_true(a, b, __LINE__);
+#define ABTS_FAIL(a, b)             abts_fail(a, b, __LINE__);
+#define ABTS_NOT_IMPL(a, b)         abts_not_impl(a, b, __LINE__);
+#define ABTS_ASSERT(a, b, c)        abts_assert(a, b, c, __LINE__);
 
 abts_suite *run_tests(abts_suite *suite);
 abts_suite *run_tests1(abts_suite *suite);

@@ -46,10 +46,10 @@ static int launch_reader(abts_case *tc)
     rv = apr_proc_create(&proc, "./tryread" EXTENSION, args, NULL, procattr, p);
     apr_assert_success(tc, "Couldn't launch program", rv);
 
-    abts_assert(tc, "wait for child process",
+    ABTS_ASSERT(tc, "wait for child process",
             apr_proc_wait(&proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
-    abts_assert(tc, "child terminated normally", why == APR_PROC_EXIT);
+    ABTS_ASSERT(tc, "child terminated normally", why == APR_PROC_EXIT);
     return exitcode;
 }
 
@@ -62,14 +62,14 @@ static void test_withlock(abts_case *tc, void *data)
     rv = apr_file_open(&file, TESTFILE, APR_WRITE|APR_CREATE, 
                        APR_OS_DEFAULT, p);
     apr_assert_success(tc, "Could not create file.", rv);
-    abts_ptr_notnull(tc, file);
+    ABTS_PTR_NOTNULL(tc, file);
 
     rv = apr_file_lock(file, APR_FLOCK_EXCLUSIVE);
     apr_assert_success(tc, "Could not lock the file.", rv);
-    abts_ptr_notnull(tc, file);
+    ABTS_PTR_NOTNULL(tc, file);
 
     code = launch_reader(tc);
-    abts_int_equal(tc, FAILED_READ, code);
+    ABTS_INT_EQUAL(tc, FAILED_READ, code);
 
     (void) apr_file_close(file);
 }
@@ -79,7 +79,7 @@ static void test_withoutlock(abts_case *tc, void *data)
     int code;
     
     code = launch_reader(tc);
-    abts_int_equal(tc, SUCCESSFUL_READ, code);
+    ABTS_INT_EQUAL(tc, SUCCESSFUL_READ, code);
 }
 
 static void remove_lockfile(abts_case *tc, void *data)

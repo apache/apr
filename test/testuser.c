@@ -41,7 +41,7 @@ static void username(abts_case *tc, void *data)
    
     apr_assert_success(tc, "apr_uid_name_get failed",
                        apr_uid_name_get(&uname, uid, p));
-    abts_ptr_notnull(tc, uname);
+    ABTS_PTR_NOTNULL(tc, uname);
 
     apr_assert_success(tc, "apr_uid_get failed",
                        apr_uid_get(&retreived_uid, &retreived_gid, uname, p));
@@ -57,10 +57,10 @@ static void username(abts_case *tc, void *data)
          * also return apr_gid_t values, which was bogus.
          */
         if (!gid) {
-            abts_not_impl(tc, "Groups from apr_uid_current");
+            ABTS_NOT_IMPL(tc, "Groups from apr_uid_current");
         }
         else {
-            abts_not_impl(tc, "Groups from apr_uid_get");
+            ABTS_NOT_IMPL(tc, "Groups from apr_uid_get");
         }        
     }
     else {
@@ -84,7 +84,7 @@ static void groupname(abts_case *tc, void *data)
 
     apr_assert_success(tc, "apr_gid_name_get failed",
                        apr_gid_name_get(&gname, gid, p));
-    abts_ptr_notnull(tc, gname);
+    ABTS_PTR_NOTNULL(tc, gname);
 
     apr_assert_success(tc, "apr_gid_get failed",
                        apr_gid_get(&retreived_gid, gname, p));
@@ -95,7 +95,7 @@ static void groupname(abts_case *tc, void *data)
 #else
 static void users_not_impl(abts_case *tc, void *data)
 {
-    abts_not_impl(tc, "Users not implemented on this platform");
+    ABTS_NOT_IMPL(tc, "Users not implemented on this platform");
 }
 #endif
 

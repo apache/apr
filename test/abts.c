@@ -193,7 +193,7 @@ void abts_log_message(const char *fmt, ...)
     }
 }
 
-void abts_int_equal(abts_case *tc, const int expected, const int actual)
+void abts_int_equal(abts_case *tc, const int expected, const int actual, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -202,12 +202,12 @@ void abts_int_equal(abts_case *tc, const int expected, const int actual)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "expected <%d>, but saw <%d>\n", expected, actual);
+        fprintf(stderr, "Line %d: expected <%d>, but saw <%d>\n", lineno, expected, actual);
         fflush(stderr);
     }
 }
 
-void abts_int_nequal(abts_case *tc, const int expected, const int actual)
+void abts_int_nequal(abts_case *tc, const int expected, const int actual, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -216,12 +216,12 @@ void abts_int_nequal(abts_case *tc, const int expected, const int actual)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "expected <%d>, but saw <%d>\n", expected, actual);
+        fprintf(stderr, "Line %d: expected <%d>, but saw <%d>\n", lineno, expected, actual);
         fflush(stderr);
     }
 }
 
-void abts_str_equal(abts_case *tc, const char *expected, const char *actual)
+void abts_str_equal(abts_case *tc, const char *expected, const char *actual, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -230,13 +230,13 @@ void abts_str_equal(abts_case *tc, const char *expected, const char *actual)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "expected <%s>, but saw <%s>\n", expected, actual);
+        fprintf(stderr, "Line %d: expected <%s>, but saw <%s>\n", lineno, expected, actual);
         fflush(stderr);
     }
 }
 
 void abts_str_nequal(abts_case *tc, const char *expected, const char *actual,
-                       size_t n)
+                       size_t n, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -245,12 +245,12 @@ void abts_str_nequal(abts_case *tc, const char *expected, const char *actual,
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "expected <%s>, but saw <%s>\n", expected, actual);
+        fprintf(stderr, "Line %d: expected <%s>, but saw <%s>\n", lineno, expected, actual);
         fflush(stderr);
     }
 }
 
-void abts_ptr_notnull(abts_case *tc, const void *ptr)
+void abts_ptr_notnull(abts_case *tc, const void *ptr, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -259,12 +259,12 @@ void abts_ptr_notnull(abts_case *tc, const void *ptr)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "Expected NULL, but saw <%p>", ptr);
+        fprintf(stderr, "Line %d: Expected NULL, but saw <%p>", lineno, ptr);
         fflush(stderr);
     }
 }
  
-void abts_ptr_equal(abts_case *tc, const void *expected, const void *actual)
+void abts_ptr_equal(abts_case *tc, const void *expected, const void *actual, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -273,24 +273,24 @@ void abts_ptr_equal(abts_case *tc, const void *expected, const void *actual)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "expected <%p>, but saw <%p>\n", expected, actual);
+        fprintf(stderr, "Line %d: expected <%p>, but saw <%p>\n", lineno, expected, actual);
         fflush(stderr);
     }
 }
 
-void abts_fail(abts_case *tc, const char *message)
+void abts_fail(abts_case *tc, const char *message, int lineno)
 {
     update_status();
     if (tc->failed) return;
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "%s\n", message);
+        fprintf(stderr, "Line %d: %s\n", lineno, message);
         fflush(stderr);
     }
 }
  
-void abts_assert(abts_case *tc, const char *message, int condition)
+void abts_assert(abts_case *tc, const char *message, int condition, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -299,12 +299,12 @@ void abts_assert(abts_case *tc, const char *message, int condition)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "%s", message);
+        fprintf(stderr, "Line %d: %s", lineno, message);
         fflush(stderr);
     }
 }
 
-void abts_true(abts_case *tc, int condition)
+void abts_true(abts_case *tc, int condition, int lineno)
 {
     update_status();
     if (tc->failed) return;
@@ -313,18 +313,18 @@ void abts_true(abts_case *tc, int condition)
 
     tc->failed = TRUE;
     if (verbose) {
-        fprintf(stderr, "Condition is false, but expected true");
+        fprintf(stderr, "Line %d: Condition is false, but expected true", lineno);
         fflush(stderr);
     }
 }
 
-void abts_not_impl(abts_case *tc, const char *message)
+void abts_not_impl(abts_case *tc, const char *message, int lineno)
 {
     update_status();
 
     tc->suite->not_impl++;
     if (verbose) {
-        fprintf(stderr, "%s", message);
+        fprintf(stderr, "Line %d: %s", lineno, message);
         fflush(stderr);
     }
 }

@@ -61,7 +61,7 @@ static void hash_make(abts_case *tc, void *data)
     apr_hash_t *h = NULL;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 }
 
 static void hash_set(abts_case *tc, void *data)
@@ -70,11 +70,11 @@ static void hash_set(abts_case *tc, void *data)
     char *result = NULL;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "value", result);
+    ABTS_STR_EQUAL(tc, "value", result);
 }
 
 static void hash_reset(abts_case *tc, void *data)
@@ -83,15 +83,15 @@ static void hash_reset(abts_case *tc, void *data)
     char *result = NULL;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "value", result);
+    ABTS_STR_EQUAL(tc, "value", result);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "new");
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "new", result);
+    ABTS_STR_EQUAL(tc, "new", result);
 }
 
 static void same_value(abts_case *tc, void *data)
@@ -100,15 +100,15 @@ static void same_value(abts_case *tc, void *data)
     char *result = NULL;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "same1", APR_HASH_KEY_STRING, "same");
     result = apr_hash_get(h, "same1", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "same", result);
+    ABTS_STR_EQUAL(tc, "same", result);
 
     apr_hash_set(h, "same2", APR_HASH_KEY_STRING, "same");
     result = apr_hash_get(h, "same2", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "same", result);
+    ABTS_STR_EQUAL(tc, "same", result);
 }
 
 static unsigned int hash_custom( const char *key, apr_ssize_t *klen)
@@ -127,15 +127,15 @@ static void same_value_custom(abts_case *tc, void *data)
     char *result = NULL;
 
     h = apr_hash_make_custom(p, hash_custom);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "same1", 5, "same");
     result = apr_hash_get(h, "same1", 5);
-    abts_str_equal(tc, "same", result);
+    ABTS_STR_EQUAL(tc, "same", result);
 
     apr_hash_set(h, "same2", 5, "same");
     result = apr_hash_get(h, "same2", 5);
-    abts_str_equal(tc, "same", result);
+    ABTS_STR_EQUAL(tc, "same", result);
 }
 
 static void key_space(abts_case *tc, void *data)
@@ -144,11 +144,11 @@ static void key_space(abts_case *tc, void *data)
     char *result = NULL;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "key with space", APR_HASH_KEY_STRING, "value");
     result = apr_hash_get(h, "key with space", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "value", result);
+    ABTS_STR_EQUAL(tc, "value", result);
 }
 
 /* This is kind of a hack, but I am just keeping an existing test.  This is
@@ -161,7 +161,7 @@ static void hash_traverse(abts_case *tc, void *data)
     char str[8196];
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "OVERWRITE", APR_HASH_KEY_STRING, "should not see this");
     apr_hash_set(h, "FOO3", APR_HASH_KEY_STRING, "bar3");
@@ -174,7 +174,7 @@ static void hash_traverse(abts_case *tc, void *data)
     apr_hash_set(h, "OVERWRITE", APR_HASH_KEY_STRING, "Overwrite key");
 
     dump_hash(p, h, str);
-    abts_str_equal(tc, "Key FOO1 (4) Value bar1\n"
+    ABTS_STR_EQUAL(tc, "Key FOO1 (4) Value bar1\n"
                           "Key FOO2 (4) Value bar2\n"
                           "Key OVERWRITE (9) Value Overwrite key\n"
                           "Key FOO3 (4) Value bar3\n"
@@ -195,7 +195,7 @@ static void summation_test(abts_case *tc, void *data)
     int i, j, *val, *key;
 
     h =apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     sumKeys = 0;
     sumVal = 0;
@@ -214,9 +214,9 @@ static void summation_test(abts_case *tc, void *data)
     }
 
     sum_hash(p, h, &i, &trySumKey, &trySumVal);
-    abts_int_equal(tc, 100, i);
-    abts_int_equal(tc, sumVal, trySumVal);
-    abts_int_equal(tc, sumKeys, trySumKey);
+    ABTS_INT_EQUAL(tc, 100, i);
+    ABTS_INT_EQUAL(tc, sumVal, trySumVal);
+    ABTS_INT_EQUAL(tc, sumKeys, trySumKey);
 }
 
 static void delete_key(abts_case *tc, void *data)
@@ -225,24 +225,24 @@ static void delete_key(abts_case *tc, void *data)
     char *result = NULL;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
     apr_hash_set(h, "key2", APR_HASH_KEY_STRING, "value2");
 
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "value", result);
+    ABTS_STR_EQUAL(tc, "value", result);
 
     result = apr_hash_get(h, "key2", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "value2", result);
+    ABTS_STR_EQUAL(tc, "value2", result);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, NULL);
 
     result = apr_hash_get(h, "key", APR_HASH_KEY_STRING);
-    abts_ptr_equal(tc, NULL, result);
+    ABTS_PTR_EQUAL(tc, NULL, result);
 
     result = apr_hash_get(h, "key2", APR_HASH_KEY_STRING);
-    abts_str_equal(tc, "value2", result);
+    ABTS_STR_EQUAL(tc, "value2", result);
 }
 
 static void hash_count_0(abts_case *tc, void *data)
@@ -251,10 +251,10 @@ static void hash_count_0(abts_case *tc, void *data)
     int count;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     count = apr_hash_count(h);
-    abts_int_equal(tc, 0, count);
+    ABTS_INT_EQUAL(tc, 0, count);
 }
 
 static void hash_count_1(abts_case *tc, void *data)
@@ -263,12 +263,12 @@ static void hash_count_1(abts_case *tc, void *data)
     int count;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "key", APR_HASH_KEY_STRING, "value");
 
     count = apr_hash_count(h);
-    abts_int_equal(tc, 1, count);
+    ABTS_INT_EQUAL(tc, 1, count);
 }
 
 static void hash_count_5(abts_case *tc, void *data)
@@ -277,7 +277,7 @@ static void hash_count_5(abts_case *tc, void *data)
     int count;
 
     h = apr_hash_make(p);
-    abts_ptr_notnull(tc, h);
+    ABTS_PTR_NOTNULL(tc, h);
 
     apr_hash_set(h, "key1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(h, "key2", APR_HASH_KEY_STRING, "value2");
@@ -286,7 +286,7 @@ static void hash_count_5(abts_case *tc, void *data)
     apr_hash_set(h, "key5", APR_HASH_KEY_STRING, "value5");
 
     count = apr_hash_count(h);
-    abts_int_equal(tc, 5, count);
+    ABTS_INT_EQUAL(tc, 5, count);
 }
 
 static void overlay_empty(abts_case *tc, void *data)
@@ -299,8 +299,8 @@ static void overlay_empty(abts_case *tc, void *data)
 
     base = apr_hash_make(p);
     overlay = apr_hash_make(p);
-    abts_ptr_notnull(tc, base);
-    abts_ptr_notnull(tc, overlay);
+    ABTS_PTR_NOTNULL(tc, base);
+    ABTS_PTR_NOTNULL(tc, overlay);
 
     apr_hash_set(base, "key1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(base, "key2", APR_HASH_KEY_STRING, "value2");
@@ -311,10 +311,10 @@ static void overlay_empty(abts_case *tc, void *data)
     result = apr_hash_overlay(p, overlay, base);
 
     count = apr_hash_count(result);
-    abts_int_equal(tc, 5, count);
+    ABTS_INT_EQUAL(tc, 5, count);
 
     dump_hash(p, result, str);
-    abts_str_equal(tc, "Key key1 (4) Value value1\n"
+    ABTS_STR_EQUAL(tc, "Key key1 (4) Value value1\n"
                           "Key key2 (4) Value value2\n"
                           "Key key3 (4) Value value3\n"
                           "Key key4 (4) Value value4\n"
@@ -332,8 +332,8 @@ static void overlay_2unique(abts_case *tc, void *data)
 
     base = apr_hash_make(p);
     overlay = apr_hash_make(p);
-    abts_ptr_notnull(tc, base);
-    abts_ptr_notnull(tc, overlay);
+    ABTS_PTR_NOTNULL(tc, base);
+    ABTS_PTR_NOTNULL(tc, overlay);
 
     apr_hash_set(base, "base1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(base, "base2", APR_HASH_KEY_STRING, "value2");
@@ -350,13 +350,13 @@ static void overlay_2unique(abts_case *tc, void *data)
     result = apr_hash_overlay(p, overlay, base);
 
     count = apr_hash_count(result);
-    abts_int_equal(tc, 10, count);
+    ABTS_INT_EQUAL(tc, 10, count);
 
     dump_hash(p, result, str);
     /* I don't know why these are out of order, but they are.  I would probably
      * consider this a bug, but others should comment.
      */
-    abts_str_equal(tc, "Key base5 (5) Value value5\n"
+    ABTS_STR_EQUAL(tc, "Key base5 (5) Value value5\n"
                           "Key overlay1 (8) Value value1\n"
                           "Key overlay2 (8) Value value2\n"
                           "Key overlay3 (8) Value value3\n"
@@ -377,7 +377,7 @@ static void overlay_same(abts_case *tc, void *data)
     char str[8196];
 
     base = apr_hash_make(p);
-    abts_ptr_notnull(tc, base);
+    ABTS_PTR_NOTNULL(tc, base);
 
     apr_hash_set(base, "base1", APR_HASH_KEY_STRING, "value1");
     apr_hash_set(base, "base2", APR_HASH_KEY_STRING, "value2");
@@ -388,13 +388,13 @@ static void overlay_same(abts_case *tc, void *data)
     result = apr_hash_overlay(p, base, base);
 
     count = apr_hash_count(result);
-    abts_int_equal(tc, 5, count);
+    ABTS_INT_EQUAL(tc, 5, count);
 
     dump_hash(p, result, str);
     /* I don't know why these are out of order, but they are.  I would probably
      * consider this a bug, but others should comment.
      */
-    abts_str_equal(tc, "Key base5 (5) Value value5\n"
+    ABTS_STR_EQUAL(tc, "Key base5 (5) Value value5\n"
                           "Key base1 (5) Value value1\n"
                           "Key base2 (5) Value value2\n"
                           "Key base3 (5) Value value3\n"

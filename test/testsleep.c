@@ -38,8 +38,8 @@ static void sleep_one(abts_case *tc, void *data)
      * we should just subtract that out.
      */
     timediff = posttime - pretime - SLEEP_INTERVAL;
-    abts_true(tc, timediff >= 0);
-    abts_true(tc, timediff <= 1);
+    ABTS_TRUE(tc, timediff >= 0);
+    ABTS_TRUE(tc, timediff <= 1);
 }
 
 abts_suite *testsleep(abts_suite *suite)

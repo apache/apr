@@ -35,7 +35,7 @@ static apr_off_t eightGb = APR_INT64_C(2) << 32;
 
 static int madefile = 0;
 
-#define PRECOND if (!madefile) abts_not_impl(tc, "Large file tests not enabled")
+#define PRECOND if (!madefile) ABTS_NOT_IMPL(tc, "Large file tests not enabled")
 
 #define TESTDIR "lfstests"
 #define TESTFILE "large.bin"
@@ -67,7 +67,7 @@ static void test_open(abts_case *tc, void *data)
         || rv == EFBIG
 #endif
         ) {
-        abts_not_impl(tc, "Creation of large file (limited by rlimit or fs?)");
+        ABTS_NOT_IMPL(tc, "Creation of large file (limited by rlimit or fs?)");
     } 
     else {
         apr_assert_success(tc, "truncate file to 8gb", rv);
@@ -89,7 +89,7 @@ static void test_reopen(abts_case *tc, void *data)
     apr_assert_success(tc, "file_info_get failed",
                        apr_file_info_get(&finfo, APR_FINFO_NORM, fh));
     
-    abts_assert(tc, "file_info_get gave incorrect size",
+    ABTS_ASSERT(tc, "file_info_get gave incorrect size",
              finfo.size == eightGb);
 
     apr_assert_success(tc, "re-close large file", apr_file_close(fh));
@@ -104,7 +104,7 @@ static void test_stat(abts_case *tc, void *data)
     apr_assert_success(tc, "stat large file", 
                        apr_stat(&finfo, TESTFN, APR_FINFO_NORM, p));
     
-    abts_assert(tc, "stat gave incorrect size", finfo.size == eightGb);
+    ABTS_ASSERT(tc, "stat gave incorrect size", finfo.size == eightGb);
 }
 
 static void test_readdir(abts_case *tc, void *data)
@@ -123,7 +123,7 @@ static void test_readdir(abts_case *tc, void *data)
         rv = apr_dir_read(&finfo, APR_FINFO_NORM, dh);
         
         if (rv == APR_SUCCESS && strcmp(finfo.name, TESTFILE) == 0) {
-            abts_assert(tc, "apr_dir_read gave incorrect size for large file", 
+            ABTS_ASSERT(tc, "apr_dir_read gave incorrect size for large file", 
                      finfo.size == eightGb);
         }
 
@@ -156,7 +156,7 @@ static void test_append(abts_case *tc, void *data)
     apr_assert_success(tc, "file_info_get failed",
                        apr_file_info_get(&finfo, APR_FINFO_NORM, fh));
     
-    abts_assert(tc, "file_info_get gave incorrect size",
+    ABTS_ASSERT(tc, "file_info_get gave incorrect size",
              finfo.size == eightGb + strlen(TESTSTR));
 
     apr_assert_success(tc, "close 8Gb file", apr_file_close(fh));
@@ -176,15 +176,15 @@ static void test_seek(abts_case *tc, void *data)
     pos = 0;
     apr_assert_success(tc, "relative seek to end", 
                        apr_file_seek(fh, APR_END, &pos));
-    abts_assert(tc, "seek to END gave 8Gb", pos == eightGb);
+    ABTS_ASSERT(tc, "seek to END gave 8Gb", pos == eightGb);
     
     pos = eightGb;
     apr_assert_success(tc, "seek to 8Gb", apr_file_seek(fh, APR_SET, &pos));
-    abts_assert(tc, "seek gave 8Gb offset", pos == eightGb);
+    ABTS_ASSERT(tc, "seek gave 8Gb offset", pos == eightGb);
 
     pos = 0;
     apr_assert_success(tc, "relative seek to 0", apr_file_seek(fh, APR_CUR, &pos));
-    abts_assert(tc, "relative seek gave 8Gb offset", pos == eightGb);
+    ABTS_ASSERT(tc, "relative seek gave 8Gb offset", pos == eightGb);
 
     apr_file_close(fh);
 }
@@ -201,7 +201,7 @@ static void test_write(abts_case *tc, void *data)
 
     apr_assert_success(tc, "seek to 8Gb - 4", 
                        apr_file_seek(fh, APR_SET, &pos));
-    abts_assert(tc, "seek gave 8Gb-4 offset", pos == eightGb - 4);
+    ABTS_ASSERT(tc, "seek gave 8Gb-4 offset", pos == eightGb - 4);
 
     apr_assert_success(tc, "write magic string to 8Gb-4",
                        apr_file_write_full(fh, "FISH", 4, NULL));
@@ -229,13 +229,13 @@ static void test_mmap(abts_case *tc, void *data)
 
     apr_assert_success(tc, "close file", apr_file_close(fh));
 
-    abts_assert(tc, "mapped a 16K block", map->size == len);
+    ABTS_ASSERT(tc, "mapped a 16K block", map->size == len);
     
     apr_assert_success(tc, "get pointer into mmaped region",
                        apr_mmap_offset(&ptr, map, len - 4));
-    abts_assert(tc, "pointer was not NULL", ptr != NULL);
+    ABTS_ASSERT(tc, "pointer was not NULL", ptr != NULL);
 
-    abts_assert(tc, "found the magic string", memcmp(ptr, "FISH", 4) == 0);
+    ABTS_ASSERT(tc, "found the magic string", memcmp(ptr, "FISH", 4) == 0);
 
     apr_assert_success(tc, "delete mmap handle", apr_mmap_delete(map));
 }
@@ -249,14 +249,14 @@ static void test_format(abts_case *tc, void *data)
 
     off = apr_atoi64(apr_off_t_toa(p, eightGb));
 
-    abts_assert(tc, "apr_atoi64 parsed apr_off_t_toa result incorrectly",
+    ABTS_ASSERT(tc, "apr_atoi64 parsed apr_off_t_toa result incorrectly",
              off == eightGb);
 }
 
 #else
 static void test_nolfs(abts_case *tc, void *data)
 {
-    abts_not_impl(tc, "Large Files not supported");
+    ABTS_NOT_IMPL(tc, "Large Files not supported");
 }
 #endif
 
