@@ -108,8 +108,9 @@ AC_ARG_WITH(libtool, [--with-libtool   use libtool to link the library],
       so_ext="o"
     fi ], [
       lt_compile="\$(LIBTOOL) --mode=compile \$(LTFLAGS) \$(COMPILE) -c \$< && touch $@"
-      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@"
+      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@ -rpath \$(libdir) \$\$objects"
       so_ext="lo"
+      lib_target="\$(libdir) \$\$objects"
     ] )
 AC_SUBST(lt_compile)
 AC_SUBST(link)
