@@ -161,6 +161,49 @@ undefine([AC_TYPE_NAME])dnl
 undefine([AC_CV_NAME])dnl
 ])
 
+dnl
+dnl check for gethostbyname() which handles numeric address strings
+dnl
+
+AC_DEFUN(APR_CHECK_GETHOSTBYNAME_NAS,[
+  AC_CACHE_CHECK(for gethostbyname() which handles numeric address strings, ac_cv_gethostbyname_nas,[
+  AC_TRY_RUN( [
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#if HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+void main(void) {
+    struct hostent *he = gethostbyname("127.0.0.1");
+    if (he == NULL) {
+        exit(1);
+    }
+    else {
+        exit(0);
+    }
+}
+],[
+  ac_cv_gethostbyname_nas="yes"
+],[
+  ac_cv_gethostbyname_nas="no"
+],[
+  ac_cv_gethostbyname_nas="yes"
+])])
+if test "$ac_cv_gethostbyname_nas" = "yes"; then
+  AC_DEFINE(GETHOSTBYNAME_HANDLES_NAS, 1, [Define if gethostbyname() handles nnn.nnn.nnn.nnn])
+fi
+])
+
 dnl 
 dnl check for socklen_t, fall back to unsigned int
 dnl
@@ -195,6 +238,24 @@ dnl the way we might want it to.
 
 AC_DEFUN(AC_PROG_RANLIB_NC,
 [AC_CHECK_PROG(RANLIB, ranlib, ranlib, true)])
+
+AC_DEFUN(APR_EBCDIC,[
+  AC_CACHE_CHECK([whether system uses EBCDIC],ac_cv_ebcdic,[
+  AC_TRY_RUN( [
+int main(void) { 
+  return (unsigned char)'A' != (unsigned char)0xC1; 
+} 
+],[
+  ac_cv_ebcdic="yes"
+],[
+  ac_cv_ebcdic="no"
+],[
+  ac_cv_ebcdic="no"
+])])
+  if test "$ac_cv_ebcdic" = "yes"; then
+    AC_DEFINE(CHARSET_EBCDIC,, [Define if system uses EBCDIC])
+  fi
+])
 
 sinclude(threads.m4)
 sinclude(hints.m4)

@@ -170,6 +170,14 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
     struct hostent *hp;
 
     if (hostname != NULL) {
+#ifndef GETHOSTBYNAME_HANDLES_NAS
+        if (*hostname >= '0' && *hostname <= '9' &&
+            strspn(hostname, "0123456789.") == strlen(hostname)) {
+            sock->remote_addr->sin_addr.s_addr = inet_addr(hostname);
+            sock->addr_len = sizeof(*sock->remote_addr);
+        }
+        else {
+#endif
         hp = gethostbyname(hostname);
 
         if ((sock->socketdes < 0) || (!sock->remote_addr)) {
@@ -182,6 +190,9 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
         memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
 
         sock->addr_len = sizeof(*sock->remote_addr);
+#ifndef GETHOSTBYNAME_HANDLES_NAS
+        }
+#endif
     }
 
     if ((connect(sock->socketdes, (const struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) &&

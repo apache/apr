@@ -33,6 +33,27 @@ dnl    PTHREAD_FLAGS="-D_REENTRANT -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=199506 
     CPPFLAGS="$CPPFLAGS $PTHREAD_FLAGS"
   fi
 ])dnl
+
+AC_DEFUN(APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS, [
+AC_CACHE_CHECK(whether pthread_getspecific takes two arguments, ac_cv_pthread_getspecific_two_args,[
+AC_TRY_COMPILE([
+#include <pthread.h>
+],[
+pthread_key_t key;
+void *tmp;
+pthread_getspecific(key,&tmp);
+],[
+    ac_cv_pthread_getspecific_two_args=yes
+],[
+    ac_cv_pthread_getspecific_two_args=no
+])
+])
+
+if test "$ac_cv_pthread_getspecific_two_args" = "yes"; then
+  AC_DEFINE(PTHREAD_GETSPECIFIC_TAKES_TWO_ARGS, 1, [Define if pthread_getspecific() has two args])
+fi
+
+])dnl
 dnl
 dnl PTHREADS_CHECK_COMPILE
 dnl
