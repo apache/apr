@@ -456,6 +456,15 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
 
     /* FreeBSD can send the headers/footers as part of the system call */
     do {
+        if (sock->netmask & APR_INCOMPLETE_WRITE) {
+            apr_status_t arv;
+            sock->netmask &= ~APR_INCOMPLETE_WRITE;
+            arv = apr_wait_for_io_or_timeout(sock, 0);
+            if (arv != APR_SUCCESS) {
+                *len = 0;
+                return arv;
+            }
+        }
         if (bytes_to_send) {
             /* We won't dare call sendfile() if we don't have
              * header or file bytes to send because bytes_to_send == 0
@@ -468,18 +477,21 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                           &headerstruct, /* Headers/footers */
                           &nbytes,       /* number of bytes written */
                           flags);        /* undefined, set to 0 */
-            /* FreeBSD's sendfile can return -1/EAGAIN even if it
-             * sent bytes.  Sanitize the result so we get normal EAGAIN
-             * semantics w.r.t. bytes sent.
-             */
-            if (rv == -1 && errno == EAGAIN && nbytes) {
-                rv = 0;
+
+            if (rv == -1 && errno == EAGAIN) {
+                if (sock->timeout) {
+                    sock->netmask |= APR_INCOMPLETE_WRITE;
+                }
+                /* FreeBSD's sendfile can return -1/EAGAIN even if it
+                 * sent bytes.  Sanitize the result so we get normal EAGAIN
+                 * semantics w.r.t. bytes sent.
+                 */
+                if (nbytes) {
+                    /* normal exit for a big file & non-blocking io */
+                    (*len) = nbytes;
+                    return APR_SUCCESS;
+                }
             }
-            
-            /* ??? performance: if rv == 0 is the most common case, 
-             *     we may want to return here and avoid a potential 
-             *     i-cache miss.
-             */
         }    
         else {
             /* just trailer bytes... use writev()

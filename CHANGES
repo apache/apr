@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Reduce the number of apr_sendfile calls on FreeBSD by remembering
+     when the kernel tells us the next one will block.  [Greg Ames]
+
   *) To support modules like PHP, which implement their own
      loaded extensions, Darwin needs to place their public
      symbols in the global table. [Marko Karppinen <markonen@php.net>,
