@@ -522,7 +522,7 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retc
 	p->sub_pools = new_pool;
     }
     else {
-        permanent_pool = p;
+        permanent_pool = new_pool;
     }
 
 #if APR_HAS_THREADS
