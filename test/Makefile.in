@@ -8,7 +8,10 @@ INCDIR=../include
 INCLUDES=-I$(INCDIR)
 MKDEP=../helpers/mkdep.sh
 
-TARGETS= testfile@EXEEXT@ \
+TARGETS= client@EXEEXT@ \
+	sendfile@EXEEXT@ \
+	server@EXEEXT@ \
+	testfile@EXEEXT@ \
 	testflock@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
@@ -22,7 +25,7 @@ TARGETS= testfile@EXEEXT@ \
 	testdso@EXEEXT@ \
 	testoc@EXEEXT@ \
 	testuuid@EXEEXT@ \
-	occhild@EXEEXT@ \
+	occhild.so \
 	mod_test.so
 
 OBJS= testfile.o \
@@ -75,10 +78,16 @@ testproc@EXEEXT@: testproc.o
 testthread@EXEEXT@: testthread.o
 	$(CC) $(CFLAGS) -o testthread@EXEEXT@ testthread.o $(LDFLAGS)
 
-testsock@EXEEXT@: testsock.o client.o server.o sendfile.o
+testsock@EXEEXT@: testsock.o client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@
 	$(CC) $(CFLAGS) -o testsock@EXEEXT@ testsock.o $(LDFLAGS)
+
+client@EXEEXT@: client.o
 	$(CC) $(CFLAGS) -o server@EXEEXT@ server.o $(LDFLAGS) 
+
+server@EXEEXT@: server.o sendfile.o
 	$(CC) $(CFLAGS) -o client@EXEEXT@ client.o $(LDFLAGS)
+
+sendfile@EXEEXT@: sendfile.o
 	$(CC) $(CFLAGS) -o sendfile@EXEEXT@ sendfile.o $(LDFLAGS)
 
 testtime@EXEEXT@: testtime.o
@@ -97,7 +106,7 @@ testuuid@EXEEXT@: testuuid.o
 	$(CC) $(CFLAGS) -o testuuid@EXEEXT@ testuuid.o $(LDFLAGS)
 
 clean:
-	$(RM) -f *.o *.a *.so $(TARGETS) testflock.tmp
+	$(RM) -f *.o *.a $(TARGETS) testflock.tmp
 
 distclean: clean
 	-$(RM) -f Makefile
