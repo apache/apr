@@ -75,6 +75,7 @@ struct file_t {
     FILESTATUS3 status;
     int validstatus;
     int eof_hit;
+    ap_int32_t flags;
     
     /* Stuff for buffered mode */
     char *buffer;
