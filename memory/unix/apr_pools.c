@@ -100,6 +100,16 @@
 
 /* Details of the debugging options can now be found in the developer
  * section of the documentaion. */
+
+/* magic numbers --- min free bytes to consider a free ap_pool_t block useable,
+ * and the min amount to allocate if we have to go to malloc() */
+
+#ifndef BLOCK_MINFREE
+#define BLOCK_MINFREE 4096
+#endif
+#ifndef BLOCK_MINALLOC
+#define BLOCK_MINALLOC 8192
+#endif
  
 #ifdef POOL_DEBUG
 /* first do some option checking... */
