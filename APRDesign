@@ -128,7 +128,7 @@ Those structures are then typedef'ed in an external header file.  For example
 in file_io/unix/fileio.h:
 
     struct ap_file_t {
-        ap_context_t *cntxt;
+        apr_pool_t *cntxt;
         int filedes;
         FILE *filehand;
         ...
@@ -145,8 +145,13 @@ The only exception to the incomplete type rule can be found in apr_portable.h.
 This file defines the native types for each platform.  Using these types, it
 is possible to extract native types for any APR type.
 
-You may notice the ap_context_t field.  All APR types have this field.  This
-type is used to allocate memory within APR.
+You may notice the apr_pool_t field.  Most APR types have this field.  This
+type is used to allocate memory within APR.  Any APR type that has this
+field should place this field first.  If it is important to retrieve the
+pool from an APR variable, it is possible to use the macro APR_GET_POOL to
+accomplish this.  This macro will only work on types that actually have
+a pool in them as the first field.  On any other type, this Macro will cause
+a seg fault as soon as the pool is used.
 
 New Function
 
