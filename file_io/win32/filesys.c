@@ -170,23 +170,21 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
         apr_wchar_t *ignored;
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
+        apr_wchar_t wroot[APR_PATH_MAX];
         /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
          * as if that is useful for anything.
          */
-        {
-            apr_wchar_t wroot[APR_PATH_MAX];
-            if (rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
-                                               / sizeof(apr_wchar_t), root))
-                return rv;
-            if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
-                return apr_get_os_error();
-        }
-        {
-            char path[APR_PATH_MAX];
-            if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
-                return rv;
-            *rootpath = apr_pstrdup(p, path);
-        }
+        if (rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
+                                           / sizeof(apr_wchar_t), root))
+            return rv;
+        if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
+            return apr_get_os_error();
+
+        /* Borrow wroot as a char buffer (twice as big as necessary) 
+         */
+        if ((rv = unicode_to_utf8_path((char*)wroot, sizeof(wroot), wpath)))
+            return rv;
+        *rootpath = apr_pstrdup(p, (char*)wroot);
     }
     else
 #endif
