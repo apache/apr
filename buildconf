@@ -98,13 +98,13 @@ rm -f aclocal.m4
 # Generate the autoconf header and ./configure
 #
 echo "Creating include/arch/unix/apr_private.h.in ..."
-autoheader
+${AUTOHEADER:-autoheader}
 
 echo "Creating configure ..."
 ### do some work to toss config.cache?
-autoconf
+${AUTOCONF:-autoconf}
 
 # Remove autoconf 2.5x's cache directory
-rm -rf autom4te.cache
+rm -rf autom4te*.cache
 
 exit 0
