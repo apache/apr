@@ -65,7 +65,7 @@
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bread;
-    int lasterror;
+    int rv;
 
     if (*nbytes <= 0) {
         *nbytes = 0;
@@ -86,15 +86,15 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             thefile->dataRead = 0;
         }
 
-        lasterror = 0;
-        while (lasterror == 0 && size > 0) {
+        rv = 0;
+        while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
-                lasterror = ReadFile(thefile->filehand, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead, NULL ) ? 0 : GetLastError();
+                rv = ReadFile(thefile->filehand, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead, NULL ) ? 0 : GetLastError();
 
                 if (thefile->dataRead == 0) {
-                    if (lasterror == 0) {
+                    if (rv == 0) {
                         thefile->eof_hit = TRUE;
-                        lasterror = APR_EOF;
+                        rv = APR_EOF;
                     }
                     break;
                 }
@@ -112,7 +112,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
         *nbytes = pos - (char *)buf;
         if (*nbytes) {
-            lasterror = 0;
+            rv = 0;
         }
         ap_unlock(thefile->mutex);
     } else {
@@ -127,17 +127,17 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }
 
         *nbytes = 0;
-        lasterror = GetLastError();
-        if (lasterror == ERROR_BROKEN_PIPE) {
+        rv = GetLastError();
+        if (rv == ERROR_BROKEN_PIPE) {
             /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
             return APR_SUCCESS;
-        } else if (lasterror == ERROR_NO_DATA) {
+        } else if (rv == ERROR_NO_DATA) {
             /* Receive this error on a read to a pipe in nonblocking mode */
             return APR_EAGAIN;
         }
     }
 
-    return lasterror;
+    return rv;
 }
 
 ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
