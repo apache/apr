@@ -1,0 +1,29 @@
+This is just a small list of things yet to be done, or things
+that we may want/need to consider.  I haven't put it in the
+STATUS file for APR as none of these can be considered
+showstoppers for the time being.
+david - 28 May 2001
+
+- we need to add dynamic loading ability for memory
+  systems.  As to how it should be done this needs to be
+  looked at.  Some known issues include 
+    o differing arguments for create functions
+
+  Just to clarify why this will be very cool if we can get
+  it working, we give the user the ability to use 3rd party modules
+  that can actually have almost total control over how the
+  memory is allocated. Not sure I know of other libraries where
+  this is possible.
+
+- given the problems that can occur when trying to find 
+  alloc/free problems we should probably have a special debug
+  memory system that records everything it does and any
+  other information we think is useful.
+
+- in addition to the debugging system, we need to look at
+  methods of checking memory allocations to ensure we're
+  behaving when we have the ASSERT_MEMORY flag turned on.
+  The pools in 1.3 had code from dean and Roy, Greg has added
+  some special stuff for pools under Linux on 2.0, so we just
+  need some ideas
+
