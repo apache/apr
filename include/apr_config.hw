@@ -165,6 +165,54 @@ typedef enum {
 } ap_oslevel_e;
 
 
+typedef enum {
+    DLL_WINBASEAPI = 0,    // kernel32 From WinBase.h
+    DLL_WINADVAPI = 1,     // advapi32 From WinBase.h
+    DLL_WINSOCKAPI = 2,    // mswsock  From WinSock.h
+    DLL_WINSOCK2API = 3,   // ws2_32   From WinSock2.h
+    DLL_defined = 4        // must define as last idx_ + 1
+} ap_dlltoken_e;
+
+FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char *fnName, int ordinal);
+
+/* The LateFunctionName call WILL fault if the function cannot be loaded */
+
+#define DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
+    typedef rettype (calltype *fpt##fn) args; \
+    static fpt##fn pfn##fn; \
+    __inline rettype Late##fn args \
+    {   if (!pfn##fn) \
+            pfn##fn = (fpt##fn) LoadLateDllFunc(lib, #fn, ord); \
+        return (*(pfn##fn)) names; }; \
+
+/* Provide late bound declarations of every API function missing from 
+ * one or more supported releases of the Win32 API
+ * 
+ * lib is the enumerated token from ap_dlltoken_e, and must correspond 
+ * to the string table entry in start.c used by the LoadLateDllFunc().
+ * Token names (attempt to) follow Windows.h declarations prefixed by DLL_
+ * in order to facilitate comparison.  Use the exact declaration syntax
+ * and names from Windows.h to prevent ambigutity and bugs.
+ * 
+ * rettype and calltype follow the original declaration in Windows.h
+ * fn is the true function name - beware Ansi/Unicode #defined macros
+ * ord is the ordinal within the library, use 0 if it varies between versions
+ * args is the parameter list following the original declaration, in parens
+ * names is the parameter list sans data types, enclosed in parens
+ *
+ * #undef/re#define the Ansi/Unicode generic name to abate confusion
+ * In the case of non-text functions, simply #define the original name
+ */
+
+DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 234, (
+    IN LPCSTR lpFileName,
+    IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
+    OUT LPVOID lpFileInformation),
+    (lpFileName, fInfoLevelId, lpFileInformation));
+#undef GetFileAttributesEx
+#define GetFileAttributesEx LateGetFileAttributesExA
+
+
 /* APR WINDOWS-ONLY FUNCTIONS
  * This section should define those functions which are
  * only found in the windows version of APR.
