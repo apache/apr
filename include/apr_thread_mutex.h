@@ -87,6 +87,7 @@ typedef struct apr_thread_mutex_t apr_thread_mutex_t;
  *        stored.
  * @param flags Or'ed value of:
  * <PRE>
+ *           APR_THREAD_MUTEX_DEFAULT   normal lock behavior (non-recursive).
  *           APR_THREAD_MUTEX_NESTED    enable nested (recursive) locks.
  * </PRE>
  * @param pool the pool from which to allocate the mutex.
