@@ -87,10 +87,12 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
      * running on Win2000, Global\ and Local\ are ignored.  These
      * prefixes are only valid on Win2000+
      */
-    if (apr_os_level >= APR_WIN_2000)
-        fname = apr_pstrcat(pool, "Global\\", fname, NULL);
-    else
-        fname = apr_pstrdup(pool, fname);
+    if (fname) {
+        if (apr_os_level >= APR_WIN_2000)
+            fname = apr_pstrcat(pool, "Global\\", fname, NULL);
+        else
+            fname = apr_pstrdup(pool, fname);
+    }
 
     hMutex = CreateMutex(&sec, FALSE, fname);
     if (!hMutex) {
