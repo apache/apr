@@ -376,11 +376,6 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     return rv < 0 ? errno : APR_SUCCESS;
 }
 
-/* These are just demos of how the code for the other OSes.
- * I haven't tested these, but they're right in terms of interface.
- * I just wanted to see what types of vars would be required from other OSes. 
- */
-
 #elif defined(__FreeBSD__)
 
 /* Release 3.1 or greater */
@@ -423,6 +418,10 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
          * first chunk of data twice, once in the first call and once in the
          * second.  If we are using a timed write, then we check to make sure
          * we can send data before trying to send it.
+         *
+         * JLT: doing this first doesn't eliminate the possibility that
+         *      we get -1/EAGAIN/nbytes>0; AFAICT it just means extra syscalls
+         *      from time to time
          */
         apr_status_t arv = wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
@@ -444,6 +443,13 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                           &headerstruct, /* Headers/footers */
                           &nbytes,       /* number of bytes written */
                           flags);        /* undefined, set to 0 */
+            /* FreeBSD's sendfile can return -1/EAGAIN even if it
+             * sent bytes.  Sanitize the result so we get normal EAGAIN
+             * semantics w.r.t. bytes sent.
+             */
+            if (rv == -1 && errno == EAGAIN && nbytes) {
+                rv = 0;
+            }
         }
         else {
             /* just trailer bytes... use writev()
@@ -462,7 +468,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     } while (rv == -1 && errno == EINTR);
 
     (*len) = nbytes;
-    if (rv == -1 && (errno != EAGAIN || (errno == EAGAIN && sock->timeout < 0))) {
+    if (rv == -1) {
         return errno;
     }
     return APR_SUCCESS;
