@@ -107,8 +107,9 @@ APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
  * atomically add 'val' to an apr_uint32_t
  * @param mem pointer to the object
  * @param val amount to add
+ * @return old value pointed to by mem
  */
-APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val);
+APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val);
 
 /**
  * atomically subtract 'val' from an apr_uint32_t
@@ -120,8 +121,9 @@ APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
 /**
  * atomically increment an apr_uint32_t by 1
  * @param mem pointer to the object
+ * @return old value pointed to by mem
  */
-APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem);
+APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem);
 
 /**
  * atomically decrement an apr_uint32_t by 1

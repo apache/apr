@@ -62,9 +62,9 @@ APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *pool)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    atomic_add((unsigned long *)mem,(unsigned long)val);
+    return atomic_add((unsigned long *)mem,(unsigned long)val);
 }
 
 APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
@@ -72,9 +72,9 @@ APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
     atomic_sub((unsigned long *)mem,(unsigned long)val);
 }
 
-APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
-    atomic_inc((unsigned long *)mem);
+    return atomic_inc((unsigned long *)mem);
 }
 
 APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
