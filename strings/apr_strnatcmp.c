@@ -25,7 +25,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "apr_strnatcmp.h"
+#include "apr_strings.h"
 
 #if defined(__GNUC__)
 #  define UNUSED __attribute__((__unused__))
