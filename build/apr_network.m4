@@ -186,6 +186,9 @@ int main(void) {
     }
     memset(&sa, 0, sizeof sa);
     sa.sin_family = AF_INET;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
     /* leave port 0 to get ephemeral */
     rc = bind(listen_s, (struct sockaddr *)&sa, sizeof sa);
     if (rc < 0) {
@@ -213,6 +216,9 @@ int main(void) {
     memset(&sa, 0, sizeof sa);
     sa.sin_family = AF_INET;
     sa.sin_port   = listen_port;
+#ifdef BEOS
+    sa.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+#endif
     /* leave sin_addr all zeros to use loopback */
     rc = connect(client_s, (struct sockaddr *)&sa, sizeof sa);
     if (rc < 0) {
