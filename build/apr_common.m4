@@ -249,7 +249,7 @@ YES_IS_DEFINED
 
 
 dnl
-dnl APR_CHECK_DEFINE( symbol, header_file [, description ])
+dnl APR_CHECK_DEFINE(symbol, header_file)
 dnl
 AC_DEFUN(APR_CHECK_DEFINE,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
@@ -261,7 +261,7 @@ YES_IS_DEFINED
     ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
   ])
   if test "$ac_cv_define_$1" = "yes"; then
-    AC_DEFINE(HAVE_$1, 1, [$3])
+    AC_DEFINE(HAVE_$1, 1, [Define if $1 is defined in $2])
   fi
 ])
 
@@ -398,7 +398,7 @@ main()
 }], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0, ifelse([$3],,,
 AC_CV_NAME=$3))])dnl
 AC_MSG_RESULT($AC_CV_NAME)
-AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME)
+AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME, [The size of ]$2)
 undefine([AC_TYPE_NAME])dnl
 undefine([AC_CV_NAME])dnl
 ])

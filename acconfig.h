@@ -4,15 +4,9 @@
 @TOP@
 
 /* Various #defines we need to know about */
-#undef HAVE_LOCK_EX
-#undef HAVE_F_SETLK
-#undef HAVE_SEM_UNDO
-#undef HAVE_PTHREAD_PROCESS_SHARED
 #undef DEV_RANDOM
 #undef EGD_DEFAULT_SOCKET
 #undef HAVE_isascii
-#undef HAVE_SO_ACCEPTFILTER
-#undef HAVE_MAP_ANON
 
 /* Cross process serialization techniques */
 #undef USE_FLOCK_SERIALIZE
@@ -26,19 +20,7 @@
 #undef FCNTL_IS_GLOBAL
 #undef FLOCK_IS_GLOBAL
 
-#undef SIZEOF_SSIZE_T
-#undef SIZEOF_SIZE_T
-#undef SIZEOF_OFF_T
-#undef SIZEOF_PID_T
-
 #undef HAVE_INT64_C
-
-/* BeOS specific flag */
-#undef HAVE_BONE_VERSION
-
-/* Does this system have a corkable TCP? */
-#undef HAVE_TCP_CORK
-#undef HAVE_TCP_NOPUSH
 
 @BOTTOM@
 
