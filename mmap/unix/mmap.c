@@ -109,7 +109,6 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 #ifdef BEOS
     void *mm;
     area_id aid = -1;
-    char *areaname = "apr_mmap\0";
     uint32 pages = 0;
 #else
     caddr_t mm;
@@ -122,8 +121,6 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 #ifdef BEOS
     /* XXX: mmap shouldn't really change the seek offset */
     apr_seek(file, APR_SET, &offset);
-    pages = ((size -1) / B_PAGE_SIZE) + 1;
-
     if (flag & APR_MMAP_WRITE) {
         native_flags |= B_WRITE_AREA;
     }
@@ -131,16 +128,21 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
         native_flags |= B_READ_AREA;
     }
 
-    aid = create_area(areaname, &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
-        B_FULL_LOCK, native_flags);
+    /* There seems to be some strange interactions that mean our area must
+     * be set as READ & WRITE or writev will fail!  Go figure...
+     */
+    pages = (size + B_PAGE_SIZE -1) / B_PAGE_SIZE;
+    aid = create_area("apr_mmap", &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
+        B_NO_LOCK, B_WRITE_AREA|B_READ_AREA);
 
     if (aid < B_NO_ERROR) {
-        /* we failed to get an mmap'd file... */
+        /* we failed to get an area we can use... */
         return APR_ENOMEM;
     }
 
     if (aid >= B_NO_ERROR)
         read(file->filedes, mm, size);
+    
     (*new)->area = aid;
 #else
 
@@ -162,7 +164,7 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     (*new)->mm = mm;
     (*new)->size = size;
     (*new)->cntxt = cont;
-
+    
     /* register the cleanup... */
     apr_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
              apr_null_cleanup);
