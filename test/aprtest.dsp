@@ -164,6 +164,10 @@ SOURCE=.\testucs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\testuser.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\testuuid.c
 # End Source File
 # End Group
