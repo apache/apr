@@ -178,6 +178,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testfileinfo.o \
 	$(OBJDIR)/testfile.o \
 	$(OBJDIR)/testfmt.o \
+	$(OBJDIR)/testfnmatch.o \
 	$(OBJDIR)/testhash.o \
 	$(OBJDIR)/testipsub.o \
 	$(OBJDIR)/testlock.o \
