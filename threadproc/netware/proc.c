@@ -333,36 +333,65 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     else
         envSpec.esEnv = NULL;
 
+    envSpec.esStdin.ssType = NX_OBJ_FIFO;
+    envSpec.esStdin.ssHandle = -1;
+    envSpec.esStdin.ssPathCtx = 0;
     if (attr->child_in) {
-        envSpec.esStdin.ssType = NX_OBJ_FIFO;
-        envSpec.esStdin.ssHandle = attr->child_in->filedes;
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_in), 
+                              attr->child_in, apr_netware_pipe_cleanup);
+        envSpec.esStdin.ssPath = attr->child_in->fname;
+        apr_file_close(attr->child_in);
+        if (attr->parent_in) {
+            apr_file_close(attr->parent_in);
+        }
+    }
+    else if (attr->parent_in) {
+        envSpec.esStdin.ssPath = attr->parent_in->fname;
+        apr_file_close(attr->parent_in);
     }
     else {
-        envSpec.esStdin.ssType = NX_OBJ_DEFAULT;
-        envSpec.esStdin.ssHandle = -1;
+        envSpec.esStdin.ssPath = NULL;
     }
-    envSpec.esStdin.ssPathCtx = NULL;
-    envSpec.esStdin.ssPath = NULL;
+
+    envSpec.esStdout.ssType = NX_OBJ_FIFO;
+    envSpec.esStdout.ssHandle = -1;
+    envSpec.esStdout.ssPathCtx = 0;
     if (attr->child_out) {
-        envSpec.esStdout.ssType = NX_OBJ_FIFO;
-        envSpec.esStdout.ssHandle = attr->child_out->filedes;
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_out),
+                              attr->child_out, apr_netware_pipe_cleanup);
+        envSpec.esStdout.ssPath = attr->child_out->fname;
+        apr_file_close(attr->child_out);
+        if (attr->parent_out) {
+            apr_file_close(attr->parent_out);
+        }
+    }
+    else if (attr->parent_out) {
+        envSpec.esStdout.ssPath = attr->parent_out->fname;
+        apr_file_close(attr->parent_out);
     }
     else {
-        envSpec.esStdout.ssType = NX_OBJ_DEFAULT;
-        envSpec.esStdout.ssHandle = -1;
+        envSpec.esStdout.ssPath = NULL;
     }
-    envSpec.esStdout.ssPathCtx = NULL;
-    envSpec.esStdout.ssPath = NULL;
+
+    envSpec.esStderr.ssType = NX_OBJ_FIFO;
+    envSpec.esStderr.ssHandle = -1;
+    envSpec.esStderr.ssPathCtx = 0;
     if (attr->child_err) {
-        envSpec.esStderr.ssType = NX_OBJ_FIFO;
-        envSpec.esStderr.ssHandle = attr->child_err->filedes;
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_err),
+                              attr->child_err, apr_netware_pipe_cleanup);
+        envSpec.esStderr.ssPath = attr->child_err->fname;
+        apr_file_close(attr->child_err);
+        if (attr->parent_err) {
+            apr_file_close(attr->parent_err);
+        }
+    }
+    else if (attr->parent_err) {
+        envSpec.esStderr.ssPath = attr->parent_err->fname;
+        apr_file_close(attr->parent_err);
     }
     else {
-        envSpec.esStderr.ssType = NX_OBJ_DEFAULT;
-        envSpec.esStderr.ssHandle = -1;
+        envSpec.esStderr.ssPath = NULL;
     }
-    envSpec.esStderr.ssPathCtx = NULL;
-    envSpec.esStderr.ssPath = NULL;
 
     if (attr->detached) {
         flags = NX_VM_CREATE_DETACHED;
@@ -376,6 +405,16 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     }
     else { 
         newproc->pid = newVM;
+        if (attr->parent_out) {
+    	    attr->parent_out->filedes = pipe_open(attr->parent_out->fname, O_WRONLY);
+        }
+        if (attr->parent_in) {
+    	    attr->parent_in->filedes = pipe_open(attr->parent_in->fname, O_RDONLY);
+        }
+        if (attr->parent_err) {
+    	    attr->parent_err->filedes = pipe_open(attr->parent_err->fname, O_RDONLY);
+        }
+
         apr_pool_cleanup_register(cont, (void *)newproc, apr_netware_proc_cleanup,
                          apr_pool_cleanup_null);
     }
