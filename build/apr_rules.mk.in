@@ -91,6 +91,7 @@ LT_COMPILE   = @lt_compile@
 
 LINK         = @link@
 
+APR_MKDIR        = $(apr_builders)/mkdir.sh
 APR_MKEXPORT     = $(AWK) -f $(apr_builders)/make_exports.awk
 APR_MKVAREXPORT  = $(AWK) -f $(apr_builders)/make_var_export.awk
 MKDEP            = @MKDEP@
