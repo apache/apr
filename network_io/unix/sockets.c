@@ -52,11 +52,11 @@
  * <http://www.apache.org/>.
  */
 
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_network_io.h"
 #include "apr_support.h"
 #include "apr_portable.h"
-#include "inherit.h"
+#include "apr_arch_inherit.h"
 
 #if defined(BEOS) && !defined(BEOS_BONE)
 #define close closesocket

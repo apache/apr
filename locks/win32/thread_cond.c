@@ -56,8 +56,8 @@
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_strings.h"
-#include "win32/thread_mutex.h"
-#include "win32/thread_cond.h"
+#include "win32/apr_arch_thread_mutex.h"
+#include "win32/apr_arch_thread_cond.h"
 #include "apr_portable.h"
 
 static apr_status_t thread_cond_cleanup(void *data)

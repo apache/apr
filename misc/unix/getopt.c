@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#include "misc.h"
+#include "apr_arch_misc.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
 

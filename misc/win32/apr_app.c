@@ -75,10 +75,10 @@
 #include "ShellAPI.h"
 #include "crtdbg.h"
 #include "wchar.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "assert.h"
 #include "apr_private.h"
-#include "misc.h"
+#include "apr_arch_misc.h"
 
 /* This symbol is _private_, although it must be exported.
  */

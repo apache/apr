@@ -52,15 +52,15 @@
  * <http://www.apache.org/>.
  */
 
-#include "win32/fileio.h"
+#include "win32/apr_arch_fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
 #include "apr_errno.h"
 #include <malloc.h>
-#include "atime.h"
-#include "misc.h"
+#include "apr_arch_atime.h"
+#include "apr_arch_misc.h"
 
 /*
  * read_with_timeout() 

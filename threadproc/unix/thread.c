@@ -54,7 +54,7 @@
 
 #include "apr.h"
 #include "apr_portable.h"
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 
 #if APR_HAS_THREADS
 

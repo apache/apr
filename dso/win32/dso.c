@@ -52,11 +52,11 @@
  * <http://www.apache.org/>.
  */
 
-#include "dso.h"
+#include "apr_arch_dso.h"
 #include "apr_strings.h"
 #include "apr_private.h"
-#include "fileio.h"
-#include "utf8.h"
+#include "apr_arch_fileio.h"
+#include "apr_arch_utf8.h"
 
 #if APR_HAS_DSO
 

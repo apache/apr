@@ -57,7 +57,7 @@
 #include "apr_general.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_portable.h"
 #include "apr_strings.h"
 

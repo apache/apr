@@ -52,8 +52,8 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
-#include "networkio.h"
+#include "apr_arch_fileio.h"
+#include "apr_arch_networkio.h"
 #include "apr_poll.h"
 #include "apr_errno.h"
 #include "apr_support.h"

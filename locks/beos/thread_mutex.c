@@ -56,7 +56,7 @@
  * Stephen Beaulieu <hippo@be.com>
  */
  
-#include "beos/thread_mutex.h"
+#include "beos/apr_arch_thread_mutex.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 

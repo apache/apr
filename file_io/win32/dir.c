@@ -53,11 +53,11 @@
  */
 
 #include "apr.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_file_io.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
-#include "atime.h"
+#include "apr_arch_atime.h"
 
 #if APR_HAVE_ERRNO_H
 #include <errno.h>

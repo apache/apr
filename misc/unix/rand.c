@@ -56,7 +56,7 @@
 #include "apr_want.h"
 #include "apr_general.h"
 
-#include "misc.h"
+#include "apr_arch_misc.h"
 #include <sys/stat.h>
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>

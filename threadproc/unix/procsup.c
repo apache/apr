@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 
 APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
 {

@@ -58,9 +58,9 @@
 #include "apr_signal.h"
 #include "ShellAPI.h"
 
-#include "misc.h"       /* for WSAHighByte / WSALowByte */
+#include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
 #include "wchar.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "crtdbg.h"
 #include "assert.h"
 

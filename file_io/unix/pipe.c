@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 

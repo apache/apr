@@ -55,8 +55,8 @@
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_portable.h"
-#include "proc_mutex.h"
-#include "thread_mutex.h"
+#include "apr_arch_proc_mutex.h"
+#include "apr_arch_thread_mutex.h"
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 const char *fname,

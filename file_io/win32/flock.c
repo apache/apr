@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 
 APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
 {

@@ -56,8 +56,8 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
-#include "proc_mutex.h"
-#include "fileio.h"
+#include "apr_arch_proc_mutex.h"
+#include "apr_arch_fileio.h"
 #include <string.h>
 #include <stddef.h>
 

@@ -52,14 +52,14 @@
  * <http://www.apache.org/>.
  */
 
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include <string.h>
-#include "inherit.h"
-#include "misc.h"
+#include "apr_arch_inherit.h"
+#include "apr_arch_misc.h"
 
 static char generic_inaddr_any[16] = {0}; /* big enough for IPv4 or IPv6 */
 

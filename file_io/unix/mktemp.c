@@ -87,7 +87,7 @@
 #include "apr_private.h"
 #include "apr_file_io.h" /* prototype of apr_mkstemp() */
 #include "apr_strings.h" /* prototype of apr_mkstemp() */
-#include "fileio.h" /* prototype of apr_mkstemp() */
+#include "apr_arch_fileio.h" /* prototype of apr_mkstemp() */
 #include "apr_portable.h" /* for apr_os_file_put() */
 
 #ifndef HAVE_MKSTEMP
