@@ -52,6 +52,7 @@
  * <http://www.apache.org/>.
  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "apr_file_io.h"
@@ -65,6 +66,7 @@
 
 int test_filedel(ap_pool_t *);
 int testdirs(ap_pool_t *);
+static void test_read(ap_pool_t *);
 
 int main()
 {
@@ -239,6 +241,7 @@ int main()
 
     testdirs(context); 
     test_filedel(context);
+    test_read(context);
 
     return 1;
 }
@@ -382,4 +385,201 @@ int testdirs(ap_pool_t *context)
     
     return 1; 
 }    
+
+#define TESTREAD_BLKSIZE 1024
+#define APR_BUFFERSIZE   4096 /* This should match APR's buffer size. */
+
+static void create_testread(ap_pool_t *p, const char *fname)
+{
+    ap_file_t *f = NULL;
+    ap_status_t rv;
+    char buf[TESTREAD_BLKSIZE];
+    ap_ssize_t nbytes;
+
+    /* Create a test file with known content.
+     */
+    rv = ap_open(&f, fname, APR_CREATE | APR_WRITE | APR_TRUNCATE, APR_UREAD | APR_UWRITE, p);
+    if (rv) {
+        fprintf(stderr, "ap_open()->%d/%s\n",
+                rv, ap_strerror(rv, buf, sizeof buf));
+        exit(1);
+    }
+    nbytes = 4;
+    rv = ap_write(f, "abc\n", &nbytes);
+    assert(!rv && nbytes == 4);
+    memset(buf, 'a', sizeof buf);
+    nbytes = sizeof buf;
+    rv = ap_write(f, buf, &nbytes);
+    assert(!rv && nbytes == sizeof buf);
+    nbytes = 2;
+    rv = ap_write(f, "\n\n", &nbytes);
+    assert(!rv && nbytes == 2);
+    rv = ap_close(f);
+    assert(!rv);
+}
+
+static char read_one(ap_file_t *f, int expected)
+{
+  char bytes[3];
+  ap_status_t rv;
+  static int counter = 0;
+  ap_ssize_t nbytes;
+
+  counter += 1;
+
+  bytes[0] = bytes[2] = 0x01;
+  if (counter % 2) {
+      rv = ap_getc(bytes + 1, f);
+  }
+  else {
+      nbytes = 1;
+      rv = ap_read(f, bytes + 1, &nbytes);
+      assert(nbytes == 1);
+  }
+  assert(!rv);
+  assert(bytes[0] == 0x01 && bytes[2] == 0x01);
+  if (expected != -1) {
+      assert(bytes[1] == expected);
+  }
+  return bytes[1];
+}
+
+static void test_read_guts(ap_pool_t *p, const char *fname, ap_int32_t extra_flags)
+{
+    ap_file_t *f = NULL;
+    ap_status_t rv;
+    ap_ssize_t nbytes;
+    char buf[1024];
+    int i;
+
+    rv = ap_open(&f, fname, APR_READ | extra_flags, 0, p);
+    assert(!rv);
+    read_one(f, 'a');
+    read_one(f, 'b');
+    if (extra_flags & APR_BUFFERED) {
+        fprintf(stdout, 
+                "\n\t\tskipping ap_ungetc() for APR_BUFFERED... "
+                "doesn't work yet...\n\t\t\t\t ");
+    }
+    else {
+        rv = ap_ungetc('z', f);
+        assert(!rv);
+        rv = ap_ungetc('a', f);
+        assert(!rv); /* we just overwrote the previously-un-got char */
+        read_one(f, 'a');
+    }
+    read_one(f, 'c');
+    read_one(f, '\n');
+    for (i = 0; i < TESTREAD_BLKSIZE; i++) {
+        read_one(f, 'a');
+    }
+    read_one(f, '\n');
+    read_one(f, '\n');
+    rv = ap_getc(buf, f);
+    assert(rv == APR_EOF);
+    rv = ap_close(f);
+    assert(!rv);
+
+    f = NULL;
+    rv = ap_open(&f, fname, APR_READ | extra_flags, 0, p);
+    assert(!rv);
+    rv = ap_fgets(buf, 10, f);
+    assert(!rv);
+    assert(!strcmp(buf, "abc\n"));
+    /* read first 800 of TESTREAD_BLKSIZE 'a's 
+     */
+    rv = ap_fgets(buf, 801, f);
+    assert(!rv);
+    assert(strlen(buf) == 800);
+    for (i = 0; i < 800; i++) {
+        assert(buf[i] == 'a');
+    }
+    /* read rest of the 'a's and the first newline
+     */
+    rv = ap_fgets(buf, sizeof buf, f);
+    assert(!rv);
+    assert(strlen(buf) == TESTREAD_BLKSIZE - 800 + 1);
+    for (i = 0; i < TESTREAD_BLKSIZE - 800; i++) {
+        assert(buf[i] == 'a');
+    }
+    assert(buf[TESTREAD_BLKSIZE - 800] == '\n');
+    /* read the last newline
+     */
+    rv = ap_fgets(buf, sizeof buf, f);
+    assert(!rv);
+    assert(!strcmp(buf, "\n"));
+    /* get APR_EOF
+     */
+    rv = ap_fgets(buf, sizeof buf, f);
+    assert(rv == APR_EOF);
+    /* get APR_EOF with ap_getc
+     */
+    rv = ap_getc(buf, f);
+    assert(rv == APR_EOF);
+    /* get APR_EOF with ap_read
+     */
+    nbytes = sizeof buf;
+    rv = ap_read(f, buf, &nbytes);
+    assert(rv == APR_EOF);
+    rv = ap_close(f);
+    assert(!rv);
+}
+
+static void test_bigread(ap_pool_t *p, const char *fname, ap_int32_t extra_flags)
+{
+    ap_file_t *f = NULL;
+    ap_status_t rv;
+    char buf[APR_BUFFERSIZE * 2];
+    ap_ssize_t nbytes;
+
+    /* Create a test file with known content.
+     */
+    rv = ap_open(&f, fname, APR_CREATE | APR_WRITE | APR_TRUNCATE, APR_UREAD | APR_UWRITE, p);
+    if (rv) {
+        fprintf(stderr, "ap_open()->%d/%s\n",
+                rv, ap_strerror(rv, buf, sizeof buf));
+        exit(1);
+    }
+    nbytes = APR_BUFFERSIZE;
+    memset(buf, 0xFE, nbytes);
+    rv = ap_write(f, buf, &nbytes);
+    assert(!rv && nbytes == APR_BUFFERSIZE);
+    rv = ap_close(f);
+    assert(!rv);
+
+    f = NULL;
+    rv = ap_open(&f, fname, APR_READ | extra_flags, 0, p);
+    assert(!rv);
+    nbytes = sizeof buf;
+    rv = ap_read(f, buf, &nbytes);
+    assert(!rv);
+    assert(nbytes == APR_BUFFERSIZE);
+    rv = ap_close(f);
+    assert(!rv);
+}
+
+static void test_read(ap_pool_t *p)
+{
+    const char *fname = "testread.dat";
+    ap_status_t rv;
+
+    fprintf(stdout, "Testing file read functions.\n");
+
+    create_testread(p, fname);
+    fprintf(stdout, "\tBuffered file tests......");
+    test_read_guts(p, fname, APR_BUFFERED);
+    fprintf(stdout, "OK\n");
+    fprintf(stdout, "\tUnbuffered file tests....");
+    test_read_guts(p, fname, 0);
+    fprintf(stdout, "OK\n");
+    fprintf(stdout, "\tMore buffered file tests......");
+    test_bigread(p, fname, APR_BUFFERED);
+    fprintf(stdout, "OK\n");
+    fprintf(stdout, "\tMore unbuffered file tests......");
+    test_bigread(p, fname, 0);
+    fprintf(stdout, "OK\n");
+    rv = ap_remove_file(fname, p);
+    assert(!rv);
+    fprintf(stdout, "\tAll read tests...........OK\n");
+}
 
