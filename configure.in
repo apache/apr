@@ -188,6 +188,47 @@ AC_ARG_ENABLE(profile,[  --enable-profile        Turn on profiling for the build
   fi
 )dnl
 
+AC_ARG_ENABLE(pool-debug,
+  [  --enable-pool-debug[[=yes|no|verbose|lifetime|owner|all]]    Turn on pools debugging],
+  [ if test -z "$enableval"; then
+        APR_ADDTO(CPPFLAGS, -DAPR_POOL_DEBUG=1)
+    elif test ! "$enableval" = "no"; then
+        apr_pool_debug=1
+    
+        for i in $enableval
+        do
+            flag=0
+        
+            case $i in
+            yes)
+                flag=1
+                ;;
+            verbose)
+                flag=2
+                ;;
+            lifetime)
+                flag=4
+                ;;
+            owner)
+                flag=8
+                ;;
+            all)
+                apr_pool_debug=15
+                ;;
+            *)
+                ;;
+            esac
+
+            if test $flag -gt 0; then
+                apr_pool_debug=`expr '(' $apr_pool_debug - $apr_pool_debug % \
+                    '(' $flag '*' 2 ')' ')' + $flag + $apr_pool_debug % $flag`
+            fi
+        done
+      
+        APR_ADDTO(CPPFLAGS, -DAPR_POOL_DEBUG=$apr_pool_debug)
+    fi
+  ])
+
 dnl Electric Fence malloc checker.
 dnl --with-efence specifies the path to Electric Fence
 AC_ARG_WITH(efence, 

@@ -70,6 +70,31 @@
 #include <stdlib.h>     /* for malloc, free and abort */
 #endif
 
+#include <unistd.h>     /* for getpid */
+
+
+/*
+ * Debug level
+ */
+
+#define APR_POOL_DEBUG_GENERAL  0x01
+#define APR_POOL_DEBUG_VERBOSE  0x02
+#define APR_POOL_DEBUG_LIFETIME 0x04
+#define APR_POOL_DEBUG_OWNER    0x08
+
+/* When no level was specified, assume APR_POOL_DEBUG_GENERAL */ 
+#if defined(APR_POOL_DEBUG) && (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
+#undef APR_POOL_DEBUG
+#define APR_POOL_DEBUG APR_POOL_DEBUG_GENERAL
+#endif
+
+/* We don't have debug level 0, assume APR_POOL_DEBUG_GENERAL. */
+#if APR_POOL_DEBUG == 0
+#undef APR_POOL_DEBUG
+#define APR_POOL_DEBUG APR_POOL_DEBUG_GENERAL
+#endif
+ 
+ 
 /*
  * Magic numbers
  */
@@ -98,7 +123,7 @@
 
 typedef struct cleanup_t cleanup_t;
 
-#if !defined(APR_POOL_DEBUG)
+#if !APR_POOL_DEBUG
 typedef struct allocator_t allocator_t;
 typedef struct node_t node_t;
 
@@ -121,7 +146,7 @@ struct allocator_t {
 #define SIZEOF_NODE_T       APR_ALIGN_DEFAULT(sizeof(node_t))
 #define SIZEOF_ALLOCATOR_T  APR_ALIGN_DEFAULT(sizeof(allocator_t))
 
-#else /* !defined(APR_POOL_DEBUG) */
+#else /* APR_POOL_DEBUG */
 
 typedef struct debug_node_t debug_node_t;
 
@@ -134,7 +159,7 @@ struct debug_node_t {
 
 #define SIZEOF_DEBUG_NODE_T APR_ALIGN_DEFAULT(sizeof(debug_node_t))
 
-#endif /* !defined(APR_POOL_DEBUG) */
+#endif /* APR_POOL_DEBUG */
 
 /* The ref field in the apr_pool_t struct holds a
  * pointer to the pointer referencing this pool.
@@ -153,13 +178,13 @@ struct apr_pool_t {
     apr_hash_t           *user_data;
     const char           *tag;
 
-#if !defined(APR_POOL_DEBUG)
+#if !APR_POOL_DEBUG
     allocator_t          *allocator;
     node_t               *active;
     node_t               *self; /* The node containing the pool itself */
     char                 *self_first_avail;
 
-#else /* !defined(APR_POOL_DEBUG) */
+#else /* APR_POOL_DEBUG */
     debug_node_t         *nodes;
     const char           *file_line;
     apr_uint32_t          creation_flags;
@@ -167,9 +192,10 @@ struct apr_pool_t {
     unsigned int          stat_total_alloc;
     unsigned int          stat_clear;
 #if APR_HAS_THREADS
-    apr_thread_mutex_t *mutex;
-#endif
-#endif /* !defined(APR_POOL_DEBUG) */
+    apr_os_thread_t       owner;
+    apr_thread_mutex_t   *mutex;
+#endif /* APR_HAS_THREADS */
+#endif /* APR_POOL_DEBUG */
 };
 
 #define SIZEOF_POOL_T       APR_ALIGN_DEFAULT(sizeof(apr_pool_t))
@@ -182,7 +208,7 @@ struct apr_pool_t {
 static apr_byte_t   apr_pools_initialized = 0;
 static apr_pool_t  *global_pool = NULL;
 
-#if !defined(APR_POOL_DEBUG)
+#if !APR_POOL_DEBUG
 static allocator_t  global_allocator = { 
     0,          /* max_index */
 #if APR_HAS_THREADS
@@ -191,9 +217,9 @@ static allocator_t  global_allocator = {
     NULL,       /* owner */
     { NULL }    /* free[0] */
 };
-#endif /* !defined(APR_POOL_DEBUG) */
+#endif /* !APR_POOL_DEBUG */
 
-#if defined(APR_POOL_DEBUG_VERBOSE)
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
 static apr_file_t *file_stderr = NULL;
 #endif
 
@@ -206,7 +232,7 @@ static void run_child_cleanups(cleanup_t *c);
 static void free_proc_chain(struct process_chain *procs);
 
 
-#if !defined(APR_POOL_DEBUG)
+#if !APR_POOL_DEBUG
 /*
  * Initialization
  */
@@ -850,7 +876,157 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 }
 
 
-#else /* !defined(APR_POOL_DEBUG) */
+#else /* APR_POOL_DEBUG */
+/*
+ * Debug helper functions
+ */
+
+static void apr_pool_log_event(apr_pool_t *pool, const char *event,
+                               const char *file_line, int deref)
+{
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+    if (file_stderr) {
+        if (deref) {
+            apr_file_printf(file_stderr,
+                "POOL DEBUG: "
+                "[%lu"
+#if APR_HAS_THREADS
+                "/%lu"
+#endif
+                "] "
+                "%7s "
+                "(%10lu/%10lu/%10lu) "
+                "0x%08X \"%s\" "
+                "<%s> "
+                "(%u/%u/%u) "
+                "\n",
+                (unsigned long)getpid(),
+#if APR_HAS_THREADS
+                (unsigned long)apr_os_thread_current(),
+#endif
+                event,
+                (unsigned long)apr_pool_num_bytes(pool, 0),
+                (unsigned long)apr_pool_num_bytes(pool, 1),
+                (unsigned long)apr_pool_num_bytes(global_pool, 1),
+                (unsigned int)pool, pool->tag,
+                file_line,
+                pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear);
+        }
+        else {
+            apr_file_printf(file_stderr,
+                "POOL DEBUG: "
+                "[%lu"
+#if APR_HAS_THREADS
+                "/%lu"
+#endif
+                "] "
+                "%7s "
+                "                                   "
+                "0x%08X "
+                "<%s> "
+                "\n",
+                (unsigned long)getpid(),
+#if APR_HAS_THREADS
+                (unsigned long)apr_os_thread_current(),
+#endif
+                event,
+                (unsigned int)pool,
+                file_line);
+        }
+    }
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+}
+
+#if APR_HAS_THREADS
+static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
+                            apr_thread_mutex_t *mutex)
+{
+    apr_pool_t *child;
+
+    if (parent == NULL)
+        return 0;
+
+    if (parent->mutex && parent->mutex != mutex)
+        apr_thread_mutex_lock(parent->mutex);
+
+    child = parent->child;
+
+    while (child) {
+        if (pool == child || apr_pool_is_child_of(pool, child, parent->mutex)) {
+            if (parent->mutex && parent->mutex != mutex)
+                apr_thread_mutex_unlock(parent->mutex);
+
+            return 1;
+        }
+ 
+        child = child->sibling;
+    }
+
+    if (parent->mutex && parent->mutex != mutex)
+        apr_thread_mutex_unlock(parent->mutex);
+
+    return 0;
+}
+
+#else /* !APR_HAS_THREADS */
+static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
+                            void *dummy)
+{
+    apr_pool_t *child;
+
+    if (parent == NULL)
+        return 0;
+
+    child = parent->child;
+
+    while (child) {
+        if (pool == child || pool_is_child_of(pool, child)) {
+            return 1;
+        }
+ 
+        child = child->sibling;
+    }
+
+    return 0;
+}
+#endif /* !APR_HAS_THREADS */
+
+static void apr_pool_check_integrity(apr_pool_t *pool)
+{
+    /* Rule of thumb: use of the global pool is always
+     * ok, since the only user this apr_pools.c.  Unless
+     * people have searched for the top level parent and
+     * started to use that...
+     */
+    if (pool == global_pool || global_pool == NULL)
+        return;
+
+    /* Lifetime
+     * This basically checks to see if the pool being used is still
+     * a relative to the global pool.  If not it was previously
+     * destroyed, in which case we abort().
+     */
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME)
+    if (!apr_pool_is_child_of(pool, global_pool, NULL)) {
+        apr_pool_log_event(pool, "LIFE", 
+                           __FILE__ ":apr_pool_integrity check", 0);
+
+        abort();
+    }
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_LIFETIME) */
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_OWNER)
+#if APR_HAS_THREADS
+    if (!apr_os_thread_equal(pool->owner, apr_os_thread_current())) {
+        apr_pool_log_event(pool, "THREAD",
+                           __FILE__ ":apr_pool_integrity check", 0);
+        abort();
+    }
+#endif /* APR_HAS_THREADS */
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_OWNER) */
+}
+
+
 /*
  * Initialization (debug)
  */
@@ -876,19 +1052,20 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 
     apr_pools_initialized = 1;
 
-#if defined(APR_POOL_DEBUG_VERBOSE)
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_file_open_stderr(&file_stderr, global_pool);
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: ACTION  [SIZE      /POOL SIZE /TOTAL SIZE] "
-            "POOL       TAG [__FILE__:__LINE__] (ALLOCS/TOTAL ALLOCS/CLEARS)\n");
-            
-        apr_file_printf(file_stderr,
-            "POOL DEBUG: GLOBAL                                     "
-            "0x%08X \"%s\"\n",
-            (unsigned int)global_pool, global_pool->tag); 
-    }
+            "POOL DEBUG: [PID"
+#if APR_HAS_THREADS
+            "/TID"
 #endif
+            "] ACTION  (SIZE      /POOL SIZE /TOTAL SIZE) "
+            "POOL       \"TAG\" <__FILE__:__LINE__> (ALLOCS/TOTAL ALLOCS/CLEARS)\n");
+
+        apr_pool_log_event(global_pool, "GLOBAL", __FILE__ ":apr_pool_initialize", 0);        
+    }
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
     
     return APR_SUCCESS;
 }
@@ -903,94 +1080,11 @@ APR_DECLARE(void) apr_pool_terminate(void)
     apr_pool_destroy(global_pool); /* This will also destroy the mutex */
     global_pool = NULL;
 
-#if defined(APR_POOL_DEBUG_VERBOSE)
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     file_stderr = NULL;
 #endif
 }
 
-/*
- * Integrity checking
- * This basically checks to see if the pool being used is still
- * a relative to the global pool.  If not it was previously
- * destroyed, in which case we abort().
- */
-
-#if APR_HAS_THREADS
-static int pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
-                            apr_thread_mutex_t *mutex)
-{
-    apr_pool_t *child;
-
-    if (parent == NULL)
-        return 0;
-
-    if (parent->mutex && parent->mutex != mutex)
-        apr_thread_mutex_lock(parent->mutex);
-
-    child = parent->child;
-
-    while (child) {
-        if (pool == child || pool_is_child_of(pool, child, parent->mutex)) {
-            if (parent->mutex && parent->mutex != mutex)
-                apr_thread_mutex_unlock(parent->mutex);
-
-            return 1;
-        }
- 
-        child = child->sibling;
-    }
-
-    if (parent->mutex && parent->mutex != mutex)
-        apr_thread_mutex_unlock(parent->mutex);
-
-    return 0;
-}
-
-#else
-static int pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent)
-{
-    apr_pool_t *child;
-
-    if (parent == NULL)
-        return 0;
-
-    child = parent->child;
-
-    while (child) {
-        if (pool == child || pool_is_child_of(pool, child)) {
-            return 1;
-        }
- 
-        child = child->sibling;
-    }
-
-    return 0;
-}
-#endif
-
-static void check_integrity(apr_pool_t *pool)
-{
-    if (pool == global_pool || global_pool == NULL)
-        return;
-
-#if APR_HAS_THREADS    
-    if (!pool_is_child_of(pool, global_pool, NULL))
-#else
-    if (!pool_is_child_of(pool, global_pool))
-#endif
-    {
-#if defined(APR_POOL_DEBUG_VERBOSE)
-        if (file_stderr) {
-            apr_file_printf(file_stderr,
-                "POOL DEBUG: INVALID                                     "
-                "0x%08X, abort().\n", 
-                (unsigned int)pool);
-        }
-#endif         
-
-        abort();
-    }
-}
 
 /*
  * Memory allocation (debug)
@@ -1001,7 +1095,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     debug_node_t *node;
     void *mem;
 
-    check_integrity(pool);
+    apr_pool_check_integrity(pool);
     
     if ((mem = malloc(size)) == NULL) {
         if (pool->abort_fn)
@@ -1018,6 +1112,8 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
 
             return NULL;
         }
+
+        memset(node, 0, SIZEOF_DEBUG_NODE_T);
 
         node->next = pool->nodes;
         pool->nodes = node;
@@ -1038,7 +1134,7 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 {
     void *mem;
 
-    check_integrity(pool);
+    apr_pool_check_integrity(pool);
     
     mem = apr_palloc(pool, size);
     memset(mem, 0, size);
@@ -1090,23 +1186,8 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool, 
                                        const char *file_line)
 {
-    check_integrity(pool);
-    
-#if defined(APR_POOL_DEBUG_VERBOSE)
-    if (file_stderr) {
-        apr_file_printf(file_stderr,
-            "POOL DEBUG: CLEAR   [%10lu/%10lu/%10lu] "
-            "0x%08X \"%s\" [%s] (%u/%u/%u) "
-            "parent=0x%08X\n",
-            (unsigned long)apr_pool_num_bytes(pool, 0),
-            (unsigned long)apr_pool_num_bytes(pool, 1),
-            (unsigned long)apr_pool_num_bytes(global_pool, 1),
-            (unsigned int)pool, pool->tag,
-            file_line,
-            pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear,
-            (unsigned int)pool->parent);
-    }
-#endif
+    apr_pool_check_integrity(pool);
+    apr_pool_log_event(pool, "CLEAR", file_line, 1);
 
     pool_clear_debug(pool, file_line);
 }
@@ -1114,24 +1195,9 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool, 
                                          const char *file_line)
 {
-    check_integrity(pool);
+    apr_pool_check_integrity(pool);
+    apr_pool_log_event(pool, "DESTROY", file_line, 1);
     
-#if defined(APR_POOL_DEBUG_VERBOSE)
-    if (file_stderr) {
-        apr_file_printf(file_stderr,
-            "POOL DEBUG: DESTROY [%10lu/%10lu/%10lu] "
-            "0x%08X \"%s\" [%s] (%u/%u/%u) "
-            "parent=0x%08X\n",
-            (unsigned long)apr_pool_num_bytes(pool, 0),
-            (unsigned long)apr_pool_num_bytes(pool, 1),
-            (unsigned long)apr_pool_num_bytes(global_pool, 1),
-            (unsigned int)pool, pool->tag,
-            file_line,
-            pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear,
-            (unsigned int)pool->parent);
-    }
-#endif
-
     pool_clear_debug(pool, file_line);
 
     /* Remove the pool from the parents child list */
@@ -1166,10 +1232,12 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 
     *newpool = NULL;
 
-    if (!parent)
+    if (!parent) {
         parent = global_pool;
-    else
-       check_integrity(parent);
+    }
+    else {
+       apr_pool_check_integrity(parent);
+    }
 
     if (!abort_fn && parent)
         abort_fn = parent->abort_fn;
@@ -1209,6 +1277,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
         pool->ref = NULL;
     }
 
+#if APR_HAS_THREADS
+    pool->owner = apr_os_thread_current();
+#endif
+
     if ((flags & APR_POOL_FNEW_ALLOCATOR) == APR_POOL_FNEW_ALLOCATOR) {
 #if APR_HAS_THREADS
         apr_status_t rv;
@@ -1237,20 +1309,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 
     *newpool = pool;
 
-#if defined(APR_POOL_DEBUG_VERBOSE)
-    if (file_stderr) {
-        apr_file_printf(file_stderr,
-            "POOL DEBUG: CREATE  [%10lu/%10lu/%10lu] "
-            "0x%08X \"%s\" [%s] flags=0x%X, parent=0x%08X \"%s\"\n",
-            (unsigned long)0,
-            (unsigned long)0,
-            (unsigned long)apr_pool_num_bytes(global_pool, 1),
-            (unsigned int)pool, pool->tag, 
-            file_line,
-            flags,
-            (unsigned int)parent, parent ? parent->tag : "<null>");
-    }
-#endif
+    apr_pool_log_event(pool, "CREATE", file_line, 1);
 
     return APR_SUCCESS;
 }
@@ -1327,7 +1386,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     struct psprintf_data ps;
     debug_node_t *node;
 
-    check_integrity(pool);
+    apr_pool_check_integrity(pool);
     
     ps.size = 64;
     ps.mem = malloc(ps.size);
@@ -1495,7 +1554,8 @@ APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
 APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
 {
 }
-#endif /* !defined(APR_POOL_DEBUG) */
+
+#endif /* !APR_POOL_DEBUG */
 
 
 /*
@@ -1565,8 +1625,8 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *ke
                                                 apr_status_t (*cleanup) (void *),
                                                 apr_pool_t *pool)
 {
-#if defined(APR_POOL_DEBUG)
-    check_integrity(pool);
+#if APR_POOL_DEBUG
+    apr_pool_check_integrity(pool);
 #endif
     
     if (pool->user_data == NULL)
@@ -1590,8 +1650,8 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *k
                                                  apr_status_t (*cleanup) (void *),
                                                  apr_pool_t *pool)
 {
-#if defined(APR_POOL_DEBUG)
-    check_integrity(pool);
+#if APR_POOL_DEBUG
+    apr_pool_check_integrity(pool);
 #endif
     
     if (pool->user_data == NULL)
@@ -1607,8 +1667,8 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *k
 
 APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key, apr_pool_t *pool)
 {
-#if defined(APR_POOL_DEBUG)
-    check_integrity(pool);
+#if APR_POOL_DEBUG
+    apr_pool_check_integrity(pool);
 #endif
     
     if (pool->user_data == NULL)
@@ -1637,8 +1697,8 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
 {
     cleanup_t *c;
     
-#if defined(APR_POOL_DEBUG)
-    check_integrity(p);
+#if APR_POOL_DEBUG
+    apr_pool_check_integrity(p);
 #endif
     
     if (p != NULL) {
@@ -1656,8 +1716,8 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
 {
     cleanup_t *c, **lastp;
 
-#if defined(APR_POOL_DEBUG)
-    check_integrity(p);
+#if APR_POOL_DEBUG
+    apr_pool_check_integrity(p);
 #endif
    
     if (p == NULL)
@@ -1682,8 +1742,8 @@ APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
 {
     cleanup_t *c;
 
-#if defined(APR_POOL_DEBUG)
-    check_integrity(p);
+#if APR_POOL_DEBUG
+    apr_pool_check_integrity(p);
 #endif
 
     if (p == NULL)
