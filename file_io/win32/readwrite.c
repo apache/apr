@@ -104,9 +104,9 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
             FlushFileBuffers(thefile->filehand);
             thefile->size = GetFileSize(thefile->filehand, NULL);
             GetFileTime(thefile->filehand, &ctime, &atime, &mtime);
-            thefile->atime = WinTimeToUnixTime(&atime);
-            thefile->mtime = WinTimeToUnixTime(&mtime);
-            thefile->ctime = WinTimeToUnixTime(&ctime);
+            FileTimeToAprTime(&thefile->atime, &atime);
+            FileTimeToAprTime(&thefile->mtime, &mtime);
+            FileTimeToAprTime(&thefile->ctime, &ctime);
         }
         *nbytes = bwrote;
         return APR_SUCCESS;
