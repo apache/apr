@@ -1,7 +1,10 @@
 Changes with APR 0.9.5
 
-  *) If available, use 'readlink -f' to resolve symlinks in apr-config.
-     [Justin Erenkrantz]
+  *) Fix build issues in paths containing symlinks.  PR 8867.
+     [Joe Orton]
+
+  *) Update config.{guess,sub} for DragonFly BSD.  PR 29858.
+     [Joe Orton]
 
   *) Win32: Fix bug in apr_socket_sendfile that interferred with
      Win32 LSPs. Bug is described in Apache 2.0 bugzilla report 

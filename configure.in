@@ -46,7 +46,12 @@ AC_SUBST(apr_builddir)
 
 if test "$apr_builddir" != "$apr_srcdir"; then
   USE_VPATH=1
+  APR_CONFIG_LOCATION=build
+else
+  APR_CONFIG_LOCATION=source
 fi
+
+AC_SUBST(APR_CONFIG_LOCATION)
 
 # Libtool might need this symbol -- it must point to the location of
 # the generated libtool script (not necessarily the "top" build dir).

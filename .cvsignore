@@ -29,5 +29,6 @@ BuildLog.htm
 *.stt
 *.sto
 *.vcproj
+apr-config.out
 autom4te.cache
 ltcf-c.sh

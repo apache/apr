@@ -31,7 +31,7 @@ TARGETS = delete-lib $(TARGET_LIB) delete-exports export_vars.c apr.exp
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-CLEAN_TARGETS = apr.exp exports.c export_vars.c
+CLEAN_TARGETS = apr.exp exports.c export_vars.c apr-config.out
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
 	libtool apr-config
@@ -60,7 +60,11 @@ delete-lib:
 	    fi \
 	fi
 
-install: $(TARGET_LIB)
+# Create apr-config script suitable for the install tree
+apr-config.out: apr-config
+	sed 's,^\(location=\).*$$,\1installed,' < apr-config > $@
+
+install: $(TARGET_LIB) apr-config.out
 	if [ ! -d $(DESTDIR)$(includedir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(includedir); \
 	fi;
@@ -90,7 +94,7 @@ install: $(TARGET_LIB)
 	if [ ! -d $(DESTDIR)$(bindir) ]; then \
 	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
 	fi;
-	$(LIBTOOL) --mode=install cp apr-config $(DESTDIR)$(bindir)
+	$(LIBTOOL) --mode=install cp apr-config.out $(DESTDIR)$(bindir)/apr-config
 	chmod 755 $(DESTDIR)$(bindir)/apr-config
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
