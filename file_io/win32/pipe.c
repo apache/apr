@@ -102,7 +102,7 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
     (*out)->direction = 0;
 
     if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
-        return GetLastError();
+        return apr_get_os_error();
     }
 
     return APR_SUCCESS;
@@ -211,7 +211,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     else {
         /* Pipes on Win9* are blocking. Live with it. */
         if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
-            return GetLastError();
+            return apr_get_os_error();
         }
     }
 

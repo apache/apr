@@ -82,7 +82,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
 
     rv = WSASend(sock->sock, &wsaData, 1, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
-        lasterror = WSAGetLastError();
+        lasterror = apr_get_netos_error();
         return lasterror;
     }
 
@@ -104,7 +104,7 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
 
     rv = WSARecv(sock->sock, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
     if (rv == SOCKET_ERROR) {
-        lasterror = WSAGetLastError();
+        lasterror = apr_get_netos_error();
         *len = 0;
         return lasterror;
     }
@@ -134,7 +134,7 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
 
     rv = WSASend(sock->sock, pWsaData, nvec, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
-        lasterror = WSAGetLastError();
+        lasterror = apr_get_netos_error();
         free(pWsaData);
         return lasterror;
     }
@@ -270,8 +270,8 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                           ptfb,           /* header and trailer buffers */
                           dwFlags);       /* flags to control various aspects of TransmitFile */
         if (!rv) {
-            status = WSAGetLastError();
-            if (status == ERROR_IO_PENDING) {
+            status = apr_get_netos_error();
+            if (status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
 #ifdef WAIT_FOR_EVENT
                 rv = WaitForSingleObject(overlapped.hEvent, 
                                          sock->timeout >= 0 ? sock->timeout : INFINITE);
@@ -286,7 +286,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                 else if (rv == WAIT_ABANDONED)
                     status = WAIT_ABANDONED;
                 else
-                    status = GetLastError();
+                    status = apr_get_os_error();
             }
         }
         if (status != APR_SUCCESS)

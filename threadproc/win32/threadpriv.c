@@ -65,7 +65,7 @@ apr_status_t apr_create_thread_private(apr_threadkey_t **key,
     if (((*key)->key = TlsAlloc()) != 0xFFFFFFFF) {
 	return APR_SUCCESS;
     }
-    return GetLastError();
+    return apr_get_os_error();
 }
 
 apr_status_t apr_get_thread_private(void **new, apr_threadkey_t *key)
@@ -73,7 +73,7 @@ apr_status_t apr_get_thread_private(void **new, apr_threadkey_t *key)
     if ((*new) = TlsGetValue(key->key)) {
         return APR_SUCCESS;
     }
-    return GetLastError();
+    return apr_get_os_error();
 }
 
 apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
@@ -81,7 +81,7 @@ apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
     if (TlsSetValue(key->key, priv)) {
         return APR_SUCCESS;
     }
-    return GetLastError();
+    return apr_get_os_error();
 }
 
 apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
@@ -89,7 +89,7 @@ apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
     if (TlsFree(key->key)) {
         return APR_SUCCESS; 
     }
-    return GetLastError();
+    return apr_get_os_error();
 }
 
 apr_status_t apr_get_threadkeydata(void **data, const char *key,

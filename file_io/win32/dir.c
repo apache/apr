@@ -76,7 +76,7 @@ apr_status_t dir_cleanup(void *thedir)
 {
     apr_dir_t *dir = thedir;
     if (!CloseHandle(dir->dirhand)) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     return APR_SUCCESS;
 } 
@@ -103,7 +103,7 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 apr_status_t apr_closedir(apr_dir_t *thedir)
 {
     if (!FindClose(thedir->dirhand)) {
-        return GetLastError();   
+        return apr_get_os_error();   
     }
     apr_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
     return APR_SUCCESS;
@@ -115,12 +115,12 @@ apr_status_t apr_readdir(apr_dir_t *thedir)
         thedir->entry = apr_pcalloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
         thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-            return GetLastError();
+            return apr_get_os_error();
         }
         return APR_SUCCESS;
     }
     if (!FindNextFile(thedir->dirhand, thedir->entry)) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     return APR_SUCCESS;
 }
@@ -146,7 +146,7 @@ apr_status_t apr_rewinddir(apr_dir_t *thedir)
 apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
     if (!CreateDirectory(path, NULL)) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     return APR_SUCCESS;
 }
@@ -155,7 +155,7 @@ apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 {
     char *temp = canonical_filename(cont, path);
     if (!RemoveDirectory(temp)) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     return APR_SUCCESS;
 }

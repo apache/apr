@@ -67,7 +67,7 @@
 apr_status_t apr_kill(apr_proc_t *proc, int signal)
 {
     if (TerminateProcess((HANDLE)proc->pid, signal) == 0) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     return APR_SUCCESS;
 }

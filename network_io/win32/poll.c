@@ -135,7 +135,7 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
 
     (*nsds) = rv;    
     if ((*nsds) < 0) {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
     return APR_SUCCESS;
 }
