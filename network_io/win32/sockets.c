@@ -180,6 +180,8 @@ APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
             winhow = SD_BOTH;
             break;
         }
+        default:
+            return APR_BADARG;
     }
     if (shutdown(thesocket->sock, winhow) == 0) {
         return APR_SUCCESS;
