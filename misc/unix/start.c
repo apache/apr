@@ -75,8 +75,12 @@ apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
     }   
 
     newpool->prog_data = NULL;
-    newpool->apr_abort = NULL;
- 
+    if (cont) {
+        newpool->apr_abort = cont->apr_abort;
+    }
+    else {
+        newpool->apr_abort = NULL;
+    }
     *newcont = newpool;
     return APR_SUCCESS;
 }
