@@ -1,5 +1,5 @@
 Apache 2.0 STATUS:
-Last modified at [$Date: 2000/12/08 00:23:03 $]
+Last modified at [$Date: 2000/12/08 14:30:41 $]
 
 Release:
 
@@ -51,7 +51,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
         Status: Greg +1 (volunteers)
 
     * snarf rules.mk(.in) from APRUTIL to simplify makefiles
-        Status: Greg +1 (volunteers), Sascha +1
+        Status: Greg +1 (volunteers), Sascha +1, rbb -0.5
 
 Documentation that needs writing:
 
