@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/18 04:34:43 $]
+Last modified at [$Date: 2001/01/19 03:08:40 $]
 
 Release:
 
@@ -16,10 +16,7 @@ Release:
 RELEASE SHOWSTOPPERS:
 
     * Many linkage errors are gpfaulting Apache/win32 in various configs
-      (load mod_dav, for example.)  Must complete the APR_DECLARES
-        Gregory Nicholes is working on this, with quick response from rbb
-        Will Rowe will fold over the libapr.dsp into it's own library
-        and remove the exports from the simple apr.dsp once it's done.
+      (load mod_dav, for example.)
 
     * Replace APR_GET_POOL macro with a typesafe mechanism to get the pool
       from an APR (incomplete) type.
