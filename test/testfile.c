@@ -155,9 +155,9 @@ int main(void)
     apr_poll_socket_add(sdset, testsock, APR_POLLIN);
     num = 1;
     STD_TEST_NEQ("        Checking for incoming data",
-                 apr_poll(sdset, &num, -1))
+                 apr_poll(sdset, &num, 1 * APR_USEC_PER_SEC))
     if (num == 0) {
-        MSG_AND_EXIT("I should not return until num == 1\n")
+        printf("** This platform doesn't return readability on a regular file.**\n");
     }
     printf("    End of files as sockets test.\n");
 #endif
