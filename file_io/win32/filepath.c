@@ -93,13 +93,15 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     /* Split the inpath into its separate parts. If it fails then
         we know we have a bad path.
     */
-    if (deconstruct(testpath, server, volume, path, file, NULL, &elements, PATH_UNDEF))
-        return APR_EBADPATH;
+    if (deconstruct(testpath, server, volume, path, file, NULL, &elements, PATH_UNDEF)) {
+        if (errno == EINVAL)
+            return APR_EBADPATH;
+    }
     
     /* If we got a volume part then continue splitting out the root.
         Otherwise we either have an incomplete or relative path
     */
-    if (strlen(volume) > 0) {
+    if (volume && strlen(volume) > 0) {
         newpath = apr_pcalloc(p, strlen(server)+strlen(volume)+5);
         construct(newpath, server, volume, NULL, NULL, NULL, PATH_NETWARE);
 
