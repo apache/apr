@@ -81,6 +81,8 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
     DWORD oflags = 0;
     DWORD createflags = 0;
     DWORD attributes = 0;
+    DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
+    ap_oslevel_e level;
 
     (*dafile) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
 
@@ -106,7 +108,11 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
 
     (*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
     (*dafile)->lowerdemonfname = strlwr((*dafile)->demonfname);
-    
+ 
+    if (ap_get_oslevel(cont, &level) == APR_SUCCESS && level == APR_WIN_NT) {
+        sharemode |= FILE_SHARE_DELETE;
+    }
+
     if (flag & APR_CREATE) {
         if (flag & APR_EXCL) {
             /* only create new if file does not already exist */
@@ -147,7 +153,7 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
     }
 
-    (*dafile)->filehand = CreateFile(fname, oflags, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+    (*dafile)->filehand = CreateFile(fname, oflags, sharemode,
                                      NULL, createflags, attributes, 0);
 
     if ((*dafile)->filehand == INVALID_HANDLE_VALUE) {
