@@ -54,28 +54,40 @@
 
 #include <stdio.h>
 
+#include "test_apr.h"
 #include "apr_version.h"
 #include "apr_general.h"
 
 
-int main(int argc, char **argv)
+static void test_strings(CuTest *tc)
+{
+    CuAssertStrEquals(tc, APR_VERSION_STRING, apr_version_string());
+}
+
+static void test_ints(CuTest *tc)
 {
     apr_version_t vsn;
 
-    printf("compiled integer form: %d.%d.%d%s\ncompiled string form:  %s\n",
-           APR_MAJOR_VERSION, APR_MINOR_VERSION, APR_PATCH_VERSION,
-#ifdef APR_IS_DEV_VERSION
-           "-dev",
-#else
-           "",
-#endif
-           APR_VERSION_STRING);
-
     apr_version(&vsn);
-    printf("runtime integer form:  %d.%d.%d%s\nruntime string form:   %s\n",
-           vsn.major, vsn.minor, vsn.patch,
-           vsn.is_dev ? "-dev" : "",
-           apr_version_string());
 
-    return 0;
+    CuAssertIntEquals(tc, APR_MAJOR_VERSION, vsn.major);
+    CuAssertIntEquals(tc, APR_MINOR_VERSION, vsn.minor);
+    CuAssertIntEquals(tc, APR_PATCH_VERSION, vsn.patch);
 }
+
+CuSuite *testvsn(void)
+{
+    CuSuite *suite = CuSuiteNew("Test Versioning");
+
+    SUITE_ADD_TEST(suite, test_strings);
+    SUITE_ADD_TEST(suite, test_ints);
+
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return testvsn();
+}
+#endif
