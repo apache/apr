@@ -156,10 +156,14 @@ void ap_unix_setup_lock(void)
 static ap_status_t lock_cleanup(void *lock_)
 {
     ap_lock_t *lock=lock_;
+    ap_status_t stat;
 
     if (lock->curr_locked == 1) {
-        if (pthread_mutex_unlock(lock->interproc)) {
-            return errno;
+        if ((stat = pthread_mutex_unlock(lock->interproc))) {
+#ifdef PTHREAD_SETS_ERRNO
+            stat = errno;
+#endif
+            return stat;
         } 
         if (munmap((caddr_t)lock->interproc, sizeof(pthread_mutex_t))){
             return errno;
@@ -186,25 +190,33 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
         return errno;
     }
     close(fd);
-    if (pthread_mutexattr_init(&mattr)) {
+    if ((stat = pthread_mutexattr_init(&mattr))) {
+#ifdef PTHREAD_SETS_ERRNO
         stat = errno;
+#endif
         lock_cleanup(new);
         return stat;
     }
-    if (pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED)) {
+    if ((stat = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))) {
+#ifdef PTHREAD_SETS_ERRNO
         stat = errno;
+#endif
         lock_cleanup(new);
         return stat;
     }
 
-    if (pthread_mutex_init(new->interproc, &mattr)) {
+    if ((stat = pthread_mutex_init(new->interproc, &mattr))) {
+#ifdef PTHREAD_SETS_ERRNO
         stat = errno;
+#endif
         lock_cleanup(new);
         return stat;
     }
 
-    if (pthread_mutexattr_destroy(&mattr)) {
+    if ((stat = pthread_mutexattr_destroy(&mattr))) {
+#ifdef PTHREAD_SETS_ERRNO
         stat = errno;
+#endif
         lock_cleanup(new);
         return stat;
     }
@@ -216,8 +228,13 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 
 ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
-    if (pthread_mutex_lock(lock->interproc)) {
-        return errno;
+    ap_status_t stat;
+
+    if ((stat = pthread_mutex_lock(lock->interproc))) {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
+        return stat;
     }
     lock->curr_locked = 1;
     return APR_SUCCESS;
@@ -225,8 +242,13 @@ ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 
 ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
-    if (pthread_mutex_unlock(lock->interproc)) {
-        return errno;
+    ap_status_t stat;
+
+    if ((stat = pthread_mutex_unlock(lock->interproc))) {
+#ifdef PTHREAD_SETS_ERRNO
+        stat = errno;
+#endif
+        return stat;
     }
     lock->curr_locked = 0;
     return APR_SUCCESS;
