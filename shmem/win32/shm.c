@@ -136,6 +136,11 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
             return rv;
         }
         rv = apr_file_trunc(f, size);
+
+        /* res_name_from_filename turns file into a pseudo-name
+         * without slashes or backslashes, and prepends the \global
+         * prefix on Win2K and later
+         */
         mapkey = res_name_from_filename(file, 1, pool);
     }
 
@@ -208,6 +213,10 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         return APR_EINVAL;
     }
     else {
+        /* res_name_from_filename turns file into a pseudo-name
+         * without slashes or backslashes, and prepends the \global
+         * prefix on Win2K and later
+         */
         mapkey = res_name_from_filename(file, 1, pool);
     }
 
