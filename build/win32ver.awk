@@ -39,21 +39,27 @@ BEGIN {
       ver = substr($0, RSTART + 32, RLENGTH - 33);
     }
   }
-
-  verc = ver;
-  gsub(/\./, ",", verc);
-  if (build) {
-    sub(/-.*/, "", verc)
-    verc = verc "," build;
-  } else if (sub(/-dev/, ",0", verc)) {
-      ff = ff + 2;
-  } else if (!sub(/-alpha/, ",10", verc)  \
-          && !sub(/-beta/, ",100", verc)  \
-          && !sub(/-gold/, ",200", verc)) {
-    sub(/-.*/, "", verc);
-    verc = verc "," 0;
+  if (ver) {
+    verc = ver;
+    gsub(/\./, ",", verc);
+    if (build) {
+      sub(/-.*/, "", verc)
+      verc = verc "," build;
+    } else if (sub(/-dev/, ",0", verc)) {
+        ff = ff + 2;
+    } else if (!sub(/-alpha/, ",10", verc)  \
+            && !sub(/-beta/, ",100", verc)  \
+            && !sub(/-gold/, ",200", verc)) {
+      sub(/-.*/, "", verc);
+      verc = verc "," 0;
+    }
+  } else {
+# XXX Gotta fix this for non-httpd installs :(
+    ver = "0.0.0.0"
+    verc = "0,0,0,0"
+    ff = ff + 2;
   }
-  
+
   if (length(vendor)) {
     ff = ff + 8;
   }
