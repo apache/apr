@@ -20,5 +20,18 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+#ifndef APR_STRNATCMP_H
+#define APR_STRNATCMP_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 int ap_strnatcmp(char const *a, char const *b);
 int ap_strnatcasecmp(char const *a, char const *b);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* !APR_STRNATCMP_H */

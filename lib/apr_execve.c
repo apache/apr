@@ -109,7 +109,8 @@ static const char **hashbang(const char *filename, char * const *argv);
  * local argv[] array. The va_arg logic makes sure we do the right thing.
  * XXX: malloc() is used because we expect to be overlaid soon.
  */
-ap_status_t ap_execle(const char *filename, const char *argv0, ...)
+APR_EXPORT_NONSTD(ap_status_t) ap_execle(const char *filename, 
+                                         const char *argv0, ...)
 {
     va_list adummy;
     char **envp;
@@ -160,8 +161,8 @@ count_args(char * const *args)
  * We have to fiddle with the argv array to make it work on platforms
  * which don't support the "hashbang" interpreter line by default.
  */
-ap_status_t ap_execve(const char *filename, char * const argv[],
-	      char * const envp[])
+APR_EXPORT(ap_status_t) ap_execve(const char *filename, char * const argv[],
+                                  char * const envp[])
 {
     char **script_argv;
     extern char **environ;
