@@ -102,7 +102,7 @@ ap_status_t ap_closedir(ap_dir_t *thedir)
         }
     }
 
-    return os2errno(rv);
+    return APR_OS2_STATUS(rv);
 } 
 
 
@@ -129,7 +129,7 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
     thedir->validentry = FALSE;
     
     if (rv)
-        return os2errno(rv);
+        return APR_OS2_STATUS(rv);
     
     return APR_ENOENT;
 }
@@ -145,14 +145,14 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir)
 
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
-    return os2errno(DosCreateDir(path, NULL));
+    return APR_OS2_STATUS(DosCreateDir(path, NULL));
 }
 
 
 
 ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
-    return os2errno(DosDeleteDir(path));
+    return APR_OS2_STATUS(DosDeleteDir(path));
 }
 
 
@@ -207,7 +207,7 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
                 DosClose( hFile );
             }
 
-            return os2errno(rc);
+            return APR_OS2_STATUS(rc);
         }
     }
 

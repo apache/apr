@@ -74,7 +74,7 @@ static ap_status_t socket_cleanup(void *sock)
         return APR_SUCCESS;
     }
     else {
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     }
 }
 
@@ -103,7 +103,7 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_context_t *cont)
     (*new)->addr_len = sizeof(*(*new)->local_addr);
     
     if ((*new)->socketdes < 0) {
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     }
     (*new)->timeout = -1;
     (*new)->nonblock = FALSE;
@@ -118,7 +118,7 @@ ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
         return APR_SUCCESS;
     }
     else {
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     }
 }
 
@@ -134,7 +134,7 @@ ap_status_t ap_close_socket(ap_socket_t *thesocket)
 ap_status_t ap_bind(ap_socket_t *sock)
 {
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     else
         return APR_SUCCESS;
 }
@@ -142,7 +142,7 @@ ap_status_t ap_bind(ap_socket_t *sock)
 ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == -1)
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     else
         return APR_SUCCESS;
 }
@@ -162,7 +162,7 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_context_t *
                         &(*new)->addr_len);
 
     if ((*new)->socketdes < 0) {
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     }
 
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -193,7 +193,7 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
 
     if ((connect(sock->socketdes, (struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) &&
         (sock_errno() != SOCEINPROGRESS)) {
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     }
     else {
         int namelen = sizeof(*sock->local_addr);

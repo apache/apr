@@ -104,7 +104,7 @@ static ap_status_t handle_type(ap_filetype_e *ftype, HFILE file)
 
         return APR_SUCCESS;
     }
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -133,7 +133,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 
     finfo->protection = 0;
     finfo->filetype = APR_NOFILE;
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -157,5 +157,5 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
         return APR_SUCCESS;
     }
     
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }

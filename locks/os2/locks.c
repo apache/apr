@@ -104,7 +104,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e 
     if (!rc)
         ap_register_cleanup(cont, new, lock_cleanup, ap_null_cleanup);
 
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -127,7 +127,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont
     if (!rc)
         ap_register_cleanup(cont, *lock, lock_cleanup, ap_null_cleanup);
 
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -143,7 +143,7 @@ ap_status_t ap_lock(ap_lock_t *lock)
         lock->lock_count++;
     }
 
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -155,7 +155,7 @@ ap_status_t ap_unlock(ap_lock_t *lock)
     if (lock->owner == CurrentTid && lock->lock_count > 0) {
         lock->lock_count--;
         rc = DosReleaseMutexSem(lock->hMutex);
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
     }
     
     return APR_SUCCESS;
@@ -184,5 +184,5 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
     if (!rc)
         lock->hMutex = 0;
         
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }

@@ -59,7 +59,7 @@
 
 ap_status_t ap_cancel_thread(ap_thread_t *thd)
 {
-    return os2errno(DosKillThread(thd->tid));
+    return APR_OS2_STATUS(DosKillThread(thd->tid));
 }
 
     
@@ -73,7 +73,7 @@ ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
     else
         rc = DosExitMustComplete(&nesting);
 
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -81,5 +81,5 @@ ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
 {
 /* There's no way to ignore thread kills altogether in OS/2 (that I know of) */
-    return -1;
+    return APR_ENOTIMPL;
 }

@@ -105,13 +105,13 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
         DosExitCritSec();
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
     } else {
         rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);
 
         if (rc) {
             *nbytes = 0;
-            return os2errno(rc);
+            return APR_OS2_STATUS(rc);
         }
 
         *nbytes = bytesread;
@@ -164,13 +164,13 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }
 
         DosExitCritSec();
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
     } else {
         rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
 
         if (rc) {
             *nbytes = 0;
-            return os2errno(rc);
+            return APR_OS2_STATUS(rc);
         }
 
         *nbytes = byteswritten;
@@ -210,7 +210,7 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
     rc = DosWrite(thefile->filedes, &ch, 1, &byteswritten);
 
     if (rc) {
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
     }
     
     return APR_SUCCESS;
@@ -276,7 +276,7 @@ ap_status_t ap_flush(ap_file_t *thefile)
                 thefile->bufpos = 0;
         }
 
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
     } else {
         /* There isn't anything to do if we aren't buffering the output
          * so just return success.

@@ -80,6 +80,8 @@ typedef int ap_status_t;
 int ap_canonical_error(ap_status_t err);
 const char *ap_strerror(ap_status_t err);
 
+#define APR_OS2_STATUS(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
+
 #define APR_SUCCESS 0
 
 /* APR ERROR VALUES */
