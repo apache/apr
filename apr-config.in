@@ -123,16 +123,19 @@ fi
 
 thisdir="`dirname $0`"
 thisdir="`cd $thisdir && pwd`"
-# If we have the realpath program, use it to resolve symlinks.
-# Otherwise, being in a symlinked dir may result in incorrect output.
-if test -x "`which realpath 2>/dev/null`"; then
-  thisdir="`realpath $thisdir`"
-  APR_SOURCE_DIR="`realpath $APR_SOURCE_DIR`"
-fi
 if test -d $bindir; then
   tmpbindir="`cd $bindir && pwd`"
 else
   tmpbindir=""
+fi
+# If we have the realpath program, use it to resolve symlinks
+# Otherwise, being in a symlinked dir may result in incorrect output.
+if test -x "`which realpath 2>/dev/null`"; then
+  thisdir="`realpath $thisdir`"
+  APR_SOURCE_DIR="`realpath $APR_SOURCE_DIR`"
+  if test -n $tmpbindir; then
+    tmpbindir="`realpath $tmpbindir`"
+  fi
 fi
 if test "$tmpbindir" = "$thisdir"; then
   location=installed

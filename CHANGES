@@ -1,6 +1,7 @@
 Changes with APR 0.9.3
 
-
+  *) Fix error in apr-config when symlinks are involved.
+     [Garrett Rooney <rooneg@electricjellyfish.net>]
 
 Changes with APR 0.9.2
 
