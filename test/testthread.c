@@ -86,7 +86,7 @@ int x = 0;
 int value = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
-void init_func(void)
+static void init_func(void)
 {
     value++;
 }
