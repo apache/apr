@@ -140,6 +140,34 @@ fi
 ])
 
 dnl
+dnl check for presence of  retrans/retry variables in the res_state structure
+dnl
+AC_DEFUN(APR_CHECK_RESOLV_RETRANS,[
+  AC_CACHE_CHECK(for presence of retrans/retry fields in res_state/resolv.h , ac_cv_retransretry,[
+  AC_TRY_RUN( [
+#include <sys/types.h>
+#include <inet/ip.h>
+#include <resolv.h>
+/* _res is a global defined in resolv.h */
+void main(void) {
+    _res.retrans = 2;
+    _res.retry = 1;
+    exit(0);
+}
+],[
+  ac_cv_retransretry="yes"
+],[
+  ac_cv_retransretry="no"
+],[
+  ac_cv_retransretry="no"
+])])
+if test "$ac_cv_retransretry" = "yes"; then
+  AC_DEFINE(RESOLV_RETRANSRETRY, 1, [Define if resolv.h's res_state has the fields retrans/rety])
+fi
+])
+
+
+dnl
 dnl check for gethostbyname() which handles numeric address strings
 dnl
 AC_DEFUN(APR_CHECK_GETHOSTBYNAME_NAS,[
