@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Other-child registrations are automatically removed when the
+     associated pool is destroyed.  This avoids garbage in the list
+     of registrations when a pool with a registration is freed.
+     [Jeff Trawick]
+
   *) Allow LTFLAGS to be overridden by the configure command-line 
      (default="--silent") and introduce LT_LDFLAGS.  [Roy Fielding]
 
