@@ -2,11 +2,11 @@
 #define APR_H
 
 /**
- * @file include\apr.h
- * @brief Basic APR header
+ * @file include/apr.h
+ * @brief APR APR Main Include
  */
 /**
- * @defgroup APR APR Functions
+ * @defgroup APR APR Routines
  * @{
  */
 
