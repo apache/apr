@@ -100,8 +100,8 @@ delete-exports:
 	    headers="`find include/*.h -newer apr.exp`" ; \
 	    if test -n "$$headers"; then \
 		echo Found newer headers. Will rebuild apr.exp. ; \
-		echo $(RM) -f apr.exp ; \
-		$(RM) -f apr.exp ; \
+		echo $(RM) -f apr.exp exports.c export_vars.h ; \
+		$(RM) -f apr.exp exports.c export_vars.h ; \
 	    fi \
 	fi
 
