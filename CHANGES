@@ -15,6 +15,11 @@ Changes with APR 0.9.4
      linking with -lpthread, which in turn caused weird problems for
      APR applications.  [Kristofer Spinka <kspinka@style.net>]
 
+  *) OS/2: apr_stat() fixes - When a character device is stat'ed, 
+     fill in finfo.name if it was asked for.  Return APR_INCOMPLETE 
+     when appropriate.  Addresses httpd incident [CAN-2003-0134].
+     [Brian Havard]
+
 Changes with APR 0.9.3
 
   *) Don't enable posixsem, at build time, on systems where sem_t *
