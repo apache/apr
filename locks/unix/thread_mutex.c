@@ -61,16 +61,16 @@
 static apr_status_t thread_mutex_cleanup(void *data)
 {
     apr_thread_mutex_t *mutex = (apr_thread_mutex_t *)data;
-    apr_status_t stat;
+    apr_status_t rv;
 
     pthread_mutex_unlock(&mutex->mutex);
-    stat = pthread_mutex_destroy(&mutex->mutex);
+    rv = pthread_mutex_destroy(&mutex->mutex);
 #ifdef PTHREAD_SETS_ERRNO
-    if (stat) {
-        stat = errno;
+    if (rv) {
+        rv = errno;
     }
 #endif
-    return stat;
+    return rv;
 } 
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
@@ -79,7 +79,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 {
     apr_thread_mutex_t *new_mutex;
     pthread_mutexattr_t mattr;
-    apr_status_t stat;
+    apr_status_t rv;
 
     new_mutex = (apr_thread_mutex_t *)apr_pcalloc(pool,
                                                   sizeof(apr_thread_mutex_t));
@@ -91,28 +91,28 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     new_mutex->pool = pool;
     new_mutex->nested = flags & APR_THREAD_MUTEX_NESTED;
 
-    if ((stat = pthread_mutexattr_init(&mattr))) {
+    if ((rv = pthread_mutexattr_init(&mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         thread_mutex_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
 
-    if ((stat = pthread_mutex_init(&new_mutex->mutex, &mattr))) {
+    if ((rv = pthread_mutex_init(&new_mutex->mutex, &mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         thread_mutex_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
 
-    if ((stat = pthread_mutexattr_destroy(&mattr))) {
+    if ((rv = pthread_mutexattr_destroy(&mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         thread_mutex_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
 
     apr_pool_cleanup_register(new_mutex->pool,
@@ -125,74 +125,62 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
 #if APR_HAS_THREADS
-    apr_os_thread_t my_thrid; /* save one call to apr_os_thread_current() */
-
-    if (mutex->nested) {
-        if (apr_os_thread_equal(mutex->owner,
-                                (my_thrid = apr_os_thread_current()))) {
-            mutex->owner_ref++;
-                return APR_SUCCESS;
-        }
+    if (mutex->nested && apr_os_thread_equal(mutex->owner,
+                                             apr_os_thread_current())) {
+        mutex->owner_ref++;
+        return APR_SUCCESS;
     }
 #endif
 
-    stat = pthread_mutex_lock(&mutex->mutex);
-    if (stat) {
+    rv = pthread_mutex_lock(&mutex->mutex);
+    if (rv) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
-        return stat;
+        return rv;
     }
 
 #if APR_HAS_THREADS
     if (mutex->nested) {
-        mutex->owner = my_thrid;
+        mutex->owner = apr_os_thread_current();
         mutex->owner_ref = 1;
     }
 #endif
 
-    return stat;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
 #if APR_HAS_THREADS
-    apr_os_thread_t my_thrid; /* save one call to apr_os_thread_current() */
-
-    if (mutex->nested) {
-        if (apr_os_thread_equal(mutex->owner,
-                                (my_thrid = apr_os_thread_current()))) {
-            mutex->owner_ref++;
-            return APR_SUCCESS;
-        }
+    if (mutex->nested && apr_os_thread_equal(mutex->owner,
+                                             apr_os_thread_current())) {
+        mutex->owner_ref++;
+        return APR_SUCCESS;
     }
 #endif
 
-    stat = pthread_mutex_trylock(&mutex->mutex);
-    if (stat) {
+    rv = pthread_mutex_trylock(&mutex->mutex);
+    if (rv) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
-        /* Normalize the return code. */
-        if (stat == EBUSY)
-            stat = APR_EBUSY;
-
-        return stat;
+        return (rv == EBUSY) ? APR_EBUSY : rv;
     }
 
 #if APR_HAS_THREADS
     if (mutex->nested) {
-        mutex->owner = my_thrid;
+        mutex->owner = apr_os_thread_current();
         mutex->owner_ref = 1;
     }
 #endif
 
-    return stat;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
@@ -229,12 +217,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
-    apr_status_t stat;
-    if ((stat = thread_mutex_cleanup(mutex)) == APR_SUCCESS) {
+    apr_status_t rv;
+    if ((rv = thread_mutex_cleanup(mutex)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(mutex->pool, mutex, thread_mutex_cleanup);
         return APR_SUCCESS;
     }
-    return stat;
+    return rv;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_mutex)
