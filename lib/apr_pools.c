@@ -762,8 +762,7 @@ extern char _end;
 /* Find the pool that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
-APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts,
-                                     int (*apr_abort)(int retcode))
+APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
 {
     const char *s = ts;
     union block_hdr **pb;
@@ -776,16 +775,18 @@ APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts,
     /* consider stuff on the stack to also be in the NULL pool...
      * XXX: there's cases where we don't want to assume this
      */
-    APR_ABORT((stack_direction == -1 && 
-              is_ptr_in_range(s, &ts, known_stack_point)) || 
-              (stack_direction == 1 &&    
-              is_ptr_in_range(s, known_stack_point, &ts)), 1, apr_abort,
-              "Ouch!  find_pool() called on pointer in a free block\n");
+    if ((stack_direction == -1 && is_ptr_in_range(s, &ts, known_stack_point))
+	|| (stack_direction == 1 && is_ptr_in_range(s, known_stack_point, &ts))) {
+	abort();
+	return NULL;
+    }
     /* search the global_block_list */
     for (pb = &global_block_list; *pb; pb = &b->h.global_next) {
 	b = *pb;
 	if (is_ptr_in_range(s, b, b->h.endp)) {
 	    if (b->h.owning_pool == FREE_POOL) {
+		fprintf(stderr,
+		    "Ouch!  find_pool() called on pointer in a free block\n");
 		abort();
 		exit(1);
 	    }
@@ -829,14 +830,15 @@ APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
  * instead.  This is a guarantee by the caller that sub will not
  * be destroyed before p is.
  */
-APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, 
-                             int (*apr_abort)(int retcode))
+APR_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub)
 {
     union block_hdr *b;
 
     /* We could handle more general cases... but this is it for now. */
-    APR_ABORT(sub->parent != p, 1, apr_abort,
-              "pool_join: p is not a parent of sub\n");
+    if (sub->parent != p) {
+	fprintf(stderr, "pool_join: p is not parent of sub\n");
+	abort();
+    }
     while (p->joined) {
 	p = p->joined;
     }
