@@ -49,7 +49,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
 {
     apr_status_t rv;
 
-    int len = strlen(dirname);
+    apr_size_t len = strlen(dirname);
     (*new) = apr_pcalloc(pool, sizeof(apr_dir_t));
     /* Leave room here to add and pop the '*' wildcard for FindFirstFile 
      * and double-null terminate so we have one character to change.
@@ -243,7 +243,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 #else
             char fspec[APR_PATH_MAX];
 #endif
-            int dirlen = strlen(thedir->dirname);
+            apr_size_t dirlen = strlen(thedir->dirname);
             if (dirlen >= sizeof(fspec))
                 dirlen = sizeof(fspec) - 1;
             apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));

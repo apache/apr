@@ -342,6 +342,8 @@ typedef  int         apr_socklen_t;
 #define APR_SIZEOF_VOIDP   4
 #endif
 
+#define DWORD_MAX 4294967295
+
 /* XXX These simply don't belong here, perhaps in apr_portable.h
  * based on some APR_HAVE_PID/GID/UID?
  */
@@ -363,7 +365,7 @@ typedef  int         gid_t;
 #endif
 
 #ifndef WS2TCPIP_INLINE
-6:09 PM 11/16/2003#define IN6_IS_ADDR_V4MAPPED(a) \
+#define IN6_IS_ADDR_V4MAPPED(a) \
     (   (*(const apr_uint64_t *)(const void *)(&(a)->s6_addr[0]) == 0) \
      && (*(const apr_uint32_t *)(const void *)(&(a)->s6_addr[8]) == ntohl(0x0000ffff)))
 #endif
