@@ -94,47 +94,88 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 	return APR_SUCCESS;
     }
 
-    bytes_read = 0;
-    if (thefile->ungetchar != -1) {
-        bytes_read = 1;
-        *(char *)buf = (char)thefile->ungetchar;
-        buf = (char *)buf + 1;
-        (*nbytes)--;
-        thefile->ungetchar = -1;
-	if (*nbytes == 0) {
-	    *nbytes = bytes_read;
-	    return APR_SUCCESS;
+    if (thefile->buffered) {
+        char *pos = (char *)buf;
+        ap_uint64_t blocksize;
+        ap_uint64_t size = *nbytes;
+
+#if APR_HAS_THREADS
+        ap_lock(thefile->thlock);
+#endif
+
+        if (thefile->direction == 1) {
+            ap_flush(thefile);
+            thefile->bufpos = 0;
+            thefile->direction = 0;
+            thefile->dataRead = 0;
+        }
+
+        while (rv == 0 && size > 0) {
+            if (thefile->bufpos >= thefile->dataRead) {
+                thefile->dataRead = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
+                if (thefile->dataRead == 0) {
+                    thefile->eof_hit = TRUE;
+                    break;
+                }
+                thefile->filePtr += thefile->dataRead;
+                thefile->bufpos = 0;
+            }
+
+            blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;                                                            memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
+            thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
+        *nbytes = rv == 0 ? pos - (char *)buf : 0;
+#if APR_HAS_THREADS
+        ap_unlock(thefile->thlock);
+#endif
+        return rv;
+    }
+    else {
+        bytes_read = 0;
+        if (thefile->ungetchar != -1) {
+            bytes_read = 1;
+            *(char *)buf = (char)thefile->ungetchar;
+            buf = (char *)buf + 1;
+            (*nbytes)--;
+            thefile->ungetchar = -1;
+	if     (*nbytes == 0) {
+	        *nbytes = bytes_read;
+	        return APR_SUCCESS;
 	}
-    }
-
-    do {
-        rv = read(thefile->filedes, buf, *nbytes);
-    } while (rv == -1 && errno == EINTR);
-
-    if (rv == -1 && 
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        thefile->timeout != 0) {
-        ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
-        if (arv != APR_SUCCESS) {
-            *nbytes = bytes_read;
-            return arv;
         }
-        else {
-            do {
-                rv = read(thefile->filedes, buf, *nbytes);
-            } while (rv == -1 && errno == EINTR);
-        }
-    }  
 
-    *nbytes = bytes_read;
-    if (rv == 0) {
-	return APR_EOF;
+        do {
+            rv = read(thefile->filedes, buf, *nbytes);
+        } while (rv == -1 && errno == EINTR);
+
+        if (rv == -1 && 
+            (errno == EAGAIN || errno == EWOULDBLOCK) && 
+            thefile->timeout != 0) {
+            ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
+            if (arv != APR_SUCCESS) {
+                *nbytes = bytes_read;
+                return arv;
+            }
+            else {
+                do {
+                    rv = read(thefile->filedes, buf, *nbytes);
+                } while (rv == -1 && errno == EINTR);
+            }
+        }  
+
+        *nbytes = bytes_read;
+        if (rv == 0) {
+	return     APR_EOF;
+        }
+        if (rv > 0) {
+	*nbytes     += rv;
+	return     APR_SUCCESS;
+        }
+        return errno;
     }
-    if (rv > 0) {
-	*nbytes += rv;
-	return APR_SUCCESS;
-    }
-    return errno;
 }
 
 ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
@@ -144,31 +185,69 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
         return APR_EBADARG;
 
-    do {
-        rv = write(thefile->filedes, buf, *nbytes);
-    } while (rv == (ap_size_t)-1 && errno == EINTR);
+    if (thefile->buffered) {
+        char *pos = (char *)buf;
+        int blocksize;
+        int size = *nbytes;
 
-    if (rv == (ap_size_t)-1 &&
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        thefile->timeout != 0) {
-        ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
-        if (arv != APR_SUCCESS) {
-            *nbytes = 0;
-            return arv;
-        }
-        else {
-            do {
-                rv = write(thefile->filedes, buf, *nbytes);
-	    } while (rv == (ap_size_t)-1 && errno == EINTR);
-        }
-    }  
+#if APR_HAS_THREADS
+        ap_lock(thefile->thlock);
+#endif
 
-    if (rv == (ap_size_t)-1) {
-        (*nbytes) = 0;
-        return errno;
+        if ( thefile->direction == 0 ) {
+            /* Position file pointer for writing at the offset we are 
+             * logically reading from
+             */
+            ap_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            if (offset != thefile->filePtr)
+                lseek(thefile->filedes, offset, SEEK_SET);
+            thefile->bufpos = thefile->dataRead = 0;
+            thefile->direction = 1;
+        }
+
+        while (rv == 0 && size > 0) {
+            if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
+                ap_flush(thefile);
+
+            blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
+                        APR_FILE_BUFSIZE - thefile->bufpos : size;
+            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);                      thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
+#if APR_HAS_THREADS
+        ap_unlock(thefile->thlock);
+#endif
+        return rv;
     }
-    *nbytes = rv;
-    return APR_SUCCESS;
+    else {
+        do {
+            rv = write(thefile->filedes, buf, *nbytes);
+        } while (rv == (ap_size_t)-1 && errno == EINTR);
+
+        if (rv == (ap_size_t)-1 &&
+            (errno == EAGAIN || errno == EWOULDBLOCK) && 
+            thefile->timeout != 0) {
+            ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
+            if (arv != APR_SUCCESS) {
+                *nbytes = 0;
+                return arv;
+            }
+            else {
+                do {
+                    rv = write(thefile->filedes, buf, *nbytes);
+	        } while (rv == (ap_size_t)-1 && errno == EINTR);
+            }
+        }  
+
+        if (rv == (ap_size_t)-1) {
+            (*nbytes) = 0;
+            return errno;
+        }
+        *nbytes = rv;
+        return APR_SUCCESS;
+    }
 }
 
 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
@@ -255,12 +334,23 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
 
 ap_status_t ap_flush(ap_file_t *thefile)
 {
-/* Another function to get rid of once we finish removing buffered I/O
- * and we are sure nobody is using it.
- */
     if(thefile == NULL)
         return APR_EBADARG;
 
+    if (thefile->buffered) {
+        ap_int64_t written = 0;
+        int rc = 0;
+
+        if (thefile->direction == 1 && thefile->bufpos) {
+            written= write(thefile->filedes, thefile->buffer, thefile->bufpos);
+            thefile->filePtr += written;
+
+            if (rc == 0)
+                thefile->bufpos = 0;
+        }
+
+        return rc;
+    }
     /* There isn't anything to do if we aren't buffering the output
      * so just return success.
      */

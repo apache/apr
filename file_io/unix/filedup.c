@@ -79,6 +79,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
         (*new_file)->filedes = dup(old_file->filedes); 
     }
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
+    (*new_file)->buffered = old_file->buffered;
     ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), ap_unix_file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;

@@ -105,6 +105,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->filedes = filedes[0];
     (*in)->pipe = 1;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in)->buffered = 0;
     (*in)->timeout = -1;
 
     (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
@@ -112,6 +113,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*out)->filedes = filedes[1];
     (*out)->pipe = 1;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out)->buffered = 0;
     (*out)->timeout = -1;
 
     pipenonblock(*in);
