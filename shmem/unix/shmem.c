@@ -75,6 +75,12 @@ apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *fi
         return errno;
     }
     (*m) = mm_malloc(newmm, sizeof(struct shmem_t));
+    /* important to check this; we may be locking a lock file for the first
+     * time, which won't work if the file is on NFS
+     */
+    if (!*m) {
+        return errno;
+    }
     (*m)->mm = newmm;
 #if BEOS
     (*m)->id = area_for((*m));
