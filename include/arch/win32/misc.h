@@ -88,7 +88,7 @@ typedef struct datastruct {
 struct ap_other_child_rec_t {
     struct ap_other_child_rec_t *next;
     int pid;
-    void (*maintenance) (int, void *);
+    void (*maintenance) (int, void *, int);
     void *data;
     int write_fd;
 };

@@ -585,7 +585,7 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont);
 
 /*
 
-=head1 void ap_register_other_child(ap_proc_t *pid, void (*maintenance) (int reason, void *data), void *data, int write_fd, ap_pool_t *p)
+=head1 void ap_register_other_child(ap_proc_t *pid, void (*maintenance) (int reason, void *data, int status), void *data, int write_fd, ap_pool_t *p)
 
 B<Register an other_child -- a child which must be kept track of so that the program knows when it has dies or disappeared.>
 
@@ -603,7 +603,7 @@ B<Register an other_child -- a child which must be kept track of so that the pro
  * needs to take an ap_file_t, expecting the write_fd to be a pipe. -dean
  */
 void ap_register_other_child(ap_proc_t *pid, 
-                             void (*maintenance) (int reason, void *),
+                             void (*maintenance) (int reason, void *, int status),
                              void *data, int write_fd, ap_pool_t *p);
 
 /*
@@ -626,7 +626,7 @@ void ap_unregister_other_children(void *data);
 
 /*
 
-=head1 ap_status_t ap_reap_other_child(ap_proc_t *piod)
+=head1 ap_status_t ap_reap_other_child(ap_proc_t *pid, int status)
 
 B<Check on the specified process.  If it is gone, call the maintenance function.>
 
@@ -634,7 +634,7 @@ B<Check on the specified process.  If it is gone, call the maintenance function.
 
 =cut
  */
-ap_status_t ap_reap_other_child(ap_proc_t *pid); 
+ap_status_t ap_reap_other_child(ap_proc_t *pid, int status); 
 
 /*
 
