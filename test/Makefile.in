@@ -90,7 +90,7 @@ testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@ $(L
 client@EXEEXT@: client.lo $(LOCAL_LIBS)
 	$(LINK) client.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-server@EXEEXT@: server.lo sendfile.lo $(LOCAL_LIBS)
+server@EXEEXT@: server.lo $(LOCAL_LIBS)
 	$(LINK) server.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
