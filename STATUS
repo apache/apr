@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/02 15:22:40 $]
+Last modified at [$Date: 2002/05/03 13:00:19 $]
 
 Release:
 
@@ -89,8 +89,9 @@ CURRENT VOTES:
                   YES means you use the atomics code, based on the *build*
                   machine (and therefore carries some dependencies) or
                   NO which maintains "universal" portabiity, which is
-                  what we have (but the default being NO atomics).
-      -1: IanH I don't agree. I think APR is the perfect place this kind of thing. 
+                  what we have (but the default being NO atomics)
+      -1: IanH, BillS: 
+                  I don't agree. I think APR is the perfect place this kind of thing. 
                   For platforms that support it is a big win, for ones which don't
                   they are no worse off than the alternative.
                   I can't maintain every asm implementation, but I am volunteering
@@ -105,7 +106,7 @@ CURRENT VOTES:
       advantage of compiler optimizations when the size of the block being
       passed to memset is known at compile time.
 
-      +1: BrianP, Justin, Sander, Cliff, Ian
+      +1: BrianP, Justin, Sander, Cliff, Ian, BillS
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
