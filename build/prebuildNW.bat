@@ -21,5 +21,5 @@ copy ..\..\pcre\config.hw ..\..\pcre\config.h
 copy ..\..\pcre\pcre.hw ..\..\pcre\pcre.h
 
 # Generate the import list
-awk95 -f make_nw_export.awk ..\include\*.h |sort > ..\misc\netware\aprlib.imp
-awk95 -f make_nw_export.awk ..\..\apr-util\include\*.h |sort > ..\misc\netware\aprutil.imp
+awk95 -f make_nw_export.awk ..\include\*.h |sort > ..\aprlib.imp
+awk95 -f make_nw_export.awk ..\..\apr-util\include\*.h |sort > ..\aprutil.imp
