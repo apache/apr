@@ -52,7 +52,6 @@
  * <http://www.apache.org/>.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,74 +62,268 @@
 #include "apr_lib.h"
 #include "test_apr.h"
 
+static void test_mkdir(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_make("data/testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_stat(&finfo, "data/testdir", APR_FINFO_TYPE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, APR_DIR, finfo.filetype);
+}
+
+static void test_mkdir_recurs(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_make_recursive("data/one/two/three", 
+                                APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_stat(&finfo, "data/one", APR_FINFO_TYPE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, APR_DIR, finfo.filetype);
+
+    rv = apr_stat(&finfo, "data/one/two", APR_FINFO_TYPE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, APR_DIR, finfo.filetype);
+
+    rv = apr_stat(&finfo, "data/one/two/three", APR_FINFO_TYPE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, APR_DIR, finfo.filetype);
+}
+
+static void test_remove(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_remove("data/testdir", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_stat(&finfo, "data/testdir", APR_FINFO_TYPE, p);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
+}
+
+static void test_removeall_fail(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_remove("data/one", p);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOTEMPTY(rv));
+}
+
+static void test_removeall(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_remove("data/one/two/three", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_remove("data/one/two", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_remove("data/one", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+static void test_remove_notthere(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_remove("data/notthere", p);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
+}
+
+static void test_mkdir_twice(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_make("data/testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_make("data/testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE, p);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EEXIST(rv));
+
+    rv = apr_dir_remove("data/testdir", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+static void test_opendir(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_dir_t *dir;
+
+    rv = apr_dir_open(&dir, "data", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_dir_close(dir);
+}
+
+static void test_opendir_notthere(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_dir_t *dir;
+
+    rv = apr_dir_open(&dir, "notthere", p);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
+}
+
+static void test_closedir(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_dir_t *dir;
+
+    rv = apr_dir_open(&dir, "data", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_dir_close(dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+static void test_readdir_onedot(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_dir_t *dir;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_open(&dir, "data", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, ".", finfo.name);
+
+    rv = apr_dir_close(dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+static void test_readdir_twodot(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_dir_t *dir;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_open(&dir, "data", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, "..", finfo.name);
+
+    rv = apr_dir_close(dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+static void test_rewind(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_dir_t *dir;
+    apr_finfo_t finfo;
+
+    rv = apr_dir_open(&dir, "data", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, ".", finfo.name);
+
+    rv = apr_dir_rewind(dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertStrEquals(tc, ".", finfo.name);
+
+    rv = apr_dir_close(dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
 
 /* Test for a (fixed) bug in apr_dir_read().  This bug only happened
    in threadless cases. */
-
-int main(void)
+static void test_uncleared_errno(CuTest *tc)
 {
-    apr_pool_t *pool;
     apr_file_t *thefile = NULL;
     apr_finfo_t finfo;
     apr_int32_t finfo_flags = APR_FINFO_TYPE | APR_FINFO_NAME;
     apr_dir_t *this_dir;
- 
-    printf("APR Directory Read Test\n===========================\n\n");
-    
-    STD_TEST_NEQ("Initializing APR", apr_initialize())
-    atexit(apr_terminate);
-    STD_TEST_NEQ("Creating the main pool we'll use", 
-                 apr_pool_create(&pool, NULL))    
+    apr_status_t rv; 
 
-    fprintf(stdout, "Testing for readdir() bug.\n");
-
-    /* Make two empty directories, and put a file in one of them. */
-    STD_TEST_NEQ("    Creating empty dir1",
-                 apr_dir_make("dir1", APR_OS_DEFAULT, pool))
-    STD_TEST_NEQ("    Creating empty dir2",
-                 apr_dir_make("dir2", APR_OS_DEFAULT, pool))
-    STD_TEST_NEQ("    Creating dir1/file1",
-                 apr_file_open(&thefile, "dir1/file1",
-                               APR_READ | APR_WRITE | APR_CREATE,
-                               APR_OS_DEFAULT, pool))
-    STD_TEST_NEQ("    Closing dir1/file1",
-                 apr_file_close(thefile))
+    rv = apr_dir_make("dir1", APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_dir_make("dir2", APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_file_open(&thefile, "dir1/file1",
+                       APR_READ | APR_WRITE | APR_CREATE, APR_OS_DEFAULT, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_file_close(thefile);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     /* Try to remove dir1.  This should fail because it's not empty.
        However, on a platform with threads disabled (such as FreeBSD),
        `errno' will be set as a result. */
-    TEST_EQ("    Failing to remove dir1", apr_dir_remove("dir1", pool), 
-            APR_SUCCESS, "OK", "Failed") 
+    rv = apr_dir_remove("dir1", p);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOTEMPTY(rv));
     
     /* Read `.' and `..' out of dir2. */
-    STD_TEST_NEQ("    Opening dir2",
-                 apr_dir_open(&this_dir, "dir2", pool))
-    STD_TEST_NEQ("       reading `.' entry",
-                 apr_dir_read(&finfo, finfo_flags, this_dir))
-    STD_TEST_NEQ("       reading `..' entry",
-                 apr_dir_read(&finfo, finfo_flags, this_dir))
+    rv = apr_dir_open(&this_dir, "dir2", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_dir_read(&finfo, finfo_flags, this_dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_dir_read(&finfo, finfo_flags, this_dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     /* Now, when we attempt to do a third read of empty dir2, and the
        underlying system readdir() returns NULL, the old value of
        errno shouldn't cause a false alarm.  We should get an ENOENT
        back from apr_dir_read, and *not* the old errno. */
-    TEST_STATUS("       get ENOENT on 3rd read", 
-                apr_dir_read(&finfo, finfo_flags, this_dir),
-                APR_STATUS_IS_ENOENT, "OK", "Failed")
+    rv = apr_dir_read(&finfo, finfo_flags, this_dir);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
 
-    STD_TEST_NEQ("       closing dir",
-		 apr_dir_close(this_dir));
+    rv = apr_dir_close(this_dir);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 		 
     /* Cleanup */
-    STD_TEST_NEQ("    Cleanup file1",
-                 apr_file_remove("dir1/file1", pool))
-    STD_TEST_NEQ("    Cleanup dir1",
-                 apr_dir_remove("dir1", pool))
-    STD_TEST_NEQ("    Cleanup dir2",
-                 apr_dir_remove("dir2", pool))
+    rv = apr_file_remove("dir1/file1", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_dir_remove("dir1", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_dir_remove("dir2", p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    apr_pool_destroy(pool);
-
-    printf("\nAll tests passed OK\n");
-    return 0;
 }
+
+CuSuite *testdir(void)
+{
+    CuSuite *suite = CuSuiteNew("Test Directory");
+
+    SUITE_ADD_TEST(suite, test_mkdir);
+    SUITE_ADD_TEST(suite, test_mkdir_recurs);
+    SUITE_ADD_TEST(suite, test_remove);
+    SUITE_ADD_TEST(suite, test_removeall_fail);
+    SUITE_ADD_TEST(suite, test_removeall);
+    SUITE_ADD_TEST(suite, test_remove_notthere);
+    SUITE_ADD_TEST(suite, test_mkdir_twice);
+
+    SUITE_ADD_TEST(suite, test_opendir);
+    SUITE_ADD_TEST(suite, test_opendir_notthere);
+    SUITE_ADD_TEST(suite, test_closedir);
+    SUITE_ADD_TEST(suite, test_uncleared_errno);
+
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return testdir();
+}
+#endif
+

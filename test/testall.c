@@ -75,6 +75,7 @@ testfunc *tests[NUM_TESTS] = {
     testpool,
     testfmt,
     testfile,
+    testdir,
     NULL
 };
 
