@@ -31,10 +31,9 @@
  * SUCH DAMAGE.
  */
 
-#include "apr_private.h"
 #include "fileio.h" /* prototype of apr_mkstemp() */
 
-#if !defined(HAVE_MKSTEMP)
+#ifndef HAVE_MKSTEMP
 
 #ifndef __warn_references
 #define __warn_references(a,b) 
