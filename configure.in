@@ -598,7 +598,9 @@ AC_CHECK_DEFINE(CODESET, langinfo.h)
 AC_CHECK_DEFINE(isascii, ctype.h)
 # We are assuming that if the platform doesn't have POLLIN, it doesn't have
 # any POLL definitions.
-AC_CHECK_DEFINE(POLLIN, poll.h)
+AC_CHECK_DEFINE_FILES(POLLIN, [
+#include <poll.h>
+#include <sys/poll.h> ] )
 
 pthreadser="0"
 if test "$threads" = "1"; then
