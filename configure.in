@@ -758,7 +758,9 @@ APR_CHECK_GETHOSTBYNAME_NAS
 echo $ac_n "${nl}Checking for IPv6 Networking support...${nl}"
 dnl # Start of checking for IPv6 support...
 AC_SEARCH_LIBS(getaddrinfo, inet6)
+AC_SEARCH_LIBS(getnameinfo, inet6)
 APR_CHECK_WORKING_GETADDRINFO
+AC_CHECK_FUNCS(getnameinfo)
 AC_CHECK_FUNCS(getipnodebyname)
 AC_CHECK_FUNCS(getipnodebyaddr)
 APR_CHECK_SOCKADDR_IN6
@@ -766,8 +768,12 @@ AC_MSG_CHECKING(if APR supports IPv6)
 have_ipv6="0"
 if test "x$have_sockaddr_in6" = "x1"; then
     if test "x$ac_cv_working_getaddrinfo" = "xyes"; then
-        have_ipv6="1"
-        AC_MSG_RESULT("yes")
+        if test "x$ac_cv_func_getnameinfo" = "xyes"; then
+            have_ipv6="1"
+            AC_MSG_RESULT("yes")
+        else
+            AC_MSG_RESULT("no -- no getnameinfo")
+        fi
     else
         AC_MSG_RESULT("no -- no working getaddrinfo")
     fi
