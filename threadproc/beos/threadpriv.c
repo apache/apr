@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "beos/threadproc.h"
+#include "threadproc.h"
 
 static struct beos_key key_table[BEOS_MAX_DATAKEYS];
 static struct beos_private_data *beos_data[BEOS_MAX_DATAKEYS];
