@@ -306,6 +306,39 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa,
                              apr_pool_t *p);
 
 /**
+ * Parse hostname/IP address with scope id and port.
+ *
+ * Any of the following strings are accepted:
+ *   8080                  (just the port number)
+ *   www.apache.org        (just the hostname)
+ *   www.apache.org:8080   (hostname and port number)
+ *   [fe80::1]:80          (IPv6 numeric address string only)
+ *   [fe80::1%eth0]        (IPv6 numeric address string and scope id)
+ *
+ * Invalid strings:
+ *                         (empty string)
+ *   [abc]                 (not valid IPv6 numeric address string)
+ *   abc:65536             (invalid port number)
+ *
+ * @param addr The new buffer containing just the hostname.  On output, *addr 
+ *             will be NULL if no hostname/IP address was specfied.
+ * @param scope_id The new buffer containing just the scope id.  On output, 
+ *                 *scope_id will be NULL if no scope id was specified.
+ * @param port The port number.  On output, *port will be 0 if no port was 
+ *             specified.
+ * @param str The input string to be parsed.
+ * @param p The pool from which *addr and *scope_id are allocated.
+ * @tip If scope id shouldn't be allowed, check for scope_id != NULL in addition 
+ *      to checking the return code.  If addr/hostname should be required, check 
+ *      for addr == NULL in addition to checking the return code.
+ */
+apr_status_t apr_parse_addr_port(char **addr,
+                                 char **scope_id,
+                                 apr_port_t *port,
+                                 const char *str,
+                                 apr_pool_t *p);
+
+/**
  * Get name of the current machine
  * @param buf A buffer to store the hostname in.
  * @param len The maximum length of the hostname that can be stored in the

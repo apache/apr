@@ -65,6 +65,10 @@
 
 #include "apr.h"
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port)
 {
     /* XXX IPv6: assumes sin_port and sin6_port at same offset */
@@ -174,6 +178,104 @@ apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_so
     else {
         *sa = NULL;
         return APR_EINVAL;
+    }
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_parse_addr_port(char **addr,
+                                 char **scope_id,
+                                 apr_port_t *port,
+                                 const char *str,
+                                 apr_pool_t *p)
+{
+    const char *ch, *lastchar;
+    int big_port;
+    apr_size_t addrlen;
+
+    *addr = NULL;         /* assume not specified */
+    *scope_id = NULL;     /* assume not specified */
+    *port = 0;            /* assume not specified */
+
+    /* First handle the optional port number.  That may be all that
+     * is specified in the string.
+     */
+    ch = lastchar = str + strlen(str) - 1;
+    while (ch >= str && apr_isdigit(*ch)) {
+        --ch;
+    }
+
+    if (ch < str) {       /* Entire string is the port. */
+        big_port = atoi(str);
+        if (big_port < 1 || big_port > 65535) {
+            return APR_EINVAL;
+        }
+        *port = big_port;
+        return APR_SUCCESS;
+    }
+
+    if (*ch == ':' && ch < lastchar) { /* host and port number specified */
+        if (ch == str) {               /* string starts with ':' -- bad */
+            return APR_EINVAL;
+        }
+        big_port = atoi(ch + 1);
+        if (big_port < 1 || big_port > 65535) {
+            return APR_EINVAL;
+        }
+        *port = big_port;
+        lastchar = ch - 1;
+    }
+
+    /* now handle the hostname */
+    addrlen = lastchar - str + 1;
+
+#if APR_HAVE_IPV6 /* XXX don't require this; would need to pass char[] for ipaddr and always define APR_INET6 */
+    if (*str == '[') {
+        const char *end_bracket = memchr(str, ']', addrlen);
+        struct in6_addr ipaddr;
+        const char *scope_delim;
+
+        if (!end_bracket || end_bracket != lastchar) {
+            *port = 0;
+            return APR_EINVAL;
+        }
+
+        /* handle scope id; this is the only context where it is allowed */
+        scope_delim = memchr(str, '%', addrlen);
+        if (scope_delim) {
+            if (scope_delim == end_bracket - 1) { /* '%' without scope identifier */
+                *port = 0;
+                return APR_EINVAL;
+            }
+            addrlen = scope_delim - str - 1;
+            *scope_id = apr_palloc(p, end_bracket - scope_delim);
+            memcpy(*scope_id, scope_delim + 1, end_bracket - scope_delim - 1);
+            (*scope_id)[end_bracket - scope_delim - 1] = '\0';
+        }
+        else {
+            addrlen = addrlen - 2; /* minus 2 for '[' and ']' */
+        }
+
+        *addr = apr_palloc(p, addrlen + 1);
+        memcpy(*addr,
+               str + 1,
+               addrlen);
+        (*addr)[addrlen] = '\0';
+        if (apr_inet_pton(AF_INET6, *addr, &ipaddr) != 1) {
+            *addr = NULL;
+            *scope_id = NULL;
+            *port = 0;
+            return APR_EINVAL;
+        }
+    }
+    else 
+#endif
+    {
+        /* XXX If '%' is not a valid char in a DNS name, we *could* check 
+         *     for bogus scope ids first.
+         */
+        *addr = apr_palloc(p, addrlen + 1);
+        memcpy(*addr, str, addrlen);
+        (*addr)[addrlen] = '\0';
     }
     return APR_SUCCESS;
 }
