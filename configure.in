@@ -650,8 +650,12 @@ fi
 # it right.  If you find that we don't get it right for your platform, 
 # you can override our decision below.
 case "$OS" in
-   *linux* | *os2_emx | *-solaris*)
+   *linux* | *os2_emx)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
+       ;;
+   *-solaris*)
+       off_t_fmt='#define APR_OFF_T_FMT "ld"'
+       os_proc_t_fmt='#define APR_OS_PROC_T_FMT "ld"'
        ;;
    *aix4*)
        ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
