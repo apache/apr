@@ -70,7 +70,7 @@
 #  define LD_LIBRARY_PATH "DYLD_LIBRARY_PATH"
 #endif
 
-#if defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
 #  define SHELL_CMD  "/bin/sh"
 #  define DYNAMIC_LIB_EXT "so"
 #  define MODULE_LIB_EXT  "so"
