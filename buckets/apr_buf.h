@@ -95,6 +95,8 @@ struct ap_bucket {
      * into the bucket.
      */ 
     int (*insert)(ap_bucket *e, const void *buf, ap_size_t nbytes, ap_ssize_t *w);
+    ap_status_t (*split)(ap_bucket *e, ap_size_t nbytes);
+
     ap_bucket *next;                     /* The next node in the bucket list */
     ap_bucket *prev;                     /* The prev node in the bucket list */
 };
@@ -131,7 +133,7 @@ struct ap_bucket_rwmem {
 
 typedef struct ap_bucket_mmap ap_bucket_mmap;
 struct ap_bucket_mmap {
-    const ap_mmap_t *data;
+    void      *alloc_addr;   /* Where does the mmap start? */
     int       len;           /* The amount of data in the mmap that we are 
                               * referencing with this bucket.  This may be 
                               * smaller than the length in the data object, 

@@ -78,6 +78,8 @@ APR_EXPORT(ap_bucket *) ap_eos_create(void)
     newbuf->color     = AP_BUCKET_eos;
     newbuf->getstr    = eos_get_str;
     newbuf->getlen    = eos_get_len;
+    newbuf->insert    = NULL;
+    newbuf->split     = NULL;
     newbuf->free      = NULL;
     newbuf->data      = NULL;
     
