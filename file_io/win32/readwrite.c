@@ -236,7 +236,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
 
         if (thefile->direction == 0) {
             // Position file pointer for writing at the offset we are logically reading from
-            apr_size_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            apr_off_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             if (offset != thefile->filePtr)
                 SetFilePointer(thefile->filehand, offset, NULL, FILE_BEGIN);
             thefile->bufpos = thefile->dataRead = 0;
@@ -282,7 +282,7 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
                                      apr_size_t *nbytes)
 {
     apr_status_t rv = APR_SUCCESS;
-    int i;
+    apr_size_t i;
     DWORD bwrote = 0;
     char *buf;
 
