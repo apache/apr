@@ -10,10 +10,14 @@ LibD
 LibR
 Debug
 Release
-*.mak
 *.opt
 *.plg
 apr.exports
 .libs
 *.la
 libapr.rc
+*.aps
+*.plg
+*.dep
+*.mak
+*.rc
