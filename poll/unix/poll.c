@@ -117,7 +117,7 @@ static apr_int16_t get_revent(apr_int16_t event)
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
                       apr_int32_t *nsds, apr_interval_time_t timeout)
 {
-    int i;
+    int i, num_to_poll;
 #ifdef HAVE_VLA
     /* XXX: I trust that this is a segv when insufficient stack exists? */
     struct pollfd pollset[num];
@@ -151,18 +151,18 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
         else if (aprset[i].desc_type == APR_POLL_FILE) {
             pollset[i].fd = aprset[i].desc.f->filedes;
         }
-        else if (aprset[i].desc_type == APR_NO_DESC) {
-            num = i + 1;
+        else {
             break;
         }
         pollset[i].events = get_event(aprset[i].reqevents);
     }
+    num_to_poll = i;
 
     if (timeout > 0) {
         timeout /= 1000; /* convert microseconds to milliseconds */
     }
 
-    i = poll(pollset, num, timeout);
+    i = poll(pollset, num_to_poll, timeout);
     (*nsds) = i;
 
     for (i = 0; i < num; i++) {
@@ -241,8 +241,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
 
 #endif /* APR_FILES_AS_SOCKETS */
         }
-        else if (aprset[i].desc_type == APR_NO_DESC) {
-            num = i + 1;
+        else {
             break;
         }
         if (aprset[i].reqevents & APR_POLLIN) {
@@ -287,12 +286,15 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             fd = aprset[i].desc.s->socketdes;
         }
-        else {
+        else if (aprset[i].desc_type == APR_POLL_FILE) {
 #if !APR_FILES_AS_SOCKETS
             return APR_EBADF;
 #else
             fd = aprset[i].desc.f->filedes;
 #endif
+        }
+        else {
+            break;
         }
         aprset[i].rtnevents = 0;
         if (FD_ISSET(fd, &readset)) {
