@@ -263,13 +263,17 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
 APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
                                                apr_pool_t *p)
 {
-    return APR_ENOTIMPL;
+    (*control) = apr_pcalloc(p, sizeof(**control));
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
                                           void (*func)(void))
 {
-    return APR_ENOTIMPL;
+    if (!atomic_xchg(&control->value, 1)) {
+        func();
+    }
+    return APR_SUCCESS;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread)
