@@ -217,48 +217,6 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
 APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
                                                 const char *hash);
 
-/*
- * These are snprintf implementations based on apr_vformatter().
- *
- * Note that various standards and implementations disagree on the return
- * value of snprintf, and side-effects due to %n in the formatting string.
- * apr_snprintf behaves as follows:
- *
- * Process the format string until the entire string is exhausted, or
- * the buffer fills.  If the buffer fills then stop processing immediately
- * (so no further %n arguments are processed), and return the buffer
- * length.  In all cases the buffer is NUL terminated.
- *
- * In no event does apr_snprintf return a negative number.  It's not possible
- * to distinguish between an output which was truncated, and an output which
- * exactly filled the buffer.
- */
-
-/**
- * snprintf routine based on apr_vformatter.  This means it understands the 
- * same extensions.
- * @param buf The buffer to write to
- * @param len The size of the buffer
- * @param format The format string
- * @param ... The arguments to use to fill out the format string.
- * @deffunc int apr_snprintf(char *buf, size_t len, const char *format, ...)
- */
-APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len, 
-                                     const char *format, ...)
-	__attribute__((format(printf,3,4)));
-
-/**
- * vsnprintf routine based on apr_vformatter.  This means it understands the 
- * same extensions.
- * @param buf The buffer to write to
- * @param len The size of the buffer
- * @param format The format string
- * @param ap The arguments to use to fill out the format string.
- * @deffunc int apr_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
- */
-APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
-			       va_list ap);
-
 /**
  * Display a prompt and read in the password from stdin.
  * @param prompt The prompt to display

@@ -53,6 +53,7 @@
  */
 
 #include "fileio.h"
+#include "apr_strings.h"
 #include "apr_lock.h"
 
 /* The only case where we don't use wait_for_io_or_timeout is on

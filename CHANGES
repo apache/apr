@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Moved the prototypes for apr_snprintf and apr_vsnprintf to the
+     apr_strings.h header, from apr_lib.h.  This location makes more
+     sense.  [Ryan Bloom]
+
   *) Added the APR_TRY_COMPILE_NO_WARNING configure macro for testing a
      compile with -Werror as well as the APR_CHECK_ICONV_INBUF macro to
      test for annoying iconv prototype differences.
