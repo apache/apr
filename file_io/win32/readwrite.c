@@ -65,7 +65,7 @@
  * read_with_timeout() 
  * Uses async i/o to emulate unix non-blocking i/o with timeouts.
  */
-static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t len, apr_ssize_t *nbytes)
+static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len, apr_size_t *nbytes)
 {
     apr_status_t rv;
     *nbytes = 0;
@@ -148,9 +148,9 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t l
     return rv;
 }
 
-apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *len)
+apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *len)
 {
-    apr_ssize_t rv;
+    apr_size_t rv;
     DWORD bytes_read = 0;
 
     if (*len <= 0) {
@@ -172,8 +172,8 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *len)
     }
     if (thefile->buffered) {
         char *pos = (char *)buf;
-        apr_ssize_t blocksize;
-        apr_ssize_t size = *len;
+        apr_size_t blocksize;
+        apr_size_t size = *len;
 
         apr_lock(thefile->mutex);
 
@@ -213,7 +213,7 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *len)
         apr_unlock(thefile->mutex);
     } else {  
         /* Unbuffered i/o */
-        apr_ssize_t nbytes;
+        apr_size_t nbytes;
         rv = read_with_timeout(thefile, buf, *len, &nbytes);
         *len = nbytes;
     }
@@ -221,7 +221,7 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *len)
     return rv;
 }
 
-apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes)
+apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_status_t rv;
     DWORD bwrote;
@@ -235,7 +235,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes
 
         if (thefile->direction == 0) {
             // Position file pointer for writing at the offset we are logically reading from
-            apr_ssize_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            apr_size_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             if (offset != thefile->filePtr)
                 SetFilePointer(thefile->filehand, offset, NULL, FILE_BEGIN);
             thefile->bufpos = thefile->dataRead = 0;
@@ -276,7 +276,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2)
  */
 apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, 
-                      apr_ssize_t *nbytes)
+                      apr_size_t *nbytes)
 {
     apr_status_t rv = APR_SUCCESS;
     int i;
@@ -337,7 +337,7 @@ apr_status_t apr_puts(const char *str, apr_file_t *thefile)
 
 apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
 {
-    apr_ssize_t readlen;
+    apr_size_t readlen;
     apr_status_t rv = APR_SUCCESS;
     int i;    
 

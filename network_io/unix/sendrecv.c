@@ -101,7 +101,7 @@ static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
+apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
     ssize_t rv;
     
@@ -130,7 +130,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
+apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 {
     ssize_t rv;
     
@@ -164,7 +164,7 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
 
 #ifdef HAVE_WRITEV
 apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
-                     apr_int32_t nvec, apr_ssize_t *len)
+                     apr_int32_t nvec, apr_size_t *len)
 {
     apr_ssize_t rv;
 
@@ -251,7 +251,7 @@ static int os_uncork(apr_socket_t *sock, int delayflag)
 }
 
 apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
-        		apr_hdtr_t *hdtr, apr_off_t *offset, apr_ssize_t *len,
+        		apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
         		apr_int32_t flags)
 {
     off_t off = *offset;
@@ -382,7 +382,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
 /* Release 3.1 or greater */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
+        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
         		apr_int32_t flags)
 {
     off_t nbytes;
@@ -475,7 +475,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
 
 /* HP-UX Version 10.30 or greater */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
+        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
         		apr_int32_t flags)
 {
     int i, ptr = 0;
@@ -582,7 +582,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
  * OS/390 - V2R7 and above
  */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
+                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
                         apr_int32_t flags)
 {
     int i, ptr, rv = 0;
@@ -711,7 +711,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
  * all cases of the headers and trailers seems to be a good idea.
  */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
+                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
                         apr_int32_t flags)
 {
     off_t nbytes = 0;
@@ -728,7 +728,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     flags = 0;
     
     if (hdtr->numheaders > 0) {
-        apr_ssize_t hdrbytes = 0;
+        apr_size_t hdrbytes = 0;
 
         arv = apr_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
         if (arv != APR_SUCCESS) {
@@ -796,7 +796,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         nbytes += rv;
 
         if (hdtr->numtrailers > 0) {
-            apr_ssize_t trlbytes = 0;
+            apr_size_t trlbytes = 0;
 
             /* send the trailers now */
             arv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trlbytes);
