@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/09/26 18:25:04 $]
+Last modified at [$Date: 2001/09/28 14:05:22 $]
 
 Release:
 
@@ -138,17 +138,13 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       -- note on Win32 we distinguish 'apache module' names from other 
          'loadable module' names, so be careful with Apache's directive.
 
-    * APR memory code - code has been added but we still need to
-      - decide on a better name for the code
-      - reformat to APR style (think this is now done, but some tabs left)
-      - test on more systems
-      - add more detailed tests to testmem.c
-        Status: Optionally enable it with --enable-sms.  Still wildly 
-                unproven.  But, it actually works as a replacement for 
-                pools now.  It may even not segfault when running httpd
-                under high-loads.  The performance impact/benefit still
-                needs to be examined.
-
+    * APR memory code
+      The SMS code has been removed.  The abstraction made it perform
+      far worse than pools.  Pools need probably be revamped to take
+      a want_new_freelist parameter to get rid of the global locking
+      on block allocation.
+        Status: Sander volunteers
+      
     * In line with the new SMS code is the fact that threading and pools
       just are not working together well.  This is due to the fact that
       the pool code has one global mutex (alloc_mutex) and one freelist
@@ -171,6 +167,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
                 There are other possibilities.  Any of those probably 
                 work as well.  See the apr archives for more info.  
                 We're still debating this.
+        Sander: The SMS code has been removed (see above).
 
     * Possible gmtime_r replacement in explode_time
       On Solaris (and possibly others), the gmtime_r libc function obtains
@@ -253,28 +250,4 @@ Stuff waiting for code thawing after Beta 1:
     * Identify and implement those protection bits that have general 
         usefulness, perhaps hidden, generic read-only [immutable],
         effective current user permissions, etc.
-
-APR Stackable Memory Code
-=========================
-
-This is just a small list of things yet to be done, or things
-that we may want/need to consider.
-
-- add a shared memory module.
-
-- locking needs to be addressed.  The scope of the locks needs
-  to be defined and it's likely we'll need some way of
-  varying the scope when locking.
-
-- given the problems that can occur when trying to find 
-  alloc/free problems we should probably have a special debug
-  memory system that records everything it does and any
-  other information we think is useful.
-
-- in addition to the debugging system, we need to look at
-  methods of checking memory allocations to ensure we're
-  behaving when we have the ASSERT_MEMORY flag turned on.
-  The pools in 1.3 had code from dean and Roy, Greg has added
-  some special stuff for pools under Linux on 2.0, so we just
-  need some ideas
 

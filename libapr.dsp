@@ -190,26 +190,6 @@ SOURCE=.\locks\win32\thread_rwlock.c
 
 SOURCE=.\memory\unix\apr_pools.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\memory\unix\apr_sms.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\memory\unix\apr_sms_blocks.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\memory\unix\apr_sms_std.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\memory\unix\apr_sms_tracking.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\memory\unix\apr_sms_trivial.c
-# End Source File
 # End Group
 # Begin Group "misc"
 
@@ -570,14 +550,6 @@ SOURCE=.\include\apr_shmem.h
 # Begin Source File
 
 SOURCE=.\include\apr_signal.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_sms.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_sms_tracking.h
 # End Source File
 # Begin Source File
 
