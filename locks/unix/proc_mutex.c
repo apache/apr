@@ -264,13 +264,13 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
             rv = errno;
 #endif
             return rv;
-        } 
-        if (munmap((caddr_t)mutex->pthread_interproc, sizeof(pthread_mutex_t))){
-            return errno;
         }
     }
+    if (munmap((caddr_t)mutex->pthread_interproc, sizeof(pthread_mutex_t))) {
+        return errno;
+    }
     return APR_SUCCESS;
-}    
+}
 
 static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
                                                    const char *fname)
