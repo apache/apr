@@ -1,3 +1,58 @@
+/* ====================================================================
+ * The Apache Software License, Version 1.1
+ *
+ * Copyright (c) 2000 The Apache Software Foundation.  All rights
+ * reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution,
+ *    if any, must include the following acknowledgment:
+ *       "This product includes software developed by the
+ *        Apache Software Foundation (http://www.apache.org/)."
+ *    Alternately, this acknowledgment may appear in the software itself,
+ *    if and wherever such third-party acknowledgments normally appear.
+ *
+ * 4. The names "Apache" and "Apache Software Foundation" must
+ *    not be used to endorse or promote products derived from this
+ *    software without prior written permission. For written
+ *    permission, please contact apache@apache.org.
+ *
+ * 5. Products derived from this software may not be called "Apache",
+ *    nor may "Apache" appear in their name, without prior written
+ *    permission of the Apache Software Foundation.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the Apache Software Foundation.  For more
+ * information on the Apache Software Foundation, please see
+ * <http://www.apache.org/>.
+ */
+
+/* Portions of this file are covered by */
 /* -*- mode: c; c-file-style: "k&r" -*-
 
   strnatcmp.c -- Perform 'natural order' comparisons of strings in C.
@@ -20,6 +75,7 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+
 #include "apr.h"
 #include "apr_lib.h"
 
@@ -30,160 +86,117 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*
+/**
+ * @package APR strings library
+ */
 
-=head1 int ap_strnatcmp(char const *a, char const *b)
-
-B<Do a natural order comparison of two strings.>
-
-    arg 1) The first string to compare
-    arg 2) The second string to compare
-    return) Either <0, 0, or >0.  If the first string is less than the second
-            this returns <0, if they are equivalent it returns 0, and if the
-            first string is greater than second string it retuns >0.
-
-=cut
+/**
+ * Do a natural order comparison of two strings.
+ * @param  The first string to compare
+ * @param  The second string to compare
+ * @return Either <0, 0, or >0.  If the first string is less than the second
+ *          this returns <0, if they are equivalent it returns 0, and if the
+ *          first string is greater than second string it retuns >0.
  */
 int ap_strnatcmp(char const *a, char const *b);
 
-/*
-
-=head1 int ap_strnatcmp(char const *a, char const *b)
-
-B<Do a natural order comparison of two strings ignoring the case of the strings.>
-
-    arg 1) The first string to compare
-    arg 2) The second string to compare
-    return) Either <0, 0, or >0.  If the first string is less than the second
-            this returns <0, if they are equivalent it returns 0, and if the
-            first string is greater than second string it retuns >0.
-
-=cut
+/**
+ * Do a natural order comparison of two strings ignoring the case of the 
+ * strings.
+ * @param a The first string to compare
+ * @param b The second string to compare
+ * @return Either <0, 0, or >0.  If the first string is less than the second
+ *         this returns <0, if they are equivalent it returns 0, and if the
+ *         first string is greater than second string it retuns >0.
  */
 int ap_strnatcasecmp(char const *a, char const *b);
 
-/*
-
-=head1 char *ap_pstrdup(ap_pool_t *c, const char *s)
-
-B<duplicate a string into memory allocated out of a pool>
-
-    arg 1) The pool to allocate out of
-    arg 2) The string to allocate
-    return) The new string
-
-=cut
+/**
+ * duplicate a string into memory allocated out of a pool
+ * @param p The pool to allocate out of
+ * @param s The string to allocate
+ * @return The new string
+ * @deffunc char *ap_pstrdup(ap_pool_t *p, const char *s)
  */
 APR_EXPORT(char *) ap_pstrdup(ap_pool_t *p, const char *s);
 
-/*
-
-=head1 char *ap_pstrndup(ap_pool_t *c, const char *s, ap_size_t n)
-
-B<duplicate the first n characters ofa string into memory allocated out of a poo
-l>
-
-    arg 1) The pool to allocate out of
-    arg 2) The string to allocate
-    arg 3) The number of characters to duplicate
-    return) The new string
-
-=cut
+/**
+ * duplicate the first n characters ofa string into memory allocated 
+ * out of a pool
+ * @param p The pool to allocate out of
+ * @param s The string to allocate
+ * @param n The number of characters to duplicate
+ * @return The new string
+ * @deffunc char *ap_pstrndup(ap_pool_t *p, const char *s, ap_size_t n)
  */
 APR_EXPORT(char *) ap_pstrndup(ap_pool_t *p, const char *s, ap_size_t n);
 
-/*
-=head1 char *ap_pstrcat(ap_pool_t *c, ...)
-
-B<Concatenate multiple strings, allocating memory out a pool>
-
-    arg 1) The pool to allocate out of
-    ...) The strings to concatenate.  The final string must be NULL
-    return) The new string
-
-=cut
+/**
+ * Concatenate multiple strings, allocating memory out a pool
+ * @param p The pool to allocate out of
+ * @param ... The strings to concatenate.  The final string must be NULL
+ * @return The new string
+ * @deffunc char *ap_pstrcat(ap_pool_t *p, ...)
  */
 APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *p, ...);
 
-/*
-
-=head1 char *ap_pvsprintf(ap_pool_t *c, const char *fmt, va_list ap)
-B<printf-style style printing routine.  The data is output to a string allocated
- from a pool>
-
-    arg 1) The pool to allocate out of
-    arg 2) The format of the string
-    arg 3) The arguments to use while printing the data
-    return) The new string
-
-=cut
+/**
+ * printf-style style printing routine.  The data is output to a string 
+ * allocated from a pool
+ * @param p The pool to allocate out of
+ * @param fmt The format of the string
+ * @param ap The arguments to use while printing the data
+ * @return The new string
+ * @deffunc char *ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
  */
 APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap);
 
-/*
-
-=head1 char *ap_psprintf(ap_pool_t *c, const char *fmt, ...)
-
-B<printf-style style printing routine.  The data is output to a string allocated from a pool>
-
-    arg 1) The pool to allocate out of
-    arg 2) The format of the string
-    ...) The arguments to use while printing the data
-    return) The new string
-
-=cut
+/**
+ * printf-style style printing routine.  The data is output to a string 
+ * allocated from a pool
+ * @param p The pool to allocate out of
+ * @param fmt The format of the string
+ * @param ... The arguments to use while printing the data
+ * @return The new string
+ * @deffunc char *ap_psprintf(ap_pool_t *p, const char *fmt, ...)
  */
 APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...);
 
-/*
-
-=head1 char *ap_cpystrn(char *dst, const char *src, size_t dst_size)
-
-B<copy n characters from src to dest>
-
-    arg 1) The destination string
-    arg 2) The source string
-    arg 3) The number of characters to copy
-
-B<NOTE>:  We re-implement this function to implement these specific changes:
-        1) strncpy() doesn't always null terminate and we want it to.
-        2) strncpy() null fills, which is bogus, esp. when copy 8byte strings
-           into 8k blocks.
-        3) Instead of returning the pointer to the beginning of the
-           destination string, we return a pointer to the terminating '\0'
-           to allow us to check for truncation.
-
-=cut
+/**
+ * copy n characters from src to des>
+ * @param dst The destination string
+ * @param src The source string
+ * @param dst_size The number of characters to copy
+ * @tip  
+ * <PRE>
+ * We re-implement this function to implement these specific changes:
+ *       1) strncpy() doesn't always null terminate and we want it to.
+ *       2) strncpy() null fills, which is bogus, esp. when copy 8byte strings
+ *          into 8k blocks.
+ *       3) Instead of returning the pointer to the beginning of the
+ *          destination string, we return a pointer to the terminating '\0'
+ *          to allow us to check for truncation.
+ * </PRE>
+ * @deffunc char *ap_cpystrn(char *dst, const char *src, size_t dst_size)
  */
 APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
 
-/*
-
-=head1 ap_status_t ap_collapse_spaces(char *dest, const char *src)
-
-B<Strip spaces from a string>
-
-    arg 1) The destination string.  It is okay to modify the string
-           in place.  Namely dest == src
-    arg 2) The string to rid the spaces from.
-
-=cut
+/**
+ * Strip spaces from a string
+ * @param dest The destination string.  It is okay to modify the string
+ *             in place.  Namely dest == src
+ * @param src The string to rid the spaces from.
+ * @deffunc char *ap_collapse_spaces(char *dest, const char *src)
  */
 APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src);
 
-/*
-
-=head1 ap_status_t ap_tokenize_to_argv(const char **arg_str, char ***argv_out, a
-p_pool_t *token_context)
-
-B<Convert the arguments to a program from one string to an array of strings term
-inated by a NULL>
-
-    arg 1) The arguments to convert
-    arg 2) Output location.  This is a pointer to an array of strings.
-    arg 3) Pool to use.
-
-=cut
+/**
+ * Convert the arguments to a program from one string to an array of 
+ * strings term inated by a NULL
+ * @param str The arguments to convert
+ * @param argv_out Output location.  This is a pointer to an array of strings.
+ * @param token_context Pool to use.
+ * @deffunc ap_status_t ap_tokenize_to_argv(const char *arg_str, char ***argv_out, ap_pool_t *token_context);
  */
 APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str,
                                             char ***argv_out,
