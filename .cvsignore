@@ -33,3 +33,4 @@ BuildLog.htm
 autom4te.cache
 ltcf-c.sh
 build-outputs.mk
+.make.dirs
