@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Correct shared library support on Darwin to not fatally error out
+     when a shared library does not exist.  [Justin Erenkrantz]
+
   *) Added optimized atomic CAS support for Linux/x86 (available only
      when APR is configured with --enable-nonportable-atomics=yes)
      [Brian Pane]

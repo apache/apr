@@ -124,8 +124,11 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 #elif defined(DSO_USE_DYLD)
     NSObjectFileImage image;
     NSModule os_handle = NULL;
+    NSObjectFileImageReturnCode dsoerr;
     char* err_msg = NULL;
-    if (NSCreateObjectFileImageFromFile(path, &image) == NSObjectFileImageSuccess) {
+    dsoerr = NSCreateObjectFileImageFromFile(path, &image);
+
+    if (dsoerr == NSObjectFileImageSuccess) {
 #if defined(NSLINKMODULE_OPTION_RETURN_ON_ERROR) && defined(NSLINKMODULE_OPTION_NONE)
         os_handle = NSLinkModule(image, path,
                                  NSLINKMODULE_OPTION_RETURN_ON_ERROR |
@@ -135,7 +138,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 #endif
         NSDestroyObjectFileImage(image);
     }
-    else if (NSAddLibrary(path) == TRUE) {
+    else if ((dsoerr == NSObjectFileImageFormat ||
+             dsoerr == NSObjectFileImageInappropriateFile) &&
+             NSAddLibrary(path) == TRUE) {
         os_handle = (NSModule)DYLD_LIBRARY_HANDLE;
     }
     else {
