@@ -116,7 +116,8 @@ int main(int argc, char *argv[])
     CuSuiteList *alltests = NULL;
     CuString *output = CuStringNew();
     int i;
-    int partial = 0;
+    int exclude = 0;
+    int list_provided = 0;
 
     apr_initialize();
     atexit(apr_terminate);
@@ -125,32 +126,69 @@ int main(int argc, char *argv[])
 
     apr_pool_create(&p, NULL);
 
-    /* build the list of tests to run */
+    /* see if we're in exclude mode, see if list of testcases provided */
     for (i = 1; i < argc; i++) {
-        int j;
         if (!strcmp(argv[i], "-v")) {
             continue;
         }
-        for (j = 0; tests[j].func != NULL; j++) {
-            if (!strcmp(argv[i], tests[j].testname)) {
-                if (!partial) {
-                    alltests = CuSuiteListNew("Partial APR Tests");
-                    partial = 1;
-                }
-
-                CuSuiteListAdd(alltests, tests[j].func());
-                break;
-            }
+        if (!strcmp(argv[i], "-x")) {
+            exclude = 1;
+            continue;
         }
+        if (argv[i][0] == '-') {
+            fprintf(stderr, "invalid option: `%s'\n", argv[i]);
+            exit(1);
+        }
+        list_provided = 1;
     }
 
-    if (!partial) {
+    if (!list_provided) {
+        /* add everything */
         alltests = CuSuiteListNew("All APR Tests");
         for (i = 0; tests[i].func != NULL; i++) {
             CuSuiteListAdd(alltests, tests[i].func());
         }
     }
+    else if (exclude) {
+        /* add everything but the tests listed */
+        alltests = CuSuiteListNew("Partial APR Tests");
+        for (i = 0; tests[i].func != NULL; i++) {
+            int this_test_excluded = 0;
+            int j;
 
+            for (j = 1; j < argc && !this_test_excluded; j++) {
+                if (!strcmp(argv[j], tests[i].testname)) {
+                    this_test_excluded = 1;
+                }
+            }
+            if (!this_test_excluded) {
+                CuSuiteListAdd(alltests, tests[i].func());
+            }
+        }
+    }
+    else {
+        /* add only the tests listed */
+        alltests = CuSuiteListNew("Partial APR Tests");
+        for (i = 1; i < argc; i++) {
+            int j;
+            int found = 0;
+
+            if (argv[i][0] == '-') {
+                continue;
+            }
+            for (j = 0; tests[j].func != NULL; j++) {
+                if (!strcmp(argv[i], tests[j].testname)) {
+                    CuSuiteListAdd(alltests, tests[j].func());
+                    found = 1;
+                }
+            }
+            if (!found) {
+                fprintf(stderr, "invalid test name: `%s'\n", argv[i]);
+                exit(1);
+            }
+        }
+    }
+    
     CuSuiteListRunWithSummary(alltests);
     i = CuSuiteListDetails(alltests, output);
     printf("%s\n", output->buffer);
