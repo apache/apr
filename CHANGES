@@ -1,5 +1,8 @@
 Changes with APR 0.9.5
 
+  *) Use NI_NAMEREQD instead of NI_NUMERICHOST in
+     APR_CHECK_GETNAMEINFO_IPV4_MAPPED.  PR 24469.  [Justin Erenkrantz]
+
   *) Ensure that apr_sockaddr_info_get() does not return anything
      other than AF_INET and AF_INET6 addresses.  [Joe Orton]
 
