@@ -53,6 +53,8 @@
  */
 
 #include "thread_mutex.h"
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 
 #if APR_HAS_THREADS
 

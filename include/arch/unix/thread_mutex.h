@@ -58,15 +58,12 @@
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
-#include "apr_lib.h"
 #include "apr_thread_mutex.h"
-#include "apr_sms.h"
 #include "apr_portable.h"
 
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
-/* End System Headers */
 
 #if APR_HAS_THREADS
 struct apr_thread_mutex_t {
