@@ -15,6 +15,14 @@ echo "Platform: ${OS}"
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
+dnl Absolute source/build directory
+abs_srcdir=`(cd $srcdir && pwd)`
+abs_builddir=`pwd`
+
+if test "$abs_builddir" != "$abs_srcdir"; then
+  USE_VPATH=1
+fi
+
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
@@ -433,6 +441,8 @@ echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
 # run the MM config script regardless of whether we are going to use
 # it or not.  When we have a much better idea of who is using MM, we can
 # run this on a more conditional basis.
+USE_MM=yes
+mm_dir=shmem/unix/mm
 AC_CONFIG_SUBDIRS($config_subdirs)
 
 AC_MSG_CHECKING(Checking for Shared memory support)
@@ -512,6 +522,16 @@ AC_MSG_RESULT([$msg])
 
 AC_SUBST(have_in_addr)
 
+dnl #----------------------------- Prepare mm directory for VPATH support
+if test -n "$USE_MM" && test -n "$USE_VPATH"; then
+  test -d $mm_dir || mkdir -p $mm_dir
+
+  for i in shtool config.guess config.sub fbtool ltconfig \
+           ltmain.sh mm_vers.c; do
+    test -r $mm_dir/$i || ln -s $abs_srcdir/$mm_dir/$i $mm_dir/$i
+  done
+fi
+
 dnl #----------------------------- Construct the files
 AC_SUBST(LDLIBS)
 AC_SUBST(OPTIM)
@@ -528,7 +548,8 @@ MAKEFILE1="Makefile lib/Makefile "
 SUBDIRS="lib "
 for dir in $MODULES
 do
-    if test -f $dir/$OSDIR/Makefile.in; then
+    test -d $dir || mkdir -p $dir
+    if test -f $srcdir/$dir/$OSDIR/Makefile.in; then
         MAKEFILE2="$MAKEFILE2 $dir/$OSDIR/Makefile "
         SUBDIRS="$SUBDIRS $dir/$OSDIR "
     else
@@ -545,5 +566,54 @@ if test -n "$CPPFLAGS"; then
   CFLAGS="$CFLAGS $CPPFLAGS"
 fi
 
-AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3 include/apr.h)
+SAVE_FILES="include/apr.h include/apr_private.h"
 
+for i in $SAVE_FILES; do
+  test -r $i && mv $i $i.save
+done
+
+AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3 include/apr.h,[
+
+SAVE_FILES="include/apr.h include/apr_private.h"
+
+for i in $SAVE_FILES; do
+  if cmp -s $i $i.save 2>/dev/null; then
+    mv $i.save $i
+    AC_MSG_RESULT($i is unchanged)
+  fi
+  rm -f $i.save
+done
+
+])
+
+dnl #----------------------------- Fixup Makefiles for VPATH support
+
+changequote({,})
+
+if test -n "$USE_VPATH"; then
+  if test -n "$USE_MM"; then
+    MAKEFILE3="$MAKEFILE3 $mm_dir/Makefile"
+  fi
+  for makefile in $MAKEFILE1 $MAKEFILE2 $MAKEFILE3; do
+    dir=`echo $makefile|sed 's%[^/][^/]*$%%'`
+    (cat <<EOF
+srcdir = $abs_srcdir/$dir
+VPATH  = $abs_srcdir/$dir
+
+EOF
+)    |  cat - $makefile | \
+        sed -e 's#-I\($(INCDIR[0-9]*)\)#-I\1 -I$(srcdir)/\1#g' > tmp
+    cp tmp $makefile
+  done
+  if test -n "$USE_MM"; then
+    cat $mm_dir/Makefile | \
+       sed \
+       -e 's#\($(CFLAGS)\)#\1 -I$(srcdir) -I.#' \
+       -e '/mm_global\.c/d' \
+       > tmp
+    cp tmp $mm_dir/Makefile
+  fi
+  rm -f tmp
+fi
+
+changequote([,])
