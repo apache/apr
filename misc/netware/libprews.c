@@ -8,18 +8,47 @@
   to do any cleanup other than the mechanism Apache modules
   provide.
 ------------------------------------------------------------------*/
-#include "stddef.h"
+#include <netware.h>
+//#include "stddef.h"
 #include "ws2nlm.h"
 
-int _lib_start_ws()
+int _NonAppStart
+(
+    void        *NLMHandle,
+    void        *errorScreen,
+    const char  *cmdLine,
+    const char  *loadDirPath,
+    size_t      uninitializedDataLength,
+    void        *NLMFileHandle,
+    int         (*readRoutineP)( int conn, void *fileHandle, size_t offset,
+                    size_t nbytes, size_t *bytesRead, void *buffer ),
+    size_t      customDataOffset,
+    size_t      customDataSize,
+    int         messageCount,
+    const char  **messages
+)
 {
+#pragma unused(cmdLine)
+#pragma unused(loadDirPath)
+#pragma unused(uninitializedDataLength)
+#pragma unused(NLMFileHandle)
+#pragma unused(readRoutineP)
+#pragma unused(customDataOffset)
+#pragma unused(customDataSize)
+#pragma unused(messageCount)
+#pragma unused(messages)
+
     WSADATA wsaData;
     
     return WSAStartup((WORD) MAKEWORD(2, 0), &wsaData);
 }
 
-int _lib_stop_ws()
+void _NonAppStop( void )
 {
     WSACleanup();
-    return 0;
+}
+
+int  _NonAppCheckUnload( void )
+{
+	return 0;
 }
