@@ -898,3 +898,37 @@ do
 done
 
 ])dnl
+
+dnl
+dnl APR_CHECK_DEPEND
+dnl
+dnl Determine what program we can use to generate .deps-style dependencies
+dnl
+AC_DEFUN(APR_CHECK_DEPEND,[
+dnl Try to determine what depend program we can use
+dnl All GCC-variants should have -MM.
+dnl If not, then we can check on those, too.
+if test "$GCC" = "yes"; then
+  MKDEP='$(CC) -MM'
+else
+  rm -f conftest.c
+dnl <sys/types.h> should be available everywhere!
+  cat > conftest.c <<EOF
+#include <sys/types.h>
+  int main() { return 0; }
+EOF
+  MKDEP="true"
+  for i in "$CC -MM" "$CC -M" "$CPP -MM" "$CPP -M" "cpp -M"; do
+    AC_MSG_CHECKING([if $i can create proper make dependencies])
+    if $i conftest.c 2>/dev/null | grep 'conftest.o: conftest.c' >/dev/null; then
+      MKDEP=$i
+      AC_MSG_RESULT(yes)
+      break;
+    fi
+    AC_MSG_RESULT(no)
+  done
+  rm -f conftest.c
+fi
+
+AC_SUBST(MKDEP)
+])
