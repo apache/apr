@@ -187,6 +187,7 @@
 #define APR_HAS_DSO               1
 #define APR_HAS_UNICODE_FS        1
 #define APR_HAS_USER              0
+#define APR_HAS_LARGE_FILES       1
 
 /* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
  * on all platforms.

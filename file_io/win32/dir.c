@@ -146,6 +146,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir)
 {
     apr_status_t rv;
+    char *fname;
     /* The while loops below allow us to skip all invalid file names, so that
      * we aren't reporting any files where their absolute paths are too long.
      */
@@ -183,7 +184,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         if (rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
                                       thedir->w.entry->cFileName))
             return rv;
-        finfo->name = thedir->name;
+        fname = thedir->name;
     }
     else
 #endif
@@ -208,28 +209,28 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                 return apr_get_os_error();
             }
         }
-        finfo->name = thedir->n.entry->cFileName;
+        fname = thedir->n.entry->cFileName;
     }
-    finfo->valid = APR_FINFO_NAME | APR_FINFO_TYPE | APR_FINFO_CTIME
-                 | APR_FINFO_ATIME | APR_FINFO_MTIME | APR_FINFO_SIZE;
-    wanted |= ~finfo->valid;
-    if (wanted) {
-        /* Win32 apr_stat() is about to open a handle to this file.
-         * we must create a full path that doesn't evaporate.
-         */
-        const char *fname = finfo->name;
-        char *fspec = apr_pstrcat(thedir->cntxt, thedir->dirname, 
-                                  finfo->name, NULL);
-        finfo->valid = 0;
+    if (wanted & ~APR_FINFO_WIN32_DIR) {
+        char fspec[APR_PATH_MAX];
+        int dirlen = strlen(thedir->dirname);
+        if (dirlen >= sizeof(fspec))
+            dirlen = sizeof(fspec) - 1;
+        apr_cpystrn(fspec, sizeof(fspec), thedir->dirname);
+        apr_cpystrn(fspec + dirlen, sizeof(fspec) - dirlen, fname);
         rv = apr_stat(finfo, fspec, wanted, thedir->cntxt);
         if (rv == APR_SUCCESS || rv == APR_INCOMPLETE) {
             finfo->valid |= APR_FINFO_NAME;
             finfo->name = fname;
             finfo->fname = fspec;
+            rv = (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
         }
         return rv;
     }
 
+    memset(finfo, '\0', sizeof(*finfo));
+    finfo->name = fname;
+    finfo->valid = APR_FINFO_WIN32_DIR;
     finfo->cntxt = thedir->cntxt;
 
     /* Do the best job we can determining the file type.
@@ -255,8 +256,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     FileTimeToAprTime(&finfo->atime, &thedir->n.entry->ftLastAccessTime);
     finfo->size = (thedir->n.entry->nFileSizeHigh * MAXDWORD)
                 +  thedir->n.entry->nFileSizeLow;
-    finfo->fname = NULL;
-    return APR_SUCCESS;
+    return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *dir)
