@@ -19,6 +19,27 @@ considered for inclusion.
 This document will discuss the structure of APR, and how best to contribute
 code to the effort.
 
+APR On Windows
+
+I am putting this at the top because it is an important topic.  APR on Windows
+is different from APR on all other systems, because it doesn't use autoconf.
+As far as I know there is no autoconf for Windows, so we don't have much of a
+choice in this.  Because autoconf is generating our apr_config.h file we need
+to take care when adding macros to it.  There is an apr_win.h file which replaces
+apr_config.h on Windows, and it needs to be kept up to date.
+
+!!!***  If you add code to acconfig.h or tests to configure.in or aclocal.m4,
+        please give some thought to whether or not Windows needs this addition
+        as well.  A general rule of thumb, is that if it is a feature macro,
+        such as APR_HAS_THREADS, Windows needs it.  If the definition is going
+        to be used in a public APR header file, such as apr_general.h, Windows
+        needs it.
+        
+        The only time it is safe to add a macro or test without also adding 
+        the macro to apr_win.h, is if the macro tells APR how to build.  For
+        example, a test for a header file does not need to be added to Windows.
+***!!!
+
 APR Features
 
 One of the goals of APR is to provide a common set of features across all 
