@@ -82,7 +82,7 @@ ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont
     ap_pool_t *pool;
 
     if (cont) {
-        pool = ap_make_sub_pool(cont->pool);
+        pool = ap_make_sub_pool(cont->pool, cont->apr_abort);
     }
     else {
         pool = ap_init_alloc();;
@@ -96,6 +96,7 @@ ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont
 
     new->pool = pool;
     new->prog_data = NULL;
+    new->apr_abort = NULL;
  
     *newcont = new;
     return APR_SUCCESS;
@@ -207,5 +208,15 @@ ap_status_t ap_initialize(void)
     pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 #endif
     return APR_SUCCESS;
+}
+
+ap_status_t ap_set_abort(int (*apr_abort)(int retcode), struct context_t *cont)
+{
+    if (cont == NULL) {
+        return APR_ENOCONT;
+    }
+    else {
+        cont->apr_abort = apr_abort;
+    }
 }
  
