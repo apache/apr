@@ -254,7 +254,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         }
         else {
 #ifdef WIN32
-            return EBADF;
+            return APR_EBADF;
 #else
             fd = aprset[i].desc.f->filedes;
 #endif
@@ -351,7 +351,11 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
         fd = descriptor->desc.s->socketdes;
     }
     else {
+#ifdef WIN32
+        return APR_EBADF;
+#else
         fd = descriptor->desc.f->filedes;
+#endif
     }
     if (descriptor->reqevents & APR_POLLIN) {
         FD_SET(fd, &(pollset->readset));
