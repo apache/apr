@@ -52,6 +52,19 @@
  * <http://www.apache.org/>.
  */
 
+/* Usage Notes:
+ *
+ *   this module, and the i18n/unix/ucs2_utf8.c modules must be 
+ *   compiled APR_EXPORT_STATIC and linked to an application with
+ *   the /entry:wmainCRTStartup flag.  This module becomes the true
+ *   wmain entry point, and passes utf-8 reformatted argv and env
+ *   arrays to the application's main function.
+ *
+ *   This module is only compatible with Unicode-only executables.
+ *   Mixed (Win9x backwards compatible) binaries should refer instead
+ *   to the apr_startup.c module.
+ */
+
 #include "apr_private.h"
 #include "apr_general.h"
 #include "wchar.h"
@@ -104,14 +117,12 @@ static int wastrtoastr(char ***retarr, int args, wchar_t **arr)
     newarr[arg] = NULL;
     *ele = '\0';
 
-    /* Return to the free store, we hope, if the heap
-     * realloc is at all optimized.
+    /* Return to the free store if the heap realloc is the least bit optimized
      */
     ele = realloc(elements, ele - elements);
 
     if (ele != elements) {
         size_t diff = ele - elements;
-        DebugBreak();
         for (arg = 0; arg < args; ++arg) {
             newarr[arg] += diff;
         }
@@ -128,7 +139,10 @@ int wmain(int argc, wchar_t **wargv, wchar_t **wenv)
     int dupenv;
 
     (void)wastrtoastr(&argv, wargv, argc);
+
+    _wenviron = wenv;
     dupenv = wastrtoastr(&env, wenv, -1);
+
     _environ = malloc((dupenv + 1) * sizeof (char *));
     memcpy(_environ, env, (dupenv + 1) * sizeof (char *));
 
