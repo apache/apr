@@ -57,6 +57,11 @@
 #else
 #include "../beos/threadproc.h"
 #endif
+#include "apr_private.h"
+#include "apr_lib.h"
+#if APR_HAVE_SIGNAL_H
+#include <signal.h>
+#endif
 
 ap_status_t ap_kill(ap_proc_t *proc, int sig)
 {
@@ -65,4 +70,26 @@ ap_status_t ap_kill(ap_proc_t *proc, int sig)
     }
     return APR_SUCCESS;
 }
+
+#if !defined(NO_USE_SIGACTION) && defined(HAVE_SIGACTION)
+/*
+ * Replace standard signal() with the more reliable sigaction equivalent
+ * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
+ * (the version that does not automatically restart system calls).
+ */
+Sigfunc *ap_signal(int signo, Sigfunc * func)
+{
+    struct sigaction act, oact;
+
+    act.sa_handler = func;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+#ifdef  SA_INTERRUPT            /* SunOS */
+    act.sa_flags |= SA_INTERRUPT;
+#endif
+    if (sigaction(signo, &act, &oact) < 0)
+        return SIG_ERR;
+    return oact.sa_handler;
+}
+#endif
 
