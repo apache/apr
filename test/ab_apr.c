@@ -219,12 +219,13 @@ static void write_request(struct connection *c)
 {
     ap_ssize_t len = reqlen;
     ap_current_time(c->connect);
-    if (ap_send(c->aprsock, request, &reqlen, 30) != APR_SUCCESS &&
+    ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, 30);
+    if (ap_send(c->aprsock, request, &reqlen) != APR_SUCCESS &&
         reqlen != len) {
         printf("Send request failed!\n");
     }
     if (posting) {
-        ap_send(c->aprsock, postdata, &postlen, 30);
+        ap_send(c->aprsock, postdata, &postlen);
         totalposted += (reqlen + postlen);
     }
 
@@ -518,7 +519,8 @@ static void read_connection(struct connection *c)
     char respcode[4];		/* 3 digits and null */
 
     r = sizeof(buffer);
-    ap_recv(c->aprsock, buffer, &r, aprtimeout);
+    ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, aprtimeout);
+    ap_recv(c->aprsock, buffer, &r);
     if (r == 0 || (r < 0 && errno != EAGAIN)) {
         good++;
         close_connection(c);

@@ -113,7 +113,7 @@ do {
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
     length = STRLEN;
-    if (ap_send(sock, datasend, &length, 5) != APR_SUCCESS) {
+    if (ap_send(sock, datasend, &length) != APR_SUCCESS) {
         ap_close_socket(sock);
         fprintf(stderr, "Problem sending data\n");
         exit(-1);
@@ -122,7 +122,7 @@ do {
    
     length = STRLEN; 
     fprintf(stdout, "\tClient:  Trying to receive data over socket.......");
-    if (ap_recv(sock, datarecv, &length, 5) != APR_SUCCESS) {
+    if (ap_recv(sock, datarecv, &length) != APR_SUCCESS) {
         ap_close_socket(sock);
         fprintf(stderr, "Problem receiving data\n");
         exit(-1);
