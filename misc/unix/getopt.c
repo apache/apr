@@ -41,22 +41,26 @@
 static const char *pretty_path (const char *name) 
 {
     const char *p;
+
     if (!(p = strrchr(name, '/')))
-        return p;
+        return name;
     else
-        return ++p;
+        return p + 1;
 }
 
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                     int argc, char *const *argv)
+                                     int argc, char **argv)
 {
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
     (*os)->cont = cont;
     (*os)->err = 1;
-    (*os)->ind = 1;
     (*os)->place = EMSG;
     (*os)->argc = argc;
     (*os)->argv = argv;
+    (*os)->interleave = 0;
+    (*os)->ind = 1;
+    (*os)->skip_start = 1;
+    (*os)->skip_end = 1;
     return APR_SUCCESS;
 }
 
@@ -130,90 +134,158 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os, 
-                                          const char *opts, 
-                                          const apr_getopt_long_t *long_opts,
-                                          int *optval, 
-                                          const char **optarg)
-     
+/* Reverse the sequence argv[start..start+len-1]. */
+static void reverse(char **argv, int start, int len)
 {
-    const apr_getopt_long_t *ptr;
-    const char *opt = os->argv[os->ind];
-    const char *arg = os->argv[os->ind +1];
-    int arg_index_incr = 1;
-  
-    /* Finished processing opts */
-    if (os->ind >= os->argc)
-        return APR_EOF;
+    char *temp;
 
-    /* End of options processing if we encounter "--" */
-    if (strcmp(opt, "--") == 0)
-        return APR_EOF;
-
-    /* 
-     * End of options processing if we encounter something that
-     * doesn't start with "-" or "--" (it's not an option if we hit it
-     * here, it's an argument) 
-     */
-    if (*opt != '-')
-        return APR_EOF;
-
-    if ((os->ind + 1) >= os->argc) 
-        arg = NULL;
-
-    /* Handle --foo=bar style opts */
-    if (strchr(opt, '=')) {
-        const char *index = strchr(opt, '=') + 1;
-        opt = apr_pstrndup(os->cont, opt, ((index - opt) - 1));
-        if (*index != '\0') /* account for "--foo=" */
-            arg = apr_pstrdup(os->cont, index);
-        arg_index_incr = 0;
-    }                       
-
-    /* If it's a longopt */
-    if (opt[1] == '-') {
-        /* see if it's in our array of long opts */
-        for (ptr = long_opts; ptr->name; ptr++) {
-            if (strcmp((opt + 2), ptr->name) == 0) { /* it's in the array */
-                if (ptr->has_arg) { 
-                    if (((os->ind + 1) >= os->argc) 
-                        && (arg == NULL)) {
-                        fprintf(stderr,
-                                "%s: option requires an argument: %s\n",
-                                pretty_path(*os->argv), opt);
-                        return APR_BADARG;
-                    }
-                                
-                    /* If we make it here, then we should be ok. */
-                    *optarg = arg;
-                    os->ind += arg_index_incr;
-                }
-                else { /* has no arg */ 
-                    *optarg = NULL;
-                }
-                *optval = ptr->val;
-                ++os->ind;
-                return APR_SUCCESS;
-            } 
-        }
-
-        /* If we get here, then we don't have the longopt in our
-         * longopts array 
-         */
-        fprintf(stderr, "%s: illegal option: %s\n", 
-                pretty_path(*os->argv), opt);
-        return APR_BADCH;
-    }
-
-    {   /* otherwise, apr_getopt gets it. */
-        char optch;
-        apr_status_t status;
-        status = apr_getopt (os, opts, &optch, optarg);
-        *optval = optch;
-        return status;
+    for (; len >= 2; start++, len -= 2) {
+	temp = argv[start];
+	argv[start] = argv[start + len - 1];
+	argv[start + len - 1] = temp;
     }
 }
 
+/*
+ * Permute os->argv with the goal that non-option arguments will all
+ * appear at the end.  os->skip_start is where we started skipping
+ * non-option arguments, os->skip_end is where we stopped, and os->ind
+ * is where we are now.
+ */
+static void permute(apr_getopt_t *os)
+{
+    int len1 = os->skip_end - os->skip_start;
+    int len2 = os->ind - os->skip_end;
 
+    if (os->interleave) {
+	/*
+	 * Exchange the sequences argv[os->skip_start..os->skip_end-1] and
+	 * argv[os->skip_end..os->ind-1].  The easiest way to do that is
+	 * to reverse the entire range and then reverse the two
+	 * sub-ranges.
+	 */
+	reverse(os->argv, os->skip_start, len1 + len2);
+	reverse(os->argv, os->skip_start, len2);
+	reverse(os->argv, os->skip_start + len2, len1);
+    }
 
+    /* Reset skip range to the new location of the non-option sequence. */
+    os->skip_start += len2;
+    os->skip_end += len2;
+}
 
+/* Helper function to print out an error involving a long option */
+static apr_status_t serr(apr_getopt_t *os, const char *err, const char *str,
+			 apr_status_t status)
+{
+    if (os->err)
+	fprintf(stderr, "%s: %s: %s\n", pretty_path(*os->argv), err, str);
+    return status;
+}
+
+/* Helper function to print out an error involving a short option */
+static apr_status_t cerr(apr_getopt_t *os, const char *err, int ch,
+			 apr_status_t status)
+{
+    if (os->err)
+	fprintf(stderr, "%s: %s: %c\n", pretty_path(*os->argv), err, ch);
+    return status;
+}
+
+APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
+					  const apr_longopt_t *opts,
+					  int *optch, const char **optarg)
+{
+    const char *p;
+    int i, len;
+
+    /* Let the calling program reset option processing. */
+    if (os->reset) {
+	os->place = EMSG;
+	os->ind = 1;
+	os->reset = 0;
+    }
+
+    /*
+     * We can be in one of two states: in the middle of processing a
+     * run of short options, or about to process a new argument.
+     * Since the second case can lead to the first one, handle that
+     * one first.  */
+    p = os->place;
+    if (*p == '\0') {
+	/* If we are interleaving, skip non-option arguments. */
+	if (os->interleave) {
+	    while (os->ind < os->argc && *os->argv[os->ind] != '-')
+		os->ind++;
+	    os->skip_end = os->ind;
+	}
+	if (os->ind >= os->argc || *os->argv[os->ind] != '-') {
+	    os->ind = os->skip_start;
+	    return APR_EOF;
+	}
+
+	p = os->argv[os->ind++] + 1;
+	if (*p == '-' && p[1] != '\0') {        /* Long option */
+	    /* Search for the long option name in the caller's table. */
+	    p++;
+	    for (i = 0; opts[i].optch != 0; i++) {
+		len = strlen(opts[i].name);
+		if (strncmp(p, opts[i].name, len) == 0
+		    && (p[len] == '\0' || p[len] == '='))
+		    break;
+	    }
+	    if (opts[i].optch == 0)             /* No match */
+		return serr(os, "invalid option", p - 2, APR_BADCH);
+	    *optch = opts[i].optch;
+
+	    if (opts[i].has_arg) {
+		if (p[len] == '=')              /* Argument inline */
+		    *optarg = p + len + 1;
+		else if (os->ind >= os->argc)   /* Argument missing */
+		    return serr(os, "missing argument", p - 2, APR_BADARG);
+		else                            /* Argument in next arg */
+		    *optarg = os->argv[os->ind++];
+	    } else {
+		*optarg = NULL;
+		if (p[len] == '=')
+		    return serr(os, "erroneous argument", p - 2, APR_BADARG);
+	    }
+	    permute(os);
+	    return APR_SUCCESS;
+	} else if (*p == '-') {                 /* Bare "--"; we're done */
+	    permute(os);
+	    os->ind = os->skip_start;
+	    return APR_EOF;
+	}
+	else if (*p == '\0')                    /* Bare "-" is illegal */
+	    return serr(os, "invalid option", p, APR_BADCH);
+    }
+
+    /*
+     * Now we're in a run of short options, and *p is the next one.
+     * Look for it in the caller's table.
+     */
+    for (i = 0; opts[i].optch != 0; i++) {
+	if (*p == opts[i].optch)
+	    break;
+    }
+    if (opts[i].optch == 0)                     /* No match */
+	return cerr(os, "invalid option character", *p, APR_BADCH);
+    *optch = *p++;
+
+    if (opts[i].has_arg) {
+	if (*p != '\0')                         /* Argument inline */
+	    *optarg = p;
+	else if (os->ind >= os->argc)           /* Argument missing */
+	    return cerr(os, "missing argument", *optch, APR_BADARG);
+	else                                    /* Argument in next arg */
+	    *optarg = os->argv[os->ind++];
+	os->place = EMSG;
+    } else {
+	*optarg = NULL;
+	os->place = p;
+    }
+
+    permute(os);
+    return APR_SUCCESS;
+}

@@ -77,23 +77,25 @@ struct apr_getopt_t {
     /** count of arguments */
     int argc;
     /** array of pointers to arguments */
-    char *const *argv;
+    char **argv;
     /** argument associated with option */
     char const* place;
+    /** set to nonzero to support interleaving */
+    int interleave;
+    /** range of non-option arguments skipped for interleaving */
+    int skip_start;
+    int skip_end;
 };
 
-typedef struct apr_getopt_long_t apr_getopt_long_t;
+typedef struct apr_longopt_t apr_longopt_t;
 
-/* structure representing a single longopt */
-struct apr_getopt_long_t {
-    /** the name of the long argument (sans "--") */
+struct apr_longopt_t {
+    /** long option name, or NULL if option has no long name */
     const char *name;
-    /** 0 for no arg, 1 for arg */
+    /** option letter, or a value greater than 255 if option has no letter */
+    int optch;
+    /** nonzero if option takes an argument */
     int has_arg;
-    /** Either the short option char that this option corresponds to 
-     * or a unique integer > 255 
-     */
-    int val;
 };
 
 /**
@@ -106,7 +108,7 @@ struct apr_getopt_long_t {
  * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
  */
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                      int argc, char *const *argv);
+                                      int argc, char **argv);
 
 /**
  * Parse the options initialized by apr_initopt().
@@ -131,26 +133,15 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
 /**
  * Parse the options initialized by apr_initopt(), accepting long
  * options beginning with "--" in addition to single-character
- * options beginning with "-" (which are passed along to apr_getopt).
- *
- * Long options are accepted in both "--foo bar" and well as
- * "--foo=bar" format
- *
- * End of argument processing if we encounter "--" or any option that
- * doesn't start with "-" or "--".
- *
- * @param os       The apr_opt_t structure returned by apr_initopt()
- * @param opts     A string of acceptable single-character options to the
- *                 program.  Characters followed by ":" are required to have
- *                 an argument associated
- * @param longopts A pointer to an array of apr_long_option_t structures, which
- *                 can be initialized with { "name", has_args, val }.  has_args
- *                 is nonzero if the option requires an argument.  A structure
- *                 with a NULL name terminates the list
- * @param optval   The next option character parsed, or the value of "optval"
- *                 from the appropriate apr_long_option_t structure if
- *                 the next option is a long option.
- * @param optarg   The argument following the option, if any
+ * options beginning with "-".
+ * @param os     The apr_getopt_t structure created by apr_initopt()
+ * @param opts   A pointer to a list of apr_longopt_t structures, which can
+ *               be initialized with { "name", optch, has_args }.  has_args
+ *               is nonzero if the option requires an argument.  A structure
+ *               with an optch value of 0 terminates the list.
+ * @param optch  Receives the value of "optch" from the apr_longopt_t structure
+ *               corresponding to the next option matched.
+ * @param optarg Receives the argument following the option, if any.
  * @tip There are four potential status values on exit.   They are:
  * <PRE>
  *             APR_EOF      --  No more options to parse
@@ -158,11 +149,14 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
  *             APR_BADARG   --  No argument followed @parameter:
  *             APR_SUCCESS  --  The next option was found.
  * </PRE>
- * @deffunc apr_status_t apr_getopt_long(apr_getopt_t *os, const char *opts, const apr_getopt_long_t *longopts, int *optval, const char **optarg) */
-APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os, 
-                                          const char *opts, 
-                                          const apr_getopt_long_t *long_opts,
-                                          int *optval, 
-                                          const char **optarg);
-
+ * When APR_SUCCESS is returned, os->ind gives the index of the first
+ * non-option argument.  On error, a message will be printed to stdout unless
+ * os->err is set to 0.  If os->interleave is set to nonzero, options can come
+ * after arguments, and os->argv will be permuted to leave non-option arguments
+ * at the end.
+ * @deffunc apr_status_t apr_getopt_long(apr_getopt_t *os, const apr_longopt_t *opts, int *optch, const char **optarg)
+ */
+APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
+					  const apr_longopt_t *opts,
+					  int *optch, const char **optarg);
 #endif  /* ! APR_GETOPT_H */
