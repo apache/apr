@@ -394,6 +394,7 @@ ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc);
  */
 ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc);
 
+#if APR_HAS_FORK
 /* ***APRDOC********************************************************
  * ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont) 
  *    This is currently the only non-portable call in APR.  This executes
@@ -402,6 +403,7 @@ ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc);
  * arg 2) The context to use. 
  */
 ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont);
+#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
