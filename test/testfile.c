@@ -675,7 +675,7 @@ static void test_mod_neg(apr_pool_t *p, apr_int32_t flags)
     assert(!rv);
     assert(nbytes == sizeof(buf));
 
-    cur = -(nbytes - 7980);
+    cur = -((apr_off_t)nbytes - 7980);
     rv = apr_file_seek(f, APR_CUR, &cur);
     assert(!rv);
     assert(cur == 7990);
