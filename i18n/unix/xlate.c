@@ -230,6 +230,12 @@ ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage,
     return status;
 }
 
+ap_status_t ap_xlate_get_sb(ap_xlate_t *convset, int *onoff)
+{
+    *onoff = convset->sbcs_table != NULL;
+    return APR_SUCCESS;
+} 
+
 ap_status_t ap_xlate_conv_buffer(ap_xlate_t *convset, const char *inbuf,
                                  ap_size_t *inbytes_left, char *outbuf,
                                  ap_size_t *outbytes_left)
