@@ -58,9 +58,9 @@
 #include "locks.h"
 #include "apr_portable.h"
 
-ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type, 
+ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 
-                           struct lock_t **lock)
+                           ap_context_t *cont)
 {
     struct lock_t *newlock;
     SECURITY_ATTRIBUTES sec;
@@ -96,7 +96,7 @@ ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fname)
+ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *cont)
 {
     /* This routine should not be called (and OpenMutex will fail if called) 
      * on a INTRAPROCESS lock
@@ -187,7 +187,7 @@ ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
     }
 }
 
-ap_status_t ap_get_os_lock(struct lock_t *lock, ap_os_lock_t *thelock)
+ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, struct lock_t *lock)
 {
     if (lock == NULL) {
         return APR_ENOFILE;

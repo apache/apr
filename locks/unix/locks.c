@@ -76,9 +76,9 @@
  * NOTE:  APR_CROSS_PROCESS may lock both processes and threads, but it is
  *        only garaunteed to lock processes.
  */
-ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type, 
+ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 
-                           struct lock_t **lock)
+                           ap_context_t *cont)
 {
     struct lock_t *new;
     ap_status_t stat;
@@ -183,7 +183,7 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
  *        idea to call it regardless, because it makes the code more
  *        portable. 
  */
-ap_status_t ap_child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fname)
+ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *cont)
 {
     ap_status_t stat;
     if ((*lock)->type != APR_CROSS_PROCESS) {
