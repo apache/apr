@@ -764,6 +764,22 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *templ,
                                           apr_int32_t flags, apr_pool_t *p);
 
+
+/**
+ * Find an existing directory suitable as a temporary storage location.
+ * @param temp_dir The temp directory.
+ * @param p The pool to use for any necessary allocations.
+ * @remark   
+ * This function uses an algorithm to search for a directory that an
+ * an application can use for temporary storage.  Once such a
+ * directory is found, that location is cached by the library.  Thus,
+ * callers only pay the cost of this algorithm once if that one time
+ * is successful.
+ *
+ */
+APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir, 
+                                           apr_pool_t *p);
+
 /** @} */
 
 #ifdef __cplusplus
