@@ -64,12 +64,17 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package APR user id services
+ * @file apr_user.h
+ * @brief APR User ID Services 
+ */
+/**
+ * @defgroup APR_User User id services
+ * @ingroup APR
+ * @{
  */
 
 /**
  * Structure for determining user ownership.
- * @defvar apr_uid_t
  */
 #ifdef WIN32
 typedef PSID                      apr_uid_t;
@@ -79,7 +84,6 @@ typedef uid_t                     apr_uid_t;
 
 /**
  * Structure for determining group ownership.
- * @defvar apr_gid_t
  */
 #ifdef WIN32
 typedef PSID                      apr_gid_t;
@@ -87,60 +91,55 @@ typedef PSID                      apr_gid_t;
 typedef gid_t                     apr_gid_t;
 #endif
 
-#if APR_HAS_USER
+#if APR_HAS_USER 
 
-/***
+/**
  * Get the userid (and groupid) of the calling process
  * @param userid   Returns the user id
  * @param groupid  Returns the user's group id
  * @param p The pool from which to allocate working space
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_current_userid(apr_uid_t *userid, apr_gid_t *groupid, apr_pool_t *p)
+ * @remark This function is available only if APR_HAS_USER is defined.
  */
 APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *userid,
                                              apr_gid_t *groupid,
                                              apr_pool_t *p);
 
-/***
+/**
  * Get the user name for a specified userid
  * @param username Pointer to new string containing user name (on output)
  * @param userid The userid
  * @param p The pool from which to allocate the string
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
+ * @remark This function is available only if APR_HAS_USER is defined.
  */
 APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p);
 
-/***
+/**
  * Get the userid (and groupid) for the specified username
  * @param userid   Returns the user id
  * @param groupid  Returns the user's group id
  * @param username The username to lookup
  * @param p The pool from which to allocate working space
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_get_userid(apr_uid_t *userid, apr_gid_t *groupid, const char *username, apr_pool_t *p)
+ * @remark This function is available only if APR_HAS_USER is defined.
  */
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *userid, apr_gid_t *groupid,
                                          const char *username, apr_pool_t *p);
 
-/***
+/**
  * Get the home directory for the named user
  * @param dirname Pointer to new string containing directory name (on output)
  * @param username The named user
  * @param p The pool from which to allocate the string
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_get_home_directory(char **dirname, const char *username, apr_pool_t *p)
+ * @remark This function is available only if APR_HAS_USER is defined.
  */
 APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *username, apr_pool_t *p);
 
-/***
+/**
  * Compare two user identifiers for equality.
  * @param left One uid to test
  * @param right Another uid to test
  * @return APR_SUCCESS if the apr_uid_t strutures identify the same user,
  * APR_EMISMATCH if not, APR_BADARG if an apr_uid_t is invalid.
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_compare_users(apr_uid_t left, apr_uid_t right)
+ * @remark This function is available only if APR_HAS_USER is defined.
  */
 #if defined(WIN32)
 APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right);
@@ -148,24 +147,22 @@ APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right);
 #define apr_compare_users(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
 #endif
 
-/***
+/**
  * Get the group name for a specified groupid
  * @param dirname Pointer to new string containing group name (on output)
  * @param userid The groupid
  * @param p The pool from which to allocate the string
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_get_groupname(char **groupname, apr_gid_t userid, apr_pool_t *p);
+ * @remark This function is available only if APR_HAS_USER is defined.
  */
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p);
 
-/***
+/**
  * Compare two group identifiers for equality.
  * @param left One gid to test
  * @param right Another gid to test
  * @return APR_SUCCESS if the apr_gid_t strutures identify the same group,
  * APR_EMISMATCH if not, APR_BADARG if an apr_gid_t is invalid.
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_compare_groups(apr_gid_t left, apr_gid_t right)
+ * @remark This function is available only if APR_HAS_USER is defined.
  */
 #if defined(WIN32)
 APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right);
@@ -175,6 +172,7 @@ APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right);
 
 #endif  /* ! APR_HAS_USER */
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif

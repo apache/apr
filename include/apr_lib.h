@@ -56,7 +56,7 @@
 #define APR_LIB_H
 /**
  * @file apr_lib.h
- * @brief general purpose library routines
+ * @brief APR general purpose library routines
  */
 
 #include "apr.h"

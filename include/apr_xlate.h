@@ -64,10 +64,18 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package APR I18N translation library
+ * @file apr_xlate.h
+ * @brief APR I18N translation library
  */
 
-/* APR_HAS_XLATE determines whether or not useful implementations of 
+/**
+ * @defgroup APR_I18N I18N translation library
+ * @ingroup APR
+ * @{
+ */
+
+/**
+ * APR_HAS_XLATE determines whether or not useful implementations of 
  * apr_xlate_open() et al are provided. 
  *
  * If APR_HAS_XLATE is zero, apr_xlate_open() et al will all return 
@@ -83,9 +91,7 @@ typedef struct apr_xlate_t            apr_xlate_t;
  * @param topage The name of the target charset
  * @param frompage The name of the source charset
  * @param pool The pool to use
- * @deffunc apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage, const char *frompage, apr_pool_t *pool)
- * @tip
- * <PRE>
+ * @remark
  *  Specify APR_DEFAULT_CHARSET for one of the charset
  *  names to indicate the charset of the source code at
  *  compile time.  This is useful if there are literal
@@ -95,6 +101,7 @@ typedef struct apr_xlate_t            apr_xlate_t;
  *  of the caller was not encoded in the same charset as
  *  APR at compile time.
  *
+ * @remark
  *  Specify APR_LOCALE_CHARSET for one of the charset
  *  names to indicate the charset of the current locale.
  * </PRE>
@@ -104,7 +111,17 @@ APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
                                          const char *frompage, 
                                          apr_pool_t *pool);
 
+/** 
+ * This is to indicate the charset of the sourcecode at compile time
+ * names to indicate the charset of the source code at
+ * compile time.  This is useful if there are literal
+ * strings in the source code which must be translated
+ * according to the charset of the source code.
+ */
 #define APR_DEFAULT_CHARSET (const char *)0
+/**
+ * To indicate charset names of the current locale 
+ */
 #define APR_LOCALE_CHARSET (const char *)1
 
 /**
@@ -112,7 +129,6 @@ APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
  * @param convset The handle allocated by apr_xlate_open, specifying the 
  *                parameters of conversion
  * @param onoff Output: whether or not the conversion is single-byte-only
- * @deffunc apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
  */
 APR_DECLARE(apr_status_t) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
 
@@ -126,7 +142,6 @@ APR_DECLARE(apr_status_t) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
  * @param outbuf The address of the destination buffer
  * @param outbytes_left Input: the size of the output buffer
  *                      Output: the amount of the output buffer not yet used
- * @deffunc apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf, apr_size_t *inbytes_left, char *outbuf, apr_size_t *outbytes_left)
  */
 APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset, 
                                                 const char *inbuf, 
@@ -134,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
                                                 char *outbuf,
                                                 apr_size_t *outbytes_left);
 
-/* See the comment in apr_file_io.h about this hack */
+/* @see apr_file_io.h the comment in apr_file_io.h about this hack */
 #ifdef APR_NOT_DONE_YET
 /**
  * The purpose of apr_xlate_conv_char is to translate one character
@@ -144,7 +159,6 @@ APR_DECLARE(apr_status_t) apr_xlate_conv_buffer(apr_xlate_t *convset,
  *                parameters of conversion
  * @param inchar The character to convert
  * @param outchar The converted character
- * @deffunc apr_status_t apr_xlate_conv_char(apr_xlate_t *convset, char inchar, char outchar)
  */
 APR_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset, 
                                               char inchar, char outchar);
@@ -155,9 +169,8 @@ APR_DECLARE(apr_status_t) apr_xlate_conv_char(apr_xlate_t *convset,
  * @param convset The handle allocated by apr_xlate_open, specifying the 
  *                parameters of conversion
  * @param inchar The single-byte character to convert.
- * @deffunc apr_int32_t apr_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar)
- * @tip This only works when converting between single-byte character sets.
- *      -1 will be returned if the conversion can't be performed.
+ * @warning This only works when converting between single-byte character sets.
+ *          -1 will be returned if the conversion can't be performed.
  */
 APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset, 
                                              unsigned char inchar);
@@ -165,15 +178,18 @@ APR_DECLARE(apr_int32_t) apr_xlate_conv_byte(apr_xlate_t *convset,
 /**
  * Close a codepage translation handle.
  * @param convset The codepage translation handle to close
- * @deffunc apr_status_t apr_xlate_close(apr_xlate_t *convset)
  */
 APR_DECLARE(apr_status_t) apr_xlate_close(apr_xlate_t *convset);
 
 #else
-
+/** 
+ * handle for the Translation routines
+ * (currently not implemented)
+ */
 typedef void                         apr_xlate_t;
 
-/* For platforms where we don't bother with translating between charsets,
+/**
+ * For platforms where we don't bother with translating between charsets,
  * these are macros which always return failure.
  */
 
@@ -186,7 +202,8 @@ typedef void                         apr_xlate_t;
 
 #define apr_xlate_conv_byte(convset, inchar) (-1)
 
-/* The purpose of apr_xlate_conv_char is to translate one character
+/**
+ * The purpose of apr_xlate_conv_char is to translate one character
  * at a time.  This needs to be written carefully so that it works
  * with double-byte character sets. 
  */
@@ -196,6 +213,7 @@ typedef void                         apr_xlate_t;
 
 #endif  /* ! APR_HAS_XLATE */
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif
