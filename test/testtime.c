@@ -55,7 +55,7 @@
 #include "apr_time.h"
 #include "apr_errno.h"
 #include "apr_general.h"
-#include "errno.h"
+#include <errno.h>
 #include <stdio.h>
 #ifdef BEOS
 #include <unistd.h>
