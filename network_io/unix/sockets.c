@@ -251,15 +251,16 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
             sock->local_port_unknown = 1;
         }
         /* XXX IPv6 to be handled better later... */
+        if (
 #if APR_HAVE_IPV6
-        if (sock->local_addr->sa.sin.sin_family == APR_INET6 ||
+            sock->local_addr->sa.sin.sin_family == APR_INET6 ||
+#endif
             sock->local_addr->sa.sin.sin_addr.s_addr == 0) {
             /* not bound to specific local interface; connect() had to assign
              * one for the socket
              */
             sock->local_interface_unknown = 1;
         }
-#endif
 #ifndef HAVE_POLL
         sock->connected=1;
 #endif
