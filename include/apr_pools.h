@@ -88,11 +88,8 @@ extern "C" {
  */
  
 /*
-#define ALLOC_DEBUG
 #define APR_POOL_DEBUG
 #define ALLOC_USE_MALLOC
-#define MAKE_TABLE_PROFILE
-#define ALLOC_STATS
 */
 
 /** The fundamental pool type */
