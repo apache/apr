@@ -182,6 +182,20 @@ void CuAssertTrue(CuTest* tc, int condition)
 	CuFail(tc, "assert failed");
 }
 
+void CuAssertStrNEquals(CuTest* tc, const char* expected, const char* actual,
+                        int n)
+{
+	CuString* message;
+	if (strncmp(expected, actual, n) == 0) return;
+	message = CuStringNew();
+	CuStringAppend(message, "expected\n---->\n");
+	CuStringAppend(message, expected);
+	CuStringAppend(message, "\n<----\nbut saw\n---->\n");
+	CuStringAppend(message, actual);
+	CuStringAppend(message, "\n<----\n");
+	CuFail(tc, message->buffer);
+}
+
 void CuAssertStrEquals(CuTest* tc, const char* expected, const char* actual)
 {
 	CuString* message;

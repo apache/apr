@@ -142,7 +142,7 @@ static void snprintf_noNULL(CuTest *tc)
     
     /* If this test fails, we are going to seg fault. */
     apr_snprintf(buff, sizeof(buff), "%.*s", 7, testing);
-    CuAssertStrEquals(tc, buff, testing);
+    CuAssertStrNEquals(tc, buff, testing, 7);
 }
 
 static void snprintf_0NULL(CuTest *tc)

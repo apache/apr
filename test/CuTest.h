@@ -86,6 +86,8 @@ void CuNotImpl(CuTest* tc, const char* message);
 void CuAssert(CuTest* tc, const char* message, int condition);
 void CuAssertTrue(CuTest* tc, int condition);
 void CuAssertStrEquals(CuTest* tc, const char* expected, const char* actual);
+void CuAssertStrNEquals(CuTest* tc, const char* expected, const char* actual,
+                        int n);
 void CuAssertIntEquals(CuTest* tc, int expected, int actual);
 void CuAssertPtrEquals(CuTest* tc, const void* expected, const void* actual);
 void CuAssertPtrNotNull(CuTest* tc, const void* pointer);
