@@ -101,6 +101,7 @@ typedef PROCESS_INFORMATION   apr_os_proc_t;
 typedef DWORD                 apr_os_threadkey_t; 
 typedef FILETIME              apr_os_imp_time_t;
 typedef SYSTEMTIME            apr_os_exp_time_t;
+typedef HANDLE                apr_os_dso_handle_t;
 
 #elif defined(OS2)
 typedef HFILE                 apr_os_file_t;
@@ -112,6 +113,7 @@ typedef PID                   apr_os_proc_t;
 typedef PULONG                apr_os_threadkey_t; 
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
+/* insert dso typedef here */
 
 #elif defined(__BEOS__)
 #include <kernel/OS.h>
@@ -134,6 +136,7 @@ typedef thread_id             apr_os_proc_t;
 typedef int                   apr_os_threadkey_t;
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
+typedef image_id              apr_os_dso_handle_t;
 
 #else
 /* Any other OS should go above this one.  This is the lowest common
@@ -180,6 +183,7 @@ typedef pthread_key_t         apr_os_threadkey_t;
 typedef pid_t                 apr_os_proc_t;
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
+/* insert dso typedef here */
 #endif
 
 /**
@@ -382,6 +386,26 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
                                                apr_pool_t *cont);
 
 #endif /* APR_HAS_THREADS */
+
+/**
+ * convert the dso handle from os specific to apr
+ * @param dso The apr handle we are converting to
+ * @param thedso the os specific handle to convert
+ * @param pool the pool to use if it is needed
+ * @deffunc apr_status_t apr_os_dso_handle_put(apr_dso_handle_t **dso, apr_os_dso_handle_t *thedso, apr_pool_t *pool)
+ */
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **dso,
+                                                apr_os_dso_handle_t *thedso,
+                                                apr_pool_t *pool);
+
+/**
+ * convert the apr dso handle into an os specific one
+ * @param aprdso The apr dso handle to convert
+ * @param dso The os specific dso to return
+ * @deffunc apr_status_t apr_os_dso_handle_get(apr_os_dso_handle_t *dso, apr_dso_handle_t *aprdso);
+ */
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
+                                                apr_dso_handle_t *aprdso);
 
 #ifdef __cplusplus
 }
