@@ -267,6 +267,24 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     return APR_SUCCESS;
 }
 
+ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status,
+                              ap_wait_how_e waithow, ap_pool_t *p)
+{
+    int waitpid_options = WUNTRACED;
+
+    if (waithow != APR_WAIT) {
+        waitpid_options |= WNOHANG;
+    }
+
+    if ((proc->pid = waitpid(-1, status, waitpid_options)) > 0) {
+        return APR_CHILD_DONE;
+    }
+    else if (proc->pid == 0) {
+        return APR_CHILD_NOTDONE;
+    }
+    return errno;
+} 
+
 ap_status_t ap_wait_proc(ap_proc_t *proc, 
                            ap_wait_how_e wait)
 {
