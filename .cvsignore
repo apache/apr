@@ -13,6 +13,5 @@ Release
 *.opt
 *.plg
 apr.exports
-aclocal.m4
 .libs
 *.la
