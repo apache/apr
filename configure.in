@@ -1628,7 +1628,9 @@ if test "$rand" != "1"; then
     [ apr_devrandom="$withval" ], [ apr_devrandom="yes" ])
 
   if test "$apr_devrandom" = "yes"; then
-    for f in /dev/random /dev/arandom /dev/urandom; do
+    # /dev/random on OpenBSD doesn't provide random data, so
+    # prefer /dev/arandom, which does; see random(4).
+    for f in /dev/arandom /dev/random /dev/urandom; do
       if test -r $f; then
         apr_devrandom=$f
         rand=1
