@@ -267,7 +267,7 @@ const char *apr_signal_get_description(int signum)
 
 #endif /* SYS_SIGLIST_DECLARED */
 
-#if APR_HAS_THREADS && !defined(OS2) && APR_HAVE_SIGWAIT
+#if APR_HAS_THREADS && (HAVE_SIGSUSPEND || APR_HAVE_SIGWAIT) && !defined(OS2)
 static void *signal_thread_func(void *signal_handler)
 {
     sigset_t sig_mask;
@@ -303,6 +303,7 @@ static void *signal_thread_func(void *signal_handler)
 #endif
 
     while (1) {
+#if APR_HAVE_SIGWAIT
         int signal_received;
 
         if (apr_sigwait(&sig_mask, &signal_received) != 0)
@@ -313,6 +314,11 @@ static void *signal_thread_func(void *signal_handler)
         if (sig_func(signal_received) == 1) {
             return NULL;
         }
+#elif HAVE_SIGSUSPEND
+	sigsuspend(&sig_mask);
+#else
+#error No apr_sigwait() and no sigsuspend(); I'm stuck.
+#endif
     }
 }
 
