@@ -59,7 +59,7 @@ depend: subdirs_depend
 distclean: subdirs_distclean
 	-$(RM) -f include/apr.h include/apr_private.h include/apr_private.h.in
 	-$(RM) -f *.o *.a *.so
-	-$(RM) -f config.cache config.status config.log configure
+	-$(RM) -f config.cache config.status config.log configure apr.exports
 	-$(RM) -f Makefile
 	-$(RM) -f APRVARS
 	-$(RM) -rf objs
