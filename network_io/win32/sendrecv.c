@@ -85,9 +85,9 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
     wsaData.buf = (char*) buf;
 
 #ifndef _WIN32_WCE
-    rv = WSASend(sock->sock, &wsaData, 1, &dwBytes, 0, NULL, NULL);
+    rv = WSASend(sock->socketdes, &wsaData, 1, &dwBytes, 0, NULL, NULL);
 #else
-    rv = send(sock->sock, wsaData.buf, wsaData.len, 0);
+    rv = send(sock->socketdes, wsaData.buf, wsaData.len, 0);
     dwBytes = rv;
 #endif
     if (rv == SOCKET_ERROR) {
@@ -114,9 +114,9 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
     wsaData.buf = (char*) buf;
 
 #ifndef _WIN32_WCE
-    rv = WSARecv(sock->sock, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
+    rv = WSARecv(sock->socketdes, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
 #else
-    rv = recv(sock->sock, wsaData.buf, wsaData.len, 0);
+    rv = recv(sock->socketdes, wsaData.buf, wsaData.len, 0);
     dwBytes = rv;
 #endif
     if (rv == SOCKET_ERROR) {
@@ -151,13 +151,13 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
         pWsaBuf[i].len = vec[i].iov_len;
     }
 #ifndef _WIN32_WCE
-    rv = WSASend(sock->sock, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
+    rv = WSASend(sock->socketdes, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         rc = apr_get_netos_error();
     }
 #else
     for (i = 0; i < nvec; i++) {
-        rv = send(sock->sock, pWsaBuf[i].buf, pWsaBuf[i].len, 0);
+        rv = send(sock->socketdes, pWsaBuf[i].buf, pWsaBuf[i].len, 0);
         if (rv == SOCKET_ERROR) {
             rc = apr_get_netos_error();
             break;
@@ -179,7 +179,7 @@ APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
 {
     apr_ssize_t rv;
 
-    rv = sendto(sock->sock, buf, (*len), flags, 
+    rv = sendto(sock->socketdes, buf, (*len), flags, 
                 (const struct sockaddr*)&where->sa, 
                 where->salen);
     if (rv == SOCKET_ERROR) {
@@ -199,7 +199,7 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from,
 {
     apr_ssize_t rv;
 
-    rv = recvfrom(sock->sock, buf, (*len), flags, 
+    rv = recvfrom(sock->socketdes, buf, (*len), flags, 
                   (struct sockaddr*)&from->sa, &from->salen);
     if (rv == SOCKET_ERROR) {
         (*len) = 0;
@@ -285,7 +285,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 #ifdef WAIT_FOR_EVENT
     wait_event = overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #else
-    wait_event = (HANDLE) sock->sock;
+    wait_event = (HANDLE) sock->socketdes;
 #endif
 
     /* Use len to keep track of number of total bytes sent (including headers) */
@@ -343,7 +343,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 #if APR_HAS_LARGE_FILES
         overlapped.OffsetHigh = (DWORD)(curoff >> 32);
 #endif
-        rv = TransmitFile(sock->sock,     /* socket */
+        rv = TransmitFile(sock->socketdes,  /* socket */
                           file->filehand, /* open file descriptor of the file to be sent */
                           nbytes,         /* number of bytes to send. 0=send all */
                           0,              /* Number of bytes per send. 0=use default */
@@ -408,7 +408,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
          */
         if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
             sock->disconnected = 1;
-            sock->sock = INVALID_SOCKET;
+            sock->socketdes = INVALID_SOCKET;
         }
     }
 
