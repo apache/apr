@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/05/17 13:36:44 $]
+Last modified at [$Date: 2001/05/31 04:10:03 $]
 
 Release:
 
@@ -65,6 +65,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * add apr_crypt() and APR_HAS_CRYPT for apps to determine whether the
       crypt() function is available, and a way to call it (whether it is
       located in libc, libcrypt, or libufc)
+      Justin says: Should apr_crypt() be in apr-util?
+
         Status: Greg +1 (volunteers)
 
     * apr_create_lock() changes:
@@ -76,6 +78,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
                     The fname parameter is essentially required if you
                     want to be portable, but I dislike wasting cycles to
                     outsmart the programmer.
+        Justin says: The type parameter is now used.
         Status: david +1
                 rbb -1
 
@@ -113,6 +116,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * I think apr_open_stderr() and friends dup() the descriptor. That
       would allow the new/returned file to be closed (via pool cleanup
       or manually) without accidentally closing stderr/out.
+      Justin says: Is this "I think it should?"
 
     * need to export the shared library extension (e.g. ".so") for the
       platform. clients need to use this to construct filenames to
