@@ -338,11 +338,13 @@ fi
 
 ac_cv_define_READDIR_IS_THREAD_SAFE=no
 ac_cv_define_GETHOSTBYNAME_IS_THREAD_SAFE=no
+ac_cv_define_GETHOSTBYADDR_IS_THREAD_SAFE=no
 if test "$threads" = "1"; then
     echo "APR will use threads"
     AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
     AC_CHECK_LIB(c_r, gethostbyname, AC_DEFINE(GETHOSTBYNAME_IS_THREAD_SAFE))
-    AC_CHECK_FUNCS(gethostbyname_r)
+    AC_CHECK_LIB(c_r, gethostbyaddr, AC_DEFINE(GETHOSTBYADDR_IS_THREAD_SAFE))
+    AC_CHECK_FUNCS(gethostbyname_r gethostbyaddr_r)
 else
     echo "APR will be non-threaded"
 fi
@@ -1195,6 +1197,11 @@ AC_SUBST(file_as_socket)
 APR_CHECK_SOCKADDR_SA_LEN
 
 APR_CHECK_GETHOSTBYNAME_NAS
+
+dnl Check the types only if we have gethostbyname_r
+if test "$ac_cv_func_gethostbyname_r" = "yes"; then
+    APR_CHECK_GETHOSTBYNAME_R_STYLE
+fi
 
 APR_CHECK_TCP_NODELAY_INHERITED
 
