@@ -63,9 +63,10 @@ APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
        that's the primary purpose of this function.  But people might
        want to use this function with arrays other than the main argv,
        and we shouldn't touch the caller's data.  So we copy. */
-    (*os)->argv = apr_palloc(cont, argc * sizeof(const char *));
+    (*os)->argv = apr_palloc(cont, (argc + 1) * sizeof(const char *));
     for (i = 0; i < argc; i++)
 	(*os)->argv[i] = argv[i];
+    (*os)->argv[argc] = NULL;
 
     (*os)->interleave = 0;
     (*os)->ind = 1;
