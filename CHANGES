@@ -1,5 +1,9 @@
 Changes with APR 1.0
 
+  *) Change i386 FreeBSD to use the asm routines in apr_atomic.h
+     to overcome issues with the FreeBSD atomic functions return
+     type on i386. [David Reid]
+
   *) Add a new PRNG. Note that the implementation of SHA-256 is a
      stop-gap pending snarfing the SHA-1 implementation from apr-util
      and upgrading it to do SHA-256. Not yet ready for prime time.
