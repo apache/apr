@@ -589,14 +589,17 @@ APR_EXPORT(void) ap_table_do(int (*comp) (void *, const char *, const char *),
 			      void *rec, const ap_table_t *t, ...)
 {
     va_list vp;
+    va_start(vp, t);
+    ap_table_vdo(comp, rec, t, vp);
+    va_end(vp);  
+} 
+APR_EXPORT(void) ap_table_vdo(int (*comp) (void *, const char *, const char *),
+				void *rec, const ap_table_t *t, va_list vp)
+{
     char *argp;
     ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
     int rv, i;
-
-    va_start(vp, t);
-
     argp = va_arg(vp, char *);
-
     do {
 	for (rv = 1, i = 0; rv && (i < t->a.nelts); ++i) {
 	    if (elts[i].key && (!argp || !strcasecmp(elts[i].key, argp))) {
@@ -604,8 +607,6 @@ APR_EXPORT(void) ap_table_do(int (*comp) (void *, const char *, const char *),
 	    }
 	}
     } while (argp && ((argp = va_arg(vp, char *)) != NULL));
-
-    va_end(vp);
 }
 
 /* Curse libc and the fact that it doesn't guarantee a stable sort.  We
