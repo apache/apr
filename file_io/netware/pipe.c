@@ -59,26 +59,6 @@
 #include "fileio.h"
 #include "apr_strings.h"
 
-apr_status_t apr_netware_pipe_cleanup(void *thefile)
-{
-    apr_file_t *file = thefile;
-    apr_status_t rv = APR_SUCCESS;
-    int rc;
-
-	rc = close(file->filedes);
-    if (rc == 0) {
-        file->filedes = -1;
-        if (file->thlock) {
-            rv = apr_thread_mutex_destroy(file->thlock);
-        }
-    }
-    else {
-        /* Are there any error conditions other than EINTR or EBADF? */
-        rv = errno;
-    }
-    return rv;
-}
-
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
 #ifdef USE_FLAGS
@@ -154,47 +134,37 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
 
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *pool)
 {
-	char        tname[L_tmpnam+1];
 	int     	filedes[2];
 	int 		err;
 
-	if (!tmpnam(tname))
-		return errno;
-
-	if (((filedes[0] = pipe_open(tname, O_RDONLY)) != -1)
-		&& ((filedes[1] = pipe_open(tname, O_WRONLY)) != -1))
-	{
-        (*in) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
-        (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
-
-		(*in)->pool     =
-		(*out)->pool    = pool;
-		(*in)->filedes   = filedes[0];
-		(*out)->filedes  = filedes[1];
-		(*in)->pipe      =
-		(*out)->pipe     = 1;
-		(*out)->fname    = apr_pstrdup(pool, tname);
-		(*in)->fname     = apr_pstrdup(pool, tname);;
-		(*in)->buffered  =
-		(*out)->buffered = 0;
-		(*in)->blocking  =
-		(*out)->blocking = BLK_ON;
-		(*in)->timeout   =
-		(*out)->timeout  = -1;
-		(*in)->ungetchar = -1;
-		(*in)->thlock    =
-		(*out)->thlock   = NULL;
-	}
-	else
-	{
-		if (filedes[0] != -1)
-			close(filedes[0]);
+    if (pipe(filedes) == -1) {
         return errno;
-	}
+    }
 
-    apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_netware_pipe_cleanup,
+    (*in) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+    (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+
+    (*in)->pool     =
+    (*out)->pool    = pool;
+    (*in)->filedes   = filedes[0];
+    (*out)->filedes  = filedes[1];
+    (*in)->pipe      =
+    (*out)->pipe     = 1;
+    (*out)->fname    = 
+    (*in)->fname     = NULL;
+    (*in)->buffered  =
+    (*out)->buffered = 0;
+    (*in)->blocking  =
+    (*out)->blocking = BLK_ON;
+    (*in)->timeout   =
+    (*out)->timeout  = -1;
+    (*in)->ungetchar = -1;
+    (*in)->thlock    =
+    (*out)->thlock   = NULL;
+
+    apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
-    apr_pool_cleanup_register((*out)->pool, (void *)(*out), apr_netware_pipe_cleanup,
+    apr_pool_cleanup_register((*out)->pool, (void *)(*out), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
 
     return APR_SUCCESS;

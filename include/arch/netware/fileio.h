@@ -162,7 +162,6 @@ apr_status_t filepath_has_drive(const char *rootpath, int only, apr_pool_t *p);
 apr_status_t filepath_compare_drive(const char *path1, const char *path2, apr_pool_t *p);
 
 apr_status_t apr_unix_file_cleanup(void *);
-apr_status_t apr_netware_pipe_cleanup(void *thefile);
 
 #endif  /* ! FILE_IO_H */
 
