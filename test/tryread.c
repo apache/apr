@@ -36,6 +36,12 @@
 #include "apr_pools.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
+#include "apr.h"
+
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 
 int main(int argc, const char * const *argv)
 {
