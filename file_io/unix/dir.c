@@ -172,6 +172,9 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                           apr_dir_t *thedir)
 {
     apr_status_t ret = 0;
+#ifdef DIRENT_TYPE
+    apr_filetype_e type;
+#endif
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
                     && !defined(READDIR_IS_THREAD_SAFE)
     struct dirent *retent;
@@ -218,11 +221,16 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         return ret;
     }
 
-#ifdef DIRENT_INODE
-    wanted &= ~APR_FINFO_INODE;
-#endif
 #ifdef DIRENT_TYPE
-    wanted &= ~APR_FINFO_TYPE;
+    type = filetype_from_dirent_type(thedir->entry->DIRENT_TYPE);
+    if (type != APR_UNKFILE) {
+        wanted &= ~APR_FINFO_TYPE;
+    }
+#endif
+#ifdef DIRENT_INODE
+    if (thedir->entry->DIRENT_INODE && thedir->entry->DIRENT_INODE != -1) {
+        wanted &= ~APR_FINFO_INODE;
+    }
 #endif
 
     wanted &= ~APR_FINFO_NAME;
@@ -251,12 +259,16 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         finfo->pool = thedir->pool;
         finfo->valid = 0;
 #ifdef DIRENT_TYPE
-        finfo->filetype = filetype_from_dirent_type(thedir->entry->DIRENT_TYPE);
-        finfo->valid |= APR_FINFO_TYPE;
+        if (type != APR_UNKFILE) {
+            finfo->filetype = type;
+            finfo->valid |= APR_FINFO_TYPE;
+        }
 #endif
 #ifdef DIRENT_INODE
-        finfo->inode = thedir->entry->DIRENT_INODE;
-        finfo->valid |= APR_FINFO_INODE;
+        if (thedir->entry->DIRENT_INODE && thedir->entry->DIRENT_INODE != -1) {
+            finfo->inode = thedir->entry->DIRENT_INODE;
+            finfo->valid |= APR_FINFO_INODE;
+        }
 #endif
     }
 
