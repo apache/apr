@@ -448,7 +448,7 @@ int apr_canonical_error(apr_status_t err);
  */
 #define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
 
-#define APR_STATUS_IS_SUCCESS           ((s) == APR_SUCCESS \
+#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS \
                 || (s) == APR_OS_START_SYSERR + ERROR_SUCCESS)
 
 /* APR CANONICAL ERROR TESTS */
@@ -504,7 +504,7 @@ int apr_canonical_error(apr_status_t err);
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
 
-#define APR_STATUS_IS_SUCCESS           ((s) == APR_SUCCESS)
+#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
 
 /* APR CANONICAL ERROR TESTS */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
