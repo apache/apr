@@ -620,6 +620,7 @@ APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
 
 APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attributes,
+                                             apr_fileattrs_t attr_mask,
                                              apr_pool_t *cont)
 {
     DWORD flags;
@@ -648,10 +649,13 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     if (flags == 0xFFFFFFFF)
         return apr_get_os_error();
 
-    if (attributes & APR_FILE_ATTR_READONLY)
-        flags |= FILE_ATTRIBUTE_READONLY;
-    else
-        flags &= !FILE_ATTRIBUTE_READONLY;
+    if (attr_mask & APR_FILE_ATTR_READONLY)
+    {
+        if (attributes & APR_FILE_ATTR_READONLY)
+            flags |= FILE_ATTRIBUTE_READONLY;
+        else
+            flags &= ~FILE_ATTRIBUTE_READONLY;
+    }
 
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE

@@ -126,7 +126,7 @@ extern "C" {
 /** @} */
 
 /** File attributes */
-typedef apr_int32_t apr_fileattrs_t;
+typedef apr_uint32_t apr_fileattrs_t;
 
 /** should be same as whence type in lseek, POSIX defines this as int */
 typedef int       apr_seek_where_t;
@@ -583,6 +583,7 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
  *            APR_FILE_ATTR_READONLY   - make the file readonly
  *            APR_FILE_ATTR_EXECUTABLE - make the file executable
  * </PRE>
+ * @param attr_mask Mask of valid bits in attributes.
  * @param cont the pool to use.
  * @remark This function should be used in preference to explict manipulation
  *      of the file permissions, because the operations to provide these
@@ -593,6 +594,7 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
  */
 APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attributes,
+                                             apr_fileattrs_t attr_mask,
                                              apr_pool_t *cont);
 
 /**
