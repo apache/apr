@@ -68,6 +68,10 @@
 #include "apr_pools.h"
 #include "apr_lock.h"
 
+#if APR_HAS_THREADS
+#include "apr_portable.h"
+#endif /* APR_HAS_THREADS */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -346,6 +350,29 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms,
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms, 
                                                    apr_int32_t type);
+
+#if APR_HAS_THREADS
+/**
+ * Register the specified thread with the sms
+ * @param sms The memory system the thread is to be registered with
+ * @param thread The thread to register
+ * @deffunc apr_status_t apr_sms_thread_register(apr_sms_t *sms, 
+ *                                               apr_os_thread_t thread);
+ */
+APR_DECLARE(apr_status_t) apr_sms_thread_register(apr_sms_t *sms, 
+                                                  apr_os_thread_t thread);
+
+/**
+ * Unregister a previously registered thread from the sms
+ * @param sms The memory system the thread is to be unregistered from
+ * @param thread The thread to unregister
+ * @deffunc apr_status_t apr_sms_thread_unregister(apr_sms_t *sms, 
+ *                                                 apr_os_thread_t thread);
+ */
+APR_DECLARE(apr_status_t) apr_sms_thread_unregister(apr_sms_t *sms, 
+                                                    apr_os_thread_t thread);
+
+#endif /* APR_HAS_THREADS */
 
 /**********************************************************************
  ** Standard SMS module

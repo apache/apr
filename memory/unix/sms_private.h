@@ -59,6 +59,7 @@
 #include "apr_errno.h"
 #include "apr_pools.h"
 #include "apr_lock.h"
+#include "apr_portable.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,6 +92,14 @@ struct apr_sms_t
     apr_status_t (*destroy_fn)     (apr_sms_t *sms);
     apr_status_t (*lock_fn)        (apr_sms_t *sms);
     apr_status_t (*unlock_fn)      (apr_sms_t *sms);
+
+#if APR_HAS_THREADS    
+    apr_status_t (*thread_register_fn)   (apr_sms_t *sms, 
+                                          apr_os_thread_t thread);
+    apr_status_t (*thread_unregister_fn) (apr_sms_t *sms, 
+                                          apr_os_thread_t thread);
+    apr_uint16_t threads;
+#endif /* APR_HAS_THREADS */
 
 #if APR_DEBUG_TAG_SMS
     const char *tag;
