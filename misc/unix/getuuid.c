@@ -66,6 +66,9 @@
 #include "apr_uuid.h"
 #include "apr_md5.h"
 #include "apr_general.h"
+#if APR_HAVE_STRING_H
+#include <string.h>
+#endif
 #if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
