@@ -245,7 +245,7 @@ apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
 }
 
 apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, 
-                           apr_pool_t *cont)
+                             apr_pool_t *cont)
 {
     if ((*file) == NULL) {
         if (cont == NULL) {
@@ -255,6 +255,7 @@ apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
         (*file)->cntxt = cont;
     }
     (*file)->filehand = *thefile;
+    (*file)->ungetchar = -1; /* no char avail */
     return APR_SUCCESS;
 }    
 

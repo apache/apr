@@ -216,7 +216,7 @@ apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
 }
 
 apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
-                           apr_pool_t *cont)
+                             apr_pool_t *cont)
 {
     int *dafile = thefile;
     
@@ -228,6 +228,7 @@ apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
     (*file)->buffered = 0;
     (*file)->blocking = BLK_UNKNOWN; /* in case it is a pipe */
     (*file)->timeout = -1;
+    (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
     /* buffer already NULL; 
      * don't get a lock (only for buffered files) 
