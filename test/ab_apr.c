@@ -886,6 +886,8 @@ int main(int argc, char **argv)
     trstring = "";
     tdstring = "bgcolor=white";
 
+    ap_initialize();
+    atexit(ap_terminate);
     ap_create_context(&cntxt, NULL);
 
     ap_optind = 1;
