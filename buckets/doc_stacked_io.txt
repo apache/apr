@@ -1,0 +1,554 @@
+[djg: comments like this are from dean]
+
+This past summer, Alexei and I wrote a spec for an I/O Filters API... 
+this proposal addresses one part of that -- 'stacked' I/O with buff.c. 
+
+We have a couple of options for stacked I/O: we can either use existing
+code, such as sfio, or we can rewrite buff.c to do it.  We've gone over
+the first possibility at length, though, and there were problems with each
+implemenation which was mentioned (licensing and compatibility,
+specifically); so far as I know, those remain issues. 
+
+Btw -- sfio will be supported w/in this model... it just wouldn't be the
+basis for the model's implementation. 
+
+     -- Ed Korthof        |  Web Server Engineer --
+     -- ed@organic.com    |  Organic Online, Inc --
+     -- (415) 278-5676    |  Fax: (415) 284-6891 --
+
+---------------------------------------------------------------------------
+Stacked I/O With BUFFs
+	Sections:
+
+	1.) Overview
+	2.) The API
+		User-supplied structures
+		API functions
+	3.) Detailed Description
+		The bfilter structure
+		The bbottomfilter structure
+		The BUFF structure
+		Public functions in buff.c
+	4.) Efficiency Considerations
+		Buffering
+		Memory copies
+		Function chaining
+		writev
+	5.) Code in buff.c
+		Default Functions
+		Heuristics for writev
+		Writing
+		Reading
+		Flushing data
+		Closing stacks and filters
+		Flags and Options
+
+*************************************************************************
+		Overview
+
+The intention of this API is to make Apache's BUFF structure modular
+while retaining high efficiency.  Basically, it involves rewriting
+buff.c to provide 'stacked' I/O -- where the data passed through a
+series of 'filters', which may modify it.
+
+There are two parts to this, the core code for BUFF structures, and the
+"filters" used to implement new behavior.  "filter" is used to refer to
+both the sets of 5 functions, as shown in the bfilter structure in the
+next section, and to BUFFs which are created using a specific bfliter.
+These will also be occasionally refered to as "user-supplied", though
+the Apache core will need to use these as well for basic functions.
+
+The user-supplied functions should use only the public BUFF API, rather
+than any internal details or functions.  One thing which may not be
+clear is that in the core BUFF functions, the BUFF pointer passed in
+refers to the BUFF on which the operation will happen.  OTOH, in the
+user-supplied code, the BUFF passed in is the next buffer down the
+chain, not the current one.
+
+*************************************************************************
+		The API
+
+	User-supplied structures
+
+First, the bfilter structure is used in all filters:
+    typedef struct {
+      int (*writev)(BUFF *, void *, struct iovect *, int);
+      int (*read)(BUFF *, void *, char *, int);
+      int (*write)(BUFF *, void *, const char *, int);
+      int (*flush)(BUFF *, void *, const char *, int, bfilter *);
+      int (*transmitfile)(BUFF *, void *, file_info_ptr *);
+      void (*close)(BUFF *, void *);
+    } bfilter;
+
+bfilters are placed into a BUFF structure along with a
+user-supplied void * pointer.
+
+Second, the following structure is for use with a filter which can
+sit at the bottom of the stack:
+
+    typedef struct {
+      void *(*bgetfileinfo)(BUFF *, void *);
+      void (*bpushfileinfo)(BUFF *, void *, void *);
+    } bbottomfilter;
+
+
+	BUFF API functions
+
+The following functions are new BUFF API functions:
+
+For filters:
+
+BUFF * bcreatestack(pool *p, int flags, struct bfilter *,
+                    struct bbottomfilter *, void *);
+BUFF * bpushfilter (BUFF *, struct bfilter *, void *);
+BUFF * bpushbuffer (BUFF *, BUFF *);
+BUFF * bpopfilter(BUFF *);
+BUFF * bpopbuffer(BUFF *);
+void bclosestack(BUFF *);
+
+For BUFFs in general:
+
+int btransmitfile(BUFF *, file_info_ptr *);
+int bsetstackopts(BUFF *, int, const void *);
+int bsetstackflags(BUFF *, int, int);
+
+Note that a new flag is needed for bsetstackflags:
+B_MAXBUFFERING
+
+The current bcreate should become
+
+BUFF * bcreatebuffer (pool *p, int flags, struct bfilter *, void *);
+
+*************************************************************************
+		Detailed Explanation
+
+	bfilter structure
+
+The void * pointer used in all these functions, as well as those in the
+bbottomfilter structure and the filter API functions, is always the same
+pointer w/in an individual BUFF.
+
+The first function in a bfilter structure is 'writev'; this is only
+needed for high efficiency writing, generally at the level of the system
+interface.  In it's absence, multiple writes will be done w/ 'write'.
+Note that defining 'writev' means you must define 'write'.
+
+The second is 'write'; this is the generic writing function, taking a BUFF
+* to which to write, a block of text, and the length of that block of
+text.  The expected return is the number of characters (out of that block
+of text) which were successfully processed (rather than the number of
+characters actually written). 
+
+The third is 'read'; this is the generic reading function, taking a BUFF *
+from which to read data, and a void * buffer in which to put text, and the
+number of characters to put in that buffer.  The expected return is the
+number of characters placed in the buffer.
+
+The fourth is 'flush'; this is intended to force the buffer to spit out
+any data it may have been saving, as well as to clear any data the
+BUFF code was storing.  If the third argument is non-null, then it
+contains more text to be printed; that text need not be null terminated,
+but the fourth argument contains the length of text to be processed.  The
+expected return value should be the number of characters handled out
+from the third argument (0 if there are none), or -1 on error.  Finally,
+the fifth argument is a pointer to the bfilter struct containing this
+function, so that it may use the write or writev functions in it.   Note
+that general buffering is handled by BUFF's internal code, and module
+writers should not store data for performance reasons.
+
+The fifth is 'transmitfile', which takes as its arguments a buffer to
+which to write (if non-null), the void * pointer containing configuration
+(or other) information for this filter, and a system-dependent pointer
+(the file_info_ptr structure will be defined on a per-system basis)
+containing information required to print the 'file' in question.
+This is intended to allow zero-copy TCP in Win32.
+
+The sixth is 'close'; this is what is called when the connection is being
+closed.  The 'close' should not be passed on to the next filter in the
+stack.  Most filters will not need to use this, but if database handles
+or some other object is created, this is the point at which to remove it.
+Note that flush is called automatically before this.
+
+	bbottomfilter Structure
+
+The first function, bgetfileinfo, is designed to allow Apache to get
+information from a BUFF struct regarding the input and output sources.
+This is currently used to get the input file number to select on a
+socket to see if there's data waiting to be read.  The information
+returned is platform specific; the void * pointer passed in holds
+the void * pointer passed to all user-supplied functions.
+
+The second function, bpushfileinfo, is used to push file information
+onto a buffer, so that the buffer can be fully constructed and ready
+to handle data as soon as possible after a client has connected.
+The first void * pointer holds platform specific information (in
+Unix, it would be a pair of file descriptors); the second holds the
+void * pointer passed to all user-supplied functions.
+
+[djg: I don't think I really agree with the distinction here between
+the bottom and the other filters.  Take the select() example, it's
+valid for any layer to define a fd that can be used for select...
+in fact it's the topmost layer that should really get to make this
+definition.  Or maybe I just have your top and bottom flipped.  In
+any event I think this should be part of the filter structure and
+not separate.]
+
+	The BUFF structure
+
+A couple of changes are needed for this structure: remove fd and
+fd_in; add a bfilter structure; add a pointer to a bbottomfilter;
+add three pointers to the next BUFFs: one for the next BUFF in the
+stack, one for the next BUFF which implements write, and one
+for the next BUFF which implements read.
+
+
+	Public functions in buff.c
+
+BUFF * bpushfilter (BUFF *, struct bfilter *, void *);
+
+This function adds the filter functions from bfilter, stacking them on
+top of the BUFF.  It returns the new top BUFF, or NULL on error.
+
+BUFF * bpushbuffer (BUFF *, BUFF *);
+
+This function places the second buffer on the top of the stack that
+the first one is on.  It returns the new top BUFF, or NULL on error.
+
+BUFF * bpopfilter(BUFF *);
+BUFF * bpopbuffer(BUFF *);
+
+Unattaches the top-most filter from the stack, and returns the new
+top-level BUFF, or NULL on error or when there are no BUFFs
+remaining.  The two are synonymous.
+
+void bclosestack(BUFF *);
+
+Closes the I/O stack, removing all the filters in it.
+
+BUFF * bcreatestack(pool *p, int flags, struct bfilter *,
+                    struct bbottomfilter *, void *);
+
+This creates an I/O stack.  It returns NULL on error.
+
+BUFF * bcreatebuffer(pool *p, int flags, struct bfilter *, void *);
+
+This creates a BUFF for later use with bpushbuffer.  The BUFF is
+not set up to be used as an I/O stack, however.  It returns NULL
+on error.
+
+int bsetstackopts(BUFF *, int, const void *);
+int bsetstackflags(BUFF *, int, int);
+
+These functions, respectively, set options on all the BUFFs in a
+stack.  The new flag, B_MAXBUFFERING is used to disable a feature
+described in the next section, whereby only the first and last
+BUFFs will buffer data.
+
+*************************************************************************
+		Efficiency Considerations
+
+	Buffering
+
+All input and output is buffered by the standard buffering code.
+People writing code to use buff.c should not concern themselves with
+buffering for efficiency, and should not buffer except when necessary.
+
+The write function will typically be called with large blocks of text;
+the read function will attempt to place the specified number of bytes
+into the buffer.
+
+Dean noted that there are possible problems w/ multiple buffers;
+further, some applications must not be buffered.  This can be
+partially dealt with by turning off buffering, or by flushing the
+data when appropriate.
+
+However, some potential problems arise anyway.  The simplest example
+involves shrinking transformations; suppose that you have a set
+of filters, A, B, and C, such that A outputs less text than it
+recieves, as does B (say A strips comments, and B gzips the result).
+Then after a write to A which fills the buffer, A writes to B.
+However, A won't write enough to fill B's buffer, so a memory copy
+will be needed.  This continues till B's buffer fills up, then
+B will write to C's buffer -- with the same effect.
+
+[djg: I don't think this is the issue I was really worried about --
+in the case of shrinking transformations you are already doing 
+non-trivial amounts of CPU activity with the data, and there's
+no copying of data that you can eliminate anyway.  I do recognize
+that there are non-CPU intensive filters -- such as DMA-capable
+hardware crypto cards.  I don't think they're hard to support in
+a zero-copy manner though.]
+
+The maximum additional number of bytes which will be copied in this
+scenario is on the order of nk, where n is the total number of bytes,
+and k is the number of filters doing shrinking transformations.
+
+There are several possible solutions to this issue.  The first
+is to turn off buffering in all but the first filter and the
+last filter.  This reduces the number of unnecessary byte copies
+to at most one per byte, however it means that the functions in
+the stack will get called more frequently; but it is the default
+behavior, overridable by setting the B_MAXBUFFERING with
+bsetstackflags.  Most filters won't involve a net shrinking
+transformation, so even this will rarely be an issue; however,
+if the filters do involve a net shrinking transformation, for
+the sake of network-efficiency (sending reasonably sized blocks),
+it may be more efficient anyway.
+
+A second solution is more general use of writev for communication
+between different buffers.  This complicates the programing work,
+however.
+
+
+	Memory copies
+
+Each write function is passed a pointer to constant text; if any changes
+are being made to the text, it must be copied.  However, if no changes
+are made to the text (or to some smaller part of it), then it may be
+sent to the next filter without any additional copying.  This should
+provide the minimal necessary memory copies.
+
+[djg: Unfortunately this makes it hard to support page-flipping and
+async i/o because you don't have any reference counts on the data.
+But I go into a little detail that already in docs/page_io.]
+
+	Function chaining
+
+In order to avoid unnecessary function chaining for reads and writes,
+when a filter is pushed onto the stack, the buff.c code will determine
+which is the next BUFF which contains a read or write function, and
+reads and writes, respectively, will go directly to that BUFF.
+
+	writev
+
+writev is a function for efficient writing to the system; in terms of
+this API, however, it also works for dealing with multiple blocks of
+text without doing unnecessary byte copies.  It is not required.
+
+Currently, the system level writev is used in two contexts: for
+chunking and when a block of text is writen which, combined with
+the text already in the buffer, would make the buffer overflow.
+
+writev would be implemented both by the default bottom level filter
+and by the chunking filter for these operations.  In addition, writev
+may, be used, as noted above, to pass multiple blocks of text w/o
+copying them into a single buffer.  Note that if the next filter does
+not implement writev, however, this will be equivalent to repeated
+calls to write, which may or may not be more efficient.  Up to
+IOV_MAX-2 blocks of text may be passed along in this manner.  Unlike
+the system writev call, the writev in this API should be called only
+once, with a array with iovec's and a count as to the number of
+iovecs in it.
+
+If a bfilter defines writev, writev will be called whether or not
+NO_WRITEV is set; hence, it should deal with that case in a reasonable
+manner.
+
+[djg: We can't guarantee atomicity of writev() when we emulate it.
+Probably not a problem, just an observation.]
+
+*************************************************************************
+		Code in buff.c
+
+	Default Functions
+
+The default actions are generally those currently performed by Apache,
+save that they they'll only attempt to write to a buffer, and they'll
+return an error if there are no more buffers.  That is, you must implement
+read, write, and flush in the bottom-most filter.
+
+Except for close(), the default code will simply pass the function call
+on to the next filter in the stack.  Some samples follow.
+
+	Heuristics for writev
+
+Currently, we call writev for chunking, and when we get a enough so that
+the total overflows the buffer.  Since chunking is going to become a
+filter, the chunking filter will use writev; in addition, bwrite will
+trigger bwritev as shown (note that system specific information should
+be kept at the filter level):
+
+in bwrite:
+
+    if (fb->outcnt > 0 && nbyte + fb->outcnt >= fb->bufsiz) {
+        /* build iovec structs */
+        struct iovec vec[2];
+        vec[0].iov_base = (void *) fb->outbase;
+        vec[0].iov_len = fb->outcnt;
+        fb->outcnt = 0;
+        vec[1].iov_base = (void *)buff;
+        vec[1].iov_length = nbyte;
+        return bwritev (fb, vec, 2);
+    } else if (nbye >= fb->bufsiz) {
+        return write_with_errors(fb,buff,nbyte);
+    }
+
+Note that the code above takes the place of large_write (as well
+as taking code from it).
+
+So, bwritev would look something like this (copying and pasting freely
+from the current source for writev_it_all, which could be replaced):
+
+-----
+int bwritev (BUFF * fb, struct iovec * vec, int nvecs) {
+    if (!fb)
+        return -1; /* the bottom level filter implemented neither write nor
+                    * writev. */
+    if (fb->bfilter.bwritev) {
+        return bf->bfilter.writev(fb->next, vec, nvecs);
+    } else if (fb->bfilter.write) {
+        /* while it's nice an easy to build the vector and crud, it's painful
+         * to deal with partial writes (esp. w/ the vector)
+         */
+        int i = 0,rv;
+        while (i < nvecs) {
+            do {
+                rv = fb->bfilter.write(fb, vec[i].iov_base, vec[i].iov_len);
+            } while (rv == -1 && (errno == EINTR || errno == EAGAIN)
+                     && !(fb->flags & B_EOUT));
+            if (rv == -1) {
+                if (errno != EINTR && errno != EAGAIN) {
+                    doerror (fb, B_WR);
+                }
+                return -1;
+            }
+            fb->bytes_sent += rv;
+            /* recalculate vec to deal with partial writes */
+            while (rv > 0) {
+                if (rv < vec[i].iov_len) {
+                    vec[i].iov_base = (char *)vec[i].iov_base + rv;
+                    vec[i].iov_len -= rv;
+                    rv = 0;
+                    if (vec[i].iov_len == 0) {
+                        ++i;
+                    }
+                } else {
+                    rv -= vec[i].iov_len;
+                    ++i;
+                }
+            }
+            if (fb->flags & B_EOUT)
+                return -1;
+        }
+        /* if we got here, we wrote it all */
+        return 0;
+    } else {
+        return bwritev(fb->next,vec,nvecs);
+    }
+}
+-----
+The default filter's writev function will pretty much like
+writev_it_all.
+
+
+	Writing
+
+The general case for writing data is significantly simpler with this
+model.  Because special cases are not dealt with in the BUFF core,
+a single internal interface to writing data is possible; I'm going
+to assume it's reasonable to standardize on write_with_errors, but
+some other function may be more appropriate.
+
+In the revised bwrite (which I'll ommit for brievity), the following
+must be done:
+	check for error conditions
+	check to see if any buffering is done; if not, send the data
+		directly to the write_with_errors function
+	check to see if we should use writev or write_with_errors
+		as above
+	copy the data to the buffer (we know it fits since we didn't
+		need writev or write_with_errors)
+
+The other work the current bwrite is doing is
+	ifdef'ing around NO_WRITEV
+	numerous decisions regarding whether or not to send chunks
+
+Generally, buff.c has a number of functions whose entire purpose is
+to handle particular special cases wrt chunking, all of which could
+be simplified with a chunking filter.
+
+write_with_errors would not need to change; buff_write would.  Here
+is a new version of it:
+
+-----
+/* the lowest level writing primitive */
+static ap_inline int buff_write(BUFF *fb, const void *buf, int nbyte)
+{
+    if (fb->bfilter.write)
+        return fb->bfilter.write(fb->next_writer,buff,nbyte);
+    else
+        return bwrite(fb->next_writer,buff,nbyte);
+}
+-----
+
+If the btransmitfile function is called on a buffer which doesn't implement
+it, the system will attempt to read data from the file identified
+by the file_info_ptr structure and use other methods to write to it.
+
+	Reading
+
+One of the basic reading functions in Apache 1.3b3 is buff_read;
+here is how it would look within this spec:
+
+-----
+/* the lowest level reading primitive */
+static ap_inline int buff_read(BUFF *fb, void *buf, int nbyte)
+{
+    int rv;
+
+    if (!fb)
+        return -1; /* the bottom level filter is not set up properly */
+
+    if (fb->bfilter.read)
+        return fb->bfilter.read(fb->next_reader,buf,nbyte,fb->bfilter_info);
+    else
+        return bread(fb->next_reader,buff,nbyte);
+}
+-----
+The code currently in buff_read would become part of the default
+filter.
+
+
+	Flushing data
+
+flush will get passed on down the stack automatically, with recursive
+calls to bflush.  The user-supplied flush function will be called then,
+and also before close is called.  The user-supplied flush should not
+call flush on the next buffer.
+
+[djg: Poorly written "expanding" filters can cause some nastiness
+here.  In order to flush a layer you have to write out your current
+buffer, and that may cause the layer below to overflow a buffer and
+flush it.  If the filter is expanding then it may have to add more to
+the buffer before flushing it to the layer below.  It's possible that
+the layer below will end up having to flush twice.  It's a case where
+writev-like capabilities are useful.]
+
+	Closing Stacks and Filters
+
+When a filter is removed from the stack, flush will be called then close
+will be called.  When the entire stack is being closed, this operation
+will be done automatically on each filter within the stack; generally,
+filters should not operate on other filters further down the stack,
+except to pass data along when flush is called.
+
+	Flags and Options
+
+Changes to flags and options using the current functions only affect
+one buffer.  To affect all the buffers on down the chain, use
+bsetstackopts or bsetstackflags.
+
+bgetopt is currently only used to grab a count of the bytes sent;
+it will continue to provide that functionality.  bgetflags is
+used to provide information on whether or not the connection is
+still open; it'll continue to provide that functionality as well.
+
+The core BUFF operations will remain, though some operations which
+are done via flags and options will be done by attaching appropriate
+filters instead (eg. chunking).
+
+[djg: I'd like to consider filesystem metadata as well -- we only need
+a few bits of metadata to do HTTP: file size and last modified.  We
+need an etag generation function, it is specific to the filters in
+use.  You see, I'm envisioning a bottom layer which pulls data out of
+a database rather than reading from a file.]
