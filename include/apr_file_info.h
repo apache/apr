@@ -132,11 +132,14 @@ typedef apr_int32_t               apr_fileperms_t;
 typedef apr_uint64_t              apr_ino_t;
 /**
  * Structure for determining the device the file is on.
- * @defvar apr_dev_t
  */
 typedef apr_uint32_t              apr_dev_t;
 #else
+/** The inode of the file. */
 typedef ino_t                     apr_ino_t;
+/**
+ * Structure for determining the device the file is on.
+ */
 typedef dev_t                     apr_dev_t;
 #endif
 
