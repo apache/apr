@@ -37,6 +37,10 @@
 /* BeOS specific flag */
 #undef HAVE_BONE_VERSION
 
+/* Does this system have a corkable TCP? */
+#undef HAVE_TCP_CORK
+#undef HAVE_TCP_NOPUSH
+
 @BOTTOM@
 
 /* Make sure we have ssize_t defined to be something */
