@@ -2,7 +2,8 @@ Changes with APR b1
 
   *) Renamed apr_strtoll()/apr_atoll() to follow int64 convention,
      so these new helpers are apr_strtoi64/apr_atoi64(), since
-	 'll' (long long) is a nonportable and aspecific construct.
+     'll' (long long) is a nonportable and aspecific construct.
+     Used ac/m4 tests to choose the appropriate fn behind strtoi64.
      [William Rowe]
 
   *) don't perform a strlen on that name value without checking for NULL 
