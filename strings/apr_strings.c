@@ -437,7 +437,8 @@ APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf)
         return strcpy(buf, "  - ");
     }
     if (size < 973) {
-        sprintf(buf, "%3d ", (int) size);
+        if (apr_snprintf(buf, 5, "%3d ", (int) size) < 0)
+            return strcpy(buf, "****");
         return buf;
     }
     do {
@@ -450,12 +451,14 @@ APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf)
         if (size < 9 || (size == 9 && remain < 973)) {
             if ((remain = ((remain * 5) + 256) / 512) >= 10)
                 ++size, remain = 0;
-            sprintf(buf, "%d.%d%c", (int) size, remain, *o);
+            if (apr_snprintf(buf, 5, "%d.%d%c", (int) size, remain, *o) < 0)
+                return strcpy(buf, "****");
             return buf;
         }
         if (remain >= 512)
             ++size;
-        sprintf(buf, "%3d%c", (int) size, *o);
+        if (apr_snprintf(buf, 5, "%3d%c", (int) size, *o) < 0)
+            return strcpy(buf, "****");
         return buf;
     } while (1);
 }
