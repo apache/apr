@@ -1,5 +1,14 @@
 Changes with APR b1
 
+  *) Begin to remove the ability to allocate out of NULL pools.  The first
+     problem to solve, is that we need an apr_lock in order to allocate
+     pools, so that we can lock things out when allocating.  So, how do we
+     allocate locks without a pool to allocate from?  The answer is to create
+     a global_apr_pool, which is a bootstrapping pool.  There should NEVER
+     be a sub-pool off this pool, and it is static to an APR file.  This is
+     only used to allow us to allocate the locks cleanly, without using the
+     NULL pool hack.  [Ryan Bloom]
+
   *) Fix a logic error in the poll code when implemented using select.
      [Nick Caruso <ncaruso@gamesville.com>]
 

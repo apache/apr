@@ -209,17 +209,23 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 
 /**
  * Setup all of the internal structures required to use pools
+ * @parm globalp The apr global pool, used to allocate APR structures
+ *               before any other pools are created.  This pool should not
+ *               ever be used outside of APR.
  * @tip Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_initialize. 
  */
-apr_status_t apr_init_alloc(void);	/* Set up everything */
+apr_status_t apr_init_alloc(apr_pool_t *globalp);	/* Set up everything */
 
 /**
  * Tear down all of the internal structures required to use pools
+ * @parm globalp The apr global pool, used to allocate APR structures
+ *               before any other pools are created.  This pool should not
+ *               ever be used outside of APR.
  * @tip Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_terminate. 
  */
-void apr_term_alloc(void);        /* Tear down everything */
+void apr_term_alloc(apr_pool_t *globalp);        /* Tear down everything */
  
 /* pool functions */
 
