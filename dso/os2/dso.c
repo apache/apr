@@ -70,11 +70,11 @@ static apr_status_t dso_cleanup(void *thedso)
 
 apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, apr_pool_t *ctx)
 {
-    char failed_module[20];
+    char failed_module[200];
     HMODULE handle;
     int rc;
 
-    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
     (*res_handle)->cont = ctx;
     (*res_handle)->load_error = APR_SUCCESS;
     (*res_handle)->failed_module = NULL;
