@@ -10,7 +10,8 @@ TARGETS = \
 	seek.lo \
 	flock.lo \
 	maperrorcode.lo \
-	fullrw.lo
+	fullrw.lo \
+	filepath.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
