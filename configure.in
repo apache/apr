@@ -149,7 +149,7 @@ AC_PROG_LIBTOOL
     ;;
 esac
 
-AC_ARG_WITH(installbuilddir, [  --with-installbuilddir=<path> location to store APR build files (defaults to '${datadir}/build')],
+AC_ARG_WITH(installbuilddir, [  --with-installbuilddir=DIR location to store APR build files (defaults to '${datadir}/build')],
   [ installbuilddir=$withval ], [ installbuilddir="${datadir}/build" ] )
 AC_SUBST(installbuilddir)
 
@@ -1610,7 +1610,7 @@ dnl ----------------------------- Checking for /dev/random
 AC_MSG_CHECKING(for entropy source)
 
 AC_ARG_WITH(egd, 
-  [  --with-egd[[=<path>]]       use egd-compatible socket],
+  [  --with-egd[[=DIR]]        use EGD-compatible socket],
   [ AC_DEFINE(HAVE_EGD, 1, [Define if EGD is supported])
     if test "$withval" = "yes"; then
         AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, ["/var/run/egd-pool","/dev/egd-pool","/etc/egd-pool","/etc/entropy"], 
