@@ -7,12 +7,6 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
-  *) Provide workaround for socklen_t declaration problem with 64-bit
-     build on HP-UX.  Stop setting a PA-RISC-specific compile option
-     on ia64.  Look for -mt thread option, which is used with HP-UX
-     vendor compiler on ia64.  [Jeff Trawick, based on idea from
-     Madhusudan Mathihalli]
-
   *) Support "large files" by default on 32-bit Unix platforms which
      implement the LFS standard.  [Joe Orton]
 
@@ -121,6 +115,12 @@ Changes with APR 1.0
      apr_compat.h
 
 Changes with APR 0.9.5
+
+  *) Provide workaround for socklen_t declaration problem with 64-bit
+     build on HP-UX.  Stop setting a PA-RISC-specific compile option
+     on ia64.  Look for -mt thread option, which is used with HP-UX
+     vendor compiler on ia64.  [Jeff Trawick, based on idea from
+     Madhusudan Mathihalli]
 
   *) Return an error instead of silently failing when apr_poll() is
      used with file descriptors >= FD_SETSIZE.  (Unix systems with
