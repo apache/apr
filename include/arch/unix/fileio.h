@@ -110,6 +110,7 @@ struct ap_file_t {
     int eof_hit;
     int pipe;
     int timeout;
+    int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
 };
 
 struct ap_dir_t {

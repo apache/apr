@@ -54,6 +54,33 @@
 
 #include "fileio.h"
 
+static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
+{
+    struct timeval tv;
+    fd_set fdset;
+    int srv;
+
+    do {
+        FD_ZERO(&fdset);
+        FD_SET(file->filedes, &fdset);
+        tv.tv_sec = file->timeout;
+        tv.tv_usec = 0;
+        srv = select(FD_SETSIZE,
+            for_read ? &fdset : NULL,
+            for_read ? NULL : &fdset,
+            NULL,
+            file->timeout < 0 ? NULL : &tv);
+    } while (srv == -1 && errno == EINTR);
+
+    if (srv == 0) {
+        return APR_TIMEUP;
+    }
+    else if (srv < 0) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
  *    Read data from the specified file.
@@ -63,11 +90,13 @@
  * NOTE:  ap_read will read up to the specified number of bytes, but never
  * more.  If there isn't enough data to fill that number of bytes, all of
  * the available data is read.  The third argument is modified to reflect the
- * number of bytes read. 
+ * number of bytes read.  If a char was put back into the stream via
+ * ungetc, it will be the first character returned. 
  */
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_ssize_t rv;
+    int used_unget = FALSE;
 
     if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
         return APR_EBADARG;
@@ -77,41 +106,31 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         return APR_EBADF;
     }
     
+    if(*nbytes <= 0) {
+        *nbytes = 0;
+	return APR_SUCCESS;
+    }
+
     if (thefile->buffered) {
-        rv = fread(buf, *nbytes, 1, thefile->filehand);
+        rv = fread(buf, 1, *nbytes, thefile->filehand);
     }
     else {
+        if(thefile->ungetchar != -1){
+	  used_unget = TRUE;
+	  *(char *)buf++ = (char)thefile->ungetchar;
+	  (*nbytes)--;
+          thefile->ungetchar == -1;
+	}
+	  
         do {
             rv = read(thefile->filedes, buf, *nbytes);
         } while (rv == -1 && errno == EINTR);
 
         if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
-            struct timeval *tv;
-            fd_set fdset;
-            int srv;
-
-            do {
-                FD_ZERO(&fdset);
-                FD_SET(thefile->filedes, &fdset);
-                if (thefile->timeout == -1) {
-                    tv = NULL;
-                }
-                else {
-                    tv = ap_palloc(thefile->cntxt, sizeof(struct timeval));
-                    tv->tv_sec  = thefile->timeout;
-                    tv->tv_usec = 0;
-                }
-
-                srv = select(FD_SETSIZE, &fdset, NULL, NULL, tv);
-            } while (srv == -1 && errno == EINTR);
-
-            if (srv == 0) {
-                (*nbytes) = 0;
-                return APR_TIMEUP;
-            }
-            else if (srv < 0) {
-                (*nbytes) = 0;
-                return errno;
+            ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
+            if (arv != APR_SUCCESS) {
+                *nbytes = 0;
+                return arv;
             }
             else {
                 do {
@@ -133,6 +152,10 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         return errno;
     }
     *nbytes = rv;
+    if(used_unget){
+      thefile->ungetchar = -1;
+      *nbytes += 1;
+    }
     return APR_SUCCESS;
 }
 
@@ -168,32 +191,10 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         } while (rv == -1 && errno == EINTR);
 
         if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
-            struct timeval *tv;
-            fd_set fdset;
-            int srv;
-
-            do {
-                FD_ZERO(&fdset);
-                FD_SET(thefile->filedes, &fdset);
-                if (thefile->timeout == -1) {
-                    tv = NULL;
-                }
-                else {
-                    tv = ap_palloc(thefile->cntxt, sizeof(struct timeval));
-                    tv->tv_sec  = thefile->timeout;
-                    tv->tv_usec = 0;
-                }
-
-                srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
-            } while (srv == -1 && errno == EINTR);
-
-            if (srv == 0) {
-                (*nbytes) = 0;
-                return APR_TIMEUP;
-            }
-            else if (srv < 0) {
-                (*nbytes) = 0;
-                return errno;
+            ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
+            if (arv != APR_SUCCESS) {
+                *nbytes = 0;
+                return arv;
             }
             else {
                 do {
@@ -281,8 +282,9 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
             return APR_SUCCESS;
         }
         return errno;
+    } else {
+        thefile->ungetchar = (unsigned char)ch;
     }
-    /* Not sure what to do in this case.  For now, return SUCCESS. */
     return APR_SUCCESS; 
 }
 
@@ -312,6 +314,12 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
             return APR_EOF;
         }
         return errno;
+    }
+    
+    if(thefile->ungetchar != -1){
+        *ch = (char) thefile->ungetchar;
+        thefile->ungetchar = -1;
+        return APR_SUCCESS;
     }
     rv = read(thefile->filedes, ch, 1); 
     if (rv == 0) {
@@ -384,10 +392,13 @@ ap_status_t ap_flush(ap_file_t *thefile)
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     ssize_t rv;
-    int i;    
+    int i, used_unget = FALSE, beg_idx;
 
     if(thefile == NULL || str == NULL || len < 0)
         return APR_EBADARG;
+
+    if(len <= 1)  /* as per fgets() */
+        return APR_SUCCESS;
 
     if (thefile->buffered) {
         if (fgets(str, len, thefile->filehand)) {
@@ -398,10 +409,25 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         }
         return errno;
     }
-    for (i = 0; i < len; i++) {
+
+    if(thefile->ungetchar != -1){
+        str[0] = thefile->ungetchar;
+	used_unget = TRUE;
+	beg_idx = 1;
+	if(str[0] == '\n' || str[0] == '\r'){
+	    thefile->ungetchar = -1;
+	    str[1] = '\0';
+	    return APR_SUCCESS;
+	}
+    } else
+        beg_idx = 0;
+    
+    for (i = beg_idx; i < len; i++) {
         rv = read(thefile->filedes, &str[i], 1); 
         if (rv == 0) {
             thefile->eof_hit = TRUE;
+	    if(used_unget) thefile->filedes = -1;
+	    str[i] = '\0';
             return APR_EOF;
         }
         else if (rv != 1) {
@@ -410,6 +436,8 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         if (str[i] == '\n' || str[i] == '\r')
             break;
     }
+    if(i < len-1)
+      str[i+1] = '\0';
     return APR_SUCCESS; 
 }
 

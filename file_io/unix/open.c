@@ -116,6 +116,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     (*new)->oflags = oflags;
     (*new)->filedes = -1;
     (*new)->filehand = NULL;
+    (*new)->ungetchar = -1;
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         buf_oflags = ap_pstrdup(cont, "r+");
