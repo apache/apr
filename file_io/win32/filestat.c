@@ -141,8 +141,8 @@ static void resolve_prot(apr_finfo_t *finfo, apr_int32_t wanted, PACL dacl)
     }
 }
 
-static int resolve_ident(apr_finfo_t *finfo, const char *fname,
-                            apr_int32_t wanted, apr_pool_t *cont)
+static apr_status_t resolve_ident(apr_finfo_t *finfo, const char *fname,
+                                  apr_int32_t wanted, apr_pool_t *cont)
 {
     apr_file_t *thefile = NULL;
     apr_status_t rv;
@@ -179,12 +179,13 @@ static int resolve_ident(apr_finfo_t *finfo, const char *fname,
             apr_file_close(thefile);
         }
     }
+
     if (rv != APR_SUCCESS && rv != APR_INCOMPLETE)
         return (rv);
+
     /* We picked up this case above and had opened the link's properties */
     if (wanted & APR_FINFO_LINK)
         finfo->valid |= APR_FINFO_LINK;
-    finfo->fname = thefile->fname;
 
     return rv;
 }
@@ -383,7 +384,9 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
 
     finfo->valid |= APR_FINFO_IDENT | APR_FINFO_NLINK;
 
-    if (wanted &= ~finfo->valid) {
+    /* If we still want something more (besides the name) go get it! 
+     */
+    if ((wanted &= ~finfo->valid) & ~APR_FINFO_NAME) {
         apr_oslevel_e os_level;
         if (apr_get_oslevel(thefile->cntxt, &os_level))
             os_level = APR_WIN_95;
@@ -402,10 +405,13 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                    apr_int32_t wanted, apr_pool_t *cont)
 {
-    /* XXX: is constant - needs testing - which needs a lighter-weight root test fn */
+    /* XXX: is constant - needs testing - which requires a lighter-weight root test fn */
     int isroot = 0;
+    apr_status_t ident_rv = 0;
+    apr_status_t rv;
 #ifdef APR_HAS_UNICODE_FS
     apr_wchar_t wfname[APR_PATH_MAX];
+
 #endif
     apr_oslevel_e os_level;
     char *filename = NULL;
@@ -427,9 +433,23 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         return APR_ENAMETOOLONG;
     }
 
+    if ((os_level >= APR_WIN_NT) 
+            && (wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK))) {
+        /* FindFirstFile and GetFileAttributesEx can't figure the inode,
+         * device or number of links, so we need to resolve with an open 
+         * file handle.  If the user has asked for these fields, fall over 
+         * to the get file info by handle method.  If we fail, or the user
+         * also asks for the file name, continue by our usual means.
+         */
+        if ((ident_rv = resolve_ident(finfo, fname, wanted, cont)) 
+                == APR_SUCCESS)
+            return ident_rv;
+        else if (ident_rv == APR_INCOMPLETE)
+            wanted &= ~finfo->valid;
+    }
+
 #ifdef APR_HAS_UNICODE_FS
     if (os_level >= APR_WIN_NT) {
-        apr_status_t rv;
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                             / sizeof(apr_wchar_t), fname))
             return rv;
@@ -458,7 +478,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             filename = apr_pstrdup(cont, tmpname);
         }
     }
-    else 
+    else
 #endif
       if ((os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
     {
@@ -502,36 +522,38 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         filename = apr_pstrdup(cont, FileInfo.n.cFileName);
     }
 
-    if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0))
-    {
-        /* Go the extra mile to assure we have a file.  WinNT/2000 seems
-         * to reliably translate char devices to the path '\\.\device'
-         * so go ask for the full path.
-         */
-        if (os_level >= APR_WIN_NT) {
+    if (ident_rv != APR_INCOMPLETE) {
+        if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0))
+        {
+            /* Go the extra mile to assure we have a file.  WinNT/2000 seems
+             * to reliably translate char devices to the path '\\.\device'
+             * so go ask for the full path.
+             */
+            if (os_level >= APR_WIN_NT) {
 #ifdef APR_HAS_UNICODE_FS
-            apr_wchar_t tmpname[APR_FILE_MAX];
-            apr_wchar_t *tmpoff;
-            if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
-                                 tmpname, &tmpoff))
-            {
-                if ((tmpoff == tmpname + 4) 
-                    && !wcsncmp(tmpname, L"\\\\.\\", 4))
-                    finfo->filetype = APR_CHR;
-            }
+                apr_wchar_t tmpname[APR_FILE_MAX];
+                apr_wchar_t *tmpoff;
+                if (GetFullPathNameW(wfname, sizeof(tmpname) / sizeof(apr_wchar_t),
+                                     tmpname, &tmpoff))
+                {
+                    if ((tmpoff == tmpname + 4) 
+                        && !wcsncmp(tmpname, L"\\\\.\\", 4))
+                        finfo->filetype = APR_CHR;
+                }
 #else
-            char tmpname[APR_FILE_MAX];
-            char *tmpoff;
-            if (GetFullPathName(fname, sizeof(tmpname), tmpname, &tmpoff))
-            {
-                if ((tmpoff == tmpname + 4) 
-                    && !strncmp(tmpname, "\\\\.\\", 4))
-                    finfo->filetype = APR_CHR;
-            }
+                char tmpname[APR_FILE_MAX];
+                char *tmpoff;
+                if (GetFullPathName(fname, sizeof(tmpname), tmpname, &tmpoff))
+                {
+                    if ((tmpoff == tmpname + 4) 
+                        && !strncmp(tmpname, "\\\\.\\", 4))
+                        finfo->filetype = APR_CHR;
+                }
 #endif
+            }
         }
+        finfo->cntxt = cont;
     }
-    finfo->cntxt = cont;
 
     if (filename && !isroot) {
         finfo->name = filename;
