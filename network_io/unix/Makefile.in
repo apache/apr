@@ -10,7 +10,7 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../include
-INCLUDES=-I$(INCDIR) -I.
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
 
 LIB=libnetwork.a
 
@@ -59,14 +59,14 @@ poll.o: poll.c networkio.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_tables.h \
- ../../file_io/unix/fileio.h
+ $(INCDIR)/arch/unix/fileio.h
 sendrecv.o: sendrecv.c networkio.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_private.h $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_tables.h \
- ../../file_io/unix/fileio.h
+ $(INCDIR)/arch/unix/fileio.h
 sockaddr.o: sockaddr.c networkio.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_private.h $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
