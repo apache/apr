@@ -65,9 +65,11 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
     int pos_read, pos_write, pos_except;
 
     for (i = 0; i < num; i++) {
-        num_read += (aprset[i].reqevents & APR_POLLIN) != 0;
-        num_write += (aprset[i].reqevents & APR_POLLOUT) != 0;
-        num_except += (aprset[i].reqevents & APR_POLLPRI) != 0;
+        if (aprset[i].desc_type == APR_POLL_SOCKET) {
+            num_read += (aprset[i].reqevents & APR_POLLIN) != 0;
+            num_write += (aprset[i].reqevents & APR_POLLOUT) != 0;
+            num_except += (aprset[i].reqevents & APR_POLLPRI) != 0;
+        }
     }
 
     num_total = num_read + num_write + num_except;
