@@ -41,7 +41,7 @@ testflock@EXEEXT@: testflock.lo
 
 ### why the export-dynamic?
 testdso@EXEEXT@: testdso.lo
-	$(LINK) --export-dynamic testdso.lo
+	$(LINK) --export-dynamic testdso.lo $(ALL_LIBS)
 
 testoc@EXEEXT@: testoc.lo
 	$(LINK) testoc.lo $(ALL_LIBS)
