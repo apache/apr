@@ -108,10 +108,10 @@ typedef struct apr_sms_trivial_t
 
 #define MIN_ALLOC  0x2000 
 #define MIN_FREE   0x1000
-#define MAX_FREE  0x80000 
+#define MAX_FREE  0x80000
 
 static void *apr_sms_trivial_malloc(apr_sms_t *sms,
-                                     apr_size_t size)
+                                    apr_size_t size)
 {
     node_t *node, *sentinel;
     apr_size_t node_size;
@@ -127,7 +127,7 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
 
     if (node->avail_size >= size) {
         mem = node->first_avail;
-        node->avail_size -= size;
+        node->avail_size  -= size;
         node->first_avail += size;
         node->count++;
 
@@ -191,7 +191,7 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
          */
         node = SMS_TRIVIAL_T(sms)->used_sentinel.prev;
         node->first_avail += node->avail_size;
-        node->avail_size = 0;
+        node->avail_size   = 0;
 
         if (SMS_TRIVIAL_T(sms)->lock)
             apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
@@ -217,6 +217,37 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
     mem = (char *)mem + SIZEOF_BLOCK_T;
     
     return mem;
+}
+
+static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem);
+
+static void *apr_sms_trivial_realloc(apr_sms_t *sms, void *mem, apr_size_t reqsize)
+{
+    void *new_mem;
+    apr_size_t size;
+    node_t *node;
+    char *endp;
+
+    reqsize = APR_ALIGN_DEFAULT(reqsize);
+    
+    new_mem = apr_sms_trivial_malloc(sms, reqsize);
+    if (new_mem) {
+        node = BLOCK_T((char *)mem - SIZEOF_NODE_T)->node;
+
+        endp = node->first_avail;
+        if (endp == (char *)node + SIZEOF_NODE_T)
+            endp += node->avail_size;
+
+        size = endp - (char *)mem;
+        if (size > reqsize)
+            size = reqsize;
+
+        memcpy(new_mem, mem, size);
+    }
+
+    apr_sms_trivial_free(sms, mem);
+
+    return new_mem;
 }
 
 static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
@@ -271,14 +302,16 @@ static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
 
 static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
 {
-    node_t *node, *prev, *used_sentinel, *free_sentinel;
+    node_t *node, *prev, *used_sentinel, *free_sentinel, *free_list;
     apr_size_t min_alloc, max_free;
  
-    if (SMS_TRIVIAL_T(sms)->lock)
-        apr_lock_acquire(SMS_TRIVIAL_T(sms)->lock);
-
     used_sentinel = &SMS_TRIVIAL_T(sms)->used_sentinel;
     free_sentinel = &SMS_TRIVIAL_T(sms)->free_sentinel;
+    
+    free_list = NULL;
+    
+    if (SMS_TRIVIAL_T(sms)->lock)
+        apr_lock_acquire(SMS_TRIVIAL_T(sms)->lock);
 
     node = SMS_TRIVIAL_T(sms)->self;
     node->avail_size += node->first_avail - ((char *)node + SIZEOF_NODE_T);
@@ -319,10 +352,7 @@ static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
         SMS_TRIVIAL_T(sms)->max_free = max_free;
         
         used_sentinel->prev->next = NULL;
-        while ((node = used_sentinel->next) != NULL) {
-            used_sentinel->next = node->next;
-            apr_sms_free(sms->parent, node);
-        }
+        free_list = used_sentinel->next;
     }
     else {
         node = used_sentinel->prev;
@@ -341,6 +371,11 @@ static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
     if (SMS_TRIVIAL_T(sms)->lock)
         apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
 
+    while ((node = free_list) != NULL) {
+        free_list = node->next;
+        apr_sms_free(sms->parent, node);
+    }
+    
     return APR_SUCCESS;
 }
 
@@ -441,6 +476,7 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
         return rv;
 
     new_sms->malloc_fn            = apr_sms_trivial_malloc;
+    new_sms->realloc_fn           = apr_sms_trivial_realloc;
     new_sms->free_fn              = apr_sms_trivial_free;
     new_sms->reset_fn             = apr_sms_trivial_reset;
     new_sms->pre_destroy_fn       = apr_sms_trivial_pre_destroy;
@@ -457,10 +493,10 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
     node->count       = 0;
 
     tms = SMS_TRIVIAL_T(new_sms);
-    tms->min_alloc   = min_alloc;
-    tms->min_free    = min_free;
-    tms->max_free    = max_free;
-    tms->self        = node;
+    tms->min_alloc = min_alloc;
+    tms->min_free  = min_free;
+    tms->max_free  = max_free;
+    tms->self      = node;
     
     node->next = node->prev = &tms->used_sentinel;
     tms->used_sentinel.next = tms->used_sentinel.prev = node;
