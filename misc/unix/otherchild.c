@@ -53,7 +53,11 @@
  */
 
 #include "misc.h"
+#ifndef BEOS
 #include "../../threadproc/unix/threadproc.h"
+#else
+#include "../../threadproc/beos/threadproc.h"
+#endif
 
 static ap_other_child_rec_t *other_children = NULL;
 
@@ -167,7 +171,7 @@ static void probe_writable_fds(void)
  *    maintenance function.
  * arg 1) The process to check.
  */
-API_EXPORT(ap_status_t) reap_other_child(ap_proc_t *pid)
+API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid)
 {
     ap_other_child_rec_t *ocr, *nocr;
 
@@ -175,6 +179,7 @@ API_EXPORT(ap_status_t) reap_other_child(ap_proc_t *pid)
         nocr = ocr->next;
         if (ocr->pid != pid->pid)
             continue;
+
         ocr->pid = -1;
         (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data);
         return 0;
@@ -212,4 +217,3 @@ API_EXPORT(void) ap_check_other_child(void)
         }
     }
 }
-

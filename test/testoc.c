@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     sleep(1);
     
     fprintf(stdout, "[PARENT] Checking on children..........\n");
-    check_other_child();
+    ap_check_other_child();
     
     return 1;
 }    

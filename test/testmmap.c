@@ -115,7 +115,7 @@ int main()
         fprintf(stdout, "%d bytes\n", (int)finfo.size);
     }  
     
-    fprintf(stdout,"Trying to mmap the file..............");
+    fprintf(stdout,"Trying to mmap the file.............");
     if (ap_mmap_create(&themmap, thefile, 0, finfo.size, context) != APR_SUCCESS) {
         fprintf(stderr,"Failed!\n");
         exit(-1);

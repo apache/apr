@@ -259,7 +259,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     }
 
     send_data(newproc, 0, (void*)sp, sizeof(struct send_pipe));
-    (*new)->tid = newproc;
+    (*new)->pid = newproc;
 
     /* before we go charging on we need the new process to get to a 
      * certain point.  When it gets there it'll let us know and we
@@ -299,14 +299,14 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
     /* when we run processes we are actually running threads, so here
        we'll wait on the thread dying... */
     if (wait == APR_WAIT) {
-        if (wait_for_thread(proc->tid, &exitval) == B_OK) {
+        if (wait_for_thread(proc->pid, &exitval) == B_OK) {
             return APR_CHILD_DONE;
         }
         return errno;
     }
     /* if the thread is still alive then it's not done...
        this won't hang or holdup the thread checking... */
-    if (get_thread_info(proc->tid, &tinfo) == B_BAD_VALUE) {
+    if (get_thread_info(proc->pid, &tinfo) == B_BAD_VALUE) {
         return APR_CHILD_DONE;
     }
     /* if we get this far it's still going... */
@@ -363,7 +363,7 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
     if (proc == NULL) {
         return APR_ENOPROC;
     }
-    *theproc = proc->tid;
+    *theproc = proc->pid;
     return APR_SUCCESS;
 }
 
@@ -377,7 +377,7 @@ ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc,
         (*proc) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
         (*proc)->cntxt = cont;
     }
-    (*proc)->tid = *theproc;
+    (*proc)->pid = *theproc;
     return APR_SUCCESS;
 }              
 
