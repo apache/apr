@@ -68,23 +68,20 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     DWORD bread;
     int lasterror;
 
-    if (thefile->filehand == INVALID_HANDLE_VALUE) {
-        *nbytes = -1;
-        return APR_EBADF;
-    }
-    
     if (ReadFile(thefile->filehand, buf, *nbytes, &bread, NULL)) {
         *nbytes = bread;
         return APR_SUCCESS;
     }
 
+    *nbytes = 0;
     lasterror = GetLastError();
     if (lasterror == ERROR_BROKEN_PIPE) {
         /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
-        *nbytes = 0;
         return APR_SUCCESS;
+    } else if (lasterror == ERROR_NO_DATA) {
+        /* Receive this error on a read to a pipe in nonblocking mode */
+        return APR_EAGAIN;
     }
-    *nbytes = -1;
 
     return lasterror;
 }
@@ -94,11 +91,6 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     DWORD bwrote;
     FILETIME atime, mtime, ctime;
 	
-    if (thefile->filehand == INVALID_HANDLE_VALUE) {
-        *nbytes = -1;
-        return APR_EBADF;
-    }
-
     if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
         if (strcmp(thefile->fname, "PIPE")) {
             FlushFileBuffers(thefile->filehand);
@@ -111,7 +103,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         *nbytes = bwrote;
         return APR_SUCCESS;
     }
-    (*nbytes) = -1;
+    (*nbytes) = 0;
     return GetLastError();
 }
 /*
