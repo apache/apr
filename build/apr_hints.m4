@@ -81,7 +81,6 @@ if test "x$apr_preload_done" != "xyes" ; then
 	;;
     *-hp-hpux11.*)
 	APR_ADDTO(CPPFLAGS, [-DHPUX11 -D_REENTRANT -D_XOPEN_SOURCE_EXTENDED])
-	APR_ADDTO(LDFLAGS, [+s])
 	;;
     *-hp-hpux10.*)
  	case $host in
@@ -92,11 +91,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	       ;;	     
  	esac
 	APR_ADDTO(CPPFLAGS, [-D_REENTRANT])
-	APR_ADDTO(LDFLAGS, [+s])
 	;;
     *-hp-hpux*)
 	APR_ADDTO(CPPFLAGS, [-DHPUX -D_REENTRANT])
-	APR_ADDTO(LDFLAGS, [+s])
 	;;
     *-linux-*)
         case `uname -r` in
