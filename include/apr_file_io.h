@@ -104,7 +104,7 @@ typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 /* should be same as whence type in lseek, POSIX defines this as int */
 typedef ap_int32_t       ap_seek_where_t;
 
-typedef struct file_t            ap_file_t;
+typedef struct ap_file_t            ap_file_t;
 typedef struct ap_finfo_t        ap_finfo_t;
 typedef struct dir_t             ap_dir_t;
 typedef ap_int32_t               ap_fileperms_t;

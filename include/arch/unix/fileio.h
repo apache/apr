@@ -100,7 +100,7 @@
 #endif
 /* End System headers */
 
-struct file_t {
+struct ap_file_t {
     ap_context_t *cntxt;
     int filedes;
     FILE *filehand;

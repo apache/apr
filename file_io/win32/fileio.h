@@ -95,7 +95,7 @@
  *           correctly when writing to a file with this flag set TRUE.
  */
 
-struct file_t {
+struct ap_file_t {
     ap_context_t *cntxt;
     HANDLE filehand;
     char *fname;

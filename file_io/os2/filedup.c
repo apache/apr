@@ -60,13 +60,13 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
+ap_status_t ap_dupfile(struct ap_file_t **new_file, struct ap_file_t *old_file)
 {
     int rv;
-    struct file_t *dup_file;
+    struct ap_file_t *dup_file;
 
     if (*new_file == NULL) {
-        dup_file = (struct file_t *)ap_palloc(old_file->cntxt, sizeof(struct file_t));
+        dup_file = (struct ap_file_t *)ap_palloc(old_file->cntxt, sizeof(struct ap_file_t));
 
         if (dup_file == NULL) {
             return APR_ENOMEM;

@@ -62,11 +62,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
+ap_status_t ap_set_pipe_timeout(struct ap_file_t *thepipe, ap_int32_t timeout)
 {
     return APR_ENOTIMPL;
 }
-ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
+ap_status_t ap_create_pipe(struct ap_file_t **in, struct ap_file_t **out, ap_context_t *cont)
 {
     SECURITY_ATTRIBUTES sa;
 
@@ -74,13 +74,13 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
-    (*in) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
-    memset(*in, '\0', sizeof(struct file_t));
+    (*in) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
+    memset(*in, '\0', sizeof(struct ap_file_t));
     (*in)->cntxt = cont;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
 
-    (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
-    memset(*out, '\0', sizeof(struct file_t));
+    (*out) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
+    memset(*out, '\0', sizeof(struct ap_file_t));
     (*out)->cntxt = cont;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
 

@@ -65,7 +65,7 @@
 
 #define APR_FILE_BUFSIZE 4096
 
-struct file_t {
+struct ap_file_t {
     ap_context_t *cntxt;
     HFILE filedes;
     char * fname;

@@ -54,7 +54,7 @@
 
 #include "fileio.h"
 
-static ap_status_t pipenonblock(struct file_t *thefile)
+static ap_status_t pipenonblock(struct ap_file_t *thefile)
 {
 #ifndef BEOS /* this code won't work on BeOS */
     int fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
@@ -84,7 +84,7 @@ static ap_status_t pipenonblock(struct file_t *thefile)
  * arg 3) The timeout value in seconds.  Values < 0 mean wait forever, 0
  *        means do not wait at all.
  */
-ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
+ap_status_t ap_set_pipe_timeout(struct ap_file_t *thepipe, ap_int32_t timeout)
 {
     if(thepipe == NULL)
         return APR_EBADARG;
@@ -104,7 +104,7 @@ ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
  * arg 2) The file descriptor to use as output from the pipe.
  * arg 3) The context to operate on.
  */
-ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
+ap_status_t ap_create_pipe(struct ap_file_t **in, struct ap_file_t **out, ap_context_t *cont)
 {
     int filedes[2];
 
@@ -118,7 +118,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
         return errno;
     }
     
-    (*in) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+    (*in) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
     (*in)->buffered = 0;
@@ -126,7 +126,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*in)->fname = ap_pstrdup(cont, "PIPE");
     (*in)->timeout = -1;
 
-    (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
+    (*out) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->buffered = 0;
