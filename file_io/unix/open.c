@@ -160,6 +160,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     }
     (*new)->pipe = 0;
     (*new)->timeout = -1;
+    (*new)->ungetchar = -1;
     (*new)->eof_hit = 0;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
                         ap_null_cleanup);
