@@ -61,18 +61,10 @@ ap_status_t ap_generate_random_bytes(unsigned char * buf, int length)
     HCRYPTPROV hProv;
 
     if (!CryptAcquireContext(&hProv,NULL,NULL,PROV_RSA_FULL,0)) {
-	/*        ap_log_error(APLOG_MARK, APLOG_CRIT, 0, s, 
-                     "Digest: Error acquiring context. Errno = %d",
-                     GetLastError());
-		     exit(EXIT_FAILURE);*/
-	return 1;
+	return GetLastError();
     }
     if (!CryptGenRandom(hProv,length,buf)) {
-	/*        ap_log_error(APLOG_MARK, APLOG_CRIT, 0, s, 
-                     "Digest: Error generating secret. Errno = %d",
-                     GetLastError());
-		     exit(EXIT_FAILURE);*/
-	return 1;
+	return GetLastError();
     }
     return APR_SUCCESS;
 }
