@@ -187,6 +187,22 @@ APR_EXPORT(void) ap_bucket_brigade_catenate(ap_bucket_brigade *a,
     }
 }
 
+APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec)
+{
+    int i;   
+
+    for (i=0; i < nvec; i++) {
+        if (b->head == b->tail) {
+            ap_bucket_destroy(b->head->bucket);
+            b->head = b->tail = NULL;
+            break;
+        }
+        b->head = b->head->next;
+        ap_bucket_destroy(b->head->prev->bucket);
+        b->head->prev = NULL;
+    }
+}
+
 APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
                                                  ap_bucket_brigade *b, 
                                                  ap_iol *iol)
