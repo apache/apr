@@ -265,7 +265,7 @@ apr_status_t apr_accept(apr_socket_t **new_sock, apr_socket_t *sock,
  *                 APR assumes that the sockaddr_in in the apr_socket is 
  *                 completely filled out.
  */
-apr_status_t apr_connect(apr_socket_t *sock, const char *hostname);
+apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
 
 /**
  * Get name of a machine we are currently connected to.
@@ -274,6 +274,23 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname);
  * @param sock The socket to examine.
  */
 apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *sock);
+
+/**
+ * Create apr_sockaddr_t from hostname, address family, and port.
+ * @param sa The new apr_sockaddr_t.
+ * @param hostname The hostname or numeric address string to resolve/parse.
+ * @param family The address family to use, or AF_UNSPEC if the system should 
+ * decide.
+ * @param port The port number.
+ * @param flags Special processing flags.
+ * @param p The pool for the apr_sockaddr_t and associated storage.
+ */
+apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, 
+                             const char *hostname,
+                             apr_int32_t family,
+                             apr_port_t port,
+                             apr_int32_t flags,
+                             apr_pool_t *p);
 
 /**
  * Get name of the current machine

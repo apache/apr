@@ -51,6 +51,8 @@ EXPORTS
 
 ;
 ; apr_network_io.h
+        apr_getaddrinfo         @45
+        apr_create_socket       @46
 	apr_create_tcp_socket   @47
 	apr_shutdown   @48
 	apr_close_socket   @49
