@@ -122,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t)
     /* example: "Wed Jun 30 21:49:08 1993" */
     /*           123456789012345678901234  */
 
-    apr_explode_localtime(&xt, t);
+    apr_time_exp_lt(&xt, t);
     s = &apr_day_snames[xt.tm_wday][0];
     *date_str++ = *s++;
     *date_str++ = *s++;

@@ -85,7 +85,7 @@ int main(void)
 
     STD_TEST_NEQ("    apr_time_exp_gmt", apr_time_exp_gmt(&xt, now))
     
-    STD_TEST_NEQ("    apr_explode_localtime", apr_explode_localtime(&xt2, now))
+    STD_TEST_NEQ("    apr_time_exp_lt", apr_time_exp_lt(&xt2, now))
 
     STD_TEST_NEQ("    apr_time_exp_get (GMT)", apr_time_exp_get(&imp, &xt))
 

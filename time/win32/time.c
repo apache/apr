@@ -171,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result,
+APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
                                                 apr_time_t input)
 {
     SYSTEMTIME st;

@@ -160,7 +160,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
     return apr_explode_time(result, input, 0);
 }
 
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result,
+APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
                                                 apr_time_t input)
 {
 #if defined(__EMX__)
