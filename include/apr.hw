@@ -129,8 +129,6 @@
 #define APR_HAVE_STRICMP        1
 #define APR_HAVE_STRNCASECMP    0
 #define APR_HAVE_STRNICMP       1
-#define APR_HAVE_STRNICMP       1
-
 #define APR_HAVE_STRDUP         1
 #define APR_HAVE_STRSTR         1
 
