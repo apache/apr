@@ -56,6 +56,7 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
+#include "apr_lib.h"
 #include <errno.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -77,7 +78,9 @@ static BOOL OnlyDots(char *pString)
     return TRUE;
 }
 
-/* Accepts as input a pathname, and tries to match it to an 
+/* XXX: Should allow path strings to 32000 chars
+ *
+ * Accepts as input a pathname, and tries to match it to an 
  * existing path and return the pathname in the case that
  * is present on the existing path.  This routine also
  * converts alias names to long names.
