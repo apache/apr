@@ -109,6 +109,11 @@ static void make_array_core(apr_array_header_t *res, apr_pool_t *p,
     res->nalloc = nelts;	/* ...but this many allocated */
 }
 
+APR_DECLARE(int) apr_is_empty_array(const apr_array_header_t *a)
+{
+    return ((a == NULL) || (a->nelts == 0));
+}
+
 APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
 						int nelts, int elt_size)
 {
