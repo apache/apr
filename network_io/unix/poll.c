@@ -246,7 +246,7 @@ apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset,
         FD_SET(sock->socketdes, aprset->read);
     }
     if (event & APR_POLLPRI) {
-        FD_SET(sock->socketdes, aprset->read);
+        FD_SET(sock->socketdes, aprset->except);
     }
     if (event & APR_POLLOUT) {
         FD_SET(sock->socketdes, aprset->write);
@@ -351,7 +351,7 @@ apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_
 apr_status_t apr_remove_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
     FD_CLR(sock->socketdes, aprset->read);
-    FD_CLR(sock->socketdes, aprset->read);
+    FD_CLR(sock->socketdes, aprset->except);
     FD_CLR(sock->socketdes, aprset->write);
     return APR_SUCCESS;
 }
@@ -362,7 +362,7 @@ apr_status_t apr_clear_poll_sockets(apr_pollfd_t *aprset, apr_int16_t event)
         FD_ZERO(aprset->read);
     }
     if (event & APR_POLLPRI) {
-        FD_ZERO(aprset->read);
+        FD_ZERO(aprset->except);
     }
     if (event & APR_POLLOUT) {
         FD_ZERO(aprset->write);

@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fix a logic error in the poll code when implemented using select.
+     [Nick Caruso <ncaruso@gamesville.com>]
+
   *) FreeBSD does not support sendfile() in combination with threads
      before version 4.2.  We no longer even try to support it.
      [Ryan Bloom]
