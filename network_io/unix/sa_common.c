@@ -498,3 +498,234 @@ APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr,
     return errno;
 }
 
+static apr_status_t parse_network(apr_ipsubnet_t *ipsub, const char *network)
+{
+    /* legacy syntax for ip addrs: a.b.c. ==> a.b.c.0/24 for example */
+    int shift;
+    char *s, *t;
+    int octet;
+    char buf[sizeof "255.255.255.255"];
+
+    if (strlen(network) < sizeof buf) {
+        strcpy(buf, network);
+    }
+    else {
+        return APR_EBADIP;
+    }
+
+    /* parse components */
+    s = buf;
+    ipsub->sub[0] = 0;
+    ipsub->mask[0] = 0;
+    shift = 24;
+    while (*s) {
+        t = s;
+        if (!apr_isdigit(*t)) {
+            return APR_EBADIP;
+        }
+        while (apr_isdigit(*t)) {
+            ++t;
+        }
+        if (*t == '.') {
+            *t++ = 0;
+        }
+        else if (*t) {
+            return APR_EBADIP;
+        }
+        if (shift < 0) {
+            return APR_EBADIP;
+        }
+        octet = atoi(s);
+        if (octet < 0 || octet > 255) {
+            return APR_EBADIP;
+        }
+        ipsub->sub[0] |= octet << shift;
+        ipsub->mask[0] |= 0xFFUL << shift;
+        s = t;
+        shift -= 8;
+    }
+    ipsub->sub[0] = ntohl(ipsub->sub[0]);
+    ipsub->mask[0] = ntohl(ipsub->mask[0]);
+    ipsub->family = AF_INET;
+    return APR_SUCCESS;
+}
+
+/* return values:
+ * APR_EINVAL     not an IP address; caller should see if it is something else
+ * APR_BADIP      IP address portion is is not valid
+ * APR_BADMASK    mask portion is not valid
+ */
+
+static apr_status_t parse_ip(apr_ipsubnet_t *ipsub, const char *ipstr, int network_allowed)
+{
+    /* supported flavors of IP:
+     *
+     * . IPv6 numeric address string (e.g., "fe80::1")
+     *
+     * . IPv4 numeric address string (e.g., "127.0.0.1")
+     *
+     * . IPv4 network string (e.g., "9.67")
+     *
+     *   IMPORTANT: This network form is only allowed if network_allowed is on.
+     */
+    int rc;
+
+#if APR_HAVE_IPV6
+    rc = apr_inet_pton(AF_INET6, ipstr, ipsub->sub);
+    if (rc == 1) {
+        ipsub->family = AF_INET6;
+    }
+    else
+#endif
+    {
+        rc = apr_inet_pton(AF_INET, ipstr, ipsub->sub);
+        if (rc == 1) {
+            if (IN6_IS_ADDR_V4MAPPED((struct in6_addr *)ipsub->sub)) {
+                /* apr_ipsubnet_test() assumes that we don't create IPv4-mapped IPv6
+                 * addresses; this of course forces the user to specify IPv4 addresses
+                 * in a.b.c.d style instead of ::ffff:a.b.c.d style.
+                 */
+                return APR_EBADIP;
+            }
+            ipsub->family = AF_INET;
+        }
+    }
+    if (rc != 1) {
+        if (network_allowed) {
+            return parse_network(ipsub, ipstr);
+        }
+        else {
+            return APR_EBADIP;
+        }
+    }
+    return APR_SUCCESS;
+}
+
+static int looks_like_ip(const char *ipstr)
+{
+    if (strchr(ipstr, ':')) {
+        /* definitely not a hostname; assume it is intended to be an IPv6 address */
+        return 1;
+    }
+
+    /* simple IPv4 address string check */
+    while ((*ipstr == '.') || apr_isdigit(*ipstr))
+        ipstr++;
+    return (*ipstr == '\0');
+}
+
+static void fix_subnet(apr_ipsubnet_t *ipsub)
+{
+    /* in case caller specified more bits in network address than are
+     * valid according to the mask, turn off the extra bits
+     */
+    int i;
+
+    for (i = 0; i < sizeof ipsub->mask / sizeof(apr_int32_t); i++) {
+        ipsub->sub[i] &= ipsub->mask[i];
+    }
+}
+
+/* be sure not to store any IPv4 address as a v4-mapped IPv6 address */
+APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char *ipstr, 
+                                              const char *mask_or_numbits, apr_pool_t *p)
+{
+    apr_status_t rv;
+    char *endptr;
+    long bits, maxbits;
+
+    /* filter out stuff which doesn't look remotely like an IP address; this helps 
+     * callers like mod_access which have a syntax allowing hostname or IP address;
+     * APR_EINVAL tells the caller that it was probably not intended to be an IP
+     * address
+     */
+    if (!looks_like_ip(ipstr)) {
+        return APR_EINVAL;
+    }
+
+    *ipsub = apr_pcalloc(p, sizeof(apr_ipsubnet_t));
+
+    /* assume ipstr is an individual IP address, not a subnet */
+    memset((*ipsub)->mask, 0xFF, sizeof (*ipsub)->mask);
+
+    rv = parse_ip(*ipsub, ipstr, mask_or_numbits == NULL);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+
+    if (mask_or_numbits) {
+        if ((*ipsub)->family == AF_INET) {
+            maxbits = 32;
+        }
+#if APR_HAVE_IPV6
+        else {
+            maxbits = 128;
+        }
+#endif
+        bits = strtol(mask_or_numbits, &endptr, 10);
+        if (*endptr == '\0' && bits > 0 && bits <= maxbits) {
+            /* valid num-bits string; fill in mask appropriately */
+            int cur_entry = 0;
+            apr_int32_t cur_bit_value;
+
+            memset((*ipsub)->mask, 0, sizeof (*ipsub)->mask);
+            while (bits > 32) {
+                (*ipsub)->mask[cur_entry] = 0xFFFFFFFF; /* all 32 bits */
+                bits -= 32;
+                ++cur_entry;
+            }
+            cur_bit_value = 0x80000000;
+            while (bits) {
+                (*ipsub)->mask[cur_entry] |= cur_bit_value;
+                --bits;
+                cur_bit_value /= 2;
+            }
+            (*ipsub)->mask[cur_entry] = htonl((*ipsub)->mask[cur_entry]);
+        }
+        else if (apr_inet_pton(AF_INET, mask_or_numbits, (*ipsub)->mask) == 1 &&
+            (*ipsub)->family == AF_INET) {
+            /* valid IPv4 netmask */
+        }
+        else {
+            return APR_EBADMASK;
+        }
+    }
+
+    fix_subnet(*ipsub);
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa)
+{
+#if APR_HAVE_IPV6
+    if (sa->sa.sin.sin_family == AF_INET) {
+        if (ipsub->family == AF_INET &&
+            ((sa->sa.sin.sin_addr.s_addr & ipsub->mask[0]) == ipsub->sub[0])) {
+            return 1;
+        }
+    }
+    else if (IN6_IS_ADDR_V4MAPPED((struct in6_addr *)sa->ipaddr_ptr)) {
+        if (ipsub->family == AF_INET &&
+            (((apr_uint32_t *)sa->ipaddr_ptr)[3] & ipsub->mask[0]) == ipsub->sub[0]) {
+            return 1;
+        }
+    }
+    else {
+        apr_uint32_t *addr = (apr_uint32_t *)sa->ipaddr_ptr;
+
+        if ((addr[0] & ipsub->mask[0]) == ipsub->sub[0] &&
+            (addr[1] & ipsub->mask[1]) == ipsub->sub[1] &&
+            (addr[2] & ipsub->mask[2]) == ipsub->sub[2] &&
+            (addr[3] & ipsub->mask[3]) == ipsub->sub[3]) {
+            return 1;
+        }
+    }
+#else
+    if ((sa->sa.sin.sin_addr.s_addr & ipsub->mask[0]) == ipsub->sub[0]) {
+        return 1;
+    }
+#endif /* APR_HAVE_IPV6 */
+    return 0; /* no match */
+}
+
