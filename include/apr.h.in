@@ -61,9 +61,7 @@
  * You must modify apr.h.in instead.
  *
  * And please, make an effort to stub apr.hw and apr.hnw in the process.
- *
- * This is the Win32 specific version of apr.h.  It is copied from
- * apr.hw when building the apr.dsp or libapr.dsp project. */
+ */
 
 /**
  * @file apr.h
