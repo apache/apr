@@ -52,11 +52,15 @@
  * <http://www.apache.org/>.
  */
 
+#include <stdlib.h>
+
 #include "test_apr.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_thread_proc.h"
+#include "apr_strings.h"
 
 static apr_file_t *readp = NULL;
 static apr_file_t *writep = NULL;
@@ -157,6 +161,68 @@ static void read_write_notimeout(CuTest *tc)
     CuAssertStrEquals(tc, "this is a test", input);
 }
 
+/* XXX FIXME */
+#ifdef WIN32
+#define EXTENSION ".exe"
+#elif NETWARE
+#define EXTENSION ".nlm"
+#else
+#define EXTENSION
+#endif
+
+static void test_pipe_writefull(CuTest *tc)
+{
+    int iterations = 1000;
+    int i;
+    int bytes_per_iteration = 8000;
+    char *buf = (char *)malloc(bytes_per_iteration);
+    char responsebuf[128];
+    apr_size_t nbytes;
+    int bytes_processed;
+    apr_proc_t proc = {0};
+    apr_procattr_t *procattr;
+    const char *args[2];
+    apr_status_t rv;
+    
+    rv = apr_procattr_create(&procattr, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_procattr_io_set(procattr, APR_CHILD_BLOCK, APR_CHILD_BLOCK,
+                             APR_CHILD_BLOCK);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_procattr_error_check_set(procattr, 1);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    args[0] = "readchild" EXTENSION;
+    args[1] = NULL;
+    rv = apr_proc_create(&proc, "./readchild" EXTENSION, args, NULL, procattr, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_pipe_timeout_set(proc.in, apr_time_from_sec(10));
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_file_pipe_timeout_set(proc.out, apr_time_from_sec(10));
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    i = iterations;
+    do {
+        rv = apr_file_write_full(proc.in, buf, bytes_per_iteration, NULL);
+        CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    } while (--i);
+
+    free(buf);
+
+    rv = apr_file_close(proc.in);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    
+    nbytes = sizeof(responsebuf);
+    rv = apr_file_read(proc.out, responsebuf, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    bytes_processed = (int)apr_strtoi64(responsebuf, NULL, 10);
+    CuAssertIntEquals(tc, iterations * bytes_per_iteration, bytes_processed);
+}
+
 CuSuite *testpipe(void)
 {
     CuSuite *suite = CuSuiteNew("Pipes");
@@ -166,6 +232,7 @@ CuSuite *testpipe(void)
     SUITE_ADD_TEST(suite, set_timeout);
     SUITE_ADD_TEST(suite, read_write);
     SUITE_ADD_TEST(suite, read_write_notimeout);
+    SUITE_ADD_TEST(suite, test_pipe_writefull);
 
     return suite;
 }
