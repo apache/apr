@@ -486,6 +486,7 @@ if test "$ac_cv_enable_threads" = "no"; then
 echo "Don't enable threads"
     threads="0"
     pthreadh="0"
+    pthreadser="0"
 else
     REENTRANCY_FLAGS
     if test "$ac_cv_enable_threads" = "pthread"; then
