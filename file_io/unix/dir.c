@@ -140,6 +140,7 @@ apr_status_t apr_dir_close(apr_dir_t *thedir)
     return apr_pool_cleanup_run(thedir->pool, thedir, dir_cleanup);
 }
 
+#ifdef DIRENT_TYPE
 apr_filetype_e apr_filetype_from_dirent_type(int type)
 {
     switch (type) {
@@ -165,7 +166,7 @@ apr_filetype_e apr_filetype_from_dirent_type(int type)
         return APR_UNKFILE;
     }
 }
-
+#endif
 
 apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                           apr_dir_t *thedir)
