@@ -30,10 +30,8 @@ Changes with APR 0.9.2
   *) Introduce Release mode debugging symbols for Win32 builds of apr.
      All library builds gain /Zi for debug symbols (which are discarded
      at link time if some flavor of the /debug flag isn't passed to link)
-     and .dll builds gain both .pdb and .dbg files (older debuggers and
-     Dr. Watson-type utilities on WinNT or Win9x don't support the newer 
-     .pdb symbol files.)  Documentation on how-to-use these symbol files
-     will be forthcoming.  [Allen Edwards, William Rowe]
+     and .dll builds gain .pdb symbols.  Documentation on how-to-use these 
+     symbols will be forthcoming.  [Allen Edwards, William Rowe]
 
   *) Add two new proc attributes to improve diagnostics for 
      apr_proc_create() failures on platforms where fork()+exec() is used.
