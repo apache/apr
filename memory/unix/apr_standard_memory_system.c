@@ -72,7 +72,7 @@
 static 
 void *
 apr_standard_memory_system_malloc(apr_memory_system_t *memory_system,
-                                  size_t size)
+                                  apr_size_t size)
 {
     return malloc(size);
 }
@@ -80,8 +80,7 @@ apr_standard_memory_system_malloc(apr_memory_system_t *memory_system,
 static 
 void *
 apr_standard_memory_system_realloc(apr_memory_system_t *memory_system,
-                                   void *mem,
-                                   size_t size)
+                                   void *mem, apr_size_t size)
 {
     return realloc(mem, size);
 }

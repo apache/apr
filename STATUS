@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/04/27 20:01:34 $]
+Last modified at [$Date: 2001/05/11 00:29:23 $]
 
 Release:
 
@@ -138,6 +138,13 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       core_output_filter can then say "setside(conn->pool)" to ensure
       that a saved brigade will last as long as the connection.
 
+    * APR memory code - code has been added but we still need to
+      - decide on a better name for the code
+      - reformat to APR style (think this is now done, but some tabs left)
+      - test on more systems
+      - add to the default build as currently it's omitted.  Also need to
+        add testmem to the test build at that point.
+      - add more detailed tests to testmem.c
 
 Documentation that needs writing:
 
@@ -156,3 +163,8 @@ Stuff waiting for code thawing after Beta 1:
     * Identify and implement those protection bits that have general 
         usefulness, perhaps hidden, generic read-only [immutable],
         effective current user permissions, etc.
+
+    * APR memory code
+      - Look at how we'll handle run-time loading of memory sub systems.
+      - shared memory module?
+      - decide on where we're actually going with the code...
