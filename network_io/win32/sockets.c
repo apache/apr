@@ -159,11 +159,6 @@ apr_status_t apr_create_socket(apr_socket_t **new, int ofamily, int type,
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
-{
-    return apr_create_socket(new, AF_INET, SOCK_STREAM, cont);
-}
-
 apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
 {
     int winhow;

@@ -54,7 +54,6 @@ EXPORTS
         apr_get_sockaddr
         apr_getaddrinfo
         apr_create_socket
-	apr_create_tcp_socket
 	apr_shutdown
 	apr_close_socket
 	apr_bind

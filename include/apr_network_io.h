@@ -206,13 +206,6 @@ struct apr_hdtr_t {
 /* function definitions */
 
 /**
- * Create a socket for tcp communication.
- * @param new_sock The new socket that has been setup. 
- * @param cont The pool to use
- */
-apr_status_t apr_create_tcp_socket(apr_socket_t **new_sock, apr_pool_t *cont);
-
-/**
  * Create a socket.
  * @param new_sock The new socket that has been set up.
  * @param family The address family of the socket (e.g., APR_INET).
