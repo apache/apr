@@ -35,7 +35,6 @@ int main(void)
     apr_shm_t *shm;
     int i;
     int sent = 0;
-    char errmsg[200];
 
     apr_initialize();
     
