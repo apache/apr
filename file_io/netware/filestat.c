@@ -308,8 +308,10 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
                 }
                 NXThreadBind (NX_THR_UNBOUND);
             }
-            else
+            else{
+                NXThreadBind (NX_THR_UNBOUND);
                 return ret;
+			}
         }
     }
     else {
