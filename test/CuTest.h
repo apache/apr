@@ -32,8 +32,6 @@
 #ifndef CU_TEST_H
 #define CU_TEST_H
 
-#include "apr_errno.h" /* for apr_status_t */
-
 #include <setjmp.h>
 #include <stdarg.h>
 
