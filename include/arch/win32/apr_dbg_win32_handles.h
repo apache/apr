@@ -144,6 +144,12 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
 
 #define CreateThread(sd,d1,fn,pv,d2,pd3) apr_dbg_rv(CreateThread,(sd,d1,fn,pv,d2,pd3))
 
+#define DeregisterEventSource(h) \
+    ((BOOL)apr_dbg_log("DeregisterEventSource", \
+                       (HANDLE)(DeregisterEventSource)(h), \
+                       __FILE__,__LINE__,1, \
+                       &(h),""))
+
 #define DuplicateHandle(h1,h2,h3,ph4,d1,b,d2) \
     ((BOOL)apr_dbg_log("DuplicateHandle", \
                        (HANDLE)(DuplicateHandle)(h1,h2,h3,ph4,d1,b,d2), \
@@ -153,9 +159,13 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
                        &(h2),((h1)==GetCurrentProcess()) \
                                  ? "Source" : "EXTERN Source"))
 
-#define GetCurrentProcess() (apr_dbg_log("GetCurrentProcess",(GetCurrentProcess)(),__FILE__,__LINE__,0))
+#define GetCurrentProcess() \
+    (apr_dbg_log("GetCurrentProcess", \
+                 (GetCurrentProcess)(),__FILE__,__LINE__,0))
 
-#define GetCurrentThread() (apr_dbg_log("GetCurrentThread",(GetCurrentThread)(),__FILE__,__LINE__,0))
+#define GetCurrentThread() \
+    (apr_dbg_log("GetCurrentThread", \
+                 (GetCurrentThread)(),__FILE__,__LINE__,0))
 
 #define GetModuleHandleA(nm) apr_dbg_rv(GetModuleHandleA,(nm))
 #define GetModuleHandleW(nm) apr_dbg_rv(GetModuleHandleW,(nm))
@@ -174,6 +184,15 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
 #define OpenFileMappingA(d,b,nm) apr_dbg_rv(OpenFileMappingA,(d,b,nm))
 #define OpenFileMappingW(d,b,nm) apr_dbg_rv(OpenFileMappingW,(d,b,nm))
 
+#define RegisterEventSourceA(s1,s2) apr_dbg_rv(RegisterEventSourceA,(s1,s2))
+#define RegisterEventSourceW(s1,s2) apr_dbg_rv(RegisterEventSourceW,(s1,s2))
+
+#define SetEvent(h) \
+    ((BOOL)apr_dbg_log("SetEvent", \
+                       (HANDLE)(SetEvent)(h), \
+                       __FILE__,__LINE__,1, \
+                       &(h),""))
+
 #define SetStdHandle(d,h) \
     ((BOOL)apr_dbg_log("SetStdHandle", \
                        (HANDLE)(SetStdHandle)(d,h), \
@@ -183,6 +202,26 @@ APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln,
     ((SOCKET)apr_dbg_log("socket", \
                          (HANDLE)(socket)(i1,i2,i3), \
                        __FILE__,__LINE__,0))
+
+#define WaitForSingleObject(h,d) \
+    ((DWORD)apr_dbg_log("WaitForSingleObject", \
+                        (HANDLE)(WaitForSingleObject)(h,d), \
+                        __FILE__,__LINE__,1,&(h),"Signaled"))
+
+#define WaitForSingleObjectEx(h,d,b) \
+    ((DWORD)apr_dbg_log("WaitForSingleObjectEx", \
+                        (HANDLE)(WaitForSingleObjectEx)(h,d,b), \
+                        __FILE__,__LINE__,1,&(h),"Signaled"))
+
+#define WaitForMultipleObjects(d1,ah,b,d2) \
+    ((DWORD)apr_dbg_log("WaitForMultipleObjects", \
+                        (HANDLE)(WaitForMultipleObjects)(d1,ah,b,d2), \
+                        __FILE__,__LINE__,1,ah,"Signaled"))
+
+#define WaitForMultipleObjectsEx(d1,ah,b1,d2,b2) \
+    ((DWORD)apr_dbg_log("WaitForMultipleObjectsEx", \
+                        (HANDLE)(WaitForMultipleObjectsEx)(d1,ah,b1,d2,b2), \
+                        __FILE__,__LINE__,1,ah,"Signaled"))
 
 #define WSASocketA(i1,i2,i3,pi,g,dw) \
     ((SOCKET)apr_dbg_log("WSASocketA", \
