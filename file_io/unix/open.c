@@ -59,23 +59,26 @@
 apr_status_t apr_unix_file_cleanup(void *thefile)
 {
     apr_file_t *file = thefile;
-    int rv;
+    apr_status_t flush_rv = APR_SUCCESS, rv = APR_SUCCESS;
+    int rc;
 
-    rv = close(file->filedes);
-
-    if (rv == 0) {
+    if (file->buffered) {
+        flush_rv = apr_file_flush(file);
+    }
+    rc = close(file->filedes);
+    if (rc == 0) {
         file->filedes = -1;
 #if APR_HAS_THREADS
         if (file->thlock) {
-            return apr_lock_destroy(file->thlock);
+            rv = apr_lock_destroy(file->thlock);
         }
 #endif
-        return APR_SUCCESS;
     }
     else {
-        return errno;
 	/* Are there any error conditions other than EINTR or EBADF? */
+        rv = errno;
     }
+    return rv != APR_SUCCESS ? rv : flush_rv;
 }
 
 apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cont)
@@ -170,17 +173,13 @@ apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag
 
 apr_status_t apr_file_close(apr_file_t *file)
 {
-    apr_status_t flush_rv = APR_SUCCESS, rv;
-
-    if (file->buffered) {
-        flush_rv = apr_file_flush(file);
-    }
+    apr_status_t rv;
 
     if ((rv = apr_unix_file_cleanup(file)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(file->cntxt, file, apr_unix_file_cleanup);
         return APR_SUCCESS;
     }
-    return rv ? rv : flush_rv;
+    return rv;
 }
 
 apr_status_t apr_file_remove(const char *path, apr_pool_t *cont)
