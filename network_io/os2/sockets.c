@@ -66,7 +66,7 @@
 #include <netdb.h>
 #include "os2calls.h"
 
-ap_status_t socket_cleanup(void *sock)
+static ap_status_t socket_cleanup(void *sock)
 {
     ap_socket_t *thesocket = sock;
     if (soclose(thesocket->socketdes) == 0) {
