@@ -161,9 +161,9 @@ int apr_atomic_dec(volatile apr_atomic_t *mem)
 #if !defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CASE)
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
 {
+    long prev;
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
-    long prev;
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
         prev = *(long*)mem;
