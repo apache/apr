@@ -141,7 +141,7 @@ apr_status_t apr_dir_close(apr_dir_t *thedir)
 }
 
 #ifdef DIRENT_TYPE
-apr_filetype_e apr_filetype_from_dirent_type(int type)
+static apr_filetype_e filetype_from_dirent_type(int type)
 {
     switch (type) {
     case DT_REG:
@@ -251,7 +251,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         finfo->pool = thedir->pool;
         finfo->valid = 0;
 #ifdef DIRENT_TYPE
-        finfo->filetype = apr_filetype_from_dirent_type(thedir->entry->DIRENT_TYPE);
+        finfo->filetype = filetype_from_dirent_type(thedir->entry->DIRENT_TYPE);
         finfo->valid |= APR_FINFO_TYPE;
 #endif
 #ifdef DIRENT_INODE
