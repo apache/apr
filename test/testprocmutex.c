@@ -126,10 +126,10 @@ apr_status_t test_exclusive(const char *lockname)
     printf("OK\n");
  
     printf("%-60s", "    Waiting for processes to exit");
-    s1 = apr_proc_wait(p1, APR_WAIT);
-    s2 = apr_proc_wait(p2, APR_WAIT);
-    s3 = apr_proc_wait(p3, APR_WAIT);
-    s4 = apr_proc_wait(p4, APR_WAIT);
+    s1 = apr_proc_wait(p1, NULL, APR_WAIT);
+    s2 = apr_proc_wait(p2, NULL, APR_WAIT);
+    s3 = apr_proc_wait(p3, NULL, APR_WAIT);
+    s4 = apr_proc_wait(p4, NULL, APR_WAIT);
     printf("OK\n");
  
     if ((*x) != MAX_COUNTER) {
