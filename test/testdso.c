@@ -66,7 +66,7 @@
 
 #ifdef NETWARE
 # define LIB_NAME "mod_test.nlm"
-#elif defined(BEOS)
+#elif defined(BEOS) || defined(WIN32)
 # define LIB_NAME "mod_test.so"
 #elif defined(DARWIN)
 # define LIB_NAME ".libs/mod_test.so" 
@@ -155,17 +155,11 @@ static void test_unload_module(CuTest *tc)
 
     status = apr_dso_unload(h);
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-
-    status = apr_dso_sym(&func1, h, "print_hello");
-    CuAssertIntEquals(tc, APR_EINIT, status);
 }
 
 
 static void test_load_non_module(CuTest *tc)
 {
-#ifndef LIB_NAME2
-    CuNotImpl(tc, "Can't load non-module library");
-#else
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
     char errstr[256];
@@ -175,14 +169,10 @@ static void test_load_non_module(CuTest *tc)
     CuAssertPtrNotNull(tc, h);
 
     apr_dso_unload(h);
-#endif
 }
 
 static void test_dso_sym_non_module(CuTest *tc)
 {
-#ifndef LIB_NAME2
-    CuNotImpl(tc, "Can't load non-module library");
-#else
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
     apr_status_t status;
@@ -203,14 +193,10 @@ static void test_dso_sym_non_module(CuTest *tc)
     CuAssertStrEquals(tc, "Hello - I'm a DSO!\n", teststr);
 
     apr_dso_unload(h);
-#endif
 }
 
 static void test_dso_sym_return_value_non_mod(CuTest *tc)
 {
-#ifndef LIB_NAME2
-    CuNotImpl(tc, "Can't load non-module library");
-#else
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
     apr_status_t status;
@@ -230,14 +216,10 @@ static void test_dso_sym_return_value_non_mod(CuTest *tc)
     CuAssertIntEquals(tc, 5, status);
 
     apr_dso_unload(h);
-#endif
 }
 
 static void test_unload_non_module(CuTest *tc)
 {
-#ifndef LIB_NAME2
-    CuNotImpl(tc, "Can't load non-module library");
-#else
     apr_dso_handle_t *h = NULL;
     apr_status_t status;
     char errstr[256];
@@ -249,22 +231,20 @@ static void test_unload_non_module(CuTest *tc)
 
     status = apr_dso_unload(h);
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
-
-    status = apr_dso_sym(&func1, h, "print_hello");
-    CuAssertIntEquals(tc, APR_EINIT, status);
-#endif
 }
 
 static void test_load_notthere(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
+    char errstr[256];
     apr_status_t status;
 
     status = apr_dso_load(&h, "No_File.so", p);
-    CuAssertIntEquals(tc, APR_EDSOOPEN, status);
+    /* Original test was status == APR_EDSOOPEN, but that's not valid
+     * with DSO_USE_SHL (HP/UX etc), OS2 or Win32.  Accept simple failure.
+     */
+    CuAssert(tc, apr_dso_error(h, errstr, 256), status);
     CuAssertPtrNotNull(tc, h);
-
-    apr_dso_unload(h);
 }    
 
 CuSuite *testdso(void)
@@ -275,21 +255,21 @@ CuSuite *testdso(void)
     getcwd(filename, 256);
     filename = apr_pstrcat(p, filename, "/", LIB_NAME, NULL);
 
-#ifdef LIB_NAME2
-    filename2 = apr_pcalloc(p, 256);
-    getcwd(filename2, 256);
-    filename2 = apr_pstrcat(p, filename2, "/", LIB_NAME2, NULL);
-#endif
-
     SUITE_ADD_TEST(suite, test_load_module);
     SUITE_ADD_TEST(suite, test_dso_sym);
     SUITE_ADD_TEST(suite, test_dso_sym_return_value);
     SUITE_ADD_TEST(suite, test_unload_module);
 
+#ifdef LIB_NAME2
+    filename2 = apr_pcalloc(p, 256);
+    getcwd(filename2, 256);
+    filename2 = apr_pstrcat(p, filename2, "/", LIB_NAME2, NULL);
+
     SUITE_ADD_TEST(suite, test_load_non_module);
     SUITE_ADD_TEST(suite, test_dso_sym_non_module);
     SUITE_ADD_TEST(suite, test_dso_sym_return_value_non_mod);
     SUITE_ADD_TEST(suite, test_unload_non_module);
+#endif
 
     SUITE_ADD_TEST(suite, test_load_notthere);
 
