@@ -398,8 +398,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             pNext = (apr_wchar_t*)pEnvBlock;
             while (env[i]) {
                 apr_size_t in = strlen(env[i]) + 1;
-                if ((rv = conv_utf8_to_ucs2(env[i], &in, 
-                                            pNext, &iEnvBlockLen)) 
+                if ((rv = apr_conv_utf8_to_ucs2(env[i], &in, 
+                                                pNext, &iEnvBlockLen)) 
                         != APR_SUCCESS) {
                     return rv;
                 }
@@ -443,9 +443,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         apr_size_t ncwd = 0, nwcwd = 0;
         apr_wchar_t *wcwd = NULL;
 
-        if (((rv = conv_utf8_to_ucs2(progname, &nprg, wprg, &nwprg))
+        if (((rv = apr_conv_utf8_to_ucs2(progname, &nprg, wprg, &nwprg))
                  != APR_SUCCESS)
-         || ((rv = conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
+         || ((rv = apr_conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
                  != APR_SUCCESS)) {
             return rv;
         }
@@ -454,7 +454,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         {
             ncwd = nwcwd = strlen(attr->currdir) + 1;
             wcwd = apr_palloc(cont, ncwd * sizeof(wcwd[0]));
-            if ((rv = conv_utf8_to_ucs2(attr->currdir, &ncwd, wcwd, &nwcwd))
+            if ((rv = apr_conv_utf8_to_ucs2(attr->currdir, &ncwd, 
+                                            wcwd, &nwcwd))
                     != APR_SUCCESS) {
                 return rv;
             }
