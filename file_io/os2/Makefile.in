@@ -19,6 +19,7 @@ OBJS=dir.o \
 	pipe.o \
 	readwrite.o \
 	seek.o \
+	flock.o \
 	maperrorcode.o
 
 .c.o:
