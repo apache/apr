@@ -136,7 +136,6 @@ ap_status_t ap_get_remote_ipaddr(char **addr, const struct socket_t *sock)
 }
 
 
-#if HAVE_NETINET_IN_H
 ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct socket_t *sock)
 {
     *name = sock->local_addr;
@@ -148,4 +147,3 @@ ap_status_t ap_get_remote_name(struct sockaddr_in **name, const struct socket_t 
     *name = sock->remote_addr;
     return APR_SUCCESS;
 }
-#endif
