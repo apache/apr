@@ -73,6 +73,8 @@ extern int (*apr_os2_setsockopt)(int, int, int, char *, int);
 extern int (*apr_os2_shutdown)(int, int);
 extern int (*apr_os2_soclose)(int);
 extern int (*apr_os2_writev)(int, struct iovec *, int);
+extern int (*apr_os2_sendto)(int, const char *, int, int, const struct sockaddr *, int);
+extern int (*apr_os2_recvfrom)(int, char *, int, int, struct sockaddr *, int *);
 
 #define socket apr_os2_socket
 #define select apr_os2_select
@@ -91,3 +93,5 @@ extern int (*apr_os2_writev)(int, struct iovec *, int);
 #define shutdown apr_os2_shutdown
 #define soclose apr_os2_soclose
 #define writev apr_os2_writev
+#define sendto apr_os2_sendto
+#define recvfrom apr_os2_recvfrom
