@@ -59,6 +59,10 @@
 extern "C" {
 #endif
 
+/**
+ * @package APR memory allocation
+ */
+
 /*
  * Resource allocation routines...
  *
@@ -124,209 +128,140 @@ APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (*apr_abort)(int retcod
  * APR memory structure manipulators (pools, tables, and arrays).
  */
 
-/*
-
-=head1 ap_status_t ap_init_alloc(void)
-
-B<Setup all of the internal structures required to use pools>
-
-B<NOTE>:  Programs do B<NOT> need to call this directly.  APR will call this
-          automatically from ap_initialize. 
-=cut
+/**
+ * Setup all of the internal structures required to use pools
+ * @tip Programs do NOT need to call this directly.  APR will call this
+ *      automatically from ap_initialize. 
  */
 ap_status_t ap_init_alloc(void);	/* Set up everything */
 
-/*
-
-=head1 void ap_term_alloc(void)
-
-B<Tear down all of the internal structures required to use pools>
-
-B<NOTE>:  Programs do B<NOT> need to call this directly.  APR will call this
-          automatically from ap_terminate. 
-
-=cut
+/**
+ * Tear down all of the internal structures required to use pools
+ * @tip Programs do NOT need to call this directly.  APR will call this
+ *      automatically from ap_terminate. 
  */
-void        ap_term_alloc(void);        /* Tear down everything */
+void ap_term_alloc(void);        /* Tear down everything */
 
-/*
-
-=head1 ap_pool_t *ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
-
-B<make a sub pool from the current pool>
-
-    arg 1) The pool to use as a parent pool
-    arg 2) A function to use if the pool cannot allocate more memory.
-    return) The new sub-pool
-
-B<NOTE>:  The apr_abort function provides a way to quit the program if the
-          machine is out of memory.  By default, APR will return with an
-          error.
-
-=cut
+/**
+ * make a sub pool from the current pool
+ * @param p The pool to use as a parent pool
+ * @param apr_abort A function to use if the pool cannot allocate more memory.
+ * @return The new sub-pool
+ * @tip The apr_abort function provides a way to quit the program if the
+ *      machine is out of memory.  By default, APR will return with an
+ *      error.
+ * @deffunc ap_pool_t *ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
  */
 APR_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode));
 
-/*
-
-=head1 void ap_clear_pool(ap_pool_t *p)
-
-B<clear all memory in the pool>
-
-    arg 1) The pool to clear
-
-B<NOTE>:  This does not actually free the memory, it just allows the pool
-          to re-use this memory for the next allocation.
-
-=cut
+/**
+ * clear all memory in the pool
+ * @param p The pool to clear
+ * @tip  This does not actually free the memory, it just allows the pool
+ *       to re-use this memory for the next allocation.
+ * @deffunc void ap_clear_pool(ap_pool_t *p)
  */
 APR_EXPORT(void) ap_clear_pool(ap_pool_t *p);
 
-/*
-
-=head1 void ap_destroy_pool(ap_pool_t *p)
-
-B<destroy the pool>
-
-    arg 1) The pool to destroy
-
-B<NOTE>:  This will actually free the memory
-
-=cut
+/**
+ * destroy the pool
+ * @param p The pool to destroy
+ * @tip This will actually free the memory
+ * @deffunc void ap_destroy_pool(ap_pool_t *p)
  */
 APR_EXPORT(void) ap_destroy_pool(ap_pool_t *p);
 
-/*
-
-=head1 ap_size_t ap_bytes_in_pool(ap_pool_t *p)
-
-B<report the number of bytes currently in the pool>
-
-    arg 1) The pool to inspect
-    return) The number of bytes
-
-=cut
+/**
+ * report the number of bytes currently in the pool
+ * @param p The pool to inspect
+ * @return The number of bytes
+ * @deffunc ap_size_t ap_bytes_in_pool(ap_pool_t *p)
  */
 APR_EXPORT(ap_size_t) ap_bytes_in_pool(ap_pool_t *p);
 
-/*
-
-=head1 ap_size_t ap_bytes_in_free_blocks(ap_pool_t *p)
-
-B<report the number of bytes currently in the list of free blocks>
-
-    return) The number of bytes
-
-=cut
+/**
+ * report the number of bytes currently in the list of free blocks
+ * @return The number of bytes
+ * @deffunc ap_size_t ap_bytes_in_free_blocks(void)
  */
 APR_EXPORT(ap_size_t) ap_bytes_in_free_blocks(void);
 
-/*
-
-=head1 ap_pool_t *ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
-
-B<Determine if pool a is an ancestor of pool b>
-
-    arg 1) The pool to search 
-    arg 2) The pool to search for
-    return) True if a is an ancestor of b, NULL is considered an ancestor
-            of all pools.
-
-=cut
+/**
+ * Determine if pool a is an ancestor of pool b
+ * @param a The pool to search 
+ * @param b The pool to search for
+ * @return True if a is an ancestor of b, NULL is considered an ancestor
+ *         of all pools.
+ * @deffunc int ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
  */
 APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b);
 
-/*
-
-=head1 void *ap_palloc(ap_pool_t *c, ap_size_t reqsize)
-
-B<Allocate a block of memory from a pool>
-
-    arg 1) The pool to allocate out of 
-    arg 2) The amount of memory to allocate 
-    return) The allocated memory
-
-=cut
+/**
+ * Allocate a block of memory from a pool
+ * @param c The pool to allocate out of 
+ * @param reqsize The amount of memory to allocate 
+ * @return The allocated memory
+ * @deffunc void *ap_palloc(ap_pool_t *c, ap_size_t reqsize)
  */
 APR_EXPORT(void *) ap_palloc(ap_pool_t *c, ap_size_t reqsize);
 
-/*
-
-=head1 void *ap_pcalloc(ap_pool_t *c, ap_size_t reqsize)
-
-B<Allocate a block of memory from a pool and set all of the memory to 0>
-
-    arg 1) The pool to allocate out of 
-    arg 2) The amount of memory to allocate 
-    return) The allocated memory
-
-=cut
+/**
+ * Allocate a block of memory from a pool and set all of the memory to 0
+ * @param p The pool to allocate out of 
+ * @param size The amount of memory to allocate 
+ * @return The allocated memory
+ * @deffunc void *ap_pcalloc(ap_pool_t *p, ap_size_t size)
  */
 APR_EXPORT(void *) ap_pcalloc(ap_pool_t *p, ap_size_t size);
 
-/*
-
-=head1 void ap_register_cleanup(ap_pool_t *p, const void *data,
-                                ap_status_t (*plain_cleanup)(void *),
-                                ap_status_t (*child_cleanup)(void *))
-
-B<Register a function to be called when a pool is cleared or destroyed>
-
-    arg 1) The pool register the cleanup with 
-    arg 2) The data to pass to the cleanup function.
-    arg 3) The function to call when the pool is cleared or destroyed
-    arg 4) The function to call when a child process is created 
-
-=cut
+/**
+ * Register a function to be called when a pool is cleared or destroyed
+ * @param p The pool register the cleanup with 
+ * @param data The data to pass to the cleanup function.
+ * @param plain_cleanup The function to call when the pool is cleared 
+ *                      or destroyed
+ * @param child_cleanup The function to call when a child process is created 
+ * @deffunc void ap_register_cleanup(ap_pool_t *p, const void *data, ap_status_t (*plain_cleanup) (void *), ap_status_t (*child_cleanup) (void *))
  */
 APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, const void *data,
                                      ap_status_t (*plain_cleanup) (void *),
                                      ap_status_t (*child_cleanup) (void *));
 
-/*
-
-=head1 void ap_kill_cleanup(ap_pool_t *p, const void *data,
-                            ap_status_t (*cleanup(void *))
-
-B<remove a previously registered cleanup function>
-
-    arg 1) The pool remove the cleanup from 
-    arg 2) The data to remove from cleanup
-    arg 3) The function to remove from cleanup
-
-=cut
+/**
+ * remove a previously registered cleanup function
+ * @param p The pool remove the cleanup from 
+ * @param data The data to remove from cleanup
+ * @param cleanup The function to remove from cleanup
+ * @deffunc void ap_kill_cleanup(ap_pool_t *p, const void *data, ap_status_t (*cleanup) (void *))
  */
 APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, const void *data,
                                  ap_status_t (*cleanup) (void *));
 
-/*
-
-=head1 ap_status_t ap_run_cleanup(ap_pool_t *p, void *data, ap_status_t (*cleanup(void *))
-
-B<Run the specified cleanup function immediately and unregister it>
-
-    arg 1) The pool remove the cleanup from 
-    arg 2) The data to remove from cleanup
-    arg 3) The function to remove from cleanup
-
-=cut
+/**
+ * Run the specified cleanup function immediately and unregister it
+ * @param p The pool remove the cleanup from 
+ * @param data The data to remove from cleanup
+ * @param cleanup The function to remove from cleanup
+ * @deffunc ap_status_t ap_run_cleanup(ap_pool_t *p, void *data, ap_status_t (*cleanup) (void *))
  */
 APR_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
                                        ap_status_t (*cleanup) (void *));
 
-/*
-
-=head1 void ap_cleanup_for_exec(void)
-
-B<Run all of the child_cleanups, so that any unnecessary files are closed because we are about to exec a new program>
-
-=cut
- */
 /* Preparing for exec() --- close files, etc., but *don't* flush I/O
  * buffers, *don't* wait for subprocesses, and *don't* free any memory.
  */
+/**
+ * Run all of the child_cleanups, so that any unnecessary files are 
+ * closed because we are about to exec a new program
+ * @deffunc void ap_cleanup_for_exec(void)
+ */
 APR_EXPORT(void) ap_cleanup_for_exec(void);
-APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
+
+/**
+ * An empty cleanup function 
+ * @param data The data to cleanup
+ * @deffunc ap_status_t ap_null_cleanup(void *data)
+ */
 APR_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
 
