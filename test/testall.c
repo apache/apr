@@ -60,6 +60,16 @@
 /* Top-level pool which can be used by tests. */
 apr_pool_t *p;
 
+void apr_assert_success(CuTest* tc, const char* context, apr_status_t rv)
+{
+    if (!APR_STATUS_IS_SUCCESS(rv)) {
+        char buf[STRING_MAX], ebuf[128];
+        sprintf(buf, "%s (%d): %s\n", context, rv,
+                apr_strerror(rv, ebuf, sizeof ebuf));
+        CuFail(tc, buf);
+    }
+}
+
 static const struct testlist {
     const char *testname;
     CuSuite *(*func)(void);
