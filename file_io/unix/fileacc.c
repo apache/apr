@@ -54,9 +54,9 @@
 
 #include "apr_strings.h"
 #ifdef OS2
-#include "../os2/fileio.h"
+#include "os2/fileio.h"
 #elif defined(WIN32)
-#include "../win32/fileio.h"
+#include "win32/fileio.h"
 #endif
 #if defined(OS2) || defined(WIN32)
 #include "apr_file_io.h"
@@ -66,7 +66,7 @@
 #include <string.h>
 #include <sys/types.h>
 #else
-#include "fileio.h"
+#include "unix/fileio.h"
 #endif
 
 /* A file to put ALL of the accessor functions for apr_file_t types. */

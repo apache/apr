@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
+#include "win32/fileio.h"
 #include "apr_file_io.h"
 #include <errno.h>
 #include <string.h>

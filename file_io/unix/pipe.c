@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
+#include "unix/fileio.h"
 #include "apr_strings.h"
 
 static apr_status_t pipeblock(apr_file_t *thepipe)
