@@ -1,4 +1,8 @@
 Changes with APR 0.9.4
+  *) Add new table function apr_table_compress() and replace
+     red-black trees with mergesort in apr_table_overlap()
+     [Joe Schaefer <joe+gmane@sunstarsys.com>, Brian Pane]
+
   *) Win32: Adopt Brian Havard's OS/2 rwlock implementation for
      Windows [Marc Adkins, Bill Stoddard]
 
