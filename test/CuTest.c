@@ -200,7 +200,7 @@ void CuAssertIntEquals(CuTest* tc, int expected, int actual)
 	CuFail(tc, buf);
 }
 
-void CuAssertPtrEquals(CuTest* tc, void* expected, void* actual)
+void CuAssertPtrEquals(CuTest* tc, const void* expected, const void* actual)
 {
 	char buf[STRING_MAX];
 	if (expected == actual) return;
@@ -208,7 +208,7 @@ void CuAssertPtrEquals(CuTest* tc, void* expected, void* actual)
 	CuFail(tc, buf);
 }
 
-void CuAssertPtrNotNull(CuTest* tc, void* pointer)
+void CuAssertPtrNotNull(CuTest* tc, const void* pointer)
 {
 	char buf[STRING_MAX];
 	if (pointer != NULL ) return;
