@@ -224,7 +224,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
     ap_status_t rv;
     int i;    
 
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len-1; i++) {
         readlen = 1;
         rv = ap_read(thefile, str+i, &readlen);
         
@@ -237,6 +237,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         else if (str[i] == '\n')
             break;
     }
+    str[i] = 0;
     return APR_SUCCESS; 
 }
 
