@@ -87,6 +87,7 @@ extern "C" {
 #define APR_SO_TIMEOUT       32
 #define APR_SO_SNDBUF        64
 #define APR_SO_RCVBUF        128
+#define APR_SO_DISCONNECTED  256
 
 #define APR_POLLIN    0x001 
 #define APR_POLLPRI   0x002
@@ -358,7 +359,7 @@ B<Send a file from an open file descriptor to a socket, along with optional head
     arg 3) A structure containing the headers and trailers to send
     arg 4) Offset into the file where we should begin writing
     arg 5) Number of bytes to send 
-    arg 6) OS-specific flags to pass to sendfile()
+    arg 6) APR flags that are mapped to OS specific flags
 
 B<NOTE>:  This functions acts like a blocking write by default.  To change 
           this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
@@ -440,6 +441,8 @@ B<Query socket options for the specified socket>
                                     don't wait at all.
               APR_SO_SNDBUF     --  Set the SendBufferSize
               APR_SO_RCVBUF     --  Set the ReceiveBufferSize
+              APR_SO_DISCONNECTED -- Query the disconnected state of the socket.
+                                    (Currently only used on Windows)
     arg 3) Socket option returned on the call.
 
 =cut

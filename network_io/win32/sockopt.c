@@ -174,6 +174,9 @@ ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
         *on = sock->timeout * 1000; /* Convert from milliseconds (windows units) to microseconds 
                                      * (APR units) */
         break;
+    case APR_SO_DISCONNECTED:
+        *on = sock->disconnected;
+        break;
     case APR_SO_KEEPALIVE:
     case APR_SO_DEBUG:
     case APR_SO_REUSEADDR:
