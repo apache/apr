@@ -86,21 +86,6 @@ typedef struct apr_proc_mutex_t apr_proc_mutex_t;
  * @param fname A file name to use if the lock mechanism requires one.  This
  *        argument should always be provided.  The lock code itself will
  *        determine if it should be used.
- * @param pool the pool from which to allocate the mutex.
- */
-APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
-                                                const char *fname,
-                                                apr_pool_t *pool);
-
-/**
- * non-portable interface to apr_proc_mutex_create()
- *
- * Create and initialize a mutex that can be used to synchronize processes.
- * @param mutex the memory address where the newly created mutex will be
- *        stored.
- * @param fname A file name to use if the lock mechanism requires one.  This
- *        argument should always be provided.  The lock code itself will
- *        determine if it should be used.
  * @param mech The mechanism to use for the interprocess lock, if any; one of
  * <PRE>
  *            APR_LOCK_FCNTL
@@ -110,13 +95,13 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
  *            APR_LOCK_DEFAULT     pick the default mechanism for the platform
  * </PRE>
  * @param pool the pool from which to allocate the mutex.
+ * @warning Check APR_HAS_foo_SERIALIZE defines to see if the platform supports
+ *          APR_LOCK_foo.  Only APR_LOCK_DEFAULT is portable.
  */
-#if APR_HAS_LOCK_CREATE_NP
-APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
-                                                   const char *fname,
-                                                   apr_lockmech_e_np mech,
-                                                   apr_pool_t *pool);
-#endif
+APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
+                                                const char *fname,
+                                                apr_lockmech_e mech,
+                                                apr_pool_t *pool);
 
 /**
  * Re-open a mutex in a child process.

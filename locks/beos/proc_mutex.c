@@ -79,11 +79,16 @@ static apr_status_t _proc_mutex_cleanup(void * data)
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 const char *fname,
+                                                apr_lockmech_e mech,
                                                 apr_pool_t *pool)
 {
     apr_proc_mutex_t *new;
     apr_status_t stat = APR_SUCCESS;
   
+    if (mech != APR_LOCK_DEFAULT) {
+        return APR_ENOTIMPL;
+    }
+
     new = (apr_proc_mutex_t *)apr_pcalloc(pool, sizeof(apr_proc_mutex_t));
     if (new == NULL){
         return APR_ENOMEM;
@@ -103,16 +108,6 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     (*mutex) = new;
     return APR_SUCCESS;
 }
-
-#if APR_HAS_CREATE_LOCKS_NP
-APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
-                                                   const char *fname,
-                                                   apr_lockmech_e_np mech,
-                                                   apr_pool_t *pool)
-{
-    return APR_ENOTIMPL;
-}       
-#endif
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
                                                     const char *fname,

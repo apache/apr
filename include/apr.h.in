@@ -81,8 +81,6 @@
 #define APR_HAS_PROC_PTHREAD_SERIALIZE    @hasprocpthreadser@
 #define APR_HAS_RWLOCK_SERIALIZE          @hasrwlockser@
 
-#define APR_HAS_LOCK_CREATE_NP            @lockcreatenp@
-
 #define APR_PROCESS_LOCK_IS_GLOBAL        @proclockglobal@
 
 #define APR_USES_ANONYMOUS_SHM            @anonymous_shm@

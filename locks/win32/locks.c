@@ -85,6 +85,7 @@ static apr_status_t lock_cleanup(void *lock_)
 APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, 
                                           apr_locktype_e type, 
                                           apr_lockscope_e scope, 
+                                          apr_lockmech_e mech,
                                           const char *fname,
                                           apr_pool_t *pool)
 {
@@ -94,6 +95,10 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
     /* FIXME: Remove when read write locks implemented. */
     if (type == APR_READWRITE)
         return APR_ENOTIMPL;
+
+    if (mech != APR_LOCK_DEFAULT) {
+        return APR_ENOTIMPL;
+    }
 
     newlock = (apr_lock_t *)apr_palloc(pool, sizeof(apr_lock_t));
 

@@ -209,7 +209,8 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     new_m->curmem = mem;
     new_m->length = reqsize;
 
-    apr_lock_create(&new_m->lock, APR_MUTEX, APR_CROSS_PROCESS, NULL, pool);
+    apr_lock_create(&new_m->lock, APR_MUTEX, APR_CROSS_PROCESS, 
+                    APR_LOCK_DEFAULT, NULL, pool);
     if (!new_m->lock)
         return APR_EGENERAL;
 
