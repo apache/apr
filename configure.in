@@ -86,6 +86,10 @@ AC_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision) 
 
 AC_CHECK_LIB(pthread, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
+AC_CHECK_LIB(c_r, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
+ac_cv_define_READDIR_IS_THREAD_SAFE=no
+AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
+
 
 case "$OS" in
    *-os2*)
@@ -104,6 +108,7 @@ esac
 
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(pthread, pthread_mutex_init)
+AC_CHECK_LIB(c_r, pthread_mutex_init)
 AC_CHECK_LIB(socket,socket)
 AC_CHECK_LIB(crypt,crypt)
 AC_CHECK_LIB(ufc,crypt)

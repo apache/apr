@@ -124,7 +124,8 @@ ap_status_t ap_closedir(struct dir_t *thedir)
  */                        
 ap_status_t ap_readdir(struct dir_t *thedir)
 {
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
+    && !defined(READDIR_IS_THREAD_SAFE)
     ap_status_t ret;
     ret = readdir_r(thedir->dirstruct, thedir->entry, &thedir->entry);
     /* Avoid the Linux problem where at end-of-directory thedir->entry
