@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "errno.h"
 #include <stdio.h>
+#include <stdlib.h>
 #ifdef BEOS
 #include <unistd.h>
 #endif
@@ -72,57 +73,66 @@ int main(void)
 }
 #else /* !APR_HAS_THREADS */
 
-void * APR_THREAD_FUNC thread_func1(void *data);
-void * APR_THREAD_FUNC thread_func2(void *data);
-void * APR_THREAD_FUNC thread_func3(void *data);
-void * APR_THREAD_FUNC thread_func4(void *data);
+void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data);
 
 
 apr_lock_t *thread_lock;
 apr_pool_t *context;
 int x = 0;
+apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
-void * APR_THREAD_FUNC thread_func1(void *data)
+void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
 {
     int i;
+    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
+    apr_thread_exit(thd, &exit_ret_val);
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_func2(void *data)
+void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data)
 {
     int i;
+    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
+    apr_thread_exit(thd, &exit_ret_val);
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_func3(void *data)
+void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data)
 {
     int i;
+    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
+    apr_thread_exit(thd, &exit_ret_val);
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_func4(void *data)
+void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data)
 {
     int i;
+    apr_pool_t *pool = apr_thread_pool_get(thd);
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
+    apr_thread_exit(thd, &exit_ret_val);
     return NULL;
 } 
 
@@ -172,7 +182,15 @@ int main(void)
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
-    fprintf (stdout, "OK\n");   
+    fprintf (stdout, "OK\n");
+
+    fprintf(stdout, "Checking thread's returned value.......");
+    if (s1 != exit_ret_val || s2 != exit_ret_val ||
+        s3 != exit_ret_val || s4 != exit_ret_val) {
+        fprintf(stderr, "Invalid return value (not expected value)\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Checking if locks worked......."); 
     if (x != 40000) {
