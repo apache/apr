@@ -601,7 +601,17 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         }
 #endif
     }
-    
+#if !APR_HAVE_IPV6
+    /* What may happen is that APR is not IPv6-enabled, but we're still
+     * going to call getaddrinfo(), so we have to tell the OS we only
+     * want IPv4 addresses back since we won't know what to do with
+     * IPv6 addresses.
+     */
+    if (family == APR_UNSPEC) {
+        family = APR_INET;
+    }
+#endif
+
     return find_addresses(sa, hostname, family, port, flags, p);
 }
 
