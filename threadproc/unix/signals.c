@@ -52,11 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef BEOS
-#include "unix/threadproc.h"
-#else
-#include "beos/threadproc.h"
-#endif
+#include "threadproc.h"
 #include "apr_private.h"
 #include "apr_lib.h"
 #if APR_HAVE_SIGNAL_H

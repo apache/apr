@@ -4,7 +4,7 @@ dnl ##
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(apr_common.m4)
-AC_CONFIG_HEADER(include/apr_private.h)
+AC_CONFIG_HEADER(include/arch/unix/apr_private.h)
 AC_CONFIG_AUX_DIR(helpers)
 
 AC_CANONICAL_SYSTEM
@@ -801,7 +801,7 @@ if test -n "$CPPFLAGS"; then
   CFLAGS="$CFLAGS $CPPFLAGS"
 fi
 
-SAVE_FILES="include/apr.h include/apr_private.h"
+SAVE_FILES="include/apr.h include/arch/unix/apr_private.h"
 
 for i in $SAVE_FILES; do
   test -r $i && mv $i $i.save
