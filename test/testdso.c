@@ -64,6 +64,8 @@
 #include <unistd.h>
 #endif
 
+#if APR_HAS_DSO
+
 #ifdef NETWARE
 # define MOD_NAME "mod_test.nlm"
 #elif defined(BEOS) || defined(WIN32)
@@ -257,10 +259,13 @@ static void test_load_notthere(CuTest *tc)
     CuAssertPtrNotNull(tc, h);
 }    
 
+#endif /* APR_HAS_DSO */
+
 CuSuite *testdso(void)
 {
     CuSuite *suite = CuSuiteNew("DSO");
 
+#if APR_HAS_DSO
     modname = apr_pcalloc(p, 256);
     getcwd(modname, 256);
     modname = apr_pstrcat(p, modname, "/", MOD_NAME, NULL);
@@ -282,6 +287,7 @@ CuSuite *testdso(void)
 #endif
 
     SUITE_ADD_TEST(suite, test_load_notthere);
+#endif /* APR_HAS_DSO */
 
     return suite;
 }
