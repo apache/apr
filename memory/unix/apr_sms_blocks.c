@@ -202,4 +202,3 @@ APR_DECLARE(apr_status_t) apr_sms_blocks_create(apr_sms_t **sms,
     return APR_SUCCESS;
 }
 
-
