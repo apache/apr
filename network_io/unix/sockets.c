@@ -118,10 +118,6 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
 
     alloc_socket(new, cont);
 
-    if ((*new)->local_addr == NULL || (*new)->remote_addr == NULL) {
-        return APR_ENOMEM;
-    }
-
     (*new)->socketdes = socket(family, type, 0);
 
 #if APR_HAVE_IPV6
