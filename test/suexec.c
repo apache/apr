@@ -52,7 +52,10 @@
  * <http://www.apache.org/>.
  */
 
-/***********************************************************************
+/*
+ * suexec.c -- "Wrapper" support program for suEXEC behaviour for Apache
+ *
+ ***********************************************************************
  *
  * NOTE! : DO NOT edit this code!!!  Unless you know what you are doing,
  *         editing this code might open up your system in unexpected 
