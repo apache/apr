@@ -30,7 +30,7 @@ TARGETS = $(PROGRAMS)
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-LIBS=../libapr.la ../shmem/unix/mm/libmm.la $(LIBS)
+ALL_LIBS=../libapr.la ../shmem/unix/mm/libmm.la $(LIBS) $(EXTRA_LIBS)
 
 CLEAN_TARGETS = testfile.tmp
 
@@ -39,76 +39,76 @@ INCLUDES=-I$(INCDIR)
 
 
 testfile@EXEEXT@: testfile.lo ../libapr.la
-	$(LINK) testfile.lo
+	$(LINK) testfile.lo $(ALL_LIBS)
 
 testnames@EXEEXT@: testnames.lo ../libapr.la
-	$(LINK) testnames.lo
+	$(LINK) testnames.lo $(ALL_LIBS)
 
 testflock@EXEEXT@: testflock.lo ../libapr.la
-	$(LINK) testflock.lo
+	$(LINK) testflock.lo $(ALL_LIBS)
 
 ### why the export-dynamic?
 testdso@EXEEXT@: testdso.lo ../libapr.la
-	$(LINK) --export-dynamic testdso.lo
+	$(LINK) --export-dynamic testdso.lo $(ALL_LIBS)
 
 testoc@EXEEXT@: testoc.lo ../libapr.la
-	$(LINK) testoc.lo
+	$(LINK) testoc.lo $(ALL_LIBS)
 
 occhild@EXEEXT@: occhild.lo ../libapr.la
-	$(LINK) occhild.lo
+	$(LINK) occhild.lo $(ALL_LIBS)
 
 mod_test.so: mod_test.lo ../libapr.la
-	$(LINK) -shared mod_test.o
+	$(LINK) -shared mod_test.o $(ALL_LIBS)
 
 testargs@EXEEXT@: testargs.lo ../libapr.la
-	$(LINK) testargs.lo
+	$(LINK) testargs.lo $(ALL_LIBS)
 
 testcontext@EXEEXT@: testcontext.lo ../libapr.la
-	$(LINK) testcontext.lo
+	$(LINK) testcontext.lo $(ALL_LIBS)
 
 testproc@EXEEXT@: testproc.lo ../libapr.la
-	$(LINK) testproc.lo
+	$(LINK) testproc.lo $(ALL_LIBS)
 
 testthread@EXEEXT@: testthread.lo ../libapr.la
-	$(LINK) testthread.lo
+	$(LINK) testthread.lo $(ALL_LIBS)
 
 testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@ ../libapr.la
-	$(LINK) testsock.lo
+	$(LINK) testsock.lo $(ALL_LIBS)
 
 client@EXEEXT@: client.lo ../libapr.la
-	$(LINK) client.lo
+	$(LINK) client.lo $(ALL_LIBS)
 
 server@EXEEXT@: server.lo sendfile.lo ../libapr.la
-	$(LINK) server.lo
+	$(LINK) server.lo $(ALL_LIBS)
 
 sendfile@EXEEXT@: sendfile.lo ../libapr.la
-	$(LINK) sendfile.lo
+	$(LINK) sendfile.lo $(ALL_LIBS)
 
 testtime@EXEEXT@: testtime.lo ../libapr.la
-	$(LINK) testtime.lo
+	$(LINK) testtime.lo $(ALL_LIBS)
 
 testmmap@EXEEXT@: testmmap.lo ../libapr.la
-	$(LINK) testmmap.lo
+	$(LINK) testmmap.lo $(ALL_LIBS)
 
 testshmem@EXEEXT@: testshmem.lo ../libapr.la
-	$(LINK) testshmem.lo
+	$(LINK) testshmem.lo $(ALL_LIBS)
 
 testpipe@EXEEXT@: testpipe.lo ../libapr.la
-	$(LINK) testpipe.lo
+	$(LINK) testpipe.lo $(ALL_LIBS)
 
 testuuid@EXEEXT@: testuuid.lo ../libapr.la
-	$(LINK) testuuid.lo
+	$(LINK) testuuid.lo $(ALL_LIBS)
 
 testsockopt@EXEEXT@: testsockopt.lo ../libapr.la
-	$(LINK) testsockopt.lo
+	$(LINK) testsockopt.lo $(ALL_LIBS)
 
 testipsub@EXEEXT@: testipsub.lo ../libapr.la
-	$(LINK) testipsub.lo
+	$(LINK) testipsub.lo $(ALL_LIBS)
 
 testmd5@EXEEXT@: testmd5.lo ../libapr.la
-	$(LINK) testmd5.lo
+	$(LINK) testmd5.lo $(ALL_LIBS)
 
 testpoll@EXEEXT@: testpoll.lo ../libapr.la
-	$(LINK) testpoll.lo
+	$(LINK) testpoll.lo $(ALL_LIBS)
 
 # DO NOT REMOVE
