@@ -117,6 +117,7 @@
 #define APR_HAS_XLATE             @iconv@
 #define APR_HAS_OTHER_CHILD       @oc@
 #define APR_HAS_DSO               @aprdso@
+#define APR_HAS_SO_ACCEPT_FILTER  @accept_filter@
 #define APR_HAS_UNICODE_FS        0
 #define APR_HAS_USER              1
 #define APR_HAS_LARGE_FILES       0
