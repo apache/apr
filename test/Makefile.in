@@ -26,7 +26,8 @@ PROGRAMS = \
 	testmem@EXEEXT@ \
 	testhash@EXEEXT@ \
 	occhild@EXEEXT@ \
-	teststr@EXEEXT@
+	teststr@EXEEXT@ \
+	testuser@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -132,5 +133,8 @@ teststr@EXEEXT@: teststr.lo $(LOCAL_LIBS)
 
 testsockets@EXEEXT@: testsockets.lo $(LOCAL_LIBS)
 	$(LINK) testsockets.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testuser@EXEEXT@: testuser.lo $(LOCAL_LIBS)
+	$(LINK) testuser.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
