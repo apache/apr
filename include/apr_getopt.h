@@ -126,8 +126,8 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
  * @param opts   A string of characters that are acceptable options to the 
  *               program.  Characters followed by ":" are required to have an 
  *               option associated
- * @param optch  The next option character parsed
- * @param optarg The argument following the option character:
+ * @param option_ch  The next option character parsed
+ * @param option_arg The argument following the option character:
  * @return There are four potential status values on exit. They are:
  * <PRE>
  *             APR_EOF      --  No more options to parse
@@ -138,7 +138,7 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
  * @deffunc apr_status_t apr_getopt(apr_getopt_t *os, const char *opts, char *optch, const char **optarg)
  */
 APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
-                                     char *optch, const char **optarg);
+                                     char *option_ch, const char **option_arg);
 
 /**
  * Parse the options initialized by apr_getopt_init(), accepting long
@@ -149,9 +149,9 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
  *               can be initialized with { "name", optch, has_args }.  has_args
  *               is nonzero if the option requires an argument.  A structure
  *               with an optch value of 0 terminates the list.
- * @param optch  Receives the value of "optch" from the apr_getopt_option_t
- *               structure corresponding to the next option matched.
- * @param optarg Receives the argument following the option, if any.
+ * @param option_ch  Receives the value of "optch" from the apr_getopt_option_t
+ *                   structure corresponding to the next option matched.
+ * @param option_arg Receives the argument following the option, if any.
  * @return There are four potential status values on exit.   They are:
  * <PRE>
  *             APR_EOF      --  No more options to parse
@@ -168,7 +168,8 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
  */
 APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
 					  const apr_getopt_option_t *opts,
-					  int *optch, const char **optarg);
+					  int *option_ch,
+                                          const char **option_arg);
 
 #ifdef __cplusplus
 }
