@@ -160,21 +160,22 @@ APR_DECLARE(void) apr_pool_terminate(void);
  */
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_create_ex(newpool, parent, abort_fn, flag)  \
-    apr_pool_create_ex_dbg(newpool, parent, abort_fn, flag, __FILE__, __LINE__)
+    apr_pool_create_ex_debug(newpool, parent, abort_fn, flag, \
+                             __FILE__, __LINE__)
 
-APR_DECLARE(apr_status_t) apr_pool_create_ex_dbg(apr_pool_t **newpool,
-                                             apr_pool_t *parent,
-                                             apr_abortfunc_t abort_fn,
-                                             apr_uint32_t flags,
-                                             const char *file,
-                                             int line);
-#
+APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
+                                                   apr_pool_t *parent,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_uint32_t flags,
+                                                   const char *file,
+                                                   int line);
 #else
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                              apr_pool_t *parent,
                                              apr_abortfunc_t abort_fn,
                                              apr_uint32_t flags);
 #endif
+
 /**
  * Create a new pool.
  * @param newpool The pool we have just created.
@@ -189,8 +190,8 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
 #else
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_create(newpool, parent) \
-    apr_pool_create_ex_dbg(newpool, parent, NULL, APR_POOL_FDEFAULT, \
-                           __FILE__, __LINE__)
+    apr_pool_create_ex_debug(newpool, parent, NULL, APR_POOL_FDEFAULT, \
+                             __FILE__, __LINE__)
 #else
 #define apr_pool_create(newpool, parent) \
     apr_pool_create_ex(newpool, parent, NULL, APR_POOL_FDEFAULT)
@@ -202,7 +203,6 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
  * @param newpool The new sub-pool
  * @param parent The pool to use as a parent pool
  * @param apr_abort A function to use if the pool cannot allocate more memory.
- * @deffunc void apr_pool_sub_make(apr_pool_t **p, apr_pool_t *parent, int (*apr_abort)(int retcode), const char *created)
  * @remark The @a apr_abort function provides a way to quit the program if the
  *      machine is out of memory.  By default, APR will return on error.
  */
@@ -213,12 +213,31 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
 #else
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
-    (void)apr_pool_create_ex_dbg(newpool, parent, abort_fn, APR_POOL_FDEFAULT, \
-                                 __FILE__, __LINE__)
+    (void)apr_pool_create_ex_debug(newpool, parent, abort_fn, \
+                                   APR_POOL_FDEFAULT, \
+                                   __FILE__, __LINE__)
 #else
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex(newpool, parent, abort_fn, APR_POOL_FDEFAULT)
 #endif
+#endif
+
+/**
+ * Clear all memory in the pool and run all the cleanups. This also destroys all
+ * subpools.
+ * @param p The pool to clear
+ * @remark  This does not actually free the memory, it just allows the pool
+ *       to re-use this memory for the next allocation.
+ * @see apr_pool_destroy()
+ */
+#if defined(APR_POOL_DEBUG)
+#define apr_pool_clear(p) \
+    apr_pool_clear_debug(p, __FILE__, __LINE__)
+
+APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *p,
+                                       const char *file, int line);
+#else
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
 #endif
 
 /**
@@ -229,12 +248,14 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
  */
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_destroy(p) \
-    apr_pool_destroy_dbg(p, __FILE__, __LINE__)
+    apr_pool_destroy_debug(p, __FILE__, __LINE__)
 
-APR_DECLARE(void) apr_pool_destroy_dbg(apr_pool_t *p, const char *file, int line);
+APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
+                                         const char *file, int line);
 #else
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 #endif
+
 
 /*
  * Memory allocation
@@ -256,22 +277,6 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *p, apr_size_t reqsize);
  */
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
 
-/**
- * Clear all memory in the pool and run all the cleanups. This also clears all
- * subpools.
- * @param p The pool to clear
- * @remark  This does not actually free the memory, it just allows the pool
- *       to re-use this memory for the next allocation.
- * @see apr_pool_destroy()
- */
-#if defined(APR_POOL_DEBUG)
-#define apr_pool_clear(p) \
-    apr_pool_clear_dbg(p, __FILE__, __LINE__)
-
-APR_DECLARE(void) apr_pool_clear_dbg(apr_pool_t *p, const char *file, int line);
-#else
-APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
-#endif
 
 /*
  * Pool Properties
@@ -284,7 +289,6 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
  *      performing cleanup and then exiting). If this function is not called,
  *      then APR will return an error and expect the calling program to
  *      deal with the error accordingly.
- * @deffunc apr_status_t apr_pool_set_abort(apr_abortfunc_t abortfunc, apr_pool_t *pool)
  */
 APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
                                      apr_pool_t *pool);
@@ -293,7 +297,6 @@ APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
  * Get the abort function associated with the specified pool.
  * @param pool The pool for retrieving the abort function.
  * @return The abort function for the given pool.
- * @deffunc apr_abortfunc_t apr_pool_get_abort(apr_pool_t *pool)
  */
 APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
 
@@ -301,7 +304,6 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
  * Get the parent pool of the specified pool.
  * @param pool The pool for retrieving the parent pool.
  * @return The parent of the given pool.
- * @deffunc apr_pool_t * apr_pool_get_parent(apr_pool_t *pool)
  */
 APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
 
