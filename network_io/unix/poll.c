@@ -71,7 +71,7 @@ ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-ap_int16_t get_event(ap_int16_t event)
+static ap_int16_t get_event(ap_int16_t event)
 {
     ap_int16_t rv = 0;
 
@@ -91,7 +91,7 @@ ap_int16_t get_event(ap_int16_t event)
     return rv;
 }
 
-ap_int16_t get_revent(ap_int16_t event)
+static ap_int16_t get_revent(ap_int16_t event)
 {
     ap_int16_t rv = 0;
 

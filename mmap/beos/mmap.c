@@ -54,7 +54,7 @@
 
 #include "mmap_h.h"
 
-ap_status_t mmap_cleanup(void *themmap)
+static ap_status_t mmap_cleanup(void *themmap)
 {
     ap_mmap_t *mm = themmap;
     int rv;
