@@ -393,6 +393,8 @@ APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir,
  * @param sock The pool to use.
  * @param thesock The socket to convert to.
  * @param cont The socket we are converting to an apr type.
+ * @remark If it is a true socket, it is best to call apr_os_sock_make()
+ *         and provide APR with more information about the socket.
  */
 APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock, 
                                           apr_os_sock_t *thesock, 
