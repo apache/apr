@@ -101,19 +101,20 @@ AC_ARG_WITH(libtool, [--with-libtool   use libtool to link the library],
 
 if test "x$use_libtool" = "xyes"; then
       lt_compile="\$(LIBTOOL) --mode=compile \$(LTFLAGS) \$(COMPILE) -c \$< && touch \$@"
-      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@ -rpath \$(libdir) \$\$objects"
+      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@"
       so_ext="lo"
-      lib_target="\$(libdir) \$\$objects"
+      lib_target="-rpath \$(libdir) \$\$objects"
 else
       lt_compile="\$(COMPILE) -c \$<"
       link="ar cr \$(TARGET_LIB) \$\$objects; ranlib \$(TARGET_LIB)"
       so_ext="o"
+      lib_target=""
 fi
 
 AC_SUBST(lt_compile)
 AC_SUBST(link)
 AC_SUBST(so_ext)
-
+AC_SUBST(lib_target)
 
 dnl #----------------------------- Checks for compiler flags
 nl='
