@@ -77,20 +77,20 @@ extern "C" {
                                          large file support; WARNING see
                                          below. */
 /* backcompat */
-#define APR_READ             APR_FOPEN_READ          
-#define APR_WRITE            APR_FOPEN_WRITE         
-#define APR_CREATE           APR_FOPEN_CREATE        
-#define APR_APPEND           APR_FOPEN_APPEND        
-#define APR_TRUNCATE         APR_FOPEN_TRUNCATE      
-#define APR_BINARY           APR_FOPEN_BINARY        
-#define APR_EXCL             APR_FOPEN_EXCL          
-#define APR_BUFFERED         APR_FOPEN_BUFFERED      
-#define APR_DELONCLOSE       APR_FOPEN_DELONCLOSE    
-#define APR_XTHREAD          APR_FOPEN_XTHREAD       
-#define APR_SHARELOCK        APR_FOPEN_SHARELOCK     
-#define APR_FILE_NOCLEANUP   APR_FOPEN_NOCLEANUP
-#define APR_SENDFILE_ENABLED APR_FOPEN_SENDFILE_ENABLED
-#define APR_LARGEFILE        APR_FOPEN_LARGEFILE
+#define APR_READ             APR_FOPEN_READ       /**< @deprecated @see APR_FOPEN_READ */
+#define APR_WRITE            APR_FOPEN_WRITE      /**< @deprecated @see APR_FOPEN_WRITE */   
+#define APR_CREATE           APR_FOPEN_CREATE     /**< @deprecated @see APR_FOPEN_CREATE */   
+#define APR_APPEND           APR_FOPEN_APPEND     /**< @deprecated @see APR_FOPEN_APPEND */   
+#define APR_TRUNCATE         APR_FOPEN_TRUNCATE   /**< @deprecated @see APR_FOPEN_TRUNCATE */   
+#define APR_BINARY           APR_FOPEN_BINARY     /**< @deprecated @see APR_FOPEN_BINARY */   
+#define APR_EXCL             APR_FOPEN_EXCL       /**< @deprecated @see APR_FOPEN_EXCL */   
+#define APR_BUFFERED         APR_FOPEN_BUFFERED   /**< @deprecated @see APR_FOPEN_BUFFERED */   
+#define APR_DELONCLOSE       APR_FOPEN_DELONCLOSE /**< @deprecated @see APR_FOPEN_DELONCLOSE */   
+#define APR_XTHREAD          APR_FOPEN_XTHREAD    /**< @deprecated @see APR_FOPEN_XTHREAD */   
+#define APR_SHARELOCK        APR_FOPEN_SHARELOCK  /**< @deprecated @see APR_FOPEN_SHARELOCK */   
+#define APR_FILE_NOCLEANUP   APR_FOPEN_NOCLEANUP  /**< @deprecated @see APR_FOPEN_NOCLEANUP */   
+#define APR_SENDFILE_ENABLED APR_FOPEN_SENDFILE_ENABLED /**< @deprecated @see APR_FOPEN_SENDFILE_ENABLED */   
+#define APR_LARGEFILE        APR_FOPEN_LARGEFILE  /**< @deprecated @see APR_FOPEN_LARGEFILE */   
 
 /** @warning The APR_LARGEFILE flag only has effect on some platforms
  * where sizeof(apr_off_t) == 4.  Where implemented, it allows opening
