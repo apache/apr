@@ -904,7 +904,9 @@ do
     fi
 done
 
-MAKEFILE3="test/Makefile"
+if test -d ./test; then
+    MAKEFILE3="test/Makefile"
+fi
 AC_SUBST(SUBDIRS)
 
 if test -n "$CPPFLAGS"; then
