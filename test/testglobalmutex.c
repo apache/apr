@@ -16,6 +16,7 @@
 #include "testglobalmutex.h"
 #include "apr_thread_proc.h"
 #include "apr_global_mutex.h"
+#include "apr_strings.h"
 #include "apr_errno.h"
 #include "testutil.h"
 
@@ -56,6 +57,20 @@ static int wait_child(abts_case *tc, apr_proc_t *proc)
     return exitcode;
 }
 
+/* return symbolic name for a locking meechanism */
+static const char *mutexname(apr_lockmech_e mech)
+{
+    switch (mech) {
+    case APR_LOCK_FCNTL: return "fcntl";
+    case APR_LOCK_FLOCK: return "flock";
+    case APR_LOCK_SYSVSEM: return "sysvsem";
+    case APR_LOCK_PROC_PTHREAD: return "proc_pthread";
+    case APR_LOCK_POSIXSEM: return "posixsem";
+    case APR_LOCK_DEFAULT: return "default";
+    default: return "unknown";
+    }
+}
+
 static void test_exclusive(abts_case *tc, void *data, apr_lockmech_e mech)
 {
     apr_proc_t p1, p2, p3, p4;
@@ -76,7 +91,12 @@ static void test_exclusive(abts_case *tc, void *data, apr_lockmech_e mech)
     x += wait_child(tc, &p3);
     x += wait_child(tc, &p4);
 
-    ABTS_INT_EQUAL(tc, MAX_COUNTER, x);
+    if (x != MAX_COUNTER) {
+        char buf[200];
+        sprintf(buf, "global mutex '%s' failed: %d not %d",
+                mutexname(mech), x, MAX_COUNTER);
+        abts_fail(tc, buf, __LINE__);
+    }
 }
 
 static void test_exclusive_default(abts_case *tc, void *data)
@@ -84,30 +104,40 @@ static void test_exclusive_default(abts_case *tc, void *data)
     test_exclusive(tc, data, APR_LOCK_DEFAULT);
 }
 
+#if APR_HAS_POSIXSEM_SERIALIZE
 static void test_exclusive_posixsem(abts_case *tc, void *data)
 {
     test_exclusive(tc, data, APR_LOCK_POSIXSEM);
 }
+#endif
 
+#if APR_HAS_SYSVSEM_SERIALIZE
 static void test_exclusive_sysvsem(abts_case *tc, void *data)
 {
     test_exclusive(tc, data, APR_LOCK_SYSVSEM);
 }
+#endif
 
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
 static void test_exclusive_proc_pthread(abts_case *tc, void *data)
 {
     test_exclusive(tc, data, APR_LOCK_PROC_PTHREAD);
 }
+#endif
 
+#if APR_HAS_FCNTL_SERIALIZE
 static void test_exclusive_fcntl(abts_case *tc, void *data)
 {
     test_exclusive(tc, data, APR_LOCK_FCNTL);
 }
+#endif
 
+#if APR_HAS_FLOCK_SERIALIZE
 static void test_exclusive_flock(abts_case *tc, void *data)
 {
     test_exclusive(tc, data, APR_LOCK_FLOCK);
 }
+#endif
 
 abts_suite *testglobalmutex(abts_suite *suite)
 {
