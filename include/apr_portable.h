@@ -150,16 +150,11 @@ union semun {
 #endif
 
 struct apr_os_lock_t {
-#if APR_USE_SYSVSEM_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
     int crossproc;
-#elif APR_USE_FCNTL_SERIALIZE
-    int crossproc;
-#elif APR_USE_PROC_PTHREAD_SERIALIZE
-    pthread_mutex_t *crossproc; 
-#elif APR_USE_FLOCK_SERIALIZE
-    int crossproc;
-#else
-    /* No Interprocess serialization, too bad. */
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    pthread_mutex_t *pthread_interproc;
 #endif
 #if APR_HAS_THREADS
     /* If no threads, no need for thread locks */

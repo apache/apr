@@ -341,7 +341,12 @@ apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
 
 apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
     oslock->crossproc = lock->interproc;
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    oslock->pthread_interproc = lock->pthread_interproc;
+#endif
 #if APR_HAS_THREADS
 #if APR_USE_PTHREAD_SERIALIZE
     oslock->intraproc = lock->intraproc;
@@ -361,8 +366,12 @@ apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock,
         (*lock) = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
         (*lock)->pool = pool;
     }
-    /* XXX handle setting of handle for PROC_PTHREAD_SERIALIZE here */
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
     (*lock)->interproc = thelock->crossproc;
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    (*lock)->pthread_interproc = thelock->pthread_interproc;
+#endif
 #if APR_HAS_THREADS
 #if (APR_USE_PTHREAD_SERIALIZE)
     (*lock)->intraproc = thelock->intraproc;
