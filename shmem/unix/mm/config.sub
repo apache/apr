@@ -723,6 +723,9 @@ case $basic_machine in
 		basic_machine=i386-sequent
 		os=-dynix
 		;;
+	s390*)
+		basic_machine=s390-ibm
+		;;
 	t3e)
 		basic_machine=t3e-cray
 		os=-unicos
