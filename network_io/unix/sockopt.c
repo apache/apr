@@ -203,6 +203,12 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
                 }
             } 
         }
+	/* must disable the incomplete read support if we change to a
+	 * blocking socket.
+	 */
+	if (on == 0) {
+	    sock->netmask &= ~APR_INCOMPLETE_READ;
+	}
         sock->timeout = on; 
         apr_set_option(&sock->netmask, APR_SO_TIMEOUT, on);
     } 
@@ -265,6 +271,9 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
 #else
         return APR_ENOTIMPL;
 #endif
+    }
+    if (opt & APR_INCOMPLETE_READ) {
+	apr_set_option(&sock->netmask, APR_INCOMPLETE_READ, on);
     }
 
     return APR_SUCCESS; 

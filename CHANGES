@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Add new socket option, APR_INCOMPLETE_READ, that should be
+     set when you expect the first non-blocking read to fail with
+     EAGAIN. Setting APR_INCOMPLETE_READ prior to calling apr_read
+     will cause select() to be called first to wait for bytes
+     to read. [Brian Pane, Dean Gaudet]
+
   *) Better installation.  This makes us install the APRVARS file,
      as well as MM.  [Ryan Bloom]
 
