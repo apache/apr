@@ -265,7 +265,7 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n)
 
 APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf)
 {
-    const char ord[] = "KMTPE";
+    const char ord[] = "KMGTPE";
     const char *o = ord;
     int remain;
 
