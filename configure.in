@@ -82,13 +82,12 @@ echo "performing libtool configuration..."
 
 case "$host_alias" in
 *os2*)
-    # Use a custom made libtool replacement
+    # Use a custom-made libtool replacement
     echo "using aplibtool"
     LIBTOOL="$srcdir/build/aplibtool"
-    AC_SUBST(LIBTOOL)dnl
     gcc $CPPFLAGS $CFLAGS -o $LIBTOOL.exe $LIBTOOL.c
     ;;
-*)  dnl libtool requires that the following not be indented
+*)  dnl libtoolize requires that the following not be indented
 AC_PROG_LIBTOOL
     ;;
 esac
