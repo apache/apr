@@ -380,3 +380,5 @@ APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
     }
     return res;
 }
+
+APR_POOL_IMPLEMENT_ACCESSOR(hash)
