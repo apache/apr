@@ -71,7 +71,7 @@
 #define APR_FILE_BUFSIZE 4096
 
 struct apr_file_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     HFILE filedes;
     char * fname;
     int isopen;
@@ -93,7 +93,7 @@ struct apr_file_t {
 };
 
 struct apr_dir_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     char *dirname;
     ULONG handle;
     FILEFINDBUF3 entry;

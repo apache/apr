@@ -61,7 +61,7 @@
 #include <string.h>
 #include <process.h>
 
-APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *pool)
 {
     ULONG filedes[2];
     ULONG rc, action;
@@ -91,7 +91,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
         return APR_OS2_STATUS(rc);
     }
 
-    (*in) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
+    (*in) = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
     rc = DosCreateEventSem(NULL, &(*in)->pipeSem, DC_SEM_SHARED, FALSE);
 
     if (rc) {
@@ -113,35 +113,35 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
         return APR_OS2_STATUS(rc);
     }
 
-    (*in)->cntxt = cont;
+    (*in)->pool = pool;
     (*in)->filedes = filedes[0];
-    (*in)->fname = apr_pstrdup(cont, pipename);
+    (*in)->fname = apr_pstrdup(pool, pipename);
     (*in)->isopen = TRUE;
     (*in)->buffered = FALSE;
     (*in)->flags = 0;
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->blocking = BLK_ON;
-    apr_pool_cleanup_register(cont, *in, apr_file_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, *in, apr_file_cleanup, apr_pool_cleanup_null);
 
-    (*out) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
-    (*out)->cntxt = cont;
+    (*out) = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
+    (*out)->pool = pool;
     (*out)->filedes = filedes[1];
-    (*out)->fname = apr_pstrdup(cont, pipename);
+    (*out)->fname = apr_pstrdup(pool, pipename);
     (*out)->isopen = TRUE;
     (*out)->buffered = FALSE;
     (*out)->flags = 0;
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->blocking = BLK_ON;
-    apr_pool_cleanup_register(cont, *out, apr_file_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, *out, apr_file_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
 
 
-APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, apr_fileperms_t perm, apr_pool_t *pool)
 {
     /* Not yet implemented, interface not suitable */
     return APR_ENOTIMPL;

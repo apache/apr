@@ -173,7 +173,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
      * Threads should NOT share an apr_file_t or its hEvent.
      */
     if ((thefile->flags & APR_XTHREAD) && !thefile->pOverlapped ) {
-        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->cntxt, 
+        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool, 
                                                          sizeof(OVERLAPPED));
         thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
         if (!thefile->pOverlapped->hEvent) {
@@ -258,7 +258,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
      * Threads should NOT share an apr_file_t or its hEvent.
      */
     if ((thefile->flags & APR_XTHREAD) && !thefile->pOverlapped ) {
-        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->cntxt, 
+        thefile->pOverlapped = (OVERLAPPED*) apr_pcalloc(thefile->pool, 
                                                          sizeof(OVERLAPPED));
         thefile->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
         if (!thefile->pOverlapped->hEvent) {

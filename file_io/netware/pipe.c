@@ -144,7 +144,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
     return APR_EINVAL;
 }
 
-APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *pool)
 {
 	char        tname[L_tmpnam+1];
 	int     	filedes[2];
@@ -156,17 +156,17 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 	if ((filedes[0] = pipe_open(tname, O_RDONLY) != -1)
 		&& (filedes[1] = pipe_open(tname, O_WRONLY) != -1))
 	{
-        (*in) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-        (*out) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
+        (*in) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+        (*out) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
 
-		(*in)->cntxt     =
-		(*out)->cntxt    = cont;
+		(*in)->pool     =
+		(*out)->pool    = pool;
 		(*in)->filedes   = filedes[0];
 		(*out)->filedes  = filedes[1];
 		(*in)->pipe      =
 		(*out)->pipe     = 1;
-		(*out)->fname    = apr_pstrdup(cont, tname);
-		(*in)->fname     = apr_pstrdup(cont, tname);;
+		(*out)->fname    = apr_pstrdup(pool, tname);
+		(*in)->fname     = apr_pstrdup(pool, tname);;
 		(*in)->buffered  =
 		(*out)->buffered = 0;
 		(*in)->blocking  =
@@ -184,16 +184,16 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
         return errno;
 	}
 
-    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), apr_netware_pipe_cleanup,
+    apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_netware_pipe_cleanup,
                          apr_pool_cleanup_null);
-    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), apr_netware_pipe_cleanup,
+    apr_pool_cleanup_register((*out)->pool, (void *)(*out), apr_netware_pipe_cleanup,
                          apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
-                                                    apr_fileperms_t perm, apr_pool_t *cont)
+                                                    apr_fileperms_t perm, apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
 } 

@@ -119,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
     struct stat info;
 
     if (fstat(thefile->filedes, &info) == 0) {
-        finfo->cntxt = thefile->cntxt;
+        finfo->pool = thefile->pool;
         finfo->fname = thefile->fname;
         fill_out_finfo(finfo, &info, wanted);
         return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
@@ -142,12 +142,12 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
 APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attributes,
                                              apr_fileattrs_t attr_mask,
-                                             apr_pool_t *cont)
+                                             apr_pool_t *pool)
 {
     apr_status_t status;
     apr_finfo_t finfo;
 
-    status = apr_stat(&finfo, fname, APR_FINFO_PROT, cont);
+    status = apr_stat(&finfo, fname, APR_FINFO_PROT, pool);
     if (!APR_STATUS_IS_SUCCESS(status))
         return status;
 
@@ -288,7 +288,7 @@ int cstat (const char *path, struct stat *buf)
 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, 
                                    const char *fname, 
-                                   apr_int32_t wanted, apr_pool_t *cont)
+                                   apr_int32_t wanted, apr_pool_t *pool)
 {
     struct stat info;
     int srv;
@@ -297,15 +297,15 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
     srv = cstat(fname, &info);
 
     if (srv == 0) {
-        finfo->cntxt = cont;
+        finfo->pool = pool;
         finfo->fname = fname;
         fill_out_finfo(finfo, &info, wanted);
         if (wanted & APR_FINFO_LINK)
             wanted &= ~APR_FINFO_LINK;
         if (wanted & APR_FINFO_NAME) {
-            s = strrchr(case_filename(cont, fname), '/');
+            s = strrchr(case_filename(pool, fname), '/');
             if (s) {
-                finfo->name = apr_pstrdup(cont, &s[1]);
+                finfo->name = apr_pstrdup(pool, &s[1]);
                 finfo->valid |= APR_FINFO_NAME;
             }
         }
@@ -349,8 +349,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
 /* Perhaps this becomes nothing but a macro?
  */
 APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
-                      apr_int32_t wanted, apr_pool_t *cont)
+                      apr_int32_t wanted, apr_pool_t *pool)
 {
-    return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, cont);
+    return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, pool);
 }
 

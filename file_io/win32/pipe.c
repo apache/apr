@@ -99,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     sa.lpSecurityDescriptor = NULL;
 
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*in)->cntxt = p;
+    (*in)->pool = p;
     (*in)->fname = NULL;
     (*in)->pipe = 1;
     (*in)->timeout = -1;
@@ -111,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->direction = 0;
 
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*out)->cntxt = p;
+    (*out)->pool = p;
     (*in)->fname = NULL;
     (*out)->pipe = 1;
     (*out)->timeout = -1;
@@ -126,9 +126,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
         return apr_get_os_error();
     }
 
-    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), file_cleanup,
+    apr_pool_cleanup_register((*in)->pool, (void *)(*in), file_cleanup,
                         apr_pool_cleanup_null);
-    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), file_cleanup,
+    apr_pool_cleanup_register((*out)->pool, (void *)(*out), file_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
 #endif
@@ -172,7 +172,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     sa.lpSecurityDescriptor = NULL;
 
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*in)->cntxt = p;
+    (*in)->pool = p;
     (*in)->fname = NULL;
     (*in)->pipe = 1;
     (*in)->timeout = -1;
@@ -185,7 +185,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     (*in)->pOverlapped = NULL;
 
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-    (*out)->cntxt = p;
+    (*out)->pool = p;
     (*out)->fname = NULL;
     (*out)->pipe = 1;
     (*out)->timeout = -1;
@@ -242,9 +242,9 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
         }
     }
 
-    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), file_cleanup,
+    apr_pool_cleanup_register((*in)->pool, (void *)(*in), file_cleanup,
                         apr_pool_cleanup_null);
-    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), file_cleanup,
+    apr_pool_cleanup_register((*out)->pool, (void *)(*out), file_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
 #endif /* _WIN32_WCE */

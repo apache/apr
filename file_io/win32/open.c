@@ -278,7 +278,7 @@ apr_status_t file_cleanup(void *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
                                    apr_int32_t flag, apr_fileperms_t perm,
-                                   apr_pool_t *cont)
+                                   apr_pool_t *pool)
 {
     HANDLE handle = INVALID_HANDLE_VALUE;
     DWORD oflags = 0;
@@ -359,10 +359,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         return apr_get_os_error();
     }
 
-    (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-    (*new)->cntxt = cont;
+    (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+    (*new)->pool = pool;
     (*new)->filehand = handle;
-    (*new)->fname = apr_pstrdup(cont, fname);
+    (*new)->fname = apr_pstrdup(pool, fname);
     (*new)->flags = flag;
 
     if (flag & APR_APPEND) {
@@ -375,13 +375,13 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
 
     if (flag & APR_BUFFERED) {
         (*new)->buffered = 1;
-        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
+        (*new)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
         rv = apr_thread_mutex_create(&(*new)->mutex, APR_THREAD_MUTEX_DEFAULT,
-                                     cont);
+                                     pool);
 
         if (rv) {
             if (file_cleanup(*new) == APR_SUCCESS) {
-                apr_pool_cleanup_kill(cont, *new, file_cleanup);
+                apr_pool_cleanup_kill(pool, *new, file_cleanup);
             }
             return rv;
         }
@@ -404,7 +404,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     (*new)->filePtr = 0;
 
     if (!(flag & APR_FILE_NOCLEANUP)) {
-        apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), file_cleanup,
+        apr_pool_cleanup_register((*new)->pool, (void *)(*new), file_cleanup,
                                   apr_pool_cleanup_null);
     }
     return APR_SUCCESS;
@@ -414,7 +414,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 {
     apr_status_t stat;
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(file->cntxt, file, file_cleanup);
+        apr_pool_cleanup_kill(file->pool, file, file_cleanup);
 
         if (file->buffered)
             apr_thread_mutex_destroy(file->mutex);
@@ -424,7 +424,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
     return stat;
 }
 
-APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *pool)
 {
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
@@ -449,7 +449,7 @@ APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
 
 APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                           const char *topath,
-                                          apr_pool_t *cont)
+                                          apr_pool_t *pool)
 {
     IF_WIN_OS_IS_UNICODE
     {
@@ -512,10 +512,10 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
 APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
                                           apr_os_file_t *thefile,
                                           apr_int32_t flags,
-                                          apr_pool_t *cont)
+                                          apr_pool_t *pool)
 {
-    (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
-    (*file)->cntxt = cont;
+    (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
+    (*file)->pool = pool;
     (*file)->filehand = *thefile;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->flags;
@@ -530,7 +530,7 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *pool)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -547,11 +547,11 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t 
         return rv;
     }
 
-    return apr_os_file_put(thefile, &file_handle, 0, cont);
+    return apr_os_file_put(thefile, &file_handle, 0, pool);
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *pool)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -568,11 +568,11 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t 
         return rv;
     }
 
-    return apr_os_file_put(thefile, &file_handle, 0, cont);
+    return apr_os_file_put(thefile, &file_handle, 0, pool);
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *pool)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -589,11 +589,11 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
         return rv;
     }
 
-    return apr_os_file_put(thefile, &file_handle, 0, cont);
+    return apr_os_file_put(thefile, &file_handle, 0, pool);
 #endif
 }
 
-APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
+APR_POOL_IMPLEMENT_ACCESSOR(file);
 
 APR_DECLARE_SET_INHERIT(file) {
     return;

@@ -84,14 +84,14 @@ static apr_status_t dir_cleanup(void *thedir)
 } 
 
 APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
-                                       apr_pool_t *cont)
+                                       apr_pool_t *pool)
 {
     int len = strlen(dirname);
-    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+    (*new) = apr_pcalloc(pool, sizeof(apr_dir_t));
     /* Leave room here to add and pop the '*' wildcard for FindFirstFile 
      * and double-null terminate so we have one character to change.
      */
-    (*new)->dirname = apr_palloc(cont, len + 3);
+    (*new)->dirname = apr_palloc(pool, len + 3);
     memcpy((*new)->dirname, dirname, len);
     if (len && (*new)->dirname[len - 1] != '/') {
     	(*new)->dirname[len++] = '/';
@@ -104,8 +104,8 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     {
         /* Create a buffer for the longest file name we will ever see 
          */
-        (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        (*new)->name = apr_pcalloc(cont, APR_FILE_MAX * 3 + 1);        
+        (*new)->w.entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
+        (*new)->name = apr_pcalloc(pool, APR_FILE_MAX * 3 + 1);        
     }
 #endif
 #if APR_HAS_ANSI_FS
@@ -121,20 +121,20 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
             (*new) = NULL;
             return APR_ENAMETOOLONG;
         }
-        (*new)->n.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
+        (*new)->n.entry = apr_pcalloc(pool, sizeof(WIN32_FIND_DATAW));
     }
 #endif
     (*new)->rootlen = len - 1;
-    (*new)->cntxt = cont;
+    (*new)->pool = pool;
     (*new)->dirhand = INVALID_HANDLE_VALUE;
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), dir_cleanup,
+    apr_pool_cleanup_register((*new)->pool, (void *)(*new), dir_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *dir)
 {
-    apr_pool_cleanup_kill(dir->cntxt, dir, dir_cleanup);
+    apr_pool_cleanup_kill(dir->pool, dir, dir_cleanup);
     return dir_cleanup(dir);
 }
 
@@ -215,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 
     fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry, 
                     0, wanted);
-    finfo->cntxt = thedir->cntxt;
+    finfo->pool = thedir->pool;
 
     finfo->valid |= APR_FINFO_NAME;
     finfo->name = fname;
@@ -270,7 +270,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *dir)
 }
 
 APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
-                                       apr_pool_t *cont)
+                                       apr_pool_t *pool)
 {
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
@@ -295,7 +295,7 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool)
 {
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
@@ -332,7 +332,7 @@ APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir,
 
 APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir,
                                          apr_os_dir_t *thedir,
-                                         apr_pool_t *cont)
+                                         apr_pool_t *pool)
 {
     return APR_ENOTIMPL;
 }

@@ -70,7 +70,7 @@ static apr_status_t _file_dup(apr_file_t **new_file,
             if ((*new_file) == NULL) {
                 return APR_ENOMEM;
             }
-            (*new_file)->cntxt = p;
+            (*new_file)->pool = p;
         } else {
             /* We can't dup2 unless we have a valid new_file */
             return APR_EINVAL;
@@ -132,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
     /* we do this here as we don't want to double register an existing 
      * apr_file_t for cleanup
      */
-    apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file),
+    apr_pool_cleanup_register((*new_file)->pool, (void *)(*new_file),
                               apr_unix_file_cleanup, apr_unix_file_cleanup);
     return rv;
 
