@@ -54,8 +54,6 @@
 
 #include "dso.h"
 #include "apr_strings.h"
-#define INCL_DOS
-#include <os2.h>
 #include <stdio.h>
 #include <string.h>
 

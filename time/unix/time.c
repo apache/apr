@@ -66,10 +66,6 @@
 #if HAVE_TIME_H
 #include <time.h>
 #endif
-#ifdef OS2
-#define INCL_DOS
-#include <os2.h>
-#endif
 #ifdef BEOS
 #include <sys/socket.h> /* for select */
 #endif

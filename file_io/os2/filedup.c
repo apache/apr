@@ -58,9 +58,6 @@
 #include "apr_strings.h"
 #include <string.h>
 
-#define INCL_DOS
-#include <os2.h>
-
 apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
     int rv;

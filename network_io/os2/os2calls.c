@@ -57,8 +57,6 @@
 #include "apr_portable.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#define INCL_DOS
-#include <os2.h>
 
 static int os2_socket_init(int, int ,int);
 

@@ -103,8 +103,6 @@ typedef FILETIME              apr_os_imp_time_t;
 typedef SYSTEMTIME            apr_os_exp_time_t;
 
 #elif defined(OS2)
-#define INCL_DOS
-#include <os2.h>
 typedef HFILE                 apr_os_file_t;
 typedef HDIR                  apr_os_dir_t;
 typedef int                   apr_os_sock_t;

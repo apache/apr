@@ -57,9 +57,7 @@
 #include "apr_file_io.h"
 #include <errno.h>
 #include <string.h>
-#include <os2.h>
-#include "../../network_io/os2/os2calls.h"
-
+#include "apr_errno.h"
 
 static int errormap[][2] = {
     { NO_ERROR,                   APR_SUCCESS      },
