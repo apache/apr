@@ -122,7 +122,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->buffered = 0;
-    (*in)->pipe = 1;
+    (*out)->pipe = 1;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
     (*out)->timeout = -1;
 
