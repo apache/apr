@@ -849,7 +849,7 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 
     apr_pools_initialized = 1;
 
-#if APR_POOL_DEBUG_VERBOSE
+#if defined(APR_POOL_DEBUG_VERBOSE)
     apr_file_open_stderr(&file_stderr, global_pool);
     if (file_stderr) {
         apr_file_printf(file_stderr,
@@ -876,7 +876,7 @@ APR_DECLARE(void) apr_pool_terminate(void)
     apr_pool_destroy(global_pool); /* This will also destroy the mutex */
     global_pool = NULL;
 
-#if APR_POOL_DEBUG_VERBOSE
+#if defined(APR_POOL_DEBUG_VERBOSE)
     file_stderr = NULL;
 #endif
 }
