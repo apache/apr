@@ -199,7 +199,7 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_cas(mem,with,cmp) \
 ({ apr_atomic_t prev; \
-    asm ("lock; cmpxchgl %1, %2"              \
+    asm volatile ("lock; cmpxchgl %1, %2"              \
          : "=a" (prev)               \
          : "r" (with), "m" (*(mem)), "0"(cmp) \
          : "memory"); \
