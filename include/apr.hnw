@@ -344,9 +344,24 @@ typedef int apr_wait_t;
 #define APR_TIME_T_FMT APR_INT64_T_FMT
 
 /* Deal with atoi64 variables ... these should move to apr_private.h */
-/* I don't have the answer, perhaps a NetWare hacker will fill this in? */
-#define APR_HAVE_INT64_STRFN  0
-#define APR_INT64_STRFN	      missing
+#define APR_HAVE_INT64_STRFN  1
+#define APR_INT64_STRFN	      strtoll
+
+/* Application global data management */
+extern int  gLibId;
+extern void *gLibHandle;
+
+#define MAX_PROCESSORS         128
+
+typedef struct app_data {
+    int     initialized;
+    void*   gPool[MAX_PROCESSORS];
+    void*   statCache[MAX_PROCESSORS];
+    void*   gs_aHooksToSort;
+    void*   gs_phOptionalHooks;
+    void*   gs_phOptionalFunctions;
+} APP_DATA;
+
 
 #endif /* APR_H */
 /** @} */
