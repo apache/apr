@@ -153,6 +153,8 @@ struct process_chain {
 
 /* Thread Function definitions */
 
+#if APR_HAS_THREADS
+
 /**
  * Create and initialize a new threadattr variable
  * @param new_attr The newly created threadattr.
@@ -296,6 +298,8 @@ APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
 APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
                                                 apr_status_t (*cleanup) (void *),
                                                 apr_threadkey_t *threadkey);
+
+#endif
 
 /* Process Function definitions */
 
