@@ -307,8 +307,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             if (attr->errfn) {
                 attr->errfn(pool, rv, 
                             apr_pstrcat(pool, "filepath_merge failed.", 
-                                        " currdir: ",attr->currdir, 
-                                        " progname: ",progname,NULL));
+                                        " currdir: ", attr->currdir, 
+                                        " progname: ", progname,NULL));
             }
             return rv;
         }
@@ -488,7 +488,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                         attr->errfn(pool, rv, 
                                     apr_pstrcat(pool, 
                                                 "utf8 to ucs2 conversion failed" 
-                                                " on this string: ",env[i],NULL));
+                                                " on this string: ", env[i], NULL));
                     }
                     return rv;
                 }
@@ -540,7 +540,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     attr->errfn(pool, rv, 
                                 apr_pstrcat(pool, 
                                             "utf8 to ucs2 conversion failed" 
-                                            " on progname: ",progname,NULL));
+                                            " on progname: ", progname, NULL));
                 }
                 return rv;
             }
@@ -556,7 +556,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     attr->errfn(pool, rv, 
                                 apr_pstrcat(pool, 
                                             "utf8 to ucs2 conversion failed" 
-                                            " on cmdline: ",cmdline,NULL));
+                                            " on cmdline: ", cmdline, NULL));
                 }
                 return rv;
             }
@@ -574,7 +574,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                     attr->errfn(pool, rv, 
                                 apr_pstrcat(pool, 
                                             "utf8 to ucs2 conversion failed" 
-                                            " on currdir: ",attr->currdir,NULL));
+                                            " on currdir: ", attr->currdir, NULL));
                 }
                 return rv;
             }
