@@ -10,12 +10,6 @@ Changes with APR b1
   *) Don't require that the DNS can map 127.0.0.1 when checking for
      the presence/usability of getnameinfo().  PR 7642.  [Jeff Trawick]
 
-  *) Remove APR_WANT_SIGNAL from apr_want.h because code must include
-     apr_signal.h in order to get consistent definitions. [Roy Fielding]
-
-  *) Don't try to use /dev/zero and mmap on platforms that don't
-     support that (such as HP-UX).  PR 8537.  [Justin Erenkrantz]
-
   *) Reduce the number of apr_sendfile calls on AIX and OS/390 by
      remembering when the kernel tells us the next one will block.
      [Jeff Trawick]
