@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Support threading on FreeBSD 5.x where kern.osreldate >= 502102.
+     [Craig Rodrigues <rodrigc crodrigues.org>]
+
   *) Add an RPM spec file derived from Fedora Core.
      [Graham Leggett, Joe Orton]
 

@@ -136,14 +136,16 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DNETBSD])
 	;;
     *-freebsd*)
-	case $host in
-	    *freebsd[[2345]]*)
-		APR_ADDTO(CFLAGS, [-funsigned-char])
-		;;
-	esac
-	APR_SETIFNULL(enable_threads, [no])
         APR_SETIFNULL(apr_lock_method, [USE_FLOCK_SERIALIZE])
-	APR_ADDTO(CPPFLAGS, [-D_REENTRANT -D_THREAD_SAFE])
+        os_version=`sysctl -n kern.osreldate`
+        dnl 502102 is when libc_r switched to libpthread (aka libkse).
+        if test $os_version -ge "502102"; then
+          apr_cv_pthreads_cflags="none"
+          apr_cv_pthreads_lib="-lpthread"
+        else
+          apr_cv_pthreads_cflags="-D_THREAD_SAFE -D_REENTRANT"
+          APR_SETIFNULL(enable_threads, [no])
+        fi
 	;;
     *-next-nextstep*)
 	APR_SETIFNULL(CFLAGS, [-O])
