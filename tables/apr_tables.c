@@ -637,7 +637,7 @@ add_new_elt:
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 {
     apr_table_entry_t *next_elt;
-    apr_table_entry_t *end_elt = next_elt + t->a.nelts;
+    apr_table_entry_t *end_elt;
     apr_table_entry_t *dst_elt;
     apr_uint32_t checksum;
     int hash;
