@@ -5,6 +5,10 @@ Changes for APR 1.1.0
      and upgrading it to do SHA-256. Not yet ready for prime time.
      [Ben Laurie]
 
+  *) Rewrite apr_file_printf to handle arbitrary length strings.
+     PR 28029.  [Chris Knight <Christopher.D.Knight nasa.gov>,
+     Garrett Rooney <rooneg electricjellyfish.net>]
+
 Changes for APR 1.0.1
 
   *) Fix HUP return codes in pollset when using KQueue.
