@@ -135,7 +135,7 @@ dnl prep libtool
 dnl
 echo "performing libtool configuration..."
 
-AC_ARG_ENABLE(experimental-libtool,[  --experimental-libtool Use experimental custom libtool (not included in source distribution)],
+AC_ARG_ENABLE(experimental-libtool,[  --experimental-libtool Use experimental custom libtool],
   [experimental_libtool=$enableval],[experimental_libtool=no])
 
 case $host in
@@ -154,9 +154,6 @@ case $host in
         echo "using jlibtool"
         LIBTOOL="$apr_builddir/libtool"
         LIBTOOL_SRC="$apr_srcdir/build/jlibtool.c"
-        if test ! -f $LIBTOOL_SRC; then
-          AC_MSG_ERROR([Experimental libtool source not found.  It is not included with APR by default.])
-        fi
         $CC $CFLAGS $CPPFLAGS -o $LIBTOOL $LIBTOOL_SRC
     else
     dnl libtoolize requires that the following not be indented
