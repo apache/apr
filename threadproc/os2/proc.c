@@ -622,7 +622,7 @@ APR_DECLARE(apr_status_t) apr_get_os_proc(apr_os_proc_t *theproc, apr_proc_t *pr
 
 
 
-APR_DECLARE(apr_status_t) apr_proc_detach()
+APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
 {
     return APR_ENOTIMPL;
 }
