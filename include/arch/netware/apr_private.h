@@ -86,7 +86,6 @@
 #define HAVE_STDLIB_H   1
 #define HAVE_SYS_STAT_H 1
 #define HAVE_FCNTL_H    1
-#define HAVE_MKSTEMP    1
 
 #define HAVE_STRICMP    1
 #define HAVE_STRNICMP   1
