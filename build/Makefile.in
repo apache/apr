@@ -4,6 +4,7 @@ VPATH = @srcdir@
 TARGETS=
 INCLUDES=
 DISTCLEAN_TARGETS = rules.mk
+EXTRACLEAN_TARGETS = ltcf-c.sh
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
