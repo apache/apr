@@ -87,7 +87,7 @@ apr_status_t apr_proc_detach(void)
     /* MPE uses negative pid for process group */
     pgrp = -getpid();
 #else
-    if ((pgrp = setpgrp(getpid(), 0)) == -1) {
+    if ((pgrp = setpgid(0, 0)) == -1) {
         return errno;
     }
 #endif
