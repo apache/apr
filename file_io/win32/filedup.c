@@ -77,7 +77,7 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
                              hCurrentProcess,
                              &(*new_file)->filehand, 0, FALSE, 
                              DUPLICATE_SAME_ACCESS)) {
-            return GetLastError();
+            return apr_get_os_error();
         }
     } else {
         HANDLE hFile = (*new_file)->filehand;
@@ -87,17 +87,17 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
         if (hFile == GetStdHandle(STD_ERROR_HANDLE)) {
             isStdHandle = TRUE;
             if (!SetStdHandle(STD_ERROR_HANDLE, old_file->filehand))
-                return GetLastError();
+                return apr_get_os_error();
         }
         else if (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) {
             isStdHandle = TRUE;
             if (!SetStdHandle(STD_OUTPUT_HANDLE, old_file->filehand))
-                return GetLastError();
+                return apr_get_os_error();
         }
         else if (hFile == GetStdHandle(STD_INPUT_HANDLE)) {
             isStdHandle = TRUE;
             if (!SetStdHandle(STD_INPUT_HANDLE, old_file->filehand))
-                return GetLastError();
+                return apr_get_os_error();
         }
         else
             return APR_ENOTIMPL;

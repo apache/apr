@@ -333,7 +333,7 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
 	|| (attr->child_err && !DuplicateHandle(hCurrentProcess, attr->parent_err->filehand,
                                                 hCurrentProcess, &hParenterrdup,
                                                 0, FALSE, DUPLICATE_SAME_ACCESS))) {
-        rv = GetLastError();
+        rv = apr_get_os_error();
         if (attr->child_in) {
             apr_close(attr->child_in);
             apr_close(attr->parent_in);
@@ -423,7 +423,7 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
         return APR_SUCCESS;
     }
 
-    return GetLastError();
+    return apr_get_os_error();
 }
 
 apr_status_t apr_wait_proc(apr_proc_t *proc, apr_wait_how_e wait)

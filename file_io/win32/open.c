@@ -161,7 +161,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
                                      NULL, createflags, attributes, 0);
 
     if ((*new)->filehand == INVALID_HANDLE_VALUE) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     if (flag & APR_APPEND) {
         SetFilePointer((*new)->filehand, 0, NULL, FILE_END);
@@ -205,7 +205,7 @@ apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
         return APR_SUCCESS;
     }
     else {
-        return GetLastError();
+        return apr_get_os_error();
     }
 }
 
@@ -216,21 +216,21 @@ apr_status_t apr_rename_file(const char *from_path, const char *to_path,
     const char *to_canon = canonical_filename(p, to_path);
     DWORD err;
 
-    /* ### would be nice to use MoveFileEx() here, but it isn't available
-       ### on Win95/98. MoveFileEx could theoretically help prevent the
-       ### case where we delete the target but don't move the file(!).
-       ### it can also copy across devices...
-    */
+    /* TODO: would be nice to use MoveFileEx() here, but it isn't available
+     * on Win95/98. MoveFileEx could theoretically help prevent the
+     * case where we delete the target but don't move the file(!).
+     * it can also copy across devices...
+     */
 
     if (MoveFile(from_canon, to_canon)) {
         return APR_SUCCESS;
     }
-    err = GetLastError();
-    if (err == ERROR_FILE_EXISTS || err == ERROR_ALREADY_EXISTS) {
+    err = apr_get_os_error();
+    if (APR_STATUS_IS_EEXIST(err)) {
         (void) DeleteFile(to_canon);
         if (MoveFile(from_canon, to_canon))
             return APR_SUCCESS;
-        err = GetLastError();
+        err = apr_get_os_error();
     }
     return err;
 }
@@ -275,7 +275,7 @@ apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
     }
     (*thefile)->filehand = GetStdHandle(STD_ERROR_HANDLE);
     if ((*thefile)->filehand == INVALID_HANDLE_VALUE)
-        return GetLastError();
+        return apr_get_os_error();
     (*thefile)->cntxt = cont;
     (*thefile)->fname = "STD_ERROR_HANDLE";
     (*thefile)->eof_hit = 0;

@@ -66,7 +66,7 @@ static apr_status_t socket_cleanup(void *sock)
 
     if (thesocket->sock != INVALID_SOCKET) {
         if (closesocket(thesocket->sock) == SOCKET_ERROR) {
-            return WSAGetLastError();
+            return apr_get_netos_error();
         }
         thesocket->sock = INVALID_SOCKET;
     }
@@ -94,7 +94,7 @@ apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
      */
     (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if ((*new)->sock == INVALID_SOCKET) {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
 
     (*new)->local_addr->sin_family = AF_INET;
@@ -135,7 +135,7 @@ apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
         return APR_SUCCESS;
     }
     else {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
 }
 
@@ -148,7 +148,7 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket)
 apr_status_t apr_bind(apr_socket_t *sock)
 {
     if (bind(sock->sock, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1) {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
     else {
         if (sock->local_addr->sin_port == 0) {
@@ -161,7 +161,7 @@ apr_status_t apr_bind(apr_socket_t *sock)
 apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
     if (listen(sock->sock, backlog) == SOCKET_ERROR)
-        return WSAGetLastError();
+        return apr_get_netos_error();
     else
         return APR_SUCCESS;
 }
@@ -186,7 +186,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
                         &(*new)->addr_len);
 
     if ((*new)->sock == INVALID_SOCKET) {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
 
     *(*new)->local_addr = *sock->local_addr;
@@ -215,7 +215,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
 apr_status_t apr_connect(apr_socket_t *sock, char *hostname)
 {
     struct hostent *hp;
-    int lasterror;
+    apr_status_t lasterror;
     fd_set temp;
 
     if ((sock->sock == INVALID_SOCKET) || (!sock->local_addr)) {
@@ -230,7 +230,7 @@ apr_status_t apr_connect(apr_socket_t *sock, char *hostname)
         else {
             hp = gethostbyname(hostname);
             if (!hp)  {
-                return WSAGetLastError();
+                return apr_get_netos_error();
             }
             memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
             sock->addr_len = sizeof(*sock->remote_addr);
@@ -241,15 +241,15 @@ apr_status_t apr_connect(apr_socket_t *sock, char *hostname)
 
     if (connect(sock->sock, (const struct sockaddr *)sock->remote_addr, 
                 sock->addr_len) == SOCKET_ERROR) {
-        lasterror = WSAGetLastError();
-        if (lasterror != WSAEWOULDBLOCK) {
+        lasterror = apr_get_netos_error();
+        if (lasterror != APR_FROM_OS_ERROR(WSAEWOULDBLOCK)) {
             return lasterror;
         }
         /* wait for the connect to complete */
         FD_ZERO(&temp);
         FD_SET(sock->sock, &temp);
         if (select(sock->sock+1, NULL, &temp, NULL, NULL) == SOCKET_ERROR) {
-            return WSAGetLastError();
+            return apr_get_netos_error();
         }
     }
     /* connect was OK .. amazing */

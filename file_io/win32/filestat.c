@@ -79,7 +79,11 @@ static apr_filetype_e filetype_from_mode(int mode)
 
     return type;
 }
+
 BOOLEAN is_exe(const char* fname, apr_pool_t *cont) {
+    /*
+     *  Sleeping code, see notes under apr_stat()
+     */
     const char* exename;
     const char* ext;
     exename = strrchr(fname, '/');
@@ -107,12 +111,12 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
     DWORD FileType;
 
     if (!GetFileInformationByHandle(thefile->filehand, &FileInformation)) {
-        return GetLastError();
+        return apr_get_os_error();
     }
 
     FileType = GetFileType(thefile->filehand);
     if (!FileType) {
-        return GetLastError();
+        return apr_get_os_error();
     }
 
     /* If my rudimentary knowledge of posix serves... inode is the absolute
@@ -195,8 +199,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     WIN32_FIND_DATA FileInformation;
     HANDLE hFind;
     apr_oslevel_e os_level;
-    apr_status_t rv = APR_SUCCESS;
-
+    
     memset(finfo,'\0', sizeof(*finfo));
 
 	/* We need to catch the case where fname length == MAX_PATH since for
@@ -206,38 +209,30 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 	 * and this is not such a case.
 	 */
     if (strlen(fname) >= MAX_PATH) {
-        rv = ERROR_FILENAME_EXCED_RANGE;
+        return APR_ENAMETOOLONG;
     }
     else if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
         if (!GetFileAttributesEx(fname, GetFileExInfoStandard, 
                                  (WIN32_FILE_ATTRIBUTE_DATA*) &FileInformation)) {
-            rv = GetLastError();
+            return apr_get_os_error();
         }
     }
     else {
-        /*  The question remains, can we assume fname is not a wildcard?
-         *  Must we test it?
+        /*  XXX: The question remains, can we assume fname is not a wildcard?
+         *  Must we test it?  Absolutely YES.
          */
         hFind = FindFirstFile(fname, &FileInformation);
         if (hFind == INVALID_HANDLE_VALUE) {
-            rv = GetLastError();
+            return apr_get_os_error();
     	} else {
             FindClose(hFind);
         }
     }
 
-    if (rv != APR_SUCCESS) {
-        /* a little ad-hoc canonicalization to the most common
-         * error conditions
-         */
-        if (rv == ERROR_FILE_NOT_FOUND || rv == ERROR_PATH_NOT_FOUND)
-            return APR_ENOENT;
-       return rv;
-    }
-
     /* Filetype - Directory or file?
      * Short of opening the handle to the file, the 'FileType' appears
-     * to be unknowable (in any trustworthy or consistent sense.)
+     * to be unknowable (in any trustworthy or consistent sense), that
+     * is, as far as PIPE, CHR, etc.
      */
     if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         finfo->protection = S_IFDIR;
@@ -264,6 +259,11 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
      * This is a rather silly test, IMHO... we are looking to test
      * if the user 'may' execute a file (permissions), 
      * not if the filetype is executable.
+     * XXX: We need to find a solution, for real.  Or provide some
+     * new mechanism for control.  Note that the PATHEXT env var,
+     * in the format .ext[;.ext]... actually lists the 'executable'
+     * types (invoking without an extension.)  Perhaps a registry
+     * key test is even appropriate here.
      */
 /*  if (is_exe(fname, cont)) {
  *       finfo->protection |= S_IEXEC;
@@ -276,7 +276,9 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
 
     /* File size 
-     * Note: This cannot handle files greater than can be held by an int */
+     * Note: This cannot handle files greater than can be held by an int 
+     * XXX: Do we want to tag if nFileSizeHigh as -1 (or 0x7fffffff?)
+     */
     finfo->size = FileInformation.nFileSizeLow;
 
     return APR_SUCCESS;
@@ -285,7 +287,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
     /* TODO: determine if apr_lstat is a true NT symlink what the stats of the
-     * link are, rather than the target.
+     * link are, rather than the target.  NT5 (W2K) only.
      */
     return apr_stat(finfo, fname, cont);
 }

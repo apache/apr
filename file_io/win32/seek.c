@@ -76,7 +76,7 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
         rc = SetFilePointer(thefile->filehand, pos, NULL, FILE_BEGIN);
 
         if ( rc == 0xFFFFFFFF )
-            rc = GetLastError();
+            rc = apr_get_os_error();
         else
             rc = thefile->bufpos = thefile->dataRead = 0;
     }
@@ -132,7 +132,7 @@ apr_status_t apr_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *of
         rv = SetFilePointer(thefile->filehand, *offset, NULL, howmove);
         if (rv == -1) {
             *offset = -1;
-            return GetLastError();
+            return apr_get_os_error();
         }
         else {
             *offset = rv;

@@ -64,7 +64,7 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
 
     if (getsockname(sock->sock, (struct sockaddr *)sock->local_addr,
                     &namelen) < 0) {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
     else {
         sock->local_port_unknown = sock->local_interface_unknown = 0;
