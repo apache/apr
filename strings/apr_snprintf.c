@@ -1190,6 +1190,10 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
         fmt++;
     }
     vbuff->curpos = sp;
+    if (sp >= bep) {
+     if (flush_func(vbuff))
+         return -1;
+    }
     return cc;
 }
 
