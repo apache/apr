@@ -159,25 +159,6 @@ APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *, const char *fmt, ...)
 #define ap_OVERLAP_TABLES_SET	(0)
 #define ap_OVERLAP_TABLES_MERGE	(1)
 
-/* A set of flags which indicate places where the server should raise(SIGSTOP).
- * This is useful for debugging, because you can then attach to that process
- * with gdb and continue.  This is important in cases where one_process
- * debugging isn't possible.
- */
-#define SIGSTOP_DETACH                  1
-#define SIGSTOP_MAKE_CHILD              2                                       #define SIGSTOP_SPAWN_CHILD             4
-#define SIGSTOP_PIPED_LOG_SPAWN         8
-#define SIGSTOP_CGI_CHILD               16
-
-#ifdef DEBUG_SIGSTOP
-extern int raise_sigstop_flags;
-#define RAISE_SIGSTOP(x)        do { \
-        if (raise_sigstop_flags & SIGSTOP_##x) raise(SIGSTOP);\
-    } while (0)
-#else
-#define RAISE_SIGSTOP(x)
-#endif
-
 #ifdef ULTRIX_BRAIN_DEATH
 #define ap_fdopen(d,m) fdopen((d), (char *)(m))
 #else
