@@ -75,8 +75,8 @@ mbox *boxes;
 
 #define SIZE       256
 #define CYCLES     40
-#define TESTSIZE   4096 * SIZE
-#define TEST2SIZE  CYCLES * SIZE
+#define TESTSIZE   (apr_size_t)(4096 * SIZE)
+#define TEST2SIZE  (apr_size_t)(CYCLES * SIZE)
 
 static void msgwait(int boxnum)
 {
@@ -101,7 +101,8 @@ int main(void)
 #if APR_HAS_SHARED_MEMORY
     apr_shmem_t *shm;
     pid_t pid;
-    int size, cntr;
+    int cntr;
+    apr_size_t size;
     char *ptrs[CYCLES];
     apr_size_t psize[CYCLES];
     apr_status_t rv;
@@ -123,7 +124,8 @@ int main(void)
     }
     printf("OK\n");
 
-    printf("Creating shared memory block (%ld bytes)........", TESTSIZE); 
+    printf("Creating shared memory block (%" APR_SIZE_T_FMT " bytes)........", 
+           TESTSIZE); 
     if (apr_shm_init(&shm, TESTSIZE, NULL, context) != APR_SUCCESS) { 
         fprintf(stderr, "Error allocating shared memory block\n");
         exit(-1);
@@ -140,22 +142,26 @@ int main(void)
     fprintf(stdout, "OK\n");
 
     printf("\nAbout to stress the alloc/free cycle.\n");
-    printf("Smallest allocation will be %ld bytes\n", psize[0]);
-    printf("Largest allocation will be  %ld bytes\n", psize[CYCLES -1]);
+    printf("Smallest allocation will be %" APR_SIZE_T_FMT " bytes\n", 
+           psize[0]);
+    printf("Largest allocation will be  %" APR_SIZE_T_FMT " bytes\n", 
+           psize[CYCLES -1]);
     printf("I will be doing it in %d steps\n", CYCLES);
     
     printf("\tAllocating via apr_shm_malloc...............");
     for (cntr = 0;cntr < CYCLES;cntr++){
         ptrs[cntr] = apr_shm_malloc(shm, psize[cntr]);
         if (ptrs[cntr] == NULL){
-            printf("Failed at step %d, %ld bytes\n", cntr, psize[cntr]);
+            printf("Failed at step %d, %" APR_SIZE_T_FMT " bytes\n", 
+                   cntr, psize[cntr]);
             exit (-1);
         }
     }
     printf("OK\n\tFreeing.....................................");
     for (cntr = 0;cntr < CYCLES;cntr++){
         if (apr_shm_free(shm, ptrs[cntr]) != APR_SUCCESS){
-            printf("Failed at step %d, %ld bytes\n", cntr, psize[cntr]);
+            printf("Failed at step %d, %" APR_SIZE_T_FMT " bytes\n", 
+                   cntr, psize[cntr]);
             exit (-1);
         }
     }
@@ -165,14 +171,16 @@ int main(void)
     for (cntr = CYCLES-1;cntr > -1;cntr--){
         ptrs[cntr] = apr_shm_malloc(shm, psize[cntr]);
         if (ptrs[cntr] == NULL){
-            printf("Failed at %ld bytes\n", psize[cntr]);
+            printf("Failed at %" APR_SIZE_T_FMT" bytes\n", 
+                   psize[cntr]);
             exit (-1);
         }
     }
     printf("OK\n\tFreeing.....................................");
     for (cntr = 0;cntr < CYCLES;cntr++){
         if (apr_shm_free(shm, ptrs[cntr]) != APR_SUCCESS){
-            printf("Failed at step %d, %ld bytes\n", cntr, psize[cntr]);
+            printf("Failed at step %d, %" APR_SIZE_T_FMT 
+                   " bytes\n", cntr, psize[cntr]);
             exit (-1);
         }
     }
@@ -190,7 +198,9 @@ int main(void)
         if (cksize == (TESTSIZE - size)){
             printf ("OK\n");
         } else {
-            printf ("Failed.\nShould have had %ld bytes, instead there are %ld bytes :(\n",
+            printf ("Failed.\nShould have had %" APR_SIZE_T_FMT 
+                    " bytes, instead there are %"
+                    APR_SIZE_T_FMT " bytes :(\n",
                     TESTSIZE - size, cksize);
             exit(-1);
         }
@@ -198,13 +208,15 @@ int main(void)
     printf("%d cycles of malloc and calloc passed.\n\n", CYCLES);
 
     printf("Block test.\n");
-    printf("\tI am about to allocate %ld bytes..........", TEST2SIZE);
+    printf("\tI am about to allocate %" APR_SIZE_T_FMT 
+           " bytes..........", TEST2SIZE);
     if ((ptrs[0] = apr_shm_malloc(shm, TEST2SIZE)) == NULL){
         printf("Failed.\n");
         exit (-1);
     }
     printf ("OK\n");
-    printf("\tFreeing the block of %ld bytes............", TEST2SIZE);
+    printf("\tFreeing the block of %" APR_SIZE_T_FMT 
+           " bytes............", TEST2SIZE);
     if ((rv = apr_shm_free(shm, ptrs[0])) != APR_SUCCESS){
         printf("Failed!\n");
         exit(-1);
@@ -243,7 +255,9 @@ int main(void)
         if (cksize == (TESTSIZE - size)){
             printf ("OK\n");
         } else {
-            printf ("Failed.\nShould have had %ld bytes, instead there are %ld bytes :(\n",
+            printf ("Failed.\nShould have had %"
+                    APR_SIZE_T_FMT " bytes, instead there are %"
+                    APR_SIZE_T_FMT " bytes :(\n",
                     TESTSIZE - size, cksize);
             exit(-1);
         }
