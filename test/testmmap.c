@@ -53,6 +53,7 @@
  *
  */
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include "apr_mmap.h"
 #include "apr_errno.h"
@@ -69,7 +70,6 @@ int main()
 {
     ap_context_t *context;
     ap_mmap_t *themmap = NULL;
-    ap_status_t status = 0;
     ap_file_t *thefile;
     ap_int32_t flag = APR_READ;
     char *file1;
@@ -87,13 +87,6 @@ int main()
     getcwd(file1, PATH_LEN);
     strncat(file1,"/testmmap.c",11);  
 
-    fprintf(stdout,"Trying to mmap file.................");
-    if (ap_mmap_create(&themmap, file1, context) != APR_SUCCESS) {
-        fprintf(stderr,"Failed.\n");
-        exit (-1);
-    }
-    fprintf(stdout,"OK\n");
-    
     fprintf(stdout,"Trying to delete the mmap file......");
     if (ap_mmap_delete(themmap) != APR_SUCCESS) {
         fprintf(stderr,"Failed!\n");
@@ -111,7 +104,7 @@ int main()
     }
 
     fprintf(stdout,"Trying to mmap the open file........");
-    if (ap_mmap_open_create(&themmap, thefile, context) != APR_SUCCESS) {
+    if (ap_mmap_create(&themmap, thefile, 0, 0, context) != APR_SUCCESS) {
         fprintf(stderr,"Failed!\n");
         exit(-1);
     }

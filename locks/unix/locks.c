@@ -53,13 +53,8 @@
  *
  */
 
-#include "apr_config.h"
-#include "apr_general.h"
-#include "apr_portable.h"
-#include "apr_lib.h"
 #include "locks.h"
-#include <string.h>
-#include <unistd.h>
+#include "apr_portable.h"
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_lock(ap_context_t *, ap_locktype_e, char *, 

@@ -54,13 +54,6 @@
  */
 
 #include "threadproc.h"
-#include "fileio.h"
-#include "apr_thread_proc.h"
-#include "apr_file_io.h"
-#include "apr_general.h"
-#include <signal.h>
-#include <string.h>
-#include <sys/wait.h>
 
 ap_status_t ap_kill(struct proc_t *proc, int sig)
 {

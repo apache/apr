@@ -52,10 +52,6 @@
  * project, please see <http://www.apache.org/>.
  *
  */
-#include "apr_config.h"
-#include "apr_lock.h"
-#include "apr_general.h"
-#include "apr_lib.h"
 #include "locks.h"
 
 #if APR_HAS_THREADS

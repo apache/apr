@@ -53,13 +53,8 @@
  *
  */
 
-#include "apr_config.h"
 #include "threadproc.h"
-#include "apr_thread_proc.h"
-#include "apr_general.h"
-#include "apr_errno.h"
 #include "apr_portable.h"
-#include "apr_lib.h"
 
 #if APR_HAS_THREADS
 

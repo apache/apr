@@ -55,26 +55,46 @@
 #ifndef LOCKS_H
 #define LOCKS_H
 
+#include "apr_config.h"
+#include "apr_general.h"
+#include "apr_lib.h"
 #include "apr_lock.h"
-#include "apr_file_io.h"
 
-#if defined (USE_USLOCK_SERIALIZE)
+/* System headers required by Locks library */
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_STRING_H
+#include <string.h>
+#endif
+#if HAVE_USLOCKS_H
 #include <uslocks.h>
-#elif defined (USE_SYSVSEM_SERIALIZE)
-#include <sys/file.h>
+#endif
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if HAVE_SYS_IPC_H
 #include <sys/ipc.h>
+#endif
+#if HAVE_SYS_SEM_H
 #include <sys/sem.h>
-#elif defined (USE_FLOCK_SERIALIZE)
+#endif
+#if HAVE_SYS_FILE_H
 #include <sys/file.h>
+#endif
+#if HAVE_STDIO_H
 #include <stdio.h>
-#elif defined (USE_FCNTL_SERIALIZE)
-#include <stdio.h>
+#endif
+#if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if APR_HAS_THREADS && HAVE_PTHREAD_H
+
+#if APR_HAS_THREADS
+#if HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#endif
+/* End System Headers */
 
 #ifndef HAVE_UNION_SEMUN
 /* it makes no sense, but this isn't defined on solaris */

@@ -53,19 +53,7 @@
  *
  */
 
-#include "apr_general.h"
-#include "apr_errno.h"
-#include "apr_pools.h"
 #include "misc.h"
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-#endif
-#include <signal.h>
-#include <errno.h>
-#include <string.h>
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_context(ap_context_t **, ap_context_t *)

@@ -54,26 +54,6 @@
  */
 
 #include "fileio.h"
-#include "apr_config.h"
-#include "apr_file_io.h"
-#include "apr_general.h"
-#include "apr_lib.h"
-#include "apr_errno.h"
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_read(ap_file_t *, void *, ap_ssize_t *)

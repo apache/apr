@@ -53,15 +53,10 @@
  *
  */
 
-#include "apr_config.h"
+#include "threadproc.h"
+#include "apr_portable.h"
 
 #ifdef APR_HAS_THREADS
-
-#include "threadproc.h"
-#include "apr_thread_proc.h"
-#include "apr_general.h"
-#include "apr_portable.h"
-#include "apr_lib.h"
 
 #ifdef HAVE_PTHREAD_H
 /* ***APRDOC********************************************************

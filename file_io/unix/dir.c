@@ -53,15 +53,7 @@
  *
  */
 
-#include <sys/types.h>
-#include <errno.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "fileio.h"
-#include "apr_file_io.h"
-#include "apr_lib.h"
 #include "apr_portable.h"
 
 static ap_status_t dir_cleanup(void *thedir)

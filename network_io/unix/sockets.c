@@ -54,23 +54,7 @@
  */
 
 #include "networkio.h"
-#include "apr_network_io.h"
-#include "apr_general.h"
 #include "apr_portable.h"
-#include "apr_lib.h"
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/tcp.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
-ap_lock_t *lock_network = NULL;
-ap_lock_t *lock_inet = NULL;
-#endif
 
 static ap_status_t socket_cleanup(void *sock)
 {
