@@ -337,19 +337,17 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                                          (DWORD)(sock->timeout >= 0 
                                                  ? sock->timeout : INFINITE));
                 if (rv == WAIT_OBJECT_0) {
-                    if (!disconnected && !GetOverlappedResult(wait_event, &overlapped,
-                                                              &nbytes, FALSE)) {
-                        status = APR_FROM_OS_ERROR(GetLastError());
-                    }
-                    else {
-                        status = APR_SUCCESS;
-                        /* Ugly Code Alert:
-                         * Account for the fact that GetOverlappedResult
-                         * tracks bytes sent in headers, trailers and the file 
-                         * and this loop only needs to track bytes sent out 
-                         * of the file.
+                    status = APR_SUCCESS;
+                    if (!disconnected) {
+                        if (!GetOverlappedResult(wait_event, &overlapped, 
+                                                 &nbytes, FALSE)) {
+                            status = APR_FROM_OS_ERROR(GetLastError());
+                        }
+                        /* Ugly code alert: GetOverlappedResult returns
+                         * a count of all bytes sent. This loop only
+                         * tracks bytes sent out of the file.
                          */
-                        if (ptfb) {
+                        else if (ptfb) {
                             nbytes -= (ptfb->HeadLength + ptfb->TailLength);
                         }
                     }
