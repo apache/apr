@@ -216,7 +216,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 
     /* TransmitFile can only send one header and one footer */
     memset(&tfb, '0', sizeof (tfb));
-    if (hdtr->numheaders) {
+    if (hdtr && hdtr->numheaders) {
         ptfb = &tfb;
         for (i = 0; i < hdtr->numheaders; i++) {
             tfb.HeadLength += hdtr->headers[i].iov_len;
@@ -230,7 +230,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             ptr += hdtr->headers[i].iov_len;
         }
     }
-    if (hdtr->numtrailers) {
+    if (hdtr && hdtr->numtrailers) {
         ptfb = &tfb;
         for (i = 0; i < hdtr->numtrailers; i++) {
             tfb.TailLength += hdtr->headers[i].iov_len;
@@ -243,8 +243,6 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
                    hdtr->trailers[i].iov_len);
             ptr += hdtr->trailers[i].iov_len;
         }
-
-
     }
 #ifdef OVERLAPPED
     memset(&overlapped,'0', sizeof(overlapped));
