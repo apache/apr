@@ -106,6 +106,9 @@ ap_status_t ap_stat(struct file_t **thefile, const char *fname, ap_context_t *co
             if ((*thefile) == NULL) {
                 return APR_ENOMEM;
             }
+            (*thefile)->cntxt = cont;
+            ap_register_cleanup((*thefile)->cntxt, (void *)(*thefile),
+                                file_cleanup, ap_null_cleanup);
             (*thefile)->fname = ap_pstrdup(cont, fname);
             (*thefile)->filehand = NULL;
             (*thefile)->filedes = -1;
