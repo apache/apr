@@ -76,10 +76,6 @@
 
 #if APR_HAS_RANDOM
 
-/* This tells the preprocessor to put quotes around the value. */
-#define	XSTR(x)	#x
-#define	STR(x)	XSTR(x)
-
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
                                                     int length) 
 {
@@ -88,7 +84,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
     int rnd, rc;
     apr_size_t got, tot;
 
-    if ((rnd = open(STR(DEV_RANDOM), O_RDONLY)) == -1) 
+    if ((rnd = open(DEV_RANDOM, O_RDONLY)) == -1) 
 	return errno;
 
     for (tot=0; tot<length; tot += got) {
