@@ -154,135 +154,110 @@ static apr_status_t make_handle_private(apr_file_t *file)
 #endif
 }
 
-static apr_status_t make_inheritable_duplicate(apr_file_t *original,
-                                               apr_file_t *duplicate)
-{
-#ifdef _WIN32_WCE
-    return APR_ENOTIMPL;
-#else
-    if (original == NULL)
-        return APR_SUCCESS;
-
-    /* XXX: Can't use apr_file_dup here because it creates a non-inhertible 
-     * handle, and apr_open_file'd apr_file_t's are non-inheritable,
-     * so we must assume we need to make an inheritable handle.
-     */
-    if (!CloseHandle(duplicate->filehand))
-        return apr_get_os_error();
-    else
-    {
-        HANDLE hproc = GetCurrentProcess();
-        if (!DuplicateHandle(hproc, original->filehand, 
-                             hproc, &duplicate->filehand, 0,
-                             TRUE, DUPLICATE_SAME_ACCESS))
-            return apr_get_os_error();
-    }
-
-    return APR_SUCCESS;
-#endif
-}
-
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
                                              apr_int32_t in, 
                                              apr_int32_t out,
                                              apr_int32_t err)
 {
-    apr_status_t stat;
+    apr_status_t stat = APR_SUCCESS;
 
     if (in) {
         stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in, in,
                                     attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_in);
-        if (stat != APR_SUCCESS)
-            return stat;
     }
-    if (out) {
+    if (out && stat == APR_SUCCESS) {
         stat = open_nt_process_pipe(&attr->parent_out, &attr->child_out, out,
                                     attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_out);
-        if (stat != APR_SUCCESS)
-            return stat;
     }
-    if (err) {
+    if (err && stat == APR_SUCCESS) {
         stat = open_nt_process_pipe(&attr->parent_err, &attr->child_err, err,
                                     attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_err);
-        if (stat != APR_SUCCESS)
-            return stat;
     }
-    return APR_SUCCESS;
+    return stat;
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, 
                                                   apr_file_t *child_in, 
                                                   apr_file_t *parent_in)
 {
-    apr_status_t stat;
+    apr_status_t rv = APR_SUCCESS;
 
-    if (attr->child_in == NULL && attr->parent_in == NULL) {
-        stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in,
-                                    APR_FULL_BLOCK,
-                                    attr->pool);
-        if (stat == APR_SUCCESS)
-            stat = make_handle_private(attr->parent_in);
-        if (stat != APR_SUCCESS)
-            return stat;
+    if (child_in) {
+        if (attr->child_in == NULL)
+            rv = apr_file_dup(&attr->child_in, child_in, attr->pool);
+        else
+            rv = apr_file_dup2(attr->child_in, child_in, attr->pool);
+
+        if (rv == APR_SUCCESS)
+            apr_file_inherit_set(attr->child_in);
     }
 
-    stat = make_inheritable_duplicate (child_in, attr->child_in);
-    if (stat == APR_SUCCESS)
-        stat = make_inheritable_duplicate (parent_in, attr->parent_in);
+    if (parent_in && rv == APR_SUCCESS) {
+        if (attr->parent_in == NULL)
+            rv = apr_file_dup(&attr->parent_in, parent_in, attr->pool);
+        else
+            rv = apr_file_dup2(attr->parent_in, parent_in, attr->pool);
+    }
 
-    return stat;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
                                                    apr_file_t *child_out,
                                                    apr_file_t *parent_out)
 {
-    apr_status_t stat;
+    apr_status_t rv = APR_SUCCESS;
 
-    if (attr->child_out == NULL && attr->parent_out == NULL) {
-        stat = open_nt_process_pipe(&attr->child_out, &attr->parent_out,
-                                    APR_FULL_BLOCK,
-                                    attr->pool);
-        if (stat == APR_SUCCESS)
-            stat = make_handle_private(attr->parent_out);
-        if (stat != APR_SUCCESS)
-            return stat;
-    }        
-        
-    stat = make_inheritable_duplicate (child_out, attr->child_out);
-    if (stat == APR_SUCCESS)
-        stat = make_inheritable_duplicate (parent_out, attr->parent_out);
+    if (child_out) {
+        if (attr->child_out == NULL)
+            rv = apr_file_dup(&attr->child_out, child_out, attr->pool);
+        else
+            rv = apr_file_dup2(attr->child_out, child_out, attr->pool);
 
-    return stat;
+        if (rv == APR_SUCCESS)
+            apr_file_inherit_set(attr->child_out);
+    }
+
+    if (parent_out && rv == APR_SUCCESS) {
+        if (attr->parent_out == NULL)
+            rv = apr_file_dup(&attr->parent_out, parent_out, attr->pool);
+        else
+            rv = apr_file_dup2(attr->parent_out, parent_out, attr->pool);
+    }
+
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
                                                    apr_file_t *child_err,
                                                    apr_file_t *parent_err)
 {
-    apr_status_t stat;
+    apr_status_t rv = APR_SUCCESS;
 
-    if (attr->child_err == NULL && attr->parent_err == NULL) {
-        stat = open_nt_process_pipe(&attr->child_err, &attr->parent_err,
-                                    APR_FULL_BLOCK,
-                                    attr->pool);
-        if (stat == APR_SUCCESS)
-            stat = make_handle_private(attr->parent_err);
-        if (stat != APR_SUCCESS)
-            return stat;
-    }        
-        
-    stat = make_inheritable_duplicate (child_err, attr->child_err);
-    if (stat == APR_SUCCESS)
-        stat = make_inheritable_duplicate (parent_err, attr->parent_err);
+    if (child_err) {
+        if (attr->child_err == NULL)
+            rv = apr_file_dup(&attr->child_err, child_err, attr->pool);
+        else
+            rv = apr_file_dup2(attr->child_err, child_err, attr->pool);
 
-    return stat;
+        if (rv == APR_SUCCESS)
+            apr_file_inherit_set(attr->child_err);
+    }
+
+    if (parent_err && rv == APR_SUCCESS) {
+        if (attr->parent_err == NULL)
+            rv = apr_file_dup(&attr->parent_err, parent_err, attr->pool);
+        else
+            rv = apr_file_dup2(attr->parent_err, parent_err, attr->pool);
+    }
+
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
