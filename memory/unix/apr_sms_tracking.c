@@ -287,8 +287,6 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms,
     
     tms = (apr_sms_tracking_t *)new_sms;
     tms->nodes = NULL;
-    apr_lock_create(&tms->lock, APR_MUTEX, APR_LOCKALL, NULL,
-                    new_sms->pool);
 
     apr_sms_post_init(new_sms);
 
