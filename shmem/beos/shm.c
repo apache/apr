@@ -62,7 +62,7 @@
 #include <kernel/OS.h>
 
 struct apr_shm_t {
-    apr_pool_t *p;
+    apr_pool_t *pool;
     void *memblock;
     void *ptr;
     apr_size_t reqsize;
@@ -78,18 +78,20 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     apr_size_t pagesize;
     area_id newid;
     char *addr;
-
+    char area_name[32];
+    
     (*m) = (apr_shm_t *)apr_pcalloc(p, sizeof(apr_shm_t));
     /* we MUST allocate in pages, so calculate how big an area we need... */
     pagesize = ((reqsize + B_PAGE_SIZE - 1) / B_PAGE_SIZE) * B_PAGE_SIZE;
-    
-    newid = create_area("apr_shm", (void*)&addr, B_ANY_ADDRESS,
+    sprintf(area_name, "apr_shm:%ld:%ld",find_thread(NULL), pagesize);
+     
+    newid = create_area(area_name, (void*)&addr, B_ANY_ADDRESS,
                         pagesize, B_CONTIGUOUS, B_READ_AREA|B_WRITE_AREA);
 
     if (newid < 0)
         return errno;
 
-    (*m)->p = p;
+    (*m)->pool = p;
     (*m)->aid = newid;
     (*m)->memblock = addr;
     (*m)->ptr = (void*)addr;
@@ -112,12 +114,29 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
                                          const char *filename,
                                          apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    area_info ai;
+    thread_info ti;
+    area_id deleteme = (*m)->aid;
+    int offs = ((char*)(*m)->ptr) - ((char*)(*m)->memblock);
+    
+    get_area_info(deleteme, &ai);
+    get_thread_info(find_thread(NULL), &ti);
+    
+    if (ti.team != ai.team) {
+        delete_area(deleteme);
+        (*m)->aid = clone_area(ai.name, &(ai.address), B_CLONE_ADDRESS,
+                               B_READ_AREA | B_WRITE_AREA, ai.area);
+        get_area_info((*m)->aid, &ai);
+        (*m)->memblock = ai.address;
+        (*m)->ptr = (void*)ai.address + offs;
+    }
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
 {
-    return APR_ENOTIMPL;
+    delete_area(m->aid);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m)
@@ -130,3 +149,4 @@ APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
     return m->reqsize;
 }
 
+APR_POOL_IMPLEMENT_ACCESSOR(shm)
