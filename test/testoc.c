@@ -85,6 +85,10 @@ static void ocmaint(int reason, void *data, int status)
 }
 #endif
 
+#ifndef SIGKILL
+#define SIGKILL 1
+#endif
+
 int main(int argc, char *argv[])
 {
 #if APR_HAS_OTHER_CHILD
