@@ -15,7 +15,7 @@ dnl # and which files are to be configured.
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
-MODULES="file_io network_io threadproc misc locks time mmap shmem dso"
+MODULES="file_io network_io threadproc misc locks time mmap shmem dso i18n"
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(configure.in)
@@ -124,11 +124,13 @@ AC_CHECK_FUNC(inet_addr, [ inet_addr="1" ], [ inet_addr="0" ])
 AC_CHECK_FUNC(inet_network, [ inet_network="1" ], [ inet_network="0" ])
 AC_CHECK_FUNC(_getch)
 AC_CHECK_FUNCS(gmtime_r localtime_r)
+AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
 AC_SUBST(sendfile)
 AC_SUBST(fork)
 AC_SUBST(inet_addr)
 AC_SUBST(inet_network)
 AC_SUBST(have_sigaction)
+AC_SUBST(iconv)
 
 
 dnl #----------------------------- Checks for Any required Headers
@@ -176,6 +178,7 @@ AC_CHECK_HEADERS(unix.h)
 AC_CHECK_HEADERS(arpa/inet.h)
 AC_CHECK_HEADERS(netinet/in.h, netinet_inh="1", netinet_inh="0")
 AC_CHECK_HEADERS(netinet/tcp.h)
+AC_CHECK_HEADERS(iconv.h)
 
 AC_CHECK_HEADERS(sys/file.h)
 AC_CHECK_HEADERS(sys/ioctl.h)
