@@ -176,6 +176,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_ENOSHMAVAIL  There is no more shared memory available
  * APR_EDSOOPEN     APR was unable to open the dso object.  For more 
  *                  information call apr_dso_error().
+ * APR_EGENERAL     General failure (specific information not available)
  * </PRE>
  *
  * <PRE>
@@ -229,7 +230,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ENOSOCKET      (APR_OS_START_ERROR + 11)
 #define APR_ENOTHREAD      (APR_OS_START_ERROR + 12)
 #define APR_ENOTHDKEY      (APR_OS_START_ERROR + 13)
-/* empty slot: +14 */
+#define APR_EGENERAL       (APR_OS_START_ERROR + 14)
 #define APR_ENOSHMAVAIL    (APR_OS_START_ERROR + 15)
 /* empty slot: +16 */
 /* empty slot: +17 */
@@ -251,7 +252,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOSOCKET(s)      ((s) == APR_ENOSOCKET)
 #define APR_STATUS_IS_ENOTHREAD(s)      ((s) == APR_ENOTHREAD)
 #define APR_STATUS_IS_ENOTHDKEY(s)      ((s) == APR_ENOTHDKEY)
-/* empty slot: +14 */
+#define APR_STATUS_IS_EGENERAL(s)       ((s) == APR_EGENERAL)
 #define APR_STATUS_IS_ENOSHMAVAIL(s)    ((s) == APR_ENOSHMAVAIL)
 /* empty slot: +16 */
 /* empty slot: +17 */
