@@ -136,29 +136,6 @@ apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_socket_inaddr(apr_in_addr_t *addr, apr_interface_e which,
-                        apr_socket_t *sock)
-{
-    if (which == APR_LOCAL){
-        if (sock->local_interface_unknown) {
-            apr_status_t rv = get_local_addr(sock);
-
-            if (rv != APR_SUCCESS){
-                return rv;
-            }
-        }
-
-        /* XXX IPv6 */
-        *addr = *(apr_in_addr_t *)&sock->local_addr->sa.sin.sin_addr;
-    } else if (which == APR_REMOTE) {
-        /* XXX IPv6 */
-        *addr = *(apr_in_addr_t *)&sock->remote_addr->sa.sin.sin_addr;
-    } else {
-        return APR_EINVAL;
-    }
-    return APR_SUCCESS;
-}
-
 static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
 {
     addr->sa.sin.sin_family = family;

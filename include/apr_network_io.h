@@ -498,20 +498,6 @@ apr_status_t apr_set_ipaddr(apr_sockaddr_t *sockaddr, const char *addr);
 apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr);
 
 /**
- * Return the local socket name as a BSD style struct sockaddr_in.
- * @param name The local name associated with the socket.
- * @param sock The socket to use 
- */
-apr_status_t apr_get_local_name(struct sockaddr_in **name, apr_socket_t *sock);
-
-/**
- * Return the remote socket name as a BSD style struct sockaddr_in.
- * @param name The remote name associated with the socket.
- * @param sock The socket to use 
- */
-apr_status_t apr_get_remote_name(struct sockaddr_in **name, apr_socket_t *sock);
-
-/**
  * Setup the memory required for poll to operate properly>
  * @param new_poll The poll structure to be used. 
  * @param num The number of socket descriptors to be polled.
@@ -637,15 +623,6 @@ apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file);
  * @param hostname The hostname to lookup.
  */
 apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname);
-
-/**
- * Given an apr_socket_t get the apr_in_addr_t for the requested interface
- * @param addr The apr_in_addr_t structure to return
- * @param which The interface to return for
- * @param sock The apr_socket_t to use
- */
-apr_status_t apr_get_socket_inaddr(apr_in_addr_t *addr, apr_interface_e which,
-                                   apr_socket_t *sock);
 
 /**
  * Given an apr_sockaddr_t and a service name, set the port for the service
