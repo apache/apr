@@ -57,6 +57,12 @@
  * This should be the only header file that programs need to include that 
  * actually has platform dependant code which refers to the .
  */
+#ifndef APR_PORTABLE_H
+#define APR_PORTABLE_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include "apr_general.h"
 #include "apr_thread_proc.h"
@@ -192,3 +198,8 @@ ap_status_t ap_put_os_proc(ap_context_t *, ap_proc_t **, ap_os_proc_t *);
 ap_status_t ap_put_os_time(ap_context_t *, ap_time_t **, ap_os_time_t *); 
 ap_status_t ap_put_os_threadkey(ap_context_t *, ap_key_t **, ap_os_threadkey_t *);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif  /* ! APR_PORTABLE_H */
