@@ -104,8 +104,10 @@ AC_MINIX
 APR_EBCDIC
 
 dnl get our version information
-APR_MAJOR_VERSION="`$apr_builders/get-version.sh major $apr_srcdir/include`"
-APR_DOTTED_VERSION="`$apr_builders/get-version.sh all $apr_srcdir/include`"
+get_version="$apr_builders/get-version.sh"
+version_hdr="$apr_srcdir/include/apr_version.h"
+APR_MAJOR_VERSION="`$get_version major $version_hdr`"
+APR_DOTTED_VERSION="`$get_version all $version_hdr`"
 
 dnl this one will go into apr-config.in
 AC_SUBST(APR_DOTTED_VERSION)
@@ -149,7 +151,8 @@ AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the 
 
 if test "x$use_libtool" = "xyes"; then
       lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -c $< && touch $@'
-      link='$(LIBTOOL) $(LTFLAGS) --mode=link $(LT_LDFLAGS) $(COMPILE) $(ALL_LDFLAGS) -o $@'
+      LT_VERSION="-version-info `$get_version libtool $version_hdr`"
+      link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(LT_LDFLAGS) \$(COMPILE) ${LT_VERSION} \$(ALL_LDFLAGS) -o \$@"
       so_ext='lo'
       lib_target='-rpath $(libdir) $$objects'
       export_lib_target='-rpath \$(libdir) \$\$objects'
