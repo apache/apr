@@ -107,9 +107,9 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
 /**
  * Lock a protected region.
  * @param lock The lock to set.
- * @deffunc apr_status_t apr_lock_aquire(apr_lock_t *lock)
+ * @deffunc apr_status_t apr_lock_acquire(apr_lock_t *lock)
  */
-APR_DECLARE(apr_status_t) apr_lock_aquire(apr_lock_t *lock);
+APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock);
 
 /**
  * Unlock a protected region.

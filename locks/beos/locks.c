@@ -86,7 +86,7 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_aquire(apr_lock_t *lock)
+apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
     

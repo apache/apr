@@ -118,7 +118,7 @@ apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
         apr_uint64_t size = *nbytes;
 
 #if APR_HAS_THREADS
-        apr_lock_aquire(thefile->thlock);
+        apr_lock_acquire(thefile->thlock);
 #endif
 
         if (thefile->direction == 1) {
@@ -216,7 +216,7 @@ apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nb
         int size = *nbytes;
 
 #if APR_HAS_THREADS
-        apr_lock_aquire(thefile->thlock);
+        apr_lock_acquire(thefile->thlock);
 #endif
 
         if ( thefile->direction == 0 ) {

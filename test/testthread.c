@@ -77,7 +77,7 @@ void * APR_THREAD_FUNC thread_func1(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock_aquire(thread_lock);
+        apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
@@ -88,7 +88,7 @@ void * APR_THREAD_FUNC thread_func2(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock_aquire(thread_lock);
+        apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
@@ -99,7 +99,7 @@ void * APR_THREAD_FUNC thread_func3(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock_aquire(thread_lock);
+        apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
@@ -110,7 +110,7 @@ void * APR_THREAD_FUNC thread_func4(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock_aquire(thread_lock);
+        apr_lock_acquire(thread_lock);
         x++;
         apr_lock_release(thread_lock);
     }
