@@ -180,6 +180,21 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
 
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 
+#elif defined(__linux__) && defined(__i386__)
+#define apr_atomic_t apr_uint32_t
+#define apr_atomic_cas(mem,with,cmp) \
+({ apr_atomic_t prev; \
+    asm ("lock; cmpxchgl %1, %2"              \
+         : "=a" (prev)               \
+         : "r" (with), "m" (*(mem)), "0"(cmp) \
+         : "memory"); \
+    prev;})
+
+#define APR_ATOMIC_NEED_DEFAULT 1
+#if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
+#undef APR_ATOMIC_NEED_CAS_DEFAULT
+#endif
+
 #elif defined(__sparc__) || defined(sparc)
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_read(p)  *p

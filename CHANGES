@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Added optimized atomic CAS support for Linux/x86 (available only
+     when APR is configured with --enable-nonportable-atomics=yes)
+     [Brian Pane]
+
   *) Fix a compile error in the EGD support in rand.c on older Solaris
      versions.  PR 9976  [Jim Morris <jmorris@sunflower.com>]
 
