@@ -69,6 +69,11 @@
  */
 #define PATH_LEN 255
 
+void closeapr(void)
+{
+    apr_terminate();
+}
+
 int main(void)
 {
 #if APR_HAS_MMAP    
@@ -89,7 +94,7 @@ int main(void)
         exit(-1);
     }
     fprintf(stdout,"OK\n");
-    atexit(apr_terminate);
+    atexit(closeapr);
 
     fprintf(stdout,"Creating context....................");    
     if (apr_create_pool(&context, NULL) != APR_SUCCESS) {

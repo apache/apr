@@ -69,6 +69,11 @@ int test_filedel(apr_pool_t *);
 int testdirs(apr_pool_t *);
 static void test_read(apr_pool_t *);
 
+void closeapr(void)
+{
+    apr_terminate();
+}
+
 int main(void)
 {
     apr_pool_t *context;
@@ -79,7 +84,6 @@ int main(void)
     apr_status_t status;
     apr_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     apr_size_t nbytes = 0;
-    apr_int32_t rv;
     apr_off_t zer = 0;
     char errmsg[120];
     char *buf;
@@ -91,7 +95,7 @@ int main(void)
         fprintf(stderr, "Couldn't initialize.");
         exit(-1);
     }
-    atexit(apr_terminate);
+    atexit(closeapr);
     if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
@@ -356,7 +360,7 @@ int testdirs(apr_pool_t *context)
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\t\tFile size.......");
-    if (dirent.size != bytes)) {
+    if (dirent.size != bytes) {
         fprintf(stderr, "Got wrong file size %" APR_SIZE_T_FMT "\n", dirent.size);
         return -1;
     }

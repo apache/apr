@@ -141,6 +141,11 @@ static void do_write(void)
     printf(" done.\nExiting.\n");
 }
 
+void closeapr(void)
+{
+    apr_terminate();
+}
+
 int main(int argc, const char * const *argv)
 {
     int reader = 0;
@@ -151,7 +156,7 @@ int main(int argc, const char * const *argv)
 
     if (apr_initialize() != APR_SUCCESS)
         errmsg("Could not initialize APR.\n");
-    atexit(apr_terminate);
+    atexit(closeapr);
 
     if (apr_create_pool(&pool, NULL) != APR_SUCCESS)
         errmsg("Could not create global pool.\n");
