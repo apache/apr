@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Add linkage declarations to the DSO code.
+     [Gregory Nicholls <gnicholls@level8.com>]
+
   *) Some adjustment of hints.m4 setting flags (used to check if null
      first) and added some verbosity. [Jim Jagielski]
 

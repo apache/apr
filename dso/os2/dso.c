@@ -68,7 +68,7 @@ static apr_status_t dso_cleanup(void *thedso)
 }
 
 
-apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, apr_pool_t *ctx)
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, const char *path, apr_pool_t *ctx)
 {
     char failed_module[200];
     HMODULE handle;
@@ -92,7 +92,7 @@ apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, apr_p
 
 
 
-apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
+APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
     int rc;
 
@@ -109,9 +109,9 @@ apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
 
 
 
-apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                       apr_dso_handle_t *handle, 
-                       const char *symname)
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+                                      apr_dso_handle_t *handle, 
+                                      const char *symname)
 {
     PFN func;
     int rc;
@@ -128,7 +128,7 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym,
 
 
 
-const char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
     char message[200];
     apr_strerror(dso->load_error, message, sizeof(message));

@@ -61,8 +61,8 @@
 #include <stddef.h>
 #endif
 
-apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, 
-                        apr_pool_t *ctx)
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+                                       const char *path, apr_pool_t *ctx)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
@@ -91,7 +91,7 @@ apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
     
-apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
+APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_unload((shl_t)handle->handle);
@@ -104,9 +104,9 @@ apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                       apr_dso_handle_t *handle, 
-                       const char *symname)
+APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+                                      apr_dso_handle_t *handle, 
+                                      const char *symname)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     void *symaddr = NULL;
@@ -146,7 +146,7 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym,
 #endif /* not HP-UX; use dlsym()/dlerror() */
 }
 
-const char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
     if (dso->errormsg) {
         apr_cpystrn(buffer, dso->errormsg, buflen);
