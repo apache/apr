@@ -173,10 +173,24 @@ APR_DECLARE(apr_status_t) apr_initialize(void);
  * automatically.
  * @tip An APR program must call this function at termination once it 
  *      has stopped using APR services.  The APR developers suggest using
- *      atexit to ensure this is called.
+ *      atexit to ensure this is called.  When using APR from a language
+ *      other than C that has problems with the calling convention, use
+ *      apr_terminate2() instead.
  * @deffunc void apr_terminate(void)
  */
-APR_DECLARE(void) apr_terminate(void);
+APR_DECLARE_NONSTD(void) apr_terminate(void);
+
+/**
+ * Tear down any APR internal data structures which aren't torn down 
+ * automatically, same as apr_terminate
+ * @tip An APR program must call either the apr_terminate or apr_terminate2 
+ *      function once it it has finished using APR services.  The APR 
+ *      developers suggest using atexit(apr_terminate) to ensure this is done.
+ *      apr_terminate2 exists to allow non-c language apps to tear down apr, 
+ *      while apr_terminate is recommended from c language applications.
+ * @deffunc void apr_terminate2(void)
+ */
+APR_DECLARE(void) apr_terminate2(void);
 
 #ifdef __cplusplus
 }
