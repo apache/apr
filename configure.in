@@ -83,12 +83,18 @@ if test ".$SYS_SW" = ".AIX"; then
     case "$SYS_KV" in
         [12]*)
             AC_DEFINE(USEBCOPY)
+            OSDIR="aix"
             ;;
         3*)
             AC_DEFINE(NEED_RLIM_T)
+            OSDIR="aix"
             ;;
         41*)
             AC_DEFINE(NEED_RLIM_T)
+            OSDIR="aix"
+            ;;
+        42*)
+            OSDIR="aix"
             ;;
     esac
 fi
