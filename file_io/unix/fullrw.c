@@ -78,9 +78,9 @@ APR_DECLARE(apr_status_t) apr_file_writev_full(apr_file_t *thefile,
         * Incomplete writes inside a single area are not supported.
         * This should be safe according to SuS v2. 
         */
-        for(i = 0; i < nvec; i++) {
+        for (i = 0; i < nvec; i++) {
             total += vec[i].iov_len;
-            if(total >= amt) {
+            if (total >= amt) {
                 vec = &vec[i+1];
                 nvec -= i+1;
                 break;
