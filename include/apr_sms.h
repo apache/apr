@@ -79,9 +79,8 @@ extern "C" {
  **********************************************************************/
 
 /* The various types of cleanup's we can offer */
-#define APR_ALL_CLEANUPS      0x0000
-#define APR_CHILD_CLEANUP     0x0001
-#define APR_PARENT_CLEANUP    0x0002
+#define APR_GENERAL_CLEANUP      0x0001
+#define APR_CHILD_CLEANUP        0x0002
 
 /* Alignment macro's 
  *
