@@ -62,7 +62,6 @@
 struct socket_t {
     ap_context_t *cntxt;
     int socketdes;
-    char *remote_hostname;
     struct sockaddr_in *addr;
     int addr_len;
 };

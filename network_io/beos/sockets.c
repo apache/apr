@@ -90,7 +90,6 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
     }
     
     (*new)->socketdes = socket(AF_INET ,SOCK_STREAM, 0);
-	(*new)->remote_hostname=NULL;
 	(*new)->addr->sin_family = AF_INET; 
     (*new)->addr_len = sizeof(*(*new)->addr);
 	memset(&(*new)->addr->sin_zero, 0, sizeof((*new)->addr->sin_zero));
@@ -172,8 +171,6 @@ ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
 
 ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock) 
 { 
-	struct hostent *hptr;
-	
 	(*new) = (struct socket_t *)ap_palloc(sock->cntxt,
 	                        sizeof(ap_socket_t)); 
 
@@ -189,12 +186,6 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
 		return errno;
 	}
 
-	hptr = gethostbyaddr((char*)&(*new)->addr->sin_addr, 
-	                    sizeof(struct in_addr), AF_INET);
-	if (hptr != NULL){
-		(*new)->remote_hostname = strdup(hptr->h_name);
-	}
-	    
     ap_register_cleanup((*new)->cntxt, (void *)new, 
                         socket_cleanup, NULL);
     return APR_SUCCESS;
@@ -222,7 +213,6 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
             return errno; 
     }
      
-    sock->remote_hostname = strdup(hostname);
     return APR_SUCCESS; 
 } 
 

@@ -58,6 +58,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <netdb.h>
 #include "networkio.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
@@ -102,9 +103,18 @@ ap_status_t ap_gethostname(ap_context_t *cont, char * buf, int len)
 
 ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
 {
-    (*name) = (char*)ap_pstrdup(sock->cntxt, sock->remote_hostname);
-    if (*name) {
-        return APR_SUCCESS;
+    struct hostent *hptr;
+    
+    hptr = gethostbyaddr((char *)&(sock->addr->sin_addr), 
+                         sizeof(struct in_addr), AF_INET);
+    if (hptr != NULL) {
+        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
+        if (*name) {
+            return APR_SUCCESS;
+        }
+        return APR_ENOMEM;
     }
-    return APR_ENOMEM;
+
+    /* XXX - Is this threadsafe? - manoj */
+    return h_errno;
 }
