@@ -129,4 +129,18 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
     *username = apr_pstrdup(p, pw->pw_name);
     return APR_SUCCESS;
 }
+
+APR_DECLARE(apr_status_t) apr_get_user_passwd(char **passwd,
+                                         const char *username, apr_pool_t *p)
+{
+    struct passwd *pw;
+    apr_status_t rv;
+        
+    if ((rv = getpwnam_safe(username, &pw)) != APR_SUCCESS)
+        return rv;
+
+    *passwd = apr_pstrdup(p, pw->pw_passwd);
+
+    return APR_SUCCESS;
+}
   

@@ -161,6 +161,16 @@ APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right);
 #define apr_compare_groups(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
 #endif
 
+/**
+ * Get a password from the system, given a username.
+ * @param passwd The returned password
+ * @param username The username to get the password for
+ * @param p The pool to allocate out of.
+ * @deffunc apr_status_t apr_get_user_passwd(char **passwd, const char *username, apr_pool_t *p);
+ */
+APR_DECLARE(apr_status_t) apr_get_user_passwd(char **passwd,
+                                         const char *username, apr_pool_t *p);
+
 #endif  /* ! APR_HAS_USER */
 
 #ifdef __cplusplus

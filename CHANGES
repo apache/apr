@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Add a method to get the password from the system for a given
+     user.  [John Barbee <jbarbee@covalent.net>]
+
   *) Change the include path order, so that we look for included files
      in the APR paths first, and the system paths second.
      [jean-frederic clere <jfrederic.clere@fujitsu-siemens.com>]
