@@ -20,9 +20,10 @@
 #include "apr_portable.h"
 #include "apr_arch_inherit.h"
 
-#if defined(BEOS) && !defined(BEOS_BONE)
+#ifdef BEOS_R5
+#undef close
 #define close closesocket
-#endif
+#endif /* BEOS_R5 */
 
 static char generic_inaddr_any[16] = {0}; /* big enough for IPv4 or IPv6 */
 
@@ -92,7 +93,28 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
 
     alloc_socket(new, cont);
 
+#ifndef BEOS_R5
     (*new)->socketdes = socket(family, type, protocol);
+#else
+    /* For some reason BeOS R5 has an unconventional protocol numbering,
+     * so we need to translate here. */
+    switch (protocol) {
+    case 0:
+        (*new)->socketdes = socket(family, type, 0);
+        break;
+    case APR_PROTO_TCP:
+        (*new)->socketdes = socket(family, type, IPPROTO_TCP);
+        break;
+    case APR_PROTO_UDP:
+        (*new)->socketdes = socket(family, type, IPPROTO_UDP);
+        break;
+    case APR_PROTO_SCTP:
+    default:
+        errno = EPROTONOSUPPORT;
+        (*new)->socketdes = -1;
+        break;
+    }
+#endif /* BEOS_R5 */
 
 #if APR_HAVE_IPV6
     if ((*new)->socketdes < 0 && ofamily == APR_UNSPEC) {
