@@ -85,9 +85,9 @@ typedef struct apr_lock_t           apr_lock_t;
  * </PRE>
  * @param scope The scope of the lock to create, one of:
  * <PRE>
- *            APR_CROSS_PROCESS -- lock processes from the protected area.
- *            APR_INTRAPROCESS  -- lock threads from the protected area.
- *            APR_LOCKALL       -- lock processes and threads from the
+ *            APR_CROSS_PROCESS    lock processes from the protected area.
+ *            APR_INTRAPROCESS     lock threads from the protected area.
+ *            APR_LOCKALL          lock processes and threads from the
  *                                 protected area.
  * </PRE>
  * @param fname A file name to use if the lock mechanism requires one.  This
