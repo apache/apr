@@ -187,7 +187,7 @@ API_EXPORT(ap_status_t) reap_other_child(ap_proc_t *pid)
  *    Loop through all registered other_children and call the
  *    appropriate maintenance function when necessary.
  */
-API_EXPORT(void) check_other_child(void)
+API_EXPORT(void) ap_check_other_child(void)
 {
     ap_other_child_rec_t *ocr, *nocr;
     pid_t waitret;    
