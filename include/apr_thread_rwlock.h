@@ -66,7 +66,7 @@ extern "C" {
 #if APR_HAS_THREADS
 
 /**
- * @file apr_lock.h
+ * @file apr_thread_rwlock.h
  * @brief APR Thread RWLock Routines
  */
 

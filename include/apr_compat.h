@@ -101,7 +101,7 @@
 /** @deprecated @see apr_dso_error */
 #define ap_os_dso_error apr_dso_error
 /** @deprecated @see apr_filepath_merge
- *  @tip apr_filepath_merge rejects invalid filenames */
+ *  @warning apr_filepath_merge rejects invalid filenames */
 #define ap_os_is_filename_valid apr_filepath_merge
 /** @deprecated @see apr_proc_kill */
 #define ap_os_kill apr_proc_kill
