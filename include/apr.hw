@@ -165,22 +165,23 @@ typedef  int         gid_t;
 #define APR_SSIZE_T_FMT          "d"
 #define APR_THREAD_FUNC          __stdcall
 
-#if defined(APR_EXPORT_SYMBOLS)
-#define APR_EXPORT(type)         __declspec(dllexport) type 
-#define APR_EXPORT_NONSTD(type)  __declspec(dllexport) type 
-#define APR_VAR_EXPORT           __declspec(dllexport)
-#define APR_IMPORT_VAR           extern __declspec(dllexport)
-#elif defined(APR_STATIC)
+#if !defined(WIN32) || defined(APR_STATIC)
+/* Default Non-WIN32 behavior removes all MSVCisms */
 #define APR_EXPORT(type)         type
 #define APR_EXPORT_NONSTD(type)  type
 #define APR_VAR_EXPORT
-#define APR_IMPORT_VAR           extern
+#define APR_VAR_IMPORT           extern
+#elif defined(APR_EXPORT_SYMBOLS)
+#define APR_EXPORT(type)         __declspec(dllexport) type 
+#define APR_EXPORT_NONSTD(type)  __declspec(dllexport) type 
+#define APR_VAR_EXPORT           __declspec(dllexport)
+#define APR_VAR_IMPORT           extern __declspec(dllexport)
 #else
-/* Default behavior is to import the shared .dll */
+/* Default WIN32 behavior is to import the shared .dll */
 #define APR_EXPORT(type)         __declspec(dllimport) type 
 #define APR_EXPORT_NONSTD(type)  __declspec(dllimport) type 
 #define APR_VAR_EXPORT           __declspec(dllimport)
-#define APR_IMPORT_VAR           extern __declspec(dllimport)
+#define APR_VAR_IMPORT           extern __declspec(dllimport)
 #endif
 
 #define ap_signal(a,b) signal(a,b)

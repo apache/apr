@@ -96,8 +96,8 @@ typedef  @off_t_value@           ap_off_t;
 #define APR_THREAD_FUNC
 #define APR_EXPORT(type)         type
 #define APR_EXPORT_NONSTD(type)  type
-#define APR_IMPORT_VAR           extern
-#define APR_EXPORT_VAR
+#define APR_VAR_IMPORT           extern
+#define APR_VAR_EXPORT
 
 /* Define APR_SSIZE_T_FMT.  
  * If ssize_t is an integer we define it to be "d",
