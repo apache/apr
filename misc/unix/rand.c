@@ -81,11 +81,7 @@
 #if APR_HAS_RANDOM
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
-#ifdef APR_ENABLE_FOR_1_0
                                                     apr_size_t length)
-#else
-                                                    int length)
-#endif
 {
 #ifdef DEV_RANDOM
 
