@@ -208,14 +208,14 @@ int main(int argc, char *argv[])
     char command[MAX_STRING_LEN];
     int found;
     
-    ap_create_context(NULL, &cntxt);
+    ap_create_context(&cntxt, NULL);
 
     tn = NULL;
     signal(SIGINT, (void (*)(int)) interrupted);
     if (argc == 5) {
 	if (strcmp(argv[1], "-c"))
 	    usage();
-	if (ap_open(cntxt, argv[2], APR_WRITE | APR_CREATE, -1, &tfp) != APR_SUCCESS) {
+	if (ap_open(&tfp, cntxt, argv[2], APR_WRITE | APR_CREATE, -1) != APR_SUCCESS) {
 	    fprintf(stderr, "Could not open passwd file %s for writing.\n",
 		    argv[2]);
 	    perror("ap_open");
@@ -230,12 +230,12 @@ int main(int argc, char *argv[])
 	usage();
 
     tn = tmpnam(NULL);
-    if (ap_open(cntxt, tn, APR_WRITE | APR_CREATE, -1, &tfp)!= APR_SUCCESS) {
+    if (ap_open(&tfp, cntxt, tn, APR_WRITE | APR_CREATE, -1)!= APR_SUCCESS) {
 	fprintf(stderr, "Could not open temp file.\n");
 	exit(1);
     }
 
-    if (ap_open(cntxt, argv[1], APR_READ, -1, &f) != APR_SUCCESS) {
+    if (ap_open(&f, cntxt, argv[1], APR_READ, -1) != APR_SUCCESS) {
 	fprintf(stderr,
 		"Could not open passwd file %s for reading.\n", argv[1]);
 	fprintf(stderr, "Use -c option to create new one.\n");

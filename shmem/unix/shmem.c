@@ -86,7 +86,7 @@ ap_status_t ap_shm_destroy(struct shmem_t *shared)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_shm_malloc(struct shmem_t *shared, ap_size_t size, void **entity)
+ap_status_t ap_shm_malloc(void **entity, struct shmem_t *shared, ap_size_t size)
 {
     entity = mm_malloc(shared->mm, size);
     if (entity == NULL) {
@@ -105,7 +105,7 @@ ap_status_t ap_shm_calloc(struct shmem_t *shared, ap_size_t num,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_shm_realloc(struct shmem_t *shared, ap_size_t size, void **entity)
+ap_status_t ap_shm_realloc(void **entity, struct shmem_t *shared, ap_size_t size)
 {
     void *new;
 
@@ -124,7 +124,7 @@ ap_status_t ap_shm_free(struct shmem_t *shared, void *entity)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_shm_strdup(struct shmem_t *shared, const char *old, char **new)
+ap_status_t ap_shm_strdup(char **new, struct shmem_t *shared, const char *old)
 {
     (*new) = mm_strdup(shared->mm, old);
     if ((*new) == NULL) {

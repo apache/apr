@@ -72,7 +72,7 @@ int main()
     char *testdata;
     char *retdata;
 
-    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -81,7 +81,7 @@ int main()
 
     ap_set_userdata(context, testdata, "TEST", string_cleanup);    
 
-    ap_get_userdata(context, "TEST", (void **)&retdata);
+    ap_get_userdata((void **)&retdata, context, "TEST");
 
     if (!strcmp(testdata, retdata)) {
         fprintf(stdout, "User data is working ok\n");

@@ -88,12 +88,12 @@ ap_status_t ap_create_thread_private(ap_context_t *cont, void (*dest)(void *),
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_thread_private(ap_key_t *, void **)
+ * ap_status_t ap_get_thread_private(void **, ap_key_t *)
  *    Get a pointer to the thread private memory
  * arg 1) The handle for the desired thread private memory 
  * arg 2) The data stored in private memory 
  */
-ap_status_t ap_get_thread_private(struct threadkey_t *key, void **new)
+ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
 {
     (*new) = pthread_getspecific(key->key);
     return APR_SUCCESS;
@@ -139,7 +139,7 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
 ap_status_t ap_get_threadkeydata(struct threadkey_t *threadkey, char *key, void *data)
 {
     if (threadkey != NULL) {
-        return ap_get_userdata(threadkey->cntxt, key, &data);
+        return ap_get_userdata(&data, threadkey->cntxt, key);
     }
     else {
         data = NULL;
@@ -190,8 +190,8 @@ ap_status_t ap_get_os_threadkey(struct threadkey_t *key, ap_os_threadkey_t *thek
  * arg 2) The apr handle we are converting to.
  * arg 3) The os specific handle to convert
  */
-ap_status_t ap_put_os_threadkey(ap_context_t *cont, struct threadkey_t **key,
-                                ap_os_threadkey_t *thekey)
+ap_status_t ap_put_os_threadkey(struct threadkey_t **key, 
+                                ap_os_threadkey_t *thekey, ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
@@ -211,7 +211,7 @@ ap_status_t ap_create_thread_private(ap_context_t *cont, void (*dest)(void *),
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_thread_private(struct threadkey_t *key, void **new)
+ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
 {
     (*new) = NULL;
     return APR_SUCCESS;

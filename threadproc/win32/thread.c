@@ -61,7 +61,7 @@
 #include <process.h>
 
 
-ap_status_t ap_create_threadattr(ap_context_t *cont, struct threadattr_t **new)
+ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
 {
     (*new) = (struct threadattr_t *)ap_palloc(cont, 
               sizeof(struct threadattr_t));
@@ -103,7 +103,7 @@ ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr,
 
     (*new)->cntxt = cont;
     
-    stat = ap_create_context(cont, &(*new)->cntxt);
+    stat = ap_create_context(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }

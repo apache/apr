@@ -67,13 +67,13 @@
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setup_poll(ap_context_t *, ap_int32_t, ap_pollfd_t **)
+ * ap_status_t ap_setup_poll(ap_pollfd_t **, ap_context_t *, ap_int32_t)
  *    Setup the memory required for poll to operate properly.
  * arg 1) The context to operate on.
  * arg 2) The number of socket descriptors to be polled.
  * arg 3) The poll structure to be used. 
  */
-ap_status_t ap_setup_poll(ap_context_t *cont, ap_int32_t num, struct pollfd_t **new)
+ap_status_t ap_setup_poll(struct pollfd_t **new, ap_context_t *cont, ap_int32_t num)
 {
     (*new) = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t));
     (*new)->sock = ap_palloc(cont, sizeof(struct socket_t) * num);
@@ -437,7 +437,7 @@ ap_status_t ap_clear_poll_sockets(struct pollfd_t *aprset, ap_int16_t event)
 ap_status_t ap_get_polldata(struct pollfd_t *pollfd, char *key, void *data)
 {
     if (pollfd != NULL) {
-        return ap_get_userdata(pollfd->cntxt, key, &data);
+        return ap_get_userdata(&data, pollfd->cntxt, key);
     }
     else {
         data = NULL;

@@ -63,7 +63,7 @@
 
 /* A file to put ALL of the accessor functions for struct file_t types. */
 
-ap_status_t ap_get_filename(struct file_t *thefile, char **new)
+ap_status_t ap_get_filename(char **new, struct file_t *thefile)
 {
     if (thefile != NULL) {
         *new = ap_pstrdup(thefile->cntxt, thefile->fname);

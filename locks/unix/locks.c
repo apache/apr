@@ -170,7 +170,7 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_child_init_lock(ap_context_t *, char *, ap_lock_t **)
+ * ap_status_t ap_child_init_lock(ap_lock_t **, ap_context_t *, char *)
  *    Re-open a lock in a child process. 
  * arg 1) The context to operate on.
  * arg 2) A file name to use if the lock mechanism requires one.  This
@@ -183,11 +183,11 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
  *        idea to call it regardless, because it makes the code more
  *        portable. 
  */
-ap_status_t ap_child_init_lock(ap_context_t *cont, char *fname, struct lock_t **lock)
+ap_status_t ap_child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fname)
 {
     ap_status_t stat;
     if ((*lock)->type != APR_CROSS_PROCESS) {
-        if ((stat = child_init_lock(cont, fname, lock)) != APR_SUCCESS) {
+        if ((stat = child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -204,7 +204,7 @@ ap_status_t ap_child_init_lock(ap_context_t *cont, char *fname, struct lock_t **
 ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
-        return ap_get_userdata(lock->cntxt, key, &data);
+        return ap_get_userdata(&data, lock->cntxt, key);
     }
     else {
         data = NULL;
@@ -260,14 +260,14 @@ ap_status_t ap_get_os_lock(struct lock_t *lock, ap_os_lock_t *oslock)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_lock(ap_context_t *, ap_lock_t **, ap_os_lock_t *)
+ * ap_status_t ap_put_os_lock(ap_lock_t **, ap_os_lock_t *, ap_context_t *)
  *    onvert the lock from os specific type to apr type
  * arg 1) The context to use if it is needed.
  * arg 2) The apr lock we are converting to.
  * arg 3) The os specific lock to convert.
  */
-ap_status_t ap_put_os_lock(ap_context_t *cont, struct lock_t **lock, 
-                           ap_os_lock_t *thelock)
+ap_status_t ap_put_os_lock(struct lock_t **lock, ap_os_lock_t *thelock, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

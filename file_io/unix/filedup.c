@@ -60,12 +60,12 @@
 #include <string.h>
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dupfile(ap_file_t *, ap_file_t **)
+ * ap_status_t ap_dupfile(ap_file_t **, ap_file_t *)
  *    duplicate the specified file descriptor.
  * arg 1) The file to duplicate.
  * arg 2) The structure to duplicate into. 
  */         
-ap_status_t ap_dupfile(struct file_t *old_file, struct file_t **new_file)
+ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
     char *buf_oflags;
     (*new_file) = (struct file_t *)ap_palloc(old_file->cntxt,

@@ -74,7 +74,7 @@ ap_status_t socket_cleanup(void *sock)
     }
 }
 
-ap_status_t ap_create_tcp_socket(ap_context_t *cont, struct socket_t **new)
+ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
 {
     (*new) = (struct socket_t *)ap_palloc(cont,sizeof(struct socket_t));
     
@@ -169,7 +169,7 @@ ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
         return APR_SUCCESS; 
 } 
 
-ap_status_t ap_accept(const struct socket_t *sock, struct socket_t **new) 
+ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock) 
 { 
 	struct hostent *hptr;
 	

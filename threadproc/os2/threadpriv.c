@@ -73,7 +73,7 @@ ap_status_t ap_create_thread_private(ap_context_t *cont, void (*dest)(void *),
     return os2errno(DosAllocThreadLocalMemory(1, &((*key)->key)));
 }
 
-ap_status_t ap_get_thread_private(struct threadkey_t *key, void **new)
+ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
 {
     (*new) = (void *)*(key->key);
     return APR_SUCCESS;

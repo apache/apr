@@ -67,12 +67,12 @@
 #include <unistd.h>
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_createprocattr_init(ap_context_t *, ap_procattr_t **)
+ * ap_status_t ap_createprocattr_init(ap_procattr_t **, ap_context_t *)
  *    Create and initialize a new procattr variable 
  * arg 1) The context to use
  * arg 2) The newly created procattr. 
  */
-ap_status_t ap_createprocattr_init(ap_context_t *cont, struct procattr_t **new)
+ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
 {
     (*new) = (struct procattr_t *)ap_palloc(cont, 
               sizeof(struct procattr_t));
@@ -107,20 +107,20 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
 {
     ap_status_t status;
     if (in) {
-        if ((status = ap_create_pipe(attr->cntxt, &attr->child_in, 
-                            &attr->parent_in)) != APR_SUCCESS) {
+        if ((status = ap_create_pipe(&attr->child_in, &attr->parent_in, 
+                                   attr->cntxt)) != APR_SUCCESS) {
             return status;
         }
     } 
     if (out) {
-        if ((status = ap_create_pipe(attr->cntxt, &attr->parent_out, 
-                            &attr->child_out)) != APR_SUCCESS) {
+        if ((status = ap_create_pipe(&attr->parent_out, &attr->child_out, 
+                                   attr->cntxt)) != APR_SUCCESS) {
             return status;
         }
     } 
     if (err) {
-        if ((status = ap_create_pipe(attr->cntxt, &attr->parent_err, 
-                            &attr->child_err)) != APR_SUCCESS) {
+        if ((status = ap_create_pipe(&attr->parent_err, &attr->child_err, 
+                                   attr->cntxt)) != APR_SUCCESS) {
             return status;
         }
     } 
@@ -173,13 +173,13 @@ ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t detach)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_fork_detach(ap_context_t *, ap_proc_t **) 
+ * ap_status_t ap_fork_detach(ap_proc_t **, ap_context_t *) 
  *    This is currently the only non-portable call in APR.  This executes
  *    a standard unix fork.
  * arg 1) The context to use. 
  * arg 2) The resulting process handle. 
  */
-ap_status_t ap_fork(ap_context_t *cont, struct proc_t **proc)
+ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
 {
     int pid;
     
@@ -271,13 +271,13 @@ ap_status_t ap_create_process(ap_context_t *cont, char *progname,
             }
             newargs[i + 3] = NULL;
             if (attr->detached) {
-                ap_detach(attr->cntxt, &pgrp);
+                ap_detach(&pgrp, attr->cntxt);
             }
             execve(SHELL_PATH, newargs, env);
         }
         else {
             if (attr->detached) {
-                ap_detach(attr->cntxt, &pgrp);
+                ap_detach(&pgrp, attr->cntxt);
             }
             execve(progname, args, env);
         }
@@ -300,36 +300,36 @@ ap_status_t ap_create_process(ap_context_t *cont, char *progname,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_childin(ap_proc_t *, ap_file_t **) 
+ * ap_status_t ap_get_childin(ap_file_t **, ap_proc_t *) 
  *    Get the file handle that is assocaited with a child's stdin.
  * arg 1) The process handle that corresponds to the desired child process 
  * arg 2) The returned file handle. 
  */
-ap_status_t ap_get_childin(struct proc_t *proc, ap_file_t **new)
+ap_status_t ap_get_childin(ap_file_t **new, struct proc_t *proc)
 {
     (*new) = proc->attr->parent_in;
     return APR_SUCCESS; 
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_childout(ap_proc_t *, ap_file_t **) 
+ * ap_status_t ap_get_childout(ap_file_t **, ap_proc_t *) 
  *    Get the file handle that is assocaited with a child's stdout.
  * arg 1) The process handle that corresponds to the desired child process 
  * arg 2) The returned file handle. 
  */
-ap_status_t ap_get_childout(struct proc_t *proc, ap_file_t **new)
+ap_status_t ap_get_childout(ap_file_t **new, struct proc_t *proc)
 {
     (*new) = proc->attr->parent_out; 
     return APR_SUCCESS;
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_childerr(ap_proc_t *, ap_file_t **) 
+ * ap_status_t ap_get_childerr(ap_file_t **, ap_proc_t *) 
  *    Get the file handle that is assocaited with a child's stderr.
  * arg 1) The process handle that corresponds to the desired child process 
  * arg 2) The returned file handle. 
  */
-ap_status_t ap_get_childerr(struct proc_t *proc, ap_file_t **new)
+ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
 {
     (*new) = proc->attr->parent_err; 
     return APR_SUCCESS;
@@ -394,8 +394,8 @@ ap_status_t ap_get_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc)
  * arg 2) The apr proc we are converting to.
  * arg 3) The os specific proc to convert
  */
-ap_status_t ap_put_os_proc(ap_context_t *cont, struct proc_t **proc,
-                           ap_os_proc_t *theproc)
+ap_status_t ap_put_os_proc(struct proc_t **proc, ap_os_proc_t *theproc, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

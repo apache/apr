@@ -83,7 +83,7 @@ typedef struct threadkey_t        ap_key_t;
 typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
 
 /* Thread Function definitions */
-ap_status_t ap_create_threadattr(ap_context_t *, ap_threadattr_t **);
+ap_status_t ap_create_threadattr(ap_threadattr_t **, ap_context_t *);
 ap_status_t ap_setthreadattr_detach(ap_threadattr_t *, ap_int32_t);
 ap_status_t ap_getthreadattr_detach(ap_threadattr_t *);
 ap_status_t ap_create_thread(ap_context_t *, ap_threadattr_t *, 
@@ -101,7 +101,7 @@ ap_status_t ap_set_threaddata(ap_thread_t *, void *, char *,
 
 ap_status_t ap_create_thread_private(ap_context_t *, void (*dest)(void *), 
                                      ap_key_t **);
-ap_status_t ap_get_thread_private(ap_key_t *, void **);
+ap_status_t ap_get_thread_private(void **, ap_key_t *);
 ap_status_t ap_set_thread_private(ap_key_t *, void *);
 ap_status_t ap_delete_thread_private(ap_key_t *);
 ap_status_t ap_get_threadkeydata(ap_key_t *, char *, void *);
@@ -109,7 +109,7 @@ ap_status_t ap_set_threadkeydata(ap_key_t *, void *, char *,
                                  ap_status_t (*cleanup) (void *));
 
 /* Process Function definitions */
-ap_status_t ap_createprocattr_init(ap_context_t *, ap_procattr_t **);
+ap_status_t ap_createprocattr_init(ap_procattr_t **, ap_context_t *);
 ap_status_t ap_setprocattr_io(ap_procattr_t *, ap_int32_t, ap_int32_t, 
                               ap_int32_t);
 ap_status_t ap_setprocattr_dir(ap_procattr_t *, char *);
@@ -119,11 +119,11 @@ ap_status_t ap_get_procdata(ap_proc_t *, char *, void *);
 ap_status_t ap_set_procdata(ap_proc_t *, void *, char *,
                             ap_status_t (*cleanup) (void *));
 
-ap_status_t ap_get_childin(ap_proc_t *, ap_file_t **);
-ap_status_t ap_get_childout(ap_proc_t *, ap_file_t **);
-ap_status_t ap_get_childerr(ap_proc_t *, ap_file_t **);
+ap_status_t ap_get_childin(ap_file_t **, ap_proc_t *);
+ap_status_t ap_get_childout(ap_file_t **, ap_proc_t *);
+ap_status_t ap_get_childerr(ap_file_t **, ap_proc_t *);
 
-ap_status_t ap_fork(ap_context_t *, ap_proc_t **);
+ap_status_t ap_fork(ap_proc_t **, ap_context_t *);
 ap_status_t ap_create_process(ap_context_t *, char *, char *const [], char **, 
                               ap_procattr_t *, ap_proc_t **);
 ap_status_t ap_wait_proc(ap_proc_t *, ap_wait_how_e);

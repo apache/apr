@@ -62,7 +62,7 @@
 #include <time.h>
 
 
-ap_status_t ap_setup_poll(ap_context_t *cont, ap_int32_t num, struct pollfd_t **new)
+ap_status_t ap_setup_poll(struct pollfd_t **new, ap_context_t *cont, ap_int32_t num)
 {
     (*new) = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t) * num);
     if ((*new) == NULL) {

@@ -71,14 +71,14 @@ int main(int argc, char *argv[])
     char datarecv[STRLEN] = "Recv data test";
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(NULL, &context) != APR_SUCCESS) {
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Could not create a context\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Creating new socket.......");
-    if (ap_create_tcp_socket(context, &sock) != APR_SUCCESS) {
+    if (ap_create_tcp_socket(&sock, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Setting up socket for polling.......");
-    ap_setup_poll(context, 1, &sdset);
+    ap_setup_poll(&sdset, context, 1);
     ap_add_poll_socket(sdset, sock, APR_POLLIN);
     fprintf(stdout, "OK\n");
     
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Accepting a connection.......");
-    if (ap_accept(sock, &sock2) != APR_SUCCESS) {
+    if (ap_accept(&sock2, sock) != APR_SUCCESS) {
         ap_close_socket(sock);
         fprintf(stderr, "Could not accept connection.\n");
         exit(-1);

@@ -107,7 +107,7 @@ typedef struct iovec_t           ap_iovec_t;
 typedef ap_int32_t               ap_fileperms_t;
 
 /*   Function definitions */
-ap_status_t ap_open(ap_context_t *, const char *, ap_int32_t, ap_fileperms_t, ap_file_t **);
+ap_status_t ap_open(ap_file_t **, ap_context_t *, const char *, ap_int32_t, ap_fileperms_t);
 ap_status_t ap_close(ap_file_t *);
 ap_status_t ap_remove_file(ap_context_t *, char *);
 ap_status_t ap_eof(ap_file_t *);
@@ -124,23 +124,23 @@ ap_status_t ap_flush(ap_file_t *);
 API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
-ap_status_t ap_dupfile(ap_file_t *, ap_file_t **);
+ap_status_t ap_dupfile(ap_file_t **, ap_file_t *);
 ap_status_t ap_getfileinfo(ap_file_t *);
 ap_status_t ap_seek(ap_file_t *, ap_seek_where_t, ap_off_t *);
 
-ap_status_t ap_opendir(ap_context_t *, const char *, ap_dir_t **);
+ap_status_t ap_opendir(ap_dir_t **, ap_context_t *, const char *);
 ap_status_t ap_closedir(ap_dir_t *);
 ap_status_t ap_readdir(ap_dir_t *);
 ap_status_t ap_rewinddir(ap_dir_t *);
 ap_status_t ap_make_dir(ap_context_t *, const char *, ap_fileperms_t);
 ap_status_t ap_remove_dir(ap_context_t *, const char *);
 
-ap_status_t ap_create_pipe(ap_context_t *, ap_file_t **, ap_file_t **);
-ap_status_t ap_create_namedpipe(ap_context_t *, char *, ap_fileperms_t, char **);
+ap_status_t ap_create_pipe(ap_file_t **, ap_file_t **, ap_context_t *);
+ap_status_t ap_create_namedpipe(char **, ap_context_t *, char *, ap_fileperms_t);
 
 /*accessor and general file_io functions. */
-ap_status_t ap_get_filename(ap_file_t *, char **);
-ap_status_t ap_get_dir_filename(ap_dir_t *, char **);
+ap_status_t ap_get_filename(char **, ap_file_t *);
+ap_status_t ap_get_dir_filename(char **, ap_dir_t *);
 ap_status_t ap_get_filedata(ap_file_t *, char *, void *);
 ap_status_t ap_set_filedata(ap_file_t *, void *, char *,
                             ap_status_t (*cleanup) (void *));

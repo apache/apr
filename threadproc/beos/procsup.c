@@ -62,7 +62,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 
-ap_status_t ap_detach(ap_context_t *cont, struct proc_t **new)
+ap_status_t ap_detach(struct proc_t **new, ap_context_t *cont)
 {
     int x;
 

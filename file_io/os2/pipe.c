@@ -59,7 +59,7 @@
 #include "apr_lib.h"
 #include <string.h>
 
-ap_status_t ap_create_pipe(ap_context_t *cont, struct file_t **in, struct file_t **out)
+ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t *cont)
 {
     ULONG filedes[2];
     ULONG rc;
@@ -89,7 +89,7 @@ ap_status_t ap_create_pipe(ap_context_t *cont, struct file_t **in, struct file_t
 
 
 
-ap_status_t ap_create_namedpipe(ap_context_t *cont, char *dirpath, ap_fileperms_t perm, char **new)
+ap_status_t ap_create_namedpipe(char **new, ap_context_t *cont, char *dirpath, ap_fileperms_t perm)
 {
     /* Not yet implemented, interface not suitable */
     return -1;

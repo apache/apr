@@ -58,7 +58,7 @@
 #include "apr_general.h"
 
 
-ap_status_t ap_create_threadattr(ap_context_t *cont, struct threadattr_t **new)
+ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
 {
     ap_status_t stat;
   
@@ -120,7 +120,7 @@ ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr,
 	else
 	    temp = B_NORMAL_PRIORITY;
 
-    stat = ap_create_context(cont, &(*new)->cntxt);
+    stat = ap_create_context(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }

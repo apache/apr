@@ -121,8 +121,8 @@ ap_status_t lock_inter(struct lock_t *lock);
 ap_status_t unlock_inter(struct lock_t *lock);
 ap_status_t destroy_inter_lock(struct lock_t *lock);
 
-ap_status_t child_init_lock(ap_context_t *cont, char *fname,
-			    struct lock_t **lock);
+ap_status_t child_init_lock(struct lock_t **lock, ap_context_t *cont, 
+                            char *fname);
 
 #endif  /* LOCKS_H */
 
