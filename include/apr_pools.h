@@ -179,12 +179,8 @@ APR_DECLARE(void) apr_pool_terminate(void);
  *        of its parent pool's attributes, except the apr_pool_t will
  *        be a sub-pool.
  * @param apr_abort A function to use if the pool cannot allocate more memory.
- * @param flags Flags indicating how the pool should be created:
- *        - POOL_FNEW_ALLOCATOR  will create a new allocator for the pool
- *          instead of using the allocator of the parent.
- *        - POOL_FLOCK will create a mutex for the newly created allocator
- *          (this flag only makes sense in combination with POOL_FNEW_ALLOCATOR)
- *
+ * @param allocator The allocator to use with the new pool.  If NULL the
+ *        allocator of the parent pool will be used.
  */
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                              apr_pool_t *parent,
@@ -196,7 +192,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
  * @param newpool See: apr_pool_create.
  * @param parent See: apr_pool_create.
  * @param abort_fn See: apr_pool_create.
- * @param flags See: apr_pool_create.
+ * @param allocator See: apr_pool_create.
  * @param file_line Where the function is called from.
  *        This is usually APR_POOL__FILE_LINE__.
  * @remark Only available when APR_POOL_DEBUG is defined.
