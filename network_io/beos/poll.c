@@ -234,7 +234,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
         return APR_TIMEUP;
     }
     if ((*nsds) < 0) {
-        return APR_EEXIST;
+        return errno;
     }
     return APR_SUCCESS;
 }
