@@ -150,6 +150,102 @@ static void string_long(CuTest *tc)
     apr_psprintf(p, "%s", s);
 }
 
+/* ### FIXME: apr.h/apr_strings.h should provide these! */
+#define MY_LLONG_MAX (APR_INT64_C(9223372036854775807))
+#define MY_LLONG_MIN (-MY_LLONG_MAX - APR_INT64_C(1))
+
+static void string_strtoi64(CuTest *tc)
+{
+    static const struct {
+        int errnum, base;
+        const char *in, *end;
+        apr_int64_t result;
+    } ts[] = {
+        
+        /* base 10 tests */
+        { 0, 10, "123545", NULL, APR_INT64_C(123545) },
+        { 0, 10, "   123545", NULL, APR_INT64_C(123545) },
+        { 0, 10, "   +123545", NULL, APR_INT64_C(123545) },
+        { 0, 10, "-123545", NULL, APR_INT64_C(-123545) },
+        { 0, 10, "   00000123545", NULL, APR_INT64_C(123545) },
+        { 0, 10, "123545ZZZ", "ZZZ", APR_INT64_C(123545) },
+        { 0, 10, "   123545   ", "   ", APR_INT64_C(123545) },
+
+        /* base 16 tests */
+        { 0, 16, "1E299", NULL, APR_INT64_C(123545) },
+        { 0, 16, "1e299", NULL, APR_INT64_C(123545) },
+        { 0, 16, "0x1e299", NULL, APR_INT64_C(123545) },
+        { 0, 16, "0X1E299", NULL, APR_INT64_C(123545) },
+        { 0, 16, "+1e299", NULL, APR_INT64_C(123545) },
+        { 0, 16, "-1e299", NULL, APR_INT64_C(-123545) },
+        { 0, 16, "   -1e299", NULL, APR_INT64_C(-123545) },
+
+        /* automatic base detection tests */
+        { 0, 0, "123545", NULL, APR_INT64_C(123545) },
+        { 0, 0, "0x1e299", NULL, APR_INT64_C(123545) },
+        { 0, 0, "  0x1e299", NULL, APR_INT64_C(123545) },
+        { 0, 0, "+0x1e299", NULL, APR_INT64_C(123545) },
+        { 0, 0, "-0x1e299", NULL, APR_INT64_C(-123545) },
+
+        /* large number tests */
+        { 0, 10, "8589934605", NULL, APR_INT64_C(8589934605) },
+        { 0, 10, "-8589934605", NULL, APR_INT64_C(-8589934605) },
+        { 0, 16, "0x20000000D", NULL, APR_INT64_C(8589934605) },
+        { 0, 16, "-0x20000000D", NULL, APR_INT64_C(-8589934605) },
+        { 0, 16, "   0x20000000D", NULL, APR_INT64_C(8589934605) },
+        { 0, 16, "   0x20000000D", NULL, APR_INT64_C(8589934605) },
+
+        /* error cases */
+        { ERANGE, 10, "999999999999999999999999999999999", "", MY_LLONG_MAX },
+        { ERANGE, 10, "-999999999999999999999999999999999", "", MY_LLONG_MIN },
+
+#if 0
+        /* C99 doesn't require EINVAL for an invalid range. */
+        { EINVAL, 99, "", (void *)-1 /* don't care */, 0 },
+#endif
+
+        /* some strtoll implementations give EINVAL when no conversion
+         * is performed. */
+        { -1 /* don't care */, 10, "zzz", "zzz", APR_INT64_C(0) },
+        { -1 /* don't care */, 10, "", NULL, APR_INT64_C(0) }
+
+    };
+    int n;
+
+    for (n = 0; n < sizeof(ts)/sizeof(ts[0]); n++) {
+        char *end = "end ptr not changed";
+        apr_int64_t result;
+        int errnum;
+        
+        errno = 0;
+        result = apr_strtoi64(ts[n].in, &end, ts[n].base);
+        errnum = errno;
+
+        CuAssert(tc,
+                 apr_psprintf(p, "for '%s': result was %" APR_INT64_T_FMT 
+                              " not %" APR_INT64_T_FMT, ts[n].in,
+                              result, ts[n].result),
+                 result == ts[n].result);
+        
+        if (ts[n].errnum != -1) {
+            CuAssert(tc,
+                     apr_psprintf(p, "for '%s': errno was %d not %d", ts[n].in,
+                                  errnum, ts[n].errnum),
+                     ts[n].errnum == errnum);
+        }
+
+        if (ts[n].end == NULL) {
+            /* end must point to NUL terminator of .in */
+            CuAssertPtrEquals(tc, ts[n].in + strlen(ts[n].in), end);
+        } else if (ts[n].end != (void *)-1) {
+            CuAssert(tc,
+                     apr_psprintf(p, "for '%s', end was '%s' not '%s'",
+                                  ts[n].in, end, ts[n].end),
+                     strcmp(ts[n].end, end) == 0);
+        }
+    }
+}
+
 CuSuite *teststr(void)
 {
     CuSuite *suite = CuSuiteNew("Strings");
@@ -160,6 +256,7 @@ CuSuite *teststr(void)
     SUITE_ADD_TEST(suite, test_strtok);
     SUITE_ADD_TEST(suite, string_error);
     SUITE_ADD_TEST(suite, string_long);
+    SUITE_ADD_TEST(suite, string_strtoi64);
 
     return suite;
 }
