@@ -83,15 +83,6 @@ diff -u -d -b -w -u -r1.69 httpd.h
      /* Info about the request itself... we begin with stuff that only
       * protocol.c should ever touch...
       */
-@@ -725,7 +729,7 @@
-     struct ap_rr_xlate *rrx;
- #endif /*APACHE_XLATE*/
- 
--    struct apr_filter_t *filters;
-+    struct ap_filter_t *filters;
- 
- /* Things placed at the end of the record to avoid breaking binary
-  * compatibility.  It would be nice to remember to reorder the entire
 Index: src/include/util_filter.h
 ===================================================================
 RCS file: /home/cvs/apache-2.0/src/include/util_filter.h,v
