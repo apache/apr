@@ -58,7 +58,9 @@
 #include "locks.h"
 #include "apr_portable.h"
 
-ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type, char *fname, struct lock_t **lock)
+ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type, 
+                           ap_lockscope_e scope, char *fname, 
+                           struct lock_t **lock)
 {
     struct lock_t *newlock;
     SECURITY_ATTRIBUTES sec;
@@ -132,10 +134,10 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_lockdata(struct lock_t *lock, void *data)
+ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
-        return ap_get_userdata(lock->cntxt, &data);
+        return ap_get_userdata(lock->cntxt, key, &data);
     }
     else {
         data = NULL;
@@ -143,10 +145,11 @@ ap_status_t ap_get_lockdata(struct lock_t *lock, void *data)
     }
 }
 
-ap_status_t ap_set_lockdata(struct lock_t *lock, void *data)
+ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
 {
     if (lock != NULL) {
-        return ap_set_userdata(lock->cntxt, data);
+        return ap_set_userdata(lock->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
