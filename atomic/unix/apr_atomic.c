@@ -108,10 +108,11 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
 static apr_uint32_t inline intel_atomic_add32(volatile apr_uint32_t *mem, 
                                               apr_uint32_t val)
 {
-    asm volatile ("lock; xaddl %1, (%2)"                              
-                  : "=r"(val)          /* output, same as 1st input */
-                  : "0"(val), "r"(mem) /* inputs */
-                  : "%1","memory");    /* tell gcc they are clobbered */
+    asm volatile ("lock; xaddl %0,%1"
+                  : "+r"(val), "+m"(*mem) /* outputs and inputs */
+                  :
+                  : "memory");            /*XXX is this needed?  it knows that
+                                                *mem is an output */
     return val;
 }
 
