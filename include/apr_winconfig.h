@@ -82,6 +82,7 @@
 #define HAVE_CONIO_H 1
 #define HAVE_MALLOC_H 1
 #define HAVE_STDLIB_H 1
+#define HAVE_LIMITS_H 1
 
 typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
 
