@@ -491,6 +491,7 @@ AC_ARG_ENABLE(dso,
     if test "$tempdso" = "no"; then
       AC_CHECK_LIB(dld, shl_load, [ tempdso="yes" LIBS="$LIBS -ldld" ],
                    tempdso="no")
+    fi
     if test "$tempdso" = "no"; then
         case $OS in
             *os390|*-os2*)
