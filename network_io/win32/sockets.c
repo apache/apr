@@ -329,7 +329,7 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
     }
     if (!memcmp(sock->local_addr->ipaddr_ptr,
                 generic_inaddr_any,
-                sock->local_addr->ipaddr_len) {
+                sock->local_addr->ipaddr_len)) {
         /* not bound to specific local interface; connect() had to assign
          * one for the socket
          */
