@@ -5,7 +5,4 @@ DISTCLEAN_TARGETS = rules.mk
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-x-local-all x-local-depend x-local-clean:
-	@echo "Congratulations -- make has successfully completed"
-
 # DO NOT REMOVE
