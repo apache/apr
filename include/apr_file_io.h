@@ -57,6 +57,7 @@
 #define APR_FILE_IO_H
 
 #include "apr_general.h"
+#include "apr_time.h"
 #include "apr_errno.h"
 #if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
@@ -101,13 +102,28 @@ typedef enum {APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 
 #define APR_OS_DEFAULT 0xFFF
 
-/* should be same as whence type in lseek, POSIZ defines this as int */
+/* should be same as whence type in lseek, POSIX defines this as int */
 typedef ap_int32_t       ap_seek_where_t;
 
 typedef struct file_t            ap_file_t;
+typedef struct ap_finfo_t        ap_finfo_t;
 typedef struct dir_t             ap_dir_t;
 typedef struct iovec_t           ap_iovec_t;
 typedef ap_int32_t               ap_fileperms_t;
+typedef uid_t                    ap_uid_t;
+typedef gid_t                    ap_gid_t;
+typedef ino_t                    ap_ino_t;
+
+struct ap_finfo_t {
+    ap_fileperms_t protection;
+    ap_uid_t user;
+    ap_gid_t group;
+    ap_ino_t inode;
+    ap_off_t size;
+    ap_time_t *atime;
+    ap_time_t *mtime;
+    ap_time_t *ctime;
+};
 
 /*   Function definitions */
 ap_status_t ap_open(ap_file_t **, const char *, ap_int32_t, ap_fileperms_t, ap_context_t *);
@@ -131,8 +147,8 @@ API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 
 ap_status_t ap_make_iov(ap_iovec_t **, struct iovec *, ap_context_t *);
 ap_status_t ap_dupfile(ap_file_t **, ap_file_t *);
-ap_status_t ap_getfileinfo(ap_file_t *);
-ap_status_t ap_stat(ap_file_t **thefile, const char *fname, ap_context_t *cont);
+ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
+ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont);
 ap_status_t ap_seek(ap_file_t *, ap_seek_where_t, ap_off_t *);
 
 ap_status_t ap_opendir(ap_dir_t **, const char *, ap_context_t *);
@@ -158,12 +174,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *, ap_dir_t *);
 ap_status_t ap_dir_entry_mtime(time_t *, ap_dir_t *);
 ap_status_t ap_dir_entry_ftype(ap_filetype_e *, ap_dir_t *);
 
-ap_status_t ap_get_filesize(ap_ssize_t *, ap_file_t *);
-ap_status_t ap_get_filetype(ap_filetype_e *, ap_file_t *);
-ap_status_t ap_get_fileperms(ap_fileperms_t *, ap_file_t *);
-ap_status_t ap_get_fileatime(time_t *, ap_file_t *);
-ap_status_t ap_get_filectime(time_t *, ap_file_t *);
-ap_status_t ap_get_filemtime(time_t *, ap_file_t *);
+ap_status_t ap_get_filetype(ap_filetype_e *, ap_fileperms_t);
 
 #ifdef __cplusplus
 }

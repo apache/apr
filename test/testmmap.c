@@ -71,6 +71,7 @@ int main()
     ap_context_t *context;
     ap_mmap_t *themmap = NULL;
     ap_file_t *thefile = NULL;
+    ap_finfo_t finfo;
     ap_int32_t flag = APR_READ;
     char *file1;
     ap_ssize_t filesize;
@@ -98,12 +99,12 @@ int main()
     }
     
     fprintf(stderr, "Getting file size...................");
-    if (ap_get_filesize(&filesize, thefile) != APR_SUCCESS) {
+    if (ap_getfileinfo(&finfo, thefile) != APR_SUCCESS) {
         perror("Didn't open file");
         exit(-1);
     }
     else {
-        fprintf(stdout, "%d bytes\n", filesize);
+        fprintf(stdout, "%d bytes\n", finfo.size);
     }  
 
     fprintf(stdout,"Trying to mmap the open file........");

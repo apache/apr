@@ -104,13 +104,6 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
     }
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->buffered = old_file->buffered;
-    (*new_file)->protection = old_file->protection;
-    (*new_file)->user = old_file->user;
-    (*new_file)->group = old_file->group;
-    (*new_file)->size = old_file->size;
-    (*new_file)->atime = old_file->atime;    
-    (*new_file)->mtime = old_file->mtime;
-    (*new_file)->ctime = old_file->ctime;
     ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;

@@ -63,20 +63,24 @@
  *    get the specified file's stats..
  * arg 1) The file to get information about. 
  */ 
-ap_status_t ap_getfileinfo(struct file_t *thefile)
+ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
 {
     struct stat info;
     int rv = stat(thefile->fname, &info);
 
     if (rv == 0) {
-        thefile->protection = info.st_mode;
-        thefile->user = info.st_uid;
-        thefile->group = info.st_gid;
-        thefile->size = info.st_size;
-        thefile->atime = info.st_atime;
-        thefile->mtime = info.st_mtime;
-        thefile->ctime = info.st_ctime;
-        thefile->stated = 1; 
+        finfo->protection = info.st_mode;
+        finfo->user = info.st_uid;
+        finfo->group = info.st_gid;
+        finfo->size = info.st_size;
+        finfo->inode = info.st_ino;
+        ap_make_time(&finfo->atime, thefile->cntxt);
+        ap_set_curtime(finfo->atime, info.st_atime);
+        ap_make_time(&finfo->mtime, thefile->cntxt);
+        ap_set_curtime(finfo->mtime, info.st_mtime);
+        ap_make_time(&finfo->ctime, thefile->cntxt);
+        ap_set_curtime(finfo->ctime, info.st_ctime);
+
         return APR_SUCCESS;
     }
     else {
@@ -92,35 +96,23 @@ ap_status_t ap_getfileinfo(struct file_t *thefile)
  * arg 2) The name of the file to stat.
  * arg 3) the context to use to allocate the new file. 
  */ 
-ap_status_t ap_stat(struct file_t **thefile, const char *fname, ap_context_t *cont)
+ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
 {
     struct stat info;
     int rv = stat(fname, &info);
 
     if (rv == 0) {
-        if ((*thefile) == NULL) {
-            /* Only allocate more space and initialize the object if it is
-             * NULL when passed in.
-             */ 
-            (*thefile) = ap_pcalloc(cont, sizeof(struct file_t));
-            if ((*thefile) == NULL) {
-                return APR_ENOMEM;
-            }
-            (*thefile)->cntxt = cont;
-            ap_register_cleanup((*thefile)->cntxt, (void *)(*thefile),
-                                file_cleanup, ap_null_cleanup);
-            (*thefile)->fname = ap_pstrdup(cont, fname);
-            (*thefile)->filehand = NULL;
-            (*thefile)->filedes = -1;
-        }
-        (*thefile)->protection = info.st_mode;
-        (*thefile)->user = info.st_uid;
-        (*thefile)->group = info.st_gid;
-        (*thefile)->size = info.st_size;
-        (*thefile)->atime = info.st_atime;
-        (*thefile)->mtime = info.st_mtime;
-        (*thefile)->ctime = info.st_ctime;
-        (*thefile)->stated = 1; 
+        finfo->protection = info.st_mode;
+        finfo->user = info.st_uid;
+        finfo->group = info.st_gid;
+        finfo->size = info.st_size;
+        finfo->inode = info.st_ino;
+        ap_make_time(&finfo->atime, cont);
+        ap_set_curtime(finfo->atime, info.st_atime);
+        ap_make_time(&finfo->mtime, cont);
+        ap_set_curtime(finfo->mtime, info.st_mtime);
+        ap_make_time(&finfo->ctime, cont);
+        ap_set_curtime(finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {
