@@ -108,7 +108,7 @@ extern "C" {
  * This turns on a print of the ancestory of the SMS when
  * creating/destroying an SMS so it's place in the world can be seen.
  */
- #define APR_DEBUG_SHOW_STRUCTURE      1
+/* #define APR_DEBUG_SHOW_STRUCTURE      1 */
 
 /* APR_DEBUG_SHOW_FUNCTIONS
  * This turns on debug printing of every call to i
@@ -119,13 +119,13 @@ extern "C" {
  * Format of output is
  *    CREATE - sms 0x0000000 [STANDARD] has been created
  */
- #define APR_DEBUG_SHOW_FUNCTIONS     1
+/*  #define APR_DEBUG_SHOW_FUNCTIONS     1 */
 
 /* APR_DEBUG_TAG_SMS
  * Turn on the ability to give an SMS a "tag" that can be used to identify
  * it.
  */
- #define APR_DEBUG_TAG_SMS    1 
+/*  #define APR_DEBUG_TAG_SMS    1 */ 
 
 /**
  * @package APR memory system
