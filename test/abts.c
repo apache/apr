@@ -85,10 +85,11 @@ static void end_suite(abts_suite *suite)
     }
 }
 
-abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
+abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
 {
     sub_suite *subsuite;
     char *p;
+    const char *suite_name;
     curr_char = 0;
     
     /* Only end the suite if we actually ran it */
@@ -100,7 +101,12 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name)
     subsuite->num_test = 0;
     subsuite->failed = 0;
     subsuite->next = NULL;
-    p = strchr(suite_name, '.');
+    /* suite_name_full is the complete path of the source code; strip out. */
+    suite_name = strrchr(suite_name_full, '/') + 1;
+    if (!suite_name) {
+        suite_name = suite_name_full;
+    }
+    p = strrchr(suite_name, '.');
     if (p)
         subsuite->name = memcpy(calloc(p - suite_name + 1, 1),
                                 suite_name, p - suite_name);
