@@ -88,6 +88,8 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
     dup_file->buffered = old_file->buffered;
     dup_file->isopen = old_file->isopen;
     dup_file->flags = old_file->flags;
+    /* TODO - dup pipes correctly */
+    dup_file->pipe = old_file->pipe;
 
     if (*new_file == NULL) {
         ap_register_cleanup(dup_file->cntxt, dup_file, apr_file_cleanup,
