@@ -103,30 +103,84 @@ BOOLEAN is_exe(const char* fname, ap_pool_t *cont) {
 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 {
-    /* TODO: 
-     * Windows should call GetFileInformationByHandle(), which is similar 
-     * to fstat(), for the best performance. Then we would need to map the 
-     * BY_HANDLE_FILE_INFORMATION to ap_finfo_t. 
-     */
-    struct stat info;
-    int rv = stat(thefile->fname, &info);
+    BY_HANDLE_FILE_INFORMATION FileInformation;
+    DWORD FileType;
 
-    if (rv == 0) {
-        finfo->protection = info.st_mode;
-        finfo->filetype = filetype_from_mode(info.st_mode);
-        finfo->user = info.st_uid;
-        finfo->group = info.st_gid;
-        finfo->size = info.st_size;
-        finfo->inode = info.st_ino;
-        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
-        return APR_SUCCESS;
+    if (!GetFileInformationByHandle(thefile->filehand, &FileInformation)) {
+        return GetLastError();
+    }
+
+    FileType = GetFileType(thefile->filehand);
+    if (!FileType) {
+        return GetLastError();
+    }
+
+    /* If my rudimentary knowledge of posix serves... inode is the absolute
+     * id of the file (uniquifier) that is returned by NT as follows:
+     * user and group could be related as SID's, although this would ensure
+     * it's own unique set of issues.  All three fields are significantly
+     * longer than the posix compatible kernals would ever require.
+     * TODO: Someday solve this, and fix the executable flag below the
+     * right way with a security permission test (as well as r/w flags.)
+     *
+     *     dwVolumeSerialNumber
+     *     nFileIndexHigh
+     *     nFileIndexLow
+     */
+    finfo->user = 0;
+    finfo->group = 0;
+    finfo->inode = 0;
+
+    /* Filetype - Directory or file: this case _will_ never happen */
+    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        finfo->protection = S_IFDIR;
+        finfo->filetype = APR_DIR;
+    }
+    else if (FileType == FILE_TYPE_DISK) {
+        finfo->protection = S_IFREG;
+        finfo->filetype = APR_REG;
+    }
+    else if (FileType == FILE_TYPE_CHAR) {
+        finfo->protection = S_IFCHR;
+        finfo->filetype = APR_CHR;
+    }
+    else if (FileType == FILE_TYPE_PIPE) {
+        /* obscure ommission in msvc... missing declaration sans underscore */
+#ifdef _MSC_VER
+        finfo->protection = _S_IFIFO;
+#else
+        finfo->protection = S_IFIFO;
+#endif
     }
     else {
-        return errno;
+        finfo->protection = 0;
+        finfo->filetype = APR_NOFILE;
     }
+
+    /* Read, write execute for owner
+     * In the Win32 environment, anything readable is executable
+     * (well, not entirely 100% true, but I'm looking for a way 
+     * to get at the acl permissions in simplified fashion.)
+     */
+    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
+        finfo->protection |= S_IREAD | S_IEXEC;
+    }
+    else {
+        finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
+    }
+    
+    /* File times */
+    FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
+    FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
+    FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
+
+    /* File size 
+     * Note: This cannot handle files greater than can be held by an int */
+    finfo->size = FileInformation.nFileSizeLow;
+
+    return APR_SUCCESS;
 }
+
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
 {
     /* WIN32_FILE_ATTRIBUTE_DATA is an exact subset of the first 
@@ -175,27 +229,41 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
        return rv;
     }
 
-    /* Filetype - Directory or file? */
+    /* Filetype - Directory or file?
+     * Short of opening the handle to the file, the 'FileType' appears
+     * to be unknowable (in any trustworthy or consistent sense.)
+     */
     if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        finfo->protection |= S_IFDIR;
+        finfo->protection = S_IFDIR;
         finfo->filetype = APR_DIR;
     }
     else {
-        finfo->protection |= S_IFREG;
+        finfo->protection = S_IFREG;
         finfo->filetype = APR_REG;
     }
-    /* Read, write execute for owner */
+    
+    /* Read, write execute for owner
+     * In the Win32 environment, anything readable is executable
+     * (well, not entirely 100% true, but I'm looking for a way 
+     * to get at the acl permissions in simplified fashion.)
+     */
     if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
-        finfo->protection |= S_IREAD;
+        finfo->protection |= S_IREAD | S_IEXEC;
     }
     else {
-        finfo->protection |= S_IREAD;
-        finfo->protection |= S_IWRITE;
+        finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
     }
-    /* Is this an executable? Guess based on the file extension. */
-    if (is_exe(fname, cont)) {
-        finfo->protection |= S_IEXEC;
-    }
+
+    /* Is this an executable? Guess based on the file extension. 
+     * This is a rather silly test, IMHO... we are looking to test
+     * if the user 'may' execute a file (permissions), 
+     * not if the filetype is executable.
+     */
+/*  if (is_exe(fname, cont)) {
+ *       finfo->protection |= S_IEXEC;
+ *  }
+ */
+    
     /* File times */
     FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
     FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
