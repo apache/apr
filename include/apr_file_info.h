@@ -291,6 +291,25 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  */
 #define APR_FILEPATH_TRUENAME       0x20
 
+/**
+ * Extract the rootpath from the given filepath
+ * @param rootpath the root file path returned with APR_SUCCESS or APR_EINCOMPLETE
+ * @param filepath the pathname to parse for it's root component
+ * @param p the pool to allocate the new path string from
+ * @deffunc apr_status_t apr_filepath_root(const char **rootpath, const char **inpath, apr_pool_t *p)
+ * @tip on return, filepath now points to the character following the root.
+ * In the simplest example, given a filepath of "/foo", returns the rootpath
+ * of "/" and filepath points at "foo".  This is far more complex on other 
+ * platforms, which even changes alternate format of rootpath to canonical
+ * form.  The function returns APR_ERELATIVE if filepath isn't rooted (an
+ * error), APR_EINCOMPLETE if the root path is ambigious (but potentially
+ * legitimate, e.g. "/" on Windows is incomplete because it doesn't specify
+ * the drive letter), or APR_EBADPATH if the root is simply invalid.
+ * APR_SUCCESS is returned if filepath is an absolute path.
+ */
+APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
+                                            const char **filepath, 
+                                            apr_pool_t *p);
 
 /**
  * Merge additional file path onto the previously processed rootpath
@@ -301,10 +320,28 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * @param p the pool to allocate the new path string from
  * @deffunc apr_status_t apr_filepath_merge(char **newpath, const char *rootpath, const char *addpath, apr_int32_t flags, apr_pool_t *p)
  */                        
-APR_DECLARE(apr_status_t) 
-                apr_filepath_merge(char **newpath, const char *rootpath,
-                                   const char *addpath, apr_int32_t flags,
-                                   apr_pool_t *p);
+APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
+                                             const char *rootpath,
+                                             const char *addpath, 
+                                             apr_int32_t flags,
+                                             apr_pool_t *p);
+
+/**
+ * Return the default file path (for relative file names)
+ * @param path the default path string returned
+ * @param p the pool to allocate the default path string from
+ * @deffunc apr_status_t apr_filepath_get(char **path, apr_pool_t *p)
+ */
+APR_DECLARE(apr_status_t) apr_filepath_get(char **path, apr_pool_t *p);
+
+/**
+ * Set the default file path (for relative file names)
+ * @param path the default path returned
+ * @param p the pool to allocate any working storage
+ * @deffunc apr_status_t apr_filepath_get(char **defpath, apr_pool_t *p)
+ */
+APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p);
+
 
 #ifdef __cplusplus
 }
