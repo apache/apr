@@ -175,7 +175,6 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }
 
         *nbytes = byteswritten;
-        thefile->validstatus = FALSE;
         return APR_SUCCESS;
     }
 }
@@ -206,7 +205,6 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssiz
     }
     else {
         *iocnt = bytes;
-        thefile->validstatus = FALSE;
         return APR_SUCCESS;
     }
 }
@@ -229,7 +227,6 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
         return os2errno(rc);
     }
     
-    thefile->validstatus = FALSE;
     return APR_SUCCESS;
 }
 

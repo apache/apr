@@ -87,7 +87,6 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 
     dup_file->fname = ap_pstrdup(dup_file->cntxt, old_file->fname);
     dup_file->buffered = old_file->buffered;
-    dup_file->status = old_file->status;
     dup_file->isopen = old_file->isopen;
     dup_file->flags = old_file->flags;
 

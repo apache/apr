@@ -53,48 +53,110 @@
  *
  */
 
+#define INCL_DOS
+#define INCL_DOSERRORS
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include <sys/time.h>
-
-#define INCL_DOS
 #include <os2.h>
 
 
-long os2date2unix( FDATE os2date, FTIME os2time )
+static void FS3_to_finfo(ap_finfo_t *finfo, FILESTATUS3 *fstatus)
 {
-  struct tm tmpdate;
+    finfo->protection = (fstatus->attrFile & FILE_READONLY) ? 0555 : 0777;
 
-  memset(&tmpdate, 0, sizeof(tmpdate));
-  tmpdate.tm_hour  = os2time.hours;
-  tmpdate.tm_min   = os2time.minutes;
-  tmpdate.tm_sec   = os2time.twosecs * 2;
+    if (fstatus->attrFile & FILE_DIRECTORY)
+        finfo->filetype = APR_DIR;
+    else
+        finfo->filetype = APR_REG;
 
-  tmpdate.tm_mday  = os2date.day;
-  tmpdate.tm_mon   = os2date.month - 1;
-  tmpdate.tm_year  = os2date.year + 80;
-  tmpdate.tm_isdst = -1;
-
-  return mktime( &tmpdate );
+    finfo->user = 0;
+    finfo->group = 0;
+    finfo->inode = 0;
+    finfo->size = fstatus->cbFile;
+    ap_os2_time_to_ap_time(&finfo->atime, fstatus->fdateLastAccess, fstatus->ftimeLastAccess );
+    ap_os2_time_to_ap_time(&finfo->mtime, fstatus->fdateLastWrite,  fstatus->ftimeLastWrite );
+    ap_os2_time_to_ap_time(&finfo->ctime, fstatus->fdateCreation,   fstatus->ftimeCreation );
 }
 
 
 
-ap_status_t ap_getfileinfo(struct file_t *thefile)
+static ap_status_t handle_type(ap_filetype_e *ftype, HFILE file)
 {
-    ULONG rc; 
-    
+    ULONG filetype, fileattr, rc;
+
+    rc = DosQueryHType(file, &filetype, &fileattr);
+
+    if (rc == 0) {
+        switch (filetype & 0xff) {
+        case 0:
+            *ftype = APR_REG;
+            break;
+
+        case 1:
+            *ftype = APR_CHR;
+            break;
+
+        case 2:
+            *ftype = APR_PIPE;
+            break;
+        }
+
+        return APR_SUCCESS;
+    }
+    return os2errno(rc);
+}
+
+
+
+ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
+{
+    ULONG rc;
+    FILESTATUS3 fstatus;
+
     if (thefile->isopen)
-        rc = DosQueryFileInfo(thefile->filedes, FIL_STANDARD, &thefile->status, sizeof(thefile->status));
+        rc = DosQueryFileInfo(thefile->filedes, FIL_STANDARD, &fstatus, sizeof(fstatus));
     else
-        rc = DosQueryPathInfo(thefile->fname, FIL_STANDARD, &thefile->status, sizeof(thefile->status));
+        rc = DosQueryPathInfo(thefile->fname, FIL_STANDARD, &fstatus, sizeof(fstatus));
+
+    if (rc == 0) {
+        FS3_to_finfo(finfo, &fstatus);
+
+        if (finfo->filetype == APR_REG) {
+            if (thefile->isopen) {
+                return handle_type(&finfo->filetype, thefile->filedes);
+            }
+        } else {
+            return APR_SUCCESS;
+        }
+    }
+
+    finfo->protection = 0;
+    finfo->filetype = APR_NOFILE;
+    return os2errno(rc);
+}
+
+
+
+ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
+{
+    ULONG rc;
+    FILESTATUS3 fstatus;
+    
+    finfo->protection = 0;
+    finfo->filetype = APR_NOFILE;
+    rc = DosQueryPathInfo(fname, FIL_STANDARD, &fstatus, sizeof(fstatus));
     
     if (rc == 0) {
-        thefile->validstatus = TRUE;
+        FS3_to_finfo(finfo, &fstatus);
+        return APR_SUCCESS;
+    } else if (rc == ERROR_INVALID_ACCESS) {
+        memset(finfo, 0, sizeof(ap_finfo_t));
+        finfo->protection = 0444;
+        finfo->filetype = APR_CHR;
         return APR_SUCCESS;
     }
     
-    thefile->validstatus = FALSE;
     return os2errno(rc);
 }

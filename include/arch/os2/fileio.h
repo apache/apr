@@ -72,8 +72,6 @@ struct file_t {
     char * fname;
     int isopen;
     int buffered;
-    FILESTATUS3 status;
-    int validstatus;
     int eof_hit;
     ap_int32_t flags;
     
@@ -99,7 +97,7 @@ struct iovec_t {
 };
 
 ap_status_t file_cleanup(void *);
-long os2date2unix( FDATE os2date, FTIME os2time );
+ap_status_t ap_os2_time_to_ap_time(ap_time_t *result, FDATE os2date, FTIME os2time);
 int os2errno( ULONG oserror );
 
 #endif  /* ! FILE_IO_H */

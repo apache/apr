@@ -104,33 +104,6 @@ mode_t get_fileperms(ap_fileperms_t mode)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filetype(ap_filetype_e, ap_file_t *)
- *    Return the type of the current file.
- * arg 1) The currently open file.
- * arg 2) The file type
- */                     
-ap_status_t ap_get_filetype(ap_filetype_e *type, ap_fileperms_t perms)
-{    
-    if (S_ISREG(perms))
-        *type = APR_REG;
-    if (S_ISDIR(perms))
-        *type = APR_DIR;
-    if (S_ISCHR(perms))
-        *type = APR_CHR;
-    if (S_ISBLK(perms))
-        *type = APR_BLK;
-    if (S_ISFIFO(perms))
-        *type = APR_PIPE;
-    if (S_ISLNK(perms))
-        *type = APR_LNK;
-#ifndef BEOS
-    if (S_ISSOCK(perms))
-        *type = APR_SOCK;
-#endif
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
  * ap_status_t ap_get_filedata(void **, char *key, ap_file_t *)
  *    Return the data associated with the current file.
  * arg 1) The currently open file.

@@ -81,7 +81,6 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     *new = dafile;
     dafile->cntxt = cntxt;
     dafile->isopen = FALSE;
-    dafile->validstatus = FALSE;
     dafile->eof_hit = FALSE;
     dafile->buffer = NULL;
     dafile->flags = flag;
@@ -203,7 +202,6 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, ap_conte
     (*file)->filedes = *dafile;
     (*file)->isopen = TRUE;
     (*file)->buffered = FALSE;
-    (*file)->validstatus = FALSE;
     (*file)->eof_hit = FALSE;
     (*file)->flags = 0;
     return APR_SUCCESS;
@@ -232,7 +230,6 @@ ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
     (*thefile)->fname = NULL;
     (*thefile)->isopen = TRUE;
     (*thefile)->buffered = FALSE;
-    (*thefile)->validstatus = FALSE;
     (*thefile)->eof_hit = FALSE;
     (*thefile)->flags = 0;
 

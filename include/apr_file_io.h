@@ -67,7 +67,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK, 
+typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK, 
               APR_SOCK} ap_filetype_e; 
 
 /* Flags for ap_open */
@@ -116,6 +116,7 @@ typedef ino_t                    ap_ino_t;
 
 struct ap_finfo_t {
     ap_fileperms_t protection;
+    ap_filetype_e filetype;
     ap_uid_t user;
     ap_gid_t group;
     ap_ino_t inode;
@@ -173,8 +174,6 @@ ap_status_t ap_set_filedata(ap_file_t *, void *, char *,
 ap_status_t ap_dir_entry_size(ap_ssize_t *, ap_dir_t *);
 ap_status_t ap_dir_entry_mtime(time_t *, ap_dir_t *);
 ap_status_t ap_dir_entry_ftype(ap_filetype_e *, ap_dir_t *);
-
-ap_status_t ap_get_filetype(ap_filetype_e *, ap_fileperms_t);
 
 #ifdef __cplusplus
 }
