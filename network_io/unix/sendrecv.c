@@ -410,7 +410,7 @@ static int include_hdrs_in_length(void)
 {
 #ifdef HAVE_SYS_SYSCTL_H
 /* this assumes: 
- *   if the header exits, so does the sysctlbyname() syscall, and 
+ *   if the header exists, so does the sysctlbyname() syscall, and 
  *   if the header doesn't exist, the kernel is really old
  */
 
