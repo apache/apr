@@ -113,6 +113,9 @@ apr.exp: exports.c export_vars.h
 dox:
 	doxygen $(top_srcdir)/docs/doxygen.conf
 
+gcov: 
+	build/run-gcov.sh
+
 check: $(TARGET_LIB)
 	(cd test && $(MAKE) check)
 
