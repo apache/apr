@@ -81,11 +81,14 @@ extern "C" {
 #define APR_TRUNCATE   16          /* Open the file and truncate to 0 length */
 #define APR_BINARY     32          /* Open the file in binary mode */
 #define APR_EXCL       64          /* Open should fail if APR_CREATE and file
-				    exists. */
+				      exists. */
 #define APR_BUFFERED   128         /* Open the file for buffered I/O */
 #define APR_DELONCLOSE 256         /* Delete the file after close */
 #define APR_XTHREAD    512         /* Platform dependent tag to open the file 
                                       for use across multiple threads */
+#define APR_SHARELOCK  1024        /* Platform dependent support for higher
+                                      level locked read/write access to support
+                                      writes across process/machines */
 
 /* flags for apr_file_seek */
 #define APR_SET SEEK_SET
