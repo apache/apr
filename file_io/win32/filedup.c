@@ -61,33 +61,42 @@
 
 ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {
-    int have_file = 0;
     HANDLE hCurrentProcess = GetCurrentProcess();
 
     if ((*new_file) == NULL) {
-        (*new_file) = (struct file_t *)ap_pcalloc(old_file->cntxt,
-                                                  sizeof(struct file_t));
+        (*new_file) = (struct file_t *) ap_pcalloc(old_file->cntxt,
+                                                   sizeof(struct file_t));
         if ((*new_file) == NULL) {
             return APR_ENOMEM;
         }
-    } else {
-        have_file = 1;
-    }
-
-    (*new_file)->cntxt = old_file->cntxt;
-    if (have_file) {
-        /* dup2 is not supported with native Windows handles */
-        return APR_ENOTIMPL;
-    }
-    else {
         if (!DuplicateHandle(hCurrentProcess, old_file->filehand, 
                              hCurrentProcess,
                              &(*new_file)->filehand, 0, FALSE, 
                              DUPLICATE_SAME_ACCESS)) {
             return GetLastError();
         }
+    } else {
+        HANDLE hFile = (*new_file)->filehand;
+        /* dup2 is not supported with native Windows handles. We 
+         * can, however, emulate dup2 for the standard i/o handles.
+         */
+        if (hFile == GetStdHandle(STD_ERROR_HANDLE)) {
+            if (!SetStdHandle(STD_ERROR_HANDLE, old_file->filehand))
+                return GetLastError();
+        }
+        else if (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) {
+            if (!SetStdHandle(STD_OUTPUT_HANDLE, old_file->filehand))
+                return GetLastError();
+        }
+        else if (hFile == GetStdHandle(STD_INPUT_HANDLE)) {
+            if (!SetStdHandle(STD_INPUT_HANDLE, old_file->filehand))
+                return GetLastError();
+        }
+        else
+            return APR_ENOTIMPL;
     }
 
+    (*new_file)->cntxt = old_file->cntxt;
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->demonfname = ap_pstrdup(old_file->cntxt, old_file->demonfname);
     (*new_file)->lowerdemonfname = ap_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
@@ -102,6 +111,7 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
     (*new_file)->ctime = old_file->ctime;
     ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
                         ap_null_cleanup);
+
     return APR_SUCCESS;
 }
 
