@@ -458,7 +458,8 @@ void SHA256_Update(SHA256_CTX* context, const sha2_byte *data, size_t len) {
         /* Sanity check: */
         assert(context != (SHA256_CTX*)0 && data != (sha2_byte*)0);
 
-        usedspace = (context->bitcount >> 3) % SHA256_BLOCK_LENGTH;
+        usedspace = (unsigned int)((context->bitcount >> 3) 
+                                 % SHA256_BLOCK_LENGTH);
         if (usedspace > 0) {
                 /* Calculate how much free space is available in the buffer */
                 freespace = SHA256_BLOCK_LENGTH - usedspace;
@@ -504,7 +505,8 @@ void SHA256_Final(sha2_byte digest[], SHA256_CTX* context) {
 
         /* If no digest buffer is passed, we don't bother doing this: */
         if (digest != (sha2_byte*)0) {
-                usedspace = (context->bitcount >> 3) % SHA256_BLOCK_LENGTH;
+                usedspace = (unsigned int)((context->bitcount >> 3) 
+                                         % SHA256_BLOCK_LENGTH);
 #if !APR_IS_BIGENDIAN
                 /* Convert FROM host byte order */
                 REVERSE64(context->bitcount,context->bitcount);
@@ -780,7 +782,8 @@ void SHA512_Update(SHA512_CTX* context, const sha2_byte *data, size_t len) {
         /* Sanity check: */
         assert(context != (SHA512_CTX*)0 && data != (sha2_byte*)0);
 
-        usedspace = (context->bitcount[0] >> 3) % SHA512_BLOCK_LENGTH;
+        usedspace = (unsigned int)((context->bitcount[0] >> 3) 
+                                 % SHA512_BLOCK_LENGTH);
         if (usedspace > 0) {
                 /* Calculate how much free space is available in the buffer */
                 freespace = SHA512_BLOCK_LENGTH - usedspace;
@@ -820,7 +823,8 @@ void SHA512_Update(SHA512_CTX* context, const sha2_byte *data, size_t len) {
 void SHA512_Last(SHA512_CTX* context) {
         unsigned int    usedspace;
 
-        usedspace = (context->bitcount[0] >> 3) % SHA512_BLOCK_LENGTH;
+        usedspace = (unsigned int)((context->bitcount[0] >> 3) 
+                                 % SHA512_BLOCK_LENGTH);
 #if !APR_IS_BIGENDIAN
         /* Convert FROM host byte order */
         REVERSE64(context->bitcount[0],context->bitcount[0]);
