@@ -1,5 +1,9 @@
 Changes for APR 1.1.0
 
+  *( rename the apr_file_permissions defines (APR_UREAD,
+     APR_FPROT_UWRITE, etc.) to have prefix APR_FPROT_ (keeping the
+     old defines) [Stas]
+
   *) Emit the run-time link path option in apr-config after installation
      if the user is linking with libtool.  [Justin Erenkrantz]
 
