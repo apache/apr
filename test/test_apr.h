@@ -82,6 +82,7 @@ CuSuite *testfileinfo(void);
 CuSuite *testrand(void);
 CuSuite *testdso(void);
 CuSuite *testoc(void);
+CuSuite *testdup(void);
 
 
 
