@@ -1,5 +1,5 @@
 #include "apr_xlate.h"
-#include "../include/arch/unix/i18n.h"
+#include "../include/misc/win32/utf8.h"
 #include <wchar.h>
 #include <string.h>
 

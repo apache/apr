@@ -163,10 +163,6 @@ SOURCE=.\file_io\win32\seek.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\i18n\unix\utf8_ucs2.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\i18n\unix\xlate.c
 # End Source File
 # End Group
@@ -237,6 +233,10 @@ SOURCE=.\misc\win32\rand.c
 # Begin Source File
 
 SOURCE=.\misc\win32\start.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\win32\utf8.c
 # End Source File
 # Begin Source File
 
@@ -426,10 +426,6 @@ SOURCE=.\include\arch\win32\fileio.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\arch\unix\i18n.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\include\arch\win32\inherit.h
 # End Source File
 # Begin Source File
@@ -451,6 +447,10 @@ SOURCE=.\include\arch\win32\thread_rwlock.h
 # Begin Source File
 
 SOURCE=.\include\arch\win32\threadproc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\arch\win32\utf8.h
 # End Source File
 # End Group
 # Begin Group "Public Header Files"

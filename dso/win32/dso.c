@@ -56,7 +56,7 @@
 #include "apr_strings.h"
 #include "apr_private.h"
 #include "fileio.h"
-#include "i18n.h"
+#include "utf8.h"
 
 #if APR_HAS_DSO
 

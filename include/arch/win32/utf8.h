@@ -52,11 +52,10 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef I18N_H
-#define I18N_H
+#ifndef UTF8_H
+#define UTF8_H
 
 #include "apr.h"
-#include "apr_xlate.h"
 
 /* If we ever support anything more exciting than char... this could move.
  */
@@ -90,4 +89,4 @@ APR_DECLARE(apr_status_t) apr_conv_ucs2_to_utf8(const apr_wchar_t *in,
                                                 char *out, 
                                                 apr_size_t *outbytes);
 
-#endif /* def I18N_H */
+#endif /* def UTF8_H */
