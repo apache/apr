@@ -219,38 +219,6 @@ static void *apr_sms_trivial_malloc(apr_sms_t *sms,
     return mem;
 }
 
-static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem);
-
-static void *apr_sms_trivial_realloc(apr_sms_t *sms, void *mem, apr_size_t reqsize)
-{
-    void *new_mem;
-    apr_size_t size;
-    node_t *node;
-    char *endp;
-
-    reqsize = APR_ALIGN_DEFAULT(reqsize);
-
-    new_mem = apr_sms_trivial_malloc(sms, reqsize);
- 
-    if (new_mem) {
-        node = BLOCK_T((char *)mem - SIZEOF_NODE_T)->node;
-
-        endp = node->first_avail;
-        if (endp == (char *)node + SIZEOF_NODE_T)
-            endp += node->avail_size;
-
-        size = endp - (char *)mem;
-        if (size > reqsize)
-            size = reqsize;
-
-        memcpy(new_mem, mem, size);
-    }
-
-    apr_sms_trivial_free(sms, mem);
-
-    return new_mem;
-}
-
 static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
 {
     node_t *node, *sentinel;
@@ -299,6 +267,36 @@ static apr_status_t apr_sms_trivial_free(apr_sms_t *sms, void *mem)
         apr_lock_release(SMS_TRIVIAL_T(sms)->lock);
 
     return APR_SUCCESS;
+}
+
+static void *apr_sms_trivial_realloc(apr_sms_t *sms, void *mem, apr_size_t reqsize)
+{
+    void *new_mem;
+    apr_size_t size;
+    node_t *node;
+    char *endp;
+
+    reqsize = APR_ALIGN_DEFAULT(reqsize);
+
+    new_mem = apr_sms_trivial_malloc(sms, reqsize);
+ 
+    if (new_mem) {
+        node = BLOCK_T((char *)mem - SIZEOF_BLOCK_T)->node;
+
+        endp = node->first_avail;
+        if (endp == (char *)node + SIZEOF_NODE_T)
+            endp += node->avail_size;
+
+        size = endp - (char *)mem;
+        if (size > reqsize)
+            size = reqsize;
+
+        memcpy(new_mem, mem, size);
+    }
+
+    apr_sms_trivial_free(sms, mem);
+
+    return new_mem;
 }
 
 static apr_status_t apr_sms_trivial_reset(apr_sms_t *sms)
