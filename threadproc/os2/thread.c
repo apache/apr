@@ -154,9 +154,9 @@ APR_DECLARE(apr_os_thread_t) apr_os_thread_current()
 
 
 
-APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
+APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
-    thd->rv = *retval;
+    thd->exitval = retval;
     _endthread();
     return -1; /* If we get here something's wrong */
 }
@@ -176,7 +176,7 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
     if (rc == ERROR_INVALID_THREADID)
         rc = 0; /* Thread had already terminated */
 
-    *retval = (apr_status_t)thd->rv;
+    *retval = thd->exitval;
     return APR_OS2_STATUS(rc);
 }
 

@@ -102,7 +102,7 @@ void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
         x++;
         apr_lock_release(thread_lock);
     }
-    apr_thread_exit(thd, &exit_ret_val);
+    apr_thread_exit(thd, exit_ret_val);
     return NULL;
 } 
 

@@ -227,7 +227,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new_thread,
  * @param retval The return value to pass back to any thread that cares
  */
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, 
-                                          apr_status_t *retval);
+                                          apr_status_t retval);
 
 /**
  * block until the desired thread stops executing.

@@ -176,10 +176,11 @@ APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
     return pthread_equal(tid1, tid2);
 }
 
-APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
+APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
+    thd->exitval = retval;
     apr_pool_destroy(thd->cntxt);
-    pthread_exit(retval);
+    pthread_exit(NULL);
     return APR_SUCCESS;
 }
 
@@ -189,7 +190,7 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
     apr_status_t *thread_stat;
 
     if ((stat = pthread_join(*thd->td,(void *)&thread_stat)) == 0) {
-        *retval = thread_stat ? *thread_stat : APR_SUCCESS;
+        *retval = thd->exitval;
         return APR_SUCCESS;
     }
     else {
