@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) When opening a file, only create an internal thread mutex
+     if APR_XTHREAD is set.  [Brian Pane]
+
   *) Move the kill_conditions enum in apr_thread_proc.h into the
      APR namespace. kill_after_timeout et al have been renamed
      appropriately (e.g., APR_KILL_AFTER_TIMEOUT).  [Jeff Trawick]
