@@ -104,13 +104,16 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
                                        const char *filename, apr_pool_t *pool)
 {
     apr_shmem_t *new_m;
-    int tmpfd;
     void *mem;
-
 #if APR_USE_SHMEM_SHMGET
     struct shmid_ds shmbuf;
-#else
-    apr_status_t stat;
+#endif
+#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
+    apr_status_t status;
+#endif
+#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || \
+    APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_SHMGET
+    int tmpfd;
 #endif
 
     new_m = apr_palloc(pool, sizeof(apr_shmem_t));
@@ -120,19 +123,20 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
 /* These implementations are very similar except for opening the file. */
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
     /* FIXME: Ignore error for now. *
-     *stat = apr_file_remove(filename, pool);*/
+     * status = apr_file_remove(filename, pool);*/
+    status = APR_SUCCESS;
     
 #if APR_USE_SHMEM_MMAP_TMP
     /* FIXME: Is APR_OS_DEFAULT sufficient? */
-    stat = apr_file_open(new_m->file, filename, 
+    status = apr_file_open(new_m->file, filename, 
                          APR_READ | APR_WRITE | APR_CREATE, APR_OS_DEFAULT,
                          pool);
-    if (stat != APR_SUCCESS)
+    if (status != APR_SUCCESS)
         return APR_EGENERAL;
 
     tmpfd = apr_os_file_get(&tmpfd, new_m->file);
-    stat = apr_file_trunc(new_m->file, reqsize);
-    if (stat != APR_SUCCESS)
+    status = apr_file_trunc(new_m->file, reqsize);
+    if (status != APR_SUCCESS)
         return APR_EGENERAL;
 
 #elif APR_USE_SHMEM_MMAP_SHM
@@ -142,16 +146,16 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
         return errno + APR_OS_START_SYSERR;
 
     apr_os_file_put(new_m->file, &tmpfd, pool); 
-    stat = apr_file_trunc(new_m->file, reqsize);
-    if (stat != APR_SUCCESS)
+    status = apr_file_trunc(new_m->file, reqsize);
+    if (status != APR_SUCCESS)
     {
         shm_unlink(filename);
         return APR_EGENERAL;
     }
 #elif APR_USE_SHMEM_MMAP_ZERO
-    stat = apr_file_open(new_m->file, "/dev/zero", APR_READ | APR_WRITE, 
+    status = apr_file_open(new_m->file, "/dev/zero", APR_READ | APR_WRITE, 
                          APR_OS_DEFAULT);
-    if (stat != APR_SUCCESS)
+    if (status != APR_SUCCESS)
         return APR_EGENERAL;
     tmpfd = apr_os_file_get(&tmpfd, new_m->file);
 #endif
@@ -296,16 +300,16 @@ APR_DECLARE(apr_status_t) apr_shm_open(apr_shmem_t *c)
 
 APR_DECLARE(apr_status_t) apr_shm_avail(apr_shmem_t *m, apr_size_t *size)
 {
-    apr_status_t stat;
+    apr_status_t status;
 
-    stat = APR_ENOSHMAVAIL;
+    status = APR_ENOSHMAVAIL;
 
     apr_lock_acquire(m->lock);
 
     *size = m->length - (m->curmem - m->mem);
     if (*size)
-        stat = APR_SUCCESS;
+        status = APR_SUCCESS;
 
     apr_lock_release(m->lock);
-    return stat;
+    return status;
 }
