@@ -46,7 +46,7 @@ void test_nrange(struct testval *p)
     
     do {
         apr_size_t nl = s.nl, wl = sizeof(s.w) / 2;
-        rc = conv_utf8_to_ucs2(s.n, &nl, s.w, &wl);
+        rc = apr_conv_utf8_to_ucs2(s.n, &nl, s.w, &wl);
         s.wl = (sizeof(s.w) / 2) - wl;
         if (!nl && rc == APR_SUCCESS) {
             if (!success) {
@@ -98,7 +98,7 @@ void test_wrange(struct testval *p)
     
     do {
         apr_size_t nl = sizeof(s.n), wl = s.wl;        
-        rc = conv_ucs2_to_utf8(s.w, &wl, s.n, &nl);
+        rc = apr_conv_ucs2_to_utf8(s.w, &wl, s.n, &nl);
         s.nl = sizeof(s.n) - nl;
         if (!wl && rc == APR_SUCCESS) {
             if (!success) {
@@ -130,7 +130,7 @@ void test_wrange(struct testval *p)
 
     do {
         int wl = s.wl, nl = sizeof(s.n);
-        rc = conv_ucs2_to_utf8(s.w, &wl, s.n, &nl);
+        rc = apr_conv_ucs2_to_utf8(s.w, &wl, s.n, &nl);
         s.nl = sizeof(s.n) - s.nl;
         if (rc == APR_INCOMPLETE) {
             test_wrange(&s);
