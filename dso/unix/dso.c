@@ -104,6 +104,7 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
     if (dlclose(handle->handle) != 0)
         return APR_EINIT;
 #endif
+    handle->handle = NULL;
 
     return APR_SUCCESS;
 }
@@ -134,8 +135,8 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
 
 
 #elif defined(DLSYM_NEEDS_UNDERSCORE)
-    char *symbol = (char*)malloc(sizeof(char)*(strlen(symname)+2));
     void *retval;
+    char *symbol = (char*)malloc(sizeof(char)*(strlen(symname)+2));
     sprintf(symbol, "_%s", symname);
     retval = dlsym(handle->handle, symbol);
     free(symbol);
@@ -148,8 +149,8 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
 
     if (retval == NULL)
         return APR_EINIT;
-    
-    ressym = retval;
+
+    *ressym = retval;
     
     return APR_SUCCESS;
 }

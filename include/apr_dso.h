@@ -63,7 +63,7 @@ extern "C" {
 #endif
 
 typedef struct ap_dso_handle_t        ap_dso_handle_t;
-typedef void *                     ap_dso_handle_sym_t;
+typedef void *                        ap_dso_handle_sym_t;
 
 ap_status_t ap_dso_init(void);
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
