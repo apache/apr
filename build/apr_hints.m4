@@ -176,7 +176,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-sco3.2v[234]*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
 	APR_ADDTO(CFLAGS, [-Oacgiltz])
-	APR_ADDTO(LIBS, [-lPW -lmalloc _i])
+	APR_ADDTO(LIBS, [-lPW -lmalloc])
 	;;
     *-sco3.2v5*)
 	APR_ADDTO(CPPFLAGS, [-DSCO5 -D_REENTRANT])
@@ -184,7 +184,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-sco_sv*|*-SCO_SV*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
-	APR_ADDTO(LIBS, [-lPW -lmalloc _i])
+	APR_ADDTO(LIBS, [-lPW -lmalloc])
 	;;
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
