@@ -121,7 +121,7 @@ struct apr_md5_ctx_t {
  * @param context The MD5 context to initialize.
  * @deffunc apr_status_t apr_MD5Init(apr_md5_ctx_t *context)
  */
-APR_EXPORT(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context);
+APR_DECLARE(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context);
 
 /**
  * MD5 translation setup.  Provides the APR translation handle to be used 
@@ -131,7 +131,7 @@ APR_EXPORT(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context);
  * @deffunc apr_status_t apr_MD5SetXlate(apr_md5_ctx_t *context, apr_xlate_t *xlate)
  */
 #if APR_HAS_XLATE
-APR_EXPORT(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context, 
+APR_DECLARE(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context, 
                                          apr_xlate_t *xlate);
 #else
 #define apr_MD5SetXlate(context, xlate) APR_ENOTIMPL
@@ -145,7 +145,7 @@ APR_EXPORT(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context,
  * @param inputLen The length of the next message block
  * @deffunc apr_status_t apr_MD5Update(apr_md5_ctx_t *context, const unsigned char *input, unsigned int inputLen)
  */
-APR_EXPORT(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
                                        const unsigned char *input,
                                        unsigned int inputLen);
 
@@ -156,7 +156,7 @@ APR_EXPORT(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
  * @param context The MD5 content we are finalizing.
  * @deffunc apr_status_t apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE], apr_md5_ctx_t *context)
  */
-APR_EXPORT(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
                                       apr_md5_ctx_t *context);
 
 /**
@@ -167,7 +167,7 @@ APR_EXPORT(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
  * @param nbytes The length of the string
  * @deffunc apr_status_t apr_MD5Encode(const char *password, const char *salt, char *result, size_t nbytes)
  */
-APR_EXPORT(apr_status_t) apr_MD5Encode(const char *password, const char *salt,
+APR_DECLARE(apr_status_t) apr_MD5Encode(const char *password, const char *salt,
                                      char *result, size_t nbytes);
 
 #ifdef __cplusplus

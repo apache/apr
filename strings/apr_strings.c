@@ -57,7 +57,7 @@
 #include "apr_private.h"
 #include "apr_lib.h"
 
-APR_EXPORT(char *) apr_pstrdup(apr_pool_t *a, const char *s)
+APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 {
     char *res;
     size_t len;
@@ -71,7 +71,7 @@ APR_EXPORT(char *) apr_pstrdup(apr_pool_t *a, const char *s)
     return res;
 }
 
-APR_EXPORT(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
+APR_DECLARE(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
 {
     char *res;
 
@@ -84,7 +84,7 @@ APR_EXPORT(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
     return res;
 }
 
-APR_EXPORT_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
+APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 {
     char *cp, *argp, *res;
 

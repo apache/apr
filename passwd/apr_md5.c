@@ -186,7 +186,7 @@ static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_MD5Encode() */
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-APR_EXPORT(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context)
+APR_DECLARE(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
     /* Load magic initialization constants. */
@@ -205,7 +205,7 @@ APR_EXPORT(apr_status_t) apr_MD5Init(apr_md5_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-APR_EXPORT(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context, 
+APR_DECLARE(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context, 
                                          apr_xlate_t *xlate)
 {
     apr_status_t rv;
@@ -229,7 +229,7 @@ APR_EXPORT(apr_status_t) apr_MD5SetXlate(apr_md5_ctx_t *context,
    operation, processing another message block, and updating the
    context.
  */
-APR_EXPORT(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
+APR_DECLARE(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen)
 {
@@ -311,7 +311,7 @@ APR_EXPORT(apr_status_t) apr_MD5Update(apr_md5_ctx_t *context,
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
-APR_EXPORT(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
+APR_DECLARE(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
                                       apr_md5_ctx_t *context)
 {
     unsigned char bits[8];
@@ -461,7 +461,7 @@ static void Decode(UINT4 *output, const unsigned char *input, unsigned int len)
 }
 
 #ifdef CHARSET_EBCDIC
-APR_EXPORT(apr_status_t) apr_MD5InitEBCDIC(apr_xlate_t *xlate)
+APR_DECLARE(apr_status_t) apr_MD5InitEBCDIC(apr_xlate_t *xlate)
 {
     xlate_ebcdic_to_ascii = xlate;
     return APR_SUCCESS;
@@ -491,7 +491,7 @@ static void to64(char *s, unsigned long v, int n)
     }
 }
 
-APR_EXPORT(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
+APR_DECLARE(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
                              char *result, size_t nbytes)
 {
     /*
@@ -652,7 +652,7 @@ APR_EXPORT(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
  * APR_EMISMATCH if they don't.
  */
 
-APR_EXPORT(apr_status_t) apr_validate_password(const char *passwd, 
+APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, 
                                                const char *hash)
 {
     char sample[120];

@@ -107,7 +107,7 @@ typedef struct apr_vformatter_buff_t {
  * </PRE>
  * @deffunc const char * apr_filename_of_pathname(const char *pathname)
  */
-APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname);
+APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
 
 /* These macros allow correct support of 8-bit characters on systems which
  * support 8-bit characters.  Pretty dumb how the cast is required, but
@@ -202,7 +202,7 @@ APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname);
  * </PRE>
  * @deffunc int apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b), apr_vformatter_buff_t *c, const char *fmt, va_list ap)
  */
-APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
+APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
 			       apr_vformatter_buff_t *c, const char *fmt,
 			       va_list ap);
 
@@ -212,7 +212,7 @@ APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
  * @param hash The password to validate against
  * @deffunc apr_status_t apr_validate_password(const char *passwd, const char *hash)
  */
-APR_EXPORT(apr_status_t) apr_validate_password(const char *passwd, const char *hash);
+APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, const char *hash);
 
 
 /*
@@ -241,7 +241,7 @@ APR_EXPORT(apr_status_t) apr_validate_password(const char *passwd, const char *h
  * @param ... The arguments to use to fill out the format string.
  * @deffunc int apr_snprintf(char *buf, size_t len, const char *format, ...)
  */
-APR_EXPORT_NONSTD(int) apr_snprintf(char *buf, size_t len, 
+APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, size_t len, 
                                    const char *format, ...)
 	__attribute__((format(printf,3,4)));
 
@@ -254,7 +254,7 @@ APR_EXPORT_NONSTD(int) apr_snprintf(char *buf, size_t len,
  * @param ap The arguments to use to fill out the format string.
  * @deffunc int apr_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
  */
-APR_EXPORT(int) apr_vsnprintf(char *buf, size_t len, const char *format,
+APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
 			      va_list ap);
 
 /**
@@ -264,7 +264,7 @@ APR_EXPORT(int) apr_vsnprintf(char *buf, size_t len, const char *format,
  * @param bufsize The length of the password string.
  * @deffunc apr_status_t apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
  */
-APR_EXPORT(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
+APR_DECLARE(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 
 /**
  * Register a process to be killed when a pool dies.
@@ -280,7 +280,7 @@ APR_EXPORT(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bu
  * </PRE>
  * @deffunc void apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid, enum kill_conditions how)
  */
-APR_EXPORT(void) apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid,
+APR_DECLARE(void) apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid,
 				     enum kill_conditions how);
 
 #ifdef __cplusplus
