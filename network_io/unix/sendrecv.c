@@ -781,7 +781,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     for (i = 0; i < hdtr->numheaders; i++, curvec++) {
         sfv[curvec].sfv_fd = SFV_FD_SELF;
         sfv[curvec].sfv_flag = 0;
-        sfv[curvec].sfv_off = hdtr->headers[i].iov_base;
+        sfv[curvec].sfv_off = (off_t)hdtr->headers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->headers[i].iov_len;
     }
 
@@ -802,7 +802,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     for (i = 0; i < hdtr->numtrailers; i++, curvec++) {
         sfv[curvec].sfv_fd = SFV_FD_SELF;
         sfv[curvec].sfv_flag = 0;
-        sfv[curvec].sfv_off = hdtr->trailers[i].iov_base;
+        sfv[curvec].sfv_off = (off_t)hdtr->trailers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->trailers[i].iov_len;
     }
  
