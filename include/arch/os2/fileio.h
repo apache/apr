@@ -98,5 +98,14 @@ apr_status_t apr_file_cleanup(void *);
 apr_status_t apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2date, 
                                       FTIME os2time);
 
+/* see win32/fileio.h for description of these */
+extern const char c_is_fnchar[256];
+
+#define IS_FNCHAR(c) c_is_fnchar[(unsigned char)c]
+
+apr_status_t filepath_root_test(char *path, apr_pool_t *p);
+apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p);
+apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
+
 #endif  /* ! FILE_IO_H */
 
