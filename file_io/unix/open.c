@@ -106,8 +106,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
 #endif
 
 #ifdef NETWARE
-    apr_hash_t *statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
+    apr_hash_t *statCache = NULL;
     apr_stat_entry_t *stat_entry = NULL;
+    NXPathCtx_t pathCtx = 0;
+    int identity;
 #endif
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
@@ -156,9 +158,15 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
 #endif
 
 #ifdef NETWARE
-    if (statCache) {
-        stat_entry = (apr_stat_entry_t*) apr_hash_get(statCache, fname, APR_HASH_KEY_STRING);
+    if (!getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD) &&
+        !get_identity (pathCtx, &identity) && !identity) {
+
+        statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
+        if (statCache) {
+            stat_entry = (apr_stat_entry_t*) apr_hash_get(statCache, fname, APR_HASH_KEY_STRING);
+        }
     }
+
     if (stat_entry) {
         errno = NXFileOpen (stat_entry->pathCtx, stat_entry->casedName, oflags, &fd);
     }
