@@ -410,7 +410,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
         return stuffbuffer(buf, bufsize, "APR does not understand this error code");
     }
     else if (statcode < APR_OS_START_SYSERR) {
-#if defined(HAVE_GETADDRINFO)
+#if defined(HAVE_GAI_STRERROR)
         statcode -= APR_OS_START_EAIERR;
 #if defined(NEGATIVE_EAI)
         statcode = -statcode;

@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fix build breakage on systems with getaddrinfo() but not 
+     gai_strerror() (e.g., RedHat 5.2).  [Jeff Trawick]
+
   *) Fix a problem in Unix apr_file_dup() which caused 0 to be returned
      by the first read.  [Stas Bekman <stas@stason.org>]
 
