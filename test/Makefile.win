@@ -78,7 +78,7 @@ globalmutexchild.exe: globalmutexchild.obj $(LOCAL_LIBS)
 testmutexscope.exe: testmutexscope.obj $(LOCAL_LIBS)
 	$(LINK) testmutexscope.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
-TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
+TESTS = abts.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testmmap.obj testud.obj testtable.obj testsleep.obj testpools.obj \
 	testfmt.obj testfile.obj testdir.obj testfileinfo.obj testrand.obj \
 	testdso.obj testoc.obj testdup.obj testsockets.obj testproc.obj \
@@ -87,10 +87,10 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testenv.obj testprocmutex.obj testrand2.obj testfnmatch.obj \
         testatomic.obj testflock.obj testshm.obj testsock.obj \
         testglobalmutex.obj teststrnatcmp.obj testfilecopy.obj \
-        testtemp.obj testlfs.obj
+        testtemp.obj testlfs.obj testutil.obj
 
-testall.exe: $(TESTS) CuTest.obj $(LOCAL_LIBS)
-	$(LINK) /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
+testall.exe: $(TESTS) $(LOCAL_LIBS)
+	$(LINK) /debug /subsystem:console /machine:I386 /out:$@ $(TESTS) \
 		$(LOCAL_LIBS) $(ALL_LIBS)
 
 

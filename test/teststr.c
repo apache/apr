@@ -20,6 +20,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#if APR_HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_errno.h"
