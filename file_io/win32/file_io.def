@@ -37,7 +37,7 @@ EXPORTS
     	ap_putc   @30
     	ap_getc   @31
 	ap_puts @32
-	ap_gets @33
+	ap_fgets @33
 	ap_flush @34
     	ap_fprintf   @35
     	ap_eof   @36
