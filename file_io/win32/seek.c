@@ -115,18 +115,20 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         return rc;
     } else {
         switch(where) {
-        case APR_SET: {
-            howmove = FILE_BEGIN;
-            break;
-        }
-        case APR_CUR: {
-            howmove = FILE_CURRENT;
-            break;
-        }
-        case APR_END: {
-            howmove = FILE_END;
-            break;
-        }
+            case APR_SET:
+                howmove = FILE_BEGIN;
+                break;
+        
+            case APR_CUR:
+                howmove = FILE_CURRENT;
+                break;
+        
+            case APR_END:
+                howmove = FILE_END;
+                break;
+
+            default:
+                return APR_BADARG;
         }
 
         rv = SetFilePointer(thefile->filehand, *offset, NULL, howmove);
