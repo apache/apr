@@ -90,29 +90,29 @@ typedef int               apr_signum_t;
 
 #if defined(CRAY) || (defined(__arm) && !defined(LINUX))
 #ifdef __STDC__
-#define XtOffset(p_type,field) _Offsetof(p_type,field)
+#define APR_XtOffset(p_type,field) _Offsetof(p_type,field)
 #else
 #ifdef CRAY2
-#define XtOffset(p_type,field) \
+#define APR_XtOffset(p_type,field) \
         (sizeof(int)*((unsigned int)&(((p_type)NULL)->field)))
 
 #else /* !CRAY2 */
 
-#define XtOffset(p_type,field) ((unsigned int)&(((p_type)NULL)->field))
+#define APR_XtOffset(p_type,field) ((unsigned int)&(((p_type)NULL)->field))
 
 #endif /* !CRAY2 */
 #endif /* __STDC__ */
 #else /* ! (CRAY || __arm) */
 
-#define XtOffset(p_type,field) \
+#define APR_XtOffset(p_type,field) \
         ((long) (((char *) (&(((p_type)NULL)->field))) - ((char *) NULL)))
 
 #endif /* !CRAY */
 
 #ifdef offsetof
-#define XtOffsetOf(s_type,field) offsetof(s_type,field)
+#define APR_XtOffsetOf(s_type,field) offsetof(s_type,field)
 #else
-#define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
+#define APR_XtOffsetOf(s_type,field) APR_XtOffset(s_type*,field)
 #endif
 
 
