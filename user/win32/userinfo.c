@@ -71,14 +71,15 @@ APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
     SID_NAME_USE sidtype;
     char *domain = NULL;
     DWORD sidlen, rv;
+    char *pos;
 
-    if (strchr(username, '/')) {
-        domain = apr_pstrndup(p, username, strchr(username, '/') - username);
-        username += strlen(domain) + 1;
+    if (pos = strchr(username, '/')) {
+        domain = apr_pstrndup(p, username, pos - username);
+        username = pos + 1;
     }
-    else if (strchr(username, '\\')) {
-        domain = apr_pstrndup(p, username, strchr(username, '/') - username);
-        username += strlen(domain) + 1;
+    else if (pos = strchr(username, '\\')) {
+        domain = apr_pstrndup(p, username, pos - username);
+        username = pos + 1;
     }
     /* Get nothing on the first pass ... need to size the sid buffer 
      */
