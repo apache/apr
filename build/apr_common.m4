@@ -239,6 +239,7 @@ for ac_spec in $1; do
             ac_var="ac_cv_file_$ac_item"
             ;;
         func )   ac_var="ac_cv_func_$ac_item"   ;;
+        struct ) ac_var="ac_cv_struct_$ac_item" ;;
         define ) ac_var="ac_cv_define_$ac_item" ;;
         custom ) ac_var="$ac_item" ;;
     esac

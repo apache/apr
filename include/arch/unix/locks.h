@@ -127,12 +127,8 @@ extern const apr_unix_lock_methods_t apr_unix_flock_methods;
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
 extern const apr_unix_lock_methods_t apr_unix_proc_pthread_methods;
 #endif
-
-#if defined(HAVE_PTHREAD_RWLOCK_INIT)
-#define APR_HAS_RWLOCK_SERIALIZE       1
+#if APR_HAS_RWLOCK_SERIALIZE
 extern const apr_unix_lock_methods_t apr_unix_rwlock_methods;
-#else
-#define APR_HAS_RWLOCK_SERIALIZE       0
 #endif
 
 #if !APR_HAVE_UNION_SEMUN && defined(APR_HAS_SYSVSEM_SERIALIZE)
