@@ -176,6 +176,9 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
     }
     if (opt & APR_SO_TIMEOUT) {
         sock->timeout = on;
+        if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) {
+            return stat;
+        }
     }
     return APR_SUCCESS;
 }         

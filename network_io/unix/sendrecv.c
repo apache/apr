@@ -169,6 +169,10 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
             } while (rv == -1 && errno == EINTR);
         }
     }
+    else if (rv == -1 && errno == EAGAIN && sock->timeout == 0) {
+        (*len) = 0;
+        return errno;
+    }
     (*len) = rv;
     return APR_SUCCESS;
 }
