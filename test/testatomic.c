@@ -231,9 +231,6 @@ static void test_atomics_threaded(CuTest *tc)
     apr_thread_t *t1[NUM_THREADS];
     apr_thread_t *t2[NUM_THREADS];
     apr_thread_t *t3[NUM_THREADS];
-    apr_status_t r1[NUM_THREADS]; 
-    apr_status_t r2[NUM_THREADS]; 
-    apr_status_t r3[NUM_THREADS]; 
     apr_status_t s1[NUM_THREADS]; 
     apr_status_t s2[NUM_THREADS];
     apr_status_t s3[NUM_THREADS];
@@ -248,18 +245,21 @@ static void test_atomics_threaded(CuTest *tc)
     apr_assert_success(tc, "Could not create lock", rv);
 
     for (i = 0; i < NUM_THREADS; i++) {
-        r1[i] = apr_thread_create(&t1[i], NULL, thread_func_mutex, NULL, p);
-        r2[i] = apr_thread_create(&t2[i], NULL, thread_func_atomic, NULL, p);
-        r3[i] = apr_thread_create(&t3[i], NULL, thread_func_none, NULL, p);
+        apr_status_t r1, r2, r3;
+        r1 = apr_thread_create(&t1[i], NULL, thread_func_mutex, NULL, p);
+        r2 = apr_thread_create(&t2[i], NULL, thread_func_atomic, NULL, p);
+        r3 = apr_thread_create(&t3[i], NULL, thread_func_none, NULL, p);
         CuAssert(tc, "Failed creating threads",
-                 r1[i] == APR_SUCCESS && r2[i] == APR_SUCCESS && 
-                 r3[i] == APR_SUCCESS);
+                 r1 == APR_SUCCESS && r2 == APR_SUCCESS && 
+                 r3 == APR_SUCCESS);
     }
 
     for (i = 0; i < NUM_THREADS; i++) {
+        char *str;
         apr_thread_join(&s1[i], t1[i]);
         apr_thread_join(&s2[i], t2[i]);
         apr_thread_join(&s3[i], t3[i]);
+                     
         CuAssert(tc, "Invalid return value from thread_join",
                  s1[i] == exit_ret_val && s2[i] == exit_ret_val && 
                  s3[i] == exit_ret_val);
