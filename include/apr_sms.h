@@ -70,6 +70,11 @@
 extern "C" {
 #endif
 
+/* The various types of cleanup's we can offer */
+#define APR_ALL_CLEANUPS      0x0000
+#define APR_CHILD_CLEANUP     0x0001
+#define APR_PARENT_CLEANUP    0x0002
+
 /**
  * @package APR memory system
  */
@@ -91,16 +96,16 @@ struct apr_sms_t
 
   struct apr_sms_cleanup *cleanups;
 
-  void * (*malloc_fn)(apr_sms_t *mem_sys, apr_size_t size);
-  void * (*calloc_fn)(apr_sms_t *mem_sys, apr_size_t size);
-  void * (*realloc_fn)(apr_sms_t *mem_sys, void *memory, 
-                       apr_size_t size);
-  apr_status_t (*free_fn)(apr_sms_t *mem_sys, void *memory);
-  apr_status_t (*reset_fn)(apr_sms_t *mem_sys);
-  void (*pre_destroy_fn)(apr_sms_t *mem_sys);
+  void * (*malloc_fn)       (apr_sms_t *mem_sys, apr_size_t size);
+  void * (*calloc_fn)       (apr_sms_t *mem_sys, apr_size_t size);
+  void * (*realloc_fn)      (apr_sms_t *mem_sys, void *memory, 
+                             apr_size_t size);
+  apr_status_t (*free_fn)   (apr_sms_t *mem_sys, void *memory);
+  apr_status_t (*reset_fn)  (apr_sms_t *mem_sys);
+  void (*pre_destroy_fn)    (apr_sms_t *mem_sys);
   apr_status_t (*destroy_fn)(apr_sms_t *mem_sys);
-  void (*threadsafe_lock_fn)(apr_sms_t *mem_sys);
-  void (*threadsafe_unlock_fn)(apr_sms_t *mem_sys);
+  apr_status_t (*lock_fn)   (apr_sms_t *mem_sys);
+  apr_status_t (*unlock_fn) (apr_sms_t *mem_sys);
 };
 
 /*
@@ -209,17 +214,17 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys);
 /**
  * Perform thread-safe locking required whilst this memory system is modified
  * @param mem_sys The memory system to be locked for thread-safety
- * @deffunc void apr_sms_threadsafe_lock(apr_sms_t *mem_sys)
+ * @deffunc void apr_sms_lock(apr_sms_t *mem_sys)
  */
-APR_DECLARE(void) apr_sms_threadsafe_lock(apr_sms_t *mem_sys);
+APR_DECLARE(apr_status_t) apr_sms_lock(apr_sms_t *mem_sys);
 
 /**
  * Release thread-safe locking required whilst this memory system was
  * being modified
  * @param mem_sys The memory system to be released from thread-safety
- * @deffunc void apr_sms_threadsafe_unlock(apr_sms_t *mem_sys)
+ * @deffunc void apr_sms_unlock(apr_sms_t *mem_sys)
  */
-APR_DECLARE(void) apr_sms_threadsafe_unlock(apr_sms_t *mem_sys);
+APR_DECLARE(apr_status_t) apr_sms__unlock(apr_sms_t *mem_sys);
 
 /**
  * Determine if memory system a is an ancestor of memory system b
@@ -238,38 +243,67 @@ APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a, apr_sms_t *b);
 /**
  * Register a function to be called when a memory system is reset or destroyed
  * @param mem_sys The memory system to register the cleanup function with
+ * @param type The type of cleanup to register
  * @param data The data to pass to the cleanup function
  * @param cleanup_fn The function to call when the memory system is reset or
  *        destroyed
- * @deffunc void apr_sms_cleanup_register(apr_sms_t *mem_sys,
+ * @deffunc void apr_sms_cleanup_register(apr_sms_t *mem_sys, apr_int32_t type,
  *		   void *data, apr_status_t (*cleanup_fn)(void *));
  */
-APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *mem_sys, void *data, 
+APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *mem_sys, apr_int32_t type,
+                                                   void *data, 
                                                    apr_status_t (*cleanup_fn)(void *));
 
 /**
  * Unregister a previously registered cleanup function
  * @param mem_sys The memory system the cleanup function is registered
  *        with
+ * @param type The type of the cleanup to unregister
  * @param data The data associated with the cleanup function
  * @param cleanup_fn The registered cleanup function
  * @deffunc void apr_sms_cleanup_unregister(apr_sms_t *mem_sys,
  *		   void *data, apr_status_t (*cleanup_fn)(void *));
  */
-APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *mem_sys, void *data,
+APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *mem_sys, apr_int32_t type,
+                                                     void *data,
                                                      apr_status_t (*cleanup)(void *));
+
+/**
+ * Unregister all previously registered cleanup functions of the specified type
+ * @param mem_sys The memory system the cleanup functions are registered with
+ * @param type The type associated with the cleanup function. Pass 0 to 
+ *        unregister all cleanup functions.
+ * @deffunc apr_status_t apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys,
+ *                 apr_int32_t type);
+ */
+APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys,
+                                                           apr_int32_t type);
 
 /**
  * Run the specified cleanup function immediately and unregister it
  * @param mem_sys The memory system the cleanup function is registered
  *        with
+ * @param mem_sys The memory system the cleanup function is registered with
+ * @param type The type associated with the cleanup function. Pass 0 to ignore type.
  * @param data The data associated with the cleanup function
  * @param cleanup The registered cleanup function
- * @deffunc apr_status_t apr_sms_cleanup_run(apr_sms_t *mem_sys,
- *			   void *data, apr_status_t (*cleanup)(void *));
+ * @deffunc apr_status_t apr_sms_cleanup_run(apr_sms_t *mem_sys, 
+ *                 apr_int32_t type, void *data, apr_status_t (*cleanup)(void *));
  */
-APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *mem_sys, void *data,
+APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *mem_sys, 
+                                              apr_int32_t type, void *data,
                                               apr_status_t (*cleanup)(void *));
+
+/**
+ * Run the specified type of cleanup functions immediately and unregister them
+ * @param mem_sys The memory system the cleanup functions are registered with
+ * @param type The category of cleanup functions to run. Pass 0 to run all
+ *        cleanup functions.
+ * @deffunc apr_status_t apr_sms_cleanup_run_type(apr_sms_t *mem_sys,
+ *	           apr_int32_t type);
+ */
+APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys, 
+                                                   apr_int32_t type);
 
 /**
  * Create a standard malloc/realloc/free memory system

@@ -76,6 +76,7 @@
 struct apr_sms_cleanup
 {
     struct apr_sms_cleanup *next;
+    apr_int32_t type;
     void *data;
     apr_status_t (*cleanup_fn)(void *);
 };
@@ -107,13 +108,12 @@ APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *mem_sys,
 #ifdef APR_ASSERT_MEMORY
     assert(mem_sys);
     assert(mem_sys->malloc_fn);
-    assert(mem_sys->calloc_fn);
 #endif
 
     if (size == 0)
         return NULL;
 
-    if (mem_sys->calloc_fn == NULL){
+    if (!mem_sys->calloc_fn){
         /* Assumption - if we don't have calloc we have
          * malloc, might be bogus...
          */
@@ -132,7 +132,7 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *mem_sys, void *mem,
     assert(mem_sys->realloc_fn);
 #endif
    
-    if (mem == NULL)
+    if (!mem)
         return apr_sms_malloc(mem_sys, size);
 
     if (size == 0)
@@ -147,20 +147,20 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *mem_sys, void *mem,
 APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *mem_sys,
                                        void *mem)
 {
+    if (!mem_sys)
+        return APR_EMEMSYS;
+       
 #ifdef APR_ASSERT_MEMORY
     assert(mem_sys->free_fn);
 #endif
 
-    if (!mem_sys)
-        return APR_EMEMSYS;
-  
-    if (mem == NULL)
+    if (!mem)
         return APR_EINVAL;
 
-    if (mem_sys->free_fn != NULL)
+    if (!mem_sys->free_fn)
         return mem_sys->free_fn(mem_sys, mem);  
 
-    return APR_SUCCESS;
+    return APR_EMEMFUNC;
 }
 
 /*
@@ -181,7 +181,7 @@ APR_DECLARE(apr_sms_t *) apr_sms_create(void *memory,
 {
     apr_sms_t *mem_sys;
 
-    if (memory == NULL)
+    if (!memory)
         return NULL;
 
     /* Just typecast it, and clear it */
@@ -192,16 +192,11 @@ APR_DECLARE(apr_sms_t *) apr_sms_create(void *memory,
     mem_sys->parent_mem_sys = parent_mem_sys;
     mem_sys->accounting_mem_sys = mem_sys;
 
-    if (parent_mem_sys != NULL)
-    {
-        if ((mem_sys->sibling_mem_sys = 
-           parent_mem_sys->child_mem_sys) != NULL)
-        {
-            mem_sys->sibling_mem_sys->ref_mem_sys = 
-              &mem_sys->sibling_mem_sys;
+    if (parent_mem_sys != NULL){
+        if (mem_sys->sibling_mem_sys = parent_mem_sys->child_mem_sys){
+            mem_sys->sibling_mem_sys->ref_mem_sys = &mem_sys->sibling_mem_sys;
         }
-        mem_sys->ref_mem_sys = 
-          &parent_mem_sys->child_mem_sys;
+        mem_sys->ref_mem_sys = &parent_mem_sys->child_mem_sys;
         parent_mem_sys->child_mem_sys = mem_sys;
     }
     /* This seems a bit redundant, but we're not taking chances */
@@ -231,15 +226,11 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys)
      * or destroy function. And to avoid half implementations
      * we require reset to be present when destroy is.
      */
-    assert(mem_sys->free_fn != NULL ||
-         (mem_sys->destroy_fn != NULL &&
-          mem_sys->reset_fn != NULL));
+    assert(mem_sys->free_fn || (mem_sys->destroy_fn && mem_sys->reset_fn));
 
-    assert(mem_sys->destroy_fn == NULL ||
-         mem_sys->reset_fn != NULL);
+    assert(!mem_sys->destroy_fn || mem_sys->reset_fn);
   
-    assert(mem_sys->reset_fn == NULL ||
-         mem_sys->destroy_fn != NULL);
+    assert(!mem_sys->reset_fn || mem_sys->destroy_fn);
 
     /*
      * Make sure all accounting memory dies with the memory system.
@@ -247,8 +238,7 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys)
      * is either the memory system itself or a direct child.
      */
     assert(mem_sys->accounting_mem_sys == mem_sys ||
-	 mem_sys->accounting_mem_sys->parent_mem_sys == 
-	   mem_sys);
+	 mem_sys->accounting_mem_sys->parent_mem_sys ==  mem_sys);
 
     /*
      * A non-tracking memory system can be the child of
@@ -260,8 +250,7 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *mem_sys)
         return;
 
     parent = mem_sys
-    while (parent)
-    {
+    while (parent){
         if (apr_sms_is_tracking(parent))
             return; /* Tracking memory system found, return satisfied ;-) */
 
@@ -304,12 +293,11 @@ static void apr_sms_do_cleanups(apr_sms_t *mem_sys)
  */
 static void apr_sms_do_child_cleanups(apr_sms_t *mem_sys)
 {
-    if (mem_sys == NULL)
+    if (!mem_sys)
         return;
 
     mem_sys = mem_sys->child_mem_sys;
-    while (mem_sys)
-    {
+    while (mem_sys){
         apr_sms_do_child_cleanups(mem_sys);
         apr_sms_do_cleanups(mem_sys);
 
@@ -324,8 +312,9 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *mem_sys)
 {
     if (!mem_sys)
         return APR_EMEMSYS;
+
     if (!mem_sys->reset_fn)
-        return APR_EINVAL; /* Not sure if this is right... */
+        return APR_EMEMFUNC;
 
     /* 
      * Run the cleanups of all child memory systems _including_
@@ -362,8 +351,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
     if (!mem_sys)
         return APR_EMEMSYS;
 
-    if (apr_sms_is_tracking(mem_sys))
-    {
+    if (apr_sms_is_tracking(mem_sys)){
         /* 
          * Run the cleanups of all child memory systems _including_
          * the accounting memory system.
@@ -384,11 +372,9 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
              * child list (we will explicitly destroy it later in this block).
              */
             if (child_mem_sys->sibling_mem_sys != NULL)
-	            child_mem_sys->sibling_mem_sys->ref_mem_sys =
-	              child_mem_sys->ref_mem_sys;
+	            child_mem_sys->sibling_mem_sys->ref_mem_sys = child_mem_sys->ref_mem_sys;
 
-            *child_mem_sys->ref_mem_sys = 
-            child_mem_sys->sibling_mem_sys;
+            *child_mem_sys->ref_mem_sys = child_mem_sys->sibling_mem_sys;
 
             /* Set this fields so destroy will work */
             child_mem_sys->ref_mem_sys = NULL;
@@ -397,8 +383,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
 
         /* Visit all children and destroy them */
         child_mem_sys = mem_sys->child_mem_sys;
-        while (child_mem_sys != NULL)
-        {
+        while (child_mem_sys != NULL){
             sibling_mem_sys = child_mem_sys->sibling_mem_sys;
             apr_sms_destroy(child_mem_sys);
             child_mem_sys = sibling_mem_sys;
@@ -408,8 +393,7 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
          * If the accounting memory system _is_ tracking, we also know that it is
          * not the memory system itself.
          */
-        if (apr_sms_is_tracking(mem_sys->accounting_mem_sys))
-        {
+        if (apr_sms_is_tracking(mem_sys->accounting_mem_sys)){
             /* 
              * Run all cleanups, the memory will be freed by the destroying of the
              * accounting memory system.
@@ -429,12 +413,10 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
         {
             /* Run all cleanups, free'ing memory as we go */
             cleanup = mem_sys->cleanups;
-            while (cleanup)
-            {
+            while (cleanup){
                 cleanup->cleanup_fn(cleanup->data);
                 next_cleanup = cleanup->next;
-                apr_sms_free(mem_sys->accounting_mem_sys, 
-			       cleanup);
+                apr_sms_free(mem_sys->accounting_mem_sys, cleanup);
                 cleanup = next_cleanup;
             }
 
@@ -452,33 +434,32 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
   }
 
   /* Remove the memory system from the parent memory systems child list */
-  if (mem_sys->sibling_mem_sys != NULL)
-      mem_sys->sibling_mem_sys->ref_mem_sys =
-        mem_sys->ref_mem_sys;
-  if (mem_sys->ref_mem_sys != NULL)
+  if (mem_sys->sibling_mem_sys)
+      mem_sys->sibling_mem_sys->ref_mem_sys = mem_sys->ref_mem_sys;
+
+  if (mem_sys->ref_mem_sys)
       *mem_sys->ref_mem_sys = mem_sys->sibling_mem_sys;
 
   /* Call the pre-destroy if present */
-  if (mem_sys->pre_destroy_fn != NULL)
+  if (mem_sys->pre_destroy_fn)
       mem_sys->pre_destroy_fn(mem_sys);
 
   /* 1 - If we have a self destruct, use it */
-  if (mem_sys->destroy_fn != NULL)
+  if (mem_sys->destroy_fn)
       return mem_sys->destroy_fn(mem_sys);
 
   /* 2 - If we don't have a parent, free using ourselves */
-  else if (mem_sys->parent_mem_sys == NULL)
+  else if (!mem_sys->parent_mem_sys)
       return mem_sys->free_fn(mem_sys, mem_sys);
 
   /* 3 - If we do have a parent and it has a free function, use it */
-  else if (mem_sys->parent_mem_sys->free_fn != NULL)
+  else if (mem_sys->parent_mem_sys->free_fn)
       return apr_sms_free(mem_sys->parent_mem_sys, mem_sys);
 
   /* 4 - Assume we are the child of a tracking memory system, and do nothing */
 #ifdef APR_ASSERT_MEMORY
     mem_sys = mem_sys->parent_mem_sys;
-    while (mem_sys)
-    {
+    while (mem_sys){
         if (apr_sms_is_tracking(mem_sys))
             return APR_SUCCESS;
 
@@ -492,12 +473,13 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
 APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a,
                                               apr_sms_t *b)
 {
+    if (!b)
+        return APR_EMEMSYS;
+
 #ifdef APR_ASSERT_MEMORY
     assert(a != NULL);
     assert(b != NULL);
 #endif
-    if (!b)
-        return APR_EINVAL;
         
     while (b && b != a)
         b = b->parent_mem_sys;
@@ -506,58 +488,58 @@ APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a,
     return !(b == a); 
 }
 
-APR_DECLARE(void) apr_sms_threadsafe_lock(apr_sms_t *mem_sys)
+APR_DECLARE(apr_status_t) apr_sms_threadsafe_lock(apr_sms_t *mem_sys)
 {
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys != NULL);
-#endif
-
     if (!mem_sys)
-        return;       
-    if (mem_sys->threadsafe_lock_fn != NULL)
-        mem_sys->threadsafe_lock_fn(mem_sys);
+        return APR_EMEMSYS;       
+
+    if (!mem_sys->lock_fn)
+        return APR_EMEMFUNC;
+
+    if (mem_sys->lock_fn)
+        return mem_sys->lock_fn(mem_sys);
 }
 
-APR_DECLARE(void) apr_sms_threadsafe_unlock(apr_sms_t *mem_sys)
+APR_DECLARE(apr_status_t) apr_sms_threadsafe_unlock(apr_sms_t *mem_sys)
 {
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys != NULL);
-#endif
-
     if (!mem_sys)
-        return;
-    if (mem_sys->threadsafe_unlock_fn != NULL)
-        mem_sys->threadsafe_unlock_fn(mem_sys);
+        return APR_EMEMSYS;
+
+    if (!mem_sys->unlock_fn)
+        return APR_EMEMFUNC;
+        
+    if (mem_sys->unlock_fn)
+        return mem_sys->unlock_fn(mem_sys);
 }
 
 /*
  * memory system cleanup management functions
  */
 
-APR_DECLARE(apr_status_t) 
-apr_sms_cleanup_register(apr_sms_t *mem_sys, void *data,
-                         apr_status_t (*cleanup_fn)(void *))
+APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *mem_sys, 
+                                                   apr_int32_t type, void *data,
+                                                   apr_status_t (*cleanup_fn)(void *))
 {
     struct apr_sms_cleanup *cleanup;
+
+    if (!mem_sys)
+        return APR_EMEMSYS;
 
 #ifdef APR_ASSERT_MEMORY
     assert(mem_sys->accounting_mem_sys != NULL);
 #endif
-
-    if (!mem_sys)
-        return APR_EMEMSYS;
     
-    if (cleanup_fn == NULL)
-        return APR_EINVAL;
+    if (!cleanup_fn)
+        return APR_EMEMFUNC;
 
     cleanup = (struct apr_sms_cleanup *)
-	    apr_sms_malloc(mem_sys->accounting_mem_sys,
-                       sizeof(struct apr_sms_cleanup));
+	    apr_sms_malloc(mem_sys->accounting_mem_sys, sizeof(struct apr_sms_cleanup));
 
-    if (cleanup == NULL)
+    if (!cleanup)
         return APR_ENOMEM;
 
     cleanup->data = data;
+    cleanup->type = type;
     cleanup->cleanup_fn = cleanup_fn;
     cleanup->next = mem_sys->cleanups;
     mem_sys->cleanups = cleanup;
@@ -566,25 +548,25 @@ apr_sms_cleanup_register(apr_sms_t *mem_sys, void *data,
 }
 
 APR_DECLARE(apr_status_t)
-apr_sms_cleanup_unregister(apr_sms_t *mem_sys, void *data,
+apr_sms_cleanup_unregister(apr_sms_t *mem_sys, apr_int32_t type, void *data,
                            apr_status_t (*cleanup_fn)(void *))
 {
     struct apr_sms_cleanup *cleanup;
     struct apr_sms_cleanup **cleanup_ref;
 
+    if (!mem_sys)
+        return APR_EMEMSYS;
+
 #ifdef APR_ASSERT_MEMORY
     assert(mem_sys->accounting_mem_sys != NULL);
 #endif
-
-    if (!mem_sys)
-        return APR_EMEMSYS;
         
     cleanup = mem_sys->cleanups;
     cleanup_ref = &mem_sys->cleanups;
     while (cleanup)
     {
-        if (cleanup->data == data && cleanup->cleanup_fn == cleanup_fn)
-        {
+        if ((type == 0 || cleanup->cleanup_fn == cleanup_fn) &&
+            cleanup->data == data && cleanup->cleanup_fn == cleanup_fn) {
             *cleanup_ref = cleanup->next;
 
             mem_sys = mem_sys->accounting_mem_sys;
@@ -603,10 +585,95 @@ apr_sms_cleanup_unregister(apr_sms_t *mem_sys, void *data,
     return APR_ENOCLEANUP;
 }
 
-APR_DECLARE(apr_status_t) 
-apr_sms_cleanup_run(apr_sms_t *mem_sys, void *data, 
-			        apr_status_t (*cleanup_fn)(void *))
+APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *mem_sys, 
+                                                          apr_int32_t type)
 {
-    apr_sms_cleanup_unregister(mem_sys, data, cleanup_fn);
-    return cleanup_fn(data);
+    struct apr_sms_cleanup *cleanup;
+    struct apr_sms_cleanup **cleanup_ref;
+    apr_status_t rv = APR_ENOCLEANUP;
+
+    if (!mem_sys)
+        return APR_EMEMSYS;
+        
+#ifdef APR_ASSERT_MEMORY
+    assert(mem_sys->accounting_mem_sys != NULL);
+#endif
+    
+    cleanup = mem_sys->cleanups;
+    cleanup_ref = &mem_sys->cleanups;
+    mem_sys = mem_sys->accounting_mem_sys;
+    while (cleanup) {
+        if (type == 0 || cleanup->type == type) {
+            *cleanup_ref = cleanup->next;
+
+            if (mem_sys->free_fn != NULL)
+                apr_sms_free(mem_sys, cleanup);
+
+            cleanup = *cleanup_ref;
+            rv = APR_SUCCESS;
+        }
+        else {
+            cleanup_ref = &cleanup->next;
+            cleanup = cleanup->next;
+        }
+    }
+
+    /* The cleanup function should have been registered previously */
+    return rv;
 }
+
+APR_DECLARE(apr_status_t)  apr_sms_cleanup_run(apr_sms_t *mem_sys, apr_int32_t type,
+                                               void *data, 
+			                                   apr_status_t (*cleanup_fn)(void *))
+{
+    apr_status_t rv;
+
+    if (!mem_sys)
+        return APR_EMEMSYS;
+
+    if ((rv = apr_sms_cleanup_unregister(mem_sys, type, data, cleanup_fn)) != APR_SUCCESS)
+        return rv;
+
+     return cleanup_fn(data);
+}
+
+APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys, 
+                                                   apr_int32_t type)
+{
+    struct apr_sms_cleanup *cleanup;
+    struct apr_sms_cleanup **cleanup_ref;
+    apr_status_t rv = APR_ENOCLEANUP;
+
+    if (!mem_sys)
+        return APR_EMEMSYS;
+        
+#ifdef APR_ASSERT_MEMORY
+    assert(mem_sys->accounting_mem_sys != NULL);
+#endif
+    
+    cleanup = mem_sys->cleanups;
+    cleanup_ref = &mem_sys->cleanups;
+    mem_sys = mem_sys->accounting_mem_sys;
+    while (cleanup)
+    {
+        if (type == 0 || cleanup->type == type) {
+            *cleanup_ref = cleanup->next;
+
+            cleanup->cleanup_fn(cleanup->data);
+            
+            if (mem_sys->free_fn != NULL)
+                apr_sms_free(mem_sys, cleanup);
+
+            cleanup = *cleanup_ref;
+            rv = APR_SUCCESS;
+        }
+        else {
+            cleanup_ref = &cleanup->next;
+            cleanup = cleanup->next;
+        }
+    }
+
+    /* The cleanup function should have been registered previously */
+    return rv;
+}
+
