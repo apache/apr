@@ -10,6 +10,10 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) apr_proc_create() on Unix: Remove unnecessary check for read 
+     access to the working directory of the child process.
+     PR 30137.  [Jeremy Chadwick <apache jdc.parodius.com>]
+
   *) Add jlibtool - enabled with '--enable-experimental-libtool' option.
      [Justin Erenkrantz]
 
