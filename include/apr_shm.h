@@ -70,6 +70,18 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
                                          apr_pool_t *pool);
 
 /**
+ * Remove shared memory segment associated with a filename.
+ * @param filename The filename associated with shared-memory segment which
+ *        needs to be removed
+ * @param pool The pool used for file operations
+ * @remark This function is only supported on platforms which support
+ * name-based shared memory segments, and will return APR_ENOTIMPL on
+ * platforms without such support.
+ */
+APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
+                                         apr_pool_t *pool);
+
+/**
  * Destroy a shared memory segment and associated memory.
  * @param m The shared memory segment structure to destroy.
  */

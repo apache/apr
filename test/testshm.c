@@ -214,6 +214,36 @@ static void test_named(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, sent, received);
 
 }
+
+static void test_named_remove(abts_case *tc, void *data)
+{
+    apr_status_t rv;
+    apr_shm_t *shm;
+
+    rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
+    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    if (rv != APR_SUCCESS) {
+        return;
+    }
+    ABTS_PTR_NOTNULL(tc, shm);
+
+    rv = apr_shm_remove(SHARED_FILENAME, p);
+    apr_assert_success(tc, "Error removing shared memory block", rv);
+    if (rv != APR_SUCCESS) {
+        return ;
+    }
+
+    rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
+    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    if (rv != APR_SUCCESS) {
+        return;
+    }
+    ABTS_PTR_NOTNULL(tc, shm);
+
+    rv = apr_shm_destroy(shm);
+    apr_assert_success(tc, "Error destroying shared memory block", rv);
+}
+
 #endif
 
 abts_suite *testshm(abts_suite *suite)
@@ -228,6 +258,7 @@ abts_suite *testshm(abts_suite *suite)
     abts_run_test(suite, test_anon, NULL);
 #endif
     abts_run_test(suite, test_named, NULL); 
+    abts_run_test(suite, test_named_remove, NULL); 
 #endif
 
     return suite;
