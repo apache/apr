@@ -80,7 +80,7 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
     rv = SetFilePointer(thefile->filehand, *offset, NULL, howmove);
     if (rv == -1) {
         *offset = -1;
-        return APR_EEXIST;
+        return GetLastError();
     }
     else {
         *offset = rv;

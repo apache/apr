@@ -70,7 +70,7 @@ static ap_status_t socket_cleanup(void *sock)
         return APR_SUCCESS;
     }
     else {
-        return APR_EEXIST;
+        return WSAGetLastError();
     }
 }
 
