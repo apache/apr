@@ -183,14 +183,6 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path,
 APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
 
 /**
- * Is there an error on the stream?
- * @param fptr The apr file we are testing.
- * @tip Returns -1 if the error indicator is set, APR_SUCCESS otherwise.
- * @deffunc apr_status_t apr_file_error(apr_file_t *fptr)
- */
-APR_DECLARE(apr_status_t) apr_file_error(apr_file_t *fptr);
-
-/**
  * open standard error as an apr file pointer.
  * @param thefile The apr file to use as stderr.
  * @param cont The pool to allocate the file out of.
