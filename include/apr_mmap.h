@@ -163,8 +163,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **newmmap,
 /**
  * Duplicate the specified MMAP.
  * @param new_mmap The structure to duplicate into. 
- * @param old_mmap The file to duplicate.
- * @param p The pool to use for the new file.
+ * @param old_mmap The mmap to duplicate.
+ * @param p The pool to use for new_mmap.
  * @param transfer_ownership  Whether responsibility for destroying
  *  the memory-mapped segment is transferred from old_mmap to new_mmap
  */         
@@ -172,6 +172,22 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
                                        apr_mmap_t *old_mmap,
                                        apr_pool_t *p,
                                        int transfer_ownership);
+
+#if defined(DOXYGEN)
+/**
+ * Transfer the specified MMAP to a different pool
+ * @param new_mmap The structure to duplicate into. 
+ * @param old_mmap The file to transfer.
+ * @param p The pool to use for new_mmap.
+ * @remark After this call, old_mmap cannot be used
+ */
+APR_DECLARE(apr_status_t) apr_mmap_setaside(apr_mmap_t **new_mmap,
+                                            apr_mmap_t *old_mmap,
+                                            apr_pool_t *p);
+#else
+#define apr_mmap_setaside(new_mmap, old_mmap, p) apr_mmap_dup(new_mmap, old_mmap, p, 1)
+#endif /* DOXYGEN */
+
 
 /**
  * Remove a mmap'ed.
