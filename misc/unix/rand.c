@@ -198,7 +198,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
 #undef	XSTR
 
 #ifdef OS2
-#include "../os2/randbyte.c"
+#include "randbyte_os2.inc"
 #endif
 
 #endif /* APR_HAS_RANDOM */
