@@ -57,6 +57,7 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_macro.h"
 #include <errno.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -65,6 +66,10 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <netdb.h>
+
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+extern ap_lock_t *lock_network;
+#endif
 
 static ap_status_t soblock(int sd)
 {
@@ -203,9 +208,13 @@ ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
 ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
 {
     struct hostent *hptr;
+    struct hostent *hp_safe;
     
+    SAFETY_LOCK(network, "net_file");
+    GETHOSTBYADDR((char *)&(sock->addr->sin_addr), hptr, hp_safe);
     hptr = gethostbyaddr((char *)&(sock->addr->sin_addr), 
                          sizeof(struct in_addr), AF_INET);
+    SAFETY_UNLOCK(network);
     if (hptr != NULL) {
         *name = ap_pstrdup(sock->cntxt, hptr->h_name);
         if (*name) {
