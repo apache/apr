@@ -109,14 +109,7 @@ typedef struct cleanup_t cleanup_t;
 struct process_chain {
     /** The process ID */
     apr_proc_t *pid;
-    /** When the process should be sent a signal. <PRE>
-     *           kill_never   -- process is never sent any signals
-     *           kill_always  -- process is sent SIGKILL on apr_pool_t cleanup
-     *           kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
-     *           just_wait    -- wait forever for the process to complete
-     *           kill_only_once -- send SIGTERM and then wait </PRE>
-     */
-    enum kill_conditions kill_how;
+    apr_kill_conditions_e kill_how;
     /** The next process in the list */
     struct process_chain *next;
 };
@@ -1718,7 +1711,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data)
  * For now, it's a special case.
  */
 APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *pool, apr_proc_t *pid,
-                                    enum kill_conditions how)
+                                           apr_kill_conditions_e how)
 {
     struct process_chain *pc = apr_palloc(pool, sizeof(struct process_chain));
 
@@ -1751,13 +1744,13 @@ static void free_proc_chain(struct process_chain *procs)
     /* Pick up all defunct processes */
     for (pc = procs; pc; pc = pc->next) {
         if (apr_proc_wait(pc->pid, NULL, NULL, APR_NOWAIT) != APR_CHILD_NOTDONE)
-            pc->kill_how = kill_never;
+            pc->kill_how = APR_KILL_NEVER;
     }
 #endif /* !defined(NEED_WAITPID) */
 
     for (pc = procs; pc; pc = pc->next) {
-        if ((pc->kill_how == kill_after_timeout) ||
-            (pc->kill_how == kill_only_once)) {
+        if ((pc->kill_how == APR_KILL_AFTER_TIMEOUT) ||
+            (pc->kill_how == APR_KILL_ONLY_ONCE)) {
             /*
              * Subprocess may be dead already.  Only need the timeout if not.
              * Note: apr_proc_kill on Windows is TerminateProcess(), which is
@@ -1771,7 +1764,7 @@ static void free_proc_chain(struct process_chain *procs)
                 need_timeout = 1;
 #endif /* !defined(WIN32) */
         }
-        else if (pc->kill_how == kill_always) {
+        else if (pc->kill_how == APR_KILL_ALWAYS) {
             apr_proc_kill(pc->pid, SIGKILL);
         }
     }
@@ -1785,13 +1778,13 @@ static void free_proc_chain(struct process_chain *procs)
      * goop...
      */
     for (pc = procs; pc; pc = pc->next) {
-        if (pc->kill_how == kill_after_timeout)
+        if (pc->kill_how == APR_KILL_AFTER_TIMEOUT)
             apr_proc_kill(pc->pid, SIGKILL);
     }
 
     /* Now wait for all the signaled processes to die */
     for (pc = procs; pc; pc = pc->next) {
-        if (pc->kill_how != kill_never)
+        if (pc->kill_how != APR_KILL_NEVER)
             (void)apr_proc_wait(pc->pid, NULL, NULL, APR_WAIT);
     }
 

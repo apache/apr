@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Move the kill_conditions enum in apr_thread_proc.h into the
+     APR namespace. kill_after_timeout et al have been renamed
+     appropriately (e.g., APR_KILL_AFTER_TIMEOUT).  [Jeff Trawick]
+
   *) Fix a segfault in apr_thread_rwlock_destroy() on Win32.
      [INOUE Seiichiro <inoue@ariel-networks.com>]
   

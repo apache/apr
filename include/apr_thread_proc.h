@@ -183,13 +183,13 @@ typedef struct apr_other_child_rec_t  apr_other_child_rec_t;
  */
 typedef void *(APR_THREAD_FUNC *apr_thread_start_t)(apr_thread_t*, void*);
 
-enum kill_conditions {
-    kill_never,                 /**< process is never sent any signals */
-    kill_always,                /**< process is sent SIGKILL on apr_pool_t cleanup */
-    kill_after_timeout,         /**< SIGTERM, wait 3 seconds, SIGKILL */
-    just_wait,                  /**< wait forever for the process to complete */
-    kill_only_once              /**< send SIGTERM and then wait */
-};
+typedef enum {
+    APR_KILL_NEVER,             /**< process is never sent any signals */
+    APR_KILL_ALWAYS,            /**< process is sent SIGKILL on apr_pool_t cleanup */
+    APR_KILL_AFTER_TIMEOUT,     /**< SIGTERM, wait 3 seconds, SIGKILL */
+    APR_JUST_WAIT,              /**< wait forever for the process to complete */
+    APR_KILL_ONLY_ONCE          /**< send SIGTERM and then wait */
+} apr_kill_conditions_e;
 
 /* Thread Function definitions */
 
@@ -634,15 +634,15 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int sig);
  * @param pid The process to register
  * @param how How to kill the process, one of:
  * <PRE>
- *         kill_never   	   -- process is never sent any signals
- *         kill_always 	   -- process is sent SIGKILL on apr_pool_t cleanup	
- *         kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
- *         just_wait          -- wait forever for the process to complete
- *         kill_only_once     -- send SIGTERM and then wait
+ *         APR_KILL_NEVER         -- process is never sent any signals
+ *         APR_KILL_ALWAYS        -- process is sent SIGKILL on apr_pool_t cleanup
+ *         APR_KILL_AFTER_TIMEOUT -- SIGTERM, wait 3 seconds, SIGKILL
+ *         APR_JUST_WAIT          -- wait forever for the process to complete
+ *         APR_KILL_ONLY_ONCE     -- send SIGTERM and then wait
  * </PRE>
  */
 APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
-                                      enum kill_conditions how);
+                                           apr_kill_conditions_e how);
 
 #if APR_HAS_THREADS 
 
