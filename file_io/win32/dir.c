@@ -53,7 +53,7 @@
  */
 
 #include "apr.h"
-#include "win32/fileio.h"
+#include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
@@ -71,6 +71,7 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+
 
 static apr_status_t dir_cleanup(void *thedir)
 {
@@ -90,12 +91,15 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
 #endif
     int len = strlen(dirname);
     (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+    /* Leave room here to add and pop the '*' wildcard for FindFirstFile 
+     * and double-null terminate so we have one character to change.
+     */
     (*new)->dirname = apr_palloc(cont, len + 3);
     memcpy((*new)->dirname, dirname, len);
     if (len && (*new)->dirname[len - 1] != '/') {
     	(*new)->dirname[len++] = '/';
     }
-    (*new)->dirname[len++] = '*';
+    (*new)->dirname[len++] = '\0';
     (*new)->dirname[len] = '\0';
 
 #if APR_HAS_UNICODE_FS
@@ -104,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
         /* Create a buffer for the longest file name we will ever see 
          */
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        (*new)->name = apr_pcalloc(cont, MAX_PATH * 3 + 1);        
+        (*new)->name = apr_pcalloc(cont, APR_FILE_MAX * 3 + 1);        
     }
     else
 #endif
@@ -115,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
          * The length not including the trailing '*' is stored as rootlen, to
          * skip over all paths which are too long.
          */
-        if (len >= MAX_PATH) {
+        if (len >= APR_PATH_MAX) {
             (*new) = NULL;
             return APR_ENAMETOOLONG;
         }
@@ -141,6 +145,7 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *dir)
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir)
 {
+    apr_status_t rv;
     /* The while loops below allow us to skip all invalid file names, so that
      * we aren't reporting any files where their absolute paths are too long.
      */
@@ -148,16 +153,18 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
-        apr_status_t rv;
         if (thedir->dirhand == INVALID_HANDLE_VALUE) 
         {
-            apr_wchar_t wdirname[8192];
+            apr_wchar_t *eos, wdirname[APR_PATH_MAX];
             apr_status_t rv;
             if (rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
                                                      / sizeof(apr_wchar_t), 
                                           thedir->dirname)) {
                 return rv;
             }
+            eos = wcschr(wdirname, '\0');
+            eos[0] = '*';
+            eos[1] = '\0';
             thedir->dirhand = FindFirstFileW(wdirname, thedir->w.entry);
             if (thedir->dirhand == INVALID_HANDLE_VALUE) {
                 return apr_get_os_error();
@@ -167,13 +174,13 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             return apr_get_os_error();
         }
         while (thedir->rootlen &&
-               thedir->rootlen + wcslen(thedir->w.entry->cFileName) >= MAX_PATH)
+               thedir->rootlen + wcslen(thedir->w.entry->cFileName) >= APR_PATH_MAX)
         {
             if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
                 return apr_get_os_error();
             }
         }
-        if (rv = unicode_to_utf8_path(thedir->name, MAX_PATH * 3 + 1, 
+        if (rv = unicode_to_utf8_path(thedir->name, APR_FILE_MAX * 3 + 1, 
                                       thedir->w.entry->cFileName))
             return rv;
         finfo->name = thedir->name;
@@ -182,8 +189,11 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 #endif
     {
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+            /* '/' terminated, so add the '*' and pop it when we finish */
+            *strchr(thedir->dirname, '\0') = '*';
             thedir->dirhand = FindFirstFileA(thedir->dirname, 
                                              thedir->n.entry);
+            *(strchr(thedir->dirname, '\0') - 1) = '\0';
             if (thedir->dirhand == INVALID_HANDLE_VALUE) {
                 return apr_get_os_error();
             }
@@ -200,15 +210,34 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         }
         finfo->name = thedir->n.entry->cFileName;
     }
-    finfo->cntxt = thedir->cntxt;
     finfo->valid = APR_FINFO_NAME | APR_FINFO_TYPE | APR_FINFO_CTIME
                  | APR_FINFO_ATIME | APR_FINFO_MTIME | APR_FINFO_SIZE;
+    wanted |= ~finfo->valid;
+    if (wanted) {
+        /* Win32 apr_stat() is about to open a handle to this file.
+         * we must create a full path that doesn't evaporate.
+         */
+        const char *fname = finfo->name;
+        char *fspec = apr_pstrcat(thedir->cntxt, thedir->dirname, 
+                                  finfo->name, NULL);
+        finfo->valid = 0;
+        rv = apr_stat(finfo, fspec, wanted, thedir->cntxt);
+        if (rv == APR_SUCCESS || rv == APR_INCOMPLETE) {
+            finfo->valid |= APR_FINFO_NAME;
+            finfo->name = fname;
+            finfo->fname = fspec;
+        }
+        return rv;
+    }
+
+    finfo->cntxt = thedir->cntxt;
+
     /* Do the best job we can determining the file type.
      * Win32 only returns device names in a directory in response to a specific
      * request (e.g. FindFirstFile("CON"), not to wildcards, so we will ignore
      * the BLK, CHR, and other oddballs, since they should -not- occur in this
      * context.
-     */.
+     */
     if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         finfo->filetype = APR_DIR;
         finfo->valid |= APR_FINFO_TYPE;
@@ -247,7 +276,7 @@ APR_DECLARE(apr_status_t) apr_make_dir(const char *path, apr_fileperms_t perm,
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t wpath[8192];
+        apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
         if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
                                               / sizeof(apr_wchar_t), path)) {
@@ -271,7 +300,7 @@ APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t wpath[8192];
+        apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
         if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
                                               / sizeof(apr_wchar_t), path)) {

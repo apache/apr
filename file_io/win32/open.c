@@ -237,7 +237,7 @@ APR_DECLARE(apr_status_t) apr_open(apr_file_t **new, const char *fname,
 
 #if APR_HAS_UNICODE_FS
     if (os_level >= APR_WIN_NT) {
-        apr_wchar_t wfname[8192];
+        apr_wchar_t wfname[APR_PATH_MAX];
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                                / sizeof(apr_wchar_t), fname))
             return rv;
@@ -320,7 +320,7 @@ APR_DECLARE(apr_status_t) apr_remove_file(const char *path, apr_pool_t *cont)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t wpath[8192];
+        apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
         if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
                                               / sizeof(apr_wchar_t), path)) {
@@ -344,7 +344,7 @@ APR_DECLARE(apr_status_t) apr_rename_file(const char *frompath,
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t wfrompath[8192], wtopath[8192];
+        apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
         apr_status_t rv;
         if (rv = utf8_to_unicode_path(wfrompath, sizeof(wfrompath) 
                                            / sizeof(apr_wchar_t), frompath)) {
