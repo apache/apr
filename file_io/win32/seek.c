@@ -57,9 +57,9 @@
 #include <errno.h>
 #include <string.h>
 
-static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
+static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 {
-    long newbufpos;
+    apr_off_t newbufpos;
     DWORD rc;
 
     if (thefile->direction == 1) {
@@ -70,15 +70,19 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
     newbufpos = pos - (thefile->filePtr - thefile->dataRead);
 
     if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
-        thefile->bufpos = newbufpos;
+        thefile->bufpos = (apr_size_t)newbufpos;
         rc = 0;
     } else {
-        rc = SetFilePointer(thefile->filehand, pos, NULL, FILE_BEGIN);
+        DWORD offlo = (DWORD)pos;
+        DWORD offhi = (DWORD)(pos >> 32);
+        rc = SetFilePointer(thefile->filehand, offlo, &offhi, FILE_BEGIN);
 
-        if ( rc == 0xFFFFFFFF )
+        if (rc == 0xFFFFFFFF)
             rc = apr_get_os_error();
         else
-            rc = thefile->bufpos = thefile->dataRead = 0;
+            rc = APR_SUCCESS;
+        if (rc == APR_SUCCESS)
+            thefile->bufpos = thefile->dataRead = 0;
     }
 
     return rc;
@@ -88,57 +92,73 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 
 APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
 {
-    DWORD howmove;
-    DWORD rv;
+    apr_finfo_t finfo;
+    apr_status_t rc = APR_EINVAL;
 
     if (thefile->buffered) {
-        int rc = APR_EINVAL;
-        apr_finfo_t finfo;
-
         switch (where) {
-        case APR_SET:
-            rc = setptr(thefile, *offset);
-            break;
+            case APR_SET:
+                rc = setptr(thefile, *offset);
+                break;
 
-        case APR_CUR:
-            rc = setptr(thefile, thefile->filePtr - thefile->dataRead + thefile->bufpos + *offset);
-            break;
+            case APR_CUR:
+                rc = setptr(thefile, thefile->filePtr - thefile->dataRead 
+                                      + thefile->bufpos + *offset);
+                break;
 
-        case APR_END:
-            rc = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
-            if (rc == APR_SUCCESS && (finfo.valid & APR_FINFO_SIZE))
-                rc = setptr(thefile, finfo.size - *offset);
-            break;
+            case APR_END:
+                rc = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
+                if (rc == APR_SUCCESS)
+                    rc = setptr(thefile, finfo.size - *offset);
+                break;
         }
 
         *offset = thefile->filePtr + thefile->bufpos;
         return rc;
-    } else {
+    } 
+    else if (thefile->pOverlapped) {
         switch(where) {
             case APR_SET:
-                howmove = FILE_BEGIN;
+                thefile->filePtr = *offset;
                 break;
         
             case APR_CUR:
-                howmove = FILE_CURRENT;
+                thefile->filePtr += *offset;
                 break;
         
             case APR_END:
-                howmove = FILE_END;
+                rc = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
+                if (rc == APR_SUCCESS && finfo.size - *offset < 0)
+                    thefile->filePtr = finfo.size - *offset;
                 break;
+        }
+        *offset = thefile->filePtr;
+        return rc;
+    }
+    else {
+        DWORD howmove;
+        DWORD offlo = (DWORD)*offset;
+        DWORD offhi = (DWORD)(*offset >> 32);
 
+        switch(where) {
+            case APR_SET:
+                howmove = FILE_BEGIN;   break;
+            case APR_CUR:
+                howmove = FILE_CURRENT; break;
+            case APR_END:
+                howmove = FILE_END;     break;
             default:
-                return APR_BADARG;
+                return APR_EINVAL;
         }
-
-        rv = SetFilePointer(thefile->filehand, *offset, NULL, howmove);
-        if (rv == -1) {
-            *offset = -1;
-            return apr_get_os_error();
-        }
-        else {
-            *offset = rv;
-            return APR_SUCCESS;
-        }
+        offlo = SetFilePointer(thefile->filehand, (LONG)offlo, 
+                               (LONG*)&offhi, howmove);
+        if (offlo == 0xFFFFFFFF)
+            rc = apr_get_os_error();
+        else
+            rc = APR_SUCCESS;
+        /* Since we can land at 0xffffffff we will measure our APR_SUCCESS */
+        if (rc == APR_SUCCESS)
+            *offset = ((apr_off_t)offhi << 32) | offlo;
+        return rc;
     }
 }
