@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/11 23:00:54 $]
+Last modified at [$Date: 2002/07/11 23:32:50 $]
 
 Release:
 
@@ -61,13 +61,18 @@ CURRENT VOTES:
     * apr_time_t will change to use binary microseconds based on
       profiling.  The last remaining question on the table is keeping
       the apr_time_t designation, or changing the symbol name.
-      1) Keeping the existing apr_time_t names, in spite of potential
-         ANSI/C99 time_t confusion.  apr_types don't promise to be
+      1) Keeping the existing apr_time_t names, in spite of
+         ANSI/C99 time_t confusion demonstrated by dozens of bug
+         fixes since it was introduced.  apr_types don't promise to be
          system types, or map to system units.
          +1: rbb, wrowe, jerenkrantz, striker
          +0: brianp
          -0.5: jwoolley
          -1: aaron [veto for reusing the apr_time_t identifier for a new use]
+             fielding [if they don't map to system types, then don't mimic
+               the system types --- give me back all of my ap_time functions
+               that were converted to microsecond arguments even though none
+               of them do anything useful with microseconds.]
       2) Renaming the function to get rid of apr_time_t vs time_t confusion,
          which brianp suggests apr_timeval_t.
          +1: fielding, aaron
@@ -78,6 +83,33 @@ CURRENT VOTES:
                        vetoed whatever that was]
          -0: wrowe, jerenkrantz, striker
          -0.5: rbb
+
+      [fielding: Is APR time guaranteed to be a scalar quantity?  If so,
+       then we must include units as part of the definition of the
+       type in order to let developers make use of that quarantee.
+       In that case, the units should be in the type name [e.g., apr_busec].
+       If not, then we should be storing time in a structure with
+       separate fields in order to have better precision with less code.
+
+       In any case, time_t ==> seconds because time_t is guaranteed
+       by POSIX to be a scalar quantity for arithmetic operations.
+       Saying that apr_time_t doesn't imply seconds is to ignore the
+       fact that all of those httpd functions used to create APR were
+       defined in terms of seconds and make no use of microseconds.
+
+       Meanwhile, the only reason we have this stupid debate is because
+       wrowe insists that time_t is 32 bits and therefore dies in 2038.
+       In fact, time_t is 64 bits on 64bit NT, Linux, OSF, and probably
+       others that I haven't checked.  In any case, since we use the
+       system's time_t time() function to get the time value everywhere
+       except Win32 w/SYSTEMTIME, we only ever have a resolution of
+       seconds or milliseconds.  So, why the hell are we storing usecs?
+       We don't use them.  We don't even have display functions for them.
+       We have to do a stupid conversion every time we actually do something
+       useful with time in order to support somebody's wet dream of a
+       potentially useful feature?  That's crap!  This is exactly why
+       I hate portability libraries that aren't based on the demonstrated
+       needs of a specific application.]
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
