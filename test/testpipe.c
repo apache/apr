@@ -104,7 +104,7 @@ int main(void)
     }        
 
     fprintf(stdout, "\tReading from the pipe.......");
-    nbytes = (apr_ssize_t)strlen("this is a test");
+    nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(context, nbytes + 1);
     if (apr_read(readp, buf, &nbytes) == APR_TIMEUP) {
         fprintf(stdout, "OK\n");

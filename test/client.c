@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 {
     apr_pool_t *context;
     apr_socket_t *sock;
-    apr_ssize_t length;
+    apr_size_t length;
     apr_status_t stat;
     char datasend[STRLEN] = "Send data test";
     char datarecv[STRLEN];

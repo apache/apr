@@ -65,7 +65,7 @@ int main(int argc, const char * const argv[])
     apr_pool_t *context;
     apr_socket_t *sock;
     apr_socket_t *sock2;
-    apr_ssize_t length;
+    apr_size_t length;
     apr_int32_t rv;
     apr_pollfd_t *sdset;
     char datasend[STRLEN];
