@@ -285,7 +285,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     if (attr->errchk) {
         if (attr->currdir) {
-            if (access(attr->currdir, R_OK|X_OK) == -1) {
+            if (access(attr->currdir, X_OK) == -1) {
                 /* chdir() in child wouldn't have worked */
                 return errno;
             }

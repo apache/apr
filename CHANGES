@@ -1,4 +1,9 @@
 Changes with APR 0.9.5
+
+  *) apr_proc_create() on Unix: Remove unnecessary check for read 
+     access to the working directory of the child process.
+     PR 30137.  [Jeremy Chadwick <apache jdc.parodius.com>]
+
   *) Win32: Fix bug tracking the file pointer on a file opened for 
      overlapped/APR_XTHREAD io. [Bill Stoddard]
 
