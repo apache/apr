@@ -204,9 +204,20 @@ API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-
 API_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
 {
+    ap_status_t rv;
+    int is_sb;
+
+    /* TODO: remove the single-byte-only restriction from this code
+     */
+    rv = ap_xlate_get_sb(xlate, &is_sb);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+    if (!is_sb) {
+        return APR_EINVAL;
+    }
     context->xlate = xlate;
     return APR_SUCCESS;
 }
