@@ -66,13 +66,14 @@ typedef char bool;
 bool silent = false;
 bool shared = false;
 bool export_all = false;
-enum mode_t { mCompile, mLink };
+enum mode_t { mCompile, mLink, mInstall };
 enum output_type_t { otGeneral, otObject, otProgram, otStaticLibrary, otDynamicLibrary };
 
 #ifdef __EMX__
 #  define SHELL_CMD  "sh"
 #  define CC         "gcc"
 #  define GEN_EXPORTS "emxexp"
+#  define DEF2IMPLIB_CMD "emximp"
 #  define SHARE_SW   "-Zdll -Zmtd"
 #  define USE_OMF true
 #  define TRUNCATE_DLL_NAME
@@ -197,8 +198,13 @@ bool parse_long_opt(char *arg, cmd_data_t *cmd_data)
             cmd_data->mode = mCompile;
             cmd_data->output_type = otObject;
         }
+
         if (strcmp(value, "link") == 0) {
             cmd_data->mode = mLink;
+        }
+
+        if (strcmp(value, "install") == 0) {
+            cmd_data->mode = mInstall;
         }
     } else if (strcmp(var, "shared") == 0) {
         shared = true;
@@ -641,6 +647,8 @@ void cleanup_tmp_dirs(cmd_data_t *cmd_data)
 void generate_def_file(cmd_data_t *cmd_data)
 {
     char def_file[1024];
+    char implib_file[1024];
+    char *ext;
     FILE *hDef;
     char *export_args[1024];
     int num_export_args = 0;
@@ -680,14 +688,36 @@ void generate_def_file(cmd_data_t *cmd_data)
             export_args[num_export_args++] = NULL;
             spawnvp(P_WAIT, export_args[0], export_args);
             cmd_data->arglist[cmd_data->num_args++] = strdup(def_file);
+
+            /* Now make an import library for the dll */
+            num_export_args = 0;
+            export_args[num_export_args++] = DEF2IMPLIB_CMD;
+            export_args[num_export_args++] = "-o";
+
+            strcpy(implib_file, ".libs/");
+            strcat(implib_file, cmd_data->stub_name);
+            ext = strrchr(implib_file, '.');
+
+            if (ext)
+                *ext = 0;
+
+            strcat(implib_file, ".");
+            strcat(implib_file, STATIC_LIB_EXT);
+
+            export_args[num_export_args++] = implib_file;
+            export_args[num_export_args++] = def_file;
+            spawnvp(P_WAIT, export_args[0], export_args);
         }
     }
 }
 
 
 
+/* returns just a file's name without path or extension */
 char *nameof(char *fullpath)
 {
+    char buffer[1024];
+    char *ext;
     char *name = strrchr(fullpath, '/');
 
     if (name == NULL) {
@@ -698,6 +728,14 @@ char *nameof(char *fullpath)
         name = fullpath;
     } else {
         name++;
+    }
+
+    strcpy(buffer, name);
+    ext = strrchr(buffer, '.');
+
+    if (ext) {
+        *ext = 0;
+        return strdup(buffer);
     }
 
     return name;
