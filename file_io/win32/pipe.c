@@ -61,6 +61,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "misc.h"
 
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
 {

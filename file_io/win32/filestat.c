@@ -60,6 +60,7 @@
 #include "apr_time.h"
 #include <sys/stat.h>
 #include "atime.h"
+#include "misc.h"
 
 #define S_ISLNK(m)  (0)
 #define S_ISREG(m)  (((m) & (S_IFMT))  == S_IFREG)
