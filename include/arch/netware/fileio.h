@@ -55,6 +55,8 @@
 #ifndef FILE_IO_H
 #define FILE_IO_H
 
+//#define FAST_STAT
+
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
@@ -102,6 +104,12 @@
 #include <sys/time.h>
 #endif
 
+#ifdef FAST_STAT
+#include <fsio.h>
+#else
+#include <nks\fsio.h>
+#endif
+
 /* End System headers */
 
 #define APR_FILE_BUFSIZE 4096
@@ -135,6 +143,17 @@ struct apr_dir_t {
     DIR *dirstruct;
     struct dirent *entry;
 };
+
+typedef struct apr_stat_entry_t apr_stat_entry_t;
+
+struct apr_stat_entry_t {
+    struct stat info;
+    char *casedName;
+    apr_time_t expire;
+    NXPathCtx_t pathCtx;
+};
+
+extern apr_int32_t CpuCurrentProcessor; /* system variable */
 
 #define MAX_SERVER_NAME     64
 #define MAX_VOLUME_NAME     64
