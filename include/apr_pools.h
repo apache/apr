@@ -207,9 +207,18 @@ APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
 /**
  * Get the abort function associated with the specified pool.
  * @param pool The pool for retrieving the abort function.
+ * @return The abort function for the given pool.
  * @deffunc apr_abortfunc_t apr_pool_get_abort(apr_pool_t *pool)
  */
 APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
+
+/**
+ * Get the parent pool of the specified pool.
+ * @param pool The pool for retrieving the parent pool.
+ * @return The parent of the given pool.
+ * @deffunc apr_pool_t * apr_pool_get_parent(apr_pool_t *pool)
+ */
+APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
 
 /**
  * Set the data associated with the current pool
@@ -272,9 +281,10 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 /**
  * Report the number of bytes currently in the pool
  * @param p The pool to inspect
+ * @param recurse Recurse/include the subpools' sizes
  * @return The number of bytes
  */
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p);
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
 
 /**
  * Report the number of bytes currently in the list of free blocks
