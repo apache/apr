@@ -108,7 +108,6 @@ typedef ap_int32_t       ap_seek_where_t;
 typedef struct file_t            ap_file_t;
 typedef struct ap_finfo_t        ap_finfo_t;
 typedef struct dir_t             ap_dir_t;
-typedef struct iovec_t           ap_iovec_t;
 typedef ap_int32_t               ap_fileperms_t;
 typedef uid_t                    ap_uid_t;
 typedef gid_t                    ap_gid_t;
@@ -136,7 +135,7 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont);
 
 ap_status_t ap_read(ap_file_t *, void *, ap_ssize_t *);
 ap_status_t ap_write(ap_file_t *, void *, ap_ssize_t *);
-ap_status_t ap_writev(ap_file_t *, const ap_iovec_t *vec, ap_size_t nvec, ap_ssize_t *nbytes);
+ap_status_t ap_writev(ap_file_t *, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes);
 ap_status_t ap_putc(char, ap_file_t *);
 ap_status_t ap_getc(char *, ap_file_t *);
 ap_status_t ap_ungetc(char, ap_file_t *);
@@ -146,7 +145,6 @@ ap_status_t ap_flush(ap_file_t *);
 API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
-ap_status_t ap_make_iov(ap_iovec_t **, const struct iovec *, ap_context_t *);
 ap_status_t ap_dupfile(ap_file_t **, ap_file_t *);
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont);
