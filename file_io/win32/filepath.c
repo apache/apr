@@ -54,222 +54,17 @@
 
 #include "apr.h"
 #include "fileio.h"
-#include "apr_file_io.h"
 #include "apr_strings.h"
 
 
-/* Win32 Exceptions:
- *
- * Note that trailing spaces and trailing periods are never recorded
- * in the file system, except by a very obscure bug where any file
- * that is created with a trailing space or period, followed by the 
- * ':' stream designator on an NTFS volume can never be accessed again.
- * In other words, don't ever accept them when designating a stream!
- *
- * An interesting side effect is that two or three periods are both 
- * treated as the parent directory, although the fourth and on are
- * not [strongly suggest all trailing periods are trimmed off, or
- * down to two if there are no other characters.]
- *
- * Leading spaces and periods are accepted, however.
- */
-static int is_fnchar(char ch) 
-{
-    /* No control code between 0 and 31 is allowed
-     * The * ? < > codes all have wildcard effects
-     * The " / \ : are exlusively separator tokens 
-     * The system doesn't accept | for any purpose.
-     * Oddly, \x7f _is_ acceptable.
-     */
-    if (ch >= 0 && ch < 32)
-        return 0;
-
-    if (ch == '\"' || ch ==  '*' || ch == '/' 
-     || ch ==  ':' || ch ==  '<' || ch == '>' 
-     || ch ==  '?' || ch == '\\' || ch == '|')
-        return 0;
-
-    return 1;
-}
-
-
-static apr_status_t filepath_root_test(char *path,
-                                       apr_pool_t *p)
-{
-    apr_status_t rv;
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
-    {
-        apr_wchar_t wpath[APR_PATH_MAX];
-        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                           / sizeof(apr_wchar_t), path))
-            return rv;
-        rv = GetDriveTypeW(wpath);
-    }
-    else
-#endif
-        rv = GetDriveType(path);
-
-    if (rv == DRIVE_UNKNOWN || rv == DRIVE_NO_ROOT_DIR)
-        return APR_EBADPATH;
-    return APR_SUCCESS;
-}
-
-
-APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
-                                           apr_pool_t *p)
-{
-    char path[APR_PATH_MAX];
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
-    {
-        apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        if (!GetCurrentDirectoryW(sizeof(wpath) / sizeof(apr_wchar_t), wpath))
-            return apr_get_os_error();
-        if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
-            return rv;
-    }
-    else
-#endif
-    {
-        if (!GetCurrentDirectory(sizeof(path), path))
-            return apr_get_os_error();
-    }
-    /* ###: We really should consider adding a flag to allow the user
-     * to have the APR_FILEPATH_NATIVE result
-     */
-    for (*rootpath = path; **rootpath; ++*rootpath) {
-        if (**rootpath == '\\')
-            **rootpath = '/';
-    }
-    *rootpath = apr_pstrdup(p, path);
-    return APR_SUCCESS;
-}
-
-
-static apr_status_t filepath_drive_get(char **rootpath,
-                                       char drive,
-                                       apr_pool_t *p)
-{
-    char path[APR_PATH_MAX];
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
-    {
-        apr_wchar_t *ignored;
-        apr_wchar_t wdrive[8];
-        apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
-         * as if that is useful for anything.
-         */
-        wcscpy(wdrive, L"D:.");
-        wdrive[0] = (apr_wchar_t)(unsigned char)drive;
-        if (!GetFullPathNameW(wdrive, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
-            return apr_get_os_error();
-        if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
-            return rv;
-    }
-    else
-#endif
-    {
-        char *ignored;
-        char drivestr[4];
-        drivestr[0] = drive;
-        drivestr[1] = ':';
-        drivestr[2] = '.';;
-        drivestr[3] = '\0';
-        if (!GetFullPathName(drivestr, sizeof(path), path, &ignored))
-            return apr_get_os_error();
-    }
-    /* ###: We really should consider adding a flag to allow the user
-     * to have the APR_FILEPATH_NATIVE result
-     */
-    for (*rootpath = path; **rootpath; ++*rootpath) {
-        if (**rootpath == '\\')
-            **rootpath = '/';
-    }
-    *rootpath = apr_pstrdup(p, path);
-    return APR_SUCCESS;
-}
-
-
-static apr_status_t filepath_root_case(char **rootpath,
-                                           char *root,
-                                           apr_pool_t *p)
-{
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
-    {
-        apr_wchar_t *ignored;
-        apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
-         * as if that is useful for anything.
-         */
-        {
-            apr_wchar_t wroot[APR_PATH_MAX];
-            if (rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
-                                               / sizeof(apr_wchar_t), root))
-                return rv;
-            if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
-                return apr_get_os_error();
-        }
-        {
-            char path[APR_PATH_MAX];
-            if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
-                return rv;
-            *rootpath = apr_pstrdup(p, path);
-        }
-    }
-    else
-#endif
-    {
-        char path[APR_PATH_MAX];
-        char *ignored;
-        if (!GetFullPathName(root, sizeof(path), path, &ignored))
-            return apr_get_os_error();
-        *rootpath = apr_pstrdup(p, path);
-    }
-    return APR_SUCCESS;
-}
-
-
-APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
-                                           apr_pool_t *p)
-{
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
-    {
-        apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                           / sizeof(apr_wchar_t), rootpath))
-            return rv;
-        if (!SetCurrentDirectoryW(wpath))
-            return apr_get_os_error();
-    }
-    else
-#endif
-    {
-        if (!SetCurrentDirectory(rootpath))
-            return apr_get_os_error();
-    }
-    return APR_SUCCESS;
-}
-
-
-/* WinNT accepts several odd forms of a 'root' path.  Under Unicode
+ /* WinNT accepts several odd forms of a 'root' path.  Under Unicode
  * calls (ApiFunctionW) the //?/C:/foo or //?/UNC/mach/share/foo forms
  * are accepted.  Ansi and Unicode functions both accept the //./C:/foo 
  * form under WinNT/2K.  Since these forms are handled in the utf-8 to 
  * unicode translation phase, we don't want the user confused by them, so 
  * we will accept them but always return the canonical C:/ or //mach/share/
+ *
+ * OS2 appears immune from the nonsense :)
  */
 
 APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
@@ -284,10 +79,11 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
     if (testpath[0] == '/' || testpath[0] == '\\') {
         if (testpath[1] == '/' || testpath[1] == '\\') {
-            /* //server/share isn't the only // delimited syntax */
+
+#ifdef WIN32 /* //server/share isn't the only // delimited syntax */
             if ((testpath[2] == '?' || testpath[2] == '.')
                     && (testpath[3] == '/' || testpath[3] == '\\')) {
-                if (is_fnchar(testpath[4]) && testpath[5] == ':') 
+                if (IS_FNCHAR(testpath[4]) && testpath[5] == ':') 
                 {
                     apr_status_t rv;
                     testpath += 4;
@@ -315,12 +111,13 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                      */
                     return APR_EBADPATH;
             }
+#endif /* WIN32 (non - //server/share syntax) */
 
             /* Evaluate path of '//[machine/[share[/]]]' */
             delim1 = testpath + 2;
             do {
                 /* Protect against //X/ where X is illegal */
-                if (*delim1 && !is_fnchar(*(delim1++)))
+                if (*delim1 && !IS_FNCHAR(*(delim1++)))
                     return APR_EBADPATH;
             } while (*delim1 && *delim1 != '/' && *delim1 != '\\');
 
@@ -329,7 +126,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                 delim2 = delim1 + 1;
                 while (*delim2 && *delim2 != '/' && *delim2 != '\\') {
                     /* Protect against //machine/X/ where X is illegal */
-                    if (!is_fnchar(*(delim2++)))
+                    if (!IS_FNCHAR(*(delim2++)))
                         return APR_EBADPATH;
                 } 
 
@@ -418,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     }
 
     /* Evaluate path of 'd:[/]' */
-    if (is_fnchar(*testpath) && testpath[1] == ':') 
+    if (IS_FNCHAR(*testpath) && testpath[1] == ':') 
     {
         apr_status_t rv;
         /* Validate that D:\ drive exists, test must be rooted
@@ -935,6 +732,14 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             if ((rv = apr_stat(&finfo, path, APR_FINFO_TYPE | APR_FINFO_NAME, p))
                     == APR_SUCCESS) {
                 size_t namelen = strlen(finfo.name);
+
+#ifdef OS2 /* only has case folding, never aliases that change the length */
+
+                if (memcmp(finfo.name, path + keptlen, seglen) != 0) {
+                    memcpy(path + keptlen, finfo.name, namelen);
+                }
+#else /* WIN32; here there be aliases that gire and gimble and change length */
+
                 if ((namelen != seglen) || 
                     (memcmp(finfo.name, path + keptlen, seglen) != 0)) 
                 {
@@ -961,6 +766,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                         seglen = namelen;
                     }
                 }
+#endif /* !OS2 (Whatever that alias was we're over it) */
+
                 /* That's it, the rest is path info. 
                  * I don't know how we aught to handle this.  Should
                  * we define a new error to indicate 'more info'?

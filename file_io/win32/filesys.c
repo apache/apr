@@ -1,0 +1,261 @@
+/* ====================================================================
+ * The Apache Software License, Version 1.1
+ *
+ * Copyright (c) 2000-2001 The Apache Software Foundation.  All rights
+ * reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution,
+ *    if any, must include the following acknowledgment:
+ *       "This product includes software developed by the
+ *        Apache Software Foundation (http://www.apache.org/)."
+ *    Alternately, this acknowledgment may appear in the software itself,
+ *    if and wherever such third-party acknowledgments normally appear.
+ *
+ * 4. The names "Apache" and "Apache Software Foundation" must
+ *    not be used to endorse or promote products derived from this
+ *    software without prior written permission. For written
+ *    permission, please contact apache@apache.org.
+ *
+ * 5. Products derived from this software may not be called "Apache",
+ *    nor may "Apache" appear in their name, without prior written
+ *    permission of the Apache Software Foundation.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the Apache Software Foundation.  For more
+ * information on the Apache Software Foundation, please see
+ * <http://www.apache.org/>.
+ */
+
+#include "apr.h"
+#include "fileio.h"
+#include "apr_strings.h"
+
+/* Win32 Exceptions:
+ *
+ * Note that trailing spaces and trailing periods are never recorded
+ * in the file system, except by a very obscure bug where any file
+ * that is created with a trailing space or period, followed by the 
+ * ':' stream designator on an NTFS volume can never be accessed again.
+ * In other words, don't ever accept them when designating a stream!
+ *
+ * An interesting side effect is that two or three periods are both 
+ * treated as the parent directory, although the fourth and on are
+ * not [strongly suggest all trailing periods are trimmed off, or
+ * down to two if there are no other characters.]
+ *
+ * Leading spaces and periods are accepted, however.
+ * The * ? < > codes all have wildcard side effects
+ * The " / \ : are exclusively component separator tokens 
+ * The system doesn't accept | for any (known) purpose 
+ * Oddly, \x7f _is_ acceptable ;)
+ */
+
+const char c_is_fnchar[256] =
+{/* Reject all ctrl codes...                                         */
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ /*   "                 *         /                      :   <   > ? */
+    1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,0,1,0,1,0,0,
+ /*                                                          \       */
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,
+ /*                                                      :   |       */
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,
+ /* High bit codes are accepted (subject to utf-8->Unicode xlation)  */
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+};
+
+
+apr_status_t filepath_root_test(char *path, apr_pool_t *p)
+{
+    apr_status_t rv;
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t wpath[APR_PATH_MAX];
+        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                           / sizeof(apr_wchar_t), path))
+            return rv;
+        rv = GetDriveTypeW(wpath);
+    }
+    else
+#endif
+        rv = GetDriveType(path);
+
+    if (rv == DRIVE_UNKNOWN || rv == DRIVE_NO_ROOT_DIR)
+        return APR_EBADPATH;
+    return APR_SUCCESS;
+}
+
+
+apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p)
+{
+    char path[APR_PATH_MAX];
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t *ignored;
+        apr_wchar_t wdrive[8];
+        apr_wchar_t wpath[APR_PATH_MAX];
+        apr_status_t rv;
+        /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+         * as if that is useful for anything.
+         */
+        wcscpy(wdrive, L"D:.");
+        wdrive[0] = (apr_wchar_t)(unsigned char)drive;
+        if (!GetFullPathNameW(wdrive, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
+            return apr_get_os_error();
+        if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
+            return rv;
+    }
+    else
+#endif
+    {
+        char *ignored;
+        char drivestr[4];
+        drivestr[0] = drive;
+        drivestr[1] = ':';
+        drivestr[2] = '.';;
+        drivestr[3] = '\0';
+        if (!GetFullPathName(drivestr, sizeof(path), path, &ignored))
+            return apr_get_os_error();
+    }
+    /* ###: We really should consider adding a flag to allow the user
+     * to have the APR_FILEPATH_NATIVE result
+     */
+    for (*rootpath = path; **rootpath; ++*rootpath) {
+        if (**rootpath == '\\')
+            **rootpath = '/';
+    }
+    *rootpath = apr_pstrdup(p, path);
+    return APR_SUCCESS;
+}
+
+
+apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
+{
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t *ignored;
+        apr_wchar_t wpath[APR_PATH_MAX];
+        apr_status_t rv;
+        /* ???: This needs review, apparently "\\?\d:." returns "\\?\d:" 
+         * as if that is useful for anything.
+         */
+        {
+            apr_wchar_t wroot[APR_PATH_MAX];
+            if (rv = utf8_to_unicode_path(wroot, sizeof(wroot) 
+                                               / sizeof(apr_wchar_t), root))
+                return rv;
+            if (!GetFullPathNameW(wroot, sizeof(wpath) / sizeof(apr_wchar_t), wpath, &ignored))
+                return apr_get_os_error();
+        }
+        {
+            char path[APR_PATH_MAX];
+            if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
+                return rv;
+            *rootpath = apr_pstrdup(p, path);
+        }
+    }
+    else
+#endif
+    {
+        char path[APR_PATH_MAX];
+        char *ignored;
+        if (!GetFullPathName(root, sizeof(path), path, &ignored))
+            return apr_get_os_error();
+        *rootpath = apr_pstrdup(p, path);
+    }
+    return APR_SUCCESS;
+}
+
+
+APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
+                                           apr_pool_t *p)
+{
+    char path[APR_PATH_MAX];
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t wpath[APR_PATH_MAX];
+        apr_status_t rv;
+        if (!GetCurrentDirectoryW(sizeof(wpath) / sizeof(apr_wchar_t), wpath))
+            return apr_get_os_error();
+        if ((rv = unicode_to_utf8_path(path, sizeof(path), wpath)))
+            return rv;
+    }
+    else
+#endif
+    {
+        if (!GetCurrentDirectory(sizeof(path), path))
+            return apr_get_os_error();
+    }
+    /* ###: We really should consider adding a flag to allow the user
+     * to have the APR_FILEPATH_NATIVE result
+     */
+    for (*rootpath = path; **rootpath; ++*rootpath) {
+        if (**rootpath == '\\')
+            **rootpath = '/';
+    }
+    *rootpath = apr_pstrdup(p, path);
+    return APR_SUCCESS;
+}
+
+
+APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
+                                           apr_pool_t *p)
+{
+#if APR_HAS_UNICODE_FS
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t wpath[APR_PATH_MAX];
+        apr_status_t rv;
+        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                           / sizeof(apr_wchar_t), rootpath))
+            return rv;
+        if (!SetCurrentDirectoryW(wpath))
+            return apr_get_os_error();
+    }
+    else
+#endif
+    {
+        if (!SetCurrentDirectory(rootpath))
+            return apr_get_os_error();
+    }
+    return APR_SUCCESS;
+}
+
+

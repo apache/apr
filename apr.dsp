@@ -117,6 +117,10 @@ SOURCE=.\file_io\win32\filestat.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\file_io\win32\filesys.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\win32\flock.c
 # End Source File
 # Begin Source File
