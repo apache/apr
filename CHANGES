@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Add apr_socket_type_get() for retrieving the type (e.g., stream)
+     of the socket.  [Philippe M. Chiasson gozer cpan.org]
+
   *) Removed deprecated interface apr_proc_other_child_check() 
      that behaved differently between win32 and unix.
      The unix behavor is now accomplished with

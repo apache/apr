@@ -72,10 +72,16 @@ static void tcp_socket(CuTest *tc)
 {
     apr_status_t rv;
     apr_socket_t *sock = NULL;
+    int type;
 
     rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, sock);
+
+    rv = apr_socket_type_get(sock, &type);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, SOCK_STREAM, type);
+
     apr_socket_close(sock);
 }
 
@@ -83,10 +89,16 @@ static void udp_socket(CuTest *tc)
 {
     apr_status_t rv;
     apr_socket_t *sock = NULL;
+    int type;
 
     rv = apr_socket_create(&sock, APR_INET, SOCK_DGRAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, sock);
+
+    rv = apr_socket_type_get(sock, &type);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, SOCK_DGRAM, type);
+
     apr_socket_close(sock);
 }
 
