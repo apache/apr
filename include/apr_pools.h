@@ -573,12 +573,6 @@ APR_DECLARE(apr_pool_t *) apr_find_pool(const void *mem);
 APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
 
 /**
- * Report the number of bytes currently in the list of free blocks
- * @return The number of bytes
- */
-APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
-
-/**
  * Lock a pool
  * @param pool The pool to lock
  * @param flag  The flag

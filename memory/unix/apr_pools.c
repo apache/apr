@@ -1532,12 +1532,6 @@ APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *pool, int recurse)
 #endif
 }
 
-APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
-{
-    /* This really doesn't apply with our current debug code, so: */
-    return 0;
-}
-
 APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag)
 {
 }
