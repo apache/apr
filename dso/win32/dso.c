@@ -89,7 +89,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     UINT em;
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) 
+    IF_WIN_OS_IS_UNICODE 
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
@@ -107,8 +107,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
             rv = apr_get_os_error();
         SetErrorMode(em);
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         char fspec[APR_PATH_MAX], *p = fspec;
         /* Must convert path from / to \ notation.
@@ -132,6 +133,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
             rv = APR_SUCCESS;
         SetErrorMode(em);
     }
+#endif
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
     (*res_handle)->cont = ctx;
 

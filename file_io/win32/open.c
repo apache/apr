@@ -168,7 +168,8 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
 void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
 {
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) {
+    IF_WIN_OS_IS_UNICODE
+    {
         apr_wchar_t *wpre, *wfile, *ch;
         apr_size_t n = strlen(file) + 1;
         apr_size_t r, d;
@@ -205,8 +206,9 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         }
         return wfile;
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         char *nfile, *ch;
         apr_size_t n = strlen(file) + 1;
@@ -247,6 +249,7 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
         }
         return nfile;
     }
+#endif
 }
 
 
@@ -333,7 +336,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     }
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) {
+    IF_WIN_OS_IS_UNICODE
+    {
         apr_wchar_t wfname[APR_PATH_MAX];
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                                / sizeof(apr_wchar_t), fname))
@@ -341,11 +345,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
         handle = CreateFileW(wfname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
         handle = CreateFileA(fname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
-
+#endif
     if (handle == INVALID_HANDLE_VALUE) {
         return apr_get_os_error();
     }
@@ -424,7 +429,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) 
+    IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -435,10 +440,12 @@ APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)
         if (DeleteFileW(wpath))
             return APR_SUCCESS;
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
         if (DeleteFile(path))
             return APR_SUCCESS;
+#endif
     return apr_get_os_error();
 }
 
@@ -446,7 +453,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
                                           const char *topath,
                                           apr_pool_t *cont)
 {
-    if (apr_os_level >= APR_WIN_NT) 
+    IF_WIN_OS_IS_UNICODE
     {
 #if APR_HAS_UNICODE_FS
         apr_wchar_t wfrompath[APR_PATH_MAX], wtopath[APR_PATH_MAX];
@@ -468,7 +475,8 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
             return APR_SUCCESS;
 #endif
     }
-    else
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         /* Windows 95 and 98 do not support MoveFileEx, so we'll use
          * the old MoveFile function.  However, MoveFile requires that
@@ -488,6 +496,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *frompath,
         if (MoveFile(frompath, topath))
             return APR_SUCCESS;
     }        
+#endif
     return apr_get_os_error();
 }
 

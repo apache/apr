@@ -100,15 +100,16 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     (*new)->dirname[len] = '\0';
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT)
+    IF_WIN_OS_IS_UNICODE
     {
         /* Create a buffer for the longest file name we will ever see 
          */
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
         (*new)->name = apr_pcalloc(cont, APR_FILE_MAX * 3 + 1);        
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         /* Note that we won't open a directory that is greater than MAX_PATH,
          * including the trailing /* wildcard suffix.  If a * won't fit, then
@@ -122,6 +123,7 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
         }
         (*new)->n.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
     }
+#endif
     (*new)->rootlen = len - 1;
     (*new)->cntxt = cont;
     (*new)->dirhand = INVALID_HANDLE_VALUE;
@@ -147,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 #if APR_HAS_UNICODE_FS
     apr_wchar_t wdirname[APR_PATH_MAX];
     apr_wchar_t *eos = NULL;
-    if (apr_os_level >= APR_WIN_NT)
+    IF_WIN_OS_IS_UNICODE
     {
         if (thedir->dirhand == INVALID_HANDLE_VALUE) 
         {
@@ -181,8 +183,9 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             return rv;
         fname = thedir->name;
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         char *eop = strchr(thedir->dirname, '\0');
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
@@ -208,6 +211,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         }
         fname = thedir->n.entry->cFileName;
     }
+#endif
 
     fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) thedir->w.entry, 
                     0, wanted);
@@ -220,7 +224,8 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         /* Go back and get more_info if we can't answer the whole inquiry
          */
 #if APR_HAS_UNICODE_FS
-        if (apr_os_level >= APR_WIN_NT) {
+        IF_WIN_OS_IS_UNICODE
+        {
             /* Almost all our work is done.  Tack on the wide file name
              * to the end of the wdirname (already / delimited)
              */
@@ -231,13 +236,16 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             eos[0] = '\0';
             return rv;
         }
-        else {
+#endif
+#if APR_HAS_ANSI_FS
+        ELSE_WIN_OS_IS_ANSI
+        {
+#if APR_HAS_UNICODE_FS
             /* Don't waste stack space on a second buffer, the one we set
              * aside for the wide directory name is twice what we need.
              */
             char *fspec = (char*)wdirname;
-#else /* !APR_HAS_UNICODE_FS */
-        {
+#else
             char fspec[APR_PATH_MAX];
 #endif
             int dirlen = strlen(thedir->dirname);
@@ -247,6 +255,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             apr_cpystrn(fspec + dirlen, fname, sizeof(fspec) - dirlen);
             return more_finfo(finfo, fspec, wanted, MORE_OF_FSPEC);
         }
+#endif
     }
 
     return APR_SUCCESS;
@@ -264,7 +273,7 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
                                        apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) 
+    IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -276,18 +285,20 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
             return apr_get_os_error();
         }
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
         if (!CreateDirectory(path, NULL)) {
             return apr_get_os_error();
         }
+#endif
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) 
+    IF_WIN_OS_IS_UNICODE
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -299,11 +310,13 @@ APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont)
             return apr_get_os_error();
         }
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
         if (!RemoveDirectory(path)) {
             return apr_get_os_error();
         }
+#endif
     return APR_SUCCESS;
 }
 

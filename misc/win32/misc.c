@@ -122,6 +122,7 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
                 apr_os_level = APR_WIN_XP;
             }
         }
+#ifndef WINNT
         else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
             char *prevision;
             if (prevision = oslev.szCSDVersion) {
@@ -147,6 +148,18 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
                 apr_os_level = APR_WIN_ME;
             }
         }
+#endif
+#ifdef _WIN32_WCE
+        else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_CE) 
+        {
+            if (oslev.dwMajorVersion < 3) {
+                apr_os_level = APR_WIN_UNSUP;
+            }
+            else {
+                apr_os_level = APR_WIN_CE_3;
+            }
+        }
+#endif
         else {
             apr_os_level = APR_WIN_UNSUP;
         }
