@@ -62,6 +62,12 @@
 #include "apr_lib.h"
 
 /* System headers the network I/O library needs */
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 #if HAVE_POLL_H
 #include <poll.h>
 #endif

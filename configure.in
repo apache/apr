@@ -215,6 +215,7 @@ AC_CHECK_HEADERS(winsock.h)
 
 AC_CHECK_HEADERS(arpa/inet.h)
 AC_CHECK_HEADERS(netinet/in.h, netinet_inh="1", netinet_inh="0")
+AC_CHECK_HEADERS(netinet/tcp.h)
 
 AC_CHECK_HEADERS(sys/file.h)
 AC_CHECK_HEADERS(sys/ioctl.h)
@@ -261,8 +262,10 @@ dnl Checks for library functions.
 AC_CHECK_FUNCS(pthread_sigmask)
 AC_CHECK_FUNCS(strcasecmp stricmp poll setsid)
 AC_CHECK_FUNCS(sigaction writev)
+AC_CHECK_FUNCS(sendfile, [ sendfile="#define APR_HAS_SENDFILE 1" ], [ sendfile="APR_HAS_SENDFILE 0" ]) 
 AC_CHECK_FUNCS(getpass)
 AC_CHECK_FUNC(_getch)
+AC_SUBST(sendfile)
 
 AC_CHECK_FUNCS(gmtime_r localtime_r)
 
