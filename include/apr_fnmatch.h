@@ -87,9 +87,6 @@ APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern,
  */
 APR_DECLARE(int) apr_fnmatch_test(const char *pattern);
 
-/** @deprecated @see apr_fnmatch_test */
-APR_DECLARE(int) apr_is_fnmatch(const char *pattern);
-
 /** @} */
 
 #ifdef __cplusplus
