@@ -246,3 +246,4 @@ EXPORTS
 	ap_day_snames @225
 	ap_canonical_error @226
 	ap_strerror @227
+	ap_generate_random_bytes @228

@@ -52,6 +52,8 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_config.h"
+#include "apr_general.h"
 #include <wincrypt.h>
 
 ap_status_t ap_generate_random_bytes(unsigned char * buf, int length) 
