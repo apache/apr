@@ -177,7 +177,7 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
     case APR_SO_TIMEOUT: 
         /* Convert from milliseconds (windows units) to microseconds 
          * (APR units) */
-        *on = sock->timeout * 1000;
+        *on = (apr_int32_t)(sock->timeout * 1000);
         break;
     case APR_SO_DISCONNECTED:
         *on = sock->disconnected;
