@@ -77,6 +77,19 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 #define APR_CANCEL_ENABLE      3
 #define APR_CANCEL_DISABLE     4
 
+#define APR_OC_REASON_DEATH         0     /* child has died, caller must call
+                                           * unregister still */
+#define APR_OC_REASON_UNWRITABLE    1     /* write_fd is unwritable */
+#define APR_OC_REASON_RESTART       2     /* a restart is occuring, perform
+                                           * any necessary cleanup (including
+                                           * sending a special signal to child)
+                                           */
+#define APR_OC_REASON_UNREGISTER    3     /* unregister has been called, do
+                                           * whatever is necessary (including
+                                           * kill the child) */
+#define APR_OC_REASON_LOST          4     /* somehow the child exited without
+                                           * us knowing ... buggy os? */
+
 typedef struct ap_thread_t           ap_thread_t;
 typedef struct ap_threadattr_t       ap_threadattr_t;
 typedef struct ap_proc_t		  ap_proc_t;
@@ -145,6 +158,12 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
                               ap_procattr_t *attr, ap_context_t *cont);
 ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e waithow);
 ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont);
+
+void ap_register_other_child(ap_proc_t *pid, 
+                             void (*maintenance) (int reason, void *),
+                             void *data, int write_fd, ap_context_t *p);
+void ap_unregister_other_children(void *data);
+ap_status_t reap_other_child(ap_proc_t *pid); 
 
 ap_status_t ap_kill(ap_proc_t *proc, int sig);
 #ifdef __cplusplus

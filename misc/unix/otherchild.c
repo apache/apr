@@ -53,18 +53,17 @@
  */
 
 #include "misc.h"
+#include "../../threadproc/unix/threadproc.h"
 
-#ifdef APR_HAS_OTHER_CHILD
-
-static other_child_rec *other_children = NULL;
+static ap_other_child_rec_t *other_children = NULL;
 
 API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
                      void (*maintenance) (int reason, void *),
-                     void *data, int write_fd)
+                     void *data, int write_fd, ap_context_t *p)
 {
-    other_child_rec *ocr;
+    ap_other_child_rec_t *ocr;
 
-    ocr = ap_palloc(pconf, sizeof(*ocr));
+    ocr = ap_palloc(p, sizeof(*ocr));
     ocr->pid = pid->pid;
     ocr->maintenance = maintenance;
     ocr->data = data;
@@ -79,12 +78,12 @@ API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
  */
 API_EXPORT(void) ap_unregister_other_child(void *data)
 {
-    other_child_rec **pocr, *nocr;
+    ap_other_child_rec_t **pocr, *nocr;
 
     for (pocr = &other_children; *pocr; pocr = &(*pocr)->next) {
         if ((*pocr)->data == data) {
             nocr = (*pocr)->next;
-            (*(*pocr)->maintenance) (OC_REASON_UNREGISTER, (*pocr)->data);
+            (*(*pocr)->maintenance) (APR_OC_REASON_UNREGISTER, (*pocr)->data);
             *pocr = nocr;
             /* XXX: um, well we've just wasted some space in pconf ? */
             return;
@@ -98,7 +97,8 @@ static void probe_writable_fds(void)
 {
     fd_set writable_fds;
     int fd_max;
-    other_child_rec *ocr, *nocr;                                                    struct timeval tv;
+    ap_other_child_rec_t *ocr, *nocr; 
+    struct timeval tv; 
     int rc;
 
     if (other_children == NULL)
@@ -120,14 +120,12 @@ static void probe_writable_fds(void)
 
         tv.tv_sec = 0;
         tv.tv_usec = 0;
-        rc = ap_select(fd_max + 1, NULL, &writable_fds, NULL, &tv);
+        rc = select(fd_max + 1, NULL, &writable_fds, NULL, &tv);
     } while (rc == -1 && errno == EINTR);
 
     if (rc == -1) {
         /* XXX: uhh this could be really bad, we could have a bad file
          * descriptor due to a bug in one of the maintenance routines */
-        ap_log_unixerr("probe_writable_fds", "select",
-                    "could not probe writable fds", server_conf);
         return;
     }
     if (rc == 0)
@@ -139,24 +137,49 @@ static void probe_writable_fds(void)
             continue;
         if (FD_ISSET(ocr->write_fd, &writable_fds))
             continue;
-        (*ocr->maintenance) (OC_REASON_UNWRITABLE, ocr->data, -1);
+        (*ocr->maintenance) (APR_OC_REASON_UNWRITABLE, ocr->data);
     }
 }
 
 /* possibly reap an other_child, return 0 if yes, -1 if not */
-API_EXPORT(int) reap_other_child(int pid)
+API_EXPORT(ap_status_t) reap_other_child(ap_proc_t *pid)
 {
-    other_child_rec *ocr, *nocr;
+    ap_other_child_rec_t *ocr, *nocr;
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
-        if (ocr->pid != pid)
+        if (ocr->pid != pid->pid)
             continue;
         ocr->pid = -1;
-        (*ocr->maintenance) (OC_REASON_DEATH, ocr->data);
+        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data);
         return 0;
     }
     return -1;
 }
-#endif
+
+API_EXPORT(void) check_other_child(void)
+{
+    ap_other_child_rec_t *ocr, *nocr;
+    pid_t waitret;    
+
+    for (ocr = other_children; ocr; ocr = nocr) {
+        nocr = ocr->next;
+        if (ocr->pid == -1)
+            continue;
+
+        waitret = waitpid(ocr->pid, NULL, WNOHANG);
+        if (waitret == ocr->pid) {
+            ocr->pid = -1;
+            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data);
+        }
+        else if (waitret == 0) {
+            (*ocr->maintenance) (APR_OC_REASON_RESTART, ocr->data);
+        }
+        else if (waitret == -1) {
+            /* uh what the heck? they didn't call unregister? */
+            ocr->pid = -1;
+            (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data);
+        }
+    }
+}
 

@@ -52,52 +52,78 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef MISC_H
-#define MISC_H
-
-#include "apr.h"
-#include "apr_config.h"
-#include "apr_general.h"
-#include "apr_pools.h"
-#include "apr_getopt.h"
 #include "apr_thread_proc.h"
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-#ifdef HAVE_STDIO_H
+#include "apr_errno.h"
+#include "apr_general.h"
+#include "apr_lib.h"
+#include "errno.h"
 #include <stdio.h>
+#ifdef BEOS
+#include <unistd.h>
 #endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-#ifdef HAVE_PTHREAD_H
-#include <pthread.h>
-#endif
- 
-typedef struct datastruct {
-    void *data;
-    char *key;
-    struct datastruct *next;
-    struct datastruct *prev;
-} datastruct;
 
-struct ap_context_t {
-    struct ap_pool_t *pool;
-    datastruct *prog_data;
-    int (*apr_abort)(int retcode);
-};
+void ocmaint(int reason, void *data)
+{
+    switch (reason) {
+    case APR_OC_REASON_DEATH:
+        fprintf(stdout, "OC killed... correctly\n");
+        break;
+    case APR_OC_REASON_LOST:
+    case APR_OC_REASON_UNWRITABLE:
+    case APR_OC_REASON_RESTART:
+        fprintf(stdout, "OC maintentance called for reason other than death\n");
+        break;
+    }
+}
 
-struct ap_other_child_rec_t {
-    struct ap_other_child_rec_t *next;
-    int pid;
-    void (*maintenance) (int, void *);
-    void *data;
-    int write_fd;
-};
+int main(int argc, char *argv[])
+{
+    ap_context_t *context;
+    ap_context_t *cont2;
+    ap_status_t status = 0;
+    ap_ssize_t nbytes = 0;
+    ap_proc_t *newproc = NULL;
+    ap_procattr_t *procattr = NULL;
+    char *args[3];
 
+    if (argc > 1) {
+        while (1);
+    }
 
-#endif  /* ! MISC_H */
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't initialize.");
+        exit(-1);
+    }
+    atexit(ap_terminate);
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't allocate context.");
+        exit(-1);
+    }
+    
+    args[0] = ap_pstrdup(context, "testoc");
+    args[1] = ap_pstrdup(context, "-X");
+    args[2] = NULL;
+
+    fprintf(stdout, "Creating procattr.......");
+    if (ap_createprocattr_init(&procattr, context) != APR_SUCCESS) {
+        fprintf(stderr, "Could not create attr\n");
+        exit(-1);;
+    }
+
+    fprintf(stdout, "starting other child.......");
+    if (ap_create_process(&newproc, "../testoc", args, NULL, procattr, context) 
+                          != APR_SUCCESS) {
+        fprintf(stderr, "error starting other child\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+
+    ap_register_other_child(newproc, ocmaint, NULL, -1, context);
+
+    ap_kill(newproc, SIGKILL);
+
+    check_other_child();
+    
+    return 1;
+}    
 
