@@ -519,6 +519,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->filehand = *thefile;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->flags;
+    (*file)->pipe;
     return APR_SUCCESS;
 }    
 
