@@ -386,7 +386,7 @@ static apr_status_t fcntl_create(apr_lock_t *new, const char *fname)
     }
     else {
         new->fname = apr_pstrdup(new->pool, "/tmp/aprXXXXXX");
-        rv = apr_file_mktemp(&new->interproc, new->fname, new->pool);
+        rv = apr_file_mktemp(&new->interproc, new->fname, 0, new->pool);
     }
 
     if (rv != APR_SUCCESS) {
@@ -498,7 +498,7 @@ static apr_status_t flock_create(apr_lock_t *new, const char *fname)
     }
     else {
         new->fname = apr_pstrdup(new->pool, "/tmp/aprXXXXXX");
-        rv = apr_file_mktemp(&new->interproc, new->fname, new->pool);
+        rv = apr_file_mktemp(&new->interproc, new->fname, 0, new->pool);
     }
 
     if (rv != APR_SUCCESS) {
