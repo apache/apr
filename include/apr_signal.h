@@ -62,9 +62,9 @@
 #include "apr.h"
 #include "apr_pools.h"
 
-#if APR_HAVE_SIGNAL_H
-#include <signal.h>
-#endif
+#define APR_WANT_SIGNAL
+#include "apr_want.h"
+
 
 #ifdef __cplusplus
 extern "C" {

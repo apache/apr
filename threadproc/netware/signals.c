@@ -59,6 +59,9 @@
 #include "apr_signal.h"
 #include "apr_strings.h"
 
+#define APR_WANT_SIGNAL
+#include "apr_want.h"
+
 #include <assert.h>
 #if APR_HAS_THREADS && APR_HAVE_PTHREAD_H
 #include <pthread.h>

@@ -64,6 +64,7 @@
  *   APR_WANT_MEMFUNC:  memcmp, memcpy, etc
  *   APR_WANT_STDIO:    <stdio.h> and related bits
  *   APR_WANT_IOVEC:    struct iovec
+ *   APR_WANT_SIGNAL:   signal numbers, functions, and types
  *   APR_WANT_BYTEFUNC: htons, htonl, ntohl, ntohs
  *
  * Typical usage:
@@ -124,6 +125,18 @@
 #endif
 
 #undef APR_WANT_IOVEC
+#endif
+
+/* --------------------------------------------------------------------- */
+
+#ifdef APR_WANT_SIGNAL
+
+#if APR_HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+/* ### some platforms may put this into unistd.h ?? */
+
+#undef APR_WANT_SIGNAL
 #endif
 
 /* --------------------------------------------------------------------- */
