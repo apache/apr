@@ -24,3 +24,5 @@ testsuite
 testsuite.opt
 testsuite.ncb
 testflock.tmp
+testfile.tmp
+testflock
