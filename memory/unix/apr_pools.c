@@ -856,7 +856,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 #if APR_HAS_THREADS
         apr_thread_mutex_t *mutex;
 
-        if ((mutex = apr_allocator_mutex_get(allocator)) != NULL)
+        if ((mutex = apr_allocator_mutex_get(parent->allocator)) != NULL)
             apr_thread_mutex_lock(mutex);
 #endif /* APR_HAS_THREADS */
 
