@@ -132,13 +132,19 @@ else
 fi
 # If we have the realpath program, use it to resolve symlinks
 # Otherwise, being in a symlinked dir may result in incorrect output.
+REALPATH=
 if test -x "`which realpath 2>/dev/null`"; then
-  thisdir="`realpath $thisdir`"
+  REALPATH=realpath
+elif test -x "`which readlink 2>/dev/null`"; then
+  REALPATH="readlink -f"
+fi
+if test -n "$REALPATH"; then
+  thisdir="`$REALPATH $thisdir`"
   if test -d "$APR_SOURCE_DIR"; then
-    APR_SOURCE_DIR="`realpath $APR_SOURCE_DIR`"
+    APR_SOURCE_DIR="`$REALPATH $APR_SOURCE_DIR`"
   fi
   if test -n "$tmpbindir"; then
-    tmpbindir="`realpath $tmpbindir`"
+    tmpbindir="`$REALPATH $tmpbindir`"
   fi
 fi
 if test "$tmpbindir" = "$thisdir"; then

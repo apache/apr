@@ -1,4 +1,8 @@
 Changes with APR 0.9.5
+
+  *) If available, use 'readlink -f' to resolve symlinks in apr-config.
+     [Justin Erenkrantz]
+
   *) Win32: Fix bug in apr_socket_sendfile that interferred with
      Win32 LSPs. Bug is described in Apache 2.0 bugzilla report 
      23982 [Jan Bilek, Bill Stoddard]
