@@ -33,20 +33,9 @@
 
 #include "misc.h"
 #include "apr_strings.h"
+#include "apr_lib.h"
 
 #define EMSG    ""
-
-/* Regardless of what we're invoked as, just print out the last part
- * of the path */
-static const char *pretty_path (const char *name) 
-{
-    const char *p;
-
-    if (!(p = strrchr(name, '/')))
-        return name;
-    else
-        return p + 1;
-}
 
 APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
                                       int argc, const char *const *argv)
@@ -56,7 +45,9 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
     (*os)->cont = cont;
     (*os)->reset = 0;
-    (*os)->err = 1;
+    (*os)->errfn = (apr_getopt_err_fn_t*)(fprintf);
+    (*os)->errarg = (void*)(stderr);
+
     (*os)->place = EMSG;
     (*os)->argc = argc;
 
@@ -108,10 +99,9 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
         }
         if (!*os->place)
             ++os->ind;
-        if (os->err && *opts != ':') {
-            (void) fprintf(stderr,
-                           "%s: illegal option -- %c\n",
-                           pretty_path(*os->argv), os->opt);
+        if (os->errfn && *opts != ':') {
+            (os->errfn)(os->errarg, "%s: illegal option -- %c\n",
+                        apr_filename_of_pathname(*os->argv), os->opt);
         }
         *optch = os->opt;
         return (APR_BADCH);
@@ -130,10 +120,9 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
                 *optch = os->opt;
                 return (APR_BADARG);
             }
-            if (os->err) {
-                (void) fprintf(stderr,
-                               "%s: option requires an argument -- %c\n",
-                               pretty_path(*os->argv), os->opt);
+            if (os->errfn) {
+                (os->errfn)(os->errarg, "%s: option requires an argument -- %c\n",
+                            apr_filename_of_pathname(*os->argv), os->opt);
             }
             *optch = os->opt;
             return (APR_BADCH);
@@ -191,8 +180,9 @@ static void permute(apr_getopt_t *os)
 static apr_status_t serr(apr_getopt_t *os, const char *err, const char *str,
 			 apr_status_t status)
 {
-    if (os->err)
-	fprintf(stderr, "%s: %s: %s\n", pretty_path(*os->argv), err, str);
+    if (os->errfn)
+	(os->errfn)(os->errarg, "%s: %s: %s\n", 
+                    apr_filename_of_pathname(*os->argv), err, str);
     return status;
 }
 
@@ -200,8 +190,9 @@ static apr_status_t serr(apr_getopt_t *os, const char *err, const char *str,
 static apr_status_t cerr(apr_getopt_t *os, const char *err, int ch,
 			 apr_status_t status)
 {
-    if (os->err)
-	fprintf(stderr, "%s: %s: %c\n", pretty_path(*os->argv), err, ch);
+    if (os->errfn)
+	(os->errfn)(os->errarg, "%s: %s: %c\n", 
+                    apr_filename_of_pathname(*os->argv), err, ch);
     return status;
 }
 
