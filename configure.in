@@ -2,8 +2,13 @@ AC_CONFIG_AUX_DIR(./helpers)
 OS=`./config.guess`
 OS=`./config.sub $OS` 
 
+# These added to allow default directories to be used...
+DEFAULT_OSDIR="unix"
+MODULES="file_io network_io threadproc misc signal locks time" 
+
 echo "Configuring APR library"
 echo "Platform: ${OS}"
+echo "(Default will be ${DEFAULT_OSDIR})"
 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(configure.in)
@@ -207,10 +212,23 @@ AC_SUBST(RANLIB)
 AC_SUBST(AR)
 AC_SUBST(RM)
 AC_SUBST(OSDIR)
+AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(LIBPREFIX)
 AC_SUBST(EXEEXT)
-AC_OUTPUT(Makefile lib/Makefile file_io/$OSDIR/Makefile 
-          network_io/$OSDIR/Makefile threadproc/$OSDIR/Makefile 
-          locks/$OSDIR/Makefile misc/$OSDIR/Makefile 
-          time/$OSDIR/Makefile signal/$OSDIR/Makefile
-          test/Makefile)
+
+MAKEFILE1="Makefile lib/Makefile "
+SUBDIRS="lib "
+for dir in $MODULES
+do
+    if test -d $dir/$OSDIR; then
+        MAKEFILE2="$MAKEFILE2 $dir/$OSDIR/Makefile "
+        SUBDIRS="$SUBDIRS $dir/$OSDIR "
+    else
+        MAKEFILE2="$MAKEFILE2 $dir/$DEFAULT_OSDIR/Makefile "
+        SUBDIRS="$SUBDIRS $dir/$DEFAULT_OSDIR "
+    fi
+done
+MAKEFILE3="test/Makefile"
+AC_SUBST(SUBDIRS)
+AC_SUBST(MODULES)
+AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3)
