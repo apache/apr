@@ -71,14 +71,17 @@ static apr_status_t dso_cleanup(void *thedso)
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
                                        const char *path, apr_pool_t *pool)
 {
-    image_id newid;
-
-    if((newid = load_add_on(path)) < B_NO_ERROR)
-        return APR_EDSOOPEN;
+    image_id newid = -1;
 
     *res_handle = apr_pcalloc(pool, sizeof(*res_handle));
-    (*res_handle)->handle = newid;
+
+    if((newid = load_add_on(path)) < B_NO_ERROR) {
+        (*res_handle)->errormsg = strerror(newid);
+        return APR_EDSOOPEN;
+	}
+	
     (*res_handle)->pool = pool;
+    (*res_handle)->handle = newid;
 
     apr_pool_cleanup_register(pool, *res_handle, dso_cleanup, apr_pool_cleanup_null);
 
