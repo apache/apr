@@ -53,6 +53,7 @@
  */
 
 #include "apr.h"
+#include "apr_file_io.h"
 #include "apr_strings.h"
 #include "locks.h"
 #include "fileio.h" /* for apr_mkstemp() */
@@ -77,9 +78,9 @@ static apr_status_t sysv_cleanup(void *lock_)
     apr_lock_t *lock=lock_;
     union semun ick;
     
-    if (lock->interproc != -1) {
+    if (lock->interproc->filedes != -1) {
         ick.val = 0;
-        semctl(lock->interproc, 0, IPC_RMID, ick);
+        semctl(lock->interproc->filedes, 0, IPC_RMID, ick);
     }
     return APR_SUCCESS;
 }    
@@ -89,15 +90,16 @@ static apr_status_t sysv_create(apr_lock_t *new, const char *fname)
     union semun ick;
     apr_status_t stat;
     
-    new->interproc = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
+    new->interproc = apr_palloc(new->pool, sizeof(*new->interproc));
+    new->interproc->filedes = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
 
-    if (new->interproc < 0) {
+    if (new->interproc->filedes < 0) {
         stat = errno;
         sysv_cleanup(new);
         return stat;
     }
     ick.val = 1;
-    if (semctl(new->interproc, 0, SETVAL, ick) < 0) {
+    if (semctl(new->interproc->filedes, 0, SETVAL, ick) < 0) {
         stat = errno;
         sysv_cleanup(new);
         return stat;
@@ -113,7 +115,7 @@ static apr_status_t sysv_acquire(apr_lock_t *lock)
     int rc;
 
     do {
-        rc = semop(lock->interproc, &op_on, 1);
+        rc = semop(lock->interproc->filedes, &op_on, 1);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -127,7 +129,7 @@ static apr_status_t sysv_release(apr_lock_t *lock)
     int rc;
 
     do {
-        rc = semop(lock->interproc, &op_off, 1);
+        rc = semop(lock->interproc->filedes, &op_off, 1);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -369,23 +371,25 @@ static apr_status_t fcntl_cleanup(void *lock_)
         if (status != APR_SUCCESS)
             return status;
     }
-    close(lock->interproc);
     
     return APR_SUCCESS;
 }    
 
 static apr_status_t fcntl_create(apr_lock_t *new, const char *fname)
 {
+    int rv;
+
     if (fname) {
         new->fname = apr_pstrdup(new->pool, fname);
-        new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
+        rv = apr_file_open(&new->interproc, new->fname, 
+                           APR_CREATE | APR_WRITE | APR_EXCL, 0644, new->pool);
     }
     else {
         new->fname = apr_pstrdup(new->pool, "/tmp/aprXXXXXX");
-        new->interproc = apr_mkstemp(new->fname);
+        rv = apr_file_mktemp(&new->interproc, new->fname, new->pool);
     }
 
-    if (new->interproc < 0) {
+    if (rv != APR_SUCCESS) {
         apr_status_t stat = errno;
 
         fcntl_cleanup(new);
@@ -404,7 +408,7 @@ static apr_status_t fcntl_acquire(apr_lock_t *lock)
     int rc;
 
     do {
-        rc = fcntl(lock->interproc, F_SETLKW, &lock_it);
+        rc = fcntl(lock->interproc->filedes, F_SETLKW, &lock_it);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -418,7 +422,7 @@ static apr_status_t fcntl_release(apr_lock_t *lock)
     int rc;
 
     do {
-        rc = fcntl(lock->interproc, F_SETLKW, &unlock_it);
+        rc = fcntl(lock->interproc->filedes, F_SETLKW, &unlock_it);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -480,23 +484,26 @@ static apr_status_t flock_cleanup(void *lock_)
         if (status != APR_SUCCESS)
             return status;
     }
-    close(lock->interproc);
+    apr_file_close(lock->interproc);
     unlink(lock->fname);
     return APR_SUCCESS;
 }    
 
 static apr_status_t flock_create(apr_lock_t *new, const char *fname)
 {
+    int rv;
+
     if (fname) {
         new->fname = apr_pstrdup(new->pool, fname);
-        new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
+        rv = apr_file_open(&new->interproc, new->fname, 
+                           APR_CREATE | APR_WRITE | APR_EXCL, 0644, new->pool);
     }
     else {
         new->fname = apr_pstrdup(new->pool, "/tmp/aprXXXXXX");
-        new->interproc = apr_mkstemp(new->fname);
+        rv = apr_file_mktemp(&new->interproc, new->fname, new->pool);
     }
 
-    if (new->interproc < 0) {
+    if (rv != APR_SUCCESS) {
         apr_status_t stat = errno;
 
         flock_cleanup(new);
@@ -513,7 +520,7 @@ static apr_status_t flock_acquire(apr_lock_t *lock)
     int rc;
 
     do {
-        rc = flock(lock->interproc, LOCK_EX);
+        rc = flock(lock->interproc->filedes, LOCK_EX);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -527,7 +534,7 @@ static apr_status_t flock_release(apr_lock_t *lock)
     int rc;
 
     do {
-        rc = flock(lock->interproc, LOCK_UN);
+        rc = flock(lock->interproc->filedes, LOCK_UN);
     } while (rc < 0 && errno == EINTR);
     if (rc < 0) {
         return errno;
@@ -550,14 +557,16 @@ static apr_status_t flock_child_init(apr_lock_t **lock, apr_pool_t *cont,
                                      const char *fname)
 {
     apr_lock_t *new;
+    int rv;
 
     new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
 
     memcpy(new, *lock, sizeof *new);
     new->pool = cont;
     new->fname = apr_pstrdup(cont, fname);
-    new->interproc = open(new->fname, O_WRONLY, 0600);
-    if (new->interproc == -1) {
+    rv = apr_file_open(&new->interproc, new->fname, 
+                       APR_CREATE | APR_WRITE, 0600, new->pool);
+    if (rv != APR_SUCCESS) {
         apr_status_t stat = errno;
 
         flock_destroy(new);

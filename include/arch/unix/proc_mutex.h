@@ -62,6 +62,8 @@
 #include "apr_proc_mutex.h"
 #include "apr_pools.h"
 #include "apr_portable.h"
+#include "apr_file_io.h"
+#include "fileio.h"
 
 /* System headers required by Locks library */
 #if APR_HAVE_SYS_TYPES_H
@@ -145,7 +147,7 @@ struct apr_proc_mutex_t {
     int curr_locked;
     char *fname;
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    int interproc;
+    apr_file_t *interproc;
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *pthread_interproc;

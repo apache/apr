@@ -139,7 +139,7 @@ struct apr_lock_t {
     int curr_locked;
     char *fname;
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    int interproc;
+    apr_file_t *interproc;
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *pthread_interproc;
