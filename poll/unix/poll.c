@@ -187,7 +187,11 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     FD_ZERO(&exceptset);
 
     for (i = 0; i < num; i++) {
+#ifdef WIN32
+        SOCKET fd;
+#else
         int fd;
+#endif
 
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             fd = aprset[i].desc.s->socketdes;
@@ -235,7 +239,11 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     }
 
     for (i = 0; i < num; i++) {
+#ifdef WIN32
+        SOCKET fd;
+#else
         int fd;
+#endif
 
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             fd = aprset[i].desc.s->socketdes;
@@ -308,7 +316,11 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor)
 {
 #ifndef HAVE_POLL
+#ifdef WIN32
+    SOCKET fd;
+#else
     int fd;
+#endif
 #endif
 
     if (pollset->nelts == pollset->nalloc) {
@@ -356,7 +368,11 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
 {
     apr_uint32_t i;
 #ifndef HAVE_POLL
+#ifdef WIN32
+    SOCKET fd;
+#else
     int fd;
+#endif
 #endif
 
 #ifdef HAVE_POLL
@@ -484,7 +500,11 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     }
     j = 0;
     for (i = 0; i < pollset->nelts; i++) {
+#ifdef WIN32
+        SOCKET fd;
+#else
         int fd;
+#endif
         if (pollset->query_set[i].desc_type == APR_POLL_SOCKET) {
             fd = pollset->query_set[i].desc.s->socketdes;
         }
