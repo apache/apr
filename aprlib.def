@@ -97,6 +97,9 @@ EXPORTS
 	apr_setprocattr_dir
 	apr_setprocattr_cmdtype
 	apr_setprocattr_detach
+	apr_setprocattr_childin
+	apr_setprocattr_childout
+	apr_setprocattr_childerr
 	apr_create_process
 ;
 ;
