@@ -193,7 +193,7 @@ AC_CHECK_LIB(truerand,main)
 
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
-AC_CHECK_FUNCS(strcasecmp stricmp setsid)
+AC_CHECK_FUNCS(strcasecmp stricmp setsid nl_langinfo)
 AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ]) 
 AC_CHECK_FUNCS(writev)
 AC_CHECK_FUNCS(sendfile, [ sendfile="1" ], [ sendfile="0" ])
@@ -264,6 +264,7 @@ AC_CHECK_HEADERS(arpa/inet.h)
 AC_CHECK_HEADERS(netinet/in.h, netinet_inh="1", netinet_inh="0")
 AC_CHECK_HEADERS(netinet/tcp.h)
 AC_CHECK_HEADERS(iconv.h)
+AC_CHECK_HEADERS(langinfo.h)
 
 AC_CHECK_HEADERS(sys/file.h)
 AC_CHECK_HEADERS(sys/ioctl.h)
@@ -541,6 +542,7 @@ AC_SUBST(have_union_semun)
 dnl Checks for libraries.
 AC_CHECK_DEFINE(LOCK_EX, sys/file.h)
 AC_CHECK_DEFINE(F_SETLK, fcntl.h)
+AC_CHECK_DEFINE(CODESET, langinfo.h)
 AC_CHECK_DEFINE(isascii, ctype.h)
 # We are assuming that if the platform doesn't have POLLIN, it doesn't have
 # any POLL definitions.
