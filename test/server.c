@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Creating new socket.......");
-    if (apr_create_tcp_socket(&sock, context) != APR_SUCCESS) {
+    if (apr_create_socket(&sock, AF_UNSPEC, SOCK_STREAM, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
     
     fprintf(stdout, "\tServer:  Listening to socket.......");
-    if (apr_listen(sock, 8021) != APR_SUCCESS) {
+    if (apr_listen(sock, 5) != APR_SUCCESS) {
         apr_close_socket(sock);
         fprintf(stderr, "Could not listen\n");
         exit(-1);
