@@ -557,15 +557,25 @@ ap_pool_t *ap_init_alloc(void)
 
 void ap_destroy_real_pool(ap_pool_t *);
 
-static void ap_clear_real_pool(ap_pool_t *a)
+/* We only want to lock the mutex if we are being called from ap_clear_pool.
+ * This is because if we also call this function from ap_destroy_real_pool,
+ * which also locks the same mutex, and recursive locks aren't portable.  
+ * This way, we are garaunteed that we only lock this mutex once when calling
+ * either one of these functions.
+ */
+static void ap_clear_real_pool(ap_pool_t *a, int clearcaller)
 {
     ap_block_alarms();
 
-    ap_lock(alloc_mutex);
+    if (clearcaller) {
+        ap_lock(alloc_mutex);
+    }
     while (a->sub_pools) {
 	ap_destroy_real_pool(a->sub_pools);
     }
-    ap_unlock(alloc_mutex);
+    if (clearcaller) {
+        ap_unlock(alloc_mutex);
+    }
     /*
      * Don't hold the mutex during cleanups.
      */
@@ -598,13 +608,13 @@ static void ap_clear_real_pool(ap_pool_t *a)
 
 API_EXPORT(void) ap_clear_pool(struct context_t *a)
 {
-    ap_clear_real_pool(a->pool);
+    ap_clear_real_pool(a->pool, 1);
 }
 
 API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
-    ap_clear_real_pool(a);
+    ap_clear_real_pool(a, 0);
     ap_lock(alloc_mutex);
 
     if (a->parent) {
