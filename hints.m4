@@ -77,30 +77,51 @@ case "$PLAT" in
 	APR_SETIFNULL(LIBS, [-lposix -lbsd])
 	APR_SETIFNULL(LDFLAGS, [-s])
 	;;
-    i386-ibm-aix*)
-	APR_SETIFNULL(CFLAGS, [-DAIX=1 -U__STR__ -DUSEBCOPY])
-	;;
-    *-ibm-aix[1-2].*)
-	APR_SETIFNULL(CFLAGS, [-DAIX=1 -DNEED_RLIM_T -U__STR__])
-	;;
-    *-ibm-aix3.*)
-	APR_SETIFNULL(CFLAGS, [-DAIX=30 -DNEED_RLIM_T -U__STR__])
-	;;
-    *-ibm-aix4.1)
-	APR_SETIFNULL(CFLAGS, [-DAIX=41 -DNEED_RLIM_T -U__STR__])
-	;;
-    *-ibm-aix4.2)
-	APR_SETIFNULL(CFLAGS, [-DAIX=42 -U__STR__])
-	APR_SETIFNULL(LDFLAGS, [-lm])
-	;;
-    *-ibm-aix4.3)
-	APR_SETIFNULL(CFLAGS, [-DAIX=43 -U__STR__])
-	APR_SETIFNULL(LDFLAGS, [-lm])
-	;;
     *-ibm-aix*)
-	APR_SETIFNULL(CFLAGS, [-DAIX=1 -U__STR__])
-	APR_SETIFNULL(LDFLAGS, [-lm])
-	;;
+        case $PLAT in
+        i386-ibm-aix*)
+	    APR_SETIFNULL(CFLAGS, [-U__STR__ -DUSEBCOPY])
+	    ;;
+        *-ibm-aix[1-2].*)
+	    APR_SETIFNULL(CFLAGS, [-DNEED_RLIM_T -U__STR__])
+	    ;;
+        *-ibm-aix3.*)
+	    APR_SETIFNULL(CFLAGS, [-DNEED_RLIM_T -U__STR__])
+	    ;;
+        *-ibm-aix4.1)
+	    APR_SETIFNULL(CFLAGS, [-DNEED_RLIM_T -U__STR__])
+	    ;;
+        *-ibm-aix4.1.*)
+            APR_SETIFNULL(CFLAGS, [-DNEED_RLIM_T -U__STR__])
+            ;;
+        *-ibm-aix4.2)
+	    APR_SETIFNULL(CFLAGS, [-U__STR__])
+	    APR_SETIFNULL(LDFLAGS, [-lm])
+	    ;;
+        *-ibm-aix4.2.*)
+            APR_SETIFNULL(CFLAGS, [-U__STR__])
+            APR_SETIFNULL(LDFLAGS, [-lm])
+            ;;
+        *-ibm-aix4.3)
+	    APR_SETIFNULL(CFLAGS, [-D_USE_IRS -U__STR__])
+	    APR_SETIFNULL(LDFLAGS, [-lm])
+	    ;;
+        *-ibm-aix4.3.*)
+            APR_SETIFNULL(CFLAGS, [-D_USE_IRS -U__STR__])
+            APR_SETIFNULL(LDFLAGS, [-lm])
+            ;;
+        *-ibm-aix*)
+	    APR_SETIFNULL(CFLAGS, [-U__STR__])
+	    APR_SETIFNULL(LDFLAGS, [-lm])
+	    ;;
+        esac
+        dnl Must do a check for gcc or egcs here, to get the right options  
+        dnl to the compiler.
+	AC_PROG_CC
+        if test "$GCC" != "yes"; then
+          APR_ADDTO(CFLAGS, [-qHALT=E])
+        fi
+        ;;
     *-apollo-*)
 	APR_SETIFNULL(CFLAGS, [-DAPOLLO])
 	;;
