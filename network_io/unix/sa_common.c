@@ -63,6 +63,8 @@
  * that differs between platforms.
  */
 
+#include "apr.h"
+
 apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, 
                          apr_port_t port)
 {
@@ -122,7 +124,7 @@ apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname)
         addr->s_addr = htonl(INADDR_ANY);
         return APR_SUCCESS;
     }
-    if ((addr->s_addr = apr_inet_addr(hostname)) != INADDR_NONE)
+    if ((addr->s_addr = apr_inet_addr(hostname)) != APR_INADDR_NONE)
         return APR_SUCCESS;
 
     /* hmmm, it's not a numeric IP address so we need to look it up :( */
