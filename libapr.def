@@ -123,7 +123,7 @@ EXPORTS
 	ap_create_context   @114
 	ap_destroy_context   @115
 ;	WinTimeToUnixTime   @116
-	ap_get_oslevel   @117
+;	ap_get_oslevel   @117
 	ap_get_userdata   @118
 	ap_set_userdata   @119
 	ap_initialize   @120
