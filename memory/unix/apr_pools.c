@@ -523,8 +523,8 @@ static apr_file_t *file_stderr = NULL;
  * Local functions
  */
 
-static void run_cleanups(cleanup_t *c);
-static void run_child_cleanups(cleanup_t *c);
+static void run_cleanups(cleanup_t **c);
+static void run_child_cleanups(cleanup_t **c);
 static void free_proc_chain(struct process_chain *procs);
 
 
@@ -715,7 +715,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
         apr_pool_destroy(pool->child);
 
     /* Run cleanups */
-    run_cleanups(pool->cleanups);
+    run_cleanups(&pool->cleanups);
     pool->cleanups = NULL;
 
     /* Free subprocesses */
@@ -752,7 +752,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
         apr_pool_destroy(pool->child);
 
     /* Run cleanups */
-    run_cleanups(pool->cleanups);
+    run_cleanups(&pool->cleanups);
 
     /* Free subprocesses */
     free_proc_chain(pool->subprocesses);
@@ -1389,7 +1389,7 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
         apr_pool_destroy_debug(pool->child, file_line);
 
     /* Run cleanups */
-    run_cleanups(pool->cleanups);
+    run_cleanups(&pool->cleanups);
     pool->cleanups = NULL;
 
     /* Free subprocesses */
@@ -1967,26 +1967,31 @@ APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
     return (*cleanup_fn)(data);
 }
 
-static void run_cleanups(cleanup_t *c)
+static void run_cleanups(cleanup_t **cref)
 {
+    cleanup_t *c = *cref;
+
     while (c) {
+        *cref = c->next;
         (*c->plain_cleanup_fn)((void *)c->data);
-        c = c->next;
+        c = *cref;
     }
 }
 
-static void run_child_cleanups(cleanup_t *c)
+static void run_child_cleanups(cleanup_t **cref)
 {
+    cleanup_t *c = *cref;
+
     while (c) {
+        *cref = c->next;
         (*c->child_cleanup_fn)((void *)c->data);
-        c = c->next;
+        c = *cref;
     }
 }
 
 static void cleanup_pool_for_exec(apr_pool_t *p)
 {
-    run_child_cleanups(p->cleanups);
-    p->cleanups = NULL;
+    run_child_cleanups(&p->cleanups);
 
     for (p = p->child; p; p = p->sibling)
         cleanup_pool_for_exec(p);
