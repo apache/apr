@@ -757,7 +757,7 @@ AC_DEFUN(APR_LAYOUT,[
   fi
   pldconf=./config.pld
   changequote({,})
-  sed -e "1s/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*//;t" \
+  sed -e "1s/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*//;1t" \
       -e "1,/[ 	]*<[lL]ayout[ 	]*$2[ 	]*>[ 	]*/d" \
       -e '/[ 	]*<\/Layout>[ 	]*/,$d' \
       -e "s/^[ 	]*//g" \
