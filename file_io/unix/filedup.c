@@ -55,6 +55,7 @@
 #include "fileio.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "apr_thread_mutex.h"
 #include "inherit.h"
 
 apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
@@ -81,8 +82,8 @@ apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_
     (*new_file)->buffered = old_file->buffered;
     if ((*new_file)->buffered) {
 #if APR_HAS_THREADS
-        apr_lock_create(&((*new_file)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, 
-                       p);
+        apr_thread_mutex_create(&((*new_file)->thlock),
+                                APR_THREAD_MUTEX_DEFAULT, p);
 #endif
         (*new_file)->buffer = apr_palloc(p, APR_FILE_BUFSIZE);
     }
