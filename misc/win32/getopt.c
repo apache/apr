@@ -63,8 +63,7 @@ char *ap_optarg = "";                   /* argument associated with option */
  * NOTE:  Arguments 2 and 3 are most commonly argc and argv from 
  *        main(argc, argv)
  */
-ap_status_t ap_getopt(struct context_t *cont, ap_int32_t nargc, 
-                      char *const *nargv, const char *ostr, ap_int32_t *rv)
+ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr, ap_int32_t *rv, struct context_t *cont)
 {
     char *p;
     static char *place = EMSG;   /* option letter processing */
