@@ -11,7 +11,7 @@
  * @{
  */
 
-/* changes between APACHE_2_0_35 and APACHE_2_0_36
+/* changes between APACHE_2_0_35 and APACHE_2_0_36 */
 
 /** @deprecated @see apr_time_exp_tz */
 #define apr_explode_time apr_time_exp_tz
