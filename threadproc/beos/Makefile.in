@@ -1,44 +1,23 @@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = \
+	proc.lo \
+	thread.lo \
+	threadpriv.lo \
+	threadproc_common.lo \
+        apr_proc_stub
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 OSDIR=$(INCDIR)/arch/@OSDIR@
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch -I$(OSDIR) -I$(DEFOSDIR)
-MKDEP=../../helpers/mkdep.sh
 
-LIB=libthreadproc.a
-
-OBJS=proc.o \
-	thread.o \
-	threadpriv.o \
-	threadproc_common.o \
-        apr_proc_stub
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(LIB)
+CLEAN_TARGETS = apr_proc_stub /boot/home/config/bin/apr_proc_stub
 
 apr_proc_stub:
 	$(CC) apr_proc_stub.c \
 	&& cp apr_proc_stub /boot/home/config/bin
-
-clean:
-	$(RM) -f *.o *.a *.so /boot/home/config/bin/apr_proc_stub apr_proc_stub
-
-distclean: clean
-	-$(RM) -f Makefile
-
-
-$(LIB): $(OBJS)
-	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

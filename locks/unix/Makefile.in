@@ -1,31 +1,15 @@
-RM=@RM@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = \
+	locks.lo \
+	crossproc.lo \
+	intraproc.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 INCDIR2=$(INCDIR)/arch
 INCDIR3=$(INCDIR)/arch/unix
 INCLUDES=-I$(INCDIR) -I$(INCDIR2) -I$(INCDIR3)
-MKDEP=../../helpers/mkdep.sh
-
-OBJS=locks.o \
-	crossproc.o \
-	intraproc.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(OBJS)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

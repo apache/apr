@@ -1,45 +1,22 @@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = \
+	dir.lo \
+	fileacc.lo \
+	filedup.lo \
+	filestat.lo \
+	open.lo \
+	pipe.lo \
+	readwrite.lo \
+	seek.lo \
+	flock.lo \
+	maperrorcode.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 OSDIR=$(INCDIR)/arch/@OSDIR@
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
-MKDEP=../../helpers/mkdep.sh
-
-LIB=file.a
-
-OBJS=dir.o \
-	fileacc.o \
-	filedup.o \
-	filestat.o \
-	open.o \
-	pipe.o \
-	readwrite.o \
-	seek.o \
-	flock.o \
-	maperrorcode.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(LIB)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-
-$(LIB): $(OBJS)
-	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

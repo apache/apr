@@ -22,6 +22,10 @@ dnl Absolute source/build directory
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
+dnl Libtool needs this symbol
+top_builddir="$abs_srcdir"
+AC_SUBST(top_builddir)
+
 dnl Get location of helpers directory
 dnl XXX This assumes that APR "lives" under Apache.
 dnl XXX We'll need to fix this when we pull it out.
@@ -42,12 +46,10 @@ LIBPREFIX='lib'
 
 dnl # Checks for programs.
 AC_PROG_CC
-AC_PROG_RANLIB_NC
 AC_PROG_MAKE_SET
 AC_PROG_AWK
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_TOOL(AR, ar, ar)
-SO_LDFLAG="-shared"
 
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
@@ -59,6 +61,12 @@ if test ".$SH" = . -a -f /bin/sh; then
   SH="/bin/sh"
 fi
 AC_CHECK_PROG(SH, sh, sh)
+
+dnl
+dnl prep libtool
+dnl
+echo "performing libtool configuration..."
+AC_PROG_LIBTOOL
 
 dnl #----------------------------- Checks for compiler flags
 nl='
@@ -106,7 +114,6 @@ case "$OS" in
        USE_MM=yes
        AC_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
        eolstr="\\n"
-       SO_LDFLAG="-nostart"
        ;;
    *os390)
        OSDIR="os390"
@@ -123,7 +130,6 @@ case "$OS" in
 esac
 
 AC_SUBST(eolstr)
-AC_SUBST(SO_LDFLAG)
 
 dnl #----------------------------- Checking for Shared Memory Support 
 echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
@@ -851,7 +857,6 @@ dnl #----------------------------- Construct the files
 
 AC_SUBST(LDLIBS)
 AC_SUBST(OPTIM)
-AC_SUBST(RANLIB)
 AC_SUBST(AR)
 AC_SUBST(RM)
 AC_SUBST(OSDIR)
@@ -884,6 +889,19 @@ if test -n "$CPPFLAGS"; then
   CFLAGS="$CFLAGS $CPPFLAGS"
 fi
 
+dnl
+dnl BSD/OS (BSDi) needs to use a different include syntax in the Makefiles
+dnl
+case "$host_alias" in
+*bsdi*)
+    INCLUDE_RULES=".include \"$top_builddir/helpers/rules.mk\""
+    ;;
+*)
+    INCLUDE_RULES="include $top_builddir/helpers/rules.mk"
+    ;;
+esac
+AC_SUBST(INCLUDE_RULES)
+
 SAVE_FILES="include/apr.h include/arch/unix/apr_private.h"
 
 for i in $SAVE_FILES; do
@@ -893,10 +911,12 @@ done
 dir=include/arch/unix
 test -d $dir || $MKDIR $dir
 
-AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3 include/apr.h APRVARS,[
-
-SAVE_FILES="include/apr.h include/apr_private.h"
-
+AC_OUTPUT([
+	$MAKEFILE1 $MAKEFILE2 $MAKEFILE3
+	include/apr.h
+	APRVARS
+	helpers/rules.mk
+],[
 for i in $SAVE_FILES; do
   if cmp -s $i $i.save 2>/dev/null; then
     mv $i.save $i
@@ -904,7 +924,6 @@ for i in $SAVE_FILES; do
   fi
   rm -f $i.save
 done
-
 ])
 
 dnl #----------------------------- Fixup Makefiles for VPATH support

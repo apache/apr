@@ -1,34 +1,10 @@
-RM=@RM@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = dso.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
-MKDEP=../../helpers/mkdep.sh
-
-LIB=libdso.a
-
-OBJS=dso.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(LIB)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-$(LIB): $(OBJS)
-	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
-
-distclean: clean
-	-$(RM) -f Makefile
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE
