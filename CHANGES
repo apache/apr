@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Amend the time code to better deal with time zones.
+     [David Reid]
+
   *) Carefully select an appropriate native type for apr_int64_t and
      define its format as APR_INT64_T_FMT and literal using APR_INT64_C().
      [Justin Erenkrantz, William Rowe]
