@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Fix DSO code on HP/UX.  We have to use == not =, and it makes more
+     sense to actually return errno, so that the return code means 
+     something.  [Ryan Bloom]
+
   *) Clean up conditionals in unix DSO code so that we decide based on
      the dynamic loading implementation, which we noticed at configure
      time, instead of by operating system.
