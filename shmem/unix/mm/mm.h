@@ -187,6 +187,10 @@ union semun {
 #include <sys/file.h>
 #endif
 
+#ifdef MM_SHMT_BEOS
+#include <kernel/OS.h>
+#endif
+
 #define MM_ALLOC_MINSIZE         (1024*8) 
 #define MM_CORE_FILEMODE         (S_IRUSR|S_IWUSR)
 #define MM_CORE_DEFAULT_PAGESIZE (1024*8)
@@ -262,6 +266,13 @@ struct mem_core {
    int          mc_fdmem;
 #if defined(MM_SHMT_MMFILE)
    char         mc_fnmem[MM_MAXPATH];
+#endif
+#if defined(MM_SHMT_BEOS)
+    area_id     mc_areaid;
+#endif
+#if defined(MM_SEMT_BEOS)
+    sem_id      mc_semid;
+    int32       mc_ben;
 #endif
 #if !defined(MM_SEMT_FLOCK)
    int          mc_fdsem;

@@ -8,6 +8,7 @@
 /* VM Page Size Determination */
 #undef MM_VMPS_GETPAGESIZE
 #undef MM_VMPS_SYSCONF
+#undef MM_VMPS_BEOS
 
 /* Shared Memory Type */
 #undef MM_SHMT_MMANON
@@ -15,6 +16,7 @@
 #undef MM_SHMT_MMZERO
 #undef MM_SHMT_MMFILE
 #undef MM_SHMT_IPCSHM
+#undef MM_SHMT_BEOS
 
 /* Shared Memory Maximum Segment Size */
 #define MM_SHM_MAXSEGSIZE @MM_SHM_MAXSEGSIZE@
@@ -23,6 +25,7 @@
 #undef MM_SEMT_FLOCK
 #undef MM_SEMT_FCNTL
 #undef MM_SEMT_IPCSEM
+#undef MM_SEMT_BEOS
 
 /* Debugging */
 #undef MM_DEBUG
