@@ -65,6 +65,7 @@
 #endif
 #include <string.h>
 #include <winbase.h>
+#include "misc.h"
 
 /* Leap year is any year divisible by four, but not by 100 unless also
  * divisible by 400
@@ -281,6 +282,25 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
      */
     Sleep((DWORD)(t / 1000));
 }
+
+
+static apr_status_t clock_restore(void *unsetres)
+{
+    ULONG newRes;
+    SetTimerResolution((ULONG)unsetres, FALSE, &newRes);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
+{
+    ULONG newRes;
+    if (SetTimerResolution(10000, TRUE, &newRes) == 0 /* STATUS_SUCCESS */) {
+        /* register the cleanup... */
+        apr_pool_cleanup_register(p, (void*)10000, clock_restore,
+                                  apr_pool_cleanup_null);
+    }
+}
+
 
 /* Deprecated */
 APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,

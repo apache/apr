@@ -256,6 +256,14 @@ APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize,
                                        apr_size_t max, const char *format, 
                                        apr_time_exp_t *tm);
 
+/**
+ * Improve the clock resolution for the lifetime of the given pool.
+ * Generally this is only desireable on benchmarking and other very
+ * time-sensitive applications, and has no impact on most platforms.
+ * @param pool The pool to associate the finer clock resolution 
+ */
+APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p);
+
 #ifdef __cplusplus
 }
 #endif

@@ -364,6 +364,12 @@ APR_DECLARE(void) apr_unix_setup_time(void)
 
 #endif
 
+/* A noop on all known Unix implementations */
+APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
+{
+    return;
+}
+
 /* Deprecated */
 APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
                                           apr_time_t input,
