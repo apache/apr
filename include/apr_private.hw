@@ -171,6 +171,9 @@ typedef void (Sigfunc)(int);
  * that the windows port needs.
  */
 #define APR_HAS_THREADS        1
+#define APR_HAS_SENDFILE       1
+#define APR_HAS_RANDOM         1
+#define APR_HAS_DSO            1
 
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
