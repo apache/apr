@@ -68,8 +68,10 @@ static apr_status_t mmap_cleanup(void *themmap)
     apr_mmap_t *mm = themmap;
     apr_status_t rv = 0;
 
-    if (!mm->is_owner || !mm->mhandle) {
-        /* XXX: we shouldn't ever get here */
+    if (!mm->is_owner) {
+        return APR_EINVAL;
+    }
+    else if (!mm->mhandle) {
         return APR_ENOENT;
     }
 
@@ -197,9 +199,9 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
 
 APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mm)
 {
-    apr_status_t rv = APR_SUCCESS;
+    apr_status_t rv;
 
-    if (mm->is_owner && ((rv = mmap_cleanup(mm)) == APR_SUCCESS)) {
+    if ((rv = mmap_cleanup(mm)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(mm->cntxt, mm, mmap_cleanup);
         return APR_SUCCESS;
     }
