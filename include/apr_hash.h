@@ -109,7 +109,7 @@ APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key,
  * @return Returns NULL if the key is not present.
  * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_size_t klen)
  */
-APR_EXPORT(void) *apr_hash_get(apr_hash_t *ht, const void *key,
+APR_EXPORT(void*) apr_hash_get(apr_hash_t *ht, const void *key,
                                apr_size_t klen);
 
 /**

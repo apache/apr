@@ -857,7 +857,7 @@ APR_EXPORT(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
  * Allocating stuff...
  */
 
-void * apr_palloc(apr_pool_t *a, apr_size_t reqsize)
+APR_EXPORT(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
 {
 #ifdef ALLOC_USE_MALLOC
     apr_size_t size = reqsize + CLICK_SZ;
