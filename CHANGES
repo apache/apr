@@ -1,4 +1,5 @@
 Changes with APR b1  
+  *) apr_pstrcat() optimizations [Doug MacEachern, Jeff Trawick]
 
   *) Make the apr_pool_is_ancestor logic public.  This is required for 
      some new logic that is going into HTTPD.  I have left the join logic
