@@ -59,13 +59,16 @@
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
     (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t));
-    (*new)->pollset = (struct pollfd *)ap_palloc(cont, 
-                                         sizeof(struct pollfd) * num);
-
-    (*new)->num = num;
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
+    (*new)->pollset = (struct pollfd *)ap_palloc(cont, 
+                                         sizeof(struct pollfd) * num);
+
+    if ((*new)->pollset == NULL) {
+        return APR_ENOMEM;
+    }
+    (*new)->num = num;
     (*new)->cntxt = cont;
     (*new)->curpos = 0;
     return APR_SUCCESS;
@@ -96,20 +99,20 @@ static ap_int16_t get_revent(ap_int16_t event)
     ap_int16_t rv = 0;
 
     if (event & POLLIN)
-        rv |= APR_POLLIN;        
+        rv |= APR_POLLIN;
     if (event & POLLPRI)
-        rv |= APR_POLLPRI;        
+        rv |= APR_POLLPRI;
     if (event & POLLOUT)
-        rv |= APR_POLLOUT;       
+        rv |= APR_POLLOUT;
     if (event & POLLERR)
-        rv |= APR_POLLERR;        
+        rv |= APR_POLLERR;
     if (event & POLLHUP)
-        rv |= APR_POLLHUP;        
+        rv |= APR_POLLHUP;
     if (event & POLLNVAL)
-        rv |= APR_POLLNVAL;        
+        rv |= APR_POLLNVAL;
 
     return rv;
-}
+}        
 
 ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, 
 			       ap_socket_t *sock, ap_int16_t event)
@@ -134,7 +137,6 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
 ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, 
 		    ap_interval_time_t timeout)
 {
-    int i;
     int rv;
 
     if (timeout > 0) {
@@ -160,7 +162,7 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
     if (i >= aprset->curpos) {
         return APR_EINVALSOCK;
     } 
-    (*event) = aprset->pollset[i].revents;
+    (*event) = get_revent(aprset->pollset[i].revents);
     return APR_SUCCESS;
 }
 
@@ -218,8 +220,6 @@ ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
 }
 
 #else    /* Use select to mimic poll */
-
-/* TODO - make this compile and perhaps even work */
 
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
