@@ -88,6 +88,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef HAVE_STRUCT_UNION_SEMUN
+#include <sys/sem.h>
+#endif
 
 #if APR_HAS_THREADS
 #if HAVE_PTHREAD_H
@@ -96,7 +99,7 @@
 #endif
 /* End System Headers */
 
-#ifndef HAVE_UNION_SEMUN
+#ifndef HAVE_STRUCT_UNION_SEMUN
 /* it makes no sense, but this isn't defined on solaris */
 union semun {
     long val;
