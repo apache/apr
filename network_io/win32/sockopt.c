@@ -156,9 +156,9 @@ ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
         return APR_ENOMEM;
     }
 
-    return status_from_res_error(WSAGetLastError());
+    return (WSAGetLastError() + APR_OS_START_SYSERR);
 }
-
+#if 0
 ap_status_t status_from_res_error(int reserr)
 {
     ap_status_t status;
@@ -180,5 +180,6 @@ ap_status_t status_from_res_error(int reserr)
     }
     return status;
 }
+#endif
 
 
