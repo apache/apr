@@ -38,3 +38,4 @@ build-outputs.mk
 *.bbg
 *.da
 coverage
+apr.pc

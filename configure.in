@@ -1998,6 +1998,7 @@ AC_OUTPUT([
 	include/apr.h
 	build/apr_rules.mk
 	apr-config
+        apr.pc
 ],[
 for i in $SAVE_FILES; do
   if cmp -s $i $i.save 2>/dev/null; then
