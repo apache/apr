@@ -270,9 +270,8 @@ typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;
 
-
 typedef struct apr_lock_t        apr_lock_t;
-typedef struct apr_sms_t         apr_sms_t;
+
 /* Mechanisms to properly type numeric literals */
 
 #define APR_INT64_C(val) (val##i64)
