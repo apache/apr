@@ -74,10 +74,7 @@ int main (int argc, char ** argv)
     apr_file_t *file2 = NULL;
     apr_file_t *file3 = NULL;
 
-    apr_status_t status;
     apr_pool_t *p;
-    int *retval;
-    char filename[256];   
     apr_size_t txtlen = sizeof(TEST);
     char buff[50];
     apr_off_t fpos;
@@ -88,39 +85,53 @@ int main (int argc, char ** argv)
     fprintf(stdout, "APR File Duplication Test\n=========================\n\n");
     STD_TEST_NEQ("Creating a pool", apr_pool_create(&p, NULL))
 
+    printf("\nTesting apr_file_dup\n");
     /* First, create a new file, empty... */
-    STD_TEST_NEQ("Open a new, empty file", apr_file_open(&file1, "./testdup.file",
+    STD_TEST_NEQ("    Open a new, empty file (#1)", apr_file_open(&file1, "./testdup.file",
                                             APR_READ | APR_WRITE | APR_CREATE,
                                             APR_OS_DEFAULT, p))
 
-    STD_TEST_NEQ("Simple dup", apr_file_dup(&file3, file1, p))
+    STD_TEST_NEQ("    Simple dup", apr_file_dup(&file3, file1, p))
 
-    STD_TEST_NEQ("Write to dup'd file", apr_file_write(file3, TEST, &txtlen))
+    STD_TEST_NEQ("    Write to dup'd file (#3)", apr_file_write(file3, TEST, &txtlen))
 
-    STD_TEST_NEQ("Rewind original file pos", apr_file_seek(file1, APR_SET, &fpos))
+    STD_TEST_NEQ("    Rewind file #1 to start", apr_file_seek(file1, APR_SET, &fpos))
 
-    txtlen = sizeof(buff);
-    STD_TEST_NEQ("Read from original file handle", 
+    txtlen = 50;
+    STD_TEST_NEQ("    Read from file #1", 
                  apr_file_read(file1, buff, &txtlen))
 
-    printf("%s\n", buff);
+    TEST_NEQ("    Checking what we read from #1", strcmp(buff, TEST), 0, "OK", "Failed")
 
-    STD_TEST_NEQ("Open another new, empty file",
+
+    printf("\nTesting apr_file_dup2\n");
+    STD_TEST_NEQ("    Open another new, empty file (#2)",
                  apr_file_open(&file2, "./testdup2.file",
                                APR_READ | APR_WRITE | APR_CREATE,
                                APR_OS_DEFAULT, p))
 
-    STD_TEST_NEQ("Dup2 test", apr_file_dup2(&file3, file2, p))
+    STD_TEST_NEQ("    Dup2 test", apr_file_dup2(&file3, file2, p))
 
     txtlen = sizeof(TEST2);
-    STD_TEST_NEQ("Write to dup'd file", apr_file_write(file3, TEST2, &txtlen))
+    STD_TEST_NEQ("    Write to dup'd file #3", apr_file_write(file3, TEST2, &txtlen))
 
-    STD_TEST_NEQ("Rewind original file pos", apr_file_seek(file1, APR_SET, &fpos))
+    STD_TEST_NEQ("    Rewind file #2 to start", apr_file_seek(file2, APR_SET, &fpos))
 
-    STD_TEST_NEQ("Read from original file handle",
-                 apr_file_read(file1, buff, &txtlen))
+    txtlen = 50;
+    STD_TEST_NEQ("    Read from file #2",
+                 apr_file_read(file2, buff, &txtlen))
 
-    printf("%s\n", buff);
+    TEST_NEQ("    Checking what we read from #2", strcmp(buff, TEST2), 0, "OK", "Failed")
+      
+    printf("\nCleaning up\n");
+    STD_TEST_NEQ("    Closing file #3", apr_file_close(file3))
+    STD_TEST_NEQ("    Closing file #2", apr_file_close(file2))
+    STD_TEST_NEQ("    Closing file #1", apr_file_close(file1))
+
+    STD_TEST_NEQ("    Removing first test file", apr_file_remove("./testdup.file", p))
+    STD_TEST_NEQ("    Removing first test file", apr_file_remove("./testdup2.file", p))
+
+    printf("\nAll Tests completed - OK!\n");
 
     return (0);
 }
