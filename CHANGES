@@ -1,4 +1,6 @@
 Changes with APR 0.9.0
+  *) handle leak related to threads on Windows2000/XP 
+     [INOUE Seiichiro <inoue@ariel-networks.com>]
 
   *) Includes moved to INCLUDEDIR/apr-{major} (e.g. /usr/include/apr-0)
      [Greg Stein]
