@@ -230,8 +230,8 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
     struct sockaddr sa;
     int salen = sizeof(sock->remote_addr->sa);
 
-    // Don't allocate the memory until after we call accept. This allows
-    //  us to work with nonblocking sockets.
+    /* Don't allocate the memory until after we call accept. This allows
+       us to work with nonblocking sockets. */
     s = accept(sock->sock, (struct sockaddr *)&sa, &salen);
     if (s == INVALID_SOCKET) {
         return apr_get_netos_error();
