@@ -80,6 +80,10 @@ fi
 AC_ARG_WITH(debug,[  --with-debug              Turn on debugging and compile time warnings],
 	[if test "$GCC" = "yes"; then CFLAGS="$CFLAGS -g -Wall"; else CFLAGS="$CFLAGS -g"; fi])
 
+dnl inherit REENTRANCY_FLAGS
+test -n "$ac_cv_pass_REENTRANCY_FLAGS" && \
+CFLAGS="$CFLAGS $ac_cv_pass_REENTRANCY_FLAGS"
+
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
 case "$OS:$CC" in
