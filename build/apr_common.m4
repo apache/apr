@@ -58,9 +58,9 @@ AC_DEFUN(APR_SUBDIR_CONFIG, [
 
   echo "configuring package in $1 now"
   ac_popdir=`pwd`
-  ac_abs_srcdir=`(cd $srcdir/$1 && pwd)`
   apr_config_subdirs="$1"
-  test -d $1 || $MKDIR $1
+  test -d $1 || $mkdir_p $1
+  ac_abs_srcdir=`(cd $srcdir/$1 && pwd)`
   cd $1
 
 changequote(, )dnl
