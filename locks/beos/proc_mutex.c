@@ -118,6 +118,11 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return stat;
 }
 
+APR_DECLARE(apr_status_t) apr_proc_mutex_cleanup(void *mutex)
+{
+    return _proc_mutex_cleanup(mutex);
+}
+
 APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
 {
     return NULL;
