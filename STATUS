@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/14 01:26:03 $]
+Last modified at [$Date: 2001/12/14 10:43:00 $]
 
 Release:
 
@@ -48,24 +48,13 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Enable pools to have thread-specific locking in it.
         Status: Sander's pool code has been tested with httpd, flood, 
-                and SVN.  It needs to be determined whether we will
-                wait for the debug code to be finished before 
-                committing.
-        Patch:
-            <JLEGKKNELMHCJPNMOKHOOECHFAAA.striker@apache.org>
+                and SVN.  It's in.  The debug code needs to be added.
+                
         Comparisons/reviews:
             Ian: <3C083414.1080208@cnet.com> (performance)
             Brian: <3C07D792.9070301@cnet.com> (code)
                    <3C0D6BB5.6010505@cnet.com> (performance)
             Justin: <20011205025611.GB22835@ebuilt.com> (code)
-        Votes:
-            Sander's patch:
-                +1: Brian (non-binding), 
-                    Ian (once we have a debug version of palloc etc),
-                    Justin
-                    Sander
-                 0:
-                -1:
 
     * Get OTHER_CHILD support into Win32
         Status: Bill S. is looking into this
@@ -167,37 +156,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       pass to apr_dso_load()
       -- note on Win32 we distinguish 'apache module' names from other 
          'loadable module' names, so be careful with Apache's directive.
-
-    * APR memory code
-      The SMS code has been removed.  The abstraction made it perform
-      far worse than pools.  Pools need probably be revamped to take
-      a want_new_freelist parameter to get rid of the global locking
-      on block allocation.
-        Status: Sander volunteers
-      
-    * In line with the new SMS code is the fact that threading and pools
-      just are not working together well.  This is due to the fact that
-      the pool code has one global mutex (alloc_mutex) and one freelist
-      (block_freelist) for all pools to share.  This means that only 
-      one worker can be allocating memory at any given time.  This is 
-      probably the reason why Apache 2.0 is faster with prefork MPM 
-      (thread-disabled APR) than threaded MPM.  The solution to this
-      is most likely to incorporate a rework of the pools to use the new
-      SMS code and allow certain pools (i.e. request pools in httpd-2.0)
-      to have an option for no locking (as they can't have contention
-      by definition).  This would mean that the mutex and freelist
-      must be moved inside of apr_pool_t.  Therefore, this is the 
-      jumping-off point into SMS.  
-        Justin: The SMS code has been checked into CVS (see above).
-                To solve this problem, we want only one trivial SMS 
-                per thread which acts as the parent for all SMSs in 
-                that thread (giving us thread-local allocation).  
-                Each descendant SMS should be something along the 
-                lines of a tracking SMS.  That's how I see it anyway.
-                There are other possibilities.  Any of those probably 
-                work as well.  See the apr archives for more info.  
-                We're still debating this.
-        Sander: The SMS code has been removed (see above).
 
     * Possible gmtime_r replacement in explode_time
       On Solaris (and possibly others), the gmtime_r libc function obtains
