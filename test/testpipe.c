@@ -115,6 +115,16 @@ static void read_write(CuTest *tc)
     char *buf;
     apr_size_t nbytes;
 
+#ifdef WIN32
+    /* XXX:   THIS IS A HACK
+     * This test currently fails on Windows, because it never returns from the file_read
+     * call.  Because this stops the test suite from working, I am just making this fail
+     * automatically on Windows without running the test.  When Windows gets this feature,
+     * this hack should be removed.
+     */
+    CuFail(tc, "Timeouts don't work on pipes on Windows");
+#endif
+    
     nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(p, nbytes + 1);
 
