@@ -171,7 +171,8 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 #endif
 
-#elif defined(__FreeBSD__) && (__FreeBSD__ >= 5)
+#elif defined(__FreeBSD__)
+
 #include <machine/atomic.h>
 
 #define apr_atomic_t apr_uint32_t
