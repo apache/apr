@@ -274,7 +274,7 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
 
 APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    apr_status_t rv;;
+    apr_status_t rv;
 
     if ((sock->sock == INVALID_SOCKET) || (!sock->local_addr)) {
         return APR_ENOTSOCK;
