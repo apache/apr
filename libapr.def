@@ -1,6 +1,6 @@
-; aprlib.def :
+; libapr.def :
 
-LIBRARY aprlib
+LIBRARY libapr
 DESCRIPTION ''
 
 EXPORTS

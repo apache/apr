@@ -1,33 +1,32 @@
-# Microsoft Developer Studio Project File - Name="aprlib" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 6.00
+# Microsoft Developer Studio Project File - Name="apr" - Package Owner=<4>
+# Microsoft Developer Studio Generated Build File, Format Version 5.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=aprlib - Win32 Debug
+CFG=apr - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "aprlib.mak".
+!MESSAGE NMAKE /f "apr.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "aprlib.mak" CFG="aprlib - Win32 Debug"
+!MESSAGE NMAKE /f "apr.mak" CFG="apr - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "aprlib - Win32 Release" (based on "Win32 (x86) Static Library")
-!MESSAGE "aprlib - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "apr - Win32 Release" (based on "Win32 (x86) Static Library")
+!MESSAGE "apr - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
-# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
 
-!IF  "$(CFG)" == "aprlib - Win32 Release"
+!IF  "$(CFG)" == "apr - Win32 Release"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
@@ -43,7 +42,7 @@ RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 # ADD BASE CPP /nologo /MD /W3 /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MD /W3 /O2 /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"LibR\aprlib" /FD /c
+# ADD CPP /nologo /MD /W3 /O2 /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"LibR\apr" /FD /c
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -51,7 +50,7 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo /out:"LibR\apr.lib"
 # ADD LIB32 /nologo /out:"LibR\apr.lib"
 
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
@@ -67,8 +66,8 @@ LIB32=link.exe -lib
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
-# ADD BASE CPP /nologo /MDd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"LibD\aprlib" /FD /c
+# ADD BASE CPP /nologo /MDd /W3 /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fd"LibD\apr" /FD /c
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -80,8 +79,8 @@ LIB32=link.exe -lib
 
 # Begin Target
 
-# Name "aprlib - Win32 Release"
-# Name "aprlib - Win32 Debug"
+# Name "apr - Win32 Release"
+# Name "apr - Win32 Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter ".c"
@@ -397,7 +396,7 @@ SOURCE=.\include\apr.h.in
 
 SOURCE=.\include\apr.hw
 
-!IF  "$(CFG)" == "aprlib - Win32 Release"
+!IF  "$(CFG)" == "apr - Win32 Release"
 
 # Begin Custom Build
 InputPath=.\include\apr.hw
@@ -408,7 +407,7 @@ InputPath=.\include\apr.hw
 	
 # End Custom Build
 
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
+!ELSEIF  "$(CFG)" == "apr - Win32 Debug"
 
 # Begin Custom Build
 InputPath=.\include\apr.hw
@@ -521,7 +520,7 @@ SOURCE=.\include\apr_xlate.h
 # End Group
 # Begin Source File
 
-SOURCE=.\aprlib.def
+SOURCE=.\libapr.def
 # End Source File
 # End Target
 # End Project
