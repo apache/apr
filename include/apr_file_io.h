@@ -527,10 +527,6 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo,
                                           apr_int32_t wanted,
                                           apr_file_t *thefile);
 
-APR_DECLARE(apr_status_t) apr_get_filename_case(const char **fname,
-                                                const char *fspec,
-                                                apr_pool_t *cont);
-
 #ifdef __cplusplus
 }
 #endif
