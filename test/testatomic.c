@@ -75,40 +75,37 @@ apr_atomic_t y;      /* atomic locks */
 static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
 {
     apr_uint32_t oldval;
+    apr_uint32_t casval=0;
     apr_atomic_set(&y,0);
     printf("%-60s", "testing CAS");
-    oldval = apr_atomic_cas(&y,12,0);
+    oldval = apr_atomic_cas(&casval,12,0);
     if (oldval != 0) {
         fprintf(stderr, "Failed\noldval =%d should be zero\n",oldval);
         return APR_EGENERAL;
     }
     printf("OK\n");
     printf("%-60s", "testing CAS - match non-null");
-    oldval = apr_atomic_cas(&y,23,12);
+    oldval = apr_atomic_cas(&casval,23,12);
     if (oldval != 12) {
         fprintf(stderr, "Failed\noldval =%d should be 12 y=%d\n",
                 oldval,
-                apr_atomic_read(&y));
+                casval);
         return APR_EGENERAL;
     }
     printf("OK\n");
     printf("%-60s", "testing CAS - no match");
-    oldval = apr_atomic_cas(&y,23,12);
+    oldval = apr_atomic_cas(&casval,23,12);
     if (oldval != 23 ) {
         fprintf(stderr, "Failed\noldval =%d should be 23 y=%d\n",
                 oldval, 
-                apr_atomic_read(&y));
+                casval);
         return APR_EGENERAL;
     }
     printf("OK\n");
 
     printf("%-60s", "testing add");
-    oldval = apr_atomic_add(&y,4);
-    if (oldval != 23) {
-        fprintf(stderr, "Failed\nAtomic Add should return the old value expecting 23 got %d\n",
-                oldval);
-        exit(-1);
-    }
+    apr_atomic_set(&y,23);
+    apr_atomic_add(&y,4);
     if (apr_atomic_read(&y) != 27) {
         fprintf(stderr, "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
             oldval);

@@ -60,7 +60,7 @@
 
 #if APR_HAS_THREADS
 
-#if defined(APR_ATOMIC_NEED_DEFAULT) 
+#if defined(APR_ATOMIC_NEED_DEFAULT)  || defined(APR_ATOMIC_NEED_CAS_DEFAULT)
 
 #define NUM_ATOMIC_HASH 7
 /* shift by 2 to get rid of alignment issues */
@@ -79,7 +79,10 @@ apr_status_t apr_atomic_init(apr_pool_t *p )
     }
     return APR_SUCCESS;
 }
-apr_uint32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val) 
+#endif /* APR_ATOMIC_NEED_DEFAULT || APR_ATOMIC_NEED_CAS_DEFAULT */
+
+#if defined(APR_ATOMIC_NEED_DEFAULT) 
+void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
@@ -93,7 +96,7 @@ apr_uint32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val)
     printf("debug no workee\n");
     return *mem;
 }
-apr_uint32_t apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val) 
+void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
@@ -107,7 +110,7 @@ apr_uint32_t apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val)
     return *mem;
 }
 
-apr_uint32_t apr_atomic_inc( volatile apr_uint32_t *mem) 
+void apr_atomic_inc( volatile apr_uint32_t *mem) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
@@ -120,7 +123,7 @@ apr_uint32_t apr_atomic_inc( volatile apr_uint32_t *mem)
     }
     return *mem;
 }
-apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem) 
+void apr_atomic_dec(volatile apr_atomic_t *mem) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t prev;
@@ -134,25 +137,25 @@ apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem)
     return *mem;
 }
 
+#endif /* APR_ATOMIC_NEED_DEFAULT */
 #if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
 
-long apr_atomic_cas(volatile apr_atomic_t *mem,long with, long cmp)
+long apr_atomic_cas(volatile void *mem,long with, long cmp)
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
-    apr_uint32_t prev;
+    long prev;
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        prev = *mem;
-        if ( *mem == cmp) {
-            *mem = with;
+        prev = *(long*)mem;
+        if ( prev == cmp) {
+            *(long*)mem = with;
         }
         apr_thread_mutex_unlock(lock);
         return prev;
     }
-    return *mem;
+    return *(long*)mem;
 }
 #endif /* APR_ATOMIC_NEED_CAS_DEFAULT */
 
-#endif /* APR_ATOMIC_NEED_DEFAULT */
 
 #endif /* APR_HAS_THREADS */
