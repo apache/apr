@@ -83,6 +83,7 @@ typedef struct ap_proc_t		  ap_proc_t;
 typedef struct ap_procattr_t         ap_procattr_t;
 
 typedef struct ap_threadkey_t        ap_threadkey_t;
+typedef struct ap_other_child_rec_t  ap_other_child_rec_t;
 
 typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
 

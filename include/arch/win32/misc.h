@@ -55,6 +55,7 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include "apr.h"
 #include "apr_config.h"
 #include "apr_general.h"
 #include "apr_pools.h"
@@ -87,6 +88,15 @@ struct ap_context_t {
     datastruct *prog_data;
     int (*apr_abort)(int retcode);
 };
+
+struct ap_other_child_rec_t {
+    struct ap_other_child_rec_t *next;
+    int pid;
+    void (*maintenance) (int, void *);
+    void *data;
+    int write_fd;
+};
+
 
 #endif  /* ! MISC_H */
 
