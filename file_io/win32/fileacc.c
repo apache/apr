@@ -106,6 +106,9 @@ ap_status_t ap_get_filename(char **new, struct file_t *thefile)
 ap_status_t ap_get_filesize(ap_ssize_t *size, struct file_t *file)
 {
     if (file != NULL) {
+        if (!file->stated) {
+            ap_getfileinfo(file);
+        }
         *size = file->size;
         return APR_SUCCESS;
     }
