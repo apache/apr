@@ -59,9 +59,8 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
-#ifdef BEOS
-#include <unistd.h>
-#endif
+#include "apr_sms.h"
+#include "test_apr.h"
 
 static apr_status_t string_cleanup(void *data)
 {
@@ -70,33 +69,42 @@ static apr_status_t string_cleanup(void *data)
 
 int main(void)
 {
-    apr_pool_t *context;
+    apr_pool_t *pool;
+    apr_sms_t *sms;
     char *testdata;
     char *retdata;
 
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't initialize.");
-        exit(-1);
-    }
+    printf("APR User Data Test\n==================\n\n");
+
+    STD_TEST_NEQ("Initializing APR", apr_initialize())
     atexit(apr_terminate);
 
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
+    STD_TEST_NEQ("Creating a pool", apr_pool_create(&pool, NULL))
+    STD_TEST_NEQ("Creating an sms", apr_sms_std_create(&sms))
 
-    testdata = apr_pstrdup(context, "This is a test\n");
+    testdata = apr_pstrdup(pool, "This is a test\n");
 
-    apr_pool_userdata_set(testdata, "TEST", string_cleanup, context);    
-
-    apr_pool_userdata_get((void **)&retdata, "TEST", context);
-
-    if (!strcmp(testdata, retdata)) {
-        fprintf(stdout, "User data is working ok\n");
-    }
-    else {
-        fprintf(stdout, "User data is not working\n");
-    } 
+    printf("Testing pool\n");
+    STD_TEST_NEQ("    Setting user data into the pool",
+          apr_pool_userdata_set(testdata, "TEST", string_cleanup, pool))
     
+    STD_TEST_NEQ("    Getting user data from the pool",
+          apr_pool_userdata_get((void **)&retdata, "TEST", pool))
+
+    TEST_NEQ("    Checking the data we got", strcmp(testdata, retdata),
+             0, "OK","Failed :(")
+
+    printf("Testing SMS\n");
+ 
+    STD_TEST_NEQ("    Setting user data into the pool",
+          apr_sms_userdata_set(testdata, "TEST", string_cleanup, sms))
+    
+    STD_TEST_NEQ("    Getting user data from the pool",
+          apr_sms_userdata_get((void **)&retdata, "TEST", sms))
+
+    TEST_NEQ("    Checking the data we got", strcmp(testdata, retdata),
+             0, "OK","Failed :(")
+
+    printf("\nTest complete\n");
     return 1;
 }

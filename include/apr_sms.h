@@ -289,6 +289,27 @@ APR_DECLARE(void) apr_sms_set_abort(apr_abortfunc_t abortfunc,
  */
 APR_DECLARE(apr_abortfunc_t) apr_sms_get_abort(apr_sms_t *sms);
 
+/**
+ * Set user data into the current sms.
+ * @param data The user data to insert
+ * @param key The key to assign to this data
+ * @param cleanup The cleanup program to use when cleaning up the data
+ * @param sms The sms to inert the data into
+ */
+APR_DECLARE(apr_status_t) apr_sms_userdata_set(const void *data,
+                                               const char *key,
+                                               apr_status_t (*cleanup)(void*),
+                                               apr_sms_t *sms);
+
+/**
+ * Get user data from an sms using the key it was registered with
+ * @param data A pointer to the returned data
+ * @param key The key to use to identify the data
+ * @param sms The sms to get the data from
+ */
+APR_DECLARE(apr_status_t) apr_sms_userdata_get(void **data, const char *key,
+                                               apr_sms_t *sms);
+
 /*
  * memory system cleanup management functions
  */

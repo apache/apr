@@ -94,6 +94,7 @@ struct apr_sms_t
     apr_status_t (*unlock_fn)      (apr_sms_t *sms);
 
     apr_status_t (*apr_abort)(int retcode);
+    struct apr_hash_t *prog_data;
 
 #if APR_HAS_THREADS    
     apr_status_t (*thread_register_fn)   (apr_sms_t *sms, 
