@@ -141,6 +141,74 @@ fi
 ])
 
 dnl
+dnl check for getnameinfo() that properly resolves IPv4-mapped IPv6 addresses
+dnl
+dnl Darwin is known not to map them correctly
+dnl
+AC_DEFUN(APR_CHECK_GETNAMEINFO_IPV4_MAPPED,[
+  AC_CACHE_CHECK(whether getnameinfo resolves IPv4-mapped IPv6 addresses,
+                 ac_cv_getnameinfo_ipv4_mapped,[
+  AC_TRY_RUN( [
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
+void main(void) {
+    struct sockaddr_in6 sa = {0};
+    struct in_addr ipv4;
+    char hbuf[NI_MAXHOST];
+    unsigned int *addr32;
+    int error;
+
+    ipv4.s_addr = inet_addr("127.0.0.1");
+
+    sa.sin6_family = AF_INET6;
+    sa.sin6_port = 0;
+
+    addr32 = (unsigned int *)&sa.sin6_addr;
+    addr32[2] = htonl(0x0000FFFF);
+    addr32[3] = ipv4.s_addr;
+    assert(IN6_IS_ADDR_V4MAPPED(&sin6.sin6_addr));
+
+#ifdef SIN6_LEN
+    sa.sin_len = sizeof(sa);
+#endif
+
+    error = getnameinfo((const struct sockaddr *)&sa, sizeof(sa),
+                        hbuf, sizeof(hbuf), NULL, 0,
+                        NI_NUMERICHOST);
+    if (error) {
+        exit(1);
+    } else {
+        exit(0);
+    }
+}
+],[
+  ac_cv_getnameinfo_ipv4_mapped="yes"
+],[
+  ac_cv_getnameinfo_ipv4_mapped="no"
+],[
+  ac_cv_getnameinfo_ipv4_mapped="yes"
+])])
+if test "$ac_cv_getnameinfo_ipv4_mapped" = "no"; then
+  AC_DEFINE(GETNAMEINFO_IPV4_MAPPED_FAILS, 1,
+            [Define if getnameinfo does not map IPv4 address correctly])
+fi
+])
+
+dnl
 dnl check for presence of  retrans/retry variables in the res_state structure
 dnl
 AC_DEFUN(APR_CHECK_RESOLV_RETRANS,[
