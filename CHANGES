@@ -5,6 +5,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
      and upgrading it to do SHA-256. Not yet ready for prime time.
      [Ben Laurie]
 
+  *) Win32: Fix bug tracking the file pointer on a file opened for 
+     overlapped/APR_XTHREAD io. [Bill Stoddard]
+
 Changes with APR 1.0
 
   *) Add jlibtool - enabled with '--enable-experimental-libtool' option.
