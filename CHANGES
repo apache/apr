@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Fixed apr_generate_random_bytes() for Win32 on Win NT or 9x by
+     dropping the 0x40 bit (CRYPT_SILENT) for earlier OS'es.
+     PR 9286  [William Rowe]
+
   *) Added --with-devrandom=[DEV] configure flag which allows a particular
      "/dev/random"-compatible device to be specified, overriding the
      default search path (/dev/random then /dev/arandom then /dev/urandom).
