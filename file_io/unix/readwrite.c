@@ -193,7 +193,6 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }  
     }   /* BUFFERED ?? */
 
-    thefile->stated = 0;
     *nbytes = rv;
     if (rv == -1) {
         return errno;
@@ -234,7 +233,6 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssiz
     }
     else {
         *iocnt = bytes;
-        thefile->stated = 0;
         return APR_SUCCESS;
     }
 }
@@ -250,7 +248,6 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
     if (thefile->buffered) {
         if (fputc(ch, thefile->filehand) == ch) {
-            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;
@@ -258,7 +255,6 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
     if (write(thefile->filedes, &ch, 1) != 1) {
         return errno;
     }
-    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
@@ -272,13 +268,11 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
     if (thefile->buffered) {
         if (ungetc(ch, thefile->filehand) == ch) {
-            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;
     }
     /* Not sure what to do in this case.  For now, return SUCCESS. */
-    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
@@ -330,7 +324,6 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
 
     if (thefile->buffered) {
         if (fputs(str, thefile->filehand)) {
-            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;
@@ -340,7 +333,6 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     if (rv != len) {
         return errno;
     }
-    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
@@ -353,7 +345,6 @@ ap_status_t ap_flush(ap_file_t *thefile)
 {
     if (thefile->buffered) {
         if (!fflush(thefile->filehand)) {
-            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;

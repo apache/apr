@@ -176,7 +176,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     if (flag & APR_DELONCLOSE) {
         unlink(fname);
     }
-    (*new)->stated = 0;  /* we haven't called stat for this file yet. */
+    (*new)->pipe = 0;
     (*new)->timeout = -1;
     (*new)->eof_hit = 0;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup,
@@ -265,7 +265,6 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile,
     (*file)->buffered = 0;
     (*file)->eof_hit = 0;
     (*file)->timeout = -1;
-    (*file)->stated = 0;
     (*file)->filedes = *dafile;
     return APR_SUCCESS;
 }    
@@ -321,7 +320,6 @@ ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
     (*thefile)->cntxt = cont;
     (*thefile)->fname = NULL;
     (*thefile)->filehand = NULL;
-    (*thefile)->stated = 0;
     (*thefile)->buffered = 0;
     (*thefile)->eof_hit = 0;
 

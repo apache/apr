@@ -858,6 +858,7 @@ static int parse_url(char *url)
 static int open_postfile(char *pfile)
 {
     ap_file_t *postfd = NULL;
+    ap_finfo_t finfo;
     ap_fileperms_t mode = APR_OS_DEFAULT;
     ap_ssize_t length;
 
@@ -866,9 +867,8 @@ static int open_postfile(char *pfile)
         return errno;
     }
 
-    /* No need to perform stat here, the ap_open will do it for us.  */  
-
-    ap_get_filesize(&postlen, postfd);
+    ap_getfileinfo(&finfo, postfd);
+    postlen = finfo.size;
     postdata = (char *)malloc(postlen);
     if (!postdata) {
         printf("Can\'t alloc postfile buffer\n");

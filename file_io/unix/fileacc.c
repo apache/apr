@@ -104,144 +104,30 @@ mode_t get_fileperms(ap_fileperms_t mode)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_filesize(ap_ssize_t *, ap_file_t *)
- *    Return the size of the current file.
- * arg 1) The currently open file.
- * arg 2) The size of the file.  
- */                     
-ap_status_t ap_get_filesize(ap_ssize_t *size, struct file_t *file)
-{
-    if (file != NULL) {
-        if (file->stated == 0) {
-            ap_getfileinfo(file);
-        }
-        *size = file->size;
-        return APR_SUCCESS;
-    }
-    else {
-        *size = -1;
-        return APR_ENOFILE;
-    }
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_fileperms(ap_fileperms_t *, ap_file_t *)
- *    Return the permissions of the current file.
- * arg 1) The currently open file.
- * arg 2) The permissions of the file.  
- */                     
-ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct file_t *file)
-{
-    if (file != NULL) {
-        if (file->stated == 0) {
-            ap_getfileinfo(file);
-        }
-        *perm = file->protection;
-        return APR_SUCCESS;
-    }
-    else {
-        *perm = -1;
-        return APR_ENOFILE;
-    }
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_fileatime(time_t *, ap_file_t *)
- *    Return the last access time of the current file.
- * arg 1) The currently open file.
- * arg 2) The last access time of the file.  
- */                     
-ap_status_t ap_get_fileatime(time_t *atime, struct file_t *file)
-{    
-    if (file != NULL) {
-        if (file->stated == 0) {
-            ap_getfileinfo(file);
-        }
-        *atime = file->atime;
-        return APR_SUCCESS;
-    }
-    else {
-        *atime = -1;
-        return APR_ENOFILE;
-    }
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_filectime(time_t *, ap_file_t *)
- *    Return the time of the last change to the current file.
- * arg 1) The currently open file.
- * arg 2) The last change time of the file.  
- */                     
-ap_status_t ap_get_filectime(time_t *ptime, struct file_t *file)
-{    
-    if (file != NULL) {
-        if (file->stated == 0) {
-            ap_getfileinfo(file);
-        }
-        *ptime = file->ctime;
-        return APR_SUCCESS;
-    }
-    else {
-        *ptime = -1;
-        return APR_ENOFILE;
-    }
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_filemtime(time_t *, ap_file_t *)
- *    Return the last modified time of the current file.
- * arg 1) The currently open file.
- * arg 2) The last modified time of the file.  
- */                     
-ap_status_t ap_get_filemtime(time_t *mtime, struct file_t *file)
-{    
-    if (file != NULL) {
-        if (file->stated == 0) {
-            ap_getfileinfo(file);
-        }
-        *mtime = file->mtime;
-        return APR_SUCCESS;
-    }
-    else {
-        *mtime = -1;
-        return APR_ENOFILE;
-    }
-}
-
-/* ***APRDOC********************************************************
  * ap_status_t ap_get_filetype(ap_filetype_e, ap_file_t *)
  *    Return the type of the current file.
  * arg 1) The currently open file.
  * arg 2) The file type
  */                     
-ap_status_t ap_get_filetype(ap_filetype_e *type, struct file_t *file)
+ap_status_t ap_get_filetype(ap_filetype_e *type, ap_fileperms_t perms)
 {    
-    if (file != NULL) {
-        if (file->stated == 0) {
-            ap_getfileinfo(file);
-        }
-        if (S_ISREG(file->protection))
-            *type = APR_REG;
-        if (S_ISDIR(file->protection))
-            *type = APR_DIR;
-        if (S_ISCHR(file->protection))
-            *type = APR_CHR;
-        if (S_ISBLK(file->protection))
-            *type = APR_BLK;
-        if (S_ISFIFO(file->protection))
-            *type = APR_PIPE;
-        if (S_ISLNK(file->protection))
-            *type = APR_LNK;
-#ifndef BEOS
-        if (S_ISSOCK(file->protection))
-            *type = APR_SOCK;
-#endif
-        return APR_SUCCESS;
-    }
-    else {
+    if (S_ISREG(perms))
         *type = APR_REG;
-        return APR_ENOFILE;
-    }
+    if (S_ISDIR(perms))
+        *type = APR_DIR;
+    if (S_ISCHR(perms))
+        *type = APR_CHR;
+    if (S_ISBLK(perms))
+        *type = APR_BLK;
+    if (S_ISFIFO(perms))
+        *type = APR_PIPE;
+    if (S_ISLNK(perms))
+        *type = APR_LNK;
+#ifndef BEOS
+    if (S_ISSOCK(perms))
+        *type = APR_SOCK;
+#endif
+    return APR_SUCCESS;
 }
 
 /* ***APRDOC********************************************************

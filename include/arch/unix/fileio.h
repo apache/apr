@@ -108,15 +108,8 @@ struct file_t {
     char * fname;
     int oflags;
     int buffered;
-    int stated;
     int eof_hit;
-    mode_t protection;
-    uid_t user;
-    gid_t group;
-    off_t size;
-    time_t atime;
-    time_t mtime;
-    time_t ctime;
+    int pipe;
     int timeout;
 };
 
