@@ -54,5 +54,6 @@
 
 /* As the signal code is identical, use the unix version to reduce
    code duplication */
-   
 #include "../unix/signals.c"
+#include "../unix/procsup.c"
+   
