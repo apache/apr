@@ -132,7 +132,7 @@ typedef DIR                   ap_os_dir_t;
 typedef int                   ap_os_sock_t;
 typedef struct os_lock_t      ap_os_lock_t;
 typedef thread_id             ap_os_thread_t;
-typedef pid_t                 ap_os_proc_t;
+typedef thread_id             ap_os_proc_t;
 typedef int                   ap_os_threadkey_t;
 typedef struct timeval        ap_os_time_t;
 
