@@ -182,21 +182,44 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
 {
     apr_uint32_t prev;
                                                                                 
-    asm volatile ("retry:\n\t"
+    asm volatile ("0:\n\t"                   /* retry local label     */
                   "lwarx  %0,0,%1\n\t"       /* load prev and reserve */
                   "cmpw   %0,%3\n\t"         /* does it match cmp?    */
-                  "bne-   exit\n\t"          /* ...no, bail out       */
+                  "bne-   1f\n\t"            /* ...no, bail out       */
                   "stwcx. %2,0,%1\n\t"       /* ...yes, conditionally
                                                 store swap            */
-                  "bne-   retry\n\t"         /* start over if we lost
+                  "bne-   0b\n\t"            /* start over if we lost
                                                 the reservation       */
-                  "exit:"
+                  "1:"                       /* exit local label      */
+
                   : "=&r"(prev)                        /* output      */
-                  : "r" (mem), "r" (swap), "r"(cmp)    /* inputs      */
-                  : "memory");                         /* clobbered   */
+                  : "b" (mem), "r" (swap), "r"(cmp)    /* inputs      */
+                  : "memory", "cc");                   /* clobbered   */
     return prev;
 }
 #define APR_OVERRIDE_ATOMIC_CAS32
+
+APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem,
+                                           apr_uint32_t delta)
+{
+    apr_uint32_t prev, temp;
+                                                                                
+    asm volatile ("0:\n\t"                   /* retry local label     */
+                  "lwarx  %0,0,%2\n\t"       /* load prev and reserve */
+                  "add    %1,%0,%3\n\t"      /* temp = prev + delta   */
+                  "stwcx. %1,0,%2\n\t"       /* conditionally store   */
+                  "bne-   0b"                /* start over if we lost
+                                                the reservation       */
+
+                  /*XXX find a cleaner way to define the temp         
+                   *    it's not an output
+                   */
+                  : "=&r" (prev), "=&r" (temp)        /* output, temp */
+                  : "b" (mem), "r" (delta)            /* inputs       */
+                  : "memory", "cc");                  /* clobbered    */
+    return prev;
+}
+#define APR_OVERRIDE_ATOMIC_ADD32
 
 #endif /* __PPC__ && __GNUC__ */
 
