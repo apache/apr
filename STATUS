@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 01:05:39 $]
+Last modified at [$Date: 2002/07/12 01:09:38 $]
 
 Release:
 
@@ -61,10 +61,11 @@ CURRENT VOTES:
     * apr_time_t will change to use binary microseconds based on
       profiling.  The last remaining question on the table is keeping
       the apr_time_t designation, or changing the symbol name.
+
       1) Keeping the existing apr_time_t names, in spite of confusion
          with ANSI/C99 time_t's units, and prior decimal usec definition.
          +1: rbb, jerenkrantz, striker
-         +1: wrowe [apr_types don't promise to map to C99/ANSI units]
+         +0: wrowe [apr_types don't promise to map to C99/ANSI units]
          +0: brianp
          -0.5: jwoolley
          -1: aaron [veto for reusing the apr_time_t identifier for a new use]
@@ -82,15 +83,15 @@ CURRENT VOTES:
          +1: jwoolley
          +1: brianp
          +1: ianh
-         -0: wrowe, jerenkrantz, striker
-         -0.5: rbb
+         -0: jerenkrantz, striker
+         -0.5: rbb, wrowe
 
       3) Renaming the function to get rid of apr_time_t vs time_t confusion,
          and strongly identify the type as apr_busec_t or apr_butime_t, with
          an ongoing contract with users about the type's units.
-         +1: fielding
+         +1: fielding  [prefers apr_busec_t]
          +1: jwoolley
-         +0.5: wrowe
+         +0.5: wrowe  [prefers apr_butime_t but isn't going to fight that]
          -0: striker, jerenkrantz
          -0.5: rbb, brianp,ianh
 
@@ -114,6 +115,9 @@ CURRENT VOTES:
         [fielding: That's nonsense. What does overflow mean?  What are you
          going to do when you print?  How do you interface with other library
          routines?  Scale always matters for scalars.]
+
+          [wrowe: We have apr_time formatting and math routines.
+           But I've always favored an explicit contract.]
 
       [fielding: If not, then we should be storing time in a 
        structure with separate fields in order to have better precision 
