@@ -61,7 +61,7 @@
 #include <signal.h>
 #endif
 
-#ifndef NO_USE_SIGACTION
+#if !defined(NO_USE_SIGACTION) && defined(HAVE_SIGACTION)
 /*
  * Replace standard signal() with the more reliable sigaction equivalent
  * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
