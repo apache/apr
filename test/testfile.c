@@ -97,7 +97,6 @@ static void closeapr(void)
 int main(void)
 {
     apr_pool_t *pool;
-    apr_pool_t *pool2;
     apr_file_t *thefile = NULL;
     apr_finfo_t finfo;
     apr_socket_t *testsock = NULL;
@@ -106,7 +105,6 @@ int main(void)
     apr_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     apr_size_t nbytes = 0;
     apr_off_t zer = 0;
-    char errmsg[120];
     char *buf;
     const char *str;
     char *filename = "test.fil";
