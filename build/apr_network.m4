@@ -640,6 +640,7 @@ else
 fi
 ])
 
+dnl Check for presence of struct sockaddr_storage.
 AC_DEFUN(APR_CHECK_SOCKADDR_STORAGE,[
 AC_CACHE_CHECK(for sockaddr_storage, apr_cv_define_sockaddr_storage,[
 AC_TRY_COMPILE([
@@ -661,6 +662,7 @@ fi
 AC_SUBST(have_sa_storage)
 ])
 
+dnl Check for presence of struct sockaddr_in6.
 AC_DEFUN(APR_CHECK_SOCKADDR_IN6,[
 AC_CACHE_CHECK(for sockaddr_in6, ac_cv_define_sockaddr_in6,[
 AC_TRY_COMPILE([
