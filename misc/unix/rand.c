@@ -85,15 +85,20 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
 {
 #ifdef DEV_RANDOM
 
-    int rnd;
+    int rnd, rc;
     apr_size_t got, tot;
 
     if ((rnd = open(STR(DEV_RANDOM), O_RDONLY)) == -1) 
 	return errno;
 
-    for (tot=0; tot<length; tot += got)
-	if ((got = read(rnd, buf+tot, length-tot)) < 0) 
+    for (tot=0; tot<length; tot += got) {
+        if ((rc = read(rnd, buf+tot, length-tot)) < 0) {
 	    return errno;
+        }
+        else {
+            got = rc;
+        }
+    }
 
     close(rnd);
 
