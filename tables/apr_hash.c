@@ -72,6 +72,7 @@ struct apr_hash_t {
     apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
     unsigned int         count, max;
+    apr_hashfunc_t       hash_func;
 };
 
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
@@ -94,6 +95,15 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool)
     ht->count = 0;
     ht->max = INITIAL_MAX;
     ht->array = alloc_array(ht, ht->max);
+    ht->hash_func = apr_hashfunc_default;
+    return ht;
+}
+
+APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool,
+                                               apr_hashfunc_t hash_func)
+{
+    ht = apr_hash_make(p);
+    ht->hash_func = hash_func;
     return ht;
 }
 
@@ -162,25 +172,12 @@ static void expand_array(apr_hash_t *ht)
     ht->max = new_max;
 }
 
-/*
- * This is where we keep the details of the hash function and control
- * the maximum collision rate.
- *
- * If val is non-NULL it creates and initializes a new hash entry if
- * there isn't already one there; it returns an updatable pointer so
- * that hash entries can be removed.
- */
-
-static apr_hash_entry_t **find_entry(apr_hash_t *ht,
-                                     const void *key,
-                                     apr_ssize_t klen,
-                                     const void *val)
+unsigned int apr_hashfunc_default( const char *key, apr_ssize_t *klen)
 {
-    apr_hash_entry_t **hep, *he;
+    unsigned int hash = 0;
     const unsigned char *p;
-    unsigned int hash;
     apr_ssize_t i;
-
+    
     /*
      * This is the popular `times 33' hash algorithm which is used by
      * perl and also appears in Berkeley DB. This is one of the best
@@ -218,18 +215,41 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
      *
      *                  -- Ralf S. Engelschall <rse@engelschall.com>
      */
-    hash = 0;
-    if (klen == APR_HASH_KEY_STRING) {
+     
+    if (*klen == APR_HASH_KEY_STRING) {
         for (p = key; *p; p++) {
             hash = hash * 33 + *p;
         }
-        klen = p - (const unsigned char *)key;
+        *klen = p - (const unsigned char *)key;
     }
     else {
-        for (p = key, i = klen; i; i--, p++) {
+        for (p = key, i = *klen; i; i--, p++) {
             hash = hash * 33 + *p;
         }
     }
+
+    return hash;
+}
+
+
+/*
+ * This is where we keep the details of the hash function and control
+ * the maximum collision rate.
+ *
+ * If val is non-NULL it creates and initializes a new hash entry if
+ * there isn't already one there; it returns an updatable pointer so
+ * that hash entries can be removed.
+ */
+
+static apr_hash_entry_t **find_entry(apr_hash_t *ht,
+                                     const void *key,
+                                     apr_ssize_t klen,
+                                     const void *val)
+{
+    apr_hash_entry_t **hep, *he;
+    unsigned int hash;
+
+    hash = ht->hash_func( key, &klen );
 
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;
@@ -267,6 +287,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
     ht->pool = pool;
     ht->count = orig->count;
     ht->max = orig->max;
+    ht->hash_func = orig->hash_func;
     ht->array = (apr_hash_entry_t **)((char *)ht + sizeof(apr_hash_t));
 
     new_vals = (apr_hash_entry_t *)((char *)(ht) + sizeof(apr_hash_t) +

@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Add support for developers to use their own hashing function with
+     apr_hash_make_custom.  [Ami Ganguli <hse_ami@yahoo.co.uk>]
+
   *) Support "large files" by default on 32-bit Unix platforms which
      implement the LFS standard.  [Joe Orton]
 

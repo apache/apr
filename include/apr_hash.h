@@ -56,11 +56,32 @@ typedef struct apr_hash_t apr_hash_t;
 typedef struct apr_hash_index_t apr_hash_index_t;
 
 /**
+ * Callback functions for calculating hash values.
+ * @param key The key.
+ * @param klen The length of the key, or APR_HASH_KEY_STRING to use the string length.  If APR_HASH_KEY_STRING then returns the actual key length.
+ */
+typedef unsigned int (*apr_hashfunc_t)(const char *key, apr_ssize_t *klen);
+
+/**
+ * The default hash function.
+ */
+unsigned int apr_hashfunc_default( const char *key, apr_ssize_t *klen);
+
+/**
  * Create a hash table.
  * @param pool The pool to allocate the hash table out of
  * @return The hash table just created
   */
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
+
+/**
+ * Create a hash table with a custom hash function
+ * @param pool The pool to allocate the hash table out of
+ * @param hash_func A custom hash function.
+ * @return The hash table just created
+  */
+APR_DECLARE(apr_hash_t *) apr_hash_make_custom(apr_pool_t *pool, 
+                                               apr_hashfunc_t hash_func);
 
 /**
  * Make a copy of a hash table
