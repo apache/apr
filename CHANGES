@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Carefully select an appropriate native type for apr_int64_t and
+     define its format as APR_INT64_T_FMT and literal using APR_INT64_C().
+     [Justin Erenkrantz, William Rowe]
+
   *) Make clean, distclean, and extraclean consistently according to the
      Gnu makefile guidelines.  [Justin Erenkrantz <jerenkrantz@ebuilt.com>]
 

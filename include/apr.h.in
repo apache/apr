@@ -43,6 +43,7 @@
 #define APR_HAVE_PTHREAD_H       @pthreadh@
 #define APR_HAVE_STDARG_H        @stdargh@
 #define APR_HAVE_STDIO_H         @stdioh@
+#define APR_HAVE_STDINT_H        @stdint@
 #define APR_HAVE_STDLIB_H        @stdlibh@
 #define APR_HAVE_SIGNAL_H        @signalh@
 #define APR_HAVE_STRING_H        @stringh@
@@ -105,6 +106,10 @@
 
 #if APR_HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+
+#if APR_HAVE_STDINT_H
+#include <stdint.h>
 #endif
 
 /*  APR Feature Macros */
@@ -170,14 +175,7 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 
 /* Mechanisms to properly type numeric literals */
-
-/* XXX: this is wrong -- the LL is only required if int64 is implemented as
- * a long long, it could be just a long on some platforms.  the C99
- * correct way of doing this is to use INT64_C(1000000) which comes
- * from stdint.h.  we'd probably be doing a Good Thing to check for
- * INT64_C in autoconf... or otherwise define an APR_INT64_C(). -dean
- */
-#define APR_INT64_C(val) (val##LL)
+@int64_literal@
 
 
 /* Definitions that APR programs need to work properly. */
@@ -242,6 +240,9 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 /* And APR_OS_PROC_T_FMT */
 @os_proc_t_fmt@
+
+/* And APR_INT64_T_FMT */
+@int64_t_fmt@
 
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "@eolstr@"
