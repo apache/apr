@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Fix a problem in the Win32 pipe creation code called by 
+     apr_proc_create():  It didn't register cleanups for either the 
+     read or the write ends of the pipe, so file handles (and event 
+     handles for pipes with asynchronous I/O mode set) are never 
+     closed.  [Tim Costello <tim.costello@zcmgroup.com.au>]
+
   *) Add support for QNX 6.  [J.T. Conklin <jtc@acorntoolworks.com>]
 
   *) We now create exports.c and export_vars.h, which in turn create
