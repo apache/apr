@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Fix a bug in apr_accept() for Win32 and Unix where the local 
+     apr_sockaddr_t in the new connected socket was not initialized
+     properly.  This could result in a bad string for apr_get_ipaddr(),
+     among other things.  [Jeff Trawick]
+
   *) Add apr_getnameinfo(), a replacement for apr_get_hostname() which
      supports IPv6 and will be friendlier for use with eventual 
      SOCK_DGRAM support.  [Jeff Trawick]
