@@ -94,20 +94,20 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
 {
     ap_status_t stat;
     if (in) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->child_in, 
-                            &attr->parent_in)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->child_in, &attr->parent_in,
+                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
     if (out) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_out, 
-                            &attr->child_out)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out,
+                                     attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
     if (err) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_err, 
-                            &attr->child_err)) != APR_SUCCESS) {
+        if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err,
+                                      attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
     } 
