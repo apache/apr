@@ -439,7 +439,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 
         if (!hp)  {
 #ifdef WIN32
-            apr_get_netos_error();
+            return apr_get_netos_error();
 #elif APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
 #ifdef GETHOSTBYNAME_R_HOSTENT_DATA
