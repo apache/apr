@@ -146,6 +146,10 @@ Changes with APR 0.9.5
      which is started by the shell and which inherits the parent's
      environment variables.  [Jeff Trawick]
 
+  *) Don't try to enable run-time linking on AIX < 4.2, as this
+     results in invalid linker options being used.  PR 29170.  
+     [Jeff Trawick]
+
   *) Don't assume getnameinfo() can handle IPv4-mapped IPv6 addresses
      on any platforms.
      [Jeff Trawick, Joe Orton, Colm MacCárthaigh <colm stdlib.net>]
