@@ -174,6 +174,32 @@ AC_DEFUN(APR_ADDTO,[
 ])dnl
 
 dnl
+dnl APR_REMOVEFROM(variable, value)
+dnl
+dnl Remove a value from a variable
+dnl
+AC_DEFUN(APR_REMOVEFROM,[
+  if test "x$$1" = "x$2"; then
+    echo "  nulling $1"
+    $1=""
+  else
+    apr_new_bugger=""
+    apr_removed=0
+    for i in $$1; do
+      if test "x$i" != "x$2"; then
+        apr_new_bugger="$apr_new_bugger $i"
+      else
+        apr_removed=1
+      fi
+    done
+    if test $apr_removed = "1"; then
+      echo "  removed \"$2\" from $1"
+      $1=$apr_new_bugger
+    fi
+  fi
+]) dnl
+
+dnl
 dnl APR_CHECK_DEFINE_FILES( symbol, header_file [header_file ...] )
 dnl
 AC_DEFUN(APR_CHECK_DEFINE_FILES,[
