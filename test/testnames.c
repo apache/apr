@@ -89,7 +89,6 @@ static void mergeresult(char *rootpath, char *addpath, apr_int32_t mergetype, ch
 {
     char errmsg[256];
     char *dstpath = NULL;
-    const char *srcpath;
     apr_status_t status = apr_filepath_merge(&dstpath, 
                                 strcmp(rootpath, "NULL") ? rootpath : NULL,
                                 strcmp(addpath, "NULL") ? addpath : NULL,
