@@ -527,10 +527,10 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
  *                                  (Currently only used on Windows)
  * </PRE>
  * @param on Socket option returned on the call.
- * @deffunc apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* on)
+ * @deffunc apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
  */
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock, 
-                                           apr_int32_t opt, apr_int32_t* on);
+                                           apr_int32_t opt, apr_int32_t *on);
 
 /**
  * Return an apr_sockaddr_t from an apr_socket_t
