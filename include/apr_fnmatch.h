@@ -62,7 +62,8 @@ extern "C" {
 #define FNM_CASE_BLIND  0x08    /**< Compare characters case-insensitively.  @remark This flag is an Apache addition */
 
 /**
- * Try to match the string to the given pattern.
+ * Try to match the string to the given pattern, return APR_SUCCESS if
+ *    match, else return FNM_NOMATCH.
  * @param pattern The pattern to match to
  * @param strings The string we are trying to match
  * @param flags flags to use in the match.  Bitwise OR of:
