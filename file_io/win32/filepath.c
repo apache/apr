@@ -358,7 +358,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         /* This call _should_ test the path
          */
         addtype = apr_filepath_root(&addroot, &addpath, 
-                                    APR_FILEPATH_TRUENAME, p);
+                                    APR_FILEPATH_TRUENAME
+                                    | (flags & APR_FILEPATH_NATIVE),
+                                    p);
         if (addtype == APR_SUCCESS) {
             addtype = APR_EABSOLUTE;
         }
@@ -430,7 +432,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     if (!baseroot) {
         /* This call should _not_ test the path
          */
-        basetype = apr_filepath_root(&baseroot, &basepath, 0, p);
+        basetype = apr_filepath_root(&baseroot, &basepath,
+                                     (flags & APR_FILEPATH_NATIVE), p);
         if (basetype == APR_SUCCESS) {
             basetype = APR_EABSOLUTE;
         }
@@ -745,7 +748,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 /* This call _should_ test the path
                  */
                 testtype = apr_filepath_root(&testroot, &testpath, 
-                                             APR_FILEPATH_TRUENAME, p);
+                                             APR_FILEPATH_TRUENAME
+                                             | (flags & APR_FILEPATH_NATIVE),
+                                             p);
                 if (testtype == APR_SUCCESS) {
                     rootlen = pathlen = (testpath - path);
                     memcpy(path, testroot, pathlen);
