@@ -201,36 +201,32 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                         return APR_EBADPATH;
                 } 
 
-                if (!*delim2) {
-                /* Have path of '//machine/[share]' so we must have
-                 * an extra byte for the trailing slash
+                /* Copy the '//machine/[share[/]]' path, always providing 
+                 * an extra byte for the trailing slash.
                  */
-                    newpath = apr_pstrndup(p, testpath, delim2 - testpath + 1);
-                    newpath[delim2 - testpath + 1] = '\0';
-                }
-                else
-                    newpath = apr_pstrndup(p, testpath, delim2 - testpath);
-
-                /* Win32 will argue about slashed in UNC paths, so use 
-                 * backslashes till we finish testing
-                 */
-                newpath[0] = '\\';
-                newpath[1] = '\\';
-                newpath[delim1 - testpath] = '\\';
+                newpath = apr_pstrmemdup(p, testpath, delim2 - testpath + 1);
 
                 if (delim2 == delim1 + 1) {
-                    /* We simply \\machine\, so give up already
+                    /* We found simply \\machine\, so give up already
                      */
                     *rootpath = newpath;
                     *inpath = delim2;
                     return APR_EINCOMPLETE;
                 }
 
-                /* Validate the \\Machine\Share\ designation, must
-                 * root this designation!
-                 */
-                newpath[delim2 - testpath] = '\\';
                 if (flags & APR_FILEPATH_TRUENAME) {
+                    /* Validate the \\Machine\Share\ designation, 
+                     * Win32 will argue about slashed in UNC paths, 
+                     * so use backslashes till we finish testing,
+                     * and add the trailing backslash [required].
+                     * apr_pstrmemdup above guarentees us the new 
+                     * trailing null character.
+                     */
+                    newpath[0] = '\\';
+                    newpath[1] = '\\';
+                    newpath[delim1 - testpath] = '\\';
+                    newpath[delim2 - testpath] = '\\';
+
                     rv = filepath_root_test(newpath, p);
                     if (rv)
                         return rv;
@@ -240,6 +236,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     newpath[0] = seperator[0];
                     newpath[1] = seperator[0];
                     newpath[delim1 - testpath] = seperator[0];
+                    newpath[delim2 - testpath] = (*delim2 ? seperator[0] : '\0');
                 }
                 else {                
                     /* Give back the caller's own choice of delimiters
@@ -247,6 +244,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     newpath[0] = testpath[0];
                     newpath[1] = testpath[1];
                     newpath[delim1 - testpath] = *delim1;
+                    newpath[delim2 - testpath] = *delim2;
                 }
 
                 /* If this root included the trailing / or \ designation 
@@ -257,14 +255,11 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                     *inpath = delim2 + 1;
                     while (**inpath == '/' || **inpath == '\\')
                         ++*inpath;
-                    if (flags & APR_FILEPATH_TRUENAME)
-                        newpath[delim2 - testpath] = seperator[0];
-                    else
-                        newpath[delim2 - testpath] = *delim2;
                 }
-                else
+                else {
                     *inpath = delim2;
-                
+                }
+
                 *rootpath = newpath;
                 return APR_SUCCESS;
             }
@@ -890,7 +885,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                     else { /* namelen > seglen */
                         if (pathlen + namelen - seglen >= sizeof(path))
                             return APR_ENAMETOOLONG;
-                        if ((namelen < seglen) && saveslash) {
+                        if (saveslash) {
                             memmove(path + keptlen + namelen + 1,
                                    path + keptlen + seglen + 1,
                                    pathlen - keptlen - seglen);
