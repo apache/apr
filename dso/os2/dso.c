@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "dso.h"
+#include "os2/dso.h"
 #define INCL_DOS
 #include <os2.h>
 #include <stdio.h>
