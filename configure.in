@@ -994,12 +994,12 @@ APR_IFALLYES(func:semget func:semctl define:SEM_UNDO,
             APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 APR_IFALLYES(func:flock define:LOCK_EX,
             APR_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
+APR_IFALLYES(header:fcntl.h define:F_SETLK,
+            APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
 # note: the current APR use of shared mutex requires /dev/zero
 APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
             func:pthread_mutexattr_setpshared file:/dev/zero,
             APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
-APR_IFALLYES(header:fcntl.h define:F_SETLK,
-            APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)
 fi
