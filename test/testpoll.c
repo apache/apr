@@ -149,7 +149,10 @@ int main(void)
     apr_socket_t *s[LARGE_NUM_SOCKETS];
     apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
     apr_pollfd_t *pollarray;
+    apr_pollset_t *pollset;
     int i = 0, srv = SMALL_NUM_SOCKETS;
+    apr_int32_t num;
+    const apr_pollfd_t *descriptors_out;
     
     fprintf (stdout,"APR Poll Test\n*************\n\n");
     
@@ -169,7 +172,7 @@ int main(void)
     printf("OK\n");
     
     printf("\tCreating the sockets I'll use..........");
-    for (i = 0; i < SMALL_NUM_SOCKETS; i++){
+    for (i = 0; i < LARGE_NUM_SOCKETS; i++){
         if (make_socket(&s[i], &sa[i], 7777 + i, context) != 0){
             exit(-1);
         }
@@ -190,7 +193,7 @@ int main(void)
     printf("OK\n");
     printf("Starting Tests\n");
 
-    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC);
+    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 2 * APR_USEC_PER_SEC);
     check_sockets(pollarray, s);
     
     send_msg(s, sa, 2);
@@ -214,15 +217,69 @@ int main(void)
     
     apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
     check_sockets(pollarray, s);
-        
+
+    recv_msg(s, 0, context);
+    recv_msg(s, 2, context);
+
     printf("Tests completed.\n");
+
+    fprintf (stdout,"\nAPR Pollset Test\n****************\n\n");
+
+    printf ("\tSetting up pollset....................");
+    if (apr_pollset_create(&pollset, LARGE_NUM_SOCKETS, context) != APR_SUCCESS){
+        printf("Couldn't create a pollset!\n");
+        exit (-1);
+    }
+    for (i = 0; i < LARGE_NUM_SOCKETS;i++){
+        apr_pollfd_t socket_pollfd;
+        socket_pollfd.desc_type = APR_POLL_SOCKET;
+        socket_pollfd.reqevents = APR_POLLIN;
+        socket_pollfd.desc.s = s[i];
+        if (apr_pollset_add(pollset, &socket_pollfd) != APR_SUCCESS){
+            printf("Failed to add socket %d\n", i);
+            exit (-1);
+        }
+    }
+    printf("OK\n");
+
+    printf("\nTest 1: No descriptors signalled.......");
+    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_SUCCESS) ||
+        (num != 0)) {
+        printf("FAILED\n");
+        exit(-1);
+    }
+    printf("OK\n");
+
+    printf("\nTest 2: First descriptor signalled.....\n");
+    send_msg(s, sa, 0);
+    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_SUCCESS) ||
+        (num != 1)) {
+        printf("Test 2: FAILED\n");
+        exit(-1);
+    }
+    recv_msg(s, 0, context);
+    printf("Test 2: OK\n");
+
+    printf("\nTest 3: Last descriptor signalled......\n");
+    send_msg(s, sa, 99);
+    if ((apr_pollset_poll(pollset, 0, &num, &descriptors_out) != APR_SUCCESS) ||
+        (num != 1)) {
+        printf("Test 3: FAILED\n");
+        exit(-1);
+    }
+    recv_msg(s, 99, context);
+    printf("Test 3: OK\n");
+
+    printf("\nTests completed.\n");
+
     printf("\tClosing sockets........................");
-    for (i = 0; i < SMALL_NUM_SOCKETS; i++){
+    for (i = 0; i < LARGE_NUM_SOCKETS; i++){
         if (apr_socket_close(s[i]) != APR_SUCCESS){
             printf("Failed!\n");
             exit(-1);
         }
     }
     printf ("OK\n");
+
     return 0;
 }
