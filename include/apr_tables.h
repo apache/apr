@@ -149,9 +149,9 @@ struct apr_table_entry_t {
  * @param nelts the number of elements in the initial array
  * @param elt_size The size of each element in the array.
  * @return The new array
- * @deffunc apr_array_header_t *apr_array_make(struct apr_pool_t *p, int nelts, int elt_size)
+ * @deffunc apr_array_header_t *apr_array_make(apr_pool_t *p, int nelts, int elt_size)
  */
-APR_DECLARE(apr_array_header_t *) apr_array_make(struct apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
                                                  int nelts, int elt_size);
 
 /**
@@ -184,7 +184,7 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
  * for the elements to be copied if (and only if) the code subsequently does 
  * a push or arraycat.
  */
-APR_DECLARE(apr_array_header_t *) apr_array_copy(struct apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
                                       const apr_array_header_t *arr);
 /**
  * Copy the headers of the array, and arrange for the elements to be copied if
@@ -195,7 +195,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_copy(struct apr_pool_t *p,
  * @deffunc apr_array_header_t *apr_array_copy_hdr(apr_pool_t *p, const apr_array_header_t *arr)
  * @tip The alternate apr_array_copy copies the *entire* array.
  */
-APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(struct apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(apr_pool_t *p,
                                       const apr_array_header_t *arr);
 
 /**
@@ -206,7 +206,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(struct apr_pool_t *p,
  * @param return A new array containing the data from the two arrays passed in.
  * @deffunc apr_array_header_t *apr_array_append(apr_pool_t *p, const apr_array_header_t *first, const apr_array_header_t *second)
 */
-APR_DECLARE(apr_array_header_t *) apr_array_append(struct apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_array_append(apr_pool_t *p,
                                       const apr_array_header_t *first,
                                       const apr_array_header_t *second);
 
@@ -222,7 +222,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_append(struct apr_pool_t *p,
  * @return A string containing all of the data in the array.
  * @deffunc char *apr_array_pstrcat(apr_pool_t *p, const apr_array_header_t *arr, const char sep)
  */
-APR_DECLARE(char *) apr_array_pstrcat(struct apr_pool_t *p,
+APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
 				      const apr_array_header_t *arr,
 				      const char sep);
 
@@ -234,7 +234,7 @@ APR_DECLARE(char *) apr_array_pstrcat(struct apr_pool_t *p,
  * @warning This table can only store text data
  * @deffunc apr_table_t *apr_table_make(apr_pool_t *p, int nelts)
  */
-APR_DECLARE(apr_table_t *) apr_table_make(struct apr_pool_t *p, int nelts);
+APR_DECLARE(apr_table_t *) apr_table_make(apr_pool_t *p, int nelts);
 
 /**
  * Create a new table and copy another table into it
@@ -243,7 +243,7 @@ APR_DECLARE(apr_table_t *) apr_table_make(struct apr_pool_t *p, int nelts);
  * @return A copy of the table passed in
  * @deffunc apr_table_t *apr_table_copy(apr_pool_t *p, const apr_table_t *t)
  */
-APR_DECLARE(apr_table_t *) apr_table_copy(struct apr_pool_t *p,
+APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p,
                                           const apr_table_t *t);
 
 /**
@@ -357,9 +357,9 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
  * @return A new table containing all of the data from the two passed in
  * @deffunc apr_table_t *apr_table_overlay(apr_pool_t *p, const apr_table_t *overlay, const apr_table_t *base);
  */
-APR_DECLARE(apr_table_t *) apr_table_overlay(struct apr_pool_t *p,
-                                              const apr_table_t *overlay,
-                                              const apr_table_t *base);
+APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
+                                             const apr_table_t *overlay,
+                                             const apr_table_t *base);
 
 /** 
  * Iterate over a table running the provided function once for every
