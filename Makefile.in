@@ -18,6 +18,7 @@ CLEAN_SUBDIRS= . test build
 INSTALL_SUBDIRS=@INSTALL_SUBDIRS@
 
 TARGET_LIB = libapr.la
+DEPEND_LIBS = @EXTRA_LIBS@ @LIBTOOL_LIBS@
 
 #
 # Rules for building specific targets, starting with 'all' for
@@ -75,7 +76,7 @@ install: $(TARGET_LIB)
 
 $(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.@so_ext@"; done ; \
-	    tmpcmd="$(LINK) @lib_target@"; \
+	    tmpcmd="$(LINK) @lib_target@ $(DEPEND_LIBS)"; \
 	    echo $$tmpcmd; \
 	    $$tmpcmd
 
