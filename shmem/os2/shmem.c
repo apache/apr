@@ -72,11 +72,16 @@ APR_DECLARE(apr_status_t) apr_shm_init(struct shmem_t **m, apr_size_t reqsize, c
     int rc;
     struct shmem_t *newm = (struct shmem_t *)apr_palloc(cont, sizeof(struct shmem_t));
     char *name = NULL;
+    ULONG flags = PAG_COMMIT|PAG_READ|PAG_WRITE;
 
     if (file)
         name = apr_pstrcat(cont, "\\SHAREMEM\\", file, NULL);
 
-    rc = DosAllocSharedMem(&(newm->memblock), name, reqsize, PAG_COMMIT|OBJ_GETTABLE|PAG_READ|PAG_WRITE);
+    if (name == NULL)
+        flags |= OBJ_GETTABLE;
+
+    reqsize += 1024; /* Allow some overhead for heap structures */
+    rc = DosAllocSharedMem(&(newm->memblock), name, reqsize, flags);
 
     if (rc)
         return APR_OS2_STATUS(rc);
