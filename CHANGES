@@ -1,4 +1,10 @@
 Changes with APR b1  
+  *) Some fixes in the Win32 time support.
+     (IsLeapYear): New macro for quickly figgerin' out if a given year is a 
+     leap year. (SystemTimeToAprExpTime): Perform the calculation of
+     tm_yday.  Also, negate the sign of the tm_gmtoff field to be
+     consistent with Unix platforms and APR header file comments.
+     [Mike Pilato]
 
   *) Implement WinNT Unix'ish permissions. [William Rowe]
 
