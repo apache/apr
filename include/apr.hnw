@@ -362,8 +362,6 @@ extern void *gLibHandle;
 
 typedef struct app_data {
     int     initialized;
-    void*   gPool[MAX_PROCESSORS];
-    void*   statCache[MAX_PROCESSORS];
     void*   gs_aHooksToSort;
     void*   gs_phOptionalHooks;
     void*   gs_phOptionalFunctions;

@@ -105,13 +105,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     apr_status_t rv;
 #endif
 
-#ifdef NETWARE
-    apr_hash_t *statCache = NULL;
-    apr_stat_entry_t *stat_entry = NULL;
-    NXPathCtx_t pathCtx = 0;
-    int identity;
-#endif
-
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         oflags = O_RDWR;
     }
@@ -157,30 +150,12 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
 #endif
 
-#ifdef NETWARE
-    if (!getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD) &&
-        !get_identity (pathCtx, &identity) && !identity) {
-
-        statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
-        if (statCache) {
-            stat_entry = (apr_stat_entry_t*) apr_hash_get(statCache, fname, APR_HASH_KEY_STRING);
-        }
-    }
-
-    if (stat_entry) {
-        errno = NXFileOpen (stat_entry->pathCtx, stat_entry->casedName, oflags, &fd);
-    }
-    else {
-#endif
     if (perm == APR_OS_DEFAULT) {
         fd = open(fname, oflags, 0666);
     }
     else {
         fd = open(fname, oflags, apr_unix_perms2mode(perm));
     } 
-#ifdef NETWARE
-    }
-#endif
     if (fd < 0) {
        return errno;
     }
