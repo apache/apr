@@ -24,6 +24,9 @@ ifndef NLM_SCREEN_NAME
 NLM_SCREEN_NAME = DEFAULT
 endif
 
+ifndef NLM_COPYRIGHT
+NLM_COPYRIGHT = Copyright (c) 2000-2003 The Apache Software Foundation. All rights reserved.
+endif
 
 #
 # Create dependency lists based on the files available
@@ -201,6 +204,8 @@ $(OBJDIR)\$(NLM_NAME)_link.opt : $($(NLM_NAME)_LINKOPT_DEPENDS)
 	@echo -o $(TARGET_nlm) >> $@
 ifneq "$(FILE_nlm_copyright)" ""
 	@-type $(FILE_nlm_copyright) >> $@
+else
+	@echo -copy "$(NLM_COPYRIGHT)" >> $@
 endif
 ifeq "$(RELEASE)" "debug"
 	@echo -g >> $@
