@@ -1241,7 +1241,29 @@ echo $ac_n "${nl}Checking for Locking...${nl}"
 AC_CHECK_FUNCS(semget semctl flock)
 APR_CHECK_FILE(/dev/zero)
 AC_CHECK_HEADERS(semaphore.h)
-AC_CHECK_FUNCS(sem_open sem_close sem_unlink sem_post sem_wait)
+AC_CHECK_FUNCS(sem_close sem_unlink sem_post sem_wait)
+
+dnl Some systems return ENOSYS from sem_open.
+AC_CACHE_CHECK(for working sem_open,ac_cv_func_sem_open,[
+AC_TRY_RUN([
+#include <errno.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <semaphore.h>
+main()
+{
+    sem_t *psem;
+    const char *sem_name = "/apr_autoconf";
+
+    psem = sem_open(sem_name, O_CREAT, 0644, 1);
+    if (psem == (sem_t *)SEM_FAILED) {
+	exit(1);
+    }
+    sem_close(psem);
+    sem_unlink(sem_name);
+    exit(0);
+}], [ac_cv_func_sem_open=yes], [ac_cv_func_sem_open=no],
+[ac_cv_func_sem_open=no])])
 
 # It's stupid, but not all platforms have union semun, even those that need it.
 AC_MSG_CHECKING(for union semun in sys/sem.h)
@@ -1328,8 +1350,8 @@ if test "$threads" = "1"; then
 fi
 
 # See which lock mechanisms we can support on this system.
-APR_IFALLYES(header:semaphore.h func:sem_open func_sem_close dnl
-             func_sem_unlink func:sem_post func_sem_wait,
+APR_IFALLYES(header:semaphore.h func:sem_open func:sem_close dnl
+             func_sem_unlink func:sem_post func:sem_wait,
              hasposixser="1", hasposixser="0")
 APR_IFALLYES(func:semget func:semctl define:SEM_UNDO, hassysvser="1", 
              hassysvser="0")
