@@ -95,7 +95,7 @@ int main(void)
     }
     
     fprintf(stdout, "\tSetting pipe timeout.......");
-    if ((rv = apr_set_pipe_timeout(readp, 1 * AP_USEC_PER_SEC)) != APR_SUCCESS) {
+    if ((rv = apr_set_pipe_timeout(readp, 1 * APR_USEC_PER_SEC)) != APR_SUCCESS) {
         fprintf(stderr, "apr_set_pipe_timeout()->%d/%s\n",
                 rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);

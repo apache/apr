@@ -118,7 +118,7 @@ EXPORTS
 ;	apr_get_os_proc   @109
 	apr_get_os_thread   @110
 	apr_get_os_threadkey   @111
-	ap_os_systemcase_filename   @112
+	apr_os_systemcase_filename   @112
 	canonical_filename   @113
 	apr_create_pool   @114
 	apr_clear_pool   @115
@@ -128,13 +128,13 @@ EXPORTS
 	apr_set_userdata   @119
 	apr_initialize   @120
 	apr_getopt    @121
-	ap_opterr   @122 DATA
-	ap_optind   @123 DATA
-	ap_optopt   @124 DATA
-	ap_optreset   @125 DATA
-	ap_optarg   @126 DATA
+	apr_opterr   @122 DATA
+	apr_optind   @123 DATA
+	apr_optopt   @124 DATA
+	apr_optreset   @125 DATA
+	apr_optarg   @126 DATA
 ;	apr_make_time   @127
-	apr_ansi_time_to_ap_time @127
+	apr_ansi_time_to_apr_time @127
 ;	apr_current_time   @128
 	apr_now		  @128
 ;	apr_explode_time   @129
@@ -242,8 +242,8 @@ EXPORTS
         apr_dso_sym @221
 ;        apr_dso_init @222
         apr_collapse_spaces @223
-	ap_month_snames @224
-	ap_day_snames @225
+	apr_month_snames @224
+	apr_day_snames @225
 	apr_canonical_error @226
 	apr_strerror @227
 	apr_generate_random_bytes @228

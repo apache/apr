@@ -82,7 +82,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
     DWORD createflags = 0;
     DWORD attributes = 0;
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
-    ap_oslevel_e level;
+    apr_oslevel_e level;
     apr_status_t rv;
 
     if ((*new) == NULL) {
@@ -117,7 +117,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname,
     (*new)->demonfname = canonical_filename((*new)->cntxt, fname);
     (*new)->lowerdemonfname = strlwr((*new)->demonfname);
  
-    if (ap_get_oslevel(cont, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
+    if (apr_get_oslevel(cont, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
         sharemode |= FILE_SHARE_DELETE;
     }
 

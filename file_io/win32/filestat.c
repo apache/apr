@@ -66,9 +66,9 @@
 #define S_ISREG(m)  (((m) & (S_IFMT))  == S_IFREG)
 #define S_ISDIR(m)  (((m) & (S_IFDIR)) == S_IFDIR)
 
-static ap_filetype_e filetype_from_mode(int mode)
+static apr_filetype_e filetype_from_mode(int mode)
 {
-    ap_filetype_e type = APR_NOFILE;
+    apr_filetype_e type = APR_NOFILE;
 
     if (S_ISREG(mode))
         type = APR_REG;
@@ -194,7 +194,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
      */
     WIN32_FIND_DATA FileInformation;
     HANDLE hFind;
-    ap_oslevel_e os_level;
+    apr_oslevel_e os_level;
     apr_status_t rv = APR_SUCCESS;
 
     memset(finfo,'\0', sizeof(*finfo));
@@ -208,7 +208,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     if (strlen(fname) >= MAX_PATH) {
         rv = ERROR_FILENAME_EXCED_RANGE;
     }
-    else if (!ap_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
+    else if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
         if (!GetFileAttributesEx(fname, GetFileExInfoStandard, 
                                  (WIN32_FILE_ATTRIBUTE_DATA*) &FileInformation)) {
             rv = GetLastError();

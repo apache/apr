@@ -56,8 +56,8 @@
  * University of Illinois, Urbana-Champaign.
  */
 
-#ifndef ap_HASH_H
-#define ap_HASH_H
+#ifndef APR_HASH_H
+#define APR_HASH_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -164,4 +164,4 @@ APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi, const void **key,
 }
 #endif
 
-#endif	/* !ap_HASH_H */
+#endif	/* !APR_HASH_H */

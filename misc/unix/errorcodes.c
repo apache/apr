@@ -187,9 +187,9 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 
       for (c=0; c<len; c++) {
 	  /* skip multiple whitespace */
-          while (ap_isspace(message[c]) && ap_isspace(message[c+1]))
+          while (apr_isspace(message[c]) && apr_isspace(message[c+1]))
               c++;
-          *(pos++) = ap_isspace(message[c]) ? ' ' : message[c];
+          *(pos++) = apr_isspace(message[c]) ? ' ' : message[c];
       }
   
       *pos = 0;

@@ -76,9 +76,9 @@
 /* End System Headers */
 
 
-apr_status_t apr_ansi_time_to_ap_time(apr_time_t *result, time_t input)
+apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input)
 {
-    *result = (apr_time_t)input * AP_USEC_PER_SEC;
+    *result = (apr_time_t)input * APR_USEC_PER_SEC;
     return APR_SUCCESS;
 }
 
@@ -87,11 +87,11 @@ apr_time_t apr_now(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return tv.tv_sec * AP_USEC_PER_SEC + tv.tv_usec;
+    return tv.tv_sec * APR_USEC_PER_SEC + tv.tv_usec;
 }
 
 
-static void tm_to_exp(ap_exploded_time_t *xt, struct tm *tm)
+static void tm_to_exp(apr_exploded_time_t *xt, struct tm *tm)
 {
     xt->tm_sec  = tm->tm_sec;
     xt->tm_min  = tm->tm_min;
@@ -105,14 +105,14 @@ static void tm_to_exp(ap_exploded_time_t *xt, struct tm *tm)
 }
 
 
-apr_status_t apr_explode_gmt(ap_exploded_time_t *result, apr_time_t input)
+apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
 {
-    time_t t = input / AP_USEC_PER_SEC;
+    time_t t = input / APR_USEC_PER_SEC;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
     struct tm banana;
 #endif
 
-    result->tm_usec = input % AP_USEC_PER_SEC;
+    result->tm_usec = input % APR_USEC_PER_SEC;
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
     gmtime_r(&t, &banana);
@@ -124,13 +124,13 @@ apr_status_t apr_explode_gmt(ap_exploded_time_t *result, apr_time_t input)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input)
+apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
 {
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-    time_t t = input / AP_USEC_PER_SEC;
+    time_t t = input / APR_USEC_PER_SEC;
     struct tm apricot;
 
-    result->tm_usec = input % AP_USEC_PER_SEC;
+    result->tm_usec = input % APR_USEC_PER_SEC;
 
     localtime_r(&t, &apricot);
     tm_to_exp(result, &apricot);
@@ -152,10 +152,10 @@ apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input)
     }
 #endif
 #else
-    time_t t = input / AP_USEC_PER_SEC;
+    time_t t = input / APR_USEC_PER_SEC;
     struct tm *tmx;
 
-    result->tm_usec = input % AP_USEC_PER_SEC;
+    result->tm_usec = input % APR_USEC_PER_SEC;
 
     tmx = localtime(&t);
     tm_to_exp(result, tmx);
@@ -181,7 +181,7 @@ apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input)
 }
 
 
-apr_status_t apr_implode_time(apr_time_t *t, ap_exploded_time_t *xt)
+apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
 {
     int year;
     time_t days;
@@ -211,18 +211,19 @@ apr_status_t apr_implode_time(apr_time_t *t, ap_exploded_time_t *xt)
         return APR_EBADDATE;
     }
     days -= xt->tm_gmtoff;
-    *t = days * AP_USEC_PER_SEC + xt->tm_usec;
+    *t = days * APR_USEC_PER_SEC + xt->tm_usec;
     return APR_SUCCESS;
 }
 
 apr_status_t apr_get_os_imp_time(apr_os_imp_time_t **ostime, apr_time_t *aprtime)
 {
-    (*ostime)->tv_usec = *aprtime % AP_USEC_PER_SEC;
-    (*ostime)->tv_sec = *aprtime / AP_USEC_PER_SEC;
+    (*ostime)->tv_usec = *aprtime % APR_USEC_PER_SEC;
+    (*ostime)->tv_sec = *aprtime / APR_USEC_PER_SEC;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
+apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, 
+                                 apr_exploded_time_t *aprtime)
 {
     (*ostime)->tm_sec  = aprtime->tm_sec;
     (*ostime)->tm_min  = aprtime->tm_min;
@@ -239,12 +240,12 @@ apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, ap_exploded_time_t 
 apr_status_t apr_put_os_imp_time(apr_time_t *aprtime, apr_os_imp_time_t **ostime,
                                apr_pool_t *cont)
 {
-    *aprtime = (*ostime)->tv_sec * AP_USEC_PER_SEC + (*ostime)->tv_usec;
+    *aprtime = (*ostime)->tv_sec * APR_USEC_PER_SEC + (*ostime)->tv_usec;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_exp_time(ap_exploded_time_t *aprtime,
-                               apr_os_exp_time_t **ostime, apr_pool_t *cont)
+apr_status_t apr_put_os_exp_time(apr_exploded_time_t *aprtime,
+                                 apr_os_exp_time_t **ostime, apr_pool_t *cont)
 {
     aprtime->tm_sec = (*ostime)->tm_sec;
     aprtime->tm_min = (*ostime)->tm_min;
@@ -264,14 +265,15 @@ void apr_sleep(apr_interval_time_t t)
     DosSleep(t/1000);
 #else
     struct timeval tv;
-    tv.tv_usec = t % AP_USEC_PER_SEC;
-    tv.tv_sec = t / AP_USEC_PER_SEC;
+    tv.tv_usec = t % APR_USEC_PER_SEC;
+    tv.tv_sec = t / APR_USEC_PER_SEC;
     select(0, NULL, NULL, NULL, &tv);
 #endif
 }
 
 #ifdef OS2
-apr_status_t ap_os2_time_to_ap_time(apr_time_t *result, FDATE os2date, FTIME os2time)
+apr_status_t apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2date, 
+                                      FTIME os2time)
 {
   struct tm tmpdate;
 
@@ -285,7 +287,7 @@ apr_status_t ap_os2_time_to_ap_time(apr_time_t *result, FDATE os2date, FTIME os2
   tmpdate.tm_year  = os2date.year + 80;
   tmpdate.tm_isdst = -1;
 
-  *result = mktime(&tmpdate) * AP_USEC_PER_SEC;
+  *result = mktime(&tmpdate) * APR_USEC_PER_SEC;
   return APR_SUCCESS;
 }
 #endif

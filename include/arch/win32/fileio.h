@@ -92,7 +92,7 @@
  * fname --  the filename as passed to the open call.
  * dwFileAttricutes -- Attributes used to open the file.
  * demonfname -- the canonicalized filename.  Used to store the result from
- *               ap_os_canonicalize_filename.
+ *               apr_os_canonicalize_filename.
  * lowerdemonfname -- inserted at Ken Parzygnat's request, because of the
  *                    ugly way windows deals with case in the filesystem.
  * append -- Windows doesn't support the append concept when opening files.
@@ -143,12 +143,12 @@ struct apr_dir_t {
 apr_status_t file_cleanup(void *);
 /*mode_t get_fileperms(apr_fileperms_t);
 */
-APR_EXPORT(char *) ap_os_systemcase_filename(struct apr_pool_t *pCont, 
-                                             const char *szFile);
+APR_EXPORT(char *) apr_os_systemcase_filename(struct apr_pool_t *pCont, 
+                                              const char *szFile);
 char * canonical_filename(struct apr_pool_t *pCont, const char *szFile);
 
-apr_status_t ap_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
-                              BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
-                              apr_pool_t *p);
+apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
+                                BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
+                                apr_pool_t *p);
 #endif  /* ! FILE_IO_H */
 

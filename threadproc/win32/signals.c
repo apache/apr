@@ -66,7 +66,7 @@
 /* Windows only really support killing process, but that will do for now. */
 apr_status_t apr_kill(apr_proc_t *proc, int signal)
 {
-    if (TerminateProcess(proc->pid, signal) == 0) {
+    if (TerminateProcess((HANDLE)proc->pid, signal) == 0) {
         return GetLastError();
     }
     return APR_SUCCESS;

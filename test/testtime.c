@@ -64,7 +64,7 @@
 int main()
 {
     apr_time_t now;
-    ap_exploded_time_t xt;
+    apr_exploded_time_t xt;
     apr_time_t imp;
 
     fprintf(stdout, "Testing Time functions.\n");

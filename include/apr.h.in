@@ -15,11 +15,11 @@
 #if !defined(__GNUC__) || __GNUC__ < 2 || \
     (__GNUC__ == 2 && __GNUC_MINOR__ < 7) ||\
     defined(NEXT)
-#define ap_inline
+#define apr_inline
 #define __attribute__(__x)
 #define ENUM_BITFIELD(e,n,w)  signed int n : w
 #else
-#define ap_inline __inline__
+#define apr_inline __inline__
 #define USE_GNU_INLINE
 #define ENUM_BITFIELD(e,n,w)  e n : w
 #endif
@@ -158,12 +158,12 @@ Sigfunc *apr_signal(int signo, Sigfunc * func);
 #include <sys/wait.h>
 
 #ifdef WEXITSTATUS
-#define ap_wait_t       int
+#define apr_wait_t       int
 #else
 /* We don't have a POSIX wait interface. Assume we have the old-style. Is this
  * a bad assumption? */
 /* Yessiree bob, it was... but will this work instead? */
-#define ap_wait_t       union wait
+#define apr_wait_t       union wait
 #define WEXITSTATUS(status)    (int)((status).w_retcode)
 #define WTERMSIG(status)       (int)((status).w_termsig)
 #endif /* !WEXITSTATUS */

@@ -125,8 +125,8 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
             tvptr = NULL;
         }
         else {
-            tv.tv_sec = (long)(timeout / AP_USEC_PER_SEC);
-            tv.tv_usec = (long)(timeout % AP_USEC_PER_SEC);
+            tv.tv_sec = (long)(timeout / APR_USEC_PER_SEC);
+            tv.tv_usec = (long)(timeout % APR_USEC_PER_SEC);
             tvptr = &tv;
         }
         rv = select(500, /* ignored on Windows */

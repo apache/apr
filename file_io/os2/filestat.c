@@ -75,14 +75,17 @@ static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
     finfo->inode = 0;
     finfo->device = 0;
     finfo->size = fstatus->cbFile;
-    ap_os2_time_to_ap_time(&finfo->atime, fstatus->fdateLastAccess, fstatus->ftimeLastAccess );
-    ap_os2_time_to_ap_time(&finfo->mtime, fstatus->fdateLastWrite,  fstatus->ftimeLastWrite );
-    ap_os2_time_to_ap_time(&finfo->ctime, fstatus->fdateCreation,   fstatus->ftimeCreation );
+    apr_os2_time_to_apr_time(&finfo->atime, fstatus->fdateLastAccess, 
+                             fstatus->ftimeLastAccess );
+    apr_os2_time_to_apr_time(&finfo->mtime, fstatus->fdateLastWrite,  
+                             fstatus->ftimeLastWrite );
+    apr_os2_time_to_apr_time(&finfo->ctime, fstatus->fdateCreation,   
+                             fstatus->ftimeCreation );
 }
 
 
 
-static apr_status_t handle_type(ap_filetype_e *ftype, HFILE file)
+static apr_status_t handle_type(apr_filetype_e *ftype, HFILE file)
 {
     ULONG filetype, fileattr, rc;
 

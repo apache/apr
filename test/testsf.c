@@ -239,7 +239,7 @@ static int client(client_socket_mode_t socket_mode)
     case TIMEOUT:
         /* set a timeout */
         rv = apr_setsocketopt(sock, APR_SO_TIMEOUT, 
-                             100 * AP_USEC_PER_SEC);
+                             100 * APR_USEC_PER_SEC);
         if (rv != APR_SUCCESS) {
             fprintf(stderr, "apr_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
                     rv,

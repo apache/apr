@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     }
 
     if (argc > 2) {
-        read_timeout = AP_USEC_PER_SEC * atoi(argv[2]);
+        read_timeout = APR_USEC_PER_SEC * atoi(argv[2]);
     }
 
     fprintf(stdout, "Initializing.........");

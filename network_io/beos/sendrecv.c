@@ -71,8 +71,8 @@ static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
             tvptr = NULL;
         }
         else {
-            tv.tv_sec = sock->timeout / AP_USEC_PER_SEC;
-            tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
+            tv.tv_sec = sock->timeout / APR_USEC_PER_SEC;
+            tv.tv_usec = sock->timeout % APR_USEC_PER_SEC;
             tvptr = &tv;
         }
         srv = select(sock->socketdes + 1,

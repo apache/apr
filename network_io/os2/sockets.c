@@ -112,7 +112,7 @@ apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_shutdown(apr_socket_t *thesocket, ap_shutdown_how_e how)
+apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
 {
     if (shutdown(thesocket->socketdes, how) == 0) {
         return APR_SUCCESS;

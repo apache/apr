@@ -491,7 +491,7 @@ apr_status_t apr_create_process(apr_proc_t *proc, const char *progname,
 
 
 
-apr_status_t apr_wait_all_procs(apr_proc_t *proc, ap_wait_t *status,
+apr_status_t apr_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
                               apr_wait_how_e waithow, apr_pool_t *p)
 {
     RESULTCODES codes;
@@ -542,7 +542,7 @@ apr_status_t apr_wait_proc(apr_proc_t *proc,
 
 
 
-apr_status_t ap_get_os_proc(apr_os_proc_t *theproc, apr_proc_t *proc)
+apr_status_t apr_get_os_proc(apr_os_proc_t *theproc, apr_proc_t *proc)
 {
     if (proc == NULL) {
         return APR_ENOPROC;
