@@ -185,10 +185,23 @@ while test $# -gt 0; do
     fi
     ;;
     --link-libtool)
-    flags="$flags $LA_FILE"
+    # If the LA_FILE exists where we think it should be, use it.  If we're
+    # installed and the LA_FILE does not exist, assume to use -L/-l
+    # (the LA_FILE may not have been installed).  If we're building ourselves,
+    # we'll assume that at some point the .la file be created.
+    if test -f "$LA_FILE"; then
+        flags="$flags $LA_FILE"
+    elif test "$location" = "installed"; then
+        ### avoid using -L if libdir is a "standard" location like /usr/lib
+        flags="$flags -L$libdir -lapr"
+    else
+        flags="$flags $LA_FILE"
+    fi
     ;;
     --apr-la-file)
-    flags="$flags $LA_FILE"
+    if test -f "$LA_FILE"; then
+        flags="$flags $LA_FILE"
+    fi
     ;;
     --apr-so-ext)
     echo "$APR_SO_EXT"
