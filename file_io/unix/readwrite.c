@@ -121,7 +121,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             if (thefile->bufpos >= thefile->dataRead) {
                 thefile->dataRead = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
                 if (thefile->dataRead == 0) {
-                    thefile->eof_hit = APR_TRUE;
+                    thefile->eof_hit = TRUE;
                     break;
                 }
                 thefile->filePtr += thefile->dataRead;
@@ -300,7 +300,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
     }
     rv = read(thefile->filedes, ch, 1); 
     if (rv == 0) {
-        thefile->eof_hit = APR_TRUE;
+        thefile->eof_hit = TRUE;
         return APR_EOF;
     }
     else if (rv != 1) {
@@ -347,14 +347,14 @@ ap_status_t ap_flush(ap_file_t *thefile)
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     ssize_t rv;
-    int i, used_unget = APR_FALSE, beg_idx;
+    int i, used_unget = FALSE, beg_idx;
 
     if(len <= 1)  /* as per fgets() */
         return APR_SUCCESS;
 
     if(thefile->ungetchar != -1){
         str[0] = thefile->ungetchar;
-	used_unget = APR_TRUE;
+	used_unget = TRUE;
 	beg_idx = 1;
 	if(str[0] == '\n' || str[0] == '\r'){
 	    thefile->ungetchar = -1;
@@ -367,7 +367,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
     for (i = beg_idx; i < len; i++) {
         rv = read(thefile->filedes, &str[i], 1); 
         if (rv == 0) {
-            thefile->eof_hit = APR_TRUE;
+            thefile->eof_hit = TRUE;
 	    if(used_unget) thefile->filedes = -1;
 	    str[i] = '\0';
             return APR_EOF;

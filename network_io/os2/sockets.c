@@ -106,7 +106,7 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
         return APR_OS2_STATUS(sock_errno());
     }
     (*new)->timeout = -1;
-    (*new)->nonblock = APR_FALSE;
+    (*new)->nonblock = FALSE;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
@@ -158,7 +158,7 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *con
     (*new)->local_addr = sock->local_addr;
     (*new)->addr_len = sizeof(struct sockaddr_in);
     (*new)->timeout = -1;
-    (*new)->nonblock = APR_FALSE;
+    (*new)->nonblock = FALSE;
 
     (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
                         &(*new)->addr_len);

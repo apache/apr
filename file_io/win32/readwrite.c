@@ -174,7 +174,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
         return GetLastError();
     }
     if (bread == 0) {
-        thefile->eof_hit = APR_TRUE;
+        thefile->eof_hit = TRUE;
         return APR_EOF;
     }
     return APR_SUCCESS; 
@@ -200,7 +200,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         }
     }
     if (bread == 0) {
-        thefile->eof_hit = APR_TRUE;
+        thefile->eof_hit = TRUE;
         return APR_EOF;
     }
     for (i=0; i<len; i++) {

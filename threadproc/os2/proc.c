@@ -88,7 +88,7 @@ ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
     (*new)->child_err = NULL;
     (*new)->currdir = NULL; 
     (*new)->cmdtype = APR_PROGRAM;
-    (*new)->detached = APR_FALSE;
+    (*new)->detached = FALSE;
     return APR_SUCCESS;
 }
 
@@ -177,13 +177,13 @@ ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont)
     } else if (pid == 0) {
         (*proc)->pid = pid;
         (*proc)->attr = NULL;
-        (*proc)->running = APR_TRUE;
+        (*proc)->running = TRUE;
         return APR_INCHILD;
     }
 
     (*proc)->pid = pid;
     (*proc)->attr = NULL;
-    (*proc)->running = APR_TRUE;
+    (*proc)->running = TRUE;
     return APR_INPARENT;
 }
 
@@ -226,7 +226,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     char **newargs;
     char savedir[300];
     HFILE save_in, save_out, save_err, dup;
-    int criticalsection = APR_FALSE;
+    int criticalsection = FALSE;
     char *extension, *newprogname, *extra_arg = NULL, *cmdline, *cmdline_pos;
     char interpreter[1024];
     char error_object[260];
@@ -242,11 +242,11 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     }
 
     (*new)->cntxt = cont;
-    (*new)->running = APR_FALSE;
+    (*new)->running = FALSE;
 
     /* Prevent other threads from running while these process-wide resources are modified */
     if (attr->child_in || attr->child_out || attr->child_err || attr->currdir) {
-        criticalsection = APR_TRUE;
+        criticalsection = TRUE;
         DosEnterCritSec();
     }
 

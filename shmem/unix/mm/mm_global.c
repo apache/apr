@@ -52,10 +52,10 @@ static MM *mm_global = NULL;
 int MM_create(size_t size, const char *file)
 {
     if (mm_global != NULL)
-        return APR_FALSE;
+        return FALSE;
     if ((mm_global = mm_create(size, file)) == NULL)
-        return APR_FALSE;
-    return APR_TRUE;
+        return FALSE;
+    return TRUE;
 }
 
 int MM_permission(mode_t mode, uid_t owner, gid_t group)
@@ -77,14 +77,14 @@ void MM_destroy(void)
 int MM_lock(mm_lock_mode mode)
 {
     if (mm_global == NULL)
-        return APR_FALSE;
+        return FALSE;
     return mm_lock(mm_global, mode);
 }
 
 int MM_unlock(void)
 {
     if (mm_global == NULL)
-        return APR_FALSE;
+        return FALSE;
     return mm_unlock(mm_global);
 }
 
