@@ -54,6 +54,7 @@
 
 #include <stdio.h>
 #include <nks/fsio.h>
+#include <nks/errno.h>
 
 #include "fileio.h"
 #include "apr_strings.h"
@@ -92,9 +93,18 @@ apr_status_t apr_netware_pipe_cleanup(void *thefile)
     return rv;
 }
 
+#ifdef WAITING_FOR_UPDATE
+#ifndef NX_CTL_FLAGS
+#define NX_CTL_FLAGS             0x00000001
+int   NXGetCtlInfo(NXHandle_t handle, unsigned long command, ...);
+int   NXSetCtlInfo(NXHandle_t handle, unsigned long command, ...);
+#endif
+#endif
+
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
 	int				err;
+#ifdef WAITING_FOR_UPDATE
 	unsigned long	flags;
 
 	if (!(err = NXGetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, &flags)))
@@ -102,6 +112,9 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 		flags &= ~NX_O_NONBLOCK;
 		err    = NXSetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, flags);
 	}
+#else
+    err = NXIoSetBlockingState(thepipe->filedes, 1);
+#endif
 
     if (err)
         return convert_error (err);
@@ -113,6 +126,7 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 static apr_status_t pipenonblock(apr_file_t *thepipe)
 {
 	int				err;
+#ifdef WAITING_FOR_UPDATE
 	unsigned long	flags;
 
 	if (!(err = NXGetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, &flags)))
@@ -120,6 +134,9 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
 		flags |= NX_O_NONBLOCK;
 		err    = NXSetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, flags);
 	}
+#else
+    err = NXIoSetBlockingState(thepipe->filedes, 0);
+#endif
 
     if (err)
         return convert_error (err);
