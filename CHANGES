@@ -3,6 +3,9 @@ Changes with APR b1
   *) configure now checks to see if we can change timeout values
      [Ian Holsman]
 
+  *) Fix a bug in apr_file_seek() on Unix when using buffered
+     files.  PR 10003 [Jeff Trawick]
+
   *) Small table performance optimization: eliminate the
      zero-fill of newly allocated elements when expanding
      a table's size. [Brian Pane]
