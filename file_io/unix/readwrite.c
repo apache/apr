@@ -289,13 +289,13 @@ ap_status_t ap_flush(ap_file_t *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_gets(ap_file_t *, char *, int)
+ * ap_status_t ap_fgets(ap_file_t *, char *, int)
  *    Get a string from a specified file.
  * arg 1) The file descriptor to read from
  * arg 2) The buffer to store the string in. 
  * arg 3) The length of the string
  */
-ap_status_t ap_gets(ap_file_t *thefile, char *str, int len)
+ap_status_t ap_fgets(ap_file_t *thefile, char *str, int len)
 {
     ssize_t rv;
     int i;    
