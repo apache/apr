@@ -122,6 +122,9 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     apr_int32_t native_flags = 0;
 #endif
 
+    if (size == 0)
+        return APR_EINVAL;
+    
     if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
     (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
