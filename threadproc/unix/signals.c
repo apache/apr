@@ -63,7 +63,9 @@
 #include "apr_want.h"
 
 #include <assert.h>
+#if APR_HAS_THREADS && APR_HAVE_PTHREAD_H
 #include <pthread.h>
+#endif
 
 apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
 {
@@ -265,6 +267,7 @@ const char *apr_signal_get_description(int signum)
 
 #endif /* SYS_SIGLIST_DECLARED */
 
+#if APR_HAS_THREADS
 static void *signal_thread_func(void *signal_handler)
 {
     sigset_t sig_mask;
@@ -299,7 +302,7 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     /* All threads should mask signals out, accoring to sigwait(2) man page */
     sigfillset(&sig_mask);
 
-#ifdef SIGPROCMASK_SETS_THREAD_MASK
+#if !APR_HAS_THREADS || defined(SIGPROCMASK_SETS_THREAD_MASK)
     rv = sigprocmask(SIG_SETMASK, &sig_mask, NULL);
 #else
     if ((rv = pthread_sigmask(SIG_SETMASK, &sig_mask, NULL)) != 0) {
@@ -319,3 +322,4 @@ APR_DECLARE(apr_status_t) apr_create_signal_thread(apr_thread_t **td,
     return apr_thread_create(td, tattr, signal_thread_func, signal_handler, p);
 }
 
+#endif
