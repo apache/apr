@@ -160,6 +160,8 @@
  */
 #define APR_HAS_UNICODE_FS     1
 
+#define APR_HAS_USER           0
+
 /* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
  * on all platforms.
  */
