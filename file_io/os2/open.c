@@ -102,7 +102,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
         rv = ap_create_lock(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cntxt);
 
         if (rv)
-            return APR_OS2_STATUS(rv);
+            return rv;
     }
 
     if (flag & APR_CREATE) {
