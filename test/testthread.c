@@ -186,6 +186,8 @@ int main(void)
     }
     printf("OK\n");
 
+    apr_terminate();
+
     return 0;
 }
 
