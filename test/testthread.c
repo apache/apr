@@ -62,6 +62,15 @@
 #include <unistd.h>
 #endif
 
+#if !APR_HAS_THREADS
+int main(void)
+{
+    fprintf(stderr,
+            "This program won't work on this platform because there is no "
+            "support for threads.\n");
+    return 0;
+}
+#else /* !APR_HAS_THREADS */
 
 void * APR_THREAD_FUNC thread_func1(void *data);
 void * APR_THREAD_FUNC thread_func2(void *data);
@@ -175,3 +184,5 @@ int main(void)
 #endif
     return 1;
 }
+
+#endif /* !APR_HAS_THREADS */
