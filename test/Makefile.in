@@ -30,7 +30,8 @@ PROGRAMS = \
 	teststr@EXEEXT@ \
 	testuser@EXEEXT@ \
         testsockets@EXEEXT@ \
-	testprocmutex@EXEEXT@
+	testprocmutex@EXEEXT@ \
+	testvsn@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -144,5 +145,8 @@ testuser@EXEEXT@: testuser.lo $(LOCAL_LIBS)
 
 testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
 	$(LINK) testprocmutex.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testvsn@EXEEXT@: testvsn.lo $(LOCAL_LIBS)
+	$(LINK) testvsn.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE

@@ -1,7 +1,7 @@
 
 TARGETS = \
 	start.lo getopt.lo otherchild.lo errorcodes.lo rand.lo \
-	uuid.lo getuuid.lo
+	uuid.lo getuuid.lo version.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
