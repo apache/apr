@@ -75,26 +75,42 @@ typedef enum {
  * @{
  */
 
-#define APR_USETID      0x8000 /**< Set user id */
-#define APR_UREAD       0x0400 /**< Read by user */
-#define APR_UWRITE      0x0200 /**< Write by user */
-#define APR_UEXECUTE    0x0100 /**< Execute by user */
+#define APR_FPROT_USETID      0x8000 /**< Set user id */
+#define APR_FPROT_UREAD       0x0400 /**< Read by user */
+#define APR_FPROT_UWRITE      0x0200 /**< Write by user */
+#define APR_FPROT_UEXECUTE    0x0100 /**< Execute by user */
 
-#define APR_GSETID      0x4000 /**< Set group id */
-#define APR_GREAD       0x0040 /**< Read by group */
-#define APR_GWRITE      0x0020 /**< Write by group */
-#define APR_GEXECUTE    0x0010 /**< Execute by group */
+#define APR_FPROT_GSETID      0x4000 /**< Set group id */
+#define APR_FPROT_GREAD       0x0040 /**< Read by group */
+#define APR_FPROT_GWRITE      0x0020 /**< Write by group */
+#define APR_FPROT_GEXECUTE    0x0010 /**< Execute by group */
 
-#define APR_WSTICKY     0x2000 /**< Sticky bit */
-#define APR_WREAD       0x0004 /**< Read by others */
-#define APR_WWRITE      0x0002 /**< Write by others */
-#define APR_WEXECUTE    0x0001 /**< Execute by others */
+#define APR_FPROT_WSTICKY     0x2000 /**< Sticky bit */
+#define APR_FPROT_WREAD       0x0004 /**< Read by others */
+#define APR_FPROT_WWRITE      0x0002 /**< Write by others */
+#define APR_FPROT_WEXECUTE    0x0001 /**< Execute by others */
 
-#define APR_OS_DEFAULT  0x0FFF /**< use OS's default permissions */
+#define APR_FPROT_OS_DEFAULT  0x0FFF /**< use OS's default permissions */
 
 /* additional permission flags for apr_file_copy  and apr_file_append */
-#define APR_FILE_SOURCE_PERMS 0x1000 /**< Copy source file's permissions */
-
+#define APR_FPROT_FILE_SOURCE_PERMS 0x1000 /**< Copy source file's permissions */
+    
+/* backcompat */
+#define APR_USETID     APR_FPROT_USETID     /**< @deprecated @see APR_FPROT_USETID     */
+#define APR_UREAD      APR_FPROT_UREAD      /**< @deprecated @see APR_FPROT_UREAD      */
+#define APR_UWRITE     APR_FPROT_UWRITE     /**< @deprecated @see APR_FPROT_UWRITE     */
+#define APR_UEXECUTE   APR_FPROT_UEXECUTE   /**< @deprecated @see APR_FPROT_UEXECUTE   */
+#define APR_GSETID     APR_FPROT_GSETID     /**< @deprecated @see APR_FPROT_GSETID     */
+#define APR_GREAD      APR_FPROT_GREAD      /**< @deprecated @see APR_FPROT_GREAD      */
+#define APR_GWRITE     APR_FPROT_GWRITE     /**< @deprecated @see APR_FPROT_GWRITE     */
+#define APR_GEXECUTE   APR_FPROT_GEXECUTE   /**< @deprecated @see APR_FPROT_GEXECUTE   */
+#define APR_WSTICKY    APR_FPROT_WSTICKY    /**< @deprecated @see APR_FPROT_WSTICKY    */
+#define APR_WREAD      APR_FPROT_WREAD      /**< @deprecated @see APR_FPROT_WREAD      */
+#define APR_WWRITE     APR_FPROT_WWRITE     /**< @deprecated @see APR_FPROT_WWRITE     */
+#define APR_WEXECUTE   APR_FPROT_WEXECUTE   /**< @deprecated @see APR_FPROT_WEXECUTE   */
+#define APR_OS_DEFAULT APR_FPROT_OS_DEFAULT /**< @deprecated @see APR_FPROT_OS_DEFAULT */
+#define APR_FILE_SOURCE_PERMS APR_FPROT_FILE_SOURCE_PERMS /**< @deprecated @see APR_FPROT_FILE_SOURCE_PERMS */
+    
 /** @} */
 
 
