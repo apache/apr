@@ -87,6 +87,17 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signum)
 
 #if APR_HAVE_SIGACTION
 
+#ifdef DARWIN
+static void avoid_zombies(int signo)
+{
+    int exit_status;
+
+    while (waitpid(-1, &exit_status, WNOHANG) > 0) {
+        /* do nothing */
+    }
+}
+#endif /* DARWIN */
+
 /*
  * Replace standard signal() with the more reliable sigaction equivalent
  * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
@@ -110,6 +121,15 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func)
      */
     if ((signo == SIGCHLD) && (func == SIG_IGN)) {
         act.sa_flags |= SA_NOCLDWAIT;
+    }
+#endif
+#ifdef DARWIN
+    /* ignoring SIGCHLD or leaving the default disposition doesn't avoid zombies,
+     * and there is no SA_NOCLDWAIT flag, so catch the signal and reap status in 
+     * the handler to avoid zombies
+     */
+    if ((signo == SIGCHLD) && (func == SIG_IGN)) {
+        act.sa_handler = avoid_zombies;
     }
 #endif
     if (sigaction(signo, &act, &oact) < 0)
