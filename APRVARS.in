@@ -1,1 +1,1 @@
-LIBS="@LIBS@"
+EXTRA_LIBS="@LIBS@"
