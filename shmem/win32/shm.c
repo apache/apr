@@ -179,12 +179,13 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     (*m)->pool = pool;
     (*m)->hMap = hMap;
     (*m)->memblk = base;
-    (*m)->usrmem = (char*)base + sizeof(memblock_t);
     (*m)->size = size;
-    (*m)->length = reqsize;
+
+    (*m)->usrmem = (char*)base + sizeof(memblock_t);
+    (*m)->length = reqsize - sizeof(memblock_t);;
     
-    (*m)->memblk->length = reqsize;
-    (*m)->memblk->size = size;
+    (*m)->memblk->length = (*m)->length;
+    (*m)->memblk->size = (*m)->size;
 
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
