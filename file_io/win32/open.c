@@ -102,7 +102,7 @@ ap_status_t ap_open(struct file_t **dafile, const char *fname,
     } else {
         (*dafile)->buffered = FALSE;
     }
-    (*dafile)->fname = strdup(fname);
+    (*dafile)->fname = ap_pstrdup(cont, fname);
 
     (*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
     (*dafile)->lowerdemonfname = strlwr((*dafile)->demonfname);

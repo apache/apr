@@ -71,10 +71,7 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     /* ToDo:  How to handle the case when no context is available? 
     *         How to cleanup the storage properly?
     */
-    if (cont)
-        newlock->fname = ap_pstrdup(cont, fname);
-    else
-        newlock->fname = strdup(fname);
+    newlock->fname = ap_pstrdup(cont, fname);
     newlock->type = type;
     newlock->scope = scope;
     sec.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -106,11 +103,7 @@ ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *
     if ((*lock) == NULL) {
         return APR_ENOMEM;
     }
-    if (cont)
-        (*lock)->fname = ap_pstrdup(cont, fname);
-    else
-        (*lock)->fname = strdup(fname);
-
+    (*lock)->fname = ap_pstrdup(cont, fname);
     (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
     
     if ((*lock)->mutex == NULL) {

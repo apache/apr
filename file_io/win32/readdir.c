@@ -40,6 +40,7 @@ API_EXPORT(DIR *) opendir(const char *dir)
         if (errno == ENOENT)
             dp->finished = 1;
         else
+        free(filespec)
         return NULL;
     }
 
