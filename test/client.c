@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     fprintf(stdout,"OK\n");
 
     fprintf(stdout, "\tClient:  Creating new socket.......");
-    if (apr_socket_create(&sock, remote_sa->sa.sin.sin_family, SOCK_STREAM,
+    if (apr_socket_create(&sock, remote_sa->family, SOCK_STREAM,
                           context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
