@@ -118,7 +118,7 @@ static void do_read(void)
     status = apr_file_lock(file, APR_FLOCK_EXCLUSIVE | APR_FLOCK_NONBLOCK);
     if (!APR_STATUS_IS_EAGAIN(status)) {
         char msg[200];
-        errmsg(apr_psprintf(pool, "Expected EAGAIN. Got %d: %s.\n",
+        errmsg(apr_psprintf(pool, "Expected APR_EAGAIN. Got %d: %s.\n",
                             status, apr_strerror(status, msg, sizeof(msg))));
     }
     printf("First attempt: we were properly locked out.\nWaiting for lock...");
