@@ -55,8 +55,6 @@
 #include "apr.h"
 #include "apr_private.h"
 
-/* TODO: Clean out the #includes */
-
 #include "apr_portable.h" /* for get_os_proc */
 #include "apr_strings.h"
 #include "apr_general.h"
@@ -64,44 +62,13 @@
 #include "apr_lib.h"
 #include "apr_thread_mutex.h"
 #include "apr_hash.h"
+#include "apr_time.h"
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 
-#if APR_HAVE_STDIO_H
-#include <stdio.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#if APR_HAVE_SYS_SIGNAL_H
-#include <sys/signal.h>
-#endif
-#if APR_HAVE_SIGNAL_H
-#include <signal.h>
-#endif
-#if APR_HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if APR_HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-#if APR_HAVE_STRING_H
-#include <string.h>
-#endif
 #if APR_HAVE_STDLIB_H
-#include <stdlib.h>
+#include <stdlib.h>     /* for malloc and free */
 #endif
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-
-
 
 /*
  * Magic numbers
@@ -1090,7 +1057,7 @@ static void free_proc_chain(struct process_chain *procs)
 
     /* Sleep only if we have to... */
     if (need_timeout)
-        sleep(3);
+        apr_sleep(3 * APR_USEC_PER_SEC);
 
     /* OK, the scripts we just timed out for have had a chance to clean up
      * --- now, just get rid of them, and also clean up the system accounting
