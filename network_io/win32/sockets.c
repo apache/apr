@@ -445,11 +445,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
                                            apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
-#ifdef APR_ENABLE_FOR_1_0 /* no protocol field yet */
     set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type, os_sock_info->protocol);
-#else
-    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type, 0);
-#endif
     (*apr_sock)->timeout = -1;
     (*apr_sock)->disconnected = 0;
     (*apr_sock)->socketdes = *os_sock_info->os_sock;
