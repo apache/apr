@@ -2088,24 +2088,26 @@ static void free_proc_chain(struct process_chain *procs)
     if (need_timeout) {
         timeout_interval = TIMEOUT_INTERVAL;
         apr_sleep(timeout_interval);
-    }
-    while (need_timeout) {
-        need_timeout = 0;
-        /* check the status of the subprocesses */
-        for (pc = procs; pc; pc = pc->next) {
-            if (pc->kill_how == APR_KILL_AFTER_TIMEOUT &&
-                apr_proc_wait(pc->pid, NULL, NULL, APR_NOWAIT) != APR_CHILD_NOTDONE)
-                pc->kill_how = APR_KILL_NEVER;	/* subprocess has exited */
-            else
-                need_timeout = 1;		/* subprocess is still active */
-        }
-        if (need_timeout) {
-            apr_sleep(timeout_interval);
-            timeout_interval *= 2;
-            if (timeout_interval >= TIMEOUT_USECS) {
-                break;
+
+        do {
+            /* check the status of the subprocesses */
+            need_timeout = 0;
+            for (pc = procs; pc; pc = pc->next) {
+                if (pc->kill_how == APR_KILL_AFTER_TIMEOUT) {
+                    if (apr_proc_wait(pc->pid, NULL, NULL, APR_NOWAIT) == APR_CHILD_NOTDONE)
+                        need_timeout = 1;		/* subprocess is still active */
+                    else
+                        pc->kill_how = APR_KILL_NEVER;	/* subprocess has exited */
+                }
             }
-        }
+            if (need_timeout) {
+                if (timeout_interval >= TIMEOUT_USECS) {
+                    break;
+                }
+                apr_sleep(timeout_interval);
+                timeout_interval *= 2;
+            }
+        } while (need_timeout);
     }
 
     /* OK, the scripts we just timed out for have had a chance to clean up
