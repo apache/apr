@@ -101,12 +101,12 @@ void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
 #define apr_is_option_set(skt, option)  \
     (((skt)->options & (option)) == (option))
 
-#define apr_set_option(mask, option, on) \
+#define apr_set_option(skt, option, on) \
     do {                                 \
         if (on)                          \
-            *(mask) |= (option);         \
+            (skt)->options |= (option);         \
         else                             \
-            *(mask) &= ~(option);        \
+            (skt)->options &= ~(option);        \
     } while (0)
 
 #endif  /* ! NETWORK_IO_H */
