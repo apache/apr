@@ -153,6 +153,11 @@ APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result,
                                           apr_time_t input,
                                           apr_int32_t offs);
 
+/** @deprecated @see apr_time_exp_tz */
+APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
+                                           apr_time_t input,
+                                           apr_int32_t offs);
+
 /**
  * convert a time to its human readable components in GMT timezone
  * @param result the exploded time
@@ -167,6 +172,10 @@ APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
  * @param input the time to explode
  */
 APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result, 
+                                          apr_time_t input);
+
+/** @deprecated @see apr_time_exp_lt */
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result, 
                                                 apr_time_t input);
 
 /**
