@@ -267,7 +267,7 @@ apr_status_t test_rw(void)
     printf("RW Lock Tests\n");
     printf("%-60s", "    Initializing the RW lock");
     s1 = apr_lock_create(&thread_rw_lock, APR_READWRITE, APR_INTRAPROCESS,
-                         "lock.file", pool);
+                         APR_LOCK_DEFAULT, "lock.file", pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
         return s1;
@@ -315,7 +315,7 @@ apr_status_t test_exclusive(void)
     printf("Exclusive lock test\n");
     printf("%-60s", "    Initializing the lock");
     s1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
-                         "lock.file", pool); 
+                         APR_LOCK_DEFAULT, "lock.file", pool); 
 
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
@@ -363,8 +363,8 @@ apr_status_t test_multiple_locking(const char *lockfile)
  
     printf("Testing multiple locking\n");
     printf("%-60s","    Creating the lock we'll use");
-    if ((rv = apr_lock_create(&multi, APR_MUTEX, APR_LOCKALL, lockfile,
-                        pool)) != APR_SUCCESS) {
+    if ((rv = apr_lock_create(&multi, APR_MUTEX, APR_LOCKALL, APR_LOCK_DEFAULT,
+                              lockfile, pool)) != APR_SUCCESS) {
         printf("Failed!\n");
         return rv;
     }

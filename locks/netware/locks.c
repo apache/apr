@@ -76,7 +76,7 @@ static apr_status_t lock_cleanup(void *lock_)
 }
 
 apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, 
-                                          const char *fname, apr_pool_t *pool)
+                             apr_lockmech_e mech, const char *fname, apr_pool_t *pool)
 {
    
     apr_lock_t *newlock = NULL;
@@ -94,6 +94,10 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_locksco
 	NXLockInfo_t *info;			   //for libc NKS NXRwLockAlloc
     apr_status_t status;
     long flags = 0;
+
+    if (mech != APR_LOCK_DEFAULT) {
+        return APR_ENOTIMPL;
+    }
 
     newlock = (apr_lock_t *)apr_palloc(pool, sizeof(apr_lock_t));
 	

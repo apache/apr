@@ -99,7 +99,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
 
     if (dafile->buffered) {
         dafile->buffer = apr_palloc(cntxt, APR_FILE_BUFSIZE);
-        rv = apr_lock_create(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cntxt);
+        rv = apr_lock_create(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, 
+                             APR_LOCK_DEFAULT, NULL, cntxt);
 
         if (rv)
             return rv;

@@ -1152,24 +1152,6 @@ case $ac_decision in
         ;;
 esac
 
-if test "$flockser$sysvser$fcntlser$procpthreadser" = "0000"; then
-  lockcreatenp="0"
-else
-  lockcreatenp="1"
-fi
-
-case $host in
-    *-os2*)
-        # The above tests detect a working flock on OS/2 
-        # but we don't want to use it when we have native locks
-        lockcreatenp="0"
-        ;;
-    *-beos*)
-        # This applies to beos as well
-        lockcreatenp="0"
-        ;;
-esac
-
 AC_SUBST(hasflockser)
 AC_SUBST(hassysvser)
 AC_SUBST(hasfcntlser)
@@ -1180,7 +1162,6 @@ AC_SUBST(sysvser)
 AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 AC_SUBST(pthreadser)
-AC_SUBST(lockcreatenp)
 
 AC_MSG_CHECKING(if interprocess lock affects threads)
 if test "x$apr_process_lock_is_global" = "xyes"; then

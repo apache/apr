@@ -274,12 +274,16 @@ static apr_status_t _destroy_lock(apr_lock_t *lock)
 }
 
 APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
-                                          apr_lockscope_e scope, const char *fname, 
-                                          apr_pool_t *pool)
+                                          apr_lockscope_e scope, apr_lockmech_e mech,
+                                          const char *fname, apr_pool_t *pool)
 {
     apr_lock_t *new;
     apr_status_t stat = APR_SUCCESS;
-  
+
+    if (mech != APR_LOCK_DEFAULT) {
+        return APR_ENOTIMPL;
+    }
+
     new = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
     if (new == NULL){
         return APR_ENOMEM;

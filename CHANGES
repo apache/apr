@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) apr_lock_create() and apr_proc_mutex_create() now have an
+     additional parameter for specifying the lock mechanism.  
+     apr_lock_create_np() and apr_proc_mutex_create_np() have been
+     removed.  [Jeff Trawick]
+
   *) Change the prototype of apr_thread_exit() so that the apr_status_t
      is no longer a pointer. It was difficult and sometimes hazardous
      to return a apr_status_t* at times, and this allows us to return

@@ -128,7 +128,7 @@ static const struct apr_unix_lock_methods_t lockall_methods =
     lockall_child_init
 };
 
-static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e_np mech)
+static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e mech)
 {
     switch (mech) {
     case APR_LOCK_FCNTL:
@@ -178,7 +178,7 @@ static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e_np mech)
     return APR_SUCCESS;
 }
 
-static apr_status_t create_lock(apr_lock_t *new, apr_lockmech_e_np mech, const char *fname)
+static apr_status_t create_lock(apr_lock_t *new, apr_lockmech_e mech, const char *fname)
 {
     apr_status_t stat;
 
@@ -230,9 +230,9 @@ static apr_status_t create_lock(apr_lock_t *new, apr_lockmech_e_np mech, const c
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_lock_create_np(apr_lock_t **lock, apr_locktype_e type, 
-                                             apr_lockscope_e scope, apr_lockmech_e_np mech,
-                                             const char *fname, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
+                                          apr_lockscope_e scope, apr_lockmech_e mech,
+                                          const char *fname, apr_pool_t *pool)
 {
     apr_lock_t *new;
     apr_status_t stat;
@@ -251,13 +251,6 @@ APR_DECLARE(apr_status_t) apr_lock_create_np(apr_lock_t **lock, apr_locktype_e t
 
     *lock = new;
     return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
-                                          apr_lockscope_e scope, const char *fname, 
-                                          apr_pool_t *pool)
-{
-    return apr_lock_create_np(lock, type, scope, APR_LOCK_DEFAULT, fname, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock)
