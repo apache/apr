@@ -17,6 +17,8 @@
 
 typedef struct app_data {
     int     initialized;
+    void*   gPool;
+    void*   statCache;
 } APP_DATA;
 
 /* library-private data...*/
@@ -147,3 +149,52 @@ int DisposeLibraryData(void *data)
     return 0;
 }
 
+int setGlobalPool(void *data)
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
+
+    NXLock(gLibLock);
+
+    if (app_data && !app_data->gPool) {
+        app_data->gPool = data;
+    }
+
+    NXUnlock(gLibLock);
+    return 1;
+}
+
+void* getGlobalPool()
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
+
+    if (app_data) {
+        return app_data->gPool;
+    }
+
+    return NULL;
+}
+
+int setStatCache(void *data)
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
+
+    NXLock(gLibLock);
+
+    if (app_data && !app_data->statCache) {
+        app_data->statCache = data;
+    }
+
+    NXUnlock(gLibLock);
+    return 1;
+}
+
+void* getStatCache()
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
+
+    if (app_data) {
+        return app_data->statCache;
+    }
+
+    return NULL;
+}
