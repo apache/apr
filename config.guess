@@ -579,6 +579,12 @@ EOF
 	echo ${UNAME_MACHINE}-unknown-bsdi${UNAME_RELEASE}
 	exit 0 ;;
     *:FreeBSD:*:*)
+	if test -x /usr/bin/objformat; then
+	    if test "elf" = "`/usr/bin/objformat`"; then
+		echo ${UNAME_MACHINE}-unknown-freebsdelf`echo ${UNAME_RELEASE}|sed -e 's/[-_].*//'`
+		exit 0
+	    fi
+	fi
 	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
 	exit 0 ;;
     *:NetBSD:*:*)
@@ -612,12 +618,12 @@ EOF
 	echo `echo ${UNAME_MACHINE}|sed -e 's,[-/].*$,,'`-unknown-gnu`echo ${UNAME_RELEASE}|sed -e 's,/.*$,,'`
 	exit 0 ;;
     *:Linux:*:*)
-	# uname on the ARM produces all sorts of strangeness, and we need to
-	# filter it out.
-	case "$UNAME_MACHINE" in
-	  armv*)		      UNAME_MACHINE=$UNAME_MACHINE ;;
-	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
-	esac
+#	# uname on the ARM produces all sorts of strangeness, and we need to
+#	# filter it out.
+#	case "$UNAME_MACHINE" in
+#	  armv*)		      UNAME_MACHINE=$UNAME_MACHINE ;;
+#	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
+#	esac
 
 	# The BFD linker knows what the default object file format is, so
 	# first see if it will tell us. cd to the root directory to prevent
@@ -630,13 +636,13 @@ EOF
 				    s/ .*//
 				    p'`
         case "$ld_supported_emulations" in
-	  *ia64)      echo "${UNAME_MACHINE}-unknown-linux"         ; exit 0 ;;
 	  i?86linux)  echo "${UNAME_MACHINE}-pc-linux-gnuaout"      ; exit 0 ;;
 	  i?86coff)   echo "${UNAME_MACHINE}-pc-linux-gnucoff"      ; exit 0 ;;
 	  sparclinux) echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
 	  armlinux)   echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
 	  m68klinux)  echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  elf32ppc | elf32ppclinux)
+	  elf32arm)   echo "${UNAME_MACHINE}-unknown-linux-gnu"     ; exit 0 ;;
+	  elf32ppc)
 		# Determine Lib Version
 		cat >$dummy.c <<EOF
 #include <features.h>
@@ -938,9 +944,6 @@ EOF
     *:Rhapsody:*:*)
 	echo ${UNAME_MACHINE}-apple-rhapsody${UNAME_RELEASE}
 	exit 0 ;;
-    *:OS/2:*:*)
-	echo "i386-pc-os2_emx"
-	exit 0;;
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2
