@@ -107,7 +107,7 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
     (*dafile)->demonfname = canonical_filename((*dafile)->cntxt, fname);
     (*dafile)->lowerdemonfname = strlwr((*dafile)->demonfname);
  
-    if (ap_get_oslevel(cont, &level) == APR_SUCCESS && level == APR_WIN_NT) {
+    if (ap_get_oslevel(cont, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
         sharemode |= FILE_SHARE_DELETE;
     }
 

@@ -137,6 +137,16 @@ typedef  int         gid_t;
 #define API_VAR_IMPORT           extern _declspec(dllimport)
 #define API_VAR_EXPORT
 
+/* Platform specific designation of run time os version.
+ * Gaps allow for specific service pack levels that 
+ * export new kernel or winsock functions or behavior.
+ */
+typedef enum {
+	APR_WIN_95 = 0, 
+	APR_WIN_98 = 4, 
+	APR_WIN_NT = 8
+} ap_oslevel_e;
+
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
     char* iov_base;
