@@ -75,6 +75,10 @@
 #pragma warning(push, 3)
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* disable or reduce the frequency of...
  *   C4057: indirection to slightly different base types
  *   C4075: slight indirection changes (unsigned short* vs short[])
@@ -426,6 +430,10 @@ struct iovec {
 #define APR_PATH_MAX MAX_PATH
 #endif
 
+#ifdef __cplusplus
+}
+#endif
+
 /* Done with badly written headers
  */
 #if defined(_MSC_VER) && _MSC_VER >= 1200
@@ -433,5 +441,6 @@ struct iovec {
 #endif
 
 #endif /* APR_H */
+
 #endif /* WIN32 */
 /** @} */
