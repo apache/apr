@@ -65,7 +65,6 @@
 #include <assert.h>
 #include <pthread.h>
 
-
 apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
 {
 #ifdef OS2
@@ -276,7 +275,16 @@ static void *signal_thread_func(void *signal_handler)
     while (1) {
         int signal_received;
 
-        apr_sigwait(&sig_mask, &signal_received);
+#ifdef SIGWAIT_TAKES_ONE_ARG
+        signal_received = sigwait(&sig_mask);
+        if (signal_received == -1)
+#else
+        if (sigwait(&sig_mask, &signal_received) == -1)
+#endif
+        {
+            /* handle sigwait() error here */
+        }
+        
         if (sig_func(signal_received) == 1) {
             return NULL;
         }
