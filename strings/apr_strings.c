@@ -83,13 +83,18 @@ APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 APR_DECLARE(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
 {
     char *res;
+    size_t len;
 
     if (s == NULL) {
         return NULL;
     }
     res = apr_palloc(a, n + 1);
-    memcpy(res, s, n);
-    res[n] = '\0';
+    len = strlen(s);
+    if(len > n) {
+	memcpy(res, s, n);
+	res[n] = '\0';
+    } else
+	memcpy(res, s, len+1);
     return res;
 }
 
