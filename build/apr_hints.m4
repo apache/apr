@@ -62,6 +62,7 @@ if test "x$apr_preload_done" != "xyes" ; then
           APR_ADDTO(CFLAGS, [-qHALT=E])
         fi
 	APR_SETIFNULL(apr_sysvsem_is_global, [yes])
+	APR_SETIFNULL(apr_lock_method, [USE_SYSVSEM_SERIALIZE])
 	APR_ADDTO(LDFLAGS, [-Wl,-brtl])
         ;;
     *-apollo-*)
