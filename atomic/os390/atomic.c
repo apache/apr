@@ -58,7 +58,7 @@
 
 #if APR_HAS_THREADS
 
-apr_atomic_t apr_atomic_add(apr_atomic_t *mem, apr_uint32_t val) 
+apr_int32_t apr_atomic_add(apr_atomic_t *mem, apr_int32_t val) 
 {
     apr_atomic_t old, new_val; 
 
