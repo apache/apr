@@ -258,9 +258,8 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     return APR_SUCCESS;
 }
 
-apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
+apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    struct hostent *hp;
     apr_status_t lasterror;
     fd_set temp;
 
@@ -268,23 +267,8 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
         return APR_ENOTSOCK;
     }
 
-    if (hostname != NULL) {
-        if (*hostname >= '0' && *hostname <= '9' && 
-            strspn(hostname, "0123456789.") == strlen(hostname)) {
-            sock->remote_addr->sa.sin.sin_addr.s_addr = inet_addr(hostname);
-        }
-        else {
-            hp = gethostbyname(hostname);
-            if (!hp)  {
-                return apr_get_netos_error();
-            }
-            memcpy((char *)&sock->remote_addr->sa.sin.sin_addr, hp->h_addr_list[0], 
-                   hp->h_length);
-        }
-    }
-    
-    if (connect(sock->sock, (const struct sockaddr *)&sock->remote_addr->sa.sin,
-                sock->remote_addr->sa_len) == SOCKET_ERROR) {
+    if (connect(sock->sock, (const struct sockaddr *)&sa->sa.sin,
+                sa->sa_len) == SOCKET_ERROR) {
         lasterror = apr_get_netos_error();
         if (lasterror != APR_FROM_OS_ERROR(WSAEWOULDBLOCK)) {
             return lasterror;
@@ -297,6 +281,7 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
         }
     }
     /* connect was OK .. amazing */
+    sock->remote_addr = sa;
     if (sock->local_addr->sa.sin.sin_port == 0) {
         sock->local_port_unknown = 1;
     }

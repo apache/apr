@@ -228,29 +228,10 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     return APR_SUCCESS;
 }
 
-apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
+apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    struct hostent *hp;
-
-    if (hostname != NULL) {
-        hp = gethostbyname(hostname);
-
-        if ((sock->socketdes < 0) || (!sock->remote_addr)) {
-            return APR_ENOTSOCK;
-        }
-        if (!hp)  {
-            if (h_errno == TRY_AGAIN) {
-                return EAGAIN;
-            }
-            return h_errno;
-        }
-    
-        memcpy((char *)&sock->remote_addr->sa.sin.sin_addr, hp->h_addr_list[0], 
-               hp->h_length);
-    }
-
-    if ((connect(sock->socketdes, (struct sockaddr *)&sock->remote_addr->sa.sin, 
-                 sock->remote_addr->sa_len) < 0) &&
+    if ((connect(sock->socketdes, (struct sockaddr *)&sa->sa.sin, 
+                 sa->sa_len) < 0) &&
         (sock_errno() != SOCEINPROGRESS)) {
         return APR_OS2_STATUS(sock_errno());
     }
@@ -258,6 +239,7 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
         int namelen = sizeof(sock->local_addr->sa.sin);
         getsockname(sock->socketdes, (struct sockaddr *)&sock->local_addr->sa.sin, 
                     &namelen);
+        sock->remote_addr = sa;
         return APR_SUCCESS;
     }
 }

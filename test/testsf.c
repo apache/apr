@@ -205,6 +205,7 @@ static int client(client_socket_mode_t socket_mode)
     apr_pollfd_t *pfd;
     apr_int32_t nsocks;
     int i;
+    apr_sockaddr_t *destsa;
 
     apr_setup(&p, &sock);
     create_testfile(p, TESTFILE);
@@ -217,15 +218,15 @@ static int client(client_socket_mode_t socket_mode)
         exit(1);
     }
 
-    rv = apr_set_port(sock, APR_REMOTE, TESTSF_PORT);
+    rv = apr_getaddrinfo(&destsa, "127.0.0.1", AF_INET, TESTSF_PORT, 0, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_set_remote_port()->%d/%s\n",
+        fprintf(stderr, "apr_getaddrinfo()->%d/%s\n",
                 rv,
                 apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
 
-    rv = apr_connect(sock, "127.0.0.1");
+    rv = apr_connect(sock, destsa);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_connect()->%d/%s\n", 
                 rv,
