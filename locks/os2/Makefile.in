@@ -1,7 +1,8 @@
 
 TARGETS = locks.lo \
 	thread_mutex.lo \
-	thread_rwlock.lo
+	thread_rwlock.lo \
+	thread_cond.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
