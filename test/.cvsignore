@@ -35,3 +35,4 @@ testipsub
 *.pdb
 *.idb
 mod_test.dll
+testnames
