@@ -307,7 +307,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ESYMNOTFOUND   (APR_OS_START_ERROR + 26)
 /** @see APR_STATUS_IS_EPROC_UNKNOWN */
 #define APR_EPROC_UNKNOWN  (APR_OS_START_ERROR + 27)
-
+/** @see APR_STATUS_IS_ENOTENOUGHENTROPY */
 #define APR_ENOTENOUGHENTROPY (APR_OS_START_ERROR + 28)
 /** @} */
 
@@ -396,6 +396,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #endif
 /** The given process was not recognized by APR. */
 #define APR_STATUS_IS_EPROC_UNKNOWN(s)  ((s) == APR_EPROC_UNKNOWN)
+
+/** APR could not gather enough entropy to continue. */
+#define APR_STATUS_IS_ENOTENOUGHENTROPY(s) ((s) == APR_ENOTENOUGHENTROPY)
 
 /** @} */
 
@@ -1147,7 +1150,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define apr_get_netos_error() (errno)
 #define apr_set_netos_error(e) (errno = (e))
-/** @} */
 
 /** 
  * @addtogroup APR_STATUS_IS

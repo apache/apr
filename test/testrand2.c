@@ -134,7 +134,7 @@ static void rand_run_seed_short(CuTest *tc,rnd_fn *f,apr_random_t *r,
     for(i=0 ; i < count ; ++i)
         rand_add_zeroes(r);
     rv=f(r,c,1);
-    CuAssertIntEquals(tc,rv,APR_ENOTENOUGHENTROPY);
+    CuAssertIntEquals(tc,1,APR_STATUS_IS_ENOTENOUGHENTROPY(rv));
     }
 
 static void rand_seed_short(CuTest *tc)
