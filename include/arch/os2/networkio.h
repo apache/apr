@@ -77,16 +77,6 @@ struct apr_socket_t {
     apr_int32_t inherit;
 };
 
-struct apr_pollfd_t {
-    apr_pool_t *cntxt;
-    int *socket_list;
-    int *r_socket_list;
-    int num_read;
-    int num_write;
-    int num_except;
-    int num_total;
-};
-
 /* Error codes returned from sock_errno() */
 #define SOCBASEERR              10000
 #define SOCEPERM                (SOCBASEERR+1)             /* Not owner */
