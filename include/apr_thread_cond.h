@@ -130,6 +130,12 @@ APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond);
  */
 APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond);
 
+/**
+ * Get the pool used by this thread_cond.
+ * @return apr_pool_t the pool
+ */
+APR_POOL_DECLARE_ACCESSOR(thread_cond);
+
 #endif /* APR_HAS_THREADS */
 
 #ifdef __cplusplus
