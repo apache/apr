@@ -99,6 +99,9 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_EEXIST;
     }
 #endif
+#if defined(NETWARE)
+    apr_netware_setup_time();
+#endif
 
     if ((status = apr_pool_alloc_init(global_apr_pool)) != APR_SUCCESS)
         return status;
