@@ -134,7 +134,6 @@ static void proc_mutex(CuTest *tc)
 {
 #if APR_HAS_FORK
     apr_status_t rv;
-    const char *lockname = "tpm.lock";
     const char *shmname = "tpm.shm";
     apr_shm_t *shm;
 
@@ -148,7 +147,7 @@ static void proc_mutex(CuTest *tc)
     apr_assert_success(tc, "create shm segment", rv);
 
     x = apr_shm_baseaddr_get(shm);
-    test_exclusive(tc, lockname);
+    test_exclusive(tc, NULL);
 #else
     CuNotImpl(tc, "APR lacks fork() support");
 #endif
