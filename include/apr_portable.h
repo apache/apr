@@ -321,7 +321,6 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
  * @param apr_sock The new socket that has been set up
  * @param os_sock_info The os representation of the socket handle and
  *        other characteristics of the socket
- * @param inherit Should this socket be inherited by child processes
  * @param cont The pool to use
  * @deffunc apr_status_t apr_os_sock_make(apr_socket_t **apr_sock, apr_os_sock_info_t *os_sock_info, apr_pool_t *cont)
  * @tip If you only know the descriptor/handle or if it isn't really
@@ -329,7 +328,6 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
  */
 APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
                                            apr_os_sock_info_t *os_sock_info,
-                                           int inherit,
                                            apr_pool_t *cont);
 
 /**
