@@ -84,12 +84,13 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
     int retremains = srcremains;
     apr_wchar_t *t = retstr;
     apr_status_t rv;
-    if (srcstr[1] == ':' && srcstr[2] == '/') {
+    if (srcstr[1] == ':' && (srcstr[2] == '/' || srcstr[2] == '\\')) {
         wcscpy (retstr, L"\\\\?\\");
         retlen -= 4;
         t += 4;
     }
-    else if (srcstr[0] == '/' && srcstr[1] == '/') {
+    else if ((srcstr[0] == '/' || srcstr[0] == '\\')
+          && (srcstr[1] == '/' || srcstr[1] == '\\')) {
         /* Skip the slashes */
         srcstr += 2;
         wcscpy (retstr, L"\\\\?\\UNC\\");
