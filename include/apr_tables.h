@@ -403,7 +403,7 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
                                      unsigned flags);
 
 /**
- * Eliminate redunandant entries in a table by either overwriting
+ * Eliminate redundant entries in a table by either overwriting
  * or merging duplicates
  *
  * @param t Table.
