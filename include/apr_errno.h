@@ -1112,8 +1112,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_FROM_OS_ERROR(e)  (e)
 #define APR_TO_OS_ERROR(e)    (e)
-/* Platform specific, should be deprecated */
-#define APR_TO_NETOS_ERROR(e)    (e-APR_OS_START_SYSERR)
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
