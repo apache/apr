@@ -1898,6 +1898,9 @@ AC_SUBST(have_sctp)
 
 AC_CHECK_FUNCS(set_h_errno)
 
+dnl Used in the Multicast Code
+AC_CHECK_FUNCS(getifaddrs)
+
 echo "${nl}Checking for IPv6 Networking support..."
 dnl Start of checking for IPv6 support...
 
