@@ -98,7 +98,10 @@
 #ifdef BEOS
 #include <kernel/OS.h>
 #endif
-#if BEOS && HAVE_ARPA_INET_H
+/* BeOS still defines fd_set in sys/socket.h so include it here.
+ * I'm not just including it as most platforms won't need it...
+ */
+#if BEOS_BONE
 #include <sys/socket.h> /* for fd_set definitions */
 #endif
 /* End System headers */
