@@ -20,7 +20,7 @@ while ($srcfile = shift(@ARGV)) {
     my $found;
 
     open (FILE, $srcfile) || die "Can't open $srcfile\n";
-    print STDERR "Reading \"$srcfile\"\n";
+#    print STDERR "Reading \"$srcfile\"\n";
 
     $count = 0;
     $found = 0;
