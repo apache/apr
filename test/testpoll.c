@@ -81,7 +81,7 @@ static void make_socket(apr_socket_t **sock, apr_sockaddr_t **sa,
     rv = apr_sockaddr_info_get(sa, "127.0.0.1", APR_UNSPEC, port, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    rv = apr_socket_create(sock, (*sa)->family, SOCK_DGRAM, p);
+    rv = apr_socket_create(sock, (*sa)->family, SOCK_DGRAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     rv =apr_socket_bind((*sock), (*sa));
