@@ -60,7 +60,7 @@
 #include <unistd.h>     /* for getpid, gethostname */
 #include <stdlib.h>     /* for rand, srand */
 
-#ifndef NETWARE
+#ifdef APR_HAVE_SYS_TIME
 #include <sys/time.h>   /* for gettimeofday */
 #endif
 
