@@ -58,24 +58,24 @@
 
 #if APR_HAS_THREADS
 
-apr_int32_t apr_atomic_add(apr_atomic_t *mem, apr_int32_t val) 
+apr_int32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_int32_t val) 
 {
     apr_atomic_t old, new_val; 
 
     old = *mem;   /* old is automatically updated on cs failure */
     do {
         new_val = old + val;
-    } while (__cs(&old, mem, new_val)); 
+    } while (__cs(&old, (cs_t *)mem, new_val)); 
 
     return new_val;
 }
 
-apr_uint32_t apr_atomic_cas(apr_atomic_t *mem, apr_uint32_t swap, 
+apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem, apr_uint32_t swap, 
                             apr_uint32_t cmp)
 {
     apr_uint32_t old = cmp;
     
-    __cs(&old, mem, swap);
+    __cs(&old, (cs_t *)mem, swap);
     return old; /* old is automatically updated from mem on cs failure */
 }
 
