@@ -531,6 +531,9 @@ case $host in
             APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_ZERO USE_SHMEM_SHMGET_ANON)
         fi
         ;;
+    *hpux11* ) 
+        APR_DECISION_OVERRIDE(USE_SHMEM_SHMGET_ANON)
+        ;;
 esac
 APR_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
