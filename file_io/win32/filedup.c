@@ -105,12 +105,14 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
 
     (*new_file)->cntxt = old_file->cntxt;
     (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
-    (*new_file)->demonfname = apr_pstrdup(old_file->cntxt, old_file->demonfname);
-    (*new_file)->lowerdemonfname = apr_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
+/*    (*new_file)->demonfname = apr_pstrdup(old_file->cntxt, old_file->demonfname);
+ *    (*new_file)->lowerdemonfname = apr_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
+ */
     (*new_file)->append = old_file->append;
-/*   (*new_file)->protection = old_file->protection;
-    (*new_file)->user = old_file->user;
-    (*new_file)->group = old_file->group;*/
+/*    (*new_file)->protection = old_file->protection;
+ *    (*new_file)->user = old_file->user;
+ *    (*new_file)->group = old_file->group;
+ */
     (*new_file)->size = old_file->size;
     (*new_file)->atime = old_file->atime;    
     (*new_file)->mtime = old_file->mtime;

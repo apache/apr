@@ -83,12 +83,10 @@ apr_status_t dir_cleanup(void *thedir)
 
 apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
-    char * temp;
     (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
     (*new)->cntxt = cont;
     (*new)->entry = NULL;
-    temp = canonical_filename((*new)->cntxt, dirname);
-    if (temp[strlen(temp)] == '/') {
+    if (dirname[strlen(dirname)] == '/') {
     	(*new)->dirname = apr_pstrcat(cont, dirname, "*", NULL);
     }
     else {
@@ -153,8 +151,7 @@ apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *co
 
 apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 {
-    char *temp = canonical_filename(cont, path);
-    if (!RemoveDirectory(temp)) {
+    if (!RemoveDirectory(path)) {
         return apr_get_os_error();
     }
     return APR_SUCCESS;

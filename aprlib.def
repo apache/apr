@@ -117,8 +117,8 @@ EXPORTS
 ;
 	apr_get_os_thread   @110
 	apr_get_os_threadkey   @111
-	apr_os_systemcase_filename   @112
-	canonical_filename   @113
+
+
 	apr_create_pool   @114
 ;
 ;
