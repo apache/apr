@@ -246,6 +246,7 @@ EXPORTS
 	apr_hash_first
 	apr_hash_next
 	apr_hash_this
+	apr_hash_count
 ;
 ; apr_lock.h
 	apr_create_lock
