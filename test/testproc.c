@@ -70,13 +70,23 @@
 int test_filedel(void);
 int testdirs(void);
 
+/* XXX I'm sure there has to be a better way to do this ... */
+#ifdef WIN32
+#define EXTENSION ".exe"
+#else
+#define EXTENSION
+#endif
+
 int main(int argc, char *argv[])
 {
     apr_pool_t *pool;
     apr_proc_t newproc;
     apr_procattr_t *attr;
     apr_file_t *testfile = NULL;
+    apr_file_t *testout = NULL;
+    apr_file_t *testerr = NULL;
     apr_size_t length;
+    apr_off_t offset;
     char *buf;
     char msgbuf[120];
     const char *args[3];
@@ -94,6 +104,8 @@ int main(int argc, char *argv[])
         teststr = apr_palloc(pool, 256);
         teststr = fgets(teststr, 256, stdin);      
         printf("%s", teststr);      
+        if (!strcmp("--to-stderr", argv[1]))
+            fprintf(stderr, "%s", teststr);
         exit(1);
     }
     teststr = apr_pstrdup(pool, "Whooo Hoooo\0");
@@ -102,6 +114,11 @@ int main(int argc, char *argv[])
     
     STD_TEST_NEQ("Creating directory for later use", 
                  apr_dir_make("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, pool))
+
+    /* =================================================================== */
+
+    printf("\nTesting process pipes ...\n\n");
+
     STD_TEST_NEQ("Creating procattr", apr_procattr_create(&attr, pool))
     STD_TEST_NEQ("Setting attr pipes, all three", apr_procattr_io_set(attr, APR_FULL_BLOCK, 
                  APR_CHILD_BLOCK, APR_NO_PIPE))
@@ -113,7 +130,7 @@ int main(int argc, char *argv[])
     args[2] = NULL;
     
     STD_TEST_NEQ("Creating a new process", apr_proc_create(&newproc,
-                 "../testproc", args, NULL, attr, pool))
+                 "../testproc" EXTENSION, args, NULL, attr, pool))
 
     printf("%-60s","Grabbing child's stdin");
     testfile = newproc.in;
@@ -149,6 +166,102 @@ int main(int argc, char *argv[])
     TEST_NEQ("Waiting for child to die",
              apr_proc_wait(&newproc, NULL, NULL, APR_WAIT),
              APR_CHILD_DONE, "OK", "Failed")   
+
+    /* =================================================================== */
+
+    printf("\nTesting file redirection ...\n\n");
+
+    testfile = NULL;
+    STD_TEST_NEQ("Creating input file",
+                 apr_file_open(&testfile, "proctest/stdin",
+                               APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                               APR_OS_DEFAULT, pool))
+    STD_TEST_NEQ("Creating output file",
+                 apr_file_open(&testout, "proctest/stdout",
+                               APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                               APR_OS_DEFAULT, pool))
+    STD_TEST_NEQ("Creating error file",
+                 apr_file_open(&testerr, "proctest/stderr",
+                               APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                               APR_OS_DEFAULT, pool))
+
+    length = strlen(teststr);
+    STD_TEST_NEQ("Writing input file",
+                 apr_file_write(testfile, teststr, &length))
+    offset = 0;
+    STD_TEST_NEQ("Rewinding input file",
+                 apr_file_seek(testfile, APR_SET, &offset))
+
+    STD_TEST_NEQ("Creating procattr", apr_procattr_create(&attr, pool))
+    STD_TEST_NEQ("Setting attr input file",
+                 apr_procattr_child_in_set(attr, testfile, NULL))
+    STD_TEST_NEQ("Setting attr output file",
+                 apr_procattr_child_out_set(attr, testout, NULL))
+    STD_TEST_NEQ("Setting attr error file",
+                 apr_procattr_child_err_set(attr, testerr, NULL))
+    STD_TEST_NEQ("Setting attr dir", apr_procattr_dir_set(attr, "proctest"))
+    STD_TEST_NEQ("Setting attr cmd type", apr_procattr_cmdtype_set(attr, APR_PROGRAM))
+
+    args[0] = "testproc";
+    args[1] = "--to-stderr";
+    args[2] = NULL;
+
+    STD_TEST_NEQ("Creating a new process", apr_proc_create(&newproc,
+                 "../testproc" EXTENSION, args, NULL, attr, pool))
+
+    TEST_NEQ("Waiting for child to die",
+             apr_proc_wait(&newproc, NULL, NULL, APR_WAIT),
+             APR_CHILD_DONE, "OK", "Failed")
+
+    offset = 0;
+    STD_TEST_NEQ("Rewinding output file",
+                 apr_file_seek(testout, APR_SET, &offset))
+    length = 256;
+    printf("%-60s", "Checking the data read from child's stdout");
+    buf = apr_pcalloc(pool, length);
+    if ((rv = apr_file_read(testout, buf, &length)) == APR_SUCCESS) {
+        if (!strcmp(buf, teststr))
+            printf("OK\n");
+        else {
+            printf( "Uh-Oh\n");
+            printf("  (I actually got %s_\n", buf);
+        }
+    }
+    else {
+        printf("Read failed - (%d) %s\n",
+               rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
+    }
+
+    offset = 0;
+    STD_TEST_NEQ("Rewinding error file",
+                 apr_file_seek(testerr, APR_SET, &offset))
+    length = 256;
+    printf("%-60s", "Checking the data read from child's stderr");
+    buf = apr_pcalloc(pool, length);
+    if ((rv = apr_file_read(testerr, buf, &length)) == APR_SUCCESS) {
+        if (!strcmp(buf, teststr))
+            printf("OK\n");
+        else {
+            printf( "Uh-Oh\n");
+            printf("  (I actually got %s_\n", buf);
+        }
+    }
+    else {
+        printf("Read failed - (%d) %s\n",
+               rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
+    }
+
+    STD_TEST_NEQ("Closing input file", apr_file_close(testfile));
+    STD_TEST_NEQ("Closing output file", apr_file_close(testout));
+    STD_TEST_NEQ("Closing error file", apr_file_close(testerr));
+
+    STD_TEST_NEQ("Removing input file", apr_file_remove("proctest/stdin", pool));
+    STD_TEST_NEQ("Removing output file", apr_file_remove("proctest/stdout", pool));
+    STD_TEST_NEQ("Removing error file", apr_file_remove("proctest/stderr", pool));
+
+    /* =================================================================== */
+
+    printf("\n");
     STD_TEST_NEQ("Removing directory", apr_dir_remove("proctest", pool))
 
     printf("\nTest completed succesfully\n");
