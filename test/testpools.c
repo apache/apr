@@ -65,90 +65,90 @@
 #endif
 #include "test_apr.h"
 
-static void alloc_bytes(apr_pool_t *p, int bytes)
+#define ALLOC_BYTES 1024
+
+apr_pool_t *pmain = NULL;
+apr_pool_t *pchild = NULL;
+
+static void alloc_bytes(CuTest *tc)
 {
     int i;
     char *alloc;
     
-    printf("apr_palloc for %d bytes\n", bytes);
-    printf("%-60s", "    apr_palloc");
-    alloc = apr_palloc(p, bytes);
-    if (!alloc) {
-        printf("Failed\n");
-        exit(-1);
-    }
-    printf("OK\n");
-    
-    printf("%-60s", "    Checking entire allocation is writable");
-    for (i=0;i<bytes;i++) {
+    alloc = apr_palloc(pmain, ALLOC_BYTES);
+    CuAssertPtrNotNull(tc, alloc);
+
+    for (i=0;i<ALLOC_BYTES;i++) {
         char *ptr = alloc + i;
         *ptr = 0xa;
     }
-    printf("OK\n");
+    /* This is just added to get the positive.  If this test fails, the
+     * suite will seg fault.
+     */
+    CuAssertTrue(tc, 1);
 }
 
-static void calloc_bytes(apr_pool_t *p, int bytes)
+static void calloc_bytes(CuTest *tc)
 {
     int i;
     char *alloc;
     
-    printf("apr_pcalloc for %d bytes\n", bytes);
-    printf("%-60s", "    apr_pcalloc");
-    alloc = apr_pcalloc(p, bytes);
-    if (!alloc) {
-        printf("Failed\n");
-        exit(-1);
-    }
-    printf("OK\n");
-    
-    printf("%-60s", "    Checking entire allocation is set to 0");
-    for (i=0;i<bytes;i++) {
+    alloc = apr_pcalloc(pmain, ALLOC_BYTES);
+    CuAssertPtrNotNull(tc, alloc);
+
+    for (i=0;i<ALLOC_BYTES;i++) {
         char *ptr = alloc + i;
-        if (*ptr != 0x0) {
-            printf("Error at byte %d (%d vs 0)\n", i, (*ptr));
-            exit (-1);
-        }
+        CuAssertPtrEquals(tc, NULL, *ptr);
     }
-    printf("OK\n");
 }
 
-
-int main (int argc, char ** argv)
+static void parent_pool(CuTest *tc)
 {
-    apr_pool_t *pmain, *pchild;
-    
-    apr_initialize();
-    atexit(apr_terminate);
+    apr_status_t rv;
 
-    fprintf(stdout, "APR Pools Test\n==============\n\n");
-    STD_TEST_NEQ("Creating a top level pool (no parent)", apr_pool_create(&pmain, NULL))
-
-    STD_TEST_NEQ("Create a child pool from the top level one",
-                 apr_pool_create(&pchild, pmain))
-
-    printf("\nMain Pool\n");
-    alloc_bytes(pmain, 1024);   
-
-    printf("\nChild Pool\n");
-
-    alloc_bytes(pchild, 1024);   
-    calloc_bytes(pchild, 1024);   
-    alloc_bytes(pchild, 4096);   
-       
-    printf("\nClearing the child pool\n\n");
-    apr_pool_clear(pchild);
-
-    alloc_bytes(pchild, 2048);    
-    calloc_bytes(pchild, 1024);   
-    alloc_bytes(pchild, 4096);   
-    
-    printf("\nDestroying the child pool\n");
-    apr_pool_destroy(pchild);
-    printf("Destroying the main pool\n");
-    apr_pool_destroy(pmain);
-    
-    printf("\nAll Tests completed - OK!\n");
-
-    return (0);
+    rv = apr_pool_create(&pmain, NULL);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertPtrNotNull(tc, pmain);
 }
+
+static void child_pool(CuTest *tc)
+{
+    apr_status_t rv;
+
+    rv = apr_pool_create(&pchild, pmain);
+    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertPtrNotNull(tc, pchild);
+}
+
+static void test_ancestor(CuTest *tc)
+{
+    CuAssertIntEquals(tc, 1, apr_pool_is_ancestor(pmain, pchild));
+}
+
+static void test_notancestor(CuTest *tc)
+{
+    CuAssertIntEquals(tc, 0, apr_pool_is_ancestor(pchild, pmain));
+}
+
+CuSuite *testpool(void)
+{
+    CuSuite *suite = CuSuiteNew("Test Pools");
+
+    SUITE_ADD_TEST(suite, parent_pool);
+    SUITE_ADD_TEST(suite, child_pool);
+    SUITE_ADD_TEST(suite, test_ancestor);
+    SUITE_ADD_TEST(suite, test_notancestor);
+    SUITE_ADD_TEST(suite, alloc_bytes);
+    SUITE_ADD_TEST(suite, calloc_bytes);
+
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return testpool();
+}
+#endif
+
 
