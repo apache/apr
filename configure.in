@@ -626,6 +626,7 @@ dnl #----------------------------- Checking for Networking Support
 echo $ac_n "${nl}Checking for Networking support...${nl}"
 AC_MSG_CHECKING(looking for in_addr in netinet/in.h)
 AC_TRY_COMPILE([
+#include <sys/types.h>
 #include <netinet/in.h>
 ],[
 struct in_addr arg;
