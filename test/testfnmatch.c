@@ -22,7 +22,7 @@
  * .txt extension in the data directory at the time testfnmatch
  * happens to be run (!?!). */
 
-#define NUM_FILES (3)
+#define NUM_FILES (4)
 
 static void test_glob(abts_case *tc, void *data)
 {
