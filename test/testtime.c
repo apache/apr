@@ -111,10 +111,8 @@ static void test_gmtstr(CuTest *tc)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
-    time_t os_now;
 
     rv = apr_time_exp_gmt(&xt, now);
-    os_now = now / APR_USEC_PER_SEC;
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_time_exp_gmt");
     }
@@ -127,10 +125,8 @@ static void test_localstr(CuTest *tc)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
-    time_t os_now;
 
     rv = apr_time_exp_lt(&xt, now);
-    os_now = now / APR_USEC_PER_SEC;
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_time_exp_lt");
     }
