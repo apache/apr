@@ -101,6 +101,9 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->buffered = 0;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
+#if APR_HAS_THREADS
+    (*in)->thlock = NULL;
+#endif
 
     (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     (*out)->cntxt = cont;
@@ -109,6 +112,9 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*out)->fname = ap_pstrdup(cont, "PIPE");
     (*out)->buffered = 0;
     (*out)->timeout = -1;
+#if APR_HAS_THREADS
+    (*in)->thlock = NULL;
+#endif
 
     pipenonblock(*in);
     pipenonblock(*out);
