@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) dont  performs a strlen on that value without checking for NULL in getopt 
+     [David Waite <mass@akuma.org>, Ian Holsman]
+
   *) Added apr_strtoll() and apr_atoll() to strings lib.
      [Shantonu Sen <ssen@apple.com>, Wilfredo Sanchez]
 
