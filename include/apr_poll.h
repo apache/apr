@@ -118,16 +118,6 @@ struct apr_pollfd_t {
     void *client_data;          /**< allows app to associate context */
 };
 
-/**
- * Setup the memory required for poll to operate properly
- * @param new_poll The poll structure to be used. 
- * @param num The number of socket descriptors to be polled.
- * @param cont The pool to operate on.
- * @deprecated This function is deprecated, APR applications should control the pollset memory themselves.
- */
-APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll, 
-                                         apr_int32_t num,
-                                         apr_pool_t *cont);
 
 /**
  * Poll the sockets in the poll structure
@@ -146,83 +136,11 @@ APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll,
  *        socket has been signalled, or the timeout has expired. 
  * </PRE>
  */
+/* ### is this deprecated, too? */
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
                                    apr_int32_t *nsds, 
                                    apr_interval_time_t timeout);
 
-/**
- * Add a socket to the poll structure.
- * @param aprset The poll structure we will be using. 
- * @param sock The socket to add to the current poll structure. 
- * @param event The events to look for when we do the poll.  One of:
- * <PRE>
- *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if prioirty data is availble to be read
- *            APR_POLLOUT      signal if write will not block
- * </PRE>
- * @deprecated This function is deprecated, APR applications should control the pollset memory themselves.
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
-                                              apr_socket_t *sock,
-                                              apr_int16_t event);
-
-/**
- * Modify a socket in the poll structure with mask.
- * @param aprset The poll structure we will be using. 
- * @param sock The socket to modify in poll structure. 
- * @param events The events to stop looking for during the poll.  One of:
- * <PRE>
- *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if priority data is available to be read
- *            APR_POLLOUT      signal if write will not block
- * </PRE>
- * @deprecated This function is deprecated, APR applications should control the pollset memory themselves.
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
-                                               apr_socket_t *sock,
-                                               apr_int16_t events);
-/**
- * Remove a socket from the poll structure.
- * @param aprset The poll structure we will be using. 
- * @param sock The socket to remove from the current poll structure. 
- * @deprecated This function is deprecated, APR applications should control the pollset memory themselves.
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, 
-                                                 apr_socket_t *sock);
-
-/**
- * Clear all events in the poll structure.
- * @param aprset The poll structure we will be using. 
- * @param events The events to clear from all sockets.  One of:
- * <PRE>
- *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if priority data is available to be read
- *            APR_POLLOUT      signal if write will not block
- * </PRE>
- * @deprecated This function is deprecated, APR applications should control the pollset memory themselves.
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, 
-                                                 apr_int16_t events);
-
-/**
- * Get the return events for the specified socket.
- * @param event The returned events for the socket.  One of:
- * <PRE>
- *            APR_POLLIN       Data is available to be read 
- *            APR_POLLPRI      Priority data is availble to be read
- *            APR_POLLOUT      Write will succeed
- *            APR_POLLERR      An error occurred on the socket
- *            APR_POLLHUP      The connection has been terminated
- *            APR_POLLNVAL     This is an invalid socket to poll on.
- *                             Socket not open.
- * </PRE>
- * @param sock The socket we wish to get information about. 
- * @param aprset The poll structure we will be using. 
- * @deprecated This function is deprecated, APR applications should control the pollset memory themselves.
- */
-APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, 
-                                          apr_socket_t *sock,
-                                          apr_pollfd_t *aprset);
 
 /* General-purpose poll API for arbitrarily large numbers of
  * file descriptors
@@ -282,6 +200,30 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            const apr_pollfd_t **descriptors);
 
 /** @} */
+
+
+/* These functions are deprecated. If you want doc, then go to older
+   versions of this header file.
+
+   ### should probably just be removed.
+*/
+APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll, 
+                                         apr_int32_t num,
+                                         apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
+                                              apr_socket_t *sock,
+                                              apr_int16_t event);
+APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
+                                               apr_socket_t *sock,
+                                               apr_int16_t events);
+APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, 
+                                                 apr_socket_t *sock);
+APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, 
+                                                 apr_int16_t events);
+APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, 
+                                          apr_socket_t *sock,
+                                          apr_pollfd_t *aprset);
+
 
 #ifdef __cplusplus
 }
