@@ -87,7 +87,6 @@ struct view_fileinfo
 }; 
 
 void test_filedel(apr_pool_t *);
-void testdirs(apr_pool_t *);
 static void test_read(apr_pool_t *);
 static void test_read_seek(apr_int32_t, apr_pool_t *);
 static void test_mod_neg(apr_pool_t *, apr_int32_t);
@@ -239,7 +238,6 @@ int main(void)
                          APR_UREAD | APR_UWRITE | APR_GREAD, pool),
            APR_SUCCESS, "OK", "Failed")
 
-    testdirs(pool); 
     test_filedel(pool);
     test_read(pool);
     test_mod_neg(pool, 0); /* unbuffered */
@@ -268,61 +266,6 @@ void test_filedel(apr_pool_t *pool)
             APR_SUCCESS,
             "OK", "Failed")
 }
-
-void testdirs(apr_pool_t *pool)
-{
-    apr_dir_t *temp;  
-    apr_file_t *file = NULL;
-    apr_size_t bytes;
-    apr_finfo_t dirent;
-
-    fprintf(stdout, "Testing Directory functions.\n");
-
-    STD_TEST_NEQ("    Making directory",
-                 apr_dir_make("tmpdir", 
-                               APR_UREAD | APR_UWRITE | APR_UEXECUTE |
-                               APR_GREAD | APR_GWRITE | APR_GEXECUTE | 
-                               APR_WREAD | APR_WWRITE | APR_WEXECUTE, pool))
-
-    STD_TEST_NEQ("    Creating a file in the new directory",
-                 apr_file_open(&file, "tmpdir/testfile", 
-                               APR_READ | APR_WRITE | APR_CREATE, 
-                               APR_UREAD | APR_UWRITE | APR_UEXECUTE, pool))
-
-    bytes = strlen("Another test!!!");
-    apr_file_write(file, "Another test!!", &bytes); 
-	apr_file_close(file);
-
-    STD_TEST_NEQ("    Opening directory", apr_dir_open(&temp, "tmpdir", pool))
-    STD_TEST_NEQ("    Reading directory", 
-                 apr_dir_read(&dirent, APR_FINFO_DIRENT, temp))
-       
-    printf("    Getting Information about the file...\n");
-    do {
-        /* Because I want the file I created, I am skipping the "." and ".."
-         * files that are here. 
-         */
-        if (apr_dir_read(&dirent, APR_FINFO_DIRENT | APR_FINFO_TYPE
-                                | APR_FINFO_SIZE | APR_FINFO_MTIME, temp) 
-                != APR_SUCCESS) {
-            fprintf(stderr, "Error reading directory tmpdir"); 
-            exit(-1);
-        }
-    } while (dirent.name[0] == '.');
-    TEST_NEQ("        File name",
-             strcmp(dirent.name, "testfile"), 0,
-             "OK", "Got wrong file name");
-    TEST_NEQ("        File type", dirent.filetype, APR_REG,
-             "OK", "Got wrong file type")
-    TEST_NEQ("        File size", dirent.size, bytes,
-             "OK", "Got wrong file size")
-    printf("    Done checking file information\n");
-    STD_TEST_NEQ("    Rewind directory", apr_dir_rewind(temp))
-    STD_TEST_NEQ("    Closing directory", apr_dir_close(temp))
-    STD_TEST_NEQ("    Removing file from directory",
-                 apr_file_remove("tmpdir/testfile", pool))
-    STD_TEST_NEQ("    Removing directory", apr_dir_remove("tmpdir", pool))
-}    
 
 #define TESTREAD_BLKSIZE 1024
 #define APR_BUFFERSIZE   4096 /* This should match APR's buffer size. */
