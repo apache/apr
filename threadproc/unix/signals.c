@@ -169,7 +169,7 @@ static const char *signal_description[APR_NUMSIG];
 #define store_desc(index, string) \
         do { \
             if (index >= APR_NUMSIG) { \
-                assert(index < APR_NUMSIG); \ 
+                assert(index < APR_NUMSIG); \
             } \
             else { \
                 signal_description[index] = string; \
