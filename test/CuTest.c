@@ -436,3 +436,4 @@ void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details)
 		}
 	} 
 }
+
