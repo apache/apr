@@ -40,30 +40,28 @@ BEGIN {
   }
 
   while ((getline < rel_h) > 0) {
-    if (match ($0, /^#define AP_SERVER_BASEREVISION "[^"]+"/)) {
-      ver = substr($0, RSTART + 32, RLENGTH - 33);
+    if (match ($0, /^#define AP._MAJOR_VERSION/)) {
+      ver_major = $3;
+    }
+    if (match ($0, /^#define AP._MINOR_VERSION/)) {
+      ver_minor = $3;
+    }
+    if (match ($0, /^#define AP._PATCH_VERSION/)) {
+      ver_patch = $3;
+    }
+    if (match ($0, /^#define AP._IS_DEV_VERSION/)) {
+      ver_suffix = "-dev";
+      ver_build = "0";
+    }
+    if (match ($0, /^#undef AP._IS_DEV_VERSION/)) {
+      ver_build = "100";
+    }
+    if (match ($0, /^.*Copyright /)) {
+      copyright = substr($0, RLENGTH + 1);
     }
   }
-  if (ver) {
-    verc = ver;
-    gsub(/\./, ",", verc);
-    if (build) {
-      sub(/-.*/, "", verc)
-      verc = verc "," build;
-    } else if (sub(/-dev/, ",0", verc)) {
-        ff = ff + 2;
-    } else if (!sub(/-alpha/, ",10", verc)  \
-            && !sub(/-beta/, ",100", verc)  \
-            && !sub(/-gold/, ",200", verc)) {
-      sub(/-.*/, "", verc);
-      verc = verc "," 0;
-    }
-  } else {
-# XXX Gotta fix this for non-httpd installs :(
-    ver = "0.0.0.0"
-    verc = "0,0,0,0"
-    ff = ff + 2;
-  }
+  ver = ver_major "." ver_minor "." ver_patch ver_suffix;
+  verc = ver_major "," ver_minor "," ver_patch "," ver_build;   
 
   if (length(vendor)) {
     ff = ff + 8;
@@ -89,15 +87,21 @@ BEGIN {
   print "  BEGIN";
   print "    BLOCK \"040904b0\"";
   print "    BEGIN";
-  print "      VALUE \"Comments\", \"All rights reserved.  The "\
-        "license is available at <http://www.apache.org/LICENSE.txt>.  "\
-        "The APR project pages are at <http://apr.apache.org/>.\\0\"";
+  print "    VALUE \"Comments\", "\
+     "\"Licensed under the Apache License, Version 2.0 (the \"\"License\"\"); "\
+     "you may not use this file except in compliance with the License.  "\
+     "You may obtain a copy of the License at\\r\\n\\r\\n"\
+     "http://www.apache.org/licenses/LICENSE-2.0\\r\\n\\r\\n"\
+     "Unless required by applicable law or agreed to in writing, "\
+     "software distributed under the License is distributed on an "\
+     "\"\"AS IS\"\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, "\
+     "either express or implied.  See the License for the specific "\
+     "language governing permissions and limitations under the License.\\0\"";
   print "      VALUE \"CompanyName\", \"Apache Software Foundation\\0\"";
   print "      VALUE \"FileDescription\", \"" desc "\\0\"";
   print "      VALUE \"FileVersion\", \"" ver "\\0\"";
   print "      VALUE \"InternalName\", \"" file "\\0\"";
-  print "      VALUE \"LegalCopyright\", \"Copyright © 2000-2003 "\
-        "The Apache Software Foundation.\\0\"";
+  print "      VALUE \"LegalCopyright\", \"Copyright " copyright "\\0\"";
   print "      VALUE \"OriginalFilename\", \"" filename "\\0\"";
   if (vendor) {
     print "      VALUE \"PrivateBuild\", \"" vendor "\\0\"";
