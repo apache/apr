@@ -55,7 +55,7 @@
 #ifndef DSO_H
 #define DSO_H
 
-#include "apr_private.h"
+#include "unix/apr_private.h"
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
