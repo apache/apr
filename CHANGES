@@ -1,10 +1,18 @@
 Changes with APR b1  
 
-  *) Add the new thread read/write lock API to APR.
-     [Aaron Bannert <aaron@clove.org>]
+  *) Fix the API for the apr_proc_create() call on Win32.  Several
+     bad assumptions are gone, including a mismatch between unix and
+     win32, where win32 was defaulting to create detached.  Also fixes
+     the apr_proc_t's pid member to a real pid (identity that works
+     across processes) instead of the handle (which is a new hproc
+     member value.)  [William Rowe]
 
-  *) Add the new thread mutex lock API to APR.
-     [Aaron Bannert <aaron@clove.org>]
+  *) Modify the external apr_filepath_get() fn to take a flags arg,
+     currently only for APR_FILEPATH_NATIVE.  This returns c:\foo
+     format on Win32, and should do the same on OS2, or sys\vol:\foo
+     on Netware.  Primarily for internals, but possibly useful to
+     others (and it mirrors some of the other apr_filepath_*() calls.)
+     [William Rowe]
 
   *) Cache GMT offset on platforms that don't store it in the tm struct.
      This offset is normalized to be independent of daylight savings

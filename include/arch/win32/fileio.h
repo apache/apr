@@ -91,11 +91,25 @@
 
 typedef apr_uint16_t apr_wchar_t;
 
+/* Helper functions for the WinNT ApiW() functions.  APR treats all
+ * resource identifiers (files, etc) by their UTF-8 name, to provide 
+ * access to all named identifiers.  [UTF-8 completely maps Unicode 
+ * into char type strings.]
+ *
+ * The _path flavors below provide us fast mappings of the
+ * Unicode filename //?/D:/path and //?/UNC/mach/share/path mappings,
+ * which allow unlimited (well, 32000 wide character) length names.
+ * These prefixes may appear in Unicode, but must not appear in the
+ * Ascii API calls.  So we tack them on in utf8_to_unicode_path, and
+ * strip them right back off in unicode_to_utf8_path.
+ */
 apr_status_t utf8_to_unicode_path(apr_wchar_t* dststr, apr_size_t dstchars, 
                                   const char* srcstr);
 apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars, 
                                   const apr_wchar_t* srcstr);
 
+/* XXX: ONE OF THESE IS WRONG, WHO CHANGED IT?
+ */
 #define APR_FILE_MAX MAX_PATH
 #else /* !APR_HAS_UNICODE_FS */
 #define APR_FILE_MAX MAX_PATH
@@ -233,8 +247,12 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p);
  *
  * But we need to figure out what the cwd of a given volume is,
  * when the user passes D:foo.  This fn will determine D:'s cwd.
+ *
+ * If flags includes the bit APR_FILEPATH_NATIVE, the path returned
+ * is in the os-native format.
  */
-apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p);
+apr_status_t filepath_drive_get(char **rootpath, char drive, 
+                                apr_int32_t flags, apr_pool_t *p);
 
 
 /* If the user passes d: vs. D: (or //mach/share vs. //MACH/SHARE),

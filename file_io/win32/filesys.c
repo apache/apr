@@ -116,7 +116,8 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p)
 }
 
 
-apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p)
+apr_status_t filepath_drive_get(char **rootpath, char drive, 
+                                apr_int32_t flags, apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
 #if APR_HAS_UNICODE_FS
@@ -149,12 +150,11 @@ apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p)
         if (!GetFullPathName(drivestr, sizeof(path), path, &ignored))
             return apr_get_os_error();
     }
-    /* ###: We really should consider adding a flag to allow the user
-     * to have the APR_FILEPATH_NATIVE result
-     */
-    for (*rootpath = path; **rootpath; ++*rootpath) {
-        if (**rootpath == '\\')
-            **rootpath = '/';
+    if (!(flags & APR_FILEPATH_NATIVE)) {
+        for (*rootpath = path; **rootpath; ++*rootpath) {
+            if (**rootpath == '\\')
+                **rootpath = '/';
+        }
     }
     *rootpath = apr_pstrdup(p, path);
     return APR_SUCCESS;
@@ -201,7 +201,7 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
 }
 
 
-APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
+APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
                                            apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
@@ -222,12 +222,11 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath,
         if (!GetCurrentDirectory(sizeof(path), path))
             return apr_get_os_error();
     }
-    /* ###: We really should consider adding a flag to allow the user
-     * to have the APR_FILEPATH_NATIVE result
-     */
-    for (*rootpath = path; **rootpath; ++*rootpath) {
-        if (**rootpath == '\\')
-            **rootpath = '/';
+    if (!(flags & APR_FILEPATH_NATIVE)) {
+        for (*rootpath = path; **rootpath; ++*rootpath) {
+            if (**rootpath == '\\')
+                **rootpath = '/';
+        }
     }
     *rootpath = apr_pstrdup(p, path);
     return APR_SUCCESS;
@@ -257,5 +256,3 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
     }
     return APR_SUCCESS;
 }
-
-

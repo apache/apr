@@ -124,6 +124,12 @@ struct apr_proc_t {
     apr_file_t *out;
     /** Parent's side of pipe to child's stdouterr */
     apr_file_t *err;
+#ifdef WIN32
+    /** Must retain the handle as any clone may not have the
+     *  the same permissions 
+     */
+    HANDLE hproc;
+#endif
 };
 
 typedef struct apr_thread_t           apr_thread_t;

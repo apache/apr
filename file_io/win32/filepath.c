@@ -418,10 +418,10 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         char *getpath;
 #ifndef NETWARE
         if (addtype == APR_EINCOMPLETE && addroot[1] == ':')
-            rv = filepath_drive_get(&getpath, addroot[0], p);
+            rv = filepath_drive_get(&getpath, addroot[0], flags, p);
         else
 #endif
-            rv = apr_filepath_get(&getpath, p);
+            rv = apr_filepath_get(&getpath, flags, p);
         if (rv != APR_SUCCESS)
             return rv;
         basepath = getpath;
