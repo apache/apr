@@ -85,16 +85,6 @@ struct apr_ipsubnet_t {
 #endif
 };
 
-#ifndef NETWARE
-#ifdef HAVE_SET_H_ERRNO
-#define SET_H_ERRNO(newval) set_h_errno(newval)
-#else
-#define SET_H_ERRNO(newval) h_errno = (newval)
-#endif
-#else
-#define SET_H_ERRNO(newval)
-#endif
-
 #if APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
     defined(HAVE_GETHOSTBYNAME_R)
 /* This is the maximum size that may be returned from the reentrant
@@ -336,8 +326,12 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo(hostname, NULL, &hints, &ai_list);
     if (error) {
+#ifdef WIN32
+        /* XXX Netware also??? */
+        return apr_get_netos_error();
+#else
         if (error == EAI_SYSTEM) {
-            return errno;
+            return apr_get_os_error();
         }
         else {
             /* issues with representing this with APR's error scheme:
@@ -350,6 +344,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
 #endif
             return error + APR_OS_START_EAIERR;
         }
+#endif
     }
 
     prev_sa = NULL;
@@ -423,6 +418,8 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
 #ifdef GETHOSTBYNAME_R_HOSTENT_DATA
     struct hostent_data hd;
 #else
+    /* If you see ERANGE, that means GETHOSBYNAME_BUFLEN needs to be
+     * bumped. */
     char tmp[GETHOSTBYNAME_BUFLEN];
 #endif
     int hosterror;
@@ -451,30 +448,23 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
         /* Linux glibc2+ */
         gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, 
                         &hp, &hosterror);
+        if (!hp)  {
+            return (hosterror + APR_OS_START_SYSERR);
+        }
 #else
         /* Solaris, Irix et alia */
         hp = gethostbyname_r(hostname, &hs, tmp, GETHOSTBYNAME_BUFLEN - 1,
                              &hosterror);
+        if (!hp)  {
+            return (hosterror + APR_OS_START_SYSERR);
+        }
 #endif
 #else
         hp = gethostbyname(hostname);
 #endif
 
         if (!hp)  {
-#ifdef WIN32
             return apr_get_netos_error();
-#elif APR_HAS_THREADS && !defined(GETHOSTBYNAME_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYNAME_R) && !defined(BEOS)
-#ifdef GETHOSTBYNAME_R_HOSTENT_DATA
-            return (h_errno + APR_OS_START_SYSERR);
-#else
-            /* If you see ERANGE, that means GETHOSBYNAME_BUFLEN needs to be
-             * bumped. */
-            return (hosterror + APR_OS_START_SYSERR);
-#endif
-#else
-            return (h_errno + APR_OS_START_SYSERR);
-#endif
         }
     }
 
@@ -556,7 +546,7 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
 
     /* don't know if it is portable for getnameinfo() to set h_errno;
      * clear it then see if it was set */
-    SET_H_ERRNO(0);
+    apr_set_netos_error(0);
     /* default flags are NI_NAMREQD; otherwise, getnameinfo() will return
      * a numeric address string if it fails to resolve the host name;
      * that is *not* what we want here
@@ -566,7 +556,10 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                      flags != 0 ? flags : NI_NAMEREQD);
     if (rc != 0) {
         *hostname = NULL;
-
+#ifdef WIN32
+        /* XXX and Netware? */
+        return apr_get_netos_error();
+#else
         /* something went wrong. Look at the EAI_ error code */
         if (rc != EAI_SYSTEM) {
 #if defined(NEGATIVE_EAI)
@@ -577,13 +570,14 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
         else {
             /* EAI_SYSTEM      System error returned in errno. */
             /* IMHO, Implementations that set h_errno a simply broken. */
-            if (h_errno) { /* for broken implementations which set h_errno */
-                return h_errno + APR_OS_START_SYSERR;
+            if (apr_get_netos_error()) { /* for broken implementations which set h_errno */
+                return apr_get_netos_error();
             }
             else { /* "normal" case */
-                return errno + APR_OS_START_SYSERR;
+                return apr_get_os_error();
             }
         }
+#endif
     }
     *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, 
                                                  tmphostname);
@@ -609,11 +603,19 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
     gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
                     sizeof(struct in_addr), AF_INET,
                     &hs, tmp, GETHOSTBYNAME_BUFLEN - 1, &hptr, &hosterror);
+    if (!hptr) {
+        *hostname = NULL;
+        return hosterror + APR_OS_START_SYSERR;
+    }
 #else
     /* Solaris, Irix et alia */
     hptr = gethostbyaddr_r((char *)&sockaddr->sa.sin.sin_addr, 
                            sizeof(struct in_addr), AF_INET,
                            &hs, tmp, GETHOSTBYNAME_BUFLEN, &hosterror);
+    if (!hptr) {
+        *hostname = NULL;
+        return hosterror + APR_OS_START_SYSERR;
+    }
 #endif
 #else
     struct hostent *hptr;
@@ -621,22 +623,12 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                          sizeof(struct in_addr), AF_INET);
 #endif
 
-    if (hptr) {
-        *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, hptr->h_name);
-        return APR_SUCCESS;
+    if (!hptr) {
+        *hostname = NULL;
+        return apr_get_netos_error();
     }
-    *hostname = NULL;
-#if APR_HAS_THREADS && !defined(GETHOSTBYADDR_IS_THREAD_SAFE) && \
-    defined(HAVE_GETHOSTBYADDR_R) && !defined(BEOS) && \
-    !defined(GETHOSTBYNAME_R_HOSTENT_DATA)
-    return hosterror + APR_OS_START_SYSERR;
-#elif defined(WIN32)
-    return apr_get_netos_error();
-#elif defined(OS2)
-    return h_errno;
-#else
-    return h_errno + APR_OS_START_SYSERR;
-#endif
+    *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, hptr->h_name);
+    return APR_SUCCESS;
 #endif
 }
 
