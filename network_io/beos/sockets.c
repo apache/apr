@@ -61,6 +61,7 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_portable.h"
+#include "apr_lib.h"
 
 ap_status_t socket_cleanup(void *sock)
 {
