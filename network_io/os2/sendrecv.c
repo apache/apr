@@ -142,9 +142,15 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec, apr_int32_t 
     apr_status_t rv;
     struct iovec *tmpvec;
     int fds, err = 0;
+    int nv_tosend, total = 0;
 
-    tmpvec = alloca(sizeof(struct iovec) * nvec);
-    memcpy(tmpvec, vec, sizeof(struct iovec) * nvec);
+    /* Make sure writev() only gets fed 64k at a time */
+    for ( nv_tosend = 0; total + vec[nv_tosend].iov_len < 65536; nv_tosend++ ) {
+        total += vec[nv_tosend].iov_len;
+    }
+
+    tmpvec = alloca(sizeof(struct iovec) * nv_tosend);
+    memcpy(tmpvec, vec, sizeof(struct iovec) * nv_tosend);
 
     do {
         if (!sock->nonblock || err == SOCEWOULDBLOCK) {
@@ -165,7 +171,7 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec, apr_int32_t 
             }
         }
 
-        rv = writev(sock->socketdes, tmpvec, nvec);
+        rv = writev(sock->socketdes, tmpvec, nv_tosend);
         err = rv < 0 ? sock_errno() : 0;
     } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
 
