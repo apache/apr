@@ -81,6 +81,13 @@ apr_status_t apr_generate_random_bytes(unsigned char * buf, int length)
 
     close(rnd);
 
+#elif defined(OS2)
+    static UCHAR randbyte();
+    unsigned int idx;
+
+    for (idx=0; idx<length; idx++)
+	buf[idx] = randbyte();
+
 #else  /* use truerand */
 
     extern int randbyte(void);	/* from the truerand library */
@@ -99,4 +106,9 @@ apr_status_t apr_generate_random_bytes(unsigned char * buf, int length)
 
 #undef	STR
 #undef	XSTR
+
+#ifdef OS2
+#include "../os2/randbyte.c"
+#endif
+
 #endif /* APR_HAS_RANDOM */

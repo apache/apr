@@ -803,11 +803,21 @@ elif test -r "/dev/urandom"; then
     rand="1"
 else
     AC_MSG_RESULT(not found);
-    if test "$ac_cv_lib_truerand_main" = "yes"; then
-        rand="1"
-    else
-        rand="0"
-    fi
+
+    case "$OS" in
+        # we have built in support for OS/2
+        *-os2*)
+            rand="1"
+            ;;
+        # no other choice, try for truerand
+        *)
+            if test "$ac_cv_lib_truerand_main" = "yes"; then
+                rand="1"
+            else
+                rand="0"
+            fi
+            ;;
+    esac
 fi
 
 AC_SUBST(rand)
