@@ -23,6 +23,15 @@
 #include "apr_time.h"
 #include "testshm.h"
 
+/* XXX I'm sure there has to be a better way to do this ... */
+#ifdef WIN32
+#define EXTENSION ".exe"
+#elif NETWARE
+#define EXTENSION ".nlm"
+#else
+#define EXTENSION
+#endif
+
 #if APR_HAS_SHARED_MEMORY
 
 static int msgwait(int sleep_sec, int first_box, int last_box)
@@ -87,7 +96,6 @@ static void test_shm_allocate(CuTest *tc)
 {
     apr_status_t rv;
     apr_shm_t *shm = NULL;
-    apr_size_t retsize;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
     apr_assert_success(tc, "Error allocating shared memory block", rv);
@@ -100,14 +108,14 @@ static void test_shm_allocate(CuTest *tc)
     apr_assert_success(tc, "Error destroying shared memory block", rv);
 }
 
+#if APR_HAS_FORK
 static void test_anon(CuTest *tc)
 {
     apr_proc_t proc;
     apr_status_t rv;
     apr_shm_t *shm;
     apr_size_t retsize;
-    pid_t pid;
-    int cnt, i, exit_int;
+    int cnt, i;
     int recvd;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
@@ -149,6 +157,7 @@ static void test_anon(CuTest *tc)
     rv = apr_shm_destroy(shm);
     apr_assert_success(tc, "Error destroying shared memory block", rv);
 }
+#endif
 
 static void test_named(CuTest *tc)
 {
@@ -174,18 +183,18 @@ static void test_named(CuTest *tc)
     rv = apr_procattr_create(&attr1, p);
     CuAssertPtrNotNull(tc, attr1);
     apr_assert_success(tc, "Couldn't create attr1", rv);
-    args[0] = apr_pstrdup(p, "testshmproducer");
+    args[0] = apr_pstrdup(p, "testshmproducer" EXTENSION);
     args[1] = NULL;
-    rv = apr_proc_create(&pidproducer, "./testshmproducer", args, NULL,
-                         attr1, p);
+    rv = apr_proc_create(&pidproducer, "./testshmproducer" EXTENSION, args,
+                         NULL, attr1, p);
     apr_assert_success(tc, "Couldn't launch producer", rv);
 
     rv = apr_procattr_create(&attr2, p);
     CuAssertPtrNotNull(tc, attr2);
     apr_assert_success(tc, "Couldn't create attr2", rv);
-    args[0] = apr_pstrdup(p, "testshmconsumer");
-    rv = apr_proc_create(&pidconsumer, "./testshmconsumer", args, NULL,
-                         attr2, p);
+    args[0] = apr_pstrdup(p, "testshmconsumer" EXTENSION);
+    rv = apr_proc_create(&pidconsumer, "./testshmconsumer" EXTENSION, args, 
+                         NULL, attr2, p);
     apr_assert_success(tc, "Couldn't launch consumer", rv);
 
     rv = apr_proc_wait(&pidconsumer, &received, &why, APR_WAIT);
@@ -216,7 +225,9 @@ CuSuite *testshm(void)
     SUITE_ADD_TEST(suite, test_anon_create);
     SUITE_ADD_TEST(suite, test_check_size);
     SUITE_ADD_TEST(suite, test_shm_allocate);
+#if APR_HAS_FORK
     SUITE_ADD_TEST(suite, test_anon);
+#endif
     SUITE_ADD_TEST(suite, test_named);
 #endif
 
