@@ -191,6 +191,22 @@ static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
 #endif
 }
 
+apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock)
+{
+    if (which == APR_LOCAL) {
+        *sa = sock->local_addr;
+    }
+    else if (which == APR_REMOTE) {
+        *sa = sock->remote_addr;
+    }
+    else {
+        *sa = NULL;
+        return APR_EINVAL;
+    }
+    return APR_SUCCESS;
+    
+}
+
 apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname, 
                              apr_int32_t family, apr_port_t port,
                              apr_int32_t flags, apr_pool_t *p)
