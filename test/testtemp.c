@@ -15,6 +15,7 @@
 
 #include "test_apr.h"
 #include "apr_file_io.h"
+#include "apr_strings.h"
 
 static void test_temp_dir(CuTest *tc)
 {
@@ -26,11 +27,27 @@ static void test_temp_dir(CuTest *tc)
     CuAssertPtrNotNull(tc, tempdir);
 }
 
+static void test_mktemp(CuTest *tc)
+{
+    apr_file_t *f = NULL;
+    const char *tempdir = NULL;
+    char *filetemplate;
+    apr_status_t rv;
+
+    rv = apr_temp_dir_get(&tempdir, p);
+    apr_assert_success(tc, "Error finding Temporary Directory", rv);
+    
+    filetemplate = apr_pstrcat(p, tempdir, "/tempfileXXXXXX", NULL);
+    rv = apr_file_mktemp(&f, filetemplate, 0, p);
+    apr_assert_success(tc, "Error opening Temporary file", rv);
+}
+
 CuSuite *testtemp(void)
 {
     CuSuite *suite = CuSuiteNew("Temp Dir");
 
     SUITE_ADD_TEST(suite, test_temp_dir);
+    SUITE_ADD_TEST(suite, test_mktemp);
 
     return suite;
 }
