@@ -100,8 +100,8 @@ static apr_int32_t get_offset(struct tm *tm)
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result, 
-                                                    time_t input)
+APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result,
+                                            time_t input)
 {
     *result = (apr_time_t)input * APR_USEC_PER_SEC;
     return APR_SUCCESS;
@@ -146,21 +146,22 @@ static void explode_time(apr_time_exp_t *xt, apr_time_t t,
     xt->tm_gmtoff = get_offset(&tm);
 }
 
-APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result, 
-		                           apr_time_t input, apr_int32_t offs)
+APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
+                                           apr_time_t input, apr_int32_t offs)
 {
     explode_time(result, input, offs, 0);
     result->tm_gmtoff = offs;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result, 
-		                           apr_time_t input)
+APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
+                                           apr_time_t input)
 {
     return apr_explode_time(result, input, 0);
 }
 
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result, apr_time_t input)
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result,
+                                                apr_time_t input)
 {
 #if defined(__EMX__)
     /* EMX gcc (OS/2) has a timezone global we can use */
@@ -210,7 +211,7 @@ APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t, apr_time_exp_t *xt)
     return status;
 }
 
-APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime, 
+APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime,
                                               apr_time_t *aprtime)
 {
     (*ostime)->tv_usec = *aprtime % APR_USEC_PER_SEC;
@@ -218,7 +219,7 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime, 
+APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
                                               apr_time_exp_t *aprtime)
 {
     (*ostime)->tm_sec  = aprtime->tm_sec;
@@ -230,15 +231,18 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
     (*ostime)->tm_wday = aprtime->tm_wday;
     (*ostime)->tm_yday = aprtime->tm_yday;
     (*ostime)->tm_isdst = aprtime->tm_isdst;
+
 #if HAVE_GMTOFF
     (*ostime)->tm_gmtoff = aprtime->tm_gmtoff;
 #elif defined(HAVE__OFFSET)
     (*ostime)->__tm_gmtoff = aprtime->tm_gmtoff;
 #endif
+
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime, apr_os_imp_time_t **ostime,
+APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
+                                              apr_os_imp_time_t **ostime,
                                               apr_pool_t *cont)
 {
     *aprtime = (*ostime)->tv_sec * APR_USEC_PER_SEC + (*ostime)->tv_usec;
@@ -246,7 +250,8 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime, apr_os_imp_ti
 }
 
 APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
-                                              apr_os_exp_time_t **ostime, apr_pool_t *cont)
+                                              apr_os_exp_time_t **ostime,
+                                              apr_pool_t *cont)
 {
     aprtime->tm_sec = (*ostime)->tm_sec;
     aprtime->tm_min = (*ostime)->tm_min;
@@ -257,11 +262,13 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
     aprtime->tm_wday = (*ostime)->tm_wday;
     aprtime->tm_yday = (*ostime)->tm_yday;
     aprtime->tm_isdst = (*ostime)->tm_isdst;
+
 #if HAVE_GMTOFF
     aprtime->tm_gmtoff = (*ostime)->tm_gmtoff;
 #elif defined(HAVE__OFFSET)
     aprtime->tm_gmtoff = (*ostime)->__tm_gmtoff;
 #endif
+
     return APR_SUCCESS;
 }
 
@@ -282,7 +289,8 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
 }
 
 #ifdef OS2
-APR_DECLARE(apr_status_t) apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2date, 
+APR_DECLARE(apr_status_t) apr_os2_time_to_apr_time(apr_time_t *result,
+                                                   FDATE os2date,
                                                    FTIME os2time)
 {
   struct tm tmpdate;
