@@ -678,8 +678,8 @@ AC_SUBST(LIBPREFIX)
 AC_SUBST(EXEEXT)
 
 echo "Construct Makefiles and header files."
-MAKEFILE1="Makefile lib/Makefile buckets/Makefile"
-SUBDIRS="lib buckets"
+MAKEFILE1="Makefile lib/Makefile "
+SUBDIRS="lib "
 for dir in $MODULES
 do
     test -d $dir || $MKDIR -p $dir
