@@ -14,8 +14,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=time.a
 
-OBJS=time.o \
-	access.o
+OBJS=default.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
