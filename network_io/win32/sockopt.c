@@ -135,45 +135,8 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
     switch (opt) {
     case APR_SO_TIMEOUT: 
     {
-        /* XXX: to be deprecated */
-        if (on == 0) {
-            /* Set the socket non-blocking if it was previously blocking */
-            if (sock->timeout != 0) {
-                if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS)
-                    return stat;
-            }
-        }
-        else if (on > 0) {
-            /* Set the socket to blocking if it was previously non-blocking */
-            if (sock->timeout == 0) {
-                if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
-                    return stat;
-            }
-            /* Reset socket timeouts if the new timeout differs from the old timeout */
-            if (sock->timeout != on) 
-            {
-                /* Win32 timeouts are in msec */
-                sock->timeout_ms = apr_time_as_msec(on);
-                setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVTIMEO, 
-                           (char *) &sock->timeout_ms, 
-                           sizeof(sock->timeout_ms));
-                setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDTIMEO, 
-                           (char *) &sock->timeout_ms, 
-                           sizeof(sock->timeout_ms));
-            }
-        }
-        else if (on < 0) {
-            int zero = 0;
-            /* Set the socket to blocking with infinite timeouts */
-            if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
-                return stat;
-            setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVTIMEO, 
-                       (char *) &zero, sizeof(zero));
-            setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDTIMEO, 
-                       (char *) &zero, sizeof(zero));
-        }
-        sock->timeout = on;
-        break;
+        /* XXX: To be deprecated */
+        return apr_socket_timeout_set(sock, on);
     }
     case APR_SO_KEEPALIVE:
         if (on != apr_is_option_set(sock->netmask, APR_SO_KEEPALIVE)) {

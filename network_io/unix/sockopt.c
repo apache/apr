@@ -227,34 +227,7 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
     }
     if (opt & APR_SO_TIMEOUT) { 
         /* XXX: To be deprecated */
-        /* If our timeout is positive or zero and our last timeout was
-         * negative, then we need to ensure that we are non-blocking.
-         * Conversely, if our timeout is negative and we had a positive
-         * or zero timeout, we must make sure our socket is blocking.
-         * We want to avoid calling fcntl more than necessary on the socket,
-         */
-        if (on >= 0 && sock->timeout < 0){
-            if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != 1){
-                if ((rv = sononblock(sock->socketdes)) != APR_SUCCESS){
-                    return rv;
-                }
-            }
-        } 
-        else if (on < 0 && sock->timeout >= 0){
-            if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != 0){ 
-                if ((rv = soblock(sock->socketdes)) != APR_SUCCESS) { 
-                    return rv; 
-                }
-            } 
-        }
-        /* must disable the incomplete read support if we change to a
-         * blocking socket.
-         */
-        if (on == 0) {
-            sock->netmask &= ~APR_INCOMPLETE_READ;
-        }
-        sock->timeout = on; 
-        apr_set_option(&sock->netmask, APR_SO_TIMEOUT, on);
+        return apr_socket_timeout_set(sock, on);
     } 
     if (opt & APR_TCP_NODELAY) {
 #if defined(TCP_NODELAY)
@@ -337,7 +310,7 @@ apr_status_t apr_socket_opt_get(apr_socket_t *sock,
     switch(opt) {
         case APR_SO_TIMEOUT:
             /* XXX: To be deprecated */
-            *on = sock->timeout;
+            *on = (apr_int32_t)sock->timeout;
             break;
         default:
             *on = apr_is_option_set(sock->netmask, opt);
