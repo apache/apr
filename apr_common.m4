@@ -211,3 +211,65 @@ else
   threads_result="POSIX Threads not found"
 fi
 ])dnl
+
+dnl
+dnl Apache and APR "hints" file
+dnl  We preload various configure settings depending
+dnl  on previously obtained platform knowledge.
+dnl  We allow all settings to be overridden from
+dnl  the command-line.
+dnl
+dnl  We maintain the "format" that we've used
+dnl  under 1.3.x, so we don't exactly follow
+dnl  what is "recommended" by autoconf.
+
+dnl
+dnl APR_DOEXTRA
+dnl
+dnl  Handle the use of EXTRA_* variables.
+dnl  Basically, EXTRA_* vars are added to the
+dnl  current settings of their "parents". We
+dnl  can expand as needed. This is ugly
+dnl
+AC_DEFUN(APR_DOEXTRA, [
+  for i in CFLAGS LDFLAGS LIBS
+  do
+    eval APR_TMP=\$EXTRA_$i
+    if test -n "$APR_TMP"; then
+      eval $i=\"\$$i $APR_TMP\"
+      eval export $i
+      eval unset EXTRA_${i}
+      eval export EXTRA_${i}
+    fi
+  done
+])
+
+dnl
+dnl APR_SETIFNULL(variable, value)
+dnl
+dnl  Set variable iff it's currently null
+dnl
+AC_DEFUN(APR_SETIFNULL,[
+  if test -z "$$1"; then
+    $1="$2"; export $1
+  fi
+])
+
+dnl
+dnl APR_SETVAR(variable, value)
+dnl
+dnl  Set variable no matter what
+dnl
+AC_DEFUN(APR_SETVAR,[
+  $1="$2"; export $1
+])
+
+dnl
+dnl APR_ADDTO(variable, value)
+dnl
+dnl  Add value to variable
+dnl
+AC_DEFUN(APR_ADDTO,[
+   $1="$$1 $2"; export $1
+])
+
