@@ -61,9 +61,7 @@
 
 #ifdef NETWARE
 #include <unistd.h>
-#ifdef FAST_STAT
 #include <fsio.h>
-#endif
 #endif
 
  /* WinNT accepts several odd forms of a 'root' path.  Under Unicode

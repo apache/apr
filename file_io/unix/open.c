@@ -58,12 +58,10 @@
 #include "apr_thread_mutex.h"
 #include "inherit.h"
 
-#ifdef FAST_STAT
 #ifdef NETWARE
 #include "nks/dirio.h"
 #include "apr_hash.h"
 #include "fsio.h"
-#endif
 #endif
 
 apr_status_t apr_unix_file_cleanup(void *thefile)
@@ -105,11 +103,9 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     apr_status_t rv;
 #endif
 
-#ifdef FAST_STAT
 #ifdef NETWARE
     apr_hash_t *statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
     apr_stat_entry_t *stat_entry;
-#endif
 #endif
 
     (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
@@ -173,7 +169,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
 #endif
     
-#ifdef FAST_STAT
 #ifdef NETWARE
     stat_entry = (apr_stat_entry_t*) apr_hash_get(statCache, fname, APR_HASH_KEY_STRING);
     if (stat_entry) {
@@ -181,17 +176,14 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
     else {
 #endif
-#endif
     if (perm == APR_OS_DEFAULT) {
         (*new)->filedes = open(fname, oflags, 0666);
     }
     else {
         (*new)->filedes = open(fname, oflags, apr_unix_perms2mode(perm));
     } 
-#ifdef FAST_STAT
 #ifdef NETWARE
     }
-#endif
 #endif
 
     if ((*new)->filedes < 0) {

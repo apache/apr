@@ -55,8 +55,6 @@
 #ifndef FILE_IO_H
 #define FILE_IO_H
 
-//#define FAST_STAT
-
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
@@ -104,11 +102,7 @@
 #include <sys/time.h>
 #endif
 
-#ifdef FAST_STAT
 #include <fsio.h>
-#else
-#include <nks\fsio.h>
-#endif
 
 /* End System headers */
 
