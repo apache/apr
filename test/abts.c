@@ -101,9 +101,11 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     subsuite->num_test = 0;
     subsuite->failed = 0;
     subsuite->next = NULL;
-    /* suite_name_full is the complete path of the source code; strip out. */
-    suite_name = strrchr(suite_name_full, '/') + 1;
-    if (!suite_name) {
+    /* suite_name_full may be an absolute path depending on __FILE__ expansion */
+    suite_name = strrchr(suite_name_full, '/');
+    if (suite_name) {
+        suite_name++;
+    } else {
         suite_name = suite_name_full;
     }
     p = strrchr(suite_name, '.');
