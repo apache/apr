@@ -85,7 +85,7 @@ struct apr_ipsubnet_t {
 #endif
 };
 
-#ifndef NETWARE
+#if !defined(NETWARE) && !defined(WIN32)
 #ifdef HAVE_SET_H_ERRNO
 #define SET_H_ERRNO(newval) set_h_errno(newval)
 #else
@@ -336,10 +336,13 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo(hostname, NULL, &hints, &ai_list);
     if (error) {
+#ifndef WIN32
         if (error == EAI_SYSTEM) {
             return errno;
         }
-        else {
+        else 
+#endif
+        {
             /* issues with representing this with APR's error scheme:
              * glibc uses negative values for these numbers, perhaps so 
              * they don't conflict with h_errno values...  Tru64 uses 
@@ -565,14 +568,9 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
     if (rc != 0) {
         *hostname = NULL;
 
+#ifndef WIN32
         /* something went wrong. Look at the EAI_ error code */
-        if (rc != EAI_SYSTEM) {
-#if defined(NEGATIVE_EAI)
-            if (rc < 0) rc = -rc;
-#endif
-            return rc + APR_OS_START_EAIERR; /* return the EAI_ error */
-        }
-        else {
+        if (rc == EAI_SYSTEM) {
             /* EAI_SYSTEM      System error returned in errno. */
             /* IMHO, Implementations that set h_errno a simply broken. */
             if (h_errno) { /* for broken implementations which set h_errno */
@@ -581,6 +579,14 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
             else { /* "normal" case */
                 return errno + APR_OS_START_SYSERR;
             }
+        }
+        else 
+#endif
+        {
+#if defined(NEGATIVE_EAI)
+            if (rc < 0) rc = -rc;
+#endif
+            return rc + APR_OS_START_EAIERR; /* return the EAI_ error */
         }
     }
     *hostname = sockaddr->hostname = apr_pstrdup(sockaddr->pool, 
