@@ -190,6 +190,10 @@ SOURCE=.\memory\unix\apr_sms_std.c
 
 SOURCE=.\memory\unix\apr_sms_tracking.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\memory\unix\apr_sms_trivial.c
+# End Source File
 # End Group
 # Begin Group "misc"
 
