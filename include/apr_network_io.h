@@ -743,7 +743,8 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
 
 /**
  * Return the IP address (in numeric address string format) in
- * an APR socket address.
+ * an APR socket address.  APR will allocate storage for the IP address 
+ * string from the pool of the apr_sockaddr_t.
  * @param addr The IP address.
  * @param sockaddr The socket address to reference.
  */
