@@ -59,11 +59,7 @@
  * rst --- 4/95 --- 6/95
  */
 
-#ifndef WIN32
 #include "apr_config.h"
-#else
-#include "apr_winconfig.h"
-#endif
 
 #include "apr_general.h"
 #include "apr_pools.h"

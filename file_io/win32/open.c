@@ -52,9 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#ifdef WIN32
-#include "apr_winconfig.h"
-#endif
+#include "apr_config.h"
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"

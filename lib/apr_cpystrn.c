@@ -52,11 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef WIN32
 #include "apr_config.h"
-#else
-#include "apr_winconfig.h"
-#endif
 #include "apr_lib.h"
 
 #if HAVE_SYS_TYPES_H

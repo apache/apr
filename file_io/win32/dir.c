@@ -64,10 +64,6 @@
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef WIN32
-#include "apr_winconfig.h"
-#include <windows.h>
-#endif
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"

@@ -52,52 +52,110 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_config.h"
-#include "apr_thread_proc.h"
-#include "apr_file_io.h"
+/*
+ * Note: This is the windows specific autoconf like config file (apr_config.h)
+ */
+#ifdef WIN32
+
+#ifndef APR_CONFIG_H
+#define APR_CONFIG_H
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef _WIN32_WINNT
+/* 
+ * Compile the server including all the Windows NT 4.0 header files by 
+ * default.
+ */
+#define _WIN32_WINNT 0x0400
+#endif
 #include <windows.h>
+#include <winsock2.h>
+#include <mswsock.h>
+#include <sys/types.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <time.h>
 
-#ifndef THREAD_PROC_H
-#define THREAD_PROC_H
+#define HAVE_SENDFILE 1
 
-#define SHELL_PATH "cmd.exe"
+/* Use this section to define all of the HAVE_FOO_H
+ * that are required to build properly.
+ */
+#define HAVE_CONIO_H 1
+#define HAVE_MALLOC_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_LIMITS_H 1
+#define HAVE_SIGNAL_H 1
 
-struct ap_thread_t {
-    ap_context_t *cntxt;
-    HANDLE td;
-    ap_int32_t cancel;
-    ap_int32_t cancel_how;
-};
+typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
 
-struct ap_threadattr_t {
-    ap_context_t *cntxt;
-    ap_int32_t detach;
-};
+#define SIGHUP     1
+/* 2 is used for SIGINT on windows */
+#define SIGQUIT    3
+/* 4 is used for SIGILL on windows */
+#define SIGTRAP    5
+#define SIGIOT     6
+#define SIGBUS     7
+/* 8 is used for SIGFPE on windows */
+#define SIGKILL    9
+#define SIGUSR1    10
+/* 11 is used for SIGSEGV on windows */
+#define SIGUSR2    12
+#define SIGPIPE    13
+#define SIGALRM    14
+/* 15 is used for SIGTERM on windows */
+#define SIGSTKFLT  16
+#define SIGCHLD    17 
+#define SIGCONT    18
+#define SIGSTOP    19
+#define SIGTSTP    20
+/* 21 is used for SIGBREAK on windows */
+/* 22 is used for SIGABRT on windows */
+#define SIGTTIN    23
+#define SIGTTOU    24
+#define SIGURG     25
+#define SIGXCPU    26
+#define SIGXFSZ    27
+#define SIGVTALRM  28
+#define SIGPROF    29
+#define SIGWINCH   30
+#define SIGIO      31
 
-struct ap_threadkey_t {
-    ap_context_t *cntxt;
-    DWORD key;
-};
+#define __attribute__(__x) 
 
-struct ap_procattr_t {
-    ap_context_t *cntxt;
-    STARTUPINFO si;
-    ap_file_t *parent_in;
-    ap_file_t *child_in;
-    ap_file_t *parent_out;
-    ap_file_t *child_out;
-    ap_file_t *parent_err;
-    ap_file_t *child_err;
-    char *currdir;
-    ap_int32_t cmdtype;
-    ap_int32_t detached;
-};
+/* APR COMPATABILITY FUNCTIONS
+ * This section should be used to define functions and
+ * macros which are need to make Windows features look
+ * like POSIX features.
+ */
+typedef void (Sigfunc)(int);
 
-struct ap_proc_t {
-    ap_context_t *cntxt;
-    PROCESS_INFORMATION pi;
-    struct ap_procattr_t *attr;
-};
+#define strcasecmp(s1, s2)       stricmp(s1, s2)
+#define sleep(t)                 Sleep(t * 1000)
 
-#endif  /* ! THREAD_PROC_H */
 
+/* APR FEATURE MACROS.
+ * This section should be used to define feature macros
+ * that the windows port needs.
+ */
+#define APR_HAS_THREADS        1
+
+#define SIZEOF_SHORT           2
+#define SIZEOF_INT             4
+#define SIZEOF_LONGLONG        8
+#define SIZEOF_CHAR            1
+#define SIZEOF_SSIZE_T         SIZEOF_INT
+
+/* APR WINDOWS-ONLY FUNCTIONS
+ * This section should define those functions which are
+ * only found in the windows version of APR.
+ */
+
+void FileTimeToAprTime(time_t *atime, FILETIME *ft);
+unsigned __stdcall SignalHandling(void *);
+int thread_ready(void);
+
+#endif  /*APR_CONFIG_H*/
+#endif  /*WIN32*/

@@ -52,52 +52,95 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_config.h"
-#include "apr_thread_proc.h"
-#include "apr_file_io.h"
+/* 
+ * Note: This is a Windows specific version of apr.h. It is renamed to
+ * apr.h at the start of a Windows build.
+ */
+
+#ifdef WIN32
+#ifndef APR_H
+#define APR_H
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef _WIN32_WINNT
+/* 
+ * Compile the server including all the Windows NT 4.0 header files by 
+ * default.
+ */
+#define _WIN32_WINNT 0x0400
+#endif
 #include <windows.h>
+#include <winsock2.h>
+#include <mswsock.h>
+#include <sys/types.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <time.h>
+#include <process.h>
+#include <signal.h>
 
-#ifndef THREAD_PROC_H
-#define THREAD_PROC_H
+#define ap_inline
+#define __attribute__(__x)
+#define ENUM_BITFIELD(e,n,w)  signed int n : w
 
-#define SHELL_PATH "cmd.exe"
+#define APR_HAVE_ERRNO_H        1
+#define APR_HAVE_DIRENT_H       0
+#define APR_HAVE_FCNTL_H        0
+#define APR_HAVE_NETINET_IN_H   0
+#define APR_HAVE_PTHREAD_H      0
+#define APR_HAVE_STDARG_H       1
+#define APR_HAVE_STDIO_H        1
+#define APR_HAVE_SYS_TYPES_H    1
+#define APR_HAVE_SYS_UIO_H      0
+#define APR_HAVE_IN_ADDR        1
 
-struct ap_thread_t {
-    ap_context_t *cntxt;
-    HANDLE td;
-    ap_int32_t cancel;
-    ap_int32_t cancel_how;
+#define APR_USE_FLOCK_SERIALIZE           0 
+#define APR_USE_SYSVSEM_SERIALIZE         0
+#define APR_USE_FCNTL_SERIALIZE           0
+#define APR_USE_PROC_PTHREAD_SERIALIZE    0 
+#define APR_USE_PTHREAD_SERIALIZE         0 
+
+#if APR_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+/*  APR Feature Macros */
+#define APR_HAS_THREADS  1
+#define APR_HAS_SENDFILE 1
+#define APR_HAS_MMAP     0
+
+/* Typedefs that APR needs. */
+
+typedef  short           ap_int16_t;
+typedef  unsigned short  ap_uint16_t;
+                                               
+typedef  int           ap_int32_t;
+typedef  unsigned int  ap_uint32_t;
+                                               
+typedef  __int64           ap_int64_t;
+typedef  unsigned __int64  ap_uint64_t;
+
+typedef  int         ap_size_t;
+typedef  int         ap_ssize_t;
+typedef  _off_t      ap_off_t;
+typedef  int         pid_t;
+typedef  int         uid_t;
+typedef  int         gid_t;
+
+/* Definitions that APR programs need to work properly. */
+#define APR_SSIZE_T_FMT          "d"
+#define API_THREAD_FUNC          __stdcall
+#define API_EXPORT(type)         type
+#define API_EXPORT_NONSTD(type)  type
+#define API_VAR_IMPORT           extern _declspec(dllimport)
+#define API_VAR_EXPORT
+
+/* struct iovec is needed to emulate Unix writev */
+struct iovec {
+    char* iov_base;
+    int   iov_len;
 };
-
-struct ap_threadattr_t {
-    ap_context_t *cntxt;
-    ap_int32_t detach;
-};
-
-struct ap_threadkey_t {
-    ap_context_t *cntxt;
-    DWORD key;
-};
-
-struct ap_procattr_t {
-    ap_context_t *cntxt;
-    STARTUPINFO si;
-    ap_file_t *parent_in;
-    ap_file_t *child_in;
-    ap_file_t *parent_out;
-    ap_file_t *child_out;
-    ap_file_t *parent_err;
-    ap_file_t *child_err;
-    char *currdir;
-    ap_int32_t cmdtype;
-    ap_int32_t detached;
-};
-
-struct ap_proc_t {
-    ap_context_t *cntxt;
-    PROCESS_INFORMATION pi;
-    struct ap_procattr_t *attr;
-};
-
-#endif  /* ! THREAD_PROC_H */
-
+#endif /* APR_H */
+#endif /* WIN32 */

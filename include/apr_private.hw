@@ -57,8 +57,8 @@
  */
 #ifdef WIN32
 
-#ifndef APR_WINCONFIG_H
-#define APR_WINCONFIG_H
+#ifndef APR_CONFIG_H
+#define APR_CONFIG_H
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -157,5 +157,5 @@ void FileTimeToAprTime(time_t *atime, FILETIME *ft);
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
 
-#endif  /*APR_WINCONFIG_H*/
+#endif  /*APR_CONFIG_H*/
 #endif  /*WIN32*/

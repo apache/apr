@@ -306,10 +306,6 @@ SOURCE=.\include\apr_time.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_win.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\time\win32\atime.h
 # End Source File
 # Begin Source File
@@ -327,6 +323,66 @@ SOURCE=.\network_io\win32\networkio.h
 # Begin Source File
 
 SOURCE=.\threadproc\win32\threadproc.h
+# End Source File
+# End Group
+# Begin Group "Generated Header Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\include\apr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_config.h
+# End Source File
+# End Group
+# Begin Group "Internal Header Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\include\apr_config.hw
+
+!IF  "$(CFG)" == "aprlib - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\include\apr_config.hw
+
+".\include\apr_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr_config.hw .\include\apr_config.h 
+	echo Created apr_config.h from apr_config.hw 
+	
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "External Header Files"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\include\apr.hw
+
+!IF  "$(CFG)" == "aprlib - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
+
+# Begin Custom Build
+InputPath=.\include\apr.hw
+
+".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr.hw .\include\apr.h > nul 
+	echo Created apr.h from apr.hw 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # End Target
