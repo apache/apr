@@ -187,7 +187,6 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
     (*new)->cntxt = connection_context;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
-    memcpy((*new)->local_addr, sock->local_addr, sizeof(struct sockaddr_in));
 
     (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
@@ -202,7 +201,11 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct
     if ((*new)->socketdes < 0) {
         return errno;
     }
-    
+
+    if (getsockname((*new)->socketdes, (*new)->local_addr, &((*new)->addr_len)) < 0) {
+	return errno;
+    }
+
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
