@@ -87,17 +87,20 @@ static apr_status_t sysv_cleanup(void *lock_)
 static apr_status_t sysv_create(apr_lock_t *new, const char *fname)
 {
     union semun ick;
+    apr_status_t stat;
     
     new->interproc = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
 
     if (new->interproc < 0) {
+        stat = errno;
         sysv_cleanup(new);
-        return errno;
+        return stat;
     }
     ick.val = 1;
     if (semctl(new->interproc, 0, SETVAL, ick) < 0) {
+        stat = errno;
         sysv_cleanup(new);
-        return errno;
+        return stat;
     }
     new->curr_locked = 0;
     apr_pool_cleanup_register(new->pool, (void *)new, sysv_cleanup, 
@@ -383,8 +386,10 @@ static apr_status_t fcntl_create(apr_lock_t *new, const char *fname)
     }
 
     if (new->interproc < 0) {
+        apr_status_t stat = errno;
+
         fcntl_cleanup(new);
-        return errno;
+        return stat;
     }
 
     new->curr_locked=0;
@@ -492,8 +497,10 @@ static apr_status_t flock_create(apr_lock_t *new, const char *fname)
     }
 
     if (new->interproc < 0) {
+        apr_status_t stat = errno;
+
         flock_cleanup(new);
-        return errno;
+        return stat;
     }
     new->curr_locked = 0;
     apr_pool_cleanup_register(new->pool, (void *)new, flock_cleanup,
@@ -551,8 +558,10 @@ static apr_status_t flock_child_init(apr_lock_t **lock, apr_pool_t *cont,
     new->fname = apr_pstrdup(cont, fname);
     new->interproc = open(new->fname, O_WRONLY, 0600);
     if (new->interproc == -1) {
+        apr_status_t stat = errno;
+
         flock_destroy(new);
-        return errno;
+        return stat;
     }
     *lock = new;
     return APR_SUCCESS;
