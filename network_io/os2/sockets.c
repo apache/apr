@@ -297,7 +297,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *th
     }
     if ((*sock) == NULL) {
         alloc_socket(sock, cont);
-        set_socket_vars(*sock, AF_INET, SOCK_STREAM, APR_PROTO_TCP);
+        set_socket_vars(*sock, AF_INET, SOCK_STREAM, 0);
         (*sock)->timeout = -1;
     }
 
