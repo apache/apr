@@ -1021,8 +1021,6 @@ AC_FUNC_SETPGRP
 
 APR_CHECK_SOCKLEN_T
 
-APR_INADDR_NONE
-
 dnl Checks for pointer size
 AC_CHECK_SIZEOF(void*, 4)
 
