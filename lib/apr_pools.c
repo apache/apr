@@ -69,6 +69,9 @@
 #include "apr_lib.h"
 #include "apr_lock.h"
 
+#ifdef HAVE_STDIO_H
+#include <stdio.h>
+#endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif

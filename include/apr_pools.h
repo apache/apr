@@ -85,38 +85,65 @@ extern "C" {
  */
 
 #include "apr.h"
-#include "apr_thread_proc.h"
+#include "apr_errno.h"
 
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
+/* Memory allocation/Pool debugging options... 
+ *
+ * Look in the developer documentation for details of what these do.
+ *
+ * NB These should ALL normally be commented out unless you REALLY
+ * need them!!
+ */
+ 
+/*
+#define ALLOC_DEBUG
+#define POOL_DEBUG
+#define ALLOC_USE_MALLOC
+#define MAKE_TABLE_PROFILE
+#define ALLOC_STATS
+*/
+
+/**
+ * @package APR memory allocation
+ */
+typedef struct apr_pool_t apr_pool_t;
+
+/** The memory allocation structure
+ */
+struct apr_pool_t {
+    /** The first block in this pool. */
+    union block_hdr *first;
+    /** The last block in this pool. */
+    union block_hdr *last;
+    /** The list of cleanups to run on pool cleanup. */
+    struct cleanup *cleanups;
+    /** A list of processes to kill when this pool is cleared */
+    struct process_chain *subprocesses;
+    /** The first sub_pool of this pool */
+    struct apr_pool_t *sub_pools;
+    /** The next sibling pool */
+    struct apr_pool_t *sub_next;
+    /** The previous sibling pool */
+    struct apr_pool_t *sub_prev;
+    /** The parent pool of this pool */
+    struct apr_pool_t *parent;
+    /** The first free byte in this pool */
+    char *free_first_avail;
+#ifdef ALLOC_USE_MALLOC
+    /** The allocation list if using malloc */
+    void *allocation_list;
 #endif
-#if APR_HAVE_STDARG_H
-#include <stdarg.h>
+#ifdef POOL_DEBUG
+    /** a list of joined pools 
+     *  @defvar apr_pool_t *joined */
+    struct apr_pool_t *joined;
 #endif
-
-enum kill_conditions {
-    kill_never,                 /* process is never sent any signals */
-    kill_always,                /* process is sent SIGKILL on apr_pool_t cleanup */
-    kill_after_timeout,         /* SIGTERM, wait 3 seconds, SIGKILL */
-    just_wait,                  /* wait forever for the process to complete */
-    kill_only_once              /* send SIGTERM and then wait */
-};
-
-/** A list of processes */
-struct process_chain {
-    /** The process ID */
-    apr_proc_t *pid;
-    /** When the process should be sent a signal. <PRE>
-     *           kill_never   -- process is never sent any signals
-     *           kill_always  -- process is sent SIGKILL on apr_pool_t cleanup
-     *           kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
-     *           just_wait    -- wait forever for the process to complete
-     *           kill_only_once -- send SIGTERM and then wait </PRE>
-     */
-    enum kill_conditions kill_how;
-    /** The next process in the list 
-     *  @defvar process_chain *next */
-    struct process_chain *next;
+    /** A function to control how pools behave when they receive ENOMEM
+     *  @deffunc int apr_abort(int retcode) */
+    int (*apr_abort)(int retcode);
+    /** A place to hand user data associated with this pool 
+     *  @defvar datastruct *prog_data */
+    struct datastruct *prog_data;
 };
 
 /* pools have nested lifetimes -- sub_pools are destroyed when the
@@ -190,6 +217,45 @@ apr_status_t apr_init_alloc(void);	/* Set up everything */
  *      automatically from apr_terminate. 
  */
 void apr_term_alloc(void);        /* Tear down everything */
+ 
+/* pool functions */
+
+/**
+ * Create a new pool.
+ * @param newcont The pool we have just created.
+ * @param cont The parent pool.  If this is NULL, the new pool is a root
+ *        pool.  If it is non-NULL, the new pool will inherit all
+ *        of it's parent pool's attributes, except the apr_pool_t will 
+ *        be a sub-pool.
+ */
+apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont);
+
+/**
+ * Set the data associated with the current pool
+ * @param data The user data associated with the pool.
+ * @param key The key to use for association
+ * @param cleanup The cleanup program to use to cleanup the data;
+ * @param cont The current pool.
+ * @tip The data to be attached to the pool should have the same
+ *      life span as the pool it is being attached to.
+ *
+ *      Users of APR must take EXTREME care when choosing a key to
+ *      use for their data.  It is possible to accidentally overwrite
+ *      data by choosing a key that another part of the program is using
+ *      It is advised that steps are taken to ensure that a unique
+ *      key is used at all times.
+ */
+apr_status_t apr_set_userdata(const void *data, const char *key, 
+                            apr_status_t (*cleanup) (void *), 
+                            apr_pool_t *cont);
+
+/**
+ * Return the data associated with the current pool.
+ * @param data The key for the data to retrieve
+ * @param key The user data associated with the pool.
+ * @param cont The current pool.
+ */
+apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont);
 
 /**
  * make a sub pool from the current pool

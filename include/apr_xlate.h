@@ -56,8 +56,7 @@
 #define APR_XLATE_H
 
 #include "apr.h"
-#include "apr_general.h"
-#include "apr_time.h"
+#include "apr_pools.h"
 #include "apr_errno.h"
 
 #ifdef __cplusplus

@@ -63,11 +63,8 @@
  * @package APR portability Routines
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-#include "apr_general.h"
+#include "apr.h"
+#include "apr_pools.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_network_io.h"
@@ -88,6 +85,10 @@ extern "C" {
 #if APR_HAVE_UNION_SEMUN
 #include <sys/sem.h>
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #ifdef WIN32
 /* The primitives for Windows types */

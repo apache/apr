@@ -55,7 +55,8 @@
 #ifndef APR_TIME_H
 #define APR_TIME_H
 
-#include "apr_general.h"
+#include "apr.h"
+#include "apr_pools.h"
 #include "apr_errno.h"
 
 #ifdef __cplusplus

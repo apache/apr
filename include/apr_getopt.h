@@ -55,6 +55,8 @@
 #ifndef APR_GETOPT_H
 #define APR_GETOPT_H
 
+#include "apr_pools.h"
+
 /**
  * @package APR command arguments
  */ 

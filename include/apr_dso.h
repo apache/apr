@@ -55,7 +55,8 @@
 #ifndef APR_DSO_DOT_H
 #define APR_DSO_DOT_H
 
-#include "apr_general.h"
+#include "apr.h"
+#include "apr_pools.h"
 #include "apr_errno.h"
 
 /**

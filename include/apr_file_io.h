@@ -55,12 +55,10 @@
 #ifndef APR_FILE_IO_H
 #define APR_FILE_IO_H
 
-#include "apr_general.h"
+#include "apr.h"
+#include "apr_pools.h"
 #include "apr_time.h"
 #include "apr_errno.h"
-#if APR_HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
