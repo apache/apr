@@ -43,10 +43,10 @@ $(NLM_NAME)_cc.opt : NWGNUmakefile $(APR_WORK)\build\NWGNUenvironment.inc $(APR_
 	@echo -nosyspath >> $@
 	@echo -w nocmdline >> $@
 	@echo -DNETWARE >> $@
-	@echo -I..\include >> $@
-	@echo -I..\include\arch\netware >> $@
-	@echo -I..\include\arch\unix >> $@
-	@echo -I..\..\apr-util\include >> $@
+	@echo -I$(APR)\include >> $@
+	@echo -I$(APR)\include\arch\netware >> $@
+	@echo -I$(APR)\include\arch\unix >> $@
+	@echo -I$(APRUTIL)\include >> $@
 	@echo -ir $(NOVELLLIBC) >> $@
 ifneq "$(LDAPSDK)" ""
 	@echo -ir $(LDAPSDK) >> $@
