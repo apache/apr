@@ -142,6 +142,10 @@ SOURCE=.\file_io\win32\dir.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dso\win32\dso.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\win32\fileacc.c
 # End Source File
 # Begin Source File
@@ -299,6 +303,10 @@ SOURCE=.\include\apr_time.h
 # Begin Source File
 
 SOURCE=.\time\win32\atime.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dso\win32\dso.h
 # End Source File
 # Begin Source File
 

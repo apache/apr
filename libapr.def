@@ -237,4 +237,7 @@ EXPORTS
       ap_open_stderr @216
         ap_set_pipe_timeout   @217
         ap_terminate @218
-
+        ap_dso_load @219
+        ap_dso_unload @220
+        ap_dso_sym @221
+        ap_dso_init @222
