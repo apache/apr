@@ -599,13 +599,13 @@ SOURCE=.\libapr.rc
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\build\win32ver.awk
+SOURCE=..\..\build\win32\win32ver.awk
 
 !IF  "$(CFG)" == "libapr - Win32 Release"
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Creating Version Resource
-InputPath=..\..\build\win32ver.awk
+InputPath=..\..\build\win32\win32ver.awk
 
 ".\libapr.rc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	awk -f ../../build/win32/win32ver.awk libapr "Apache Portability Runtime Library"\
