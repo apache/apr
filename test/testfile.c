@@ -89,6 +89,7 @@ void test_filedel(apr_pool_t *);
 void testdirs(apr_pool_t *);
 static void test_read(apr_pool_t *);
 static void test_read_seek(apr_int32_t, apr_pool_t *);
+static void test_mod_neg(apr_pool_t *, apr_int32_t);
 
 int main(void)
 {
@@ -240,6 +241,8 @@ int main(void)
     testdirs(pool); 
     test_filedel(pool);
     test_read(pool);
+    test_mod_neg(pool, 0); /* unbuffered */
+    test_mod_neg(pool, APR_BUFFERED);
 
     apr_pool_destroy(pool);
 
@@ -585,9 +588,12 @@ static void test_read_seek(apr_int32_t moreflags, apr_pool_t *p)
     assert(nbytes == strlen(str3) + strlen(str1) + strlen(str2) + strlen(str3));
     assert(!memcmp(buf, str3, strlen(str3)));
 
+    /* seek back a couple of strings */
     seek_amt = -(apr_off_t)(nbytes - strlen(str3) - strlen(str1));
     rv = apr_file_seek(f, APR_CUR, &seek_amt);
     assert(!rv);
+    /* seek_amt should be updated with the current offset into the file */
+    assert(seek_amt == strlen(str1) + strlen(str2) + strlen(str3) + strlen(str1));
 
     rv = apr_file_gets(buf, sizeof buf, f);
     assert(!rv);
@@ -599,6 +605,84 @@ static void test_read_seek(apr_int32_t moreflags, apr_pool_t *p)
 
     rv = apr_file_close(f);
     assert(!rv);
+
+    rv = apr_file_remove(fname, p);
+    assert(!rv);
+}
+
+static void test_mod_neg(apr_pool_t *p, apr_int32_t flags)
+{
+    apr_status_t rv;
+    apr_file_t *f;
+    const char *s;
+    int i;
+    apr_ssize_t nbytes;
+    char buf[8192];
+    apr_off_t cur;
+    const char *fname = "modneg.dat";
+
+    printf("    Testing mod_negotiation-style file access (%sbuffered)...\n",
+           !flags ? "un" : "");
+    
+    rv = apr_file_open(&f, fname, APR_CREATE | APR_WRITE, APR_UREAD | APR_UWRITE, p);
+    assert(!rv);
+
+    s = "body56789\n";
+    nbytes = strlen(s);
+    rv = apr_file_write(f, s, &nbytes);
+    assert(!rv);
+    assert(nbytes == strlen(s));
+    
+    for (i = 0; i < 7980; i++) {
+        s = "0";
+        nbytes = strlen(s);
+        rv = apr_file_write(f, s, &nbytes);
+        assert(!rv);
+        assert(nbytes == strlen(s));
+    }
+    
+    s = "end456789\n";
+    nbytes = strlen(s);
+    rv = apr_file_write(f, s, &nbytes);
+    assert(!rv);
+    assert(nbytes == strlen(s));
+
+    for (i = 0; i < 10000; i++) {
+        s = "1";
+        nbytes = strlen(s);
+        rv = apr_file_write(f, s, &nbytes);
+        assert(!rv);
+        assert(nbytes == strlen(s));
+    }
+    
+    rv = apr_file_close(f);
+    assert(!rv);
+
+    rv = apr_file_open(&f, fname, APR_READ | flags, 0, p);
+    assert(!rv);
+
+    rv = apr_file_gets(buf, 11, f);
+    assert(!rv);
+    assert(!strcmp(buf, "body56789\n"));
+
+    cur = 0;
+    rv = apr_file_seek(f, APR_CUR, &cur);
+    assert(!rv);
+    assert(cur == 10);
+
+    nbytes = sizeof(buf);
+    rv = apr_file_read(f, buf, &nbytes);
+    assert(!rv);
+    assert(nbytes == sizeof(buf));
+
+    cur = -(nbytes - 7980);
+    rv = apr_file_seek(f, APR_CUR, &cur);
+    assert(!rv);
+    assert(cur == 7990);
+
+    rv = apr_file_gets(buf, 11, f);
+    assert(!rv);
+    assert(!strcmp(buf, "end456789\n"));
 
     rv = apr_file_remove(fname, p);
     assert(!rv);
