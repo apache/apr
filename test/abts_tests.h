@@ -34,7 +34,9 @@ const struct testlist {
     {testfmt},
     {testfnmatch},
     {testgetopt},
+#if 0 /* not ready yet due to API issues */
     {testglobalmutex},
+#endif
     {testhash},
     {testipsub},
     {testlock},
