@@ -69,7 +69,7 @@ struct block_t {
     void *prev;
 };
 
-typedef struct apr_shmem_t {
+struct apr_shmem_t {
     apr_pool_t *p;
     void *memblock;
     void *ptr;
@@ -77,7 +77,7 @@ typedef struct apr_shmem_t {
     area_id aid;
     struct block_t *uselist;
     struct block_t *freelist;
-} apr_shmem_t;
+};
 
 #define MIN_BLK_SIZE 128
 

@@ -60,10 +60,10 @@
 #include <umalloc.h>
 #include <stdlib.h>
 
-typedef struct apr_shmem_t {
+struct apr_shmem_t {
     void *memblock;
     Heap_t heap;
-} apr_shmem_t;
+};
 
 
 
