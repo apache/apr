@@ -97,7 +97,10 @@ typedef struct apr_pool_t apr_pool_t;
 /** A function that is called when allocation fails. */
 typedef int (*apr_abortfunc_t)(int retcode);
 
-/* pools have nested lifetimes -- sub_pools are destroyed when the
+/**
+ * @defgroup PoolDebug Pool Debugging functions.
+ *
+ * pools have nested lifetimes -- sub_pools are destroyed when the
  * parent pool is cleared.  We allow certain liberties with operations
  * on things such as tables (and on other structures in a more general
  * sense) where we allow the caller to insert values into a table which
@@ -133,9 +136,24 @@ typedef int (*apr_abortfunc_t)(int retcode);
  * In this case the caller must call apr_pool_join() to indicate this
  * guarantee to the APR_POOL_DEBUG code.  There are a few examples spread
  * through the standard modules.
+ *
+ * These functions are only implemented when #APR_POOL_DEBUG is set.
+ *
+ * @{
  */
-#ifdef APR_POOL_DEBUG
+#if defined(APR_POOL_DEBUG) || defined(DOXYGEN)
+/**
+ * Guarantee that a subpool has the same lifetime as the parent.
+ * @param p The parent pool
+ * @param sub The subpool
+ */
 APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
+
+/**
+ * Find a pool from something allocated in it.
+ * @param ts The thing allocated in the pool
+ * @return The pool it is allocated in
+ */
 APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts);
 
 /**
@@ -146,6 +164,9 @@ APR_DECLARE(apr_pool_t *) apr_find_pool(const void *ts);
  *         of all pools.
  */
 APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
+
+/* @} */
+
 #else
 # ifdef apr_pool_join
 #  undef apr_pool_join
