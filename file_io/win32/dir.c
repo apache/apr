@@ -82,7 +82,7 @@ apr_status_t dir_cleanup(void *thedir)
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
+apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
     /* Note that we won't open a directory that is greater than MAX_PATH,
      * including the trailing /* wildcard suffix.  If a * won't fit, then

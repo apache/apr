@@ -69,7 +69,7 @@ static apr_status_t dir_cleanup(void *thedir)
 
 
 
-apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cntxt)
+apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cntxt)
 {
     apr_dir_t *thedir = (apr_dir_t *)apr_palloc(cntxt, sizeof(apr_dir_t));
     

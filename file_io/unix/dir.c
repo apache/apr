@@ -67,7 +67,7 @@ static apr_status_t dir_cleanup(void *thedir)
     }
 } 
 
-apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
+apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
     /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct 
      * dirent is declared with enough storage for the name.  On other

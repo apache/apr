@@ -643,7 +643,7 @@ apr_status_t apr_seek(apr_file_t *thefile, apr_seek_where_t where,apr_off_t *off
  * @param dirname The full path to the directory (use / on all systems)
  * @param cont The pool to use.
  */                        
-apr_status_t apr_opendir(apr_dir_t **new_dir, const char *dirname, apr_pool_t *cont);
+apr_status_t apr_dir_open(apr_dir_t **new_dir, const char *dirname, apr_pool_t *cont);
 
 /**
  * close the specified directory. 
