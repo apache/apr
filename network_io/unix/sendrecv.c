@@ -693,145 +693,118 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 #elif defined(__osf__) && defined (__alpha)
 /*
  * ap_sendfile for Tru64 Unix. 
+ *
+ * Note: while the sendfile implementation on Tru64 can send 
+ * a one header/trailer with the file, it will send only one
+ * each and not an array as is passed into this function. In
+ * addition, there is a limitation on the size of the header/trailer
+ * that can be referenced ( > 4096 seems to cause an ENOMEM)
+ * Rather than code these special cases in, using ap_sendv for
+ * all cases of the headers and trailers seems to be a good idea.
  */
 ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
-		    ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
-		    ap_int32_t flags)
+                        ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
+                        ap_int32_t flags)
 {
     off_t nbytes = 0;
     int rv, i;
     ap_status_t arv;
-    struct iovec headerstruct[2];
+    struct iovec headerstruct[2] = {(0, 0), (0, 0)};
     size_t bytes_to_send = *len;
-
+    
     /* Ignore flags for now. */
     flags = 0;
+    
+    if (hdtr->numheaders > 0) {
+        ap_ssize_t hdrbytes = 0;
 
-    /*
-     Tru64 can send 1 header and 1 trailer per sendfile().
-     with > 1, we have the choice to build 1 header/trailer or
-     to send them before/after the sendfile. I did the later.
+        arv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return errno;
+        }
 
-     headerstruct is a 2 iovec array with the first pointing
-     to the header, the second pointing to the trailer.
-     iov_len must be set to zero on any not being used.
-     */
+        nbytes += hdrbytes;
 
-    if(hdtr->numheaders == 0) {
-	headerstruct[0].iov_len = 0;
-    } else if (hdtr->numheaders == 1) {
-	headerstruct[0].iov_base = hdtr->headers[0].iov_base;
-	headerstruct[0].iov_len = hdtr->headers[0].iov_len;
-    } else {
-	ap_size_t hdrbytes = 0;
-	/* sending them in bits.. if more than one header/trailer */
-	headerstruct[0].iov_len = 0;
-
-	arv = ap_sendv(sock, hdtr->headers, hdtr->numheaders, &hdrbytes);
-	if (arv != APR_SUCCESS) {
-	    *len = 0;
-	    return errno;
-	}
-
-	nbytes += hdrbytes;
-
-	/* If this was a partial write and we aren't doing timeouts, 
-	 * return now with the partial byte count; this is a non-blocking 
-	 * socket.
-	 */
-	if (sock->timeout <= 0) {
-	    ap_size_t total_hdrbytes = 0;
-	    for (i = 0; i < hdtr->numheaders; i++) {
-		total_hdrbytes += hdtr->headers[i].iov_len;
-	    }
-	    if (hdrbytes < total_hdrbytes) {
-		*len = hdrbytes;
-		return APR_SUCCESS;
-	    }
-	}
+        /* If this was a partial write and we aren't doing timeouts, 
+         * return now with the partial byte count; this is a non-blocking 
+         * socket.
+         */
+        if (sock->timeout <= 0) {
+            ap_size_t total_hdrbytes = 0;
+            for (i = 0; i < hdtr->numheaders; i++) {
+                total_hdrbytes += hdtr->headers[i].iov_len;
+            }
+            if (hdrbytes < total_hdrbytes) {
+                *len = hdrbytes;
+                return APR_SUCCESS;
+            }
+        }
     }
-
-    if(hdtr->numtrailers == 0) {
-	headerstruct[1].iov_len = 0;
-    } else if (hdtr->numtrailers == 1) {
-	headerstruct[1].iov_base = hdtr->trailers[0].iov_base;
-	headerstruct[1].iov_len = hdtr->trailers[0].iov_len;
-    } else {
-	/* we will send them after the file as more than one */
-	headerstruct[1].iov_len = 0;
-    }
-
+    
     if (bytes_to_send) {
-	/* We won't dare call sendfile() if we don't have
-	 * header or file bytes to send because bytes_to_send == 0
-	 * means send the whole file.
-	 */
-	do {
-	    rv = sendfile(
-		  sock->socketdes, /* socket */
-		  file->filedes,   /* file to be sent */
-		  *offset,         /* where in the file to start */
-		  bytes_to_send,   /* number of bytes to send */
-		  headerstruct,    /* Headers/footers */
-		  flags);          /* currently unused */
-	} while (rv == -1 && errno == EINTR);
-    } else 
-	rv = 0;
+        /* We won't dare call sendfile() if we don't have
+         * header or file bytes to send because bytes_to_send == 0
+         * means send the whole file.
+         */
+        do {
+            rv = sendfile(sock->socketdes, /* socket */
+                          file->filedes,   /* file to be sent */
+                          *offset,         /* where in the file to start */
+                          bytes_to_send,   /* number of bytes to send */
+                          headerstruct,    /* Headers/footers */
+                          flags);          /* currently unused */
+        } while (rv == -1 && errno == EINTR);
+    }
+    else
+        rv = 0;
 
-    if (rv == -1 && 
-	(errno == EAGAIN || errno == EWOULDBLOCK) && 
-	sock->timeout > 0) {
-	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+    if (rv == -1 &&
+        (errno == EAGAIN || errno == EWOULDBLOCK) &&
+        sock->timeout > 0) {
+        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
 
-	if (arv != APR_SUCCESS) {
-	    *len = 0;
-	    return arv;
-	}
-	else {
-	    do {
-		rv = sendfile(
-		  sock->socketdes, /* socket */
-		  file->filedes, /* file to be sent */
-		  *offset,       /* where in the file to start */
-		  bytes_to_send, /* number of bytes to send */
-		  headerstruct, /* Headers/footers */
-		  flags        /* undefined, set to 0 */
-		    );
-	    } while (rv == -1 && errno == EINTR);
-	}
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
+        else {
+            do {
+                rv = sendfile(sock->socketdes, /* socket */
+                              file->filedes,   /* file to be sent */
+                              *offset,         /* where in the file to start */
+                              bytes_to_send,   /* number of bytes to send */
+                              headerstruct,    /* Headers/footers */
+                              flags);          /* undefined, set to 0 */
+            } while (rv == -1 && errno == EINTR);
+        }
     }
 
-    if(rv != -1) {
-	nbytes += rv;
+    if (rv != -1) {
+        nbytes += rv;
+
+        if (hdtr->numtrailers > 0) {
+            ap_ssize_t trlbytes = 0;
+
+            /* send the trailers now */
+            arv = ap_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trlbytes);
+            if (arv != APR_SUCCESS) {
+                *len = 0;
+                return errno;
+            }
+
+            nbytes += trlbytes;
+        }
     }
 
-    if((rv != -1) && (hdtr->numtrailers > 1)) {
-	ap_size_t trlbytes = 0;
-
-	/* send the trailers now */
-	arv = ap_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trlbytes);
-	if (arv != APR_SUCCESS) {
-	    *len = 0;
-	    return errno;
-	}
-
-	nbytes += trlbytes;
-    }
-
-    /* 
-       question:
-       should this be the sum of all of them ?
-       sendfile returns a total byte count incl headers/trailers
-       but when headers/trailers is > 1 hdrbytes and trlbytes
-       will be non-zero
-    */
     (*len) = nbytes;
 
     return (rv < 0) ? errno : APR_SUCCESS;
 }
+
 #else
 #error APR has detected sendfile on your system, but nobody has written a
 #error version of it for APR yet.  To get past this, either write ap_sendfile
 #error or change APR_HAS_SENDFILE in apr.h to 0. 
-#endif /* __linux__, __FreeBSD__, __HPUX__, _AIX, Tru64/OSF1 */
+#endif /* __linux__, __FreeBSD__, __HPUX__, _AIX, __MVS__, Tru64/OSF1 */
 #endif /* APR_HAS_SENDFILE */
