@@ -84,7 +84,7 @@ typedef struct ap_hash_index_t ap_hash_index_t;
  * @param pool The pool to allocate the hash table out of
  * @return The hash table just created
  */
-ap_hash_t *ap_make_hash(ap_pool_t *pool);
+APR_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool);
 
 /**
  * Associate a value with a key in a hash table.
@@ -95,7 +95,8 @@ ap_hash_t *ap_make_hash(ap_pool_t *pool);
  * @param val Value to associate with the key
  * @tip If the value is NULL the hash entry is deleted.
  */
-void ap_hash_set(ap_hash_t *ht, const void *key, size_t klen, const void *val);
+APR_EXPORT(void) ap_hash_set(ap_hash_t *ht, const void *key, size_t klen, 
+                             const void *val);
 
 /**
  * Look up the value associated with a key in a hash table.
@@ -105,7 +106,7 @@ void ap_hash_set(ap_hash_t *ht, const void *key, size_t klen, const void *val);
  *         If the length is 0 it is assumed to be strlen(key)+1
  * @return Returns NULL if the key is not present.
  */
-void *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
+APR_EXPORT(void) *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
 
 /**
  * Start iterating over the entries in a hash table.
@@ -132,14 +133,14 @@ void *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
  * progress at the same time.
  * </PRE>
  */
-ap_hash_index_t *ap_hash_first(ap_hash_t *ht);
+APR_EXPORT(ap_hash_index_t *) ap_hash_first(ap_hash_t *ht);
 
 /**
  * Continue iterating over the entries in a hash table.
  * @param hi The iteration state
  * @return a pointer to the updated iteration state.  NULL if there are no more  *         entries.
  */
-ap_hash_index_t *ap_hash_next(ap_hash_index_t *hi);
+APR_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi);
 
 /**
  * Get the current entry's details from the iteration state.
@@ -150,8 +151,8 @@ ap_hash_index_t *ap_hash_next(ap_hash_index_t *hi);
  * @tip The return pointers should point to a variable that will be set to the
  *      corresponding data, or they may be NULL if the data isn't interesting.
  */
-void ap_hash_this(ap_hash_index_t *hi, const void **key, size_t *klen,
-                  void **val);
+APR_EXPORT(void) ap_hash_this(ap_hash_index_t *hi, const void **key, 
+                              size_t *klen, void **val);
 
 #ifdef __cplusplus
 }

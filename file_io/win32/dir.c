@@ -55,7 +55,7 @@
 #include "apr.h"
 #include "fileio.h"
 #include "apr_file_io.h"
-#include "apr_lib.h"
+#include "apr_strings.h"
 #include "apr_portable.h"
 #include "atime.h"
 

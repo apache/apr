@@ -58,7 +58,7 @@
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
-#include "apr_lib.h"
+#include "apr_strings.h"
 #include "apr_portable.h"
 #include <stdlib.h>
 #include <signal.h>
@@ -404,6 +404,9 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
         // The completion of the ap_proc_t type leaves us ill equiped to track both 
         // the pid (Process ID) and handle to the process, which are entirely
         // different things and each useful in their own rights.
+        //
+        // Signals are broken since the hProcess varies from process to process, 
+        // while the true process ID would not.
         new->pid = (pid_t) pi.hProcess;
 
         if (attr->child_in) {

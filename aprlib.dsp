@@ -68,8 +68,8 @@ LIB32=link.exe -lib
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "_DEBUG" /D "APR_EXPORT_SYMBOLS" /D "WIN32" /D "_WINDOWS" /FD /c
+# ADD BASE CPP /nologo /MTd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /D "_DEBUG" /D "APR_EXPORT_SYMBOLS" /D "WIN32" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
@@ -93,23 +93,23 @@ SOURCE=.\time\win32\access.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_cpystrn.c
+SOURCE=.\strings\apr_cpystrn.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_execve.c
+SOURCE=.\strings\apr_fnmatch.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_fnmatch.c
+SOURCE=.\passwd\apr_getpass.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_getpass.c
+SOURCE=.\tables\apr_hash.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_md5.c
+SOURCE=.\passwd\apr_md5.c
 # End Source File
 # Begin Source File
 
@@ -117,19 +117,23 @@ SOURCE=.\lib\apr_pools.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_snprintf.c
+SOURCE=.\lib\apr_signal.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_strnatcmp.c
+SOURCE=.\strings\apr_snprintf.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\lib\apr_tables.c
+SOURCE=.\strings\apr_strings.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\aprlib.def
+SOURCE=.\strings\apr_strnatcmp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\tables\apr_tables.c
 # End Source File
 # Begin Source File
 
@@ -209,6 +213,11 @@ SOURCE=.\network_io\win32\sendrecv.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\shmem\win32\shmem.c
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
 SOURCE=.\threadproc\win32\signals.c
 # End Source File
 # Begin Source File
@@ -242,114 +251,6 @@ SOURCE=.\time\win32\time.c
 # Begin Source File
 
 SOURCE=.\time\win32\timestr.c
-# End Source File
-# End Group
-# Begin Group "Header Files"
-
-# PROP Default_Filter ".h"
-# Begin Source File
-
-SOURCE=.\include\apr_dso.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_errno.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_file_io.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_fnmatch.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_general.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_getopt.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_lib.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_lock.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_md5.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_network_io.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_pools.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_portable.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_shmem.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_signal.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_strnatcmp.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_tables.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_thread_proc.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_time.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_xlate.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\time\win32\atime.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\dso\win32\dso.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\file_io\win32\fileio.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\locks\win32\locks.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\misc\unix\misc.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\network_io\win32\networkio.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\threadproc\win32\threadproc.h
 # End Source File
 # End Group
 # Begin Group "Generated Header Files"
@@ -396,10 +297,42 @@ InputPath=.\include\apr_private.hw
 !ENDIF 
 
 # End Source File
+# Begin Source File
+
+SOURCE=.\time\win32\atime.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\dso\win32\dso.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\win32\fileio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\locks\win32\locks.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\unix\misc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\network_io\win32\networkio.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\threadproc\win32\threadproc.h
+# End Source File
 # End Group
 # Begin Group "External Header Files"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\include\apr.h.in
+# End Source File
 # Begin Source File
 
 SOURCE=.\include\apr.hw
@@ -429,6 +362,91 @@ InputPath=.\include\apr.hw
 !ENDIF 
 
 # End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_dso.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_errno.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_file_io.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_fnmatch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_general.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_getopt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_hash.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_lib.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_lock.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_md5.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_mmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_network_io.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_pools.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_portable.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_shmem.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_strings.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_tables.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_thread_proc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_time.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_xlate.h
+# End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\aprlib.def
+# PROP Exclude_From_Build 1
+# End Source File
 # End Target
 # End Project
