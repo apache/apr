@@ -56,9 +56,11 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_config.h"
 #include "errno.h"
 #include <stdio.h>
-#ifdef BEOS
+#include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -84,9 +86,6 @@ void ocmaint(int reason, void *data)
 int main(int argc, char *argv[])
 {
     ap_context_t *context;
-    ap_context_t *cont2;
-    ap_status_t status = 0;
-    ap_ssize_t nbytes = 0;
     ap_proc_t *newproc = NULL;
     ap_procattr_t *procattr = NULL;
     char *args[3];
