@@ -178,8 +178,8 @@ endif
 endif
 
 ifndef INSTALL
-INSTALL = $(APR_WORK)\..\Dist
-INSTDIRS = $(APR_WORK)\..\Dist
+INSTALL = $(APR_WORK)\Dist
+INSTDIRS = $(APR_WORK)\Dist
 endif
 
 INSTDEVDIRS := \
