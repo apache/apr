@@ -121,7 +121,10 @@ APR_DECLARE(apr_status_t) apr_global_mutex_child_init(
                               const char *fname,
                               apr_pool_t *pool)
 {
-    return APR_SUCCESS;
+    apr_status_t rv;
+
+    rv = apr_proc_mutex_child_init(&((*mutex)->proc_mutex), fname, pool);
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_lock(apr_global_mutex_t *mutex)
