@@ -274,13 +274,13 @@ void testdirs(apr_pool_t *pool)
     fprintf(stdout, "Testing Directory functions.\n");
 
     STD_TEST_NEQ("    Making directory",
-                 apr_dir_make("testdir", 
+                 apr_dir_make("tmpdir", 
                                APR_UREAD | APR_UWRITE | APR_UEXECUTE |
                                APR_GREAD | APR_GWRITE | APR_GEXECUTE | 
                                APR_WREAD | APR_WWRITE | APR_WEXECUTE, pool))
 
     STD_TEST_NEQ("    Creating a file in the new directory",
-                 apr_file_open(&file, "testdir/testfile", 
+                 apr_file_open(&file, "tmpdir/testfile", 
                                APR_READ | APR_WRITE | APR_CREATE, 
                                APR_UREAD | APR_UWRITE | APR_UEXECUTE, pool))
 
@@ -288,7 +288,7 @@ void testdirs(apr_pool_t *pool)
     apr_file_write(file, "Another test!!", &bytes); 
 	apr_file_close(file);
 
-    STD_TEST_NEQ("    Opening directory", apr_dir_open(&temp, "testdir", pool))
+    STD_TEST_NEQ("    Opening directory", apr_dir_open(&temp, "tmpdir", pool))
     STD_TEST_NEQ("    Reading directory", 
                  apr_dir_read(&dirent, APR_FINFO_DIRENT, temp))
        
@@ -300,7 +300,7 @@ void testdirs(apr_pool_t *pool)
         if (apr_dir_read(&dirent, APR_FINFO_DIRENT | APR_FINFO_TYPE
                                 | APR_FINFO_SIZE | APR_FINFO_MTIME, temp) 
                 != APR_SUCCESS) {
-            fprintf(stderr, "Error reading directory testdir"); 
+            fprintf(stderr, "Error reading directory tmpdir"); 
             exit(-1);
         }
     } while (dirent.name[0] == '.');
@@ -315,8 +315,8 @@ void testdirs(apr_pool_t *pool)
     STD_TEST_NEQ("    Rewind directory", apr_dir_rewind(temp))
     STD_TEST_NEQ("    Closing directory", apr_dir_close(temp))
     STD_TEST_NEQ("    Removing file from directory",
-                 apr_file_remove("testdir/testfile", pool))
-    STD_TEST_NEQ("    Removing directory", apr_dir_remove("testdir", pool))
+                 apr_file_remove("tmpdir/testfile", pool))
+    STD_TEST_NEQ("    Removing directory", apr_dir_remove("tmpdir", pool))
 }    
 
 #define TESTREAD_BLKSIZE 1024
