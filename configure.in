@@ -329,7 +329,7 @@ case $host in
         *sparc*)
             OSDIR="solaris_sparc"
             eolstr="\\n"
-            is_gnu_as=`${AS} --help | grep gnu.org`
+            is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
             if [ -z "$is_gnu_as" ]
             then
                 ASFLAGS="-xarch=v8plus -KPIC -q"
