@@ -112,6 +112,7 @@ dox:
 gcov: 
 	@build/run-gcov.sh
 
+test: check
 check: $(TARGET_LIB)
 	(cd test && $(MAKE) check)
 
