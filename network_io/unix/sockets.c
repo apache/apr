@@ -377,6 +377,7 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
 apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock, 
                            apr_pool_t *cont)
 {
+    /* XXX Bogus assumption that *sock points at anything legit */
     if ((*sock) == NULL) {
         alloc_socket(sock, cont);
         /* XXX IPv6 figure out the family here! */
