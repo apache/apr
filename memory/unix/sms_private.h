@@ -52,90 +52,76 @@
  * <http://www.apache.org/>.
  */
 
-/* This code kindly donated to APR by 
- *    Elrond  <elrond@samba-tng.org>
- *    Luke Kenneth Casson Leighton <lkcl@samba-tng.org>
- *    Sander Striker <striker@samba-tng.org>
- *
- * May 2001
- */
+#ifndef SMS_PRIVATE_H
+#define SMS_PRIVATE_H
 
 #include "apr.h"
-#include "apr_private.h"
-#include "apr_sms.h"
-#include <stdlib.h>
-#include "sms_private.h"
+#include "apr_errno.h"
+#include "apr_pools.h"
+#include "apr_lock.h"
 
-static const char *module_identity = "STANDARD";
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * The memory system structure
+ */
+struct apr_sms_t
+{
+    apr_sms_t  *parent;
+    apr_sms_t  *child;
+    apr_sms_t  *sibling;
+    apr_sms_t **ref;
+    apr_sms_t  *accounting;
+    const char *identity; /* a string identifying the module */
+
+    apr_pool_t *pool;
+    apr_lock_t *sms_lock;
+    
+    struct apr_sms_cleanup *cleanups;
+
+    void * (*malloc_fn)            (apr_sms_t *sms, apr_size_t size);
+    void * (*calloc_fn)            (apr_sms_t *sms, apr_size_t size);
+    void * (*realloc_fn)           (apr_sms_t *sms, void *memory, 
+                                    apr_size_t size);
+    apr_status_t (*free_fn)        (apr_sms_t *sms, void *memory);
+    apr_status_t (*reset_fn)       (apr_sms_t *sms);
+    apr_status_t (*pre_destroy_fn) (apr_sms_t *sms);
+    apr_status_t (*destroy_fn)     (apr_sms_t *sms);
+    apr_status_t (*lock_fn)        (apr_sms_t *sms);
+    apr_status_t (*unlock_fn)      (apr_sms_t *sms);
+};
 
 /*
- * standard memory system
+ * private memory system functions
  */
 
-static void *apr_sms_std_malloc(apr_sms_t *sms,
-                                apr_size_t size)
-{
-    return malloc(size);
-}
+/**
+ * Initialize a memory system
+ * @caution Call this function as soon as you have obtained a block of memory
+ *          to serve as a memory system structure from your 
+ *          apr_xxx_sms_create. Only use this function when you are
+ *          implementing a memory system.
+ * @param sms The memory system created
+ * @param parent_sms The parent memory system
+ * @deffunc apr_status_t apr_sms_init(apr_sms_t *sms,
+ *                                    apr_sms_t *parent_sms)
+ */
+APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms, 
+                                       apr_sms_t *parent_sms);
 
-static void *apr_sms_std_calloc(apr_sms_t *sms,
-                                apr_size_t size)
-{
-#if HAVE_CALLOC
-    return calloc(1, size);
-#else
-    void *mem;
-    mem = malloc(size);
-    memset(mem, '\0', size);
-    return mem;
+/**
+ * Do post init work that needs the sms to have been fully
+ * initialised.
+ * @param sms The memory system to use
+ */
+APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms);
+
+
+#ifdef __cplusplus
+}
 #endif
-}
 
-
-static void *apr_sms_std_realloc(apr_sms_t *sms,
-                                 void *mem, apr_size_t size)
-{
-    return realloc(mem, size);
-}
-
-static apr_status_t apr_sms_std_free(apr_sms_t *sms,
-                                     void *mem)
-{
-    free(mem);
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms)
-{
-    apr_sms_t *new_sms;
-    apr_status_t rv;
-
-    *sms = NULL;
-    /* We don't have a parent so we allocate the memory
-     * for the structure ourselves...
-     */
-    new_sms = apr_sms_std_calloc(NULL, sizeof(apr_sms_t));
-
-    if (!new_sms)
-        return APR_ENOMEM;
-
-    if ((rv = apr_sms_init(new_sms, NULL)) != APR_SUCCESS)
-        return rv;
-
-    new_sms->malloc_fn  = apr_sms_std_malloc;
-    new_sms->calloc_fn  = apr_sms_std_calloc;
-    new_sms->realloc_fn = apr_sms_std_realloc;
-    new_sms->free_fn    = apr_sms_std_free;
-    new_sms->identity   = module_identity;
-
-    /* as we're not a tracking memory module, i.e. we don't keep
-     * track of our allocations, we don't have apr_sms_reset or
-     * apr_sms_destroy functions.
-     */
-    
-    apr_sms_post_init(new_sms);
-
-    *sms = new_sms;
-    return APR_SUCCESS;
-}
+#endif /* !SMS_PRIVATE_H */
 
