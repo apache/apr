@@ -144,14 +144,15 @@ int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
     apr_pool_destroy(thd->cntxt);
-	exit_thread ((status_t)(*retval));
-	return APR_SUCCESS;
+    exit_thread ((status_t)(*retval));
+    /* This will never be reached... */
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
 {
     status_t rv = 0, ret;
-    if ((ret = wait_for_thread(thd->td,&rv)) == B_NO_ERROR) {
+    if ((ret = wait_for_thread(thd->td, &rv)) == B_NO_ERROR) {
         *retval = rv;
         return APR_SUCCESS;
     }

@@ -283,46 +283,55 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
 APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   int *exitcode,
                                                   apr_exit_why_e *exitwhy,
-                                          apr_wait_how_e waithow, apr_pool_t *p)
+                                                  apr_wait_how_e waithow, 
+                                                  apr_pool_t *p)
 {
+    proc->pid = -1;
+    return apr_proc_wait(proc, exitcode, exitwhy, waithow);
+} 
+
+APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
+                                        int *exitcode, 
+                                        apr_exit_why_e *exitwhy,
+                                        apr_wait_how_e waithow)
+{
+    pid_t pstatus;
     int waitpid_options = WUNTRACED;
+    int exit_int;
+    int ignore;
+    apr_exit_why_e ignorewhy;
+
+    if (exitcode == NULL) {
+        exitcode = &ignore;
+    }
+    if (exitwhy == NULL) {
+        exitwhy = &ignorewhy;
+    }
 
     if (waithow != APR_WAIT) {
         waitpid_options |= WNOHANG;
     }
-
-    if ((proc->pid = waitpid(-1, status, waitpid_options)) > 0) {
+    
+    if ((pstatus = waitpid(proc->pid, &exit_int, waitpid_options)) > 0) {
+        proc->pid = pstatus;
+        if (WIFEXITED(exit_int)) {
+            *exitwhy = APR_PROC_EXIT;
+            *exitcode = WEXITSTATUS(exit_int);
+        }
+        else if (WIFSIGNALED(exit_int)) {
+            *exitwhy = APR_PROC_SIGNAL;
+            *exitcode = WTERMSIG(exit_int);
+        }
+        else {
+            /* unexpected condition */
+            return APR_EGENERAL;
+        }
         return APR_CHILD_DONE;
     }
-    else if (proc->pid == 0) {
+    else if (pstatus == 0) {
         return APR_CHILD_NOTDONE;
     }
     return errno;
-} 
-
-APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
-                                        int *exitcode, apr_exit_why_e *exitwhy,
-                                        apr_wait_how_e waithow)
-{
-    status_t rv;
-
-    if (!proc)
-        return APR_ENOPROC;
-    /* when we run processes we are actually running threads, so here
-       we'll wait on the thread dying... */
-    if (wait == APR_WAIT) {
-        if ((rv = wait_for_thread(proc->pid, exitcode)) == B_OK) {
-            return APR_CHILD_DONE;
-        }
-        return rv;
-    }
-    /* if the thread is still alive then it's not done...
-       this won't hang or holdup the thread checking... */
-    if (resume_thread(proc->pid) == B_BAD_THREAD_ID) {
-        return APR_CHILD_DONE;
-    }
-    /* if we get this far it's still going... */
-    return APR_CHILD_NOTDONE;
 } 
 
 APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_file_t *child_in,
