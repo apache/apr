@@ -52,6 +52,7 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_lib.h"
 #include "misc.h"
 
 
