@@ -143,6 +143,12 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #define memmove(a,b,c) bcopy(b,a,c)
 #endif
 
+#if (!HAVE_MKSTEMP)
+#define mkstemp(a) ap_mkstemp(a)
+#define mkstemps(a,b) ap_mkstemp(a,b)
+#define mkdtemp(a) ap_mkdtemp(a)
+#endif
+
 /**
  * @package APR Random Functions
  */
