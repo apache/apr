@@ -395,7 +395,7 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
-        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 
+        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 0,
                              new_mutex->pool);
     }
  
@@ -516,7 +516,7 @@ static apr_status_t proc_mutex_flock_create(apr_proc_mutex_t *new_mutex,
     }
     else {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, "/tmp/aprXXXXXX");
-        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 
+        rv = apr_file_mktemp(&new_mutex->interproc, new_mutex->fname, 0,
                              new_mutex->pool);
     }
  
