@@ -144,8 +144,6 @@ apr_status_t apr_socket_timeout_set(apr_socket_t *sock, apr_interval_time_t t)
     if (t <= 0) {
         sock->options &= ~APR_INCOMPLETE_READ;
     }
-    sock->timeout = t; 
-    apr_set_option(sock, APR_SO_TIMEOUT, t > 0);
     return APR_SUCCESS;
 }
 
@@ -240,10 +238,6 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #else
         return APR_ENOTIMPL;
 #endif
-        break;
-    case APR_SO_TIMEOUT:
-        /* XXX: To be deprecated */
-        return apr_socket_timeout_set(sock, on);
         break;
     case APR_TCP_NODELAY:
 #if defined(TCP_NODELAY)
@@ -359,10 +353,6 @@ apr_status_t apr_socket_opt_get(apr_socket_t *sock,
                                 apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
-        case APR_SO_TIMEOUT:
-            /* XXX: To be deprecated */
-            *on = (apr_int32_t)sock->timeout;
-            break;
         default:
             *on = apr_is_option_set(sock, opt);
     }

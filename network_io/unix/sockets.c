@@ -271,8 +271,8 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
     /* we can see EINPROGRESS the first time connect is called on a non-blocking
      * socket; if called again, we can see EALREADY
      */
-    if (rc == -1 && (errno == EINPROGRESS || errno == EALREADY) &&
-        apr_is_option_set(sock, APR_SO_TIMEOUT)) {
+    if ((rc == -1) && (errno == EINPROGRESS || errno == EALREADY)
+                   && (sock->timeout > 0)) {
         rc = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (rc != APR_SUCCESS) {
             return rc;

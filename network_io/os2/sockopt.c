@@ -120,10 +120,6 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
             return APR_OS2_STATUS(sock_errno());
         }
     }
-    if (opt & APR_SO_TIMEOUT) {
-        /* XXX: To be deprecated */
-        return apr_socket_timeout_set(sock, on);
-    }
     if (opt & APR_TCP_NODELAY) {
         if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
             return APR_OS2_STATUS(sock_errno());
@@ -145,10 +141,6 @@ APR_DECLARE(apr_status_t) apr_socket_opt_get(apr_socket_t *sock,
                                              apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
-    case APR_SO_TIMEOUT:
-        /* XXX: To be deprecated */
-        *on = (apr_int32_t)sock->timeout;
-        break;
     default:
         return APR_EINVAL;
     }
