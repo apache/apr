@@ -28,11 +28,11 @@ cat > index.html << EOF
     width="150" border="0" alt="ApacheCon" /></a>
           <p><b>Get Involved</b></p>
    <menu compact="compact">
-         <li><a href="anoncvs.txt">CVS</a></li>
-         <li><a href="mailing-lists.html">Mailing Lists</a></li>
+         <li><a href="/anoncvs.txt">CVS</a></li>
+         <li><a href="/mailing-lists.html">Mailing Lists</a></li>
          <li><a href="http://cvs.apache.org/snapshots/apr/">Snapshots</a></li>
-         <li><a href="compiling_win32.html">Build on Win32</a></li>
-         <li><a href="compiling_unix.html">Build on Unix</a></li>
+         <li><a href="/compiling_win32.html">Build on Win32</a></li>
+         <li><a href="/compiling_unix.html">Build on Unix</a></li>
        </menu>
      <p><b>Download!</b></p>
    <menu compact="compact">
@@ -40,20 +40,20 @@ cat > index.html << EOF
        </menu>
      <p><b>Docs</b></p>
    <menu compact="compact">
-         <li><a href="docs/apr/">APR</a></li>
-         <li><a href="docs/apr-util/">APR-util</a></li>
+         <li><a href="/docs/apr/">APR</a></li>
+         <li><a href="/docs/apr-util/">APR-util</a></li>
          <li>APR-iconv</li>
        </menu>
      <p><b>Guidelines</b></p>
    <menu compact="compact">
-         <li><a href="guidelines.html">Project Guidelines</a></li>
-         <li><a href="patches.html">Contributing</a></li>
-        <li><a href="versioning.html">Version Numbers</a></li>
+         <li><a href="/guidelines.html">Project Guidelines</a></li>
+         <li><a href="/patches.html">Contributing</a></li>
+         <li><a href="/versioning.html">Version Numbers</a></li>
       </menu>
     <p><b><a href="/info/">Miscellaneous</a></b></p>
   <menu compact="compact">
         <li><a href="http://www.apache.org/LICENSE.txt">License</a></li>
-        <li><a href="projects.html">Projects using APR</a></li>
+        <li><a href="/projects.html">Projects using APR</a></li>
       </menu>
   </td>
   <!-- RIGHT SIDE INFORMATION -->
