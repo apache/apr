@@ -393,46 +393,6 @@ case $host in
        enable_threads="no"
        eolstr="\\n"
        ;;
-   *sun*)
-       case $host_cpu in
-         *sparc*)
-            OSDIR="solaris_sparc"
-            eolstr="\\n"
-            if test "$nonportable_atomics_enabled" = 1; then
-              apr_atomic_sparc_compile=apr_atomic_sparc.lo
-              sparc_arch=`uname -m`
-              is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
-              case "$sparc_arch" in
-                sun4c|sun4m|sun4d|sun4t|sun4)
-                  apr_force_atomic_generic=1
-                  apr_atomic_sparc_compile=""
-                  ;;
-                *)
-                  if test -n "$is_gnu_as"; then
-                    ASFLAGS="-xarch=v8plus -K PIC"
-                    ASCPPFLAGS="-traditional-cpp -D_ASM -D__STDC__=0"
-                    ASCPP="gcc -E"
-                  else 
-                    ASFLAGS="-K pic -P -D_ASM -D__STDC__=0 -xarch=v8plus"
-                    ASCPPFLAGS=""
-                    ASCPP="cat"
-                  fi
-                  ;;
-                esac
-            else
-              apr_force_atomic_generic=1
-              apr_atomic_sparc_compile=""
-            fi
-            AC_SUBST(ASCPPFLAGS)
-            AC_SUBST(ASFLAGS)
-            AC_SUBST(apr_atomic_sparc_compile)
-            ;;
-         *)
-            OSDIR="unix"
-            eolstr="\\n"
-            ;;
-       esac
-       ;;
    *linux*)
        apr_force_atomic_generic=1
        case $host_cpu in
