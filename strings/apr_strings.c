@@ -235,11 +235,11 @@ void *memchr(const void *s, int c, size_t n)
 
 APR_DECLARE(apr_int64_t) apr_strtoi64(const char *buf, char **end, int base)
 {
-#if (APR_HAVE_STRTOLL)
-    return (apr_int64_t)strtoll(buf, end, base);
+#if (APR_HAVE_INT64_STRFN)
+    return APR_INT64_STRFN(buf, end, base);
 #else
-    /* XXX This Is Absolutely Bogus */
-    return (apr_int64_t)strtol(buf, end, base);
+    /* XXX This Is Absolutely Bogus :: REIMPLEMENT! */
+    return strtol(buf, end, base);
 #endif
 }
 

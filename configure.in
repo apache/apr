@@ -1028,12 +1028,14 @@ if test "$ac_cv_sizeof_int" = "8"; then
     int64_t_fmt_len='#define APR_INT64_T_FMT_LEN 1'
     int64_value="int"
     long_value=int
+    int64_strfn="strtoi"
 elif test "$ac_cv_sizeof_long" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##L)'
     int64_t_fmt='#define APR_INT64_T_FMT "ld"'
     int64_t_fmt_len='#define APR_INT64_T_FMT_LEN 2'
     int64_value="long"
     long_value=long
+    int64_strfn="strtol"
 elif test "$ac_cv_sizeof_long_long" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LL)'
     dnl Linux, Solaris, FreeBSD all support ll with printf.
@@ -1044,18 +1046,21 @@ elif test "$ac_cv_sizeof_long_long" = "8"; then
     int64_t_fmt_len='#define APR_INT64_T_FMT_LEN 3'
     int64_value="long long"
     long_value="long long"
+    int64_strfn="strtoll"
 elif test "$ac_cv_sizeof_long_double" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LD)'
     int64_t_fmt='#define APR_INT64_T_FMT "Ld"'
     int64_t_fmt_len='#define APR_INT64_T_FMT_LEN 2'
     int64_value="long double"
     long_value="long double"
+    int64_strfn="strtoll"
 elif test "$ac_cv_sizeof_longlong" = "8"; then
     int64_literal='#define APR_INT64_C(val) (val##LL)'
     int64_t_fmt='#define APR_INT64_T_FMT "qd"'
     int64_t_fmt_len='#define APR_INT64_T_FMT_LEN 2'
     int64_value="__int64"
     long_value="__int64"
+    int64_strfn="strtoll"
 else
     dnl # int64_literal may be overriden if your compiler thinks you have
     dnl # a 64-bit value but APR does not agree.
@@ -1210,7 +1215,7 @@ AC_CHECK_FUNCS(strcasecmp, have_strcasecmp="1", have_strcasecmp="0")
 AC_CHECK_FUNCS(strdup, have_strdup="1", have_strdup="0")
 AC_CHECK_FUNCS(strstr, have_strstr="1", have_strstr="0")
 AC_CHECK_FUNCS(memchr, have_memchr="1", have_memchr="0")
-AC_CHECK_FUNCS(strtoll, have_strtoll="1", have_strtoll="0")
+AC_CHECK_FUNCS($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
 
 AC_SUBST(have_strnicmp)
 AC_SUBST(have_strncasecmp)
@@ -1219,7 +1224,8 @@ AC_SUBST(have_strcasecmp)
 AC_SUBST(have_strdup)
 AC_SUBST(have_strstr)
 AC_SUBST(have_memchr)
-AC_SUBST(have_strtoll)
+AC_SUBST(have_int64_strfn)
+AC_SUBST(int64_strfn)
 
 dnl #----------------------------- Checking for DSO support
 echo $ac_n "${nl}Checking for DSO...${nl}"

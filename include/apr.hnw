@@ -339,6 +339,10 @@ typedef int apr_wait_t;
 #define APR_INT64_T_FMT          "l64d"
 #define APR_TIME_T_FMT APR_INT64_T_FMT
 
+/* Deal with atoi64 variables ... these should move to apr_private.h */
+/* I don't have the answer, perhaps a NetWare hacker will fill this in? */
+#define APR_HAVE_INT64_STRFN  0
+#define APR_INT64_STRFN	      missing
 
 #endif /* APR_H */
 /** @} */
