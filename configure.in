@@ -650,6 +650,9 @@ case "$OS" in
     *alpha*-dec-osf* )
         sendfile="0"
         ;;
+    s390-*-linux-gnu)
+        sendfile="0"
+        ;;
 esac       
 if test "$orig_sendfile" != "$sendfile"; then
   echo "sendfile support disabled to avoid system problem"
