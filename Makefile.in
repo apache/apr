@@ -75,7 +75,9 @@ install: $(TARGET_LIB)
 
 $(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.@so_ext@"; done ; \
-	    $(LINK) @lib_target@
+	    tmpcmd="$(LINK) @lib_target@"; \
+	    echo $$tmpcmd; \
+	    $$tmpcmd
 
 delete-exports:
 	@if test -f apr.exp; then \
