@@ -27,9 +27,7 @@ void apr_assert_success(abts_case* tc, const char* context, apr_status_t rv,
 {
     if (rv == APR_ENOTIMPL) {
         abts_not_impl(tc, context, lineno);
-    }
-
-    if (rv != APR_SUCCESS) {
+    } else if (rv != APR_SUCCESS) {
         char buf[STRING_MAX], ebuf[128];
         sprintf(buf, "%s (%d): %s\n", context, rv,
                 apr_strerror(rv, ebuf, sizeof ebuf));
