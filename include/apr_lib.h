@@ -358,18 +358,6 @@ API_EXPORT(int)
 
 API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
 
-/*
- * Routine definitions that only work on Windows.
- */
-
-/*#ifdef TPF*/
-#define ap_block_alarms()
-#define ap_unblock_alarms()
-/*#else 
-API_EXPORT(void) ap_block_alarms(void);
-API_EXPORT(void) ap_unblock_alarms(void);
-#endif */
-
 #ifdef __cplusplus
 }
 #endif
