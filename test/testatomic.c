@@ -83,58 +83,59 @@ apr_atomic_t y;      /* atomic locks */
 static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
 {
     apr_uint32_t oldval;
-    apr_uint32_t casval=0;
-    apr_atomic_set(&y,2);
+    apr_uint32_t casval = 0;
+    apr_atomic_set(&y, 2);
     printf("%-60s", "testing apr_atomic_dec");
-    if ( apr_atomic_dec(&y) == 0 ) {
-        fprintf(stderr, "Failed\noldval =%d should not be zero\n",apr_atomic_read(&y));
+    if (apr_atomic_dec(&y) == 0) {
+        fprintf(stderr, "Failed\noldval =%d should not be zero\n",
+                apr_atomic_read(&y));
         return APR_EGENERAL;
     }
-    if ( apr_atomic_dec(&y) != 0 ) {
-        fprintf(stderr, "Failed\noldval =%d should be zero\n",apr_atomic_read(&y));
+    if (apr_atomic_dec(&y) != 0) {
+        fprintf(stderr, "Failed\noldval =%d should be zero\n",
+                apr_atomic_read(&y));
         return APR_EGENERAL;
     }
     printf("OK\n");
 
     printf("%-60s", "testing CAS");
-    oldval = apr_atomic_cas(&casval,12,0);
+    oldval = apr_atomic_cas(&casval, 12, 0);
     if (oldval != 0) {
-        fprintf(stderr, "Failed\noldval =%d should be zero\n",oldval);
+        fprintf(stderr, "Failed\noldval =%d should be zero\n", oldval);
         return APR_EGENERAL;
     }
     printf("OK\n");
     printf("%-60s", "testing CAS - match non-null");
-    oldval = apr_atomic_cas(&casval,23,12);
+    oldval = apr_atomic_cas(&casval, 23, 12);
     if (oldval != 12) {
         fprintf(stderr, "Failed\noldval =%d should be 12 y=%d\n",
-                oldval,
-                casval);
+                oldval, casval);
         return APR_EGENERAL;
     }
     printf("OK\n");
     printf("%-60s", "testing CAS - no match");
-    oldval = apr_atomic_cas(&casval,23,12);
-    if (oldval != 23 ) {
+    oldval = apr_atomic_cas(&casval, 23, 12);
+    if (oldval != 23) {
         fprintf(stderr, "Failed\noldval =%d should be 23 y=%d\n",
-                oldval, 
-                casval);
+                oldval, casval);
         return APR_EGENERAL;
     }
     printf("OK\n");
 
     printf("%-60s", "testing add");
-    apr_atomic_set(&y,23);
-    apr_atomic_add(&y,4);
+    apr_atomic_set(&y, 23);
+    apr_atomic_add(&y, 4);
     if (apr_atomic_read(&y) != 27) {
-        fprintf(stderr, "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
-            oldval);
-        exit(-1);
+        fprintf(stderr,
+                "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
+                oldval);
+        return APR_EGENERAL;
     }
  
     printf("OK\n");
     printf("%-60s", "testing add/inc");
-    apr_atomic_set(&y,0);
-    apr_atomic_add(&y,20);
+    apr_atomic_set(&y, 0);
+    apr_atomic_add(&y, 20);
     apr_atomic_inc(&y);
     if (apr_atomic_read(&y) != 21) {
         fprintf(stderr, "Failed.\natomics do not add up\n");
@@ -217,6 +218,7 @@ void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
 }
+
 void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data)
 {
     int i;
@@ -240,15 +242,18 @@ int main(int argc, char**argv)
     apr_status_t s2[NUM_THREADS];
     apr_status_t rv;
     int i;
-    int mutex=0;
+    int mutex;
 
     apr_initialize();
 
-    if (argc==2 && argv[1][0]=='m') 
-        mutex=1;
+    if (argc == 2 && argv[1][0] == 'm') {
+        mutex = 1;
+    }
+    else {
+        mutex = 0;
+    }
 
-    printf("APR Simple Thread Test\n======================\n\n");
-    
+    printf("APR Atomic Test\n===============\n\n");
 #if !(defined WIN32) && !(defined NETWARE) && !(defined __MVS__)
     pthread_setconcurrency(8);
 #endif
@@ -262,7 +267,7 @@ int main(int argc, char**argv)
 
     apr_thread_once_init(&control, context);
 
-    if (mutex==1) {
+    if (mutex == 1) {
         printf("%-60s", "Initializing the lock"); 
         rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT,
                                      context);
@@ -273,22 +278,28 @@ int main(int argc, char**argv)
         }
         printf("OK\n");
     }
-    rv = apr_atomic_init( context);
+    printf("%-60s", "Initializing the atomics"); 
+    rv = apr_atomic_init(context);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "Failed.\n");
+        exit(-1);
+    }
+    printf("OK\n");
 
     rv = check_basic_atomics(&y);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
     }
-    apr_atomic_set(&y,0);
+    apr_atomic_set(&y, 0);
 
     printf("%-60s", "Starting all the threads"); 
-    for (i=0;i<NUM_THREADS;i++) {
-        if (mutex ==1) 
-            r1[i] = apr_thread_create(&t1[i], NULL, thread_func_mutex, NULL, context);
-        else
-            r1[i] = apr_thread_create(&t1[i], NULL, thread_func_atomic, NULL, context);
-        r2[i] = apr_thread_create(&t2[i], NULL, thread_func_none, NULL, context);
+    for (i = 0; i < NUM_THREADS; i++) {
+        r1[i] = apr_thread_create(&t1[i], NULL, 
+                    (mutex == 1 ? thread_func_mutex : thread_func_atomic),
+                    NULL, context);
+        r2[i] = apr_thread_create(&t2[i], NULL, thread_func_none, NULL,
+                                  context);
         if (r1[i] != APR_SUCCESS || r2[i] != APR_SUCCESS ) {
             fflush(stdout);
             fprintf(stderr, "Failed\nError starting thread in group %d\n",i);
@@ -297,53 +308,60 @@ int main(int argc, char**argv)
     }
     printf("OK\n");
 
-    printf("%-60s", "Waiting for threads to exit");
+    printf("%-60s\n", "Waiting for threads to exit");
+    printf("%-60s", "(Note that this may take a while to complete.)");
     fflush(stdout);
-    for (i=0;i<NUM_THREADS;i++) {
+
+    for (i = 0; i < NUM_THREADS; i++) {
         apr_thread_join(&s1[i], t1[i]);
         apr_thread_join(&s2[i], t2[i]);
-        if (s1[i] != exit_ret_val || s2[i] != exit_ret_val ) {
-                fprintf(stderr, 
-                        "Invalid return value\nGot %d/%d, but expected %d for all \n",
-                        s1[i], s2[i], exit_ret_val);
+        if (s1[i] != exit_ret_val || s2[i] != exit_ret_val) {
+            fprintf(stderr, 
+                    "Invalid return value\n"
+                    "Got %d/%d, but expected %d for all \n",
+                    s1[i], s2[i], exit_ret_val);
         }
     }
     printf("OK\n");
 
-    if (mutex ==1) {
+    if (mutex == 1) {
         printf("%-60s", "Checking if mutex locks worked"); 
-        if (x != NUM_THREADS*NUM_ITERATIONS) {
+        if (x != NUM_THREADS * NUM_ITERATIONS) {
             fflush(stdout);
             fprintf(stderr, 
                     "No!\nThe locks didn't work?? x = %ld instead of %ld\n",
                     x,
-                    (long)NUM_THREADS*NUM_ITERATIONS);
+                    (long)NUM_THREADS * NUM_ITERATIONS);
         }
-        else
+        else {
             printf("OK\n");
+        }
     }
     else {
         printf("%-60s", "Checking if atomic worked"); 
-        if (apr_atomic_read(&y) != NUM_THREADS*NUM_ITERATIONS) {
+        if (apr_atomic_read(&y) != NUM_THREADS * NUM_ITERATIONS) {
             fflush(stdout);
             fprintf(stderr, 
                     "No!\nThe atomics didn't work?? y = %ld instead of %ld\n",
                     (long)apr_atomic_read(&y),
-                    (long)NUM_THREADS*NUM_ITERATIONS);
+                    (long)NUM_THREADS * NUM_ITERATIONS);
         }
-        else
+        else {
             printf("OK\n");
+        }
     }
     printf("%-60s", "Checking if nolock worked"); 
-    if ( z != NUM_THREADS*NUM_ITERATIONS) {
+    if (z != NUM_THREADS * NUM_ITERATIONS) {
         fflush(stdout);
         fprintf(stderr, 
-                "no suprise\nThe no-locks didn't work. z = %ld instead of %ld\n", 
+                "no surprise\n"
+                "The no-locks didn't work. z = %ld instead of %ld\n", 
                 z, 
-                (long)NUM_THREADS*NUM_ITERATIONS);
+                (long)NUM_THREADS * NUM_ITERATIONS);
     }
-    else
+    else {
         printf("OK\n");
+    }
 
     printf("%-60s", "Checking if apr_thread_once worked");
     if (value != 1) {
