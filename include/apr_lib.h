@@ -220,12 +220,12 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 /**
  * Display a prompt and read in the password from stdin.
  * @param prompt The prompt to display
- * @param pwbuf Where to store the password
- * @param bufsize The length of the password string.
+ * @param pwbuf Buffer to store the password
+ * @param bufsize The length of the password buffer.
  * @deffunc apr_status_t apr_password_get(const char *prompt, char *pwbuf, size_t *bufsize)
  */
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, 
-                                      size_t *bufsize);
+                                           size_t *bufsize);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Purge system password buffer before returning from apr_password_get.
+     No longer abuses bufsize argument on return.  [William Rowe]
+
   *) Moved the prototypes for apr_snprintf and apr_vsnprintf to the
      apr_strings.h header, from apr_lib.h.  This location makes more
      sense.  [Ryan Bloom]
