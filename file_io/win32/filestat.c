@@ -282,7 +282,7 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
  * dword discrepancy in offset of the High/Low size structure members.
  *
  * The generic fillin returns 1 if the caller should further inquire
- * if this is a CHR filetype.  If it's resonably certain it can't be,
+ * if this is a CHR filetype.  If it's reasonably certain it can't be,
  * then the function returns 0.
  */
 int fillin_fileinfo(apr_finfo_t *finfo, 

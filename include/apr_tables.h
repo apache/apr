@@ -423,7 +423,7 @@ APR_DECLARE(void) apr_table_vdo(int (*comp)(void *, const char *, const char *),
  * For each element in table b, either use setn or mergen to add the data
  * to table a.  Which method is used is determined by the flags passed in.
  * @param a The table to add the data to.
- * @param b The table to iterate over, adding it's data to table a
+ * @param b The table to iterate over, adding its data to table a
  * @param flags How to add the table to table a.  One of:
  *          APR_OVERLAP_TABLES_SET        Use apr_table_setn
  *          APR_OVERLAP_TABLES_MERGE      Use apr_table_mergen

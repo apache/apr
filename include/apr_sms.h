@@ -136,7 +136,7 @@ typedef int (*apr_abortfunc_t)(int retcode);
 
 /* APR_DEBUG_SHOW_STRUCTURE
  * This turns on a print of the ancestory of the SMS when
- * creating/destroying an SMS so it's place in the world can be seen.
+ * creating/destroying an SMS so its place in the world can be seen.
  */
 #define APR_DEBUG_SHOW_STRUCTURE      0
 

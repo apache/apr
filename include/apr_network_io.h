@@ -764,7 +764,7 @@ APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock,
 
 /**
  * Given an apr_sockaddr_t and a service name, set the port for the service
- * @param sockaddr The apr_sockaddr_t that will have it's port set
+ * @param sockaddr The apr_sockaddr_t that will have its port set
  * @param servname The name of the service you wish to use
  */
 APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr, 
