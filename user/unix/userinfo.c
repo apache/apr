@@ -99,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname,
 }
 
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
-                                         const char *username)
+                                         const char *username, apr_pool_t *p)
 {
     struct passwd *pw;
     apr_status_t rv;

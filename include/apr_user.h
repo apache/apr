@@ -104,10 +104,12 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
  * @param userid   Returns the user id
  * @param groupid  Returns the user's group id
  * @param username The username to lookup
+ * @param p The pool from which to allocate working space
  * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_get_userid(apr_uid_t *userid, apr_gid_t *groupid, const char *username)
+ * @deffunc apr_status_t apr_get_userid(apr_uid_t *userid, apr_gid_t *groupid, const char *username, apr_pool_t *p)
  */
-APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *userid, apr_gid_t *groupid, const char *username);
+APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *userid, apr_gid_t *groupid,
+                                         const char *username, apr_pool_t *p);
 
 /***
  * Get the home directory for the named user
