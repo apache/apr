@@ -346,7 +346,7 @@ sub handleCommentLine {
 	my $entry = { 'type'    => $type,
 		      'name'    => $name,
 		      'longname'=> $name,
-		      'fullname'=> "$name$decl",
+		      'fullname'=> "$name $decl",
 		      'scopename'=>"$baseScope$name",
 		      'uname'   => $dbname,
 		      'decl'    => $decl,
