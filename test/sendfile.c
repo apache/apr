@@ -307,7 +307,7 @@ static int client(client_socket_mode_t socket_mode)
         strlen(TRL1) + strlen(TRL2) + TRL3_LEN +
         FILE_LENGTH;
     
-    if (socket_mode == BLK || socket_mode == TIMEOUT) {
+    if (socket_mode == BLK) {
         current_file_offset = 0;
         len = FILE_LENGTH;
         rv = apr_sendfile(sock, f, &hdtr, &current_file_offset, &len, 0);
