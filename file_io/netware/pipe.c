@@ -77,13 +77,11 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 	int				err;
 	unsigned long	flags;
 
-#ifdef TBD
 	if (!(err = NXGetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, &flags)))
 	{
 		flags &= ~NX_O_NONBLOCK;
 		err    = NXSetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, flags);
 	}
-#endif	
 
     if (err)
         return convert_error (err);
@@ -97,13 +95,11 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
 	int				err;
 	unsigned long	flags;
 
-#ifdef TBD
 	if (!(err = NXGetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, &flags)))
 	{
 		flags |= NX_O_NONBLOCK;
 		err    = NXSetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, flags);
 	}
-#endif	
 
     if (err)
         return convert_error (err);
