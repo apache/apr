@@ -360,7 +360,7 @@ int apr_canonical_error(apr_status_t err);
  */
 #define APR_OS2_STATUS(e) (APR_FROM_OS_ERROR(e))
 
-#define APR_STATUS_IS_SUCCESS           ((s) == APR_SUCCESS \
+#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS \
                 || (s) == APR_OS_START_SYSERR + NO_ERROR)
 
 /* APR CANONICAL ERROR TESTS */
