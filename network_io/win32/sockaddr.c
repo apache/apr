@@ -60,10 +60,9 @@
 
 static apr_status_t get_local_addr(apr_socket_t *sock)
 {
-    size_t namelen = sizeof(sock->local_addr->sa);
-
+    sock->local_addr->sa_len = sizeof(sock->local_addr->sa);
     if (getsockname(sock->sock, (struct sockaddr *)&sock->local_addr->sa,
-                    &namelen) < 0) {
+                    &sock->local_addr->sa_len) < 0) {
         return apr_get_netos_error();
     }
     else {
