@@ -109,7 +109,6 @@ fi
 
 if test -n "$ac_cv_pthreads_cflags"; then
   CFLAGS="$CFLAGS $ac_cv_pthreads_cflags"
-  THREAD_CFLAGS="$THREAD_CFLAGS $ac_cv_pthreads_cflags"
 fi
 
 APR_PTHREADS_CHECK_COMPILE
@@ -123,15 +122,12 @@ if test "$pthreads_working" != "yes"; then
     APR_PTHREADS_CHECK_COMPILE
     if test "$pthreads_working" = "yes"; then
       ac_cv_pthreads_cflags="$flag"
-      dnl this was already added to CFLAGS; add to THREAD_CFLAGS, too
-      THREAD_CFLAGS="$THREAD_CFLAGS $ac_cv_pthreads_cflags"
       break
     fi
     CFLAGS="$ac_save"
   done
 fi
 ])
-
 
 AC_CACHE_CHECK(for pthreads_lib, ac_cv_pthreads_lib,[
 ac_cv_pthreads_lib=""
@@ -156,6 +152,27 @@ else
 fi
 ])dnl
 
+dnl
+dnl APR_PTHREADS_CHECK_SAVE
+dnl APR_PTHREADS_CHECK_RESTORE
+dnl
+dnl Save the global environment variables that might be modified during
+dnl the checks for threading support so that they can restored if the
+dnl result is not what the caller wanted.
+dnl
+AC_DEFUN(APR_PTHREADS_CHECK_SAVE, [
+  apr_pthsv_CFLAGS="$CFLAGS"
+  apr_pthsv_LIBS="$LIBS"
+])dnl
+
+AC_DEFUN(APR_PTHREADS_CHECK_RESTORE, [
+  CFLAGS="$apr_pthsv_CFLAGS"
+  LIBS="$apr_pthsv_LIBS"
+])dnl
+
+dnl
+dnl APR_CHECK_SIGWAIT_ONE_ARG
+dnl
 AC_DEFUN(APR_CHECK_SIGWAIT_ONE_ARG,[
   AC_CACHE_CHECK(whether sigwait takes one argument,ac_cv_sigwait_one_arg,[
   AC_TRY_COMPILE([
@@ -179,4 +196,4 @@ AC_DEFUN(APR_CHECK_SIGWAIT_ONE_ARG,[
   if test "$ac_cv_sigwait_one_arg" = "yes"; then
     AC_DEFINE(SIGWAIT_TAKES_ONE_ARG,1,[ ])
   fi
-])                                                                              
+])

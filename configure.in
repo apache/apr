@@ -17,6 +17,14 @@ sinclude(build/apr_threads.m4)
 sinclude(build/apr_hints.m4)
 sinclude(build/libtool.m4)
 
+dnl Save user-defined environment settings for later restoration
+dnl
+APR_SAVE_THE_ENVIRONMENT(CPPFLAGS)
+APR_SAVE_THE_ENVIRONMENT(CFLAGS)
+APR_SAVE_THE_ENVIRONMENT(LDFLAGS)
+APR_SAVE_THE_ENVIRONMENT(LIBS)
+APR_SAVE_THE_ENVIRONMENT(INCLUDES)
+
 dnl Generate ./config.nice for reproducing runs of configure
 dnl
 APR_CONFIG_NICE(config.nice)
@@ -55,31 +63,30 @@ AC_SUBST(apr_builders)
 
 MKDIR=$apr_builders/mkdir.sh
 
-# These added to allow default directories to be used...
+dnl These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
 
 apr_modules="file_io network_io threadproc misc locks time mmap shmem i18n user"
 
-dnl # Checks for programs.
-AC_PROG_CC
+dnl Checks for programs.
 AC_PROG_MAKE_SET
+AC_PROG_CC
+AC_PROG_CPP
 AC_PROG_AWK
+AC_PROG_LN_S
+AC_PROG_RANLIB
+AC_PROG_INSTALL
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_TOOL(AR, ar, ar)
 
-# This macro needs to be here in case we are on an AIX box.
+dnl Various OS checks that apparently set required flags
 AC_AIX
+AC_ISC_POSIX
+AC_MINIX
 
 APR_EBCDIC
  
-# Use /bin/sh if it exists, otherwise go looking for sh in the path
-if test ".$SH" = . -a -f /bin/sh; then
-  SH="/bin/sh"
-fi
-AC_CHECK_PROG(SH, sh, sh)
-
-dnl
 dnl prep libtool
 dnl
 echo "performing libtool configuration..."
@@ -101,7 +108,7 @@ AC_ARG_ENABLE(libtool, [--with-libtool   use libtool to link the library],
 
 if test "x$use_libtool" = "xyes"; then
       lt_compile="\$(LIBTOOL) --mode=compile \$(LTFLAGS) \$(COMPILE) -c \$< && touch \$@"
-      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@"
+      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(ALL_LDFLAGS) -o \$@"
       so_ext="lo"
       lib_target="-rpath \$(libdir) \$\$objects"
 else
@@ -122,24 +129,32 @@ nl='
 echo $ac_n "${nl}Check for compiler flags..."
 
 AC_ARG_ENABLE(debug,[  --enable-debug            Turn on debugging and compile time warnings],
-        [CFLAGS="$CFLAGS -g"; if test "$GCC" = "yes"; then CFLAGS="$CFLAGS -Wall"; fi])
+  [APR_ADDTO(CFLAGS,-g)
+   if test "$GCC" = "yes"; then
+     APR_ADDTO(CFLAGS,-Wall)
+   fi
+])dnl
 
 AC_ARG_ENABLE(maintainer-mode,[  --enable-maintainer-mode  Turn on debugging and compile time warnings],
-        [CFLAGS="$CFLAGS -g"; if test "$GCC" = "yes"; then CFLAGS="$CFLAGS -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations"; fi])
+  [APR_ADDTO(CFLAGS,-g)
+   if test "$GCC" = "yes"; then
+     APR_ADDTO(CFLAGS,[-Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations])
+   fi
+])dnl
 
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
 case "$OS:$CC" in
     *-hp-hpux*:cc )
-	CFLAGS="$CFLAGS -Ae +DAportable +Z"
+	APR_ADDTO(CFLAGS,[-Ae +DAportable +Z])
 	;;
     powerpc-*-beos:mwcc* )
-        CPP="mwcc -E"
-        CC="mwcc"
-        AR="ar"
-        ;;
+	APR_SETVAR(CPP,[mwcc -E])
+	APR_SETVAR(CC,mwcc)
+	APR_SETVAR(AR,ar)
+	;;
     mips-sni-sysv4:cc )
-	CFLAGS="$CFLAGS -Kthread"
+	APR_ADDTO(CFLAGS,-Kthread)
 	;;
 esac
 
@@ -151,8 +166,8 @@ case "$OS" in
        eolstr="\\n"
        ;;
    *-os2*)
-       CPPFLAGS="$CPPFLAGS -DOS2"
-       CFLAGS="$CFLAGS -Zmt"
+       APR_ADDTO(CPPFLAGS,-DOS2)
+       APR_ADDTO(CFLAGS,-Zmt)
        OSDIR="os2"
        enable_threads="system_threads"
        eolstr="\\r\\n"
@@ -160,7 +175,7 @@ case "$OS" in
        ;;
    *beos*)
        OSDIR="beos"
-       CPPFLAGS="$CPPFLAGS -DBEOS"
+       APR_ADDTO(CPPFLAGS,-DBEOS)
        enable_threads="system_threads"
        config_subdirs="shmem/unix/mm"
        native_mmap_emul="1"
@@ -214,20 +229,10 @@ echo "Don't enable threads"
     pthreadh="0"
     pthreadser="0"
 else
-#
-#   Play with CPPFLAGS given what was learned from APR_PRELOAD.
-#
-#   [Roy: I don't like this because it messes up an environment
-#         variable that should remain pristine.  However, it is needed
-#         for compatibility until all flag handling can be rewritten.]
-#
-    apr_save_cppflags="$CPPFLAGS"
-    if test -n "$THREAD_CPPFLAGS"; then
-        CPPFLAGS="$CPPFLAGS $THREAD_CPPFLAGS"
-    fi
     if test "$enable_threads" = "pthread"; then
 # We have specified pthreads for our threading library, just make sure
 # that we have everything we need
+      APR_PTHREADS_CHECK_SAVE
       APR_PTHREADS_CHECK
       APR_CHECK_PTHREADS_H([
           threads="1"
@@ -236,7 +241,8 @@ else
           AC_DEFINE(USE_THREADS) ], [
           threads="0"
           pthreadh="0"
-          pthreadser="0" ] )
+          pthreadser="0"
+          APR_PTHREADS_CHECK_RESTORE ] )
     elif test "$enable_threads" = "system_threads"; then
         threads="1"
         pthreadh="0"
@@ -245,6 +251,7 @@ else
 # We basically specified that we wanted threads, but not how to implement
 # them.  In this case, just look for pthreads.  In the future, we can check
 # for other threading libraries as well.
+      APR_PTHREADS_CHECK_SAVE
       APR_PTHREADS_CHECK
       APR_CHECK_PTHREADS_H([
           threads="1"
@@ -254,7 +261,7 @@ else
           threads="0"
           pthreadser="0"
           pthreadh="0"
-          CPPFLAGS="$apr_save_cppflags" ] )
+          APR_PTHREADS_CHECK_RESTORE ] )
     fi
     if test "$pthreadh" = "1"; then
         APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
@@ -359,7 +366,7 @@ AC_SUBST(mem_based)
 AC_SUBST(file_based)
 
 if test ".$SYS_SW" = ".AIX"; then
-    CPPFLAGS="$CPPFLAGS -U__STR__"
+    APR_ADDTO(CPPFLAGS,-U__STR__)
     case "$SYS_KV" in
         [12]*)
             AC_DEFINE(USEBCOPY)
@@ -782,7 +789,7 @@ AC_ARG_ENABLE(dso,
   [ 
     AC_CHECK_FUNCS(NSLinkModule, [ tempdso="dyld" ], [ tempdso="no" ])
     if test "$tempdso" = "no"; then
-      AC_CHECK_LIB(dl, dlopen, [ tempdso="dlfcn" LIBS="$LIBS -ldl" ], 
+      AC_CHECK_LIB(dl, dlopen, [ tempdso="dlfcn" APR_ADDTO(LIBS,-ldl) ], 
                    tempdso="no")
     fi
     if test "$tempdso" = "no"; then
@@ -792,7 +799,7 @@ AC_ARG_ENABLE(dso,
       AC_CHECK_LIB(root, load_image, tempdso="yes", tempdso="no")
     fi
     if test "$tempdso" = "no"; then
-      AC_CHECK_LIB(dld, shl_load, [ tempdso="shl" LIBS="$LIBS -ldld" ],
+      AC_CHECK_LIB(dld, shl_load, [ tempdso="shl" APR_ADDTO(LIBS,-ldld) ],
                    tempdso="no")
     fi
     if test "$tempdso" = "no"; then
@@ -1081,17 +1088,29 @@ else
 fi
 AC_SUBST(have_ipv6)
 
+dnl #----------------------------- Finalize the variables
+
+echo $ac_n "${nl}Restore user-defined environment settings...${nl}"
+
+APR_RESTORE_THE_ENVIRONMENT(CPPFLAGS, EXTRA_)
+APR_RESTORE_THE_ENVIRONMENT(CFLAGS, EXTRA_)
+APR_RESTORE_THE_ENVIRONMENT(LDFLAGS, EXTRA_)
+APR_RESTORE_THE_ENVIRONMENT(LIBS, EXTRA_)
+APR_RESTORE_THE_ENVIRONMENT(INCLUDES, EXTRA_)
+AC_SUBST(NOTEST_CPPFLAGS)
+AC_SUBST(NOTEST_CFLAGS)
+AC_SUBST(NOTEST_LDFLAGS)
+AC_SUBST(NOTEST_LIBS)
+AC_SUBST(NOTEST_INCLUDES)
+
 dnl #----------------------------- Construct the files
 
 AC_SUBST(LDLIBS)
-AC_SUBST(OPTIM)
 AC_SUBST(AR)
 AC_SUBST(RM)
 AC_SUBST(OSDIR)
 AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(EXEEXT)
-AC_SUBST(THREAD_CPPFLAGS)
-AC_SUBST(THREAD_CFLAGS)
 AC_SUBST(LIBTOOL_LIBS)
 
 echo "${nl}Construct Makefiles and header files."

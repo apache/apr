@@ -65,17 +65,48 @@ top_builddir=@top_builddir@
 apr_builders=@apr_builders@
 
 CC=@CC@
+RM=@RM@
 AWK=@AWK@
+SHELL=@SHELL@
 LIBTOOL=@LIBTOOL@
 
-CFLAGS=@CFLAGS@
-OPTIM=@OPTIM@
+# compilation and linking flags that are supposed to be set only by the user.
+# configure adds to them for tests, but we restore them at the end.
+#
 CPPFLAGS=@CPPFLAGS@
-LIBS=@LIBS@
+CFLAGS=@CFLAGS@
 LDFLAGS=@LDFLAGS@
+LIBS=@LIBS@
+DEFS=@DEFS@
 
-RM=@RM@
-SHELL=@SHELL@
+# anything added to the standard flags by configure is moved to EXTRA_*
+# at the end of the process.
+#
+EXTRA_CPPFLAGS=@EXTRA_CPPFLAGS@
+EXTRA_CFLAGS=@EXTRA_CFLAGS@
+EXTRA_LDFLAGS=@EXTRA_LDFLAGS@
+EXTRA_LIBS=@EXTRA_LIBS@
+EXTRA_INCLUDES=@EXTRA_INCLUDES@
+
+# NOTEST_* are flags and libraries that can be added by the user without
+# causing them to be used in configure tests (necessary for things like
+# -Werror and other strict warnings that maintainers like to use).
+#
+NOTEST_CPPFLAGS=@NOTEST_CPPFLAGS@
+NOTEST_CFLAGS=@NOTEST_CFLAGS@
+NOTEST_LDFLAGS=@NOTEST_LDFLAGS@
+NOTEST_LIBS=@NOTEST_LIBS@
+
+# Finally, combine all of the flags together in the proper order so that
+# the user-defined flags can always override the configure ones, if needed.
+# Note that includes are listed after the flags because -I options have
+# left-to-right precedence and CPPFLAGS may include user-defined overrides.
+#
+ALL_CPPFLAGS = $(DEFS) $(EXTRA_CPPFLAGS) $(NOTEST_CPPFLAGS) $(CPPFLAGS)
+ALL_CFLAGS   = $(EXTRA_CFLAGS) $(NOTEST_CFLAGS) $(CFLAGS)
+ALL_LDFLAGS  = $(EXTRA_LDFLAGS) $(NOTEST_LDFLAGS) $(LDFLAGS)
+ALL_LIBS     = $(EXTRA_LIBS) $(NOTEST_LIBS) $(LIBS)
+ALL_INCLUDES = $(INCLUDES) $(EXTRA_INCLUDES)
 
 ### make LTFLAGS somewhat variable?
 LTFLAGS = --silent
@@ -83,7 +114,7 @@ LTFLAGS = --silent
 #
 # Basic macro setup
 #
-COMPILE      = $(CC) $(CPPFLAGS) $(INCLUDES) $(OPTIM) $(CFLAGS)
+COMPILE      = $(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) $(ALL_INCLUDES)
 LT_COMPILE   = @lt_compile@
 
 LINK         = @link@
@@ -143,8 +174,8 @@ local-all: $(TARGETS)
 
 local-depend:
 	@if test -n "`ls *.c 2> /dev/null`"; then \
-	    echo $(MKDEP) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) *.c ; \
-	    $(MKDEP) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) *.c ; \
+	    echo $(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) *.c ; \
+	    $(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) *.c ; \
 	fi
 
 # to be filled in by the actual Makefile
