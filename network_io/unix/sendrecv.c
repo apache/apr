@@ -293,7 +293,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     flags = 0;
 
     if (hdtr->numheaders > 0) {
-        apr_int32_t hdrbytes;
+        apr_size_t hdrbytes;
 
         /* cork before writing headers */
         rv = apr_setsocketopt(sock, APR_TCP_NOPUSH, 1);
@@ -369,7 +369,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     /* Now write the footers */
     if (hdtr->numtrailers > 0) {
-        apr_int32_t trbytes;
+        apr_size_t trbytes;
         arv = apr_sendv(sock, hdtr->trailers, hdtr->numtrailers, &trbytes);
         nbytes += trbytes;
         if (arv != APR_SUCCESS) {
