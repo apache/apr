@@ -903,12 +903,6 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
     apr_size_t size = reqsize + CLICK_SZ;
     void *ptr;
 
-    if (a == NULL) {
-        return malloc(reqsize);
-    }
-    if (c == NULL) {
-        return malloc(reqsize);
-    }
     ptr = malloc(size);
     if (ptr == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
