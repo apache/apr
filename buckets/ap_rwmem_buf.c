@@ -81,6 +81,28 @@ static void rwmem_destroy(void *e)
     free(d->alloc_addr);
 }
 
+static ap_status_t rwmem_split(ap_bucket *e, ap_size_t nbyte)
+{
+    ap_bucket *newbuck;
+    ap_bucket_rwmem *a = (ap_bucket_rwmem *)e;
+    ap_bucket_rwmem *b;
+
+    newbuck = ap_bucket_new(AP_BUCKET_rwmem);
+    b = (ap_bucket_rwmem *)newbuck;
+
+    b->alloc_addr = a->alloc_addr;
+    b->alloc_len = a->alloc_len;
+    b->end = a->end;
+    a->end = a->start + nbyte;
+    b->start = a->end + 1;
+
+    newbuck->prev = e;
+    newbuck->next = e->next;
+    e->next = newbuck;
+
+    return APR_SUCCESS;
+}
+
 /*
  * save nbyte bytes to the bucket.
  * Only returns fewer than nbyte if an error occurred.
@@ -136,6 +158,7 @@ APR_EXPORT(ap_bucket *) ap_rwmem_create(void)
     newbuf->getstr     = rwmem_get_str;
     newbuf->getlen     = rwmem_get_len;
     newbuf->insert     = rwmem_insert;
+    newbuf->split      = rwmem_split;
     newbuf->free       = rwmem_destroy;
     newbuf->data       = b;
 

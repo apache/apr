@@ -75,6 +75,29 @@ static int rmem_get_len(ap_bucket *e)
     return (char *)b->end - (char *)b->start;
 }
 
+static ap_status_t rmem_split(ap_bucket *e, ap_size_t nbyte)
+{
+    ap_bucket *newbuck;
+    ap_bucket_rmem *a = (ap_bucket_rmem *)e->data; 
+    ap_bucket_rmem *b; 
+
+    newbuck = ap_bucket_new(AP_BUCKET_rmem);
+    b = (ap_bucket_rmem *)newbuck->data;
+
+    b->alloc_len = a->alloc_len - nbyte;
+    a->alloc_len = nbyte;
+    b->end = a->end;
+    a->end = a->start + nbyte;
+    b->start = a->end + 1; 
+
+    newbuck->prev = e;
+    newbuck->next = e->next;
+    e->next = newbuck;
+
+
+    return APR_SUCCESS;
+}
+
 /*
  * save nbyte bytes to the bucket.
  * Only returns fewer than nbyte if an error ocurred.
@@ -116,6 +139,7 @@ APR_EXPORT(ap_bucket *) ap_rmem_create(void)
     newbuf->getstr        = rmem_get_str;
     newbuf->getlen        = rmem_get_len;
     newbuf->insert        = rmem_insert;
+    newbuf->split         = rmem_split;
     newbuf->free          = NULL;
     newbuf->data          = b;
     return newbuf;

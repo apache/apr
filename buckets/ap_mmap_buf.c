@@ -62,7 +62,7 @@
 static const char * mmap_get_str(ap_bucket *e)
 {
     ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
-    return b->data->mm;
+    return b->alloc_addr;
 }
 
 static int mmap_get_len(ap_bucket *e)
@@ -75,14 +75,33 @@ static ap_status_t mmap_bucket_insert(ap_bucket *e, const void *buf,
                                       ap_size_t nbytes, ap_ssize_t *w)
 {
     ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
-    const ap_mmap_t *mm = buf;
+    ap_mmap_t *mm = (ap_mmap_t *)buf;
 
-    b->data = mm;
+    b->alloc_addr = mm->mm;;
     b->len = nbytes;
     *w = nbytes;
     return APR_SUCCESS;
 }
     
+static ap_status_t mmap_split(ap_bucket *e, ap_size_t nbyte)
+{
+    ap_bucket *newbuck;
+    ap_bucket_mmap *a = (ap_bucket_mmap *)e->data;
+    ap_bucket_mmap *b;
+
+    newbuck = ap_bucket_new(AP_BUCKET_mmap);
+    b = (ap_bucket_mmap *)newbuck->data;
+    a->alloc_addr = a->alloc_addr + nbyte;
+    a->len = b->len - nbyte;
+
+    a->len = nbyte;
+
+    newbuck->prev = e;
+    newbuck->next = e->next;
+    e->next = newbuck;
+
+    return APR_SUCCESS;
+}
 
 APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void)
 {
@@ -92,13 +111,14 @@ APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void)
     newbuf            = calloc(1, sizeof(*newbuf));
     b                 = malloc(sizeof(*b));
 
-    b->data      = NULL;
-    b->len       = 0;
+    b->alloc_addr     = NULL;
+    b->len            = 0;
 
     newbuf->color     = AP_BUCKET_mmap;
     newbuf->getstr    = mmap_get_str;
     newbuf->getlen    = mmap_get_len;
     newbuf->insert    = mmap_bucket_insert;
+    newbuf->split     = mmap_split;
     newbuf->free      = NULL;
     newbuf->data      = b;
     
