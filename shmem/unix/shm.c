@@ -105,9 +105,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     if (filename == NULL) {
 #if APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_MMAP_ANON
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
-        if (!new_m) {
-            return APR_ENOMEM;
-        }
         new_m->pool = pool;
         new_m->reqsize = reqsize;
         new_m->realsize = reqsize + 
@@ -168,9 +165,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_USE_SHMEM_SHMGET_ANON
 
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
-        if (!new_m) {
-            return APR_ENOMEM;
-        }
         new_m->pool = pool;
         new_m->reqsize = reqsize;
         new_m->realsize = reqsize;
@@ -216,9 +210,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     /* Name-based shared memory */
     else {
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
-        if (!new_m) {
-            return APR_ENOMEM;
-        }
         new_m->pool = pool;
         new_m->reqsize = reqsize;
         new_m->filename = apr_pstrdup(pool, filename);
@@ -414,9 +405,6 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         apr_size_t nbytes;
 
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
-        if (!new_m) {
-            return APR_ENOMEM;
-        }
         new_m->pool = pool;
         new_m->filename = apr_pstrdup(pool, filename);
 
@@ -473,9 +461,6 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         key_t shmkey;
 
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
-        if (!new_m) {
-            return APR_ENOMEM;
-        }
 
         /* FIXME: does APR_OS_DEFAULT matter for reading? */
         status = apr_file_open(&file, filename, 
