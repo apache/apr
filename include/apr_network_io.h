@@ -92,6 +92,7 @@ extern "C" {
 #define APR_SO_SNDBUF        64
 #define APR_SO_RCVBUF        128
 #define APR_SO_DISCONNECTED  256
+#define APR_TCP_NODELAY      512
 
 #define APR_POLLIN    0x001 
 #define APR_POLLPRI   0x002
