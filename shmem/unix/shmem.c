@@ -63,7 +63,7 @@ struct shmem_t {
 };
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_shm_init(ap_shmem_t *, ap_size_t, char *)
+ * ap_status_t ap_shm_init(ap_shmem_t *m, ap_size_t reqsize, char *file)
  *    Create a pool of shared memory for use later.
  * arg 1) The shared memory block.
  * arg 2) The size of the shared memory pool.
@@ -82,7 +82,7 @@ ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_shm_destroy(ap_shmem_t *)
+ * ap_status_t ap_shm_destroy(ap_shmem_t *m)
  *    Destroy the shared memory block.
  * arg 1) The shared memory block to destroy. 
  */
@@ -93,7 +93,7 @@ ap_status_t ap_shm_destroy(struct shmem_t *m)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_shm_malloc(ap_shmem_t *, ap_size_t)
+ * ap_status_t ap_shm_malloc(ap_shmem_t *c, ap_size_t reqsize)
  *    allocate memory from the block of shared memory.
  * arg 1) The shared memory block to destroy. 
  * arg 2) How much memory to allocate
@@ -107,7 +107,7 @@ void *ap_shm_malloc(struct shmem_t *c, ap_size_t reqsize)
 }
 
 /* ***APRDOC********************************************************
- * void *ap_shm_calloc(ap_shmem_t *, ap_size_t)
+ * void *ap_shm_calloc(ap_shmem_t *shared, ap_size_t size)
  *    allocate memory from the block of shared memory and initialize it
  *    to zero.
  * arg 1) The shared memory block to destroy. 
@@ -122,7 +122,7 @@ void *ap_shm_calloc(struct shmem_t *shared, ap_size_t size)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_shm_free(ap_shmem_t *, void *)
+ * ap_status_t ap_shm_free(ap_shmem_t *shared, void *entity)
  *    free shared memory previously allocated.
  * arg 1) The shared memory block to destroy. 
  */
@@ -133,7 +133,7 @@ ap_status_t ap_shm_free(struct shmem_t *shared, void *entity)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_shm_name(ap_shmem_t *, ap_shm_name_t **)
+ * ap_status_t ap_get_shm_name(ap_shmem_t *c, ap_shm_name_t **name)
  *    Get the name of the shared memory segment if not using
  *    anonymous shared memory.
  * arg 1)  The shared memory block to destroy. 
@@ -161,7 +161,7 @@ ap_status_t ap_get_shm_name(ap_shmem_t *c, ap_shm_name_t **name)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_shm_name(ap_shmem_t *, ap_shm_name_t *)
+ * ap_status_t ap_set_shm_name(ap_shmem_t *c, ap_shm_name_t *name)
  *    Set the name of the shared memory segment if not using
  *    anonymous shared memory.  This is to allow processes to open
  *    shared memory created by another process.
@@ -187,7 +187,7 @@ ap_status_t ap_set_shm_name(ap_shmem_t *c, ap_shm_name_t *name)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_open_shmem(ap_shmem_t *)
+ * ap_status_t ap_open_shmem(ap_shmem_t *c)
  *    Open the shared memory block in a child process. 
  * arg 1)  The shared memory block to open in the child. 
  * return) This should be called after ap_set_shm_name.  The ap_shmem_t 
@@ -211,7 +211,7 @@ ap_status_t ap_open_shmem(struct shmem_t *c)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_shm_avail(ap_shmem_t *, ap_size_t *)
+ * ap_status_t ap_shm_avail(ap_shmem_t *c, ap_size_t *size)
  *    Determine how much memory is available in the specified shared
  *    memory block
  * arg 1)  The shared memory block to open in the child. 

@@ -183,12 +183,12 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file);
 ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir);      
 ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock);
 ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock);     
-ap_status_t ap_get_os_proc(ap_os_proc_t *, ap_proc_t *);     
+ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc);     
 ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **, ap_exploded_time_t *);     
 ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *);     
 #if APR_HAS_THREADS
-ap_status_t ap_get_os_thread(ap_os_thread_t *, ap_thread_t *);
-ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *, ap_key_t *);
+ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd);
+ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_key_t *key);
 #endif
 
 ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, 
@@ -199,12 +199,15 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
                            ap_context_t *cont);
 ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
                            ap_context_t *cont); 
-ap_status_t ap_put_os_proc(ap_proc_t **, ap_os_proc_t *, ap_context_t *); 
+ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
+                           ap_context_t *cont); 
 ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_context_t *); 
 ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_context_t *); 
 #if APR_HAS_THREADS
-ap_status_t ap_put_os_thread(ap_thread_t **, ap_os_thread_t *, ap_context_t *);
-ap_status_t ap_put_os_threadkey(ap_key_t **, ap_os_threadkey_t *, ap_context_t *);
+ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
+                             ap_context_t *cont);
+ap_status_t ap_put_os_threadkey(ap_key_t **key, ap_os_threadkey_t *thekey, 
+                                ap_context_t *cont);
 #endif
 
 #ifdef __cplusplus

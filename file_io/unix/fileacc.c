@@ -123,7 +123,7 @@ ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
-                               ap_status (*cleanup) (void *))
+ *                             ap_status (*cleanup) (void *))
  *    Set the data associated with the current file.
  * arg 1) The currently open file.
  * arg 2) The user data to associate with the file.  

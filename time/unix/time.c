@@ -96,7 +96,7 @@ static void tm_to_exp(ap_exploded_time_t *xt, struct tm *tm)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_explode_gmt(ap_exploded_time_t *, ap_time_t)
+ * ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
  *   convert a time to its human readable components in GMT timezone
  * arg 1) the exploded time
  * arg 2) the time to explode
@@ -121,7 +121,7 @@ ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_explode_localtime(ap_exploded_time_t *, ap_time_t)
+ * ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
  *   convert a time to its human readable components in local timezone
  * arg 1) the exploded time
  * arg 2) the time to explode
@@ -184,7 +184,7 @@ ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_implode_time(ap_time_t *, ap_exploded_time_t *)
+ * ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
  *    Convert time value from human readable format to number of seconds 
  *    since epoch
  * arg 1) the resulting imploded time
@@ -225,7 +225,7 @@ ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *)
+ * ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **ostime, ap_time_t *aprtime)
  *    Get the imploded time in the platforms native format.
  * arg 1) the native time format
  * arg 2) the time to convert
@@ -238,7 +238,7 @@ ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **ostime, ap_time_t *aprtime)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **, ap_exploded_time_t *)
+ * ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
  *    Get the exploded time in the platforms native format.
  * arg 1) the native time format
  * arg 2) the time to convert
@@ -258,7 +258,7 @@ ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *ap
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_context_t, *cont)
+ * ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime, ap_context_t, *cont)
  *    Put the imploded time in the APR format.
  * arg 1) the APR time format
  * arg 2) the time to convert
@@ -272,7 +272,7 @@ ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_context_t, *cont)
+ * ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime, ap_os_exp_time_t **ostime, ap_context_t, *cont)
  *    Put the exploded time in the APR format.
  * arg 1) the APR time format
  * arg 2) the time to convert
