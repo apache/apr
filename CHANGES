@@ -1,5 +1,15 @@
 Changes with APR b1  
 
+  *) Changed apr/helpers to apr/build to be consistent with other Apache
+     source trees.  Added make variables to rules.mk.in that point to the
+     builders directory and its scripts.  Updated buildconf, configure.in,
+     and Makefile.in files to create and use the new scripts.  Moved scandoc
+     to scandoc.pl and its default.pl template to scandoc_template.pl.
+     [Roy Fielding]
+
+  *) Updated config.guess and config.sub to GNU libtool 1.3.5 features,
+     with the Apache additions for OS/390 and OS/2 emx.  [Roy Fielding]
+
   *) Moved hints.m4, apr_common.m4, and helpers/apr-conf.m4 into the
      new build directory as apr_hints.m4, apr_common.m4, apr_network.m4,
      and apr_threads.m4.  [Roy Fielding]
