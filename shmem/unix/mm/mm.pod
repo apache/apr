@@ -1,5 +1,5 @@
 ## ====================================================================
-## Copyright (c) 1999 Ralf S. Engelschall. All rights reserved.
+## Copyright (c) 1999-2000 Ralf S. Engelschall. All rights reserved.
 ##
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -120,7 +120,7 @@ with data-structures inside those shared memory segments.
 
 The abbreviation B<MM> is historically and originally comes from the phrase
 ``I<memory mapped>'' as used by the POSIX.1 mmap(2) function. Because this
-facility is internally used by this library on most platforms to create the
+facility is internally used by this library on most platforms to establish the
 shared memory segments. 
 
 =head2 LIBRARY STRUCTURE
@@ -139,24 +139,24 @@ based data structures without the need to change the code dramatically.  All
 which is needed is to prefix the POSIX.1 memory allocation functions with
 `C<MM_>', i.e. `C<malloc>' becomes `C<MM_malloc>', `C<strdup>' becomes
 `C<MM_strdup>', etc. This API internally uses just a global `C<MM *>' pool for
-calling the corresponding functions (with prefix `C<mm_>') of the I<Standard
-Malloc-Style API>.
+calling the corresponding functions (those with prefix `C<mm_>') of the
+I<Standard Malloc-Style API>.
 
 =item B<Standard Malloc-Style API>
 
 This is the standard high-level memory allocation API. Its interface is
 similar to the I<Global Malloc-Replacement API> but it uses an explicit `C<MM *>'
-pool to operate on. That's why every function of this API has an argument of
-type `C<MM *>' as the first argument.  This API provides a comfortable way to
+pool to operate on. That is why every function of this API has an argument of
+type `C<MM *>' as its first argument. This API provides a comfortable way to
 work with small dynamically allocated shared memory chunks inside large
-statically allocated shared memory segments. It's internally based on the
+statically allocated shared memory segments. It is internally based on the
 I<Low-Level Shared Memory API> for creating the underlaying shared memory
 segment.
 
 =item B<Low-Level Shared Memory API>
 
 This is the basis of the whole B<MM> library. It provides low-level functions
-for creating shared memory segments with mutual exclusion (in short: I<mutex>)
+for creating shared memory segments with mutual exclusion (in short I<mutex>)
 capabilities in a portable way. Internally the shared memory and mutex
 facility is implemented in various platform-dependent ways. A list of
 implementation variants follows under the next topic.
@@ -166,20 +166,20 @@ implementation variants follows under the next topic.
 =head2 SHARED MEMORY IMPLEMENTATION
 
 Internally the shared memory facility is implemented in various
-platform-dependent variants. Each has it's own advantages and disadvantages
+platform-dependent ways. Each way has its own advantages and disadvantages
 (in addition to the fact that some variants aren't available at all on some
-platforms). The MM libraries configuration procedure tried hard to make a good
-decision. The implemented variants are now given for overview and background
-reasons with their advantages and disadvantages and in an ascending order,
-i.e. the MM configuration mechanism chooses the last available one in the list
-as the preferred variant.
+platforms). The B<MM> library's configuration procedure tries hard to make a
+good decision. The implemented variants are now given for overview and
+background reasons with their advantages and disadvantages and in an ascending
+order, i.e. the B<MM> configuration mechanism chooses the last available one
+in the list as the preferred variant.
 
 =over 4
 
 =item Classical mmap(2) on temporary file (MMFILE)
 
 I<Advantage:> maximum portable.
-I<Disadvantage:> needs a temporary file on the filesystem
+I<Disadvantage:> needs a temporary file on the filesystem.
 
 =item mmap(2) via POSIX.1 shm_open(3) on temporary file (MMPOSX)
 
@@ -189,20 +189,20 @@ is usually not available on existing Unix platform.
 
 =item SVR4-style mmap(2) on C</dev/zero> device (MMZERO)
 
-I<Advantage:> widely available on mostly portable on SVR4 platforms.
-I<Disadvantage:> needs the C</dev/zero/> device and an mmap(2)
-which supports memory mapping through it.
+I<Advantage:> widely available and mostly portable on SVR4 platforms.
+I<Disadvantage:> needs the C</dev/zero/> device and a mmap(2)
+which supports memory mapping through this device.
 
 =item 4.4BSD-style mmap(2) via C<MAP_ANON> facility (MMANON)
 
-I<Advantage:> doesn't need a temporary file or external device
+I<Advantage:> does not need a temporary file or external device.
 I<Disadvantage:> usually only available on BSD platforms and derivatives.
 
 =item SysV IPC shmget(2) (IPCSHM)
 
-I<Advantage:> doesn't need a temporary file or external device
-I<Disadvantage:> although available on mostly all modern Unix platforms it has
-hard restrictions like the maximum size of a single shared memory segment (can
+I<Advantage:> does not need a temporary file or external device.
+I<Disadvantage:> although available on mostly all modern Unix platforms, it has
+strong restrictions like the maximum size of a single shared memory segment (can
 be as small as 100KB, but depends on the platform).
 
 =back
@@ -210,7 +210,7 @@ be as small as 100KB, but depends on the platform).
 =head2 LOCKING IMPLEMENTATION
 
 As for the shared memory facility, internally the locking facility is
-implemented in various platform-dependent variants. A short overview of
+implemented in various platform-dependent ways. A short overview of
 implemented variants is given:
 
 =over 4
@@ -219,19 +219,19 @@ implemented variants is given:
 
 I<Advantage:> exists on a lot of platforms, especially on older Unix
 derivates.  I<Disadvantage:> needs a temporary file on the filesystem and has
-to reopen filedescriptors to it in each(!) fork(2)ed child process.
+to re-open file-descriptors to it in each(!) fork(2)'ed child process.
 
 =item SysV IPC semget(2) (IPCSEM)
 
-I<Advantage:> exists on a lot of platforms and doesn't need a temporary file.
+I<Advantage:> exists on a lot of platforms and does not need a temporary file.
 I<Disadvantage:> an unmeant termination of the application leads to a
-semaphore leak because the facility doesn't allow an "remove in advance" trick
-(as the IPC shared memory facility does!) for safe cleanups.
+semaphore leak because the facility does not allow a ``remove in advance''
+trick (as the IPC shared memory facility does) for safe cleanups.
 
 =item SVR4-style fcntl(2) on temporary file (FCNTL)
 
 I<Advantage:> exists on a lot of platforms and is also the most powerful
-variant (although not always the fastest one).  I<Disadvantage:> needs a
+variant (although not always the fastest one). I<Disadvantage:> needs a
 temporary file.
 
 =back
@@ -245,25 +245,26 @@ internally is the following:
 
 =item B<Allocation>
 
-When a chunk of memory has to be allocated, the internal list of free chunks
-is searched for a minimal-sized chunk which is larger or equal than the size
-of the to be allocated chunk (some sort of a I<best fit algorithm>). 
+If a chunk of memory has to be allocated, the internal list of free chunks
+is searched for a minimal-size chunk which is larger or equal than the size of
+the to be allocated chunk (a I<best fit> strategy>). 
 
-When a chunk is found which matches this best-fit criteria, but is still a lot
+If a chunk is found which matches this best-fit criteria, but is still a lot
 larger than the requested size, it is split into two chunks: One with exactly
-the requested size (which is the resulting chunk) and one with the remaining
-size (which is immediately re-inserted into the list of free chunks). 
+the requested size (which is the resulting chunk given back) and one with the
+remaining size (which is immediately re-inserted into the list of free
+chunks). 
 
-When no fitting chunk is found at all in the list of free chunks, a new one is
+If no fitting chunk is found at all in the list of free chunks, a new one is
 created from the spare area of the shared memory segment until the segment is
 full (in which case an I<out of memory> error occurs).
 
 =item B<Deallocation>
 
-When a chunk of memory has to be deallocated, it is inserted in sorted manner
-into the internal list of free chunks.  The insertion operation automatically
-merges the chunk with a previous and/or next free chunk when possible, i.e.
-the free chunks stay physically seamless (one after another) in memory, to
+If a chunk of memory has to be deallocated, it is inserted in sorted manner
+into the internal list of free chunks. The insertion operation automatically
+merges the chunk with a previous and/or a next free chunk if possible, i.e.
+if the free chunks stay physically seamless (one after another) in memory, to
 automatically form larger free chunks out of smaller ones. 
 
 This way the shared memory segment is automatically defragmented when memory
@@ -275,16 +276,16 @@ This strategy reduces memory waste and fragmentation caused by small and
 frequent allocations and deallocations to a minimum. 
 
 The internal implementation of the list of free chunks is not specially
-optimized (for instance by using binary search trees or even splay trees,
-etc.), because it's assumed that the total amount of entries in the list of
+optimized (for instance by using binary search trees or even I<splay> trees,
+etc), because it is assumed that the total amount of entries in the list of
 free chunks is always small (caused both by the fact that shared memory
 segments are usually a lot smaller than heaps and the fact that we always
-defragment by merging the free chunks when possible).
+defragment by merging the free chunks if possible).
 
 =head1 API FUNCTIONS
 
 In the following all API functions are described in detail.
-The order directly follows the one in the SYNOPSIS.
+The order directly follows the one in the B<SYNOPSIS>.
 
 =head2 Global Malloc-Replacement API
 
@@ -292,14 +293,14 @@ The order directly follows the one in the SYNOPSIS.
 
 =item int B<MM_create>(size_t I<size>, const char *I<file>);
 
-This initialized the global shared memory pool with I<size> and I<file> and
-has be called I<before> any fork(2) operations are performed by the
+This initializes the global shared memory pool with I<size> and I<file> and
+has to be called I<before> any fork(2) operations are performed by the
 application.
 
 =item int B<MM_permission>(mode_t I<mode>, uid_t I<owner>, gid_t I<group>);
 
 This sets the filesystem I<mode>, I<owner> and I<group> for the global shared
-memory pool (has effects only when the underlaying shared memory segment
+memory pool (has effects only if the underlaying shared memory segment
 implementation is actually based on external auxiliary files).  The arguments
 are directly passed through to chmod(2) and chown(2).
 
@@ -312,14 +313,13 @@ child processes were killed.
 
 This locks the global shared memory pool for the current process in order to
 perform either shared/read-only (I<mode> is C<MM_LOCK_RD>) or
-exclusive/read-write (I<mode> is C<MM_LOCK_RW>) operations inside the global
-shared memory pool.
+exclusive/read-write (I<mode> is C<MM_LOCK_RW>) critical operations inside the
+global shared memory pool.
 
 =item int B<MM_unlock>(void);
 
-This unlocks the global shared memory pool for the current process after
-mutual exclusion operations were performed inside the global shared memory
-pool.
+This unlocks the global shared memory pool for the current process after the
+critical operations were performed inside the global shared memory pool.
 
 =item void *B<MM_malloc>(size_t I<size>);
 
@@ -351,7 +351,7 @@ string copy in the I<heap> it creates it in the global shared memory pool.
 
 This function returns the size in bytes of the chunk starting at I<ptr> when
 I<ptr> was previously allocated with MM_malloc(3). The result is undefined
-when I<ptr> was not previously allocated with MM_malloc(3).
+if I<ptr> was not previously allocated with MM_malloc(3).
 
 =item size_t B<MM_maxsize>(void);
 
@@ -379,10 +379,10 @@ This creates a shared memory pool which has space for approximately a total of
 I<size> bytes with the help of I<file>. Here I<file> is a filesystem path to a
 file which need not to exist (and perhaps is never created because this
 depends on the platform and chosen shared memory and mutex implementation).
-The return value is a pointer to an C<MM> structure which should be treated as
+The return value is a pointer to a C<MM> structure which should be treated as
 opaque by the application. It describes the internals of the created shared
 memory pool. In case of an error C<NULL> is returned.  A I<size> of 0 means to
-allocate the maximum allowed size which is platform dependent and between a
+allocate the maximum allowed size which is platform dependent and is between a
 few KB and the soft limit of 64MB.
 
 =item int B<mm_permission>(MM *I<mm>, mode_t I<mode>, uid_t I<owner>, gid_t I<group>);
@@ -402,13 +402,13 @@ filesystem corresponding the to shared memory pool are unlinked.
 
 This locks the shared memory pool I<mm> for the current process in order to
 perform either shared/read-only (I<mode> is C<MM_LOCK_RD>) or
-exclusive/read-write (I<mode> is C<MM_LOCK_RW>) operations inside the global
-shared memory pool.
+exclusive/read-write (I<mode> is C<MM_LOCK_RW>) critical operations inside the
+global shared memory pool.
 
 =item int B<mm_unlock>(MM *I<mm>);
 
-This unlocks the shared memory pool I<mm> for the current process after mutual
-exclusion operations were performed inside the global shared memory pool.
+This unlocks the shared memory pool I<mm> for the current process after
+critical operations were performed inside the global shared memory pool.
 
 =item void *B<mm_malloc>(MM *I<mm>, size_t I<size>);
 
@@ -509,7 +509,7 @@ at I<core> is no longer allowed and will usually lead to a segmentation fault.
 
 This function acquires an advisory lock for the current process on the shared
 memory segment I<core> for either shared/read-only (I<mode> is C<MM_LOCK_RD>)
-or exclusive/read-write (I<mode> is C<MM_LOCK_RW>) operations between
+or exclusive/read-write (I<mode> is C<MM_LOCK_RW>) critical operations between
 fork(2)'ed child processes.
 
 =item int B<mm_core_unlock>(const void *I<core>);
@@ -535,17 +535,17 @@ limit of 64MB.
 This is just a utility function which can be used to align the number I<size>
 to the next virtual memory I<page> boundary used by the underlaying platform.
 The memory page boundary under Unix platforms is usually somewhere between
-2048 and 16384 bytes. You don't have to align the I<size> arguments of other
+2048 and 16384 bytes. You do not have to align the I<size> arguments of other
 B<MM> library functions yourself, because this is already done internally.
 This function is exported by the B<MM> library just for convenience reasons in
-case an application wants to perform simular calculations for other purposes.
+case an application wants to perform similar calculations for other purposes.
 
 =item size_t B<mm_core_align2word>(size_t I<size>);
 
 This is another utility function which can be used to align the number I<size>
 to the next virtual memory I<word> boundary used by the underlaying platform.
 The memory word boundary under Unix platforms is usually somewhere between 4
-and 16 bytes.  You don't have to align the I<size> arguments of other B<MM>
+and 16 bytes.  You do not have to align the I<size> arguments of other B<MM>
 library functions yourself, because this is already done internally.  This
 function is exported by the B<MM> library just for convenience reasons in case
 an application wants to perform simular calculations for other purposes.
@@ -564,16 +564,16 @@ an error string. It's usually not called directly from applications.
 =item char *B<mm_lib_error_get>(void);
 
 This is a function which is used internally by MM_error(3) and mm_error(3)
-functions to get the current error string. It's usually not called directly
+functions to get the current error string. It is usually not called directly
 from applications.
 
 =item int B<mm_lib_version>(void);
 
 This function returns a hex-value ``0xI<V>I<RR>I<T>I<LL>'' which describes the
-current MM library version. I<V> is the version, I<RR> the revisions, I<LL>
+current B<MM> library version. I<V> is the version, I<RR> the revisions, I<LL>
 the level and I<T> the type of the level (alphalevel=0, betalevel=1,
-patchlevel=2, etc). For instance MM version 1.0.4 is encoded as 0x100204.  The
-reason for this unusual mapping is that this way the version number is
+patchlevel=2, etc). For instance B<MM> version 1.0.4 is encoded as 0x100204.
+The reason for this unusual mapping is that this way the version number is
 steadily I<increasing>.
 
 =back
@@ -584,10 +584,10 @@ The maximum size of a continuous shared memory segment one can allocate
 depends on the underlaying platform. This cannot be changed, of course.  But
 currently the high-level malloc(3)-style API just uses a single shared memory
 segment as the underlaying data structure for an C<MM> object which means that
-the maximum amount of memory a C<MM> object represents also depends on the
+the maximum amount of memory an C<MM> object represents also depends on the
 platform. 
 
-This should be changed in later versions by allowing the high-level
+This should be changed in later versions by allowing at least the high-level
 malloc(3)-style API to internally use multiple shared memory segments to form
 the C<MM> object. This way C<MM> objects could have arbitrary sizes, although
 the maximum size of an allocatable chunk still is bounded by the maximum size
@@ -613,10 +613,10 @@ http://www.engelschall.com/sw/mm/
 
 =head1 HISTORY
 
-This library was originally written in January 1999 by I<Ralf S. Engelschall>
-<rse@engelschall.com> for use in the B<Extended API> (EAPI) of the B<Apache>
-HTTP server project (see www.apache.org), which was originally invented for
-B<mod_ssl> (see http://www.modssl.org/). 
+This library was originally written in January 1999 by I<Ralf S.
+Engelschall> <rse@engelschall.com> for use in the B<Extended API> (EAPI)
+of the B<Apache> HTTP server project (see www.apache.org), which was
+originally invented for B<mod_ssl> (see http://www.modssl.org/).
 
 Its base idea (a malloc-style API for handling shared memory) was originally
 derived from the non-publically available I<mm_malloc> library written in

@@ -7,7 +7,7 @@ dnl #   standard Autoconf prolog
 dnl #
 
 AC_PREREQ(2.12)dnl
-AC_REVISION(1.0)dnl
+AC_REVISION($1.0$)dnl
 
 dnl #   shtool bootstrap
 SHTOOL="\$(TOP)/shtool"
@@ -22,12 +22,12 @@ AC_SUBST(MM_VERSION_STR)
 
 dnl #   friendly header ;-)
 echo "Configuring ${T_MD}MM${T_ME} (Shared Memory Library), Version ${T_MD}${MM_VERSION_STR}${T_ME}"
-echo "Copyright (c) 1999 Ralf S. Engelschall, All Rights Reserved."
+echo "Copyright (c) 1999-2000 Ralf S. Engelschall, All Rights Reserved."
 echo "Platform: ${T_MD}${PLATFORM}${T_ME}"
 
 dnl #   autoconf initialization
 AC_INIT(README)
-AC_CONFIG_HEADER(mm_conf.h)dnl
+AC_CONFIG_HEADER(mm_conf.h)
 AC_PREFIX_DEFAULT(/usr/local)
 
 dnl #   determine build mode
@@ -81,7 +81,8 @@ AC_CHECK_DEFINE(CHILD_MAX, limits.h)
 
 dnl #   some special defines for brain dead platforms
 case $PLATFORM in
-   *-*-sunos* ) AC_DEFINE(MM_OS_SUNOS) ;;
+   *-*-sunos* ) AC_DEFINE(MM_OS_SUNOS)  ;;
+   BS2000-*-* ) AC_DEFINE(MM_OS_BS2000) ;;
 esac
 
 dnl #
@@ -90,10 +91,9 @@ dnl #
 
 AC_CONFIGURE_PART(Virtual Memory Page Size)
 
-AC_HAVE_HEADERS(unistd.h)
+AC_HAVE_HEADERS(unistd.h kernel/OS.h)
 AC_HAVE_FUNCS(getpagesize sysconf)
 AC_CHECK_DEFINE(_SC_PAGESIZE, unistd.h)
-AC_HAVE_HEADERS(kernel/OS.h)
 AC_CHECK_DEFINE(B_PAGE_SIZE, kernel/OS.h)
 
 AC_BEGIN_DECISION([memory page size determination])
@@ -134,7 +134,7 @@ AC_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
 AC_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON, 
             AC_DECIDE(MM_SHMT_MMANON, [4.4BSD-style mmap() via MAP_ANON]))
 AC_IFALLYES(header:kernel/OS.h func:create_area,
-           AC_DECIDE(MM_SHMT_BEOS, [BeOS areas]))
+            AC_DECIDE(MM_SHMT_BEOS, [BeOS areas]))
 case $PLATFORM in
     *-*-linux* ) 
         #   Linux has problems with MM_SHMT_MMANON
@@ -143,7 +143,7 @@ case $PLATFORM in
         ;;
 esac
 AC_ARG_WITH(shm,dnl
-[  --with-shm=TYPE         force shared memory type: MMFILE MMZERO MMPOSX MMANON IPCSHM],
+[  --with-shm=TYPE         force shared memory type: MMFILE MMZERO MMPOSX MMANON IPCSHM BEOS],
 AC_DECISION_FORCE(MM_SHMT_$withval)
 )dnl
 AC_END_DECISION
@@ -164,7 +164,7 @@ AC_CHECK_DEFINE(F_SETLK, fcntl.h)
 AC_CHECK_DEFINE(IPC_PRIVATE, sys/ipc.h)
 AC_CHECK_DEFINE(SEM_UNDO, sys/sem.h)
 AC_HAVE_HEADERS(kernel/OS.h)
-AC_CHECK_FUNCS(create_sem, kernel/OS.h)
+AC_CHECK_FUNCS(create_sem)
 
 AC_MSG_CHECKING(whether union semun is defined in sys/sem.h)
 AC_TRY_COMPILE([
@@ -189,9 +189,9 @@ AC_IFALLYES(header:sys/ipc.h header:sys/sem.h header:sys/file.h dnl
 AC_IFALLYES(header:fcntl.h define:F_SETLK, 
             AC_DECIDE(MM_SEMT_FCNTL, [SVR4-style fcntl() on temporary file]))
 AC_IFALLYES(header:kernel/OS.h func:create_sem,
-            AC_DECIDE(MM_SEMT_BEOS, [BeOS semaphores/benaphores]))
+            AC_DECIDE(MM_SEMT_BEOS, [BeOS semaphores]))
 AC_ARG_WITH(sem,dnl
-[  --with-sem=TYPE         force semaphore type: FLOCK FCNTL IPCSEM],
+[  --with-sem=TYPE         force semaphore type: FLOCK FCNTL IPCSEM BEOS],
 AC_DECISION_FORCE(MM_SEMT_$withval)
 )dnl
 AC_END_DECISION

@@ -1,0 +1,61 @@
+   __  __ __  __ 
+  |  \/  |  \/  |
+  | |\/| | |\/| |
+  | |  | | |  | |
+  |_|  |_|_|  |_|
+                 
+  MM - Shared Memory Library
+
+  THANKS
+  ======
+
+  Credit has to be given to the following people who contributed ideas,
+  bugfixes, hints, gave platform feedback, etc. (in alphabetical order):
+
+    o  Ronald Appelfelder          <ra@intraregio.net>
+    o  Robert Belleman             <robbel@wins.uva.nl>
+    o  Ryan Bloom                  <rbb@apache.org>
+    o  Volker Borchert             <bt@teknon.de>
+    o  William Campbell            <william@stand.demon.co.uk>
+    o  Richard Cardwell            <ricc@hplb.hpl.hp.com>
+    o  Jeff Clark                  <hotwire@hoser.com>
+    o  Eric Cholet                 <cholet@logilune.com>
+    o  Alexander Demenchuk         <alder@untech.com>
+    o  Jason Dillon                <jason@planet57.com>
+    o  Joe France                  <france@sysar.com>
+    o  Richard Furda               <riso@best.ca>
+    o  Dean Gaudet                 <dgaudet@arctic.org>
+    o  Greg Gears                  <gears@netair.com>
+    o  Ask Bjoern Hansen           <ask@netcetera.dk>
+    o  Robin Hunt                  <robin@sharenet.co.za>
+    o  Markus Kilbinger            <kilbi@rad.rwth-aachen.de>
+    o  Kristian Köhntopp           <kk@netuse.de>
+    o  Jim Jagielski               <jim@jagunet.com>
+    o  Bob Jones                   <jonesr@pjm.com>
+    o  Mats Josefsson              <matjos@rsv.se>
+    o  Sergey Kachanovsky          <ranger@tversu.ru>
+    o  Martin Kraemer              <martin.kraemer@mch.sni.de>
+    o  Mike Latinovich             <mlatin@boing.skysys.org>
+    o  Rasmus Lerdorf              <rasmus@lerdorf.on.ca>
+    o  Dave Malhotra               <davem@glue.umd.edu>
+    o  Christophe Massiot          <massiot@via.ecp.fr>
+    o  Thomas J. Menini            <menini@lvip.net>
+    o  Patrick                     <puzzled@symplex.net>
+    o  Charles Randall             <crandall@matchlogic.com> 
+    o  David Rees                  <drees@ucsd.edu>
+    o  Martin Rosenbach            <Rosenbach@seninn.verwalt-berlin.de>
+    o  David Reid                  <dreid@jetnet.co.uk>
+    o  Scott Rothgaber             <scott@easley.net>
+    o  Saeid Sadeghi               <Saeid.Sadeghi@unilever.com>
+    o  Mehul N. Sanghvi            <mehul@kirsun.ne.mediaone.net>
+    o  Joaquim Sanmarti            <qss@gtd.es>
+    o  Sascha Schumann             <sascha@schumann.cx>
+    o  Dan Sullivan                <sullivan@epa.gov>
+    o  Jeff Trawick                <trawick@ibm.net>
+    o  Tom Vaughan                 <tvaughan@aventail.com>
+    o  Kai Voigt                   <k@123.org>
+    o  Martin Waterworth           <m.waterworth@qut.edu.au>
+    o  Rick Watson                 <rick@akbar.cc.utexas.edu>
+    o  Mark Wilkie                 <mark@exceptionmedia.com>
+    o  Cliff Woolley               <jwoolley@wlu.edu>
+

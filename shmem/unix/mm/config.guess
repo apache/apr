@@ -226,7 +226,7 @@ EOF
 	exit 0 ;;
     # The situation for MiNT is a little confusing.  The machine name
     # can be virtually everything (everything which is not
-    # "atarist" or "atariste" at least should have a processor 
+    # "atarist" or "atariste" at least should have a processor
     # > m68000).  The system name ranges from "MiNT" over "FreeMiNT"
     # to the lowercase version "mint" (or "freemint").  Finally
     # the system name "TOS" denotes a system which is actually not
@@ -627,172 +627,52 @@ EOF
 	echo `echo ${UNAME_MACHINE}|sed -e 's,[-/].*$,,'`-unknown-gnu`echo ${UNAME_RELEASE}|sed -e 's,/.*$,,'`
 	exit 0 ;;
     *:Linux:*:*)
-	# uname on the ARM produces all sorts of strangeness, and we need to
-	# filter it out.
-	case "$UNAME_MACHINE" in
-	  armv*)		      UNAME_MACHINE=$UNAME_MACHINE ;;
-	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
+	# determine canonical machine name
+	MACHINE="$UNAME_MACHINE"
+	case "$MACHINE" in
+	    arm*|sa110*) MACHINE="arm" ;;
 	esac
 
-	# The BFD linker knows what the default object file format is, so
-	# first see if it will tell us. cd to the root directory to prevent
-	# problems with other programs or directories called `ld' in the path.
-	ld_help_string=`cd /; ld --help 2>&1`
-	ld_supported_emulations=`echo $ld_help_string \
-			 | sed -ne '/supported emulations:/!d
-				    s/[ 	][ 	]*/ /g
-				    s/.*supported emulations: *//
-				    s/ .*//
-				    p'`
-        case "$ld_supported_emulations" in
-	  *ia64)      echo "${UNAME_MACHINE}-unknown-linux"         ; exit 0 ;;
-	  i?86linux)  echo "${UNAME_MACHINE}-pc-linux-gnuaout"      ; exit 0 ;;
-	  i?86coff)   echo "${UNAME_MACHINE}-pc-linux-gnucoff"      ; exit 0 ;;
-	  sparclinux) echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  armlinux)   echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  m68klinux)  echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  elf32ppc | elf32ppclinux)
-		# Determine Lib Version
-		cat >$dummy.c <<EOF
+        # determine (distribution) vendor
+	VENDOR="gnu"
+	for tagfile in dummy `cd /etc && echo *-release *_version 2>/dev/null`; do
+	    test ! -f /etc/$tagfile && continue
+	    VENDOR=`echo $tagfile | sed -e 's/-release$//' -e 's/_version$//' |\
+	            tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+	done
+
+	# determine kernel version
+	KERNEL=`echo ${UNAME_RELEASE} | sed -e 's/^\([0-9]*\.[0-9]*\)\..*$/\1/'`
+
+	# determine [g]libc version
+	cat >$dummy.c <<EOF
+#include <stdio.h>
 #include <features.h>
-#if defined(__GLIBC__)
-extern char __libc_version[];
-extern char __libc_release[];
-#endif
 main(argc, argv)
-     int argc;
-     char *argv[];
+int argc;
+char *argv[];
 {
-#if defined(__GLIBC__)
-  printf("%s %s\n", __libc_version, __libc_release);
+#if defined(__GLIBC__) && !defined(__GLIBC_MINOR__)
+    printf("%d", __GLIBC__);
+#elif defined(__GLIBC__) && defined(__GLIBC_MINOR__)
+    printf("%d.%d", __GLIBC__, __GLIBC_MINOR__);
+#elif defined(__GNU_LIBRARY__)
+    printf("%d", __GNU_LIBRARY__);
 #else
-  printf("unkown\n");
+    printf("1");
 #endif
-  return 0;
+    return 0;
 }
 EOF
-		LIBC=""
-		$CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null
-		if test "$?" = 0 ; then
-			./$dummy | grep 1\.99 > /dev/null
-			if test "$?" = 0 ; then
-				LIBC="libc1"
-			fi
-		fi	
-		rm -f $dummy.c $dummy
-		echo powerpc-unknown-linux-gnu${LIBC} ; exit 0 ;;
-	esac
+	LIBC="1"
+	$CC_FOR_BUILD $dummy.c -o $dummy # 2>/dev/null
+	if [ $? = 0 ]; then
+	    LIBC=`./$dummy | sed -e 's/^\([0-9]*\.[0-9]*\)\..*$/\1/'`
+	fi
+	rm -f $dummy.c $dummy
 
-	if test "${UNAME_MACHINE}" = "alpha" ; then
-		sed 's/^	//'  <<EOF >$dummy.s
-		.globl main
-		.ent main
-	main:
-		.frame \$30,0,\$26,0
-		.prologue 0
-		.long 0x47e03d80 # implver $0
-		lda \$2,259
-		.long 0x47e20c21 # amask $2,$1
-		srl \$1,8,\$2
-		sll \$2,2,\$2
-		sll \$0,3,\$0
-		addl \$1,\$0,\$0
-		addl \$2,\$0,\$0
-		ret \$31,(\$26),1
-		.end main
-EOF
-		LIBC=""
-		$CC_FOR_BUILD $dummy.s -o $dummy 2>/dev/null
-		if test "$?" = 0 ; then
-			./$dummy
-			case "$?" in
-			7)
-				UNAME_MACHINE="alpha"
-				;;
-			15)
-				UNAME_MACHINE="alphaev5"
-				;;
-			14)
-				UNAME_MACHINE="alphaev56"
-				;;
-			10)
-				UNAME_MACHINE="alphapca56"
-				;;
-			16)
-				UNAME_MACHINE="alphaev6"
-				;;
-			esac
-
-			objdump --private-headers $dummy | \
-			  grep ld.so.1 > /dev/null
-			if test "$?" = 0 ; then
-				LIBC="libc1"
-			fi
-		fi
-		rm -f $dummy.s $dummy
-		echo ${UNAME_MACHINE}-unknown-linux-gnu${LIBC} ; exit 0
-	elif test "${UNAME_MACHINE}" = "mips" ; then
-	  cat >$dummy.c <<EOF
-#ifdef __cplusplus
-	int main (int argc, char *argv[]) {
-#else
-	int main (argc, argv) int argc; char *argv[]; {
-#endif
-#ifdef __MIPSEB__
-  printf ("%s-unknown-linux-gnu\n", argv[1]);
-#endif
-#ifdef __MIPSEL__
-  printf ("%sel-unknown-linux-gnu\n", argv[1]);
-#endif
-  return 0;
-}
-EOF
-	  $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null && ./$dummy "${UNAME_MACHINE}" && rm $dummy.c $dummy && exit 0
-	  rm -f $dummy.c $dummy
-	else
-	  # Either a pre-BFD a.out linker (linux-gnuoldld)
-	  # or one that does not give us useful --help.
-	  # GCC wants to distinguish between linux-gnuoldld and linux-gnuaout.
-	  # If ld does not provide *any* "supported emulations:"
-	  # that means it is gnuoldld.
-	  echo "$ld_help_string" | grep >/dev/null 2>&1 "supported emulations:"
-	  test $? != 0 && echo "${UNAME_MACHINE}-pc-linux-gnuoldld" && exit 0
-
-	  case "${UNAME_MACHINE}" in
-	  i?86)
-	    VENDOR=pc;
-	    ;;
-	  *)
-	    VENDOR=unknown;
-	    ;;
-	  esac
-	  # Determine whether the default compiler is a.out or elf
-	  cat >$dummy.c <<EOF
-#include <features.h>
-#ifdef __cplusplus
-	int main (int argc, char *argv[]) {
-#else
-	int main (argc, argv) int argc; char *argv[]; {
-#endif
-#ifdef __ELF__
-# ifdef __GLIBC__
-#  if __GLIBC__ >= 2
-    printf ("%s-${VENDOR}-linux-gnu\n", argv[1]);
-#  else
-    printf ("%s-${VENDOR}-linux-gnulibc1\n", argv[1]);
-#  endif
-# else
-   printf ("%s-${VENDOR}-linux-gnulibc1\n", argv[1]);
-# endif
-#else
-  printf ("%s-${VENDOR}-linux-gnuaout\n", argv[1]);
-#endif
-  return 0;
-}
-EOF
-	  $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null && ./$dummy "${UNAME_MACHINE}" && rm $dummy.c $dummy && exit 0
-	  rm -f $dummy.c $dummy
-	fi ;;
+	echo "${MACHINE}-${VENDOR}-linux${KERNEL}glibc${LIBC}"
+	;;
 # ptx 4.0 does uname -s correctly, with DYNIX/ptx in there.  earlier versions
 # are messed up and put the nodename in both sysname and nodename.
     i?86:DYNIX/ptx:4*:*)
@@ -896,7 +776,7 @@ EOF
 	echo mips-dde-sysv${UNAME_RELEASE}
 	exit 0 ;;
     BS2000:POSIX-BC:*:*)
-	echo bs2000-siemens-sysv4
+	echo BS2000-siemens-sysv4
 	exit 0 ;;
     RM*:ReliantUNIX-*:*:*)
 	echo mips-sni-sysv4

@@ -1,6 +1,43 @@
-dnl ##
-dnl ##
-dnl ##
+## ====================================================================
+## Copyright (c) 1999-2000 Ralf S. Engelschall. All rights reserved.
+##
+## Redistribution and use in source and binary forms, with or without
+## modification, are permitted provided that the following conditions
+## are met:
+##
+## 1. Redistributions of source code must retain the above copyright
+##    notice, this list of conditions and the following disclaimer. 
+##
+## 2. Redistributions in binary form must reproduce the above copyright
+##    notice, this list of conditions and the following disclaimer in
+##    the documentation and/or other materials provided with the
+##    distribution.
+##
+## 3. All advertising materials mentioning features or use of this
+##    software must display the following acknowledgment:
+##    "This product includes software developed by
+##     Ralf S. Engelschall <rse@engelschall.com>."
+##
+## 4. Redistributions of any form whatsoever must retain the following
+##    acknowledgment:
+##    "This product includes software developed by
+##     Ralf S. Engelschall <rse@engelschall.com>."
+##
+## THIS SOFTWARE IS PROVIDED BY RALF S. ENGELSCHALL ``AS IS'' AND ANY
+## EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+## IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+## PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL RALF S. ENGELSCHALL OR
+## ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+## SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+## NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+## LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+## HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+## STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+## ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+## OF THE POSSIBILITY OF SUCH DAMAGE.
+## ====================================================================
+divert(-1)
+
 define(AC_PROG_LIBTOOL,[dnl
 AC_ARG_ENABLE(static,dnl
 [  --enable-static         build static libraries (default=yes)],
@@ -25,9 +62,7 @@ AC_MSG_ERROR([libtool configuration failed])
 LIBTOOL="\$(TOP)/libtool"
 AC_SUBST(LIBTOOL)
 ])dnl
-dnl ##
-dnl ##
-dnl ##
+
 define(AC_CHECK_DEBUGGING,[dnl
 AC_MSG_CHECKING(for compilation debug mode)
 AC_ARG_ENABLE(debug,dnl
@@ -62,28 +97,27 @@ msg=disabled
 ])dnl
 AC_MSG_RESULT([$msg])
 ])
-dnl ##
-dnl ##
-dnl ##
+
 define(AC_CONFIGURE_PART,[dnl
 AC_MSG_RESULT()
 AC_MSG_RESULT(${T_MD}$1:${T_ME})
 ])dnl
-dnl ##
-dnl ##
-dnl ##
+
 define(AC_CHECK_DEFINE,[dnl
-AC_CACHE_CHECK(for $1 in $2, ac_cv_define_$1,
-AC_EGREP_CPP([YES_IS_DEFINED], [
+  AC_CACHE_CHECK(for $1 in $2, ac_cv_define_$1,
+    AC_EGREP_CPP([YES_IS_DEFINED], [
 #include <$2>
 #ifdef $1
 YES_IS_DEFINED
 #endif
-], ac_cv_define_$1=yes; AC_DEFINE(HAVE_$1), ac_cv_define_$1=no)
-)])dnl
-dnl ##
-dnl ##
-dnl ##
+    ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
+  )
+  if test "$ac_cv_define_$1" = "yes" ; then
+    AC_DEFINE(HAVE_$1)
+  fi
+])dnl
+AC_DEFINE(HAVE_$1)
+
 define(AC_IFALLYES,[dnl
 ac_rc=yes
 for ac_spec in $1; do
@@ -116,9 +150,7 @@ else
     $3
 fi
 ])dnl
-dnl ##
-dnl ##
-dnl ##
+
 define(AC_BEGIN_DECISION,[dnl
 ac_decision_item='$1'
 ac_decision_msg='FAILED'
@@ -155,9 +187,7 @@ else
     AC_MSG_RESULT([decision on $ac_decision_item... $ac_decision_msg])
 fi
 ])dnl
-dnl ##
-dnl ##
-dnl ##
+
 AC_DEFUN(AC_TEST_FILE,
 [AC_REQUIRE([AC_PROG_CC])
 ac_safe=`echo "$1" | sed 'y%./+-%__p_%'`
@@ -177,9 +207,7 @@ else
 ifelse([$3], , , [$3])
 fi
 ])
-dnl ##
-dnl ##  AC_PROG_NM - find the path to a BSD-compatible name lister
-dnl ##
+
 AC_DEFUN(AC_PROG_NM,
 [AC_MSG_CHECKING([for BSD-compatible nm])
 AC_CACHE_VAL(ac_cv_path_NM,
@@ -211,9 +239,7 @@ NM="$ac_cv_path_NM"
 AC_MSG_RESULT([$NM])
 AC_SUBST(NM)
 ])
-dnl #
-dnl #
-dnl #
+
 define(AC_CHECK_MAXSEGSIZE,[dnl
 AC_MSG_CHECKING(for shared memory maximum segment size)
 OCFLAGS="$CFLAGS"
@@ -228,29 +254,33 @@ changequote(<<, >>)dnl
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/file.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #ifdef TEST_MMAP
 #include <sys/mman.h>
 #endif
 #ifdef TEST_SHMGET
+#ifdef MM_OS_SUNOS
+#define KERNEL 1
+#endif
+#ifdef MM_OS_BS2000
+#define _KMEMUSER 
+#endif
 #include <sys/ipc.h>
-#ifndef _OSD_POSIX
 #include <sys/shm.h>
+#ifdef MM_OS_SUNOS
+#undef KERNEL
+#endif
+#ifdef MM_OS_BS2000
+#undef _KMEMUSER
+#endif
 #if !defined(SHM_R)
 #define SHM_R 0400
 #endif
 #if !defined(SHM_W)
 #define SHM_W 0200
-#endif     
-#else
-#define _KMEMUSER 1 /* BS2000 needs this to enable SHM_[RW] */
-#include <sys/shm.h>
-#undef  _KMEMUSER
 #endif
 #endif
 #if !defined(MAP_FAILED)
@@ -369,3 +399,5 @@ test ".$msg" = .unknown && AC_MSG_ERROR([Unable to determine maximum shared memo
 AC_MSG_RESULT([$msg])
 AC_DEFINE_UNQUOTED(MM_SHM_MAXSEGSIZE, $MM_SHM_MAXSEGSIZE)
 ])
+
+divert

@@ -1,7 +1,7 @@
 #!/bin/sh
 ##
 ##  fbtool -- MM library feedback tool
-##  Copyright (c) 1999 Ralf S. Engelschall, All Rights Reserved. 
+##  Copyright (c) 1999-2000 Ralf S. Engelschall, All Rights Reserved. 
 ##
 
 if [ ! -f .fbtool ]; then

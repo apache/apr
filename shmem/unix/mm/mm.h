@@ -1,5 +1,5 @@
 /* ====================================================================
- * Copyright (c) 1999 Ralf S. Engelschall. All rights reserved.
+ * Copyright (c) 1999-2000 Ralf S. Engelschall. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,8 +44,8 @@
 **
 */
 
-#ifndef MM_H 
-#define MM_H 1
+#ifndef _MM_H_
+#define _MM_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -82,9 +82,8 @@ typedef enum {
 #include <sys/types.h>
 
 #ifdef MM_OS_SUNOS
-#define KERNEL 1
 #include <memory.h>
-/* SunOS lacks prototypes */
+/* SunOS4 lacks prototypes */
 extern int   getpagesize(void);
 extern int   munmap(caddr_t, int);
 extern int   ftruncate(int, off_t);
@@ -122,12 +121,12 @@ extern char *strerror(int);
 #define memcpy(to,from,len) bcopy(from,to,len)
 #else
 #define memcpy(to,from,len) \
-        { int i; for (i = 0; i < (len); i++) *((char *)(to)+i) = *((char *)(from)+i); }
+        { int i; for (i = 0; i < (len); i++) *(((char *)(to))+i) = *(((char *)(from))+i); }
 #endif
 #endif
 #if !defined(HAVE_MEMSET)
 #define memset(to,ch,len) \
-        { int i; for (i = 0; i < (len); i++) *((char *)(to)+i) = (ch); }
+        { int i; for (i = 0; i < (len); i++) *(((char *)(to))+i) = (ch); }
 #endif
 
 #define ERR(type,str)   mm_lib_error_set(type,str)
@@ -169,13 +168,29 @@ extern char *strerror(int);
 #endif
 
 #if defined(MM_SHMT_IPCSHM)
+#ifdef MM_OS_SUNOS
+#define KERNEL 1
+#endif
+#ifdef MM_OS_BS2000
+#define _KMEMUSER 
+#endif
 #include <sys/shm.h>
+#ifdef MM_OS_SUNOS
+#undef KERNEL
+#endif
+#ifdef MM_OS_BS2000
+#undef _KMEMUSER
+#endif
 #if !defined(SHM_R)
 #define SHM_R 0400
 #endif
 #if !defined(SHM_W)
 #define SHM_W 0200
-#endif    
+#endif
+#endif
+
+#ifdef MM_SHMT_BEOS
+#include <kernel/OS.h>
 #endif
 
 #if defined(MM_SEMT_IPCSEM)
@@ -191,10 +206,6 @@ union semun {
 
 #ifdef MM_SEMT_FLOCK
 #include <sys/file.h>
-#endif
-
-#ifdef MM_SHMT_BEOS
-#include <kernel/OS.h>
 #endif
 
 #define MM_ALLOC_MINSIZE         (1024*8) 
@@ -276,10 +287,6 @@ struct mem_core {
 #if defined(MM_SHMT_BEOS)
     area_id     mc_areaid;
 #endif
-#if defined(MM_SEMT_BEOS)
-    sem_id      mc_semid;
-    int32       mc_ben;
-#endif
 #if !defined(MM_SEMT_FLOCK)
    int          mc_fdsem;
 #endif
@@ -293,6 +300,10 @@ struct mem_core {
 #endif
 #if defined(MM_SEMT_FLOCK) || defined(MM_SEMT_FCNTL)
    char         mc_fnsem[MM_MAXPATH];
+#endif
+#if defined(MM_SEMT_BEOS)
+   sem_id       mc_semid;
+   int32        mc_ben;
 #endif
    mem_word     mc_base;
 };
@@ -364,4 +375,5 @@ int     mm_lib_version(void);
 }
 #endif
 
-#endif /* MM_H */
+#endif /* _MM_H_ */
+
