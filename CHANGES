@@ -1,5 +1,11 @@
 Changes with APR 0.9.2
 
+  *) Changed apr_mmap_dup() and friends so that there's no longer any
+     is_owner concept on the mmaped region, but rather something more
+     along the lines of a reference count.  This allows the old apr_mmap_t
+     to still be used safely when the new apr_mmap_t is in a disjoint pool.
+     [Cliff Woolley, Sander Striker]
+
   *) Fix a bug in apr_hash_merge() which caused the last entry in the
      overlay hash to be lost.  PR 10522  [Jeff Trawick]
 

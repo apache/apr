@@ -58,6 +58,7 @@
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
+#include "apr_ring.h"
 #include "apr_file_io.h"        /* for apr_file_t */
 
 #ifdef BEOS
@@ -115,8 +116,12 @@ struct apr_mmap_t {
     void *mm;
     /** The amount of data in the mmap */
     apr_size_t size;
-    /** Whether this object is reponsible for doing the munmap */
-    int is_owner;
+    /** @deprecated this field is no longer used and will be removed
+     * in APR 1.0 */
+    int unused;
+    /** ring of apr_mmap_t's that reference the same
+     * mmap'ed region; acts in place of a reference count */
+    APR_RING_ENTRY(apr_mmap_t) link;
 };
 
 #if APR_HAS_MMAP || defined(DOXYGEN)
@@ -174,8 +179,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **newmmap,
  * @param new_mmap The structure to duplicate into. 
  * @param old_mmap The mmap to duplicate.
  * @param p The pool to use for new_mmap.
- * @param transfer_ownership  Whether responsibility for destroying
- *  the memory-mapped segment is transferred from old_mmap to new_mmap
+ * @param transfer_ownership DEPRECATED: this param is now ignored
+ *  and should be removed prior to APR 1.0
  */         
 APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
                                        apr_mmap_t *old_mmap,
@@ -185,10 +190,11 @@ APR_DECLARE(apr_status_t) apr_mmap_dup(apr_mmap_t **new_mmap,
 #if defined(DOXYGEN)
 /**
  * Transfer the specified MMAP to a different pool
- * @param new_mmap The structure to duplicate into. 
+ * @param new_mmap The structure to duplicate into.
  * @param old_mmap The file to transfer.
  * @param p The pool to use for new_mmap.
- * @remark After this call, old_mmap cannot be used
+ * @deprecated Just use apr_mmap_dup().  The transfer_ownership flag will
+ *  go away soon anyway.
  */
 APR_DECLARE(apr_status_t) apr_mmap_setaside(apr_mmap_t **new_mmap,
                                             apr_mmap_t *old_mmap,
@@ -196,7 +202,6 @@ APR_DECLARE(apr_status_t) apr_mmap_setaside(apr_mmap_t **new_mmap,
 #else
 #define apr_mmap_setaside(new_mmap, old_mmap, p) apr_mmap_dup(new_mmap, old_mmap, p, 1)
 #endif /* DOXYGEN */
-
 
 /**
  * Remove a mmap'ed.
