@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Add a new lock API (apr_global_mutex_t) to provide guaranteed
+     cross-process AND cross-thread mutual exclusion.  [Aaron Bannert]
+
   *) Note: We are in the process of deprecating the apr_lock.h API.
      The new and improved lock/synchronization APIs now reside
      in apr_thread_mutex.h, apr_proc_mutex.h, apr_thread_rwlock.h,
