@@ -192,7 +192,7 @@ static void test_readdir_onedot(CuTest *tc)
     rv = apr_dir_open(&dir, "data", p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, ".", finfo.name);
 
@@ -209,8 +209,8 @@ static void test_readdir_twodot(CuTest *tc)
     rv = apr_dir_open(&dir, "data", p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
-    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
+    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, "..", finfo.name);
 
@@ -227,14 +227,14 @@ static void test_rewind(CuTest *tc)
     rv = apr_dir_open(&dir, "data", p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, ".", finfo.name);
 
     rv = apr_dir_rewind(dir);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    rv = apr_dir_read(&finfo, APR_FINFO_NORM, dir);
+    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, ".", finfo.name);
 
