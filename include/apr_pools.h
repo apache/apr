@@ -466,7 +466,6 @@ APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
  *      Careful namespace prefixing of key names typically helps to ensure this
  *      uniqueness.
  *
- * @bug Specify how to ensure this uniqueness!
  */
 APR_DECLARE(apr_status_t) apr_pool_userdata_set(
     const void *data,
