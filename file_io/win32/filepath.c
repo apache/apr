@@ -55,6 +55,7 @@
 #include "apr.h"
 #include "fileio.h"
 #include "apr_strings.h"
+#include "apr_lib.h"
 #include <string.h>
 #include <ctype.h>
 
@@ -324,7 +325,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
         newpath[2] = seperator[0];
         newpath[3] = '\0';
         if (flags & APR_FILEPATH_TRUENAME) {
-            newpath[0] = toupper(newpath[0]);
+            newpath[0] = apr_toupper(newpath[0]);
             rv = filepath_root_test(newpath, p);
             if (rv)
                 return rv;
