@@ -402,7 +402,7 @@ case $host in
               case "$sparc_arch" in
                 sun4c|sun4m|sun4d|sun4t|sun4)
                   apr_force_atomic_generic=1
-                  apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
+                  apr_atomic_sparc_compile=""
                   ;;
                 *)
                   if test -n "$is_gnu_as"; then
@@ -418,7 +418,7 @@ case $host in
                 esac
             else
               apr_force_atomic_generic=1
-              apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
+              apr_atomic_sparc_compile=""
             fi
             AC_SUBST(ASCPPFLAGS)
             AC_SUBST(ASFLAGS)

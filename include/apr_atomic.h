@@ -63,6 +63,7 @@
 extern "C" {
 #endif
 
+#include "apr.h"
 #include "apr_pools.h"
 
 /**
@@ -134,6 +135,16 @@ int apr_atomic_dec(volatile apr_atomic_t *mem);
  * on some platforms they may be implemented by different mechanisms
  */
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
+
+/**
+ * compare the pointer's value with cmp.
+ * If they are the same swap the value with 'with'
+ * @param mem pointer to the pointer
+ * @param with what to swap it with
+ * @param the value to compare it to
+ * @return the old value of the pointer
+ */
+void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 #else /* !DOXYGEN */
 
 /* The following definitions provide optimized, OS-specific
@@ -306,6 +317,15 @@ int apr_atomic_dec(volatile apr_atomic_t *mem);
 #if !defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CAS)
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define APR_ATOMIC_NEED_DEFAULT_INIT 1
+#endif
+
+#if !defined(apr_atomic_casptr) && !defined(APR_OVERRIDE_ATOMIC_CASPTR)
+#if APR_SIZEOF_VOIDP == 4
+#define apr_atomic_casptr(mem, with, cmp) (void *)apr_atomic_cas((apr_uint32_t *)(mem), (long)(with), (long)cmp)
+#else
+void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
+#define APR_ATOMIC_NEED_DEFAULT_INIT 1
+#endif
 #endif
 
 #ifndef APR_ATOMIC_NEED_DEFAULT_INIT
