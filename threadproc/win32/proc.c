@@ -105,7 +105,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
                                    attr->cntxt)) != APR_SUCCESS) {
             return stat;
         }
-    } 
+    }
     if (err) {
         if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err, 
                                    attr->cntxt)) != APR_SUCCESS) {
@@ -122,7 +122,6 @@ ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
 ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_out,
                                     ap_file_t *parent_out)
 {
-
     if (attr->child_out == NULL && attr->parent_out == NULL)
         ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
 
@@ -451,7 +450,7 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
     if (proc == NULL) {
         return APR_ENOPROC;
     }
-    theproc = &(proc->pi);
+    *theproc = proc->pi;
     return APR_SUCCESS;
 }
 
