@@ -324,6 +324,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *beos*)
         APR_ADDTO(CPPFLAGS, [-DBEOS])
         PLATOSVERS=`uname -r`
+        APR_SETIFNULL(apr_process_lock_is_global, [yes])
         case $PLATOSVERS in
             5.0.4)
                 APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
