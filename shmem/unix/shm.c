@@ -420,8 +420,10 @@ APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
     /* FIXME: munmap the segment. */
     return APR_ENOTIMPL;
 #elif APR_USE_SHMEM_SHMGET
-    /* FIXME: shmdt. */
-    return APR_ENOTIMPL;
+    if (shmdt(m->base) < 0) {
+        return errno;
+    }
+    return APR_SUCCESS;
 #else
     return APR_ENOTIMPL;
 #endif
