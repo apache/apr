@@ -57,76 +57,138 @@
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_ssize_t rv;
+    ap_ssize_t bytes_read;
 
-    if (thefile->filedes < 0) {
-        (*nbytes) = 0;
-        return APR_EBADF;
+    if(*nbytes <= 0) {
+        *nbytes = 0;
+        return APR_SUCCESS;
     }
-    
+
     if (thefile->buffered) {
-        rv = fread(buf, *nbytes, 1, thefile->filehand);
+        char *pos = (char *)buf;
+        ap_uint64_t blocksize;
+        ap_uint64_t size = *nbytes;
+
+        ap_lock(thefile->thlock);
+
+        if (thefile->direction == 1) {
+            ap_flush(thefile);
+            thefile->bufpos = 0;
+            thefile->direction = 0;
+            thefile->dataRead = 0;
+        }
+
+        rv = 0;
+        while (rv == 0 && size > 0) {
+            if (thefile->bufpos >= thefile->dataRead) {
+                thefile->dataRead = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
+                if (thefile->dataRead == 0) {
+                    thefile->eof_hit = TRUE;
+                    break;
+                }
+                thefile->filePtr += thefile->dataRead;
+                thefile->bufpos = 0;
+            }
+
+            blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;                                                            memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
+            thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
+        *nbytes = rv == 0 ? pos - (char *)buf : 0;
+        ap_unlock(thefile->thlock);
+        return rv;
     }
     else {
-        rv = read(thefile->filedes, buf, *nbytes);
-    }
-
-    if ((*nbytes != rv) && (errno != EINTR) && !thefile->buffered) {
-        thefile->eof_hit = 1;
-    }
-    if (rv == -1) {
-        *nbytes = 0;
+        bytes_read = 0;
+        if (thefile->ungetchar != -1) {
+            bytes_read = 1;
+            *(char *)buf = (char)thefile->ungetchar;
+            buf = (char *)buf + 1;
+            (*nbytes)--;
+            thefile->ungetchar = -1;
+            if (*nbytes == 0) {
+	            *nbytes = bytes_read;
+	            return APR_SUCCESS;
+            }
+        }
+        do {
+            rv = read(thefile->filedes, buf, *nbytes);
+        } while (rv == -1 && errno == EINTR);
+        *nbytes = bytes_read;
+        if (rv == 0) {
+            return APR_EOF;
+        }
+        if (rv > 0) {
+            *nbytes += rv;
+            return APR_SUCCESS;
+        }
         return errno;
     }
-    (*nbytes) = rv;
-    return APR_SUCCESS;
 }
 
 ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
-
-    if (thefile->filedes < 0) {
-        (*nbytes) = 0;
-        return APR_EBADF;
-    }
-
+    
     if (thefile->buffered) {
-        rv = fwrite(buf, *nbytes, 1, thefile->filehand);
+        char *pos = (char *)buf;
+        int blocksize;
+        int size = *nbytes;
+
+        ap_lock(thefile->thlock);
+
+        if ( thefile->direction == 0 ) {
+            /* Position file pointer for writing at the offset we are 
+             * logically reading from
+             */
+            ap_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            if (offset != thefile->filePtr)
+                lseek(thefile->filedes, offset, SEEK_SET);
+            thefile->bufpos = thefile->dataRead = 0;
+            thefile->direction = 1;
+        }
+
+        rv = 0;
+        while (rv == 0 && size > 0) {
+            if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
+                ap_flush(thefile);
+
+            blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
+                        APR_FILE_BUFSIZE - thefile->bufpos : size;
+            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);                      thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
+        ap_unlock(thefile->thlock);
+        return rv;
     }
     else {
-        rv = write(thefile->filedes, buf, *nbytes);
-    }
+        do {
+            rv = write(thefile->filedes, buf, *nbytes);
+        } while (rv == (ap_size_t)-1 && errno == EINTR);
 
-    if (rv == -1) {
-        (*nbytes) = 0;
-        return errno;
+        if (rv == (ap_size_t)-1) {
+            (*nbytes) = 0;
+            return errno;
+        }
+        *nbytes = rv;
+        return APR_SUCCESS;
     }
-    (*nbytes) = rv;
-    return APR_SUCCESS;
 }
 
 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, 
                       ap_size_t nvec, ap_ssize_t *nbytes)
 {
     int bytes;
-    if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
-        (*nbytes) = 0;
-        return errno;
-    }
-    else {
-        (*nbytes) = bytes;
-        return APR_SUCCESS;
-    }
+    *nbytes = vec[0].iov_len;
+    return ap_write(thefile, vec[0].iov_base, nbytes);
 }
 
 ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
-    if (thefile->buffered) {
-        if (fputc(ch, thefile->filehand) == ch) {
-            return APR_SUCCESS;
-        }
-        return errno;
-    }
     if (write(thefile->filedes, &ch, 1) != 1) {
         return errno;
     }
@@ -135,13 +197,7 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
-    if (thefile->buffered) {
-        if (ungetc(ch, thefile->filehand) == ch) {
-            return APR_SUCCESS;
-        }
-        return errno;
-    }
-    /* Not sure what to do in this case.  For now, return SUCCESS. */
+    thefile->ungetchar = (unsigned char)ch;
     return APR_SUCCESS; 
 }
 
@@ -149,19 +205,10 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
     ssize_t rv;
     
-    if (thefile->buffered) {
-        int r;
-
-	r=fgetc(thefile->filehand);
-	if(r != EOF)
-	    {
-	    *ch=(char)r;
-	    return APR_SUCCESS;
-	    }
-        if (feof(thefile->filehand)) {
-            return APR_EOF;
-        }
-        return errno;
+    if (thefile->ungetchar != -1) {
+        *ch = (char) thefile->ungetchar;
+        thefile->ungetchar = -1;
+        return APR_SUCCESS;
     }
     rv = read(thefile->filedes, ch, 1); 
     if (rv == 0) {
@@ -179,12 +226,6 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
     ssize_t rv;
     int len;
 
-    if (thefile->buffered) {
-        if (fputs(str, thefile->filehand)) {
-            return APR_SUCCESS;
-        }
-        return errno;
-    }
     len = strlen(str);
     rv = write(thefile->filedes, str, len); 
     if (rv != len) {
@@ -196,10 +237,18 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
 ap_status_t ap_flush(ap_file_t *thefile)
 {
     if (thefile->buffered) {
-        if (!fflush(thefile->filehand)) {
-            return APR_SUCCESS;
+        ap_int64_t written = 0;
+        int rc = 0;
+
+        if (thefile->direction == 1 && thefile->bufpos) {
+            written= write(thefile->filedes, thefile->buffer, thefile->bufpos);
+            thefile->filePtr += written;
+
+            if (rc == 0)
+                thefile->bufpos = 0;
         }
-        return errno;
+
+        return rc;
     }
     /* There isn't anything to do if we aren't buffering the output
      * so just return success.
@@ -210,21 +259,29 @@ ap_status_t ap_flush(ap_file_t *thefile)
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
     ssize_t rv;
-    int i;    
+    int i, used_unget = FALSE, beg_idx;
 
-    if (thefile->buffered) {
-        if (fgets(str, len, thefile->filehand)) {
-            return APR_SUCCESS;
-        }
-        if (feof(thefile->filehand)) {
-            return APR_EOF;
-        }
-        return errno;
-    }
-    for (i = 0; i < len; i++) {
+    if(len <= 1)  /* as per fgets() */
+        return APR_SUCCESS;
+
+    if(thefile->ungetchar != -1){
+        str[0] = thefile->ungetchar;
+	used_unget = TRUE;
+	beg_idx = 1;
+	if(str[0] == '\n' || str[0] == '\r'){
+	    thefile->ungetchar = -1;
+	    str[1] = '\0';
+	    return APR_SUCCESS;
+	}
+    } else
+        beg_idx = 0;
+    
+    for (i = beg_idx; i < len; i++) {
         rv = read(thefile->filedes, &str[i], 1); 
         if (rv == 0) {
             thefile->eof_hit = TRUE;
+	    if(used_unget) thefile->filedes = -1;
+	    str[i] = '\0';
             return APR_EOF;
         }
         else if (rv != 1) {
@@ -233,6 +290,8 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
         if (str[i] == '\n' || str[i] == '\r')
             break;
     }
+    if (i < len-1)
+        str[i+1] = '\0';
     return APR_SUCCESS; 
 }
 
@@ -250,28 +309,19 @@ API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;
-    ap_vformatter_buff_t vbuff;
     char *buf;
-    ap_ssize_t len;
+    int len;
 
     buf = malloc(HUGE_STRING_LEN);
     if (buf == NULL) {
         return 0;
     }
-    /* save one byte for nul terminator */
-    vbuff.curpos = buf;
-    vbuff.endpos = buf + len - 1;
     va_start(ap, format);
-#if 0
-    cc = ap_vformatter(printf_flush, &vbuff, format, ap);
+    len = ap_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
+    cc = ap_puts(buf, fptr);
     va_end(ap);
-    *vbuff.curpos = '\0';
-#endif
-    vsprintf(buf, format, ap);
-    len = strlen(buf);
-    cc = ap_write(fptr, buf, &len);
-    va_end(ap);
-    return (cc == -1) ? len : cc;
+    free(buf);
+    return (cc == APR_SUCCESS) ? len : -1;
 }
 
 

@@ -81,13 +81,6 @@ typedef struct datastruct {
     struct datastruct *prev;
 } datastruct;
 
-struct ap_pool_t {
-    struct ap_pool_t *pool;
-    void *prog_data;
-    int (*apr_abort)(int retcode);
-};
-
-
 struct ap_other_child_rec_t {
     struct ap_other_child_rec_t *next;
     thread_id pid; /* this is actually a thread_id, but in order to
