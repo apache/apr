@@ -303,5 +303,13 @@ if test -n "$USE_MM" && test -n "$USE_VPATH"; then
 fi
 ])
 
+AC_DEFUN(APR_OUTPUT_VARS,[
+dnl #----------------------------- output environment variables to a file to
+dnl #----------------------------- be used by calling program.
+    rm APRVARS
+    echo "LIBS=\"$LIBS\"" >> APRVARS
+])
+
+
 sinclude(threads.m4)
 sinclude(hints.m4)
