@@ -75,6 +75,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <process.h>
+#include <signal.h>
 
 #define ap_inline
 #define __attribute__(__x)
