@@ -117,9 +117,4 @@ Sigfunc *ap_signal(int signo, Sigfunc * func);
 #define ap_signal(a,b) signal(a,b)
 #endif
 
-#if !defined(HAVE_PTHREAD_SIGMASK) && defined(HAVE_SIGTHREADMASK)
-#define pthread_sigmask sigthreadmask
-#define HAVE_PTHREAD_SIGMASK 1
-#endif
-
 #endif /* APR_H */
