@@ -68,32 +68,49 @@ ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type,
     newlock = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
 
     newlock->cntxt = cont;
-    newlock->fname = strdup(fname);
-
+    /* ToDo:  How to handle the case when no context is available? 
+    *         How to cleanup the storage properly?
+    */
+    if (cont)
+        newlock->fname = ap_pstrdup(cont, fname);
+    else
+        newlock->fname = strdup(fname);
+    newlock->type = type;
+    newlock->scope = scope;
     sec.nLength = sizeof(SECURITY_ATTRIBUTES);
     sec.lpSecurityDescriptor = NULL;
 
-    if (type == APR_CROSS_PROCESS || type == APR_LOCKALL) {
+    if (scope == APR_CROSS_PROCESS || scope == APR_LOCKALL) {
         sec.bInheritHandle = TRUE;
     }
     else {
         sec.bInheritHandle = FALSE;
     }
 
-    newlock->mutex = CreateMutex(&sec, FALSE, fname);
+    if (type == APR_INTRAPROCESS) {
+        InitializeCriticalSection(&newlock->section);
+    } else {
+        newlock->mutex = CreateMutex(&sec, FALSE, fname);
+    }
     *lock = newlock;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_child_init_lock(struct lock_t **lock, ap_context_t *cont, char *fname)
 {
+    /* This routine should not be called (and OpenMutex will fail if called) 
+     * on a INTRAPROCESS lock
+     */
     (*lock) = (struct lock_t *)ap_palloc(cont, sizeof(struct lock_t));
 
     if ((*lock) == NULL) {
         return APR_ENOMEM;
     }
+    if (cont)
+        (*lock)->fname = ap_pstrdup(cont, fname);
+    else
+        (*lock)->fname = strdup(fname);
 
-    (*lock)->fname = strdup(fname);
     (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
     
     if ((*lock)->mutex == NULL) {
@@ -105,31 +122,44 @@ ap_status_t ap_child_init_lock(struct lock_t **lock, ap_context_t *cont, char *f
 ap_status_t ap_lock(struct lock_t *lock)
 {
     DWORD rv;
-
-    rv = WaitForSingleObject(lock->mutex, INFINITE);
-
-    if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+    if (lock->type == APR_INTRAPROCESS) {
+        EnterCriticalSection(&lock->section);
         return APR_SUCCESS;
-    }
-    if (rv == WAIT_TIMEOUT) {
-        return APR_TIMEUP;
-    }
+    } else {
+        rv = WaitForSingleObject(lock->mutex, INFINITE);
 
+        if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
+            return APR_SUCCESS;
+        }
+        if (rv == WAIT_TIMEOUT) {
+            return APR_TIMEUP;
+        }
+    }
     return APR_EEXIST;
 }
 
 ap_status_t ap_unlock(struct lock_t *lock)
 {
-    if (ReleaseMutex(lock->mutex) == 0) {
-        return APR_EEXIST;
+    if (lock->type == APR_INTRAPROCESS) {
+        LeaveCriticalSection(&lock->section);
+        return APR_SUCCESS;
+    } else {
+        if (ReleaseMutex(lock->mutex) == 0) {
+            return APR_EEXIST;
+        }
     }
     return APR_SUCCESS;
 }
 
 ap_status_t ap_destroy_lock(struct lock_t *lock)
 {
-    if (CloseHandle(lock->mutex) == 0) {
-        return APR_EEXIST;
+    if (lock->type == APR_INTRAPROCESS) {
+        DeleteCriticalSection(&lock->section);
+        return APR_SUCCESS;
+    } else {
+        if (CloseHandle(lock->mutex) == 0) {
+            return APR_EEXIST;
+        }
     }
     return APR_SUCCESS;
 }
@@ -137,7 +167,7 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
 ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
-        return ap_get_userdata(lock->cntxt, key, &data);
+        return ap_get_userdata(&data, lock->cntxt, key);
     }
     else {
         data = NULL;
@@ -166,8 +196,8 @@ ap_status_t ap_get_os_lock(struct lock_t *lock, ap_os_lock_t *thelock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_lock(ap_context_t *cont, struct lock_t **lock, 
-                            ap_os_lock_t *thelock)
+ap_status_t ap_put_os_lock(struct lock_t **lock, ap_os_lock_t *thelock, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

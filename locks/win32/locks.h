@@ -59,7 +59,10 @@
 
 struct lock_t {
     ap_context_t *cntxt;
+    ap_locktype_e type;
+    ap_lockscope_e scope;
     HANDLE mutex;
+    CRITICAL_SECTION section;
     char *fname;
 };
 
