@@ -80,11 +80,6 @@ APR_DECLARE(apr_status_t) apr_##name##_inherit_set(apr_##name##_t *the##name) \
         the##name->filehand = temp;                                 \
     }                                                               \
     return APR_SUCCESS;                                             \
-}                                                                   \
-/* Deprecated */                                                    \
-APR_DECLARE(void) apr_##name##_set_inherit(apr_##name##_t *the##name) \
-{                                                                   \
-    apr_##name##_inherit_set(the##name);                            \
 }
 
 #define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
@@ -107,11 +102,6 @@ APR_DECLARE(apr_status_t) apr_##name##_inherit_unset(apr_##name##_t *the##name)\
         the##name->filehand = temp;                                 \
     }                                                               \
     return APR_SUCCESS;                                             \
-}                                                                   \
-/* Deprecated */                                                    \
-APR_DECLARE(void) apr_##name##_unset_inherit(apr_##name##_t *the##name) \
-{                                                                   \
-    apr_##name##_inherit_unset(the##name);                          \
 }
 
 #endif	/* ! INHERIT_H */

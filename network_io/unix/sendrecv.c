@@ -1001,52 +1001,8 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 }
 #else
 #error APR has detected sendfile on your system, but nobody has written a
-#error version of it for APR yet.  To get past this, either write apr_sendfile
-#error or change APR_HAS_SENDFILE in apr.h to 0. 
+#error version of it for APR yet.  To get past this, either write 
+#error apr_socket_sendfile or change APR_HAS_SENDFILE in apr.h to 0.
 #endif /* __linux__, __FreeBSD__, __HPUX__, _AIX, __MVS__, Tru64/OSF1 */
 
-/* deprecated */
-apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
-                          apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
-                          apr_int32_t flags)
-{
-    return apr_socket_sendfile(sock, file, hdtr, offset, len, flags);
-}
-
 #endif /* APR_HAS_SENDFILE */
-
-/* deprecated */
-apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
-{
-    return apr_socket_send(sock, buf, len);
-}
-
-/* deprecated */
-#ifdef HAVE_WRITEV
-apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
-                       apr_int32_t nvec, apr_size_t *len)
-{
-    return apr_socket_sendv(sock, vec, nvec, len);
-}
-#endif
-
-/* deprecated */
-apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
-                        apr_int32_t flags, const char *buf, apr_size_t *len)
-{
-    return apr_socket_sendto(sock, where, flags, buf, len);
-}
-
-/* deprecated */
-apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
-                          apr_int32_t flags, char *buf, 
-                          apr_size_t *len)
-{
-    return apr_socket_recvfrom(from, sock, flags, buf, len);
-}
-
-/* deprecated */
-apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
-{
-    return apr_socket_recv(sock, buf, len);
-}
