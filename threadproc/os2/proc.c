@@ -279,8 +279,9 @@ static char *double_quotes(apr_pool_t *cntxt, char *str)
 
 
 apr_status_t apr_create_process(apr_proc_t *proc, const char *progname,
-                              char *const args[], char **env,
-                              apr_procattr_t *attr, apr_pool_t *cont)
+                                const char * const *args,
+                                const char * const *env,
+                                apr_procattr_t *attr, apr_pool_t *cont)
 {
     int i, arg, numargs, cmdlen;
     apr_status_t status;

@@ -202,16 +202,17 @@ apr_status_t apr_fork(apr_proc_t *proc, apr_pool_t *cont)
 
 
 apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
-                              char *const args[], char **env, 
-                              apr_procattr_t *attr, apr_pool_t *cont)
+                                const char * const *args,
+                                const char * const *env, 
+                                apr_procattr_t *attr, apr_pool_t *cont)
 {
     int i=0,nargs=0;
     char **newargs = NULL;
     thread_id newproc, sender;
     struct send_pipe *sp;        
-	char * dir = NULL;
+    char * dir = NULL;
 	    
-	sp = (struct send_pipe *)apr_palloc(cont, sizeof(struct send_pipe));
+    sp = (struct send_pipe *)apr_palloc(cont, sizeof(struct send_pipe));
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;

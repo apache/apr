@@ -378,8 +378,9 @@ apr_status_t apr_fork(apr_proc_t *proc, apr_pool_t *cont);
  * @param cont The pool to use. 
  */
 apr_status_t apr_create_process(apr_proc_t *new_proc, const char *progname, 
-                              char *const *args, char **env, 
-                              apr_procattr_t *attr, apr_pool_t *cont);
+                                const char * const *args,
+                                const char * const *env, 
+                                apr_procattr_t *attr, apr_pool_t *cont);
 
 /**
  * Wait for a child process to die

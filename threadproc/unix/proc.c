@@ -271,8 +271,9 @@ static apr_status_t limit_proc(apr_procattr_t *attr)
 }
 
 apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
-                              char *const *args, char **env,
-                              apr_procattr_t *attr, apr_pool_t *cont)
+                                const char * const *args,
+                                const char * const *env,
+                                apr_procattr_t *attr, apr_pool_t *cont)
 {
     int i;
     const char **newargs;
@@ -334,13 +335,13 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
             if (attr->detached) {
                 apr_detach();
             }
-            execve(SHELL_PATH, (char **) newargs, env);
+            execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
         }
         else {
             if (attr->detached) {
                 apr_detach();
             }
-            execve(progname, args, env);
+            execve(progname, (char * const *)args, (char * const *)env);
         }
         exit(-1);  /* if we get here, there is a problem, so exit with an */ 
                    /* error code. */
