@@ -59,6 +59,9 @@
 #ifdef HAVE_STDDEF_H
 #include <stddef.h> /* NULL */
 #endif
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 {

@@ -66,6 +66,9 @@
 #include "apr_uuid.h"
 #include "apr_md5.h"
 #include "apr_general.h"
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif

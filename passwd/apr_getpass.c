@@ -73,6 +73,9 @@
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#ifdef HAVE_STRINGS_H
+#include <strings.h>
+#endif
 
 #if defined(HAVE_TERMIOS_H) && !defined(HAVE_GETPASS)
 #include <termios.h>
