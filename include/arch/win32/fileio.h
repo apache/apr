@@ -212,6 +212,38 @@ struct apr_dir_t {
     };
 };
 
+/* There are many goofy characters we can't accept.  Here's the list.
+ */
+extern const char c_is_fnchar[256];
+
+#define IS_FNCHAR(c) c_is_fnchar[(unsigned char)c]
+
+
+/* If the user passes APR_FILEPATH_TRUENAME to either
+ * apr_filepath_root or apr_filepath_merge, this fn determines
+ * that the root really exists.  It's expensive, wouldn't want
+ * to do this too frequenly.
+ */
+apr_status_t filepath_root_test(char *path, apr_pool_t *p);
+
+
+/* The apr_filepath_merge wants to canonicalize the cwd to the 
+ * addpath if the user passes NULL as the old root path (this
+ * isn't true of an empty string "", which won't be concatinated.
+ *
+ * But we need to figure out what the cwd of a given volume is,
+ * when the user passes D:foo.  This fn will determine D:'s cwd.
+ */
+apr_status_t filepath_drive_get(char **rootpath, char drive, apr_pool_t *p);
+
+
+/* If the user passes d: vs. D: (or //mach/share vs. //MACH/SHARE),
+ * we need to fold the case to canonical form.  This function is
+ * supposed to do so.
+ */
+apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
+
+
 apr_status_t file_cleanup(void *);
 
 /**
