@@ -52,8 +52,8 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef ap_POOLS_H
-#define ap_POOLS_H
+#ifndef APR_POOLS_H
+#define APR_POOLS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -140,37 +140,37 @@ struct process_chain {
  * if the data is allocated in any ancestor of T's pool.  This is the
  * basis on which the POOL_DEBUG code works -- it tests these ancestor
  * relationships for all data inserted into tables.  POOL_DEBUG also
- * provides tools (ap_find_pool, and ap_pool_is_ancestor) for other
+ * provides tools (apr_find_pool, and apr_pool_is_ancestor) for other
  * folks to implement similar restrictions for their own data
  * structures.
  *
  * However, sometimes this ancestor requirement is inconvenient --
  * sometimes we're forced to create a sub pool (such as through
- * ap_sub_req_lookup_uri), and the sub pool is guaranteed to have
+ * apr_sub_req_lookup_uri), and the sub pool is guaranteed to have
  * the same lifetime as the parent pool.  This is a guarantee implemented
  * by the *caller*, not by the pool code.  That is, the caller guarantees
  * they won't destroy the sub pool individually prior to destroying the
  * parent pool.
  *
- * In this case the caller must call ap_pool_join() to indicate this
+ * In this case the caller must call apr_pool_join() to indicate this
  * guarantee to the POOL_DEBUG code.  There are a few examples spread
  * through the standard modules.
  */
 #ifndef POOL_DEBUG
-#ifdef ap_pool_join
-#undef ap_pool_join
+#ifdef apr_pool_join
+#undef apr_pool_join
 #endif
-#define ap_pool_join(a,b)
+#define apr_pool_join(a,b)
 #else
-APR_EXPORT(void) ap_pool_join(apr_pool_t *p, apr_pool_t *sub);
-APR_EXPORT(apr_pool_t *) ap_find_pool(const void *ts);
-APR_EXPORT(int) ap_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
+APR_EXPORT(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub);
+APR_EXPORT(apr_pool_t *) apr_find_pool(const void *ts);
+APR_EXPORT(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 #endif
 
 #ifdef ULTRIX_BRAIN_DEATH
-#define ap_fdopen(d,m) fdopen((d), (char *)(m))
+#define apr_fdopen(d,m) fdopen((d), (char *)(m))
 #else
-#define ap_fdopen(d,m) fdopen((d), (m))
+#define apr_fdopen(d,m) fdopen((d), (m))
 #endif
 
 /*
@@ -241,9 +241,9 @@ APR_EXPORT(apr_size_t) apr_bytes_in_free_blocks(void);
  * @param b The pool to search for
  * @return True if a is an ancestor of b, NULL is considered an ancestor
  *         of all pools.
- * @deffunc int ap_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
+ * @deffunc int apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
  */
-APR_EXPORT(int) ap_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
+APR_EXPORT(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 
 /**
  * Allocate a block of memory from a pool
@@ -318,14 +318,14 @@ APR_EXPORT_NONSTD(apr_status_t) apr_null_cleanup(void *data);
  * destroyed before the parent pool
  */
 #ifndef POOL_DEBUG
-#ifdef ap_pool_join
-#undef ap_pool_join
-#endif /* ap_pool_join */
-#define ap_pool_join(a,b)
+#ifdef apr_pool_join
+#undef apr_pool_join
+#endif /* apr_pool_join */
+#define apr_pool_join(a,b)
 #endif /* POOL_DEBUG */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	/* !ap_POOLS_H */
+#endif	/* !APR_POOLS_H */

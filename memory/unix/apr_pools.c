@@ -131,8 +131,8 @@
 #define BLOCK_MINALLOC	0
 #endif /* ALLOC_USE_MALLOC */
 
-#define AP_SLACK_LOW    1
-#define AP_SLACK_HIGH   2
+#define APR_SLACK_LOW    1
+#define APR_SLACK_HIGH   2
 
 
 /*****************************************************************
@@ -671,7 +671,7 @@ void apr_term_alloc(void)
 }
 
 /* We only want to lock the mutex if we are being called from apr_clear_pool.
- * This is because if we also call this function from ap_destroy_real_pool,
+ * This is because if we also call this function from apr_destroy_real_pool,
  * which also locks the same mutex, and recursive locks aren't portable.  
  * This way, we are garaunteed that we only lock this mutex once when calling
  * either one of these functions.
@@ -762,7 +762,7 @@ extern char _end;
 /* Find the pool that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
-APR_EXPORT(apr_pool_t *) ap_find_pool(const void *ts)
+APR_EXPORT(apr_pool_t *) apr_find_pool(const void *ts)
 {
     const char *s = ts;
     union block_hdr **pb;
@@ -808,7 +808,7 @@ APR_EXPORT(apr_pool_t *) ap_find_pool(const void *ts)
 /* return TRUE iff a is an ancestor of b
  * NULL is considered an ancestor of all pools
  */
-APR_EXPORT(int) ap_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
+APR_EXPORT(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
 {
     if (a == NULL) {
 	return 1;
@@ -830,7 +830,7 @@ APR_EXPORT(int) ap_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
  * instead.  This is a guarantee by the caller that sub will not
  * be destroyed before p is.
  */
-APR_EXPORT(void) ap_pool_join(apr_pool_t *p, apr_pool_t *sub)
+APR_EXPORT(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
 {
     union block_hdr *b;
 
@@ -1207,7 +1207,7 @@ static void free_proc_chain(struct process_chain *procs)
      */
     {
         for (p = procs; p; p = p->next) {
-            CloseHandle(p->pid->pid);
+            CloseHandle((HANDLE)p->pid->pid);
         }
     }
 #endif /* WIN32 */

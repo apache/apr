@@ -108,7 +108,7 @@ APR_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size)
  * This function provides a way to parse a generic argument string
  * into a standard argv[] form of argument list. It respects the 
  * usual "whitespace" and quoteing rules. In the future this could
- * be expanded to include support for the ap_call_exec command line
+ * be expanded to include support for the apr_call_exec command line
  * string processing (including converting '+' to ' ' and doing the 
  * url processing. It does not currently support this function.
  *
@@ -237,7 +237,7 @@ APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname)
 APR_EXPORT(char *) apr_collapse_spaces(char *dest, const char *src)
 {
     while (*src) {
-        if (!ap_isspace(*src)) 
+        if (!apr_isspace(*src)) 
             *dest++ = *src;
         ++src;
     }
@@ -254,8 +254,8 @@ char *strdup(const char *str)
     if (!(sdup = (char *) malloc(len))) {
         /* ### whoops! we can't call Apache logging routines here... */
 #if 0
-        ap_log_error(APLOG_MARK, APLOG_STARTUP | APLOG_NOERRNO, 0, NULL,
-                     "Ouch! Out of memory in our strdup()!");
+        apr_log_error(APLOG_MARK, APLOG_STARTUP | APLOG_NOERRNO, 0, NULL,
+                      "Ouch! Out of memory in our strdup()!");
 #endif
         return NULL;
     }
@@ -272,7 +272,7 @@ int strcasecmp(const char *a, const char *b)
     const char *p = a;
     const char *q = b;
     for (p = a, q = b; *p && *q; p++, q++) {
-        int diff = ap_tolower(*p) - ap_tolower(*q);
+        int diff = apr_tolower(*p) - apr_tolower(*q);
         if (diff)
             return diff;
     }
@@ -297,7 +297,7 @@ int strncasecmp(const char *a, const char *b, size_t n)
             return 0;           /*   Match up to n characters */
         if (!(*p && *q))
             return *p - *q;
-        diff = ap_tolower(*p) - ap_tolower(*q);
+        diff = apr_tolower(*p) - apr_tolower(*q);
         if (diff)
             return diff;
     }

@@ -346,7 +346,7 @@ APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
 
 
 
-apr_status_t ap_file_check_read(apr_file_t *fd)
+apr_status_t apr_file_check_read(apr_file_t *fd)
 {
     int rc;
 

@@ -97,7 +97,8 @@ struct apr_dir_t {
 };
 
 apr_status_t apr_file_cleanup(void *);
-apr_status_t ap_os2_time_to_ap_time(apr_time_t *result, FDATE os2date, FTIME os2time);
+apr_status_t apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2date, 
+                                      FTIME os2time);
 
 #endif  /* ! FILE_IO_H */
 

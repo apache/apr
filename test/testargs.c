@@ -79,12 +79,12 @@ int main(int argc, char * const argv[])
                 printf("option %c\n", data);
                 break;
             case 'c':
-                printf("option %c with %s\n", data, ap_optarg);
+                printf("option %c with %s\n", data, apr_optarg);
                 break;
             case 'd':
                 printf("option %c", data);
-                if (ap_optarg) {
-                    printf(" with %s\n", ap_optarg);
+                if (apr_optarg) {
+                    printf(" with %s\n", apr_optarg);
                 }
                 else {
                     printf("\n");

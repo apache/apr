@@ -71,7 +71,7 @@ extern "C" {
  */
 
 typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK, 
-              APR_SOCK} ap_filetype_e; 
+              APR_SOCK} apr_filetype_e; 
 
 /* Flags for apr_open */
 #define APR_READ       1           /* Open the file for reading */
@@ -129,7 +129,7 @@ struct apr_finfo_t {
     /** The type of file.  One of APR_NOFILE, APR_REG, APR_DIR, APR_CHR, 
      *  APR_BLK, APR_PIPE, APR_LNK, APR_SOCK 
      */
-    ap_filetype_e filetype;
+    apr_filetype_e filetype;
     /** The user id that owns the file */
     apr_uid_t user;
     /** The group id that owns the file */
@@ -261,7 +261,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes
  * @param thefile The file descriptor to write to.
  * @param vec The array from which to get the data to write to the file.
  * @param nvec The number of elements in the struct iovec array. This must 
- *             be smaller than AP_MAX_IOVEC_SIZE.  If it isn't, the function 
+ *             be smaller than APR_MAX_IOVEC_SIZE.  If it isn't, the function 
  *             will fail with APR_EINVAL.
  * @param nbytes The number of bytes written.
  * @tip It is possible for both bytes to be written and an error to be returned.
@@ -536,7 +536,7 @@ apr_status_t apr_dir_entry_mtime(apr_time_t *mtime, apr_dir_t *thedir);
  * @param type the file type of the directory entry. 
  * @param thedir the currently open directory.
  */
-apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir);
+apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir);
 
 /**
  * Write a string to a file using a printf format.

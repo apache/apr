@@ -66,8 +66,8 @@ extern "C" {
  * @package APR Time library
  */
 
-APR_VAR_IMPORT const char ap_month_snames[12][4];
-APR_VAR_IMPORT const char ap_day_snames[7][4];
+APR_VAR_IMPORT const char apr_month_snames[12][4];
+APR_VAR_IMPORT const char apr_day_snames[7][4];
 
 /* number of microseconds since 00:00:00 january 1, 1970 UTC */
 typedef apr_int64_t apr_time_t;
@@ -76,15 +76,15 @@ typedef apr_int64_t apr_time_t;
 typedef apr_int32_t apr_interval_time_t;
 
 #ifdef WIN32
-#define AP_USEC_PER_SEC ((LONGLONG) 1000000)
+#define APR_USEC_PER_SEC ((LONGLONG) 1000000)
 #else
 /* XXX: this is wrong -- the LL is only required if int64 is implemented as
  * a long long, it could be just a long on some platforms.  the C99
  * correct way of doing this is to use INT64_C(1000000) which comes
  * from stdint.h.  we'd probably be doing a Good Thing to check for
- * INT64_C in autoconf... or otherwise define an AP_INT64_C(). -dean
+ * INT64_C in autoconf... or otherwise define an APR_INT64_C(). -dean
  */
-#define AP_USEC_PER_SEC (1000000LL)
+#define APR_USEC_PER_SEC (1000000LL)
 #endif
 
 /**
@@ -92,13 +92,13 @@ typedef apr_int32_t apr_interval_time_t;
  */
 apr_time_t apr_now(void);
 
-typedef struct ap_exploded_time_t ap_exploded_time_t;
+typedef struct apr_exploded_time_t apr_exploded_time_t;
 /**
  * a structure similar to ANSI struct tm with the following differences:
  *  - tm_usec isn't an ANSI field
  *  - tm_gmtoff isn't an ANSI field (it's a bsdism)
  */
-struct ap_exploded_time_t {
+struct apr_exploded_time_t {
     /** microseconds past tm_sec */
     apr_int32_t tm_usec;
     /** (0-61) seconds past tm_min */
@@ -128,21 +128,21 @@ struct ap_exploded_time_t {
  * @param result the resulting apr_time_t
  * @param input the time_t to convert
  */
-apr_status_t apr_ansi_time_to_ap_time(apr_time_t *result, time_t input);
+apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input);
 
 /**
  * convert a time to its human readable components in GMT timezone
  * @param result the exploded time
  * @param input the time to explode
  */
-apr_status_t apr_explode_gmt(ap_exploded_time_t *result, apr_time_t input);
+apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input);
 
 /**
  * convert a time to its human readable components in local timezone
  * @param result the exploded time
  * @param input the time to explode
  */
-apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input);
+apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input);
 
 /**
  * Convert time value from human readable format to number of seconds 
@@ -150,7 +150,7 @@ apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input)
  * @param result the resulting imploded time
  * @param input the input exploded time
  */
-apr_status_t apr_implode_time(apr_time_t *result, ap_exploded_time_t *input);
+apr_status_t apr_implode_time(apr_time_t *result, apr_exploded_time_t *input);
 
 /**
  * Sleep for the specified number of micro-seconds.
@@ -159,7 +159,7 @@ apr_status_t apr_implode_time(apr_time_t *result, ap_exploded_time_t *input);
  */
 void apr_sleep(apr_interval_time_t t);
 
-#define AP_RFC822_DATE_LEN (30)
+#define APR_RFC822_DATE_LEN (30)
 /**
  * apr_rfc822_date formats dates in the RFC822
  * format in an efficient manner.  it is a fixed length
@@ -170,7 +170,7 @@ void apr_sleep(apr_interval_time_t t);
  */
 apr_status_t apr_rfc822_date(char *date_str, apr_time_t t);
 
-#define AP_CTIME_LEN (25)
+#define APR_CTIME_LEN (25)
 /**
  * apr_ctime formats dates in the ctime() format
  * in an efficient manner.  it is a fixed length format
@@ -189,7 +189,7 @@ apr_status_t apr_ctime(char *date_str, apr_time_t t);
  * @param format The format for the time string
  * @param tm The time to convert
  */
-apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, const char *format, ap_exploded_time_t *tm);
+apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, const char *format, apr_exploded_time_t *tm);
 
 #ifdef __cplusplus
 }

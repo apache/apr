@@ -112,8 +112,8 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
         tvptr = NULL;
     }
     else {
-        tv.tv_sec = timeout / AP_USEC_PER_SEC;
-        tv.tv_usec = timeout % AP_USEC_PER_SEC;
+        tv.tv_sec = timeout / APR_USEC_PER_SEC;
+        tv.tv_usec = timeout % APR_USEC_PER_SEC;
 	tvptr = &tv;
     }
 

@@ -146,7 +146,7 @@ APR_EXPORT(apr_status_t) apr_fnmatch(const char *pattern, const char *string, in
 	    /* FALLTHROUGH */
 	default:
 	    if (flags & FNM_CASE_BLIND) {
-	        if (ap_tolower(c) != ap_tolower(*string)) {
+	        if (apr_tolower(c) != apr_tolower(*string)) {
 		    return (FNM_NOMATCH);
 		}
 	    }
@@ -193,14 +193,14 @@ static const char *rangematch(const char *pattern, int test, int flags)
 	    }
 	    if ((c <= test && test <= c2)
 		|| ((flags & FNM_CASE_BLIND)
-		    && ((ap_tolower(c) <= ap_tolower(test))
-			&& (ap_tolower(test) <= ap_tolower(c2))))) {
+		    && ((apr_tolower(c) <= apr_tolower(test))
+			&& (apr_tolower(test) <= apr_tolower(c2))))) {
 		ok = 1;
 	    }
 	}
 	else if ((c == test)
 		 || ((flags & FNM_CASE_BLIND)
-		     && (ap_tolower(c) == ap_tolower(test)))) {
+		     && (apr_tolower(c) == apr_tolower(test)))) {
 	    ok = 1;
 	}
     }

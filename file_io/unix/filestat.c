@@ -57,9 +57,9 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 
-static ap_filetype_e filetype_from_mode(int mode)
+static apr_filetype_e filetype_from_mode(int mode)
 {
-    ap_filetype_e type = APR_NOFILE;
+    apr_filetype_e type = APR_NOFILE;
 
     if (S_ISREG(mode))
         type = APR_REG;
@@ -92,9 +92,9 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        apr_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        apr_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        apr_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
+        apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
+        apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {
@@ -123,9 +123,9 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        apr_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        apr_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        apr_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
+        apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
+        apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {
@@ -145,9 +145,9 @@ apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        apr_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        apr_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        apr_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
+        apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
+        apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {

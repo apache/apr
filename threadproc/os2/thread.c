@@ -92,7 +92,7 @@ apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
 
 
 
-static void ap_thread_begin(void *arg)
+static void apr_thread_begin(void *arg)
 {
   apr_thread_t *thread = (apr_thread_t *)arg;
   thread->rv = thread->func(thread->data);
@@ -133,9 +133,11 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
     }
     
     if (thread->attr->attr & APR_THREADATTR_DETACHED)
-        thread->tid = _beginthread((os2_thread_start_t)func, NULL, APR_THREAD_STACKSIZE, data);
+        thread->tid = _beginthread((os2_thread_start_t)func, NULL, 
+                                   APR_THREAD_STACKSIZE, data);
     else
-        thread->tid = _beginthread(ap_thread_begin, NULL, APR_THREAD_STACKSIZE, thread);
+        thread->tid = _beginthread(apr_thread_begin, NULL, 
+                                   APR_THREAD_STACKSIZE, thread);
         
     if (thread->tid < 0) {
         return errno;

@@ -86,7 +86,7 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
 {
     int i;
     apr_status_t rv;
-    ap_md5_ctx_t context;
+    apr_md5_ctx_t context;
     unsigned char hash[MD5_DIGESTSIZE];
 
     rv = apr_MD5Init(&context);
@@ -94,7 +94,7 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
 
     if (xlate) {
 #if APR_HAS_XLATE
-        ap_MD5SetXlate(&context, xlate);
+        apr_MD5SetXlate(&context, xlate);
 #else
         fprintf(stderr,
                 "A translation handle was unexpected.\n");
@@ -156,11 +156,11 @@ int main(int argc, char **argv)
 
     if (src) {
 #if APR_HAS_XLATE
-        rv = ap_xlate_open(&xlate, dst, src, pool);
+        rv = apr_xlate_open(&xlate, dst, src, pool);
         if (rv) {
             char buf[80];
 
-            fprintf(stderr, "ap_xlate_open()->%s (%d)\n",
+            fprintf(stderr, "apr_xlate_open()->%s (%d)\n",
                     apr_strerror(rv, buf, sizeof(buf)), rv);
             exit(1);
         }

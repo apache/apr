@@ -108,10 +108,10 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
     return APR_SUCCESS;
 }
 
-/* ap_create_nt_pipe()
+/* apr_create_nt_pipe()
  * An internal (for now) APR function created for use by apr_create_process() 
  * when setting up pipes to communicate with the child process. 
- * ap_create_nt_pipe() allows setting the blocking mode of each end of 
+ * apr_create_nt_pipe() allows setting the blocking mode of each end of 
  * the pipe when the pipe is created (rather than after the pipe is created). 
  * A pipe handle must be opened in full async i/o mode in order to 
  * emulate Unix non-blocking pipes with timeouts. 
@@ -128,11 +128,11 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
  *
  * wgs
  */
-apr_status_t ap_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
-                              BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
-                              apr_pool_t *p)
+apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
+                                BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
+                                apr_pool_t *p)
 {
-    ap_oslevel_e level;
+    apr_oslevel_e level;
     SECURITY_ATTRIBUTES sa;
     static unsigned long id = 0;
     DWORD dwPipeMode;
@@ -169,7 +169,7 @@ apr_status_t ap_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     (*out)->direction = 0;
     (*out)->pOverlapped = NULL;
 
-    if (ap_get_oslevel(p, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
+    if (apr_get_oslevel(p, &level) == APR_SUCCESS && level >= APR_WIN_NT) {
         /* Create the read end of the pipe */
         dwOpenMode = PIPE_ACCESS_INBOUND;
         if (bAsyncRead) {
