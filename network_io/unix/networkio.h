@@ -68,6 +68,9 @@ struct socket_t {
     struct sockaddr_in *addr;
     size_t addr_len;
     int timeout; 
+#ifndef HAVE_POLL
+    int connected;
+#endif
 };
 
 struct pollfd_t {

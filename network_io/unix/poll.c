@@ -349,8 +349,7 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
 ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_int16_t *event)
 {
     ap_int16_t revents = 0;
-    char data[256];
-    int dummy = 256;
+    char data[1];
     int flags = MSG_PEEK;
 
     /* We just want to PEEK at the data, so I am setting up a dummy WSABUF
@@ -358,24 +357,24 @@ ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_in
      */
     if (FD_ISSET(sock->socketdes, aprset->read)) {
         revents |= APR_POLLIN;
-        if (recv(sock->socketdes, &data, dummy, flags) == -1) {
+        if (sock->connected
+	    && recv(sock->socketdes, data, sizeof data, flags) == -1) {
             switch (errno) {
                 case ECONNRESET:
                 case ECONNABORTED:
                 case ESHUTDOWN:
-                case ENETRESET: {
+                case ENETRESET:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLHUP;
                     break;
-                }
-                case ENOTSOCK: {
+                case ENOTSOCK:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLNVAL;
-                }
-                default: {
+		    break;
+                default:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLERR;
-                }
+		    break;
             }
         }
     }

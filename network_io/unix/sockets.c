@@ -258,6 +258,9 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
     (*new)->addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->addr_len = sizeof(struct sockaddr_in);
+#ifndef HAVE_POLL
+    (*new)->connected = 1;
+#endif
 
     (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->addr,
                         &(*new)->addr_len);
@@ -307,6 +310,9 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
         return errno;
     }
     else {
+#ifndef HAVE_POLL
+	sock->connected=1;
+#endif
         return APR_SUCCESS;
     }
 }
