@@ -1,6 +1,10 @@
 Changes with APR b1  
 
-  *) Implemented name-based shared memory on Unix. [Aaron Bannert]
+  *) Changed the apr_file_dup2() function prototype. It can only
+     take and reuse an apr_file_t*, and will no longer create one
+     if *new_file == NULL (use apr_file_dup() for that).  [Aaron Bannert]
+
+  *) Implemented name-based shared memory on Unix.  [Aaron Bannert]
 
   *) Fix spelling mistakes in APRDesign.  
      [Blair Zajac <blair@orcaware.com>]
