@@ -63,9 +63,6 @@
 static apr_status_t thread_cond_cleanup(void *data)
 {
     apr_thread_cond_t *cond = data;
-    if (cond->num_waiting != 0) {
-        printf("somebody's waiting, but I'm closing it anyway.\n");
-    }
     CloseHandle(cond->mutex);
     CloseHandle(cond->event);
     return APR_SUCCESS;
