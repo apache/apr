@@ -9,11 +9,10 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../../inc
-INCDIR1=../../include
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
+INCDIR=../../include
+INCLUDES=-I$(INCDIR) -I.
 
-LIB=libfile.a
+#LIB=libfile.a
 
 OBJS=dir.o \
 	fileacc.o \
@@ -27,7 +26,7 @@ OBJS=dir.o \
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
 
-all: $(LIB)
+all: $(OBJS)
 
 clean:
 	$(RM) -f *.o *.a *.so
@@ -37,10 +36,10 @@ distclean: clean
 
 $(OBJS): Makefile
 
-$(LIB): $(OBJS)
-	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
+#$(LIB): $(OBJS)
+#	$(RM) -f $@
+#	$(AR) cr $@ $(OBJS)
+#	$(RANLIB) $@
 
 #
 # We really don't expect end users to use this rule.  It works only with

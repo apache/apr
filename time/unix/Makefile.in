@@ -12,7 +12,7 @@ LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../include
 INCLUDES=-I$(INCDIR) -I.
 
-LIB=libtime.a
+#LIB=libtime.a
 
 OBJS=time.o \
 	access.o \
@@ -21,7 +21,7 @@ OBJS=time.o \
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
 
-all: $(LIB)
+all: $(OBJS)
 
 clean:
 	$(RM) -f *.o *.a *.so
@@ -31,10 +31,10 @@ distclean: clean
 
 $(OBJS): Makefile
 
-$(LIB): $(OBJS)
-	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
-	$(RANLIB) $@
+#$(LIB): $(OBJS)
+#	$(RM) -f $@
+#	$(AR) cr $@ $(OBJS)
+#	$(RANLIB) $@
 
 #
 # We really don't expect end users to use this rule.  It works only with
