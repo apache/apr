@@ -33,6 +33,8 @@ DISTCLEAN_TARGETS = config.cache config.log config.status \
 EXTRACLEAN_TARGETS = configure libtool aclocal.m4 \
 	include/arch/unix/apr_private.h.in
 
+SCANDOC_TEMPLATE = -i$(apr_builders)/scandoc_template.pl
+
 ### fix this up at some point (install location)
 libdir = /usr/local/lib
 
@@ -65,7 +67,7 @@ $(TARGET_EXPORTS):
 	$(MKEXPORT) include/*.h > $@
 
 docs:
-	$(SCANDOC) -ihelpers/default.pl -p./docs/ ./include/*.h
+	$(SCANDOC) $(SCANDOC_TEMPLATE) -p./docs/ $(INCDIR)/*.h
 
 test: $(TARGET_LIB)
 	(cd test; make clean; make; \

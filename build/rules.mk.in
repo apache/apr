@@ -62,6 +62,7 @@
 # Configuration variables
 #
 top_builddir=@top_builddir@
+apr_builders=@apr_builders@
 
 CC=@CC@
 AWK=@AWK@
@@ -75,10 +76,6 @@ LDFLAGS=@LDFLAGS@
 RM=@RM@
 SHELL=@SHELL@
 
-MKEXPORT=@APR_MKEXPORT@
-MKDEP=@APR_MKDEP@
-SCANDOC=@APR_SCANDOC@
-
 ### make LTFLAGS somewhat variable?
 LTFLAGS = --silent
 
@@ -89,6 +86,10 @@ COMPILE      = $(CC) $(CFLAGS) $(CPPFLAGS)
 LT_COMPILE   = $(LIBTOOL) --mode=compile $(LTFLAGS) $(COMPILE) -c $< && touch $@
 
 LINK         = $(LIBTOOL) --mode=link $(LTFLAGS) $(COMPILE) $(LDFLAGS) -o $@
+
+MKEXPORT     = $(AWK) -f $(apr_builders)/make_export.awk
+MKDEP        = $(apr_builders)/mkdep.sh
+SCANDOC      = $(apr_builders)/scandoc.pl
 
 #
 # Standard build rules
