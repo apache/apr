@@ -173,15 +173,27 @@ typedef LONG apr_atomic_t;
 #define apr_atomic_t unsigned long
 
 #define apr_atomic_add(mem, val)     atomic_add(mem,val)
-APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
-#define APR_OVERRIDE_ATOMIC_DEC 1
-#define APR_OVERRIDE_ATOMIC_CASPTR 1
 #define apr_atomic_inc(mem)          atomic_inc(mem)
 #define apr_atomic_set(mem, val)     (*mem = val)
 #define apr_atomic_read(mem)         (*mem)
 #define apr_atomic_init(pool)        APR_SUCCESS
 #define apr_atomic_cas(mem,with,cmp) atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
-#define apr_atomic_casptr(mem,with,cmp) (void*)atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
+    
+int apr_atomic_dec(apr_atomic_t *mem);
+void *apr_atomic_casptr(void **mem, void *with, const void *cmp);
+#define APR_OVERRIDE_ATOMIC_DEC 1
+#define APR_OVERRIDE_ATOMIC_CASPTR 1
+
+inline int apr_atomic_dec(apr_atomic_t *mem) 
+{
+    atomic_dec(mem);
+    return *mem; 
+}
+
+inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
+{
+    return (void*)atomic_cmpxchg((unsigned long *)mem,(unsigned long)cmp,(unsigned long)with);
+}
 
 #elif defined(__FreeBSD__)
 
