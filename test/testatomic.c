@@ -184,6 +184,19 @@ static apr_status_t check_basic_atomics32(void)
     }
     printf("OK\n");
 
+    printf("%-60s", "testing apr_atomic_xchg32");
+    apr_atomic_set32(&y32, 100);
+    oldval = apr_atomic_xchg32(&y32, 50);
+    if (oldval != 100) {
+        fprintf(stderr, "Failed\noldval =%d should be 100\n", oldval);
+        return APR_EGENERAL;
+    }
+    if (y32 != 50) {
+        fprintf(stderr, "Failed\nnewval =%d should be 50\n", oldval);
+        return APR_EGENERAL;
+    }
+    printf("OK\n");
+
     printf("%-60s", "testing apr_atomic_cas32");
     oldval = apr_atomic_cas32(&casval, 12, 0);
     if (oldval != 0) {
