@@ -2,6 +2,7 @@ Makefile
 libtool.m4
 ltconfig
 ltmain.sh
+ltcf-c.sh
 rules.mk
 LibD
 LibR
