@@ -347,14 +347,6 @@ SOURCE=.\dso\win32\dso.c
 SOURCE=.\include\arch\win32\dso.h
 # End Source File
 # End Group
-# Begin Group "lib"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\lib\apr_signal.c
-# End Source File
-# End Group
 # Begin Group "i18n"
 
 # PROP Default_Filter ""
