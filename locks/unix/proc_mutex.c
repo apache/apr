@@ -62,6 +62,10 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return apr_pool_cleanup_run(mutex->pool, mutex, apr_proc_mutex_cleanup);
 }
 
+static apr_status_t proc_mutex_no_tryacquire(apr_proc_mutex_t *new_mutex)
+{
+    return APR_ENOTIMPL;
+}
 
 #if APR_HAS_POSIXSEM_SERIALIZE
 
@@ -188,7 +192,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods =
 #endif
     proc_mutex_posix_create,
     proc_mutex_posix_acquire,
-    NULL, /* no tryacquire */
+    proc_mutex_no_tryacquire,
     proc_mutex_posix_release,
     proc_mutex_posix_cleanup,
     proc_mutex_posix_child_init,
@@ -293,7 +297,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods =
 #endif
     proc_mutex_sysv_create,
     proc_mutex_sysv_acquire,
-    NULL, /* no tryacquire */
+    proc_mutex_no_tryacquire,
     proc_mutex_sysv_release,
     proc_mutex_sysv_cleanup,
     proc_mutex_sysv_child_init,
@@ -456,7 +460,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_proc_pthread_method
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
     proc_mutex_proc_pthread_create,
     proc_mutex_proc_pthread_acquire,
-    NULL, /* no tryacquire */
+    proc_mutex_no_tryacquire,
     proc_mutex_proc_pthread_release,
     proc_mutex_proc_pthread_cleanup,
     proc_mutex_proc_pthread_child_init,
@@ -579,7 +583,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods =
 #endif
     proc_mutex_fcntl_create,
     proc_mutex_fcntl_acquire,
-    NULL, /* no tryacquire */
+    proc_mutex_no_tryacquire,
     proc_mutex_fcntl_release,
     proc_mutex_fcntl_cleanup,
     proc_mutex_fcntl_child_init,
@@ -705,7 +709,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_methods =
 #endif
     proc_mutex_flock_create,
     proc_mutex_flock_acquire,
-    NULL, /* no tryacquire */
+    proc_mutex_no_tryacquire,
     proc_mutex_flock_release,
     proc_mutex_flock_cleanup,
     proc_mutex_flock_child_init,
