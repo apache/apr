@@ -232,9 +232,6 @@ extern "C" {
 #ifndef NOUSER
 #define NOUSER
 #endif
-#ifndef NOGDI
-#define NOGDI
-#endif
 #ifndef NOMCX
 #define NOMCX
 #endif
@@ -349,10 +346,11 @@ typedef  int         gid_t;
 #if APR_HAVE_IPV6
 #include <ws2tcpip.h>
 
-/* Win32 does it's own thing.  Again. */
-#define  in6_addr    in_addr6
-
 /* Appears in later flavors, not the originals. */
+#ifndef in_addr6
+#define  in6_addr    in_addr6
+#endif
+
 #ifndef WS2TCPIP_INLINE
 #define IN6_IS_ADDR_V4MAPPED(a) \
     (   (*(const apr_uint64_t *)(const void *)(&(a)->s6_addr[0]) == 0) \
