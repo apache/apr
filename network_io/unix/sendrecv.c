@@ -720,6 +720,10 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
  */
 apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                           apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
+                          apr_int32_t flags); /* avoid warning for no proto */
+
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+                          apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
                           apr_int32_t flags)
 {
     return APR_ENOTIMPL;
