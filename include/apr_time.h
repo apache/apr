@@ -70,24 +70,21 @@ extern "C" {
 extern APR_DECLARE_DATA const char apr_month_snames[12][4];
 extern APR_DECLARE_DATA const char apr_day_snames[7][4];
 
+
 /* number of microseconds since 00:00:00 january 1, 1970 UTC */
 typedef apr_int64_t apr_time_t;
+
+
+/* mechanism to properly type apr_time_t literals */
+#define APR_TIME_C(val) APR_INT64_C(val)
+
 
 /* intervals for I/O timeouts, in microseconds */
 typedef apr_int64_t apr_interval_time_t;
 typedef apr_int32_t apr_short_interval_time_t;
 
-#ifdef WIN32
-#define APR_USEC_PER_SEC ((LONGLONG) 1000000)
-#else
-/* XXX: this is wrong -- the LL is only required if int64 is implemented as
- * a long long, it could be just a long on some platforms.  the C99
- * correct way of doing this is to use INT64_C(1000000) which comes
- * from stdint.h.  we'd probably be doing a Good Thing to check for
- * INT64_C in autoconf... or otherwise define an APR_INT64_C(). -dean
- */
-#define APR_USEC_PER_SEC (1000000LL)
-#endif
+#define APR_USEC_PER_SEC APR_TIME_C(1000000)
+
 
 /**
  * return the current time
@@ -154,8 +151,8 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
                                                 apr_time_t input);
 
 /**
- * Convert time value from human readable format to number of seconds 
- * since epoch
+ * Convert time value from human readable format to a numeric apr_time_t 
+ * e.g. elapsed usec since epoch
  * @param result the resulting imploded time
  * @param input the input exploded time
  * @deffunc apr_status_t apr_implode_time(apr_time_t *result, apr_exploded_time_t *input)
