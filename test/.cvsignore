@@ -11,6 +11,7 @@ testargs
 testdso
 testoc
 testpipe
+testpoll
 testshmem
 testtime
 testthread
