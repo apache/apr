@@ -128,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
             break;
         }
 
-        return APR_OS2_STATUS(DosSetFilePtr(thefile->filedes, *offset, where, (ULONG *)&offset));
+        return APR_OS2_STATUS(DosSetFilePtr(thefile->filedes, *offset, where, (ULONG *)offset));
     }
 }
 
