@@ -328,7 +328,7 @@ int main(void) {
 AC_DEFUN(APR_PREPARE_MM_DIR,[
 dnl #----------------------------- Prepare mm directory for VPATH support
 if test -n "$USE_MM" && test -n "$USE_VPATH"; then
-  test -d $mm_dir || $MKDIR -p $mm_dir
+  test -d $mm_dir || $MKDIR $mm_dir
 
   for i in shtool config.guess config.sub fbtool ltconfig \
            ltmain.sh mm_vers.c; do
