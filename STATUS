@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/04/01 21:50:45 $]
+Last modified at [$Date: 2002/04/13 06:12:33 $]
 
 Release:
 
@@ -327,3 +327,27 @@ Stuff waiting for code thawing after Beta 1:
         usefulness, perhaps hidden, generic read-only [immutable],
         effective current user permissions, etc.
 
+    * Maybe make the following functions return void instead of
+      apr_status_t, as they cannot ever error:
+
+         apr_md5_init()
+         apr_md5_update()
+         apr_md5_final()
+         apr_md5_encode()
+         apr_md5()       /* plus make the obvious code tweak in this one */
+
+      (Volunteer: Karl Fogel <kfogel@collab.net>.)
+
+      However, don't do this until after apr and apr-util offer
+      library version numbers, and httpd uses those numbers to
+      indicate which version it needs.  Until the libraries are
+      versioned, this api change is [somewhat] painful for httpd.
+      Status: Still in discussion, current leanings appear to be
+        Bill Stoddard -0.5 (?)
+        Justin Erenkrantz -1
+        Sander Striker -1 or -0.5 (?)
+        Greg Stein +1
+        Karl Fogel +1
+      (Not sure if the negatives would stay negative given that the
+      change would now wait for the library versioning thing described
+      above, though.)
