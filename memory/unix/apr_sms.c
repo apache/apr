@@ -232,6 +232,8 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
 
 APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms)
 {
+    apr_sms_assert(sms);
+    
     /* We do things here as these may potentially make calls
      * to the sms that we're creating, and if we make the calls
      * in the sms_init phase we haven't yet added the function

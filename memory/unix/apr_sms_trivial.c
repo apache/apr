@@ -432,7 +432,7 @@ APR_DECLARE(apr_status_t) apr_sms_trivial_create_ex(apr_sms_t **sms,
     tms->used_sentinel.next = tms->used_sentinel.prev = node;
     tms->free_sentinel.next = tms->free_sentinel.prev = &tms->free_sentinel;
    
-    apr_sms_assert(new_sms);
+    apr_sms_post_init(new_sms);
 
     *sms = new_sms;
     return APR_SUCCESS;
