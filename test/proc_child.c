@@ -3,12 +3,15 @@
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if APR_HAVE_IO_H
+#include <io.h>
+#endif
 #include <stdlib.h>
 
 int main(void)
 {
     char buf[256];
-    ssize_t bytes;
+    apr_ssize_t bytes;
     
     bytes = read(STDIN_FILENO, buf, 256);
     if (bytes > 0)
