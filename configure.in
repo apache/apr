@@ -310,7 +310,7 @@ proc_mutex_is_global=0
 user_disabled_optimized_atomics=0
 
 AC_ARG_ENABLE(atomics,
-  [  --disable-optimized-atomics  Turn off optimized atomic code],
+  [  --disable-atomics  Turn off optimized atomic code],
   [ if test "$enableval" = "no"; then
         user_disabled_optimized_atomics=1
     fi ] )
