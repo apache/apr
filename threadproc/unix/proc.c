@@ -200,15 +200,15 @@ ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont)
     }
     else if (pid == 0) {
         proc->pid = pid;
-        proc->stdin = NULL; 
-        proc->stdout = NULL; 
-        proc->stderr = NULL; 
+        proc->in = NULL; 
+        proc->out = NULL; 
+        proc->err = NULL; 
         return APR_INCHILD;
     }
     proc->pid = pid;
-    proc->stdin = NULL; 
-    proc->stdout = NULL; 
-    proc->stderr = NULL; 
+    proc->in = NULL; 
+    proc->out = NULL; 
+    proc->err = NULL; 
     return APR_INPARENT;
 }
 
@@ -221,9 +221,9 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     my_stupid_string *newargs;
     ap_proc_t pgrp; 
 
-    new->stdin = attr->parent_in;
-    new->stderr = attr->parent_err;
-    new->stdout = attr->parent_out;
+    new->in = attr->parent_in;
+    new->err = attr->parent_err;
+    new->out = attr->parent_out;
     if ((new->pid = fork()) < 0) {
         return errno;
     }
