@@ -221,4 +221,5 @@ EXPORTS
 	ap_set_local_port @213
 	ap_get_remote_port @214
 	ap_set_remote_port @215
+      ap_open_stderr @216
 
