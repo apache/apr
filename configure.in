@@ -330,6 +330,7 @@ esac
 AC_SUBST(threads)
 AC_SUBST(have_sigwait)
 
+AC_CHECK_FUNCS(kqueue)
 AC_CHECK_FUNCS(poll)
 
 dnl #----------------------------- Checking for missing POSIX thread functions
@@ -556,6 +557,7 @@ APR_FLAG_HEADERS(
     net/errno.h		\
     netinet/in.h	\
     sys/file.h		\
+    sys/event.h		\
     sys/mman.h		\
     sys/poll.h		\
     sys/resource.h	\
