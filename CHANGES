@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Add --with-egd to support EGD-compatible entropy gatherers for 
+     those platforms without native support.  [Justin Erenkrantz]
+
   *) apr_lock_create() and apr_proc_mutex_create() now have an
      additional parameter for specifying the lock mechanism.  
      apr_lock_create_np() and apr_proc_mutex_create_np() have been

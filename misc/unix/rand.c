@@ -52,23 +52,38 @@
  * <http://www.apache.org/>.
  */
 
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
+#include "apr_general.h"
+
 #include "misc.h"
-#include <sys/types.h>
 #include <sys/stat.h>
+#if APR_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#if APR_HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#if APR_HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#if APR_HAVE_SYS_UN_H
+#include <sys/un.h>
 #endif
 
 #if APR_HAS_RANDOM
 
+/* This tells the preprocessor to put quotes around the value. */
 #define	XSTR(x)	#x
 #define	STR(x)	XSTR(x)
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
                                                     int length) 
 {
-#ifdef	DEV_RANDOM
+#ifdef DEV_RANDOM
 
     int rnd;
     size_t got, tot;
@@ -89,7 +104,89 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
     for (idx=0; idx<length; idx++)
 	buf[idx] = randbyte();
 
-#else  /* use truerand */
+#elif defined(HAVE_EGD)
+    /* use EGD-compatible socket daemon (such as EGD or PRNGd).
+     * message format:
+     * 0x00 (get entropy level)
+     *   0xMM (msb) 0xmm 0xll 0xLL (lsb)
+     * 0x01 (read entropy nonblocking) 0xNN (bytes requested)
+     *   0xMM (bytes granted) MM bytes
+     * 0x02 (read entropy blocking) 0xNN (bytes desired)
+     *   [block] NN bytes
+     * 0x03 (write entropy) 0xMM 0xLL (bits of entropy) 0xNN (bytes of data) 
+     *      NN bytes
+     * (no response - write only) 
+     * 0x04 (report PID)
+     *   0xMM (length of PID string, not null-terminated) MM chars
+     */
+    int egd_socket, egd_path_len, rv;
+    struct sockaddr_un addr;
+    socklen_t egd_addr_len;
+    size_t resp_expected;
+    unsigned char req[2], resp[255];
+    char *curbuf = buf;
+
+    egd_path_len = strlen(STR(EGD_DEFAULT_SOCKET));
+
+    if (egd_path_len > sizeof(addr.sun_path)) {
+        return APR_EINVAL;
+    }
+
+    memset(&addr, 0, sizeof(struct sockaddr_un));
+    addr.sun_family = AF_UNIX;
+    memcpy(addr.sun_path, STR(EGD_DEFAULT_SOCKET), egd_path_len);
+    egd_addr_len = APR_XtOffsetOf(struct sockaddr_un, sun_path) + 
+                   egd_path_len; 
+
+    egd_socket = socket(PF_UNIX, SOCK_STREAM, 0);
+
+    if (egd_socket == -1) {
+        /* Does socket set errno? */
+        return APR_EGENERAL;
+    }
+
+    rv = connect(egd_socket, (struct sockaddr*)&addr, egd_addr_len);
+
+    if (rv == -1) {
+        return errno;
+    }
+
+    /* EGD can only return 255 bytes of data at a time.  Silly.  */ 
+    while (length > 0) {
+        ssize_t srv;
+        req[0] = 2; /* We'll block for now. */
+        req[1] = length > 255 ? 255: length;
+
+        srv = write(egd_socket, req, 2);
+        if (srv == -1) {
+            shutdown(egd_socket, SHUT_RDWR);
+            close(egd_socket);
+            return errno;
+        }
+
+        if (srv != 2) {
+            shutdown(egd_socket, SHUT_RDWR);
+            close(egd_socket);
+            return APR_EGENERAL;  /* Try again. */
+        }
+
+        resp_expected = req[1];
+        srv = read(egd_socket, resp, resp_expected);
+        if (srv == -1) {
+            shutdown(egd_socket, SHUT_RDWR);
+            close(egd_socket);
+            return errno;
+        }
+
+        memcpy(curbuf, resp, srv);
+        curbuf += srv;
+        length -= srv;
+    }
+
+    shutdown(egd_socket, SHUT_RDWR);
+    close(egd_socket);
+    
+#elif defined(HAVE_TRUERAND) /* use truerand */
 
     extern int randbyte(void);	/* from the truerand library */
     unsigned int idx;
