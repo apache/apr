@@ -1,15 +1,15 @@
-dnl ##
-dnl ##
-dnl ##
+dnl
+dnl apr-conf.m4: APR's autoconf support macros
+dnl
+
 define(AC_USE_FUNCTION,[dnl
 AC_CHECK_FUNCS($1)
 if test ".$ac_func_$1" = .yes; then 
 AC_DEFINE(USE_$2)
 fi
-])dnl
-dnl ##
-dnl ##
-dnl ##
+])
+
+
 AC_DEFUN(AC_CHECK_DEFINE_FILES,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
     ac_cv_define_$1=no
@@ -27,9 +27,8 @@ AC_DEFUN(AC_CHECK_DEFINE_FILES,[
     AC_DEFINE(HAVE_$1)
   fi
 ])
-dnl ##
-dnl ##
-dnl ##
+
+
 AC_DEFUN(AC_CHECK_DEFINE,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
     AC_EGREP_CPP(YES_IS_DEFINED, [
@@ -43,9 +42,8 @@ AC_DEFUN(AC_CHECK_DEFINE,[
     AC_DEFINE(HAVE_$1)
   fi
 ])
-dnl ##
-dnl ##
-dnl ##
+
+
 define(AC_IFALLYES,[dnl
 ac_rc=yes
 for ac_spec in $1; do
@@ -77,21 +75,24 @@ else
     :
     $3
 fi
-])dnl
-dnl ##
-dnl ##
-dnl ##
+])
+
+
 define(AC_BEGIN_DECISION,[dnl
 ac_decision_item='$1'
 ac_decision_msg='FAILED'
 ac_decision=''
-])dnl
+])
+
+
 define(AC_DECIDE,[dnl
 ac_decision='$1'
 ac_decision_msg='$2'
 ac_decision_$1=yes
 ac_decision_$1_msg='$2'
-])dnl
+])
+
+
 define(AC_DECISION_OVERRIDE,[dnl
     ac_decision=''
     for ac_item in $1; do
@@ -101,11 +102,15 @@ define(AC_DECISION_OVERRIDE,[dnl
              eval "ac_decision_msg=\$ac_decision_${ac_item}_msg"
          fi
     done
-])dnl
+])
+
+
 define(AC_DECISION_FORCE,[dnl
 ac_decision="$1"
 eval "ac_decision_msg=\"\$ac_decision_${ac_decision}_msg\""
-])dnl
+])
+
+
 define(AC_END_DECISION,[dnl
 if test ".$ac_decision" = .; then
     echo "[$]0:Error: decision on $ac_decision_item failed" 1>&2
@@ -117,7 +122,7 @@ else
     AC_DEFINE_UNQUOTED(${ac_decision_item})
     AC_MSG_RESULT([decision on $ac_decision_item... $ac_decision_msg])
 fi
-])dnl
+])
 
 dnl ### AC_TRY_RUN had some problems actually using a programs return code,
 dnl ### so I am re-working it here to be used in APR's configure script.
@@ -157,6 +162,8 @@ ifelse([$3], , , [  $3
 ])dnl
 fi
 rm -fr conftest*])
+
+
 dnl A variant of AC_CHECK_SIZEOF which allows the checking of
 dnl sizes of non-builtin types
 dnl AC_CHECK_SIZEOF_EXTENDED(INCLUDES, TYPE [, CROSS_SIZE])
@@ -188,7 +195,6 @@ undefine([AC_CV_NAME])dnl
 dnl
 dnl check for working getaddrinfo()
 dnl
-
 AC_DEFUN(APR_CHECK_WORKING_GETADDRINFO,[
   AC_CACHE_CHECK(for working getaddrinfo, ac_cv_working_getaddrinfo,[
   AC_TRY_RUN( [
@@ -232,7 +238,6 @@ fi
 dnl
 dnl check for gethostbyname() which handles numeric address strings
 dnl
-
 AC_DEFUN(APR_CHECK_GETHOSTBYNAME_NAS,[
   AC_CACHE_CHECK(for gethostbyname() which handles numeric address strings, ac_cv_gethostbyname_nas,[
   AC_TRY_RUN( [
@@ -275,7 +280,6 @@ fi
 dnl 
 dnl check for socklen_t, fall back to unsigned int
 dnl
-
 AC_DEFUN(APR_CHECK_SOCKLEN_T,[
 AC_CACHE_CHECK(for socklen_t, ac_cv_socklen_t,[
 AC_TRY_COMPILE([
@@ -303,9 +307,9 @@ dnl Check for ranlib but, unlike the check provided with autoconf, set
 dnl RANLIB to "true" if there is no ranlib instead of setting it to ":".
 dnl OS/390 doesn't have ranlib and the make utility doesn't parse "RANLIB=:" 
 dnl the way we might want it to.
-
 AC_DEFUN(AC_PROG_RANLIB_NC,
 [AC_CHECK_TOOL(RANLIB, ranlib, true)])
+
 
 AC_DEFUN(APR_EBCDIC,[
   AC_CACHE_CHECK([whether system uses EBCDIC],ac_cv_ebcdic,[
@@ -328,6 +332,7 @@ int main(void) {
   AC_SUBST(apr_charset_ebcdic)
 ])
 
+
 AC_DEFUN(APR_PREPARE_MM_DIR,[
 dnl #----------------------------- Prepare mm directory for VPATH support
 if test -n "$USE_MM" && test -n "$USE_VPATH"; then
@@ -339,6 +344,7 @@ if test -n "$USE_MM" && test -n "$USE_VPATH"; then
   done
 fi
 ])
+
 
 AC_DEFUN(APR_CHECK_INET_ADDR,[
 AC_CACHE_CHECK(for inet_addr, ac_cv_func_inet_addr,[
@@ -365,6 +371,7 @@ else
 fi
 ])
 
+
 AC_DEFUN(APR_CHECK_INET_NETWORK,[
 AC_CACHE_CHECK(for inet_network, ac_cv_func_inet_network,[
 AC_TRY_COMPILE([
@@ -389,6 +396,7 @@ else
   have_inet_network=0
 fi
 ])
+
 
 AC_DEFUN(APR_CHECK_SOCKADDR_IN6,[
 AC_CACHE_CHECK(for sockaddr_in6, ac_cv_define_sockaddr_in6,[
@@ -415,11 +423,11 @@ else
 fi
 ])
 
-#
-# Check to see if this platform includes sa_len in it's
-# struct sockaddr.  If it does it changes the length of sa_family
-# which could cause us problems
-#
+dnl
+dnl Check to see if this platform includes sa_len in it's
+dnl struct sockaddr.  If it does it changes the length of sa_family
+dnl which could cause us problems
+dnl
 AC_DEFUN(APR_CHECK_SOCKADDR_SA_LEN,[
 AC_CACHE_CHECK(for sockaddr sa_len, ac_cv_define_sockaddr_sa_len,[
 AC_TRY_COMPILE([
@@ -443,6 +451,7 @@ if test "$ac_cv_define_sockaddr_sa_len" = "yes"; then
   AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1 ,[Define if we have length field in sockaddr_in])
 fi
 ])
+
 
 dnl
 dnl APR_INADDR_NONE
@@ -477,6 +486,7 @@ unsigned long foo = INADDR_NONE;
     apr_inaddr_none="INADDR_NONE"
   fi
 ])
+
 
 dnl
 dnl APR_CHECK_H_ERRNO_FLAG
@@ -531,6 +541,3 @@ AC_DEFUN(APR_CHECK_H_ERRNO_FLAG,[
     AC_MSG_RESULT([$ac_cv_h_errno_cflags])
   fi
 ])
-
-sinclude(apr_common.m4)
-sinclude(hints.m4)
