@@ -1158,7 +1158,8 @@ static int snprintf_flush(ap_vformatter_buff_t *vbuff)
 }
 
 
-APR_EXPORT(int) ap_snprintf(char *buf, size_t len, const char *format,...)
+APR_EXPORT_NONSTD(int) ap_snprintf(char *buf, size_t len, 
+                                   const char *format, ...)
 {
     int cc;
     va_list ap;
