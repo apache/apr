@@ -33,92 +33,95 @@
 
 #include "misc.h"
 
-APR_VAR_EXPORT int
-    apr_opterr = 1,                      /* if error message should be printed */
-    apr_optind = 1,                      /* index into parent argv vector */
-    apr_optopt,                          /* character checked for validity */
-    apr_optreset;                        /* reset getopt */
-APR_VAR_EXPORT char *apr_optarg = "";    /* argument associated with option */
-
 #define EMSG    ""
 
-APR_EXPORT(apr_status_t) apr_getopt(apr_int32_t nargc, char *const *nargv, 
-                                    const char *ostr, apr_int32_t *rv, 
-                                    apr_pool_t *cont)
+APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
+                                     int argc, char const* const* argv)
 {
-    char *p;
-    static char *place = EMSG;   /* option letter processing */
-    char *oli;                   /* option letter list index */
+    *os = apr_palloc(cont, sizeof(apr_getopt_t));
+    (*os)->err = 1;
+    (*os)->ind = 1;
+    (*os)->place = EMSG;
+    (*os)->argc = argc;
+    (*os)->argv = argv;
+    return APR_SUCCESS;
+}
 
-    if (apr_optreset || !*place) {   /* update scanning pointer */
-        apr_optreset = 0;
-        if (apr_optind >= nargc || *(place = nargv[apr_optind]) != '-') {
-            place = EMSG;
-            *rv = apr_optopt;
+APR_EXPORT(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
+                                    char *optch, char const** optarg)
+{
+    const char *p;
+    const char *oli;  /* option letter list index */
+
+    if (os->reset || !*os->place) {   /* update scanning pointer */
+        os->reset = 0;
+        if (os->ind >= os->argc || *(os->place = os->argv[os->ind]) != '-') {
+            os->place = EMSG;
+            *optch = os->opt;
             return (APR_EOF);
         }
-        if (place[1] && *++place == '-') {        /* found "--" */
-            ++apr_optind;
-            place = EMSG;
-            *rv = apr_optopt;
+        if (os->place[1] && *++os->place == '-') {        /* found "--" */
+            ++os->ind;
+            os->place = EMSG;
+            *optch = os->opt;
             return (APR_EOF);
         }
     }                                /* option letter okay? */
-    if ((apr_optopt = (int) *place++) == (int) ':' ||
-        !(oli = strchr(ostr, apr_optopt))) {
+    if ((os->opt = (int) *os->place++) == (int) ':' ||
+        !(oli = strchr(opts, os->opt))) {
         /*
          * if the user didn't specify '-' as an option,
          * assume it means -1.
          */
-        if (apr_optopt == (int) '-') {
-            *rv = apr_optopt;
+        if (os->opt == (int) '-') {
+            *optch = os->opt;
             return (APR_EOF);
         }
-        if (!*place)
-            ++apr_optind;
-        if (apr_opterr && *ostr != ':') {
-            if (!(p = strrchr(*nargv, '/')))
-                p = *nargv;
+        if (!*os->place)
+            ++os->ind;
+        if (os->err && *opts != ':') {
+            if (!(p = strrchr(*os->argv, '/')))
+                p = *os->argv;
             else
                 ++p;
             (void) fprintf(stderr,
-                           "%s: illegal option -- %c\n", p, apr_optopt);
+                           "%s: illegal option -- %c\n", p, os->opt);
         }
-        *rv = apr_optopt;
-        return APR_BADCH;
+        *optch = os->opt;
+        return (APR_BADCH);
     }
     if (*++oli != ':') {        /* don't need argument */
-        apr_optarg = NULL;
-        if (!*place)
-            ++apr_optind;
+        *optarg = NULL;
+        if (!*os->place)
+            ++os->ind;
     }
     else {                        /* need an argument */
-        if (*place)                /* no white space */
-            apr_optarg = place;
-        else if (nargc <= ++apr_optind) {        /* no arg */
-            place = EMSG;
-            if (*ostr == ':') {
-                *rv = apr_optopt;
+        if (*os->place)                /* no white space */
+            *optarg = os->place;
+        else if (os->argc <= ++os->ind) {        /* no arg */
+            os->place = EMSG;
+            if (*opts == ':') {
+                *optch = os->opt;
                 return (APR_BADARG);
             }
-            if (apr_opterr) {
-                if (!(p = strrchr(*nargv, '/')))
-                    p = *nargv;
+            if (os->err) {
+                if (!(p = strrchr(*os->argv, '/')))
+                    p = *os->argv;
                 else
                     ++p;
                 (void) fprintf(stderr,
                                "%s: option requires an argument -- %c\n",
-                               p, apr_optopt);
+                               p, os->opt);
             }
-            *rv = apr_optopt;
+            *optch = os->opt;
             return (APR_BADCH);
         }
         else                        /* white space */
-            apr_optarg = nargv[apr_optind];
-        place = EMSG;
-        ++apr_optind;
+            *optarg = os->argv[os->ind];
+        os->place = EMSG;
+        ++os->ind;
     }
-    *rv = apr_optopt;
+    *optch = os->opt;
     return APR_SUCCESS;
 }
 

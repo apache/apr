@@ -55,36 +55,48 @@
 #ifndef APR_GETOPT_H
 #define APR_GETOPT_H
 
-APR_VAR_IMPORT int
-    apr_opterr,                          /* if error message should be printed */
-    apr_optind,                          /* index into parent argv vector */
-    apr_optopt,                          /* character checked for validity */
-    apr_optreset;                        /* reset getopt */
-APR_VAR_IMPORT char *
-    apr_optarg;                          /* argument associated with option */
+typedef struct apr_getopt_t {
+    apr_pool_t cont;         /* context for processing */
+    int err;                 /* if error message should be printed */
+    int ind;                 /* index into parent argv vector */
+    int opt;                 /* character checked for validity */
+    int reset;               /* reset getopt */
+    int argc;                /* count of arguments */
+    char const* const* argv; /* array of pointers to arguments */
+    char const* place;       /* argument associated with option */
+} apr_getopt_t;
 
 /**
- * Parse the command line options passed to the program.
- * @param nargc The number of arguments passed to apr_getopt to parse
- * @param nargv The array of command line options to parse
- * @param ostr A string of characters that are acceptable options to the 
- *             program.  Characters followed by ":" are required to have an 
- *             option associated 
- * @param rv The next option found.  There are four potential values for 
- *          this variable on exit. They are:
- * <PRE>
- *             APR_EOF    --  No more options to parse
- *             APR_BADCH  --  Found a bad option character
- *             APR_BADARG --  Missing @parameter for the found option
- *             Other      --  The next option found.
- * </PRE>
- * @param cont The pool to operate on.
+ * Initialize the arguments for parsing by apr_getopt().
+ * @param cont The pool to operate on
+ * @param os   The options structure created for apr_getopt()
+ * @param argc The number of arguments to parse
+ * @param argv The array of arguments to parse
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
- * @deffunc apr_status_t apr_getopt(apr_int32_t nargc, char *const *nargv, const char *ostr, apr_int32_t *rv, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont, int argc, char const* const* argv)
  */
-APR_EXPORT(apr_status_t) apr_getopt(apr_int32_t nargc, char *const *nargv, 
-                                  const char *ostr, apr_int32_t *rv, 
-                                  apr_pool_t *cont);
+APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
+                                     int argc, char const* const* argv);
+
+/**
+ * Parse the options initialized by apr_initopt().
+ * @param os     The apr_opt_t structure returned by apr_initopt()
+ * @param opts   A string of characters that are acceptable options to the 
+ *               program.  Characters followed by ":" are required to have an 
+ *               option associated
+ * @param optch  The next option character parsed
+ * @param optarg The argument following the option character:
+ * @tip There are four potential status values on exit. They are:
+ * <PRE>
+ *             APR_EOF      --  No more options to parse
+ *             APR_BADCH    --  Found a bad option character
+ *             APR_BADARG   --  No argument followed @parameter:
+ *             APR_SUCCESS  --  The next option was found.
+ * </PRE>
+ * @deffunc apr_status_t apr_getopt(apr_getopt_t *os, const char *opts, char *optch, char **optarg)
+ */
+APR_EXPORT(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
+                                    char *optch, char const** optarg);
 
 #endif  /* ! APR_GETOPT_H */
 
