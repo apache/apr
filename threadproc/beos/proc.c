@@ -61,15 +61,15 @@ struct send_pipe {
 	int err;
 };
 
-APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new, apr_pool_t *pool)
 {
-    (*new) = (apr_procattr_t *)apr_palloc(cont, 
+    (*new) = (apr_procattr_t *)apr_palloc(pool, 
               sizeof(apr_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
-    (*new)->cntxt = cont;
+    (*new)->pool = pool;
     (*new)->parent_in = NULL;
     (*new)->child_in = NULL;
     (*new)->parent_out = NULL;
@@ -88,7 +88,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
     apr_status_t status;
     if (in != 0) {
         if ((status = apr_file_pipe_create(&attr->child_in, &attr->parent_in, 
-                                   attr->cntxt)) != APR_SUCCESS) {
+                                   attr->pool)) != APR_SUCCESS) {
             return status;
         }
         switch (in) {
@@ -108,7 +108,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
     } 
     if (out) {
         if ((status = apr_file_pipe_create(&attr->parent_out, &attr->child_out, 
-                                   attr->cntxt)) != APR_SUCCESS) {
+                                   attr->pool)) != APR_SUCCESS) {
             return status;
         }
         switch (out) {
@@ -128,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
     } 
     if (err) {
         if ((status = apr_file_pipe_create(&attr->parent_err, &attr->child_err, 
-                                   attr->cntxt)) != APR_SUCCESS) {
+                                   attr->pool)) != APR_SUCCESS) {
             return status;
         }
         switch (err) {
@@ -158,10 +158,10 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
         getcwd(cwd, PATH_MAX);
         strncat(cwd,"/\0",2);
         strcat(cwd,dir);
-        attr->currdir = (char *)apr_pstrdup(attr->cntxt, cwd);
+        attr->currdir = (char *)apr_pstrdup(attr->pool, cwd);
         free(cwd);
     } else {
-        attr->currdir = (char *)apr_pstrdup(attr->cntxt, dir);
+        attr->currdir = (char *)apr_pstrdup(attr->pool, dir);
     }
     if (attr->currdir) {
         return APR_SUCCESS;
@@ -182,7 +182,7 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int3
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
     
@@ -207,7 +207,7 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont)
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname, 
                                           const char * const *args,
                                           const char * const *env, 
-                                          apr_procattr_t *attr, apr_pool_t *cont)
+                                          apr_procattr_t *attr, apr_pool_t *pool)
 {
     int i=0,nargs=0;
     char **newargs = NULL;
@@ -215,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
     struct send_pipe *sp;        
     char * dir = NULL;
 	    
-    sp = (struct send_pipe *)apr_palloc(cont, sizeof(struct send_pipe));
+    sp = (struct send_pipe *)apr_palloc(pool, sizeof(struct send_pipe));
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -343,13 +343,13 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
                                    apr_file_t *parent_in)
 {
     if (attr->child_in == NULL && attr->parent_in == NULL)
-        apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->cntxt);
+        apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->pool);
 
     if (child_in != NULL)
-        apr_file_dup(&attr->child_in, child_in, attr->cntxt);
+        apr_file_dup(&attr->child_in, child_in, attr->pool);
 
     if (parent_in != NULL)
-        apr_file_dup(&attr->parent_in, parent_in, attr->cntxt);
+        apr_file_dup(&attr->parent_in, parent_in, attr->pool);
 
     return APR_SUCCESS;
 }
@@ -358,13 +358,13 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
                                                      apr_file_t *parent_out)
 {
     if (attr->child_out == NULL && attr->parent_out == NULL)
-        apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->cntxt);
+        apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->pool);
 
     if (child_out != NULL)
-        apr_file_dup(&attr->child_out, child_out, attr->cntxt);
+        apr_file_dup(&attr->child_out, child_out, attr->pool);
 
     if (parent_out != NULL)
-        apr_file_dup(&attr->parent_out, parent_out, attr->cntxt);
+        apr_file_dup(&attr->parent_out, parent_out, attr->pool);
 
     return APR_SUCCESS;
 }
@@ -373,13 +373,13 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
                                                      apr_file_t *parent_err)
 {
     if (attr->child_err == NULL && attr->parent_err == NULL)
-        apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->cntxt);
+        apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->pool);
 
     if (child_err != NULL)
-        apr_file_dup(&attr->child_err, child_err, attr->cntxt);
+        apr_file_dup(&attr->child_err, child_err, attr->pool);
 
     if (parent_err != NULL)
-        apr_file_dup(&attr->parent_err, parent_err, attr->cntxt);
+        apr_file_dup(&attr->parent_err, parent_err, attr->pool);
 
     return APR_SUCCESS;
 }

@@ -60,16 +60,16 @@
 static int thread_count = 0;
 
 apr_status_t apr_threadattr_create(apr_threadattr_t **new,
-                                                apr_pool_t *cont)
+                                                apr_pool_t *pool)
 {
-    (*new) = (apr_threadattr_t *)apr_palloc(cont, 
+    (*new) = (apr_threadattr_t *)apr_palloc(pool, 
               sizeof(apr_threadattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-    (*new)->cntxt = cont;
+    (*new)->pool = pool;
     (*new)->stack_size = APR_DEFAULT_STACK_SIZE;
     (*new)->detach = 0;
     (*new)->thread_name = NULL;
@@ -99,7 +99,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
  											apr_threadattr_t *attr, 
                              				apr_thread_start_t func,
  											void *data,
- 											apr_pool_t *cont)
+ 											apr_pool_t *pool)
 {
     apr_status_t stat;
     long flags = NX_THR_BIND_CONTEXT;
@@ -122,18 +122,18 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         stack_size = attr->stack_size;
     }
     
-    (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
+    (*new) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
     
-    (*new)->cntxt = cont;
+    (*new)->pool = pool;
     (*new)->data = data;
     (*new)->func = func;
-    (*new)->thread_name = (char*)apr_pstrdup(cont, threadName);
+    (*new)->thread_name = (char*)apr_pstrdup(pool, threadName);
     
-    stat = apr_pool_create(&(*new)->cntxt, cont);
+    stat = apr_pool_create(&(*new)->pool, pool);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -185,7 +185,7 @@ apr_status_t apr_thread_exit(apr_thread_t *thd,
                              apr_status_t retval)
 {
     thd->exitval = retval;
-    apr_pool_destroy(thd->cntxt);
+    apr_pool_destroy(thd->pool);
     NXThreadExit(NULL);
     return APR_SUCCESS;
 }
@@ -214,7 +214,7 @@ apr_status_t apr_thread_data_get(void **data, const char *key,
                                              apr_thread_t *thread)
 {
     if (thread != NULL) {
-            return apr_pool_userdata_get(data, key, thread->cntxt);
+            return apr_pool_userdata_get(data, key, thread->pool);
     }
     else {
         data = NULL;
@@ -227,7 +227,7 @@ apr_status_t apr_thread_data_set(void *data, const char *key,
                               apr_thread_t *thread)
 {
     if (thread != NULL) {
-       return apr_pool_userdata_set(data, key, cleanup, thread->cntxt);
+       return apr_pool_userdata_set(data, key, cleanup, thread->pool);
     }
     else {
         data = NULL;
@@ -247,14 +247,14 @@ APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
 
 APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
                                             apr_os_thread_t *thethd,
-                                            apr_pool_t *cont)
+                                            apr_pool_t *pool)
 {
-    if (cont == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     if ((*thd) == NULL) {
-        (*thd) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
-        (*thd)->cntxt = cont;
+        (*thd) = (apr_thread_t *)apr_palloc(pool, sizeof(apr_thread_t));
+        (*thd)->pool = pool;
     }
     (*thd)->td = *thethd;
     return APR_SUCCESS;
@@ -272,6 +272,6 @@ APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
     return APR_ENOTIMPL;
 }
 
-APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
+APR_POOL_IMPLEMENT_ACCESSOR(thread)
 
 

@@ -60,15 +60,15 @@
 
 #if APR_HAVE_PTHREAD_H
 APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key, 
-                                                void (*dest)(void *), apr_pool_t *cont)
+                                                void (*dest)(void *), apr_pool_t *pool)
 {
-    (*key) = (apr_threadkey_t *)apr_pcalloc(cont, sizeof(apr_threadkey_t));
+    (*key) = (apr_threadkey_t *)apr_pcalloc(pool, sizeof(apr_threadkey_t));
 
     if ((*key) == NULL) {
         return APR_ENOMEM;
     }
 
-    (*key)->cntxt = cont;
+    (*key)->pool = pool;
 
     return pthread_key_create(&(*key)->key, dest);
 
@@ -110,14 +110,14 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
                                  apr_threadkey_t *threadkey)
 {
-    return apr_pool_userdata_get(data, key, threadkey->cntxt);
+    return apr_pool_userdata_get(data, key, threadkey->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
                                          apr_status_t (*cleanup) (void *),
                                          apr_threadkey_t *threadkey)
 {
-    return apr_pool_userdata_set(data, key, cleanup, threadkey->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, threadkey->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
@@ -127,14 +127,14 @@ APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_t
 }
 
 APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key, 
-                                     apr_os_threadkey_t *thekey, apr_pool_t *cont)
+                                     apr_os_threadkey_t *thekey, apr_pool_t *pool)
 {
-    if (cont == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     if ((*key) == NULL) {
-        (*key) = (apr_threadkey_t *)apr_pcalloc(cont, sizeof(apr_threadkey_t));
-        (*key)->cntxt = cont;
+        (*key) = (apr_threadkey_t *)apr_pcalloc(pool, sizeof(apr_threadkey_t));
+        (*key)->pool = pool;
     }
     (*key)->key = *thekey;
     return APR_SUCCESS;

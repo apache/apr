@@ -64,7 +64,7 @@
 #define APR_DEFAULT_STACK_SIZE 65536
 
 struct apr_thread_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     NXContext_t ctx;
     NXThreadId_t td;
     char *thread_name;
@@ -76,19 +76,19 @@ struct apr_thread_t {
 };
 
 struct apr_threadattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     size_t stack_size;
     apr_int32_t detach;
     char *thread_name;
 };
 
 struct apr_threadkey_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     NXKey_t key;
 };
 
 struct apr_procattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     apr_file_t *parent_in;
     apr_file_t *child_in;
     apr_file_t *parent_out;
@@ -101,7 +101,7 @@ struct apr_procattr_t {
 };
 
 //struct apr_proc_t {
-//    apr_pool_t *cntxt;
+//    apr_pool_t *pool;
 //    pid_t pid;
 //    apr_procattr_t *attr;
 //};

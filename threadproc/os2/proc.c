@@ -72,15 +72,15 @@
 #include <process.h>
 #include <stdlib.h>
 
-APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new, apr_pool_t *pool)
 {
-    (*new) = (apr_procattr_t *)apr_palloc(cont, 
+    (*new) = (apr_procattr_t *)apr_palloc(pool, 
               sizeof(apr_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
-    (*new)->cntxt = cont;
+    (*new)->pool = pool;
     (*new)->parent_in = NULL;
     (*new)->child_in = NULL;
     (*new)->parent_out = NULL;
@@ -99,7 +99,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
     apr_status_t stat;
     if (in) {
         if ((stat = apr_file_pipe_create(&attr->child_in, &attr->parent_in,
-                                   attr->cntxt)) != APR_SUCCESS) {
+                                   attr->pool)) != APR_SUCCESS) {
             return stat;
         }
         switch (in) {
@@ -118,7 +118,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
     } 
     if (out) {
         if ((stat = apr_file_pipe_create(&attr->parent_out, &attr->child_out,
-                                   attr->cntxt)) != APR_SUCCESS) {
+                                   attr->pool)) != APR_SUCCESS) {
             return stat;
         }
         switch (out) {
@@ -137,7 +137,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr, apr_int32_t 
     } 
     if (err) {
         if ((stat = apr_file_pipe_create(&attr->parent_err, &attr->child_err,
-                                   attr->cntxt)) != APR_SUCCESS) {
+                                   attr->pool)) != APR_SUCCESS) {
             return stat;
         }
         switch (err) {
@@ -161,13 +161,13 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
                                                     apr_file_t *parent_in)
 {
     if (attr->child_in == NULL && attr->parent_in == NULL)
-        apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->cntxt);
+        apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->pool);
 
     if (child_in != NULL)
-        apr_file_dup(&attr->child_in, child_in, attr->cntxt);
+        apr_file_dup(&attr->child_in, child_in, attr->pool);
 
     if (parent_in != NULL)
-        apr_file_dup(&attr->parent_in, parent_in, attr->cntxt);
+        apr_file_dup(&attr->parent_in, parent_in, attr->pool);
 
     return APR_SUCCESS;
 }
@@ -177,13 +177,13 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
                                                      apr_file_t *parent_out)
 {
     if (attr->child_out == NULL && attr->parent_out == NULL)
-        apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->cntxt);
+        apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->pool);
 
     if (child_out != NULL)
-        apr_file_dup(&attr->child_out, child_out, attr->cntxt);
+        apr_file_dup(&attr->child_out, child_out, attr->pool);
 
     if (parent_out != NULL)
-        apr_file_dup(&attr->parent_out, parent_out, attr->cntxt);
+        apr_file_dup(&attr->parent_out, parent_out, attr->pool);
 
     return APR_SUCCESS;
 }
@@ -193,13 +193,13 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
                                                      apr_file_t *parent_err)
 {
     if (attr->child_err == NULL && attr->parent_err == NULL)
-        apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->cntxt);
+        apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->pool);
 
     if (child_err != NULL)
-        apr_file_dup(&attr->child_err, child_err, attr->cntxt);
+        apr_file_dup(&attr->child_err, child_err, attr->pool);
 
     if (parent_err != NULL)
-        apr_file_dup(&attr->parent_err, parent_err, attr->cntxt);
+        apr_file_dup(&attr->parent_err, parent_err, attr->pool);
 
     return APR_SUCCESS;
 }
@@ -207,7 +207,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
 
 APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr, const char *dir)
 {
-    attr->currdir = apr_pstrdup(attr->cntxt, dir);
+    attr->currdir = apr_pstrdup(attr->pool, dir);
     if (attr->currdir) {
         return APR_SUCCESS;
     }
@@ -227,7 +227,7 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr, apr_int3
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
 {
     int pid;
     
@@ -253,7 +253,7 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont)
 /* quotes in the string are doubled up.
  * Used to escape quotes in args passed to OS/2's cmd.exe
  */
-static char *double_quotes(apr_pool_t *cntxt, const char *str)
+static char *double_quotes(apr_pool_t *pool, const char *str)
 {
     int num_quotes = 0;
     int len = 0;
@@ -263,7 +263,7 @@ static char *double_quotes(apr_pool_t *cntxt, const char *str)
         num_quotes += str[len++] == '\"';
     }
     
-    quote_doubled_str = apr_palloc(cntxt, len + num_quotes + 1);
+    quote_doubled_str = apr_palloc(pool, len + num_quotes + 1);
     dest = quote_doubled_str;
     
     while (*str) {
@@ -281,7 +281,7 @@ static char *double_quotes(apr_pool_t *cntxt, const char *str)
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname,
                                           const char * const *args,
                                           const char * const *env,
-                                          apr_procattr_t *attr, apr_pool_t *cont)
+                                          apr_procattr_t *attr, apr_pool_t *pool)
 {
     int i, arg, numargs, cmdlen;
     apr_status_t status;
@@ -351,10 +351,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         strcpy(interpreter, "#!" SHELL_PATH);
         extra_arg = "/C";
     } else if (stricmp(extension, ".exe") != 0) {
-        status = apr_file_open(&progfile, progname, APR_READ|APR_BUFFERED, 0, cont);
+        status = apr_file_open(&progfile, progname, APR_READ|APR_BUFFERED, 0, pool);
 
         if (status != APR_SUCCESS && APR_STATUS_IS_ENOENT(status)) {
-            progname = apr_pstrcat(cont, progname, ".exe", NULL);
+            progname = apr_pstrcat(pool, progname, ".exe", NULL);
         }
 
         if (status == APR_SUCCESS) {
@@ -391,7 +391,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         i++;
     }
 
-    newargs = (const char **)apr_palloc(cont, sizeof (char *) * (i + 4));
+    newargs = (const char **)apr_palloc(pool, sizeof (char *) * (i + 4));
     numargs = 0;
 
     if (interpreter[0])
@@ -399,7 +399,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
     if (extra_arg)
         newargs[numargs++] = "/c";
 
-    newargs[numargs++] = newprogname = apr_pstrdup(cont, progname);
+    newargs[numargs++] = newprogname = apr_pstrdup(pool, progname);
     arg = 1;
 
     while (args && args[arg]) {
@@ -417,14 +417,14 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
     for (i=0; i<numargs; i++)
         cmdlen += strlen(newargs[i]) + 3;
 
-    cmdline = apr_palloc(cont, cmdlen + 2);
+    cmdline = apr_palloc(pool, cmdlen + 2);
     cmdline_pos = cmdline;
 
     for (i=0; i<numargs; i++) {
         const char *a = newargs[i];
 
         if (strpbrk(a, "&|<>\" "))
-            a = apr_pstrcat(cont, "\"", double_quotes(cont, a), "\"", NULL);
+            a = apr_pstrcat(pool, "\"", double_quotes(pool, a), "\"", NULL);
 
         if (i)
             *(cmdline_pos++) = ' ';
@@ -446,7 +446,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
         for (env_len=1, e=0; env[e]; e++)
             env_len += strlen(env[e]) + 1;
 
-        env_block = apr_palloc(cont, env_len);
+        env_block = apr_palloc(pool, env_len);
         env_block_pos = env_block;
 
         for (e=0; env[e]; e++) {

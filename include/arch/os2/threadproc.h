@@ -64,12 +64,12 @@
 #define APR_THREAD_STACKSIZE 65536
 
 struct apr_threadattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     unsigned long attr;
 };
 
 struct apr_thread_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     struct apr_threadattr_t *attr;
     unsigned long tid;
     apr_thread_start_t func;
@@ -83,7 +83,7 @@ struct apr_threadkey_t {
 };
 
 struct apr_procattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     apr_file_t *parent_in;
     apr_file_t *child_in;
     apr_file_t *parent_out;

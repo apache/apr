@@ -56,16 +56,16 @@
 #include "threadproc.h"
 
 apr_status_t apr_threadkey_private_create(apr_threadkey_t **key, 
-                                        void (*dest)(void *), apr_pool_t *cont) 
+                                        void (*dest)(void *), apr_pool_t *pool) 
 {
     apr_status_t stat;
     
-    (*key) = (apr_threadkey_t *)apr_palloc(cont, sizeof(apr_threadkey_t));
+    (*key) = (apr_threadkey_t *)apr_palloc(pool, sizeof(apr_threadkey_t));
 	if ((*key) == NULL) {
         return APR_ENOMEM;
     }
 
-    (*key)->cntxt = cont;
+    (*key)->pool = pool;
 
     if ((stat = NXKeyCreate(NULL, dest, &(*key)->key)) == 0) {
         return stat;
@@ -107,14 +107,14 @@ apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
 
 apr_status_t apr_threadkey_data_get(void **data, const char *key, apr_threadkey_t *threadkey)
 {
-    return apr_pool_userdata_get(data, key, threadkey->cntxt);
+    return apr_pool_userdata_get(data, key, threadkey->pool);
 }
 
 apr_status_t apr_threadkey_data_set(void *data,
                                  const char *key, apr_status_t (*cleanup) (void *),
                                  apr_threadkey_t *threadkey)
 {
-    return apr_pool_userdata_set(data, key, cleanup, threadkey->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, threadkey->pool);
 }
 
 apr_status_t apr_os_threadkey_get(apr_os_threadkey_t *thekey,
@@ -125,14 +125,14 @@ apr_status_t apr_os_threadkey_get(apr_os_threadkey_t *thekey,
 }
 
 apr_status_t apr_os_threadkey_put(apr_threadkey_t **key, 
-                                apr_os_threadkey_t *thekey, apr_pool_t *cont)
+                                apr_os_threadkey_t *thekey, apr_pool_t *pool)
 {
-    if (cont == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     if ((*key) == NULL) {
-        (*key) = (apr_threadkey_t *)apr_palloc(cont, sizeof(apr_threadkey_t));
-        (*key)->cntxt = cont;
+        (*key) = (apr_threadkey_t *)apr_palloc(pool, sizeof(apr_threadkey_t));
+        (*key)->pool = pool;
     }
     (*key)->key = *thekey;
     return APR_SUCCESS;
