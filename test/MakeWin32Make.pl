@@ -11,7 +11,7 @@ while ($t = <$srcfl>) {
            . "LINK = link.exe /nologo /debug /machine:I386 /subsystem:console /incremental:no \n\n"
            . "CFLAGS = /nologo /c /MDd /W3 /Gm /GX /Zi /Od /D _DEBUG /D WIN32 /D APR_DECLARE_STATIC /FD \n\n"
            . ".c.obj::\n"
-           . "\t\$(CL) -c \$*.c \$(CFLAGS) \$(INCLUDES)\n";
+           . "\t\$(CL) -c \$< \$(CFLAGS) \$(INCLUDES)\n";
     }
     if ($t =~ m|^ALL_LIBS=|) {
         $t = "";
