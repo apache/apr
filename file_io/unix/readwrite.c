@@ -137,16 +137,17 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
         while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
-                thefile->dataRead = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
-                if (thefile->dataRead == 0) {
+                int bytesread = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
+                if (bytesread == 0) {
                     thefile->eof_hit = TRUE;
                     rv = APR_EOF;
                     break;
                 }
-                else if (thefile->dataRead == -1) {
+                else if (bytesread == -1) {
                     rv = errno;
                     break;
                 }
+                thefile->dataRead = bytesread;
                 thefile->filePtr += thefile->dataRead;
                 thefile->bufpos = 0;
             }
