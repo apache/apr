@@ -151,6 +151,16 @@ APR_DECLARE(void) apr_allocator_set_owner(apr_allocator_t *allocator,
  */
 APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(apr_allocator_t *allocator);
 
+
+/**
+ * Set the current threshold at which the allocator should start
+ * giving blocks back to the system.
+ * @param allocator The allocator the set the threshold on
+ * @param size The threshold.  0 == unlimited.
+ */
+APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
+                                             apr_size_t size);
+
 #include "apr_thread_mutex.h"
 
 #if APR_HAS_THREADS
