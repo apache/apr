@@ -11,6 +11,15 @@
  * @{
  */
 
+/* changes between APACHE_2_0_35 and APACHE_2_0_36
+
+/** @deprecated @see apr_time_exp_tz */
+#define apr_explode_time apr_time_exp_tz
+/** @deprecated @see apr_time_exp_lt */
+#define apr_explode_localtime apr_time_exp_lt
+/** @deprecated @see apr_group_name_get */
+#define apr_get_groupname apr_group_name_get
+
 /* redefine 1.3.x symbols to those that now live in libapr */
 
 /** @see APR_INLINE */
