@@ -29,10 +29,9 @@ static apr_status_t soblock(int sd)
 #elif defined(O_NDELAY)
     fd_flags &= ~O_NDELAY;
 #elif defined(FNDELAY)
-    fd_flags &= ~O_FNDELAY;
+    fd_flags |= FNDELAY;
 #else
-    /* XXXX: this breaks things, but an alternative isn't obvious...*/
-    return -1;
+#error Please teach APR how to make sockets blocking on your platform.
 #endif
     if (fcntl(sd, F_SETFL, fd_flags) == -1) {
         return errno;
@@ -56,10 +55,9 @@ static apr_status_t sononblock(int sd)
 #elif defined(O_NDELAY)
     fd_flags |= O_NDELAY;
 #elif defined(FNDELAY)
-    fd_flags |= O_FNDELAY;
+    fd_flags |= FNDELAY;
 #else
-    /* XXXX: this breaks things, but an alternative isn't obvious...*/
-    return -1;
+#error Please teach APR how to make sockets non-blocking on your platform.
 #endif
     if (fcntl(sd, F_SETFL, fd_flags) == -1) {
         return errno;
