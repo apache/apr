@@ -73,7 +73,6 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
      * (which support nonblocking I/O) on Windows NT.
      */
     if (thepipe->pipe == 1) {
-        thepipe->timeout = timeout;
         if (ap_get_oslevel(thepipe->cntxt, &oslevel) == APR_SUCCESS &&
             oslevel >= APR_WIN_NT) {
             if (timeout == 0) {
@@ -81,9 +80,19 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
             } else {
                 dwMode = PIPE_WAIT;
             }
-            SetNamedPipeHandleState(thepipe->filehand, &dwMode, NULL, NULL);
+            if (SetNamedPipeHandleState(thepipe->filehand, &dwMode, NULL, NULL)) {
+                thepipe->timeout = timeout;
+                return APR_SUCCESS;
+            }
+            else {
+                return GetLastError();
+            }
+        } 
+        else {
+            /* can't make anonymous pipes non-blocking on Win9x
+             */
+            return APR_ENOTIMPL;
         }
-        return APR_SUCCESS;
     }
     return APR_EINVAL;
 }

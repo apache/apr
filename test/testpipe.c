@@ -62,16 +62,15 @@
 #include <unistd.h>
 #endif
 
-int test_filedel(ap_pool_t *);
-int testdirs(ap_pool_t *);
-
-int main()
+int main(void)
 {
     ap_pool_t *context;
     ap_file_t *readp = NULL;
     ap_file_t *writep = NULL;
     ap_size_t nbytes;
+    ap_status_t rv;
     char *buf;
+    char msgbuf[120];
 
     if (ap_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Couldn't initialize.");
@@ -86,8 +85,9 @@ int main()
     fprintf(stdout, "Testing pipe functions.\n");
 
     fprintf(stdout, "\tCreating pipes.......");
-    if (ap_create_pipe(&readp, &writep, context) != APR_SUCCESS) {
-        perror("Didn't create the pipe");
+    if ((rv = ap_create_pipe(&readp, &writep, context)) != APR_SUCCESS) {
+        fprintf(stderr, "ap_create_pipe()->%d/%s\n",
+                rv, ap_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
     }
     else {
@@ -95,14 +95,15 @@ int main()
     }
     
     fprintf(stdout, "\tSetting pipe timeout.......");
-    if (ap_set_pipe_timeout(readp, 1 * AP_USEC_PER_SEC) != APR_SUCCESS) {
-        perror("Couldn't set a timeout");
+    if ((rv = ap_set_pipe_timeout(readp, 1 * AP_USEC_PER_SEC)) != APR_SUCCESS) {
+        fprintf(stderr, "ap_set_pipe_timeout()->%d/%s\n",
+                rv, ap_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
     } else {
         fprintf(stdout, "OK\n");
     }        
 
-    fprintf(stdout, "\tReading from the file.......");
+    fprintf(stdout, "\tReading from the pipe.......");
     nbytes = (ap_ssize_t)strlen("this is a test");
     buf = (char *)ap_palloc(context, nbytes + 1);
     if (ap_read(readp, buf, &nbytes) == APR_TIMEUP) {
