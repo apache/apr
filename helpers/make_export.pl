@@ -35,7 +35,7 @@ while ($srcfile = shift(@ARGV)) {
             $count++;
             $found++;
             $macro = $2;
-            $line = "$macro\n";
+            $line .= "$macro\n";
             next;
         }
         elsif (/^(APR_DECLARE[^\(]*\()?[a-z_]+\)?\s+([A-Za-z0-9_]+)\(/) {
