@@ -113,10 +113,11 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
         status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_DATA, &symaddr);
     if (status = -1)
         return APR_EINIT;
-    ressym = symaddr;
+    *ressym = symaddr;
+    return APR_SUCCESS;
+#else /* not HP-UX; use dlsym()/dlerror() */
 
-
-#elif defined(DLSYM_NEEDS_UNDERSCORE)
+#if defined(DLSYM_NEEDS_UNDERSCORE)
     void *retval;
     char *symbol = (char*)malloc(sizeof(char)*(strlen(symname)+2));
     sprintf(symbol, "_%s", symname);
@@ -129,12 +130,15 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     void *retval = dlsym(handle->handle, symname);
 #endif
 
-    if (retval == NULL)
+    if (retval == NULL) {
+        handle->errormsg = dlerror();
         return APR_EINIT;
+    }
 
     *ressym = retval;
     
     return APR_SUCCESS;
+#endif /* not HP-UX; use dlsym()/dlerror() */
 }
 
 const char *ap_dso_error(ap_dso_handle_t *dso, char *buffer, ap_size_t buflen)
