@@ -385,43 +385,43 @@ typedef int ap_status_t;
 
 
 /*  APR ERROR VALUES */
-#define APR_ENOSTAT        OS_START_ERROR + 1
-#define APR_ENOPOOL        OS_START_ERROR + 2
-#define APR_ENOFILE        OS_START_ERROR + 3
-#define APR_EBADDATE       OS_START_ERROR + 4
-#define APR_ENOCONT        OS_START_ERROR + 5
-#define APR_ENOPROC        OS_START_ERROR + 6
-#define APR_ENOTIME        OS_START_ERROR + 7
-#define APR_ENODIR         OS_START_ERROR + 8
-#define APR_ENOLOCK        OS_START_ERROR + 9
-#define APR_ENOPOLL        OS_START_ERROR + 10
-#define APR_ENOSOCKET      OS_START_ERROR + 11
-#define APR_ENOTHREAD      OS_START_ERROR + 12
-#define APR_ENOTHDKEY      OS_START_ERROR + 13
-#define APR_ENOTTHREADSAFE OS_START_ERROR + 14
+#define APR_ENOSTAT        (OS_START_ERROR + 1)
+#define APR_ENOPOOL        (OS_START_ERROR + 2)
+#define APR_ENOFILE        (OS_START_ERROR + 3)
+#define APR_EBADDATE       (OS_START_ERROR + 4)
+#define APR_ENOCONT        (OS_START_ERROR + 5)
+#define APR_ENOPROC        (OS_START_ERROR + 6)
+#define APR_ENOTIME        (OS_START_ERROR + 7)
+#define APR_ENODIR         (OS_START_ERROR + 8)
+#define APR_ENOLOCK        (OS_START_ERROR + 9)
+#define APR_ENOPOLL        (OS_START_ERROR + 10)
+#define APR_ENOSOCKET      (OS_START_ERROR + 11)
+#define APR_ENOTHREAD      (OS_START_ERROR + 12)
+#define APR_ENOTHDKEY      (OS_START_ERROR + 13)
+#define APR_ENOTTHREADSAFE (OS_START_ERROR + 14)
 
 /*  APR STATUS VALUES */
-#define APR_INCHILD        OS_START_ERROR + 500 + 1
-#define APR_INPARENT       OS_START_ERROR + 500 + 2
-#define APR_DETACH         OS_START_ERROR + 500 + 3
-#define APR_NOTDETACH      OS_START_ERROR + 500 + 4
-#define APR_CHILD_DONE     OS_START_ERROR + 500 + 5
-#define APR_CHILD_NOTDONE  OS_START_ERROR + 500 + 6
-#define APR_TIMEUP         OS_START_ERROR + 500 + 7
-#define APR_INVALSOCK      OS_START_ERROR + 500 + 8
-#define APR_ALLSTD         OS_START_ERROR + 500 + 9
-#define APR_STDOUT         OS_START_ERROR + 500 + 10
-#define APR_STDERR         OS_START_ERROR + 500 + 11
-#define APR_BADCH          OS_START_ERROR + 500 + 12
-#define APR_BADARG         OS_START_ERROR + 500 + 13
-#define APR_EOF            OS_START_ERROR + 500 + 14
-#define APR_NOTFOUND       OS_START_ERROR + 500 + 15
+#define APR_INCHILD        (OS_START_ERROR + 500 + 1)
+#define APR_INPARENT       (OS_START_ERROR + 500 + 2)
+#define APR_DETACH         (OS_START_ERROR + 500 + 3)
+#define APR_NOTDETACH      (OS_START_ERROR + 500 + 4)
+#define APR_CHILD_DONE     (OS_START_ERROR + 500 + 5)
+#define APR_CHILD_NOTDONE  (OS_START_ERROR + 500 + 6)
+#define APR_TIMEUP         (OS_START_ERROR + 500 + 7)
+#define APR_INVALSOCK      (OS_START_ERROR + 500 + 8)
+#define APR_ALLSTD         (OS_START_ERROR + 500 + 9)
+#define APR_STDOUT         (OS_START_ERROR + 500 + 10)
+#define APR_STDERR         (OS_START_ERROR + 500 + 11)
+#define APR_BADCH          (OS_START_ERROR + 500 + 12)
+#define APR_BADARG         (OS_START_ERROR + 500 + 13)
+#define APR_EOF            (OS_START_ERROR + 500 + 14)
+#define APR_NOTFOUND       (OS_START_ERROR + 500 + 15)
 /* A simple value to be used to initialze a status variable. */
-#define APR_EINIT          OS_START_ERROR + 500 + 16   
+#define APR_EINIT          (OS_START_ERROR + 500 + 16)  
 /* Not implemented either because we haven't gotten to it yet, or 
  * because it is not possible to do correctly.  
  */
-#define APR_ENOTIMPL       OS_START_ERROR + 500 + 17   
+#define APR_ENOTIMPL       (OS_START_ERROR + 500 + 17)
 
 #ifdef __cplusplus
 }
