@@ -386,7 +386,7 @@ APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *p, apr_size_t size,
  */
 #if defined(DOXYGEN)
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
-#else
+#elif !APR_POOL_DEBUG
 #define apr_pcalloc(p, size) memset(apr_palloc(p, size), 0, size)
 #endif
 
