@@ -103,15 +103,6 @@ APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *sms,
     if (size == 0)
         return NULL;
 
-    if (!sms->calloc_fn) {
-        /* Assumption - if we don't have calloc we have
-         * malloc, might be bogus...
-         */
-        void *mem = sms->malloc_fn(sms, size);
-        memset(mem, '\0', size);
-        return mem;
-    }
-    
     return sms->calloc_fn(sms, size);
 }
 
@@ -126,7 +117,11 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem,
         return NULL;
     }
 
-    return sms->realloc_fn(sms, mem, size);
+    if (sms->realloc_fn)
+        return sms->realloc_fn(sms, mem, size);
+
+    /* XXX - shoulod we free the block passed in ??? */
+    return NULL;
 }
 
 APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms,
@@ -136,6 +131,22 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms,
         return sms->free_fn(sms, mem);  
 
     return APR_ENOTIMPL;
+}
+
+/*
+ * default allocation functions
+ */
+
+static void *apr_sms_default_calloc(apr_sms_t *sms,
+                                    apr_size_t size)
+{
+    void *mem;
+
+    mem = sms->malloc_fn(sms, size);
+    if (mem)
+        memset(mem, '\0', size);
+
+    return mem;
 }
 
 /*
@@ -200,6 +211,11 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
         apr_lock_release(pms->sms_lock);    
     }
 
+    /* Set default functions.  These should NOT be altered by an sms
+     * module unless it implements them itself.
+     */
+    sms->calloc_fn = apr_sms_default_calloc;
+    
     /* XXX - This should eventually be removed */
     apr_pool_create(&sms->pool, pms ? pms->pool : NULL);
 
@@ -232,6 +248,11 @@ APR_DECLARE(void) apr_sms_assert(apr_sms_t *sms)
   
     assert(!sms->reset_fn || sms->destroy_fn);
 
+    /* Has someone been stupid and NULL'd our default function without
+     * providing an implementation of their own... tsch, tsch
+     */
+    assert(sms->calloc_fn);
+    
     /*
      * Make sure all accounting memory dies with the memory system.
      * To be more specific, make sure the accounting memort system
