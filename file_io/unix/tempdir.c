@@ -56,13 +56,6 @@
 #include "apr_strings.h"
 #include "apr_env.h"
 
-/*
- * FIXME
- * Currently, this variable is a bit of misnomer.
- * The intention is to have this in APR's global pool so that we don't have 
- * to go through this every time.
- */
-static char global_temp_dir[APR_PATH_MAX+1] = { 0 };
 
 /* Try to open a temporary file in the temporary dir, write to it,
    and then close it. */
@@ -88,12 +81,9 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
     apr_status_t apr_err;
     const char *try_dirs[] = { "/tmp", "/usr/tmp", "/var/tmp" };
     const char *try_envs[] = { "TMP", "TEMP", "TMPDIR" };
+    const char *dir;
     char *cwd;
     int i;
-
-    /* If we have a cached temp dir, use it. */
-    if (global_temp_dir[0])
-      goto end;
 
     /* Our goal is to find a temporary directory suitable for writing
        into.  We'll only pay the price once if we're successful -- we
@@ -121,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
         if ((apr_err == APR_SUCCESS) && value) {
             apr_size_t len = strlen(value);
             if (len && (len < APR_PATH_MAX) && test_tempdir(value, p)) {
-                memcpy(global_temp_dir, value, len + 1);
+                dir = value;
                 goto end;
             }
         }
@@ -130,14 +120,14 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
 #ifdef WIN32
     /* Next, on Win32, try the C:\TEMP directory. */
     if (test_tempdir("C:\\TEMP", p)) {
-        memcpy(global_temp_dir, "C:\\TEMP", 7 + 1);
+        dir = "C:\\TEMP";
         goto end;
     }
 #endif
 #ifdef NETWARE
     /* Next, on NetWare, try the SYS:/TMP directory. */
     if (test_tempdir("SYS:/TMP", p)) {
-        memcpy(global_temp_dir, "SYS:/TMP", 8 + 1);
+        dir = "SYS:/TMP";
         goto end;
     }
 #endif
@@ -145,7 +135,7 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
     /* Next, try a set of hard-coded paths. */
     for (i = 0; i < (sizeof(try_dirs) / sizeof(const char *)); i++) {
         if (test_tempdir(try_dirs[i], p)) {
-            memcpy(global_temp_dir, try_dirs[i], strlen(try_dirs[i]) + 1);
+            dir = try_dirs[i];
             goto end;
         }
     }
@@ -156,7 +146,7 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
      * the tmpdir should be 
      */
     if (test_tempdir(P_tmpdir, p)) {
-        memcpy(global_temp_dir, P_tmpdir, strlen(P_tmpdir) +1);
+        dir = P_tmpdir;
         goto end;
     }
 #endif
@@ -164,16 +154,15 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
     /* Finally, try the current working directory. */
     if (APR_SUCCESS == apr_filepath_get(&cwd, APR_FILEPATH_NATIVE, p)) {
         if (test_tempdir(cwd, p)) {
-            /* Don't cache if the selected temp dir is the cwd */
-            *temp_dir = apr_pstrdup(p, cwd);
-            return APR_SUCCESS;
+            dir = cwd;
+	    goto end;
         }
     }
 
-end:
-    if (global_temp_dir[0]) {
-        *temp_dir = apr_pstrdup(p, global_temp_dir);
-        return APR_SUCCESS;
-    }
+    /* We didn't find a suitable temp dir anywhere */
     return APR_EGENERAL;
+
+end:
+    *temp_dir = apr_pstrdup(p, dir);
+    return APR_SUCCESS;
 }
