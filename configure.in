@@ -323,6 +323,9 @@ case "$host:$CC" in
 	;;
 esac
 
+dnl Check the depend program we can use
+APR_CHECK_DEPEND
+
 # force_atomic_generic flag 
 # this will be set we find a cpu/OS combo
 # which is historical and doesn't work with the method

@@ -1,5 +1,8 @@
 Changes with APR 0.9.2
 
+  *) Allow generation of dependencies by non-GCC compilers.
+     [Justin Erenkrantz]
+
   *) Prevent obscenely large values of precision in apr_vformatter
      from clobbering a buffer. [Sander Striker, Jim Jagielski]
 
