@@ -36,16 +36,6 @@ all: $(SUBDIRS) libs nlms install
 
 $(TARGETS) :: $(SUBDIRS)
 
-install :: nlms $(INSTDIRS)
-
-installdev :: $(INSTDEVDIRS)
-
-$(INSTDIRS) ::
-	$(CHKNOT) $@\NUL mkdir $@
-
-$(INSTDEVDIRS) ::
-	$(CHKNOT) $@\NUL mkdir $@
-
 endif #NO_LICENSE_FILE check
 
 help :
