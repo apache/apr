@@ -1,4 +1,6 @@
 Changes with APR b1  
+  *) added new functions for atomic operations. These are experimental
+     at the moment, so use in apps is discouraged [Ian Holsman]
 
   *) Disable SHMEM_MMAP_ZERO on HPUX 11.x where it is not supported.
      Use SHMEM_SHMGET_ANON instead.  [Aaron Bannert]
