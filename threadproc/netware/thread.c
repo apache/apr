@@ -92,7 +92,7 @@ apr_status_t apr_thread_create(apr_thread_t **new,
 {
     apr_status_t stat;
     size_t stacksize;
-    long flags = NX_CTX_AUTO_CLEANUP;
+    long flags = NX_THR_BIND_CONTEXT;
   	char threadName[NX_MAX_OBJECT_NAME_LEN+1];
    	//srj added for nks giving the threads names
 	
@@ -115,12 +115,9 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         stacksize = attr->stack_size; 
         if (attr->detach)
             flags |= NX_THR_DETACHED;
-        else
-            flags |= NX_THR_JOINABLE;
     }
     else {
         stacksize = APR_DEFAULT_STACK_SIZE;
-        flags |= NX_THR_JOINABLE;
     }
     
     (*new)->ctx = NXContextAlloc(
