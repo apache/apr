@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/14 00:15:50 $]
+Last modified at [$Date: 2001/12/14 01:26:03 $]
 
 Release:
 
@@ -52,7 +52,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
                 wait for the debug code to be finished before 
                 committing.
         Patch:
-            <JLEGKKNELMHCJPNMOKHOOECGEPAA.striker@apache.org>
+            <JLEGKKNELMHCJPNMOKHOOECHFAAA.striker@apache.org>
         Comparisons/reviews:
             Ian: <3C083414.1080208@cnet.com> (performance)
             Brian: <3C07D792.9070301@cnet.com> (code)
@@ -63,6 +63,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
                 +1: Brian (non-binding), 
                     Ian (once we have a debug version of palloc etc),
                     Justin
+                    Sander
                  0:
                 -1:
 
