@@ -603,7 +603,7 @@ else
             dnl ----------------------------- Checking for pthread_rwlock_t
             AC_CACHE_CHECK([for pthread_rwlock_t], [apr_cv_type_rwlock_t],
             AC_TRY_COMPILE([#include <sys/types.h>
-#include <pthread.h>], [pthread_rwlock_t rwlock=PTHREAD_RWLOCK_INITIALIZER;],
+#include <pthread.h>], [pthread_rwlock_t *rwlock;],
               [apr_cv_type_rwlock_t=yes], [apr_cv_type_rwlock_t=no], 
               [apr_cv_type_rwlock_t=no]))
             if test "$apr_cv_type_rwlock_t" = "yes"; then
