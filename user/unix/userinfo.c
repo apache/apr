@@ -76,7 +76,12 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
 #endif
         return errno;
     }
+#ifdef OS2
+    /* Need to manually add user name for OS/2 */
+    *dirname = apr_pstrcat(p, pw->pw_dir, pw->pw_name, NULL);
+#else
     *dirname = apr_pstrdup(p, pw->pw_dir);
+#endif
     return APR_SUCCESS;
 }
 
