@@ -76,8 +76,15 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         *nbytes = bread;
         return APR_SUCCESS;
     }
-    *nbytes = -1;
+
     lasterror = GetLastError();
+    if (lasterror == ERROR_BROKEN_PIPE) {
+        /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
+        *nbytes = 0;
+        return APR_SUCCESS;
+    }
+    *nbytes = -1;
+
     return APR_EEXIST;
 }
 
