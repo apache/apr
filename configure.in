@@ -416,6 +416,8 @@ case $host in
             fi
             ;;
        esac
+       OSDIR="unix"
+       eolstr="\\n"
        ;;
    *)
        OSDIR="unix"
