@@ -155,7 +155,7 @@ APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color);
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e);
 
 /* Convert a bucket to a char * */
-APR_EXPORT(char *) ap_get_bucket_char_str(ap_bucket *b);
+APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b);
 
 /* get the length of the data in the bucket */
 APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b);
@@ -207,6 +207,35 @@ APR_EXPORT(char *) ap_mmap_get_char_str(ap_bucket_mmap *b);
 APR_EXPORT(int) ap_mmap_get_len(ap_bucket_mmap *b);
 
 APR_EXPORT(void) ap_mmap_bucket_insert(ap_bucket_mmap *b, ap_mmap_t *mm);
+
+/*   ******  RMEM Functions  *****  */
+
+typedef struct ap_bucket_rmem ap_bucket_rmem;
+struct ap_bucket_rmem {
+    size_t  alloc_len;                  /* how much was allocated */
+    const void    *start;               /* Where does the actual data start
+                                           in the alloc'ed block */
+    const void    *end;                 /* where does the data actually end? */
+};
+
+/* Create a read only memory bucket */
+APR_EXPORT(ap_bucket_rmem *) ap_rmem_create(void);
+
+/* destroy a read only memory bucket */
+APR_EXPORT(void) ap_rmem_destroy(void *e);
+
+/* Convert a read only bucket into a char * */
+APR_EXPORT(const char *) ap_rmem_get_char_str(ap_bucket_rmem *b);
+
+/* get the length of the data in the rmem bucket */
+APR_EXPORT(int) ap_rmem_get_len(ap_bucket_rmem *b);
+
+APR_EXPORT(int) ap_rmem_write(ap_bucket_rmem *b, const void *buf,
+                               ap_size_t nbyte, ap_ssize_t *bytes_written);
+
+APR_EXPORT(int) ap_rmem_vputs(ap_bucket_rmem *b, va_list va);
+
+APR_EXPORT(int) ap_rmem_vputstrs(ap_bucket_rmem *b, va_list va);
 
 #endif
 

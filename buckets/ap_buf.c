@@ -81,6 +81,9 @@ APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color)
             newbuf->free = NULL;
             break;
         case AP_BUCKET_rmem:
+            newbuf->data = ap_rmem_create();
+            newbuf->free = NULL;
+            break;
         case AP_BUCKET_file:
         case AP_BUCKET_filename:
         case AP_BUCKET_cached_entity:
@@ -155,7 +158,7 @@ APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *b,
     orig = vec;
     e = b->head;
     while (e && nvec) {
-	vec->iov_base = ap_get_bucket_char_str(e->bucket);
+	vec->iov_base = (void *)ap_get_bucket_char_str(e->bucket);
 	vec->iov_len = ap_get_bucket_len(e->bucket);
 	e = e->next;
 	--nvec;
@@ -212,7 +215,7 @@ APR_EXPORT(ap_status_t) ap_destroy_bucket_list(ap_bucket_list *buf)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(char *) ap_get_bucket_char_str(ap_bucket *b)
+APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b)
 {
     switch (b->color) {
         case AP_BUCKET_rwmem:
@@ -220,6 +223,7 @@ APR_EXPORT(char *) ap_get_bucket_char_str(ap_bucket *b)
         case AP_BUCKET_mmap:
             return ap_mmap_get_char_str(b->data);
         case AP_BUCKET_rmem:
+            return ap_rmem_get_char_str(b->data);
         case AP_BUCKET_file:
         case AP_BUCKET_filename:
         case AP_BUCKET_cached_entity:
@@ -239,6 +243,7 @@ APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b)
         case AP_BUCKET_mmap:
             return ap_mmap_get_len(b->data);
         case AP_BUCKET_rmem:
+            return ap_rmem_get_len(b->data);
         case AP_BUCKET_file:
         case AP_BUCKET_filename:
         case AP_BUCKET_cached_entity:
@@ -252,21 +257,50 @@ APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b)
 
 APR_EXPORT(int) ap_brigade_vputs(ap_bucket_brigade *b, ...)
 {
-    ap_bucket_list *dptr = b->tail;
-    ap_bucket_rwmem *r;
+    ap_bucket *r;
     va_list va;
-    int n;
+    const char *x;
+    int n, j, k, rv;
+    ap_ssize_t i;
 
-    if (dptr->bucket->color != AP_BUCKET_rwmem) {
-        r = ap_rwmem_create();
-    }
-    else {
-        r = dptr->bucket->data;
+    if (b->tail->bucket->color == AP_BUCKET_rwmem) {
+        ap_bucket_rwmem *rw;
+        rw = b->tail->bucket->data;
+        /* I have no idea if this is a good idea or not.  Probably not.
+         * Basically, if the last bucket in the list is a rwmem bucket,
+         * then we just add to it instead of allocating a new read only
+         * bucket.  This is incredibly easy to take out if it is a bad 
+         * idea.  RBB
+         */
+        va_start(va, b);
+        ap_rwmem_vputstrs(rw, va);
+        va_end(va);
     }
     
     va_start(va, b);
-    n = ap_rwmem_vputstrs(r, va);
-    va_end(va);
+    for (k = 0;;) {
+        r = ap_bucket_new(AP_BUCKET_rmem);
+        x = va_arg(va, const char *);
+        if (x == NULL)
+            break;
+        j = strlen(x);
+       
+        rv = ap_rmem_write(r->data, x, j, &i);
+        if (i != j) {
+            /* Do we need better error reporting?  */
+            return -1;
+        }
+        k += i;
+
+        /* This really requires an API.  Basically we are just adding
+         * a bucket to a bucket list.
+         */
+        b->tail->next = ap_bucket_list_create();
+        b->tail->next->prev = b->tail->next;
+        b->tail = b->tail->next;
+        b->tail->bucket = r;
+    }
+    va_end(v);
 
     return n;
 }
