@@ -1,0 +1,17 @@
+Index: Makefile.in
+===================================================================
+RCS file: /home/cvs/apache-2.0/src/main/Makefile.in,v
+retrieving revision 1.16
+diff -u -r1.16 Makefile.in
+--- Makefile.in	2000/07/01 14:14:15	1.16
++++ Makefile.in	2000/07/25 00:42:50
+@@ -8,7 +8,8 @@
+ 	http_protocol.c http_request.c http_vhost.c util.c util_date.c \
+ 	util_script.c util_uri.c util_md5.c util_cfgtree.c util_ebcdic.c \
+ 	rfc1413.c http_connection.c iol_file.c iol_socket.c listen.c \
+-        mpm_common.c util_charset.c util_debug.c util_xml.c
++        mpm_common.c util_charset.c util_debug.c util_xml.c \
++	util_filter.c
+ 
+ include $(top_srcdir)/build/ltlib.mk
+ 
