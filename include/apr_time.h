@@ -62,6 +62,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @package APR Time library
+ */
+
 APR_VAR_IMPORT const char ap_month_snames[12][4];
 APR_VAR_IMPORT const char ap_day_snames[7][4];
 
@@ -83,13 +87,8 @@ typedef ap_int32_t ap_interval_time_t;
 #define AP_USEC_PER_SEC (1000000LL)
 #endif
 
-/*
-
-=head1 ap_time_t ap_now(void)
-
-B<return the current time>
-
-=cut
+/**
+ * return the current time
  */
 ap_time_t ap_now(void);
 
@@ -111,86 +110,72 @@ typedef struct {
     ap_int32_t tm_gmtoff; /* seconds east of UTC */
 } ap_exploded_time_t;
 
-/*
-
-=head1 ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
-
-B<convert an ansi time_t to an ap_time_t>
-
-    arg 1) the resulting ap_time_t
-    arg 2) the time_t to convert
-
-=cut
+/**
+ * convert an ansi time_t to an ap_time_t
+ * @param result the resulting ap_time_t
+ * @param input the time_t to convert
  */
 ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input);
 
-/*
-
-=head1 ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
-
-B<convert a time to its human readable components in GMT timezone>
-
-    arg 1) the exploded time
-    arg 2) the time to explode
-
-=cut
+/**
+ * convert a time to its human readable components in GMT timezone
+ * @param result the exploded time
+ * @param input the time to explode
  */
 ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input);
 
-/*
-
-=head1 ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
-
-B<convert a time to its human readable components in local timezone>
-
-    arg 1) the exploded time
-    arg 2) the time to explode
-
-=cut
+/**
+ * convert a time to its human readable components in local timezone
+ * @param result the exploded time
+ * @param input the time to explode
  */
 ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input);
 
-/*
-
-=head1 ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
-
-B<Convert time value from human readable format to number of seconds since epoch>
-
-    arg 1) the resulting imploded time
-    arg 2) the input exploded time
-
-=cut
+/**
+ * Convert time value from human readable format to number of seconds 
+ * since epoch
+ * @param result the resulting imploded time
+ * @param input the input exploded time
  */
 ap_status_t ap_implode_time(ap_time_t *result, ap_exploded_time_t *input);
 
-/*
-
-=head1 void ap_sleep(ap_interval_time_t t)
-
-B<Sleep for the specified number of micro-seconds.>
-
-    arg 1) desired amount of time to sleep.
-
-B<NOTE>:  May sleep for longer than the specified time. 
-
-=cut
+/**
+ * Sleep for the specified number of micro-seconds.
+ * @param t desired amount of time to sleep.
+ * @tip May sleep for longer than the specified time. 
  */
 void ap_sleep(ap_interval_time_t t);
 
-/* ap_rfc822_date formats dates in the RFC822
-   format in an efficient manner.  it is a fixed length
-   format and requires the indicated amount of storage
-   including trailing \0 */
 #define AP_RFC822_DATE_LEN (30)
+/**
+ * ap_rfc822_date formats dates in the RFC822
+ * format in an efficient manner.  it is a fixed length
+ * format and requires the indicated amount of storage
+ * including trailing \0
+ * @param date_str String to write to.
+ * @param t the time to convert 
+ */
 ap_status_t ap_rfc822_date(char *date_str, ap_time_t t);
 
-/* ap_ctime formats dates in the ctime() format
-   in an efficient manner.  it is a fixed length format
-   and requires the indicated amount of storage
-   including trailing \0 */
 #define AP_CTIME_LEN (25)
+/**
+ * ap_ctime formats dates in the ctime() format
+ * in an efficient manner.  it is a fixed length format
+ * and requires the indicated amount of storage
+ * including trailing \0 
+ * @param date_str String to write to.
+ * @param t the time to convert 
+ */
 ap_status_t ap_ctime(char *date_str, ap_time_t t);
 
+/**
+ * formats the exploded time according to the format specified
+ * @param s string to write to
+ * @param retsize The length of the returned string
+ * @param max The maximum length of the string
+ * @param format The format for the time string
+ * @param tm The time to convert
+ */
 ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, const char *format, ap_exploded_time_t *tm);
 
 #ifdef __cplusplus
