@@ -56,7 +56,7 @@
 #include "threadproc.h"
 #include "apr_portable.h"
 
-#ifdef APR_HAS_THREADS
+#if APR_HAS_THREADS
 
 #ifdef HAVE_PTHREAD_H
 /* ***APRDOC********************************************************
