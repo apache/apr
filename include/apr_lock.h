@@ -91,7 +91,7 @@ typedef struct ap_lock_t           ap_lock_t;
  *        only guaranteed to lock processes.
  */
 ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
-                           ap_lockscope_e scope, char *fname, 
+                           ap_lockscope_e scope, const char *fname, 
                            ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
