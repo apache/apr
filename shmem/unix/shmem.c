@@ -89,7 +89,6 @@ ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file)
 ap_status_t ap_shm_destroy(struct shmem_t *m)
 {
     mm_destroy(m->mm);
-    m->mm = NULL;
     return APR_SUCCESS;
 }
 
@@ -108,7 +107,7 @@ void *ap_shm_malloc(struct shmem_t *c, ap_size_t reqsize)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_shm_calloc(ap_shmem_t *, ap_size_t)
+ * void *ap_shm_calloc(ap_shmem_t *, ap_size_t)
  *    allocate memory from the block of shared memory and initialize it
  *    to zero.
  * arg 1) The shared memory block to destroy. 
