@@ -896,7 +896,7 @@ EOF
 	echo mips-dde-sysv${UNAME_RELEASE}
 	exit 0 ;;
     BS2000:POSIX-BC:*:*)
-	echo BS2000-siemens-sysv4
+	echo bs2000-siemens-sysv4
 	exit 0 ;;
     RM*:ReliantUNIX-*:*:*)
 	echo mips-sni-sysv4
