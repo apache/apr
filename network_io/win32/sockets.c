@@ -410,3 +410,11 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
     (*sock)->sock = *thesock;
     return APR_SUCCESS;
 }
+
+APR_DECLARE_SET_INHERIT(socket) {
+    return;
+}
+
+APR_DECLARE_UNSET_INHERIT(socket) {
+    return;
+}
