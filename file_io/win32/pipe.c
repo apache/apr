@@ -148,6 +148,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     (*in)->dataRead = 0;
     (*in)->direction = 0;
     (*in)->pOverlapped = NULL;
+    (void) apr_pollset_create(&(*in)->pollset, 1, p, 0);
 
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->pool = p;
@@ -161,6 +162,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     (*out)->dataRead = 0;
     (*out)->direction = 0;
     (*out)->pOverlapped = NULL;
+    (void) apr_pollset_create(&(*out)->pollset, 1, p, 0);
 
     if (apr_os_level >= APR_WIN_NT) {
         /* Create the read end of the pipe */

@@ -57,6 +57,7 @@
 
 #include "apr_network_io.h"
 #include "apr_general.h"
+#include "apr_poll.h"
 
 typedef struct sock_userdata_t sock_userdata_t;
 struct sock_userdata_t {
@@ -81,6 +82,9 @@ struct apr_socket_t {
     apr_int32_t         options;
     apr_int32_t         inherit;
     sock_userdata_t    *userdata;
+
+    /* if there is a timeout set, then this pollset is used */
+    apr_pollset_t *pollset;
 };
 
 #ifdef _WIN32_WCE

@@ -103,6 +103,10 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
                                                         sizeof(apr_sockaddr_t));
     (*new)->remote_addr->pool = p;
+
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*new)->pollset, 1, p, 0);
 }
 
 APR_DECLARE(apr_status_t) apr_socket_protocol_get(apr_socket_t *sock, int *protocol)
@@ -115,6 +119,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family, int 
                                             int protocol, apr_pool_t *cont)
 {
     int downgrade = (family == AF_UNSPEC);
+    apr_pollfd_t pfd;
 
     if (family == AF_UNSPEC) {
 #if APR_HAVE_IPV6
@@ -143,6 +148,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family, int 
     (*new)->nonblock = FALSE;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, apr_pool_cleanup_null);
+
     return APR_SUCCESS;
 } 
 

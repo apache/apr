@@ -63,6 +63,7 @@
 #include "apr_file_info.h"
 #include "apr_errno.h"
 #include "apr_lib.h"
+#include "apr_poll.h"
 
 /* System headers the file I/O library needs */
 #if APR_HAVE_FCNTL_H
@@ -119,6 +120,9 @@ struct apr_file_t {
     int buffered;
     enum {BLK_UNKNOWN, BLK_OFF, BLK_ON } blocking;
     int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
+
+    /* if there is a timeout set, then this pollset is used */
+    apr_pollset_t *pollset;
 
     /* Stuff for buffered mode */
     char *buffer;

@@ -131,6 +131,10 @@ static apr_status_t _file_dup(apr_file_t **new_file,
                               apr_unix_file_cleanup, 
                               apr_unix_file_cleanup);
 
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
+
     return APR_SUCCESS;
 }
 
@@ -183,5 +187,10 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
     old_file->filedes = -1;
     apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
                           apr_unix_file_cleanup);
+
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*new_file)->pollset, 1, p, 0);
+
     return APR_SUCCESS;
 }
