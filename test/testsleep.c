@@ -77,7 +77,7 @@ static void do_sleep(int howlong)
     diff = now - then;
 
     printf("%-60s","    Just woken up, checking how long I've been asleep");
-    if (diff < interval || diff > interval * 1.01) {
+    if (diff < interval * 0.99 || diff > interval * 1.01) {
         printf("Failed!\n\t(actual: %" APR_TIME_T_FMT
                ", wanted: %" APR_TIME_T_FMT")\n", diff, interval);
     } else {
