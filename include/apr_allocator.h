@@ -118,9 +118,6 @@ APR_DECLARE(void) apr_allocator_destroy(apr_allocator_t *allocator);
  * @param size The size of the mem to allocate (excluding the
  *        memnode structure)
  */
-/*
- * XXX: Move this to a private header file
- */
 APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
                                                  apr_size_t size);
 
@@ -128,9 +125,6 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
  * Free a block of mem, giving it back to the allocator
  * @param allocator The allocator to give the mem back to
  * @param memnode The memory node to return
- */
-/*
- * XXX: Move this to a private header file
  */
 APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                                      apr_memnode_t *memnode);
