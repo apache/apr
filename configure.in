@@ -1210,6 +1210,7 @@ AC_CHECK_FUNCS(strcasecmp, have_strcasecmp="1", have_strcasecmp="0")
 AC_CHECK_FUNCS(strdup, have_strdup="1", have_strdup="0")
 AC_CHECK_FUNCS(strstr, have_strstr="1", have_strstr="0")
 AC_CHECK_FUNCS(memchr, have_memchr="1", have_memchr="0")
+AC_CHECK_FUNCS(strtoll, have_strtoll="1", have_strtoll="0")
 
 AC_SUBST(have_strnicmp)
 AC_SUBST(have_strncasecmp)
@@ -1218,6 +1219,7 @@ AC_SUBST(have_strcasecmp)
 AC_SUBST(have_strdup)
 AC_SUBST(have_strstr)
 AC_SUBST(have_memchr)
+AC_SUBST(have_strtoll)
 
 dnl #----------------------------- Checking for DSO support
 echo $ac_n "${nl}Checking for DSO...${nl}"
