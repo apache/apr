@@ -180,7 +180,7 @@ static int run_sendfile(apr_pool_t *context, int number)
     return 1;
 }
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }

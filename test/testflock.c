@@ -141,7 +141,7 @@ static void do_write(void)
     printf(" done.\nExiting.\n");
 }
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }

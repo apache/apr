@@ -90,7 +90,7 @@ int main(void)
 
 typedef enum {BLK, NONBLK, TIMEOUT} client_socket_mode_t;
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }
