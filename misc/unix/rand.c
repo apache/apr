@@ -74,6 +74,10 @@
 #include <sys/un.h>
 #endif
 
+#ifndef SHUT_RDWR
+#define SHUT_RDWR 2
+#endif
+
 #if APR_HAS_RANDOM
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
