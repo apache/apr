@@ -60,9 +60,9 @@
 
 #include <machine/atomic.h>
 
-APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    atomic_add_int(mem, val);
+    return atomic_add_int(mem, val);
 }
 #define APR_OVERRIDE_ATOMIC_ADD32
 
@@ -72,9 +72,9 @@ APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
 }
 #define APR_OVERRIDE_ATOMIC_DEC32
 
-APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
-    atomic_add_int(mem, 1);
+    return atomic_add_int(mem, 1);
 }
 #define APR_OVERRIDE_ATOMIC_INC32
 
@@ -103,12 +103,13 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
 }
 #define APR_OVERRIDE_ATOMIC_CAS32
 
-APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    asm volatile ("lock; addl %1, %0"                              
-                  :                                                           
-                  : "m" (*(mem)), "r" (val)                                   
-                  : "memory");
+    asm volatile ("lock; xadd %1, (%2)"                              
+                  : "=r"(val)          /* output, same as 1st input */
+                  : "r"(val), "r"(mem) /* inputs */
+                  : "%1","memory");    /* tell gcc they are clobbered */
+    return val;
 }
 #define APR_OVERRIDE_ATOMIC_ADD32
 
@@ -136,12 +137,15 @@ APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
 }
 #define APR_OVERRIDE_ATOMIC_DEC32
 
-APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
-    asm volatile ("lock; incl %0"
-                  :
-                  : "m" (*(mem))
-                  : "memory");
+    apr_uint32_t val = 1;
+
+    asm volatile ("lock; xadd %1, (%2)"                              
+                  : "=r"(val)          /* output, same as 1st input */
+                  : "r"(val), "r"(mem) /* inputs */
+                  : "%1","memory");    /* tell gcc they are clobbered */
+    return val;
 }
 #define APR_OVERRIDE_ATOMIC_INC32
 
@@ -196,18 +200,23 @@ apr_status_t apr_atomic_init(apr_pool_t *p)
 #endif /*!defined(apr_atomic_init) && !defined(APR_OVERRIDE_ATOMIC_INIT) */
 
 #if !defined(apr_atomic_add32) && !defined(APR_OVERRIDE_ATOMIC_ADD32)
-void apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val) 
+apr_uint32_t apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+    apr_uint32_t old_value;
+
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
        
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        old_value = *mem;
         *mem += val;
         apr_thread_mutex_unlock(lock);
     }
 #else
+    old_value = *mem;
     *mem += val;
 #endif /* APR_HAS_THREADS */
+    return old_value;
 }
 #endif /*!defined(apr_atomic_sub32) && !defined(APR_OVERRIDE_ATOMIC_SUB32) */
 
@@ -244,18 +253,23 @@ void apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
 #endif /*!defined(apr_atomic_set32) && !defined(APR_OVERRIDE_ATOMIC_SET32) */
 
 #if !defined(apr_atomic_inc32) && !defined(APR_OVERRIDE_ATOMIC_INC32)
-void apr_atomic_inc32(volatile apr_uint32_t *mem) 
+apr_uint32_t apr_atomic_inc32(volatile apr_uint32_t *mem) 
 {
+    apr_uint32_t old_value;
+
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
+        old_value = *mem;
         (*mem)++;
         apr_thread_mutex_unlock(lock);
     }
 #else
+    old_value = *mem;
     (*mem)++;
 #endif /* APR_HAS_THREADS */
+    return old_value;
 }
 #endif /*!defined(apr_atomic_inc32) && !defined(APR_OVERRIDE_ATOMIC_INC32) */
 

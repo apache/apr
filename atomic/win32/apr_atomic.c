@@ -79,9 +79,9 @@ typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_val_fn)
     (apr_uint32_t volatile *, 
      apr_uint32_t, apr_uint32_t);
 
-APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, val);
+    return ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, val);
 }
 
 APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
@@ -89,9 +89,10 @@ APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
     ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, -val);
 }
 
-APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
-    ((apr_atomic_win32_ptr_fn)InterlockedIncrement)(mem);
+    /* we return old value, win32 returns new value :( */
+    return ((apr_atomic_win32_ptr_fn)InterlockedIncrement)(mem) - 1;
 }
 
 APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
