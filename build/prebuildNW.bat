@@ -15,6 +15,7 @@ copy ..\include\apr.hnw ..\include\apr.h
 copy ..\..\apr-util\include\apu.h.in ..\..\apr-util\include\apu.h
 copy ..\..\apr-util\include\private\apu_config.hw ..\..\apr-util\include\private\apu_config.h
 copy ..\..\apr-util\xml\expat\lib\expat.h.in ..\..\apr-util\xml\expat\lib\expat.h
+copy ..\..\apr-util\xml\expat\lib\config.hnw ..\..\apr-util\xml\expat\lib\config.h
 copy ..\..\apr-util\include\private\apu_select_dbm.hw ..\..\apr-util\include\private\apu_select_dbm.h
 
 @echo Fixing up the pcre headers
@@ -23,4 +24,4 @@ copy ..\..\pcre\pcre.hw ..\..\pcre\pcre.h
 
 @echo Generating the import list...
 awk -f make_nw_export.awk ..\include\*.h |sort > ..\aprlib.imp
-awk -f make_nw_export.awk ..\..\apr-util\include\*.h |sort > ..\aprutil.imp
+awk -f make_nw_export.awk ..\..\apr-util\include\*.h |sort >> ..\aprlib.imp
