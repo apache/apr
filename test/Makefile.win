@@ -7,6 +7,11 @@ NONPORTABLE = \
 	testglobalmutex.exe
 
 PROGRAMS = \
+	client.exe \
+	sendfile.exe \
+	server.exe \
+	proc_child.exe \
+	occhild.exe\
 	testflock.exe \
 	testsock.exe \
 	testlockperf.exe \
@@ -18,14 +23,12 @@ PROGRAMS = \
 	mod_test.so
 
 
-TARGETS = $(PROGRAMS) client.exe sendfile.exe \
-	server.exe 
+TARGETS = $(PROGRAMS)
 
 LOCAL_LIBS=..\LibD\apr.lib 
 ALL_LIBS=kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib
 
-CLEAN_TARGETS = mod_test.slo proc_child.exe occhild.exe \
-	        testprocmutex.exe testglobalmutex.exe testshm.exe
+CLEAN_TARGETS = mod_test.lib mod_test.exp
 
 INCDIR=../include
 INCLUDES=/I "$(INCDIR)"
@@ -45,7 +48,8 @@ occhild.exe: occhild.obj $(LOCAL_LIBS)
 	$(LINK) occhild.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
 proc_child.exe: proc_child.obj $(LOCAL_LIBS)
-	$(LINK) proc_child.obj $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK) /debug /subsystem:console /machine:I386 \
+		proc_child.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
 # FIXME: This is BS ... we should deal with namespace decoration within the
 # apr_dso_sym() function or within the test (take y'r pick) since many platforms
