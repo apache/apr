@@ -68,11 +68,14 @@ changequote(, )dnl
       ac_dots=`echo $apr_config_subdirs|sed -e 's%^\./%%' -e 's%[^/]$%&/%' -e 's%[^/]*/%../%g'`
 changequote([, ])dnl
 
-  # Make the cache file name correct relative to the subdirectory.
+  # Make the cache file pathname absolute for the subdirs
+  # required to correctly handle subdirs that might actually
+  # be symlinks
   case "$cache_file" in
-  /*) ac_sub_cache_file=$cache_file ;;
-  *) # Relative path.
-    ac_sub_cache_file="$ac_dots$cache_file" ;;
+  /*) # already absolute
+    ac_sub_cache_file=$cache_file ;;
+  *)  # Was relative path.
+    ac_sub_cache_file="$ac_popdir/$cache_file" ;;
   esac
 
   # The eval makes quoting arguments work.
