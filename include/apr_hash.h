@@ -38,10 +38,10 @@ extern "C" {
  * passed to indicate a string-valued key, and have apr_hash compute the
  * length automatically.
  *
- * @remark apr_hash will use strlen(key) for the length. The null-terminator
+ * @remark apr_hash will use strlen(key) for the length. The NUL terminator
  *         is not included in the hash value (why throw a constant in?).
  *         Since the hash table merely references the provided key (rather
- *         than copying it), apr_hash_this() will return the null-term'd key.
+ *         than copying it), apr_hash_this() will return the NUL-term'd key.
  */
 #define APR_HASH_KEY_STRING     (-1)
 
@@ -173,7 +173,8 @@ APR_DECLARE(unsigned int) apr_hash_count(apr_hash_t *ht);
 
 /**
  * Merge two hash tables into one new hash table. The values of the overlay
- * hash override the values of the base if both have the same key.
+ * hash override the values of the base if both have the same key.  Both
+ * hash tables must use the same hash function.
  * @param p The pool to use for the new hash table
  * @param overlay The table to add to the initial table
  * @param base The table that represents the initial values of the new table
@@ -186,7 +187,8 @@ APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
 /**
  * Merge two hash tables into one new hash table. If the same key
  * is present in both tables, call the supplied merge function to
- * produce a merged value for the key in the new table.
+ * produce a merged value for the key in the new table.  Both
+ * hash tables must use the same hash function.
  * @param p The pool to use for the new hash table
  * @param h1 The first of the tables to merge
  * @param h2 The second of the tables to merge
