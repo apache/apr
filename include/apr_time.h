@@ -63,55 +63,58 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef enum {APR_LOCALTIME, APR_UTCTIME} ap_timetype_e;
-
-/* ap_ansi_time_t is defined as the number of seconds since
- * 0:00:00 01/01/70.
- */
-typedef ap_int64_t           ap_ansi_time_t;
-typedef struct atime_t       ap_time_t;
-
 API_VAR_IMPORT const char ap_month_snames[12][4];
 API_VAR_IMPORT const char ap_day_snames[7][4];
 
-/* Function Definitions */
-ap_status_t ap_make_time(ap_time_t **, ap_context_t *);
-ap_status_t ap_make_init_time(ap_time_t **, ap_context_t *);
-ap_status_t ap_current_time(ap_time_t *);
-ap_status_t ap_explode_time(ap_time_t *, ap_timetype_e);
-ap_status_t ap_implode_time(ap_time_t *);
+/* number of microseconds since 00:00:00 january 1, 1970 UTC */
+typedef ap_int64_t ap_time_t;
 
-ap_status_t ap_timestr(char **date_str, struct atime_t *t, ap_timetype_e type, ap_context_t *p);
-ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, const char *format, ap_time_t *tm);
+#define AP_USEC_PER_SEC (1000000LL)
 
-/* accessor functions */
-ap_status_t ap_get_ansitime(ap_time_t *, ap_ansi_time_t *);
-ap_status_t ap_timediff(ap_time_t *, ap_time_t *, ap_int32_t *);
+/* the time right now */
+ap_time_t ap_now(void);
 
-ap_status_t ap_get_sec(ap_time_t *, ap_int32_t *);
-ap_status_t ap_get_min(ap_time_t *, ap_int32_t *);
-ap_status_t ap_get_hour(ap_time_t *, ap_int32_t *);
-ap_status_t ap_get_mday(ap_time_t *, ap_int32_t *);
-ap_status_t ap_get_mon(ap_time_t *, ap_int32_t *);
-ap_status_t ap_get_year(ap_time_t *, ap_int32_t *);
-ap_status_t ap_get_wday(ap_time_t *, ap_int32_t *);
+/* a structure similar to ANSI struct tm with the following differences:
+   - tm_usec isn't an ANSI field
+   - tm_gmtoff isn't an ANSI field (it's a bsdism)
+*/
+typedef struct {
+    ap_int32_t tm_usec;	/* microseconds past tm_sec */
+    ap_int32_t tm_sec;	/* (0-61) seconds past tm_min */
+    ap_int32_t tm_min;  /* (0-59) minutes past tm_hour */
+    ap_int32_t tm_hour; /* (0-23) hours past midnight */
+    ap_int32_t tm_mday; /* (1-31) day of the month */
+    ap_int32_t tm_mon;  /* (0-11) month of the year */
+    ap_int32_t tm_year; /* year since 1900 */
+    ap_int32_t tm_wday; /* (0-6) days since sunday */
+    ap_int32_t tm_yday; /* (0-365) days since jan 1 */
+    ap_int32_t tm_isdst; /* daylight saving time */
+    ap_int32_t tm_gmtoff; /* seconds east of UTC */
+} ap_exploded_time_t;
 
-ap_status_t ap_set_ansitime(ap_time_t *, ap_ansi_time_t);
-ap_status_t ap_set_sec(ap_time_t *, ap_int32_t);
-ap_status_t ap_set_min(ap_time_t *, ap_int32_t);
-ap_status_t ap_set_hour(ap_time_t *, ap_int32_t);
-ap_status_t ap_set_mday(ap_time_t *, ap_int32_t);
-ap_status_t ap_set_mon(ap_time_t *, ap_int32_t);
-ap_status_t ap_set_year(ap_time_t *, ap_int32_t);
-ap_status_t ap_set_wday(ap_time_t *, ap_int32_t);
-ap_status_t ap_timecmp(ap_time_t *a, ap_time_t *b);
+/* convert an ANSI time_t to ap_time_t */
+ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input);
 
-ap_status_t ap_get_gmtoff(int *tz, ap_time_t *tt, ap_context_t *cont);
+ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input);
+ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input);
+ap_status_t ap_implode_time(ap_time_t *result, ap_exploded_time_t *input);
 
-ap_status_t ap_get_timedata(ap_time_t *, char *, void *);
-ap_status_t ap_set_timedata(ap_time_t *, void *, char *,
-                            ap_status_t (*cleanup) (void *));
- 
+/* ap_rfc822_date formats dates in the RFC822
+   format in an efficient manner.  it is a fixed length
+   format and requires the indicated amount of storage
+   including trailing \0 */
+#define AP_RFC822_DATE_LEN (30)
+ap_status_t ap_rfc822_date(char *date_str, ap_time_t t);
+
+/* ap_ctime formats dates in the ctime() format
+   in an efficient manner.  it is a fixed length format
+   and requires the indicated amount of storage
+   including trailing \0 */
+#define AP_CTIME_LEN (25)
+ap_status_t ap_ctime(char *date_str, ap_time_t t);
+
+ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, const char *format, ap_exploded_time_t *tm);
+
 #ifdef __cplusplus
 }
 #endif
