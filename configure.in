@@ -46,25 +46,26 @@ dnl Preload
 APR_PRELOAD
 
 dnl Absolute source/build directory
-abs_srcdir=`(cd $srcdir && pwd)`
-abs_builddir=`pwd`
+apr_srcdir=`(cd $srcdir && pwd)`
+apr_builddir=`pwd`
+AC_SUBST(apr_srcdir)
+AC_SUBST(apr_builddir)
 
-if test "$abs_builddir" != "$abs_srcdir"; then
+if test "$apr_builddir" != "$apr_srcdir"; then
   USE_VPATH=1
 fi
 
 dnl Libtool might need this symbol -- it must point to the location of
 dnl the generated libtool script (not necessarily the "top" build dir).
 dnl
-top_builddir="$abs_builddir"
+top_builddir="$apr_builddir"
 AC_SUBST(top_builddir)
-AC_SUBST(abs_srcdir)
 
 dnl Directory containing apr build macros, helpers, and make rules
 dnl NOTE: make rules (rules.mk) will be in the builddir for vpath
 dnl
-apr_buildout=$abs_builddir/build
-apr_builders=$abs_srcdir/build
+apr_buildout=$apr_builddir/build
+apr_builders=$apr_srcdir/build
 AC_SUBST(apr_builders)
 
 MKDIR=$apr_builders/mkdir.sh
@@ -109,7 +110,7 @@ AC_PROG_LIBTOOL
         LTFLAGS='--silent'
     fi
     dnl get libtool's setting of shlibpath_var
-    eval `grep "^shlibpath_var=[[A-Z_]]\+$" $abs_builddir/libtool`
+    eval `grep "^shlibpath_var=[[A-Z_]]\+$" $apr_builddir/libtool`
     ;;
 esac
 
@@ -1564,8 +1565,8 @@ if test -n "$USE_VPATH"; then
   for makefile in $MAKEFILE1 $MAKEFILE2 $MAKEFILE3; do
     dir=`echo $makefile|sed 's%[^/][^/]*$%%'`
     (cat <<EOF
-srcdir = $abs_srcdir/$dir
-VPATH  = $abs_srcdir/$dir
+srcdir = $apr_srcdir/$dir
+VPATH  = $apr_srcdir/$dir
 
 EOF
 )    |  cat - $makefile | \
