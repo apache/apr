@@ -316,7 +316,7 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
 #if APR_HAS_THREADS
         if (allocator->mutex)
             apr_thread_mutex_lock(allocator->mutex);
-#endif
+#endif /* APR_HAS_THREADS */
         
         /* Walk the free list to see if there are
          * any nodes on it of the requested size
@@ -351,13 +351,14 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
 
                 allocator->max_index = max_index;
             }
-            
-            node->next = NULL;
 
 #if APR_HAS_THREADS
             if (allocator->mutex)
                 apr_thread_mutex_unlock(allocator->mutex);
-#endif
+#endif /* APR_HAS_THREADS */
+
+            node->next = NULL;
+            node->first_avail = (char *)node + SIZEOF_NODE_T;
 
             return node;
         }
@@ -365,7 +366,7 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
 #if APR_HAS_THREADS
         if (allocator->mutex)
             apr_thread_mutex_unlock(allocator->mutex);
-#endif
+#endif /* APR_HAS_THREADS */
     }
 
     /* If we found nothing, seek the sink (at index 0), if
@@ -375,7 +376,7 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
 #if APR_HAS_THREADS
         if (allocator->mutex)
             apr_thread_mutex_lock(allocator->mutex);
-#endif
+#endif /* APR_HAS_THREADS */
 
         /* Walk the free list to see if there are
          * any nodes on it of the requested size
@@ -386,12 +387,14 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
 
         if (node) {
             *ref = node->next;
-            node->next = NULL;
-            
+
 #if APR_HAS_THREADS
             if (allocator->mutex)
                 apr_thread_mutex_unlock(allocator->mutex);
-#endif
+#endif /* APR_HAS_THREADS */
+
+            node->next = NULL;
+            node->first_avail = (char *)node + SIZEOF_NODE_T;
 
             return node;
         }
@@ -399,7 +402,7 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
 #if APR_HAS_THREADS
         if (allocator->mutex)
             apr_thread_mutex_unlock(allocator->mutex);
-#endif
+#endif /* APR_HAS_THREADS */
     }
     
     /* If we haven't got a suitable node, malloc a new one
@@ -480,12 +483,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
         return mem;
     }
 
-    /* Reset the active node, get ourselves a new one and activate it. */
-    active->first_avail = (char *)active + SIZEOF_NODE_T;
-
     if ((node = node_malloc(pool->allocator, size)) == NULL) {
-        active->first_avail = active->endp;
-
         if (pool->abort_fn)
             pool->abort_fn(APR_ENOMEM);
 
@@ -496,7 +494,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
 
     mem = node->first_avail;
     node->first_avail += size;
-    
+
     return mem;
 }
 
@@ -520,9 +518,6 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
         return mem;
     }
 
-    /* Reset the active node, get ourselves a new one and activate it. */
-    active->first_avail = (char *)active + SIZEOF_NODE_T;
-
     if ((node = node_malloc(pool->allocator, size)) == NULL) {
         active->first_avail = active->endp;
 
@@ -536,9 +531,9 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 
     mem = node->first_avail;
     node->first_avail += size;
-    
+ 
     memset(mem, 0, size);
-    
+ 
     return mem;
 }
 
@@ -568,19 +563,15 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     /* Clear the user data. */
     pool->user_data = NULL;
 
-    /* Reset the active node */
-    if ((active = pool->active) == pool->self) {
-        active->first_avail = pool->self_first_avail;
-        return;
-    }
-
-    active->first_avail = (char *)active + SIZEOF_NODE_T;
-
-    /* Find the node attached to the pool structure, make
+    /* Find the node attached to the pool structure, reset it, make
      * it the active node and free the rest of the nodes.
      */
     active = pool->active = pool->self; 
     active->first_avail = pool->self_first_avail;
+    
+    if (active->next == NULL)
+        return;
+    
     node_free(pool->allocator, active->next);
     active->next = NULL;
 }
@@ -620,17 +611,12 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
             apr_thread_mutex_unlock(mutex);
 #endif
     }
-    
-    /* Reset the active block */
-    active = pool->active;
-    active->first_avail = (char *)active + SIZEOF_NODE_T;
-
+ 
     /* Find the block attached to the pool structure.  Save a copy of the
      * allocator pointer, because the pool struct soon will be no more.
      */
     allocator = pool->allocator;
     active = pool->self;
-    active->first_avail = (char *)active + SIZEOF_NODE_T;
 
     /* If this pool happens to be the owner of the allocator, free 
      * everything in the allocator (that includes the pool struct
@@ -645,13 +631,13 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
                 free(node);
             }
         }
-            
+
         ref = &active;
         while ((node = *ref) != NULL) {
             *ref = node->next;
             free(node);
         }
-            
+
         return;
     }
 
@@ -828,9 +814,6 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
         return -1;
 
     memcpy(active->first_avail, node->first_avail, cur_len);
-
-    /* Reset the previous active node */
-    node->first_avail = (char *)node + SIZEOF_NODE_T;
 
     if (ps->got_a_new_node) {
         node->next = ps->free;
