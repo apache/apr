@@ -53,6 +53,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include "apr_mmap.h"
@@ -77,6 +78,14 @@ int main()
     
     fprintf (stdout,"APR MMAP Test\n*************\n\n");
     
+    fprintf(stdout,"Initializing........................");
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Failed.\n");
+        exit(-1);
+    }
+    fprintf(stdout,"OK\n");
+    atexit(ap_terminate);
+
     fprintf(stdout,"Creating context....................");    
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
@@ -103,7 +112,7 @@ int main()
         exit(-1);
     }
     else {
-        fprintf(stdout, "%d bytes\n", finfo.size);
+        fprintf(stdout, "%d bytes\n", (int)finfo.size);
     }  
     
     fprintf(stdout,"Trying to mmap the file..............");
@@ -120,8 +129,7 @@ int main()
     }
     fprintf(stdout,"OK\n");
     
-    
     fprintf (stdout,"\nTest Complete\n");
-    
+
     return 1;
 }
