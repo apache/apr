@@ -268,9 +268,7 @@ APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
 {
-    apr_size_t nbytes = strlen(str);
-
-    return apr_file_write(thefile, str, &nbytes);
+    return apr_file_write_full(thefile, str, strlen(str), NULL);
 }
 
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
