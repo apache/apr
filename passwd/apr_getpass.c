@@ -115,6 +115,8 @@ static char *getpass(const char *prompt)
 }
 
 #elif defined (HAVE_TERMIOS_H)
+#include <stdio.h>
+
 static char *getpass(const char *prompt)
 {
     struct termios attr;
