@@ -83,7 +83,9 @@ typedef struct apr_memnode_t apr_memnode_t;
 
 struct apr_memnode_t {
     apr_memnode_t *next;
+    apr_memnode_t **ref;
     apr_uint32_t   index;
+    apr_uint32_t   free_index;
     char          *first_avail;
     char          *endp;
 };

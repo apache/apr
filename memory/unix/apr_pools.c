@@ -596,6 +596,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     apr_memnode_t *active, *node;
     void *mem;
     char *endp;
+    apr_uint32_t free_index;
 
     size = APR_ALIGN_DEFAULT(size);
     active = pool->active;
@@ -609,17 +610,54 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
         return mem;
     }
 
-    if ((node = apr_allocator_alloc(pool->allocator, size)) == NULL) {
-        if (pool->abort_fn)
-            pool->abort_fn(APR_ENOMEM);
+    node = active->next;
+    endp = node->first_avail + size;
+    if (endp < node->endp) {
+        *node->ref = node->next;
+        node->next->ref = node->ref;
+    }
+    else {
+        if ((node = apr_allocator_alloc(pool->allocator, size)) == NULL) {
+            if (pool->abort_fn)
+                pool->abort_fn(APR_ENOMEM);
 
-        return NULL;
+            return NULL;
+        }
+        endp = node->first_avail + size;
     }
 
-    active->next = pool->active = node;
+    node->free_index = 0;
 
     mem = node->first_avail;
-    node->first_avail += size;
+    node->first_avail = endp;
+
+    node->ref = active->ref;
+    *node->ref = node;
+    node->next = active;
+    active->ref = &node->next;
+
+    pool->active = node;
+
+    free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
+                            BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
+
+    active->free_index = free_index;
+    node = active->next;
+    if (free_index >= node->free_index)
+        return mem;
+
+    do {
+        node = node->next;
+    }
+    while (free_index < node->free_index);
+
+    *active->ref = active->next;
+    active->next->ref = active->ref;
+
+    active->ref = node->ref;
+    *active->ref = active;
+    active->next = node;
+    node->ref = &active->next;
 
     return mem;
 }
@@ -677,11 +715,13 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
     active = pool->active = pool->self;
     active->first_avail = pool->self_first_avail;
 
-    if (active->next == NULL)
+    if (active->next == active)
         return;
 
+    *active->ref = NULL;
     apr_allocator_free(pool->allocator, active->next);
-    active->next = NULL;
+    active->next = active;
+    active->ref = &active->next;
 }
 
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
@@ -724,6 +764,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
      */
     allocator = pool->allocator;
     active = pool->self;
+    *active->ref = NULL;
 
 #if APR_HAS_THREADS
     if (apr_allocator_get_owner(allocator) == pool) {
@@ -775,6 +816,9 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 
         return APR_ENOMEM;
     }
+
+    node->next = node;
+    node->ref = &node->next;
 
     pool = (apr_pool_t *)node->first_avail;
     node->first_avail = pool->self_first_avail = (char *)pool + SIZEOF_POOL_T;
@@ -843,7 +887,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 struct psprintf_data {
     apr_vformatter_buff_t vbuff;
     apr_memnode_t   *node;
-    apr_allocator_t *allocator;
+    apr_pool_t      *pool;
     apr_byte_t       got_a_new_node;
     apr_memnode_t   *free;
 };
@@ -852,29 +896,70 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 {
     struct psprintf_data *ps = (struct psprintf_data *)vbuff;
     apr_memnode_t *node, *active;
-    apr_size_t cur_len;
+    apr_size_t cur_len, size;
     char *strp;
-    apr_allocator_t *allocator;
+    apr_pool_t *pool;
+    apr_uint32_t free_index;
 
-    allocator = ps->allocator;
-    node = ps->node;
+    pool = ps->pool;
+    active = ps->node;
     strp = ps->vbuff.curpos;
-    cur_len = strp - node->first_avail;
+    cur_len = strp - active->first_avail;
+    size = cur_len << 1;
 
-    if ((active = apr_allocator_alloc(allocator, cur_len << 1)) == NULL)
-        return -1;
+    node = active->next;
+    if (!ps->got_a_new_node && node->first_avail + size < node->endp) {
+        *node->ref = node->next;
+        node->next->ref = node->ref;
 
-    memcpy(active->first_avail, node->first_avail, cur_len);
+        node->ref = active->ref;
+        *node->ref = node;
+        node->next = active;
+        active->ref = &node->next;
 
-    if (ps->got_a_new_node) {
-        node->next = ps->free;
-        ps->free = node;
+        node->free_index = 0;
+
+        pool->active = node;
+
+        free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
+                                BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
+
+        active->free_index = free_index;
+        node = active->next;
+        if (free_index < node->free_index) {
+            do {
+                node = node->next;
+            }
+            while (free_index < node->free_index);
+
+            *active->ref = active->next;
+            active->next->ref = active->ref;
+
+            active->ref = node->ref;
+            *active->ref = active;
+            active->next = node;
+            node->ref = &active->next;
+        }
+ 
+        node = pool->active;
+    }
+    else {
+        if ((node = apr_allocator_alloc(pool->allocator, size)) == NULL)
+            return -1;
+
+        if (ps->got_a_new_node) {
+            active->next = ps->free;
+            ps->free = node; 
+        }
+
+        ps->got_a_new_node = 1;
     }
 
-    ps->node = active;
-    ps->vbuff.curpos = active->first_avail + cur_len;
-    ps->vbuff.endpos = active->endp - 1; /* Save a byte for NUL terminator */
-    ps->got_a_new_node = 1;
+    memcpy(node->first_avail, active->first_avail, cur_len);
+
+    ps->node = node;
+    ps->vbuff.curpos = node->first_avail + cur_len;
+    ps->vbuff.endpos = node->endp - 1; /* Save a byte for NUL terminator */
 
     return 0;
 }
@@ -884,10 +969,11 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     struct psprintf_data ps;
     char *strp;
     apr_size_t size;
-    apr_memnode_t *active;
+    apr_memnode_t *active, *node;
+    apr_uint32_t free_index;
 
     ps.node = active = pool->active;
-    ps.allocator = pool->allocator;
+    ps.pool = pool;
     ps.vbuff.curpos  = ps.node->first_avail;
 
     /* Save a byte for the NUL terminator */
@@ -910,15 +996,48 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
     strp = ps.node->first_avail;
     ps.node->first_avail += size;
 
+   if (ps.free)
+        apr_allocator_free(pool->allocator, ps.free);
+
     /*
      * Link the node in if it's a new one
      */
-    if (ps.got_a_new_node) {
-        active->next = pool->active = ps.node;
-    }
+    if (!ps.got_a_new_node)
+        return strp;
 
-    if (ps.free)
-        apr_allocator_free(ps.allocator, ps.free);
+    active = pool->active;
+    node = ps.node;
+
+    node->free_index = 0;
+
+    node->ref = active->ref;
+    *node->ref = node;
+    node->next = active;
+    active->ref = &node->next;
+
+    pool->active = node;
+
+    free_index = (APR_ALIGN(active->endp - active->first_avail + 1,
+                            BOUNDARY_SIZE) - BOUNDARY_SIZE) >> BOUNDARY_INDEX;
+
+    active->free_index = free_index;
+    node = active->next;
+
+    if (free_index >= node->free_index)
+        return strp;
+
+    do {
+        node = node->next;
+    }
+    while (free_index < node->free_index);
+
+    *active->ref = active->next;
+    active->next->ref = active->ref;
+
+    active->ref = node->ref;
+    *active->ref = active;
+    active->next = node;
+    node->ref = &active->next;
 
     return strp;
 }
