@@ -1,5 +1,13 @@
 Changes with APR b1  
 
+  *) Fix the new shared memory configure script.  The APR_DECIDE
+     macros go in order, so the last set of dependancies that are
+     met are the ones used.  That means that when using those macros,
+     options should be listed with the least desirable option first,
+     and the most desirable last.  The new shared memory routines did
+     the opposite, so we chose the wrong shared memory option on Linux.
+     [Ryan Bloom]
+
   *) Move the necessary shared memory code from MM into APR and remove
      our dependency upon MM.  [Justin Erenkrantz]
 

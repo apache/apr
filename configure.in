@@ -394,22 +394,22 @@ AC_HAVE_FUNCS(create_area)
 
 dnl Now we determine which one is our preference.
 APR_BEGIN_DECISION([shared memory allocation method])
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
-             APR_DECIDE(USE_SHMEM_MMAP_TMP, 
-             [Classical mmap() on temporary file]))
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
+             APR_DECIDE(USE_SHMEM_MMAP_ANON, 
+             [4.4BSD-style mmap() via MAP_ANON]))
+APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
+             func:shmget func:shmat func:shmdt func:shmctl,
+             APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()]))
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap file:/dev/zero,
+             APR_DECIDE(USE_SHMEM_MMAP_ZERO, 
+             [SVR4-style mmap() on /dev/zero]))
 APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
              func:shm_unlink,
              APR_DECIDE(USE_SHMEM_MMAP_SHM, 
              [mmap() via POSIX.1 shm_open() on temporary file]))
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap file:/dev/zero,
-             APR_DECIDE(USE_SHMEM_MMAP_ZERO, 
-             [SVR4-style mmap() on /dev/zero]))
-APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
-             func:shmget func:shmat func:shmdt func:shmctl,
-             APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()]))
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
-             APR_DECIDE(USE_SHMEM_MMAP_ANON, 
-             [4.4BSD-style mmap() via MAP_ANON]))
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
+             APR_DECIDE(USE_SHMEM_MMAP_TMP, 
+             [Classical mmap() on temporary file]))
 APR_IFALLYES(header:kernel/OS.h func:create_area,
              APR_DECIDE(USE_SHMEM_BEOS, [BeOS areas]))
 APR_END_DECISION
