@@ -1,6 +1,9 @@
 Changes with APR 0.9.4
 
-
+  *) Solaris cc: Don't use the -mt option for threaded builds.  That
+     is for non-Posix threading, and the use of it prevented us from
+     linking with -lpthread, which in turn caused weird problems for
+     APR applications.  [Kristofer Spinka <kspinka@style.net>]
 
 Changes with APR 0.9.3
 
