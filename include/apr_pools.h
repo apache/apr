@@ -381,13 +381,15 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
                                    apr_status_t (*cleanup)(void *));
 
 /**
- * Remove a previously registered child cleanup function
- * @param p The pool remove the cleanup from 
- * @param data The data to remove from cleanup
- * @param cleanup The function to remove from cleanup
+ * Replace the child cleanup of a previously registered cleanup
+ * @param p The pool of the registered cleanup
+ * @param data The data of the registered cleanup
+ * @param plain_cleanup The plain cleanup function of the registered cleanup
+ * @param child_cleanup The function to register as the child cleanup
  */
-APR_DECLARE(void) apr_pool_child_cleanup_kill(apr_pool_t *p, const void *data,
-                                              apr_status_t (*cleanup) (void *));
+APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
+                                      apr_status_t (*plain_cleanup) (void *),
+                                      apr_status_t (*child_cleanup) (void *));
 
 /**
  * Run the specified cleanup function immediately and unregister it. Use

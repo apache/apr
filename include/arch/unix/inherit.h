@@ -64,8 +64,8 @@ void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 {                                                                   \
     if (!(name->flag & APR_INHERIT)) {                              \
         name->flag |= APR_INHERIT;                                  \
-        apr_pool_cleanup_register(name->pool, (void *)name,         \
-                                  NULL, cleanup);                   \
+        apr_pool_cleanup_child_set(name->pool, (void *)name,        \
+                                   cleanup, apr_pool_cleanup_null); \
     }                                                               \
 }
 
@@ -75,7 +75,7 @@ void apr_##name##_unset_inherit(apr_##name##_t *name)               \
     if (name->flag & APR_INHERIT) {                                 \
         name->flag &= ~APR_INHERIT;                                 \
         apr_pool_cleanup_kill(name->pool, (void *)name,             \
-                              cleanup);                             \
+                              cleanup, cleanup);                    \
     }                                                               \
 }
 
