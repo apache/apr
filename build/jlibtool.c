@@ -1,61 +1,19 @@
-/* ====================================================================
- * The Apache Software License, Version 1.1
+/* Copyright 2000-2004 The Apache Software Foundation
  *
- * Copyright (c) 2000-2002 The Apache Software Foundation.  All rights
- * reserved.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution,
- *    if any, must include the following acknowledgment:
- *       "This product includes software developed by the
- *        Apache Software Foundation (http://www.apache.org/)."
- *    Alternately, this acknowledgment may appear in the software itself,
- *    if and wherever such third-party acknowledgments normally appear.
- *
- * 4. The names "Apache" and "Apache Software Foundation" must
- *    not be used to endorse or promote products derived from this
- *    software without prior written permission. For written
- *    permission, please contact apache@apache.org.
- *
- * 5. Products derived from this software may not be called "Apache",
- *    nor may "Apache" appear in their name, without prior written
- *    permission of the Apache Software Foundation.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the Apache Software Foundation.  For more
- * information on the Apache Software Foundation, please see
- * <http://www.apache.org/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 #include <stdio.h>
-#if defined(_OSD_POSIX)
-#include <stdarg.h>
-#endif
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -136,10 +94,15 @@
 #  define LIBRARIAN_OPTS "cr"
 #  define DYNAMIC_LINK_OPTS "-G"
 #  define LINKER_FLAG_PREFIX "-Wl,"
+#  define NEED_SNPRINTF
 #endif
 
 #ifndef SHELL_CMD
 #error Unsupported platform: Please add defines for SHELL_CMD etc. for your platform.
+#endif
+
+#ifdef NEED_SNPRINTF
+#include <stdarg.h>
 #endif
 
 #ifdef __EMX__
@@ -172,9 +135,9 @@ enum output_t {
 };
 
 enum pic_mode_e {
-    UNKNOWN,
-    PREFER,
-    AVOID,
+    pic_UNKNOWN,
+    pic_PREFER,
+    pic_AVOID,
 };
 
 typedef struct {
@@ -232,7 +195,7 @@ typedef struct {
     const char *version_info;
 } command_t;
 
-#if defined(_OSD_POSIX)
+#if defined(NEED_SNPRINTF)
 /* Write at most n characters to the buffer in str, return the
  * number of chars written or -1 if the buffer would have been
  * overflowed.
@@ -493,12 +456,12 @@ int parse_short_opt(char *arg, command_t *cmd_data)
     }
 
     if (strcmp(arg, "prefer-pic") == 0) {
-        cmd_data->options.pic_mode = PREFER;
+        cmd_data->options.pic_mode = pic_PREFER;
         return 1;
     }
 
     if (strcmp(arg, "prefer-non-pic") == 0) {
-        cmd_data->options.pic_mode = AVOID;
+        cmd_data->options.pic_mode = pic_AVOID;
         return 1;
     }
 
@@ -696,7 +659,7 @@ char *check_object_exists(command_t *cmd, const char *arg, int arglen)
 
     if (rv == 0) {
         if (pass == 1) {
-            cmd->options.pic_mode = AVOID;
+            cmd->options.pic_mode = pic_AVOID;
         }
         return newarg;
     }
@@ -734,7 +697,7 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
 
         switch (pass) {
         case 0:
-            if (cmd->options.pic_mode != AVOID || cmd->options.shared) {
+            if (cmd->options.pic_mode != pic_AVOID || cmd->options.shared) {
                 strcpy(ext, DYNAMIC_LIB_EXT);
                 break;
             }
@@ -913,7 +876,7 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
         cmd_data->basename = arg;
         cmd_data->output = otProgram;
 #if defined(_OSD_POSIX)
-        cmd_data->options.pic_mode = AVOID;
+        cmd_data->options.pic_mode = pic_AVOID;
 #endif
         newarg = (char *)malloc(strlen(arg) + 5);
         strcpy(newarg, arg);
@@ -1228,7 +1191,7 @@ void link_fixup(command_t *c)
             append_count_chars(c->arglist, c->obj_files);
             append_count_chars(c->arglist, c->shared_opts.dependencies);
 #ifdef DYNAMIC_LINK_OPTS
-            if (c->options.pic_mode != AVOID) {
+            if (c->options.pic_mode != pic_AVOID) {
                 push_count_chars(c->arglist, DYNAMIC_LINK_OPTS);
             }
 #endif
@@ -1242,7 +1205,7 @@ void post_parse_fixup(command_t *cmd_data)
     {
     case mCompile:
 #ifdef PIC_FLAG
-        if (cmd_data->options.pic_mode != AVOID) {
+        if (cmd_data->options.pic_mode != pic_AVOID) {
             push_count_chars(cmd_data->arglist, PIC_FLAG);
         }
 #endif
@@ -1413,7 +1376,7 @@ int run_mode(command_t *cmd_data)
 #endif
             }
 #ifdef DYNAMIC_LINK_OPTS
-            if (cmd_data->options.pic_mode != AVOID) {
+            if (cmd_data->options.pic_mode != pic_AVOID) {
                 push_count_chars(cmd_data->program_opts,
                                  DYNAMIC_LINK_OPTS);
             }
@@ -1491,7 +1454,7 @@ int main(int argc, char *argv[])
 
     memset(&cmd_data, 0, sizeof(cmd_data));
 
-    cmd_data.options.pic_mode = UNKNOWN;
+    cmd_data.options.pic_mode = pic_UNKNOWN;
 
     cmd_data.program_opts = (count_chars*)malloc(sizeof(count_chars));
     init_count_chars(cmd_data.program_opts);
