@@ -65,7 +65,7 @@
  * @brief APR SMS Memory routines
  */
 /**
- * @defgroup SMS SMS Stackable Memory allocation system
+ * @defgroup APR_SMS SMS Stackable Memory allocation system
  * @ingroup APR
  * @{
  */

@@ -69,9 +69,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /**
- * @package APR tracking memory system
+ * @file apr_sms_tracking.h
+ * @brief APR SMS Tracking Memory System
+ */
+/**
+ * @defgroup APR_SMS_Tracking Tracking SMS
+ * @ingroup APR_SMS
+ * @{
  */
 
 /**
@@ -79,14 +84,12 @@ extern "C" {
  * @param mem_sys A pointer to the returned apr_sms_t*
  * @param pms The parent memory system, used to allocate the memory
  *            that we will be tracking.
- * @deffunc apr_status_t apr_sms_tracking_create(apr_sms_t **mem_sys,
- *                                               apr_sms_t *pms);
  */
 APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys,
                                                   apr_sms_t *pms);
 
 
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif

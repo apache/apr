@@ -69,9 +69,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /**
- * @package APR blocks memory system
+ * @file apr_sms_blocks.h
+ * @brief APR SMS Blocks Memory System
+ */
+/**
+ * @defgroup APR_SMS_Blocks Blocks SMS
+ * @ingroup APR_SMS
+ * @{
  */
 
 /**
@@ -86,7 +91,7 @@ APR_DECLARE(apr_status_t) apr_sms_blocks_create(apr_sms_t **sms,
                                                 apr_size_t block_size);
 
 
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif

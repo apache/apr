@@ -58,8 +58,8 @@
  */
 /**
  *
- * @defgroup SMS_Private Private  routines
- * @ingroup SMS
+ * @defgroup APR_SMS_Private Private  routines
+ * @ingroup APR_SMS
  * @{
  */
 #ifndef SMS_PRIVATE_H
@@ -85,14 +85,14 @@ struct apr_sms_t
     apr_sms_t  *parent;  /**< parent of the current SMS  */
     apr_sms_t  *child;   /**< children of the current SMS */
     apr_sms_t  *sibling; /**< next SMS at the same level */
-    apr_sms_t **ref;
-    apr_sms_t  *accounting;
+    apr_sms_t **ref; /**< a pointer to the pointer pointing to memory */
+    apr_sms_t  *accounting; /**< SMS for accounting type tasks */
     const char *identity; /**< a string identifying the module */
 
-    apr_pool_t *pool;
-    apr_lock_t *sms_lock;
+    apr_pool_t *pool; /**< pool to associate with this SMS */
+    apr_lock_t *sms_lock; /**< lock to use when allocated memory in this SMS */
     
-    struct apr_sms_cleanup *cleanups;
+    struct apr_sms_cleanup *cleanups; /**< stuff to call when the SMS is being freed */
 
     void * (*malloc_fn)            (apr_sms_t *sms, apr_size_t size); /**< malloc fn for this SMS */
     void * (*calloc_fn)            (apr_sms_t *sms, apr_size_t size); /**< calloc fn for this SMS */
@@ -106,8 +106,8 @@ the SMS */
     apr_status_t (*lock_fn)        (apr_sms_t *sms); /**< locking function */
     apr_status_t (*unlock_fn)      (apr_sms_t *sms); /**< unlocking function */
 
-    apr_status_t (*apr_abort)(int retcode);
-    struct apr_hash_t *prog_data;
+    apr_status_t (*apr_abort)(int retcode); /**< function to call when a malloc fails */
+    struct apr_hash_t *prog_data; /**< has to store userdata */
 
 #ifdef APR_POOLS_ARE_SMS
     struct process_chain *subprocesses;

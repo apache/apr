@@ -54,6 +54,10 @@
 
 #ifndef APR_SIGNAL_H
 #define APR_SIGNAL_H
+/**
+ * @file apr_signal.h 
+ * @brief APR Signal Handling
+ */
 
 #include "apr.h"
 #include "apr_pools.h"
@@ -67,7 +71,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package APR signal handling
+ * @defgroup APR_Signal Signal Handling
+ * @ingroup APR
+ * @{
  */
 
 #if APR_HAVE_SIGACTION
@@ -75,6 +81,11 @@ extern "C" {
 typedef void apr_sigfunc_t(int);
 
 /* ### how to doc this? */
+/**
+ * Set the signal handler function for a given signal
+ * @param signo The signal (eg... SIGWINCH)
+ * @parm the function to get called
+ */
 APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func);
 
 #if defined(SIG_IGN) && !defined(SIG_ERR)
@@ -90,17 +101,17 @@ APR_DECLARE(apr_sigfunc_t *) apr_signal(int signo, apr_sigfunc_t * func);
  * Get the description for a specific signal number
  * @param signum The signal number
  * @return The description of the signal
- * @deffunc const char *apr_signal_get_description(int signum)
  */
 APR_DECLARE(const char *) apr_signal_get_description(int signum);
 
 /**
  * APR-private function for initializing the signal package
+ * @internal
  * @param pglobal The internal, global pool
- * @deffunc apr_signal_init(apr_pool_t *pglobal)
  */
 void apr_signal_init(apr_pool_t *pglobal);
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
