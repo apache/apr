@@ -24,6 +24,7 @@ while ($t = <$srcfl>) {
     $t =~ s|-I\$\(INCDIR\)|\/I "\$\(INCDIR\)"|;
     $t =~ s|\.\.\/libapr\.a|\.\./LibD/apr\.lib|;
     if ($t =~ s|\@EXEEXT\@|\.exe|) {
+        while ($t =~ s|\@EXEEXT\@|\.exe|) {}
         $t =~ s|\$\(CC\) \$\(CFLAGS\)|\$\(LINK\) \/subsystem:console|;
         $t =~ s|-o (\S+)|\/out:\"$1\"|;
         $t =~ s|--export-dynamic ||; 
