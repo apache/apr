@@ -5,6 +5,8 @@
 
 #ifdef WIN32
 /* win32 implementation is all macros */
+#elif defined(__linux)
+/* linux implementation is all macros */
 #else
 
 #if APR_HAS_THREADS
@@ -26,7 +28,7 @@ apr_status_t apr_atomic_init(apr_pool_t *p )
     }
     return APR_SUCCESS;
 }
-long apr_atomic_add(volatile long*mem, long val) 
+apr_uint32_t apr_atomic_add(volatile apr_atomic_t *mem, long val) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     long prev;
@@ -39,7 +41,7 @@ long apr_atomic_add(volatile long*mem, long val)
     }
     return *mem;
 }
-long apr_atomic_set(volatile long*mem, long val) 
+apr_uint32_t apr_atomic_set(volatile apr_atomic_t *mem, long val) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     long prev;
@@ -53,7 +55,7 @@ long apr_atomic_set(volatile long*mem, long val)
     return *mem;
 }
 
-long apr_atomic_inc( volatile long *mem) 
+apr_uint32_t apr_atomic_inc( volatile apr_uint32_t *mem) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     long prev;
@@ -66,7 +68,7 @@ long apr_atomic_inc( volatile long *mem)
     }
     return *mem;
 }
-long apr_atomic_dec(volatile long *mem) 
+apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem) 
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     long prev;
@@ -79,7 +81,12 @@ long apr_atomic_dec(volatile long *mem)
     }
     return *mem;
 }
-long apr_atomic_cas(volatile long *mem,long with,long cmp)
+#if 0
+/*
+ * linux doesn't have a easy to do this 
+ * so comment it out for the moment
+ */
+apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem,apr_uint32_t with, apr_uint32_t cmp)
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     long prev;
@@ -94,7 +101,7 @@ long apr_atomic_cas(volatile long *mem,long with,long cmp)
     }
     return *mem;
 }
-
+#endif
 #endif /* APR_HAS_THREADS */
 
 #endif /* default implementation */
