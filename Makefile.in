@@ -34,8 +34,6 @@ DISTCLEAN_TARGETS = config.cache config.log config.status \
 	APRVARS libtool
 EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in
 
-SCANDOC_TEMPLATE = -i$(apr_builders)/scandoc_template.pl
-
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
@@ -84,8 +82,8 @@ delete-exports:
 $(TARGET_EXPORTS):
 	$(MKEXPORT) include/*.h > $@
 
-docs:
-	$(SCANDOC) $(SCANDOC_TEMPLATE) -p./docs/ $(INCDIR)/*.h
+dox:
+	doxygen docs/doxygen.conf
 
 test: $(TARGET_LIB)
 	(cd test; make clean; make; \
