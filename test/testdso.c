@@ -53,16 +53,11 @@
  */
 
 
+#include "test_apr.h"
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
 #include "apr_dso.h"
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #ifdef NETWARE
 # define LIB_NAME "mod_test.nlm"
@@ -80,104 +75,223 @@
 # endif
 #endif
 
-void test_shared_library(const char *libname, apr_pool_t *pool)
+static char *filename;
+static char *filename2;
+
+void test_load_module(CuTest *tc)
+{
+    apr_dso_handle_t *h = NULL;
+    apr_status_t status;
+    char errstr[256];
+
+    status = apr_dso_load(&h, filename, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_dso_unload(h);
+}
+
+void test_dso_sym(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
     apr_dso_handle_sym_t func1 = NULL;
-    apr_dso_handle_sym_t func2 = NULL;
     apr_status_t status;
-    void (*function)(void);
-    void (*function1)(int);
-    int *retval;
-    char filename[256];   
+    void (*function)(char str[256]);
+    char teststr[256];
+    char errstr[256];
 
-    getcwd(filename, 256);
-    strcat(filename, "/");
-    strcat(filename, libname);
+    status = apr_dso_load(&h, filename, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
 
-    fprintf(stdout,"Trying to load DSO now.....................");
-    fflush(stdout);
-    if ((status = apr_dso_load(&h, filename, pool)) != APR_SUCCESS){
-        char my_error[256];
-        apr_strerror(status, my_error, sizeof(my_error));
-        fprintf(stderr, "%s!\n", my_error);
-        exit (-1);
-    }
-    fprintf(stdout,"OK\n");
+    status = apr_dso_sym(&func1, h, "print_hello");
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, func1);
 
-    fprintf(stdout,"Trying to get the DSO's attention..........");
-    fflush(stdout);
-    if ((status = apr_dso_sym(&func1, h, "print_hello")) != APR_SUCCESS) { 
-        char my_error[256];
-        apr_dso_error(h, my_error, sizeof(my_error));
-        fprintf(stderr, "%s\n", my_error);
-        exit (-1);
-    }        
-    fprintf(stdout,"OK\n");
-    
     function = (void *)func1;
-    (*function)();
+    (*function)(teststr);
+    CuAssertStrEquals(tc, "Hello - I'm a DSO!\n", teststr);
 
-    fprintf(stdout,"Saying farewell 5 times....................");
-    fflush(stdout);
-    if (apr_dso_sym(&func2, h, "print_goodbye") != APR_SUCCESS) {
-        fprintf(stderr, "Failed!\n");
-        exit (-1);
-    }        
-    fprintf(stdout,"OK\n");
-
-    function1 = (void *)(int)func2;
-    (*function1)(5);
-
-    fprintf(stdout,"Checking how many times I said goodbye..");
-    fflush(stdout);
-    if (apr_dso_sym(&func1, h, "goodbyes") != APR_SUCCESS) {
-        fprintf(stderr, "Failed!\n");
-        exit (-1);
-    }
-    retval = (int *)func1;
-    fprintf(stdout,"%d..", (*retval));
-    fflush(stdout);
-    if ((*retval) == 5){
-        fprintf(stderr,"OK\n");
-    } else {
-        fprintf(stderr,"Failed!\n");
-    }
-       
-    fprintf(stdout,"Trying to unload DSO now...................");
-    if (apr_dso_unload(h) != APR_SUCCESS) {
-        fprintf(stderr, "Failed!\n");
-        exit (-1);
-    }
-    fprintf(stdout,"OK\n");
-
-    fprintf(stdout,"Checking it's been unloaded................");
-    fflush(stdout);
-    if (apr_dso_sym(&func1, h, "print_hello") == APR_SUCCESS) {
-        fprintf(stderr, "Failed!\n");
-        exit (-1);
-    }        
-    fprintf(stdout,"OK\n");
+    apr_dso_unload(h);
 }
 
-int main (int argc, char ** argv)
+void test_dso_sym_return_value(CuTest *tc)
 {
-    apr_pool_t *pool;
+    apr_dso_handle_t *h = NULL;
+    apr_dso_handle_sym_t func1 = NULL;
+    apr_status_t status;
+    int (*function)(int);
+    char teststr[256];
+    char errstr[256];
 
-    apr_initialize();
-    atexit(apr_terminate);
-        
-    if (apr_pool_create(&pool, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
+    status = apr_dso_load(&h, filename, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
 
-    fprintf(stdout,"=== Checking module library ===\n");
-    test_shared_library(LIB_NAME, pool);
-#ifdef LIB_NAME2
-    fprintf(stdout,"=== Checking non-module library ===\n");
-    test_shared_library(LIB_NAME2, pool);
-#endif
+    status = apr_dso_sym(&func1, h, "count_reps");
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, func1);
 
-    return 0;
+    function = (void *)func1;
+    status = (*function)(5);
+    CuAssertIntEquals(tc, 5, status);
+
+    apr_dso_unload(h);
 }
+
+void test_unload_module(CuTest *tc)
+{
+    apr_dso_handle_t *h = NULL;
+    apr_status_t status;
+    char errstr[256];
+    apr_dso_handle_sym_t func1 = NULL;
+
+    status = apr_dso_load(&h, filename, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
+
+    status = apr_dso_unload(h);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+
+    status = apr_dso_sym(&func1, h, "print_hello");
+    CuAssertIntEquals(tc, APR_EINIT, status);
+}
+
+
+void test_load_non_module(CuTest *tc)
+{
+#ifndef LIB_NAME2
+    CuNotImpl(tc, "Can't load non-module library");
+#else
+    apr_dso_handle_t *h = NULL;
+    apr_status_t status;
+    char errstr[256];
+
+    status = apr_dso_load(&h, filename2, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_dso_unload(h);
+#endif
+}
+
+void test_dso_sym_non_module(CuTest *tc)
+{
+#ifndef LIB_NAME2
+    CuNotImpl(tc, "Can't load non-module library");
+#else
+    apr_dso_handle_t *h = NULL;
+    apr_dso_handle_sym_t func1 = NULL;
+    apr_status_t status;
+    void (*function)(char str[256]);
+    char teststr[256];
+    char errstr[256];
+
+    status = apr_dso_load(&h, filename2, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
+
+    status = apr_dso_sym(&func1, h, "print_hello");
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, func1);
+
+    function = (void *)func1;
+    (*function)(teststr);
+    CuAssertStrEquals(tc, "Hello - I'm a DSO!\n", teststr);
+
+    apr_dso_unload(h);
+#endif
+}
+
+void test_dso_sym_return_value_non_mod(CuTest *tc)
+{
+#ifndef LIB_NAME2
+    CuNotImpl(tc, "Can't load non-module library");
+#else
+    apr_dso_handle_t *h = NULL;
+    apr_dso_handle_sym_t func1 = NULL;
+    apr_status_t status;
+    int (*function)(int);
+    char teststr[256];
+    char errstr[256];
+
+    status = apr_dso_load(&h, filename2, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
+
+    status = apr_dso_sym(&func1, h, "count_reps");
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, func1);
+
+    function = (void *)func1;
+    status = (*function)(5);
+    CuAssertIntEquals(tc, 5, status);
+
+    apr_dso_unload(h);
+#endif
+}
+
+void test_unload_non_module(CuTest *tc)
+{
+#ifndef LIB_NAME2
+    CuNotImpl(tc, "Can't load non-module library");
+#else
+    apr_dso_handle_t *h = NULL;
+    apr_status_t status;
+    char errstr[256];
+    apr_dso_handle_sym_t func1 = NULL;
+
+    status = apr_dso_load(&h, filename2, p);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+    CuAssertPtrNotNull(tc, h);
+
+    status = apr_dso_unload(h);
+    CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+
+    status = apr_dso_sym(&func1, h, "print_hello");
+    CuAssertIntEquals(tc, APR_EINIT, status);
+#endif
+}
+
+static void test_load_notthere(CuTest *tc)
+{
+    apr_dso_handle_t *h = NULL;
+    apr_dso_handle_sym_t func1 = NULL;
+    apr_status_t status;
+    char errstr[256];
+
+    status = apr_dso_load(&h, "No_File.so", p);
+    CuAssertIntEquals(tc, APR_EDSOOPEN, status);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_dso_unload(h);
+}    
+
+CuSuite *testdso(void)
+{
+    filename = apr_pcalloc(p, 256);
+    getcwd(filename, 256);
+    filename = apr_pstrcat(p, filename, "/", LIB_NAME, NULL);
+
+    filename2 = apr_pcalloc(p, 256);
+    getcwd(filename2, 256);
+    filename2 = apr_pstrcat(p, filename2, "/", LIB_NAME2, NULL);
+
+
+    CuSuite *suite = CuSuiteNew("Test DSO");
+
+    SUITE_ADD_TEST(suite, test_load_module);
+    SUITE_ADD_TEST(suite, test_dso_sym);
+    SUITE_ADD_TEST(suite, test_dso_sym_return_value);
+    SUITE_ADD_TEST(suite, test_unload_module);
+
+    SUITE_ADD_TEST(suite, test_load_non_module);
+    SUITE_ADD_TEST(suite, test_dso_sym_non_module);
+    SUITE_ADD_TEST(suite, test_dso_sym_return_value_non_mod);
+    SUITE_ADD_TEST(suite, test_unload_non_module);
+
+    SUITE_ADD_TEST(suite, test_load_notthere);
+
+    return suite;
+}
+
