@@ -409,7 +409,7 @@ case $host in
    *linux*)
        apr_force_atomic_generic=1
        case $host_cpu in
-         i486|i586|i686)
+         i486|i586|i686|powerpc64)
             if test "$nonportable_atomics_enabled" = 1; then
               apr_force_atomic_generic=0
             fi
