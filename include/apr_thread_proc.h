@@ -67,6 +67,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @package APR Thread library
+ */
+
 typedef enum {APR_SHELLCMD, APR_PROGRAM} ap_cmdtype_e;
 typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 
@@ -115,549 +119,357 @@ typedef void *(APR_THREAD_FUNC *ap_thread_start_t)(void *);
 
 /* Thread Function definitions */
 
-/*
-
-=head1 ap_status_t ap_create_threadattr(ap_threadattr_t **new_attr, ap_pool_t *cont)
-
-B<Create and initialize a new threadattr variable>
-
-    arg 1) The newly created threadattr.
-    arg 2) The pool to use
-
-=cut
+/**
+ * Create and initialize a new threadattr variable
+ * @param new_attr The newly created threadattr.
+ * @param cont The pool to use
  */
 ap_status_t ap_create_threadattr(ap_threadattr_t **new_attr, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
-
-B<Set if newly created threads should be created in detach mode.>
-
-    arg 1) The threadattr to affect 
-    arg 2) Thread detach state on or off
-
-=cut
+/**
+ * Set if newly created threads should be created in detach mode.
+ * @param attr The threadattr to affect 
+ * @param on Thread detach state on or off
  */
 ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on);
 
-/*
-
-=head1 ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
-
-B<Get the detach mode for this threadattr.>
-
-    arg 1) The threadattr to reference 
-
-=cut
+/**
+ * Get the detach mode for this threadattr.
+ * @param attr The threadattr to reference 
  */
 ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr);
 
-/*
-
-=head1 ap_status_t ap_create_thread(ap_thread_t **new_thread, ap_threadattr_t *attr, ap_thread_start_t func, void *data, ap_pool_t *cont)
-
-B<Create a new thread of execution> 
-
-    arg 1) The newly created thread handle.
-    arg 2) The threadattr to use to determine how to create the thread
-    arg 3) The function to start the new thread in
-    arg 4) Any data to be passed to the starting function
-    arg 5) The pool to use
-
-=cut
+/**
+ * Create a new thread of execution
+ * @param new_thread The newly created thread handle.
+ * @param attr The threadattr to use to determine how to create the thread
+ * @param func The function to start the new thread in
+ * @param data Any data to be passed to the starting function
+ * @param cont The pool to use
  */
 ap_status_t ap_create_thread(ap_thread_t **new_thread, ap_threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
                              ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
-
-B<stop the current thread> 
-
-    arg 1) The thread to stop
-    arg 2) The return value to pass back to any thread that cares
-
-=cut
+/**
+ * stop the current thread
+ * @param thd The thread to stop
+ * @param retval The return value to pass back to any thread that cares
  */
 ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval);
 
-/*
-
-=head1 ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
-
-B<block until the desired thread stops executing.>
-
-    arg 1) The return value from the dead thread.
-    arg 2) The thread to join
-
-=cut
+/**
+ * block until the desired thread stops executing.
+ * @param retval The return value from the dead thread.
+ * @param thd The thread to join
  */
 ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd); 
 
-/*
-
-=head1 ap_status_t ap_thread_detach(ap_thread_t *thd)
-
-B<detach a thread>
-
-    arg 1) The thread to detach 
-
-=cut
+/**
+ * detach a thread
+ * @param thd The thread to detach 
  */
 ap_status_t ap_thread_detach(ap_thread_t *thd);
 
-/*
-
-=head1 ap_status_t ap_get_threaddata(void **data, const char *key, ap_thread_t *thread)
-
-B<Return the pool associated with the current thread.>
-
-    arg 1) The user data associated with the thread.
-    arg 2) The key to associate with the data
-    arg 3) The currently open thread.
-
-=cut
+/**
+ * Return the pool associated with the current thread.
+ * @param data The user data associated with the thread.
+ * @param key The key to associate with the data
+ * @param thread The currently open thread.
  */
 ap_status_t ap_get_threaddata(void **data, const char *key, ap_thread_t *thread);
 
-/*
-
-=head1 ap_status_t ap_set_threaddata(void *data, const char *key, ap_status_t (*cleanup) (void *), ap_thread_t *thread)
-
-B<Return the pool associated with the current thread.>
-
-    arg 1) The user data to associate with the thread.
-    arg 2) The key to use for associating the data with the tread
-    arg 3) The cleanup routine to use when the thread is destroyed.
-    arg 4) The currently open thread.
-
-=cut
+/**
+ * Return the pool associated with the current thread.
+ * @param data The user data to associate with the thread.
+ * @param key The key to use for associating the data with the tread
+ * @param cleanup The cleanup routine to use when the thread is destroyed.
+ * @param thread The currently open thread.
  */
 ap_status_t ap_set_threaddata(void *data, const char *key,
                               ap_status_t (*cleanup) (void *), 
                               ap_thread_t *thread);
 
-/*
-
-=head1 ap_status_t ap_create_thread_private(ap_threadkey_t **key, void (*dest)(void *), ap_pool_t *cont)
-
-B<Create and initialize a new thread private address space>
-
-    arg 1) The thread private handle.
-    arg 2) The destructor to use when freeing the private memory.
-    arg 3) The pool to use
-
-=cut
+/**
+ * Create and initialize a new thread private address space
+ * @param key The thread private handle.
+ * @param dest The destructor to use when freeing the private memory.
+ * @param cont The pool to use
  */
 ap_status_t ap_create_thread_private(ap_threadkey_t **key, void (*dest)(void *),
                                      ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_get_thread_private(void **new_mem, ap_threadkey_t *key)
-
-B<Get a pointer to the thread private memory>
-
-    arg 1) The data stored in private memory 
-    arg 2) The handle for the desired thread private memory 
-
-=cut
+/**
+ * Get a pointer to the thread private memory
+ * @param new_mem The data stored in private memory 
+ * @param key The handle for the desired thread private memory 
  */
 ap_status_t ap_get_thread_private(void **new_mem, ap_threadkey_t *key);
 
-/*
-
-=head1 ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
-
-B<Set the data to be stored in thread private memory>
-
-    arg 1) The data to be stored in private memory 
-    arg 2) The handle for the desired thread private memory 
-
-=cut
+/**
+ * Set the data to be stored in thread private memory
+ * @param priv The data to be stored in private memory 
+ * @param key The handle for the desired thread private memory 
  */
 ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key);
 
-/*
-
-=head1 ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
-
-B<Free the thread private memory>
-
-    arg 1) The handle for the desired thread private memory 
-
-=cut
+/**
+ * Free the thread private memory
+ * @param key The handle for the desired thread private memory 
  */
 ap_status_t ap_delete_thread_private(ap_threadkey_t *key);
 
-/*
-
-=head1 ap_status_t ap_get_threadkeydata(void **data, const char *key, ap_threadkey_t *threadkey)
-
-B<Return the pool associated with the current threadkey.>
-
-    arg 1) The user data associated with the threadkey.
-    arg 2) The key associated with the data
-    arg 3) The currently open threadkey.
-
-=cut
+/**
+ * Return the pool associated with the current threadkey.
+ * @param data The user data associated with the threadkey.
+ * @param key The key associated with the data
+ * @param threadkey The currently open threadkey.
  */
 ap_status_t ap_get_threadkeydata(void **data, const char *key, ap_threadkey_t *threadkey);
 
-/*
-
-=head1 ap_status_t ap_set_threadkeydata(void *data, const char *key, ap_status_t (*cleanup) (void *), ap_threadkey_t *threadkey)
-
-B<Return the pool associated with the current threadkey.>
-
-    arg 1) The data to set.
-    arg 2) The key to associate with the data.
-    arg 3) The cleanup routine to use when the file is destroyed.
-    arg 4) The currently open threadkey.
-
-=cut
+/**
+ * Return the pool associated with the current threadkey.
+ * @param data The data to set.
+ * @param key The key to associate with the data.
+ * @param cleanup The cleanup routine to use when the file is destroyed.
+ * @param threadkey The currently open threadkey.
  */
 ap_status_t ap_set_threadkeydata(void *data, const char *key,
                                  ap_status_t (*cleanup) (void *), 
                                  ap_threadkey_t *threadkey);
 
 /* Process Function definitions */
-/*
 
-=head1 ap_status_t ap_createprocattr_init(ap_procattr_t **new_attr, ap_pool_t *cont)
+/**
+ * @package APR Process library
+ */
 
-B<Create and initialize a new procattr variable> 
-
-    arg 1) The newly created procattr. 
-    arg 2) The pool to use
-
-=cut
+/**
+ * Create and initialize a new procattr variable
+ * @param new_attr The newly created procattr. 
+ * @param cont The pool to use
  */
 ap_status_t ap_createprocattr_init(ap_procattr_t **new_attr, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, ap_int32_t out, ap_int32_t err)
-
-B<Determine if any of stdin, stdout, or stderr should be linked to pipes when starting a child process.> 
-
-    arg 1) The procattr we care about. 
-    arg 2) Should stdin be a pipe back to the parent?
-    arg 3) Should stdout be a pipe back to the parent?
-    arg 4) Should stderr be a pipe back to the parent?
-
-=cut
+/**
+ * Determine if any of stdin, stdout, or stderr should be linked to pipes 
+ * when starting a child process.
+ * @param attr The procattr we care about. 
+ * @param in Should stdin be a pipe back to the parent?
+ * @param out Should stdout be a pipe back to the parent?
+ * @param err Should stderr be a pipe back to the parent?
  */
 ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
                               ap_int32_t out, ap_int32_t err);
 
-/*
-
-=head1 ap_status_t ap_setprocattr_childin(ap_procattr_t *attr, ap_file_t *child_in, ap_file_t *parent_in)
-
-B<Set the child_in and/or parent_in values to existing ap_file_t values.> 
-
-    arg 1) The procattr we care about. 
-    arg 2) ap_file_t value to use as child_in. Must be a valid file.
-    arg 3) ap_file_t value to use as parent_in. Must be a valid file.
-
-B<NOTE>:  This is NOT a required initializer function. This is
-          useful if you have already opened a pipe (or multiple files)
-          that you wish to use, perhaps persistently across mutiple
-          process invocations - such as a log file. You can save some 
-          extra function calls by not creating your own pipe since this
-          creates one in the process space for you.
-
-=cut
+/**
+ * Set the child_in and/or parent_in values to existing ap_file_t values.
+ * @param attr The procattr we care about. 
+ * @param child_in ap_file_t value to use as child_in. Must be a valid file.
+ * @param parent_in ap_file_t value to use as parent_in. Must be a valid file.
+ * @tip  This is NOT a required initializer function. This is
+ *       useful if you have already opened a pipe (or multiple files)
+ *       that you wish to use, perhaps persistently across mutiple
+ *       process invocations - such as a log file. You can save some 
+ *       extra function calls by not creating your own pipe since this
+ *       creates one in the process space for you.
  */
 ap_status_t ap_setprocattr_childin(struct ap_procattr_t *attr, ap_file_t *child_in,
                                    ap_file_t *parent_in);
 
-/*
-
-=head1 ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, ap_file_t *child_out, ap_file_t *parent_out)
-
-B<Set the child_out and parent_out values to existing ap_file_t values.> 
-
-    arg 1) The procattr we care about. 
-    arg 2) ap_file_t value to use as child_out. Must be a valid file.
-    arg 3) ap_file_t value to use as parent_out. Must be a valid file.
-
-B<NOTE>:  This is NOT a required initializer function. This is
-          useful if you have already opened a pipe (or multiple files)
-          that you wish to use, perhaps persistently across mutiple
-          process invocations - such as a log file. 
-
-=cut
+/**
+ * Set the child_out and parent_out values to existing ap_file_t values.
+ * @param attr The procattr we care about. 
+ * @param child_out ap_file_t value to use as child_out. Must be a valid file.
+ * @param parent_out ap_file_t value to use as parent_out. Must be a valid file.
+ * @tip This is NOT a required initializer function. This is
+ *      useful if you have already opened a pipe (or multiple files)
+ *      that you wish to use, perhaps persistently across mutiple
+ *      process invocations - such as a log file. 
  */
 ap_status_t ap_setprocattr_childout(struct ap_procattr_t *attr, 
                                     ap_file_t *child_out, 
                                     ap_file_t *parent_out);
 
-/*
-
-=head1 ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err, ap_file_t *parent_err)
-
-B<Set the child_err and parent_err values to existing ap_file_t values.> 
-
-    arg 1) The procattr we care about. 
-    arg 2) ap_file_t value to use as child_err. Must be a valid file.
-    arg 3) ap_file_t value to use as parent_err. Must be a valid file.
-
-B<NOTE>:  This is NOT a required initializer function. This is
-          useful if you have already opened a pipe (or multiple files)
-          that you wish to use, perhaps persistently across mutiple
-          process invocations - such as a log file. 
-
-=cut
+/**
+ * Set the child_err and parent_err values to existing ap_file_t values.
+ * @param attr The procattr we care about. 
+ * @param child_err ap_file_t value to use as child_err. Must be a valid file.
+ * @param parent_err ap_file_t value to use as parent_err. Must be a valid file.
+ * @tip This is NOT a required initializer function. This is
+ *      useful if you have already opened a pipe (or multiple files)
+ *      that you wish to use, perhaps persistently across mutiple
+ *      process invocations - such as a log file. 
  */
 ap_status_t ap_setprocattr_childerr(struct ap_procattr_t *attr, 
                                     ap_file_t *child_err,
                                     ap_file_t *parent_err);
 
-/*
-
-=head1 ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, constchar *dir) 
-
-B<Set which directory the child process should start executing in.> 
-
-    arg 1) The procattr we care about. 
-    arg 2) Which dir to start in.  By default, this is the same dir as
-          the parent currently resides in, when the createprocess call
-          is made. 
-
-=cut
+/**
+ * Set which directory the child process should start executing in.
+ * @param attr The procattr we care about. 
+ * @param dir Which dir to start in.  By default, this is the same dir as
+ *            the parent currently resides in, when the createprocess call
+ *            is made. 
  */
 ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, const char *dir);
 
-/*
-
-=head1 ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr, ap_cmdtype_e cmd)
-
-B<Set what type of command the child process will call.>
-
-    arg 1) The procattr we care about. 
-    arg 2) The type of command.  One of:
-              APR_SHELLCMD --  Shell script
-              APR_PROGRAM  --  Executable program   (default) 
-
-=cut
+/**
+ * Set what type of command the child process will call.
+ * @param attr The procattr we care about. 
+ * @param cmd The type of command.  One of:
+ * <PRE>
+ *            APR_SHELLCMD --  Shell script
+ *            APR_PROGRAM  --  Executable program   (default) 
+ * </PRE>
  */
 ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr, ap_cmdtype_e cmd);
 
-/*
-
-=head1 ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach)
-
-B<Determine if the chlid should start in detached state.>
-
-    arg 1) The procattr we care about. 
-    arg 2) Should the child start in detached state?  Default is no. 
-
-=cut
+/**
+ * Determine if the chlid should start in detached state.
+ * @param attr The procattr we care about. 
+ * @param detach Should the child start in detached state?  Default is no. 
  */
 ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach);
 
 #if APR_HAVE_STRUCT_RLIMIT
-/*
-
-=head1 ap_status_t ap_setprocattr_limit(ap_procattr_t *attr, ap_int32_t what, struct rlimit *limit)
-
-B<Set the Resource Utilization limits when starting a new process.> 
-
-    arg 1) The procattr we care about. 
-    arg 2) Which limit to set, one of:
-                   APR_LIMIT_CPU
-                   APR_LIMIT_MEM
-                   APR_LIMIT_NPROC
-    arg 3) Value to set the limit to.
-
-=cut
+/**
+ * Set the Resource Utilization limits when starting a new process.
+ * @param attr The procattr we care about. 
+ * @param what Which limit to set, one of:
+ * <PRE>
+ *                 APR_LIMIT_CPU
+ *                 APR_LIMIT_MEM
+ *                 APR_LIMIT_NPROC
+ * </PRE>
+ * @param limit Value to set the limit to.
  */
 ap_status_t ap_setprocattr_limit(ap_procattr_t *attr, ap_int32_t what, 
                               struct rlimit *limit);
 #endif
 
 #if APR_HAS_FORK
-/*
-
-=head1 ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont) 
-
-B<This is currently the only non-portable call in APR.  This executes a standard unix fork.>
-
-    arg 1) The resulting process handle. 
-    arg 2) The pool to use. 
-
-=cut
+/**
+ * This is currently the only non-portable call in APR.  This executes 
+ * a standard unix fork.
+ * @param proc The resulting process handle. 
+ * @param cont The pool to use. 
  */
 ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont);
 #endif
 
-/*
-
-=head1 ap_status_t ap_create_process(ap_proc_t *new_proc, const char *progname, char *const args[], char **env, ap_procattr_t *attr, ap_pool_t *cont) 
-
-B<Create a new process and execute a new program within that process.>
-
-    arg 1) The resulting process handle.
-    arg 2) The program to run 
-    arg 3) the arguments to pass to the new program.  The first one should
-           be the program name.
-    arg 4) The new environment ap_table_t for the new process.  This should be a
-           list of NULL-terminated strings.
-    arg 5) the procattr we should use to determine how to create the new
-           process
-    arg 6) The pool to use. 
-
-=cut
+/**
+ * Create a new process and execute a new program within that process.
+ * @param new_proc The resulting process handle.
+ * @param progname The program to run 
+ * @param const_args the arguments to pass to the new program.  The first 
+ *                   one should be the program name.
+ * @param env The new environment ap_table_t for the new process.  This 
+ *            should be a list of NULL-terminated strings.
+ * @param attr the procattr we should use to determine how to create the new
+ *         process
+ * @param cont The pool to use. 
  */
 ap_status_t ap_create_process(ap_proc_t *new_proc, const char *progname, 
                               char *const args[], char **env, 
                               ap_procattr_t *attr, ap_pool_t *cont);
 
-/*
-
-=head1 ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how waithow) 
-
-B<Wait for a child process to die>
-
-    arg 1) The process handle that corresponds to the desired child process 
-    arg 2) How should we wait.  One of:
-              APR_WAIT   -- block until the child process dies.
-              APR_NOWAIT -- return immediately regardless of if the 
-                            child is dead or not.
-
-B<NOTE>:  The childs status is in the return code to this process.  It is 
-          one of:
-              APR_CHILD_DONE     -- child is no longer running.
-              APR_CHILD_NOTDONE  -- child is still running.
-
-=cut
+/**
+ * Wait for a child process to die
+ * @param proc The process handle that corresponds to the desired child process 
+ * @param waithow How should we wait.  One of:
+ * <PRE>
+ *            APR_WAIT   -- block until the child process dies.
+ *            APR_NOWAIT -- return immediately regardless of if the 
+ *                          child is dead or not.
+ * </PRE>
+ * @tip The childs status is in the return code to this process.  It is one of:
+ * <PRE>
+ *            APR_CHILD_DONE     -- child is no longer running.
+ *            APR_CHILD_NOTDONE  -- child is still running.
+ * </PRE>
  */
 ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e waithow);
 
 
-/*
-
-=head1 ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status, ap_wait_how waithow, ap_pool_t *p) 
-
-B<Wait for any current child process to die and return information about that child.>
-
-    arg 1) Pointer to NULL on entry, will be filled out with child's 
-           information 
-    arg 2) The returned exit status of the child, if a child process dies
-             On platforms that don't support obtaining this information, the 
-             status parameter will be returned as APR_ENOTIMPL.
-    arg 3) How should we wait.  One of:
-              APR_WAIT   -- block until the child process dies.
-              APR_NOWAIT -- return immediately regardless of if the 
-                            child is dead or not.
-    arg 4) Pool to allocate child information out of.
-
-=cut
+/**
+ * Wait for any current child process to die and return information 
+ * about that child.
+ * @param proc Pointer to NULL on entry, will be filled out with child's 
+ *             information 
+ * @param status The returned exit status of the child, if a child process dies
+ *               On platforms that don't support obtaining this information, 
+ *               the status parameter will be returned as APR_ENOTIMPL.
+ * @param waithow How should we wait.  One of:
+ * <PRE>
+ *            APR_WAIT   -- block until the child process dies.
+ *            APR_NOWAIT -- return immediately regardless of if the 
+ *                          child is dead or not.
+ * </PRE>
+ * @param p Pool to allocate child information out of.
  */
 
 ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status, 
                               ap_wait_how_e waithow, ap_pool_t *p);
 
-/*
-
-=head1 ap_status_t ap_detach(void)
-
-B<Detach the process from the controlling terminal.>
-
-=cut
+/**
+ * Detach the process from the controlling terminal.
  */
 ap_status_t ap_detach(void);
 
 #if APR_HAS_OTHER_CHILD
-/*
-
-=head1 void ap_register_other_child(ap_proc_t *pid, void (*maintenance) (int reason, void *data, int status), void *data, ap_file_t *write_fd, ap_pool_t *p)
-
-B<Register an other_child -- a child which must be kept track of so that the program knows when it has dies or disappeared.>
-
-    arg 1)  pid is the pid of the child.
-    arg 2)  maintenance is a function that is invoked with a reason and the
-            data pointer passed here.
-    arg 3)  The data to pass to the maintenance function.
-    arg 4)  An fd that is probed for writing.  If it is ever unwritable
-            then the maintenance is invoked with reason OC_REASON_UNWRITABLE.
-    arg 5)  The pool to use for allocating memory.
-
-=cut
- */
-/* XXX: it's not clear how write_fd can be made portable -- i think this
- * needs to take an ap_file_t, expecting the write_fd to be a pipe. -dean
+/**
+ * Register an other_child -- a child which must be kept track of so 
+ * that the program knows when it has dies or disappeared.
+ * @param pid pid is the pid of the child.
+ * @param maintenance maintenance is a function that is invoked with a 
+ *                    reason and the data pointer passed here.
+ * @param data The data to pass to the maintenance function.
+ * @param write_fd An fd that is probed for writing.  If it is ever unwritable
+ *                 then the maintenance is invoked with reason 
+ *                 OC_REASON_UNWRITABLE.
+ * @param p The pool to use for allocating memory.
  */
 void ap_register_other_child(ap_proc_t *pid, 
                              void (*maintenance) (int reason, void *, int status),
                              void *data, ap_file_t *write_fd, ap_pool_t *p);
 
-/*
-
-=head1 void ap_unregister_other_child(void *data)
-
-B<Stop watching the specified process.>
-
-    arg 1) The data to pass to the maintenance function.  This is
-           used to find the process to unregister.
-
-B<NOTE>:  Since this can be called by a maintenance function while we're
-          scanning the other_children list, all scanners should protect 
-          themself by loading ocr->next before calling any maintenance 
-          function.
-
-=cut
+/**
+ * Stop watching the specified process.
+ * @param data The data to pass to the maintenance function.  This is
+ *             used to find the process to unregister.
+ * @tip Since this can be called by a maintenance function while we're
+ *      scanning the other_children list, all scanners should protect 
+ *      themself by loading ocr->next before calling any maintenance 
+ *      function.
  */
 void ap_unregister_other_child(void *data);
 
-/*
-
-=head1 ap_status_t ap_reap_other_child(ap_proc_t *pid, int status)
-
-B<Check on the specified process.  If it is gone, call the maintenance function.>
-
-    arg 1) The process to check.
-
-=cut
+/**
+ * Check on the specified process.  If it is gone, call the maintenance 
+ * function.
+ * @param pid The process to check.
+ * @param status The status to pass to the maintenance function.
  */
 ap_status_t ap_reap_other_child(ap_proc_t *pid, int status); 
 
-/*
-
-=head1 void ap_check_other_child(void)
-
-B<Loop through all registered other_children and call the appropriate maintenance function when necessary.>
-
-=cut
+/**
+ * Loop through all registered other_children and call the appropriate 
+ * maintenance function when necessary.
  */
 void ap_check_other_child(void); 
 
-/*
-
-=head1 void ap_probe_writable_fds(void)
-
-B<Ensure all the registered write_fds are still writable, otherwise invoke the maintenance functions as appropriate.>
-
-=cut
+/**
+ * Ensure all the registered write_fds are still writable, otherwise 
+ * invoke the maintenance functions as appropriate.
  */
 void ap_probe_writable_fds(void);
 #endif /* APR_HAS_OTHER_CHILD */
 
-/*
-
-=head1 ap_status_t ap_kill(ap_proc_t *proc, int sig)
-
-B<Terminate a process.>
-
-    arg 1) The process to terminate.
-    arg 2) How to kill the process.
-
-=cut
+/** 
+ * Terminate a process.
+ * @param proc The process to terminate.
+ * @param sig How to kill the process.
  */
 ap_status_t ap_kill(ap_proc_t *proc, int sig);
 #ifdef __cplusplus
