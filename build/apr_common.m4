@@ -235,10 +235,10 @@ AC_DEFUN(APR_CHECK_DEFINE_FILES,[
     for curhdr in $2
     do
       AC_EGREP_CPP(YES_IS_DEFINED, [
-      #include <$curhdr>
-      #ifdef $1
-      YES_IS_DEFINED
-      #endif
+#include <$curhdr>
+#ifdef $1
+YES_IS_DEFINED
+#endif
       ], ac_cv_define_$1=yes)
     done
   ])
@@ -254,10 +254,10 @@ dnl
 AC_DEFUN(APR_CHECK_DEFINE,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
     AC_EGREP_CPP(YES_IS_DEFINED, [
-    #include <$2>
-    #ifdef $1
-    YES_IS_DEFINED
-    #endif
+#include <$2>
+#ifdef $1
+YES_IS_DEFINED
+#endif
     ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
   ])
   if test "$ac_cv_define_$1" = "yes"; then
@@ -270,10 +270,10 @@ dnl APR_CHECK_APR_DEFINE( symbol, path_to_apr )
 dnl
 AC_DEFUN(APR_CHECK_APR_DEFINE,[
     AC_EGREP_CPP(YES_IS_DEFINED, [
-    #include "$2/include/apr.h"
-    #if $1
-    YES_IS_DEFINED
-    #endif
+#include "$2/include/apr.h"
+#if $1
+YES_IS_DEFINED
+#endif
     ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
 ])
 
