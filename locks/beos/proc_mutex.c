@@ -118,7 +118,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
                                                     const char *fname,
                                                     apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    return APR_SUCCESS;
 }
     
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
