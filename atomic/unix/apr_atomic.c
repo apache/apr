@@ -153,5 +153,13 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
 }
 #endif /* APR_ATOMIC_NEED_CAS_DEFAULT */
 
+#else /* !APR_HAS_THREADS */
+
+#if !defined(apr_atomic_init)
+apr_status_t apr_atomic_init(apr_pool_t *p)
+{
+    return APR_SUCCESS;
+}
+#endif /* !defined(apr_atomic_init) */
 
 #endif /* APR_HAS_THREADS */
