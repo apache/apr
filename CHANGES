@@ -1,0 +1,3 @@
+Changes with APR a8
+  *) Source was moved from the apache-2.0 repository.  For all CHANGES
+     prior to this time, please see the apache-2.0 repository
