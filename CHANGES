@@ -1,5 +1,8 @@
 Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
+  *) jlibtool: Ignore '-export-symbols-regexp' option.
+     [Justin Erenkrantz]
+
   *) fix apr_file_dup and apr_file_dup2 win32 implementations
      to create a mutex [Steve Hay <steve.hay uk.radan.com>]
 
