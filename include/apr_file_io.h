@@ -329,7 +329,9 @@ APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
  *      will block until they can be written. Exceptional error such as 
  *      "out of space" or "pipe closed" will terminate with an error.
  *
- *      It is possible for both bytes to be written and an error to be returned.
+ *      It is possible for both bytes to be written and an error to be 
+ *      returned.  And if *bytes_written is less than nbytes, an
+ *      accompanying error is _always_ returned.
  *
  *      APR_EINTR is never returned.
  */
