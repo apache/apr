@@ -185,6 +185,10 @@
  */
 #define APR_INADDR_NONE           INADDR_NONE
 
+/* This macro indicates whether or not EBCDIC is the native character set.
+ */
+#define APR_CHARSET_EBCDIC        0
+
 /* Typedefs that APR needs. */
 
 typedef  short           apr_int16_t;
