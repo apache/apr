@@ -1,4 +1,4 @@
-Changes with APR 0.9.0
+Changes with APR 0.9.1
 
   *) Fixed usage of alloca in apr_poll() on Tru64
      [Dave Hill <ddhill@zk3.dec.com>]
@@ -10,6 +10,8 @@ Changes with APR 0.9.0
 
   *) Fixed the native SPARC v8plus version of apr_atomic_dec
      to match the semantics of the default C version [Brian Pane]
+
+Changes with APR 0.9.0
 
   *) If the length argument to apr_snprintf is 0, then we should return the
      length that the string would be if we actually were going to fill it out.
