@@ -65,102 +65,165 @@
 ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ap_ssize_t rv;
-    WSABUF data;
-    int lasterror;    
+    WSABUF wsaData;
+    int lasterror;
+    DWORD dwBytes = 0;
+    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
 
-    data.len = *len;
-    data.buf = ap_pstrdup(sock->cntxt, buf);
-    do {
-        rv = WSASend(sock->sock, &data, 1, len, 0, NULL, NULL);
-        if (rv == SOCKET_ERROR) {
-            lasterror = WSAGetLastError();
-        } 
-    } while (rv == SOCKET_ERROR && lasterror == WSAEINTR);
+    wsaData.len = *len;
+    wsaData.buf = (char*) buf;
 
-    if (rv == SOCKET_ERROR && lasterror == WSAEWOULDBLOCK && sock->timeout > 0) {
-        struct timeval tv;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->sock, &fdset);
-            tv.tv_sec  = sock->timeout;
-            tv.tv_usec = 0;
-
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, &tv);
-            if (srv == SOCKET_ERROR) {
-                lasterror = WSAGetLastError();
-            }
-        } while (srv == SOCKET_ERROR && errno == WSAEINTR);
-
-        if (srv == 0) {
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        if (srv < 0) {
-            (*len) = -1;
-            return APR_EEXIST;
-        }
-        else {
-            do {
-                rv = WSASend(sock->sock, &data, 1, len, 0, NULL, NULL);
-                if (rv == SOCKET_ERROR) {
-                    lasterror = WSAGetLastError();
-                } 
-            } while (rv == SOCKET_ERROR && lasterror == WSAEINTR);
-        }
+    rv = setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char*) &timeout, 
+                    sizeof(timeout));
+    if (rv == SOCKET_ERROR) {
+        return WSAGetLastError();
     }
+
+    rv = WSASend(sock->sock, &wsaData, 1, &dwBytes, 0, NULL, NULL);
+    if (rv == SOCKET_ERROR) {
+        lasterror = WSAGetLastError();
+        /* Test code: Remove before release */
+        if (lasterror == WSAETIMEDOUT)
+            printf("wsasend: Connection timed out\n");
+        else
+            printf("wsasend: connection failed. lasterror = %d\n", lasterror);            
+
+        return lasterror;
+    }
+
+    *len = dwBytes;
+
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
+ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len) 
 {
     ap_ssize_t rv;
+    WSABUF wsaData;
     int lasterror;
+    DWORD dwBytes = 0;
+    DWORD flags = 0;
+    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
 
-    do {
-        rv = recv(sock->sock, buf, *len, 0);
-        if (rv == SOCKET_ERROR) {
-            lasterror = WSAGetLastError();
-        } 
-    } while (rv == SOCKET_ERROR && lasterror == WSAEINTR);
+    wsaData.len = *len;
+    wsaData.buf = (char*) buf;
 
-    if (rv == SOCKET_ERROR && lasterror == WSAEWOULDBLOCK && sock->timeout > 0) {
-        struct timeval tv;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->sock, &fdset);
-            tv.tv_sec  = sock->timeout;
-            tv.tv_usec = 0;
-
-            srv = select(FD_SETSIZE, &fdset, NULL, NULL, &tv);
-            if (srv == SOCKET_ERROR) {
-                lasterror = WSAGetLastError();
-            } 
-        } while (srv == SOCKET_ERROR && errno == WSAEINTR);
-
-        if (srv == 0) {
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-            (*len) = -1;
-            return errno;
-        }
-        else {
-            do {
-                rv = recv(sock->sock, buf, *len, 0);
-                if (rv == SOCKET_ERROR) {
-                    lasterror = WSAGetLastError();
-                } 
-            } while (rv == SOCKET_ERROR && lasterror == WSAEINTR);
-        }
+    rv = setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char*) &timeout, 
+                    sizeof(timeout));
+    if (rv == SOCKET_ERROR) {
+        return WSAGetLastError();
     }
-    (*len) = rv;
+
+    rv = WSARecv(sock->sock, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
+    if (rv == SOCKET_ERROR) {
+        lasterror = WSAGetLastError();
+        /* Test code: remove before release */
+        if (lasterror == WSAETIMEDOUT)
+            printf("wsarecv: Connection timed out\n");
+        else
+            printf("wsarecv: connection failed. lasterror = %d\n", lasterror);            
+        return lasterror;
+    }
+
+    *len = dwBytes;
     return APR_SUCCESS;
 }
 
+ap_status_t ap_sendv(struct socket_t *sock, const struct iovec *vec,
+                     ap_int32_t nvec, ap_int32_t *nbytes)
+{
+    ap_ssize_t rv;
+    int i;
+    int lasterror;
+    DWORD dwBytes = 0;
+    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
+
+    LPWSABUF pWsaData = (LPWSABUF) malloc(sizeof(WSABUF) * nvec);
+
+    if (!pWsaData)
+        return APR_ENOMEM;
+
+    for (i = 0; i < nvec; i++) {
+        pWsaData[i].buf = vec[i].iov_base;
+        pWsaData[i].len = vec[i].iov_len;
+    }
+
+    rv = setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char*) &timeout, 
+                    sizeof(timeout));
+    if (rv == SOCKET_ERROR) {
+        lasterror = WSAGetLastError();
+        /* Test code: remove before release */
+        printf("win32_writev: setsockopt failed. errno = %d\n", lasterror);
+        free(pWsaData);
+        return lasterror;
+    }
+
+    rv = WSASend(sock->sock, pWsaData, nvec, &dwBytes, 0, NULL, NULL);
+    if (rv == SOCKET_ERROR) {
+        lasterror = WSAGetLastError();
+        /* Test code: remove before release */
+        if (lasterror == WSAETIMEDOUT)
+            printf("wsasend: Connection timed out\n");
+        else
+            printf("wsasend: connection failed. lasterror = %d\n", lasterror);            
+
+        free(pWsaData);
+        return lasterror;
+    }
+
+    free(pWsaData);
+
+    *nbytes = dwBytes;
+    return APR_SUCCESS;
+}
+#if defined(HAVE_SENDFILE)
+/*
+ * ap_status_t ap_sendfile(ap_socket_t *, ap_file_t *, ap_hdtr_t *, 
+ *                         ap_off_t *, ap_size_t *, ap_int32_t flags)
+ *    Send a file from an open file descriptor to a socket, along with 
+ *    optional headers and trailers
+ * arg 1) The socket to which we're writing
+ * arg 2) The open file from which to read
+ * arg 3) A structure containing the headers and trailers to send
+ * arg 4) Offset into the file where we should begin writing
+ * arg 5) Number of bytes to send 
+ * arg 6) OS-specific flags to pass to sendfile()
+ */
+ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
+        		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
+        		ap_int32_t flags) 
+{
+    ap_ssize_t rv;
+    int rv;
+    int lasterror;
+    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
+    HANDLE nfd;
+    DWORD dwFlags = 0;
+
+    ap_get_os_file(&nfd, file);
+
+    rv = setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO,
+               (char*) &timeout, sizeof(timeout));
+#if 0
+    if (flags | APR_SENDFILE_KEEP_SOCKET)
+        dwFlags |= TF_REUSE_SOCKET;
+    if (flags | APR_SENDFILE_CLOSE_SOCKET)
+        dwFlags |= TF_DISCONNECT;
+#else
+    dwFlags = 0; // TF_DISCONNECT;TF_WRITE_BEHIND;TF_REUSE_SOCKET;
+#endif
+    rv = TransmitFile(sock->sock, /* socket */
+                      nfd,        /* open file descriptor of the file to be sent */
+                      filelen,    /* number of bytes to send. 0==> send all */
+                      0,          /* Number of bytes per send. 0=> use default */
+                      NULL,       /* OVERLAPPED structure */
+                      NULL,       /* header and trailer buffers */
+                      dwFlags);   /* flags to control various aspects of TransmitFIle */
+    if (!rv) {
+        lasterror = WSAGetLastError();
+        printf("TransmitFile failed with error %d\n", lasterror);
+        return lasterror;
+    }
+    return APR_SUCCESS;
+}
+#endif
