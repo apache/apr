@@ -84,7 +84,7 @@ typedef struct apr_hash_entry_t apr_hash_entry_t;
 
 struct apr_hash_entry_t {
     apr_hash_entry_t *next;
-    apr_uint32_t      hash;
+    unsigned int      hash;
     const void       *key;
     apr_ssize_t       klen;
     const void       *val;
@@ -100,7 +100,7 @@ struct apr_hash_entry_t {
 struct apr_hash_index_t {
     apr_hash_t         *ht;
     apr_hash_entry_t   *this, *next;
-    apr_uint32_t        index;
+    unsigned int        index;
 };
 
 /*
@@ -114,7 +114,7 @@ struct apr_hash_t {
     apr_pool_t          *pool;
     apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
-    apr_uint32_t         count, max;
+    unsigned int         count, max;
 };
 
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
@@ -124,7 +124,7 @@ struct apr_hash_t {
  * Hash creation functions.
  */
 
-static apr_hash_entry_t **alloc_array(apr_hash_t *ht, apr_uint32_t max)
+static apr_hash_entry_t **alloc_array(apr_hash_t *ht, unsigned int max)
 {
    return apr_pcalloc(ht->pool, sizeof(*ht->array) * (max + 1));
 }
@@ -192,14 +192,12 @@ static void expand_array(apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
     apr_hash_entry_t **new_array;
-    apr_uint32_t new_max;
+    unsigned int new_max;
 
     new_max = ht->max * 2 + 1;
     new_array = alloc_array(ht, new_max);
     for (hi = apr_hash_first(NULL, ht); hi; hi = apr_hash_next(hi)) {
-        apr_uint32_t i;
-
-        i = hi->this->hash & new_max;
+        unsigned int i = hi->this->hash & new_max;
         hi->this->next = new_array[i];
         new_array[i] = hi->this;
     }
@@ -223,7 +221,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
 {
     apr_hash_entry_t **hep, *he;
     const unsigned char *p;
-    apr_uint32_t hash;
+    unsigned int hash;
     apr_ssize_t i;
 
     /*
@@ -304,7 +302,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
 {
     apr_hash_t *ht;
     apr_hash_entry_t *new_vals;
-    apr_uint32_t i, j;
+    unsigned int i, j;
 
     ht = apr_palloc(pool, sizeof(apr_hash_t) +
                     sizeof(*ht->array) * (orig->max + 1) +
@@ -371,7 +369,7 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
     /* else key not present and val==NULL */
 }
 
-APR_DECLARE(apr_uint32_t) apr_hash_count(apr_hash_t *ht)
+APR_DECLARE(unsigned int) apr_hash_count(apr_hash_t *ht)
 {
     return ht->count;
 }
@@ -398,7 +396,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
     apr_hash_entry_t *new_vals = NULL;
     apr_hash_entry_t *iter;
     apr_hash_entry_t *ent;
-    apr_uint32_t i,j,k;
+    unsigned int i,j,k;
 
 #ifdef POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that
