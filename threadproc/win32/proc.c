@@ -72,17 +72,17 @@
  */
 
 APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,
-                                                  apr_pool_t *cont)
+                                                  apr_pool_t *pool)
 {
-    (*new) = (apr_procattr_t *)apr_pcalloc(cont, sizeof(apr_procattr_t));
-    (*new)->cntxt = cont;
+    (*new) = (apr_procattr_t *)apr_pcalloc(pool, sizeof(apr_procattr_t));
+    (*new)->pool = pool;
     (*new)->cmdtype = APR_PROGRAM;
     return APR_SUCCESS;
 }
 
 static apr_status_t open_nt_process_pipe(apr_file_t **read, apr_file_t **write,
                                          apr_int32_t iBlockingMode,
-                                         apr_pool_t *cntxt)
+                                         apr_pool_t *pool)
 {
     apr_status_t stat;
     BOOLEAN bAsyncRead, bAsyncWrite;
@@ -104,7 +104,7 @@ static apr_status_t open_nt_process_pipe(apr_file_t **read, apr_file_t **write,
         bAsyncWrite = TRUE;
     }
     if ((stat = apr_create_nt_pipe(read, write, bAsyncRead, bAsyncWrite,
-                                   cntxt)) != APR_SUCCESS)
+                                   pool)) != APR_SUCCESS)
         return stat;
 
     return APR_SUCCESS;
@@ -164,7 +164,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
 
     if (in) {
         stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in, in,
-                                    attr->cntxt);
+                                    attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_in);
         if (stat != APR_SUCCESS)
@@ -172,7 +172,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
     }
     if (out) {
         stat = open_nt_process_pipe(&attr->parent_out, &attr->child_out, out,
-                                    attr->cntxt);
+                                    attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_out);
         if (stat != APR_SUCCESS)
@@ -180,7 +180,7 @@ APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
     }
     if (err) {
         stat = open_nt_process_pipe(&attr->parent_err, &attr->child_err, err,
-                                    attr->cntxt);
+                                    attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_err);
         if (stat != APR_SUCCESS)
@@ -198,7 +198,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr,
     if (attr->child_in == NULL && attr->parent_in == NULL) {
         stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in,
                                     APR_FULL_BLOCK,
-                                    attr->cntxt);
+                                    attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_in);
         if (stat != APR_SUCCESS)
@@ -221,7 +221,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
     if (attr->child_out == NULL && attr->parent_out == NULL) {
         stat = open_nt_process_pipe(&attr->child_out, &attr->parent_out,
                                     APR_FULL_BLOCK,
-                                    attr->cntxt);
+                                    attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_out);
         if (stat != APR_SUCCESS)
@@ -244,7 +244,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
     if (attr->child_err == NULL && attr->parent_err == NULL) {
         stat = open_nt_process_pipe(&attr->child_err, &attr->parent_err,
                                     APR_FULL_BLOCK,
-                                    attr->cntxt);
+                                    attr->pool);
         if (stat == APR_SUCCESS)
             stat = make_handle_private(attr->parent_err);
         if (stat != APR_SUCCESS)
@@ -265,7 +265,7 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
      * the NT library loading code that flunk the '/' parsing test.
      */
     return apr_filepath_merge(&attr->currdir, NULL, dir, 
-                              APR_FILEPATH_NATIVE, attr->cntxt);
+                              APR_FILEPATH_NATIVE, attr->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
@@ -287,7 +287,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char * const *args,
                                           const char * const *env,
                                           apr_procattr_t *attr,
-                                          apr_pool_t *cont)
+                                          apr_pool_t *pool)
 {
     apr_status_t rv;
     apr_size_t i;
@@ -321,7 +321,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
      * a 16 bit app running in the VDM or WOW context.
      */
     if (progname[0] == '\"') {
-        progname = apr_pstrndup(cont, progname + 1, strlen(progname) - 2);
+        progname = apr_pstrndup(pool, progname + 1, strlen(progname) - 2);
     }
     
     /* progname must be unquoted, in native format, as there are all sorts 
@@ -330,16 +330,16 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
      * so we've casted past the constness issue.
      */
     if (strchr(progname, ' '))
-        cmdline = apr_pstrcat(cont, "\"", progname, "\"", NULL);
+        cmdline = apr_pstrcat(pool, "\"", progname, "\"", NULL);
     else
         cmdline = (char*)progname;
 
     i = 1;
     while (args && args[i]) {
         if (strchr(args[i], ' '))
-            cmdline = apr_pstrcat(cont, cmdline, " \"", args[i], "\"", NULL);
+            cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
         else
-            cmdline = apr_pstrcat(cont, cmdline, " ", args[i], NULL);
+            cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
         i++;
     }
 
@@ -350,10 +350,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if (!shellcmd)
             shellcmd = SHELL_PATH;
         if (shellcmd[0] == '"')
-            progname = apr_pstrndup(cont, shellcmd + 1, strlen(shellcmd) - 1);
+            progname = apr_pstrndup(pool, shellcmd + 1, strlen(shellcmd) - 1);
         else if (strchr(shellcmd, ' '))
-            shellcmd = apr_pstrcat(cont, "\"", shellcmd, "\"", NULL);
-        cmdline = apr_pstrcat(cont, shellcmd, " /C \"", cmdline, "\"", NULL);
+            shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
+        cmdline = apr_pstrcat(pool, shellcmd, " /C \"", cmdline, "\"", NULL);
     } 
     else {
         /* Win32 is _different_ than unix.  While unix will find the given
@@ -364,7 +364,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          */
         char *progpath;
         apr_filepath_merge(&progpath, attr->currdir, progname, 
-                           APR_FILEPATH_NATIVE, cont);
+                           APR_FILEPATH_NATIVE, pool);
         progname = progpath;
     }
 
@@ -391,7 +391,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         IF_WIN_OS_IS_UNICODE
         {
             apr_wchar_t *pNext;
-            pEnvBlock = (char *)apr_palloc(cont, iEnvBlockLen * 2);
+            pEnvBlock = (char *)apr_palloc(pool, iEnvBlockLen * 2);
             dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
 
             i = 0;
@@ -415,7 +415,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         ELSE_WIN_OS_IS_ANSI
         {
             char *pNext;
-            pEnvBlock = (char *)apr_palloc(cont, iEnvBlockLen);
+            pEnvBlock = (char *)apr_palloc(pool, iEnvBlockLen);
     
             i = 0;
             pNext = pEnvBlock;
@@ -437,9 +437,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         STARTUPINFOW si;
         apr_size_t nprg = strlen(progname) + 1;
         apr_size_t nwprg = nprg + 6;
-        apr_wchar_t *wprg = apr_palloc(cont, nwprg * sizeof(wprg[0]));
+        apr_wchar_t *wprg = apr_palloc(pool, nwprg * sizeof(wprg[0]));
         apr_size_t ncmd = strlen(cmdline) + 1, nwcmd = ncmd;
-        apr_wchar_t *wcmd = apr_palloc(cont, nwcmd * sizeof(wcmd[0]));
+        apr_wchar_t *wcmd = apr_palloc(pool, nwcmd * sizeof(wcmd[0]));
         apr_size_t ncwd = 0, nwcwd = 0;
         apr_wchar_t *wcwd = NULL;
 
@@ -453,7 +453,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         if (attr->currdir)
         {
             ncwd = nwcwd = strlen(attr->currdir) + 1;
-            wcwd = apr_palloc(cont, ncwd * sizeof(wcwd[0]));
+            wcwd = apr_palloc(pool, ncwd * sizeof(wcwd[0]));
             if ((rv = apr_conv_utf8_to_ucs2(attr->currdir, &ncwd, 
                                             wcwd, &nwcwd))
                     != APR_SUCCESS) {

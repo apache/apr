@@ -62,7 +62,7 @@
 #define SHELL_PATH "cmd.exe"
 
 struct apr_thread_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     HANDLE td;
     apr_int32_t cancel;
     apr_int32_t cancel_how;
@@ -72,17 +72,17 @@ struct apr_thread_t {
 };
 
 struct apr_threadattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     apr_int32_t detach;
 };
 
 struct apr_threadkey_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     DWORD key;
 };
 
 struct apr_procattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     apr_file_t *parent_in;
     apr_file_t *child_in;
     apr_file_t *parent_out;
