@@ -125,8 +125,8 @@ static int strnatcmp0(char const *a, char const *b, int fold_case)
 	  }
 
 	  if (fold_case) {
-	       ca = toupper(ca);
-	       cb = toupper(cb);
+	       ca = apr_toupper(ca);
+	       cb = apr_toupper(cb);
 	  }
 	  
 	  if (ca < cb)
