@@ -441,6 +441,7 @@ static apr_status_t apr_sms_trivial_destroy(apr_sms_t *sms)
     node = tms->used_sentinel.next;
     while (node) {
         next = node->next;
+
         apr_sms_free(sms->parent, node);
         node = next;
     }
