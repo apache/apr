@@ -57,25 +57,20 @@
 #include "apr_pools.h"
 #include "apr_signal.h"
 
-#include "misc.h"       /* for WSAHighByte / WSALowByte */
 #include "locks.h"      /* for apr_unix_setup_lock() */
 #include "proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "internal_time.h"
 
 
-#ifndef WIN32
-APR_DECLARE(apr_status_t) apr_app_main(int *argc, char ***argv, char ***env)
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, char ***argv, char ***env)
 {
     /* An absolute noop.  At present, only Win32 requires this stub, but it's
      * required in order to move command arguments passed through the service
      * control manager into the process, and it's required to fix the char*
-     * data passed in from local/wide codepage into utf-8, our internal fmt.
-     *
-     * Win32 declares it's implementation in misc/win32/apr_app.c
+     * data passed in from win32 unicode into utf-8, win32's apr internal fmt.
      */
-    return APR_SUCCESS;
+    return apr_initialize();
 }
-#endif
 
 static int initialized = 0;
 
@@ -83,20 +78,12 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 {
     apr_pool_t *pool;
     apr_status_t status;
-#if defined WIN32
-    int iVersionRequested;
-    WSADATA wsaData;
-    int err;
-#endif
-#if defined WIN32 
-    apr_oslevel_e osver;
-#endif
 
     if (initialized++) {
         return APR_SUCCESS;
     }
 
-#if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
+#if !defined(BEOS) && !defined(OS2)
     apr_unix_setup_lock();
     apr_proc_mutex_unix_setup_lock();
     apr_unix_setup_time();
@@ -111,26 +98,6 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_pool_tag(pool, "apr_initilialize");
 
-#ifdef WIN32
-    /* Initialize apr_os_level global */
-    if (apr_get_oslevel(pool, &osver) != APR_SUCCESS) {
-        return APR_EEXIST;
-    }
-#endif
-    
-#if defined(WIN32)
-    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
-    err = WSAStartup((WORD) iVersionRequested, &wsaData);
-    if (err) {
-        return err;
-    }
-    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
-        HIBYTE(wsaData.wVersion) != WSALowByte) {
-        WSACleanup();
-        return APR_EEXIST;
-    }
-#endif
-    
     apr_signal_init(pool);
 
     return APR_SUCCESS;
@@ -144,9 +111,6 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
     }
     apr_pool_terminate();
     
-#if defined(WIN32)
-    WSACleanup();
-#endif
 }
 
 APR_DECLARE(void) apr_terminate2(void)
