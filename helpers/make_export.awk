@@ -1,6 +1,6 @@
 # Based on Ryan Bloom's make_export.pl
 
-/^#[ \t]*if(def)? (APR?_|!?defined).*/ {
+/^#[ \t]*if(def)? (AP[RU]?_|!?defined).*/ {
 	if (old_filename != FILENAME) {
 		if (old_filename != "") printf("%s", line)
 		macro_no = 0
@@ -32,14 +32,14 @@
 	next
 }
 
-/^[ \t]*(APR?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?([A-Za-z0-9_]+)\(/ {
+/^[ \t]*(AP[RU]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?([A-Za-z0-9_]+)\(/ {
 	if (found) {
 		found++
 	}
 	for (i = 0; i < count; i++) {
 		line = line "\t"
 	}
-	sub("^[ \t]*(APR?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?", "");
+	sub("^[ \t]*(AP[UR]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?", "");
 	sub("[(].*", "");
 	line = line $0 "\n"
 	next
