@@ -119,6 +119,7 @@ ap_status_t sononblock(int sd)
  *            APR_SO_REUSEADDR  --  The rules used in validating addresses
  *                                  supplied to bind should allow reuse
  *                                  of local addresses.
+ *            APR_SO_TIMEOUT    --  Set the timeout value in seconds.
  * arg 3) Are we turning the option on or off.
  */
 ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on)
@@ -163,6 +164,9 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
             return errno;
         }
+    }
+    if (opt & APR_SO_TIMEOUT) {
+        sock->timeout = on;
     }
     return APR_SUCCESS;
 }         

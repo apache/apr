@@ -82,6 +82,7 @@ extern "C" {
 #define APR_SO_DEBUG         4
 #define APR_SO_NONBLOCK      8
 #define APR_SO_REUSEADDR     16
+#define APR_SO_TIMEOUT       32
 
 #define APR_POLLIN    0x001 
 #define APR_POLLPRI   0x002
@@ -112,8 +113,8 @@ ap_status_t ap_gethostname(ap_context_t *, char *, int);
 ap_status_t ap_get_socketdata(ap_socket_t *, void *);
 ap_status_t ap_set_socketdata(ap_socket_t *, void *);
 
-ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *, time_t);
-ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *, time_t);
+ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *);
+ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *);
 
 ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t, ap_int32_t);
 ap_status_t ap_setport(ap_socket_t *, ap_uint32_t);

@@ -59,6 +59,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_network_io.h"
+#include "apr_lib.h"
 #include <sys/time.h>
 
 /* ***APRDOC********************************************************
@@ -67,11 +68,11 @@
  * arg 1) The socket to send the data over.
  * arg 2) The buffer which contains the data to be sent. 
  * arg 3) The maximum number of bytes to send 
- * arg 4) The amount of time in seconds to try sending this data. 
- * NOTE: The number of bytes actually sent is stored in argument 3.  To have
- *       this behave like a non-blocking write, us a timeout of -1. 
+ * NOTE:  This functions acts like a blocking write by default.  To change 
+ *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
+ *        The number of bytes actually sent is stored in argument 3.
  */
-ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, time_t sec)
+ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
     
@@ -79,7 +80,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
         rv = write(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sec > 0) {
+    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
         struct timeval *tv;
         fd_set fdset;
         int srv;
@@ -87,12 +88,12 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            if (sec == -1) {
+            if (sock->timeout== -1) {
                 tv = NULL;
             }
             else {
                 tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-                tv->tv_sec  = sec;
+                tv->tv_sec  = sock->timeout;
                 tv->tv_usec = 0;
             }
             srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
@@ -122,11 +123,11 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
  * arg 1) The socket to read the data from.
  * arg 2) The buffer to store the data in. 
  * arg 3) The maximum number of bytes to read 
- * arg 4) The amount of time in seconds to try reading data. 
- * NOTE: The number of bytes actually sent is stored in argument 3.  To have
- *       this behave like a non-blocking write, us a timeout of -1. 
+ * NOTE:  This functions acts like a blocking write by default.  To change 
+ *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
+ *        The number of bytes actually sent is stored in argument 3.
  */
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t sec)
+ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
     
@@ -134,7 +135,7 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t se
         rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sec > 0) {
+    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
         struct timeval *tv;
         fd_set fdset;
         int srv;
@@ -142,12 +143,12 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t se
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            if (sec == -1) {
+            if (sock->timeout == -1) {
                 tv = NULL;
             }
             else {
                 tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-                tv->tv_sec  = sec;
+                tv->tv_sec  = sock->timeout;
                 tv->tv_usec = 0;
             }
 
