@@ -60,31 +60,66 @@
 #include "thread_cond.h"
 #include "apr_portable.h"
 
+static apr_status_t thread_cond_cleanup(void *data)
+{
+    apr_thread_cond_t *cond = (apr_thread_cond_t *)data;
+
+    NXCondFree(cond->cond);        
+    return APR_SUCCESS;
+} 
+
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
                                                  apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    apr_thread_cond_t *new_cond = NULL;
+
+    new_cond = (apr_thread_cond_t *)apr_pcalloc(pool, sizeof(apr_thread_cond_t));
+	
+	if(new_cond ==NULL) {
+        return APR_ENOMEM;
+    }     
+    new_cond->pool = pool;
+
+    new_cond->cond = NXCondAlloc(NULL);
+    
+    if(new_cond->cond == NULL)
+        return APR_ENOMEM;
+
+    apr_pool_cleanup_register(new_cond->pool, new_cond, 
+                                (void*)thread_cond_cleanup,
+                                apr_pool_cleanup_null);
+   *cond = new_cond;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
                                                apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    if (NXCondWait(cond->cond, mutex->mutex) != 0)
+        return APR_EINTR;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
 {
-    return APR_ENOTIMPL;
+    NXCondSignal(cond->cond);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
 {
-    return APR_ENOTIMPL;
+    NXCondBroadcast(cond->cond);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond)
 {
-    return APR_ENOTIMPL;
+    apr_status_t stat;
+    if ((stat = thread_cond_cleanup(cond)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(cond->pool, cond, thread_cond_cleanup);
+        return APR_SUCCESS;
+    }
+    return stat;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(thread_cond)
