@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/11/03 01:54:15 $]
+Last modified at [$Date: 2001/11/14 08:36:16 $]
 
 Release:
 
@@ -28,12 +28,19 @@ RELEASE SHOWSTOPPERS:
       since apr_proc_create didn't allocate the apr_proc_t storage.
       (Aren't transparent types swell?)  Suggestions?
 
-    * The new lock API is a full replacement for the old API, save
-      for the apr_lock_data_get/apr_lock_data_set functions. These
-      should be translated into apr_proc_mutex_data_get and
-      apr_proc_mutex_data_set to be complete.
-        Status: This should be in place before we make an APR release.
-                Aaron will do it unless someone beats him to it.
+    * The new lock API is a full replacement for the old API, but is
+      not yet complete on all platforms. Components that are incomplete
+      or missing include:
+      Beos: apr_thread_cond_*()
+      Netware: apr_proc_mutex_*() (Is proc_mutex unnecessary on Netware?)
+      OS/2: apr_thread_cond_*(), apr_proc_mutex_*()
+
+      Less critical components that we may wish to add at some point:
+      Beos: apr_thread_rwlock_try*lock()
+            apr_proc_mutex_trylock()
+      Unix: apr_thread_rwlock_*() for platforms w/o rwlocks in pthread
+      Win32: apr_thread_rwlock_try*lock(), apr_thread_cond_timedwait(),
+             apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -224,7 +231,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       thereafter destroyed. Simply changing the type of this parameter
       to (apr_status_t) should solve the problem (along with some
       internal changes in apr_thread_join() to accomodate).
-        Status: Aaron is working on this.
+        Status: "I'll probably test and commit this soonish," says Aaron,
+                "Here's the patch:"
+         http://marc.theaimsgroup.com/?l=apr-dev&m=100137033309456&q=raw
 
     * There are some optimizations that can be done to the new
       apr_proc_*() functions (on UNIX). One that may reduce pointer
