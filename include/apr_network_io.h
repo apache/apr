@@ -410,7 +410,7 @@ APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len, apr_pool_t *cont);
  * @param sock The currently open socket.
  */
 APR_DECLARE(apr_status_t) apr_socket_data_get(void **data, const char *key,
-                                             apr_socket_t *sock);
+                                              apr_socket_t *sock);
 
 /**
  * Set the data associated with the current socket.
@@ -420,8 +420,8 @@ APR_DECLARE(apr_status_t) apr_socket_data_get(void **data, const char *key,
  * @param cleanup The cleanup to call when the socket is destroyed.
  */
 APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *sock, void *data,
-                                             const char *key,
-                                             apr_status_t (*cleanup)(void*));
+                                              const char *key,
+                                              apr_status_t (*cleanup)(void*));
 
 /**
  * Send data over a network.
@@ -545,9 +545,12 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock,
  * </PRE>
  * @param on Value for the option.
  */
+APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
+                                             apr_int32_t opt, apr_int32_t on);
+
+/** @deprecated @see apr_socket_opt_set */
 APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
-                                           apr_int32_t opt, 
-                                           apr_int32_t on);
+                                           apr_int32_t opt, apr_int32_t on);
 
 /**
  * Setup socket timeout for the specified socket
@@ -576,6 +579,10 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock,
  * </PRE>
  * @param on Socket option returned on the call.
  */
+APR_DECLARE(apr_status_t) apr_socket_opt_get(apr_socket_t *sock, 
+                                             apr_int32_t opt, apr_int32_t *on);
+
+/** @deprecated @see apr_socket_opt_set */
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock, 
                                            apr_int32_t opt, apr_int32_t *on);
 
@@ -594,8 +601,8 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock,
  * @param sock The socket to use
  */
 APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
-                                           apr_interface_e which,
-                                           apr_socket_t *sock);
+                                              apr_interface_e which,
+                                              apr_socket_t *sock);
  
 /**
  * Set the port in an APR socket address.
@@ -603,7 +610,7 @@ APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
  * @param port The port to be stored in the socket address.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
-                                       apr_port_t port);
+                                                apr_port_t port);
 
 /**
  * Return the port in an APR socket address.
@@ -611,7 +618,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
  * @param sockaddr The socket address to reference.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
-                                       apr_sockaddr_t *sockaddr);
+                                                apr_sockaddr_t *sockaddr);
 
 /**
  * Set the IP address in an APR socket address.
@@ -620,7 +627,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
  *             Use APR_ANYADDR to use any IP addr on the machine.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
-                                         const char *addr);
+                                              const char *addr);
 
 /**
  * Return the IP address (in numeric address string format) in
@@ -629,7 +636,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
  * @param sockaddr The socket address to reference.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr, 
-                                         apr_sockaddr_t *sockaddr);
+                                              apr_sockaddr_t *sockaddr);
 
 /**
  * See if the IP addresses in two APR socket addresses are
@@ -678,8 +685,10 @@ APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr,
  * @param mask_or_numbits The input netmask or number-of-bits string, or NULL
  * @param p The pool to allocate from
  */
-APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char *ipstr, 
-                                              const char *mask_or_numbits, apr_pool_t *p);
+APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, 
+                                              const char *ipstr, 
+                                              const char *mask_or_numbits, 
+                                              apr_pool_t *p);
 
 /**
  * Test the IP address in an apr_sockaddr_t against a pre-built ip-subnet
