@@ -41,3 +41,4 @@ testnames
 testmem
 testlock
 *.core
+testsockets
