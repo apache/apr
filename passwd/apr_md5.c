@@ -718,8 +718,9 @@ APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd,
 #else
         /* XXX if this is a threaded build, we should hold a mutex 
          *     around the next two lines... but note that on some
-         *     platforms (e.g., Solaris, HP-UX) crypt() returns a
-         *     pointer to thread-specific data
+         *     platforms (e.g., Solaris, HP-UX, OS/390) crypt() 
+         *     returns a pointer to thread-specific data so we don't
+         *     want a mutex on those platforms
          */
         crypt_pw = crypt(passwd, hash);
         apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
