@@ -20,6 +20,8 @@ abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
 dnl Get location of helpers directory
+dnl XXX This assumes that APR "lives" under Apache.
+dnl XXX We'll need to fix this when we pull it out.
 abs_helpersdir=$abs_srcdir/helpers
 MKDIR=$abs_helpersdir/mkdir.sh
 
