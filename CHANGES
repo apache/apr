@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Get flock-based mutexes to work in apps like Apache.  Use the
+     same permissions on flock- and fcntl-based mutexes as Apache
+     1.3.  [Jeff Trawick]
+
   *) Fix apr-config so that it will not attempt to cd to a non-existent
      directory.  [Justin Erenkrantz]
 

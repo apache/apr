@@ -390,7 +390,8 @@ static apr_status_t proc_mutex_fcntl_create(apr_proc_mutex_t *new_mutex,
     if (fname) {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
         rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
-                           APR_CREATE | APR_WRITE | APR_EXCL, 0644, 
+                           APR_CREATE | APR_WRITE | APR_EXCL, 
+                           APR_UREAD | APR_UWRITE | APR_GREAD | APR_WREAD,
                            new_mutex->pool);
     }
     else {
@@ -511,7 +512,8 @@ static apr_status_t proc_mutex_flock_create(apr_proc_mutex_t *new_mutex,
     if (fname) {
         new_mutex->fname = apr_pstrdup(new_mutex->pool, fname);
         rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
-                           APR_CREATE | APR_WRITE | APR_EXCL, 0644, 
+                           APR_CREATE | APR_WRITE | APR_EXCL, 
+                           APR_UREAD | APR_UWRITE,
                            new_mutex->pool);
     }
     else {
@@ -582,10 +584,10 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
     new_mutex->pool = pool;
     new_mutex->fname = apr_pstrdup(pool, fname);
     rv = apr_file_open(&new_mutex->interproc, new_mutex->fname,
-                       APR_CREATE | APR_WRITE, 0600, new_mutex->pool);
+                       APR_WRITE, 0, new_mutex->pool);
     if (rv != APR_SUCCESS) {
         proc_mutex_flock_destroy(new_mutex);
-        return errno;
+        return rv;
     }
     *mutex = new_mutex;
     return APR_SUCCESS;
