@@ -351,7 +351,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         int error;
 
         memset(&hints, 0, sizeof(hints));
-        hints.ai_flags = 0; /* XXX: might need a way to turn on AI_CANONNAME */
 #if !APR_HAVE_IPV6
         /* we can't talk IPv6 so we might as well not search for IPv6
          * addresses
@@ -362,7 +361,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 #endif
             hints.ai_family = family;
         hints.ai_socktype = SOCK_STREAM;
-        hints.ai_protocol = 0;
         error = getaddrinfo(hostname, NULL, &hints, &ai_list);
         if (error) {
             if (error == EAI_SYSTEM) {
