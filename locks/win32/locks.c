@@ -59,6 +59,28 @@
 #include "win32/locks.h"
 #include "apr_portable.h"
 
+static apr_status_t lock_cleanup(void *lock_)
+{
+    apr_lock_t *lock = lock_;
+
+    switch (lock->type)
+    {
+    case APR_MUTEX:
+        if (lock->scope == APR_INTRAPROCESS) {
+            DeleteCriticalSection(&lock->section);
+            return APR_SUCCESS;
+        } else {
+            if (CloseHandle(lock->mutex) == 0) {
+                return apr_get_os_error();
+            }
+        }
+        break;
+    case APR_READWRITE:
+        return APR_ENOTIMPL;
+    }
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, 
                                           apr_locktype_e type, 
                                           apr_lockscope_e scope, 
@@ -97,6 +119,8 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
         newlock->mutex = CreateMutex(&sec, FALSE, fname);
     }
     *lock = newlock;
+    apr_pool_cleanup_register(newlock->pool, newlock, lock_cleanup,
+                              apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -189,23 +213,13 @@ APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock)
 
 APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock)
 {
-    switch (lock->type)
-    {
-    case APR_MUTEX:
-        if (lock->scope == APR_INTRAPROCESS) {
-            DeleteCriticalSection(&lock->section);
-            return APR_SUCCESS;
-        } else {
-            if (CloseHandle(lock->mutex) == 0) {
-                return apr_get_os_error();
-            }
-        }
-        break;
-    case APR_READWRITE:
-        return APR_ENOTIMPL;
-    }
+    apr_status_t stat;
 
-    return APR_SUCCESS;
+    stat = lock_cleanup(lock);
+    if (stat == APR_SUCCESS) {
+        apr_pool_cleanup_kill(lock->pool, lock, lock_cleanup);
+    }
+    return stat;
 }
 
 APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, const char *key,
