@@ -52,8 +52,17 @@
  * <http://www.apache.org/>.
  */
 
+#ifdef OS2
+#include "../os2/fileio.h"
+#include "apr_file_io.h"
+#include "apr_general.h"
+#include "apr_lib.h"
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#else
 #include "fileio.h"
-
+#endif
 /* A file to put ALL of the accessor functions for ap_file_t types. */
 
 ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
@@ -68,6 +77,7 @@ ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
     }
 }
 
+#ifndef (OS2)
 mode_t ap_unix_get_fileperms(ap_fileperms_t mode)
 {
     mode_t rv = 0;
@@ -95,6 +105,7 @@ mode_t ap_unix_get_fileperms(ap_fileperms_t mode)
 
     return rv;
 }
+#endif
 
 ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
 {    
@@ -114,6 +125,7 @@ ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
         return ap_set_userdata(data, key, cleanup, file->cntxt);
     }
     else {
+        *data = NULL;
         return APR_ENOFILE;
     }
 }

@@ -15,7 +15,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 LIB=file.a
 
 OBJS=dir.o \
-	fileacc.o \
+	common.o \
 	filedup.o \
 	filestat.o \
 	open.o \
