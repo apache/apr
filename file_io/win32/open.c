@@ -259,6 +259,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     (*new)->cntxt = cont;
     (*new)->filehand = handle;
     (*new)->fname = apr_pstrdup(cont, fname);
+    (*new)->flags = flag;
 
     if (flag & APR_APPEND) {
         (*new)->append = 1;
