@@ -67,6 +67,8 @@
 extern "C" {
 #endif
 
+#if APR_HAS_DSO
+
 typedef struct apr_dso_handle_t        apr_dso_handle_t;
 typedef void *                        apr_dso_handle_sym_t;
 
@@ -101,6 +103,8 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
  * @param bufsize The size of the provided buffer
  */
 const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize);
+
+#endif /* APR_HAS_DSO */
 
 #ifdef __cplusplus
 }

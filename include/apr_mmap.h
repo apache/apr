@@ -93,6 +93,8 @@ struct apr_mmap_t {
     size_t size;
 };
 
+#if APR_HAS_MMAP
+
 /*   Function definitions */
 
 /** 
@@ -119,6 +121,8 @@ apr_status_t apr_mmap_delete(apr_mmap_t *mmap);
  * @param offset The offset to move to.
  */
 apr_status_t apr_mmap_offset(void **addr, apr_mmap_t *mmap, apr_off_t offset);
+
+#endif /* APR_HAS_MMAP */
 
 #ifdef __cplusplus
 }
