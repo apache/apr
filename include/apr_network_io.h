@@ -743,6 +743,7 @@ APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
  * Set the port in an APR socket address.
  * @param sockaddr The socket address to set.
  * @param port The port to be stored in the socket address.
+ * @deprecated @see apr_sockaddr_info_get
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
                                                 apr_port_t port);
@@ -751,6 +752,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
  * Return the port in an APR socket address.
  * @param port The port from the socket address.
  * @param sockaddr The socket address to reference.
+ * @deprecated Access port field directly.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
                                                 apr_sockaddr_t *sockaddr);
@@ -760,6 +762,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
  * @param sockaddr The socket address to use 
  * @param addr The IP address to attach to the socket.
  *             Use APR_ANYADDR to use any IP addr on the machine.
+ * @deprecated @see apr_sockaddr_info_get
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
                                               const char *addr);
