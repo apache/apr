@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) apr-atomic support for old-sparc's and gas on solaris
+     [Dale Ghent <daleg@elemental.org>,  jean-frederic clere, Ian Holsman]
+
   *) Change apr_proc_detach to take a parameter that can enable/disable
      automatic forking (aka, to "daemonize").
      [Jos Backus <josb@cncdsl.com>, Aaron Bannert]
