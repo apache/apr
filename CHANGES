@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Ensure that the ATOMIC_HASH can not be negative.
+     [Joe Orton <jorton@redhat.com>]
+
   *) Fix a problem with eof reporting with Unix file I/O on 
      unbuffered files.  [Stas Bekman <stas@stason.org>]
 
