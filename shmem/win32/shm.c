@@ -264,3 +264,35 @@ APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
 {
     return m->length;
 }
+
+APR_DECLARE(apr_status_t) apr_os_shm_get(apr_os_shm_t *osshm,
+                                         apr_shm_t *shm)
+{
+    *osshm = shm->hMap;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **m,
+                                         apr_os_shm_t *osshm,
+                                         apr_pool_t *pool)
+{
+    void* base;
+    base = MapViewOfFile(*osshm, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, 0);
+    if (!base) {
+        return apr_get_os_error();
+    }
+    
+    *m = (apr_shm_t *) apr_palloc(pool, sizeof(apr_shm_t));
+    (*m)->pool = pool;
+    (*m)->hMap = *osshm;
+    (*m)->memblk = base;
+    (*m)->usrmem = (char*)base + sizeof(memblock_t);
+    /* Real (*m)->mem->size could be recovered with VirtualQuery */
+    (*m)->size = (*m)->memblk->size;
+    (*m)->length = (*m)->memblk->length;
+
+    apr_pool_cleanup_register((*m)->pool, *m, 
+                              shm_cleanup, apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}    
+
