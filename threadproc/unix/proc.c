@@ -331,7 +331,7 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
                 newargs[i + 2] = args[i]; 
                 i++;
             }
-            newargs[i + 3] = NULL;
+            newargs[i + 2] = NULL;
             if (attr->detached) {
                 apr_detach();
             }
