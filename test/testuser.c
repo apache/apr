@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     char *username;
     char *homedir;
     apr_uid_t userid;
-    apr_gid_t groupid;
+    apr_gid_t groupid, newgroupid;
 
     if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
@@ -120,6 +120,24 @@ int main(int argc, char *argv[])
     rv = apr_get_groupname(&groupname, groupid, p);
     if (rv != APR_SUCCESS)
         groupname = "(none)";
+
+    rv = apr_get_groupid(&newgroupid, groupname, p);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "apr_get_groupid(,%s,) failed: %s\n",
+                groupname,
+                apr_strerror(rv, msgbuf, sizeof msgbuf));
+        exit(-1);
+    }
+
+    if (groupid != newgroupid) {
+        fprintf(stderr, "oops, we got a different result for the "
+                "group name/id mapping\n");
+        /* whoever hits this problem gets to figure out how to 
+         * portably display groupid and newgroupid :) 
+         */
+        fprintf(stderr, "group: %s\n",
+                groupname);
+    }
 
     printf("user/group ids for %s: %d/%d\n",
            username,
