@@ -227,7 +227,7 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n)
     }
     *start = 0;
     do {
-	*--start = '0' + (n % 10);
+	*--start = '0' + (char)(n % 10);
 	n /= 10;
     } while (n);
     if (negative) {
