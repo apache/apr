@@ -64,11 +64,8 @@ apr_filepath_merge
 apr_filepath_root
 apr_filepath_set
 apr_fnmatch
+apr_fnmatch_found               from apr_is_fnmatch
 apr_generate_random_bytes
-apr_groupname_get          from apr_get_groupname
-apr_homepath_get           from apr_get_home_directory
-apr_userid_get             from apr_get_userid
-apr_username_get           from apr_get_username
 apr_gethostname
 apr_getnameinfo
 apr_getopt
@@ -76,6 +73,7 @@ apr_getopt_init
 apr_getopt_long
 apr_getservbyname
 apr_getsocketopt
+apr_groupname_get          from apr_get_groupname
 apr_hash_count
 apr_hash_first
 apr_hash_get
@@ -86,7 +84,6 @@ apr_hash_this
 apr_initialize
 apr_ipsubnet_create
 apr_ipsubnet_test
-apr_fnmatch_found               from apr_is_fnmatch
 apr_listen
 apr_lock_acquire
 apr_lock_child_init
@@ -231,6 +228,9 @@ apr_time_implode                 from apr_implode_time
 apr_time_lt_explode              from apr_explode_localtime
 apr_time_now
 apr_tokenize_to_argv
+apr_user_path_get                from apr_get_home_directory
+apr_user_id_get                  from apr_get_userid
+apr_user_name_get                from apr_get_username
 apr_uuid_format
 apr_uuid_get
 apr_uuid_parse
