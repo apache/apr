@@ -56,6 +56,7 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_signal.h"
+#include "ShellAPI.h"
 
 #include "misc.h"       /* for WSAHighByte / WSALowByte */
 #include "wchar.h"
