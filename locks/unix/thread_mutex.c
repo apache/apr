@@ -60,7 +60,7 @@
 
 static apr_status_t thread_mutex_cleanup(void *data)
 {
-    apr_thread_mutex_t *mutex = (apr_thread_mutex_t *)data;
+    apr_thread_mutex_t *mutex = data;
     apr_status_t rv;
 
     rv = pthread_mutex_destroy(&mutex->mutex);
@@ -79,12 +79,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     apr_thread_mutex_t *new_mutex;
     apr_status_t rv;
 
-    new_mutex = (apr_thread_mutex_t *)apr_pcalloc(pool,
-                                                  sizeof(apr_thread_mutex_t));
-
-    if (new_mutex == NULL) {
-        return APR_ENOMEM;
-    }
+    new_mutex = apr_pcalloc(pool, sizeof(apr_thread_mutex_t));
 
     new_mutex->pool = pool;
 
@@ -102,7 +97,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     }
 
     apr_pool_cleanup_register(new_mutex->pool,
-                              (void *)new_mutex, thread_mutex_cleanup,
+                              new_mutex, thread_mutex_cleanup,
                               apr_pool_cleanup_null);
 
     *mutex = new_mutex;
