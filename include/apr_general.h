@@ -143,10 +143,6 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #define memmove(a,b,c) bcopy(b,a,c)
 #endif
 
-#if (!APR_HAVE_BZERO)
-#define bzero(a,b) memset(a,0,b)
-#endif
-
 /**
  * @package APR Random Functions
  */
