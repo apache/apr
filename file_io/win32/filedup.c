@@ -99,9 +99,8 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
     (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->demonfname = ap_pstrdup(old_file->cntxt, old_file->demonfname);
     (*new_file)->lowerdemonfname = ap_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
-    (*new_file)->buffered = old_file->buffered;
-	(*new_file)->append = old_file->append;
- /*   (*new_file)->protection = old_file->protection;
+    (*new_file)->append = old_file->append;
+/*   (*new_file)->protection = old_file->protection;
     (*new_file)->user = old_file->user;
     (*new_file)->group = old_file->group;*/
     (*new_file)->size = old_file->size;

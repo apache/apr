@@ -164,10 +164,6 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
     if (GetFileType(thefile->filehand) != FILE_TYPE_DISK) {
         return GetLastError();
     }
-    /* that's buffered... */
-    if (!thefile->buffered) {
-        return GetLastError();
-    }
     /* and the file pointer is not pointing to the start of the file. */
     if (GetFilePointer(thefile->filehand)) {
         if (SetFilePointer(thefile->filehand, -1, NULL, FILE_CURRENT) 
