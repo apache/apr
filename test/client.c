@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
     ap_status_t stat;
     char datasend[STRLEN] = "Send data test";
     char datarecv[STRLEN];
+    char msgbuf[80];
     char *local_ipaddr, *remote_ipaddr;
     char *dest = "127.0.0.1";
     ap_uint32_t local_port, remote_port;
@@ -124,13 +125,12 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
-    do {
-      stat = ap_connect(sock, dest);
-    } while (stat == APR_ECONNREFUSED);
+    stat = ap_connect(sock, dest);
 
     if (stat != APR_SUCCESS) {
         ap_close_socket(sock);
-        fprintf(stderr, "Could not connect  %d\n", stat);
+        fprintf(stderr, "Could not connect: %s (%d)\n", 
+		ap_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
         fflush(stderr);
         exit(-1);
     }
@@ -166,7 +166,8 @@ int main(int argc, char *argv[])
 
     if ((stat = ap_recv(sock, datarecv, &length)) != APR_SUCCESS) {
         ap_close_socket(sock);
-        fprintf(stderr, "Problem receiving data: %d\n", stat);
+        fprintf(stderr, "Problem receiving data: %s (%d)\n", 
+		ap_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
         exit(-1);
     }
     if (strcmp(datarecv, "Recv data test")) {
