@@ -268,8 +268,7 @@ static union block_hdr *malloc_block(int size)
 
     blok = (union block_hdr *) malloc(size + sizeof(union block_hdr));
     if (blok == NULL) {
-	fprintf(stderr, "Ouch!  malloc failed in malloc_block()\n");
-	exit(1);
+        return NULL;
     }
     debug_fill(blok, size + sizeof(union block_hdr));
     blok->h.next = NULL;
@@ -299,7 +298,6 @@ static void chk_on_blk_list(union block_hdr *blok, union block_hdr *free_blk)
 			"at the end of a block!\n");
     while (free_blk) {
 	if (free_blk == blok) {
-	    fprintf(stderr, "Ouch!  Freeing free block\n");
 	    abort();
 	    exit(1);
 	}
@@ -685,9 +683,6 @@ API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
 	b = *pb;
 	if (is_ptr_in_range(s, b, b->h.endp)) {
 	    if (b->h.owning_pool == FREE_POOL) {
-		fprintf(stderr,
-			"Ouch!  find_pool() called on pointer "
-			"in a free block\n");
 		abort();
 		exit(1);
 	    }
@@ -739,7 +734,6 @@ API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub)
 
     /* We could handle more general cases... but this is it for now. */
     if (sub->parent != p) {
-	fprintf(stderr, "pool_join: p is not parent of sub\n");
 	abort();
     }
     ap_block_alarms();

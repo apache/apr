@@ -349,7 +349,6 @@ static const char **hashbang(const char *filename, char **argv)
 	    newargv = (char **) malloc((p - lbuf + 1)
                       + (i + sargc + 1) * sizeof(*newargv));
 	    if (newargv == NULL) {
-		fprintf(stderr, "Ouch!  Out of memory in hashbang()!\n");
 		return NULL;
 	    }
 	    ws = &((char *) newargv)[(i + sargc + 1) * sizeof(*newargv)];
