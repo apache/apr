@@ -100,6 +100,7 @@ APR_DECLARE(apr_uint32_t) apr_atomic_read32(volatile apr_uint32_t *mem);
 /**
  * atomically set an apr_uint32_t in memory
  * @param mem pointer to the object
+ * @param val value that the object will assume
  */
 APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val);
 
