@@ -290,10 +290,16 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
         int status;
         /* child process */
 
-        /* do exec cleanup before duping pipes to fds 0-2; otherwise,
-         * any files cleaned up with those fds will hose our pipes
+        /* XXX major SNAFU
+         *
+         * If we do exec cleanup before the dup2() calls to set up pipes 
+         * on 0-2, we accidentally close the pipes used by programs like 
+         * mod_cgid.
+         *
+         * If we do exec cleanup after the dup2() calls, cleanup can accidentally
+         * close our pipes which replaced any files which previously had
+         * descriptors 0-2.
          */
-        apr_pool_cleanup_for_exec();
 
         if (attr->child_in) {
             apr_file_close(attr->parent_in);
@@ -318,6 +324,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
                 exit(-1);   /* We have big problems, the child should exit. */
             }
         }
+
+        apr_pool_cleanup_for_exec();
 
         if ((status = limit_proc(attr)) != APR_SUCCESS) {
             return status;
