@@ -126,7 +126,7 @@ ap_status_t ap_setport(struct socket_t *sock, ap_uint32_t port)
     return APR_SUCCESS; 
 } 
 
-ap_status_t ap_getport(struct socket_t *sock, ap_uint32_t *port)
+ap_status_t ap_getport(ap_uint32_t *port, struct socket_t *sock)
 {
     *port = ntohs(sock->addr->sin_port);
     return APR_SUCCESS;
@@ -216,7 +216,7 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
     return APR_SUCCESS; 
 } 
 
-ap_status_t ap_get_socketdata(struct socket_t *sock, char *key, void *data)
+ap_status_t ap_get_socketdata(void *data, char *key, struct socket_t *sock)
 {
     if (socket != NULL) {
         return ap_get_userdata(&data, key, sock->cntxt);
@@ -239,7 +239,7 @@ ap_status_t ap_set_socketdata(struct socket_t *sock, void *data, char *key,
     }
 }
 
-ap_status_t ap_get_os_sock(struct socket_t *sock, ap_os_sock_t *thesock)
+ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct socket_t *sock)
 {
     if (sock == NULL) {
         return APR_ENOSOCKET;

@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Setting up socket for polling.......");
-    ap_setup_poll(&sdset, context, 1);
+    ap_setup_poll(&sdset, 1, context);
     ap_add_poll_socket(sdset, sock, APR_POLLIN);
     fprintf(stdout, "OK\n");
     

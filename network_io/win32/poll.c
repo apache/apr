@@ -62,7 +62,7 @@
 #include <time.h>
 
 
-ap_status_t ap_setup_poll(struct pollfd_t **new, ap_context_t *cont, ap_int32_t num)
+ap_status_t ap_setup_poll(struct pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
     (*new) = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t) * num);
     if ((*new) == NULL) {
@@ -143,7 +143,7 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_int16_t *event)
+ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct pollfd_t *aprset)
 {
     ap_int16_t revents = 0;
     WSABUF data;

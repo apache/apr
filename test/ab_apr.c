@@ -683,7 +683,7 @@ static void test(void)
     memset(con, 0, concurrency * sizeof(struct connection));
 
     stats = (struct data *)malloc(requests * sizeof(struct data));
-    ap_setup_poll(&readbits, cntxt, concurrency);
+    ap_setup_poll(&readbits, concurrency, cntxt);
 
     for (i = 0; i < concurrency; i++) {
         ap_make_time(&con[i].start, cntxt);
@@ -761,7 +761,7 @@ static void test(void)
             err("select");
 
         for (i = 0; i < concurrency; i++) {
-            ap_get_revents(readbits, con[i].aprsock, &rv);
+            ap_get_revents(&rv, con[i].aprsock, readbits);
             if ((rv & APR_POLLERR) || (rv & APR_POLLNVAL) || (rv & APR_POLLHUP)) {
         	bad++;
         	err_except++;

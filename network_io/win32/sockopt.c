@@ -126,7 +126,7 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
     return APR_SUCCESS;
 }         
 
-ap_status_t ap_gethostname(ap_context_t *cont, char *buf, int len)
+ap_status_t ap_gethostname(char *buf, int len, ap_context_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return APR_EEXIST;
