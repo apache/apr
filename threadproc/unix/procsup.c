@@ -128,6 +128,8 @@ ap_status_t ap_detach(ap_context_t *cont, struct proc_t **new)
     if (freopen("/dev/null", "w", stderr) == NULL) {
         return APR_STDERR;
     }
+
+    return APR_SUCCESS;
 }
 
 /* ***APRDOC********************************************************

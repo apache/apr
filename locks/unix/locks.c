@@ -55,6 +55,7 @@
 
 #include "apr_general.h"
 #include "apr_portable.h"
+#include "apr_lib.h"
 #include "locks.h"
 #include <string.h>
 

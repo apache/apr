@@ -108,5 +108,18 @@ struct lock_t {
      */    
 };
 
+ap_status_t create_intra_lock(struct lock_t *new);
+ap_status_t lock_intra(struct lock_t *lock);
+ap_status_t unlock_intra(struct lock_t *lock);
+ap_status_t destroy_intra_lock(struct lock_t *lock);
+
+ap_status_t create_inter_lock(struct lock_t *new);
+ap_status_t lock_inter(struct lock_t *lock);
+ap_status_t unlock_inter(struct lock_t *lock);
+ap_status_t destroy_inter_lock(struct lock_t *lock);
+
+ap_status_t child_init_lock(ap_context_t *cont, char *fname,
+			    struct lock_t **lock);
+
 #endif  /* LOCKS_H */
 

@@ -58,6 +58,8 @@
 #include "apr_general.h"
 
 #ifdef HAVE_PTHREAD_H
+
+#if 0 /* some platforms, e.g. FreeBSD 2.2.8, do not have pthread_cancel (they do have an undocumented pthread_kill, though) */
 /* ***APRDOC********************************************************
  * ap_status_t ap_cancel_thread(ap_thread_t *)
  *    Asynchronously kill a thread
@@ -73,6 +75,7 @@ ap_status_t ap_cancel_thread(struct thread_t *thd)
         return stat;
     }
 }
+#endif
     
 /* ***APRDOC********************************************************
  * ap_status_t ap_setcanceltype(ap_context_t *, ap_int32_t)

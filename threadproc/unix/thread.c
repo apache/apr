@@ -57,6 +57,7 @@
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_portable.h"
+#include "apr_lib.h"
 
 #ifdef HAVE_PTHREAD_H
 /* ***APRDOC********************************************************
@@ -179,6 +180,7 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
 {
     ap_destroy_pool(thd->cntxt);
     pthread_exit(retval);
+    return APR_SUCCESS;
 }
 
 /* ***APRDOC********************************************************

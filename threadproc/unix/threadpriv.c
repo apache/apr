@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 #include "apr_portable.h"
+#include "apr_lib.h"
 
 #ifdef HAVE_PTHREAD_H
 /* ***APRDOC********************************************************
