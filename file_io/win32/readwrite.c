@@ -137,6 +137,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
                 break;
             }
             if (rv != APR_SUCCESS) {
+                /* XXX CancelIo is not available on Win95 */
                 CancelIo(file->filehand);
             }
         }
@@ -184,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         apr_size_t blocksize;
         apr_size_t size = *len;
 
-        apr_lock_acquire(thefile->mutex);
+        apr_thread_mutex_lock(thefile->mutex);
 
         if (thefile->direction == 1) {
             apr_file_flush(thefile);
@@ -222,7 +223,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         if (*len) {
             rv = APR_SUCCESS;
         }
-        apr_lock_release(thefile->mutex);
+        apr_thread_mutex_unlock(thefile->mutex);
     } else {  
         /* Unbuffered i/o */
         apr_size_t nbytes;
@@ -243,7 +244,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         apr_size_t blocksize;
         apr_size_t size = *nbytes;
 
-        apr_lock_acquire(thefile->mutex);
+        apr_thread_mutex_lock(thefile->mutex);
 
         if (thefile->direction == 0) {
             // Position file pointer for writing at the offset we are logically reading from
@@ -268,7 +269,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             size -= blocksize;
         }
 
-        apr_lock_release(thefile->mutex);
+        apr_thread_mutex_unlock(thefile->mutex);
         return rv;
     } else {
         if (thefile->pOverlapped && !thefile->pipe) {
@@ -304,6 +305,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                         break;
                 }
                 if (rv != APR_SUCCESS) {
+                    /* XXX CancelIo is not available on Win95 */
                     CancelIo(thefile->filehand);
                 }
             }
