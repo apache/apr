@@ -363,8 +363,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * ###: This solution isn't much better - it may defeat path searching
          * when the path search was desired.  Open to further discussion.
          */
-        apr_filepath_merge(&progname, attr->currdir, progname, 
+        char *progpath;
+        apr_filepath_merge(&progpath, attr->currdir, progname, 
                            APR_FILEPATH_NATIVE, cont);
+        progname = progpath;
     }
 
 
