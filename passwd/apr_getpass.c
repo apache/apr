@@ -204,7 +204,7 @@ static char *getpass(const char *prompt)
  * but the caller is *not* made aware of it.
  */
 
-APR_EXPORT(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsiz)
+APR_DECLARE(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsiz)
 {
     char *pw_got = NULL;
     int result = 0;

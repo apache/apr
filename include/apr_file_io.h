@@ -546,7 +546,7 @@ apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir);
  * @return The number of bytes written
  * @deffunc int apr_fprintf(apr_file_t *fptr, const char *format, ...)
  */ 
-APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
+APR_DECLARE(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
 #ifdef __cplusplus

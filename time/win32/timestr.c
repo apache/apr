@@ -55,11 +55,11 @@
 #include "atime.h"
 #include "apr_portable.h"
 
-APR_VAR_EXPORT const char apr_month_snames[12][4] =
+APR_DECLARE_DATA const char apr_month_snames[12][4] =
 {
     "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
-APR_VAR_EXPORT const char apr_day_snames[7][4] =
+APR_DECLARE_DATA const char apr_day_snames[7][4] =
 {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };

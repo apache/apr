@@ -91,7 +91,7 @@ struct apr_getopt_t {
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
  * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
  */
-APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
+APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
                                      int argc, char *const *argv);
 
 /**
@@ -111,7 +111,7 @@ APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
  * </PRE>
  * @deffunc apr_status_t apr_getopt(apr_getopt_t *os, const char *opts, char *optch, const char **optarg)
  */
-APR_EXPORT(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
+APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
                                     char *optch, const char **optarg);
 
 #endif  /* ! APR_GETOPT_H */

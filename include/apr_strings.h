@@ -118,7 +118,7 @@ int apr_strnatcasecmp(char const *a, char const *b);
  * @return The new string
  * @deffunc char *apr_pstrdup(apr_pool_t *p, const char *s)
  */
-APR_EXPORT(char *) apr_pstrdup(apr_pool_t *p, const char *s);
+APR_DECLARE(char *) apr_pstrdup(apr_pool_t *p, const char *s);
 
 /**
  * duplicate the first n characters ofa string into memory allocated 
@@ -129,7 +129,7 @@ APR_EXPORT(char *) apr_pstrdup(apr_pool_t *p, const char *s);
  * @return The new string
  * @deffunc char *apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n)
  */
-APR_EXPORT(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
+APR_DECLARE(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
 
 /**
  * Concatenate multiple strings, allocating memory out a pool
@@ -138,7 +138,7 @@ APR_EXPORT(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
  * @return The new string
  * @deffunc char *apr_pstrcat(apr_pool_t *p, ...)
  */
-APR_EXPORT_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
+APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
 
 /**
  * printf-style style printing routine.  The data is output to a string 
@@ -149,7 +149,7 @@ APR_EXPORT_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
  * @return The new string
  * @deffunc char *apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap)
  */
-APR_EXPORT(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
+APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
 
 /**
  * printf-style style printing routine.  The data is output to a string 
@@ -160,7 +160,7 @@ APR_EXPORT(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
  * @return The new string
  * @deffunc char *apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  */
-APR_EXPORT_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...);
+APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...);
 
 /**
  * copy n characters from src to des>
@@ -179,7 +179,7 @@ APR_EXPORT_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...);
  * </PRE>
  * @deffunc char *apr_cpystrn(char *dst, const char *src, size_t dst_size)
  */
-APR_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size);
+APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size);
 
 /**
  * Strip spaces from a string
@@ -188,7 +188,7 @@ APR_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size);
  * @param src The string to rid the spaces from.
  * @deffunc char *apr_collapse_spaces(char *dest, const char *src)
  */
-APR_EXPORT(char *) apr_collapse_spaces(char *dest, const char *src);
+APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
 
 /**
  * Convert the arguments to a program from one string to an array of 
@@ -198,7 +198,7 @@ APR_EXPORT(char *) apr_collapse_spaces(char *dest, const char *src);
  * @param token_context Pool to use.
  * @deffunc apr_status_t apr_tokenize_to_argv(const char *arg_str, char ***argv_out, apr_pool_t *token_context);
  */
-APR_EXPORT(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
+APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                             char ***argv_out,
                                             apr_pool_t *token_context);
 

@@ -376,7 +376,7 @@ apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
     return rv;
 }
 
-APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
+APR_DECLARE(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
 {
     apr_status_t cc;
     va_list ap;

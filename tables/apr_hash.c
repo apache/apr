@@ -127,7 +127,7 @@ static apr_hash_entry_t **alloc_array(apr_hash_t *ht)
    return apr_pcalloc(ht->pool, sizeof(*ht->array) * (ht->max + 1));
 }
 
-APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool)
+APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool)
 {
     apr_hash_t *ht;
     ht = apr_palloc(pool, sizeof(apr_hash_t));
@@ -143,7 +143,7 @@ APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool)
  * Hash iteration functions.
  */
 
-APR_EXPORT(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
+APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
 {
     hi->this = hi->next;
     while (!hi->this) {
@@ -155,7 +155,7 @@ APR_EXPORT(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
     return hi;
 }
 
-APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
+APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
     hi = apr_palloc(ht->pool, sizeof(*hi));
@@ -166,7 +166,7 @@ APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
     return apr_hash_next(hi);
 }
 
-APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi,
+APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi,
 			       const void **key,
 			       apr_size_t *klen,
 			       void **val)
@@ -280,7 +280,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     return hep;
 }
 
-APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
+APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht,
 			       const void *key,
 			       apr_ssize_t klen)
 {
@@ -292,7 +292,7 @@ APR_EXPORT(void *) apr_hash_get(apr_hash_t *ht,
 	return NULL;
 }
 
-APR_EXPORT(void) apr_hash_set(apr_hash_t *ht,
+APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
 			     const void *key,
 			     apr_ssize_t klen,
 			     const void *val)

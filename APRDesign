@@ -179,7 +179,7 @@ The last line is not strictly needed.  The parser in ScanDoc is not perfect
 yet, and it can not parse prototypes that are in any form other than
 	return_type program_name(type1 param1, type2 param2, ...)
 This means that any function prototype that resembles:
-	APR_EXPORT(ap_status_t) ap_foo(int f1, char *f2)
+	APR_DECLARE(ap_status_t) ap_foo(int f1, char *f2)
 will need the deffunc.
 
 For an actual example, look at any file in the include directory (ap_tables.h

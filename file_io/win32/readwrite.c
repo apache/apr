@@ -388,7 +388,7 @@ static int printf_flush(apr_vformatter_buff_t *vbuff)
     return -1;
 }
 
-APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
+APR_DECLARE(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;

@@ -144,7 +144,7 @@ struct apr_dir_t {
 apr_status_t file_cleanup(void *);
 /*mode_t get_fileperms(apr_fileperms_t);
 */
-APR_EXPORT(char *) apr_os_systemcase_filename(struct apr_pool_t *pCont, 
+APR_DECLARE(char *) apr_os_systemcase_filename(struct apr_pool_t *pCont, 
                                               const char *szFile);
 char * canonical_filename(struct apr_pool_t *pCont, const char *szFile);
 

@@ -231,14 +231,6 @@ typedef  int         gid_t;
 #define APR_DECLARE_DATA             __declspec(dllimport)
 #endif
 
-/* These need to move into apr_compat.h when the symbol rename is complete 
- */
-#define APR_EXPORT(t)         APR_DECLARE(t)
-#define APR_EXPORT_NONSTD(t)  APR_DECLARE_NONSTD(t)
-#define APR_VAR_EXPORT        APR_DECLARE_DATA
-#define APR_VAR_IMPORT        APR_DECLARE_DATA
-
-
 #define apr_signal(a,b) signal(a,b)
 
 typedef int apr_wait_t;
