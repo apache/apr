@@ -104,9 +104,9 @@
 
 #ifndef HAVE_GETPASS
 
-/* MPE, Win32 and BeOS all lack a native getpass() */
+/* MPE, Win32, NetWare and BeOS all lack a native getpass() */
 
-#if !defined(HAVE_TERMIOS_H) && !defined(WIN32)
+#if !defined(HAVE_TERMIOS_H) && !defined(WIN32) && !defined(NETWARE)
 /*
  * MPE lacks getpass() and a way to suppress stdin echo.  So for now, just
  * issue the prompt and read the results with echo.  (Ugh).
