@@ -16,7 +16,7 @@ INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
 LIB=file.a
 
 OBJS=dir.o \
-	common.o \
+	fileacc.o \
 	filedup.o \
 	filestat.o \
 	open.o \
@@ -58,13 +58,6 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-common.o: common.c ../unix/fileacc.c $(INCDIR)/apr_strings.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/../network_io/os2/os2nerrno.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_tables.h $(OSDIR)/fileio.h \
- $(INCDIR)/apr_private.h $(INCDIR)/apr_lock.h
 dir.o: dir.c $(OSDIR)/fileio.h \
  $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
@@ -73,6 +66,13 @@ dir.o: dir.c $(OSDIR)/fileio.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_tables.h \
  $(INCDIR)/apr_strings.h
+fileacc.o: fileacc.c ../unix/fileacc.c $(INCDIR)/apr_strings.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/../network_io/os2/os2nerrno.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_tables.h $(OSDIR)/fileio.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_lock.h
 filedup.o: filedup.c $(OSDIR)/fileio.h \
  $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
