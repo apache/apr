@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) apr_table_do() and apr_table_vdo() now return an int rather than
+     void to indicate whether or not any of its iterations returned 0.
+     [Cliff Woolley]
+
   *) Fix the definition of union semun so that it is valid on systems
      where sizeof(long) != sizeof(int).  This resolves a hang on
      HP-UX/Itanium.  

@@ -695,21 +695,56 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  *
  * So to make mod_file_cache easier to maintain, it's a good thing
  */
-APR_DECLARE_NONSTD(void) apr_table_do(apr_table_do_callback_fn_t *comp,
-                                      void *rec, const apr_table_t *t, ...)
+APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
+                                     void *rec, const apr_table_t *t, ...)
 {
+    int rv;
+
     va_list vp;
     va_start(vp, t);
-    apr_table_vdo(comp, rec, t, vp);
-    va_end(vp);  
+    rv = apr_table_vdo(comp, rec, t, vp);
+    va_end(vp);
+
+    return rv;
 } 
 
-APR_DECLARE(void) apr_table_vdo(apr_table_do_callback_fn_t *comp,
-                                void *rec, const apr_table_t *t, va_list vp)
+/* XXX: do the semantics of this routine make any sense?  Right now,
+ * if the caller passed in a non-empty va_list of keys to search for,
+ * the "early termination" facility only terminates on *that* key; other
+ * keys will continue to process.  Note that this only has any effect
+ * at all if there are multiple entries in the table with the same key,
+ * otherwise the called function can never effectively early-terminate
+ * this function, as the zero return value is effectively ignored.
+ *
+ * Note also that this behavior is at odds with the behavior seen if an
+ * empty va_list is passed in -- in that case, a zero return value terminates
+ * the entire apr_table_vdo (which is what I think should happen in
+ * both cases).
+ *
+ * If nobody objects soon, I'm going to change the order of the nested
+ * loops in this function so that any zero return value from the (*comp)
+ * function will cause a full termination of apr_table_vdo.  I'm hesitant
+ * at the moment because these (funky) semantics have been around for a
+ * very long time, and although Apache doesn't seem to use them at all,
+ * some third-party vendor might.  I can only think of one possible reason
+ * the existing semantics would make any sense, and it's very Apache-centric,
+ * which is this: if (*comp) is looking for matches of a particular
+ * substring in request headers (let's say it's looking for a particular
+ * cookie name in the Set-Cookie headers), then maybe it wants to be
+ * able to stop searching early as soon as it finds that one and move
+ * on to the next key.  That's only an optimization of course, but changing
+ * the behavior of this function would mean that any code that tried
+ * to do that would stop working right.
+ *
+ * Sigh.  --JCW, 06/28/02
+ */
+APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
+                               void *rec, const apr_table_t *t, va_list vp)
 {
     char *argp;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
-    int rv, i;
+    int vdorv = 1, rv, i;
+
     argp = va_arg(vp, char *);
     do {
         apr_uint32_t checksum = 0;
@@ -723,7 +758,12 @@ APR_DECLARE(void) apr_table_vdo(apr_table_do_callback_fn_t *comp,
 		rv = (*comp) (rec, elts[i].key, elts[i].val);
 	    }
 	}
+	if (rv == 0) {
+	    vdorv = 0;
+	}
     } while (argp && ((argp = va_arg(vp, char *)) != NULL));
+
+    return vdorv;
 }
 
 /* During apr_table_overlap(), we build an overlap key for
