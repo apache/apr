@@ -1,4 +1,8 @@
 Changes with APR 0.9.2
+
+  *) Prevent obscenely large values of precision in apr_vformatter
+     from clobbering a buffer. [Sander Striker, Jim Jagielski]
+
   *) limit the renames performed in apr_rename.pl to the most recent renames.
      [Thom May]
 
