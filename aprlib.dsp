@@ -317,6 +317,10 @@ SOURCE=.\include\apr_time.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_xlate.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\time\win32\atime.h
 # End Source File
 # Begin Source File
@@ -330,6 +334,10 @@ SOURCE=.\file_io\win32\fileio.h
 # Begin Source File
 
 SOURCE=.\locks\win32\locks.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\unix\misc.h
 # End Source File
 # Begin Source File
 
