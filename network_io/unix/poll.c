@@ -168,7 +168,7 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
         i++;
     }
     if (i >= aprset->curpos) {
-        return APR_INVALSOCK;
+        return APR_EINVALSOCK;
     } 
     (*event) = aprset->revents[i];
     return APR_SUCCESS;
