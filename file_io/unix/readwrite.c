@@ -129,6 +129,12 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
 
 	rv = 0;
+        if (thefile->ungetchar != -1) {
+            *pos = (char)thefile->ungetchar;
+            ++pos;
+            --size;
+            thefile->ungetchar = -1;
+        }
         while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
                 thefile->dataRead = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
