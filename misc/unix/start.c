@@ -53,11 +53,7 @@
  */
 
 #include "misc.h"
-#ifndef BEOS
-#include "../../locks/unix/locks.h"
-#else
-#include "../../locks/beos/locks.h"
-#endif
+#include "locks.h"
 
 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
 {
@@ -144,7 +140,7 @@ ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
 ap_status_t ap_initialize(void)
 {
     ap_status_t status;
-#ifndef BEOS
+#if !defined(BEOS) && !defined(OS2)
     ap_unix_setup_lock();
 #endif
     status = ap_init_alloc();

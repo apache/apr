@@ -53,10 +53,15 @@
  */
 
 #include "misc.h"
-#ifndef BEOS
-#include "../../threadproc/unix/threadproc.h"
-#else
-#include "../../threadproc/beos/threadproc.h"
+#include "threadproc.h"
+#ifdef HAVE_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
 #endif
 
 static ap_other_child_rec_t *other_children = NULL;

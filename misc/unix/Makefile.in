@@ -10,8 +10,10 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR1=../../include
-INCDIR2=../../file_io/unix
-INCLUDES=-I$(INCDIR1) -I$(INCDIR2) -I.
+INCDIR2=../../file_io/@OSDIR@
+INCDIR3=../../locks/@OSDIR@
+INCDIR4=../../threadproc/@OSDIR@
+INCLUDES=-I$(INCDIR1) -I$(INCDIR2) -I$(INCDIR3) -I$(INCDIR4) -I.
 
 #LIB=libmisc.a
 
