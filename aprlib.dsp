@@ -346,13 +346,22 @@ SOURCE=.\include\apr_config.hw
 
 !IF  "$(CFG)" == "aprlib - Win32 Release"
 
+# Begin Custom Build
+InputPath=.\include\apr_config.hw
+
+".\include\apr_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr_config.hw .\include\apr_config.h > nul 
+	echo Created apr_config.h from apr_config.hw 
+	
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
 
 # Begin Custom Build
 InputPath=.\include\apr_config.hw
 
 ".\include\apr_config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy .\include\apr_config.hw .\include\apr_config.h 
+	copy .\include\apr_config.hw .\include\apr_config.h > nul 
 	echo Created apr_config.h from apr_config.hw 
 	
 # End Custom Build
@@ -369,6 +378,15 @@ InputPath=.\include\apr_config.hw
 SOURCE=.\include\apr.hw
 
 !IF  "$(CFG)" == "aprlib - Win32 Release"
+
+# Begin Custom Build
+InputPath=.\include\apr.hw
+
+".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy .\include\apr.hw .\include\apr.h > nul 
+	echo Created apr.h from apr.hw 
+	
+# End Custom Build
 
 !ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
 
