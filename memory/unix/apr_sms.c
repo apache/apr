@@ -65,6 +65,7 @@
 #include "apr_sms.h"
 #include <stdlib.h>
 #include "sms_private.h"
+#include "apr_portable.h"
 
 #ifdef APR_ASSERT_MEMORY
 #include <assert.h>
