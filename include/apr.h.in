@@ -72,5 +72,14 @@ typedef  @off_t_value@           ap_off_t;
 #define API_VAR_IMPORT           extern
 #define API_VAR_EXPORT           
 
+/* Define APR_SSIZE_T_FMT.  
+ * If ssize_t is an integer we define it to be "d",
+ * if ssize_t is a long int we define it to be "ld",
+ * if ssize_t is neither we declare an error here.
+ * I looked for a better way to define this here, but couldn't find one, so
+ * to find the logic for this definition search for "ssize_t_fmt" in
+ * configure.in.
+ */
+@ssize_t_fmt@
 
 #endif /* APR_H */

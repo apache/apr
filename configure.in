@@ -144,6 +144,14 @@ fi
 
 AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
 
+if test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_int"; then
+    ssize_t_fmt='#define APR_SSIZE_T_FMT "d"'
+elif test "$ac_cv_sizeof_ssize_t" = "$ac_cv_sizeof_long"; then
+    ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
+else
+    ssize_t_fmt='#error Can not determine the proper size for ssize_t'
+fi
+
 # Use /bin/sh if it exists, otherwise go looking for sh in the path
 if test ".$SH" = . -a -f /bin/sh; then
   SH="/bin/sh"
@@ -361,6 +369,7 @@ AC_SUBST(sysvser)
 AC_SUBST(fcntlser)
 AC_SUBST(procpthreadser)
 AC_SUBST(pthreadser)
+AC_SUBST(ssize_t_fmt)
 
 AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 [AC_TRY_COMPILE([#include <sys/types.h>
