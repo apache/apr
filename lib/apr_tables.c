@@ -584,6 +584,27 @@ APR_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
  *
  * Note that rec is simply passed-on to the comp function, so that the
  * caller can pass additional info for the task.
+ *
+ * ADDENDUM for ap_table_vdo():
+ * 
+ * The caching api will allow a user to walk the header values:
+ *
+ * ap_status_t ap_cache_el_header_walk(ap_cache_el *el, 
+ *    int (*comp)(void *, const char *, const char *), void *rec, ...);
+ *
+ * So it can be ..., however from there I use a  callback that use a va_list:
+ *
+ * ap_status_t (*cache_el_header_walk)(ap_cache_el *el, 
+ *    int (*comp)(void *, const char *, const char *), void *rec, va_list);
+ *
+ * To pass those ...'s on down to the actual module that will handle walking
+ * their headers, in the file case this is actually just an ap_table - and
+ * rather than reimplementing ap_table_do (which IMHO would be bad) I just
+ * called it with the va_list. For mod_shmem_cache I don't need it since I
+ * can't use ap_table's, but mod_file_cache should (though a good hash would
+ * be better, but that's a different issue :). 
+ *
+ * So to make mod_file_cache easier to maintain, it's a good thing
  */
 APR_EXPORT(void) ap_table_do(int (*comp) (void *, const char *, const char *),
 			      void *rec, const ap_table_t *t, ...)
