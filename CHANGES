@@ -1,5 +1,10 @@
 Changes with APR 0.9.4
 
+  *) Modify apr_sockaddr_info_get to call the resolver when we
+     do not have a hostname.  Also, fix bugs in the getaddrinfo()
+     implementation.
+     [Colm MacCárthaigh <colm@stdlib.net>, Justin Erenkrantz]
+
   *) Change the behavior of unix process 'trylock's to return
      APR_ENOTIMPL instead of segfaulting, consistent with the
      other lock implementations.  [William Rowe]
