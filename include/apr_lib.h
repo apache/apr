@@ -236,14 +236,6 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
 			        va_list ap);
 
 /**
- * Validate any password encypted with any algorithm that APR understands
- * @param passwd The password to validate
- * @param hash The password to validate against
- */
-APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
-                                                const char *hash);
-
-/**
  * Display a prompt and read in the password from stdin.
  * @param prompt The prompt to display
  * @param pwbuf Buffer to store the password
