@@ -126,11 +126,14 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     (*new)->pstart = (offset / memblock) * memblock;
     (*new)->psize = (apr_size_t)(offset % memblock) + size;
     (*new)->poffset = offset - (*new)->pstart;
-    offlo = (DWORD)(*new)->psize;
-    offhi = (DWORD)((*new)->psize << 32);
+    /* XXX: psize below should be the MAXIMUM size of the mmap object,
+     * (e.g. file size) not the size of the mapped region!
+     * Since apr doesn't seem to acknowledge the discrepancy (the mmap
+     * size/view/off concepts are pretty horked) this will have to wait.
+     */
 
     (*new)->mhandle = CreateFileMapping(file->filehand, NULL, fmaccess,
-                                        offhi, offlo, NULL);
+                                        0, (*new)->psize, NULL);
     if (!(*new)->mhandle || (*new)->mhandle == INVALID_HANDLE_VALUE)
     {
         *new = NULL;
