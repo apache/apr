@@ -77,6 +77,9 @@
 #ifdef HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#ifdef BEOS
+#include <kernel/OS.h>
+#endif
  
 typedef struct datastruct {
     void *data;
@@ -87,7 +90,7 @@ typedef struct datastruct {
 
 struct ap_other_child_rec_t {
     struct ap_other_child_rec_t *next;
-    int pid;
+    int id;  /* This is either a pid or tid depending on the platform */
     void (*maintenance) (int, void *, int);
     void *data;
     int write_fd;
