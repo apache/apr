@@ -137,6 +137,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 #else
       os_handle = NSLinkModule(image, path, TRUE);
 #endif
+      NSDestroyObjectFileImage(image);
     }
 
 #elif defined(DSO_USE_DLFCN)
