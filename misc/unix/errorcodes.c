@@ -54,6 +54,10 @@
 
 #include "misc.h"
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
 /*
  * stuffbuffer - like ap_cpystrn() but returns the address of the
  * dest buffer instead of the address of the terminating '\0'
@@ -186,9 +190,38 @@ static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
   return stuffbuffer(buf, bufsize, result);  
 }
 #else
+
+/* On Unix, apr_os_strerror() handles error codes from the resolver 
+ * (h_errno). 
+ e*/
 static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err) 
 {
-    	return stuffbuffer(buf, bufsize,strerror(err));
+#ifdef HAVE_HSTRERROR
+    return stuffbuffer(buf, bufsize, hstrerror(err));
+#else /* HAVE_HSTRERROR */
+    const char *msg;
+
+    switch(err) {
+    case HOST_NOT_FOUND:
+        msg = "Unknown host";
+        break;
+#if defined(NO_DATA)
+    case NO_DATA:
+#if defined(NO_ADDRESS) && (NO_DATA != NO_ADDRESS)
+    case NO_ADDRESS:
+#endif
+        msg = "No address for host";
+        break;
+#elif defined(NO_ADDRESS)
+    case NO_ADDRESS:
+        msg = "No address for host";
+        break;
+#endif /* NO_DATA */
+    default:
+        msg = "Unrecognized resolver error";
+    }
+    return stuffbuffer(buf, bufsize, msg);
+#endif /* HAVE_STRERROR */
 }
 #endif
 
@@ -204,9 +237,6 @@ char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
         return stuffbuffer(buf, bufsize, "APR does not understand this error code");
     }
     else {
-        /* TODO - recognize when the system has hstrerror() and call it here for
-         * Unix since on Unix this would be a resolver error code
-         */
 	return apr_os_strerror(buf, bufsize, statcode - APR_OS_START_SYSERR);
     }
 }
