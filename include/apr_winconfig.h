@@ -79,7 +79,6 @@
 #include <stdio.h>
 #include <time.h>
 
-
 #define HAVE_SENDFILE 1
 
 /* Use this section to define all of the HAVE_FOO_H
@@ -89,6 +88,7 @@
 #define HAVE_MALLOC_H 1
 #define HAVE_STDLIB_H 1
 #define HAVE_LIMITS_H 1
+#define HAVE_SIGNAL_H 1
 
 typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
 

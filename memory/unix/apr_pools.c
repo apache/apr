@@ -73,6 +73,7 @@
 #include "apr_lib.h"
 #include "apr_lock.h"
 #include "misc.h"
+
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
@@ -1248,7 +1249,6 @@ static void free_proc_chain(struct process_chain *procs)
      * whatever it was we're cleaning up now.  This may involve killing
      * some of them off...
      */
-
     struct process_chain *p;
     int need_timeout = 0;
     int status;
@@ -1263,70 +1263,39 @@ static void free_proc_chain(struct process_chain *procs)
      * don't waste any more cycles doing whatever it is that they shouldn't
      * be doing anymore.
      */
-#ifdef WIN32
-    /* Pick up all defunct processes */
-    for (p = procs; p; p = p->next) {
-	if (GetExitCodeProcess((HANDLE) p->pid, &status)) {
-	    p->kill_how = kill_never;
-	}
-    }
 
-
-    for (p = procs; p; p = p->next) {
-	if (p->kill_how == kill_after_timeout) {
-	    need_timeout = 1;
-	}
-	else if (p->kill_how == kill_always) {
-	    TerminateProcess((HANDLE) p->pid, 1);
-	}
-    }
-    /* Sleep only if we have to... */
-
-    if (need_timeout) {
-	sleep(3);
-    }
-
-    /* OK, the scripts we just timed out for have had a chance to clean up
-     * --- now, just get rid of them, and also clean up the system accounting
-     * goop...
-     */
-
-    for (p = procs; p; p = p->next) {
-	if (p->kill_how == kill_after_timeout) {
-	    TerminateProcess((HANDLE) p->pid, 1);
-	}
-    }
-
-    for (p = procs; p; p = p->next) {
-	CloseHandle((HANDLE) p->pid);
-    }
-#else
 #ifndef NEED_WAITPID
     /* Pick up all defunct processes */
     for (p = procs; p; p = p->next) {
-	if (ap_wait_proc(p->pid, APR_NOWAIT) > 0) {
-	    p->kill_how = kill_never;
-	}
+        if (ap_wait_proc(p->pid, APR_NOWAIT) == APR_CHILD_DONE) {
+            p->kill_how = kill_never;
+        }
     }
 #endif
 
     for (p = procs; p; p = p->next) {
-	if ((p->kill_how == kill_after_timeout)
-	    || (p->kill_how == kill_only_once)) {
-	    /*
-	     * Subprocess may be dead already.  Only need the timeout if not.
-	     */
-	    if (ap_kill(p->pid, SIGTERM) != -1) {
+        if ((p->kill_how == kill_after_timeout)
+            || (p->kill_how == kill_only_once)) {
+            /*
+             * Subprocess may be dead already.  Only need the timeout if not.
+             * Note: ap_kill on Windows is TerminateProcess(), which is 
+             * similar to a SIGKILL, so always give the process a timeout
+             * under Windows before killing it.
+             */
+#ifdef WIN32
+            need_timeout = 1;
+#else
+	    if (ap_kill(p->pid, APR_SIGTERM) == APR_SUCCESS) {
 		need_timeout = 1;
 	    }
+#endif
 	}
 	else if (p->kill_how == kill_always) {
-	    ap_kill(p->pid, SIGKILL);
+	    ap_kill(p->pid, APR_SIGKILL);
 	}
     }
 
     /* Sleep only if we have to... */
-
     if (need_timeout) {
 	sleep(3);
     }
@@ -1335,16 +1304,25 @@ static void free_proc_chain(struct process_chain *procs)
      * --- now, just get rid of them, and also clean up the system accounting
      * goop...
      */
-
     for (p = procs; p; p = p->next) {
-
 	if (p->kill_how == kill_after_timeout) {
-	    ap_kill(p->pid, SIGKILL);
+	    ap_kill(p->pid, APR_SIGKILL);
 	}
+    }
+#ifdef WIN32
+    /* Humm, still trying to understand what to do about this.
+     * Do we need an APR function to clean-up a proc_t?
+     * We have a handle leak here until this is fixed.
+     for (p = procs; p; p = p->next) {
+         CloseHandle(p->pid->pi.hProcess);
+     }
+    */
+#endif /* WIN32 */
 
+    /* Now wait for all the signaled processes to die */
+    for (p = procs; p; p = p->next) {
 	if (p->kill_how != kill_never) {
 	    status = ap_wait_proc(p->pid, APR_WAIT);
 	}
     }
-#endif /* WIN32 */
 }
