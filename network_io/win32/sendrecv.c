@@ -69,6 +69,8 @@
  * bytes.
  */
 #define MAX_SEGMENT_SIZE 65536
+
+
 APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
                                    apr_size_t *len)
 {
@@ -90,6 +92,7 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
 
     return APR_SUCCESS;
 }
+
 
 APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
                                    apr_size_t *len) 
@@ -114,6 +117,7 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
     return APR_SUCCESS;
 
 }
+
 
 APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
                                     const struct iovec *vec,
@@ -147,6 +151,61 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
     *nbytes = dwBytes;
     return APR_SUCCESS;
 }
+
+
+APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
+                                     apr_int32_t flags, const char *buf, 
+                                     apr_size_t *len)
+{
+    apr_ssize_t rv;
+
+    rv = sendto(sock->sock, buf, (*len), flags, 
+                (const struct sockaddr*)&where->sa, 
+                where->salen);
+    if (rv == SOCKET_ERROR) {
+        *len = 0;
+        return apr_get_netos_error();
+    }
+
+    *len = rv;
+    return APR_SUCCESS;
+}
+
+
+APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, 
+                                       apr_socket_t *sock,
+                                       apr_int32_t flags, 
+                                       char *buf, apr_size_t *len)
+{
+    apr_ssize_t rv;
+    apr_status_t err;
+
+    if (from == NULL){
+        return APR_ENOMEM;
+        /* Not sure if this is correct.  Maybe we should just allocate
+           the memory??
+         */
+    }
+
+    rv = recvfrom(sock->sock, buf, (*len), flags, 
+                  (struct sockaddr*)&from->sa, &from->salen);
+    if (rv == SOCKET_ERROR) {
+        (*len) = 0;
+        return apr_get_netos_error();
+    }
+
+    if (err) {
+        return errno;
+    }
+
+    (*len) = rv;
+    if (rv == 0)
+        return APR_EOF;
+
+    return APR_SUCCESS;
+}
+
+
 static void collapse_iovec(char **buf, int *len, struct iovec *iovec, int numvec, apr_pool_t *p)
 {
     int ptr = 0;
@@ -169,6 +228,8 @@ static void collapse_iovec(char **buf, int *len, struct iovec *iovec, int numvec
         }
     }
 }
+
+
 #if APR_HAS_SENDFILE
 /*
  *#define WAIT_FOR_EVENT
