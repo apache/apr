@@ -233,3 +233,96 @@ apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd,
 #endif  /* HAVE_PTHREAD_H */
 #endif  /* APR_HAS_THREADS */
 
+#if !APR_HAS_THREADS
+
+apr_status_t apr_create_thread(apr_thread_t **new_thread, apr_threadattr_t *attr, 
+                               apr_thread_start_t func, void *data, 
+                               apr_pool_t *cont)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_create_thread_private(apr_threadkey_t **key, void (*dest)(void *),
+                                       apr_pool_t *cont)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_get_os_thread(void); /* avoid warning for no prototype */
+
+apr_status_t apr_get_os_thread(void) 
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_get_threaddata(void **data, const char *key, apr_thread_t *thread)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_get_threadkeydata(void **data, const char *key, 
+                                   apr_threadkey_t *threadkey)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_get_thread_private(void **new_mem, apr_threadkey_t *key)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_set_threaddata(void *data, const char *key,
+                                apr_status_t (*cleanup)(void *),
+                                apr_thread_t *thread) 
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_set_threadkeydata(void *data, const char *key,
+                                   apr_status_t (*cleanup) (void *), 
+                                   apr_threadkey_t *threadkey)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_thread_detach(apr_thread_t *thd)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
+{
+    return APR_ENOTIMPL;
+}
+
+apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd) 
+{
+    return APR_ENOTIMPL;
+}
+
+#endif
