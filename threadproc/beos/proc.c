@@ -288,25 +288,27 @@ ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
 ap_status_t ap_wait_proc(struct proc_t *proc, 
                            ap_wait_how_e wait)
 {
-    pid_t stat;
+    status_t exitval;
+    thread_info tinfo;
+    
     if (!proc)
         return APR_ENOPROC;
+    /* when we run processes we are actually running threads, so here
+       we'll wait on the thread dying... */
     if (wait == APR_WAIT) {
-        if ((stat = waitpid(proc->pid, NULL, WUNTRACED)) > 0) {
+        if (wait_for_thread(proc->tid, &exitval) == B_OK) {
             return APR_CHILD_DONE;
-        }
-        else if (stat == 0) {
-            return APR_CHILD_NOTDONE;
         }
         return errno;
     }
-    if ((stat = waitpid(proc->pid, NULL, WUNTRACED | WNOHANG)) > 0) {
-            return APR_CHILD_DONE;
-        }
-        else if (stat == 0) {
-            return APR_CHILD_NOTDONE;
-        }
-        return errno;
+    /* if the thread is still alive then it's not done...
+       this won't hang or holdup the thread checking... */
+    if (get_thread_info(proc->tid, &tinfo) == B_BAD_VALUE) {
+        return APR_CHILD_DONE;
+    }
+    else {
+        return APR_CHILD_NOTDONE;
+    }
 } 
 
 ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,

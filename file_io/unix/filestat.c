@@ -84,7 +84,8 @@ static ap_filetype_e filetype_from_mode(int mode)
 /* ***APRDOC********************************************************
  * ap_status_t ap_getfileinfo(ap_file_t *)
  *    get the specified file's stats..
- * arg 1) The file to get information about. 
+ * arg 1) Where to store the information about the file.
+ * arg 2) The file to get information about. 
  */ 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
 {
@@ -99,9 +100,9 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
         finfo->group = info.st_gid;
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
-	ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-	ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-	ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {
@@ -129,9 +130,9 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
         finfo->group = info.st_gid;
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
-	ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-	ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-	ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {
