@@ -182,7 +182,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     if(os_handle == NULL) {
 #if defined(DSO_USE_SHL)
         (*res_handle)->errormsg = strerror(errno);
-        return errno;
+        return APR_EDSOOPEN;
 #elif defined(DSO_USE_DYLD)
         (*res_handle)->errormsg = (err_msg) ? err_msg : "link failed";
         return APR_EDSOOPEN;
@@ -219,7 +219,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     if (status == -1 && errno == 0) /* try TYPE_DATA instead */
         status = shl_findsym((shl_t *)&handle->handle, symname, TYPE_DATA, &symaddr);
     if (status == -1)
-        return errno;
+        return APR_ESYMNOTFOUND;
     *ressym = symaddr;
     return APR_SUCCESS;
 
@@ -241,12 +241,12 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     free(symname2);
     if (symbol == NULL) {
         handle->errormsg = "undefined symbol";
-	return APR_EINIT;
+	return APR_ESYMNOTFOUND;
     }
     retval = NSAddressOfSymbol(symbol);
     if (retval == NULL) {
         handle->errormsg = "cannot resolve symbol";
-	return APR_EINIT;
+	return APR_ESYMNOTFOUND;
     }
     *ressym = retval;
     return APR_SUCCESS;
@@ -266,7 +266,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
 
     if (retval == NULL) {
         handle->errormsg = dlerror();
-        return APR_EINIT;
+        return APR_ESYMNOTFOUND;
     }
 
     *ressym = retval;

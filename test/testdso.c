@@ -157,7 +157,7 @@ static void test_unload_module(CuTest *tc)
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
 
     status = apr_dso_sym(&func1, h, "print_hello");
-    CuAssertIntEquals(tc, APR_EINIT, status);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ESYMNOTFOUND(status));
 }
 
 
@@ -234,26 +234,28 @@ static void test_unload_library(CuTest *tc)
 
     status = apr_dso_unload(h);
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
+
+    status = apr_dso_sym(&func1, h, "print_hello");
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ESYMNOTFOUND(status));
 }
 
 static void test_load_notthere(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
-    char errstr[256];
     apr_status_t status;
 
     status = apr_dso_load(&h, "No_File.so", p);
-    /* Original test was status == APR_EDSOOPEN, but that's not valid
-     * with DSO_USE_SHL (HP/UX etc), OS2 or Win32.  Accept simple failure.
-     */
-    CuAssert(tc, apr_dso_error(h, errstr, 256), status);
+
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EDSOOPEN(status));
     CuAssertPtrNotNull(tc, h);
 }    
 
+#ifndef LIB_NAME
 static void library_not_impl(CuTest *tc)
 {
     CuNotImpl(tc, "Loadable libraries and modules are equivilant on this platform");
 }
+#endif
 
 CuSuite *testdso(void)
 {
