@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 01:20:14 $]
+Last modified at [$Date: 2002/07/12 01:23:19 $]
 
 Release:
 
@@ -86,7 +86,7 @@ CURRENT VOTES:
       3) Renaming the function to get rid of apr_time_t vs time_t confusion,
          and strongly identify the type as apr_busec_t or apr_butime_t, with
          an ongoing contract with users about the type's units.
-         +1: fielding  [prefers apr_busec_t]
+         +1: fielding  [prefers apr_busec or simple time_t / struct tm]
          +1: jwoolley
          +0.5: wrowe  [prefers apr_butime_t but isn't going to fight that]
          -0: striker, jerenkrantz
@@ -133,8 +133,8 @@ CURRENT VOTES:
        by POSIX to be a scalar quantity for arithmetic operations.
        Saying that apr_time_t doesn't imply seconds is to ignore the
        fact that all of those httpd functions used to create APR were
-       defined in terms of seconds and make no use of microseconds.]
-       Meanwhile, the only reason we have this stupid debate is 
+       defined in terms of seconds and make no use of microseconds.
+       Meanwhile, the only reason we have this debate is 
        because wrowe insists that time_t is 32 bits and therefore dies in 2038.
        In fact, time_t is 64 bits on 64bit NT, Linux, OSF, and probably
        others that I haven't checked.  In any case, since we use the
@@ -166,11 +166,15 @@ CURRENT VOTES:
 
      [fielding: 1. POSIX requires it to be long, so largest native int.
        2. Microsoft claims otherwise, but it is still vaporware anyway.
-       3. POSIX always stores them as separate integers.
-       4. Benchmarks are meaningless unless they average over hundreds
+       3. Benchmarks are meaningless unless they average over hundreds
           of requests, which requires double floats (not time intervals).
-       5. +1 for using struct tm everywhere.
-       6. No.]
+       4. POSIX always stores them as separate integers. +1 for that.]
+
+      [fielding; Cliff says he has a sample app.  I still don't know how
+       he uses them without making implementation assumptions about
+       apr_time_t everywhere (there is no print routine for microsecond
+       resolution), but I'll accept the need for microsecond resolution
+       in addition to second resolution.]
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
