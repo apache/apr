@@ -147,7 +147,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     
 #if APR_HAS_THREADS
     if ((flag & APR_BUFFERED) && ((*new)->flags & APR_XTHREAD)) {
-        rv = apr_thread_mutex_create(thlock),
+        rv = apr_thread_mutex_create(&thlock,
                                      APR_THREAD_MUTEX_DEFAULT, pool);
         if (rv) {
             return rv;
