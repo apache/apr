@@ -123,7 +123,7 @@ thisdir="`dirname $0`"
 thisdir="`cd $thisdir && pwd`"
 # If we have the realpath program, use it to resolve symlinks.
 # Otherwise, being in a symlinked dir may result in incorrect output.
-if test -x `which realpath 2>/dev/null`; then
+if test -x "`which realpath 2>/dev/null`"; then
   thisdir="`realpath $thisdir`"
 fi
 if test -d $bindir; then
