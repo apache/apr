@@ -280,7 +280,7 @@ int testdirs(apr_pool_t *context)
     apr_file_t *file = NULL;
     apr_size_t bytes;
     apr_filetype_e type;
-    char *fname;
+    const char *fname;
 
     fprintf(stdout, "Testing Directory functions.\n");
 

@@ -218,7 +218,7 @@ apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
 
 
 
-apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
+apr_status_t apr_get_dir_filename(const char **new, apr_dir_t *thedir)
 {
     if (thedir->validentry) {
         *new = thedir->entry.achName;
