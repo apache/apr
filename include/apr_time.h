@@ -65,6 +65,10 @@ extern "C" {
 
 typedef enum {APR_LOCALTIME, APR_UTCTIME} ap_timetype_e;
 
+/* ap_ansi_time_t is defined as the number of seconds since
+ * 0:00:00 01/01/70.
+ */
+typedef ap_int64_t           ap_ansi_time_t;
 typedef struct atime_t       ap_time_t;
 
 API_VAR_IMPORT const char ap_month_snames[12][4];
@@ -80,7 +84,7 @@ ap_status_t ap_timestr(char **date_str, struct atime_t *t, ap_timetype_e type, a
 ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, const char *format, ap_time_t *tm);
 
 /* accessor functions */
-ap_status_t ap_get_curtime(ap_time_t *, ap_int64_t *);
+ap_status_t ap_get_ansitime(ap_time_t *, ap_ansi_time_t *);
 ap_status_t ap_timediff(ap_time_t *, ap_time_t *, ap_int32_t *);
 
 ap_status_t ap_get_sec(ap_time_t *, ap_int32_t *);
@@ -91,7 +95,7 @@ ap_status_t ap_get_mon(ap_time_t *, ap_int32_t *);
 ap_status_t ap_get_year(ap_time_t *, ap_int32_t *);
 ap_status_t ap_get_wday(ap_time_t *, ap_int32_t *);
 
-ap_status_t ap_set_curtime(ap_time_t *, ap_int64_t);
+ap_status_t ap_set_ansitime(ap_time_t *, ap_ansi_time_t);
 ap_status_t ap_set_sec(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_min(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_hour(ap_time_t *, ap_int32_t);

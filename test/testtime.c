@@ -165,8 +165,8 @@ int main()
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tComparing two time values.......");
-    ap_get_curtime(time, &t1);
-    ap_get_curtime(time2, &t2);
+    ap_get_ansitime(time, &t1);
+    ap_get_ansitime(time2, &t2);
     if ((t1 == -1) || (t2 == -1) || (t1 != t2)) {
         fprintf(stderr, "Values don't match\n");
         exit(-1);
