@@ -125,14 +125,21 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 {
     ssize_t rv;
-    
+    apr_status_t arv;
+
+    if (sock->netmask & APR_INCOMPLETE_READ) {
+	sock->netmask &= ~APR_INCOMPLETE_READ;
+    	goto do_select;
+    }
+
     do {
         rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
       sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 1);
+do_select:
+	arv = apr_wait_for_io_or_timeout(sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -146,6 +153,9 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
     if (rv == -1) {
         (*len) = 0;
         return errno;
+    }
+    if (sock->timeout && rv < *len) {
+	sock->netmask |= APR_INCOMPLETE_READ;
     }
     (*len) = rv;
     if (rv == 0) {
