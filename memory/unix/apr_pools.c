@@ -686,6 +686,13 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
      * in the allocator, it will have been destroyed by the cleanup function.
      */
     if (apr_allocator_get_owner(allocator) == pool) {
+#if APR_HAS_THREADS
+        /* Make sure to remove the lock, since it is highly likely to
+         * be invalid now.
+         */
+        apr_allocator_set_mutex(allocator, NULL);
+#endif /* APR_HAS_THREADS */
+
         apr_allocator_destroy(allocator);
     }
 }
