@@ -55,7 +55,7 @@
 #include "apr.h"
 #include "apr_strings.h"
 #include "apr_arch_proc_mutex.h"
-#include "apr_arch_fileio.h" /* for apr_mkstemp() */
+#include "apr_arch_file_io.h" /* for apr_mkstemp() */
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {

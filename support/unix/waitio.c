@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "apr_arch_networkio.h"
 #include "apr_poll.h"
 #include "apr_errno.h"

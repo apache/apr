@@ -58,7 +58,7 @@
 #include "apr_portable.h"
 #include "apr_arch_thread_mutex.h"
 #include "apr_arch_thread_cond.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include <string.h>
 
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,

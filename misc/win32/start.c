@@ -60,7 +60,7 @@
 
 #include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
 #include "wchar.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "crtdbg.h"
 #include "assert.h"
 

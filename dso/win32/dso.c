@@ -55,7 +55,7 @@
 #include "apr_arch_dso.h"
 #include "apr_strings.h"
 #include "apr_private.h"
-#include "apr_arch_fileio.h"
+#include "apr_arch_file_io.h"
 #include "apr_arch_utf8.h"
 
 #if APR_HAS_DSO
