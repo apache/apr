@@ -61,7 +61,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t dir_cleanup(void *thedir)
+static ap_status_t dir_cleanup(void *thedir)
 {
     struct dir_t *dir = thedir;
     return ap_closedir(dir);
@@ -78,9 +78,14 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cn
     
     thedir->cntxt = cntxt;
     thedir->dirname = ap_pstrdup(cntxt, dirname);
+
+    if (thedir->dirname == NULL)
+        return APR_ENOMEM;
+
     thedir->handle = 0;
     thedir->validentry = FALSE;
     *new = thedir;
+    ap_register_cleanup(cntxt, thedir, dir_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 
