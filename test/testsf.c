@@ -283,25 +283,25 @@ static int client(client_socket_mode_t socket_mode)
     if (socket_mode == BLK || socket_mode == TIMEOUT) {
         current_file_offset = 0;
         len = FILE_LENGTH;
-        rv = ap_sendfile(sock, f, &hdtr, &current_file_offset, &len, 0);
+        rv = apr_sendfile(sock, f, &hdtr, &current_file_offset, &len, 0);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "ap_sendfile()->%d/%s\n",
+            fprintf(stderr, "apr_sendfile()->%d/%s\n",
                     rv,
                     apr_strerror(rv, buf, sizeof buf));
             exit(1);
         }
         
-        printf("ap_sendfile() updated offset with %ld\n",
+        printf("apr_sendfile() updated offset with %ld\n",
                (long int)current_file_offset);
         
-        printf("ap_sendfile() updated len with %ld\n",
+        printf("apr_sendfile() updated len with %ld\n",
                (long int)len);
         
         printf("bytes really sent: %d\n",
                expected_len);
 
         if (len != expected_len) {
-            fprintf(stderr, "ap_sendfile() didn't report the correct "
+            fprintf(stderr, "apr_sendfile() didn't report the correct "
                     "number of bytes sent!\n");
             exit(1);
         }
@@ -323,7 +323,7 @@ static int client(client_socket_mode_t socket_mode)
             apr_size_t tmplen;
 
             tmplen = len; /* bytes remaining to send from the file */
-            printf("Calling ap_sendfile()...\n");
+            printf("Calling apr_sendfile()...\n");
             printf("Headers:\n");
             for (i = 0; i < hdtr.numheaders; i++) {
                 printf("\t%d bytes\n",
@@ -337,8 +337,8 @@ static int client(client_socket_mode_t socket_mode)
                        hdtr.trailers[i].iov_len);
             }
 
-            rv = ap_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
-            printf("ap_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
+            rv = apr_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
+            printf("apr_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
             if (rv) {
                 if (apr_canonical_error(rv) == APR_EAGAIN) {
                     nsocks = 1;
@@ -430,7 +430,7 @@ static int client(client_socket_mode_t socket_mode)
         exit(1);
     }
 
-    printf("After ap_sendfile(), the kernel file pointer is "
+    printf("After apr_sendfile(), the kernel file pointer is "
            "at offset %ld.\n",
            (long int)current_file_offset);
 
@@ -457,7 +457,7 @@ static int client(client_socket_mode_t socket_mode)
         exit(1);
     }
 
-    printf("client: ap_sendfile() worked as expected!\n");
+    printf("client: apr_sendfile() worked as expected!\n");
 
     rv = apr_remove_file(TESTFILE, p);
     if (rv != APR_SUCCESS) {
@@ -696,7 +696,7 @@ static int server(void)
         exit(1);
     }
 
-    printf("server: ap_sendfile() worked as expected!\n");
+    printf("server: apr_sendfile() worked as expected!\n");
 
     return 0;
 }
