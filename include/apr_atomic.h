@@ -87,6 +87,18 @@ extern "C" {
 #define apr_atomic_read(mem)         atomic_read(mem)
 #define apr_atomic_init(pool)        APR_SUCCESS
 
+#elif defined(__FreeBSD__) && (__FreeBSD__ >= 4)
+#include <machine/atomic.h>
+
+#define apr_atomic_t apr_uint32_t
+#define apr_atomic_add(mem, val)     atomic_add_int(mem,val)
+#define apr_atomic_dec(mem)          atomic_subtract_int(mem,1)
+#define apr_atomic_inc(mem)          atomic_add_int(mem,1)
+#define apr_atomic_set(mem, val)     atomic_set_int(mem, val)
+#define apr_atomic_read(mem)         *mem
+#define apr_atomic_init(pool)        APR_SUCCESS
+
+
 #elif defined(__sparc__not_ready_yet)
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_read(p)  *p
