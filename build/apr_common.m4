@@ -580,3 +580,23 @@ done
 $1=$cur
 ])
 
+dnl
+dnl Removes the value of $3 from the string in $2, strips of any leading
+dnl slashes, and returns the value in $1.
+dnl
+dnl Example:
+dnl orig_path="${prefix}/bar"
+dnl APR_PATH_RELATIVE(final_path, $orig_path, $prefix)
+dnl    $final_path now contains "bar"
+AC_DEFUN(APR_PATH_RELATIVE,[
+stripped=`echo $2 | sed -e "s#^$3##"`
+# check if the stripping was successful
+if test "x$2" != "x$stripped"; then
+    # it was, so strip of any leading slashes
+    $1=`echo $stripped | sed -e 's#^/*##'`
+else
+    # it wasn't so return the original
+    $1=$2
+fi
+])
+
