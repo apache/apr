@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/11 21:01:20 $]
+Last modified at [$Date: 2002/01/12 17:18:37 $]
 
 Release:
 
@@ -53,12 +53,6 @@ RELEASE SHOWSTOPPERS:
                    that platform).  I think so.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
-
-    *  We should check if a pool is still existent when passed into
-      any apr_pool_xxx function.  We could do this by recursively
-      checking if the pool is in a child list, starting at
-      global_pool.  If it is not, bail out and report sourcefile
-      linenumber (or cause a segv).
 
     * Get OTHER_CHILD support into Win32
         Status: Bill S. is looking into this
