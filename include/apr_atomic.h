@@ -156,6 +156,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 
 #elif defined(__linux)
 
+#include <stdlib.h>
 #include <asm/atomic.h>
 #include <asm/system.h>
 #define apr_atomic_t atomic_t
