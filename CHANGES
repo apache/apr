@@ -1,4 +1,6 @@
 Changes with APR b1  
+  *) Get apr_lock_file and apr_unlock_file working on Windows 9x.
+     [Mladen Turk, Bill Stoddard]
 
   *) Make all APR pools be allocated out of the permanent pool.
      This brings APR pools back to a tree structure.  There are
