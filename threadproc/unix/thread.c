@@ -189,7 +189,7 @@ apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
     apr_status_t *thread_stat;
 
     if ((stat = pthread_join(*thd->td,(void *)&thread_stat)) == 0) {
-        *retval = *thread_stat;
+        *retval = thread_stat ? *thread_stat : APR_SUCCESS;
         return APR_SUCCESS;
     }
     else {
