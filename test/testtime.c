@@ -120,22 +120,34 @@ static void test_gmtstr(CuTest *tc)
                       print_time(p, &xt));
 }
 
-static void test_localstr(CuTest *tc)
+static void test_exp_lt(CuTest *tc)
 {
     apr_status_t rv;
     apr_time_exp_t xt;
+    struct tm *libc_exp;
+    time_t now_secs = apr_time_sec(now);
 
     rv = apr_time_exp_lt(&xt, now);
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_time_exp_lt");
     }
-    /* XXX: This test is bogus, and a good example of why one never
-     * runs tests in their own timezone.  Of course changing the delta
-     * has no impact on the resulting time, only the tm_gmtoff.
-     */
     CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "2002-08-14 12:05:36.186711 -25200 [257 Sat] DST",
-                      print_time(p, &xt));
+
+    libc_exp = localtime(&now_secs);
+
+#define CHK_FIELD(f) \
+    CuAssertIntEquals(tc, libc_exp->f, xt.f)
+
+    CHK_FIELD(tm_sec);
+    CHK_FIELD(tm_min);
+    CHK_FIELD(tm_hour);
+    CHK_FIELD(tm_mday);
+    CHK_FIELD(tm_mon);
+    CHK_FIELD(tm_year);
+    CHK_FIELD(tm_wday);
+    CHK_FIELD(tm_yday);
+    CHK_FIELD(tm_isdst);
+#undef CHK_FIELD
 }
 
 static void test_exp_get_gmt(CuTest *tc)
@@ -206,18 +218,19 @@ static void test_rfcstr(CuTest *tc)
 static void test_ctime(CuTest *tc)
 {
     apr_status_t rv;
-    char str[STR_SIZE];
+    char apr_str[STR_SIZE];
+    char libc_str[STR_SIZE];
+    time_t now_sec = apr_time_sec(now);
 
-    /* XXX: This test is bogus, and a good example of why one never
-     * runs tests in their own timezone.  Of course changing the delta
-     * has no impact on the resulting time, only the tm_gmtoff.
-     */
-    rv = apr_ctime(str, now);
+    rv = apr_ctime(apr_str, now);
     if (rv == APR_ENOTIMPL) {
         CuNotImpl(tc, "apr_ctime");
     }
     CuAssertTrue(tc, rv == APR_SUCCESS);
-    CuAssertStrEquals(tc, "Sat Sep 14 12:05:36 2002", str);
+    strcpy(libc_str, ctime(&now_sec));
+    *strchr(libc_str, '\n') = '\0';
+
+    CuAssertStrEquals(tc, libc_str, apr_str);
 }
 
 static void test_strftime(CuTest *tc)
@@ -297,7 +310,7 @@ CuSuite *testtime(void)
 
     SUITE_ADD_TEST(suite, test_now);
     SUITE_ADD_TEST(suite, test_gmtstr);
-    SUITE_ADD_TEST(suite, test_localstr);
+    SUITE_ADD_TEST(suite, test_exp_lt);
     SUITE_ADD_TEST(suite, test_exp_get_gmt);
     SUITE_ADD_TEST(suite, test_exp_get_lt);
     SUITE_ADD_TEST(suite, test_imp_gmt);
