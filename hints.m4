@@ -112,6 +112,7 @@ case "$PLAT" in
 	APR_SETIFNULL(LDFLAGS, -Zexe -Zmtd -Zsysv-signals -Zbin-files)
 	APR_SETIFNULL(LIBS, -lsocket -lufc -lbsd)
 	APR_SETIFNULL(SHELL, sh)
+        APR_SETIFNULL(file_as_socket, 0)
 	;;
     *-hi-hiux)
 	APR_SETIFNULL(CFLAGS, -DHIUX)
@@ -345,6 +346,7 @@ dnl	;;
 	;;
     *-BeOS*)
 	APR_SETIFNULL(CFLAGS, -DBEOS)
+        APR_SETIFNULL(file_as_socket, 0)
 	;;
     4850-*.*)
 	APR_SETIFNULL(CFLAGS, -DSVR4 -DMPRAS)
