@@ -62,10 +62,11 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
     HCRYPTPROV hProv;
     apr_status_t res = APR_SUCCESS;
 
-    if (!CryptAcquireContext(&hProv,NULL,NULL,PROV_RSA_FULL,0)) {
+    if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL,
+                             CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
 	return apr_get_os_error();
     }
-    if (!CryptGenRandom(hProv,length,buf)) {
+    if (!CryptGenRandom(hProv, length, buf)) {
     	res = apr_get_os_error();
     }
     CryptReleaseContext(hProv, 0);
