@@ -104,11 +104,16 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(void) apr_terminate(void)
+APR_DECLARE_NONSTD(void) apr_terminate(void)
 {
     initialized--;
     if (initialized) {
         return;
     }
     apr_pool_alloc_term(global_apr_pool);
+}
+
+APR_DECLARE(void) apr_terminate2(void)
+{
+    apr_terminate();
 }
