@@ -81,12 +81,22 @@ void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data);
 
 apr_lock_t *thread_lock;
 apr_pool_t *context;
+apr_thread_once_t *control = NULL;
 int x = 0;
+int value = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
+
+void init_func(void)
+{
+    value++;
+}
 
 void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
 {
     int i;
+
+    apr_thread_once(control, init_func);
+
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
@@ -99,6 +109,9 @@ void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
 void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data)
 {
     int i;
+
+    apr_thread_once(control, init_func);
+
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
@@ -111,6 +124,9 @@ void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data)
 void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data)
 {
     int i;
+
+    apr_thread_once(control, init_func);
+
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
@@ -123,6 +139,9 @@ void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data)
 void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data)
 {
     int i;
+
+    apr_thread_once(control, init_func);
+
     for (i = 0; i < 10000; i++) {
         apr_lock_acquire(thread_lock);
         x++;
@@ -152,6 +171,8 @@ int main(void)
         exit(-1);
     }
     fprintf(stdout, "OK\n");
+
+    apr_thread_once_init(&control, context);
 
     fprintf(stdout, "Initializing the lock......."); 
     s1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
@@ -201,6 +222,17 @@ int main(void)
     }
     else {
         fprintf(stdout, "Everything is working!\n");
+    }
+
+    fprintf(stdout, "Checking if apr_thread_once worked.......");
+    if (value != 1) {
+        fflush(stdout);
+        fprintf(stderr, "apr_thread_once must not have worked, "
+                "value is %d\n", value);
+        exit(-1);
+    }
+    else {
+        fprintf(stdout, "apr_thread_once worked\n");
     }
     return 0;
 }
