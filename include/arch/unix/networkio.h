@@ -101,6 +101,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_SYS_SENDFILE_H
+#include <sys/sendfile.h>
+#endif
 /* End System Headers */
 
 struct socket_t {
