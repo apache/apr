@@ -300,22 +300,21 @@ apr_status_t apr_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
 apr_status_t apr_wait_proc(apr_proc_t *proc, 
                            apr_wait_how_e wait)
 {
-    status_t exitval;
-    thread_info tinfo;
-    
+    status_t exitval, rv;
+
     if (!proc)
         return APR_ENOPROC;
     /* when we run processes we are actually running threads, so here
        we'll wait on the thread dying... */
     if (wait == APR_WAIT) {
-        if (wait_for_thread(proc->pid, &exitval) == B_OK) {
+        if ((rv = wait_for_thread(proc->pid, &exitval)) == B_OK) {
             return APR_CHILD_DONE;
         }
-        return errno;
+        return rv;
     }
     /* if the thread is still alive then it's not done...
        this won't hang or holdup the thread checking... */
-    if (get_thread_info(proc->pid, &tinfo) == B_BAD_VALUE) {
+    if (resume_thread(proc->pid) == B_BAD_THREAD_ID) {
         return APR_CHILD_DONE;
     }
     /* if we get this far it's still going... */
@@ -368,7 +367,7 @@ apr_status_t apr_setprocattr_childerr(apr_procattr_t *attr, apr_file_t *child_er
 }
 
 apr_status_t apr_setprocattr_limit(apr_procattr_t *attr, apr_int32_t what, 
-                          struct rlimit *limit)
+                          void *limit)
 {
     return APR_ENOTIMPL;
 }
