@@ -230,5 +230,9 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
         }
     }
 
+    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), file_cleanup,
+                        apr_pool_cleanup_null);
+    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), file_cleanup,
+                        apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
