@@ -58,9 +58,7 @@
 #include "apr_lib.h"
 #include <errno.h>
 #include <stdio.h>
-#ifdef BEOS
-#include <unistd.h>
-#endif
+#include "test_apr.h"
 
 #define STR_SIZE 45
 
@@ -75,39 +73,21 @@ int main(void)
     apr_int32_t hr_off = -5 * 3600; /* 5 hours in seconds */
     apr_int64_t hr_off_64;
 
-    fprintf(stdout, "Testing Time functions.\n");
+    printf("APR Time Functions\n==================\n\n");
 
-    if (apr_pool_create(&p, NULL) != APR_SUCCESS){
-        printf("Failed to create a context!\n");
-        exit (-1);
-    }
+    STD_TEST_NEQ("Creating a pool to use", apr_pool_create(&p, NULL))
 
-    printf("\tapr_time_now....................................");
+    printf("%-60s", "    apr_time_now()");
     now = apr_time_now();
     printf("OK\n");
 
-    printf("\tapr_explode_gmt.................................");
-    if (apr_explode_gmt(&xt, now) != APR_SUCCESS) {
-        printf("Couldn't explode the time\n");
-        exit(-1);
-    }
-    printf("OK\n");
+    STD_TEST_NEQ("    apr_explode_gmt", apr_explode_gmt(&xt, now))
+    
+    STD_TEST_NEQ("    apr_explode_localtime", apr_explode_localtime(&xt2, now))
 
-    printf("\tapr_explode_localtime...........................");
-    if (apr_explode_localtime(&xt2, now) != APR_SUCCESS) {
-        printf("Couldn't explode the time\n");
-        exit(-1);
-    }
-    printf("OK\n");
+    STD_TEST_NEQ("    apr_implode_time (GMT)", apr_implode_time(&imp, &xt))
 
-    printf("\tapr_implode_time................................");
-    if (apr_implode_time(&imp, &xt) != APR_SUCCESS) {
-        printf("Couldn't implode the time\n");
-        exit(-1);
-    }
-    printf("OK\n");
-
-    printf("\tchecking the explode/implode (GMT)..............");
+    printf("%-60s", "    checking GMT explode == implode");
     if (imp != now) {
 	printf("mismatch\n"
                 "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
@@ -119,96 +99,56 @@ int main(void)
     }
     printf("OK\n");
 
-    printf("\tchecking the explode/implode (local time).......");
-    if (apr_implode_time(&imp, &xt2) != APR_SUCCESS) {
-        printf("Couldn't implode the time\n");
-        exit(-1);
-    }
-    hr_off_64 = (apr_int64_t)xt2.tm_gmtoff * APR_USEC_PER_SEC; /* microseconds */ 
-    if (imp != now + hr_off_64) {
-	printf("mismatch\n"
-                "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
-                "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
-                "\t\terror delta was          %" APR_TIME_T_FMT "\n"
-                "\t\tshould have been         %" APR_INT64_T_FMT "\n",
-                now, imp, imp-now, hr_off_64);
-	exit(-1);
-    }
-    printf("OK\n");
-
     str = apr_pcalloc(p, sizeof(char) * STR_SIZE);
     str2 = apr_pcalloc(p, sizeof(char) * STR_SIZE);
     imp = 0;
 
-    printf("\tapr_rfc822_date.................");
-    if (apr_rfc822_date(str, now) != APR_SUCCESS){
-        printf("Failed!\n");
-        exit (-1);
-    }
-    printf("%s\n", str);
-
-    printf("\tapr_ctime.......(local).........");
-    if (apr_ctime(str, now) != APR_SUCCESS){
-        printf("Failed!\n");
+    if (!str || !str2) {
+        printf("Failure!\n");
+        fprintf(stderr,"Failed to allocate memory!\n");
         exit(-1);
     }
-    printf("%s\n", str);
 
-    printf("\tapr_strftime....................");
-    if (str == NULL){
-        printf("Couldn't allocate memory.\n");
-        exit (-1);
-    } 
-    if (apr_strftime(str, &sz, STR_SIZE, "%R %A %d %B %Y", &xt) !=
-         APR_SUCCESS){
-        printf("Failed!");
-        exit (-1); 
-    }
-    printf("%s\n", str);
+    STD_TEST_NEQ("    apr_rfc822_date", apr_rfc822_date(str, now))
+    printf("        ( %s )\n", str);
 
-    printf("\tCurrent time (GMT)..............................");
-    if (apr_strftime(str, &sz, STR_SIZE, "%T ", &xt) != APR_SUCCESS){
-        printf("Failed!\n");
-        exit (-1);
-    }
-    printf ("%s\n", str);    
+    STD_TEST_NEQ("    apr_ctime (local time)", apr_ctime(str, now))
+    printf("        ( %s )\n", str);
 
-    printf("\tTrying to explode time with 5 hour offset.......");
-    if (apr_explode_time(&xt2, now, hr_off) != APR_SUCCESS){
-        printf("Failed.\n");
-        exit(-1);
-    }
-    printf("OK\n");
+    STD_TEST_NEQ("    apr_strftime (GMT) (24H day date month year)", 
+                 apr_strftime(str, &sz, STR_SIZE, "%R %A %d %B %Y", &xt))
+    printf("        ( %s )\n", str);
 
-    printf("\tOffset Time Zone -5 hours.......................");
-    if (apr_strftime(str2, &sz, STR_SIZE, "%T  (%z)", &xt2) != APR_SUCCESS){
-        printf("Failed!\n");
-        exit(-1);
-    }
-    printf("%s\n", str2);
+    STD_TEST_NEQ("    apr_strftime (GMT) (HH:MM:SS)",
+                 apr_strftime(str, &sz, STR_SIZE, "%T", &xt))
+    printf ("        ( %s )\n", str);    
 
-    printf("\tComparing the created times.....................");
-    if (! strcmp(str,str2)){
-        printf("Failed!\n");
-        exit(-1);
-    } else {
-        printf("OK\n");
-    }
+    STD_TEST_NEQ("    apr_explode_time (GMT -5 hours)",
+                 apr_explode_time(&xt2, now, hr_off))
 
-    printf("\tChecking imploded time after offset.............");
-    apr_implode_time(&imp, &xt2);
-    hr_off_64 = (apr_int64_t)hr_off * APR_USEC_PER_SEC; /* microseconds */ 
+    STD_TEST_NEQ("    apr_strftime (offset) (HH:MM:SS)",
+                 apr_strftime(str2, &sz, STR_SIZE, "%T", &xt2))
+    printf("        ( %s )\n", str2);
+
+    TEST_EQ("    Comparing the GMT and offset time strings",
+             strcmp(str, str2), 0, "OK", "Failed")
+    printf("        ( %s != %s )\n", str, str2);
+
+    STD_TEST_NEQ("    apr_implode_time (offset)",
+                 apr_implode_time(&imp, &xt2))
+   
+    hr_off_64 = (apr_int64_t) hr_off * APR_USEC_PER_SEC; /* microseconds */ 
+    printf("%-60s","    Checking offset is correct");
     if (imp != now + hr_off_64){
-	printf("mismatch\n"
-                "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
-                "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
-                "\t\terror delta was          %" APR_TIME_T_FMT "\n"
-                "\t\tshould have been         %" APR_INT64_T_FMT "\n",
-                now, imp, imp-now, hr_off_64);
+        printf("Failed! :(\n");
+        printf("Difference is %" APR_INT64_T_FMT " (should be %"
+               APR_INT64_T_FMT")\n", imp - now, hr_off_64);
         exit(-1);
     }
     printf("OK\n");
-    
+    printf("        ( %lld - %lld = %lld )\n", imp, now, imp - now);
+ 
+    printf("\nTest Complete.\n");
     return 1;
 }    
 
