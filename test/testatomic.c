@@ -141,7 +141,7 @@ static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
         return APR_EGENERAL;
     }
     printf("OK\n");
-    printf("%-60s", "testing CAS - no match");
+    printf("%-60s", "testing CAS for pointers - no match");
     oldptr = apr_atomic_casptr(&casptr, &object2, &object1);
     if (oldptr != &object2) {
         fprintf(stderr, "Failed\noldval =%p should be %p\n", oldptr, &object2);
