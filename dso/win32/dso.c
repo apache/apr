@@ -62,7 +62,13 @@
 static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
-    return apr_dso_unload(dso);
+
+    if (dso->handle != NULL && !FreeLibrary(dso->handle)) {
+        return apr_get_os_error();
+    }
+    dso->handle = NULL;
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle, 
@@ -125,10 +131,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     
 APR_DECLARE(apr_status_t) apr_dso_unload(struct apr_dso_handle_t *handle)
 {
-    if (!FreeLibrary(handle->handle)) {
-        return apr_get_os_error();
-    }
-    return APR_SUCCESS;
+    return apr_run_cleanup(handle->cont, handle, dso_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 

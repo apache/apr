@@ -64,7 +64,17 @@
 static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
-    return apr_dso_unload(dso);
+    int rc;
+
+    if (dso->handle == 0)
+        return APR_SUCCESS;
+       
+    rc = DosFreeModule(dso->handle);
+
+    if (rc == 0)
+        dso->handle = 0;
+
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -94,17 +104,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, const char
 
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
-    int rc;
-
-    if (handle->handle == 0)
-        return APR_SUCCESS;
-       
-    rc = DosFreeModule(handle->handle);
-
-    if (rc == 0)
-        handle->handle = 0;
-
-    return APR_OS2_STATUS(rc);
+    return apr_run_cleanup(handle->cont, handle, dso_cleanup);
 }
 
 
