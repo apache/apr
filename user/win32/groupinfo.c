@@ -72,9 +72,20 @@ APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid,
         return APR_BADARG;
     if (!LookupAccountSid(NULL, groupid, name, &cbname, domain, &cbdomain, &type))
         return apr_get_os_error();
-    if (type != SidTypeGroup && type != SidTypeWellKnownGroup)
+    if (type != SidTypeGroup && type != SidTypeWellKnownGroup 
+                             && type != SidTypeAlias)
         return APR_BADARG;
     *groupname = apr_pstrdup(p, name);
     return APR_SUCCESS;
 }
   
+APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right)
+{
+    if (!left || !right)
+        return APR_BADARG;
+    if (!IsValidSid(left) || !IsValidSid(right))
+        return APR_BADARG;
+    if (!EqualSid(left, right))
+        return APR_EMISMATCH;
+    return APR_SUCCESS;
+}
