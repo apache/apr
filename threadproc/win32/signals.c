@@ -57,7 +57,9 @@
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
+#if APR_HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 #include <string.h>
 #if APR_HAVE_SYS_WAIT
 #include <sys/wait.h>
