@@ -1,5 +1,21 @@
 Changes for APR 1.2.0
 
+
+Changes for APR 1.1.1
+
+  *) Disable sendfile support for S/390 only in kernel versions < 2.4.0. 
+     [Joe Orton]
+
+  *) Fix posix rwlock detection on Darwin. [Aaron Bannert]
+
+  *) Build fix for Multicast support on HP-UX 11.00 and Tru64 [Joe Orton]
+
+  *) Fix libapr.rc for Win32 builds [William Rowe]
+
+  *) Rewrite apr_file_writev_full using apr_file_write_full. [Paul Querna]
+
+  *) Fix memory leak when in APR_POOL_DEBUG mode. [Joe Schaefer]
+
   *) Use APR_RING_CONCAT for moving dead list in KQueue, sys_epoll, and 
      Event Ports. [Paul Querna]
 
