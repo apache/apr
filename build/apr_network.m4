@@ -164,11 +164,18 @@ AC_DEFUN(APR_CHECK_GETNAMEINFO_IPV4_MAPPED,[
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
 
 void main(void) {
     struct sockaddr_in6 sa = {0};
     struct in_addr ipv4;
+#if defined(NI_MAXHOST)
     char hbuf[NI_MAXHOST];
+#else
+    char hbuf[256];
+#endif
     unsigned int *addr32;
     int error;
 
