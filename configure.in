@@ -231,12 +231,14 @@ AC_CHECK_LIB(m,modf)
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
 AC_CHECK_FUNCS(strcasecmp stricmp setsid nl_langinfo)
-AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ]) 
 AC_CHECK_FUNCS(setrlimit, [ have_setrlimit="1" ], [ have_setrlimit="0" ]) 
 AC_CHECK_FUNCS(getrlimit, [ have_getrlimit="1" ], [ have_getrlimit="0" ]) 
 AC_CHECK_FUNCS(writev)
 sendfile="0"
 AC_CHECK_FUNCS(sendfile send_file, [ sendfile="1" ])
+
+AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ]) 
+AC_DECL_SYS_SIGLIST
 
 AC_CHECK_FUNCS(fork, [ fork="1" ], [ fork="0" ])
 AC_CHECK_FUNCS(getpass)
@@ -255,7 +257,6 @@ if test "$native_mmap_emul" = "1"; then
 fi
 AC_CHECK_FUNCS(hstrerror)
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
-AC_CHECK_FUNCS(bzero, [ have_bzero="1" ], [ have_bzero="0"] )
 
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
@@ -266,7 +267,6 @@ AC_SUBST(have_getrlimit)
 AC_SUBST(iconv)
 AC_SUBST(mmap)
 AC_SUBST(have_memmove)
-AC_SUBST(have_bzero)
 
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC

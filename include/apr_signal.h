@@ -52,69 +52,53 @@
  * <http://www.apache.org/>.
  */
 
+#ifndef APR_SIGNAL_H
+#define APR_SIGNAL_H
+
 #include "apr.h"
-#include "apr_general.h"
 #include "apr_pools.h"
-#include "apr_signal.h"
 
-#include "misc.h"       /* for WSAHighByte / WSALowByte */
-#include "locks.h"      /* for apr_unix_setup_lock() */
+#define APR_WANT_SIGNAL
+#include "apr_want.h"
 
 
-static int initialized = 0;
-static apr_pool_t *global_apr_pool;
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-APR_DECLARE(apr_status_t) apr_initialize(void)
-{
-    apr_status_t status;
-#if defined WIN32
-    int iVersionRequested;
-    WSADATA wsaData;
-    int err;
+/**
+ * @package APR signal handling
+ */
+
+#if APR_HAVE_SIGACTION
+
+typedef void apr_sigfunc_t(int);
+
+/* ### how to doc this? */
+apr_sigfunc_t *apr_signal(int signo, apr_sigfunc_t * func);
+
+#if defined(SIG_IGN) && !defined(SIG_ERR)
+#define SIG_ERR ((apr_sigfunc_t *) -1)
 #endif
 
-    if (initialized++) {
-        return APR_SUCCESS;
-    }
-
-    if (apr_pool_create(&global_apr_pool, NULL) != APR_SUCCESS) {
-        return APR_ENOPOOL;
-    }
-
-#if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
-    apr_unix_setup_lock();
-#elif defined WIN32
-    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
-    err = WSAStartup((WORD) iVersionRequested, &wsaData);
-    if (err) {
-        return err;
-    }
-    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
-        HIBYTE(wsaData.wVersion) != WSALowByte) {
-        WSACleanup();
-        return APR_EEXIST;
-    }
+#else /* !APR_HAVE_SIGACTION */
+#define apr_signal(a, b) signal(a, b)
 #endif
 
-    if ((status = apr_pool_alloc_init(global_apr_pool)) != APR_SUCCESS)
-        return status;
 
-    apr_signal_init(global_apr_pool);
+/**
+ * Get the description for a specific signal number
+ * @param signum The signal number
+ * @return The description of the signal
+ * @deffunc const char *apr_signal_get_description(int signum)
+ */
+const char *apr_signal_get_description(int signum);
 
-    return APR_SUCCESS;
-}
+/**
+ * APR-private function for initializing the signal package
+ * @param pglobal The internal, global pool
+ * @deffunc apr_signal_init(apr_pool_t *pglobal)
+ */
+void apr_signal_init(apr_pool_t *pglobal);
 
-APR_DECLARE(void) apr_terminate(void)
-{
-    initialized--;
-    if (initialized) {
-        return;
-    }
-    apr_pool_alloc_term(global_apr_pool);
-}
-
-APR_DECLARE(apr_status_t) apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
-{
-    cont->apr_abort = apr_abort;
-    return APR_SUCCESS;
-}
+#endif /* APR_SIGNAL_H */
