@@ -1,7 +1,7 @@
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2000-2003 The Apache Software Foundation.  All rights
+ * Copyright (c) 2000-2004 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,10 +62,9 @@ static void uid_current(CuTest *tc)
 {
     apr_uid_t uid;
     apr_gid_t gid;
-    apr_status_t rv;
 
-    rv = apr_uid_current(&uid, &gid, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_uid_current failed",
+                       apr_uid_current(&uid, &gid, p));
 }
 
 static void username(CuTest *tc)
@@ -74,20 +73,20 @@ static void username(CuTest *tc)
     apr_gid_t gid;
     apr_uid_t retreived_uid;
     apr_gid_t retreived_gid;
-    apr_status_t rv;
     char *uname = NULL;
 
-    rv = apr_uid_current(&uid, &gid, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-
-    rv = apr_uid_name_get(&uname, uid, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_uid_current failed",
+                       apr_uid_current(&uid, &gid, p));
+   
+    apr_assert_success(tc, "apr_uid_name_get failed",
+                       apr_uid_name_get(&uname, uid, p));
     CuAssertPtrNotNull(tc, uname);
 
-    rv = apr_uid_get(&retreived_uid, &retreived_gid, uname, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_uid_get failed",
+                       apr_uid_get(&retreived_uid, &retreived_gid, uname, p));
 
-    CuAssertIntEquals(tc, APR_SUCCESS, apr_uid_compare(uid, retreived_uid));
+    apr_assert_success(tc, "apr_uid_compare failed",
+                       apr_uid_compare(uid, retreived_uid));
 #ifdef WIN32
     /* ### this fudge was added for Win32 but makes the test return NotImpl
      * on Unix if run as root, when !gid is also true. */
@@ -105,7 +104,8 @@ static void username(CuTest *tc)
     }
     else {
 #endif
-        CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
+        apr_assert_success(tc, "apr_gid_compare failed",
+                           apr_gid_compare(gid, retreived_gid));
 #ifdef WIN32
     }
 #endif
@@ -116,20 +116,20 @@ static void groupname(CuTest *tc)
     apr_uid_t uid;
     apr_gid_t gid;
     apr_gid_t retreived_gid;
-    apr_status_t rv;
     char *gname = NULL;
 
-    rv = apr_uid_current(&uid, &gid, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_uid_current failed",
+                       apr_uid_current(&uid, &gid, p));
 
-    rv = apr_gid_name_get(&gname, gid, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_gid_name_get failed",
+                       apr_gid_name_get(&gname, gid, p));
     CuAssertPtrNotNull(tc, gname);
 
-    rv = apr_gid_get(&retreived_gid, gname, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_gid_get failed",
+                       apr_gid_get(&retreived_gid, gname, p));
 
-    CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
+    apr_assert_success(tc, "apr_gid_compare failed",
+                       apr_gid_compare(gid, retreived_gid));
 }
 #else
 static void users_not_impl(CuTest *tc)
