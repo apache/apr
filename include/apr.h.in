@@ -258,6 +258,9 @@ typedef  @socklen_t_value@       apr_socklen_t;
 /* are we going to force the generic atomic operations */
 #define APR_FORCE_ATOMIC_GENERIC @apr_force_atomic_generic@
 
+/* ### aught to actual deploy this for OS2? */
+#define APR_PROC_MUTEX_IS_GLOBAL      0
+
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "@eolstr@"
 
