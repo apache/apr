@@ -66,6 +66,7 @@ case "$host" in
 	AC_PROG_CC
         if test "$GCC" != "yes"; then
           APR_ADDTO(CFLAGS, [-qHALT=E])
+          APR_ADDTO(CFLAGS, [-qLANGLVL=extended])
         fi
         ;;
     *-apollo-*)
