@@ -514,7 +514,12 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
  * Cleanup
  *
  * Cleanups are performed in the reverse order they were registered.  That is:
- * Last In, First Out.
+ * Last In, First Out.  A cleanup function can safely allocate memory from
+ * the pool that is being cleaned up. It can also safely register additional
+ * cleanups which will be run LIFO, directly after the current cleanup
+ * terminates.  Cleanups have to take caution in calling functions that
+ * create subpools. Subpools, created during cleanup will NOT automatically
+ * be cleaned up.  In other words, cleanups are to clean up after themselves.
  */
 
 /**
