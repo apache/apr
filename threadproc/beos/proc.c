@@ -114,12 +114,10 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
                                                const char *dir) 
 {
     char * cwd;
-    if (strncmp("/",dir,1) != 0 ) {
+    if (dir[0] != '/') {
         cwd = (char*)malloc(sizeof(char) * PATH_MAX);
         getcwd(cwd, PATH_MAX);
-        strncat(cwd,"/\0",2);
-        strcat(cwd,dir);
-        attr->currdir = (char *)apr_pstrdup(attr->pool, cwd);
+        attr->currdir = (char *)apr_pstrcat(attr->pool, cwd, "/", dir, NULL);
         free(cwd);
     } else {
         attr->currdir = (char *)apr_pstrdup(attr->pool, dir);
@@ -154,7 +152,7 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
         proc->pid = pid;
         proc->in = NULL; 
         proc->out = NULL; 
-        proc->err = NULL; 
+        proc->err = NULL;
         return APR_INCHILD;
     }
     proc->pid = pid;
@@ -188,7 +186,8 @@ APR_DECLARE(apr_status_t) apr_procattr_addrspace_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname, 
                                           const char * const *args,
                                           const char * const *env, 
-                                          apr_procattr_t *attr, apr_pool_t *pool)
+                                          apr_procattr_t *attr, 
+                                          apr_pool_t *pool)
 {
     int i=0,nargs=0;
     char **newargs = NULL;
@@ -239,7 +238,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
         free (newargs[nargs]);
     free(newargs);
         
-    if ( newproc < B_NO_ERROR) {
+    if (newproc < B_NO_ERROR) {
         return errno;
     }
 
@@ -297,7 +296,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     if (waithow != APR_WAIT) {
         waitpid_options |= WNOHANG;
     }
-    
+
     if ((pstatus = waitpid(proc->pid, &exit_int, waitpid_options)) > 0) {
         proc->pid = pstatus;
         if (WIFEXITED(exit_int)) {
@@ -309,6 +308,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
             *exitcode = WTERMSIG(exit_int);
         }
         else {
+
             /* unexpected condition */
             return APR_EGENERAL;
         }
@@ -317,6 +317,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     else if (pstatus == 0) {
         return APR_CHILD_NOTDONE;
     }
+
     return errno;
 } 
 
