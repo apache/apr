@@ -1,6 +1,6 @@
 # Based on Ryan Bloom's make_export.pl
 
-/^#[ \t]*if(def)? (APR?_|defined).*/ {
+/^#[ \t]*if(def)? (APR?_|!?defined).*/ {
 	if (old_filename != FILENAME) {
 		if (old_filename != "") printf("%s", line)
 		macro_no = 0
@@ -10,7 +10,7 @@
 		line = ""
 	}
 	macro_stack[macro_no++] = macro
-	macro = $2
+	macro = substr($0, length($1)+2)
 	found++
 	count++
 	line = line macro "\n"
