@@ -1020,6 +1020,15 @@ APR_CHECK_SOCKLEN_T
 
 APR_INADDR_NONE
 
+dnl Checks for pointer size
+AC_CHECK_SIZEOF(void*, 4)
+
+if test "x$ac_cv_sizeof_voidp" != "x"; then
+    voidp_size=$ac_cv_sizeof_voidp
+else
+    AC_ERROR([Cannot determine size of void*])
+fi
+
 dnl Checks for integer size
 AC_CHECK_SIZEOF(char, 1)
 AC_CHECK_SIZEOF(int, 4)
@@ -1208,6 +1217,7 @@ case $host in
         ;;
 esac
 
+AC_SUBST(voidp_size)
 AC_SUBST(short_value)
 AC_SUBST(int_value)
 AC_SUBST(long_value)
