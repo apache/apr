@@ -287,6 +287,7 @@ static void test_userdata_set(abts_case *tc, void *data)
 static void test_userdata_get(abts_case *tc, void *data)
 {
     apr_status_t rv;
+    void *udata;
     char *teststr;
     apr_file_t *filetest = NULL;
 
@@ -299,8 +300,9 @@ static void test_userdata_get(abts_case *tc, void *data)
                            "test", apr_pool_cleanup_null);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_file_data_get((void **)&teststr, "test", filetest);
+    rv = apr_file_data_get(&udata, "test", filetest);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
+    teststr = udata;
     ABTS_STR_EQUAL(tc, "This is a test", teststr);
 
     apr_file_close(filetest);
@@ -309,7 +311,7 @@ static void test_userdata_get(abts_case *tc, void *data)
 static void test_userdata_getnokey(abts_case *tc, void *data)
 {
     apr_status_t rv;
-    char *teststr;
+    void *teststr;
     apr_file_t *filetest = NULL;
 
     rv = apr_file_open(&filetest, FILENAME, 
@@ -317,7 +319,7 @@ static void test_userdata_getnokey(abts_case *tc, void *data)
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_file_data_get((void **)&teststr, "nokey", filetest);
+    rv = apr_file_data_get(&teststr, "nokey", filetest);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_PTR_EQUAL(tc, NULL, teststr);
     apr_file_close(filetest);
