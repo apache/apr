@@ -93,26 +93,53 @@ ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
 ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in, 
                                  ap_int32_t out, ap_int32_t err)
 {
-    ap_status_t stat;
-    if (in) {
-        if ((stat = ap_create_pipe(&attr->child_in, &attr->parent_in,
-                                    attr->cntxt)) != APR_SUCCESS) {
-            return stat;
+    ap_status_t status;
+    if (in != 0) {
+        if ((status = ap_create_pipe(&attr->child_in, &attr->parent_in, 
+                                   attr->cntxt)) != APR_SUCCESS) {
+            return status;
+        }
+        switch (in) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_in);
+            ap_block_pipe(attr->parent_in);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_in);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_in);
         }
     } 
     if (out) {
-        if ((stat = ap_create_pipe(&attr->parent_out, &attr->child_out,
-                                     attr->cntxt)) != APR_SUCCESS) {
-            return stat;
+        if ((status = ap_create_pipe(&attr->parent_out, &attr->child_out, 
+                                   attr->cntxt)) != APR_SUCCESS) {
+            return status;
+        }
+        switch (out) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_out);
+            ap_block_pipe(attr->parent_out);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_out);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_out);
         }
     } 
     if (err) {
-        if ((stat = ap_create_pipe(&attr->parent_err, &attr->child_err,
-                                      attr->cntxt)) != APR_SUCCESS) {
-            return stat;
+        if ((status = ap_create_pipe(&attr->parent_err, &attr->child_err, 
+                                   attr->cntxt)) != APR_SUCCESS) {
+            return status;
+        }
+        switch (err) {
+        case APR_FULL_BLOCK:
+            ap_block_pipe(attr->child_err);
+            ap_block_pipe(attr->parent_err);
+        case APR_PARENT_BLOCK:
+            ap_block_pipe(attr->parent_err);
+        case APR_CHILD_BLOCK:
+            ap_block_pipe(attr->child_err);
         }
     } 
-	return APR_SUCCESS;
+    return APR_SUCCESS;
 }
 
 ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
@@ -224,10 +251,17 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
         return errno;
     }
     resume_thread(newproc);
-    ap_close (attr->child_in);
-    ap_close (attr->child_out);
-    ap_close (attr->child_err);
-    
+
+    if (attr->child_in) {
+        ap_close(attr->child_in);
+    }
+    if (attr->child_out) {
+        ap_close(attr->child_out);
+    }
+    if (attr->child_err) {
+        ap_close(attr->child_err);
+    }
+
     send_data(newproc, 0, (void*)sp, sizeof(struct send_pipe));
     (*new)->tid = newproc;
 
