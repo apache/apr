@@ -65,7 +65,7 @@ static ap_status_t pipenonblock(ap_file_t *thefile)
     fd_flags |= O_NDELAY;
 #elif defined(FNDELAY)
     fd_flags |= O_FNDELAY;
-#else */
+#else
     /* XXXX: this breaks things, but an alternative isn't obvious...*/
     return -1;
 #endif
