@@ -104,7 +104,7 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle);
 
 /*
 
-=head1 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle *, const char *symname)
+=head1 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle, const char *symname)
 
 B<Load a symbol from a DSO handle.>
 
