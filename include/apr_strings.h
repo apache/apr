@@ -89,11 +89,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 /**
- * @package APR strings library
+ * @file apr_strings.h
+ * @brief APR Strings library
  */
-
+/**
+ * @defgroup APR_Strings String routines
+ * @ingroup APR
+ * @{
+ */
 /**
  * Do a natural order comparison of two strings.
  * @param a The first string to compare
@@ -101,7 +105,6 @@ extern "C" {
  * @return Either <0, 0, or >0.  If the first string is less than the second
  *          this returns <0, if they are equivalent it returns 0, and if the
  *          first string is greater than second string it retuns >0.
- * @deffunc int apr_strnatcmp(char const *a, char const *b)
  */
 APR_DECLARE(int) apr_strnatcmp(char const *a, char const *b);
 
@@ -113,7 +116,6 @@ APR_DECLARE(int) apr_strnatcmp(char const *a, char const *b);
  * @return Either <0, 0, or >0.  If the first string is less than the second
  *         this returns <0, if they are equivalent it returns 0, and if the
  *         first string is greater than second string it retuns >0.
- * @deffunc int apr_strnatcasecmp(char const *a, char const *b)
  */
 APR_DECLARE(int) apr_strnatcasecmp(char const *a, char const *b);
 
@@ -122,7 +124,6 @@ APR_DECLARE(int) apr_strnatcasecmp(char const *a, char const *b);
  * @param p The pool to allocate out of
  * @param s The string to duplicate
  * @return The new string
- * @deffunc char *apr_pstrdup(apr_pool_t *p, const char *s)
  */
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *p, const char *s);
 
@@ -133,7 +134,6 @@ APR_DECLARE(char *) apr_pstrdup(apr_pool_t *p, const char *s);
  * @param s The string to duplicate
  * @param n The number of characters to duplicate
  * @return The new string
- * @deffunc char *apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n)
  */
 APR_DECLARE(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
 
@@ -144,7 +144,6 @@ APR_DECLARE(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
  * @param m The memory to duplicate
  * @param n The number of bytes to duplicate
  * @return The new block of memory
- * @deffunc void *apr_pmemdup(apr_pool_t *p, const void *m, apr_size_t n)
  */
 APR_DECLARE(void *) apr_pmemdup(apr_pool_t *p, const void *m, apr_size_t n);
 
@@ -153,7 +152,6 @@ APR_DECLARE(void *) apr_pmemdup(apr_pool_t *p, const void *m, apr_size_t n);
  * @param p The pool to allocate out of
  * @param ... The strings to concatenate.  The final string must be NULL
  * @return The new string
- * @deffunc char *apr_pstrcat(apr_pool_t *p, ...)
  */
 APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
 
@@ -164,7 +162,6 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
  * @param fmt The format of the string
  * @param ap The arguments to use while printing the data
  * @return The new string
- * @deffunc char *apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap)
  */
 APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
 
@@ -175,7 +172,6 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
  * @param fmt The format of the string
  * @param ... The arguments to use while printing the data
  * @return The new string
- * @deffunc char *apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  */
 APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
         __attribute__((format(printf,2,3)));
@@ -188,7 +184,7 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  *                 null-termination, so if src is longer than
  *                 dst_size, the actual number of characters copied is
  *                 dst_size - 1.
- * @tip  
+ * @remark
  * <PRE>
  * We re-implement this function to implement these specific changes:
  *       1) strncpy() doesn't always null terminate and we want it to.
@@ -198,7 +194,6 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  *          destination string, we return a pointer to the terminating '\0'
  *          to allow us to check for truncation.
  * </PRE>
- * @deffunc char *apr_cpystrn(char *dst, const char *src, apr_size_t dst_size)
  */
 APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src,
                                 apr_size_t dst_size);
@@ -208,7 +203,6 @@ APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src,
  * @param dest The destination string.  It is okay to modify the string
  *             in place.  Namely dest == src
  * @param src The string to rid the spaces from.
- * @deffunc char *apr_collapse_spaces(char *dest, const char *src)
  */
 APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
 
@@ -218,7 +212,6 @@ APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
  * @param str The arguments to convert
  * @param argv_out Output location.  This is a pointer to an array of strings.
  * @param token_context Pool to use.
- * @deffunc apr_status_t apr_tokenize_to_argv(const char *arg_str, char ***argv_out, apr_pool_t *token_context);
  */
 APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                                char ***argv_out,
@@ -234,11 +227,13 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
  * @param sep The set of delimiters
  * @param last Internal state saved by apr_strtok() between calls.
  * @return The next token from the string
- * @deffunc char *apr_strtok(char *str, const char *sep, char **last)
  */
 APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last);
 
-/*
+/**
+ * @defgroup APR_Strings_Snprintf snprintf implementations
+ *
+ * @warning
  * These are snprintf implementations based on apr_vformatter().
  *
  * Note that various standards and implementations disagree on the return
@@ -253,6 +248,7 @@ APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last);
  * In no event does apr_snprintf return a negative number.  It's not possible
  * to distinguish between an output which was truncated, and an output which
  * exactly filled the buffer.
+ * @{
  */
 
 /**
@@ -262,7 +258,6 @@ APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last);
  * @param len The size of the buffer
  * @param format The format string
  * @param ... The arguments to use to fill out the format string.
- * @deffunc int apr_snprintf(char *buf, apr_size_t len, const char *format, ...)
  */
 APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
                                      const char *format, ...)
@@ -275,17 +270,16 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
  * @param len The size of the buffer
  * @param format The format string
  * @param ap The arguments to use to fill out the format string.
- * @deffunc int apr_vsnprintf(char *buf, apr_size_t len, const char *format, va_list ap)
  */
 APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
                                va_list ap);
 
+/** @} */
 /**
  * create a string representation of an int, allocated from a pool
  * @param p The pool from which to allocate
  * @param n The number to format
  * @return The string representation of the number
- * @deffunc int apr_itoa(apr_pool_t *p, int n)
  */
 APR_DECLARE(char *) apr_itoa(apr_pool_t *p, int n);
 
@@ -294,7 +288,6 @@ APR_DECLARE(char *) apr_itoa(apr_pool_t *p, int n);
  * @param p The pool from which to allocate
  * @param n The number to format
  * @return The string representation of the number
- * @deffunc int apr_ltoa(apr_pool_t *p, long n)
  */
 APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n);
 
@@ -303,7 +296,6 @@ APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n);
  * @param p The pool from which to allocate
  * @param n The number to format
  * @return The string representation of the number
- * @deffunc int apr_ltoa(apr_pool_t *p, apr_off_t n)
  */
 APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
 
@@ -313,11 +305,10 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
  * @param size The size to format
  * @param buf The 5 byte text buffer (counting the trailing null)
  * @return The buf passed to apr_strfsize()
- * @deffunc char *apr_strfsize(apr_off_t size, char *buf)
- * @tip All negative sizes report '  - ', apr_strfsize only formats positive values.
+ * @remark All negative sizes report '  - ', apr_strfsize only formats positive values.
  */
 APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf);
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif

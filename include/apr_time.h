@@ -62,26 +62,32 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 /**
- * @package APR Time library
+ * @file apr_time.h
+ * @brief APR Time Library
  */
-
+/**
+ * @defgroup APR_Time Time Routines
+ * @ingroup APR
+ * @{
+ */
+/** month names */
 APR_DECLARE_DATA extern const char apr_month_snames[12][4];
+/** day names */
 APR_DECLARE_DATA extern const char apr_day_snames[7][4];
 
 
-/* number of microseconds since 00:00:00 january 1, 1970 UTC */
+/** number of microseconds since 00:00:00 january 1, 1970 UTC */
 typedef apr_int64_t apr_time_t;
 
 
-/* mechanism to properly type apr_time_t literals */
+/** mechanism to properly type apr_time_t literals */
 #define APR_TIME_C(val) APR_INT64_C(val)
 
-/* mechanism to properly print apr_time_t values */
+/** mechanism to properly print apr_time_t values */
 #define APR_TIME_T_FMT APR_INT64_T_FMT
 
-/* intervals for I/O timeouts, in microseconds */
+/** intervals for I/O timeouts, in microseconds */
 typedef apr_int64_t apr_interval_time_t;
 typedef apr_int32_t apr_short_interval_time_t;
 
@@ -90,16 +96,16 @@ typedef apr_int32_t apr_short_interval_time_t;
 
 /**
  * return the current time
- * @deffunc apr_time_t apr_time_now(void)
  */
 APR_DECLARE(apr_time_t) apr_time_now(void);
 
-typedef struct apr_exploded_time_t apr_exploded_time_t;
 /**
  * a structure similar to ANSI struct tm with the following differences:
  *  - tm_usec isn't an ANSI field
  *  - tm_gmtoff isn't an ANSI field (it's a bsdism)
  */
+typedef struct apr_exploded_time_t apr_exploded_time_t;
+
 struct apr_exploded_time_t {
     /** microseconds past tm_sec */
     apr_int32_t tm_usec;
@@ -129,7 +135,6 @@ struct apr_exploded_time_t {
  * convert an ansi time_t to an apr_time_t
  * @param result the resulting apr_time_t
  * @param input the time_t to convert
- * @deffunc apr_status_t apr_ansi_time_to_apr_time(apr_time_t *result, time_t input)
  */
 APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result, 
                                                     time_t input);
@@ -141,7 +146,6 @@ APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result,
  * @param input the time to explode
  * @param offs the number of seconds offset to apply
  * @param zone the zone description
- * @deffunc apr_status_t apr_explode_time(apr_exploded_time_t *result, apr_time_t input, apr_int32_t offs)
  */
 APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result,
                                            apr_time_t input,
@@ -151,7 +155,6 @@ APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result,
  * convert a time to its human readable components in GMT timezone
  * @param result the exploded time
  * @param input the time to explode
- * @deffunc apr_status_t apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
  */
 APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result, 
                                           apr_time_t input);
@@ -160,7 +163,6 @@ APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result,
  * convert a time to its human readable components in local timezone
  * @param result the exploded time
  * @param input the time to explode
- * @deffunc apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
  */
 APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result, 
                                                 apr_time_t input);
@@ -170,7 +172,6 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
  * e.g. elapsed usec since epoch
  * @param result the resulting imploded time
  * @param input the input exploded time
- * @deffunc apr_status_t apr_implode_time(apr_time_t *result, apr_exploded_time_t *input)
  */
 APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *result, 
                                            apr_exploded_time_t *input);
@@ -180,7 +181,6 @@ APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *result,
  * always represents GMT
  * @param result the resulting imploded time
  * @param input the input exploded time
- * @deffunc apr_status_t apr_implode_gmt(apr_time_t *result, apr_exploded_time_t *input)
  */
 APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *result, 
                                           apr_exploded_time_t *input);
@@ -188,11 +188,11 @@ APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *result,
 /**
  * Sleep for the specified number of micro-seconds.
  * @param t desired amount of time to sleep.
- * @deffunc void apr_sleep(apr_interval_time_t t)
- * @tip May sleep for longer than the specified time. 
+ * @warning May sleep for longer than the specified time. 
  */
 APR_DECLARE(void) apr_sleep(apr_interval_time_t t);
 
+/** length of a RFC822 Date */
 #define APR_RFC822_DATE_LEN (30)
 /**
  * apr_rfc822_date formats dates in the RFC822
@@ -201,10 +201,10 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t);
  * including trailing \0
  * @param date_str String to write to.
  * @param t the time to convert 
- * @deffunc apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
  */
 APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t);
 
+/** length of a CTIME date */
 #define APR_CTIME_LEN (25)
 /**
  * apr_ctime formats dates in the ctime() format
@@ -213,7 +213,6 @@ APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t);
  * including trailing \0 
  * @param date_str String to write to.
  * @param t the time to convert 
- * @deffunc apr_status_t apr_ctime(char *date_str, apr_time_t t)
  */
 APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t);
 
@@ -224,7 +223,6 @@ APR_DECLARE(apr_status_t) apr_ctime(char *date_str, apr_time_t t);
  * @param max The maximum length of the string
  * @param format The format for the time string
  * @param tm The time to convert
- * @deffunc apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, const char *format, apr_exploded_time_t *tm)
  */
 APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize, 
                                        apr_size_t max, const char *format, 

@@ -64,7 +64,7 @@ extern "C" {
 #endif
 /**
  * @file apr_hash.h
- * @brief Hash Tables
+ * @brief APR Hash Tables
  */
 
 /**

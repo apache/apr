@@ -53,8 +53,11 @@
  */
 
 #include "apr.h"        /* configuration data */
-
-/*
+/**
+ * @file apr_want.h
+ * @brief APR_WANT_XXX documentation
+ *
+ * <PRE>
  * Features:
  *
  *   APR_WANT_STRFUNC:  strcmp, strcat, strcpy, etc
@@ -74,6 +77,7 @@
  *
  * Note: it is safe to use this in a header (it won't interfere with other
  *       headers' or source files' use of apr_want.h)
+ * </PRE>
  */
 
 /* --------------------------------------------------------------------- */
@@ -154,4 +158,3 @@
 #endif
 
 /* --------------------------------------------------------------------- */
-
