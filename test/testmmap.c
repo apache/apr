@@ -69,7 +69,7 @@
  */
 #define PATH_LEN 255
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }

@@ -69,7 +69,7 @@ int test_filedel(apr_pool_t *);
 int testdirs(apr_pool_t *);
 static void test_read(apr_pool_t *);
 
-void closeapr(void)
+static void closeapr(void)
 {
     apr_terminate();
 }
@@ -90,6 +90,9 @@ int main(void)
     const char *str;
     char *filename = "test.fil";
     char *teststr;
+#if APR_FILES_AS_SOCKETS
+    apr_int32_t num;
+#endif
 
     if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Couldn't initialize.");
@@ -175,18 +178,17 @@ int main(void)
     fprintf(stdout, "\t\tChecking for incoming data.......");
     apr_setup_poll(&sdset, 1, context);
     apr_add_poll_socket(sdset, testsock, APR_POLLIN);
-    rv = 1;
-    if (apr_poll(sdset, &rv, -1) != APR_SUCCESS) {
+    num = 1;
+    if (apr_poll(sdset, &num, -1) != APR_SUCCESS) {
         fprintf(stderr, "Select caused an error\n");
         exit(-1);
     }
-    else if (rv == 0) {
-        fprintf(stderr, "I should not return until rv == 1\n");
+    else if (num == 0) {
+        fprintf(stderr, "I should not return until num == 1\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 #endif
-
 
     fprintf(stdout, "\tReading from the file.......");
     nbytes = strlen("this is a test");
@@ -361,7 +363,7 @@ int testdirs(apr_pool_t *context)
 
     fprintf(stdout, "\t\tFile size.......");
     if (dirent.size != bytes) {
-        fprintf(stderr, "Got wrong file size %" APR_SIZE_T_FMT "\n", dirent.size);
+        fprintf(stderr, "Got wrong file size %" APR_OFF_T_FMT "\n", dirent.size);
         return -1;
     }
     fprintf(stdout, "OK\n");
