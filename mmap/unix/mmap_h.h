@@ -83,7 +83,7 @@
 struct ap_mmap_t {
     ap_pool_t *cntxt;
 #ifdef BEOS
-    area_id;
+    area_id area;
 #endif
     void *mm;
     size_t size;
