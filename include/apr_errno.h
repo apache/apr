@@ -283,6 +283,16 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 /* APR ERROR VALUE TESTS */
 /** 
+ * @defgroup APRErrorValueTests Error Value Tests
+ * @remark For any particular error condition, more than one of these tests
+ *      may match. This is because platform-specific error codes may not
+ *      always match the semantics of the POSIX codes these tests (and the
+ *      correcponding APR error codes) are named after. A notable example
+ *      are the APR_STATUS_IS_ENOENT and APR_STATUS_IS_ENOTDIR tests on
+ *      Win32 platforms. The programmer should always be aware of this and
+ *      adjust the order of the tests accordingly.
+ */
+/** 
  * APR was unable to perform a stat on the file 
  * @warning always use this test, as platform-specific variances may meet this
  * more than one error code 
@@ -923,6 +933,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAENAMETOOLONG)
 #define APR_STATUS_IS_ENOENT(s)         ((s) == APR_ENOENT \
                 || (s) == APR_OS_START_SYSERR + ERROR_FILE_NOT_FOUND \
+                || (s) == APR_OS_START_SYSERR + ERROR_PATH_NOT_FOUND \
                 || (s) == APR_OS_START_SYSERR + ERROR_OPEN_FAILED \
                 || (s) == APR_OS_START_SYSERR + ERROR_NO_MORE_FILES)
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR \
