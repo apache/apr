@@ -67,6 +67,9 @@
 #ifdef HAVE_STDDEF_H
 #include <stddef.h> /* for NULL */
 #endif
+#if APR_HAVE_STRING_H
+#include <string.h>
+#endif
 #if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
@@ -180,7 +183,7 @@ static apr_status_t apr_xlate_cleanup(void *convset)
 static void check_sbcs(apr_xlate_t *convset)
 {
     char inbuf[256], outbuf[256];
-    const char *inbufptr = inbuf;
+    char *inbufptr = inbuf;
     char *outbufptr = outbuf;
     size_t inbytes_left, outbytes_left;
     int i;
@@ -273,7 +276,7 @@ apr_status_t apr_xlate_get_sb(apr_xlate_t *convset, int *onoff)
     return APR_SUCCESS;
 } 
 
-apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
+apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, char *inbuf,
                                    apr_size_t *inbytes_left, char *outbuf,
                                    apr_size_t *outbytes_left)
 {
@@ -282,7 +285,7 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
     size_t translated;
 
     if (convset->ich != (iconv_t)-1) {
-        const char *inbufptr = inbuf;
+        char *inbufptr = inbuf;
         char *outbufptr = outbuf;
         
         translated = iconv(convset->ich, &inbufptr, 
