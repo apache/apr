@@ -233,6 +233,7 @@ static apr_status_t test_named(apr_pool_t *parpool)
         if (execlp("testshmconsumer", "testshmconsumer", (char*)0) < 0) {
             return errno;
         }
+	return 0; /* not reached - avoid warnings */
     }
     else if (pidproducer > 0) { /* parent */
         /* fork another child */
