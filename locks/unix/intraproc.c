@@ -78,8 +78,8 @@ apr_status_t apr_unix_create_intra_lock(apr_lock_t *new)
     apr_status_t stat;
     pthread_mutexattr_t mattr;
 
-    new->intraproc = (pthread_mutex_t *)apr_palloc(new->cntxt, 
-                              sizeof(pthread_mutex_t));
+    new->intraproc = (pthread_mutex_t *)apr_palloc(new->pool, 
+                                                   sizeof(pthread_mutex_t));
     if (new->intraproc == NULL ) {
         return errno;
     }
@@ -108,8 +108,8 @@ apr_status_t apr_unix_create_intra_lock(apr_lock_t *new)
     }
 
     new->curr_locked = 0;
-    apr_pool_cleanup_register(new->cntxt, (void *)new, lock_intra_cleanup,
-                        apr_pool_cleanup_null);
+    apr_pool_cleanup_register(new->pool, (void *)new, lock_intra_cleanup,
+                              apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -143,7 +143,7 @@ apr_status_t apr_unix_destroy_intra_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_intra_cleanup(lock)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(lock->cntxt, lock, lock_intra_cleanup);
+        apr_pool_cleanup_kill(lock->pool, lock, lock_intra_cleanup);
         return APR_SUCCESS;
     }
     return stat;
