@@ -161,7 +161,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /**
  * <PRE>
  * <b>APR ERROR VALUES</b>
- * APR_ENOSTAT     -APR was unable to perform a stat on the file 
+ * APR_ENOSTAT      APR was unable to perform a stat on the file 
  * APR_ENOPOOL      APR was not provided a pool with which to allocate memory
  * APR_EBADDATE     APR was given an invalid date 
  * APR_EINVALSOCK   APR was given an invalid socket
@@ -177,9 +177,12 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_ENOSHMAVAIL  There is no more shared memory available
  * APR_EDSOOPEN     APR was unable to open the dso object.  For more 
  *                  information call apr_dso_error().
- * APR_EGENERAL    -General failure (specific information not available)
+ * APR_EGENERAL     General failure (specific information not available)
  * APR_EBADIP       The specified IP address is invalid
  * APR_EBADMASK     The specified netmask is invalid
+ * APR_ENOCLEANUP     There is no memory cleanup available
+ * APR_EMEMSYS        An invalid memory system was passed in to an 
+ *                    apr_sms function
  * </PRE>
  *
  * <PRE>
@@ -248,7 +251,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EINCOMPLETE    (APR_OS_START_ERROR + 22)
 #define APR_EABOVEROOT     (APR_OS_START_ERROR + 23)
 #define APR_EBADPATH       (APR_OS_START_ERROR + 24)
-
+#define APR_ENOCLEANUP     (APR_OS_START_ERROR + 25)
+#define APR_EMEMSYS        (APR_OS_START_ERROR + 26)
 
 /* APR ERROR VALUE TESTS */
 #define APR_STATUS_IS_ENOSTAT(s)        ((s) == APR_ENOSTAT)
@@ -275,6 +279,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EINCOMPLETE(s)    ((s) == APR_EINCOMPLETE)
 #define APR_STATUS_IS_EABOVEROOT(s)     ((s) == APR_EABOVEROOT)
 #define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
+#define APR_STATUS_IS_ENOCLEANUP(s)     ((s) == APR_ENOCLEANUP)
+#define APR_STATUS_IS_EMEMSYS(s)        ((s) == APR_EMEMSYS)
 
 
 /* APR STATUS VALUES */
@@ -302,7 +308,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EINIT          (APR_OS_START_STATUS + 22)  
 #define APR_ENOTIMPL       (APR_OS_START_STATUS + 23)
 #define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
-#define APR_ENOCLEANUP     (APR_OS_START_STATUS + 25)
 
 /* APR STATUS VALUE TESTS */
 #define APR_STATUS_IS_INCHILD(s)        ((s) == APR_INCHILD)
@@ -329,7 +334,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EINIT(s)          ((s) == APR_EINIT)
 #define APR_STATUS_IS_ENOTIMPL(s)       ((s) == APR_ENOTIMPL)
 #define APR_STATUS_IS_EMISMATCH(s)      ((s) == APR_EMISMATCH)
-#define APR_STATUS_IS_ENOCLEANUP(s)     ((s) == APR_ENOCLEANUP)
 
 /* APR CANONICAL ERROR VALUES */
 #ifdef EACCES
