@@ -140,6 +140,8 @@ typedef  int         gid_t;
 #define API_VAR_IMPORT           extern _declspec(dllimport)
 #define API_VAR_EXPORT
 
+#define ap_signal(a,b) signal(a,b)
+
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
     char* iov_base;
