@@ -124,7 +124,7 @@ LT_COMPILE   = @lt_compile@
 LINK         = @link@
 
 MKEXPORT     = $(AWK) -f $(apr_builders)/make_export.awk
-MKDEP        = $(apr_builders)/mkdep.sh
+MKDEP        = @MKDEP@
 
 #
 # Standard build rules
@@ -200,8 +200,12 @@ local-all: $(TARGETS)
 
 local-depend: x-local-depend
 	@if test -n "`ls $(srcdir)/*.c 2> /dev/null`"; then \
-		$(CC) -MM $(ALL_CPPFLAGS) $(ALL_INCLUDES) $(srcdir)/*.c | sed 's/\.o:/.lo:/' > .deps || true;           \
-    fi
+		$(RM) -f .deps; \
+		list='$(srcdir)/*.c'; \
+		for i in $$list; do \
+			$(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) $$i | sed 's/\.o:/.lo:/' >> .deps; \
+		done; \
+	fi
 
 # to be filled in by the actual Makefile
 x-local-depend x-local-clean x-local-distclean x-local-extraclean:
