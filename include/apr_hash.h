@@ -195,6 +195,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
                                            const apr_hash_t *overlay, 
                                            const apr_hash_t *base);
 
+APR_DECLARE(apr_pool_t *) apr_hash_pool_get(apr_hash_t *hash);
 #ifdef __cplusplus
 }
 #endif
