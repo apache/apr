@@ -599,7 +599,7 @@ if test "$threads" = "1"; then
         AC_DEFINE(USE_PTHREAD_SERIALIZE)
         pthreadser="1" ])
 fi
-AC_BEGIN_DECISION([lock implementation method])
+AC_BEGIN_DECISION([ap_lock implementation method])
 AC_IFALLYES(custom:union_semun,
             AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 AC_IFALLYES(header:sys/file.h define:LOCK_EX,
