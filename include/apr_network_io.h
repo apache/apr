@@ -727,7 +727,14 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
 APR_DECLARE(int) apr_sockaddr_equal(const apr_sockaddr_t *addr1,
                                     const apr_sockaddr_t *addr2);
 
-
+/**
+* Return the type of the socket.
+* @param sock The socket to query.
+* @param type The returned type (e.g., SOCK_STREAM).
+*/
+APR_DECLARE(apr_status_t) apr_socket_type_get(apr_socket_t *sock,
+                                              int *type);
+ 
 /**
  * Given an apr_sockaddr_t and a service name, set the port for the service
  * @param sockaddr The apr_sockaddr_t that will have its port set
