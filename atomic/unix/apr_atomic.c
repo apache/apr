@@ -99,7 +99,7 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
     asm volatile ("lock; cmpxchgl %1, %2"             
                   : "=a" (prev)               
                   : "r" (with), "m" (*(mem)), "0"(cmp) 
-                  : "memory");
+                  : "memory", "cc");
     return prev;
 }
 #define APR_OVERRIDE_ATOMIC_CAS32
@@ -108,10 +108,9 @@ static apr_uint32_t inline intel_atomic_add32(volatile apr_uint32_t *mem,
                                               apr_uint32_t val)
 {
     asm volatile ("lock; xaddl %0,%1"
-                  : "+r"(val), "+m"(*mem) /* outputs and inputs */
-                  :
-                  : "memory");            /*XXX is this needed?  it knows that
-                                                *mem is an output */
+                  : "=r"(val), "=m"(*mem) /* outputs */
+                  : "0"(val), "m"(*mem)   /* inputs */
+                  : "memory", "cc");
     return val;
 }
 
@@ -127,21 +126,19 @@ APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
     asm volatile ("lock; subl %1, %0"
                   :
                   : "m" (*(mem)), "r" (val)
-                  : "memory");
+                  : "memory", "cc");
 }
 #define APR_OVERRIDE_ATOMIC_SUB32
 
 APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
 {
-    int prev;
+    unsigned char prev;
 
-    asm volatile ("mov $0, %%eax;\n\t"
-                  "lock; decl %1;\n\t"
-                  "setnz %%al;\n\t"
-                  "mov %%eax, %0"
-                  : "=r" (prev)
+    asm volatile ("lock; decl %1;\n\t"
+                  "setnz %%al"
+                  : "=a" (prev)
                   : "m" (*(mem))
-                  : "memory", "%eax");
+                  : "memory", "cc");
     return prev;
 }
 #define APR_OVERRIDE_ATOMIC_DEC32
