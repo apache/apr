@@ -23,7 +23,7 @@ abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
 dnl Libtool needs this symbol
-top_builddir="$abs_srcdir"
+top_builddir="$abs_builddir"
 AC_SUBST(top_builddir)
 
 dnl Get location of helpers directory
