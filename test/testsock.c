@@ -63,10 +63,8 @@
 
 #define STRLEN 15
 
-int main(int argc, char *argv[])
+static int run_basic_test(apr_pool_t *context)
 {
-    apr_pool_t *context;
-
     apr_procattr_t *attr1 = NULL;
     apr_procattr_t *attr2 = NULL;
     apr_proc_t proc1;
@@ -74,26 +72,6 @@ int main(int argc, char *argv[])
     apr_status_t s1;
     apr_status_t s2;
     const char *args[2];
-
-    fprintf(stdout, "Initializing.........");
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Something went wrong\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
-    atexit(apr_terminate);
-
-    fprintf(stdout, "Creating context.......");
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Could not create context\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
-
-    fprintf(stdout, "This test relies on the process test working.  Please\n");
-    fprintf(stdout, "run that test first, and only run this test when it\n");
-    fprintf(stdout, "completes successfully.  Alternatively, you could run\n");
-    fprintf(stdout, "server and client by yourself.\n");
 
     fprintf(stdout, "Creating children to run network tests.......\n");
     s1 = apr_createprocattr_init(&attr1, context);
@@ -108,8 +86,8 @@ int main(int argc, char *argv[])
     args[1] = NULL; 
     s1 = apr_create_process(&proc1, "./server", args, NULL, attr1, context);
 
-    /* Sleep for 10 seconds to ensure the server is setup before we begin */
-    apr_sleep(10000000);
+    /* Sleep for 5 seconds to ensure the server is setup before we begin */
+    apr_sleep(5000000);
     args[0] = apr_pstrdup(context, "client");
     s2 = apr_create_process(&proc2, "./client", args, NULL, attr2, context);
 
@@ -134,4 +112,101 @@ int main(int argc, char *argv[])
     fprintf(stdout, "Network test completed.\n");   
 
     return 1;
+}
+
+static int run_sendfile(apr_pool_t *context, int number)
+{
+    apr_procattr_t *attr1 = NULL;
+    apr_procattr_t *attr2 = NULL;
+    apr_proc_t proc1;
+    apr_proc_t proc2;
+    apr_status_t s1;
+    apr_status_t s2;
+    const char *args[3];
+
+    fprintf(stdout, "Creating children to run network tests.......\n");
+    s1 = apr_createprocattr_init(&attr1, context);
+    s2 = apr_createprocattr_init(&attr2, context);
+
+    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
+        fprintf(stderr, "Problem creating proc attrs\n");
+        exit(-1);
+    }
+
+    args[0] = apr_pstrdup(context, "sendfile");
+    args[1] = apr_pstrdup(context, "server");
+    args[2] = NULL; 
+    s1 = apr_create_process(&proc1, "./sendfile", args, NULL, attr1, context);
+
+    /* Sleep for 5 seconds to ensure the server is setup before we begin */
+    apr_sleep(5000000);
+    args[1] = apr_pstrdup(context, "client");
+    switch (number) {
+        case 0: {
+            args[2] = apr_pstrdup(context, "blocking");
+            break;
+        }
+        case 1: {
+            args[2] = apr_pstrdup(context, "nonblocking");
+            break;
+        }
+        case 2: {
+            args[2] = apr_pstrdup(context, "timeout");
+            break;
+        }
+    }
+    s2 = apr_create_process(&proc2, "./sendfile", args, NULL, attr2, context);
+
+    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
+        fprintf(stderr, "Problem spawning new process\n");
+        exit(-1);
+    }
+
+    while ((s1 = apr_wait_proc(&proc1, APR_NOWAIT)) != APR_CHILD_DONE || 
+           (s2 = apr_wait_proc(&proc2, APR_NOWAIT)) != APR_CHILD_DONE) {
+        continue;
+    }
+
+    if (s1 == APR_SUCCESS) {
+        apr_kill(&proc2, SIGTERM);
+        apr_wait_proc(&proc2, APR_WAIT);
+    }
+    else {
+        apr_kill(&proc1, SIGTERM);
+        apr_wait_proc(&proc1, APR_WAIT);
+    }
+    fprintf(stdout, "Network test completed.\n");   
+
+    return 1;
+}
+
+int main(int argc, char *argv[])
+{
+    apr_pool_t *context = NULL;
+
+    fprintf(stdout, "Initializing.........");
+    if (apr_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Something went wrong\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+    atexit(apr_terminate);
+
+    fprintf(stdout, "Creating context.......");
+    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+        fprintf(stderr, "Could not create context\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+
+    fprintf(stdout, "This test relies on the process test working.  Please\n");
+    fprintf(stdout, "run that test first, and only run this test when it\n");
+    fprintf(stdout, "completes successfully.  Alternatively, you could run\n");
+    fprintf(stdout, "server and client by yourself.\n");
+    run_basic_test(context);
+    run_sendfile(context, 0);
+    run_sendfile(context, 1);
+    run_sendfile(context, 2);
+
+    return 0;
 }
