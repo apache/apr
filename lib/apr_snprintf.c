@@ -50,6 +50,10 @@
  * individuals on behalf of the Apache Software Foundation.  For more
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
+ *
+ * The ap_vsnprintf/ap_snprintf functions are based on, and used with the
+ * permission of, the  SIO stdio-replacement strx_* functions by Panos
+ * Tsirigotis <panos@alumni.cs.colorado.edu> for xinetd.
  */
 
 #ifdef WIN32
