@@ -68,5 +68,12 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
     }
 }
 
-/* included here to allow us to use local_addr */
-#include "sa_common.c"
+/* included here to allow us to use get_local_addr().
+
+   NOTE: this file (sockaddr.c) can be included from other directories. If
+   we left the following include as just "sa_common.c", then it would be
+   relative to the directory where sockaddr.c was included (wrong!). To
+   fix that problem, this include specifically refers to the unix directory
+   to include sa_common.c
+ */
+#include "../unix/sa_common.c"
