@@ -361,22 +361,13 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
-                                                  apr_wait_how_e waithow, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, 
+                                                  apr_wait_t *status,
+                                                  apr_wait_how_e waithow, 
+                                                  apr_pool_t *p)
 {
-    int waitpid_options = WUNTRACED;
-
-    if (waithow != APR_WAIT) {
-        waitpid_options |= WNOHANG;
-    }
-
-    if ((proc->pid = waitpid(-1, status, waitpid_options)) > 0) {
-        return APR_CHILD_DONE;
-    }
-    else if (proc->pid == 0) {
-        return APR_CHILD_NOTDONE;
-    }
-    return errno;
+    proc->pid = -1;
+    return apr_proc_wait(proc, status, waithow);
 } 
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, 
@@ -384,18 +375,24 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
                                         apr_wait_how_e waithow)
 {
     pid_t pstatus;
+    int waitpid_options = WUNTRACED;
+    int exit_int;
 
-    if (waithow == APR_WAIT) {
-        if ((pstatus = waitpid(proc->pid, exitcode, WUNTRACED)) > 0) {
+    if (waithow != APR_WAIT) {
+        waitpid_options |= WNOHANG;
+    }
+    
+    if ((pstatus = waitpid(proc->pid, &exit_int, waitpid_options)) > 0) {
+        if (proc->pid == -1) {
+            proc->pid = pstatus;
+        }
+        if (WIFEXITED(exit_int)) {
+            if (exitcode != NULL) {
+                *exitcode = WEXITSTATUS(exit_int);
+            }
             return APR_CHILD_DONE;
         }
-        else if (pstatus == 0) {
-            return APR_CHILD_NOTDONE;
-        }
-        return errno;
-    }
-    if ((pstatus = waitpid(proc->pid, exitcode, WUNTRACED | WNOHANG)) > 0) {
-        return APR_CHILD_DONE;
+        return APR_CHILD_NOTDONE;
     }
     else if (pstatus == 0) {
         return APR_CHILD_NOTDONE;
