@@ -206,6 +206,8 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
  * In the case of non-text functions, simply #define the original name
  */
 
+#if !defined(_WIN32_WCE) && !defined(WINNT)
+
 #ifdef GetFileAttributesExA
 #undef GetFileAttributesExA
 #endif
@@ -290,6 +292,8 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetSecurityInfo, 0, (
     (handle, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
 	 ppDacl, ppSacl, ppSecurityDescriptor));
 #define GetSecurityInfo apr_winapi_GetSecurityInfo
+
+#endif /* !defined(_WIN32_WCE) && !defined(WINNT) */
 
 #endif /* WIN32 */
 
