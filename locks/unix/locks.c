@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "unix/locks.h"
+#include "locks.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 

@@ -5,7 +5,9 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../include
-INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
+INCDIR2=$(INCDIR)/arch
+INCDIR3=$(INCDIR)/arch/unix
+INCLUDES=-I$(INCDIR) -I$(INCDIR2) -I$(INCDIR3)
 MKDEP=../../helpers/mkdep.sh
 
 OBJS=locks.o \

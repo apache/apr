@@ -116,10 +116,18 @@ delete-exports:
 	fi
 
 $(TARGET_EXPORTS):
-	perl ./helpers/make_export.pl -o $@ include/*.h
+	if test -z "$(srcdir)"; then \
+		perl $(srcdir)helpers/make_export.pl -o $@ include/*.h; \
+	else \
+		perl $(srcdir)helpers/make_export.pl -o $@ include/*.h $(srcdir)include/*.h; \
+	fi
 
 docs:
-	./helpers/scandoc -i./helpers/default.pl -p./docs/ ./include/*.h
+	if test -z "$(srcdir)"; then \
+		$(srcdir)helpers/scandoc -i$(srcdir)helpers/default.pl -p./docs/ ./include/*.h; \
+	else \
+		$(srcdir)helpers/scandoc -i$(srcdir)helpers/default.pl -p./docs/ ./include/*.h $(srcdir)include/*.h; \
+	fi
 
 test: $(LIBAPR)
 	(cd test; make clean; make; \
