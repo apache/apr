@@ -64,9 +64,36 @@ struct atime_t {
     apr_time_t currtime;
     SYSTEMTIME *explodedtime;
 };
-    
-void FileTimeToAprTime(apr_time_t *atime, FILETIME *ft);
-void AprTimeToFileTime(LPFILETIME pft, apr_time_t t);
+
+
+/* Number of micro-seconds between the beginning of the Windows epoch
+ * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970) 
+ */
+#define APR_DELTA_EPOCH_IN_USEC   APR_TIME_C(11644473600000000);
+
+
+__inline void FileTimeToAprTime(apr_time_t *result, FILETIME *input)
+{
+    /* Convert FILETIME one 64 bit number so we can work with it. */
+    *result = input->dwHighDateTime;
+    *result = (*result) << 32;
+    *result |= input->dwLowDateTime;
+    *result /= 10;    /* Convert from 100 nano-sec periods to micro-seconds. */
+    *result -= APR_DELTA_EPOCH_IN_USEC;  /* Convert from Windows epoch to Unix epoch */
+    return;
+}
+
+
+__inline void AprTimeToFileTime(LPFILETIME pft, apr_time_t t)
+{
+    LONGLONG ll;
+    t += APR_DELTA_EPOCH_IN_USEC;
+    ll = t * 10;
+    pft->dwLowDateTime = (DWORD)ll;
+    pft->dwHighDateTime = (DWORD) (ll >> 32);
+    return;
+}
+
 
 #endif  /* ! ATIME_H */
 
