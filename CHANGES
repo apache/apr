@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Add the apr_thread_cond_timedwait function to the condition
+     variable API.   [Aaron Bannert]
+
   *) Fixed apr_file_mktemp on systems without mkstemp (Win32, etc).
      [Mladen Turk, Cliff Woolley]
 
