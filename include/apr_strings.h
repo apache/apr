@@ -1,7 +1,7 @@
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2000-2003 The Apache Software Foundation.  All rights
+ * Copyright (c) 2000-2004 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -214,6 +214,7 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  *                 null-termination, so if src is longer than
  *                 dst_size, the actual number of characters copied is
  *                 dst_size - 1.
+ * @return The destination string, dst
  * @remark
  * <PRE>
  * We re-implement this function to implement these specific changes:
@@ -233,6 +234,7 @@ APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src,
  * @param dest The destination string.  It is okay to modify the string
  *             in place.  Namely dest == src
  * @param src The string to rid the spaces from.
+ * @return The destination string, dest.
  */
 APR_DECLARE(char *) apr_collapse_spaces(char *dest, const char *src);
 
