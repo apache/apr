@@ -993,12 +993,28 @@ else
 fi
 
 dnl # If present, allow the C99 macro INT64_C to override our conversion.
-APR_CHECK_DEFINE(INT64_C, stdint.h)
+dnl #
+dnl # HP-UX's ANSI C compiler provides this without any includes, so we
+dnl # will first look for INT64_C without adding stdint.h
+AC_MSG_CHECKING(for INT64_C)
+stdint=0
+AC_EGREP_CPP(YES_IS_DEFINED,
+[#ifdef INT64_C
+YES_IS_DEFINED
+#endif
+], 
+[ ac_cv_define_INT64_C=yes
+  AC_MSG_RESULT(yes)
+],
+[ ac_cv_define_INT64_C=no 
+  AC_MSG_RESULT(no)
+  APR_CHECK_DEFINE(INT64_C, stdint.h)
+  if test "$ac_cv_define_INT64_C" = "yes"; then
+    stdint=1
+  fi
+])
 if test "$ac_cv_define_INT64_C" = "yes"; then
     int64_literal='#define APR_INT64_C(val) INT64_C(val)'
-    stdint=1
-else
-    stdint=0
 fi
 
 if test "$ac_cv_type_off_t" = "yes"; then
