@@ -418,7 +418,7 @@ fi
 # don't get it right for your platform, you can override our decision
 # below.
 case "$OS" in
-   *linux* | *os2_emx | *-pc-solaris*)
+   *linux* | *os2_emx | *-solaris*)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
 esac
 

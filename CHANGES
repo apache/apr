@@ -1,3 +1,7 @@
+Changes with APR a9
+  *) Get APR_OFF_T_FMT defined properly on Solaris Sparc.
+     [Jeff Trawick]
+
 Changes with APR a8
   *) Change the name of the sa_len field in apr_sockaddr_t to salen.
      Some platforms have a macro named sa_len.
