@@ -127,8 +127,6 @@ typedef  int         pid_t;
 #define API_EXPORT_NONSTD(type)  type
 #define API_VAR_IMPORT           extern _declspec(dllimport)
 
-
-
 /* struct iovec is needed to emulate Unix writev */
 struct iovec {
     char* iov_base;
