@@ -1,5 +1,11 @@
 Changes with APR 0.9.5
 
+  *) Fix handling of negative numbers in apr_strtoi64() on platforms
+     without strtoll.  [Joe Orton]
+
+  *) Fix printing apr_int64_t values smaller than LONG_MIN on 32-bit
+     platforms in apr_vformatter.  [Joe Orton]
+
   *) Fix apr_socket_opt_set with APR_IPV6_V6ONLY flag.  Fixes httpd
      Listen IPv6 socket behavior on FreeBSD 5.x, OpenBSD, NetBSD.
      [Justin Erenkrantz]
