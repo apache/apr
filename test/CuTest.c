@@ -414,7 +414,6 @@ void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details)
 	}
 	if (notImplCount != 0 && verbose)
 	{
-		CuStringAppendFormat(details, "\nNot Implemented tests:\n");
 		for (i = 0 ; i < testSuite->count ; ++i)
 		{
 			CuString *str = CuStringNew();
