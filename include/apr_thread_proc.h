@@ -87,9 +87,15 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
                                            * us knowing ... buggy os? */
 #endif /* APR_HAS_OTHER_CHILD */
 
+typedef struct ap_proc_t {
+    pid_t pid;
+    ap_file_t *stdin;          /* Parent's side of pipe to child's stdin */
+    ap_file_t *stdout;         /* Parent's side of pipe to child's stdout */
+    ap_file_t *stderr;         /* Parent's side of pipe to child's stdouterr */
+} ap_proc_t;
+
 typedef struct ap_thread_t           ap_thread_t;
 typedef struct ap_threadattr_t       ap_threadattr_t;
-typedef struct ap_proc_t		  ap_proc_t;
 typedef struct ap_procattr_t         ap_procattr_t;
 
 typedef struct ap_threadkey_t        ap_threadkey_t;
@@ -447,79 +453,10 @@ B<Determine if the chlid should start in detached state.>
  */
 ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach);
 
-/*
-
-=head1 ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
-
-B<Return the pool associated with the current proc.>
-
-    arg 1) The key associated with the data to retreive.
-    arg 2) The user data associated with the proc.
-    arg 3) The currently open proc.
-
-=cut
- */
-ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc);
-
-/*
-
-=head1 ap_status_t ap_set_procdata(void *data, char *key, ap_status_t (*cleanup) (void *), ap_proc_t *proc)
-
-B<Return the pool associated with the current proc.>
-
-    arg 1) The user data to associate with the file.
-    arg 2) The key to use for associating data with the file.
-    arg 3) The cleanup routine to use when the file is destroyed.
-    arg 4) The current process.
-
-=cut
- */
-ap_status_t ap_set_procdata(void *data, char *key,
-                            ap_status_t (*cleanup) (void *), ap_proc_t *proc);
-
-/*
-
-=head1 ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc) 
-
-B<Get the file handle that is associated with a child's stdin.>
-
-    arg 1) The returned file handle. 
-    arg 2) The process handle that corresponds to the desired child process 
-
-=cut
- */
-ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc);
-
-/*
-
-=head1 ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc) 
-
-B<Get the file handle that is associated with a child's stdout.>
-
-    arg 1) The returned file handle. 
-    arg 2) The process handle that corresponds to the desired child process 
-
-=cut
- */
-ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc);
-
-/*
-
-=head1 ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc) 
-
-B<Get the file handle that is associated with a child's stderr.>
-
-    arg 1) The returned file handle. 
-    arg 2) The process handle that corresponds to the desired child process 
-
-=cut
- */
-ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc);
-
 #if APR_HAS_FORK
 /*
 
-=head1 ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont) 
+=head1 ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont) 
 
 B<This is currently the only non-portable call in APR.  This executes a standard unix fork.>
 
@@ -528,12 +465,12 @@ B<This is currently the only non-portable call in APR.  This executes a standard
 
 =cut
  */
-ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont);
+ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont);
 #endif
 
 /*
 
-=head1 ap_status_t ap_create_process(ap_proc_t **new, const char *progname, char *const args[], char **env, ap_procattr_t *attr, ap_pool_t *cont) 
+=head1 ap_status_t ap_create_process(ap_proc_t *new, const char *progname, char *const args[], char **env, ap_procattr_t *attr, ap_pool_t *cont) 
 
 B<Create a new process and execute a new program within that process.>
 
@@ -549,7 +486,7 @@ B<Create a new process and execute a new program within that process.>
 
 =cut
  */
-ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
+ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
                               char *const args[], char **env, 
                               ap_procattr_t *attr, ap_pool_t *cont);
 
@@ -577,7 +514,7 @@ ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e waithow);
 
 /*
 
-=head1 ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_t *status, ap_wait_how waithow, ap_pool_t *p) 
+=head1 ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status, ap_wait_how waithow, ap_pool_t *p) 
 
 B<Wait for any current child process to die and return information about that child.>
 
@@ -595,12 +532,12 @@ B<Wait for any current child process to die and return information about that ch
 =cut
  */
 
-ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_t *status, 
+ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status, 
                               ap_wait_how_e waithow, ap_pool_t *p);
 
 /*
 
-=head1 ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
+=head1 ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont)
 
 B<Detach the process from the controlling terminal.>
 
@@ -609,7 +546,7 @@ B<Detach the process from the controlling terminal.>
 
 =cut
  */
-ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont);
+ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont);
 
 #if APR_HAS_OTHER_CHILD
 /*

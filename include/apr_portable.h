@@ -235,19 +235,6 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock);
 
 /*
 
-=head1 ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
-
-B<convert the proc from os specific type to apr type.>
-
-    arg 1) The os specific proc we are converting to
-    arg 2) The apr proc we are converting
-
-=cut
- */
-ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc);     
-
-/*
-
 =head1 ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
 
 B<Get the exploded time in the platforms native format.>
@@ -360,21 +347,6 @@ B<Convert the lock from os specific type to apr type>
 =cut
  */
 ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
-                           ap_pool_t *cont); 
-
-/*
-
-=head1 ap_status_t ap_put_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc, ap_pool_t *cont)
-
-B<convert the proc from os specific type to apr type.>
-
-    arg 1) The apr proc we are converting to.
-    arg 2) The os specific proc to convert
-    arg 3) The pool to use if it is needed.
-
-=cut
- */
-ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
                            ap_pool_t *cont); 
 
 /*
