@@ -41,17 +41,19 @@
 #ifndef __warn_references
 #define __warn_references(a,b) 
 #endif
-#ifdef  SVR4
+#if defined(SVR4) || defined(WIN32)
+#ifdef SVR4
 #include <inttypes.h>
+#endif
 #define arc4random() rand()
 #define seedrandom(a) srand(a)
 #else
+#ifdef APR_HAS_STDINT_H
 #include <stdint.h>
+#endif
 #define arc4random() random()
 #define seedrandom(a) srandom(a)
 #endif
-#define _open(a,b,c) open(a,b,c)
-
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -64,15 +66,16 @@
 
 static const unsigned char padchar[] =
 "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-static uint32_t randseed=0;
+static apr_uint32_t randseed=0;
 
-static int gettemp(char *path, register int *doopen, int domkdir, int slen)
+static int gettemp(char *path, apr_file_t *doopen, int domkdir, int slen,
+                   apr_pool_t *p)
 {
 	register char *start, *trv, *suffp;
 	char *pad;
-	struct stat sbuf;
-	int rval;
-	uint32_t randnum;
+	apr_finfo_t sbuf;
+    apr_status_t rv;
+	apr_uint32_t randnum;
 
 	if (doopen && domkdir) {
 		errno = EINVAL;
@@ -109,11 +112,11 @@ static int gettemp(char *path, register int *doopen, int domkdir, int slen)
 				break;
 			if (*trv == '/') {
 				*trv = '\0';
-				rval = stat(path, &sbuf);
+				rv = apr_stat(&sbuf, path, APR_FINFO_TYPE, p);
 				*trv = '/';
-				if (rval != 0)
+				if (rv != APR_SUCCESS)
 					return(0);
-				if (!S_ISDIR(sbuf.st_mode)) {
+				if (sbuf.filetype != APR_DIR) {
 					errno = ENOTDIR;
 					return(0);
 				}
@@ -125,18 +128,18 @@ static int gettemp(char *path, register int *doopen, int domkdir, int slen)
 	for (;;) {
 		errno = 0;
 		if (doopen) {
-			if ((*doopen =
-			    _open(path, O_CREAT|O_EXCL|O_RDWR, 0600)) >= 0)
+			if ((rv = apr_file_open(&doopen, path, APR_CREATE|APR_EXCL|APR_READ|APR_WRITE, 
+                                    0600, p)) == APR_SUCCESS)
 				return(1);
 			if (errno != EEXIST)
 				return(0);
 		} else if (domkdir) {
-			if (mkdir(path, 0700) == 0)
+			if (apr_dir_make(path, 0700, p) == 0)
 				return(1);
 			if (errno != EEXIST)
 				return(0);
-		} else if (lstat(path, &sbuf))
-			return(errno == ENOENT ? 1 : 0);
+		} else if ((rv = apr_lstat(&sbuf, path, APR_FINFO_TYPE, p)) != APR_SUCCESS)
+			return(rv == ENOENT ? 1 : 0);
 
 		/* If we have a collision, cycle through the space of filenames */
 		for (trv = start;;) {
@@ -162,37 +165,44 @@ static int gettemp(char *path, register int *doopen, int domkdir, int slen)
 #if APR_HAVE_UNISTD_H
 #include <unistd.h> /* for mkstemp() - FreeBSD */
 #endif
+#endif /* !defined(HAVE_MKSTEMP) */
 
-apr_status_t apr_file_mktemp(apr_file_t **fp, char *template, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_pool_t *p)
 {
-    int fd;
 #ifndef HAVE_MKSTEMP
     int rv;
+#else
+    int fd;
 #endif
 
+#ifndef HAVE_MKSTEMP
+    rv = gettemp(template, (*fp), 0, 0, p);
+    if (rv == 0) {
+        return errno;
+    }
+#else
     (*fp) = apr_pcalloc(p, sizeof(**fp));
     (*fp)->cntxt = p;
     (*fp)->timeout = -1;
     (*fp)->blocking = BLK_ON;
     (*fp)->flags = APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE;
 
-#ifndef HAVE_MKSTEMP
-    rv = gettemp(path, &fd, 0, 0);
-    if (rv == 0) {
-        return errno;
-    }
-#else
     fd = mkstemp(template);
     if (fd == -1) {
         return errno;
     }
-#endif
     (*fp)->fname = apr_pstrdup(p, template);
     (*fp)->filedes = fd;
-    unlink((*fp)->fname);
+
+#endif
+    apr_file_remove((*fp)->fname, p);
+#ifdef WIN32
+    apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
+                              file_cleanup, file_cleanup);
+#else
     apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
                               apr_unix_file_cleanup, apr_unix_file_cleanup);
+#endif
     return APR_SUCCESS;
 }
 
-#endif /* !defined(HAVE_MKSTEMP) */
