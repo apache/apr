@@ -149,6 +149,7 @@ typedef void (Sigfunc)(int);
 #define strcasecmp(s1, s2)       stricmp(s1, s2)
 #define Sleep(t)                 delay(t)
 #define lstat(a,b)               stat(a,b)
+#define _getch()                 getcharacter()
 
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
