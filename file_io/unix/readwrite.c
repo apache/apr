@@ -203,7 +203,11 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
              */
             apr_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             if (offset != thefile->filePtr)
+#if defined(NETWARE) && APR_HAS_LARGE_FILES
+                lseek64(thefile->filedes, offset, SEEK_SET);
+#else
                 lseek(thefile->filedes, offset, SEEK_SET);
+#endif
             thefile->bufpos = thefile->dataRead = 0;
             thefile->direction = 1;
         }
