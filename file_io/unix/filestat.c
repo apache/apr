@@ -81,6 +81,35 @@ static apr_filetype_e filetype_from_mode(int mode)
     return type;
 }
 
+static apr_status_t fill_out_finfo(apr_finfo_t *finfo, struct stat info,
+                                   apr_int32_t wanted)
+{ 
+    finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_OWNER | 
+                   APR_FINFO_PROT;
+    finfo->protection = apr_unix_mode2perms(info.st_mode);
+    finfo->filetype = filetype_from_mode(info.st_mode);
+    finfo->user = info.st_uid;
+    finfo->group = info.st_gid;
+    finfo->size = info.st_size;
+    finfo->inode = info.st_ino;
+    finfo->device = info.st_dev;
+
+/* We don't have nlinks in the finfo structure.  Are we going to add it? RBB*/
+/*        finfo->nlinks = info.st_nlink;  */
+
+    apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
+    apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
+    apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
+    if (wanted & APR_FINFO_CSIZE) {
+        finfo->csize = info.st_blocks * 512;
+        finfo->valid |= APR_FINFO_CSIZE;
+    }
+    if (finfo->filetype == APR_LNK) {
+        finfo->valid |= APR_FINFO_LINK;
+    }
+    return APR_SUCCESS;
+}
+
 apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
                              apr_file_t *thefile)
 {
@@ -88,30 +117,8 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
 
     if (fstat(thefile->filedes, &info) == 0) {
         finfo->cntxt = thefile->cntxt;
-        finfo->valid = APR_FINFO_MIN| APR_FINFO_IDENT | APR_FINFO_OWNER | APR_FINFO_PROT;
-        finfo->protection = apr_unix_mode2perms(info.st_mode);
-        finfo->filetype = filetype_from_mode(info.st_mode);
-        finfo->user = info.st_uid;
-        finfo->group = info.st_gid;
-        finfo->size = info.st_size;
-        finfo->inode = info.st_ino;
-        finfo->device = info.st_dev;
-
-/* We don't have nlinks in the finfo structure.  Are we going to add it? RBB*/
-/*        finfo->nlinks = info.st_nlink;  */
-
-        apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
-        apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
-        apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
         finfo->fname = thefile->fname;
-        if (wanted & APR_FINFO_CSIZE) {
-            finfo->csize = info.st_blocks * 512;
-            finfo->valid |= APR_FINFO_CSIZE;
-        }
-        if (finfo->filetype == APR_LNK) {
-            finfo->valid |= APR_FINFO_LINK;
-        }
-        return APR_SUCCESS;
+        return fill_out_finfo(finfo, info, wanted);
     }
     else {
         return errno;
@@ -140,30 +147,8 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
 
     if (srv == 0) {
         finfo->cntxt = cont;
-        finfo->valid = APR_FINFO_MIN| APR_FINFO_IDENT | APR_FINFO_OWNER | APR_FINFO_PROT;
-        finfo->protection = apr_unix_mode2perms(info.st_mode);
-        finfo->filetype = filetype_from_mode(info.st_mode);
-        finfo->user = info.st_uid;
-        finfo->group = info.st_gid;
-        finfo->size = info.st_size;
-        finfo->inode = info.st_ino;
-        finfo->device = info.st_dev;
-
-/* We don't have nlinks in the finfo structure.  Are we going to add it? RBB*/
-/*        finfo->nlinks = info.st_nlink;  */
-
-        apr_ansi_time_to_apr_time(&finfo->atime, info.st_atime);
-        apr_ansi_time_to_apr_time(&finfo->mtime, info.st_mtime);
-        apr_ansi_time_to_apr_time(&finfo->ctime, info.st_ctime);
         finfo->fname = fname;
-        if (wanted & APR_FINFO_CSIZE) {
-            finfo->csize = info.st_blocks * 512;
-            finfo->valid |= APR_FINFO_CSIZE;
-        }
-        if (finfo->filetype == APR_LNK) {
-            finfo->valid |= APR_FINFO_LINK;
-        }
-        return APR_SUCCESS;
+        return fill_out_finfo(finfo, info, wanted);
     }
     else {
 #if !defined(ENOENT) || !defined(ENOTDIR)
