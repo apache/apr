@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/05 02:46:59 $]
+Last modified at [$Date: 2001/12/05 16:54:23 $]
 
 Release:
 
@@ -59,7 +59,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
             Justin: <20011205025611.GB22835@ebuilt.com> (code)
         Votes:
             Sander's patch:
-                +1: Brian (non-binding)
+                +1: Brian (non-binding), 
+                    Ian (once we have a debug version of palloc etc)
                  0:
                 -1:
 
