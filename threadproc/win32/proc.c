@@ -362,19 +362,34 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     /* progname must be unquoted, in native format, as there are all sorts 
      * of bugs in the NT library loader code that fault when parsing '/'.
-     * We do not directly manipulate cmdline, and it will become a copy,
-     * so we've casted past the constness issue.
      * XXX progname must be NULL if this is a 16 bit app running in WOW
      */
     if (progname[0] == '\"') {
         progname = apr_pstrndup(pool, progname + 1, strlen(progname) - 2);
     }
 
-    if ((rv = apr_filepath_merge(&cmdline, attr->currdir, progname, 
-                                 APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
-        return rv;
+    if (attr->cmdtype == APR_PROGRAM || attr->cmdtype == APR_PROGRAM_ENV) {
+        char *fullpath = NULL;
+        if ((rv = apr_filepath_merge(&fullpath, attr->currdir, progname, 
+                                     APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
+            return rv;
+        }
+        progname = fullpath;
+    } 
+    else {
+        /* Do not fail if the path isn't parseable for APR_PROGRAM_PATH
+         * or APR_SHELLCMD.  We only invoke apr_filepath_merge (with no
+         * left hand side expression) in order to correct the path slash
+         * delimiters.  But the filename doesn't need to be in the CWD,
+         * nor does it need to be a filename at all (it could be a
+         * built-in shell command.)
+         */
+        char *fullpath = NULL;
+        if ((rv = apr_filepath_merge(&fullpath, "", progname, 
+                                     APR_FILEPATH_NATIVE, pool)) == APR_SUCCESS) {
+            progname = fullpath;
+        }        
     }
-    progname = cmdline;
 
     if (has_space(progname)) {
         argv0 = apr_pstrcat(pool, "\"", progname, "\"", NULL);
@@ -393,8 +408,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
         }
     }
-
-    /* ### how to handle APR_PROGRAM_ENV and APR_PROGRAM_PATH? */
 
     if (attr->cmdtype == APR_SHELLCMD) {
         char *shellcmd = getenv("COMSPEC");
@@ -475,13 +488,22 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
         }
         else {
-            /* A simple command we are directly invoking
+            /* A simple command we are directly invoking.  Do not pass
+             * the first arg to CreateProc() for APR_PROGRAM_PATH
+             * invocation, since it would need to be a literal and
+             * complete file path.  That is; "c:\bin\aprtest.exe"
+             * would succeed, but "c:\bin\aprtest" or "aprtest.exe"
+             * can fail.
              */
             cmdline = apr_pstrcat(pool, argv0, cmdline, NULL);
+
+            if (attr->cmdtype == APR_PROGRAM_PATH) {
+                progname = NULL;
+            }
         }
     }
 
-    if (!env) 
+    if (!env || attr->cmdtype == APR_PROGRAM_ENV) 
         pEnvBlock = NULL;
     else {
         apr_size_t iEnvBlockLen;
@@ -549,24 +571,34 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     IF_WIN_OS_IS_UNICODE
     {
         STARTUPINFOW si;
-        apr_size_t nprg = strlen(progname) + 1;
-        apr_size_t nwprg = nprg + 6;
-        apr_wchar_t *wprg = apr_palloc(pool, nwprg * sizeof(wprg[0]));
-        apr_size_t ncmd = strlen(cmdline) + 1, nwcmd = ncmd;
-        apr_wchar_t *wcmd = apr_palloc(pool, nwcmd * sizeof(wcmd[0]));
-        apr_size_t ncwd = 0, nwcwd = 0;
+        apr_wchar_t *wprg = NULL;
+        apr_wchar_t *wcmd = NULL;
         apr_wchar_t *wcwd = NULL;
 
-        if (((rv = apr_conv_utf8_to_ucs2(progname, &nprg, wprg, &nwprg))
-                 != APR_SUCCESS)
-         || ((rv = apr_conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
-                 != APR_SUCCESS)) {
-            return rv;
+        if (progname) {
+            apr_size_t nprg = strlen(progname) + 1;
+            apr_size_t nwprg = nprg + 6;
+            wprg = apr_palloc(pool, nwprg * sizeof(wprg[0]));
+            if ((rv = apr_conv_utf8_to_ucs2(progname, &nprg, wprg, &nwprg))
+                   != APR_SUCCESS) {
+                return rv;
+            }
+        }
+
+        if (cmdline) {
+            apr_size_t ncmd = strlen(cmdline) + 1;
+            apr_size_t nwcmd = ncmd;
+            wcmd = apr_palloc(pool, nwcmd * sizeof(wcmd[0]));
+            if ((rv = apr_conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd))
+                    != APR_SUCCESS) {
+                return rv;
+            }
         }
 
         if (attr->currdir)
         {
-            ncwd = nwcwd = strlen(attr->currdir) + 1;
+            apr_size_t ncwd = strlen(attr->currdir) + 1;
+            apr_size_t nwcwd = ncwd;
             wcwd = apr_palloc(pool, ncwd * sizeof(wcwd[0]));
             if ((rv = apr_conv_utf8_to_ucs2(attr->currdir, &ncwd, 
                                             wcwd, &nwcwd))
