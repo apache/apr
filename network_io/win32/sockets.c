@@ -523,7 +523,7 @@ APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 /* Deprecated */
 APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
-    return apr_socket_listen(sock. backlog);
+    return apr_socket_listen(sock, backlog);
 }
 
 /* Deprecated */
