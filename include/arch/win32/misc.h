@@ -104,7 +104,8 @@ struct apr_other_child_rec_t {
  * export new kernel or winsock functions or behavior.
  */
 typedef enum {
-        APR_WIN_95 = 0,
+        APR_WIN_UNK = 0,
+        APR_WIN_95 = 2,
         APR_WIN_98 = 4,
         APR_WIN_NT = 8,
         APR_WIN_NT_4 = 12,
@@ -115,6 +116,7 @@ typedef enum {
         APR_WIN_2000 = 24
 } apr_oslevel_e;
 
+extern apr_oslevel_e apr_os_level;
 
 typedef enum {
     DLL_WINBASEAPI = 0,    // kernel32 From WinBase.h
