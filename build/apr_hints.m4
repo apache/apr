@@ -350,8 +350,12 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
         APR_ADDTO(CPPFLAGS, [-DBEOS])
         PLATOSVERS=`uname -r`
         case $PLATOSVERS in
+            5.0.4)
+                APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
+                APR_ADDTO(LIBS, [-lbind -lsocket -lbe -lroot])
+                APR_ADDTO(CPPFLAGS,[-DBONE7])
+                ;;
             5.1)
-                APR_ADDTO(CPPFLAGS, [-I/boot/develop/headers/bone])
                 APR_ADDTO(LDFLAGS, [-L/boot/develop/lib/x86 -L/boot/beos/system/lib -lbind -lsocket])
                 APR_ADDTO(LIBS, [-lbind -lsocket -lbe -lroot])
                 ;;
