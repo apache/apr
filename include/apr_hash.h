@@ -58,14 +58,15 @@ typedef struct apr_hash_index_t apr_hash_index_t;
 /**
  * Callback functions for calculating hash values.
  * @param key The key.
- * @param klen The length of the key, or APR_HASH_KEY_STRING to use the string length.  If APR_HASH_KEY_STRING then returns the actual key length.
+ * @param klen The length of the key, or APR_HASH_KEY_STRING to use the string 
+ *             length. If APR_HASH_KEY_STRING then returns the actual key length.
  */
 typedef unsigned int (*apr_hashfunc_t)(const char *key, apr_ssize_t *klen);
 
 /**
  * The default hash function.
  */
-unsigned int apr_hashfunc_default( const char *key, apr_ssize_t *klen);
+unsigned int apr_hashfunc_default(const char *key, apr_ssize_t *klen);
 
 /**
  * Create a hash table.
