@@ -55,6 +55,7 @@
 #include "threadproc.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "apr_signal.h"
 
 apr_status_t apr_procattr_create(apr_procattr_t **new, apr_pool_t *cont)
 {
