@@ -542,12 +542,10 @@ ap_pool_t *ap_init_alloc(void)
     known_stack_point = &s;
     stack_var_init(&s);
 #endif
-    ap_create_lock(NULL, APR_MUTEX, APR_INTRAPROCESS,
-                   NULL,
-                   &alloc_mutex);
-    ap_create_lock(NULL, APR_MUTEX, APR_INTRAPROCESS,
-                   NULL,
-                   &spawn_mutex);
+    ap_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
+                   NULL, NULL);
+    ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
+                   NULL, NULL);
 
     permanent_pool = ap_make_sub_pool(NULL);
 #ifdef ALLOC_STATS
