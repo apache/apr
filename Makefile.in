@@ -16,7 +16,7 @@ MODULES=@MODULES@
 SUBDIRS=@SUBDIRS@
 #shmem/@OSDIR@
 
-LIBAPR = @LIBPREFIX@apr.la
+LIBAPR = libapr.la
 
 TARGET_EXPORTS = apr.exports
 

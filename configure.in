@@ -41,9 +41,6 @@ DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
 MODULES="file_io network_io threadproc misc locks time mmap shmem i18n user"
 
-# Most platforms use a prefix of 'lib' on their library files.
-LIBPREFIX='lib'
-
 dnl # Checks for programs.
 AC_PROG_CC
 AC_PROG_MAKE_SET
@@ -101,7 +98,6 @@ case "$OS" in
    *-os2*)
        CFLAGS="$CFLAGS -DOS2 -Zmt"
        OSDIR="os2"
-       LIBPREFIX=""
        enable_threads="system_threads"
        eolstr="\\r\\n"
        ;;
@@ -862,7 +858,6 @@ AC_SUBST(AR)
 AC_SUBST(RM)
 AC_SUBST(OSDIR)
 AC_SUBST(DEFAULT_OSDIR)
-AC_SUBST(LIBPREFIX)
 AC_SUBST(EXEEXT)
 AC_SUBST(THREAD_CPPFLAGS)
 AC_SUBST(THREAD_CFLAGS)
