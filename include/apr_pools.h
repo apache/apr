@@ -55,16 +55,6 @@
 #ifndef APR_POOLS_H
 #define APR_POOLS_H
 
-#include "apr.h"
-#include "apr_errno.h"
-#include "apr_general.h" /* for APR_STRINGIFY */
-#define APR_WANT_MEMFUNC
-#include "apr_want.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @file apr_pools.h
  * @brief APR memory allocation
@@ -81,9 +71,20 @@ extern "C" {
  * we can delete everything in the per-transaction apr_pool_t without fear,
  * and without thinking too hard about it either.
  */
+
+#include "apr.h"
+#include "apr_errno.h"
+#include "apr_general.h" /* for APR_STRINGIFY */
+#define APR_WANT_MEMFUNC /**< for no good reason? */
+#include "apr_want.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @defgroup APR_Pool Memory Pool Functions
- * @ingroup APR
+ * @defgroup apr_pools Memory Pool Functions
+ * @ingroup APR 
  * @{
  */
 
@@ -92,34 +93,37 @@ typedef struct apr_pool_t apr_pool_t;
 
 
 /**
- * Pool accessor functions.
+ * Declaration helper macro to construct apr_foo_pool_get()s.
  *
- * These standardized function are used by opaque (APR) data types to return
+ * This standardized macro is used by opaque (APR) data types to return
  * the apr_pool_t that is associated with the data type.
  *
  * APR_POOL_DECLARE_ACCESSOR() is used in a header file to declare the
  * accessor function. A typical usage and result would be:
- *
+ * <pre>
  *    APR_POOL_DECLARE_ACCESSOR(file);
  * becomes:
  *    APR_DECLARE(apr_pool_t *) apr_file_pool_get(apr_file_t *ob);
+ * </pre>
+ * @remark Doxygen unwraps this macro (via doxygen.conf) to provide 
+ * actual help for each specific occurance of apr_foo_pool_get.
+ * @remark the linkage is specified for APR. It would be possible to expand
+ *       the macros to support other linkages.
+ */
+#define APR_POOL_DECLARE_ACCESSOR(type) \
+    APR_DECLARE(apr_pool_t *) apr_##type##_pool_get \
+        (const apr_##type##_t *the##type)
+
+/** 
+ * Implementation helper macro to provide apr_foo_pool_get()s.
  *
  * In the implementation, the APR_POOL_IMPLEMENT_ACCESSOR() is used to
  * actually define the function. It assumes the field is named "pool".
- *
- * Note: the linkage is specified for APR. It would be possible to expand
- *       the macros to support other linkages.
  */
-
-#define APR_POOL_DECLARE_ACCESSOR(typename) \
-    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-        (const apr_##typename##_t *ob)
-
-/** used to implement the pool accessor */
-#define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
-    APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
-        (const apr_##typename##_t *ob) { return ob->pool; }
-
+#define APR_POOL_IMPLEMENT_ACCESSOR(type) \
+    APR_DECLARE(apr_pool_t *) apr_##type##_pool_get \
+            (const apr_##type##_t *the##type) \
+        { return the##type->pool; }
 
 
 /**
@@ -412,7 +416,7 @@ APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *p, apr_size_t size,
 
 /**
  * Set the function to be called when an allocation failure occurs.
- * @tip If the program wants APR to exit on a memory allocation error,
+ * @remark If the program wants APR to exit on a memory allocation error,
  *      then this function can be called to set the callback to use (for
  *      performing cleanup and then exiting). If this function is not called,
  *      then APR will return an error and expect the calling program to
@@ -684,8 +688,8 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 
 #endif /* APR_POOL_DEBUG or DOXYGEN */
 
-
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif

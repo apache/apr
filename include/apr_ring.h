@@ -61,12 +61,14 @@
  * We'd use Dean's code directly if we could guarantee the
  * availability of inline functions.
  */
+
+#ifndef APR_RING_H
+#define APR_RING_H
+
 /**
  * @file apr_ring.h
  * @brief APR Rings
  */
-#ifndef APR_RING_H
-#define APR_RING_H
 
 /*
  * for offsetof()
@@ -74,14 +76,11 @@
 #include "apr_general.h"
 
 /**
- * @defgroup APR_Rings Rings
- * @ingroup APR
- * @{
- */
-
-/**
+ * @defgroup apr_ring Ring Macro Implementations
+ * @ingroup APR 
  * A ring is a kind of doubly-linked list that can be manipulated
  * without knowing where its head is.
+ * @{
  */
 
 /**
@@ -544,5 +543,7 @@
  */
 #define APR_RING_CHECK_ELEM(ep, elem, link, msg)
 #endif
+
 /** @} */ 
+
 #endif /* !APR_RING_H */

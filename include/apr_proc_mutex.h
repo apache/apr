@@ -55,6 +55,11 @@
 #ifndef APR_PROC_MUTEX_H
 #define APR_PROC_MUTEX_H
 
+/**
+ * @file apr_proc_mutex.h
+ * @brief APR Process Locking Routines
+ */
+
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -64,13 +69,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @file apr_proc_mutex.h
- * @brief APR Process Locking Routines
- */
-
-/**
- * @defgroup APR_ProcMutex Process Locking Routines
- * @ingroup APR
+ * @defgroup apr_proc_mutex Process Locking Routines
+ * @ingroup APR 
  * @{
  */
 
@@ -187,6 +187,8 @@ APR_DECLARE(const char *) apr_proc_mutex_defname(void);
  * @return apr_pool_t the pool
  */
 APR_POOL_DECLARE_ACCESSOR(proc_mutex);
+
+/** @} */
 
 #ifdef __cplusplus
 }

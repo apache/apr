@@ -55,6 +55,11 @@
 #ifndef APR_TIME_H
 #define APR_TIME_H
 
+/**
+ * @file apr_time.h
+ * @brief APR Time Library
+ */
+
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -62,15 +67,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 /**
- * @file apr_time.h
- * @brief APR Time Library
- */
-/**
- * @defgroup APR_Time Time Routines
- * @ingroup APR
+ * @defgroup apr_time Time Routines
+ * @ingroup APR 
  * @{
  */
+
 /** month names */
 APR_DECLARE_DATA extern const char apr_month_snames[12][4];
 /** day names */
@@ -229,9 +232,9 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t);
 #define APR_RFC822_DATE_LEN (30)
 /**
  * apr_rfc822_date formats dates in the RFC822
- * format in an efficient manner.  it is a fixed length
- * format and requires the indicated amount of storage
- * including trailing \0
+ * format in an efficient manner.  It is a fixed length
+ * format which requires the indicated amount of storage,
+ * including the trailing null byte.
  * @param date_str String to write to.
  * @param t the time to convert 
  */
@@ -242,10 +245,10 @@ APR_DECLARE(apr_status_t) apr_rfc822_date(char *date_str, apr_time_t t);
 /**
  * apr_ctime formats dates in the ctime() format
  * in an efficient manner.  it is a fixed length format
- * and requires the indicated amount of storage
+ * and requires the indicated amount of storage including
+ * the trailing null byte.
  * Unlike ANSI/ISO C ctime(), apr_ctime() does not include
  * a \n at the end of the string.
- * including trailing \0 
  * @param date_str String to write to.
  * @param t the time to convert 
  */
@@ -270,6 +273,8 @@ APR_DECLARE(apr_status_t) apr_strftime(char *s, apr_size_t *retsize,
  * @param p The pool to associate the finer clock resolution 
  */
 APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p);
+
+/** @} */
 
 #ifdef __cplusplus
 }

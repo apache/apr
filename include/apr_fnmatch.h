@@ -41,17 +41,18 @@
  * @file apr_fnmatch.h
  * @brief APR FNMatch Functions
  */
-/**
- * @defgroup APR_FNMatch FNMatch Functions
- * @ingroup APR
- * @{
- */
 
 #include "apr_errno.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @defgroup apr_fnmatch Filename Matching Functions
+ * @ingroup APR 
+ * @{
+ */
 
 #define APR_FNM_NOMATCH     1     /**< Match failed. */
  
@@ -62,11 +63,11 @@ extern "C" {
                                    * @remark This flag is an Apache addition 
                                    */
 
-#define FNM_NOMATCH    APR_FNM_NOMATCH    /**< @deprecated */
-#define FNM_NOESCAPE   APR_FNM_NOESCAPE   /**< @deprecated */
-#define FNM_PATHNAME   APR_FNM_PATHNAME   /**< @deprecated */
-#define FNM_PERIOD     APR_FNM_PERIOD     /**< @deprecated */
-#define FNM_CASE_BLIND APR_FNM_CASE_BLIND /**< @deprecated */
+#define FNM_NOMATCH    APR_FNM_NOMATCH    /**< @deprecated @see APR_FNM_NOMATCH */
+#define FNM_NOESCAPE   APR_FNM_NOESCAPE   /**< @deprecated @see APR_FNM_NOESCAPE */
+#define FNM_PATHNAME   APR_FNM_PATHNAME   /**< @deprecated @see APR_FNM_PATHNAME */
+#define FNM_PERIOD     APR_FNM_PERIOD     /**< @deprecated @see APR_FNM_PERIOD */
+#define FNM_CASE_BLIND APR_FNM_CASE_BLIND /**< @deprecated @see APR_FNM_CASE_BLIND */
 
 /**
  * Try to match the string to the given pattern, return APR_SUCCESS if
@@ -95,8 +96,10 @@ APR_DECLARE(int) apr_fnmatch_test(const char *pattern);
 /** @deprecated @see apr_fnmatch_test */
 APR_DECLARE(int) apr_is_fnmatch(const char *pattern);
 
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif
-/** @} */
-#endif /* !_FNMATCH_H_ */
+
+#endif /* !_APR_FNMATCH_H_ */

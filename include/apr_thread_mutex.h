@@ -55,6 +55,11 @@
 #ifndef APR_THREAD_MUTEX_H
 #define APR_THREAD_MUTEX_H
 
+/**
+ * @file apr_thread_mutex.h
+ * @brief APR Thread Mutex Routines
+ */
+
 #include "apr.h"
 #include "apr_errno.h"
 
@@ -62,16 +67,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#if APR_HAS_THREADS
+#if APR_HAS_THREADS || defined(DOXYGEN)
 
 /**
- * @file apr_thread_mutex.h
- * @brief APR Thread Mutex Routines
- */
-
-/**
- * @defgroup APR_ThreadMutex Thread Mutex Routines
- * @ingroup APR
+ * @defgroup apr_thread_mutex Thread Mutex Routines
+ * @ingroup APR 
  * @{
  */
 
@@ -96,7 +96,7 @@ typedef struct apr_thread_mutex_t apr_thread_mutex_t;
  *           APR_THREAD_MUTEX_UNNESTED  disable nested locks (non-recursive).
  * </PRE>
  * @param pool the pool from which to allocate the mutex.
- * @tip Be cautious in using APR_THREAD_MUTEX_DEFAULT.  While this is the
+ * @warning Be cautious in using APR_THREAD_MUTEX_DEFAULT.  While this is the
  * most optimial mutex based on a given platform's performance charateristics,
  * it will behave as either a nested or an unnested lock.
  */
@@ -137,8 +137,9 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex);
  */
 APR_POOL_DECLARE_ACCESSOR(thread_mutex);
 
-
 #endif /* APR_HAS_THREADS */
+
+/** @} */
 
 #ifdef __cplusplus
 }

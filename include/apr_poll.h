@@ -58,12 +58,6 @@
  * @file apr_poll.h
  * @brief APR Poll interface
  */
-/**
- * @defgroup APR_Poll Poll Routines
- * @ingroup APR
- * @{
- */
-
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -80,7 +74,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup Poll options
+ * @defgroup apr_poll Poll Routines
+ * @ingroup APR 
+ * @{
+ */
+
+/**
+ * @defgroup apr_poll_opt Poll options
  * @{
  */
 #define APR_POLLIN    0x001     /**< Can read without blocking */
@@ -281,9 +281,11 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            apr_int32_t *num,
                                            const apr_pollfd_t **descriptors);
 
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif
-/** @} */
+
 #endif  /* ! APR_POLL_H */
 

@@ -62,11 +62,6 @@
  * @file apr_portable.h
  * @brief APR Portability Routines
  */
-/**
- * @defgroup APR_portability Portability Routines
- * @ingroup APR
- * @{
- */
 
 #include "apr.h"
 #include "apr_pools.h"
@@ -93,6 +88,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/**
+ * @defgroup apr_portabile Portability Routines
+ * @ingroup APR 
+ * @{
+ */
 
 #ifdef WIN32
 /* The primitives for Windows types */
@@ -310,7 +311,7 @@ APR_DECLARE(apr_status_t) apr_os_shm_get(apr_os_shm_t *osshm,
 
 #if APR_HAS_THREADS || defined(DOXYGEN)
 /** 
- * @defgroup APR_PORT_Thread Thread portability Routines
+ * @defgroup apr_os_thread Thread portability Routines
  * @{ 
  */
 /**
@@ -471,7 +472,7 @@ APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **shm,
 
 #if APR_HAS_DSO || defined(DOXYGEN)
 /** 
- * @defgroup apr_port_DSO DSO (Dynamic Loading) Portabiliity Routines
+ * @defgroup apr_os_dso DSO (Dynamic Loading) Portabiliity Routines
  * @{
  */
 /**
@@ -518,11 +519,10 @@ APR_DECLARE(const char*) apr_os_default_encoding(apr_pool_t *pool);
  */
 APR_DECLARE(const char*) apr_os_locale_encoding(apr_pool_t *pool);
 
+/** @} */
 
 #ifdef __cplusplus
 }
 #endif
-
-/** @} */
 
 #endif  /* ! APR_PORTABLE_H */

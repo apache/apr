@@ -54,8 +54,12 @@
 
 #ifndef APR_LIB_H
 #define APR_LIB_H
+
 /**
  * @file apr_lib.h
+ * This is collection of oddballs that didn't fit anywhere else,
+ * and might move to more appropriate headers with the release
+ * of APR 1.0.
  * @brief APR general purpose library routines
  */
 
@@ -68,15 +72,19 @@
 #if APR_HAVE_STDARG_H
 #include <stdarg.h>
 #endif
-/**
- * @defgroup APR_General General Purpose Library Routines
- * @ingroup APR
- * @{
- */
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/**
+ * @defgroup apr_lib General Purpose Library Routines
+ * @ingroup APR 
+ * This is collection of oddballs that didn't fit anywhere else,
+ * and might move to more appropriate headers with the release
+ * of APR 1.0.
+ * @{
+ */
 
 /** A constant representing a 'large' string. */
 #define HUGE_STRING_LEN 8192
@@ -102,15 +110,13 @@ struct apr_vformatter_buff_t {
  * return the final element of the pathname
  * @param pathname The path to get the final element of
  * @return the final element of the path
- * @example
- */
-/**
- * Examples:
+ * @remark
  * <PRE>
- *                 "/foo/bar/gum"   -> "gum"
- *                 "/foo/bar/gum/"  -> ""
- *                 "gum"            -> "gum"
- *                 "wi\\n32\\stuff" -> "stuff"
+ * For example:
+ *                 "/foo/bar/gum"    -> "gum"
+ *                 "/foo/bar/gum/"   -> ""
+ *                 "gum"             -> "gum"
+ *                 "bs\\path\\stuff" -> "stuff"
  * </PRE>
  */
 APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
@@ -118,47 +124,6 @@ APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
 /** @deprecated @see apr_filepath_name_get */
 APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
 
-/**
- * These macros allow correct support of 8-bit characters on systems which
- * support 8-bit characters.  Pretty dumb how the cast is required, but
- * that's legacy libc for ya.  These new macros do not support EOF like
- * the standard macros do.  Tough.
- * @defgroup apr_ctype ctype functions
- * @{
- */
-/** @see isalnum */
-#define apr_isalnum(c) (isalnum(((unsigned char)(c))))
-/** @see isalpha */
-#define apr_isalpha(c) (isalpha(((unsigned char)(c))))
-/** @see iscntrl */
-#define apr_iscntrl(c) (iscntrl(((unsigned char)(c))))
-/** @see isdigit */
-#define apr_isdigit(c) (isdigit(((unsigned char)(c))))
-/** @see isgraph */
-#define apr_isgraph(c) (isgraph(((unsigned char)(c))))
-/** @see islower*/
-#define apr_islower(c) (islower(((unsigned char)(c))))
-/** @see isascii */
-#ifdef isascii
-#define apr_isascii(c) (isascii(((unsigned char)(c))))
-#else
-#define apr_isascii(c) (((c) & ~0x7f)==0)
-#endif
-/** @see isprint */
-#define apr_isprint(c) (isprint(((unsigned char)(c))))
-/** @see ispunct */
-#define apr_ispunct(c) (ispunct(((unsigned char)(c))))
-/** @see isspace */
-#define apr_isspace(c) (isspace(((unsigned char)(c))))
-/** @see isupper */
-#define apr_isupper(c) (isupper(((unsigned char)(c))))
-/** @see isxdigit */
-#define apr_isxdigit(c) (isxdigit(((unsigned char)(c))))
-/** @see tolower */
-#define apr_tolower(c) (tolower(((unsigned char)(c))))
-/** @see toupper */
-#define apr_toupper(c) (toupper(((unsigned char)(c))))
-/** @} */
 /**
  * apr_killpg
  * Small utility macros to make things easier to read.  Not usually a
@@ -183,9 +148,7 @@ APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
  * @param fmt The format string
  * @param ap The arguments to use to fill out the format string.
  *
- * @example 
- */
-/**
+ * @remark
  * <PRE>
  * The extensions are:
  *
@@ -249,8 +212,53 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, 
                                            apr_size_t *bufsize);
 
+/** @} */
+
+/**
+ * @defgroup apr_ctype ctype functions
+ * These macros allow correct support of 8-bit characters on systems which
+ * support 8-bit characters.  Pretty dumb how the cast is required, but
+ * that's legacy libc for ya.  These new macros do not support EOF like
+ * the standard macros do.  Tough.
+ * @{
+ */
+/** @see isalnum */
+#define apr_isalnum(c) (isalnum(((unsigned char)(c))))
+/** @see isalpha */
+#define apr_isalpha(c) (isalpha(((unsigned char)(c))))
+/** @see iscntrl */
+#define apr_iscntrl(c) (iscntrl(((unsigned char)(c))))
+/** @see isdigit */
+#define apr_isdigit(c) (isdigit(((unsigned char)(c))))
+/** @see isgraph */
+#define apr_isgraph(c) (isgraph(((unsigned char)(c))))
+/** @see islower*/
+#define apr_islower(c) (islower(((unsigned char)(c))))
+/** @see isascii */
+#ifdef isascii
+#define apr_isascii(c) (isascii(((unsigned char)(c))))
+#else
+#define apr_isascii(c) (((c) & ~0x7f)==0)
+#endif
+/** @see isprint */
+#define apr_isprint(c) (isprint(((unsigned char)(c))))
+/** @see ispunct */
+#define apr_ispunct(c) (ispunct(((unsigned char)(c))))
+/** @see isspace */
+#define apr_isspace(c) (isspace(((unsigned char)(c))))
+/** @see isupper */
+#define apr_isupper(c) (isupper(((unsigned char)(c))))
+/** @see isxdigit */
+#define apr_isxdigit(c) (isxdigit(((unsigned char)(c))))
+/** @see tolower */
+#define apr_tolower(c) (tolower(((unsigned char)(c))))
+/** @see toupper */
+#define apr_toupper(c) (toupper(((unsigned char)(c))))
+
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif
-/** @} */
+
 #endif	/* ! APR_LIB_H */

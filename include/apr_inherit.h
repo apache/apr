@@ -54,40 +54,36 @@
 
 #ifndef APR_INHERIT_H
 #define APR_INHERIT_H
-/**
- * @file apr_inherit.h
- * @brief APR File Handle Inheritance
- */
-/**
- * @defgroup APR_File_Inheritance Inheritance Of File/Sockets
- * @ingroup APR_File_Handle
- * Sets/Unsets inheritance for File descriptor inheritance in children
- * processes.
- *
- * @{
- */
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
 /**
- * @param name Set Inheritance for this Socket/File Handle
+ * @file apr_inherit.h 
+ * @brief APR File Handle Inheritance Helpers
+ * @remark This internal header includes internal declaration helpers 
+ * for other headers to declare apr_foo_inherit_[un]set functions.
  */
-#define APR_DECLARE_INHERIT_SET(name) \
-    APR_DECLARE(apr_status_t) apr_##name##_inherit_set( \
-                                          apr_##name##_t *the##name)
 
 /**
- * @param name Unset Inheritance for this Socket/File Handle
+ * Prototype for type-specific declarations of apr_foo_inherit_set 
+ * functions.  
+ * @remark Doxygen unwraps this macro (via doxygen.conf) to provide 
+ * actual help for each specific occurance of apr_foo_inherit_set.
+ * @remark the linkage is specified for APR. It would be possible to expand
+ *       the macros to support other linkages.
  */
-#define APR_DECLARE_INHERIT_UNSET(name) \
-    APR_DECLARE(apr_status_t) apr_##name##_inherit_unset( \
-                                          apr_##name##_t *the##name)
+#define APR_DECLARE_INHERIT_SET(type) \
+    APR_DECLARE(apr_status_t) apr_##type##_inherit_set( \
+                                          apr_##type##_t *the##type)
 
-#ifdef __cplusplus
-}
-#endif
-/** @} */
+/**
+ * Prototype for type-specific declarations of apr_foo_inherit_unset 
+ * functions.  
+ * @remark Doxygen unwraps this macro (via doxygen.conf) to provide 
+ * actual help for each specific occurance of apr_foo_inherit_unset.
+ * @remark the linkage is specified for APR. It would be possible to expand
+ *       the macros to support other linkages.
+ */
+#define APR_DECLARE_INHERIT_UNSET(type) \
+    APR_DECLARE(apr_status_t) apr_##type##_inherit_unset( \
+                                          apr_##type##_t *the##type)
 
 #endif	/* ! APR_INHERIT_H */

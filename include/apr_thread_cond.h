@@ -55,6 +55,11 @@
 #ifndef APR_THREAD_COND_H
 #define APR_THREAD_COND_H
 
+/**
+ * @file apr_thread_cond.h
+ * @brief APR Condition Variable Routines
+ */
+
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -65,23 +70,16 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#if APR_HAS_THREADS
+#if APR_HAS_THREADS || defined(DOXYGEN)
 
 /**
- * @file apr_thread_cond.h
- * @brief APR Condition Variable Routines
- */
-
-/**
- * @defgroup APR_Cond Condition Variable Routines
- * @ingroup APR
+ * @defgroup apr_thread_cond Condition Variable Routines
+ * @ingroup APR 
  * @{
  */
 
 /** Opaque structure for thread condition variables */
 typedef struct apr_thread_cond_t apr_thread_cond_t;
-
-/*   Function definitions */
 
 /**
  * Create and initialize a condition variable that can be used to signal
@@ -158,6 +156,8 @@ APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond);
 APR_POOL_DECLARE_ACCESSOR(thread_cond);
 
 #endif /* APR_HAS_THREADS */
+
+/** @} */
 
 #ifdef __cplusplus
 }

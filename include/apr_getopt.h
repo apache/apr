@@ -55,6 +55,11 @@
 #ifndef APR_GETOPT_H
 #define APR_GETOPT_H
 
+/**
+ * @file apr_getopt.h
+ * @brief APR Command Arguments (getopt)
+ */
+
 #include "apr_pools.h"
 
 #ifdef __cplusplus
@@ -62,12 +67,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @file apr_getopt.h
- * @brief APR Command Arguments (getopt)
- */
-/**
- * @defgroup APR_getopt Command Argument Parsing
- * @ingroup APR
+ * @defgroup apr_getopt Command Argument Parsing
+ * @ingroup APR 
  * @{
  */
 
@@ -150,7 +151,7 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
  * <PRE>
  *             APR_EOF      --  No more options to parse
  *             APR_BADCH    --  Found a bad option character
- *             APR_BADARG   --  No argument followed @parameter:
+ *             APR_BADARG   --  No argument followed the option flag
  *             APR_SUCCESS  --  The next option was found.
  * </PRE>
  */
@@ -173,7 +174,7 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
  * <PRE>
  *             APR_EOF      --  No more options to parse
  *             APR_BADCH    --  Found a bad option character
- *             APR_BADARG   --  No argument followed @parameter:
+ *             APR_BADARG   --  No argument followed the option flag
  *             APR_SUCCESS  --  The next option was found.
  * </PRE>
  * When APR_SUCCESS is returned, os->ind gives the index of the first

@@ -55,26 +55,27 @@
 #ifndef APR_ALLOCATOR_H
 #define APR_ALLOCATOR_H
 
+/**
+ * @file apr_allocator.h
+ * @brief APR Internal Memory Allocation
+ */
+
+#include "apr.h"
+#include "apr_errno.h"
+#define APR_WANT_MEMFUNC /**< For no good reason? */
+#include "apr_want.h"
+#include "apr_pools.h"
+#include "apr_thread_mutex.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @file apr_allocator.h
- * @brief APR memory allocation
- *
- */
-/**
- * @defgroup APR_Pool_allocator Allocator
- * @ingroup APR_Pool
+ * @defgroup apr_allocator Internal Memory Allocation
+ * @ingroup APR 
  * @{
  */
-
-
-#include "apr.h"
-#include "apr_errno.h"
-#define APR_WANT_MEMFUNC
-#include "apr_want.h"
 
 /** the allocator structure */
 typedef struct apr_allocator_t apr_allocator_t;
@@ -130,8 +131,6 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                                      apr_memnode_t *memnode);
 
 
-#include "apr_pools.h"
-
 /**
  * Set the owner of the allocator
  * @param allocator The allocator to set the owner for
@@ -173,8 +172,6 @@ APR_DECLARE(void) apr_allocator_max_free_set(apr_allocator_t *allocator,
 APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
                                              apr_size_t size);
 
-#include "apr_thread_mutex.h"
-
 #if APR_HAS_THREADS
 /**
  * Set a mutex for the allocator to use
@@ -202,6 +199,7 @@ APR_DECLARE(apr_thread_mutex_t *) apr_allocator_get_mutex(
 #endif /* APR_HAS_THREADS */
 
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif

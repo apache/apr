@@ -55,36 +55,34 @@
 #ifndef APR_DSO_DOT_H
 #define APR_DSO_DOT_H
 
-#include "apr.h"
-#include "apr_pools.h"
-#include "apr_errno.h"
 /**
  * @file apr_dso.h
  * @brief APR Dynamic Object Handling Routines
  */
 
-
-/**
- * @defgroup APR_DSO Dynamic Object Handling
- * @ingroup APR
- * @{
- */
+#include "apr.h"
+#include "apr_pools.h"
+#include "apr_errno.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * @defgroup apr_dso Dynamic Object Handling
+ * @ingroup APR 
+ * @{
+ */
+
 #if APR_HAS_DSO || defined(DOXYGEN)
 
 /**
  * Structure for referencing dynamic objects
- * @defvar apr_dso_handle_t
  */
 typedef struct apr_dso_handle_t       apr_dso_handle_t;
 
 /**
  * Structure for referencing symbols from dynamic objects
- * @defvar apr_dso_handle_sym_t
  */
 typedef void *                        apr_dso_handle_sym_t;
 
@@ -123,8 +121,10 @@ APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_si
 
 #endif /* APR_HAS_DSO */
 
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif
-/** @} */
+
 #endif
