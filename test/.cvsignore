@@ -11,6 +11,7 @@ testmd5
 testmmap
 htdigest
 proctest
+readchild
 testatomic
 testud
 testargs
