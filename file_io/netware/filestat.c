@@ -59,13 +59,6 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_hash.h"
-#define USE_CSTAT_RWLOCK
-#ifdef USE_CSTAT_MUTEX
-#include "apr_thread_mutex.h"
-#endif
-#ifdef USE_CSTAT_RWLOCK
-#include "apr_thread_rwlock.h"
-#endif
 
 static apr_filetype_e filetype_from_mode(mode_t mode)
 {
@@ -222,28 +215,11 @@ struct apr_stat_entry_t {
     apr_time_t expire;
 };
 
-typedef struct apr_stat_cache_t apr_stat_cache_t;
-
-struct apr_stat_cache_t {
-    apr_hash_t *statCache;
-#ifdef USE_CSTAT_MUTEX
-    apr_thread_mutex_t *statcache_mutex;
-#endif
-#ifdef USE_CSTAT_RWLOCK
-    apr_thread_rwlock_t *statcache_mutex;
-#endif
-};
+extern apr_int32_t CpuCurrentProcessor; /* system variable */
 
 int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *pool)
 {
-    apr_stat_cache_t *statCacheData = (apr_stat_cache_t *)getStatCache();
-    apr_hash_t *statCache = NULL;
-#ifdef USE_CSTAT_MUTEX
-    apr_thread_mutex_t *statcache_mutex;
-#endif
-#ifdef USE_CSTAT_RWLOCK
-    apr_thread_rwlock_t *statcache_mutex;
-#endif
+    apr_hash_t *statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
     apr_pool_t *gPool = (apr_pool_t *)getGlobalPool();
     apr_stat_entry_t *stat_entry;
     struct stat *info;
@@ -263,46 +239,18 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
         return ret;
     }
 
-    /* If we have a statCacheData structure then use it.
+    /* If we have a statCache hash table then use it.
        Otherwise we need to create it and initialized it
        with a new mutex lock. */
-    if (statCacheData) {
-        statCache = statCacheData->statCache;
-#if defined(USE_CSTAT_MUTEX) || defined(USE_CSTAT_RWLOCK)
-        statcache_mutex = statCacheData->statcache_mutex;
-#endif
-    }
-    else {
-        statCacheData = (apr_stat_cache_t *)apr_palloc (gPool, sizeof(apr_stat_cache_t));
+    if (!statCache) {
         statCache = apr_hash_make(gPool);
-#ifdef USE_CSTAT_MUTEX
-        apr_thread_mutex_create(&statcache_mutex, APR_THREAD_MUTEX_DEFAULT, gPool);
-        statCacheData->statcache_mutex = statcache_mutex;
-#endif
-#ifdef USE_CSTAT_RWLOCK
-        apr_thread_rwlock_create(&statcache_mutex, gPool);
-        statCacheData->statcache_mutex = statcache_mutex;
-#endif
-        statCacheData->statCache = statCache;
-        setStatCache((void*)statCacheData);
+        setStatCache((void*)statCache, CpuCurrentProcessor);
     }
 
     /* If we have a statCache then try to pull the information
        from the cache.  Otherwise just stat the file and return.*/
     if (statCache) {
-#ifdef USE_CSTAT_MUTEX
-        apr_thread_mutex_lock(statcache_mutex);
-#endif
-#ifdef USE_CSTAT_RWLOCK
-        apr_thread_rwlock_rdlock(statcache_mutex);
-#endif
         stat_entry = (apr_stat_entry_t*) apr_hash_get(statCache, path, APR_HASH_KEY_STRING);
-#ifdef USE_CSTAT_MUTEX
-        apr_thread_mutex_unlock(statcache_mutex);
-#endif
-#ifdef USE_CSTAT_RWLOCK
-        apr_thread_rwlock_unlock(statcache_mutex);
-#endif
         /* If we got an entry then check the expiration time.  If the entry
            hasn't expired yet then copy the information and return. */
         if (stat_entry) {
@@ -316,16 +264,16 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
             }
         }
 
+        /* Since we are creating a separate stat cache for each processor, we
+           don't need to worry about locking the hash table before manipulating
+           it. */
         if (!found) {
+            /* Bind the thread to the current cpu so that we don't wake
+               up on some other cpu and try to manipulate the wrong cache. */
+            NXThreadBind (CpuCurrentProcessor);
             ret = stat(path, buf);
             if (ret == 0) {
                 *casedName = case_filename(pool, path);
-#ifdef USE_CSTAT_MUTEX
-                apr_thread_mutex_lock(statcache_mutex);
-#endif
-#ifdef USE_CSTAT_RWLOCK
-                apr_thread_rwlock_wrlock(statcache_mutex);
-#endif
                 /* If we don't have a stat_entry then create one, copy
                    the data and add it to the hash table. */
                 if (!stat_entry) {
@@ -349,12 +297,7 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
                     }
                     stat_entry->expire = now;
                 }
-#ifdef USE_CSTAT_MUTEX
-                apr_thread_mutex_unlock(statcache_mutex);
-#endif
-#ifdef USE_CSTAT_RWLOCK
-                apr_thread_rwlock_unlock(statcache_mutex);
-#endif
+                NXThreadBind (NX_THR_UNBOUND);
             }
             else
                 return ret;
