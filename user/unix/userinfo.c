@@ -139,7 +139,11 @@ APR_DECLARE(apr_status_t) apr_get_user_passwd(char **passwd,
     if ((rv = getpwnam_safe(username, &pw)) != APR_SUCCESS)
         return rv;
 
+#if defined(__MVS__) /* silly hack, but this function will be replaced soon anyway */
+    *passwd = "x"; /* same as many Linux (and Solaris and more) boxes these days */
+#else
     *passwd = apr_pstrdup(p, pw->pw_passwd);
+#endif
 
     return APR_SUCCESS;
 }
