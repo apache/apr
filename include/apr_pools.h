@@ -86,6 +86,11 @@ extern "C" {
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 
+/** The fundamental pool type */
+typedef struct apr_pool_t apr_pool_t;
+
+#include "apr_allocator.h"
+
 /**
  * Pool debug levels
  *
@@ -127,24 +132,15 @@ extern "C" {
 #else
 #define APR_POOL_DEBUG 0
 #endif
-    
+
 #define APR_POOL_STRINGIZE(x) APR_POOL__STRINGIZE(x)
 #define APR_POOL__STRINGIZE(x) #x
 #define APR_POOL__FILE_LINE__ __FILE__ ":" APR_POOL_STRINGIZE(__LINE__)
-    
-    
-/** The fundamental pool type */
-typedef struct apr_pool_t apr_pool_t;
+
+
 
 /** A function that is called when allocation fails. */
 typedef int (*apr_abortfunc_t)(int retcode);
-
-/** Pool creation flags */
-
-#define APR_POOL_FDEFAULT       0x0
-#define APR_POOL_FNEW_ALLOCATOR 0x1
-#define APR_POOL_FLOCK          0x2
-
 
 /*
  * APR memory structure manipulators (pools, tables, and arrays).
@@ -193,7 +189,7 @@ APR_DECLARE(void) apr_pool_terminate(void);
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                              apr_pool_t *parent,
                                              apr_abortfunc_t abort_fn,
-                                             apr_uint32_t flags);
+                                             apr_allocator_t *allocator);
 
 /**
  * Debug version of apr_pool_create_ex.
@@ -214,12 +210,12 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
                                                    apr_pool_t *parent,
                                                    apr_abortfunc_t abort_fn,
-                                                   apr_uint32_t flags,
+                                                   apr_allocator_t *allocator,
                                                    const char *file_line);
 
 #if APR_POOL_DEBUG
-#define apr_pool_create_ex(newpool, parent, abort_fn, flag)  \
-    apr_pool_create_ex_debug(newpool, parent, abort_fn, flag, \
+#define apr_pool_create_ex(newpool, parent, abort_fn, allocator)  \
+    apr_pool_create_ex_debug(newpool, parent, abort_fn, allocator, \
                              APR_POOL__FILE_LINE__)
 #endif
 
@@ -237,11 +233,11 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
 #else
 #if APR_POOL_DEBUG
 #define apr_pool_create(newpool, parent) \
-    apr_pool_create_ex_debug(newpool, parent, NULL, APR_POOL_FDEFAULT, \
+    apr_pool_create_ex_debug(newpool, parent, NULL, NULL, \
                              APR_POOL__FILE_LINE__)
 #else
 #define apr_pool_create(newpool, parent) \
-    apr_pool_create_ex(newpool, parent, NULL, APR_POOL_FDEFAULT)
+    apr_pool_create_ex(newpool, parent, NULL, NULL)
 #endif
 #endif
 
@@ -256,11 +252,11 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
 #if APR_POOL_DEBUG
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex_debug(newpool, parent, abort_fn, \
-                                   APR_POOL_FDEFAULT, \
+                                   NULL, \
                                    APR_POOL__FILE_LINE__)
 #else
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
-    (void)apr_pool_create_ex(newpool, parent, abort_fn, APR_POOL_FDEFAULT)
+    (void)apr_pool_create_ex(newpool, parent, abort_fn, NULL)
 #endif
 
 /**
