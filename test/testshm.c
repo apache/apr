@@ -314,7 +314,7 @@ int main(void)
     }
     printf("Anonymous shared memory test passed!\n");
 
-    if (test_named(pool) != APR_SUCCESS) {
+    if ((rv = test_named(pool)) != APR_SUCCESS) {
         printf("Name-based shared memory test FAILED: [%d] %s \n",
                rv, apr_strerror(rv, errmsg, sizeof(errmsg)));
         exit(-3);
