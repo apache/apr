@@ -67,7 +67,7 @@ AC_DEFUN(APR_FIND_APR, [
       AC_MSG_ERROR([--with-apr requires a directory to be provided])
     fi
 
-    if test -x $withval/bin/apr-config; then
+    if test -x "$withval/bin/apr-config"; then
        apr_config="$withval/bin/apr-config"
        CFLAGS="$CFLAGS `$withval/bin/apr-config --cflags`"
        LIBS="$LIBS `$withval/bin/apr-config --libs`"
@@ -116,33 +116,50 @@ APR, nor an APR build directory.])
   ],[
     dnl always look in the builtin/default places
     LIBS="$LIBS -lapr"
-    AC_TRY_LINK_FUNC(apr_initialize, [apr_libdir=""], [
+    AC_TRY_LINK_FUNC(apr_initialize, [
+        dnl We don't have to do anything.
+        apr_found="yes"
+        apr_srcdir=""
+        apr_libdir=""
+        apr_includes=""
+        apr_la_file=""
+        apr_config=""
+        apr_vars=""
+      ], [
       dnl look in the some standard places (apparently not in builtin/default)
-      for lookdir in /usr /usr/local ; do
-        LDFLAGS="$preserve_LDFLAGS -L$lookdir/lib"
-        AC_TRY_LINK_FUNC(apr_initialize, [
-          apr_libdir="$lookdir" ; break
-        ])
+      for lookdir in /usr /usr/local /opt/apr ; do
+        if test "$apr_found" != "yes"; then
+          LDFLAGS="$preserve_LDFLAGS -L$lookdir/lib"
+          AC_TRY_LINK_FUNC(apr_initialize, [
+            apr_found="yes"
+            apr_libdir="$lookdir/lib" 
+            apr_includes="-I$lookdir/include"
+            if test -x "$withval/bin/apr-config"; then
+              apr_config="$withval/bin/apr-config"
+            else
+              apr_config=""
+            fi
+          ])
+        fi
       done
     ])
-  ])
-
-  dnl We attempt to guess what the data will be *after* configure is run.
-  dnl Note, if we don't see configure, but do have configure.in, it'd be
-  dnl nice to run buildconf, but that's for another day.
-  if test "$apr_found" = "no" && test -n "$1" && test -x "$1/configure"; then
-    apr_found="reconfig"
-    apr_srcdir="$1"
-    apr_libdir=""
-    apr_la_file="$apr_srcdir/libapr.la"
-    apr_vars="$apr_srcdir/APRVARS"
-    if test -f $apr_srcdir/apr-config.in; then
-      apr_config="$apr_srcdir/apr-config"
-    else
-      apr_config=""
+    dnl We attempt to guess what the data will be *after* configure is run.
+    dnl Note, if we don't see configure, but do have configure.in, it'd be
+    dnl nice to run buildconf, but that's for another day.
+    if test "$apr_found" = "no" && test -n "$1" && test -x "$1/configure"; then
+      apr_found="reconfig"
+      apr_srcdir="$1"
+      apr_libdir=""
+      apr_la_file="$apr_srcdir/libapr.la"
+      apr_vars="$apr_srcdir/APRVARS"
+      if test -f "$apr_srcdir/apr-config.in"; then
+        apr_config="$apr_srcdir/apr-config"
+      else
+        apr_config=""
+      fi
+      apr_includes="-I$apr_srcdir/include"
     fi
-    apr_includes="-I$apr_srcdir/include"
-  fi
+  ])
 
   if test "$apr_found" != "no" && test "$apr_libdir" != ""; then
     if test "$apr_vars" = "" && test -f "$apr_libdir/APRVARS"; then
