@@ -131,7 +131,7 @@ static char *apr_error_string(apr_status_t statcode)
     case APR_TIMEUP:
         return "The timeout specified has expired";
     case APR_INCOMPLETE:
-        return "The input data is incomplete";
+        return "Partial results are valid but processing is incomplete";
     case APR_BADCH:
         return "Bad character specified on command line";
     case APR_BADARG:
