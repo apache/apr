@@ -707,7 +707,7 @@ AC_DEFUN(APR_LAYOUT,[
 ])dnl
 
 dnl
-dnl APR_ENABLE_LAYOUT
+dnl APR_ENABLE_LAYOUT(default layout name)
 dnl
 AC_DEFUN(APR_ENABLE_LAYOUT,[
 AC_ARG_ENABLE(layout,
@@ -716,7 +716,7 @@ AC_ARG_ENABLE(layout,
 ])
 
 if test -z "$LAYOUT"; then
-  LAYOUT="Apache"
+  LAYOUT="$1"
 fi
 APR_LAYOUT($srcdir/config.layout, $LAYOUT)
 
