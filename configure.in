@@ -271,6 +271,7 @@ else
     echo "APR will be non-threaded"
 fi
 
+AC_CHECK_FUNCS(sigsuspend)
 AC_CHECK_FUNCS(sigwait, [ have_sigwait="1" ], [ have_sigwait="0" ]) 
 dnl AC_CHECK_FUNCS doesn't work for this on Tru64 since the function
 dnl is renamed in signal.h.  Todo: Autodetect
