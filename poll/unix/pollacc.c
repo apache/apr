@@ -134,11 +134,28 @@ APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
 
 APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
-    apr_pollfd_t *curr = find_poll_sock(aprset, sock);
-    if (curr == NULL) {
+    apr_pollfd_t *match = NULL;
+    apr_pollfd_t *curr;
+
+    for (curr = aprset; (curr->desc_type != APR_POLL_LASTDESC) &&
+             (curr->desc_type != APR_NO_DESC); curr++) {
+        if (curr->desc.s == sock) {
+            match = curr;
+        }
+    }
+    if (match == NULL) {
         return APR_NOTFOUND;
     }
 
+    /* Remove this entry by swapping the last entry into its place.
+     * This ensures that the non-APR_NO_DESC entries are all at the
+     * start of the array, so that apr_poll() doesn't have to worry
+     * about invalid entries in the middle of the pollset.
+     */
+    curr--;
+    if (curr != match) {
+        *match = *curr;
+    }
     curr->desc_type = APR_NO_DESC;
 
     return APR_SUCCESS;
