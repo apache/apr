@@ -237,13 +237,13 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 
 #define apr_atomic_t LONG
 
+#define apr_atomic_init(pool)        APR_SUCCESS
 #define apr_atomic_add(mem, val)     InterlockedExchangeAdd(mem,val)
 #define apr_atomic_dec(mem)          InterlockedDecrement(mem)
 #define apr_atomic_inc(mem)          InterlockedIncrement(mem)
 #define apr_atomic_set(mem, val)     InterlockedExchange(mem, val)
 #define apr_atomic_read(mem)         (*mem)
 #define apr_atomic_cas(mem,with,cmp) InterlockedCompareExchange(mem,with,cmp)
-  /*#define apr_atomic_init(pool)        APR_SUCCESS*/
 #define apr_atomic_casptr(mem,with,cmp) InterlockedCompareExchangePointer(mem,with,cmp)
 
 #elif defined(NETWARE)
