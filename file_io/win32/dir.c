@@ -295,11 +295,55 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
     return APR_SUCCESS;
 }
 
+
+static apr_status_t dir_make_parent(char *path,
+                                    apr_fileperms_t perm,
+                                    apr_pool_t *pool)
+{
+    apr_status_t rv;
+    char *ch = strrchr(path, '\\');
+    if (!ch) {
+        return APR_ENOENT;
+    }
+
+    *ch = '\0';
+    rv = apr_dir_make (path, perm, pool); /* Try to make straight off */
+    
+    if (APR_STATUS_IS_ENOENT(rv)) { /* Missing an intermediate dir */
+        rv = dir_make_parent(path, perm, pool);
+
+        if (rv == APR_SUCCESS) {
+            rv = apr_dir_make (path, perm, pool); /* And complete the path */
+        }
+    }
+
+    *ch = '\\'; /* Always replace the slash before returning */
+    return rv;
+}
+
 APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
                                                  apr_fileperms_t perm,
                                                  apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    apr_status_t rv = 0;
+    
+    rv = apr_dir_make (path, perm, pool); /* Try to make PATH right out */
+    
+    if (APR_STATUS_IS_EEXIST(rv)) /* It's OK if PATH exists */
+        return APR_SUCCESS;
+    
+    if (APR_STATUS_IS_ENOENT(rv)) { /* Missing an intermediate dir */
+        char *dir;
+        
+        rv = apr_filepath_merge(&dir, "", path, APR_FILEPATH_NATIVE, pool);
+
+        if (rv == APR_SUCCESS)
+            rv = dir_make_parent(dir, perm, pool); /* Make intermediate dirs */
+        
+        if (rv == APR_SUCCESS)
+            rv = apr_dir_make (dir, perm, pool);   /* And complete the path */
+    }
+    return rv;
 }
 
 
