@@ -87,7 +87,7 @@
 #include <signal.h>
 
 
-#include <ws2nlm.h>
+#include <novsock2.h>
 
 #define _POSIX_THREAD_SAFE_FUNCTIONS    1
 #define READDIR_IS_THREAD_SAFE          1
