@@ -108,17 +108,21 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {
-            (*len) = -1;
+            (*len) = 0;
             return APR_TIMEUP;
         }
         else if (srv < 0) {
-            (*len) = -1;
+            (*len) = 0;
             return errno;
         }
         else {
             do {
                 rv = write(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
+            if (rv == -1) {
+                (*len) = 0;
+                return errno;
+            }
         }
     }
     (*len) = rv;
@@ -175,6 +179,10 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
             do {
                 rv = read(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
+            if (rv == -1) {
+                (*len) = 0;
+                return errno;
+            }
         }
     }
     else if (rv == -1 && errno == EAGAIN && sock->timeout == 0) {
