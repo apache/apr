@@ -140,6 +140,12 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock);
  */
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock);
 
+/**
+ * Get the pool used by this thread_rwlock.
+ * @return apr_pool_t the pool
+ */
+APR_POOL_DECLARE_ACCESSOR(thread_rwlock);
+
 #endif  /* APR_HAS_THREADS */
 
 #ifdef __cplusplus
