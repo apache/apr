@@ -28,6 +28,8 @@ MODULES=@MODULES@
 SUBDIRS=@SUBDIRS@
 #shmem/@OSDIR@
 
+LIBAPR = @LIBPREFIX@apr.a
+
 #
 # Rules for turning inputs into outputs
 #
@@ -38,13 +40,15 @@ SUBDIRS=@SUBDIRS@
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-all: Makefile $(MODULES) subdirs
+all: Makefile $(MODULES) subdirs $(LIBAPR)
+
+$(LIBAPR):
 	@rm -rf objs
 	@mkdir objs
-	@rm -f @LIBPREFIX@apr.a
+	@rm -f $@
 	for i in $(SUBDIRS); do cp $$i/*.o objs ; done;
-	$(AR) cr @LIBPREFIX@apr.a objs/*.o
-	$(RANLIB) @LIBPREFIX@apr.a
+	$(AR) cr $@ objs/*.o
+	$(RANLIB) $@
 
 clean: subdirs_clean
 	$(RM) -f *.o *.a *.so objs/*.o
@@ -90,4 +94,6 @@ subdirs_distclean:
 	    echo "<=== $(SDP)lib/apr/$$i"; \
 	done;
 
+install: all
+	
 # DO NOT REMOVE
