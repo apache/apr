@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "beos/threadproc.h"
+#include "threadproc.h"
 
 struct send_pipe {
 	int in;
