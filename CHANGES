@@ -1,5 +1,7 @@
 Changes with APR 0.9.5
 
+  *) Fix FreeBSD atomics.  [Paul Querna <chip force-elite.com>]
+
   *) Fix apr_snprintf() to respect precision for small floating point
      numbers.  PR 29621.  [Artur Zaprzala <zybi talex.pl>]
 
