@@ -1,3 +1,32 @@
+dnl APR_TRY_GCC_WARNING(INCLUDES, FUNCTION-BODY,
+dnl             [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+AC_DEFUN(APR_TRY_GCC_WARNING,
+[if test "$GCC" = "yes"; then 
+  changequote(', ')
+  cat > conftest.$ac_ext <<EOTEST
+#include "confdefs.h"
+'$1'
+int main(int argc, const char * const argv[]) {
+'$2'
+; return 0; }
+EOTEST
+  changequote([, ])
+  if ${CC-cc} -c -Wall -Wmissing-prototypes -Wstrict-prototypes -Wmissing-declarations -Werror $CFLAGS $CPPFLAGS conftest.$ac_ext 1>&AC_FD_CC ; then
+    ifelse([$3], , :, [rm -rf conftest*
+    $3])
+  else
+    echo "configure: warning on program:" >&AC_FD_CC
+    cat conftest.$ac_ext >&AC_FD_CC
+    ifelse([$4], , , [rm -rf conftest*
+    $4])
+  fi
+else
+    # Not using gcc -- assume everything is okay
+    ifelse([$3], , :, [rm -rf conftest*
+    $3])
+fi
+rm -f conftest*])
+
 dnl
 dnl RUN_SUBDIR_CONFIG_NOW(dir [, sub-package-cmdline-args])
 dnl
@@ -300,13 +329,10 @@ dnl
 AC_DEFUN(APR_CHECK_ICONV_INBUF,[
 AC_MSG_CHECKING(for type of inbuf parameter to iconv)
 if test "x$apr_iconv_inbuf_const" = "x"; then
-    AC_TRY_COMPILE([
+    APR_TRY_GCC_WARNING([
     #include <stddef.h>
     #include <iconv.h>
     ],[
-    #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR < 2
-    #error We know this version of glibc has const char **, so fail this compile
-    #endif
     iconv(0,(char **)0,(size_t *)0,(char **)0,(size_t *)0);
     ], apr_iconv_inbuf_const="0", apr_iconv_inbuf_const="1")
 fi
