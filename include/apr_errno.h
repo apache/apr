@@ -356,6 +356,36 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
 #define APR_EINPROGRESS    (APR_OS_START_CANONERR + 17)
 #endif
 
+#ifdef ECONNABORTED
+#define APR_ECONNABORTED ECONNABORTED
+#else
+#define APR_ECONNABORTED   (APR_OS_START_CANONERR + 18)
+#endif
+
+#ifdef ECONNRESET
+#define APR_ECONNRESET ECONNRESET
+#else
+#define APR_ECONNRESET     (APR_OS_START_CANONERR + 19)
+#endif
+
+#ifdef ETIMEDOUT
+#define APR_ETIMEDOUT ETIMEDOUT
+#else
+#define APR_ETIMEDOUT      (APR_OS_START_CANONERR + 20)
+#endif
+
+#ifdef EHOSTUNREACH
+#define APR_EHOSTUNREACH EHOSTUNREACH
+#else
+#define APR_EHOSTUNREACH   (APR_OS_START_CANONERR + 21)
+#endif
+
+#ifdef ENETUNREACH
+#define APR_ENETUNREACH ENETUNREACH
+#else
+#define APR_ENETUNREACH    (APR_OS_START_CANONERR + 22)
+#endif
+
 
 #if defined(OS2)
 
@@ -410,6 +440,16 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
                 || (s) == APR_OS_START_SYSERR + SOCECONNREFUSED)
 #define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
                 || (s) == APR_OS_START_SYSERR + SOCEINPROGRESS)
+#define APR_STATUS_IS_ECONNABORTED(s)   ((s) == APR_ECONNABORTED \
+                || (s) == APR_OS_START_SYSERR + SOCECONNABORTED)
+#define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
+                || (s) == APR_OS_START_SYSERR + SOCECONNRESET)
+#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + SOCETIMEDOUT)    
+#define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
+                || (s) == APR_OS_START_SYSERR + SOCEHOSTUNREACH)
+#define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
+                || (s) == APR_OS_START_SYSERR + SOCENETUNREACH)
 
 /*
     Sorry, too tired to wrap this up for OS2... feel free to
@@ -429,19 +469,14 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
     { SOCEADDRINUSE,            EADDRINUSE      },
     { SOCEADDRNOTAVAIL,         EADDRNOTAVAIL   },
     { SOCENETDOWN,              ENETDOWN        },
-    { SOCENETUNREACH,           ENETUNREACH     },
     { SOCENETRESET,             ENETRESET       },
-    { SOCECONNABORTED,          ECONNABORTED    },
-    { SOCECONNRESET,            ECONNRESET      },
     { SOCENOBUFS,               ENOBUFS         },
     { SOCEISCONN,               EISCONN         },
     { SOCENOTCONN,              ENOTCONN        },
     { SOCESHUTDOWN,             ESHUTDOWN       },
     { SOCETOOMANYREFS,          ETOOMANYREFS    },
-    { SOCETIMEDOUT,             ETIMEDOUT       },
     { SOCELOOP,                 ELOOP           },
     { SOCEHOSTDOWN,             EHOSTDOWN       },
-    { SOCEHOSTUNREACH,          EHOSTUNREACH    },
     { SOCENOTEMPTY,             ENOTEMPTY       },
     { SOCEPIPE,                 EPIPE           }
 */
@@ -500,7 +535,16 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
                 || (s) == APR_OS_START_SYSERR + WSAECONNREFUSED)
 #define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS \
                 || (s) == APR_OS_START_SYSERR + WSAEINPROGRESS)
-
+#define APR_STATUS_IS_ECONNABORTED(s)   ((s) == APR_ECONNABORTED \
+                || (s) == APR_OS_START_SYSERR + WSAECONNABORTED)
+#define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
+                || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
+#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT)    
+#define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
+                || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
+#define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
+                || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
 
 #else /* !def OS2 || WIN32 */
 
@@ -529,19 +573,42 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
 #define APR_STATUS_IS_EBADF(s)          ((s) == APR_EBADF)
 #define APR_STATUS_IS_EINVAL(s)         ((s) == APR_EINVAL)
 #define APR_STATUS_IS_ESPIPE(s)         ((s) == APR_ESPIPE)
+
 #if !defined(EWOULDBLOCK) || !defined(EAGAIN)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN)
 #elif (EWOULDBLOCK == EAGAIN)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN)
 #else
-#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN || (s) == EWOULDBLOCK)
+#define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
+                                      || (s) == EWOULDBLOCK)
 #endif
+
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR)
 #define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK)
 #define APR_STATUS_IS_ECONNREFUSED(s)   ((s) == APR_ECONNREFUSED)
 #define APR_STATUS_IS_EINPROGRESS(s)    ((s) == APR_EINPROGRESS)
 
-#endif /* endif defined(WIN32) */
+/* EPROTO on certain older kernels really means ECONNABORTED, so we need to 
+ * ignore it for them.  See discussion in new-httpd archives nh.9701 & nh.9603
+ *
+ * There is potentially a bug in Solaris 2.x x<6, and other boxes that 
+ * implement tcp sockets in userland (i.e. on top of STREAMS).  On these
+ * systems, EPROTO can actually result in a fatal loop.  See PR#981 for 
+ * example.  It's hard to handle both uses of EPROTO.
+ */
+#ifdef EPROTO
+#define APR_STATUS_IS_ECONNABORTED(s)    ((s) == APR_ECONNABORTED \
+                                       || (s) == EPROTO)
+#else
+#define APR_STATUS_IS_ECONNABORTED(s)    ((s) == APR_ECONNABORTED)
+#endif
+
+#define APR_STATUS_IS_ECONNRESET(s)      ((s) == APR_ECONNRESET)
+#define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT)    
+#define APR_STATUS_IS_EHOSTUNREACH(s)    ((s) == APR_EHOSTUNREACH)
+#define APR_STATUS_IS_ENETUNREACH(s)     ((s) == APR_ENETUNREACH)
+
+#endif /* !def OS2 || WIN32 */
 
 
 #ifdef __cplusplus
