@@ -56,7 +56,7 @@
 
 #if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the apr_file_t internals. */
-#include "unix/fileio.h"
+#include "fileio.h"
 
 /* Glibc2.1.1 fails to define TCP_CORK.  This is a bug that will be 
  *fixed in the next release.  It should be 3
