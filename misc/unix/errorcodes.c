@@ -278,15 +278,14 @@ static const struct {
 
 static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode)
 {
-    DWORD len;
-    DWORD i;
+    apr_size_t len, i;
 
     len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
                         NULL,
                         errcode,
                         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default language */
                         (LPTSTR) buf,
-                        bufsize,
+                        (DWORD)bufsize,
                         NULL);
 
     if (!len) {
