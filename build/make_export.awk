@@ -56,6 +56,7 @@ function add_symbol (sym_name) {
 /^[ \t]*AP_DECLARE_HOOK[(][^,]+,[a-z_]+,.+[)]$/ {
 	split($0, args, ",");
 	add_symbol("ap_hook_" args[2]);
+	add_symbol("ap_hook_get_" args[2]);
 	add_symbol("ap_run_" args[2]);
 }
 
