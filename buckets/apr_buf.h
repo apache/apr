@@ -82,15 +82,15 @@ typedef enum {
 typedef struct ap_bucket ap_bucket;
 struct ap_bucket {
     ap_bucket_color_e color;            /* what type of bucket is it */
-    void (*free)(void *e);              /* never NULL */
+    void (*free)(void *e);              /* can be NULL */
     void *data;				/* for use by free() */
 };
 
 typedef struct ap_bucket_list ap_bucket_list;
 struct ap_bucket_list {
     ap_bucket *bucket;                   /* The bucket */
-    ap_bucket_list *next;                /* The start of the bucket list */
-    ap_bucket_list *prev;                /* The end of the bucket list */
+    ap_bucket_list *next;                /* The next node in the bucket list */
+    ap_bucket_list *prev;                /* The prev node in the bucket list */
 };
 
 typedef struct ap_bucket_brigade ap_bucket_brigade;
@@ -112,9 +112,13 @@ APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p);
 /* destroy an enitre bucket brigade */
 APR_EXPORT(ap_status_t) ap_bucket_brigade_destroy(void *b);
 
-/* append a bucket_brigade to a bucket_brigade */
-APR_EXPORT(void) ap_bucket_brigade_append(ap_bucket_brigade *b, 
-                                          ap_bucket_list *e);
+/* append a bucket_list to a bucket_brigade */
+APR_EXPORT(void) ap_bucket_brigade_append_list(ap_bucket_brigade *b, 
+                                               ap_bucket_list *e);
+
+/* append a bucket to a bucket_brigade */
+APR_EXPORT(void) ap_bucket_brigade_append_bucket(ap_bucket_brigade *b,
+                                                 ap_bucket *r);
 
 /* consume nbytes from beginning of b -- call ap_bucket_destroy as
     appropriate, and/or modify start on last element */
@@ -149,9 +153,6 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
 
 /* create a new bucket_list */
 APR_EXPORT(ap_bucket_list *) ap_bucket_list_create(void);
-
-/* initialize a bucket_list */
-APR_EXPORT(void) ap_bucket_list_init(ap_bucket_list *b);
 
 /* destroy an entire bucket_list */
 APR_EXPORT(ap_status_t) ap_destroy_bucket_list(ap_bucket_list *b);
