@@ -590,26 +590,30 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         memset(&si, 0, sizeof(si));
         si.cb = sizeof(si);
-        si.hStdInput = INVALID_HANDLE_VALUE;
-        si.hStdOutput = INVALID_HANDLE_VALUE;
-        si.hStdError = INVALID_HANDLE_VALUE;
 
         if (attr->detached) {
             si.dwFlags |= STARTF_USESHOWWINDOW;
             si.wShowWindow = SW_HIDE;
         }
+
 #ifndef _WIN32_WCE
         if ((attr->child_in && attr->child_in->filehand)
             || (attr->child_out && attr->child_out->filehand)
             || (attr->child_err && attr->child_err->filehand))
         {
             si.dwFlags |= STARTF_USESTDHANDLES;
-            if (attr->child_in)
-                si.hStdInput = attr->child_in->filehand;
-            if (attr->child_out)
-                si.hStdOutput = attr->child_out->filehand;
-            if (attr->child_err)
-                si.hStdError = attr->child_err->filehand;
+
+            si.hStdInput = (attr->child_in) 
+                              ? attr->child_in->filehand
+                              : INVALID_HANDLE_VALUE;
+
+            si.hStdOutput = (attr->child_out)
+                              ? attr->child_out->filehand
+                              : INVALID_HANDLE_VALUE;
+
+            si.hStdError = (attr->child_err)
+                              ? attr->child_err->filehand
+                              : INVALID_HANDLE_VALUE;
         }
         rv = CreateProcessW(wprg, wcmd,        /* Executable & Command line */
                             NULL, NULL,        /* Proc & thread security attributes */
@@ -636,21 +640,29 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         STARTUPINFOA si;
         memset(&si, 0, sizeof(si));
         si.cb = sizeof(si);
+
         if (attr->detached) {
             si.dwFlags |= STARTF_USESHOWWINDOW;
             si.wShowWindow = SW_HIDE;
         }
+
         if ((attr->child_in && attr->child_in->filehand)
             || (attr->child_out && attr->child_out->filehand)
             || (attr->child_err && attr->child_err->filehand))
         {
             si.dwFlags |= STARTF_USESTDHANDLES;
-            if (attr->child_in)
-                si.hStdInput = attr->child_in->filehand;
-            if (attr->child_out)
-                si.hStdOutput = attr->child_out->filehand;
-            if (attr->child_err)
-                si.hStdError = attr->child_err->filehand;
+
+            si.hStdInput = (attr->child_in) 
+                              ? attr->child_in->filehand
+                              : INVALID_HANDLE_VALUE;
+
+            si.hStdOutput = (attr->child_out)
+                              ? attr->child_out->filehand
+                              : INVALID_HANDLE_VALUE;
+
+            si.hStdError = (attr->child_err)
+                              ? attr->child_err->filehand
+                              : INVALID_HANDLE_VALUE;
         }
 
         rv = CreateProcessA(progname, cmdline, /* Command line */
