@@ -99,6 +99,19 @@ APR_DECLARE(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
     return res;
 }
 
+APR_DECLARE(char *) apr_pstrmemdup(apr_pool_t *a, const char *s, apr_size_t n)
+{
+    char *res;
+
+    if (s == NULL) {
+        return NULL;
+    }
+    res = apr_palloc(a, n + 1);
+    memcpy(res, s, n);
+    res[n] = '\0';
+    return res;
+}
+
 APR_DECLARE(void *) apr_pmemdup(apr_pool_t *a, const void *m, apr_size_t n)
 {
     void *res;
