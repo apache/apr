@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Rename XtOffset to APR_XtOffset.  This namespace protection
+     is important to keep from conflicting with other packages.
+     [Doug MacEachern]
+
   *) Introduce a new --disable-ipv6 option to disable IPv6 support.
      [Sterling Hughes <sterling@designmultimedia.com>, Jeff
      Trawick]
