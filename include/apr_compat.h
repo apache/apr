@@ -16,6 +16,8 @@
 #define ap_array_pstrcat apr_array_pstrcat
 #define ap_bytes_in_free_blocks apr_bytes_in_free_blocks
 #define ap_bytes_in_pool apr_bytes_in_pool
+#define ap_check_file_time apr_check_file_time
+#define ap_filetype_e apr_filetype_e
 #define ap_cleanup_for_exec apr_cleanup_for_exec
 #define ap_clear_pool apr_clear_pool
 #define ap_clear_table apr_clear_table
@@ -27,6 +29,7 @@
 #define ap_destroy_pool apr_destroy_pool
 #define ap_exploded_time_t apr_exploded_time_t
 #define ap_fnmatch apr_fnmatch
+#define ap_getopt apr_getopt
 #define ap_inet_addr apr_inet_addr
 #define ap_init_alloc apr_init_alloc
 #define ap_is_empty_table apr_is_empty_table
@@ -38,11 +41,12 @@
 #define ap_month_snames apr_month_snames
 #define ap_note_subprocess apr_note_subprocess
 #define ap_null_cleanup apr_null_cleanup
-#define ap_optarg apr_optarg 
-#define ap_opterr apr_opterr
-#define ap_optind apr_optind
-#define ap_optopt apr_optopt
-#define ap_optreset apr_optreset
+#define ap_os_dso_load apr_dso_load
+#define ap_os_dso_unload apr_dso_unload
+#define ap_os_dso_sym apr_dso_sym
+#define ap_os_dso_error apr_dso_error
+#define ap_os_error_message apr_canonical_error
+#define ap_os_kill apr_kill
 #define ap_overlap_tables apr_overlap_tables
 #define ap_overlay_tables apr_overlay_tables
 #define ap_palloc apr_palloc
