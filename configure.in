@@ -880,7 +880,6 @@ done
 
 MAKEFILE3="test/Makefile"
 AC_SUBST(SUBDIRS)
-AC_SUBST(MODULES)
 
 if test -n "$CPPFLAGS"; then
   CFLAGS="$CFLAGS $CPPFLAGS"

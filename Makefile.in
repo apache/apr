@@ -12,19 +12,16 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1)
 #
 # Macros for target determination
 #
-MODULES=@MODULES@
 SUBDIRS=@SUBDIRS@
-#shmem/@OSDIR@
 
-LIBAPR = libapr.la
-
+TARGET_LIB = libapr.la
 TARGET_EXPORTS = apr.exports
 
 #
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-TARGETS = $(LIBAPR) delete-exports $(TARGET_EXPORTS)
+TARGETS = delete-lib $(TARGET_LIB) delete-exports $(TARGET_EXPORTS)
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
@@ -39,7 +36,17 @@ EXTRACLEAN_TARGETS = configure libtool aclocal.m4 \
 ### fix this up at some point (install location)
 libdir = /usr/local/lib
 
-$(LIBAPR): $(MODULES)
+delete-lib:
+	@if test -f $(TARGET_LIB); then \
+	    for i in $(SUBDIRS); do objects="$$objects $$i/*.lo"; done ; \
+	    if test -n "`find $$objects -newer $(TARGET_LIB)`"; then \
+		echo Found newer objects. Will relink $(TARGET_LIB). ; \
+		echo $(RM) -f $(TARGET_LIB) ; \
+		$(RM) -f $(TARGET_LIB) ; \
+	    fi \
+	fi
+
+$(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.lo"; done ; \
 	    echo $(LINK) -rpath $(libdir) $$objects ; \
 	    $(LINK) -rpath $(libdir) $$objects
@@ -68,7 +75,7 @@ docs:
 		$(srcdir)helpers/scandoc -i$(srcdir)helpers/default.pl -p./docs/ $(srcdir)include/*.h; \
 	fi
 
-test: $(LIBAPR)
+test: $(TARGET_LIB)
 	(cd test; make clean; make; \
 	cd test; \
 	for prog in `find . -type f -perm +u+x -name "test*" -print`; do \
