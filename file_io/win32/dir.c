@@ -210,12 +210,12 @@ ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_dir(ap_os_dir_t *thedir, struct dir_t *dir)
+ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, struct dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
     }
-    thedir = dir->dirhand;
+    *thedir = dir->dirhand;
     return APR_SUCCESS;
 }
 
