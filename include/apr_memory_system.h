@@ -56,6 +56,7 @@
 #define APR_MEMORY_SYSTEM_H
 
 #include "apr.h"
+#include "apr_errno.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -135,7 +136,7 @@ G * @param mem The block of memory to be freed
  * @deffunc void apr_memory_system_free(apr_memory_system_t *memory_system,
  *					void *mem)
  */
-APR_DECLARE(void)
+APR_DECLARE(apr_status_t)
 apr_memory_system_free(apr_memory_system_t *memory_system,
                        void *mem);
 
@@ -197,7 +198,7 @@ apr_memory_system_reset(apr_memory_system_t *memory_system);
  * @param memory_system The memory system to be destroyed
  * @deffunc void apr_memory_system_destroy(apr_memory_system_t *memory_system)
  */
-APR_DECLARE(void)
+APR_DECLARE(apr_status_t)
 apr_memory_system_destroy(apr_memory_system_t *memory_system);
 
 /**
