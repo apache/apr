@@ -155,10 +155,10 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
         (*len) = 0;
         return errno;
     }
+    (*len) = rv;
     if (rv == 0) {
         return APR_EOF;
     }
-    (*len) = rv;
     return APR_SUCCESS;
 }
 
