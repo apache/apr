@@ -101,7 +101,4 @@ echo "Creating configure ..."
 ### do some work to toss config.cache?
 autoconf
 
-# We do not currently use MM
-#(cd shmem/unix/mm && autoconf)
-
 exit 0
