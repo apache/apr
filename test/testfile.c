@@ -62,9 +62,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#ifdef BEOS
-#include <unistd.h>
-#endif
+#include "test_apr.h"
 
 struct view_fileinfo
 {
@@ -98,8 +96,8 @@ static void closeapr(void)
 
 int main(void)
 {
-    apr_pool_t *context;
-    apr_pool_t *cont2;
+    apr_pool_t *pool;
+    apr_pool_t *pool2;
     apr_file_t *thefile = NULL;
     apr_finfo_t finfo;
     apr_socket_t *testsock = NULL;
@@ -119,250 +117,162 @@ int main(void)
     apr_int32_t num;
 #endif
 
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't initialize.");
-        exit(-1);
-    }
+    printf("APR File Functions Test\n=======================\n\n");
+    
+    STD_TEST_NEQ("Initializing APR", apr_initialize())
     atexit(closeapr);
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
-    if (apr_pool_create(&cont2, context) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
+    STD_TEST_NEQ("Creating the main pool we'll use", 
+                 apr_pool_create(&pool, NULL))
+    STD_TEST_NEQ("Creating the second pool we'll use", 
+                 apr_pool_create(&pool, NULL))
+    
 
     fprintf(stdout, "Testing file functions.\n");
 
-    fprintf(stdout, "\tOpening file.......");
-    status = apr_file_open(&thefile, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
-    if (status != APR_SUCCESS) {
-        fprintf(stderr, "Didn't open file: %d/%s\n", status, 
-                apr_strerror(status, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
+    STD_TEST_NEQ("    Opening file", 
+                 apr_file_open(&thefile, filename, flag, 
+                               APR_UREAD | APR_UWRITE | APR_GREAD, pool))
     
-    fprintf(stdout, "\tChecking file.......");
-    if (thefile == NULL) {
-        fprintf(stderr, "Bad file des\n");
-        exit(-1);
+    printf("%-60s", "    Checking filename");
+    if (thefile == NULL){
+        MSG_AND_EXIT("\nBad file descriptor")
     }
     apr_file_name_get(&str, thefile);
-    if (strcmp(str, filename) != 0) {
-        fprintf(stderr, "wrong filename\n");
-        exit(-1);
+    printf("%s\n", str);
+    if (strcmp(str, filename) != 0){
+        MSG_AND_EXIT("Wrong filename\n")
     }
-    else {
-        fprintf(stdout, "OK\n");
-    }
-
-    fprintf(stdout, "\tWriting to file.......");
+    
+    printf("%-60s", "    Writing to file");
     
     nbytes = strlen("this is a test");
     status = apr_file_write(thefile, "this is a test", &nbytes);
     if (status != APR_SUCCESS) {
-        fprintf(stderr, "something's wrong; apr_file_write->%d/%s\n",
-                status, apr_strerror(status, errmsg, sizeof errmsg));
-        exit(-1);
+        printf("Failed\n");
+        PRINT_ERROR(status);
     }
     if (nbytes != strlen("this is a test")) {
-        fprintf(stderr, "didn't write properly.\n");
-        exit(-1);
+        printf("Failed\n");
+        MSG_AND_EXIT("Failed to write correctly.");
     }
     else {
-        fprintf(stdout, "OK\n");
+        printf("OK\n");
     }
 
-    fprintf(stdout, "\tMoving to start of file.......");
     zer = 0;
-    status = apr_file_seek(thefile, SEEK_SET, &zer);
-    if (status != APR_SUCCESS) {
-        fprintf(stderr, "couldn't seek to beginning of file: %d/%s",
-                status, apr_strerror(status, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
-
+    STD_TEST_NEQ("    Moving to the start of file", 
+                 apr_file_seek(thefile, SEEK_SET, &zer))
+                 
 #if APR_FILES_AS_SOCKETS
-    fprintf(stdout, "\tThis platform supports files_like_sockets\n");
-    fprintf(stdout, "\t\tMaking file look like a socket.......");
-    status = apr_socket_from_file(&testsock, thefile);
-    if (status != APR_SUCCESS) {
-        fprintf(stderr, "apr_socket_from_file()->%d/%s\n",
-                status, apr_strerror(status, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
+    printf("    This platform supports files_like_sockets, testing...\n");
+    STD_TEST_NEQ("        Making file look like a socket",
+                 apr_socket_from_file(&testsock, thefile))
 
-    fprintf(stdout, "\t\tChecking for incoming data.......");
-    apr_poll_setup(&sdset, 1, context);
+    apr_poll_setup(&sdset, 1, pool);
     apr_poll_socket_add(sdset, testsock, APR_POLLIN);
     num = 1;
-    if (apr_poll(sdset, &num, -1) != APR_SUCCESS) {
-        fprintf(stderr, "Select caused an error\n");
-        exit(-1);
+    STD_TEST_NEQ("        Checking for incoming data",
+                 apr_poll(sdset, &num, -1))
+    if (num == 0) {
+        MSG_AND_EXIT("I should not return until num == 1\n")
     }
-    else if (num == 0) {
-        fprintf(stderr, "I should not return until num == 1\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
+    printf("    End of files as sockets test.\n");
 #endif
 
-    fprintf(stdout, "\tReading from the file.......");
     nbytes = strlen("this is a test");
-    buf = (char *)apr_palloc(context, nbytes + 1);
-    status = apr_file_read(thefile, buf, &nbytes);
-    if (status != APR_SUCCESS) {
-        fprintf(stderr, "apr_file_read()->%d/%s\n",
-                status, apr_strerror(status, errmsg, sizeof errmsg));
-        exit(-1);
-    }
+    buf = (char *)apr_palloc(pool, nbytes + 1);
+    STD_TEST_NEQ("    Reading from the file",
+                 apr_file_read(thefile, buf, &nbytes))
     if (nbytes != strlen("this is a test")) {
-        fprintf(stderr, "didn't read properly.\n");
-        exit(-1);
+        MSG_AND_EXIT("We didn't read properly.\n");
     }
-    else {
-        fprintf(stdout, "OK\n");
+    
+    STD_TEST_NEQ("    Adding user data to the file",
+                 apr_file_data_set(thefile, "This is a test",
+                                   "test", apr_pool_cleanup_null))
+
+    STD_TEST_NEQ("    Getting user data from the file",
+                 apr_file_data_get((void **)&teststr, "test", thefile))
+                 
+    if (strcmp(teststr, "This is a test")) {
+        MSG_AND_EXIT("Got the data, but it was wrong");
     }
 
-    fprintf(stdout, "\tAdding user data to the file.......");
-    status = apr_file_data_set(thefile, "This is a test", "test", apr_pool_cleanup_null);
-    if (status  != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't add the data\n");
-        exit(-1); 
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
-
-    fprintf(stdout, "\tGetting user data from the file.......");
-    status = apr_file_data_get((void **)&teststr, "test", thefile);
-    if (status  != APR_SUCCESS || strcmp(teststr, "This is a test")) {
-        fprintf(stderr, "Couldn't get the data\n");
-        exit(-1); 
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
-
-    fprintf(stdout, "\tGetting fileinfo.......");
+    printf("%-60s", "    Getting fileinfo");
     status = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     if (status  == APR_INCOMPLETE) {
 	int i;
-        fprintf(stdout, "INCOMPLETE\n");
+        printf("INCOMPLETE\n");
         for (i = 0; vfi[i].bits; ++i)
             if (vfi[i].bits & ~finfo.valid)
-                fprintf(stdout, "\t    Missing %s\n", vfi[i].description);
+                fprintf(stderr, "\t    Missing %s\n", vfi[i].description);
     }
-    else if (status  != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't get the fileinfo\n");
-        exit(-1); 
+    else if (status != APR_SUCCESS) {
+        printf("OK\n");
+        MSG_AND_EXIT("Couldn't get the fileinfo")
     }
     else {
-        fprintf(stdout, "OK\n");
+        printf("OK\n");
     }
     gid = finfo.group;
     uid = finfo.user;
 
-    fprintf(stdout, "\tClosing File.......");
-    status = apr_file_close(thefile);
-    if (status  != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't close the file\n");
-        exit(-1); 
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
+    STD_TEST_NEQ("    Closing the file", apr_file_close(thefile))
 
-    fprintf(stdout, "\tStat'ing file.......");
-    status = apr_stat(&finfo, filename, APR_FINFO_NORM, context);
+    printf("%-60s", "    Stat'ing file");
+    status = apr_stat(&finfo, filename, APR_FINFO_NORM, pool);
     if (status  == APR_INCOMPLETE) {
 	int i;
-        fprintf(stdout, "INCOMPLETE\n");
+        printf("INCOMPLETE\n");
         for (i = 0; vfi[i].bits; ++i)
             if (vfi[i].bits & ~finfo.valid)
-                fprintf(stdout, "\t    Missing %s\n", vfi[i].description);
+                fprintf(stderr, "\t    Missing %s\n", vfi[i].description);
     }
     else if (status  != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't stat the file\n");
-        exit(-1); 
+        printf("Failed\n");
+        MSG_AND_EXIT("Couldn't stat the file")
     }
     else {
-        fprintf(stdout, "OK\n");
+        printf("OK\n");
     }    
 
     if (finfo.valid & APR_FINFO_GROUP) {
-        fprintf(stdout, "\tComparing group ids.......");
-        status = apr_get_groupname(&buf, finfo.group, context);
-        if (status  != APR_SUCCESS) {
-            fprintf(stderr, "Couldn't retrieve the group name\n");
-            exit(-1); 
-        }
-        status = apr_compare_groups(finfo.group, gid);
-        if (status  != APR_SUCCESS) {
-            fprintf(stderr, "gid's for %s don't match\n", buf);
-            exit(-1); 
-        }
-        fprintf(stdout, "gid's for %s match\n", buf);
+        STD_TEST_NEQ("    Getting groupname", 
+                     apr_get_groupname(&buf, finfo.group, pool))
+        STD_TEST_NEQ("    Comparing group ID's",
+                     apr_compare_groups(finfo.group, gid))
+        printf("     (gid's for %s match)\n", buf);
     }
 
     if (finfo.valid & APR_FINFO_USER) {
-        fprintf(stdout, "\tComparing user ids.......");
-        status = apr_get_username(&buf, finfo.user, context);
-        if (status  != APR_SUCCESS) {
-            fprintf(stderr, "Couldn't retrieve the user name\n");
-            exit(-1); 
-        }
-        status = apr_compare_users(finfo.user, uid);
-        if (status  != APR_SUCCESS) {
-            fprintf(stderr, "uid's for %s don't match\n", buf);
-            exit(-1); 
-        }
-        fprintf(stdout, "uid's for %s match\n", buf);
+        STD_TEST_NEQ("    Getting username", 
+                     apr_get_username(&buf, finfo.user, pool))
+        STD_TEST_NEQ("    Comparing users",
+                     apr_compare_users(finfo.user, uid))
+        printf("     (uid's for %s match)\n", buf);
     }
 
-    fprintf(stdout, "\tDeleting file.......");
-    status = apr_file_remove(filename, context);
-    if (status  != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't delete the file\n");
-        exit(-1); 
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
-    
-    fprintf(stdout, "\tMaking sure it's gone.......");
-    status = apr_file_open(&thefile, filename, APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
-    if (status == APR_SUCCESS) {
-        fprintf(stderr, "I could open the file for some reason?\n");
-        exit(-1);
-    }
-    else {
-        fprintf(stdout, "OK\n");
-    }
+    STD_TEST_NEQ("    Deleting the file", apr_file_remove(filename, pool))
+    TEST_EQ("    Making sure it's gone",
+           apr_file_open(&thefile, filename, APR_READ, 
+                         APR_UREAD | APR_UWRITE | APR_GREAD, pool),
+           APR_SUCCESS, "OK", "Failed")
 
-    testdirs(context); 
-    test_filedel(context);
-    test_read(context);
+    testdirs(pool); 
+    test_filedel(pool);
+    test_read(pool);
 
-    apr_pool_destroy(context);
+    apr_pool_destroy(pool);
     return 1;
 }
 
-int test_filedel(apr_pool_t *context)
+int test_filedel(apr_pool_t *pool)
 {
     apr_file_t *thefile = NULL;
     apr_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     apr_status_t stat;
   
-    stat = apr_file_open(&thefile, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
+    stat = apr_file_open(&thefile, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD, pool);
     if (stat != APR_SUCCESS) {
          return stat;
     }
@@ -371,11 +281,11 @@ int test_filedel(apr_pool_t *context)
         return stat;
     }
 
-    if ((stat = apr_file_remove("testdel", context))  != APR_SUCCESS) {
+    if ((stat = apr_file_remove("testdel", pool))  != APR_SUCCESS) {
         return stat;
     }
 
-    stat = apr_file_open(&thefile, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
+    stat = apr_file_open(&thefile, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, pool);
     if (stat == APR_SUCCESS) {
         return stat;
     }
@@ -383,7 +293,7 @@ int test_filedel(apr_pool_t *context)
     return APR_SUCCESS;
 }
 
-int testdirs(apr_pool_t *context)
+int testdirs(apr_pool_t *pool)
 {
     apr_dir_t *temp;  
     apr_file_t *file = NULL;
@@ -393,7 +303,7 @@ int testdirs(apr_pool_t *context)
     fprintf(stdout, "Testing Directory functions.\n");
 
     fprintf(stdout, "\tMakeing Directory.......");
-    if (apr_dir_make("testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE | APR_GREAD | APR_GWRITE | APR_GEXECUTE | APR_WREAD | APR_WWRITE | APR_WEXECUTE, context)  != APR_SUCCESS) {
+    if (apr_dir_make("testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE | APR_GREAD | APR_GWRITE | APR_GEXECUTE | APR_WREAD | APR_WWRITE | APR_WEXECUTE, pool)  != APR_SUCCESS) {
         fprintf(stderr, "Could not create directory\n");
         return -1;
     }
@@ -401,7 +311,7 @@ int testdirs(apr_pool_t *context)
         fprintf(stdout, "OK\n");
     }
 
-    if (apr_file_open(&file, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {;
+    if (apr_file_open(&file, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE, pool) != APR_SUCCESS) {;
         return -1;
     }
 
@@ -410,7 +320,7 @@ int testdirs(apr_pool_t *context)
 	apr_file_close(file);
 
     fprintf(stdout, "\tOpening Directory.......");
-    if (apr_dir_open(&temp, "testdir", context) != APR_SUCCESS) {
+    if (apr_dir_open(&temp, "testdir", pool) != APR_SUCCESS) {
         fprintf(stderr, "Could not open directory\n");
         return -1;
     }
@@ -474,7 +384,7 @@ int testdirs(apr_pool_t *context)
     }
 
     fprintf(stdout, "\tRemoving file from directory.......");
-    if (apr_file_remove("testdir/testfile", context)  != APR_SUCCESS) {
+    if (apr_file_remove("testdir/testfile", pool)  != APR_SUCCESS) {
         fprintf(stderr, "Could not remove file\n");
         return -1;
     }
@@ -483,7 +393,7 @@ int testdirs(apr_pool_t *context)
     }
 
     fprintf(stdout, "\tRemoving Directory.......");
-    if (apr_dir_remove("testdir", context)  != APR_SUCCESS) {
+    if (apr_dir_remove("testdir", pool)  != APR_SUCCESS) {
         fprintf(stderr, "Could not remove directory\n");
         return -1;
     }
