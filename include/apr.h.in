@@ -99,18 +99,18 @@
 
 /* Typedefs that APR needs. */
 
-typedef  @short_value@           ap_int16_t;
-typedef  unsigned @short_value@  ap_uint16_t;
+typedef  @short_value@           apr_int16_t;
+typedef  unsigned @short_value@  apr_uint16_t;
                                                
-typedef  @int_value@             ap_int32_t;
-typedef  unsigned @int_value@    ap_uint32_t;
+typedef  @int_value@             apr_int32_t;
+typedef  unsigned @int_value@    apr_uint32_t;
                                                
-typedef  @long_value@            ap_int64_t;
-typedef  unsigned @long_value@   ap_uint64_t;
+typedef  @long_value@            apr_int64_t;
+typedef  unsigned @long_value@   apr_uint64_t;
 
-typedef  @size_t_value@          ap_size_t;
-typedef  @ssize_t_value@         ap_ssize_t;
-typedef  @off_t_value@           ap_off_t;
+typedef  @size_t_value@          apr_size_t;
+typedef  @ssize_t_value@         apr_ssize_t;
+typedef  @off_t_value@           apr_off_t;
 
 /* Definitions that APR programs need to work properly. */
 
@@ -136,20 +136,20 @@ typedef  @off_t_value@           ap_off_t;
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "@eolstr@"
 
-/* Define ap_signal and related necessary definitions.
+/* Define apr_signal and related necessary definitions.
  */
 /* We are checking for HAVE_SIGACTION, but autoconf is filling this in 
  * for us automatically.
  */
 #if @have_sigaction@ && !defined(NO_USE_SIGACTION)
 typedef void Sigfunc(int);
-Sigfunc *ap_signal(int signo, Sigfunc * func);
+Sigfunc *apr_signal(int signo, Sigfunc * func);
 
 #if defined(SIG_ING) && !defined(SIG_ERR)
 #define SIG_ERR ((Sigfunc *)-1)
 #endif
 #else
-#define ap_signal(a,b) signal(a,b)
+#define apr_signal(a,b) signal(a,b)
 #endif
 
 #ifdef APR_HAVE_SYS_WAIT_H
