@@ -1321,7 +1321,10 @@ fi
 # you can override our decision below.
 case $host in
    s390*linux*)
-       size_t_fmt='#define APR_SIZE_T_FMT "ld"'
+       # uniquely, the 31-bit Linux/s390 uses "unsigned long int"
+       # for size_t rather than "unsigned int":
+       size_t_fmt='#define APR_SIZE_T_FMT "lu"'
+       ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
        ;;
    *-os2*)
        size_t_fmt='#define APR_SIZE_T_FMT "lu"'
