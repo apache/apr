@@ -67,20 +67,9 @@
 #include <pthread.h>
 #endif
 
-apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
+APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signum)
 {
-#ifndef NETWARE
-    if (kill(proc->pid, signum) == -1) {
-        return errno;
-    }
-#endif
-
-    //srj need to find equal to kill or use sigterm in nks
-	//srj windows is using TerminateProcess here
-    //srj if ( NXThreadExit(proc->pid) != 0) {
-    //srj    return errno;
-    //srj }
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
 
 
@@ -116,7 +105,7 @@ static void *signal_thread_func(void *signal_handler)
     return NULL;
 }
 
-apr_status_t apr_setup_signal_thread(void)
+APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
 {
     int rv = 0;
 
