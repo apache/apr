@@ -64,7 +64,7 @@
 #define APR_TRACKING_MEMORY_SYSTEM_H
 
 #include "apr.h"
-#include "apr_memory_system.h"
+#include "apr_sms.h"
 
 #ifdef __cplusplus
 extern "C" {

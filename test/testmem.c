@@ -52,8 +52,8 @@
  * <http://www.apache.org/>.
  */
 
-#include "apr_memory_system.h"
-#include "apr_tracking_memory_system.h"
+#include "apr_sms.h"
+#include "apr_sms_tracking.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
