@@ -63,6 +63,8 @@
 #include "apr_date.h"
 #include "apr_dbm.h"
 #include "apr_hooks.h"
+#include "apr_ldap.h"
+#include "apr_ldap_url.h"
 #include "apr_md4.h"
 #include "apr_md5.h"
 #include "apr_optional.h"
