@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 01:23:19 $]
+Last modified at [$Date: 2002/07/12 04:28:16 $]
 
 Release:
 
@@ -88,9 +88,10 @@ CURRENT VOTES:
          an ongoing contract with users about the type's units.
          +1: fielding  [prefers apr_busec or simple time_t / struct tm]
          +1: jwoolley
-         +0.5: wrowe  [prefers apr_butime_t but isn't going to fight that]
+         +0.5: wrowe,  [prefers apr_butime_t but isn't going to fight that]
+               brianp
          -0: striker, jerenkrantz
-         -0.5: rbb, brianp,ianh
+         -0.5: rbb, ianh
 
       [fielding: Is APR time guaranteed to be a scalar quantity?  If so,
        then we must include units as part of the definition of the
