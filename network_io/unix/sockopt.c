@@ -150,7 +150,7 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interva
 apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
 {
     int one;
-    apr_status_t stat;
+    apr_status_t rv;
 
     if (on)
         one = 1;
@@ -199,12 +199,12 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
     if (opt & APR_SO_NONBLOCK) {
         if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != on){
             if (on) {
-                if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) 
-                    return stat;
+                if ((rv = sononblock(sock->socketdes)) != APR_SUCCESS) 
+                    return rv;
             }
             else {
-                if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
-                    return stat;
+                if ((rv = soblock(sock->socketdes)) != APR_SUCCESS)
+                    return rv;
             }
             apr_set_option(&sock->netmask, APR_SO_NONBLOCK, on);
         }
@@ -234,15 +234,15 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
          */
         if (on >= 0 && sock->timeout < 0){
             if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != 1){
-                if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS){
-                    return stat;
+                if ((rv = sononblock(sock->socketdes)) != APR_SUCCESS){
+                    return rv;
                 }
             }
         } 
         else if (on < 0 && sock->timeout >= 0){
             if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != 0){ 
-                if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) { 
-                    return stat; 
+                if ((rv = soblock(sock->socketdes)) != APR_SUCCESS) { 
+                    return rv; 
                 }
             } 
         }
