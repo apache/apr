@@ -47,7 +47,7 @@ RSC=rc.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG" /I "./include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -73,7 +73,7 @@ LINK32=link.exe
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o /win32 "NUL"
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG" /I "./include"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -636,37 +636,6 @@ SOURCE=.\include\apr_want.h
 # Begin Source File
 
 SOURCE=.\libapr.rc
-# End Source File
-# Begin Source File
-
-SOURCE=.\build\win32ver.awk
-
-!IF  "$(CFG)" == "libapr - Win32 Release"
-
-# PROP Ignore_Default_Tool 1
-USERDEP__WIN32="./include/apr_version.h"	
-# Begin Custom Build - Creating Version Resource
-InputPath=.\build\win32ver.awk
-
-".\libapr.rc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	awk -f ./build/win32ver.awk libapr.dll "Apache Portability Runtime Library" ./include/apr_version.h > .\libapr.rc
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
-
-# PROP Ignore_Default_Tool 1
-USERDEP__WIN32="./include/apr_version.h"	
-# Begin Custom Build - Creating Version Resource
-InputPath=.\build\win32ver.awk
-
-".\libapr.rc" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	awk -f ./build/win32ver.awk libapr.dll "Apache Portability Runtime Library" ./include/apr_version.h > .\libapr.rc
-
-# End Custom Build
-
-!ENDIF 
-
 # End Source File
 # End Target
 # End Project
