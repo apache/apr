@@ -71,6 +71,7 @@ static const struct testlist {
     {"testmmap", testmmap},
     {"testud", testud},
     {"testtable", testtable},
+    {"testhash", testhash},
     {"testsleep", testsleep},
     {"testpool", testpool},
     {"testfmt", testfmt},
