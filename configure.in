@@ -1257,7 +1257,7 @@ else
             ;;
         *)
             AC_ARG_WITH(egd, 
-              [  --with-egd=<path>   use egd-compatible socket],
+              [  --with-egd=<path>       use egd-compatible socket],
               [ if test "$withval" = "yes"; then
                   AC_ERROR([You must specify a default EGD socket path.])
                 fi
