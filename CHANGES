@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Add memory code kindly donated to APR by  
+       Elrond  <elrond@samba-tng.org> 
+       Luke Kenneth Casson Leighton <lkcl@samba-tng.org>
+       Sander Striker <striker@samba-tng.org>
+     [David Reid]
+
   *) Fix a problem with the FreeBSD flavor of apr_sendfile() where we 
      could return APR_EAGAIN+bytes_sent.  [Jeff Trawick]
 
