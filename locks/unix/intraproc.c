@@ -80,7 +80,7 @@ static apr_status_t intra_create(apr_lock_t *new, const char *fname)
 
     new->intraproc = (pthread_mutex_t *)apr_palloc(new->pool, 
                                                    sizeof(pthread_mutex_t));
-    if (new->intraproc == NULL ) {
+    if (new->intraproc == NULL) {
         return errno;
     }
     if ((stat = pthread_mutexattr_init(&mattr))) {
