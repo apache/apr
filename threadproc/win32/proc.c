@@ -282,7 +282,7 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
             ptr++;
         }
 
-        if (*ptr == '\\' || *++ptr == ':') {
+        if (*ptr == '\\' || *ptr == '/' || *++ptr == ':') {
             cmdline = apr_pstrdup(cont, progname);
         }
         else if (attr->currdir == NULL) {
