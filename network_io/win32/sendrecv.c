@@ -69,7 +69,7 @@
  * bytes.
  */
 #define MAX_SEGMENT_SIZE 65536
-
+#define WSABUF_ON_STACK 50
 
 APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
                                    apr_size_t *len)
@@ -123,33 +123,33 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
                                     const struct iovec *vec,
                                     apr_int32_t nvec, apr_size_t *nbytes)
 {
+    apr_status_t rc = APR_SUCCESS;
     apr_ssize_t rv;
     int i;
-    int lasterror;
     DWORD dwBytes = 0;
+    WSABUF wsabuf[WSABUF_ON_STACK];
+    LPWSABUF pWsaBuf = wsabuf;
 
-    /* Todo: Put the WSABUF array on the stack. */
-    LPWSABUF pWsaData = (LPWSABUF) malloc(sizeof(WSABUF) * nvec);
-
-    if (!pWsaData)
-        return APR_ENOMEM;
-
+    if (nvec > WSABUF_ON_STACK) {
+        pWsaBuf = (LPWSABUF) malloc(sizeof(WSABUF) * nvec);
+        if (!pWsaBuf)
+            return APR_ENOMEM;
+    }
     for (i = 0; i < nvec; i++) {
-        pWsaData[i].buf = vec[i].iov_base;
-        pWsaData[i].len = vec[i].iov_len;
+        pWsaBuf[i].buf = vec[i].iov_base;
+        pWsaBuf[i].len = vec[i].iov_len;
     }
 
-    rv = WSASend(sock->sock, pWsaData, nvec, &dwBytes, 0, NULL, NULL);
+    rv = WSASend(sock->sock, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
-        lasterror = apr_get_netos_error();
-        free(pWsaData);
-        return lasterror;
+        rc = apr_get_netos_error();
     }
 
-    free(pWsaData);
+    if (nvec > WSABUF_ON_STACK) 
+        free(pWsaBuf);
 
     *nbytes = dwBytes;
-    return APR_SUCCESS;
+    return rc;
 }
 
 
