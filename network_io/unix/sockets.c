@@ -108,6 +108,7 @@ ap_status_t ap_create_tcp_socket(ap_context_t *cont, struct socket_t **new)
     if ((*new)->socketdes < 0) {
         return errno;
     }
+    (*new)->timeout = -1;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, NULL);
     return APR_SUCCESS;

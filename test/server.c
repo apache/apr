@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
     length = STRLEN;
     fprintf(stdout, "\tServer:  Trying to recv data from socket.......");
-    if (ap_recv(sock2, datasend, &length, 5) != APR_SUCCESS) {
+    if (ap_recv(sock2, datasend, &length) != APR_SUCCESS) {
         ap_close_socket(sock);
         ap_close_socket(sock2);
         fprintf(stderr, "Problem recving data\n");
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 
     length = STRLEN;
     fprintf(stdout, "\tServer:  Sending data over socket.......");
-    if (ap_send(sock2, datarecv, &length, 5) != APR_SUCCESS) {
+    if (ap_send(sock2, datarecv, &length) != APR_SUCCESS) {
         ap_close_socket(sock);
         ap_close_socket(sock2);
         fprintf(stderr, "Problem sending data\n");
