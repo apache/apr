@@ -236,7 +236,7 @@ static int warrsztoastr(char ***retarr, wchar_t *arrsz, int args)
 /* Reprocess the arguments to main() for a completely apr-ized application
  */
 
-APR_DECLARE(apr_status_t) apr_main(int *argc, char ***argv, char ***env)
+APR_DECLARE(apr_status_t) apr_app_main(int *argc, char ***argv, char ***env)
 {
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
