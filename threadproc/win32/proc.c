@@ -699,7 +699,10 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
                                                   apr_pool_t *p)
 {
     /* Unix does apr_proc_wait(proc(-1), exitcode, exitwhy, waithow)
-     * but Win32's apr_proc_wait won't work that way.
+     * but Win32's apr_proc_wait won't work that way.  We can either
+     * register all APR created processes in some sort of AsyncWait
+     * thread, or simply walk from the global process pool for all 
+     * apr_pool_note_subprocess()es registered with APR.
      */
     return APR_ENOTIMPL;
 }
@@ -735,6 +738,8 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
                 *exitcode = stat;
             if (exitwhy)
                 *exitwhy = why_from_exit_code(stat);
+            CloseHandle(proc->hproc);
+            proc->hproc = NULL;
             return APR_CHILD_DONE;
         }
     }
