@@ -508,7 +508,7 @@ apr_status_t apr_proc_detach(void);
 
 /**
  * Register an other_child -- a child which must be kept track of so 
- * that the program knows when it has dies or disappeared.
+ * that the program knows when it has died or disappeared.
  * @param pid pid is the pid of the child.
  * @param maintenance maintenance is a function that is invoked with a 
  *                    reason and the data pointer passed here.
