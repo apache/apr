@@ -332,9 +332,9 @@ fi
 AC_MSG_RESULT([$msg])
 ])dnl
 
-dnl APR_CHECK_HEADERS(HEADER-FILE ... , FLAG-TO-SET)
+dnl APR_FLAG_HEADERS(HEADER-FILE ... , FLAG-TO-SET)
 dnl  we set FLAG-TO-SET to 1 if we find HEADER-FILE, otherwise we set to 0
-AC_DEFUN(APR_CHECK_HEADER,[
+AC_DEFUN(APR_FLAG_HEADERS,[
 if test "x$2" != "x"; then
     s1="$2=\"1\""
     s0="$2=\"0\""
@@ -345,9 +345,9 @@ fi
 AC_CHECK_HEADERS($1, eval $s1, eval $s0)
 ])
 
-dnl APR_CHECK_FUNCS(FUNC ... , FLAG-TO-SET)
+dnl APR_FLAG_FUNCS(FUNC ... , FLAG-TO-SET)
 dnl  we set FLAG-TO-SET to 1 if we find FUNC, otherwise we set to 0
-AC_DEFUN(APR_CHECK_FUNC,[
+AC_DEFUN(APR_FLAG_FUNCS,[
 if test "x$2" != "x"; then
     s1="$2=\"1\""
     s0="$2=\"0\""
