@@ -238,6 +238,14 @@ bool parse_short_opt(char *arg, cmd_data_t *cmd_data)
         return true;
     }
 
+    if (strcmp(arg, "prefer-pic") == 0) {
+        return true;
+    }
+
+    if (strcmp(arg, "prefer-non-pic") == 0) {
+        return true;
+    }
+
     return false;
 }
 
