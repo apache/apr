@@ -366,12 +366,12 @@ if test "$threads" = "1"; then
         pthreadser="1" ])
 fi
 AC_BEGIN_DECISION([lock implementation method])
+AC_IFALLYES(custom:union_semun,
+            AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 AC_IFALLYES(header:sys/file.h define:LOCK_EX,
             AC_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
 AC_IFALLYES(header:fcntl.h define:F_SETLK,
             AC_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
-AC_IFALLYES(custom:union_semun,
-            AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 AC_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
             custom:use_pthread_cross,
             AC_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
