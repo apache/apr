@@ -153,7 +153,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
 
 void abts_run_test(abts_suite *ts, test_func f, void *value)
 {
-    abts_case *tc;
+    abts_case tc;
     sub_suite *ss;
 
     if (!should_test_run(ts->tail->name)) {
@@ -161,19 +161,17 @@ void abts_run_test(abts_suite *ts, test_func f, void *value)
     }
     ss = ts->tail;
 
-    tc = malloc(sizeof(tc));
-    tc->failed = 0;
-    tc->suite = ss;
+    tc.failed = 0;
+    tc.suite = ss;
     
     ss->num_test++;
     update_status();
 
-    f(tc, value);
+    f(&tc, value);
     
-    if (tc->failed) {
+    if (tc.failed) {
         ss->failed++;
     }
-    free(tc);
 }
 
 static int report(abts_suite *suite)
