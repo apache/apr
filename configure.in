@@ -276,6 +276,14 @@ case "$host:$CC" in
 	APR_SETVAR(AR,ar)
 	;;
 esac
+
+dnl force_atomic_generic flag 
+dnl this will be set we find a cpu/OS combo
+dnl which is historical and doesn't work with the method
+dnl we are using for the more up to date cpu/OS
+dnl  (ie.. old sparcs)
+apr_force_atomic_generic=0
+
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
 case $host in
@@ -329,18 +337,37 @@ case $host in
         *sparc*)
             OSDIR="solaris_sparc"
             eolstr="\\n"
+            apr_atomic_sparc_compile=apr_atomic_sparc.lo
+            sparc_arch=`uname -m`
             is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
             if [ -z "$is_gnu_as" ]
             then
-                ASFLAGS="-xarch=v8plus -KPIC -q"
-                ASCPPFLAGS="-D_ASM -D__STDC__=0"
+                case "$sparc_arch" in
+                 sun4c|sun4m|sun4d|sun4t|sun4)
+                    apr_force_atomic_generic=1
+                    apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
+                    ;;
+                 *)
+                    ASFLAGS="-xarch=v8plus -K PIC"
+                    ASCPPFLAGS="-D_ASM -D__STDC__=0"
+                    ;;
+                esac
             else
-                ASFLAGS="-K pic -P -D_ASM -D__STDC__=0 -xarch=v8plus"
-                ASCPPFLAGS=""
-                ASCPP="cat"
+                case "$sparc_arch" in
+                 sun4c|sun4m|sun4d|sun4t|sun4)
+                    apr_force_atomic_generic=1
+                    apr_atomic_sparc_compile=apr_atomic_sparc_no_support.lo
+                    ;;
+                 *)
+                    ASFLAGS="-K pic -P -D_ASM -D__STDC__=0 -xarch=v8plus"
+                    ASCPPFLAGS=""
+                    ASCPP="cat"
+                    ;;
+                esac
             fi
             AC_SUBST(ASCPPFLAGS)
             AC_SUBST(ASFLAGS)
+            AC_SUBST(apr_atomic_sparc_compile)
             ;;
         *)
             OSDIR="unix"
@@ -354,6 +381,7 @@ case $host in
        ;;
 esac
 
+AC_SUBST(apr_force_atomic_generic)
 AC_SUBST(eolstr)
 AC_SUBST(INSTALL_SUBDIRS)
 
