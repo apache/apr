@@ -158,11 +158,23 @@ APR_DECLARE(void) apr_pool_terminate(void);
  *          (this flag only makes sense in combination with POOL_FNEW_ALLOCATOR)
  *
  */
+#if defined(APR_POOL_DEBUG)
+#define apr_pool_create_ex( newpool, parent, abort_fn, flag)  \
+    apr_pool_create_ex_dbg( newpool, parent, abort_fn, flag,__FILE__,__LINE__)  
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex_dbg(apr_pool_t **newpool,
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_uint32_t flags,
+                                             const char *file,
+                                             int line);
+#
+#else
 APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
                                              apr_pool_t *parent,
                                              apr_abortfunc_t abort_fn,
                                              apr_uint32_t flags);
-
+#endif
 /**
  * Create a new pool.
  * @param newpool The pool we have just created.
@@ -175,8 +187,13 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
                                           apr_pool_t *parent);
 #else
+#if defined(APR_POOL_DEBUG)
+#define apr_pool_create(newpool, parent) \
+    apr_pool_create_ex_dbg(newpool, parent, NULL, APR_POOL_FDEFAULT,__FILE__,__LINE__)
+#else
 #define apr_pool_create(newpool, parent) \
     apr_pool_create_ex(newpool, parent, NULL, APR_POOL_FDEFAULT)
+#endif
 #endif
 
 /**
@@ -193,8 +210,13 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
                                     apr_pool_t *parent,
                                     int (*apr_abort)(int retcode));
 #else
+#if defined(APR_POOL_DEBUG)
+#define apr_pool_sub_make(newpool, parent, abort_fn) \
+    (void)apr_pool_create_ex_dbg(newpool, parent, abort_fn, APR_POOL_FDEFAULT,__FILE__,__LINE__);
+#else
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex(newpool, parent, abort_fn, APR_POOL_FDEFAULT);
+#endif
 #endif
 
 /**
@@ -203,8 +225,14 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
  * @param p The pool to destroy
  * @remark This will actually free the memory
  */
-APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
+#if defined(APR_POOL_DEBUG)
+#define apr_pool_destroy(p) \
+    apr_pool_destroy_dbg(p, __FILE__,__LINE__)
 
+APR_DECLARE(void) apr_pool_destroy_dbg(apr_pool_t *p, const char *file, int line);
+#else
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
+#endif
 
 /*
  * Memory allocation
@@ -234,8 +262,14 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
  *       to re-use this memory for the next allocation.
  * @see apr_pool_destroy()
  */
-APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
+#if defined(APR_POOL_DEBUG)
+#define apr_pool_clear(p) \
+    apr_pool_clear_dbg(p, __FILE__,__LINE__)
 
+APR_DECLARE(void) apr_pool_clear_dbg(apr_pool_t *p, const char*file, int line);
+#else
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
+#endif
 
 /*
  * Pool Properties
