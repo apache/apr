@@ -52,12 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#ifdef BEOS
-#include "../beos/mmap_h.h"
-#else
 #include "mmap_h.h"
-#endif
-
 #include "apr_portable.h"
 
 #if HAVE_MMAP
@@ -66,33 +61,65 @@ static ap_status_t mmap_cleanup(void *themmap)
 {
     ap_mmap_t *mm = themmap;
     int rv;
+#ifdef BEOS
+    rv = delete_area(mm->area);
+
+    if (rv == 0) {
+        mm->mm = (caddr_t)-1;
+        return APR_SUCCESS;
+    }
+#else
     rv = munmap(mm->mm, mm->size);
 
     if (rv == 0) {
         mm->mm = (caddr_t)-1;
         return APR_SUCCESS;
     }
-    else
-        return errno;
+#endif
+    return errno;
 }
 
 ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset, 
        ap_size_t size, ap_pool_t *cont)
 {
+#ifdef BEOS
+    void *mm;
+    area_id aid = -1;
+    char *areaname = "apr_mmap\0";
+    uint32 pages = 0;
+#else
     caddr_t mm;
+#endif
    
-    if (file == NULL || file->filedes == -1)
+    if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
-
     (*new) = (ap_mmap_t *)ap_pcalloc(cont, sizeof(ap_mmap_t));
     
     ap_seek(file, APR_SET, &offset);
+#ifdef BEOS
+    pages = ((size -1) / B_PAGE_SIZE) + 1;
+
+    aid = create_area(areaname, &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
+        B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
+
+    if (aid < B_NO_ERROR) {
+        /* we failed to get an mmap'd file... */
+        return APR_ENOMEM;
+    }
+
+    if (aid >= B_NO_ERROR)
+        read(file->filedes, mm, size);
+    (*new)->area = aid;
+#else
+
     mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes ,0);
 
     if (mm == (caddr_t)-1) {
         /* we failed to get an mmap'd file... */
         return APR_ENOMEM;
     }
+#endif
+
     (*new)->mm = mm;
     (*new)->size = size;
     (*new)->cntxt = cont;

@@ -61,11 +61,7 @@
  *
  */
 
-#ifdef BEOS
-#include "../beos/mmap_h.h"
-#else
 #include "mmap_h.h"
-#endif
 
 #if HAVE_MMAP
 
