@@ -635,6 +635,8 @@ fi
 
 AC_SUBST(threads)
 
+AC_CHECK_FUNCS(sigwait, [ have_sigwait="1" ], [ have_sigwait="0" ]) 
+
 dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
 dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
 dnl systems if we are also using threads.
