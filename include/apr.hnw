@@ -159,7 +159,7 @@
 
 #define APR_HAS_LOCK_CREATE_NP            0
 
-#define APR_PROCESS_LOCK_IS_GLOBAL        0
+#define APR_PROCESS_LOCK_IS_GLOBAL        1
 
 #define APR_FILE_BASED_SHM      0
 
