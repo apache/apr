@@ -568,7 +568,7 @@ apr_status_t test_cond(void)
     return APR_SUCCESS;
 }
 
-apr_status_t test_timeoutcond(void)
+static apr_status_t test_timeoutcond(void)
 {
     apr_status_t s;
     apr_interval_time_t timeout;
