@@ -144,7 +144,7 @@ abts_suite *abts_add_suite(abts_suite *suite, const char *suite_name_full)
     }
 
     reset_status();
-    fprintf(stdout, "%s:  ", subsuite->name);
+    fprintf(stdout, "%-20s:  ", subsuite->name);
     update_status();
     fflush(stdout);
 
