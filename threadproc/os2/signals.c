@@ -52,6 +52,7 @@
  * <http://www.apache.org/>.
  */
 
+#define INCL_DOSEXCEPTIONS
 #include "threadproc.h"
 #include "fileio.h"
 #include "apr_thread_proc.h"
@@ -79,3 +80,21 @@ apr_status_t apr_kill(apr_proc_t *proc, int signal)
     return rc;
 }
 
+
+
+/*
+ * Replace standard signal() with the more reliable sigaction equivalent
+ * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
+ * (the version that does not automatically restart system calls).
+ */
+Sigfunc *apr_signal(int signo, Sigfunc * func)
+{
+    struct sigaction act, oact;
+
+    act.sa_handler = func;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    if (sigaction(signo, &act, &oact) < 0)
+        return SIG_ERR;
+    return oact.sa_handler;
+}
