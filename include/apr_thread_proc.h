@@ -592,8 +592,8 @@ B<Wait for any current child process to die and return information about that ch
 =cut
  */
 
-ap_status_t ap_wait_all_proc(ap_proc_t **proc, ap_wait_how_e waithow, 
-                             ap_pool_t *p);
+ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_how_e waithow, 
+                              ap_pool_t *p);
 
 /*
 
