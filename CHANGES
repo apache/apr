@@ -40,6 +40,12 @@ Changes for APR 1.1.0
      PR 28029.  [Chris Knight <Christopher.D.Knight nasa.gov>,
      Garrett Rooney <rooneg electricjellyfish.net>]
 
+Changes for APR 1.0.2
+
+  *) [NetWare] Fixed some type mismatches in threadproc/netware/proc.c and
+     locks/netware/thread_mutex.c that prevented APR from building with the
+     latest release of the LibC SDK. [Brad Nicholes]
+     
 Changes for APR 1.0.1
 
   *) apr_password_get(): Fix the check for buffer overflow.  [Jeff Trawick]
