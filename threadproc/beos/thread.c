@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "beos/threadproc.h"
 
 apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
 {
