@@ -135,4 +135,37 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
+ap_status_t ap_child_init_lock(struct lock_t **lock, char *fname, ap_context_t *cont)
+{
+    ap_status_t stat;
+    if ((*lock)->scope != APR_CROSS_PROCESS) {
+        if ((stat = child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
+            return stat;
+        }
+    }
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
+{
+    if (lock != NULL) {
+        return ap_get_userdata(data, key, lock->cntxt);
+    }
+    else {
+        data = NULL;
+        return APR_ENOLOCK;
+    }
+}
+
+ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
+{
+    if (lock != NULL) {
+        return ap_set_userdata(data, key, cleanup, lock->cntxt);
+    }
+    else {
+        data = NULL;
+        return APR_ENOLOCK;
+    }
+}
 
