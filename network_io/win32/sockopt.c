@@ -259,7 +259,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_get(apr_socket_t *sock,
     switch (opt) {
     case APR_SO_TIMEOUT: 
         /* XXX: to be deprecated */
-        *on = sock->timeout;
+        *on = (apr_int32_t)sock->timeout;
         break;
     case APR_SO_DISCONNECTED:
         *on = sock->disconnected;
