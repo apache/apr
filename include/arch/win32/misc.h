@@ -160,13 +160,27 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
  * In the case of non-text functions, simply #define the original name
  */
 
+#ifdef GetFileAttributesExA
+#undef GetFileAttributesExA
+#endif
 APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
     IN LPCSTR lpFileName,
     IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
     OUT LPVOID lpFileInformation),
     (lpFileName, fInfoLevelId, lpFileInformation));
+#define GetFileAttributesExA apr_winapi_GetFileAttributesExA
 #undef GetFileAttributesEx
 #define GetFileAttributesEx apr_winapi_GetFileAttributesExA
+
+#ifdef GetFileAttributesExW
+#undef GetFileAttributesExW
+#endif
+APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExW, 0, (
+    IN LPCWSTR lpFileName,
+    IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
+    OUT LPVOID lpFileInformation),
+    (lpFileName, fInfoLevelId, lpFileInformation));
+#define GetFileAttributesExW apr_winapi_GetFileAttributesExW
 
 APR_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
     IN HANDLE hFile),
