@@ -65,7 +65,7 @@
 #define READ(x,y,z)   read(x,y,z)
 #endif
 
-#if APR_HAVE_SENDFILE
+#if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the ap_file_t internals. */
 #include "../../file_io/unix/fileio.h"
 
@@ -76,7 +76,7 @@
 #define TCP_CORK 3
 #endif
 
-#endif /* APR_HAVE_SENDFILE */
+#endif /* APR_HAS_SENDFILE */
 
 static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
 {
@@ -204,7 +204,7 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
 }
 #endif
 
-#if APR_HAVE_SENDFILE
+#if APR_HAS_SENDFILE
 
  /* TODO: Verify that all platforms handle the fd the same way 
   *     (i.e. not moving current file pointer)
@@ -555,4 +555,4 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     return APR_SUCCESS;
 }
 #endif /* __linux__, __FreeBSD__, __HPUX__, _AIX */
-#endif /* APR_HAVE_SENDFILE */
+#endif /* APR_HAS_SENDFILE */

@@ -133,7 +133,7 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec,
     *nbytes = dwBytes;
     return APR_SUCCESS;
 }
-#if APR_HAVE_SENDFILE
+#if APR_HAS_SENDFILE
 /*
  * ap_status_t ap_sendfile(ap_socket_t *, ap_file_t *, ap_hdtr_t *, 
  *                         ap_off_t *, ap_size_t *, ap_int32_t flags)
