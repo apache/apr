@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/19 03:13:00 $]
+Last modified at [$Date: 2001/01/20 21:38:03 $]
 
 Release:
 
@@ -23,6 +23,9 @@ RELEASE SHOWSTOPPERS:
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
+    * Unix, OS2 apr_stat/lstat/getfileinfo were very fast hacks.  These
+      need to be fleshed out.
+
     * SysV semaphore support isn't usable by Apache when started as
       root because we don't have a way to allow the semaphore to be
       used by the configured User and Group.  Current work-around:
@@ -38,6 +41,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       something similar) to direct ap_create_process to create the
       process suspended. We also need a call to wake up the suspended 
       process This may not be able to be implemented everywhere though.
+        Status: OtherBill asks, why?  What is the benefit, how is it
+        portably implemented?
 
     * Replace tables with a proper opaque ADT that has pluggable
       implementations (including something like the existing data type,

@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Introduce the wanted flag argument to the apr_stat/lstat/getfileinfo
+     family of functions.  This change allows the user to determine what
+     platform-specific file information is retrieved, to optimize both
+     portability and performance.  [William Rowe]
+
   *) Fix make depend.  [Ryan Bloom]
 
   *) All dso implementations now register a cleanup to unload the DSO
