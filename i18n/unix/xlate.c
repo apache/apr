@@ -95,7 +95,7 @@ struct apr_xlate_t {
     char *frompage;
     char *topage;
     char *sbcs_table;
-#ifdev HAVE_ICONV
+#ifdef HAVE_ICONV
     iconv_t ich;
 #endif
 };
@@ -173,7 +173,7 @@ static const char *handle_special_names(const char *page)
 
 static apr_status_t apr_xlate_cleanup(void *convset)
 {
-#ifdev HAVE_ICONV
+#ifdef HAVE_ICONV
     apr_xlate_t *old = convset;
 
     if (old->ich != (iconv_t)-1) {
@@ -185,7 +185,7 @@ static apr_status_t apr_xlate_cleanup(void *convset)
     return APR_SUCCESS;
 }
 
-#ifdev HAVE_ICONV
+#ifdef HAVE_ICONV
 static void check_sbcs(apr_xlate_t *convset)
 {
     char inbuf[256], outbuf[256];
@@ -251,7 +251,7 @@ apr_status_t apr_xlate_open(apr_xlate_t **convset, const char *topage,
     set found to non-zero if found in the cache
 #endif
 
-#ifdev HAVE_ICONV
+#ifdef HAVE_ICONV
     if (!found) {
         new->ich = iconv_open(topage, frompage);
         if (new->ich == (iconv_t)-1) {
@@ -287,7 +287,7 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
                                    apr_size_t *outbytes_left)
 {
     apr_status_t status = APR_SUCCESS;
-#ifdev HAVE_ICONV
+#ifdef HAVE_ICONV
     size_t translated;
 
     if (convset->ich != (iconv_t)-1) {
