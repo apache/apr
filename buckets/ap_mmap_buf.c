@@ -88,8 +88,9 @@ static ap_status_t mmap_split(ap_bucket *e, ap_size_t nbyte)
     ap_bucket *newbuck;
     ap_bucket_mmap *a = (ap_bucket_mmap *)e->data;
     ap_bucket_mmap *b;
+    ap_ssize_t dump;
 
-    newbuck = ap_bucket_mmap_create();
+    newbuck = ap_bucket_mmap_create(a->alloc_addr, a->len, &dump);
     b = (ap_bucket_mmap *)newbuck->data;
     a->alloc_addr = a->alloc_addr + nbyte;
     a->len = b->len - nbyte;
@@ -103,7 +104,8 @@ static ap_status_t mmap_split(ap_bucket *e, ap_size_t nbyte)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(void)
+APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(const void *buf, 
+                                      ap_size_t nbytes, ap_ssize_t *w)
 {
     ap_bucket *newbuf;
     ap_bucket_mmap *b;
@@ -114,13 +116,15 @@ APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(void)
     b->alloc_addr     = NULL;
     b->len            = 0;
 
+    newbuf->data      = b;
+    mmap_bucket_insert(newbuf, buf, nbytes, w);
+
     newbuf->color     = AP_BUCKET_mmap;
     newbuf->read      = mmap_get_str;
     newbuf->getlen    = mmap_get_len;
     newbuf->write     = mmap_bucket_insert;
     newbuf->split     = mmap_split;
     newbuf->free      = NULL;
-    newbuf->data      = b;
     
     return newbuf;
 }
