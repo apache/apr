@@ -56,6 +56,7 @@
 #include "apr_general.h"
 #include "apr_pools.h"
 #include "apr_signal.h"
+#include "apr_atomic.h"
 
 #include "proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "internal_time.h"
