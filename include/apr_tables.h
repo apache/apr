@@ -145,7 +145,7 @@ struct apr_table_entry_t {
 /**
  * Determine if the table is empty
  * @param t The table to check
- * @return True if empty, Falso otherwise
+ * @return True if empty, False otherwise
  */
 #define apr_is_empty_table(t) (((t) == NULL) \
                                || (((apr_array_header_t *)(t))->nelts == 0))
