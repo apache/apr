@@ -530,7 +530,9 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
  * @remark This functions acts like a blocking write by default.  To change 
  *         this behavior, use apr_socket_timeout_set() or the
  *         APR_SO_NONBLOCK socket option.
- *         The number of bytes actually sent is stored in argument 5.
+ * The number of bytes actually sent is stored in the len parameter.
+ * The offset parameter is passed by reference for no reason; its
+ * value will never be modified by the apr_socket_sendfile() function.
  */
 APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock, 
                                               apr_file_t *file,
