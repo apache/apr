@@ -62,17 +62,18 @@
 #define socketdes sock
 
 struct apr_socket_t {
-    apr_pool_t *cntxt;
-    SOCKET sock;
-    int type; /* SOCK_STREAM, SOCK_DGRAM */
-    apr_sockaddr_t *local_addr;
-    apr_sockaddr_t *remote_addr;
+    apr_pool_t         *cntxt;
+    SOCKET              sock;
+    int                 type; /* SOCK_STREAM, SOCK_DGRAM */
+    apr_sockaddr_t     *local_addr;
+    apr_sockaddr_t     *remote_addr;
+    int                 timeout_ms; /* MUST MATCH if timeout > 0 */
     apr_interval_time_t timeout;
-    apr_int32_t disconnected;
-    int local_port_unknown;
-    int local_interface_unknown;
-    apr_int32_t netmask;
-    apr_int32_t inherit;
+    apr_int32_t         disconnected;
+    int                 local_port_unknown;
+    int                 local_interface_unknown;
+    apr_int32_t         netmask;
+    apr_int32_t         inherit;
 };
 
 #ifdef _WIN32_WCE
