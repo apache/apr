@@ -1,5 +1,7 @@
 Changes with APR 0.9.7
 
+  *) Fix detection of rwlocks on Mac OS X. [Aaron Bannert]
+
 Changes with APR 0.9.6
 
   *) Add apr_threadattr_stacksize_set() for overriding the default
