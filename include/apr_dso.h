@@ -58,16 +58,23 @@
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
+/**
+ * @file apr_dso.h
+ * @brief APR Dynamic Object Handling Routines
+ */
+
 
 /**
- * @package Dynamic Object Handling
+ * @defgroup APR_DSO Dynamic Object Handling
+ * @ingroup APR
+ * @{
  */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#if APR_HAS_DSO
+#if APR_HAS_DSO || defined(DOXYGEN)
 
 /**
  * Structure for referencing dynamic objects
@@ -86,7 +93,6 @@ typedef void *                        apr_dso_handle_sym_t;
  * @param res_handle Location to store new handle for the DSO.
  * @param path Path to the DSO library
  * @param ctx Pool to use.
- * @deffunc apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, apr_pool_t *ctx)
  */
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
                                        const char *path, apr_pool_t *ctx);
@@ -94,7 +100,6 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 /**
  * Close a DSO library.
  * @param handle handle to close.
- * @deffunc apr_status_t apr_dso_unload(apr_dso_handle_t *handle)
  */
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle);
 
@@ -103,7 +108,6 @@ APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle);
  * @param ressym Location to store the loaded symbol
  * @param handle handle to load the symbol from.
  * @param symname Name of the symbol to load.
- * @deffunc apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle, const char *symname)
  */
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 
                                       apr_dso_handle_t *handle,
@@ -114,7 +118,6 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
  * @param dso The dso handle that has been opened
  * @param buf Location to store the dso error
  * @param bufsize The size of the provided buffer
- * @deffunc const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize)
  */
 APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize);
 
@@ -123,5 +126,5 @@ APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_si
 #ifdef __cplusplus
 }
 #endif
-
+/** @} */
 #endif

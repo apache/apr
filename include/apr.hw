@@ -56,6 +56,16 @@
  * Note: This is a Windows specific version of apr.h. It is copied as
  * apr.h at the start of a Windows build.
  */
+/**
+ * @file apr.h
+ * @brief Basic APR header
+ */
+
+/**
+ * @defgroup APR APR Functions
+ * @{
+ */
+
 
 #ifdef WIN32
 #ifndef APR_H
@@ -343,3 +353,4 @@ struct iovec {
 
 #endif /* APR_H */
 #endif /* WIN32 */
+/** @} */

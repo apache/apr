@@ -54,6 +54,17 @@
 
 #ifndef APR_FILE_IO_H
 #define APR_FILE_IO_H
+/**
+ * @file apr_file_io.h
+ * @brief APR File I/O Handling
+ */
+/**
+ * @defgroup APR_File_IO_Handle I/O Handling Functions
+ * @ingroup APR_File_Handle
+ * @{
+ */
+
+
 
 #include "apr.h"
 #include "apr_pools.h"
@@ -71,32 +82,39 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package APR File handling
+ * @defgroup apr_file_open File Open Flags/Routines
+ * @{
  */
 
-/* Flags for apr_file_open */
-#define APR_READ       1           /* Open the file for reading */
-#define APR_WRITE      2           /* Open the file for writing */
-#define APR_CREATE     4           /* Create the file if not there */
-#define APR_APPEND     8           /* Append to the end of the file */
-#define APR_TRUNCATE   16          /* Open the file and truncate to 0 length */
-#define APR_BINARY     32          /* Open the file in binary mode */
-#define APR_EXCL       64          /* Open should fail if APR_CREATE and file
-				      exists. */
-#define APR_BUFFERED   128         /* Open the file for buffered I/O */
-#define APR_DELONCLOSE 256         /* Delete the file after close */
-#define APR_XTHREAD    512         /* Platform dependent tag to open the file 
-                                      for use across multiple threads */
-#define APR_SHARELOCK  1024        /* Platform dependent support for higher
-                                      level locked read/write access to support
-                                      writes across process/machines */
+#define APR_READ       1           /**< Open the file for reading */
+#define APR_WRITE      2           /**< Open the file for writing */
+#define APR_CREATE     4           /**< Create the file if not there */
+#define APR_APPEND     8           /**< Append to the end of the file */
+#define APR_TRUNCATE   16          /**< Open the file and truncate to 0 length */
+#define APR_BINARY     32          /**< Open the file in binary mode */
+#define APR_EXCL       64          /**< Open should fail if APR_CREATE and file
+                                        exists. */
+#define APR_BUFFERED   128         /**< Open the file for buffered I/O */
+#define APR_DELONCLOSE 256         /**< Delete the file after close */
+#define APR_XTHREAD    512         /**< Platform dependent tag to open the file
+                                        for use across multiple threads */
+#define APR_SHARELOCK  1024        /**< Platform dependent support for higher
+                                        level locked read/write access to support
+                                        writes across process/machines */
+ 
+/** @} */
+
+/**
+ * @defgroup APR_file_seek_flags File Seek Flags
+ * @{
+ */
 
 /* flags for apr_file_seek */
 #define APR_SET SEEK_SET
 #define APR_CUR SEEK_CUR
 #define APR_END SEEK_END
 
-/* should be same as whence type in lseek, POSIX defines this as int */
+/** should be same as whence type in lseek, POSIX defines this as int */
 typedef int       apr_seek_where_t;
 
 /**
@@ -106,21 +124,26 @@ typedef int       apr_seek_where_t;
 typedef struct apr_file_t         apr_file_t;
 
 /* File lock types/flags */
-#define APR_FLOCK_SHARED        1       /* Shared lock. More than one process
+/**
+ * @defgroup APR_file_lock_types File Lock Types
+ * @{
+ */
+
+#define APR_FLOCK_SHARED        1       /**< Shared lock. More than one process
                                            or thread can hold a shared lock
                                            at any given time. Essentially,
                                            this is a "read lock", preventing
                                            writers from establishing an
                                            exclusive lock. */
-#define APR_FLOCK_EXCLUSIVE     2       /* Exclusive lock. Only one process
+#define APR_FLOCK_EXCLUSIVE     2       /**< Exclusive lock. Only one process
                                            may hold an exclusive lock at any
                                            given time. This is analogous to
                                            a "write lock". */
 
-#define APR_FLOCK_TYPEMASK      0x000F  /* mask to extract lock type */
-#define APR_FLOCK_NONBLOCK      0x0010  /* do not block while acquiring the
+#define APR_FLOCK_TYPEMASK      0x000F  /**< mask to extract lock type */
+#define APR_FLOCK_NONBLOCK      0x0010  /**< do not block while acquiring the
                                            file lock */
-
+/** @} */
 /**
  * Open the specified file.
  * @param new_file The opened file descriptor.
@@ -145,8 +168,8 @@ typedef struct apr_file_t         apr_file_t;
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.
- * @deffunc apr_status_t apr_file_open(apr_file_t **new_file, const char *fname, apr_int32_t flag, apr_fileperms_t perm, apr_pool_t *cont)
- * @tip If perm is APR_OS_DEFAULT and the file is being created, appropriate 
+ * @ingroup apr_file_open
+ * @remark If perm is APR_OS_DEFAULT and the file is being created, appropriate 
  *      default permissions will be used.  *arg1 must point to a valid file_t, 
  *      or NULL (in which case it will be allocated)
  */
@@ -157,7 +180,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new_file, const char *fname
 /**
  * Close the specified file.
  * @param file The file descriptor to close.
- * @deffunc apr_status_t apr_file_close(apr_file_t *file)
  */
 APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file);
 
@@ -165,8 +187,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file);
  * delete the specified file.
  * @param path The full path to the file (using / on all systems)
  * @param cont The pool to use.
- * @deffunc apr_status_t apr_file_remove(const char *path, apr_pool_t *cont)
- * @tip If the file is open, it won't be removed until all instances are closed.
+ * @remark If the file is open, it won't be removed until all instances are closed.
  */
 APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont);
 
@@ -175,9 +196,8 @@ APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont);
  * @param from_path The full path to the original file (using / on all systems)
  * @param to_path The full path to the new file (using / on all systems)
  * @param pool The pool to use.
- * @tip If a file exists at the new location, then it will be overwritten.  
+ * @warning If a file exists at the new location, then it will be overwritten.  
  *      Moving files or directories across devices may not be possible.
- * @deffunc apr_status_t apr_file_rename(const char *from_path, const char *to_path, apr_pool_t *pool)
  */
 APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path, 
                                           const char *to_path,
@@ -186,8 +206,7 @@ APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path,
 /**
  * Are we at the end of the file
  * @param fptr The apr file we are testing.
- * @tip Returns APR_EOF if we are at the end of file, APR_SUCCESS otherwise.
- * @deffunc apr_status_t apr_file_eof(apr_file_t *fptr)
+ * @remark Returns APR_EOF if we are at the end of file, APR_SUCCESS otherwise.
  */
 APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
 
@@ -195,7 +214,7 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
  * open standard error as an apr file pointer.
  * @param thefile The apr file to use as stderr.
  * @param cont The pool to allocate the file out of.
- * @deffunc apr_status_t apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+ * @ingroup apr_file_open
  */
 APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
                                           apr_pool_t *cont);
@@ -204,7 +223,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
  * open standard output as an apr file pointer.
  * @param thefile The apr file to use as stdout.
  * @param cont The pool to allocate the file out of.
- * @deffunc apr_status_t apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+ * @ingroup apr_file_open
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
                                           apr_pool_t *cont);
@@ -213,7 +232,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
  * open standard input as an apr file pointer.
  * @param thefile The apr file to use as stdin.
  * @param cont The pool to allocate the file out of.
- * @deffunc apr_status_t apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
+ * @ingroup apr_file_open
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
                                               apr_pool_t *cont);
@@ -223,17 +242,17 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
  * @param thefile The file descriptor to read from.
  * @param buf The buffer to store the data to.
  * @param nbytes On entry, the number of bytes to read; on exit, the number of bytes read.
- * @tip apr_file_read will read up to the specified number of bytes, but never 
- *      more.  If there isn't enough data to fill that number of bytes, all 
- *      of the available data is read.  The third argument is modified to 
- *      reflect the number of bytes read.  If a char was put back into the 
- *      stream via ungetc, it will be the first character returned. 
+ * @remark apr_file_read will read up to the specified number of bytes, but 
+ *         never more.  If there isn't enough data to fill that number of 
+ *         bytes, all of the available data is read.  The third argument is 
+ *         modified to reflect the number of bytes read.  If a char was put 
+ *         back into the stream via ungetc, it will be the first character 
+ *         returned. 
  *
- *      It is not possible for both bytes to be read and an APR_EOF or other 
- *      error to be returned.
+ *         It is not possible for both bytes to be read and an APR_EOF or other 
+ *         error to be returned.
  *
- *      APR_EINTR is never returned.
- * @deffunc apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
+ *         APR_EINTR is never returned.
  */
 APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf,
                                    apr_size_t *nbytes);
@@ -244,7 +263,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf,
  * @param buf The buffer which contains the data.
  * @param nbytes On entry, the number of bytes to write; on exit, the number 
  *               of bytes written.
- * @tip apr_file_write will write up to the specified number of bytes, but never 
+ * @remark apr_file_write will write up to the specified number of bytes, but never 
  *      more.  If the OS cannot write that many bytes, it will write as many 
  *      as it can.  The third argument is modified to reflect the * number 
  *      of bytes written. 
@@ -252,7 +271,6 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf,
  *      It is possible for both bytes to be written and an error to be returned.
  *
  *      APR_EINTR is never returned.
- * @deffunc apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
  */
 APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf,
                                     apr_size_t *nbytes);
@@ -265,13 +283,12 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf,
  *             be smaller than APR_MAX_IOVEC_SIZE.  If it isn't, the function 
  *             will fail with APR_EINVAL.
  * @param nbytes The number of bytes written.
- * @tip It is possible for both bytes to be written and an error to be returned.
+ * @remark It is possible for both bytes to be written and an error to be returned.
  *      APR_EINTR is never returned.
  *
  *      apr_file_writev is available even if the underlying operating system 
  *
  *      doesn't provide writev().
- * @deffunc apr_status_t apr_file_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, apr_size_t *nbytes)
  */
 APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
                                      const struct iovec *vec,
@@ -284,7 +301,7 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
  * @param buf The buffer to store the data to.
  * @param nbytes The number of bytes to read.
  * @param bytes_read If non-NULL, this will contain the number of bytes read.
- * @tip apr_file_read will read up to the specified number of bytes, but never 
+ * @remark apr_file_read will read up to the specified number of bytes, but never 
  *      more.  If there isn't enough data to fill that number of bytes, 
  *      then the process/thread will block until it is available or EOF 
  *      is reached.  If a char was put back into the stream via ungetc, 
@@ -294,7 +311,6 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
  *      error to be returned.
  *
  *      APR_EINTR is never returned.
- * @deffunc apr_status_t apr_file_read_full(apr_file_t *thefile, void *buf, apr_size_t nbytes, apr_size_t *bytes_read)
  */
 APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
                                         apr_size_t nbytes,
@@ -307,7 +323,7 @@ APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
  * @param buf The buffer which contains the data.
  * @param nbytes The number of bytes to write.
  * @param bytes_written If non-NULL, this will contain the number of bytes written.
- * @tip apr_file_write will write up to the specified number of bytes, but never 
+ * @remark apr_file_write will write up to the specified number of bytes, but never 
  *      more.  If the OS cannot write that many bytes, the process/thread 
  *      will block until they can be written. Exceptional error such as 
  *      "out of space" or "pipe closed" will terminate with an error.
@@ -315,7 +331,6 @@ APR_DECLARE(apr_status_t) apr_file_read_full(apr_file_t *thefile, void *buf,
  *      It is possible for both bytes to be written and an error to be returned.
  *
  *      APR_EINTR is never returned.
- * @deffunc apr_status_t apr_file_write_full(apr_file_t *thefile, const void *buf, apr_size_t nbytes, apr_size_t *bytes_written)
  */
 APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile, const void *buf,
                                          apr_size_t nbytes, 
@@ -325,7 +340,6 @@ APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile, const void *b
  * put a character into the specified file.
  * @param ch The character to write.
  * @param thefile The file descriptor to write to
- * @deffunc apr_status_t apr_file_putc(char ch, apr_file_t *thefile)
  */
 APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile);
 
@@ -333,7 +347,6 @@ APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile);
  * get a character from the specified file.
  * @param ch The character to write.
  * @param thefile The file descriptor to write to
- * @deffunc apr_status_t apr_file_getc(char *ch, apr_file_t *thefile)
  */
 APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile);
 
@@ -341,7 +354,6 @@ APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile);
  * put a character back onto a specified stream.
  * @param ch The character to write.
  * @param thefile The file descriptor to write to
- * @deffunc apr_status_t apr_file_ungetc(char ch, apr_file_t *thefile)
  */
 APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile);
 
@@ -350,7 +362,6 @@ APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile);
  * @param str The buffer to store the string in. 
  * @param len The length of the string
  * @param thefile The file descriptor to read from
- * @deffunc apr_status_t apr_file_gets(char *str, int len, apr_file_t *thefile)
  */
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile);
 
@@ -358,14 +369,12 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
  * Put the string into a specified file.
  * @param str The string to write. 
  * @param thefile The file descriptor to write to
- * @deffunc apr_status_t apr_file_puts(const char *str, apr_file_t *thefile)
  */
 APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile);
 
 /**
  * Flush the file's buffer.
  * @param thefile The file descriptor to flush
- * @deffunc apr_status_t apr_file_flush(apr_file_t *thefile)
  */
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile);
 
@@ -374,8 +383,7 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile);
  * @param new_file The structure to duplicate into. 
  * @param old_file The file to duplicate.
  * @param p The pool to use for the new file.
- * @tip *arg1 must point to a valid apr_file_t, or point to NULL
- * @deffunc apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
+ * @remark *arg1 must point to a valid apr_file_t, or point to NULL
  */         
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                       apr_file_t *old_file,
@@ -391,9 +399,8 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
  *            APR_END  --  add the offset to the current file size 
  * </PRE>
  * @param offset The offset to move the pointer to.
- * @tip The third argument is modified to be the offset the pointer
+ * @remark The third argument is modified to be the offset the pointer
           was actually moved to.
- * @deffunc apr_status_t apr_file_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
  */
 APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, 
                                    apr_seek_where_t where,
@@ -404,7 +411,6 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile,
  * @param in The file descriptor to use as input to the pipe.
  * @param out The file descriptor to use as output from the pipe.
  * @param cont The pool to operate on.
- * @deffunc apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out,
                                           apr_pool_t *cont);
@@ -414,7 +420,6 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
  * @param filename The filename of the named pipe
  * @param perm The permissions for the newly created pipe.
  * @param cont The pool to operate on.
- * @deffunc apr_status_t apr_file_namedpipe_create(const char *filename, apr_fileperms_t perm, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
                                                apr_fileperms_t perm, 
@@ -424,7 +429,6 @@ APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename,
  * Get the timeout value for a pipe or manipulate the blocking state.
  * @param thepipe The pipe we are getting a timeout for.
  * @param timeout The current timeout value in microseconds. 
- * @deffunc apr_status_t apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
  */
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, 
                                                apr_interval_time_t *timeout);
@@ -434,7 +438,6 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe,
  * @param thepipe The pipe we are setting a timeout on.
  * @param timeout The timeout value in microseconds.  Values < 0 mean wait 
  *        forever, 0 means do not wait at all.
- * @deffunc apr_status_t apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
  */
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, 
                                                apr_interval_time_t timeout);
@@ -449,14 +452,12 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe,
  * block.
  * @param thefile The file to lock.
  * @param type The type of lock to establish on the file.
- * @deffunc apr_status_t apr_file_lock(apr_file_t *thefile, int type)
  */
 APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type);
 
 /**
  * Remove any outstanding locks on the file.
  * @param thefile The file to unlock.
- * @deffunc apr_status_t apr_file_unlock(apr_file_t *thefile)
  */
 APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile);
 
@@ -466,7 +467,6 @@ APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile);
  * return the file name of the current file.
  * @param new_path The path of the file.  
  * @param thefile The currently open file.
- * @deffunc apr_status_t apr_file_name_get(const char **new_path, apr_file_t *thefile)
  */                     
 APR_DECLARE(apr_status_t) apr_file_name_get(const char **new_path, 
                                            apr_file_t *thefile);
@@ -476,7 +476,6 @@ APR_DECLARE(apr_status_t) apr_file_name_get(const char **new_path,
  * @param data The user data associated with the file.  
  * @param key The key to use for retreiving data associated with this file.
  * @param file The currently open file.
- * @deffunc apr_status_t apr_file_data_get(void **data, const char *key, apr_file_t *file)
  */                     
 APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key, 
                                            apr_file_t *file);
@@ -487,7 +486,6 @@ APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key,
  * @param data The user data to associate with the file.  
  * @param key The key to use for assocaiteing data with the file.
  * @param cleanup The cleanup routine to use when the file is destroyed.
- * @deffunc apr_status_t apr_file_data_set(apr_file_t *file, void *data, const char *key, apr_status_t (*cleanup)(void *))
  */                     
 APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
                                            const char *key,
@@ -499,7 +497,6 @@ APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
  * @param format The format string
  * @param ... The values to substitute in the format string
  * @return The number of bytes written
- * @deffunc int apr_file_printf(apr_file_t *fptr, const char *format, ...)
  */ 
 APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
@@ -508,12 +505,11 @@ APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, const char *format, ..
  * set the specified file's permission bits.
  * @param fname The file (name) to apply the permissions to.
  * @param perms The permission bits to apply to the file.
- * @tip Some platforms may not be able to apply all of the available 
+ * @warning Some platforms may not be able to apply all of the available 
  *      permission bits; APR_INCOMPLETE will be returned if some permissions 
  *      are specified which could not be set.
  *
  *      Platforms which do not implement this feature will return APR_ENOTIMPL.
- * @deffunc apr_status_t apr_file_perms_set(const char *fname, apr_fileperms_t perms)
  */
 APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
                                            apr_fileperms_t perms);
@@ -523,7 +519,6 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
  * @param path the path for the directory to be created.  (use / on all systems)
  * @param perm Permissions for the new direcoty.
  * @param cont the pool to use.
- * @deffunc apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
  */                        
 APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, 
                         apr_pool_t *cont);
@@ -532,7 +527,6 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
  * Remove directory from the file system.
  * @param path the path for the directory to be removed.  (use / on all systems)
  * @param cont the pool to use.
- * @deffunc apr_status_t apr_dir_remove(const char *path, apr_pool_t *cont)
  */                        
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont);
 
@@ -541,7 +535,6 @@ APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont);
  * @param finfo Where to store the information about the file.
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param thefile The file to get information about.
- * @deffunc apr_status_t apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted, apr_file_t *thefile)
  */ 
 APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, 
                                           apr_int32_t wanted,
@@ -559,33 +552,23 @@ APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *fp, apr_off_t offset);
  * Retrieve the flags that were passed into apr_file_open()
  * when the file was opened.
  * @return apr_int32_t the flags
- * @deffunc apr_int32_t apr_file_flags_get(apr_file_t *f)
  */
 APR_DECLARE(apr_int32_t) apr_file_flags_get(apr_file_t *f);
 
 /**
  * Get the pool used by the file.
  * @return apr_pool_t the pool
- * @deffunc apr_pool_t apr_file_pool_get(apr_file_t *f)
- */
-APR_POOL_DECLARE_ACCESSOR(file);
-
-/**
- * Set a file to be inherited by child processes.
- * @param file The file to enable inheritance.
- * @deffunc void apr_file_set_inherit(apr_file_t *file)
  */
 APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
 
 /**
  * Unset a file from being inherited by child processes.
  * @param file The file to disable inheritance.
- * @deffunc void apr_file_unset_inherit(apr_file_t *file)
  */
 APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 
 #ifdef __cplusplus
 }
 #endif
-
+/** @} */
 #endif  /* ! APR_FILE_IO_H */

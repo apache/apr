@@ -37,23 +37,29 @@
 #ifndef	_APR_FNMATCH_H_
 #define	_APR_FNMATCH_H_
 
+/**
+ * @file apr_fnmatch.h
+ * @brief APR FNMatch Functions
+ */
+/**
+ * @defgroup APR_FNMatch FNMatch Functions
+ * @ingroup APR
+ * @{
+ */
+
 #include "apr_errno.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @package Fnmatch functions 
- */
-
-#define	FNM_NOMATCH	1	/* Match failed. */
-
-#define	FNM_NOESCAPE	0x01	/* Disable backslash escaping. */
-#define	FNM_PATHNAME	0x02	/* Slash must be matched by slash. */
-#define	FNM_PERIOD	0x04	/* Period must be matched by period. */
-/* This flag is an Apache addition */
-#define FNM_CASE_BLIND  0x08    /* Compare characters case-insensitively. */
+#define    FNM_NOMATCH    1    /**< Match failed. */
+ 
+#define    FNM_NOESCAPE    0x01    /**< Disable backslash escaping. */
+#define    FNM_PATHNAME    0x02    /**< Slash must be matched by slash. */
+#define    FNM_PERIOD    0x04    /**< Period must be matched by period. */
+ 
+#define FNM_CASE_BLIND  0x08    /**< Compare characters case-insensitively.  @remark This flag is an Apache addition */
 
 /**
  * Try to match the string to the given pattern.
@@ -66,7 +72,6 @@ extern "C" {
  *              FNM_PERIOD         Period must be matched by period
  *              FNM_CASE_BLIND     Compare characters case-insensitively.
  * </PRE>
- * @deffunc apr_status_t apr_fnmatch(const char *pattern, const char *strings, int flags)
  */
 
 APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern, 
@@ -76,12 +81,11 @@ APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern,
  * Determine if the given pattern is a regular expression.
  * @param pattern The pattern to search for glob characters.
  * @return non-zero if pattern has any glob characters in it
- * @deffunc int apr_is_fnmatch(const char *pattern)
  */
 APR_DECLARE(int) apr_is_fnmatch(const char *pattern);
 
 #ifdef __cplusplus
 }
 #endif
-
+/** @} */
 #endif /* !_FNMATCH_H_ */

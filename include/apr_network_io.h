@@ -54,9 +54,14 @@
 
 #ifndef APR_NETWORK_IO_H
 #define APR_NETWORK_IO_H
-
 /**
- * @package APR Network library
+ * @file apr_network_io.h
+ * @brief APR Network library
+ */
+/**
+ * @defgroup APR_Net Network Routines
+ * @ingroup APR
+ * @{
  */
 
 #include "apr.h"
@@ -85,7 +90,10 @@ extern "C" {
 #define APR_ANYADDR "0.0.0.0"
 #endif
 
-/* Socket option definitions */
+/**
+ * @defgroup Sock_opt Socket option definitions
+ * @{
+ */
 #define APR_SO_LINGER        1
 #define APR_SO_KEEPALIVE     2
 #define APR_SO_DEBUG         4
@@ -97,13 +105,13 @@ extern "C" {
 #define APR_SO_DISCONNECTED  256
 #define APR_TCP_NODELAY      512
 #define APR_TCP_NOPUSH       1024
-#define APR_RESET_NODELAY    2048 /* This flag is ONLY set internally
+#define APR_RESET_NODELAY    2048 /**< This flag is ONLY set internally
                                    * when we set APR_TCP_NOPUSH with
                                    * APR_TCP_NODELAY set to tell us that
                                    * APR_TCP_NODELAY should be turned on
                                    * again when NOPUSH is turned off
                                    */
-#define APR_INCOMPLETE_READ 4096  /* Set on non-blocking sockets
+#define APR_INCOMPLETE_READ 4096  /**< Set on non-blocking sockets
 				   * (APR_SO_TIMEOUT != 0) on which the
 				   * previous read() did not fill a buffer
 				   * completely.  the next apr_recv() will
@@ -121,23 +129,30 @@ extern "C" {
 #define APR_POLLERR   0x010
 #define APR_POLLHUP   0x020
 #define APR_POLLNVAL  0x040
+/** @} */
 
 typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE, 
 	      APR_SHUTDOWN_READWRITE} apr_shutdown_how_e;
 
-/* We need to make sure we always have an in_addr type, so APR will just
+#if (!APR_HAVE_IN_ADDR)
+/**
+ * We need to make sure we always have an in_addr type, so APR will just
  * define it ourselves, if the platform doesn't provide it.
  */
-#if (!APR_HAVE_IN_ADDR)
 struct in_addr {
-    apr_uint32_t  s_addr;
+    apr_uint32_t  s_addr; /**< storage to hold the IP# */
 }
 #endif
 
-/* Not all platforms have these defined, so we'll define them here
+/**
+ * @def APR_INET
+ * Not all platforms have these defined, so we'll define them here
  * The default values come from FreeBSD 4.1.1
  */
 #define APR_INET     AF_INET
+/** @def APR_UNSPEC
+ * Let the system decide which address family to use
+ */
 #ifdef AF_UNSPEC
 #define APR_UNSPEC   AF_UNSPEC
 #else
@@ -147,7 +162,9 @@ struct in_addr {
 #define APR_INET6    AF_INET6
 #endif
 
-/* Enum to tell us if we're interested in remote or local socket */
+/**
+ * Enum to tell us if we're interested in remote or local socket
+ */
 typedef enum {
     APR_LOCAL,
     APR_REMOTE
@@ -160,25 +177,31 @@ typedef enum {
 #if APR_HAVE_INET_ADDR
 #define apr_inet_addr    inet_addr
 #elif APR_HAVE_INET_NETWORK        /* only DGUX, as far as I know */
-/* not generally safe... inet_network() and inet_addr() perform
+/**
+ * @warning
+ * not generally safe... inet_network() and inet_addr() perform
  * different functions */
 #define apr_inet_addr    inet_network
 #endif
 
 typedef struct apr_socket_t     apr_socket_t;
 typedef struct apr_pollfd_t     apr_pollfd_t;
+/**
+ * A structure to encapsulate headers and trailers for apr_sendfile
+ */
 typedef struct apr_hdtr_t       apr_hdtr_t;
 typedef struct in_addr          apr_in_addr_t;
 
-/* use apr_uint16_t just in case some system has a short that isn't 16 bits... */
+/** @remark use apr_uint16_t just in case some system has a short that isn't 16 bits... */
 typedef apr_uint16_t            apr_port_t;
 
 /* It's defined here as I think it should all be platform safe...
  */
-typedef struct apr_sockaddr_t apr_sockaddr_t;
 /**
  * APRs socket address type, used to ensure protocol independence
  */
+typedef struct apr_sockaddr_t apr_sockaddr_t;
+
 struct apr_sockaddr_t {
     /** The pool to use... */
     apr_pool_t *pool;
@@ -253,7 +276,6 @@ struct apr_ipsubnet_t {
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
  * @param cont The pool to use
- * @deffunc apr_status_t apr_socket_create(apr_socket_t **new_sock, int family, int type, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
                                             int family, int type,
@@ -268,8 +290,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock,
  *            APR_SHUTDOWN_WRITE        no longer allow write requests
  *            APR_SHUTDOWN_READWRITE    no longer allow read or write requests 
  * </PRE>
- * @deffunc apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
- * @tip This does not actually close the socket descriptor, it just
+ * @remark This does not actually close the socket descriptor, it just
  *      controls which calls are still valid on the socket.
  */
 APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
@@ -278,7 +299,6 @@ APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
 /**
  * Close a tcp socket.
  * @param thesocket The socket to close 
- * @deffunc apr_status_t apr_socket_close(apr_socket_t *thesocket)
  */
 APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket);
 
@@ -286,9 +306,8 @@ APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket);
  * Bind the socket to its associated port
  * @param sock The socket to bind 
  * @param sa The socket address to bind to
- * @tip This may be where we will find out if there is any other process
+ * @remark This may be where we will find out if there is any other process
  *      using the selected port.
- * @deffunc apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
  */
 APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
 
@@ -298,7 +317,6 @@ APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
  * @param backlog The number of outstanding connections allowed in the sockets
  *                listen queue.  If this value is less than zero, the listen
  *                queue size is set to zero.  
- * @deffunc apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
  */
 APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog);
 
@@ -309,7 +327,6 @@ APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog);
  *                 be used for all future communication.
  * @param sock The socket we are listening on.
  * @param connection_pool The pool for the new socket.
- * @deffunc apr_status_t apr_accept(apr_socket_t **new_sock, apr_socket_t *sock, apr_pool_t *connection_pool)
  */
 APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new_sock, 
                                      apr_socket_t *sock,
@@ -322,7 +339,6 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new_sock,
  * @param sa The address of the machine we wish to connect to.  If NULL,
  *           APR assumes that the sockaddr_in in the apr_socket is 
  *           completely filled out.
- * @deffunc apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
  */
 APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
 
@@ -335,7 +351,6 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
  * @param port The port number.
  * @param flags Special processing flags.
  * @param p The pool for the apr_sockaddr_t and associated storage.
- * @deffunc apr_status_t apr_sockaddr_info_get(apr_sockaddr_t **sa, const char *hostname, apr_int32_t family, apr_port_t port, apr_int32_t flags, apr_pool_t *p)
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                                           const char *hostname,
@@ -349,7 +364,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
  * @param hostname The hostname.
  * @param sa The apr_sockaddr_t.
  * @param flags Special processing flags.
- * @deffunc apr_status_t apr_getnameinfo(char **hostname, apr_sockaddr_t *sa, apr_int32_t flags)
  */
 APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                                           apr_sockaddr_t *sa,
@@ -378,10 +392,10 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
  *             specified.
  * @param str The input string to be parsed.
  * @param p The pool from which *addr and *scope_id are allocated.
- * @tip If scope id shouldn't be allowed, check for scope_id != NULL in addition 
- *      to checking the return code.  If addr/hostname should be required, check 
- *      for addr == NULL in addition to checking the return code.
- * @deffunc apr_status_t apr_parse_addr_port(char **addr, char **scope_id, apr_port_t *port, const char *str, apr_pool_t *p)
+ * @remark If scope id shouldn't be allowed, check for scope_id != NULL in 
+ *         addition to checking the return code.  If addr/hostname should be 
+ *         required, check for addr == NULL in addition to checking the 
+ *         return code.
  */
 APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
                                               char **scope_id,
@@ -395,7 +409,6 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
  * @param len The maximum length of the hostname that can be stored in the
  *            buffer provided. 
  * @param cont The pool to use.
- * @deffunc apr_status_t apr_gethostname(char *buf, int len, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len, apr_pool_t *cont);
 
@@ -404,7 +417,6 @@ APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len, apr_pool_t *cont);
  * @param data The user data associated with the socket.
  * @param key The key to associate with the user data.
  * @param sock The currently open socket.
- * @deffunc apr_status_t apr_socket_data_get(void **data, const char *key, apr_socket_t *sock)
  */
 APR_DECLARE(apr_status_t) apr_socket_data_get(void **data, const char *key,
                                              apr_socket_t *sock);
@@ -415,7 +427,6 @@ APR_DECLARE(apr_status_t) apr_socket_data_get(void **data, const char *key,
  * @param data The user data to associate with the socket.
  * @param key The key to associate with the data.
  * @param cleanup The cleanup to call when the socket is destroyed.
- * @deffunc apr_status_t apr_socket_data_set(apr_socket_t *sock, void *data, const char *key, apr_status_t (*cleanup)(void*))
  */
 APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *sock, void *data,
                                              const char *key,
@@ -427,8 +438,7 @@ APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *sock, void *data,
  * @param buf The buffer which contains the data to be sent. 
  * @param len On entry, the number of bytes to send; on exit, the number
  *            of bytes sent.
- * @deffunc apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
- * @tip
+ * @remark
  * <PRE>
  * This functions acts like a blocking write by default.  To change 
  * this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
@@ -447,8 +457,7 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
  * @param vec The array of iovec structs containing the data to send 
  * @param nvec The number of iovec structs in the array
  * @param len Receives the number of bytes actually written
- * @deffunc apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec, apr_int32_t nvec, apr_size_t *len)
- * @tip
+ * @remark
  * <PRE>
  * This functions acts like a blocking write by default.  To change 
  * this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
@@ -497,10 +506,9 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
  *            (output) - Number of bytes actually sent, 
  *                       including headers, file, and trailers
  * @param flags APR flags that are mapped to OS specific flags
- * @deffunc apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file, apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len, apr_int32_t flags)
- * @tip This functions acts like a blocking write by default.  To change 
- *      this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
- *      The number of bytes actually sent is stored in argument 5.
+ * @remark This functions acts like a blocking write by default.  To change 
+ *         this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
+ *         The number of bytes actually sent is stored in argument 5.
  */
 APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                                        apr_hdtr_t *hdtr, apr_off_t *offset,
@@ -514,8 +522,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
  * @param buf The buffer to store the data in. 
  * @param len On entry, the number of bytes to receive; on exit, the number
  *            of bytes received.
- * @deffunc apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
- * @tip
+ * @remark
  * <PRE>
  * This functions acts like a blocking read by default.  To change 
  * this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
@@ -549,7 +556,6 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock,
  *            APR_SO_RCVBUF     --  Set the ReceiveBufferSize
  * </PRE>
  * @param on Value for the option.
- * @deffunc apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
  */
 APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
                                            apr_int32_t opt, apr_int32_t on);
@@ -575,7 +581,6 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
  *                                  (Currently only used on Windows)
  * </PRE>
  * @param on Socket option returned on the call.
- * @deffunc apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
  */
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock, 
                                            apr_int32_t opt, apr_int32_t *on);
@@ -585,7 +590,6 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
  * @param sa The returned apr_sockaddr_t.
  * @param which Which interface do we want the apr_sockaddr_t for?
  * @param sock The socket to use
- * @deffunc apr_status_t apr_socket_addr_get(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock)
  */
 APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
                                            apr_interface_e which,
@@ -595,7 +599,6 @@ APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
  * Set the port in an APR socket address.
  * @param sockaddr The socket address to set.
  * @param port The port to be stored in the socket address.
- * @deffunc apr_status_t apr_sockaddr_port_set(apr_sockaddr_t *sockaddr, apr_port_t port)
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
                                        apr_port_t port);
@@ -604,7 +607,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
  * Return the port in an APR socket address.
  * @param port The port from the socket address.
  * @param sockaddr The socket address to reference.
- * @deffunc apr_status_t apr_sockaddr_port_get(apr_port_t *port, apr_sockaddr_t *sockaddr)
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
                                        apr_sockaddr_t *sockaddr);
@@ -614,7 +616,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
  * @param sockaddr The socket address to use 
  * @param addr The IP address to attach to the socket.
  *             Use APR_ANYADDR to use any IP addr on the machine.
- * @deffunc apr_status_t apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr, const char *addr)
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
                                          const char *addr);
@@ -624,7 +625,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
  * an APR socket address.
  * @param addr The IP address.
  * @param sockaddr The socket address to reference.
- * @deffunc apr_status_t apr_sockaddr_ip_get(char **addr, apr_sockaddr_t *sockaddr)
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr, 
                                          apr_sockaddr_t *sockaddr);
@@ -634,7 +634,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
  * @param new_poll The poll structure to be used. 
  * @param num The number of socket descriptors to be polled.
  * @param cont The pool to operate on.
- * @deffunc apr_status_t apr_poll_setup(apr_pollfd_t **new_poll, apr_int32_t num, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll, 
                                          apr_int32_t num,
@@ -648,14 +647,13 @@ APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll,
  *                a maximum, not a minimum.  If a socket is signalled, we 
  *                will wake up before this time.  A negative number means 
  *                wait until a socket is signalled.
- * @tip
+ * @remark
  * <PRE>
  * The number of sockets signalled is returned in the second argument. 
  *
  *        This is a blocking call, and it will not return until either a 
  *        socket has been signalled, or the timeout has expired. 
  * </PRE>
- * @deffunc apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds, apr_interval_time_t timeout)
  */
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds, 
                                    apr_interval_time_t timeout);
@@ -670,7 +668,6 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
  *            APR_POLLPRI      signal if prioirty data is availble to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
- * @deffunc apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset, apr_socket_t *sock, apr_int16_t event)
  */
 APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
                                               apr_socket_t *sock,
@@ -686,7 +683,6 @@ APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset,
  *            APR_POLLPRI      signal if prioirty data is availble to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
- * @deffunc apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset, apr_socket_t *sock, apr_int16_t events)
  */
 APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
                                                apr_socket_t *sock,
@@ -695,7 +691,6 @@ APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
  * Remove a socket from the poll structure.
  * @param aprset The poll structure we will be using. 
  * @param sock The socket to remove from the current poll structure. 
- * @deffunc apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
  */
 APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, 
                                                  apr_socket_t *sock);
@@ -709,7 +704,6 @@ APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset,
  *            APR_POLLPRI      signal if prioirty data is availble to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
- * @deffunc apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
  */
 APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, 
                                                  apr_int16_t events);
@@ -728,7 +722,6 @@ APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset,
  * </PRE>
  * @param sock The socket we wish to get information about. 
  * @param aprset The poll structure we will be using. 
- * @deffunc apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
  */
 APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, 
                                           apr_socket_t *sock,
@@ -739,7 +732,6 @@ APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event,
  * @param pollfd The currently open pollfd.
  * @param key The key to use for retreiving data associated with a poll struct.
  * @param data The user data associated with the pollfd.
- * @deffunc apr_status_t apr_poll_data_get(apr_pollfd_t *pollfd, const char *key, void *data)
  */
 APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd, 
                                            const char *key, void *data);
@@ -750,7 +742,6 @@ APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd,
  * @param data The key to associate with the data.
  * @param key The user data to associate with the pollfd.
  * @param cleanup The cleanup function
- * @deffunc apr_status_t apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key, apr_status_t (*cleanup)(void *))
  */
 APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data,
                                            const char *key,
@@ -762,7 +753,6 @@ APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data,
  * Convert a File type to a socket so that it can be used in a poll operation.
  * @param newsock the newly created socket which represents a file.
  * @param file the file to mask as a socket.
- * @deffunc apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file)
  * @warning This is not available on all platforms.  Platforms that have the
  *      ability to poll files for data to be read/written/exceptions will
  *      have the APR_FILES_AS_SOCKETS macro defined as true.
@@ -776,7 +766,6 @@ APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock,
  * Given an apr_sockaddr_t and a service name, set the port for the service
  * @param sockaddr The apr_sockaddr_t that will have it's port set
  * @param servname The name of the service you wish to use
- * @deffunc apr_status_t apr_getservbyname(apr_sockaddr_t *sockaddr, const char *servname)
  */
 APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr, 
                                             const char *servname);
@@ -816,20 +805,18 @@ apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name,
 /**
  * Set a socket to be inherited by child processes.
  * @param socket The socket to enable inheritance.
- * @deffunc void apr_socket_set_inherit(apr_socket_t *socket)
  */
 APR_DECLARE(void) apr_socket_set_inherit(apr_socket_t *skt);
 
 /**
  * Unset a socket from being inherited by child processes.
  * @param socket The socket to disable inheritance.
- * @deffunc void apr_socket_unset_inherit(apr_socket_t *socket)
  */
 APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *skt);
 
 #ifdef __cplusplus
 }
 #endif
-
+/** @} */
 #endif  /* ! APR_NETWORK_IO_H */
 

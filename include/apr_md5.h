@@ -91,9 +91,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/**
+ * @file apr_md5.h
+ * @brief APR MD5 Routines
+ */
 
 /**
- * @package APR MD5 Library
+ * @defgroup APR_MD5 MD5 Routines
+ * @ingroup APR
+ * @{
  */
 
 #define MD5_DIGESTSIZE 16
@@ -117,7 +123,6 @@ struct apr_md5_ctx_t {
 /**
  * MD5 Initialize.  Begins an MD5 operation, writing a new context.
  * @param context The MD5 context to initialize.
- * @deffunc apr_status_t apr_md5_init(apr_md5_ctx_t *context)
  */
 APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context);
 
@@ -126,7 +131,6 @@ APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context);
  * for translating the content before calculating the digest.
  * @param context The MD5 content to set the translation for.
  * @param xlate The translation handle to use for this MD5 context 
- * @deffunc apr_status_t apr_md5_set_xlate(apr_md5_ctx_t *context, apr_xlate_t *xlate)
  */
 #if APR_HAS_XLATE
 APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
@@ -141,7 +145,6 @@ APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
  * @param context The MD5 content to update.
  * @param input next message block to update
  * @param inputLen The length of the next message block
- * @deffunc apr_status_t apr_md5_update(apr_md5_ctx_t *context, apr_size_t char *input, unsigned int inputLen)
  */
 APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                          const unsigned char *input,
@@ -152,7 +155,6 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
  * message digest and zeroing the context
  * @param digest The final MD5 digest
  * @param context The MD5 content we are finalizing.
- * @deffunc apr_status_t apr_md5_final(unsigned char digest[MD5_DIGESTSIZE], apr_md5_ctx_t *context)
  */
 APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
                                         apr_md5_ctx_t *context);
@@ -162,7 +164,6 @@ APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
  * @param digest The final MD5 digest
  * @param input The message block to use
  * @param inputLen The length of the message block
- * @deffunc apr_status_t apr_md5(unsigned char digest[MD5_DIGESTSIZE], const unsigned char *input, apr_size_t size);
  */
 APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[MD5_DIGESTSIZE],
                                   const unsigned char *input,
@@ -174,11 +175,11 @@ APR_DECLARE(apr_status_t) apr_md5(unsigned char digest[MD5_DIGESTSIZE],
  * @param salt The salt to use for the encoding
  * @param result The string to store the encoded password in
  * @param nbytes The length of the string
- * @deffunc apr_status_t apr_md5_encode(const char *password, const char *salt, char *result, size_t nbytes)
  */
 APR_DECLARE(apr_status_t) apr_md5_encode(const char *password, const char *salt,
                                          char *result, size_t nbytes);
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif
