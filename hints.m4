@@ -8,9 +8,12 @@ dnl  Generally, we force the setting of CC, and add flags
 dnl  to CFLAGS, LIBS and LDFLAGS. 
 dnl
 AC_DEFUN(APR_PRELOAD, [
-echo "Applying hints file rules for $host"
+if test "$DID_APR_PRELOAD" != "yes" ; then
+    DID_APR_PRELOAD="yes"; export DID_APR_PRELOAD
 
-case "$host" in
+  echo "Applying APR hints file rules for $host"
+
+  case "$host" in
     *mint)
 	APR_ADDTO(CFLAGS, [-DMINT])
 	APR_ADDTO(LIBS, [-lportlib -lsocket])
@@ -362,6 +365,7 @@ dnl	;;
        APR_ADDTO(CFLAGS, [-DSIGPROCMASK_SETS_THREAD_MASK])
        APR_ADDTO(CFLAGS, [-DTCP_NODELAY=1])
        ;;
-esac
-APR_DOEXTRA
+  esac
+  APR_DOEXTRA
+fi
 ])
