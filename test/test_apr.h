@@ -55,7 +55,13 @@
 /* Some simple functions to make the test apps easier to write and
  * a bit more consistent...
  */
- 
+
+/* Things to bear in mind when using these...
+ *
+ * If you include '\t' within the string passed in it won't be included
+ * in the spacing, so use spaces instead :)
+ * 
+ */ 
 #include "apr_strings.h"
 
 #define TEST_EQ(str, func, value, good, bad) \
@@ -89,3 +95,15 @@ printf("%-60s", str); \
 #define STD_TEST_NEQ(str, func) \
 	TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
 
+#define PRINT_ERROR(rv) \
+    { \
+        char errmsg[200]; \
+        fprintf(stderr, "Error was %d : %s\n", rv, \
+                apr_strerror(rv, (char*)&errmsg, 200)); \
+        exit(-1); \
+    }
+
+#define MSG_AND_EXIT(msg) \
+    printf("%s\n", msg); \
+    exit (-1);
+    
