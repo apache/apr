@@ -95,9 +95,9 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
     finfo->inode = info->st_ino;
     finfo->device = info->st_dev;
     finfo->nlink = info->st_nlink;
-    apr_ansi_time_to_apr_time(&finfo->atime, info->st_atime);
-    apr_ansi_time_to_apr_time(&finfo->mtime, info->st_mtime);
-    apr_ansi_time_to_apr_time(&finfo->ctime, info->st_ctime);
+    apr_time_ansi_put(&finfo->atime, info->st_atime);
+    apr_time_ansi_put(&finfo->mtime, info->st_mtime);
+    apr_time_ansi_put(&finfo->ctime, info->st_ctime);
     /* ### needs to be revisited  
      * if (wanted & APR_FINFO_CSIZE) {
      *   finfo->csize = info->st_blocks * 512;

@@ -71,7 +71,7 @@
  */
 #define IsLeapYear(y) ((!(y % 4)) ? (((!(y % 400)) && (y % 100)) ? 1 : 0) : 0)
 
-static void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm, BOOL lt)
+static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm, BOOL lt)
 {
     TIME_ZONE_INFORMATION tz;
     DWORD rc;
@@ -123,7 +123,7 @@ static void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm, BOOL
     return;
 }
 
-APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result, 
+APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result, 
                                                     time_t input)
 {
     *result = (apr_time_t) input * APR_USEC_PER_SEC;
@@ -146,7 +146,7 @@ APR_DECLARE(apr_time_t) apr_time_now(void)
     return aprtime; 
 }
 
-APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result,
+APR_DECLARE(apr_status_t) apr_explode_gmt(apr_time_exp_t *result,
                                           apr_time_t input)
 {
     FILETIME ft;
@@ -158,7 +158,7 @@ APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result, 
+APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result, 
                                            apr_time_t input, apr_int32_t offs)
 {
     FILETIME ft;
@@ -171,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result,
                                                 apr_time_t input)
 {
     SYSTEMTIME st;
@@ -186,7 +186,7 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
 }
 
 APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t,
-                                           apr_exploded_time_t *xt)
+                                           apr_time_exp_t *xt)
 {
     int year;
     time_t days;
@@ -221,7 +221,7 @@ APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t,
 }
 
 APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t,
-                                          apr_exploded_time_t *xt)
+                                          apr_time_exp_t *xt)
 {
     apr_status_t status = apr_implode_time(t, xt);
     if (status == APR_SUCCESS)
@@ -238,7 +238,7 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime,
 }
 
 APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime, 
-                                              apr_exploded_time_t *aprexptime)
+                                              apr_time_exp_t *aprexptime)
 {
     (*ostime)->wYear = aprexptime->tm_year + 1900;
     (*ostime)->wMonth = aprexptime->tm_mon + 1;
@@ -261,7 +261,7 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
+APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
                                               apr_os_exp_time_t **ostime,
                                               apr_pool_t *cont)
 {

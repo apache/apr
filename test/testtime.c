@@ -65,7 +65,7 @@
 int main(void)
 {
     apr_time_t now;
-    apr_exploded_time_t xt, xt2;
+    apr_time_exp_t xt, xt2;
     apr_time_t imp;
     apr_pool_t *p;
     char *str, *str2;
