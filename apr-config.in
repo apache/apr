@@ -59,7 +59,7 @@ Known values for OPTION are:
   --cc              print C compiler name
   --cpp             print C preprocessor name and any required options
   --cflags          print C compiler flags
-  --cppflags        print cpp flags
+  --cppflags        print C preprocessor flags
   --includes        print include information
   --ldflags         print linker flags
   --libs            print additional libraries to link against
