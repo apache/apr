@@ -53,25 +53,32 @@
 extern "C" {
 #endif
 
-#define    FNM_NOMATCH    1    /**< Match failed. */
+#define APR_FNM_NOMATCH     1     /**< Match failed. */
  
-#define    FNM_NOESCAPE    0x01    /**< Disable backslash escaping. */
-#define    FNM_PATHNAME    0x02    /**< Slash must be matched by slash. */
-#define    FNM_PERIOD    0x04    /**< Period must be matched by period. */
- 
-#define FNM_CASE_BLIND  0x08    /**< Compare characters case-insensitively.  @remark This flag is an Apache addition */
+#define APR_FNM_NOESCAPE    0x01  /**< Disable backslash escaping. */
+#define APR_FNM_PATHNAME    0x02  /**< Slash must be matched by slash. */
+#define APR_FNM_PERIOD      0x04  /**< Period must be matched by period. */
+#define APR_FNM_CASE_BLIND  0x08  /**< Compare characters case-insensitively.
+                                   * @remark This flag is an Apache addition 
+                                   */
+
+#define FNM_NOMATCH    APR_FNM_NOMATCH    /**< @deprecated */
+#define FNM_NOESCAPE   APR_FNM_NOESCAPE   /**< @deprecated */
+#define FNM_PATHNAME   APR_FNM_PATHNAME   /**< @deprecated */
+#define FNM_PERIOD     APR_FNM_PERIOD     /**< @deprecated */
+#define FNM_CASE_BLIND APR_FNM_CASE_BLIND /**< @deprecated */
 
 /**
  * Try to match the string to the given pattern, return APR_SUCCESS if
- *    match, else return FNM_NOMATCH.
+ *    match, else return APR_FNM_NOMATCH.
  * @param pattern The pattern to match to
  * @param strings The string we are trying to match
  * @param flags flags to use in the match.  Bitwise OR of:
  * <PRE>
- *              FNM_NOESCAPE       Disable backslash escaping
- *              FNM_PATHNAME       Slash must be matched by slash
- *              FNM_PERIOD         Period must be matched by period
- *              FNM_CASE_BLIND     Compare characters case-insensitively.
+ *              APR_FNM_NOESCAPE       Disable backslash escaping
+ *              APR_FNM_PATHNAME       Slash must be matched by slash
+ *              APR_FNM_PERIOD         Period must be matched by period
+ *              APR_FNM_CASE_BLIND     Compare characters case-insensitively.
  * </PRE>
  */
 

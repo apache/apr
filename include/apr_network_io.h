@@ -78,9 +78,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifndef MAX_SECS_TO_LINGER
+#ifndef APR_MAX_SECS_TO_LINGER
 /** Maximum seconds to linger */
-#define MAX_SECS_TO_LINGER 30
+#define APR_MAX_SECS_TO_LINGER 30
+#endif
+
+#ifndef MAX_SECS_TO_LINGER
+/** @deprecated */
+#define MAX_SECS_TO_LINGER APR_MAX_SECS_TO_LINGER
 #endif
 
 #ifndef APRMAXHOSTLEN
