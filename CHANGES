@@ -1,5 +1,8 @@
 Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
+  *) Prevent unbounded memory use during repeated operations on a hash table.
+     [Julian Foad <julianfoad btopenworld.com>
+
   *) Moved repository to SVN
      [Hackathon]
 
