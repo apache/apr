@@ -97,6 +97,7 @@
 #define APR_HAVE_STRNCASECMP    @have_strncasecmp@
 #define APR_HAVE_STRNICMP       @have_strnicmp@
 #define APR_HAVE_STRSTR         @have_strstr@
+#define APR_HAVE_MEMCHR         @have_memchr@
 #define APR_HAVE_STRUCT_RLIMIT  @struct_rlimit@
 #define APR_HAVE_UNION_SEMUN    @have_union_semun@
 
