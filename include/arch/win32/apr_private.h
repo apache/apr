@@ -168,19 +168,6 @@ typedef void (Sigfunc)(int);
 #define strcasecmp(s1, s2)       stricmp(s1, s2)
 #define sleep(t)                 Sleep(t * 1000)
 
-
-/* APR FEATURE MACROS.
- * This section should be used to define feature macros
- * that the windows port needs.
- */
-#define APR_HAS_THREADS        1
-#define APR_HAS_SENDFILE       1
-#define APR_HAS_RANDOM         1
-#define APR_HAS_DSO            1
-
-#define APR_HAS_MMAP           0
-#define APR_HAS_XLATE          0
-
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
 #define SIZEOF_LONGLONG        8
