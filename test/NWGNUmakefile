@@ -168,6 +168,7 @@ TARGET_nlm = \
 	$(OBJDIR)/aprtest.nlm \
 	$(OBJDIR)/mod_test.nlm \
 	$(OBJDIR)/proc_child.nlm \
+	$(OBJDIR)/testatmc.nlm \
 	$(EOLIST)
 #
 # If there is an LIB target, put it here
