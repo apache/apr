@@ -5,7 +5,7 @@ dnl ##
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(build/apr_common.m4)
 AC_CONFIG_HEADER(include/arch/unix/apr_private.h)
-AC_CONFIG_AUX_DIR(helpers)
+AC_CONFIG_AUX_DIR(build)
 
 AC_CANONICAL_SYSTEM
 echo "Configuring APR library"
@@ -30,6 +30,12 @@ if test "$abs_builddir" != "$abs_srcdir"; then
   USE_VPATH=1
 fi
 
+dnl Directory containing apr build macros, helpers, and make rules
+apr_builders=$abs_srcdir/build
+AC_SUBST(apr_builders)
+
+MKDIR=$apr_builders/mkdir.sh
+
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
@@ -41,15 +47,6 @@ AC_PROG_MAKE_SET
 AC_PROG_AWK
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_TOOL(AR, ar, ar)
-
-dnl Get locations of the build helper scripts
-MKDIR=$abs_srcdir/helpers/mkdir.sh
-APR_MKEXPORT="$AWK -f $abs_srcdir/helpers/make_export.awk"
-AC_SUBST(APR_MKEXPORT)
-APR_MKDEP=$abs_srcdir/helpers/mkdep.sh
-AC_SUBST(APR_MKDEP)
-APR_SCANDOC=$abs_srcdir/helpers/scandoc
-AC_SUBST(APR_SCANDOC)
 
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
@@ -923,10 +920,10 @@ dnl BSD/OS (BSDi) needs to use a different include syntax in the Makefiles
 dnl
 case "$host_alias" in
 *bsdi*)
-    INCLUDE_RULES=".include \"$top_builddir/helpers/rules.mk\""
+    INCLUDE_RULES=".include \"$apr_builders/rules.mk\""
     ;;
 *)
-    INCLUDE_RULES="include $top_builddir/helpers/rules.mk"
+    INCLUDE_RULES="include $apr_builders/rules.mk"
     ;;
 esac
 AC_SUBST(INCLUDE_RULES)
@@ -944,7 +941,7 @@ AC_OUTPUT([
 	$MAKEFILE1 $MAKEFILE2 $MAKEFILE3
 	include/apr.h
 	APRVARS
-	helpers/rules.mk
+	build/rules.mk
 ],[
 for i in $SAVE_FILES; do
   if cmp -s $i $i.save 2>/dev/null; then
