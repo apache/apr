@@ -1,4 +1,10 @@
+dnl
+dnl RUN_SUBDIR_CONFIG_NOW(dir [, sub-package-cmdline-args])
+dnl
 AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
+  # save our work to this point; this allows the sub-package to use it
+  AC_CACHE_SAVE
+
   echo "configuring package in $1 now"
   ac_popdir=`pwd`
   ac_abs_srcdir=`(cd $srcdir/$1 && pwd)`
@@ -19,8 +25,7 @@ changequote([, ])dnl
   esac
 
   # The eval makes quoting arguments work.
- 
-  if eval $ac_abs_srcdir/configure $ac_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir
+  if eval $ac_abs_srcdir/configure $ac_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir $2
   then :
     echo "$1 configured properly"
   else
@@ -28,6 +33,9 @@ changequote([, ])dnl
   fi
 
   cd $ac_popdir
+
+  # grab any updates from the sub-package
+  AC_CACHE_LOAD
 ])
 dnl
 dnl REENTRANCY_FLAGS
