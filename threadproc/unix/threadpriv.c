@@ -99,6 +99,7 @@ apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
     }
 }
 
+#ifdef HAVE_PTHREAD_KEY_DELETE
 apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
 {
     apr_status_t stat;
@@ -107,6 +108,7 @@ apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
     }
     return stat;
 }
+#endif
 
 apr_status_t apr_get_threadkeydata(void **data, const char *key,
                                  apr_threadkey_t *threadkey)

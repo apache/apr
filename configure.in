@@ -509,6 +509,7 @@ fi
 if test "$pthreadh" = "1"; then
     APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
     APR_CHECK_PTHREAD_ATTR_GETDETACHSTATE_ONE_ARG
+    AC_CHECK_FUNCS(pthread_key_delete);
 fi
 
 ac_cv_define_READDIR_IS_THREAD_SAFE=no
