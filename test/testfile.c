@@ -79,7 +79,7 @@ static void test_open_noreadwrite(CuTest *tc)
                        APR_CREATE | APR_EXCL, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
     CuAssertTrue(tc, rv != APR_SUCCESS);
-    CuAssertIntEquals(tc, APR_EACCES, rv);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
 #if 0
     /* I consider this a bug, if we are going to return an error, we shouldn't
      * allocate the file pointer.  But, this would make us fail the text, so
@@ -151,7 +151,7 @@ static void test_fileclose(CuTest *tc)
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
     /* We just closed the file, so this should fail */
     rv = apr_file_read(filetest, &str, &one);
-    CuAssertIntEquals(tc, APR_EBADF, rv);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EBADF(rv));
 }
 
 static void test_file_remove(CuTest *tc)
@@ -174,7 +174,7 @@ static void test_open_write(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, APR_ENOENT, rv);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_ENOENT(rv));
 }
 
 static void test_open_writecreate(CuTest *tc)
