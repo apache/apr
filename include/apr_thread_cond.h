@@ -64,6 +64,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#if APR_HAS_THREADS
+
 /**
  * @file apr_thread_cond.h
  * @brief APR Condition Variable Routines
@@ -128,6 +130,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond);
  */
 APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond);
 
+#endif /* APR_HAS_THREADS */
 
 #ifdef __cplusplus
 }
