@@ -385,7 +385,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
         		apr_int32_t flags)
 {
-    off_t nbytes;
+    off_t nbytes = 0;
     int rv, i;
     struct sf_hdtr headerstruct;
     size_t bytes_to_send = *len;
@@ -412,7 +412,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     headerstruct.trl_cnt = hdtr->numtrailers;
 
     /* FreeBSD can send the headers/footers as part of the system call */
-    if (sock->timeout > 0) {
+    if (sock->timeout >= 0) {
         /* On FreeBSD, it is possible for the first call to sendfile to
          * get EAGAIN, but still send some data.  This means that we cannot
          * call sendfile and then check for EAGAIN, and then wait and call
@@ -459,7 +459,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     } while (rv == -1 && errno == EINTR);
 
     (*len) = nbytes;
-    if (rv == -1) {
+    if (rv == -1 && (errno != EAGAIN || (errno == EAGAIN && sock->timeout < 0))) {
         return errno;
     }
     return APR_SUCCESS;
