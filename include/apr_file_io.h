@@ -275,6 +275,16 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
  * @param thefile The apr file to use as stderr.
  * @param cont The pool to allocate the file out of.
  * @ingroup apr_file_open
+ * 
+ * @remark The only reason that the apr_file_open_std* functions exist
+ * is that you may not always have a stderr/out/in on Windows.  This
+ * is generally a problem with newer versions of Windows and services.
+ * 
+ * The other problem is that the C library functions generally work
+ * differently on Windows and Unix.  So, by using apr_file_open_std*
+ * functions, you can get a handle to an APR struct that works with
+ * the APR functions which are supposed to work identically on all
+ * platforms.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
                                           apr_pool_t *cont);
@@ -284,6 +294,16 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
  * @param thefile The apr file to use as stdout.
  * @param cont The pool to allocate the file out of.
  * @ingroup apr_file_open
+ * 
+ * @remark The only reason that the apr_file_open_std* functions exist
+ * is that you may not always have a stderr/out/in on Windows.  This
+ * is generally a problem with newer versions of Windows and services.
+ * 
+ * The other problem is that the C library functions generally work
+ * differently on Windows and Unix.  So, by using apr_file_open_std*
+ * functions, you can get a handle to an APR struct that works with
+ * the APR functions which are supposed to work identically on all
+ * platforms.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
                                           apr_pool_t *cont);
@@ -293,6 +313,16 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
  * @param thefile The apr file to use as stdin.
  * @param cont The pool to allocate the file out of.
  * @ingroup apr_file_open
+ * 
+ * @remark The only reason that the apr_file_open_std* functions exist
+ * is that you may not always have a stderr/out/in on Windows.  This
+ * is generally a problem with newer versions of Windows and services.
+ * 
+ * The other problem is that the C library functions generally work
+ * differently on Windows and Unix.  So, by using apr_file_open_std*
+ * functions, you can get a handle to an APR struct that works with
+ * the APR functions which are supposed to work identically on all
+ * platforms.
  */
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile,
                                               apr_pool_t *cont);
