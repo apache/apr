@@ -111,8 +111,8 @@ APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,
                     /2)*g->pool_hash->size*2;
     g->reseed_size = APR_RANDOM_DEFAULT_RESEED_SIZE;
 
-    g->H = apr_palloc(p,H_size(g));
-    g->H_waiting = apr_palloc(p,H_size(g));
+    g->H = apr_pcalloc(p,H_size(g));
+    g->H_waiting = apr_pcalloc(p,H_size(g));
 
     g->randomness = apr_palloc(p,B_size(g));
     g->random_bytes = 0;
