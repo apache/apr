@@ -224,6 +224,25 @@ AC_DEFUN(APR_CHECK_APR_DEFINE,[
     ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
 ])
 
+define(APR_CHECK_FILE,[
+ac_safe=`echo "$1" | sed 'y%./+-%__p_%'`
+AC_MSG_CHECKING([for $1])
+AC_CACHE_VAL(ac_cv_file_$ac_safe, [
+  if test -r $1; then
+    eval "ac_cv_file_$ac_safe=yes"
+  else
+    eval "ac_cv_file_$ac_safe=no"
+  fi
+])dnl
+if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
+  AC_MSG_RESULT(yes)
+  ifelse([$2], , :, [$2])
+else
+  AC_MSG_RESULT(no)
+ifelse([$3], , , [$3])
+fi
+])
+
 define(APR_IFALLYES,[dnl
 ac_rc=yes
 for ac_spec in $1; do

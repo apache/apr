@@ -912,6 +912,7 @@ dnl #----------------------------- Checking for Locking Characteristics
 echo $ac_n "${nl}Checking for Locking...${nl}"
 
 AC_CHECK_FUNCS(semget semctl flock)
+APR_CHECK_FILE(/dev/zero)
 
 # It's stupid, but not all platforms have union semun, even those that need it.
 AC_MSG_CHECKING(for union semun in sys/sem.h)
@@ -973,7 +974,10 @@ fi
 APR_IFALLYES(func:semget func:semctl define:SEM_UNDO, hassysvser="1", hassysvser="0")
 APR_IFALLYES(func:flock define:LOCK_EX, hasflockser="1", hasflockser="0")
 APR_IFALLYES(header:fcntl.h define:F_SETLK, hasfcntlser="1", hasfcntlser="0")
-APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED func:pthread_mutexattr_setpshared, hasprocpthreadser="1", hasprocpthreadser="0")
+# note: the current APR use of shared mutex requires /dev/zero
+APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
+             func:pthread_mutexattr_setpshared file:/dev/zero,
+             hasprocpthreadser="1", hasprocpthreadser="0")
 APR_IFALLYES(struct:pthread_rw, hasrwlockser="1", hasrwlockser="0")
 
 # See which lock mechanism we'll select by default on this system.
@@ -983,8 +987,9 @@ APR_IFALLYES(func:semget func:semctl define:SEM_UNDO,
             APR_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
 APR_IFALLYES(func:flock define:LOCK_EX,
             APR_DECIDE(USE_FLOCK_SERIALIZE, [4.2BSD-style flock()]))
+# note: the current APR use of shared mutex requires /dev/zero
 APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
-            func:pthread_mutexattr_setpshared,
+            func:pthread_mutexattr_setpshared file:/dev/zero,
             APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
 APR_IFALLYES(header:fcntl.h define:F_SETLK,
             APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
