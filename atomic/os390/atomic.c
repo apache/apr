@@ -63,24 +63,30 @@ apr_status_t apr_atomic_init(apr_pool_t *p)
     return APR_SUCCESS;
 }
 
-void apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+apr_uint32_t apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
     apr_uint32_t old, new_val; 
 
     old = *mem;   /* old is automatically updated on cs failure */
     do {
         new_val = old + val;
-    } while (__cs(&old, (cs_t *)mem, new_val)); 
+    } while (__cs(&old, (cs_t *)mem, new_val));
+    return old;
 }
 
 void apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
-    apr_atomic_add32(mem, -val);
+     apr_uint32_t old, new_val;
+
+     old = *mem;   /* old is automatically updated on cs failure */
+     do {
+         new_val = old - val;
+     } while (__cs(&old, (cs_t *)mem, new_val));
 }
 
-void apr_atomic_inc32(volatile apr_uint32_t *mem)
+apr_uint32_t apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
-    apr_atomic_add32(mem, 1);
+    return apr_atomic_add32(mem, 1);
 }
 
 int apr_atomic_dec32(volatile apr_uint32_t *mem)
