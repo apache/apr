@@ -407,8 +407,9 @@ APR_DECLARE(apr_status_t) apr_parse_addr_port(char **addr,
  * Get name of the current machine
  * @param buf A buffer to store the hostname in.
  * @param len The maximum length of the hostname that can be stored in the
- *            buffer provided. 
+ *            buffer provided.  The suggested length is APRMAXHOSTLEN + 1.
  * @param cont The pool to use.
+ * @remark If the buffer was not large enough, an error will be returned.
  */
 APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len, apr_pool_t *cont);
 
