@@ -53,7 +53,7 @@
  */
 /*
  * Copyright (c) 1987, 1993
- *	The Regents of the University of California.  All rights reserved.
+ * The Regents of the University of California.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,8 +65,8 @@
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
  *    must display the following acknowledgement:
- *	This product includes software developed by the University of
- *	California, Berkeley and its contributors.
+ *    This product includes software developed by the University of
+ *    California, Berkeley and its contributors.
  * 4. Neither the name of the University nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
@@ -122,35 +122,35 @@ static apr_uint32_t randseed=0;
 
 static int gettemp(char *path, apr_file_t **doopen, apr_pool_t *p)
 {
-	register char *start, *trv, *suffp;
-	char *pad;
-	apr_finfo_t sbuf;
+    register char *start, *trv, *suffp;
+    char *pad;
+    apr_finfo_t sbuf;
     apr_status_t rv;
-	apr_uint32_t randnum;
+    apr_uint32_t randnum;
 
-	if (randseed==0) {
-		randseed = time(NULL);
-		seedrandom(randseed);
-	}
+    if (randseed==0) {
+        randseed = time(NULL);
+        seedrandom(randseed);
+    }
 
-	for (trv = path; *trv; ++trv)
-		;
-	suffp = trv;
-	--trv;
-	if (trv < path) {
-		return APR_EINVAL;
-	}
+    for (trv = path; *trv; ++trv)
+        ;
+    suffp = trv;
+    --trv;
+    if (trv < path) {
+        return APR_EINVAL;
+    }
 
-	/* Fill space with random characters */
-	while (*trv == 'X') {
-		randnum = arc4random() % (sizeof(padchar) - 1);
-		*trv-- = padchar[randnum];
-	}
-	start = trv + 1;
+    /* Fill space with random characters */
+    while (*trv == 'X') {
+        randnum = arc4random() % (sizeof(padchar) - 1);
+        *trv-- = padchar[randnum];
+    }
+    start = trv + 1;
 
-	/*
-	 * check the target directory.
-	 */
+    /*
+     * check the target directory.
+     */
     for (;; --trv) {
         if (trv <= path)
             break;
@@ -167,7 +167,7 @@ static int gettemp(char *path, apr_file_t **doopen, apr_pool_t *p)
         }
     }
 
-	for (;;) {
+    for (;;) {
         if ((rv = apr_file_open(doopen, path, APR_CREATE|APR_EXCL|APR_READ|
                                 APR_WRITE|APR_DELONCLOSE, 
                                 APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS)
@@ -175,20 +175,21 @@ static int gettemp(char *path, apr_file_t **doopen, apr_pool_t *p)
         if (rv != APR_EEXIST)
             return rv;
 
-		/* If we have a collision, cycle through the space of filenames */
-		for (trv = start;;) {
-			if (*trv == '\0' || trv == suffp)
+        /* If we have a collision, cycle through the space of filenames */
+        for (trv = start;;) {
+            if (*trv == '\0' || trv == suffp)
                 return APR_EINVAL; /* XXX: is this the correct return code? */
-			pad = strchr((char *)padchar, *trv);
-			if (pad == NULL || !*++pad)
-				*trv++ = padchar[0];
-			else {
-				*trv++ = *pad;
-				break;
-			}
-		}
-	}
-	/*NOTREACHED*/
+            pad = strchr((char *)padchar, *trv);
+            if (pad == NULL || !*++pad) {
+                *trv++ = padchar[0];
+            }
+            else {
+                *trv++ = *pad;
+                break;
+            }
+        }
+    }
+    /*NOTREACHED*/
 }
 
 #else
