@@ -79,7 +79,7 @@
 int apr_wastrtoastr(char const * const * *retarr, 
                     wchar_t const * const *arr, int args)
 {
-    size_t elesize = 0;
+    apr_size_t elesize = 0;
     char **newarr;
     char *elements;
     char *ele;
@@ -95,7 +95,7 @@ int apr_wastrtoastr(char const * const * *retarr,
 
     for (arg = 0; arg < args; ++arg) {
         newarr[arg] = (void*)(wcslen(arr[arg]) + 1);
-        elesize += (size_t)newarr[arg];
+        elesize += (apr_size_t)newarr[arg];
     }
 
     /* This is a safe max allocation, we will realloc after
@@ -108,8 +108,8 @@ int apr_wastrtoastr(char const * const * *retarr,
                                  _CRT_BLOCK, __FILE__, __LINE__);
 
     for (arg = 0; arg < args; ++arg) {
-        size_t len = (size_t)newarr[arg];
-        size_t newlen = elesize;
+        apr_size_t len = (apr_size_t)newarr[arg];
+        apr_size_t newlen = elesize;
 
         newarr[arg] = ele;
         (void)apr_conv_ucs2_to_utf8(arr[arg], &len,
@@ -129,7 +129,7 @@ int apr_wastrtoastr(char const * const * *retarr,
                        _CRT_BLOCK, __FILE__, __LINE__);
 
     if (ele != elements) {
-        size_t diff = ele - elements;
+        apr_size_t diff = ele - elements;
         for (arg = 0; arg < args; ++arg) {
             newarr[arg] += diff;
         }

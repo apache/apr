@@ -223,7 +223,7 @@ static char *getpass(const char *prompt)
  * smaller than our own.
  */
 
-APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, size_t *bufsiz)
+APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, apr_size_t *bufsiz)
 {
     char *pw_got = getpass(prompt);
     if (!pw_got)

@@ -71,7 +71,7 @@
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 {
     char *res;
-    size_t len;
+    apr_size_t len;
 
     if (s == NULL) {
         return NULL;

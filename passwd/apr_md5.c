@@ -520,7 +520,7 @@ static void to64(char *s, unsigned long v, int n)
 }
 
 APR_DECLARE(apr_status_t) apr_md5_encode(const char *pw, const char *salt,
-                             char *result, size_t nbytes)
+                             char *result, apr_size_t nbytes)
 {
     /*
      * Minimum size is 8 bytes for salt, plus 1 for the trailing NUL,
