@@ -113,6 +113,7 @@ extern "C" {
 #define APR_SET SEEK_SET
 #define APR_CUR SEEK_CUR
 #define APR_END SEEK_END
+/** @} */
 
 /** should be same as whence type in lseek, POSIX defines this as int */
 typedef int       apr_seek_where_t;
