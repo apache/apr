@@ -1,0 +1,3 @@
+autoconf;autoheader
+
+(cd shmem/unix/mm && autoconf)
