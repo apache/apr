@@ -610,12 +610,11 @@ int main(int argc, const char * const *argv)
                 rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-3);
     }
-    /*
+    
     if ((rv = test_rw()) != APR_SUCCESS) {
         fprintf(stderr,"RW Lock test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-4);
-    }*/
+    }
 
     if ((rv = test_thread_mutex()) != APR_SUCCESS) {
         fprintf(stderr,"thread_mutex test failed : [%d] %s\n",
