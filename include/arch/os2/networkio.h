@@ -59,7 +59,7 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "os2calls.h"
-#if HAVE_NETDB_H
+#if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif
 

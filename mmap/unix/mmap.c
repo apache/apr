@@ -64,16 +64,16 @@
 #ifdef BEOS
 #include <kernel/OS.h>
 #endif
-#if HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 #if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
-#if HAVE_SYS_STAT_H
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#if HAVE_SYS_MMAN_H
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 

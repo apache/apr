@@ -88,7 +88,7 @@ apr_status_t apr_proc_kill(apr_proc_t *proc, int signum)
 }
 
 
-#ifdef HAVE_SIGACTION
+#if APR_HAVE_SIGACTION
 
 /*
  * Replace standard signal() with the more reliable sigaction equivalent

@@ -60,10 +60,10 @@
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#if HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_CTYPE_H
+#if APR_HAVE_CTYPE_H
 #include <ctype.h>
 #endif
 

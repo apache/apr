@@ -72,7 +72,7 @@
 #if APR_HAVE_STRINGS_H
 #include <strings.h>
 #endif
-#ifdef HAVE_NETDB_H
+#if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif
 

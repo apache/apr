@@ -111,11 +111,11 @@
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
  */
-#define HAVE_CONIO_H  1
-#define HAVE_MALLOC_H 1
-#define HAVE_STDLIB_H 1
 #define HAVE_LIMITS_H 1
+#define HAVE_MALLOC_H 1
 #define HAVE_SIGNAL_H 1
+/* #define HAVE_STDDEF_H 1 why not? */
+#define HAVE_STDLIB_H 1
 
 #define HAVE_STRICMP  1
 #define HAVE_STRNICMP 1
