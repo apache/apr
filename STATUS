@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/06/28 21:58:55 $]
+Last modified at [$Date: 2002/06/28 22:12:09 $]
 
 Release:
 
@@ -62,11 +62,14 @@ CURRENT VOTES:
       apps (like httpd-2.0) due to the need for 64-bit division to
       retrieve the seconds "field."  Alternatives that have been
       discussed on dev@apr are:
-      1) Keep the 64-bit int, but change it to use binary microseconds 
-         +1: BrianP
+      1) Keep the 64-bit int, but change it to use binary microseconds
+         (renaming the function to get rid of apr_time_t vs time_t confusion,
+          and having macros to convert BUSEC to USEC and back if need be)
+         +1: BrianP, Cliff
       2) Add a separate data type (and supporting functions) for seconds only
+         -0: Cliff
       3) Replace it with a struct with separate fields for sec and usec
-         -0: BrianP
+         -0: BrianP, Cliff
 
     * For the atomics code to be efficient it depends on instructions
       in newer sparc models. Unfortunately this means that binaries
