@@ -24,6 +24,9 @@
 #define USE_WAIT_FOR_IO
 #endif
 
+/* problems: 
+ * 1) ungetchar not used for buffered files
+ */
 APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 {
     apr_ssize_t rv;
@@ -308,65 +311,18 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
         return APR_SUCCESS;
     }
 
-    /* If we have an underlying buffer, we can be *much* more efficient
-     * and skip over the apr_file_read calls.
-     */
-    if (thefile->buffered) {
-
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_lock(thefile->thlock);
+    while (str < final) { /* leave room for trailing '\0' */
+        nbytes = 1;
+        rv = apr_file_read(thefile, str, &nbytes);
+        if (rv != APR_SUCCESS) {
+            break;
         }
-#endif
-
-        if (thefile->direction == 1) {
-            apr_file_flush(thefile);
-            thefile->direction = 0;
-            thefile->bufpos = 0;
-            thefile->dataRead = 0;
-        }
-
-        while (str < final) { /* leave room for trailing '\0' */
-            /* Force ungetc leftover to call apr_file_read. */
-            if (thefile->bufpos < thefile->dataRead &&
-                thefile->ungetchar == -1) {
-                *str = thefile->buffer[thefile->bufpos++];
-            }
-            else {
-                nbytes = 1;
-                rv = apr_file_read(thefile, str, &nbytes);
-                if (rv != APR_SUCCESS) {
-                    break;
-                }
-            }
-            if (*str == '\n') {
-                ++str;
-                break;
-            }
+        if (*str == '\n') {
             ++str;
+            break;
         }
-
-#if APR_HAS_THREADS
-        if (thefile->thlock) {
-            apr_thread_mutex_unlock(thefile->thlock);
-        }
-#endif
+        ++str;
     }
-    else {
-        while (str < final) { /* leave room for trailing '\0' */
-            nbytes = 1;
-            rv = apr_file_read(thefile, str, &nbytes);
-            if (rv != APR_SUCCESS) {
-                break;
-            }
-            if (*str == '\n') {
-                ++str;
-                break;
-            }
-            ++str;
-        }
-    }
-
     /* We must store a terminating '\0' if we've stored any chars. We can
      * get away with storing it if we hit an error first. 
      */
