@@ -223,8 +223,10 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
         return APR_ENOMEM;
     }
     (*thefile)->filehand = GetStdHandle(STD_ERROR_HANDLE);
+    if ((*thefile)->filehand == INVALID_HANDLE_VALUE)
+        return GetLastError();
     (*thefile)->cntxt = cont;
-    (*thefile)->fname = NULL;
+    (*thefile)->fname = "STD_ERROR_HANDLE";
     (*thefile)->stated = 0;
     (*thefile)->eof_hit = 0;
 

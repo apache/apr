@@ -88,14 +88,19 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
 ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
+    ap_status_t rv;
     DWORD bwrote;
-    
+
     if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
         *nbytes = bwrote;
-        return APR_SUCCESS;
+        rv = APR_SUCCESS;
+    } 
+    else {
+        (*nbytes) = 0;
+        rv = GetLastError();
     }
-    (*nbytes) = 0;
-    return GetLastError();
+
+    return rv;
 }
 /*
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2) 
@@ -103,28 +108,29 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, 
                       ap_ssize_t *nbytes)
 {
+    ap_status_t rv = APR_SUCCESS;
     int i;
     DWORD bwrote = 0;
+    char *buf;
 
     *nbytes = 0;
     for (i = 0; i < nvec; i++) {
-        if (!WriteFile(thefile->filehand,
-                       vec[i].iov_base, vec[i].iov_len, &bwrote, NULL)) {
-            return GetLastError();
-        }
+        buf = vec[i].iov_base;
+        bwrote = vec[i].iov_len;
+        rv = ap_write(thefile, buf, &bwrote);
         *nbytes += bwrote;
+        if (rv != APR_SUCCESS) {
+            break;
+        }
     }
-    return APR_SUCCESS;
+    return rv;
 }
 
 ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
-    DWORD bwrote;
+    DWORD len = 1;
 
-    if (!WriteFile(thefile->filehand, &ch, 1, &bwrote, NULL)) {
-        return GetLastError();
-    }
-    return APR_SUCCESS; 
+    return ap_write(thefile, &ch, &len);
 }
 
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
@@ -174,15 +180,9 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 
 ap_status_t ap_puts(char *str, ap_file_t *thefile)
 {
-    DWORD bwrote;
-    int len;
+    DWORD len = strlen(str);
 
-    len = strlen(str);
-    if (!WriteFile(thefile->filehand, str, len, &bwrote, NULL)) {
-        return GetLastError();
-    }
-
-    return APR_SUCCESS; 
+    return ap_write(thefile, str, &len);
 }
 
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
