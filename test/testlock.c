@@ -183,6 +183,10 @@ static void test_thread_rwlock(abts_case *tc, void *data)
     apr_status_t s1, s2, s3, s4;
 
     s1 = apr_thread_rwlock_create(&rwlock, p);
+    if (s1 == APR_ENOTIMPL) {
+        ABTS_NOT_IMPL(tc, "rwlocks not implemented");
+        return;
+    }
     apr_assert_success(tc, "rwlock_create", s1);
     ABTS_PTR_NOTNULL(tc, rwlock);
 
