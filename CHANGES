@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Handle the weird case where getpwnam() returns NULL but errno is zero.
+     [Jeff Trawick]
+
   *) Add apr_file_flags_get() which returns the flags that were originally
      passed in to apr_file_open().  [Cliff Woolley]
 
