@@ -1,4 +1,3 @@
 MODULE  LIBC.NLM
 MODULE  WS2_32.NLM
-IMPORT  CpuCurrentProcessor
 EXPORT	@aprlib.imp
