@@ -113,7 +113,7 @@ static apr_status_t _file_dup(apr_file_t **new_file,
     (*new_file)->ungetchar = old_file->ungetchar;
 
     /* apr_file_dup() clears the inherit attribute, user must call 
-     * apr_file_set_inherit() again on the dupped handle, as necessary.
+     * apr_file_inherit_set() again on the dupped handle, as necessary.
      */
     (*new_file)->flags = old_file->flags & ~APR_INHERIT;
 

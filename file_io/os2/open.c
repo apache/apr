@@ -267,7 +267,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
 
 APR_POOL_IMPLEMENT_ACCESSOR(file);
 
-APR_IMPLEMENT_SET_INHERIT(file, flags, pool, apr_file_cleanup)
+APR_IMPLEMENT_INHERIT_SET(file, flags, pool, apr_file_cleanup)
 
-APR_IMPLEMENT_UNSET_INHERIT(file, flags, pool, apr_file_cleanup)
+APR_IMPLEMENT_INHERIT_UNSET(file, flags, pool, apr_file_cleanup)
 
