@@ -54,6 +54,7 @@
 
 #include "apr.h"
 #include "apr_poll.h"
+#include "apr_time.h"
 #include "networkio.h"
 #include "fileio.h"
 #if HAVE_POLL_H
