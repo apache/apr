@@ -89,6 +89,9 @@ void AprTimeToFileTime(LPFILETIME pft, ap_time_t t)
 
 void SystemTimeToAprExpTime(ap_exploded_time_t *xt, SYSTEMTIME *tm)
 {
+    TIME_ZONE_INFORMATION tz;
+    DWORD rc;
+
     xt->tm_usec = tm->wMilliseconds * 1000;
     xt->tm_sec  = tm->wSecond;
     xt->tm_min  = tm->wMinute;
@@ -98,8 +101,25 @@ void SystemTimeToAprExpTime(ap_exploded_time_t *xt, SYSTEMTIME *tm)
     xt->tm_year = tm->wYear - 1900;
     xt->tm_wday = tm->wDayOfWeek;
     xt->tm_yday = 0; /* ToDo: need to compute this */
-    xt->tm_isdst = 0; /* ToDo: need to compute this */
-    xt->tm_gmtoff = 0; /* ToDo: maybe the caller should set this explicitly */
+
+    rc = GetTimeZoneInformation(&tz);
+    switch (rc) {
+    case TIME_ZONE_ID_UNKNOWN:
+    case TIME_ZONE_ID_STANDARD:
+        xt->tm_isdst = 0;
+        /* Bias = UTC - local time in minutes 
+         * tm_gmtoff is seconds east of UTC
+         */
+        xt->tm_gmtoff = tz.Bias * 60;
+        break;
+    case TIME_ZONE_ID_DAYLIGHT:
+        xt->tm_isdst = 1;
+        xt->tm_gmtoff = tz.Bias * 60;
+        break;
+    default:
+        xt->tm_isdst = 0;
+        xt->tm_gmtoff = 0;
+    }
     return;
 }
 
@@ -109,7 +129,7 @@ ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
     return APR_SUCCESS;
 }
 
-/* Return micro-seconds since the Unix epoch (jan. 1, 1970) */
+/* Return micro-seconds since the Unix epoch (jan. 1, 1970) UTC */
 ap_time_t ap_now(void)
 {
     LONGLONG aprtime = 0;
@@ -126,7 +146,6 @@ ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
     AprTimeToFileTime(&ft, input);
     FileTimeToSystemTime(&ft, &st);
     SystemTimeToAprExpTime(result, &st);
-    result->tm_gmtoff = 0;
     return APR_SUCCESS;
 }
 
