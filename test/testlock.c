@@ -187,20 +187,20 @@ static void test_thread_rwlock(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "rwlocks not implemented");
         return;
     }
-    apr_assert_success(tc, "rwlock_create", s1);
+    APR_ASSERT_SUCCESS(tc, "rwlock_create", s1);
     ABTS_PTR_NOTNULL(tc, rwlock);
 
     i = 0;
     x = 0;
 
     s1 = apr_thread_create(&t1, NULL, thread_rwlock_func, NULL, p);
-    apr_assert_success(tc, "create thread 1", s1);
+    APR_ASSERT_SUCCESS(tc, "create thread 1", s1);
     s2 = apr_thread_create(&t2, NULL, thread_rwlock_func, NULL, p);
-    apr_assert_success(tc, "create thread 2", s2);
+    APR_ASSERT_SUCCESS(tc, "create thread 2", s2);
     s3 = apr_thread_create(&t3, NULL, thread_rwlock_func, NULL, p);
-    apr_assert_success(tc, "create thread 3", s3);
+    APR_ASSERT_SUCCESS(tc, "create thread 3", s3);
     s4 = apr_thread_create(&t4, NULL, thread_rwlock_func, NULL, p);
-    apr_assert_success(tc, "create thread 4", s4);
+    APR_ASSERT_SUCCESS(tc, "create thread 4", s4);
 
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
@@ -217,17 +217,17 @@ static void test_cond(abts_case *tc, void *data)
     int count1, count2, count3, count4;
     int sum;
     
-    apr_assert_success(tc, "create put mutex",
+    APR_ASSERT_SUCCESS(tc, "create put mutex",
                        apr_thread_mutex_create(&put.mutex, 
                                                APR_THREAD_MUTEX_DEFAULT, p));
     ABTS_PTR_NOTNULL(tc, put.mutex);
 
-    apr_assert_success(tc, "create nready mutex",
+    APR_ASSERT_SUCCESS(tc, "create nready mutex",
                        apr_thread_mutex_create(&nready.mutex, 
                                                APR_THREAD_MUTEX_DEFAULT, p));
     ABTS_PTR_NOTNULL(tc, nready.mutex);
 
-    apr_assert_success(tc, "create condvar",
+    APR_ASSERT_SUCCESS(tc, "create condvar",
                        apr_thread_cond_create(&nready.cond, p));
     ABTS_PTR_NOTNULL(tc, nready.cond);
 
@@ -254,7 +254,7 @@ static void test_cond(abts_case *tc, void *data)
     apr_thread_join(&s3, p4);
     apr_thread_join(&s4, c1);
 
-    apr_assert_success(tc, "destroy condvar", 
+    APR_ASSERT_SUCCESS(tc, "destroy condvar", 
                        apr_thread_cond_destroy(nready.cond));
 
     sum = count1 + count2 + count3 + count4;

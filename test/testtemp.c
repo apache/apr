@@ -23,7 +23,7 @@ static void test_temp_dir(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_temp_dir_get(&tempdir, p);
-    apr_assert_success(tc, "Error finding Temporary Directory", rv);
+    APR_ASSERT_SUCCESS(tc, "Error finding Temporary Directory", rv);
     ABTS_PTR_NOTNULL(tc, tempdir);
 }
 
@@ -35,11 +35,11 @@ static void test_mktemp(abts_case *tc, void *data)
     apr_status_t rv;
 
     rv = apr_temp_dir_get(&tempdir, p);
-    apr_assert_success(tc, "Error finding Temporary Directory", rv);
+    APR_ASSERT_SUCCESS(tc, "Error finding Temporary Directory", rv);
     
     filetemplate = apr_pstrcat(p, tempdir, "/tempfileXXXXXX", NULL);
     rv = apr_file_mktemp(&f, filetemplate, 0, p);
-    apr_assert_success(tc, "Error opening Temporary file", rv);
+    APR_ASSERT_SUCCESS(tc, "Error opening Temporary file", rv);
 }
 
 abts_suite *testtemp(abts_suite *suite)

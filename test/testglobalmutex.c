@@ -28,21 +28,21 @@ static void launch_child(abts_case *tc, apr_lockmech_e mech,
     apr_status_t rv;
 
     rv = apr_procattr_create(&procattr, p);
-    apr_assert_success(tc, "Couldn't create procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't create procattr", rv);
 
     rv = apr_procattr_io_set(procattr, APR_NO_PIPE, APR_NO_PIPE,
             APR_NO_PIPE);
-    apr_assert_success(tc, "Couldn't set io in procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set io in procattr", rv);
 
     rv = apr_procattr_error_check_set(procattr, 1);
-    apr_assert_success(tc, "Couldn't set error check in procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set error check in procattr", rv);
 
     args[0] = "globalmutexchild" EXTENSION;
     args[1] = (const char*)apr_itoa(p, (int)mech);
     args[2] = NULL;
     rv = apr_proc_create(proc, "./globalmutexchild" EXTENSION, args, NULL,
             procattr, p);
-    apr_assert_success(tc, "Couldn't launch program", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't launch program", rv);
 }
 
 static int wait_child(abts_case *tc, apr_proc_t *proc)
@@ -79,7 +79,7 @@ static void test_exclusive(abts_case *tc, void *data, apr_lockmech_e mech)
     int x = 0;
  
     rv = apr_global_mutex_create(&global_lock, LOCKNAME, mech, p);
-    apr_assert_success(tc, "Error creating mutex", rv);
+    APR_ASSERT_SUCCESS(tc, "Error creating mutex", rv);
 
     launch_child(tc, mech, &p1, p);
     launch_child(tc, mech, &p2, p);

@@ -22,17 +22,18 @@
 
 apr_pool_t *p;
 
-void apr_assert_success(abts_case* tc, const char* context, apr_status_t rv)
+void apr_assert_success(abts_case* tc, const char* context, apr_status_t rv, 
+                        int lineno) 
 {
     if (rv == APR_ENOTIMPL) {
-        ABTS_NOT_IMPL(tc, context);
+        abts_not_impl(tc, context, lineno);
     }
 
     if (rv != APR_SUCCESS) {
         char buf[STRING_MAX], ebuf[128];
         sprintf(buf, "%s (%d): %s\n", context, rv,
                 apr_strerror(rv, ebuf, sizeof ebuf));
-        ABTS_FAIL(tc, buf);
+        abts_fail(tc, buf, lineno);
     }
 }
 

@@ -32,19 +32,19 @@ static int launch_reader(abts_case *tc)
     int exitcode;
 
     rv = apr_procattr_create(&procattr, p);
-    apr_assert_success(tc, "Couldn't create procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't create procattr", rv);
 
     rv = apr_procattr_io_set(procattr, APR_NO_PIPE, APR_NO_PIPE,
             APR_NO_PIPE);
-    apr_assert_success(tc, "Couldn't set io in procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set io in procattr", rv);
 
     rv = apr_procattr_error_check_set(procattr, 1);
-    apr_assert_success(tc, "Couldn't set error check in procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set error check in procattr", rv);
 
     args[0] = "tryread" EXTENSION;
     args[1] = NULL;
     rv = apr_proc_create(&proc, "./tryread" EXTENSION, args, NULL, procattr, p);
-    apr_assert_success(tc, "Couldn't launch program", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't launch program", rv);
 
     ABTS_ASSERT(tc, "wait for child process",
             apr_proc_wait(&proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
@@ -61,11 +61,11 @@ static void test_withlock(abts_case *tc, void *data)
     
     rv = apr_file_open(&file, TESTFILE, APR_WRITE|APR_CREATE, 
                        APR_OS_DEFAULT, p);
-    apr_assert_success(tc, "Could not create file.", rv);
+    APR_ASSERT_SUCCESS(tc, "Could not create file.", rv);
     ABTS_PTR_NOTNULL(tc, file);
 
     rv = apr_file_lock(file, APR_FLOCK_EXCLUSIVE);
-    apr_assert_success(tc, "Could not lock the file.", rv);
+    APR_ASSERT_SUCCESS(tc, "Could not lock the file.", rv);
     ABTS_PTR_NOTNULL(tc, file);
 
     code = launch_reader(tc);
@@ -84,7 +84,7 @@ static void test_withoutlock(abts_case *tc, void *data)
 
 static void remove_lockfile(abts_case *tc, void *data)
 {
-    apr_assert_success(tc, "Couldn't remove lock file.",
+    APR_ASSERT_SUCCESS(tc, "Couldn't remove lock file.",
                        apr_file_remove(TESTFILE, p));
 }
     

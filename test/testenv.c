@@ -32,7 +32,7 @@ static void test_setenv(abts_case *tc, void *data)
     if (!have_env_set) {
         ABTS_NOT_IMPL(tc, "apr_env_set");
     } else {
-        apr_assert_success(tc, "set environment variable", rv);
+        APR_ASSERT_SUCCESS(tc, "set environment variable", rv);
     }
 }
 
@@ -52,7 +52,7 @@ static void test_getenv(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "apr_env_get");
         return;
     }
-    apr_assert_success(tc, "get environment variable", rv);
+    APR_ASSERT_SUCCESS(tc, "get environment variable", rv);
     ABTS_STR_EQUAL(tc, TEST_ENVVAR_VALUE, value);
 }
 
@@ -71,7 +71,7 @@ static void test_delenv(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "apr_env_delete");
         return;
     }
-    apr_assert_success(tc, "delete environment variable", rv);
+    APR_ASSERT_SUCCESS(tc, "delete environment variable", rv);
 
     if (!have_env_get) {
         ABTS_NOT_IMPL(tc, "apr_env_get (skip sanity check for apr_env_delete)");

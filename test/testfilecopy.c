@@ -36,13 +36,13 @@ static void copy_helper(abts_case *tc, const char *from, const char * to,
     else {
         rv = apr_file_append(from, to, perms, p);
     }
-    apr_assert_success(tc, "Error copying file", rv);
+    APR_ASSERT_SUCCESS(tc, "Error copying file", rv);
 
     rv = apr_stat(&orig, from, APR_FINFO_SIZE, p);
-    apr_assert_success(tc, "Couldn't stat original file", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't stat original file", rv);
 
     rv = apr_stat(&copy, to, APR_FINFO_SIZE, p);
-    apr_assert_success(tc, "Couldn't stat copy file", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't stat copy file", rv);
 
     if (!append) {
         ABTS_INT_EQUAL(tc, orig.size, copy.size);
@@ -64,7 +64,7 @@ static void copy_short_file(abts_case *tc, void *data)
     copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
                 APR_FILE_SOURCE_PERMS, 0, p);
     rv = apr_file_remove("data/file_copy.txt", p);
-    apr_assert_success(tc, "Couldn't remove copy file", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
 
 static void copy_over_existing(abts_case *tc, void *data)
@@ -85,7 +85,7 @@ static void copy_over_existing(abts_case *tc, void *data)
                 APR_FILE_SOURCE_PERMS, 0, p);
   
     rv = apr_file_remove("data/file_copy.txt", p);
-    apr_assert_success(tc, "Couldn't remove copy file", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
 
 static void append_nonexist(abts_case *tc, void *data)
@@ -98,7 +98,7 @@ static void append_nonexist(abts_case *tc, void *data)
     copy_helper(tc, "data/file_datafile.txt", "data/file_copy.txt", 
                 APR_FILE_SOURCE_PERMS, 0, p);
     rv = apr_file_remove("data/file_copy.txt", p);
-    apr_assert_success(tc, "Couldn't remove copy file", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
 
 static void append_exist(abts_case *tc, void *data)
@@ -119,7 +119,7 @@ static void append_exist(abts_case *tc, void *data)
                 APR_FILE_SOURCE_PERMS, 1, p);
   
     rv = apr_file_remove("data/file_copy.txt", p);
-    apr_assert_success(tc, "Couldn't remove copy file", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't remove copy file", rv);
 }
 
 abts_suite *testfilecopy(abts_suite *suite)
