@@ -716,6 +716,7 @@ void generate_def_file(cmd_data_t *cmd_data)
 
             export_args[num_export_args++] = implib_file;
             export_args[num_export_args++] = def_file;
+            export_args[num_export_args++] = NULL;
             spawnvp(P_WAIT, export_args[0], export_args);
         }
     }
