@@ -78,6 +78,8 @@ typedef apr_int64_t apr_time_t;
 /* mechanism to properly type apr_time_t literals */
 #define APR_TIME_C(val) APR_INT64_C(val)
 
+/* mechanism to properly print apr_time_t values */
+#define APR_TIME_T_FMT APR_INT64_T_FMT
 
 /* intervals for I/O timeouts, in microseconds */
 typedef apr_int64_t apr_interval_time_t;

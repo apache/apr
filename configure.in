@@ -608,21 +608,49 @@ fi
 if test "$ac_cv_sizeof_int" = "4"; then
     int_value=int
 fi
-if test "$ac_cv_sizeof_long" = "8"; then
+dnl # Now we need to find what apr_int64_t (sizeof == 8) will be.
+dnl # The first match is our preference.
+if test "$ac_cv_sizeof_int" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val)'
+    int64_t_fmt='#define APR_INT64_T_FMT "d"'
+    int64_value="int"
+    long_value=int
+elif test "$ac_cv_sizeof_long" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val##L)'
+    int64_t_fmt='#define APR_INT64_T_FMT "ld"'
+    int64_value="long"
     long_value=long
-fi
-if test "$ac_cv_sizeof_long_double" = "8"; then
+elif test "$ac_cv_sizeof_long_long" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val##LL)'
+    dnl Linux, Solaris, FreeBSD all support ll with printf.
+    dnl BSD 4.4 originated 'q'.  Solaris is more popular and 
+    dnl doesn't support 'q'.  Solaris wins.  Exceptions can
+    dnl go to the OS-dependent section.
+    int64_t_fmt='#define APR_INT64_T_FMT "lld"'
+    int64_value="long long"
+    long_value="long long"
+elif test "$ac_cv_sizeof_long_double" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val##LD)'
+    int64_t_fmt='#define APR_INT64_T_FMT "Ld"'
+    int64_value="long double"
     long_value="long double"
-fi
-if test "$ac_cv_sizeof_long_long" = "8"; then
-    if test "$ac_cv_sizeof_long_long" = "$ac_cv_sizeof_long"; then
-        long_value="long"
-    else
-        long_value="long long"
-    fi
-fi
-if test "$ac_cv_sizeof_longlong" = "8"; then
+elif test "$ac_cv_sizeof_longlong" = "8"; then
+    int64_literal='#define APR_INT64_C(val) (val##LL)'
+    int64_t_fmt='#define APR_INT64_T_FMT "qd"'
+    int64_value="__int64"
     long_value="__int64"
+else
+    dnl # int64_literal may be overriden if your compiler thinks you have
+    dnl # a 64-bit value but APR does not agree.
+    int64_literal='#error Can not determine the proper size for apr_int64_t'
+    int64_t_fmt='#error Can not determine the proper size for apr_int64_t'
+fi
+
+dnl # If present, allow the C99 macro INT64_C to override our conversion.
+APR_CHECK_DEFINE(INT64_C, stdint.h)
+if test "$ac_cv_define_INT64_C" = "yes"; then
+    int64_literal='#define APR_INT64_C(val) INT64_C(val)'
+    stdint=1
 fi
 
 if test "$ac_cv_type_off_t" = "yes"; then
@@ -716,14 +744,18 @@ esac
 AC_SUBST(short_value)
 AC_SUBST(int_value)
 AC_SUBST(long_value)
+AC_SUBST(int64_value)
 AC_SUBST(off_t_value)
 AC_SUBST(size_t_value)
 AC_SUBST(ssize_t_value)
 AC_SUBST(socklen_t_value)
+AC_SUBST(int64_t_fmt) 
 AC_SUBST(ssize_t_fmt) 
 AC_SUBST(size_t_fmt)
 AC_SUBST(off_t_fmt) 
 AC_SUBST(os_proc_t_fmt)
+AC_SUBST(int64_literal) 
+AC_SUBST(stdint) 
 
 dnl #----------------------------- Checking for string functions
 AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")
