@@ -250,19 +250,30 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 
 #define apr_atomic_t unsigned long
 
-#define apr_atomic_add(mem, val)     atomic_add(mem,val)
-#define apr_atomic_inc(mem)          atomic_inc(mem)
-#define apr_atomic_set(mem, val)     (*mem = val)
-#define apr_atomic_read(mem)         (*mem)
-  /*#define apr_atomic_init(pool)        APR_SUCCESS*/
-#define apr_atomic_cas(mem,with,cmp) atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
+#define apr_atomic_init(pool)           APR_SUCCESS
+#define apr_atomic_add32(mem, val)      atomic_add(mem,val)
+#define apr_atomic_sub32(mem, val)      atomic_sub(mem,val)
+#define apr_atomic_inc32(mem)           atomic_inc(mem)
+#define apr_atomic_set32(mem, val)      (*mem = val)
+#define apr_atomic_read32(mem)          (*mem)
+#define apr_atomic_cas32(mem,with,cmp)  atomic_cmpxchg((unsigned long *)(mem),(unsigned long)(cmp),(unsigned long)(with))
+#define apr_atomic_xchg32(mem, val)     atomic_xchg(mem, val)
     
-int apr_atomic_dec(apr_atomic_t *mem);
+int apr_atomic_dec32(apr_atomic_t *mem);
 void *apr_atomic_casptr(void **mem, void *with, const void *cmp);
-#define APR_OVERRIDE_ATOMIC_DEC 1
+
+#define APR_OVERRIDE_ATOMIC_READ32  1
+#define APR_OVERRIDE_ATOMIC_SET32   1
+#define APR_OVERRIDE_ATOMIC_ADD32   1
+#define APR_OVERRIDE_ATOMIC_SUB32   1
+#define APR_OVERRIDE_ATOMIC_INC32   1
+#define APR_OVERRIDE_ATOMIC_DEC32   1
+#define APR_OVERRIDE_ATOMIC_CAS32   1
+#define APR_OVERRIDE_ATOMIC_XCHG32  1
+
 #define APR_OVERRIDE_ATOMIC_CASPTR 1
 
-inline int apr_atomic_dec(apr_atomic_t *mem) 
+inline int apr_atomic_dec32(apr_atomic_t *mem) 
 {
     atomic_dec(mem);
     return *mem; 
@@ -272,6 +283,20 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 {
     return (void*)atomic_cmpxchg((unsigned long *)mem,(unsigned long)cmp,(unsigned long)with);
 }
+
+#define apr_atomic_read(mem)            apr_atomic_read32(mem)
+#define apr_atomic_set(mem, val)        apr_atomic_set32(mem, val)
+#define apr_atomic_add(mem, val)        apr_atomic_add32(mem,val)
+#define apr_atomic_inc(mem)             apr_atomic_inc32(mem)
+#define apr_atomic_dec(mem)             apr_atomic_dec32(mem)
+#define apr_atomic_cas(mem,with,cmp)    apr_atomic_cas32(mem,with,cmp)
+
+#define APR_OVERRIDE_ATOMIC_READ    1
+#define APR_OVERRIDE_ATOMIC_SET     1
+#define APR_OVERRIDE_ATOMIC_ADD     1
+#define APR_OVERRIDE_ATOMIC_INC     1
+#define APR_OVERRIDE_ATOMIC_DEC     1
+#define APR_OVERRIDE_ATOMIC_CAS     1
 
 #elif defined(__FreeBSD__)
 
