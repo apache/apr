@@ -158,6 +158,21 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,
 
 /*
 
+=head1 ap_fileperms_t ap_set_default_fperms(ap_fileperms_t perm)
+
+B<Set the default file permissions.>
+
+    arg 1) The permissions to use as the defaults for all files created by APR.
+
+B<NOTE>:  This function can not fail, and it returns the current default
+          permissions.
+
+=cut
+ */
+ap_fileperms_t ap_set_default_fperms(ap_fileperms_t perm);
+
+/*
+
 =head1 ap_status_t ap_close(ap_file_t *file)
 
 B<Close the specified file.>
