@@ -307,6 +307,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EABOVEROOT     (APR_OS_START_ERROR + 23)
 /** @see APR_STATUS_IS_EBADPATH */
 #define APR_EBADPATH       (APR_OS_START_ERROR + 24)
+/** @see APR_STATUS_IS_EPATHWILD */
+#define APR_EPATHWILD      (APR_OS_START_ERROR + 25)
 
 /* APR ERROR VALUE TESTS */
 /** 
@@ -375,6 +377,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EABOVEROOT(s)     ((s) == APR_EABOVEROOT)
 /** The given path was bad. */
 #define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
+/** The given path contained wildcards. */
+#define APR_STATUS_IS_EPATHWILD(s)      ((s) == APR_EPATHWILD)
 
 /* APR STATUS VALUES */
 /** @see APR_STATUS_IS_INCHILD */
