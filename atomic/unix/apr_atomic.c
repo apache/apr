@@ -262,7 +262,7 @@ apr_uint32_t apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
     return old_value;
 }
 #endif /* defined(APR_OVERRIDE_ATOMIC_CAS32) */
-#endif /* !defined(APR_OVERRIDE_ATOMIC_SUB32) */
+#endif /* !defined(APR_OVERRIDE_ATOMIC_ADD32) */
 
 #if !defined(APR_OVERRIDE_ATOMIC_SUB32)
 #if defined(APR_OVERRIDE_ATOMIC_CAS32)
