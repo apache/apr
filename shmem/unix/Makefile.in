@@ -13,7 +13,7 @@ INCDIR=../../inc
 INCDIR1=../../include
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -Imm -I.
 
-LIB=../libshmem.a
+LIB=libshmem.a
 
 OBJS=shmem.o \
 

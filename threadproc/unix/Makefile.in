@@ -14,7 +14,7 @@ INCDIR1=../../include
 INCDIR2=../../file_io/unix
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
 
-LIB=../libthreadproc.a
+LIB=libthreadproc.a
 
 OBJS=proc.o \
 	procsup.o \

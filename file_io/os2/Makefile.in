@@ -12,7 +12,7 @@ INCDIR=../../inc
 INCDIR1=../../include
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
-LIB=../file.a
+LIB=file.a
 
 OBJS=dir.o \
 	fileacc.o \
