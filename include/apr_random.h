@@ -52,56 +52,45 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef APR_TEST_INCLUDES
-#define APR_TEST_INCLUDES
+#ifndef APR_RANDOM_H
+#define APR_RANDOM_H
 
-#include "CuTest.h"
-#include "apr_pools.h"
+#include <apr_pools.h>
 
-/* Some simple functions to make the test apps easier to write and
- * a bit more consistent...
- */
+typedef struct apr_crypto_hash_t apr_crypto_hash_t;
 
-extern apr_pool_t *p;
+typedef void apr_crypto_hash_init_t(apr_crypto_hash_t *hash);
+typedef void apr_crypto_hash_add_t(apr_crypto_hash_t *hash,const void *data,
+				   apr_size_t bytes);
+typedef void apr_crypto_hash_finish_t(apr_crypto_hash_t *hash,
+				      unsigned char *result);
 
-CuSuite *getsuite(void);
+// FIXME: make this opaque
+struct apr_crypto_hash_t
+    {
+    apr_crypto_hash_init_t *init;
+    apr_crypto_hash_add_t *add;
+    apr_crypto_hash_finish_t *finish;
+    apr_size_t size;
+    void *data;
+    };
 
-CuSuite *teststr(void);
-CuSuite *testtime(void);
-CuSuite *testvsn(void);
-CuSuite *testipsub(void);
-CuSuite *testmmap(void);
-CuSuite *testud(void);
-CuSuite *testtable(void);
-CuSuite *testhash(void);
-CuSuite *testsleep(void);
-CuSuite *testpool(void);
-CuSuite *testfmt(void);
-CuSuite *testfile(void);
-CuSuite *testdir(void);
-CuSuite *testfileinfo(void);
-CuSuite *testrand(void);
-CuSuite *testrand2(void);
-CuSuite *testdso(void);
-CuSuite *testoc(void);
-CuSuite *testdup(void);
-CuSuite *testsockets(void);
-CuSuite *testproc(void);
-CuSuite *testprocmutex(void);
-CuSuite *testpoll(void);
-CuSuite *testlock(void);
-CuSuite *testsockopt(void);
-CuSuite *testpipe(void);
-CuSuite *testthread(void);
-CuSuite *testgetopt(void);
-CuSuite *testnames(void);
-CuSuite *testuser(void);
-CuSuite *testpath(void);
-CuSuite *testenv(void);
+apr_crypto_hash_t *apr_crypto_sha256_new(apr_pool_t *p);
 
-/* Assert that RV is an APR_SUCCESS value; else fail giving strerror
- * for RV and CONTEXT message. */
-void apr_assert_success(CuTest* tc, const char *context, apr_status_t rv);
+typedef struct apr_random_t apr_random_t;
 
+void apr_random_init(apr_random_t *g,apr_pool_t *p,
+		     apr_crypto_hash_t *pool_hash,apr_crypto_hash_t *key_hash,
+		     apr_crypto_hash_t *prng_hash);
+apr_random_t *apr_random_standard_new(apr_pool_t *p);
+void apr_random_add_entropy(apr_random_t *g,const void *entropy_,
+			    apr_size_t bytes);
+apr_status_t apr_random_insecure_bytes(apr_random_t *g,void *random,
+				       apr_size_t bytes);
+apr_status_t apr_random_secure_bytes(apr_random_t *g,void *random,
+				     apr_size_t bytes);
+void apr_random_barrier(apr_random_t *g);
+apr_status_t apr_random_secure_ready(apr_random_t *r);
+apr_status_t apr_random_insecure_ready(apr_random_t *r);
 
-#endif /* APR_TEST_INCLUDES */
+#endif /* ndef APR_RANDOM_H */

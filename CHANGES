@@ -1,5 +1,10 @@
 Changes with APR 1.0
 
+  *) Add a new PRNG. Note that the implementation of SHA-256 is a
+     stop-gap pending snarfing the SHA-1 implementation from apr-util
+     and upgrading it to do SHA-256. Not yet ready for prime time.
+     [Ben Laurie]
+
   *) Added new versions of the apr_atomic functions for
      use with 32-bit ints  [Brian Pane]
 
