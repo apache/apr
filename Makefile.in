@@ -68,6 +68,9 @@ install: $(TARGET_LIB)
 	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
 	$(LIBTOOL) --mode=install cp APRVARS $(libdir)
 	$(LIBTOOL) --mode=install cp apr.exp $(libdir)
+	if [ ! -d $(bindir) ]; then \
+	    $(top_srcdir)/build/mkdir.sh $(bindir); \
+	fi;
 	$(LIBTOOL) --mode=install cp apr-config $(bindir)
 	chmod 755 $(bindir)/apr-config
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
