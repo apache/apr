@@ -15,11 +15,12 @@ EXPORTS
 	ap_dir_entry_mtime   @8
 	ap_dir_entry_ftype   @9
 	ap_get_dir_filename   @10
-	ap_get_filename   @11
-	ap_get_filesize   @12
-	ap_get_fileatime   @13
-	ap_get_filectime   @14
-	ap_get_filemtime   @15
+;	ap_get_filename   @11
+	ap_stat		  @11
+;	ap_get_filesize   @12
+;	ap_get_fileatime   @13
+;	ap_get_filectime   @14
+;	ap_get_filemtime   @15
 	ap_dupfile   @16
 	ap_getfileinfo   @17
 	ap_open   @18
@@ -41,7 +42,7 @@ EXPORTS
 	ap_flush @34
     	ap_fprintf   @35
     	ap_eof   @36
-	ap_get_filetype @37
+;	ap_get_filetype @37
 	ap_writev @38
 	; locks
 	ap_create_lock   @39
@@ -132,29 +133,41 @@ EXPORTS
 	ap_optopt   @124 DATA
 	ap_optreset   @125 DATA
 	ap_optarg   @126 DATA
-	ap_make_time   @127
-	ap_current_time   @128
-	ap_explode_time   @129
-	ap_implode_time   @130
-	ap_get_curtime   @131
-	ap_get_sec   @132
-	ap_get_min   @133
-	ap_get_hour   @134
-	ap_get_mday   @135
-	ap_get_mon   @136
-	ap_get_year   @137
-	ap_get_wday   @138
-	ap_set_sec   @139
-	ap_set_min   @140
-	ap_set_hour   @141
-	ap_set_mday   @142
-	ap_set_mon   @143
-	ap_set_year   @144
-	ap_set_wday   @145
-	ap_get_timedata   @146
-	ap_set_timedata   @147
-	ap_get_os_time   @148
-	ap_timediff   @149
+;	ap_make_time   @127
+	ap_ansi_time_to_ap_time @127
+;	ap_current_time   @128
+	ap_now		  @128
+;	ap_explode_time   @129
+	ap_explode_gmt	  @129
+;	ap_implode_time   @130
+	ap_explode_localtime @130
+;	ap_get_curtime   @131
+	ap_implode_time	 @131
+;	ap_get_sec   @132
+	ap_get_os_imp_time	@132
+;	ap_get_min   @133
+	ap_get_os_exp_time	@133
+;	ap_get_hour   @134
+	ap_put_os_imp_time	@134
+;	ap_get_mday   @135
+	ap_put_os_exp_time	@135
+;	ap_get_mon   @136
+	ap_ctime     @136
+;	ap_get_year   @137
+	ap_rfc822_date	@137
+;	ap_get_wday   @138
+	ap_strftime   @138
+;	ap_set_sec   @139
+;	ap_set_min   @140
+;	ap_set_hour   @141
+;	ap_set_mday   @142
+;	ap_set_mon   @143
+;	ap_set_year   @144
+;	ap_set_wday   @145
+;	ap_get_timedata   @146
+;	ap_set_timedata   @147
+;	ap_get_os_time   @148
+;	ap_timediff   @149
 	ap_MD5Final   @150
 	ap_MD5Init   @151
 	ap_MD5Update   @152
