@@ -658,10 +658,12 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
                                           apr_pool_t *parent_pool)
 {
     apr_abortfunc_t abortfunc;
+    apr_pool_t *ppool;
 
     abortfunc = parent_pool ? parent_pool->apr_abort : NULL;
+    ppool = parent_pool ? parent_pool : permanent_pool;
 
-    apr_pool_sub_make(newpool, parent_pool, abortfunc);
+    apr_pool_sub_make(newpool, ppool, abortfunc);
     if (*newpool == NULL) {
         return APR_ENOPOOL;
     }   
@@ -834,7 +836,7 @@ APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *globalp)
         return status;
     }
 #endif
-    apr_pool_sub_make(&permanent_pool, globalp, NULL);
+    permanent_pool = globalp;
 
 #ifdef ALLOC_STATS
     atexit(dump_stats);
@@ -1488,3 +1490,4 @@ static void free_proc_chain(struct process_chain *procs)
 	}
     }
 }
+
