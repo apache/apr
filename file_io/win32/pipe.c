@@ -63,9 +63,16 @@
 #include <sys/stat.h>
 #include "misc.h"
 
+static ap_status_t setpipeblockmode(ap_file_t *pipe, DWORD dwMode) {
+    if (!SetNamedPipeHandleState(pipe->filehand, &dwMode, NULL, NULL)) {
+        return GetLastError();
+    }
+    return APR_SUCCESS;
+}
+
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
-    DWORD dwMode;
+    ap_status_t rc = APR_SUCCESS;
     ap_oslevel_e oslevel;
 
     /* This code relies on the fact that anonymous pipes (which
@@ -75,26 +82,28 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
     if (thepipe->pipe == 1) {
         if (ap_get_oslevel(thepipe->cntxt, &oslevel) == APR_SUCCESS &&
             oslevel >= APR_WIN_NT) {
-            if (timeout == 0) {
-                dwMode = PIPE_NOWAIT;
-            } else {
-                dwMode = PIPE_WAIT;
+            if (timeout >= 0) {
+                /* Set the pipe non-blocking if it was previously blocking */  
+                if (thepipe->timeout < 0) {
+                    rc = setpipeblockmode(thepipe, PIPE_NOWAIT);
+                }
             }
-            if (SetNamedPipeHandleState(thepipe->filehand, &dwMode, NULL, NULL)) {
-                thepipe->timeout = timeout;
-                return APR_SUCCESS;
-            }
-            else {
-                return GetLastError();
+            else if (thepipe->timeout >= 0) {
+                rc = setpipeblockmode(thepipe, PIPE_WAIT);
             }
         } 
         else {
-            /* can't make anonymous pipes non-blocking on Win9x
-             */
-            return APR_ENOTIMPL;
+            /* can't make anonymous pipes non-blocking on Win9x */
+            rc = APR_ENOTIMPL;
         }
+        thepipe->timeout = timeout;
     }
-    return APR_EINVAL;
+    else {
+        /* Timeout not valid for file i/o (yet...) */
+        rc = APR_EINVAL;
+    }
+
+    return rc;
 }
 
 ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
