@@ -69,10 +69,11 @@ apr_status_t apr_filepath_list_split_impl(apr_array_header_t **pathelts,
                                           apr_pool_t *p)
 {
     char *path, *part, *ptr;
-    char separator_string[2] = { separator, '\0' };
+    char separator_string[2] = { '\0', '\0' };
     apr_array_header_t *elts;
     int nelts;
 
+    separator_string[0] = separator;
     /* Count the number of path elements. We know there'll be at least
        one even if path is an empty string. */
     path = apr_pstrdup(p, liststr);
