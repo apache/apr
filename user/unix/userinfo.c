@@ -74,6 +74,10 @@ static apr_status_t getpwnam_safe(const char *username,
 #else
     if ((*pw = getpwnam(username)) == NULL) {
 #endif
+        if (errno == 0) {
+            /* this can happen with getpwnam() on FreeBSD 4.3 */
+            return APR_EGENERAL;
+        }
         return errno;
     }
     return APR_SUCCESS;
