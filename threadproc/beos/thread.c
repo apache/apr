@@ -155,3 +155,35 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
         return errno;
     }
 }
+
+apr_status_t apr_get_threaddata(void **data, const char *key, apr_thread_t *thread)
+{
+    return apr_get_userdata(data, key, thread->cntxt);
+}
+
+apr_status_t apr_set_threaddata(void *data, const char *key,
+                              apr_status_t (*cleanup) (void *),
+                              apr_thread_t *thread)
+{
+    return apr_set_userdata(data, key, cleanup, thread->cntxt);
+}
+
+apr_status_t apr_get_os_thread(apr_os_thread_t **thethd, apr_thread_t *thd)
+{
+    *thethd = &thd->td;
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd, 
+                             apr_pool_t *cont)
+{
+    if (cont == NULL) {
+        return APR_ENOPOOL;
+    }
+    if ((*thd) == NULL) {
+        (*thd) = (apr_thread_t *)apr_pcalloc(cont, sizeof(apr_thread_t));
+        (*thd)->cntxt = cont;
+    }
+    (*thd)->td = *thethd;
+    return APR_SUCCESS;
+}
