@@ -63,6 +63,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#if APR_HAS_THREADS
+
 /**
  * @file apr_thread_mutex.h
  * @brief APR Thread Mutex Routines
@@ -111,6 +113,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex);
  * @param mutex the mutex to destroy.
  */
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex);
+
+#endif
 
 #ifdef __cplusplus
 }
