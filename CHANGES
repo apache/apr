@@ -7,10 +7,6 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
-  *) Don't assume getnameinfo() can handle IPv4-mapped IPv6 addresses
-     on any platforms.
-     [Jeff Trawick, Joe Orton, Colm MacCárthaigh <colm@stdlib.net>]
-
   *) Add new functions apr_signal_block, apr_signal_unblock to block/unblock
      the delivery of a particular signal.  [Madhusudan Mathihalli]
 
@@ -125,6 +121,10 @@ Changes with APR 1.0
      apr_compat.h
 
 Changes with APR 0.9.5
+
+  *) Don't assume getnameinfo() can handle IPv4-mapped IPv6 addresses
+     on any platforms.
+     [Jeff Trawick, Joe Orton, Colm MacCárthaigh <colm stdlib.net>]
 
   *) Support setuid, setgid and sticky file permissions bits on Unix.
      [André Malo]
