@@ -59,6 +59,7 @@
 #include "errno.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "apr_time.h"
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -77,7 +78,6 @@ void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data);
-
 
 apr_lock_t *thread_lock;
 apr_pool_t *context;
@@ -106,134 +106,86 @@ void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data)
-{
-    int i;
-
-    apr_thread_once(control, init_func);
-
-    for (i = 0; i < 10000; i++) {
-        apr_lock_acquire(thread_lock);
-        x++;
-        apr_lock_release(thread_lock);
-    }
-    apr_thread_exit(thd, &exit_ret_val);
-    return NULL;
-} 
-
-void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data)
-{
-    int i;
-
-    apr_thread_once(control, init_func);
-
-    for (i = 0; i < 10000; i++) {
-        apr_lock_acquire(thread_lock);
-        x++;
-        apr_lock_release(thread_lock);
-    }
-    apr_thread_exit(thd, &exit_ret_val);
-    return NULL;
-} 
-
-void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data)
-{
-    int i;
-
-    apr_thread_once(control, init_func);
-
-    for (i = 0; i < 10000; i++) {
-        apr_lock_acquire(thread_lock);
-        x++;
-        apr_lock_release(thread_lock);
-    }
-    apr_thread_exit(thd, &exit_ret_val);
-    return NULL;
-} 
-
 int main(void)
 {
     apr_thread_t *t1;
     apr_thread_t *t2;
     apr_thread_t *t3;
     apr_thread_t *t4;
-    apr_status_t s1;
-    apr_status_t s2;
-    apr_status_t s3;
-    apr_status_t s4;
-
+    apr_status_t r1, r2, r3, r4;
+    apr_status_t s1, s2, s3, s4;
     apr_initialize();
 
-    fprintf(stdout, "Initializing the context......."); 
+    printf("APR Simple Thread Test\n======================\n\n");
+    
+    printf("%-60s", "Initializing the context"); 
     if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fflush(stdout);
-        fprintf(stderr, "could not initialize\n");
+        fprintf(stderr, "Failed.\nCould not initialize\n");
         exit(-1);
     }
-    fprintf(stdout, "OK\n");
+    printf("OK\n");
 
     apr_thread_once_init(&control, context);
 
-    fprintf(stdout, "Initializing the lock......."); 
-    s1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
-    if (s1 != APR_SUCCESS) {
+    printf("%-60s", "Initializing the lock"); 
+    r1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
+    if (r1 != APR_SUCCESS) {
         fflush(stdout);
-        fprintf(stderr, "Could not create lock\n");
+        fprintf(stderr, "Failed\nCould not create lock\n");
         exit(-1);
     }
-    fprintf(stdout, "OK\n");
+    printf("OK\n");
 
-    fprintf(stdout, "Starting all the threads......."); 
-    s1 = apr_thread_create(&t1, NULL, thread_func1, NULL, context);
-    s2 = apr_thread_create(&t2, NULL, thread_func2, NULL, context);
-    s3 = apr_thread_create(&t3, NULL, thread_func3, NULL, context);
-    s4 = apr_thread_create(&t4, NULL, thread_func4, NULL, context);
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
-        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
+    printf("%-60s", "Starting all the threads"); 
+    r1 = apr_thread_create(&t1, NULL, thread_func1, NULL, context);
+    r2 = apr_thread_create(&t2, NULL, thread_func1, NULL, context);
+    r3 = apr_thread_create(&t3, NULL, thread_func1, NULL, context);
+    r4 = apr_thread_create(&t4, NULL, thread_func1, NULL, context);
+    if (r1 != APR_SUCCESS || r2 != APR_SUCCESS || 
+        r3 != APR_SUCCESS || r4 != APR_SUCCESS) {
         fflush(stdout);
-        fprintf(stderr, "Error starting thread\n");
+        fprintf(stderr, "Failed\nError starting thread\n");
         exit(-1);
     }
-    fprintf(stdout, "OK\n");
+    printf("OK\n");
 
-    fprintf(stdout, "Waiting for threads to exit.......");
+    printf("%-60s", "Waiting for threads to exit");
+    fflush(stdout);
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
     apr_thread_join(&s3, t3);
     apr_thread_join(&s4, t4);
-    fprintf(stdout, "OK\n");
+    printf("OK\n");
 
-    fprintf(stdout, "Checking thread's returned value.......");
+    printf("%-60s", "Checking thread's returned value");
     if (s1 != exit_ret_val || s2 != exit_ret_val ||
         s3 != exit_ret_val || s4 != exit_ret_val) {
         fflush(stdout);
         fprintf(stderr, 
-                "Invalid return value %d/%d/%d/%d (not expected value %d)\n",
+                "Invalid return value\nGot %d/%d/%d/%d, but expected %d for all 4\n",
                 s1, s2, s3, s4, exit_ret_val);
         exit(-1);
     }
-    fprintf(stdout, "OK\n");
+    printf("OK\n");
 
-    fprintf(stdout, "Checking if locks worked......."); 
+    printf("%-60s", "Checking if locks worked"); 
     if (x != 40000) {
         fflush(stdout);
-        fprintf(stderr, "The locks didn't work????  %d\n", x);
+        fprintf(stderr, "No!\nThe locks didn't work????  x = %d instead of 40,000\n", x);
         exit(-1);
     }
-    else {
-        fprintf(stdout, "Everything is working!\n");
-    }
+    printf("OK\n");
 
-    fprintf(stdout, "Checking if apr_thread_once worked.......");
+    printf("%-60s", "Checking if apr_thread_once worked");
     if (value != 1) {
         fflush(stdout);
-        fprintf(stderr, "apr_thread_once must not have worked, "
-                "value is %d\n", value);
+        fprintf(stderr, "Failed!\napr_thread_once must not have worked, "
+                "value is %d instead of 1\n", value);
         exit(-1);
     }
-    else {
-        fprintf(stdout, "apr_thread_once worked\n");
-    }
+    printf("OK\n");
+
     return 0;
 }
 
