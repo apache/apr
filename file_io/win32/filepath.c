@@ -79,13 +79,15 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 {
     const char *testpath = *inpath;
     char *newpath;
-    char seperator[2] = { (flags & APR_FILEPATH_NATIVE) ? '\\' : '/', 0};
 #ifdef NETWARE
+    char seperator[2] = { 0, 0};
     char server[MAX_SERVER_NAME+1];
     char volume[MAX_VOLUME_NAME+1];
     char path[MAX_PATH_NAME+1];
     char file[MAX_FILE_NAME+1];
     int elements;
+
+    seperator[0] = (flags & APR_FILEPATH_NATIVE) ? '\\' : '/';
 
     /* Allocate and initialize each of the segment buffers
     */
@@ -108,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
         /* NetWare doesn't add the root slash so we need to add it manually.
         */
-        strcat(newpath, "/");
+        strcat(newpath, seperator);
         *rootpath = newpath;
 
         /* Skip the inpath pointer down to the first non-root character
@@ -141,6 +143,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     return APR_EINCOMPLETE;
 
 #else
+    char seperator[2] = { (flags & APR_FILEPATH_NATIVE) ? '\\' : '/', 0};
     const char *delim1;
     const char *delim2;
 
