@@ -185,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
-    (*file)->flags = 0;
+    (*file)->flags = APR_FILE_NOCLEANUP;
     (*file)->buffered = 0;
 #if APR_HAS_THREADS
     (*file)->thlock = NULL;
