@@ -109,7 +109,17 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         ap_unlock(thefile->mutex);
         return APR_OS2_STATUS(rc);
     } else {
+        if (thefile->pipe)
+            DosResetEventSem(thefile->pipeSem, &rc);
+
         rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);
+
+        if (rc == ERROR_NO_DATA && thefile->timeout != 0) {
+            int rcwait = DosWaitEventSem(thefile->pipeSem, thefile->timeout >= 0 ? thefile->timeout / 1000 : SEM_INDEFINITE_WAIT);
+
+            if (rcwait == 0)
+                rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);
+        }
 
         if (rc) {
             *nbytes = 0;
