@@ -62,7 +62,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t file_cleanup(void *thefile)
+ap_status_t apr_file_cleanup(void *thefile)
 {
     struct file_t *file = thefile;
     return ap_close(file);
@@ -140,7 +140,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     if (dafile->buffered)
         dafile->buffer = ap_palloc(cntxt, APR_FILE_BUFSIZE);
 
-    ap_register_cleanup(dafile->cntxt, dafile, file_cleanup, ap_null_cleanup);
+    ap_register_cleanup(dafile->cntxt, dafile, apr_file_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
 
