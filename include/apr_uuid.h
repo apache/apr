@@ -52,6 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+/**
+ * @file apr_uuid.h
+ * @brief routines that maninpulate UUID's
+ */
 #ifndef APR_UUID_H
 #define APR_UUID_H
 
@@ -63,12 +67,17 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package APR UUID Handling
+ * @defgroup APR_UUID UUID Handling
+ * @ingroup APR
+ * @{
  */
 
-/* we represent a UUID as a block of 16 bytes. */
+/**
+ * we represent a UUID as a block of 16 bytes.
+ */
+
 typedef struct {
-    unsigned char data[16];
+    unsigned char data[16]; /**< the actual UUID */
 } apr_uuid_t;
 
 /* UUIDs are formatted as: 00112233-4455-6677-8899-AABBCCDDEEFF */
@@ -78,7 +87,6 @@ typedef struct {
 /**
  * Generate and return a (new) UUID
  * @param uuid The resulting UUID
- * @deffunc void apr_uuid_get(apr_uuid_t *uuid)
  */ 
 APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid);
 
@@ -88,7 +96,6 @@ APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid);
  *               be at least APR_UUID_FORMATTED_LENGTH + 1 bytes long to hold
  *               the formatted UUID and a null terminator
  * @param uuid The UUID to format
- * @deffunc void apr_uuid_format(char *buffer, const apr_uuid_t *uuid)
  */ 
 APR_DECLARE(void) apr_uuid_format(char *buffer, const apr_uuid_t *uuid);
 
@@ -96,10 +103,10 @@ APR_DECLARE(void) apr_uuid_format(char *buffer, const apr_uuid_t *uuid);
  * Parse a standard-format string into a UUID
  * @param uuid The resulting UUID
  * @param uuid_str The formatted UUID
- * @deffunc apr_status_t apr_uuid_parse(apr_uuid_t *uuid, const char *uuid_str)
  */ 
 APR_DECLARE(apr_status_t) apr_uuid_parse(apr_uuid_t *uuid, const char *uuid_str);
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif

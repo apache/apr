@@ -5,6 +5,10 @@
  * @file apr.h
  * @brief Basic APR header
  */
+/**
+ * @defgroup APR APR Functions
+ * @{
+ */
 
 /* So that we can use inline on some critical functions, and use
  * GNUC attributes (such as to get -Wall warnings for printf-like
@@ -291,5 +295,5 @@ typedef  @socklen_t_value@       apr_socklen_t;
 #else
 #error no decision has been made on APR_PATH_MAX for your platform
 #endif
-
+/** @} */
 #endif /* APR_H */
