@@ -78,7 +78,7 @@
 #define BEOS_MAX_DATAKEYS	128
 
 struct apr_thread_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     thread_id td;
     void *data;
     apr_thread_start_t func;
@@ -86,14 +86,14 @@ struct apr_thread_t {
 };
 
 struct apr_threadattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     int32 attr;
     int detached;
     int joinable;
 };
 
 struct apr_threadkey_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
 	int32  key;
 };
 
@@ -112,7 +112,7 @@ struct beos_key {
 };
 
 struct apr_procattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     apr_file_t *parent_in;
     apr_file_t *child_in;
     apr_file_t *parent_out;

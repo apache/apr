@@ -88,7 +88,7 @@
 #if APR_HAS_THREADS
 
 struct apr_thread_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     pthread_t *td;
     void *data;
     apr_thread_start_t func;
@@ -96,12 +96,12 @@ struct apr_thread_t {
 };
 
 struct apr_threadattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     pthread_attr_t *attr;
 };
 
 struct apr_threadkey_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     pthread_key_t key;
 };
 
@@ -112,7 +112,7 @@ struct apr_thread_once_t {
 #endif
 
 struct apr_procattr_t {
-    apr_pool_t *cntxt;
+    apr_pool_t *pool;
     apr_file_t *parent_in;
     apr_file_t *child_in;
     apr_file_t *parent_out;

@@ -55,16 +55,16 @@
 #include "threadproc.h"
 #include "apr_portable.h"
 
-APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *pool)
 {
-    (*new) = (apr_threadattr_t *)apr_palloc(cont, 
+    (*new) = (apr_threadattr_t *)apr_palloc(pool, 
               sizeof(apr_threadattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-    (*new)->cntxt = cont;
+    (*new)->pool = pool;
 	(*new)->attr = (int32)B_NORMAL_PRIORITY;
 
     return APR_SUCCESS;
@@ -106,7 +106,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
         return APR_ENOMEM;
     }
 
-    (*new)->cntxt = pool;
+    (*new)->pool = pool;
     (*new)->data = data;
     (*new)->func = func;
     (*new)->exitval = -1;
@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
 	else
 	    temp = B_NORMAL_PRIORITY;
 
-    stat = apr_pool_create(&(*new)->cntxt, pool);
+    stat = apr_pool_create(&(*new)->pool, pool);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -144,7 +144,7 @@ int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
 
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
 {
-    apr_pool_destroy(thd->cntxt);
+    apr_pool_destroy(thd->pool);
     thd->exitval = retval;
     exit_thread ((status_t)(retval));
     /* This will never be reached... */
@@ -186,14 +186,14 @@ void apr_thread_yield()
 
 APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
 {
-    return apr_pool_userdata_get(data, key, thread->cntxt);
+    return apr_pool_userdata_get(data, key, thread->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
                                               apr_status_t (*cleanup) (void *),
                                               apr_thread_t *thread)
 {
-    return apr_pool_userdata_set(data, key, cleanup, thread->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, thread->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
@@ -203,14 +203,14 @@ APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd, apr_thread
 }
 
 APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
-                                            apr_pool_t *cont)
+                                            apr_pool_t *pool)
 {
-    if (cont == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     if ((*thd) == NULL) {
-        (*thd) = (apr_thread_t *)apr_pcalloc(cont, sizeof(apr_thread_t));
-        (*thd)->cntxt = cont;
+        (*thd) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
+        (*thd)->pool = pool;
     }
     (*thd)->td = *thethd;
     return APR_SUCCESS;
@@ -256,4 +256,4 @@ APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
     return APR_SUCCESS;
 }
 
-APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
+APR_POOL_IMPLEMENT_ACCESSOR(thread)
