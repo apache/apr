@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Setting port for socket.......");
-    if (apr_set_local_port(sock, 8021) != APR_SUCCESS) {
+    if (apr_set_port(sock, APR_LOCAL, 8021) != APR_SUCCESS) {
         apr_close_socket(sock);
         fprintf(stderr, "Couldn't set the port correctly\n");
         exit(-1);
@@ -162,9 +162,9 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     apr_get_remote_ipaddr(&remote_ipaddr, sock2);
-    apr_get_remote_port(&remote_port, sock2);
+    apr_get_port(&remote_port, APR_REMOTE, sock2);
     apr_get_local_ipaddr(&local_ipaddr, sock2);
-    apr_get_local_port(&local_port, sock2);
+    apr_get_port(&local_port, APR_LOCAL, sock2);
     fprintf(stdout, "\tServer socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     length = STRLEN;
