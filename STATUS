@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/24 08:26:19 $]
+Last modified at [$Date: 2001/01/28 02:13:18 $]
 
 Release:
 
@@ -15,8 +15,6 @@ Release:
 
 RELEASE SHOWSTOPPERS:
 
-    * Many linkage errors are gpfaulting Apache/win32 in various configs
-      (load mod_dav, for example.)
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -39,7 +37,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       process suspended. We also need a call to wake up the suspended 
       process This may not be able to be implemented everywhere though.
         Status: OtherBill asks, why?  What is the benefit, how is it
-        portably implemented?
+        portably implemented?  Unless this creates some tangible that
+        mirrors another platform, then I'm -1.
 
     * Replace tables with a proper opaque ADT that has pluggable
       implementations (including something like the existing data type,
