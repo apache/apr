@@ -89,7 +89,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
-void *dummy_func(void *opaque)
+static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
     return thd->func(thd, thd->data);
@@ -122,8 +122,9 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     /* Use 0 for Thread Stack Size, because that will default the stack to the
      * same size as the calling thread. 
      */
-    if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (APR_THREAD_FUNC *)(void *))dummy_func,
-                                               (*new), 0, &temp)) == 0) {
+    if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, 
+                        (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
+                        (*new), 0, &temp)) == 0) {
         lasterror = apr_get_os_error();
         return APR_EEXIST; 
         /* MSVC++ doc doesn't mention any additional error info 
