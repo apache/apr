@@ -33,13 +33,13 @@ INCLUDES=-I$(INCDIR)
 
 CFLAGS=$(MY_CFLAGS)
 
-check: $(PROGRAMS) $(NONPORTABLE)
-	for prog in $(PROGRAMS) $(NONPORTABLE); do \
+check: $(PROGRAMS) $(NONPORTABLE) testall
+	for prog in $(PROGRAMS) $(NONPORTABLE) testall; do \
 		./$$prog; \
-		if test $$i = 255; then \
+		if test $$? = 255; then \
 			echo "$$prog failed"; \
 			break; \
-		fi \
+		fi; \
 	done
 
 testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
