@@ -14,6 +14,7 @@
 #include "apr_atomic.h"
 #include "apr_compat.h"
 #include "apr_dso.h"
+#include "apr_env.h"
 #include "apr_errno.h"
 #include "apr_file_info.h"
 #include "apr_file_io.h"
