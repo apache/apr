@@ -74,23 +74,23 @@ struct apr_crypto_hash_t {
     void *data;
 };
 
-apr_crypto_hash_t *apr_crypto_sha256_new(apr_pool_t *p);
+APR_DECLARE(apr_crypto_hash_t *) apr_crypto_sha256_new(apr_pool_t *p);
 
 typedef struct apr_random_t apr_random_t;
 
-void apr_random_init(apr_random_t *g,apr_pool_t *p,
+APR_DECLARE(void) apr_random_init(apr_random_t *g,apr_pool_t *p,
                      apr_crypto_hash_t *pool_hash,apr_crypto_hash_t *key_hash,
                      apr_crypto_hash_t *prng_hash);
-apr_random_t *apr_random_standard_new(apr_pool_t *p);
-void apr_random_add_entropy(apr_random_t *g,const void *entropy_,
+APR_DECLARE(apr_random_t *) apr_random_standard_new(apr_pool_t *p);
+APR_DECLARE(void) apr_random_add_entropy(apr_random_t *g,const void *entropy_,
                             apr_size_t bytes);
-apr_status_t apr_random_insecure_bytes(apr_random_t *g,void *random,
+APR_DECLARE(apr_status_t) apr_random_insecure_bytes(apr_random_t *g,void *random,
                                        apr_size_t bytes);
-apr_status_t apr_random_secure_bytes(apr_random_t *g,void *random,
+APR_DECLARE(apr_status_t) apr_random_secure_bytes(apr_random_t *g,void *random,
                                      apr_size_t bytes);
-void apr_random_barrier(apr_random_t *g);
-apr_status_t apr_random_secure_ready(apr_random_t *r);
-apr_status_t apr_random_insecure_ready(apr_random_t *r);
+APR_DECLARE(void) apr_random_barrier(apr_random_t *g);
+APR_DECLARE(apr_status_t) apr_random_secure_ready(apr_random_t *r);
+APR_DECLARE(apr_status_t) apr_random_insecure_ready(apr_random_t *r);
 
 /* Call this in the child after forking to mix the randomness
    pools. Note that its generally a bad idea to fork a process with a
@@ -103,6 +103,6 @@ apr_status_t apr_random_insecure_ready(apr_random_t *r);
    applications need ever call it themselves.
 */
 struct apr_proc_t;
-void apr_random_after_fork(struct apr_proc_t *proc);
+APR_DECLARE(void) apr_random_after_fork(struct apr_proc_t *proc);
 
 #endif /* ndef APR_RANDOM_H */
