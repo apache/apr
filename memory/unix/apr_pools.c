@@ -873,6 +873,11 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_allocator_t *) apr_pool_allocator_get(apr_pool_t *pool)
+{
+    return pool->allocator;
+}
+
 
 /*
  * "Print" functions
