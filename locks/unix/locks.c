@@ -241,6 +241,9 @@ apr_status_t apr_lock_create_np(apr_lock_t **lock, apr_locktype_e type,
     new->pool  = pool;
     new->type  = type;
     new->scope = scope;
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+    new->interproc = -1;
+#endif
 
     if ((stat = create_lock(new, mech, fname)) != APR_SUCCESS)
         return stat;
