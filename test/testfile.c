@@ -393,6 +393,7 @@ static int test_read_guts(apr_pool_t *p, const char *fname, apr_int32_t extra_fl
     if (extra_flags & APR_BUFFERED) {
         printf("\n        skipping apr_file_ungetc() for APR_BUFFERED as it "
                "doesn't work yet\n");
+        apr_file_close(f);
         return (0);
     }
     else {
