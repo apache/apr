@@ -1,4 +1,6 @@
 Changes with APR b1  
+  *) APR Documentation is now in Doxygen format.
+     [Ian Holsman]
 
   *) Get apr_ungetc() to work with buffered files on Unix.
      [Jeff Trawick]
