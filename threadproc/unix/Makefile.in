@@ -59,8 +59,9 @@ proc.o: proc.c threadproc.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
  ../../file_io/unix/fileio.h $(INCDIR)/apr_lib.h \
  $(INCDIR)/apr_pools.h $(INCDIR)/apr_tables.h \
- $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
- $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h
+ $(INCDIR)/apr_strings.h $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_dso.h
 procsup.o: procsup.c threadproc.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_private.h $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
@@ -81,12 +82,6 @@ thread.o: thread.c $(INCDIR)/apr.h $(INCDIR)/apr_portable.h \
  $(INCDIR)/apr_private.h ../../file_io/unix/fileio.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_tables.h
-threadcancel.o: threadcancel.c threadproc.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_private.h $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
- ../../file_io/unix/fileio.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_pools.h $(INCDIR)/apr_tables.h
 threadpriv.o: threadpriv.c $(INCDIR)/apr.h \
  $(INCDIR)/apr_portable.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr_errno.h $(INCDIR)/apr_thread_proc.h \
