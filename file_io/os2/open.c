@@ -76,7 +76,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     ULONG action;
     apr_file_t *dafile = (apr_file_t *)apr_palloc(pool, sizeof(apr_file_t));
 
-    *new = dafile;
     dafile->pool = pool;
     dafile->isopen = FALSE;
     dafile->eof_hit = FALSE;
@@ -148,6 +147,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     if (!(flag & APR_FILE_NOCLEANUP)) { 
         apr_pool_cleanup_register(dafile->pool, dafile, apr_file_cleanup, apr_file_cleanup);
     }
+
+    *new = dafile;
     return APR_SUCCESS;
 }
 
