@@ -142,7 +142,7 @@ extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_rwlock_metho
 
 #if !APR_HAVE_UNION_SEMUN && defined(APR_HAS_SYSVSEM_SERIALIZE)
 union semun {
-    long val;
+    int val;
     struct semid_ds *buf;
     unsigned short *array;
 };
