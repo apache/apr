@@ -52,6 +52,7 @@
  * <http://www.apache.org/>.
  */
 
+#include <aclapi.h>
 #include "apr_private.h"
 #include "win32/fileio.h"
 #include "apr_file_io.h"
@@ -62,7 +63,6 @@
 #include <sys/stat.h>
 #include "atime.h"
 #include "misc.h"
-#include <aclapi.h>
 
 static apr_status_t free_localheap(void *heap) {
     LocalFree(heap);
