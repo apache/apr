@@ -67,13 +67,13 @@
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setup_poll(ap_pollfd_t **, ap_context_t *, ap_int32_t)
+ * ap_status_t ap_setup_poll(ap_pollfd_t **, ap_int32_t, ap_context_t *)
  *    Setup the memory required for poll to operate properly.
  * arg 1) The context to operate on.
  * arg 2) The number of socket descriptors to be polled.
  * arg 3) The poll structure to be used. 
  */
-ap_status_t ap_setup_poll(struct pollfd_t **new, ap_context_t *cont, ap_int32_t num)
+ap_status_t ap_setup_poll(struct pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
     (*new) = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t));
     (*new)->sock = ap_palloc(cont, sizeof(struct socket_t) * num);
@@ -199,7 +199,7 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_revents(ap_pollfd_t *, ap_socket_t *, ap_int_16_t *)
+ * ap_status_t ap_get_revents(ap_int_16_t *, ap_socket_t *, ap_pollfd_t *)
  *    Get the return events for the specified socket. 
  * arg 1) The poll structure we will be using. 
  * arg 2) The socket we wish to get information about. 
@@ -212,7 +212,7 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
  *            APR_POLLNVAL  -- This is an invalid socket to poll on.
  *                             Socket not open.
  */
-ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_int16_t *event)
+ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct pollfd_t *aprset)
 {
     int i = 0;
     
@@ -283,7 +283,7 @@ ap_status_t ap_clear_poll_sockets(struct pollfd_t *aprset, ap_int16_t events)
 
 #else    /* Use select to mimic poll */
 
-ap_status_t ap_setup_poll(struct pollfd_t **new, ap_context_t *cont, ap_int32_t num)
+ap_status_t ap_setup_poll(struct pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
     (*new) = (struct pollfd_t *)ap_palloc(cont, sizeof(struct pollfd_t) * num);
     if ((*new) == NULL) {
@@ -346,7 +346,7 @@ ap_status_t ap_poll(struct pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeou
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_revents(struct pollfd_t *aprset, struct socket_t *sock, ap_int16_t *event)
+ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct pollfd_t *aprset)
 {
     ap_int16_t revents = 0;
     char data[1];

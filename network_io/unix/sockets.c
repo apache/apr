@@ -162,12 +162,12 @@ ap_status_t ap_setport(struct socket_t *sock, ap_uint32_t port)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_getport(ap_socket_t *, ap_uint32_t *)
+ * ap_status_t ap_getport(ap_uint32_t *, ap_socket_t *)
  *    Return the port with a socket.
  * arg 1) The socket use 
  * arg 2) The port this socket will be dealing with.
  */
-ap_status_t ap_getport(struct socket_t *sock, ap_uint32_t *port)
+ap_status_t ap_getport(ap_uint32_t *port, struct socket_t *sock)
 {
     *port = ntohs(sock->addr->sin_port);
     return APR_SUCCESS;
@@ -318,12 +318,12 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_socketdata(ap_socket_t *, char *, void *)
+ * ap_status_t ap_get_socketdata(void *, char *, ap_socket_t *)
  *    Return the context associated with the current socket.
  * arg 1) The currently open socket.
  * arg 2) The user data associated with the socket.
  */
-ap_status_t ap_get_socketdata(struct socket_t *sock, char *key, void *data)
+ap_status_t ap_get_socketdata(void *data, char *key, struct socket_t *sock)
 {
     if (socket != NULL) {
         return ap_get_userdata(&data, key, sock->cntxt);
@@ -354,12 +354,12 @@ ap_status_t ap_set_socketdata(struct socket_t *sock, void *data, char *key,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_sock(ap_socket_t *, ap_os_sock_t *)
+ * ap_status_t ap_get_os_sock(ap_os_sock_t *, ap_socket_t *)
  *    Convert the socket from an apr type to an OS specific socket
  * arg 1) The socket to convert.
  * arg 2) The os specifc equivelant of the apr socket..
  */
-ap_status_t ap_get_os_sock(struct socket_t *sock, ap_os_sock_t *thesock)
+ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct socket_t *sock)
 {
     if (sock == NULL) {
         return APR_ENOSOCKET;

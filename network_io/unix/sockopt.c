@@ -179,14 +179,14 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
 }         
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_gethostname(ap_context_t *, char *, ap_int32_t)
+ * ap_status_t ap_gethostname(char *, ap_int32_t, ap_context_t *)
  *    Get name of the current machine 
  * arg 1) The context to use.
  * arg 2) A buffer to store the hostname in.
  * arg 3) The maximum length of the hostname that can be stored in the
  *        buffer provided. 
  */
-ap_status_t ap_gethostname(ap_context_t *cont, char *buf, ap_int32_t len)
+ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return errno;

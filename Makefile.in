@@ -52,6 +52,7 @@ distclean: subdirs_distclean
 	-$(RM) -f *.o *.a *.so
 	-$(RM) -f config.cache config.status config.log
 	-$(RM) -f Makefile
+	-$(RM) -Rf libs
 
 subdirs:
 	@for i in $(SUBDIRS); do \
