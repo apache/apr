@@ -84,6 +84,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     dafile->validstatus = FALSE;
     dafile->eof_hit = FALSE;
     dafile->buffer = NULL;
+    dafile->flags = flag;
     
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         mflags |= OPEN_ACCESS_READWRITE;
@@ -148,7 +149,8 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
 
 ap_status_t ap_close(ap_file_t *file)
 {
-    ULONG rc; 
+    ULONG rc;
+    ap_status_t status;
     
     if (file && file->isopen) {
         ap_flush(file);
@@ -156,12 +158,16 @@ ap_status_t ap_close(ap_file_t *file)
     
         if (rc == 0) {
             file->isopen = FALSE;
-            return APR_SUCCESS;
+            status = APR_SUCCESS;
+
+            if (file->flags & APR_DELONCLOSE) {
+                status = os2errno(DosDelete(file->fname));
+            }
         } else {
             return os2errno(rc);
         }
     }
-    
+
     return APR_SUCCESS;
 }
 
@@ -199,6 +205,7 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile, ap_conte
     (*file)->buffered = FALSE;
     (*file)->validstatus = FALSE;
     (*file)->eof_hit = FALSE;
+    (*file)->flags = 0;
     return APR_SUCCESS;
 }    
 
@@ -216,7 +223,7 @@ ap_status_t ap_eof(ap_file_t *fptr)
 
 ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
 {
-    (*thefile) = ap_palloc(cont, sizeof(ap_file_t *));
+    (*thefile) = ap_palloc(cont, sizeof(struct file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }
@@ -227,6 +234,7 @@ ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
     (*thefile)->buffered = FALSE;
     (*thefile)->validstatus = FALSE;
     (*thefile)->eof_hit = FALSE;
+    (*thefile)->flags = 0;
 
     return APR_SUCCESS;
 }
