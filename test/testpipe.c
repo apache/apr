@@ -53,8 +53,6 @@ static void close_pipe(CuTest *tc)
 static void set_timeout(CuTest *tc)
 {
     apr_status_t rv;
-    apr_file_t *readp = NULL;
-    apr_file_t *writep = NULL;
     apr_interval_time_t timeout;
 
     rv = apr_file_pipe_create(&readp, &writep, p);
@@ -188,9 +186,12 @@ CuSuite *testpipe(void)
     SUITE_ADD_TEST(suite, create_pipe);
     SUITE_ADD_TEST(suite, close_pipe);
     SUITE_ADD_TEST(suite, set_timeout);
+    SUITE_ADD_TEST(suite, close_pipe);
     SUITE_ADD_TEST(suite, read_write);
+    SUITE_ADD_TEST(suite, close_pipe);
     SUITE_ADD_TEST(suite, read_write_notimeout);
     SUITE_ADD_TEST(suite, test_pipe_writefull);
+    SUITE_ADD_TEST(suite, close_pipe);
 
     return suite;
 }
