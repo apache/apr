@@ -54,6 +54,7 @@
 
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include "locks.h"
 #include "fileio.h"
 #include <string.h>

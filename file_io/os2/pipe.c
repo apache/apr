@@ -57,6 +57,7 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include <string.h>
 #include <process.h>
 

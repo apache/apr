@@ -56,6 +56,7 @@
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
+#include "apr_strings.h"
 #include <string.h>
 
 apr_status_t apr_file_cleanup(void *thefile)
