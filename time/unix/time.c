@@ -92,6 +92,9 @@ static apr_int32_t get_offset(struct tm *tm)
     if (daylightOnOff) {
         return server_gmt_offset + daylightOffset;
     }
+#else
+    if(tm->tm_isdst)
+        return server_gmt_offset + 3600;
 #endif
     return server_gmt_offset;
 #endif
@@ -341,7 +344,6 @@ APR_DECLARE(void) apr_unix_setup_time(void)
     struct timeval now;
     time_t t1, t2;
     struct tm t;
-    int was_dst;
 
     gettimeofday(&now, NULL);
     t1 = now.tv_sec;
@@ -352,10 +354,9 @@ APR_DECLARE(void) apr_unix_setup_time(void)
 #else
     t = *gmtime(&t1);
 #endif
-    was_dst = (t.tm_isdst > 0);
     t.tm_isdst = -1;
     t2 = mktime(&t);
-    server_gmt_offset = (apr_int32_t) difftime(t1, t2) + (was_dst ? 3600 : 0);
+    server_gmt_offset = (apr_int32_t) difftime(t1, t2);
 #endif
 }
 

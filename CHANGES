@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fix GMT offset adjustments for platforms that do not have native
+     GMT offset adjustments.  [Jon Travis <jtravis@covalent.net>]
+
   *) Add new apr_shm_t API and remove old apr_shmem_t API. The new
      API handles both anonymous and name-based shared memory. Anonymous
      shared memory segments are only usable on systems with process
