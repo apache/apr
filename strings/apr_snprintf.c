@@ -807,7 +807,13 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 	    /*
 	     * Modifier check
 	     */
-	    if (*fmt == 'q') {
+            if (strncmp(fmt, APR_INT64_T_FMT, 
+                             sizeof(APR_INT64_T_FMT) - 2) == 0) {
+                /* Need to account for trailing 'd' and null in sizeof() */
+		var_type = IS_QUAD;
+		fmt += (sizeof(APR_INT64_T_FMT) - 2);
+            }
+	    else if (*fmt == 'q') {
 		var_type = IS_QUAD;
 		fmt++;
 	    }
