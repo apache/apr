@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/29 02:03:55 $]
+Last modified at [$Date: 2002/01/29 16:10:14 $]
 
 Release:
 
@@ -14,6 +14,10 @@ Release:
     2.0a1   : released March 10, 2000
 
 RELEASE SHOWSTOPPERS:
+
+    * Must namespace protect all include/apr_foo.h headers.  Jon Travis
+      has especially observed these including apr and Apache-1.3.
+        Message-ID: <20020128100116.A4288@covalent.net>
 
     * complete the efforts started by DougM for cleaner fn naming
       conventions: see proposed name changes in renames_pending
@@ -45,6 +49,15 @@ RELEASE SHOWSTOPPERS:
              apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * Need to contemplate apr_strftime... platforms vary.  OtherBill
+      suggested this solution (but has no time to implement):
+        Document our list of 'supported' escapes.
+        Run some autoconf/m4 magic against the complete list we support.
+        Move the strftime re-implementation from time/win32 to time/unix.
+        Add some APR_HAVE_STRFTIME magic to use the system fn, or fail
+        over to time/unix/strftime.c.
+        Message-ID: <025e01c1a891$bf41f660$94c0b0d0@v505>
 
     * Using reentrant libraries with non-threaded APR
         - Anecdotal evidence exists that suggests it is bad to
