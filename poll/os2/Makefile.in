@@ -2,6 +2,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 TARGETS = \
+	poll.lo \
 	pollset.lo \
 	pollacc.lo
 
