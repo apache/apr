@@ -105,6 +105,16 @@ typedef struct apr_hash_index_t apr_hash_index_t;
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
 
 /**
+ * Make a copy of a hash table
+ * @param pool The pool from which to allocate the new hash table
+ * @param h The hash table to clone
+ * @return The hash table just created
+ * @remark Makes a shallow copy
+ */
+APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
+                                        const apr_hash_t *h);
+
+/**
  * Associate a value with a key in a hash table.
  * @param ht The hash table
  * @param key Pointer to the key
@@ -192,6 +202,30 @@ APR_DECLARE(int) apr_hash_count(apr_hash_t *ht);
 APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
                                            const apr_hash_t *overlay, 
                                            const apr_hash_t *base);
+
+/**
+ * Merge two hash tables into one new hash table. If the same key
+ * is present in both tables, call the supplied merge function to
+ * produce a merged value for the key in the new table.
+ * @param p The pool to use for the new hash table
+ * @param h1 The first of the tables to merge
+ * @param h2 The second of the tables to merge
+ * @param merger A callback function to merge values, or NULL to
+ *  make values from h1 override values from h2 (same semantics as
+ *  apr_hash_overlay())
+ * @param data Client data to pass to the merger function
+ * @return A new hash table containing all of the data from the two passed in
+ */
+APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
+                                         const apr_hash_t *h1,
+                                         const apr_hash_t *h2,
+                                         void * (*merger)(apr_pool_t *p,
+                                                     const void *key,
+                                                     apr_ssize_t klen,
+                                                     const void *h1_val,
+                                                     const void *h2_val,
+                                                     const void *data),
+                                         const void *data);
 
 /**
  * Get a pointer to the pool which the hash table 
