@@ -96,7 +96,7 @@ static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_ssize_t rv;
-    int used_unget = FALSE;
+    ap_ssize_t bytes_read;
 
     if(thefile == NULL || nbytes == NULL || (buf == NULL && *nbytes != 0))
         return APR_EBADARG;
@@ -106,14 +106,19 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 	return APR_SUCCESS;
     }
 
+    bytes_read = 0;
     if (thefile->ungetchar != -1) {
-        used_unget = TRUE;
+        bytes_read = 1;
         *(char *)buf = (char)thefile->ungetchar;
         buf = (char *)buf + 1;
         (*nbytes)--;
         thefile->ungetchar = -1;
+	if (*nbytes == 0) {
+	    *nbytes = bytes_read;
+	    return APR_SUCCESS;
+	}
     }
-	  
+
     do {
         rv = read(thefile->filedes, buf, *nbytes);
     } while (rv == -1 && errno == EINTR);
@@ -123,7 +128,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         thefile->timeout != 0) {
         ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
         if (arv != APR_SUCCESS) {
-            *nbytes = 0;
+            *nbytes = bytes_read;
             return arv;
         }
         else {
@@ -132,23 +137,16 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             } while (rv == -1 && errno == EINTR);
         }
     }  
-    /* getting less data than requested does not signify an EOF when
-       dealing with a pipe.
-     */
-    if ((*nbytes != rv) && ((errno == EPIPE && thefile->pipe == 1)
-        || (errno != EINTR && thefile->pipe == 0 ))) {
-        thefile->eof_hit = 1;
+
+    *nbytes = bytes_read;
+    if (rv == 0) {
+	return APR_EOF;
     }
-    if (rv == -1) {
-        (*nbytes) = 0;
-        return errno;
+    if (rv > 0) {
+	*nbytes += rv;
+	return APR_SUCCESS;
     }
-    *nbytes = rv;
-    if (used_unget) {
-        thefile->ungetchar = -1;
-        *nbytes += 1;
-    }
-    return APR_SUCCESS;
+    return errno;
 }
 
 /* ***APRDOC********************************************************
