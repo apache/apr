@@ -2033,6 +2033,7 @@ AC_OUTPUT([
 	$MAKEFILES
 	include/apr.h
 	build/apr_rules.mk
+	build/pkg/pkginfo
 	apr-$APR_MAJOR_VERSION-config:apr-config.in
         apr.pc
 ],[
