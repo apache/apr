@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/09 20:54:42 $]
+Last modified at [$Date: 2001/12/10 22:04:41 $]
 
 Release:
 
@@ -258,6 +258,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
                 We have a preliminary patch at:
                   http://people.freebsd.org/~alfred/uthread_sf.diff
+                FreeBSD PR kern/32684:
+                  http://www.freebsd.org/cgi/query-pr.cgi?pr=kern/32684
 
     * Currently it is difficult if not impossible to return a proper
       status code from a thread using apr_thread_exit(), since the
