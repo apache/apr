@@ -168,23 +168,25 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
         __attribute__((format(printf,2,3)));
 
 /**
- * copy n characters from src to dst
+ * Copy up to dst_size characters from src to dst; does not copy
+ * past a NUL terminator in src, but always terminates dst with a NUL
+ * regardless.
  * @param dst The destination string
  * @param src The source string
  * @param dst_size The space available in dst; dst always receives
- *                 null-termination, so if src is longer than
+ *                 NUL termination, so if src is longer than
  *                 dst_size, the actual number of characters copied is
  *                 dst_size - 1.
- * @return The destination string, dst
+ * @return Pointer to the NUL terminator of the destination string, dst
  * @remark
  * <PRE>
- * We re-implement this function to implement these specific changes:
- *       1) strncpy() doesn't always null terminate and we want it to.
- *       2) strncpy() null fills, which is bogus, esp. when copy 8byte strings
- *          into 8k blocks.
- *       3) Instead of returning the pointer to the beginning of the
- *          destination string, we return a pointer to the terminating null
- *          to allow us to check for truncation.
+ * Note the differences between this function and strncpy():
+ *  1) strncpy() doesn't always NUL terminate; apr_cpystrn() does.
+ *  2) strncpy() pads the destination string with NULs, which is often 
+ *     unnecessary; apr_cpystrn() does not.
+ *  3) strncpy() returns a pointer to the beginning of the dst string;
+ *     apr_cpystrn() returns a pointer to the NUL terminator of dst, 
+ *     to allow a check for truncation.
  * </PRE>
  */
 APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src,
