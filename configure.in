@@ -129,6 +129,9 @@ dnl prep libtool
 dnl
 echo "performing libtool configuration..."
 
+AC_ARG_ENABLE(experimental-libtool,[  --experimental-libtool Use experimental custom libtool (not included in source distribution)],
+  [experimental_libtool=$enableval],[experimental_libtool=no])
+
 case $host in
 *os2*)
     # Use a custom-made libtool replacement
@@ -136,15 +139,27 @@ case $host in
     LIBTOOL="$srcdir/build/aplibtool"
     gcc $CFLAGS $CPPFLAGS -o $LIBTOOL.exe $LIBTOOL.c
     ;;
-*)  dnl libtoolize requires that the following not be indented
-AC_PROG_LIBTOOL
+*)
     if test "x$LTFLAGS" = "x"; then
         LTFLAGS='--silent'
     fi
-    # get libtool's setting of shlibpath_var
-    eval `grep "^shlibpath_var=[[A-Z_]]*$" $apr_builddir/libtool`
-    if test "x$shlibpath_var" = "x"; then
-        shlibpath_var=REPLACE_WITH_YOUR_SHLIBPATH_VAR
+    if test "$experimental_libtool" = "yes"; then
+        # Use a custom-made libtool replacement
+        echo "using jlibtool"
+        LIBTOOL="$apr_builddir/libtool"
+        LIBTOOL_SRC="$apr_srcdir/build/jlibtool.c"
+        if test ! -f $LIBTOOL_SRC; then
+          AC_MSG_ERROR([Experimental libtool source not found.  It is not included with APR by default.])
+        fi
+        $CC $CFLAGS $CPPFLAGS -o $LIBTOOL $LIBTOOL_SRC
+    else
+    dnl libtoolize requires that the following not be indented
+AC_PROG_LIBTOOL
+        # get libtool's setting of shlibpath_var
+        eval `grep "^shlibpath_var=[[A-Z_]]*$" $apr_builddir/libtool`
+        if test "x$shlibpath_var" = "x"; then
+            shlibpath_var=REPLACE_WITH_YOUR_SHLIBPATH_VAR
+        fi
     fi
     ;;
 esac
