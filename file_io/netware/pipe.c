@@ -81,7 +81,8 @@ apr_status_t apr_netware_pipe_cleanup(void *thefile)
 
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
-	int				err;
+#ifdef USE_FLAGS
+    int				err;
 	unsigned long	flags;
 
 	if (fcntl(thepipe->filedes, F_GETFL, &flags) != -1)
@@ -89,6 +90,9 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 		flags &= ~FNDELAY;
 		fcntl(thepipe->filedes, F_SETFL, flags);
 	}
+#else
+		fcntl(thepipe->filedes, F_SETFL, FNDELAY);
+#endif
 
     if (errno)
         return errno;
@@ -99,6 +103,7 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 
 static apr_status_t pipenonblock(apr_file_t *thepipe)
 {
+#ifdef USE_FLAGS
 	int				err;
 	unsigned long	flags;
 
@@ -108,6 +113,9 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
 		flags |= FNDELAY;
 		fcntl(thepipe->filedes, F_SETFL, flags);
 	}
+#else
+		fcntl(thepipe->filedes, F_SETFL, 0);
+#endif
 
     if (errno)
         return errno;
