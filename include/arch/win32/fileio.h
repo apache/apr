@@ -192,6 +192,7 @@ struct apr_file_t {
 struct apr_dir_t {
     apr_pool_t *cntxt;
     HANDLE dirhand;
+    apr_size_t rootlen;
     union {
 #if APR_HAS_UNICODE_FS
         struct {
