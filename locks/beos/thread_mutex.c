@@ -114,14 +114,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create_np(apr_thread_mutex_t **mutex,
     return APR_ENOTIMPL;
 }       
 #endif
-
-APR_DECLARE(apr_status_t) apr_thread_mutex_child_init(apr_thread_mutex_t **mutex,
-                                                    const char *fname,
-                                                    apr_pool_t *pool)
-{
-    return APR_SUCCESS;
-}
-    
+  
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     int32 stat;
@@ -186,3 +179,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
     }
     return stat;
 }
+
+APR_POOL_IMPLEMENT_ACCESSOR(thread_mutex)
+
