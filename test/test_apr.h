@@ -42,6 +42,7 @@ CuSuite *testdso(void);
 CuSuite *testdup(void);
 CuSuite *testenv(void);
 CuSuite *testfile(void);
+CuSuite *testfilecopy(void);
 CuSuite *testfileinfo(void);
 CuSuite *testflock(void);
 CuSuite *testfmt(void);
