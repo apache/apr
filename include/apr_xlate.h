@@ -64,6 +64,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * @package APR I18N translation library
+ */
+
 /* APR_HAS_XLATE determines whether or not useful implementations of 
  * ap_xlate_open() et al are provided. 
  *
@@ -100,30 +104,26 @@ typedef void                         ap_xlate_t;
 
 typedef struct ap_xlate_t            ap_xlate_t;
 
-/*
-
-=head1 ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage, const char *frompage, ap_pool_t *pool)
-
-B<Set up for converting text from one charset to another.>
-
-    arg 1) The handle to be filled in by this function
-    arg 2) The name of the target charset
-    arg 3) The name of the source charset
-    arg 4) The pool to use
-
-B<NOTE>:  Specify APR_DEFAULT_CHARSET for one of the charset
-          names to indicate the charset of the source code at
-          compile time.  This is useful if there are literal
-          strings in the source code which must be translated
-          according to the charset of the source code.
-          APR_DEFAULT_CHARSET is not useful if the source code
-          of the caller was not encoded in the same charset as
-          APR at compile time.
-
-          Specify APR_LOCALE_CHARSET for one of the charset
-          names to indicate the charset of the current locale.
-
-=cut
+/**
+ * Set up for converting text from one charset to another.
+ * @param convset The handle to be filled in by this function
+ * @param topage The name of the target charset
+ * @param frompage The name of the source charset
+ * @param pool The pool to use
+ * @tip
+ * <PRE>
+ *  Specify APR_DEFAULT_CHARSET for one of the charset
+ *  names to indicate the charset of the source code at
+ *  compile time.  This is useful if there are literal
+ *  strings in the source code which must be translated
+ *  according to the charset of the source code.
+ *  APR_DEFAULT_CHARSET is not useful if the source code
+ *  of the caller was not encoded in the same charset as
+ *  APR at compile time.
+ *
+ *  Specify APR_LOCALE_CHARSET for one of the charset
+ *  names to indicate the charset of the current locale.
+ * </PRE>
  */
 ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage, 
                           const char *frompage, ap_pool_t *pool);
@@ -131,74 +131,54 @@ ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage,
 #define APR_DEFAULT_CHARSET (const char *)0
 #define APR_LOCALE_CHARSET (const char *)1
 
-/*
-
-=head1 ap_status_t ap_xlate_get_sb(ap_xlate_t *convset, int *onoff)
-
-B<Find out whether or not the specified conversion is single-byte-only.>
-
-    arg 1) The handle allocated by ap_xlate_open, specifying the parameters
-           of conversion
-    arg 2) Output: whether or not the conversion is single-byte-only
-
-=cut
+/**
+ * Find out whether or not the specified conversion is single-byte-only.
+ * @param convset The handle allocated by ap_xlate_open, specifying the 
+ *                parameters of conversion
+ * @param onoff Output: whether or not the conversion is single-byte-only
  */
 
 ap_status_t ap_xlate_get_sb(ap_xlate_t *convset, int *onoff);
 
-/*
-
-=head1 ap_status_t ap_xlate_conv_buffer(ap_xlate_t *convset, const char *inbuf, ap_size_t *inbytes_left, char *outbuf, ap_size_t outbytes_left)
-
-B<Convert a buffer of text from one codepage to another.>
-
-    arg 1) The handle allocated by ap_xlate_open, specifying the parameters
-           of conversion
-    arg 2) The address of the source buffer
-    arg 3) Input: the amount of input data to be translated
-           Output: the amount of input data not yet translated    
-    arg 4) The address of the destination buffer
-    arg 5) Input: the size of the output buffer
-           Output: the amount of the output buffer not yet used
-
-=cut
+/**
+ * Convert a buffer of text from one codepage to another.
+ * @param convset The handle allocated by ap_xlate_open, specifying 
+ *                the parameters of conversion
+ * @param inbuf The address of the source buffer
+ * @param inbytes_left Input: the amount of input data to be translated
+ *                     Output: the amount of input data not yet translated    
+ * @param outbuf The address of the destination buffer
+ * @param outbytes_left Input: the size of the output buffer
+ *                      Output: the amount of the output buffer not yet used
  */
 ap_status_t ap_xlate_conv_buffer(ap_xlate_t *convset, const char *inbuf, 
                               ap_size_t *inbytes_left, char *outbuf,
                               ap_size_t *outbytes_left);
 
-/* The purpose of ap_xlate_conv_char is to translate one character
+/**
+ * The purpose of ap_xlate_conv_char is to translate one character
  * at a time.  This needs to be written carefully so that it works
  * with double-byte character sets. 
+ * @param convset The handle allocated by ap_xlate_open, specifying the
+ *                parameters of conversion
+ * @param inchar The character to convert
+ * @param outchar The converted character
  */
 ap_status_t ap_xlate_conv_char(ap_xlate_t *convset, char inchar, char outchar);
 
-/*
-
-=head1 ap_int32_t ap_xlate_conv_byte(ap_xlate_t *convset, unsigned char inchar)
-
-B<Convert a single-byte character from one charset to another.>
-
-    arg 1) The handle allocated by ap_xlate_open, specifying the parameters
-           of conversion
-    arg 2) The single-byte character to convert.
-
-B<NOTE>: This only works when converting between single-byte character sets.
-         -1 will be returned if the conversion can't be performed.
-
-=cut
+/**
+ * Convert a single-byte character from one charset to another.
+ * @param convset The handle allocated by ap_xlate_open, specifying the 
+ *                parameters of conversion
+ * @param inchar The single-byte character to convert.
+ * @tip This only works when converting between single-byte character sets.
+        -1 will be returned if the conversion can't be performed.
 */
 ap_int32_t ap_xlate_conv_byte(ap_xlate_t *convset, unsigned char inchar);
 
-/*
-
-=head1 ap_status_t ap_xlate_close(ap_xlate_t *convset)
-
-B<Close a codepage translation handle.>
-
-    arg 1) The codepage translation handle to close
-
-=cut
+/**
+ * Close a codepage translation handle.
+ * @param convset The codepage translation handle to close
  */
 ap_status_t ap_xlate_close(ap_xlate_t *convset);
 
