@@ -241,9 +241,6 @@ ap_status_t ap_create_signal(ap_signum_t, ap_context_t *);
 ap_status_t ap_send_signal(ap_signum_t, ap_context_t *);
 ap_status_t ap_setup_signal(ap_signum_t, Sigfunc *, ap_context_t *);
 
-ap_status_t ap_getopt(ap_context_t *, ap_int32_t, char *const *, const char *,
-                      ap_int32_t *); 
-
 #ifdef __cplusplus
 }
 #endif
