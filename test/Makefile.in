@@ -67,8 +67,8 @@ proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
 	$(LINK) proc_child.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # FIXME: -prefer-pic is only supported with libtool-1.4+
-mod_test.slo: mod_test.c
-	$(LIBTOOL) --mode=compile $(COMPILE) -prefer-pic -c mod_test.c && touch $@
+mod_test.slo: $(srcdir)/mod_test.c
+	$(LIBTOOL) --mode=compile $(COMPILE) -prefer-pic -c $(srcdir)/mod_test.c && touch $@
 
 mod_test.la: mod_test.slo $(LOCAL_LIBS)
 	$(LINK) --mode=link $(COMPILE) -rpath `pwd` -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
