@@ -81,30 +81,9 @@ struct shmem_t {
 
 #define MIN_BLK_SIZE 128
 
-/*
-#define DEBUG_ 1
-*/
 
 void add_block(struct block_t **list, struct block_t *blk);
 void split_block(struct block_t **list, struct block_t *blk, apr_size_t size);
-
-/* Debugging functions */
-#if DEBUG_
-static void printf_block(struct block_t *b)
-{
-    printf ("Block : %ld bytes\n\tthis = %x\n\tnext = %x\n",
-            b->size, b, b->nxt);
-}
-
-static void walk_list(struct block_t *list)
-{
-    struct block_t *b = list;
-    do {
-        printf_block(b);
-    }
-    while ((b = b->nxt) != NULL);
-}
-#endif
 
 static struct block_t * find_block_by_addr(struct block_t *list, void *addr)
 {
@@ -140,18 +119,8 @@ static struct block_t *find_block_of_size(struct block_t *list, apr_size_t size)
     }
     while ((b = b->nxt) != list);
 
-    if (diff > MIN_BLK_SIZE){
-        split_block(&list, rv, size);
-        
-        /* we're going to split the block now... */
-/*        apr_size_t nsz = rv->size - size;
-        struct block_t *blk = (struct block_t*)apr_pcalloc(rv->p, sizeof(struct block_t));
-        blk->p = rv->p;
-        blk->size = nsz;
-        rv->size = size;
-        blk->addr = rv->addr + size;
-        add_block(&list, blk);     
-*/
+    if (diff > MIN_BLK_SIZE) {
+        split_block(&list, rv, size);       
     }
 
     if (rv)
@@ -207,7 +176,7 @@ static void remove_block(struct block_t **list, struct block_t *blk)
 static void free_block(struct shmem_t *m, void *entity)
 {
     struct block_t *b;
-    if ((b = find_block_by_addr(m->uselist, entity))){
+    if ((b = find_block_by_addr(m->uselist, entity)) != NULL){
         remove_block(&(m->uselist), b);
         add_block(&(m->freelist), b);
         m->avail += b->size;
@@ -221,7 +190,7 @@ static struct block_t *alloc_block(struct shmem_t *m, apr_size_t size)
     if (m->avail < size)
         return NULL; 
 
-    if ((b = find_block_of_size(m->freelist, size))){
+    if ((b = find_block_of_size(m->freelist, size)) != NULL){
         remove_block(&(m->freelist), b);
     } else {
         b = (struct block_t*)apr_pcalloc(m->p, sizeof(struct block_t));   
@@ -263,8 +232,6 @@ apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *fi
     return APR_SUCCESS;
 }
 
-
-
 apr_status_t apr_shm_destroy(struct shmem_t *m)
 {
     delete_area(m->aid);
@@ -278,7 +245,7 @@ apr_status_t apr_shm_destroy(struct shmem_t *m)
 void *apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
 {
     struct block_t *b;
-    if ((b = alloc_block(m, reqsize)))
+    if ((b = alloc_block(m, reqsize)) != NULL)
         return b->addr;
     return NULL;
 }
@@ -286,7 +253,7 @@ void *apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
 void *apr_shm_calloc(struct shmem_t *m, apr_size_t reqsize)
 {
     struct block_t *b; 
-    if ((b = alloc_block(m, reqsize))){  
+    if ((b = alloc_block(m, reqsize)) != NULL){  
         memset(b->addr, 0, reqsize);
         return b->addr;
     }
