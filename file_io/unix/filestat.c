@@ -136,6 +136,32 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
+                                             apr_fileattrs_t attributes,
+                                             apr_pool_t *cont)
+{
+    apr_status_t status;
+    apr_finfo_t finfo;
+
+    status = apr_stat(&finfo, fname, APR_FINFO_PROT, cont);
+    if (!APR_STATUS_IS_SUCCESS(status))
+        return status;
+
+    if (attributes & APR_FILE_ATTR_READONLY) {
+        finfo.protection &= ~APR_UWRITE;
+        finfo.protection &= ~APR_GWRITE;
+        finfo.protection &= ~APR_WWRITE;
+    }
+    if (attributes & APR_FILE_ATTR_EXECUTABLE) {
+        /* ### TODO: should this be umask'd? */
+        finfo.protection |= APR_UEXECUTE;
+        finfo.protection |= APR_GEXECUTE;
+        finfo.protection |= APR_WEXECUTE;
+    }
+
+   return apr_file_perms_set(fname, finfo.protection);
+}
+                                                  
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, 
                                    const char *fname, 
                                    apr_int32_t wanted, apr_pool_t *cont)

@@ -94,20 +94,25 @@ typedef enum {
  * @{
  */
 
-#define APR_UREAD     0x400 /**< Read by user */
-#define APR_UWRITE    0x200 /**< Write by user */
-#define APR_UEXECUTE  0x100 /**< Execute by user */
+#define APR_UREAD       0x4000 /**< Read by user */
+#define APR_UWRITE      0x2000 /**< Write by user */
+#define APR_UEXECUTE    0x1000 /**< Execute by user */
 
-#define APR_GREAD     0x040 /**< Read by group */
-#define APR_GWRITE    0x020 /**< Write by group */
-#define APR_GEXECUTE  0x010 /**< Execute by group */
+#define APR_GREAD       0x0040 /**< Read by group */
+#define APR_GWRITE      0x0020 /**< Write by group */
+#define APR_GEXECUTE    0x0010 /**< Execute by group */
 
-#define APR_WREAD     0x004 /**< Read by others */
-#define APR_WWRITE    0x002 /**< Write by others */
-#define APR_WEXECUTE  0x001 /**< Execute by others */
+#define APR_WREAD       0x0004 /**< Read by others */
+#define APR_WWRITE      0x0002 /**< Write by others */
+#define APR_WEXECUTE    0x0001 /**< Execute by others */
 
-#define APR_OS_DEFAULT 0xFFF /**< use default permissions of Underlying Operating System*/
+#define APR_OS_DEFAULT  0x0FFF /**< use OS's default permissions */
+
+/* additional permission flags for apr_file_copy  and apr_file_append */
+#define APR_FILE_SOURCE_PERMS 0x1000 /**< Copy source file's permissions */
+
 /** @} */
+
 
 /**
  * Structure for referencing directories.

@@ -115,6 +115,19 @@ extern "C" {
 #define APR_END SEEK_END
 /** @} */
 
+/**
+ * @defgroup APR_file_set_attributes File Attribute Flags
+ * @{
+ */
+
+/* flags for apr_file_set_attributes */
+#define APR_FILE_ATTR_READONLY   0x01          /**< File is read-only */
+#define APR_FILE_ATTR_EXECUTABLE 0x02          /**< File is executable */
+/** @} */
+
+/** File attributes */
+typedef apr_int32_t apr_fileattrs_t;
+
 /** should be same as whence type in lseek, POSIX defines this as int */
 typedef int       apr_seek_where_t;
 
@@ -202,6 +215,39 @@ APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont);
  */
 APR_DECLARE(apr_status_t) apr_file_rename(const char *from_path, 
                                           const char *to_path,
+                                          apr_pool_t *pool);
+
+/**
+ * copy the specified file to another file.
+ * @param from_path The full path to the original file (using / on all systems)
+ * @param to_path The full path to the new file (using / on all systems)
+ * @param perms Access permissions for the new file if it is created.
+ *     In place of the usual or'd combination of file permissions, the
+ *     value APR_FILE_SOURCE_PERMS may be given, in which case the source
+ *     file's permissions are copied.
+ * @param pool The pool to use.
+ * @remark The new file does not need to exist, it will be created if required.
+ * @warning If the new file already exists, its contents will be overwritten.
+ */
+APR_DECLARE(apr_status_t) apr_file_copy(const char *from_path, 
+                                        const char *to_path,
+                                        apr_fileperms_t perms,
+                                        apr_pool_t *pool);
+
+/**
+ * append the specified file to another file.
+ * @param from_path The full path to the source file (using / on all systems)
+ * @param to_path The full path to the destination file (using / on all systems)
+ * @param perms Access permissions for the destination file if it is created.
+ *     In place of the usual or'd combination of file permissions, the
+ *     value APR_FILE_SOURCE_PERMS may be given, in which case the source
+ *     file's permissions are copied.
+ * @param pool The pool to use.
+ * @remark The new file does not need to exist, it will be created if required.
+ */
+APR_DECLARE(apr_status_t) apr_file_append(const char *from_path, 
+                                          const char *to_path,
+                                          apr_fileperms_t perms,
                                           apr_pool_t *pool);
 
 /**
@@ -528,6 +574,26 @@ APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, const char *format, ..
  */
 APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
                                            apr_fileperms_t perms);
+
+/**
+ * Set attributes of the specified file.
+ * @param fname The full path to the file (using / on all systems)
+ * @param attributes Or'd combination of
+ * <PRE>
+ *            APR_FILE_ATTR_READONLY   - make the file readonly
+ *            APR_FILE_ATTR_EXECUTABLE - make the file executable
+ * </PRE>
+ * @param cont the pool to use.
+ * @remark This function should be used in preference to explict manipulation
+ *      of the file permissions, because the operations to provide these
+ *      attributes are platform specific and may involve more than simply
+ *      setting permission bits.
+ * @warning Platforms which do not implement this feature will return
+ *      APR_ENOTIMPL.
+ */
+APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
+                                             apr_fileattrs_t attributes,
+                                             apr_pool_t *cont);
 
 /**
  * Create a new directory on the file system.

@@ -1,5 +1,6 @@
 
 TARGETS = \
+	copy.lo \
 	dir.lo \
 	fileacc.lo \
 	filedup.lo \
