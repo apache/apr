@@ -119,6 +119,7 @@ APR_DECLARE(apr_status_t) apr_allocator_create(apr_allocator_t **allocator)
         return APR_ENOMEM;
 
     memset(new_allocator, 0, SIZEOF_ALLOCATOR_T);
+    new_allocator->max_free_index = APR_ALLOCATOR_MAX_FREE_UNLIMITED;
 
     *allocator = new_allocator;
 
@@ -351,7 +352,8 @@ void allocator_free(apr_allocator_t *allocator, apr_memnode_t *node)
         next = node->next;
         index = node->index;
 
-        if (max_free_index != 0 && index > current_free_index) {
+        if (max_free_index != APR_ALLOCATOR_MAX_FREE_UNLIMITED
+            && index > current_free_index) {
             node->next = freelist;
             freelist = node;
         }
@@ -402,6 +404,7 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
 {
     allocator_free(allocator, node);
 }
+
 
 
 /*

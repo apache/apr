@@ -92,6 +92,9 @@ struct apr_memnode_t {
 
 #define APR_MEMNODE_T_SIZE APR_ALIGN_DEFAULT(sizeof(apr_memnode_t))
 
+/** Symbolic constants */
+#define APR_ALLOCATOR_MAX_FREE_UNLIMITED 0
+
 /**
  * Create a new allocator
  * @param allocator The allocator we have just created.
