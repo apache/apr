@@ -496,10 +496,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *proc, const char *progname
     return status;
 }
 
-
-
-APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
-                                                  apr_wait_how_e waithow, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
+                                                  int *exitcode,
+                                                  apr_exit_why_e *exitwhy,
+                                                  apr_wait_how_e waithow,
+                                                  apr_pool_t *p)
 {
     RESULTCODES codes;
     ULONG rc;
@@ -527,8 +528,8 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *
 
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
-                                        apr_wait_t *exitcode,
-                                        apr_wait_how_e wait)
+                                        int *exitcode, apr_exit_why_e *exitwhy,
+                                        apr_wait_how_e waithow)
 {
     RESULTCODES codes;
     ULONG rc;

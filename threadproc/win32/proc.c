@@ -541,8 +541,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 }
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
-                                        apr_wait_t *exitcode, 
-                                        apr_wait_how_e wait)
+                                        int *exitcode, apr_exit_why_e *exitwhy,
+                                        apr_wait_how_e waithow)
 {
     DWORD stat;
     DWORD time;
