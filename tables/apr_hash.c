@@ -216,7 +216,7 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     int i;
 
     if (klen == APR_HASH_KEY_STRING)
-	klen = strlen(key) + 1;
+	klen = strlen(key);
 
     /*
      * This is Daniel J. Bernstein's popular `times 33' hash function
