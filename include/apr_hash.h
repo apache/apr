@@ -173,6 +173,15 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
                                apr_size_t *klen, void **val);
 
+/**
+ * Get the number of keys in the hash table.
+ * @param ht The hash table
+ * @param count Return pointer for the number of keys
+ * @deffunc void apr_hash_count(apr_hash_t *ht, apr_size_t *count);
+ */
+APR_DECLARE(void) apr_hash_count(apr_hash_t *ht, apr_size_t *count);
+
+
 #ifdef __cplusplus
 }
 #endif
