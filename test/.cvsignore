@@ -18,7 +18,7 @@ testsock
 testproc
 testfile
 occhild
-testsf
+sendfile
 testuuid
 testsuite
 testsuite.opt
