@@ -52,125 +52,40 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef NETWORK_IO_H
-#define NETWORK_IO_H
+#ifndef APR_INHERIT_H
+#define APR_INHERIT_H
 
-#include "apr.h"
-#include "apr_private.h"
-#include "apr_network_io.h"
-#include "apr_errno.h"
-#include "apr_general.h"
-#include "apr_lib.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-/* System headers the network I/O library needs */
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#if APR_HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
-#ifdef HAVE_SYS_POLL_H
-#include <sys/poll.h>
-#endif
-#ifdef HAVE_POLL_H
-#include <poll.h>
-#endif
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-#if APR_HAVE_ERRNO_H
-#include <errno.h>
-#endif
-#if APR_HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#if APR_HAVE_STRING_H
-#include <string.h>
-#endif
-#if APR_HAVE_NETINET_TCP_H
-#include <netinet/tcp.h>
-#endif
-#if APR_HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#if APR_HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#if APR_HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#if APR_HAVE_NETDB_H
-#include <netdb.h>
-#endif
-#if APR_HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-#if APR_HAVE_SYS_SENDFILE_H
-#include <sys/sendfile.h>
-#endif
-/* End System Headers */
+#define APR_NO_INHERIT 0
+#define APR_INHERIT    1
 
-#ifndef HAVE_POLLIN
-#define POLLIN   1
-#define POLLPRI  2
-#define POLLOUT  4
-#define POLLERR  8
-#define POLLHUP  16
-#define POLLNVAL 32
+#define APR_DECLARE_SET_INHERIT(name) \
+    void apr_##name##_set_inherit(apr_##name##_t *name)
+
+#define APR_SET_INHERIT(name, pool, cleanup, field_exists)          \
+void apr_##name##_set_inherit(apr_##name##_t *name)                 \
+{                                                                   \
+    name->inherit = 1;                                              \
+    apr_pool_cleanup_register(name->##pool, (void *)##name##, NULL, \
+                              cleanup);                             \
+}
+
+#define APR_DECLARE_UNSET_INHERIT(name) \
+    void apr_##name##_unset_inherit(apr_##name##_t *name)
+
+#define APR_UNSET_INHERIT(name, pool, cleanup, field_exists)          \
+void apr_##name##_unset_inherit(apr_##name##_t *name)                 \
+{                                                                   \
+    name->inherit = 0;                                              \
+    apr_pool_cleanup_kill(name->##pool, (void *)##name##, NULL, \
+                              cleanup);                             \
+}
+
+#ifdef __cplusplus
+}
 #endif
 
-struct apr_socket_t {
-    apr_pool_t *cntxt;
-    int socketdes;
-    int type;
-    apr_sockaddr_t *local_addr;
-    apr_sockaddr_t *remote_addr;
-    apr_interval_time_t timeout; 
-#ifndef HAVE_POLL
-    int connected;
-#endif
-    int local_port_unknown;
-    int local_interface_unknown;
-    apr_int32_t netmask;
-    int inherit;
-};
-
-struct apr_pollfd_t {
-    apr_pool_t *cntxt;
-#ifdef HAVE_POLL
-    struct pollfd *pollset;
-    int num;
-    int curpos;
-#else
-    fd_set *read;
-    fd_set *write;
-    fd_set *except;
-    int highsock;
-    fd_set *read_set;
-    fd_set *write_set;
-    fd_set *except_set;
-#endif
-    apr_int16_t *events;
-    apr_int16_t *revents;
-
-};
-
-const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
-int apr_inet_pton(int af, const char *src, void *dst);
-apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read);
-
-#define apr_is_option_set(mask, option)  ((mask & option) ==option)
-
-#define apr_set_option(mask, option, on) \
-    do {                                 \
-        if (on)                          \
-            *mask |= option;             \
-        else                             \
-            *mask &= ~option;            \
-    } while (0)
-
-#endif  /* ! NETWORK_IO_H */
-
+#endif	/* ! APR_INHERIT_H */
