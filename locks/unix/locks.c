@@ -166,7 +166,7 @@ static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e_np mech)
 #elif APR_USE_FCNTL_SERIALIZE
         new->inter_meth = &apr_unix_fcntl_methods;
 #elif APR_USE_PROC_PTHREAD_SERIALIZE
-        new->inter_method = &apr_unix_proc_pthread_methods;
+        new->inter_meth = &apr_unix_proc_pthread_methods;
 #else
         return APR_ENOTIMPL;
 #endif
