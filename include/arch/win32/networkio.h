@@ -97,5 +97,14 @@ const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
 int apr_inet_pton(int af, const char *src, void *dst);
 void apr_sockaddr_vars_set(apr_sockaddr_t *, int, apr_port_t);
 
+#define apr_is_option_set(mask, option)  ((mask & option) ==option)
+#define apr_set_option(mask, option, on) \
+    do {                                 \
+        if (on)                          \
+            *mask |= option;             \
+        else                             \
+            *mask &= ~option;            \
+    } while (0)
+
 #endif  /* ! NETWORK_IO_H */
 

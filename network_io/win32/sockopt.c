@@ -124,43 +124,61 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
         break;
     }
     case APR_SO_KEEPALIVE:
-        if (setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
-            return apr_get_netos_error();
+        if (on != apr_is_option_set(sock->netmask, APR_SO_KEEPALIVE)) {
+            if (setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
+                return apr_get_netos_error();
+            }
+            apr_set_option(&sock->netmask,APR_SO_KEEPALIVE, on);
         }
         break;
     case APR_SO_DEBUG:
-        if (setsockopt(sock->sock, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
-            return apr_get_netos_error();
+        if (on != apr_is_option_set(sock->netmask, APR_SO_DEBUG)) {
+            if (setsockopt(sock->sock, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
+                return apr_get_netos_error();
+            }
+            apr_set_option(&sock->netmask, APR_SO_DEBUG, on);
         }
         break;
     case APR_SO_REUSEADDR:
-        if (setsockopt(sock->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
-            return apr_get_netos_error();
+        if (on != apr_is_option_set(sock->netmask, APR_SO_REUSEADDR)){
+            if (setsockopt(sock->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
+                return apr_get_netos_error();
+            }
+            apr_set_option(&sock->netmask, APR_SO_REUSEADDR, on);
         }
         break;
     case APR_SO_NONBLOCK:
-        if (on) {
-            if ((stat = sononblock(sock->sock)) != APR_SUCCESS) 
-                return stat;
-        }
-        else {
-            if ((stat = soblock(sock->sock)) != APR_SUCCESS)
-                return stat;
+        if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != on){
+            if (on) {
+                if ((stat = sononblock(sock->sock)) != APR_SUCCESS) 
+                    return stat;
+            }
+            else {
+                if ((stat = soblock(sock->sock)) != APR_SUCCESS)
+                    return stat;
+            }
+            apr_set_option(&sock->netmask, APR_SO_NONBLOCK, on);
         }
         break;
     case APR_SO_LINGER:
     {
-        struct linger li;
-        li.l_onoff = on;
-        li.l_linger = MAX_SECS_TO_LINGER;
-        if (setsockopt(sock->sock, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
-            return apr_get_netos_error();
+        if (apr_is_option_set(sock->netmask, APR_SO_LINGER) != on){
+            struct linger li;
+            li.l_onoff = on;
+            li.l_linger = MAX_SECS_TO_LINGER;
+            if (setsockopt(sock->sock, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
+                return apr_get_netos_error();
+            }
+            apr_set_option(&sock->netmask, APR_SO_LINGER, on);
         }
         break;
     }
     case APR_TCP_NODELAY:
-        if (setsockopt(sock->sock, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
-            return apr_get_netos_error();
+        if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) != on){
+            if (setsockopt(sock->sock, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
+                return apr_get_netos_error();
+            }
+            apr_set_option(&sock->netmask, APR_TCP_NODELAY, on);
         }
         break;
     default:
@@ -173,41 +191,6 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
 APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
                                            apr_int32_t opt, apr_int32_t *on)
 {
-#ifdef NETWARE
-    int sol_opt = 0;
-
-    switch (opt) {
-    case APR_SO_TIMEOUT: 
-        /* Convert from milliseconds (windows units) to microseconds 
-         * (APR units) */
-        *on = (apr_int32_t)(sock->timeout * 1000);
-        break;
-    case APR_SO_DISCONNECTED:
-        *on = sock->disconnected;
-        break;
-    case APR_SO_KEEPALIVE:
-        sol_opt = SO_KEEPALIVE;
-        break;
-    case APR_SO_DEBUG:
-        sol_opt = SO_DEBUG;
-        break;
-    case APR_SO_REUSEADDR:
-        sol_opt = SO_REUSEADDR;
-        break;
-    case APR_SO_NONBLOCK:
-    case APR_SO_LINGER:
-    default:
-        return APR_ENOTIMPL;
-        break;
-    }
-    if (sol_opt) {
-        int sz = sizeof(apr_int32_t);
-
-        if (getsockopt(sock->sock, SOL_SOCKET, sol_opt, (char *)on, &sz) == -1) {
-            return apr_get_netos_error();
-        }
-    }
-#else
     switch (opt) {
     case APR_SO_TIMEOUT: 
         /* Convert from milliseconds (windows units) to microseconds 
@@ -223,10 +206,8 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
     case APR_SO_NONBLOCK:
     case APR_SO_LINGER:
     default:
-        return APR_ENOTIMPL;
-        break;
+        *on = apr_is_option_set(sock->netmask, opt);
     }
-#endif
     return APR_SUCCESS;
 }
 
