@@ -74,7 +74,6 @@ static char *stuffbuffer(char *buf, ap_size_t bufsize, const char *s)
 
 static char *apr_error_string(ap_status_t statcode)
 {
-    char buf[256];
     switch (statcode) {
     case APR_ENOPOOL:
         return "A new pool could not be created.";
@@ -103,7 +102,11 @@ static char *apr_error_string(ap_status_t statcode)
     case APR_ENOSHMAVAIL:
         return "No shared memory is currently available";
     case APR_EDSOOPEN:
-        return ap_dso_error(buf, sizeof(buf), APR_EDSOOPEN);
+#ifdef HAVE_LIBDL
+        return dlerror();
+#else
+        return "DSO load failed";
+#endif
     case APR_INCHILD:
         return
 	    "Your code just forked, and you are currently executing in the "

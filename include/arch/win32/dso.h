@@ -63,6 +63,7 @@
 struct ap_dso_handle_t {
     ap_pool_t  *cont;
     void          *handle;
+    ap_status_t   load_error;
 };
 
 #endif

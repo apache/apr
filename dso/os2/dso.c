@@ -73,20 +73,22 @@ static ap_status_t dso_cleanup(void *thedso)
 
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, ap_pool_t *ctx)
 {
-    char failed_module[1024];
+    char failed_module[20];
     HMODULE handle;
     int rc;
 
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
+    (*res_handle)->cont = ctx;
+    (*res_handle)->load_error = APR_SUCCESS;
+    (*res_handle)->failed_module = NULL;
 
     if ((rc = DosLoadModule(failed_module, sizeof(failed_module), path, &handle)) != 0) {
+        (*res_handle)->load_error = APR_OS2_STATUS(rc);
         (*res_handle)->failed_module = ap_pstrdup(ctx, failed_module);
         return APR_OS2_STATUS(rc);
     }
 
     (*res_handle)->handle  = handle;
-    (*res_handle)->cont    = ctx;
-    (*res_handle)->failed_module = NULL;
     ap_register_cleanup(ctx, *res_handle, dso_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
@@ -129,8 +131,13 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
 
 
 
-/* Just a stub, it will never be called because we never return APR_EDSOOPEN */
-char *ap_dso_error(char *buf, int bufsize, ap_status_t errcode)
+char *ap_dso_error(ap_dso_handle_t *dso, char *buffer, ap_size_t buflen)
 {
-    return NULL;
+    char message[200];
+    ap_strerror(dso->load_error, message, sizeof(message));
+    strcat(message, " (");
+    strcat(message, dso->failed_module);
+    strcat(message, ")");
+    ap_cpystrn(buffer, message, buflen);
+    return buffer;
 }
