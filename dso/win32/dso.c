@@ -89,8 +89,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     UINT em;
 
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(ctx, &os_level) && os_level >= APR_WIN_NT) 
+    if (apr_os_level >= APR_WIN_NT) 
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 

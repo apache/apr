@@ -59,11 +59,12 @@ apr_oslevel_e apr_os_level = APR_WIN_UNK;
 
 apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
 {
-    static OSVERSIONINFO oslev;
-    static unsigned int servpack = 0;
-    char *pservpack;
+    if (apr_os_level == APR_WIN_UNK) 
+    {
+        static OSVERSIONINFO oslev;
+        static unsigned int servpack = 0;
+        char *pservpack;
 
-    if (apr_os_level == APR_WIN_UNK) {
         oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
         GetVersionEx(&oslev);
         if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
@@ -114,7 +115,7 @@ apr_status_t apr_get_oslevel(apr_pool_t *cont, apr_oslevel_e *level)
         *level = apr_os_level;
         return APR_SUCCESS;
     }
-    return APR_EEXIST;
+    return APR_EGENERAL;
 }
 
 

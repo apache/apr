@@ -97,8 +97,7 @@ apr_status_t filepath_root_test(char *path, apr_pool_t *p)
 {
     apr_status_t rv;
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
@@ -121,8 +120,7 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
 {
     char path[APR_PATH_MAX];
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         apr_wchar_t *ignored;
         apr_wchar_t wdrive[8];
@@ -164,8 +162,7 @@ apr_status_t filepath_drive_get(char **rootpath, char drive,
 apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p)
 {
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         apr_wchar_t *ignored;
         apr_wchar_t wpath[APR_PATH_MAX];
@@ -204,8 +201,7 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
 {
     char path[APR_PATH_MAX];
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;
@@ -235,8 +231,7 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
                                            apr_pool_t *p)
 {
 #if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(p, &os_level) && os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         apr_wchar_t wpath[APR_PATH_MAX];
         apr_status_t rv;

@@ -103,7 +103,6 @@ void get_sid_string(char *buf, int blen, apr_uid_t id)
  */
 APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *username, apr_pool_t *p)
 {
-    apr_oslevel_e os_level;
     apr_status_t rv;
     char regkey[MAX_PATH * 2];
     char *fixch;
@@ -111,7 +110,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
     DWORD type;
     HKEY key;
 
-    if (apr_get_oslevel(p, &os_level) || os_level >= APR_WIN_NT) {
+    if (apr_os_level >= APR_WIN_NT) {
         apr_uid_t uid;
         apr_gid_t gid;
     
@@ -136,7 +135,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
         return APR_FROM_OS_ERROR(rv);
 
 #if APR_HAS_UNICODE_FS
-    if (apr_get_oslevel(p, &os_level) || os_level >= APR_WIN_NT) {
+    if (apr_os_level >= APR_WIN_NT) {
 
         keylen = sizeof(regkey);
         rv = RegQueryValueExW(key, L"ProfileImagePath", NULL, &type,

@@ -137,7 +137,7 @@ static apr_status_t make_inheritable_duplicate(apr_file_t *original,
     if (original == NULL)
         return APR_SUCCESS;
 
-    /* Can't use apr_file_dup here because it creates a non-inhertible 
+    /* XXX: Can't use apr_file_dup here because it creates a non-inhertible 
      * handle, and apr_open_file'd apr_file_t's are non-inheritable,
      * so we must assume we need to make an inheritable handle.
      */
@@ -290,7 +290,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           apr_pool_t *cont)
 {
     apr_status_t rv;
-    apr_oslevel_e os_level;
     apr_size_t i;
     char *cmdline;
     char *pEnvBlock;
@@ -301,8 +300,6 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     new->err = attr->parent_err;
     new->out = attr->parent_out;
 
-    (void) apr_get_oslevel(cont, &os_level);
-
     if (attr->detached) {
         /* If we are creating ourselves detached, Then we should hide the
          * window we are starting in.  And we had better redfine our
@@ -311,7 +308,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * not manage the stdio handles properly when running old 16
          * bit executables if the detached attribute is set.
          */
-        if (os_level >= APR_WIN_NT) {
+        if (apr_os_level >= APR_WIN_NT) {
             /* 
              * XXX DETACHED_PROCESS won't on Win9x at all; on NT/W2K 
              * 16 bit executables fail (MS KB: Q150956)
@@ -389,7 +386,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             ++iEnvBlockLen;
 
 #if APR_HAS_UNICODE_FS
-        if (os_level >= APR_WIN_NT) {
+        if (apr_os_level >= APR_WIN_NT) {
             apr_wchar_t *pNext;
             pEnvBlock = (char *)apr_palloc(cont, iEnvBlockLen * 2);
             dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
@@ -430,7 +427,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     } 
 
 #if APR_HAS_UNICODE_FS
-    if (os_level >= APR_WIN_NT)
+    if (apr_os_level >= APR_WIN_NT)
     {
         STARTUPINFOW si;
         apr_size_t nprg = strlen(progname) + 1;
