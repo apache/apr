@@ -132,7 +132,7 @@ static char *apr_error_string(ap_status_t statcode)
     }
 }
 
-static char *ap_os_format_message(ap_status_t errcode, char *buf, size_t bufsize)
+static char *ap_os_format_message(ap_status_t errcode, char *buf, ap_size_t bufsize)
 {
     DWORD len;
     DWORD i;
@@ -162,7 +162,7 @@ static char *ap_os_format_message(ap_status_t errcode, char *buf, size_t bufsize
     return buf;
 }
 
-char *ap_strerror(ap_status_t statcode, char* buf, size_t bufsize)
+char *ap_strerror(ap_status_t statcode, char* buf, ap_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
         return ap_os_format_message(statcode, buf, bufsize);

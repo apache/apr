@@ -359,7 +359,7 @@ ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont);
 
 /*
 
-=head1 char *ap_strerror(ap_status_t statcode, char *buf, size_t bufsize)
+=head1 char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
 
 B<Return a human readable string describing the specified error.>
 
@@ -369,7 +369,7 @@ B<Return a human readable string describing the specified error.>
 
 =cut
  */
-char *ap_strerror(ap_status_t statcode, char *buf, size_t bufsize);
+char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize);
 
 #ifdef __cplusplus
 }

@@ -134,12 +134,12 @@ static char *apr_error_string(ap_status_t statcode)
 #ifdef WIN32
 #error "not implemented yet"
 #elif OS2
-static char *apr_os_strerror(int err, char *buf, size_t bufsize);
+static char *apr_os_strerror(int err, char *buf, ap_size_t bufsize);
 #else
 #define apr_os_strerror(err, buf, bufsize)	strerror(err)
 #endif
 
-char *ap_strerror(ap_status_t statcode, char *buf, size_t bufsize)
+char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
         return strerror(statcode);
@@ -162,7 +162,7 @@ char *ap_strerror(ap_status_t statcode, char *buf, size_t bufsize)
 #include <os2.h>
 #include <ctype.h>
 
-static char *apr_os_strerror(int err, char* buf, size_t bufsize)
+static char *apr_os_strerror(int err, char* buf, ap_size_t bufsize)
 {
   char result[200];
   unsigned char message[HUGE_STRING_LEN];
