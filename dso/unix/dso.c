@@ -72,6 +72,10 @@
 #include <string.h> /* for strerror() on HP-UX */
 #endif
 
+#if defined(DSO_USE_DYLD)
+#define DYLD_LIBRARY_HANDLE (void *)-1
+#endif
+
 APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
                                                 apr_os_dso_handle_t osdso,
                                                 apr_pool_t *pool)
@@ -99,7 +103,9 @@ static apr_status_t dso_cleanup(void *thedso)
 #if defined(DSO_USE_SHL)
     shl_unload((shl_t)dso->handle);
 #elif defined(DSO_USE_DYLD)
-    NSUnLinkModule(dso->handle, FALSE);
+    if (dso->handle != DYLD_LIBRARY_HANDLE) {
+        NSUnLinkModule(dso->handle, FALSE);
+    }
 #elif defined(DSO_USE_DLFCN)
     if (dlclose(dso->handle) != 0)
         return APR_EINIT;
@@ -119,18 +125,21 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     NSObjectFileImage image;
     NSModule os_handle = NULL;
     char* err_msg = NULL;
-    if (NSCreateObjectFileImageFromFile(path, &image) != NSObjectFileImageSuccess) {
-	err_msg = "cannot create object file image";
+    if (NSCreateObjectFileImageFromFile(path, &image) == NSObjectFileImageSuccess) {
+#ifdef NSLINKMODULE_OPTION_PRIVATE
+        os_handle = NSLinkModule(image, path,
+                                 NSLINKMODULE_OPTION_PRIVATE |
+                                 NSLINKMODULE_OPTION_RETURN_ON_ERROR);
+#else
+        os_handle = NSLinkModule(image, path, TRUE);
+#endif
+        NSDestroyObjectFileImage(image);
+    }
+    else if (NSAddLibrary(path) == TRUE) {
+        os_handle = (NSModule)DYLD_LIBRARY_HANDLE;
     }
     else {
-#ifdef NSLINKMODULE_OPTION_PRIVATE
-      os_handle = NSLinkModule(image, path,
-			       NSLINKMODULE_OPTION_PRIVATE |
-			       NSLINKMODULE_OPTION_RETURN_ON_ERROR);
-#else
-      os_handle = NSLinkModule(image, path, TRUE);
-#endif
-      NSDestroyObjectFileImage(image);
+        err_msg = "cannot create object file image or add library";
     }
 
 #elif defined(DSO_USE_DLFCN)
@@ -208,7 +217,12 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     char *symname2 = (char*)malloc(sizeof(char)*(strlen(symname)+2));
     sprintf(symname2, "_%s", symname);
 #ifdef NSLINKMODULE_OPTION_PRIVATE
-    symbol = NSLookupSymbolInModule((NSModule)handle->handle, symname2);
+    if (handle->handle == DYLD_LIBRARY_HANDLE) {
+        symbol = NSLookupAndBindSymbol(symname2);
+    }
+    else {
+        symbol = NSLookupSymbolInModule((NSModule)handle->handle, symname2);
+    }
 #else
     symbol = NSLookupAndBindSymbol(symname2);
 #endif
