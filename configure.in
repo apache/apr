@@ -103,6 +103,7 @@ esac
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(pthread, pthread_mutex_init)
 AC_CHECK_LIB(socket,socket)
+AC_CHECK_LIB(crypt,crypt)
 AC_CHECK_LIB(ufc,crypt)
 
 if test ".$SYS_SW" = ".AIX"; then
