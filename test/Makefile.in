@@ -35,7 +35,8 @@ TARGETS = $(PROGRAMS) $(NONPORTABLE)
 
 LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
-CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@
+CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
+	        testprocmutex@EXEEXT@ testglobalmutex@EXEEXT@ testshm@EXEEXT@
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
