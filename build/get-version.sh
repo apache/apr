@@ -12,14 +12,14 @@
 #
 
 if test $# != 3; then
-  echo "USAGE: $0 CMD INCLUDEDIR PREFIX"
-  echo "  where CMD is one of: all, major"
+  echo "USAGE: $0 CMD VERSION_HEADER PREFIX"
+  echo "  where CMD is one of: all, major, libtool"
   exit 1
 fi
 
-major_sed="/#define.*$3_MAJOR_VERSION/s/^.*\([0-9][0-9]*\).*$/\1/p"
-minor_sed="/#define.*$3_MINOR_VERSION/s/^.*\([0-9][0-9]*\).*$/\1/p"
-patch_sed="/#define.*$3_PATCH_VERSION/s/^.*\([0-9][0-9]*\).*$/\1/p"
+major_sed="/#define.*$3_MAJOR_VERSION/s/^[^0-9]*\([0-9]*\).*$/\1/p"
+minor_sed="/#define.*$3_MINOR_VERSION/s/^[^0-9]*\([0-9]*\).*$/\1/p"
+patch_sed="/#define.*$3_PATCH_VERSION/s/^[^0-9]*\([0-9]*\).*$/\1/p"
 major="`sed -n $major_sed $2`"
 minor="`sed -n $minor_sed $2`"
 patch="`sed -n $patch_sed $2`"
