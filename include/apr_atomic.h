@@ -62,7 +62,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 #ifdef WIN32
+
 #define apr_atomic_t LONG;
 
 #define apr_atomic_add(mem, val)     InterlockedExchangeAdd(mem,val)
@@ -74,6 +76,7 @@ extern "C" {
 #define apr_atomic_init(pool)        APR_SUCCESS
 
 #elif defined(__linux)
+
 #include <asm/atomic.h>
 #define apr_atomic_t atomic_t
 
@@ -84,8 +87,7 @@ extern "C" {
 #define apr_atomic_read(mem)         atomic_read(mem)
 #define apr_atomic_init(pool)        APR_SUCCESS
 
-
-#else
+#else /* !defined(WIN32) && !defined(__linux) */
 
 #if APR_HAS_THREADS
 
@@ -100,7 +102,8 @@ apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem);
 
 #endif /* APR_HAS_THREADS */
 
-#endif
+#endif /* !defined(WIN32) && !defined(__linux) */
+
 #ifdef __cplusplus
 }
 #endif
