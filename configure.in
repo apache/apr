@@ -75,6 +75,9 @@ AC_SUBST(apr_builders)
 
 MKDIR=$apr_builders/mkdir.sh
 
+dnl Initialize mkdir -p functionality.
+APR_MKDIR_P_CHECK($apr_builders/mkdir.sh)
+
 dnl These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
