@@ -2006,12 +2006,6 @@ AC_SUBST(DEFAULT_OSDIR)
 AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
 
-echo "${nl}Construct Makefiles and header files."
-MAKEFILES="Makefile"
-if test -d $srcdir/test; then
-    MAKEFILES="$MAKEFILES test/Makefile test/internal/Makefile"
-fi
-
 #
 # BSD/OS (BSDi) needs to use a different include syntax in the Makefiles
 #
@@ -2035,31 +2029,41 @@ esac
 AC_SUBST(INCLUDE_RULES)
 AC_SUBST(INCLUDE_OUTPUTS)
 
-SAVE_FILES="include/apr.h include/arch/unix/apr_private.h"
+AC_CONFIG_FILES([Makefile
+                 include/apr.h
+                 build/apr_rules.mk
+                 build/pkg/pkginfo
+                 apr-$APR_MAJOR_VERSION-config:apr-config.in
+                 apr.pc])
 
-for i in $SAVE_FILES; do
-  test -r $i && mv $i $i.save
-done
+if test -d $srcdir/test; then
+   AC_CONFIG_FILES([test/Makefile test/internal/Makefile])
+fi
 
 dir=include/arch/unix
 test -d $dir || $MKDIR $dir
 
-AC_OUTPUT([
-	$MAKEFILES
-	include/apr.h
-	build/apr_rules.mk
-	build/pkg/pkginfo
-	apr-$APR_MAJOR_VERSION-config:apr-config.in
-        apr.pc
-],[
-for i in $SAVE_FILES; do
+AC_CONFIG_COMMANDS([default], [
+# Commands run at the end of config.status:
+for i in $APR_SAVE_HEADERS; do
   if cmp -s $i $i.save 2>/dev/null; then
     mv $i.save $i
-    echo "$i is unchanged"
+    AC_MSG_NOTICE([$i is unchanged])
   fi
   rm -f $i.save
 done
 chmod +x apr-$APR_MAJOR_VERSION-config
 ],[
+dnl This section is expanded by configure UNQUOTED so variable 
+dnl references must be backslash-escaped as necessary.
+
+# Commands run at the beginning of config.status:
+APR_SAVE_HEADERS="include/apr.h include/arch/unix/apr_private.h"
 APR_MAJOR_VERSION=$APR_MAJOR_VERSION
+
+for apri in \${APR_SAVE_HEADERS}; do
+  test -r \${apri} && mv \${apri} \${apri}.save
+done
 ])
+
+AC_OUTPUT
