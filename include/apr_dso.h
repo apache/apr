@@ -69,7 +69,16 @@ extern "C" {
 
 #if APR_HAS_DSO
 
-typedef struct apr_dso_handle_t        apr_dso_handle_t;
+/**
+ * Structure for referencing dynamic objects
+ * @defvar apr_dso_handle_t
+ */
+typedef struct apr_dso_handle_t       apr_dso_handle_t;
+
+/**
+ * Structure for referencing symbols from dynamic objects
+ * @defvar apr_dso_handle_sym_t
+ */
 typedef void *                        apr_dso_handle_sym_t;
 
 /**
@@ -90,10 +99,10 @@ apr_status_t apr_dso_unload(apr_dso_handle_t *handle);
 /**
  * Load a symbol from a DSO handle.
  * @param ressym Location to store the loaded symbol
- * @param handle handle to load from.
+ * @param handle handle to load the symbol from.
  * @param symname Name of the symbol to load.
  */
-apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle, 
+apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
                        const char *symname);
 
 /**
