@@ -125,7 +125,7 @@ apr_memory_system_free(apr_memory_system_t *memory_system,
         return APR_EINVAL; /* Hmm, is this an error??? */
 
     if (memory_system->free_fn != NULL)
-        memory_system->free_fn(memory_system, mem);  
+        return memory_system->free_fn(memory_system, mem);  
 
 #ifdef APR_MEMORY_SYSTEM_DEBUG
     else /* assume this is a tracking memory system */
@@ -301,7 +301,7 @@ apr_memory_system_do_child_cleanups(apr_memory_system_t *memory_system)
     }
 }
 
-APR_DECLARE(void)
+APR_DECLARE(apr_status_t)
 apr_memory_system_reset(apr_memory_system_t *memory_system)
 {
     assert(memory_system != NULL);
@@ -330,7 +330,7 @@ apr_memory_system_reset(apr_memory_system_t *memory_system)
     memory_system->accounting_memory_system = memory_system;
 
     /* Let the memory system handle the actual reset */
-    memory_system->reset_fn(memory_system);
+    return memory_system->reset_fn(memory_system);
 }
 
 APR_DECLARE(apr_status_t)
@@ -515,24 +515,22 @@ apr_memory_system_cleanup_register(apr_memory_system_t *memory_system,
     assert(memory_system != NULL);
     assert(memory_system->accounting_memory_system != NULL);
 
-    /*
-     * If someone passes us a NULL cleanup_fn, assert, because the cleanup
-     * code can't handle it _and_ it makes no sense.
-     */
+    if (cleanup_fn == NULL)
+        return APR_EINVAL;
+
     cleanup = (struct apr_memory_system_cleanup *)
 	    apr_memory_system_malloc(memory_system->accounting_memory_system,
 				     sizeof(struct apr_memory_system_cleanup));
 
-    /* See if we actually got the memory */
     if (cleanup == NULL)
-        return APR_ENOMEM; /* strikerXXX: Should this become APR_FALSE? */
+        return APR_ENOMEM;
 
     cleanup->data = data;
     cleanup->cleanup_fn = cleanup_fn;
     cleanup->next = memory_system->cleanups;
     memory_system->cleanups = cleanup;
 
-    return APR_SUCCESS; /* strikerXXX: Should this become APR_TRUE? */
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t)
@@ -559,7 +557,7 @@ apr_memory_system_cleanup_unregister(apr_memory_system_t *memory_system,
             if (memory_system->free_fn != NULL)
                 apr_memory_system_free(memory_system, cleanup);
 
-            return APR_SUCCESS; /* strikerXXX: Should this become APR_TRUE? */
+            return APR_SUCCESS;
         }
 
         cleanup_ref = &cleanup->next;
