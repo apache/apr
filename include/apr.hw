@@ -52,17 +52,16 @@
  * <http://www.apache.org/>.
  */
 
-/* 
- * Note: This is a Windows specific version of apr.h. It is copied as
- * apr.h at the start of a Windows build.
- */
+
 /**
- * @file apr.h
- * @brief Basic APR header
+ * @file include\apr.h
+ * @brief Basic APR header for WIN32
+ * @remark This is a Windows specific version of apr.h. It is copied as
+ * apr.h at the start of a Windows build.
  */
 
 /**
- * @defgroup APR APR Functions
+ * @defgroup APR APR Functions (WIN32)
  * @{
  */
 
