@@ -67,14 +67,18 @@ typedef struct apr_sms_t    apr_sms_t;
 
 #include "apr.h"
 #include "apr_errno.h"
+#ifndef APR_POOLS_ARE_SMS
 #include "apr_pools.h"
-#include "apr_lock.h"
-#include "apr_portable.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifdef APR_POOLS_ARE_SMS
+typedef struct apr_sms_t           apr_pool_t;
+typedef int (*apr_abortfunc_t)(int retcode);
+#endif
 
 /**********************************************************************
  ** Defines 
@@ -149,7 +153,6 @@ extern "C" {
  */
 #define APR_DEBUG_ALLOCATIONS         0
 #define APR_DEBUG_ALLOC_FILE "/tmp/sms_alloc"
-
 
 /**
  * @package APR memory system
@@ -408,6 +411,10 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
  */
 APR_DECLARE(void) apr_sms_tag(apr_sms_t *sms, const char *tag);
 #endif /* APR_DEBUG_TAG_SMS */
+
+#if SMS_ALLOC_STATS
+APR_DECLARE(void) apr_sms_dump_stats(apr_sms_t *sms);
+#endif
 
 #ifdef __cplusplus
 }

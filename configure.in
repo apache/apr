@@ -152,11 +152,22 @@ AC_ARG_ENABLE(assert-memory,[  --enable-assert-memory  Turn on asserts in the AP
   APR_ADDTO(NOTEST_CPPFLAGS,-DAPR_ASSERT_MEMORY)
 ])dnl
 
-AC_ARG_ENABLE(profile,[  --enable-profile        Turn on profiling for the build (GCC)],[
+AC_ARG_ENABLE(profile,[  --enable-profile   Turn on profiling for the build (GCC)],
   if test "$GCC" = "yes"; then
     APR_ADDTO(CFLAGS, -pg)
   fi
-])dnl
+)dnl
+
+POOLS_TARGET=apr_pools.lo
+AC_ARG_ENABLE(sms, [ --enable-sms Build APR to use sms emulating pools],
+    echo "*************   WARNING   ***************"
+    echo "You have switched ON using SMS to emulate pools.  This is highly"
+    echo "experimental and so you may want to think about it!"
+    echo "Presently this option is only advised for people working on SMS"
+    APR_ADDTO(CFLAGS, -DAPR_POOLS_ARE_SMS)
+    POOLS_TARGET=apr_sms_pools.lo
+)dnl
+AC_SUBST(POOLS_TARGET)
 
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
