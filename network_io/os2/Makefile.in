@@ -55,29 +55,37 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+os2calls.o: os2calls.c networkio.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h os2calls.h $(INCDIR1)/apr_portable.h \
+ $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_lock.h \
+ $(INCDIR1)/apr_lib.h
 poll.o: poll.c networkio.h $(INCDIR1)/apr_network_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_portable.h \
- $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
- $(INCDIR1)/apr_win.h $(INCDIR1)/apr_lock.h \
- $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h os2calls.h $(INCDIR1)/apr_portable.h \
+ $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_lock.h \
+ $(INCDIR1)/apr_lib.h
 sendrecv.o: sendrecv.c networkio.h $(INCDIR1)/apr_network_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h os2calls.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
 sockaddr.o: sockaddr.c ../unix/sockaddr.c ../unix/networkio.h \
- $(INCDIR1)/apr_network_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_lock.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h
+ $(INCDIR1)/apr_config.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
 sockets.o: sockets.c networkio.h $(INCDIR1)/apr_network_io.h \
- $(INCDIR1)/apr_general.h $(INCDIR1)/apr_config.h \
- $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_portable.h \
- $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_file_io.h \
- $(INCDIR1)/apr_win.h $(INCDIR1)/apr_lock.h \
- $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h
-sockopt.o: sockopt.c ../unix/sockopt.c ../unix/networkio.h \
- $(INCDIR1)/apr_network_io.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_lock.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_file_io.h
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h os2calls.h $(INCDIR1)/apr_portable.h \
+ $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_lock.h \
+ $(INCDIR1)/apr_lib.h
+sockopt.o: sockopt.c networkio.h $(INCDIR1)/apr_network_io.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h os2calls.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h

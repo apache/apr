@@ -58,33 +58,48 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-dir.o: dir.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h
-fileacc.o: fileacc.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h
-filedup.o: filedup.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h
-filestat.o: filestat.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h
-maperrorcode.o: maperrorcode.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h
-open.o: open.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h \
- $(INCDIR1)/apr_portable.h $(INCDIR1)/apr_thread_proc.h \
- $(INCDIR1)/apr_win.h $(INCDIR1)/apr_network_io.h \
- $(INCDIR1)/apr_lock.h $(INCDIR1)/apr_time.h
-pipe.o: pipe.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h
-readwrite.o: readwrite.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h
-seek.o: seek.c fileio.h $(INCDIR1)/apr_general.h \
- $(INCDIR1)/apr_config.h $(INCDIR1)/apr_errno.h \
- $(INCDIR1)/apr_file_io.h $(INCDIR1)/apr_lib.h
+dir.o: dir.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
+fileacc.o: fileacc.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
+filedup.o: filedup.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
+filestat.o: filestat.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
+maperrorcode.o: maperrorcode.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h ../../network_io/os2/os2calls.h
+open.o: open.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h $(INCDIR1)/apr_portable.h \
+ $(INCDIR1)/apr_network_io.h $(INCDIR1)/apr_lock.h
+pipe.o: pipe.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
+readwrite.o: readwrite.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
+seek.o: seek.c fileio.h $(INCDIR1)/apr_config.h \
+ $(INCDIR1)/apr_general.h $(INCDIR1)/apr.h \
+ $(INCDIR1)/apr_errno.h $(INCDIR1)/apr_file_io.h \
+ $(INCDIR1)/apr_time.h $(INCDIR1)/apr_lib.h \
+ $(INCDIR1)/apr_thread_proc.h
