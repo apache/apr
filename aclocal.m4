@@ -321,8 +321,11 @@ int main(void) {
   ac_cv_ebcdic="no"
 ])])
   if test "$ac_cv_ebcdic" = "yes"; then
-    AC_DEFINE(AP_CHARSET_EBCDIC,, [Define if system uses EBCDIC])
+    apr_charset_ebcdic=1
+  else
+    apr_charset_ebcdic=0
   fi
+  AC_SUBST(apr_charset_ebcdic)
 ])
 
 AC_DEFUN(APR_PREPARE_MM_DIR,[
