@@ -105,8 +105,10 @@ LINK32=link.exe
 LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib\
  odbccp32.lib ws2_32.lib /nologo /subsystem:windows /dll /incremental:no\
- /pdb:"$(OUTDIR)\aprlib.pdb" /machine:I386 /out:"$(OUTDIR)\aprlib.dll"\
- /implib:"$(OUTDIR)\aprlib.lib" 
+ /pdb:"$(OUTDIR)\aprlib.pdb" /machine:I386 /def:".\aprlib.def"\
+ /out:"$(OUTDIR)\aprlib.dll" /implib:"$(OUTDIR)\aprlib.lib" 
+DEF_FILE= \
+	".\aprlib.def"
 LINK32_OBJS= \
 	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\apr_cpystrn.obj" \
@@ -228,8 +230,10 @@ LINK32=link.exe
 LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib\
  advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib\
  odbccp32.lib ws2_32.lib /nologo /subsystem:windows /dll /incremental:yes\
- /pdb:"$(OUTDIR)\aprlib.pdb" /debug /machine:I386 /out:"$(OUTDIR)\aprlib.dll"\
- /implib:"$(OUTDIR)\aprlib.lib" /pdbtype:sept 
+ /pdb:"$(OUTDIR)\aprlib.pdb" /debug /machine:I386 /def:".\aprlib.def"\
+ /out:"$(OUTDIR)\aprlib.dll" /implib:"$(OUTDIR)\aprlib.lib" /pdbtype:sept 
+DEF_FILE= \
+	".\aprlib.def"
 LINK32_OBJS= \
 	"$(INTDIR)\access.obj" \
 	"$(INTDIR)\apr_cpystrn.obj" \
@@ -307,9 +311,6 @@ LINK32_OBJS= \
 
 !IF "$(CFG)" == "aprlib - Win32 Release" || "$(CFG)" == "aprlib - Win32 Debug"
 SOURCE=.\time\win32\access.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_ACCES=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -319,35 +320,17 @@ DEP_CPP_ACCES=\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
 	".\time\win32\atime.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_ACCES=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\access.obj" : $(SOURCE) $(DEP_CPP_ACCES) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_ACCES=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_time.h"\
-	".\include\apr_win.h"\
-	".\time\win32\atime.h"\
-	
-
-"$(INTDIR)\access.obj" : $(SOURCE) $(DEP_CPP_ACCES) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\lib\apr_cpystrn.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_C=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -355,39 +338,27 @@ DEP_CPP_APR_C=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_APR_C=\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
 	
 
 "$(INTDIR)\apr_cpystrn.obj" : $(SOURCE) $(DEP_CPP_APR_C) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_APR_C=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\apr_cpystrn.obj" : $(SOURCE) $(DEP_CPP_APR_C) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\lib\apr_execve.c
+NODEP_CPP_APR_E=\
+	".\lib\apr_config.h"\
+	
 
 "$(INTDIR)\apr_execve.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
 SOURCE=.\lib\apr_fnmatch.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_F=\
 	".\file_io\win32\readdir.h"\
 	".\inc\apr_fnmatch.h"\
@@ -396,34 +367,19 @@ DEP_CPP_APR_F=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_APR_F=\
+	".\inc\apr_config.h"\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
 	
 
 "$(INTDIR)\apr_fnmatch.obj" : $(SOURCE) $(DEP_CPP_APR_F) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_APR_F=\
-	".\file_io\win32\readdir.h"\
-	".\inc\apr_fnmatch.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\apr_fnmatch.obj" : $(SOURCE) $(DEP_CPP_APR_F) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\lib\apr_getpass.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_G=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -431,33 +387,18 @@ DEP_CPP_APR_G=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_APR_G=\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
 	
 
 "$(INTDIR)\apr_getpass.obj" : $(SOURCE) $(DEP_CPP_APR_G) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_APR_G=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\apr_getpass.obj" : $(SOURCE) $(DEP_CPP_APR_G) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\lib\apr_md5.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_M=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -466,34 +407,18 @@ DEP_CPP_APR_M=\
 	".\include\apr_lib.h"\
 	".\include\apr_md5.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_APR_M=\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
 	
 
 "$(INTDIR)\apr_md5.obj" : $(SOURCE) $(DEP_CPP_APR_M) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_APR_M=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_md5.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\apr_md5.obj" : $(SOURCE) $(DEP_CPP_APR_M) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\lib\apr_pools.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_P=\
 	".\file_io\win32\readdir.h"\
 	".\inc\apr_pools.h"\
@@ -504,36 +429,19 @@ DEP_CPP_APR_P=\
 	".\include\apr_lock.h"\
 	".\include\apr_win.h"\
 	".\misc\win32\misc.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_APR_P=\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
 	
 
 "$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_APR_P=\
-	".\file_io\win32\readdir.h"\
-	".\inc\apr_pools.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_win.h"\
-	".\misc\win32\misc.h"\
-	
-
-"$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\lib\apr_slack.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_S=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -541,7 +449,16 @@ DEP_CPP_APR_S=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
 	
+NODEP_CPP_APR_S=\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
+	".\lib\http_log.h"\
+	
+
+!IF  "$(CFG)" == "aprlib - Win32 Release"
+
 CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /I "./include" /I "./inc" /I\
  "./misc/win32" /I "./file_io/win32" /I "./misc/win32/" /I "./file_io/win32/" /D\
  "WIN32" /D "NDEBUG" /D "_WINDOWS" /Fp"$(INTDIR)\aprlib.pch" /YX\
@@ -555,14 +472,6 @@ CPP_SWITCHES=/nologo /MT /W3 /GX /O2 /I "./include" /I "./inc" /I\
 
 !ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
 
-DEP_CPP_APR_S=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
 CPP_SWITCHES=/nologo /MTd /W3 /Gm /GX /Zi /Od /I "./include" /I "./inc" /I\
  "./misc/win32" /I "./file_io/win32" /I "./misc/win32/" /I "./file_io/win32/" /D\
  "WIN32" /D "_DEBUG" /D "_WINDOWS" /Fp"$(INTDIR)\aprlib.pch" /YX\
@@ -577,9 +486,6 @@ CPP_SWITCHES=/nologo /MTd /W3 /Gm /GX /Zi /Od /I "./include" /I "./inc" /I\
 !ENDIF 
 
 SOURCE=.\lib\apr_snprintf.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_SN=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -587,33 +493,18 @@ DEP_CPP_APR_SN=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_APR_SN=\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
 	
 
 "$(INTDIR)\apr_snprintf.obj" : $(SOURCE) $(DEP_CPP_APR_SN) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_APR_SN=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\apr_snprintf.obj" : $(SOURCE) $(DEP_CPP_APR_SN) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\lib\apr_tables.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_APR_T=\
 	".\file_io\win32\readdir.h"\
 	".\inc\apr_pools.h"\
@@ -623,35 +514,18 @@ DEP_CPP_APR_T=\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
 	".\misc\win32\misc.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_APR_T=\
+	".\include\apr_config.h"\
+	".\lib\apr_config.h"\
 	
 
 "$(INTDIR)\apr_tables.obj" : $(SOURCE) $(DEP_CPP_APR_T) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_APR_T=\
-	".\file_io\win32\readdir.h"\
-	".\inc\apr_pools.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	".\misc\win32\misc.h"\
-	
-
-"$(INTDIR)\apr_tables.obj" : $(SOURCE) $(DEP_CPP_APR_T) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\file_io\win32\dir.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_DIR_C=\
 	".\file_io\win32\fileio.h"\
 	".\file_io\win32\readdir.h"\
@@ -666,40 +540,18 @@ DEP_CPP_DIR_C=\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_DIR_C=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\dir.obj" : $(SOURCE) $(DEP_CPP_DIR_C) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_DIR_C=\
-	".\file_io\win32\fileio.h"\
-	".\file_io\win32\readdir.h"\
-	".\inc\apr_pools.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\dir.obj" : $(SOURCE) $(DEP_CPP_DIR_C) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\file_io\win32\fileacc.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_FILEA=\
 	".\file_io\win32\fileio.h"\
 	".\file_io\win32\readdir.h"\
@@ -709,35 +561,18 @@ DEP_CPP_FILEA=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_FILEA=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\fileacc.obj" : $(SOURCE) $(DEP_CPP_FILEA) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_FILEA=\
-	".\file_io\win32\fileio.h"\
-	".\file_io\win32\readdir.h"\
-	".\inc\apr_pools.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\fileacc.obj" : $(SOURCE) $(DEP_CPP_FILEA) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\file_io\win32\filedup.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_FILED=\
 	".\file_io\win32\fileio.h"\
 	".\file_io\win32\readdir.h"\
@@ -747,35 +582,18 @@ DEP_CPP_FILED=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_FILED=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\filedup.obj" : $(SOURCE) $(DEP_CPP_FILED) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_FILED=\
-	".\file_io\win32\fileio.h"\
-	".\file_io\win32\readdir.h"\
-	".\inc\apr_pools.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\filedup.obj" : $(SOURCE) $(DEP_CPP_FILED) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\file_io\win32\filestat.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_FILES=\
 	".\file_io\win32\fileio.h"\
 	".\file_io\win32\readdir.h"\
@@ -785,30 +603,16 @@ DEP_CPP_FILES=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_FILES=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\filestat.obj" : $(SOURCE) $(DEP_CPP_FILES) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_FILES=\
-	".\file_io\win32\fileio.h"\
-	".\file_io\win32\readdir.h"\
-	".\inc\apr_pools.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_win.h"\
-	
-
-"$(INTDIR)\filestat.obj" : $(SOURCE) $(DEP_CPP_FILES) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\misc\win32\getopt.c
 
@@ -820,6 +624,10 @@ DEP_CPP_GETOP=\
 	".\include\apr_general.h"\
 	".\include\apr_win.h"\
 	".\misc\win32\misc.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_GETOP=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\getopt.obj" : $(SOURCE) $(DEP_CPP_GETOP) "$(INTDIR)"
@@ -859,6 +667,10 @@ DEP_CPP_LOCKS=\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
 	".\locks\win32\locks.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_LOCKS=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\locks.obj" : $(SOURCE) $(DEP_CPP_LOCKS) "$(INTDIR)"
@@ -899,6 +711,11 @@ DEP_CPP_NAMES=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_NAMES=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\names.obj" : $(SOURCE) $(DEP_CPP_NAMES) "$(INTDIR)"
@@ -940,6 +757,11 @@ DEP_CPP_OPEN_=\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_OPEN_=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\open.obj" : $(SOURCE) $(DEP_CPP_OPEN_) "$(INTDIR)"
@@ -983,6 +805,11 @@ DEP_CPP_PIPE_=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_PIPE_=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\pipe.obj" : $(SOURCE) $(DEP_CPP_PIPE_) "$(INTDIR)"
@@ -1021,6 +848,10 @@ DEP_CPP_POLL_=\
 	".\include\apr_network_io.h"\
 	".\include\apr_win.h"\
 	".\network_io\win32\networkio.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_POLL_=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\poll.obj" : $(SOURCE) $(DEP_CPP_POLL_) "$(INTDIR)"
@@ -1065,6 +896,11 @@ DEP_CPP_PROC_=\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
 	".\threadproc\win32\threadproc.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_PROC_=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\proc.obj" : $(SOURCE) $(DEP_CPP_PROC_) "$(INTDIR)"
@@ -1097,13 +933,31 @@ DEP_CPP_PROC_=\
 !ENDIF 
 
 SOURCE=.\file_io\win32\readdir.c
+
+!IF  "$(CFG)" == "aprlib - Win32 Release"
+
 DEP_CPP_READD=\
 	".\file_io\win32\readdir.h"\
+	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
 	
 
 "$(INTDIR)\readdir.obj" : $(SOURCE) $(DEP_CPP_READD) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
+
+!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
+
+DEP_CPP_READD=\
+	".\file_io\win32\readdir.h"\
+	".\include\apr_win.h"\
+	
+
+"$(INTDIR)\readdir.obj" : $(SOURCE) $(DEP_CPP_READD) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+!ENDIF 
 
 SOURCE=.\file_io\win32\readwrite.c
 
@@ -1118,6 +972,11 @@ DEP_CPP_READW=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_READW=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\readwrite.obj" : $(SOURCE) $(DEP_CPP_READW) "$(INTDIR)"
@@ -1156,6 +1015,11 @@ DEP_CPP_SEEK_=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_SEEK_=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\seek.obj" : $(SOURCE) $(DEP_CPP_SEEK_) "$(INTDIR)"
@@ -1194,6 +1058,10 @@ DEP_CPP_SENDR=\
 	".\include\apr_network_io.h"\
 	".\include\apr_win.h"\
 	".\network_io\win32\networkio.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_SENDR=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\sendrecv.obj" : $(SOURCE) $(DEP_CPP_SENDR) "$(INTDIR)"
@@ -1230,6 +1098,10 @@ DEP_CPP_SIGNA=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_SIGNA=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\signal.obj" : $(SOURCE) $(DEP_CPP_SIGNA) "$(INTDIR)"
@@ -1268,6 +1140,11 @@ DEP_CPP_SIGNAL=\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_win.h"\
 	".\threadproc\win32\threadproc.h"\
+	{$(INCLUDE)}"sys\stat.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_SIGNAL=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\signals.obj" : $(SOURCE) $(DEP_CPP_SIGNAL) "$(INTDIR)"
@@ -1312,6 +1189,10 @@ DEP_CPP_SOCKE=\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
 	".\network_io\win32\networkio.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_SOCKE=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\sockets.obj" : $(SOURCE) $(DEP_CPP_SOCKE) "$(INTDIR)"
@@ -1354,6 +1235,10 @@ DEP_CPP_SOCKO=\
 	".\include\apr_network_io.h"\
 	".\include\apr_win.h"\
 	".\network_io\win32\networkio.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_SOCKO=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\sockopt.obj" : $(SOURCE) $(DEP_CPP_SOCKO) "$(INTDIR)"
@@ -1392,6 +1277,10 @@ DEP_CPP_START=\
 	".\include\apr_lib.h"\
 	".\include\apr_win.h"\
 	".\misc\win32\misc.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_START=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\start.obj" : $(SOURCE) $(DEP_CPP_START) "$(INTDIR)"
@@ -1434,6 +1323,10 @@ DEP_CPP_THREA=\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
 	".\threadproc\win32\threadproc.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_THREA=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\thread.obj" : $(SOURCE) $(DEP_CPP_THREA) "$(INTDIR)"
@@ -1474,6 +1367,10 @@ DEP_CPP_THREAD=\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_win.h"\
 	".\threadproc\win32\threadproc.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_THREAD=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\threadcancel.obj" : $(SOURCE) $(DEP_CPP_THREAD) "$(INTDIR)"
@@ -1498,9 +1395,6 @@ DEP_CPP_THREAD=\
 !ENDIF 
 
 SOURCE=.\threadproc\win32\threadpriv.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_THREADP=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -1514,39 +1408,17 @@ DEP_CPP_THREADP=\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
 	".\threadproc\win32\threadproc.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_THREADP=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\threadpriv.obj" : $(SOURCE) $(DEP_CPP_THREADP) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_THREADP=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_win.h"\
-	".\threadproc\win32\threadproc.h"\
-	
-
-"$(INTDIR)\threadpriv.obj" : $(SOURCE) $(DEP_CPP_THREADP) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\time\win32\time.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
 DEP_CPP_TIME_=\
 	".\file_io\win32\readdir.h"\
 	".\include\apr_errno.h"\
@@ -1560,34 +1432,15 @@ DEP_CPP_TIME_=\
 	".\include\apr_time.h"\
 	".\include\apr_win.h"\
 	".\time\win32\atime.h"\
+	{$(INCLUDE)}"sys\types.h"\
+	
+NODEP_CPP_TIME_=\
+	".\include\apr_config.h"\
 	
 
 "$(INTDIR)\time.obj" : $(SOURCE) $(DEP_CPP_TIME_) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_TIME_=\
-	".\file_io\win32\readdir.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_lib.h"\
-	".\include\apr_lock.h"\
-	".\include\apr_network_io.h"\
-	".\include\apr_portable.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\include\apr_win.h"\
-	".\time\win32\atime.h"\
-	
-
-"$(INTDIR)\time.obj" : $(SOURCE) $(DEP_CPP_TIME_) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
 
 SOURCE=.\misc\win32\timetest.c
 
