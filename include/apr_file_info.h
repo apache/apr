@@ -133,7 +133,7 @@ typedef struct apr_finfo_t        apr_finfo_t;
 
 #define APR_FINFO_LINK   0x00000001 /**< Stat the link not the file itself if it is a link */
 #define APR_FINFO_MTIME  0x00000010 /**< Modification Time */
-#define APR_FINFO_CTIME  0x00000020 /**< Creation Time */
+#define APR_FINFO_CTIME  0x00000020 /**< Creation or inode-changed time */
 #define APR_FINFO_ATIME  0x00000040 /**< Access Time */
 #define APR_FINFO_SIZE   0x00000100 /**< Size of the file */
 #define APR_FINFO_CSIZE  0x00000200 /**< Storage size consumed by the file */
@@ -191,7 +191,7 @@ struct apr_finfo_t {
     apr_time_t atime;
     /** The time the file was last modified */
     apr_time_t mtime;
-    /** The time the file was last changed */
+    /** The time the file was created, or the inode was last changed */
     apr_time_t ctime;
     /** The pathname of the file (possibly unrooted) */
     const char *fname;
