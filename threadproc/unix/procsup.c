@@ -54,9 +54,10 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont)
+ap_status_t ap_detach(void)
 {
     int x;
+    pid_t pgrp;
 
     chdir("/");
 #if !defined(MPE) && !defined(OS2) && !defined(TPF) && !defined(BEOS)
@@ -72,21 +73,21 @@ ap_status_t ap_detach(ap_proc_t *new, ap_pool_t *cont)
 /*    RAISE_SIGSTOP(DETACH);*/
 #endif
 #if HAVE_SETSID
-    if ((new->pid = setsid()) == -1) {
+    if ((pgrp = setsid()) == -1) {
         return errno;
     }
 #elif defined(NEXT) || defined(NEWSOS)
-    if (setpgrp(0, getpid()) == -1 || (new->pid = getpgrp(0)) == -1) {
+    if (setpgrp(0, getpid()) == -1 || (pgrp = getpgrp(0)) == -1) {
         return errno;
     }
 #elif defined(OS2) || defined(TPF)
     /* OS/2 don't support process group IDs */
-    new->pid = getpid();
+    pgrp = getpid();
 #elif defined(MPE)
     /* MPE uses negative pid for process group */
-     new->pid = -getpid();
+    pgrp = -getpid();
 #else
-    if ((new->pid = setpgrp(getpid(), 0)) == -1) {
+    if ((pgrp = setpgrp(getpid(), 0)) == -1) {
         return errno;
     }
 #endif

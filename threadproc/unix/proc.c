@@ -261,7 +261,6 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     int i;
     typedef const char *my_stupid_string;
     my_stupid_string *newargs;
-    ap_proc_t pgrp; 
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -320,13 +319,13 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
             }
             newargs[i + 3] = NULL;
             if (attr->detached) {
-                ap_detach(&pgrp, attr->cntxt);
+                ap_detach();
             }
             execve(SHELL_PATH, (char **) newargs, env);
         }
         else {
             if (attr->detached) {
-                ap_detach(&pgrp, attr->cntxt);
+                ap_detach();
             }
             execve(progname, args, env);
         }

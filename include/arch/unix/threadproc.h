@@ -123,10 +123,5 @@ struct ap_procattr_t {
 #endif
 };
 
-/*This will move to ap_threadproc.h in time, but I need to figure it out
- * on windows first.  :)
- */
-ap_status_t ap_detach(struct ap_proc_t *, ap_pool_t *);
-
 #endif  /* ! THREAD_PROC_H */
 

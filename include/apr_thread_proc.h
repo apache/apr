@@ -565,16 +565,13 @@ ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status,
 
 /*
 
-=head1 ap_status_t ap_detach(ap_proc_t *new_proc, ap_pool_t *cont)
+=head1 ap_status_t ap_detach(void)
 
 B<Detach the process from the controlling terminal.>
 
-    arg 1) The new process handler
-    arg 2) The pool to use if it is needed.
-
 =cut
  */
-ap_status_t ap_detach(ap_proc_t *new_proc, ap_pool_t *cont);
+ap_status_t ap_detach(void);
 
 #if APR_HAS_OTHER_CHILD
 /*
