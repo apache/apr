@@ -51,6 +51,7 @@
 #define APR_HAVE_INET_ADDR      @inet_addr@
 #define APR_HAVE_INET_NETWORK   @inet_network@
 #define APR_HAVE_UNION_SEMUN    @have_union_semun@
+#define APR_HAVE_STRUCT_RLIMIT  @struct_rlimit@
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>

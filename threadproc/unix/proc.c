@@ -212,6 +212,48 @@ ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont)
     return APR_INPARENT;
 }
 
+#if APR_HAVE_STRUCT_RLIMIT
+#if defined(RLIMIT_CPU) || defined(RLIMIT_NPROC) || defined(RLIMIT_AS) || defined(RLIMIT_DATA) || defined(RLIMIT_VMEM)
+static ap_status_t limit_proc(ap_procattr_t *attr)
+{
+#ifdef RLIMIT_CPU
+    if (attr->limit_cpu != NULL) {
+        if ((setrlimit(RLIMIT_CPU, attr->limit_cpu)) != 0) {
+            return errno;
+        }
+    }
+#endif
+#ifdef RLIMIT_NPROC
+    if (attr->limit_nproc != NULL) {
+        if ((setrlimit(RLIMIT_NPROC, attr->limit_nproc)) != 0) {
+            return errno;
+        }
+    }
+#endif
+#if defined(RLIMIT_AS)
+    if (attr->limit_mem != NULL) {
+        if ((setrlimit(RLIMIT_AS, attr->limit_mem)) != 0) {
+            return errno;
+        }
+    }
+#elif defined(RLIMIT_DATA)
+    if (attr->limit_mem != NULL) {
+        if ((setrlimit(RLIMIT_DATA, attr->limit_mem)) != 0) {
+            return errno;
+        }
+    }
+#elif defined(RLIMIT_VMEM)
+    if (attr->limit_mem != NULL) {
+        if ((setrlimit(RLIMIT_VMEM, attr->limit_mem)) != 0) {
+            return errno;
+        }
+    }
+#endif
+    return APR_SUCCESS;
+}
+#endif
+#endif
+
 ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
                               char *const args[], char **env,
                               ap_procattr_t *attr, ap_pool_t *cont)
@@ -228,6 +270,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
         return errno;
     }
     else if (new->pid == 0) { 
+        int status;
         /* child process */
         if (attr->child_in) {
             ap_close(attr->parent_in);
@@ -254,6 +297,12 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
         }
 
         ap_cleanup_for_exec();
+
+#if defined(RLIMIT_CPU) || defined(RLIMIT_NPROC) || defined(RLIMIT_AS) || defined(RLIMIT_DATA) || defined(RLIMIT_VMEM)
+        if ((status = limit_proc(attr)) != APR_SUCCESS) {
+            return status;
+        }
+#endif 
 
         if (attr->cmdtype == APR_SHELLCMD) {
             i = 0;
@@ -338,3 +387,29 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
     }
     return errno;
 } 
+
+ap_status_t ap_setprocattr_limit(ap_procattr_t *attr, ap_int32_t what, 
+                          struct rlimit *limit)
+{
+    switch(what) {
+        case APR_LIMIT_CPU:
+#ifdef RLIMIT_CPU
+            attr->limit_cpu = limit;
+#else
+            return APR_ENOTIMPL;
+#endif
+        case APR_LIMIT_MEM:
+#if defined (RLIMIT_DATA) || defined (RLIMIT_VMEM) || defined(RLIMIT_AS)
+            attr->limit_mem = limit;
+#else
+            return APR_ENOTIMPL;
+#endif
+        case APR_LIMIT_NPROC:
+#ifdef RLIMIT_NPROC
+            attr->limit_nproc = limit;
+#else
+            return APR_ENOTIMPL;
+#endif
+    }
+    return APR_SUCCESS;
+}  
