@@ -66,6 +66,49 @@
 #include <stdarg.h>
 #endif
 
+
+/* The basic concept behind bucket_brigades.....
+ *
+ * A bucket brigade is simply a Queue of buckets, where we aren't limited
+ * to inserting at the front and removing at the end.
+ *
+ * Buckets are just data stores.  They can be files, mmap areas, or just
+ * pre-allocated memory.  The point of buckets is to store data.  Along with
+ * that data, come some functions to access it.  The functions are relatively
+ * simple, read, write, getlen, split, and free.
+ *
+ * read reads a string of data.  Currently, it assumes we read all of the 
+ * data in the bucket.  This should be changed to only read the specified 
+ * amount.
+ *
+ * getlen gets the number of bytes stored in the bucket.
+ * 
+ * write writes the specified data to the bucket.  Depending on the type of
+ * bucket, this may append to the end of previous data, or wipe out the data
+ * currently in the bucket.  rwmem buckets append currently, all others 
+ * erase the current bucket.
+ *
+ * split just makes one bucket into two at the spefied location.  To implement
+ * this correctly, we really need to implement reference counting.
+ *
+ * free just destroys the data associated with the bucket.
+ *
+ * We may add more functions later.  There has been talk of needing a stat,
+ * which would probably replace the getlen.  And, we definately need a convert
+ * function.  Convert would make one bucket type into another bucket type.
+ *
+ * To write a bucket brigade, they are first made into an iovec, so that we
+ * don't write too little data at one time.  Currently we ignore compacting the
+ * buckets into as few buckets as possible, but if we really want to be
+ * performant, then we need to compact the buckets before we convert to an
+ * iovec, or possibly while we are converting to an iovec.
+ *
+ * I'm not really sure what else to say about the buckets.  They are relatively
+ * simple and straight forward IMO.  It is just a way to organize data in
+ * memory that allows us to modify that data and move it around quickly and
+ * easily.
+ */
+
 typedef enum {
     AP_BUCKET_rwmem,
     AP_BUCKET_rmem,
@@ -82,11 +125,16 @@ typedef enum {
 typedef struct ap_bucket ap_bucket;
 struct ap_bucket {
     ap_bucket_color_e color;              /* what type of bucket is it */
-    void (*free)(void *e);                /* can be NULL */
     void *data;				  /* for use by free() */
-    const char *(*getstr)(ap_bucket *e);  /* Get the string */
+
+    /* All of the function pointers that can act on a bucket. */
+    void (*free)(void *e);                /* can be NULL */
     int (*getlen)(ap_bucket *e);          /* Get the length of the string */
-    /* Insert into a bucket.  The buf is a different type based on the
+
+    /* Read the data from the bucket. */
+    const char *(*read)(ap_bucket *e);  /* Get the string */
+
+    /* Write into a bucket.  The buf is a different type based on the
      * bucket type used.  For example, with AP_BUCKET_mmap it is an ap_mmap_t
      * for AP_BUCKET_file it is an ap_file_t, and for AP_BUCKET_rwmem it is
      * a char *.  The nbytes is the amount of actual data in buf.  This is
@@ -94,7 +142,9 @@ struct ap_bucket {
      * that buf resolves to.  written is how much of that data was inserted
      * into the bucket.
      */ 
-    int (*insert)(ap_bucket *e, const void *buf, ap_size_t nbytes, ap_ssize_t *w);
+    int (*write)(ap_bucket *e, const void *buf, ap_size_t nbytes, ap_ssize_t *w);
+   
+    /* Split one bucket into to at the specified position */
     ap_status_t (*split)(ap_bucket *e, ap_size_t nbytes);
 
     ap_bucket *next;                     /* The next node in the bucket list */
@@ -195,6 +245,8 @@ APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b);
 
 /* get the length of the data in the bucket */
 APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b);
+
+/****** Functions to Create Buckets of varying type ******/
 
 /* Create a read/write memory bucket */
 APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(void);

@@ -136,9 +136,9 @@ APR_EXPORT(ap_bucket *) ap_bucket_rmem_create(void)
     b->start = b->end     = NULL;
 
     newbuf->color         = AP_BUCKET_rmem;
-    newbuf->getstr        = rmem_get_str;
+    newbuf->read          = rmem_get_str;
     newbuf->getlen        = rmem_get_len;
-    newbuf->insert        = rmem_insert;
+    newbuf->write         = rmem_insert;
     newbuf->split         = rmem_split;
     newbuf->free          = NULL;
     newbuf->data          = b;

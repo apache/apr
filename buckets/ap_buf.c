@@ -206,7 +206,7 @@ APR_EXPORT(ap_status_t) ap_bucket_brigade_to_iol(ap_ssize_t *total_bytes,
 APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b)
 {
     if (b) {
-        return b->getstr(b);
+        return b->read(b);
     }
     return NULL;
 }    
@@ -241,7 +241,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
                 break;
             j = strlen(x);
            
-            rv = rw->insert(rw, x, j, &i);
+            rv = rw->write(rw, x, j, &i);
             if (i != j) {
                 /* Do we need better error reporting?  */
                 return -1;
@@ -259,7 +259,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
         j = strlen(x);
        
         r = ap_bucket_rwmem_create();
-        rv = r->insert(r, x, j, &i);
+        rv = r->write(r, x, j, &i);
         if (i != j) {
             /* Do we need better error reporting?  */
             return -1;
@@ -295,7 +295,7 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
     res = ap_vsnprintf(buf, 4096, fmt, va);
 
     r = ap_bucket_rwmem_create();
-    res = r->insert(r, buf, strlen(buf), &i);
+    res = r->write(r, buf, strlen(buf), &i);
     ap_bucket_brigade_append_buckets(b, r);
 
     return res;
