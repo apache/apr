@@ -58,7 +58,9 @@
 
 #include "apr_general.h"
 #include "apr_errno.h"
+#if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

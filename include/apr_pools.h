@@ -85,7 +85,9 @@ extern "C" {
 
 #include "apr_lib.h"
 
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 
 struct process_chain {
     pid_t pid;

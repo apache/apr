@@ -59,8 +59,12 @@
 #include <windows.h>
 #endif
 
+#if APR_HAVE_STDIO_H
 #include <stdio.h>
+#endif
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include "apr_errno.h"
 
 #ifndef APR_GENERAL_H

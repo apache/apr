@@ -62,7 +62,9 @@
 
 #include "apr_general.h"
 #include "apr_errno.h"
+#if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
