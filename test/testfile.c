@@ -372,12 +372,15 @@ static void test_gets(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     rv = apr_file_gets(str, 256, f);
-    /* Only one line in the test file, so we should get the EOF on the first
-     * call to gets.
+    /* Only one line in the test file, so APR will encounter EOF on the first
+     * call to gets, but we should get APR_SUCCESS on this call and
+     * APR_EOF on the next.
      */
-    CuAssertIntEquals(tc, APR_EOF, rv);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, TESTSTR, str);
-
+    rv = apr_file_gets(str, 256, f);
+    CuAssertIntEquals(tc, APR_EOF, rv);
+    CuAssertStrEquals(tc, "", str);
     apr_file_close(f);
 }
 
