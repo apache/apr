@@ -78,7 +78,7 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
     ap_pool_t *pool;
 
     if (cont) {
-        pool = ap_make_sub_pool(cont->pool);
+        pool = ap_make_sub_pool(cont->pool, cont->apr_abort);
     }
     else {
         pool = ap_init_alloc();;
@@ -89,8 +89,10 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
     }
     
     new = (ap_context_t *)ap_palloc(cont, sizeof(ap_context_t));
+
     new->pool = pool;
     new->prog_data = NULL;
+    new->apr_abort = NULL;
 
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
@@ -198,6 +200,7 @@ ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 /* This puts one thread in a Listen for signals mode */
 ap_status_t ap_initialize(void)
 {
+#if 0
     unsigned tid;
 
     if (_beginthreadex(NULL, 0, SignalHandling, NULL, 0, &tid) == 0) {
@@ -207,6 +210,6 @@ ap_status_t ap_initialize(void)
     while (thread_ready() != 1) {
         sleep(1);
     }
-
+#endif
     return APR_SUCCESS;
 }

@@ -80,11 +80,11 @@ EXPORTS
 	ap_clear_poll_sockets   @72
 ;	ap_setipaddr @73
 ;	ap_getipaddr @74
-	ap_create_signal   @75
-	ap_setup_signal   @76
-SignalHandling   @77
-	ap_send_signal    @78
-thread_ready   @79
+;	ap_create_signal   @75
+;	ap_setup_signal   @76
+;       SignalHandling   @77
+;	ap_send_signal    @78
+;       thread_ready   @79
 	ap_createprocattr_init   @80
 	ap_setprocattr_io   @81
 	ap_setprocattr_dir   @82
@@ -127,11 +127,11 @@ thread_ready   @79
 	ap_set_userdata   @119
 	ap_initialize   @120
 	ap_getopt    @121
-	opterr   @122 DATA
-	optind   @123 DATA
-	optopt   @124 DATA
-	optreset   @125 DATA
-	optarg   @126 DATA
+	ap_opterr   @122 DATA
+	ap_optind   @123 DATA
+	ap_optopt   @124 DATA
+	ap_optreset   @125 DATA
+	ap_optarg   @126 DATA
 	ap_make_time   @127
 	ap_current_time   @128
 	ap_explode_time   @129

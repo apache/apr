@@ -70,7 +70,8 @@ typedef struct datastruct {
 
 struct context_t {
     struct ap_pool_t *pool;
-    void *prog_data;
+    datastruct *prog_data;
+    int (*apr_abort)(int retcode);
 };
 
 #define WSAHighByte 2

@@ -204,10 +204,6 @@ SOURCE=.\network_io\win32\sendrecv.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\signal\win32\signal.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\threadproc\win32\signals.c
 # End Source File
 # Begin Source File
@@ -260,7 +256,7 @@ SOURCE=.\include\apr_file_io.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\inc\apr_fnmatch.h
+SOURCE=.\include\apr_fnmatch.h
 # End Source File
 # Begin Source File
 
