@@ -114,7 +114,10 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
     if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (APR_THREAD_FUNC *)(void *))func,
                                                data, 0, &temp)) == 0) {
         lasterror = apr_get_os_error();
-        return APR_EEXIST; /* MSVC++ doc doesn't mention any additional error info */
+        return APR_EEXIST; 
+        /* MSVC++ doc doesn't mention any additional error info 
+         * XXX: need to check the sources
+         */
     }
 
     if (attr && attr->detach) {
