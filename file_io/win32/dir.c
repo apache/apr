@@ -165,10 +165,10 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             eos[0] = '*';
             eos[1] = '\0';
             thedir->dirhand = FindFirstFileW(wdirname, thedir->w.entry);
+            eos[0] = '\0';
             if (thedir->dirhand == INVALID_HANDLE_VALUE) {
                 return apr_get_os_error();
             }
-            eos[0] = '\0';
         }
         else if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
             return apr_get_os_error();
@@ -188,12 +188,14 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     else
 #endif
     {
+        char *eop = strchr(thedir->dirname, '\0');
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
             /* '/' terminated, so add the '*' and pop it when we finish */
-            *strchr(thedir->dirname, '\0') = '*';
+            eop[0] = '*';
+            eop[1] = '\0';
             thedir->dirhand = FindFirstFileA(thedir->dirname, 
                                              thedir->n.entry);
-            *(strchr(thedir->dirname, '\0') - 1) = '\0';
+            eop[0] = '\0';
             if (thedir->dirhand == INVALID_HANDLE_VALUE) {
                 return apr_get_os_error();
             }
@@ -228,7 +230,9 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             if (!eos)
                 eos = wcschr(wdirname, '\0');
             wcscpy(eos, thedir->w.entry->cFileName);
-            return more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC, os_level);
+            rv = more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC, os_level);
+            eos[0] = '\0';
+            return rv;
         }
         else {
             /* Don't waste stack space on a second buffer, the one we set
