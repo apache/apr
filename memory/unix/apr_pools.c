@@ -572,6 +572,14 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     return mem;
 }
 
+/* Provide an implementation of apr_pcalloc for backward compatibility
+ * with code built before apr_pcalloc was a macro
+ */
+
+#ifdef apr_pcalloc
+#undef apr_pcalloc
+#endif
+
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 {
     void *mem;
