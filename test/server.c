@@ -56,10 +56,11 @@
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
+#include "apr_getopt.h"
 
 #define STRLEN 15
 
-int main(int argc, char *argv[])
+int main(int argc, char * const argv[])
 {
     apr_pool_t *context;
     apr_socket_t *sock;
@@ -69,8 +70,16 @@ int main(int argc, char *argv[])
     apr_pollfd_t *sdset;
     char datasend[STRLEN];
     char datarecv[STRLEN] = "Recv data test";
+    const char *bind_to_ipaddr = NULL;
     char *local_ipaddr, *remote_ipaddr;
     apr_port_t local_port, remote_port;
+    apr_sockaddr_t *localsa = NULL;
+    apr_status_t stat;
+    int family = APR_UNSPEC;
+    char buf[128];
+    apr_getopt_t *opt;
+    const char *optarg;
+    char optchar;
 
     fprintf(stdout, "Initializing.........");
     if (apr_initialize() != APR_SUCCESS) {
@@ -87,8 +96,43 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
+    if (apr_initopt(&opt, context, argc, argv)) {
+        fprintf(stderr, "failed to initialize opts\n");
+        exit(-1);
+    }
+
+    while ((stat = apr_getopt(opt, "i:", &optchar, &optarg)) == APR_SUCCESS) {
+        switch(optchar) {
+        case 'i':
+            bind_to_ipaddr = optarg;
+            break;
+        }
+    }
+    if (stat != APR_EOF) {
+        fprintf(stderr,
+                "usage: %s [-i local-interface-address]\n",
+                argv[0]);
+        exit(-1);
+    }
+
+    if (bind_to_ipaddr) {
+        /* First, parse/resolve ipaddr so we know what address family of
+         * socket we need.  We'll use the returned sockaddr later when
+         * we bind.
+         */
+        stat = apr_getaddrinfo(&localsa, bind_to_ipaddr, APR_UNSPEC, 8021, 0,
+                               context);
+        if (stat != APR_SUCCESS) {
+            fprintf(stderr,
+                    "Couldn't build the socket address correctly: %s\n",
+                    apr_strerror(stat, buf, sizeof buf));
+            exit(-1);
+        }
+        family = localsa->sa.sin.sin_family;
+    }
+
     fprintf(stdout, "\tServer:  Creating new socket.......");
-    if (apr_create_socket(&sock, APR_UNSPEC, SOCK_STREAM, context) != APR_SUCCESS) {
+    if (apr_create_socket(&sock, family, SOCK_STREAM, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }
@@ -110,18 +154,16 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tServer:  Setting port for socket.......");
-    if (apr_set_port(sock, APR_LOCAL, 8021) != APR_SUCCESS) {
-        apr_close_socket(sock);
-        fprintf(stderr, "Couldn't set the port correctly\n");
-        exit(-1);
+    if (!localsa) {
+        apr_set_port(sock, APR_LOCAL, 8021);
+        apr_get_sockaddr(&localsa, APR_LOCAL, sock);
     }
-    fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Binding socket to port.......");
-    if (apr_bind(sock) != APR_SUCCESS) {
+    if ((stat = apr_bind(sock, localsa)) != APR_SUCCESS) {
         apr_close_socket(sock);
-        fprintf(stderr, "Could not bind\n");
+        fprintf(stderr, "Could not bind: %s\n",
+                apr_strerror(stat, buf, sizeof buf));
         exit(-1);
     }
     fprintf(stdout, "OK\n");
