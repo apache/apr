@@ -9,11 +9,8 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR1=../../include
-INCDIR2=../../file_io/@OSDIR@
-INCDIR3=../../locks/@OSDIR@
-INCDIR4=../../threadproc/@OSDIR@
-INCLUDES=-I$(INCDIR1) -I$(INCDIR2) -I$(INCDIR3) -I$(INCDIR4) -I.
+INCDIR=../../include
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch/@OSDIR@
 
 #LIB=libmisc.a
 
@@ -52,40 +49,55 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-canonerr.o: canonerr.c misc.h ../../include/apr.h \
- ../../include/apr_private.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_pools.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_time.h ../../include/apr_getopt.h
-errorcodes.o: errorcodes.c misc.h ../../include/apr.h \
- ../../include/apr_private.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_pools.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_time.h ../../include/apr_getopt.h \
- ../../include/apr_strings.h ../../include/apr_lib.h \
- ../../include/apr_tables.h ../../include/apr_dso.h
-getopt.o: getopt.c misc.h ../../include/apr.h \
- ../../include/apr_private.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_pools.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_time.h ../../include/apr_getopt.h
-otherchild.o: otherchild.c ../../include/apr.h misc.h \
- ../../include/apr_private.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_pools.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_time.h ../../include/apr_getopt.h \
- ../../threadproc/unix/threadproc.h ../../file_io/unix/fileio.h \
- ../../include/apr_lib.h ../../include/apr_tables.h
-rand.o: rand.c misc.h ../../include/apr.h ../../include/apr_private.h \
- ../../include/apr_general.h ../../include/apr_errno.h \
- ../../include/apr_pools.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_time.h \
- ../../include/apr_getopt.h
-start.o: start.c misc.h ../../include/apr.h \
- ../../include/apr_private.h ../../include/apr_general.h \
- ../../include/apr_errno.h ../../include/apr_pools.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_time.h ../../include/apr_getopt.h \
- ../../locks/unix/locks.h ../../include/apr_lib.h \
- ../../include/apr_tables.h ../../include/apr_lock.h \
- ../../include/apr_strings.h
+canonerr.o: canonerr.c $(INCDIR)/arch/unix/misc.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_getopt.h
+errorcodes.o: errorcodes.c $(INCDIR)/arch/unix/misc.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_getopt.h $(INCDIR)/apr_strings.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_dso.h
+getopt.o: getopt.c $(INCDIR)/arch/unix/misc.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_getopt.h
+getuuid.o: getuuid.c $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_uuid.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_md5.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_xlate.h
+otherchild.o: otherchild.c $(INCDIR)/apr.h \
+ $(INCDIR)/arch/unix/misc.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_getopt.h $(INCDIR)/arch/unix/threadproc.h \
+ $(INCDIR)/arch/unix/fileio.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_lib.h
+rand.o: rand.c $(INCDIR)/arch/unix/misc.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_getopt.h
+start.o: start.c $(INCDIR)/arch/unix/misc.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_getopt.h \
+ $(INCDIR)/arch/unix/locks.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_tables.h $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_strings.h
+uuid.o: uuid.c $(INCDIR)/apr.h $(INCDIR)/apr_uuid.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_pools.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h
