@@ -87,15 +87,15 @@ Known values for OPTION are:
   --ldflags         print linker flags
   --libs            print additional libraries to link against
   --srcdir          print APR source directory
-  --apr-ld          print link switch(es) for linking to APR
-  --apr-libtool     print the libtool inputs for linking to APR
+  --link-ld         print link switch(es) for linking to APR
+  --link-libtool    print the libtool inputs for linking to APR
   --apr-la-file     print the path to the .la file, if available
   --help            print this help
 
 When linking with libtool, an application should do something like:
-  APR_LIBS="\`apr-config --apr-libtool --libs\`"
+  APR_LIBS="\`apr-config --link-libtool --libs\`"
 or when linking directly:
-  APR_LIBS="\`apr-config --apr-ld --libs\`"
+  APR_LIBS="\`apr-config --link-ld --libs\`"
 
 An application should use the results of --cflags, --cppflags, --includes,
 and --ldflags in their build process.
@@ -162,7 +162,7 @@ while test $# -gt 0; do
     --srcdir)
     echo $APR_SOURCE_DIR
     ;;
-    --apr-ld)
+    --link-ld)
     if test "$location" = "installed"; then
         ### avoid using -L if libdir is a "standard" location like /usr/lib
         echo "-L$libdir -lapr"
@@ -170,7 +170,7 @@ while test $# -gt 0; do
         echo "-L$thisdir -lapr"
     fi
     ;;
-    --apr-libtool)
+    --link-libtool)
     if test -f "$LA_FILE"; then
         echo $LA_FILE
     elif test "$location" = "installed"; then
