@@ -52,34 +52,35 @@
  * <http://www.apache.org/>.
  */
 
+#include "test_apr.h"
 #include "apr_thread_proc.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #if APR_HAS_OTHER_CHILD
+
+static char reasonstr[256];
+
 static void ocmaint(int reason, void *data, int status)
 {
-    fprintf(stdout,"[CHILD]  Maintenance routine called....");
-    fflush(stdout);
     switch (reason) {
     case APR_OC_REASON_DEATH:
-        fprintf(stdout, "Died correctly\n");
+        apr_cpystrn(reasonstr, "APR_OC_REASON_DEATH", 
+                    strlen("APR_OC_REASON_DEATH") + 1);
         break;
     case APR_OC_REASON_LOST:
-        fprintf(stdout, "APR_OC_REASON_LOST\n");
+        apr_cpystrn(reasonstr, "APR_OC_REASON_LOST", 
+                    strlen("APR_OC_REASON_LOST") + 1);
+        break;
     case APR_OC_REASON_UNWRITABLE:
-        fprintf(stdout, "APR_OC_REASON_UNWRITEABLE\n");
+        apr_cpystrn(reasonstr, "APR_OC_REASON_UNWRITEABLE", 
+                    strlen("APR_OC_REASON_UNWRITEABLE") + 1);
+        break;
     case APR_OC_REASON_RESTART:
-        fprintf(stdout, "APR_OC_REASON_RESTART\n");
-        fprintf(stdout, "OC maintentance called for reason other than death\n");
+        apr_cpystrn(reasonstr, "APR_OC_REASON_RESTART", 
+                    strlen("APR_OC_REASON_RESTART") + 1);
         break;
     }
 }
@@ -89,80 +90,67 @@ static void ocmaint(int reason, void *data, int status)
 #define SIGKILL 1
 #endif
 
-int main(int argc, char *argv[])
+/* It would be great if we could stress this stuff more, and make the test
+ * more granular.
+ */
+static void test_child_kill(CuTest *tc)
 {
-#if APR_HAS_OTHER_CHILD
-    apr_status_t rv;
-    apr_pool_t *context;
+    apr_file_t *std = NULL;
     apr_proc_t newproc;
     apr_procattr_t *procattr = NULL;
-    apr_file_t *std = NULL;
     const char *args[3];
+    apr_status_t rv;
 
-    if (argc > 1) {
-        while (1);
-    }
-
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't initialize.");
-        exit(-1);
-    }
-    atexit(apr_terminate);
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Couldn't allocate context.");
-        exit(-1);
-    }
-    
-    args[0] = apr_pstrdup(context, "occhild");
-    args[1] = apr_pstrdup(context, "-X");
+    args[0] = apr_pstrdup(p, "occhild");
+    args[1] = apr_pstrdup(p, "-X");
     args[2] = NULL;
 
-    fprintf(stdout, "[PARENT] Creating procattr.............");
-    fflush(stdout);
-    if (apr_procattr_create(&procattr, context) != APR_SUCCESS) {
-        fprintf(stderr, "Could not create attr\n");
-        exit(-1);;
-    }
-    else {
-        apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_NO_PIPE, APR_NO_PIPE);
-    }
-    fprintf(stdout, "OK\n");
+    rv = apr_procattr_create(&procattr, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    fprintf(stdout, "[PARENT] Starting other child..........");
-    fflush(stdout);
-    if (apr_proc_create(&newproc, "./occhild", args, NULL, procattr, context) 
-                          != APR_SUCCESS) {
-        fprintf(stderr, "error starting other child\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
+    rv = apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_NO_PIPE, 
+                             APR_NO_PIPE);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
+    rv = apr_proc_create(&newproc, "./occhild", args, NULL, procattr, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, newproc.in);
+    CuAssertPtrEquals(tc, NULL, newproc.out);
+    CuAssertPtrEquals(tc, NULL, newproc.err);
 
     std = newproc.in;
 
-    apr_proc_other_child_register(&newproc, ocmaint, NULL, std, context);
+    apr_proc_other_child_register(&newproc, ocmaint, NULL, std, p);
 
-    fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
-    fflush(stdout);
     apr_sleep(apr_time_from_sec(1));
-    if ((rv = apr_proc_kill(&newproc, SIGKILL)) != APR_SUCCESS) {
-        char msgbuf[120];
-
-        fprintf(stderr,"couldn't send the signal: %d/%s!\n",
-                rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
-        exit(-1);
-    }
-    fprintf(stdout,"OK\n");
+    rv = apr_proc_kill(&newproc, SIGKILL);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
     
     /* allow time for things to settle... */
     apr_sleep(apr_time_from_sec(3));
     
-    fprintf(stdout, "[PARENT] Checking on children..........\n");
     apr_proc_other_child_check();
-#else
-    fprintf(stdout, "OC failed!\n");
-    fprintf(stdout, "Other_child is not supported on this platform\n");
+    CuAssertStrEquals(tc, "APR_OC_REASON_DEATH", reasonstr);
+}    
+
+#if !APR_HAS_OTHER_CHILD
+static void oc_not_impl(CuTest *tc)
+{
+    CuNotImpl(tc, "Other child logic not implemented on this platform");
+}
 #endif
 
-    return 0;
-}    
+CuSuite *testoc(void)
+{
+    CuSuite *suite = CuSuiteNew("Test Time");
+
+#if !APR_HAS_OTHER_CHILD
+    SUITE_ADD_TEST(suite, oc_not_impl);
+#else
+
+    SUITE_ADD_TEST(suite, test_child_kill); 
+
+#endif
+    return suite;
+}
 
