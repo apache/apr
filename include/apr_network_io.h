@@ -61,6 +61,7 @@
 #endif
 
 #include "apr_general.h"
+#include "apr_file_io.h"
 #include "apr_errno.h"
 #if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -103,6 +104,17 @@ typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE,
 
 typedef struct socket_t     ap_socket_t;
 typedef struct pollfd_t    ap_pollfd_t;
+typedef struct hdtr_t		ap_hdtr_t;
+
+#ifdef APR_HAS_SENDFILE
+/* A structure to encapsulate headers and trailers for ap_sendfile */
+struct hdtr_t {
+    struct iovec* headers;
+    int numheaders;
+    struct iovec* trailers;
+    int numtrailers;
+};
+#endif
 
 /* function definitions */
 
@@ -123,6 +135,10 @@ ap_status_t ap_set_socketdata(ap_socket_t *, void *, char *,
 
 ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *);
 ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *nbytes);
+#ifdef HAVE_SENDFILE
+ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file, ap_hdtr_t *hdtr, ap_off_t *offset, 
+                         ap_size_t *len, ap_int32_t flags);
+#endif
 ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *);
 
 ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t, ap_int32_t);

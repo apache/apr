@@ -18,6 +18,7 @@
 
 /*  APR Feature Macros */
 @threads@
+@sendfile@
 @mmap@
 
 /* Typedefs that APR needs. */
