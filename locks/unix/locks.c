@@ -76,7 +76,9 @@
  * NOTE:  APR_CROSS_PROCESS may lock both processes and threads, but it is
  *        only garaunteed to lock processes.
  */
-ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type, char *fname, struct lock_t **lock)
+ap_status_t ap_create_lock(ap_context_t *cont, ap_locktype_e type, 
+                           ap_lockscope_e scope, char *fname, 
+                           struct lock_t **lock)
 {
     struct lock_t *new;
     ap_status_t stat;
@@ -196,7 +198,8 @@ ap_status_t ap_child_init_lock(ap_context_t *cont, char *fname, struct lock_t **
  * ap_status_t ap_get_lockdata(ap_lock_t *, char *key, void *)
  *    Return the context associated with the current lock.
  * arg 1) The currently open lock.
- * arg 2) The user data associated with the lock.
+ * arg 2) The key to use when retreiving data associated with this lock
+ * arg 3) The user data associated with the lock.
  */
 ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
@@ -215,6 +218,8 @@ ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
  *    Return the context associated with the current lock.
  * arg 1) The currently open lock.
  * arg 2) The user data to associate with the lock.
+ * arg 3) The key to use when associating data with this lock
+ * arg 4) The cleanup to use when the lock is destroyed.
  */
 ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
