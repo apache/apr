@@ -58,38 +58,39 @@
 #include <stdlib.h>
 #include "test_apr.h"
 
-#if !APR_HAS_RANDOM
-#error Random support is not available.  Go punt.
-#endif
-
-int main(void)
+static void rand_exists(CuTest *tc)
 {
+#if !APR_HAS_RANDOM
+    CuNotImpl(tc, "apr_generate_random_bytes");
+#else
     apr_pool_t *p;
     apr_status_t rv;
     unsigned char c[2048];
     int i;
 
-    apr_initialize();
-
-    printf("Testing apr_generate_random_bytes()\n===================\n\n");
-
-    if (apr_pool_create(&p, NULL) != APR_SUCCESS) {
-        exit(-1);
-    }
-
+    /* There must be a better way to test random-ness, but I don't know
+     * what it is right now.
+     */
     for (i = 1; i <= 8; i++) {
-        printf("%-5d %-55s", i * 255, "bytes");
         rv = apr_generate_random_bytes(c, i * 255);
-        if (rv != APR_SUCCESS) {
-            char msgbuf[120];
-
-            printf("Failed: %d %s\n", rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
-        }
-        else {
-            printf("OK\n");
-        }
+        CuAssertIntEquals(tc, APR_SUCCESS, rv);
     }
-
-    return 0;
+#endif
 }    
+
+CuSuite *testrand(void)
+{
+    CuSuite *suite = CuSuiteNew("Test Random");
+
+    SUITE_ADD_TEST(suite, rand_exists);
+
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return testrand();
+}
+#endif
 

@@ -28,7 +28,6 @@ PROGRAMS = \
 	occhild@EXEEXT@ \
 	testuser@EXEEXT@ \
 	testsockets@EXEEXT@ \
-	testrand@EXEEXT@ \
 	testdup@EXEEXT@ \
 	testatomic@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
@@ -57,9 +56,6 @@ check: $(PROGRAMS) $(NONPORTABLE)
 			break; \
 		fi \
 	done
-
-testfile@EXEEXT@: testfile.lo $(LOCAL_LIBS)
-	$(LINK) testfile.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testdir@EXEEXT@: testdir.lo $(LOCAL_LIBS)
 	$(LINK) testdir.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -155,14 +151,11 @@ testatomic@EXEEXT@: testatomic.lo $(LOCAL_LIBS)
 testdup@EXEEXT@: testdup.lo $(LOCAL_LIBS)
 	$(LINK) testdup.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testrand@EXEEXT@: testrand.lo $(LOCAL_LIBS)
-	$(LINK) testrand.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo testfmt.lo testfile.lo testdir.lo testfileinfo.lo CuTest.lo $(LOCAL_LIBS)
-	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo testfmt.lo testfile.lo testdir.lo testfileinfo.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo CuTest.lo $(LOCAL_LIBS)
+	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE

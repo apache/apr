@@ -78,6 +78,7 @@ static testfunc *tests[NUM_TESTS] = {
     testfile,
     testdir,
     testfileinfo,
+    testrand,
     NULL
 };
 

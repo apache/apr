@@ -79,6 +79,7 @@ CuSuite *testfmt(void);
 CuSuite *testfile(void);
 CuSuite *testdir(void);
 CuSuite *testfileinfo(void);
+CuSuite *testrand(void);
 
 
 
