@@ -93,6 +93,12 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
             } while (rv == -1 && errno == EINTR);
         }
     }
+
+    if (rv < 0) {
+        *len = 0;
+        return errno;
+    }
+
     (*len) = rv;
     return APR_SUCCESS;
 }
@@ -130,6 +136,12 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
             } while (rv == -1 && errno == EINTR);
         }
     }
+
+    if (rv < 0) {
+        *len = 0;
+        return errno;
+    }
+
     (*len) = rv;
     return APR_SUCCESS;
 }
