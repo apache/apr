@@ -205,6 +205,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
     pollresult = alloca(sizeof(int) * pollset->num_total);
     memcpy(pollresult, pollset->pollset, sizeof(int) * pollset->num_total);
+    (*num) = 0;
 
     if (timeout > 0) {
         timeout /= 1000;
@@ -223,7 +224,6 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     read_pos = 0;
     write_pos = pollset->num_read;
     except_pos = pollset->num_read + pollset->num_write;
-    (*num) = 0;
 
     for (i = 0; i < pollset->nelts; i++) {
         int rtnevents = 0;
