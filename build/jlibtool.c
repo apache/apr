@@ -53,6 +53,9 @@
  */
 
 #include <stdio.h>
+#if defined(_OSD_POSIX)
+#include <stdarg.h>
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -120,6 +123,18 @@
 #  define PIC_FLAG "-fPIC"
 #  define RPATH "-rpath"
 #  define DYNAMIC_LINK_OPTS "-shared"
+#  define LINKER_FLAG_PREFIX "-Wl,"
+#endif
+
+#if defined(_OSD_POSIX)
+#  define SHELL_CMD  "/usr/bin/sh"
+#  define DYNAMIC_LIB_EXT "so"
+#  define MODULE_LIB_EXT  "so"
+#  define STATIC_LIB_EXT "a"
+#  define OBJECT_EXT     "o"
+#  define LIBRARIAN      "ar"
+#  define LIBRARIAN_OPTS "cr"
+#  define DYNAMIC_LINK_OPTS "-G"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #endif
 
@@ -216,6 +231,44 @@ typedef struct {
 
     const char *version_info;
 } command_t;
+
+#if defined(_OSD_POSIX)
+/* Write at most n characters to the buffer in str, return the
+ * number of chars written or -1 if the buffer would have been
+ * overflowed.
+ *
+ * This is portable to any POSIX-compliant system has /dev/null
+ */
+static FILE *f=NULL;
+static int vsnprintf( char *str, size_t n, const char *fmt, va_list ap )
+{
+       int res;
+
+       if (f == NULL)
+               f = fopen("/dev/null","w");
+       if (f == NULL)
+               return -1;
+
+       setvbuf( f, str, _IOFBF, n );
+
+       res = vfprintf( f, fmt, ap );
+
+       if ( res > 0 && res < n ) {
+               res = vsprintf( str, fmt, ap );
+       }
+       return res;
+}
+static int snprintf( char *str, size_t n, const char *fmt, ... )
+{
+        va_list ap;
+        int res;
+ 
+        va_start( ap, fmt );
+        res = vsnprintf( str, n, fmt, ap );
+        va_end( ap );
+        return res;
+}
+#endif
 
 void init_count_chars(count_chars *cc)
 {
@@ -859,6 +912,9 @@ int parse_output_file_name(char *arg, command_t *cmd_data)
     if (!ext) {
         cmd_data->basename = arg;
         cmd_data->output = otProgram;
+#if defined(_OSD_POSIX)
+        cmd_data->options.pic_mode = AVOID;
+#endif
         newarg = (char *)malloc(strlen(arg) + 5);
         strcpy(newarg, arg);
 #ifdef EXE_EXT
