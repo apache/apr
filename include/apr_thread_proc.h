@@ -584,7 +584,7 @@ APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int sig);
 APR_DECLARE(void) apr_pool_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
                                       enum kill_conditions how);
 
-#if APR_HAS_THREADS
+#if APR_HAS_THREADS && !defined(OS2)
 /**
  * Setup the process for a single thread to be used for all signal handling.
  * @warn This must be called before any threads are created
