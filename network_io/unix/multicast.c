@@ -19,7 +19,7 @@
 #include "apr_portable.h"
 #include "apr_arch_inherit.h"
 
-#if HAVE_GETIFADDRS
+#ifdef HAVE_GETIFADDRS
 #include <net/if.h>
 #include <ifaddrs.h>
 #endif
@@ -59,6 +59,7 @@ static void fill_mip_v4(struct ip_mreq *mip, apr_sockaddr_t *mcast,
 static unsigned int find_if_index(const apr_sockaddr_t *iface)
 {
     unsigned int index = 0;
+#ifdef HAVE_GETIFADDRS
     struct ifaddrs *ifp, *ifs;
 
     /**
@@ -69,7 +70,6 @@ static unsigned int find_if_index(const apr_sockaddr_t *iface)
      *       getifaddrs. The license is acceptable, but, It is a fairly large 
      *       chunk of code.
      */
-#if HAVE_GETIFADDRS
     if (getifaddrs(&ifs) != 0) {
         return 0;
     }
