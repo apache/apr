@@ -354,9 +354,15 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     if (is_fnchar(*testpath) && testpath[1] == ':') 
     {
         apr_status_t rv;
-        /* Validate that d:\ drive exists, test must be rooted
+        /* Validate that D:\ drive exists, test must be rooted
+         * Note that posix/win32 insists a drive letter is upper case,
+         * so who are we to argue with a 'feature' we might exploit.
+         * It is a safe fold, since only A-Z is legal, and has no
+         * side effects of legal mis-mapped non-us-ascii codes.
          */
-        newpath = apr_pstrndup(p, testpath, 3);
+        newpath = apr_palloc(p, 3);
+        newpath[0] = toupper(testpath[0]);
+        newpath[1] = ':';
         newpath[2] = '\\';
         newpath[3] = '\0';
         rv = apr_filepath_root_test(newpath, p);
@@ -819,7 +825,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
          * we better be sure that /foo wasn't replaced with /foobar!
          */
         if (basepath[baselen - 1] != '/' && basepath[baselen - 1] != '\\'
-             && path[baselen] && path[baselen] != '/' && path[baselen] != '\\')
+                && path[rootlen + baselen] && path[rootlen + baselen] != '/' 
+                                           && path[rootlen + baselen] != '\\')
             return APR_EABOVEROOT;
     }
 
