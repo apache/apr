@@ -88,6 +88,7 @@ Usage: apr-config [OPTION]
 Known values for OPTION are:
   --prefix[=DIR]    change prefix to DIR
   --bindir          print location where binaries are installed
+  --includedir      print location where headers are installed
   --cflags          print C compiler flags
   --cppflags        print cpp flags
   --includes        print include information
@@ -165,6 +166,18 @@ while test $# -gt 0; do
     ;;
     --bindir)
     echo $bindir
+    exit 0
+    ;;
+    --includedir)
+    if test "$location" = "installed"; then
+        flags="$includedir"
+    elif test "$location" = "source"; then
+        flags="$APR_SOURCE_DIR/include"
+    else
+        # this is for VPATH builds
+        flags="$thisdir/include $APR_SOURCE_DIR/include"
+    fi
+    echo $flags
     exit 0
     ;;
     --cflags)
