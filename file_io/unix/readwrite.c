@@ -119,7 +119,6 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
-    struct stat info;
 
     if (thefile->filedes < 0) {
         *nbytes = -1;
@@ -133,14 +132,7 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         rv = write(thefile->filedes, buf, *nbytes);
     }
 
-    if (strcmp(thefile->fname, "PIPE")) {
-        if (stat(thefile->fname, &info) == 0) {
-            thefile->size = info.st_size;
-            thefile->atime = info.st_atime;
-            thefile->mtime = info.st_mtime;
-            thefile->ctime = info.st_ctime;
-        }
-    }
+    thefile->stated = 0;
     *nbytes = rv;
     return APR_SUCCESS;
 }
@@ -166,6 +158,7 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssiz
     }
     else {
         *iocnt = bytes;
+        thefile->stated = 0;
         return APR_SUCCESS;
     }
 }
@@ -181,6 +174,7 @@ ap_status_t ap_putc(ap_file_t *thefile, char ch)
 {
     if (thefile->buffered) {
         if (fputc(ch, thefile->filehand) == ch) {
+            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;
@@ -188,6 +182,7 @@ ap_status_t ap_putc(ap_file_t *thefile, char ch)
     if (write(thefile->filedes, &ch, 1) != 1) {
         return errno;
     }
+    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
@@ -203,11 +198,13 @@ ap_status_t ap_ungetc(ap_file_t *thefile, char ch)
     
     if (thefile->buffered) {
         if (ungetc(ch, thefile->filehand) == ch) {
+            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;
     }
     /* Not sure what to do in this case.  For now, return SUCCESS. */
+    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
@@ -251,20 +248,21 @@ ap_status_t ap_puts(ap_file_t *thefile, char *str)
 {
     ssize_t rv;
     int i = 0;    
+    int len;
 
     if (thefile->buffered) {
         if (fputs(str, thefile->filehand)) {
+            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;
     }
-    while (str[i] != '\0') {
-        rv = write(thefile->filedes, &str[i], 1); 
-        if (rv != 1) {
-            return errno;
-        }
-        i++;
+    len = strlen(str);
+    rv = write(thefile->filedes, str, len); 
+    if (rv != len) {
+        return errno;
     }
+    thefile->stated = 0;
     return APR_SUCCESS; 
 }
 
@@ -277,6 +275,7 @@ ap_status_t ap_flush(ap_file_t *thefile)
 {
     if (thefile->buffered) {
         if (!fflush(thefile->filehand)) {
+            thefile->stated = 0;
             return APR_SUCCESS;
         }
         return errno;
