@@ -69,15 +69,15 @@
 #include <sys/socket.h> /* for fd_set definition! */
 #endif
 
-static ap_other_child_rec_t *other_children = NULL;
+static apr_other_child_rec_t *other_children = NULL;
 
-APR_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
+APR_EXPORT(void) apr_register_other_child(apr_proc_t *pid,
                      void (*maintenance) (int reason, void *, int status),
-                     void *data, ap_file_t *write_fd, ap_pool_t *p)
+                     void *data, apr_file_t *write_fd, apr_pool_t *p)
 {
-    ap_other_child_rec_t *ocr;
+    apr_other_child_rec_t *ocr;
 
-    ocr = ap_palloc(p, sizeof(*ocr));
+    ocr = apr_palloc(p, sizeof(*ocr));
     ocr->id = pid->pid;
     ocr->maintenance = maintenance;
     ocr->data = data;
@@ -91,9 +91,9 @@ APR_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
     other_children = ocr;
 }
 
-APR_EXPORT(void) ap_unregister_other_child(void *data)
+APR_EXPORT(void) apr_unregister_other_child(void *data)
 {
-    ap_other_child_rec_t **pocr, *nocr;
+    apr_other_child_rec_t **pocr, *nocr;
 
     for (pocr = &other_children; *pocr; pocr = &(*pocr)->next) {
         if ((*pocr)->data == data) {
@@ -108,11 +108,11 @@ APR_EXPORT(void) ap_unregister_other_child(void *data)
 
 /* test to ensure that the write_fds are all still writable, otherwise
  * invoke the maintenance functions as appropriate */
-void ap_probe_writable_fds(void)
+void apr_probe_writable_fds(void)
 {
     fd_set writable_fds;
     int fd_max;
-    ap_other_child_rec_t *ocr, *nocr; 
+    apr_other_child_rec_t *ocr, *nocr; 
     struct timeval tv; 
     int rc;
 
@@ -156,9 +156,9 @@ void ap_probe_writable_fds(void)
     }
 }
 
-APR_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid, int status)
+APR_EXPORT(apr_status_t) apr_reap_other_child(apr_proc_t *pid, int status)
 {
-    ap_other_child_rec_t *ocr, *nocr;
+    apr_other_child_rec_t *ocr, *nocr;
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
@@ -172,9 +172,9 @@ APR_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid, int status)
     return APR_CHILD_NOTDONE;
 }
 
-APR_EXPORT(void) ap_check_other_child(void)
+APR_EXPORT(void) apr_check_other_child(void)
 {
-    ap_other_child_rec_t *ocr, *nocr;
+    apr_other_child_rec_t *ocr, *nocr;
     pid_t waitret; 
     int status;
 

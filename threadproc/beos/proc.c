@@ -60,10 +60,10 @@ struct send_pipe {
 	int err;
 };
 
-ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
+apr_status_t apr_createprocattr_init(apr_procattr_t **new, apr_pool_t *cont)
 {
-    (*new) = (ap_procattr_t *)ap_palloc(cont, 
-              sizeof(ap_procattr_t));
+    (*new) = (apr_procattr_t *)apr_palloc(cont, 
+              sizeof(apr_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -81,12 +81,12 @@ ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
-                                 ap_int32_t out, ap_int32_t err)
+apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in, 
+                                 apr_int32_t out, apr_int32_t err)
 {
-    ap_status_t status;
+    apr_status_t status;
     if (in != 0) {
-        if ((status = ap_create_pipe(&attr->child_in, &attr->parent_in, 
+        if ((status = apr_create_pipe(&attr->child_in, &attr->parent_in, 
                                    attr->cntxt)) != APR_SUCCESS) {
             return status;
         }
@@ -94,18 +94,18 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
         case APR_FULL_BLOCK:
             break;
         case APR_PARENT_BLOCK:
-            ap_set_pipe_timeout(attr->child_in, 0);
+            apr_set_pipe_timeout(attr->child_in, 0);
             break;
         case APR_CHILD_BLOCK:
-            ap_set_pipe_timeout(attr->parent_in, 0);
+            apr_set_pipe_timeout(attr->parent_in, 0);
             break;
         default:
-            ap_set_pipe_timeout(attr->child_in, 0);
-            ap_set_pipe_timeout(attr->parent_in, 0);
+            apr_set_pipe_timeout(attr->child_in, 0);
+            apr_set_pipe_timeout(attr->parent_in, 0);
         }
     } 
     if (out) {
-        if ((status = ap_create_pipe(&attr->parent_out, &attr->child_out, 
+        if ((status = apr_create_pipe(&attr->parent_out, &attr->child_out, 
                                    attr->cntxt)) != APR_SUCCESS) {
             return status;
         }
@@ -113,18 +113,18 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
         case APR_FULL_BLOCK:
             break;
         case APR_PARENT_BLOCK:
-            ap_set_pipe_timeout(attr->child_out, 0);
+            apr_set_pipe_timeout(attr->child_out, 0);
             break;
         case APR_CHILD_BLOCK:
-            ap_set_pipe_timeout(attr->parent_out, 0);
+            apr_set_pipe_timeout(attr->parent_out, 0);
             break;
         default:
-            ap_set_pipe_timeout(attr->child_out, 0);
-            ap_set_pipe_timeout(attr->parent_out, 0);
+            apr_set_pipe_timeout(attr->child_out, 0);
+            apr_set_pipe_timeout(attr->parent_out, 0);
         }
     } 
     if (err) {
-        if ((status = ap_create_pipe(&attr->parent_err, &attr->child_err, 
+        if ((status = apr_create_pipe(&attr->parent_err, &attr->child_err, 
                                    attr->cntxt)) != APR_SUCCESS) {
             return status;
         }
@@ -132,20 +132,20 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
         case APR_FULL_BLOCK:
             break;
         case APR_PARENT_BLOCK:
-            ap_set_pipe_timeout(attr->child_err, 0);
+            apr_set_pipe_timeout(attr->child_err, 0);
             break;
         case APR_CHILD_BLOCK:
-            ap_set_pipe_timeout(attr->parent_err, 0);
+            apr_set_pipe_timeout(attr->parent_err, 0);
             break;
         default:
-            ap_set_pipe_timeout(attr->child_err, 0);
-            ap_set_pipe_timeout(attr->parent_err, 0);
+            apr_set_pipe_timeout(attr->child_err, 0);
+            apr_set_pipe_timeout(attr->parent_err, 0);
         }
     } 
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, 
+apr_status_t apr_setprocattr_dir(apr_procattr_t *attr, 
                                  const char *dir) 
 {
     char * cwd;
@@ -154,10 +154,10 @@ ap_status_t ap_setprocattr_dir(ap_procattr_t *attr,
         getcwd(cwd, PATH_MAX);
         strncat(cwd,"/\0",2);
         strcat(cwd,dir);
-        attr->currdir = (char *)ap_pstrdup(attr->cntxt, cwd);
+        attr->currdir = (char *)apr_pstrdup(attr->cntxt, cwd);
         free(cwd);
     } else {
-        attr->currdir = (char *)ap_pstrdup(attr->cntxt, dir);
+        attr->currdir = (char *)apr_pstrdup(attr->cntxt, dir);
     }
     if (attr->currdir) {
         return APR_SUCCESS;
@@ -165,20 +165,20 @@ ap_status_t ap_setprocattr_dir(ap_procattr_t *attr,
     return APR_ENOMEM;
 }
 
-ap_status_t ap_setprocattr_cmdtype(ap_procattr_t *attr,
-                                     ap_cmdtype_e cmd) 
+apr_status_t apr_setprocattr_cmdtype(apr_procattr_t *attr,
+                                     apr_cmdtype_e cmd) 
 {
     attr->cmdtype = cmd;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach) 
+apr_status_t apr_setprocattr_detach(apr_procattr_t *attr, apr_int32_t detach) 
 {
     attr->detached = detach;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont)
+apr_status_t apr_fork(apr_proc_t *proc, apr_pool_t *cont)
 {
     int pid;
     
@@ -200,9 +200,9 @@ ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont)
 }
 
 
-ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
+apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
                               char *const args[], char **env, 
-                              ap_procattr_t *attr, ap_pool_t *cont)
+                              apr_procattr_t *attr, apr_pool_t *cont)
 {
     int i=0,nargs=0;
     char **newargs = NULL;
@@ -210,7 +210,7 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     struct send_pipe *sp;        
 	char * dir = NULL;
 	    
-	sp = (struct send_pipe *)ap_palloc(cont, sizeof(struct send_pipe));
+	sp = (struct send_pipe *)apr_palloc(cont, sizeof(struct send_pipe));
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -257,13 +257,13 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     resume_thread(newproc);
 
     if (attr->child_in) {
-        ap_close(attr->child_in);
+        apr_close(attr->child_in);
     }
     if (attr->child_out) {
-        ap_close(attr->child_out);
+        apr_close(attr->child_out);
     }
     if (attr->child_err) {
-        ap_close(attr->child_err);
+        apr_close(attr->child_err);
     }
 
     send_data(newproc, 0, (void*)sp, sizeof(struct send_pipe));
@@ -277,8 +277,8 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status,
-                              ap_wait_how_e waithow, ap_pool_t *p)
+apr_status_t apr_wait_all_procs(apr_proc_t *proc, ap_wait_t *status,
+                              apr_wait_how_e waithow, apr_pool_t *p)
 {
     int waitpid_options = WUNTRACED;
 
@@ -295,8 +295,8 @@ ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status,
     return errno;
 } 
 
-ap_status_t ap_wait_proc(ap_proc_t *proc, 
-                           ap_wait_how_e wait)
+apr_status_t apr_wait_proc(apr_proc_t *proc, 
+                           apr_wait_how_e wait)
 {
     status_t exitval;
     thread_info tinfo;
@@ -320,47 +320,47 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
     return APR_CHILD_NOTDONE;
 } 
 
-ap_status_t ap_setprocattr_childin(ap_procattr_t *attr, ap_file_t *child_in,
-                                   ap_file_t *parent_in)
+apr_status_t apr_setprocattr_childin(apr_procattr_t *attr, apr_file_t *child_in,
+                                   apr_file_t *parent_in)
 {
     if (attr->child_in == NULL && attr->parent_in == NULL)
-        ap_create_pipe(&attr->child_in, &attr->parent_in, attr->cntxt);
+        apr_create_pipe(&attr->child_in, &attr->parent_in, attr->cntxt);
 
     if (child_in != NULL)
-        ap_dupfile(&attr->child_in, child_in, attr->cntxt);
+        apr_dupfile(&attr->child_in, child_in, attr->cntxt);
 
     if (parent_in != NULL)
-        ap_dupfile(&attr->parent_in, parent_in, attr->cntxt);
+        apr_dupfile(&attr->parent_in, parent_in, attr->cntxt);
 
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, ap_file_t *child_out,
-                                    ap_file_t *parent_out)
+apr_status_t apr_setprocattr_childout(apr_procattr_t *attr, apr_file_t *child_out,
+                                    apr_file_t *parent_out)
 {
     if (attr->child_out == NULL && attr->parent_out == NULL)
-        ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
+        apr_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
 
     if (child_out != NULL)
-        ap_dupfile(&attr->child_out, child_out, attr->cntxt);
+        apr_dupfile(&attr->child_out, child_out, attr->cntxt);
 
     if (parent_out != NULL)
-        ap_dupfile(&attr->parent_out, parent_out, attr->cntxt);
+        apr_dupfile(&attr->parent_out, parent_out, attr->cntxt);
 
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err,
-                                   ap_file_t *parent_err)
+apr_status_t apr_setprocattr_childerr(apr_procattr_t *attr, apr_file_t *child_err,
+                                   apr_file_t *parent_err)
 {
     if (attr->child_err == NULL && attr->parent_err == NULL)
-        ap_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
+        apr_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
 
     if (child_err != NULL)
-        ap_dupfile(&attr->child_err, child_err, attr->cntxt);
+        apr_dupfile(&attr->child_err, child_err, attr->cntxt);
 
     if (parent_err != NULL)
-        ap_dupfile(&attr->parent_err, parent_err, attr->cntxt);
+        apr_dupfile(&attr->parent_err, parent_err, attr->cntxt);
 
     return APR_SUCCESS;
 }

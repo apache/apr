@@ -63,7 +63,7 @@
 #include <sys/uio.h>
 #include "apr_buf.h"
 
-APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
+APR_EXPORT(apr_status_t) ap_bucket_destroy(ap_bucket *e)
 {
     if (e->free) {
         e->free(e);
@@ -72,7 +72,7 @@ APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
     return APR_SUCCESS;
 }
 
-static ap_status_t ap_bucket_list_destroy(ap_bucket *e)
+static apr_status_t ap_bucket_list_destroy(ap_bucket *e)
 {
     ap_bucket *cur = e;
     ap_bucket *next;
@@ -85,9 +85,9 @@ static ap_status_t ap_bucket_list_destroy(ap_bucket *e)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_status_t) ap_brigade_destroy(void *data)
+APR_EXPORT(apr_status_t) ap_brigade_destroy(void *data)
 {
-    ap_bucket_brigade *b = data;
+    apr_bucket_brigade *b = data;
 
     ap_bucket_list_destroy(b->head);
     /* The brigade itself is allocated out of a pool, so we don't actually 
@@ -97,20 +97,20 @@ APR_EXPORT(ap_status_t) ap_brigade_destroy(void *data)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_bucket_brigade *) ap_brigade_create(ap_pool_t *p)
+APR_EXPORT(apr_bucket_brigade *) ap_brigade_create(apr_pool_t *p)
 {
-    ap_bucket_brigade *b;
+    apr_bucket_brigade *b;
 
-    b = ap_palloc(p, sizeof(*b));
+    b = apr_palloc(p, sizeof(*b));
     b->p = p;
     b->head = b->tail = NULL;
 
-    ap_register_cleanup(b->p, b, ap_brigade_destroy, 
+    apr_register_cleanup(b->p, b, ap_brigade_destroy, 
                         ap_brigade_destroy);
     return b;
 }
 
-APR_EXPORT(void) ap_brigade_append_buckets(ap_bucket_brigade *b, 
+APR_EXPORT(void) ap_brigade_append_buckets(apr_bucket_brigade *b, 
                                                   ap_bucket *e)
 {
     ap_bucket *cur = e;
@@ -128,7 +128,7 @@ APR_EXPORT(void) ap_brigade_append_buckets(ap_bucket_brigade *b,
     }
 }
 
-APR_EXPORT(int) ap_brigade_to_iovec(ap_bucket_brigade *b, 
+APR_EXPORT(int) ap_brigade_to_iovec(apr_bucket_brigade *b, 
                                            struct iovec *vec, int nvec)
 {
     ap_bucket *e;
@@ -146,8 +146,8 @@ APR_EXPORT(int) ap_brigade_to_iovec(ap_bucket_brigade *b,
     return vec - orig;
 }
 
-APR_EXPORT(void) ap_brigade_catenate(ap_bucket_brigade *a, 
-                                            ap_bucket_brigade *b)
+APR_EXPORT(void) ap_brigade_catenate(apr_bucket_brigade *a, 
+                                            apr_bucket_brigade *b)
 {
     if (b->head) {
         if (a->tail) {
@@ -163,7 +163,7 @@ APR_EXPORT(void) ap_brigade_catenate(ap_bucket_brigade *a,
     }
 }
 
-APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec)
+APR_EXPORT(void) ap_consume_buckets(apr_bucket_brigade *b, int nvec)
 {
     int i;   
 
@@ -179,14 +179,14 @@ APR_EXPORT(void) ap_consume_buckets(ap_bucket_brigade *b, int nvec)
     }
 }
 
-APR_EXPORT(ap_status_t) ap_brigade_to_iol(ap_ssize_t *total_bytes,
-                                                 ap_bucket_brigade *b, 
+APR_EXPORT(apr_status_t) ap_brigade_to_iol(apr_ssize_t *total_bytes,
+                                                 apr_bucket_brigade *b, 
                                                  ap_iol *iol)
 {
-    ap_status_t status;
+    apr_status_t status;
     int iov_used;
     struct iovec vec[16];   /* seems like a reasonable number to me */
-    ap_ssize_t bytes = 0;
+    apr_ssize_t bytes = 0;
 
     *total_bytes = 0;
     do {
@@ -211,12 +211,12 @@ APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b)
     return 0;
 }    
 
-APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
+APR_EXPORT(int) ap_brigade_vputstrs(apr_bucket_brigade *b, va_list va)
 {
     ap_bucket *r;
     const char *x;
     int j, k, rv;
-    ap_ssize_t i;
+    apr_ssize_t i;
 
     if (b->tail && b->tail->color == AP_BUCKET_rwmem) {
         ap_bucket *rw;
@@ -263,7 +263,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
     return k;
 }
 
-APR_EXPORT(int) ap_brigade_printf(ap_bucket_brigade *b, const char *fmt, ...)
+APR_EXPORT(int) ap_brigade_printf(apr_bucket_brigade *b, const char *fmt, ...)
 {
     va_list ap;
     int res;
@@ -274,7 +274,7 @@ APR_EXPORT(int) ap_brigade_printf(ap_bucket_brigade *b, const char *fmt, ...)
     return res;
 }
 
-APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_list va)
+APR_EXPORT(int) ap_brigade_vprintf(apr_bucket_brigade *b, const char *fmt, va_list va)
 {
     /* THIS IS A HACK.  This needs to be replaced with a function to printf
      * directly into a bucket.  I'm being lazy right now.  RBB
@@ -283,7 +283,7 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
     ap_bucket *r;
     int res, i;
 
-    res = ap_vsnprintf(buf, 4096, fmt, va);
+    res = apr_vsnprintf(buf, 4096, fmt, va);
 
     r = ap_bucket_rwmem_create(buf, strlen(buf), &i);
     ap_brigade_append_buckets(b, r);

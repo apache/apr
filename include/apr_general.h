@@ -81,7 +81,7 @@ extern "C" {
 
 #define MAXIMUM_WAIT_OBJECTS 64
 
-typedef int               ap_signum_t;
+typedef int               apr_signum_t;
 
 #ifdef SIGHUP
 #define APR_SIGHUP SIGHUP
@@ -253,7 +253,7 @@ int strncasecmp(const char *a, const char *b, size_t n);
  * @param length size of the buffer
  */
 /* TODO: I'm not sure this is the best place to put this prototype...*/
-ap_status_t ap_generate_random_bytes(unsigned char * buf, int length);
+apr_status_t apr_generate_random_bytes(unsigned char * buf, int length);
 #endif
 
 /* Memory allocation/Pool debugging options... 
@@ -272,25 +272,25 @@ ap_status_t ap_generate_random_bytes(unsigned char * buf, int length);
 #define ALLOC_STATS
 */
 
-typedef struct ap_pool_t {
+typedef struct apr_pool_t {
     union block_hdr *first;
     union block_hdr *last;
     struct cleanup *cleanups;
     struct process_chain *subprocesses;
-    struct ap_pool_t *sub_pools;
-    struct ap_pool_t *sub_next;
-    struct ap_pool_t *sub_prev;
-    struct ap_pool_t *parent;
+    struct apr_pool_t *sub_pools;
+    struct apr_pool_t *sub_next;
+    struct apr_pool_t *sub_prev;
+    struct apr_pool_t *parent;
     char *free_first_avail;
 #ifdef ALLOC_USE_MALLOC
     void *allocation_list;
 #endif
 #ifdef POOL_DEBUG
-    struct ap_pool_t *joined;
+    struct apr_pool_t *joined;
 #endif
     int (*apr_abort)(int retcode);
     struct datastruct *prog_data;
-}ap_pool_t;
+}apr_pool_t;
  
 /* pool functions */
 
@@ -299,10 +299,10 @@ typedef struct ap_pool_t {
  * @param newcont The pool we have just created.
  * @param cont The parent pool.  If this is NULL, the new pool is a root
  *        pool.  If it is non-NULL, the new pool will inherit all
- *        of it's parent pool's attributes, except the ap_pool_t will 
+ *        of it's parent pool's attributes, except the apr_pool_t will 
  *        be a sub-pool.
  */
-ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont);
+apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont);
 
 /**
  * Set the data associated with the current pool
@@ -319,9 +319,9 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont);
  *      It is advised that steps are taken to ensure that a unique
  *      key is used at all times.
  */
-ap_status_t ap_set_userdata(const void *data, const char *key, 
-                            ap_status_t (*cleanup) (void *), 
-                            ap_pool_t *cont);
+apr_status_t apr_set_userdata(const void *data, const char *key, 
+                            apr_status_t (*cleanup) (void *), 
+                            apr_pool_t *cont);
 
 /**
  * Return the data associated with the current pool.
@@ -329,13 +329,13 @@ ap_status_t ap_set_userdata(const void *data, const char *key,
  * @param key The user data associated with the pool.
  * @param cont The current pool.
  */
-ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont);
+apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont);
 
 /**
  * Setup any APR internal data structures.  This MUST be the first function 
  * called for any APR program.
  */
-ap_status_t ap_initialize(void);
+apr_status_t apr_initialize(void);
 
 /**
  * Tear down any APR internal data structures which aren't torn down 
@@ -343,7 +343,7 @@ ap_status_t ap_initialize(void);
  * @tip An APR program must call this function at termination once it 
  *      has stopped using APR services.
  */
-void ap_terminate(void);
+void apr_terminate(void);
 
 /**
  * Set the APR_ABORT function.
@@ -354,7 +354,7 @@ void ap_terminate(void);
  *      then APR will return an error and expect the calling program to
  *      deal with the error accordingly.
  */
-ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont);
+apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont);
 
 /**
  * Return a human readable string describing the specified error.
@@ -362,7 +362,7 @@ ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont);
  * @param buf A buffer to hold the error string.
  * @param bufsize Size of the buffer to hold the string.
  */
-char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize);
+char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
 
 #ifdef __cplusplus
 }

@@ -67,7 +67,7 @@
  */
 #define AP_DELTA_EPOCH_IN_USEC   11644473600000000;
 
-void FileTimeToAprTime(ap_time_t *result, FILETIME *input)
+void FileTimeToAprTime(apr_time_t *result, FILETIME *input)
 {
     /* Convert FILETIME one 64 bit number so we can work with it. */
     *result = input->dwHighDateTime;
@@ -77,7 +77,7 @@ void FileTimeToAprTime(ap_time_t *result, FILETIME *input)
     *result -= AP_DELTA_EPOCH_IN_USEC;  /* Convert from Windows epoch to Unix epoch */
     return;
 }
-void AprTimeToFileTime(LPFILETIME pft, ap_time_t t)
+void AprTimeToFileTime(LPFILETIME pft, apr_time_t t)
 {
     LONGLONG ll;
     t += AP_DELTA_EPOCH_IN_USEC;
@@ -123,14 +123,14 @@ void SystemTimeToAprExpTime(ap_exploded_time_t *xt, SYSTEMTIME *tm)
     return;
 }
 
-ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
+apr_status_t apr_ansi_time_to_ap_time(apr_time_t *result, time_t input)
 {
-    *result = (ap_time_t) input * AP_USEC_PER_SEC;
+    *result = (apr_time_t) input * AP_USEC_PER_SEC;
     return APR_SUCCESS;
 }
 
 /* Return micro-seconds since the Unix epoch (jan. 1, 1970) UTC */
-ap_time_t ap_now(void)
+apr_time_t apr_now(void)
 {
     LONGLONG aprtime = 0;
     FILETIME time;
@@ -139,7 +139,7 @@ ap_time_t ap_now(void)
     return aprtime; 
 }
 
-ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
+apr_status_t apr_explode_gmt(ap_exploded_time_t *result, apr_time_t input)
 {
     FILETIME ft;
     SYSTEMTIME st;
@@ -149,7 +149,7 @@ ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
+apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input)
 {
     SYSTEMTIME st;
     FILETIME ft, localft;
@@ -161,7 +161,7 @@ ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
+apr_status_t apr_implode_time(apr_time_t *t, ap_exploded_time_t *xt)
 {
     int year;
     time_t days;
@@ -195,14 +195,14 @@ ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **ostime, ap_time_t *aprtime)
+apr_status_t apr_get_os_imp_time(apr_os_imp_time_t **ostime, apr_time_t *aprtime)
 {
-    /* TODO: Consider not passing in pointer to ap_time_t (e.g., call by value) */
+    /* TODO: Consider not passing in pointer to apr_time_t (e.g., call by value) */
     AprTimeToFileTime(*ostime, *aprtime);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *aprexptime)
+apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, ap_exploded_time_t *aprexptime)
 {
     (*ostime)->wYear = aprexptime->tm_year + 1900;
     (*ostime)->wMonth = aprexptime->tm_mon + 1;
@@ -215,15 +215,15 @@ ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *ap
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime,
-                               ap_pool_t *cont)
+apr_status_t apr_put_os_imp_time(apr_time_t *aprtime, apr_os_imp_time_t **ostime,
+                               apr_pool_t *cont)
 {
     FileTimeToAprTime(aprtime, *ostime);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
-                               ap_os_exp_time_t **ostime, ap_pool_t *cont)
+apr_status_t apr_put_os_exp_time(ap_exploded_time_t *aprtime,
+                               apr_os_exp_time_t **ostime, apr_pool_t *cont)
 {
     SystemTimeToAprExpTime(aprtime, *ostime);
     return APR_SUCCESS;

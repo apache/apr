@@ -61,21 +61,21 @@
 
 static const char * mmap_get_str(ap_bucket *e)
 {
-    ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
+    apr_bucket_mmap *b = (apr_bucket_mmap *)e->data;
     return b->alloc_addr;
 }
 
 static int mmap_get_len(ap_bucket *e)
 {
-    ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
+    apr_bucket_mmap *b = (apr_bucket_mmap *)e->data;
     return b->len;
 }
 
-static ap_status_t mmap_bucket_insert(ap_bucket *e, const void *buf, 
-                                      ap_size_t nbytes, ap_ssize_t *w)
+static apr_status_t mmap_bucket_insert(ap_bucket *e, const void *buf, 
+                                      apr_size_t nbytes, apr_ssize_t *w)
 {
-    ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
-    ap_mmap_t *mm = (ap_mmap_t *)buf;
+    apr_bucket_mmap *b = (apr_bucket_mmap *)e->data;
+    apr_mmap_t *mm = (apr_mmap_t *)buf;
 
     b->alloc_addr = mm->mm;
     b->len = nbytes;
@@ -83,15 +83,15 @@ static ap_status_t mmap_bucket_insert(ap_bucket *e, const void *buf,
     return APR_SUCCESS;
 }
     
-static ap_status_t mmap_split(ap_bucket *e, ap_size_t nbyte)
+static apr_status_t mmap_split(ap_bucket *e, apr_size_t nbyte)
 {
     ap_bucket *newbuck;
-    ap_bucket_mmap *a = (ap_bucket_mmap *)e->data;
-    ap_bucket_mmap *b;
-    ap_ssize_t dump;
+    apr_bucket_mmap *a = (apr_bucket_mmap *)e->data;
+    apr_bucket_mmap *b;
+    apr_ssize_t dump;
 
     newbuck = ap_bucket_mmap_create(a->alloc_addr, a->len, &dump);
-    b = (ap_bucket_mmap *)newbuck->data;
+    b = (apr_bucket_mmap *)newbuck->data;
     a->alloc_addr = a->alloc_addr + nbyte;
     a->len = b->len - nbyte;
 
@@ -105,10 +105,10 @@ static ap_status_t mmap_split(ap_bucket *e, ap_size_t nbyte)
 }
 
 APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(const void *buf, 
-                                      ap_size_t nbytes, ap_ssize_t *w)
+                                      apr_size_t nbytes, apr_ssize_t *w)
 {
     ap_bucket *newbuf;
-    ap_bucket_mmap *b;
+    apr_bucket_mmap *b;
 
     newbuf            = calloc(1, sizeof(*newbuf));
     b                 = malloc(sizeof(*b));

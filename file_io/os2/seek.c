@@ -63,13 +63,13 @@
 
 
 
-static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
+static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 {
     long newbufpos;
     ULONG rc;
 
     if (thefile->direction == 1) {
-        ap_flush(thefile);
+        apr_flush(thefile);
         thefile->bufpos = thefile->direction = thefile->dataRead = 0;
     }
 
@@ -89,7 +89,7 @@ static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
 
 
 
-ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
+apr_status_t apr_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
 {
     if (!thefile->isopen) {
         return APR_EBADF;
@@ -97,7 +97,7 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 
     if (thefile->buffered) {
         int rc = EINVAL;
-        ap_finfo_t finfo;
+        apr_finfo_t finfo;
 
         switch (where) {
         case APR_SET:
@@ -109,7 +109,7 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
             break;
 
         case APR_END:
-            rc = ap_getfileinfo(&finfo, thefile);
+            rc = apr_getfileinfo(&finfo, thefile);
             if (rc == APR_SUCCESS)
                 rc = setptr(thefile, finfo.size - *offset);
             break;

@@ -66,19 +66,19 @@ extern "C" {
  *              FNM_PERIOD     --  Period must be matched by period
  *              FNM_CASE_BLIND --  Compare characters case-insensitively.
  * </PRE>
- * @deffunc ap_status_t ap_fnmatch(const char *pattern, const char *strings, int flags)
+ * @deffunc apr_status_t apr_fnmatch(const char *pattern, const char *strings, int flags)
  */
 
-APR_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
+APR_EXPORT(apr_status_t) apr_fnmatch(const char *pattern, const char *strings,
 			    int flags);
 
 /**
  * Determine if the given pattern is a regular expression.
  * @param pattern The pattern to search for glob characters.
  * @return non-zero if pattern has any glob characters in it
- * @deffunc int ap_is_fnmatch(const char *pattern)
+ * @deffunc int apr_is_fnmatch(const char *pattern)
  */
-APR_EXPORT(int) ap_is_fnmatch(const char *pattern);
+APR_EXPORT(int) apr_is_fnmatch(const char *pattern);
 
 #ifdef __cplusplus
 }

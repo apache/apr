@@ -54,9 +54,9 @@
 
 #include "locks.h"
 
-ap_status_t lock_inter_cleanup(void * data)
+apr_status_t lock_inter_cleanup(void * data)
 {
-    ap_lock_t *lock = (ap_lock_t*)data;
+    apr_lock_t *lock = (apr_lock_t*)data;
     if (lock->curr_locked == 1) {
     	if (atomic_add(&lock->ben_interproc , -1) > 1){
             release_sem (lock->sem_interproc);
@@ -66,12 +66,12 @@ ap_status_t lock_inter_cleanup(void * data)
     return APR_SUCCESS;
 }    
 
-ap_status_t create_inter_lock(ap_lock_t *new)
+apr_status_t create_inter_lock(apr_lock_t *new)
 {
     int32 stat;
     
-    new->sem_interproc = (sem_id)ap_palloc(new->cntxt, sizeof(sem_id));
-    new->ben_interproc = (int32)ap_palloc(new->cntxt, sizeof(int32));
+    new->sem_interproc = (sem_id)apr_palloc(new->cntxt, sizeof(sem_id));
+    new->ben_interproc = (int32)apr_palloc(new->cntxt, sizeof(int32));
 
     if ((stat = create_sem(0, "ap_interproc")) < B_NO_ERROR) {
         lock_inter_cleanup(new);
@@ -80,12 +80,12 @@ ap_status_t create_inter_lock(ap_lock_t *new)
     new->ben_interproc = 0;
     new->curr_locked = 0;
     new->sem_interproc = stat;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_inter_cleanup,
-                        ap_null_cleanup);
+    apr_register_cleanup(new->cntxt, (void *)new, lock_inter_cleanup,
+                        apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t lock_inter(ap_lock_t *lock)
+apr_status_t lock_inter(apr_lock_t *lock)
 {
     int32 stat;
     
@@ -99,7 +99,7 @@ ap_status_t lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t unlock_inter(ap_lock_t *lock)
+apr_status_t unlock_inter(apr_lock_t *lock)
 {
     int32 stat;
     
@@ -113,17 +113,17 @@ ap_status_t unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t destroy_inter_lock(ap_lock_t *lock)
+apr_status_t destroy_inter_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = lock_inter_cleanup(lock)) == APR_SUCCESS) {
-        ap_kill_cleanup(lock->cntxt, lock, lock_inter_cleanup);
+        apr_kill_cleanup(lock->cntxt, lock, lock_inter_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-ap_status_t child_init_lock(ap_lock_t **lock, ap_pool_t *cont, const char *fname)
+apr_status_t child_init_lock(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
 {
     return APR_SUCCESS;
 }

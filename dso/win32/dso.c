@@ -56,11 +56,11 @@
 
 #if APR_HAS_DSO
 
-ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path, 
-                        ap_pool_t *ctx)
+apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path, 
+                        apr_pool_t *ctx)
 {
     HINSTANCE os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-    *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
 
     if(os_handle == NULL) {
         (*res_handle)->load_error = GetLastError();
@@ -73,7 +73,7 @@ ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path,
     return APR_SUCCESS;
 }
     
-ap_status_t ap_dso_unload(struct ap_dso_handle_t *handle)
+apr_status_t apr_dso_unload(struct apr_dso_handle_t *handle)
 {
     if (!FreeLibrary(handle->handle)) {
         return GetLastError();
@@ -81,8 +81,8 @@ ap_status_t ap_dso_unload(struct ap_dso_handle_t *handle)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
-                       struct ap_dso_handle_t *handle, 
+apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
+                       struct apr_dso_handle_t *handle, 
                        const char *symname)
 {
     FARPROC retval = GetProcAddress(handle->handle, symname);
@@ -95,9 +95,9 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     return APR_SUCCESS;
 }
 
-const char *ap_dso_error(ap_dso_handle_t *dso, char *buf, ap_size_t bufsize)
+const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize)
 {
-    return ap_strerror(dso->load_error, buf, bufsize);
+    return apr_strerror(dso->load_error, buf, bufsize);
 }
 
 #endif

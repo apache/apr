@@ -79,9 +79,9 @@
 
 #if APR_HAS_MMAP || defined(BEOS)
 
-static ap_status_t mmap_cleanup(void *themmap)
+static apr_status_t mmap_cleanup(void *themmap)
 {
-    ap_mmap_t *mm = themmap;
+    apr_mmap_t *mm = themmap;
     int rv;
 #ifdef BEOS
     rv = delete_area(mm->area);
@@ -101,8 +101,8 @@ static ap_status_t mmap_cleanup(void *themmap)
     return errno;
 }
 
-ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset, 
-       ap_size_t size, ap_pool_t *cont)
+apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, apr_off_t offset, 
+       apr_size_t size, apr_pool_t *cont)
 {
 #ifdef BEOS
     void *mm;
@@ -115,11 +115,11 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset,
    
     if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
-    (*new) = (ap_mmap_t *)ap_pcalloc(cont, sizeof(ap_mmap_t));
+    (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
     
 #ifdef BEOS
     /* XXX: mmap shouldn't really change the seek offset */
-    ap_seek(file, APR_SET, &offset);
+    apr_seek(file, APR_SET, &offset);
     pages = ((size -1) / B_PAGE_SIZE) + 1;
 
     aid = create_area(areaname, &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
@@ -148,20 +148,20 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset,
     (*new)->cntxt = cont;
 
     /* register the cleanup... */
-    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
-             ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
+             apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_mmap_delete(ap_mmap_t *mmap)
+apr_status_t apr_mmap_delete(apr_mmap_t *mmap)
 {
-    ap_status_t rv;
+    apr_status_t rv;
 
     if (mmap->mm == (caddr_t) -1)
         return APR_ENOENT;
       
     if ((rv = mmap_cleanup(mmap)) == APR_SUCCESS) {
-        ap_kill_cleanup(mmap->cntxt, mmap, mmap_cleanup);
+        apr_kill_cleanup(mmap->cntxt, mmap, mmap_cleanup);
         return APR_SUCCESS;
     }
     return rv;

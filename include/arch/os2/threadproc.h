@@ -63,36 +63,36 @@
 #define SHELL_PATH "cmd.exe"
 #define APR_THREAD_STACKSIZE 65536
 
-struct ap_threadattr_t {
-    ap_pool_t *cntxt;
+struct apr_threadattr_t {
+    apr_pool_t *cntxt;
     unsigned long attr;
 };
 
-struct ap_thread_t {
-    ap_pool_t *cntxt;
-    struct ap_threadattr_t *attr;
+struct apr_thread_t {
+    apr_pool_t *cntxt;
+    struct apr_threadattr_t *attr;
     unsigned long tid;
-    ap_thread_start_t func;
+    apr_thread_start_t func;
     void *data;
     void *rv;
 };
 
-struct ap_threadkey_t {
-    ap_pool_t *cntxt;
+struct apr_threadkey_t {
+    apr_pool_t *cntxt;
     unsigned long *key;
 };
 
-struct ap_procattr_t {
-    ap_pool_t *cntxt;
-    ap_file_t *parent_in;
-    ap_file_t *child_in;
-    ap_file_t *parent_out;
-    ap_file_t *child_out;
-    ap_file_t *parent_err;
-    ap_file_t *child_err;
+struct apr_procattr_t {
+    apr_pool_t *cntxt;
+    apr_file_t *parent_in;
+    apr_file_t *child_in;
+    apr_file_t *parent_out;
+    apr_file_t *child_out;
+    apr_file_t *parent_err;
+    apr_file_t *child_err;
     char *currdir;
-    ap_int32_t cmdtype;
-    ap_int32_t detached;
+    apr_int32_t cmdtype;
+    apr_int32_t detached;
 };
 
 typedef void (*os2_thread_start_t)(void *);

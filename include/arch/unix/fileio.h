@@ -112,14 +112,14 @@
 
 #define APR_FILE_BUFSIZE 4096
 
-struct ap_file_t {
-    ap_pool_t *cntxt;
+struct apr_file_t {
+    apr_pool_t *cntxt;
     int filedes;
     char * fname;
     int oflags;
     int eof_hit;
     int pipe;
-    ap_interval_time_t timeout;
+    apr_interval_time_t timeout;
     int buffered;
     enum {BLK_UNKNOWN, BLK_OFF, BLK_ON } blocking;
     int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
@@ -131,21 +131,21 @@ struct ap_file_t {
     int direction;            /* buffer being used for 0 = read, 1 = write */
     unsigned long filePtr;    /* position in file of handle */
 #if APR_HAS_THREADS
-    struct ap_lock_t *thlock;
+    struct apr_lock_t *thlock;
 #endif
 };
 
-struct ap_dir_t {
-    ap_pool_t *cntxt;
+struct apr_dir_t {
+    apr_pool_t *cntxt;
     char *dirname;
     DIR *dirstruct;
     struct dirent *entry;
 };
 
-ap_status_t ap_unix_file_cleanup(void *);
+apr_status_t apr_unix_file_cleanup(void *);
 
-mode_t ap_unix_perms2mode(ap_fileperms_t perms);
-ap_fileperms_t ap_unix_mode2perms(mode_t mode);
+mode_t apr_unix_perms2mode(apr_fileperms_t perms);
+apr_fileperms_t apr_unix_mode2perms(mode_t mode);
 
 #endif  /* ! FILE_IO_H */
 

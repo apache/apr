@@ -58,20 +58,20 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 
-struct ap_socket_t {
-    ap_pool_t *cntxt;
+struct apr_socket_t {
+    apr_pool_t *cntxt;
     SOCKET sock;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
     size_t addr_len;
-    ap_interval_time_t timeout;
-    ap_int32_t disconnected;
+    apr_interval_time_t timeout;
+    apr_int32_t disconnected;
     int local_port_unknown;
     int local_interface_unknown;
 };
 
-struct ap_pollfd_t {
-    ap_pool_t *cntxt;
+struct apr_pollfd_t {
+    apr_pool_t *cntxt;
     fd_set *read;
     int numread;
     fd_set *write;
@@ -80,7 +80,7 @@ struct ap_pollfd_t {
     int numexcept;    
 };
 
-ap_status_t status_from_res_error(int);
+apr_status_t status_from_res_error(int);
 
 #endif  /* ! NETWORK_IO_H */
 

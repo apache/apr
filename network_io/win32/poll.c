@@ -60,16 +60,16 @@
 #include <time.h>
 
 
-ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
+apr_status_t apr_setup_poll(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
-    (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t) * num);
+    (*new) = (apr_pollfd_t *)apr_palloc(cont, sizeof(apr_pollfd_t) * num);
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
     (*new)->cntxt = cont;
-    (*new)->read = (fd_set *)ap_palloc(cont, sizeof(fd_set));
-    (*new)->write = (fd_set *)ap_palloc(cont, sizeof(fd_set));
-    (*new)->except = (fd_set *)ap_palloc(cont, sizeof(fd_set));
+    (*new)->read = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->write = (fd_set *)apr_palloc(cont, sizeof(fd_set));
+    (*new)->except = (fd_set *)apr_palloc(cont, sizeof(fd_set));
     FD_ZERO((*new)->read);
     (*new)->numread = 0;
     FD_ZERO((*new)->write);
@@ -79,8 +79,8 @@ ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, 
-			       ap_socket_t *sock, ap_int16_t event)
+apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset, 
+			       apr_socket_t *sock, apr_int16_t event)
 {
     if (event & APR_POLLIN) {
         FD_SET(sock->sock, aprset->read);
@@ -97,8 +97,8 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, 
-                    ap_interval_time_t timeout)
+apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds, 
+                    apr_interval_time_t timeout)
 {
     int rv;
     struct timeval tv, *tvptr;
@@ -118,7 +118,7 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,
 
     if (newread == NULL && newwrite == NULL && newexcept == NULL) {
         Sleep(timeout / 1000); /* convert microseconds into milliseconds */
-        return APR_TIMEUP; /* TODO - get everybody in synch with Win32 ap_status_t */
+        return APR_TIMEUP; /* TODO - get everybody in synch with Win32 apr_status_t */
     }
     else {
         if (timeout < 0) {
@@ -140,9 +140,9 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *aprset)
+apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
 {
-    ap_int16_t revents = 0;
+    apr_int16_t revents = 0;
     WSABUF data;
     int dummy;
     int flags = MSG_PEEK;
@@ -151,7 +151,7 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
      * variable here.
      */
     data.len = 256;
-    data.buf = (char *)ap_palloc(aprset->cntxt, 256);
+    data.buf = (char *)apr_palloc(aprset->cntxt, 256);
 
     if (FD_ISSET(sock->sock, aprset->read)) {
         revents |= APR_POLLIN;
@@ -193,19 +193,19 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, const char *key, void *data)
+apr_status_t apr_get_polldata(apr_pollfd_t *pollfd, const char *key, void *data)
 {
-    return ap_get_userdata(data, key, pollfd->cntxt);
+    return apr_get_userdata(data, key, pollfd->cntxt);
 }
 
-ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, const char *key,
-                            ap_status_t (*cleanup) (void *))
+apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *))
 {
-    return ap_set_userdata(data, key, cleanup, pollfd->cntxt);
+    return apr_set_userdata(data, key, cleanup, pollfd->cntxt);
 }
 
-ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, 
-                                ap_socket_t *sock, ap_int16_t events)
+apr_status_t apr_mask_poll_socket(apr_pollfd_t *aprset, 
+                                apr_socket_t *sock, apr_int16_t events)
 {
     if (events & APR_POLLIN) {
         FD_CLR(sock->sock, aprset->read);
@@ -222,12 +222,12 @@ ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock)
+apr_status_t apr_remove_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
-    return ap_mask_poll_socket(aprset, sock, ~0);
+    return apr_mask_poll_socket(aprset, sock, ~0);
 }
 
-ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
+apr_status_t apr_clear_poll_sockets(apr_pollfd_t *aprset, apr_int16_t events)
 {
     if (events & APR_POLLIN) {
         FD_ZERO(aprset->read);

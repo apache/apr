@@ -58,7 +58,7 @@
 #include "apr_strings.h"
 #include <string.h>
 
-ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
+apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
     BOOLEAN isStdHandle = FALSE;
     HANDLE hCurrentProcess = GetCurrentProcess();
@@ -68,8 +68,8 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
             p = old_file->cntxt;
         }
             
-        (*new_file) = (ap_file_t *) ap_pcalloc(p,
-                                               sizeof(ap_file_t));
+        (*new_file) = (apr_file_t *) apr_pcalloc(p,
+                                               sizeof(apr_file_t));
         if ((*new_file) == NULL) {
             return APR_ENOMEM;
         }
@@ -104,9 +104,9 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
     }
 
     (*new_file)->cntxt = old_file->cntxt;
-    (*new_file)->fname = ap_pstrdup(old_file->cntxt, old_file->fname);
-    (*new_file)->demonfname = ap_pstrdup(old_file->cntxt, old_file->demonfname);
-    (*new_file)->lowerdemonfname = ap_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
+    (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
+    (*new_file)->demonfname = apr_pstrdup(old_file->cntxt, old_file->demonfname);
+    (*new_file)->lowerdemonfname = apr_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
     (*new_file)->append = old_file->append;
 /*   (*new_file)->protection = old_file->protection;
     (*new_file)->user = old_file->user;
@@ -118,8 +118,8 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
     (*new_file)->buffered = FALSE;
 
     if (!isStdHandle) {
-        ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
-                            ap_null_cleanup);
+        apr_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
+                            apr_null_cleanup);
     }
 
     return APR_SUCCESS;

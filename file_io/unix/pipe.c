@@ -55,7 +55,7 @@
 #include "fileio.h"
 #include "apr_strings.h"
 
-static ap_status_t pipeblock(ap_file_t *thepipe)
+static apr_status_t pipeblock(apr_file_t *thepipe)
 {
 #if !BEOS /* this code won't work on BeOS */
       int fd_flags;
@@ -91,7 +91,7 @@ static ap_status_t pipeblock(ap_file_t *thepipe)
     return APR_SUCCESS;
 }
 
-static ap_status_t pipenonblock(ap_file_t *thepipe)
+static apr_status_t pipenonblock(apr_file_t *thepipe)
 {
 #if !BEOS /* this code won't work on BeOS */
       int fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
@@ -126,7 +126,7 @@ static ap_status_t pipenonblock(ap_file_t *thepipe)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
+apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
@@ -145,7 +145,7 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
     return APR_EINVAL;
 }
 
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
+apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
 {
     int filedes[2];
 
@@ -153,11 +153,11 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
         return errno;
     }
     
-    (*in) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
+    (*in) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
     (*in)->pipe = 1;
-    (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in)->fname = apr_pstrdup(cont, "PIPE");
     (*in)->buffered = 0;
     (*in)->blocking = BLK_ON;
     (*in)->timeout = -1;
@@ -166,11 +166,11 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->thlock = NULL;
 #endif
 
-    (*out) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
+    (*out) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->pipe = 1;
-    (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out)->fname = apr_pstrdup(cont, "PIPE");
     (*out)->buffered = 0;
     (*out)->blocking = BLK_ON;
     (*out)->timeout = -1;
@@ -181,10 +181,10 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_create_namedpipe(const char *filename, 
-                                ap_fileperms_t perm, ap_pool_t *cont)
+apr_status_t apr_create_namedpipe(const char *filename, 
+                                apr_fileperms_t perm, apr_pool_t *cont)
 {
-    mode_t mode = ap_unix_perms2mode(perm);
+    mode_t mode = apr_unix_perms2mode(perm);
 
     if (mkfifo(filename, mode) == -1) {
         return errno;

@@ -81,15 +81,15 @@ struct testcase testcases[] =
      "\xd1\xa1\xc0\x97\x8a\x60\xbb\xfb\x2a\x25\x46\x9d\xa5\xae\xd0\xb0"}
 };
 
-static void try(const void *buf, size_t bufLen, ap_xlate_t *xlate,
+static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
                 const void *digest)
 {
     int i;
-    ap_status_t rv;
+    apr_status_t rv;
     ap_md5_ctx_t context;
     unsigned char hash[MD5_DIGESTSIZE];
 
-    rv = ap_MD5Init(&context);
+    rv = apr_MD5Init(&context);
     assert(!rv);
 
     if (xlate) {
@@ -101,10 +101,10 @@ static void try(const void *buf, size_t bufLen, ap_xlate_t *xlate,
 #endif
     }
     
-    rv = ap_MD5Update(&context, buf, bufLen);
+    rv = apr_MD5Update(&context, buf, bufLen);
     assert(!rv);
 
-    rv = ap_MD5Final(hash, &context);
+    rv = apr_MD5Final(hash, &context);
     assert(!rv);
 
     for (i = 0; i < MD5_DIGESTSIZE; i++) {
@@ -128,9 +128,9 @@ static void try(const void *buf, size_t bufLen, ap_xlate_t *xlate,
 
 int main(int argc, char **argv)
 {
-    ap_status_t rv;
-    ap_xlate_t *xlate = NULL;
-    ap_pool_t *pool;
+    apr_status_t rv;
+    apr_xlate_t *xlate = NULL;
+    apr_pool_t *pool;
     const char *src = NULL, *dst = NULL;
     int cur;
 
@@ -148,11 +148,11 @@ int main(int argc, char **argv)
         exit(1);
     }
 
-    rv = ap_initialize();
+    rv = apr_initialize();
     assert(!rv);
-    atexit(ap_terminate);
+    atexit(apr_terminate);
 
-    rv = ap_create_pool(&pool, NULL);
+    rv = apr_create_pool(&pool, NULL);
 
     if (src) {
 #if APR_HAS_XLATE
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
             char buf[80];
 
             fprintf(stderr, "ap_xlate_open()->%s (%d)\n",
-                    ap_strerror(rv, buf, sizeof(buf)), rv);
+                    apr_strerror(rv, buf, sizeof(buf)), rv);
             exit(1);
         }
 #else

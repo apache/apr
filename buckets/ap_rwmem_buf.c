@@ -65,31 +65,31 @@
 
 static const char * rwmem_get_str(ap_bucket *e)
 {
-    ap_bucket_rwmem *b = (ap_bucket_rwmem *)e->data;
+    apr_bucket_rwmem *b = (apr_bucket_rwmem *)e->data;
     return b->start;
 }
 
 static int rwmem_get_len(ap_bucket *e)
 {
-    ap_bucket_rwmem *b = (ap_bucket_rwmem *)e->data;
+    apr_bucket_rwmem *b = (apr_bucket_rwmem *)e->data;
     return (char *)b->end - (char *)b->start;
 }
 
 static void rwmem_destroy(void *e)
 {
-    ap_bucket_rwmem *d = (ap_bucket_rwmem *)e;
+    apr_bucket_rwmem *d = (apr_bucket_rwmem *)e;
     free(d->alloc_addr);
 }
 
-static ap_status_t rwmem_split(ap_bucket *e, ap_size_t nbyte)
+static apr_status_t rwmem_split(ap_bucket *e, apr_size_t nbyte)
 {
     ap_bucket *newbuck;
-    ap_bucket_rwmem *a = (ap_bucket_rwmem *)e;
-    ap_bucket_rwmem *b;
-    ap_ssize_t dump; 
+    apr_bucket_rwmem *a = (apr_bucket_rwmem *)e;
+    apr_bucket_rwmem *b;
+    apr_ssize_t dump; 
 
     newbuck = ap_bucket_rwmem_create(a->alloc_addr, a->alloc_len, &dump);
-    b = (ap_bucket_rwmem *)newbuck->data;
+    b = (apr_bucket_rwmem *)newbuck->data;
 
     b->alloc_addr = a->alloc_addr;
     b->alloc_len = a->alloc_len;
@@ -111,12 +111,12 @@ static ap_status_t rwmem_split(ap_bucket *e, ap_size_t nbyte)
  * It is worth noting that if an error occurs, the buffer is in an unknown
  * state.
  */
-static ap_status_t rwmem_insert(ap_bucket *e, const void *buf,
-                                ap_size_t nbyte, ap_ssize_t *w)
+static apr_status_t rwmem_insert(ap_bucket *e, const void *buf,
+                                apr_size_t nbyte, apr_ssize_t *w)
 {
     int amt;
     int total;
-    ap_bucket_rwmem *b = (ap_bucket_rwmem *)e->data;
+    apr_bucket_rwmem *b = (apr_bucket_rwmem *)e->data;
 
     if (nbyte == 0) {
         *w = 0;
@@ -143,10 +143,10 @@ static ap_status_t rwmem_insert(ap_bucket *e, const void *buf,
 }
 
 APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(const void *buf,
-                                ap_size_t nbyte, ap_ssize_t *w)
+                                apr_size_t nbyte, apr_ssize_t *w)
 {
     ap_bucket *newbuf;
-    ap_bucket_rwmem *b;
+    apr_bucket_rwmem *b;
 
     newbuf = calloc(1, sizeof(*newbuf));
     b = malloc(sizeof(*b));

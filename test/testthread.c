@@ -69,17 +69,17 @@ void * APR_THREAD_FUNC thread_func3(void *data);
 void * APR_THREAD_FUNC thread_func4(void *data);
 
 
-ap_lock_t *thread_lock;
-ap_pool_t *context;
+apr_lock_t *thread_lock;
+apr_pool_t *context;
 int x = 0;
 
 void * APR_THREAD_FUNC thread_func1(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        ap_lock(thread_lock);
+        apr_lock(thread_lock);
         x++;
-        ap_unlock(thread_lock);
+        apr_unlock(thread_lock);
     }
     return NULL;
 } 
@@ -88,9 +88,9 @@ void * APR_THREAD_FUNC thread_func2(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        ap_lock(thread_lock);
+        apr_lock(thread_lock);
         x++;
-        ap_unlock(thread_lock);
+        apr_unlock(thread_lock);
     }
     return NULL;
 } 
@@ -99,9 +99,9 @@ void * APR_THREAD_FUNC thread_func3(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        ap_lock(thread_lock);
+        apr_lock(thread_lock);
         x++;
-        ap_unlock(thread_lock);
+        apr_unlock(thread_lock);
     }
     return NULL;
 } 
@@ -110,35 +110,35 @@ void * APR_THREAD_FUNC thread_func4(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        ap_lock(thread_lock);
+        apr_lock(thread_lock);
         x++;
-        ap_unlock(thread_lock);
+        apr_unlock(thread_lock);
     }
     return NULL;
 } 
 
 int main()
 {
-    ap_thread_t *t1;
-    ap_thread_t *t2;
-    ap_thread_t *t3;
-    ap_thread_t *t4;
-    ap_status_t s1;
-    ap_status_t s2;
-    ap_status_t s3;
-    ap_status_t s4;
+    apr_thread_t *t1;
+    apr_thread_t *t2;
+    apr_thread_t *t3;
+    apr_thread_t *t4;
+    apr_status_t s1;
+    apr_status_t s2;
+    apr_status_t s3;
+    apr_status_t s4;
 
-    ap_initialize();
+    apr_initialize();
 
     fprintf(stdout, "Initializing the context......."); 
-    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "could not initialize\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Initializing the lock......."); 
-    s1 = ap_create_lock(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
+    s1 = apr_create_lock(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
     if (s1 != APR_SUCCESS) {
         fprintf(stderr, "Could not create lock\n");
         exit(-1);
@@ -146,10 +146,10 @@ int main()
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Starting all the threads......."); 
-    s1 = ap_create_thread(&t1, NULL, thread_func1, NULL, context);
-    s2 = ap_create_thread(&t2, NULL, thread_func2, NULL, context);
-    s3 = ap_create_thread(&t3, NULL, thread_func3, NULL, context);
-    s4 = ap_create_thread(&t4, NULL, thread_func4, NULL, context);
+    s1 = apr_create_thread(&t1, NULL, thread_func1, NULL, context);
+    s2 = apr_create_thread(&t2, NULL, thread_func2, NULL, context);
+    s3 = apr_create_thread(&t3, NULL, thread_func3, NULL, context);
+    s4 = apr_create_thread(&t4, NULL, thread_func4, NULL, context);
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
         s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
         fprintf(stderr, "Error starting thread\n");
@@ -158,10 +158,10 @@ int main()
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Waiting for threads to exit.......");
-    ap_thread_join(&s1, t1);
-    ap_thread_join(&s2, t2);
-    ap_thread_join(&s3, t3);
-    ap_thread_join(&s4, t4);
+    apr_thread_join(&s1, t1);
+    apr_thread_join(&s2, t2);
+    apr_thread_join(&s3, t3);
+    apr_thread_join(&s4, t4);
     fprintf (stdout, "OK\n");   
 
     fprintf(stdout, "Checking if locks worked......."); 

@@ -55,16 +55,16 @@
 #include "apr_file_io.h"
 
 
-ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
-                         ap_size_t *bytes_read)
+apr_status_t apr_full_read(apr_file_t *thefile, void *buf, apr_size_t nbytes,
+                         apr_size_t *bytes_read)
 {
-    ap_status_t status;
-    ap_size_t total_read = 0;
+    apr_status_t status;
+    apr_size_t total_read = 0;
 
     do {
-	ap_ssize_t amt = (ap_ssize_t)nbytes;
+	apr_ssize_t amt = (apr_ssize_t)nbytes;
 
-	status = ap_read(thefile, buf, &amt);
+	status = apr_read(thefile, buf, &amt);
 	buf = (char *)buf + amt;
         nbytes -= amt;
         total_read += amt;
@@ -76,16 +76,16 @@ ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
     return status;
 }
 
-ap_status_t ap_full_write(ap_file_t *thefile, const void *buf,
-                          ap_size_t nbytes, ap_size_t *bytes_written)
+apr_status_t apr_full_write(apr_file_t *thefile, const void *buf,
+                          apr_size_t nbytes, apr_size_t *bytes_written)
 {
-    ap_status_t status;
-    ap_size_t total_written = 0;
+    apr_status_t status;
+    apr_size_t total_written = 0;
 
     do {
-	ap_ssize_t amt = (ap_ssize_t)nbytes;
+	apr_ssize_t amt = (apr_ssize_t)nbytes;
 
-	status = ap_write(thefile, buf, &amt);
+	status = apr_write(thefile, buf, &amt);
 	buf = (char *)buf + amt;
         nbytes -= amt;
         total_written += amt;

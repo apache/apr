@@ -56,9 +56,9 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-ap_status_t ap_unix_file_cleanup(void *thefile)
+apr_status_t apr_unix_file_cleanup(void *thefile)
 {
-    ap_file_t *file = thefile;
+    apr_file_t *file = thefile;
     int rv;
 
     rv = close(file->filedes);
@@ -67,7 +67,7 @@ ap_status_t ap_unix_file_cleanup(void *thefile)
         file->filedes = -1;
 #if APR_HAS_THREADS
         if (file->thlock) {
-            return ap_destroy_lock(file->thlock);
+            return apr_destroy_lock(file->thlock);
         }
 #endif
         return APR_SUCCESS;
@@ -78,15 +78,15 @@ ap_status_t ap_unix_file_cleanup(void *thefile)
     }
 }
 
-ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_pool_t *cont)
+apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cont)
 {
     int oflags = 0;
 #if APR_HAS_THREADS
-    ap_status_t rv;
+    apr_status_t rv;
 #endif
 
     if ((*new) == NULL) {
-        (*new) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
+        (*new) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
     }
 
     (*new)->cntxt = cont;
@@ -106,15 +106,15 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
         return APR_EACCES; 
     }
 
-    (*new)->fname = ap_pstrdup(cont, fname);
+    (*new)->fname = apr_pstrdup(cont, fname);
 
     (*new)->blocking = BLK_ON;
     (*new)->buffered = (flag & APR_BUFFERED) > 0;
 
     if ((*new)->buffered) {
-        (*new)->buffer = ap_palloc(cont, APR_FILE_BUFSIZE);
+        (*new)->buffer = apr_palloc(cont, APR_FILE_BUFSIZE);
 #if APR_HAS_THREADS
-        rv = ap_create_lock(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, 
+        rv = apr_create_lock(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, 
                             NULL, cont);
         if (rv) {
             return rv;
@@ -146,7 +146,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
         (*new)->filedes = open(fname, oflags, 0666);
     }
     else {
-        (*new)->filedes = open(fname, oflags, ap_unix_perms2mode(perm));
+        (*new)->filedes = open(fname, oflags, apr_unix_perms2mode(perm));
     }    
 
     if ((*new)->filedes < 0) {
@@ -166,27 +166,27 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     (*new)->bufpos = 0;
     (*new)->dataRead = 0;
     (*new)->direction = 0;
-    ap_register_cleanup((*new)->cntxt, (void *)(*new), ap_unix_file_cleanup,
-                        ap_null_cleanup);
+    apr_register_cleanup((*new)->cntxt, (void *)(*new), apr_unix_file_cleanup,
+                        apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_close(ap_file_t *file)
+apr_status_t apr_close(apr_file_t *file)
 {
-    ap_status_t flush_rv = APR_SUCCESS, rv;
+    apr_status_t flush_rv = APR_SUCCESS, rv;
 
     if (file->buffered) {
-        flush_rv = ap_flush(file);
+        flush_rv = apr_flush(file);
     }
 
-    if ((rv = ap_unix_file_cleanup(file)) == APR_SUCCESS) {
-        ap_kill_cleanup(file->cntxt, file, ap_unix_file_cleanup);
+    if ((rv = apr_unix_file_cleanup(file)) == APR_SUCCESS) {
+        apr_kill_cleanup(file->cntxt, file, apr_unix_file_cleanup);
         return APR_SUCCESS;
     }
     return rv ? rv : flush_rv;
 }
 
-ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
+apr_status_t apr_remove_file(const char *path, apr_pool_t *cont)
 {
     if (unlink(path) == 0) {
         return APR_SUCCESS;
@@ -196,8 +196,8 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cont)
     }
 }
 
-ap_status_t ap_rename_file(const char *from_path, const char *to_path,
-                           ap_pool_t *p)
+apr_status_t apr_rename_file(const char *from_path, const char *to_path,
+                           apr_pool_t *p)
 {
     if (rename(from_path, to_path) != 0) {
         return errno;
@@ -205,7 +205,7 @@ ap_status_t ap_rename_file(const char *from_path, const char *to_path,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
+apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -215,13 +215,13 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
-                           ap_pool_t *cont)
+apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
+                           apr_pool_t *cont)
 {
     int *dafile = thefile;
     
     if ((*file) == NULL) {
-        (*file) = ap_pcalloc(cont, sizeof(ap_file_t));
+        (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
         (*file)->cntxt = cont;
     }
     (*file)->eof_hit = 0;
@@ -235,7 +235,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
     return APR_SUCCESS;
 }    
 
-ap_status_t ap_eof(ap_file_t *fptr)
+apr_status_t apr_eof(apr_file_t *fptr)
 {
     if (fptr->eof_hit == 1) {
         return APR_EOF;
@@ -243,7 +243,7 @@ ap_status_t ap_eof(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-ap_status_t ap_ferror(ap_file_t *fptr)
+apr_status_t apr_ferror(apr_file_t *fptr)
 {
 /* This function should be removed ASAP.  It is next on my list once
  * I am sure nobody is using it.
@@ -251,12 +251,12 @@ ap_status_t ap_ferror(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-/* ap_open_stderr() could just call ap_put_os_file() with
+/* apr_open_stderr() could just call apr_put_os_file() with
  * STDERR_FILENO for the descriptor...
  */
-ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
+apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
-    (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
+    (*thefile) = apr_pcalloc(cont, sizeof(apr_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }

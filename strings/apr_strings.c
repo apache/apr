@@ -57,7 +57,7 @@
 #include "apr_private.h"
 #include "apr_lib.h"
 
-APR_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
+APR_EXPORT(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 {
     char *res;
     size_t len;
@@ -66,31 +66,31 @@ APR_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
         return NULL;
     }
     len = strlen(s) + 1;
-    res = ap_palloc(a, len);
+    res = apr_palloc(a, len);
     memcpy(res, s, len);
     return res;
 }
 
-APR_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, ap_size_t n)
+APR_EXPORT(char *) apr_pstrndup(apr_pool_t *a, const char *s, apr_size_t n)
 {
     char *res;
 
     if (s == NULL) {
         return NULL;
     }
-    res = ap_palloc(a, n + 1);
+    res = apr_palloc(a, n + 1);
     memcpy(res, s, n);
     res[n] = '\0';
     return res;
 }
 
-APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
+APR_EXPORT_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 {
     char *cp, *argp, *res;
 
     /* Pass one --- find length of required string */
 
-    ap_size_t len = 0;
+    apr_size_t len = 0;
     va_list adummy;
 
     va_start(adummy, a);
@@ -103,7 +103,7 @@ APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
 
     /* Allocate the required string */
 
-    res = (char *) ap_palloc(a, len + 1);
+    res = (char *) apr_palloc(a, len + 1);
     cp = res;
     *cp = '\0';
 

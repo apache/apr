@@ -62,7 +62,7 @@
 #endif
 
 #ifdef USE_WAIT_FOR_IO
-static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
+static apr_status_t wait_for_io_or_timeout(apr_file_t *file, int for_read)
 {
     struct timeval tv, *tvptr;
     fd_set fdset;
@@ -101,10 +101,10 @@ static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
 /* problems: 
  * 1) ungetchar not used for buffered files
  */
-ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *nbytes)
 {
-    ap_ssize_t rv;
-    ap_ssize_t bytes_read;
+    apr_ssize_t rv;
+    apr_ssize_t bytes_read;
 
     if (*nbytes <= 0) {
         *nbytes = 0;
@@ -113,15 +113,15 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
     if (thefile->buffered) {
         char *pos = (char *)buf;
-        ap_uint64_t blocksize;
-        ap_uint64_t size = *nbytes;
+        apr_uint64_t blocksize;
+        apr_uint64_t size = *nbytes;
 
 #if APR_HAS_THREADS
-        ap_lock(thefile->thlock);
+        apr_lock(thefile->thlock);
 #endif
 
         if (thefile->direction == 1) {
-            ap_flush(thefile);
+            apr_flush(thefile);
             thefile->bufpos = 0;
             thefile->direction = 0;
             thefile->dataRead = 0;
@@ -156,7 +156,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             rv = 0;
         }
 #if APR_HAS_THREADS
-        ap_unlock(thefile->thlock);
+        apr_unlock(thefile->thlock);
 #endif
         return rv;
     }
@@ -181,7 +181,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         if (rv == -1 && 
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
-            ap_status_t arv = wait_for_io_or_timeout(thefile, 1);
+            apr_status_t arv = wait_for_io_or_timeout(thefile, 1);
             if (arv != APR_SUCCESS) {
                 *nbytes = bytes_read;
                 return arv;
@@ -205,9 +205,9 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     }
 }
 
-ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
+apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes)
 {
-    ap_size_t rv;
+    apr_size_t rv;
 
     if (thefile->buffered) {
         char *pos = (char *)buf;
@@ -215,14 +215,14 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
         int size = *nbytes;
 
 #if APR_HAS_THREADS
-        ap_lock(thefile->thlock);
+        apr_lock(thefile->thlock);
 #endif
 
         if ( thefile->direction == 0 ) {
             /* Position file pointer for writing at the offset we are 
              * logically reading from
              */
-            ap_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            apr_int64_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             if (offset != thefile->filePtr)
                 lseek(thefile->filedes, offset, SEEK_SET);
             thefile->bufpos = thefile->dataRead = 0;
@@ -232,7 +232,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 	rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
-                ap_flush(thefile);
+                apr_flush(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
                         APR_FILE_BUFSIZE - thefile->bufpos : size;
@@ -243,19 +243,19 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
         }
 
 #if APR_HAS_THREADS
-        ap_unlock(thefile->thlock);
+        apr_unlock(thefile->thlock);
 #endif
         return rv;
     }
     else {
         do {
             rv = write(thefile->filedes, buf, *nbytes);
-        } while (rv == (ap_size_t)-1 && errno == EINTR);
+        } while (rv == (apr_size_t)-1 && errno == EINTR);
 #ifdef USE_WAIT_FOR_IO
-        if (rv == (ap_size_t)-1 &&
+        if (rv == (apr_size_t)-1 &&
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
-            ap_status_t arv = wait_for_io_or_timeout(thefile, 0);
+            apr_status_t arv = wait_for_io_or_timeout(thefile, 0);
             if (arv != APR_SUCCESS) {
                 *nbytes = 0;
                 return arv;
@@ -263,11 +263,11 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
             else {
                 do {
                     rv = write(thefile->filedes, buf, *nbytes);
-	        } while (rv == (ap_size_t)-1 && errno == EINTR);
+	        } while (rv == (apr_size_t)-1 && errno == EINTR);
             }
         }  
 #endif
-        if (rv == (ap_size_t)-1) {
+        if (rv == (apr_size_t)-1) {
             (*nbytes) = 0;
             return errno;
         }
@@ -276,8 +276,8 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
     }
 }
 
-ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
-                      ap_size_t nvec, ap_ssize_t *nbytes)
+apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec,
+                      apr_size_t nvec, apr_ssize_t *nbytes)
 {
 #ifdef HAVE_WRITEV
     int bytes;
@@ -292,11 +292,11 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
     }
 #else
     *nbytes = vec[0].iov_len;
-    return ap_write(thefile, vec[0].iov_base, nbytes);
+    return apr_write(thefile, vec[0].iov_base, nbytes);
 #endif
 }
 
-ap_status_t ap_putc(char ch, ap_file_t *thefile)
+apr_status_t apr_putc(char ch, apr_file_t *thefile)
 {
     if (write(thefile->filedes, &ch, 1) != 1) {
         return errno;
@@ -304,20 +304,20 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
+apr_status_t apr_ungetc(char ch, apr_file_t *thefile)
 {
     thefile->ungetchar = (unsigned char)ch;
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_getc(char *ch, ap_file_t *thefile)
+apr_status_t apr_getc(char *ch, apr_file_t *thefile)
 {
-    ap_ssize_t nbytes = 1;
+    apr_ssize_t nbytes = 1;
 
-    return ap_read(thefile, ch, &nbytes);
+    return apr_read(thefile, ch, &nbytes);
 }
 
-ap_status_t ap_puts(const char *str, ap_file_t *thefile)
+apr_status_t apr_puts(const char *str, apr_file_t *thefile)
 {
     ssize_t rv;
     int len;
@@ -330,10 +330,10 @@ ap_status_t ap_puts(const char *str, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_flush(ap_file_t *thefile)
+apr_status_t apr_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
-        ap_int64_t written = 0;
+        apr_int64_t written = 0;
         int rc = 0;
 
         if (thefile->direction == 1 && thefile->bufpos) {
@@ -352,10 +352,10 @@ ap_status_t ap_flush(ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
+apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
 {
-    ap_status_t rv = APR_SUCCESS; /* get rid of gcc warning */
-    ap_ssize_t nbytes;
+    apr_status_t rv = APR_SUCCESS; /* get rid of gcc warning */
+    apr_ssize_t nbytes;
     char *final = str + len - 1;
 
     if (len <= 1) {  
@@ -366,7 +366,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 
     while (str < final) { /* leave room for trailing '\0' */
         nbytes = 1;
-        rv = ap_read(thefile, str, &nbytes);
+        rv = apr_read(thefile, str, &nbytes);
         if (rv != APR_SUCCESS) {
             break;
         }
@@ -383,7 +383,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
     return rv;
 }
 
-APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;
@@ -395,8 +395,8 @@ APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         return 0;
     }
     va_start(ap, format);
-    len = ap_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
-    cc = ap_puts(buf, fptr);
+    len = apr_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
+    cc = apr_puts(buf, fptr);
     va_end(ap);
     free(buf);
     return (cc == APR_SUCCESS) ? len : -1;

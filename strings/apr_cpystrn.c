@@ -77,10 +77,10 @@
  *       the destination string, we return a pointer to the
  *       terminating '\0' to allow us to "check" for truncation
  *
- * ap_cpystrn() follows the same call structure as strncpy().
+ * apr_cpystrn() follows the same call structure as strncpy().
  */
 
-APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
+APR_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size)
 {
 
     char *d, *end;
@@ -120,9 +120,9 @@ APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
  *                   pool and filled in with copies of the tokens
  *                   found during parsing of the arg_str. 
  */
-APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str, 
+APR_EXPORT(apr_status_t) apr_tokenize_to_argv(const char *arg_str, 
                                             char ***argv_out,
-                                            ap_pool_t *token_context)
+                                            apr_pool_t *token_context)
 {
     const char *cp;
     const char *tmpCnt;
@@ -172,7 +172,7 @@ APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str,
         SKIP_WHITESPACE(tmpCnt);
     }
 
-    *argv_out = ap_palloc(token_context, numargs*sizeof(char*));
+    *argv_out = apr_palloc(token_context, numargs*sizeof(char*));
     if (*argv_out == NULL) {
         return (APR_ENOMEM);
     }
@@ -184,15 +184,15 @@ APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str,
         tmpCnt = cp;
         DETERMINE_NEXTSTRING(cp, isquoted);
         if (*cp == '\0') {
-            (*argv_out)[numargs] = ap_pstrdup(token_context, tmpCnt);
+            (*argv_out)[numargs] = apr_pstrdup(token_context, tmpCnt);
             numargs++;
             (*argv_out)[numargs] = '\0';
             break;
         }
         else {
             cp++;
-            (*argv_out)[numargs] = ap_palloc(token_context, cp - tmpCnt);
-            ap_cpystrn((*argv_out)[numargs], tmpCnt, cp - tmpCnt);
+            (*argv_out)[numargs] = apr_palloc(token_context, cp - tmpCnt);
+            apr_cpystrn((*argv_out)[numargs], tmpCnt, cp - tmpCnt);
             numargs++;
         }
         
@@ -212,7 +212,7 @@ APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str,
  * Corrected Win32 to accept "a/b\\stuff", "a:stuff"
  */
 
-APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname)
+APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname)
 {
     const char path_separator = '/';
     const char *s = strrchr(pathname, path_separator);
@@ -234,7 +234,7 @@ APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname)
  * collapse in place (src == dest) is legal.
  * returns terminating null ptr to dest string.
  */
-APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src)
+APR_EXPORT(char *) apr_collapse_spaces(char *dest, const char *src)
 {
     while (*src) {
         if (!ap_isspace(*src)) 

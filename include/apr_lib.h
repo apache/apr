@@ -89,10 +89,10 @@ extern "C" {
 /*
  * Structure used by the variable-formatter routines.
  */
-typedef struct ap_vformatter_buff_t {
+typedef struct apr_vformatter_buff_t {
     char *curpos;
     char *endpos;
-} ap_vformatter_buff_t;
+} apr_vformatter_buff_t;
 
 /**
  * return the final element of the pathname
@@ -105,9 +105,9 @@ typedef struct ap_vformatter_buff_t {
  *                 "gum"            -> "gum"
  *                 "wi\\n32\\stuff" -> "stuff"
  * </PRE>
- * @deffunc const char * ap_filename_of_pathname(const char *pathname)
+ * @deffunc const char * apr_filename_of_pathname(const char *pathname)
  */
-APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
+APR_EXPORT(const char *) apr_filename_of_pathname(const char *pathname);
 
 /* These macros allow correct support of 8-bit characters on systems which
  * support 8-bit characters.  Pretty dumb how the cast is required, but
@@ -145,7 +145,7 @@ APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 #endif /* WIN32 */
 
 /**
- * ap_vformatter() is a generic printf-style formatting routine
+ * apr_vformatter() is a generic printf-style formatting routine
  * with some extensions.
  * @param flush_func The function to call when the buffer is full
  * @param c The buffer to write to
@@ -165,96 +165,96 @@ APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
  * work as expected at all, but that seems to be a fair trade-off
  * for the increased robustness of having printf-warnings work.
  *
- * Additionally, ap_vformatter allows for arbitrary output methods
+ * Additionally, apr_vformatter allows for arbitrary output methods
  * using the ap_vformatter_buff and flush_func.
  *
  * The ap_vformatter_buff has two elements curpos and endpos.
- * curpos is where ap_vformatter will write the next byte of output.
+ * curpos is where apr_vformatter will write the next byte of output.
  * It proceeds writing output to curpos, and updating curpos, until
  * either the end of output is reached, or curpos == endpos (i.e. the
  * buffer is full).
  *
- * If the end of output is reached, ap_vformatter returns the
+ * If the end of output is reached, apr_vformatter returns the
  * number of bytes written.
  *
  * When the buffer is full, the flush_func is called.  The flush_func
  * can return -1 to indicate that no further output should be attempted,
- * and ap_vformatter will return immediately with -1.  Otherwise
+ * and apr_vformatter will return immediately with -1.  Otherwise
  * the flush_func should flush the buffer in whatever manner is
- * appropriate, re ap_pool_t nitialize curpos and endpos, and return 0.
+ * appropriate, re apr_pool_t nitialize curpos and endpos, and return 0.
  *
  * Note that flush_func is only invoked as a result of attempting to
  * write another byte at curpos when curpos >= endpos.  So for
  * example, it's possible when the output exactly matches the buffer
  * space available that curpos == endpos will be true when
- * ap_vformatter returns.
+ * apr_vformatter returns.
  *
- * ap_vformatter does not call out to any other code, it is entirely
+ * apr_vformatter does not call out to any other code, it is entirely
  * self-contained.  This allows the callers to do things which are
- * otherwise "unsafe".  For example, ap_psprintf uses the "scratch"
+ * otherwise "unsafe".  For example, apr_psprintf uses the "scratch"
  * space at the unallocated end of a block, and doesn't actually
- * complete the allocation until ap_vformatter returns.  ap_psprintf
- * would be completely broken if ap_vformatter were to call anything
- * that used a ap_pool_t.  Similarly http_bprintf() uses the "scratch"
+ * complete the allocation until apr_vformatter returns.  apr_psprintf
+ * would be completely broken if apr_vformatter were to call anything
+ * that used a apr_pool_t.  Similarly http_bprintf() uses the "scratch"
  * space at the end of its output buffer, and doesn't actually note
  * that the space is in use until it either has to flush the buffer
- * or until ap_vformatter returns.
+ * or until apr_vformatter returns.
  * </PRE>
- * @deffunc int ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b), ap_vformatter_buff_t *c, const char *fmt, va_list ap)
+ * @deffunc int apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b), apr_vformatter_buff_t *c, const char *fmt, va_list ap)
  */
-APR_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b),
-			       ap_vformatter_buff_t *c, const char *fmt,
+APR_EXPORT(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
+			       apr_vformatter_buff_t *c, const char *fmt,
 			       va_list ap);
 
 /**
  * Validate any password encypted with any algorithm that APR understands
  * @param passwd The password to validate
  * @param hash The password to validate against
- * @deffunc ap_status_t ap_validate_password(const char *passwd, const char *hash)
+ * @deffunc apr_status_t apr_validate_password(const char *passwd, const char *hash)
  */
-APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash);
+APR_EXPORT(apr_status_t) apr_validate_password(const char *passwd, const char *hash);
 
 
 /*
- * These are snprintf implementations based on ap_vformatter().
+ * These are snprintf implementations based on apr_vformatter().
  *
  * Note that various standards and implementations disagree on the return
  * value of snprintf, and side-effects due to %n in the formatting string.
- * ap_snprintf behaves as follows:
+ * apr_snprintf behaves as follows:
  *
  * Process the format string until the entire string is exhausted, or
  * the buffer fills.  If the buffer fills then stop processing immediately
  * (so no further %n arguments are processed), and return the buffer
  * length.  In all cases the buffer is NUL terminated.
  *
- * In no event does ap_snprintf return a negative number.  It's not possible
+ * In no event does apr_snprintf return a negative number.  It's not possible
  * to distinguish between an output which was truncated, and an output which
  * exactly filled the buffer.
  */
 
 /**
- *snprintf routine based on ap_vformatter.  This means it understands the 
+ *snprintf routine based on apr_vformatter.  This means it understands the 
  *same extensions.>
  * @param buf The buffer to write to
  * @param len The size of the buffer
  * @param format The format string
  * @param ... The arguments to use to fill out the format string.
- * @deffunc int ap_snprintf(char *buf, size_t len, const char *format, ...)
+ * @deffunc int apr_snprintf(char *buf, size_t len, const char *format, ...)
  */
-APR_EXPORT_NONSTD(int) ap_snprintf(char *buf, size_t len, 
+APR_EXPORT_NONSTD(int) apr_snprintf(char *buf, size_t len, 
                                    const char *format, ...)
 	__attribute__((format(printf,3,4)));
 
 /**
- * vsnprintf routine based on ap_vformatter.  This means it understands the 
+ * vsnprintf routine based on apr_vformatter.  This means it understands the 
  * same extensions.
  * @param buf The buffer to write to
  * @param len The size of the buffer
  * @param format The format string
  * @param ap The arguments to use to fill out the format string.
- * @deffunc int ap_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
+ * @deffunc int apr_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
  */
-APR_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
+APR_EXPORT(int) apr_vsnprintf(char *buf, size_t len, const char *format,
 			      va_list ap);
 
 /**
@@ -262,9 +262,9 @@ APR_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
  * @param prompt The prompt to display
  * @param pwbuf Where to store the password
  * @param bufsize The length of the password string.
- * @deffunc ap_status_t ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
+ * @deffunc apr_status_t apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
  */
-APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
+APR_EXPORT(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 
 /**
  * Register a process to be killed when a pool dies.
@@ -273,14 +273,14 @@ APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufs
  * @param how How to kill the process, one of:
  * <PRE>
  *         kill_never   	   -- process is never sent any signals
- *         kill_always 	   -- process is sent SIGKILL on ap_pool_t cleanup	
+ *         kill_always 	   -- process is sent SIGKILL on apr_pool_t cleanup	
  *         kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
  *         just_wait          -- wait forever for the process to complete
  *         kill_only_once     -- send SIGTERM and then wait
  * </PRE>
- * @deffunc void ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid, enum kill_conditions how)
+ * @deffunc void apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid, enum kill_conditions how)
  */
-APR_EXPORT(void) ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid,
+APR_EXPORT(void) apr_note_subprocess(struct apr_pool_t *a, apr_proc_t *pid,
 				     enum kill_conditions how);
 
 #ifdef __cplusplus

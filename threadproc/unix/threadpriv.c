@@ -59,11 +59,11 @@
 #if APR_HAS_THREADS
 
 #if APR_HAVE_PTHREAD_H
-ap_status_t ap_create_thread_private(ap_threadkey_t **key, 
-                                     void (*dest)(void *), ap_pool_t *cont)
+apr_status_t apr_create_thread_private(apr_threadkey_t **key, 
+                                     void (*dest)(void *), apr_pool_t *cont)
 {
-    ap_status_t stat;
-    (*key) = (ap_threadkey_t *)ap_pcalloc(cont, sizeof(ap_threadkey_t));
+    apr_status_t stat;
+    (*key) = (apr_threadkey_t *)apr_pcalloc(cont, sizeof(apr_threadkey_t));
 
     if ((*key) == NULL) {
         return APR_ENOMEM;
@@ -77,7 +77,7 @@ ap_status_t ap_create_thread_private(ap_threadkey_t **key,
     return stat;
 }
 
-ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
+apr_status_t apr_get_thread_private(void **new, apr_threadkey_t *key)
 {
 #ifdef PTHREAD_GETSPECIFIC_TAKES_TWO_ARGS
     if (pthread_getspecific(key->key,new))
@@ -88,9 +88,9 @@ ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
+apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = pthread_setspecific(key->key, priv)) == 0) {
         return APR_SUCCESS;
     }
@@ -99,42 +99,42 @@ ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
     }
 }
 
-ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
+apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = pthread_key_delete(key->key)) == 0) {
         return APR_SUCCESS; 
     }
     return stat;
 }
 
-ap_status_t ap_get_threadkeydata(void **data, const char *key,
-                                 ap_threadkey_t *threadkey)
+apr_status_t apr_get_threadkeydata(void **data, const char *key,
+                                 apr_threadkey_t *threadkey)
 {
-    return ap_get_userdata(data, key, threadkey->cntxt);
+    return apr_get_userdata(data, key, threadkey->cntxt);
 }
 
-ap_status_t ap_set_threadkeydata(void *data, const char *key,
-                                 ap_status_t (*cleanup) (void *),
-                                 ap_threadkey_t *threadkey)
+apr_status_t apr_set_threadkeydata(void *data, const char *key,
+                                 apr_status_t (*cleanup) (void *),
+                                 apr_threadkey_t *threadkey)
 {
-    return ap_set_userdata(data, key, cleanup, threadkey->cntxt);
+    return apr_set_userdata(data, key, cleanup, threadkey->cntxt);
 }
 
-ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key)
+apr_status_t apr_get_os_threadkey(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
 {
     *thekey = key->key;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_threadkey(ap_threadkey_t **key, 
-                                ap_os_threadkey_t *thekey, ap_pool_t *cont)
+apr_status_t apr_put_os_threadkey(apr_threadkey_t **key, 
+                                apr_os_threadkey_t *thekey, apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;
     }
     if ((*key) == NULL) {
-        (*key) = (ap_threadkey_t *)ap_pcalloc(cont, sizeof(ap_threadkey_t));
+        (*key) = (apr_threadkey_t *)apr_pcalloc(cont, sizeof(apr_threadkey_t));
         (*key)->cntxt = cont;
     }
     (*key)->key = *thekey;

@@ -56,9 +56,9 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-static ap_status_t dir_cleanup(void *thedir)
+static apr_status_t dir_cleanup(void *thedir)
 {
-    ap_dir_t *dir = thedir;
+    apr_dir_t *dir = thedir;
     if (closedir(dir->dirstruct) == 0) {
         return APR_SUCCESS;
     }
@@ -67,50 +67,50 @@ static ap_status_t dir_cleanup(void *thedir)
     }
 } 
 
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
+apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
     /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct 
      * dirent is declared with enough storage for the name.  On other
      * platforms (e.g., Solaris 8 for Intel), d_name is declared as a
      * one-byte array.  Note: gcc evaluates this at compile time.
      */
-    ap_size_t dirent_size = 
+    apr_size_t dirent_size = 
         (sizeof((*new)->entry->d_name) > 1 ? 
          sizeof(struct dirent) : sizeof (struct dirent) + 255);
 
-    (*new) = (ap_dir_t *)ap_palloc(cont, sizeof(ap_dir_t));
+    (*new) = (apr_dir_t *)apr_palloc(cont, sizeof(apr_dir_t));
 
     (*new)->cntxt = cont;
-    (*new)->dirname = ap_pstrdup(cont, dirname);
+    (*new)->dirname = apr_pstrdup(cont, dirname);
     (*new)->dirstruct = opendir(dirname);
-    (*new)->entry = ap_pcalloc(cont, dirent_size);
+    (*new)->entry = apr_pcalloc(cont, dirent_size);
 
     if ((*new)->dirstruct == NULL) {
         return errno;
     }    
     else {
-        ap_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
-	                    ap_null_cleanup);
+        apr_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
+	                    apr_null_cleanup);
         return APR_SUCCESS;
     }
 }
 
-ap_status_t ap_closedir(ap_dir_t *thedir)
+apr_status_t apr_closedir(apr_dir_t *thedir)
 {
-    ap_status_t rv;
+    apr_status_t rv;
 
     if ((rv = dir_cleanup(thedir)) == APR_SUCCESS) {
-        ap_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
+        apr_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
         return APR_SUCCESS;
     }
     return rv;
 }
 
-ap_status_t ap_readdir(ap_dir_t *thedir)
+apr_status_t apr_readdir(apr_dir_t *thedir)
 {
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
     && !defined(READDIR_IS_THREAD_SAFE)
-    ap_status_t ret;
+    apr_status_t ret;
 #endif
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
@@ -135,15 +135,15 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
 #endif
 }
 
-ap_status_t ap_rewinddir(ap_dir_t *thedir)
+apr_status_t apr_rewinddir(apr_dir_t *thedir)
 {
     rewinddir(thedir->dirstruct);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
+apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
-    mode_t mode = ap_unix_perms2mode(perm);
+    mode_t mode = apr_unix_perms2mode(perm);
 
     if (mkdir(path, mode) == 0) {
         return APR_SUCCESS;
@@ -153,7 +153,7 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
     }
 }
 
-ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
+apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 {
     if (rmdir(path) == 0) {
         return APR_SUCCESS;
@@ -163,7 +163,7 @@ ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
     }
 }
 
-ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;    
@@ -172,7 +172,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
         *size = -1;
         return APR_ENOFILE;
     }
-    fname = ap_pstrcat(thedir->cntxt, thedir->dirname, "/", 
+    fname = apr_pstrcat(thedir->cntxt, thedir->dirname, "/", 
                        thedir->entry->d_name, NULL);
     if (stat(fname, &filestat) == -1) {
         *size = -1;
@@ -183,7 +183,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_mtime(apr_time_t *mtime, apr_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
@@ -193,18 +193,18 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir)
         return APR_ENOFILE;
     }
 
-    fname = ap_pstrcat(thedir->cntxt, thedir->dirname, "/", 
+    fname = apr_pstrcat(thedir->cntxt, thedir->dirname, "/", 
                        thedir->entry->d_name, NULL);
     if (stat(fname, &filestat) == -1) {
         *mtime = -1;
         return errno;
     }
     
-    ap_ansi_time_to_ap_time(mtime, filestat.st_mtime);
+    apr_ansi_time_to_ap_time(mtime, filestat.st_mtime);
     return APR_SUCCESS;
 }
  
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
+apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir)
 {
     struct stat filestat;
     char *fname = NULL;
@@ -214,7 +214,7 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
         return APR_ENOFILE;
     }
 
-    fname = ap_pstrcat(thedir->cntxt, thedir->dirname, "/", 
+    fname = apr_pstrcat(thedir->cntxt, thedir->dirname, "/", 
                        thedir->entry->d_name, NULL);
     if (stat(fname, &filestat) == -1) {
         *type = APR_REG;
@@ -240,18 +240,18 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir)
+apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
 {
     /* Detect End-Of-File */
     if (thedir == NULL || thedir->entry == NULL) {
         *new = NULL;
         return APR_ENOENT;
     }
-    (*new) = ap_pstrdup(thedir->cntxt, thedir->entry->d_name);
+    (*new) = apr_pstrdup(thedir->cntxt, thedir->entry->d_name);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
+apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
@@ -260,11 +260,11 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir,
-                          ap_pool_t *cont)
+apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir,
+                          apr_pool_t *cont)
 {
     if ((*dir) == NULL) {
-        (*dir) = (ap_dir_t *)ap_pcalloc(cont, sizeof(ap_dir_t));
+        (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
         (*dir)->cntxt = cont;
     }
     (*dir)->dirstruct = thedir;

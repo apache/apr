@@ -59,18 +59,18 @@
 #include "apr_general.h"
 #include "os2calls.h"
 
-struct ap_socket_t {
-    ap_pool_t *cntxt;
+struct apr_socket_t {
+    apr_pool_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
     int addr_len;
-    ap_interval_time_t timeout;
+    apr_interval_time_t timeout;
     int nonblock;
 };
 
-struct ap_pollfd_t {
-    ap_pool_t *cntxt;
+struct apr_pollfd_t {
+    apr_pool_t *cntxt;
     int *socket_list;
     int *r_socket_list;
     int num_read;

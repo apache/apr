@@ -62,7 +62,7 @@
 #include <os2.h>
 #include <malloc.h>
 
-ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *nbytes)
 {
     ULONG rc = 0;
     ULONG bytesread;
@@ -77,10 +77,10 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         ULONG blocksize;
         ULONG size = *nbytes;
 
-        ap_lock(thefile->mutex);
+        apr_lock(thefile->mutex);
 
         if (thefile->direction == 1) {
-            ap_flush(thefile);
+            apr_flush(thefile);
             thefile->bufpos = 0;
             thefile->direction = 0;
             thefile->dataRead = 0;
@@ -106,7 +106,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
-        ap_unlock(thefile->mutex);
+        apr_unlock(thefile->mutex);
         return APR_OS2_STATUS(rc);
     } else {
         if (thefile->pipe)
@@ -138,7 +138,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
 
 
-ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
+apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes)
 {
     ULONG rc = 0;
     ULONG byteswritten;
@@ -153,7 +153,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
         int blocksize;
         int size = *nbytes;
 
-        ap_lock(thefile->mutex);
+        apr_lock(thefile->mutex);
 
         if ( thefile->direction == 0 ) {
             // Position file pointer for writing at the offset we are logically reading from
@@ -166,7 +166,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 
         while (rc == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
-                rc = ap_flush(thefile);
+                rc = apr_flush(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? APR_FILE_BUFSIZE - thefile->bufpos : size;
             memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
@@ -175,7 +175,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
             size -= blocksize;
         }
 
-        ap_unlock(thefile->mutex);
+        apr_unlock(thefile->mutex);
         return APR_OS2_STATUS(rc);
     } else {
         rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
@@ -194,7 +194,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 
 #ifdef HAVE_WRITEV
 
-ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes)
+apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, apr_ssize_t *nbytes)
 {
     int bytes;
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
@@ -210,7 +210,7 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nve
 
 
 
-ap_status_t ap_putc(char ch, ap_file_t *thefile)
+apr_status_t apr_putc(char ch, apr_file_t *thefile)
 {
     ULONG rc;
     ULONG byteswritten;
@@ -230,15 +230,15 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 
 
 
-ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
+apr_status_t apr_ungetc(char ch, apr_file_t *thefile)
 {
-    ap_off_t offset = -1;
-    return ap_seek(thefile, APR_CUR, &offset);
+    apr_off_t offset = -1;
+    return apr_seek(thefile, APR_CUR, &offset);
 }
 
 
 
-ap_status_t ap_getc(char *ch, ap_file_t *thefile)
+apr_status_t apr_getc(char *ch, apr_file_t *thefile)
 {
     ULONG rc;
     int bytesread;
@@ -248,7 +248,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
     }
 
     bytesread = 1;
-    rc = ap_read(thefile, ch, &bytesread);
+    rc = apr_read(thefile, ch, &bytesread);
 
     if (rc) {
         return rc;
@@ -264,17 +264,17 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 
 
 
-ap_status_t ap_puts(const char *str, ap_file_t *thefile)
+apr_status_t apr_puts(const char *str, apr_file_t *thefile)
 {
-    ap_ssize_t len;
+    apr_ssize_t len;
 
     len = strlen(str);
-    return ap_write(thefile, str, &len); 
+    return apr_write(thefile, str, &len); 
 }
 
 
 
-ap_status_t ap_flush(ap_file_t *thefile)
+apr_status_t apr_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
         ULONG written = 0;
@@ -299,15 +299,15 @@ ap_status_t ap_flush(ap_file_t *thefile)
 
 
 
-ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
+apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
 {
     ssize_t readlen;
-    ap_status_t rv = APR_SUCCESS;
+    apr_status_t rv = APR_SUCCESS;
     int i;    
 
     for (i = 0; i < len-1; i++) {
         readlen = 1;
-        rv = ap_read(thefile, str+i, &readlen);
+        rv = apr_read(thefile, str+i, &readlen);
 
         if (readlen != 1) {
             rv = APR_EOF;
@@ -325,7 +325,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 
 
 
-APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;
@@ -337,8 +337,8 @@ APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         return 0;
     }
     va_start(ap, format);
-    len = ap_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
-    cc = ap_puts(buf, fptr);
+    len = apr_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
+    cc = apr_puts(buf, fptr);
     va_end(ap);
     free(buf);
     return (cc == APR_SUCCESS) ? len : -1;
@@ -346,7 +346,7 @@ APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 
 
 
-ap_status_t ap_file_check_read(ap_file_t *fd)
+apr_status_t ap_file_check_read(apr_file_t *fd)
 {
     int rc;
 

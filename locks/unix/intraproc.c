@@ -58,10 +58,10 @@
 
 #if (APR_USE_PTHREAD_SERIALIZE)  
 
-static ap_status_t lock_intra_cleanup(void *data)
+static apr_status_t lock_intra_cleanup(void *data)
 {
-    ap_lock_t *lock = (ap_lock_t *) data;
-    ap_status_t stat;
+    apr_lock_t *lock = (apr_lock_t *) data;
+    apr_status_t stat;
 
     stat = pthread_mutex_unlock(lock->intraproc);
 #ifdef PTHREAD_SETS_ERRNO
@@ -72,12 +72,12 @@ static ap_status_t lock_intra_cleanup(void *data)
     return stat;
 }    
 
-ap_status_t ap_unix_create_intra_lock(ap_lock_t *new)
+apr_status_t apr_unix_create_intra_lock(apr_lock_t *new)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     pthread_mutexattr_t mattr;
 
-    new->intraproc = (pthread_mutex_t *)ap_palloc(new->cntxt, 
+    new->intraproc = (pthread_mutex_t *)apr_palloc(new->cntxt, 
                               sizeof(pthread_mutex_t));
     if (new->intraproc == NULL ) {
         return errno;
@@ -107,14 +107,14 @@ ap_status_t ap_unix_create_intra_lock(ap_lock_t *new)
     }
 
     new->curr_locked = 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup,
-                        ap_null_cleanup);
+    apr_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup,
+                        apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_lock_intra(ap_lock_t *lock)
+apr_status_t apr_unix_lock_intra(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
 
     stat = pthread_mutex_lock(lock->intraproc);
 #ifdef PTHREAD_SETS_ERRNO
@@ -125,9 +125,9 @@ ap_status_t ap_unix_lock_intra(ap_lock_t *lock)
     return stat;
 }
 
-ap_status_t ap_unix_unlock_intra(ap_lock_t *lock)
+apr_status_t apr_unix_unlock_intra(apr_lock_t *lock)
 {
-    ap_status_t status;
+    apr_status_t status;
 
     status = pthread_mutex_unlock(lock->intraproc);
 #ifdef PTHREAD_SETS_ERRNO
@@ -138,11 +138,11 @@ ap_status_t ap_unix_unlock_intra(ap_lock_t *lock)
     return status;
 }
 
-ap_status_t ap_unix_destroy_intra_lock(ap_lock_t *lock)
+apr_status_t apr_unix_destroy_intra_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = lock_intra_cleanup(lock)) == APR_SUCCESS) {
-        ap_kill_cleanup(lock->cntxt, lock, lock_intra_cleanup);
+        apr_kill_cleanup(lock->cntxt, lock, lock_intra_cleanup);
         return APR_SUCCESS;
     }
     return stat;

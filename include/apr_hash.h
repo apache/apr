@@ -72,19 +72,19 @@ extern "C" {
 /*
  * Abstract type for hash tables.
  */
-typedef struct ap_hash_t ap_hash_t;
+typedef struct apr_hash_t apr_hash_t;
 
 /*
  * Abstract type for scanning hash tables.
  */
-typedef struct ap_hash_index_t ap_hash_index_t;
+typedef struct apr_hash_index_t apr_hash_index_t;
 
 /**
  * Create a hash table within a pool.
  * @param pool The pool to allocate the hash table out of
  * @return The hash table just created
  */
-APR_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool);
+APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
 
 /**
  * Associate a value with a key in a hash table.
@@ -95,7 +95,7 @@ APR_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool);
  * @param val Value to associate with the key
  * @tip If the value is NULL the hash entry is deleted.
  */
-APR_EXPORT(void) ap_hash_set(ap_hash_t *ht, const void *key, size_t klen, 
+APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key, size_t klen, 
                              const void *val);
 
 /**
@@ -106,7 +106,7 @@ APR_EXPORT(void) ap_hash_set(ap_hash_t *ht, const void *key, size_t klen,
  *         If the length is 0 it is assumed to be strlen(key)+1
  * @return Returns NULL if the key is not present.
  */
-APR_EXPORT(void) *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
+APR_EXPORT(void) *apr_hash_get(apr_hash_t *ht, const void *key, size_t klen);
 
 /**
  * Start iterating over the entries in a hash table.
@@ -115,13 +115,13 @@ APR_EXPORT(void) *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
  * @tip Example:
  * <PRE>
  * 
- *     int sum_values(ap_hash_t *ht)
+ *     int sum_values(apr_hash_t *ht)
  *     {
- *         ap_hash_index_t *hi;
+ *         apr_hash_index_t *hi;
  * 	   void *val;
  * 	   int sum = 0;
- * 	   for (hi = ap_hash_first(ht); hi; hi = ap_hash_next(hi)) {
- * 	       ap_hash_this(hi, NULL, NULL, &val);
+ * 	   for (hi = apr_hash_first(ht); hi; hi = apr_hash_next(hi)) {
+ * 	       apr_hash_this(hi, NULL, NULL, &val);
  * 	       sum += *(int *)val;
  * 	   }
  * 	   return sum;
@@ -133,14 +133,14 @@ APR_EXPORT(void) *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
  * progress at the same time.
  * </PRE>
  */
-APR_EXPORT(ap_hash_index_t *) ap_hash_first(ap_hash_t *ht);
+APR_EXPORT(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht);
 
 /**
  * Continue iterating over the entries in a hash table.
  * @param hi The iteration state
  * @return a pointer to the updated iteration state.  NULL if there are no more  *         entries.
  */
-APR_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi);
+APR_EXPORT(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
 
 /**
  * Get the current entry's details from the iteration state.
@@ -151,7 +151,7 @@ APR_EXPORT(ap_hash_index_t *) ap_hash_next(ap_hash_index_t *hi);
  * @tip The return pointers should point to a variable that will be set to the
  *      corresponding data, or they may be NULL if the data isn't interesting.
  */
-APR_EXPORT(void) ap_hash_this(ap_hash_index_t *hi, const void **key, 
+APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
                               size_t *klen, void **val);
 
 #ifdef __cplusplus

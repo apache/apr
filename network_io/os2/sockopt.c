@@ -66,7 +66,7 @@
 #include <sys/so_ioctl.h>
 
 
-ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
+apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
 {
     int one;
     struct linger li;
@@ -118,7 +118,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 
 
 
-ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
+apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
     case APR_SO_TIMEOUT:
@@ -132,7 +132,7 @@ ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
 
 
 
-ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_pool_t *cont)
+apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return APR_OS2_STATUS(sock_errno());
@@ -142,14 +142,14 @@ ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_pool_t *cont)
 
 
 
-ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
+apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
 {
     struct hostent *hptr;
 
     hptr = gethostbyaddr((char *)&(sock->remote_addr->sin_addr),
                          sizeof(struct in_addr), AF_INET);
     if (hptr != NULL) {
-        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
+        *name = apr_pstrdup(sock->cntxt, hptr->h_name);
         if (*name) {
             return APR_SUCCESS;
         }

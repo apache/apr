@@ -71,47 +71,47 @@ int testdirs(void);
 
 int main(int argc, char *argv[])
 {
-    ap_pool_t *context;
-    ap_proc_t newproc;
-    ap_procattr_t *attr;
-    ap_file_t *testfile = NULL;
-    ap_ssize_t length;
+    apr_pool_t *context;
+    apr_proc_t newproc;
+    apr_procattr_t *attr;
+    apr_file_t *testfile = NULL;
+    apr_ssize_t length;
     char *buf;
     char *args[3];
     char *teststr;
 
-    if (ap_initialize() != APR_SUCCESS) {
+    if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Couldn't initialize.");
         exit(-1);
     }
-    atexit(ap_terminate);
-    ap_create_pool(&context, NULL);
+    atexit(apr_terminate);
+    apr_create_pool(&context, NULL);
 
 
     if (argc > 1) {
-        teststr = ap_palloc(context, 256);
+        teststr = apr_palloc(context, 256);
         teststr = fgets(teststr, 256, stdin);      
         fprintf(stdout, "%s", teststr);      
         exit(1);
     }
-    teststr = ap_pstrdup(context, "Whooo Hoooo\0");
+    teststr = apr_pstrdup(context, "Whooo Hoooo\0");
 
     fprintf(stdout, "Creating directory for later use.......");
-    if (ap_make_dir("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {
+    if (apr_make_dir("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create dir\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Creating procattr.......");
-    if (ap_createprocattr_init(&attr, context) != APR_SUCCESS) {
+    if (apr_createprocattr_init(&attr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create attr\n");
         exit(-1);;
     }
     fprintf(stdout, "OK.\n");
 
     fprintf(stdout, "Setting attr pipes, all three.......");
-    if (ap_setprocattr_io(attr, APR_FULL_BLOCK, 
+    if (apr_setprocattr_io(attr, APR_FULL_BLOCK, 
                           APR_CHILD_BLOCK, APR_NO_PIPE) != APR_SUCCESS) {
         fprintf(stderr, "Could not set pipes attr\n");
         exit(-1);
@@ -119,25 +119,25 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK.\n");
     
     fprintf(stdout, "Setting attr dir.......");
-    if (ap_setprocattr_dir(attr, "proctest") != APR_SUCCESS) {
+    if (apr_setprocattr_dir(attr, "proctest") != APR_SUCCESS) {
         fprintf(stderr, "Could not set directory attr\n");
         exit(-1);
     }
     fprintf(stdout, "OK.\n");
 
     fprintf(stdout, "Setting attr cmd type.......");
-    if (ap_setprocattr_cmdtype(attr, APR_PROGRAM) != APR_SUCCESS) {
+    if (apr_setprocattr_cmdtype(attr, APR_PROGRAM) != APR_SUCCESS) {
         fprintf(stderr, "Could not set cmd type attr\n");
         exit(-1);
     }
     fprintf(stdout, "OK.\n");
 
-    args[0] = ap_pstrdup(context, "testproc");
-    args[1] = ap_pstrdup(context, "-X");
+    args[0] = apr_pstrdup(context, "testproc");
+    args[1] = apr_pstrdup(context, "-X");
     args[2] = NULL;
     
     fprintf(stdout, "Creating a new process.......");
-    if (ap_create_process(&newproc, "../testproc", args, NULL, attr, context) != APR_SUCCESS) {
+    if (apr_create_process(&newproc, "../testproc", args, NULL, attr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create the new process\n");
         exit(-1);
     }
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 
     length = 256;
     fprintf(stdout, "Writing the data to child.......");
-    if (ap_write(testfile, teststr, &length) == APR_SUCCESS) {
+    if (apr_write(testfile, teststr, &length) == APR_SUCCESS) {
         fprintf(stdout,"OK\n");
     }
     else fprintf(stderr, "Write failed.\n");
@@ -160,8 +160,8 @@ int main(int argc, char *argv[])
 
     length = 256;
     fprintf(stdout, "Checking the data read from pipe to child.......");
-    buf = ap_pcalloc(context, length);
-    if (ap_read(testfile, buf, &length) == APR_SUCCESS) {
+    buf = apr_pcalloc(context, length);
+    if (apr_read(testfile, buf, &length) == APR_SUCCESS) {
         if (!strcmp(buf, teststr))
             fprintf(stdout,"OK\n");
         else fprintf(stderr, "Uh-Oh\n");
@@ -169,14 +169,14 @@ int main(int argc, char *argv[])
     else fprintf(stderr, "Read failed.\n");
 
     fprintf(stdout, "Waiting for child to die.......");
-    if (ap_wait_proc(&newproc, APR_WAIT) != APR_CHILD_DONE) {
+    if (apr_wait_proc(&newproc, APR_WAIT) != APR_CHILD_DONE) {
         fprintf(stderr, "Wait for child failed\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
     
     fprintf(stdout, "Removing directory.......");
-    if (ap_remove_dir("proctest", context) != APR_SUCCESS) {
+    if (apr_remove_dir("proctest", context) != APR_SUCCESS) {
         fprintf(stderr, "Could not remove directory.\n");
         exit(-1);
     }

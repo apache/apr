@@ -54,7 +54,7 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_detach(void)
+apr_status_t apr_detach(void)
 {
     int x;
     pid_t pgrp;

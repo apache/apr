@@ -77,13 +77,13 @@ APR_VAR_EXPORT const char ap_day_snames[7][4] =
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-ap_status_t ap_rfc822_date(char *date_str, ap_time_t t)
+apr_status_t apr_rfc822_date(char *date_str, apr_time_t t)
 {
     ap_exploded_time_t xt;
     const char *s;
     int real_year;
 
-    ap_explode_gmt(&xt, t);
+    apr_explode_gmt(&xt, t);
 
     /* example: "Sat, 08 Jan 2000 18:31:41 GMT" */
     /*           12345678901234567890123456789  */
@@ -125,7 +125,7 @@ ap_status_t ap_rfc822_date(char *date_str, ap_time_t t)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_ctime(char *date_str, ap_time_t t)
+apr_status_t apr_ctime(char *date_str, apr_time_t t)
 {
     ap_exploded_time_t xt;
     const char *s;
@@ -134,7 +134,7 @@ ap_status_t ap_ctime(char *date_str, ap_time_t t)
     /* example: "Wed Jun 30 21:49:08 1993" */
     /*           123456789012345678901234  */
 
-    ap_explode_localtime(&xt, t);
+    apr_explode_localtime(&xt, t);
     s = &ap_day_snames[xt.tm_wday][0];
     *date_str++ = *s++;
     *date_str++ = *s++;
@@ -167,7 +167,7 @@ ap_status_t ap_ctime(char *date_str, ap_time_t t)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, 
+apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, 
                         const char *format, ap_exploded_time_t *xt)
 {
     struct tm tm;

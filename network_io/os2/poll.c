@@ -64,21 +64,21 @@
 
 /*  OS/2 doesn't have a poll function, implement using OS/2 style select */
  
-ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
+apr_status_t apr_setup_poll(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
-    *new = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t));
+    *new = (apr_pollfd_t *)apr_palloc(cont, sizeof(apr_pollfd_t));
 
     if (*new == NULL) {
         return APR_ENOMEM;
     }
 
-    (*new)->socket_list = ap_palloc(cont, sizeof(int) * num);
+    (*new)->socket_list = apr_palloc(cont, sizeof(int) * num);
     
     if ((*new)->socket_list == NULL) {
         return APR_ENOMEM;
     }
     
-    (*new)->r_socket_list = ap_palloc(cont, sizeof(int) * num);
+    (*new)->r_socket_list = apr_palloc(cont, sizeof(int) * num);
     
     if ((*new)->r_socket_list == NULL) {
         return APR_ENOMEM;
@@ -95,8 +95,8 @@ ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 
 
 
-ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, 
-			       ap_socket_t *sock, ap_int16_t events)
+apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset, 
+			       apr_socket_t *sock, apr_int16_t events)
 {
     int i;
     
@@ -126,8 +126,8 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
 
 
 
-ap_status_t ap_poll(ap_pollfd_t *pollfdset, ap_int32_t *nsds, 
-                    ap_interval_time_t timeout)
+apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds, 
+                    apr_interval_time_t timeout)
 {
     int i;
     int rv = 0;
@@ -167,7 +167,7 @@ ap_status_t ap_poll(ap_pollfd_t *pollfdset, ap_int32_t *nsds,
 
 
 
-ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *aprset)
+apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
 {
     int i;
     
@@ -189,8 +189,8 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
 
 
 
-ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, 
-                                ap_socket_t *sock, ap_int16_t events)
+apr_status_t apr_mask_poll_socket(apr_pollfd_t *aprset, 
+                                apr_socket_t *sock, apr_int16_t events)
 {
     int start, *count, pos;
 
@@ -227,7 +227,7 @@ ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset,
 
 
 
-ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock)
+apr_status_t apr_remove_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
-    return ap_mask_poll_socket(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
+    return apr_mask_poll_socket(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
 }

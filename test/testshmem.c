@@ -70,7 +70,7 @@ typedef struct mbox {
     char msg[1024]; 
     int msgavail; 
 } mbox;
-ap_pool_t *context;
+apr_pool_t *context;
 mbox *boxes;
 
 void msgwait(int boxnum)
@@ -87,27 +87,27 @@ void msgwait(int boxnum)
 void msgput(int boxnum, char *msg)
 {
     fprintf(stdout, "Sending message to box %d\n", boxnum);
-    ap_cpystrn(boxes[boxnum].msg, msg, strlen(msg));
+    apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg));
     boxes[boxnum].msgavail = 1;
 }
 
 int main()
 {
-    ap_shmem_t *shm;
+    apr_shmem_t *shm;
     pid_t pid;
     int size;
 
-    ap_initialize();
+    apr_initialize();
 
     fprintf(stdout, "Initializing the context......."); 
-    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "could not initialize\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Creating shared memory block......."); 
-    if (ap_shm_init(&shm, 1048576, NULL, context) != APR_SUCCESS) { 
+    if (apr_shm_init(&shm, 1048576, NULL, context) != APR_SUCCESS) { 
         fprintf(stderr, "Error allocating shared memory block\n");
         exit(-1);
     }
@@ -115,7 +115,7 @@ int main()
 
     fprintf(stdout, "Allocating shared memory......."); 
     size = sizeof(mbox) * 2;
-    boxes = ap_shm_calloc(shm, size);
+    boxes = apr_shm_calloc(shm, size);
     if (boxes == NULL) { 
         fprintf(stderr, "Error creating message boxes.\n");
         exit(-1);
@@ -126,7 +126,7 @@ int main()
     pid = fork();
     if (pid == 0) {
 sleep(1);
-        if (ap_open_shmem(shm) == APR_SUCCESS) {
+        if (apr_open_shmem(shm) == APR_SUCCESS) {
             msgwait(1);
             msgput(0, "Msg received\n");
         } else {

@@ -67,14 +67,14 @@
 
 #define APR_FILE_BUFSIZE 4096
 
-struct ap_file_t {
-    ap_pool_t *cntxt;
+struct apr_file_t {
+    apr_pool_t *cntxt;
     HFILE filedes;
     char * fname;
     int isopen;
     int buffered;
     int eof_hit;
-    ap_int32_t flags;
+    apr_int32_t flags;
     int timeout;
     int pipe;
     HEV pipeSem;
@@ -85,19 +85,19 @@ struct ap_file_t {
     unsigned long dataRead;   // amount of valid data read into buffer
     int direction;            // buffer being used for 0 = read, 1 = write
     unsigned long filePtr;    // position in file of handle
-    ap_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
+    apr_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
 };
 
-struct ap_dir_t {
-    ap_pool_t *cntxt;
+struct apr_dir_t {
+    apr_pool_t *cntxt;
     char *dirname;
     ULONG handle;
     FILEFINDBUF3 entry;
     int validentry;
 };
 
-ap_status_t apr_file_cleanup(void *);
-ap_status_t ap_os2_time_to_ap_time(ap_time_t *result, FDATE os2date, FTIME os2time);
+apr_status_t apr_file_cleanup(void *);
+apr_status_t ap_os2_time_to_ap_time(apr_time_t *result, FDATE os2date, FTIME os2time);
 
 #endif  /* ! FILE_IO_H */
 

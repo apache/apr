@@ -57,7 +57,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 
-ap_status_t ap_get_curtime(struct atime_t *time, ap_time_t *rv)
+apr_status_t ap_get_curtime(struct atime_t *time, apr_time_t *rv)
 {
     if (time) {
         (*rv) = time->currtime;
@@ -66,7 +66,7 @@ ap_status_t ap_get_curtime(struct atime_t *time, ap_time_t *rv)
     return APR_ENOTIME;    
 }
 
-ap_status_t ap_get_sec(struct atime_t *time, ap_int32_t *rv)
+apr_status_t ap_get_sec(struct atime_t *time, apr_int32_t *rv)
 {
     if (time) {
         (*rv) = time->explodedtime->wSecond;
@@ -75,7 +75,7 @@ ap_status_t ap_get_sec(struct atime_t *time, ap_int32_t *rv)
     return APR_ENOTIME;
 }
 
-ap_status_t ap_get_min(struct atime_t *time, ap_int32_t *rv)
+apr_status_t ap_get_min(struct atime_t *time, apr_int32_t *rv)
 {
     if (time) {
         (*rv) = time->explodedtime->wMinute;
@@ -84,7 +84,7 @@ ap_status_t ap_get_min(struct atime_t *time, ap_int32_t *rv)
     return APR_ENOTIME;
 }
 
-ap_status_t ap_get_hour(struct atime_t *time, ap_int32_t *rv)
+apr_status_t ap_get_hour(struct atime_t *time, apr_int32_t *rv)
 {
     if (time) {
         (*rv) = time->explodedtime->wHour;
@@ -93,7 +93,7 @@ ap_status_t ap_get_hour(struct atime_t *time, ap_int32_t *rv)
     return APR_ENOTIME;
 }
 
-ap_status_t ap_get_mday(struct atime_t *time, ap_int32_t *rv)
+apr_status_t ap_get_mday(struct atime_t *time, apr_int32_t *rv)
 {
     if (time) {
         (*rv) = time->explodedtime->wDay;
@@ -102,7 +102,7 @@ ap_status_t ap_get_mday(struct atime_t *time, ap_int32_t *rv)
     return APR_ENOTIME;
 }
 
-ap_status_t ap_get_mon(struct atime_t *time, ap_int32_t *rv)
+apr_status_t ap_get_mon(struct atime_t *time, apr_int32_t *rv)
 {
     if (time) {
         (*rv) = time->explodedtime->wMonth;
@@ -111,7 +111,7 @@ ap_status_t ap_get_mon(struct atime_t *time, ap_int32_t *rv)
     return APR_ENOTIME;
 }
 
-ap_status_t ap_get_year(struct atime_t *time, ap_int32_t *rv)
+apr_status_t ap_get_year(struct atime_t *time, apr_int32_t *rv)
 {
     if (time) {
         (*rv) = time->explodedtime->wYear;
@@ -120,7 +120,7 @@ ap_status_t ap_get_year(struct atime_t *time, ap_int32_t *rv)
     return APR_ENOTIME;
 }
 
-ap_status_t ap_get_wday(struct atime_t *time, ap_int32_t *rv)
+apr_status_t ap_get_wday(struct atime_t *time, apr_int32_t *rv)
 {
     if (time) {
         (*rv) = time->explodedtime->wDayOfWeek;
@@ -129,13 +129,13 @@ ap_status_t ap_get_wday(struct atime_t *time, ap_int32_t *rv)
     return APR_ENOTIME;
 }
 
-ap_status_t ap_set_sec(struct atime_t *time, ap_int32_t value)
+apr_status_t ap_set_sec(struct atime_t *time, apr_int32_t value)
 {
     if (!time) {
         return APR_ENOTIME;
     }
     if (time->explodedtime == NULL) {
-        time->explodedtime = (SYSTEMTIME *)ap_pcalloc(time->cntxt, 
+        time->explodedtime = (SYSTEMTIME *)apr_pcalloc(time->cntxt, 
                               sizeof(SYSTEMTIME));
     }
     if (time->explodedtime == NULL) {
@@ -145,13 +145,13 @@ ap_status_t ap_set_sec(struct atime_t *time, ap_int32_t value)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_min(struct atime_t *time, ap_int32_t value)
+apr_status_t ap_set_min(struct atime_t *time, apr_int32_t value)
 {
     if (!time) {
         return APR_ENOTIME;
     }
     if (time->explodedtime == NULL) {
-        time->explodedtime = (SYSTEMTIME *)ap_pcalloc(time->cntxt, 
+        time->explodedtime = (SYSTEMTIME *)apr_pcalloc(time->cntxt, 
                               sizeof(SYSTEMTIME));
     }
     if (time->explodedtime == NULL) {
@@ -161,13 +161,13 @@ ap_status_t ap_set_min(struct atime_t *time, ap_int32_t value)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_hour(struct atime_t *time, ap_int32_t value)
+apr_status_t ap_set_hour(struct atime_t *time, apr_int32_t value)
 {
     if (!time) {
         return APR_ENOTIME;
     }
     if (time->explodedtime == NULL) {
-        time->explodedtime = (SYSTEMTIME *)ap_pcalloc(time->cntxt, 
+        time->explodedtime = (SYSTEMTIME *)apr_pcalloc(time->cntxt, 
                               sizeof(SYSTEMTIME));
     }
     if (time->explodedtime == NULL) {
@@ -177,13 +177,13 @@ ap_status_t ap_set_hour(struct atime_t *time, ap_int32_t value)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_mday(struct atime_t *time, ap_int32_t value)
+apr_status_t ap_set_mday(struct atime_t *time, apr_int32_t value)
 {
     if (!time) {
         return APR_ENOTIME;
     }
     if (time->explodedtime == NULL) {
-        time->explodedtime = (SYSTEMTIME *)ap_pcalloc(time->cntxt, 
+        time->explodedtime = (SYSTEMTIME *)apr_pcalloc(time->cntxt, 
                               sizeof(SYSTEMTIME));
     }
     if (time->explodedtime == NULL) {
@@ -193,13 +193,13 @@ ap_status_t ap_set_mday(struct atime_t *time, ap_int32_t value)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_mon(struct atime_t *time, ap_int32_t value)
+apr_status_t ap_set_mon(struct atime_t *time, apr_int32_t value)
 {
     if (!time) {
         return APR_ENOTIME;
     }
     if (time->explodedtime == NULL) {
-        time->explodedtime = (SYSTEMTIME *)ap_pcalloc(time->cntxt, 
+        time->explodedtime = (SYSTEMTIME *)apr_pcalloc(time->cntxt, 
                               sizeof(SYSTEMTIME));
     }
     if (time->explodedtime == NULL) {
@@ -209,13 +209,13 @@ ap_status_t ap_set_mon(struct atime_t *time, ap_int32_t value)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_year(struct atime_t *time, ap_int32_t value)
+apr_status_t ap_set_year(struct atime_t *time, apr_int32_t value)
 {
     if (!time) {
         return APR_ENOTIME;
     }
     if (time->explodedtime == NULL) {
-        time->explodedtime = (SYSTEMTIME *)ap_pcalloc(time->cntxt, 
+        time->explodedtime = (SYSTEMTIME *)apr_pcalloc(time->cntxt, 
                               sizeof(SYSTEMTIME));
     }
     if (time->explodedtime == NULL) {
@@ -225,13 +225,13 @@ ap_status_t ap_set_year(struct atime_t *time, ap_int32_t value)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_wday(struct atime_t *time, ap_int32_t value)
+apr_status_t ap_set_wday(struct atime_t *time, apr_int32_t value)
 {
     if (!time) {
         return APR_ENOTIME;
     }
     if (time->explodedtime == NULL) {
-        time->explodedtime = (SYSTEMTIME *)ap_pcalloc(time->cntxt, 
+        time->explodedtime = (SYSTEMTIME *)apr_pcalloc(time->cntxt, 
                               sizeof(SYSTEMTIME));
     }
     if (time->explodedtime == NULL) {

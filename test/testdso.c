@@ -9,11 +9,11 @@
 
 int main (int argc, char ** argv)
 {
-    ap_dso_handle_t *h = NULL;
-    ap_dso_handle_sym_t func1 = NULL;
-    ap_dso_handle_sym_t func2 = NULL;
-    ap_status_t status;
-    ap_pool_t *cont;
+    apr_dso_handle_t *h = NULL;
+    apr_dso_handle_sym_t func1 = NULL;
+    apr_dso_handle_sym_t func2 = NULL;
+    apr_status_t status;
+    apr_pool_t *cont;
     void (*function)(void);
     void (*function1)(int);
     int *retval;
@@ -23,19 +23,19 @@ int main (int argc, char ** argv)
     strcat(filename, "/");
     strcat(filename, LIB_NAME);
 
-    ap_initialize();
-    atexit(ap_terminate);
+    apr_initialize();
+    atexit(apr_terminate);
         
-    if (ap_create_pool(&cont, NULL) != APR_SUCCESS) {
+    if (apr_create_pool(&cont, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
 
     fprintf(stdout,"Trying to load DSO now.....................");
     fflush(stdout);
-    if ((status = ap_dso_load(&h, filename, cont)) != APR_SUCCESS){
+    if ((status = apr_dso_load(&h, filename, cont)) != APR_SUCCESS){
         char my_error[256];
-        ap_strerror(status, my_error, sizeof(my_error));
+        apr_strerror(status, my_error, sizeof(my_error));
         fprintf(stderr, "%s!\n", my_error);
         exit (-1);
     }
@@ -43,7 +43,7 @@ int main (int argc, char ** argv)
 
     fprintf(stdout,"Trying to get the DSO's attention..........");
     fflush(stdout);
-    if (ap_dso_sym(&func1, h, "print_hello") != APR_SUCCESS) { 
+    if (apr_dso_sym(&func1, h, "print_hello") != APR_SUCCESS) { 
         fprintf(stderr, "Failed!\n");
         exit (-1);
     }        
@@ -54,7 +54,7 @@ int main (int argc, char ** argv)
 
     fprintf(stdout,"Saying farewell 5 times....................");
     fflush(stdout);
-    if (ap_dso_sym(&func2, h, "print_goodbye") != APR_SUCCESS) {
+    if (apr_dso_sym(&func2, h, "print_goodbye") != APR_SUCCESS) {
         fprintf(stderr, "Failed!\n");
         exit (-1);
     }        
@@ -65,7 +65,7 @@ int main (int argc, char ** argv)
 
     fprintf(stdout,"Checking how many times I said goodbye..");
     fflush(stdout);
-    if (ap_dso_sym(&func1, h, "goodbyes") != APR_SUCCESS) {
+    if (apr_dso_sym(&func1, h, "goodbyes") != APR_SUCCESS) {
         fprintf(stderr, "Failed!\n");
         exit (-1);
     }
@@ -79,7 +79,7 @@ int main (int argc, char ** argv)
     }
        
     fprintf(stdout,"Trying to unload DSO now...................");
-    if (ap_dso_unload(h) != APR_SUCCESS) {
+    if (apr_dso_unload(h) != APR_SUCCESS) {
         fprintf(stderr, "Failed!\n");
         exit (-1);
     }
@@ -87,7 +87,7 @@ int main (int argc, char ** argv)
 
     fprintf(stdout,"Checking it's been unloaded................");
     fflush(stdout);
-    if (ap_dso_sym(&func1, h, "print_hello") == APR_SUCCESS) {
+    if (apr_dso_sym(&func1, h, "print_hello") == APR_SUCCESS) {
         fprintf(stderr, "Failed!\n");
         exit (-1);
     }        

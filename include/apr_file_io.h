@@ -73,7 +73,7 @@ extern "C" {
 typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK, 
               APR_SOCK} ap_filetype_e; 
 
-/* Flags for ap_open */
+/* Flags for apr_open */
 #define APR_READ       1           /* Open the file for reading */
 #define APR_WRITE      2           /* Open the file for writing */
 #define APR_CREATE     4           /* Create the file if not there */
@@ -85,7 +85,7 @@ typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 #define APR_BUFFERED   128         /* Open the file for buffered I/O */
 #define APR_DELONCLOSE 256         /* Delete the file after close */
 
-/* flags for ap_seek */
+/* flags for apr_seek */
 #define APR_SET SEEK_SET
 #define APR_CUR SEEK_CUR
 #define APR_END SEEK_END
@@ -106,28 +106,28 @@ typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK,
 #define APR_OS_DEFAULT 0xFFF
 
 /* should be same as whence type in lseek, POSIX defines this as int */
-typedef ap_int32_t       ap_seek_where_t;
+typedef apr_int32_t       apr_seek_where_t;
 
-typedef struct ap_file_t         ap_file_t;
-typedef struct ap_finfo_t        ap_finfo_t;
-typedef struct ap_dir_t          ap_dir_t;
-typedef ap_int32_t               ap_fileperms_t;
-typedef uid_t                    ap_uid_t;
-typedef gid_t                    ap_gid_t;
-typedef ino_t                    ap_ino_t;
-typedef dev_t                    ap_dev_t;
+typedef struct apr_file_t         apr_file_t;
+typedef struct apr_finfo_t        apr_finfo_t;
+typedef struct apr_dir_t          apr_dir_t;
+typedef apr_int32_t               apr_fileperms_t;
+typedef uid_t                    apr_uid_t;
+typedef gid_t                    apr_gid_t;
+typedef ino_t                    apr_ino_t;
+typedef dev_t                    apr_dev_t;
 
-struct ap_finfo_t {
-    ap_fileperms_t protection;
+struct apr_finfo_t {
+    apr_fileperms_t protection;
     ap_filetype_e filetype;
-    ap_uid_t user;
-    ap_gid_t group;
-    ap_ino_t inode;
-    ap_dev_t device;
-    ap_off_t size;
-    ap_time_t atime;
-    ap_time_t mtime;
-    ap_time_t ctime;
+    apr_uid_t user;
+    apr_gid_t group;
+    apr_ino_t inode;
+    apr_dev_t device;
+    apr_off_t size;
+    apr_time_t atime;
+    apr_time_t mtime;
+    apr_time_t ctime;
 };
 
 /*   Function definitions */
@@ -155,14 +155,14 @@ struct ap_finfo_t {
  *      default permissions will be used.  *arg1 must point to a valid file_t, 
  *      or NULL (in which case it will be allocated)
  */
-ap_status_t ap_open(ap_file_t **new_file, const char *fname, ap_int32_t flag, 
-                    ap_fileperms_t perm, ap_pool_t *cont);
+apr_status_t apr_open(apr_file_t **new_file, const char *fname, apr_int32_t flag, 
+                    apr_fileperms_t perm, apr_pool_t *cont);
 
 /**
  * Close the specified file.
  * @param file The file descriptor to close.
  */
-ap_status_t ap_close(ap_file_t *file);
+apr_status_t apr_close(apr_file_t *file);
 
 /**
  * delete the specified file.
@@ -170,7 +170,7 @@ ap_status_t ap_close(ap_file_t *file);
  * @param cont The pool to use.
  * @tip If the file is open, it won't be removed until all instances are closed.
  */
-ap_status_t ap_remove_file(const char *path, ap_pool_t *cont);
+apr_status_t apr_remove_file(const char *path, apr_pool_t *cont);
 
 /**
  * rename the specified file.
@@ -180,36 +180,36 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cont);
  * @tip If a file exists at the new location, then it will be overwritten.  
  *      Moving files or directories across devices may not be possible.
  */
-ap_status_t ap_rename_file(const char *from_path, const char *to_path,
-                           ap_pool_t *pool);
+apr_status_t apr_rename_file(const char *from_path, const char *to_path,
+                           apr_pool_t *pool);
 
 /**
  * Are we at the end of the file
  * @param fptr The apr file we are testing.
  * @tip Returns APR_EOF if we are at the end of file, APR_SUCCESS otherwise.
  */
-ap_status_t ap_eof(ap_file_t *fptr);
+apr_status_t apr_eof(apr_file_t *fptr);
 
 /**
  * Is there an error on the stream?
  * @param fptr The apr file we are testing.
  * @tip Returns -1 if the error indicator is set, APR_SUCCESS otherwise.
  */
-ap_status_t ap_ferror(ap_file_t *fptr);
+apr_status_t apr_ferror(apr_file_t *fptr);
 
 /**
  * open standard error as an apr file pointer.
  * @param thefile The apr file to use as stderr.
  * @param cont The pool to allocate the file out of.
  */
-ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont);
+apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont);
 
 /**
  * Read data from the specified file.
  * @param thefile The file descriptor to read from.
  * @param buf The buffer to store the data to.
  * @param nbytes On entry, the number of bytes to read; on exit, the number of bytes read.
- * @tip ap_read will read up to the specified number of bytes, but never 
+ * @tip apr_read will read up to the specified number of bytes, but never 
  *      more.  If there isn't enough data to fill that number of bytes, all 
  *      of the available data is read.  The third argument is modified to 
  *      reflect the number of bytes read.  If a char was put back into the 
@@ -220,14 +220,14 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont);
  *
  *      APR_EINTR is never returned.
  */
-ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
+apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *nbytes);
 
 /**
  * Write data to the specified file.
  * @param thefile The file descriptor to write to.
  * @param buf The buffer which contains the data.
  * @param nbytes On entry, the number of bytes to write; on exit, the number of bytes written.
- * @tip ap_write will write up to the specified number of bytes, but never 
+ * @tip apr_write will write up to the specified number of bytes, but never 
  *      more.  If the OS cannot write that many bytes, it will write as many 
  *      as it can.  The third argument is modified to reflect the * number 
  *      of bytes written. 
@@ -236,7 +236,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
  *
  *      APR_EINTR is never returned.
  */
-ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes);
+apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes);
 
 /**
  * Write data from iovec array to the specified file.
@@ -249,12 +249,12 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes);
  * @tip It is possible for both bytes to be written and an error to be returned.
  *      APR_EINTR is never returned.
  *
- *      ap_writev is available even if the underlying operating system 
+ *      apr_writev is available even if the underlying operating system 
  *
  *      doesn't provide writev().
  */
-ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, 
-                      ap_size_t nvec, ap_ssize_t *nbytes);
+apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, 
+                      apr_size_t nvec, apr_ssize_t *nbytes);
 
 /**
  * Read data from the specified file.
@@ -262,7 +262,7 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
  * @param buf The buffer to store the data to.
  * @param nbytes The number of bytes to read.
  * @param bytes_read If non-NULL, this will contain the number of bytes read.
- * @tip ap_read will read up to the specified number of bytes, but never 
+ * @tip apr_read will read up to the specified number of bytes, but never 
  *      more.  If there isn't enough data to fill that number of bytes, 
  *      then the process/thread will block until it is available or EOF 
  *      is reached.  If a char was put back into the stream via ungetc, 
@@ -273,8 +273,8 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec,
  *
  *      APR_EINTR is never returned.
  */
-ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
-                         ap_size_t *bytes_read);
+apr_status_t apr_full_read(apr_file_t *thefile, void *buf, apr_size_t nbytes,
+                         apr_size_t *bytes_read);
 
 /**
  * Write data to the specified file.
@@ -282,7 +282,7 @@ ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
  * @param buf The buffer which contains the data.
  * @param nbytes The number of bytes to write.
  * @param bytes_written If non-NULL, this will contain the number of bytes written.
- * @tip ap_write will write up to the specified number of bytes, but never 
+ * @tip apr_write will write up to the specified number of bytes, but never 
  *      more.  If the OS cannot write that many bytes, the process/thread 
  *      will block until they can be written. Exceptional error such as 
  *      "out of space" or "pipe closed" will terminate with an error.
@@ -291,29 +291,29 @@ ap_status_t ap_full_read(ap_file_t *thefile, void *buf, ap_size_t nbytes,
  *
  *      APR_EINTR is never returned.
  */
-ap_status_t ap_full_write(ap_file_t *thefile, const void *buf,
-                          ap_size_t nbytes, ap_size_t *bytes_written);
+apr_status_t apr_full_write(apr_file_t *thefile, const void *buf,
+                          apr_size_t nbytes, apr_size_t *bytes_written);
 
 /**
  * put a character into the specified file.
  * @param ch The character to write.
  * @param thefile The file descriptor to write to
  */
-ap_status_t ap_putc(char ch, ap_file_t *thefile);
+apr_status_t apr_putc(char ch, apr_file_t *thefile);
 
 /**
  * get a character from the specified file.
  * @param ch The character to write.
  * @param thefile The file descriptor to write to
  */
-ap_status_t ap_getc(char *ch, ap_file_t *thefile);
+apr_status_t apr_getc(char *ch, apr_file_t *thefile);
 
 /**
  * put a character back onto a specified stream.
  * @param ch The character to write.
  * @param thefile The file descriptor to write to
  */
-ap_status_t ap_ungetc(char ch, ap_file_t *thefile);
+apr_status_t apr_ungetc(char ch, apr_file_t *thefile);
 
 /**
  * Get a string from a specified file.
@@ -321,36 +321,36 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile);
  * @param len The length of the string
  * @param thefile The file descriptor to read from
  */
-ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile);
+apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile);
 
 /**
  * Put the string into a specified file.
  * @param str The string to write. 
  * @param thefile The file descriptor to write to
  */
-ap_status_t ap_puts(const char *str, ap_file_t *thefile);
+apr_status_t apr_puts(const char *str, apr_file_t *thefile);
 
 /**
  * Flush the file's buffer.
  * @param thefile The file descriptor to flush
  */
-ap_status_t ap_flush(ap_file_t *thefile);
+apr_status_t apr_flush(apr_file_t *thefile);
 
 /**
  * duplicate the specified file descriptor.
  * @param new_file The structure to duplicate into. 
  * @param old_file The file to duplicate.
  * @param p The pool to use for the new file.
- * @tip *arg1 must point to a valid ap_file_t, or point to NULL
+ * @tip *arg1 must point to a valid apr_file_t, or point to NULL
  */         
-ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p);
+apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p);
 
 /**
  * get the specified file's stats.
  * @param finfo Where to store the information about the file.
  * @param thefile The file to get information about.
  */ 
-ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
+apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile);
 
 /**
  * set the specified file's permission bits.
@@ -362,7 +362,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
  *
  *      Platforms which do not implement this feature will return APR_ENOTIMPL.
  */
-ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms);
+apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms);
 
 /**
  * get the specified file's stats.  The file is specified by filename, 
@@ -371,7 +371,7 @@ ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms);
  * @param fname The name of the file to stat.
  * @param cont the pool to use to allocate the new file. 
  */ 
-ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
+apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont);
 
 /**
  * get the specified file's stats.  The file is specified by filename, 
@@ -381,7 +381,7 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
  * @param fname The name of the file to stat.
  * @param cont the pool to use to allocate the new file. 
  */ 
-ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
+apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont);
 
 /**
  * Move the read/write file offset to a specified byte within a file.
@@ -395,7 +395,7 @@ ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
  * @tip The third argument is modified to be the offset the pointer
           was actually moved to.
  */
-ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where,ap_off_t *offset);
+apr_status_t apr_seek(apr_file_t *thefile, apr_seek_where_t where,apr_off_t *offset);
 
 /**
  * Open the specified directory.
@@ -403,26 +403,26 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where,ap_off_t *offset);
  * @param dirname The full path to the directory (use / on all systems)
  * @param cont The pool to use.
  */                        
-ap_status_t ap_opendir(ap_dir_t **new_dir, const char *dirname, ap_pool_t *cont);
+apr_status_t apr_opendir(apr_dir_t **new_dir, const char *dirname, apr_pool_t *cont);
 
 /**
  * close the specified directory. 
  * @param thedir the directory descriptor to close.
  */                        
-ap_status_t ap_closedir(ap_dir_t *thedir);
+apr_status_t apr_closedir(apr_dir_t *thedir);
 
 /**
  * Read the next entry from the specified directory. 
  * @param thedir the directory descriptor to read from, and fill out.
  * @tip All systems return . and .. as the first two files.
  */                        
-ap_status_t ap_readdir(ap_dir_t *thedir);
+apr_status_t apr_readdir(apr_dir_t *thedir);
 
 /**
  * Rewind the directory to the first entry.
  * @param thedir the directory descriptor to rewind.
  */                        
-ap_status_t ap_rewinddir(ap_dir_t *thedir);
+apr_status_t apr_rewinddir(apr_dir_t *thedir);
 
 /**
  * Create a new directory on the file system.
@@ -430,15 +430,15 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir);
  * @param perm Permissions for the new direcoty.
  * @param cont the pool to use.
  */                        
-ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, 
-                        ap_pool_t *cont);
+apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, 
+                        apr_pool_t *cont);
 
 /**
  * Remove directory from the file system.
  * @param path the path for the directory to be removed.  (use / on all systems)
  * @param cont the pool to use.
  */                        
-ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont);
+apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont);
 
 /**
  * Create an anonymous pipe.
@@ -446,7 +446,7 @@ ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont);
  * @param out The file descriptor to use as output from the pipe.
  * @param cont The pool to operate on.
  */
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont);
+apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont);
 
 /**
  * Create a named pipe.
@@ -454,8 +454,8 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont);
  * @param perm The permissions for the newly created pipe.
  * @param cont The pool to operate on.
  */
-ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, 
-                                ap_pool_t *cont);
+apr_status_t apr_create_namedpipe(const char *filename, apr_fileperms_t perm, 
+                                apr_pool_t *cont);
 
 /**
  * Set the timeout value for a pipe or manipulate the blocking state.
@@ -463,7 +463,7 @@ ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm,
  * @param timeoutThe timeout value in microseconds.  Values < 0 mean wait 
  *        forever, 0 means do not wait at all.
  */
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout);
+apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout);
 
 /**accessor and general file_io functions. */
 
@@ -472,14 +472,14 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout);
  * @param new_path The path of the file.  
  * @param thefile The currently open file.
  */                     
-ap_status_t ap_get_filename(char **new_path, ap_file_t *thefile);
+apr_status_t apr_get_filename(char **new_path, apr_file_t *thefile);
 
 /**
  * Get the file name of the current directory entry.
  * @param new_path the file name of the directory entry. 
  * @param thedir the currently open directory.
  */                        
-ap_status_t ap_get_dir_filename(char **new_path, ap_dir_t *thedir);
+apr_status_t apr_get_dir_filename(char **new_path, apr_dir_t *thedir);
 
 /**
  * Return the data associated with the current file.
@@ -487,7 +487,7 @@ ap_status_t ap_get_dir_filename(char **new_path, ap_dir_t *thedir);
  * @param key The key to use for retreiving data associated with this file.
  * @param file The currently open file.
  */                     
-ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file);
+apr_status_t apr_get_filedata(void **data, const char *key, apr_file_t *file);
 
 /**
  * Set the data associated with the current file.
@@ -496,29 +496,29 @@ ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file);
  * @param key The key to use for assocaiteing data with the file.
  * @param cleanup The cleanup routine to use when the file is destroyed.
  */                     
-ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key,
-                            ap_status_t (*cleanup) (void *));
+apr_status_t apr_set_filedata(apr_file_t *file, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *));
 
 /**
  * Get the size of the current directory entry.
  * @param size the size of the directory entry. 
  * @param thedir the currently open directory.
  */                        
-ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir);
+apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir);
 
 /**
  * Get the last modified time of the current directory entry.
  * @param mtime the last modified time of the directory entry. 
  * @param thedir the currently open directory.
  */ 
-ap_status_t ap_dir_entry_mtime(ap_time_t *mtime, ap_dir_t *thedir);
+apr_status_t apr_dir_entry_mtime(apr_time_t *mtime, apr_dir_t *thedir);
 
 /**
  * Get the file type of the current directory entry.
  * @param type the file type of the directory entry. 
  * @param thedir the currently open directory.
  */
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir);
+apr_status_t apr_dir_entry_ftype(ap_filetype_e *type, apr_dir_t *thedir);
 
 /**
  * Write a string to a file using a printf format.
@@ -526,9 +526,9 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir);
  * @param format The format string
  * @param ... The values to substitute in the format string
  * @return The number of bytes written
- * @deffunc int ap_fprintf(ap_file_t *fptr, const char *format, ...)
+ * @deffunc int apr_fprintf(apr_file_t *fptr, const char *format, ...)
  */ 
-APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
 #ifdef __cplusplus
