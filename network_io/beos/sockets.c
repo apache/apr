@@ -102,7 +102,7 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
 
 ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
 {
-    return APR_SUCCESS;
+    return shutdown(thesocket->socketdes, how);
 }
 
 ap_status_t ap_close_socket(ap_socket_t *thesocket)

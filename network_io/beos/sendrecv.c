@@ -54,6 +54,40 @@
 
 #include "networkio.h"
 
+static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
+{
+    struct timeval tv, *tvptr;
+    fd_set fdset;
+    int srv;
+
+    do {
+        FD_ZERO(&fdset);
+        FD_SET(sock->socketdes, &fdset);
+        if (sock->timeout < 0) {
+            tvptr = NULL;
+        }
+        else {
+            tv.tv_sec = sock->timeout / AP_USEC_PER_SEC;
+            tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
+            tvptr = &tv;
+        }
+        srv = select(sock->socketdes + 1,
+            for_read ? &fdset : NULL,
+            for_read ? NULL : &fdset, 
+            NULL,
+            tvptr);
+            /* TODO - timeout should be smaller on repeats of this loop */
+    } while (srv == -1 && errno == EINTR);
+
+    if (srv == 0) {
+        return APR_TIMEUP;
+    }
+    else if (srv < 0) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+
 ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
@@ -62,38 +96,21 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
         rv = send(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
-        struct timeval tv, *tvptr;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout == -1)
-                tvptr = NULL;
-            else {
-                tv.tv_sec  = sock->timeout / AP_USEC_PER_SEC;
-                tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
-                tvptr = &tv;
-            }
-            
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tvptr);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        if (srv < 1) {
-            (*len) = -1;
-            return errno;
+    if (rv == -1 && errno == EWOULDBLOCK && sock->timeout > 0) {
+        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
         }
         else {
             do {
-                rv = send(sock->socketdes, buf, (*len),0);
+                rv = send(sock->socketdes, buf, (*len), 0);
             } while (rv == -1 && errno == EINTR);
         }
+    }
+    if (rv == -1) {
+        *len = 0;
+        return errno;
     }
     (*len) = rv;
     return APR_SUCCESS;
@@ -107,38 +124,21 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
         rv = recv(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
-        struct timeval tv, *tvptr;
-        fd_set fdset;
-        int srv;
-
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout == -1)
-                tvptr = NULL;
-            else {
-                tv.tv_sec  = sock->timeout / AP_USEC_PER_SEC;
-                tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
-                tvptr = &tv;
-            }
-            
-            srv = select(FD_SETSIZE, &fdset, NULL, NULL, tvptr);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        if (srv < 1) {
-            (*len) = -1;
-            return errno;
+    if (rv == -1 && errno == EWOULDBLOCK && sock->timeout > 0) {
+        ap_status_t arv = wait_for_io_or_timeout(sock, 1);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
         }
         else {
             do {
                 rv = recv(sock->socketdes, buf, (*len), 0);
             } while (rv == -1 && errno == EINTR);
         }
+    }
+    if (rv == -1) {
+        (*len) = 0;
+        return errno;
     }
     (*len) = rv;
     return APR_SUCCESS;
