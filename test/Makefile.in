@@ -1,5 +1,5 @@
 
-TARGETS = \
+PROGRAMS = \
 	client@EXEEXT@ \
 	sendfile@EXEEXT@ \
 	server@EXEEXT@ \
@@ -20,6 +20,8 @@ TARGETS = \
         testsockopt@EXEEXT@ \
 	occhild@EXEEXT@ \
 	mod_test.so
+
+TARGETS = $(PROGRAMS)
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
