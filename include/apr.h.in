@@ -249,8 +249,8 @@ typedef  @socklen_t_value@       apr_socklen_t;
 /* And APR_OFF_T_FMT */
 @off_t_fmt@
 
-/* And APR_OS_PROC_T_FMT */
-@os_proc_t_fmt@
+/* And APR_PID_T_FMT */
+@pid_t_fmt@
 
 /* And APR_INT64_T_FMT */
 @int64_t_fmt@
