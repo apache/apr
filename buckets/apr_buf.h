@@ -358,12 +358,6 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
  */
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e);
 
-/* destroy an entire list of buckets.  I am not sure how useful this is,
- * because it basically duplicates some logic in the bucket_brigade section.
- * I need to review where this is used and remove it if at all possible.
- */
-APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e);
-
 /* get the length of the data in the bucket that is currently being
  * referenced.  The bucket may contain more data, but if the start or end
  * has been moved, we really don't care about it.
