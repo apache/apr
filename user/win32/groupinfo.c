@@ -136,3 +136,10 @@ APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right)
 #endif
     return APR_SUCCESS;
 }
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, 
+                                            apr_gid_t groupid, apr_pool_t *p)
+{
+    return apr_group_name_get(groupname, groupid, p);
+}
