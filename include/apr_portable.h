@@ -58,9 +58,14 @@
  */
 #ifndef APR_PORTABLE_H
 #define APR_PORTABLE_H
-
+/*
+ * @file apr_portable.h
+ * @brief APR Portability Routines
+ */
 /**
- * @package APR portability Routines
+ * @defgroup APR_portability Portability Routines
+ * @ingroup APR
+ * @{
  */
 
 #include "apr.h"
@@ -202,15 +207,19 @@ typedef void *                apr_os_dso_handle_t;
 #endif
 
 /**
+ * @typedef apr_os_sock_t
+ * @brief alias for local OS socket
+ */
+/**
  * everything APR needs to know about an active socket to construct
  * an APR socket from it; currently, this is platform-independent
  */
 struct apr_os_sock_info_t {
-    apr_os_sock_t *os_sock; /* always required */
-    struct sockaddr *local; /* NULL if not yet bound */
-    struct sockaddr *remote; /* NULL if not connected */
-    int family;             /* always required (APR_INET, APR_INET6, etc. */
-    int type;               /* always required (SOCK_STREAM, SOCK_DGRAM, etc. */
+    apr_os_sock_t *os_sock; /**< always required */
+    struct sockaddr *local; /**< NULL if not yet bound */
+    struct sockaddr *remote; /**< NULL if not connected */
+    int family;             /**< always required (APR_INET, APR_INET6, etc. */
+    int type;               /**< always required (SOCK_STREAM, SOCK_DGRAM, etc. */
 };
 
 typedef struct apr_os_sock_info_t apr_os_sock_info_t;
@@ -460,5 +469,7 @@ APR_DECLARE(apr_status_t) apr_sms_thread_unregister(apr_sms_t *sms,
 #ifdef __cplusplus
 }
 #endif
+
+/** @} */
 
 #endif  /* ! APR_PORTABLE_H */
