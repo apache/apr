@@ -165,7 +165,7 @@ static void *apr_sms_threads_malloc(apr_sms_t *sms,
    
     /* If the thread wasn't registered before, we will segfault */ 
     thread_node = SMS_THREADS_T(sms)->hashtable[hash];
-    while (!apr_os_thread_equal(thread_node->thread, thread))
+    while (thread_node->thread != thread)
         thread_node = thread_node->next;
    
     node = thread_node->used_sentinel.prev;
@@ -309,7 +309,7 @@ static apr_status_t apr_sms_threads_free(apr_sms_t *sms, void *mem)
     hash = THREAD_HASH(thread);
     
     thread_node = SMS_THREADS_T(sms)->hashtable[hash];
-    while (!apr_os_thread_equal(thread_node->thread, thread))
+    while (thread_node->thread != thread)
         thread_node = thread_node->next;
 
     node->avail_size += node->first_avail - 
@@ -639,7 +639,7 @@ static apr_status_t apr_sms_threads_thread_unregister(apr_sms_t *sms,
         apr_lock_acquire(SMS_THREADS_T(sms)->lock);
 
     thread_node = SMS_THREADS_T(sms)->hashtable[hash];
-    while (!apr_os_thread_equal(thread_node->thread, thread))
+    while (thread_node->thread != thread)
         thread_node = thread_node->next;
 
     if ((*thread_node->ref = thread_node->next) != NULL)

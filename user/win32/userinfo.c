@@ -189,39 +189,6 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
-                                             apr_gid_t *gid,
-                                             apr_pool_t *p)
-{
-    HANDLE threadtok;
-    DWORD needed;
-    TOKEN_USER *usr;
-    TOKEN_PRIMARY_GROUP *grp;
-    
-    if(!OpenProcessToken(GetCurrentProcess(), STANDARD_RIGHTS_READ | READ_CONTROL | TOKEN_QUERY, &threadtok)) {
-        return apr_get_os_error();
-    }
-
-    *uid = NULL;
-    if (!GetTokenInformation(threadtok, TokenUser, NULL, 0, &needed)
-        && (GetLastError() == ERROR_INSUFFICIENT_BUFFER) 
-        && (usr = apr_palloc(p, needed))
-        && GetTokenInformation(threadtok, TokenUser, usr, needed, &needed))
-        *uid = usr->User.Sid;
-    else
-        return apr_get_os_error();
-
-    if (!GetTokenInformation(threadtok, TokenPrimaryGroup, NULL, 0, &needed)
-        && (GetLastError() == ERROR_INSUFFICIENT_BUFFER) 
-        && (grp = apr_palloc(p, needed))
-        && GetTokenInformation(threadtok, TokenPrimaryGroup, grp, needed, &needed))
-        *gid = grp->PrimaryGroup;
-    else
-        return apr_get_os_error();
-
-    return APR_SUCCESS;
-}
-
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
                                          const char *username, apr_pool_t *p)
 {

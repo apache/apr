@@ -111,21 +111,6 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname,
     return APR_SUCCESS;
 }
 
-
-
-APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
-                                             apr_gid_t *gid,
-                                             apr_pool_t *p)
-{
-    *uid = getuid();
-    *gid = getgid();
-  
-    return APR_SUCCESS;
-}
-
-
-
-
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
                                          const char *username, apr_pool_t *p)
 {

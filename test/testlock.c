@@ -73,8 +73,8 @@ int main(void)
 
 #define MAX_ITER 40000
 
-void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_rw_func(void *data);
+void * APR_THREAD_FUNC thread_function(void *data);
 apr_status_t test_exclusive(void);
 apr_status_t test_rw(void);
 apr_status_t test_multiple_locking(void);
@@ -85,7 +85,7 @@ apr_lock_t *thread_rw_lock, *thread_lock;
 apr_pool_t *pool;
 int i = 0, x = 0;
 
-void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data)
+void * APR_THREAD_FUNC thread_rw_func(void *data)
 {
     int exitLoop = 1;
 
@@ -110,7 +110,7 @@ void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data)
     return NULL;
 } 
 
-void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data)
+void * APR_THREAD_FUNC thread_function(void *data)
 {
     int exitLoop = 1;
 

@@ -90,18 +90,6 @@ typedef gid_t                     apr_gid_t;
 #if APR_HAS_USER
 
 /***
- * Get the userid (and groupid) of the calling process
- * @param userid   Returns the user id
- * @param groupid  Returns the user's group id
- * @param p The pool from which to allocate working space
- * @tip This function is available only if APR_HAS_USER is defined.
- * @deffunc apr_status_t apr_current_userid(apr_uid_t *userid, apr_gid_t *groupid, apr_pool_t *p)
- */
-APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *userid,
-                                             apr_gid_t *groupid,
-                                             apr_pool_t *p);
-
-/***
  * Get the user name for a specified userid
  * @param username Pointer to new string containing user name (on output)
  * @param userid The userid

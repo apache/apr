@@ -72,11 +72,19 @@ int main(int argc, char *argv[])
     apr_pool_t *p;
     apr_status_t rv;
     char msgbuf[80];
-    char *groupname;
-    char *username;
+    const char *username;
     char *homedir;
     apr_uid_t userid;
     apr_gid_t groupid;
+
+    if (argc != 2) {
+        fprintf(stderr,
+                "usage: %s username\n",
+                argv[0]);
+        exit(-1);
+    }
+
+    username = argv[1];
 
     if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
@@ -89,42 +97,6 @@ int main(int argc, char *argv[])
         exit(-1);
     }
 
-    if (argc != 2) {
-        fprintf(stderr,
-                "optional: %s username\n",
-                argv[0]);
-        if ((rv = apr_current_userid(&userid, &groupid, p)) != APR_SUCCESS) {
-            fprintf(stderr, "apr_current_userid failed: %s\n",
-                    apr_strerror(rv, msgbuf, sizeof(msgbuf)));
-            exit(-1);
-        }
-        apr_get_username(&username, userid, p);
-        if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_get_username(,,) failed: %s\n",
-                    apr_strerror(rv, msgbuf, sizeof(msgbuf)));
-            exit(-1);
-        }
-    }
-    else {
-        username = argv[1];
-
-        rv = apr_get_userid(&userid, &groupid, username, p);
-        if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_get_userid(,,%s,) failed: %s\n",
-                    username,
-                    apr_strerror(rv, msgbuf, sizeof(msgbuf)));
-            exit(-1);
-        }
-    }
-
-    rv = apr_get_groupname(&groupname, groupid, p);
-    if (rv != APR_SUCCESS)
-        groupname = "(none)";
-
-    printf("user/group ids for %s: %d/%d\n",
-           username,
-           (int)userid, (int)groupid);
-
     rv = apr_get_home_directory(&homedir, username, p);
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "apr_get_home_directory(,%s,) failed: %s\n",
@@ -132,8 +104,23 @@ int main(int argc, char *argv[])
                 apr_strerror(rv, msgbuf, sizeof(msgbuf)));
         exit(-1);
     }
-    printf("home directory for %s (member of %s) is:\n`%s'\n",
-           username, groupname, homedir);
+    else {
+        printf("home directory for %s: `%s'\n",
+               username, homedir);
+    }
+
+    rv = apr_get_userid(&userid, &groupid, username, p);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "apr_get_userid(,,%s,) failed: %s\n",
+                username,
+                apr_strerror(rv, msgbuf, sizeof(msgbuf)));
+        exit(-1);
+    }
+    else {
+        printf("user/group ids for %s: %d/%d\n",
+               username,
+               (int)userid, (int)groupid);
+    }
 
     return 1;
 }
