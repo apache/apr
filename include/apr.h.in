@@ -69,7 +69,7 @@
 #define APR_HAVE_STRDUP         @have_strdup@
 #define APR_HAVE_STRSTR         @have_strstr@
 #define APR_HAVE_MEMMOVE        @have_memmove@
-#define APR_HAVE_BCOPY          @have_bcopy@
+#define APR_HAVE_BZERO          @have_bzero@
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
