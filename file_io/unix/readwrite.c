@@ -149,7 +149,7 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
 
-    if (thefile->filedes < 0) {
+    if (thefile->filedes < 0 && !thefile->buffered) {
         *nbytes = 0;
         return APR_EBADF;
     }
