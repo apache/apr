@@ -125,8 +125,8 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                             apr_pool_t *token_context)
 {
     const char *cp;
-    const char *tmpCnt;
-    int isquoted, numargs = 0, rc = APR_SUCCESS;
+    const char *ct;
+    int isquoted, numargs = 0;
 
 #define SKIP_WHITESPACE(cp) \
     for ( ; *cp == ' ' || *cp == '\t'; ) { \
@@ -159,44 +159,39 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
 
     cp = arg_str;
     SKIP_WHITESPACE(cp);
-    tmpCnt = cp;
+    ct = cp;
 
     /* This is ugly and expensive, but if anyone wants to figure a
      * way to support any number of args without counting and 
      * allocating, please go ahead and change the code.
+     *
+     * Must account for the trailing NULL arg.
      */
-    while (*tmpCnt != '\0') {
-        CHECK_QUOTATION(tmpCnt, isquoted);
-        DETERMINE_NEXTSTRING(tmpCnt, isquoted);
+    numargs = 1;
+    while (*ct != '\0') {
+        CHECK_QUOTATION(ct, isquoted);
+        DETERMINE_NEXTSTRING(ct, isquoted);
+        ct++;
         numargs++;
-        SKIP_WHITESPACE(tmpCnt);
+        SKIP_WHITESPACE(ct);
     }
-
-    *argv_out = apr_palloc(token_context, (numargs + 1)*sizeof(char*));
-    if (*argv_out == NULL) {
-        return (APR_ENOMEM);
-    }
+    *argv_out = apr_palloc(token_context, numargs * sizeof(char*));
 
     /*  determine first argument */
     numargs = 0;
     while (*cp != '\0') {
         CHECK_QUOTATION(cp, isquoted);
-        tmpCnt = cp;
+        ct = cp;
         DETERMINE_NEXTSTRING(cp, isquoted);
         cp++;
-        (*argv_out)[numargs] = apr_palloc(token_context, cp - tmpCnt);
-        apr_cpystrn((*argv_out)[numargs], tmpCnt, cp - tmpCnt);
+        (*argv_out)[numargs] = apr_palloc(token_context, cp - ct);
+        apr_cpystrn((*argv_out)[numargs], ct, cp - ct);
         numargs++;
-        /* This needs to be -1 because we move past the end above. */
-        if (*(cp - 1) == '\0') {
-            (*argv_out)[numargs] = '\0';
-            break;
-        }
-        
         SKIP_WHITESPACE(cp);
     }
+    (*argv_out)[numargs] = NULL;
 
-    return(rc);
+    return APR_SUCCESS;
 }
 
 /* Filename_of_pathname returns the final element of the pathname.
