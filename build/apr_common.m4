@@ -340,6 +340,7 @@ dnl  all "." chars. If the 3rd parameter is "yes" then instead of
 dnl  setting to 1 or 0, we set FLAG-TO-SET to yes or no.
 dnl  
 AC_DEFUN(APR_FLAG_HEADERS,[
+AC_CHECK_HEADERS($1)
 for aprt_i in $1
 do
     if test "x$2" = "x"; then
@@ -347,14 +348,13 @@ do
     else
         aprt_fts="$2"
     fi
-    if test "x$3" = "xyes"; then
-        s1="$aprt_fts=\"yes\""
-        s0="$aprt_fts=\"no\""
+    safe_name=`echo "$aprt_i" | sed 'y%./+-%__p_%'`
+    eval "cache_value=\$ac_cv_header_$safe_name"
+    if test "$cache_value" = "yes"; then
+      eval $aprt_fts=ifelse($3,yes,yes,1)
     else
-        s1="$aprt_fts=\"1\""
-        s0="$aprt_fts=\"0\""
+      eval $aprt_fts=ifelse($3,yes,no,0)
     fi
-    AC_CHECK_HEADERS($aprt_i, eval $s1, eval $s0)
 done
 ])
 
