@@ -150,8 +150,7 @@ void *apr_atomic_casptr(void **mem, void *with, const void *cmp);
 
 inline int apr_atomic_dec(apr_atomic_t *mem) 
 {
-    atomic_dec(mem);
-    return *mem; 
+    return (atomic_xchgadd(mem, 0xFFFFFFFF) - 1);
 }
 
 inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
