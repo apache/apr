@@ -268,6 +268,13 @@ API_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b),
 			       ap_vformatter_buff_t *c, const char *fmt,
 			       va_list ap);
 
+
+/* A small routine to validate a plain text password with a password
+ * that has been encrypted using any algorithm APR knows about.
+ */
+API_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash);
+
+
 /*
  * These are snprintf implementations based on ap_vformatter().
  *

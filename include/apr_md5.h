@@ -119,7 +119,6 @@ API_EXPORT(ap_status_t) ap_MD5Update(APR_MD5_CTX * context, const unsigned char 
 API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[16], APR_MD5_CTX * context);
 API_EXPORT(ap_status_t) ap_MD5Encode(const char *password, const char *salt,
 			      char *result, size_t nbytes);
-API_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash);
 
 #ifdef __cplusplus
 }
