@@ -65,7 +65,7 @@ API_VAR_EXPORT const char ap_day_snames[7][4] =
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-ap_status_t ap_gm_timestr_822(char **date_str, struct atime_t *t, ap_context_t *p)
+ap_status_t ap_timestr(char **date_str, struct atime_t *t, ap_timetype_e type, ap_context_t *p)
 {
     struct tm *tms;
     char *date_str_ptr;
@@ -74,9 +74,7 @@ ap_status_t ap_gm_timestr_822(char **date_str, struct atime_t *t, ap_context_t *
     (*date_str) = ap_palloc(p, 48 * sizeof(char));
     date_str_ptr = (*date_str);
 
-    if (t->time_ex == 0) {
-        ap_explode_time(t, APR_UTCTIME);
-    }
+    ap_explode_time(t, type);
 
     /* Assumption: this is always 3 */
     /* i = strlen(ap_day_snames[tms->tm_wday]); */
@@ -107,10 +105,12 @@ ap_status_t ap_gm_timestr_822(char **date_str, struct atime_t *t, ap_context_t *
     *date_str_ptr++ = ':';
     *date_str_ptr++ = t->explodedtime->tm_sec / 10 + '0';
     *date_str_ptr++ = t->explodedtime->tm_sec % 10 + '0';
-    *date_str_ptr++ = ' ';
-    *date_str_ptr++ = 'G';
-    *date_str_ptr++ = 'M';
-    *date_str_ptr++ = 'T';
+    if (type == APR_UTCTIME) {
+        *date_str_ptr++ = ' ';
+        *date_str_ptr++ = 'G';
+        *date_str_ptr++ = 'M';
+        *date_str_ptr++ = 'T';
+    }
     *date_str_ptr = '\0';
                                                                                     return APR_SUCCESS;
     /* RFC date format; as strftime '%a, %d %b %Y %T GMT' */
