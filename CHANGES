@@ -1,5 +1,8 @@
 Changes with APR b1
-  
+  *) Added APR_LIMIT_NOFILE option to apr_procattr_limit_set() to
+     control the file descriptor limit on platforms that support
+     RLIMIT_NOFILE.  [Brian Pane]
+
   *) FreeBSD: change apr_sendfile to accomodate a 4.6 kernel patch.
      [Greg Ames]
 

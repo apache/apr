@@ -127,6 +127,8 @@ typedef enum {
 #define APR_LIMIT_MEM        1
 /** @see apr_procattr_limit_set */
 #define APR_LIMIT_NPROC      2
+/** @see apr_procattr_limit_set */
+#define APR_LIMIT_NOFILE     3
 
 #if APR_HAS_OTHER_CHILD || defined(DOXYGEN)
 /**
@@ -469,6 +471,7 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
  *                 APR_LIMIT_CPU
  *                 APR_LIMIT_MEM
  *                 APR_LIMIT_NPROC
+ *                 APR_LIMIT_NOFILE
  * </PRE>
  * @param limit Value to set the limit to.
  */
