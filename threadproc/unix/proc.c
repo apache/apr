@@ -556,7 +556,11 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
         waitpid_options |= WNOHANG;
     }
 
-    if ((pstatus = waitpid(proc->pid, &exit_int, waitpid_options)) > 0) {
+    do {
+        pstatus = waitpid(proc->pid, &exit_int, waitpid_options);
+    } while (pstatus < 0 && errno == EINTR);
+
+    if (pstatus > 0) {
         proc->pid = pstatus;
 
         if (WIFEXITED(exit_int)) {
