@@ -71,14 +71,13 @@
  *   since we are single threaded [so far].
  */
 
-#include "apr_private.h"
 #include "apr_general.h"
+#include "ShellAPI.h"
+#include "crtdbg.h"
 #include "wchar.h"
 #include "fileio.h"
 #include "assert.h"
-#include <crtdbg.h>
-
-extern int main(int argc, char **argv, char **env);
+#include "apr_private.h"
 
 static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
 {
@@ -93,7 +92,7 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
             ;
     }
 
-    newarr = _malloc_dbg(args * sizeof(char *),
+    newarr = _malloc_dbg((args + 1) * sizeof(char *),
                          _CRT_BLOCK, __FILE__, __LINE__);
 
     for (arg = 0; arg < args; ++arg) {
@@ -120,11 +119,11 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
 
         newlen -= elesize;
         ele += newlen;
-        assert(elesize);
+        assert(elesize && (len == 0));
     }
 
     newarr[arg] = NULL;
-    *ele = '\0';
+    *(ele++) = '\0';
 
     /* Return to the free store if the heap realloc is the least bit optimized
      */
@@ -141,6 +140,10 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
     *retarr = newarr;
     return args;
 }
+
+#ifdef APR_APP
+
+extern int main(int argc, char **argv, char **env);
 
 int wmain(int argc, wchar_t **wargv, wchar_t **wenv)
 {
@@ -171,3 +174,84 @@ int wmain(int argc, wchar_t **wargv, wchar_t **wenv)
 
     return main(argc, argv, env);
 }
+
+#else
+
+static int warrsztoastr(char ***retarr, wchar_t *arrsz, int args)
+{
+    apr_wchar_t *wch;
+    size_t totlen;
+    size_t newlen;
+    size_t wsize;
+    char **newarr;
+    int arg;
+
+    if (args < 0) {
+        for (args = 1, wch = arrsz; wch[0] || wch[1]; ++wch)
+            if (!*wch) 
+                ++args;
+    }
+    wsize = 1 + wch - arrsz;
+
+    newarr = _malloc_dbg((args + 1) * sizeof(char *),
+                         _CRT_BLOCK, __FILE__, __LINE__);
+
+    /* This is a safe max allocation, we will realloc after
+     * processing and return the excess to the free store.
+     * 3 ucs bytes hold any single wchar_t value (16 bits)
+     * 4 ucs bytes will hold a wchar_t pair value (20 bits)
+     */
+    newlen = totlen = wsize * 3 + 1;
+    newarr[0] = _malloc_dbg(newlen * sizeof(char), 
+                            _CRT_BLOCK, __FILE__, __LINE__);
+
+    (void)apr_conv_ucs2_to_utf8(arrsz, &wsize,
+                                newarr[0], &newlen);
+
+    assert(newlen && !wsize);
+    /* Return to the free store if the heap realloc is the least bit optimized
+     */
+    newarr[0] = _realloc_dbg(newarr[0], totlen - newlen, 
+                             _CRT_BLOCK, __FILE__, __LINE__);
+
+    for (arg = 1; arg < args; ++arg) {
+        newarr[arg] = newarr[arg - 1] + 2;
+        while (*(newarr[arg]++)) {
+            ;
+        }
+    }
+
+    newarr[arg] = NULL;
+
+    *retarr = newarr;
+    return args;
+}
+
+/* Reprocess the arguments to main() for a completely apr-ized application
+ */
+
+APR_DECLARE(apr_status_t) apr_main(int *argc, char ***argv, char ***env)
+{
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+    {
+        apr_wchar_t **wstrs;
+        apr_wchar_t *sysstr;
+        int wstrc;
+
+        sysstr = GetCommandLineW();
+        if (sysstr) {
+            wstrs = CommandLineToArgvW(sysstr, &wstrc);
+            if (wstrs) {
+                *argc = wastrtoastr(argv, wstrs, wstrc);
+                GlobalFree(wstrs);
+            }
+        }
+
+        sysstr = GetEnvironmentStringsW();
+    }
+#endif
+    return APR_SUCCESS;
+}
+
+#endif
