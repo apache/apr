@@ -148,9 +148,10 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
     length = STRLEN;
-    if (apr_send(sock, datasend, &length) != APR_SUCCESS) {
+    if ((stat = apr_send(sock, datasend, &length) != APR_SUCCESS)) {
         apr_socket_close(sock);
-        fprintf(stderr, "Problem sending data\n");
+        fprintf(stderr, "Problem sending data: %s (%d)\n",
+		apr_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
         exit(-1);
     }
     fprintf(stdout, "OK\n");
