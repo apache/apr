@@ -482,9 +482,15 @@ int main(int argc, const char * const *argv)
     }
 
     if ((rv = test_thread_rwlock()) != APR_SUCCESS) {
-        fprintf(stderr,"thread_rwlock test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-6);
+        if (rv == APR_ENOTIMPL) {
+            fprintf(stderr, "read/write locks aren't implemented on this "
+                    "platform... skipping those tests...\n");
+        }
+        else {
+            fprintf(stderr,"thread_rwlock test failed : [%d] %s\n",
+                    rv, apr_strerror(rv, (char*)errmsg, 200));
+            exit(-6);
+        }
     }
 
     if ((rv = test_cond()) != APR_SUCCESS) {
