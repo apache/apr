@@ -350,7 +350,7 @@ static int client(client_socket_mode_t socket_mode)
             rv = apr_sendfile(sock, f, &hdtr, &current_file_offset, &tmplen, 0);
             printf("apr_sendfile()->%d, sent %ld bytes\n", rv, (long)tmplen);
             if (rv) {
-                if (apr_canonical_error(rv) == APR_EAGAIN) {
+                if (APR_STATUS_IS_EAGAIN(rv)) {
                     nsocks = 1;
                     tmprv = apr_poll(pfd, &nsocks, -1);
                     assert(!tmprv);
@@ -417,7 +417,7 @@ static int client(client_socket_mode_t socket_mode)
 
         } while (total_bytes_sent < expected_len &&
                  (rv == APR_SUCCESS || 
-                  apr_canonical_error(rv) == APR_EAGAIN));
+                  APR_STATUS_IS_EAGAIN(rv)));
         if (total_bytes_sent != expected_len) {
             fprintf(stderr,
                     "client problem: sent %ld of %ld bytes\n",
