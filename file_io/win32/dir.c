@@ -109,7 +109,7 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
         }
         (*new)->w.dirname[len++] = '*';
         (*new)->w.dirname[len] = '\0';
-        for (wch = (*new)->w.dirname + 4; *wch; ++wch);
+        for (wch = (*new)->w.dirname + 4; *wch; ++wch)
             if (*wch == L'/')
                 *wch = L'\\';
     }
