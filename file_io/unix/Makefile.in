@@ -3,6 +3,7 @@ TARGETS = \
 	dir.lo \
 	fileacc.lo \
 	filedup.lo \
+	filepath.lo \
 	filestat.lo \
 	flock.lo \
 	fullrw.lo \
