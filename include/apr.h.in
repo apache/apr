@@ -148,13 +148,10 @@
 #define APR_HAS_LARGE_FILES       0
 #define APR_HAS_XTHREAD_FILES     0
 
-/* This macro tells APR that it is safe to make a file masquerade as a 
- * socket.  This is necessary, because some platforms support poll'ing
- * on pipes/files, while some don't.  APR only supports poll'ing on 
- * sockets to handle this inconsistensy.  However, it is often useful to
- * be able to poll on files/pipes on platforms that support it.  This
- * feature macro allows us to find those platforms and support the feature
- * where available.
+/* APR sets APR_FILES_AS_SOCKETS to 1 on systems where it is possible
+ * to poll on files/pipes.  On such a system, the application can
+ * call apr_socket_from_file() to get an APR socket representation and 
+ * then pass the socket representation to apr_poll_socket_add().
  */
 #define APR_FILES_AS_SOCKETS      @file_as_socket@
 
