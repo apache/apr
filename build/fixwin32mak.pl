@@ -12,28 +12,36 @@ use File::Find;
 
 $root = cwd;
 # ignore our own direcory (allowing us to move into any parallel tree)
-$root =~ s|^.:(.*)/.*?$|cd "$1|;
+$root =~ s|^.:(.*)?$|cd "$1|;
 $root =~ s|/|\\\\|g;
 print "Testing " . $root . "\n";
 find(\&fixcwd, '.');
 
 sub fixcwd { 
     if (m|.mak$|) {
-# note repl is broken... isn't freindly to directories with periods.
-	$repl = $File::Find::dir;
-# replace ./ with the parent (moving into any parallel tree)
-        $repl =~ s|^\./|../|;
-# replace each directory in this path with .. to get back to our root
-        $repl =~ s|[^/]+|..|g;
-        $repl =~ s|/|\\|;
+        $thisroot = $File::Find::dir;
+	$thisroot =~ s|^./(.*)$|$1|;
+	$thisroot =~ s|/|\\\\|g;
+        $thisroot = $root . "\\\\" . $thisroot;
         $oname = $_;
 	$tname = '.#' . $_;
 	$verchg = 0;
-print "Processing " . $_ . "\n";
+#print "Processing " . $thisroot . " of " . $_ . "\n";
 	$srcfl = new IO::File $_, "r" || die;
 	$dstfl = new IO::File $tname, "w" || die;
 	while ($src = <$srcfl>) {
-	    if ($src =~ s|^(\s*)$root|$1cd "$repl|) {
+	    if ($src =~ m|^\s*($root[^\"]*)\".*$|) {
+#print "Found " . $1 . "\"\n";
+		$orig = $thisroot;
+                $repl = "cd \".";
+                while (!($src =~ s|$orig|$repl|)) {
+#print "Tried replacing " . $orig . " with " . $repl . "\n";
+		   if (!($orig =~ s|^(.*)\\\\[^\\]+$|$1|)) {
+                       break;
+                   }
+		   $repl .= "\\..";
+		}
+#print "Replaced " . $orig . " with " . $repl . "\n";
 		$verchg = -1;
 	    }
             print $dstfl $src; 
