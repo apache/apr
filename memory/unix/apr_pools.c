@@ -1860,10 +1860,16 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
     apr_pool_check_integrity(pool);
 #endif /* APR_POOL_DEBUG */
 
-    if (pool->user_data == NULL)
+    if (pool->user_data == NULL) {
         *data = NULL;
-    else
+    }
+    else {
         *data = apr_hash_get(pool->user_data, key, APR_HASH_KEY_STRING);
+    }
+
+    if (*data == NULL) {
+        return APR_KEYNOTFOUND;
+    }
 
     return APR_SUCCESS;
 }
