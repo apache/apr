@@ -66,11 +66,11 @@ static apr_status_t socket_cleanup(void *sock)
 {
     apr_socket_t *thesocket = sock;
 
-    if (thesocket->sock != INVALID_SOCKET) {
-        if (closesocket(thesocket->sock) == SOCKET_ERROR) {
+    if (thesocket->socketdes != INVALID_SOCKET) {
+        if (closesocket(thesocket->socketdes) == SOCKET_ERROR) {
             return apr_get_netos_error();
         }
-        thesocket->sock = INVALID_SOCKET;
+        thesocket->socketdes = INVALID_SOCKET;
     }
     return APR_SUCCESS;
 }
@@ -118,15 +118,15 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
     /* For right now, we are not using socket groups.  We may later.
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
-    (*new)->sock = socket(family, type, 0);
+    (*new)->socketdes = socket(family, type, 0);
 #if APR_HAVE_IPV6
-    if ((*new)->sock == INVALID_SOCKET && downgrade) {
+    if ((*new)->socketdes == INVALID_SOCKET && downgrade) {
         family = AF_INET;
-        (*new)->sock = socket(family, type, 0);
+        (*new)->socketdes = socket(family, type, 0);
     }
 #endif
 
-    if ((*new)->sock == INVALID_SOCKET) {
+    if ((*new)->socketdes == INVALID_SOCKET) {
         return apr_get_netos_error();
     }
     set_socket_vars(*new, family, type);
@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
             return APR_BADARG;
     }
 #endif
-    if (shutdown(thesocket->sock, winhow) == 0) {
+    if (shutdown(thesocket->socketdes, winhow) == 0) {
         return APR_SUCCESS;
     }
     else {
@@ -179,7 +179,7 @@ APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket)
 
 APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    if (bind(sock->sock, 
+    if (bind(sock->socketdes, 
              (struct sockaddr *)&sa->sa, 
              sa->salen) == -1) {
         return apr_get_netos_error();
@@ -195,7 +195,7 @@ APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
 
 APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 {
-    if (listen(sock->sock, backlog) == SOCKET_ERROR)
+    if (listen(sock->socketdes, backlog) == SOCKET_ERROR)
         return apr_get_netos_error();
     else
         return APR_SUCCESS;
@@ -210,7 +210,7 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
 
     /* Don't allocate the memory until after we call accept. This allows
        us to work with nonblocking sockets. */
-    s = accept(sock->sock, (struct sockaddr *)&sa, &salen);
+    s = accept(sock->socketdes, (struct sockaddr *)&sa, &salen);
     if (s == INVALID_SOCKET) {
         return apr_get_netos_error();
     }
@@ -221,7 +221,7 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
     (*new)->timeout = -1;   
     (*new)->disconnected = 0;
 
-    (*new)->sock = s;
+    (*new)->socketdes = s;
     /* XXX next line looks bogus w.r.t. AF_INET6 support */
     (*new)->remote_addr->salen = sizeof((*new)->remote_addr->sa);
     memcpy (&(*new)->remote_addr->sa, &sa, salen);
@@ -281,11 +281,11 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
     apr_status_t rv;
 
-    if ((sock->sock == INVALID_SOCKET) || (!sock->local_addr)) {
+    if ((sock->socketdes == INVALID_SOCKET) || (!sock->local_addr)) {
         return APR_ENOTSOCK;
     }
 
-    if (connect(sock->sock, (const struct sockaddr *)&sa->sa.sin,
+    if (connect(sock->socketdes, (const struct sockaddr *)&sa->sa.sin,
                 sa->salen) == SOCKET_ERROR) {
         int rc;
         struct timeval tv, *tvptr;
@@ -307,9 +307,9 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 
         /* wait for the connect to complete or timeout */
         FD_ZERO(&wfdset);
-        FD_SET(sock->sock, &wfdset);
+        FD_SET(sock->socketdes, &wfdset);
         FD_ZERO(&efdset);
-        FD_SET(sock->sock, &efdset);
+        FD_SET(sock->socketdes, &efdset);
 
         if (sock->timeout < 0) {
             tvptr = NULL;
@@ -328,10 +328,10 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
             return APR_FROM_OS_ERROR(WSAETIMEDOUT);
         }
         /* Evaluate the efdset */
-        if (FD_ISSET(sock->sock, &efdset)) {
+        if (FD_ISSET(sock->socketdes, &efdset)) {
             /* The connect failed. */
             int rclen = sizeof(rc);
-            if (getsockopt(sock->sock, SOL_SOCKET, SO_ERROR, (char*) &rc, &rclen)) {
+            if (getsockopt(sock->socketdes, SOL_SOCKET, SO_ERROR, (char*) &rc, &rclen)) {
                 return apr_get_netos_error();
             }
             return APR_FROM_OS_ERROR(rc);
@@ -369,7 +369,7 @@ APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *socket, void *data,
 APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock,
                                           apr_socket_t *sock)
 {
-    *thesock = sock->sock;
+    *thesock = sock->socketdes;
     return APR_SUCCESS;
 }
 
@@ -381,7 +381,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
     set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type);
     (*apr_sock)->timeout = -1;
     (*apr_sock)->disconnected = 0;
-    (*apr_sock)->sock = *os_sock_info->os_sock;
+    (*apr_sock)->socketdes = *os_sock_info->os_sock;
     if (os_sock_info->local) {
         memcpy(&(*apr_sock)->local_addr->sa.sin, 
                os_sock_info->local, 
@@ -421,7 +421,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
         (*sock)->disconnected = 0;
     }
     (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;
-    (*sock)->sock = *thesock;
+    (*sock)->socketdes = *thesock;
     return APR_SUCCESS;
 }
 
