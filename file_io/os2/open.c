@@ -58,9 +58,6 @@
 #include "apr_portable.h"
 #include <string.h>
 
-#define INCL_DOS
-#include <os2.h>
-
 ap_status_t apr_file_cleanup(void *thefile)
 {
     ap_file_t *file = thefile;
@@ -191,12 +188,17 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cntxt)
 ap_status_t ap_rename_file(const char *from_path, const char *to_path,
                            ap_pool_t *p)
 {
-    /* ### use an OS/2 specific function and error handling here... */
-    if (rename(from_path, to_path) != 0) {
-        /* ### wrong error code, but we don't have APR_ERROR */
-        return APR_EINVAL;
+    ULONG rc = DosMove(from_path, to_path);
+
+    if (rc == ERROR_ACCESS_DENIED) {
+        rc = DosDelete(to_path);
+
+        if (rc == 0 || rc == ERROR_FILE_NOT_FOUND) {
+            rc = DosMove(from_path, to_path);
+        }
     }
-    return APR_SUCCESS;
+
+    return APR_OS2_STATUS(rc);
 }
 
 
