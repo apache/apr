@@ -369,7 +369,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR was unable to open the dso object.  
  * For more information call apr_dso_error().
  */
+#if defined(WIN32)
+#define APR_STATUS_IS_EDSOOPEN(s)       (APR_TO_OS_ERROR(s) == ERROR_MOD_NOT_FOUND)
+#else
 #define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN)
+#endif
 /** The given path was absolute. */
 #define APR_STATUS_IS_EABSOLUTE(s)      ((s) == APR_EABSOLUTE)
 /** The given path was relative. */
@@ -383,7 +387,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /** The given path contained wildcards. */
 #define APR_STATUS_IS_EPATHWILD(s)      ((s) == APR_EPATHWILD)
 /** Could not find the requested symbol. */
+#if defined(WIN32)
+#define APR_STATUS_IS_ESYMNOTFOUND(s)   (APR_TO_OS_ERROR(s) == ERROR_PROC_NOT_FOUND)
+#else
 #define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND)
+#endif
 
 /* APR STATUS VALUES */
 /** @see APR_STATUS_IS_INCHILD */
