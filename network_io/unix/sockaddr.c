@@ -575,11 +575,10 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
      * a numeric address string if it fails to resolve the host name;
      * that is *not* what we want here
      *
-     * Additionally, if we know getnameinfo() doesn't handle IPv4-mapped
-     * IPv6 addresses correctly, drop down to IPv4 before calling
-     * getnameinfo().
+     * For IPv4-mapped IPv6 addresses, drop down to IPv4 before calling
+     * getnameinfo() to avoid getnameinfo bugs (MacOS X, glibc).
      */
-#ifdef GETNAMEINFO_IPV4_MAPPED_FAILS
+#if APR_HAVE_IPV6
     if (sockaddr->family == AF_INET6 &&
         IN6_IS_ADDR_V4MAPPED(&sockaddr->sa.sin6.sin6_addr)) {
         struct apr_sockaddr_t tmpsa;
