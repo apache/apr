@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/28 12:09:31 $]
+Last modified at [$Date: 2001/01/28 17:23:22 $]
 
 Release:
 
@@ -62,7 +62,13 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       - It ignores the "type" parameter, so toss it.
       - The fname param is allowed to be NULL on the Unix platform.
         Change it to always use the passed value, and check callers.
+        rbb says:   The type parameter is supposed to be used to determine
+                    if we are working with a read/write lock or a mutex.
+                    The fname parameter is essentially required if you
+                    want to be portable, but I dislike wasting cycles to
+                    outsmart the programmer.
         Status: david +1
+                rbb -1
 
     * configure.in does post-processing on the AC_OUTPUT files (for
       VPATH support). This means that config.status doesn't do the
