@@ -239,3 +239,17 @@ APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
+
+
+
+APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
+                                               apr_pool_t *p)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control, 
+                                          void (*func)(void))
+{
+    return APR_ENOTIMPL;
+}
