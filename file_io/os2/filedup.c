@@ -80,7 +80,7 @@ static apr_status_t file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_po
     rv = DosDupHandle(old_file->filedes, &dup_file->filedes);
 
     if (rv) {
-        return APR_OS2_STATUS(rv);
+        return APR_FROM_OS_ERROR(rv);
     }
 
     dup_file->fname = apr_pstrdup(dup_file->pool, old_file->fname);
