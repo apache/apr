@@ -199,3 +199,22 @@ ap_status_t ap_eof(ap_file_t *fptr)
     }
     APR_SUCCESS;
 }   
+
+ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
+{
+    (*thefile) = ap_pcalloc(cont, sizeof(ap_os_file_t *));
+    if ((*thefile) == NULL) {
+        return APR_ENOMEM;
+    }
+
+    (*thefile)->filehand = GetStdHandle(STD_ERROR_HANDLE);
+    (*thefile)->cntxt = cont;
+    (*thefile)->fname = NULL;
+    (*thefile)->filehand = NULL;
+    (*thefile)->stated = 0;
+    (*thefile)->buffered = 0;
+    (*thefile)->eof_hit = 0;
+
+    return APR_SUCCESS;
+}
+
