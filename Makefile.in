@@ -10,14 +10,14 @@ APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
 # Macros for supporting directories
 #
 INCDIR=./include
-INCDIR1=../include
-INCLUDES=-I$(INCDIR) -I$(INCDIR1)
+OSDIR=$(INCDIR)/arch/@OSDIR@
+DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
+INCLUDES=-I$(INCDIR) -I$(OSDIR) -I$(DEFOSDIR)
 
 #
 # Macros for target determination
 #
-SUBDIRS=@SUBDIRS@
-CLEAN_SUBDIRS= . test build
+CLEAN_SUBDIRS= test
 INSTALL_SUBDIRS=@INSTALL_SUBDIRS@
 
 TARGET_LIB = lib@APR_LIBNAME@.la
@@ -26,16 +26,18 @@ TARGET_LIB = lib@APR_LIBNAME@.la
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-TARGETS = delete-lib $(TARGET_LIB) delete-exports export_vars.h apr.exp
+TARGETS = $(TARGET_LIB) export_vars.h apr.exp
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
+@INCLUDE_OUTPUTS@
 
 CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.h
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
-	libtool apr-config
-EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in
+	libtool apr-config build/apr_rules.mk
+EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in \
+	build-outputs.mk build/ltcf-c.sh build/ltmain.sh build/libtool.m4
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
@@ -48,17 +50,6 @@ VPATH=@srcdir@
 top_srcdir=@apr_srcdir@
 top_blddir=@apr_builddir@
 
-EXPORT_FILES = $(top_srcdir)/include/*.h
-
-delete-lib:
-	@if test -f $(TARGET_LIB); then \
-	    for i in $(SUBDIRS); do objects="$$objects $$i/*.@so_ext@"; done ; \
-	    if test -n "`find $$objects -newer $(TARGET_LIB)`"; then \
-		echo Found newer objects. Will relink $(TARGET_LIB). ; \
-		echo $(RM) -f $(TARGET_LIB) ; \
-		$(RM) -f $(TARGET_LIB) ; \
-	    fi \
-	fi
 
 # Create apr-config script suitable for the install tree
 apr-config.out: apr-config
@@ -102,27 +93,14 @@ install: $(TARGET_LIB) apr-config.out
 	    done \
 	fi
 
-$(TARGET_LIB):
-	@for i in $(SUBDIRS); do objects="$$objects $$i/*.@so_ext@"; done ; \
-	    tmpcmd="$(LINK) @lib_target@ $(ALL_LIBS)"; \
-	    echo $$tmpcmd; \
-	    $$tmpcmd && touch $@
+$(TARGET_LIB): $(OBJECTS)
+	$(LINK) @lib_target@ $(ALL_LIBS)
 
-delete-exports:
-	@if test -f apr.exp; then \
-	    headers="`find include/*.h -newer apr.exp`" ; \
-	    if test -n "$$headers"; then \
-		echo Found newer headers. Will rebuild apr.exp. ; \
-		echo $(RM) -f apr.exp exports.c export_vars.h ; \
-		$(RM) -f apr.exp exports.c export_vars.h ; \
-	    fi \
-	fi
+exports.c: $(HEADERS)
+	$(AWK) -f $(top_srcdir)/build/make_exports.awk $^ > $@
 
-exports.c:
-	$(AWK) -f $(top_srcdir)/build/make_exports.awk $(EXPORT_FILES) > $@
-
-export_vars.h:
-	$(AWK) -f $(top_srcdir)/build/make_var_export.awk $(EXPORT_FILES) > $@
+export_vars.h: $(HEADERS)
+	$(AWK) -f $(top_srcdir)/build/make_var_export.awk $^ > $@
 
 apr.exp: exports.c export_vars.h
 	@echo "#! lib@APR_LIBNAME@.so" > $@
@@ -142,6 +120,3 @@ etags:
 
 # DO NOT REMOVE
 docs: $(INCDIR)/*.h
-
-.PHONY: delete-lib delete-exports
-.NOTPARALLEL: delete-lib delete-exports
