@@ -69,26 +69,13 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
     WSABUF wsaData;
     int lasterror;
     DWORD dwBytes = 0;
-    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
 
     wsaData.len = *len;
     wsaData.buf = (char*) buf;
 
-    rv = setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char*) &timeout, 
-                    sizeof(timeout));
-    if (rv == SOCKET_ERROR) {
-        return WSAGetLastError();
-    }
-
     rv = WSASend(sock->sock, &wsaData, 1, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         lasterror = WSAGetLastError();
-        /* Test code: Remove before release */
-        if (lasterror == WSAETIMEDOUT)
-            printf("wsasend: Connection timed out\n");
-        else
-            printf("wsasend: connection failed. lasterror = %d\n", lasterror);            
-
         return lasterror;
     }
 
@@ -104,25 +91,13 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
     int lasterror;
     DWORD dwBytes = 0;
     DWORD flags = 0;
-    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
 
     wsaData.len = *len;
     wsaData.buf = (char*) buf;
 
-    rv = setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char*) &timeout, 
-                    sizeof(timeout));
-    if (rv == SOCKET_ERROR) {
-        return WSAGetLastError();
-    }
-
     rv = WSARecv(sock->sock, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         lasterror = WSAGetLastError();
-        /* Test code: remove before release */
-        if (lasterror == WSAETIMEDOUT)
-            printf("wsarecv: Connection timed out\n");
-        else
-            printf("wsarecv: connection failed. lasterror = %d\n", lasterror);            
         return lasterror;
     }
 
@@ -137,7 +112,6 @@ ap_status_t ap_sendv(struct socket_t *sock, const struct iovec *vec,
     int i;
     int lasterror;
     DWORD dwBytes = 0;
-    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
 
     LPWSABUF pWsaData = (LPWSABUF) malloc(sizeof(WSABUF) * nvec);
 
@@ -149,25 +123,9 @@ ap_status_t ap_sendv(struct socket_t *sock, const struct iovec *vec,
         pWsaData[i].len = vec[i].iov_len;
     }
 
-    rv = setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char*) &timeout, 
-                    sizeof(timeout));
-    if (rv == SOCKET_ERROR) {
-        lasterror = WSAGetLastError();
-        /* Test code: remove before release */
-        printf("win32_writev: setsockopt failed. errno = %d\n", lasterror);
-        free(pWsaData);
-        return lasterror;
-    }
-
     rv = WSASend(sock->sock, pWsaData, nvec, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         lasterror = WSAGetLastError();
-        /* Test code: remove before release */
-        if (lasterror == WSAETIMEDOUT)
-            printf("wsasend: Connection timed out\n");
-        else
-            printf("wsasend: connection failed. lasterror = %d\n", lasterror);            
-
         free(pWsaData);
         return lasterror;
     }
@@ -194,17 +152,24 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
         		ap_int32_t flags) 
 {
+/*
+ *#define WAIT_FOR_EVENT
+ * Note: Waiting for the socket directly is much faster than creating a seperate
+ * wait event. There are a couple of dangerous aspects to waiting directly 
+ * for the socket. First, we should not wait on the socket if concurrent threads
+ * can wait-on/signal the same socket. This shouldn't be happening with Apache since 
+ * a socket is uniquely tied to a thread. This will change when we begin using 
+ * async I/O with completion ports on the socket. Second, I am not sure how the
+ * socket timeout code will work. I am hoping the socket will be signaled if the
+ * setsockopt timeout expires. Need to verify this...
+ */
     ap_ssize_t rv;
-#ifdef OVERLAPPED
     OVERLAPPED overlapped;
-#endif
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
-    int i, lasterror, ptr = 0;
+    int i, ptr = 0;
+    int lasterror = APR_SUCCESS;
     DWORD dwFlags = 0;
-    int timeout = sock->timeout * 1000; /* Need timeout in milliseconds */
 
-    rv = setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO,
-               (char*) &timeout, sizeof(timeout));
 #if 0
     if (flags | APR_SENDFILE_KEEP_SOCKET)
         dwFlags |= TF_REUSE_SOCKET;
@@ -215,7 +180,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
 #endif
 
     /* TransmitFile can only send one header and one footer */
-    memset(&tfb, '0', sizeof (tfb));
+    memset(&tfb, '\0', sizeof (tfb));
     if (hdtr && hdtr->numheaders) {
         ptfb = &tfb;
         for (i = 0; i < hdtr->numheaders; i++) {
@@ -244,26 +209,43 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             ptr += hdtr->trailers[i].iov_len;
         }
     }
-#ifdef OVERLAPPED
-    memset(&overlapped,'0', sizeof(overlapped));
+    /* Initialize the overlapped structure */
+    memset(&overlapped,'\0', sizeof(overlapped));
+    if (offset && *offset) {
+        overlapped.Offset = *offset;
+    }
+#ifdef WAIT_FOR_EVENT
+    overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
+ 
     rv = TransmitFile(sock->sock,     /* socket */
                       file->filehand, /* open file descriptor of the file to be sent */
                       *len,           /* number of bytes to send. 0=send all */
                       0,              /* Number of bytes per send. 0=use default */
-#ifdef OVERLAPPED
-                      &overlapped,
-#else
-                      NULL,           /* OVERLAPPED structure */
-#endif
+                      &overlapped,    /* OVERLAPPED structure */
                       ptfb,           /* header and trailer buffers */
                       dwFlags);       /* flags to control various aspects of TransmitFile */
     if (!rv) {
         lasterror = WSAGetLastError();
-        printf("TransmitFile failed with error %d\n", lasterror);
-        return lasterror;
+        if (lasterror == ERROR_IO_PENDING) {
+#ifdef WAIT_FOR_EVENT
+            rv = WaitForSingleObject(overlapped.hEvent, sock->timeout * 1000);
+#else
+            rv = WaitForSingleObject((HANDLE) sock->sock, sock->timeout * 1000);
+#endif
+            if (rv == WAIT_OBJECT_0)
+                lasterror = APR_SUCCESS;
+            else if (rv == WAIT_TIMEOUT)
+                lasterror = WAIT_TIMEOUT;
+            else if (rv == WAIT_ABANDONED)
+                lasterror = WAIT_ABANDONED;
+            else
+                lasterror = GetLastError();
+        }
     }
-
-    return APR_SUCCESS;
+#ifdef WAIT_FOR_EVENT
+    CloseHandle(overlapped.hEvent);
+#endif
+    return lasterror;
 }
 #endif
