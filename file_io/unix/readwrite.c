@@ -244,6 +244,8 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
     int i, tbytes;
     apr_status_t rv = APR_SUCCESS;
 
+    *nbytes = 0;
+
     for(i = 0; i < nvec; i++){
          tbytes = vec[i].iov_len;
          rv = apr_file_write(thefile, vec[i].iov_base, &tbytes);

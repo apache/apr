@@ -1,5 +1,8 @@
 Changes for APR 1.1.0
 
+  *) Add apr_file_writev_full to ensure an entire iovec is writen to a file.
+     [Paul Querna]
+
   *) apr_file_writev will now at least try to write all iovecs on platforms
      that do not support writev. 
      [Paul Querna]

@@ -130,6 +130,22 @@ extern "C" {
 #define APR_FILE_ATTR_HIDDEN     0x04          /**< File is hidden */
 /** @} */
 
+/**
+ * @defgroup apr_file_writev{_full} max iovec size
+ * @{
+ */
+#if defined(DOXYGEN)
+#define APR_MAX_IOVEC_SIZE 1024                /**< System dependent maximum 
+                                                    size of an iovec array */
+#elif defined(IOV_MAX)
+#define APR_MAX_IOVEC_SIZE IOV_MAX
+#elif defined(MAX_IOVEC)
+#define APR_MAX_IOVEC_SIZE MAX_IOVEC
+#else
+#define APR_MAX_IOVEC_SIZE 1024
+#endif
+/** @} */
+
 /** File attributes */
 typedef apr_uint32_t apr_fileattrs_t;
 
@@ -413,6 +429,24 @@ APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile,
                                               apr_size_t nbytes, 
                                               apr_size_t *bytes_written);
 
+
+/**
+ * Write data from iovec array to the specified file, ensuring that all of the
+ * data is written before returning.
+ * @param thefile The file descriptor to write to.
+ * @param vec The array from which to get the data to write to the file.
+ * @param nvec The number of elements in the struct iovec array. This must 
+ *             be smaller than APR_MAX_IOVEC_SIZE.  If it isn't, the function 
+ *             will fail with APR_EINVAL.
+ * @param nbytes The number of bytes written.
+ *
+ * @remark apr_file_writev_full is available even if the underlying
+ * operating system doesn't provide writev().
+ */
+APR_DECLARE(apr_status_t) apr_file_writev_full(apr_file_t *thefile,
+                                               const struct iovec *vec,
+                                               apr_size_t nvec,
+                                               apr_size_t *nbytes);
 /**
  * Write a character into the specified file.
  * @param ch The character to write.

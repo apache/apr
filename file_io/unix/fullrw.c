@@ -60,3 +60,37 @@ APR_DECLARE(apr_status_t) apr_file_write_full(apr_file_t *thefile,
 
     return status;
 }
+
+APR_DECLARE(apr_status_t) apr_file_writev_full(apr_file_t *thefile,
+                                               const struct iovec *vec,
+                                               apr_size_t nvec,
+                                               apr_size_t *bytes_written)
+{
+    apr_status_t status;
+    apr_size_t total = 0;
+
+    do {
+        int i;
+	apr_size_t amt;
+        status = apr_file_writev(thefile, vec, nvec, &amt);
+ 
+       /* We assume that writev will only write complete iovec areas.
+        * Incomplete writes inside a single area are not supported.
+        * This should be safe according to SuS v2. 
+        */
+        for(i = 0; i < nvec; i++) {
+            total += vec[i].iov_len;
+            if(total >= amt) {
+                vec = &vec[i+1];
+                nvec -= i+1;
+                break;
+            }
+        }
+    } while (status == APR_SUCCESS && nvec > 0);
+
+    if (bytes_written != NULL)
+        *bytes_written = total;
+
+    return status;
+}
+

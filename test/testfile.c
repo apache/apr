@@ -595,6 +595,42 @@ static void test_writev(abts_case *tc, void *data)
 
 }
 
+static void test_writev_full(abts_case *tc, void *data)
+{
+    apr_file_t *f;
+    int nbytes;
+    struct iovec vec[5];
+    const char *fname = "data/testwritev_full.txt";
+
+    APR_ASSERT_SUCCESS(tc, "open file for writing",
+                       apr_file_open(&f, fname, 
+                                     APR_WRITE|APR_CREATE|APR_TRUNCATE, 
+                                     APR_OS_DEFAULT, p));
+    
+    vec[0].iov_base = LINE1;
+    vec[0].iov_len = strlen(LINE1);
+    vec[1].iov_base = LINE2;
+    vec[1].iov_len = strlen(LINE2);
+    vec[2].iov_base = LINE1;
+    vec[2].iov_len = strlen(LINE1);
+    vec[3].iov_base = LINE1;
+    vec[3].iov_len = strlen(LINE1);
+    vec[4].iov_base = LINE2;
+    vec[4].iov_len = strlen(LINE2);
+
+    APR_ASSERT_SUCCESS(tc, "writev_full of size 5 to file",
+                       apr_file_writev_full(f, vec, 5, &nbytes));
+
+    ABTS_INT_EQUAL(tc, strlen(LINE1)*3 + strlen(LINE2)*2, nbytes);
+
+    APR_ASSERT_SUCCESS(tc, "close for writing",
+                       apr_file_close(f));
+
+    file_contents_equal(tc, fname, LINE1 LINE2 LINE1 LINE1 LINE2, 
+                        strlen(LINE1)*3 + strlen(LINE2)*2);
+
+}
+
 static void test_truncate(abts_case *tc, void *data)
 {
     apr_status_t rv;
@@ -691,6 +727,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_gets, NULL);
     abts_run_test(suite, test_puts, NULL);
     abts_run_test(suite, test_writev, NULL);
+    abts_run_test(suite, test_writev_full, NULL);
     abts_run_test(suite, test_bigread, NULL);
     abts_run_test(suite, test_mod_neg, NULL);
     abts_run_test(suite, test_truncate, NULL);
