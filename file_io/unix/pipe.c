@@ -42,7 +42,7 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
       fd_flags &= ~O_NONBLOCK;
 #  elif defined(O_NDELAY)
       fd_flags &= ~O_NDELAY;
-#  elif defined(FNDELAY)
+#  elif defined(O_FNDELAY)
       fd_flags &= ~O_FNDELAY;
 #  else 
       /* XXXX: this breaks things, but an alternative isn't obvious...*/
@@ -77,7 +77,7 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
       fd_flags |= O_NONBLOCK;
 #  elif defined(O_NDELAY)
       fd_flags |= O_NDELAY;
-#  elif defined(FNDELAY)
+#  elif defined(O_FNDELAY)
       fd_flags |= O_FNDELAY;
 #  else
       /* XXXX: this breaks things, but an alternative isn't obvious...*/
