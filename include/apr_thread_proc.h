@@ -99,12 +99,19 @@ typedef enum {APR_WAIT, APR_NOWAIT} apr_wait_how_e;
                                            * us knowing ... buggy os? */
 #endif /* APR_HAS_OTHER_CHILD */
 
-typedef struct apr_proc_t {
+typedef struct apr_proc_t apr_proc_t;
+
+/** The APR process type */
+struct apr_proc_t {
+    /** The process ID */
     pid_t pid;
-    apr_file_t *in;          /* Parent's side of pipe to child's stdin */
-    apr_file_t *out;         /* Parent's side of pipe to child's stdout */
-    apr_file_t *err;         /* Parent's side of pipe to child's stdouterr */
-} apr_proc_t;
+    /** Parent's side of pipe to child's stdin */
+    apr_file_t *in;
+    /** Parent's side of pipe to child's stdout */
+    apr_file_t *out;
+    /* Parent's side of pipe to child's stdouterr */
+    apr_file_t *err;
+};
 
 typedef struct apr_thread_t           apr_thread_t;
 typedef struct apr_threadattr_t       apr_threadattr_t;

@@ -272,25 +272,45 @@ apr_status_t apr_generate_random_bytes(unsigned char * buf, int length);
 #define ALLOC_STATS
 */
 
-typedef struct apr_pool_t {
+typedef struct apr_pool_t apr_pool_t;
+
+/** The memory allocation structure
+ */
+struct apr_pool_t {
+    /** The first block in this pool. */
     union block_hdr *first;
+    /** The last block in this pool. */
     union block_hdr *last;
+    /** The list of cleanups to run on pool cleanup. */
     struct cleanup *cleanups;
+    /** A list of processes to kill when this pool is cleared */
     struct process_chain *subprocesses;
+    /** The first sub_pool of this pool */
     struct apr_pool_t *sub_pools;
+    /** The next sibling pool */
     struct apr_pool_t *sub_next;
+    /** The previous sibling pool */
     struct apr_pool_t *sub_prev;
+    /** The parent pool of this pool */
     struct apr_pool_t *parent;
+    /** The first free byte in this pool */
     char *free_first_avail;
 #ifdef ALLOC_USE_MALLOC
+    /** The allocation list if using malloc */
     void *allocation_list;
 #endif
 #ifdef POOL_DEBUG
+    /** a list of joined pools 
+     *  @defvar apr_pool_t *joined */
     struct apr_pool_t *joined;
 #endif
+    /** A function to control how pools behave when they receive ENOMEM
+     *  @deffunc int apr_abort(int retcode) */
     int (*apr_abort)(int retcode);
+    /** A place to hand user data associated with this pool 
+     *  @defvar datastruct *prog_data */
     struct datastruct *prog_data;
-}apr_pool_t;
+};
  
 /* pool functions */
 
