@@ -252,6 +252,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/dir.o \
 	$(OBJDIR)/dso.o \
 	$(OBJDIR)/errorcodes.o \
+	$(OBJDIR)/env.o \
 	$(OBJDIR)/fileacc.o \
 	$(OBJDIR)/filedup.o \
 	$(OBJDIR)/filepath.o \
