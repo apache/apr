@@ -42,6 +42,15 @@ AC_DEFUN(APR_SETIFNULL,[
 ])
 
 dnl
+dnl APR_SETVAR(variable, value)
+dnl
+dnl  Set variable no matter what
+dnl
+AC_DEFUN(APR_SETVAR,[
+  $1="$2"; export $1
+])
+
+dnl
 dnl APR_ADDTO(variable, value)
 dnl
 dnl  Add value to variable
@@ -76,6 +85,7 @@ case "$PLAT" in
 	APR_SETIFNULL(CFLAGS, [-DAUX3 -D_POSIX_SOURCE])
 	APR_SETIFNULL(LIBS, [-lposix -lbsd])
 	APR_SETIFNULL(LDFLAGS, [-s])
+	APR_SETVAR(APACHE_MPM, [prefork])
 	;;
     *-ibm-aix*)
         case $PLAT in
@@ -131,6 +141,7 @@ case "$PLAT" in
     *os2_emx*)
 	APR_SETIFNULL(SHELL, [sh])
         APR_SETIFNULL(file_as_socket, [0])
+        APR_SETVAR(APACHE_MPM, [spmt_os2])
 	;;
     *-hi-hiux)
 	APR_SETIFNULL(CFLAGS, [-DHIUX])
@@ -365,6 +376,7 @@ dnl	;;
     *beos*)
 	APR_SETIFNULL(CFLAGS, [-DBEOS])
 	APR_SETIFNULL(file_as_socket, [0])
+	APR_SETVAR(APACHE_MPM, [mpmt_beos])
 	PLATOSVERS=`uname -r`
 	case $PLATOSVERS in
 		5.1)
