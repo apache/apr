@@ -295,6 +295,14 @@ APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_dir_make_recursive(const char *path,
+                                                 apr_fileperms_t perm,
+                                                 apr_pool_t *pool)
+{
+    return APR_ENOTIMPL;
+}
+
+
 APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *pool)
 {
 #if APR_HAS_UNICODE_FS
