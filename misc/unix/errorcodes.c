@@ -168,6 +168,8 @@ static char *apr_error_string(apr_status_t statcode)
         return "The given path contained wildcard characters";
     case APR_EPROC_UNKNOWN:
         return "The process is not recognized.";
+    case APR_EGENERAL:
+        return "Internal error";
     default:
         return "Error string not specified yet";
     }
