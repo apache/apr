@@ -175,6 +175,9 @@ typedef void (Sigfunc)(int);
 #define APR_HAS_RANDOM         1
 #define APR_HAS_DSO            1
 
+#define APR_HAS_MMAP           0
+#define APR_HAS_XLATE          0
+
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
 #define SIZEOF_LONGLONG        8
