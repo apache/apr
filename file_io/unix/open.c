@@ -215,10 +215,9 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
     (*file)->buffered = 0;
     (*file)->timeout = -1;
     (*file)->filedes = *dafile;
-    /* buffer already NULL */
-#if APR_HAS_THREADS
-    ap_create_lock(&((*file)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
-#endif
+    /* buffer already NULL; 
+     * don't get a lock (only for buffered files) 
+     */
     return APR_SUCCESS;
 }    
 
