@@ -100,6 +100,7 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
           $TEMP
           $TMPDIR
           "C:\TEMP"     (windows only)
+          "SYS:\TMP"    (netware only)
           "/tmp"
           "/var/tmp"
           "/usr/tmp"
@@ -126,6 +127,13 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
     /* Next, on Win32, try the C:\TEMP directory. */
     if (test_tempdir("C:\\TEMP", p)) {
         memcpy(global_temp_dir, "C:\\TEMP", 7 + 1);
+        goto end;
+    }
+#endif
+#ifdef NETWARE
+    /* Next, on NetWare, try the SYS:/TMP directory. */
+    if (test_tempdir("SYS:/TMP", p)) {
+        memcpy(global_temp_dir, "SYS:/TMP", 8 + 1);
         goto end;
     }
 #endif
