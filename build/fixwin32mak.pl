@@ -10,7 +10,6 @@ use Cwd;
 use IO::File;
 use File::Find;
 
-chdir '..';
 $root = cwd;
 # ignore our own direcory (allowing us to move into any parallel tree)
 $root =~ s|^.:(.*)/.*?$|cd "$1|;
