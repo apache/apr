@@ -411,23 +411,3 @@ APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
     free(buf);
     return (cc == APR_SUCCESS) ? len : -1;
 }
-
-ap_status_t ap_file_check_read(ap_file_t *fd)
-{
-    fd_set fds;
-    int rv;
-    struct timeval tv = { 0 };
-
-    FD_ZERO(&fds);
-    FD_SET(fd->filedes, &fds);
-    if ((rv = select(fd->filedes + 1, &fds, NULL, NULL, &tv)) == -1) {
-        return errno;
-    }
-    else if (rv == 0) {
-        return APR_TIMEUP;
-    }
-    else {
-        return APR_SUCCESS;
-    }
-}
-
