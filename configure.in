@@ -801,7 +801,7 @@ MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefil
 SUBDIRS="lib strings passwd tables "
 for dir in $MODULES
 do
-    test -d $dir || $MKDIR -p $dir
+    test -d $dir || $MKDIR $dir
     if test -f $srcdir/$dir/$OSDIR/Makefile.in; then
         MAKEFILE2="$MAKEFILE2 $dir/$OSDIR/Makefile "
         SUBDIRS="$SUBDIRS $dir/$OSDIR "
@@ -824,6 +824,9 @@ SAVE_FILES="include/apr.h include/arch/unix/apr_private.h"
 for i in $SAVE_FILES; do
   test -r $i && mv $i $i.save
 done
+
+dir=include/arch/unix
+test -d $dir || $MKDIR $dir
 
 AC_OUTPUT($MAKEFILE1 $MAKEFILE2 $MAKEFILE3 include/apr.h APRVARS,[
 
@@ -855,7 +858,11 @@ VPATH  = $abs_srcdir/$dir
 
 EOF
 )    |  cat - $makefile | \
-        sed -e 's#-I\($(INCDIR[0-9]*)\)#-I\1 -I$(srcdir)/\1#g' > tmp
+        sed \
+		-e 's#-I\($(INCDIR[0-9]*)\)#-I\1 -I$(srcdir)\1#g' \
+		-e 's#-I\($(OSDIR[0-9]*)\)#-I\1 -I$(srcdir)\1#g' \
+		-e 's#-I\($(DEFOSDIR[0-9]*)\)#-I\1 -I$(srcdir)\1#g' \
+		> tmp
     cp tmp $makefile
   done
   if test -n "$USE_MM"; then

@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "unix/dso.h"
+#include "dso.h"
 #include "apr_strings.h"
 
 #if APR_HAS_DSO
