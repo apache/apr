@@ -72,7 +72,7 @@
 #include <sys/stat.h>
 #endif
 
-apr_status_t dir_cleanup(void *thedir)
+static apr_status_t dir_cleanup(void *thedir)
 {
     apr_dir_t *dir = thedir;
     if (dir->dirhand != INVALID_HANDLE_VALUE && !FindClose(dir->dirhand)) {
@@ -85,88 +85,43 @@ apr_status_t dir_cleanup(void *thedir)
 APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
                                        apr_pool_t *cont)
 {
-    /* Note that we won't open a directory that is greater than MAX_PATH,
-     * including the trailing /* wildcard suffix.  If a * won't fit, then
-     * neither will any other file name within the directory.
-     * The length not including the trailing '*' is stored as rootlen, to
-     * skip over all paths which are too long.
-     */
-    int len = strlen(dirname);
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
+#endif
+    int len = strlen(dirname);
+    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+    (*new)->dirname = apr_palloc(cont, len + 3);
+    memcpy((*new)->dirname, dirname, len);
+    if (len && (*new)->dirname[len - 1] != '/') {
+    	(*new)->dirname[len++] = '/';
+    }
+    (*new)->dirname[len++] = '*';
+    (*new)->dirname[len] = '\0';
+
+#if APR_HAS_UNICODE_FS
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
     {
-        /* While there is now a generic accessor to convert to Unicode,
-         * we do something special here to provide a few extra wchars
-         * for the /* (really \*) suffix
-         *
-         * Note that the \\?\ form only works for local drive paths, and
-         * not for UNC paths.
+        /* Create a buffer for the longest file name we will ever see 
          */
-        int srcremains = len;
-        int dirremains = len;
-        apr_wchar_t *wch;
-        (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        if (dirname[1] == ':' && dirname[2] == '/') {
-            (*new)->w.dirname = apr_palloc(cont, (dirremains + 7) * 2);
-            wcscpy((*new)->w.dirname, L"\\\\?\\");
-            wch = (*new)->w.dirname + 4;
-        }
-        else if (dirname[0] == '/' && dirname[1] == '/') {
-            /* Skip the leading slashes */
-            dirname += 2;
-            srcremains = dirremains = (len -= 2);
-            (*new)->w.dirname = apr_palloc(cont, (dirremains + 11) * 2);
-            wcscpy ((*new)->w.dirname, L"\\\\?\\UNC\\");
-            wch = (*new)->w.dirname + 8;
-        }
-        else
-            wch = (*new)->w.dirname = apr_palloc(cont, (dirremains + 3) * 2);
-        
-        if (conv_utf8_to_ucs2(dirname, &srcremains,
-                              wch, &dirremains) || srcremains) {
-            (*new) = NULL;
-            return APR_ENAMETOOLONG;
-        }
-        len -= dirremains;
-        if (len && wch[len - 1] != '/') {
-    	    wch[len++] = L'/';
-        }
-        wch[len++] = L'*';
-        wch[len] = L'\0';
-        if (wch != (*new)->w.dirname)
-        {
-            if (len >= MAX_PATH ) {
-                (*new) = NULL;
-                return APR_ENAMETOOLONG;
-            }
-            (*new)->rootlen = len - 1;
-        }
-        else /* we don't care, since the path isn't limited in length */
-            (*new)->rootlen = 0;
-        for (; *wch; ++wch)
-            if (*wch == L'/')
-                *wch = L'\\';
+        (*new)->name = apr_pcalloc(cont, MAX_PATH * 3 + 1);        
     }
     else
 #endif
     {
-        (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
-        (*new)->n.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATA));
-        (*new)->n.dirname = apr_palloc(cont, len + 3);
-        memcpy((*new)->n.dirname, dirname, len);
-        if (len && (*new)->n.dirname[len - 1] != '/') {
-    	    (*new)->n.dirname[len++] = '/';
-        }
-        (*new)->n.dirname[len++] = '*';
-        (*new)->n.dirname[len] = '\0';
-        (*new)->rootlen = len - 1;
-        if (len >= MAX_PATH ){
+        /* Note that we won't open a directory that is greater than MAX_PATH,
+         * including the trailing /* wildcard suffix.  If a * won't fit, then
+         * neither will any other file name within the directory.
+         * The length not including the trailing '*' is stored as rootlen, to
+         * skip over all paths which are too long.
+         */
+        if (len >= MAX_PATH) {
             (*new) = NULL;
             return APR_ENAMETOOLONG;
         }
+        (*new)->n.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
     }
+    (*new)->rootlen = len - 1;
     (*new)->cntxt = cont;
     (*new)->dirhand = INVALID_HANDLE_VALUE;
     apr_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
@@ -192,8 +147,16 @@ APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
-        if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-            thedir->dirhand = FindFirstFileW(thedir->w.dirname, thedir->w.entry);
+        if (thedir->dirhand == INVALID_HANDLE_VALUE) 
+        {
+            apr_wchar_t wdirname[8192];
+            apr_status_t rv;
+            if (rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
+                                                     / sizeof(apr_wchar_t), 
+                                          thedir->dirname)) {
+                return rv;
+            }
+            thedir->dirhand = FindFirstFileW(wdirname, thedir->w.entry);
             if (thedir->dirhand == INVALID_HANDLE_VALUE) {
                 return apr_get_os_error();
             }
@@ -213,7 +176,8 @@ APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir)
 #endif
     {
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-            thedir->dirhand = FindFirstFile(thedir->n.dirname, thedir->n.entry);
+            thedir->dirhand = FindFirstFileA(thedir->dirname, 
+                                             thedir->n.entry);
             if (thedir->dirhand == INVALID_HANDLE_VALUE) {
                 return apr_get_os_error();
             }
@@ -249,9 +213,12 @@ APR_DECLARE(apr_status_t) apr_make_dir(const char *path, apr_fileperms_t perm,
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t *wpath = utf8_to_unicode_path(path, cont);
-        if (!wpath)
-            return APR_ENAMETOOLONG;
+        apr_wchar_t wpath[8192];
+        apr_status_t rv;
+        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                              / sizeof(apr_wchar_t), path)) {
+            return rv;
+        }
         if (!CreateDirectoryW(wpath, NULL)) {
             return apr_get_os_error();
         }
@@ -270,9 +237,12 @@ APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont)
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT) 
     {
-        apr_wchar_t *wpath = utf8_to_unicode_path(path, cont);
-        if (!wpath)
-            return APR_ENAMETOOLONG;
+        apr_wchar_t wpath[8192];
+        apr_status_t rv;
+        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                              / sizeof(apr_wchar_t), path)) {
+            return rv;
+        }
         if (!RemoveDirectoryW(wpath)) {
             return apr_get_os_error();
         }
@@ -332,10 +302,11 @@ APR_DECLARE(apr_status_t) apr_get_dir_filename(const char **new,
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
-        (*new) = unicode_to_utf8_path(thedir->w.entry->cFileName, 
-                                      thedir->cntxt);
-        if (!*new)
-            return APR_ENAMETOOLONG;
+        apr_status_t rv;
+        if (rv = unicode_to_utf8_path(thedir->name, MAX_PATH * 3 + 1, 
+                                      thedir->w.entry->cFileName))
+            return rv;
+        (*new) = thedir->name;
     }
     else
 #endif

@@ -115,7 +115,7 @@ int main(void)
     }
     
     fprintf(stderr, "Getting file size...................");
-    rv = apr_getfileinfo(&finfo, thefile);
+    rv = apr_getfileinfo(&finfo, APR_FINFO_NORM, thefile);
     if (rv != APR_SUCCESS) {
         fprintf(stderr,
                 "Didn't get file information: %d/%s\n",

@@ -113,26 +113,10 @@
 
 #define APR_FILE_BUFSIZE 4096
 
-typedef struct apr_canon_elem_t {
-/* A possible comparison mechanism to play with once we start
- * implementing case insensitive mount poinbt semantices
- *  int dev;
- *  int inode;
- *  apr_time_t cached;  --for timeout?
- */
-    int pathlen;
-    char *element;
-} apr_canon_elem_t;
-
-struct apr_canon_t {
-    apr_pool_t *cntxt;
-    apr_array_header_t *elems;
-};
-
 struct apr_file_t {
     apr_pool_t *cntxt;
     int filedes;
-    char * fname;
+    char *fname;
     int oflags;
     int eof_hit;
     int pipe;

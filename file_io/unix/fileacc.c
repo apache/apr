@@ -60,22 +60,7 @@
 APR_DECLARE(apr_status_t) apr_get_filename(const char **fname,
                                            apr_file_t *thefile)
 {
-#ifdef WIN32 /* this test is only good until some other platform trys wchar* */
-#if APR_HAS_UNICODE_FS
-    apr_oslevel_e os_level;
-    if (!apr_get_oslevel(thefile->cntxt, &os_level) && os_level >= APR_WIN_NT)
-    {
-        *fname = unicode_to_utf8_path(thefile->w.fname, thefile->cntxt);
-        if (!*fname)
-            return APR_ENAMETOOLONG;
-    }
-    else
-#endif /* !APR_HAS_UNICODE_FS */
-        *fname = thefile->n.fname;
-
-#else /* !def Win32 */
     *fname = thefile->fname;
-#endif 
     return APR_SUCCESS;
 }
 

@@ -56,6 +56,7 @@
 #include "win32/fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
+#include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_time.h"
 #include <sys/stat.h>
@@ -74,32 +75,8 @@
 #define FILE_FLAG_OPEN_REPARSE_POINT 0x00200000
 #endif
 
-BOOLEAN is_exe(const char* fname, apr_pool_t *cont) {
-    /*
-     *  Sleeping code, see notes under apr_stat()
-     */
-    const char* exename;
-    const char* ext;
-    exename = strrchr(fname, '/');
-    if (!exename) {
-        exename = strrchr(fname, '\\');
-    }
-    if (!exename) {
-        exename = fname;
-    }
-    else {
-        exename++;
-    }
-    ext = strrchr(exename, '.');
 
-    if (ext && (!strcasecmp(ext,".exe") || !strcasecmp(ext,".com") || 
-                !strcasecmp(ext,".bat") || !strcasecmp(ext,".cmd"))) {
-        return TRUE;
-    }
-    return FALSE;
-}
-
-APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo,
+APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
                                           apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInformation;
@@ -199,7 +176,7 @@ APR_DECLARE(apr_status_t) apr_setfileperms(const char *fname,
 }
 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
-                                   apr_pool_t *cont)
+                                   apr_int32_t wanted, apr_pool_t *cont)
 {
     apr_oslevel_e os_level;
     /*
@@ -211,7 +188,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
      */        
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
     {
-        apr_file_t thefile;
+        apr_file_t *thefile = NULL;
         apr_status_t rv;
         /* 
          * NT5 (W2K) only supports symlinks in the same manner as mount points.
@@ -221,22 +198,38 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
          * We must open the file with READ_CONTROL if we plan to retrieve the
          * user, group or permissions.
          */
-        thefile.cntxt = cont;
-        thefile.w.fname = utf8_to_unicode_path(fname, cont);
-        if (!thefile.w.fname)
-            return APR_ENAMETOOLONG;
-        thefile.filehand = CreateFileW(thefile.w.fname, 
-                                       0 /* READ_CONTROL */, 
-                                       FILE_SHARE_READ | FILE_SHARE_WRITE
-                                     | FILE_SHARE_DELETE, NULL, 
-                                       OPEN_EXISTING, 
-                                       FILE_FLAG_BACKUP_SEMANTICS 
-                                     | FILE_FLAG_OPEN_NO_RECALL, NULL);
-        if (thefile.filehand == INVALID_HANDLE_VALUE)
-            return apr_get_os_error();
-        rv = apr_getfileinfo(finfo, &thefile);
-        CloseHandle(thefile.filehand);
-        return rv;
+        
+        if (rv = apr_open(&thefile, fname, 
+                          ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
+                        | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
+                             ? APR_READCONTROL : 0), APR_OS_DEFAULT, cont))
+        {
+            /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
+             * proceed with the alternate...
+             */
+            if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER)) {
+                rv = apr_open(&thefile, fname, 
+                              ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
+                              APR_OS_DEFAULT, cont);
+                wanted &= ~(APR_FINFO_PROT | APR_FINFO_OWNER);
+            }
+            if (rv)
+                return rv;
+        }
+
+        /* 
+         * NT5 (W2K) only supports symlinks in the same manner as mount points.
+         * This code should eventually take that into account, for now treat
+         * every reparse point as a symlink...
+         *
+         * We must open the file with READ_CONTROL if we plan to retrieve the
+         * user, group or permissions.
+         */
+        rv = apr_getfileinfo(finfo, wanted, thefile);
+        finfo->cntxt = thefile->cntxt;
+        finfo->fname = thefile->fname;
+        finfo->filehand = thefile;
+        return (rv);
     }
     else
     {
@@ -298,7 +291,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
         }
 
-        /* Is this an executable? Guess based on the file extension. 
+        /* Is this an executable? Guess based on the file extension?
          * This is a rather silly test, IMHO... we are looking to test
          * if the user 'may' execute a file (permissions), 
          * not if the filetype is executable.
@@ -308,10 +301,6 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
          * types (invoking without an extension.)  Perhaps a registry
          * key test is even appropriate here.
          */
-    /*  if (is_exe(fname, cont)) {
-     *       finfo->protection |= S_IEXEC;
-     *  }
-     */
     
         /* File times */
         FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
@@ -328,44 +317,27 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 }
 
 APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
-                                    apr_pool_t *cont)
+                                    apr_int32_t wanted, apr_pool_t *cont)
 {
-    apr_oslevel_e os_level;
-    if (apr_get_oslevel(cont, &os_level) || os_level < APR_WIN_2000)
-    {
-        /* Windows 9x doesn't support links whatsoever, and NT 4.0 
-         * only supports hard links.  Just fall through
-         */
-        return apr_stat(finfo, fname, cont);
-    }
-    else
-    {
-        apr_file_t thefile;
-        apr_status_t rv;
-        /* 
-         * NT5 (W2K) only supports symlinks in the same manner as mount points.
-         * This code should eventually take that into account, for now treat
-         * every reparse point as a symlink...
-         *
-         * We must open the file with READ_CONTROL if we plan to retrieve the
-         * user, group or permissions.
-         */
-        thefile.cntxt = cont;
-        thefile.w.fname = utf8_to_unicode_path(fname, cont);
-        if (!thefile.w.fname)
-            return APR_ENAMETOOLONG;
-        thefile.filehand = CreateFileW(thefile.w.fname, 
-                                       0 /* READ_CONTROL */, 
-                                       FILE_SHARE_READ | FILE_SHARE_WRITE
-                                     | FILE_SHARE_DELETE, NULL, 
-                                       OPEN_EXISTING, 
-                                       FILE_FLAG_OPEN_REPARSE_POINT
-                                     | FILE_FLAG_BACKUP_SEMANTICS 
-                                     | FILE_FLAG_OPEN_NO_RECALL, NULL);
-        if (thefile.filehand == INVALID_HANDLE_VALUE)
-            return apr_get_os_error();
-        rv = apr_getfileinfo(finfo, &thefile);
-        CloseHandle(thefile.filehand);
-        return rv;
-    }
+    return apr_stat(finfo, fname, wanted & APR_FINFO_LINK, cont);
 }
+
+#if 0
+    apr_oslevel_e os_level;
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
+    {
+        WIN32_FIND_DATAW FileInformation;
+        HANDLE hFind;
+        apr_wchar_t *wname;
+        if (strchr(fspec, '*') || strchr(fspec, '?'))
+            return APR_ENOENT;
+        wname = utf8_to_unicode_path(fspec, cont);
+        if (!wname)
+            return APR_ENAMETOOLONG;
+        hFind = FindFirstFileW(wname, &FileInformation);
+        if (hFind == INVALID_HANDLE_VALUE)
+            return apr_get_os_error();
+    	else
+            FindClose(hFind);
+        *fname = unicode_to_utf8_path(FileInformation.cFileName, cont);
+#endif

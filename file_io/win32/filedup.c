@@ -63,7 +63,6 @@ APR_DECLARE(apr_status_t) apr_dupfile(apr_file_t **new_file,
 {
     BOOLEAN isStdHandle = FALSE;
     HANDLE hCurrentProcess = GetCurrentProcess();
-    apr_oslevel_e os_level;
 
     if ((*new_file) == NULL) {
         if (p == NULL) {
@@ -105,29 +104,8 @@ APR_DECLARE(apr_status_t) apr_dupfile(apr_file_t **new_file,
     }
 
     (*new_file)->cntxt = old_file->cntxt;
-#if APR_HAS_UNICODE_FS
-    if (!apr_get_oslevel(old_file->cntxt, &os_level) && os_level >= APR_WIN_NT)
-    {
-        int len = wcslen(old_file->w.fname) + 1;
-        (*new_file)->w.fname = apr_palloc(old_file->cntxt, len * 2);
-        memcpy((*new_file)->w.fname, old_file->w.fname, len * 2);
-    }
-    else
-#endif
-        (*new_file)->n.fname = apr_pstrdup(old_file->cntxt, old_file->n.fname);
-
-/*    (*new_file)->demonfname = apr_pstrdup(old_file->cntxt, old_file->demonfname);
- *    (*new_file)->lowerdemonfname = apr_pstrdup(old_file->cntxt, old_file->lowerdemonfname);
- */
+    (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->append = old_file->append;
-/*    (*new_file)->protection = old_file->protection;
- *    (*new_file)->user = old_file->user;
- *    (*new_file)->group = old_file->group;
- */
-    (*new_file)->size = old_file->size;
-    (*new_file)->atime = old_file->atime;    
-    (*new_file)->mtime = old_file->mtime;
-    (*new_file)->ctime = old_file->ctime;
     (*new_file)->buffered = FALSE;
 
     if (!isStdHandle) {

@@ -113,7 +113,8 @@ static apr_status_t handle_type(apr_filetype_e *ftype, HFILE file)
 
 
 
-apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
+apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted, 
+                             apr_file_t *thefile)
 {
     ULONG rc;
     FILESTATUS3 fstatus;
@@ -125,6 +126,8 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
 
     if (rc == 0) {
         FS3_to_finfo(finfo, &fstatus);
+        /* XXX: This is wrong, but it will work for today */
+        finfo->valid = APR_FINFO_NORM;
 
         if (finfo->filetype == APR_REG) {
             if (thefile->isopen) {
@@ -146,7 +149,8 @@ apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
 }
 
 
-apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
+                      apr_int32_wanted, apr_pool_t *cont)
 {
     ULONG rc;
     FILESTATUS3 fstatus;
@@ -156,9 +160,13 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     rc = DosQueryPathInfo(fname, FIL_STANDARD, &fstatus, sizeof(fstatus));
     
     if (rc == 0) {
+        /* XXX: This is wrong, but it will work for today */
+        finfo->valid = APR_FINFO_NORM;
         FS3_to_finfo(finfo, &fstatus);
         return APR_SUCCESS;
     } else if (rc == ERROR_INVALID_ACCESS) {
+        /* XXX: This is wrong, but it will work for today */
+        finfo->valid = APR_FINFO_NORM;
         memset(finfo, 0, sizeof(apr_finfo_t));
         finfo->protection = 0444;
         finfo->filetype = APR_CHR;
@@ -170,7 +178,8 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 
 
 
-apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname,
+                       apr_int32_wanted, apr_pool_t *cont)
 {
-    return apr_stat(finfo, fname, cont);
+    return apr_stat(finfo, fname, wanted, cont);
 }
