@@ -233,11 +233,14 @@ struct apr_dir_t {
     };
 };
 
-/* There are many goofy characters we can't accept.  Here's the list.
+/* There are many goofy characters the filesystem can't accept
+ * or can confound the cmd.exe shell.  Here's the list
+ * [declared in filesys.c]
  */
-extern const char c_is_fnchar[256];
+extern const char apr_c_is_fnchar[256];
 
-#define IS_FNCHAR(c) c_is_fnchar[(unsigned char)c]
+#define IS_FNCHAR(c) (apr_c_is_fnchar[(unsigned char)(c)] & 1)
+#define IS_SHCHAR(c) (apr_c_is_fnchar[(unsigned char)(c)] & 2 == 2)
 
 
 /* If the user passes APR_FILEPATH_TRUENAME to either

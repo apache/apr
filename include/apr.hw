@@ -284,6 +284,7 @@ extern "C" {
 #define APR_HAS_DSO               1
 #define APR_HAS_SO_ACCEPTFILTER   0
 #define APR_HAS_UNICODE_FS        1
+#define APR_HAS_PROC_INVOKED      1
 #ifndef _WIN32_WCE
 #define APR_HAS_SENDFILE          1
 #define APR_HAS_USER              1
