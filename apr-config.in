@@ -55,10 +55,12 @@
 # APR script designed to allow easy command line access to APR configuration
 # parameters.
 
-PREFIX="@prefix@"
-EXEC_PREFIX="@exec_prefix@"
-LIBDIR="@libdir@"
-INCLUDEDIR="@includedir@"
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+bindir="@bindir@"
+libdir="@libdir@"
+includedir="@includedir@"
+
 CC="@CC@"
 CPP="@CPP@"
 SHELL="@SHELL@"
@@ -66,8 +68,7 @@ CPPFLAGS="@EXTRA_CPPFLAGS@"
 CFLAGS="@EXTRA_CFLAGS@"
 LDFLAGS="@EXTRA_LDFLAGS@"
 LIBS="@EXTRA_LIBS@"
-INCLUDES="@EXTRA_INCLUDES@"
-LIBTOOL_LIBS="@LIBTOOL_LIBS@"
+EXTRA_INCLUDES="@EXTRA_INCLUDES@"
 SHLIBPATH_VAR="@shlibpath_var@"
 APR_SOURCE_DIR="@abs_srcdir@"
 APR_SO_EXT="@so_ext@"
@@ -84,14 +85,42 @@ Known values for OPTION are:
   --cppflags        print cpp flags
   --includes        print include information
   --ldflags         print linker flags
-  --libs            print library information
+  --libs            print additional libraries to link against
+  --srcdir          print APR source directory
+  --apr-ld          print link switch(es) for linking to APR
+  --apr-libtool     print the libtool inputs for linking to APR
+  --apr-la-file     print the path to the .la file, if available
   --help            print this help
+
+When linking with libtool, an application should do something like:
+  APR_LIBS="\`apr-config --apr-libtool --libs\`"
+or when linking directly:
+  APR_LIBS="\`apr-config --apr-ld --libs\`"
+
+An application should use the results of --cflags, --cppflags, --includes,
+and --ldflags in their build process.
 EOF
 }
 
 if test $# -eq 0; then
     show_usage
     exit 1
+fi
+
+thisdir="`dirname $0`"
+thisdir="`cd $thisdir && pwd`"
+if test "$BINDIR" = "$thisdir"; then
+  location=installed
+elif test "$APR_SOURCE_DIR" = "$thisdir"; then
+  location=source
+else
+  location=build
+fi
+
+if test "$location" = "installed"; then
+    LA_FILE="$libdir/libapr.la"
+else
+    LA_FILE="$thisdir/libapr.la"
 fi
 
 while test $# -gt 0; do
@@ -107,7 +136,7 @@ while test $# -gt 0; do
     prefix=$optarg
     ;;
     --prefix)
-    echo $PREFIX
+    echo $prefix
     ;;
     --cflags)
     echo $CFLAGS
@@ -122,11 +151,43 @@ while test $# -gt 0; do
     echo $LDFLAGS
     ;;
     --includes)
-    echo $INCLUDES
+    if test "$location" = "installed"; then
+        echo "-I$includedir $EXTRA_INCLUDES"
+    elif test "$location" = "source"; then
+        echo "-I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
+    else
+        echo "-I$thisdir/include -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
+    fi
+    ;;
+    --srcdir)
+    echo $APR_SOURCE_DIR
+    ;;
+    --apr-ld)
+    if test "$location" = "installed"; then
+        ### avoid using -L if libdir is a "standard" location like /usr/lib
+        echo "-L$libdir -lapr"
+    else
+        echo "-L$thisdir -lapr"
+    fi
+    ;;
+    --apr-libtool)
+    if test -f "$LA_FILE"; then
+        echo $LA_FILE
+    elif test "$location" = "installed"; then
+        ### avoid using -L if libdir is a "standard" location like /usr/lib
+        echo "-L$libdir -lapr"
+    else
+        echo "-L$thisdir -lapr"
+    fi
+    ;;
+    --apr-la-file)
+    if test -f "$LA_FILE"; then
+        echo $LA_FILE
+    fi
     ;;
     --help)
     show_usage
-    exit 1
+    exit 0
     ;;
     *)
     show_usage
