@@ -304,17 +304,6 @@ APR_DECLARE(apr_table_t *) apr_make_table(apr_pool_t *p, int nelts)
     return t;
 }
 
-APR_DECLARE(apr_btable_t *) apr_make_btable(apr_pool_t *p, int nelts)
-{
-    apr_btable_t *t = apr_palloc(p, sizeof(apr_btable_t));
-
-    make_array_core(&t->a, p, nelts, sizeof(apr_btable_entry_t));
-#ifdef MAKE_TABLE_PROFILE
-    t->creator = __builtin_return_address(0);
-#endif
-    return t;
-}
-
 APR_DECLARE(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
 {
     apr_table_t *new = apr_palloc(p, sizeof(apr_table_t));
@@ -334,32 +323,7 @@ APR_DECLARE(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
     return new;
 }
 
-APR_DECLARE(apr_btable_t *) apr_copy_btable(apr_pool_t *p,
-					   const apr_btable_t *t)
-{
-    apr_btable_t *new = apr_palloc(p, sizeof(apr_btable_entry_t));
-
-#ifdef POOL_DEBUG
-    /* we don't copy keys and values, so it's necessary that t->a.pool
-     * have a life span at least as long as p
-     */
-    if (!apr_pool_is_ancestor(t->a.cont, p)) {
-	fprintf(stderr, "copy_btable: t's pool is not an ancestor of p\n");
-	abort();
-    }
-#endif
-    make_array_core(&new->a, p, t->a.nalloc, sizeof(apr_btable_entry_t));
-    memcpy(new->a.elts, t->a.elts, t->a.nelts * sizeof(apr_btable_entry_t));
-    new->a.nelts = t->a.nelts;
-    return new;
-}
-
 APR_DECLARE(void) apr_clear_table(apr_table_t *t)
-{
-    t->a.nelts = 0;
-}
-
-APR_DECLARE(void) apr_clear_btable(apr_btable_t *t)
 {
     t->a.nelts = 0;
 }
@@ -367,25 +331,6 @@ APR_DECLARE(void) apr_clear_btable(apr_btable_t *t)
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
-    int i;
-
-    if (key == NULL) {
-	return NULL;
-    }
-
-    for (i = 0; i < t->a.nelts; ++i) {
-	if (!strcasecmp(elts[i].key, key)) {
-	    return elts[i].val;
-	}
-    }
-
-    return NULL;
-}
-
-APR_DECLARE(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
-					      const char *key)
-{
-    apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
     int i;
 
     if (key == NULL) {
@@ -432,46 +377,6 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 	elts = (apr_table_entry_t *) table_push(t);
 	elts->key = apr_pstrdup(t->a.cont, key);
 	elts->val = apr_pstrdup(t->a.cont, val);
-    }
-}
-
-APR_DECLARE(void) apr_btable_set(apr_btable_t *t, const char *key,
-				size_t size, const void *val)
-{
-    register int i, j, k;
-    apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
-    apr_item_t *item;
-    int done = 0;
-
-    item = apr_pcalloc(t->a.cont, sizeof(apr_item_t));
-    item->size = size;
-    item->data = apr_pcalloc(t->a.cont, size);
-    memcpy(item->data, val, size);
-
-    for (i = 0; i < t->a.nelts; ) {
-	if (!strcasecmp(elts[i].key, key)) {
-	    if (!done) {
-		elts[i].val = item;
-		done = 1;
-		++i;
-	    }
-	    else {		/* delete an extraneous element */
-		for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
-		    elts[j].key = elts[k].key;
-		    elts[j].val = elts[k].val;
-		}
-		--t->a.nelts;
-	    }
-	}
-	else {
-	    ++i;
-	}
-    }
-
-    if (!done) {
-	elts = (apr_btable_entry_t *) table_push((apr_btable_t *) t);
-	elts->key = apr_pstrdup(t->a.cont, key);
-	elts->val = item;
     }
 }
 
@@ -522,87 +427,10 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
     }
 }
 
-APR_DECLARE(void) apr_btable_setn(apr_btable_t *t, const char *key,
-				 size_t size, const void *val)
-{
-    register int i, j, k;
-    apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
-    int done = 0;
-    apr_item_t *item;
-
-#ifdef POOL_DEBUG
-    {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
-	    abort();
-	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
-	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
-	    abort();
-	}
-    }
-#endif
-
-    item = (apr_item_t *) apr_pcalloc(t->a.cont, size);
-    item->size = size;
-    item->data = (void *)val;
-
-    for (i = 0; i < t->a.nelts; ) {
-	if (!strcasecmp(elts[i].key, key)) {
-	    if (!done) {
-		elts[i].val = item;
-		done = 1;
-		++i;
-	    }
-	    else {		/* delete an extraneous element */
-		for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
-		    elts[j].key = elts[k].key;
-		    elts[j].val = elts[k].val;
-		}
-		--t->a.nelts;
-	    }
-	}
-	else {
-	    ++i;
-	}
-    }
-
-    if (!done) {
-	elts = (apr_btable_entry_t *) table_push((apr_table_t *)t);
-	elts->key = (char *)key;
-	elts->val = item;
-    }
-}
-
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 {
     register int i, j, k;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
-
-    for (i = 0; i < t->a.nelts; ) {
-	if (!strcasecmp(elts[i].key, key)) {
-
-	    /* found an element to skip over
-	     * there are any number of ways to remove an element from
-	     * a contiguous block of memory.  I've chosen one that
-	     * doesn't do a memcpy/bcopy/array_delete, *shrug*...
-	     */
-	    for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
-		elts[j].key = elts[k].key;
-		elts[j].val = elts[k].val;
-	    }
-	    --t->a.nelts;
-	}
-	else {
-	    ++i;
-	}
-    }
-}
-
-APR_DECLARE(void) apr_btable_unset(apr_btable_t *t, const char *key)
-{
-    register int i, j, k;
-    apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
 
     for (i = 0; i < t->a.nelts; ) {
 	if (!strcasecmp(elts[i].key, key)) {
@@ -683,21 +511,6 @@ APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
     elts->val = apr_pstrdup(t->a.cont, val);
 }
 
-APR_DECLARE(void) apr_btable_add(apr_btable_t *t, const char *key,
-				size_t size, const void *val)
-{
-    apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
-    apr_item_t *item;
-
-    item = (apr_item_t *) apr_pcalloc(t->a.cont, sizeof(apr_item_t));
-    item->size = size;
-    item->data = apr_pcalloc(t->a.cont, size);
-    memcpy(item->data, val, size);
-    elts = (apr_btable_entry_t *) table_push((apr_btable_t *)t);
-    elts->key = apr_pstrdup(t->a.cont, key);
-    elts->val = item;
-}
-
 APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 				const char *val)
 {
@@ -719,34 +532,6 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
     elts = (apr_table_entry_t *) table_push(t);
     elts->key = (char *)key;
     elts->val = (char *)val;
-}
-
-APR_DECLARE(void) apr_btable_addn(apr_btable_t *t, const char *key,
-				 size_t size, const void *val)
-{
-    apr_btable_entry_t *elts = (apr_btable_entry_t *) t->a.elts;
-    apr_item_t *item;
-
-#ifdef POOL_DEBUG
-    {
-	if (!apr_pool_is_ancestor(apr_find_pool(key), t->a.cont)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
-	    abort();
-	}
-	if (!apr_pool_is_ancestor(apr_find_pool(val), t->a.cont)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
-	    abort();
-	}
-    }
-#endif
-
-    item = (apr_item_t *) apr_pcalloc(t->a.cont, sizeof(apr_item_t));
-    item->size = size;
-    item->data = apr_pcalloc(t->a.cont, size);
-    memcpy(item->data, val, size);
-    elts = (apr_btable_entry_t *) table_push((apr_btable_t *)t);
-    elts->key = (char *)key;
-    elts->val = item;
 }
 
 APR_DECLARE(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
@@ -773,38 +558,6 @@ APR_DECLARE(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
 #endif
 
     res = apr_palloc(p, sizeof(apr_table_t));
-    /* behave like append_arrays */
-    res->a.cont = p;
-    copy_array_hdr_core(&res->a, &overlay->a);
-    apr_array_cat(&res->a, &base->a);
-
-    return res;
-}
-
-APR_DECLARE(apr_btable_t *) apr_overlay_btables(apr_pool_t *p,
-					       const apr_btable_t *overlay,
-					       const apr_btable_t *base)
-{
-    apr_btable_t *res;
-
-#ifdef POOL_DEBUG
-    /* we don't copy keys and values, so it's necessary that
-     * overlay->a.pool and base->a.pool have a life span at least
-     * as long as p
-     */
-    if (!apr_pool_is_ancestor(overlay->a.cont, p)) {
-	fprintf(stderr,
-		"overlay_tables: overlay's pool is not an ancestor of p\n");
-	abort();
-    }
-    if (!apr_pool_is_ancestor(base->a.cont, p)) {
-	fprintf(stderr,
-		"overlay_tables: base's pool is not an ancestor of p\n");
-	abort();
-    }
-#endif
-
-    res = apr_palloc(p, sizeof(apr_btable_t));
     /* behave like append_arrays */
     res->a.cont = p;
     copy_array_hdr_core(&res->a, &overlay->a);

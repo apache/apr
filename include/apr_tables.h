@@ -80,7 +80,6 @@ extern "C" {
  * published.
  */
 typedef struct apr_table_t apr_table_t;
-typedef struct apr_btable_t apr_btable_t;
 typedef struct apr_array_header_t apr_array_header_t;
 
 /** An opaque array type */
@@ -112,21 +111,6 @@ struct apr_table_t {
 #endif
 };
 
-/** The opaque binary-content table type */
-struct apr_btable_t {
-    /* This has to be first to promote backwards compatibility with
-     * older modules which cast a apr_table_t * to an apr_array_header_t *...
-     * they should use the table_elts() function for most of the
-     * cases they do this for.
-     */
-    /** The underlying array for the table */
-    apr_array_header_t a;
-#ifdef MAKE_TABLE_PROFILE
-    /** Who created the array. */
-    void *creator;
-#endif
-};
-
 /**
  * The (opaque) structure for string-content tables.
  */
@@ -143,11 +127,6 @@ struct apr_table_entry_t {
 };
 
 /**
- * The (opaque) structure for binary-content tables.
- */
-typedef struct apr_btable_entry_t apr_btable_entry_t;
-
-/**
  * A transparent type for items stored in binary-content tables, and
  * possibly elsewhere.
  */
@@ -162,16 +141,6 @@ typedef struct apr_item_t {
     void *data;
 } apr_item_t;
 
-/** The type for each entry in a binary-content table */
-struct apr_btable_entry_t {
-    /** The key for the current table entry */
-    char *key;          /* maybe NULL in future;
-                         * check when iterating thru table_elts
-                         */
-    /** The value for the current table entry */
-    apr_item_t *val;
-};
-
 /**
  * Get the elements from a table
  * @param t The table
@@ -181,14 +150,6 @@ struct apr_btable_entry_t {
 #define apr_table_elts(t) ((apr_array_header_t *)(t))
 
 /**
- * Get the elements from a binary table
- * @param t The table
- * @return An array containing the contents of the table
- * @deffunc apr_array_header_t *apr_table_elts(apr_table_t *t)
- */
-#define apr_btable_elts(t) apr_table_elts(t)
-
-/**
  * Determine if the table is empty
  * @param t The table to check
  * @return True if empty, Falso otherwise
@@ -196,13 +157,6 @@ struct apr_btable_entry_t {
  */
 #define apr_is_empty_table(t) (((t) == NULL) \
                                || (((apr_array_header_t *)(t))->nelts == 0))
-/**
- * Determine if the binary table is empty
- * @param t The table to check
- * @return True if empty, Falso otherwise
- * @deffunc int apr_is_empty_btable(apr_table_t *t)
- */
-#define apr_is_empty_btable(t) apr_is_empty_table(t)
 
 /**
  * Create an array
@@ -301,15 +255,6 @@ APR_DECLARE(char *) apr_array_pstrcat(struct apr_pool_t *p,
 APR_DECLARE(apr_table_t *) apr_make_table(struct apr_pool_t *p, int nelts);
 
 /**
- * Make a new table capable of storing binary data
- * @param p The pool to allocate the pool out of
- * @param nelts The number of elements in the initial table.
- * @return The new table.
- * @deffunc apr_table_t *apr_make_btable(apr_pool_t *p, int nelts)
- */
-APR_DECLARE(apr_btable_t *) apr_make_btable(struct apr_pool_t *p, int nelts);
-
-/**
  * Create a new table and copy another table into it
  * @param p The pool to allocate the new table out of
  * @param t The table to copy
@@ -320,28 +265,11 @@ APR_DECLARE(apr_table_t *) apr_copy_table(struct apr_pool_t *p,
                                           const apr_table_t *t);
 
 /**
- * Create a new binary table and copy another table into it
- * @param p The pool to allocate the new table out of
- * @param t The table to copy
- * @return A copy of the table passed in
- * @deffunc apr_table_t *apr_copy_btable(apr_pool_t *p, const apr_btable_t *t)
- */
-APR_DECLARE(apr_btable_t *) apr_copy_btable(struct apr_pool_t *p,
-                                            const apr_btable_t *t);
-
-/**
  * Delete all of the elements from a table
  * @param t The table to clear
  * @deffunc void apr_clear_table(apr_table_t *t)
  */
 APR_DECLARE(void) apr_clear_table(apr_table_t *t);
-
-/**
- * Delete all of the elements from a binary table
- * @param t The table to clear
- * @deffunc void apr_clear_btable(apr_btable_t *t)
- */
-APR_DECLARE(void) apr_clear_btable(apr_btable_t *t);
 
 /**
  * Get the value associated with a given key from the table.  After this call,
@@ -352,17 +280,6 @@ APR_DECLARE(void) apr_clear_btable(apr_btable_t *t);
  * @deffunc const char *apr_table_get(const apr_table_t *t, const char *key)
  */
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
-
-/**
- * Get the value associated with a given key from a binary table.  After this
- * call, the data is still in the table.
- * @param t The table to search for the key
- * @param key The key to search for
- * @return The value associated with the key
- * @deffunc const apr_item_t *apr_btable_get(const apr_btable_t *t, const char *key)
- */
-APR_DECLARE(const apr_item_t *) apr_btable_get(const apr_btable_t *t,
-                                               const char *key);
 
 /**
  * Add a key/value pair to a table, if another element already exists with the
@@ -378,20 +295,6 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
                                 const char *val);
 
 /**
- * Add a key/value pair to a binary table if another element already exists 
- * with the same key, this will over-write the old data.
- * @param t The table to add the data to.
- * @param key The key fo use
- * @param size The size of the data to add
- * @param val The value to add
- * @tip When adding data, this function makes a copy of both the key and the
- *      value.
- * @deffunc void apr_btable_set(apr_btable_t *t, const char *key, size_t size, const void *val)
- */
-APR_DECLARE(void) apr_btable_set(apr_btable_t *t, const char *key,
-                                 size_t size, const void *val);
-
-/**
  * Add a key/value pair to a table, if another element already exists with the
  * same key, this will over-write the old data.
  * @param t The table to add the data to.
@@ -404,20 +307,6 @@ APR_DECLARE(void) apr_btable_set(apr_btable_t *t, const char *key,
  */
 APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
                                  const char *val);
-/**
- * Add a key/value pair to a binary table if another element already exists 
- * with the same key, this will over-write the old data.
- * @param t The table to add the data to.
- * @param key The key fo use
- * @param size The size of the data to add
- * @param val The value to add
- * @tip When adding data, this function does not make a copy of the key or the
- *      value, so care should be taken to ensure that the values will not 
- *      change after they have been added..
- * @deffunc void apr_btable_setn(apr_btable_t *t, const char *key, size_t size, const void *val)
- */
-APR_DECLARE(void) apr_btable_setn(apr_btable_t *t, const char *key,
-				 size_t size, const void *val);
 
 /**
  * Remove data from the table
@@ -426,14 +315,6 @@ APR_DECLARE(void) apr_btable_setn(apr_btable_t *t, const char *key,
  * @deffunc void apr_table_unset(apr_table_t *t, const char *key)
  */
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
-
-/**
- * Remove data from a binary table
- * @param t The table to remove data from
- * @param key The key of the data being removed
- * @deffunc void apr_btable_unset(apr_btable_t *t, const char *key)
- */
-APR_DECLARE(void) apr_btable_unset(apr_btable_t *t, const char *key);
 
 /**
  * Add data to a table by merging the value with data that has already been 
@@ -473,20 +354,6 @@ APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
                                 const char *val);
 
 /**
- * Add data to a binary table, regardless of whether there is another element 
- * with the same key.
- * @param t The table to add to
- * @param key The key to use
- * @param size The size of the value to add
- * @param val The value to add.
- * @tip When adding data, this function makes a copy of both the key and the
- *      value.
- * @deffunc void apr_btable_add(apr_btable_t *t, const char *key, size_t size, const char *val)
- */
-APR_DECLARE(void) apr_btable_add(apr_btable_t *t, const char *key,
-                                 size_t size, const void *val);
-
-/**
  * Add data to a table, regardless of whether there is another element with the
  * same key.
  * @param t The table to add to
@@ -501,21 +368,6 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
                                  const char *val);
 
 /**
- * Add data to a binary table, regardless of whether there is another element 
- * with the same key.
- * @param t The table to add to
- * @param key The key to use
- * @param size The size of the value to add
- * @param val The value to add.
- * @tip When adding data, this function does not make a copy of the key or the
- *      value, so care should be taken to ensure that the values will not 
- *      change after they have been added..
- * @deffunc void apr_btable_addn(apr_btable_t *t, const char *key, size_t size, const char *val)
- */
-APR_DECLARE(void) apr_btable_addn(apr_btable_t *t, const char *key,
-                                  size_t size, const void *val);
-
-/**
  * Merge two tables into one new table
  * @param p The pool to use for the new table
  * @param overlay The first table to put in the new table
@@ -526,17 +378,6 @@ APR_DECLARE(void) apr_btable_addn(apr_btable_t *t, const char *key,
 APR_DECLARE(apr_table_t *) apr_overlay_tables(struct apr_pool_t *p,
                                               const apr_table_t *overlay,
                                               const apr_table_t *base);
-/**
- * Merge two binary tables into one new table
- * @param p The pool to use for the new table
- * @param overlay The first table to put in the new table
- * @param base The table to add at the end of the new table
- * @return A new table containing all of the data from the two passed in
- * @deffunc apr_btable_t *apr_overlay_tables(apr_pool_t *p, const apr_btable_t *overlay, const apr_btable_t *base);
- */
-APR_DECLARE(apr_btable_t *) apr_overlay_btables(struct apr_pool_t *p,
-                                                const apr_btable_t *overlay,
-                                                const apr_btable_t *base);
 
 /** 
  * Iterate over a table running the provided function once for every
