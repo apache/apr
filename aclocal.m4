@@ -90,7 +90,7 @@ else
     if test ".$ac_decision_msg" = .; then
         ac_decision_msg="$ac_decision"
     fi
-    AC_DEFINE($ac_decision_item)
+    AC_DEFINE_UNQUOTED(${ac_decision_item})
     AC_MSG_RESULT([decision on $ac_decision_item... $ac_decision_msg])
 fi
 ])dnl
