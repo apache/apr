@@ -59,15 +59,35 @@
 #include "win32/thread_rwlock.h"
 #include "apr_portable.h"
 
+static apr_status_t thread_rwlock_cleanup(void *data)
+{
+    apr_thread_rwlock_t *rwlock = data;
+    CloseHandle(rwlock->readevent);
+    CloseHandle(rwlock->mutex);
+    CloseHandle(rwlock->writemutex);
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
                                                    apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    (*rwlock) = apr_palloc(pool, sizeof(**rwlock));
+    (*rwlock)->readevent=CreateEvent(NULL,TRUE,FALSE,NULL);
+    (*rwlock)->mutex = CreateEvent(NULL,FALSE,TRUE,NULL);
+    (*rwlock)->writemutex = CreateMutex(NULL,FALSE,NULL);
+    (*rwlock)->counter = -1;
+    (*rwlock)->wrcounter = 0;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_rdlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    if (InterlockedIncrement(&rwlock->counter) == 0) {
+        WaitForSingleObject(rwlock->mutex, INFINITE);
+        SetEvent(rwlock->readevent);
+    }
+    WaitForSingleObject(rwlock->readevent,INFINITE);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwlock)
@@ -77,7 +97,10 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_tryrdlock(apr_thread_rwlock_t *rwloc
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_wrlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    WaitForSingleObject(rwlock->writemutex,INFINITE);
+    WaitForSingleObject(rwlock->mutex, INFINITE);
+    rwlock->wrcounter++;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwlock)
@@ -87,11 +110,22 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwloc
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    if (rwlock->wrcounter) {
+        /* If wrcounter is > 0, then we must have a writer lock */
+        SetEvent(rwlock->mutex);
+        ReleaseMutex(rwlock->writemutex);
+    } 
+    else {
+        if (InterlockedDecrement(&rwlock->counter) < 0) {
+            ResetEvent(rwlock->readevent);
+            SetEvent(rwlock->mutex);
+        }
+    } 
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 {
-    return APR_ENOTIMPL;
+    return apr_pool_cleanup_run(rwlock->pool, rwlock, thread_rwlock_cleanup);
 }
 
