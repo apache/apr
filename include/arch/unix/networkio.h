@@ -144,6 +144,9 @@ struct apr_pollfd_t {
     fd_set *write;
     fd_set *except;
     int highsock;
+    fd_set *read_set;
+    fd_set *write_set;
+    fd_set *except_set;
 #endif
     apr_int16_t *events;
     apr_int16_t *revents;
