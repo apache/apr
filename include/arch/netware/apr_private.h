@@ -63,6 +63,8 @@
 #define HAVE_SETENV     1
 #define HAVE_UNSETENV   1
 
+#define HAVE_WRITEV     1
+
 /*#define DSO_USE_DLFCN */
 
 #ifdef NW_BUILD_IPV6
