@@ -27,11 +27,6 @@
  * 64, the test will fail even though the code is correct.
  */
 #define LARGE_NUM_SOCKETS 50
-#ifdef NETWARE
-#define SOCK_TIMEOUT 1000
-#else
-#define SOCK_TIMEOUT 0
-#endif
 
 static apr_socket_t *s[LARGE_NUM_SOCKETS];
 static apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
@@ -319,7 +314,7 @@ static void nomessage_pollset(abts_case *tc, void *data)
     int lrv;
     const apr_pollfd_t *descs = NULL;
 
-    rv = apr_pollset_poll(pollset, SOCK_TIMEOUT, &lrv, &descs);
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
     ABTS_INT_EQUAL(tc, 0, lrv);
     ABTS_PTR_EQUAL(tc, NULL, descs);
@@ -332,7 +327,7 @@ static void send0_pollset(abts_case *tc, void *data)
     int num;
     
     send_msg(s, sa, 0, tc);
-    rv = apr_pollset_poll(pollset, SOCK_TIMEOUT, &num, &descs);
+    rv = apr_pollset_poll(pollset, 0, &num, &descs);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 1, num);
     ABTS_PTR_NOTNULL(tc, descs);
@@ -348,7 +343,7 @@ static void recv0_pollset(abts_case *tc, void *data)
     const apr_pollfd_t *descs = NULL;
 
     recv_msg(s, 0, p, tc);
-    rv = apr_pollset_poll(pollset, SOCK_TIMEOUT, &lrv, &descs);
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
     ABTS_INT_EQUAL(tc, 0, lrv);
     ABTS_PTR_EQUAL(tc, NULL, descs);
@@ -362,7 +357,7 @@ static void send_middle_pollset(abts_case *tc, void *data)
     
     send_msg(s, sa, 2, tc);
     send_msg(s, sa, 5, tc);
-    rv = apr_pollset_poll(pollset, SOCK_TIMEOUT, &num, &descs);
+    rv = apr_pollset_poll(pollset, 0, &num, &descs);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 2, num);
     ABTS_PTR_NOTNULL(tc, descs);
@@ -381,7 +376,7 @@ static void clear_middle_pollset(abts_case *tc, void *data)
     recv_msg(s, 2, p, tc);
     recv_msg(s, 5, p, tc);
 
-    rv = apr_pollset_poll(pollset, SOCK_TIMEOUT, &lrv, &descs);
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
     ABTS_INT_EQUAL(tc, 0, lrv);
     ABTS_PTR_EQUAL(tc, NULL, descs);
@@ -394,7 +389,7 @@ static void send_last_pollset(abts_case *tc, void *data)
     int num;
     
     send_msg(s, sa, LARGE_NUM_SOCKETS - 1, tc);
-    rv = apr_pollset_poll(pollset, SOCK_TIMEOUT, &num, &descs);
+    rv = apr_pollset_poll(pollset, 0, &num, &descs);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, 1, num);
     ABTS_PTR_NOTNULL(tc, descs);
@@ -411,7 +406,7 @@ static void clear_last_pollset(abts_case *tc, void *data)
 
     recv_msg(s, LARGE_NUM_SOCKETS - 1, p, tc);
 
-    rv = apr_pollset_poll(pollset, SOCK_TIMEOUT, &lrv, &descs);
+    rv = apr_pollset_poll(pollset, 0, &lrv, &descs);
     ABTS_INT_EQUAL(tc, 1, APR_STATUS_IS_TIMEUP(rv));
     ABTS_INT_EQUAL(tc, 0, lrv);
     ABTS_PTR_EQUAL(tc, NULL, descs);
