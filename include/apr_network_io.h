@@ -466,7 +466,7 @@ apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port);
 /**
  * Return the port in an APR socket address.
  * @param port The port from the socket address.
- * @param sock The socket address to reference.
+ * @param sockaddr The socket address to reference.
  */
 apr_status_t apr_get_port(apr_port_t *port, apr_sockaddr_t *sockaddr);
 
@@ -482,7 +482,7 @@ apr_status_t apr_set_ipaddr(apr_sockaddr_t *sockaddr, const char *addr);
  * Return the IP address (in numeric address string format) in
  * an APR socket address.
  * @param addr The IP address.
- * @param sock The socket address to reference.
+ * @param sockaddr The socket address to reference.
  */
 apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr);
 
