@@ -141,8 +141,7 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_CTIME  0x00000020
 #define APR_FINFO_ATIME  0x00000040
 #define APR_FINFO_SIZE   0x00000100
-#define APR_FINFO_ASIZE  0x00000200
-#define APR_FINFO_CSIZE  0x00000400
+#define APR_FINFO_CSIZE  0x00000200
 #define APR_FINFO_DEV    0x00001000
 #define APR_FINFO_INODE  0x00002000
 #define APR_FINFO_NLINK  0x00004000
@@ -190,8 +189,6 @@ struct apr_finfo_t {
     apr_int16_t nlink;
     /** The size of the file */
     apr_off_t size;
-    /** The space allocated for the file */
-    apr_off_t asize;
     /** The storage size consumed by the file */
     apr_off_t csize;
     /** The time the file was last accessed */
