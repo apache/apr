@@ -55,7 +55,11 @@
 #include "fileio.h"
 #include "apr_lock.h"
 
-#ifndef BEOS
+#if !BEOS || (BEOS && HAVE_ARPA_INET_H)
+#define USE_WAIT_FOR_IO
+#endif
+
+#ifdef USE_WAIT_FOR_IO
 static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
 {
     struct timeval tv, *tvptr;
@@ -159,7 +163,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         do {
             rv = read(thefile->filedes, buf, *nbytes);
         } while (rv == -1 && errno == EINTR);
-#ifndef BEOS
+#ifdef USE_WAIT_FOR_IO
         if (rv == -1 && 
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
@@ -232,7 +236,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         do {
             rv = write(thefile->filedes, buf, *nbytes);
         } while (rv == (ap_size_t)-1 && errno == EINTR);
-#ifndef BEOS
+#ifdef USE_WAIT_FOR_IO
         if (rv == (ap_size_t)-1 &&
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
