@@ -63,7 +63,7 @@
 
 static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
 {
-    finfo->protection = (fstatus->attrFile & FILE_READONLY) ? 0555 : 0777;
+    finfo->protection = (fstatus->attrFile & FILE_READONLY) ? 0x555 : 0x777;
 
     if (fstatus->attrFile & FILE_DIRECTORY)
         finfo->filetype = APR_DIR;
