@@ -57,8 +57,12 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
+#if APR_HAVE_TIME_H
 #include <time.h>
+#endif
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
+#endif
 #include <string.h>
 #include <winbase.h>
 
