@@ -302,7 +302,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  *      APR_FILEPATH_TRUENAME  Tests that the root exists, and makes it proper
  * </PRE>
  * @param p the pool to allocate the new path string from
- * @deffunc apr_status_t apr_filepath_root(const char **rootpath, const char **inpath, apr_pool_t *p)
+ * @deffunc apr_status_t apr_filepath_root(const char **rootpath, const char **inpath, apr_int32_t flags, apr_pool_t *p)
  * @tip on return, filepath points to the first non-root character in the
  * given filepath.  In the simplest example, given a filepath of "/foo", 
  * returns the rootpath of "/" and filepath points at "foo".  This is far 
