@@ -142,9 +142,9 @@ static void reverse(const char **argv, int start, int len)
     const char *temp;
 
     for (; len >= 2; start++, len -= 2) {
-	temp = argv[start];
-	argv[start] = argv[start + len - 1];
-	argv[start + len - 1] = temp;
+        temp = argv[start];
+        argv[start] = argv[start + len - 1];
+        argv[start + len - 1] = temp;
     }
 }
 
@@ -160,15 +160,15 @@ static void permute(apr_getopt_t *os)
     int len2 = os->ind - os->skip_end;
 
     if (os->interleave) {
-	/*
-	 * Exchange the sequences argv[os->skip_start..os->skip_end-1] and
-	 * argv[os->skip_end..os->ind-1].  The easiest way to do that is
-	 * to reverse the entire range and then reverse the two
-	 * sub-ranges.
-	 */
-	reverse(os->argv, os->skip_start, len1 + len2);
-	reverse(os->argv, os->skip_start, len2);
-	reverse(os->argv, os->skip_start + len2, len1);
+        /*
+         * Exchange the sequences argv[os->skip_start..os->skip_end-1] and
+         * argv[os->skip_end..os->ind-1].  The easiest way to do that is
+         * to reverse the entire range and then reverse the two
+         * sub-ranges.
+         */
+        reverse(os->argv, os->skip_start, len1 + len2);
+        reverse(os->argv, os->skip_start, len2);
+        reverse(os->argv, os->skip_start + len2, len1);
     }
 
     /* Reset skip range to the new location of the non-option sequence. */
@@ -178,36 +178,36 @@ static void permute(apr_getopt_t *os)
 
 /* Helper function to print out an error involving a long option */
 static apr_status_t serr(apr_getopt_t *os, const char *err, const char *str,
-			 apr_status_t status)
+                         apr_status_t status)
 {
     if (os->errfn)
-	(os->errfn)(os->errarg, "%s: %s: %s\n", 
+        (os->errfn)(os->errarg, "%s: %s: %s\n", 
                     apr_filename_of_pathname(*os->argv), err, str);
     return status;
 }
 
 /* Helper function to print out an error involving a short option */
 static apr_status_t cerr(apr_getopt_t *os, const char *err, int ch,
-			 apr_status_t status)
+                         apr_status_t status)
 {
     if (os->errfn)
-	(os->errfn)(os->errarg, "%s: %s: %c\n", 
+        (os->errfn)(os->errarg, "%s: %s: %c\n", 
                     apr_filename_of_pathname(*os->argv), err, ch);
     return status;
 }
 
 APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
-					  const apr_getopt_option_t *opts,
-					  int *optch, const char **optarg)
+                                          const apr_getopt_option_t *opts,
+                                          int *optch, const char **optarg)
 {
     const char *p;
     int i;
 
     /* Let the calling program reset option processing. */
     if (os->reset) {
-	os->place = EMSG;
-	os->ind = 1;
-	os->reset = 0;
+        os->place = EMSG;
+        os->ind = 1;
+        os->reset = 0;
     }
 
     /*
@@ -217,54 +217,54 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
      * one first.  */
     p = os->place;
     if (*p == '\0') {
-	/* If we are interleaving, skip non-option arguments. */
-	if (os->interleave) {
-	    while (os->ind < os->argc && *os->argv[os->ind] != '-')
-		os->ind++;
-	    os->skip_end = os->ind;
-	}
-	if (os->ind >= os->argc || *os->argv[os->ind] != '-') {
-	    os->ind = os->skip_start;
-	    return APR_EOF;
-	}
+        /* If we are interleaving, skip non-option arguments. */
+        if (os->interleave) {
+            while (os->ind < os->argc && *os->argv[os->ind] != '-')
+                os->ind++;
+            os->skip_end = os->ind;
+        }
+        if (os->ind >= os->argc || *os->argv[os->ind] != '-') {
+            os->ind = os->skip_start;
+            return APR_EOF;
+        }
 
-	p = os->argv[os->ind++] + 1;
-	if (*p == '-' && p[1] != '\0') {        /* Long option */
-	    /* Search for the long option name in the caller's table. */
-	    apr_size_t len = 0;
+        p = os->argv[os->ind++] + 1;
+        if (*p == '-' && p[1] != '\0') {        /* Long option */
+            /* Search for the long option name in the caller's table. */
+            apr_size_t len = 0;
 
-	    p++;
-	    for (i = 0; ; i++) {
-	        if (opts[i].optch == 0)             /* No match */
-		    return serr(os, "invalid option", p - 2, APR_BADCH);
-		len = strlen(opts[i].name);
-		if (strncmp(p, opts[i].name, len) == 0
-		    && (p[len] == '\0' || p[len] == '='))
-		    break;
-	    }
-	    *optch = opts[i].optch;
+            p++;
+            for (i = 0; ; i++) {
+                if (opts[i].optch == 0)             /* No match */
+                    return serr(os, "invalid option", p - 2, APR_BADCH);
+                len = strlen(opts[i].name);
+                if (strncmp(p, opts[i].name, len) == 0
+                    && (p[len] == '\0' || p[len] == '='))
+                    break;
+            }
+            *optch = opts[i].optch;
 
-	    if (opts[i].has_arg) {
-		if (p[len] == '=')              /* Argument inline */
-		    *optarg = p + len + 1;
-		else if (os->ind >= os->argc)   /* Argument missing */
-		    return serr(os, "missing argument", p - 2, APR_BADARG);
-		else                            /* Argument in next arg */
-		    *optarg = os->argv[os->ind++];
-	    } else {
-		*optarg = NULL;
-		if (p[len] == '=')
-		    return serr(os, "erroneous argument", p - 2, APR_BADARG);
-	    }
-	    permute(os);
-	    return APR_SUCCESS;
-	} else if (*p == '-') {                 /* Bare "--"; we're done */
-	    permute(os);
-	    os->ind = os->skip_start;
-	    return APR_EOF;
-	}
-	else if (*p == '\0')                    /* Bare "-" is illegal */
-	    return serr(os, "invalid option", p, APR_BADCH);
+            if (opts[i].has_arg) {
+                if (p[len] == '=')              /* Argument inline */
+                    *optarg = p + len + 1;
+                else if (os->ind >= os->argc)   /* Argument missing */
+                    return serr(os, "missing argument", p - 2, APR_BADARG);
+                else                            /* Argument in next arg */
+                    *optarg = os->argv[os->ind++];
+            } else {
+            *optarg = NULL;
+                if (p[len] == '=')
+                    return serr(os, "erroneous argument", p - 2, APR_BADARG);
+            }
+            permute(os);
+            return APR_SUCCESS;
+        } else if (*p == '-') {                 /* Bare "--"; we're done */
+            permute(os);
+            os->ind = os->skip_start;
+            return APR_EOF;
+        }
+        else if (*p == '\0')                    /* Bare "-" is illegal */
+            return serr(os, "invalid option", p, APR_BADCH);
     }
 
     /*
@@ -272,24 +272,24 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
      * Look for it in the caller's table.
      */
     for (i = 0; ; i++) {
-	if (opts[i].optch == 0)                     /* No match */
-	    return cerr(os, "invalid option character", *p, APR_BADCH);
-	if (*p == opts[i].optch)
-	    break;
+        if (opts[i].optch == 0)                     /* No match */
+            return cerr(os, "invalid option character", *p, APR_BADCH);
+        if (*p == opts[i].optch)
+            break;
     }
     *optch = *p++;
 
     if (opts[i].has_arg) {
-	if (*p != '\0')                         /* Argument inline */
-	    *optarg = p;
-	else if (os->ind >= os->argc)           /* Argument missing */
-	    return cerr(os, "missing argument", *optch, APR_BADARG);
-	else                                    /* Argument in next arg */
-	    *optarg = os->argv[os->ind++];
-	os->place = EMSG;
+        if (*p != '\0')                         /* Argument inline */
+            *optarg = p;
+        else if (os->ind >= os->argc)           /* Argument missing */
+            return cerr(os, "missing argument", *optch, APR_BADARG);
+        else                                    /* Argument in next arg */
+            *optarg = os->argv[os->ind++];
+        os->place = EMSG;
     } else {
-	*optarg = NULL;
-	os->place = p;
+        *optarg = NULL;
+        os->place = p;
     }
 
     permute(os);
