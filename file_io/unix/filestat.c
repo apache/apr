@@ -84,8 +84,12 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
 static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
                            apr_int32_t wanted)
 { 
+#ifdef NETWARE
+    finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK;
+#else
     finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK
                  | APR_FINFO_OWNER | APR_FINFO_PROT;
+#endif
     finfo->protection = apr_unix_mode2perms(info->st_mode);
     finfo->filetype = filetype_from_mode(info->st_mode);
     finfo->user = info->st_uid;
