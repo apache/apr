@@ -830,6 +830,10 @@ AC_CHECK_FUNCS(strerror_r, [ strerror_r="1" ], [ strerror_r="0" ])
 if test "$strerror_r" = "1"; then
   APR_CHECK_STRERROR_R_RC
 fi
+AC_CHECK_FUNCS(crypt_r, [ crypt_r="1" ], [ crypt_r="0" ])
+if test "$crypt_r" = "1"; then
+  APR_CHECK_CRYPT_R_STYLE
+fi
 AC_CHECK_FUNCS(iconv, [ iconv="1" ], [ iconv="0" ])
 if test "$iconv" = "1"; then
   APR_CHECK_ICONV_INBUF

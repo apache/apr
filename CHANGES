@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Linux, AIX: Use crypt_r() instead of crypt() because the native
+     crypt() is not thread-safe.  The misuse of crypt() led to   
+     intermittent failures with Apache basic authentication when crypt 
+     passwords were being used.  [Jeff Trawick]
+
   *) AIX: Global mutexes don't need an intraprocess mutex when SysV
      sems are used for the crossprocess mutex.
      Darwin: The same optimization was applied for Posix sems.
