@@ -870,8 +870,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             }
             /* Null term for stat! */
             path[keptlen + seglen] = '\0';
-            if ((rv = apr_lstat(&finfo, path, APR_FINFO_TYPE | APR_FINFO_NAME, p))
-                    == APR_SUCCESS) {
+            if ((rv = apr_lstat(&finfo, path, 
+                                APR_FINFO_TYPE | APR_FINFO_NAME, p))
+                == APR_SUCCESS) {
                 apr_size_t namelen = strlen(finfo.name);
 
 #if defined(OS2) || defined(NETWARE) /* only has case folding, never aliases that change the length */

@@ -1,4 +1,30 @@
 Changes with APR 0.9.2
+  *) Add DougM's apr_rename.pl script into helpers, and update for the new batch     of updates [Thom May]
+
+  *) Renames done (deprecated functions wrapped):
+     apr_filename_of_pathname -> apr_filepath_name_get
+     apr_get_groupid -> apr_gid_get
+     apr_get_groupname -> apr_gid_name_get
+     apr_compare_groups -> apr_gid_compare
+     apr_parse_addr_port -> apr_port_addr_parse
+     apr_shutdown -> apr_socket_shutdown
+     apr_bind -> apr_socket_bind
+     apr_listen -> apr_socket_listen
+     apr_accept -> apr_socket_accept
+     apr_connect -> apr_socket_connect
+     apr_send -> apr_socket_send
+     apr_sendv -> apr_socket_sendv
+     apr_sendto -> apr_socket_sendto
+     apr_implode_gmt -> apr_time_exp_gmt_get
+     apr_get_home_directory -> apr_uid_homepath_get
+     apr_get_userid -> apr_uid_get
+     apr_current_userid -> apr_uid_current
+     apr_compare_users -> apr_uid_compare
+     apr_get_username -> apr_uid_name_get
+     apr_recvfrom -> apr_socket_recvfrom
+     apr_sendfile -> apr_socket_sendfile
+     apr_recv -> apr_socket_recv 
+     [Thom May]
 
   *) Add APR_IPV6_V6ONLY socket option.  [Jeff Trawick]
 

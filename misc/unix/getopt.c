@@ -101,7 +101,7 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
             ++os->ind;
         if (os->errfn && *opts != ':') {
             (os->errfn)(os->errarg, "%s: illegal option -- %c\n",
-                        apr_filename_of_pathname(*os->argv), os->opt);
+                        apr_filepath_name_get(*os->argv), os->opt);
         }
         *optch = os->opt;
         return (APR_BADCH);
@@ -123,7 +123,7 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
             if (os->errfn) {
                 (os->errfn)(os->errarg, 
                             "%s: option requires an argument -- %c\n",
-                            apr_filename_of_pathname(*os->argv), os->opt);
+                            apr_filepath_name_get(*os->argv), os->opt);
             }
             *optch = os->opt;
             return (APR_BADCH);
@@ -183,7 +183,7 @@ static apr_status_t serr(apr_getopt_t *os, const char *err, const char *str,
 {
     if (os->errfn)
         (os->errfn)(os->errarg, "%s: %s: %s\n", 
-                    apr_filename_of_pathname(*os->argv), err, str);
+                    apr_filepath_name_get(*os->argv), err, str);
     return status;
 }
 
@@ -193,7 +193,7 @@ static apr_status_t cerr(apr_getopt_t *os, const char *err, int ch,
 {
     if (os->errfn)
         (os->errfn)(os->errarg, "%s: %s: %c\n", 
-                    apr_filename_of_pathname(*os->argv), err, ch);
+                    apr_filepath_name_get(*os->argv), err, ch);
     return status;
 }
 

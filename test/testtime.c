@@ -179,9 +179,9 @@ static void test_imp_gmt(CuTest *tc)
 
     rv = apr_time_exp_gmt(&xt, now);
     CuAssertTrue(tc, rv == APR_SUCCESS);
-    rv = apr_implode_gmt(&imp, &xt);
+    rv = apr_time_exp_gmt_get(&imp, &xt);
     if (rv == APR_ENOTIMPL) {
-        CuNotImpl(tc, "apr_implode_gmt");
+        CuNotImpl(tc, "apr_time_exp_gmt_get");
     }
     CuAssertTrue(tc, rv == APR_SUCCESS);
     CuAssertTrue(tc, now == imp);

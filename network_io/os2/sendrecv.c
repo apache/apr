@@ -59,7 +59,8 @@
 #include "apr_lib.h"
 #include <sys/time.h>
 
-APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
+                                          apr_size_t *len)
 {
     apr_ssize_t rv;
     int fds, err = 0;
@@ -98,7 +99,8 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf, apr_size
 
 
 
-APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
+                                          apr_size_t *len)
 {
     apr_ssize_t rv;
     int fds, err = 0;
@@ -137,7 +139,9 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf, apr_size_t *le
 
 
 
-APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock, const struct iovec *vec, apr_int32_t nvec, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock, 
+                                           const struct iovec *vec, 
+                                           apr_int32_t nvec, apr_size_t *len)
 {
     apr_status_t rv;
     struct iovec *tmpvec;
@@ -182,4 +186,26 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock, const struct iovec *vec,
 
     *len = rv;
     return APR_SUCCESS;
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
+                                   apr_size_t *len)
+{
+    return apr_socket_send(sock, buf, len);
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock, 
+                                    const struct iovec *vec, 
+                                    apr_int32_t nvec, apr_size_t *len)
+{
+    return apr_socket_sendv(sock, vec, nvec, len);
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
+                                   apr_size_t *len)
+{
+    return apr_socket_recv(sock, buf, len);
 }

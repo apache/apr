@@ -93,14 +93,14 @@ int main(int argc, char *argv[])
         fprintf(stderr,
                 "optional: %s username\n",
                 argv[0]);
-        if ((rv = apr_current_userid(&userid, &groupid, p)) != APR_SUCCESS) {
-            fprintf(stderr, "apr_current_userid failed: %s\n",
+        if ((rv = apr_uid_current(&userid, &groupid, p)) != APR_SUCCESS) {
+            fprintf(stderr, "apr_uid_current failed: %s\n",
                     apr_strerror(rv, msgbuf, sizeof(msgbuf)));
             exit(-1);
         }
-        apr_get_username(&username, userid, p);
+        apr_uid_name_get(&username, userid, p);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_get_username(,,) failed: %s\n",
+            fprintf(stderr, "apr_uid_name_get(,,) failed: %s\n",
                     apr_strerror(rv, msgbuf, sizeof(msgbuf)));
             exit(-1);
         }
@@ -108,22 +108,22 @@ int main(int argc, char *argv[])
     else {
         username = argv[1];
 
-        rv = apr_get_userid(&userid, &groupid, username, p);
+        rv = apr_uid_get(&userid, &groupid, username, p);
         if (rv != APR_SUCCESS) {
-            fprintf(stderr, "apr_get_userid(,,%s,) failed: %s\n",
+            fprintf(stderr, "apr_uid_get(,,%s,) failed: %s\n",
                     username,
                     apr_strerror(rv, msgbuf, sizeof(msgbuf)));
             exit(-1);
         }
     }
 
-    rv = apr_group_name_get(&groupname, groupid, p);
+    rv = apr_gid_name_get(&groupname, groupid, p);
     if (rv != APR_SUCCESS)
         groupname = "(none)";
 
-    rv = apr_get_groupid(&newgroupid, groupname, p);
+    rv = apr_gid_get(&newgroupid, groupname, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_get_groupid(,%s,) failed: %s\n",
+        fprintf(stderr, "apr_gid_get(,%s,) failed: %s\n",
                 groupname,
                 apr_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
@@ -143,9 +143,9 @@ int main(int argc, char *argv[])
            username,
            (int)userid, (int)groupid);
 
-    rv = apr_get_home_directory(&homedir, username, p);
+    rv = apr_uid_homepath_get(&homedir, username, p);
     if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_get_home_directory(,%s,) failed: %s\n",
+        fprintf(stderr, "apr_uid_homepath_get(,%s,) failed: %s\n",
                 username,
                 apr_strerror(rv, msgbuf, sizeof(msgbuf)));
         exit(-1);

@@ -113,6 +113,9 @@ struct apr_vformatter_buff_t {
  *                 "wi\\n32\\stuff" -> "stuff"
  * </PRE>
  */
+APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
+
+/** @deprecated @see apr_filepath_name_get */
 APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
 
 /**

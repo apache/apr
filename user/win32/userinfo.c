@@ -102,7 +102,9 @@ void get_sid_string(char *buf, int blen, apr_uid_t id)
 /* Query the ProfileImagePath from the version-specific branch, where the
  * regkey uses the user's name on 9x, and user's sid string on NT.
  */
-APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *username, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_uid_homepath_get(char **dirname, 
+                                               const char *username, 
+                                               apr_pool_t *p)
 {
 #ifdef _WIN32_WCE
     *dirname = apr_pstrdup(p, "/My Documents");
@@ -119,7 +121,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
         apr_uid_t uid;
         apr_gid_t gid;
     
-        if ((rv = apr_get_userid(&uid, &gid, username, p)) != APR_SUCCESS)
+        if ((rv = apr_uid_get(&uid, &gid, username, p)) != APR_SUCCESS)
             return rv;
 
         strcpy(regkey, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\"
@@ -197,9 +199,9 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
 #endif /* _WIN32_WCE */
 }
 
-APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
-                                             apr_gid_t *gid,
-                                             apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_uid_current(apr_uid_t *uid,
+                                          apr_gid_t *gid,
+                                          apr_pool_t *p)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -234,8 +236,8 @@ APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
 #endif 
 }
 
-APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
-                                         const char *username, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_uid_get(apr_uid_t *uid, apr_gid_t *gid,
+                                      const char *username, apr_pool_t *p)
 {
 #ifdef _WIN32_WCE
     return APR_ENOTIMPL;
@@ -281,7 +283,8 @@ APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_uid_name_get(char **username, apr_uid_t userid,
+                                           apr_pool_t *p)
 {
 #ifdef _WIN32_WCE
     *username = apr_pstrdup(p, "Administrator");
@@ -301,7 +304,7 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
 #endif
 }
   
-APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right)
+APR_DECLARE(apr_status_t) apr_uid_compare(apr_uid_t left, apr_uid_t right)
 {
     if (!left || !right)
         return APR_EINVAL;
@@ -312,4 +315,40 @@ APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right)
         return APR_EMISMATCH;
 #endif
     return APR_SUCCESS;
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, 
+                                                 const char *username, 
+                                                 apr_pool_t *p)
+{
+    return apr_uid_homepath_get(dirname, username, p);
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
+                                         const char *username, apr_pool_t *p)
+{
+    return apr_uid_get(uid, gid, username, p);
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_current_userid(apr_uid_t *uid,
+                                             apr_gid_t *gid,
+                                             apr_pool_t *p)
+{
+    return apr_uid_current(uid, gid, p);
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right)
+{
+    return apr_uid_compare(left, right);
+}
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid,
+                                           apr_pool_t *p)
+{
+    return apr_uid_name_get(username, userid, p);
 }

@@ -128,10 +128,10 @@ int main(int argc, const char * const argv[])
     }
 
     APR_TEST_SUCCESS(rv, "Binding socket to port",
-        apr_bind(sock, localsa))
+        apr_socket_bind(sock, localsa))
     
     APR_TEST_SUCCESS(rv, "Listening to socket",
-        apr_listen(sock, 5))
+        apr_socket_listen(sock, 5))
     
     APR_TEST_BEGIN(rv, "Setting up for polling",
         apr_poll_setup(&sdset, 1, context))
@@ -152,7 +152,7 @@ int main(int argc, const char * const argv[])
     fprintf(stdout, "OK\n");
 
     APR_TEST_SUCCESS(rv, "Accepting a connection",
-        apr_accept(&sock2, sock, context))
+        apr_socket_accept(&sock2, sock, context))
 
     apr_socket_protocol_get(sock2, &protocol);
     if (protocol != APR_PROTO_TCP) {
@@ -171,7 +171,7 @@ int main(int argc, const char * const argv[])
 
     length = STRLEN;
     APR_TEST_BEGIN(rv, "Receiving data from socket",
-        apr_recv(sock2, datasend, &length))
+        apr_socket_recv(sock2, datasend, &length))
 
     if (strcmp(datasend, "Send data test")) {
         fprintf(stdout, "Failed\n");
@@ -186,10 +186,10 @@ int main(int argc, const char * const argv[])
 
     length = STRLEN;
     APR_TEST_SUCCESS(rv, "Sending data over socket",
-        apr_send(sock2, datarecv, &length))
+        apr_socket_send(sock2, datarecv, &length))
     
     APR_TEST_SUCCESS(rv, "Shutting down accepted socket",
-        apr_shutdown(sock2, APR_SHUTDOWN_READ))
+        apr_socket_shutdown(sock2, APR_SHUTDOWN_READ))
 
     APR_TEST_SUCCESS(rv, "Closing duplicate socket",
         apr_socket_close(sock2))

@@ -78,7 +78,7 @@ static int make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, apr_port_t port
         printf("couldn't create UDP socket, shutting down");
         return 1;
     }
-    if (apr_bind((*sock), (*sa)) != APR_SUCCESS){
+    if (apr_socket_bind((*sock), (*sa)) != APR_SUCCESS){
         printf("couldn't bind UDP socket!");
         return 1;
     }
@@ -112,7 +112,7 @@ static void send_msg(apr_socket_t **sockarray, apr_sockaddr_t **sas, int which)
     char errmsg[120];
 
     printf("\tSending message to socket %d............", which);
-    if ((rv = apr_sendto(sockarray[which], sas[which], 0, "hello", &len)) != APR_SUCCESS){
+    if ((rv = apr_socket_sendto(sockarray[which], sas[which], 0, "hello", &len)) != APR_SUCCESS){
         apr_strerror(rv, errmsg, sizeof errmsg);
         printf("Failed! %s\n", errmsg);
         exit(-1);
@@ -131,7 +131,7 @@ static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p)
     apr_sockaddr_info_get(&recsa, "127.0.0.1", APR_UNSPEC, 7770, 0, p);
 
     printf("\tTrying to get message from socket %d....", which);
-    if ((rv = apr_recvfrom(recsa, sockarray[which], 0, buffer, &buflen))
+    if ((rv = apr_socket_recvfrom(recsa, sockarray[which], 0, buffer, &buflen))
         != APR_SUCCESS){
         apr_strerror(rv, errmsg, sizeof errmsg);
         printf("Failed! %s\n", errmsg);

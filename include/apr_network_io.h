@@ -119,8 +119,8 @@ extern "C" {
 #define APR_INCOMPLETE_READ 4096  /**< Set on non-blocking sockets
 				   * (timeout != 0) on which the
 				   * previous read() did not fill a buffer
-				   * completely.  the next apr_recv() will
-				   * first call select()/poll() rather than
+				   * completely.  the next apr_socket_recv() 
+                                   * will first call select()/poll() rather than
 				   * going straight into read().  (Can also
 				   * be set by an application to force a
 				   * select()/poll() call before the next
@@ -209,7 +209,7 @@ typedef enum {
 /** A structure to represent sockets */
 typedef struct apr_socket_t     apr_socket_t;
 /**
- * A structure to encapsulate headers and trailers for apr_sendfile
+ * A structure to encapsulate headers and trailers for apr_socket_sendfile
  */
 typedef struct apr_hdtr_t       apr_hdtr_t;
 /** A structure to represent in_addr */
@@ -263,11 +263,11 @@ struct apr_sockaddr_t {
 };
 
 #if APR_HAS_SENDFILE
-/* Define flags passed in on apr_sendfile() */
+/* Define flags passed in on apr_socket_sendfile() */
 #define APR_SENDFILE_DISCONNECT_SOCKET      1
 #endif
 
-/** A structure to encapsulate headers and trailers for apr_sendfile */
+/** A structure to encapsulate headers and trailers for apr_socket_sendfile */
 struct apr_hdtr_t {
     /** An iovec to store the headers sent before the file. 
      *  @defvar iovec *headers */
@@ -322,6 +322,10 @@ APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new_sock,
  * @remark This does not actually close the socket descriptor, it just
  *      controls which calls are still valid on the socket.
  */
+APR_DECLARE(apr_status_t) apr_socket_shutdown(apr_socket_t *thesocket,
+                                              apr_shutdown_how_e how);
+
+/** @deprecated @see apr_socket_shutdown */
 APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
                                        apr_shutdown_how_e how);
 
@@ -338,6 +342,10 @@ APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket);
  * @remark This may be where we will find out if there is any other process
  *      using the selected port.
  */
+APR_DECLARE(apr_status_t) apr_socket_bind(apr_socket_t *sock, 
+                                          apr_sockaddr_t *sa);
+
+/* @deprecated @see apr_socket_bind */
 APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
 
 /**
@@ -347,6 +355,10 @@ APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
  *                listen queue.  If this value is less than zero, the listen
  *                queue size is set to zero.  
  */
+APR_DECLARE(apr_status_t) apr_socket_listen(apr_socket_t *sock, 
+                                            apr_int32_t backlog);
+
+/** @deprecated @see apr_socket_listen */
 APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog);
 
 /**
@@ -357,6 +369,11 @@ APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog);
  * @param sock The socket we are listening on.
  * @param connection_pool The pool for the new socket.
  */
+APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new_sock, 
+                                            apr_socket_t *sock,
+                                            apr_pool_t *connection_pool);
+
+/** @deprecated @see apr_socket_accept */
 APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new_sock, 
                                      apr_socket_t *sock,
                                      apr_pool_t *connection_pool);
@@ -369,6 +386,10 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new_sock,
  *           APR assumes that the sockaddr_in in the apr_socket is 
  *           completely filled out.
  */
+APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
+                                             apr_sockaddr_t *sa);
+
+/** @deprecated @see apr_socket_connect */
 APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
 
 /**
@@ -410,7 +431,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
                                           apr_sockaddr_t *sa,
                                           apr_int32_t flags);
-                             
+
 /**
  * Parse hostname/IP address with scope id and port.
  *
@@ -493,6 +514,10 @@ APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *sock, void *data,
  * APR_EINTR is never returned.
  * </PRE>
  */
+APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf, 
+                                          apr_size_t *len);
+
+/** @deprecated @see apr_socket_send */
 APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf, 
                                    apr_size_t *len);
 
@@ -513,6 +538,11 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
  * APR_EINTR is never returned.
  * </PRE>
  */
+APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock, 
+                                           const struct iovec *vec,
+                                           apr_int32_t nvec, apr_size_t *len);
+
+/** @deprecated @see apr_socket_sendv */
 APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock, 
                                     const struct iovec *vec,
                                     apr_int32_t nvec, apr_size_t *len);
@@ -524,6 +554,12 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
  * @param buf  The data to send
  * @param len  The length of the data to send
  */
+APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock, 
+                                            apr_sockaddr_t *where,
+                                            apr_int32_t flags, const char *buf, 
+                                            apr_size_t *len);
+
+/** @deprecated @see apr_socket_sendto */
 APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
                                      apr_int32_t flags, const char *buf, 
                                      apr_size_t *len);
@@ -536,10 +572,16 @@ APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
  * @param len  The length of the available buffer
  */
 
+APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from, 
+                                              apr_socket_t *sock,
+                                              apr_int32_t flags, char *buf, 
+                                              apr_size_t *len);
+ 
+/** @deprecated @see apr_socket_recvfrom */
 APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                                        apr_int32_t flags, char *buf, 
                                        apr_size_t *len);
- 
+
 #if APR_HAS_SENDFILE || defined(DOXYGEN)
 
 /**
@@ -557,6 +599,14 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
  *         this behavior, use apr_socket_timeout_set().
  *         The number of bytes actually sent is stored in argument 5.
  */
+APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock, 
+                                              apr_file_t *file,
+                                              apr_hdtr_t *hdtr,
+                                              apr_off_t *offset,
+                                              apr_size_t *len,
+                                              apr_int32_t flags);
+
+/** @deprecated @see apr_socket_sendfile */
 APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                                        apr_hdtr_t *hdtr, apr_off_t *offset,
                                        apr_size_t *len, apr_int32_t flags);
@@ -581,6 +631,10 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
  * APR_EINTR is never returned.
  * </PRE>
  */
+APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, 
+                                   char *buf, apr_size_t *len);
+
+/** @deprecated @see apr_socket_recv */
 APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, 
                                    char *buf, apr_size_t *len);
 
@@ -732,7 +786,6 @@ APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock,
  */
 APR_DECLARE(apr_status_t) apr_getservbyname(apr_sockaddr_t *sockaddr, 
                                             const char *servname);
-
 /**
  * Build an ip-subnet representation from an IP address and optional netmask or
  * number-of-bits.
