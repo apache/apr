@@ -149,7 +149,8 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
      */
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
-    apr_wchar_t *eos, wdirname[APR_PATH_MAX];
+    apr_wchar_t wdirname[APR_PATH_MAX];
+    apr_wchar_t *eos = NULL;
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
         if (thedir->dirhand == INVALID_HANDLE_VALUE) 
@@ -224,6 +225,8 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             /* Almost all our work is done.  Tack on the wide file name
              * to the end of the wdirname (already / delimited)
              */
+            if (!eos)
+                eos = wcschr(wdirname, '\0');
             wcscpy(eos, thedir->w.entry->cFileName);
             return more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC, os_level);
         }
