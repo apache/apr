@@ -34,7 +34,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "CuTest.h"
 
@@ -42,11 +41,15 @@ static int verbose = 0;
 
 void CuInit(int argc, char *argv[])
 {
-	int c;
+	int i;
 	
-	c = getopt(argc, argv, "v");
-	if (c == 'v') {
-		verbose = 1;
+	/* Windows doesn't have getopt, so we have to fake it.  We can't use
+	 * apr_getopt, because CuTest is meant to be a stand-alone test suite
+	 */
+	for (i = 0; i < argc; i++) {
+		if (!strcmp(argv[i], "-v")) {
+			verbose = 1;
+		}
 	}
 }
 
