@@ -529,6 +529,66 @@ if test "$ac_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
 fi
 ])
 
+dnl
+dnl APR_CHECK_DIRENT_INODE
+dnl
+dnl  Decide if d_fileno or d_ino are available in the dirent
+dnl  structure on this platform.  Single UNIX Spec says d_ino,
+dnl  BSD uses d_fileno.  Undef to find the real beast.
+dnl
+AC_DEFUN(APR_CHECK_DIRENT_INODE, [
+AC_CACHE_CHECK([for inode member of struct dirent], apr_cv_dirent_inode, [
+apr_cv_dirent_inode=no
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <dirent.h>
+],[
+#ifdef d_ino
+#undef d_ino
+#endif
+struct dirent de; de.d_fileno;
+], apr_cv_dirent_inode=d_fileno)
+if test "$apr_cv_dirent_inode" = "no"; then
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <dirent.h>
+],[
+#ifdef d_fileno
+#undef d_fileno
+#endif
+struct dirent de; de.d_ino;
+], apr_cv_dirent_inode=d_ino)
+fi
+])
+if test "$apr_cv_dirent_inode" != "no"; then
+  AC_DEFINE_UNQUOTED(DIRENT_INODE, $apr_cv_dirent_inode)
+fi
+AC_MSG_RESULT($apr_cv_dirent_inode)
+])
+
+dnl
+dnl APR_CHECK_DIRENT_TYPE
+dnl
+dnl  Decide if d_type is available in the dirent structure 
+dnl  on this platform.  Not part of the Single UNIX Spec.
+dnl  Note that this is worthless without DT_xxx macros, so
+dnl  look for one while we are at it.
+dnl
+AC_DEFUN(APR_CHECK_DIRENT_TYPE,[
+AC_CACHE_CHECK([for file type member of struct dirent], apr_cv_dirent_type,[
+apr_cv_dirent_type=no
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <dirent.h>
+],[
+struct dirent de; de.d_type = DT_REG;
+], apr_cv_dirent_type=d_type)
+])
+if test "$apr_cv_dirent_type" != "no"; then
+  AC_DEFINE_UNQUOTED(DIRENT_TYPE, $apr_cv_dirent_type) 
+fi
+AC_MSG_RESULT($apr_cv_dirent_type)
+])
 
 dnl the following is a newline, a space, a tab, and a backslash (the
 dnl backslash is used by the shell to skip newlines, but m4 sees it;
