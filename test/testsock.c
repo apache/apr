@@ -22,11 +22,10 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 
-static apr_proc_t launch_child(CuTest *tc, const char *arg1)
+static void launch_child(CuTest *tc, apr_proc_t *proc, const char *arg1, apr_pool_t *p)
 {
-    apr_proc_t proc = {0};
     apr_procattr_t *procattr;
-    const char *args[2];
+    const char *args[3];
     apr_status_t rv;
 
     rv = apr_procattr_create(&procattr, p);
@@ -42,19 +41,18 @@ static apr_proc_t launch_child(CuTest *tc, const char *arg1)
     args[0] = "sockchild" EXTENSION;
     args[1] = arg1;
     args[2] = NULL;
-    rv = apr_proc_create(&proc, "./sockchild" EXTENSION, args, NULL,
+    rv = apr_proc_create(proc, "./sockchild" EXTENSION, args, NULL,
                          procattr, p);
     apr_assert_success(tc, "Couldn't launch program", rv);
-    return proc;
 }
 
-static int wait_child(CuTest *tc, apr_proc_t proc) 
+static int wait_child(CuTest *tc, apr_proc_t *proc) 
 {
     int exitcode;
     apr_exit_why_e why;
 
     CuAssert(tc, "Error waiting for child process",
-            apr_proc_wait(&proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
+            apr_proc_wait(proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
     CuAssert(tc, "child terminated normally", why == APR_PROC_EXIT);
     return exitcode;
@@ -99,7 +97,7 @@ static void test_create_bind_listen(CuTest *tc)
     apr_status_t rv;
     apr_socket_t *sock = setup_socket(tc);
     
-    rv = apr_socket_close(sock);
+    rv = apr_socket_close(sock) ;
     apr_assert_success(tc, "Problem closing socket", rv);
 }
 
@@ -111,10 +109,10 @@ static void test_send(CuTest *tc)
     apr_proc_t proc;
     int protocol;
     int length;
-    
+
     sock = setup_socket(tc);
 
-    proc = launch_child(tc, "read");
+    launch_child(tc, &proc, "read", p);
     
     rv = apr_socket_accept(&sock2, sock, p);
     apr_assert_success(tc, "Problem with receiving connection", rv);
@@ -126,7 +124,7 @@ static void test_send(CuTest *tc)
     apr_socket_send(sock2, DATASTR, &length);
 
     /* Make sure that the client received the data we sent */
-    CuAssertIntEquals(tc, strlen(DATASTR), wait_child(tc, proc));
+    CuAssertIntEquals(tc, strlen(DATASTR), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     apr_assert_success(tc, "Problem closing connected socket", rv);
@@ -146,7 +144,7 @@ static void test_recv(CuTest *tc)
     
     sock = setup_socket(tc);
 
-    proc = launch_child(tc, "write");
+    launch_child(tc, &proc, "write", p);
     
     rv = apr_socket_accept(&sock2, sock, p);
     apr_assert_success(tc, "Problem with receiving connection", rv);
@@ -159,7 +157,7 @@ static void test_recv(CuTest *tc)
 
     /* Make sure that the server received the data we sent */
     CuAssertStrEquals(tc, DATASTR, datastr);
-    CuAssertIntEquals(tc, strlen(datastr), wait_child(tc, proc));
+    CuAssertIntEquals(tc, strlen(datastr), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
     apr_assert_success(tc, "Problem closing connected socket", rv);
@@ -178,7 +176,7 @@ static void test_timeout(CuTest *tc)
     
     sock = setup_socket(tc);
 
-    proc = launch_child(tc, "read");
+    launch_child(tc, &proc, "read", p);
     
     rv = apr_socket_accept(&sock2, sock, p);
     apr_assert_success(tc, "Problem with receiving connection", rv);
@@ -186,7 +184,7 @@ static void test_timeout(CuTest *tc)
     apr_socket_protocol_get(sock2, &protocol);
     CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
     
-    exit = wait_child(tc, proc);    
+    exit = wait_child(tc, &proc);    
     CuAssertIntEquals(tc, SOCKET_TIMEOUT, exit);
 
     /* We didn't write any data, so make sure the child program returns
