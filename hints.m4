@@ -348,6 +348,7 @@ dnl	;;
 	;;
     *-ibm-os390)
        APR_SETIFNULL(apr_lock_method, [USE_SYSVSEM_SERIALIZE])
+       APR_SETIFNULL(apr_process_lock_is_global, [yes])
        APR_SETIFNULL(CC, [cc])
        APR_ADDTO(CFLAGS, [-U_NO_PROTO])
        APR_ADDTO(CFLAGS, [-DPTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR])
