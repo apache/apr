@@ -275,8 +275,8 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     }
 #endif
 
-    for (i = 0; i < *nsds; i++) {
-      aprset[i].rtnevents = 0;
+    for (i = 0; i < num; i++) {
+        aprset[i].rtnevents = 0;
     }
 
     (*nsds) = rv;
@@ -303,7 +303,6 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         else {
             break;
         }
-        aprset[i].rtnevents = 0;
         if (FD_ISSET(fd, &readset)) {
             aprset[i].rtnevents |= APR_POLLIN;
         }
