@@ -233,7 +233,7 @@ int ap_execve(const char *filename, const char *argv[],
 
 	    while (i > 0) {
 		script_argv[i] = argv[i-1];
-		- ap_context_t ;
+		--i;
 	    }
 
 	    execve(SHELL_PATH, script_argv, envp);
