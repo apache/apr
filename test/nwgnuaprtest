@@ -183,7 +183,6 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testmmap.o \
 	$(OBJDIR)/testnames.o \
 	$(OBJDIR)/testoc.o \
-	$(OBJDIR)/testpipe.o \
 	$(OBJDIR)/testpoll.o \
 	$(OBJDIR)/testpools.o \
 	$(OBJDIR)/testproc.o \
@@ -198,8 +197,11 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testud.o \
 	$(OBJDIR)/testuser.o \
 	$(OBJDIR)/testvsn.o \
+	$(OBJDIR)/nw_misc.o \
 	$(EOLIST)
 
+# Pending tests
+#	$(OBJDIR)/testpipe.o \
 	
 #
 # These are the LIB files needed to create the NLM target above.
