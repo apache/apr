@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/04/13 07:46:58 $]
+Last modified at [$Date: 2002/04/26 17:28:20 $]
 
 Release:
 
@@ -50,6 +50,19 @@ RELEASE SHOWSTOPPERS:
 
     * The new apr_global_mutex_t lock type must be implemented on
       all platforms.
+
+CURRENT VOTES:
+
+    * For the atomics code to be efficient it depends on instructions
+      in newer sparc models. Unfortunately this means that binaries
+      optimized at build-time for these architectures will not work
+      on older hardware, regardless of the version of Solaris running.
+      The same is likely happening on the various x86 implementations.
+      Although I had high hopes for the atomics code, I think we can
+      not support it in a way that is compatible with the portability
+      goals of APR, and I hereby propose that we remove it from APR.
+
+      +1: Aaron
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
