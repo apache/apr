@@ -268,7 +268,7 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
         size = MIN_ALLOC;
 
     /* Find the index for this node size by
-     * deviding its size by the boundary size
+     * dividing its size by the boundary size
      */
     index = (size >> BOUNDARY_INDEX) - 1;
 
