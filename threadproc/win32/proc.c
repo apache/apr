@@ -264,13 +264,8 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
     /* curr dir must be in native format, there are all sorts of bugs in
      * the NT library loading code that flunk the '/' parsing test.
      */
-    apr_status_t rv = apr_filepath_merge(&attr->currdir, NULL, dir, 
-                                         APR_FILEPATH_NATIVE, attr->cntxt);
-    if (rv == APR_SUCCESS) {
-        if (attr->currdir[strlen(attr->currdir) - 1] == '\\')
-            attr->currdir[strlen(attr->currdir) - 1] = '\0';
-    }
-    return rv;
+    return apr_filepath_merge(&attr->currdir, NULL, dir, 
+                              APR_FILEPATH_NATIVE, attr->cntxt);
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
