@@ -127,8 +127,8 @@ enum kill_conditions {
  * Define the prototypes for the various APR GP routines.
  */
 API_EXPORT(char *) ap_cpystrn(char *d, const char *s, size_t l);
-API_EXPORT(int) ap_tokenize_to_argv(ap_pool_t *token_pool,
-                                    char *arg_str, char ***argv_out);
+API_EXPORT(ap_status_t) ap_tokenize_to_argv(char *arg_str, char ***argv_out,
+                                            ap_pool_t *token_context);
 API_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 API_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src);
 
