@@ -59,6 +59,8 @@
 extern "C" {
 #endif
 
+
+    
 /**
  * @file apr_pools.h
  * @brief APR memory allocation
@@ -85,22 +87,42 @@ extern "C" {
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 
-/* Memory allocation/Pool debugging options... 
+/**
+ * Pool debug levels
  *
- * Look in the developer documentation for details of what these do.
+ * | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+ * ---------------------------------
+ * |   |   |   |   |   |   |   | x |  General debug code enabled (good for --with-efence)
  *
- * NB These should ALL normally be commented out unless you REALLY
- * need them!!
+ * |   |   |   |   |   |   | x |   |  Verbose output on stderr (report CREATE, CLEAR, DESTROY)
+ *
+ * |   |   |   |   |   | x |   |   |  Lifetime checking. On each use of a pool, check its lifetime.
+ *                                    If the pool is out of scope, abort().  In combination with
+ *                                    the verbose flag above, it will output LIFE in such an event
+ *                                    prior to aborting.
+ *
+ * |   |   |   |   | x |   |   |   |  Pool owner checking.  On each use of a pool, check if the
+ *                                    current thread is the pools owner.  If not, abort().  In
+ *                                    combination with the verbose flag above, it will output OWNER
+ *                                    in such an event prior to aborting.  Use the debug function
+ *                                    apr_pool_set_owner() to switch a pools ownership.
+ *
+ * When no debug level was specified, assume general debug mode.
+ * If level 0 was specified, debugging is switched off
  */
-/* 
-#define APR_POOL_DEBUG
-#define APR_POOL_DEBUG_VERBOSE
-*/
-
-#if defined(APR_POOL_DEBUG_VERBOSE) && !defined(APR_POOL_DEBUG)
-#define APR_POOL_DEBUG
-#endif    
-
+#if defined(APR_POOL_DEBUG)
+#    if (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
+#        undef APR_POOL_DEBUG
+#        define APR_POOL_DEBUG 1
+#    endif
+#    if APR_POOL_DEBUG == 0
+#        undef APR_POOL_DEBUG
+#        define APR_POOL_DEBUG 1
+#    endif
+#else
+#    define APR_POOL_DEBUG 0
+#endif
+    
 #define APR_POOL_STRINGIZE(x) APR_POOL__STRINGIZE(x)
 #define APR_POOL__STRINGIZE(x) #x
 #define APR_POOL__FILE_LINE__ __FILE__ ":" APR_POOL_STRINGIZE(__LINE__)
@@ -190,7 +212,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
                                                    apr_uint32_t flags,
                                                    const char *file_line);
 
-#if defined(APR_POOL_DEBUG)
+#if APR_POOL_DEBUG
 #define apr_pool_create_ex(newpool, parent, abort_fn, flag)  \
     apr_pool_create_ex_debug(newpool, parent, abort_fn, flag, \
                              APR_POOL__FILE_LINE__)
@@ -208,7 +230,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
                                           apr_pool_t *parent);
 #else
-#if defined(APR_POOL_DEBUG)
+#if APR_POOL_DEBUG
 #define apr_pool_create(newpool, parent) \
     apr_pool_create_ex_debug(newpool, parent, NULL, APR_POOL_FDEFAULT, \
                              APR_POOL__FILE_LINE__)
@@ -231,7 +253,7 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
                                     apr_pool_t *parent,
                                     int (*apr_abort)(int retcode));
 #else
-#if defined(APR_POOL_DEBUG)
+#if APR_POOL_DEBUG
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex_debug(newpool, parent, abort_fn, \
                                    APR_POOL_FDEFAULT, \
@@ -268,7 +290,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
 APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *p,
                                        const char *file_line);
 
-#if defined(APR_POOL_DEBUG)
+#if APR_POOL_DEBUG
 #define apr_pool_clear(p) \
     apr_pool_clear_debug(p, APR_POOL__FILE_LINE__)
 #endif
@@ -297,7 +319,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
                                          const char *file_line);
 
-#if defined(APR_POOL_DEBUG)
+#if APR_POOL_DEBUG
 #define apr_pool_destroy(p) \
     apr_pool_destroy_debug(p, APR_POOL__FILE_LINE__)
 #endif
@@ -532,7 +554,7 @@ APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
  *
  * @{
  */
-#if defined(APR_POOL_DEBUG) || defined(DOXYGEN)
+#if APR_POOL_DEBUG || defined(DOXYGEN)
 /**
  * Guarantee that a subpool has the same lifetime as the parent.
  * @param p The parent pool

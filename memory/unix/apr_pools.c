@@ -56,6 +56,7 @@
 #include "apr_private.h"
 
 #include "apr_portable.h" /* for get_os_proc */
+#include "apr_thread_proc.h" /* for getpid */
 #include "apr_strings.h"
 #include "apr_general.h"
 #include "apr_pools.h"
@@ -70,8 +71,6 @@
 #include <stdlib.h>     /* for malloc, free and abort */
 #endif
 
-#include <unistd.h>     /* for getpid */
-
 
 /*
  * Debug level
@@ -82,18 +81,6 @@
 #define APR_POOL_DEBUG_LIFETIME 0x04
 #define APR_POOL_DEBUG_OWNER    0x08
 
-/* When no level was specified, assume APR_POOL_DEBUG_GENERAL */ 
-#if defined(APR_POOL_DEBUG) && (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
-#undef APR_POOL_DEBUG
-#define APR_POOL_DEBUG APR_POOL_DEBUG_GENERAL
-#endif
-
-/* We don't have debug level 0, assume APR_POOL_DEBUG_GENERAL. */
-#if APR_POOL_DEBUG == 0
-#undef APR_POOL_DEBUG
-#define APR_POOL_DEBUG APR_POOL_DEBUG_GENERAL
-#endif
- 
  
 /*
  * Magic numbers
