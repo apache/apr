@@ -228,7 +228,7 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
         SystemTimeToAprExpTime(result, &st);
         result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
 
-        switch (get_local_timezone(&tz)) {
+        switch (GetTimeZoneInformation(&tz)) {
             case TIME_ZONE_ID_UNKNOWN:
                 result->tm_isdst = 0;
                 /* Bias = UTC - local time in minutes
