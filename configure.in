@@ -402,65 +402,69 @@ APR_CHECK_SIGWAIT_ONE_ARG
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
 
-APR_FLAG_HEADERS(ByteOrder.h)
-APR_FLAG_HEADERS(conio.h)
-APR_FLAG_HEADERS(crypt.h)
-APR_FLAG_HEADERS(ctype.h)
-APR_FLAG_HEADERS(dir.h)
-APR_FLAG_HEADERS(dirent.h)
-APR_FLAG_HEADERS(errno.h)
-APR_FLAG_HEADERS(net/errno.h)
-APR_FLAG_HEADERS(fcntl.h)
-APR_FLAG_HEADERS(grp.h)
-APR_FLAG_HEADERS(io.h)
-APR_FLAG_HEADERS(limits.h)
-APR_FLAG_HEADERS(malloc.h)
-APR_FLAG_HEADERS(memory.h)
-APR_FLAG_HEADERS(netdb.h)
-APR_FLAG_HEADERS(osreldate.h)
-APR_FLAG_HEADERS(process.h)
-APR_FLAG_HEADERS(pwd.h)
-APR_FLAG_HEADERS(sys/syslimits.h)
-APR_FLAG_HEADERS(sys/sem.h)
-APR_FLAG_HEADERS(signal.h)
-APR_FLAG_HEADERS(stdarg.h)
-APR_FLAG_HEADERS(stddef.h)
-APR_FLAG_HEADERS(stdio.h)
-APR_FLAG_HEADERS(stdlib.h)
-APR_FLAG_HEADERS(string.h)
-APR_FLAG_HEADERS(strings.h)
-APR_FLAG_HEADERS(sysapi.h)
-APR_FLAG_HEADERS(sysgtime.h)
-APR_FLAG_HEADERS(termios.h)
-APR_FLAG_HEADERS(time.h)
-APR_FLAG_HEADERS(sys/time.h)
-APR_FLAG_HEADERS(tpfeq.h)
-APR_FLAG_HEADERS(tpfio.h)
-APR_FLAG_HEADERS(sys/uio.h)
-APR_FLAG_HEADERS(unistd.h)
-APR_FLAG_HEADERS(poll.h)
-APR_FLAG_HEADERS(sys/poll.h)
-APR_FLAG_HEADERS(unix.h)
-APR_FLAG_HEADERS(arpa/inet.h)
-APR_FLAG_HEADERS(netinet/in.h)
-APR_FLAG_HEADERS(netinet/tcp.h)
-APR_FLAG_HEADERS(iconv.h)
-APR_FLAG_HEADERS(langinfo.h)
-
-APR_FLAG_HEADERS(sys/file.h)
-APR_FLAG_HEADERS(sys/mman.h)
-APR_FLAG_HEADERS(sys/resource.h)
-APR_FLAG_HEADERS(sys/select.h)
-APR_FLAG_HEADERS(sys/sendfile.h)
-APR_FLAG_HEADERS(sys/signal.h)
-APR_FLAG_HEADERS(sys/socket.h)
-APR_FLAG_HEADERS(sys/stat.h)
-APR_FLAG_HEADERS(sys/types.h)
-APR_FLAG_HEADERS(sys/wait.h)
-APR_FLAG_HEADERS(dlfcn.h)
-APR_FLAG_HEADERS(dl.h)
-
-APR_FLAG_HEADERS(kernel/OS.h)
+APR_FLAG_HEADERS(
+    ByteOrder.h		\
+    conio.h		\
+    crypt.h		\
+    ctype.h		\
+    dir.h		\
+    dirent.h		\
+    dl.h		\
+    dlfcn.h		\
+    errno.h		\
+    fcntl.h		\
+    grp.h		\
+    iconv.h		\
+    io.h		\
+    langinfo.h		\
+    limits.h		\
+    malloc.h		\
+    memory.h		\
+    netdb.h		\
+    osreldate.h		\
+    poll.h		\
+    process.h		\
+    pwd.h		\
+    signal.h		\
+    stdarg.h		\
+    stddef.h		\
+    stdio.h		\
+    stdlib.h		\
+    string.h		\
+    strings.h		\
+    sysapi.h		\
+    sysgtime.h		\
+    termios.h		\
+    time.h		\
+    tpfeq.h		\
+    tpfio.h		\
+    unistd.h		\
+    unix.h		\
+			\
+    arpa/inet.h		\
+			\
+    kernel/OS.h		\
+			\
+    net/errno.h		\
+			\
+    netinet/in.h	\
+    netinet/tcp.h	\
+			\
+    sys/file.h		\
+    sys/mman.h		\
+    sys/poll.h		\
+    sys/resource.h	\
+    sys/select.h	\
+    sys/sem.h		\
+    sys/sendfile.h	\
+    sys/signal.h	\
+    sys/socket.h	\
+    sys/stat.h		\
+    sys/syslimits.h	\
+    sys/time.h		\
+    sys/types.h		\
+    sys/uio.h		\
+    sys/wait.h)
 
 AC_SUBST(arpa_ineth)
 AC_SUBST(conioh)
