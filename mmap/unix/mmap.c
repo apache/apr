@@ -101,9 +101,11 @@ static apr_status_t mmap_cleanup(void *themmap)
     return errno;
 }
 
-apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, apr_off_t offset, 
-       apr_size_t size, apr_pool_t *cont)
+apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, 
+                             apr_off_t offset, apr_size_t size, 
+                             apr_int32_t flag, apr_pool_t *cont)
 {
+    apr_int32_t native_flags = 0;
 #ifdef BEOS
     void *mm;
     area_id aid = -1;
@@ -122,8 +124,15 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, apr_off_t offse
     apr_seek(file, APR_SET, &offset);
     pages = ((size -1) / B_PAGE_SIZE) + 1;
 
+    if (flag & APR_MMAP_WRITE) {
+        native_flags |= B_WRITE_AREA;
+    }
+    if (flag & APR_MMAP_READ) {
+        native_flags |= B_READ_AREA;
+    }
+
     aid = create_area(areaname, &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
-        B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
+        B_FULL_LOCK, native_flags);
 
     if (aid < B_NO_ERROR) {
         /* we failed to get an mmap'd file... */
@@ -134,6 +143,13 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, apr_off_t offse
         read(file->filedes, mm, size);
     (*new)->area = aid;
 #else
+
+    if (flag & APR_MMAP_WRITE) {
+        native_flags |= PROT_WRITE;
+    }
+    if (flag & APR_MMAP_READ) {
+        native_flags |= PROT_READ;
+    }
 
     mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes, offset);
 
