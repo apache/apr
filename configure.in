@@ -44,6 +44,7 @@ dnl # Checks for programs.
 AC_PROG_CC
 AC_PROG_RANLIB_NC
 AC_PROG_MAKE_SET
+AC_PROG_AWK
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_TOOL(AR, ar, ar)
 
