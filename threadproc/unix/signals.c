@@ -374,6 +374,9 @@ APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
     sigdelset(&sig_mask, SIGWAITING);
 #endif
 
+    /* no synchronous signals should be in the mask passed to sigwait() */
+    remove_sync_sigs(&sig_mask);
+
     /* On AIX (4.3.3, at least), sigwait() won't wake up if the high-
      * order bit of the second word of flags is turned on.  sigdelset()
      * returns an error when trying to turn this off, so we'll turn it
