@@ -144,17 +144,26 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
 #if defined(WIN32)
 APR_DECLARE(apr_status_t) apr_compare_users(apr_uid_t left, apr_uid_t right);
 #else
-#define apr_compare_users(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
+#define apr_compare_users(left,right) (((left) == (right)) ? APR_SUCCESS : APR_EMISMATCH)
 #endif
 
 /**
  * Get the group name for a specified groupid
- * @param dirname Pointer to new string containing group name (on output)
- * @param userid The groupid
+ * @param groupname Pointer to new string containing group name (on output)
+ * @param groupid The groupid
  * @param p The pool from which to allocate the string
  * @remark This function is available only if APR_HAS_USER is defined.
  */
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p);
+
+/**
+ * Get the groupid for a specified group name
+ * @param groupid Pointer to the group id (on output)
+ * @param groupname The group name to look up
+ * @param p The pool from which to allocate the string
+ * @remark This function is available only if APR_HAS_USER is defined.
+ */
+APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *groupid, const char *groupname, apr_pool_t *p);
 
 /**
  * Compare two group identifiers for equality.
@@ -167,7 +176,7 @@ APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid,
 #if defined(WIN32)
 APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right);
 #else
-#define apr_compare_groups(left,right) ((left == right) ? APR_SUCCESS : APR_EMISMATCH)
+#define apr_compare_groups(left,right) (((left) == (right)) ? APR_SUCCESS : APR_EMISMATCH)
 #endif
 
 #endif  /* ! APR_HAS_USER */
