@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Detect required libraries first.  This minimizes the libraries
+     needed in apr_hints.m4.  [Justin Erenkrantz]
+
   *) Support the AIX, glibc2, and Solaris variants of gethostby{name|addr}_r.
      Use gethostbyaddr_r function when available.
      [Sterling Hughes <sterling@designmultimedia.com>]
