@@ -76,7 +76,7 @@ install: $(TARGET_LIB) apr-config.out build/apr_rules.out
 	for f in libtool shlibtool; do \
 	    if test -f $${f}; then $(INSTALL) -m 755 $${f} $(DESTDIR)$(installbuilddir); fi; \
 	done
-	$(INSTALL) -m 755 build/mkdir.sh $(DESTDIR)$(installbuilddir)
+	$(INSTALL) -m 755 $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(installbuilddir)
 	for f in make_exports.awk make_var_export.awk; do \
 	    $(INSTALL_DATA) $(top_srcdir)/build/$${f} $(DESTDIR)$(installbuilddir); \
 	done
