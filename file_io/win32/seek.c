@@ -57,7 +57,7 @@
 #include <errno.h>
 #include <string.h>
 
-ap_status_t ap_seek(struct ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
+ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     DWORD howmove;
     DWORD rv;

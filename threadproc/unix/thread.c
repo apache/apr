@@ -64,12 +64,12 @@
  * arg 1) The newly created threadattr.
  * arg 2) The context to use
  */
-ap_status_t ap_create_threadattr(struct ap_threadattr_t **new, ap_context_t *cont)
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
 {
     ap_status_t stat;
   
-    (*new) = (struct ap_threadattr_t *)ap_palloc(cont, 
-              sizeof(struct ap_threadattr_t));
+    (*new) = (ap_threadattr_t *)ap_palloc(cont, 
+              sizeof(ap_threadattr_t));
     (*new)->attr = (pthread_attr_t *)ap_palloc(cont, 
                     sizeof(pthread_attr_t));
 
@@ -92,7 +92,7 @@ ap_status_t ap_create_threadattr(struct ap_threadattr_t **new, ap_context_t *con
  * arg 1) The threadattr to affect 
  * arg 2) Thread detach state on or off
  */
-ap_status_t ap_setthreadattr_detach(struct ap_threadattr_t *attr, ap_int32_t on)
+ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
 {
     ap_status_t stat;
     if ((stat = pthread_attr_setdetachstate(attr->attr, on)) == 0) {
@@ -108,7 +108,7 @@ ap_status_t ap_setthreadattr_detach(struct ap_threadattr_t *attr, ap_int32_t on)
  *    Get the detach mode for this threadattr.
  * arg 1) The threadattr to reference 
  */
-ap_status_t ap_getthreadattr_detach(struct ap_threadattr_t *attr)
+ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
 {
     int state;
 
@@ -129,14 +129,14 @@ ap_status_t ap_getthreadattr_detach(struct ap_threadattr_t *attr)
  * arg 4) Any data to be passed to the starting function
  * arg 5) The context to use
  */
-ap_status_t ap_create_thread(struct ap_thread_t **new, struct ap_threadattr_t *attr, 
+ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
                              ap_context_t *cont)
 {
     ap_status_t stat;
     pthread_attr_t *temp;
  
-    (*new) = (struct ap_thread_t *)ap_palloc(cont, sizeof(struct ap_thread_t));
+    (*new) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -187,7 +187,7 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
  * arg 1) The return value from the dead thread.
  * arg 2) The thread to join
  */
-ap_status_t ap_thread_join(ap_status_t *retval, struct ap_thread_t *thd)
+ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
 {
     ap_status_t stat;
 
@@ -204,7 +204,7 @@ ap_status_t ap_thread_join(ap_status_t *retval, struct ap_thread_t *thd)
  *    detach a thread
  * arg 1) The thread to detach 
  */
-ap_status_t ap_thread_detach(struct ap_thread_t *thd)
+ap_status_t ap_thread_detach(ap_thread_t *thd)
 {
     ap_status_t stat;
 
@@ -223,7 +223,7 @@ ap_status_t ap_thread_detach(struct ap_thread_t *thd)
  * arg 2) The key to associate with the data
  * arg 3) The currently open thread.
  */
-ap_status_t ap_get_threaddata(void **data, char *key, struct ap_thread_t *thread)
+ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread)
 {
     if (thread != NULL) {
         return ap_get_userdata(data, key, thread->cntxt);
@@ -246,7 +246,7 @@ ap_status_t ap_get_threaddata(void **data, char *key, struct ap_thread_t *thread
  */
 ap_status_t ap_set_threaddata(void *data, char *key,
                               ap_status_t (*cleanup) (void *),
-                              struct ap_thread_t *thread)
+                              ap_thread_t *thread)
 {
     if (thread != NULL) {
         return ap_set_userdata(data, key, cleanup, thread->cntxt);
@@ -263,7 +263,7 @@ ap_status_t ap_set_threaddata(void *data, char *key,
  * arg 1) The apr thread to convert
  * arg 2) The os specific thread we are converting to
  */
-ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, struct ap_thread_t *thd)
+ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd)
 {
     if (thd == NULL) {
         return APR_ENOTHREAD;
@@ -280,14 +280,14 @@ ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, struct ap_thread_t *thd)
  * arg 2) The os specific thread to convert
  * arg 3) The context to use if it is needed.
  */
-ap_status_t ap_put_os_thread(struct ap_thread_t **thd, ap_os_thread_t *thethd, 
+ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
                              ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*thd) == NULL) {
-        (*thd) = (struct ap_thread_t *)ap_palloc(cont, sizeof(struct ap_thread_t));
+        (*thd) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
         (*thd)->cntxt = cont;
     }
     (*thd)->td = thethd;

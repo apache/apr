@@ -54,12 +54,12 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_create_threadattr(struct ap_threadattr_t **new, ap_context_t *cont)
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
 {
     ap_status_t stat;
   
-    (*new) = (struct ap_threadattr_t *)ap_palloc(cont, 
-              sizeof(struct ap_threadattr_t));
+    (*new) = (ap_threadattr_t *)ap_palloc(cont, 
+              sizeof(ap_threadattr_t));
     (*new)->attr = (int32)ap_palloc(cont, 
                     sizeof(int32));
 
@@ -73,7 +73,7 @@ ap_status_t ap_create_threadattr(struct ap_threadattr_t **new, ap_context_t *con
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setthreadattr_detach(struct ap_threadattr_t *attr, ap_int32_t on)
+ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
 {
 	if (on == 1){
 		attr->detached = 1;
@@ -83,7 +83,7 @@ ap_status_t ap_setthreadattr_detach(struct ap_threadattr_t *attr, ap_int32_t on)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_getthreadattr_detach(struct ap_threadattr_t *attr)
+ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
 {
 	if (attr->detached == 1){
 		return APR_DETACH;
@@ -91,14 +91,14 @@ ap_status_t ap_getthreadattr_detach(struct ap_threadattr_t *attr)
 	return APR_NOTDETACH;
 }
 
-ap_status_t ap_create_thread(struct ap_thread_t **new, struct ap_threadattr_t *attr,
+ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
                              ap_thread_start_t func, void *data,
                              ap_context_t *cont)
 {
     int32 temp;
     ap_status_t stat;
     
-    (*new) = (struct ap_thread_t *)ap_palloc(cont, sizeof(struct ap_thread_t));
+    (*new) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }

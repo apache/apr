@@ -54,14 +54,14 @@
 
 #include "locks.h"
 
-ap_status_t ap_create_lock(struct ap_lock_t **lock, ap_locktype_e type, 
+ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 
                            ap_context_t *cont)
 {
-    struct ap_lock_t *new;
+    ap_lock_t *new;
     ap_status_t stat;
     
-    new = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
+    new = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
     if (new == NULL){
         return APR_ENOMEM;
     }
@@ -134,7 +134,7 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_child_init_lock(struct ap_lock_t **lock, char *fname, ap_context_t *cont)
+ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont)
 {
     ap_status_t stat;
     if ((*lock)->scope != APR_CROSS_PROCESS) {
@@ -145,7 +145,7 @@ ap_status_t ap_child_init_lock(struct ap_lock_t **lock, char *fname, ap_context_
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_lockdata(struct ap_lock_t *lock, char *key, void *data)
+ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
         return ap_get_userdata(data, key, lock->cntxt);
@@ -156,7 +156,7 @@ ap_status_t ap_get_lockdata(struct ap_lock_t *lock, char *key, void *data)
     }
 }
 
-ap_status_t ap_set_lockdata(struct ap_lock_t *lock, void *data, char *key,
+ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {
     if (lock != NULL) {

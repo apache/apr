@@ -60,7 +60,7 @@
 #include <os2.h>
 #include <malloc.h>
 
-ap_status_t ap_read(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ULONG rc = 0;
     ULONG bytesread;
@@ -126,7 +126,7 @@ ap_status_t ap_read(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
 
 
-ap_status_t ap_write(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ULONG rc = 0;
     ULONG byteswritten;
@@ -182,7 +182,7 @@ ap_status_t ap_write(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
 #ifdef HAVE_WRITEV
 
-ap_status_t ap_writev(struct ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes)
+ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes)
 {
     int bytes;
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
@@ -313,7 +313,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 
 
 
-API_EXPORT(int) ap_fprintf(struct ap_file_t *fptr, const char *format, ...)
+API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;

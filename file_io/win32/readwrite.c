@@ -62,7 +62,7 @@
 
 #define GetFilePointer(hfile) SetFilePointer(hfile,0,NULL, FILE_CURRENT)
 
-ap_status_t ap_read(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bread;
     int lasterror;
@@ -88,7 +88,7 @@ ap_status_t ap_read(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     return lasterror;
 }
 
-ap_status_t ap_write(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bwrote;
     FILETIME atime, mtime, ctime;
@@ -116,7 +116,7 @@ ap_status_t ap_write(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 /*
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2) 
  */
-ap_status_t ap_writev(struct ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, 
+ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, 
                       ap_ssize_t *nbytes)
 {
     int i;
@@ -249,7 +249,7 @@ static int printf_flush(ap_vformatter_buff_t *vbuff)
     return -1;
 }
 
-API_EXPORT(int) ap_fprintf(struct ap_file_t *fptr, const char *format, ...)
+API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;

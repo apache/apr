@@ -63,7 +63,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_kill(struct ap_proc_t *proc, int signal)
+ap_status_t ap_kill(ap_proc_t *proc, int signal)
 {
 /* SIGTERM's don't work too well in OS/2 (only affects other EMX programs).
    CGIs may not be, esp. REXX scripts, so use a native call instead */

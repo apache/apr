@@ -99,7 +99,7 @@ BOOLEAN is_exe(const char* fname, ap_context_t *cont) {
     return FALSE;
 }
 
-ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct ap_file_t *thefile)
+ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 {
     /* TODO: 
      * Windows should call GetFileInformationByHandle(), which is similar 

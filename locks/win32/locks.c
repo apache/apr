@@ -57,14 +57,14 @@
 #include "locks.h"
 #include "apr_portable.h"
 
-ap_status_t ap_create_lock(struct ap_lock_t **lock, ap_locktype_e type, 
+ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 
                            ap_context_t *cont)
 {
-    struct ap_lock_t *newlock;
+    ap_lock_t *newlock;
     SECURITY_ATTRIBUTES sec;
 
-    newlock = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
+    newlock = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
 
     newlock->cntxt = cont;
     /* ToDo:  How to handle the case when no context is available? 
@@ -92,12 +92,12 @@ ap_status_t ap_create_lock(struct ap_lock_t **lock, ap_locktype_e type,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_child_init_lock(struct ap_lock_t **lock, char *fname, ap_context_t *cont)
+ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_context_t *cont)
 {
     /* This routine should not be called (and OpenMutex will fail if called) 
      * on a INTRAPROCESS lock
      */
-    (*lock) = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
+    (*lock) = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
 
     if ((*lock) == NULL) {
         return APR_ENOMEM;
@@ -111,7 +111,7 @@ ap_status_t ap_child_init_lock(struct ap_lock_t **lock, char *fname, ap_context_
     return APR_SUCCESS;
 }
 
-ap_status_t ap_lock(struct ap_lock_t *lock)
+ap_status_t ap_lock(ap_lock_t *lock)
 {
     DWORD rv;
     if (lock->scope == APR_INTRAPROCESS) {
@@ -130,7 +130,7 @@ ap_status_t ap_lock(struct ap_lock_t *lock)
     return APR_EEXIST;
 }
 
-ap_status_t ap_unlock(struct ap_lock_t *lock)
+ap_status_t ap_unlock(ap_lock_t *lock)
 {
     if (lock->scope == APR_INTRAPROCESS) {
         LeaveCriticalSection(&lock->section);
@@ -143,7 +143,7 @@ ap_status_t ap_unlock(struct ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_destroy_lock(struct ap_lock_t *lock)
+ap_status_t ap_destroy_lock(ap_lock_t *lock)
 {
     if (lock->scope == APR_INTRAPROCESS) {
         DeleteCriticalSection(&lock->section);
@@ -156,7 +156,7 @@ ap_status_t ap_destroy_lock(struct ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_lockdata(struct ap_lock_t *lock, char *key, void *data)
+ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
         return ap_get_userdata(data, key, lock->cntxt);
@@ -167,7 +167,7 @@ ap_status_t ap_get_lockdata(struct ap_lock_t *lock, char *key, void *data)
     }
 }
 
-ap_status_t ap_set_lockdata(struct ap_lock_t *lock, void *data, char *key,
+ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {
     if (lock != NULL) {
@@ -179,7 +179,7 @@ ap_status_t ap_set_lockdata(struct ap_lock_t *lock, void *data, char *key,
     }
 }
 
-ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, struct ap_lock_t *lock)
+ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, ap_lock_t *lock)
 {
     if (lock == NULL) {
         return APR_ENOFILE;
@@ -188,14 +188,14 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, struct ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_lock(struct ap_lock_t **lock, ap_os_lock_t *thelock, 
+ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
                            ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*lock) == NULL) {
-        (*lock) = (struct ap_lock_t *)ap_palloc(cont, sizeof(struct ap_lock_t));
+        (*lock) = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
         (*lock)->cntxt = cont;
     }
     (*lock)->mutex = *thelock;

@@ -60,7 +60,7 @@
  * arg 1) The process to terminate.
  * arg 2) How to kill the process.
  */
-ap_status_t ap_kill(struct ap_proc_t *proc, int sig)
+ap_status_t ap_kill(ap_proc_t *proc, int sig)
 {
     if (kill(proc->pid, sig) == -1) {
         return errno;

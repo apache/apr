@@ -57,7 +57,7 @@
 
 static ap_status_t socket_cleanup(void *sock)
 {
-    struct ap_socket_t *thesocket = sock;
+    ap_socket_t *thesocket = sock;
     if (close(thesocket->socketdes) == 0) {
         thesocket->socketdes = -1;
         return APR_SUCCESS;
@@ -73,9 +73,9 @@ static ap_status_t socket_cleanup(void *sock)
  * arg 1) The new socket that has been setup. 
  * arg 2) The context to use
  */
-ap_status_t ap_create_tcp_socket(struct ap_socket_t **new, ap_context_t *cont)
+ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_context_t *cont)
 {
-    (*new) = (struct ap_socket_t *)ap_palloc(cont, sizeof(struct ap_socket_t));
+    (*new) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -117,7 +117,7 @@ ap_status_t ap_create_tcp_socket(struct ap_socket_t **new, ap_context_t *cont)
  * NOTE:  This does not actually close the socket descriptor, it just
  *        controls which calls are still valid on the socket.
  */
-ap_status_t ap_shutdown(struct ap_socket_t *thesocket, ap_shutdown_how_e how)
+ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
 {
     if (shutdown(thesocket->socketdes, how) == 0) {
         return APR_SUCCESS;
@@ -132,7 +132,7 @@ ap_status_t ap_shutdown(struct ap_socket_t *thesocket, ap_shutdown_how_e how)
  *    Close a tcp socket.
  * arg 1) The socket to close 
  */
-ap_status_t ap_close_socket(struct ap_socket_t *thesocket)
+ap_status_t ap_close_socket(ap_socket_t *thesocket)
 {
     ap_kill_cleanup(thesocket->cntxt, thesocket, socket_cleanup);
     return socket_cleanup(thesocket);
@@ -145,7 +145,7 @@ ap_status_t ap_close_socket(struct ap_socket_t *thesocket)
  * NOTE:  This is where we will find out if there is any other process
  *        using the selected port.
  */
-ap_status_t ap_bind(struct ap_socket_t *sock)
+ap_status_t ap_bind(ap_socket_t *sock)
 {
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
         return errno;
@@ -161,7 +161,7 @@ ap_status_t ap_bind(struct ap_socket_t *sock)
  *        listen queue.  If this value is less than zero, the listen
  *        queue size is set to zero.  
  */
-ap_status_t ap_listen(struct ap_socket_t *sock, ap_int32_t backlog)
+ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
 {
     if (listen(sock->socketdes, backlog) == -1)
         return errno;
@@ -179,10 +179,10 @@ ap_status_t ap_listen(struct ap_socket_t *sock, ap_int32_t backlog)
  * arg 2) The socket we are listening on.
  * arg 3) The context for the new socket.
  */
-ap_status_t ap_accept(struct ap_socket_t **new, const struct ap_socket_t *sock, struct ap_context_t *connection_context)
+ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_context_t *connection_context)
 {
-    (*new) = (struct ap_socket_t *)ap_palloc(connection_context, 
-                            sizeof(struct ap_socket_t));
+    (*new) = (ap_socket_t *)ap_palloc(connection_context, 
+                            sizeof(ap_socket_t));
 
     (*new)->cntxt = connection_context;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
@@ -220,7 +220,7 @@ ap_status_t ap_accept(struct ap_socket_t **new, const struct ap_socket_t *sock, 
  *        APR assumes that the sockaddr_in in the apr_socket is completely
  *        filled out.
  */
-ap_status_t ap_connect(struct ap_socket_t *sock, char *hostname)
+ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
 {
     struct hostent *hp;
 
@@ -259,7 +259,7 @@ ap_status_t ap_connect(struct ap_socket_t *sock, char *hostname)
  * arg 1) The currently open socket.
  * arg 2) The user data associated with the socket.
  */
-ap_status_t ap_get_socketdata(void **data, char *key, struct ap_socket_t *sock)
+ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *sock)
 {
     if (sock != NULL) {
         return ap_get_userdata(data, key, sock->cntxt);
@@ -279,7 +279,7 @@ ap_status_t ap_get_socketdata(void **data, char *key, struct ap_socket_t *sock)
  * arg 3) The key to associate with the data.
  * arg 4) The cleanup to call when the socket is destroyed.
  */
-ap_status_t ap_set_socketdata(struct ap_socket_t *sock, void *data, char *key,
+ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, char *key,
                               ap_status_t (*cleanup) (void *))
 {
     if (sock != NULL) {
@@ -297,7 +297,7 @@ ap_status_t ap_set_socketdata(struct ap_socket_t *sock, void *data, char *key,
  * arg 1) The socket to convert.
  * arg 2) The os specifc equivelant of the apr socket..
  */
-ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct ap_socket_t *sock)
+ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
 {
     if (sock == NULL) {
         return APR_ENOSOCKET;
@@ -314,14 +314,14 @@ ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct ap_socket_t *sock)
  * arg 2) The socket to convert to.
  * arg 3) The socket we are converting to an apr type.
  */
-ap_status_t ap_put_os_sock(struct ap_socket_t **sock, ap_os_sock_t *thesock, 
+ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, 
                            ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*sock) == NULL) {
-        (*sock) = (struct ap_socket_t *)ap_palloc(cont, sizeof(struct ap_socket_t));
+        (*sock) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
         (*sock)->cntxt = cont;
         (*sock)->local_addr = (struct sockaddr_in *)ap_palloc((*sock)->cntxt,
                              sizeof(struct sockaddr_in));

@@ -86,7 +86,7 @@ static ap_filetype_e filetype_from_mode(int mode)
  * arg 1) Where to store the information about the file.
  * arg 2) The file to get information about. 
  */ 
-ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct ap_file_t *thefile)
+ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 {
     struct stat info;
     int rv;

@@ -82,7 +82,7 @@ typedef struct ap_threadattr_t       ap_threadattr_t;
 typedef struct ap_proc_t		  ap_proc_t;
 typedef struct ap_procattr_t         ap_procattr_t;
 
-typedef struct ap_threadkey_t        ap_key_t;
+typedef struct ap_threadkey_t        ap_threadkey_t;
 
 typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
 
@@ -105,15 +105,15 @@ ap_status_t ap_set_threaddata(void *data, char *key,
                               ap_status_t (*cleanup) (void *), 
                               ap_thread_t *thread);
 
-ap_status_t ap_create_thread_private(ap_key_t **key, void (*dest)(void *), 
+ap_status_t ap_create_thread_private(ap_threadkey_t **key, void (*dest)(void *), 
                                      ap_context_t *cont);
-ap_status_t ap_get_thread_private(void **new, ap_key_t *key);
-ap_status_t ap_set_thread_private(void *priv, ap_key_t *key);
-ap_status_t ap_delete_thread_private(ap_key_t *key);
-ap_status_t ap_get_threadkeydata(void **data, char *key, ap_key_t *threadkey);
+ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key);
+ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key);
+ap_status_t ap_delete_thread_private(ap_threadkey_t *key);
+ap_status_t ap_get_threadkeydata(void **data, char *key, ap_threadkey_t *threadkey);
 ap_status_t ap_set_threadkeydata(void *data, char *key,
                                  ap_status_t (*cleanup) (void *), 
-                                 ap_key_t *threadkey);
+                                 ap_threadkey_t *threadkey);
 
 /* Process Function definitions */
 ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont);

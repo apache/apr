@@ -65,7 +65,7 @@ int os2errno( ULONG oserror );
 
 
 
-static ap_status_t setptr(struct ap_file_t *thefile, unsigned long pos )
+static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
 {
     long newbufpos;
     ULONG rc;
@@ -91,7 +91,7 @@ static ap_status_t setptr(struct ap_file_t *thefile, unsigned long pos )
 
 
 
-ap_status_t ap_seek(struct ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
+ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     if (!thefile->isopen) {
         return APR_EBADF;

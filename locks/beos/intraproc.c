@@ -68,7 +68,7 @@ ap_status_t lock_intra_cleanup(void *data)
     return APR_SUCCESS;
 }    
 
-ap_status_t create_intra_lock(struct ap_lock_t *new)
+ap_status_t create_intra_lock(ap_lock_t *new)
 {
     int32 stat;
     new->sem_intraproc = (sem_id)ap_palloc(new->cntxt, sizeof(sem_id));

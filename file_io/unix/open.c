@@ -57,7 +57,7 @@
 
 ap_status_t file_cleanup(void *thefile)
 {
-    struct ap_file_t *file = thefile;
+    ap_file_t *file = thefile;
     int rv;
 
     if (file->buffered) {
@@ -100,7 +100,7 @@ ap_status_t file_cleanup(void *thefile)
  *        called without any mode parameters.  *arg1 must point to a valid
  *        file_t, or NULL (in which case it will be allocated)
  */
-ap_status_t ap_open(struct ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cont)
+ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cont)
 {
     int oflags = 0;
     char *buf_oflags;
@@ -112,7 +112,7 @@ ap_status_t ap_open(struct ap_file_t **new, const char *fname, ap_int32_t flag, 
         return APR_ENOCONT;
 
     if ((*new) == NULL) {
-        (*new) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
+        (*new) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     }
 
     (*new)->cntxt = cont;
@@ -196,7 +196,7 @@ ap_status_t ap_open(struct ap_file_t **new, const char *fname, ap_int32_t flag, 
  *    Close the specified file.
  * arg 1) The file descriptor to close.
  */
-ap_status_t ap_close(struct ap_file_t *file)
+ap_status_t ap_close(ap_file_t *file)
 {
     ap_status_t rv;
   
@@ -239,7 +239,7 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cont)
  * NOTE:  On Unix, it is only possible to get a file descriptor from 
  *        an apr file type.
  */
-ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct ap_file_t *file)
+ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 {
     if (thefile == NULL)
         return APR_EBADARG;
@@ -267,7 +267,7 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct ap_file_t *file)
  * NOTE:  On Unix, it is only possible to put a file descriptor into
  *        an apr file type.
  */
-ap_status_t ap_put_os_file(struct ap_file_t **file, ap_os_file_t *thefile,
+ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
                            ap_context_t *cont)
 {
     int *dafile = thefile;
@@ -279,7 +279,7 @@ ap_status_t ap_put_os_file(struct ap_file_t **file, ap_os_file_t *thefile,
         return APR_ENOCONT;
 
     if ((*file) == NULL) {
-        (*file) = ap_pcalloc(cont, sizeof(struct ap_file_t));
+        (*file) = ap_pcalloc(cont, sizeof(ap_file_t));
         (*file)->cntxt = cont;
     }
     /* if we are putting in a new file descriptor, then we don't really
@@ -340,7 +340,7 @@ ap_status_t ap_ferror(ap_file_t *fptr)
  * arg 1) The apr file to use as stderr.
  * arg 2) The context to allocate the file out of.
  */
-ap_status_t ap_open_stderr(struct ap_file_t **thefile, ap_context_t *cont)
+ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
 {
     if (thefile == NULL)
         return APR_EBADARG;
@@ -348,7 +348,7 @@ ap_status_t ap_open_stderr(struct ap_file_t **thefile, ap_context_t *cont)
     if (cont == NULL)
         return APR_ENOCONT;
 
-    (*thefile) = ap_pcalloc(cont, sizeof(struct ap_file_t));
+    (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }

@@ -68,7 +68,7 @@
  *        that this socket is going to use this port if possible.  If
  *        the port is already used, we won't find out about it here.
  */
-ap_status_t ap_set_local_port(struct ap_socket_t *sock, ap_uint32_t port)
+ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
 {
     sock->local_addr->sin_port = htons((short)port);
     return APR_SUCCESS;
@@ -84,7 +84,7 @@ ap_status_t ap_set_local_port(struct ap_socket_t *sock, ap_uint32_t port)
  * NOTE:  This does not make a connection to the remote port, it is just 
  *        telling apr which port ap_connect() should attempt to connect to.
  */
-ap_status_t ap_set_remote_port(struct ap_socket_t *sock, ap_uint32_t port)
+ap_status_t ap_set_remote_port(ap_socket_t *sock, ap_uint32_t port)
 {
     sock->remote_addr->sin_port = htons((short)port);
     return APR_SUCCESS;
@@ -98,7 +98,7 @@ ap_status_t ap_set_remote_port(struct ap_socket_t *sock, ap_uint32_t port)
  * arg 1) The local port this socket is associated with.
  * arg 2) The socket to enquire about.
  */
-ap_status_t ap_get_local_port(ap_uint32_t *port, struct ap_socket_t *sock)
+ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *sock)
 {
     *port = ntohs(sock->local_addr->sin_port);
     return APR_SUCCESS;
@@ -112,7 +112,7 @@ ap_status_t ap_get_local_port(ap_uint32_t *port, struct ap_socket_t *sock)
  * arg 1) The remote port this socket is associated with.
  * arg 2) The socket to enquire about.
  */
-ap_status_t ap_get_remote_port(ap_uint32_t *port, struct ap_socket_t *sock)
+ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *sock)
 {
     *port = ntohs(sock->remote_addr->sin_port);
     return APR_SUCCESS;
@@ -129,7 +129,7 @@ ap_status_t ap_get_remote_port(ap_uint32_t *port, struct ap_socket_t *sock)
  * NOTE:  This does not bind the two together, it is just telling apr 
  *        that this socket is going to use this address if possible. 
  */
-ap_status_t ap_set_local_ipaddr(struct ap_socket_t *sock, const char *addr)
+ap_status_t ap_set_local_ipaddr(ap_socket_t *sock, const char *addr)
 {
     u_long ipaddr;
     
@@ -156,7 +156,7 @@ ap_status_t ap_set_local_ipaddr(struct ap_socket_t *sock, const char *addr)
  * NOTE:  This does not make a connection to the remote address, it is just
  *        telling apr which address ap_connect() should attempt to connect to.
  */
-ap_status_t ap_set_remote_ipaddr(struct ap_socket_t *sock, const char *addr)
+ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr)
 {
     u_long ipaddr;
     
@@ -181,7 +181,7 @@ ap_status_t ap_set_remote_ipaddr(struct ap_socket_t *sock, const char *addr)
  * arg 1) The local IP address associated with the socket.
  * arg 2) The socket to use 
  */
-ap_status_t ap_get_local_ipaddr(char **addr, const struct ap_socket_t *sock)
+ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
 {
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sin_addr));
     return APR_SUCCESS;
@@ -195,7 +195,7 @@ ap_status_t ap_get_local_ipaddr(char **addr, const struct ap_socket_t *sock)
  * arg 1) The remote IP address associated with the socket.
  * arg 2) The socket to use 
  */
-ap_status_t ap_get_remote_ipaddr(char **addr, const struct ap_socket_t *sock)
+ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock)
 {
     *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sin_addr));
     return APR_SUCCESS;
@@ -208,7 +208,7 @@ ap_status_t ap_get_remote_ipaddr(char **addr, const struct ap_socket_t *sock)
  * arg 1) The local name associated with the socket.
  * arg 2) The socket to use 
  */
-ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct ap_socket_t *sock)
+ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock)
 {
     *name = sock->local_addr;
     return APR_SUCCESS;
@@ -222,7 +222,7 @@ ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct ap_socket_
  * arg 1) The remote name associated with the socket.
  * arg 2) The socket to use 
  */
-ap_status_t ap_get_remote_name(struct sockaddr_in **name, const struct ap_socket_t *sock)
+ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock)
 {
     *name = sock->remote_addr;
     return APR_SUCCESS;

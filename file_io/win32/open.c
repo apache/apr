@@ -65,7 +65,7 @@
 
 ap_status_t file_cleanup(void *thefile)
 {
-    struct ap_file_t *file = thefile;
+    ap_file_t *file = thefile;
     if (!CloseHandle(file->filehand)) {
         return GetLastError();
     }
@@ -73,7 +73,7 @@ ap_status_t file_cleanup(void *thefile)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_open(struct ap_file_t **dafile, const char *fname, 
+ap_status_t ap_open(ap_file_t **dafile, const char *fname, 
                     ap_int32_t flag, ap_fileperms_t perm, ap_context_t *cont)
 {
     DWORD oflags = 0;
@@ -82,7 +82,7 @@ ap_status_t ap_open(struct ap_file_t **dafile, const char *fname,
     DWORD sharemode = FILE_SHARE_READ | FILE_SHARE_WRITE;
     ap_oslevel_e level;
 
-    (*dafile) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
+    (*dafile) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
 
     (*dafile)->cntxt = cont;
 
@@ -168,7 +168,7 @@ ap_status_t ap_open(struct ap_file_t **dafile, const char *fname,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_close(struct ap_file_t *file)
+ap_status_t ap_close(ap_file_t *file)
 {
     ap_status_t stat;
     if ((stat = file_cleanup(file)) == APR_SUCCESS) {
@@ -190,7 +190,7 @@ ap_status_t ap_remove_file(char *path, ap_context_t *cont)
     }
 }
 
-ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct ap_file_t *file)
+ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -199,14 +199,14 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct ap_file_t *file)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_file(struct ap_file_t **file, ap_os_file_t *thefile, 
+ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, 
                            ap_context_t *cont)
 {
     if ((*file) == NULL) {
         if (cont == NULL) {
             return APR_ENOCONT;
         }
-        (*file) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
+        (*file) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
         (*file)->cntxt = cont;
     }
     (*file)->filehand = *thefile;
@@ -221,9 +221,9 @@ ap_status_t ap_eof(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-ap_status_t ap_open_stderr(struct ap_file_t **thefile, ap_context_t *cont)
+ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
 {
-    (*thefile) = ap_pcalloc(cont, sizeof(struct ap_file_t));
+    (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }

@@ -54,11 +54,11 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_detach(struct ap_proc_t **new, ap_context_t *cont)
+ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont)
 {
     int x;
 
-    (*new) = (struct ap_proc_t *)ap_palloc(cont, sizeof(struct ap_proc_t));
+    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
     (*new)->cntxt = cont;
     (*new)->attr = NULL;
 
@@ -89,7 +89,7 @@ ap_status_t ap_detach(struct ap_proc_t **new, ap_context_t *cont)
     }
 }
 
-ap_status_t ap_get_procdata(char *key, void *data, struct ap_proc_t *proc)
+ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
 {
     if (proc != NULL) {
         return ap_get_userdata(data, key, proc->cntxt);
@@ -102,7 +102,7 @@ ap_status_t ap_get_procdata(char *key, void *data, struct ap_proc_t *proc)
 
 ap_status_t ap_set_procdata(void *data, char *key, 
                             ap_status_t (*cleanup) (void *), 
-                            struct ap_proc_t *proc)
+                            ap_proc_t *proc)
 {
     if (proc != NULL) {
         return ap_set_userdata(data, key, cleanup, proc->cntxt);

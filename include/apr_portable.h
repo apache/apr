@@ -187,7 +187,7 @@ ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **, ap_exploded_time_t *);
 ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *);     
 #if APR_HAS_THREADS
 ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd);
-ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_key_t *key);
+ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key);
 #endif
 
 ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, 
@@ -205,7 +205,7 @@ ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_con
 #if APR_HAS_THREADS
 ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
                              ap_context_t *cont);
-ap_status_t ap_put_os_threadkey(ap_key_t **key, ap_os_threadkey_t *thekey, 
+ap_status_t ap_put_os_threadkey(ap_threadkey_t **key, ap_os_threadkey_t *thekey, 
                                 ap_context_t *cont);
 #endif
 
