@@ -19,9 +19,23 @@
 
 #if APR_HAS_THREADS
 
-/* XXX: missing a cleanup, pthread_attr_destroy is never called! */
-
 #if APR_HAVE_PTHREAD_H
+
+/* Destroy the threadattr object */
+static apr_status_t threadattr_cleanup(void *data)
+{
+    apr_threadattr_t *attr = data;
+    apr_status_t rv;
+
+    rv = pthread_attr_destroy(&attr->attr);
+#ifdef PTHREAD_SETS_ERRNO
+    if (rv) {
+        rv = errno;
+    }
+#endif
+    return rv;
+}
+
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *pool)
 {
@@ -32,6 +46,8 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
     stat = pthread_attr_init(&(*new)->attr);
 
     if (stat == 0) {
+        apr_pool_cleanup_register(pool, *new, threadattr_cleanup,
+                                  apr_pool_cleanup_null);
         return APR_SUCCESS;
     }
 #ifdef PTHREAD_SETS_ERRNO
