@@ -58,14 +58,10 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include "apr_macro.h"
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
-#include "apr_lock.h"
 #include "apr_portable.h"
-
-static ap_lock_t *lock_readdir = NULL;
 
 static ap_status_t dir_cleanup(void *thedir)
 {
@@ -128,11 +124,20 @@ ap_status_t ap_closedir(struct dir_t *thedir)
  */                        
 ap_status_t ap_readdir(struct dir_t *thedir)
 {
+#if APR_HAS_THREADS && _POSIX_THREAD_SAFE_FUNCTIONS 
+    return readdir_r(thedir->dirstruct, thedir->entry, &thedir->entry);
+#else
+    int save_errno;
     ap_status_t status;
-    SAFETY_LOCK(readdir, "readdir_file");
-    READDIR(thedir->dirstruct, thedir->entry, status);
-    SAFETY_UNLOCK(readdir);
-    return status;
+
+    thedir->entry = readdir(thedir->dirstruct);
+    if (thedir->entry == NULL) {
+        if (errno == save_errno) {
+            return APR_SUCCESS;
+        }
+        return errno;
+    }
+#endif
 }
 
 /* ***APRDOC********************************************************

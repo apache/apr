@@ -47,6 +47,8 @@
 #undef NEED_RLIM_T
 #undef USEBCOPY
 
+#undef APR_HAS_THREADS
+
 @BOTTOM@
 #define API_EXPORT(type) type
 #define API_EXPORT_NONSTD(type) type
