@@ -103,7 +103,7 @@ typedef SOCKET                apr_os_sock_t;
 typedef HANDLE                apr_os_lock_t;
 typedef HANDLE                apr_os_proc_mutex_t;
 typedef HANDLE                apr_os_thread_t;
-typedef PROCESS_INFORMATION   apr_os_proc_t;
+typedef HANDLE                apr_os_proc_t;
 typedef DWORD                 apr_os_threadkey_t; 
 typedef FILETIME              apr_os_imp_time_t;
 typedef SYSTEMTIME            apr_os_exp_time_t;
