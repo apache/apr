@@ -1,2 +1,4 @@
 Makefile
 apr_proc_stub
+*.lo
+.libs

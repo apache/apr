@@ -1,30 +1,11 @@
-CC=@CC@
-RANLIB=@RANLIB@
-AR=@AR@
-RM=@RM@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = apr_md5.lo apr_getpass.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../include
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCLUDES=-I$(INCDIR) -I$(DEFOSDIR)
-MKDEP=../helpers/mkdep.sh
-
-OBJS=apr_md5.o \
-	apr_getpass.o 
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(OBJS)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

@@ -1,28 +1,11 @@
-RM=@RM@
-CC=@CC@
-RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@
-LIBS=@LIBS@
-LDFLAGS=@LDFLAGS@ $(LIBS)
+
+TARGETS = homedir.lo
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
 INCDIR=../../include
 DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
 INCLUDES=-I$(INCDIR) -I$(DEFOSDIR)
-MKDEP=../../helpers/mkdep.sh
-
-OBJS=homedir.o
-
-.c.o:
-	$(CC) $(CFLAGS) -c $(INCLUDES) $<
-
-all: $(OBJS)
-
-clean:
-	$(RM) -f *.o *.a *.so
-
-distclean: clean
-	-$(RM) -f Makefile
-
-depend:
-	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE

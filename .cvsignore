@@ -3,9 +3,8 @@ config.cache
 config.log
 config.status
 configure
+libtool
 APRVARS
-objs
-.deps
 LibD
 LibR
 Debug
@@ -14,3 +13,6 @@ Release
 *.opt
 *.plg
 apr.exports
+aclocal.m4
+.libs
+*.la
