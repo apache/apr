@@ -90,16 +90,8 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bwrote;
     FILETIME atime, mtime, ctime;
-	
+    
     if (WriteFile(thefile->filehand, buf, *nbytes, &bwrote, NULL)) {
-        if (!thefile->pipe) {
-            FlushFileBuffers(thefile->filehand);
-            thefile->size = GetFileSize(thefile->filehand, NULL);
-            GetFileTime(thefile->filehand, &ctime, &atime, &mtime);
-            FileTimeToAprTime(&thefile->atime, &atime);
-            FileTimeToAprTime(&thefile->mtime, &mtime);
-            FileTimeToAprTime(&thefile->ctime, &ctime);
-        }
         *nbytes = bwrote;
         return APR_SUCCESS;
     }
