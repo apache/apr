@@ -264,7 +264,7 @@ endif
 
 APR			= $(APR_WORK)
 APRTEST		= $(APR_WORK)/test
-APRUTIL		= $(APR_WORK)/../apr-util
+APRUTIL		= $(APU_WORK)
 XML			= $(APRUTIL)/xml
 
 #
