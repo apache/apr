@@ -45,9 +45,8 @@ $libtoolize --copy --automake
 if [ -f libtool.m4 ]; then 
    ltfile=`pwd`/libtool.m4
 else
-   libtool=`build/PrintPath glibtool libtool libtool15 libtool14`
-   ltpath=`dirname $libtool`
-   ltfile=${LIBTOOL_M4-`cd $ltpath/../share/aclocal ; pwd`/`basename $libtool`.m4}
+   ltpath=`dirname $libtoolize`
+   ltfile=${LIBTOOL_M4-`cd $ltpath/../share/aclocal ; pwd`/libtool.m4}
 fi
   
 if [ ! -f $ltfile ]; then
@@ -55,7 +54,7 @@ if [ ! -f $ltfile ]; then
     exit 1
 fi
 
-echo "buildconf: Using libtool.m4 from ${ltfile}."
+echo "buildconf: Using libtool.m4 at ${ltfile}."
 
 cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
 
