@@ -952,17 +952,22 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 	    case 'E':
 		fp_num = va_arg(ap, double);
 		/*
-		 * * We use &num_buf[ 1 ], so that we have room for the sign
+		 * We use &num_buf[ 1 ], so that we have room for the sign
 		 */
+        s = NULL;
+#ifdef HAVE_ISNAN
 		if (isnan(fp_num)) {
 		    s = "nan";
 		    s_len = 3;
 		}
-		else if (isinf(fp_num)) {
+#endif
+#ifdef HAVE_ISINF
+		if (!s && isinf(fp_num)) {
 		    s = "inf";
 		    s_len = 3;
 		}
-		else {
+#endif
+	    if (!s) {
 		    s = conv_fp(*fmt, fp_num, alternate_form,
 			    (adjust_precision == NO) ? FLOAT_DIGITS : precision,
 				&is_negative, &num_buf[1], &s_len);
