@@ -74,33 +74,7 @@ extern "C" {
  * APR_ENOTIMPL at run-time.
  */
 
-#if ! APR_HAS_XLATE
-
-typedef void                         apr_xlate_t;
-
-/* For platforms where we don't bother with translating between charsets,
- * these are macros which always return failure.
- */
-
-#define apr_xlate_open(convset, topage, frompage, pool) APR_ENOTIMPL
-
-#define apr_xlate_get_sb(convset, onoff) APR_ENOTIMPL
-
-#define apr_xlate_conv_buffer(convset, inbuf, inbytes_left, outbuf, \
-                              outbytes_left) APR_ENOTIMPL
-
-#define apr_xlate_conv_byte(convset, inchar) (-1)
-
-/* The purpose of apr_xlate_conv_char is to translate one character
- * at a time.  This needs to be written carefully so that it works
- * with double-byte character sets. 
- */
-#define apr_xlate_conv_char(convset, inchar, outchar) APR_ENOTIMPL
-
-#define apr_xlate_close(convset) APR_ENOTIMPL
-
-#else  /* ! APR_HAS_XLATE */
-
+#if APR_HAS_XLATE
 typedef struct apr_xlate_t            apr_xlate_t;
 
 /**
@@ -154,6 +128,8 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
                                    apr_size_t *inbytes_left, char *outbuf,
                                    apr_size_t *outbytes_left);
 
+/* See the comment in apr_file_io.h about this hack */
+#ifdef APR_NOT_DONE_YET
 /**
  * The purpose of apr_xlate_conv_char is to translate one character
  * at a time.  This needs to be written carefully so that it works
@@ -164,6 +140,7 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
  * @param outchar The converted character
  */
 apr_status_t apr_xlate_conv_char(apr_xlate_t *convset, char inchar, char outchar);
+#endif
 
 /**
  * Convert a single-byte character from one charset to another.
@@ -180,6 +157,31 @@ apr_int32_t apr_xlate_conv_byte(apr_xlate_t *convset, unsigned char inchar);
  * @param convset The codepage translation handle to close
  */
 apr_status_t apr_xlate_close(apr_xlate_t *convset);
+
+#else
+
+typedef void                         apr_xlate_t;
+
+/* For platforms where we don't bother with translating between charsets,
+ * these are macros which always return failure.
+ */
+
+#define apr_xlate_open(convset, topage, frompage, pool) APR_ENOTIMPL
+
+#define apr_xlate_get_sb(convset, onoff) APR_ENOTIMPL
+
+#define apr_xlate_conv_buffer(convset, inbuf, inbytes_left, outbuf, \
+                              outbytes_left) APR_ENOTIMPL
+
+#define apr_xlate_conv_byte(convset, inchar) (-1)
+
+/* The purpose of apr_xlate_conv_char is to translate one character
+ * at a time.  This needs to be written carefully so that it works
+ * with double-byte character sets. 
+ */
+#define apr_xlate_conv_char(convset, inchar, outchar) APR_ENOTIMPL
+
+#define apr_xlate_close(convset) APR_ENOTIMPL
 
 #endif  /* ! APR_HAS_XLATE */
 

@@ -246,7 +246,13 @@ struct apr_finfo_t {
  * @param child_name May be absolute, in which case trusted_name is ignored
  * unless APR_CHILD_RELATIVE is tested.
  */
-
+/* This is a hack, because none of these functions actually exist yet.  The
+ * problem is that we generate our exports from the header files, so we are
+ * trying to export these functions, but they don't exist, so we can't link.
+ * This just makes sure that we don't try to link these functions until
+ * they actually exist.
+ */
+#ifdef APR_NOT_DONE_YET
 apr_status_t apr_make_canonical_name(apr_canon_t **new_name, 
                                      const apr_canon_t *trusted_name, 
                                      const char *child_name, 
@@ -292,6 +298,7 @@ apr_status_t apr_is_relative(apr_canon_t **path);
  *  isn't an adaquately complete root for UNC paths.
  */
 apr_status_t apr_is_virtualroot(apr_canon_t **path, int elements);
+#endif
 
 /**
  * Open the specified file.
