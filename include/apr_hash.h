@@ -85,7 +85,8 @@ ap_hash_t *ap_make_hash(ap_pool_t *pool);
 
 /*
 
-=head1 void ap_hash_set(ap_hash_t *ht, void *key, size_t klen, void *val)
+=head1 void ap_hash_set(ap_hash_t *ht, const void *key, size_t klen,
+                        const void *val)
 
 B<Associate a value with a key in a hash table.>
 
@@ -99,11 +100,11 @@ If the value is NULL the hash entry is deleted.
 
 =cut
 */
-void ap_hash_set(ap_hash_t *ht, void *key, size_t klen, void *val);
+void ap_hash_set(ap_hash_t *ht, const void *key, size_t klen, const void *val);
 
 /*
 
-=head1 void *ap_hash_get(ap_hash_t *ht, void *key, size_t klen)
+=head1 void *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen)
 
 B<Look up the value associated with a key in a hash table.>
 
@@ -116,7 +117,7 @@ Returns NULL if the key is not present.
 
 =cut
 */
-void *ap_hash_get(ap_hash_t *ht, void *key, size_t klen);
+void *ap_hash_get(ap_hash_t *ht, const void *key, size_t klen);
 
 /*
 
@@ -149,7 +150,8 @@ ap_hash_index_t *ap_hash_next(ap_hash_index_t *hi);
 
 /*
 
-=head1 void ap_hash_this(ap_hash_index_t *hi, void **key, size_t *klen, void **val)
+=head1 void ap_hash_this(ap_hash_index_t *hi, const void **key, size_t *klen,
+                         void **val)
 
 B<Get the current entry's details from the iteration state.>
 
@@ -163,7 +165,8 @@ corresponding data, or they may be NULL if the data isn't interesting.
 
 =cut
 */
-void ap_hash_this(ap_hash_index_t *hi, void **key, size_t *klen, void **val);
+void ap_hash_this(ap_hash_index_t *hi, const void **key, size_t *klen,
+                  void **val);
 
 /*
 
