@@ -106,14 +106,6 @@
 #endif
 /* End System Headers */
 
-/* The definition of isascii was missed from the BeOS PowerPC ctype.h
- *
- * It will be included in the next release, but until then... 
- */
-#if (HAVE_ISASCII == 0)
-#define isascii(c) (((c) & ~0x7f)==0)
-#endif
-
 #ifndef HAVE_POLLIN
 #define POLLIN   1
 #define POLLPRI  2
