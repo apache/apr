@@ -117,7 +117,7 @@
 
 /*
  * Pool debugging support:  This is intended to detect cases where the
- * wrong ap_context_t is used when assigning data to an object in another pool.
+ * wrong pool is used when assigning data to an object in another pool.
  * In particular, it causes the table_{set,add,merge}n routines to check
  * that their arguments are safe for the ap_table_t they're being placed in.
  * It currently only works with the unix multiprocess model, but could
@@ -460,7 +460,7 @@ static void free_proc_chain(struct process_chain *p);
 
 static ap_pool_t *permanent_pool;
 
-/* Each ap_context_t structure is allocated in the start of its own first block,
+/* Each pool structure is allocated in the start of its own first block,
  * so we need to know how many bytes that is (once properly aligned...).
  * This also means that when a pool's sub-pool is destroyed, the storage
  * associated with it is *completely* gone, so we have to make sure it
@@ -653,7 +653,7 @@ extern char _end;
     (((unsigned long)(ptr) - (unsigned long)(lo)) \
      < (unsigned long)(hi) - (unsigned long)(lo))
 
-/* Find the ap_context_t that ts belongs to, return NULL if it doesn't
+/* Find the pool that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
 API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
@@ -990,7 +990,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
     ps->blok = nblok;
     ps->got_a_new_block = 1;
     /* note that we've deliberately not linked the new block onto
-     * the ap_context_t yet... because we may need to flush again later, and
+     * the pool yet... because we may need to flush again later, and
      * we'd have to spend more effort trying to unlink the block.
      */
     return 0;
