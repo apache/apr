@@ -40,9 +40,9 @@ LIBAPR = @LIBPREFIX@apr.a
 # Rules for building specific targets, starting with 'all' for
 # building the entire package.
 #
-all: Makefile $(MODULES) subdirs $(LIBAPR)
+all: Makefile $(LIBAPR)
 
-$(LIBAPR):
+$(LIBAPR): $(MODULES) subdirs
 	@rm -rf objs
 	@mkdir objs
 	@rm -f $@
