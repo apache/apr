@@ -1139,11 +1139,6 @@ else
     stdint=0
 fi
 
-if test "$ac_cv_type_off_t" = "yes"; then
-    off_t_value="off_t"
-else
-    off_t_value="apr_int32_t"
-fi
 if test "$ac_cv_type_size_t" = "yes"; then
     size_t_value="size_t"
 else
@@ -1180,16 +1175,24 @@ else
     size_t_fmt='#error Can not determine the proper size for size_t'
 fi
 
-APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
-
-if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
-    off_t_fmt='#define APR_OFF_T_FMT "d"'
-elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
-    off_t_fmt='#define APR_OFF_T_FMT "ld"'
-elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
-    off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+if test "$ac_cv_type_off_t" = "yes"; then
+    APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
+    if test "$ac_cv_sizeof_off_t" = "2"; then
+        off_t_value='apr_int16_t'
+        off_t_fmt='#define APR_OFF_T_FMT APR_INT16_T_FMT'
+    elif test "$ac_cv_sizeof_off_t" = "4"; then
+        off_t_value='apr_int32_t'
+        off_t_fmt='#define APR_OFF_T_FMT APR_INT32_T_FMT'
+    elif test "$ac_cv_sizeof_off_t" = "8"; then
+        off_t_value='apr_int64_t'
+        off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+    else
+        off_t_value='apr_int64_t'
+        off_t_fmt='#error Can not determine the proper size for off_t'
+    fi
 else
-    off_t_fmt='#error Can not determine the proper size for off_t'
+    off_t_value='apr_int32_t'
+    off_t_fmt='#define APR_OFF_T_FMT APR_INT32_T_FMT'
 fi
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], pid_t, 8)
@@ -1212,7 +1215,6 @@ fi
 # you can override our decision below.
 case $host in
    *linux*)
-       off_t_fmt='#define APR_OFF_T_FMT "ld"'
        case $host in
            s390*)
                size_t_fmt='#define APR_SIZE_T_FMT "ld"'
@@ -1220,17 +1222,14 @@ case $host in
        esac
        ;;
    *os2_emx)
-       off_t_fmt='#define APR_OFF_T_FMT "ld"'
        size_t_fmt='#define APR_SIZE_T_FMT "lu"'
        ;;
    *-solaris*)
-       off_t_fmt='#define APR_OFF_T_FMT "ld"'
        pid_t_fmt='#define APR_PID_T_FMT "ld"'
        ;;
    *aix4*|*aix5*)
        ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
        size_t_fmt='#define APR_SIZE_T_FMT "ld"'
-       off_t_fmt='#define APR_OFF_T_FMT "ld"'
        ;;
     *beos*)
         ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
