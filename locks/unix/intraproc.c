@@ -58,13 +58,13 @@
 
 #if defined(USE_PTHREAD_SERIALIZE)  
 
-ap_status_t lock_intra_cleanup(void *data)
+static ap_status_t lock_intra_cleanup(void *data)
 {
     ap_lock_t *lock = (ap_lock_t *) data;
     return pthread_mutex_unlock(lock->intraproc);
 }    
 
-ap_status_t create_intra_lock(ap_lock_t *new)
+ap_status_t ap_unix_create_intra_lock(ap_lock_t *new)
 {
     ap_status_t stat;
     pthread_mutexattr_t mattr;
@@ -95,12 +95,12 @@ ap_status_t create_intra_lock(ap_lock_t *new)
     return APR_SUCCESS;
 }
 
-ap_status_t lock_intra(ap_lock_t *lock)
+ap_status_t ap_unix_lock_intra(ap_lock_t *lock)
 {
     return pthread_mutex_lock(lock->intraproc);
 }
 
-ap_status_t unlock_intra(ap_lock_t *lock)
+ap_status_t ap_unix_unlock_intra(ap_lock_t *lock)
 {
     ap_status_t status;
 
@@ -108,7 +108,7 @@ ap_status_t unlock_intra(ap_lock_t *lock)
     return status;
 }
 
-ap_status_t destroy_intra_lock(ap_lock_t *lock)
+ap_status_t ap_unix_destroy_intra_lock(ap_lock_t *lock)
 {
     ap_status_t stat;
     if ((stat = lock_intra_cleanup(lock)) == APR_SUCCESS) {

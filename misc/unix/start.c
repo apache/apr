@@ -149,7 +149,7 @@ ap_status_t ap_initialize(void)
 {
     ap_status_t status;
 #ifndef BEOS
-    setup_lock();
+    ap_unix_setup_lock();
 #endif
     status = ap_init_alloc();
     return status;

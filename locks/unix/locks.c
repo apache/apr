@@ -82,7 +82,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
 
     if (scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
+        if ((stat = ap_unix_create_intra_lock(new)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -90,7 +90,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
 #endif
     }
     if (scope != APR_INTRAPROCESS) {
-        if ((stat = create_inter_lock(new)) != APR_SUCCESS) {
+        if ((stat = ap_unix_create_inter_lock(new)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -103,7 +103,7 @@ ap_status_t ap_lock(ap_lock_t *lock)
     ap_status_t stat;
     if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = lock_intra(lock)) != APR_SUCCESS) {
+        if ((stat = ap_unix_lock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -111,7 +111,7 @@ ap_status_t ap_lock(ap_lock_t *lock)
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = lock_inter(lock)) != APR_SUCCESS) {
+        if ((stat = ap_unix_lock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -124,7 +124,7 @@ ap_status_t ap_unlock(ap_lock_t *lock)
 
     if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
+        if ((stat = ap_unix_unlock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -132,7 +132,7 @@ ap_status_t ap_unlock(ap_lock_t *lock)
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = unlock_inter(lock)) != APR_SUCCESS) {
+        if ((stat = ap_unix_unlock_inter(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -144,7 +144,7 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
     ap_status_t stat;
     if (lock->scope != APR_CROSS_PROCESS) {
 #if APR_HAS_THREADS
-        if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
+        if ((stat = ap_unix_destroy_intra_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
 #else
@@ -152,7 +152,7 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
 #endif
     }
     if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = destroy_inter_lock(lock)) != APR_SUCCESS) {
+        if ((stat = ap_unix_destroy_inter_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -164,7 +164,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
 {
     ap_status_t stat;
     if ((*lock)->scope != APR_CROSS_PROCESS) {
-        if ((stat = child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
+        if ((stat = ap_unix_child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
             return stat;
         }
     }
