@@ -68,6 +68,11 @@
 #include <pthread.h>
 #endif
 
+static void foo(apr_atomic_t *bar, long xyzzy)
+{
+    apr_atomic_add(bar, xyzzy);
+}
+
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
 
@@ -143,7 +148,7 @@ static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
     printf("%-60s", "testing add");
     apr_atomic_set(&y, 23);
     apr_atomic_add(&y, 4);
-    if (apr_atomic_read(&y) != 27) {
+    if ((oldval = apr_atomic_read(&y)) != 27) {
         fprintf(stderr,
                 "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
                 oldval);
