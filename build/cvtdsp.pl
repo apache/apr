@@ -1,25 +1,29 @@
 use IO::File;
 use File::Find;
 
-if ($ARGV[0] == '-6') {
+if ($ARGV[0] eq '-6') {
     find(\&tovc6, '.');
 }
-elsif ($ARGV[0] == '-5') {
+elsif ($ARGV[0] eq '-5') {
     find(\&tovc5, '.');
 }
-elsif ($ARGV[0] == '-w3') {
+elsif ($ARGV[0] eq '-w3') {
     find(\&tow3, '.');
 }
-elsif ($ARGV[0] == '-w4') {
+elsif ($ARGV[0] eq '-w4') {
     find(\&tow4, '.');
 }
-elsif ($ARGV[0] == '-ia64') {
+elsif ($ARGV[0] eq '-ia64') {
     find(\&tovc64, '.');
+}
+elsif ($ARGV[0] eq '-d') {
+    find(\&todebugpools, '.');
 }
 else {
     print "Specify -5 or -6 for Visual Studio 5 or 6 (98) .dsp format\n";
     print "Specify -w3 or -w4 for .dsp build with warning level 3 or 4 (strict)\n\n";
     print "Specify -ia64 for build targeted at Itanium (req's psdk tools)\n\n";
+    print "Specify -p for extreme pool debugging\n\n";
     die "Missing argument";
 }
 
@@ -190,3 +194,34 @@ sub tovc64 {
 	}
     }
 }
+
+sub todebugpools { 
+
+    if (m|.dsp$|) {
+        $oname = $_;
+	$tname = '.#' . $_;
+        $verchg = 0;
+	$srcfl = new IO::File $oname, "r" || die;
+	$dstfl = new IO::File $tname, "w" || die;
+	while ($src = <$srcfl>) {
+	    if ($src =~ s|^(# ADD CPP .* /D "_DEBUG" )|$1/D "APR_POOL_DEBUG" |) {
+		$verchg = -1;
+                if ($oname =~ /apr\.dsp$/) {
+	            $src =~ s|^(# ADD CPP .* /D "_DEBUG" )|$1/D "POOL_DEBUG" |;
+                }
+	    }
+            print $dstfl $src; 
+	}
+	undef $srcfl;
+	undef $dstfl;
+	if ($verchg) {
+	    unlink $oname || die;
+	    rename $tname, $oname || die;
+	    print "Converted project " . $oname . " to debug pools in " . $File::Find::dir . "\n"; 
+	}
+	else {
+	    unlink $tname;
+	}
+    }
+}
+
