@@ -297,7 +297,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
         /* Left with a path of '/', what drive are we asking about? 
          */
-        *inpath = ++testpath;
+        *inpath = testpath + 1;
         newpath = apr_palloc(p, 2);
         if (flags & APR_FILEPATH_TRUENAME)
             newpath[0] = seperator[0];
