@@ -110,8 +110,8 @@ struct process_chain {
 #ifndef POOL_DEBUG
 APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
 #else
-APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, int (apr_abort)(int retcode));
-APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode));
+APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, int (*apr_abort)(int retcode));
+APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (*apr_abort)(int retcode));
 #endif /* POOL_DEBUG */
 
 #ifdef ULTRIX_BRAIN_DEATH
@@ -198,7 +198,7 @@ APR_EXPORT(void) ap_destroy_pool(struct ap_pool_t *p);
 
 /*
 
-=head1 long *ap_bytes_in_pool(ap_pool_t *p)
+=head1 ap_size_t ap_bytes_in_pool(ap_pool_t *p)
 
 B<report the number of bytes currently in the pool>
 
@@ -207,11 +207,11 @@ B<report the number of bytes currently in the pool>
 
 =cut
  */
-APR_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p);
+APR_EXPORT(ap_size_t) ap_bytes_in_pool(ap_pool_t *p);
 
 /*
 
-=head1 long *ap_bytes_in_free_blocks(ap_pool_t *p)
+=head1 ap_size_t ap_bytes_in_free_blocks(ap_pool_t *p)
 
 B<report the number of bytes currently in the list of free blocks>
 
@@ -219,7 +219,7 @@ B<report the number of bytes currently in the list of free blocks>
 
 =cut
  */
-APR_EXPORT(long) ap_bytes_in_free_blocks(void);
+APR_EXPORT(ap_size_t) ap_bytes_in_free_blocks(void);
 
 /*
 
@@ -238,7 +238,7 @@ APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b);
 
 /*
 
-=head1 void *ap_palloc(ap_pool_t *c, int reqsize)
+=head1 void *ap_palloc(ap_pool_t *c, ap_size_t reqsize)
 
 B<Allocate a block of memory from a pool>
 
@@ -248,11 +248,11 @@ B<Allocate a block of memory from a pool>
 
 =cut
  */
-APR_EXPORT(void *) ap_palloc(struct ap_pool_t *c, int reqsize);
+APR_EXPORT(void *) ap_palloc(struct ap_pool_t *c, ap_size_t reqsize);
 
 /*
 
-=head1 void *ap_pcalloc(ap_pool_t *c, int reqsize)
+=head1 void *ap_pcalloc(ap_pool_t *c, ap_size_t reqsize)
 
 B<Allocate a block of memory from a pool and set all of the memory to 0>
 
@@ -262,7 +262,7 @@ B<Allocate a block of memory from a pool and set all of the memory to 0>
 
 =cut
  */
-APR_EXPORT(void *) ap_pcalloc(struct ap_pool_t *p, int size);
+APR_EXPORT(void *) ap_pcalloc(struct ap_pool_t *p, ap_size_t size);
 
 /*
 
@@ -280,7 +280,7 @@ APR_EXPORT(char *) ap_pstrdup(struct ap_pool_t *p, const char *s);
 
 /*
 
-=head1 char *ap_pstrndup(ap_pool_t *c, const char *s, int n)
+=head1 char *ap_pstrndup(ap_pool_t *c, const char *s, ap_size_t n)
 
 B<duplicate the first n characters ofa string into memory allocated out of a pool>
 
@@ -291,7 +291,7 @@ B<duplicate the first n characters ofa string into memory allocated out of a poo
 
 =cut
  */
-APR_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, int n);
+APR_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, ap_size_t n);
 
 /*
 
@@ -351,8 +351,8 @@ B<Register a function to be called when a pool is cleared or destroyed>
 =cut
  */
 APR_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
-                                      ap_status_t (*plain_cleanup) (void *),
-                                      ap_status_t (*child_cleanup) (void *));
+                                     ap_status_t (*plain_cleanup) (void *),
+                                     ap_status_t (*child_cleanup) (void *));
 
 /*
 
@@ -367,7 +367,7 @@ B<remove a previously registered cleanup function>
 =cut
  */
 APR_EXPORT(void) ap_kill_cleanup(struct ap_pool_t *p, void *data,
-                                  ap_status_t (*cleanup) (void *));
+                                 ap_status_t (*cleanup) (void *));
 
 /*
 
@@ -382,7 +382,7 @@ B<Run the specified cleanup function immediately and unregister it>
 =cut
  */
 APR_EXPORT(ap_status_t) ap_run_cleanup(struct ap_pool_t *p, void *data,
-                                 ap_status_t (*cleanup) (void *));
+                                       ap_status_t (*cleanup) (void *));
 
 /*
 
