@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) change the apr_table_elts macro so that it provides access via
+     a const pointer instead of a non-const pointer
+     [Brian Pane <bpane@pacbell.net]
+
   *) Use strerror_r() where available, since strerror() isn't always
      thread-safe.  Example systems where strerror() isn't thread-safe:
      Linux+glibc, AIX  [Jeff Trawick]
