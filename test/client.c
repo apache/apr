@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
     char *dest = "127.0.0.1";
     apr_port_t local_port, remote_port;
     apr_interval_time_t read_timeout = -1;
+    apr_sockaddr_t *destsa;
 
     setbuf(stdout, NULL);
     if (argc > 1) {
@@ -115,17 +116,18 @@ int main(int argc, char *argv[])
         fprintf(stdout, "OK\n");
     }
 
-    fprintf(stdout, "\tClient:  Setting port for socket.......");
-    if (apr_set_port(sock, APR_REMOTE, 8021) != APR_SUCCESS) {
+    fprintf(stdout,"\tClient:  Making socket address...............");
+    if (apr_getaddrinfo(&destsa, dest, AF_INET, 8021, 0, context) != APR_SUCCESS) {
         apr_close_socket(sock);
-        fprintf(stderr, "Couldn't set the port correctly\n");
+        fprintf(stdout, "Failed!\n");
+        fprintf(stdout, "Couldn't create a socket address structure for %s\n", dest);
         exit(-1);
     }
-    fprintf(stdout, "OK\n");           
+    fprintf(stdout,"OK\n");
 
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
-    stat = apr_connect(sock, dest);
+    stat = apr_connect(sock, destsa);
 
     if (stat != APR_SUCCESS) {
         apr_close_socket(sock);
