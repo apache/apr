@@ -4,11 +4,12 @@ Makefile
 testmd5
 testmmap
 htdigest
-ab
 proctest
 testud
 testargs
+testdir
 testdso
+testhash
 testoc
 testpipe
 testpoll
