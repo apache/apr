@@ -875,12 +875,12 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 == APR_SUCCESS) {
                 apr_size_t namelen = strlen(finfo.name);
 
-#if defined(OS2) || defined(NETWARE) /* only has case folding, never aliases that change the length */
+#if defined(OS2) /* only has case folding, never aliases that change the length */
 
                 if (memcmp(finfo.name, path + keptlen, seglen) != 0) {
                     memcpy(path + keptlen, finfo.name, namelen);
                 }
-#else /* WIN32; here there be aliases that gire and gimble and change length */
+#else /* WIN32 || NETWARE; here there be aliases that gire and gimble and change length */
 
                 if ((namelen != seglen) || 
                     (memcmp(finfo.name, path + keptlen, seglen) != 0)) 
