@@ -183,6 +183,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testmmap.o \
 	$(OBJDIR)/testnames.o \
 	$(OBJDIR)/testoc.o \
+	$(OBJDIR)/testpath.o \
 	$(OBJDIR)/testpoll.o \
 	$(OBJDIR)/testpools.o \
 	$(OBJDIR)/testproc.o \
