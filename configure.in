@@ -518,24 +518,6 @@ AC_SUBST(anonymous_shm)
 AC_SUBST(filebased_shm)
 AC_SUBST(keybased_shm)
 
-if test ".$SYS_SW" = ".AIX"; then
-    APR_ADDTO(CPPFLAGS,-U__STR__)
-    case "$SYS_KV" in
-        [12]*)
-            OSDIR="aix"
-            ;;
-        3*)
-            OSDIR="aix"
-            ;;
-        41*)
-            OSDIR="aix"
-            ;;
-        42*)
-            OSDIR="aix"
-            ;;
-    esac
-fi
-
 dnl #----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
 AC_CHECK_FUNCS(calloc strcasecmp stricmp setsid nl_langinfo isinf isnan)
