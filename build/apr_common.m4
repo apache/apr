@@ -333,9 +333,12 @@ AC_MSG_RESULT([$msg])
 ])dnl
 
 
-dnl the following is a newline, a space, and a tab. don't reindent!
-define([newline_space_tab],[
- 	])
+dnl the following is a newline, a space, a tab, and a backslash (the
+dnl backslash is used by the shell to skip newlines, but m4 sees it;
+dnl treat it like whitespace).
+dnl WARNING: don't reindent these lines, or the space/tab will be lost!
+define([apr_whitespace],[
+ 	\])
 
 dnl
 dnl APR_COMMA_ARGS(ARG1 ...)
@@ -347,7 +350,7 @@ dnl  subsitute CODE-BLOCK for each ARG[i]. "eachval" will be set to ARG[i]
 dnl  within each iteration.
 dnl
 changequote({,})
-define({APR_COMMA_ARGS},{patsubst([$}{1],[[}newline_space_tab{]+],[,])})
+define({APR_COMMA_ARGS},{patsubst([$}{1],[[}apr_whitespace{]+],[,])})
 define({APR_FOREACH},
   {ifelse($}{2,,,
           [define([eachval],
