@@ -98,8 +98,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
                                         apr_fileperms_t perm, 
                                         apr_pool_t *pool)
 {
+    apr_os_file_t fd;
     int oflags = 0;
 #if APR_HAS_THREADS
+    apr_thread_mutex_t *thlock;
     apr_status_t rv;
 #endif
 
@@ -107,11 +109,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     apr_hash_t *statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
     apr_stat_entry_t *stat_entry = NULL;
 #endif
-
-    (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
-    (*new)->pool = pool;
-    (*new)->flags = flag;
-    (*new)->filedes = -1;
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         oflags = O_RDWR;
@@ -124,27 +121,6 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
     else {
         return APR_EACCES; 
-    }
-
-    (*new)->fname = apr_pstrdup(pool, fname);
-
-    (*new)->blocking = BLK_ON;
-    (*new)->buffered = (flag & APR_BUFFERED) > 0;
-
-    if ((*new)->buffered) {
-        (*new)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
-#if APR_HAS_THREADS
-        if ((*new)->flags & APR_XTHREAD) {
-            rv = apr_thread_mutex_create(&((*new)->thlock),
-                                         APR_THREAD_MUTEX_DEFAULT, pool);
-            if (rv) {
-                return rv;
-            }
-        }
-#endif
-    }
-    else {
-        (*new)->buffer = NULL;
     }
 
     if (flag & APR_CREATE) {
@@ -169,29 +145,58 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
     }
 #endif
     
+#if APR_HAS_THREADS
+    if ((flag & APR_BUFFERED) && ((*new)->flags & APR_XTHREAD)) {
+        rv = apr_thread_mutex_create(thlock),
+                                     APR_THREAD_MUTEX_DEFAULT, pool);
+        if (rv) {
+            return rv;
+        }
+    }
+#endif
+
 #ifdef NETWARE
     if (statCache) {
         stat_entry = (apr_stat_entry_t*) apr_hash_get(statCache, fname, APR_HASH_KEY_STRING);
     }
     if (stat_entry) {
-        errno = NXFileOpen (stat_entry->pathCtx, stat_entry->casedName, oflags, &(*new)->filedes);
+        errno = NXFileOpen (stat_entry->pathCtx, stat_entry->casedName, oflags, &fd);
     }
     else {
 #endif
     if (perm == APR_OS_DEFAULT) {
-        (*new)->filedes = open(fname, oflags, 0666);
+        fd = open(fname, oflags, 0666);
     }
     else {
-        (*new)->filedes = open(fname, oflags, apr_unix_perms2mode(perm));
+        fd = open(fname, oflags, apr_unix_perms2mode(perm));
     } 
 #ifdef NETWARE
     }
 #endif
-
-    if ((*new)->filedes < 0) {
-       (*new)->filedes = -1;
-       (*new)->eof_hit = 1;
+    if (fd < 0) {
        return errno;
+    }
+
+    (*new) = (apr_file_t *)apr_pcalloc(pool, sizeof(apr_file_t));
+    (*new)->pool = pool;
+    (*new)->flags = flag;
+    (*new)->filedes = fd;
+
+    (*new)->fname = apr_pstrdup(pool, fname);
+
+    (*new)->blocking = BLK_ON;
+    (*new)->buffered = (flag & APR_BUFFERED) > 0;
+
+    if ((*new)->buffered) {
+        (*new)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+#if APR_HAS_THREADS
+        if ((*new)->flags & APR_XTHREAD) {
+            (*new)->thlock = thlock;
+        }
+#endif
+    }
+    else {
+        (*new)->buffer = NULL;
     }
 
     (*new)->is_pipe = 0;
