@@ -56,62 +56,44 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-dir.o: dir.c $(INCDIR)/arch/unix/fileio.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_tables.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_pools.h $(INCDIR)/apr_strings.h \
+dir.o: dir.c $(INCDIR)/apr_strings.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h \
  $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h
 fileacc.o: fileacc.c $(INCDIR)/apr_strings.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h \
- $(INCDIR)/arch/unix/fileio.h $(INCDIR)/apr_private.h
-filedup.o: filedup.c $(INCDIR)/arch/unix/fileio.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_tables.h $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h
+filedup.o: filedup.c $(INCDIR)/apr_strings.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
- $(INCDIR)/apr_strings.h $(INCDIR)/apr_portable.h \
- $(INCDIR)/apr_network_io.h $(INCDIR)/apr_lock.h \
- $(INCDIR)/apr_dso.h
-filestat.o: filestat.c $(INCDIR)/arch/unix/fileio.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_tables.h $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h
+filestat.o: filestat.c $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h
 fullrw.o: fullrw.c $(INCDIR)/apr_file_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h
-open.o: open.c $(INCDIR)/arch/unix/fileio.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_tables.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_pools.h $(INCDIR)/apr_strings.h \
+open.o: open.c $(INCDIR)/apr_strings.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h \
  $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_lock.h $(INCDIR)/apr_dso.h
-pipe.o: pipe.c $(INCDIR)/arch/unix/fileio.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_tables.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_pools.h $(INCDIR)/apr_strings.h
-readwrite.o: readwrite.c $(INCDIR)/arch/unix/fileio.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_private.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_tables.h $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_thread_proc.h \
+pipe.o: pipe.c $(INCDIR)/apr_strings.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_lib.h $(INCDIR)/apr_pools.h \
- $(INCDIR)/apr_lock.h
-seek.o: seek.c $(INCDIR)/arch/unix/fileio.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_private.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_tables.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_pools.h
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_tables.h
+readwrite.o: readwrite.c $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h
+seek.o: seek.c
