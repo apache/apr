@@ -302,8 +302,8 @@ int test_thread_rwlock(void)
 
     mutex_counter = 0;
 
-    printf("apr_thread_mutex_t Tests\n");
-    printf("%-60s", "    Initializing the apr_thread_mutex_t");
+    printf("apr_thread_rwlock_t Tests\n");
+    printf("%-60s", "    Initializing the apr_thread_rwlock_t");
     s1 = apr_thread_rwlock_create(&thread_rwlock, pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
