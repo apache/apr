@@ -319,7 +319,16 @@ AC_SUBST(off_t_fmt)
 
 dnl #----------------------------- Checking for DSO support
 echo $ac_n "${nl}Checking for DSO...${nl}"
-AC_CHECK_LIB(dl, dlopen, aprdso="1", apr_dso="0")
+AC_ARG_ENABLE(dso,
+  [  --enable-dso              Enable reliable child processes ],
+  [ tempdso=$enableval],
+  [ AC_CHECK_LIB(dl, dlopen, tempdso="yes", tempdso="no") ] )
+
+if test "$tempdso" = "no"; then
+    aprdso="0"
+else
+    aprdso="1"
+fi
 
 AC_SUBST(aprdso)
 
