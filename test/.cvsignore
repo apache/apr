@@ -60,3 +60,4 @@ test.fil
 testprocmutex
 testglobalmutex
 testvsn
+testregex
