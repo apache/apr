@@ -810,8 +810,15 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
             /*
              * Modifier check
              */
+#if defined(APR_INT64_T_FMT_LEN) && (APR_INT64_T_FMT_LEN == 3)
+            if ((*fmt == APR_INT64_T_FMT[0]) &&
+                (fmt[1] == APR_INT64_T_FMT[1])) {
+#elif defined(APR_INT64_T_FMT_LEN) && (APR_INT64_T_FMT_LEN == 2)
+            if (*fmt == APR_INT64_T_FMT[0]) {
+#else
             if (strncmp(fmt, APR_INT64_T_FMT, 
                              sizeof(APR_INT64_T_FMT) - 2) == 0) {
+#endif
                 /* Need to account for trailing 'd' and null in sizeof() */
                 var_type = IS_QUAD;
                 fmt += (sizeof(APR_INT64_T_FMT) - 2);
