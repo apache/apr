@@ -196,3 +196,24 @@ API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
 
     return(rc);
 }
+
+/* Filename_of_pathname returns the final element of the pathname.
+ * Using the current platform's filename syntax.
+ *   "/foo/bar/gum" -> "gum"
+ *   "/foo/bar/gum/" -> ""
+ *   "gum" -> "gum"
+ *   "wi\\n32\\stuff" -> "stuff
+ */
+
+const char *ap_filename_of_pathname(const char *pathname)
+{
+#ifdef WIN32
+    const char path_separator = '\\';
+#else
+    const char path_separator = '/';
+#endif
+    const char *s = strrchr(pathname, path_separator);
+
+    return s ? ++s : pathname;
+}
+

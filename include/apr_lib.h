@@ -166,6 +166,7 @@ enum kill_conditions {
 API_EXPORT(char *) ap_cpystrn(char *d, const char *s, size_t l);
 API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
                                     char *arg_str, char ***argv_out);
+API_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 /*API_EXPORT(ap_mutex_t *) ap_create_mutex(void *m);*/
 API_EXPORT(int) ap_slack(int l, int h);
 API_EXPORT_NONSTD(int) ap_execle(const char *c, const char *a, ...);
