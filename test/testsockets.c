@@ -52,10 +52,6 @@
  * <http://www.apache.org/>.
  */
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -64,93 +60,125 @@
 
 #if APR_HAVE_IPV6
 #define US "::1"
+#define FAMILY APR_INET6
 #else
 #define US "127.0.0.1"
+#define FAMILY APR_INET
 #endif
-
-static void closeapr(void)
-{
-    apr_terminate();
-}
-
-static void close_sock(apr_socket_t *sock)
-{
-    STD_TEST_NEQ("    Closing socket", apr_socket_close(sock))
-}
 
 #define STRLEN 21
 
-int main(void)
+static void tcp_socket(CuTest *tc)
 {
-    apr_pool_t *pool;
-    apr_socket_t *sock = NULL, *sock2 = NULL;
-    apr_sockaddr_t *from;
-    apr_sockaddr_t *to;
-    apr_size_t len = 30;
+    apr_status_t rv;
+    apr_socket_t *sock = NULL;
+
+    rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, sock);
+    apr_socket_close(sock);
+}
+
+static void udp_socket(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_socket_t *sock = NULL;
+
+    rv = apr_socket_create(&sock, APR_INET, SOCK_DGRAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, sock);
+    apr_socket_close(sock);
+}
+
+static void tcp6_socket(CuTest *tc)
+{
+#if APR_HAVE_IPV6
+    apr_status_t rv;
+    apr_socket_t *sock = NULL;
+
+    rv = apr_socket_create(&sock, APR_INET6, SOCK_STREAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, sock);
+    apr_socket_close(sock);
+#else
+    CuNotImpl(tc, "IPv6");
+#endif
+}
+
+static void udp6_socket(CuTest *tc)
+{
+#if APR_HAVE_IPV6
+    apr_status_t rv;
+    apr_socket_t *sock = NULL;
+
+    rv = apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertPtrNotNull(tc, sock);
+    apr_socket_close(sock);
+#else
+    CuNotImpl(tc, "IPv6");
+#endif
+}
+
+static void sendto_receivefrom(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_socket_t *sock = NULL;
+    apr_socket_t *sock2 = NULL;
     char sendbuf[STRLEN] = "APR_INET, SOCK_DGRAM";
     char recvbuf[80];
     char *ip_addr;
     apr_port_t fromport;
-#if APR_HAVE_IPV6
-    int family = APR_INET6;
-#else
-    int family = APR_INET;
-#endif
+    apr_sockaddr_t *from;
+    apr_sockaddr_t *to;
+    apr_size_t len = 30;
 
-    STD_TEST_NEQ("Initializing APR", apr_initialize())
+    rv = apr_socket_create(&sock, FAMILY, SOCK_DGRAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_socket_create(&sock2, FAMILY, SOCK_DGRAM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    atexit(closeapr);
-    STD_TEST_NEQ("Creating 1st pool", apr_pool_create(&pool, NULL))
+    rv = apr_sockaddr_info_get(&to, US, APR_UNSPEC, 7772, 0, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_sockaddr_info_get(&from, US, APR_UNSPEC, 7771, 0, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    printf("Testing socket creation functions.\n");
-
-    STD_TEST_NEQ("    Creating a TCP socket",
-                 apr_socket_create(&sock, APR_INET, SOCK_STREAM, pool))
-    close_sock(sock);
-
-    STD_TEST_NEQ("    Creating UDP socket",
-                 apr_socket_create(&sock, APR_INET, SOCK_DGRAM, pool))
-    close_sock(sock);
-
-#if APR_HAVE_IPV6
-    STD_TEST_NEQ("    Creating an IPv6 TCP socket",
-                 apr_socket_create(&sock, APR_INET6, SOCK_STREAM, pool))
-    close_sock(sock);
-
-    STD_TEST_NEQ("    Creating an IPv6 UDP socket",
-                 apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, pool))
-    close_sock(sock);
-#else
-    printf("NO IPv6 support.\n");
-#endif
-
-    printf("Now trying sendto/recvfrom (simple tests only)\n");
-
-    STD_TEST_NEQ("    Creating socket #1 for test",
-                 apr_socket_create(&sock, family, SOCK_DGRAM, pool))
-    STD_TEST_NEQ("    Creating socket #2 for test",
-                 apr_socket_create(&sock2, family, SOCK_DGRAM, pool))
-
-    apr_sockaddr_info_get(&to, US, APR_UNSPEC, 7772, 0, pool);
-    apr_sockaddr_info_get(&from, US, APR_UNSPEC, 7771, 0, pool);
-
-    STD_TEST_NEQ("    Binding socket #1", apr_socket_bind(sock, to))
-    STD_TEST_NEQ("    Binding socket #2", apr_socket_bind(sock2, from))
+    rv = apr_socket_bind(sock, to);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_socket_bind(sock2, from);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     len = STRLEN;
+    rv = apr_socket_sendto(sock2, to, 0, sendbuf, &len);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, STRLEN, len);
 
-    STD_TEST_NEQ("    Trying to sendto",
-                 apr_socket_sendto(sock2, to, 0, sendbuf, &len))
     len = 80;
-    STD_TEST_NEQ("    Trying to recvfrom",
-                 apr_socket_recvfrom(from, sock, 0, recvbuf, &len))
-    printf("\t\tGot back %d bytes [%s] from recvfrom\n", len, recvbuf);   
+    rv = apr_socket_recvfrom(from, sock, 0, recvbuf, &len);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, STRLEN, len);
+    CuAssertStrEquals(tc, "APR_INET, SOCK_DGRAM", recvbuf);
+
     apr_sockaddr_ip_get(&ip_addr, from);
     apr_sockaddr_port_get(&fromport, from);
-    printf("\t\tData came from %s:%u\n", ip_addr, fromport);
+    CuAssertStrEquals(tc, US, ip_addr);
+    CuAssertIntEquals(tc, 7771, fromport);
 
-    close_sock(sock);
-    close_sock(sock2);
-
-    return 1;
+    apr_socket_close(sock);
+    apr_socket_close(sock2);
 }
+
+CuSuite *testsockets(void)
+{
+    CuSuite *suite = CuSuiteNew("Socket Creation");
+
+    SUITE_ADD_TEST(suite, tcp_socket);
+    SUITE_ADD_TEST(suite, udp_socket);
+
+    SUITE_ADD_TEST(suite, tcp6_socket);
+    SUITE_ADD_TEST(suite, udp6_socket);
+
+    SUITE_ADD_TEST(suite, sendto_receivefrom);
+    return suite;
+}
+
