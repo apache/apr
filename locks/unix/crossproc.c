@@ -98,9 +98,13 @@ static apr_status_t posix_create(apr_lock_t *new, const char *fname)
      *
      * Because of this, we ignore fname and craft our own.
      *
-     * FIXME: if we try to create another semaphore within a second
-     * of creating this on, we won't get a new one but another
-     * reference to this one.
+     * FIXME: There is a small window of opportunity where
+     * instead of getting a new semaphore descriptor, we get
+     * a previously obtained one. This can happen if the requests
+     * are made at the "same time" (within a second, due to the
+     * apr_time_now() call) and in the small span of time between
+     * the sem_open and the sem_unlink. Use of O_EXCL does not
+     * help here however...
      */
     epoch = apr_time_now() / APR_USEC_PER_SEC;
     apr_snprintf(semname, sizeof(semname), "/ApR.%lx", epoch);
