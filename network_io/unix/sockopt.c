@@ -29,7 +29,7 @@ static apr_status_t soblock(int sd)
 #elif defined(O_NDELAY)
     fd_flags &= ~O_NDELAY;
 #elif defined(FNDELAY)
-    fd_flags |= FNDELAY;
+    fd_flags &= ~FNDELAY;
 #else
 #error Please teach APR how to make sockets blocking on your platform.
 #endif
