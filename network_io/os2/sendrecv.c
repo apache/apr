@@ -59,9 +59,10 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_network_io.h"
+#include "apr_lib.h"
 #include <sys/time.h>
 
-ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, time_t sec)
+ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
     
@@ -69,21 +70,20 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
         rv = write(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sec > 0) {
-        struct timeval tv;
-        fd_set fdset;
+    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
+        int fds;
         int srv;
 
         do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            tv.tv_sec  = sec;
-            tv.tv_usec = 0;
-
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, &tv);
+            fds = sock->socketdes;
+            srv = os2_select(&fds, 0, 1, 0, sock->timeout);
         } while (srv == -1 && errno == EINTR);
 
-        if (srv < 1) {
+        if (srv == 0) {
+            (*len) = -1;
+            return APR_TIMEUP;
+        }
+        else if (srv < 0) {
             (*len) = -1;
             return errno;
         }
@@ -97,7 +97,9 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t sec)
+
+
+ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
     
@@ -105,21 +107,20 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t se
         rv = read(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && errno == EAGAIN && sec > 0) {
-        struct timeval tv;
-        fd_set fdset;
+    if (rv == -1 && errno == EAGAIN && sock->timeout > 0) {
+        int fds;
         int srv;
 
         do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            tv.tv_sec  = sec;
-            tv.tv_usec = 0;
-
-            srv = select(FD_SETSIZE, &fdset, NULL, NULL, &tv);
+            fds = sock->socketdes;
+            srv = os2_select(&fds, 1, 0, 0, sock->timeout);
         } while (srv == -1 && errno == EINTR);
 
-        if (srv < 1) {
+        if (srv == 0) {
+            (*len) = -1;
+            return APR_TIMEUP;
+        }
+        else if (srv < 0) {
             (*len) = -1;
             return errno;
         }
