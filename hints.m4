@@ -84,6 +84,7 @@ case "$host" in
 	APR_SETIFNULL(LIBS, [-lposix -lbsd])
 	APR_SETIFNULL(LDFLAGS, [-s])
 	APR_SETVAR(APACHE_MPM, [prefork])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-ibm-aix*)
         case $host in
@@ -140,6 +141,7 @@ case "$host" in
 	APR_SETIFNULL(SHELL, [sh])
         APR_SETIFNULL(file_as_socket, [0])
         APR_SETVAR(APACHE_MPM, [spmt_os2])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-hi-hiux)
 	APR_SETIFNULL(CFLAGS, [-DHIUX])
@@ -163,6 +165,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_SETIFNULL(LIBS, [-lm])
 	;;
     *-linux2)
+        ver=`uname -r`
 	APR_SETIFNULL(CFLAGS, [-DLINUX=2])
 	APR_SETIFNULL(LIBS, [-lm])
 	;;
@@ -179,10 +182,12 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *486-*-bsdi*)
 	APR_SETIFNULL(CFLAGS, [-m486])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-netbsd*)
 	APR_SETIFNULL(CFLAGS, [-DNETBSD])
 	APR_SETIFNULL(LIBS, [-lcrypt])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-freebsd*)
 	case $host in
@@ -191,6 +196,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 		;;
 	esac
 	APR_SETIFNULL(LIBS, [-lcrypt])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-next-nextstep*)
 	APR_SETIFNULL(OPTIM, [-O])
@@ -203,17 +209,21 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
 dnl    *-apple-rhapsody*)
 dnl	APR_SETIFNULL(CFLAGS, [-DDARWIN -DMAC_OS_X_SERVER])
+dnl     APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 dnl	;;
     *-apple-darwin*)
 	APR_SETIFNULL(CFLAGS, [-DDARWIN])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-dec-osf*)
 	APR_SETIFNULL(CFLAGS, [-DOSF1])
 	APR_SETIFNULL(LIBS, [-lm])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-qnx)
 	APR_SETIFNULL(CFLAGS, [-DQNX])
 	APR_SETIFNULL(LIBS, [-N128k -lsocket -lunix])
+        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-qnx32)
         APR_SETIFNULL(CC, [cc -F])
