@@ -95,6 +95,7 @@ static const struct testlist {
     {"testdup", testdup},
     {"testdir", testdir},
     {"testrand", testrand},
+    {"testrand2", testrand2},
     {"testdso", testdso},
     {"testoc", testoc},
     {"testsockets", testsockets},

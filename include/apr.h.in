@@ -305,6 +305,9 @@ typedef  @socklen_t_value@       apr_socklen_t;
 
 #define APR_SIZEOF_VOIDP @voidp_size@
 
+/* Are we big endian? */
+#define APR_IS_BIGENDIAN	@bigendian@
+
 /* Mechanisms to properly type numeric literals */
 @int64_literal@
 
