@@ -20,5 +20,5 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-int strnatcmp(char const *a, char const *b);
-int strnatcasecmp(char const *a, char const *b);
+int ap_strnatcmp(char const *a, char const *b);
+int ap_strnatcasecmp(char const *a, char const *b);
