@@ -56,6 +56,7 @@
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 #include <string.h>
 
 static apr_status_t dir_cleanup(void *thedir)
@@ -181,5 +182,24 @@ apr_status_t apr_dir_remove(const char *path, apr_pool_t *cont)
 
 
 
+apr_status_t apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
+{
+    if (dir == NULL) {
+        return APR_ENODIR;
+    }
+    *thedir = &dir->handle;
+    return APR_SUCCESS;
+}
 
 
+
+apr_status_t apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir,
+                          apr_pool_t *cont)
+{
+    if ((*dir) == NULL) {
+        (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));
+        (*dir)->cntxt = cont;
+    }
+    (*dir)->handle = *thedir;
+    return APR_SUCCESS;
+}

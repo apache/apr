@@ -222,3 +222,29 @@ apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
     return apr_poll_socket_mask(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
 }
+
+
+
+apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
+{
+    aprset->num_read = 0;
+    aprset->num_write = 0;
+    aprset->num_except = 0;
+    aprset->num_total = 0;
+    return APR_SUCCESS;
+}
+
+
+
+apr_status_t apr_poll_data_get(apr_pollfd_t *pollfd, const char *key, void *data)
+{
+    return apr_pool_userdata_get(data, key, pollfd->cntxt);
+}
+
+
+
+apr_status_t apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *))
+{
+    return apr_pool_userdata_set(data, key, cleanup, pollfd->cntxt);
+}
