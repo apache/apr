@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Fix sign error in apr_file_seek(APR_END).
+     [Greg Hudson <ghudson MIT.EDU>]
+
   *) Support setuid, setgid and sticky file permissions bits on Unix.
      [André Malo]
 
