@@ -161,7 +161,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /**
  * <PRE>
  * <b>APR ERROR VALUES</b>
- * APR_ENOSTAT      APR was unable to perform a stat on the file 
+ * APR_ENOSTAT     -APR was unable to perform a stat on the file 
  * APR_ENOPOOL      APR was not provided a pool with which to allocate memory
  * APR_EBADDATE     APR was given an invalid date 
  * APR_EINVALSOCK   APR was given an invalid socket
@@ -177,7 +177,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_ENOSHMAVAIL  There is no more shared memory available
  * APR_EDSOOPEN     APR was unable to open the dso object.  For more 
  *                  information call apr_dso_error().
- * APR_EGENERAL     General failure (specific information not available)
+ * APR_EGENERAL    -General failure (specific information not available)
  * APR_EBADIP       The specified IP address is invalid
  * APR_EBADMASK     The specified netmask is invalid
  * </PRE>
@@ -247,6 +247,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ERELATIVE      (APR_OS_START_ERROR + 21)
 #define APR_EINCOMPLETE    (APR_OS_START_ERROR + 22)
 #define APR_EABOVEROOT     (APR_OS_START_ERROR + 23)
+#define APR_EBADPATH       (APR_OS_START_ERROR + 24)
 
 
 /* APR ERROR VALUE TESTS */
@@ -273,6 +274,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ERELATIVE(s)      ((s) == APR_ERELATIVE)
 #define APR_STATUS_IS_EINCOMPLETE(s)    ((s) == APR_EINCOMPLETE)
 #define APR_STATUS_IS_EABOVEROOT(s)     ((s) == APR_EABOVEROOT)
+#define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
 
 
 /* APR STATUS VALUES */
