@@ -150,6 +150,12 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
         fill_out_finfo(finfo, &info, wanted);
         if (wanted & APR_FINFO_LINK)
             wanted &= ~APR_FINFO_LINK;
+#ifdef NETWARE
+        if (wanted & APR_FINFO_NAME) {
+            finfo->name = apr_pstrdup(cont, info.st_name);
+            finfo->valid |= APR_FINFO_NAME;
+        }
+#endif
         return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
     }
     else {
