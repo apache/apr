@@ -57,6 +57,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_file_io.h"
+#include "apr_strings.h"
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -98,9 +99,8 @@ int main(void)
     }
     fprintf(stdout,"OK\n");
     
-    file1 = (char*) apr_palloc(context, sizeof(char) * PATH_LEN);
-    getcwd(file1, PATH_LEN);
-    strncat(file1,"/testmmap.c",11);  
+    apr_filepath_get(&file1, context);
+    file1 = apr_pstrcat(context,file1,"/testmmap.c",NULL);
 
     fprintf(stdout, "Opening file........................");
     rv = apr_file_open(&thefile, file1, flag, APR_UREAD | APR_GREAD, context);
