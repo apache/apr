@@ -345,3 +345,18 @@ APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 }
 
 
+
+ap_status_t ap_file_check_read(ap_file_t *fd)
+{
+    int rc;
+
+    if (!fd->pipe)
+        return APR_SUCCESS; /* Not a pipe, assume no waiting */
+
+    rc = DosWaitEventSem(fd->pipeSem, SEM_IMMEDIATE_RETURN);
+
+    if (rc == ERROR_TIMEOUT)
+        return APR_TIMEUP;
+
+    return APR_OS2_STATUS(rc);
+}
