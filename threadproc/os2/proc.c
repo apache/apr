@@ -491,6 +491,34 @@ ap_status_t ap_create_process(ap_proc_t *proc, const char *progname,
 
 
 
+ap_status_t ap_wait_all_procs(ap_proc_t *proc, ap_wait_t *status,
+                              ap_wait_how_e waithow, ap_pool_t *p)
+{
+    RESULTCODES codes;
+    ULONG rc;
+    PID pid;
+
+    if (!proc)
+        return APR_ENOPROC;
+
+    rc = DosWaitChild(DCWA_PROCESSTREE, wait == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, 0);
+
+    if (rc == 0) {
+        proc->pid = pid;
+
+        if (status)
+            *status = codes.codeResult;
+
+        return APR_CHILD_DONE;
+    } else if (rc == ERROR_CHILD_NOT_COMPLETE) {
+        return APR_CHILD_NOTDONE;
+    }
+
+    return APR_OS2_STATUS(rc);
+} 
+
+
+
 ap_status_t ap_wait_proc(ap_proc_t *proc,
                            ap_wait_how_e wait)
 {
