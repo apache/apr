@@ -9,8 +9,8 @@ ASCPP = @ASCPP@
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-apr_atomic_sparc.lo: apr_atomic_sparc.s
-	$(ASCPP) $(ASCPPFLAGS) $*.s > $*.S
+apr_atomic_sparc.lo: $(srcdir)/apr_atomic_sparc.s
+	$(ASCPP) $(ASCPPFLAGS) $(srcdir)/$*.s > $*.S
 	$(AS) $(ASFLAGS) -o $@ $*.S
 
 
