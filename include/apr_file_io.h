@@ -200,7 +200,7 @@ struct apr_finfo_t {
     apr_time_t ctime;
 };
 
-/** File lock types/flags */
+/* File lock types/flags */
 #define APR_FLOCK_SHARED        1       /* Shared lock. More than one process
                                            or thread can hold a shared lock
                                            at any given time. Essentially,
@@ -238,7 +238,7 @@ struct apr_finfo_t {
  * @param new_name The newly allocated canonicalized trusted+child name
  * @param trusted_name Already canonical parent path; may be NULL.
  * @param child_name An absolute path or path relative to trusted_name.
- * @param options Bit-wise of:
+ * @param options Bit-wise OR of:
  * <PRE>
  *   APR_CANON_ONLY_ABSOLUTE     Require the trusted_name+child_name result is 
  *                               an absolute product or fail with error for the 
