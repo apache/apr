@@ -166,6 +166,10 @@ SOURCE=.\locks\win32\locks.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\locks\win32\thread_cond.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\locks\win32\thread_mutex.c
 # End Source File
 # Begin Source File
