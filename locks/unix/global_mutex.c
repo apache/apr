@@ -64,19 +64,20 @@ static apr_status_t global_mutex_cleanup(void *data)
     apr_global_mutex_t *m = (apr_global_mutex_t *)data;
     apr_status_t rv;
 
+    rv = apr_proc_mutex_destroy(m->proc_mutex);
+
 #if APR_HAS_THREADS
     if (m->thread_mutex) {
-        rv = apr_thread_mutex_destroy(m->thread_mutex);
         if (rv != APR_SUCCESS) {
-            return rv;
+            (void)apr_thread_mutex_destroy(m->thread_mutex);
+        }
+        else {
+            rv = apr_thread_mutex_destroy(m->thread_mutex);
         }
     }
 #endif /* APR_HAS_THREADS */
-    rv = apr_proc_mutex_destroy(m->proc_mutex);
-    if (rv != APR_SUCCESS) {
-       return rv;
-    }
-    return APR_SUCCESS;
+
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_create(apr_global_mutex_t **mutex,
@@ -103,6 +104,7 @@ APR_DECLARE(apr_status_t) apr_global_mutex_create(apr_global_mutex_t **mutex,
         rv = apr_thread_mutex_create(&m->thread_mutex,
                                      APR_THREAD_MUTEX_DEFAULT, m->pool);
         if (rv != APR_SUCCESS) {
+            rv = apr_proc_mutex_destroy(m->proc_mutex);
             return rv;
         }
     }
@@ -134,11 +136,18 @@ APR_DECLARE(apr_status_t) apr_global_mutex_lock(apr_global_mutex_t *mutex)
         }
     }
 #endif /* APR_HAS_THREADS */
+
     rv = apr_proc_mutex_lock(mutex->proc_mutex);
+
+#if APR_HAS_THREADS
     if (rv != APR_SUCCESS) {
-        return rv;
+        if (mutex->thread_mutex) {
+            (void)apr_thread_mutex_unlock(mutex->thread_mutex);
+        }
     }
-    return APR_SUCCESS;
+#endif /* APR_HAS_THREADS */
+
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex)
@@ -153,11 +162,18 @@ APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex)
         }
     }
 #endif /* APR_HAS_THREADS */
+
     rv = apr_proc_mutex_trylock(mutex->proc_mutex);
+
+#if APR_HAS_THREADS
     if (rv != APR_SUCCESS) {
-        return rv;
+        if (mutex->thread_mutex) {
+            (void)apr_thread_mutex_unlock(mutex->thread_mutex);
+        }
     }
-    return APR_SUCCESS;
+#endif /* APR_HAS_THREADS */
+
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex)
@@ -165,18 +181,17 @@ APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex)
     apr_status_t rv;
 
     rv = apr_proc_mutex_unlock(mutex->proc_mutex);
-    if (rv != APR_SUCCESS) {
-        return rv;
-    }
 #if APR_HAS_THREADS
     if (mutex->thread_mutex) {
-        rv = apr_thread_mutex_unlock(mutex->thread_mutex);
         if (rv != APR_SUCCESS) {
-            return rv;
+            (void)apr_thread_mutex_unlock(mutex->thread_mutex);
+        }
+        else {
+            rv = apr_thread_mutex_unlock(mutex->thread_mutex);
         }
     }
 #endif /* APR_HAS_THREADS */
-    return APR_SUCCESS;
+    return rv;
 }
 
 APR_DECLARE(apr_status_t) apr_os_global_mutex_get(apr_os_global_mutex_t *ospmutex,
