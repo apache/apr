@@ -108,9 +108,17 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         sock->timeout = on; 
     } 
     if (opt & APR_TCP_NODELAY) {
-        if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
-            return errno;
-        }
+        /* BeOS pre-BONE has TCP_NODELAY set to ON by default.
+         * This is a hang over from a long time ago and until BONE there
+         * is no way to turn it off.  Use this information as follows...
+         *
+         * on == 0 - return APR_ENOTIMPL
+         * on == 1 - allow it to return APR_SUCCESS
+         *
+         * based on information from Howard Berkey (howard@be.com)
+         */
+        if (! on)
+            return APR_ENOTIMPL;
     }
     return APR_SUCCESS;
 }         
