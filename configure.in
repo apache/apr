@@ -187,8 +187,8 @@ AC_CHECK_LIB(ufc,crypt)
 AC_CHECK_LIB(truerand,main)
 
 dnl #----------------------------- Checks for Any required Functions
-dnl Checks for library functions.
-AC_CHECK_FUNCS(strcasecmp stricmp poll setsid)
+dnl Checks for library functions. (N.B. poll is further down)
+AC_CHECK_FUNCS(strcasecmp stricmp setsid)
 AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ]) 
 AC_CHECK_FUNCS(writev)
 AC_CHECK_FUNCS(sendfile, [ sendfile="1" ], [ sendfile="0" ])
@@ -466,6 +466,11 @@ else
 fi
 
 AC_SUBST(threads)
+
+dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
+dnl threaded poll()
+
+AC_CHECK_FUNCS(poll)
 
 dnl #----------------------------- Checking for Processes
 echo $ac_n "${nl}Checking for Processes...${nl}"
