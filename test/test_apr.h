@@ -110,6 +110,20 @@ CuSuite *testtime(void);
     printf("%s\n", good); \
     }
 
+#define TEST_NEQ_NONFATAL(str, func, value, good, bad) \
+    printf("%-60s", str); \
+    { \
+    apr_status_t rv; \
+    if ((rv = func) != value){ \
+        char errmsg[200]; \
+        printf("%s\n", bad); \
+        fprintf(stderr, "Error was %d : %s\n", rv, \
+                apr_strerror(rv, (char*)&errmsg, 200)); \
+    } \
+    else \
+        printf("%s\n", good); \
+    }
+
 #define TEST_STATUS(str, func, testmacro, good, bad) \
     printf("%-60s", str); \
     { \
@@ -126,6 +140,9 @@ CuSuite *testtime(void);
 
 #define STD_TEST_NEQ(str, func) \
 	TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
+
+#define STD_TEST_NEQ_NONFATAL(str, func) \
+        TEST_NEQ_NONFATAL(str, func, APR_SUCCESS, "OK", "Failed");
 
 #define PRINT_ERROR(rv) \
     { \
