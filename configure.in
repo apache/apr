@@ -861,15 +861,14 @@ AC_SUBST(sharedmem)
 
 dnl ----------------------------- Checks for Any required Functions
 dnl Checks for library functions. (N.B. poll is further down)
-AC_CHECK_FUNCS(alloca calloc setsid isinf isnan)
-AC_CHECK_FUNCS(getenv putenv setenv unsetenv)
+AC_CHECK_FUNCS([alloca calloc setsid isinf isnan \
+                getenv putenv setenv unsetenv \
+                writev getifaddrs utime utimes])
 AC_CHECK_FUNCS(setrlimit, [ have_setrlimit="1" ], [ have_setrlimit="0" ]) 
 AC_CHECK_FUNCS(getrlimit, [ have_getrlimit="1" ], [ have_getrlimit="0" ]) 
-AC_CHECK_FUNCS(writev)
 sendfile="0"
 AC_CHECK_LIB(sendfile, sendfilev)
 AC_CHECK_FUNCS(sendfile send_file sendfilev, [ sendfile="1" ])
-AC_CHECK_FUNCS(utime utimes)
 
 dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
 dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
@@ -1897,9 +1896,6 @@ AC_SUBST(acceptfilter)
 AC_SUBST(have_sctp)
 
 AC_CHECK_FUNCS(set_h_errno)
-
-dnl Used in the Multicast Code
-AC_CHECK_FUNCS(getifaddrs)
 
 echo "${nl}Checking for IPv6 Networking support..."
 dnl Start of checking for IPv6 support...
