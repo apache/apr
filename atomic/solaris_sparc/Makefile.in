@@ -1,7 +1,7 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-TARGETS =  @apr_atomic_sparc_compile@
+TARGETS =  @apr_atomic_sparc_compile@ apr_atomic_sparc_no_support.lo
 
 ASFLAGS += @ASFLAGS@
 ASCPPFLAGS = @ASCPPFLAGS@
