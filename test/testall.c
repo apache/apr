@@ -59,11 +59,12 @@
 
 #define NUM_TESTS 255
 
+/* Top-level pool which can be used by tests. */
 apr_pool_t *p;
 
 typedef CuSuite *(testfunc)(void);
 
-testfunc *tests[NUM_TESTS] = {
+static testfunc *tests[NUM_TESTS] = {
     teststr,
     testtime,
     testvsn,
