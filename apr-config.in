@@ -279,9 +279,9 @@ while test $# -gt 0; do
     ;;
     --apr-libtool)
     if test "$location" = "installed"; then
-        echo "${SHELL} ${installbuilddir}/libtool"
+        echo "${installbuilddir}/libtool"
     else
-        echo "${SHELL} $thisdir/libtool"
+        echo "$thisdir/libtool"
     fi
     exit 0
     ;;
