@@ -314,7 +314,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * @warning For any particular error condition, more than one of these tests
  *      may match. This is because platform-specific error codes may not
  *      always match the semantics of the POSIX codes these tests (and the
- *      correcponding APR error codes) are named after. A notable example
+ *      corresponding APR error codes) are named after. A notable example
  *      are the APR_STATUS_IS_ENOENT and APR_STATUS_IS_ENOTDIR tests on
  *      Win32 platforms. The programmer should always be aware of this and
  *      adjust the order of the tests accordingly.
