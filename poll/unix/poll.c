@@ -106,17 +106,29 @@ static apr_int16_t get_revent(apr_int16_t event)
     return rv;
 }        
 
+#define SMALL_POLLSET_LIMIT  8
+
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
                       apr_int32_t *nsds, apr_interval_time_t timeout)
 {
-    /* obvious optimization, it would be better if this could be allocated
-     * on the stack.  For a single file/socket, this can be otpimized
-     * very cleanly.
-     */
-    struct pollfd *pollset = apr_palloc(aprset->p,
-                                        sizeof(struct pollfd) * num);
+    struct pollfd tmp_pollset[SMALL_POLLSET_LIMIT];
+    struct pollfd *pollset;
     int i;
 
+    if (num <= SMALL_POLLSET_LIMIT) {
+        pollset = tmp_pollset;
+    }
+    else {
+        /* XXX There are two problems with this code: it leaks
+         * memory, and it requires an O(n)-time loop to copy
+         * n descriptors from the apr_pollfd_t structs into
+         * the pollfd structs.  At the moment, it's best suited
+         * for use with fewer than SMALL_POLLSET_LIMIT
+         * descriptors.
+         */
+        pollset = apr_palloc(aprset->p,
+                             sizeof(struct pollfd) * num);
+    }
     for (i = 0; i < num; i++) {
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             pollset[i].fd = aprset[i].desc.s->socketdes;
