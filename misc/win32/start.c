@@ -200,7 +200,7 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     }
 
     /* Initialize apr_os_level global */
-    if (apr_get_oslevel(NULL, &osver) != APR_SUCCESS) {
+    if (apr_get_oslevel(&osver) != APR_SUCCESS) {
         return APR_EEXIST;
     }
     
