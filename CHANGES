@@ -1,4 +1,9 @@
 Changes with APR b1  
+
+  *) Add an apr_thread_once function to APR.  This allows a
+     program to ensure that a function is only called once.
+     [Ryan Bloom]
+
   *) APR Documentation is now in Doxygen format.
      [Ian Holsman]
 

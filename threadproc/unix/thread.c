@@ -255,6 +255,19 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t 
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
+                                               apr_pool_t *p)
+{
+    (*control)->once = PTHREAD_ONCE_INIT;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control, 
+                                          void (*func)(void))
+{
+    return pthread_once(&control->once, func);
+}
+
 APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
 
 #endif  /* HAVE_PTHREAD_H */

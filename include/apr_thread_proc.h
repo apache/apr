@@ -129,6 +129,7 @@ struct apr_proc_t {
 typedef struct apr_thread_t           apr_thread_t;
 typedef struct apr_threadattr_t       apr_threadattr_t;
 typedef struct apr_procattr_t         apr_procattr_t;
+typedef struct apr_thread_once_t      apr_thread_once_t;
 
 typedef struct apr_threadkey_t        apr_threadkey_t;
 #if APR_HAS_OTHER_CHILD
@@ -223,6 +224,27 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
  * force the current thread to yield the processor
  */
 APR_DECLARE(void) apr_thread_yield(void);
+
+/**
+ * Initialize the control variable for apr_thread_once.  If this isn't
+ * called, apr_initialize won't work.
+ * @param control The control variable to initialize
+ * @param p The pool to allocate data from.
+ */
+APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
+                                               apr_pool_t *p);
+
+/**
+ * Run the specified function one time, regardless of how many threads
+ * call it.
+ * @param control The control variable.  The same variable should
+ *                be passed in each time the function is tried to be
+ *                called.  This is how the underlying functions determine
+ *                if the function has ever been called before.
+ * @param func The function to call.
+ */
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
+                                          void (*func)(void));
 
 /**
  * detach a thread
