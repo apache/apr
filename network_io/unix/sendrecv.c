@@ -65,7 +65,7 @@
 #define READ(x,y,z)   read(x,y,z)
 #endif
 
-#ifdef HAVE_SENDFILE
+#if defined(HAVE_SENDFILE) || defined(HAVE_SEND_FILE)
 /* This file is needed to allow us access to the ap_file_t internals. */
 #include "../../file_io/unix/fileio.h"
 
@@ -76,7 +76,7 @@
 #define TCP_CORK 3
 #endif
 
-#endif /* HAVE_SENDFILE */
+#endif /* HAVE_SENDFILE || HAVE_SEND_FILE */
 
 static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
 {
@@ -204,7 +204,7 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
 }
 #endif
 
-#if defined(HAVE_SENDFILE)
+#if defined(HAVE_SENDFILE) || defined(HAVE_SEND_FILE)
 
  /* TODO: Verify that all platforms handle the fd the same way 
   *     (i.e. not moving current file pointer)
@@ -451,8 +451,108 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     (*len) = rv;
     return APR_SUCCESS;
 }
-#else
-/* TODO: Add AIX support */
-#endif /* __linux__, __FreeBSD__, __HPUX__ */
-#endif /* HAVE_SENDFILE */
+#elif defined(_AIX)
+/* Need another check to make sure the dependencies are checked */
+/* AIX, version 4.3.2 with APAR IX85388, or version 4.3.3 and above */
+ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
+                        ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
+                        ap_int32_t flags)
+{
+    int i, ptr, rv = 0;
+    void * hbuf=NULL, * tbuf=NULL;
+    ap_status_t arv;
+    struct sf_parms parms;
 
+    /* AIX can also send the headers/footers as part of the system call
+       ... badly.*/
+    parms.header_length = 0;
+    if (hdtr && hdtr->numheaders) {
+        if (hdtr->numheaders == 1) {
+            parms.header_data = hdtr->headers[0].iov_base;
+            parms.header_length = hdtr->headers[0].iov_len;
+        }
+        else {
+            for (i = 0; i < hdtr->numheaders; i++) {
+                parms.header_length += hdtr->headers[i].iov_len;
+            }
+            /* Keepalives make ap_palloc a bad idea */
+            hbuf = malloc(parms.header_length);
+            ptr = 0;
+            for (i = 0; i < hdtr->numheaders; i++) {
+                memcpy(hbuf + ptr, hdtr->headers[i].iov_base,
+                       hdtr->headers[i].iov_len);
+                ptr += hdtr->headers[i].iov_len;
+            }
+            parms.header_data = hbuf;
+        }
+    }
+    else parms.header_data = NULL;
+    parms.trailer_length = 0;
+    if (hdtr && hdtr->numtrailers) {
+        if (hdtr->numtrailers == 1) {
+            parms.trailer_data = hdtr->trailers[0].iov_base;
+            parms.trailer_length = hdtr->trailers[0].iov_len;
+        }
+        else {
+            for (i = 0; i < hdtr->numtrailers; i++) {
+                parms.trailer_length += hdtr->trailers[i].iov_len;
+            }
+            /* Keepalives make ap_palloc a bad idea */
+            tbuf = malloc(parms.trailer_length);
+            ptr = 0;
+            for (i = 0; i < hdtr->numtrailers; i++) {
+                memcpy(tbuf + ptr, hdtr->trailers[i].iov_base,
+                       hdtr->trailers[i].iov_len);
+                ptr += hdtr->trailers[i].iov_len;
+            }
+            parms.trailer_data = tbuf;
+        }
+    }
+    else parms.trailer_data = NULL;
+
+    /* Whew! Headers and trailers set up. Now for the file data */
+
+    parms.file_descriptor = file->filedes;
+    parms.file_offset = *offset;
+    parms.file_bytes = *len;
+
+    /* O.K. All set up now. Let's go to town */
+
+    do {
+        rv = send_file(&(sock->socketdes), /* socket */
+                       &(parms),           /* all data */
+                       flags               /* flags */
+            );
+    } while (rv == -1 && errno == EINTR);
+
+    if (rv == -1 &&
+        (errno == EAGAIN || errno == EWOULDBLOCK) &&
+        sock->timeout != 0) {
+        arv = wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
+        else {
+            do {
+                rv = send_file(&(sock->socketdes), /* socket */
+                               &(parms),           /* all data */
+                               flags               /* flags */
+                    );
+            } while (rv == -1 && errno == EINTR);
+        }
+    }
+
+    (*len) = parms.bytes_sent;
+
+    /* Clean up after ourselves */
+    if(hbuf) free(hbuf);
+    if(tbuf) free(tbuf);
+
+    if (rv == -1) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+#endif /* __linux__, __FreeBSD__, __HPUX__, _AIX */
+#endif /* HAVE_SENDFILE */
