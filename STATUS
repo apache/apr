@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/29 16:10:14 $]
+Last modified at [$Date: 2002/02/04 19:15:20 $]
 
 Release:
 
@@ -32,12 +32,15 @@ RELEASE SHOWSTOPPERS:
       since apr_proc_create didn't allocate the apr_proc_t storage.
       (Aren't transparent types swell?)  Suggestions?
 
+    * The new lock API is a full replacement for the old API. Before
+      we do a major APR release, we must deprecate the old locks API,
+      lest we support 2 lock APIs in perpetuity.
+
+RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
     * The new lock API is a full replacement for the old API, but is
       not yet complete on all platforms. Components that are incomplete
       or missing include:
-      Beos: apr_thread_cond_*()
-            Initial code committed. Aaron has some concerns, David agrees
-            and will find time to address the issues.
       Netware: apr_proc_mutex_*() (Is proc_mutex unnecessary on Netware?)
       OS/2: apr_thread_cond_*(), apr_proc_mutex_*()
 
@@ -47,8 +50,6 @@ RELEASE SHOWSTOPPERS:
       Unix: apr_thread_rwlock_*() for platforms w/o rwlocks in pthread
       Win32: apr_thread_rwlock_try*lock(), apr_thread_cond_timedwait(),
              apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
-
-RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Need to contemplate apr_strftime... platforms vary.  OtherBill
       suggested this solution (but has no time to implement):
