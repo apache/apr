@@ -47,7 +47,7 @@ testoc@EXEEXT@: testoc.lo
 	$(LINK) testoc.lo $(ALL_LIBS)
 
 occhild@EXEEXT@: occhild.lo
-	$(LINK) --module occhild.lo
+	$(LINK) occhild.lo $(ALL_LIBS)
 
 mod_test.so: mod_test.lo
 	$(LINK) --module mod_test.lo
