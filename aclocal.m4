@@ -306,7 +306,7 @@ fi
 AC_DEFUN(APR_OUTPUT_VARS,[
 dnl #----------------------------- output environment variables to a file to
 dnl #----------------------------- be used by calling program.
-    rm APRVARS
+    rm -f APRVARS
     echo "LIBS=\"$LIBS\"" >> APRVARS
 ])
 
