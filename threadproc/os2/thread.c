@@ -52,13 +52,14 @@
  * <http://www.apache.org/>.
  */
 
+#define INCL_DOSERRORS
+#define INCL_DOS
 #include "threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "fileio.h"
 #include <stdlib.h>
-#define INCL_DOS
 #include <os2.h>
 
 ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
@@ -160,9 +161,13 @@ ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
     TID waittid = thd->tid;
 
     if (thd->attr->attr & APR_THREADATTR_DETACHED)
-        return APR_ENOSTAT;
+        return APR_EINVAL;
 
     rc = DosWaitThread(&waittid, DCWW_WAIT);
+
+    if (rc == ERROR_INVALID_THREADID)
+        rc = 0; /* Thread had already terminated */
+
     *retval = (ap_status_t)thd->rv;
     return APR_OS2_STATUS(rc);
 }
