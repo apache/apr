@@ -62,13 +62,15 @@
 #include <unistd.h>
 #endif
 
+#define STR_SIZE 45
+
 int main(void)
 {
     apr_time_t now;
     apr_exploded_time_t xt;
     apr_time_t imp;
     apr_pool_t *p;
-    char *str;
+    char *str, *str2;
     apr_size_t sz;
     apr_interval_time_t hr_off = 5 * 3600; /* 5 hours in seconds */
 
@@ -111,22 +113,37 @@ int main(void)
 	exit(-1);
     }
     fprintf(stdout, "OK\n");
+    str = apr_pcalloc(p, sizeof(char) * STR_SIZE);
+    str2 = apr_pcalloc(p, sizeof(char) * STR_SIZE);
+
+    printf("\tapr_rfc822_date.(GMT)...........");
+    if (apr_rfc822_date(str, now) != APR_SUCCESS){
+        printf("Failed!\n");
+        exit (-1);
+    }
+    printf("%s\n", str);
+
+    printf("\tapr_ctime.......(local).........");
+    if (apr_ctime(str, now) != APR_SUCCESS){
+        printf("Failed!\n");
+        exit(-1);
+    }
+    printf("%s\n", str);
 
     printf("\tapr_strftime....................");
-    str = (char*) apr_pcalloc(p, sizeof(char) * 30);
     if (str == NULL){
         printf("Couldn't allocate memory.\n");
         exit (-1);
     } 
-    if (apr_strftime(str, &sz, 30, "%R %A %d %B %Y", &xt) !=
+    if (apr_strftime(str, &sz, STR_SIZE, "%R %A %d %B %Y", &xt) !=
          APR_SUCCESS){
         printf("Failed!");
         exit (-1); 
     }
     printf("%s\n", str);
 
-    printf("\tTime Zone (???)...........................");
-    if (apr_strftime(str, &sz, 30, "%R %Z", &xt) != APR_SUCCESS){
+    printf("\tCurrent time (GMT).......................");
+    if (apr_strftime(str, &sz, STR_SIZE, "%T %Z", &xt) != APR_SUCCESS){
         printf("Failed!\n");
         exit (-1);
     }
@@ -134,11 +151,21 @@ int main(void)
 
     xt.tm_gmtoff = hr_off; /* 5 hour offset */
     printf("\tOffset Time Zone -5 hours.................");
-    if (apr_strftime(str, &sz, 30, "%R %Z", &xt) != APR_SUCCESS){
+    if (apr_strftime(str2, &sz, STR_SIZE, "%T %Z", &xt) != APR_SUCCESS){
         printf("Failed!\n");
         exit(-1);
     }
-    printf("%s\n", str);
+    printf("%s\n", str2);
+
+    /* We just check and report, but this isn't a hanging offense
+       as it currently doesn't work
+     */
+    printf("\tComparing the created times...............");
+    if (! strcmp(str,str2)){
+        printf("Failed\n");
+    } else {
+        printf("OK\n");
+    }
 
     printf("\tChecking imploded time after offset.......");
     apr_implode_time(&imp, &xt);
