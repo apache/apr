@@ -260,6 +260,11 @@ EXPORTS
 	apr_parse_uuid
 	apr_get_uuid
 
+; apr_mmap.h
+        apr_mmap_create
+        apr_mmap_delete
+        apr_mmap_offset
+
 ; Moved out of the way for Bill Stoddard's reorg
 ;
 ; apr_getopt.h
