@@ -122,15 +122,6 @@ static void read_write_notimeout(CuTest *tc)
     CuAssertStrEquals(tc, "this is a test", input);
 }
 
-/* XXX FIXME */
-#ifdef WIN32
-#define EXTENSION ".exe"
-#elif NETWARE
-#define EXTENSION ".nlm"
-#else
-#define EXTENSION
-#endif
-
 static void test_pipe_writefull(CuTest *tc)
 {
     int iterations = 1000;
