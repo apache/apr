@@ -36,6 +36,11 @@ echo "Platform: $host"
 dnl # Some initial steps for configuration.  We setup the default directory
 dnl # and which files are to be configured.
 
+dnl Set optional CC hints here in case autoconf make an inappropriate choice.
+dnl This allows us to suggest what the compiler should be, but still
+dnl allows the user to override CC externally.
+APR_CC_HINTS
+
 dnl Do the various CC checks *before* preloading values. The preload code
 dnl may need to use compiler characteristics to make decisions. This macro
 dnl can only be used once within a configure script, so this prevents a
