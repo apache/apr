@@ -62,7 +62,7 @@
 
 #define APR_TEST_BEGIN(rv, desc, op) \
     fprintf(stdout, "%s%.*s ", APR_TEST_PREFIX desc,                  \
-            strlen(desc) < 37 ? 40 - strlen(desc) : 3,                \
+            strlen(desc) < 37 ? (int)(40 - strlen(desc)) : 3,         \
             "........................................");              \
     APR_TEST_MORE(rv, op)
 
