@@ -19,7 +19,6 @@ TARGETS= testfile@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testthread@EXEEXT@ \
 	testtime@EXEEXT@ \
-	testsig@EXEEXT@ \
 	testargs@EXEEXT@ \
 	testcontext@EXEEXT@ \
 	ab@EXEEXT@ \
@@ -31,7 +30,6 @@ OBJS= testfile.o \
 	testsock.o \
 	testthread.o \
 	testtime.o \
-	testsig.o \
         testargs.o \
         testcontext.o \
 	ab_apr.o \
@@ -71,9 +69,6 @@ testsock@EXEEXT@: testsock.o client.o server.o
 
 testtime@EXEEXT@: testtime.o
 	$(CC) $(CFLAGS) testtime.o -o testtime@EXEEXT@ $(LDFLAGS)
-
-testsig@EXEEXT@: testsig.o
-	$(CC) $(CFLAGS) testsig.o -o testsig@EXEEXT@ $(LDFLAGS) 
 
 testmmap@EXEEXT@: testmmap.o
 	$(CC) $(CFLAGS) testmmap.o -o testmmap@EXEEXT@ $(LDFLAGS)
@@ -131,10 +126,6 @@ testproc.o: testproc.c $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_win.h \
  $(INCDIR)/apr_lib.h 
-testsig.o: testsig.c $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_win.h \
- $(INCDIR)/apr_lib.h
 testsock.o: testsock.c $(INCDIR)/apr_thread_proc.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr_config.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_win.h \
