@@ -272,6 +272,10 @@ SOURCE=.\network_io\unix\inet_ntop.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\network_io\unix\inet_pton.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\arch\win32\networkio.h
 # End Source File
 # Begin Source File
