@@ -527,6 +527,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *
 
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
+                                        apr_wait_t *exitcode,
                                         apr_wait_how_e wait)
 {
     RESULTCODES codes;
@@ -538,6 +539,8 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
 
     rc = DosWaitChild(DCWA_PROCESS, wait == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, proc->pid);
 
+    if (exitcode)
+        *exitcode = codes.codeResult;
     if (rc == 0) {
         return APR_CHILD_DONE;
     } else if (rc == ERROR_CHILD_NOT_COMPLETE) {
