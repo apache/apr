@@ -177,7 +177,8 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap);
  * @return The new string
  * @deffunc char *apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  */
-APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...);
+APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
+        __attribute__((format(printf,2,3)));
 
 /**
  * copy n characters from src to des>
