@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/04/26 17:28:20 $]
+Last modified at [$Date: 2002/05/01 00:29:16 $]
 
 Release:
 
@@ -63,6 +63,11 @@ CURRENT VOTES:
       goals of APR, and I hereby propose that we remove it from APR.
 
       +1: Aaron
+      -0: Justin (I think it's warranted and fits with our portability
+                  goals, but I'm not going to spend my time supporting it -
+                  although I have spent more time on this than I'd like.
+                  If someone wants to maintain it, more power to them.  If
+                  no one maintains it, this gets changed to a +1.)
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
