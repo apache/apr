@@ -169,6 +169,11 @@ APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock)
     return apr_get_os_error();
 }
 
+APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock)
+{
+    return APR_ENOTIMPL;
+}
+
 APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock,
                                               apr_readerwriter_e e)
 {

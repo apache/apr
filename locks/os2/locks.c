@@ -157,6 +157,11 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     return APR_OS2_STATUS(rc);
 }
 
+apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
+{
+    return APR_ENOTIMPL;
+}
+
 apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
 {
     switch (lock->type) {

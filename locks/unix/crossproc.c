@@ -158,6 +158,7 @@ const apr_unix_lock_methods_t apr_unix_sysv_methods =
 #endif
     sysv_create,
     sysv_acquire,
+    NULL, /* no tryacquire */
     NULL, /* no rw lock */
     NULL, /* no rw lock */
     sysv_release,
@@ -324,6 +325,7 @@ const apr_unix_lock_methods_t apr_unix_proc_pthread_methods =
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
     proc_pthread_create,
     proc_pthread_acquire,
+    NULL, /* no tryacquire */
     NULL, /* no rw lock */
     NULL, /* no rw lock */
     proc_pthread_release,
@@ -440,6 +442,7 @@ const apr_unix_lock_methods_t apr_unix_fcntl_methods =
 #endif
     fcntl_create,
     fcntl_acquire,
+    NULL, /* no tryacquire */
     NULL, /* no rw lock */
     NULL, /* no rw lock */
     fcntl_release,
@@ -555,6 +558,7 @@ const apr_unix_lock_methods_t apr_unix_flock_methods =
 #endif
     flock_create,
     flock_acquire,
+    NULL, /* no tryacquire */
     NULL, /* no rw lock */
     NULL, /* no rw lock */
     flock_release,

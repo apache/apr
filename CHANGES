@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Added apr_lock_tryacquire.  It will attempt to acquire the lock, but 
+     will not block if it can not acquire the lock.  Returns APR_EBUSY if 
+     acquistion can not happen.  [Justin Erenkrantz]
+
   *) Added an inherit flag to apr_socket_create and other socket creation
      functions.  This allows APR programs to specify that a socket should
      be passed to any child processes that are created.  The inherit flag

@@ -211,6 +211,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_ERELATIVE      The given path was relative.
  * APR_EINCOMPLETE    The given path was neither relative nor absolute.
  * APR_EABOVEROOT     The given path was above the root path.
+ * APR_EBUSY          The given lock was busy.
  * </PRE>
  * 
  * @param status The APR_status code to check.
@@ -298,6 +299,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EINIT          (APR_OS_START_STATUS + 22)  
 #define APR_ENOTIMPL       (APR_OS_START_STATUS + 23)
 #define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
+#define APR_EBUSY          (APR_OS_START_STATUS + 25)
 
 /* APR STATUS VALUE TESTS */
 #define APR_STATUS_IS_INCHILD(s)        ((s) == APR_INCHILD)
@@ -324,6 +326,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EINIT(s)          ((s) == APR_EINIT)
 #define APR_STATUS_IS_ENOTIMPL(s)       ((s) == APR_ENOTIMPL)
 #define APR_STATUS_IS_EMISMATCH(s)      ((s) == APR_EMISMATCH)
+#define APR_STATUS_IS_EBUSY(s)          ((s) == APR_EBUSY)
 
 /* APR CANONICAL ERROR VALUES */
 #ifdef EACCES
