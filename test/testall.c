@@ -70,6 +70,7 @@ testfunc *tests[NUM_TESTS] = {
     testipsub,
     testmmap,
     testud,
+    testtable,
     NULL
 };
 
