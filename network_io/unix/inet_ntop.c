@@ -99,7 +99,7 @@ apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size)
 static const char *
 inet_ntop4(const unsigned char *src, char *dst, apr_size_t size)
 {
-	const int MIN_SIZE = 16; /* space for 255.255.255.255\0 */
+	const apr_size_t MIN_SIZE = 16; /* space for 255.255.255.255\0 */
 	int n = 0;
 	char *next = dst;
 
