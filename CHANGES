@@ -1,5 +1,10 @@
 Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
+  *) Makes the threads to behave like on posix. If the thread is created
+     without APR_DETACH expect that the thread_join will be called, so don't
+     close the handle in advance, if the thread has already finished.
+     [Mladen Turk]
+
   *) The apr/test/Makefile.win is missing a target to build a
      readchild.exe that test is depending on but is never built.
      [Mladen Turk]
