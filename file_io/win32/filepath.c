@@ -952,9 +952,16 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             if (rv != APR_SUCCESS) {
                 if (APR_STATUS_IS_ENOENT(rv))
                     break;
+                if (APR_STATUS_IS_EPATHWILD(rv))
+                    /* This path included wildcards.  The path elements
+                     * that did not contain wildcards are canonicalized,
+                     * so we will return the path, although later elements
+                     * don't necessarily exist, and aren't canonical.
+                     */
+                    break;
                 else if (APR_STATUS_IS_ENOTDIR(rv))
                     /* This is a little more serious, we just added a name
-                     * onto a filename (think http's CGI MORE_INFO)
+                     * onto a filename (think http's PATH_INFO)
                      * If the caller is foolish enough to do this, we expect
                      * the've already canonicalized the root) that they knew
                      * what they are doing :(
