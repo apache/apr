@@ -114,7 +114,7 @@ ap_status_t ap_close_socket(ap_socket_t *);
 
 ap_status_t ap_bind(ap_socket_t *);
 ap_status_t ap_listen(ap_socket_t *, ap_int32_t);
-ap_status_t ap_accept(ap_socket_t **, const ap_socket_t *);
+ap_status_t ap_accept(ap_socket_t **, const ap_socket_t *, ap_context_t *);
 ap_status_t ap_connect(ap_socket_t *, char *);
 
 ap_status_t ap_get_remote_hostname(char **, ap_socket_t *);

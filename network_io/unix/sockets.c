@@ -187,19 +187,20 @@ ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_accept(ap_socket_t **, ap_socket_t *)
+ * ap_status_t ap_accept(ap_socket_t **, ap_socket_t *, ap_context_t *connection_context)
  *    Accept a new connection request
- * arg 1) The socket we are listening on 
- * arg 2) A copy of the socket that is connected to the socket that
+ * arg 1) A copy of the socket that is connected to the socket that
  *        made the connection request.  This is the socket which should
  *        be used for all future communication.
+ * arg 2) The socket we are listening on.
+ * arg 3) The context for the new socket.
  */
-ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
+ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct context_t *connection_context)
 {
-    (*new) = (struct socket_t *)ap_palloc(sock->cntxt, 
+    (*new) = (struct socket_t *)ap_palloc(connection_context, 
                             sizeof(struct socket_t));
 
-    (*new)->cntxt = sock->cntxt;
+    (*new)->cntxt = connection_context;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
