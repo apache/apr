@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/01/23 04:07:21 $]
+Last modified at [$Date: 2003/01/23 16:46:36 $]
 
 Release:
 
@@ -119,6 +119,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       not yet complete on all platforms. Components that are incomplete
       or missing include:
       Netware: apr_proc_mutex_*() (Is proc_mutex unnecessary on Netware?)
+		* proc_mutex is not necessary on NetWare since the OS does
+		  not support processes.  The proc_mutex APIs actually
+		  redirect to the thread_mutex APIs. (bnicholes)
       OS/2: apr_thread_cond_*(), apr_proc_mutex_*()
 
       Less critical components that we may wish to add at some point:
