@@ -74,12 +74,17 @@ AC_ARG_WITH(maintainer-mode,[  --with-maintainer-mode  Turn on debugging and com
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
 case "$OS:$CC" in
-    *-hp-hpux*:cc ) CFLAGS="$CFLAGS -Ae +DAportable" ;;
+    *-hp-hpux*:cc )
+	CFLAGS="$CFLAGS -Ae +DAportable"
+	;;
     powerpc-*-beos:mwcc* )
         CPP="mwcc -E"
         CC="mwcc"
         AR="ar"
         ;;
+    mips-sni-sysv4:cc )
+	CFLAGS="$CFLAGS -Kthread"
+	;;
 esac
 
 case "$OS" in
