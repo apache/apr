@@ -73,8 +73,8 @@ LIBTOOL=@LIBTOOL@
 # compilation and linking flags that are supposed to be set only by the user.
 # configure adds to them for tests, but we restore them at the end.
 #
-CPPFLAGS=@CPPFLAGS@
 CFLAGS=@CFLAGS@
+CPPFLAGS=@CPPFLAGS@
 LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 DEFS=@DEFS@
@@ -82,8 +82,8 @@ DEFS=@DEFS@
 # anything added to the standard flags by configure is moved to EXTRA_*
 # at the end of the process.
 #
-EXTRA_CPPFLAGS=@EXTRA_CPPFLAGS@
 EXTRA_CFLAGS=@EXTRA_CFLAGS@
+EXTRA_CPPFLAGS=@EXTRA_CPPFLAGS@
 EXTRA_LDFLAGS=@EXTRA_LDFLAGS@
 EXTRA_LIBS=@EXTRA_LIBS@
 EXTRA_INCLUDES=@EXTRA_INCLUDES@
@@ -92,8 +92,8 @@ EXTRA_INCLUDES=@EXTRA_INCLUDES@
 # causing them to be used in configure tests (necessary for things like
 # -Werror and other strict warnings that maintainers like to use).
 #
-NOTEST_CPPFLAGS=@NOTEST_CPPFLAGS@
 NOTEST_CFLAGS=@NOTEST_CFLAGS@
+NOTEST_CPPFLAGS=@NOTEST_CPPFLAGS@
 NOTEST_LDFLAGS=@NOTEST_LDFLAGS@
 NOTEST_LIBS=@NOTEST_LIBS@
 
@@ -102,8 +102,8 @@ NOTEST_LIBS=@NOTEST_LIBS@
 # Note that includes are listed after the flags because -I options have
 # left-to-right precedence and CPPFLAGS may include user-defined overrides.
 #
-ALL_CPPFLAGS = $(DEFS) $(EXTRA_CPPFLAGS) $(NOTEST_CPPFLAGS) $(CPPFLAGS)
 ALL_CFLAGS   = $(EXTRA_CFLAGS) $(NOTEST_CFLAGS) $(CFLAGS)
+ALL_CPPFLAGS = $(DEFS) $(EXTRA_CPPFLAGS) $(NOTEST_CPPFLAGS) $(CPPFLAGS)
 ALL_LDFLAGS  = $(EXTRA_LDFLAGS) $(NOTEST_LDFLAGS) $(LDFLAGS)
 ALL_LIBS     = $(LIBS) $(NOTEST_LIBS) $(EXTRA_LIBS)
 ALL_INCLUDES = $(INCLUDES) $(EXTRA_INCLUDES)
@@ -114,7 +114,7 @@ LT_LDFLAGS   = @LT_LDFLAGS@
 #
 # Basic macro setup
 #
-COMPILE      = $(CC) $(ALL_CPPFLAGS) $(ALL_CFLAGS) $(ALL_INCLUDES)
+COMPILE      = $(CC) $(ALL_CFLAGS) $(ALL_CPPFLAGS) $(ALL_INCLUDES)
 LT_COMPILE   = @lt_compile@
 
 LINK         = @link@
