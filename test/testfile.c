@@ -104,7 +104,7 @@ static void test_open_read(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, filetest);
     apr_file_close(filetest);
 }
@@ -141,7 +141,7 @@ static void test_filename(CuTest *tc)
     apr_assert_success(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_name_get(&str, filetest);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, FILENAME, str);
 
     apr_file_close(filetest);
@@ -160,7 +160,7 @@ static void test_fileclose(CuTest *tc)
     apr_assert_success(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_close(filetest);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
     /* We just closed the file, so this should fail */
     rv = apr_file_read(filetest, &str, &one);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EBADF(rv));
@@ -232,7 +232,7 @@ static void test_open_readwrite(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ | APR_WRITE, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, filetest);
 
     apr_file_close(filetest);
