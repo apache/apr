@@ -1,1 +1,5 @@
 Makefile
+.libs
+testregex
+testregex.lo
+
