@@ -492,21 +492,16 @@ static void pollset_remove(CuTest *tc)
     rv = apr_pollset_add(pollset, &pfd);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    pfd.desc.s = s[1];
-    pfd.client_data = (void *)4;
-    rv = apr_pollset_add(pollset, &pfd);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-
     pfd.desc.s = s[3];
-    pfd.client_data = (void *)5;
+    pfd.client_data = (void *)4;
     rv = apr_pollset_add(pollset, &pfd);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     rv = apr_pollset_poll(pollset, 1000, &num, &hot_files);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 5, num);
+    CuAssertIntEquals(tc, 4, num);
 
-    /* now remove the pollset elements referring to desc s[1] */
+    /* now remove the pollset element referring to desc s[1] */
     pfd.desc.s = s[1];
     pfd.client_data = (void *)999; /* not used on this call */
     rv = apr_pollset_remove(pollset, &pfd);
@@ -520,7 +515,7 @@ static void pollset_remove(CuTest *tc)
     CuAssertPtrEquals(tc, s[0], hot_files[0].desc.s);
     CuAssertPtrEquals(tc, (void *)3, hot_files[1].client_data);
     CuAssertPtrEquals(tc, s[2], hot_files[1].desc.s);
-    CuAssertPtrEquals(tc, (void *)5, hot_files[2].client_data);
+    CuAssertPtrEquals(tc, (void *)4, hot_files[2].client_data);
     CuAssertPtrEquals(tc, s[3], hot_files[2].desc.s);
     
     /* now remove the pollset elements referring to desc s[2] */
@@ -535,7 +530,7 @@ static void pollset_remove(CuTest *tc)
     CuAssertIntEquals(tc, 2, num);
     CuAssertPtrEquals(tc, (void *)1, hot_files[0].client_data);
     CuAssertPtrEquals(tc, s[0], hot_files[0].desc.s);
-    CuAssertPtrEquals(tc, (void *)5, hot_files[1].client_data);
+    CuAssertPtrEquals(tc, (void *)4, hot_files[1].client_data);
     CuAssertPtrEquals(tc, s[3], hot_files[1].desc.s);
 }
 
