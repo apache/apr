@@ -74,7 +74,7 @@ extern "C" {
  */
 
 typedef enum {
-    APR_NOFILE,         /* the file exists, but APR doesn't know its type */
+    APR_NOFILE = 0,     /* the file exists, but APR doesn't know its type */
     APR_REG,            /* a regular file */
     APR_DIR,            /* a directory */
     APR_CHR,            /* a character device */
