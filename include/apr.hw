@@ -341,10 +341,24 @@ typedef  int         pid_t;
 typedef  int         uid_t;
 typedef  int         gid_t;
 
-
 /* Mechanisms to properly type numeric literals */
 
 #define APR_INT64_C(val) (val##i64)
+
+
+#if APR_HAVE_IPV6
+#include <ws2tcpip.h>
+
+/* Win32 does it's own thing.  Again. */
+#define  in6_addr    in_addr6
+
+/* Appears in later flavors, not the originals. */
+#ifndef WS2TCPIP_INLINE
+#define IN6_IS_ADDR_V4MAPPED(a) \
+    (   (*(const apr_uint64_t *)(const void *)(&(a)->s6_addr[0]) == 0) \
+     && (*(const apr_uint32_t *)(const void *)(&(a)->s6_addr[8]) == ntohl(0x0000ffff)))
+#endif
+#endif
 
 
 /* Definitions that APR programs need to work properly. */
