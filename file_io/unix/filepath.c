@@ -171,7 +171,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
          * passing the address of a char const* for a char** arg.
          */
         char *getpath;
-        rv = apr_filepath_get(&getpath, apr_int32_t flags, p);
+        rv = apr_filepath_get(&getpath, flags, p);
         rootpath = getpath;
         if (rv != APR_SUCCESS)
             return errno;
