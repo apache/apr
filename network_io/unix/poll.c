@@ -55,45 +55,7 @@
 #include "networkio.h"
 #include "fileio.h"
 
-#if defined(HAVE_KQUEUE)  /* FreeBSD provides kqueue, let's use it :) */
-
-apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
-{
-    (*new) = (apr_pollfd_t *)apr_pcalloc(cont, sizeof(apr_pollfd_t) * num);
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-}
-
-apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset,
-                               apr_socket_t *sock, apr_int16_t event)
-{
-}
-
-apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
-                    apr_interval_time_t timeout)
-{
-}
-
-apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
-{
-}
-
-apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset,
-                                  apr_socket_t *sock, apr_int16_t events)
-{
-}
-
-apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
-{
-}
-
-apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
-{
-}
-
-#elif defined(HAVE_POLL)    /* We can just use poll to do our socket polling. */
+#ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
 apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {

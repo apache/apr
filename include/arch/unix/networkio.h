@@ -69,9 +69,6 @@
 #if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
-#ifdef HAVE_SYS_EVENT_H
-#include <sys/event.h>
-#endif
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
