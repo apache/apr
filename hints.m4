@@ -323,7 +323,7 @@ dnl	;;
                 APR_ADDTO(CPPFLAGS, [-I/boot/develop/headers/bone])
                 APR_ADDTO(LDFLAGS, [-nodefaultlibs -L/boot/develop/lib/x86 -L/boot/beos/system/lib])
                 APR_SETIFNULL(EXTRA_LIBS, [-lbind -lsocket -lbe -lroot])
-                APR_SETIFNULL(file_as_socket, [1])
+                APR_SETIFNULL(file_as_socket, [0])
                 ;;
             default)
                 APR_SETIFNULL(file_as_socket, [0])
