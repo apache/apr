@@ -47,7 +47,6 @@ int main(void)
     apr_status_t rv;
     apr_pool_t *pool;
     apr_shm_t *shm;
-    char errmsg[200];
     int recvd;
 
     apr_initialize();
