@@ -92,13 +92,14 @@ static void await_child(abts_case *tc, apr_proc_t *proc)
              rv == APR_CHILD_DONE && why == APR_PROC_EXIT && code == 0);
 }
 
-static void test_exclusive(abts_case *tc, const char *lockname)
+static void test_exclusive(abts_case *tc, const char *lockname, 
+                           apr_lockmech_e mech)
 {
     apr_proc_t *child[CHILDREN];
     apr_status_t rv;
     int n;
  
-    rv = apr_proc_mutex_create(&proc_lock, lockname, APR_LOCK_DEFAULT, p);
+    rv = apr_proc_mutex_create(&proc_lock, lockname, mech, p);
     APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
  
     for (n = 0; n < CHILDREN; n++)
@@ -117,6 +118,7 @@ static void proc_mutex(abts_case *tc, void *data)
     apr_status_t rv;
     const char *shmname = "tpm.shm";
     apr_shm_t *shm;
+    apr_lockmech_e *mech = data;
 
     /* Use anonymous shm if available. */
     rv = apr_shm_create(&shm, sizeof(int), NULL, p);
@@ -128,7 +130,7 @@ static void proc_mutex(abts_case *tc, void *data)
     APR_ASSERT_SUCCESS(tc, "create shm segment", rv);
 
     x = apr_shm_baseaddr_get(shm);
-    test_exclusive(tc, NULL);
+    test_exclusive(tc, NULL, *mech);
 #else
     ABTS_NOT_IMPL(tc, "APR lacks fork() support");
 #endif
@@ -137,9 +139,30 @@ static void proc_mutex(abts_case *tc, void *data)
 
 abts_suite *testprocmutex(abts_suite *suite)
 {
-    suite = ADD_SUITE(suite)
+    apr_lockmech_e mech = APR_LOCK_DEFAULT;
 
-    abts_run_test(suite, proc_mutex, NULL);
+    suite = ADD_SUITE(suite)
+    abts_run_test(suite, proc_mutex, &mech);
+#if APR_HAS_POSIXSEM_SERIALIZE
+    mech = APR_LOCK_POSIXSEM;
+    abts_run_test(suite, proc_mutex, &mech);
+#endif
+#if APR_HAS_SYSVSEM_SERIALIZE
+    mech = APR_LOCK_SYSVSEM;
+    abts_run_test(suite, proc_mutex, &mech);
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    mech = APR_LOCK_PROC_PTHREAD;
+    abts_run_test(suite, proc_mutex, &mech);
+#endif
+#if APR_HAS_FCNTL_SERIALIZE
+    mech = APR_LOCK_FCNTL;
+    abts_run_test(suite, proc_mutex, &mech);
+#endif
+#if APR_HAS_FLOCK_SERIALIZE
+    mech = APR_LOCK_FLOCK;
+    abts_run_test(suite, proc_mutex, &mech);
+#endif
 
     return suite;
 }
