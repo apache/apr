@@ -64,6 +64,10 @@
 #if HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
+#if HAVE_ALLOCA && defined(__osf__)
+/* Tru64 UNIX requires this for proper alloca operation in threaded programs */
+#include <alloca.h>
+#endif
 
 #ifdef NETWARE
 #define HAS_SOCKETS(dt) (dt == APR_POLL_SOCKET) ? 1 : 0
