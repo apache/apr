@@ -117,7 +117,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 
 #elif defined(DSO_USE_DYLD)
     NSObjectFileImage image;
-    NSModule os_handle;
+    NSModule os_handle = NULL;
     char* err_msg = NULL;
     if (NSCreateObjectFileImageFromFile(path, &image) != NSObjectFileImageSuccess) {
 	err_msg = "cannot create object file image";
