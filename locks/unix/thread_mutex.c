@@ -77,7 +77,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
                                                   apr_pool_t *pool)
 {
     apr_thread_mutex_t *new_mutex;
-    pthread_mutexattr_t mattr;
     apr_status_t rv;
 
     new_mutex = (apr_thread_mutex_t *)apr_pcalloc(pool,
@@ -94,23 +93,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
      */
     new_mutex->nested = flags & APR_THREAD_MUTEX_NESTED;
 
-    if ((rv = pthread_mutexattr_init(&mattr))) {
-#ifdef PTHREAD_SETS_ERRNO
-        rv = errno;
-#endif
-        thread_mutex_cleanup(new_mutex);
-        return rv;
-    }
-
-    if ((rv = pthread_mutex_init(&new_mutex->mutex, &mattr))) {
-#ifdef PTHREAD_SETS_ERRNO
-        rv = errno;
-#endif
-        thread_mutex_cleanup(new_mutex);
-        return rv;
-    }
-
-    if ((rv = pthread_mutexattr_destroy(&mattr))) {
+    if ((rv = pthread_mutex_init(&new_mutex->mutex, NULL))) {
 #ifdef PTHREAD_SETS_ERRNO
         rv = errno;
 #endif
