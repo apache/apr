@@ -52,6 +52,7 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+inet_aton.o: inet_aton.c $(INCDIR)/apr_private.h
 poll.o: poll.c networkio.h $(INCDIR)/apr_private.h \
  $(INCDIR)/apr_network_io.h $(INCDIR)/apr_general.h \
  $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
