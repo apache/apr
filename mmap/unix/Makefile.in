@@ -50,3 +50,4 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+mmap.o: mmap.c

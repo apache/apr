@@ -57,9 +57,10 @@ crossproc.o: crossproc.c ../../include/apr_lock.h \
  ../../include/apr_general.h ../../include/apr_config.h \
  ../../include/apr_errno.h ../../include/apr_lib.h \
  ../../include/apr_file_io.h locks.h
-intraproc.o: intraproc.c ../../include/apr_lock.h \
- ../../include/apr_general.h ../../include/apr_config.h \
- ../../include/apr_errno.h locks.h ../../include/apr_file_io.h
+intraproc.o: intraproc.c ../../include/apr_config.h \
+ ../../include/apr_lock.h ../../include/apr_general.h \
+ ../../include/apr_errno.h ../../include/apr_lib.h \
+ ../../include/apr_file_io.h locks.h
 locks.o: locks.c ../../include/apr_general.h \
  ../../include/apr_config.h ../../include/apr_errno.h \
  ../../include/apr_portable.h ../../include/apr_thread_proc.h \
