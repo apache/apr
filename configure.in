@@ -5,7 +5,7 @@ OS=`./config.sub $OS`
 
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
-MODULES="file_io network_io threadproc misc locks time mmap" 
+MODULES="file_io network_io threadproc misc locks time mmap shmem" 
 
 echo "Configuring APR library"
 echo "Platform: ${OS}"
@@ -357,6 +357,15 @@ else
     procpthreadser="0"
 fi
 
+# Shared memory support.  Until I figure out how to do this well, we are hard
+# coding this.  I am hoping to do this more generally ASAP.
+anonymous_shm="1"
+filebased_shm="0"
+keybased_shm="0"
+AC_SUBST(anonymous_shm)
+AC_SUBST(filebased_shm)
+AC_SUBST(keybased_shm)
+
 dnl Start building stuff from our information
 AC_SUBST(LDLIBS)
 AC_SUBST(OPTIM)
@@ -399,6 +408,11 @@ AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
 if test "$ac_cv_struct_tm_gmtoff" = "yes"; then
     AC_DEFINE(HAVE_GMTOFF)
 fi
+
+# run the MM config script regardless of whether we are going to use 
+# it or not.  When we have a much better idea of who is using MM, we can
+# run this on a more conditional basis.
+AC_CONFIG_SUBDIRS(shmem/unix/mm)
 
 MAKEFILE1="Makefile lib/Makefile "
 SUBDIRS="lib "

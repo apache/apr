@@ -56,6 +56,7 @@
 #ifndef APR_SHMEM_H
 #define APR_SHMEM_H
 
+#include "apr.h"
 #include "apr_general.h"
 #include "apr_errno.h"
 
@@ -63,19 +64,25 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef   struct shmem_t ap_shmem_t
+#if APR_USES_ANONYMOUS_SHM
+typedef   void           ap_shm_name_t;
+#elif APR_USES_FILEBASED_SHM
+typedef   char *         ap_shm_name_t;
+#elif APR_USES_KEYBASED_SHM
+typedef   key_t          ap_shm_name_t;
+#endif
 
-ap_status_t ap_shm_create(ap_shmem_t **, ap_context_t *, ap_size_t, const char *);
-ap_status_t ap_shm_destroy(ap_shmem_t *);
-ap_status_t ap_shm_malloc(void **, ap_shmem_t *, ap_size_t);
-ap_status_t ap_shm_calloc(void **, ap_shmem_t *, ap_size_t, ap_size_t);
-ap_status_t ap_shm_realloc(void **, ap_shmem_t *, ap_size_t);
-ap_status_t ap_shm_free(ap_shmem_t *, void *);
-ap_status_t ap_shm_strdup(char **, ap_shmem_t *, const char *);
-ap_status_t ap_shm_sizeof(ap_shmem_t *, void *, ap_size_t *);
-ap_status_t ap_shm_maxsize(ap_size_t *);
-ap_status_t ap_shm_available(ap_shmem_t *, ap_size_t *);
-ap_status_t ap_shm_child_create(ap_shmem_t**, ap_context_t *, const char *);
+typedef   struct shmem_t ap_shmem_t;
+
+ap_status_t ap_shm_init(ap_shmem_t **m, ap_size_t reqsize, const char *file);
+ap_status_t ap_shm_destroy(ap_shmem_t *m);
+void *ap_shm_malloc(ap_shmem_t *c, ap_size_t reqsize);
+void *ap_shm_calloc(ap_shmem_t *shared, ap_size_t size);
+ap_status_t ap_shm_free(ap_shmem_t *shared, void *free);
+ap_status_t ap_get_shm_name(ap_shmem_t *c, ap_shm_name_t **name);
+ap_status_t ap_set_shm_name(ap_shmem_t *c, ap_shm_name_t *name);
+ap_status_t ap_open_shmem(ap_shmem_t *c);
+ap_status_t ap_shm_avail(ap_shmem_t *c, ap_size_t *avail);
 
 #ifdef __cplusplus
 }

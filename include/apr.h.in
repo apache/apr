@@ -40,6 +40,11 @@
 #define APR_USE_PROC_PTHREAD_SERIALIZE    @procpthreadser@ 
 #define APR_USE_PTHREAD_SERIALIZE         @pthreadser@ 
 
+#define APR_USES_ANONYMOUS_SHM            @anonymous_shm@
+#define APR_USES_FILEBASED_SHM            @filebased_shm@
+#define APR_USES_KEYBASED_SHM             @keybased_shm@
+
+
 #define APR_HAVE_IN_ADDR        @have_in_addr@
 #define APR_HAVE_INET_ADDR      @inet_addr@
 #define APR_HAVE_INET_NETWORK   @inet_network@
