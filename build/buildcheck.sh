@@ -3,7 +3,7 @@
 echo "buildconf: checking installation..."
 
 # autoconf 2.13 or newer
-ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|sed -e 's/^[^0-9]*//;s/[a-z]* *$//;q'`
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
 echo "           You need autoconf version 2.13 or newer installed"
@@ -20,9 +20,14 @@ else
 echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
-# libtool 1.3.3 or newer
+# Sample libtool --version outputs:
+# ltmain.sh (GNU libtool) 1.3.3 (1.385.2.181 1999/07/02 15:49:11)
+# ltmain.sh (GNU libtool 1.1361 2004/01/02 23:10:52) 1.5a
+# output is multiline from 1.5 onwards
+
+# Require libtool 1.3.3 or newer
 libtool=`build/PrintPath glibtool libtool`
-lt_pversion=`$libtool --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
+lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/([^)]*)//g;s/^[^0-9]*//;s/[- ].*//g;q'`
 if test -z "$lt_pversion"; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.3.3 or newer installed"
