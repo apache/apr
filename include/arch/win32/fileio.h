@@ -83,16 +83,28 @@
 #include "apr_file_io.h"
 #include "apr_errno.h"
 
+/* quick run-down of fields in windows' ap_file_t structure that may have 
+ * obvious uses.
+ * fname --  the filename as passed to the open call.
+ * dwFileAttricutes -- Attributes used to open the file.
+ * demonfname -- the canonicalized filename.  Used to store the result from
+ *               ap_os_canonicalize_filename.
+ * lowerdemonfname -- inserted at Ken Parzygnat's request, because of the
+ *                    ugly way windows deals with case in the filesystem.
+ * append -- Windows doesn't support the append concept when opening files.
+ *           APR needs to keep track of this, and always make sure we append
+ *           correctly when writing to a file with this flag set TRUE.
+ *          
 struct file_t {
     ap_context_t *cntxt;
     HANDLE filehand;
     char *fname;
     DWORD dwFileAttributes;
-    char *demonfname; /* Is this necessary */
-    char *lowerdemonfname; /* Is this necessary */
+    char *demonfname; 
+    char *lowerdemonfname; 
     int buffered;
     int stated;
-    int append; /* is this necessary?*/
+    int append; 
     int eof_hit;
     off_t size;
     time_t atime;
