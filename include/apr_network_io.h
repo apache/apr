@@ -271,7 +271,7 @@ apr_status_t apr_set_socketdata(apr_socket_t *sock, void *data, const char *key,
  * APR_EINTR is never returned.
  * </PRE>
  */
-apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len);
+apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len);
 
 /**
  * Send multiple packets of data over a network.
@@ -291,7 +291,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len);
  * </PRE>
  */
 apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec, 
-                     apr_int32_t nvec, apr_ssize_t *len);
+                     apr_int32_t nvec, apr_size_t *len);
 
 #if APR_HAS_SENDFILE
 /**
@@ -308,7 +308,7 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
  *      The number of bytes actually sent is stored in argument 5.
  */
 apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file, apr_hdtr_t *hdtr, 
-                          apr_off_t *offset, apr_ssize_t *len, apr_int32_t flags);
+                          apr_off_t *offset, apr_size_t *len, apr_int32_t flags);
 #endif
 
 /**
@@ -329,7 +329,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file, apr_hdtr_t *hdtr
  * APR_EINTR is never returned.
  * </PRE>
  */
-apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len);
+apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len);
 
 /**
  * Setup socket options for the specified socket

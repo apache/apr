@@ -357,7 +357,7 @@ apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont);
  *
  *      APR_EINTR is never returned.
  */
-apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *nbytes);
+apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes);
 
 /**
  * Write data to the specified file.
@@ -373,7 +373,7 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *nbytes);
  *
  *      APR_EINTR is never returned.
  */
-apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes);
+apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes);
 
 /**
  * Write data from iovec array to the specified file.
@@ -391,7 +391,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes
  *      doesn't provide writev().
  */
 apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, 
-                      apr_size_t nvec, apr_ssize_t *nbytes);
+                      apr_size_t nvec, apr_size_t *nbytes);
 
 /**
  * Read data from the specified file.
@@ -648,7 +648,7 @@ apr_status_t apr_set_filedata(apr_file_t *file, void *data, const char *key,
  * @param size the size of the directory entry. 
  * @param thedir the currently open directory.
  */                        
-apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir);
+apr_status_t apr_dir_entry_size(apr_size_t *size, apr_dir_t *thedir);
 
 /**
  * Get the last modified time of the current directory entry.

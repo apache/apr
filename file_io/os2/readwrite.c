@@ -62,7 +62,7 @@
 #include <os2.h>
 #include <malloc.h>
 
-apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *nbytes)
+apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 {
     ULONG rc = 0;
     ULONG bytesread;
@@ -138,7 +138,7 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *nbytes)
 
 
 
-apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes)
+apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     ULONG rc = 0;
     ULONG byteswritten;
@@ -194,7 +194,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes
 
 #ifdef HAVE_WRITEV
 
-apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, apr_ssize_t *nbytes)
+apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, apr_size_t *nbytes)
 {
     int bytes;
     if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
@@ -266,7 +266,7 @@ apr_status_t apr_getc(char *ch, apr_file_t *thefile)
 
 apr_status_t apr_puts(const char *str, apr_file_t *thefile)
 {
-    apr_ssize_t len;
+    apr_size_t len;
 
     len = strlen(str);
     return apr_write(thefile, str, &len); 
@@ -301,7 +301,7 @@ apr_status_t apr_flush(apr_file_t *thefile)
 
 apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
 {
-    ssize_t readlen;
+    size_t readlen;
     apr_status_t rv = APR_SUCCESS;
     int i;    
 
