@@ -32,6 +32,8 @@ Changes for APR 1.1.0
 
 Changes for APR 1.0.1
 
+  *) apr_password_get(): Fix the check for buffer overflow.  [Jeff Trawick]
+
   *) Fix HUP return codes in pollset when using KQueue.
      [Paul Querna]
 
