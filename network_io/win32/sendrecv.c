@@ -95,6 +95,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     rv = WSARecv(sock->sock, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         lasterror = WSAGetLastError();
+        *len = 0;
         return lasterror;
     }
 
