@@ -67,6 +67,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
     return APR_ENOTIMPL;
 }
 
+#if APR_HAS_LOCK_CREATE_NP
 APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
                                                    const char *fname,
                                                    apr_lockmech_e_np mech,
@@ -74,6 +75,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
 {
     return APR_ENOTIMPL;
 }       
+#endif
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
                                                     const char *fname,
