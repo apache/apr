@@ -114,9 +114,12 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
 {
     int i;
 #ifdef HAVE_VLA
+    /* XXX: I trust that this is a segv when insufficient stack exists? */
     struct pollfd pollset[num];
 #elif defined(HAVE_ALLOCA)
     struct pollfd *pollset = alloca(sizeof(pollfd) * num);
+    if (!pollset)
+        return APR_ENOMEM;
 #else
     struct pollfd tmp_pollset[SMALL_POLLSET_LIMIT];
     struct pollfd *pollset;
@@ -129,6 +132,11 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
          * mapping.
          */
         pollset = malloc(sizeof(struct pollfd) * num);
+        /* The other option is adding an apr_pool_abort() fn to invoke
+         * the pool's out of memory handler
+         */
+        if (!pollset)
+            return APR_ENOMEM;
     }
 #endif
     for (i = 0; i < num; i++) {
