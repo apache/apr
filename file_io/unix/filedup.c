@@ -163,11 +163,13 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
         else {
             memcpy((*new_file)->buffer, old_file->buffer, old_file->dataRead);
         }
+#if APR_HAS_THREADS
         if (old_file->thlock) {
             apr_thread_mutex_create(&((*new_file)->thlock),
                                     APR_THREAD_MUTEX_DEFAULT, p);
             apr_thread_mutex_destroy(old_file->thlock);
         }
+#endif /* APR_HAS_THREADS */
     }
     if (old_file->fname) {
         (*new_file)->fname = apr_pstrdup(p, old_file->fname);
