@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) To support modules like PHP, which implement their own
+     loaded extensions, Darwin needs to place their public
+     symbols in the global table. [Marko Karppinen <markonen@php.net>,
+     Jim Jagielski]
+
   *) Rename apr_get_groupname to apr_group_name_get.
      [Thom May <thom@planetarytramp.net>]
      
