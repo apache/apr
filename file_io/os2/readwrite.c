@@ -153,7 +153,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         int blocksize;
         int size = *nbytes;
 
-        DosEnterCritSec();
+        ap_lock(thefile->mutex);
 
         if ( thefile->direction == 0 ) {
             // Position file pointer for writing at the offset we are logically reading from
@@ -166,7 +166,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
         while (rc == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
-                ap_flush(thefile);
+                rc = ap_flush(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? APR_FILE_BUFSIZE - thefile->bufpos : size;
             memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
@@ -175,7 +175,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             size -= blocksize;
         }
 
-        DosExitCritSec();
+        ap_unlock(thefile->mutex);
         return APR_OS2_STATUS(rc);
     } else {
         rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
