@@ -72,7 +72,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #endif
+#if APR_HAS_THREADS && HAVE_PTHREAD_H
 #include <pthread.h>
+#endif
 
 #ifndef HAVE_UNION_SEMUN
 /* it makes no sense, but this isn't defined on solaris */
@@ -103,18 +105,24 @@ struct lock_t {
 #else
     /* No Interprocess serialization.  Too bad. */
 #endif 
+#if APR_HAS_THREADS
+    /* APR doesn't have threads, no sense in having an thread lock mechanism.
+     */
 #if defined (USE_PTHREAD_SERIALIZE)
     pthread_mutex_t *intraproc;
+#endif
 #endif
     /* At some point, we should do a type for both inter and intra process
      *  locking here.  Something like pthread_mutex with PTHREAD_PROCESS_SHARED
      */    
 };
 
+#if APR_HAS_THREADS
 ap_status_t create_intra_lock(struct lock_t *new);
 ap_status_t lock_intra(struct lock_t *lock);
 ap_status_t unlock_intra(struct lock_t *lock);
 ap_status_t destroy_intra_lock(struct lock_t *lock);
+#endif
 
 ap_status_t create_inter_lock(struct lock_t *new);
 ap_status_t lock_inter(struct lock_t *lock);

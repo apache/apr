@@ -52,11 +52,13 @@
  * project, please see <http://www.apache.org/>.
  *
  */
-
+#include "apr_config.h"
 #include "apr_lock.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "locks.h"
+
+#if APR_HAS_THREADS
 
 #if defined (USE_PTHREAD_SERIALIZE)  
 
@@ -119,4 +121,5 @@ ap_status_t destroy_intra_lock(struct lock_t *lock)
     }
     return stat;
 }
+#endif
 #endif

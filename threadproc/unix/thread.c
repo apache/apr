@@ -53,6 +53,10 @@
  *
  */
 
+#include "apr_config.h"
+
+#ifdef APR_HAS_THREADS
+
 #include "threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
@@ -290,83 +294,6 @@ ap_status_t ap_put_os_thread(struct thread_t **thd, ap_os_thread_t *thethd,
     (*thd)->td = thethd;
     return APR_SUCCESS;
 }
-#else
-    /* No pthread.h, no threads for right now.*/
-ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
-{
-    *new = NULL;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_setthreadattr_detach(struct threadattr_t *attr, ap_int32_t on)
-{
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_getthreadattr_detach(struct threadattr_t *attr)
-{
-    return APR_NOTDETACH;
-}
-
-ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr, 
-                             ap_thread_start_t func, void *data, 
-                             ap_context_t *cont)
-{
-    *new = NULL;
-    return stat;
-}
-
-ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
-{
-    APR_SUCCESS;
-}
-
-ap_status_t ap_thread_join(ap_status_t *retval, struct thread_t *thd)
-{
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_thread_detach(struct thread_t *thd)
-{
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(void **, char *, ap_thread_t *)
- *    Return the context associated with the current thread.
- * arg 1) The currently open thread.
- * arg 2) The user data associated with the thread.
- */
-ap_status_t ap_get_threaddata(void **data, char *key, struct thread_t *thread)
-{
-    data = NULL;
-    return APR_ENOTHREAD;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_set_threaddata(ap_thread_t *, void *, char *,
-                                 ap_status_t (*cleanup) (void *))
- *    Return the context associated with the current thread.
- * arg 1) The currently open thread.
- * arg 2) The user data to associate with the thread.
- */
-ap_status_t ap_set_threaddata(void *data, char *key,
-                              ap_status_t (*cleanup) (void *),
-                              struct thread_t *thread)
-{
-    return APR_ENOTHREAD;
-}
-
-ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, struct thread_t *thd)
-{
-    thethd = NULL;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_put_os_thread(ap_context_t *cont, struct thread_t **thd,
-                             ap_os_thread_t *thethd)
-{
-    return APR_SUCCESS;
-}
-#endif
+#endif  /* HAVE_PTHREAD_H */
+#endif  /* APR_HAS_THREADS */
 

@@ -96,9 +96,13 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     }
 
     if (type != APR_CROSS_PROCESS) {
+#if APR_HAS_THREADS
         if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
             return stat;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
     if (type != APR_INTRAPROCESS) {
         if ((stat = create_inter_lock(new)) != APR_SUCCESS) {
@@ -118,9 +122,13 @@ ap_status_t ap_lock(struct lock_t *lock)
 {
     ap_status_t stat;
     if (lock->type != APR_CROSS_PROCESS) {
+#if APR_HAS_THREADS
         if ((stat = lock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
     if (lock->type != APR_INTRAPROCESS) {
         if ((stat = lock_inter(lock)) != APR_SUCCESS) {
@@ -140,9 +148,13 @@ ap_status_t ap_unlock(struct lock_t *lock)
     ap_status_t stat;
 
     if (lock->type != APR_CROSS_PROCESS) {
+#if APR_HAS_THREADS
         if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
             return stat;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
     if (lock->type != APR_INTRAPROCESS) {
         if ((stat = unlock_inter(lock)) != APR_SUCCESS) {
@@ -163,9 +175,13 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
 {
     ap_status_t stat;
     if (lock->type != APR_CROSS_PROCESS) {
+#if APR_HAS_THREADS
         if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
             return stat;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
     if (lock->type != APR_INTRAPROCESS) {
         if ((stat = destroy_inter_lock(lock)) != APR_SUCCESS) {
@@ -258,8 +274,10 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct lock_t *lock)
     oslock->lock_it = lock->lock_it;
     oslock->unlock_it = lock->unlock_it;
 #endif
+#if APR_HAS_THREADS
 #if defined (USE_PTHREAD_SERIALIZE)
     oslock->intraproc = lock->intraproc;
+#endif
 #endif
 
     return APR_SUCCESS;
@@ -290,8 +308,10 @@ ap_status_t ap_put_os_lock(struct lock_t **lock, ap_os_lock_t *thelock,
     (*lock)->lock_it = thelock->lock_it;
     (*lock)->unlock_it = thelock->unlock_it;
 #endif
+#if APR_HAS_THREADS
 #if defined (USE_PTHREAD_SERIALIZE)
     (*lock)->intraproc = thelock->intraproc;
+#endif
 #endif
     return APR_SUCCESS;
 }

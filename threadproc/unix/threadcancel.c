@@ -53,6 +53,8 @@
  *
  */
 
+#if APR_HAS_THREADS
+
 #include "threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
@@ -112,20 +114,5 @@ ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
         return stat;
     }
 }
-#else
-ap_status_t ap_cancel_thread(struct thread_t *thd)
-{
-    return APR_SUCCESS;
-}
-    
-ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
-{
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
-{
-    return APR_SUCCESS;
-}
 #endif
-
+#endif

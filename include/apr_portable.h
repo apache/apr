@@ -64,6 +64,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "apr_config.h"
 #include "apr_general.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
@@ -165,8 +166,11 @@ struct os_lock_t {
 #else
     /* No Interprocess serialization, too bad. */
 #endif
+#if APR_HAS_THREADS
+    /* If no threads, no need for thread locks */
 #if defined (USE_PTHREAD_SERIALIZE)
     pthread_mutex_t *intraproc;
+#endif
 #endif
 };
 
@@ -174,9 +178,11 @@ typedef int                   ap_os_file_t;
 typedef DIR                   ap_os_dir_t;
 typedef int                   ap_os_sock_t;
 typedef struct os_lock_t      ap_os_lock_t;
+#if APR_HAS_THREADS && HAVE_PTHREAD_H
 typedef pthread_t             ap_os_thread_t;
-typedef pid_t                 ap_os_proc_t;
 typedef pthread_key_t         ap_os_threadkey_t;
+#endif
+typedef pid_t                 ap_os_proc_t;
 typedef struct timeval        ap_os_time_t;
 #endif
 
@@ -184,19 +190,23 @@ ap_status_t ap_get_os_file(ap_os_file_t *, ap_file_t *);
 ap_status_t ap_get_os_dir(ap_os_dir_t *, ap_dir_t *);      
 ap_status_t ap_get_os_sock(ap_os_sock_t *, ap_socket_t *);
 ap_status_t ap_get_os_lock(ap_os_lock_t *, ap_lock_t *);     
-ap_status_t ap_get_os_thread(ap_os_thread_t *, ap_thread_t *);
 ap_status_t ap_get_os_proc(ap_os_proc_t *, ap_proc_t *);     
 ap_status_t ap_get_os_time(ap_os_time_t **, ap_time_t *);     
+#if APR_HAS_THREADS && HAVE_PTHREAD_H
+ap_status_t ap_get_os_thread(ap_os_thread_t *, ap_thread_t *);
 ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *, ap_key_t *);
+#endif
 
 ap_status_t ap_put_os_file(ap_file_t **, ap_os_file_t *, ap_context_t *); 
 ap_status_t ap_put_os_dir(ap_dir_t **, ap_os_dir_t *, ap_context_t *); 
 ap_status_t ap_put_os_sock(ap_socket_t **, ap_os_sock_t *, ap_context_t *);
 ap_status_t ap_put_os_lock(ap_lock_t **, ap_os_lock_t *, ap_context_t *); 
-ap_status_t ap_put_os_thread(ap_thread_t **, ap_os_thread_t *, ap_context_t *);
 ap_status_t ap_put_os_proc(ap_proc_t **, ap_os_proc_t *, ap_context_t *); 
 ap_status_t ap_put_os_time(ap_time_t **, ap_os_time_t *, ap_context_t *); 
+#if APR_HAS_THREADS && HAVE_PTHREAD_H
+ap_status_t ap_put_os_thread(ap_thread_t **, ap_os_thread_t *, ap_context_t *);
 ap_status_t ap_put_os_threadkey(ap_key_t **, ap_os_threadkey_t *, ap_context_t *);
+#endif
 
 #ifdef __cplusplus
 }
