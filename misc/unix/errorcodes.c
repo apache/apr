@@ -211,6 +211,7 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
     DWORD len;
     DWORD i;
 
+    
     len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
                         NULL,
                         errcode,
@@ -280,17 +281,7 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
-#ifdef WIN32
-        /* XXX This is just plain wrong.  We started discussing this one
-         * day, and then it dropped, but doing this here is a symptom of a
-         * problem with the design that will keep us from safely sharing 
-         * Windows code with any other platform.  This needs to be changed, 
-         * Windows is NOT a special platform when it comes to APR. rbb
-         */
-        return apr_os_strerror(buf, bufsize, statcode);
-#else
         return stuffbuffer(buf, bufsize, strerror(statcode));
-#endif
     }
     else if (statcode < APR_OS_START_USEERR) {
         return stuffbuffer(buf, bufsize, apr_error_string(statcode));
