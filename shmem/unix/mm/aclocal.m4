@@ -91,7 +91,7 @@ AC_DEFINE(MM_DEBUG)
 ],[
 case "$CFLAGS" in
     *-g* ) CFLAGS=`echo "$CFLAGS" |\
-                   sed -e 's/ -g //g' -e 's/ -g$//' -e 's/^-g //g' -e 's/^-g$//'` ;;
+                   sed -e 's/ -g / /g' -e 's/ -g$//' -e 's/^-g //g' -e 's/^-g$//'` ;;
 esac
 msg=disabled
 ])dnl
