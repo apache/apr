@@ -80,8 +80,7 @@ extern "C" {
  */
 
 /**
- * @defgroup apr_poll_opt Poll options
- * @{
+ * Poll options
  */
 #define APR_POLLIN    0x001     /**< Can read without blocking */
 #define APR_POLLPRI   0x002     /**< Priority data available */
@@ -89,7 +88,6 @@ extern "C" {
 #define APR_POLLERR   0x010     /**< Pending error */
 #define APR_POLLHUP   0x020     /**< Hangup occurred */
 #define APR_POLLNVAL  0x040     /**< Descriptior invalid */
-/** @} */
 
 /** Used in apr_pollfd_t to determine what the apr_descriptor is */
 typedef enum { 
@@ -186,13 +184,9 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
  *                a maximum, not a minimum.  If a socket is signalled, we 
  *                will wake up before this time.  A negative number means 
  *                wait until a socket is signalled.
- * @remark
- * <PRE>
- * The number of sockets signalled is returned in the second argument. 
- *
- *        This is a blocking call, and it will not return until either a 
- *        socket has been signalled, or the timeout has expired. 
- * </PRE>
+ * @remark The number of sockets signalled is returned in the third argument. 
+ *         This is a blocking call, and it will not return until either a 
+ *         socket has been signalled, or the timeout has expired. 
  */
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t numsock,
                                    apr_int32_t *nsds, 
