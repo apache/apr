@@ -83,16 +83,19 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
     }
     
     (*new)->cntxt = cont;
-	(*new)->addr = (struct sockaddr_in *) ap_palloc((*new)->cntxt,
+	(*new)->local_addr = (struct sockaddr_in *) ap_palloc((*new)->cntxt,
 	                    sizeof (struct sockaddr_in));
-    if ((*new)->addr == NULL){
+	(*new)->remote_addr = (struct sockaddr_in *) ap_palloc((*new)->cntxt,
+	                    sizeof (struct sockaddr_in));
+    if ((*new)->local_addr == NULL || (*new)->remote_addr==NULL){
         return APR_ENOMEM;
     }
     
     (*new)->socketdes = socket(AF_INET ,SOCK_STREAM, 0);
-	(*new)->addr->sin_family = AF_INET; 
-    (*new)->addr_len = sizeof(*(*new)->addr);
-	memset(&(*new)->addr->sin_zero, 0, sizeof((*new)->addr->sin_zero));
+	(*new)->local_addr->sin_family = AF_INET; 
+	(*new)->remote_addr->sin_family = AF_INET; 
+    (*new)->addr_len = sizeof(*(*new)->local_addr);
+	memset(&(*new)->local_addr->sin_zero, 0, sizeof((*new)->local_addr->sin_zero));
 
     if ((*new)->socketdes < 0) {
         return errno;
@@ -120,42 +123,10 @@ ap_status_t ap_close_socket(struct socket_t *thesocket)
     return socket_cleanup(thesocket);
 }
 
-ap_status_t ap_setport(struct socket_t *sock, ap_uint32_t port) 
-{ 
-    sock->addr->sin_port = htons((short)port); 
-    return APR_SUCCESS; 
-} 
-
-ap_status_t ap_getport(ap_uint32_t *port, struct socket_t *sock)
-{
-    *port = ntohs(sock->addr->sin_port);
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
-{
-    if (!strcmp(addr, APR_ANYADDR)) {
-        sock->addr->sin_addr.s_addr = htonl(INADDR_ANY);
-        return APR_SUCCESS;
-    }
-    if (inet_aton(addr, &sock->addr->sin_addr) == 0) {
-        return errno;
-    }
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
-			 const struct socket_t *sock)
-{
-    char *temp = inet_ntoa(sock->addr->sin_addr);
-    ap_cpystrn(addr,temp,len-1);
-    return APR_SUCCESS;
-}
-
 ap_status_t ap_bind(struct socket_t *sock) 
 { 
-    sock->addr->sin_addr.s_addr = INADDR_ANY;
-    if (bind(sock->socketdes, (struct sockaddr *)sock->addr, sock->addr_len) == -1) 
+    sock->local_addr->sin_addr.s_addr = INADDR_ANY;
+    if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1) 
         return errno; 
     else 
         return APR_SUCCESS; 
@@ -175,11 +146,14 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
 	                        sizeof(ap_socket_t)); 
 
     (*new)->cntxt = sock->cntxt;
-    (*new)->addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
+    (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
+                 sizeof(struct sockaddr_in));
+    (*new)->remote_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
     (*new)->addr_len = sizeof(struct sockaddr_in);
-
-    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->addr,
+    (*new)->connected = 1;
+    
+    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->local_addr,
                         &(*new)->addr_len);
 
 	if ((*new)->socketdes <0){
@@ -196,21 +170,25 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
     struct hostent *hp; 
 
     hp = gethostbyname(hostname); 
-    if ((sock->socketdes < 0) || (!sock->addr)) { 
+    if ((sock->socketdes < 0) || (!sock->remote_addr)) { 
         return APR_ENOTSOCK; 
     } 
 
-	memcpy((char *)&sock->addr->sin_addr, hp->h_addr , hp->h_length);
+	memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr , hp->h_length);
 
-    sock->addr->sin_family = AF_INET;
+    sock->remote_addr->sin_family = AF_INET;
      
-    memset(sock->addr->sin_zero, 0, sizeof(sock->addr->sin_zero));
+    memset(sock->remote_addr->sin_zero, 0, sizeof(sock->remote_addr->sin_zero));
     
-    sock->addr_len = sizeof(sock->addr);
+    sock->addr_len = sizeof(sock->remote_addr);
     
-    while ((connect(sock->socketdes, (const struct sockaddr *)sock->addr, sock->addr_len) < 0)){
-    	if (errno != EALREADY && errno != EINPROGRESS)
+    if ((connect(sock->socketdes, (const struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) 
+      && (errno != EINPROGRESS)) {
             return errno; 
+    } else {
+        int namelen = sizeof(*sock->local_addr);
+        getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr, &namelen);
+        sock->connected = 1;
     }
      
     return APR_SUCCESS; 

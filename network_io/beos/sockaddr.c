@@ -6,7 +6,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -53,51 +53,99 @@
  *
  */
 
-#ifndef NETWORK_IO_H
-#define NETWORK_IO_H
-
-#include <socket.h>
-#include <netdb.h>
-
-/* The definition of isascii was missed from the PowerPC ctype.h
- *
- * It will be included in the next release, but until then... */
-#if __POWERPC__
-#define isascii(c) (((c) & ~0x7f)==0)
-#endif
-
+#include "networkio.h"
+#include "apr_network_io.h"
 #include "apr_general.h"
-#include <ByteOrder.h> /* for the ntohs definition */
+#include "apr_lib.h"
+#include <errno.h>
+#include <string.h>
+#include <sys/socket.h>
 
-#define POLLIN	 1
-#define POLLPRI  2
-#define POLLOUT  4
-#define POLLERR  8
-#define POLLHUP  16
-#define POLLNVAL 32
+ap_status_t ap_set_local_port(struct socket_t *sock, ap_uint32_t port)
+{
+    sock->local_addr->sin_port = htons((short)port);
+    return APR_SUCCESS;
+}
 
-struct socket_t {
-    ap_context_t *cntxt;
-    int socketdes;
-    struct sockaddr_in *local_addr;
-    struct sockaddr_in *remote_addr;
-    int addr_len;
-    int timeout;
-    int connected;
-};
+ap_status_t ap_set_remote_port(struct socket_t *sock, ap_uint32_t port)
+{
+    sock->remote_addr->sin_port = htons((short)port);
+    return APR_SUCCESS;
+}
 
-struct pollfd_t {
-    ap_context_t *cntxt;
-    struct socket_t *sock;
-    fd_set *read;
-    fd_set *write;
-    fd_set *except;
-    int highsock;
-};
+ap_status_t ap_get_local_port(ap_uint32_t *port, struct socket_t *sock)
+{
+    *port = ntohs(sock->local_addr->sin_port);
+    return APR_SUCCESS;
+}
 
-ap_int16_t get_event(ap_int16_t);
+ap_status_t ap_get_remote_port(ap_uint32_t *port, struct socket_t *sock)
+{
+    *port = ntohs(sock->remote_addr->sin_port);
+    return APR_SUCCESS;
+}
 
-int inet_aton(const char *cp, struct in_addr *addr);
+ap_status_t ap_set_local_ipaddr(struct socket_t *sock, const char *addr)
+{
+    u_long ipaddr;
+    
+    if (!strcmp(addr, APR_ANYADDR)) {
+        sock->local_addr->sin_addr.s_addr = htonl(INADDR_ANY);
+        return APR_SUCCESS;
+    }
+    
+    ipaddr = inet_addr(addr);
+    
+    if (ipaddr == -1) {
+        return errno;
+    }
+    
+    sock->local_addr->sin_addr.s_addr = ipaddr;
+    return APR_SUCCESS;
+}
 
-#endif  /* ! NETWORK_IO_H */
+ap_status_t ap_set_remote_ipaddr(struct socket_t *sock, const char *addr)
+{
+    u_long ipaddr;
+    
+    if (!strcmp(addr, APR_ANYADDR)) {
+        sock->remote_addr->sin_addr.s_addr = htonl(INADDR_ANY);
+        return APR_SUCCESS;
+    }
+    
+    ipaddr = inet_addr(addr);
+    
+    if (ipaddr == (u_long)-1) {
+        return errno;
+    }
+    
+    sock->remote_addr->sin_addr.s_addr = ipaddr;
+    return APR_SUCCESS;
+}
 
+ap_status_t ap_get_local_ipaddr(char **addr, const struct socket_t *sock)
+{
+    *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->local_addr->sin_addr));
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_get_remote_ipaddr(char **addr, const struct socket_t *sock)
+{
+    *addr = ap_pstrdup(sock->cntxt, inet_ntoa(sock->remote_addr->sin_addr));
+    return APR_SUCCESS;
+}
+
+
+#if HAVE_NETINET_IN_H
+ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct socket_t *sock)
+{
+    *name = sock->local_addr;
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_get_remote_name(struct sockaddr_in **name, const struct socket_t *sock)
+{
+    *name = sock->remote_addr;
+    return APR_SUCCESS;
+}
+#endif
