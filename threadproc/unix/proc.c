@@ -407,18 +407,21 @@ ap_status_t ap_setprocattr_limit(ap_procattr_t *attr, ap_int32_t what,
         case APR_LIMIT_CPU:
 #ifdef RLIMIT_CPU
             attr->limit_cpu = limit;
+            break;
 #else
             return APR_ENOTIMPL;
 #endif
         case APR_LIMIT_MEM:
 #if defined (RLIMIT_DATA) || defined (RLIMIT_VMEM) || defined(RLIMIT_AS)
             attr->limit_mem = limit;
+            break;
 #else
             return APR_ENOTIMPL;
 #endif
         case APR_LIMIT_NPROC:
 #ifdef RLIMIT_NPROC
             attr->limit_nproc = limit;
+            break;
 #else
             return APR_ENOTIMPL;
 #endif
