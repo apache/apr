@@ -224,18 +224,12 @@ apr_status_t apr_accept(apr_socket_t **new_sock, apr_socket_t *sock,
 apr_status_t apr_connect(apr_socket_t *sock, const char *hostname);
 
 /**
- * Get name of the machine we are currently connected to.
+ * Get name of a machine we are currently connected to.
  * @param name A buffer to store the hostname in.
+ * @param which Which interface do we wnt the hostname for?
  * @param sock The socket to examine.
  */
-apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock);
-
-/**
- * Get name of the local machine via it's ip address.
- * @param name A buffer to store the hostname in.
- * @param sock The socket to examine.
- */
-apr_status_t apr_get_local_hostname(char **name, apr_socket_t *sock);
+apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *sock);
 
 /**
  * Get name of the current machine
@@ -558,10 +552,19 @@ apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file);
 
 /**
  * Given a hostname and a port, create an apr_in_addr for it...
- * @param addr The apr_in_addr structure to return.
+ * @param addr The apr_in_addr_t structure to return.
  * @param hostname The hostname to lookup.
  */
 apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname);
+
+/**
+ * Given an apr_socket_t get the apr_in_addr_t for the requested interface
+ * @param addr The apr_in_addr_t structure to return
+ * @param which The interface to return for
+ * @param sock The apr_socket_t to use
+ */
+apr_status_t apr_get_socket_inaddr(apr_in_addr_t *addr, apr_interface_e which,
+                  apr_socket_t *sock);
 
 #ifdef __cplusplus
 }
