@@ -57,7 +57,9 @@
 #include "apr_errno.h"
 #include "apr_pools.h"
 #include "misc.h"
+#ifdef HAVE_PTHREAD_H
 #include <pthread.h>
+#endif
 #include <signal.h>
 #include <errno.h>
 #include <string.h>
