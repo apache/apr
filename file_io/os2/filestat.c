@@ -137,6 +137,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t want
 
     if (rc == 0) {
         FS3_to_finfo(finfo, &fstatus);
+        finfo->fname = thefile->fname;
 
         if (finfo->filetype == APR_REG) {
             if (thefile->isopen) {
@@ -171,6 +172,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     
     if (rc == 0) {
         FS3_to_finfo(finfo, &fstatus);
+        finfo->fname = fname;
 
         if (wanted & APR_FINFO_NAME) {
             ULONG count = 1;
