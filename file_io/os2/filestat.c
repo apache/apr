@@ -75,12 +75,15 @@ static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
     finfo->inode = 0;
     finfo->device = 0;
     finfo->size = fstatus->cbFile;
+    finfo->csize = fstatus->cbFileAlloc;
     apr_os2_time_to_apr_time(&finfo->atime, fstatus->fdateLastAccess, 
                              fstatus->ftimeLastAccess );
     apr_os2_time_to_apr_time(&finfo->mtime, fstatus->fdateLastWrite,  
                              fstatus->ftimeLastWrite );
     apr_os2_time_to_apr_time(&finfo->ctime, fstatus->fdateCreation,   
                              fstatus->ftimeCreation );
+    finfo->valid |= APR_FINFO_TYPE | APR_FINFO_PROT | APR_FINFO_SIZE |
+        APR_FINFO_CSIZE | APR_FINFO_MTIME | APR_FINFO_CTIME | APR_FINFO_ATIME;
 }
 
 
@@ -160,15 +163,12 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname,
     rc = DosQueryPathInfo(fname, FIL_STANDARD, &fstatus, sizeof(fstatus));
     
     if (rc == 0) {
-        /* XXX: This is wrong, but it will work for today */
-        finfo->valid = APR_FINFO_NORM;
         FS3_to_finfo(finfo, &fstatus);
         return APR_SUCCESS;
     } else if (rc == ERROR_INVALID_ACCESS) {
-        /* XXX: This is wrong, but it will work for today */
-        finfo->valid = APR_FINFO_NORM;
         memset(finfo, 0, sizeof(apr_finfo_t));
-        finfo->protection = 0444;
+        finfo->valid = APR_FINFO_TYPE | APR_FINFO_PROT;
+        finfo->protection = 0666;
         finfo->filetype = APR_CHR;
         return APR_SUCCESS;
     }
