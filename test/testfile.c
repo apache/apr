@@ -390,22 +390,14 @@ static int test_read_guts(apr_pool_t *p, const char *fname, apr_int32_t extra_fl
     assert(!rv);
     read_one(f, 'a');
     read_one(f, 'b');
-    if (extra_flags & APR_BUFFERED) {
-        printf("\n        skipping apr_file_ungetc() for APR_BUFFERED as it "
-               "doesn't work yet\n");
-        apr_file_close(f);
-        return (0);
-    }
-    else {
-        rv = apr_file_ungetc('b', f);
-        assert(!rv);
-        /* Note: some implementations move the file ptr back;
-         *       others just save up to one char; it isn't 
-         *       portable to unget more than once.
-         */
-        /* Don't do this: rv = apr_file_ungetc('a', f); */
-        read_one(f, 'b');
-    }
+    rv = apr_file_ungetc('b', f);
+    assert(!rv);
+    /* Note: some implementations move the file ptr back;
+     *       others just save up to one char; it isn't 
+     *       portable to unget more than once.
+     */
+    /* Don't do this: rv = apr_file_ungetc('a', f); */
+    read_one(f, 'b');
     read_one(f, 'c');
     read_one(f, '\n');
     for (i = 0; i < TESTREAD_BLKSIZE; i++) {
