@@ -139,7 +139,11 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t l
             rv = APR_SUCCESS; /* APR_EOF? */
         }
     } else {
-        rv = APR_SUCCESS;
+        /* OK and 0 bytes read ==> end of file */
+        if (*nbytes == 0)
+            rv = APR_EOF;
+        else
+            rv = APR_SUCCESS;
     }
     return rv;
 }
@@ -186,10 +190,8 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *len)
                 rv = read_with_timeout(thefile, thefile->buffer, 
                                        APR_FILE_BUFSIZE, &thefile->dataRead);
                 if (thefile->dataRead == 0) {
-                    if (rv == APR_SUCCESS) {
+                    if (rv == APR_EOF)
                         thefile->eof_hit = TRUE;
-                        rv = APR_EOF;
-                    }
                     break;
                 }
 
@@ -240,6 +242,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes
             thefile->direction = 1;
         }
 
+        rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
                 rv = apr_flush(thefile);
