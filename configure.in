@@ -671,6 +671,7 @@ APR_FLAG_HEADERS(
     sys/time.h		\
     sys/types.h		\
     sys/uio.h		\
+    sys/un.h		\
     sys/wait.h)
 
 dnl IRIX 6.5 has a problem in <netinet/tcp.h> which prevents it from
@@ -714,6 +715,7 @@ AC_SUBST(sys_socketh)
 AC_SUBST(sys_typesh)
 AC_SUBST(sys_timeh)
 AC_SUBST(sys_uioh)
+AC_SUBST(sys_unh)
 AC_SUBST(unistdh)
 AC_SUBST(signalh)
 AC_SUBST(sys_waith)
@@ -1186,19 +1188,32 @@ elif test -r "/dev/urandom"; then
     AC_MSG_RESULT(/dev/urandom)
     rand="1"
 else
-    AC_MSG_RESULT(not found);
-
     case $host in
         # we have built in support for OS/2
         *-os2*)
+            AC_MSG_RESULT([Using OS/2 builtin random])
             rand="1"
             ;;
-        # no other choice, try for truerand
         *)
-            if test "$ac_cv_lib_truerand_main" = "yes"; then
+            AC_ARG_WITH(egd, 
+              [  --with-egd=<path>   use egd-compatible socket],
+              [ if test "$withval" = "yes"; then
+                  AC_ERROR([You must specify a default EGD socket path.])
+                fi
+                AC_DEFINE(HAVE_EGD)
+                AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, [$withval])
+                AC_MSG_RESULT(EGD-compatible daemon)
                 rand="1"
-            else
+              ])
+            if test "$rand" != "1"; then
+              if test "$ac_cv_lib_truerand_main" = "yes"; then
+                AC_DEFINE(HAVE_TRUERAND)
+                AC_MSG_RESULT(truerand)
+                rand="1"
+              else
+                AC_MSG_RESULT(not found)
                 rand="0"
+              fi
             fi
             ;;
     esac
