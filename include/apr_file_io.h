@@ -86,25 +86,28 @@ extern "C" {
  * @{
  */
 
-#define APR_READ       1           /**< Open the file for reading */
-#define APR_WRITE      2           /**< Open the file for writing */
-#define APR_CREATE     4           /**< Create the file if not there */
-#define APR_APPEND     8           /**< Append to the end of the file */
-#define APR_TRUNCATE   16          /**< Open the file and truncate to 0 length */
-#define APR_BINARY     32          /**< Open the file in binary mode */
-#define APR_EXCL       64          /**< Open should fail if APR_CREATE and file
+/* Note to implementors: Values in the range 0x00100000--0x80000000
+   are reserved for platform-specific values. */
+
+#define APR_READ       0x00001     /**< Open the file for reading */
+#define APR_WRITE      0x00002     /**< Open the file for writing */
+#define APR_CREATE     0x00004     /**< Create the file if not there */
+#define APR_APPEND     0x00008     /**< Append to the end of the file */
+#define APR_TRUNCATE   0x00010     /**< Open the file and truncate to 0 length */
+#define APR_BINARY     0x00020     /**< Open the file in binary mode */
+#define APR_EXCL       0x00040     /**< Open should fail if APR_CREATE and file
                                         exists. */
-#define APR_BUFFERED   128         /**< Open the file for buffered I/O */
-#define APR_DELONCLOSE 256         /**< Delete the file after close */
-#define APR_XTHREAD    512         /**< Platform dependent tag to open the file
+#define APR_BUFFERED   0x00080     /**< Open the file for buffered I/O */
+#define APR_DELONCLOSE 0x00100     /**< Delete the file after close */
+#define APR_XTHREAD    0x00200     /**< Platform dependent tag to open the file
                                         for use across multiple threads */
-#define APR_SHARELOCK  1024        /**< Platform dependent support for higher
+#define APR_SHARELOCK  0x00400     /**< Platform dependent support for higher
                                         level locked read/write access to support
                                         writes across process/machines */
-#define APR_FILE_NOCLEANUP  2048   /**< Do not register a cleanup when the file
+#define APR_FILE_NOCLEANUP 0x00800 /**< Do not register a cleanup when the file
                                         is opened */
-#define APR_SENDFILE_ENABLED  4096 /**< Advisory flag that this file should 
-                                        support apr_sendfile operation */ 
+#define APR_SENDFILE_ENABLED 0x01000 /**< Advisory flag that this file should
+                                          support apr_sendfile operation */
 /** @} */
 
 /**
