@@ -125,7 +125,8 @@ static int sock_is_ipv6(apr_socket_t* sock)
 #endif
 
 static apr_status_t do_mcast(int type, apr_socket_t *sock, 
-                             apr_sockaddr_t *mcast, apr_sockaddr_t *iface)
+                             apr_sockaddr_t *mcast, apr_sockaddr_t *iface,
+                             apr_sockaddr_t *ssm)
 {
     struct ip_mreq mip4;
     apr_status_t rv = APR_SUCCESS;
@@ -133,6 +134,10 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
     struct ipv6_mreq mip6;
 #endif
     
+    /* We do not currently support Single Source Multicast. */
+    if (ssm != NULL)
+        return APR_ENOTIMPL;
+
     rv = mcast_check_type(sock);
 
     if (rv != APR_SUCCESS) {
@@ -223,10 +228,11 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
 
 APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
                                          apr_sockaddr_t *join,
-                                         apr_sockaddr_t *iface)
+                                         apr_sockaddr_t *iface,
+                                         apr_sockaddr_t *ssm)
 {
 #ifdef IP_ADD_MEMBERSHIP
-    return do_mcast(IP_ADD_MEMBERSHIP, sock, join, iface);
+    return do_mcast(IP_ADD_MEMBERSHIP, sock, join, iface, ssm);
 #else
     return APR_ENOTIMPL;
 #endif
@@ -234,10 +240,11 @@ APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
 
 APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
                                           apr_sockaddr_t *leave,
-                                          apr_sockaddr_t *iface)
+                                          apr_sockaddr_t *iface,
+                                          apr_sockaddr_t *ssm)
 {
 #ifdef IP_DROP_MEMBERSHIP
-    return do_mcast(IP_DROP_MEMBERSHIP, sock, leave, iface);
+    return do_mcast(IP_DROP_MEMBERSHIP, sock, leave, iface, ssm);
 #else
     return APR_ENOTIMPL;
 #endif
