@@ -113,25 +113,22 @@
 #define __attribute__(__x)
 #define ENUM_BITFIELD(e,n,w)  signed int n : w
 
-#define APR_HAVE_ERRNO_H        1
+#define NO_USE_SIGACTION
+
+#define APR_HAVE_CTYPE_H        1
 #define APR_HAVE_DIRENT_H       0
+#define APR_HAVE_ERRNO_H        1
 #define APR_HAVE_FCNTL_H        0
 #define APR_HAVE_NETINET_IN_H   0
 #define APR_HAVE_PTHREAD_H      0
 #define APR_HAVE_STDARG_H       1
 #define APR_HAVE_STDIO_H        1
+#define APR_HAVE_SYS_SOCKET_H   0
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      0
-#define APR_HAVE_IN_ADDR        1
-#define APR_HAVE_INET_ADDR	1
-
-#define APR_HAVE_MEMMOVE        1
-#define APR_HAVE_STRCASECMP     0
-#define APR_HAVE_STRICMP        1
-#define APR_HAVE_STRNCASECMP    0
-#define APR_HAVE_STRNICMP       1
-#define APR_HAVE_STRDUP         1
-#define APR_HAVE_STRSTR         1
+#define APR_HAVE_SIGNAL_H       0
+#define APR_HAVE_SYS_WAIT_H     0
+#define APR_HAVE_UNISTD_H       0
 
 #define APR_USE_FLOCK_SERIALIZE           0 
 #define APR_USE_SYSVSEM_SERIALIZE         0
@@ -141,28 +138,47 @@
 
 #define APR_PROCESS_LOCK_IS_GLOBAL        0
 
-#define NO_USE_SIGACTION
+#define APR_USES_ANONYMOUS_SHM            0
+#define APR_USES_FILEBASED_SHM            0
+#define APR_USES_KEYBASED_SHM             0
+
+#define APR_FILE_BASED_SHM      0
+#define APR_MEM_BASED_SHM       0
+
+#define APR_HAVE_IN_ADDR        1
+#define APR_HAVE_INET_ADDR	1
+#define APR_HAVE_INET_NETWORK   0
+#define APR_HAVE_UNION_SEMUN    0
+#define APR_HAVE_STRUCT_RLIMIT  0
+#define APR_HAVE_SETRLIMIT      0
+#define APR_HAVE_GETRLIMIT      0
+#define APR_HAVE_STRICMP        1
+#define APR_HAVE_STRNICMP       1
+#define APR_HAVE_STRCASECMP     0
+#define APR_HAVE_STRNCASECMP    0
+#define APR_HAVE_STRDUP         1
+#define APR_HAVE_STRSTR         1
+#define APR_HAVE_MEMMOVE        1
+#define APR_HAVE_BZERO          0
+#define APR_HAVE_IPV6           0
+
 
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
 /*  APR Feature Macros */
-#define APR_HAS_THREADS        1
-#define APR_HAS_SENDFILE       1
-#define APR_HAS_RANDOM         1
-#define APR_HAS_DSO            1
-
-#define APR_HAS_MMAP           0
-#define APR_HAS_XLATE          0
-
-/*
- * XXX: Problem - while this may be an NT build - so we are experimenting
- * but if we have problems, please feel free to revert to 0.
- */
-#define APR_HAS_UNICODE_FS     1
-
-#define APR_HAS_USER           0
+#define APR_HAS_SHARED_MEMORY     0
+#define APR_HAS_THREADS           1
+#define APR_HAS_SENDFILE          1
+#define APR_HAS_MMAP              0
+#define APR_HAS_FORK              0
+#define APR_HAS_RANDOM            1
+#define APR_HAS_XLATE             0
+#define APR_HAS_OTHER_CHILD       0
+#define APR_HAS_DSO               1
+#define APR_HAS_UNICODE_FS        1
+#define APR_HAS_USER              0
 
 /* Not all platforms have a real INADDR_NONE.  This macro replaces INADDR_NONE
  * on all platforms.
@@ -189,13 +205,8 @@ typedef  int         uid_t;
 typedef  int         gid_t;
 
 /* Definitions that APR programs need to work properly. */
-#define APR_SSIZE_T_FMT          "d"
-#define APR_SIZE_T_FMT          "d"
-#define APR_THREAD_FUNC          __stdcall
-#define APR_OFF_T_FMT            "ld"
 
-/* Local machine definition for console and log output. */
-#define APR_EOL_STR              "\r\n"
+#define APR_THREAD_FUNC          __stdcall
 
 /**
  * APR_DECLARE_EXPORT is defined when building the APR dynamic library,
@@ -248,6 +259,15 @@ typedef  int         gid_t;
 #define APR_DECLARE_NONSTD(type)     __declspec(dllimport) type
 #define APR_DECLARE_DATA             __declspec(dllimport)
 #endif
+
+#define APR_SSIZE_T_FMT          "d"
+
+#define APR_SIZE_T_FMT          "d"
+
+#define APR_OFF_T_FMT            "ld"
+
+/* Local machine definition for console and log output. */
+#define APR_EOL_STR              "\r\n"
 
 #define apr_signal(a,b) signal(a,b)
 
