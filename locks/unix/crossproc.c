@@ -86,7 +86,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
         lock_cleanup(new);
         return errno;
     }
-            /* pre-initialize these */
+            /* pre ap_context_t nitialize these */
     new->op_on.sem_num = 0;
     new->op_on.sem_op = -1;
     new->op_on.sem_flg = SEM_UNDO;
@@ -248,7 +248,7 @@ ap_status_t create_inter_lock(struct lock_t *new)
         lock_cleanup(new);
         return errno;
     }
-            /* pre-initialize these */
+            /* pre ap_context_t nitialize these */
     new->lock_it.l_whence = SEEK_SET;        /* from current point */
     new->lock_it.l_start = 0;                /* -"- */
     new->lock_it.l_len = 0;                  /* until end of file */

@@ -112,7 +112,7 @@ ap_status_t ap_shm_realloc(struct shmem_t *shared, ap_size_t size, void **entity
     return APR_SUCCESS;
 }
 
-ap_status_t apr_shm_free(struct shmem_t *shared, void *entity)
+ap_status_t ap_shm_free(struct shmem_t *shared, void *entity)
 {
     mm_free(shared->mm, entity);
     return APR_SUCCESS;

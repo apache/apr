@@ -72,14 +72,14 @@ extern "C" {
  * Instead, we maintain pools, and allocate items (both memory and I/O
  * handlers) from the pools --- currently there are two, one for per
  * transaction info, and one for config info.  When a transaction is over,
- * we can delete everything in the per-transaction pool without fear, and
+ * we can delete everything in the per-transaction ap_context_t without fear, and
  * without thinking too hard about it either.
  *
  * rst
  */
 
 /* Arenas for configuration info and transaction info
- * --- actual layout of the pool structure is private to 
+ * --- actual layout of the ap_context_t structure is private to 
  * alloc.c.  
  */
 
@@ -168,7 +168,7 @@ API_EXPORT_NONSTD(char *) ap_psprintf(struct context_t *, const char *fmt, ...)
  * Common enough to want common support code ...
  */
 
-/* ap_array_pstrcat generates a new string from the pool containing
+/* ap_array_pstrcat generates a new string from the ap_context_t containing
  * the concatenated sequence of substrings referenced as elements within
  * the array.  The string will be empty if all substrings are empty or null,
  * or if there are no elements in the array.
@@ -207,10 +207,39 @@ API_EXPORT_NONSTD(char *) ap_psprintf(struct context_t *, const char *fmt, ...)
 #define ap_OVERLAP_TABLES_SET	(0)
 #define ap_OVERLAP_TABLES_MERGE	(1)
 
-/* XXX: these know about the definition of struct table in alloc.c.  That
+/* A set of flags which indicate places where the server should raise(SIGSTOP).
+ * This is useful for debugging, because you can then attach to that process
+ * with gdb and continue.  This is important in cases where one_process
+ * debugging isn't possible.
+ */
+#define SIGSTOP_DETACH                  1
+#define SIGSTOP_MAKE_CHILD              2                                       #define SIGSTOP_SPAWN_CHILD             4
+#define SIGSTOP_PIPED_LOG_SPAWN         8
+#define SIGSTOP_CGI_CHILD               16
+
+#ifdef DEBUG_SIGSTOP
+extern int raise_sigstop_flags;
+#define RAISE_SIGSTOP(x)        do { \
+        if (raise_sigstop_flags & SIGSTOP_##x) raise(SIGSTOP);\
+    } while (0)
+#else
+#define RAISE_SIGSTOP(x)
+#endif
+
+#ifdef ULTRIX_BRAIN_DEATH
+#define ap_fdopen(d,m) fdopen((d), (char *)(m))
+#else
+#define ap_fdopen(d,m) fdopen((d), (m))
+#endif
+
+#define closesocket(s) close(s)
+
+
+
+/* XXX: these know about the definition of struct ap_table_t in alloc.c.  That
  * definition is not here because it is supposed to be private, and by not
  * placing it here we are able to get compile-time diagnostics from modules
- * written which assume that a table is the same as an ap_array_header_t. -djg
+ * written which assume that a ap_table_t is the same as an ap_array_header_t. -djg
  */
 #define ap_table_elts(t) ((ap_array_header_t *)(t))
 #define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
@@ -254,31 +283,28 @@ API_EXPORT_NONSTD(char *) ap_psprintf(struct context_t *, const char *fmt, ...)
  * the note_cleanups_for_foo routines are for 
  */
 
-API_EXPORT(FILE *) ap_pfopen(ap_pool_t *, const char *name, const char *fmode);
-API_EXPORT(FILE *) ap_pfdopen(ap_pool_t *, int fd, const char *fmode);
-API_EXPORT(int) ap_popenf(ap_pool_t *, const char *name, int flg, int mode);
+API_EXPORT(FILE *) ap_pfopen(ap_context_t *, const char *name, const char *fmode);
+API_EXPORT(FILE *) ap_pfdopen(ap_context_t *, int fd, const char *fmode);
+API_EXPORT(int) ap_popenf(ap_context_t *, const char *name, int flg, int mode);
 
-API_EXPORT(void) ap_note_cleanups_for_file(ap_pool_t *, FILE *);
-API_EXPORT(void) ap_note_cleanups_for_fd(ap_pool_t *, int);
-API_EXPORT(void) ap_kill_cleanups_for_fd(ap_pool_t *p, int fd);
-API_EXPORT(void) ap_note_cleanups_for_socket(ap_pool_t *, int);
-API_EXPORT(void) ap_kill_cleanups_for_socket(ap_pool_t *p, int sock);
-API_EXPORT(int) ap_psocket(ap_pool_t *p, int, int, int);
-API_EXPORT(int) ap_pclosesocket(ap_pool_t *a, int sock);
-API_EXPORT(regex_t *) ap_pregcomp(ap_pool_t *p, const char *pattern,
-				   int cflags);
-API_EXPORT(void) ap_pregfree(ap_pool_t *p, regex_t * reg);
+API_EXPORT(void) ap_note_cleanups_for_file(ap_context_t *, FILE *);
+API_EXPORT(void) ap_note_cleanups_for_fd(ap_context_t *, int);
+API_EXPORT(void) ap_kill_cleanups_for_fd(ap_context_t *p, int fd);
+API_EXPORT(void) ap_note_cleanups_for_socket(ap_context_t *, int);
+API_EXPORT(void) ap_kill_cleanups_for_socket(ap_context_t *p, int sock);
+API_EXPORT(int) ap_psocket(ap_context_t *p, int, int, int);
+API_EXPORT(int) ap_pclosesocket(ap_context_t *a, int sock);
 
 /* routines to note closes... file descriptors are constrained enough
  * on some systems that we want to support this.
  */
 
-API_EXPORT(int) ap_pfclose(ap_pool_t *, FILE *);
-API_EXPORT(int) ap_pclosef(ap_pool_t *, int fd);
+API_EXPORT(int) ap_pfclose(ap_context_t *, FILE *);
+API_EXPORT(int) ap_pclosef(ap_context_t *, int fd);
 
 /* routines to deal with directories */
-/*API_EXPORT(DIR *) ap_popendir(ap_pool_t *p, const char *name);
-API_EXPORT(void) ap_pclosedir(ap_pool_t *p, DIR * d);
+/*API_EXPORT(DIR *) ap_popendir(ap_context_t *p, const char *name);
+API_EXPORT(void) ap_pclosedir(ap_context_t *p, DIR * d);
 */
 /* ... even child processes (which we may want to wait for,
  * or to kill outright, on unexpected termination).
@@ -293,7 +319,7 @@ API_EXPORT(void) ap_pclosedir(ap_pool_t *p, DIR * d);
 API_EXPORT(void) ap_note_subprocess(struct context_t *a, pid_t pid,
 				    enum kill_conditions how);
 
-/* magic numbers --- min free bytes to consider a free pool block useable,
+/* magic numbers --- min free bytes to consider a free ap_context_t block useable,
  * and the min amount to allocate if we have to go to malloc() */
 
 #ifndef BLOCK_MINFREE

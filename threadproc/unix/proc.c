@@ -206,7 +206,7 @@ ap_status_t ap_fork(ap_context_t *cont, struct proc_t **proc)
  * arg 2) The program to run 
  * arg 3) the arguments to pass to the new program.  The first one should
  *        be the program name.
- * arg 4) The new environment table for the new process.  This should be a
+ * arg 4) The new environment ap_table_t for the new process.  This should be a
  *        list of NULL-terminated strings.
  * arg 5) the procattr we should use to determine how to create the new
  *        process

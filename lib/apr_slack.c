@@ -56,7 +56,7 @@
  */
 
 /*
- * apr_slack.c: File descriptor preallocation
+ * ap_slack.c: File descriptor preallocation
  * 
  * 3/21/93 Rob McCool
  * 1995-96 Many changes by the Apache Group
@@ -74,7 +74,7 @@
 #endif
 
 #ifndef NO_SLACK
-int apr_slack(int fd, int line)
+int ap_slack(int fd, int line)
 {
 #if !defined(F_DUPFD)
     return fd;
@@ -107,7 +107,7 @@ int apr_slack(int fd, int line)
 	     * the high line, because if it fails we'll eventually try
 	     * the low line...
 	     */
-	    apr_log_error(APLOG_MARK, APLOG_WARNING, NULL,
+	    ap_log_error(APLOG_MARK, APLOG_WARNING, NULL,
 		        "unable to open a file descriptor above %u, "
 			"you may need to increase the number of descriptors",
 			LOW_SLACK_LINE);
@@ -122,5 +122,5 @@ int apr_slack(int fd, int line)
 }
 #else
 /* need at least one function in the file for some linkers */
-void apr_slack_is_not_here(void) {}
+void ap_slack_is_not_here(void) {}
 #endif /* NO_SLACK */

@@ -113,13 +113,13 @@ typedef struct {
     unsigned char buffer[64];	/* input buffer */
 } APR_MD5_CTX;
 
-API_EXPORT(void) apr_MD5Init(APR_MD5_CTX * context);
-API_EXPORT(void) apr_MD5Update(APR_MD5_CTX * context, const unsigned char *input,
+API_EXPORT(void) ap_MD5Init(APR_MD5_CTX * context);
+API_EXPORT(void) ap_MD5Update(APR_MD5_CTX * context, const unsigned char *input,
 			   unsigned int inputLen);
-API_EXPORT(void) apr_MD5Final(unsigned char digest[16], APR_MD5_CTX * context);
-API_EXPORT(void) apr_MD5Encode(const char *password, const char *salt,
+API_EXPORT(void) ap_MD5Final(unsigned char digest[16], APR_MD5_CTX * context);
+API_EXPORT(void) ap_MD5Encode(const char *password, const char *salt,
 			      char *result, size_t nbytes);
-API_EXPORT(char *) apr_validate_password(const char *passwd, const char *hash);
+API_EXPORT(char *) ap_validate_password(const char *passwd, const char *hash);
 
 #ifdef __cplusplus
 }

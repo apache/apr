@@ -53,7 +53,7 @@ static char sccsid[] = "@(#)fnmatch.c	8.2 (Berkeley) 4/16/94";
 
 static const char *rangematch(const char *, int, int);
 
-API_EXPORT(int) apr_fnmatch(const char *pattern, const char *string, int flags)
+API_EXPORT(int) ap_fnmatch(const char *pattern, const char *string, int flags)
 {
     const char *stringstart;
     char c, test;
@@ -107,7 +107,7 @@ API_EXPORT(int) apr_fnmatch(const char *pattern, const char *string, int flags)
 
 	    /* General case, use recursion. */
 	    while ((test = *string) != EOS) {
-	        if (!apr_fnmatch(pattern, string, flags & ~FNM_PERIOD)) {
+	        if (!ap_fnmatch(pattern, string, flags & ~FNM_PERIOD)) {
 		    return (0);
 		}
 		if (test == '/' && flags & FNM_PATHNAME) {
@@ -143,7 +143,7 @@ API_EXPORT(int) apr_fnmatch(const char *pattern, const char *string, int flags)
 	    /* FALLTHROUGH */
 	default:
 	    if (flags & FNM_CASE_BLIND) {
-	        if (apr_tolower(c) != apr_tolower(*string)) {
+	        if (ap_tolower(c) != ap_tolower(*string)) {
 		    return (FNM_NOMATCH);
 		}
 	    }
@@ -190,14 +190,14 @@ static const char *rangematch(const char *pattern, int test, int flags)
 	    }
 	    if ((c <= test && test <= c2)
 		|| ((flags & FNM_CASE_BLIND)
-		    && ((apr_tolower(c) <= apr_tolower(test))
-			&& (apr_tolower(test) <= apr_tolower(c2))))) {
+		    && ((ap_tolower(c) <= ap_tolower(test))
+			&& (ap_tolower(test) <= ap_tolower(c2))))) {
 		ok = 1;
 	    }
 	}
 	else if ((c == test)
 		 || ((flags & FNM_CASE_BLIND)
-		     && (apr_tolower(c) == apr_tolower(test)))) {
+		     && (ap_tolower(c) == ap_tolower(test)))) {
 	    ok = 1;
 	}
     }
@@ -207,7 +207,7 @@ static const char *rangematch(const char *pattern, int test, int flags)
 
 /* This function is an Apache addition */
 /* return non-zero if pattern has any glob chars in it */
-API_EXPORT(int) apr_is_fnmatch(const char *pattern)
+API_EXPORT(int) ap_is_fnmatch(const char *pattern)
 {
     int nesting;
 

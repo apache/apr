@@ -171,9 +171,9 @@ static void add_password(char *user, char *realm, ap_file_t *f)
     /* Do MD5 stuff */
     sprintf(string, "%s:%s:%s", user, realm, pw);
 
-    apr_MD5Init(&context);
-    apr_MD5Update(&context, (unsigned char *) string, strlen(string));
-    apr_MD5Final(digest, &context);
+    ap_MD5Init(&context);
+    ap_MD5Update(&context, (unsigned char *) string, strlen(string));
+    ap_MD5Final(digest, &context);
 
     for (i = 0; i < 16; i++)
 	ap_fprintf(f, "%02x", digest[i]);

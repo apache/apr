@@ -80,7 +80,7 @@
    **    - Enhanced by Dean Gaudet <dgaudet@apache.org>, November 1997
    **    - Cleaned up by Ralf S. Engelschall <rse@apache.org>, March 1998
    **    - POST and verbosity by Kurt Sussman <kls@merlot.com>, August 1998
-   **    - HTML table output added by David N. Welton <davidw@prosa.it>, January 1999
+   **    - HTML ap_table_t output added by David N. Welton <davidw@prosa.it>, January 1999
    **
  */
 
@@ -810,7 +810,7 @@ static void usage(char *progname)
     fprintf(stderr, "    -T content-type Content-type header for POSTing\n");
     fprintf(stderr, "    -v verbosity    How much troubleshooting info to print\n");
     fprintf(stderr, "    -w              Print out results in HTML tables\n");
-    fprintf(stderr, "    -x attributes   String to insert as table attributes\n");
+    fprintf(stderr, "    -x attributes   String to insert as ap_table_t attributes\n");
     fprintf(stderr, "    -y attributes   String to insert as tr attributes\n");
     fprintf(stderr, "    -z attributes   String to insert as td or th attributes\n");
     fprintf(stderr, "    -V              Print version number and exit\n");
@@ -862,7 +862,7 @@ static int open_postfile(char *pfile)
         return errno;
     }
 
-    /* No need to perform stat here, the apr_open will do it for us.  */  
+    /* No need to perform stat here, the ap_open will do it for us.  */  
 
     ap_get_filesize(postfd, &postlen);
     postdata = (char *)malloc(postlen);
@@ -886,7 +886,7 @@ int main(int argc, char **argv)
 {
     int c, r;
 
-    /* table defaults  */
+    /* ap_table_t defaults  */
     tablestring = "";
     trstring = "";
     tdstring = "bgcolor=white";
