@@ -53,6 +53,7 @@
  */
 
 #include "beos/dso.h"
+#include "apr_portable.h"
 
 #if APR_HAS_DSO
 
@@ -60,9 +61,9 @@ static apr_status_t dso_cleanup(void *thedso)
 {
     apr_dso_handle_t *dso = thedso;
 
-    if (dso->handle != NULL && unload_add_on(dso->handle) < B_NO_ERROR)
+    if (dso->handle > 0 && unload_add_on(dso->handle) < B_NO_ERROR)
       return APR_EINIT;
-    dso->handle = NULL;
+    dso->handle = -1;
 
     return APR_SUCCESS;
 }
@@ -110,6 +111,23 @@ APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr
 {
     strncpy(buffer, strerror(errno), buflen);
     return buffer;
+}
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
+                                                apr_os_dso_handle_t *osdso,
+                                                apr_pool_t *pool)
+{
+    *aprdso = apr_pcalloc(pool, sizeof **aprdso);
+    (*aprdso)->handle = *osdso;
+    (*aprdso)->cont = pool;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *osdso,
+                                                apr_dso_handle_t *aprdso)
+{
+    *osdso = aprdso->handle;
+    return APR_SUCCESS;
 }
 
 #endif
