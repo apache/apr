@@ -125,6 +125,24 @@ static void snprintf_0nonNULL(abts_case *tc, void *data)
     ABTS_ASSERT(tc, "buff unmangled", strcmp(buff, "FOOBAR") != 0);
 }
 
+static void snprintf_underflow(abts_case *tc, void *data)
+{
+    char buf[20];
+    int rv;
+
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.0001);
+    ABTS_INT_EQUAL(tc, 4, rv);
+    ABTS_STR_EQUAL(tc, "0.00", buf);
+    
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.001);
+    ABTS_INT_EQUAL(tc, 4, rv);
+    ABTS_STR_EQUAL(tc, "0.00", buf);
+    
+    rv = apr_snprintf(buf, sizeof buf, "%.2f", (double)0.01);
+    ABTS_INT_EQUAL(tc, 4, rv);
+    ABTS_STR_EQUAL(tc, "0.01", buf);
+}
+
 static void string_error(abts_case *tc, void *data)
 {
      char buf[128], *rv;
@@ -267,6 +285,7 @@ abts_suite *teststr(abts_suite *suite)
     abts_run_test(suite, snprintf_0NULL, NULL);
     abts_run_test(suite, snprintf_0nonNULL, NULL);
     abts_run_test(suite, snprintf_noNULL, NULL);
+    abts_run_test(suite, snprintf_underflow, NULL);
     abts_run_test(suite, test_strtok, NULL);
     abts_run_test(suite, string_error, NULL);
     abts_run_test(suite, string_long, NULL);
