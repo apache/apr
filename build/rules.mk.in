@@ -83,10 +83,10 @@ LTFLAGS = --silent
 #
 # Basic macro setup
 #
-COMPILE      = $(CC) $(CPPFLAGS) $(INCLUDES) $(CFLAGS) $(OPTIM)
-LT_COMPILE   = $(LIBTOOL) --mode=compile $(LTFLAGS) $(COMPILE) -c $< && touch $@
+COMPILE      = $(CC) $(CPPFLAGS) $(CFLAGS) $(OPTIM) $(INCLUDES)
+LT_COMPILE   = @lt_compile@
 
-LINK         = $(LIBTOOL) --mode=link $(LTFLAGS) $(COMPILE) $(LDFLAGS) -o $@
+LINK         = @link@
 
 MKEXPORT     = $(AWK) -f $(apr_builders)/make_export.awk
 MKDEP        = $(apr_builders)/mkdep.sh
