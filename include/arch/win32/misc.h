@@ -171,7 +171,8 @@ typedef enum {
     DLL_WINADVAPI = 1,     // advapi32 From WinBase.h
     DLL_WINSOCKAPI = 2,    // mswsock  From WinSock.h
     DLL_WINSOCK2API = 3,   // ws2_32   From WinSock2.h
-    DLL_defined = 4        // must define as last idx_ + 1
+    DLL_SHSTDAPI = 4,      // shell32  From ShellAPI.h
+    DLL_defined = 5        // must define as last idx_ + 1
 } apr_dlltoken_e;
 
 FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char *fnName, int ordinal);
@@ -292,6 +293,12 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetSecurityInfo, 0, (
     (handle, ObjectType, SecurityInfo, ppsidOwner, ppsidGroup, 
 	 ppDacl, ppSacl, ppSecurityDescriptor));
 #define GetSecurityInfo apr_winapi_GetSecurityInfo
+
+APR_DECLARE_LATE_DLL_FUNC(DLL_SHSTDAPI, LPWSTR *, WINAPI, CommandLineToArgvW, 0, (
+    LPCWSTR lpCmdLine, 
+    int *pNumArgs),
+    (lpCmdLine, pNumArgs));
+#define CommandLineToArgvW apr_winapi_CommandLineToArgvW
 
 #endif /* !defined(_WIN32_WCE) && !defined(WINNT) */
 
