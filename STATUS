@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/02 07:13:54 $]
+Last modified at [$Date: 2001/01/07 00:35:37 $]
 
 Release:
 
@@ -89,6 +89,9 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
               built-in macro processing is much more powerful, and
               combined with the include facility, generating Makefiles
               becomes simpler and faster.
+
+    * use os_(un)cork in network_io/unix/sendrecv.c for FreeBSD's
+      sendfile implementation.
 
 
 Documentation that needs writing:
