@@ -175,6 +175,9 @@ typedef  int         gid_t;
 #define APR_THREAD_FUNC          __stdcall
 #define APR_OFF_T_FMT            "ld"
 
+/* Local machine definition for console and log output. */
+#define APR_EOL_STR              "\r\n"
+
 #if !defined(WIN32) || defined(APR_STATIC)
 /* Default Non-WIN32 behavior removes all MSVCisms */
 #define APR_EXPORT(type)         type
