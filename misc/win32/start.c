@@ -119,14 +119,46 @@ ap_status_t ap_destroy_context(ap_context_t *cont)
 ap_status_t ap_get_oslevel(ap_context_t *cont, ap_oslevel_e *level)
 {
     static OSVERSIONINFO oslev;
+    static unsigned int servpack = 0;
     static BOOL first = TRUE;
+    char *pservpack;
 
     if (first) {
         first = FALSE;
+        oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
         GetVersionEx(&oslev);
+        if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+            for (pservpack = oslev.szCSDVersion; 
+                 *pservpack && !isdigit(*pservpack); pservpack++)
+                ;
+            if (*pservpack)
+                servpack = atoi(pservpack);
+        }
     }
     if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-        (*level) = APR_WIN_NT;
+        if (oslev.dwMajorVersion == 5) {
+            (*level) = APR_WIN_2000;
+        }
+        else if (oslev.dwMajorVersion == 4) {
+            if (servpack >= 6) {
+                (*level) = APR_WIN_NT_4_SP6;
+            }
+            else if (servpack >= 4) {
+                (*level) = APR_WIN_NT_4_SP4;
+            }
+            else if (servpack >= 3) {
+                (*level) = APR_WIN_NT_4_SP3;
+            }
+            else if (servpack >= 2) {
+                (*level) = APR_WIN_NT_4_SP2;
+            }
+            else {
+                (*level) = APR_WIN_NT_4;
+            }
+        }
+        else {
+            (*level) = APR_WIN_NT;
+        }
         return APR_SUCCESS;
     }
     else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
