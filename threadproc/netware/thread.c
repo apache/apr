@@ -54,8 +54,10 @@
 
 #include "apr.h"
 #include "apr_portable.h"
+#include "apr_strings.h"
 #include "threadproc.h"
 
+static int thread_count = 0;
 
 apr_status_t apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *cont)
@@ -68,6 +70,9 @@ apr_status_t apr_threadattr_create(apr_threadattr_t **new,
     }
 
     (*new)->cntxt = cont;
+    (*new)->stack_size = APR_DEFAULT_STACK_SIZE;
+    (*new)->detach = 0;
+    (*new)->thread_name = NULL;
     return APR_SUCCESS;
 }
 
@@ -91,12 +96,27 @@ apr_status_t apr_thread_create(apr_thread_t **new,
  											apr_pool_t *cont)
 {
     apr_status_t stat;
-    size_t stacksize;
     long flags = NX_THR_BIND_CONTEXT;
   	char threadName[NX_MAX_OBJECT_NAME_LEN+1];
-   	//srj added for nks giving the threads names
-	
-	sprintf(threadName, "Apache-2.0 %003ld",data);
+
+    if (!attr)
+        return APR_EINVAL;
+
+    if (!attr->thread_name) {
+        char threadName[32];
+
+	    sprintf(threadName, "APR_thread %0004ld", ++thread_count);
+        attr->thread_name = apr_pstrdup(cont, threadName);
+    }
+
+    /* An original stack size of 0 will allow NXCreateThread() to
+    *   assign a default system stack size.  An original stack
+    *   size of less than 0 will assign the APR default stack size.
+    *   anything else will be taken as is.
+    */
+    if (attr->stack_size < 0) {
+        attr->stack_size = APR_DEFAULT_STACK_SIZE;
+    }
     
     (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
 
@@ -111,27 +131,22 @@ apr_status_t apr_thread_create(apr_thread_t **new,
         return stat;
     }
     
-    if (attr) {
-        stacksize = attr->stack_size; 
-        if (attr->detach)
-            flags |= NX_THR_DETACHED;
-    }
-    else {
-        stacksize = APR_DEFAULT_STACK_SIZE;
+    if (attr && attr->detach) {
+        flags |= NX_THR_DETACHED;
     }
     
     (*new)->ctx = NXContextAlloc(
     	/* void(*start_routine)(void *arg)*/(void (*)(void *)) func,
      	/* void *arg */										   data,
      	/* int priority */ 									   NX_PRIO_MED,
-     	/* NXSize_t stackSize */							   stacksize,
+     	/* NXSize_t stackSize */							   attr->stack_size,
      	/* long flags */									   NX_CTX_NORMAL,
      	/* int *error */									   &stat);
 		
      	                                                                   
   	stat = NXContextSetName(
 		 	/* NXContext_t ctx */			(*new)->ctx,
-			/* const char *name */			threadName);
+			/* const char *name */			attr->thread_name);
 
   	stat = NXThreadCreate(
         	/* NXContext_t context */		(*new)->ctx,
