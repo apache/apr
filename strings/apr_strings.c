@@ -50,6 +50,37 @@
  * individuals on behalf of the Apache Software Foundation.  For more
  * information on the Apache Software Foundation, please see
  * <http://www.apache.org/>.
+ *
+ * Copyright (c) 1990, 1993
+ *	The Regents of the University of California.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 3. All advertising materials mentioning features or use of this software
+ *    must display the following acknowledgement:
+ *	This product includes software developed by the University of
+ *	California, Berkeley and its contributors.
+ * 4. Neither the name of the University nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  */
 
 #include "apr.h"
@@ -233,13 +264,113 @@ void *memchr(const void *s, int c, size_t n)
 }
 #endif
 
-APR_DECLARE(apr_int64_t) apr_strtoi64(const char *buf, char **end, int base)
+#ifndef INT64_MAX
+#define INT64_MAX  APR_INT64_C(0x7fffffffffffffff)
+#endif
+#ifndef INT64_MIN
+#define INT64_MIN (-APR_INT64_C(0x7fffffffffffffff) - APR_INT64_C(1))
+#endif
+
+APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 {
 #if (APR_HAVE_INT64_STRFN)
-    return APR_INT64_STRFN(buf, end, base);
+    return APR_INT64_STRFN(nptr, endptr, base);
 #else
-    /* XXX This Is Absolutely Bogus :: REIMPLEMENT! */
-    return strtol(buf, end, base);
+    const char *s;
+    apr_int64_t acc;
+    apr_int64_t val;
+    int neg, any;
+    char c;
+
+    /*
+     * Skip white space and pick up leading +/- sign if any.
+     * If base is 0, allow 0x for hex and 0 for octal, else
+     * assume decimal; if base is already 16, allow 0x.
+     */
+    s = nptr;
+    do {
+	c = *s++;
+    } while (apr_isspace(c));
+    if (c == '-') {
+	neg = 1;
+	c = *s++;
+    } else {
+	neg = 0;
+	if (c == '+')
+	    c = *s++;
+    }
+    if ((base == 0 || base == 16) &&
+	c == '0' && (*s == 'x' || *s == 'X')) {
+	    c = s[1];
+	    s += 2;
+	    base = 16;
+    }
+    if (base == 0)
+	base = c == '0' ? 8 : 10;
+    acc = any = 0;
+    if (base < 2 || base > 36) {
+	errno = EINVAL;
+        if (endptr != NULL)
+	    *endptr = (char *)(any ? s - 1 : nptr);
+        return acc;
+    }
+
+    /* The classic bsd implementation requires div/mod operators
+     * to compute a cutoff.  Benchmarking proves that iss very, very
+     * evil to some 32 bit processors.  Instead, look for underflow
+     * in both the mult and add/sub operation.  Unlike the bsd impl,
+     * we also work strictly in a signed int64 word as we haven't
+     * implemented the unsigned type in win32.
+     * 
+     * Set 'any' if any `digits' consumed; make it negative to indicate
+     * overflow.
+     */
+    while (acc >= 0 && (c = *s++)) {
+        if (c >= '0' && c <= '9')
+	    c -= '0';
+#if (('Z' - 'A') == 25)
+	else if (c >= 'A' && c <= 'Z')
+	    c -= 'A' - 10;
+	else if (c >= 'a' && c <= 'z')
+	    c -= 'a' - 10;
+#elif (('I' - 'A') == 9) && (('R' - 'J') == 9) && (('Z' - 'S') == 8) 
+	else if (c >= 'A' && c <= 'I')
+	    c -= 'A' - 10;
+	else if (c >= 'J' && c <= 'R')
+	    c -= 'J' - 19;
+	else if (c >= 'S' && c <= 'Z')
+	    c -= 'S' - 28;
+	else if (c >= 'a' && c <= 'i')
+	    c -= 'a' - 10;
+	else if (c >= 'j' && c <= 'r')
+	    c -= 'j' - 19;
+	else if (c >= 's' && c <= 'z')
+	    c -= 'z' - 28;
+#else
+#error "CANNOT COMPILE apr_strtoi64(), only ASCII and EBCDIC supported" 
+#endif
+	else
+	    break;
+	if (c >= base)
+	    break;
+	val *= base;
+        if ((neg && (val > acc || (val -= c) > acc))
+                 || (val < acc || (val += c) < acc)) {
+            any = -1;
+        } else {
+            acc = val;
+	    any = 1;
+        }
+    }
+    if (any < 0) {
+	acc = neg ? INT64_MIN : INT64_MAX;
+	errno = ERANGE;
+    } else if (!any) {
+	errno = EINVAL;
+    }
+    if (endptr != NULL)
+	*endptr = (char *)(any ? s - 1 : nptr);
+    return (acc);
 #endif
 }
 
