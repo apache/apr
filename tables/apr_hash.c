@@ -325,3 +325,58 @@ APR_DECLARE(int) apr_hash_count(apr_hash_t *ht)
 {
     return ht->count;
 }
+
+APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p, 
+                                          const apr_hash_t *overlay, 
+                                          const apr_hash_t *base)
+{
+    apr_hash_t *res;
+    apr_hash_index_t *hi;
+    apr_hash_entry_t *new_vals;
+    int i,j;
+
+#ifdef POOL_DEBUG
+    /* we don't copy keys and values, so it's necessary that
+     * overlay->a.pool and base->a.pool have a life span at least
+     * as long as p
+     */
+    if (!apr_pool_is_ancestor(overlay->a.pool, p)) {
+        fprintf(stderr, 
+                "apr_hash_overlay: overlay's pool is not an ancestor of p\n");
+        abort();
+    }
+    if (!apr_pool_is_ancestor(base->a.pool, p)) {
+        fprintf(stderr, 
+                "apr_hash_overlay: base's pool is not an ancestor of p\n");
+        abort();
+    }
+#endif
+
+    res = apr_palloc(p, sizeof(apr_hash_t));
+    res->pool = p;
+    res->count = base->count;
+    res->max = (overlay->max > base->max) ? overlay->max : base->max;
+    res->array = alloc_array(res, res->max);
+    new_vals = apr_palloc(p, sizeof(apr_hash_entry_t) * res->count);
+    j = 0;
+    for (hi = apr_hash_first((apr_hash_t*)base); hi; hi = apr_hash_next(hi)) {
+        i = hi->this->hash & res->max;
+
+        new_vals[j].klen = hi->this->klen;
+        new_vals[j].key = hi->this->key;
+        new_vals[j].val = hi->this->val;
+        new_vals[j].hash = hi->this->hash;
+        new_vals[j].next = res->array[i];
+        res->array[i] = &new_vals[j];
+        j++;
+    }
+
+    /* can't simply copy the stuff over, need to set each one so as to
+     * increment the counts/array properly
+     */
+    for (hi = apr_hash_first((apr_hash_t*)overlay); hi; 
+         hi = apr_hash_next(hi)) {
+        apr_hash_set(res, hi->this->key, hi->this->klen, hi->this->val);
+    }
+    return res;
+}

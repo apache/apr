@@ -181,6 +181,19 @@ APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key,
  */
 APR_DECLARE(int) apr_hash_count(apr_hash_t *ht);
 
+/**
+ * Merge two hash tables into one new hash table. The values of the overlay
+ * hash override the values of the base if both have the same key.
+ * @param p The pool to use for the new hash table
+ * @param overlay The table to add to the initial table
+ * @param base The table that represents the initial values of the new table
+ * @return A new hash table containing all of the data from the two passed in
+ * @deffunc apr_hash_t *apr_hash_overlay(apr_pool_t *p, const apr_table_t *over
+lay, const apr_table_t *base);
+ */
+APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
+                                           const apr_hash_t *overlay, 
+                                           const apr_hash_t *base);
 
 #ifdef __cplusplus
 }
