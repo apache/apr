@@ -43,7 +43,7 @@ RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /I "i18n/unix" /D "NDEBUG" /D "APR_UNICODE" /D "APR_IMPLEMENT_UNICODE" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /I "i18n/unix" /D "NDEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /FD /c
 # SUBTRACT CPP /YX
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
@@ -69,7 +69,7 @@ RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
 # ADD BASE CPP /nologo /MTd /W3 /GX /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /ZI /c
-# ADD CPP /nologo /MDd /W3 /GX /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /I "i18n/unix" /D "_DEBUG" /D "APR_UNICODE" /D "APR_IMPLEMENT_UNICODE" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /FD /ZI /c
+# ADD CPP /nologo /MDd /W3 /GX /Od /I "include" /I "dso/win32" /I "file_io/win32" /I "locks/win32" /I "misc/win32" /I "misc/unix" /I "network_io/win32" /I "threadproc/win32" /I "time/win32" /I "i18n/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /FD /ZI /c
 # SUBTRACT CPP /YX
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
