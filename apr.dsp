@@ -221,10 +221,6 @@ SOURCE=.\threadproc\win32\thread.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\threadproc\win32\threadcancel.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\threadproc\win32\threadpriv.c
 # End Source File
 # Begin Source File

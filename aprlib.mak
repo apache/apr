@@ -78,7 +78,6 @@ CLEAN :
 	-@erase "$(INTDIR)\sockopt.obj"
 	-@erase "$(INTDIR)\start.obj"
 	-@erase "$(INTDIR)\thread.obj"
-	-@erase "$(INTDIR)\threadcancel.obj"
 	-@erase "$(INTDIR)\threadpriv.obj"
 	-@erase "$(INTDIR)\time.obj"
 	-@erase "$(INTDIR)\timestr.obj"
@@ -139,7 +138,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\start.obj" \
 	"$(INTDIR)\thread.obj" \
-	"$(INTDIR)\threadcancel.obj" \
 	"$(INTDIR)\threadpriv.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj"
@@ -198,7 +196,6 @@ CLEAN :
 	-@erase "$(INTDIR)\sockopt.obj"
 	-@erase "$(INTDIR)\start.obj"
 	-@erase "$(INTDIR)\thread.obj"
-	-@erase "$(INTDIR)\threadcancel.obj"
 	-@erase "$(INTDIR)\threadpriv.obj"
 	-@erase "$(INTDIR)\time.obj"
 	-@erase "$(INTDIR)\timestr.obj"
@@ -263,7 +260,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\sockopt.obj" \
 	"$(INTDIR)\start.obj" \
 	"$(INTDIR)\thread.obj" \
-	"$(INTDIR)\threadcancel.obj" \
 	"$(INTDIR)\threadpriv.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj"
@@ -344,7 +340,7 @@ DEP_CPP_ACCES=\
 	
 
 "$(INTDIR)\access.obj" : $(SOURCE) $(DEP_CPP_ACCES) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -385,7 +381,7 @@ DEP_CPP_APR_C=\
 	
 
 "$(INTDIR)\apr_cpystrn.obj" : $(SOURCE) $(DEP_CPP_APR_C) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -493,7 +489,7 @@ DEP_CPP_APR_G=\
 	
 
 "$(INTDIR)\apr_getpass.obj" : $(SOURCE) $(DEP_CPP_APR_G) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -585,7 +581,7 @@ DEP_CPP_APR_P=\
 	
 
 "$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -673,7 +669,7 @@ DEP_CPP_APR_T=\
 	
 
 "$(INTDIR)\apr_tables.obj" : $(SOURCE) $(DEP_CPP_APR_T) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -726,8 +722,8 @@ DEP_CPP_DIR_C=\
 	".\time\win32\atime.h"\
 	
 
-"$(INTDIR)\dir.obj" : $(SOURCE) $(DEP_CPP_DIR_C) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+"$(INTDIR)\dir.obj" : $(SOURCE) $(DEP_CPP_DIR_C) "$(INTDIR)" ".\include\apr.h"\
+ ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -773,8 +769,8 @@ DEP_CPP_DSO_C=\
 	".\include\apr_time.h"\
 	
 
-"$(INTDIR)\dso.obj" : $(SOURCE) $(DEP_CPP_DSO_C) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+"$(INTDIR)\dso.obj" : $(SOURCE) $(DEP_CPP_DSO_C) "$(INTDIR)" ".\include\apr.h"\
+ ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -820,7 +816,7 @@ DEP_CPP_FILEA=\
 	
 
 "$(INTDIR)\fileacc.obj" : $(SOURCE) $(DEP_CPP_FILEA) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -866,7 +862,7 @@ DEP_CPP_FILED=\
 	
 
 "$(INTDIR)\filedup.obj" : $(SOURCE) $(DEP_CPP_FILED) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -914,7 +910,7 @@ DEP_CPP_FILES=\
 	
 
 "$(INTDIR)\filestat.obj" : $(SOURCE) $(DEP_CPP_FILES) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1042,7 +1038,7 @@ DEP_CPP_NAMES=\
 	
 
 "$(INTDIR)\names.obj" : $(SOURCE) $(DEP_CPP_NAMES) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1139,8 +1135,8 @@ DEP_CPP_PIPE_=\
 	".\include\apr_time.h"\
 	
 
-"$(INTDIR)\pipe.obj" : $(SOURCE) $(DEP_CPP_PIPE_) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+"$(INTDIR)\pipe.obj" : $(SOURCE) $(DEP_CPP_PIPE_) "$(INTDIR)" ".\include\apr.h"\
+ ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1283,7 +1279,7 @@ DEP_CPP_READW=\
 	
 
 "$(INTDIR)\readwrite.obj" : $(SOURCE) $(DEP_CPP_READW) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1328,8 +1324,8 @@ DEP_CPP_SEEK_=\
 	".\include\apr_time.h"\
 	
 
-"$(INTDIR)\seek.obj" : $(SOURCE) $(DEP_CPP_SEEK_) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+"$(INTDIR)\seek.obj" : $(SOURCE) $(DEP_CPP_SEEK_) "$(INTDIR)" ".\include\apr.h"\
+ ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1427,7 +1423,7 @@ DEP_CPP_SIGNA=\
 	
 
 "$(INTDIR)\signals.obj" : $(SOURCE) $(DEP_CPP_SIGNA) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1607,7 +1603,7 @@ DEP_CPP_START=\
 	
 
 "$(INTDIR)\start.obj" : $(SOURCE) $(DEP_CPP_START) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1656,48 +1652,7 @@ DEP_CPP_THREA=\
 	
 
 "$(INTDIR)\thread.obj" : $(SOURCE) $(DEP_CPP_THREA) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ENDIF 
-
-SOURCE=.\threadproc\win32\threadcancel.c
-
-!IF  "$(CFG)" == "aprlib - Win32 Release"
-
-DEP_CPP_THREAD=\
-	".\include\apr.h"\
-	".\include\apr_config.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\threadproc\win32\threadproc.h"\
-	{$(INCLUDE)}"sys\types.h"\
-	
-
-"$(INTDIR)\threadcancel.obj" : $(SOURCE) $(DEP_CPP_THREAD) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
-!ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
-
-DEP_CPP_THREAD=\
-	".\include\apr.h"\
-	".\include\apr_config.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_file_io.h"\
-	".\include\apr_general.h"\
-	".\include\apr_thread_proc.h"\
-	".\include\apr_time.h"\
-	".\threadproc\win32\threadproc.h"\
-	
-
-"$(INTDIR)\threadcancel.obj" : $(SOURCE) $(DEP_CPP_THREAD) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1707,7 +1662,7 @@ SOURCE=.\threadproc\win32\threadpriv.c
 
 !IF  "$(CFG)" == "aprlib - Win32 Release"
 
-DEP_CPP_THREADP=\
+DEP_CPP_THREAD=\
 	".\include\apr.h"\
 	".\include\apr_config.h"\
 	".\include\apr_errno.h"\
@@ -1723,14 +1678,14 @@ DEP_CPP_THREADP=\
 	{$(INCLUDE)}"sys\types.h"\
 	
 
-"$(INTDIR)\threadpriv.obj" : $(SOURCE) $(DEP_CPP_THREADP) "$(INTDIR)"\
+"$(INTDIR)\threadpriv.obj" : $(SOURCE) $(DEP_CPP_THREAD) "$(INTDIR)"\
  ".\include\apr_config.h" ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
 !ELSEIF  "$(CFG)" == "aprlib - Win32 Debug"
 
-DEP_CPP_THREADP=\
+DEP_CPP_THREAD=\
 	".\include\apr.h"\
 	".\include\apr_config.h"\
 	".\include\apr_errno.h"\
@@ -1745,8 +1700,8 @@ DEP_CPP_THREADP=\
 	".\threadproc\win32\threadproc.h"\
 	
 
-"$(INTDIR)\threadpriv.obj" : $(SOURCE) $(DEP_CPP_THREADP) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+"$(INTDIR)\threadpriv.obj" : $(SOURCE) $(DEP_CPP_THREAD) "$(INTDIR)"\
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1794,8 +1749,8 @@ DEP_CPP_TIME_=\
 	".\time\win32\atime.h"\
 	
 
-"$(INTDIR)\time.obj" : $(SOURCE) $(DEP_CPP_TIME_) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+"$(INTDIR)\time.obj" : $(SOURCE) $(DEP_CPP_TIME_) "$(INTDIR)" ".\include\apr.h"\
+ ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
@@ -1842,7 +1797,7 @@ DEP_CPP_TIMES=\
 	
 
 "$(INTDIR)\timestr.obj" : $(SOURCE) $(DEP_CPP_TIMES) "$(INTDIR)"\
- ".\include\apr_config.h" ".\include\apr.h"
+ ".\include\apr.h" ".\include\apr_config.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

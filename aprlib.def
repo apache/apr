@@ -104,7 +104,7 @@ EXPORTS
 	ap_thread_exit   @95
 	ap_thread_join   @96
 	ap_thread_detach   @97
-	ap_cancel_thread   @98
+;	ap_cancel_thread   @98
 	ap_create_thread_private   @99
 	ap_get_thread_private   @100
 	ap_set_thread_private   @101
