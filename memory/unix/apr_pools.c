@@ -1310,13 +1310,16 @@ static void free_proc_chain(struct process_chain *procs)
 	}
     }
 #ifdef WIN32
-    /* Humm, still trying to understand what to do about this.
+    /* 
      * Do we need an APR function to clean-up a proc_t?
-     * We have a handle leak here until this is fixed.
-     for (p = procs; p; p = p->next) {
-         CloseHandle(p->pid->pi.hProcess);
-     }
-    */
+     */
+    {
+        PROCESS_INFORMATION pi;
+        for (p = procs; p; p = p->next) {
+            ap_get_os_proc(&pi, p->pid);
+            CloseHandle(pi.hProcess);
+        }
+    }
 #endif /* WIN32 */
 
     /* Now wait for all the signaled processes to die */
