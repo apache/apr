@@ -62,62 +62,82 @@
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
 {
-    BOOLEAN isStdHandle = FALSE;
-    HANDLE hCurrentProcess = GetCurrentProcess();
-
-    if ((*new_file) == NULL) {
-        if (p == NULL) {
-            p = old_file->cntxt;
-        }
-            
-        (*new_file) = (apr_file_t *) apr_pcalloc(p, sizeof(apr_file_t));
-        if ((*new_file) == NULL) {
-            return APR_ENOMEM;
-        }
-        if (!DuplicateHandle(hCurrentProcess, old_file->filehand, 
-                             hCurrentProcess,
-                             &(*new_file)->filehand, 0, FALSE, 
-                             DUPLICATE_SAME_ACCESS)) {
-            return apr_get_os_error();
-        }
-    } else {
-        HANDLE hFile = (*new_file)->filehand;
-        /* XXX: need to dup the handle!!! 
-         */
-        /* dup2 is not supported with native Windows handles. We 
-         * can, however, emulate dup2 for the standard i/o handles.
-         */
-        if (hFile == GetStdHandle(STD_ERROR_HANDLE)) {
-            isStdHandle = TRUE;
-            if (!SetStdHandle(STD_ERROR_HANDLE, old_file->filehand))
-                return apr_get_os_error();
-        }
-        else if (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) {
-            isStdHandle = TRUE;
-            if (!SetStdHandle(STD_OUTPUT_HANDLE, old_file->filehand))
-                return apr_get_os_error();
-        }
-        else if (hFile == GetStdHandle(STD_INPUT_HANDLE)) {
-            isStdHandle = TRUE;
-            if (!SetStdHandle(STD_INPUT_HANDLE, old_file->filehand))
-                return apr_get_os_error();
-        }
-        else
-            return APR_ENOTIMPL;
+    HANDLE hproc = GetCurrentProcess();
+    HANDLE newhand = NULL;
+        
+    if (!DuplicateHandle(hproc, old_file->filehand, 
+                         hproc, newhand, 0, FALSE, 
+                         DUPLICATE_SAME_ACCESS)) {
+        return apr_get_os_error();
     }
 
+    (*new_file) = (apr_file_t *) apr_pcalloc(p, sizeof(apr_file_t));
+    (*new_file)->filehand = newhand;
     (*new_file)->flags = old_file->flags & ~APR_INHERIT;
-    (*new_file)->cntxt = old_file->cntxt;
-    (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
+    (*new_file)->cntxt = p;
+    (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     (*new_file)->append = old_file->append;
     (*new_file)->buffered = FALSE;
 
-    if (!isStdHandle) {
-        apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
-                            apr_pool_cleanup_null);
-    }
+    apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
+                        apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
+
+APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
+                                        apr_file_t *old_file, apr_pool_t *p)
+{
+    DWORD stdhandle = -1;
+    HANDLE hproc = GetCurrentProcess();
+    HANDLE newhand = NULL;
+    apr_int32_t newflags;
+
+    /* dup2 is not supported literaly with native Windows handles.
+     * We can, however, emulate dup2 for the standard i/o handles,
+     * and close and replace other handles with duped handles.
+     * The os_handle will change, however.
+     */
+    if (old_file->filehand == GetStdHandle(STD_ERROR_HANDLE)) {
+        stdhandle = STD_ERROR_HANDLE;
+    }
+    else if (old_file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
+        stdhandle = STD_OUTPUT_HANDLE;
+    }
+    else if (old_file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
+        stdhandle = STD_INPUT_HANDLE;
+    }
+
+    if (stdhandle != -1) {
+        if (!DuplicateHandle(hproc, old_file->filehand, 
+                             hproc, newhand, 0,
+                             TRUE, DUPLICATE_SAME_ACCESS)) {
+            return apr_get_os_error();
+        }
+        if (!SetStdHandle(stdhandle, newhand)) {
+            return apr_get_os_error();
+        }
+        newflags = old_file->flags | APR_INHERIT;
+    }
+    else {
+        if (!DuplicateHandle(hproc, old_file->filehand, 
+                             hproc, newhand, 0,
+                             FALSE, DUPLICATE_SAME_ACCESS)) {
+            return apr_get_os_error();
+        }
+        if ((*new_file)->filehand) {
+            CloseHandle((*new_file)->filehand);
+        }
+        newflags = old_file->flags & ~APR_INHERIT;
+    }
+
+    (*new_file)->flags = newflags;
+    (*new_file)->filehand = newhand;
+    (*new_file)->fname = apr_pstrdup((*new_file)->cntxt, old_file->fname);
+    (*new_file)->append = old_file->append;
+    (*new_file)->buffered = FALSE;
+
+    return APR_SUCCESS;
+}
 
