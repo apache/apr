@@ -66,25 +66,32 @@
 int main(int argc, char * const argv[])
 {
     apr_pool_t *context;
-    apr_int32_t data;
+    apr_getopt_t *opt;
+    char data;
+    const char *optarg;
 
     apr_initialize();
     atexit(apr_terminate);
     apr_create_pool(&context, NULL);
 
-    while (apr_getopt(argc, argv, "abc:d::", &data, context) == APR_SUCCESS) {
+    if (apr_initopt(&opt, context, argc, argv))
+    {
+        printf("failed to initialize opts");
+        exit(1);
+    }
+    while (apr_getopt(opt, "abc:d::", &data, &optarg) == APR_SUCCESS) {
         switch(data) {
             case 'a':
             case 'b':
                 printf("option %c\n", data);
                 break;
             case 'c':
-                printf("option %c with %s\n", data, apr_optarg);
+                printf("option %c with %s\n", data, optarg);
                 break;
             case 'd':
                 printf("option %c", data);
-                if (apr_optarg) {
-                    printf(" with %s\n", apr_optarg);
+                if (optarg) {
+                    printf(" with %s\n", optarg);
                 }
                 else {
                     printf("\n");
