@@ -62,7 +62,7 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#ifdef APR_HAVE_SYS_WAIT_H
+#if APR_HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
 #ifdef BEOS
