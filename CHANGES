@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Don't try to enable run-time linking on AIX < 4.2, as this
+     results in invalid linker options being used.  PR 29170.  
+     [Jeff Trawick]
+
   *) Remove apr_file_copy()'s 2Gb file size limit on some platforms.
      [Joe Orton]
 

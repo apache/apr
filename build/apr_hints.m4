@@ -63,7 +63,13 @@ if test "x$apr_preload_done" != "xyes" ; then
         fi
 	APR_SETIFNULL(apr_sysvsem_is_global, [yes])
 	APR_SETIFNULL(apr_lock_method, [USE_SYSVSEM_SERIALIZE])
-	APR_ADDTO(LDFLAGS, [-Wl,-brtl])
+        case $host in
+            *-ibm-aix3* | *-ibm-aix4.1.*)
+                ;;
+            *)
+                APR_ADDTO(LDFLAGS, [-Wl,-brtl])
+                ;;
+	esac
         ;;
     *-apollo-*)
 	APR_ADDTO(CPPFLAGS, [-DAPOLLO])
