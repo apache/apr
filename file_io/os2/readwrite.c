@@ -59,6 +59,7 @@
 
 #define INCL_DOS
 #include <os2.h>
+#include <malloc.h>
 
 ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
