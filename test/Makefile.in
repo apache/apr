@@ -126,4 +126,7 @@ testmem@EXEEXT@: testmem.lo $(LOCAL_LIBS)
 teststr@EXEEXT@: teststr.lo $(LOCAL_LIBS)
 	$(LINK) teststr.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
+testsockets@EXEEXT@: testsockets.lo $(LOCAL_LIBS)
+	$(LINK) testsockets.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
 # DO NOT REMOVE
