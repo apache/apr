@@ -497,7 +497,7 @@ else
       CHECK_PTHREADS_H([
           threads="1"
           pthreadh="1"
-          pthreadser="0"
+          pthreadser="1"
           AC_DEFINE(USE_THREADS) ], [
           threads="0"
           pthreadh="0"
@@ -605,6 +605,10 @@ AC_CHECK_DEFINE(isascii, ctype.h)
 # We are assuming that if the platform doesn't have POLLIN, it doesn't have
 # any POLL definitions.
 AC_CHECK_DEFINE_FILES(POLLIN, poll.h sys/poll.h)
+
+if test "$threads" = "1"; then
+    AC_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
+fi
 
 AC_BEGIN_DECISION([ap_lock implementation method])
 AC_IFALLYES(custom:union_semun,
