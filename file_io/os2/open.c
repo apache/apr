@@ -220,10 +220,9 @@ apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
 apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, apr_pool_t *cont)
 {
     apr_os_file_t *dafile = thefile;
-    if ((*file) == NULL) {
-        (*file) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
-        (*file)->cntxt = cont;
-    }
+
+    (*file) = apr_palloc(cont, sizeof(apr_file_t));
+    (*file)->cntxt = cont;
     (*file)->filedes = *dafile;
     (*file)->isopen = TRUE;
     (*file)->buffered = FALSE;
@@ -247,20 +246,9 @@ apr_status_t apr_eof(apr_file_t *fptr)
 
 apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
-    (*thefile) = apr_palloc(cont, sizeof(apr_file_t));
-    if ((*thefile) == NULL) {
-        return APR_ENOMEM;
-    }
-    (*thefile)->cntxt = cont;
-    (*thefile)->filedes = 2;
-    (*thefile)->fname = NULL;
-    (*thefile)->isopen = TRUE;
-    (*thefile)->buffered = FALSE;
-    (*thefile)->eof_hit = FALSE;
-    (*thefile)->flags = 0;
-    (*thefile)->pipe = FALSE;
+    int fd = 2;
 
-    return APR_SUCCESS;
+    return apr_put_os_file(thefile, &fd, cont);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
