@@ -79,7 +79,7 @@ show_usage()
 Usage: apr-config [OPTION]
 
 Known values for OPTION are:
-  --prefix=DIR      change prefix to DIR
+  --prefix[=DIR]    change prefix to DIR
   --cflags          print C compiler flags
   --cppflags        print cpp flags
   --includes        print include information
