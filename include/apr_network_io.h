@@ -758,14 +758,13 @@ APR_DECLARE_INHERIT_UNSET(socket);
  * @param join The address of the multicast group to join
  * @param iface Address of the interface to use.  If NULL is passed, the 
  *              default multicast interface will be used. (OS Dependent)
- * @param ssm Single Source Multicast Address to accept transmissions from.
- * @remark Single Source Multicast is not currently implemented, and you must 
- * pass NULL for the argument.
+ * @param source Source Address to accept transmissions from (non-NULL 
+ *               implies Source-Specific Multicast)
  */
 APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
                                          apr_sockaddr_t *join,
                                          apr_sockaddr_t *iface,
-                                         apr_sockaddr_t *ssm);
+                                         apr_sockaddr_t *source);
 
 /**
  * Leave a Multicast Group.  All arguments must be the same as
@@ -774,14 +773,13 @@ APR_DECLARE(apr_status_t) apr_mcast_join(apr_socket_t *sock,
  * @param leave The address of the multicast group to leave
  * @param iface Address of the interface to use.  If NULL is passed, the 
  *              default multicast interface will be used. (OS Dependent)
- * @param ssm Single Source Multicast Address that transmissions came from.
- * @remark Single Source Multicast is not currently implemented, and you must 
- * pass NULL for the argument.
+ * @param source Source Address to accept transmissions from (non-NULL 
+ *               implies Source-Specific Multicast)
  */
 APR_DECLARE(apr_status_t) apr_mcast_leave(apr_socket_t *sock,
                                           apr_sockaddr_t *leave,
                                           apr_sockaddr_t *iface,
-                                          apr_sockaddr_t *ssm);
+                                          apr_sockaddr_t *source);
 
 /**
  * Set the Multicast Time to Live (ttl) for a multicast transmission.
