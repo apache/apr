@@ -1177,19 +1177,29 @@ fi
 
 if test "$ac_cv_type_off_t" = "yes"; then
     APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
-    if test "$ac_cv_sizeof_off_t" = "2"; then
-        off_t_value='apr_int16_t'
-        off_t_fmt='#define APR_OFF_T_FMT APR_INT16_T_FMT'
-    elif test "$ac_cv_sizeof_off_t" = "4"; then
-        off_t_value='apr_int32_t'
-        off_t_fmt='#define APR_OFF_T_FMT "d"'
-    elif test "$ac_cv_sizeof_off_t" = "8"; then
-        off_t_value='apr_int64_t'
-        off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+    AC_MSG_CHECKING([which type to use for apr_off_t])
+    if test "${ac_cv_sizeof_off_t}${ac_cv_sizeof_long}" = "44"; then
+        # Special case: off_t may change size with _FILE_OFFSET_BITS
+        # on 32-bit systems with LFS support.  To avoid compatibility
+        # with other software which may export _FILE_OFFSET_BITS,
+        # hard-code apr_off_t to long.
+        off_t_value=long
+        off_t_fmt='#define APR_OFF_T_FMT "ld"'
     else
-        off_t_value='apr_int64_t'
-        off_t_fmt='#error Can not determine the proper size for off_t'
+        off_t_value=off_t
+        # off_t is more commonly a long than an int; prefer that case
+        # where int and long are the same size.
+        if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
+            off_t_fmt='#define APR_OFF_T_FMT "ld"'
+        elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
+            off_t_fmt='#define APR_OFF_T_FMT "d"'
+        elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
+            off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+        else
+            AC_ERROR([could not determine the size of off_t])
+        fi
     fi
+    AC_MSG_RESULT([$off_t_value])
 else
     off_t_value='apr_int32_t'
     off_t_fmt='#define APR_OFF_T_FMT "d"'
