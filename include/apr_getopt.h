@@ -56,7 +56,7 @@
 #define APR_GETOPT_H
 
 typedef struct apr_getopt_t {
-    apr_pool_t cont;         /* context for processing */
+    apr_pool_t *cont;        /* context for processing */
     int err;                 /* if error message should be printed */
     int ind;                 /* index into parent argv vector */
     int opt;                 /* character checked for validity */
@@ -73,7 +73,7 @@ typedef struct apr_getopt_t {
  * @param argc The number of arguments to parse
  * @param argv The array of arguments to parse
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
- * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont, int argc, char const* const* argv)
+ * @deffunc apr_status_t apr_initopt(apr_pool_t *cont, apr_getopt_t **os, int argc, char const* const* argv)
  */
 APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
                                      int argc, char const* const* argv);
