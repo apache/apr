@@ -108,8 +108,8 @@ typedef struct apr_pollfd_t apr_pollfd_t;
 struct apr_pollfd_t {
     apr_pool_t *p;
     apr_datatype_e desc_type;
-    apr_int16_t events;
-    apr_int16_t revents;
+    apr_int16_t reqevents;
+    apr_int16_t rtnevents;
     apr_descriptor desc;
 };
 

@@ -101,7 +101,7 @@ APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset,
     }
     curr->desc.s = sock;
     curr->desc_type = APR_POLL_SOCKET;
-    curr->events = event;
+    curr->reqevents = event;
 
     return APR_SUCCESS;
 }
@@ -125,8 +125,8 @@ APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
         return APR_NOTFOUND;
     }
     
-    if (curr->events & events) {
-        curr->events ^= events;
+    if (curr->reqevents & events) {
+        curr->reqevents ^= events;
     }
 
     return APR_SUCCESS;
@@ -272,13 +272,13 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         else if (aprset[i].desc_type == APR_POLL_FILE) {
             fd = aprset[i].desc.f->filedes;
         }
-        if (aprset[i].events & APR_POLLIN) {
+        if (aprset[i].reqevents & APR_POLLIN) {
             FD_SET(fd, &readset);
         }
-        if (aprset[i].events & APR_POLLOUT) {
+        if (aprset[i].reqevents & APR_POLLOUT) {
             FD_SET(fd, &writeset);
         }
-        if (aprset[i].events & 
+        if (aprset[i].reqevents & 
             (APR_POLLPRI | APR_POLLERR | APR_POLLHUP | APR_POLLNVAL)) {
             FD_SET(fd, &exceptset);
         }
@@ -306,15 +306,15 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         else if (aprset[i].desc_type == APR_POLL_FILE) {
             fd = aprset[i].desc.f->filedes;
         }
-        aprset[i].revents = 0;
+        aprset[i].rtnevents = 0;
         if (FD_ISSET(fd, &readset)) {
-            aprset[i].revents |= APR_POLLIN;
+            aprset[i].rtnevents |= APR_POLLIN;
         }
         if (FD_ISSET(fd, &writeset)) {
-            aprset[i].revents |= APR_POLLOUT;
+            aprset[i].rtnevents |= APR_POLLOUT;
         }
         if (FD_ISSET(fd, &exceptset)) {
-            aprset[i].revents |= APR_POLLERR;
+            aprset[i].rtnevents |= APR_POLLERR;
         }
     }
 
