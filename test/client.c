@@ -99,31 +99,23 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
+    fprintf(stdout,"\tClient:  Making socket address...............");
+    if ((stat = apr_getaddrinfo(&destsa, dest, APR_UNSPEC, 8021, 0, context)) 
+        != APR_SUCCESS) {
+        fprintf(stdout, "Failed!\n");
+        fprintf(stdout, "Address resolution failed for %s: %s\n", 
+                dest, apr_strerror(stat, msgbuf, sizeof(msgbuf)));
+        exit(-1);
+    }
+    fprintf(stdout,"OK\n");
+
     fprintf(stdout, "\tClient:  Creating new socket.......");
-    if (apr_create_tcp_socket(&sock, context) != APR_SUCCESS) {
+    if (apr_create_socket(&sock, destsa->sa.sin.sin_family, SOCK_STREAM,
+                          context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
-
-    if (read_timeout == -1) {
-        fprintf(stdout, "\tClient:  Setting socket option NONBLOCK.......");
-        if (apr_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
-            apr_close_socket(sock);
-            fprintf(stderr, "Couldn't set socket option\n");
-            exit(-1);
-        }
-        fprintf(stdout, "OK\n");
-    }
-
-    fprintf(stdout,"\tClient:  Making socket address...............");
-    if (apr_getaddrinfo(&destsa, dest, APR_INET, 8021, 0, context) != APR_SUCCESS) {
-        apr_close_socket(sock);
-        fprintf(stdout, "Failed!\n");
-        fprintf(stdout, "Couldn't create a socket address structure for %s\n", dest);
-        exit(-1);
-    }
-    fprintf(stdout,"OK\n");
 
     fprintf(stdout, "\tClient:  Connecting to socket.......");
 
@@ -137,6 +129,16 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     fprintf(stdout, "OK\n");
+
+    if (read_timeout == -1) {
+        fprintf(stdout, "\tClient:  Setting socket option NONBLOCK.......");
+        if (apr_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
+            apr_close_socket(sock);
+            fprintf(stderr, "Couldn't set socket option\n");
+            exit(-1);
+        }
+        fprintf(stdout, "OK\n");
+    }
 
     apr_get_ipaddr(&remote_ipaddr, APR_REMOTE, sock);
     apr_get_port(&remote_port, APR_REMOTE, sock);
