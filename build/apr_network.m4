@@ -180,7 +180,6 @@ void main(void) {
     addr32 = (unsigned int *)&sa.sin6_addr;
     addr32[2] = htonl(0x0000FFFF);
     addr32[3] = ipv4.s_addr;
-    assert(IN6_IS_ADDR_V4MAPPED(&sin6.sin6_addr));
 
 #ifdef SIN6_LEN
     sa.sin_len = sizeof(sa);
