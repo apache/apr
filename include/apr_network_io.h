@@ -136,6 +136,9 @@ extern "C" {
 typedef enum {APR_SHUTDOWN_READ, APR_SHUTDOWN_WRITE, 
 	      APR_SHUTDOWN_READWRITE} apr_shutdown_how_e;
 
+#define APR_IPV4_ADDR_OK  0x01  /* see doc for apr_sockaddr_info_get() */
+#define APR_IPV6_ADDR_OK  0x02  /* see doc for apr_sockaddr_info_get() */
+
 #if (!APR_HAVE_IN_ADDR)
 /**
  * We need to make sure we always have an in_addr type, so APR will just
@@ -335,11 +338,24 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
 /**
  * Create apr_sockaddr_t from hostname, address family, and port.
  * @param sa The new apr_sockaddr_t.
- * @param hostname The hostname or numeric address string to resolve/parse.
+ * @param hostname The hostname or numeric address string to resolve/parse, or
+ *               NULL to build an address that corresponds to 0.0.0.0 or ::
  * @param family The address family to use, or APR_UNSPEC if the system should 
  *               decide.
  * @param port The port number.
- * @param flags Special processing flags.
+ * @param flags Special processing flags:
+ * <PRE>
+ *       APR_IPV4_ADDR_OK          first query for IPv4 addresses; only look
+ *                                 for IPv6 addresses if the first query failed;
+ *                                 only valid if family is APR_UNSPEC and hostname
+ *                                 isn't NULL; mutually exclusive with
+ *                                 APR_IPV6_ADDR_OK
+ *       APR_IPV6_ADDR_OK          first query for IPv6 addresses; only look
+ *                                 for IPv4 addresses if the first query failed;
+ *                                 only valid if family is APR_UNSPEC and hostname
+ *                                 isn't NULL and APR_HAVE_IPV6; mutually exclusive
+ *                                 with APR_IPV4_ADDR_OK
+ * </PRE>
  * @param p The pool for the apr_sockaddr_t and associated storage.
  */
 APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,

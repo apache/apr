@@ -1,5 +1,9 @@
 Changes with APR 0.9.2
 
+  *) Add APR_IPV4_ADDR_OK flag to apr_sockaddr_info_get() to allow
+     apps to avoid lookup of IPv6 address if IPv4 address is sufficient.
+     (New APR_IPV6_ADDR_OK flag is similar.)  [Jeff Trawick]
+
   *) Disable IPv6 support on Darwin.  The current IPv6 support has a
      problem in getnameinfo() which breaks certain applications.
      [Sander Temme <sctemme@covalent.net>, Jeff Trawick]
