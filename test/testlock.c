@@ -85,11 +85,13 @@ void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data);
-apr_status_t test_exclusive(void);
 apr_status_t test_rw(void);
-apr_status_t test_multiple_locking(const char *);
+apr_status_t test_exclusive(void);
+apr_status_t test_multiple_locking(const char *lockfile);
+apr_status_t test_thread_mutex(void);
+apr_status_t test_thread_rwlock(void);
 apr_status_t test_cond(void);
-
+apr_status_t test_timeoutcond(void);
 
 apr_file_t *in, *out, *err;
 apr_lock_t *thread_rw_lock, *thread_lock;
@@ -257,7 +259,7 @@ void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data)
     return NULL;
 }
 
-int test_rw(void)
+apr_status_t test_rw(void)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
@@ -399,7 +401,7 @@ apr_status_t test_multiple_locking(const char *lockfile)
     return APR_SUCCESS;
 }
 
-static apr_status_t test_thread_mutex(void)
+apr_status_t test_thread_mutex(void)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
@@ -447,7 +449,7 @@ static apr_status_t test_thread_mutex(void)
     return APR_SUCCESS;
 }
 
-static int test_thread_rwlock(void)
+apr_status_t test_thread_rwlock(void)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
@@ -568,7 +570,7 @@ apr_status_t test_cond(void)
     return APR_SUCCESS;
 }
 
-static apr_status_t test_timeoutcond(void)
+apr_status_t test_timeoutcond(void)
 {
     apr_status_t s;
     apr_interval_time_t timeout;
