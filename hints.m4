@@ -55,23 +55,18 @@ else
             ;;
         *-ibm-aix4.2)
 	    APR_ADDTO(CFLAGS, [-U__STR__])
-	    APR_ADDTO(LDFLAGS, [-lm])
 	    ;;
         *-ibm-aix4.2.*)
             APR_ADDTO(CFLAGS, [-U__STR__])
-            APR_ADDTO(LDFLAGS, [-lm])
             ;;
         *-ibm-aix4.3)
 	    APR_ADDTO(CFLAGS, [-D_USE_IRS -U__STR__])
-	    APR_ADDTO(LDFLAGS, [-lm])
 	    ;;
         *-ibm-aix4.3.*)
             APR_ADDTO(CFLAGS, [-D_USE_IRS -U__STR__])
-            APR_ADDTO(LDFLAGS, [-lm])
             ;;
         *-ibm-aix*)
 	    APR_ADDTO(CFLAGS, [-U__STR__])
-	    APR_ADDTO(LDFLAGS, [-lm])
 	    ;;
         esac
         dnl Must do a check for gcc or egcs here, to get the right options  
@@ -97,7 +92,7 @@ else
 	;;
     *-hp-hpux11.*)
 	APR_ADDTO(CFLAGS, [-DHPUX11])
-	APR_ADDTO(LIBS, [-lm -lpthread])
+	APR_ADDTO(LIBS, [-lpthread])
 	;;
     *-hp-hpux10.*)
  	case $host in
@@ -110,15 +105,12 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-hp-hpux*)
 	APR_ADDTO(CFLAGS, [-DHPUX])
-	APR_ADDTO(LIBS, [-lm])
 	;;
     *-linux-*)
         case `uname -r` in
 	    2.2* ) APR_ADDTO(CFLAGS, [-DLINUX=2])
-	           APR_ADDTO(LIBS, [-lm])
 	           ;;
 	    2.0* ) APR_ADDTO(CFLAGS, [-DLINUX=2])
-	           APR_ADDTO(LIBS, [-lm])
 	           ;;
 	    1.* )  APR_ADDTO(CFLAGS, [-DLINUX=1])
 	           ;;
@@ -128,7 +120,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-GNU*)
 	APR_ADDTO(CFLAGS, [-DHURD])
-	APR_ADDTO(LIBS, [-lm -lcrypt])
+	APR_ADDTO(LIBS, [-lcrypt])
 	;;
     *-lynx-lynxos)
 	APR_ADDTO(CFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])
@@ -166,7 +158,6 @@ dnl	;;
 	;;
     *-dec-osf*)
 	APR_ADDTO(CFLAGS, [-DOSF1])
-	APR_ADDTO(LIBS, [-lm])
 	;;
     *-qnx)
 	APR_ADDTO(CFLAGS, [-DQNX])
@@ -189,7 +180,7 @@ dnl	;;
 	;;
     *-sco5*)
 	APR_ADDTO(CFLAGS, [-DSCO5])
-	APR_ADDTO(LIBS, [-lsocket -lmalloc -lprot -ltinfo -lx -lm])
+	APR_ADDTO(LIBS, [-lsocket -lmalloc -lprot -ltinfo -lx])
 	;;
     *-sco_sv*|*-SCO_SV*)
 	APR_ADDTO(CFLAGS, [-DSCO])
