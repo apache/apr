@@ -230,6 +230,17 @@ int strcasecmp(const char *a, const char *b);
 int strncasecmp(const char *a, const char *b, size_t n);
 #endif
 
+/*
+ * String and memory functions
+ */
+
+#if (!APR_HAVE_MEMMOVE)
+#define memmove(a,b,c) bcopy(b,a,c)
+#endif
+
+#if (!APR_HAVE_BZERO)
+#define bzero(a,b) memset(a,0,b)
+#endif
 
 #if APR_HAS_RANDOM
 /*

@@ -219,6 +219,9 @@ if test "$native_mmap_emul" = "1"; then
     mmap="1"
 fi
 AC_CHECK_FUNCS(hstrerror)
+AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
+AC_CHECK_FUNCS(bcopy, [ have_bcopy="1" ], [ have_bcopy="0"] )
+
 AC_SUBST(sendfile)
 AC_SUBST(fork)
 AC_SUBST(inet_addr)
@@ -226,6 +229,8 @@ AC_SUBST(inet_network)
 AC_SUBST(have_sigaction)
 AC_SUBST(iconv)
 AC_SUBST(mmap)
+AC_SUBST(have_memmove)
+AC_SUBST(have_bcopy)
 
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
