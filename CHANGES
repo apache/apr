@@ -1,4 +1,7 @@
 Changes with APR a9
+  *) Add apr_make_os_sock() for constructing a fully-capable APR
+     socket.  [Jeff Trawick]
+
   *) Make APR's shared memory routines always allocate enough memory
      for the requested segment, the MM internal types, and the APR
      internal types.

@@ -305,6 +305,35 @@ apr_status_t apr_get_os_sock(apr_os_sock_t *thesock, apr_socket_t *sock)
     return APR_SUCCESS;
 }
 
+apr_status_t apr_make_os_sock(apr_socket_t **apr_sock, 
+                              apr_os_sock_info_t *os_sock_info, 
+                              apr_pool_t *cont)
+{
+    alloc_socket(apr_sock, cont);
+    set_socket_vars(*apr_sock, os_sock_info->family);
+    (*apr_sock)->timeout = -1;
+    (*apr_sock)->disconnected = 0;
+    (*apr_sock)->sock = *os_sock_info->os_sock;
+    if (os_sock_info->local) {
+        memcpy(&(*apr_sock)->local_addr->sa.sin, 
+               os_sock_info->local, 
+               (*apr_sock)->local_addr->salen);
+    }
+    else {
+        (*apr_sock)->local_port_unknown = (*apr_sock)->local_interface_unknown = 1;
+    }
+    if (os_sock_info->remote) {
+        memcpy(&(*apr_sock)->remote_addr->sa.sin, 
+               os_sock_info->remote,
+               (*apr_sock)->remote_addr->salen);
+    }
+        
+    apr_register_cleanup((*apr_sock)->cntxt, (void *)(*apr_sock), 
+                        socket_cleanup, apr_null_cleanup);
+
+    return APR_SUCCESS;
+}
+
 apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, 
                            apr_pool_t *cont)
 {
