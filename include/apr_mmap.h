@@ -68,6 +68,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define APR_MMAP_READ    1
+#define APR_MMAP_WRITE   2
+
 /**
  * @package APR MMAP library
  */
@@ -103,10 +106,16 @@ struct apr_mmap_t {
  * @param file The file turn into an mmap.
  * @param offset The offset into the file to start the data pointer at.
  * @param size The size of the file
+ * @param flag bit-wise or of:
+ * <PRE>
+ *          APR_MMAP_READ       MMap opened for reading
+ *          APR_MMAP_WRITE      MMap opened for writing
+ * </PRE>
  * @param cntxt The pool to use when creating the mmap.
  */
-apr_status_t apr_mmap_create(apr_mmap_t ** newmmap, apr_file_t *file, apr_off_t offset,
-                 apr_size_t size, apr_pool_t *cntxt);
+apr_status_t apr_mmap_create(apr_mmap_t ** newmmap, apr_file_t *file, 
+                             apr_off_t offset, apr_size_t size, 
+                             apr_int32_t flag, apr_pool_t *cntxt);
 
 /**
  * Remove a mmap'ed.
