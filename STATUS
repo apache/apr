@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/02 13:50:38 $]
+Last modified at [$Date: 2002/05/02 14:02:42 $]
 
 Release:
 
@@ -68,7 +68,8 @@ CURRENT VOTES:
                   although I have spent more time on this than I'd like.
                   If someone wants to maintain it, more power to them.  If
                   no one maintains it, this gets changed to a +1.),
-          BrianP (All the reasons why we don't want the processor-specific
+          BrianP,cliff:
+	  	  (All the reasons why we don't want the processor-specific
                   code in APR are also reasons why I don't want to push
                   that code up into the apps that use APR.  I'd rather
                   spend some more time searching for a workable solution
@@ -76,12 +77,12 @@ CURRENT VOTES:
                   apps using the atomic API set a preprocessor flag to
                   choose an "optimal" or "portable" version of the atomic
                   ops?)
-          Cliff  (Agrees with BrianP)
           Sander (The positive sides of the atomics outweigh the negative
                   in my opinion.  That said, I am not going to be the
                   one spending time on this, since asm on various
                   processors isn't really my game)
-          Jim     (who thinks we'll need to reformat this vote) Any time
+          Jim,rbb:
+	  	  (who thinks we'll need to reformat this vote) Any time
                   you make use of processor specific code for optimizations
                   or capability, you run into portability concerns. The
                   real option is to make atomics a compile-time option.
