@@ -83,6 +83,7 @@
 #  define RPATH "-rpath"
 #  define SHARED_OPTS "-shared"
 #  define MODULE_OPTS "-shared"
+#  define DYNAMIC_LINK_OPTS "-export-dynamic"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #  define ADD_MINUS_L
 #  define LD_RUN_PATH "LD_RUN_PATH"
