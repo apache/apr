@@ -103,6 +103,7 @@ static void *getservbyname(const char *name, const char *proto)
 {
     return NULL;
 }
+#endif
 
 static apr_status_t get_local_addr(apr_socket_t *sock)
 {
