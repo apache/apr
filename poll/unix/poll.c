@@ -209,14 +209,14 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
             fd = aprset[i].desc.s->socketdes;
         }
         else {
-#ifdef WIN32
+#if !APR_FILES_AS_SOCKETS
             return APR_EBADF;
 #else
             fd = aprset[i].desc.f->filedes;
 #ifdef NETWARE
             is_pipe = aprset[i].desc.f->is_pipe;
 #endif /* NETWARE */
-#endif /* !WIN32 */
+#endif /* APR_FILES_AS_SOCKETS */
         }
         if (aprset[i].reqevents & APR_POLLIN) {
             FD_SET(fd, &readset);
@@ -261,7 +261,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
             fd = aprset[i].desc.s->socketdes;
         }
         else {
-#ifdef WIN32
+#if !APR_FILES_AS_SOCKETS
             return APR_EBADF;
 #else
             fd = aprset[i].desc.f->filedes;
@@ -355,7 +355,7 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
         fd = descriptor->desc.s->socketdes;
     }
     else {
-#ifdef WIN32
+#if !APR_FILES_AS_SOCKETS
         return APR_EBADF;
 #else
         fd = descriptor->desc.f->filedes;
@@ -412,7 +412,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
         fd = descriptor->desc.s->socketdes;
     }
     else {
-#ifdef WIN32
+#if !APR_FILES_AS_SOCKETS
         return APR_EBADF;
 #else
         fd = descriptor->desc.f->filedes;
@@ -521,7 +521,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
             fd = pollset->query_set[i].desc.s->socketdes;
         }
         else {
-#ifdef WIN32
+#if !APR_FILES_AS_SOCKETS
             return APR_EBADF;
 #else
             fd = pollset->query_set[i].desc.f->filedes;
