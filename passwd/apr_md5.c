@@ -272,8 +272,10 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
     if (inputLen >= partLen) {
         if (context->xlate) {
             inbytes_left = outbytes_left = partLen;
-            apr_xlate_conv_buffer(context->xlate, input, &inbytes_left,
-                                  &context->buffer[idx], &outbytes_left);
+            apr_xlate_conv_buffer(context->xlate, (const char *)input, 
+                                  &inbytes_left,
+                                  (char *)&context->buffer[idx], 
+                                  &outbytes_left);
         }
         else {
             memcpy(&context->buffer[idx], input, partLen);
@@ -284,8 +286,9 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
             if (context->xlate) {
                 unsigned char inp_tmp[64];
                 inbytes_left = outbytes_left = 64;
-                apr_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
-                                      inp_tmp, &outbytes_left);
+                apr_xlate_conv_buffer(context->xlate, (const char *)&input[i], 
+                                      &inbytes_left, (char *)inp_tmp, 
+                                      &outbytes_left);
                 MD5Transform(context->state, inp_tmp);
             }
             else {
@@ -301,8 +304,9 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
     /* Buffer remaining input */
     if (context->xlate) {
         inbytes_left = outbytes_left = inputLen - i;
-        apr_xlate_conv_buffer(context->xlate, &input[i], &inbytes_left,
-                              &context->buffer[idx], &outbytes_left);
+        apr_xlate_conv_buffer(context->xlate, (const char *)&input[i], 
+                              &inbytes_left, (char *)&context->buffer[idx], 
+                              &outbytes_left);
     }
     else {
         memcpy(&context->buffer[idx], &input[i], inputLen - i);
