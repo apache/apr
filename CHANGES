@@ -1,5 +1,7 @@
 Changes with APR b1
 
+  *) Fixed apr_file_seek() to unset the eof_hit flag.  [Stas Bekman]
+
   *) Removed --disable-atomics flag and added --enable-nonportable-atomics,
      thereby defaulting to portable binaries on those systems that could
      be optimized at the expense of portability. PR: 9507  [Aaron Bannert]
