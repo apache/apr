@@ -433,8 +433,6 @@ DEP_CPP_TIME_=\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\time.obj" : $(SOURCE) $(DEP_CPP_TIME_) "$(INTDIR)" ".\include\apr.h"
@@ -458,8 +456,6 @@ DEP_CPP_TIMES=\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\timestr.obj" : $(SOURCE) $(DEP_CPP_TIMES) "$(INTDIR)"\
@@ -510,8 +506,6 @@ DEP_CPP_APR_S=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"sys\socket.h"\
 	
 
 "$(INTDIR)\apr_snprintf.obj" : $(SOURCE) $(DEP_CPP_APR_S) "$(INTDIR)"\
@@ -630,9 +624,6 @@ DEP_CPP_ERROR=\
 	".\include\apr_want.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"netdb.h"\
-	{$(INCLUDE)}"sys\socket.h"\
 	
 
 "$(INTDIR)\errorcodes.obj" : $(SOURCE) $(DEP_CPP_ERROR) "$(INTDIR)"\
@@ -656,7 +647,6 @@ DEP_CPP_GETOP=\
 	".\include\apr_want.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\getopt.obj" : $(SOURCE) $(DEP_CPP_GETOP) "$(INTDIR)"\
@@ -691,7 +681,6 @@ DEP_CPP_MISC_=\
 	".\include\apr_want.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\misc.obj" : $(SOURCE) $(DEP_CPP_MISC_) "$(INTDIR)" ".\include\apr.h"
@@ -712,7 +701,6 @@ DEP_CPP_NAMES=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\names.obj" : $(SOURCE) $(DEP_CPP_NAMES) "$(INTDIR)"\
@@ -751,7 +739,6 @@ DEP_CPP_START=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\locks.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\start.obj" : $(SOURCE) $(DEP_CPP_START) "$(INTDIR)"\
@@ -797,8 +784,6 @@ DEP_CPP_DIR_C=\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\dir.obj" : $(SOURCE) $(DEP_CPP_DIR_C) "$(INTDIR)" ".\include\apr.h"
@@ -826,8 +811,6 @@ DEP_CPP_FILEA=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\fileacc.obj" : $(SOURCE) $(DEP_CPP_FILEA) "$(INTDIR)"\
@@ -856,8 +839,6 @@ DEP_CPP_FILED=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\filedup.obj" : $(SOURCE) $(DEP_CPP_FILED) "$(INTDIR)"\
@@ -887,8 +868,6 @@ DEP_CPP_FILES=\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\filestat.obj" : $(SOURCE) $(DEP_CPP_FILES) "$(INTDIR)"\
@@ -916,8 +895,6 @@ DEP_CPP_FLOCK=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\flock.obj" : $(SOURCE) $(DEP_CPP_FLOCK) "$(INTDIR)"\
@@ -935,7 +912,6 @@ DEP_CPP_FULLR=\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\fullrw.obj" : $(SOURCE) $(DEP_CPP_FULLR) "$(INTDIR)"\
@@ -967,8 +943,6 @@ DEP_CPP_OPEN_=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\open.obj" : $(SOURCE) $(DEP_CPP_OPEN_) "$(INTDIR)" ".\include\apr.h"
@@ -996,8 +970,6 @@ DEP_CPP_PIPE_=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\pipe.obj" : $(SOURCE) $(DEP_CPP_PIPE_) "$(INTDIR)" ".\include\apr.h"
@@ -1027,8 +999,6 @@ DEP_CPP_READW=\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\readwrite.obj" : $(SOURCE) $(DEP_CPP_READW) "$(INTDIR)"\
@@ -1056,8 +1026,6 @@ DEP_CPP_SEEK_=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\seek.obj" : $(SOURCE) $(DEP_CPP_SEEK_) "$(INTDIR)" ".\include\apr.h"
@@ -1082,8 +1050,6 @@ DEP_CPP_LOCKS=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\locks.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\locks.obj" : $(SOURCE) $(DEP_CPP_LOCKS) "$(INTDIR)"\
@@ -1105,8 +1071,6 @@ DEP_CPP_INET_=\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\networkio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"sys\socket.h"\
 	
 
 "$(INTDIR)\inet_ntop.obj" : $(SOURCE) $(DEP_CPP_INET_) "$(INTDIR)"\
@@ -1128,7 +1092,6 @@ DEP_CPP_POLL_=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\poll.obj" : $(SOURCE) $(DEP_CPP_POLL_) "$(INTDIR)" ".\include\apr.h"
@@ -1159,8 +1122,6 @@ DEP_CPP_SENDR=\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
 	".\include\arch\win32\networkio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\sendrecv.obj" : $(SOURCE) $(DEP_CPP_SENDR) "$(INTDIR)"\
@@ -1184,7 +1145,6 @@ DEP_CPP_SOCKA=\
 	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
 	".\network_io\unix\sa_common.c"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\sockaddr.obj" : $(SOURCE) $(DEP_CPP_SOCKA) "$(INTDIR)"\
@@ -1210,8 +1170,6 @@ DEP_CPP_SOCKE=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\sockets.obj" : $(SOURCE) $(DEP_CPP_SOCKE) "$(INTDIR)"\
@@ -1233,7 +1191,6 @@ DEP_CPP_SOCKO=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\sockopt.obj" : $(SOURCE) $(DEP_CPP_SOCKO) "$(INTDIR)"\
@@ -1266,8 +1223,6 @@ DEP_CPP_PROC_=\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
 	".\include\arch\win32\threadproc.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\proc.obj" : $(SOURCE) $(DEP_CPP_PROC_) "$(INTDIR)" ".\include\apr.h"
@@ -1295,8 +1250,6 @@ DEP_CPP_SIGNA=\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
 	".\include\arch\win32\threadproc.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\signals.obj" : $(SOURCE) $(DEP_CPP_SIGNA) "$(INTDIR)"\
@@ -1323,8 +1276,6 @@ DEP_CPP_THREA=\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\threadproc.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\thread.obj" : $(SOURCE) $(DEP_CPP_THREA) "$(INTDIR)"\
@@ -1351,8 +1302,6 @@ DEP_CPP_THREAD=\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\threadproc.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\threadpriv.obj" : $(SOURCE) $(DEP_CPP_THREAD) "$(INTDIR)"\
@@ -1383,8 +1332,6 @@ DEP_CPP_DSO_C=\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\dso.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\dso.obj" : $(SOURCE) $(DEP_CPP_DSO_C) "$(INTDIR)" ".\include\apr.h"
@@ -1411,8 +1358,6 @@ DEP_CPP_APR_P=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\apr_pools.obj" : $(SOURCE) $(DEP_CPP_APR_P) "$(INTDIR)"\
@@ -1461,7 +1406,6 @@ DEP_CPP_COMMO=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
 	
 
 "$(INTDIR)\common.obj" : $(SOURCE) $(DEP_CPP_COMMO) "$(INTDIR)"\
@@ -1493,8 +1437,6 @@ DEP_CPP_MMAP_=\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\mmap.obj" : $(SOURCE) $(DEP_CPP_MMAP_) "$(INTDIR)" ".\include\apr.h"
@@ -1518,8 +1460,6 @@ DEP_CPP_GROUP=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\groupinfo.obj" : $(SOURCE) $(DEP_CPP_GROUP) "$(INTDIR)"\
@@ -1544,8 +1484,6 @@ DEP_CPP_USERI=\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
-	{$(INCLUDE)}"arpa\inet.h"\
-	{$(INCLUDE)}"dirent.h"\
 	
 
 "$(INTDIR)\userinfo.obj" : $(SOURCE) $(DEP_CPP_USERI) "$(INTDIR)"\
