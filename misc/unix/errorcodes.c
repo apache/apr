@@ -189,8 +189,46 @@ static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
    */
   return stuffbuffer(buf, bufsize, result);  
 }
-#else
 
+#elif defined(WIN32)
+
+static char *apr_os_strerror(char *buf, ap_size_t bufsize, ap_status_t errcode)
+{
+    DWORD len;
+    DWORD i;
+
+    len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+                        NULL,
+                        errcode,
+                        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default language */
+                        (LPTSTR) buf,
+                        bufsize,
+                        NULL);
+
+    if (len) {
+        /* FormatMessage put the message in the buffer, but it may
+         * have embedded a newline (\r\n), and possible more than one.
+         * Remove the newlines replacing them with a space. This is not
+         * as visually perfect as moving all the remaining message over,
+         * but more efficient.
+         */
+        i = len;
+        while (i) {
+            i--;
+            if ((buf[i] == '\r') || (buf[i] == '\n'))
+                buf[i] = ' ';
+        }
+    }
+    else {
+        /* Windows didn't provide us with a message.  Even stuff like                    * WSAECONNREFUSED won't get a message.
+         */
+        ap_cpystrn(buf, "Unrecognized error code", bufsize);
+    }
+
+    return buf;
+}
+
+#else
 /* On Unix, apr_os_strerror() handles error codes from the resolver 
  * (h_errno). 
  e*/
@@ -228,7 +266,17 @@ static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
 char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
+#ifdef WIN32
+        /* XXX This is just plain wrong.  We started discussing this one
+         * day, and then it dropped, but doing this here is a symptom of a
+         * problem with the design that will keep us from safely sharing 
+         * Windows code with any other platform.  This needs to be changed, 
+         * Windows is NOT a special platform when it comes to APR. rbb
+         */
+        return apr_os_strerror(buf, bufsize, statcode);
+#else
         return stuffbuffer(buf, bufsize, strerror(statcode));
+#endif
     }
     else if (statcode < APR_OS_START_USEERR) {
         return stuffbuffer(buf, bufsize, apr_error_string(statcode));
@@ -237,7 +285,7 @@ char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
         return stuffbuffer(buf, bufsize, "APR does not understand this error code");
     }
     else {
-	return apr_os_strerror(buf, bufsize, statcode - APR_OS_START_SYSERR);
+        return apr_os_strerror(buf, bufsize, statcode - APR_OS_START_SYSERR);
     }
 }
 

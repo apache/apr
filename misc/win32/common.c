@@ -52,20 +52,10 @@
  * <http://www.apache.org/>.
  */
 
-#include "misc.h"
+#include "../unix/canonerr.c"
 
-/*
- * Map Windows system errors to APR specific error codes.
- * This routine should only be called when it is necessary to 
- * selectively react to errors returned by APR functions.
- * 
- * hack alert:
- * Certain Windows APR routines already canonicalize their 
- * return codes in most (and maybe all) cases that are
- * interesting to Apache. For now, canonicalization 
- * on Windows is a no-op.
- */
-int ap_canonical_error(ap_status_t code)
-{
-    return code;
-}
+#include "../unix/getopt.c"
+
+#include "../unix/errorcodes.c"
+
+#include "../unix/start.c"

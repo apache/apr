@@ -61,7 +61,9 @@
 #include "apr_pools.h"
 #include "apr_getopt.h"
 #include "apr_thread_proc.h"
+#include "apr_file_io.h"
 #include "apr_errno.h"
+#include "apr_getopt.h"
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -96,6 +98,80 @@ struct ap_other_child_rec_t {
     int write_fd;
 };
 
+#ifdef WIN32
+#define WSAHighByte 2
+#define WSALowByte 0
+/* Platform specific designation of run time os version.
+ * Gaps allow for specific service pack levels that
+ * export new kernel or winsock functions or behavior.
+ */
+typedef enum {
+        APR_WIN_95 = 0,
+        APR_WIN_98 = 4,
+        APR_WIN_NT = 8,
+        APR_WIN_NT_4 = 12,
+        APR_WIN_NT_4_SP2 = 14,
+        APR_WIN_NT_4_SP3 = 15,
+        APR_WIN_NT_4_SP4 = 16,
+        APR_WIN_NT_4_SP6 = 18,
+        APR_WIN_2000 = 24
+} ap_oslevel_e;
+
+
+typedef enum {
+    DLL_WINBASEAPI = 0,    // kernel32 From WinBase.h
+    DLL_WINADVAPI = 1,     // advapi32 From WinBase.h
+    DLL_WINSOCKAPI = 2,    // mswsock  From WinSock.h
+    DLL_WINSOCK2API = 3,   // ws2_32   From WinSock2.h
+    DLL_defined = 4        // must define as last idx_ + 1
+} ap_dlltoken_e;
+
+FARPROC ap_load_dll_func(ap_dlltoken_e fnLib, char *fnName, int ordinal);
+
+/* The ap_load_dll_func call WILL fault if the function cannot be loaded */
+
+#define AP_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
+    typedef rettype (calltype *ap_winapi_fpt_##fn) args; \
+    static ap_winapi_fpt_##fn ap_winapi_pfn_##fn = NULL; \
+    __inline rettype ap_winapi_##fn args \
+    {   if (!ap_winapi_pfn_##fn) \
+            ap_winapi_pfn_##fn = (ap_winapi_fpt_##fn) ap_load_dll_func(lib, #fn, ord); \
+        return (*(ap_winapi_pfn_##fn)) names; }; \
+
+/* Provide late bound declarations of every API function missing from
+ * one or more supported releases of the Win32 API
+ *
+ * lib is the enumerated token from ap_dlltoken_e, and must correspond
+ * to the string table entry in start.c used by the ap_load_dll_func().
+ * Token names (attempt to) follow Windows.h declarations prefixed by DLL_
+ * in order to facilitate comparison.  Use the exact declaration syntax
+ * and names from Windows.h to prevent ambigutity and bugs.
+ *
+ * rettype and calltype follow the original declaration in Windows.h
+ * fn is the true function name - beware Ansi/Unicode #defined macros
+ * ord is the ordinal within the library, use 0 if it varies between versions
+ * args is the parameter list following the original declaration, in parens
+ * names is the parameter list sans data types, enclosed in parens
+ *
+ * #undef/re#define the Ansi/Unicode generic name to abate confusion
+ * In the case of non-text functions, simply #define the original name
+ */
+
+AP_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
+    IN LPCSTR lpFileName,
+    IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
+    OUT LPVOID lpFileInformation),
+    (lpFileName, fInfoLevelId, lpFileInformation));
+#undef GetFileAttributesEx
+#define GetFileAttributesEx ap_winapi_GetFileAttributesExA
+
+AP_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
+    IN HANDLE hFile),
+    (hFile));
+#define CancelIo ap_winapi_CancelIo
+
+ap_status_t ap_get_oslevel(struct ap_pool_t *, ap_oslevel_e *);
+#endif /* WIN32 */
 
 #endif  /* ! MISC_H */
 
