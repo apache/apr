@@ -62,6 +62,10 @@
 #include "apr_hash.h"
 #include "apr_thread_rwlock.h"
 
+#ifdef HAVE_UTIME_H
+#include <utime.h>
+#endif
+
 /*#define APR_HAS_PSA*/
 
 static apr_filetype_e filetype_from_mode(mode_t mode)
@@ -388,10 +392,45 @@ APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
 }
 
 
-/* ### Somebody please write this! */
 APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
                                               apr_time_t mtime,
                                               apr_pool_t *pool)
 {
-  return APR_ENOTIMPL;
+    apr_status_t status;
+    apr_finfo_t finfo;
+
+    status = apr_stat(&finfo, fname, APR_FINFO_ATIME, pool);
+    if (!APR_STATUS_IS_SUCCESS(status)) {
+        return status;
+    }
+
+#ifdef HAVE_UTIMES
+    {
+      struct timeval tvp[2];
+    
+      tvp[0].tv_sec = apr_time_sec(finfo.atime);
+      tvp[0].tv_usec = apr_time_usec(finfo.atime);
+      tvp[1].tv_sec = apr_time_sec(mtime);
+      tvp[1].tv_usec = apr_time_usec(mtime);
+      
+      if (utimes(fname, tvp) == -1) {
+        return errno;
+      }
+    }
+#elif defined(HAVE_UTIME)
+    {
+      struct utimbuf buf;
+      
+      buf.actime = (time_t) (finfo.atime / APR_USEC_PER_SEC);
+      buf.modtime = (time_t) (mtime / APR_USEC_PER_SEC);
+      
+      if (utime(fname, &buf) == -1) {
+        return errno;
+      }
+    }
+#else
+    return APR_ENOTIMPL;
+#endif
+
+    return APR_SUCCESS;
 }
