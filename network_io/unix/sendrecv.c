@@ -490,18 +490,29 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                           &nbytes,       /* number of bytes written */
                           flags);        /* undefined, set to 0 */
 
-            if (rv == -1 && errno == EAGAIN) {
-                if (sock->timeout) {
-                    sock->netmask |= APR_INCOMPLETE_WRITE;
+            if (rv == -1) {
+                if (errno == EAGAIN) {
+                    if (sock->timeout) {
+                        sock->netmask |= APR_INCOMPLETE_WRITE;
+                    }
+                    /* FreeBSD's sendfile can return -1/EAGAIN even if it
+                     * sent bytes.  Sanitize the result so we get normal EAGAIN
+                     * semantics w.r.t. bytes sent.
+                     */
+                    if (nbytes) {
+                        /* normal exit for a big file & non-blocking io */
+                        (*len) = nbytes;
+                        return APR_SUCCESS;
+                    }
                 }
-                /* FreeBSD's sendfile can return -1/EAGAIN even if it
-                 * sent bytes.  Sanitize the result so we get normal EAGAIN
-                 * semantics w.r.t. bytes sent.
-                 */
-                if (nbytes) {
-                    /* normal exit for a big file & non-blocking io */
+            }
+            else {       /* rv == 0 (or the kernel is broken) */
+                if (nbytes == 0) {
+                    /* Most likely the file got smaller after the stat.
+                     * Return an error so the caller can do the Right Thing.
+                     */
                     (*len) = nbytes;
-                    return APR_SUCCESS;
+                    return APR_EOF;
                 }
             }
         }    
