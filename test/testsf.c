@@ -70,12 +70,14 @@ int main(void)
 }
 #else /* !APR_HAS_SENDFILE */
 
-#define FILE_LENGTH    100000
+#define FILE_LENGTH    200000
 
-#define HDR1           "First header\n"
-#define HDR2           "Last header\n"
-#define TRL1           "First trailer\n"
-#define TRL2           "Last trailer\n"
+#define FILE_DATA_CHAR '0'
+
+#define HDR1           "1234567890ABCD\n"
+#define HDR2           "EFGH\n"
+#define TRL1           "IJKLMNOPQRSTUVWXYZ\n"
+#define TRL2           "!@#$%&*()\n"
 
 #define TESTSF_PORT    8021
 
@@ -121,17 +123,22 @@ static void create_testfile(ap_pool_t *p, const char *fname)
     char buf[120];
     int i;
     ap_ssize_t nbytes;
+    ap_finfo_t finfo;
 
-    rv = ap_open(&f, fname, APR_CREATE | APR_WRITE | APR_TRUNCATE, APR_UREAD | APR_UWRITE, p);
+    printf("Creating a test file...\n");
+    rv = ap_open(&f, fname, 
+                 APR_CREATE | APR_WRITE | APR_TRUNCATE | APR_BUFFERED,
+                 APR_UREAD | APR_UWRITE, p);
     if (rv) {
         fprintf(stderr, "ap_open()->%d/%s\n",
                 rv, ap_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     
+    buf[0] = FILE_DATA_CHAR;
     for (i = 0; i < FILE_LENGTH; i++) {
         nbytes = 1;
-        rv = ap_write(f, "0", &nbytes);
+        rv = ap_write(f, buf, &nbytes);
         if (rv) {
             fprintf(stderr, "ap_write()->%d/%s\n",
                     rv, ap_strerror(rv, buf, sizeof buf));
@@ -145,16 +152,33 @@ static void create_testfile(ap_pool_t *p, const char *fname)
                 rv, ap_strerror(rv, buf, sizeof buf));
         exit(1);
     }
+
+    rv = ap_stat(&finfo, fname, p);
+    if (rv) {
+        fprintf(stderr, "ap_close()->%d/%s\n",
+                rv, ap_strerror(rv, buf, sizeof buf));
+        exit(1);
+    }
+
+    if (finfo.size != FILE_LENGTH) {
+        fprintf(stderr, 
+                "test file %s should be %ld-bytes long\n"
+                "instead it is %ld-bytes long\n",
+                fname,
+                (long int)FILE_LENGTH,
+                (long int)finfo.size);
+        exit(1);
+    }
 }
 
-static int client(int blocking)
+static int client(int socket_mode)
 {
     ap_status_t rv;
     ap_socket_t *sock;
     ap_pool_t *p;
     char buf[120];
     ap_file_t *f = NULL;
-    ap_size_t len;
+    ap_size_t len, expected_len;
     ap_off_t offset;
     ap_hdtr_t hdtr;
     struct iovec headers[2];
@@ -188,7 +212,12 @@ static int client(int blocking)
         exit(1);
     }
 
-    if (!blocking) {
+    switch(socket_mode) {
+    case 1:
+        /* leave it blocking */
+        break;
+    case 0:
+        /* set it non-blocking */
         rv = ap_setsocketopt(sock, APR_SO_NONBLOCK, 1);
         if (rv != APR_SUCCESS) {
             fprintf(stderr, "ap_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
@@ -196,7 +225,23 @@ static int client(int blocking)
                     ap_strerror(rv, buf, sizeof buf));
             exit(1);
         }
+        break;
+    case 2:
+        /* set a timeout */
+        rv = ap_setsocketopt(sock, APR_SO_TIMEOUT, 
+                             100 * AP_USEC_PER_SEC);
+        if (rv != APR_SUCCESS) {
+            fprintf(stderr, "ap_setsocketopt(APR_SO_NONBLOCK)->%d/%s\n", 
+                    rv,
+                    ap_strerror(rv, buf, sizeof buf));
+            exit(1);
+        }
+        break;
+    default:
+        assert(1 != 1);
     }
+
+    printf("Sending the file...\n");
 
     hdtr.headers = headers;
     hdtr.numheaders = 2;
@@ -222,8 +267,38 @@ static int client(int blocking)
         exit(1);
     }
 
+    printf("ap_sendfile() updated offset with %ld\n",
+           (long int)offset);
+
     printf("ap_sendfile() updated len with %ld\n",
            (long int)len);
+
+    expected_len = 
+        strlen(HDR1) + strlen(HDR2) + 
+        strlen(TRL1) + strlen(TRL2) + 
+        FILE_LENGTH;
+
+    printf("bytes really sent: %d\n",
+           expected_len);
+
+    if (len != expected_len) {
+        fprintf(stderr, "ap_sendfile() didn't report the correct "
+                "number of bytes sent!\n");
+        exit(1);
+    }
+    
+    offset = 0;
+    rv = ap_seek(f, APR_CUR, &offset);
+    if (rv != APR_SUCCESS) {
+        fprintf(stderr, "ap_seek()->%d/%s\n",
+                rv,
+		ap_strerror(rv, buf, sizeof buf));
+        exit(1);
+    }
+
+    printf("After ap_sendfile(), the kernel file pointer is "
+           "at offset %ld.\n",
+           (long int)offset);
 
     rv = ap_shutdown(sock, APR_SHUTDOWN_WRITE);
     if (rv != APR_SUCCESS) {
@@ -315,6 +390,8 @@ static int server(void)
         exit(1);
     }
 
+    printf("Processing a client...\n");
+
     assert(sizeof buf > strlen(HDR1));
     bytes_read = strlen(HDR1);
     rv = ap_recv(newsock, buf, &bytes_read);
@@ -367,6 +444,15 @@ static int server(void)
         if (bytes_read != 1) {
             fprintf(stderr, "ap_recv()->%ld bytes instead of 1\n",
                     (long int)bytes_read);
+            exit(1);
+        }
+        if (buf[0] != FILE_DATA_CHAR) {
+            fprintf(stderr,
+                    "problem with data read (byte %d of file):\n",
+                    i);
+            fprintf(stderr, "read `%c' (0x%x) from client; expected "
+                    "`%c'\n",
+                    buf[0], buf[0], FILE_DATA_CHAR);
             exit(1);
         }
     }
@@ -444,6 +530,9 @@ int main(int argc, char *argv[])
         if (!strcmp(argv[2], "blocking")) {
             return client(1);
         }
+        else if (!strcmp(argv[2], "timeout")) {
+            return client(2);
+        }
         else if (!strcmp(argv[2], "nonblocking")) {
             return client(0);
         }
@@ -453,7 +542,7 @@ int main(int argc, char *argv[])
     }
 
     fprintf(stderr, 
-            "Usage: %s client {blocking|nonblocking}\n"
+            "Usage: %s client {blocking|nonblocking|timeout}\n"
             "       %s server\n",
             argv[0], argv[0]);
     return -1;
