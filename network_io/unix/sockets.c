@@ -335,6 +335,20 @@ ap_status_t ap_put_os_sock(struct socket_t **sock, ap_os_sock_t *thesock,
     if ((*sock) == NULL) {
         (*sock) = (struct socket_t *)ap_palloc(cont, sizeof(struct socket_t));
         (*sock)->cntxt = cont;
+        (*sock)->local_addr = (struct sockaddr_in *)ap_palloc((*sock)->cntxt,
+                             sizeof(struct sockaddr_in));
+        (*sock)->remote_addr = (struct sockaddr_in *)ap_palloc((*sock)->cntxt,
+                              sizeof(struct sockaddr_in));
+
+        if ((*sock)->local_addr == NULL || (*sock)->remote_addr == NULL) {
+            return APR_ENOMEM;
+        }
+     
+        (*sock)->addr_len = sizeof(*(*sock)->local_addr);
+        (*sock)->timeout = -1;
+        if (getsockname(*thesock, (*sock)->local_addr, &((*sock)->addr_len)) < 0) {
+            return errno;
+        }
     }
     (*sock)->socketdes = *thesock;
     return APR_SUCCESS;
