@@ -104,7 +104,7 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf, apr_size_t *le
     int fds, err = 0;
 
     do {
-        if (!sock->nonblock || err == SOCEWOULDBLOCK) {
+        if (!sock->nonblock || (err == SOCEWOULDBLOCK && sock->timeout != 0)) {
             fds = sock->socketdes;
             rv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout/1000 : -1);
 
@@ -124,7 +124,7 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf, apr_size_t *le
 
         rv = recv(sock->socketdes, buf, (*len), 0);
         err = rv < 0 ? sock_errno() : 0;
-    } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
+    } while (err == SOCEINTR || (err == SOCEWOULDBLOCK && sock->timeout != 0));
 
     if (err) {
         *len = 0;
