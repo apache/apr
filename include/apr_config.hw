@@ -155,7 +155,13 @@ typedef void (Sigfunc)(int);
 typedef enum {
 	APR_WIN_95 = 0, 
 	APR_WIN_98 = 4, 
-	APR_WIN_NT = 8
+	APR_WIN_NT = 8,
+	APR_WIN_NT_4 = 12,
+	APR_WIN_NT_4_SP2 = 14,
+	APR_WIN_NT_4_SP3 = 15,
+	APR_WIN_NT_4_SP4 = 16,
+	APR_WIN_NT_4_SP6 = 18,
+	APR_WIN_2000 = 24
 } ap_oslevel_e;
 
 
