@@ -117,7 +117,8 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 
 #elif defined(DSO_USE_DLFCN)
 #if defined(OSF1) || defined(SEQUENT) || defined(SNI) ||\
-    (defined(__FreeBSD_version) && (__FreeBSD_version >= 220000))
+    (defined(__FreeBSD_version) && (__FreeBSD_version >= 220000)) ||\
+    defined(__DragonFly__)
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 
 #else
