@@ -262,7 +262,7 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog);
  * @param connection_pool The pool for the new socket.
  */
 apr_status_t apr_accept(apr_socket_t **new_sock, apr_socket_t *sock, 
-                      apr_pool_t *connection_pool);
+                        apr_pool_t *connection_pool);
 
 /**
  * Issue a connection request to a socket either on the same machine 
@@ -280,7 +280,8 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
  * @param which Which interface do we wnt the hostname for?
  * @param sock The socket to examine.
  */
-apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *sock);
+apr_status_t apr_get_hostname(char **name, apr_interface_e which,
+                              apr_socket_t *sock);
 
 /**
  * Create apr_sockaddr_t from hostname, address family, and port.
@@ -314,7 +315,8 @@ apr_status_t apr_gethostname(char *buf, int len, apr_pool_t *cont);
  * @param key The key to associate with the user data.
  * @param sock The currently open socket.
  */
-apr_status_t apr_get_socketdata(void **data, const char *key, apr_socket_t *sock);
+apr_status_t apr_get_socketdata(void **data, const char *key,
+                                apr_socket_t *sock);
 
 /**
  * Set the pool associated with the current socket.
@@ -323,8 +325,9 @@ apr_status_t apr_get_socketdata(void **data, const char *key, apr_socket_t *sock
  * @param key The key to associate with the data.
  * @param cleanup The cleanup to call when the socket is destroyed.
  */
-apr_status_t apr_set_socketdata(apr_socket_t *sock, void *data, const char *key,
-                              apr_status_t (*cleanup) (void*));
+apr_status_t apr_set_socketdata(apr_socket_t *sock, void *data,
+                                const char *key,
+                                apr_status_t (*cleanup) (void*));
 
 /**
  * Send data over a network.
@@ -362,7 +365,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len);
  * </PRE>
  */
 apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec, 
-                     apr_int32_t nvec, apr_size_t *len);
+                       apr_int32_t nvec, apr_size_t *len);
 
 #if APR_HAS_SENDFILE
 /**
@@ -380,8 +383,9 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
  *      this behavior, use apr_setsocketopt with the APR_SO_TIMEOUT option.
  *      The number of bytes actually sent is stored in argument 5.
  */
-apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file, apr_hdtr_t *hdtr, 
-                          apr_off_t *offset, apr_size_t *len, apr_int32_t flags);
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+                          apr_hdtr_t *hdtr, apr_off_t *offset,
+                          apr_size_t *len, apr_int32_t flags);
 #endif
 
 /**
@@ -424,7 +428,8 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len);
  * </PRE>
  * @param on Are we turning the option on or off.
  */
-apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on);
+apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt,
+                              apr_int32_t on);
 
 /**
  * Query socket options for the specified socket
@@ -448,7 +453,8 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
  * </PRE>
  * @param on Socket option returned on the call.
  */
-apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* on);
+apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt,
+                              apr_int32_t* on);
 
 /**
  * Return an apr_sockaddr_t from an apr_socket_t
@@ -456,7 +462,8 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* 
  * @param which Which interface do we want the apr_sockaddr_t for?
  * @param sock The socket to use
  */
-apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock);
+apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which,
+                              apr_socket_t *sock);
  
 /**
  * Set the port in an APR socket address.
@@ -540,8 +547,8 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds, apr_interval_time
  *            APR_POLLOUT   -- signal if write will not block
  * </PRE>
  */
-apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset, apr_socket_t *socket, 
-                               apr_int16_t event);
+apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock,
+                                 apr_int16_t event);
 
 /**
  * Modify a socket in the poll structure with mask.
@@ -591,7 +598,7 @@ apr_status_t apr_clear_poll_sockets(apr_pollfd_t *aprset, apr_int16_t events);
  * @param aprset The poll structure we will be using. 
  */
 apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, 
-                           apr_pollfd_t *aprset);
+                             apr_pollfd_t *aprset);
 
 /**
  * Return the data associated with the current poll.
@@ -608,8 +615,9 @@ apr_status_t apr_get_polldata(apr_pollfd_t *pollfd, const char *key, void *data)
  * @param key The user data to associate with the pollfd.
  * @param cleanup The cleanup function
  */
-apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data, const char *key,
-                            apr_status_t (*cleanup) (void *));
+apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data,
+                              const char *key,
+                              apr_status_t (*cleanup) (void *));
 
 /**
  * Convert a File type to a socket so that it can be used in a poll operation.
@@ -635,7 +643,7 @@ apr_status_t apr_get_inaddr(apr_in_addr_t *addr, char *hostname);
  * @param sock The apr_socket_t to use
  */
 apr_status_t apr_get_socket_inaddr(apr_in_addr_t *addr, apr_interface_e which,
-                  apr_socket_t *sock);
+                                   apr_socket_t *sock);
 
 /**
  * Given an apr_sockaddr_t and a service name, set the port for the service
