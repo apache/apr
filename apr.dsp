@@ -155,6 +155,10 @@ SOURCE=.\file_io\win32\readwrite.c
 
 SOURCE=.\file_io\win32\seek.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\file_io\unix\tempdir.c
+# End Source File
 # End Group
 # Begin Group "locks"
 
