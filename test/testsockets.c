@@ -167,7 +167,7 @@ static void socket_userdata(abts_case *tc, void *data)
 {
     apr_socket_t *sock1, *sock2;
     apr_status_t rv;
-    char *user;
+    void *user;
     const char *key = "GENERICKEY";
 
     rv = apr_socket_create(&sock1, AF_INET, SOCK_STREAM, 0, p);
@@ -180,10 +180,10 @@ static void socket_userdata(abts_case *tc, void *data)
     rv = apr_socket_data_set(sock2, "SOCK2", key, NULL);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 
-    rv = apr_socket_data_get((void **)&user, key, sock1);
+    rv = apr_socket_data_get(&user, key, sock1);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, "SOCK1", user);
-    rv = apr_socket_data_get((void **)&user, key, sock2);
+    rv = apr_socket_data_get(&user, key, sock2);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_STR_EQUAL(tc, "SOCK2", user);
 }
