@@ -738,6 +738,27 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
     }
 }
 
+APR_DECLARE(void) apr_pool_child_cleanup_kill(apr_pool_t *p, const void *data,
+				  	      apr_status_t (*cleanup) (void *))
+{
+    struct cleanup *c;
+    struct cleanup **lastp;
+
+    if (p == NULL)
+        return;
+    c = p->cleanups;
+    lastp = &p->cleanups;
+    while (c) {
+        if (c->data == data && c->child_cleanup == cleanup) {
+            *lastp = c->next;
+            break;
+        }
+
+        lastp = &c->next;
+        c = c->next;
+    }
+}
+
 APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
                                        apr_status_t (*cleanup) (void *))
 {
