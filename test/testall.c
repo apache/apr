@@ -71,6 +71,7 @@ testfunc *tests[NUM_TESTS] = {
     testmmap,
     testud,
     testtable,
+    testsleep,
     NULL
 };
 
