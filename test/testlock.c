@@ -597,12 +597,14 @@ apr_status_t test_timeoutcond(void)
     timeout = 5 * APR_USEC_PER_SEC;
 
     for (i = 0; i < MAX_RETRY; i++) {
+        apr_thread_mutex_lock(timeout_mutex);
         printf("%-60s","    Waiting for condition for 5 seconds"); 
 
         begin = apr_time_now();
         s = apr_thread_cond_timedwait(timeout_cond, timeout_mutex, timeout);
         end = apr_time_now();
-
+        apr_thread_mutex_unlock(timeout_mutex);
+        
         /* If we slept for more than 100ms over the timeout. */
         if (end - begin - timeout > 100000) {
             if (APR_STATUS_IS_TIMEUP(s)) {
