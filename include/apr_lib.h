@@ -89,22 +89,6 @@ typedef struct ap_vformatter_buff_t {
 
 /*
 
-=head1 ap_status_t ap_tokenize_to_argv(const char **arg_str, char ***argv_out, ap_pool_t *token_context)
-
-B<Convert the arguments to a program from one string to an array of strings terminated by a NULL>
-
-    arg 1) The arguments to convert
-    arg 2) Output location.  This is a pointer to an array of strings.
-    arg 3) Pool to use.
-
-=cut
- */
-APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str, 
-                                            char ***argv_out,
-                                            ap_pool_t *token_context);
-
-/*
-
 =head1 ap_status_t ap_filename_of_pathname(const char *pathname)
 
 B<return the final element of the pathname>
@@ -119,21 +103,6 @@ B<NOTE>:  Examples:  "/foo/bar/gum"   -> "gum"
 =cut
  */
 APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
-
-
-/*
-
-=head1 ap_status_t ap_collapse_spaces(char *dest, const char *src)
-
-B<Strip spaces from a string>
-
-    arg 1) The destination string.  It is okay to modify the string
-           in place.  Namely dest == src
-    arg 2) The string to rid the spaces from.
-
-=cut
- */
-APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src);
 
 /*
 
