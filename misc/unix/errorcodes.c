@@ -135,8 +135,6 @@ static const char *apr_error_string(ap_status_t statcode)
 #error "not implemented yet"
 #elif OS2
 static const char *apr_os_strerror(int err, ap_pool_t *p);
-#elif BEOS    
-#error "not implemented yet"
 #else
 #define apr_os_strerror(err, p)		strerror(err)
 #endif

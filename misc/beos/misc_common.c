@@ -59,3 +59,6 @@
 #include "../unix/getopt.c"
 
 #include "../unix/otherchild.c"
+
+#include "../unix/canonerr.c"
+#include "../unix/errorcodes.c"
