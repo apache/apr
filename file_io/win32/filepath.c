@@ -83,10 +83,9 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     char *newpath;
 #ifdef NETWARE
     char seperator[2] = { 0, 0};
-    char server[MAX_SERVER_NAME+1];
-    char volume[MAX_VOLUME_NAME+1];
-    char path[MAX_PATH_NAME+1];
-    char file[MAX_FILE_NAME+1];
+    char server[APR_PATH_MAX+1];
+    char volume[APR_PATH_MAX+1];
+    char file[APR_PATH_MAX+1];
     char *volsep = NULL;
     int elements;
 
@@ -95,18 +94,22 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     else
         return APR_EBADPATH;
 
+    if (strlen(*inpath) > APR_PATH_MAX) {
+        return APR_EBADPATH;
+    }
+
     seperator[0] = (flags & APR_FILEPATH_NATIVE) ? '\\' : '/';
 
     /* Allocate and initialize each of the segment buffers
     */
-    server[0] = volume[0] = path[0] = file[0] = '\0';
+    server[0] = volume[0] = file[0] = '\0';
 
     /* If we don't have a volume separator then don't bother deconstructing
         the path since we won't use the deconstructed information anyway.
     */
     if (volsep) {
         /* Split the inpath into its separate parts. */
-        deconstruct(testpath, server, volume, path, file, NULL, &elements, PATH_UNDEF);
+        deconstruct(testpath, server, volume, NULL, file, NULL, &elements, PATH_UNDEF);
     
         /* If we got a volume part then continue splitting out the root.
             Otherwise we either have an incomplete or relative path
