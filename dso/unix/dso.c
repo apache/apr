@@ -53,6 +53,7 @@
  */
 
 #include "unix/dso.h"
+#include "apr_strings.h"
 
 #if APR_HAS_DSO
 
@@ -147,8 +148,10 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym,
 
 const char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
-    if (dso->errormsg)
+    if (dso->errormsg) {
+        apr_cpystrn(buffer, dso->errormsg, buflen);
         return dso->errormsg;
+    }
     return "No Error";
 }
 
