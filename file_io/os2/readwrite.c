@@ -349,6 +349,12 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
         }
     }
     str[i] = 0;
+    if (i > 0) {
+        /* we stored chars; don't report EOF or any other errors;
+         * the app will find out about that on the next call
+         */
+        return APR_SUCCESS;
+    }
     return rv;
 }
 
