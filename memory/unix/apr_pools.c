@@ -1402,37 +1402,37 @@ APR_DECLARE(void) apr_pool_join(apr_pool_t *p, apr_pool_t *sub)
 {
 }
 
-static apr_pool_t *find_pool(apr_pool_t *pool, const void *mem)
+static int pool_find(apr_pool_t *pool, void *data)
 {
-    apr_pool_t *found;
+    void **pmem = (void **)data;
     debug_node_t *node;
     apr_uint32_t index;
 
-    while (pool) {
-        node = pool->nodes;
+    node = pool->nodes;
 
-        while (node) {
-            for (index = 0; index < node->index; index++) {
-                if (node->beginp[index] <= mem &&
-                    node->endp[index] > mem)
-                    return pool;
-            }
-
-            node = node->next;
+    while (node) {
+        for (index = 0; index < node->index; index++) {
+             if (node->beginp[index] <= *pmem &&
+                 node->endp[index] > *pmem) {
+                 *pmem = pool;
+                 return 1;
+             }
         }
 
-        if ((found = find_pool(pool->child, mem)) != NULL)
-            return found;
-
-        pool = pool->sibling;
+        node = node->next;
     }
 
-    return NULL;
+    return 0;
 }
 
-APR_DECLARE(apr_pool_t *) apr_find_pool(const void *mem)
+APR_DECLARE(apr_pool_t *) apr_pool_find(const void *mem)
 {
-    return find_pool(global_pool, mem);
+    void *pool = mem;
+
+    if (apr_pool_walk_tree(global_pool, pool_find, &pool))
+        return pool;
+
+    return NULL;
 }
 
 static int pool_num_bytes(apr_pool_t *pool, void *data)
