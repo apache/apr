@@ -79,9 +79,9 @@ int main()
 
     testdata = ap_pstrdup(context, "This is a test\n");
 
-    ap_set_userdata(context, testdata, "TEST", string_cleanup);    
+    ap_set_userdata(testdata, "TEST", string_cleanup, context);    
 
-    ap_get_userdata((void **)&retdata, context, "TEST");
+    ap_get_userdata((void **)&retdata, "TEST", context);
 
     if (!strcmp(testdata, retdata)) {
         fprintf(stdout, "User data is working ok\n");

@@ -132,8 +132,9 @@ ap_status_t ap_destroy_context(struct context_t *cont)
  *        It is advised that steps are taken to ensure that a unique
  *        key is used at all times.
  */
-ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
-                            ap_status_t (*cleanup) (void *))
+ap_status_t ap_set_userdata(void *data, char *key,
+                            ap_status_t (*cleanup) (void *),
+                            struct context_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
     if (cont) { 
@@ -170,7 +171,7 @@ ap_status_t ap_set_userdata(struct context_t *cont, void *data, char *key,
  * arg 2) The key for the data to retrieve
  * arg 3) The user data associated with the context.
  */
-ap_status_t ap_get_userdata(void **data, struct context_t *cont, char *key)
+ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 {
     datastruct *dptr = NULL;
     if (cont) { 
