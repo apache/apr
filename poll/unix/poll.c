@@ -216,8 +216,8 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
             (APR_POLLPRI | APR_POLLERR | APR_POLLHUP | APR_POLLNVAL)) {
             FD_SET(fd, &exceptset);
         }
-        if (fd > maxfd) {
-            maxfd = fd;
+        if ((int)fd > maxfd) {
+            maxfd = (int)fd;
         }
     }
 
@@ -367,8 +367,8 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
         (APR_POLLPRI | APR_POLLERR | APR_POLLHUP | APR_POLLNVAL)) {
         FD_SET(fd, &(pollset->exceptset));
     }
-    if (fd > pollset->maxfd) {
-        pollset->maxfd = fd;
+    if ((int)fd > pollset->maxfd) {
+        pollset->maxfd = (int)fd;
     }
 #endif
     pollset->nelts++;
@@ -432,7 +432,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
             FD_CLR(fd, &(pollset->readset));
             FD_CLR(fd, &(pollset->writeset));
             FD_CLR(fd, &(pollset->exceptset));
-            if ((fd == pollset->maxfd) && (pollset->maxfd > 0)) {
+            if (((int)fd == pollset->maxfd) && (pollset->maxfd > 0)) {
                 pollset->maxfd--;
             }
             return APR_SUCCESS;
