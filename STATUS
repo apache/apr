@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/11 19:10:53 $]
+Last modified at [$Date: 2002/07/11 19:17:29 $]
 
 Release:
 
@@ -64,14 +64,14 @@ CURRENT VOTES:
       1) Keeping the existing apr_time_t names, in spite of potential
          ANSI/C99 time_t confusion.  apr_types don't promise to be
          system types, or map to system units.
-         +1: rbb, wrowe, jerenkrantz
+         +1: rbb, wrowe, jerenkrantz, striker
          +0: brianp
          -1: aaron [veto for reusing the apr_time_t identifier for a new use.
                     I'm ok with apr_timeval_t.]
       2) Renaming the function to get rid of apr_time_t vs time_t confusion,
          which wrowe suggests apr_butime_t [binary microtime].
          +1: fielding, aaron
-         -0: wrowe, jerenkrantz
+         -0: wrowe, jerenkrantz, striker
          -0.5: rbb
          -1: brianp [-1 for the apr_butime_t name specifically: let's
                      keep the type name independent of the internal
