@@ -423,4 +423,50 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     return rv;
 }
 
+APR_DECLARE(apr_status_t) apr_signal_block(int signum)
+{
+    sigset_t sig_mask;
+    int rv;
+
+    sigemptyset(&sig_mask);
+
+    sigaddset(&sig_mask, signum);
+
+#if defined(SIGPROCMASK_SETS_THREAD_MASK)
+    if ((rv = sigprocmask(SIG_BLOCK, &sig_mask, NULL)) != 0) {
+        rv = errno;
+    }
+#else
+    if ((rv = pthread_sigmask(SIG_BLOCK, &sig_mask, NULL)) != 0) {
+#ifdef PTHREAD_SETS_ERRNO
+        rv = errno;
+#endif
+    }
+#endif
+    return rv;
+}
+
+APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
+{
+    sigset_t sig_mask;
+    int rv;
+
+    sigemptyset(&sig_mask);
+
+    sigaddset(&sig_mask, signum);
+
+#if defined(SIGPROCMASK_SETS_THREAD_MASK)
+    if ((rv = sigprocmask(SIG_UNBLOCK, &sig_mask, NULL)) != 0) {
+        rv = errno;
+    }
+#else
+    if ((rv = pthread_sigmask(SIG_UNBLOCK, &sig_mask, NULL)) != 0) {
+#ifdef PTHREAD_SETS_ERRNO
+        rv = errno;
+#endif
+    }
+#endif
+    return rv;
+}
+
 #endif
