@@ -227,7 +227,7 @@ apr_status_t apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile,
     /* buffer already NULL; 
      * don't get a lock (only for buffered files) 
      */
-    (*file)->inherit = 1;
+    (*file)->flags = APR_INHERIT;
     return APR_SUCCESS;
 }    
 
