@@ -5,7 +5,6 @@
 
 /* Various #defines we need to know about */
 #undef EGD_DEFAULT_SOCKET
-#undef HAVE_isascii
 
 /* Cross process serialization techniques */
 #undef USE_FLOCK_SERIALIZE
@@ -13,13 +12,6 @@
 #undef USE_FCNTL_SERIALIZE
 #undef USE_PROC_PTHREAD_SERIALIZE
 #undef USE_PTHREAD_SERIALIZE
-
-#undef POSIXSEM_IS_GLOBAL
-#undef SYSVSEM_IS_GLOBAL
-#undef FCNTL_IS_GLOBAL
-#undef FLOCK_IS_GLOBAL
-
-#undef HAVE_INT64_C
 
 @BOTTOM@
 
