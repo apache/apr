@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Provide new number conversion functions apr_itoa, apr_ltoa, and 
+     apr_off_t_toa, and inline code in inet_ntop4, to reduce CPU
+     consumption. [Brian Pane]
+
   *) Updated APR to pass the thread worker_function prototype 
      (apr_thread_start_t) two parameters, the apr private data 
      (apr_thread_t*) and the application private data (void*).  

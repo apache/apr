@@ -279,6 +279,33 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
 APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
                                va_list ap);
 
+/**
+ * create a string representation of an int, allocated from a pool
+ * @param p The pool from which to allocate
+ * @param n The number to format
+ * @return The string representation of the number
+ * @deffunc int apr_itoa(apr_pool_t *p, int n)
+ */
+APR_DECLARE(char *) apr_itoa(apr_pool_t *p, int n);
+
+/**
+ * create a string representation of a long, allocated from a pool
+ * @param p The pool from which to allocate
+ * @param n The number to format
+ * @return The string representation of the number
+ * @deffunc int apr_ltoa(apr_pool_t *p, long n)
+ */
+APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n);
+
+/**
+ * create a string representation of an apr_off_t, allocated from a pool
+ * @param p The pool from which to allocate
+ * @param n The number to format
+ * @return The string representation of the number
+ * @deffunc int apr_ltoa(apr_pool_t *p, apr_off_t n)
+ */
+APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
+
 #ifdef __cplusplus
 }
 #endif
