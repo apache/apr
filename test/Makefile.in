@@ -60,7 +60,7 @@ testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 testdso@EXEEXT@: testdso.lo mod_test.so $(LOCAL_LIBS)
 	$(LINK) -export-dynamic testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testoc@EXEEXT@: testoc.lo $(LOCAL_LIBS)
+testoc@EXEEXT@: testoc.lo occhild@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testoc.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)

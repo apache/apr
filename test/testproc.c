@@ -146,6 +146,6 @@ int main(int argc, char *argv[])
     STD_TEST_NEQ("Removing directory", apr_dir_remove("proctest", pool))
 
     printf("\nTest completed succesfully\n");
-    return(1);
+    return 0;
 }
 
