@@ -145,33 +145,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
     return APR_SUCCESS;
 }
 
-/* XXX assumes IPv4... I don't think this function is needed anyway
- * since we have apr_sockaddr_info_get(), but we need to clean up Apache's 
- * listen.c a bit more first.
- */
-APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
-                                         const char *addr)
-{
-    apr_uint32_t ipaddr;
-    
-    if (!strcmp(addr, APR_ANYADDR)) {
-        sockaddr->sa.sin.sin_addr.s_addr = htonl(INADDR_ANY);
-        return APR_SUCCESS;
-    }
-    
-    ipaddr = inet_addr(addr);
-    if (ipaddr == (apr_uint32_t)-1) {
-#ifdef WIN32
-        return WSAEADDRNOTAVAIL;
-#else
-        return errno;
-#endif
-    }
-    
-    sockaddr->sa.sin.sin_addr.s_addr = ipaddr;
-    return APR_SUCCESS;
-}
-
 APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
                                        apr_sockaddr_t *sockaddr)
 {
