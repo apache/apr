@@ -273,9 +273,17 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
      * socket; if called again, we can see EALREADY
      */
     if (rc == -1 && (errno == EINPROGRESS || errno == EALREADY) && sock->timeout != 0) {
+        int error;
+        apr_size_t len = sizeof(error);
         rc = apr_wait_for_io_or_timeout(sock, 0);
         if (rc != APR_SUCCESS) {
             return rc;
+        }
+        if ((rc = getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len)) < 0) {
+            return(rc);
+        }
+        if (error) {
+            return error;
         }
     }
 
