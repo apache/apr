@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fixed apr_strfsize formatting of values over 1 gig
+     [Matsuzaki Yoshinobu <maz@iij.ad.jp>]
+
   *) Renamed --disable-atomics as --disable-optimized-atomics,
      since it doesn't really disable the atomics.  [Aaron Bannert]
 
