@@ -174,8 +174,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
 
 APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
 {
-    apr_pool_cleanup_kill(file->cntxt, file, apr_unix_file_cleanup);
-    return apr_unix_file_cleanup(file);
+    return apr_pool_cleanup_run(file->cntxt, file, apr_unix_file_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_file_remove(const char *path, apr_pool_t *cont)

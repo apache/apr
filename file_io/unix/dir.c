@@ -103,8 +103,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont
 
 apr_status_t apr_dir_close(apr_dir_t *thedir)
 {
-    apr_pool_cleanup_kill(thedir->cntxt, thedir, dir_cleanup);
-    return dir_cleanup(thedir);
+    return apr_pool_cleanup_run(thedir->cntxt, thedir, dir_cleanup);
 }
 
 apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
