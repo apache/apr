@@ -218,16 +218,10 @@ APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
 APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *t,
                                            apr_time_exp_t *xt)
 {
-    int year;
-    time_t days;
+    apr_time_t year = xt->tm_year;
+    apr_time_t days;
     static const int dayoffset[12] =
     {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
-
-    year = xt->tm_year;
-
-    if (year < 70 || ((sizeof(time_t) <= 4) && (year >= 138))) {
-        return APR_EBADDATE;
-    }
 
     /* shift new year to 1st March in order to make leap year calc easy */
 

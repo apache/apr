@@ -265,6 +265,24 @@ static void test_strftimeoffset(CuTest *tc)
     CuAssertTrue(tc, rv == APR_SUCCESS);
 }
 
+/* 0.9.4 and earlier rejected valid dates in 2038 */
+static void test_2038(CuTest *tc)
+{
+    apr_time_exp_t xt;
+    apr_time_t t;
+
+    /* 2038-01-19T03:14:07.000000Z */
+    xt.tm_year = 138;
+    xt.tm_mon = 0;
+    xt.tm_mday = 19;
+    xt.tm_hour = 3;
+    xt.tm_min = 14;
+    xt.tm_sec = 7;
+    
+    apr_assert_success(tc, "explode January 19th, 2038",
+                       apr_time_exp_get(&t, &xt));
+}
+
 CuSuite *testtime(void)
 {
     CuSuite *suite = CuSuiteNew("Time");
@@ -281,6 +299,7 @@ CuSuite *testtime(void)
     SUITE_ADD_TEST(suite, test_strftimesmall);
     SUITE_ADD_TEST(suite, test_exp_tz);
     SUITE_ADD_TEST(suite, test_strftimeoffset);
+    SUITE_ADD_TEST(suite, test_2038);
 
     return suite;
 }

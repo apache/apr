@@ -1,5 +1,8 @@
 Changes with APR 0.9.5
 
+  *) Fix apr_time_exp_get() for dates in 2038.  
+     [Philip Martin <philip codematters.co.uk>]
+
   *) Add APR_LARGEFILE flag to allow opening files with the
      O_LARGEFILE flag; not recommended for general use, see
      include/apr_file_io.h.  [Joe Orton]
