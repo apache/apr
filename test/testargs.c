@@ -112,5 +112,5 @@ int main(int argc, const char * const argv[])
     while (opt->ind < opt->argc)
         printf("extra arg: %s\n", opt->argv[opt->ind++]);
 
-    return 1;
+    return 0;
 }

@@ -135,6 +135,6 @@ int main(int argc, char *argv[])
     printf("home directory for %s (member of %s) is:\n`%s'\n",
            username, groupname, homedir);
 
-    return 1;
+    return 0;
 }
 #endif /* APR_HAS_USER */
