@@ -174,7 +174,8 @@ static apr_status_t apr_xlate_cleanup(void *convset)
 static void check_sbcs(apr_xlate_t *convset)
 {
     char inbuf[256], outbuf[256];
-    char *inbufptr = inbuf, *outbufptr = outbuf;
+    const char *inbufptr = inbuf;
+    char *outbufptr = outbuf;
     size_t inbytes_left, outbytes_left;
     int i;
     size_t translated;
@@ -184,7 +185,7 @@ static void check_sbcs(apr_xlate_t *convset)
     }
 
     inbytes_left = outbytes_left = sizeof(inbuf);
-    translated = iconv(convset->ich, (const char **)&inbufptr, 
+    translated = iconv(convset->ich, &inbufptr, 
                        &inbytes_left, &outbufptr, &outbytes_left);
     if (translated != (size_t) -1 &&
         inbytes_left == 0 &&
@@ -275,10 +276,10 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
     size_t translated;
 
     if (convset->ich != (iconv_t)-1) {
-        char *inbufptr = (char *)inbuf;
+        const char *inbufptr = inbuf;
         char *outbufptr = outbuf;
         
-        translated = iconv(convset->ich, (const char **)&inbufptr, 
+        translated = iconv(convset->ich, &inbufptr, 
                            inbytes_left, &outbufptr, outbytes_left);
         /* If everything went fine but we ran out of buffer, don't
          * report it as an error.  Caller needs to look at the two
