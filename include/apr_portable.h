@@ -192,7 +192,8 @@ typedef struct tm             apr_os_exp_time_t;
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
 #include <dl.h>
 typedef shl_t                 apr_os_dso_handle_t;
-#elif defined(DRAWIN)
+#elif defined(DARWIN)
+#include <mach-o/dyld.h>
 typedef NSModule              apr_os_dso_handle_t;
 #else
 typedef void *                apr_os_dso_handle_t;
