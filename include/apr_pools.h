@@ -203,12 +203,6 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
 #define apr_pool_join(a,b)
 #endif
 
-#ifdef ULTRIX_BRAIN_DEATH
-#define apr_fdopen(d,m) fdopen((d), (char *)(m))
-#else
-#define apr_fdopen(d,m) fdopen((d), (m))
-#endif
-
 /*
  * APR memory structure manipulators (pools, tables, and arrays).
  */
@@ -272,8 +266,7 @@ apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont);
  * @param apr_abort A function to use if the pool cannot allocate more memory.
  * @return The new sub-pool
  * @tip The apr_abort function provides a way to quit the program if the
- *      machine is out of memory.  By default, APR will return with an
- *      error.
+ *      machine is out of memory.  By default, APR will return on error.
  * @deffunc apr_pool_t *apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode))
  */
 APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode));
