@@ -98,7 +98,7 @@ apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
         apr_wchar_t *wch;
         (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
         (*new)->w.entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
-        (*new)->w.dirname = apr_palloc(cont, dirremains + 7);
+        (*new)->w.dirname = apr_palloc(cont, (dirremains + 7) * 2);
         wcscpy((*new)->w.dirname, L"\\\\?\\");
         if (conv_utf8_to_ucs2(dirname, &srcremains,
                               (*new)->w.dirname + 4, &dirremains) || srcremains)
