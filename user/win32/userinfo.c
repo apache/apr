@@ -66,10 +66,38 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
 }
 
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
-                                         const char *username)
+                                         const char *username, apr_pool_t *p)
 {
-    /* XXX: could someone please implement this for me? */
-    return APR_ENOTIMPL;
+    SID_NAME_USE sidtype;
+    char *domain = NULL;
+    DWORD sidlen, rv;
+
+    if (strchr(username, '/')) {
+        domain = apr_pstrndup(p, username, strchr(username, '/') - username);
+        username += strlen(domain) + 1;
+    }
+    else if (strchr(username, '\\')) {
+        domain = apr_pstrndup(p, username, strchr(username, '/') - username);
+        username += strlen(domain) + 1;
+    }
+    /* Get nothing on the first pass ... need to size the sid buffer 
+     */
+    sidlen = LookupAccountName(domain, username, NULL, NULL, 
+                               NULL, NULL, &sidtype);
+    if (sidlen) {
+        /* Give it back on the second pass
+         */
+        *uid = apr_palloc(p, sidlen);
+        rv = LookupAccountName(domain, username, *uid, &sidlen, 
+                               NULL, NULL, &sidtype);
+    }
+    if (!sidlen || !rv) {
+        return apr_get_os_error();
+    }
+    /* There doesn't seem to be a simple way to retrieve the primary group sid
+     */
+    *gid = NULL;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
