@@ -699,7 +699,20 @@ fi
 AC_SUBST(have_in_addr)
 AC_SUBST(file_as_socket)
 
+AC_CHECK_FUNCS(inet_pton)
+AC_CHECK_FUNCS(inet_ntop)
+APR_CHECK_SOCKADDR_SA_LEN
+
 APR_CHECK_GETHOSTBYNAME_NAS
+
+echo "${nl}IPv6 Networking support??"
+dnl # Start of checking for IPv6 support...
+AC_SEARCH_LIBS(getaddrinfo, inet6)
+AC_CHECK_FUNCS(getaddrinfo)
+AC_CHECK_FUNCS(getipnodebyname)
+AC_CHECK_FUNCS(getipnodebyaddr)
+APR_CHECK_SOCKADDR_IN6
+AC_SUBST(have_sockaddr_in6)
 
 dnl #----------------------------- Construct the files
 
@@ -715,7 +728,7 @@ AC_SUBST(EXEEXT)
 AC_SUBST(THREAD_CPPFLAGS)
 AC_SUBST(THREAD_CFLAGS)
 
-echo "Construct Makefiles and header files."
+echo "${nl}${nl}Construct Makefiles and header files."
 MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile"
 SUBDIRS="lib strings passwd tables "
 for dir in $MODULES
