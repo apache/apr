@@ -35,7 +35,7 @@ fi
 # These added to allow default directories to be used...
 DEFAULT_OSDIR="unix"
 echo "(Default will be ${DEFAULT_OSDIR})"
-MODULES="file_io network_io threadproc misc locks time mmap shmem i18n"
+MODULES="file_io network_io threadproc misc locks time mmap shmem i18n user"
 
 # Most platforms use a prefix of 'lib' on their library files.
 LIBPREFIX='lib'
@@ -268,6 +268,7 @@ AC_CHECK_HEADERS(memory.h)
 AC_CHECK_HEADERS(netdb.h)
 AC_CHECK_HEADERS(osreldate.h)
 AC_CHECK_HEADERS(process.h)
+AC_CHECK_HEADERS(pwd.h)
 AC_CHECK_HEADERS(sys/sem.h)
 AC_CHECK_HEADERS(signal.h, signalh="1", signalh="0")
 AC_CHECK_HEADERS(stdarg.h, stdargh="1", stdargh="0")
