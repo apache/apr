@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) added new functions for atomic operations. These are experimental
+     at the moment, so use in apps is discouraged [Ian Holsman]
+
   *) Correct serious problems with the Win32 apr_file_dup2 
      and apr_file_open_stdxxx() fns.  [William Rowe]
 
