@@ -106,8 +106,8 @@ struct ap_file_t {
     int eof_hit;
     int pipe;
     ap_interval_time_t timeout;
-    int buffered;     /* Not currently used on Windows */
-    int ungetchar;    /* Not used. Last char provided by an unget op. (-1 = no char)*/
+    int buffered;
+    int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
 
     char *demonfname; 
     char *lowerdemonfname; 
@@ -120,10 +120,10 @@ struct ap_file_t {
 
     /* Stuff for buffered mode */
     char *buffer;
-    int bufpos;               // Read/Write position in buffer
-    unsigned long dataRead;   // amount of valid data read into buffer
+    ap_ssize_t bufpos;        // Read/Write position in buffer
+    ap_ssize_t dataRead;      // amount of valid data read into buffer
     int direction;            // buffer being used for 0 = read, 1 = write
-    unsigned long filePtr;    // position in file of handle
+    ap_ssize_t filePtr;       // position in file of handle
     ap_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
 };
 
