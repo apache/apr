@@ -301,7 +301,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     newproc->out = attr->parent_out;
     newproc->err = attr->parent_err;
 
-    addr_space = (attr->detached ? 0 : PROC_CURRENT_SPACE) | PROC_LOAD_SILENT;
+    /* attr->detached and PROC_DETACHED do not mean the same thing.  attr->detached means
+     * start the NLM in a separate address space.  PROC_DETACHED means don't wait for the
+     * NLM to unload by calling wait() or waitpid(), just clean up */
+    addr_space = (attr->detached ? 0 : PROC_CURRENT_SPACE) | PROC_LOAD_SILENT | PROC_DETACHED;
 
     if (attr->currdir) {
         char *fullpath = NULL;
@@ -315,7 +318,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     } 
 
     if ((newproc->pid = procve(progname, addr_space, (const char**)env, &wire, 
-        NULL, NULL, 0, NULL, (const char **)args)) == 0) {
+        NULL, NULL, 0, NULL, (const char **)args)) == -1) {
         return errno;
     }
 
