@@ -44,6 +44,7 @@ all: Makefile $(MODULES) subdirs
 	@rm -f @LIBPREFIX@apr.a
 	for i in $(SUBDIRS); do cp $$i/*.o objs ; done;
 	$(AR) cr @LIBPREFIX@apr.a objs/*.o
+	$(RANLIB) @LIBPREFIX@apr.a
 
 clean: subdirs_clean
 	$(RM) -f *.o *.a *.so objs/*.o
