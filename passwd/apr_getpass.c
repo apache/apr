@@ -253,7 +253,11 @@ static char *getpass(const char *prompt)
 
 APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, apr_size_t *bufsiz)
 {
+#ifdef HAVE_GETPASSPHRASE
+    char *pw_got = getpassphrase(prompt);
+#else
     char *pw_got = getpass(prompt);
+#endif
     if (!pw_got)
         return APR_EINVAL;
     apr_cpystrn(pwbuf, pw_got, *bufsiz);
