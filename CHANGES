@@ -1,4 +1,7 @@
 Changes with APR a9
+  *) Only support IPv6 if we have sockaddr_in and a working 
+     getaddrinfo().  [Jeff Trawick]
+
   *) Add apr_parse_addr_port() for parsing the hostname:port portion
      of URLs and similar strings.  [Jeff Trawick]
 
