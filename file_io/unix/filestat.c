@@ -58,6 +58,10 @@
 #include "apr_strings.h"
 #include "apr_errno.h"
 
+#ifdef HAVE_UTIME
+#include <utime.h>
+#endif
+
 static apr_filetype_e filetype_from_mode(mode_t mode)
 {
     apr_filetype_e type;
