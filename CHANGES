@@ -1,5 +1,11 @@
 Changes with APR 0.9.5
 
+  *) Provide workaround for socklen_t declaration problem with 64-bit
+     build on HP-UX.  Stop setting a PA-RISC-specific compile option
+     on ia64.  Look for -mt thread option, which is used with HP-UX
+     vendor compiler on ia64.  [Jeff Trawick, based on idea from
+     Madhusudan Mathihalli]
+
   *) Return an error instead of silently failing when apr_poll() is
      used with file descriptors >= FD_SETSIZE.  (Unix systems with
      no native poll())  [Jeff Trawick, Brad Nicholes]

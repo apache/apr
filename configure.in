@@ -324,10 +324,16 @@ fi
 case "$host:$CC" in
     *-hp-hpux*:cc )
 	APR_ADDTO(CFLAGS,[-Ae +Z])
-	if echo "$CFLAGS " | grep '+DA' >/dev/null; then :
-	else
-	  APR_ADDTO(CFLAGS,[+DAportable])
-	fi 
+	case $host in
+	  ia64-* )
+	    ;;
+          * )
+	    if echo "$CFLAGS " | grep '+DA' >/dev/null; then :
+	    else
+	      APR_ADDTO(CFLAGS,[+DAportable])
+	    fi 
+	    ;;
+        esac
 	;;
     powerpc-*-beos:mwcc* )
 	APR_SETVAR(CPP,[mwcc -E])
@@ -1151,6 +1157,18 @@ else
 fi
 if test "$ac_cv_socklen_t" = "yes"; then
     socklen_t_value="socklen_t"
+    case $host in
+        *-hp-hpux*)
+            if test "$ac_cv_sizeof_long" = "8"; then
+                # 64-bit HP-UX requires 32-bit socklens in
+                # kernel, but user-space declarations say
+                # 64-bit (socklen_t == size_t == long).
+                # This will result in many compile warnings,
+                # but we're functionally busted otherwise.
+                socklen_t_value="int"
+            fi
+            ;;
+    esac
 else
     socklen_t_value="int"
 fi
