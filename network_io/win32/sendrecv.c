@@ -280,14 +280,6 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         return APR_ENOTIMPL;
     }
 
-    /* Initialize the overlapped structure */
-    memset(&overlapped,'\0', sizeof(overlapped));
-#ifdef WAIT_FOR_EVENT
-    wait_event = overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-#else
-    wait_event = (HANDLE) sock->socketdes;
-#endif
-
     /* Use len to keep track of number of total bytes sent (including headers) */
     bytes_to_send = *len;
     *len = 0;
@@ -309,9 +301,17 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         return APR_SUCCESS;
     }
 
+    /* Initialize the header/trailer and overlapped structures */
+    memset(&tfb, '\0', sizeof (tfb));
+    memset(&overlapped,'\0', sizeof(overlapped));
+#ifdef WAIT_FOR_EVENT
+    wait_event = overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+#else
+    wait_event = (HANDLE) sock->socketdes;
+#endif
+
     /* Collapse the headers into a single buffer */
     if (hdtr && hdtr->numheaders) {
-        memset(&tfb, '\0', sizeof (tfb));
         ptfb = &tfb;
         collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, hdtr->headers, 
                        hdtr->numheaders, sock->cntxt);
@@ -326,7 +326,6 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             nbytes = bytes_to_send;
             /* Collapse the trailers into a single buffer */
             if (hdtr && hdtr->numtrailers) {
-                memset(&tfb, '\0', sizeof (tfb));
                 ptfb = &tfb;
                 collapse_iovec((char**) &ptfb->Tail, &ptfb->TailLength, 
                                hdtr->trailers, hdtr->numtrailers, sock->cntxt);
@@ -342,7 +341,8 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         overlapped.Offset = (DWORD)(curoff);
 #if APR_HAS_LARGE_FILES
         overlapped.OffsetHigh = (DWORD)(curoff >> 32);
-#endif
+#endif  
+        /* XXX BoundsChecker claims dwFlags must not be zero. */
         rv = TransmitFile(sock->socketdes,  /* socket */
                           file->filehand, /* open file descriptor of the file to be sent */
                           nbytes,         /* number of bytes to send. 0=send all */
@@ -353,7 +353,8 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         if (!rv) {
             status = apr_get_netos_error();
             if ((status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) ||
-                (status == APR_FROM_OS_ERROR(WSA_IO_PENDING))) {
+                (status == APR_FROM_OS_ERROR(WSA_IO_PENDING))) 
+            {
                 rv = WaitForSingleObject(wait_event, 
                                          (DWORD)(sock->timeout >= 0 
                                                  ? sock->timeout_ms : INFINITE));
@@ -362,7 +363,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                     if (!disconnected) {
                         if (!GetOverlappedResult(wait_event, &overlapped, 
                                                  &nbytes, FALSE)) {
-                            status = APR_FROM_OS_ERROR(GetLastError());
+                            status = apr_get_os_error();
                         }
                         /* Ugly code alert: GetOverlappedResult returns
                          * a count of all bytes sent. This loop only
@@ -373,8 +374,9 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                         }
                     }
                 }
-                else if (rv == WAIT_TIMEOUT)
+                else if (rv == WAIT_TIMEOUT) {
                     status = APR_FROM_OS_ERROR(WAIT_TIMEOUT);
+                }
                 else if (rv == WAIT_ABANDONED) {
                     /* Hummm... WAIT_ABANDONDED is not an error code. It is
                      * a return specific to the Win32 WAIT functions that
@@ -397,6 +399,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         /* Adjust len for any headers/trailers sent */
         if (ptfb) {
             *len += (ptfb->HeadLength + ptfb->TailLength);
+            memset(&tfb, '\0', sizeof (tfb));
             ptfb = NULL;
         }
     }
