@@ -616,7 +616,7 @@ static void test_mod_neg(apr_pool_t *p, apr_int32_t flags)
     apr_file_t *f;
     const char *s;
     int i;
-    apr_ssize_t nbytes;
+    apr_size_t nbytes;
     char buf[8192];
     apr_off_t cur;
     const char *fname = "modneg.dat";
