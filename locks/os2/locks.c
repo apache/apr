@@ -139,8 +139,7 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     ULONG rc;
 
-    switch (lock->type)
-    {
+    switch (lock->type) {
     case APR_MUTEX: 
         rc = DosRequestMutexSem(lock->hMutex, SEM_INDEFINITE_WAIT);
 
@@ -158,13 +157,11 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
 
 apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
 {
-    switch (lock->type)
-    {
+    switch (lock->type) {
     case APR_MUTEX:
         return APR_ENOTIMPL;
     case APR_READWRITE:
-        switch (e)
-        {
+        switch (e) {
         case APR_READER:
             break;
         case APR_WRITER:
@@ -179,8 +176,7 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     ULONG rc;
     
-    switch (lock->type)
-    {
+    switch (lock->type) {
     case APR_MUTEX:
         if (lock->owner == CurrentTid && lock->lock_count > 0) {
             lock->lock_count--;
@@ -202,8 +198,7 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
     ULONG rc;
     apr_status_t stat = APR_SUCCESS;
 
-    switch (lock->type)
-    {
+    switch (lock->type) {
     case APR_MUTEX:
         if (lock->owner == CurrentTid) {
             while (lock->lock_count > 0 && stat == APR_SUCCESS)
