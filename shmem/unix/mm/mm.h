@@ -122,12 +122,12 @@ extern char *strerror(int);
 #define memcpy(to,from,len) bcopy(from,to,len)
 #else
 #define memcpy(to,from,len) \
-        { int i; for (i = 0; i < (len); i++) *((to)+i) = *((from)+i); }
+        { int i; for (i = 0; i < (len); i++) *((char *)(to)+i) = *((char *)(from)+i); }
 #endif
 #endif
 #if !defined(HAVE_MEMSET)
 #define memset(to,ch,len) \
-        { int i; for (i = 0; i < (len); i++) *((to)+i) = (ch); }
+        { int i; for (i = 0; i < (len); i++) *((char *)(to)+i) = (ch); }
 #endif
 
 #define ERR(type,str)   mm_lib_error_set(type,str)
