@@ -33,7 +33,8 @@ PROGRAMS = \
         testsockets@EXEEXT@ \
 	testprocmutex@EXEEXT@ \
 	testvsn@EXEEXT@ \
-	testsleep@EXEEXT@
+	testsleep@EXEEXT@ \
+	testrand@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -156,5 +157,8 @@ testvsn@EXEEXT@: testvsn.lo $(LOCAL_LIBS)
 
 testsleep@EXEEXT@: testsleep.lo $(LOCAL_LIBS)
 	$(LINK) testsleep.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testrand@EXEEXT@: testrand.lo $(LOCAL_LIBS)
+	$(LINK) testrand.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
