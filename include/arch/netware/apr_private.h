@@ -97,6 +97,10 @@
 #define HAVE_CALLOC     1
 #define HAVE_UTIME      1
 
+#define HAVE_GETENV     1
+#define HAVE_SETENV     1
+#define HAVE_UNSETENV   1
+
 /*#define DSO_USE_DLFCN */
 
 #ifdef NW_BUILD_IPV6
