@@ -58,7 +58,7 @@
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_make_time(ap_context_t *, ap_time_t *)
- *    Create a time entity.
+ *    Create an empty time entity.
  * arg 1) The context to operate on.
  * arg 2) The new time entity to create.
  */
@@ -74,6 +74,27 @@ ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
     (*new)->explodedtime = ap_palloc(cont, sizeof(struct tm));
     (*new)->time_ex = 0;
     (*new)->currtime = NULL;
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_make_init_time(ap_context_t *, ap_time_t *)
+ *    Create a time entity and fill it out with the current time.
+ * arg 1) The context to operate on.
+ * arg 2) The new time entity to create.
+ */
+ap_status_t ap_make_init_time(struct atime_t **new, ap_context_t *cont)
+{
+    (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
+
+    if ((*new) == NULL) {
+        return APR_ENOMEM;
+    }
+
+    (*new)->cntxt = cont;
+    (*new)->explodedtime = ap_palloc(cont, sizeof(struct tm));
+    (*new)->time_ex = 0;
+    gettimeofday((*new)->currtime, NULL);
     return APR_SUCCESS;
 }
 
