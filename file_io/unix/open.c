@@ -260,4 +260,4 @@ APR_IMPLEMENT_SET_INHERIT(file, flags, cntxt, apr_unix_file_cleanup)
 
 APR_IMPLEMENT_UNSET_INHERIT(file, flags, cntxt, apr_unix_file_cleanup)
 
-APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
+APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt)
