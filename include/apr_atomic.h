@@ -186,7 +186,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 #endif
 
-#elif defined(__FreeBSD__) && (__FreeBSD__ >= 4)
+#elif defined(__FreeBSD__) && (__FreeBSD__ >= 5)
 #include <machine/atomic.h>
 
 #define apr_atomic_t apr_uint32_t
