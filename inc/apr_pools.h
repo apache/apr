@@ -232,7 +232,11 @@ extern int raise_sigstop_flags;
 #define ap_fdopen(d,m) fdopen((d), (m))
 #endif
 
+/* XXX - the socket functions for pools should (and will) use APR sockets.
+ * This is temporary. */
+#ifndef BEOS /* this really screws up BeOS R4.5 !! */
 #define closesocket(s) close(s)
+#endif
 
 
 
