@@ -51,11 +51,11 @@ delete-lib:
 
 install: $(TARGET_LIB)
 	if [ ! -d $(includedir) ]; then \
-	    ./build/mkdir.sh $(includedir); \
+	    $(srcdir)/build/mkdir.sh $(includedir); \
 	fi; \
 	cp include/*.h $(includedir); \
 	if [ ! -d $(libdir) ]; then \
-	    ./build/mkdir.sh $(libdir); \
+	    $(srcdir)/build/mkdir.sh $(libdir); \
 	fi; \
 	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
 	$(LIBTOOL) --mode=install cp APRVARS $(libdir)
