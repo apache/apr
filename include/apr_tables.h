@@ -85,7 +85,7 @@ typedef struct apr_array_header_t apr_array_header_t;
 /** An opaque array type */
 struct apr_array_header_t {
     /** The pool the array is allocated out of */
-    apr_pool_t *cont;
+    apr_pool_t *pool;
     /** The amount of memory allocated for each element of the array */
     int elt_size;
     /** The number of active elements in the array */
