@@ -56,9 +56,9 @@ typedef struct
 void CuStringInit(CuString* str);
 CuString* CuStringNew(void);
 void CuStringRead(CuString* str, char* path);
-void CuStringAppend(CuString* str, char* text);
+void CuStringAppend(CuString* str, const char* text);
 void CuStringAppendChar(CuString* str, char ch);
-void CuStringAppendFormat(CuString* str, char* format, ...);
+void CuStringAppendFormat(CuString* str, const char* format, ...);
 void CuStringResize(CuString* str, int newSize);
 
 /* CuTest */
@@ -85,7 +85,7 @@ void CuFail(CuTest* tc, char* message);
 void CuNotImpl(CuTest* tc, char* message);
 void CuAssert(CuTest* tc, char* message, int condition);
 void CuAssertTrue(CuTest* tc, int condition);
-void CuAssertStrEquals(CuTest* tc, char* expected, char* actual);
+void CuAssertStrEquals(CuTest* tc, const char* expected, const char* actual);
 void CuAssertIntEquals(CuTest* tc, int expected, int actual);
 void CuAssertPtrEquals(CuTest* tc, void* expected, void* actual);
 void CuAssertPtrNotNull(CuTest* tc, void* pointer);

@@ -96,7 +96,7 @@ void CuStringResize(CuString* str, int newSize)
 	str->size = newSize;
 }
 
-void CuStringAppend(CuString* str, char* text)
+void CuStringAppend(CuString* str, const char* text)
 {
 	int length = strlen(text);
 	if (str->length + length + 1 >= str->size)
@@ -113,7 +113,7 @@ void CuStringAppendChar(CuString* str, char ch)
 	CuStringAppend(str, text);
 }
 
-void CuStringAppendFormat(CuString* str, char* format, ...)
+void CuStringAppendFormat(CuString* str, const char* format, ...)
 {
 	va_list argp;
 	char buf[HUGE_STRING_LEN];
@@ -179,7 +179,7 @@ void CuAssertTrue(CuTest* tc, int condition)
 	CuFail(tc, "assert failed");
 }
 
-void CuAssertStrEquals(CuTest* tc, char* expected, char* actual)
+void CuAssertStrEquals(CuTest* tc, const char* expected, const char* actual)
 {
 	CuString* message;
 	if (strcmp(expected, actual) == 0) return;
