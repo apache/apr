@@ -412,7 +412,7 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
 APR_DECLARE(void) apr_sms_tag(apr_sms_t *sms, const char *tag);
 #endif /* APR_DEBUG_TAG_SMS */
 
-#if SMS_ALLOC_STATS
+#if APR_SMS_ALLOC_STATS
 APR_DECLARE(void) apr_sms_dump_stats(apr_sms_t *sms);
 #endif
 
