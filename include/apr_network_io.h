@@ -607,6 +607,7 @@ apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data,
                               const char *key,
                               apr_status_t (*cleanup) (void *));
 
+#if APR_FILES_AS_SOCKETS
 /**
  * Convert a File type to a socket so that it can be used in a poll operation.
  * @param newsock the newly created socket which represents a file.
@@ -616,6 +617,7 @@ apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data,
  *      have the APR_FILES_AS_SOCKETS macro defined as true.
  */
 apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file);
+#endif
 
 /**
  * Given a hostname and a port, create an apr_in_addr for it...
