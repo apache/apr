@@ -159,6 +159,17 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #endif
 
 /**
+ * Allignment macros
+ */
+
+/* APR_ALIGN() is only to be used to align on a power of 2 boundary */
+#define APR_ALIGN(size, boundary) \
+    (((size) + ((boundary) - 1)) & ~((boundary) - 1))
+
+#define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
+
+
+/**
  * String and memory functions
  */
 
