@@ -63,7 +63,8 @@ static apr_status_t lock_intra_cleanup(void *data)
     apr_lock_t *lock = (apr_lock_t *) data;
     apr_status_t stat;
 
-    stat = pthread_mutex_unlock(lock->intraproc);
+    pthread_mutex_unlock(lock->intraproc);
+    stat = pthread_mutex_destroy(lock->intraproc);
 #ifdef PTHREAD_SETS_ERRNO
     if (stat) {
         stat = errno;
