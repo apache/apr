@@ -495,6 +495,10 @@ case "$OS" in
        size_t_fmt='#define APR_SIZE_T_FMT "ld"'
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
        ;;
+    *beos*)
+        ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
+        size_t_fmt='#define APR_SIZE_T_FMT "ld"'
+        ;;
 esac
 
 AC_SUBST(short_value)
