@@ -79,7 +79,18 @@ dnl
 dnl prep libtool
 dnl
 echo "performing libtool configuration..."
-AC_PROG_LIBTOOL
+
+case "$host_alias" in
+*os2*)
+    # Use a custom made libtool replacement
+    echo "using aplibtool"
+    LIBTOOL="$srcdir/build/aplibtool"
+    gcc -o $LIBTOOL.exe $LIBTOOL.c
+    ;;
+*)
+    AC_PROG_LIBTOOL
+    ;;
+esac
 
 dnl #----------------------------- Checks for compiler flags
 nl='
