@@ -586,9 +586,6 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
     ULONG rc;
     PID pid;
 
-    if (!proc)
-        return APR_ENOPROC;
-
     rc = DosWaitChild(DCWA_PROCESSTREE, waithow == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, 0);
 
     if (rc == 0) {
@@ -611,10 +608,6 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     RESULTCODES codes;
     ULONG rc;
     PID pid;
-
-    if (!proc)
-        return APR_ENOPROC;
-
     rc = DosWaitChild(DCWA_PROCESS, waithow == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, proc->pid);
 
     if (rc == 0) {
