@@ -122,6 +122,8 @@ extern "C" {
 				   * read, in cases where the app expects
 				   * that an immediate read would fail.)
 				   */
+#define APR_INCOMPLETE_WRITE 8192 /* like APR_INCOMPLETE_READ, but for write
+                                   */
 
 #define APR_POLLIN    0x001 
 #define APR_POLLPRI   0x002
