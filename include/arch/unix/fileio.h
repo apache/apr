@@ -100,6 +100,8 @@
 #endif
 /* End System headers */
 
+#define APR_FILE_BUFSIZE 4096
+
 struct ap_file_t {
     ap_pool_t *cntxt;
     int filedes;
@@ -108,7 +110,18 @@ struct ap_file_t {
     int eof_hit;
     int pipe;
     int timeout;
+    int buffered;
     int ungetchar;    /* Last char provided by an unget op. (-1 = no char)*/
+
+    /* Stuff for buffered mode */
+    char *buffer;
+    int bufpos;               /* Read/Write position in buffer */
+    unsigned long dataRead;   /* amount of valid data read into buffer */
+    int direction;            /* buffer being used for 0 = read, 1 = write */
+    unsigned long filePtr;    /* position in file of handle */
+#if APR_HAS_THREADS
+    ap_lock_t *thlock;
+#endif
 };
 
 struct ap_dir_t {

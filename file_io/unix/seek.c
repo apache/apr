@@ -54,16 +54,71 @@
 
 #include "fileio.h"
 
+static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
+{
+    long newbufpos;
+    int rc;
+
+    if (thefile->direction == 1) {
+        ap_flush(thefile);
+        thefile->bufpos = thefile->direction = thefile->dataRead = 0;
+    }
+
+    newbufpos = pos - (thefile->filePtr - thefile->dataRead);
+    if (newbufpos >= 0 && newbufpos <= thefile->dataRead) {
+        thefile->bufpos = newbufpos;
+        rc = 0;
+    } 
+    else {
+        rc = lseek(thefile->filedes, pos, SEEK_SET);
+
+        if (rc != -1 ) {
+            thefile->bufpos = thefile->dataRead = 0;
+            rc == errno;
+        }
+    }
+
+    return rc;
+}
+
+
 ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     ap_off_t rv;
-    rv = lseek(thefile->filedes, *offset, where);
-    if (rv == -1) {
-        *offset = -1;
-        return errno;
-    }
-    else {
-        *offset = rv;
-        return APR_SUCCESS;
+
+
+    if (thefile->buffered) {
+        int rc = EINVAL;
+        ap_finfo_t finfo;
+
+        switch (where) {
+        case APR_SET:
+            rc = setptr(thefile, *offset);
+            break;
+
+        case APR_CUR:
+            rc = setptr(thefile, thefile->filePtr - thefile->dataRead + thefile->bufpos + *offset);
+            break;
+
+        case APR_END:
+            rc = ap_getfileinfo(&finfo, thefile);
+            if (rc == APR_SUCCESS)
+                rc = setptr(thefile, finfo.size - *offset);
+            break;
+        }
+
+        *offset = thefile->filePtr + thefile->bufpos;
+        return rc;
+    } else {
+
+        rv = lseek(thefile->filedes, *offset, where);
+        if (rv == -1) {
+            *offset = -1;
+            return errno;
+        }
+        else {
+            *offset = rv;
+            return APR_SUCCESS;
+        }
     }
 }

@@ -64,7 +64,11 @@ ap_status_t ap_unix_file_cleanup(void *thefile)
 
     if (rv == 0) {
         file->filedes = -1;
+#if APR_HAS_THREADS
+        return ap_destroy_lock(file->thlock);
+#else
         return APR_SUCCESS;
+#endif
     }
     else {
         return errno;
@@ -80,12 +84,16 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
         return APR_EBADARG;
 
     if ((*new) == NULL) {
-        (*new) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+        (*new) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     }
 
     (*new)->cntxt = cont;
     (*new)->oflags = oflags;
     (*new)->filedes = -1;
+    (*new)->buffer = NULL;
+#if APR_HAS_THREADS
+    ap_create_lock(&((*new)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, cont);
+#endif
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         oflags = O_RDWR;
@@ -101,6 +109,8 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     }
 
     (*new)->fname = ap_pstrdup(cont, fname);
+
+    (*new)->buffered = (flag & APR_BUFFERED) > 0;
 
     if (flag & APR_CREATE) {
         oflags |= O_CREAT; 
@@ -139,6 +149,10 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     (*new)->timeout = -1;
     (*new)->ungetchar = -1;
     (*new)->eof_hit = 0;
+    (*new)->filePtr = 0;
+    (*new)->bufpos = 0;
+    (*new)->dataRead = 0;
+    (*new)->direction = 0;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), ap_unix_file_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;
@@ -194,6 +208,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
         (*file)->cntxt = cont;
     }
     (*file)->eof_hit = 0;
+    (*file)->buffered = 0;
     (*file)->timeout = -1;
     (*file)->filedes = *dafile;
     return APR_SUCCESS;
@@ -232,6 +247,7 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
     }
     (*thefile)->filedes = STDERR_FILENO;
     (*thefile)->cntxt = cont;
+    (*thefile)->buffered = 0;
     (*thefile)->fname = NULL;
     (*thefile)->eof_hit = 0;
 
