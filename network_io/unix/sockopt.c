@@ -128,6 +128,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         }
     }
     if (opt & APR_SO_NONBLOCK) {
+#ifndef BEOS
         if (on) {
             if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) 
                 return stat;
@@ -136,6 +137,11 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
             if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS)
                 return stat;
         }
+#else
+        stat = setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int));
+        if (stat != 0)
+            return stat;
+#endif
     }
     if (opt & APR_SO_LINGER) {
         li.l_onoff = on;
