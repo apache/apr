@@ -178,15 +178,15 @@ AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the 
   [ use_libtool=$withval ], [ use_libtool="yes" ] )
 
 if test "x$use_libtool" = "xyes"; then
-      lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -c $< && touch $@'
+      lt_compile='$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -o $@ -c $< && touch $@'
       LT_VERSION="-version-info `$get_version libtool $version_hdr APR`"
       link="\$(LIBTOOL) \$(LTFLAGS) --mode=link \$(LT_LDFLAGS) \$(COMPILE) ${LT_VERSION} \$(ALL_LDFLAGS) -o \$@"
       so_ext='lo'
-      lib_target='-rpath $(libdir) $$objects'
-      export_lib_target='-rpath \$(libdir) \$\$objects'
+      lib_target='-rpath $(libdir) $(OBJECTS)'
+      export_lib_target='-rpath \$(libdir) \$(OBJECTS)'
 else
-      lt_compile='$(COMPILE) -c $<'
-      link='$(AR) cr $(TARGET_LIB) $$objects; $(RANLIB) $(TARGET_LIB)'
+      lt_compile='$(COMPILE) -o $@ -c $<'
+      link='$(AR) cr $(TARGET_LIB) $(OBJECTS); $(RANLIB) $(TARGET_LIB)'
       so_ext='o'
       lib_target=''
       export_lib_target=''
@@ -1873,24 +1873,10 @@ AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
 
 echo "${nl}Construct Makefiles and header files."
-MAKEFILE1="Makefile strings/Makefile passwd/Makefile tables/Makefile build/Makefile"
-SUBDIRS="strings passwd tables "
-for dir in $apr_modules
-do
-    test -d $dir || $MKDIR $dir
-    if test -f $srcdir/$dir/$OSDIR/Makefile.in; then
-        MAKEFILE2="$MAKEFILE2 $dir/$OSDIR/Makefile "
-        SUBDIRS="$SUBDIRS $dir/$OSDIR "
-    else
-        MAKEFILE2="$MAKEFILE2 $dir/$DEFAULT_OSDIR/Makefile "
-        SUBDIRS="$SUBDIRS $dir/$DEFAULT_OSDIR "
-    fi
-done
-
+MAKEFILES="Makefile"
 if test -d $srcdir/test; then
-    MAKEFILE3="test/Makefile test/internal/Makefile"
+    MAKEFILES="$MAKEFILES test/Makefile test/internal/Makefile"
 fi
-AC_SUBST(SUBDIRS)
 
 #
 # BSD/OS (BSDi) needs to use a different include syntax in the Makefiles
@@ -1900,16 +1886,20 @@ case $host in
     # Check whether they've installed GNU make
     if make --version > /dev/null 2>&1; then 
 	INCLUDE_RULES="include $apr_buildout/apr_rules.mk"
+	INCLUDE_OUTPUTS="include build-outputs.mk"
     else
 	# BSDi make
 	INCLUDE_RULES=".include \"$apr_buildout/apr_rules.mk\""
+	INCLUDE_OUTPUTS=".include \"build-outputs.mk\""
     fi
     ;;
 *)
     INCLUDE_RULES="include $apr_buildout/apr_rules.mk"
+    INCLUDE_OUTPUTS="include build-outputs.mk"
     ;;
 esac
 AC_SUBST(INCLUDE_RULES)
+AC_SUBST(INCLUDE_OUTPUTS)
 
 SAVE_FILES="include/apr.h include/arch/unix/apr_private.h"
 
@@ -1921,7 +1911,7 @@ dir=include/arch/unix
 test -d $dir || $MKDIR $dir
 
 AC_OUTPUT([
-	$MAKEFILE1 $MAKEFILE2 $MAKEFILE3
+	$MAKEFILES
 	include/apr.h
 	build/apr_rules.mk
 	apr-config
@@ -1935,22 +1925,3 @@ for i in $SAVE_FILES; do
 done
 chmod +x apr-config
 ])
-
-dnl ----------------------------- Fixup Makefiles for VPATH support
-
-changequote({,})
-
-if test -n "$USE_VPATH"; then
-  for makefile in $MAKEFILE1 $MAKEFILE2 $MAKEFILE3; do
-    cat $makefile | \
-        sed \
-		-e 's#-I\($(INCDIR[0-9]*)\)#-I\1 -I$(srcdir)/\1#g' \
-		-e 's#-I\($(OSDIR[0-9]*)\)#-I\1 -I$(srcdir)/\1#g' \
-		-e 's#-I\($(DEFOSDIR[0-9]*)\)#-I\1 -I$(srcdir)/\1#g' \
-		> tmp
-    cp tmp $makefile
-  done
-  rm -f tmp
-fi
-
-changequote([,])

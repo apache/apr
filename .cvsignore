@@ -32,3 +32,4 @@ BuildLog.htm
 *.vcproj
 autom4te.cache
 ltcf-c.sh
+build-outputs.mk
