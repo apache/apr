@@ -1,12 +1,10 @@
 .rn '' }`
-''' $RCSfile: mm.3,v $$Revision: 1.3 $$Date: 2000/03/10 00:06:32 $
+''' $RCSfile: mm.3,v $$Revision: 1.4 $$Date: 2000/05/03 17:15:49 $
 '''
 ''' $Log: mm.3,v $
-''' Revision 1.3  2000/03/10 00:06:32  rbb
-''' Fix all the License issues.  Including:
-''' s/Apache Group/Apache Software Foundation/
-''' s/1999/2000/
-''' s/Sascha's license/ASF license
+''' Revision 1.4  2000/05/03 17:15:49  rbb
+''' Update MM to the latest version.  retrieved from
+''' http://www.engelschall.com/sw/mm
 '''
 '''
 .de Sh
@@ -99,7 +97,7 @@
 .nr % 0
 .rr F
 .\}
-.TH mm 3 "06-Sep-1999" "MM 1.0.11" "Shared Memory Library"
+.TH mm 3 "30-Apr-2000" "MM 1.1.1" "Shared Memory Library"
 .UC
 .if n .hy 0
 .if n .na
@@ -196,7 +194,7 @@
 .SH "NAME"
 \fBMM \- Shared Memory Library\fR
 .SH "VERSION"
-MM 1.0.11 (06-Sep-1999)
+MM 1.1.1 (30-Apr-2000)
 .SH "SYNOPSIS"
 .PP
 .Vb 1
@@ -270,7 +268,7 @@ with data-structures inside those shared memory segments.
 .PP
 The abbreviation \fBMM\fR is historically and originally comes from the phrase
 ``\fImemory mapped\fR'\*(R' as used by the POSIX.1 \fImmap\fR\|(2) function. Because this
-facility is internally used by this library on most platforms to create the
+facility is internally used by this library on most platforms to establish the
 shared memory segments. 
 .Sh "\s-1LIBRARY\s0 \s-1STRUCTURE\s0"
 This library is structured into three main APIs which are internally based on
@@ -283,89 +281,90 @@ based data structures without the need to change the code dramatically.  All
 which is needed is to prefix the \s-1POSIX\s0.1 memory allocation functions with
 `\f(CWMM_\fR\*(R', i.e. `\f(CWmalloc\fR\*(R' becomes `\f(CWMM_malloc\fR\*(R', `\f(CWstrdup\fR\*(R' becomes
 `\f(CWMM_strdup\fR\*(R', etc. This \s-1API\s0 internally uses just a global `\f(CWMM *\fR\*(R' pool for
-calling the corresponding functions (with prefix `\f(CWmm_\fR') of the \fIStandard
-Malloc-Style \s-1API\s0\fR.
+calling the corresponding functions (those with prefix `\f(CWmm_\fR') of the
+\fIStandard Malloc-Style \s-1API\s0\fR.
 .Ip "\fBStandard Malloc-Style \s-1API\s0\fR" 4
 This is the standard high-level memory allocation \s-1API\s0. Its interface is
 similar to the \fIGlobal Malloc-Replacement \s-1API\s0\fR but it uses an explicit `\f(CWMM *\fR\*(R'
-pool to operate on. That's why every function of this \s-1API\s0 has an argument of
-type `\f(CWMM *\fR\*(R' as the first argument.  This \s-1API\s0 provides a comfortable way to
+pool to operate on. That is why every function of this \s-1API\s0 has an argument of
+type `\f(CWMM *\fR\*(R' as its first argument. This \s-1API\s0 provides a comfortable way to
 work with small dynamically allocated shared memory chunks inside large
-statically allocated shared memory segments. It's internally based on the
+statically allocated shared memory segments. It is internally based on the
 \fILow-Level Shared Memory \s-1API\s0\fR for creating the underlaying shared memory
 segment.
 .Ip "\fBLow-Level Shared Memory \s-1API\s0\fR" 4
 This is the basis of the whole \fB\s-1MM\s0\fR library. It provides low-level functions
-for creating shared memory segments with mutual exclusion (in short: \fImutex\fR)
+for creating shared memory segments with mutual exclusion (in short \fImutex\fR)
 capabilities in a portable way. Internally the shared memory and mutex
 facility is implemented in various platform-dependent ways. A list of
 implementation variants follows under the next topic.
 .Sh "\s-1SHARED\s0 \s-1MEMORY\s0 \s-1IMPLEMENTATION\s0"
 Internally the shared memory facility is implemented in various
-platform-dependent variants. Each has it's own advantages and disadvantages
+platform-dependent ways. Each way has its own advantages and disadvantages
 (in addition to the fact that some variants aren't available at all on some
-platforms). The \s-1MM\s0 libraries configuration procedure tried hard to make a good
-decision. The implemented variants are now given for overview and background
-reasons with their advantages and disadvantages and in an ascending order,
-i.e. the \s-1MM\s0 configuration mechanism chooses the last available one in the list
-as the preferred variant.
+platforms). The \fB\s-1MM\s0\fR library's configuration procedure tries hard to make a
+good decision. The implemented variants are now given for overview and
+background reasons with their advantages and disadvantages and in an ascending
+order, i.e. the \fB\s-1MM\s0\fR configuration mechanism chooses the last available one
+in the list as the preferred variant.
 .Ip "Classical mmap(2) on temporary file (\s-1MMFILE\s0)" 4
 \fIAdvantage:\fR maximum portable.
-\fIDisadvantage:\fR needs a temporary file on the filesystem
+\fIDisadvantage:\fR needs a temporary file on the filesystem.
 .Ip "mmap(2) via \s-1POSIX\s0.1 shm_open(3) on temporary file (\s-1MMPOSX\s0)" 4
 \fIAdvantage:\fR standardized by \s-1POSIX\s0.1 and theoretically portable.
 \fIDisadvantage:\fR needs a temporary file on the filesystem and is
 is usually not available on existing Unix platform.
 .Ip "\s-1SVR4-\s0style mmap(2) on \f(CW/dev/zero\fR device (\s-1MMZERO\s0)" 4
-\fIAdvantage:\fR widely available on mostly portable on \s-1SVR4\s0 platforms.
-\fIDisadvantage:\fR needs the \f(CW/dev/zero/\fR device and an \fImmap\fR\|(2)
-which supports memory mapping through it.
+\fIAdvantage:\fR widely available and mostly portable on \s-1SVR4\s0 platforms.
+\fIDisadvantage:\fR needs the \f(CW/dev/zero/\fR device and a \fImmap\fR\|(2)
+which supports memory mapping through this device.
 .Ip "4.4BSD\-style mmap(2) via \f(CWMAP_ANON\fR facility (\s-1MMANON\s0)" 4
-\fIAdvantage:\fR doesn't need a temporary file or external device
+\fIAdvantage:\fR does not need a temporary file or external device.
 \fIDisadvantage:\fR usually only available on \s-1BSD\s0 platforms and derivatives.
 .Ip "SysV \s-1IPC\s0 shmget(2) (\s-1IPCSHM\s0)" 4
-\fIAdvantage:\fR doesn't need a temporary file or external device
-\fIDisadvantage:\fR although available on mostly all modern Unix platforms it has
-hard restrictions like the maximum size of a single shared memory segment (can
+\fIAdvantage:\fR does not need a temporary file or external device.
+\fIDisadvantage:\fR although available on mostly all modern Unix platforms, it has
+strong restrictions like the maximum size of a single shared memory segment (can
 be as small as 100KB, but depends on the platform).
 .Sh "\s-1LOCKING\s0 \s-1IMPLEMENTATION\s0"
 As for the shared memory facility, internally the locking facility is
-implemented in various platform-dependent variants. A short overview of
+implemented in various platform-dependent ways. A short overview of
 implemented variants is given:
 .Ip "4.2BSD\-style flock(2) on temporary file (\s-1FLOCK\s0)" 4
 \fIAdvantage:\fR exists on a lot of platforms, especially on older Unix
 derivates.  \fIDisadvantage:\fR needs a temporary file on the filesystem and has
-to reopen filedescriptors to it in \fIeach\fR\|(!) \fIfork\fR\|(2)ed child process.
+to re-open file-descriptors to it in \fIeach\fR\|(!) \fIfork\fR\|(2)'ed child process.
 .Ip "SysV \s-1IPC\s0 semget(2) (\s-1IPCSEM\s0)" 4
-\fIAdvantage:\fR exists on a lot of platforms and doesn't need a temporary file.
+\fIAdvantage:\fR exists on a lot of platforms and does not need a temporary file.
 \fIDisadvantage:\fR an unmeant termination of the application leads to a
-semaphore leak because the facility doesn't allow an \*(L"remove in advance\*(R" trick
-(as the \s-1IPC\s0 shared memory facility does!) for safe cleanups.
+semaphore leak because the facility does not allow a ``remove in advance'\*(R'
+trick (as the \s-1IPC\s0 shared memory facility does) for safe cleanups.
 .Ip "\s-1SVR4-\s0style fcntl(2) on temporary file (\s-1FCNTL\s0)" 4
 \fIAdvantage:\fR exists on a lot of platforms and is also the most powerful
-variant (although not always the fastest one).  \fIDisadvantage:\fR needs a
+variant (although not always the fastest one). \fIDisadvantage:\fR needs a
 temporary file.
 .Sh "\s-1MEMORY\s0 \s-1ALLOCATION\s0 \s-1STRATEGY\s0"
 The memory allocation strategy the \fIStandard Malloc-Style \s-1API\s0\fR functions use
 internally is the following:
 .Ip "\fBAllocation\fR" 4
-When a chunk of memory has to be allocated, the internal list of free chunks
-is searched for a minimal-sized chunk which is larger or equal than the size
-of the to be allocated chunk (some sort of a \fIbest fit algorithm\fR). 
+If a chunk of memory has to be allocated, the internal list of free chunks
+is searched for a minimal-size chunk which is larger or equal than the size of
+the to be allocated chunk (a \fIbest fit\fR strategy>). 
 .Sp
-When a chunk is found which matches this best-fit criteria, but is still a lot
+If a chunk is found which matches this best-fit criteria, but is still a lot
 larger than the requested size, it is split into two chunks: One with exactly
-the requested size (which is the resulting chunk) and one with the remaining
-size (which is immediately re-inserted into the list of free chunks). 
+the requested size (which is the resulting chunk given back) and one with the
+remaining size (which is immediately re-inserted into the list of free
+chunks). 
 .Sp
-When no fitting chunk is found at all in the list of free chunks, a new one is
+If no fitting chunk is found at all in the list of free chunks, a new one is
 created from the spare area of the shared memory segment until the segment is
 full (in which case an \fIout of memory\fR error occurs).
 .Ip "\fBDeallocation\fR" 4
-When a chunk of memory has to be deallocated, it is inserted in sorted manner
-into the internal list of free chunks.  The insertion operation automatically
-merges the chunk with a previous and/or next free chunk when possible, i.e.
-the free chunks stay physically seamless (one after another) in memory, to
+If a chunk of memory has to be deallocated, it is inserted in sorted manner
+into the internal list of free chunks. The insertion operation automatically
+merges the chunk with a previous and/or a next free chunk if possible, i.e.
+if the free chunks stay physically seamless (one after another) in memory, to
 automatically form larger free chunks out of smaller ones. 
 .Sp
 This way the shared memory segment is automatically defragmented when memory
@@ -375,22 +374,22 @@ This strategy reduces memory waste and fragmentation caused by small and
 frequent allocations and deallocations to a minimum. 
 .PP
 The internal implementation of the list of free chunks is not specially
-optimized (for instance by using binary search trees or even splay trees,
-etc.), because it's assumed that the total amount of entries in the list of
+optimized (for instance by using binary search trees or even \fIsplay\fR trees,
+etc), because it is assumed that the total amount of entries in the list of
 free chunks is always small (caused both by the fact that shared memory
 segments are usually a lot smaller than heaps and the fact that we always
-defragment by merging the free chunks when possible).
+defragment by merging the free chunks if possible).
 .SH "API FUNCTIONS"
 In the following all API functions are described in detail.
-The order directly follows the one in the SYNOPSIS.
+The order directly follows the one in the \fBSYNOPSIS\fR.
 .Sh "Global Malloc-Replacement \s-1API\s0"
 .Ip "int \fBMM_create\fR(size_t \fIsize\fR, const char *\fIfile\fR);" 4
-This initialized the global shared memory pool with \fIsize\fR and \fIfile\fR and
-has be called \fIbefore\fR any \fIfork\fR\|(2) operations are performed by the
+This initializes the global shared memory pool with \fIsize\fR and \fIfile\fR and
+has to be called \fIbefore\fR any \fIfork\fR\|(2) operations are performed by the
 application.
 .Ip "int \fBMM_permission\fR(mode_t \fImode\fR, uid_t \fIowner\fR, gid_t \fIgroup\fR);" 4
 This sets the filesystem \fImode\fR, \fIowner\fR and \fIgroup\fR for the global shared
-memory pool (has effects only when the underlaying shared memory segment
+memory pool (has effects only if the underlaying shared memory segment
 implementation is actually based on external auxiliary files).  The arguments
 are directly passed through to \fIchmod\fR\|(2) and \fIchown\fR\|(2).
 .Ip "void \fBMM_destroy\fR(void);" 4
@@ -399,12 +398,11 @@ child processes were killed.
 .Ip "int \fBMM_lock\fR(mm_lock_mode \fImode\fR);" 4
 This locks the global shared memory pool for the current process in order to
 perform either shared/read-only (\fImode\fR is \f(CWMM_LOCK_RD\fR) or
-exclusive/read-write (\fImode\fR is \f(CWMM_LOCK_RW\fR) operations inside the global
-shared memory pool.
+exclusive/read-write (\fImode\fR is \f(CWMM_LOCK_RW\fR) critical operations inside the
+global shared memory pool.
 .Ip "int \fBMM_unlock\fR(void);" 4
-This unlocks the global shared memory pool for the current process after
-mutual exclusion operations were performed inside the global shared memory
-pool.
+This unlocks the global shared memory pool for the current process after the
+critical operations were performed inside the global shared memory pool.
 .Ip "void *\fBMM_malloc\fR(size_t \fIsize\fR);" 4
 Identical to the \s-1POSIX\s0.1 \fImalloc\fR\|(3) function but instead of allocating
 memory from the \fIheap\fR it allocates it from the global shared memory pool.
@@ -424,7 +422,7 @@ string copy in the \fIheap\fR it creates it in the global shared memory pool.
 .Ip "size_t \fBMM_sizeof\fR(const void *\fIptr\fR);" 4
 This function returns the size in bytes of the chunk starting at \fIptr\fR when
 \fIptr\fR was previously allocated with \fIMM_malloc\fR\|(3). The result is undefined
-when \fIptr\fR was not previously allocated with \fIMM_malloc\fR\|(3).
+if \fIptr\fR was not previously allocated with \fIMM_malloc\fR\|(3).
 .Ip "size_t \fBMM_maxsize\fR(void);" 4
 This function returns the maximum size which is allowed
 as the first argument to the \fIMM_create\fR\|(3) function.
@@ -439,10 +437,10 @@ This creates a shared memory pool which has space for approximately a total of
 \fIsize\fR bytes with the help of \fIfile\fR. Here \fIfile\fR is a filesystem path to a
 file which need not to exist (and perhaps is never created because this
 depends on the platform and chosen shared memory and mutex implementation).
-The return value is a pointer to an \f(CWMM\fR structure which should be treated as
+The return value is a pointer to a \f(CWMM\fR structure which should be treated as
 opaque by the application. It describes the internals of the created shared
 memory pool. In case of an error \f(CWNULL\fR is returned.  A \fIsize\fR of 0 means to
-allocate the maximum allowed size which is platform dependent and between a
+allocate the maximum allowed size which is platform dependent and is between a
 few \s-1KB\s0 and the soft limit of 64MB.
 .Ip "int \fBmm_permission\fR(\s-1MM\s0 *\fImm\fR, mode_t \fImode\fR, uid_t \fIowner\fR, gid_t \fIgroup\fR);" 4
 This sets the filesystem \fImode\fR, \fIowner\fR and \fIgroup\fR for the shared memory
@@ -456,11 +454,11 @@ filesystem corresponding the to shared memory pool are unlinked.
 .Ip "int \fBmm_lock\fR(\s-1MM\s0 *\fImm\fR, mm_lock_mode \fImode\fR);" 4
 This locks the shared memory pool \fImm\fR for the current process in order to
 perform either shared/read-only (\fImode\fR is \f(CWMM_LOCK_RD\fR) or
-exclusive/read-write (\fImode\fR is \f(CWMM_LOCK_RW\fR) operations inside the global
-shared memory pool.
+exclusive/read-write (\fImode\fR is \f(CWMM_LOCK_RW\fR) critical operations inside the
+global shared memory pool.
 .Ip "int \fBmm_unlock\fR(\s-1MM\s0 *\fImm\fR);" 4
-This unlocks the shared memory pool \fImm\fR for the current process after mutual
-exclusion operations were performed inside the global shared memory pool.
+This unlocks the shared memory pool \fImm\fR for the current process after
+critical operations were performed inside the global shared memory pool.
 .Ip "void *\fBmm_malloc\fR(\s-1MM\s0 *\fImm\fR, size_t \fIsize\fR);" 4
 This function allocates \fIsize\fR bytes from the shared memory pool \fImm\fR and
 returns either a (virtual memory word aligned) pointer to it or \f(CWNULL\fR in
@@ -528,7 +526,7 @@ at \fIcore\fR is no longer allowed and will usually lead to a segmentation fault
 .Ip "int \fBmm_core_lock\fR(const void *\fIcore\fR, mm_lock_mode \fImode\fR);" 4
 This function acquires an advisory lock for the current process on the shared
 memory segment \fIcore\fR for either shared/read-only (\fImode\fR is \f(CWMM_LOCK_RD\fR)
-or exclusive/read-write (\fImode\fR is \f(CWMM_LOCK_RW\fR) operations between
+or exclusive/read-write (\fImode\fR is \f(CWMM_LOCK_RW\fR) critical operations between
 \fIfork\fR\|(2)'ed child processes.
 .Ip "int \fBmm_core_unlock\fR(const void *\fIcore\fR);" 4
 This function releases a previously acquired advisory lock for the current
@@ -546,15 +544,15 @@ limit of 64MB.
 This is just a utility function which can be used to align the number \fIsize\fR
 to the next virtual memory \fIpage\fR boundary used by the underlaying platform.
 The memory page boundary under Unix platforms is usually somewhere between
-2048 and 16384 bytes. You don't have to align the \fIsize\fR arguments of other
+2048 and 16384 bytes. You do not have to align the \fIsize\fR arguments of other
 \fB\s-1MM\s0\fR library functions yourself, because this is already done internally.
 This function is exported by the \fB\s-1MM\s0\fR library just for convenience reasons in
-case an application wants to perform simular calculations for other purposes.
+case an application wants to perform similar calculations for other purposes.
 .Ip "size_t \fBmm_core_align2word\fR(size_t \fIsize\fR);" 4
 This is another utility function which can be used to align the number \fIsize\fR
 to the next virtual memory \fIword\fR boundary used by the underlaying platform.
 The memory word boundary under Unix platforms is usually somewhere between 4
-and 16 bytes.  You don't have to align the \fIsize\fR arguments of other \fB\s-1MM\s0\fR
+and 16 bytes.  You do not have to align the \fIsize\fR arguments of other \fB\s-1MM\s0\fR
 library functions yourself, because this is already done internally.  This
 function is exported by the \fB\s-1MM\s0\fR library just for convenience reasons in case
 an application wants to perform simular calculations for other purposes.
@@ -564,24 +562,24 @@ This is a function which is used internally by the various \s-1MM\s0 function to
 an error string. It's usually not called directly from applications.
 .Ip "char *\fBmm_lib_error_get\fR(void);" 4
 This is a function which is used internally by \fIMM_error\fR\|(3) and \fImm_error\fR\|(3)
-functions to get the current error string. It's usually not called directly
+functions to get the current error string. It is usually not called directly
 from applications.
 .Ip "int \fBmm_lib_version\fR(void);" 4
 This function returns a hex-value ``0x\fIV\fR\fI\s-1RR\s0\fR\fIT\fR\fI\s-1LL\s0\fR'\*(R' which describes the
-current \s-1MM\s0 library version. \fIV\fR is the version, \fI\s-1RR\s0\fR the revisions, \fI\s-1LL\s0\fR
+current \fB\s-1MM\s0\fR library version. \fIV\fR is the version, \fI\s-1RR\s0\fR the revisions, \fI\s-1LL\s0\fR
 the level and \fIT\fR the type of the level (alphalevel=0, betalevel=1,
-patchlevel=2, etc). For instance \s-1MM\s0 version 1.0.4 is encoded as 0x100204.  The
-reason for this unusual mapping is that this way the version number is
+patchlevel=2, etc). For instance \fB\s-1MM\s0\fR version 1.0.4 is encoded as 0x100204.
+The reason for this unusual mapping is that this way the version number is
 steadily \fIincreasing\fR.
 .SH "RESTRICTIONS"
 The maximum size of a continuous shared memory segment one can allocate
 depends on the underlaying platform. This cannot be changed, of course.  But
 currently the high-level \fImalloc\fR\|(3)\-style API just uses a single shared memory
 segment as the underlaying data structure for an \f(CWMM\fR object which means that
-the maximum amount of memory a \f(CWMM\fR object represents also depends on the
+the maximum amount of memory an \f(CWMM\fR object represents also depends on the
 platform. 
 .PP
-This should be changed in later versions by allowing the high-level
+This should be changed in later versions by allowing at least the high-level
 \fImalloc\fR\|(3)\-style API to internally use multiple shared memory segments to form
 the \f(CWMM\fR object. This way \f(CWMM\fR objects could have arbitrary sizes, although
 the maximum size of an allocatable chunk still is bounded by the maximum size
@@ -595,10 +593,10 @@ mm-\fIconfig\fR\|(1).
 http://www.engelschall.com/sw/mm/
 
 .SH "HISTORY"
-This library was originally written in January 1999 by \fIRalf S. Engelschall\fR
-<rse@engelschall.com> for use in the \fBExtended API\fR (EAPI) of the \fBApache\fR
-HTTP server project (see www.apache.org), which was originally invented for
-\fBmod_ssl\fR (see http://www.modssl.org/). 
+This library was originally written in January 1999 by \fIRalf S.
+Engelschall\fR <rse@engelschall.com> for use in the \fBExtended API\fR (EAPI)
+of the \fBApache\fR HTTP server project (see www.apache.org), which was
+originally invented for \fBmod_ssl\fR (see http://www.modssl.org/).
 .PP
 Its base idea (a malloc-style API for handling shared memory) was originally
 derived from the non-publically available \fImm_malloc\fR library written in

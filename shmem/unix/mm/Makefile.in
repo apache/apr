@@ -1,5 +1,5 @@
 ## ====================================================================
-## Copyright (c) 1999 Ralf S. Engelschall. All rights reserved.
+## Copyright (c) 1999-2000 Ralf S. Engelschall. All rights reserved.
 ##
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions
@@ -74,31 +74,29 @@ _VERSION = \
 .SUFFIXES: .o .lo
 
 .c.o:
-	$(LIBTOOL) --quiet --mode=compile \
-		$(CC) -c $(CFLAGS) $<
+	$(LIBTOOL) --quiet --mode=compile $(CC) -c $(CFLAGS) $<
 
 .c.lo:
-	$(LIBTOOL) --quiet --mode=compile \
-		$(CC) -c $(CFLAGS) $<
+	$(LIBTOOL) --quiet --mode=compile $(CC) -c $(CFLAGS) $<
 
 all: libmm.la $(MAN) mm_test
 
 libmm.la: $(OBJ) $(LOBJ)
-	$(LIBTOOL) --quiet --mode=link  \
-		$(CC) -o libmm.la $(LOBJ) \
+	$(LIBTOOL) --quiet --mode=link $(CC) -o libmm.la $(LOBJ) \
 	    -rpath $(libdir) -version-info `$(SHTOOL) version -l c -d libtool mm_vers.c`
 
 mm_alloc.c mm_core.c mm_global.c: mm_conf.h mm.h mm_vers.c
 
+check: test
 test: mm_test
 	-@./mm_test; \
 	if [ $$? -eq 0 ]; then \
 		PLATFORM=`$(SHELL) ./config.guess`; \
 		PLATFORM=`$(SHELL) ./config.sub $$PLATFORM`; \
-		if [ ".`grep $$PLATFORM README`" = . ]; then \
+		if [ ".`grep $$PLATFORM PORTING`" = . ]; then \
 	        echo "Please send the following summary via Email to the author"; \
 	        echo "Ralf S. Engelschall <rse@engelschall.com> for inclusion into"; \
-	        echo "the list of successfully tested platforms (see README file):"; \
+	        echo "the list of successfully tested platforms (see PORTING file):"; \
 	        echo ""; \
 	        echo "Ok" >.fbtool; \
 	        $(SHELL) ./fbtool -d; \
@@ -118,8 +116,7 @@ debug: mm_test
 	@$(LIBTOOL) --mode=execute gdb mm_test
 
 mm_test: mm_test.lo libmm.la
-	$(LIBTOOL) --quiet --mode=link \
-		$(CC) -o $@ mm_test.lo libmm.la
+	$(LIBTOOL) --quiet --mode=link $(CC) -o $@ mm_test.lo libmm.la
 
 mm.3: mm.pod
 	V1=`$(SHTOOL) version -l c -d short $(_VERSION_FILE)`; \
@@ -157,7 +154,7 @@ ltconfig:
 	echo "ltconfig <-- $$F"; cp $$F .
 
 shtool:
-	shtoolize -o shtool all
+	shtoolize -o shtool version echo mkdir install fixperm tarball
 
 install: all
 	$(SHTOOL) mkdir -f -p -m 755 $(bindir)

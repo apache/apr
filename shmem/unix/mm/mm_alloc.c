@@ -1,5 +1,5 @@
 /* ====================================================================
- * Copyright (c) 1999 Ralf S. Engelschall. All rights reserved.
+ * Copyright (c) 1999-2000 Ralf S. Engelschall. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,10 +59,6 @@ MM *mm_create(size_t usize, const char *file)
 
     /* defaults */
     maxsize = mm_maxsize();
-    if (usize < 0) {
-        errno = EINVAL;
-        return NULL;
-    }
     if (usize == 0)
         usize = maxsize;
     if (usize > maxsize)
