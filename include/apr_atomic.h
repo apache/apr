@@ -337,7 +337,7 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 #define apr_atomic_add32(mem, val)        apr_atomic_add(mem, val)
 #define apr_atomic_dec32(mem)             apr_atomic_dec(mem)
 #define apr_atomic_inc32(mem)             apr_atomic_inc(mem)
-#define apr_atomic_set32(mem)             apr_atomic_set(mem)
+#define apr_atomic_set32(mem,val)         apr_atomic_set(mem,val)
 #define apr_atomic_read32(mem)            apr_atomic_read(mem)
 
 #elif (defined(__linux__) || defined(__EMX__)) && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC

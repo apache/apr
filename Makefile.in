@@ -133,6 +133,9 @@ dox:
 check: $(TARGET_LIB)
 	(cd test && $(MAKE) check)
 
+etags:
+	etags `find . -name '*.[ch]'`
+
 # DO NOT REMOVE
 docs: $(INCDIR)/*.h
 

@@ -307,6 +307,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ESYMNOTFOUND   (APR_OS_START_ERROR + 26)
 /** @see APR_STATUS_IS_EPROC_UNKNOWN */
 #define APR_EPROC_UNKNOWN  (APR_OS_START_ERROR + 27)
+
+#define APR_ENOTENOUGHENTROPY (APR_OS_START_ERROR + 28)
 /** @} */
 
 /** 
