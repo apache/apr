@@ -84,7 +84,7 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset,
     if (file == NULL || file->filedes == -1)
         return APR_EBADF;
 
-    (*new) = (ap_mmap_t *)ap_palloc(cont, sizeof(ap_mmap_t));
+    (*new) = (ap_mmap_t *)ap_pcalloc(cont, sizeof(ap_mmap_t));
     
     ap_seek(file, APR_SET, &offset);
     mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes ,0);

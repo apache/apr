@@ -58,11 +58,11 @@
 
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
-    (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t));
+    (*new) = (ap_pollfd_t *)ap_pcalloc(cont, sizeof(ap_pollfd_t));
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
-    (*new)->pollset = (struct pollfd *)ap_palloc(cont, 
+    (*new)->pollset = (struct pollfd *)ap_pcalloc(cont, 
                                          sizeof(struct pollfd) * num);
 
     if ((*new)->pollset == NULL) {
@@ -223,14 +223,14 @@ ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
 
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
-    (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t) * num);
+    (*new) = (ap_pollfd_t *)ap_pcalloc(cont, sizeof(ap_pollfd_t) * num);
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
     (*new)->cntxt = cont;
-    (*new)->read = (fd_set *)ap_palloc(cont, sizeof(fd_set));
-    (*new)->write = (fd_set *)ap_palloc(cont, sizeof(fd_set));
-    (*new)->except = (fd_set *)ap_palloc(cont, sizeof(fd_set));
+    (*new)->read = (fd_set *)ap_pcalloc(cont, sizeof(fd_set));
+    (*new)->write = (fd_set *)ap_cpalloc(cont, sizeof(fd_set));
+    (*new)->except = (fd_set *)ap_pcalloc(cont, sizeof(fd_set));
     FD_ZERO((*new)->read);
     FD_ZERO((*new)->write);
     FD_ZERO((*new)->except);

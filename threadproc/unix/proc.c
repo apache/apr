@@ -57,22 +57,13 @@
 
 ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
 {
-    (*new) = (ap_procattr_t *)ap_palloc(cont, 
-              sizeof(ap_procattr_t));
+    (*new) = (ap_procattr_t *)ap_pcalloc(cont, sizeof(ap_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
     (*new)->cntxt = cont;
-    (*new)->parent_in = NULL;
-    (*new)->child_in = NULL;
-    (*new)->parent_out = NULL;
-    (*new)->child_out = NULL;
-    (*new)->parent_err = NULL;
-    (*new)->child_err = NULL;
-    (*new)->currdir = NULL; 
     (*new)->cmdtype = APR_PROGRAM;
-    (*new)->detached = 0; 
     return APR_SUCCESS;
 }
 
@@ -204,7 +195,7 @@ ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont)
 {
     int pid;
     
-    (*proc) = ap_palloc(cont, sizeof(ap_proc_t));
+    (*proc) = ap_pcalloc(cont, sizeof(ap_proc_t));
 
     if ((pid = fork()) < 0) {
         return errno;
@@ -228,7 +219,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     my_stupid_string *newargs;
     ap_proc_t *pgrp; 
 
-    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
+    (*new) = (ap_proc_t *)ap_pcalloc(cont, sizeof(ap_proc_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -369,7 +360,7 @@ ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc,
         return APR_ENOPOOL;
     }
     if ((*proc) == NULL) {
-        (*proc) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
+        (*proc) = (ap_proc_t *)ap_pcalloc(cont, sizeof(ap_proc_t));
         (*proc)->cntxt = cont;
     }
     (*proc)->pid = *theproc;

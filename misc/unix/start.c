@@ -97,7 +97,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
             dptr = dptr->next;
         }
         if (dptr == NULL) {
-            dptr = ap_palloc(cont, sizeof(datastruct));
+            dptr = ap_pcalloc(cont, sizeof(datastruct));
             dptr->next = dptr->prev = NULL;
             dptr->key = ap_pstrdup(cont, key);
             if (dptr2) {

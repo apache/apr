@@ -263,7 +263,7 @@ ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir,
                           ap_pool_t *cont)
 {
     if ((*dir) == NULL) {
-        (*dir) = (ap_dir_t *)ap_palloc(cont, sizeof(ap_dir_t));
+        (*dir) = (ap_dir_t *)ap_pcalloc(cont, sizeof(ap_dir_t));
         (*dir)->cntxt = cont;
     }
     (*dir)->dirstruct = thedir;
