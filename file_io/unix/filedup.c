@@ -86,6 +86,7 @@ apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_
         (*new_file)->buffer = apr_palloc(p, APR_FILE_BUFSIZE);
     }
     (*new_file)->blocking = old_file->blocking; /* this is the way dup() works */
+    (*new_file)->flags = old_file->flags;
     apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), apr_unix_file_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;

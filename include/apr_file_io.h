@@ -136,6 +136,11 @@ typedef struct apr_file_t         apr_file_t;
  *           APR_BUFFERED         buffer the data.  Default is non-buffered
  *           APR_EXCL             return error if APR_CREATE and file exists
  *           APR_DELONCLOSE       delete the file after closing.
+ *           APR_XTHREAD          Platform dependent tag to open the file
+ *                                for use across multiple threads
+ *           APR_SHARELOCK        Platform dependent support for higher
+ *                                level locked read/write access to support
+ *                                writes across process/machines
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.
@@ -548,6 +553,14 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
  * @param offset The offset to truncate to.
  */
 APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *fp, apr_off_t offset);
+
+/**
+ * Retrieve the flags that were passed into apr_file_open()
+ * when the file was opened.
+ * @return apr_int32_t the flags
+ * @deffunc apr_int32_t apr_file_flags_get(apr_file_t *f)
+ */
+APR_DECLARE(apr_int32_t) apr_file_flags_get(apr_file_t *f);
 
 /**
  * Get the pool used by the file.

@@ -1,5 +1,12 @@
 Changes with APR b1  
 
+  *) Add apr_file_flags_get() which returns the flags that were originally
+     passed in to apr_file_open().  [Cliff Woolley]
+
+  *) Added APR_HAS_XTHREAD_FILES macro that indicates whether or not the
+     platform handles files opened in APR_XTHREAD mode natively.  Currently
+     only Win32 has such native support.  [Cliff Woolley]
+
   *) Fix gmt offset handling on Solaris.  Apache log messages now show
      local time again. PR #7902 [Taketo Kabe <kabe@sra-tohoku.co.jp>]
 

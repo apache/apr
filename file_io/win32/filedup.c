@@ -103,6 +103,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
             return APR_ENOTIMPL;
     }
 
+    (*new_file)->flags = old_file->flags;
     (*new_file)->cntxt = old_file->cntxt;
     (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->append = old_file->append;
