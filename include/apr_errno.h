@@ -56,7 +56,10 @@
 #define APR_ERRNO_H
 
 #include "apr.h"
+
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,6 +79,13 @@ typedef int apr_status_t;
  */
 int apr_canonical_error(apr_status_t err);
 
+/**
+ * Return a human readable string describing the specified error.
+ * @param statcode The error code the get a string for.
+ * @param buf A buffer to hold the error string.
+ * @param bufsize Size of the buffer to hold the string.
+ */
+char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
 
 /*
  * APR_OS_START_ERROR is where the APR specific error values should start.
