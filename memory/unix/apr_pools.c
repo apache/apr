@@ -1438,7 +1438,7 @@ APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *pool, int recurse)
         return pool_num_bytes(pool);
 
 #if APR_HAS_THREADS
-    return pool_num_bytes_recursive(pool, pool->mutex);
+    return pool_num_bytes_recursive(pool, NULL);
 #else
     return pool_num_bytes_recursive(pool);
 #endif
