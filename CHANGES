@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Fix a problem with buffered files on Unix.  [Brian Havard]
+
   *) Fix the bungling of getaddrinfo() error codes.  [Jeff Trawick]
 
   *) Add an apr_thread_once function to APR.  This allows a
