@@ -143,29 +143,15 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         psec = NULL;
     }
 
-    /* XXX: I had nothing but utter failure on WinNT attempting to specify
-     * the size of the CreateFileMapping() calls below (given in DWORDs
-     * as hi-DWORD, lo-DWORD where you see the 0, 0 args.)  Consistently,
-     * Win2K reported insufficient disk space, when that is obviously not
-     * the case.  I'm suspecting size should have been in pages (???) but
-     * there was no docs in the PSDK that made that implication.
-     *
-     * The XXX above is due to the fact that anon allocation dies right now,
-     * since we can't create a filemapping with size zero, when we don't
-     * back it with a file.  Since I clearly don't understand what Win32
-     * has done with this size arg, I'm loath to make the obvious fix.
-     * Let it fail until I, or someone with time on their hands, wants to
-     * research, experiment and fix this for good.
-     */
 #if APR_HAS_UNICODE_FS
     if (apr_os_level >= APR_WIN_NT) 
     {
-        hMap = CreateFileMappingW(hFile, psec, PAGE_READWRITE, 0, 0, mapkey);
+        hMap = CreateFileMappingW(hFile, psec, PAGE_READWRITE, 0, size, mapkey);
     }
     else
 #endif
     {
-        hMap = CreateFileMappingA(hFile, psec, PAGE_READWRITE, 0, 0, mapkey);
+        hMap = CreateFileMappingA(hFile, psec, PAGE_READWRITE, 0, size, mapkey);
     }
     err = apr_get_os_error();
 
