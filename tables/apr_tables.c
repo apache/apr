@@ -313,7 +313,7 @@ APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p, const apr_table_t *t)
     /* we don't copy keys and values, so it's necessary that t->a.pool
      * have a life span at least as long as p
      */
-    if (!apr_pool_is_ancestor(t->a.cont, p)) {
+    if (!apr_pool_is_ancestor(t->a.pool, p)) {
 	fprintf(stderr, "copy_table: t's pool is not an ancestor of p\n");
 	abort();
     }
