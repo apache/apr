@@ -116,6 +116,8 @@ struct apr_getopt_option_t {
     int optch;
     /** nonzero if option takes an argument */
     int has_arg;
+    /** a description of the option */
+    const char *description;
 };
 
 /**
