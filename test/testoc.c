@@ -63,7 +63,7 @@
 #include <unistd.h>
 #endif
 
-void ocmaint(int reason, void *data)
+void ocmaint(int reason, void *data, int status)
 {
     fprintf(stdout,"[CHILD]  Maintenance routine called....");
     fflush(stdout);

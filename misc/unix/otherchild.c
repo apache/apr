@@ -67,7 +67,7 @@
 static ap_other_child_rec_t *other_children = NULL;
 
 API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
-                     void (*maintenance) (int reason, void *),
+                     void (*maintenance) (int reason, void *, int status),
                      void *data, int write_fd, ap_pool_t *p)
 {
     ap_other_child_rec_t *ocr;
@@ -88,7 +88,7 @@ API_EXPORT(void) ap_unregister_other_child(void *data)
     for (pocr = &other_children; *pocr; pocr = &(*pocr)->next) {
         if ((*pocr)->data == data) {
             nocr = (*pocr)->next;
-            (*(*pocr)->maintenance) (APR_OC_REASON_UNREGISTER, (*pocr)->data);
+            (*(*pocr)->maintenance) (APR_OC_REASON_UNREGISTER, (*pocr)->data, -1);
             *pocr = nocr;
             /* XXX: um, well we've just wasted some space in pconf ? */
             return;
@@ -142,11 +142,11 @@ static void probe_writable_fds(void)
             continue;
         if (FD_ISSET(ocr->write_fd, &writable_fds))
             continue;
-        (*ocr->maintenance) (APR_OC_REASON_UNWRITABLE, ocr->data);
+        (*ocr->maintenance) (APR_OC_REASON_UNWRITABLE, ocr->data, -1);
     }
 }
 
-API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid)
+API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid, int status)
 {
     ap_other_child_rec_t *ocr, *nocr;
 
@@ -156,7 +156,7 @@ API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid)
             continue;
 
         ocr->pid = -1;
-        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data);
+        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         return 0;
     }
     return APR_CHILD_NOTDONE;
@@ -165,25 +165,26 @@ API_EXPORT(ap_status_t) ap_reap_other_child(ap_proc_t *pid)
 API_EXPORT(void) ap_check_other_child(void)
 {
     ap_other_child_rec_t *ocr, *nocr;
-    pid_t waitret;    
+    pid_t waitret; 
+    int status;
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
         if (ocr->pid == -1)
             continue;
 
-        waitret = waitpid(ocr->pid, NULL, WNOHANG);
+        waitret = waitpid(ocr->pid, &status, WNOHANG);
         if (waitret == ocr->pid) {
             ocr->pid = -1;
-            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data);
+            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         }
         else if (waitret == 0) {
-            (*ocr->maintenance) (APR_OC_REASON_RESTART, ocr->data);
+            (*ocr->maintenance) (APR_OC_REASON_RESTART, ocr->data, -1);
         }
         else if (waitret == -1) {
             /* uh what the heck? they didn't call unregister? */
             ocr->pid = -1;
-            (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data);
+            (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
         }
     }
 }
