@@ -1,4 +1,6 @@
 Changes with APR 0.9.4
+  *) Win32: Adopt Brian Havard's OS/2 rwlock implementation for
+     Windows [Marc Adkins, Bill Stoddard]
 
   *) Add apr_proc_mutex_lockfile() for retrieving the name of the
      file associated with a mutex.  [Jeff Trawick]
