@@ -327,7 +327,7 @@ APR_DECLARE(char *) apr_ltoa(apr_pool_t *p, long n);
 APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
 
 /**
- * parse a numeric string into a long long value
+ * parse a numeric string into a 64-bit numeric value
  * @param buf The string to parse. It may contain optional whitespace,
  *   followed by an optional '+' (positive, default) or '-' (negative)
  *   character, followed by an optional '0x' prefix if base is 0 or 16,
@@ -338,17 +338,17 @@ APR_DECLARE(char *) apr_off_t_toa(apr_pool_t *p, apr_off_t n);
  *   or 0.  If base is zero, buf will be treated as base ten unless its
  *   digits are prefixed with '0x', in which case it will be treated as
  *   base 16.
- * @return The long long value of the string.
+ * @return The numeric value of the string.
  */
-APR_DECLARE(long long) apr_strtoll(const char *buf, char **end, int base);
+APR_DECLARE(apr_int64_t) apr_strtoll(const char *buf, char **end, int base);
 
 /**
- * parse a base-10 numeric string into a long long value.
+ * parse a base-10 numeric string into a 64-bit numeric value.
  * Equivalent to apr_strtoll(buf, (char**)NULL, 10).
  * @param buf The string to parse
- * @return The long long value of the string
+ * @return The numeric value of the string
  */
-APR_DECLARE(long long) apr_atoll(const char *buf);
+APR_DECLARE(apr_int64_t) apr_atoll(const char *buf);
 
 /**
  * Format a binary size (magnitiudes are 2^10 rather than 10^3) from an apr_off_t,

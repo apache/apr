@@ -233,17 +233,17 @@ void *memchr(const void *s, int c, size_t n)
 }
 #endif
 
-APR_DECLARE(long long) apr_strtoll(const char *buf, char **end, int base)
+APR_DECLARE(apr_int64_t) apr_strtoll(const char *buf, char **end, int base)
 {
 #if (APR_HAVE_STRTOLL)
-    return strtoll(buf, end, base);
+    return (apr_int64_t)strtoll(buf, end, base);
 #else
     /* best-effort function. If no strtoll, use strtol */
-    return (long long)strtol(buf, end, base);
+    return (apr_int64_t)strtol(buf, end, base);
 #endif
 }
 
-APR_DECLARE(long long) apr_atoll(const char *buf)
+APR_DECLARE(apr_int64_t) apr_atoll(const char *buf)
 {
     return apr_strtoll(buf, NULL, 0);
 }
