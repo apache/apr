@@ -276,10 +276,12 @@ dnl
 AC_DEFUN(APR_CHECK_APR_DEFINE,[
 apr_old_cppflags=$CPPFLAGS
 CPPFLAGS="$CPPFLAGS $INCLUDES"
-AC_TRY_COMPILE([#include <apr.h>], [
-#if !$1
-#error APR does not have $1
-#endif], ac_cv_define_$1=yes, ac_cv_define_$1=no)
+AC_EGREP_CPP(YES_IS_DEFINED, [
+#include <apr.h>
+#if $1
+YES_IS_DEFINED
+#endif
+], ac_cv_define_$1=yes, ac_cv_define_$1=no)
 CPPFLAGS=$apr_old_cppflags
 ])
 
