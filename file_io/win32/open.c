@@ -84,6 +84,7 @@ apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p)
     apr_wchar_t *retstr = apr_palloc(p, retremains * 2), *t = retstr;
     if (srcstr[1] == ':' && srcstr[2] == '/') {
         wcscpy (retstr, L"\\\\?\\");
+        retremains -= 4;
         t += 4;
     }
     if (conv_utf8_to_ucs2(srcstr, &srcremains,
