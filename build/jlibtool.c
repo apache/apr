@@ -81,6 +81,7 @@
 #  define PIC_FLAG "-fPIC"
 #  define RPATH "-rpath"
 #  define SHARED_OPTS "-shared"
+#  define MODULE_OPTS "-shared"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #endif
 
@@ -93,6 +94,7 @@
 #  define LIBRARIAN      "ar"
 #  define LIBRARIAN_OPTS "cr"
 #  define SHARED_OPTS "-G"
+#  define MODULE_OPTS "-G"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #  define NEED_SNPRINTF
 #endif
