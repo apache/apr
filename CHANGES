@@ -7,9 +7,6 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
-  *) Fix sign error in apr_file_seek(APR_END).
-     [Greg Hudson <ghudson MIT.EDU>]
-
   *) Support setuid, setgid and sticky file permissions bits on Unix.
      [André Malo]
 
@@ -127,6 +124,9 @@ Changes with APR 1.0
      apr_compat.h
 
 Changes with APR 0.9.5
+
+  *) Fix sign error in apr_file_seek(APR_END).
+     [Greg Hudson <ghudson MIT.EDU>]
 
   *) Provide workaround for socklen_t declaration problem with 64-bit
      build on HP-UX.  Stop setting a PA-RISC-specific compile option
