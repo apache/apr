@@ -207,7 +207,7 @@ void main(void) {
     int error;
 
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;
+    hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
     if (error) {
