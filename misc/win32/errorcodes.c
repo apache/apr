@@ -55,6 +55,24 @@
 #include "apr_lib.h"
 #include "misc.h"
 
+/* Todo: Merge this code with the code in the misc/unix directory.
+ * Most of it is common
+ */
+
+/*
+ * stuffbuffer - Stuff contents of string 's' into buffer 'buf' 
+ * w/o overflowing 'buf' then NULL terminate.
+ */
+static char *stuffbuffer(char *buf, ap_size_t bufsize, const char *s)
+{
+    ap_size_t len = strlen(s);
+    if (len > bufsize)
+        len = bufsize;
+    memcpy(buf, s, len);
+    if (len)
+        buf[len-1] = '\0';
+    return buf;
+}
 
 static char *apr_error_string(ap_status_t statcode)
 {
@@ -120,9 +138,8 @@ static char *apr_error_string(ap_status_t statcode)
     case APR_KEYBASED:
         return "Shared memory is implemented using a key system";
     case APR_EINIT:
-        return
-	    "There is no error, this value signifies an initialized "
-	    "error code";
+        return "There is no error, this value signifies an initialized "
+              "error code";
     case APR_ENOTIMPL:
         return "This function has not been implemented on this platform";
     case APR_EMISMATCH:
@@ -132,7 +149,7 @@ static char *apr_error_string(ap_status_t statcode)
     }
 }
 
-static char *ap_os_format_message(ap_status_t errcode, char *buf, ap_size_t bufsize)
+static char *apr_os_strerror(char *buf, ap_size_t bufsize, ap_status_t errcode)
 {
     DWORD len;
     DWORD i;
@@ -165,17 +182,15 @@ static char *ap_os_format_message(ap_status_t errcode, char *buf, ap_size_t bufs
 char *ap_strerror(ap_status_t statcode, char* buf, ap_size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
-        return ap_os_format_message(statcode, buf, bufsize);
+        return apr_os_strerror(buf, bufsize, statcode);
     }
     else if (statcode < APR_OS_START_USEERR) {
-        return apr_error_string(statcode);
+        return stuffbuffer(buf, bufsize, apr_error_string(statcode));
     }
     else if (statcode < APR_OS_START_SYSERR) {
-        return "APR does not understand this error code";
+        return stuffbuffer(buf, bufsize, "APR does not understand this error code");
     }
     else {
-	return ap_os_format_message(statcode - APR_OS_START_SYSERR, buf, bufsize);
+	return apr_os_strerror(buf, bufsize, statcode - APR_OS_START_SYSERR);
     }
 }
-
-
