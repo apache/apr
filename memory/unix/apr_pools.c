@@ -888,31 +888,75 @@ APR_DECLARE(void) apr_pool_terminate(void)
  * destroyed, in which case we abort().
  */
 
+#if APR_HAS_THREADS
+static int pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
+                            apr_thread_mutex_t *mutex)
+{
+    apr_pool_t *child;
+
+    if (parent == NULL)
+        return 0;
+
+#if APR_HAS_THREADS
+    if (parent->mutex && parent->mutex != mutex)
+        apr_thread_mutex_lock(parent->mutex);
+#endif
+
+    child = parent->child;
+
+    while (child) {
+        if (pool == child || pool_is_child_of(pool, child, parent->mutex)) {
+#if APR_HAS_THREADS
+            if (parent->mutex && parent->mutex != mutex)
+                apr_thread_mutex_unlock(parent->mutex);
+#endif
+
+            return 1;
+        }
+ 
+        child = child->sibling;
+    }
+
+#if APR_HAS_THREADS
+    if (parent->mutex && parent->mutex != mutex)
+        apr_thread_mutex_unlock(parent->mutex);
+#endif
+
+    return 0;
+}
+
+#else
 static int pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent)
 {
     apr_pool_t *child;
-   
+
     if (parent == NULL)
         return 0;
 
     child = parent->child;
 
     while (child) {
-        if (pool == child || pool_is_child_of(pool, child))
+        if (pool == child || pool_is_child_of(pool, child)) {
             return 1;
-        
+        }
+ 
         child = child->sibling;
     }
 
     return 0;
 }
+#endif
 
 static void check_integrity(apr_pool_t *pool)
 {
     if (pool == global_pool || global_pool == NULL)
         return;
 
+#if APR_HAS_THREADS    
+    if (!pool_is_child_of(pool, global_pool, NULL))
+#else
     if (!pool_is_child_of(pool, global_pool))
+#endif
     {
 #if defined(APR_POOL_DEBUG_VERBOSE)
         if (file_stderr) {
