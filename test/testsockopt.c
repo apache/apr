@@ -91,7 +91,7 @@ static void set_debug(CuTest *tc)
      * for get/set consistency of this option. */
     rv1 = apr_socket_opt_set(sock, APR_SO_DEBUG, 1);
     rv2 = apr_socket_opt_get(sock, APR_SO_DEBUG, &ck);
-    CuAssertSuccess(tc, "get SO_DEBUG option", rv2);
+    apr_assert_success(tc, "get SO_DEBUG option", rv2);
     if (APR_STATUS_IS_SUCCESS(rv1)) {
         CuAssertIntEquals(tc, 1, ck);
     } else {
