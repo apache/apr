@@ -196,11 +196,8 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
 APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr, 
                                const char *dir) 
 {
-    attr->currdir = apr_pstrdup(attr->pool, dir);
-    if (attr->currdir) {
-        return APR_SUCCESS;
-    }
-    return APR_ENOMEM;
+    return apr_filepath_merge(&attr->currdir, NULL, dir, 
+                              APR_FILEPATH_NATIVE, attr->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
@@ -305,6 +302,17 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     newproc->err = attr->parent_err;
 
     addr_space = (attr->detached ? 0 : PROC_CURRENT_SPACE) | PROC_LOAD_SILENT;
+
+    if (attr->currdir) {
+        char *fullpath = NULL;
+        apr_status_t rv;
+
+        if ((rv = apr_filepath_merge(&fullpath, attr->currdir, progname, 
+                                     APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
+            return rv;
+        }
+        progname = fullpath;
+    } 
 
     if ((newproc->pid = procve(progname, addr_space, (const char**)env, &wire, 
         NULL, NULL, 0, NULL, (const char **)args)) == 0) {
