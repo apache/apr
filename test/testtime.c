@@ -279,7 +279,7 @@ static void test_2038(abts_case *tc, void *data)
     xt.tm_min = 14;
     xt.tm_sec = 7;
     
-    apr_assert_success(tc, "explode January 19th, 2038",
+    APR_ASSERT_SUCCESS(tc, "explode January 19th, 2038",
                        apr_time_exp_get(&t, &xt));
 }
 

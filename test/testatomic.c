@@ -35,7 +35,7 @@
 
 static void test_init(abts_case *tc, void *data)
 {
-    apr_assert_success(tc, "Could not initliaze atomics", apr_atomic_init(p));
+    APR_ASSERT_SUCCESS(tc, "Could not initliaze atomics", apr_atomic_init(p));
 }
 
 static void test_set32(abts_case *tc, void *data)
@@ -242,7 +242,7 @@ static void test_atomics_threaded(abts_case *tc, void *data)
 #endif
 
     rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, p);
-    apr_assert_success(tc, "Could not create lock", rv);
+    APR_ASSERT_SUCCESS(tc, "Could not create lock", rv);
 
     for (i = 0; i < NUM_THREADS; i++) {
         apr_status_t r1, r2, r3;

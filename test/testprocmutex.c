@@ -99,7 +99,7 @@ static void test_exclusive(abts_case *tc, const char *lockname)
     int n;
  
     rv = apr_proc_mutex_create(&proc_lock, lockname, APR_LOCK_DEFAULT, p);
-    apr_assert_success(tc, "create the mutex", rv);
+    APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
  
     for (n = 0; n < CHILDREN; n++)
         make_child(tc, &child[n], p);
@@ -125,7 +125,7 @@ static void proc_mutex(abts_case *tc, void *data)
         rv = apr_shm_create(&shm, sizeof(int), shmname, p);
     }
 
-    apr_assert_success(tc, "create shm segment", rv);
+    APR_ASSERT_SUCCESS(tc, "create shm segment", rv);
 
     x = apr_shm_baseaddr_get(shm);
     test_exclusive(tc, NULL);

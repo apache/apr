@@ -24,7 +24,7 @@ static void uid_current(abts_case *tc, void *data)
     apr_uid_t uid;
     apr_gid_t gid;
 
-    apr_assert_success(tc, "apr_uid_current failed",
+    APR_ASSERT_SUCCESS(tc, "apr_uid_current failed",
                        apr_uid_current(&uid, &gid, p));
 }
 
@@ -36,17 +36,17 @@ static void username(abts_case *tc, void *data)
     apr_gid_t retreived_gid;
     char *uname = NULL;
 
-    apr_assert_success(tc, "apr_uid_current failed",
+    APR_ASSERT_SUCCESS(tc, "apr_uid_current failed",
                        apr_uid_current(&uid, &gid, p));
    
-    apr_assert_success(tc, "apr_uid_name_get failed",
+    APR_ASSERT_SUCCESS(tc, "apr_uid_name_get failed",
                        apr_uid_name_get(&uname, uid, p));
     ABTS_PTR_NOTNULL(tc, uname);
 
-    apr_assert_success(tc, "apr_uid_get failed",
+    APR_ASSERT_SUCCESS(tc, "apr_uid_get failed",
                        apr_uid_get(&retreived_uid, &retreived_gid, uname, p));
 
-    apr_assert_success(tc, "apr_uid_compare failed",
+    APR_ASSERT_SUCCESS(tc, "apr_uid_compare failed",
                        apr_uid_compare(uid, retreived_uid));
 #ifdef WIN32
     /* ### this fudge was added for Win32 but makes the test return NotImpl
@@ -65,7 +65,7 @@ static void username(abts_case *tc, void *data)
     }
     else {
 #endif
-        apr_assert_success(tc, "apr_gid_compare failed",
+        APR_ASSERT_SUCCESS(tc, "apr_gid_compare failed",
                            apr_gid_compare(gid, retreived_gid));
 #ifdef WIN32
     }
@@ -79,17 +79,17 @@ static void groupname(abts_case *tc, void *data)
     apr_gid_t retreived_gid;
     char *gname = NULL;
 
-    apr_assert_success(tc, "apr_uid_current failed",
+    APR_ASSERT_SUCCESS(tc, "apr_uid_current failed",
                        apr_uid_current(&uid, &gid, p));
 
-    apr_assert_success(tc, "apr_gid_name_get failed",
+    APR_ASSERT_SUCCESS(tc, "apr_gid_name_get failed",
                        apr_gid_name_get(&gname, gid, p));
     ABTS_PTR_NOTNULL(tc, gname);
 
-    apr_assert_success(tc, "apr_gid_get failed",
+    APR_ASSERT_SUCCESS(tc, "apr_gid_get failed",
                        apr_gid_get(&retreived_gid, gname, p));
 
-    apr_assert_success(tc, "apr_gid_compare failed",
+    APR_ASSERT_SUCCESS(tc, "apr_gid_compare failed",
                        apr_gid_compare(gid, retreived_gid));
 }
 #else
