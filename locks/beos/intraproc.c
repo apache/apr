@@ -52,9 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+#include "unix/apr_private.h"
 #include "beos/locks.h"
 
-apr_status_t lock_intra_cleanup(void *data)
+static apr_status_t lock_intra_cleanup(void *data)
 {
     apr_lock_t *lock = (apr_lock_t *)data;
     if (lock->ben_intraproc != 0) {
@@ -76,7 +77,7 @@ apr_status_t create_intra_lock(apr_lock_t *new)
     }
     new->ben_intraproc = 0;
     new->sem_intraproc = stat;
-    apr_pool_cleanup_register(new->cntxt, (void *)new, lock_intra_cleanup,
+    APR_REGISTER_CLEANUP(new, (void *)new, lock_intra_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
@@ -111,7 +112,7 @@ apr_status_t destroy_intra_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_intra_cleanup(lock)) == APR_SUCCESS) {
-        apr_pool_cleanup_kill(lock->cntxt, lock, lock_intra_cleanup);
+        APR_REMOVE_CLEANUP(lock, lock, lock_intra_cleanup);
         return APR_SUCCESS;
     }
     return stat;
