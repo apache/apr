@@ -105,13 +105,20 @@ APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
 }
 #define APR_OVERRIDE_ATOMIC_CAS32
 
-APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+static apr_uint32_t inline intel_atomic_add32(volatile apr_uint32_t *mem, 
+                                              apr_uint32_t val)
 {
     asm volatile ("lock; xaddl %1, (%2)"                              
                   : "=r"(val)          /* output, same as 1st input */
                   : "0"(val), "r"(mem) /* inputs */
                   : "%1","memory");    /* tell gcc they are clobbered */
     return val;
+}
+
+APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, 
+                                           apr_uint32_t val)
+{
+    return intel_atomic_add32(mem, val);
 }
 #define APR_OVERRIDE_ATOMIC_ADD32
 
@@ -141,13 +148,7 @@ APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
 
 APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
 {
-    apr_uint32_t val = 1;
-
-    asm volatile ("lock; xaddl %1, (%2)"                              
-                  : "=r"(val)          /* output, same as 1st input */
-                  : "0"(val), "r"(mem) /* inputs */
-                  : "%1","memory");    /* tell gcc they are clobbered */
-    return val;
+    return intel_atomic_add32(mem, 1);
 }
 #define APR_OVERRIDE_ATOMIC_INC32
 
