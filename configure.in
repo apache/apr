@@ -936,6 +936,7 @@ APR_CHECK_DEFINE_FILES(POLLIN, poll.h sys/poll.h)
 
 if test "$threads" = "1"; then
     APR_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
+    AC_CHECK_FUNCS(pthread_mutexattr_setpshared)
 fi
 
 # See which lock mechanisms we can support on this system.
@@ -946,7 +947,7 @@ hasprocpthreadser="0"
 APR_IFALLYES(func:semget func:semctl, hassysvser="1")
 APR_IFALLYES(func:flock define:LOCK_EX, hasflockser="1")
 APR_IFALLYES(header:fcntl.h define:F_SETLK, hasfcntlser="1")
-APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED, hasprocpthreadser="1")
+APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED func:pthread_mutexattr_setpshared, hasprocpthreadser="1")
 
 # See which lock mechanism we'll select by default on this system.
 # The last APR_DECIDE to execute sets the default
@@ -958,7 +959,7 @@ APR_IFALLYES(func:flock define:LOCK_EX,
 APR_IFALLYES(header:fcntl.h define:F_SETLK,
             APR_DECIDE(USE_FCNTL_SERIALIZE, [SVR4-style fcntl()]))
 APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
-            custom:with_pthread_cross,
+            func:pthread_mutexattr_setpshared custom:with_pthread_cross,
             APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)
