@@ -52,6 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_private.h"
+#ifdef HAVE_NETINET_TCP_H
+#include "../unix/sendrecv.c"
+#else
 #include "networkio.h"
 
 static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
@@ -143,4 +147,4 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     (*len) = rv;
     return APR_SUCCESS;
 }
-
+#endif

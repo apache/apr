@@ -52,6 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_private.h"
+#ifdef HAVE_NETINET_TCP_H
+#include "../unix/sockaddr.c"
+#else
 #include "networkio.h"
 
 ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
@@ -176,3 +180,4 @@ ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *soc
     *name = sock->remote_addr;
     return APR_SUCCESS;
 }
+#endif

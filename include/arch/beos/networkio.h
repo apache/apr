@@ -52,8 +52,13 @@
  * <http://www.apache.org/>.
  */
 
+#ifdef HAVE_NETINET_TCP_H
+#include "../unix/network_io.h"
+#else
+
 #ifndef NETWORK_IO_H
 #define NETWORK_IO_H
+
 
 #include <socket.h>
 #include <netdb.h>
@@ -109,4 +114,4 @@ ap_int16_t get_event(ap_int16_t);
 int inet_aton(const char *cp, struct in_addr *addr);
 
 #endif  /* ! NETWORK_IO_H */
-
+#endif
