@@ -86,7 +86,13 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     char volume[MAX_VOLUME_NAME+1];
     char path[MAX_PATH_NAME+1];
     char file[MAX_FILE_NAME+1];
+    char *volsep = NULL;
     int elements;
+
+    if (inpath && *inpath)
+        volsep = strchr (*inpath, ':');
+    else
+        return APR_EBADPATH;
 
     seperator[0] = (flags & APR_FILEPATH_NATIVE) ? '\\' : '/';
 
@@ -94,39 +100,44 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
     */
     server[0] = volume[0] = path[0] = file[0] = '\0';
 
-    /* Split the inpath into its separate parts. If it fails then
-        we know we have a bad path.
+    /* If we don't have a volume separator then don't bother deconstructing
+        the path since we won't use the deconstructed information anyway.
     */
-    if (deconstruct(testpath, server, volume, path, file, NULL, &elements, PATH_UNDEF)) {
-        if (errno == EINVAL)
-            return APR_EBADPATH;
-    }
+    if (volsep) {
+        /* Split the inpath into its separate parts. If it fails then
+            we know we have a bad path.
+        */
+        if (deconstruct(testpath, server, volume, path, file, NULL, &elements, PATH_UNDEF)) {
+            if (errno == EINVAL)
+                return APR_EBADPATH;
+        }
     
-    /* If we got a volume part then continue splitting out the root.
-        Otherwise we either have an incomplete or relative path
-    */
-    if (volume && strlen(volume) > 0) {
-        newpath = apr_pcalloc(p, strlen(server)+strlen(volume)+5);
-        construct(newpath, server, volume, NULL, NULL, NULL, PATH_NETWARE);
-
-        /* NetWare doesn't add the root slash so we need to add it manually.
+        /* If we got a volume part then continue splitting out the root.
+            Otherwise we either have an incomplete or relative path
         */
-        strcat(newpath, seperator);
-        *rootpath = newpath;
+        if (volume && strlen(volume) > 0) {
+            newpath = apr_pcalloc(p, strlen(server)+strlen(volume)+5);
+            construct(newpath, server, volume, NULL, NULL, NULL, PATH_NETWARE);
 
-        /* Skip the inpath pointer down to the first non-root character
-        */
-        newpath = strchr (*inpath, ':');
-        if (newpath) {
+            /* NetWare doesn't add the root slash so we need to add it manually.
+            */
+            strcat(newpath, seperator);
+            *rootpath = newpath;
+
+            /* Skip the inpath pointer down to the first non-root character
+            */
+            newpath = volsep;
             do {
                 ++newpath;
             } while (*newpath && ((*newpath == '/') || (*newpath == '\\')));
             *inpath = newpath;
+
+            /* Need to handle APR_FILEPATH_TRUENAME checking here. */
+
+            return APR_SUCCESS;
         }
-
-/* Need to handle APR_FILEPATH_TRUENAME checking here. */
-
-        return APR_SUCCESS;
+        else
+            return APR_EBADPATH;
     }
     else if ((**inpath == '/') || (**inpath == '\\')) {
         /* if we have a root path without a volume then just split
