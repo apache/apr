@@ -56,6 +56,7 @@
 #include "apr_strings.h"
 #include "apr_private.h"
 #include "fileio.h"
+#include "i18n.h"
 
 #if APR_HAS_DSO
 
@@ -86,7 +87,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
 {
     HINSTANCE os_handle;
     apr_status_t rv;
+#ifndef _WIN32_WCE
     UINT em;
+#endif
 
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE 
@@ -99,15 +102,19 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
             return ((*res_handle)->load_error = rv);
         }
         /* Prevent ugly popups from killing our app */
+#ifndef _WIN32_WCE
         em = SetErrorMode(SEM_FAILCRITICALERRORS);
+#endif
         os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
         if (!os_handle)
             os_handle = LoadLibraryExW(wpath, NULL, 0);
         if (!os_handle)
             rv = apr_get_os_error();
+#ifndef _WIN32_WCE
         SetErrorMode(em);
-    }
 #endif
+    }
+#endif /* APR_HAS_UNICODE_FS */
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
     {
@@ -134,6 +141,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
         SetErrorMode(em);
     }
 #endif
+
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
     (*res_handle)->cont = ctx;
 
@@ -158,8 +166,24 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
                          struct apr_dso_handle_t *handle, 
                          const char *symname)
 {
-    *ressym = (apr_dso_handle_sym_t)GetProcAddress(handle->handle, symname);
+#ifdef _WIN32_WCE
+    apr_size_t symlen = strlen(symname) + 1;
+    apr_size_t wsymlen = 256;
+    apr_wchar_t wsymname[256];
+    apr_status_t rv;
 
+    rv = apr_conv_utf8_to_ucs2(wsymname, &wsymlen, symname, &symlen);
+    if (rv != APR_SUCCESS) {
+        return rv;
+    }
+    else if (symlen) {
+        return APR_ENAMETOOLONG;
+    }
+
+    *ressym = (apr_dso_handle_sym_t)GetProcAddressW(handle->handle, wsymname);
+#else
+    *ressym = (apr_dso_handle_sym_t)GetProcAddress(handle->handle, symname);
+#endif
     if (!*ressym) {
         return apr_get_os_error();
     }
