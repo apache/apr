@@ -77,12 +77,6 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_destroy_context(ap_pool_t *cont)
-{
-    ap_destroy_pool(cont);
-    return APR_SUCCESS;
-}
-
 ap_status_t ap_set_userdata(void *data, char *key,
                             ap_status_t (*cleanup) (void *),
                             ap_pool_t *cont)
