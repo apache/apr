@@ -150,7 +150,7 @@ typedef struct apr_pool_t apr_pool_t;
  *                                    combination with the verbose flag above,
  *                                    it will output OWNER in such an event
  *                                    prior to aborting.  Use the debug
- *                                    function apr_pool_set_owner() to switch
+ *                                    function apr_pool_owner_set() to switch
  *                                    a pools ownership.
  *
  * When no debug level was specified, assume general debug mode.
