@@ -36,11 +36,11 @@
 #include <string.h>
 #include "misc.h"
 
-int opterr = 1,                      /* if error message should be printed */
-    optind = 1,                      /* index into parent argv vector */
-    optopt,                          /* character checked for validity */
-    optreset;                        /* reset getopt */
-char *optarg = "";                        /* argument associated with option */
+int ap_opterr = 1,                      /* if error message should be printed */
+    ap_optind = 1,                      /* index into parent argv vector */
+    ap_optopt,                          /* character checked for validity */
+    ap_optreset;                        /* reset getopt */
+char *ap_optarg = "";                   /* argument associated with option */
 
 #define EMSG    ""
 
@@ -70,73 +70,73 @@ ap_status_t ap_getopt(struct context_t *cont, ap_int32_t nargc,
     static char *place = EMSG;   /* option letter processing */
     char *oli;                   /* option letter list index */
 
-    if (optreset || !*place) {   /* update scanning pointer */
-        optreset = 0;
-        if (optind >= nargc || *(place = nargv[optind]) != '-') {
+    if (ap_optreset || !*place) {   /* update scanning pointer */
+        ap_optreset = 0;
+        if (ap_optind >= nargc || *(place = nargv[ap_optind]) != '-') {
             place = EMSG;
-            *rv = optopt;
+            *rv = ap_optopt;
             return (APR_EOF);
         }
         if (place[1] && *++place == '-') {        /* found "--" */
-            ++optind;
+            ++ap_optind;
             place = EMSG;
-            *rv = optopt;
+            *rv = ap_optopt;
             return (APR_EOF);
         }
     }                                /* option letter okay? */
-    if ((optopt = (int) *place++) == (int) ':' ||
-        !(oli = strchr(ostr, optopt))) {
+    if ((ap_optopt = (int) *place++) == (int) ':' ||
+        !(oli = strchr(ostr, ap_optopt))) {
         /*
          * if the user didn't specify '-' as an option,
          * assume it means -1.
          */
-        if (optopt == (int) '-')
-            *rv = optopt;
+        if (ap_optopt == (int) '-')
+            *rv = ap_optopt;
             return (APR_EOF);
         if (!*place)
-            ++optind;
-        if (opterr && *ostr != ':') {
+            ++ap_optind;
+        if (ap_opterr && *ostr != ':') {
             if (!(p = strrchr(*nargv, '/')))
                 p = *nargv;
             else
                 ++p;
             (void) fprintf(stderr,
-                           "%s: illegal option -- %c\n", p, optopt);
+                           "%s: illegal option -- %c\n", p, ap_optopt);
         }
-        *rv = optopt;
+        *rv = ap_optopt;
         return APR_BADCH;
     }
     if (*++oli != ':') {        /* don't need argument */
-        optarg = NULL;
+        ap_optarg = NULL;
         if (!*place)
-            ++optind;
+            ++ap_optind;
     }
     else {                        /* need an argument */
         if (*place)                /* no white space */
-            optarg = place;
-        else if (nargc <= ++optind) {        /* no arg */
+            ap_optarg = place;
+        else if (nargc <= ++ap_optind) {        /* no arg */
             place = EMSG;
             if (*ostr == ':')
-                *rv = optopt;
+                *rv = ap_optopt;
                 return (APR_BADARG);
-            if (opterr) {
+            if (ap_opterr) {
                 if (!(p = strrchr(*nargv, '/')))
                     p = *nargv;
                 else
                     ++p;
                 (void) fprintf(stderr,
                                "%s: option requires an argument -- %c\n",
-                               p, optopt);
+                               p, ap_optopt);
             }
-            *rv = optopt;
+            *rv = ap_optopt;
             return (APR_BADCH);
         }
         else                        /* white space */
-            optarg = nargv[optind];
+            ap_optarg = nargv[ap_optind];
         place = EMSG;
-        ++optind;
+        ++ap_optind;
     }
-    *rv = optopt;
+    *rv = ap_optopt;
     return APR_SUCCESS;
 }
 

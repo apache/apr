@@ -57,12 +57,11 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_getopt.h"
 #include <stdio.h>
 #ifdef BEOS
 #include <unistd.h>
 #endif
-
-API_VAR_IMPORT char *optarg;                        /* argument associated with option */
 
 int main(int argc, char * const argv[])
 {
@@ -78,12 +77,12 @@ int main(int argc, char * const argv[])
                 printf("option %c\n", data);
                 break;
             case 'c':
-                printf("option %c with %s\n", data, optarg);
+                printf("option %c with %s\n", data, ap_optarg);
                 break;
             case 'd':
                 printf("option %c", data);
                 if (optarg) {
-                    printf(" with %s\n", optarg);
+                    printf(" with %s\n", ap_optarg);
                 }
                 else {
                     printf("\n");

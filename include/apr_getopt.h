@@ -56,24 +56,16 @@
 #ifndef APR_GETOPT_H
 #define APR_GETOPT_H
 
-/* Rename all interfaces to prevent a name clash with system libraries */
-#define opterr   apr_opterr
-#define optind   apr_optind
-#define optopt   apr_optopt
-#define optreset apr_optreset
-#define optarg   apr_optarg
-#define getopt   apr_getopt
+API_VAR_IMPORT int
+    ap_opterr,                          /* if error message should be printed */
+    ap_optind,                          /* index into parent argv vector */
+    ap_optopt,                          /* character checked for validity */
+    ap_optreset;                        /* reset getopt */
+API_VAR_IMPORT char *
+    ap_optarg;                          /* argument associated with option */
 
-extern int
-    opterr,                          /* if error message should be printed */
-    optind,                          /* index into parent argv vector */
-    optopt,                          /* character checked for validity */
-    optreset;                        /* reset getopt */
-extern char *
-    optarg;                          /* argument associated with option */
-
-extern int
-    getopt(int _argc, char *const _argv[], const char *_opts);
+ap_status_t ap_getopt(ap_context_t *, ap_int32_t, char *const *, const char *,
+                      ap_int32_t *);
 
 #endif  /* ! APR_GETOPT_H */
 
