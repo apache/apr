@@ -54,9 +54,9 @@
 
 #include "apr_arch_file_io.h"
 
-static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
+static apr_status_t setptr(apr_file_t *thefile, apr_off_t pos )
 {
-    long newbufpos;
+    apr_off_t newbufpos;
     int rc;
 
     if (thefile->direction == 1) {
@@ -70,7 +70,11 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
         rc = 0;
     } 
     else {
+#if defined(NETWARE) && APR_HAS_LARGE_FILES
+        rc = lseek64(thefile->filedes, pos, SEEK_SET);
+#else 
         rc = lseek(thefile->filedes, pos, SEEK_SET);
+#endif
 
         if (rc != -1 ) {
             thefile->bufpos = thefile->dataRead = 0;
@@ -117,7 +121,11 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
     }
     else {
 
+#if defined(NETWARE) && APR_HAS_LARGE_FILES
+        rv = lseek64(thefile->filedes, *offset, where);
+#else 
         rv = lseek(thefile->filedes, *offset, where);
+#endif
         if (rv == -1) {
             *offset = -1;
             return errno;
@@ -131,7 +139,11 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
 
 apr_status_t apr_file_trunc(apr_file_t *fp, apr_off_t offset)
 {
+#if defined(NETWARE) && APR_HAS_LARGE_FILES
+    if (ftruncate64(fp->filedes, offset) == -1) {
+#else 
     if (ftruncate(fp->filedes, offset) == -1) {
+#endif
         return errno;
     }
     return setptr(fp, offset);
