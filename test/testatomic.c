@@ -83,7 +83,6 @@ static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
         return APR_EGENERAL;
     }
     printf("OK\n");
-    printf("debug\n y=%d\n",y);
     printf("%-60s", "testing CAS - match non-null");
     oldval = apr_atomic_cas(&y,23,12);
     if (oldval != 12) {
