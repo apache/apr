@@ -18,8 +18,6 @@ PROGRAMS = \
 	testud@EXEEXT@ \
 	testmmap@EXEEXT@ \
 	testshm@EXEEXT@ \
-	testshmproducer@EXEEXT@ \
-	testshmconsumer@EXEEXT@ \
 	testpipe@EXEEXT@ \
 	testoc@EXEEXT@ \
 	testuuid@EXEEXT@ \
@@ -36,7 +34,9 @@ PROGRAMS = \
 	testvsn@EXEEXT@ \
 	testsleep@EXEEXT@ \
 	testrand@EXEEXT@ \
-	testdup@EXEEXT@
+	testdup@EXEEXT@ \
+	testpools@EXEEXT@
+
 
 TARGETS = $(PROGRAMS)
 
@@ -115,14 +115,8 @@ testtime@EXEEXT@: testtime.lo $(LOCAL_LIBS)
 testmmap@EXEEXT@: testmmap.lo $(LOCAL_LIBS)
 	$(LINK) testmmap.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testshm@EXEEXT@: testshm.lo $(LOCAL_LIBS) testshmproducer@EXEEXT@ testshmconsumer@EXEEXT@
+testshm@EXEEXT@: testshm.lo $(LOCAL_LIBS)
 	$(LINK) testshm.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testshmproducer@EXEEXT@: testshmproducer.lo $(LOCAL_LIBS)
-	$(LINK) testshmproducer.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
-	$(LINK) testshmconsumer.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testpipe@EXEEXT@: testpipe.lo $(LOCAL_LIBS)
 	$(LINK) testpipe.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -169,7 +163,7 @@ testdup@EXEEXT@: testdup.lo $(LOCAL_LIBS)
 testrand@EXEEXT@: testrand.lo $(LOCAL_LIBS)
 	$(LINK) testrand.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testshm@EXEEXT@: testshm.lo $(LOCAL_LIBS)
-	$(LINK) testshm.lo $(LOCAL_LIBS) $(ALL_LIBS)
+testpools@EXEEXT@: testpools.lo $(LOCAL_LIBS)
+	$(LINK) testpools.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
