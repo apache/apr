@@ -23,7 +23,7 @@ fi
 # libtool 1.3.3 or newer
 libtool=`build/PrintPath glibtool libtool`
 lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
-if test "$lt_pversion" = ""; then
+if test -z "$lt_pversion"; then
 echo "buildconf: libtool not found."
 echo "           You need libtool version 1.3 or newer installed"
 echo "           to build Apache from CVS."
@@ -31,14 +31,25 @@ exit 1
 fi
 lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
 IFS=.; set $lt_version; IFS=' '
-if test "$1" -gt "1" || test "$2" -gt "3" || test "$2" = "3" -a "$3" -ge "3" || test "$2" = "3" -a "$3" -ge "b"
-then
-echo "buildconf: libtool version $lt_pversion (ok)"
-else
+lt_status="good"
+if test "$1" = "1"; then
+   if test "$2" -lt "3"; then
+      lt_status="bad"
+   else
+      if test "$2" = "3"; then
+         if test -z "$3" -o "$3" = "1" -o "$3" = "2"; then
+            lt_status="bad"
+         fi
+      fi
+   fi
+fi
+if test $lt_status = "good"; then
+   echo "buildconf: libtool version $lt_pversion (ok)"
+   exit 0
+fi
+
 echo "buildconf: libtool version $lt_pversion found."
 echo "           You need libtool version 1.3.3 or newer installed"
 echo "           to build Apache from CVS."
-exit 1
-fi
 
-exit 0
+exit 1
