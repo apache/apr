@@ -144,19 +144,11 @@ APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
 APR_DECLARE(void) apr_allocator_owner_set(apr_allocator_t *allocator,
                                           apr_pool_t *pool);
 
-/** @deprecated @see apr_allocator_owner_set */
-APR_DECLARE(void) apr_allocator_set_owner(apr_allocator_t *allocator,
-                                          apr_pool_t *pool);
-
 /**
  * Get the current owner of the allocator
  * @param allocator The allocator to get the owner from
  */
 APR_DECLARE(apr_pool_t *) apr_allocator_owner_get(apr_allocator_t *allocator);
-
-/** @deprecated @see apr_allocator_owner_get */
-APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(
-                                  apr_allocator_t *allocator);
 
 /**
  * Set the current threshold at which the allocator should start
@@ -165,10 +157,6 @@ APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(
  * @param size The threshold.  0 == unlimited.
  */
 APR_DECLARE(void) apr_allocator_max_free_set(apr_allocator_t *allocator,
-                                             apr_size_t size);
-
-/** @deprecated @see apr_allocator_max_free_set */
-APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
                                              apr_size_t size);
 
 #include "apr_thread_mutex.h"
@@ -182,19 +170,11 @@ APR_DECLARE(void) apr_allocator_set_max_free(apr_allocator_t *allocator,
 APR_DECLARE(void) apr_allocator_mutex_set(apr_allocator_t *allocator,
                                           apr_thread_mutex_t *mutex);
 
-/** @deprecated @see apr_allocator_mutex_set */
-APR_DECLARE(void) apr_allocator_set_mutex(apr_allocator_t *allocator,
-                                          apr_thread_mutex_t *mutex);
-
 /**
  * Get the mutex currently set for the allocator
  * @param allocator The allocator
  */
 APR_DECLARE(apr_thread_mutex_t *) apr_allocator_mutex_get(
-                                      apr_allocator_t *allocator);
-
-/** @deprecated @see apr_allocator_mutex_get */
-APR_DECLARE(apr_thread_mutex_t *) apr_allocator_get_mutex(
                                       apr_allocator_t *allocator);
 
 #endif /* APR_HAS_THREADS */

@@ -275,17 +275,6 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
 #endif
 #endif
 
-/** @deprecated @see apr_pool_create_ex */
-#if APR_POOL_DEBUG
-#define apr_pool_sub_make(newpool, parent, abort_fn) \
-    (void)apr_pool_create_ex_debug(newpool, parent, abort_fn, \
-                                   NULL, \
-                                   APR_POOL__FILE_LINE__)
-#else
-#define apr_pool_sub_make(newpool, parent, abort_fn) \
-    (void)apr_pool_create_ex(newpool, parent, abort_fn, NULL)
-#endif
-
 /**
  * Find the pools allocator
  * @param pool The pool to get the allocator from.
@@ -425,10 +414,6 @@ APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *p, apr_size_t size,
 APR_DECLARE(void) apr_pool_abort_set(apr_abortfunc_t abortfunc,
                                      apr_pool_t *pool);
 
-/** @deprecated @see apr_pool_abort_set */
-APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
-                                     apr_pool_t *pool);
-
 /**
  * Get the abort function associated with the specified pool.
  * @param pool The pool for retrieving the abort function.
@@ -436,18 +421,12 @@ APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
  */
 APR_DECLARE(apr_abortfunc_t) apr_pool_abort_get(apr_pool_t *pool);
 
-/** @deprecated @see apr_pool_abort_get */
-APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
-
 /**
  * Get the parent pool of the specified pool.
  * @param pool The pool for retrieving the parent pool.
  * @return The parent of the given pool.
  */
 APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool);
-
-/** @deprecated @see apr_pool_parent_get */
-APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
 
 /**
  * Determine if pool a is an ancestor of pool b

@@ -3,10 +3,19 @@ Changes with APR 1.0
   *) The following deprecated interfaces have been removed:
 
      apr_accept                   -> apr_socket_accept
+     apr_allocator_get_mutex      -> apr_allocator_mutex_get
+     apr_allocator_get_owner      -> apr_allocator_owner_get
+     apr_allocator_set_max_free   -> apr_allocator_max_free_set
+     apr_allocator_set_mutex      -> apr_allocator_mutex_set
+     apr_allocator_set_owner      -> apr_allocator_owner_set
      apr_bind                     -> apr_socket_bind
      apr_connect                  -> apr_socket_connect
      apr_getsocketopt             -> apr_socket_opt_get
      apr_listen                   -> apr_socket_listen
+     apr_pool_get_abort           -> apr_pool_abort_get
+     apr_pool_get_parent          -> apr_pool_parent_get
+     apr_pool_set_abort           -> apr_pool_abort_set
+     apr_pool_sub_make            -> apr_pool_create_ex
      apr_recv                     -> apr_socket_recv
      apr_recvfrom                 -> apr_socket_recvfrom
      apr_send                     -> apr_socket_send
@@ -15,6 +24,7 @@ Changes with APR 1.0
      apr_sendv                    -> apr_socket_sendv
      apr_setsocketopt             -> apr_socket_opt_set
      apr_shutdown                 -> apr_socket_shutdown
+     apr_signal_get_description   -> apr_signal_description_get
      apr_socket_create_ex         -> apr_socket_create
      apr_socket_set_inherit       -> apr_socket_inherit_set
      apr_socket_unset_inherit     -> apr_socket_inherit_unset
