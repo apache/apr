@@ -83,8 +83,11 @@
 #define APR_POOL_DEBUG_VERBOSE  0x02
 #define APR_POOL_DEBUG_LIFETIME 0x04
 #define APR_POOL_DEBUG_OWNER    0x08
+#define APR_POOL_DEBUG_VERBOSE_ALLOC 0x10
 
- 
+#define APR_POOL_DEBUG_VERBOSE_ALL (APR_POOL_DEBUG_VERBOSE \
+                                    | APR_POOL_DEBUG_VERBOSE_ALLOC)
+
 /*
  * Magic numbers
  */
@@ -212,7 +215,7 @@ static allocator_t  global_allocator = {
 };
 #endif /* !APR_POOL_DEBUG */
 
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
 static apr_file_t *file_stderr = NULL;
 #endif
 
@@ -714,6 +717,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->user_data = NULL;
         pool->tag = NULL;
     }
+
 #ifdef NETWARE
     pool->owner_proc = (apr_os_proc_t)getnlmhandle();
 #endif
@@ -742,32 +746,6 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     *newpool = pool;
 
     return APR_SUCCESS;
-}
-
-/*
- * Pool creation/destruction stubs, for people who are running 
- * mixed release/debug enviroments.
- */
-
-APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
-                                       const char *file_line)
-{
-    apr_pool_clear(pool);
-}
-
-APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
-                                         const char *file_line)
-{
-    apr_pool_destroy(pool);
-}
-
-APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
-                                                   apr_pool_t *parent,
-                                                   apr_abortfunc_t abort_fn,
-                                                   apr_uint32_t flags,
-                                                   const char *file_line)
-{
-    return apr_pool_create_ex(newpool, parent, abort_fn, flags);
 }
 
 
@@ -881,7 +859,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *pool, const char *fmt, va_list ap)
 static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                                const char *file_line, int deref)
 {
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
     if (file_stderr) {
         if (deref) {
             apr_file_printf(file_stderr,
@@ -931,7 +909,7 @@ static void apr_pool_log_event(apr_pool_t *pool, const char *event,
                 file_line);
         }
     }
-#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
 }
 
 #if APR_HAS_THREADS
@@ -1049,7 +1027,7 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 
     apr_pools_initialized = 1;
 
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
     apr_file_open_stderr(&file_stderr, global_pool);
     if (file_stderr) {
         apr_file_printf(file_stderr,
@@ -1062,7 +1040,7 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 
         apr_pool_log_event(global_pool, "GLOBAL", __FILE__ ":apr_pool_initialize", 0);        
     }
-#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL) */
     
     return APR_SUCCESS;
 }
@@ -1077,7 +1055,7 @@ APR_DECLARE(void) apr_pool_terminate(void)
     apr_pool_destroy(global_pool); /* This will also destroy the mutex */
     global_pool = NULL;
 
-#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
     file_stderr = NULL;
 #endif
 }
@@ -1087,12 +1065,10 @@ APR_DECLARE(void) apr_pool_terminate(void)
  * Memory allocation (debug)
  */
 
-APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
+static void *pool_alloc(apr_pool_t *pool, apr_size_t size)
 {
     debug_node_t *node;
     void *mem;
-
-    apr_pool_check_integrity(pool);
     
     if ((mem = malloc(size)) == NULL) {
         if (pool->abort_fn)
@@ -1127,14 +1103,35 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
     return mem;
 }
 
-APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
+APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *pool, apr_size_t size,
+                                     const char *file_line)
+{
+    void *mem;
+
+    apr_pool_check_integrity(pool);
+
+    mem = pool_alloc(pool, size);
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALLOC)
+    apr_pool_log_event(pool, "PALLOC", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALLOC) */
+
+    return mem;
+}
+    
+APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *pool, apr_size_t size,
+                                      const char *file_line)
 {
     void *mem;
 
     apr_pool_check_integrity(pool);
     
-    mem = apr_palloc(pool, size);
+    mem = pool_alloc(pool, size);
     memset(mem, 0, size);
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALLOC)
+    apr_pool_log_event(pool, "PCALLOC", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALLOC) */
 
     return mem;
 }
@@ -1184,7 +1181,10 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
                                        const char *file_line)
 {
     apr_pool_check_integrity(pool);
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CLEAR", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
     pool_clear_debug(pool, file_line);
 }
@@ -1193,7 +1193,10 @@ APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
                                          const char *file_line)
 {
     apr_pool_check_integrity(pool);
+
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "DESTROY", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
     
     pool_clear_debug(pool, file_line);
 
@@ -1306,48 +1309,11 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 
     *newpool = pool;
 
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CREATE", file_line, 1);
+#endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
     return APR_SUCCESS;
-}
-
-/*
- * Pool creation/destruction stubs, for people who want 
- * APR_POOL_DEBUG, but didn't recompile their entire application.
- * The prototypes are here to keep compilers picky about
- * prototypes happy.
- */
-
-#undef apr_pool_clear
-APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool);
-
-APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
-{
-    apr_pool_clear_debug(pool, "<undefined>");
-}
-
-#undef apr_pool_destroy
-APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool);
-
-APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
-{
-    apr_pool_destroy_debug(pool, "<undefined>");
-}
-
-#undef apr_pool_create_ex
-APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
-                                             apr_pool_t *parent,
-                                             apr_abortfunc_t abort_fn,
-                                             apr_uint32_t flags);
-
-APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
-                                             apr_pool_t *parent,
-                                             apr_abortfunc_t abort_fn,
-                                             apr_uint32_t flags)
-{
-    return apr_pool_create_ex_debug(newpool, parent, 
-                                    abort_fn, flags,
-                                    "<undefined>");
 }
 
 
@@ -1907,3 +1873,95 @@ static void free_proc_chain(struct process_chain *procs)
     }
 #endif /* WIN32 */
 }
+
+
+/*
+ * Pool creation/destruction stubs, for people who are running 
+ * mixed release/debug enviroments.
+ */
+
+#if !APR_POOL_DEBUG
+APR_DECLARE(void *) apr_palloc_debug(apr_pool_t *pool, apr_size_t size,
+                                     const char *file_line)
+{
+    return apr_palloc(pool, size);
+}
+
+APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *pool, apr_size_t size,
+                                      const char *file_line)
+{
+    return apr_pcalloc(pool, size);
+}
+
+APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
+                                       const char *file_line)
+{
+    apr_pool_clear(pool);
+}
+
+APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
+                                         const char *file_line)
+{
+    apr_pool_destroy(pool);
+}
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
+                                                   apr_pool_t *parent,
+                                                   apr_abortfunc_t abort_fn,
+                                                   apr_uint32_t flags,
+                                                   const char *file_line)
+{
+    return apr_pool_create_ex(newpool, parent, abort_fn, flags);
+}
+
+#else /* APR_POOL_DEBUG */
+
+#undef apr_palloc
+APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size);
+
+APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
+{
+    return apr_palloc_debug(pool, size, "undefined");
+}
+
+#undef apr_pcalloc
+APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size);
+
+APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
+{
+    return apr_pcalloc_debug(pool, size, "undefined");
+}
+
+#undef apr_pool_clear
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool);
+
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
+{
+    apr_pool_clear_debug(pool, "undefined");
+}
+
+#undef apr_pool_destroy
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool);
+
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
+{
+    apr_pool_destroy_debug(pool, "undefined");
+}
+
+#undef apr_pool_create_ex
+APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_uint32_t flags);
+
+APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_uint32_t flags)
+{
+    return apr_pool_create_ex_debug(newpool, parent, 
+                                    abort_fn, flags,
+                                    "undefined");
+}
+
+#endif /* APR_POOL_DEBUG */
