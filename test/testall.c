@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
     CuSuiteListRunWithSummary(alltests);
     i = CuSuiteListDetails(alltests, output);
     printf("%s\n", output->buffer);
+
     return i > 0 ? 1 : 0;
 }
 

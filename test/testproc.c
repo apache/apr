@@ -188,6 +188,11 @@ static void test_file_redir(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertStrEquals(tc, TESTSTR, buf);
 
+
+    apr_file_close(testfile);
+    apr_file_close(testout);
+    apr_file_close(testerr);
+
     rv = apr_file_remove("data/stdin", p);;
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     rv = apr_file_remove("data/stdout", p);;
