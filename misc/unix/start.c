@@ -117,10 +117,9 @@ apr_status_t apr_initialize(void)
     int err;
 #endif
 
-    if (initialized) {
+    if (initialized++) {
         return APR_SUCCESS;
     }
-    initialized++;
 
 #if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
     apr_unix_setup_lock();
