@@ -117,7 +117,7 @@ NLM_VERSION		= 1,0,0
 #
 # If this is specified, it will override the default of 64K
 #
-NLM_STACK_SIZE	= 524288
+NLM_STACK_SIZE = 524288
 
 #
 # If this is specified it will be used by the link '-entry' directive
@@ -171,16 +171,21 @@ FILES_nlm_objs = \
 	$(OBJDIR)/cutest.o \
 	$(OBJDIR)/testall.o \
 	$(OBJDIR)/testargs.o \
+	$(OBJDIR)/testatomic.o \
 	$(OBJDIR)/testdir.o \
 	$(OBJDIR)/testdup.o \
 	$(OBJDIR)/testdso.o \
 	$(OBJDIR)/testenv.o \
+	$(OBJDIR)/testfilecopy.o \
 	$(OBJDIR)/testfileinfo.o \
 	$(OBJDIR)/testfile.o \
+	$(OBJDIR)/testflock.o \
 	$(OBJDIR)/testfmt.o \
 	$(OBJDIR)/testfnmatch.o \
+	$(OBJDIR)/testglobalmutex.o \
 	$(OBJDIR)/testhash.o \
 	$(OBJDIR)/testipsub.o \
+	$(OBJDIR)/testlfs.o \
 	$(OBJDIR)/testlock.o \
 	$(OBJDIR)/testmmap.o \
 	$(OBJDIR)/testnames.o \
@@ -191,10 +196,15 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testproc.o \
 	$(OBJDIR)/testprocmutex.o \
 	$(OBJDIR)/testrand.o \
+	$(OBJDIR)/testrand2.o \
+	$(OBJDIR)/testshm.o \
 	$(OBJDIR)/testsleep.o \
+	$(OBJDIR)/testsock.o \
 	$(OBJDIR)/testsockets.o \
 	$(OBJDIR)/testsockopt.o \
 	$(OBJDIR)/teststr.o \
+	$(OBJDIR)/teststrnatcmp.o \
+	$(OBJDIR)/testtemp.o \
 	$(OBJDIR)/testthread.o \
 	$(OBJDIR)/testtime.o \
 	$(OBJDIR)/testtable.o \
@@ -203,7 +213,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testvsn.o \
 	$(OBJDIR)/nw_misc.o \
 	$(OBJDIR)/testpipe.o \
-	$(EOLIST)
+	$(EOLIST) 
 
 # Pending tests
 	
