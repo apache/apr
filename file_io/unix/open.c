@@ -278,3 +278,17 @@ ap_status_t ap_eof(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_ferror(ap_file_t *) 
+ *    Is there an error on the stream?
+ * arg 1) The apr file we are testing.
+ * NOTE:  Returns -1 if the error indicator is set, APR_SUCCESS otherwise.
+ */
+ap_status_t ap_ferror(ap_file_t *fptr)
+{
+    if (ferror(fptr->filehand)) {
+        return (-1);
+    }
+
+    return APR_SUCCESS;
+}   

@@ -100,3 +100,87 @@ API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
 
     return (d);
 }
+
+
+/*
+ * This function provides a way to parse a generic argument string
+ * into a standard argv[] form of argument list. It respects the 
+ * usual "whitespace" and quoteing rules. In the future this could
+ * be expanded to include support for the ap_call_exec command line
+ * string processing (including converting '+' to ' ' and doing the 
+ * url processing. It does not currently support this function.
+ *
+ *    token_context: Context from which pool allocations will occur.
+ *    arg_str:       Input argument string for conversion to argv[].
+ *    argv_out:      Output location. This is a pointer to an array
+ *                   of pointers to strings (ie. &(char *argv[]).
+ *                   This value will be allocated from the contexts
+ *                   pool and filled in with copies of the tokens
+ *                   found during parsing of the arg_str. 
+ */
+API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
+                                    char *arg_str, char ***argv_out)
+{
+    char *cp, *tmpCnt;
+    int isquoted, numargs = 0, rc = APR_SUCCESS;
+
+#define SKIP_WHITESPACE(cp) \
+    for ( ; *cp == ' ' || *cp == '\t'; ) { \
+        cp++; \
+    };
+
+#define CHECK_QUOTATION(cp,isquoted) \
+    isquoted = 0; \
+    if (*cp == '"') { \
+        isquoted = 1; \
+        cp++; \
+    }
+
+#define DETERMINE_NEXTSTRING(cp,isquoted) \
+    for ( ; *cp != '\0'; cp++) { \
+        if (   (isquoted    && (*cp     == ' ' || *cp     == '\t')) \
+            || (*cp == '\\' && (*(cp+1) == ' ' || *(cp+1) == '\t'))) { \
+            cp++; \
+            continue; \
+        } \
+        if (   (!isquoted && (*cp == ' ' || *cp == '\t')) \
+            || (isquoted  && *cp == '"')                  ) { \
+            break; \
+        } \
+    }
+
+    cp = arg_str;
+    SKIP_WHITESPACE(cp);
+    tmpCnt = cp;
+
+    /* This is ugly and expensive, but if anyone wants to figure a
+     * way to support any number of args without counting and 
+     * allocating, please go ahead and change the code.
+     */
+    while (*tmpCnt != '\0') {
+        CHECK_QUOTATION(tmpCnt, isquoted);
+        DETERMINE_NEXTSTRING(tmpCnt, isquoted);
+        numargs++;
+        SKIP_WHITESPACE(tmpCnt);
+    }
+
+    *argv_out = ap_palloc(token_context, numargs*sizeof(char*));
+    if (*argv_out == NULL) {
+        return (APR_ENOMEM);
+    }
+
+    /*  determine first argument */
+    numargs = 0;
+    while (*cp != '\0') {
+        CHECK_QUOTATION(cp, isquoted);
+        tmpCnt = cp;
+        DETERMINE_NEXTSTRING(cp, isquoted);
+        *cp++ = '\0';
+        (*argv_out)[numargs] = ap_pstrdup(token_context, tmpCnt);
+
+        SKIP_WHITESPACE(cp);
+    }
+    *cp++ = '\0';
+
+    return(rc);
+}

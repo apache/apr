@@ -111,6 +111,7 @@ ap_status_t ap_open(ap_file_t **, ap_context_t *, const char *, ap_int32_t, ap_f
 ap_status_t ap_close(ap_file_t *);
 ap_status_t ap_remove_file(char *, ap_context_t *);
 ap_status_t ap_eof(ap_file_t *);
+ap_status_t ap_ferror(ap_file_t *);
 
 ap_status_t ap_read(ap_file_t *, void *, ap_ssize_t *);
 ap_status_t ap_write(ap_file_t *, void *, ap_ssize_t *);

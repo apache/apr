@@ -127,6 +127,93 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
     return APR_SUCCESS;
 }
 
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_setprocattr_childin(ap_procattr_t *, ap_file_t *,
+ *                                    ap_file_t *)
+ *    Set the child_in and/or parent_in values to existing ap_file_t
+ *    values. This is NOT a required initializer function. This is
+ *    useful if you have already opened a pipe (or multiple files)
+ *    that you wish to use, perhaps persistently across mutiple
+ *    process invocations - such as a log file. You can save some 
+ *    extra function calls by not creating your own pipe since this
+ *    creates one in the process space for you.
+ * arg 1) The procattr we care about. 
+ * arg 2) ap_file_t value to use as child_in. Must be a valid file.
+ * arg 3) ap_file_t value to use as parent_in. Must be a valid file.
+ */
+ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
+                                   ap_file_t *parent_in)
+{
+    if (attr->child_in == NULL && attr->parent_in == NULL)
+        ap_create_pipe(&attr->child_in, &attr->parent_in, attr->cntxt);
+
+    if (child_in != NULL)
+        ap_dupfile(&attr->child_in, child_in);
+
+    if (parent_in != NULL)
+        ap_dupfile(&attr->parent_in, parent_in);
+
+    return APR_SUCCESS;
+}
+
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_setprocattr_childout(ap_procattr_t *, ap_file_t *,
+ *                                     ap_file_t *)
+ *    Set the child_out and parent_out values to existing ap_file_t
+ *    values. This is NOT a required initializer function. This is
+ *    useful if you have already opened a pipe (or multiple files)
+ *    that you wish to use, perhaps persistently across mutiple
+ *    process invocations - such as a log file. 
+ * arg 1) The procattr we care about. 
+ * arg 2) ap_file_t value to use as child_out. Must be a valid file.
+ * arg 3) ap_file_t value to use as parent_out. Must be a valid file.
+ */
+ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_out,
+                                    ap_file_t *parent_out)
+{
+    if (attr->child_out == NULL && attr->parent_out == NULL)
+        ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
+
+    if (child_out != NULL)
+        ap_dupfile(&attr->child_out, child_out);
+
+    if (parent_out != NULL)
+        ap_dupfile(&attr->parent_out, parent_out);
+
+    return APR_SUCCESS;
+}
+
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_setprocattr_childerr(ap_procattr_t *, ap_file_t *,
+ *                                     ap_file_t *)
+ *    Set the child_err and parent_err values to existing ap_file_t
+ *    values. This is NOT a required initializer function. This is
+ *    useful if you have already opened a pipe (or multiple files)
+ *    that you wish to use, perhaps persistently across mutiple
+ *    process invocations - such as a log file. 
+ * arg 1) The procattr we care about. 
+ * arg 2) ap_file_t value to use as child_err. Must be a valid file.
+ * arg 3) ap_file_t value to use as parent_err. Must be a valid file.
+ */
+ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_err,
+                                   ap_file_t *parent_err)
+{
+    if (attr->child_err == NULL && attr->parent_err == NULL)
+        ap_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
+
+    if (child_err != NULL)
+        ap_dupfile(&attr->child_err, child_err);
+
+    if (parent_err != NULL)
+        ap_dupfile(&attr->parent_err, parent_err);
+
+    return APR_SUCCESS;
+}
+
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_setprocattr_dir(ap_procattr_t *, char *) 
  *    Set which directory the child process should start executing in. 
@@ -136,7 +223,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
  *        is made. 
  */
 ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
-                                 char *dir) 
+                               const char *dir) 
 {
     attr->currdir = ap_pstrdup(attr->cntxt, dir);
     if (attr->currdir) {
@@ -199,7 +286,7 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_process(ap_context_t *, char *, char *const [],
+ * ap_status_t ap_create_process(ap_context_t *, const char *, char *const [],
                                  char **, ap_procattr_t *, ap_proc_t **) 
  *    Create a new process and execute a new program within that process.
  * arg 1) The context to use. 
@@ -212,9 +299,9 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
  *        process
  * arg 6) The resulting process handle.
  */
-ap_status_t ap_create_process(ap_context_t *cont, char *progname, 
-                               char *const args[], char **env, 
-                               struct procattr_t *attr, struct proc_t **new)
+ap_status_t ap_create_process(struct proc_t **new, ap_context_t *cont, 
+                              const char *progname, char *const args[],
+                              char **env, struct procattr_t *attr)
 {
     int i;
     char **newargs;
