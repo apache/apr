@@ -846,7 +846,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
              */
             switch (*fmt) {
             case 'u':
-                    if (var_type == IS_QUAD) {
+                if (var_type == IS_QUAD) {
                     i_quad = va_arg(ap, u_widest_int);
                     s = conv_10_quad(i_quad, 1, &is_negative,
                             &num_buf[NUM_BUF_SIZE], &s_len);
@@ -866,7 +866,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 
             case 'd':
             case 'i':
-                    if (var_type == IS_QUAD) {
+                if (var_type == IS_QUAD) {
                     i_quad = va_arg(ap, widest_int);
                     s = conv_10_quad(i_quad, 0, &is_negative,
                             &num_buf[NUM_BUF_SIZE], &s_len);
@@ -964,7 +964,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                 /*
                  * We use &num_buf[ 1 ], so that we have room for the sign
                  */
-        s = NULL;
+                s = NULL;
 #ifdef HAVE_ISNAN
                 if (isnan(fp_num)) {
                     s = "nan";
@@ -977,7 +977,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                     s_len = 3;
                 }
 #endif
-            if (!s) {
+                if (!s) {
                     s = conv_fp(*fmt, fp_num, alternate_form,
                             (adjust_precision == NO) ? FLOAT_DIGITS : precision,
                                 &is_negative, &num_buf[1], &s_len);
@@ -1037,7 +1037,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 
 
             case 'n':
-                    if (var_type == IS_QUAD)
+                if (var_type == IS_QUAD)
                     *(va_arg(ap, widest_int *)) = cc;
                 else if (var_type == IS_LONG)
                     *(va_arg(ap, long *)) = cc;
@@ -1054,12 +1054,12 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                  */
             case 'p':
                 switch(*++fmt) {
-                    /*
-                     * If the pointer size is equal to or smaller than the size
-                     * of the largest unsigned int, we convert the pointer to a
-                     * hex number, otherwise we print "%p" to indicate that we
-                     * don't handle "%p".
-                     */
+                /*
+                 * If the pointer size is equal to or smaller than the size
+                 * of the largest unsigned int, we convert the pointer to a
+                 * hex number, otherwise we print "%p" to indicate that we
+                 * don't handle "%p".
+                 */
                 case 'p':
 #ifdef APR_VOID_P_IS_QUAD
                     if (sizeof(void *) <= sizeof(u_widest_int)) {
@@ -1082,43 +1082,43 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                     pad_char = ' ';
                     break;
 
-                    /* print an apr_sockaddr_t as a.b.c.d:port */
+                /* print an apr_sockaddr_t as a.b.c.d:port */
                 case 'I':
-                    {
-                        apr_sockaddr_t *sa;
+                {
+                    apr_sockaddr_t *sa;
 
-                        sa = va_arg(ap, apr_sockaddr_t *);
-                        if (sa != NULL) {
-                            s = conv_apr_sockaddr(sa, &num_buf[NUM_BUF_SIZE], &s_len);
-                            if (adjust_precision && precision < s_len)
-                                s_len = precision;
-                        }
-                        else {
-                            s = S_NULL;
-                            s_len = S_NULL_LEN;
-                        }
-                        pad_char = ' ';
+                    sa = va_arg(ap, apr_sockaddr_t *);
+                    if (sa != NULL) {
+                        s = conv_apr_sockaddr(sa, &num_buf[NUM_BUF_SIZE], &s_len);
+                        if (adjust_precision && precision < s_len)
+                            s_len = precision;
                     }
-                    break;
+                    else {
+                        s = S_NULL;
+                        s_len = S_NULL_LEN;
+                    }
+                    pad_char = ' ';
+                }
+                break;
 
-                    /* print a struct in_addr as a.b.c.d */
+                /* print a struct in_addr as a.b.c.d */
                 case 'A':
-                    {
-                        struct in_addr *ia;
+                {
+                    struct in_addr *ia;
 
-                        ia = va_arg(ap, struct in_addr *);
-                        if (ia != NULL) {
-                            s = conv_in_addr(ia, &num_buf[NUM_BUF_SIZE], &s_len);
-                            if (adjust_precision && precision < s_len)
-                                s_len = precision;
-                        }
-                        else {
-                            s = S_NULL;
-                            s_len = S_NULL_LEN;
-                        }
-                        pad_char = ' ';
+                    ia = va_arg(ap, struct in_addr *);
+                    if (ia != NULL) {
+                        s = conv_in_addr(ia, &num_buf[NUM_BUF_SIZE], &s_len);
+                        if (adjust_precision && precision < s_len)
+                            s_len = precision;
                     }
-                    break;
+                    else {
+                        s = S_NULL;
+                        s_len = S_NULL_LEN;
+                    }
+                    pad_char = ' ';
+                }
+                break;
 
                 case NUL:
                     /* if %p ends the string, oh well ignore it */
