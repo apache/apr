@@ -81,6 +81,16 @@ static int make_child(apr_proc_t **proc, apr_pool_t *p)
     apr_sleep (1);
 
     if (apr_proc_fork(*proc, p) == APR_INCHILD) {
+        /* The parent process has setup all processes to call apr_terminate
+         * at exit.  But, that means that all processes must also call
+         * apr_initialize at startup.  You cannot have an unequal number
+         * of apr_terminate and apr_initialize calls.  If you do, bad things
+         * will happen.  In this case, the bad thing is that if the mutex
+         * is a semaphore, it will be destroyed before all of the processes
+         * die.  That means that the test will most likely fail.
+         */
+        apr_initialize();
+
         while (1) {
             apr_proc_mutex_lock(proc_lock); 
             if (i == MAX_ITER) {
