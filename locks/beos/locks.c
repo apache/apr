@@ -72,10 +72,6 @@ ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type,
     }
     
     new->cntxt = cont;
-    if (new->cntxt == NULL){
-        printf ("null pool\n");
-        return APR_ENOMEM;
-    }
     new->type = type;
     new->fname = strdup(fname);
 
