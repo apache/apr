@@ -1,4 +1,9 @@
 Changes with APR b1
+  *) Win32: Fix bug where apr_sendfile() was incorrectly returning
+     APR_SUCCESS on a TransmitFile call that was interrupted by
+     the client closing its end of the connection. Always call 
+     GetOverlappedResults() to get results of async TransmitFile()
+     completion notification. [Bill Stoddard] 
 
   *) Renamed APR_XtOffset -> APR_OFFSET and APR_XtOffsetOf -> APR_OFFSETOF.
      [Cliff Woolley]
