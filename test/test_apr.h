@@ -97,6 +97,20 @@
     printf("%s\n", good); \
     }
 
+#define TEST_STATUS(str, func, testmacro, good, bad) \
+    printf("%-60s", str); \
+    { \
+        apr_status_t rv = func; \
+        if (!testmacro(rv)) { \
+            char errmsg[200]; \
+            printf("%s\n", bad); \
+            fprintf(stderr, "Error was %d : %s\n", rv, \
+                    apr_strerror(rv, (char*)&errmsg, 200)); \
+            exit(-1); \
+        } \
+        printf("%s\n", good); \
+    }
+
 #define STD_TEST_NEQ(str, func) \
 	TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
 
