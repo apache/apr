@@ -178,7 +178,6 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from,
                                        char *buf, apr_size_t *len)
 {
     apr_ssize_t rv;
-    apr_status_t err;
 
     if (from == NULL){
         return APR_ENOMEM;
@@ -192,10 +191,6 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from,
     if (rv == SOCKET_ERROR) {
         (*len) = 0;
         return apr_get_netos_error();
-    }
-
-    if (err) {
-        return errno;
     }
 
     (*len) = rv;
