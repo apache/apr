@@ -122,7 +122,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*out)->dataRead = 0;
     (*out)->direction = 0;
 
-    if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
+    if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 65536)) {
         return apr_get_os_error();
     }
 
@@ -214,8 +214,8 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
                                           dwOpenMode,
                                           dwPipeMode,
                                           1,            //nMaxInstances,
-                                          8182,         //nOutBufferSize, 
-                                          8192,         //nInBufferSize,                   
+                                          0,            //nOutBufferSize, 
+                                          65536,        //nInBufferSize,                   
                                           1,            //nDefaultTimeOut,                
                                           &sa);
 
@@ -237,7 +237,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
     }
     else {
         /* Pipes on Win9* are blocking. Live with it. */
-        if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
+        if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 65536)) {
             return apr_get_os_error();
         }
     }
