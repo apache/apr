@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/13 04:23:10 $]
+Last modified at [$Date: 2001/01/13 11:51:03 $]
 
 Release:
 
@@ -19,8 +19,8 @@ RELEASE SHOWSTOPPERS:
       Source code layout needs to be decided for apr and apr-util.  There
       has been some discussion about adding a src/ directory to apr or 
       removing it from apr-util/.  Either way, this needs to be decided.
-      Those for adding apr/src/    : gstein
-      Those removing apr-util/src/ : wrowe, rbb
+      Those for adding apr/src/        : gstein
+      Those for removing apr-util/src/ : wrowe, rbb , dreid
 
     * Many linkage errors are gpfaulting Apache/win32 in various configs
       (load mod_dav, for example.)  Must complete the APR_DECLARES
@@ -101,3 +101,11 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 Documentation that needs writing:
 
     * API documentation
+
+Stuff waiting for code thawing after Beta 1:
+
+    * socket options patch - this is an attempt to track and cache
+      the various options we have set on a socket to avoid needless
+      systems calls to discover if an option is set or not...
+      http://www.apache.org/~dreid/sockopt_diff
+
