@@ -822,6 +822,9 @@ APR_DECLARE(void) apr_socket_set_inherit(apr_socket_t *skt);
  */
 APR_DECLARE(void) apr_socket_inherit_unset(apr_socket_t *skt);
 
+/** @deprecated @see apr_socket_inherit_unset */
+APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *skt);
+
 #ifdef __cplusplus
 }
 #endif
