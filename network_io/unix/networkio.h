@@ -86,7 +86,7 @@
 #if HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
-#if APR_HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #if HAVE_ARPA_INET_H

@@ -203,7 +203,7 @@ ap_status_t ap_get_remote_ipaddr(char **addr, const struct socket_t *sock)
 
 
 
-#if APR_HAVE_NETINET_IN_H
+#if HAVE_NETINET_IN_H
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *socket)
  *    Return the local socket name as a BSD style struct sockaddr_in.
