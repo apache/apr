@@ -109,14 +109,6 @@ From network_io/unix/inet_ntop.c, network_io/unix/inet_pton.c:
  * SOFTWARE.
  */
 
-From atomic/solaris_sparc/apr_atomic_sparc.s:
-
-!*  This code is based on the UltraSPARC atomics library by Mike Bennett
-!*  The Initial Developer of the Original Code is Mike Bennett,
-!*  mbennett@netcom.com, Copyright (C) 1999. All Rights Reserved.
-!*  This code is based on the sparc architecture Manual version 9
-!*  section J.11 (page 333)
-
 From dso/aix/dso.c:
 
  *  Based on libdl (dlfcn.c/dlfcn.h) which is
