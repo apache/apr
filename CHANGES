@@ -63,6 +63,9 @@ Changes with APR 1.0
 
 Changes with APR 0.9.4
 
+  *) fix apr_file_dup() and apr_file_dup2() to dup the ungetchar
+     member [Stas Bekman]
+
   *) Preserve leading '../' segments as when merging to an empty and
      unrooted path - fixes a bug observed in SVN with Win32/Netware/OS2.
      [Mike Pilato <cmpilato@collab.net>, William Rowe]
