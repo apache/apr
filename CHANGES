@@ -1,5 +1,7 @@
 Changes for APR 1.1.1
 
+  *) Fix posix rwlock detection on Darwin. [Aaron Bannert]
+
   *) Build fix for Multicast support on HP-UX 11.00 and Tru64 [Joe Orton]
 
   *) Fix libapr.rc for Win32 builds [William Rowe]
