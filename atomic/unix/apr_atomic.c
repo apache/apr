@@ -3,11 +3,7 @@
 #include "apr_thread_mutex.h"
 #include "apr_atomic.h"
 
-#ifdef WIN32
-/* win32 implementation is all macros */
-#elif defined(__linux)
-/* linux implementation is all macros */
-#else
+#if defined(APR_ATOMIC_NEED_DEFAULT) 
 
 #if APR_HAS_THREADS
 
@@ -104,4 +100,4 @@ apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem,apr_uint32_t with, apr_ui
 #endif
 #endif /* APR_HAS_THREADS */
 
-#endif /* default implementation */
+#endif /* APR_ATOMIC_NEED_DEFAULT */
