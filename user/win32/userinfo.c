@@ -52,17 +52,138 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_private.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 #include "apr_user.h"
-#include "apr_private.h"
+#include "fileio.h"
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
+/* Internal sid binary to string translation, see MSKB Q131320.
+ * Several user related operations require our SID to access
+ * the registry, but in a string format.  All error handling
+ * depends on IsValidSid(), which internally we better test long
+ * before we get here!
+ */
+void get_sid_string(char *buf, int blen, apr_uid_t id)
+{
+    PSID_IDENTIFIER_AUTHORITY psia;
+    DWORD nsa;
+    DWORD sa;
+    int slen;
+
+    /* Determine authority values (these is a big-endian value, 
+     * and NT records the value as hex if the value is > 2^32.)
+     */
+    psia = GetSidIdentifierAuthority(id);
+    nsa = (DWORD)psia->Value[5]       + (DWORD)psia->Value[4] <<  8 +
+          (DWORD)psia->Value[3] << 16 + (DWORD)psia->Value[2] << 24;
+    sa  = (DWORD)psia->Value[1]       + (DWORD)psia->Value[0] <<  8;
+    if (sa) {
+        slen = apr_snprintf(buf, blen, "S-%lu-0x%04x%08x",
+                            SID_REVISION, sa, nsa);
+    } else {
+        slen = apr_snprintf(buf, blen, "S-%lu-%lu",
+                            SID_REVISION, nsa);
+    }
+
+    /* Now append all the subauthority strings.
+     */
+    nsa = *GetSidSubAuthorityCount(id);
+    for (sa = 0; sa < nsa; ++sa) {
+        slen += apr_snprintf(buf + slen, blen - slen, "-%lu",
+                             *GetSidSubAuthority(id, sa));
+    }
+} 
+
+/* Query the ProfileImagePath from the version-specific branch, where the
+ * regkey uses the user's name on 9x, and user's sid string on NT.
+ */
 APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *username, apr_pool_t *p)
 {
-    return APR_ENOTIMPL;
+    apr_oslevel_e os_level;
+    apr_status_t rv;
+    char regkey[MAX_PATH * 2];
+    DWORD keylen;
+    DWORD type;
+    HKEY key;
+
+    if (apr_get_oslevel(p, &os_level) || os_level >= APR_WIN_NT) {
+        apr_uid_t uid;
+        apr_gid_t gid;
+    
+        if ((rv = apr_get_userid(&uid, &gid, username, p)) != APR_SUCCESS)
+            return rv;
+
+        strcpy(regkey, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\"
+                       "ProfileList\\");
+        keylen = strlen(regkey);
+        get_sid_string(regkey + keylen, sizeof(regkey) - keylen, uid);
+    }
+    else {
+        strcpy(regkey, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\"
+                       "ProfileList\\");
+        keylen = strlen(regkey);
+        apr_cpystrn(regkey + keylen, username, sizeof(regkey) - keylen);
+
+    }
+
+    if ((rv = RegOpenKeyEx(HKEY_LOCAL_MACHINE, regkey, 0, 
+                           KEY_QUERY_VALUE, &key)) != ERROR_SUCCESS)
+        return APR_FROM_OS_ERROR(rv);
+
+#if APR_HAS_UNICODE_FS
+    if (apr_get_oslevel(p, &os_level) || os_level >= APR_WIN_NT) {
+
+        keylen = sizeof(regkey);
+        rv = RegQueryValueExW(key, L"ProfileImagePath", NULL, &type,
+                                   (void*)regkey, &keylen);
+        RegCloseKey(key);
+        if (rv != ERROR_SUCCESS)
+            return APR_FROM_OS_ERROR(rv);
+        if (type == REG_SZ) {
+            char retdir[MAX_PATH];
+            if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), 
+                                           (apr_wchar_t*)regkey)) != APR_SUCCESS)
+                return rv;
+            *dirname = apr_pstrdup(p, retdir);
+            return APR_SUCCESS;
+        }
+        else if (type == REG_EXPAND_SZ) {
+            apr_wchar_t path[MAX_PATH];
+            char retdir[MAX_PATH];
+            ExpandEnvironmentStringsW((apr_wchar_t*)regkey, path, sizeof(path));
+            if ((rv = unicode_to_utf8_path(retdir, sizeof(retdir), path))
+                    != APR_SUCCESS)
+                return rv;
+            *dirname = apr_pstrdup(p, retdir);
+            return APR_SUCCESS;
+        }
+        return APR_ENOENT;
+    }
+    else
+#endif APR_HAS_UNICODE_FS
+    {
+        keylen = sizeof(regkey);
+        rv = RegQueryValueEx(key, "ProfileImagePath", NULL, &type,
+                                  (void*)regkey, &keylen);
+        RegCloseKey(key);
+        if (rv != ERROR_SUCCESS)
+            return APR_FROM_OS_ERROR(rv);
+        if (type == REG_SZ) {
+            *dirname = apr_pstrdup(p, regkey);
+            return APR_SUCCESS;
+        }
+        else if (type == REG_EXPAND_SZ) {
+            char path[MAX_PATH];
+            ExpandEnvironmentStrings(regkey, path, sizeof(path));
+            *dirname = apr_pstrdup(p, path);
+            return APR_SUCCESS;
+        }
+        return APR_ENOENT;
+    }
 }
 
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
