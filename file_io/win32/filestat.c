@@ -363,7 +363,8 @@ int fillin_fileinfo(apr_finfo_t *finfo,
         finfo->size = 0x7fffffff;
 #endif
 
-    if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+    if (wanted & APR_FINFO_LINK &&
+        wininfo->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
         finfo->filetype = APR_LNK;
     }
     else if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
