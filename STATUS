@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/10/18 12:36:12 $]
+Last modified at [$Date: 2002/10/22 04:59:26 $]
 
 Release:
 
@@ -80,6 +80,9 @@ CURRENT VOTES:
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * Someone needs to port testucs to Unix. Right now it only works
+      on Windows.
 
     * The return type of a thread function (void *) is inconsistent with
       the type used in apr_thread_exit()/apr_thread_join() (apr_status_t).
