@@ -466,24 +466,29 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         return APR_ENAMETOOLONG;
     }
 
-    if ((apr_os_level >= APR_WIN_NT) 
-            && (wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK))) {
-        /* FindFirstFile and GetFileAttributesEx can't figure the inode,
-         * device or number of links, so we need to resolve with an open 
-         * file handle.  If the user has asked for these fields, fall over 
-         * to the get file info by handle method.  If we fail, or the user
-         * also asks for the file name, continue by our usual means.
-         */
-        if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
-                == APR_SUCCESS)
-            return ident_rv;
-        else if (ident_rv == APR_INCOMPLETE)
-            wanted &= ~finfo->valid;
-    }
-
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
+        if ((wanted & (APR_FINFO_IDENT | APR_FINFO_NLINK)) 
+               || (~wanted & APR_FINFO_LINK)) {
+            /* FindFirstFile and GetFileAttributesEx can't figure the inode,
+             * device or number of links, so we need to resolve with an open 
+             * file handle.  If the user has asked for these fields, fall over 
+             * to the get file info by handle method.  If we fail, or the user
+             * also asks for the file name, continue by our usual means.
+             *
+             * We also must use this method for a 'true' stat, that resolves
+             * a symlink (NTFS Junction) target.  This is because all fileinfo
+             * on a Junction always returns the junction, opening the target
+             * is the only way to resolve the target's attributes.
+             */
+            if ((ident_rv = resolve_ident(finfo, fname, wanted, pool)) 
+                    == APR_SUCCESS)
+                return ident_rv;
+            else if (ident_rv == APR_INCOMPLETE)
+                wanted &= ~finfo->valid;
+        }
+
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                             / sizeof(apr_wchar_t), fname))
             return rv;
