@@ -66,11 +66,12 @@ case "$OS" in
        CFLAGS="$CFLAGS -DOS2 -Zmt"
        OSDIR="os2"
        LIBPREFIX=""
-       enable_threads="os2"
+       enable_threads="system_threads"
        ;;
    *beos*)
        OSDIR="beos"
        CFLAGS="$CFLAGS -DBEOS"
+       enable_threads="system_threads"
        ;;
    *)
        OSDIR="unix"
@@ -289,7 +290,7 @@ else
           AC_DEFINE(USE_THREADS) ], [
           threads="0"
           pthreadh="0" ] )
-    elif test "$ac_cv_enable_threads" = "os2"; then
+    elif test "$ac_cv_enable_threads" = "system_threads"; then
           threads="1"
           pthreadh="0"
     else
