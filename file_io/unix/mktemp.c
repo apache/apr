@@ -196,7 +196,6 @@ APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template, apr_p
     (*fp)->filedes = fd;
 
 #endif
-    apr_file_remove((*fp)->fname, p);
 #ifdef WIN32
     apr_pool_cleanup_register((*fp)->cntxt, (void *)(*fp),
                               file_cleanup, file_cleanup);
