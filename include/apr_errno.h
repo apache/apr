@@ -438,7 +438,8 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
                 || (s) == APR_OS_START_SYSERR + ERROR_NEGATIVE_SEEK)
 #define APR_STATUS_IS_EAGAIN(s)         ((s) == APR_EAGAIN \
                 || (s) == APR_OS_START_SYSERR + ERROR_NO_DATA \
-                || (s) == APR_OS_START_SYSERR + SOCEWOULDBLOCK)
+                || (s) == APR_OS_START_SYSERR + SOCEWOULDBLOCK \
+                || (s) == APR_OS_START_SYSERR + ERROR_LOCK_VIOLATION)
 #define APR_STATUS_IS_EINTR(s)          ((s) == APR_EINTR \
                 || (s) == APR_OS_START_SYSERR + SOCEINTR)
 #define APR_STATUS_IS_ENOTSOCK(s)       ((s) == APR_ENOTSOCK \
