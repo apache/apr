@@ -248,7 +248,8 @@ APR_DECLARE(void *) apr_shm_malloc(apr_shmem_t *m, apr_size_t reqsize)
 APR_DECLARE(void *) apr_shm_calloc(apr_shmem_t *m, apr_size_t reqsize) 
 {
     void *new = apr_shm_malloc(m, reqsize);
-    memset(new, '\0', reqsize);
+    if (new)
+        memset(new, '\0', reqsize);
     return new;
 }
 
