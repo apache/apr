@@ -1,5 +1,8 @@
 Changes for APR 1.1.1
 
+  *) Disable sendfile support for S/390 only in kernel versions < 2.4.0. 
+     [Joe Orton]
+
   *) Fix posix rwlock detection on Darwin. [Aaron Bannert]
 
   *) Build fix for Multicast support on HP-UX 11.00 and Tru64 [Joe Orton]
