@@ -60,29 +60,92 @@
 #include "win32/thread_cond.h"
 #include "apr_portable.h"
 
+static apr_status_t thread_cond_cleanup(void *data)
+{
+    apr_thread_cond_t *cond = data;
+    if (cond->num_waiting != 0) {
+        printf("somebody's waiting, but I'm closing it anyway.\n");
+    }
+    CloseHandle(cond->mutex);
+    CloseHandle(cond->event);
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_thread_cond_create(apr_thread_cond_t **cond,
                                                  apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    *cond = apr_palloc(pool, sizeof(**cond));
+    (*cond)->pool = pool;
+    (*cond)->event = CreateEvent(NULL, TRUE, FALSE, NULL);
+    (*cond)->mutex = CreateMutex(NULL, FALSE, NULL);
+    (*cond)->signal_all = 0;
+    (*cond)->num_waiting = 0;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_wait(apr_thread_cond_t *cond,
                                                apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    DWORD rv;
+
+    while (1) {
+        WaitForSingleObject(cond->mutex, INFINITE);
+        cond->num_waiting++;
+        ReleaseMutex(cond->mutex);
+
+        apr_thread_mutex_unlock(mutex);
+        rv = WaitForSingleObject(cond->event, INFINITE);
+        cond->num_waiting--;
+        if (rv == WAIT_FAILED) {
+            return apr_get_os_error();
+        }
+        if (cond->signal_all) {
+            if (cond->num_waiting == 0) {
+                ResetEvent(cond->event);
+            }
+            break;
+        }
+        if (cond->signalled) {
+            cond->signalled = 0;
+            ResetEvent(cond->event);
+            break;
+        }
+        ReleaseMutex(cond->mutex);
+    }
+    apr_thread_mutex_lock(mutex);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_signal(apr_thread_cond_t *cond)
 {
-    return APR_ENOTIMPL;
+    DWORD rv;
+
+    WaitForSingleObject(cond->mutex, INFINITE);
+    cond->signalled = 1;
+    rv = SetEvent(cond->event);
+    ReleaseMutex(cond->mutex);
+    if (rv == 0) {
+        return apr_get_os_error();
+    }
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_broadcast(apr_thread_cond_t *cond)
 {
-    return APR_ENOTIMPL;
+    DWORD rv;
+
+    WaitForSingleObject(cond->mutex, INFINITE);
+    cond->signalled = 1;
+    cond->signal_all = 1;
+    rv = SetEvent(cond->event);
+    ReleaseMutex(cond->mutex);
+    if (rv == 0) {
+        return apr_get_os_error();
+    }
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_cond_destroy(apr_thread_cond_t *cond)
 {
-    return APR_ENOTIMPL;
+    return apr_pool_cleanup_run(cond->pool, cond, thread_cond_cleanup);
 }
