@@ -61,7 +61,7 @@
 #
 # Configuration variables
 #
-top_builddir=@top_builddir@
+apr_builddir=@top_builddir@
 apr_builders=@apr_builders@
 
 CC=@CC@
