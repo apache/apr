@@ -253,7 +253,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
 
 /*
 
-=head1 ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+=head1 ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 
 B<Write data to the specified file.>
 
@@ -274,7 +274,7 @@ B<NOTE>:  ap_write will write up to the specified number of bytes, but never
 
 =cut
  */
-ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes);
+ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes);
 
 /*
 
@@ -357,7 +357,7 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile);
 
 /*
 
-=head1 ap_status_t ap_puts(char *str, ap_file_t *thefile)
+=head1 ap_status_t ap_puts(const char *str, ap_file_t *thefile)
 
 B<Put the string into a specified file.>
 
@@ -366,7 +366,7 @@ B<Put the string into a specified file.>
 
 =cut
  */
-ap_status_t ap_puts(char *str, ap_file_t *thefile);
+ap_status_t ap_puts(const char *str, ap_file_t *thefile);
 
 /*
 
@@ -555,7 +555,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont);
 
 /*
 
-=head1 ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, ap_pool_t *cont)
+=head1 ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, ap_pool_t *cont)
 
 B<Create a named pipe.>
 
@@ -565,7 +565,7 @@ B<Create a named pipe.>
 
 =cut
  */
-ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, 
+ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, 
                                 ap_pool_t *cont);
 
 /*
