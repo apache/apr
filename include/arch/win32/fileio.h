@@ -98,6 +98,13 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* dststr, apr_size_t dstchars,
                                   const char* srcstr);
 apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars, 
                                   const apr_wchar_t* srcstr);
+
+/* An arbitrary size that is digestable. True max is a bit less than 32000 */
+#define APR_PATH_MAX 8192
+#define APR_FILE_MAX MAX_PATH
+#else /* !APR_HAS_UNICODE_FS */
+#define APR_PATH_MAX MAX_PATH
+#define APR_FILE_MAX MAX_PATH
 #endif
 
 #define APR_FILE_BUFSIZE 4096
