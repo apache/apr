@@ -1,8 +1,6 @@
 #!/bin/sh
 
-autoconf;autoheader
+autoheader
+autoconf
 
 (cd shmem/unix/mm && autoconf)
-
-perl ./helpers/make_export.pl -o ./apr.exports include/*.h
-
