@@ -464,16 +464,6 @@ typedef  int         gid_t;
 #define APR_UINT64_T_FMT         "I64u"
 #define APR_UINT64_T_HEX_FMT     "I64x"
 
-/* Deal with atoi64 variables ... these should move to apr_private.h */
-/* MSVC 7.0 introduced _strtoui64 */
-#if _MSC_VER >= 1300 && _INTEGRAL_MAX_BITS >= 64
-#define APR_HAVE_INT64_STRFN  1
-#define APR_INT64_STRFN	      _strtoui64
-#else
-#define APR_HAVE_INT64_STRFN  0
-#define APR_INT64_STRFN	      undef
-#endif
-
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "\r\n"
 
