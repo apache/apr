@@ -307,13 +307,13 @@ dnl we are using for the more up to date cpu/OS
 dnl  (ie.. old sparcs)
 apr_force_atomic_generic=0
 proc_mutex_is_global=0
-enable_nonportable_atomics=0
+nonportable_atomics_enabled=0
 
 AC_ARG_ENABLE(nonportable-atomics,
 [  --enable-nonportable-atomics  Turn on optimized atomic code which may produce nonportable binaries],
 [
     if test "$enableval" = "yes"; then
-        enable_nonportable_atomics=1
+        nonportable_atomics_enabled=1
     fi
 ])
 
@@ -372,7 +372,7 @@ case $host in
          *sparc*)
             OSDIR="solaris_sparc"
             eolstr="\\n"
-            if test "$enable_nonportable_atomics" = 1; then
+            if test "$nonportable_atomics_enabled" = 1; then
               apr_atomic_sparc_compile=apr_atomic_sparc.lo
               sparc_arch=`uname -m`
               is_gnu_as=`${AS} --help 2>/dev/null | grep gnu.org`
