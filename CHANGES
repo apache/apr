@@ -1,4 +1,7 @@
 Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
+
+  *) Improve apr_file_gets() performance on buffered files. [Justin Erenkrantz]
+
   *) Win32: Fix bug in apr_socket_sendfile that interferred with
      Win32 LSPs. PR 23982 [Jan Bilek, Bill Stoddard]
 
