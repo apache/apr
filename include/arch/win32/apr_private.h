@@ -138,8 +138,7 @@
  */
 typedef void (Sigfunc)(int);
 
-#define strcasecmp(s1, s2)       stricmp(s1, s2)
-#define sleep(t)                 Sleep(t * 1000)
+#define sleep(t)                 Sleep((t) * 1000)
 
 #define SIZEOF_SHORT           2
 #define SIZEOF_INT             4
