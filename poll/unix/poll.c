@@ -172,7 +172,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
 #endif
 
     if ((*nsds) < 0) {
-        return errno;
+        return apr_get_netos_error();
     }
     if ((*nsds) == 0) {
         return APR_TIMEUP;
@@ -270,7 +270,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         return APR_TIMEUP;
     }
     if ((*nsds) < 0) {
-        return errno;
+        return apr_get_netos_error();
     }
 
     for (i = 0; i < num; i++) {
@@ -513,7 +513,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     rv = poll(pollset->pollset, pollset->nelts, timeout);
     (*num) = rv;
     if (rv < 0) {
-        return errno;
+        return apr_get_netos_error();
     }
     if (rv == 0) {
         return APR_TIMEUP;
@@ -566,7 +566,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
 
     (*num) = rv;
     if (rv < 0) {
-        return errno;
+        return apr_get_netos_error();
     }
     if (rv == 0) {
         return APR_TIMEUP;
