@@ -60,7 +60,7 @@
 #include "errno.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <process.h>
+/*#include <process.h>*/
 #ifdef BEOS
 #include <unistd.h>
 #endif

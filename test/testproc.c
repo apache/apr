@@ -78,6 +78,11 @@ int main(int argc, char *argv[])
     char *args[3];
     char *teststr;
 
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't initialize.");
+        exit(-1);
+    }
+    atexit(ap_terminate);
     ap_create_context(&context, NULL);
 
 
