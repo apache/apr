@@ -246,6 +246,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 {
     apr_status_t status = APR_SUCCESS;
     apr_ssize_t rv;
+    apr_off_t curoff = *offset;
     DWORD dwFlags = 0;
     DWORD nbytes;
     OVERLAPPED overlapped;
@@ -258,9 +259,6 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     /* Initialize the overlapped structure */
     memset(&overlapped,'\0', sizeof(overlapped));
-    if (offset && *offset) {
-        overlapped.Offset = *offset;
-    }
 #ifdef WAIT_FOR_EVENT
     overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
@@ -310,6 +308,10 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             }
         }
 
+        overlapped.Offset = (DWORD)(curoff);
+#if APR_HAS_LARGE_FILES
+        overlapped.OffsetHigh = (DWORD)(curoff >> 32);
+#endif
         rv = TransmitFile(sock->sock,     /* socket */
                           file->filehand, /* open file descriptor of the file to be sent */
                           nbytes,         /* number of bytes to send. 0=send all */
@@ -357,7 +359,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         }
         bytes_to_send -= nbytes;
         *len += nbytes;
-        overlapped.Offset += nbytes;
+        curoff += nbytes;
     }
 
 
