@@ -76,7 +76,6 @@
 #include "../file_io/win32/readdir.h" /* definition of DIR for WIN32 */
 #include "apr_win.h"
 #endif
-#include "hsregex.h"
 #ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #endif
@@ -372,9 +371,6 @@ API_EXPORT(void) ap_cleanup_for_exec(void);
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
-API_EXPORT(regex_t *) ap_pregcomp(ap_context_t *p, const char *pattern,
-				   int cflags);
-API_EXPORT(void) ap_pregfree(ap_context_t *p, regex_t *reg);
 /*API_EXPORT(void) ap_note_subprocess(ap_pool_t *a, pid_t pid,
 				     enum kill_conditions how);
 */
