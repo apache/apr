@@ -63,6 +63,7 @@
  */
 
 #include "fileio.h"
+#include "apr_config.h"
 #include "apr_mmap.h"
 #include "apr_general.h"
 #include "apr_portable.h"
