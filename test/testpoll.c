@@ -167,7 +167,7 @@ int main(void)
     
     printf("\tCreating the sockets I'll use..........");
     for (i = 0; i < 3; i++){
-        if (make_socket(&s[i], &sa[i], 7770 + i, context) != 0){
+        if (make_socket(&s[i], &sa[i], 7777 + i, context) != 0){
             exit(-1);
         }
     }
