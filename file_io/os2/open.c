@@ -224,10 +224,20 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file, apr_os_file_t *thef
     (*file)->pool = pool;
     (*file)->filedes = *dafile;
     (*file)->isopen = TRUE;
-    (*file)->buffered = FALSE;
     (*file)->eof_hit = FALSE;
     (*file)->flags = flags;
     (*file)->pipe = FALSE;
+    (*file)->buffered = (flags & APR_BUFFERED) > 0;
+
+    if ((*file)->buffered) {
+        apr_status_t rv;
+
+        (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+        rv = apr_thread_mutex_create(&(*file)->mutex, 0, pool);
+
+        if (rv)
+            return rv;
+    }
     return APR_SUCCESS;
 }    
 

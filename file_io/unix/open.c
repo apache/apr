@@ -228,15 +228,26 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
     (*file)->pool = pool;
     (*file)->eof_hit = 0;
-    (*file)->buffered = 0;
     (*file)->blocking = BLK_UNKNOWN; /* in case it is a pipe */
     (*file)->timeout = -1;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
     (*file)->flags = flags;
-    /* buffer already NULL; 
-     * don't get a lock (only for buffered files) 
-     */
+    (*file)->buffered = (flags & APR_BUFFERED) > 0;
+
+    if ((*file)->buffered) {
+        (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
+#if APR_HAS_THREADS
+        if ((*file)->flags & APR_XTHREAD) {
+            apr_status_t rv;
+            rv = apr_thread_mutex_create(&((*file)->thlock),
+                                         APR_THREAD_MUTEX_DEFAULT, pool);
+            if (rv) {
+                return rv;
+            }
+        }
+#endif
+    }
     return APR_SUCCESS;
 }    
 
