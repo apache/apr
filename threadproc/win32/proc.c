@@ -295,7 +295,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     char *pEnvBlock;
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = 0;
-    char *ch;
+    const char *ch;
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -338,13 +338,16 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     i = 1;
     while (args && args[i]) {
         for (ch = args[i]; *ch; ++ch) {
-            if (apr_iswhite(*ch)) {
+            if (isspace(*ch)) {
                 break;
+            }
         }
-        if (*ch)
+        if (*ch) {
             cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
-        else
+        }
+        else {
             cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
+        }
         i++;
     }
 
@@ -361,10 +364,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         else {
             progname = shellcmd;
             for (ch = shellcmd; *ch; ++ch) {
-                if (apr_iswhite(*ch)) {
+                if (isspace(*ch)) {
                     break;
+                }
             }
-            if (*ch)
+            if (*ch) {
                 shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
             }
         }
