@@ -146,15 +146,16 @@ static void explode_time(apr_time_exp_t *xt, apr_time_t t,
     xt->tm_gmtoff = get_offset(&tm);
 }
 
-APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result, apr_time_t input,
-                              apr_int32_t offs)
+APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result, 
+		                           apr_time_t input, apr_int32_t offs)
 {
     explode_time(result, input, offs, 0);
     result->tm_gmtoff = offs;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_explode_gmt(apr_time_exp_t *result, apr_time_t input)
+APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result, 
+		                           apr_time_t input)
 {
     return apr_explode_time(result, input, 0);
 }

@@ -146,8 +146,8 @@ APR_DECLARE(apr_time_t) apr_time_now(void)
     return aprtime; 
 }
 
-APR_DECLARE(apr_status_t) apr_explode_gmt(apr_time_exp_t *result,
-                                          apr_time_t input)
+APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
+                                           apr_time_t input)
 {
     FILETIME ft;
     SYSTEMTIME st;
