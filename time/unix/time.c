@@ -156,7 +156,7 @@ APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result, apr_time_
 
 APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
 {
-#if defined(__EMX__)
+#if defined(__EMX__) || defined(NETWARE)
     /* EMX gcc (OS/2) has a timezone global we can use */
     return apr_explode_time(result, input, -timezone);
 #else
