@@ -122,7 +122,7 @@ static int run_sendfile(apr_pool_t *context, int number)
     apr_proc_t proc2;
     apr_status_t s1;
     apr_status_t s2;
-    const char *args[3];
+    const char *args[4];
 
     fprintf(stdout, "Creating children to run network tests.......\n");
     s1 = apr_procattr_create(&attr1, context);
@@ -155,6 +155,7 @@ static int run_sendfile(apr_pool_t *context, int number)
             break;
         }
     }
+    args[3] = NULL;
     s2 = apr_proc_create(&proc2, "./sendfile", args, NULL, attr2, context);
 
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
