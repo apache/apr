@@ -207,6 +207,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 #endif
         *nbytes = bytes_read;
         if (rv == 0) {
+            thefile->eof_hit = TRUE;
             return APR_EOF;
         }
         if (rv > 0) {
