@@ -5,9 +5,19 @@ Changes with APR 1.0
      apr_accept                   -> apr_socket_accept
      apr_bind                     -> apr_socket_bind
      apr_connect                  -> apr_socket_connect
+     apr_getsocketopt             -> apr_socket_opt_get
      apr_listen                   -> apr_socket_listen
+     apr_recv                     -> apr_socket_recv
+     apr_recvfrom                 -> apr_socket_recvfrom
+     apr_send                     -> apr_socket_send
+     apr_sendfile                 -> apr_socket_sendfile
+     apr_sendto                   -> apr_socket_sendto
+     apr_sendv                    -> apr_socket_sendv
+     apr_setsocketopt             -> apr_socket_opt_set
      apr_shutdown                 -> apr_socket_shutdown
      apr_socket_create_ex         -> apr_socket_create
+     apr_socket_set_inherit       -> apr_socket_inherit_set
+     apr_socket_unset_inherit     -> apr_socket_inherit_unset
      MAX_SECONDS_TO_LINGER        -> APR_MAX_SECONDS_TO_LINGER
 
 Changes with APR 0.9.4

@@ -107,7 +107,7 @@ extern "C" {
 #define APR_FILE_NOCLEANUP 0x00800 /**< Do not register a cleanup when the file
                                         is opened */
 #define APR_SENDFILE_ENABLED 0x01000 /**< Advisory flag that this file should
-                                          support apr_sendfile operation */
+                                          support apr_socket_sendfile operation */
 /** @} */
 
 /**
@@ -195,7 +195,7 @@ typedef struct apr_file_t         apr_file_t;
  *                               be closed when the pool is destroyed.
  *         APR_SENDFILE_ENABLED  Open with appropriate platform semantics
  *                               for sendfile operations.  Advisory only,
- *                               apr_sendfile does not check this flag.
+ *                               apr_socket_sendfile does not check this flag.
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.
