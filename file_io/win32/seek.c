@@ -61,24 +61,24 @@
 ap_status_t ap_seek(struct file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
 {
     DWORD howmove;
-	DWORD rv;
+    DWORD rv;
 
-	switch(where) {
-	case APR_SET: {
-		howmove = FILE_BEGIN;
-		break;
-				  }
-	case APR_CUR: {
-		howmove = FILE_CURRENT;
-		break;
-				  }
-	case APR_END: {
-		howmove = FILE_END;
-		break;
-				  }
-	}
+    switch(where) {
+    case APR_SET: {
+        howmove = FILE_BEGIN;
+        break;
+    }
+    case APR_CUR: {
+        howmove = FILE_CURRENT;
+        break;
+    }
+    case APR_END: {
+        howmove = FILE_END;
+        break;
+    }
+    }
 
-    rv = SetFilePointer(thefile->filehand, *offset,NULL, howmove);
+    rv = SetFilePointer(thefile->filehand, *offset, NULL, howmove);
     if (rv == -1) {
         *offset = -1;
         return APR_EEXIST;
