@@ -69,7 +69,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         case APR_END:
             rc = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
             if (rc == APR_SUCCESS)
-                rc = setptr(thefile, finfo.size - *offset);
+                rc = setptr(thefile, finfo.size + *offset);
             break;
         }
 

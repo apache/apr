@@ -228,6 +228,27 @@ static void test_seek(CuTest *tc)
     CuAssertStrEquals(tc, TESTSTR + 5, str);
 
     apr_file_close(filetest);
+
+    /* Test for regression of sign error bug with SEEK_END and
+       buffered files. */
+    rv = apr_file_open(&filetest, FILENAME,
+                       APR_READ | APR_BUFFERED,
+                       APR_UREAD | APR_UWRITE | APR_GREAD, p);
+    apr_assert_success(tc, "Open test file " FILENAME, rv);
+
+    offset = -5;
+    rv = apr_file_seek(filetest, SEEK_END, &offset);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, strlen(TESTSTR) - 5, nbytes);
+
+    memset(str, 0, nbytes + 1);
+    nbytes = 256;
+    rv = apr_file_read(filetest, str, &nbytes);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    CuAssertIntEquals(tc, 5, nbytes);
+    CuAssertStrEquals(tc, TESTSTR + strlen(TESTSTR) - 5, str);
+
+    apr_file_close(filetest);
 }                
 
 static void test_userdata_set(CuTest *tc)
