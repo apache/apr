@@ -131,6 +131,7 @@
 /*
 #define ALLOC_DEBUG
 #define ALLOC_STATS
+#define ALLOC_USE_MALLOC
 #define DEBUG_WITH_MPROTECT
 */
 
@@ -171,6 +172,42 @@
 #endif
 
 
+/** The memory allocation structure
+ */
+struct apr_pool_t {
+    /** The first block in this pool. */
+    union block_hdr *first;
+    /** The last block in this pool. */
+    union block_hdr *last;
+    /** The list of cleanups to run on pool cleanup. */
+    struct cleanup *cleanups;
+    /** A list of processes to kill when this pool is cleared */
+    struct process_chain *subprocesses;
+    /** The first sub_pool of this pool */
+    struct apr_pool_t *sub_pools;
+    /** The next sibling pool */
+    struct apr_pool_t *sub_next;
+    /** The previous sibling pool */
+    struct apr_pool_t *sub_prev;
+    /** The parent pool of this pool */
+    struct apr_pool_t *parent;
+    /** The first free byte in this pool */
+    char *free_first_avail;
+#ifdef ALLOC_USE_MALLOC
+    /** The allocation list if using malloc */
+    void *allocation_list;
+#endif
+#ifdef APR_POOL_DEBUG
+    /** a list of joined pools */
+    struct apr_pool_t *joined;
+#endif
+    /** A function to control how pools behave when they receive ENOMEM */
+    int (*apr_abort)(int retcode);
+    /** A place to hold user data associated with this pool */
+    struct apr_hash_t *prog_data;
+};
+
+
 /*****************************************************************
  *
  * Managing free storage blocks...
@@ -207,16 +244,6 @@ union block_hdr {
     } h;
 };
 
-#define APR_ABORT(conditional, retcode, func, str) \
-    if (conditional) { \
-        if ((func) == NULL) { \
-            return NULL; \
-        } \
-        else { \
-            fprintf(stderr, "%s", str); \
-            (*(func))(retcode); \
-        } \
-    }
 
 /*
  * Static cells for managing our internal synchronisation.
@@ -320,7 +347,7 @@ static void *mprotect_realloc(void *addr, apr_size_t size)
  * Get a completely new block from the system pool. Note that we rely on
  * malloc() to provide aligned memory.
  */
-static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
+static union block_hdr *malloc_block(int size, apr_abortfunc_t abortfunc)
 {
     union block_hdr *blok;
 
@@ -337,8 +364,15 @@ static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
 #endif /* ALLOC_STATS */
 
     blok = (union block_hdr *) DO_MALLOC(size + sizeof(union block_hdr));
-    APR_ABORT(blok == NULL, APR_ENOMEM, apr_abort,
-              "Ouch!  malloc failed in malloc_block()\n");
+    if (blok == NULL) {
+        /* ### keep this fprintf here? */
+        fprintf(stderr, "Ouch!  malloc failed in malloc_block()\n");
+        if (abortfunc != NULL) {
+            (void) (*abortfunc)(APR_ENOMEM);
+        }
+        return NULL;
+    }
+
     debug_fill(blok, size + sizeof(union block_hdr));
 
     blok->h.next = NULL;
@@ -472,7 +506,7 @@ static void free_blocks(union block_hdr *blok)
  * Get a new block, from our own free list if possible, from the system
  * if necessary.  Must be called with alarms blocked.
  */
-static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
+static union block_hdr *new_block(int min_size, apr_abortfunc_t abortfunc)
 {
     union block_hdr **lastptr = &block_freelist;
     union block_hdr *blok = block_freelist;
@@ -500,7 +534,7 @@ static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
 
     min_size += BLOCK_MINFREE;
     blok = malloc_block((min_size > BLOCK_MINALLOC)
-			? min_size : BLOCK_MINALLOC, apr_abort);
+			? min_size : BLOCK_MINALLOC, abortfunc);
     return blok;
 }
 
@@ -546,7 +580,8 @@ static apr_pool_t *permanent_pool;
 #define POOL_HDR_CLICKS (1 + ((sizeof(struct apr_pool_t) - 1) / CLICK_SZ))
 #define POOL_HDR_BYTES (POOL_HDR_CLICKS * CLICK_SZ)
 
-APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p, int (*apr_abort)(int retcode))
+APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
+                                            apr_abortfunc_t abortfunc)
 {
     union block_hdr *blok;
     apr_pool_t *new_pool;
@@ -558,7 +593,7 @@ APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p, int (*apr_abort)(int 
     }
 #endif
 
-    blok = new_block(POOL_HDR_BYTES, apr_abort);
+    blok = new_block(POOL_HDR_BYTES, abortfunc);
     new_pool = (apr_pool_t *) blok->h.first_avail;
     blok->h.first_avail += POOL_HDR_BYTES;
 #ifdef APR_POOL_DEBUG
@@ -618,30 +653,35 @@ static void dump_stats(void)
 #endif
 
 /* ### why do we have this, in addition to apr_pool_sub_make? */
-APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont,
+                                          apr_pool_t *parent_pool)
 {
     apr_pool_t *newpool;
+    apr_abortfunc_t abortfunc;
 
-    if (cont) {
-        newpool = apr_pool_sub_make(cont, cont->apr_abort);
-    }
-    else {
-        newpool = apr_pool_sub_make(NULL, NULL);
-    }
-        
+    abortfunc = parent_pool ? parent_pool->apr_abort : NULL;
+
+    newpool = apr_pool_sub_make(parent_pool, abortfunc);
     if (newpool == NULL) {
         return APR_ENOPOOL;
     }   
 
     newpool->prog_data = NULL;
-    if (cont) {
-        newpool->apr_abort = cont->apr_abort;
-    }
-    else {
-        newpool->apr_abort = NULL;
-    }
+    newpool->apr_abort = abortfunc;
+
     *newcont = newpool;
     return APR_SUCCESS;
+}
+
+APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
+                                     apr_pool_t *pool)
+{
+    pool->apr_abort = abortfunc;
+}
+
+APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool)
+{
+    return pool->apr_abort;
 }
 
 /*****************************************************************

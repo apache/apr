@@ -174,19 +174,6 @@ APR_DECLARE(apr_status_t) apr_initialize(void);
  */
 APR_DECLARE(void) apr_terminate(void);
 
-/**
- * Set the APR_ABORT function.
- * @tip This is in for backwards compatability.  If the program using
- *      APR wants APR to exit on a memory allocation error, then this
- *      function should be called to set the function to use in order
- *      to actually exit the program.  If this function is not called,
- *      then APR will return an error and expect the calling program to
- *      deal with the error accordingly.
- * @deffunc apr_status_t apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
- */
-APR_DECLARE(apr_status_t) apr_set_abort(int (*apr_abort)(int retcode),
-                                        apr_pool_t *cont);
-
 #ifdef __cplusplus
 }
 #endif
