@@ -124,7 +124,7 @@ typedef struct apr_dir_t          apr_dir_t;
  * @defvar apr_fileperms_t
  */
 typedef apr_int32_t               apr_fileperms_t;
-#ifdef WIN32
+#if (defined WIN32) || (defined NETWARE)
 /**
  * Structure for determining the inode of the file.
  * @defvar apr_ino_t
