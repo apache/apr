@@ -81,23 +81,21 @@ ap_status_t sononblock(SOCKET sd)
 ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 {
     int one;
-    struct linger li;
     ap_status_t stat;
 
-    if (on)
-        one = 1;
-    else
-        one = 0;
+    one = on ? 1 : 0;
 
-    if (opt & APR_SO_TIMEOUT) {
+    switch (opt) {
+    case APR_SO_TIMEOUT: 
+    {
         int new_timeout;
         if (on <= 0)
             new_timeout = on;
         else
             new_timeout = on/1000;  /* Windows needs timeout in mSeconds */
-                    
+        
         if (new_timeout == 0) {
-            /* Set the socket non-blocking if it isn't already set to non-blocking */
+            /* Set the socket non-blocking if it was previously blocking */
             if (sock->timeout != 0) {
                 if ((stat = sononblock(sock->sock)) != APR_SUCCESS)
                     return stat;
@@ -124,23 +122,24 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
             setsockopt(sock->sock, SOL_SOCKET, SO_SNDTIMEO, (char *) &zero, sizeof(zero));
         }
         sock->timeout = new_timeout;
+        break;
     }
-    if (opt & APR_SO_KEEPALIVE) {
+    case APR_SO_KEEPALIVE:
         if (setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
             return WSAGetLastError();
         }
-    }
-    if (opt & APR_SO_DEBUG) {
+        break;
+    case APR_SO_DEBUG:
         if (setsockopt(sock->sock, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
             return WSAGetLastError();
         }
-    }
-    if (opt & APR_SO_REUSEADDR) {
+        break;
+    case APR_SO_REUSEADDR:
         if (setsockopt(sock->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
             return WSAGetLastError();
         }
-    }
-    if (opt & APR_SO_NONBLOCK) {
+        break;
+    case APR_SO_NONBLOCK:
         if (on) {
             if ((stat = soblock(sock->sock)) != APR_SUCCESS) 
                 return stat;
@@ -149,16 +148,44 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
             if ((stat = sononblock(sock->sock)) != APR_SUCCESS)
                 return stat;
         }
-    }
-    if (opt & APR_SO_LINGER) {
+        break;
+    case APR_SO_LINGER:
+    {
+        struct linger li;
         li.l_onoff = on;
         li.l_linger = MAX_SECS_TO_LINGER;
         if (setsockopt(sock->sock, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
             return WSAGetLastError();
         }
+        break;
+    }
+    default:
+        return APR_EINVAL;
+        break;
     }
     return APR_SUCCESS;
 }
+
+ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
+{
+    switch (opt) {
+    case APR_SO_TIMEOUT: 
+        /* Do we want to store sock->timeout in APR units or windows units? */
+        *on = sock->timeout * 1000; /* Convert from milliseconds (windows units) to microseconds 
+                                     * (APR units) */
+        break;
+    case APR_SO_KEEPALIVE:
+    case APR_SO_DEBUG:
+    case APR_SO_REUSEADDR:
+    case APR_SO_NONBLOCK:
+    case APR_SO_LINGER:
+    default:
+        return APR_ENOTIMPL;
+        break;
+    }
+    return APR_SUCCESS;
+}
+
 
 ap_status_t ap_gethostname(char *buf, int len, ap_pool_t *cont)
 {

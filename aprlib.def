@@ -79,7 +79,7 @@ EXPORTS
 	ap_get_os_sock   @70
 	ap_remove_poll_socket   @71
 	ap_clear_poll_sockets   @72
-;	ap_setipaddr @73
+	ap_getsocketopt @73
 ;	ap_getipaddr @74
 ;	ap_create_signal   @75
 ;	ap_setup_signal   @76
