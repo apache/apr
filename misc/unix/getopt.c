@@ -49,14 +49,24 @@ static const char *pretty_path (const char *name)
 }
 
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                     int argc, char **argv)
+                                     int argc, char *const *argv)
 {
+    int i;
+
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
     (*os)->cont = cont;
     (*os)->err = 1;
     (*os)->place = EMSG;
     (*os)->argc = argc;
-    (*os)->argv = argv;
+
+    /* The argv parameter must be compatible with main()'s argv, since
+       that's the primary purpose of this function.  But people might
+       want to use this function with arrays other than the main argv,
+       and we shouldn't touch the caller's data.  So we copy. */
+    (*os)->argv = apr_palloc(cont, argc * sizeof(const char *));
+    for (i = 0; i < argc; i++)
+	(*os)->argv[i] = argv[i];
+
     (*os)->interleave = 0;
     (*os)->ind = 1;
     (*os)->skip_start = 1;
@@ -135,9 +145,9 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
 }
 
 /* Reverse the sequence argv[start..start+len-1]. */
-static void reverse(char **argv, int start, int len)
+static void reverse(const char **argv, int start, int len)
 {
-    char *temp;
+    const char *temp;
 
     for (; len >= 2; start++, len -= 2) {
 	temp = argv[start];
@@ -193,7 +203,7 @@ static apr_status_t cerr(apr_getopt_t *os, const char *err, int ch,
 }
 
 APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
-					  const apr_longopt_t *opts,
+					  const apr_getopt_option_t *opts,
 					  int *optch, const char **optarg)
 {
     const char *p;
