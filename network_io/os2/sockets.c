@@ -52,8 +52,8 @@
  * <http://www.apache.org/>.
  */
 
-#include "networkio.h"
-#include "inherit.h"
+#include "apr_arch_networkio.h"
+#include "apr_arch_inherit.h"
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_portable.h"
@@ -65,7 +65,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include "os2calls.h"
+#include "apr_arch_os2calls.h"
 
 static apr_status_t socket_cleanup(void *sock)
 {

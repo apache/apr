@@ -57,8 +57,8 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
-#include "proc_mutex.h"
-#include "misc.h"
+#include "apr_arch_proc_mutex.h"
+#include "apr_arch_misc.h"
 
 static apr_status_t proc_mutex_cleanup(void *mutex_)
 {

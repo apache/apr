@@ -53,7 +53,7 @@
  */
 
 #include "apr_portable.h"
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 
 apr_status_t apr_threadkey_private_create(apr_threadkey_t **key, 
                                         void (*dest)(void *), apr_pool_t *pool) 

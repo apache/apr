@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "shm.h"
+#include "apr_arch_shm.h"
 
 #include "apr_general.h"
 #include "apr_errno.h"

@@ -56,10 +56,10 @@
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_strings.h"
-#include "thread_mutex.h"
+#include "apr_arch_thread_mutex.h"
 #include "apr_thread_mutex.h"
 #include "apr_portable.h"
-#include "misc.h"
+#include "apr_arch_misc.h"
 
 static apr_status_t thread_mutex_cleanup(void *data)
 {

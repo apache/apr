@@ -55,7 +55,7 @@
 #include "apr.h"
 #include "apr_portable.h"
 #include "apr_strings.h"
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 
 static int thread_count = 0;
 

@@ -54,12 +54,12 @@
 
 #define INCL_DOSERRORS
 #define INCL_DOS
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 #include "apr_thread_proc.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include <stdlib.h>
 
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *pool)

@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 
 #if APR_HAVE_FCNTL_H
 #include <fcntl.h>

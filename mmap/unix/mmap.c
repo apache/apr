@@ -58,7 +58,7 @@
 #include "apr_strings.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_portable.h"
 
 /* System headers required for the mmap library */

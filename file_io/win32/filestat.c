@@ -55,15 +55,15 @@
 #include "apr.h"
 #include <aclapi.h>
 #include "apr_private.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_errno.h"
 #include "apr_time.h"
 #include <sys/stat.h>
-#include "atime.h"
-#include "misc.h"
+#include "apr_arch_atime.h"
+#include "apr_arch_misc.h"
 
 /* We have to assure that the file name contains no '*'s, or other
  * wildcards when using FindFirstFile to recover the true file name.

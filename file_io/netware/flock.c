@@ -53,7 +53,7 @@
  */
 
 #include <nks/fsio.h>
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 
 
 apr_status_t apr_file_lock(apr_file_t *thefile, int type)

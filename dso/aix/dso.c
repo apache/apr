@@ -87,7 +87,7 @@
 #include <sys/types.h>
 #include <sys/ldr.h>
 #include <a.out.h>
-#include "dso.h"
+#include "apr_arch_dso.h"
 #include "apr_portable.h"
 
 #if APR_HAS_DSO

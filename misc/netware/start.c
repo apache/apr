@@ -57,9 +57,9 @@
 #include "apr_pools.h"
 #include "apr_signal.h"
 
-#include "misc.h"       /* for WSAHighByte / WSALowByte */
-#include "proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
-#include "internal_time.h"
+#include "apr_arch_misc.h"       /* for WSAHighByte / WSALowByte */
+#include "apr_arch_proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
+#include "apr_arch_internal_time.h"
 
 
 APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 

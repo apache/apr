@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "dso.h"
+#include "apr_arch_dso.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
 #include <stdio.h>

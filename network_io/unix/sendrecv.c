@@ -52,12 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-#include "networkio.h"
+#include "apr_arch_networkio.h"
 #include "apr_support.h"
 
 #if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the apr_file_t internals. */
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #endif /* APR_HAS_SENDFILE */
 
 /* sys/sysctl.h is only needed on FreeBSD for include_hdrs_in_length() */

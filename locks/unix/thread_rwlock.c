@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "thread_rwlock.h"
+#include "apr_arch_thread_rwlock.h"
 #include "apr_private.h"
 
 #if APR_HAS_THREADS

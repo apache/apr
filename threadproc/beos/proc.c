@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "threadproc.h"
+#include "apr_arch_threadproc.h"
 #include "apr_strings.h"
 
 struct send_pipe {

@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "win32/fileio.h"
+#include "win32/apr_arch_fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
@@ -67,7 +67,7 @@
 #if APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#include "misc.h"
+#include "apr_arch_misc.h"
 
 APR_DECLARE(apr_status_t) apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {

@@ -53,7 +53,7 @@
  */
 
 #include "apr.h"
-#include "arch/win32/utf8.h"
+#include "arch/win32/apr_arch_utf8.h"
 #include <wchar.h>
 #include <string.h>
 

@@ -52,12 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include <string.h>
-#include "inherit.h"
+#include "apr_arch_inherit.h"
 
 static apr_status_t file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {

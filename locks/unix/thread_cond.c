@@ -56,8 +56,8 @@
 
 #if APR_HAS_THREADS
 
-#include "thread_mutex.h"
-#include "thread_cond.h"
+#include "apr_arch_thread_mutex.h"
+#include "apr_arch_thread_cond.h"
 
 static apr_status_t thread_cond_cleanup(void *data)
 {

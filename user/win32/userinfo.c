@@ -56,7 +56,7 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 #include "apr_user.h"
-#include "fileio.h"
+#include "apr_arch_fileio.h"
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif

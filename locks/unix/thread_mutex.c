@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "thread_mutex.h"
+#include "apr_arch_thread_mutex.h"
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 

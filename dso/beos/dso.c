@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "beos/dso.h"
+#include "beos/apr_arch_dso.h"
 #include "apr_portable.h"
 
 #if APR_HAS_DSO
