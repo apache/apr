@@ -149,6 +149,38 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *pool)
         return errno;
     }
     else if (pid == 0) {
+		/* This is really ugly...
+		 * The semantics of BeOS's fork() are that areas (used for shared
+		 * memory) get COW'd :-( The only way we can make shared memory
+		 * work across fork() is therefore to find any areas that have
+		 * been created and then clone them into our address space.
+         * Thankfully only COW'd areas have the lock variable set at
+         * anything but 0, so we can use that to find the areas we need to
+         * copy. Of course what makes it even worse is that the loop through
+         * the area's will go into an infinite loop, eating memory and then
+         * eventually segfault unless we know when we reach then end of the
+         * "original" areas and stop. Why? Well, we delete the area and then
+         * add another to the end of the list...
+		 */
+		area_info ai;
+		int32 cookie = 0;
+        area_id highest = 0;
+		
+        while (get_next_area_info(0, &cookie, &ai) == B_OK)
+            if (ai.area	> highest)
+                highest = ai.area;
+        cookie = 0;
+        while (get_next_area_info(0, &cookie, &ai) == B_OK) {
+            if (ai.area > highest)
+                break;
+            if (ai.lock > 0) {
+                area_id original = find_area(ai.name);
+                delete_area(ai.area);
+                clone_area(ai.name, &ai.address, B_CLONE_ADDRESS,
+                           ai.protection, original);
+            }
+        }
+		
         proc->pid = pid;
         proc->in = NULL; 
         proc->out = NULL; 
