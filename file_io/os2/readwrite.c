@@ -75,6 +75,8 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         ULONG blocksize;
         ULONG size = *nbytes;
 
+        DosEnterCritSec();
+
         if (thefile->direction == 1) {
             ap_flush(thefile);
             thefile->bufpos = 0;
@@ -102,6 +104,7 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         }
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
+        DosExitCritSec();
         return os2errno(rc);
     } else {
         rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);
@@ -139,6 +142,8 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         int blocksize;
         int size = *nbytes;
 
+        DosEnterCritSec();
+
         if ( thefile->direction == 0 ) {
             // Position file pointer for writing at the offset we are logically reading from
             ULONG offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
@@ -159,6 +164,7 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
             size -= blocksize;
         }
 
+        DosExitCritSec();
         return os2errno(rc);
     } else {
         rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
