@@ -138,13 +138,13 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 
 }
 
-APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t **new_file,
+APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
 #ifdef NETWARE
-    return _file_dup(new_file, old_file, p, 1);
+    return _file_dup(&new_file, old_file, p, 1);
 #else
-    return _file_dup(new_file, old_file, p, 2);
+    return _file_dup(&new_file, old_file, p, 2);
 #endif
 }
 
