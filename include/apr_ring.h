@@ -404,6 +404,10 @@
  *          APR_RING_REMOVE(ep, link);
  *      }
  * </pre>
+ * @deprecated This macro causes more headaches than it's worth.  Use
+ * one of the alternatives documented here instead; the clarity gained
+ * in what's really going on is well worth the extra line or two of code.
+ * This macro will be removed at some point in the future.
  */
 #define APR_RING_FOREACH(ep, hp, elem, link)				\
     for ((ep)  = APR_RING_FIRST((hp));					\
