@@ -155,7 +155,8 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
     return APR_EINCOMPLETE;
 
-#else
+#else /* ndef(NETWARE) */
+
     char seperator[2] = { (flags & APR_FILEPATH_NATIVE) ? '\\' : '/', 0};
     const char *delim1;
     const char *delim2;
@@ -361,7 +362,8 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
     /* Nothing interesting */
     return APR_ERELATIVE;
-#endif
+
+#endif /* ndef(NETWARE) */
 }
 
 
