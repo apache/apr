@@ -1,4 +1,6 @@
 Changes with APR a9
+  *) Add apr_parse_addr_port() for parsing the hostname:port portion
+     of URLs and similar strings.  [Jeff Trawick]
 
   *) Add Win32 MMAP support [William Rowe]
 

@@ -17,6 +17,7 @@ OBJS=poll.o \
 	sockopt.o \
 	sockaddr.o \
 	inet_ntop.o \
+	inet_pton.o \
 	os2calls.o
 
 .c.o:
