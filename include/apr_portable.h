@@ -218,7 +218,7 @@ struct apr_os_sock_info_t {
 
 typedef struct apr_os_sock_info_t apr_os_sock_info_t;
 
-#if APR_PROCESS_LOCK_IS_GLOBAL
+#if APR_PROC_MUTEX_IS_GLOBAL
 #define apr_os_global_mutex_t apr_os_proc_mutex_t
 #define apr_os_global_mutex_get apr_os_proc_mutex_get
 #else
