@@ -62,6 +62,8 @@ static apr_status_t _file_dup(apr_file_t **new_file,
                               apr_file_t *old_file, apr_pool_t *p,
                               int which_dup)
 {
+    int rv;
+    
     if ((*new_file) == NULL) {
         if (which_dup == 1) {
             (*new_file) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
@@ -76,11 +78,14 @@ static apr_status_t _file_dup(apr_file_t **new_file,
     }
 
     if (which_dup == 2) {
-        dup2(old_file->filedes, (*new_file)->filedes);
+        rv = dup2(old_file->filedes, (*new_file)->filedes);
     } else {
-        (*new_file)->filedes = dup(old_file->filedes); 
+        rv = ((*new_file)->filedes = dup(old_file->filedes)); 
     }
 
+    if (rv == -1)
+        return errno;
+    
     (*new_file)->fname = apr_pstrdup(p, old_file->fname);
     (*new_file)->buffered = old_file->buffered;
 
