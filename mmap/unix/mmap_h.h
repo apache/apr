@@ -60,11 +60,7 @@
 #include "apr_mmap.h"
 #include "apr_errno.h"
 #include "fileio.h"
-#ifdef BEOS
-#include "../beos/mmap_h.h"
-#else
 #include "mmap_h.h"
-#endif
 
 /* System headers required for the mmap library */
 #ifdef BEOS
@@ -86,6 +82,9 @@
 
 struct ap_mmap_t {
     ap_pool_t *cntxt;
+#ifdef BEOS
+    area_id;
+#endif
     void *mm;
     size_t size;
 };
