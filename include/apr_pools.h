@@ -250,11 +250,6 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
  * @remark The @a apr_abort function provides a way to quit the program if the
  *      machine is out of memory.  By default, APR will return on error.
  */
-#if defined(DOXYGEN)
-APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool, 
-                                    apr_pool_t *parent,
-                                    int (*apr_abort)(int retcode));
-#else
 #if APR_POOL_DEBUG
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex_debug(newpool, parent, abort_fn, \
@@ -263,7 +258,6 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
 #else
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex(newpool, parent, abort_fn, APR_POOL_FDEFAULT)
-#endif
 #endif
 
 /**
@@ -414,10 +408,11 @@ APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
  *      key is used at all times.
  * @bug Specify how to ensure this uniqueness!
  */
-APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data,
-                                                const char *key,
-                                                apr_status_t (*cleanup)(void *),
-                                                apr_pool_t *pool);
+APR_DECLARE(apr_status_t) apr_pool_userdata_set(
+    const void *data,
+    const char *key,
+    apr_status_t (*cleanup)(void *),
+    apr_pool_t *pool);
 
 /**
  * Set the data associated with the current pool
@@ -432,10 +427,11 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data,
  *       a life span at least as long as the pool itself.
  *
  */
-APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data,
-                                                 const char *key,
-                                                 apr_status_t (*cleanup)(void *),
-                                                 apr_pool_t *pool);
+APR_DECLARE(apr_status_t) apr_pool_userdata_setn(
+    const void *data,
+    const char *key,
+    apr_status_t (*cleanup)(void *),
+    apr_pool_t *pool);
 
 /**
  * Return the data associated with the current pool.
@@ -444,7 +440,7 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data,
  * @param pool The current pool.
  */
 APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
-                                           apr_pool_t *pool);
+                                                apr_pool_t *pool);
 
 
 /*
@@ -460,9 +456,11 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
  * @param child_cleanup The function to call when a child process is created -
  *                      this function is called in the child, obviously!
  */
-APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
-                                       apr_status_t (*plain_cleanup)(void *),
-                                       apr_status_t (*child_cleanup)(void *));
+APR_DECLARE(void) apr_pool_cleanup_register(
+    apr_pool_t *p,
+    const void *data,
+    apr_status_t (*plain_cleanup)(void *),
+    apr_status_t (*child_cleanup)(void *));
 
 /**
  * Remove a previously registered cleanup function
@@ -473,7 +471,7 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
  *          function
  */
 APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
-                                   apr_status_t (*cleanup)(void *));
+                                        apr_status_t (*cleanup)(void *));
 
 /**
  * Replace the child cleanup of a previously registered cleanup
@@ -482,9 +480,11 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
  * @param plain_cleanup The plain cleanup function of the registered cleanup
  * @param child_cleanup The function to register as the child cleanup
  */
-APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
-                                      apr_status_t (*plain_cleanup)(void *),
-                                      apr_status_t (*child_cleanup)(void *));
+APR_DECLARE(void) apr_pool_child_cleanup_set(
+    apr_pool_t *p,
+    const void *data,
+    apr_status_t (*plain_cleanup)(void *),
+    apr_status_t (*child_cleanup)(void *));
 
 /**
  * Run the specified cleanup function immediately and unregister it. Use
@@ -493,8 +493,10 @@ APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
  */
-APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
-                                          apr_status_t (*cleanup)(void *));
+APR_DECLARE(apr_status_t) apr_pool_cleanup_run(
+    apr_pool_t *p,
+    void *data,
+    apr_status_t (*cleanup)(void *));
 
 /**
  * An empty cleanup function 
@@ -588,7 +590,8 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 
 /* @} */
 
-#else
+#else /* APR_POOL_DEBUG or DOXYGEN */
+
 #ifdef apr_pool_join
 #undef apr_pool_join
 #endif
@@ -598,7 +601,8 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 #undef apr_pool_lock
 #endif
 #define apr_pool_lock(pool, lock)
-#endif
+
+#endif /* APR_POOL_DEBUG or DOXYGEN */
 
 
 /*
