@@ -105,6 +105,10 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
         return apr_get_os_error();
     }
 
+    apr_register_cleanup((*in)->cntxt, (void *)(*in), file_cleanup,
+                        apr_null_cleanup);
+    apr_register_cleanup((*out)->cntxt, (void *)(*out), file_cleanup,
+                        apr_null_cleanup);
     return APR_SUCCESS;
 }
 
