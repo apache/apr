@@ -62,6 +62,7 @@
 #include "atime.h"
 #include "misc.h"
 
+/* XXX: this is wrong for W2K */
 #define S_ISLNK(m)  (0)
 #define S_ISREG(m)  (((m) & (S_IFMT))  == S_IFREG)
 #define S_ISDIR(m)  (((m) & (S_IFDIR)) == S_IFDIR)
