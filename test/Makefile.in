@@ -118,68 +118,66 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-ab_apr.o: ab_apr.c ../include/apr_network_io.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_file_io.h ../include/apr_time.h \
- ../include/apr_getopt.h
-abc.o: abc.c ../include/apr_file_io.h ../include/apr_general.h \
- ../include/apr.h ../include/apr_errno.h ../include/apr_time.h
-client.o: client.c ../include/apr_network_io.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_file_io.h ../include/apr_time.h /usr/include/errno.h
-htdigest.o: htdigest.c ../include/apr_lib.h ../include/apr_general.h \
- ../include/apr.h ../include/apr_errno.h ../include/apr_file_io.h \
- ../include/apr_time.h ../include/apr_thread_proc.h \
- ../include/apr_md5.h
-htpasswd.o: htpasswd.c ../include/apr_signal.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_lib.h ../include/apr_file_io.h ../include/apr_time.h \
- ../include/apr_thread_proc.h
-logresolve.o: logresolve.c ../include/apr_config.h
+ab_apr.o: ab_apr.c $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_getopt.h
+abc.o: abc.c $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h
+client.o: client.c $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h $(OSDIR)/usr/include/errno.h
+htdigest.o: htdigest.c $(INCDIR)/apr_lib.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_md5.h $(INCDIR)/apr_config.h
 mod_test.o: mod_test.c
-rotatelogs.o: rotatelogs.c ../include/apr_config.h
-server.o: server.c ../include/apr_network_io.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_file_io.h ../include/apr_time.h
-testargs.o: testargs.c ../include/apr_file_io.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_time.h ../include/apr_lib.h \
- ../include/apr_thread_proc.h ../include/apr_getopt.h
-testcontext.o: testcontext.c ../include/apr_file_io.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_time.h ../include/apr_lib.h \
- ../include/apr_thread_proc.h
-testdso.o: testdso.c ../include/apr_config.h ../include/apr_general.h \
- ../include/apr.h ../include/apr_errno.h ../include/apr_pools.h \
- ../include/apr_lib.h ../include/apr_file_io.h ../include/apr_time.h \
- ../include/apr_thread_proc.h ../include/apr_dso.h
-testfile.o: testfile.c ../include/apr_file_io.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_time.h ../include/apr_lib.h \
- ../include/apr_thread_proc.h
-testmmap.o: testmmap.c ../include/apr_mmap.h ../include/apr_general.h \
- ../include/apr.h ../include/apr_errno.h ../include/apr_network_io.h \
- ../include/apr_file_io.h ../include/apr_time.h \
- ../include/apr_portable.h ../include/apr_thread_proc.h \
- ../include/apr_lock.h ../include/apr_lib.h
-testpipe.o: testpipe.c ../include/apr_file_io.h \
- ../include/apr_general.h ../include/apr.h ../include/apr_errno.h \
- ../include/apr_time.h ../include/apr_lib.h \
- ../include/apr_thread_proc.h
-testproc.o: testproc.c ../include/apr_thread_proc.h \
- ../include/apr_file_io.h ../include/apr_general.h ../include/apr.h \
- ../include/apr_errno.h ../include/apr_time.h ../include/apr_lib.h \
- /usr/include/errno.h
-testshmem.o: testshmem.c ../include/apr_shmem.h ../include/apr.h \
- ../include/apr_general.h ../include/apr_errno.h ../include/apr_lock.h \
- ../include/apr_lib.h ../include/apr_file_io.h ../include/apr_time.h \
- ../include/apr_thread_proc.h /usr/include/errno.h
-testsock.o: testsock.c ../include/apr_thread_proc.h \
- ../include/apr_file_io.h ../include/apr_general.h ../include/apr.h \
- ../include/apr_errno.h ../include/apr_time.h ../include/apr_lib.h
-testthread.o: testthread.c ../include/apr_thread_proc.h \
- ../include/apr_file_io.h ../include/apr_general.h ../include/apr.h \
- ../include/apr_errno.h ../include/apr_time.h ../include/apr_lock.h \
- /usr/include/errno.h
-testtime.o: testtime.c ../include/apr_time.h ../include/apr_general.h \
- ../include/apr.h ../include/apr_errno.h /usr/include/errno.h
+server.o: server.c $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h
+testargs.o: testargs.c $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_getopt.h
+testcontext.o: testcontext.c $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_thread_proc.h
+testdso.o: testdso.c $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_dso.h
+testfile.o: testfile.c $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_thread_proc.h
+testmmap.o: testmmap.c $(INCDIR)/apr_mmap.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_lock.h $(INCDIR)/apr_lib.h
+testoc.o: testoc.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(OSDIR)/usr/include/errno.h
+testpipe.o: testpipe.c $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_thread_proc.h
+testproc.o: testproc.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
+ $(OSDIR)/usr/include/errno.h
+testshmem.o: testshmem.c $(INCDIR)/apr_shmem.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_thread_proc.h $(OSDIR)/usr/include/errno.h
+testsock.o: testsock.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h
+testthread.o: testthread.c $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lock.h \
+ $(OSDIR)/usr/include/errno.h
+testtime.o: testtime.c $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(OSDIR)/usr/include/errno.h
