@@ -1,5 +1,12 @@
 Changes with APR b1  
 
+  *) Add new apr_shm_t API and remove old apr_shmem_t API. The new
+     API handles both anonymous and name-based shared memory. Anonymous
+     shared memory segments are only usable on systems with process
+     inheritance, and so the new API with name-based segments is
+     usable on platforms like Win32.  [Aaron Bannert and William Rowe
+     with much help from Justin Erenkrantz and Sander Striker]
+
   *) Add --with-egd to support EGD-compatible entropy gatherers for 
      those platforms without native support.  [Justin Erenkrantz]
 
