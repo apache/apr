@@ -120,12 +120,16 @@ B<NOTE>:  Specify APR_DEFAULT_CHARSET for one of the charset
           of the caller was not encoded in the same charset as
           APR at compile time.
 
+          Specify APR_LOCALE_CHARSET for one of the charset
+          names to indicate the charset of the current locale.
+
 =cut
  */
 ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage, 
                           const char *frompage, ap_pool_t *pool);
 
-#define APR_DEFAULT_CHARSET NULL
+#define APR_DEFAULT_CHARSET (const char *)0
+#define APR_LOCALE_CHARSET (const char *)1
 
 /*
 

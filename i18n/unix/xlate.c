@@ -63,6 +63,9 @@
 
 #if APR_HAS_XLATE
 
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif
@@ -81,7 +84,7 @@ struct ap_xlate_t {
 #endif
 };
 
-/* get_default_codepage()
+/* get_default_charset()
  *
  * simple heuristic to determine codepage of source code so that
  * literal strings (e.g., "GET /\r\n") in source code can be translated
@@ -92,7 +95,7 @@ struct ap_xlate_t {
  * unpacked.
  */
 
-static const char *get_default_codepage(void)
+static const char *get_default_charset(void)
 {
 #ifdef __MVS__
     #ifdef __CODESET__
@@ -119,6 +122,37 @@ static const char *get_default_codepage(void)
     }
 
     return "unknown";
+}
+
+/* get_locale_charset()
+ *
+ * If possible on this system, get the charset of the locale.  Otherwise,
+ * defer to get_default_charset().
+ */
+
+static const char *get_locale_charset(void)
+{
+#if defined(HAVE_NL_LANGINFO) && defined(HAVE_CODESET)
+    const char *charset;
+    charset = nl_langinfo(CODESET);
+    if (charset) {
+        return charset;
+    }
+#endif
+    return get_default_charset();
+}
+
+static const char *handle_special_names(const char *page)
+{
+    if (page == APR_DEFAULT_CHARSET) {
+        return get_default_charset();
+    }
+    else if (page == APR_LOCALE_CHARSET) {
+        return get_locale_charset();
+    }
+    else {
+        return page;
+    }
 }
 
 static ap_status_t ap_xlate_cleanup(void *convset)
@@ -176,14 +210,9 @@ ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage,
     int found = 0;
 
     *convset = NULL;
-    
-    if (!topage) {
-        topage = get_default_codepage();
-    }
 
-    if (!frompage) {
-        frompage = get_default_codepage();
-    }
+    topage = handle_special_names(topage);
+    frompage = handle_special_names(frompage);
     
     new = (ap_xlate_t *)ap_pcalloc(pool, sizeof(ap_xlate_t));
     if (!new) {

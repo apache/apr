@@ -29,6 +29,7 @@
 /* Various #defines we need to know about */
 #undef HAVE_LOCK_EX
 #undef HAVE_F_SETLK
+#undef HAVE_CODESET
 #undef HAVE_PTHREAD_PROCESS_SHARED
 #undef DEV_RANDOM
 #undef HAVE_TRUERAND
