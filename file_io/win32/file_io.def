@@ -43,4 +43,5 @@ EXPORTS
     ap_eof   @36
 	ap_get_filetype @37
 	ap_writev @38
-    ap_open_stderr   @39
+    ap_open_stderr  @39
+    
