@@ -467,6 +467,11 @@ SOURCE=.\include\apr.h.in
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr.hnw
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr.hw
 
 !IF  "$(CFG)" == "libapr - Win32 Release"
