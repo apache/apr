@@ -118,8 +118,8 @@ struct ap_dir_t {
     struct dirent *entry;
 };
 
-ap_status_t file_cleanup(void *);
-mode_t get_fileperms(ap_fileperms_t);
+ap_status_t ap_unix_file_cleanup(void *);
+mode_t ap_unix_get_fileperms(ap_fileperms_t);
 
 #endif  /* ! FILE_IO_H */
 

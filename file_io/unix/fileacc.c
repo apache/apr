@@ -71,7 +71,7 @@ ap_status_t ap_get_filename(char **new, ap_file_t *thefile)
     }
 }
 
-mode_t get_fileperms(ap_fileperms_t mode)
+mode_t ap_unix_get_fileperms(ap_fileperms_t mode)
 {
     mode_t rv = 0;
 

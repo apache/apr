@@ -145,7 +145,7 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir)
 
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
-    mode_t mode = get_fileperms(perm);
+    mode_t mode = ap_unix_get_fileperms(perm);
 
     if (mkdir(path, mode) == 0) {
         return APR_SUCCESS;
