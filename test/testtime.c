@@ -99,6 +99,21 @@ int main(void)
     }
     printf("OK\n");
 
+    STD_TEST_NEQ("    apr_implode_gmt (localtime)",
+                 apr_implode_gmt(&imp, &xt2))
+
+    printf("%-60s", "    checking localtime explode == GMT implode");
+    if (imp != now) {
+	printf("mismatch\n"
+                "\t\tapr_now()                %" APR_INT64_T_FMT "\n"
+                "\t\tapr_implode() returned   %" APR_INT64_T_FMT "\n"
+                "\t\terror delta was          %" APR_TIME_T_FMT "\n"
+                "\t\tshould have been         0\n",
+                now, imp, imp-now);
+	exit(-1);
+    }
+    printf("OK\n");
+
     str = apr_pcalloc(p, sizeof(char) * STR_SIZE);
     str2 = apr_pcalloc(p, sizeof(char) * STR_SIZE);
     imp = 0;

@@ -193,6 +193,14 @@ apr_status_t apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
     return APR_SUCCESS;
 }
 
+apr_status_t apr_implode_gmt(apr_time_t *t, apr_exploded_time_t *xt)
+{
+    apr_status_t status = apr_implode_time(t, xt);
+    if (status == APR_SUCCESS)
+        *t -= (apr_time_t) xt->tm_gmtoff * APR_USEC_PER_SEC;
+    return status;
+}
+
 apr_status_t apr_os_imp_time_get(apr_os_imp_time_t **ostime, apr_time_t *aprtime)
 {
     (*ostime)->tv_usec = *aprtime % APR_USEC_PER_SEC;
