@@ -53,7 +53,6 @@
  */
 
 #include "networkio.h"
-#include <sys/sendfile.h>
 
 #if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the apr_file_t internals. */
