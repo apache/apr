@@ -55,6 +55,11 @@
 #ifndef APR_THREAD_PROC_H
 #define APR_THREAD_PROC_H
 
+/**
+ * @file apr_thread_proc.h
+ * @brief APR Thread and Process Library
+ */
+
 #include "apr.h"
 #include "apr_file_io.h"
 #include "apr_pools.h"
@@ -65,17 +70,13 @@
 #include <sys/resource.h>
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 /**
- * @file apr_thread_proc.h
- * @brief APR Thread and Process Library
- */
-/**
- * @defgroup APR_Thread Thread Library
- * @ingroup APR
+ * @defgroup apr_thread_proc Threads and Process Functions
+ * @ingroup APR 
  * @{
  */
 
@@ -131,7 +132,7 @@ typedef enum {
 #define APR_LIMIT_NOFILE     3
 
 /**
- * @defgroup Other_Child Other Child Flags
+ * @defgroup APR_OC Other Child Flags
  * @{
  */
 #define APR_OC_REASON_DEATH         0     /**< child has died, caller must call
@@ -152,11 +153,8 @@ typedef enum {
                                            */
 /** @} */
 
-/** @see apr_proc_t */
-typedef struct apr_proc_t apr_proc_t;
-
 /** The APR process type */
-struct apr_proc_t {
+typedef struct apr_proc_t {
     /** The process ID */
     pid_t pid;
     /** Parent's side of pipe to child's stdin */
@@ -184,7 +182,7 @@ struct apr_proc_t {
      */
     HANDLE hproc;
 #endif
-};
+} apr_proc_t;
 
 /**
  * The prototype for APR child errfn functions.  (See the description
@@ -391,12 +389,6 @@ APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
 
 #endif
 
-/* Process Function definitions */
-
-/**
- * @package APR Process library
- */
-
 /**
  * Create and initialize a new procattr variable
  * @param new_attr The newly created procattr. 
@@ -514,11 +506,13 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
 /**
  * Specify an error function to be called in the child process if APR
  * encounters an error in the child prior to running the specified program.
- * @param child_errfn The function to call in the child process.
- * @param userdata Parameter to be passed to errfn.
+ * @param attr The procattr describing the child process to be created.
+ * @param errfn The function to call in the child process.
  * @remark At the present time, it will only be called from apr_proc_create()
  *         on platforms where fork() is used.  It will never be called on other
- *         platforms.
+ *         platforms, on those platforms apr_proc_create() will return the error
+ *         in the parent process rather than invoke the callback in the now-forked
+ *         child process.
  */
 APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
                                                        apr_child_errfn_t *errfn);
@@ -527,6 +521,7 @@ APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
  * Specify that apr_proc_create() should do whatever it can to report
  * failures to the caller of apr_proc_create(), rather than find out in
  * the child.
+ * @param attr The procattr describing the child process to be created.
  * @param chk Flag to indicate whether or not extra work should be done
  *            to try to report failures to the caller.
  * @remark This flag only affects apr_proc_create() on platforms where
@@ -679,8 +674,9 @@ APR_DECLARE(void) apr_proc_other_child_unregister(void *data);
 /**
  * Notify the maintenance callback of a registered other child process
  * that application has detected an event, such as death.
- * @param proc The process to check.
- * @param status The status to pass to the maintenance function.
+ * @param proc The process to check
+ * @param reason The reason code to pass to the maintenance function
+ * @param status The status to pass to the maintenance function
  * @remark An example of code using this behavior;
  * <pre>
  * rv = apr_proc_wait_all_procs(&proc, &exitcode, &status, APR_WAIT, p);
@@ -699,18 +695,34 @@ APR_DECLARE(apr_status_t) apr_proc_other_child_alert(apr_proc_t *proc,
                                                      int reason,
                                                      int status);
 
+/**
+ * Test one specific other child processes and invoke the maintenance callback 
+ * with the appropriate reason code, if still running, or the appropriate reason 
+ * code if the process is no longer healthy.
+ * @param ocr The registered other child
+ * @param reason The reason code (e.g. APR_OC_REASON_RESTART) if still running
+ */
 APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
                                                int reason);
 
+/**
+ * Test all registered other child processes and invoke the maintenance callback 
+ * with the appropriate reason code, if still running, or the appropriate reason 
+ * code if the process is no longer healthy.
+ * @param reason The reason code (e.g. APR_OC_REASON_RESTART) to running processes
+ */
 APR_DECLARE(void) apr_proc_other_child_refresh_all(int reason);
 
-/** @deprecated 
- * @see apr_proc_other_child_refresh_all(APR_OC_REASON_RESTART)
+/** @deprecated @see apr_proc_other_child_refresh_all
+ * @remark Call apr_proc_other_child_refresh_all(APR_OC_REASON_RESTART)
+ * or apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING) instead.
+ * @bug The differing implementations of this function on Win32 (_RUNNING checks) 
+ * and Unix (used only for _RESTART) are the reason it will be dropped with APR 1.0.
  */
 APR_DECLARE(void) apr_proc_other_child_check(void);
 
-/** @deprecated 
- * @see apr_proc_other_child_alert()
+/** @deprecated @see apr_proc_other_child_alert
+ * @bug This function's name had nothing to do with it's purpose
  */
 APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *proc, int status);
 
@@ -766,7 +778,9 @@ APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum));
 APR_POOL_DECLARE_ACCESSOR(thread);
 
 #endif /* APR_HAS_THREADS */
+
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif

@@ -55,6 +55,11 @@
 #ifndef APR_MMAP_H
 #define APR_MMAP_H
 
+/**
+ * @file apr_mmap.h
+ * @brief APR MMAP routines
+ */
+
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -68,13 +73,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 /**
- * @file apr_mmap.h
- * @brief APR MMAP routines
- */
-/**
- * @defgroup APR_MMAP MMAP (Memory Map) Routines
- * @ingroup APR
+ * @defgroup apr_mmap MMAP (Memory Map) Routines
+ * @ingroup APR 
  * @{
  */
 
@@ -219,11 +221,11 @@ APR_DECLARE(apr_status_t) apr_mmap_offset(void **addr, apr_mmap_t *mm,
                                           apr_off_t offset);
 
 #endif /* APR_HAS_MMAP */
+
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif  /* ! APR_MMAP_H */
-
-

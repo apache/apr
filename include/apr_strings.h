@@ -78,6 +78,11 @@
 #ifndef APR_STRINGS_H
 #define APR_STRINGS_H
 
+/**
+ * @file apr_strings.h
+ * @brief APR Strings library
+ */
+
 #include "apr.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
@@ -91,15 +96,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 /**
- * @file apr_strings.h
- * @brief APR Strings library
- */
-/**
- * @defgroup APR_Strings String routines
- * @ingroup APR
+ * @defgroup apr_strings String routines
+ * @ingroup APR 
  * @{
  */
+
 /**
  * Do a natural order comparison of two strings.
  * @param a The first string to compare
@@ -145,7 +148,7 @@ APR_DECLARE(char *) apr_pstrmemdup(apr_pool_t *p, const char *s, apr_size_t n);
 
 /**
  * duplicate the first n characters of a string into memory allocated 
- * out of a pool; the new string will be '\0'-terminated
+ * out of a pool; the new string will be null-terminated
  * @param p The pool to allocate out of
  * @param s The string to duplicate
  * @param n The number of characters to duplicate
@@ -218,7 +221,7 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  *       2) strncpy() null fills, which is bogus, esp. when copy 8byte strings
  *          into 8k blocks.
  *       3) Instead of returning the pointer to the beginning of the
- *          destination string, we return a pointer to the terminating '\0'
+ *          destination string, we return a pointer to the terminating null
  *          to allow us to check for truncation.
  * </PRE>
  */
@@ -245,7 +248,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
                                                apr_pool_t *token_context);
 
 /**
- * Split a string into separate '\0'-terminated tokens.  The tokens are 
+ * Split a string into separate null-terminated tokens.  The tokens are 
  * delimited in the string by one or more characters from the sep
  * argument.
  * @param str The string to separate; this should be specified on the
@@ -259,7 +262,6 @@ APR_DECLARE(char *) apr_strtok(char *str, const char *sep, char **last);
 
 /**
  * @defgroup APR_Strings_Snprintf snprintf implementations
- *
  * @warning
  * These are snprintf implementations based on apr_vformatter().
  *
@@ -302,8 +304,8 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
  */
 APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
                                va_list ap);
-
 /** @} */
+
 /**
  * create a string representation of an int, allocated from a pool
  * @param p The pool from which to allocate
@@ -361,7 +363,9 @@ APR_DECLARE(apr_int64_t) apr_atoi64(const char *buf);
  * @remark All negative sizes report '  - ', apr_strfsize only formats positive values.
  */
 APR_DECLARE(char *) apr_strfsize(apr_off_t size, char *buf);
+
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif

@@ -55,6 +55,11 @@
 #ifndef APR_TABLES_H
 #define APR_TABLES_H
 
+/**
+ * @file apr_tables.h
+ * @brief APR Table library
+ */
+
 #include "apr.h"
 #include "apr_pools.h"
 
@@ -66,23 +71,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*
- * Define the structures used by the APR general-purpose library.
- */
-
 /**
- * @file apr_tables.h
- * @brief APR Table library
- */
-/**
- * @defgroup APR_Table Table routines
- * @ingroup APR
- *
- * Memory allocation stuff, like pools, arrays, and tables.  Pools
- * and tables are opaque structures to applications, but arrays are
- * published.
+ * @defgroup apr_tables Table and Array Functions
+ * @ingroup APR 
+ * Tables are used to store entirely opaque structures 
+ * for applications, while Arrays are usually used to
+ * deal with string lists.
  * @{
  */
+
 /** the table abstract data type */
 typedef struct apr_table_t apr_table_t;
 
@@ -398,7 +395,7 @@ APR_DECLARE_NONSTD(int) apr_table_do(apr_table_do_callback_fn_t *comp,
  * @see apr_table_do_callback_fn_t
  */
 APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
-                               void *rec, const apr_table_t *t, va_list);
+                               void *rec, const apr_table_t *t, va_list vp);
 
 /** flag for overlap to use apr_table_setn */
 #define APR_OVERLAP_TABLES_SET   (0)
@@ -445,6 +442,7 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
                                      unsigned flags);
 
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif

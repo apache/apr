@@ -55,7 +55,7 @@
 #include "apr.h"        /* configuration data */
 /**
  * @file apr_want.h
- * @brief APR_WANT_HEADERS documentation
+ * @brief APR Standard Headers Support
  *
  * <PRE>
  * Features:

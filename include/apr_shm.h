@@ -55,6 +55,11 @@
 #ifndef APR_SHM_H
 #define APR_SHM_H
 
+/**
+ * @file apr_shm.h
+ * @brief APR Shared Memory Routines
+ */
+
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -64,13 +69,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @file apr_shm.h
- * @brief APR Shared Memory Routines
- */
-
-/**
- * @defgroup APR_SHM Shared Memory Routines
- * @ingroup APR
+ * @defgroup apr_shm Shared Memory Routines
+ * @ingroup APR 
  * @{
  */
 
@@ -155,6 +155,8 @@ APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m);
  * Get the pool used by this shared memory segment.
  */
 APR_POOL_DECLARE_ACCESSOR(shm);
+
+/** @} */ 
 
 #ifdef __cplusplus
 }

@@ -55,6 +55,11 @@
 #ifndef APR_ERRNO_H
 #define APR_ERRNO_H
 
+/**
+ * @file apr_errno.h
+ * @brief APR Error Codes
+ */
+
 #include "apr.h"
 
 #if APR_HAVE_ERRNO_H
@@ -66,12 +71,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @file apr_errno.h
- * @brief APR Error Codes
- */
-/**
- * @defgroup APR_Error_Codes Error Codes
- * @ingroup APR
+ * @defgroup apr_errno Error Codes
+ * @ingroup APR 
  * @{
  */
 
@@ -111,48 +112,40 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_TO_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
 
-/**
- * @def apr_get_os_error()
+/** @def apr_get_os_error()
  * @return apr_status_t the last platform error, folded into apr_status_t, on most platforms
  * @remark This retrieves errno, or calls a GetLastError() style function, and
  *      folds it with APR_FROM_OS_ERROR.  Some platforms (such as OS2) have no
  *      such mechanism, so this call may be unsupported.  Do NOT use this
  *      call for socket errors from socket, send, recv etc!
  */
-#define apr_get_os_error()
 
-/**
+/** @def apr_set_os_error(e)
  * Reset the last platform error, unfolded from an apr_status_t, on some platforms
- * @param statcode The OS error folded in a prior call to APR_FROM_OS_ERROR()
- * @deffunc void apr_set_os_error(apr_status_t statcode)
- * @tip Warning: macro implementation; the statcode argument may be evaluated
+ * @param e The OS error folded in a prior call to APR_FROM_OS_ERROR()
+ * @warning This is a macro implementation; the statcode argument may be evaluated
  *      multiple times.  If the statcode was not created by apr_get_os_error
  *      or APR_FROM_OS_ERROR, the results are undefined.  This macro sets
  *      errno, or calls a SetLastError() style function, unfolding statcode
  *      with APR_TO_OS_ERROR.  Some platforms (such as OS2) have no such
  *      mechanism, so this call may be unsupported.
  */
-#define apr_set_os_error(statcode)
 
-/**
+/** @def apr_get_netos_error()
  * Return the last socket error, folded into apr_status_t, on all platforms
- * @deffunc apr_status_t apr_get_netos_error()
- * @tip This retrieves errno or calls a GetLastSocketError() style function,
+ * @remark This retrieves errno or calls a GetLastSocketError() style function,
  *      and folds it with APR_FROM_OS_ERROR.
  */
-#define apr_get_netos_error()
 
-/**
+/** @def apr_set_netos_error(e)
  * Reset the last socket error, unfolded from an apr_status_t
- * @param socketcode The socket error folded in a prior call to APR_FROM_OS_ERROR()
- * @deffunc void apr_set_os_error(apr_status_t statcode)
- * @tip Warning: macro implementation; the statcode argument may be evaluated
+ * @param e The socket error folded in a prior call to APR_FROM_OS_ERROR()
+ * @warning This is a macro implementation; the statcode argument may be evaluated
  *      multiple times.  If the statcode was not created by apr_get_os_error
  *      or APR_FROM_OS_ERROR, the results are undefined.  This macro sets
  *      errno, or calls a WSASetLastError() style function, unfolding 
  *      socketcode with APR_TO_OS_ERROR.
  */
-#define apr_set_netos_error(socketcode)
 
 #endif /* defined(DOXYGEN) */
 
@@ -203,9 +196,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /** no error. @see APR_STATUS_IS_SUCCESS */
 #define APR_SUCCESS 0
 
-/* APR ERROR VALUES */
 /** 
- * @defgroup APRErrorValues Error Values
+ * @defgroup APR_Error APR Error Values
  * <PRE>
  * <b>APR ERROR VALUES</b>
  * APR_ENOSTAT      APR was unable to perform a stat on the file 
@@ -315,17 +307,18 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ESYMNOTFOUND   (APR_OS_START_ERROR + 26)
 /** @see APR_STATUS_IS_EPROC_UNKNOWN */
 #define APR_EPROC_UNKNOWN  (APR_OS_START_ERROR + 27)
+/** @} */
 
-/* APR ERROR VALUE TESTS */
 /** 
- * @defgroup APRErrorValueTests Error Value Tests
- * @remark For any particular error condition, more than one of these tests
+ * @defgroup APR_STATUS_IS Status Value Tests
+ * @warning For any particular error condition, more than one of these tests
  *      may match. This is because platform-specific error codes may not
  *      always match the semantics of the POSIX codes these tests (and the
  *      correcponding APR error codes) are named after. A notable example
  *      are the APR_STATUS_IS_ENOENT and APR_STATUS_IS_ENOTDIR tests on
  *      Win32 platforms. The programmer should always be aware of this and
  *      adjust the order of the tests accordingly.
+ * @{
  */
 /** 
  * APR was unable to perform a stat on the file 
@@ -402,7 +395,12 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /** The given process was not recognized by APR. */
 #define APR_STATUS_IS_EPROC_UNKNOWN(s)  ((s) == APR_EPROC_UNKNOWN)
 
-/* APR STATUS VALUES */
+/** @} */
+
+/** 
+ * @addtogroup APR_Error
+ * @{
+ */
 /** @see APR_STATUS_IS_INCHILD */
 #define APR_INCHILD        (APR_OS_START_STATUS + 1)
 /** @see APR_STATUS_IS_INPARENT */
@@ -447,18 +445,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
 /** @see APR_STATUS_IS_EBUSY */
 #define APR_EBUSY          (APR_OS_START_STATUS + 25)
+/** @} */
 
-/**
- * @defgroup aprerr_status Status Value Tests 
+/** 
+ * @addtogroup APR_STATUS_IS
  * @{
- */ 
-/**
- * @param status The APR_status code to check.
- * @param statcode The apr status code to test.
- * @tip Warning: macro implementations; the statcode argument may be
- *      evaluated multiple times.  To test for APR_EOF, always test
- *      APR_STATUS_IS_EOF(statcode) because platform-specific codes are
- *      not necessarily translated into the corresponding APR_Estatus code.
  */
 /** 
  * Program is currently executing in the child 
@@ -602,9 +593,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * more than one error code 
  */
 #define APR_STATUS_IS_EBUSY(s)          ((s) == APR_EBUSY)
+
 /** @} */
-/**
- * @defgroup aprerrcanonical Canonical Errors
+
+/** 
+ * @addtogroup APR_Error APR Error Values
  * @{
  */
 /* APR CANONICAL ERROR VALUES */
@@ -800,8 +793,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #endif
 
 /** @} */
-/** @} */
-#if defined(OS2)
+
+#if defined(OS2) && !defined(DOXYGEN)
 
 #define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
 #define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
@@ -971,7 +964,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
     { SOCEPIPE,                 EPIPE           }
 */
 
-#elif defined(WIN32) /* endif defined(OS2) */
+#elif defined(WIN32) && !defined(DOXYGEN) /* !defined(OS2) */
 
 #define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
 #define APR_TO_OS_ERROR(e)   (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
@@ -1082,7 +1075,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY \
                 || (s) == APR_OS_START_SYSERR + ERROR_DIR_NOT_EMPTY)
 
-#elif defined(NETWARE) /* !def OS2 || WIN32 */
+#elif defined(NETWARE) && !defined(DOXYGEN) /* !defined(OS2) && !defined(WIN32) */
 
 #define APR_FROM_OS_ERROR(e)  (e)
 #define APR_TO_OS_ERROR(e)    (e)
@@ -1137,7 +1130,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EXDEV(s)          ((s) == APR_EXDEV)
 #define APR_STATUS_IS_ENOTEMPTY(s)      ((s) == APR_ENOTEMPTY)
 
-#else /* endif defined(NETWARE) */
+#else /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
 
 /*
  *  os error codes are clib error codes
@@ -1152,11 +1145,15 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define apr_get_netos_error() (errno)
 #define apr_set_netos_error(e) (errno = (e))
+/** @} */
 
+/** 
+ * @addtogroup APR_STATUS_IS
+ * @{
+ */
 /** no error */
-#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
+#define APR_STATUS_IS_SUCCESS(s)        ((s) == APR_SUCCESS)
 
-/* APR CANONICAL ERROR TESTS */
 /** permission denied */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
 /** file exists */
@@ -1236,8 +1233,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /** Directory Not Empty */
 #define APR_STATUS_IS_ENOTEMPTY(s)       ((s) == APR_ENOTEMPTY || \
                                           (s) == APR_EEXIST)
+/** @} */
 
-#endif /* !def OS2 || WIN32 */
+#endif /* !defined(NETWARE) && !defined(OS2) && !defined(WIN32) */
 
 /** @} */
 

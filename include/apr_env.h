@@ -58,12 +58,6 @@
  * @file apr_env.h
  * @brief APR Environment functions
  */
-/**
- * @defgroup APR_ENV Functions for manupulating the environment
- * @ingroup APR_ENV
- * @{
- */
-
 #include "apr_errno.h"
 #include "apr_pools.h"
 
@@ -72,11 +66,16 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
+ * @defgroup apr_env Functions for manupulating the environment
+ * @ingroup APR 
+ * @{
+ */
+
+/**
  * Get the value of an environment variable
  * @param value the returned value, allocated from @a pool
  * @param envvar the name of the environment variable
  * @param pool where to allocate @a value and any temporary storage from
- * @deffunc apr_status_t apr_env_get(char **value, const char *envvar, apr_pool_t *pool)
  */
 APR_DECLARE(apr_status_t) apr_env_get(char **value, const char *envvar,
                                       apr_pool_t *pool);
@@ -86,7 +85,6 @@ APR_DECLARE(apr_status_t) apr_env_get(char **value, const char *envvar,
  * @param envvar the name of the environment variable
  * @param value the value to set
  * @param pool where to allocate temporary storage from
- * @deffunc apr_status_t apr_env_get(const char *envvar, const char *value, apr_pool_t *pool)
  */
 APR_DECLARE(apr_status_t) apr_env_set(const char *envvar, const char *value,
                                       apr_pool_t *pool);
@@ -95,13 +93,13 @@ APR_DECLARE(apr_status_t) apr_env_set(const char *envvar, const char *value,
  * Delete a variable from the environment
  * @param envvar the name of the environment variable
  * @param pool where to allocate temporary storage from
- * @deffunc apr_status_t apr_env_delete(const char *envvar, apr_pool_t *pool)
  */
 APR_DECLARE(apr_status_t) apr_env_delete(const char *envvar, apr_pool_t *pool);
 
+/** @} */
 
 #ifdef __cplusplus
 }
 #endif
-/** @} */
+
 #endif  /* ! APR_ENV_H */

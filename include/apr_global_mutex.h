@@ -55,23 +55,26 @@
 #ifndef APR_GLOBAL_MUTEX_H
 #define APR_GLOBAL_MUTEX_H
 
+/**
+ * @file apr_global_mutex.h
+ * @brief APR Global Locking Routines
+ */
+
 #include "apr.h"
 #include "apr_proc_mutex.h"    /* only for apr_lockmech_e */
 #include "apr_pools.h"
 #include "apr_errno.h"
+#if APR_PROC_MUTEX_IS_GLOBAL
+#include "apr_proc_mutex.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @file apr_global_mutex.h
- * @brief APR Global Locking Routines
- */
-
-/**
  * @defgroup APR_GlobalMutex Global Locking Routines
- * @ingroup APR
+ * @ingroup APR 
  * @{
  */
 
@@ -168,8 +171,6 @@ APR_POOL_DECLARE_ACCESSOR(global_mutex);
  * Define these platforms in terms of an apr_proc_mutex_t.
  */
 
-#include "apr_proc_mutex.h"
-
 #define apr_global_mutex_t          apr_proc_mutex_t
 #define apr_global_mutex_create     apr_proc_mutex_create
 #define apr_global_mutex_child_init apr_proc_mutex_child_init
@@ -180,6 +181,8 @@ APR_POOL_DECLARE_ACCESSOR(global_mutex);
 #define apr_global_mutex_pool_get   apr_proc_mutex_pool_get
 
 #endif
+
+/** @} */
 
 #ifdef __cplusplus
 }

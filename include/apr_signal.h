@@ -54,6 +54,7 @@
 
 #ifndef APR_SIGNAL_H
 #define APR_SIGNAL_H
+
 /**
  * @file apr_signal.h 
  * @brief APR Signal Handling
@@ -71,8 +72,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup APR_Signal Signal Handling
- * @ingroup APR
+ * @defgroup apr_signal Handling
+ * @ingroup APR 
  * @{
  */
 
@@ -127,6 +128,7 @@ APR_DECLARE(const char *) apr_signal_get_description(int signum);
 void apr_signal_init(apr_pool_t *pglobal);
 
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

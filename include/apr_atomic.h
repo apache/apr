@@ -59,20 +59,28 @@
 #ifndef APR_ATOMIC_H
 #define APR_ATOMIC_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "apr.h"
-#include "apr_pools.h"
-
 /**
  * @file apr_atomic.h
  * @brief APR Atomic Operations
  */
+
+#include "apr.h"
+#include "apr_pools.h"
+
+/* Platform includes for atomics */
+#if defined(NETWARE) || defined(__MVS__) /* OS/390 */
+#include <stdlib.h>
+#elif defined(__FreeBSD__)
+#include <machine/atomic.h>
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
- * @defgroup APR_Atomic Atomic operations
- * @ingroup APR
+ * @defgroup apr_atomic Atomic Operations
+ * @ingroup APR 
  * @{
  */
 
@@ -169,7 +177,6 @@ typedef LONG apr_atomic_t;
 
 #elif defined(NETWARE)
 
-#include <stdlib.h>
 #define apr_atomic_t unsigned long
 
 #define apr_atomic_add(mem, val)     atomic_add(mem,val)
@@ -196,8 +203,6 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 }
 
 #elif defined(__FreeBSD__)
-
-#include <machine/atomic.h>
 
 #define apr_atomic_t apr_uint32_t
 #define apr_atomic_add(mem, val)     atomic_add_int(mem,val)
@@ -259,7 +264,7 @@ apr_uint32_t apr_atomic_sub_sparc(volatile apr_atomic_t *mem, apr_uint32_t sub);
 apr_uint32_t apr_atomic_cas_sparc(volatile apr_uint32_t *mem, long with, long cmp);
 
 #elif defined(__MVS__) /* OS/390 */
-#include <stdlib.h>
+
 #define apr_atomic_t cs_t
 
 apr_int32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_int32_t val);
@@ -358,6 +363,9 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 #endif /* APR_ATOMIC_NEED_DEFAULT_INIT */
 
 #endif /* !DOXYGEN */
+
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif

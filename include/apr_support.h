@@ -54,14 +54,10 @@
 
 #ifndef APR_SUPPORT_H
 #define APR_SUPPORT_H
+
 /**
  * @file apr_support.h
  * @brief APR Support functions
- */
-/**
- * @defgroup APR_Support Internal APR support functions
- * @ingroup APR_Support
- * @{
  */
 
 #include "apr.h"
@@ -73,13 +69,21 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
+ * @defgroup apr_support Internal APR support functions
+ * @ingroup APR 
+ * @{
+ */
+
+/**
  * Wait for IO to occur or timeout.
  */
 apr_status_t apr_wait_for_io_or_timeout(apr_file_t *f, apr_socket_t *s,
                                         int for_read);
 
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif
-/** @} */
+
 #endif  /* ! APR_SUPPORT_H */
