@@ -93,8 +93,8 @@ apr_status_t apr_atomic_init(apr_pool_t *p);
 /**
  * read the value stored in a atomic variable
  * @param the pointer
- * @warning on certain platforms (linux) this number is not
- * stored directly in the pointer. in others it is 
+ * @warning on certain platforms this number is not stored
+ * directly in the pointer. in others it is 
  */
 apr_uint32_t apr_atomic_read(volatile apr_atomic_t *mem);
 /**
@@ -228,7 +228,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem, apr_uint32_t swap,
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 #endif /* APR_HAS_THREADS */
 
-#endif /* !defined(WIN32) && !defined(__linux) */
+#endif /* !defined(WIN32) */
 
 #if defined(APR_ATOMIC_NEED_DEFAULT)
 #define apr_atomic_t apr_uint32_t
