@@ -2066,6 +2066,7 @@ static void free_proc_chain(struct process_chain *procs)
 #endif /* !defined(NEED_WAITPID) */
 
     for (pc = procs; pc; pc = pc->next) {
+#ifndef WIN32
         if ((pc->kill_how == APR_KILL_AFTER_TIMEOUT)
             || (pc->kill_how == APR_KILL_ONLY_ONCE)) {
             /*
@@ -2074,14 +2075,15 @@ static void free_proc_chain(struct process_chain *procs)
              * similar to a SIGKILL, so always give the process a timeout
              * under Windows before killing it.
              */
-#ifdef WIN32
-            need_timeout = 1;
-#else /* !defined(WIN32) */
             if (apr_proc_kill(pc->proc, SIGTERM) == APR_SUCCESS)
                 need_timeout = 1;
-#endif /* !defined(WIN32) */
         }
         else if (pc->kill_how == APR_KILL_ALWAYS) {
+#else /* WIN32 knows only one fast, clean method of killing processes today */
+        if (pc->kill_how != APR_KILL_NEVER) {
+            need_timeout = 1;
+            pc->kill_how = APR_KILL_ALWAYS;
+#endif
             apr_proc_kill(pc->proc, SIGKILL);
         }
     }
@@ -2130,23 +2132,6 @@ static void free_proc_chain(struct process_chain *procs)
         if (pc->kill_how != APR_KILL_NEVER)
             (void)apr_proc_wait(pc->proc, NULL, NULL, APR_WAIT);
     }
-
-#ifdef WIN32
-    /*
-     * XXX: Do we need an APR function to clean-up a proc_t?
-     * Well ... yeah ... but we can't since it's scope is ill defined.
-     * We can't dismiss the handle until the apr_proc_wait above is
-     * finished with the proc_t.
-     */
-    {
-        for (pc = procs; pc; pc = pc->next) {
-            if (pc->proc->hproc) {
-                CloseHandle(pc->proc->hproc);
-                pc->proc->hproc = NULL;
-            }
-        }
-    }
-#endif /* defined(WIN32) */
 }
 
 
