@@ -93,7 +93,6 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
     (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    (*new)->remote_hostname = NULL;
 
     (*new)->addr->sin_family = AF_INET;
 
@@ -189,9 +188,6 @@ ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
 
 ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
 {
-    struct hostent *hptr;
-    
-  
     (*new) = (struct socket_t *)ap_palloc(sock->cntxt, 
                             sizeof(struct socket_t));
 
@@ -205,12 +201,6 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
 
     if ((*new)->sock == INVALID_SOCKET) {
         return errno;
-    }
-    
-    hptr = gethostbyaddr((char *)&(*new)->addr->sin_addr, 
-                         sizeof(struct in_addr), AF_INET);
-    if (hptr != NULL) {
-        (*new)->remote_hostname = strdup(hptr->h_name);
     }
     
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -248,7 +238,6 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 
     if (connect(sock->sock, (const struct sockaddr *)sock->addr, 
                 sock->addr_len) == 0) {
-        sock->remote_hostname = strdup(hostname);
         return APR_SUCCESS;
     }
     else {

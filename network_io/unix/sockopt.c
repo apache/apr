@@ -64,7 +64,6 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <arpa/inet.h>
 #include <netdb.h>
 
 static ap_status_t soblock(int sd)
@@ -215,7 +214,8 @@ ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
         return APR_ENOMEM;
     }
 
-    return errno;
+    /* XXX - Is this threadsafe? */
+    return h_errno;
 }
 
 

@@ -136,11 +136,26 @@ ap_status_t ap_gethostname(ap_context_t *cont, char *buf, int len)
 
 ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
 {
-    (*name) = ap_pstrdup(sock->cntxt, sock->remote_hostname);
-    if (*name) {
-        return APR_SUCCESS;
+    struct hostent *hptr;
+
+    hptr = gethostbyaddr((char *)&(sock->addr->sin_addr),
+                         sizeof(struct in_addr), AF_INET);
+
+    if (hptr != NULL) {
+        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
+        if (*name) {
+            return APR_SUCCESS;
+        }
+        return APR_ENOMEM;
     }
-    return APR_ENOMEM;
+
+    /* XXX - I don't know what the correct way to deal with host resolution
+     * errors on Windows is. WSAGetLastError() seems to use a different set of
+     * error numbers than APR does. The previous code didn't deal with them at
+     * all.  - manoj
+     */
+
+    return h_errno;
 }
 
 

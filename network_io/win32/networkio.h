@@ -62,7 +62,6 @@
 struct socket_t {
     ap_context_t *cntxt;
     SOCKET sock;
-    char *remote_hostname;
     struct sockaddr_in *addr;
     size_t addr_len;
     int timeout;
