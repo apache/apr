@@ -249,7 +249,7 @@ static apr_status_t test_named(apr_pool_t *parpool)
     if (waitpid(pidconsumer, &exit_int, 0) < 0) {
         return errno;
     }
-    if (WIFEXITED(exit_int)) {
+    if (!WIFEXITED(exit_int)) {
         printf("Producer was unsuccessful.\n");
         return APR_EGENERAL;
     }
@@ -257,7 +257,7 @@ static apr_status_t test_named(apr_pool_t *parpool)
     if (waitpid(pidproducer, &exit_int, 0) < 0) {
         return errno;
     }
-    if (WIFEXITED(exit_int)) {
+    if (!WIFEXITED(exit_int)) {
         printf("Consumer was unsuccessful.\n");
         return APR_EGENERAL;
     }
