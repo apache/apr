@@ -363,6 +363,14 @@ void CuSuiteListRun(CuSuiteList* testSuite)
 	}
 }
 
+static const char *genspaces(int i)
+{
+    char *str = malloc((i + 1) * sizeof(char));
+    memset(str, ' ', i);
+    str[i] = '\0';
+    return str;
+}
+
 void CuSuiteListRunWithSummary(CuSuiteList* testSuite)
 {
 	int i;
@@ -373,7 +381,8 @@ void CuSuiteListRunWithSummary(CuSuiteList* testSuite)
 		CuSuite* testCase = testSuite->list[i];
 		CuString *str = CuStringNew();
 
-	        printf("%s:\t", testCase->name);
+	        printf("    %s:%s", testCase->name, 
+                                  genspaces(21 - strlen(testCase->name)));
 		CuSuiteRun(testCase);
 		CuSuiteSummary(testCase, str);
 		printf("    %s", str->buffer);
