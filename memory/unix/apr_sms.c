@@ -153,7 +153,7 @@ static int apr_sms_is_tracking(apr_sms_t *mem_sys)
 }
 
 APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys, 
-                                       apr_sms_t *parent_mem_sys)
+                                       apr_sms_t *pms)
 {
     /* XXX - I've assumed that memory passed in will be zeroed,
      * i.e. calloc'd instead of malloc'd...
@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys,
      * an assumption to make as it sounds :)
      */
 
-    mem_sys->parent_mem_sys = parent_mem_sys;
+    mem_sys->parent_mem_sys = pms;
     mem_sys->accounting_mem_sys = mem_sys;
     mem_sys->child_mem_sys = NULL;
 
@@ -185,14 +185,17 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys,
      *      sibling->ref = ref;
      */
      
-    if (parent_mem_sys) {
-        if ((mem_sys->sibling_mem_sys = parent_mem_sys->child_mem_sys) != NULL)
+    if (pms) {
+        if ((mem_sys->sibling_mem_sys = pms->child_mem_sys) != NULL)
             mem_sys->sibling_mem_sys->ref_mem_sys = &mem_sys->sibling_mem_sys;
 
-        mem_sys->ref_mem_sys = &parent_mem_sys->child_mem_sys;
-        parent_mem_sys->child_mem_sys = mem_sys;
+        mem_sys->ref_mem_sys = &pms->child_mem_sys;
+        pms->child_mem_sys = mem_sys;
     }
 
+    /* XXX - This should eventually be removed */
+    apr_pool_create(&mem_sys->pool, pms ? pms->pool : NULL);
+    
     return APR_SUCCESS;
 }
 
@@ -423,6 +426,9 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
     if (mem_sys->pre_destroy_fn)
         mem_sys->pre_destroy_fn(mem_sys);
 
+    /* XXX - This should eventually be removed */
+    apr_pool_destroy(mem_sys->pool);
+    
     /* 1 - If we have a self destruct, use it */
     if (mem_sys->destroy_fn)
         return mem_sys->destroy_fn(mem_sys);
