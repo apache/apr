@@ -624,8 +624,8 @@ dnl
 dnl check for presence of SCTP protocol support
 dnl
 AC_DEFUN(APR_CHECK_SCTP,[
-  AC_CACHE_CHECK(if SCTP protocol is supported, ac_cv_sctp,[
-  AC_TRY_RUN( [
+  AC_CACHE_CHECK([whether SCTP is supported], [apr_cv_sctp], [
+  AC_TRY_RUN([
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -635,21 +635,17 @@ AC_DEFUN(APR_CHECK_SCTP,[
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+#include <stdlib.h>
 int main(void) {
-    int s = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
-    if (s < 0) {
-        exit(1);
-    }
+    int s, opt = 1;
+    if ((s = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)) < 0)
+       exit(1);
+    if (setsockopt(s, IPPROTO_SCTP, SCTP_NODELAY, &opt, sizeof(int)) < 0)
+       exit(2);
     exit(0);
-}
-],[
-    ac_cv_sctp="yes"
-],[
-    ac_cv_sctp="no"
-],[
-    ac_cv_sctp="yes"
-])])
-if test "$ac_cv_sctp" = "yes"; then
+}], [apr_cv_sctp=yes], [apr_cv_sctp=no], [apr_cv_sctp=no])])
+
+if test "$apr_cv_sctp" = "yes"; then
     have_sctp=1
 else
     have_sctp=0
