@@ -149,17 +149,17 @@ static void test_rewind(abts_case *tc, void *data)
     apr_dir_t *dir;
     apr_finfo_t first, second;
 
-    apr_assert_success(tc, "apr_dir_open failed", apr_dir_open(&dir, "data", p));
+    APR_ASSERT_SUCCESS(tc, "apr_dir_open failed", apr_dir_open(&dir, "data", p));
 
-    apr_assert_success(tc, "apr_dir_read failed",
+    APR_ASSERT_SUCCESS(tc, "apr_dir_read failed",
                        apr_dir_read(&first, APR_FINFO_DIRENT, dir));
 
-    apr_assert_success(tc, "apr_dir_rewind failed", apr_dir_rewind(dir));
+    APR_ASSERT_SUCCESS(tc, "apr_dir_rewind failed", apr_dir_rewind(dir));
 
-    apr_assert_success(tc, "second apr_dir_read failed",
+    APR_ASSERT_SUCCESS(tc, "second apr_dir_read failed",
                        apr_dir_read(&second, APR_FINFO_DIRENT, dir));
 
-    apr_assert_success(tc, "apr_dir_close failed", apr_dir_close(dir));
+    APR_ASSERT_SUCCESS(tc, "apr_dir_close failed", apr_dir_close(dir));
 
     ABTS_STR_EQUAL(tc, first.name, second.name);
 }

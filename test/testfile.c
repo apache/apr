@@ -81,7 +81,7 @@ static void test_read(abts_case *tc, void *data)
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
 
-    apr_assert_success(tc, "Opening test file " FILENAME, rv);
+    APR_ASSERT_SUCCESS(tc, "Opening test file " FILENAME, rv);
     rv = apr_file_read(filetest, str, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
     ABTS_INT_EQUAL(tc, strlen(TESTSTR), nbytes);
@@ -98,7 +98,7 @@ static void test_readzero(abts_case *tc, void *data)
     apr_file_t *filetest;
     
     rv = apr_file_open(&filetest, FILENAME, APR_READ, APR_OS_DEFAULT, p);
-    apr_assert_success(tc, "Opening test file " FILENAME, rv);
+    APR_ASSERT_SUCCESS(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_read(filetest, str, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -116,7 +116,7 @@ static void test_filename(abts_case *tc, void *data)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    apr_assert_success(tc, "Opening test file " FILENAME, rv);
+    APR_ASSERT_SUCCESS(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_name_get(&str, filetest);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -135,7 +135,7 @@ static void test_fileclose(abts_case *tc, void *data)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    apr_assert_success(tc, "Opening test file " FILENAME, rv);
+    APR_ASSERT_SUCCESS(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_close(filetest);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -227,7 +227,7 @@ static void test_seek(abts_case *tc, void *data)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    apr_assert_success(tc, "Open test file " FILENAME, rv);
+    APR_ASSERT_SUCCESS(tc, "Open test file " FILENAME, rv);
 
     rv = apr_file_read(filetest, str, &nbytes);
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
@@ -251,7 +251,7 @@ static void test_seek(abts_case *tc, void *data)
     rv = apr_file_open(&filetest, FILENAME,
                        APR_READ | APR_BUFFERED,
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-    apr_assert_success(tc, "Open test file " FILENAME, rv);
+    APR_ASSERT_SUCCESS(tc, "Open test file " FILENAME, rv);
 
     offset = -5;
     rv = apr_file_seek(filetest, SEEK_END, &offset);

@@ -48,17 +48,17 @@ static void test_open(abts_case *tc, void *data)
 
     rv = apr_dir_make(TESTDIR, APR_OS_DEFAULT, p);
     if (rv && !APR_STATUS_IS_EEXIST(rv)) {
-        apr_assert_success(tc, "make test directory", rv);
+        APR_ASSERT_SUCCESS(tc, "make test directory", rv);
     }
 
-    apr_assert_success(tc, "open file",
+    APR_ASSERT_SUCCESS(tc, "open file",
                        apr_file_open(&f, TESTFN, 
                                      APR_CREATE | APR_WRITE | APR_TRUNCATE,
                                      APR_OS_DEFAULT, p));
 
     rv = apr_file_trunc(f, eightGb);
 
-    apr_assert_success(tc, "close large file", apr_file_close(f));
+    APR_ASSERT_SUCCESS(tc, "close large file", apr_file_close(f));
 
     /* 8Gb may pass rlimits or filesystem limits */
 
@@ -70,7 +70,7 @@ static void test_open(abts_case *tc, void *data)
         ABTS_NOT_IMPL(tc, "Creation of large file (limited by rlimit or fs?)");
     } 
     else {
-        apr_assert_success(tc, "truncate file to 8gb", rv);
+        APR_ASSERT_SUCCESS(tc, "truncate file to 8gb", rv);
     }
 
     madefile = rv == APR_SUCCESS;
@@ -83,16 +83,16 @@ static void test_reopen(abts_case *tc, void *data)
 
     PRECOND;
     
-    apr_assert_success(tc, "re-open 8Gb file",
+    APR_ASSERT_SUCCESS(tc, "re-open 8Gb file",
                        apr_file_open(&fh, TESTFN, APR_READ, APR_OS_DEFAULT, p));
 
-    apr_assert_success(tc, "file_info_get failed",
+    APR_ASSERT_SUCCESS(tc, "file_info_get failed",
                        apr_file_info_get(&finfo, APR_FINFO_NORM, fh));
     
     ABTS_ASSERT(tc, "file_info_get gave incorrect size",
              finfo.size == eightGb);
 
-    apr_assert_success(tc, "re-close large file", apr_file_close(fh));
+    APR_ASSERT_SUCCESS(tc, "re-close large file", apr_file_close(fh));
 }
 
 static void test_stat(abts_case *tc, void *data)
@@ -101,7 +101,7 @@ static void test_stat(abts_case *tc, void *data)
 
     PRECOND;
 
-    apr_assert_success(tc, "stat large file", 
+    APR_ASSERT_SUCCESS(tc, "stat large file", 
                        apr_stat(&finfo, TESTFN, APR_FINFO_NORM, p));
     
     ABTS_ASSERT(tc, "stat gave incorrect size", finfo.size == eightGb);
@@ -114,7 +114,7 @@ static void test_readdir(abts_case *tc, void *data)
 
     PRECOND;
 
-    apr_assert_success(tc, "open test directory", 
+    APR_ASSERT_SUCCESS(tc, "open test directory", 
                        apr_dir_open(&dh, TESTDIR, p));
 
     do {
@@ -130,10 +130,10 @@ static void test_readdir(abts_case *tc, void *data)
     } while (rv == APR_SUCCESS);
         
     if (!APR_STATUS_IS_ENOENT(rv)) {
-        apr_assert_success(tc, "apr_dir_read failed", rv);
+        APR_ASSERT_SUCCESS(tc, "apr_dir_read failed", rv);
     }
     
-    apr_assert_success(tc, "close test directory",
+    APR_ASSERT_SUCCESS(tc, "close test directory",
                        apr_dir_close(dh));
 }
 
@@ -146,20 +146,20 @@ static void test_append(abts_case *tc, void *data)
     
     PRECOND;
 
-    apr_assert_success(tc, "open 8Gb file for append",
+    APR_ASSERT_SUCCESS(tc, "open 8Gb file for append",
                        apr_file_open(&fh, TESTFN, APR_WRITE | APR_APPEND, 
                                      APR_OS_DEFAULT, p));
 
-    apr_assert_success(tc, "append to 8Gb file",
+    APR_ASSERT_SUCCESS(tc, "append to 8Gb file",
                        apr_file_write_full(fh, TESTSTR, strlen(TESTSTR), NULL));
 
-    apr_assert_success(tc, "file_info_get failed",
+    APR_ASSERT_SUCCESS(tc, "file_info_get failed",
                        apr_file_info_get(&finfo, APR_FINFO_NORM, fh));
     
     ABTS_ASSERT(tc, "file_info_get gave incorrect size",
              finfo.size == eightGb + strlen(TESTSTR));
 
-    apr_assert_success(tc, "close 8Gb file", apr_file_close(fh));
+    APR_ASSERT_SUCCESS(tc, "close 8Gb file", apr_file_close(fh));
 }
 
 static void test_seek(abts_case *tc, void *data)
@@ -169,21 +169,21 @@ static void test_seek(abts_case *tc, void *data)
 
     PRECOND;
     
-    apr_assert_success(tc, "open 8Gb file for writing",
+    APR_ASSERT_SUCCESS(tc, "open 8Gb file for writing",
                        apr_file_open(&fh, TESTFN, APR_WRITE, 
                                      APR_OS_DEFAULT, p));
 
     pos = 0;
-    apr_assert_success(tc, "relative seek to end", 
+    APR_ASSERT_SUCCESS(tc, "relative seek to end", 
                        apr_file_seek(fh, APR_END, &pos));
     ABTS_ASSERT(tc, "seek to END gave 8Gb", pos == eightGb);
     
     pos = eightGb;
-    apr_assert_success(tc, "seek to 8Gb", apr_file_seek(fh, APR_SET, &pos));
+    APR_ASSERT_SUCCESS(tc, "seek to 8Gb", apr_file_seek(fh, APR_SET, &pos));
     ABTS_ASSERT(tc, "seek gave 8Gb offset", pos == eightGb);
 
     pos = 0;
-    apr_assert_success(tc, "relative seek to 0", apr_file_seek(fh, APR_CUR, &pos));
+    APR_ASSERT_SUCCESS(tc, "relative seek to 0", apr_file_seek(fh, APR_CUR, &pos));
     ABTS_ASSERT(tc, "relative seek gave 8Gb offset", pos == eightGb);
 
     apr_file_close(fh);
@@ -196,17 +196,17 @@ static void test_write(abts_case *tc, void *data)
 
     PRECOND;
 
-    apr_assert_success(tc, "re-open 8Gb file",
+    APR_ASSERT_SUCCESS(tc, "re-open 8Gb file",
                        apr_file_open(&fh, TESTFN, APR_WRITE, APR_OS_DEFAULT, p));
 
-    apr_assert_success(tc, "seek to 8Gb - 4", 
+    APR_ASSERT_SUCCESS(tc, "seek to 8Gb - 4", 
                        apr_file_seek(fh, APR_SET, &pos));
     ABTS_ASSERT(tc, "seek gave 8Gb-4 offset", pos == eightGb - 4);
 
-    apr_assert_success(tc, "write magic string to 8Gb-4",
+    APR_ASSERT_SUCCESS(tc, "write magic string to 8Gb-4",
                        apr_file_write_full(fh, "FISH", 4, NULL));
 
-    apr_assert_success(tc, "close 8Gb file", apr_file_close(fh));
+    APR_ASSERT_SUCCESS(tc, "close 8Gb file", apr_file_close(fh));
 }
 
 
@@ -221,23 +221,23 @@ static void test_mmap(abts_case *tc, void *data)
 
     PRECOND;
 
-    apr_assert_success(tc, "open 8gb file for mmap",
+    APR_ASSERT_SUCCESS(tc, "open 8gb file for mmap",
                        apr_file_open(&fh, TESTFN, APR_READ, APR_OS_DEFAULT, p));
     
-    apr_assert_success(tc, "mmap 8Gb file",
+    APR_ASSERT_SUCCESS(tc, "mmap 8Gb file",
                        apr_mmap_create(&map, fh, off, len, APR_MMAP_READ, p));
 
-    apr_assert_success(tc, "close file", apr_file_close(fh));
+    APR_ASSERT_SUCCESS(tc, "close file", apr_file_close(fh));
 
     ABTS_ASSERT(tc, "mapped a 16K block", map->size == len);
     
-    apr_assert_success(tc, "get pointer into mmaped region",
+    APR_ASSERT_SUCCESS(tc, "get pointer into mmaped region",
                        apr_mmap_offset(&ptr, map, len - 4));
     ABTS_ASSERT(tc, "pointer was not NULL", ptr != NULL);
 
     ABTS_ASSERT(tc, "found the magic string", memcmp(ptr, "FISH", 4) == 0);
 
-    apr_assert_success(tc, "delete mmap handle", apr_mmap_delete(map));
+    APR_ASSERT_SUCCESS(tc, "delete mmap handle", apr_mmap_delete(map));
 }
 #endif /* APR_HAS_MMAP */
 

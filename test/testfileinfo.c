@@ -182,7 +182,7 @@ static void test_buffered_write_size(abts_case *tc, void *data)
                        APR_READ | APR_WRITE | APR_CREATE | APR_TRUNCATE
                        | APR_BUFFERED | APR_DELONCLOSE,
                        APR_OS_DEFAULT, p);
-    apr_assert_success(tc, "open file", rv);
+    APR_ASSERT_SUCCESS(tc, "open file", rv);
 
     /* A funny thing happened to me the other day: I wrote something
      * into a buffered file, then asked for its size using
@@ -191,11 +191,11 @@ static void test_buffered_write_size(abts_case *tc, void *data)
      */
     bytes = data_len;
     rv = apr_file_write(thefile, NEWFILEDATA, &bytes);
-    apr_assert_success(tc, "write file contents", rv);
+    APR_ASSERT_SUCCESS(tc, "write file contents", rv);
     ABTS_TRUE(tc, data_len == bytes);
 
     rv = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
-    apr_assert_success(tc, "get file size", rv);
+    APR_ASSERT_SUCCESS(tc, "get file size", rv);
     ABTS_TRUE(tc, bytes == (apr_size_t) finfo.size);
     apr_file_close(thefile);
 }
@@ -215,7 +215,7 @@ static void test_mtime_set(abts_case *tc, void *data)
                        APR_READ | APR_WRITE | APR_CREATE | APR_TRUNCATE
                        | APR_BUFFERED | APR_DELONCLOSE,
                        APR_OS_DEFAULT, p);
-    apr_assert_success(tc, "open file", rv);
+    APR_ASSERT_SUCCESS(tc, "open file", rv);
 
     /* Check that the current mtime is not the epoch */
     rv = apr_stat(&finfo, NEWFILENAME, APR_FINFO_MTIME, p);
@@ -230,7 +230,7 @@ static void test_mtime_set(abts_case *tc, void *data)
         }
         ABTS_FAIL(tc, str);
     }
-    apr_assert_success(tc, "get initial mtime", rv);
+    APR_ASSERT_SUCCESS(tc, "get initial mtime", rv);
     ABTS_TRUE(tc, finfo.mtime != epoch);
 
     /* Reset the mtime to the epoch and verify the result.
@@ -238,10 +238,10 @@ static void test_mtime_set(abts_case *tc, void *data)
      * the second one will, too.
      */
     rv = apr_file_mtime_set(NEWFILENAME, epoch, p);
-    apr_assert_success(tc, "set mtime", rv);
+    APR_ASSERT_SUCCESS(tc, "set mtime", rv);
 
     rv = apr_stat(&finfo, NEWFILENAME, APR_FINFO_MTIME, p);
-    apr_assert_success(tc, "get modified mtime", rv);
+    APR_ASSERT_SUCCESS(tc, "get modified mtime", rv);
     ABTS_TRUE(tc, finfo.mtime == epoch);
 
     apr_file_close(thefile);

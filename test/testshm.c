@@ -64,11 +64,11 @@ static void test_anon_create(abts_case *tc, void *data)
     apr_shm_t *shm = NULL;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
-    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     ABTS_PTR_NOTNULL(tc, shm);
 
     rv = apr_shm_destroy(shm);
-    apr_assert_success(tc, "Error destroying shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 }
 
 static void test_check_size(abts_case *tc, void *data)
@@ -78,14 +78,14 @@ static void test_check_size(abts_case *tc, void *data)
     apr_size_t retsize;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
-    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     ABTS_PTR_NOTNULL(tc, shm);
 
     retsize = apr_shm_size_get(shm);
     ABTS_INT_EQUAL(tc, SHARED_SIZE, retsize);
 
     rv = apr_shm_destroy(shm);
-    apr_assert_success(tc, "Error destroying shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 }
 
 static void test_shm_allocate(abts_case *tc, void *data)
@@ -94,14 +94,14 @@ static void test_shm_allocate(abts_case *tc, void *data)
     apr_shm_t *shm = NULL;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
-    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     ABTS_PTR_NOTNULL(tc, shm);
 
     boxes = apr_shm_baseaddr_get(shm);
     ABTS_PTR_NOTNULL(tc, boxes);
 
     rv = apr_shm_destroy(shm);
-    apr_assert_success(tc, "Error destroying shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 }
 
 #if APR_HAS_FORK
@@ -115,7 +115,7 @@ static void test_anon(abts_case *tc, void *data)
     int recvd;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
-    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     ABTS_PTR_NOTNULL(tc, shm);
 
     retsize = apr_shm_size_get(shm);
@@ -151,7 +151,7 @@ static void test_anon(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, N_MESSAGES, recvd);
 
     rv = apr_shm_destroy(shm);
-    apr_assert_success(tc, "Error destroying shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 }
 #endif
 
@@ -167,7 +167,7 @@ static void test_named(abts_case *tc, void *data)
     const char *args[4];
 
     rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
-    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     if (rv != APR_SUCCESS) {
         return;
     }
@@ -181,20 +181,20 @@ static void test_named(abts_case *tc, void *data)
 
     rv = apr_procattr_create(&attr1, p);
     ABTS_PTR_NOTNULL(tc, attr1);
-    apr_assert_success(tc, "Couldn't create attr1", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't create attr1", rv);
     args[0] = apr_pstrdup(p, "testshmproducer" EXTENSION);
     args[1] = NULL;
     rv = apr_proc_create(&pidproducer, "./testshmproducer" EXTENSION, args,
                          NULL, attr1, p);
-    apr_assert_success(tc, "Couldn't launch producer", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't launch producer", rv);
 
     rv = apr_procattr_create(&attr2, p);
     ABTS_PTR_NOTNULL(tc, attr2);
-    apr_assert_success(tc, "Couldn't create attr2", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't create attr2", rv);
     args[0] = apr_pstrdup(p, "testshmconsumer" EXTENSION);
     rv = apr_proc_create(&pidconsumer, "./testshmconsumer" EXTENSION, args, 
                          NULL, attr2, p);
-    apr_assert_success(tc, "Couldn't launch consumer", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't launch consumer", rv);
 
     rv = apr_proc_wait(&pidconsumer, &received, &why, APR_WAIT);
     ABTS_INT_EQUAL(tc, APR_CHILD_DONE, rv);
@@ -208,7 +208,7 @@ static void test_named(abts_case *tc, void *data)
      * This way, if they didn't succeed, we can just run this test again
      * without having to cleanup manually.
      */
-    apr_assert_success(tc, "Error destroying shared memory", 
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory", 
                        apr_shm_destroy(shm));
     
     ABTS_INT_EQUAL(tc, sent, received);
@@ -221,27 +221,27 @@ static void test_named_remove(abts_case *tc, void *data)
     apr_shm_t *shm;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
-    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     if (rv != APR_SUCCESS) {
         return;
     }
     ABTS_PTR_NOTNULL(tc, shm);
 
     rv = apr_shm_remove(SHARED_FILENAME, p);
-    apr_assert_success(tc, "Error removing shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error removing shared memory block", rv);
     if (rv != APR_SUCCESS) {
         return ;
     }
 
     rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
-    apr_assert_success(tc, "Error allocating shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     if (rv != APR_SUCCESS) {
         return;
     }
     ABTS_PTR_NOTNULL(tc, shm);
 
     rv = apr_shm_destroy(shm);
-    apr_assert_success(tc, "Error destroying shared memory block", rv);
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 }
 
 #endif

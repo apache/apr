@@ -29,21 +29,21 @@ static void launch_child(abts_case *tc, apr_proc_t *proc, const char *arg1, apr_
     apr_status_t rv;
 
     rv = apr_procattr_create(&procattr, p);
-    apr_assert_success(tc, "Couldn't create procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't create procattr", rv);
 
     rv = apr_procattr_io_set(procattr, APR_NO_PIPE, APR_NO_PIPE,
             APR_NO_PIPE);
-    apr_assert_success(tc, "Couldn't set io in procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set io in procattr", rv);
 
     rv = apr_procattr_error_check_set(procattr, 1);
-    apr_assert_success(tc, "Couldn't set error check in procattr", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't set error check in procattr", rv);
 
     args[0] = "sockchild" EXTENSION;
     args[1] = arg1;
     args[2] = NULL;
     rv = apr_proc_create(proc, "./sockchild" EXTENSION, args, NULL,
                          procattr, p);
-    apr_assert_success(tc, "Couldn't launch program", rv);
+    APR_ASSERT_SUCCESS(tc, "Couldn't launch program", rv);
 }
 
 static int wait_child(abts_case *tc, apr_proc_t *proc) 
@@ -64,10 +64,10 @@ static void test_addr_info(abts_case *tc, void *data)
     apr_sockaddr_t *sa;
 
     rv = apr_sockaddr_info_get(&sa, NULL, APR_UNSPEC, 80, 0, p);
-    apr_assert_success(tc, "Problem generating sockaddr", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 80, 0, p);
-    apr_assert_success(tc, "Problem generating sockaddr", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
     ABTS_STR_EQUAL(tc, "127.0.0.1", sa->hostname);
 }
 
@@ -78,17 +78,17 @@ static apr_socket_t *setup_socket(abts_case *tc)
     apr_socket_t *sock;
 
     rv = apr_sockaddr_info_get(&sa, NULL, APR_INET, 8021, 0, p);
-    apr_assert_success(tc, "Problem generating sockaddr", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem generating sockaddr", rv);
 
     rv = apr_socket_create(&sock, sa->family, SOCK_STREAM, APR_PROTO_TCP, p);
-    apr_assert_success(tc, "Problem creating socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem creating socket", rv);
     
     rv = apr_socket_bind(sock, sa);
-    apr_assert_success(tc, "Problem binding to port", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem binding to port", rv);
     if (rv) return NULL;
                 
     rv = apr_socket_listen(sock, 5);
-    apr_assert_success(tc, "Problem listening on socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem listening on socket", rv);
 
     return sock;
 }
@@ -101,7 +101,7 @@ static void test_create_bind_listen(abts_case *tc, void *data)
     if (!sock) return;
     
     rv = apr_socket_close(sock);
-    apr_assert_success(tc, "Problem closing socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 }
 
 static void test_send(abts_case *tc, void *data)
@@ -119,7 +119,7 @@ static void test_send(abts_case *tc, void *data)
     launch_child(tc, &proc, "read", p);
     
     rv = apr_socket_accept(&sock2, sock, p);
-    apr_assert_success(tc, "Problem with receiving connection", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
     ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
@@ -131,9 +131,9 @@ static void test_send(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, strlen(DATASTR), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
-    apr_assert_success(tc, "Problem closing connected socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem closing connected socket", rv);
     rv = apr_socket_close(sock);
-    apr_assert_success(tc, "Problem closing socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 }
 
 static void test_recv(abts_case *tc, void *data)
@@ -152,7 +152,7 @@ static void test_recv(abts_case *tc, void *data)
     launch_child(tc, &proc, "write", p);
     
     rv = apr_socket_accept(&sock2, sock, p);
-    apr_assert_success(tc, "Problem with receiving connection", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
     ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
@@ -165,9 +165,9 @@ static void test_recv(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, strlen(datastr), wait_child(tc, &proc));
 
     rv = apr_socket_close(sock2);
-    apr_assert_success(tc, "Problem closing connected socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem closing connected socket", rv);
     rv = apr_socket_close(sock);
-    apr_assert_success(tc, "Problem closing socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 }
 
 static void test_timeout(abts_case *tc, void *data)
@@ -185,7 +185,7 @@ static void test_timeout(abts_case *tc, void *data)
     launch_child(tc, &proc, "read", p);
     
     rv = apr_socket_accept(&sock2, sock, p);
-    apr_assert_success(tc, "Problem with receiving connection", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem with receiving connection", rv);
 
     apr_socket_protocol_get(sock2, &protocol);
     ABTS_INT_EQUAL(tc, APR_PROTO_TCP, protocol);
@@ -197,9 +197,9 @@ static void test_timeout(abts_case *tc, void *data)
      * an error.
      */
     rv = apr_socket_close(sock2);
-    apr_assert_success(tc, "Problem closing connected socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem closing connected socket", rv);
     rv = apr_socket_close(sock);
-    apr_assert_success(tc, "Problem closing socket", rv);
+    APR_ASSERT_SUCCESS(tc, "Problem closing socket", rv);
 }
 
 abts_suite *testsock(abts_suite *suite)

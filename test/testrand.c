@@ -29,7 +29,7 @@ static void rand_exists(abts_case *tc, void *data)
     /* There must be a better way to test random-ness, but I don't know
      * what it is right now.
      */
-    apr_assert_success(tc, "apr_generate_random_bytes failed",
+    APR_ASSERT_SUCCESS(tc, "apr_generate_random_bytes failed",
                        apr_generate_random_bytes(c, sizeof c));
 #endif
 }    
