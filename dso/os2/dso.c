@@ -53,6 +53,7 @@
  */
 
 #include "dso.h"
+#include "apr_strings.h"
 #define INCL_DOS
 #include <os2.h>
 #include <stdio.h>
@@ -127,7 +128,7 @@ apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym,
 
 
 
-char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
+const char *apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
 {
     char message[200];
     apr_strerror(dso->load_error, message, sizeof(message));
