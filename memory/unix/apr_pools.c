@@ -967,7 +967,7 @@ static int apr_pool_is_child_of(apr_pool_t *pool, apr_pool_t *parent,
     child = parent->child;
 
     while (child) {
-        if (pool == child || pool_is_child_of(pool, child)) {
+        if (pool == child || apr_pool_is_child_of(pool, child, NULL)) {
             return 1;
         }
  
