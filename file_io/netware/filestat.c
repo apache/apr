@@ -217,6 +217,7 @@ typedef struct apr_stat_entry_t apr_stat_entry_t;
 
 struct apr_stat_entry_t {
     struct stat info;
+    char *casedName;
     apr_time_t expire;
 };
 
@@ -229,7 +230,7 @@ struct apr_stat_cache_t {
 #endif
 };
 
-int cstat (const char *path, struct stat *buf)
+int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *pool)
 {
     apr_stat_cache_t *statCacheData = (apr_stat_cache_t *)getStatCache();
     apr_hash_t *statCache = NULL;
@@ -244,9 +245,20 @@ int cstat (const char *path, struct stat *buf)
     int ret;
     int found = 0;
 
-    if (!gPool)
-        return stat(path, buf);
+    *casedName = NULL;
 
+    /* If there isn't a global pool then just stat the file
+       and return */
+    if (!gPool) {
+        ret = stat(path, buf);
+        if (ret == 0)
+            *casedName = case_filename(pool, path);
+        return ret;
+    }
+
+    /* If we have a statCacheData structure then use it.
+       Otherwise we need to create it and initialized it
+       with a new mutex lock. */
     if (statCacheData) {
         statCache = statCacheData->statCache;
 #ifdef USE_CSTAT_MUTEX
@@ -264,6 +276,8 @@ int cstat (const char *path, struct stat *buf)
         setStatCache((void*)statCacheData);
     }
 
+    /* If we have a statCache then try to pull the information
+       from the cache.  Otherwise just stat the file and return.*/
     if (statCache) {
 #ifdef USE_CSTAT_MUTEX
         apr_thread_mutex_lock(statcache_mutex);
@@ -272,9 +286,15 @@ int cstat (const char *path, struct stat *buf)
 #ifdef USE_CSTAT_MUTEX
         apr_thread_mutex_unlock(statcache_mutex);
 #endif
+        /* If we got an entry then check the expiration time.  If the entry
+           hasn't expired yet then copy the information and return. */
         if (stat_entry) {
             if ((now - stat_entry->expire) <= APR_USEC_PER_SEC) {
                 memcpy (buf, &(stat_entry->info), sizeof(struct stat));
+                if (stat_entry->casedName)
+                    *casedName = apr_pstrdup (pool, stat_entry->casedName);
+                else
+                    *casedName = case_filename(pool, path);
                 found = 1;
             }
         }
@@ -282,30 +302,46 @@ int cstat (const char *path, struct stat *buf)
         if (!found) {
             ret = stat(path, buf);
             if (ret == 0) {
-                if (!stat_entry) {
+                *casedName = case_filename(pool, path);
 #ifdef USE_CSTAT_MUTEX
-		            apr_thread_mutex_lock(statcache_mutex);
+                apr_thread_mutex_lock(statcache_mutex);
 #endif
+                /* If we don't have a stat_entry then create one, copy
+                   the data and add it to the hash table. */
+                if (!stat_entry) {
                     key = apr_pstrdup (gPool, path);
                     stat_entry = apr_palloc (gPool, sizeof(apr_stat_entry_t));
                     memcpy (&(stat_entry->info), buf, sizeof(struct stat));
+                    if (*casedName)
+                        stat_entry->casedName = apr_pstrdup (gPool, *casedName);
                     stat_entry->expire = now;
                     apr_hash_set(statCache, key, APR_HASH_KEY_STRING, stat_entry);
-#ifdef USE_CSTAT_MUTEX
-					apr_thread_mutex_unlock(statcache_mutex);
-#endif
                 }
                 else {
+                    /* If we do have a stat_entry then it must have expired.  Just
+                       copy the data and reset the expiration. */
                     memcpy (&(stat_entry->info), buf, sizeof(struct stat));
+
+                    /* If we have a casedName and don't have a cached name or the names don't
+                       compare, then cache the name. */
+                    if (*casedName && (!stat_entry->casedName || strcmp(*casedName, stat_entry->casedName))) {
+                        stat_entry->casedName = apr_pstrdup (gPool, *casedName);
+                    }
                     stat_entry->expire = now;
                 }
+#ifdef USE_CSTAT_MUTEX
+                apr_thread_mutex_unlock(statcache_mutex);
+#endif
             }
             else
                 return ret;
         }
     }
     else {
-        return stat(path, buf);
+        ret = stat(path, buf);
+        if (ret == 0)
+            *casedName = case_filename(pool, path);
+        return ret;
     }
     return 0;
 }
@@ -316,9 +352,9 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
 {
     struct stat info;
     int srv;
-    char *s;
+    char *casedName = NULL;
 
-    srv = cstat(fname, &info);
+    srv = cstat(fname, &info, &casedName, pool);
 
     if (srv == 0) {
         finfo->pool = pool;
@@ -327,9 +363,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
         if (wanted & APR_FINFO_LINK)
             wanted &= ~APR_FINFO_LINK;
         if (wanted & APR_FINFO_NAME) {
-            s = case_filename(pool, fname);
-            if (s) {
-                finfo->name = s;
+            if (casedName) {
+                finfo->name = casedName;
                 finfo->valid |= APR_FINFO_NAME;
             }
         }
