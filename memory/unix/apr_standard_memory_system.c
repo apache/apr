@@ -52,15 +52,16 @@
  * <http://www.apache.org/>.
  */
 
-/* This code donated to APR by 
+/* This code kindly donated to APR by 
  *    Elrond  <elrond@samba-tng.org>
  *    Luke Kenneth Casson Leighton <lkcl@samba-tng.org>
  *    Sander Striker <striker@samba-tng.org>
+ *
+ * May 2001
  */
 
 #include "apr.h"
 #include "apr_private.h"
-#include "apr_general.h"
 #include "apr_memory_system.h"
 #include <stdlib.h>
 #include <assert.h>
@@ -69,51 +70,63 @@
  * standard memory system
  */
 
-static 
-void *
-apr_standard_memory_system_malloc(apr_memory_system_t *memory_system,
-                                  apr_size_t size)
+static void * apr_sms_std_malloc(apr_sms_t *mem_sys,
+                                 apr_size_t size)
 {
     return malloc(size);
 }
 
-static 
-void *
-apr_standard_memory_system_realloc(apr_memory_system_t *memory_system,
-                                   void *mem, apr_size_t size)
+static void * apr_sms_std_calloc(apr_sms_t *mem_sys,
+                                 apr_size_t size)
+{
+#if HAVE_CALLOC
+    return calloc(1, size);
+#else
+    void *mem;
+    mem = malloc(size);
+    memset(mem, '\0', size);
+    return mem;
+#endif
+}
+
+
+static void * apr_sms_std_realloc(apr_sms_t *mem_sys,
+                                  void *mem, apr_size_t size)
 {
     return realloc(mem, size);
 }
 
-static 
-apr_status_t
-apr_standard_memory_system_free(apr_memory_system_t *memory_system,
-                                void *mem)
+static apr_status_t apr_sms_std_free(apr_sms_t *mem_sys,
+                                     void *mem)
 {
     free(mem);
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t)
-apr_standard_memory_system_create(apr_memory_system_t **memory_system)
+APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
 {
-    apr_memory_system_t *new_memory_system;
+    apr_sms_t *new_mem_sys;
 
-    assert(memory_system != NULL);
+    assert(mem_sys != NULL);
 
-    *memory_system = NULL;
-    new_memory_system = apr_memory_system_create(
-        malloc(sizeof(apr_memory_system_t)), NULL);
+    *mem_sys = NULL;
+    /* should we be using apr_sms_calloc now we have it??? */
+    new_mem_sys = apr_sms_create(malloc(sizeof(apr_sms_t)),
+                                 NULL);
 
-    if (new_memory_system == NULL)
+    if (new_mem_sys == NULL)
         return APR_ENOMEM;
 
-    new_memory_system->malloc_fn = apr_standard_memory_system_malloc;
-    new_memory_system->realloc_fn = apr_standard_memory_system_realloc;
-    new_memory_system->free_fn = apr_standard_memory_system_free;
+    new_mem_sys->malloc_fn  = apr_sms_std_malloc;
+    new_mem_sys->calloc_fn  = apr_sms_std_calloc;
+    new_mem_sys->realloc_fn = apr_sms_std_realloc;
+    new_mem_sys->free_fn    = apr_sms_std_free;
+    /* as we're not a tracking memory module, i.e. we don't keep
+     * track of our allocations, we don't have apr_sms_reset or
+     * apr_sms_destroy functions.
+     */
+    apr_sms_assert(new_mem_sys);
 
-    apr_memory_system_assert(new_memory_system);
-
-    *memory_system = new_memory_system;
+    *mem_sys = new_mem_sys;
     return APR_SUCCESS;
 }

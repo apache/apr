@@ -52,10 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-/* This code donated to APR by 
+/* This code kindly donated to APR by 
  *    Elrond  <elrond@samba-tng.org>
  *    Luke Kenneth Casson Leighton <lkcl@samba-tng.org>
  *    Sander Striker <striker@samba-tng.org>
+ *
+ * May 2001
  */
 
 #include "apr.h"
@@ -66,41 +68,39 @@
 #include <assert.h>
 
 /*
- * tracking memory system
+ * Simple tracking memory system
  */
 
 /* INTERNALLY USED STRUCTURES */
 typedef struct apr_track_node_t
 {
-    struct apr_track_node_t *next;
+    struct apr_track_node_t  *next;
     struct apr_track_node_t **ref;
 } apr_track_node_t;
 
-typedef struct apr_tracking_memory_system_t
+typedef struct apr_sms_tracking_t
 {
-    apr_memory_system_t  header;
+    apr_sms_t            header;
     apr_track_node_t    *nodes;
-} apr_tracking_memory_system_t;
+} apr_sms_tracking_t;
 
-static 
-void *
-apr_tracking_memory_system_malloc(apr_memory_system_t *memory_system,
-                                  apr_size_t size)
+static void * apr_sms_tracking_malloc(apr_sms_t *mem_sys,
+                                      apr_size_t size)
 {
-    apr_tracking_memory_system_t *tracking_memory_system;
+    apr_sms_tracking_t *tms;
     apr_track_node_t *node;
   
-    assert (memory_system != NULL);
+    assert (mem_sys != NULL);
 
-    tracking_memory_system = (apr_tracking_memory_system_t *)memory_system;
-    node = apr_memory_system_malloc(memory_system->parent_memory_system,
-				  size + sizeof(apr_track_node_t));
+    tms = (apr_sms_tracking_t *)mem_sys;
+    node = apr_sms_malloc(mem_sys->parent_mem_sys,
+                          size + sizeof(apr_track_node_t));
     if (node == NULL)
         return NULL;
 
-    node->next = tracking_memory_system->nodes;
-    tracking_memory_system->nodes = node;
-    node->ref = &tracking_memory_system->nodes;
+    node->next = tms->nodes;
+    tms->nodes = node;
+    node->ref = &tms->nodes;
     if (node->next != NULL)
         node->next->ref = &node->next;
 
@@ -109,17 +109,40 @@ apr_tracking_memory_system_malloc(apr_memory_system_t *memory_system,
     return (void *)node;
 }
 
-static 
-void *
-apr_tracking_memory_system_realloc(apr_memory_system_t *memory_system,
-                                   void *mem, apr_size_t size)
+static  void * apr_sms_tracking_calloc(apr_sms_t *mem_sys, 
+                                       apr_size_t size)
 {
-    apr_tracking_memory_system_t *tracking_memory_system;
+    apr_sms_tracking_t *tms;
+    apr_track_node_t *node;
+  
+    assert (mem_sys != NULL);
+
+    tms = (apr_sms_tracking_t *)mem_sys;
+    node = apr_sms_calloc(mem_sys->parent_mem_sys,
+                          size + sizeof(apr_track_node_t));
+    if (node == NULL)
+        return NULL;
+
+    node->next = tms->nodes;
+    tms->nodes = node;
+    node->ref = &tms->nodes;
+    if (node->next != NULL)
+        node->next->ref = &node->next;
+
+    node++;
+
+    return (void *)node;
+}
+
+static  void * apr_sms_tracking_realloc(apr_sms_t *mem_sys,
+                                        void *mem, apr_size_t size)
+{
+    apr_sms_tracking_t *tms;
     apr_track_node_t *node;
 
-    assert (memory_system != NULL);
+    assert (mem_sys != NULL);
 
-    tracking_memory_system = (apr_tracking_memory_system_t *)memory_system;
+    tms = (apr_sms_tracking_t *)mem_sys;
     node = (apr_track_node_t *)mem;
 
     if (node != NULL)
@@ -128,14 +151,14 @@ apr_tracking_memory_system_realloc(apr_memory_system_t *memory_system,
         *(node->ref) = node->next;
     }
 
-    node = apr_memory_system_realloc(memory_system->parent_memory_system,
-				   node, size + sizeof(apr_track_node_t));
+    node = apr_sms_realloc(mem_sys->parent_mem_sys,
+                           node, size + sizeof(apr_track_node_t));
     if (node == NULL)
         return NULL;
 
-    node->next = tracking_memory_system->nodes;
-    tracking_memory_system->nodes = node;
-    node->ref = &tracking_memory_system->nodes;
+    node->next = tms->nodes;
+    tms->nodes = node;
+    node->ref = &tms->nodes;
     if (node->next != NULL)
         node->next->ref = &node->next;
 
@@ -144,14 +167,12 @@ apr_tracking_memory_system_realloc(apr_memory_system_t *memory_system,
     return (void *)node;
 }
 
-static 
-apr_status_t
-apr_tracking_memory_system_free(apr_memory_system_t *memory_system,
-                                void *mem)
+static  apr_status_t apr_sms_tracking_free(apr_sms_t *mem_sys,
+                                           void *mem)
 {
     apr_track_node_t *node;
 
-    assert (memory_system != NULL);
+    assert (mem_sys != NULL);
     assert (mem != NULL);
 
     node = (apr_track_node_t *)mem;
@@ -161,74 +182,70 @@ apr_tracking_memory_system_free(apr_memory_system_t *memory_system,
     if (node->next != NULL)
         node->next->ref = node->ref;
           
-    return apr_memory_system_free(memory_system->parent_memory_system, node);
+    return apr_sms_free(mem_sys->parent_mem_sys, node);
 }
 
-static
-apr_status_t
-apr_tracking_memory_system_reset(apr_memory_system_t *memory_system)
+static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
 {
-    apr_tracking_memory_system_t *tracking_memory_system;
+    apr_sms_tracking_t *tms;
     apr_track_node_t *node;
     apr_status_t rv;
     
-    assert (memory_system != NULL);
+    assert (mem_sys != NULL);
 
-    tracking_memory_system = (apr_tracking_memory_system_t *)memory_system;
+    tms = (apr_sms_tracking_t *)mem_sys;
 
-    while (tracking_memory_system->nodes != NULL)
+    while (tms->nodes != NULL)
     {
-        node = tracking_memory_system->nodes;
+        node = tms->nodes;
         *(node->ref) = node->next;
         if (node->next != NULL)
             node->next->ref = node->ref;
-        if ((rv = apr_memory_system_free(memory_system->parent_memory_system,
-                                         node)) != APR_SUCCESS)
+        if ((rv = apr_sms_free(mem_sys->parent_mem_sys, 
+                               node)) != APR_SUCCESS)
             return rv;
     }
     return APR_SUCCESS;
 }
 
-static
-void
-apr_tracking_memory_system_destroy(apr_memory_system_t *memory_system)
+static void apr_sms_tracking_destroy(apr_sms_t *mem_sys)
 {
-    assert (memory_system != NULL);
+    assert (mem_sys != NULL);
 
-    apr_tracking_memory_system_reset(memory_system);
-    apr_memory_system_free(memory_system->parent_memory_system, memory_system);
+    apr_sms_tracking_reset(mem_sys);
+    apr_sms_free(mem_sys->parent_mem_sys, mem_sys);
 }
 
-APR_DECLARE(apr_status_t)
-apr_tracking_memory_system_create(apr_memory_system_t **memory_system,
-				  apr_memory_system_t *parent_memory_system)
+APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys, 
+                                                  apr_sms_t *pms)
 {
-    apr_memory_system_t *new_memory_system;
-    apr_tracking_memory_system_t *tracking_memory_system;
+    apr_sms_t *new_mem_sys, *tmpms;
+    apr_sms_tracking_t *tms;
 
-    assert (memory_system != NULL);
-    assert (parent_memory_system != NULL);
+    assert (mem_sys != NULL);
+    assert (pms != NULL);
+    *mem_sys = NULL;
+    /* changed this to 2 stages to make easier to follow...
+     * should we be using apr_sms_calloc now we have it? 
+     */
+    tmpms = apr_sms_malloc(pms, sizeof(apr_sms_tracking_t));
+    new_mem_sys = apr_sms_create(tmpms, pms);
 
-    new_memory_system = apr_memory_system_create(
-        apr_memory_system_malloc(parent_memory_system, 
-                                 sizeof(apr_tracking_memory_system_t)), 
-		parent_memory_system);
-
-    *memory_system = NULL;
-    if (new_memory_system == NULL)
+    if (new_mem_sys == NULL)
         return APR_ENOMEM;
 
-    new_memory_system->malloc_fn = apr_tracking_memory_system_malloc;
-    new_memory_system->realloc_fn = apr_tracking_memory_system_realloc;
-    new_memory_system->free_fn = apr_tracking_memory_system_free;
-    new_memory_system->reset_fn = apr_tracking_memory_system_reset;
-    new_memory_system->destroy_fn = apr_tracking_memory_system_destroy;
+    new_mem_sys->malloc_fn  = apr_sms_tracking_malloc;
+    new_mem_sys->calloc_fn  = apr_sms_tracking_calloc;
+    new_mem_sys->realloc_fn = apr_sms_tracking_realloc;
+    new_mem_sys->free_fn    = apr_sms_tracking_free;
+    new_mem_sys->reset_fn   = apr_sms_tracking_reset;
+    new_mem_sys->destroy_fn = apr_sms_tracking_destroy;
 
-    tracking_memory_system = (apr_tracking_memory_system_t *)new_memory_system;
-    tracking_memory_system->nodes = NULL;
+    tms = (apr_sms_tracking_t *)new_mem_sys;
+    tms->nodes = NULL;
 
-    apr_memory_system_assert(new_memory_system);
+    apr_sms_assert(new_mem_sys);
 
-    *memory_system = new_memory_system;
+    *mem_sys = new_mem_sys;
     return APR_SUCCESS;
 }
