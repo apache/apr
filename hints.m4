@@ -87,7 +87,6 @@ case "$host" in
 	APR_SETIFNULL(LIBS, [-lm -lpthread])
 	;;
     *-hp-hpux10.*)
-	APR_SETIFNULL(CFLAGS, [-DHPUX10])
  	case $host in
  	  *-hp-hpux10.01)
 dnl	       # We know this is a problem in 10.01.
