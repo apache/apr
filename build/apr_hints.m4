@@ -165,7 +165,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DRHAPSODY])
 	;;
     *-apple-darwin*)
-	APR_ADDTO(CPPFLAGS, [-DDARWIN])
+	APR_ADDTO(CPPFLAGS, [-DDARWIN -DSIGPROCMASK_SETS_THREAD_MASK])
 	;;
     *-dec-osf*)
 	APR_ADDTO(CPPFLAGS, [-DOSF1])
