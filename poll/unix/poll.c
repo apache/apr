@@ -314,7 +314,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
             aprset[i].revents |= APR_POLLOUT;
         }
         if (FD_ISSET(fd, &exceptset)) {
-            aprset[i].events |= APR_POLLERR;
+            aprset[i].revents |= APR_POLLERR;
         }
     }
 
