@@ -166,8 +166,7 @@ To add a new Suite to the full driver, you must make a couple of modifications.
 
 1)  Edit test_apr.h, and add the prototype for the function.
 2)  Edit testall.c, and add the function to the tests array.
-3)  Increase the NUM_TESTS macro in testall.c
-4)  Edit Makefile.in, and add the .lo file to the testall target.
+3)  Edit Makefile.in, and add the .lo file to the testall target.
 
 Once those four things are done, your tests will automatically be added
 to the suite.
