@@ -69,7 +69,7 @@ ap_status_t apr_file_cleanup(void *thefile)
 
 
 
-ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cntxt)
+ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_pool_t *cntxt)
 {
     int oflags = 0;
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;
@@ -171,7 +171,7 @@ ap_status_t ap_close(ap_file_t *file)
 
 
 
-ap_status_t ap_remove_file(char *path, ap_context_t *cntxt)
+ap_status_t ap_remove_file(char *path, ap_pool_t *cntxt)
 {
     ULONG rc = DosDelete(path);
     return APR_OS2_STATUS(rc);
@@ -191,7 +191,7 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 
 
 
-ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, ap_context_t *cont)
+ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, ap_pool_t *cont)
 {
     ap_os_file_t *dafile = thefile;
     if ((*file) == NULL) {
@@ -218,7 +218,7 @@ ap_status_t ap_eof(ap_file_t *fptr)
 
 
 
-ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
+ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
 {
     (*thefile) = ap_palloc(cont, sizeof(ap_file_t));
     if ((*thefile) == NULL) {

@@ -62,13 +62,13 @@
 #include <unistd.h>
 #endif
 
-int test_filedel(ap_context_t *);
-int testdirs(ap_context_t *);
+int test_filedel(ap_pool_t *);
+int testdirs(ap_pool_t *);
 
 int main()
 {
-    ap_context_t *context;
-    ap_context_t *cont2;
+    ap_pool_t *context;
+    ap_pool_t *cont2;
     ap_file_t *thefile = NULL;
     ap_status_t status = 0;
     ap_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
@@ -84,11 +84,11 @@ int main()
         exit(-1);
     }
     atexit(ap_terminate);
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
-    if (ap_create_context(&cont2, context) != APR_SUCCESS) {
+    if (ap_create_pool(&cont2, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -214,7 +214,7 @@ int main()
     return 1;
 }
 
-int test_filedel(ap_context_t *context)
+int test_filedel(ap_pool_t *context)
 {
     ap_file_t *thefile = NULL;
     ap_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
@@ -241,7 +241,7 @@ int test_filedel(ap_context_t *context)
     return APR_SUCCESS;
 }
 
-int testdirs(ap_context_t *context)
+int testdirs(ap_pool_t *context)
 {
     ap_dir_t *temp;  
     ap_file_t *file = NULL;

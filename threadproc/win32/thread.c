@@ -61,7 +61,7 @@
 #include <process.h>
 
 
-ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 {
     (*new) = (ap_threadattr_t *)ap_palloc(cont, 
               sizeof(ap_threadattr_t));
@@ -89,7 +89,7 @@ ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
 
 ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
-                             ap_context_t *cont)
+                             ap_pool_t *cont)
 {
     ap_status_t stat;
 	unsigned temp;
@@ -103,7 +103,7 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
 
     (*new)->cntxt = cont;
     
-    stat = ap_create_context(&(*new)->cntxt, cont);
+    stat = ap_create_pool(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -190,7 +190,7 @@ ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd)
 }
 
 ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
-                             ap_context_t *cont)
+                             ap_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

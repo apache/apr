@@ -53,62 +53,62 @@
  */
 
 #include "threadproc.h"
+#if APR_HAS_THREADS
 
-ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
+#ifdef HAVE_PTHREAD_H
+
+#if 0 /* some platforms, e.g. FreeBSD 2.2.8, do not have pthread_cancel (they do have an undocumented pthread_kill, though) */
+/* ***APRDOC********************************************************
+ * ap_status_t ap_cancel_thread(ap_thread_t *thd)
+ *    Asynchronously kill a thread
+ * arg 1) The thread to kill.
+ */
+ap_status_t ap_cancel_thread(ap_thread_t *thd)
 {
-    int x;
-
-    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-    (*new)->cntxt = cont;
-    (*new)->attr = NULL;
-
-    chdir("/");
-
-    if (((*new)->pid = setsid()) == -1) {
-        return errno;
-    }
-
-    /* close out the standard file descriptors */
-    if (freopen("/dev/null", "r", stdin) == NULL) {
-        return APR_ALLSTD;
-        /* continue anyhow -- note we can't close out descriptor 0 because we
-         * have nothing to replace it with, and if we didn't have a descriptor
-         * 0 the next file would be created with that value ... leading to
-         * havoc.
-         */
-    }
-    if (freopen("/dev/null", "w", stdout) == NULL) {
-        return APR_STDOUT;
-    }
-     /* We are going to reopen this again in a little while to the error
-      * log file, but better to do it twice and suffer a small performance
-      * hit for consistancy than not reopen it here.
-      */
-    if (freopen("/dev/null", "w", stderr) == NULL) {
-        return APR_STDERR;
-    }
-}
-
-ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
-{
-    if (proc != NULL) {
-        return ap_get_userdata(data, key, proc->cntxt);
+    ap_status_t stat;
+    if ((stat = pthread_cancel(*thd->td)) == 0) {
+        return APR_SUCCESS;
     }
     else {
-        data = NULL;
-        return APR_ENOPROC;
+        return stat;
+    }
+}
+#endif
+    
+/* ***APRDOC********************************************************
+ * ap_status_t ap_setcanceltype(ap_int32_t type, ap_pool_t *cont)
+ *    Determine how threads are cancelable.
+ * arg 1) how are threads cancelable.  One of:
+ *            APR_CANCEL_ASYNCH  -- cancel it no matter where it is
+ *            APR_CANCEL_DEFER   -- only cancel the thread if it is safe. 
+ * arg 2) The context to operate on 
+ */
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_pool_t *cont)
+{
+    ap_status_t stat;
+    if ((stat = pthread_setcanceltype(type, NULL)) == 0) {
+        return APR_SUCCESS;
+    }
+    else {
+        return stat;
     }
 }
 
-ap_status_t ap_set_procdata(void *data, char *key, 
-                            ap_status_t (*cleanup) (void *), 
-                            ap_proc_t *proc)
+/* ***APRDOC********************************************************
+ * ap_status_t ap_setcancelstate(ap_int32_t type, ap_pool_t *cont)
+ *    Determine if threads will be cancelable.
+ * arg 1) Are threads cancelable. 
+ * arg 2) The context to operate on 
+ */
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_pool_t *cont)
 {
-    if (proc != NULL) {
-        return ap_set_userdata(data, key, cleanup, proc->cntxt);
+    ap_status_t stat;
+    if ((stat = pthread_setcanceltype(type, NULL)) == 0) {
+        return APR_SUCCESS;
     }
     else {
-        data = NULL;
-        return APR_ENOPROC;
+        return stat;
     }
 }
+#endif
+#endif

@@ -78,7 +78,7 @@ static ap_filetype_e filetype_from_mode(int mode)
 
     return type;
 }
-BOOLEAN is_exe(const char* fname, ap_context_t *cont) {
+BOOLEAN is_exe(const char* fname, ap_pool_t *cont) {
     const char* exename;
     const char* ext;
     exename = strrchr(fname, '/');
@@ -126,7 +126,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
         return errno;
     }
 }
-ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
+ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
 {
     /* WIN32_FILE_ATTRIBUTE_DATA is an exact subset of the first 
      * entries of WIN32_FIND_DATA

@@ -62,7 +62,7 @@
 
 int main(int argc, char *argv[])
 {
-    ap_context_t *context;
+    ap_pool_t *context;
     ap_socket_t *sock;
     ap_ssize_t length;
     ap_status_t stat;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     atexit(ap_terminate);
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
         exit(-1);
     }

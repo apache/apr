@@ -190,7 +190,7 @@ char buffer[8192];
 
 struct connection *con;		/* connection array */
 struct data *stats;		/* date for each request */
-ap_context_t *cntxt;
+ap_pool_t *cntxt;
 
 ap_pollfd_t *readbits;
 
@@ -888,7 +888,7 @@ int main(int argc, char **argv)
 
     ap_initialize();
     atexit(ap_terminate);
-    ap_create_context(&cntxt, NULL);
+    ap_create_pool(&cntxt, NULL);
 
     ap_optind = 1;
     while (ap_getopt(argc, argv, "n:c:t:T:p:v:kVhwx:y:z:", &c, cntxt) == APR_SUCCESS) {

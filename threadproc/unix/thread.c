@@ -58,7 +58,7 @@
 #if APR_HAS_THREADS
 
 #ifdef HAVE_PTHREAD_H
-ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 {
     ap_status_t stat;
   
@@ -101,111 +101,8 @@ ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
-ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
-                             ap_thread_start_t func, void *data, 
-                             ap_context_t *cont)
-{
-    ap_status_t stat;
-    pthread_attr_t *temp;
- 
-    (*new) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->td = (pthread_t *)ap_palloc(cont, sizeof(pthread_t));
-
-    if ((*new)->td == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->cntxt = cont;
-
-    if (attr)
-        temp = attr->attr;
-    else
-        temp = NULL;
-    
-    stat = ap_create_context(&(*new)->cntxt, cont);
-    if (stat != APR_SUCCESS) {
-        return stat;
-    }
-
-    if ((stat = pthread_create((*new)->td, temp, func, data)) == 0) {
-        return APR_SUCCESS;
-    }
-    else {
-        return stat;
-    } 
-}
-
-ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
-{
-    ap_destroy_pool(thd->cntxt);
-    pthread_exit(retval);
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
-{
-    ap_status_t stat;
-
-    if ((stat = pthread_join(*thd->td,(void *)&retval)) == 0) {
-        return APR_SUCCESS;
-    }
-    else {
-        return stat;
-    }
-}
-
-ap_status_t ap_thread_detach(ap_thread_t *thd)
-{
-    ap_status_t stat;
-
-    if ((stat = pthread_detach(*thd->td)) == 0) {
-        return APR_SUCCESS;
-    }
-    else {
-        return stat;
-    }
-}
-
-ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread)
-{
-    if (thread != NULL) {
-        return ap_get_userdata(data, key, thread->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTHREAD;
-    }
-}
-
-ap_status_t ap_set_threaddata(void *data, char *key,
-                              ap_status_t (*cleanup) (void *),
-                              ap_thread_t *thread)
-{
-    if (thread != NULL) {
-        return ap_set_userdata(data, key, cleanup, thread->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOTHREAD;
-    }
-}
-
-ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd)
-{
-    if (thd == NULL) {
-        return APR_ENOTHREAD;
-    }
-    thethd = thd->td;
-    return APR_SUCCESS;
-}
-
 ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
-                             ap_context_t *cont)
+                             ap_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

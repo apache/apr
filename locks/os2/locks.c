@@ -77,8 +77,7 @@ static ap_status_t lock_cleanup(void *thelock)
 
 
 
-ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, 
-                           const char *fname, ap_context_t *cont)
+ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, char *fname, ap_pool_t *cont)
 {
     ap_lock_t *new;
     ULONG rc;
@@ -110,7 +109,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e 
 
 
 
-ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, ap_context_t *cont)
+ap_status_t ap_child_init_lock(ap_lock_t **lock, char *fname, ap_pool_t *cont)
 {
     int rc;
     PIB *ppib;

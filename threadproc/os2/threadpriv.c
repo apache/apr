@@ -60,7 +60,7 @@
 #include "fileio.h"
 
 ap_status_t ap_create_thread_private(ap_threadkey_t **key,
-                                     void (*dest)(void *), ap_context_t *cont)
+                                     void (*dest)(void *), ap_pool_t *cont)
 {
     (*key) = (ap_threadkey_t *)ap_palloc(cont, sizeof(ap_threadkey_t));
 

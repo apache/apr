@@ -81,12 +81,11 @@ extern "C" {
  * and tables are opaque structures to applications, but arrays are
  * published.
  */
-typedef struct ap_pool_t ap_pool_t;
 typedef struct ap_table_t ap_table_t;
 typedef struct ap_child_info_t ap_child_info_t;
 typedef void ap_mutex_t;
 typedef struct ap_array_header_t {
-    ap_context_t *cont;
+    ap_pool_t *cont;
     int elt_size;
     int nelts;
     int nalloc;
@@ -118,7 +117,7 @@ typedef struct ap_vformatter_buff_t {
 
 enum kill_conditions {
     kill_never,			/* process is never sent any signals */
-    kill_always,		/* process is sent SIGKILL on ap_context_t cleanup */
+    kill_always,		/* process is sent SIGKILL on ap_pool_t cleanup */
     kill_after_timeout,		/* SIGTERM, wait 3 seconds, SIGKILL */
     just_wait,			/* wait forever for the process to complete */
     kill_only_once		/* send SIGTERM and then wait */
@@ -128,7 +127,7 @@ enum kill_conditions {
  * Define the prototypes for the various APR GP routines.
  */
 API_EXPORT(char *) ap_cpystrn(char *d, const char *s, size_t l);
-API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
+API_EXPORT(int) ap_tokenize_to_argv(ap_pool_t *token_context,
                                     char *arg_str, char ***argv_out);
 API_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 /*API_EXPORT(ap_mutex_t *) ap_create_mutex(void *m);*/
@@ -208,7 +207,7 @@ API_EXPORT_NONSTD(ap_status_t) ap_execve(const char *c, const char *argv[],
  * can return -1 to indicate that no further output should be attempted,
  * and ap_vformatter will return immediately with -1.  Otherwise
  * the flush_func should flush the buffer in whatever manner is
- * appropriate, re ap_context_t nitialize curpos and endpos, and return 0.
+ * appropriate, re ap_pool_t nitialize curpos and endpos, and return 0.
  *
  * Note that flush_func is only invoked as a result of attempting to
  * write another byte at curpos when curpos >= endpos.  So for
@@ -264,15 +263,15 @@ API_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
  * APR memory structure manipulators (pools, tables, and arrays).
  */
 API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode));
-API_EXPORT(void) ap_clear_pool(struct ap_context_t *p);
-API_EXPORT(void) ap_destroy_pool(struct ap_context_t *p);
+API_EXPORT(void) ap_clear_pool(struct ap_pool_t *p);
+API_EXPORT(void) ap_destroy_pool(struct ap_pool_t *p);
 API_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p);
 API_EXPORT(long) ap_bytes_in_free_blocks(void);
 API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
 API_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b);
 API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub);
 
-/* used to guarantee to the ap_context_t debugging code that the sub ap_context_t will not be
+/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t will not be
  * destroyed before the parent pool
  */
 #ifndef POOL_DEBUG
@@ -283,32 +282,32 @@ API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub);
 #endif /* POOL_DEBUG */
 
 
-API_EXPORT(void *) ap_palloc(struct ap_context_t *c, int reqsize);
-API_EXPORT(void *) ap_pcalloc(struct ap_context_t *p, int size);
-API_EXPORT(char *) ap_pstrdup(struct ap_context_t *p, const char *s);
-API_EXPORT(char *) ap_pstrndup(struct ap_context_t *p, const char *s, int n);
-API_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_context_t *p, ...);
-API_EXPORT(char *) ap_pvsprintf(struct ap_context_t *p, const char *fmt, va_list ap);
-API_EXPORT_NONSTD(char *) ap_psprintf(struct ap_context_t *p, const char *fmt, ...);
-API_EXPORT(ap_array_header_t *) ap_make_array(struct ap_context_t *p, int nelts,
+API_EXPORT(void *) ap_palloc(struct ap_pool_t *c, int reqsize);
+API_EXPORT(void *) ap_pcalloc(struct ap_pool_t *p, int size);
+API_EXPORT(char *) ap_pstrdup(struct ap_pool_t *p, const char *s);
+API_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, int n);
+API_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_pool_t *p, ...);
+API_EXPORT(char *) ap_pvsprintf(struct ap_pool_t *p, const char *fmt, va_list ap);
+API_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *p, const char *fmt, ...);
+API_EXPORT(ap_array_header_t *) ap_make_array(struct ap_pool_t *p, int nelts,
 						int elt_size);
 API_EXPORT(void *) ap_push_array(ap_array_header_t *arr);
 API_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
 			       const ap_array_header_t *src);
-API_EXPORT(ap_array_header_t *) ap_copy_array(struct ap_context_t *p,
+API_EXPORT(ap_array_header_t *) ap_copy_array(struct ap_pool_t *p,
 						const ap_array_header_t *arr);
 API_EXPORT(ap_array_header_t *)
-	ap_copy_array_hdr(struct ap_context_t *p,
+	ap_copy_array_hdr(struct ap_pool_t *p,
 			   const ap_array_header_t *arr);
 API_EXPORT(ap_array_header_t *)
-	ap_append_arrays(struct ap_context_t *p,
+	ap_append_arrays(struct ap_pool_t *p,
 			  const ap_array_header_t *first,
 			  const ap_array_header_t *second);
-API_EXPORT(char *) ap_array_pstrcat(struct ap_context_t *p,
+API_EXPORT(char *) ap_array_pstrcat(struct ap_pool_t *p,
 				     const ap_array_header_t *arr,
 				     const char sep);
-API_EXPORT(ap_table_t *) ap_make_table(struct ap_context_t *p, int nelts);
-API_EXPORT(ap_table_t *) ap_copy_table(struct ap_context_t *p, const ap_table_t *t);
+API_EXPORT(ap_table_t *) ap_make_table(struct ap_pool_t *p, int nelts);
+API_EXPORT(ap_table_t *) ap_copy_table(struct ap_pool_t *p, const ap_table_t *t);
 API_EXPORT(void) ap_clear_table(ap_table_t *t);
 API_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key);
 API_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
@@ -324,7 +323,7 @@ API_EXPORT(void) ap_table_add(ap_table_t *t, const char *key,
 			       const char *val);
 API_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
 				const char *val);
-API_EXPORT(ap_table_t *) ap_overlay_tables(struct ap_context_t *p,
+API_EXPORT(ap_table_t *) ap_overlay_tables(struct ap_pool_t *p,
 					     const ap_table_t *overlay,
 					     const ap_table_t *base);
 API_EXPORT(void)
@@ -334,21 +333,21 @@ API_EXPORT(void)
 #define AP_OVERLAP_TABLES_MERGE (1)
 API_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 				    unsigned flags);
-API_EXPORT(void) ap_register_cleanup(struct ap_context_t *p, void *data,
+API_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *));
-API_EXPORT(void) ap_kill_cleanup(struct ap_context_t *p, void *data,
+API_EXPORT(void) ap_kill_cleanup(struct ap_pool_t *p, void *data,
 				  ap_status_t (*cleanup) (void *));
-API_EXPORT(void) ap_run_cleanup(struct ap_context_t *p, void *data,
+API_EXPORT(void) ap_run_cleanup(struct ap_pool_t *p, void *data,
 				 ap_status_t (*cleanup) (void *));
 API_EXPORT(void) ap_cleanup_for_exec(void);
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
-API_EXPORT(void) ap_note_subprocess(struct ap_context_t *a, ap_proc_t *pid,
+API_EXPORT(void) ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid,
 				     enum kill_conditions how);
 API_EXPORT(int)
-	ap_spawn_child(ap_context_t *p,
+	ap_spawn_child(ap_pool_t *p,
 			int (*func) (void *a, ap_child_info_t *c),
 			void *data, enum kill_conditions kill_how,
 			FILE **pipe_in, FILE **pipe_out,

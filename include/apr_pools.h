@@ -69,14 +69,14 @@ extern "C" {
  * Instead, we maintain pools, and allocate items (both memory and I/O
  * handlers) from the pools --- currently there are two, one for per
  * transaction info, and one for config info.  When a transaction is over,
- * we can delete everything in the per-transaction ap_context_t without fear, and
+ * we can delete everything in the per-transaction ap_pool_t without fear, and
  * without thinking too hard about it either.
  *
  * rst
  */
 
 /* Arenas for configuration info and transaction info
- * --- actual layout of the ap_context_t structure is private to 
+ * --- actual layout of the ap_pool_t structure is private to 
  * alloc.c.  
  */
 
@@ -90,24 +90,6 @@ struct process_chain {
     ap_proc_t *pid;
     enum kill_conditions kill_how;
     struct process_chain *next;
-};
-
-struct ap_pool_t {
-    union block_hdr *first;
-    union block_hdr *last;
-    struct cleanup *cleanups;
-    struct process_chain *subprocesses;
-    ap_pool_t *sub_pools;
-    ap_pool_t *sub_next;
-    ap_pool_t *sub_prev;
-    ap_pool_t *parent;
-    char *free_first_avail;
-#ifdef ALLOC_USE_MALLOC
-    void *allocation_list;
-#endif
-#ifdef POOL_DEBUG
-    ap_pool_t *joined;
-#endif
 };
 
 struct ap_table_t {
@@ -153,14 +135,14 @@ void        ap_term_alloc(void);        /* Tear down everything */
 
 /* routines to allocate memory from an pool... */
 
-API_EXPORT_NONSTD(char *) ap_psprintf(struct ap_context_t *, const char *fmt, ...)
+API_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *, const char *fmt, ...)
     __attribute__((format(printf,2,3)));
 
 /* array and alist management... keeping lists of things.
  * Common enough to want common support code ...
  */
 
-/* ap_array_pstrcat generates a new string from the ap_context_t containing
+/* ap_array_pstrcat generates a new string from the ap_pool_t containing
  * the concatenated sequence of substrings referenced as elements within
  * the array.  The string will be empty if all substrings are empty or null,
  * or if there are no elements in the array.
@@ -240,7 +222,7 @@ extern int raise_sigstop_flags;
 #define ap_table_elts(t) ((ap_array_header_t *)(t))
 #define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
 
-/* magic numbers --- min free bytes to consider a free ap_context_t block useable,
+/* magic numbers --- min free bytes to consider a free ap_pool_t block useable,
  * and the min amount to allocate if we have to go to malloc() */
 
 #ifndef BLOCK_MINFREE

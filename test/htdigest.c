@@ -97,7 +97,7 @@
 #define MAX_STRING_LEN 256
 
 char *tn;
-ap_context_t *cntxt;
+ap_pool_t *cntxt;
 
 static void getword(char *word, char *line, char stop)
 {
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
     char command[MAX_STRING_LEN];
     int found;
     
-    ap_create_context(&cntxt, NULL);
+    ap_create_pool(&cntxt, NULL);
 
     tn = NULL;
     ap_signal(SIGINT, (void (*)(int)) interrupted);

@@ -77,7 +77,7 @@ static ap_status_t mmap_cleanup(void *themmap)
 }
 
 ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset, 
-       ap_size_t size, ap_context_t *cont)
+       ap_size_t size, ap_pool_t *cont)
 {
     caddr_t mm;
    

@@ -115,7 +115,7 @@ API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
  *                   pool and filled in with copies of the tokens
  *                   found during parsing of the arg_str. 
  */
-API_EXPORT(int) ap_tokenize_to_argv(ap_context_t *token_context,
+API_EXPORT(int) ap_tokenize_to_argv(ap_pool_t *token_context,
                                     char *arg_str, char ***argv_out)
 {
     char *cp, *tmpCnt;

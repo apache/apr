@@ -58,7 +58,7 @@
 #include "apr_lock.h"
 
 struct ap_lock_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     ap_locktype_e type;
     ap_lockscope_e scope;
     HANDLE mutex;

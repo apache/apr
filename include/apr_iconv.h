@@ -85,7 +85,7 @@ typedef void                         ap_iconv_t;
 typedef struct ap_iconv_t            ap_iconv_t;
 
 void ap_codepage_open(ap_iconv_t **convset, const char *topage, 
-                         const char *frompage, ap_context_t *context); 
+                         const char *frompage, ap_pool_t *context); 
 void ap_translate_codepage(ap_iconv_t *convset, const char *inbuf, 
                               ap_size_t inbytes_left, const char *outbuf,
                               ap_size_t outbytes_left);

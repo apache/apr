@@ -153,7 +153,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
     return APR_SUCCESS;
 }         
 
-ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
+ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return errno;

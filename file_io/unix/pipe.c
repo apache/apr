@@ -89,7 +89,7 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
     return APR_EINVAL;
 }
 
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
+ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 {
     int filedes[2];
 
@@ -121,7 +121,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
 }
 
 ap_status_t ap_create_namedpipe(char *filename, 
-                                ap_fileperms_t perm, ap_context_t *cont)
+                                ap_fileperms_t perm, ap_pool_t *cont)
 {
     mode_t mode = ap_unix_get_fileperms(perm);
 

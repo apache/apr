@@ -59,7 +59,7 @@ ap_status_t ap_dso_init(void){
 }
 
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
-                        ap_context_t *ctx)
+                        ap_pool_t *ctx)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);

@@ -54,7 +54,7 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont)
+ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
 {
     int x;
 

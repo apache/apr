@@ -70,7 +70,7 @@ int testdirs(void);
 
 int main(int argc, char *argv[])
 {
-    ap_context_t *context;
+    ap_pool_t *context;
     ap_proc_t *newproc;
     ap_procattr_t *attr;
     ap_file_t *testfile = NULL;
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     atexit(ap_terminate);
-    ap_create_context(&context, NULL);
+    ap_create_pool(&context, NULL);
 
 
     if (argc > 1) {

@@ -78,19 +78,19 @@
 #define BEOS_MAX_DATAKEYS	128
 
 struct ap_thread_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     thread_id td;
 };
 
 struct ap_threadattr_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     int32 attr;
     int detached;
     int joinable;
 };
 
 struct ap_threadkey_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
 	int32  key;
 };
 
@@ -109,7 +109,7 @@ struct beos_key {
 };
 
 struct ap_procattr_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     ap_file_t *parent_in;
     ap_file_t *child_in;
     ap_file_t *parent_out;
@@ -122,7 +122,7 @@ struct ap_procattr_t {
 };
 
 struct ap_proc_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     thread_id pid;
     struct ap_procattr_t *attr;
 };

@@ -87,7 +87,7 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
     return APR_EINVAL;
 }
 
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
+ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 {
     SECURITY_ATTRIBUTES sa;
 

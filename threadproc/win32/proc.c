@@ -65,7 +65,7 @@
 #include <string.h>
 #include <process.h>
 
-ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont)
+ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
 {
     (*new) = (ap_procattr_t *)ap_palloc(cont, 
               sizeof(ap_procattr_t));
@@ -185,7 +185,7 @@ ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t det)
 
 ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
                               char *const args[], char **env, 
-                              ap_procattr_t *attr, ap_context_t *cont)
+                              ap_procattr_t *attr, ap_pool_t *cont)
 {
     int i, iEnvBlockLen;
     char *cmdline;
@@ -440,7 +440,7 @@ ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
 }
 
 ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
-                           ap_context_t *cont)
+                           ap_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

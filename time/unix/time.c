@@ -216,14 +216,14 @@ ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *ap
 }
 
 ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime,
-                               ap_context_t *cont)
+                               ap_pool_t *cont)
 {
     *aprtime = (*ostime)->tv_sec * AP_USEC_PER_SEC + (*ostime)->tv_usec;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
-                               ap_os_exp_time_t **ostime, ap_context_t *cont)
+                               ap_os_exp_time_t **ostime, ap_pool_t *cont)
 {
     aprtime->tm_sec = (*ostime)->tm_sec;
     aprtime->tm_min = (*ostime)->tm_min;

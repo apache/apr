@@ -70,7 +70,7 @@ void * API_THREAD_FUNC thread_func4(void *data);
 
 
 ap_lock_t *thread_lock;
-ap_context_t *context;
+ap_pool_t *context;
 int x = 0;
 
 void * API_THREAD_FUNC thread_func1(void *data)
@@ -131,7 +131,7 @@ int main()
     ap_initialize();
 
     fprintf(stdout, "Initializing the context......."); 
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "could not initialize\n");
         exit(-1);
     }

@@ -79,7 +79,7 @@ typedef struct ap_mmap_t            ap_mmap_t;
  * arg 5) The context to use when creating the mmap.
  */
 ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, ap_file_t *file, ap_off_t offset,
-                 ap_size_t size, ap_context_t *cntxt);
+                 ap_size_t size, ap_pool_t *cntxt);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_mmap_delete(ap_mmap_t *mmap)

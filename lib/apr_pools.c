@@ -594,7 +594,7 @@ static void ap_register_pool_cleanup(struct ap_pool_t *p, void *data,
 }
 #endif
 
-API_EXPORT(void) ap_register_cleanup(ap_context_t *p, void *data,
+API_EXPORT(void) ap_register_cleanup(ap_pool_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *))
 {
@@ -605,12 +605,12 @@ API_EXPORT(void) ap_register_cleanup(ap_context_t *p, void *data,
         c->data = data;
         c->plain_cleanup = plain_cleanup;
         c->child_cleanup = child_cleanup;
-        c->next = p->pool->cleanups;
-        p->pool->cleanups = c;
+        c->next = p->cleanups;
+        p->cleanups = c;
     }
 }
 
-API_EXPORT(void) ap_kill_cleanup(ap_context_t *p, void *data,
+API_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, void *data,
 				  ap_status_t (*cleanup) (void *))
 {
     struct cleanup *c;
@@ -618,8 +618,8 @@ API_EXPORT(void) ap_kill_cleanup(ap_context_t *p, void *data,
 
     if (p == NULL)
         return;
-    c = p->pool->cleanups;
-    lastp = &p->pool->cleanups;
+    c = p->cleanups;
+    lastp = &p->cleanups;
     while (c) {
         if (c->data == data && c->plain_cleanup == cleanup) {
             *lastp = c->next;
@@ -631,7 +631,7 @@ API_EXPORT(void) ap_kill_cleanup(ap_context_t *p, void *data,
     }
 }
 
-API_EXPORT(void) ap_run_cleanup(ap_context_t *p, void *data,
+API_EXPORT(void) ap_run_cleanup(ap_pool_t *p, void *data,
 				 ap_status_t (*cleanup) (void *))
 {
     ap_block_alarms();		/* Run cleanup only once! */
@@ -731,20 +731,18 @@ void ap_term_alloc(void)
 #endif
 }
 
-void ap_destroy_real_pool(ap_pool_t *);
-
 /* We only want to lock the mutex if we are being called from ap_clear_pool.
  * This is because if we also call this function from ap_destroy_real_pool,
  * which also locks the same mutex, and recursive locks aren't portable.  
  * This way, we are garaunteed that we only lock this mutex once when calling
  * either one of these functions.
  */
-static void ap_clear_real_pool(ap_pool_t *a)
+API_EXPORT(void) ap_clear_pool(ap_pool_t *a)
 {
     ap_block_alarms();
 
     while (a->sub_pools) {
-	ap_destroy_real_pool(a->sub_pools);
+	ap_destroy_pool(a->sub_pools);
     }
     /*
      * Don't hold the mutex during cleanups.
@@ -776,15 +774,10 @@ static void ap_clear_real_pool(ap_pool_t *a)
     ap_unblock_alarms();
 }
 
-API_EXPORT(void) ap_clear_pool(ap_context_t *a)
-{
-    ap_clear_real_pool(a->pool);
-}
-
-API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
+API_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
 {
     ap_block_alarms();
-    ap_clear_real_pool(a);
+    ap_clear_pool(a);
 #if APR_HAS_THREADS
     ap_lock(alloc_mutex);
 #endif
@@ -805,11 +798,6 @@ API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 #endif
     free_blocks(a->first);
     ap_unblock_alarms();
-}
-
-API_EXPORT(void) ap_destroy_pool(ap_context_t *a)
-{
-    ap_destroy_real_pool(a->pool);
 }
 
 API_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p)
@@ -935,12 +923,15 @@ API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub,
  * Allocating stuff...
  */
 
-static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int retcode))
+void * ap_palloc(ap_pool_t *a, int reqsize)
 {
 #ifdef ALLOC_USE_MALLOC
     int size = reqsize + CLICK_SZ;
     void *ptr;
 
+    if (a == NULL) {
+        return malloc(reqsize);
+    }
     ap_block_alarms();
     if (c == NULL) {
         return malloc(reqsize);
@@ -971,6 +962,10 @@ static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int ret
     union block_hdr *blok;
     char *first_avail;
     char *new_first_avail;
+
+    if (a == NULL) {
+        return malloc(reqsize);
+    }
 
     nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
     size = nclicks * CLICK_SZ;
@@ -1004,7 +999,7 @@ static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int ret
     ap_lock(alloc_mutex);
 #endif
 
-    blok = new_block(size, apr_abort);
+    blok = new_block(size, a->apr_abort);
     a->last->h.next = blok;
     a->last = blok;
 #ifdef POOL_DEBUG
@@ -1024,22 +1019,14 @@ static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int ret
 #endif
 }
 
-API_EXPORT(void *) ap_palloc(ap_context_t *c, int reqsize)
-{
-    if (c == NULL) {
-        return malloc(reqsize);
-    }
-    return ap_pool_palloc(c->pool, reqsize, c->apr_abort);
-}
-
-API_EXPORT(void *) ap_pcalloc(ap_context_t *a, int size)
+API_EXPORT(void *) ap_pcalloc(ap_pool_t *a, int size)
 {
     void *res = ap_palloc(a, size);
     memset(res, '\0', size);
     return res;
 }
 
-API_EXPORT(char *) ap_pstrdup(ap_context_t *a, const char *s)
+API_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
 {
     char *res;
     size_t len;
@@ -1053,7 +1040,7 @@ API_EXPORT(char *) ap_pstrdup(ap_context_t *a, const char *s)
     return res;
 }
 
-API_EXPORT(char *) ap_pstrndup(ap_context_t *a, const char *s, int n)
+API_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, int n)
 {
     char *res;
 
@@ -1066,7 +1053,7 @@ API_EXPORT(char *) ap_pstrndup(ap_context_t *a, const char *s, int n)
     return res;
 }
 
-API_EXPORT_NONSTD(char *) ap_pstrcat(ap_context_t *a, ...)
+API_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
 {
     char *cp, *argp, *res;
 
@@ -1113,7 +1100,7 @@ API_EXPORT_NONSTD(char *) ap_pstrcat(ap_context_t *a, ...)
  * until all the output is done.
  *
  * Note that this is completely safe because nothing else can
- * allocate in this ap_context_t while ap_psprintf is running.  alarms are
+ * allocate in this ap_pool_t while ap_psprintf is running.  alarms are
  * blocked, and the only thing outside of alloc.c that's invoked
  * is ap_vformatter -- which was purposefully written to be
  * self-contained with no callouts.
@@ -1191,10 +1178,9 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 #endif
 }
 
-API_EXPORT(char *) ap_pvsprintf(ap_context_t *c, const char *fmt, va_list ap)
+API_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
 {
 #ifdef ALLOC_USE_MALLOC
-    ap_pool_t *p = c->pool;
     struct psprintf_data ps;
     void *ptr;
 
@@ -1224,7 +1210,6 @@ API_EXPORT(char *) ap_pvsprintf(ap_context_t *c, const char *fmt, va_list ap)
     struct psprintf_data ps;
     char *strp;
     int size;
-    ap_pool_t *p = c->pool;
 
     ap_block_alarms();
     ps.blok = p->last;
@@ -1256,7 +1241,7 @@ API_EXPORT(char *) ap_pvsprintf(ap_context_t *c, const char *fmt, va_list ap)
 #endif
 }
 
-API_EXPORT_NONSTD(char *) ap_psprintf(ap_context_t *p, const char *fmt, ...)
+API_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...)
 {
     va_list ap;
     char *res;
@@ -1279,7 +1264,7 @@ API_EXPORT_NONSTD(char *) ap_psprintf(ap_context_t *p, const char *fmt, ...)
  * generic interface, but for now, it's a special case
  */
 
-API_EXPORT(void) ap_note_subprocess(ap_context_t *a, ap_proc_t *pid,
+API_EXPORT(void) ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid,
 				     enum kill_conditions how)
 {
     struct process_chain *new =
@@ -1287,8 +1272,8 @@ API_EXPORT(void) ap_note_subprocess(ap_context_t *a, ap_proc_t *pid,
 
     new->pid = pid;
     new->kill_how = how;
-    new->next = a->pool->subprocesses;
-    a->pool->subprocesses = new;
+    new->next = a->subprocesses;
+    a->subprocesses = new;
 }
 
 #ifdef WIN32

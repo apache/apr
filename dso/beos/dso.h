@@ -64,7 +64,7 @@
 
 struct ap_dso_handle_t {
     image_id       handle;    /* Handle to the DSO loaded */
-    ap_context_t   *cont;
+    ap_pool_t   *cont;
 };
 
 #endif

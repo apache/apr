@@ -13,7 +13,7 @@ int main (int argc, char ** argv)
     ap_dso_handle_t *h = NULL;
     ap_dso_handle_sym_t func1 = NULL;
     ap_dso_handle_sym_t func2 = NULL;
-    ap_context_t *cont;
+    ap_pool_t *cont;
     void (*function)(void);
     void (*function1)(int);
     int *retval;
@@ -26,7 +26,7 @@ int main (int argc, char ** argv)
     ap_initialize();
     atexit(ap_terminate);
         
-    if (ap_create_context(&cont, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&cont, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }

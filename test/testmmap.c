@@ -69,7 +69,7 @@
 
 int main()
 {
-    ap_context_t *context;
+    ap_pool_t *context;
     ap_mmap_t *themmap = NULL;
     ap_file_t *thefile = NULL;
     ap_finfo_t finfo;
@@ -87,7 +87,7 @@ int main()
     atexit(ap_terminate);
 
     fprintf(stdout,"Creating context....................");    
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
     }

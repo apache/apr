@@ -80,7 +80,7 @@ ap_status_t ap_dso_init(void);
  * arg 3) Context to use. 
  */
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
-                        ap_context_t *ctx);
+                        ap_pool_t *ctx);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_dso_unload(ap_dso_handle_t *handle)

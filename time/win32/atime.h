@@ -60,7 +60,7 @@
 #include <time.h>
 
 struct atime_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     ap_time_t currtime;
     SYSTEMTIME *explodedtime;
 };

@@ -77,7 +77,6 @@ extern "C" {
 
 #define MAXIMUM_WAIT_OBJECTS 64
 
-typedef struct ap_context_t  ap_context_t;
 typedef int               ap_signum_t;
 
 #ifdef SIGHUP
@@ -212,8 +211,26 @@ typedef int               ap_signum_t;
 #define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
 #endif
 
-
-
+typedef struct ap_pool_t {
+    union block_hdr *first;
+    union block_hdr *last;
+    struct cleanup *cleanups;
+    struct process_chain *subprocesses;
+    struct ap_pool_t *sub_pools;
+    struct ap_pool_t *sub_next;
+    struct ap_pool_t *sub_prev;
+    struct ap_pool_t *parent;
+    char *free_first_avail;
+#ifdef ALLOC_USE_MALLOC
+    void *allocation_list;
+#endif
+#ifdef POOL_DEBUG
+    ap_pool_t *joined;
+#endif
+    int (*apr_abort)(int retcode);
+    struct datastruct *prog_data;
+}ap_pool_t;
+ 
 /* Context functions */
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
@@ -224,15 +241,16 @@ typedef int               ap_signum_t;
  *        of it's parent context's attributes, except the ap_context_t will be a
  *        sub-pool.
  */
-ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont);
+ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_destroy_context(ap_context_t *cont)
  *    Free the context and all of it's child contexts'.
  * arg 1) The context to free.
  */
-ap_status_t ap_destroy_context(struct ap_context_t *cont);
-ap_status_t ap_exit(ap_context_t *);
+ap_status_t ap_destroy_context(ap_pool_t *cont);
+
+ap_status_t ap_exit(ap_pool_t *);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_set_userdata(void *data, char *key, 
@@ -254,7 +272,7 @@ ap_status_t ap_exit(ap_context_t *);
  */
 ap_status_t ap_set_userdata(void *data, char *key, 
                             ap_status_t (*cleanup) (void *), 
-                            ap_context_t *cont);
+                            ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
@@ -263,7 +281,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
  * arg 2) The user data associated with the context.
  * arg 3) The current context.
  */
-ap_status_t ap_get_userdata(void **, char *key, ap_context_t *cont);
+ap_status_t ap_get_userdata(void **, char *key, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_initialize(void)
@@ -279,7 +297,7 @@ ap_status_t ap_initialize(void);
  *    function at termination once it has stopped using APR
  *    services.
  */
-void        ap_terminate(void);
+void ap_terminate(void);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont)
@@ -291,7 +309,7 @@ void        ap_terminate(void);
  *        then APR will return an error and expect the calling program to
  *        deal with the error accordingly.
  */
-ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont);
+ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont);
 
 #ifdef __cplusplus
 }

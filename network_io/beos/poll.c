@@ -63,7 +63,7 @@
 /*  select for R4.5 of BeOS.  So here we use code that uses the write */
 /*  bits. */
     
-ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
+ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
     (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t) * num);
     if ((*new) == NULL) {

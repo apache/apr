@@ -66,7 +66,7 @@ static ap_status_t dir_cleanup(void *thedir)
     }
 } 
 
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cont)
+ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
 {
     if (new == NULL)
         return APR_EBADARG;
@@ -143,7 +143,7 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
+ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
 {
     mode_t mode = ap_unix_get_fileperms(perm);
 
@@ -155,7 +155,7 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *con
     }
 }
 
-ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
+ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
 {
     if (rmdir(path) == 0) {
         return APR_SUCCESS;
@@ -275,7 +275,7 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
 }
 
 ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir,
-                          ap_context_t *cont)
+                          ap_pool_t *cont)
 {
     if ((*dir) == NULL) {
         (*dir) = (ap_dir_t *)ap_palloc(cont, sizeof(ap_dir_t));

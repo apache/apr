@@ -143,7 +143,7 @@ struct ap_hdtr_t {
  * arg 1) The new socket that has been setup. 
  * arg 2) The context to use
  */
-ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_context_t *cont);
+ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
@@ -195,7 +195,7 @@ ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog);
  * arg 3) The context for the new socket.
  */
 ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, 
-                      ap_context_t *connection_context);
+                      ap_pool_t *connection_context);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
@@ -224,7 +224,7 @@ ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock);
  *        buffer provided. 
  * arg 3) The context to use.
  */
-ap_status_t ap_gethostname(char *buf, int len, ap_context_t *cont);
+ap_status_t ap_gethostname(char *buf, int len, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *sock)
@@ -440,7 +440,7 @@ ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *soc
  * arg 3) The context to operate on.
  */
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, 
-                          ap_context_t *cont);
+                          ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,

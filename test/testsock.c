@@ -64,7 +64,7 @@
 
 int main(int argc, char *argv[])
 {
-    ap_context_t *context;
+    ap_pool_t *context;
 
     ap_procattr_t *attr1 = NULL;
     ap_procattr_t *attr2 = NULL;
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     atexit(ap_terminate);
 
     fprintf(stdout, "Creating context.......");
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Could not create context\n");
         exit(-1);
     }

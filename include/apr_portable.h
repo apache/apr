@@ -265,7 +265,7 @@ ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key);
  *        an apr file type.
  */
 ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, 
-                           ap_context_t *cont); 
+                           ap_pool_t *cont); 
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, 
@@ -276,7 +276,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
  * arg 3) The context to use when creating to apr directory.
  */
 ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, 
-                          ap_context_t *cont); 
+                          ap_pool_t *cont); 
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_socket_t *thesock, 
@@ -287,7 +287,7 @@ ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir,
  * arg 3) The socket we are converting to an apr type.
  */
 ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, 
-                           ap_context_t *cont);
+                           ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *,
@@ -298,7 +298,7 @@ ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock,
  * arg 3) The context to use if it is needed.
  */
 ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
-                           ap_context_t *cont); 
+                           ap_pool_t *cont); 
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc,
@@ -309,7 +309,7 @@ ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock,
  * arg 3) The context to use if it is needed.
  */
 ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
-                           ap_context_t *cont); 
+                           ap_pool_t *cont); 
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime, ap_context_t, *cont)
@@ -318,7 +318,7 @@ ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc,
  * arg 2) the time to convert
  * arg 3) the context to use if necessary
  */
-ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_context_t *); 
+ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_pool_t *); 
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime, ap_os_exp_time_t **ostime, ap_context_t, *cont)
@@ -327,7 +327,8 @@ ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_context_t *)
  * arg 2) the time to convert
  * arg 3) the context to use if necessary
  */
-ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_context_t *); 
+ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_pool_t *); 
+
 #if APR_HAS_THREADS
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_thread(ap_thread_t *thd, ap_os_thread_t *thethd,
@@ -338,7 +339,7 @@ ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_con
  * arg 3) The context to use if it is needed.
  */
 ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
-                             ap_context_t *cont);
+                             ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_put_os_threadkey(ap_threadkey_t *key, ap_os_threadkey_t *thekey, 
@@ -349,7 +350,7 @@ ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd,
  * arg 3) The context to use if it is needed.
  */
 ap_status_t ap_put_os_threadkey(ap_threadkey_t **key, ap_os_threadkey_t *thekey, 
-                                ap_context_t *cont);
+                                ap_pool_t *cont);
 #endif
 
 #ifdef __cplusplus

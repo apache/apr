@@ -82,7 +82,7 @@ typedef   struct shmem_t ap_shmem_t;
  *        require it.
  * arg 4) The context to use
  */
-ap_status_t ap_shm_init(ap_shmem_t **m, ap_size_t reqsize, const char *file, ap_context_t *cont);
+ap_status_t ap_shm_init(ap_shmem_t **m, ap_size_t reqsize, const char *file, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_shm_destroy(ap_shmem_t *m)

@@ -85,7 +85,10 @@ void ocmaint(int reason, void *data)
 
 int main(int argc, char *argv[])
 {
-    ap_context_t *context;
+    ap_pool_t *context;
+    ap_pool_t *cont2;
+    ap_status_t status = 0;
+    ap_ssize_t nbytes = 0;
     ap_proc_t *newproc = NULL;
     ap_procattr_t *procattr = NULL;
     char *args[3];
@@ -99,7 +102,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     atexit(ap_terminate);
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
