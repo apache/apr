@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/04 08:50:12 $]
+Last modified at [$Date: 2002/01/10 01:19:24 $]
 
 Release:
 
@@ -82,16 +82,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * Build scripts do not recognise AIX 4.2.1 pthreads
       Justin says: "Is this still true?"
-
-    * Win32: Implement apr_shm_ functions 
-      Status: rbb insists he has thoughts about splitting apr_shm_*
-              mechanisms to support muliple models (some sort of 'keyed'
-              schema as well as anonymous inheritable shmem), and has a
-              possible solution to the 'ask for 1MB, then ask for 4x256kb
-              bogosity, so we are waiting on this.
-      Justin says: "That problem should be fixed now because we ignore memory
-                    management with shared memory on Unix (at least).  So, 
-                    the Win32 guys should be able to go ahead if they want."
 
     * FirstBill says we need a new procattr, APR_CREATE_SUSPENDED (or
       something similar) to direct ap_create_process to create the
