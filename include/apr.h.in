@@ -146,6 +146,10 @@
  */
 #define APR_TCP_NOPUSH_FLAG       @apr_tcp_nopush_flag@
 
+/* Is the TCP_NODELAY socket option inherited from listening sockets?
+*/
+#define APR_TCP_NODELAY_INHERITED @tcp_nodelay_inherited@
+
 /* Typedefs that APR needs. */
 
 typedef  unsigned char           apr_byte_t;

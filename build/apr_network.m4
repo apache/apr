@@ -146,6 +146,111 @@ fi
 ])
 
 
+dnl
+dnl see if TCP_NODELAY setting is inherited from listening sockets
+dnl
+AC_DEFUN(APR_CHECK_TCP_NODELAY_INHERITED,[
+  AC_CACHE_CHECK(if TCP_NODELAY setting is inherited from listening sockets, ac_cv_tcp_nodelay_inherited,[
+  AC_TRY_RUN( [
+#include <stdio.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
+#include <netinet/tcp.h>
+#endif
+int main(void) {
+    int listen_s, connected_s, client_s;
+    int listen_port, rc;
+    struct sockaddr_in sa;
+    int sa_len;
+    int option_len;
+    int option;
+
+    listen_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (listen_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    option = 1;
+    rc = setsockopt(listen_s, IPPROTO_TCP, TCP_NODELAY, &option, sizeof option);
+    if (rc < 0) {
+        perror("setsockopt TCP_NODELAY");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+    /* leave port 0 to get ephemeral */
+    rc = bind(listen_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("bind for ephemeral port");
+        exit(1);
+    }
+    /* find ephemeral port */
+    sa_len = sizeof(sa);
+    rc = getsockname(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (rc < 0) {
+        perror("getsockname");
+        exit(1);
+    }
+    listen_port = sa.sin_port;
+    rc = listen(listen_s, 5);
+    if (rc < 0) {
+        perror("listen");
+        exit(1);
+    }
+    client_s = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_s < 0) {
+        perror("socket");
+        exit(1);
+    }
+    memset(&sa, 0, sizeof sa);
+    sa.sin_family = AF_INET;
+    sa.sin_port   = listen_port;
+    /* leave sin_addr all zeros to use loopback */
+    rc = connect(client_s, (struct sockaddr *)&sa, sizeof sa);
+    if (rc < 0) {
+        perror("connect");
+        exit(1);
+    }
+    sa_len = sizeof sa;
+    connected_s = accept(listen_s, (struct sockaddr *)&sa, &sa_len);
+    if (connected_s < 0) {
+        perror("accept");
+        exit(1);
+    }
+    option_len = sizeof option;
+    rc = getsockopt(connected_s, IPPROTO_TCP, TCP_NODELAY, &option, &option_len);
+    if (rc < 0) {
+        perror("getsockopt");
+        exit(1);
+    }
+    if (!option) {
+        fprintf(stderr, "TCP_NODELAY is not set in the child.\n");
+        exit(1);
+    }
+    return 0;
+}
+],[
+    ac_cv_tcp_nodelay_inherited="yes"
+],[
+    ac_cv_tcp_nodelay_inherited="no"
+],[
+    ac_cv_tcp_nodelay_inherited="yes"
+])])
+if test "$ac_cv_tcp_nodelay_inherited" = "yes"; then
+    tcp_nodelay_inherited=1
+else
+    tcp_nodelay_inherited=0
+fi
+])
+
 dnl 
 dnl check for socklen_t, fall back to unsigned int
 dnl
