@@ -130,7 +130,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     }
     
     if (perm == APR_OS_DEFAULT) {
-        (*new)->filedes = open(fname, oflags, 0777);
+        (*new)->filedes = open(fname, oflags, 0666);
     }
     else {
         (*new)->filedes = open(fname, oflags, ap_unix_get_fileperms(perm));
