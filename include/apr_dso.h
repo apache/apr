@@ -86,7 +86,7 @@ apr_status_t apr_dso_unload(apr_dso_handle_t *handle);
 
 /**
  * Load a symbol from a DSO handle.
- * @param dso Location to store the loaded symbol
+ * @param ressym Location to store the loaded symbol
  * @param handle handle to load from.
  * @param symname Name of the symbol to load.
  */

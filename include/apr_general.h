@@ -243,7 +243,7 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #endif
 
 /**
- * package APR Random Functions
+ * @package APR Random Functions
  */
 
 #if APR_HAS_RANDOM
@@ -272,6 +272,9 @@ apr_status_t apr_generate_random_bytes(unsigned char * buf, int length);
 #define ALLOC_STATS
 */
 
+/**
+ * @package APR memory allocation
+ */
 typedef struct apr_pool_t apr_pool_t;
 
 /** The memory allocation structure
