@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_general.h"
 #include "apr_network_io.h"
 #include "apr_errno.h"
 
-static void test_bad_input(CuTest *tc)
+static void test_bad_input(abts_case *tc, void *data)
 {
     struct {
         const char *ipstr;
@@ -67,11 +67,11 @@ static void test_bad_input(CuTest *tc)
 
     for (i = 0; i < (sizeof testcases / sizeof testcases[0]); i++) {
         rv = apr_ipsubnet_create(&ipsub, testcases[i].ipstr, testcases[i].mask, p);
-        CuAssertIntEquals(tc, rv, testcases[i].expected_rv);
+        abts_int_equal(tc, rv, testcases[i].expected_rv);
     }
 }
 
-static void test_singleton_subnets(CuTest *tc)
+static void test_singleton_subnets(abts_case *tc, void *data)
 {
     const char *v4addrs[] = {
         "127.0.0.1", "129.42.18.99", "63.161.155.20", "207.46.230.229", "64.208.42.36",
@@ -85,16 +85,16 @@ static void test_singleton_subnets(CuTest *tc)
 
     for (i = 0; i < sizeof v4addrs / sizeof v4addrs[0]; i++) {
         rv = apr_ipsubnet_create(&ipsub, v4addrs[i], NULL, p);
-        CuAssertTrue(tc, rv == APR_SUCCESS);
+        abts_true(tc, rv == APR_SUCCESS);
         for (j = 0; j < sizeof v4addrs / sizeof v4addrs[0]; j++) {
             rv = apr_sockaddr_info_get(&sa, v4addrs[j], APR_INET, 0, 0, p);
-            CuAssertTrue(tc, rv == APR_SUCCESS);
+            abts_true(tc, rv == APR_SUCCESS);
             rc = apr_ipsubnet_test(ipsub, sa);
             if (!strcmp(v4addrs[i], v4addrs[j])) {
-                CuAssertTrue(tc, rc != 0);
+                abts_true(tc, rc != 0);
             }
             else {
-                CuAssertTrue(tc, rc == 0);
+                abts_true(tc, rc == 0);
             }
         }
     }
@@ -102,7 +102,7 @@ static void test_singleton_subnets(CuTest *tc)
     /* same for v6? */
 }
 
-static void test_interesting_subnets(CuTest *tc)
+static void test_interesting_subnets(abts_case *tc, void *data)
 {
     struct {
         const char *ipstr, *mask;
@@ -130,43 +130,43 @@ static void test_interesting_subnets(CuTest *tc)
 
     for (i = 0; i < sizeof testcases / sizeof testcases[0]; i++) {
         rv = apr_ipsubnet_create(&ipsub, testcases[i].ipstr, testcases[i].mask, p);
-        CuAssertTrue(tc, rv == APR_SUCCESS);
+        abts_true(tc, rv == APR_SUCCESS);
         rv = apr_sockaddr_info_get(&sa, testcases[i].in_subnet, testcases[i].family, 0, 0, p);
-        CuAssertTrue(tc, rv == APR_SUCCESS);
+        abts_true(tc, rv == APR_SUCCESS);
         rc = apr_ipsubnet_test(ipsub, sa);
-        CuAssertTrue(tc, rc != 0);
+        abts_true(tc, rc != 0);
         rv = apr_sockaddr_info_get(&sa, testcases[i].not_in_subnet, testcases[i].family, 0, 0, p);
-        CuAssertTrue(tc, rv == APR_SUCCESS);
+        abts_true(tc, rv == APR_SUCCESS);
         rc = apr_ipsubnet_test(ipsub, sa);
-        CuAssertTrue(tc, rc == 0);
+        abts_true(tc, rc == 0);
     }
 }
 
-static void test_badmask_str(CuTest *tc)
+static void test_badmask_str(abts_case *tc, void *data)
 {
     char buf[128];
 
-    CuAssertStrEquals(tc, apr_strerror(APR_EBADMASK, buf, sizeof buf),
+    abts_str_equal(tc, apr_strerror(APR_EBADMASK, buf, sizeof buf),
                       "The specified network mask is invalid.");
 }
 
-static void test_badip_str(CuTest *tc)
+static void test_badip_str(abts_case *tc, void *data)
 {
     char buf[128];
 
-    CuAssertStrEquals(tc, apr_strerror(APR_EBADIP, buf, sizeof buf),
+    abts_str_equal(tc, apr_strerror(APR_EBADIP, buf, sizeof buf),
                       "The specified IP address is invalid.");
 }
 
-CuSuite *testipsub(void)
+abts_suite *testipsub(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("IP subnets");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_bad_input);
-    SUITE_ADD_TEST(suite, test_singleton_subnets);
-    SUITE_ADD_TEST(suite, test_interesting_subnets);
-    SUITE_ADD_TEST(suite, test_badmask_str);
-    SUITE_ADD_TEST(suite, test_badip_str);
+    abts_run_test(suite, test_bad_input, NULL);
+    abts_run_test(suite, test_singleton_subnets, NULL);
+    abts_run_test(suite, test_interesting_subnets, NULL);
+    abts_run_test(suite, test_badmask_str, NULL);
+    abts_run_test(suite, test_badip_str, NULL);
     return suite;
 }
 

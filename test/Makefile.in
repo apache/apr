@@ -94,7 +94,7 @@ testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
+TESTS = testutil.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
@@ -104,11 +104,11 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
         testatomic.lo testflock.lo testshm.lo testsock.lo testglobalmutex.lo \
         teststrnatcmp.lo testfilecopy.lo testtemp.lo testlfs.lo
 
-testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
-	 readchild@EXEEXT@ CuTest.lo proc_child@EXEEXT@ \
+testall@EXEEXT@: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
+	 readchild@EXEEXT@ abts.lo proc_child@EXEEXT@ \
          tryread@EXEEXT@ sockchild@EXEEXT@ globalmutexchild@EXEEXT@ \
          $(LOCAL_LIBS)
-	$(LINK_PROG) $(TESTS) CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+	$(LINK_PROG) $(TESTS) abts.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE

@@ -24,20 +24,20 @@
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include "test_apr.h"
+#include "testutil.h"
 
 #define ALLOC_BYTES 1024
 
 static apr_pool_t *pmain = NULL;
 static apr_pool_t *pchild = NULL;
 
-static void alloc_bytes(CuTest *tc)
+static void alloc_bytes(abts_case *tc, void *data)
 {
     int i;
     char *alloc;
     
     alloc = apr_palloc(pmain, ALLOC_BYTES);
-    CuAssertPtrNotNull(tc, alloc);
+    abts_ptr_notnull(tc, alloc);
 
     for (i=0;i<ALLOC_BYTES;i++) {
         char *ptr = alloc + i;
@@ -46,61 +46,61 @@ static void alloc_bytes(CuTest *tc)
     /* This is just added to get the positive.  If this test fails, the
      * suite will seg fault.
      */
-    CuAssertTrue(tc, 1);
+    abts_true(tc, 1);
 }
 
-static void calloc_bytes(CuTest *tc)
+static void calloc_bytes(abts_case *tc, void *data)
 {
     int i;
     char *alloc;
     
     alloc = apr_pcalloc(pmain, ALLOC_BYTES);
-    CuAssertPtrNotNull(tc, alloc);
+    abts_ptr_notnull(tc, alloc);
 
     for (i=0;i<ALLOC_BYTES;i++) {
         char *ptr = alloc + i;
-        CuAssertTrue(tc, *ptr == '\0');
+        abts_true(tc, *ptr == '\0');
     }
 }
 
-static void parent_pool(CuTest *tc)
+static void parent_pool(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_pool_create(&pmain, NULL);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertPtrNotNull(tc, pmain);
+    abts_int_equal(tc, rv, APR_SUCCESS);
+    abts_ptr_notnull(tc, pmain);
 }
 
-static void child_pool(CuTest *tc)
+static void child_pool(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_pool_create(&pchild, pmain);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertPtrNotNull(tc, pchild);
+    abts_int_equal(tc, rv, APR_SUCCESS);
+    abts_ptr_notnull(tc, pchild);
 }
 
-static void test_ancestor(CuTest *tc)
+static void test_ancestor(abts_case *tc, void *data)
 {
-    CuAssertIntEquals(tc, 1, apr_pool_is_ancestor(pmain, pchild));
+    abts_int_equal(tc, 1, apr_pool_is_ancestor(pmain, pchild));
 }
 
-static void test_notancestor(CuTest *tc)
+static void test_notancestor(abts_case *tc, void *data)
 {
-    CuAssertIntEquals(tc, 0, apr_pool_is_ancestor(pchild, pmain));
+    abts_int_equal(tc, 0, apr_pool_is_ancestor(pchild, pmain));
 }
 
-CuSuite *testpool(void)
+abts_suite *testpool(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Pools");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, parent_pool);
-    SUITE_ADD_TEST(suite, child_pool);
-    SUITE_ADD_TEST(suite, test_ancestor);
-    SUITE_ADD_TEST(suite, test_notancestor);
-    SUITE_ADD_TEST(suite, alloc_bytes);
-    SUITE_ADD_TEST(suite, calloc_bytes);
+    abts_run_test(suite, parent_pool, NULL);
+    abts_run_test(suite, child_pool, NULL);
+    abts_run_test(suite, test_ancestor, NULL);
+    abts_run_test(suite, test_notancestor, NULL);
+    abts_run_test(suite, alloc_bytes, NULL);
+    abts_run_test(suite, calloc_bytes, NULL);
 
     return suite;
 }

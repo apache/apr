@@ -17,33 +17,33 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 static apr_socket_t *sock = NULL;
 
-static void create_socket(CuTest *tc)
+static void create_socket(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertPtrNotNull(tc, sock);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_ptr_notnull(tc, sock);
 }
 
-static void set_keepalive(CuTest *tc)
+static void set_keepalive(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_int32_t ck;
 
     rv = apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 1);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 1, ck);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 1, ck);
 }
 
-static void set_debug(CuTest *tc)
+static void set_debug(abts_case *tc, void *data)
 {
     apr_status_t rv1, rv2;
     apr_int32_t ck;
@@ -54,82 +54,82 @@ static void set_debug(CuTest *tc)
     rv2 = apr_socket_opt_get(sock, APR_SO_DEBUG, &ck);
     apr_assert_success(tc, "get SO_DEBUG option", rv2);
     if (APR_STATUS_IS_SUCCESS(rv1)) {
-        CuAssertIntEquals(tc, 1, ck);
+        abts_int_equal(tc, 1, ck);
     } else {
-        CuAssertIntEquals(tc, 0, ck);
+        abts_int_equal(tc, 0, ck);
     }
 }
 
-static void remove_keepalive(CuTest *tc)
+static void remove_keepalive(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_int32_t ck;
 
     rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 1, ck);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 1, ck);
 
     rv = apr_socket_opt_set(sock, APR_SO_KEEPALIVE, 0);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_SO_KEEPALIVE, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, ck);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 0, ck);
 }
 
-static void corkable(CuTest *tc)
+static void corkable(abts_case *tc, void *data)
 {
 #if !APR_HAVE_CORKABLE_TCP
-    CuNotImpl(tc, "TCP isn't corkable");
+    abts_not_impl(tc, "TCP isn't corkable");
 #else
     apr_status_t rv;
     apr_int32_t ck;
 
     rv = apr_socket_opt_set(sock, APR_TCP_NODELAY, 1);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 1, ck);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 1, ck);
 
     rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 1);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_opt_get(sock, APR_TCP_NOPUSH, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 1, ck);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 1, ck);
 
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 0, ck);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 0, ck);
 
     rv = apr_socket_opt_set(sock, APR_TCP_NOPUSH, 0);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
     
     rv = apr_socket_opt_get(sock, APR_TCP_NODELAY, &ck);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertIntEquals(tc, 1, ck);
+    abts_int_equal(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, 1, ck);
 #endif
 }
 
-static void close_socket(CuTest *tc)
+static void close_socket(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_socket_close(sock);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    abts_int_equal(tc, APR_SUCCESS, rv);
 }
 
-CuSuite *testsockopt(void)
+abts_suite *testsockopt(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Socket Options");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, create_socket);
-    SUITE_ADD_TEST(suite, set_keepalive);
-    SUITE_ADD_TEST(suite, set_debug);
-    SUITE_ADD_TEST(suite, remove_keepalive);
-    SUITE_ADD_TEST(suite, corkable);
-    SUITE_ADD_TEST(suite, close_socket);
+    abts_run_test(suite, create_socket, NULL);
+    abts_run_test(suite, set_keepalive, NULL);
+    abts_run_test(suite, set_debug, NULL);
+    abts_run_test(suite, remove_keepalive, NULL);
+    abts_run_test(suite, corkable, NULL);
+    abts_run_test(suite, close_socket, NULL);
 
     return suite;
 }

@@ -20,7 +20,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
-#include "test_apr.h"
+#include "testutil.h"
 
 static apr_pool_t *pool;
 static char *testdata;
@@ -32,58 +32,58 @@ static apr_status_t string_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-static void set_userdata(CuTest *tc)
+static void set_userdata(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_pool_userdata_set(testdata, "TEST", string_cleanup, pool);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    abts_int_equal(tc, rv, APR_SUCCESS);
 }
 
-static void get_userdata(CuTest *tc)
+static void get_userdata(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *retdata;
 
     rv = apr_pool_userdata_get((void **)&retdata, "TEST", pool);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertStrEquals(tc, retdata, testdata);
+    abts_int_equal(tc, rv, APR_SUCCESS);
+    abts_str_equal(tc, retdata, testdata);
 }
 
-static void get_nonexistkey(CuTest *tc)
+static void get_nonexistkey(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *retdata;
 
     rv = apr_pool_userdata_get((void **)&retdata, "DOESNTEXIST", pool);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertPtrEquals(tc, retdata, NULL);
+    abts_int_equal(tc, rv, APR_SUCCESS);
+    abts_ptr_equal(tc, retdata, NULL);
 }
 
-static void post_pool_clear(CuTest *tc)
+static void post_pool_clear(abts_case *tc, void *data)
 {
     apr_status_t rv;
     char *retdata;
 
     rv = apr_pool_userdata_get((void **)&retdata, "DOESNTEXIST", pool);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertPtrEquals(tc, retdata, NULL);
+    abts_int_equal(tc, rv, APR_SUCCESS);
+    abts_ptr_equal(tc, retdata, NULL);
 }
 
-CuSuite *testud(void)
+abts_suite *testud(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("User Data");
+    suite = ADD_SUITE(suite)
 
     apr_pool_create(&pool, p);
     testdata = apr_pstrdup(pool, "This is a test\n");
 
-    SUITE_ADD_TEST(suite, set_userdata);
-    SUITE_ADD_TEST(suite, get_userdata);
-    SUITE_ADD_TEST(suite, get_nonexistkey);
+    abts_run_test(suite, set_userdata, NULL);
+    abts_run_test(suite, get_userdata, NULL);
+    abts_run_test(suite, get_nonexistkey, NULL);
 
     apr_pool_clear(pool);
 
-    SUITE_ADD_TEST(suite, post_pool_clear);
+    abts_run_test(suite, post_pool_clear, NULL);
 
     return suite;
 }

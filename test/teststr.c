@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -28,7 +28,7 @@
  * functions exist on all platforms.
  */
 
-static void test_strtok(CuTest *tc)
+static void test_strtok(abts_case *tc, void *data)
 {
     struct {
         char *input;
@@ -77,11 +77,11 @@ static void test_strtok(CuTest *tc)
             retval2 = strtok(str2, cases[curtc].sep);
 
             if (!retval1) {
-                CuAssertTrue(tc, retval2 == NULL);
+                abts_true(tc, retval2 == NULL);
             }
             else {
-                CuAssertTrue(tc, retval2 != NULL);
-                CuAssertStrEquals(tc, retval2, retval1);
+                abts_true(tc, retval2 != NULL);
+                abts_str_equal(tc, retval2, retval1);
             }
 
             str1 = str2 = NULL; /* make sure we pass NULL on subsequent calls */
@@ -89,7 +89,7 @@ static void test_strtok(CuTest *tc)
     }
 }
 
-static void snprintf_noNULL(CuTest *tc)
+static void snprintf_noNULL(abts_case *tc, void *data)
 {
     char buff[100];
     char *testing = apr_palloc(p, 10);
@@ -104,43 +104,43 @@ static void snprintf_noNULL(CuTest *tc)
     
     /* If this test fails, we are going to seg fault. */
     apr_snprintf(buff, sizeof(buff), "%.*s", 7, testing);
-    CuAssertStrNEquals(tc, buff, testing, 7);
+    abts_str_nequal(tc, buff, testing, 7);
 }
 
-static void snprintf_0NULL(CuTest *tc)
+static void snprintf_0NULL(abts_case *tc, void *data)
 {
     int rv;
 
     rv = apr_snprintf(NULL, 0, "%sBAR", "FOO");
-    CuAssertIntEquals(tc, 6, rv);
+    abts_int_equal(tc, 6, rv);
 }
 
-static void snprintf_0nonNULL(CuTest *tc)
+static void snprintf_0nonNULL(abts_case *tc, void *data)
 {
     int rv;
     char *buff = "testing";
 
     rv = apr_snprintf(buff, 0, "%sBAR", "FOO");
-    CuAssertIntEquals(tc, 6, rv);
-    CuAssert(tc, "buff unmangled", strcmp(buff, "FOOBAR") != 0);
+    abts_int_equal(tc, 6, rv);
+    abts_assert(tc, "buff unmangled", strcmp(buff, "FOOBAR") != 0);
 }
 
-static void string_error(CuTest *tc)
+static void string_error(abts_case *tc, void *data)
 {
      char buf[128], *rv;
 
      buf[0] = '\0';
      rv = apr_strerror(APR_ENOENT, buf, sizeof buf);
-     CuAssertPtrEquals(tc, buf, rv);
-     CuAssertTrue(tc, strlen(buf) > 0);
+     abts_ptr_equal(tc, buf, rv);
+     abts_true(tc, strlen(buf) > 0);
 
      rv = apr_strerror(APR_TIMEUP, buf, sizeof buf);
-     CuAssertPtrEquals(tc, buf, rv);
-     CuAssertStrEquals(tc, "The timeout specified has expired", buf);
+     abts_ptr_equal(tc, buf, rv);
+     abts_str_equal(tc, "The timeout specified has expired", buf);
 }
 
 #define SIZE 180000
-static void string_long(CuTest *tc)
+static void string_long(abts_case *tc, void *data)
 {
     char s[SIZE + 1];
 
@@ -154,7 +154,7 @@ static void string_long(CuTest *tc)
 #define MY_LLONG_MAX (APR_INT64_C(9223372036854775807))
 #define MY_LLONG_MIN (-MY_LLONG_MAX - APR_INT64_C(1))
 
-static void string_strtoi64(CuTest *tc)
+static void string_strtoi64(abts_case *tc, void *data)
 {
     static const struct {
         int errnum, base;
@@ -221,14 +221,14 @@ static void string_strtoi64(CuTest *tc)
         result = apr_strtoi64(ts[n].in, &end, ts[n].base);
         errnum = errno;
 
-        CuAssert(tc,
+        abts_assert(tc,
                  apr_psprintf(p, "for '%s': result was %" APR_INT64_T_FMT 
                               " not %" APR_INT64_T_FMT, ts[n].in,
                               result, ts[n].result),
                  result == ts[n].result);
         
         if (ts[n].errnum != -1) {
-            CuAssert(tc,
+            abts_assert(tc,
                      apr_psprintf(p, "for '%s': errno was %d not %d", ts[n].in,
                                   errnum, ts[n].errnum),
                      ts[n].errnum == errnum);
@@ -236,9 +236,9 @@ static void string_strtoi64(CuTest *tc)
 
         if (ts[n].end == NULL) {
             /* end must point to NUL terminator of .in */
-            CuAssertPtrEquals(tc, ts[n].in + strlen(ts[n].in), end);
+            abts_ptr_equal(tc, ts[n].in + strlen(ts[n].in), end);
         } else if (ts[n].end != (void *)-1) {
-            CuAssert(tc,
+            abts_assert(tc,
                      apr_psprintf(p, "for '%s', end was '%s' not '%s'",
                                   ts[n].in, end, ts[n].end),
                      strcmp(ts[n].end, end) == 0);
@@ -246,17 +246,17 @@ static void string_strtoi64(CuTest *tc)
     }
 }
 
-CuSuite *teststr(void)
+abts_suite *teststr(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Strings");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, snprintf_0NULL);
-    SUITE_ADD_TEST(suite, snprintf_0nonNULL);
-    SUITE_ADD_TEST(suite, snprintf_noNULL);
-    SUITE_ADD_TEST(suite, test_strtok);
-    SUITE_ADD_TEST(suite, string_error);
-    SUITE_ADD_TEST(suite, string_long);
-    SUITE_ADD_TEST(suite, string_strtoi64);
+    abts_run_test(suite, snprintf_0NULL, NULL);
+    abts_run_test(suite, snprintf_0nonNULL, NULL);
+    abts_run_test(suite, snprintf_noNULL, NULL);
+    abts_run_test(suite, test_strtok, NULL);
+    abts_run_test(suite, string_error, NULL);
+    abts_run_test(suite, string_long, NULL);
+    abts_run_test(suite, string_strtoi64, NULL);
 
     return suite;
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -28,9 +28,9 @@
 #define TEST_STRING "This is the MMAP data file."APR_EOL_STR
 
 #if !APR_HAS_MMAP
-static void not_implemented(CuTest *tc)
+static void not_implemented(abts_case *tc, void *data)
 {
-    CuNotImpl(tc, "User functions");
+    abts_not_impl(tc, "User functions");
 }
 
 #else
@@ -41,110 +41,110 @@ static char *file1;
 static apr_finfo_t finfo;
 static int fsize;
 
-static void create_filename(CuTest *tc)
+static void create_filename(abts_case *tc, void *data)
 {
     char *oldfileptr;
 
     apr_filepath_get(&file1, 0, p);
 #ifndef NETWARE
 #ifdef WIN32
-    CuAssertTrue(tc, file1[1] == ':');
+    abts_true(tc, file1[1] == ':');
 #else
-    CuAssertTrue(tc, file1[0] == '/');
+    abts_true(tc, file1[0] == '/');
 #endif
 #endif
-    CuAssertTrue(tc, file1[strlen(file1) - 1] != '/');
+    abts_true(tc, file1[strlen(file1) - 1] != '/');
 
     oldfileptr = file1;
     file1 = apr_pstrcat(p, file1,"/data/mmap_datafile.txt" ,NULL);
-    CuAssertTrue(tc, oldfileptr != file1);
+    abts_true(tc, oldfileptr != file1);
 }
 
-static void test_file_close(CuTest *tc)
+static void test_file_close(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_file_close(thefile);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    abts_int_equal(tc, rv, APR_SUCCESS);
 }
    
-static void test_file_open(CuTest *tc)
+static void test_file_open(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_file_open(&thefile, file1, APR_READ, APR_UREAD | APR_GREAD, p);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertPtrNotNull(tc, thefile);
+    abts_int_equal(tc, rv, APR_SUCCESS);
+    abts_ptr_notnull(tc, thefile);
 }
    
-static void test_get_filesize(CuTest *tc)
+static void test_get_filesize(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
-    CuAssertIntEquals(tc, fsize, finfo.size);
+    abts_int_equal(tc, rv, APR_SUCCESS);
+    abts_int_equal(tc, fsize, finfo.size);
 }
 
-static void test_mmap_create(CuTest *tc)
+static void test_mmap_create(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
     rv = apr_mmap_create(&themmap, thefile, 0, finfo.size, APR_MMAP_READ, p);
-    CuAssertPtrNotNull(tc, themmap);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    abts_ptr_notnull(tc, themmap);
+    abts_int_equal(tc, rv, APR_SUCCESS);
 }
 
-static void test_mmap_contents(CuTest *tc)
+static void test_mmap_contents(abts_case *tc, void *data)
 {
     
-    CuAssertPtrNotNull(tc, themmap);
-    CuAssertPtrNotNull(tc, themmap->mm);
-    CuAssertIntEquals(tc, fsize, themmap->size);
+    abts_ptr_notnull(tc, themmap);
+    abts_ptr_notnull(tc, themmap->mm);
+    abts_int_equal(tc, fsize, themmap->size);
 
     /* Must use nEquals since the string is not guaranteed to be NULL terminated */
-    CuAssertStrNEquals(tc, themmap->mm, TEST_STRING, fsize);
+    abts_str_nequal(tc, themmap->mm, TEST_STRING, fsize);
 }
 
-static void test_mmap_delete(CuTest *tc)
+static void test_mmap_delete(abts_case *tc, void *data)
 {
     apr_status_t rv;
 
-    CuAssertPtrNotNull(tc, themmap);
+    abts_ptr_notnull(tc, themmap);
     rv = apr_mmap_delete(themmap);
-    CuAssertIntEquals(tc, rv, APR_SUCCESS);
+    abts_int_equal(tc, rv, APR_SUCCESS);
 }
 
-static void test_mmap_offset(CuTest *tc)
+static void test_mmap_offset(abts_case *tc, void *data)
 {
     apr_status_t rv;
     void *addr;
 
-    CuAssertPtrNotNull(tc, themmap);
+    abts_ptr_notnull(tc, themmap);
     rv = apr_mmap_offset(&addr, themmap, 5);
 
     /* Must use nEquals since the string is not guaranteed to be NULL terminated */
-    CuAssertStrNEquals(tc, addr, TEST_STRING + 5, fsize-5);
+    abts_str_nequal(tc, addr, TEST_STRING + 5, fsize-5);
 }
 #endif
 
-CuSuite *testmmap(void)
+abts_suite *testmmap(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("MMAP");
+    suite = ADD_SUITE(suite)
 
 #if APR_HAS_MMAP    
     fsize = strlen(TEST_STRING);
 
-    SUITE_ADD_TEST(suite, create_filename);
-    SUITE_ADD_TEST(suite, test_file_open);
-    SUITE_ADD_TEST(suite, test_get_filesize);
-    SUITE_ADD_TEST(suite, test_mmap_create);
-    SUITE_ADD_TEST(suite, test_mmap_contents);
-    SUITE_ADD_TEST(suite, test_mmap_offset);
-    SUITE_ADD_TEST(suite, test_mmap_delete);
-    SUITE_ADD_TEST(suite, test_file_close);
+    abts_run_test(suite, create_filename, NULL);
+    abts_run_test(suite, test_file_open, NULL);
+    abts_run_test(suite, test_get_filesize, NULL);
+    abts_run_test(suite, test_mmap_create, NULL);
+    abts_run_test(suite, test_mmap_contents, NULL);
+    abts_run_test(suite, test_mmap_offset, NULL);
+    abts_run_test(suite, test_mmap_delete, NULL);
+    abts_run_test(suite, test_file_close, NULL);
 #else
-    SUITE_ADD_TEST(suite, not_implemented);
+    abts_run_test(suite, not_implemented, NULL);
 #endif
 
     return suite;

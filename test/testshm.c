@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_shm.h"
 #include "apr_errno.h"
 #include "apr_general.h"
@@ -58,20 +58,20 @@ static void msgput(int boxnum, char *msg)
     boxes[boxnum].msgavail = 1;
 }
 
-static void test_anon_create(CuTest *tc)
+static void test_anon_create(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_shm_t *shm = NULL;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
     apr_assert_success(tc, "Error allocating shared memory block", rv);
-    CuAssertPtrNotNull(tc, shm);
+    abts_ptr_notnull(tc, shm);
 
     rv = apr_shm_destroy(shm);
     apr_assert_success(tc, "Error destroying shared memory block", rv);
 }
 
-static void test_check_size(CuTest *tc)
+static void test_check_size(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_shm_t *shm = NULL;
@@ -79,33 +79,33 @@ static void test_check_size(CuTest *tc)
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
     apr_assert_success(tc, "Error allocating shared memory block", rv);
-    CuAssertPtrNotNull(tc, shm);
+    abts_ptr_notnull(tc, shm);
 
     retsize = apr_shm_size_get(shm);
-    CuAssertIntEquals(tc, SHARED_SIZE, retsize);
+    abts_int_equal(tc, SHARED_SIZE, retsize);
 
     rv = apr_shm_destroy(shm);
     apr_assert_success(tc, "Error destroying shared memory block", rv);
 }
 
-static void test_shm_allocate(CuTest *tc)
+static void test_shm_allocate(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_shm_t *shm = NULL;
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
     apr_assert_success(tc, "Error allocating shared memory block", rv);
-    CuAssertPtrNotNull(tc, shm);
+    abts_ptr_notnull(tc, shm);
 
     boxes = apr_shm_baseaddr_get(shm);
-    CuAssertPtrNotNull(tc, boxes);
+    abts_ptr_notnull(tc, boxes);
 
     rv = apr_shm_destroy(shm);
     apr_assert_success(tc, "Error destroying shared memory block", rv);
 }
 
 #if APR_HAS_FORK
-static void test_anon(CuTest *tc)
+static void test_anon(abts_case *tc, void *data)
 {
     apr_proc_t proc;
     apr_status_t rv;
@@ -116,13 +116,13 @@ static void test_anon(CuTest *tc)
 
     rv = apr_shm_create(&shm, SHARED_SIZE, NULL, p);
     apr_assert_success(tc, "Error allocating shared memory block", rv);
-    CuAssertPtrNotNull(tc, shm);
+    abts_ptr_notnull(tc, shm);
 
     retsize = apr_shm_size_get(shm);
-    CuAssertIntEquals(tc, SHARED_SIZE, retsize);
+    abts_int_equal(tc, SHARED_SIZE, retsize);
 
     boxes = apr_shm_baseaddr_get(shm);
-    CuAssertPtrNotNull(tc, boxes);
+    abts_ptr_notnull(tc, boxes);
 
     rv = apr_proc_fork(&proc, p);
     if (rv == APR_INCHILD) { /* child */
@@ -144,18 +144,18 @@ static void test_anon(CuTest *tc)
         }
     }
     else {
-        CuFail(tc, "apr_proc_fork failed");
+        abts_fail(tc, "apr_proc_fork failed");
     }
     /* wait for the child */
     rv = apr_proc_wait(&proc, &recvd, NULL, APR_WAIT);
-    CuAssertIntEquals(tc, N_MESSAGES, recvd);
+    abts_int_equal(tc, N_MESSAGES, recvd);
 
     rv = apr_shm_destroy(shm);
     apr_assert_success(tc, "Error destroying shared memory block", rv);
 }
 #endif
 
-static void test_named(CuTest *tc)
+static void test_named(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_shm_t *shm = NULL;
@@ -168,16 +168,16 @@ static void test_named(CuTest *tc)
 
     rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
     apr_assert_success(tc, "Error allocating shared memory block", rv);
-    CuAssertPtrNotNull(tc, shm);
+    abts_ptr_notnull(tc, shm);
 
     retsize = apr_shm_size_get(shm);
-    CuAssertIntEquals(tc, SHARED_SIZE, retsize);
+    abts_int_equal(tc, SHARED_SIZE, retsize);
 
     boxes = apr_shm_baseaddr_get(shm);
-    CuAssertPtrNotNull(tc, boxes);
+    abts_ptr_notnull(tc, boxes);
 
     rv = apr_procattr_create(&attr1, p);
-    CuAssertPtrNotNull(tc, attr1);
+    abts_ptr_notnull(tc, attr1);
     apr_assert_success(tc, "Couldn't create attr1", rv);
     args[0] = apr_pstrdup(p, "testshmproducer" EXTENSION);
     args[1] = NULL;
@@ -186,7 +186,7 @@ static void test_named(CuTest *tc)
     apr_assert_success(tc, "Couldn't launch producer", rv);
 
     rv = apr_procattr_create(&attr2, p);
-    CuAssertPtrNotNull(tc, attr2);
+    abts_ptr_notnull(tc, attr2);
     apr_assert_success(tc, "Couldn't create attr2", rv);
     args[0] = apr_pstrdup(p, "testshmconsumer" EXTENSION);
     rv = apr_proc_create(&pidconsumer, "./testshmconsumer" EXTENSION, args, 
@@ -194,12 +194,12 @@ static void test_named(CuTest *tc)
     apr_assert_success(tc, "Couldn't launch consumer", rv);
 
     rv = apr_proc_wait(&pidconsumer, &received, &why, APR_WAIT);
-    CuAssertIntEquals(tc, APR_CHILD_DONE, rv);
-    CuAssertIntEquals(tc, APR_PROC_EXIT, why);
+    abts_int_equal(tc, APR_CHILD_DONE, rv);
+    abts_int_equal(tc, APR_PROC_EXIT, why);
 
     rv = apr_proc_wait(&pidproducer, &sent, &why, APR_WAIT);
-    CuAssertIntEquals(tc, APR_CHILD_DONE, rv);
-    CuAssertIntEquals(tc, APR_PROC_EXIT, why);
+    abts_int_equal(tc, APR_CHILD_DONE, rv);
+    abts_int_equal(tc, APR_PROC_EXIT, why);
 
     /* Cleanup before testing that producer and consumer worked correctly.
      * This way, if they didn't succeed, we can just run this test again
@@ -208,23 +208,23 @@ static void test_named(CuTest *tc)
     apr_assert_success(tc, "Error destroying shared memory", 
                        apr_shm_destroy(shm));
     
-    CuAssertIntEquals(tc, sent, received);
+    abts_int_equal(tc, sent, received);
 
 }
 #endif
 
-CuSuite *testshm(void)
+abts_suite *testshm(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Shared Memory");
+    suite = ADD_SUITE(suite)
 
 #if APR_HAS_SHARED_MEMORY
-    SUITE_ADD_TEST(suite, test_anon_create);
-    SUITE_ADD_TEST(suite, test_check_size);
-    SUITE_ADD_TEST(suite, test_shm_allocate);
+    abts_run_test(suite, test_anon_create, NULL);
+    abts_run_test(suite, test_check_size, NULL);
+    abts_run_test(suite, test_shm_allocate, NULL);
 #if APR_HAS_FORK
-    SUITE_ADD_TEST(suite, test_anon);
+    abts_run_test(suite, test_anon, NULL);
 #endif
-    SUITE_ADD_TEST(suite, test_named);
+    abts_run_test(suite, test_named, NULL);
 #endif
 
     return suite;

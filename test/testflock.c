@@ -14,7 +14,7 @@
  */
 
 #include "testflock.h"
-#include "test_apr.h"
+#include "testutil.h"
 #include "apr_pools.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
@@ -22,7 +22,7 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 
-static int launch_reader(CuTest *tc)
+static int launch_reader(abts_case *tc)
 {
     apr_proc_t proc = {0};
     apr_procattr_t *procattr;
@@ -46,14 +46,14 @@ static int launch_reader(CuTest *tc)
     rv = apr_proc_create(&proc, "./tryread" EXTENSION, args, NULL, procattr, p);
     apr_assert_success(tc, "Couldn't launch program", rv);
 
-    CuAssert(tc, "wait for child process",
+    abts_assert(tc, "wait for child process",
             apr_proc_wait(&proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
-    CuAssert(tc, "child terminated normally", why == APR_PROC_EXIT);
+    abts_assert(tc, "child terminated normally", why == APR_PROC_EXIT);
     return exitcode;
 }
 
-static void test_withlock(CuTest *tc)
+static void test_withlock(abts_case *tc, void *data)
 {
     apr_file_t *file;
     apr_status_t rv;
@@ -62,39 +62,39 @@ static void test_withlock(CuTest *tc)
     rv = apr_file_open(&file, TESTFILE, APR_WRITE|APR_CREATE, 
                        APR_OS_DEFAULT, p);
     apr_assert_success(tc, "Could not create file.", rv);
-    CuAssertPtrNotNull(tc, file);
+    abts_ptr_notnull(tc, file);
 
     rv = apr_file_lock(file, APR_FLOCK_EXCLUSIVE);
     apr_assert_success(tc, "Could not lock the file.", rv);
-    CuAssertPtrNotNull(tc, file);
+    abts_ptr_notnull(tc, file);
 
     code = launch_reader(tc);
-    CuAssertIntEquals(tc, FAILED_READ, code);
+    abts_int_equal(tc, FAILED_READ, code);
 
     (void) apr_file_close(file);
 }
 
-static void test_withoutlock(CuTest *tc)
+static void test_withoutlock(abts_case *tc, void *data)
 {
     int code;
     
     code = launch_reader(tc);
-    CuAssertIntEquals(tc, SUCCESSFUL_READ, code);
+    abts_int_equal(tc, SUCCESSFUL_READ, code);
 }
 
-static void remove_lockfile(CuTest *tc)
+static void remove_lockfile(abts_case *tc, void *data)
 {
     apr_assert_success(tc, "Couldn't remove lock file.",
                        apr_file_remove(TESTFILE, p));
 }
     
-CuSuite *testflock(void)
+abts_suite *testflock(abts_suite *suite)
 {
-    CuSuite *suite = CuSuiteNew("Flock");
+    suite = ADD_SUITE(suite)
 
-    SUITE_ADD_TEST(suite, test_withlock);
-    SUITE_ADD_TEST(suite, test_withoutlock);
-    SUITE_ADD_TEST(suite, remove_lockfile);
+    abts_run_test(suite, test_withlock, NULL);
+    abts_run_test(suite, test_withoutlock, NULL);
+    abts_run_test(suite, remove_lockfile, NULL);
 
     return suite;
 }
