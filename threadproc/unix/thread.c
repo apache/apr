@@ -186,8 +186,10 @@ apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
 {
     apr_status_t stat;
+    apr_status_t *thread_stat;
 
-    if ((stat = pthread_join(*thd->td,(void *)&retval)) == 0) {
+    if ((stat = pthread_join(*thd->td,(void *)&thread_stat)) == 0) {
+        *retval = *thread_stat;
         return APR_SUCCESS;
     }
     else {
