@@ -88,21 +88,21 @@ static apr_status_t proc_mutex_sysv_create(apr_proc_mutex_t *new_mutex,
                                            const char *fname)
 {
     union semun ick;
-    apr_status_t stat;
+    apr_status_t rv;
     
     new_mutex->interproc = apr_palloc(new_mutex->pool, sizeof(*new_mutex->interproc));
     new_mutex->interproc->filedes = semget(IPC_PRIVATE, 1, IPC_CREAT | 0600);
 
     if (new_mutex->interproc->filedes < 0) {
-        stat = errno;
+        rv = errno;
         proc_mutex_sysv_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
     ick.val = 1;
     if (semctl(new_mutex->interproc->filedes, 0, SETVAL, ick) < 0) {
-        stat = errno;
+        rv = errno;
         proc_mutex_sysv_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
     new_mutex->curr_locked = 0;
     apr_pool_cleanup_register(new_mutex->pool,
@@ -141,13 +141,13 @@ static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
 
 static apr_status_t proc_mutex_sysv_destroy(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
-    if ((stat = proc_mutex_sysv_cleanup(mutex)) == APR_SUCCESS) {
+    if ((rv = proc_mutex_sysv_cleanup(mutex)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_sysv_cleanup);
         return APR_SUCCESS;
     }
-    return stat;
+    return rv;
 }
 
 static apr_status_t proc_mutex_sysv_child_init(apr_proc_mutex_t **mutex, apr_pool_t *cont, const char *fname)
@@ -181,14 +181,14 @@ static void proc_mutex_proc_pthread_setup(void)
 static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
 {
     apr_proc_mutex_t *mutex=mutex_;
-    apr_status_t stat;
+    apr_status_t rv;
 
     if (mutex->curr_locked == 1) {
-        if ((stat = pthread_mutex_unlock(mutex->pthread_interproc))) {
+        if ((rv = pthread_mutex_unlock(mutex->pthread_interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
-            stat = errno;
+            rv = errno;
 #endif
-            return stat;
+            return rv;
         } 
         if (munmap((caddr_t)mutex->pthread_interproc, sizeof(pthread_mutex_t))){
             return errno;
@@ -200,7 +200,7 @@ static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
 static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
                                                    const char *fname)
 {
-    apr_status_t stat;
+    apr_status_t rv;
     int fd;
     pthread_mutexattr_t mattr;
 
@@ -218,53 +218,53 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
         return errno;
     }
     close(fd);
-    if ((stat = pthread_mutexattr_init(&mattr))) {
+    if ((rv = pthread_mutexattr_init(&mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
-    if ((stat = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))) {
+    if ((rv = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
 
 #ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
-    if ((stat = pthread_mutexattr_setrobust_np(&mattr, 
+    if ((rv = pthread_mutexattr_setrobust_np(&mattr, 
                                                PTHREAD_MUTEX_ROBUST_NP))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
-    if ((stat = pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))) {
+    if ((rv = pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
 #endif
 
-    if ((stat = pthread_mutex_init(new_mutex->pthread_interproc, &mattr))) {
+    if ((rv = pthread_mutex_init(new_mutex->pthread_interproc, &mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
 
-    if ((stat = pthread_mutexattr_destroy(&mattr))) {
+    if ((rv = pthread_mutexattr_destroy(&mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
         proc_mutex_proc_pthread_cleanup(new_mutex);
-        return stat;
+        return rv;
     }
 
     new_mutex->curr_locked = 0;
@@ -277,21 +277,21 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 
 static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
-    if ((stat = pthread_mutex_lock(mutex->pthread_interproc))) {
+    if ((rv = pthread_mutex_lock(mutex->pthread_interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
 #ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP
         /* Okay, our owner died.  Let's try to make it consistent again. */
-        if (stat == EOWNERDEAD) {
+        if (rv == EOWNERDEAD) {
             pthread_mutex_consistent_np(mutex->pthread_interproc);
         }
         else
-            return stat;
+            return rv;
 #else
-        return stat;
+        return rv;
 #endif
     }
     mutex->curr_locked = 1;
@@ -302,13 +302,13 @@ static apr_status_t proc_mutex_proc_pthread_acquire(apr_proc_mutex_t *mutex)
 
 static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
-    if ((stat = pthread_mutex_unlock(mutex->pthread_interproc))) {
+    if ((rv = pthread_mutex_unlock(mutex->pthread_interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
-        stat = errno;
+        rv = errno;
 #endif
-        return stat;
+        return rv;
     }
     mutex->curr_locked = 0;
     return APR_SUCCESS;
@@ -316,14 +316,14 @@ static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
 
 static apr_status_t proc_mutex_proc_pthread_destroy(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
-    if ((stat = proc_mutex_proc_pthread_cleanup(mutex)) == APR_SUCCESS) {
+    apr_status_t rv;
+    if ((rv = proc_mutex_proc_pthread_cleanup(mutex)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(mutex->pool,
                               mutex,
                               proc_mutex_proc_pthread_cleanup);
         return APR_SUCCESS;
     }
-    return stat;
+    return rv;
 }
 
 static apr_status_t proc_mutex_proc_pthread_child_init(apr_proc_mutex_t **mutex,
@@ -443,12 +443,12 @@ static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
 
 static apr_status_t proc_mutex_fcntl_destroy(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
-    if ((stat = proc_mutex_fcntl_cleanup(mutex)) == APR_SUCCESS) {
+    apr_status_t rv;
+    if ((rv = proc_mutex_fcntl_cleanup(mutex)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_fcntl_cleanup);
         return APR_SUCCESS;
     }
-    return stat;
+    return rv;
 }
 
 static apr_status_t proc_mutex_fcntl_child_init(apr_proc_mutex_t **mutex,
@@ -556,12 +556,12 @@ static apr_status_t proc_mutex_flock_release(apr_proc_mutex_t *mutex)
 
 static apr_status_t proc_mutex_flock_destroy(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
-    if ((stat = proc_mutex_flock_cleanup(mutex)) == APR_SUCCESS) {
+    apr_status_t rv;
+    if ((rv = proc_mutex_flock_cleanup(mutex)) == APR_SUCCESS) {
         apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_flock_cleanup);
         return APR_SUCCESS;
     }
-    return stat;
+    return rv;
 }
 
 static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
@@ -679,18 +679,18 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lo
 
 static apr_status_t proc_mutex_create(apr_proc_mutex_t *new_mutex, apr_lockmech_e_np mech, const char *fname)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
     if (new_mutex->scope != APR_INTRAPROCESS) {
-        if ((stat = proc_mutex_choose_method(new_mutex, mech)) != APR_SUCCESS) {
-            return stat;
+        if ((rv = proc_mutex_choose_method(new_mutex, mech)) != APR_SUCCESS) {
+            return rv;
         }
     }
 
     new_mutex->meth = new_mutex->inter_meth;
 
-    if ((stat = new_mutex->meth->create(new_mutex, fname)) != APR_SUCCESS) {
-        return stat;
+    if ((rv = new_mutex->meth->create(new_mutex, fname)) != APR_SUCCESS) {
+        return rv;
     }
 
     return APR_SUCCESS;
@@ -709,7 +709,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
                                                    apr_pool_t *pool)
 {
     apr_proc_mutex_t *new_mutex;
-    apr_status_t stat;
+    apr_status_t rv;
 
     new_mutex = (apr_proc_mutex_t *)apr_pcalloc(pool,
                                                 sizeof(apr_proc_mutex_t));
@@ -719,8 +719,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
     new_mutex->interproc = NULL;
 #endif
 
-    if ((stat = proc_mutex_create(new_mutex, mech, fname)) != APR_SUCCESS)
-        return stat;
+    if ((rv = proc_mutex_create(new_mutex, mech, fname)) != APR_SUCCESS)
+        return rv;
 
     *mutex = new_mutex;
     return APR_SUCCESS;
@@ -735,7 +735,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
 #if APR_HAS_THREADS
     if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
@@ -744,8 +744,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
     }
 #endif
 
-    if ((stat = mutex->meth->acquire(mutex)) != APR_SUCCESS) {
-        return stat;
+    if ((rv = mutex->meth->acquire(mutex)) != APR_SUCCESS) {
+        return rv;
     }
 
 #if APR_HAS_THREADS
@@ -758,7 +758,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
 #if APR_HAS_THREADS
     if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
@@ -767,8 +767,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
     }
 #endif
 
-    if ((stat = mutex->meth->tryacquire(mutex)) != APR_SUCCESS) {
-        return stat;
+    if ((rv = mutex->meth->tryacquire(mutex)) != APR_SUCCESS) {
+        return rv;
     }
 
 #if APR_HAS_THREADS
@@ -781,7 +781,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 {
-    apr_status_t stat;
+    apr_status_t rv;
 
 #if APR_HAS_THREADS
     if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
@@ -791,8 +791,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
     }
 #endif
 
-    if ((stat = mutex->meth->release(mutex)) != APR_SUCCESS) {
-        return stat;
+    if ((rv = mutex->meth->release(mutex)) != APR_SUCCESS) {
+        return rv;
     }
 
 #if APR_HAS_THREADS
