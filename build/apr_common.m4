@@ -14,6 +14,9 @@ AC_DEFUN(APR_CONFIG_NICE,[
 # Created by configure
 
 EOF
+  if test -n "$CC"; then
+    echo "CC=\"$CC\"; export CC" >> $1
+  fi
   if test -n "$CFLAGS"; then
     echo "CFLAGS=\"$CFLAGS\"; export CFLAGS" >> $1
   fi
