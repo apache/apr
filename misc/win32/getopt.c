@@ -72,9 +72,10 @@ ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr, ap
          * if the user didn't specify '-' as an option,
          * assume it means -1.
          */
-        if (ap_optopt == (int) '-')
+        if (ap_optopt == (int) '-') {
             *rv = ap_optopt;
             return (APR_EOF);
+        }
         if (!*place)
             ++ap_optind;
         if (ap_opterr && *ostr != ':') {
@@ -98,9 +99,10 @@ ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr, ap
             ap_optarg = place;
         else if (nargc <= ++ap_optind) {        /* no arg */
             place = EMSG;
-            if (*ostr == ':')
+            if (*ostr == ':') {
                 *rv = ap_optopt;
                 return (APR_BADARG);
+            }
             if (ap_opterr) {
                 if (!(p = strrchr(*nargv, '/')))
                     p = *nargv;
