@@ -97,7 +97,7 @@ static int make_child(apr_proc_t **proc, apr_pool_t *p)
     return APR_SUCCESS;
 }
 
-apr_status_t test_exclusive(const char *lockname)
+static apr_status_t test_exclusive(const char *lockname)
 {
     apr_proc_t *p1, *p2, *p3, *p4;
     apr_status_t s1, s2, s3, s4;
