@@ -121,6 +121,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily,
                                             int type, apr_pool_t *cont)
 {
     int family = ofamily;
+    int downgrade = (family == AF_UNSPEC);
 
     if (family == AF_UNSPEC) {
 #if APR_HAVE_IPV6
@@ -145,19 +146,19 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int ofamily,
     /* For right now, we are not using socket groups.  We may later.
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
-    (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    (*new)->sock = socket(family, type, /* IPPROTO_TCP */ 0);
 #endif
 #if APR_HAVE_IPV6
-    if ((*new)->sock == INVALID_SOCKET && ofamily == AF_UNSPEC) {
+    if ((*new)->sock == INVALID_SOCKET && downgrade) {
         family = AF_INET;
-        (*new)->sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        (*new)->sock = socket(family, type, /* IPPROTO_TCP */ 0);
     }
 #endif
 
     if ((*new)->sock == INVALID_SOCKET) {
         return apr_get_netos_error();
     }
-    set_socket_vars(*new, AF_INET, type);
+    set_socket_vars(*new, family, type);
 
     (*new)->timeout = -1;
     (*new)->disconnected = 0;
