@@ -83,12 +83,11 @@ static ap_filetype_e filetype_from_mode(int mode)
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 {
     struct stat info;
-    int rv;
 
     if (finfo == NULL || thefile == NULL)
         return APR_EBADARG;
 
-    if ((rv = fstat(thefile->filedes, &info)) == 0) {
+    if (fstat(thefile->filedes, &info) == 0) {
         finfo->protection = info.st_mode;
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
@@ -108,12 +107,11 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
 {
     struct stat info;
-    int rv;
 
     if(finfo == NULL || fname == NULL)
         return APR_EBADARG;
 
-    if ((rv = stat(fname, &info)) == 0) {
+    if (stat(fname, &info) == 0) {
         finfo->protection = info.st_mode;
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
