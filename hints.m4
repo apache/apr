@@ -164,17 +164,24 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_SETIFNULL(CFLAGS, [-DHPUX])
 	APR_SETIFNULL(LIBS, [-lm])
 	;;
-    *-linux2)
-        ver=`uname -r`
-	APR_SETIFNULL(CFLAGS, [-DLINUX=2])
-	APR_SETIFNULL(LIBS, [-lm])
+    *-linux-*)
+        case `uname -r` in
+	    2.2* ) APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
+	           APR_SETIFNULL(CFLAGS, [-DLINUX=2])
+	           APR_SETIFNULL(LIBS, [-lm])
+	           ;;
+	    2.0* ) APR_SETIFNULL(CFLAGS, [-DLINUX=2])
+	           APR_SETIFNULL(LIBS, [-lm])
+	           ;;
+	    1.* )  APR_SETIFNULL(CFLAGS, [-DLINUX=1])
+	           ;;
+	    * )
+	           ;;
+        esac
 	;;
     *-GNU*)
 	APR_SETIFNULL(CFLAGS, [-DHURD])
 	APR_SETIFNULL(LIBS, [-lm -lcrypt])
-	;;
-    *-linux1)
-	APR_SETIFNULL(CFLAGS, [-DLINUX=1])
 	;;
     *-lynx-lynxos)
 	APR_SETIFNULL(CFLAGS, [-D__NO_INCLUDE_WARN__ -DLYNXOS])
