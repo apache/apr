@@ -55,10 +55,19 @@
 #include "networkio.h"
 #include "apr_portable.h"
 
+/* BeOS uses closesocket instead of close to close their sockets and they
+ * don't provide inet_aton.  This small ifndef takes care of both problems.
+ */
+#ifndef BEOS
+#define closesocket  close
+#else
+#include "inet_aton.c"
+#endif
+
 static ap_status_t socket_cleanup(void *sock)
 {
     ap_socket_t *thesocket = sock;
-    if (close(thesocket->socketdes) == 0) {
+    if (closesocket(thesocket->socketdes) == 0) {
         thesocket->socketdes = -1;
         return APR_SUCCESS;
     }
@@ -102,6 +111,9 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
 
 ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
 {
+#ifdef BEOS
+    return shutdown(thesocket->socketdes, how);
+#endif
     if (shutdown(thesocket->socketdes, how) == 0) {
         return APR_SUCCESS;
     }
@@ -169,6 +181,9 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
 {
     struct hostent *hp;
 
+    if ((sock->socketdes < 0) || (!sock->remote_addr)) {
+        return APR_ENOTSOCK;
+    }
     if (hostname != NULL) {
 #ifndef GETHOSTBYNAME_HANDLES_NAS
         if (*hostname >= '0' && *hostname <= '9' &&
@@ -180,14 +195,12 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
 #endif
         hp = gethostbyname(hostname);
 
-        if ((sock->socketdes < 0) || (!sock->remote_addr)) {
-            return APR_ENOTSOCK;
-        }
         if (!hp)  {
             return (h_errno + APR_OS_START_SYSERR);
         }
     
-        memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
+        memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], 
+               hp->h_length);
 
         sock->addr_len = sizeof(*sock->remote_addr);
 #ifndef GETHOSTBYNAME_HANDLES_NAS
@@ -195,8 +208,8 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
 #endif
     }
 
-    if ((connect(sock->socketdes, (const struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) &&
-        (errno != EINPROGRESS)) {
+    if ((connect(sock->socketdes, (const struct sockaddr *)sock->remote_addr,
+        sock->addr_len) < 0) && (errno != EINPROGRESS)) {
         return errno;
     }
     else {
