@@ -56,6 +56,8 @@
 #include "apr_atomic.h"
 #include "apr_thread_mutex.h"
 
+#include <stdlib.h>
+
 #if defined(__FreeBSD__) && !defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
 
 #include <machine/atomic.h>
@@ -199,6 +201,9 @@ apr_status_t apr_atomic_init(apr_pool_t *p)
 }
 #endif /*!defined(apr_atomic_init) && !defined(APR_OVERRIDE_ATOMIC_INIT) */
 
+/* abort() if 'x' does not evaluate to APR_SUCCESS. */
+#define CHECK(x) do { if ((x) != APR_SUCCESS) abort(); } while (0)
+
 #if !defined(apr_atomic_add32) && !defined(APR_OVERRIDE_ATOMIC_ADD32)
 apr_uint32_t apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
@@ -207,11 +212,10 @@ apr_uint32_t apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
        
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        old_value = *mem;
-        *mem += val;
-        apr_thread_mutex_unlock(lock);
-    }
+    CHECK(apr_thread_mutex_lock(lock));
+    old_value = *mem;
+    *mem += val;
+    CHECK(apr_thread_mutex_unlock(lock));
 #else
     old_value = *mem;
     *mem += val;
@@ -226,10 +230,9 @@ void apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
        
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        *mem -= val;
-        apr_thread_mutex_unlock(lock);
-    }
+    CHECK(apr_thread_mutex_lock(lock));
+    *mem -= val;
+    CHECK(apr_thread_mutex_unlock(lock));
 #else
     *mem -= val;
 #endif /* APR_HAS_THREADS */
@@ -242,10 +245,9 @@ void apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
 
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        *mem = val;
-        apr_thread_mutex_unlock(lock);
-    }
+    CHECK(apr_thread_mutex_lock(lock));
+    *mem = val;
+    CHECK(apr_thread_mutex_unlock(lock));
 #else
     *mem = val;
 #endif /* APR_HAS_THREADS */
@@ -260,11 +262,10 @@ apr_uint32_t apr_atomic_inc32(volatile apr_uint32_t *mem)
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
 
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        old_value = *mem;
-        (*mem)++;
-        apr_thread_mutex_unlock(lock);
-    }
+    CHECK(apr_thread_mutex_lock(lock));
+    old_value = *mem;
+    (*mem)++;
+    CHECK(apr_thread_mutex_unlock(lock));
 #else
     old_value = *mem;
     (*mem)++;
@@ -280,16 +281,15 @@ int apr_atomic_dec32(volatile apr_uint32_t *mem)
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     apr_uint32_t new;
 
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        (*mem)--;
-        new = *mem;
-        apr_thread_mutex_unlock(lock);
-        return new; 
-    }
+    CHECK(apr_thread_mutex_lock(lock));
+    (*mem)--;
+    new = *mem;
+    CHECK(apr_thread_mutex_unlock(lock));
+    return new;
 #else
     (*mem)--;
-#endif /* APR_HAS_THREADS */
     return *mem; 
+#endif /* APR_HAS_THREADS */
 }
 #endif /*!defined(apr_atomic_dec32) && !defined(APR_OVERRIDE_ATOMIC_DEC32) */
 
@@ -301,22 +301,19 @@ apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t with,
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
 
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        prev = *mem;
-        if (prev == cmp) {
-            *mem = with;
-        }
-        apr_thread_mutex_unlock(lock);
-        return prev;
+    CHECK(apr_thread_mutex_lock(lock));
+    prev = *mem;
+    if (prev == cmp) {
+        *mem = with;
     }
-    return *mem;
+    CHECK(apr_thread_mutex_unlock(lock));
 #else
     prev = *mem;
     if (prev == cmp) {
         *mem = with;
     }
-    return prev;
 #endif /* APR_HAS_THREADS */
+    return prev;
 }
 #endif /*!defined(apr_atomic_cas32) && !defined(APR_OVERRIDE_ATOMIC_CAS32) */
 
@@ -327,18 +324,15 @@ apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
 
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        prev = *mem;
-        *mem = val;
-        apr_thread_mutex_unlock(lock);
-        return prev;
-    }
-    return *mem;
+    CHECK(apr_thread_mutex_lock(lock));
+    prev = *mem;
+    *mem = val;
+    CHECK(apr_thread_mutex_unlock(lock));
 #else
     prev = *mem;
     *mem = val;
-    return prev;
 #endif /* APR_HAS_THREADS */
+    return prev;
 }
 #endif /*!defined(apr_atomic_xchg32) && !defined(APR_OVERRIDE_ATOMIC_XCHG32) */
 
@@ -349,22 +343,19 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
 #if APR_HAS_THREADS
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
 
-    if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
-        prev = *(void **)mem;
-        if (prev == cmp) {
-            *mem = with;
-        }
-        apr_thread_mutex_unlock(lock);
-        return prev;
+    CHECK(apr_thread_mutex_lock(lock));
+    prev = *(void **)mem;
+    if (prev == cmp) {
+        *mem = with;
     }
-    return *(void **)mem;
+    CHECK(apr_thread_mutex_unlock(lock));
 #else
     prev = *(void **)mem;
     if (prev == cmp) {
         *mem = with;
     }
-    return prev;
 #endif /* APR_HAS_THREADS */
+    return prev;
 }
 #endif /*!defined(apr_atomic_casptr) && !defined(APR_OVERRIDE_ATOMIC_CASPTR) */
 
