@@ -163,6 +163,7 @@ apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input
     mangotm = *localtime(&mango);
 #endif
     tm_to_exp(result, &mangotm, &mango);
+    result->tm_usec = input % APR_USEC_PER_SEC;
     return APR_SUCCESS;
 #endif /* __EMX__ */
 }
