@@ -62,6 +62,7 @@
  *   APR_WANT_STDIO:    <stdio.h> and related bits
  *   APR_WANT_IOVEC:    struct iovec
  *   APR_WANT_SIGNAL:   signal numbers, functions, and types
+ *   APR_WANT_BYTEFUNC: htons, htonl, ntohl, ntohs
  *
  * Typical usage:
  *
@@ -135,3 +136,22 @@
 #endif
 
 /* --------------------------------------------------------------------- */
+
+#ifdef APR_WANT_BYTEFUNC
+
+/* Single Unix says they are in arpa/inet.h.  Linux has them in
+ * netinet/in.h.  FreeBSD has them in arpa/inet.h but requires that
+ * netinet/in.h be included first.
+ */
+#if APR_HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#if APR_HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+
+#undef APR_WANT_BYTEFUNC
+#endif
+
+/* --------------------------------------------------------------------- */
+
