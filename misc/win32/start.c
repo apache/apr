@@ -64,16 +64,12 @@
 
 ap_status_t clean_cont(void *data)
 {
-    WSACleanup();
     return APR_SUCCESS;
 }
     
 
 ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
 {
-    int iVersionRequested;
-    WSADATA wsaData;
-    int err;
     ap_pool_t *new;
 
     if (cont) {
@@ -89,17 +85,6 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
     
     new->prog_data = NULL;
     new->apr_abort = NULL;
-
-    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
-    err = WSAStartup((WORD) iVersionRequested, &wsaData);
-    if (err) {
-        return APR_EEXIST;
-    }
-    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
-        HIBYTE(wsaData.wVersion) != WSALowByte) {
-        WSACleanup();
-        return APR_EEXIST;
-    }
 
     *newcont = new;
     return APR_SUCCESS;
@@ -249,6 +234,9 @@ FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char* fnName, int ordinal)
 ap_status_t ap_initialize(void)
 {
     ap_status_t status;
+    int iVersionRequested;
+    WSADATA wsaData;
+    int err;
 #if 0
     unsigned tid;
 
@@ -260,11 +248,24 @@ ap_status_t ap_initialize(void)
         sleep(1);
     }
 #endif
+
+    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
+    err = WSAStartup((WORD) iVersionRequested, &wsaData);
+    if (err) {
+        return APR_EEXIST;
+    }
+    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
+        HIBYTE(wsaData.wVersion) != WSALowByte) {
+        WSACleanup();
+        return APR_EEXIST;
+    }
+
     status = ap_init_alloc();
     return status;
 }
 
 void ap_terminate(void)
 {
+    WSACleanup();
     ap_term_alloc();
 }
