@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/01/28 02:13:18 $]
+Last modified at [$Date: 2001/01/28 12:09:31 $]
 
 Release:
 
@@ -48,7 +48,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * add a version number to apr_initialize() as an extra failsafe against
       (APR) library version skew.
       MsgID: <Pine.LNX.4.10.10005231712380.31927-100000@nebula.lyra.org>
-      Status: Greg +1 (volunteers), Jeff +1, Ryan +1, Tony -0(?)
+      Status: Greg +1 (volunteers), Jeff +1, Ryan +1, Tony -0(?), david +1
 
     * The MM library is built as static and shared library. This should
       be set up to build only the required version.
@@ -62,6 +62,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       - It ignores the "type" parameter, so toss it.
       - The fname param is allowed to be NULL on the Unix platform.
         Change it to always use the passed value, and check callers.
+        Status: david +1
 
     * configure.in does post-processing on the AC_OUTPUT files (for
       VPATH support). This means that config.status doesn't do the
@@ -83,6 +84,12 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * use os_(un)cork in network_io/unix/sendrecv.c for FreeBSD's
       sendfile implementation.
 
+      david: The socket options stuff is now in and using it should
+             reduce the number of syscalls that are required for 
+             os_cork and uncork, so the code should be reviewed to
+             make use of the new calls.  If no-one beats me to it I'll
+             get around to it soonish...
+
     * toss the per-Makefile setup of INCLUDES; shift to rules.mk.in
 
     * Change the return type of apr_hash_count() to some counter type 
@@ -97,9 +104,4 @@ Documentation that needs writing:
     * API documentation
 
 Stuff waiting for code thawing after Beta 1:
-
-    * socket options patch - this is an attempt to track and cache
-      the various options we have set on a socket to avoid needless
-      systems calls to discover if an option is set or not...
-      http://www.apache.org/~dreid/sockopt_diff
 
