@@ -52,7 +52,10 @@
  * <http://www.apache.org/>.
  */
 
-#include "i18n.h"
+#include "apr.h"
+#include "apr_private.h"
+#include "apr_errno.h"
+#include "utf8.h"
 
 /* Implement the design principal specified by RFC 2718 2.2.5 
  * Guidelines for new URL Schemes - within the APR.
