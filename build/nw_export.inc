@@ -10,6 +10,7 @@
 #undef APR_DECLARE_DATA
 
 /* Preprocess all of the standard APR headers. */
+#include "apr_atomic.h"
 #include "apr_compat.h"
 #include "apr_dso.h"
 #include "apr_errno.h"
