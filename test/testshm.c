@@ -166,6 +166,8 @@ static void test_named(abts_case *tc, void *data)
     apr_exit_why_e why;
     const char *args[4];
 
+    apr_shm_remove(SHARED_FILENAME, p);
+
     rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
     APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
     if (rv != APR_SUCCESS) {
@@ -219,6 +221,8 @@ static void test_named_remove(abts_case *tc, void *data)
 {
     apr_status_t rv;
     apr_shm_t *shm;
+
+    apr_shm_remove(SHARED_FILENAME, p);
 
     rv = apr_shm_create(&shm, SHARED_SIZE, SHARED_FILENAME, p);
     APR_ASSERT_SUCCESS(tc, "Error allocating shared memory block", rv);
