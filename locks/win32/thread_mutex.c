@@ -56,23 +56,39 @@
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_strings.h"
-#include "win32/thread_mutex.h"
+#include "thread_mutex.h"
+#include "apr_thread_mutex.h"
 #include "apr_portable.h"
 
 static apr_status_t thread_mutex_cleanup(void *data)
 {
-    return APR_ENOTIMPL;
+    apr_thread_mutex_t *lock = data;
+
+    DeleteCriticalSection(&lock->section);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
                                                   apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    SECURITY_ATTRIBUTES sec;
+    (*mutex) = (apr_thread_mutex_t *)apr_palloc(pool, sizeof(**mutex));
+
+    (*mutex)->pool = pool;
+    sec.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sec.lpSecurityDescriptor = NULL;
+    sec.bInheritHandle = FALSE;
+
+    InitializeCriticalSection(&(*mutex)->section);
+    apr_pool_cleanup_register((*mutex)->pool, (*mutex), thread_mutex_cleanup,
+                              apr_pool_cleanup_null);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    EnterCriticalSection(&mutex->section);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
@@ -82,11 +98,11 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    LeaveCriticalSection(&mutex->section);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    return apr_pool_cleanup_run(mutex->pool, mutex, thread_mutex_cleanup);
 }
-

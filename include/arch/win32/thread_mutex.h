@@ -59,6 +59,7 @@
 
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
+    CRITICAL_SECTION section;
 };
 
 #endif  /* THREAD_MUTEX_H */
