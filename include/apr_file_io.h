@@ -59,6 +59,9 @@
 #include "apr_pools.h"
 #include "apr_time.h"
 #include "apr_errno.h"
+#if APR_HAVE_STDIO_H
+#include <stdio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
