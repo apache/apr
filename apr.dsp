@@ -484,6 +484,14 @@ InputPath=.\include\apr.hw
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_allocator.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_atomic.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_compat.h
 # End Source File
 # Begin Source File
@@ -544,6 +552,10 @@ SOURCE=.\include\apr_network_io.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_poll.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_pools.h
 # End Source File
 # Begin Source File
@@ -565,6 +577,10 @@ SOURCE=.\include\apr_shm.h
 # Begin Source File
 
 SOURCE=.\include\apr_signal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_support.h
 # End Source File
 # Begin Source File
 
@@ -597,6 +613,10 @@ SOURCE=.\include\apr_time.h
 # Begin Source File
 
 SOURCE=.\include\apr_user.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_version.h
 # End Source File
 # Begin Source File
 
