@@ -172,7 +172,7 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
         SKIP_WHITESPACE(tmpCnt);
     }
 
-    *argv_out = apr_palloc(token_context, numargs*sizeof(char*));
+    *argv_out = apr_palloc(token_context, (numargs + 1)*sizeof(char*));
     if (*argv_out == NULL) {
         return (APR_ENOMEM);
     }
@@ -183,17 +183,14 @@ APR_DECLARE(apr_status_t) apr_tokenize_to_argv(const char *arg_str,
         CHECK_QUOTATION(cp, isquoted);
         tmpCnt = cp;
         DETERMINE_NEXTSTRING(cp, isquoted);
-        if (*cp == '\0') {
-            (*argv_out)[numargs] = apr_pstrdup(token_context, tmpCnt);
-            numargs++;
+        cp++;
+        (*argv_out)[numargs] = apr_palloc(token_context, cp - tmpCnt);
+        apr_cpystrn((*argv_out)[numargs], tmpCnt, cp - tmpCnt);
+        numargs++;
+        /* This needs to be -1 because we move past the end above. */
+        if (*(cp - 1) == '\0') {
             (*argv_out)[numargs] = '\0';
             break;
-        }
-        else {
-            cp++;
-            (*argv_out)[numargs] = apr_palloc(token_context, cp - tmpCnt);
-            apr_cpystrn((*argv_out)[numargs], tmpCnt, cp - tmpCnt);
-            numargs++;
         }
         
         SKIP_WHITESPACE(cp);
