@@ -134,7 +134,7 @@ static const char *apr_error_string(ap_status_t statcode)
 
 static char *ap_os_format_message(ap_status_t code, char *buf, size_t bufsize)
 {
-    strcpy(buf, "Not implemented\n");
+    strcpy(buf, "Not implemented");
     return buf;
 }
 
