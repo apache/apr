@@ -133,3 +133,14 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     
     return APR_SUCCESS;
 }
+
+char *ap_dso_error(void)
+{
+#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+    return strerror(errno);
+#elif defined(HAVE_DYLD)
+    return NULL;
+#else
+    return dlerror();
+#endif
+}
