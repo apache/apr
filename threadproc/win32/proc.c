@@ -99,59 +99,38 @@ APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,
     return APR_SUCCESS;
 }
 
-static apr_status_t open_nt_process_pipe(apr_file_t **read, apr_file_t **write,
-                                         apr_int32_t iBlockingMode,
-                                         apr_pool_t *pool)
-{
-    apr_status_t stat;
-    BOOLEAN bAsyncRead, bAsyncWrite;
-
-    switch (iBlockingMode) {
-    case APR_FULL_BLOCK:
-        bAsyncRead = bAsyncWrite = FALSE;
-        break;
-    case APR_PARENT_BLOCK:
-        bAsyncRead = FALSE;
-        bAsyncWrite = TRUE;
-        break;
-    case APR_CHILD_BLOCK:
-        bAsyncRead = TRUE;
-        bAsyncWrite = FALSE;
-        break;
-    default:
-        bAsyncRead = TRUE;
-        bAsyncWrite = TRUE;
-    }
-    if ((stat = apr_create_nt_pipe(read, write, bAsyncRead, bAsyncWrite,
-                                   pool)) != APR_SUCCESS)
-        return stat;
-
-    return APR_SUCCESS;
-}
-
-
 APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
-                                             apr_int32_t in, 
-                                             apr_int32_t out,
-                                             apr_int32_t err)
+                                              apr_int32_t in, 
+                                              apr_int32_t out,
+                                              apr_int32_t err)
 {
     apr_status_t stat = APR_SUCCESS;
 
     if (in) {
-        stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in, in,
-                                    attr->pool);
+        /* APR_CHILD_BLOCK maps to APR_WRITE_BLOCK, while
+         * APR_PARENT_BLOCK maps to APR_READ_BLOCK, so we
+         * must transpose the CHILD/PARENT blocking flags
+         * only for the stdin pipe.  stdout/stderr naturally
+         * map to the correct mode.
+         */
+        if (in == APR_CHILD_BLOCK)
+            in = APR_READ_BLOCK;
+        else if (in == APR_PARENT_BLOCK)
+            in = APR_WRITE_BLOCK;
+        stat = apr_create_nt_pipe(&attr->child_in, &attr->parent_in, in,
+                                  attr->pool);
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_in);
     }
     if (out && stat == APR_SUCCESS) {
-        stat = open_nt_process_pipe(&attr->parent_out, &attr->child_out, out,
-                                    attr->pool);
+        stat = apr_create_nt_pipe(&attr->parent_out, &attr->child_out, out,
+                                  attr->pool);
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_out);
     }
     if (err && stat == APR_SUCCESS) {
-        stat = open_nt_process_pipe(&attr->parent_err, &attr->child_err, err,
-                                    attr->pool);
+        stat = apr_create_nt_pipe(&attr->parent_err, &attr->child_err, err,
+                                  attr->pool);
         if (stat == APR_SUCCESS)
             stat = apr_file_inherit_unset(attr->parent_err);
     }
