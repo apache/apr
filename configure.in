@@ -780,19 +780,19 @@ AC_ARG_ENABLE(dso,
   [  --enable-dso            Enable dso support ],
   [ tempdso=$enableval],
   [ 
-    AC_CHECK_FUNCS(NSLinkModule, [ tempdso="yes" ], [ tempdso="no" ])
+    AC_CHECK_FUNCS(NSLinkModule, [ tempdso="dyld" ], [ tempdso="no" ])
     if test "$tempdso" = "no"; then
-      AC_CHECK_LIB(dl, dlopen, [ tempdso="yes" LIBS="$LIBS -ldl" ], 
+      AC_CHECK_LIB(dl, dlopen, [ tempdso="dlfcn" LIBS="$LIBS -ldl" ], 
                    tempdso="no")
     fi
     if test "$tempdso" = "no"; then
-      AC_CHECK_FUNCS(dlopen, [ tempdso="yes" ], [ tempdso="no" ])
+      AC_CHECK_FUNCS(dlopen, [ tempdso="dlfcn" ], [ tempdso="no" ])
     fi
     if test "$tempdso" = "no"; then
       AC_CHECK_LIB(root, load_image, tempdso="yes", tempdso="no")
     fi
     if test "$tempdso" = "no"; then
-      AC_CHECK_LIB(dld, shl_load, [ tempdso="yes" LIBS="$LIBS -ldld" ],
+      AC_CHECK_LIB(dld, shl_load, [ tempdso="shl" LIBS="$LIBS -ldld" ],
                    tempdso="no")
     fi
     if test "$tempdso" = "no"; then
@@ -807,6 +807,11 @@ AC_ARG_ENABLE(dso,
 if test "$tempdso" = "no"; then
     aprdso="0"
 else
+    case "$tempdso" in
+	dlfcn) AC_DEFINE(DSO_USE_DLFCN);;
+	shl)   AC_DEFINE(DSO_USE_SHL);;
+	dyld)  AC_DEFINE(DSO_USE_DYLD);;
+    esac
     aprdso="1"
     apr_modules="$apr_modules dso"
 fi

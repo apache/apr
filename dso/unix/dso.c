@@ -57,6 +57,10 @@
 
 #if APR_HAS_DSO
 
+#if !defined(DSO_USE_DLFCN) && !defined(DSO_USE_SHL) && !defined(DSO_USE_DYLD)
+#error No DSO implementation specified.
+#endif
+
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>
 #endif
@@ -71,11 +75,11 @@ static apr_status_t dso_cleanup(void *thedso)
     if (dso->handle == NULL)
         return APR_SUCCESS;
 
-#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+#if defined(DSO_USE_SHL)
     shl_unload((shl_t)dso->handle);
-#elif defined(DARWIN)
+#elif defined(DSO_USE_DYLD)
     NSUnLinkModule(dso->handle, FALSE);
-#else
+#elif defined(DSO_USE_DLFCN)
     if (dlclose(dso->handle) != 0)
         return APR_EINIT;
 #endif
@@ -87,10 +91,10 @@ static apr_status_t dso_cleanup(void *thedso)
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
                                        const char *path, apr_pool_t *ctx)
 {
-#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+#if defined(DSO_USE_SHL)
     shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
 
-#elif defined(DARWIN)
+#elif defined(DSO_USE_DYLD)
     NSObjectFileImage image;
     NSModule os_handle;
     char* err_msg = NULL;
@@ -107,24 +111,26 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 #endif
     }
 
-#elif defined(OSF1) || defined(SEQUENT) || defined(SNI) ||\
+#elif defined(DSO_USE_DLFCN)
+#if defined(OSF1) || defined(SEQUENT) || defined(SNI) ||\
     (defined(__FreeBSD_version) && (__FreeBSD_version >= 220000))
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 
 #else
     void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
 #endif    
+#endif /* DSO_USE_x */
 
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
 
     if(os_handle == NULL) {
-#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+#if defined(DSO_USE_SHL)
         (*res_handle)->errormsg = strerror(errno);
         return errno;
-#elif defined(DARWIN)
+#elif defined(DSO_USE_DYLD)
         (*res_handle)->errormsg = (err_msg) ? err_msg : "link failed";
         return APR_EDSOOPEN;
-#else
+#elif defined(DSO_USE_DLFCN)
         (*res_handle)->errormsg = dlerror();
         return APR_EDSOOPEN;
 #endif
@@ -148,7 +154,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
                                       apr_dso_handle_t *handle, 
                                       const char *symname)
 {
-#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+#if defined(DSO_USE_SHL)
     void *symaddr = NULL;
     int status;
 
@@ -161,7 +167,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     *ressym = symaddr;
     return APR_SUCCESS;
 
-#elif defined(DARWIN)
+#elif defined(DSO_USE_DYLD)
     void *retval = NULL;
     NSSymbol symbol;
     char *symname2 = (char*)malloc(sizeof(char)*(strlen(symname)+2));
@@ -182,7 +188,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
 	return APR_EINIT;
     }
 
-#else /* use dlsym()/dlerror() */
+#elif defined(DSO_USE_DLFCN)
 
 #if defined(DLSYM_NEEDS_UNDERSCORE)
     void *retval;
@@ -190,12 +196,11 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     sprintf(symbol, "_%s", symname);
     retval = dlsym(handle->handle, symbol);
     free(symbol);
-
 #elif defined(SEQUENT) || defined(SNI)
     void *retval = dlsym(handle->handle, (char *)symname);
 #else
     void *retval = dlsym(handle->handle, symname);
-#endif
+#endif /* DLSYM_NEEDS_UNDERSCORE */
 
     if (retval == NULL) {
         handle->errormsg = dlerror();
@@ -205,7 +210,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     *ressym = retval;
     
     return APR_SUCCESS;
-#endif /* use dlsym()/dlerror() */
+#endif /* DSO_USE_x */
 }
 
 APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
