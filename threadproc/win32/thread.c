@@ -175,7 +175,7 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
         return APR_SUCCESS;
     }
     /* Wait failed */
-    return APR_FROM_OS_ERROR(GetLastError());
+    return apr_get_os_error();;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
