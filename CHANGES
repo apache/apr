@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) EBCDIC: fix compile failure in strings/apr_strings.c in
+     httpd-2.0.40 with the following error message:
+     CANNOT COMPILE apr_strtoi64(), only ASCII and EBCDIC supported
+     
   *) In apr_signal_thread() remove synchronous signals from the mask
      passed to sigwait().  It is never valid for them to be there.
      Some platforms silently ignore them, some return EINVAL, some
