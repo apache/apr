@@ -211,6 +211,17 @@ typedef int               ap_signum_t;
 #define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
 #endif
 
+#if APR_HAS_RANDOM
+/* ***APRDOC********************************************************
+ * TODO: I'm not sure this is the best place to put this prototype...
+ * ap_status_t ap_generate_random_bytes(unsigned char * buf, int length)
+ *    Generate a string of random bytes.
+ * arg 1) Random bytes go here
+ * arg 2) size of the buffer
+ */
+ap_status_t ap_generate_random_bytes(unsigned char * buf, int length);
+#endif
+
 typedef struct ap_pool_t {
     union block_hdr *first;
     union block_hdr *last;

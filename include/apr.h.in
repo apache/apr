@@ -61,6 +61,7 @@
 #define APR_HAS_SENDFILE          @sendfile@
 #define APR_HAS_MMAP              @mmap@
 #define APR_HAS_FORK              @fork@
+#define APR_HAS_RANDOM            @rand@
 
 /* Typedefs that APR needs. */
 
