@@ -709,7 +709,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ECONNRESET     (APR_OS_START_CANONERR + 19)
 #endif
 
-/** @see APR_STATUS_IS_ETIMEDOUT */
+/** @see APR_STATUS_IS_ETIMEDOUT 
+ *  @deprecated */
 #ifdef ETIMEDOUT
 #define APR_ETIMEDOUT ETIMEDOUT
 #else
@@ -884,7 +885,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + SOCECONNABORTED)
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + SOCECONNRESET)
-#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
+// XXX deprecated
+#define APR_STATUS_IS_ETIMEDOUT(s)         ((s) == APR_ETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + SOCETIMEDOUT)    
+#define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP \
                 || (s) == APR_OS_START_SYSERR + SOCETIMEDOUT)    
 #define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
                 || (s) == APR_OS_START_SYSERR + SOCEHOSTUNREACH)
@@ -1019,7 +1023,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + ERROR_NETNAME_DELETED \
                 || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
-#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
+// XXX deprecated
+#define APR_STATUS_IS_ETIMEDOUT(s)         ((s) == APR_ETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
+#define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
 #define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
@@ -1084,7 +1092,11 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAECONNABORTED)
 #define APR_STATUS_IS_ECONNRESET(s)     ((s) == APR_ECONNRESET \
                 || (s) == APR_OS_START_SYSERR + WSAECONNRESET)
-#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT \
+// XXX deprecated
+#define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
+                || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
+#define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP \
                 || (s) == APR_OS_START_SYSERR + WSAETIMEDOUT \
                 || (s) == APR_OS_START_SYSERR + WAIT_TIMEOUT)
 #define APR_STATUS_IS_EHOSTUNREACH(s)   ((s) == APR_EHOSTUNREACH \
@@ -1189,8 +1201,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 /** Connection Reset by peer */
 #define APR_STATUS_IS_ECONNRESET(s)      ((s) == APR_ECONNRESET)
-/** Operation timed out */
-#define APR_STATUS_IS_ETIMEDOUT(s)       ((s) == APR_ETIMEDOUT)    
+/** Operation timed out
+ *  @deprecated */
+#define APR_STATUS_IS_ETIMEDOUT(s)      ((s) == APR_ETIMEDOUT)
 /** no route to host */
 #define APR_STATUS_IS_EHOSTUNREACH(s)    ((s) == APR_EHOSTUNREACH)
 /** network is unreachable */
