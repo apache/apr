@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Deprecated the apr_lock.h API. Please see the following files
+     for the improved thread and process locking and signaling:
+     apr_proc_mutex.h, apr_thread_mutex.h, apr_thread_rwlock.h,
+     apr_thread_cond.h, and apr_global_mutex.h.  [Aaron Bannert]
+
   *) Fix some daylight savings time breakage on (at least) AIX, 
      Solaris, and HP-UX.  [Jeff Trawick]
 
