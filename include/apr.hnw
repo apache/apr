@@ -189,6 +189,10 @@
 #include <sys/types.h>
 #endif
 
+#if APR_HAVE_IPV6
+#include <novtcpip.h>
+#endif
+
 /*  APR Feature Macros */
 #define APR_HAS_SHARED_MEMORY     0
 #define APR_HAS_THREADS           1
