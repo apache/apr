@@ -160,9 +160,10 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     set_socket_vars(*new, family, type);
 
     (*new)->timeout = -1;
-    (*new)->inherit = inherit;
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, inherit ? socket_cleanup : NULL );
+    (*new)->inherit = (inherit & APR_INHERIT) ? 1 : 0;
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
+                              (*new)->inherit ? apr_pool_cleanup_null
+                                              : socket_cleanup);
     return APR_SUCCESS;
 } 
 
@@ -254,8 +255,9 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     }
 
     (*new)->inherit = sock->inherit;
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
-                        socket_cleanup, (*new)->inherit ? socket_cleanup : NULL);
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
+                              (inherit & APR_INHERIT) ? apr_pool_cleanup_null
+                                                      : socket_cleanup);
     return APR_SUCCESS;
 }
 
@@ -356,10 +358,11 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
                (*apr_sock)->remote_addr->salen);
     }
         
-    (*apr_sock)->inherit = inherit;
+    (*apr_sock)->inherit = (inherit & APR_INHERIT) ? 1 : 0;
     apr_pool_cleanup_register((*apr_sock)->cntxt, (void *)(*apr_sock), 
-                        socket_cleanup, inherit ? socket_cleanup : NULL);
-
+                              socket_cleanup,
+                              (*apr_sock)->inherit ? apr_pool_cleanup_null
+                                                   : socket_cleanup);
     return APR_SUCCESS;
 }
 
@@ -379,4 +382,6 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
     return APR_SUCCESS;
 }
 
-APR_SET_INHERIT(socket, cntxt, socket_cleanup, 1)
+APR_IMPLEMENT_SET_INHERIT(socket, cntxt, socket_cleanup)
+
+APR_IMPLEMENT_UNSET_INHERIT(socket, cntxt, socket_cleanup)

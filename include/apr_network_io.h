@@ -241,13 +241,17 @@ struct apr_ipsubnet_t {
  * @param new_sock The new socket that has been set up.
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
- * @param inherit Should this socket be inherited by child processes
+ * @param flag Should this socket be inherited by child processes.  One of
+ * <PRE>
+ *          APR_INHERIT       This socket is inherited by children
+ *          APR_NO_INHERIT    This socket is not inherited by children.
+ * </PRE>
  * @param cont The pool to use
- * @deffunc apr_status_t apr_socket_create(apr_socket_t **new_sock, int family, int type, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_socket_create(apr_socket_t **new_sock, int family, int type, apr_int32_t flag, apr_pool_t *cont)
  */
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
                                             int family, int type,
-                                            int inherit, apr_pool_t *cont);
+                                            apr_int32_t flag, apr_pool_t *cont);
 
 /**
  * Shutdown either reading, writing, or both sides of a tcp socket.
@@ -803,7 +807,23 @@ apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char name[16],
                                       char args[256 - 16]);
 #endif
 
+/**
+ * Set a socket to be inherited by child processes.
+ * @param socket The socket to enable inheritance.
+ * @deffunc void apr_socket_set_inherit(apr_socket_t *socket)
+ * @tip Same effect as passing the APR_INHERIT flag to apr_socket_create(),
+ * but it is far more efficient to pass the correct value in the first place.
+ */
 APR_DECLARE_SET_INHERIT(socket);
+
+/**
+ * Unset a socket from being inherited by child processes.
+ * @param socket The socket to disable inheritance.
+ * @deffunc void apr_socket_unset_inherit(apr_socket_t *socket)
+ * @tip Same effect as passing the APR_NO_INHERIT flag to apr_socket_create(),
+ * but it is far more efficient to pass the correct value in the first place.
+ */
+APR_DECLARE_UNSET_INHERIT(socket);
 
 #ifdef __cplusplus
 }
