@@ -63,7 +63,7 @@ static void test_addr_info(CuTest *tc)
     apr_status_t rv;
     apr_sockaddr_t *sa;
 
-    rv = apr_sockaddr_info_get(&sa, APR_LOCAL, APR_UNSPEC, 80, 0, p);
+    rv = apr_sockaddr_info_get(&sa, NULL, APR_UNSPEC, 80, 0, p);
     apr_assert_success(tc, "Problem generating sockaddr", rv);
 
     rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 80, 0, p);
@@ -77,7 +77,7 @@ static apr_socket_t *setup_socket(CuTest *tc)
     apr_sockaddr_t *sa;
     apr_socket_t *sock;
 
-    rv = apr_sockaddr_info_get(&sa, APR_LOCAL, APR_INET, 8021, 0, p);
+    rv = apr_sockaddr_info_get(&sa, NULL, APR_INET, 8021, 0, p);
     apr_assert_success(tc, "Problem generating sockaddr", rv);
 
     rv = apr_socket_create(&sock, sa->family, SOCK_STREAM, APR_PROTO_TCP, p);
