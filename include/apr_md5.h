@@ -98,16 +98,14 @@ extern "C" {
 
 #define MD5_DIGESTSIZE 16
 
-/* UINT4 defines a four byte word */
-typedef unsigned int UINT4;
 typedef struct apr_md5_ctx_t apr_md5_ctx_t;
 
 /** MD5 context. */
 struct apr_md5_ctx_t {
     /** state (ABCD) */
-    UINT4 state[4];
+    apr_uint32_t state[4];
     /** number of bits, modulo 2^64 (lsb first) */
-    UINT4 count[2];
+    apr_uint32_t count[2];
     /** input buffer */
     unsigned char buffer[64];
 #if APR_HAS_XLATE
@@ -132,7 +130,7 @@ APR_DECLARE(apr_status_t) apr_md5_init(apr_md5_ctx_t *context);
  */
 #if APR_HAS_XLATE
 APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
-                                          apr_xlate_t *xlate);
+                                            apr_xlate_t *xlate);
 #else
 #define apr_md5_set_xlate(context, xlate) APR_ENOTIMPL
 #endif
@@ -146,8 +144,8 @@ APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
  * @deffunc apr_status_t apr_md5_update(apr_md5_ctx_t *context, apr_size_t char *input, unsigned int inputLen)
  */
 APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
-                                        const unsigned char *input,
-                                        apr_size_t inputLen);
+                                         const unsigned char *input,
+                                         apr_size_t inputLen);
 
 /**
  * MD5 finalization.  Ends an MD5 message-digest operation, writing the 
@@ -157,7 +155,7 @@ APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
  * @deffunc apr_status_t apr_md5_final(unsigned char digest[MD5_DIGESTSIZE], apr_md5_ctx_t *context)
  */
 APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
-                                       apr_md5_ctx_t *context);
+                                        apr_md5_ctx_t *context);
 
 /**
  * Encode a password using an MD5 algorithm
@@ -168,10 +166,10 @@ APR_DECLARE(apr_status_t) apr_md5_final(unsigned char digest[MD5_DIGESTSIZE],
  * @deffunc apr_status_t apr_md5_encode(const char *password, const char *salt, char *result, size_t nbytes)
  */
 APR_DECLARE(apr_status_t) apr_md5_encode(const char *password, const char *salt,
-                                        char *result, size_t nbytes);
+                                         char *result, size_t nbytes);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	/* !APR_MD5_H */
+#endif /* !APR_MD5_H */
