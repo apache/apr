@@ -52,17 +52,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /machine:I386
-# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /debug /debugtype:both /machine:I386 /pdbtype:sept
-# Begin Custom Build - Extracting .dbg symbols from $(InputPath)
-InputPath=.\Release\libapr.dll
-SOURCE="$(InputPath)"
-
-".\Release\libapr.dbr" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	rebase -q -p -b 0x6EEC0000 -x ".\Release" $(InputPath)
-	echo rebased > ".\Release\libapr.dbr"
-
-# End Custom Build
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386 /opt:ref
+# ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386 /opt:ref
 
 !ELSEIF  "$(CFG)" == "libapr - Win32 Debug"
 
@@ -87,7 +78,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386
+# ADD BASE LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386
 # ADD LINK32 kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib /nologo /base:"0x6EEC0000" /subsystem:windows /dll /incremental:no /debug /machine:I386
 
 !ENDIF 
@@ -595,11 +586,11 @@ SOURCE=.\include\apr_signal.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_support.h
+SOURCE=.\include\apr_strings.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_strings.h
+SOURCE=.\include\apr_support.h
 # End Source File
 # Begin Source File
 
