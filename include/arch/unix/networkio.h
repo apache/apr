@@ -111,7 +111,7 @@ struct socket_t {
     int socketdes;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
-    size_t addr_len;
+    socklen_t addr_len;
     int timeout; 
 #ifndef HAVE_POLL
     int connected;
