@@ -518,13 +518,15 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->pool = pool;
     (*file)->filehand = *thefile;
     (*file)->ungetchar = -1; /* no char avail */
+    (*file)->timeout = -1;
+    (*file)->flags = flags;
+    if (flags & APR_APPEND)
+	(*file)->append = 1;
 
-    /* XXX... we pcalloc above so these are zeroed.  Is zero really
-     * the right answer when we passed flags into os_file_put?
-     * Should we be testing if thefile is a handle to a PIPE and
-     * set up the mechanics appropriately?
+    /* XXX... we pcalloc above so all others are zeroed.
+     * Should we be testing if thefile is a handle to 
+     * a PIPE and set up the mechanics appropriately?
      *
-     *  (*file)->flags;
      *  (*file)->pipe;
      */
     return APR_SUCCESS;
