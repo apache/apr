@@ -93,7 +93,7 @@ void main(void) {
 
     error = getnameinfo((const struct sockaddr *)&sa, sizeof(sa),
                         hbuf, 256, NULL, 0,
-                        NI_NAMEREQD);
+                        NI_NUMERICHOST);
     if (error) {
         exit(1);
     } else {
