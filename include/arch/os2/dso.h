@@ -57,6 +57,9 @@
 #ifndef DSO_H
 #define DSO_H
 
+#define INCL_DOS
+#include <os2.h>
+
 #include "apr_config.h"
 #include "apr_general.h"
 #include "apr_pools.h"
@@ -64,7 +67,7 @@
 
 struct ap_dso_handle_st {
     HMODULE       handle;     /* Handle to the DSO loaded            */
-    ap_context_t  cont;       /* Context for returning error strings */
+    ap_context_t  *cont;       /* Context for returning error strings */
 };
 
 #endif

@@ -3,6 +3,7 @@
 #INCLUDES=$(INCLUDES1) $(INCLUDES0) $(EXTRA_INCLUDES)
 #LDFLAGS=$(LDFLAGS1) $(EXTRA_LDFLAGS)
 
+SHELL=@SH@
 CC=@CC@
 RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
@@ -41,20 +42,16 @@ $(LIB): $(OBJS)
 depend:
 	cp Makefile.in Makefile.in.bak \
 	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
+	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c | sed -e "s%\\\\\(.\)%/\\1%g" >> Makefile.new \
 	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
 	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
 		> Makefile.in \
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-getopt.o: getopt.c misc.h ../../include/apr_config.h \
- ../../include/apr_general.h ../../include/apr.h \
- ../../include/apr_errno.h ../../include/apr_pools.h \
- ../../include/apr_lib.h ../../include/apr_file_io.h \
- ../../include/apr_getopt.h
-start.o: start.c misc.h ../../include/apr_config.h \
- ../../include/apr_general.h ../../include/apr.h \
- ../../include/apr_errno.h ../../include/apr_pools.h \
- ../../include/apr_lib.h ../../include/apr_file_io.h \
- ../../include/apr_getopt.h
+dso.o: dso.c dso.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_time.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_dso.h

@@ -54,7 +54,7 @@
  *
  */
 
-#include "misc.h"
+#include "dso.h"
 #define INCL_DOS
 #include <os2.h>
 #include <stdio.h>
@@ -71,7 +71,7 @@ ap_status_t ap_dso_load(const char *path, ap_context_t *ctx,
     HMODULE handle;
     int rc;
 
-    if((rc = DosLoadModule(somebuf, sizeof(somebuf), path, &handle)) != 0)
+    if ((rc = DosLoadModule(somebuf, sizeof(somebuf), path, &handle)) != 0)
       return APR_EINIT;
 
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
