@@ -54,6 +54,20 @@
 
 #include "misc.h"
 
+/*
+ * stuffbuffer - Stuff contents of string 's' into buffer 'buf' 
+ * w/o overflowing 'buf' then NULL terminate.
+ */
+static char *stuffbuffer(char *buf, ap_size_t bufsize, const char *s)
+{
+    ap_size_t len = strlen(s);
+    if (len > bufsize)
+        len = bufsize;
+    memcpy(buf, s, len);
+    if (len)
+        buf[len-1] = '\0';
+    return buf;
+}
 
 static char *apr_error_string(ap_status_t statcode)
 {
@@ -131,38 +145,13 @@ static char *apr_error_string(ap_status_t statcode)
     }
 }
 
-#ifdef WIN32
-#error "not implemented yet"
-#elif OS2
-static char *apr_os_strerror(int err, char *buf, ap_size_t bufsize);
-#else
-#define apr_os_strerror(err, buf, bufsize)	strerror(err)
-#endif
-
-char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
-{
-    if (statcode < APR_OS_START_ERROR) {
-        return strerror(statcode);
-    }
-    else if (statcode < APR_OS_START_USEERR) {
-        return apr_error_string(statcode);
-    }
-    else if (statcode < APR_OS_START_SYSERR) {
-        return "APR does not understand this error code";
-    }
-    else {
-	return apr_os_strerror(statcode - APR_OS_START_SYSERR, buf, bufsize);
-    }
-}
-
-
 
 #ifdef OS2
 #define INCL_DOS
 #include <os2.h>
 #include <ctype.h>
 
-static char *apr_os_strerror(int err, char* buf, ap_size_t bufsize)
+static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err)
 {
   char result[200];
   unsigned char message[HUGE_STRING_LEN];
@@ -171,7 +160,8 @@ static char *apr_os_strerror(int err, char* buf, ap_size_t bufsize)
   int c;
   
   if (err >= 10000 && err < 12000) {  /* socket error codes */
-      return strerror(ap_canonical_error(err+APR_OS_START_SYSERR));
+      return stuffbuffer(buf, bufsize,
+                         strerror(ap_canonical_error(err+APR_OS_START_SYSERR)));
   } 
   else if (DosGetMessage(NULL, 0, message, HUGE_STRING_LEN, err,
 			 "OSO001.MSG", &len) == 0) {
@@ -194,12 +184,35 @@ static char *apr_os_strerror(int err, char* buf, ap_size_t bufsize)
   else {
       sprintf(result, "OS/2 error %d", err);
   }
-  
-  if (len > bufsize)
-      len = bufsize;
 
-  memcpy(buf, result, len);
-
-  return buf;
+  /* Stuff the string into the caller supplied buffer, then return 
+   * a pointer to it.
+   */
+  return stuffbuffer(buf, bufsize, result);  
+}
+#else
+static char *apr_os_strerror(char* buf, ap_size_t bufsize, int err) 
+{
+    	return stuffbuffer(buf, bufsize,strerror(err));
 }
 #endif
+
+char *ap_strerror(ap_status_t statcode, char *buf, ap_size_t bufsize)
+{
+    char *msg;
+    ap_size_t len;
+
+    if (statcode < APR_OS_START_ERROR) {
+        return stuffbuffer(buf, bufsize, strerror(statcode));
+    }
+    else if (statcode < APR_OS_START_USEERR) {
+        return stuffbuffer(buf, bufsize, apr_error_string(statcode));
+    }
+    else if (statcode < APR_OS_START_SYSERR) {
+        return stuffbuffer(buf, bufsize, "APR does not understand this error code");
+    }
+    else {
+	return apr_os_strerror(buf, bufsize, statcode - APR_OS_START_SYSERR);
+    }
+}
+
