@@ -5,6 +5,10 @@ Changes for APR 1.1.0
      and upgrading it to do SHA-256. Not yet ready for prime time.
      [Ben Laurie]
 
+  *) Added Solaris 10 'Event Ports' as a backend for APR Pollset.  This 
+     backend also supports the APR_POLLSET_THREADSAFE flag.
+     [Paul Querna]
+
   *) Added the APR_POLLSET_THREADSAFE flag. This allows multiple threads
      to call the Pollset Add or Remove functions in a thread safe manner.
      Currently only EPoll and KQueue support this flag. [Paul Querna]

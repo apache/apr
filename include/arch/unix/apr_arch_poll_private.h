@@ -31,6 +31,11 @@
 #include <sys/poll.h>
 #endif
 
+#ifdef HAVE_PORT_CREATE
+#include <port.h>
+#include <sys/port_impl.h>
+#endif
+
 #ifdef HAVE_KQUEUE
 #include <sys/types.h>
 #include <sys/event.h>
@@ -49,6 +54,8 @@
 /* Choose the best method platform specific to use in apr_pollset */
 #ifdef HAVE_KQUEUE
 #define POLLSET_USES_KQUEUE
+#elif defined(HAVE_PORT_CREATE)
+#define POLLSET_USES_PORT
 #elif defined(HAVE_EPOLL)
 #define POLLSET_USES_EPOLL
 #elif defined(HAVE_POLL)
@@ -63,7 +70,7 @@
 #define POLL_USES_SELECT
 #endif
 
-#if defined(POLLSET_USES_KQUEUE) || defined(POLLSET_USES_EPOLL)
+#if defined(POLLSET_USES_KQUEUE) || defined(POLLSET_USES_EPOLL) || defined(POLLSET_USES_PORT)
 
 #include "apr_ring.h"
 
