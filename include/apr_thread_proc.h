@@ -483,5 +483,5 @@ apr_status_t apr_kill(apr_proc_t *proc, int sig);
 }
 #endif
 
-#endif  /* ! APR_FILE_IO_H */
+#endif  /* ! APR_THREAD_PROC_H */
 
