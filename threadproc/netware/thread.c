@@ -98,15 +98,13 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     apr_status_t stat;
     long flags = NX_THR_BIND_CONTEXT;
   	char threadName[NX_MAX_OBJECT_NAME_LEN+1];
+    size_t stack_size = APR_DEFAULT_STACK_SIZE;
 
-    if (!attr)
-        return APR_EINVAL;
-
-    if (!attr->thread_name) {
-        char threadName[32];
-
+    if (attr && attr->thread_name) {
+        strncpy (threadName, attr->thread_name, NX_MAX_OBJECT_NAME_LEN);
+    }
+    else {
 	    sprintf(threadName, "APR_thread %0004ld", ++thread_count);
-        attr->thread_name = apr_pstrdup(cont, threadName);
     }
 
     /* An original stack size of 0 will allow NXCreateThread() to
@@ -114,8 +112,8 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     *   size of less than 0 will assign the APR default stack size.
     *   anything else will be taken as is.
     */
-    if (attr->stack_size < 0) {
-        attr->stack_size = APR_DEFAULT_STACK_SIZE;
+    if (attr && (attr->stack_size >= 0)) {
+        stack_size = attr->stack_size;
     }
     
     (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
@@ -139,14 +137,14 @@ apr_status_t apr_thread_create(apr_thread_t **new,
     	/* void(*start_routine)(void *arg)*/(void (*)(void *)) func,
      	/* void *arg */										   data,
      	/* int priority */ 									   NX_PRIO_MED,
-     	/* NXSize_t stackSize */							   attr->stack_size,
+     	/* NXSize_t stackSize */							   stack_size,
      	/* long flags */									   NX_CTX_NORMAL,
      	/* int *error */									   &stat);
 		
      	                                                                   
   	stat = NXContextSetName(
 		 	/* NXContext_t ctx */			(*new)->ctx,
-			/* const char *name */			attr->thread_name);
+			/* const char *name */			threadName);
 
   	stat = NXThreadCreate(
         	/* NXContext_t context */		(*new)->ctx,
