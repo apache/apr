@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Don't require that the DNS can map 127.0.0.1 when checking for
+     the presence/usability of getnameinfo().  PR 7642.  [Jeff Trawick]
+
   *) Remove APR_WANT_SIGNAL from apr_want.h because code must include
      apr_signal.h in order to get consistent definitions. [Roy Fielding]
 
