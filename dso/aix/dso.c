@@ -132,6 +132,12 @@ struct dl_info {
  * add the basic "wrappers" here.
  */
 
+static apr_status_t dso_cleanup(void *thedso)
+{
+    apr_dso_handle_t *dso = thedso;
+    return apr_dso_unload(dso);
+}
+
 APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
                                        const char *path, apr_pool_t *ctx)
 {
@@ -143,6 +149,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
+
+    apr_register_cleanup(ctx, *res_handle, dso_cleanup, apr_null_cleanup);
+
     return APR_SUCCESS;
 }
 
