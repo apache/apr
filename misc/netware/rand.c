@@ -61,18 +61,10 @@
 
 #include <nks/plat.h>
 
-#ifdef WAITING_FOR_UPDATE
-int          NXGetRandom( size_t width, void *result );
-#endif
-
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf, 
                                                     int length) 
 {
-#ifdef WAITING_FOR_UPDATE
-    return NXGetRandom(length, buf);
-#else
     return NXSeedRandom(length, buf);
-#endif
 }
 
 #endif /* APR_HAS_RANDOM */
