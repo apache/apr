@@ -112,7 +112,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
             /* Wait for the pending i/o */
             if (file->timeout > 0) {
-                rv = WaitForSingleObject(file->pOverlapped->hEvent, file->timeout/1000); // timeout in milliseconds...
+                rv = WaitForSingleObject(file->pOverlapped->hEvent, (DWORD)(file->timeout/1000)); // timeout in milliseconds...
             }
             else if (file->timeout == -1) {
                 rv = WaitForSingleObject(file->pOverlapped->hEvent, INFINITE);
