@@ -152,11 +152,11 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
      */
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
+    apr_wchar_t *eos, wdirname[APR_PATH_MAX];
     if (!apr_get_oslevel(thedir->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
         if (thedir->dirhand == INVALID_HANDLE_VALUE) 
         {
-            apr_wchar_t *eos, wdirname[APR_PATH_MAX];
             apr_status_t rv;
             if (rv = utf8_to_unicode_path(wdirname, sizeof(wdirname) 
                                                      / sizeof(apr_wchar_t), 
@@ -170,6 +170,7 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
             if (thedir->dirhand == INVALID_HANDLE_VALUE) {
                 return apr_get_os_error();
             }
+            eos[0] = '\0';
         }
         else if (!FindNextFileW(thedir->dirhand, thedir->w.entry)) {
             return apr_get_os_error();
@@ -211,22 +212,6 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         }
         fname = thedir->n.entry->cFileName;
     }
-    if (wanted & ~APR_FINFO_WIN32_DIR) {
-        char fspec[APR_PATH_MAX];
-        int dirlen = strlen(thedir->dirname);
-        if (dirlen >= sizeof(fspec))
-            dirlen = sizeof(fspec) - 1;
-        apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
-        apr_cpystrn(fspec + dirlen, fname, sizeof(fspec) - dirlen);
-        rv = apr_stat(finfo, fspec, wanted, thedir->cntxt);
-        if (rv == APR_SUCCESS || rv == APR_INCOMPLETE) {
-            finfo->valid |= APR_FINFO_NAME;
-            finfo->name = fname;
-            finfo->fname = fspec;
-            rv = (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
-        }
-        return rv;
-    }
 
     memset(finfo, '\0', sizeof(*finfo));
     finfo->name = fname;
@@ -262,7 +247,40 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     if (finfo->size < 0 || FileInformation.nFileSizeHigh)
         finfo->size = 0x7fffffff;
 #endif
-    return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
+
+    if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_READONLY)
+        finfo->protection = APR_FREADONLY;
+
+    if (wanted &= ~finfo->valid) {
+        /* Go back and get more_info if we can't answer the whole inquiry
+         */
+#if APR_HAS_UNICODE_FS
+        if (os_level >= APR_WIN_NT) {
+            /* Almost all our work is done.  Tack on the wide file name
+             * to the end of the wdirname (already / delimited)
+             */
+            wcscpy(eos, thedir->w.entry->cFileName);
+            return more_finfo(finfo, wdirname, wanted, MORE_OF_WFSPEC, os_level);
+        }
+        else {
+            /* Don't waste stack space on a second buffer, the one we set
+             * aside for the wide directory name is twice what we need.
+             */
+            char *fspec = (char*)wdirname;
+#else /* !APR_HAS_UNICODE_FS */
+        {
+            char fspec[APR_PATH_MAX];
+#endif
+            int dirlen = strlen(thedir->dirname);
+            if (dirlen >= sizeof(fspec))
+                dirlen = sizeof(fspec) - 1;
+            apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
+            apr_cpystrn(fspec + dirlen, fname, sizeof(fspec) - dirlen);
+            return more_finfo(finfo, fspec, wanted, MORE_OF_FSPEC, os_level);
+        }
+    }
+
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *dir)
@@ -323,11 +341,6 @@ APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont)
         }
     return APR_SUCCESS;
 }
-
-
-
-
-
 
 APR_DECLARE(apr_status_t) apr_get_os_dir(apr_os_dir_t **thedir,
                                          apr_dir_t *dir)
