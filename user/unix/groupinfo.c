@@ -62,6 +62,9 @@
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#if APR_HAVE_UNISTD_H
+#include <unistd.h> /* for _POSIX_THREAD_SAFE_FUNCTIONS */
+#endif
 
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
 {
