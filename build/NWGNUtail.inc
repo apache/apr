@@ -25,7 +25,7 @@ NLM_SCREEN_NAME = DEFAULT
 endif
 
 ifndef NLM_COPYRIGHT
-NLM_COPYRIGHT = Copyright (c) 2000-2003 The Apache Software Foundation. All rights reserved.
+NLM_COPYRIGHT = Copyright (c) 2000-2004 The Apache Software Foundation. All rights reserved.
 endif
 
 #
@@ -97,11 +97,13 @@ VERSION_STR	= 1.0.0
 endif
 
 
-$(OBJDIR)/%.o: %.c $(OBJDIR)\cc.opt
-	@echo Compiling $<
-	$(CC) $< -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+ifeq "$(words $(strip $(TARGET_lib)))" "1"
 
-$(OBJDIR)\cc.opt: $(CCOPT_DEPENDS)
+$(OBJDIR)/%.o: %.c $(OBJDIR)\$(NLM_NAME)_cc.opt
+	@echo Compiling $<
+	$(CC) $< -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
+
+$(OBJDIR)\$(NLM_NAME)_cc.opt: $(CCOPT_DEPENDS)
 	@echo CCOPT_DEPENDS=$(CCOPT_DEPENDS)
 	$(CHK) $@ $(DEL) $@
 	@echo Generating $@
@@ -149,6 +151,8 @@ endif
 ifneq "$(strip $(XDEFINES))" ""
 	@echo $(XDEFINES) >> $@
 endif
+
+endif # one target nlm
 
 #
 # Rules to build libraries

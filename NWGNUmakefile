@@ -344,89 +344,89 @@ endif
 # Any specialized rules here
 #
 
-$(OBJDIR)/%.o: strings/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: strings/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) strings\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) strings\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: tables/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: tables/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) tables\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) tables\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: passwd/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: passwd/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) passwd\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) passwd\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: lib/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: lib/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) lib\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) lib\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: time/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: time/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) time\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) time\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: file_io/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) file_io\netware\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) file_io\netware\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: file_io/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: file_io/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) file_io\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) file_io\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: locks/netware/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: locks/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) locks\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) locks\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: misc/netware/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: misc/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) misc\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) misc\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: misc/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: misc/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) misc\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) misc\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: threadproc/netware/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: threadproc/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) threadproc\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) threadproc\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: dso/netware/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: dso/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) dso\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) dso\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: memory/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: memory/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) memory\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) memory\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: mmap/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: mmap/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) mmap\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) mmap\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: user/netware/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: user/netware/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) user\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) user\netware\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: network_io/win32/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: network_io/win32/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) network_io\win32\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) network_io\win32\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: network_io/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: network_io/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) network_io\unix\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) network_io\unix\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 	
-$(OBJDIR)/%.o: poll/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: poll/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) poll\unix\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) poll\unix\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: file_io/os2/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: file_io/os2/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) file_io\os2\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) file_io\os2\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: shmem/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: shmem/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) shmem\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) shmem\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
-$(OBJDIR)/%.o: support/unix/%.c $(OBJDIR)\cc.opt
+$(OBJDIR)/%.o: support/unix/%.c $(OBJDIR)\$(NLM_NAME)_cc.opt
 	@echo Compiling $<
-	$(CC) support\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+	$(CC) support\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\$(NLM_NAME)_cc.opt
 
 #
 # Include the 'tail' makefile that has targets that depend on variables defined
