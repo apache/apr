@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Removed apr/i18n to apr-util/xlate for inclusion of apr-iconv
+     as required by missing libiconv.  [William Rowe]
+
+  *) Removed apr/md5 and apr/uuid into apr-util/crypto.  [William Rowe]
+
   *) Add APR_BUFFERED support to apr_os_file_put().  [Justin Erenkrantz]
 
   *) Fix misinterpretation of timeout for select() on Win32/Netware.
