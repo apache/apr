@@ -165,7 +165,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_ENOPOOL      APR was not provided a pool with which to allocate memory
  * APR_EBADDATE     APR was given an invalid date 
  * APR_EINVALSOCK   APR was given an invalid socket
- * APR_ENOFILE      APR was not given a file structure
  * APR_ENOPROC      APR was not given a process structure
  * APR_ENOTIME      APR was not given a time structure
  * APR_ENODIR       APR was not given a directory structure
@@ -218,15 +217,15 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * @param statcode The apr status code to test.
  * @deffunc int APR_STATUS_IS_status(apr_status_t statcode)
  * @tip Warning: macro implementations; the statcode argument may be
- *      evaluated multiple times.  To test for APR_ENOFILE, always test
- *      APR_STATUS_IS_ENOFILE(statcode) because platform-specific codes are
+ *      evaluated multiple times.  To test for APR_EOF, always test
+ *      APR_STATUS_IS_EOF(statcode) because platform-specific codes are
  *      not necessarily translated into the corresponding APR_Estatus code.
  */
 
 /* APR ERROR VALUES */
 #define APR_ENOSTAT        (APR_OS_START_ERROR + 1)
 #define APR_ENOPOOL        (APR_OS_START_ERROR + 2)
-#define APR_ENOFILE        (APR_OS_START_ERROR + 3)
+/* empty slot: +3 */
 #define APR_EBADDATE       (APR_OS_START_ERROR + 4)
 #define APR_EINVALSOCK     (APR_OS_START_ERROR + 5)
 #define APR_ENOPROC        (APR_OS_START_ERROR + 6)
@@ -252,7 +251,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /* APR ERROR VALUE TESTS */
 #define APR_STATUS_IS_ENOSTAT(s)        ((s) == APR_ENOSTAT)
 #define APR_STATUS_IS_ENOPOOL(s)        ((s) == APR_ENOPOOL)
-#define APR_STATUS_IS_ENOFILE(s)        ((s) == APR_ENOFILE)
 #define APR_STATUS_IS_EBADDATE(s)       ((s) == APR_EBADDATE)
 #define APR_STATUS_IS_EINVALSOCK(s)     ((s) == APR_EINVALSOCK)
 #define APR_STATUS_IS_ENOPROC(s)        ((s) == APR_ENOPROC)
