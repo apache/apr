@@ -55,6 +55,7 @@
 #ifndef APR_NETWORK_IO_H
 #define APR_NETWORK_IO_H
 
+#include "apr_private.h"
 #include "apr_general.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
