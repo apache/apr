@@ -1,4 +1,5 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation or its licensors, as
+ * applicable.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -516,6 +517,13 @@ int parse_long_opt(char *arg, command_t *cmd_data)
         printf("Sorry.  No help available.\n");
     } else if (strcmp(var, "config") == 0) {
         print_config();
+    } else if (strcmp(var, "tag") == 0) {
+        if (strcmp(value, "CC") == 0) {
+            /* Do nothing. */
+        }
+        if (strcmp(value, "CXX") == 0) {
+            /* Do nothing. */
+        }
     } else {
         return 0;
     }
