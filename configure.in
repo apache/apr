@@ -1114,7 +1114,7 @@ AC_SUBST(EXEEXT)
 AC_SUBST(LIBTOOL_LIBS)
 
 echo "${nl}Construct Makefiles and header files."
-MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile"
+MAKEFILE1="Makefile lib/Makefile strings/Makefile passwd/Makefile tables/Makefile build/Makefile"
 SUBDIRS="lib strings passwd tables "
 for dir in $apr_modules
 do
