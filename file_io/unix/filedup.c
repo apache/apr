@@ -104,7 +104,8 @@ ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
     (*new_file)->atime = old_file->atime;    
     (*new_file)->mtime = old_file->mtime;
     (*new_file)->ctime = old_file->ctime;
-    ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup, NULL);
+    ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
+                        ap_null_cleanup);
     return APR_SUCCESS;
 }
 
