@@ -149,7 +149,7 @@ static apr_status_t do_mcast(int type, apr_socket_t *sock,
         fill_mip_v4(&mip4, mcast, iface);
 
         if (setsockopt(sock->socketdes, IPPROTO_IP, type,
-                       &mip4, sizeof(mip4)) == -1) {
+                       (const void *)&mip4, sizeof(mip4)) == -1) {
             rv = errno;
         }
     }
@@ -192,7 +192,7 @@ static apr_status_t do_mcast_opt(int type, apr_socket_t *sock,
 
     if (sock_is_ipv4(sock)) {
         if (setsockopt(sock->socketdes, IPPROTO_IP, type,
-                      &value, sizeof(value)) == -1) {
+                      (const void *)&value, sizeof(value)) == -1) {
             rv = errno;
         }
     }
@@ -278,7 +278,7 @@ APR_DECLARE(apr_status_t) apr_mcast_interface(apr_socket_t *sock,
 
     if (sock_is_ipv4(sock)) {
         if (setsockopt(sock->socketdes, IPPROTO_IP, IP_MULTICAST_IF,
-                      &iface->sa.sin.sin_addr,
+                      (const void *)&iface->sa.sin.sin_addr,
                       sizeof(iface->sa.sin.sin_addr)) == -1) {
             rv = errno;
         }
