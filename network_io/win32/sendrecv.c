@@ -409,7 +409,7 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
          * Note: The application must have stored the socket prior to making
          * the call to apr_sendfile in order to either reuse it or close it.
          */
-        if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
+        if (disconnected) {
             sock->disconnected = 1;
             sock->socketdes = INVALID_SOCKET;
         }
