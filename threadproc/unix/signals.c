@@ -268,6 +268,41 @@ const char *apr_signal_get_description(int signum)
 #endif /* SYS_SIGLIST_DECLARED */
 
 #if APR_HAS_THREADS && (HAVE_SIGSUSPEND || APR_HAVE_SIGWAIT) && !defined(OS2)
+
+static void remove_sync_sigs(sigset_t *sig_mask)
+{
+#ifdef SIGABRT
+    sigdelset(sig_mask, SIGABRT);
+#endif
+#ifdef SIGBUS
+    sigdelset(sig_mask, SIGBUS);
+#endif
+#ifdef SIGEMT
+    sigdelset(sig_mask, SIGEMT);
+#endif
+#ifdef SIGFPE
+    sigdelset(sig_mask, SIGFPE);
+#endif
+#ifdef SIGILL
+    sigdelset(sig_mask, SIGILL);
+#endif
+#ifdef SIGIOT
+    sigdelset(sig_mask, SIGIOT);
+#endif
+#ifdef SIGPIPE
+    sigdelset(sig_mask, SIGPIPE);
+#endif
+#ifdef SIGSEGV
+    sigdelset(sig_mask, SIGSEGV);
+#endif
+#ifdef SIGSYS
+    sigdelset(sig_mask, SIGSYS);
+#endif
+#ifdef SIGTRAP
+    sigdelset(sig_mask, SIGTRAP);
+#endif
+}
+
 APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
 {
     sigset_t sig_mask;
@@ -329,8 +364,20 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     sigset_t sig_mask;
     int rv;
 
-    /* All threads should mask signals out, according to sigwait(2) man page */
+    /* All threads should mask out signals to be handled by
+     * the thread doing sigwait().
+     *
+     * No thread should ever block synchronous signals.
+     * See the Solaris man page for pthread_sigmask() for
+     * some information.  Solaris chooses to knock out such
+     * processes when a blocked synchronous signal is 
+     * delivered, skipping any registered signal handler.
+     * AIX doesn't call a signal handler either.  At least
+     * one level of linux+glibc does call the handler even
+     * when the synchronous signal is blocked.
+     */
     sigfillset(&sig_mask);
+    remove_sync_sigs(&sig_mask);
 
 #if defined(SIGPROCMASK_SETS_THREAD_MASK)
     rv = sigprocmask(SIG_SETMASK, &sig_mask, NULL);
