@@ -69,6 +69,12 @@ extern "C" {
  * @package APR user id services
  */
 
+/**
+ * Structure for determining file owner.
+ * @defvar apr_uid_t
+ */
+typedef uid_t                     apr_uid_t;
+
 /***
  * Get the user name for a specified userid
  * @param dirname Pointer to new string containing user name (on output)
@@ -77,7 +83,7 @@ extern "C" {
  * @deffunc apr_status_t apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p)
  * @tip This function is available only if APR_HAS_USER is defined.
  */
-APR_DECLARE(apr_status_t) apr_get_userid(char **username, apr_uid_t userid, apr_pool_t *p);
+APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, apr_pool_t *p);
 
 /***
  * Get the home directory for the named user

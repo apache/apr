@@ -56,6 +56,7 @@
 #define APR_FILE_INFO_H
 
 #include "apr.h"
+#include "apr_user.h"
 #include "apr_pools.h"
 #include "apr_time.h"
 #include "apr_errno.h"
@@ -108,11 +109,6 @@ typedef struct apr_dir_t          apr_dir_t;
  * @defvar apr_fileperms_t
  */
 typedef apr_int32_t               apr_fileperms_t;
-/**
- * Structure for determining file owner.
- * @defvar apr_uid_t
- */
-typedef uid_t                     apr_uid_t;
 /**
  * Structure for determining the group that owns the file.
  * @defvar apr_gid_t
