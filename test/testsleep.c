@@ -86,7 +86,7 @@ static void do_sleep(int howlong)
 }
 
 #if APR_HAS_THREADS
-void * APR_THREAD_FUNC time_a_thread(apr_thread_t *thd, void *data)
+static void * APR_THREAD_FUNC time_a_thread(apr_thread_t *thd, void *data)
 {
     do_sleep(15);
 
