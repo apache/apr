@@ -10,6 +10,8 @@
 #undef HAVE_CODESET
 #undef HAVE_PTHREAD_PROCESS_SHARED
 #undef DEV_RANDOM
+#undef HAVE_EGD
+#undef EGD_DEFAULT_SOCKET
 #undef HAVE_TRUERAND
 #undef HAVE_POLLIN
 #undef HAVE_isascii
