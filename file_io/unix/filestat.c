@@ -208,16 +208,3 @@ apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname,
     return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, cont);
 }
 
-/* XXX: This is wrong for case-insensitive, case-preserving mount points.
- * Unfortuantely, I don't have a clue about tweaking this code for unix,
- * other than the basic stratagy of stat, then walk dirread for dev/inode.
- */
-APR_DECLARE(apr_status_t) apr_get_filename_case(const char **fname,
-                                                const char *fspec,
-                                                apr_pool_t *cont)
-{
-    *fname = strrchr(fspec, '/');
-    if (!*fname)
-        *fname = fspec;
-    return APR_SUCCESS;
-}
