@@ -58,6 +58,9 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 
+// for apr_poll.c;
+#define socketdes sock
+
 struct apr_socket_t {
     apr_pool_t *cntxt;
     SOCKET sock;
@@ -70,16 +73,6 @@ struct apr_socket_t {
     int local_interface_unknown;
     apr_int32_t netmask;
     apr_int32_t inherit;
-};
-
-struct apr_pollfd_t {
-    apr_pool_t *cntxt;
-    fd_set *read;
-    int numread;
-    fd_set *write;
-    int numwrite;
-    fd_set *exception;
-    int numexcept;    
 };
 
 #ifdef _WIN32_WCE

@@ -63,7 +63,7 @@
 #include <sys/poll.h>
 #endif
 
-apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
     (*new) = (apr_pollfd_t *)apr_pcalloc(cont, sizeof(apr_pollfd_t) * (num + 1));
     if ((*new) == NULL) {
@@ -74,7 +74,7 @@ apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *con
     return APR_SUCCESS;
 }
 
-apr_pollfd_t *find_poll_sock(apr_pollfd_t *aprset, apr_socket_t *sock)
+APR_DECLARE(apr_pollfd_t*) find_poll_sock(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
     apr_pollfd_t *curr = aprset;
     
@@ -88,7 +88,7 @@ apr_pollfd_t *find_poll_sock(apr_pollfd_t *aprset, apr_socket_t *sock)
     return curr;
 }
 
-apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset, 
+APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
 			       apr_socket_t *sock, apr_int16_t event)
 {
     apr_pollfd_t *curr = aprset;
@@ -106,7 +106,7 @@ apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
+APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
 {
     apr_pollfd_t *curr = find_poll_sock(aprset, sock);
     if (curr == NULL) {
@@ -117,7 +117,7 @@ apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_po
     return APR_SUCCESS;
 }
 
-apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset, 
+APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset, 
                                   apr_socket_t *sock, apr_int16_t events)
 {
     apr_pollfd_t *curr = find_poll_sock(aprset, sock);
@@ -132,7 +132,7 @@ apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
+APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
     apr_pollfd_t *curr = find_poll_sock(aprset, sock);
     if (curr == NULL) {
@@ -144,7 +144,7 @@ apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
+APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
 {
     apr_pollfd_t *curr = aprset;
 
@@ -198,7 +198,7 @@ static apr_int16_t get_revent(apr_int16_t event)
     return rv;
 }        
 
-apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
+APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
                       apr_int32_t *nsds, apr_interval_time_t timeout)
 {
     /* obvious optimization, it would be better if this could be allocated
@@ -242,7 +242,7 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
 
 #else    /* Use select to mimic poll */
 
-apr_status_t apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *nsds, 
+APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *nsds, 
 		    apr_interval_time_t timeout)
 {
     fd_set readset, writeset, exceptset;
@@ -328,7 +328,7 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *nsds,
  * for right now, we'll leave it this way, and change it later if
  * necessary.
  */
-apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file)
+APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file)
 {
     (*newsock) = apr_pcalloc(file->pool, sizeof(**newsock));
     (*newsock)->socketdes = file->filedes;

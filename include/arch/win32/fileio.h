@@ -185,6 +185,9 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile,
  *           correctly when writing to a file with this flag set TRUE.
  */
 
+// for apr_poll.c;
+#define filedes filehand
+
 struct apr_file_t {
     apr_pool_t *pool;
     HANDLE filehand;
