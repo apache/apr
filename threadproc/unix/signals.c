@@ -275,6 +275,33 @@ static void *signal_thread_func(void *signal_handler)
 
     /* This thread will be the one responsible for handling signals */
     sigfillset(&sig_mask);
+
+    /* On certain platforms, sigwait() returns EINVAL if any of various
+     * unblockable signals are included in the mask.  This was first 
+     * observed on AIX and Tru64.
+     */
+#ifdef SIGKILL
+    sigdelset(&sig_mask, SIGKILL);
+#endif
+#ifdef SIGSTOP
+    sigdelset(&sig_mask, SIGSTOP);
+#endif
+#ifdef SIGCONT
+    sigdelset(&sig_mask, SIGCONT);
+#endif
+#ifdef SIGWAITING
+    sigdelset(&sig_mask, SIGWAITING);
+#endif
+
+    /* On AIX (4.3.3, at least), sigwait() won't wake up if the high-
+     * order bit of the second word of flags is turned on.  sigdelset()
+     * returns an error when trying to turn this off, so we'll turn it
+     * off manually.
+     */
+#ifdef _AIX
+    sig_mask.hisigs &= 0x7FFFFFFF;
+#endif
+
     while (1) {
         int signal_received;
 
