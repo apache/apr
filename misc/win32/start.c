@@ -69,7 +69,7 @@ ap_status_t clean_cont(void *data)
 }
     
 
-ap_status_t ap_create_context(ap_context_t *cont, void *data, ap_context_t **newcont)
+ap_status_t ap_create_context(ap_context_t *cont, ap_context_t **newcont)
 {
     int iVersionRequested;
     WSADATA wsaData;
