@@ -953,18 +953,18 @@ APR_FLAG_HEADERS(
 # IRIX 6.5 has a problem in <netinet/tcp.h> which prevents it from
 # being included by itself.  Check for <netinet/tcp.h> manually,
 # including another header file first.
-AC_MSG_CHECKING(for netinet/tcp.h)
-AC_TRY_CPP([
-#ifdef HAVE_NETINET_IN_H
+AC_CACHE_CHECK([for netinet/tcp.h], [apr_cv_hdr_netinet_tcp_h],
+[AC_TRY_CPP(
+[#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 #include <netinet/tcp.h>
-], netinet_tcph="1", netinet_tcph="0")
-if test $netinet_tcph = 1; then
-  AC_MSG_RESULT(yes)
-  echo "#define HAVE_NETINET_TCP_H 1" >> confdefs.h
+], [apr_cv_hdr_netinet_tcp_h=yes], [apr_cv_hdr_netinet_tcp_h=no])])
+if test "$apr_cv_hdr_netinet_tcp_h" = "yes"; then
+   netinet_tcph=1
+   AC_DEFINE([HAVE_NETINET_TCP_H], 1, [Defined if netinet/tcp.h is present])
 else
-  AC_MSG_RESULT(no)
+   netinet_tcph=0
 fi
 
 AC_SUBST(arpa_ineth)
