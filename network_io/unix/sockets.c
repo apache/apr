@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "apr_portable.h"
 #include "apr_lib.h"
+#include "apr_macro.h"
 #include <errno.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -65,6 +66,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+ap_lock_t *lock_network = NULL;
+ap_lock_t *lock_inet = NULL;
+#endif
 
 static ap_status_t socket_cleanup(void *sock)
 {
@@ -204,8 +210,9 @@ ap_status_t ap_setipaddr(struct socket_t *sock, const char *addr)
 ap_status_t ap_getipaddr(char *addr, ap_ssize_t len,
 			 const struct socket_t *sock)
 {
-    char *temp = inet_ntoa(sock->addr->sin_addr);
-    ap_cpystrn(addr,temp,len-1);
+    SAFETY_LOCK(inet, "inetfile");
+    INET_NTOA(sock->addr->sin_addr, addr, len - 1);
+    SAFETY_UNLOCK(inet);
     return APR_SUCCESS;
 }
 
@@ -286,21 +293,24 @@ ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock)
 ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 {
     struct hostent *hp;
+    struct hostent *hp_safe;
 
     if (hostname != NULL) {
-        hp = gethostbyname(hostname);
+        SAFETY_LOCK(network, "net_file");
+        GETHOSTBYNAME(hostname, hp, hp_safe);
+        SAFETY_UNLOCK(network);
 
         if ((sock->socketdes < 0) || (!sock->addr)) {
             return APR_ENOTSOCK;
         }
-        if (!hp)  {
+        if (!hp_safe)  {
             if (h_errno == TRY_AGAIN) {
                 return EAGAIN;
             }
             return h_errno;
         }
     
-        memcpy((char *)&sock->addr->sin_addr, hp->h_addr_list[0], hp->h_length);
+        memcpy((char *)&sock->addr->sin_addr, hp_safe->h_addr_list[0], hp_safe->h_length);
 
         sock->addr_len = sizeof(*sock->addr);
     }

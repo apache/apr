@@ -58,6 +58,7 @@
 
 #include "apr_network_io.h"
 #include "apr_general.h"
+#include "apr_lock.h"
 #ifdef HAVE_POLL_H
 #include <poll.h>
 #endif

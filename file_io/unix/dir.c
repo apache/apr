@@ -58,10 +58,14 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include "apr_macro.h"
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
+#include "apr_lock.h"
 #include "apr_portable.h"
+
+static ap_lock_t *lock_readdir = NULL;
 
 static ap_status_t dir_cleanup(void *thedir)
 {
@@ -88,7 +92,7 @@ ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *co
     (*new)->cntxt = cont;
     (*new)->dirname = strdup(dirname);
     (*new)->dirstruct = opendir(dirname);
-    (*new)->entry = NULL;
+    (*new)->entry = ap_pcalloc(cont, sizeof(struct dirent));
 
     if ((*new)->dirstruct == NULL) {
         return errno;
@@ -124,11 +128,11 @@ ap_status_t ap_closedir(struct dir_t *thedir)
  */                        
 ap_status_t ap_readdir(struct dir_t *thedir)
 {
-    thedir->entry = readdir(thedir->dirstruct);
-    if (thedir->entry == NULL) {
-        return errno;
-    }    
-    return APR_SUCCESS;
+    ap_status_t status;
+    SAFETY_LOCK(readdir, "readdir_file");
+    READDIR(thedir->dirstruct, thedir->entry, status);
+    SAFETY_UNLOCK(readdir);
+    return status;
 }
 
 /* ***APRDOC********************************************************
