@@ -55,6 +55,8 @@
 #include "apr.h"
 #include "fileio.h"
 #include "apr_strings.h"
+#include <string.h>
+#include <ctype.h>
 
 #ifdef NETWARE
 #include <unistd.h>
@@ -331,8 +333,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                                              apr_pool_t *p)
 {
     char path[APR_PATH_MAX]; /* isn't null term */
-    char *baseroot = NULL;
-    char *addroot;
+    const char *baseroot = NULL;
+    const char *addroot;
     apr_size_t rootlen; /* the length of the root portion of path, d:/ is 3 */
     apr_size_t baselen; /* the length of basepath (excluding baseroot) */
     apr_size_t keptlen; /* the length of the retained basepath (incl root) */
@@ -716,8 +718,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         {
 #ifndef NETWARE
             if (fixunc) {
-                char *testpath = path;
-                char *testroot;
+                const char *testpath = path;
+                const char *testroot;
                 apr_status_t testtype;
                 apr_size_t i = (addpath[segend] != '\0');
                 
