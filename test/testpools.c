@@ -65,7 +65,7 @@
 #endif
 #include "test_apr.h"
 
-void alloc_bytes(apr_pool_t *p, int bytes)
+static void alloc_bytes(apr_pool_t *p, int bytes)
 {
     int i;
     char *alloc;
@@ -87,7 +87,7 @@ void alloc_bytes(apr_pool_t *p, int bytes)
     printf("OK\n");
 }
 
-void calloc_bytes(apr_pool_t *p, int bytes)
+static void calloc_bytes(apr_pool_t *p, int bytes)
 {
     int i;
     char *alloc;
@@ -116,9 +116,6 @@ void calloc_bytes(apr_pool_t *p, int bytes)
 int main (int argc, char ** argv)
 {
     apr_pool_t *pmain, *pchild;
-    char buff[50];
-    char *bytes, *zbytes;
-    int i;
     
     apr_initialize();
     atexit(apr_terminate);
