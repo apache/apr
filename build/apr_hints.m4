@@ -57,9 +57,9 @@ if test "x$apr_preload_done" != "xyes" ; then
                 APR_ADDTO(CPPFLAGS, [-D_USE_IRS])
                 ;;
         esac
-        dnl Must do a check for gcc or egcs here, to get the right options  
-        dnl to the compiler.
-        if test "$GCC" != "yes"; then
+        dnl If using xlc, remember it, and give it the right options.
+        if $CC 2>&1 | grep 'xlc' > /dev/null; then
+          APR_SETIFNULL(AIX_XLC, [yes])
           APR_ADDTO(CFLAGS, [-qHALT=E])
         fi
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
