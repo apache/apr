@@ -538,6 +538,8 @@ APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
  * a standard unix fork.
  * @param proc The resulting process handle. 
  * @param cont The pool to use. 
+ * @remark returns APR_INCHILD for the child, and APR_INPARENT for the parent
+ * or an error.
  */
 APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont);
 #endif
