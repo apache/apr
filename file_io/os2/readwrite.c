@@ -77,7 +77,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         ULONG blocksize;
         ULONG size = *nbytes;
 
-        apr_lock_acquire(thefile->mutex);
+        apr_thread_mutex_lock(thefile->mutex);
 
         if (thefile->direction == 1) {
             apr_file_flush(thefile);
@@ -111,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         }
 
         *nbytes = rc == 0 ? pos - (char *)buf : 0;
-        apr_lock_release(thefile->mutex);
+        apr_thread_mutex_unlock(thefile->mutex);
 
         if (*nbytes == 0 && rc == 0) {
             return APR_EOF;
@@ -164,7 +164,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         int blocksize;
         int size = *nbytes;
 
-        apr_lock_acquire(thefile->mutex);
+        apr_thread_mutex_lock(thefile->mutex);
 
         if ( thefile->direction == 0 ) {
             // Position file pointer for writing at the offset we are logically reading from
@@ -186,7 +186,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             size -= blocksize;
         }
 
-        apr_lock_release(thefile->mutex);
+        apr_thread_mutex_unlock(thefile->mutex);
         return APR_OS2_STATUS(rc);
     } else {
         if (thefile->flags & APR_APPEND) {
