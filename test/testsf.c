@@ -129,7 +129,6 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     apr_status_t rv;
     char buf[120];
     int i;
-    apr_ssize_t nbytes;
     apr_finfo_t finfo;
 
     printf("Creating a test file...\n");
@@ -143,13 +142,24 @@ static void create_testfile(apr_pool_t *p, const char *fname)
     }
     
     buf[0] = FILE_DATA_CHAR;
+    buf[1] = '\0';
     for (i = 0; i < FILE_LENGTH; i++) {
-        nbytes = 1;
-        rv = apr_write(f, buf, &nbytes);
-        if (rv) {
-            fprintf(stderr, "apr_write()->%d/%s\n",
-                    rv, apr_strerror(rv, buf, sizeof buf));
-            exit(1);
+        /* exercise apr_putc() and apr_puts() on buffered files */
+        if ((i % 2) == 0) {
+            rv = apr_putc(buf[0], f);
+            if (rv) {
+                fprintf(stderr, "apr_putc()->%d/%s\n",
+                        rv, apr_strerror(rv, buf, sizeof buf));
+                exit(1);
+            }
+        }
+        else {
+            rv = apr_puts(buf, f);
+            if (rv) {
+                fprintf(stderr, "apr_puts()->%d/%s\n",
+                        rv, apr_strerror(rv, buf, sizeof buf));
+                exit(1);
+            }
         }
     }
 

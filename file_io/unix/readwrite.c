@@ -298,10 +298,9 @@ apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec,
 
 apr_status_t apr_putc(char ch, apr_file_t *thefile)
 {
-    if (write(thefile->filedes, &ch, 1) != 1) {
-        return errno;
-    }
-    return APR_SUCCESS; 
+    apr_ssize_t nbytes = 1;
+
+    return apr_write(thefile, &ch, &nbytes);
 }
 
 apr_status_t apr_ungetc(char ch, apr_file_t *thefile)
@@ -319,32 +318,26 @@ apr_status_t apr_getc(char *ch, apr_file_t *thefile)
 
 apr_status_t apr_puts(const char *str, apr_file_t *thefile)
 {
-    ssize_t rv;
-    int len;
+    apr_ssize_t nbytes = strlen(str);
 
-    len = strlen(str);
-    rv = write(thefile->filedes, str, len); 
-    if (rv != len) {
-        return errno;
-    }
-    return APR_SUCCESS; 
+    return apr_write(thefile, str, &nbytes);
 }
 
 apr_status_t apr_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
         apr_int64_t written = 0;
-        int rc = 0;
 
         if (thefile->direction == 1 && thefile->bufpos) {
-            written= write(thefile->filedes, thefile->buffer, thefile->bufpos);
+            do {
+                written = write(thefile->filedes, thefile->buffer, thefile->bufpos);
+            } while (written == (apr_int64_t)-1 && errno == EINTR);
+            if (written == (apr_int64_t)-1) {
+                return errno;
+            }
             thefile->filePtr += written;
-
-            if (rc == 0)
-                thefile->bufpos = 0;
+            thefile->bufpos = 0;
         }
-
-        return rc;
     }
     /* There isn't anything to do if we aren't buffering the output
      * so just return success.
@@ -385,7 +378,7 @@ apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
 
 APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
 {
-    int cc;
+    apr_status_t cc;
     va_list ap;
     char *buf;
     int len;
