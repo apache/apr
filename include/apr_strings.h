@@ -181,10 +181,13 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
         __attribute__((format(printf,2,3)));
 
 /**
- * copy n characters from src to des>
+ * copy n characters from src to dst
  * @param dst The destination string
  * @param src The source string
- * @param dst_size The number of characters to copy
+ * @param dst_size The space available in dst; dst always receives
+ *                 null-termination, so if src is longer than
+ *                 dst_size, the actual number of characters copied is
+ *                 dst_size - 1.
  * @tip  
  * <PRE>
  * We re-implement this function to implement these specific changes:
