@@ -214,7 +214,6 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys);
 /**
  * Perform thread-safe locking required whilst this memory system is modified
  * @param mem_sys The memory system to be locked for thread-safety
- * @deffunc void apr_sms_lock(apr_sms_t *mem_sys)
  */
 APR_DECLARE(apr_status_t) apr_sms_lock(apr_sms_t *mem_sys);
 
@@ -222,7 +221,6 @@ APR_DECLARE(apr_status_t) apr_sms_lock(apr_sms_t *mem_sys);
  * Release thread-safe locking required whilst this memory system was
  * being modified
  * @param mem_sys The memory system to be released from thread-safety
- * @deffunc void apr_sms_unlock(apr_sms_t *mem_sys)
  */
 APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *mem_sys);
 
