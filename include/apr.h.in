@@ -96,6 +96,7 @@
 #define APR_HAS_OTHER_CHILD       @oc@
 #define APR_HAS_DSO               @aprdso@
 #define APR_HAS_UNICODE_FS        0
+#define APR_HAS_USER              1
 
 /* This macro tells APR that it is safe to make a file masquerade as a 
  * socket.  This is necessary, because some platforms support poll'ing
