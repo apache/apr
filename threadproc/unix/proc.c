@@ -380,23 +380,24 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *
 } 
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, 
+                                        apr_wait_t *exitcode,
                                         apr_wait_how_e waithow)
 {
-    pid_t status;
+    pid_t pstatus;
 
     if (waithow == APR_WAIT) {
-        if ((status = waitpid(proc->pid, NULL, WUNTRACED)) > 0) {
+        if ((pstatus = waitpid(proc->pid, exitcode, WUNTRACED)) > 0) {
             return APR_CHILD_DONE;
         }
-        else if (status == 0) {
+        else if (pstatus == 0) {
             return APR_CHILD_NOTDONE;
         }
         return errno;
     }
-    if ((status = waitpid(proc->pid, NULL, WUNTRACED | WNOHANG)) > 0) {
+    if ((pstatus = waitpid(proc->pid, exitcode, WUNTRACED | WNOHANG)) > 0) {
         return APR_CHILD_DONE;
     }
-    else if (status == 0) {
+    else if (pstatus == 0) {
         return APR_CHILD_NOTDONE;
     }
     return errno;

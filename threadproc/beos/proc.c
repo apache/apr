@@ -299,16 +299,17 @@ APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *
 } 
 
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, 
+                                        apr_wait_t *exitcode,
                                         apr_wait_how_e wait)
 {
-    status_t exitval, rv;
+    status_t rv;
 
     if (!proc)
         return APR_ENOPROC;
     /* when we run processes we are actually running threads, so here
        we'll wait on the thread dying... */
     if (wait == APR_WAIT) {
-        if ((rv = wait_for_thread(proc->pid, &exitval)) == B_OK) {
+        if ((rv = wait_for_thread(proc->pid, exitcode)) == B_OK) {
             return APR_CHILD_DONE;
         }
         return rv;
