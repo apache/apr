@@ -12,7 +12,6 @@
 /* Preprocess all of the standard APR headers. */
 #include "apr_allocator.h"
 #include "apr_atomic.h"
-#include "apr_compat.h"
 #include "apr_dso.h"
 #include "apr_env.h"
 #include "apr_errno.h"
@@ -77,5 +76,4 @@
 #include "apr_uuid.h"
 #include "apr_xlate.h"
 #include "apr_xml.h"
-#include "apu_compat.h"
 #include "apu_want.h"
