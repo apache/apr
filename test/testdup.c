@@ -95,6 +95,7 @@ int main (int argc, char ** argv)
 
     STD_TEST_NEQ("    Write to dup'd file (#3)", apr_file_write(file3, TEST, &txtlen))
 
+    fpos = 0;
     STD_TEST_NEQ("    Rewind file #1 to start", apr_file_seek(file1, APR_SET, &fpos))
 
     txtlen = 50;
