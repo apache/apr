@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/04/09 01:36:32 $]
+Last modified at [$Date: 2004/05/24 08:44:37 $]
 
 Release:
 
@@ -67,10 +67,6 @@ CURRENT test/testall -v EXCEPTIONS:
     Please add any platform anomilies to the following exception list.
 
     * various tests fail on Unix in VPATH builds.
-
-    * 'testsockets' will fail on some systems such as Linux where IPv6
-      can be "supported" but not "enabled", and socket(PF_INET6, ...)
-      can fail.
 
     * 'testipsub' will tickle an Solaris 8 getaddrinfo() IPv6 bug,
       causing the test to hang.  Configure with --disable-ipv6 if
