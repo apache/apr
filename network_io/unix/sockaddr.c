@@ -581,12 +581,11 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
 #if APR_HAVE_IPV6
     if (sockaddr->family == AF_INET6 &&
         IN6_IS_ADDR_V4MAPPED(&sockaddr->sa.sin6.sin6_addr)) {
-        struct apr_sockaddr_t tmpsa;
-        tmpsa.sa.sin.sin_family = AF_INET;
-        tmpsa.sa.sin.sin_addr.s_addr = ((uint32_t *)sockaddr->ipaddr_ptr)[3];
+        struct sockaddr_in tmpsa;
+        tmpsa.sin_family = AF_INET;
+        tmpsa.sin_addr.s_addr = ((apr_uint32_t *)sockaddr->ipaddr_ptr)[3];
 
-        rc = getnameinfo((const struct sockaddr *)&tmpsa.sa,
-                         sizeof(struct sockaddr_in),
+        rc = getnameinfo((const struct sockaddr *)&tmpsa, sizeof(tmpsa),
                          tmphostname, sizeof(tmphostname), NULL, 0,
                          flags != 0 ? flags : NI_NAMEREQD);
     }
