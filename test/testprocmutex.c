@@ -72,7 +72,7 @@
 static apr_proc_mutex_t *proc_lock;
 static volatile int *x;
 
-/* a slower more racy may to implement (*x)++ */
+/* a slower more racy way to implement (*x)++ */
 static int increment(int n)
 {
     apr_sleep(1);
