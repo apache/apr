@@ -243,6 +243,10 @@ SOURCE=.\misc\win32\start.c
 
 SOURCE=.\misc\unix\uuid.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\misc\unix\version.c
+# End Source File
 # End Group
 # Begin Group "mmap"
 
