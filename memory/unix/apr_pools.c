@@ -1382,13 +1382,44 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
                                        const char *file_line)
 {
+#if APR_HAS_THREADS
+    apr_thread_mutex_t *mutex = NULL;
+#endif
+    
     apr_pool_check_integrity(pool);
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
     apr_pool_log_event(pool, "CLEAR", file_line, 1);
 #endif /* (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE) */
 
+#if APR_HAS_THREADS
+    if (pool->parent != NULL)
+	mutex = pool->parent->mutex;
+    
+    /* Lock the parent mutex before clearing so that if we have our
+     * own mutex it won't be accessed by apr_pool_walk_tree after
+     * it has been destroyed.
+     */
+    if (mutex != NULL && mutex != pool->mutex) {
+	apr_thread_mutex_lock(mutex);
+    }
+#endif
+    
     pool_clear_debug(pool, file_line);
+
+#if APR_HAS_THREADS
+    /* If we had our own mutex, it will have been destroyed by
+     * the registered cleanups.  Recreate the mutex.  Unlock
+     * the mutex we obtained above.
+     */
+    if (mutex != pool->mutex) {
+        (void)apr_thread_mutex_create(&pool->mutex,
+                                      APR_THREAD_MUTEX_NESTED, pool);
+
+	if (mutex != NULL)
+	    (void)apr_thread_mutex_unlock(mutex);
+    }
+#endif /* APR_HAS_THREADS */
 }
 
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool,
