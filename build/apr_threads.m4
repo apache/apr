@@ -208,16 +208,18 @@ AC_DEFUN(APR_CHECK_SIGWAIT_ONE_ARG,[
 dnl Check for recursive mutex support (per SUSv3).
 AC_DEFUN([APR_CHECK_PTHREAD_RECURSIVE_MUTEX], [
   AC_CACHE_CHECK([for recursive mutex support], [apr_cv_mutex_recursive],
-[AC_TRY_COMPILE([#include <sys/types.h>
+[AC_TRY_RUN([#include <sys/types.h>
 #include <pthread.h>
-#include <stdlib.h>], [
+#include <stdlib.h>
+
+int main() {
     pthread_mutexattr_t attr;
     pthread_mutex_t m;
 
     exit (pthread_mutexattr_init(&attr) 
           || pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE)
-          || pthread_mutex_init(&m, &attr));], 
-[apr_cv_mutex_recursive=yes], [apr_cv_mutex_recursive=no], 
+          || pthread_mutex_init(&m, &attr));
+}], [apr_cv_mutex_recursive=yes], [apr_cv_mutex_recursive=no], 
 [apr_cv_mutex_recursive=no])])
 
 if test "$apr_cv_mutex_recursive" = "yes"; then
