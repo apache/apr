@@ -67,16 +67,16 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#ifdef APR_HAVE_STDIO_H
+#if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef APR_HAVE_SIGNAL_H
+#if APR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
-#ifdef APR_HAVE_PTHREAD_H
+#if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
 #ifdef BEOS

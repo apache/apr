@@ -54,7 +54,7 @@
 
 #include "apr_private.h"
 #include "apr_lib.h"
-#ifdef APR_HAVE_SIGNAL_H
+#if APR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 
