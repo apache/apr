@@ -89,8 +89,6 @@
 #define HAVE_LIMITS_H 1
 #define HAVE_SIGNAL_H 1
 
-typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
-
 #define SIGHUP     1
 /* 2 is used for SIGINT on windows */
 #define SIGQUIT    3
