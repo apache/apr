@@ -123,6 +123,8 @@ else
     LA_FILE="$thisdir/libapr.la"
 fi
 
+flags=""
+
 while test $# -gt 0; do
     # Normalize the prefix.
     case "$1" in
@@ -137,52 +139,54 @@ while test $# -gt 0; do
     ;;
     --prefix)
     echo $prefix
+    exit 0
     ;;
     --cflags)
-    echo $CFLAGS
+    flags="$flags $CFLAGS"
     ;;
     --cppflags)
-    echo $CPPFLAGS
+    flags="$flags $CPPFLAGS"
     ;;
     --libs)
-    echo $LIBS
+    flags="$flags $LIBS"
     ;;
     --ldflags)
-    echo $LDFLAGS
+    flags="$flags $LDFLAGS"
     ;;
     --includes)
     if test "$location" = "installed"; then
-        echo "-I$includedir $EXTRA_INCLUDES"
+        flags="$flags -I$includedir $EXTRA_INCLUDES"
     elif test "$location" = "source"; then
-        echo "-I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
+        flags="$flags -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
     else
-        echo "-I$thisdir/include -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
+        flags="$flags -I$thisdir/include -I$APR_SOURCE_DIR/include $EXTRA_INCLUDES"
     fi
     ;;
     --srcdir)
     echo $APR_SOURCE_DIR
+    exit 0
     ;;
     --link-ld)
     if test "$location" = "installed"; then
         ### avoid using -L if libdir is a "standard" location like /usr/lib
-        echo "-L$libdir -lapr"
+        flags="$flags -L$libdir -lapr"
     else
-        echo "-L$thisdir -lapr"
+        flags="$flags -L$thisdir -lapr"
     fi
     ;;
     --link-libtool)
     if test -f "$LA_FILE"; then
-        echo $LA_FILE
+        flags="$flags $LA_FILE"
     elif test "$location" = "installed"; then
         ### avoid using -L if libdir is a "standard" location like /usr/lib
-        echo "-L$libdir -lapr"
+        flags="$flags -L$libdir -lapr"
     else
-        echo "-L$thisdir -lapr"
+        flags="$flags-L$thisdir -lapr"
     fi
     ;;
     --apr-la-file)
     if test -f "$LA_FILE"; then
-        echo $LA_FILE
+        flags="$flags $LA_FILE"
     fi
     ;;
     --help)
@@ -198,5 +202,9 @@ while test $# -gt 0; do
     # Next please.
     shift
 done
+
+if test -n "$flags"; then
+  echo "$flags"
+fi
 
 exit 0
