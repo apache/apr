@@ -56,10 +56,6 @@
 /* Make sure we have ssize_t defined to be somethine */
 #undef ssize_t
 
-#if !defined(HAVE_PTHREAD_SIGMASK) && defined(_AIX)
-#define pthread_sigmask sigprocmask
-#endif
-
 #if !defined(HAVE_STRCASECMP) && defined(HAVE_STRICMP)
 #define strcasecmp(s1,s2) stricmp(s1,s2)
 #endif
