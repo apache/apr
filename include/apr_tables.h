@@ -120,6 +120,11 @@ APR_EXPORT(ap_array_header_t *) ap_make_array(struct ap_pool_t *p, int nelts,
 APR_EXPORT(void *) ap_push_array(ap_array_header_t *arr);
 APR_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
 			       const ap_array_header_t *src);
+
+/* copy_array copies the *entire* array.  copy_array_hdr just copies
+ * the header, and arranges for the elements to be copied if (and only
+ * if) the code subsequently does a push or arraycat.
+ */
 APR_EXPORT(ap_array_header_t *) ap_copy_array(struct ap_pool_t *p,
 						const ap_array_header_t *arr);
 APR_EXPORT(ap_array_header_t *)
@@ -129,6 +134,13 @@ APR_EXPORT(ap_array_header_t *)
 	ap_append_arrays(struct ap_pool_t *p,
 			  const ap_array_header_t *first,
 			  const ap_array_header_t *second);
+
+/* ap_array_pstrcat generates a new string from the ap_pool_t containing
+ * the concatenated sequence of substrings referenced as elements within
+ * the array.  The string will be empty if all substrings are empty or null,
+ * or if there are no elements in the array.
+ * If sep is non-NUL, it will be inserted between elements as a separator.
+ */
 APR_EXPORT(char *) ap_array_pstrcat(struct ap_pool_t *p,
 				     const ap_array_header_t *arr,
 				     const char sep);
@@ -158,6 +170,29 @@ APR_EXPORT(void)
 APR_EXPORT(void)
         ap_table_vdo(int (*comp) (void *, const char *, const char *),
                      void *rec, const ap_table_t *t, va_list);                  
+
+/* Conceptually, ap_overlap_tables does this:
+
+    ap_array_header_t *barr = ap_table_elts(b);
+    ap_table_entry_t *belt = (ap_table_entry_t *)barr->elts;
+    int i;
+
+    for (i = 0; i < barr->nelts; ++i) {
+        if (flags & ap_OVERLAP_TABLES_MERGE) {
+            ap_table_mergen(a, belt[i].key, belt[i].val);
+        }
+        else {
+            ap_table_setn(a, belt[i].key, belt[i].val);
+        }
+    }
+
+    Except that it is more efficient (less space and cpu-time) especially
+    when b has many elements.
+
+    Notice the assumptions on the keys and values in b -- they must be
+    in an ancestor of a's pool.  In practice b and a are usually from
+    the same pool.
+*/
 #define AP_OVERLAP_TABLES_SET   (0)
 #define AP_OVERLAP_TABLES_MERGE (1)
 APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
