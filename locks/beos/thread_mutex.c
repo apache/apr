@@ -118,8 +118,9 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create_np(apr_thread_mutex_t **mutex,
 APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     int32 stat;
+    thread_id me = find_thread(NULL);
     
-    if (mutex->nested && mutex->owner == find_thread(NULL)) {
+    if (mutex->nested && mutex->owner == me) {
         mutex->owner_ref++;
         return APR_SUCCESS;
     }
@@ -132,10 +133,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 		}
 	}
 
-    if (mutex->nested) {
-        mutex->owner = find_thread(NULL);
-        mutex->owner_ref = 1;
-    }
+    mutex->owner = me;
+    mutex->owner_ref = 1;
     
     return APR_SUCCESS;
 }
@@ -148,7 +147,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
     int32 stat;
-    
+        
     if (mutex->nested && mutex->owner == find_thread(NULL)) {
         mutex->owner_ref--;
         if (mutex->owner_ref > 0)
@@ -162,10 +161,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
         }
     }
 
-    if (mutex->nested) {
-        mutex->owner = -1;
-        mutex->owner_ref = 0;
-    }
+    mutex->owner = -1;
+    mutex->owner_ref = 0;
 
     return APR_SUCCESS;
 }
