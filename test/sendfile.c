@@ -357,7 +357,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
             printf("Headers (%d):\n", hdtr.numheaders);
             for (i = 0; i < hdtr.numheaders; i++) {
                 printf("\t%d bytes (%c)\n",
-                       hdtr.headers[i].iov_len, hdtr.headers[i].iov_base[0]);
+                       hdtr.headers[i].iov_len, *(char *)hdtr.headers[i].iov_base);
             }
             printf("File: %ld bytes from offset %ld\n",
                    (long)tmplen, (long)current_file_offset);
