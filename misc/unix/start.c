@@ -112,9 +112,3 @@ APR_DECLARE(void) apr_terminate(void)
     }
     apr_pool_alloc_term(global_apr_pool);
 }
-
-APR_DECLARE(apr_status_t) apr_set_abort(int (*apr_abort)(int retcode), apr_pool_t *cont)
-{
-    cont->apr_abort = apr_abort;
-    return APR_SUCCESS;
-}
