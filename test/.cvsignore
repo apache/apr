@@ -23,11 +23,13 @@ testfile
 occhild
 sendfile
 testuuid
-testsuite
-testsuite.opt
-testsuite.ncb
+aprtest
+aprtest.ncb
+aprtest.opt
+aprtest.plg
 testfile.tmp
 testflock
 testsockopt
 testipsub
-
+*.ilk
+*.pdb
