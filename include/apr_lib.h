@@ -382,13 +382,6 @@ API_EXPORT(int)
 			void *data, enum kill_conditions kill_how,
 			FILE **pipe_in, FILE **pipe_out,
 			FILE **pipe_err);
-#if 0
-API_EXPORT(int)
-	ap_bspawn_child(ap_context_t *p,
-			 int (*func) (void *v, ap_child_info_t *c),
-			 void *data, enum kill_conditions kill_how,
-			 BUFF **pipe_in, BUFF **pipe_out, BUFF **pipe_err);
-#endif /* 0 */
 
 API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
 
