@@ -88,6 +88,11 @@ ap_int32_t ap_mmap_inode_compare(const void *m1, const void *m2)
     const ap_mmap_t *b = *(ap_mmap_t **)m2;
     ap_int32_t c;
 
+    if (a->statted == 0 || b->statted == 0) {
+        /* we can't do this as we have no stat info... */
+        /* what do we return??? */
+        return (-1);
+    }
     c = a->sinfo.st_ino - b->sinfo.st_ino;
     if (c == 0) {
 	    return a->sinfo.st_dev - b->sinfo.st_dev;
@@ -111,7 +116,6 @@ ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_size_t offset)
         return APR_EINVAL;
     
     (*addr) = mmap->mm + offset;
-    fprintf(stderr,"ap_mmap_offset (%p, %d) ==> %p\n",mmap->mm, offset, (*addr));
     return APR_SUCCESS;
 }
 

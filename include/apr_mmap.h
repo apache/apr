@@ -73,6 +73,8 @@ typedef struct mmap_t            ap_mmap_t;
 /* creation */
 ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, const char *fname, ap_context_t *cntxt);
 ap_status_t ap_mmap_open_create(ap_mmap_t **newmmap, ap_file_t *file, ap_context_t *cntxt);
+ap_status_t ap_mmap_size_create(ap_mmap_t **newmmap, ap_file_t *file, ap_size_t size,
+                                ap_context_t *cntxt);
 
 /* destruction */
 ap_status_t ap_mmap_delete(ap_mmap_t *mmap);
