@@ -141,10 +141,10 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
         apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->cntxt);
 
     if (child_in != NULL)
-        apr_file_dup(&attr->child_in, child_in, attr->cntxt);
+        apr_file_dup2(attr->child_in, child_in, attr->cntxt);
 
     if (parent_in != NULL)
-        apr_file_dup(&attr->parent_in, parent_in, attr->cntxt);
+        apr_file_dup2(attr->parent_in, parent_in, attr->cntxt);
 
     return APR_SUCCESS;
 }
@@ -157,10 +157,10 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
         apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->cntxt);
 
     if (child_out != NULL)
-        apr_file_dup(&attr->child_out, child_out, attr->cntxt);
+        apr_file_dup2(attr->child_out, child_out, attr->cntxt);
 
     if (parent_out != NULL)
-        apr_file_dup(&attr->parent_out, parent_out, attr->cntxt);
+        apr_file_dup2(attr->parent_out, parent_out, attr->cntxt);
 
     return APR_SUCCESS;
 }
@@ -173,10 +173,10 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
         apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->cntxt);
 
     if (child_err != NULL)
-        apr_file_dup(&attr->child_err, child_err, attr->cntxt);
+        apr_file_dup2(attr->child_err, child_err, attr->cntxt);
 
     if (parent_err != NULL)
-        apr_file_dup(&attr->parent_err, parent_err, attr->cntxt);
+        apr_file_dup2(attr->parent_err, parent_err, attr->cntxt);
 
     return APR_SUCCESS;
 }
