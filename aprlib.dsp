@@ -162,6 +162,10 @@ SOURCE=.\locks\win32\locks.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\misc\win32\misc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\misc\win32\names.c
 # End Source File
 # Begin Source File

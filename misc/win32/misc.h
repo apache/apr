@@ -94,23 +94,23 @@ typedef enum {
     DLL_defined = 4        // must define as last idx_ + 1
 } ap_dlltoken_e;
 
-FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char *fnName, int ordinal);
+FARPROC ap_load_dll_func(ap_dlltoken_e fnLib, char *fnName, int ordinal);
 
-/* The LateFunctionName call WILL fault if the function cannot be loaded */
+/* The ap_load_dll_func call WILL fault if the function cannot be loaded */
 
-#define DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
-    typedef rettype (calltype *fpt##fn) args; \
-    static fpt##fn pfn##fn = NULL; \
-    __inline rettype Late##fn args \
-    {   if (!pfn##fn) \
-            pfn##fn = (fpt##fn) LoadLateDllFunc(lib, #fn, ord); \
-        return (*(pfn##fn)) names; }; \
+#define AP_DECLARE_LATE_DLL_FUNC(lib, rettype, calltype, fn, ord, args, names) \
+    typedef rettype (calltype *ap_winapi_fpt_##fn) args; \
+    static ap_winapi_fpt_##fn ap_winapi_pfn_##fn = NULL; \
+    __inline rettype ap_winapi_##fn args \
+    {   if (!ap_winapi_pfn_##fn) \
+            ap_winapi_pfn_##fn = (ap_winapi_fpt_##fn) ap_load_dll_func(lib, #fn, ord); \
+        return (*(ap_winapi_pfn_##fn)) names; }; \
 
 /* Provide late bound declarations of every API function missing from 
  * one or more supported releases of the Win32 API
  * 
  * lib is the enumerated token from ap_dlltoken_e, and must correspond 
- * to the string table entry in start.c used by the LoadLateDllFunc().
+ * to the string table entry in start.c used by the ap_load_dll_func().
  * Token names (attempt to) follow Windows.h declarations prefixed by DLL_
  * in order to facilitate comparison.  Use the exact declaration syntax
  * and names from Windows.h to prevent ambigutity and bugs.
@@ -125,18 +125,18 @@ FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char *fnName, int ordinal);
  * In the case of non-text functions, simply #define the original name
  */
 
-DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
+AP_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 0, (
     IN LPCSTR lpFileName,
     IN GET_FILEEX_INFO_LEVELS fInfoLevelId,
     OUT LPVOID lpFileInformation),
     (lpFileName, fInfoLevelId, lpFileInformation));
 #undef GetFileAttributesEx
-#define GetFileAttributesEx LateGetFileAttributesExA
+#define GetFileAttributesEx ap_winapi_GetFileAttributesExA
 
-DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
+AP_DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, CancelIo, 0, (
     IN HANDLE hFile),
     (hFile));
-#define CancelIo LateCancelIo
+#define CancelIo ap_winapi_CancelIo
 
 ap_status_t ap_get_oslevel(struct ap_pool_t *, ap_oslevel_e *);
 
