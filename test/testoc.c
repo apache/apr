@@ -137,7 +137,7 @@ static void test_child_kill(CuTest *tc)
     /* allow time for things to settle... */
     apr_sleep(apr_time_from_sec(3));
     
-    apr_proc_other_child_check();
+    apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING);
     CuAssertStrEquals(tc, "APR_OC_REASON_DEATH", reasonstr);
 }    
 #else
