@@ -172,6 +172,7 @@ typedef  int         gid_t;
 /* Definitions that APR programs need to work properly. */
 #define APR_SSIZE_T_FMT          "d"
 #define APR_THREAD_FUNC          __stdcall
+#define APR_OFF_T_FMT            "ld"
 
 #if !defined(WIN32) || defined(APR_STATIC)
 /* Default Non-WIN32 behavior removes all MSVCisms */
