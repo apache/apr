@@ -190,7 +190,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         tfb.Head = ap_palloc(sock->cntxt, tfb.HeadLength); /* Should this be a malloc? */
 
         for (i = 0; i < hdtr->numheaders; i++) {
-            memcpy(&tfb.Head + ptr, hdtr->headers[i].iov_base,
+            memcpy((char*)tfb.Head + ptr, hdtr->headers[i].iov_base,
                    hdtr->headers[i].iov_len);
             ptr += hdtr->headers[i].iov_len;
         }
@@ -204,7 +204,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
         tfb.Tail = ap_palloc(sock->cntxt, tfb.TailLength); /* Should this be a malloc? */
 
         for (i = 0; i < hdtr->numtrailers; i++) {
-            memcpy(&tfb.Tail + ptr, hdtr->trailers[i].iov_base,
+            memcpy((char*)tfb.Tail + ptr, hdtr->trailers[i].iov_base,
                    hdtr->trailers[i].iov_len);
             ptr += hdtr->trailers[i].iov_len;
         }
