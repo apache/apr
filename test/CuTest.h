@@ -128,6 +128,7 @@ typedef struct
 CuSuiteList* CuSuiteListNew(char* name);
 void CuSuiteListAdd(CuSuiteList* testSuite, CuSuite *testCase);
 void CuSuiteListRun(CuSuiteList* testSuite);
+void CuSuiteListRunWithSummary(CuSuiteList* testSuite);
 void CuSuiteListSummary(CuSuiteList* testSuite, CuString* summary);
 void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details);
 #endif /* CU_TEST_H */

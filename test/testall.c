@@ -93,8 +93,7 @@ int main(int argc, char *argv[])
         CuSuiteListAdd(alltests, tests[i]());
     }
 
-    CuSuiteListRun(alltests);
-    CuSuiteListSummary(alltests, output);
+    CuSuiteListRunWithSummary(alltests);
     CuSuiteListDetails(alltests, output);
     printf("%s\n", output->buffer);
     return 0;
