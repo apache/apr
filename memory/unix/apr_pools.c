@@ -566,9 +566,141 @@ static void dump_stats(void)
 }
 #endif
 
+/*****************************************************************
+ *
+ * Managing generic cleanups.  
+ */
+
+struct cleanup {
+    void *data;
+    ap_status_t (*plain_cleanup) (void *);
+    ap_status_t (*child_cleanup) (void *);
+    struct cleanup *next;
+};
+
+static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int retcode));
+
+static void ap_register_pool_cleanup(struct ap_pool_t *p, void *data,
+				      ap_status_t (*plain_cleanup) (void *),
+				      ap_status_t (*child_cleanup) (void *))
+{
+    struct cleanup *c;
+
+    if (p != NULL) {
+        c = (struct cleanup *) ap_pool_palloc(p, sizeof(struct cleanup), NULL);
+        c->data = data;
+        c->plain_cleanup = plain_cleanup;
+        c->child_cleanup = child_cleanup;
+        c->next = p->cleanups;
+        p->cleanups = c;
+    }
+}
+
+API_EXPORT(void) ap_register_cleanup(struct context_t *p, void *data,
+				      ap_status_t (*plain_cleanup) (void *),
+				      ap_status_t (*child_cleanup) (void *))
+{
+    struct cleanup *c;
+
+    if (p != NULL) {
+        c = (struct cleanup *) ap_palloc(p, sizeof(struct cleanup));
+        c->data = data;
+        c->plain_cleanup = plain_cleanup;
+        c->child_cleanup = child_cleanup;
+        c->next = p->pool->cleanups;
+        p->pool->cleanups = c;
+    }
+}
+
+API_EXPORT(void) ap_kill_cleanup(struct context_t *p, void *data,
+				  ap_status_t (*cleanup) (void *))
+{
+    struct cleanup *c;
+    struct cleanup **lastp;
+
+    if (p == NULL)
+        return;
+    c = p->pool->cleanups;
+    lastp = &p->pool->cleanups;
+    while (c) {
+        if (c->data == data && c->plain_cleanup == cleanup) {
+            *lastp = c->next;
+            break;
+        }
+
+        lastp = &c->next;
+        c = c->next;
+    }
+}
+
+API_EXPORT(void) ap_run_cleanup(struct context_t *p, void *data,
+				 ap_status_t (*cleanup) (void *))
+{
+    ap_block_alarms();		/* Run cleanup only once! */
+    (*cleanup) (data);
+    ap_kill_cleanup(p, data, cleanup);
+    ap_unblock_alarms();
+}
+
+static void run_cleanups(struct cleanup *c)
+{
+    while (c) {
+	(*c->plain_cleanup) (c->data);
+	c = c->next;
+    }
+}
+
+static void run_child_cleanups(struct cleanup *c)
+{
+    while (c) {
+	(*c->child_cleanup) (c->data);
+	c = c->next;
+    }
+}
+
+static void cleanup_pool_for_exec(ap_pool_t *p)
+{
+    run_child_cleanups(p->cleanups);
+    p->cleanups = NULL;
+
+    for (p = p->sub_pools; p; p = p->sub_next) {
+	cleanup_pool_for_exec(p);
+    }
+}
+
+API_EXPORT(void) ap_cleanup_for_exec(void)
+{
+#if !defined(WIN32) && !defined(OS2)
+    /*
+     * Don't need to do anything on NT or OS/2, because I
+     * am actually going to spawn the new process - not
+     * exec it. All handles that are not inheritable, will
+     * be automajically closed. The only problem is with
+     * file handles that are open, but there isn't much
+     * I can do about that (except if the child decides
+     * to go out and close them
+     */
+    ap_block_alarms();
+    cleanup_pool_for_exec(permanent_pool);
+    ap_unblock_alarms();
+#endif /* ndef WIN32 */
+}
+
+API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
+{
+    /* do nothing cleanup routine */
+    return APR_SUCCESS;
+}
+
+static ap_status_t cleanup_locks(void *data)
+{
+    ap_lock_t *thelock = (ap_lock_t *)data;
+    return ap_destroy_lock(thelock);
+}
+
 ap_pool_t *ap_init_alloc(void)
 {
-    ap_status_t status1, status2;
+    ap_status_t status;
 #ifdef POOL_DEBUG
     char s;
 
@@ -576,16 +708,31 @@ ap_pool_t *ap_init_alloc(void)
     stack_var_init(&s);
 #endif
 #if APR_HAS_THREADS
-    status1 = ap_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    status = ap_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
-    status2 = ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    if (status != APR_SUCCESS) {
+        ap_destroy_lock(alloc_mutex); 
+        return NULL;
+    }
+    status = ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
-    if (status1 != APR_SUCCESS || status2 != APR_SUCCESS) {
+    if (status != APR_SUCCESS) {
+        ap_destroy_lock(spawn_mutex); 
         return NULL;
     }
 #endif
 
     permanent_pool = ap_make_sub_pool(NULL, NULL);
+
+#if APR_HAS_THREADS
+    ap_register_pool_cleanup(permanent_pool, (void *)alloc_mutex, 
+                             cleanup_locks, 
+                             ap_null_cleanup);
+    ap_register_pool_cleanup(permanent_pool, spawn_mutex, 
+                             cleanup_locks, 
+                             ap_null_cleanup);
+#endif
+
 #ifdef ALLOC_STATS
     atexit(dump_stats);
 #endif
@@ -797,11 +944,9 @@ API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub,
  * Allocating stuff...
  */
 
-
-API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
+static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int retcode))
 {
 #ifdef ALLOC_USE_MALLOC
-    ap_pool_t *a;
     int size = reqsize + CLICK_SZ;
     void *ptr;
 
@@ -809,7 +954,6 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
     if (c == NULL) {
         return malloc(reqsize);
     }
-    a = c->pool;
     ptr = malloc(size);
     if (ptr == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
@@ -826,7 +970,6 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
      * Round up requested size to an even number of alignment units
      * (core clicks)
      */
-    ap_pool_t *a;
     int nclicks;
     int size;
 
@@ -838,10 +981,6 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
     char *first_avail;
     char *new_first_avail;
 
-    if (c == NULL) {
-        return malloc(reqsize);
-    }
-    a = c->pool;
     nclicks = 1 + ((reqsize - 1) / CLICK_SZ);
     size = nclicks * CLICK_SZ;
 
@@ -874,7 +1013,7 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
     ap_lock(alloc_mutex);
 #endif
 
-    blok = new_block(size, c->apr_abort);
+    blok = new_block(size, apr_abort);
     a->last->h.next = blok;
     a->last = blok;
 #ifdef POOL_DEBUG
@@ -892,6 +1031,14 @@ API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
 
     return (void *) first_avail;
 #endif
+}
+
+API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize)
+{
+    if (c == NULL) {
+        return malloc(reqsize);
+    }
+    return ap_pool_palloc(c->pool, reqsize, c->apr_abort);
 }
 
 API_EXPORT(void *) ap_pcalloc(struct context_t *a, int size)
@@ -1129,113 +1276,6 @@ API_EXPORT_NONSTD(char *) ap_psprintf(struct context_t *p, const char *fmt, ...)
     return res;
 }
 
-/*****************************************************************
- *
- * Managing generic cleanups.  
- */
-
-struct cleanup {
-    void *data;
-    ap_status_t (*plain_cleanup) (void *);
-    ap_status_t (*child_cleanup) (void *);
-    struct cleanup *next;
-};
-
-API_EXPORT(void) ap_register_cleanup(struct context_t *p, void *data,
-				      ap_status_t (*plain_cleanup) (void *),
-				      ap_status_t (*child_cleanup) (void *))
-{
-    struct cleanup *c;
-
-    if (p != NULL) {
-        c = (struct cleanup *) ap_palloc(p, sizeof(struct cleanup));
-        c->data = data;
-        c->plain_cleanup = plain_cleanup;
-        c->child_cleanup = child_cleanup;
-        c->next = p->pool->cleanups;
-        p->pool->cleanups = c;
-    }
-}
-
-API_EXPORT(void) ap_kill_cleanup(struct context_t *p, void *data,
-				  ap_status_t (*cleanup) (void *))
-{
-    struct cleanup *c;
-    struct cleanup **lastp;
-
-    if (p == NULL)
-        return;
-    c = p->pool->cleanups;
-    lastp = &p->pool->cleanups;
-    while (c) {
-        if (c->data == data && c->plain_cleanup == cleanup) {
-            *lastp = c->next;
-            break;
-        }
-
-        lastp = &c->next;
-        c = c->next;
-    }
-}
-
-API_EXPORT(void) ap_run_cleanup(struct context_t *p, void *data,
-				 ap_status_t (*cleanup) (void *))
-{
-    ap_block_alarms();		/* Run cleanup only once! */
-    (*cleanup) (data);
-    ap_kill_cleanup(p, data, cleanup);
-    ap_unblock_alarms();
-}
-
-static void run_cleanups(struct cleanup *c)
-{
-    while (c) {
-	(*c->plain_cleanup) (c->data);
-	c = c->next;
-    }
-}
-
-static void run_child_cleanups(struct cleanup *c)
-{
-    while (c) {
-	(*c->child_cleanup) (c->data);
-	c = c->next;
-    }
-}
-
-static void cleanup_pool_for_exec(ap_pool_t *p)
-{
-    run_child_cleanups(p->cleanups);
-    p->cleanups = NULL;
-
-    for (p = p->sub_pools; p; p = p->sub_next) {
-	cleanup_pool_for_exec(p);
-    }
-}
-
-API_EXPORT(void) ap_cleanup_for_exec(void)
-{
-#if !defined(WIN32) && !defined(OS2)
-    /*
-     * Don't need to do anything on NT or OS/2, because I
-     * am actually going to spawn the new process - not
-     * exec it. All handles that are not inheritable, will
-     * be automajically closed. The only problem is with
-     * file handles that are open, but there isn't much
-     * I can do about that (except if the child decides
-     * to go out and close them
-     */
-    ap_block_alarms();
-    cleanup_pool_for_exec(permanent_pool);
-    ap_unblock_alarms();
-#endif /* ndef WIN32 */
-}
-
-API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
-{
-    /* do nothing cleanup routine */
-    return APR_SUCCESS;
-}
 
 /*****************************************************************
  *
