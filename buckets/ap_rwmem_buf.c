@@ -63,31 +63,44 @@
 #define DEFAULT_RWBUF_SIZE (4096)
 #endif
 
-APR_EXPORT(ap_bucket_rwmem *) ap_rwmem_create(void)
+static const char * rwmem_get_str(ap_bucket *e)
 {
-    ap_bucket_rwmem *newbuf;
-    newbuf = malloc(sizeof(*newbuf));
-    newbuf->alloc_addr = calloc(DEFAULT_RWBUF_SIZE, 1);
-    newbuf->alloc_len  = DEFAULT_RWBUF_SIZE;
-    newbuf->start      = newbuf->alloc_addr;
-    newbuf->end        = newbuf->alloc_addr;
-    return newbuf;
+    ap_bucket_rwmem *b = (ap_bucket_rwmem *)e->data;
+    return b->start;
 }
 
-APR_EXPORT(void) ap_rwmem_destroy(void *e)
+static int rwmem_get_len(ap_bucket *e)
+{
+    ap_bucket_rwmem *b = (ap_bucket_rwmem *)e->data;
+    return (char *)b->end - (char *)b->start;
+}
+
+static void rwmem_destroy(void *e)
 {
     ap_bucket_rwmem *d = (ap_bucket_rwmem *)e;
     free(d->alloc_addr);
 }
 
-APR_EXPORT(char *) ap_rwmem_get_char_str(ap_bucket_rwmem *b)
+APR_EXPORT(ap_bucket *) ap_rwmem_create(void)
 {
-    return b->start;
-}
+    ap_bucket *newbuf;
+    ap_bucket_rwmem *b;
 
-APR_EXPORT(int) ap_rwmem_get_len(ap_bucket_rwmem *b)
-{
-    return (char *)b->end - (char *)b->start;
+    newbuf = malloc(sizeof(*newbuf));
+    b = malloc(sizeof(*b));
+    
+    b->alloc_addr = calloc(DEFAULT_RWBUF_SIZE, 1);
+    b->alloc_len  = DEFAULT_RWBUF_SIZE;
+    b->start      = b->alloc_addr;
+    b->end        = b->alloc_addr;
+
+    newbuf->color      = AP_BUCKET_rwmem;
+    newbuf->getstr     = rwmem_get_str;
+    newbuf->getlen     = rwmem_get_len;
+    newbuf->free       = rwmem_destroy;
+    newbuf->data       = b;
+
+    return newbuf;
 }
 
 /*

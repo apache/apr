@@ -62,7 +62,7 @@
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>	/* for struct iovec */
 #endif
-#ifdef APR_HAVE_STDARG_H
+#ifdef HAVE_STDARG_H
 #include <stdarg.h>
 #endif
 
@@ -81,9 +81,11 @@ typedef enum {
 
 typedef struct ap_bucket ap_bucket;
 struct ap_bucket {
-    ap_bucket_color_e color;            /* what type of bucket is it */
-    void (*free)(void *e);              /* can be NULL */
-    void *data;				/* for use by free() */
+    ap_bucket_color_e color;              /* what type of bucket is it */
+    void (*free)(void *e);                /* can be NULL */
+    void *data;				  /* for use by free() */
+    const char *(*getstr)(ap_bucket *e);  /* Get the string */
+    int (*getlen)(ap_bucket *e);          /* Get the length of the string */
 };
 
 typedef struct ap_bucket_list ap_bucket_list;
@@ -183,16 +185,7 @@ struct ap_bucket_rwmem {
 };
 
 /* Create a read/write memory bucket */
-APR_EXPORT(ap_bucket_rwmem *) ap_rwmem_create(void);
-
-/* destroy a read/write memory bucket */
-APR_EXPORT(void) ap_rwmem_destroy(void *e);
-
-/* Convert a rwmem bucket into a char * */
-APR_EXPORT(char *) ap_rwmem_get_char_str(ap_bucket_rwmem *b);
-
-/* get the length of the data in the rwmem bucket */
-APR_EXPORT(int) ap_rwmem_get_len(ap_bucket_rwmem *b);
+APR_EXPORT(ap_bucket *) ap_rwmem_create(void);
 
 APR_EXPORT(int) ap_rwmem_write(ap_bucket_rwmem *b, const void *buf,
                                ap_size_t nbyte, ap_ssize_t *bytes_written);
@@ -207,13 +200,7 @@ struct ap_bucket_mmap {
 };
 
 /* Create a mmap memory bucket */
-APR_EXPORT(ap_bucket_mmap *) ap_mmap_bucket_create(void);
-
-/* Convert a mmap bucket into a char * */
-APR_EXPORT(char *) ap_mmap_get_char_str(ap_bucket_mmap *b);
-
-/* get the length of the data in the mmap bucket */
-APR_EXPORT(int) ap_mmap_get_len(ap_bucket_mmap *b);
+APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void);
 
 APR_EXPORT(void) ap_mmap_bucket_insert(ap_bucket_mmap *b, ap_mmap_t *mm);
 
@@ -228,21 +215,17 @@ struct ap_bucket_rmem {
 };
 
 /* Create a read only memory bucket */
-APR_EXPORT(ap_bucket_rmem *) ap_rmem_create(void);
-
-/* destroy a read only memory bucket */
-APR_EXPORT(void) ap_rmem_destroy(void *e);
-
-/* Convert a read only bucket into a char * */
-APR_EXPORT(const char *) ap_rmem_get_char_str(ap_bucket_rmem *b);
-
-/* get the length of the data in the rmem bucket */
-APR_EXPORT(int) ap_rmem_get_len(ap_bucket_rmem *b);
+APR_EXPORT(ap_bucket *) ap_rmem_create(void);
 
 APR_EXPORT(int) ap_rmem_write(ap_bucket_rmem *b, const void *buf,
                                ap_size_t nbyte, ap_ssize_t *bytes_written);
 
 APR_EXPORT(int) ap_rmem_vputstrs(ap_bucket_rmem *b, va_list va);
+
+/*   ******  RMEM Functions  *****  */
+
+/* Create an End of Stream bucket */
+APR_EXPORT(ap_bucket *) ap_eos_create(void);
 
 #endif
 
