@@ -1,4 +1,8 @@
 Changes with APR a8
+  *) Change the name of the sa_len field in apr_sockaddr_t to salen.
+     Some platforms have a macro named sa_len.
+     [Tony Finch]
+
   *) apr_set_port(), apr_get_port(), apr_set_ipaddr(), and apr_get_ipaddr()
      now take apr_sockaddr_t as a parameter instead of apr_socket_t +
      apr_interface_e.  This will allow the same routines to be used with

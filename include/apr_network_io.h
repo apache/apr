@@ -170,7 +170,7 @@ typedef struct apr_sockaddr_t {
         struct sockaddr_in6 sin6;  /* IPv6 sockaddr structure */
 #endif
     } sa;
-    apr_socklen_t sa_len;          /* How big is the sockaddr we're using? */
+    apr_socklen_t salen;          /* How big is the sockaddr we're using? */
     int ipaddr_len;                /* How big is the ip address structure
                                     * we're using? 
                                     */
