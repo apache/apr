@@ -55,6 +55,9 @@
 
 #undef HAVE_MM_SHMT_MMFILE
 
+/* BeOS specific flag */
+#undef HAVE_BONE_VERSION
+
 @BOTTOM@
 
 /* Make sure we have ssize_t defined to be something */
