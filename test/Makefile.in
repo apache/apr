@@ -22,7 +22,8 @@ TARGETS= testfile@EXEEXT@ \
 	testcontext@EXEEXT@ \
 	ab@EXEEXT@ \
 	htdigest@EXEEXT@ \
-	testmmap@EXEEXT@
+	testmmap@EXEEXT@ \
+	testshmem@EXEEXT@
 
 OBJS= testfile.o \
 	testproc.o \
@@ -71,6 +72,9 @@ testtime@EXEEXT@: testtime.o
 
 testmmap@EXEEXT@: testmmap.o
 	$(CC) $(CFLAGS) testmmap.o -o testmmap@EXEEXT@ $(LDFLAGS)
+
+testshmem@EXEEXT@: testshmem.o
+	$(CC) $(CFLAGS) testshmem.o -o testshmem@EXEEXT@ $(LDFLAGS)
 
 clean:
 	$(RM) -f *.o *.a *.so $(TARGETS)

@@ -52,106 +52,90 @@
  * project, please see <http://www.apache.org/>.
  *
  */
+#include "apr_shmem.h"
+#include "apr_lock.h"
+#include "apr_errno.h"
+#include "apr_general.h"
+#include "apr_lib.h"
+#include "errno.h"
+#include <stdio.h>
+#ifdef BEOS
+#include <unistd.h>
+#endif
 
-struct shmem_t {
-    MM *mm;
-    ap_context_t *cntxt;
+typedef struct mbox {
+    char msg[1024]; 
+    int msgavail; 
+} mbox;
+ap_context_t *context;
+mbox *boxes;
+
+void msgwait(int boxnum)
+{
+    volatile int test = 0;
+    while (test == 0) {
+        test = boxes[boxnum].msgavail;
+    }    
+    fprintf(stdout, "\nreceived a message in box %d, message was: %s\n", 
+            boxnum, boxes[boxnum].msg); 
 }
 
-ap_status_t ap_shm_create(struct shmem_t **new, ap_context_t *cont, ap_size_t size, const char *file)
+void msgput(int boxnum, char *msg)
 {
-    MM *mm = mm_create(size, file);
+    fprintf(stdout, "Sending message to box %d\n", boxnum);
+    ap_cpystrn(boxes[boxnum].msg, msg, strlen(msg));
+    boxes[boxnum].msgavail = 1;
+}
 
-    if (mm == NULL) {
-        return APR_ENOMEM;
+int main()
+{
+    ap_status_t s4;
+    ap_shmem_t *shm;
+    pid_t pid;
+    ap_status_t s1;
+    int size;
+
+    ap_initialize();
+
+    fprintf(stdout, "Initializing the context......."); 
+    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+        fprintf(stderr, "could not initialize\n");
+        exit(-1);
     }
-    (*new) = (struct shmem_t *)mm_malloc(mm, sizeof(struct shmem_t));
-    if ((*new) == NULL)
-        return APR_ENOMEM;
+    fprintf(stdout, "OK\n");
+
+    fprintf(stdout, "Creating shared memory block......."); 
+    if (ap_shm_init(&shm, 1048576, NULL) != APR_SUCCESS) { 
+        fprintf(stderr, "Error allocating shared memory block\n");
+        exit(-1);
     }
-    (*new)->mm = mm;
-    (*new)->cntxt = cont;
-    return APR_SUCCESS;
-}
+    fprintf(stdout, "OK\n");
 
-ap_status_t ap_shm_destroy(struct shmem_t *shared)
-{
-    mm_destroy(shared->mm);
-    shared->mm = NULL;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_shm_malloc(void **entity, struct shmem_t *shared, ap_size_t size)
-{
-    entity = mm_malloc(shared->mm, size);
-    if (entity == NULL) {
-        return APR_ENOMEM;
+    fprintf(stdout, "Allocating shared memory......."); 
+    size = sizeof(mbox) * 2;
+    boxes = ap_shm_calloc(shm, size);
+    if (boxes == NULL) { 
+        fprintf(stderr, "Error creating message boxes.\n");
+        exit(-1);
     }
-    return APR_SUCCESS;
-}
+    fprintf(stdout, "OK\n");
 
-ap_status_t ap_shm_calloc(void **entity, struct shmem_t *shared, ap_size_t size)
-{
-    entity = mm_calloc(shared->mm, size);
-    if (entity == NULL) {
-        return APR_ENOMEM;
+    fprintf(stdout, "Creating a child process\n");
+    pid = fork();
+    if (pid == 0) {
+sleep(1);
+        msgwait(1);
+        msgput(0, "Msg received\n");
+        exit(1);
     }
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_shm_realloc(void **entity, struct shmem_t *shared, ap_size_t size)
-{
-    void *new;
-
-    new = mm_realloc(shared->mm, *entity, size);
-    if (new == NULL)
-        return APR_ENOMEM;
+    else if (pid > 0) {
+        msgput(1, "Sending a message\n");
+sleep(1);
+        msgwait(0);
+        exit(1);
     }
-
-    (*entity) = new;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_shm_free(struct shmem_t *shared, void *entity)
-{
-    mm_free(shared->mm, entity);
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_shm_strdup(char **new, struct shmem_t *shared, const char *old)
-{
-    (*new) = mm_strdup(shared->mm, old);
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
+    else {
+        fprintf(stderr, "Error creating a child process\n");
+        exit(1);
     }
-    return APR_SUCCESS;
 }
-
-ap_status_t ap_shm_sizeof(struct shmem_t *shared, const void *ent, 
-                          ap_size_t *size)
-{
-    *size = mm_sizeof(shared->mm, ent);
-    if ((*size) == -1) {
-        return APR_EINVAL;
-    }
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_shm_maxsize(ap_size_t **size)
-{
-    (*size) = mm_maxsize();
-    if ((*size) <= 0) {
-        return APR_ENOMEM;
-    }
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_shm_available(struct shmem_t *shared, ap_size_t *size)
-{
-    (*size) = mm_available(shared->mm);
-    if ((*size <= 0) {
-        return APR_ENOMEM;
-    }
-    return APR_SUCCESS;
-}
-

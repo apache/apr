@@ -107,6 +107,7 @@ typedef int ap_status_t;
 #define APR_ENOTHREAD      (APR_OS_START_ERROR + 12)
 #define APR_ENOTHDKEY      (APR_OS_START_ERROR + 13)
 #define APR_ENOTTHREADSAFE (APR_OS_START_ERROR + 14)
+#define APR_ESHMLOCK       (APR_OS_START_ERROR + 15)
 
 /* APR STATUS VALUES */
 #define APR_INCHILD        (APR_OS_START_STATUS + 1)
@@ -127,6 +128,9 @@ typedef int ap_status_t;
 #define APR_LESS           (APR_OS_START_STATUS + 16)
 #define APR_EQUAL          (APR_OS_START_STATUS + 17)
 #define APR_MORE           (APR_OS_START_STATUS + 18)
+#define APR_ANONYMOUS      (APR_OS_START_STATUS + 19)
+#define APR_FILEBASED      (APR_OS_START_STATUS + 20)
+#define APR_KEYBASED       (APR_OS_START_STATUS + 21)
 
 /* A simple value to be used to initialze a status variable. */
 #define APR_EINIT          (APR_OS_START_STATUS + 16)  

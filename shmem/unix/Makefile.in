@@ -11,7 +11,8 @@ LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../inc
 INCDIR1=../../include
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -Imm -I.
+INCDIR2=../../misc/@OSDIR@
+INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -Imm -I.
 
 LIB=libshmem.a
 
@@ -32,6 +33,8 @@ $(OBJS): Makefile
 
 $(LIB): $(OBJS)
 	$(RM) -f $@
+	cd mm; make; cd ..
+	cp mm/*.o .
 	$(AR) cr $@ $(OBJS)
 	$(RANLIB) $@
 
