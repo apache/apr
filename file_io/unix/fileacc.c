@@ -91,8 +91,10 @@ apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
             return APR_ENAMETOOLONG;
     }
     else
-#endif
         *fname = apr_pstrdup(thefile->cntxt, thefile->n.fname);
+#else
+        *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
+#endif
     return APR_SUCCESS;
 }
 
