@@ -154,7 +154,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_OS_START_SYSERR    (APR_OS_START_EAIERR + APR_OS_ERRSPACE_SIZE)
 
-/** no error. @see APR_STATUS_IS_SUCCESS */
+/** no error. */
 #define APR_SUCCESS 0
 
 /** 
@@ -787,9 +787,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  */
 #define APR_OS2_STATUS(e) (APR_FROM_OS_ERROR(e))
 
-#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS \
-                || (s) == APR_OS_START_SYSERR + NO_ERROR)
-
 /* These can't sit in a private header, so in spite of the extra size, 
  * they need to be made available here.
  */
@@ -948,9 +945,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
 #define apr_set_netos_error(e)   (WSASetLastError(APR_TO_OS_ERROR(e)))
 
-#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS \
-                || (s) == APR_OS_START_SYSERR + ERROR_SUCCESS)
-
 /* APR CANONICAL ERROR TESTS */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES \
                 || (s) == APR_OS_START_SYSERR + ERROR_ACCESS_DENIED \
@@ -1063,8 +1057,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
 #define apr_set_netos_error(e)  (WSASetLastError(APR_TO_OS_ERROR(e)))
 
-#define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
-
 /* APR CANONICAL ERROR TESTS */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
 #define APR_STATUS_IS_EEXIST(s)         ((s) == APR_EEXIST)
@@ -1132,8 +1124,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * @addtogroup APR_STATUS_IS
  * @{
  */
-/** no error */
-#define APR_STATUS_IS_SUCCESS(s)        ((s) == APR_SUCCESS)
 
 /** permission denied */
 #define APR_STATUS_IS_EACCES(s)         ((s) == APR_EACCES)
