@@ -58,7 +58,6 @@
 #include "apr_signal.h"
 
 #include "misc.h"       /* for WSAHighByte / WSALowByte */
-#include "locks.h"      /* for apr_unix_setup_lock() */
 #include "proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "internal_time.h"
 
