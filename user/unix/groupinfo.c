@@ -86,3 +86,22 @@ APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid,
     return APR_SUCCESS;
 }
   
+APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *groupid, const char *groupname, apr_pool_t *p)
+{
+    struct group *gr;
+#ifndef BEOS
+
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRGID_R)
+    struct group grp;
+    char grbuf[512];
+
+    if (getgrnam_r(&grpname, &gr, grbuf, sizeof(grbuf))) {
+#else
+    if ((gr = getgrnam(groupname)) == NULL) {
+#endif
+        return errno;
+    }
+    *groupid = gr->gr_gid;
+#endif
+    return APR_SUCCESS;
+}
