@@ -100,9 +100,9 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv,
     }
 }
 
-#ifdef HAVE_PTHREAD_KEY_DELETE
 APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
+#ifdef HAVE_PTHREAD_KEY_DELETE
     apr_status_t stat;
 
     if ((stat = pthread_key_delete(key->key)) == 0) {
@@ -110,8 +110,10 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
     }
 
     return stat;
-}
+#else
+    return APR_ENOTIMPL;
 #endif
+}
 
 APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
                                                  apr_threadkey_t *threadkey)
