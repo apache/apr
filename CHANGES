@@ -1,4 +1,8 @@
 Changes with APR b1  
+
+  *) Fix a buglet that caused APR_FILE_BASED_SHM to be set inadvertently 
+     on some platforms (e.g., Linux, AIX).  [Jeff Trawick]
+
   *) Speed up apr_table operations by using a cache/checksum and a
      red-black tree in the overlay.
      [Brian Pane <bpane@pacbell.net>, Cliff Woolley]
