@@ -283,6 +283,7 @@ dnl which is historical and doesn't work with the method
 dnl we are using for the more up to date cpu/OS
 dnl  (ie.. old sparcs)
 apr_force_atomic_generic=0
+proc_mutex_is_global=0
 
 config_subdirs="none"
 INSTALL_SUBDIRS="none"
@@ -300,6 +301,7 @@ case $host in
        enable_threads="system_threads"
        eolstr="\\r\\n"
        file_as_socket="0"
+       proc_mutex_is_global=1
        ;;
    *beos*)
        OSDIR="beos"
@@ -382,6 +384,7 @@ case $host in
 esac
 
 AC_SUBST(apr_force_atomic_generic)
+AC_SUBST(proc_mutex_is_global)
 AC_SUBST(eolstr)
 AC_SUBST(INSTALL_SUBDIRS)
 
