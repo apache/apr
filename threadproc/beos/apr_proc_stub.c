@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 	size_t readbuf = 100;
 	
 	readbuffer = (char*)malloc(sizeof(char) * readbuf);
-	newargs = (char**)malloc(sizeof(char) * (argc - 1));
+	*newargs = (char*)malloc(sizeof(char) * (argc - 1));
   
 	buffer = (void*)malloc(sizeof(struct pipefd));
 	/* this will block until we get the data */
