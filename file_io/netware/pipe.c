@@ -59,27 +59,13 @@
 #include "fileio.h"
 #include "apr_strings.h"
 
-static int convert_error (int err)
-{
-	switch (err)
-	{
-		default :			break;
-		case NX_EINVAL:	    return APR_EINVAL;
-		case NX_EBADF:		return APR_EBADF;
-		case NX_ENOENT:		return APR_ENOENT;
-		case NX_ENAMETOOLONG:return APR_ENAMETOOLONG;
-	}
-
-    return err;
-}
-
 apr_status_t apr_netware_pipe_cleanup(void *thefile)
 {
     apr_file_t *file = thefile;
     apr_status_t rv = APR_SUCCESS;
     int rc;
 
-	rc = NXClose(file->filedes);
+	rc = close(file->filedes);
     if (rc == 0) {
         file->filedes = -1;
         if (file->thlock) {
@@ -93,31 +79,19 @@ apr_status_t apr_netware_pipe_cleanup(void *thefile)
     return rv;
 }
 
-#ifdef WAITING_FOR_UPDATE
-#ifndef NX_CTL_FLAGS
-#define NX_CTL_FLAGS             0x00000001
-int   NXGetCtlInfo(NXHandle_t handle, unsigned long command, ...);
-int   NXSetCtlInfo(NXHandle_t handle, unsigned long command, ...);
-#endif
-#endif
-
 static apr_status_t pipeblock(apr_file_t *thepipe)
 {
 	int				err;
-#ifdef WAITING_FOR_UPDATE
 	unsigned long	flags;
 
-	if (!(err = NXGetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, &flags)))
+	if (fcntl(thepipe->filedes, F_GETFL, &flags) != -1)
 	{
-		flags &= ~NX_O_NONBLOCK;
-		err    = NXSetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, flags);
+		flags &= ~FNDELAY;
+		fcntl(thepipe->filedes, F_SETFL, flags);
 	}
-#else
-    err = NXIoSetBlockingState(thepipe->filedes, 1);
-#endif
 
-    if (err)
-        return convert_error (err);
+    if (errno)
+        return errno;
 
     thepipe->blocking = BLK_ON;
     return APR_SUCCESS;
@@ -126,20 +100,17 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 static apr_status_t pipenonblock(apr_file_t *thepipe)
 {
 	int				err;
-#ifdef WAITING_FOR_UPDATE
 	unsigned long	flags;
 
-	if (!(err = NXGetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, &flags)))
+    errno = 0;
+	if (fcntl(thepipe->filedes, F_GETFL, &flags) != -1)
 	{
-		flags |= NX_O_NONBLOCK;
-		err    = NXSetCtlInfo(thepipe->filedes, NX_CTL_FLAGS, flags);
+		flags |= FNDELAY;
+		fcntl(thepipe->filedes, F_SETFL, flags);
 	}
-#else
-    err = NXIoSetBlockingState(thepipe->filedes, 0);
-#endif
 
-    if (err)
-        return convert_error (err);
+    if (errno)
+        return errno;
 
     thepipe->blocking = BLK_OFF;
     return APR_SUCCESS;
@@ -176,14 +147,14 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
 {
 	char        tname[L_tmpnam+1];
-	NXHandle_t	filedes[2];
+	int     	filedes[2];
 	int 		err;
 
 	if (!tmpnam(tname))
 		return errno;
 
-	if (  !(err = NXFifoOpen(0, tname, NX_O_RDONLY, 0, &filedes[0]))
-		&& !(err = NXFifoOpen(0, tname, NX_O_WRONLY, 0, &filedes[1])))
+	if ((filedes[0] = pipe_open(tname, O_RDONLY) != -1)
+		&& (filedes[1] = pipe_open(tname, O_WRONLY) != -1))
 	{
         (*in) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
         (*out) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
@@ -208,12 +179,9 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 	}
 	else
 	{
-		if (filedes[0] != (NXHandle_t) -1)
-			NXClose(filedes[0]);
-
-        if (err)
-            return convert_error (err);
-
+		if (filedes[0] != -1)
+			close(filedes[0]);
+        return errno;
 	}
 
     apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), apr_netware_pipe_cleanup,
@@ -227,16 +195,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 APR_DECLARE(apr_status_t) apr_file_namedpipe_create(const char *filename, 
                                                     apr_fileperms_t perm, apr_pool_t *cont)
 {
-    mode_t mode = apr_unix_perms2mode(perm);
-	NXHandle_t	filedes;
-	int err;
-
-	err = NXFifoOpen(0, filename, mode, 0, &filedes);
-
-    if (err)
-        return convert_error (err);
-
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 } 
 
     
