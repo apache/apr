@@ -164,14 +164,14 @@ static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
     addr->sa.sin.sin_family = family;
 
     if (family == APR_INET) {
-        addr->sa_len = sizeof(struct sockaddr_in);
+        addr->salen = sizeof(struct sockaddr_in);
         addr->addr_str_len = 16;
         addr->ipaddr_ptr = &(addr->sa.sin.sin_addr);
         addr->ipaddr_len = sizeof(struct in_addr);
     }
 #if APR_HAVE_IPV6
     else if (family == APR_INET6) {
-        addr->sa_len = sizeof(struct sockaddr_in6);
+        addr->salen = sizeof(struct sockaddr_in6);
         addr->addr_str_len = 46;
         addr->ipaddr_ptr = &(addr->sa.sin6.sin6_addr);
         addr->ipaddr_len = sizeof(struct in6_addr);
@@ -266,7 +266,7 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
         if (*hostname >= '0' && *hostname <= '9' &&
             strspn(hostname, "0123456789.") == strlen(hostname)) {
             (*sa)->sa.sin.sin_addr.s_addr = inet_addr(hostname);
-            (*sa)->sa_len = sizeof(struct sockaddr_in);
+            (*sa)->salen = sizeof(struct sockaddr_in);
         }
         else {
 #endif
@@ -282,7 +282,7 @@ apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname,
 
         memcpy((char *)&(*sa)->sa.sin.sin_addr, hp->h_addr_list[0],
                hp->h_length);
-        (*sa)->sa_len = sizeof(struct sockaddr_in);
+        (*sa)->salen = sizeof(struct sockaddr_in);
         (*sa)->ipaddr_len = hp->h_length;
 
 #ifndef GETHOSTBYNAME_HANDLES_NAS
