@@ -78,13 +78,21 @@ extern "C" {
 
 typedef struct apr_thread_mutex_t apr_thread_mutex_t;
 
+#define APR_THREAD_MUTEX_DEFAULT  0x0
+#define APR_THREAD_MUTEX_NESTED   0x1
+
 /**
  * Create and initialize a mutex that can be used to synchronize threads.
  * @param mutex the memory address where the newly created mutex will be
  *        stored.
+ * @param flags Or'ed value of:
+ * <PRE>
+ *           APR_THREAD_MUTEX_NESTED    enable nested (recursive) locks.
+ * </PRE>
  * @param pool the pool from which to allocate the mutex.
  */
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
+                                                  unsigned int flags,
                                                   apr_pool_t *pool);
 /**
  * Acquire the lock for the given mutex. If the mutex is already locked,
