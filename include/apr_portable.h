@@ -149,12 +149,8 @@ union semun {
 struct os_lock_t {
 #if APR_USE_SYSVSEM_SERIALIZE
     int crossproc;
-    struct sembuf op_on;
-    struct sembuf op_off;
 #elif APR_USE_FCNTL_SERIALIZE
     int crossproc;
-    struct flock lock_it;
-    struct flock unlock_it;
 #elif APR_USE_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *crossproc; 
 #elif APR_USE_FLOCK_SERIALIZE

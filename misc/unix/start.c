@@ -54,6 +54,7 @@
  */
 
 #include "misc.h"
+#include "../../locks/unix/locks.h"
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_context(ap_context_t **, ap_context_t *)
@@ -187,6 +188,8 @@ ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 ap_status_t ap_initialize(void)
 {
     sigset_t sigset;
+
+    setup_lock();
 
     sigfillset(&sigset);
 #if defined(HAVE_PTHREAD_SIGMASK) && defined(USE_THREADS)

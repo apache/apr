@@ -264,13 +264,6 @@ ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct lock_t *lock)
         return APR_ENOLOCK;
     }
     oslock->crossproc = lock->interproc;
-#if USE_SYSVSEM_SERIALIZE
-    oslock->op_on = lock->op_on;
-    oslock->op_off = lock->op_off;
-#elif USE_FCNTL_SERIALIZE
-    oslock->lock_it = lock->lock_it;
-    oslock->unlock_it = lock->unlock_it;
-#endif
 #if APR_HAS_THREADS
 #if USE_PTHREAD_SERIALIZE
     oslock->intraproc = lock->intraproc;
@@ -298,13 +291,6 @@ ap_status_t ap_put_os_lock(struct lock_t **lock, ap_os_lock_t *thelock,
         (*lock)->cntxt = cont;
     }
     (*lock)->interproc = thelock->crossproc;
-#if defined (USE_SYSVSEM_SERIALIZE)
-    (*lock)->op_on = thelock->op_on;
-    (*lock)->op_off = thelock->op_off;
-#elif defined (USE_FCNTL_SERIALIZE)
-    (*lock)->lock_it = thelock->lock_it;
-    (*lock)->unlock_it = thelock->unlock_it;
-#endif
 #if APR_HAS_THREADS
 #if defined (USE_PTHREAD_SERIALIZE)
     (*lock)->intraproc = thelock->intraproc;

@@ -112,12 +112,8 @@ struct lock_t {
     char *fname;
 #if USE_SYSVSEM_SERIALIZE
     int interproc;
-    struct sembuf op_on;
-    struct sembuf op_off;
 #elif USE_FCNTL_SERIALIZE
     int interproc;
-    struct flock lock_it;
-    struct flock unlock_it;
 #elif USE_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *interproc;
 #elif USE_FLOCK_SERIALIZE
@@ -144,6 +140,7 @@ ap_status_t unlock_intra(struct lock_t *lock);
 ap_status_t destroy_intra_lock(struct lock_t *lock);
 #endif
 
+void setup_lock();
 ap_status_t create_inter_lock(struct lock_t *new);
 ap_status_t lock_inter(struct lock_t *lock);
 ap_status_t unlock_inter(struct lock_t *lock);
