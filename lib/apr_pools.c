@@ -528,6 +528,9 @@ API_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retc
 	}
 	p->sub_pools = new_pool;
     }
+    else {
+        permanent_pool = p;
+    }
 
 #if APR_HAS_THREADS
     ap_unlock(alloc_mutex);
@@ -580,6 +583,7 @@ struct cleanup {
 
 static void * ap_pool_palloc(ap_pool_t *a, int reqsize, int (*apr_abort)(int retcode));
 
+#if 0
 static void ap_register_pool_cleanup(struct ap_pool_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *))
@@ -595,6 +599,7 @@ static void ap_register_pool_cleanup(struct ap_pool_t *p, void *data,
         p->cleanups = c;
     }
 }
+#endif
 
 API_EXPORT(void) ap_register_cleanup(struct context_t *p, void *data,
 				      ap_status_t (*plain_cleanup) (void *),
@@ -692,13 +697,7 @@ API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-static ap_status_t cleanup_locks(void *data)
-{
-    ap_lock_t *thelock = (ap_lock_t *)data;
-    return ap_destroy_lock(thelock);
-}
-
-ap_pool_t *ap_init_alloc(void)
+ap_status_t ap_init_alloc(void)
 {
     ap_status_t status;
 #ifdef POOL_DEBUG
@@ -712,32 +711,29 @@ ap_pool_t *ap_init_alloc(void)
                    NULL, NULL);
     if (status != APR_SUCCESS) {
         ap_destroy_lock(alloc_mutex); 
-        return NULL;
+        return status;
     }
     status = ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
     if (status != APR_SUCCESS) {
         ap_destroy_lock(spawn_mutex); 
-        return NULL;
+        return status;
     }
-#endif
-
-    permanent_pool = ap_make_sub_pool(NULL, NULL);
-
-#if APR_HAS_THREADS
-    ap_register_pool_cleanup(permanent_pool, (void *)alloc_mutex, 
-                             cleanup_locks, 
-                             ap_null_cleanup);
-    ap_register_pool_cleanup(permanent_pool, spawn_mutex, 
-                             cleanup_locks, 
-                             ap_null_cleanup);
 #endif
 
 #ifdef ALLOC_STATS
     atexit(dump_stats);
 #endif
 
-    return permanent_pool;
+    return APR_SUCCESS;
+}
+
+void ap_term_alloc(void)
+{
+#if APR_HAS_THREADS
+    ap_destroy_lock(alloc_mutex);
+    ap_destroy_lock(spawn_mutex);
+#endif
 }
 
 void ap_destroy_real_pool(ap_pool_t *);

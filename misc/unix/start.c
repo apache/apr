@@ -74,7 +74,7 @@ ap_status_t ap_create_context(struct context_t **newcont, struct context_t *cont
         pool = ap_make_sub_pool(cont->pool, cont->apr_abort);
     }
     else {
-        pool = ap_init_alloc();;
+        pool = ap_make_sub_pool(NULL, NULL);
     }
         
     if (pool == NULL) {
@@ -188,8 +188,22 @@ ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
  */
 ap_status_t ap_initialize(void)
 {
+    ap_status_t status;
     setup_lock();
-    return APR_SUCCESS;
+    status = ap_init_alloc();
+    return status;
+}
+
+/* ***APRDOC*******************************************************
+ * void ap_terminate(void)
+ *    Tear down any APR internal data structures which aren't
+ *    torn down automatically.  An APR program must call this
+ *    function at termination once it has stopped using APR
+ *    services.
+ */
+void ap_terminate(void)
+{
+    ap_term_alloc();
 }
 
 /* ***APRDOC********************************************************
