@@ -253,5 +253,8 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
 
 APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
 {
-    Sleep(t/1000);
+    /* One of the few sane situations for a cast, Sleep
+     * is in ms, not us, and passed as a DWORD value
+     */
+    Sleep((DWORD)(t / 1000));
 }
