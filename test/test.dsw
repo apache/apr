@@ -3,7 +3,7 @@ Microsoft Developer Studio Workspace File, Format Version 5.00
 
 ###############################################################################
 
-Project: "ab_apr"=".\ab_apr.dsp" - Package Owner=<4>
+Project: "ab_apr"=.\ab_apr.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -15,7 +15,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "client"=".\client.dsp" - Package Owner=<4>
+Project: "client"=.\client.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -27,7 +27,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "htdigest"=".\htdigest.dsp" - Package Owner=<4>
+Project: "server"=.\server.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -39,7 +39,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "server"=".\server.dsp" - Package Owner=<4>
+Project: "testarg"=.\testarg.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -51,7 +51,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testarg"=".\testarg.dsp" - Package Owner=<4>
+Project: "testfile"=.\testfile.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,7 +63,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testfile"=".\testfile.dsp" - Package Owner=<4>
+Project: "testproc"=.\testproc.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -75,31 +75,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testproc"=".\testproc.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "testsig"=".\testsig.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "testsock"=".\testsock.dsp" - Package Owner=<4>
+Project: "testsock"=.\testsock.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -117,7 +93,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "testthread"=".\testthread.dsp" - Package Owner=<4>
+Project: "testthread"=.\testthread.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -129,7 +105,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "timetest"=".\timetest.dsp" - Package Owner=<4>
+Project: "timetest"=.\timetest.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
