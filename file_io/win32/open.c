@@ -81,7 +81,6 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
      * \\?\UNC\ is needed UNC paths.
      */
     int srcremains = strlen(srcstr) + 1;
-    int retremains = srcremains;
     apr_wchar_t *t = retstr;
     apr_status_t rv;
     if (srcstr[1] == ':' && (srcstr[2] == '/' || srcstr[2] == '\\')) {
@@ -94,12 +93,13 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen,
           && (srcstr[2] != '?')) {
         /* Skip the slashes */
         srcstr += 2;
+        srcremains -= 2;
         wcscpy (retstr, L"\\\\?\\UNC\\");
         retlen -= 8;
         t += 8;
     }
 
-    if (rv = conv_utf8_to_ucs2(srcstr, &srcremains, t, &retremains)) {
+    if (rv = conv_utf8_to_ucs2(srcstr, &srcremains, t, &retlen)) {
         return (rv == APR_INCOMPLETE) ? APR_EINVAL : rv;
     }
     if (srcremains) {
