@@ -84,7 +84,7 @@ static const struct testlist {
 
 int main(int argc, char *argv[])
 {
-    CuSuiteList *alltests;
+    CuSuiteList *alltests = NULL;
     CuString *output = CuStringNew();
     int i;
     int partial = 0;
