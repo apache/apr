@@ -267,7 +267,7 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 ap_status_t ap_get_socketdata(struct socket_t *socket, char *key, void *data)
 {
     if (socket != NULL) {
-        return ap_get_userdata(socket->cntxt, key, &data);
+        return ap_get_userdata(&data, socket->cntxt, key);
     }
     else {
         data = NULL;
@@ -296,8 +296,8 @@ ap_status_t ap_get_os_sock(struct socket_t *sock, ap_os_sock_t *thesock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_sock(ap_context_t *cont, struct socket_t **sock,
-                            ap_os_sock_t *thesock)
+ap_status_t ap_put_os_sock(struct socket_t **sock, ap_os_sock_t *thesock, 
+                           ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
