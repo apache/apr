@@ -171,9 +171,6 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                           apr_dir_t *thedir)
 {
     apr_status_t ret = 0;
-#ifdef DIRENT_TYPE
-    apr_filetype_e type;
-#endif
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
                     && !defined(READDIR_IS_THREAD_SAFE)
     struct dirent *retent;
@@ -242,7 +239,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         finfo->pool = thedir->pool;
         finfo->valid = 0;
 #ifdef DIRENT_TYPE
-        finfo->filetype = apr_type_from_dirent_type(thedir->entry->DIRENT_TYPE);
+        finfo->filetype = apr_filetype_from_dirent_type(thedir->entry->DIRENT_TYPE);
         finfo->valid |= APR_FINFO_TYPE;
 #endif
 #ifdef DIRENT_INODE
