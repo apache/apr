@@ -118,8 +118,10 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     if (symname == NULL || ressym == NULL)
         return APR_EINIT;
 
-    if ((rc = DosQueryProcAddr(handle->handle, 0, symname, &func)) != 0)
-        return APR_EINIT;
+    if ((rc = DosQueryProcAddr(handle->handle, 0, symname, &func)) != 0) {
+        handle->load_error = APR_FROM_OS_ERROR(rc);
+        return handle->load_error;
+    }
 
     *ressym = func;
     return APR_SUCCESS;
@@ -131,9 +133,13 @@ APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr
 {
     char message[200];
     apr_strerror(dso->load_error, message, sizeof(message));
-    strcat(message, " (");
-    strcat(message, dso->failed_module);
-    strcat(message, ")");
+
+    if (dso->failed_module != NULL) {
+        strcat(message, " (");
+        strcat(message, dso->failed_module);
+        strcat(message, ")");
+    }
+
     apr_cpystrn(buffer, message, buflen);
     return buffer;
 }
