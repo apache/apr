@@ -52,8 +52,9 @@
  * <http://www.apache.org/>.
  */
 
-#ifdef HAVE_NETINET_TCP_H
-#include "../unix/network_io.h"
+#include "apr_private.h"
+#if BEOS_BONE /* woohoo - we can use the Unix code! */
+#include "../unix/networkio.h"
 #else
 
 #ifndef NETWORK_IO_H
@@ -75,13 +76,13 @@
 
 /* The definition of isascii was missed from the PowerPC ctype.h
  *
- * It will be included in the next release, but until then... */
-#if __POWERPC__
+ * It will be included in the next release, but until then... 
+ */
+#if !HAVE_isascii
 #define isascii(c) (((c) & ~0x7f)==0)
 #endif
 
 #include "apr_general.h"
-#include <ByteOrder.h> /* for the ntohs definition */
 
 #define POLLIN	 1
 #define POLLPRI  2
@@ -112,6 +113,7 @@ struct ap_pollfd_t {
 ap_int16_t get_event(ap_int16_t);
 
 int inet_aton(const char *cp, struct in_addr *addr);
+#include <ByteOrder.h> /* for the ntohs definition */
 
 #endif  /* ! NETWORK_IO_H */
 #endif

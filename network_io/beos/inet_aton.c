@@ -69,7 +69,7 @@
  */
 
 #include "apr_private.h"
-#ifndef HAVE_NETINET_TCP_H
+#if BEOS_R5 /* this isn't needed for BONE */
 
 #include "networkio.h"
 
