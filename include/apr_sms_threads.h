@@ -101,10 +101,10 @@ APR_DECLARE(apr_status_t) apr_sms_threads_create_ex(apr_sms_t **sms,
                                                     apr_size_t min_free,
                                                     apr_size_t max_free);
 
+#endif /* APR_HAS_THREADS */
+
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* APR_HAS_THREADS */
 
 #endif /* !APR_SMS_THREADS_H */
