@@ -385,20 +385,28 @@ APR_DECLARE(apr_status_t) apr_shm_remove(const char *filename,
      * exist before calling ftok(). */
     shmkey = ftok(filename, 1);
     if (shmkey == (key_t)-1) {
-        return errno;
+        goto shm_remove_failed;
     }
 
+    apr_file_close(file);
+
     if ((shmid = shmget(shmkey, 0, SHM_R | SHM_W)) < 0) {
-        return errno;
+        goto shm_remove_failed;
     }
 
     /* Indicate that the segment is to be destroyed as soon
      * as all processes have detached. This also disallows any
      * new attachments to the segment. */
     if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-        return errno;
+        goto shm_remove_failed;
     }
     return apr_file_remove(filename, pool);
+
+shm_remove_failed:
+    status = errno;
+    /* ensure the file has been removed anyway. */
+    apr_file_remove(filename, pool);
+    return status;
 #endif
 
     /* No support for anonymous shm */
