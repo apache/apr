@@ -92,9 +92,3 @@ const char *apr_signal_description_get(int signum)
 {
     return "unknown signal (not supported)";
 }
-
-/* Deprecated */
-const char *apr_signal_get_description(int signum)
-{
-    return apr_signal_description_get(signum);
-}
