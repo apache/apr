@@ -128,7 +128,8 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
+ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, 
+		    ap_interval_time_t timeout)
 {
     int i;
     struct pollfd *pollset;
@@ -142,8 +143,8 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
         pollset[i].events = aprset->events[i];
     }
 
-    if (timeout != -1) {
-        timeout *= 1000;
+    if (timeout > 0) {
+        timeout /= 1000; /* convert microseconds to milliseconds */
     }
 
     rv = poll(pollset, aprset->curpos, timeout);
@@ -211,6 +212,8 @@ ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
 
 #else    /* Use select to mimic poll */
 
+/* TODO - make this compile and perhaps even work */
+
 ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
     (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t) * num);
@@ -246,23 +249,23 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
+ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, 
+		    ap_interval_time_t timeout)
 {
     int rv;
-    struct timeval *thetime;
+    struct timeval tv, *tvptr;
 
-    if (timeout == -1) {
-        thetime = NULL;
+    if (timeout < 0) {
+        tvptr = NULL;
     }
     else {
-        /* Convert milli-seconds into seconds and micro-seconds. */
-        thetime = (struct timeval *)ap_palloc(aprset->cntxt, sizeof(struct timeval));
-        thetime->tv_sec = timeout;
-        thetime->tv_usec = 0;
+        tv.tv_sec = timeout / AP_USEC_PER_SEC;
+        tv.tv_usec = timeout % AP_USEC_PER_SEC;
+        tvptr = &tv;
     }
 
     rv = select(aprset->highsock + 1, aprset->read, aprset->write, 
-                    aprset->except, thetime);
+                    aprset->except, tvptr);
     
     (*nsds) = rv;
     if ((*nsds) == 0) {
