@@ -60,7 +60,7 @@ char* CuStrAlloc(int size)
 	return new;
 }
 
-char* CuStrCopy(char* old)
+char* CuStrCopy(const char* old)
 {
 	int len = strlen(old);
 	char* new = CuStrAlloc(len + 1);
@@ -150,7 +150,7 @@ CuTest* CuTestNew(char* name, TestFunction function)
 	return tc;
 }
 
-void CuNotImpl(CuTest* tc, char* message)
+void CuNotImpl(CuTest* tc, const char* message)
 {
 	CuString* newstr = CuStringNew();
         CuStringAppend(newstr, message);
@@ -160,14 +160,14 @@ void CuNotImpl(CuTest* tc, char* message)
 	if (tc->jumpBuf != 0) longjmp(*(tc->jumpBuf), 0);
 }
 
-void CuFail(CuTest* tc, char* message)
+void CuFail(CuTest* tc, const char* message)
 {
 	tc->failed = 1;
 	tc->message = CuStrCopy(message);
 	if (tc->jumpBuf != 0) longjmp(*(tc->jumpBuf), 0);
 }
 
-void CuAssert(CuTest* tc, char* message, int condition)
+void CuAssert(CuTest* tc, const char* message, int condition)
 {
 	if (condition) return;
 	CuFail(tc, message);

@@ -38,7 +38,7 @@
 /* CuString */
 
 char* CuStrAlloc(int size);
-char* CuStrCopy(char* old);
+char* CuStrCopy(const char* old);
 
 #define CU_ALLOC(TYPE)		((TYPE*) malloc(sizeof(TYPE)))
 
@@ -81,9 +81,9 @@ struct CuTest
 void CuInit(int argc, char *argv[]);
 void CuTestInit(CuTest* t, char* name, TestFunction function);
 CuTest* CuTestNew(char* name, TestFunction function);
-void CuFail(CuTest* tc, char* message);
-void CuNotImpl(CuTest* tc, char* message);
-void CuAssert(CuTest* tc, char* message, int condition);
+void CuFail(CuTest* tc, const char* message);
+void CuNotImpl(CuTest* tc, const char* message);
+void CuAssert(CuTest* tc, const char* message, int condition);
 void CuAssertTrue(CuTest* tc, int condition);
 void CuAssertStrEquals(CuTest* tc, const char* expected, const char* actual);
 void CuAssertIntEquals(CuTest* tc, int expected, int actual);
