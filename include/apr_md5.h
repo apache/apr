@@ -82,10 +82,11 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef APACHE_MD5_H
-#define APACHE_MD5_H
+#ifndef APR_MD5_H
+#define APR_MD5_H
 
 #include "apr_lib.h"
+#include "apr_xlate.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -101,9 +102,15 @@ typedef struct {
     UINT4 state[4];		/* state (ABCD) */
     UINT4 count[2];		/* number of bits, modulo 2^64 (lsb first) */
     unsigned char buffer[64];	/* input buffer */
+#if APR_HAS_XLATE
+    ap_xlate_t *xlate;          /* translation handle */
+#endif
 } ap_md5_ctx_t;
 
 API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context);
+#if APR_HAS_XLATE
+API_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate);
+#endif
 API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen);
@@ -116,4 +123,4 @@ API_EXPORT(ap_status_t) ap_MD5Encode(const char *password, const char *salt,
 }
 #endif
 
-#endif	/* !APACHE_MD5_H */
+#endif	/* !APR_MD5_H */

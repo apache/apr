@@ -7,13 +7,14 @@
 RM=@RM@
 CC=@CC@
 RANLIB=@RANLIB@
-CFLAGS=@CFLAGS@ @OPTIM@ 
-LIBS=-L.. -lapr @LIBS@ 
+CFLAGS=@CFLAGS@ @OPTIM@
+LIBS=../libapr.a @LIBS@ 
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
 
-TARGETS= testfile@EXEEXT@ \
+TARGETS= testmd5@EXEEXT@ \
+	testfile@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testthread@EXEEXT@ \
@@ -28,7 +29,8 @@ TARGETS= testfile@EXEEXT@ \
 	occhild@EXEEXT@ \
 	mod_test.so
 
-OBJS= testfile.o \
+OBJS= testmd5.o \
+	testfile.o \
 	testproc.o \
 	testsock.o \
 	testthread.o \
@@ -46,14 +48,17 @@ OBJS= testfile.o \
 
 all: $(TARGETS) 
 
+testmd5@EXEEXT@: testmd5.o
+	$(CC) $(CFLAGS) -o testmd5@EXEEXT@ testmd5.o $(LDFLAGS)
+
 testfile@EXEEXT@: testfile.o
-	$(CC) $(CFLAGS) testfile.o -o testfile@EXEEXT@ $(LDFLAGS) 
+	$(CC) $(CFLAGS) -o testfile@EXEEXT@ testfile.o $(LDFLAGS) 
 
 testdso@EXEEXT@: testdso.o
 	$(CC) $(CFLAGS) --export-dynamic -fPIC testdso.o -o testdso@EXEEXT@ $(LDFLAGS) 
 
 testoc@EXEEXT@: testoc.o
-	$(CC) $(CFLAGS) testoc.o -o testoc@EXEEXT@ $(LDFLAGS) 
+	$(CC) $(CFLAGS) -o testoc@EXEEXT@ testoc.o $(LDFLAGS) 
 
 occhild.so: occhild.o
 	$(CC) -shared occhild.o -o occhild.so 
@@ -62,33 +67,33 @@ mod_test.so: mod_test.o
 	$(CC) -shared mod_test.o -o mod_test.so 
 
 testargs@EXEEXT@: testargs.o
-	$(CC) $(CFLAGS) testargs.o -o testargs@EXEEXT@ $(LDFLAGS) 
+	$(CC) $(CFLAGS) -o testargs@EXEEXT@ testargs.o $(LDFLAGS) 
 
 testcontext@EXEEXT@: testcontext.o
-	$(CC) $(CFLAGS) testcontext.o -o testcontext@EXEEXT@ $(LDFLAGS) 
+	$(CC) $(CFLAGS) -o testcontext@EXEEXT@ testcontext.o $(LDFLAGS) 
 
 testproc@EXEEXT@: testproc.o
-	$(CC) $(CFLAGS) testproc.o -o testproc@EXEEXT@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o testproc@EXEEXT@ testproc.o $(LDFLAGS)
 
 testthread@EXEEXT@: testthread.o
-	$(CC) $(CFLAGS) testthread.o -o testthread@EXEEXT@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o testthread@EXEEXT@ testthread.o $(LDFLAGS)
 
 testsock@EXEEXT@: testsock.o client.o server.o 
-	$(CC) $(CFLAGS) testsock.o -o testsock@EXEEXT@  $(LDFLAGS)
-	$(CC) $(CFLAGS) server.o -o server@EXEEXT@ $(LDFLAGS) 
-	$(CC) $(CFLAGS) client.o -o client@EXEEXT@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o testsock@EXEEXT@ testsock.o $(LDFLAGS)
+	$(CC) $(CFLAGS) -o server@EXEEXT@ server.o $(LDFLAGS) 
+	$(CC) $(CFLAGS) -o client@EXEEXT@ client.o $(LDFLAGS)
 
 testtime@EXEEXT@: testtime.o
-	$(CC) $(CFLAGS) testtime.o -o testtime@EXEEXT@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o testtime@EXEEXT@ testtime.o $(LDFLAGS)
 
 testmmap@EXEEXT@: testmmap.o
-	$(CC) $(CFLAGS) testmmap.o -o testmmap@EXEEXT@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o testmmap@EXEEXT@ testmmap.o $(LDFLAGS)
 
 testshmem@EXEEXT@: testshmem.o
-	$(CC) $(CFLAGS) testshmem.o -o testshmem@EXEEXT@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o testshmem@EXEEXT@ testshmem.o $(LDFLAGS)
 
 testpipe@EXEEXT@: testpipe.o
-	$(CC) $(CFLAGS) testpipe.o -o testpipe@EXEEXT@ $(LDFLAGS)
+	$(CC) $(CFLAGS) -o testpipe@EXEEXT@ testpipe.o $(LDFLAGS)
 
 clean:
 	$(RM) -f *.o *.a *.so $(TARGETS)
