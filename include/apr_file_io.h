@@ -439,7 +439,7 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile);
  * @param new_file The structure to duplicate into. 
  * @param old_file The file to duplicate.
  * @param p The pool to use for the new file.
- * @remark *arg1 must point to a valid apr_file_t, or point to NULL
+ * @remark *new_file must point to a valid apr_file_t, or point to NULL
  */         
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                       apr_file_t *old_file,
@@ -451,7 +451,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
  * @param old_file The file to duplicate
  * @param p        The pool to use for the new file
  *
- * @remark *arg1 MUST point at a valid apr_file_t. It cannot point at NULL
+ * @remark new_file MUST point at a valid apr_file_t. It cannot be NULL
  */
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file,
