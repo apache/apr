@@ -67,7 +67,7 @@ static apr_pool_t *global_apr_pool;
 APR_DECLARE(apr_status_t) apr_initialize(void)
 {
     apr_status_t status;
-#if defined WIN32
+#if defined WIN32 || defined(NETWARE)
     int iVersionRequested;
     WSADATA wsaData;
     int err;
@@ -81,9 +81,9 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
         return APR_ENOPOOL;
     }
 
-#if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
+#if !defined(BEOS) && !defined(OS2) && !defined(WIN32) && !defined(NETWARE)
     apr_unix_setup_lock();
-#elif defined WIN32
+#elif defined WIN32 || defined(NETWARE)
     iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
     err = WSAStartup((WORD) iVersionRequested, &wsaData);
     if (err) {
