@@ -56,7 +56,6 @@
 #define APR_THREAD_MUTEX_H
 
 #include "apr.h"
-#include "apr_pools.h"
 #include "apr_errno.h"
 
 #ifdef __cplusplus
@@ -80,6 +79,9 @@ typedef struct apr_thread_mutex_t apr_thread_mutex_t;
 
 #define APR_THREAD_MUTEX_DEFAULT  0x0
 #define APR_THREAD_MUTEX_NESTED   0x1
+
+/* Delayed the include to avoid a circular reference */
+#include "apr_pools.h"
 
 /**
  * Create and initialize a mutex that can be used to synchronize threads.

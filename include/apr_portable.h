@@ -74,7 +74,6 @@
 #include "apr_file_io.h"
 #include "apr_network_io.h"
 #include "apr_errno.h"
-#include "apr_lock.h"
 #include "apr_proc_mutex.h"
 #include "apr_time.h"
 #include "apr_dso.h"
@@ -99,8 +98,6 @@ extern "C" {
 typedef HANDLE                apr_os_file_t;
 typedef HANDLE                apr_os_dir_t;
 typedef SOCKET                apr_os_sock_t;
-/* We're deprecating apr_lock_t, so apr_os_lock_t will be gone too. */
-typedef HANDLE                apr_os_lock_t;
 typedef HANDLE                apr_os_proc_mutex_t;
 typedef HANDLE                apr_os_thread_t;
 typedef HANDLE                apr_os_proc_t;
@@ -114,8 +111,6 @@ typedef HANDLE                apr_os_shm_t;
 typedef HFILE                 apr_os_file_t;
 typedef HDIR                  apr_os_dir_t;
 typedef int                   apr_os_sock_t;
-/* We're deprecating apr_lock_t, so apr_os_lock_t will be gone too. */
-typedef HMTX                  apr_os_lock_t;
 typedef HMTX                  apr_os_proc_mutex_t;
 typedef TID                   apr_os_thread_t;
 typedef PID                   apr_os_proc_t;
@@ -137,8 +132,6 @@ struct apr_os_proc_mutex_t {
 typedef int                   apr_os_file_t;
 typedef DIR                   apr_os_dir_t;
 typedef int                   apr_os_sock_t;
-/* We're deprecating apr_lock_t, so apr_os_lock_t will be gone too. */
-typedef struct apr_os_proc_mutex_t  apr_os_lock_t;
 typedef struct apr_os_proc_mutex_t  apr_os_proc_mutex_t;
 typedef thread_id             apr_os_thread_t;
 typedef thread_id             apr_os_proc_t;
@@ -152,8 +145,6 @@ typedef void*                 apr_os_shm_t;
 typedef int                   apr_os_file_t;
 typedef DIR                   apr_os_dir_t;
 typedef int                   apr_os_sock_t;
-/* We're deprecating apr_lock_t, so apr_os_lock_t will be gone too. */
-typedef NXMutex_t             apr_os_lock_t;
 typedef NXMutex_t             apr_os_proc_mutex_t;
 typedef NXThreadId_t          apr_os_thread_t;
 typedef long                  apr_os_proc_t;
@@ -186,8 +177,6 @@ struct apr_os_proc_mutex_t {
 typedef int                   apr_os_file_t;
 typedef DIR                   apr_os_dir_t;
 typedef int                   apr_os_sock_t;
-/* We're deprecating apr_lock_t, so apr_os_lock_t will be gone too. */
-typedef struct apr_os_proc_mutex_t  apr_os_lock_t;
 typedef struct apr_os_proc_mutex_t  apr_os_proc_mutex_t;
 #if APR_HAS_THREADS && APR_HAVE_PTHREAD_H 
 typedef pthread_t             apr_os_thread_t;
@@ -253,14 +242,6 @@ APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir,
  */
 APR_DECLARE(apr_status_t) apr_os_sock_get(apr_os_sock_t *thesock,
                                           apr_socket_t *sock);
-
-/**
- * Convert the lock from os specific type to apr type
- * @param oslock The os specific lock we are converting to.
- * @param lock The apr lock to convert.
- */
-APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *oslock, 
-                                          apr_lock_t *lock);
 
 /**
  * Convert the proc mutex from os specific type to apr type
@@ -396,16 +377,6 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
 APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
                                            apr_os_sock_info_t *os_sock_info,
                                            apr_pool_t *cont);
-
-/**
- * Convert the lock from os specific type to apr type
- * @param lock The apr lock we are converting to.
- * @param thelock The os specific lock to convert.
- * @param cont The pool to use if it is needed.
- */
-APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock,
-                                          apr_os_lock_t *thelock,
-                                          apr_pool_t *cont); 
 
 /**
  * Convert the proc mutex from os specific type to apr type
