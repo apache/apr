@@ -783,7 +783,7 @@ fi
 
 dnl #----------------------------- Checking for Networking Support 
 echo $ac_n "${nl}Checking for Networking support...${nl}"
-AC_MSG_CHECKING(looking for in_addr in netinet/in.h)
+AC_MSG_CHECKING(for in_addr in netinet/in.h)
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -795,7 +795,7 @@ msg=yes ] , [ have_in_addr="0"
 msg=no ])
 AC_MSG_RESULT([$msg])
 
-echo $ac_n "checking if fd == socket on this platform... "
+AC_MSG_CHECKING("if fd == socket on this platform")
 if test "x$file_as_socket" = "x" ; then
     file_as_socket="1";
     echo "yes"
