@@ -1,4 +1,4 @@
-/*-
+/*
  * Copyright (c) 1992, 1993
  *	The Regents of the University of California.  All rights reserved.
  *
@@ -49,12 +49,38 @@ extern "C" {
 #define	FNM_PATHNAME	0x02	/* Slash must be matched by slash. */
 #define	FNM_PERIOD	0x04	/* Period must be matched by period. */
 /* This flag is an Apache addition */
-#define FNM_CASE_BLIND  0x08    /* Compare characters case ap_pool_t nsensitively. */
+#define FNM_CASE_BLIND  0x08    /* Compare characters case-insensitively. */
+
+/*
+
+=head1 ap_status_t ap_fnmatch(const char *pattern, const char *strings, int flags)
+
+B<Try to match the string to the given pattern.>
+
+    arg 1) The pattern to match to
+    arg 2) The string we are trying to match
+    arg 3) flags to use in the match.  Bitwise OR of:
+                FNM_NOESCAPE   --  Disable backslash escaping
+                FNM_PATHNAME   --  Slash must be matched by slash
+                FNM_PERIOD     --  Period must be matched by period
+                FNM_CASE_BLIND --  Compare characters case-insensitively.
+
+=cut
+ */
 
 APR_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
 			    int flags);
 
-/* this function is an Apache addition */
+/*
+
+=head1 ap_status_t ap_is_fnmatch(const char *pattern)
+
+B<Determine if the given pattern is a regular expression.>
+
+    arg 1) The pattern to search for glob characters.
+
+=cut
+ */
 APR_EXPORT(int) ap_is_fnmatch(const char *pattern);
 
 #ifdef __cplusplus
