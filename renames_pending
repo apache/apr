@@ -4,3 +4,51 @@ apr_user_homedir_get             from apr_get_home_directory
 apr_user_id_get                  from apr_get_userid
 apr_user_name_get                from apr_get_username
 
+----------------------------------------------------------
+apr_time_exp_gmt_get             from apr_implode_gmt
+apr_time_interval_t              from apr_interval_time_t
+apr_time_interval_short_t        from apr_short_interval_time_t
+apr_file_info_t                  from apr_finfo_t
+apr_file_stat                    from apr_stat
+apr_file_lstat                   from apr_lstat
+apr_file_path_root               from apr_filepath_root
+apr_file_path_merge              from apr_file_path_merge
+apr_file_path_set                from apr_filepath_set
+apr_file_path_get                from apr_filepath_get
+apr_file_attrs_t                 from apr_fileattrs_t
+apr_file_seek_where_t            from apr_seek_where_t
+ 
+apr_fnmatch_test                 from apr_is_fnmatch
+
+apr_lock_scope_e                 from apr_lockscope_e
+apr_lock_type_e                  from apr_locktype_e
+apr_lock_mech_e                  from apr_lockmech_e
+apr_lock_readerwriter_e          from apr_readerwriter_e
+
+apr_socket_shutdown              from apr_shutdown
+apr_socket_bind                  from apr_bind
+apr_socket_listen                from apr_listen
+apr_socket_accept                from apr_accept
+apr_socket_connect               from apr_connect
+apr_sockaddr_name_info_get       from apr_getnameinfo
+apr_port_addr_parse              from apr_parse_addr_port
+apr_hostname_get                 from apr_gethostname
+apr_socket_send                  from apr_send
+apr_socket_sendv                 from apr_sendv
+apr_socket_sendto                from apr_sendto
+apr_socket_recv_from             from apr_recvfrom
+apr_socket_file_send             from apr_sendfile
+apr_socket_recv                  from apr_recv
+apr_socket_opt_set               from apr_setsocketopt
+apr_socket_opt_get               from apr_getsocketopt
+apr_socket_file_create           from apr_socket_from_file
+apr_service_byname_get           from apr_getservbyname
+apr_socket_filter_accept         from apr_socket_accept_filter
+apr_socket_inherit_set           from apr_socket_set_inherit
+apr_socket_inherit_unset         from apr_socket_unset_inherit
+
+apr_user_id_current              from apr_current_userid
+apr_user_compare                 from apr_compare_users
+apr_group_id_get                 from apr_get_groupid
+apr_group_compare                from apr_compare_groups
+
