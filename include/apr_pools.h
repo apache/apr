@@ -163,21 +163,37 @@ APR_DECLARE(void) apr_pool_terminate(void);
  *          (this flag only makes sense in combination with POOL_FNEW_ALLOCATOR)
  *
  */
-#if defined(APR_POOL_DEBUG)
-#define apr_pool_create_ex(newpool, parent, abort_fn, flag)  \
-    apr_pool_create_ex_debug(newpool, parent, abort_fn, flag, \
-                             APR_POOL__FILE_LINE__)
+APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
+                                             apr_pool_t *parent,
+                                             apr_abortfunc_t abort_fn,
+                                             apr_uint32_t flags);
 
+/**
+ * Debug version of apr_pool_create_ex.
+ * @param newpool See: apr_pool_create.
+ * @param parent See: apr_pool_create.
+ * @param abort_fn See: apr_pool_create.
+ * @param flags See: apr_pool_create.
+ * @param file_line Where the function is called from.
+ *        This is usually APR_POOL__FILE_LINE__.
+ * @remark Only available when APR_POOL_DEBUG is defined.
+ *         Call this directly if you have you apr_pool_create_ex
+ *         calls in a wrapper function and wish to override
+ *         the file_line argument to reflect the caller of
+ *         your wrapper function.  If you do not have
+ *         apr_pool_create_ex in a wrapper, trust the macro
+ *         and don't call apr_pool_create_ex_debug directly.
+ */
 APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
                                                    apr_pool_t *parent,
                                                    apr_abortfunc_t abort_fn,
                                                    apr_uint32_t flags,
                                                    const char *file_line);
-#else
-APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
-                                             apr_pool_t *parent,
-                                             apr_abortfunc_t abort_fn,
-                                             apr_uint32_t flags);
+
+#if defined(APR_POOL_DEBUG)
+#define apr_pool_create_ex(newpool, parent, abort_fn, flag)  \
+    apr_pool_create_ex_debug(newpool, parent, abort_fn, flag, \
+                             APR_POOL__FILE_LINE__)
 #endif
 
 /**
@@ -234,14 +250,27 @@ APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **newpool,
  *       to re-use this memory for the next allocation.
  * @see apr_pool_destroy()
  */
+APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
+
+/**
+ * Debug version of apr_pool_clear.
+ * @param p See: apr_pool_clear.
+ * @param file_line Where the function is called from.
+ *        This is usually APR_POOL__FILE_LINE__.
+ * @remark Only available when APR_POOL_DEBUG is defined.
+ *         Call this directly if you have you apr_pool_clear
+ *         calls in a wrapper function and wish to override
+ *         the file_line argument to reflect the caller of
+ *         your wrapper function.  If you do not have
+ *         apr_pool_clear in a wrapper, trust the macro
+ *         and don't call apr_pool_destroy_clear directly.
+ */
+APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *p,
+                                       const char *file_line);
+
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_clear(p) \
     apr_pool_clear_debug(p, APR_POOL__FILE_LINE__)
-
-APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *p,
-                                       const char *file_line);
-#else
-APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
 #endif
 
 /**
@@ -250,14 +279,27 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *p);
  * @param p The pool to destroy
  * @remark This will actually free the memory
  */
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
+
+/**
+ * Debug version of apr_pool_destroy.
+ * @param p See: apr_pool_destroy.
+ * @param file_line Where the function is called from.
+ *        This is usually APR_POOL__FILE_LINE__.
+ * @remark Only available when APR_POOL_DEBUG is defined.
+ *         Call this directly if you have you apr_pool_destroy
+ *         calls in a wrapper function and wish to override
+ *         the file_line argument to reflect the caller of
+ *         your wrapper function.  If you do not have
+ *         apr_pool_destroy in a wrapper, trust the macro
+ *         and don't call apr_pool_destroy_debug directly.
+ */
+APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
+                                         const char *file_line);
+
 #if defined(APR_POOL_DEBUG)
 #define apr_pool_destroy(p) \
     apr_pool_destroy_debug(p, APR_POOL__FILE_LINE__)
-
-APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *p,
-                                         const char *file_line);
-#else
-APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 #endif
 
 
