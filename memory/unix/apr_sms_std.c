@@ -105,6 +105,20 @@ static apr_status_t apr_sms_std_free(apr_sms_t *sms,
     return APR_SUCCESS;
 }
 
+#if APR_HAS_THREADS
+static apr_status_t apr_sms_std_thread_register(apr_sms_t *sms,
+                                                apr_os_thread_t thread)
+{
+    return APR_SUCCESS;
+}
+
+static apr_status_t apr_sms_std_thread_unregister(apr_sms_t *sms,
+                                                  apr_os_thread_t thread)
+{
+    return APR_SUCCESS;
+}
+#endif /* APR_HAS_THREADS */
+
 APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms)
 {
     apr_sms_t *new_sms;
@@ -122,11 +136,15 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms)
     if ((rv = apr_sms_init(new_sms, NULL)) != APR_SUCCESS)
         return rv;
 
-    new_sms->malloc_fn  = apr_sms_std_malloc;
-    new_sms->calloc_fn  = apr_sms_std_calloc;
-    new_sms->realloc_fn = apr_sms_std_realloc;
-    new_sms->free_fn    = apr_sms_std_free;
-    new_sms->identity   = module_identity;
+    new_sms->malloc_fn            = apr_sms_std_malloc;
+    new_sms->calloc_fn            = apr_sms_std_calloc;
+    new_sms->realloc_fn           = apr_sms_std_realloc;
+    new_sms->free_fn              = apr_sms_std_free;
+#if APR_HAS_THREADS
+    new_sms->thread_register_fn   = apr_sms_std_thread_register;
+    new_sms->thread_unregister_fn = apr_sms_std_thread_unregister;
+#endif /* APR_HAS_THREADS */
+    new_sms->identity             = module_identity;
 
     /* as we're not a tracking memory module, i.e. we don't keep
      * track of our allocations, we don't have apr_sms_reset or

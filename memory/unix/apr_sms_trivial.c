@@ -388,8 +388,7 @@ static apr_status_t apr_sms_trivial_destroy(apr_sms_t *sms)
 }
 
 #if APR_HAS_THREADS
-static apr_status_t apr_sms_trivial_thread_register(
-                                                    apr_sms_t *sms,
+static apr_status_t apr_sms_trivial_thread_register(apr_sms_t *sms,
                                                     apr_os_thread_t thread)
 {
     if (!SMS_TRIVIAL_T(sms)->lock && sms->threads > 1)
@@ -400,8 +399,7 @@ static apr_status_t apr_sms_trivial_thread_register(
     return APR_SUCCESS;
 }
 
-static apr_status_t apr_sms_trivial_thread_unregister(
-                                                      apr_sms_t *sms,
+static apr_status_t apr_sms_trivial_thread_unregister(apr_sms_t *sms,
                                                       apr_os_thread_t thread)
 {
     return APR_SUCCESS;

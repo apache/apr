@@ -89,6 +89,8 @@ typedef struct apr_sms_tracking_t
     apr_lock_t          *lock;
 } apr_sms_tracking_t;
 
+#define SMS_TRACKING_T(sms)  ((apr_sms_tracking_t *)(sms))
+
 #define INSERT_NODE(node, tms) \
     if (tms->lock) \
         apr_lock_acquire(tms->lock); \
@@ -256,6 +258,24 @@ static apr_status_t apr_sms_tracking_destroy(apr_sms_t *sms)
     return apr_sms_free(sms->parent, sms);
 }
 
+#if APR_HAS_THREADS
+static apr_status_t apr_sms_tracking_thread_register(apr_sms_t *sms,
+                                                     apr_os_thread_t thread)
+{
+    if (!SMS_TRACKING_T(sms)->lock && sms->threads > 1)
+        return apr_lock_create(&SMS_TRACKING_T(sms)->lock,
+                               APR_MUTEX, APR_LOCKALL,
+                               NULL, sms->pool);
+    return APR_SUCCESS;
+}
+
+static apr_status_t apr_sms_tracking_thread_unregister(apr_sms_t *sms,
+                                                       apr_os_thread_t thread)
+{
+    return APR_SUCCESS;
+}
+#endif /* APR_HAS_THREADS */
+
 
 APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms, 
                                                   apr_sms_t *pms)
@@ -277,14 +297,18 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **sms,
     if ((rv = apr_sms_init(new_sms, pms)) != APR_SUCCESS)
         return rv;
 
-    new_sms->malloc_fn      = apr_sms_tracking_malloc;
-    new_sms->calloc_fn      = apr_sms_tracking_calloc;
-    new_sms->realloc_fn     = apr_sms_tracking_realloc;
-    new_sms->free_fn        = apr_sms_tracking_free;
-    new_sms->reset_fn       = apr_sms_tracking_reset;
-    new_sms->pre_destroy_fn = apr_sms_tracking_pre_destroy;
-    new_sms->destroy_fn     = apr_sms_tracking_destroy;
-    new_sms->identity       = module_identity;
+    new_sms->malloc_fn            = apr_sms_tracking_malloc;
+    new_sms->calloc_fn            = apr_sms_tracking_calloc;
+    new_sms->realloc_fn           = apr_sms_tracking_realloc;
+    new_sms->free_fn              = apr_sms_tracking_free;
+    new_sms->reset_fn             = apr_sms_tracking_reset;
+    new_sms->pre_destroy_fn       = apr_sms_tracking_pre_destroy;
+    new_sms->destroy_fn           = apr_sms_tracking_destroy;
+#if APR_HAS_THREADS
+    new_sms->thread_register_fn   = apr_sms_tracking_thread_register;
+    new_sms->thread_unregister_fn = apr_sms_tracking_thread_unregister;
+#endif /* APR_HAS_THREADS */
+    new_sms->identity             = module_identity;
     
     tms = (apr_sms_tracking_t *)new_sms;
     tms->nodes = NULL;
