@@ -159,7 +159,7 @@ ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max,
                         const char *format, ap_exploded_time_t *xt)
 {
     struct tm tm;
-
+    memset(&tm, 0, sizeof(struct tm));
     tm.tm_sec  = xt->tm_sec;
     tm.tm_min  = xt->tm_min;
     tm.tm_hour = xt->tm_hour;
