@@ -212,10 +212,6 @@ SOURCE=.\misc\unix\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\win32\getuuid.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc\win32\internal.c
 # End Source File
 # Begin Source File
@@ -237,10 +233,6 @@ SOURCE=.\misc\win32\start.c
 # Begin Source File
 
 SOURCE=.\misc\win32\utf8.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\misc\unix\uuid.c
 # End Source File
 # Begin Source File
 
@@ -604,10 +596,6 @@ SOURCE=.\include\apr_time.h
 # Begin Source File
 
 SOURCE=.\include\apr_user.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_uuid.h
 # End Source File
 # Begin Source File
 

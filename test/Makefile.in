@@ -29,7 +29,6 @@ PROGRAMS = \
 	testshmconsumer@EXEEXT@ \
 	testpipe@EXEEXT@ \
 	testoc@EXEEXT@ \
-	testuuid@EXEEXT@ \
 	testsockopt@EXEEXT@ \
 	testipsub@EXEEXT@ \
 	testpoll@EXEEXT@ \
@@ -142,9 +141,6 @@ testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
 
 testpipe@EXEEXT@: testpipe.lo $(LOCAL_LIBS)
 	$(LINK) testpipe.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testuuid@EXEEXT@: testuuid.lo $(LOCAL_LIBS)
-	$(LINK) testuuid.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testsockopt@EXEEXT@: testsockopt.lo $(LOCAL_LIBS)
 	$(LINK) testsockopt.lo $(LOCAL_LIBS) $(ALL_LIBS)
