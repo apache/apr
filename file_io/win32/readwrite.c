@@ -313,12 +313,10 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                  * that occasionally leads to deadlocked threads.
                  */
                 apr_thread_mutex_lock(thefile->mutex);
-                if (!thefile->pOverlapped) {
-                    rc = apr_file_lock(thefile, APR_FLOCK_EXCLUSIVE);
-                    if (rc != APR_SUCCESS) {
-                        apr_thread_mutex_unlock(thefile->mutex);
-                        return rc;
-                    }
+                rc = apr_file_lock(thefile, APR_FLOCK_EXCLUSIVE);
+                if (rc != APR_SUCCESS) {
+                    apr_thread_mutex_unlock(thefile->mutex);
+                    return rc;
                 }
                 rc = apr_file_seek(thefile, APR_END, &offset);
                 if (rc != APR_SUCCESS) {
@@ -333,9 +331,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             rv = WriteFile(thefile->filehand, buf, *nbytes, &bwrote,
                            thefile->pOverlapped);
             if (thefile->append) {
-                if (!thefile->pOverlapped) {
-                    apr_file_unlock(thefile);
-                }
+                apr_file_unlock(thefile);
                 apr_thread_mutex_unlock(thefile->mutex);
             }
         }
