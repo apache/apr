@@ -77,18 +77,28 @@ static apr_int32_t get_offset(struct tm *tm)
 #elif defined(HAVE___OFFSET)
     return tm->__tm_gmtoff;
 #else
-    /* we don't have an offset field to use, so calculate it */
+    /* We don't have an offset field to use, so calculate it.
+       mktime() is the inverse of localtime(); so, presumably,
+       passing in a struct tm made by gmtime() let's us calculate
+       the true GMT offset. However, there's a catch: if daylight
+       savings is in effect, gmtime()will set the tm_isdst field
+       and confuse mktime() into returning a time that's offset
+       by one hour. In that case, we must adjust the calculated GMT
+       offset. */
     {
         time_t t1 = time(0), t2 = 0;
         struct tm t;
+        int was_dst;
 
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
         gmtime_r(&t1, &t);
 #else
         t = *gmtime(&t1);
 #endif
+        was_dst = (t.tm_isdst > 0);
+        t.tm_isdst = -1;
         t2 = mktime(&t);
-        return (apr_int32_t) difftime(t1, t2);
+        return (apr_int32_t) difftime(t1, t2) + (was_dst ? 3600 : 0);
     }
 #endif
 }
