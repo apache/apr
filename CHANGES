@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Change config.nice generation to always expand variables.
+     [Justin Erenkrantz]
+
   *) Renamed apr_strtoll()/apr_atoll() to follow int64 convention,
      so these new helpers are apr_strtoi64/apr_atoi64(), since
      'll' (long long) is a nonportable and aspecific construct.
