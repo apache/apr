@@ -3,7 +3,7 @@ Changes with APR b1
   *) Fix a segfault in apr_thread_rwlock_destroy() on Win32.
      [INOUE Seiichiro <inoue@ariel-networks.com>]
   
-  *) configure now checks to see if we can change timeout values
+  *) configure now checks to see if we can change DNS timeout values
      [Ian Holsman]
 
   *) Fix a bug in apr_file_seek() on Unix when using buffered
