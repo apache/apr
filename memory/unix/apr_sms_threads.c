@@ -104,6 +104,8 @@ typedef struct thread_node_t
 
 #define HASH_SIZE 1021
 #define SIZEOF_HASHTABLE APR_ALIGN_DEFAULT(HASH_SIZE)
+#define THREAD_HASH(tid) \
+(*(int *)&(tid) % HASH_SIZE)
 
 typedef struct apr_sms_threads_t
 {
@@ -159,7 +161,7 @@ static void *apr_sms_threads_malloc(apr_sms_t *sms,
     size = APR_ALIGN_DEFAULT(size) + SIZEOF_BLOCK_T;
 
     thread = apr_os_thread_current();
-    hash = thread % HASH_SIZE;
+    hash = THREAD_HASH(thread);
    
     /* If the thread wasn't registered before, we will segfault */ 
     thread_node = SMS_THREADS_T(sms)->hashtable[hash];
@@ -304,7 +306,7 @@ static apr_status_t apr_sms_threads_free(apr_sms_t *sms, void *mem)
         return APR_SUCCESS;
 
     thread = apr_os_thread_current();
-    hash = thread % HASH_SIZE;
+    hash = THREAD_HASH(thread);
     
     thread_node = SMS_THREADS_T(sms)->hashtable[hash];
     while (thread_node->thread != thread)
@@ -562,7 +564,7 @@ static apr_status_t apr_sms_threads_thread_register(apr_sms_t *sms,
     node_t *node, *sentinel;
     apr_uint16_t hash;
 
-    hash = thread % HASH_SIZE;
+    hash = THREAD_HASH(thread);
     
     if (sms->threads > 1 && !SMS_THREADS_T(sms)->lock) {
         apr_lock_create(&SMS_THREADS_T(sms)->lock,
@@ -630,7 +632,7 @@ static apr_status_t apr_sms_threads_thread_unregister(apr_sms_t *sms,
     apr_uint16_t hash;
     apr_size_t min_alloc, max_free;
 
-    hash = thread % HASH_SIZE;
+    hash = THREAD_HASH(thread);
     free_list = NULL;
     
     if (SMS_THREADS_T(sms)->lock)
