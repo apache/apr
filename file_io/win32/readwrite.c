@@ -307,6 +307,11 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             apr_off_t offset = 0;
             apr_status_t rc;
             if (thefile->append) {
+                /* apr_file_lock will mutex the file across processes.
+                 * The call to apr_thread_mutex_lock is added to avoid
+                 * a race condition between LockFile and WriteFile 
+                 * that occasionally leads to deadlocked threads.
+                 */
                 apr_thread_mutex_lock(thefile->mutex);
                 if (!thefile->pOverlapped) {
                     rc = apr_file_lock(thefile, APR_FLOCK_EXCLUSIVE);
