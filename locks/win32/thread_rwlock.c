@@ -72,6 +72,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_create(apr_thread_rwlock_t **rwlock,
                                                    apr_pool_t *pool)
 {
     (*rwlock) = apr_palloc(pool, sizeof(**rwlock));
+    (*rwlock)->pool = pool;
     (*rwlock)->readevent=CreateEvent(NULL,TRUE,FALSE,NULL);
     (*rwlock)->mutex = CreateEvent(NULL,FALSE,TRUE,NULL);
     (*rwlock)->writemutex = CreateMutex(NULL,FALSE,NULL);

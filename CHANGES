@@ -1,4 +1,7 @@
 Changes with APR b1
+
+  *) Fix a segfault in apr_thread_rwlock_destroy() on Win32.
+     [INOUE Seiichiro <inoue@ariel-networks.com>]
   
   *) configure now checks to see if we can change timeout values
      [Ian Holsman]
