@@ -69,7 +69,7 @@
 #include <pthread.h>
 #endif
 
-#if defined(__FreeBSD__) && (__FreeBSD__ < 4)
+#if defined(__FreeBSD__) && (__FreeBSD__ < 5)
 
 int main(void)
 {
