@@ -1,0 +1,8 @@
+TARGETS=
+INCLUDES=
+DISTCLEAN_TARGETS = rules.mk
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
+# DO NOT REMOVE

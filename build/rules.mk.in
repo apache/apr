@@ -155,6 +155,14 @@ all-recursive depend-recursive clean-recursive distclean-recursive \
 	fi; \
 	if test -z "$$made_local"; then \
 	    $(MAKE) "local-$$otarget" || exit 1; \
+	fi; \
+	if test -d "test"; then \
+	    echo "Making $$target in test"; \
+	    (cd test && $(MAKE) local-$$target) || exit 1; \
+	fi; \
+	if test -d "build"; then \
+	    echo "Making $$target in build"; \
+	    (cd build && $(MAKE) local-$$target) || exit 1; \
 	fi
 
 local-clean: x-local-clean
@@ -164,23 +172,23 @@ local-clean: x-local-clean
 local-distclean: local-clean x-local-distclean
 	$(RM) -f Makefile $(DISTCLEAN_TARGETS)
 
-local-extraclean: local-distclean
+local-extraclean: local-distclean x-local-extraclean
 	@if test -n "$(EXTRACLEAN_TARGETS)"; then \
 	    echo $(RM) -f $(EXTRACLEAN_TARGETS) ; \
 	    $(RM) -f $(EXTRACLEAN_TARGETS) ; \
 	fi
 
-local-all: $(TARGETS)
+local-all: $(TARGETS) x-local-all
 
-local-depend:
+local-depend: x-local-depend
 	@if test -n "`ls *.c 2> /dev/null`"; then \
 	    echo $(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) *.c ; \
 	    $(MKDEP) $(ALL_CPPFLAGS) $(ALL_INCLUDES) *.c ; \
 	fi
 
 # to be filled in by the actual Makefile
-x-local-clean x-local-distclean:
-
+x-local-all x-local-depend:
+x-local-clean x-local-distclean x-local-extraclean:
 
 #
 # Implicit rules for creating outputs from input files
@@ -198,4 +206,5 @@ x-local-clean x-local-distclean:
 	all-recursive depend-recursive clean-recursive distclean-recursive \
 	extraclean-recursive
 	local-all local-depend local-clean local-distclean local-extraclean \
-	x-local-clean x-local-distclean
+	x-local-all x-local-depend x-local-clean x-local-distclean \
+	x-local-extraclean
