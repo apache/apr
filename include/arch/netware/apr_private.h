@@ -189,5 +189,10 @@ void* getStatCache();
 #undef malloc
 #define malloc(x) library_malloc(gLibHandle,x)
 
+/*
+ * Include common private declarations.
+ */
+#include "../apr_private_common.h"
+
 #endif  /*APR_PRIVATE_H*/
 #endif  /*NETWARE*/

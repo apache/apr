@@ -182,5 +182,10 @@ APR_DECLARE_DATA int errno;
 #define HAVE_GETNAMEINFO 1
 #endif
 
+/*
+ * Include common private declarations.
+ */
+#include "../apr_private_common.h"
+
 #endif  /*APR_PRIVATE_H*/
 #endif  /*WIN32*/
