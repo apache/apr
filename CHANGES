@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Change the include path order, so that we look for included files
+     in the APR paths first, and the system paths second.
+     [jean-frederic clere <jfrederic.clere@fujitsu-siemens.com>]
+
   *) Add a with-sendfile option, so that people on platforms without a
      sendfile implementation for APR can easily disable it from the 
      configure line.  [Ryan Bloom]
