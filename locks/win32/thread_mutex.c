@@ -106,3 +106,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_destroy(apr_thread_mutex_t *mutex)
 {
     return apr_pool_cleanup_run(mutex->pool, mutex, thread_mutex_cleanup);
 }
+
+APR_POOL_IMPLEMENT_ACCESSOR(thread_mutex)
+

@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Add pool accessors to the apr_thread_mutex_t datatype.
+     [Aaron Bannert <aaron@clove.org>]
+
   *) Add the apr_file_mktemp function.  This creates and opens a 
      temporary file, for use by the program.  This file is created
      delete_on_close.  The initial implementation only works on
