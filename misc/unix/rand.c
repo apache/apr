@@ -135,7 +135,7 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char *buf,
     memset(&addr, 0, sizeof(struct sockaddr_un));
     addr.sun_family = AF_UNIX;
     memcpy(addr.sun_path, STR(EGD_DEFAULT_SOCKET), egd_path_len);
-    egd_addr_len = APR_XtOffsetOf(struct sockaddr_un, sun_path) + 
+    egd_addr_len = APR_OFFSETOF(struct sockaddr_un, sun_path) + 
                    egd_path_len; 
 
     egd_socket = socket(PF_UNIX, SOCK_STREAM, 0);
