@@ -165,10 +165,10 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
         else {
             memcpy((*new_file)->buffer, old_file->buffer, old_file->dataRead);
         }
-        if (old_file->thlock) {
-            apr_thread_mutex_create(&((*new_file)->thlock),
+        if (old_file->mutex) {
+            apr_thread_mutex_create(&((*new_file)->mutex),
                                     APR_THREAD_MUTEX_DEFAULT, p);
-            apr_thread_mutex_destroy(old_file->thlock);
+            apr_thread_mutex_destroy(old_file->mutex);
         }
     }
     if (old_file->fname) {
@@ -180,7 +180,7 @@ APR_DECLARE(apr_status_t) apr_file_setaside(apr_file_t **new_file,
                                   file_cleanup);
     }
 
-    old_file->filedes = -1;
+    old_file->filehand = INVALID_HANDLE_VALUE;
     apr_pool_cleanup_kill(old_file->pool, (void *)old_file,
                           file_cleanup);
     return APR_SUCCESS;
