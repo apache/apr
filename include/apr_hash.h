@@ -74,8 +74,10 @@ extern "C" {
  * passed to indicate a string-valued key, and have apr_hash compute the
  * length automatically.
  *
- * Note: apr_hash will use strlen(key)+1 for the length. This allows
- *   apr_hash_this() to return a null-terminated string as the key.
+ * Note: apr_hash will use strlen(key) for the length. The null-terminator
+ *       is not included in the hash value (why throw a constant in?).
+ *       Since the hash table merely references the provided key (rather
+ *       than copying it), apr_hash_this() will return the null-term'd key.
  */
 #define APR_HASH_KEY_STRING     (-1)
 
