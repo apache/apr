@@ -1,5 +1,7 @@
 Changes for APR 1.0.2
 
+  *) Add a build script to create a solaris package. [Graham Leggett]
+
   *) [NetWare] Fixed some type mismatches in threadproc/netware/proc.c and
      locks/netware/thread_mutex.c that prevented APR from building with the
      latest release of the LibC SDK. [Brad Nicholes]
