@@ -324,7 +324,7 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
         /* Evaluate the efdset */
         if (FD_ISSET(sock->sock, &efdset)) {
             /* The connect failed. */
-            unsigned int rclen = sizeof(rc);
+            int rclen = sizeof(rc);
             if (getsockopt(sock->sock, SOL_SOCKET, SO_ERROR, (char*) &rc, &rclen)) {
                 return apr_get_netos_error();
             }
