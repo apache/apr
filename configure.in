@@ -526,25 +526,13 @@ else
 
         if test "$ac_cv_func_pthread_rwlock_init" = "yes"; then
             dnl ----------------------------- Checking for pthread_rwlock_t
-            dnl Linux is silly as it has pthread_rwlock_init defined
-            dnl but keeps the pthread_rwlock_t structure hidden unless 
-            dnl special things are defined.
             AC_CACHE_CHECK([for pthread_rwlock_t], [apr_cv_type_rwlock_t],
             AC_TRY_COMPILE([#include <sys/types.h>
 #include <pthread.h>], [pthread_rwlock_t rwlock=PTHREAD_RWLOCK_INITIALIZER;],
-              [apr_cv_type_rwlock_t=yes],
-              [AC_TRY_COMPILE([#define _XOPEN_SOURCE 500
-#define _BSD_SOURCE
-#define _SVID_SOURCE
-#include <sys/types.h>
-#include <pthread.h>], [pthread_rwlock_t rwlock=PTHREAD_RWLOCK_INITIALIZER;],
-              [apr_cv_type_rwlock_t=yes-with-XOPEN_SOURCE], [apr_cv_type_rwlock_t=no])],
+              [apr_cv_type_rwlock_t=yes], [apr_cv_type_rwlock_t=no], 
               [apr_cv_type_rwlock_t=no]))
-            case $apr_cv_type_rwlock_t in
-            yes*) AC_DEFINE(HAVE_PTHREAD_RWLOCKS, 1, [Define if pthread rwlocks are available]) ;;
-            esac
-            if test "$apr_cv_type_rwlock_t" = "yes-with-XOPEN_SOURCE"; then
-               APR_ADDTO(CPPFLAGS, [-D_XOPEN_SOURCE=500 -D_BSD_SOURCE -D_SVID_SOURCE])
+            if test "$apr_cv_type_rwlock_t" = "yes"; then
+               AC_DEFINE(HAVE_PTHREAD_RWLOCKS, 1, [Define if pthread rwlocks are available])
             fi
         fi
     fi
