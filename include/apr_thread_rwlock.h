@@ -131,7 +131,7 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwloc
 /**
  * Release either the read or write lock currently held by the calling thread
  * associated with the given read-write lock.
- * @param rwlock the read-write lock rom which to release the lock.
+ * @param rwlock the read-write lock to be released (unlocked).
  */
 APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock);
 
