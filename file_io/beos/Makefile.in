@@ -25,7 +25,6 @@ OBJS=../unix/dir.o \
 	../unix/pipe.o \
 	../unix/readwrite.o \
 	../unix/seek.o \
-         ../unix/mmap_file.o
 
 OBJS2=dir.o \
 	fileacc.o \
@@ -35,7 +34,7 @@ OBJS2=dir.o \
 	pipe.o \
 	readwrite.o \
 	seek.o \
-         mmap_file.o
+
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
 
