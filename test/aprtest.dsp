@@ -75,16 +75,97 @@ CFG=aprtest - Win32 Debug
 
 !ENDIF 
 
+# Begin Group "Sources"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\abc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\client.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\mod_test.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\occhild.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sendfile.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\server.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testargs.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testcontext.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testdso.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testfile.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testflock.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testmmap.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testoc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testpipe.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testproc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testshmem.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testsock.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testthread.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testtime.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testucs.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\testuuid.c
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\aprtest.win
-
-!IF  "$(CFG)" == "aprtest - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "aprtest - Win32 Debug"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
