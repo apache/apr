@@ -114,11 +114,7 @@ typedef unsigned __int64       ap_uint64_t;
 #endif
 
 typedef size_t                 ap_size_t;
-#ifdef ssize_t
 typedef ssize_t                ap_ssize_t;
-#else
-typedef int                    ap_ssize_t;
-#endif
 typedef off_t                  ap_off_t;
 
 typedef struct context_t  ap_context_t;
