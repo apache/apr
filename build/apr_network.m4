@@ -267,7 +267,7 @@ dnl APR_H_ERRNO_COMPILE_CHECK
 dnl
 AC_DEFUN(APR_H_ERRNO_COMPILE_CHECK,[
   if test x$1 != x; then
-    CFLAGS="-D$1 $CFLAGS"
+    CPPFLAGS="-D$1 $CPPFLAGS"
   fi
   AC_TRY_COMPILE([
 #ifdef HAVE_SYS_TYPES_H
@@ -280,12 +280,12 @@ AC_DEFUN(APR_H_ERRNO_COMPILE_CHECK,[
 int h_e = h_errno;
 ],[
   if test x$1 != x; then
-    ac_cv_h_errno_cflags="$1"
+    ac_cv_h_errno_cppflags="$1"
   else
-    ac_cv_h_errno_cflags=yes
+    ac_cv_h_errno_cppflags=yes
   fi
 ],[
-  ac_cv_h_errno_cflags=no
+  ac_cv_h_errno_cppflags=no
 ])])
 
 
@@ -296,28 +296,28 @@ dnl checks which flags are necessary for <netdb.h> to define h_errno
 dnl
 AC_DEFUN(APR_CHECK_H_ERRNO_FLAG,[
   AC_MSG_CHECKING([for h_errno in netdb.h])
-  AC_CACHE_VAL(ac_cv_h_errno_cflags,[
+  AC_CACHE_VAL(ac_cv_h_errno_cppflags,[
     APR_H_ERRNO_COMPILE_CHECK
-    if test "$ac_cv_h_errno_cflags" = "no"; then
-      ac_save="$CFLAGS"
+    if test "$ac_cv_h_errno_cppflags" = "no"; then
+      ac_save="$CPPFLAGS"
       for flag in _XOPEN_SOURCE_EXTENDED; do
         APR_H_ERRNO_COMPILE_CHECK($flag)
-        if test "$ac_cv_h_errno_cflags" != "no"; then
+        if test "$ac_cv_h_errno_cppflags" != "no"; then
           break
         fi
       done
-      CFLAGS="$ac_save"
+      CPPFLAGS="$ac_save"
     fi
   ])
-  if test "$ac_cv_h_errno_cflags" != "no"; then
-    if test "$ac_cv_h_errno_cflags" != "yes"; then
-      CFLAGS="-D$ac_cv_h_errno_cflags $CFLAGS"
-      AC_MSG_RESULT([yes, with -D$ac_cv_h_errno_cflags])
+  if test "$ac_cv_h_errno_cppflags" != "no"; then
+    if test "$ac_cv_h_errno_cppflags" != "yes"; then
+      CPPFLAGS="-D$ac_cv_h_errno_cppflags $CPPFLAGS"
+      AC_MSG_RESULT([yes, with -D$ac_cv_h_errno_cppflags])
     else
-      AC_MSG_RESULT([$ac_cv_h_errno_cflags])
+      AC_MSG_RESULT([$ac_cv_h_errno_cppflags])
     fi
   else
-    AC_MSG_RESULT([$ac_cv_h_errno_cflags])
+    AC_MSG_RESULT([$ac_cv_h_errno_cppflags])
   fi
 ])
 
