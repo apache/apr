@@ -355,10 +355,12 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 	if (c >= base)
 	    break;
 	val *= base;
-        if ((neg && (val > acc || (val -= c) > acc))
+        if ( (any < 0) || (neg && (val > acc || (val -= c) > acc))
                  || (val < acc || (val += c) < acc)) {
             any = -1;
+#ifdef APR_STRTOI64_OVERFLOW_IS_BAD_CHAR
             break;
+#endif
         } else {
             acc = val;
 	    any = 1;
