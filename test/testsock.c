@@ -108,7 +108,7 @@ static void test_send(CuTest *tc)
     apr_socket_t *sock2;
     apr_proc_t proc;
     int protocol;
-    int length;
+    apr_size_t length;
 
     sock = setup_socket(tc);
 
@@ -139,7 +139,7 @@ static void test_recv(CuTest *tc)
     apr_socket_t *sock2;
     apr_proc_t proc;
     int protocol;
-    int length = STRLEN;
+    apr_size_t length = STRLEN;
     char datastr[STRLEN];
     
     sock = setup_socket(tc);
