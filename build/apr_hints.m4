@@ -89,6 +89,7 @@ else
           APR_ADDTO(CFLAGS, [-qLANGLVL=extended])
         fi
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_THREAD_SAFE])
         ;;
     *-apollo-*)
 	APR_ADDTO(CFLAGS, [-DAPOLLO])
@@ -105,6 +106,7 @@ else
     *-hp-hpux11.*)
 	APR_ADDTO(CFLAGS, [-DHPUX11])
 	APR_ADDTO(LIBS, [-lpthread])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-hp-hpux10.*)
  	case $host in
@@ -114,9 +116,11 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	       APR_ADDTO(CFLAGS, [-DSELECT_NEEDS_CAST])
 	       ;;	     
  	esac
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-hp-hpux*)
 	APR_ADDTO(CFLAGS, [-DHPUX])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-linux-*)
         case `uname -r` in
@@ -129,6 +133,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	    * )
 	           ;;
         esac
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-GNU*)
 	APR_ADDTO(CFLAGS, [-DHURD])
@@ -141,6 +146,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *486-*-bsdi*)
 	APR_ADDTO(CFLAGS, [-m486])
 	;;
+    *-openbsd*)
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_POSIX_THREADS])
+	;;
     *-netbsd*)
 	APR_ADDTO(CFLAGS, [-DNETBSD])
 	APR_ADDTO(LIBS, [-lcrypt])
@@ -152,7 +160,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 		;;
 	esac
 	APR_ADDTO(LIBS, [-lcrypt])
-        APR_SETIFNULL(enable_threads, [no])
+	APR_SETIFNULL(enable_threads, [no])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT -D_THREAD_SAFE])
 	;;
     *-next-nextstep*)
 	APR_SETIFNULL(OPTIM, [-O])
@@ -190,20 +199,24 @@ dnl	;;
     *-sco3*)
 	APR_ADDTO(CFLAGS, [-DSCO -Oacgiltz])
 	APR_ADDTO(LIBS, [-lPW -lsocket -lmalloc -lcrypt_i])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-sco5*)
 	APR_ADDTO(CFLAGS, [-DSCO5])
 	APR_ADDTO(LIBS, [-lsocket -lmalloc -lprot -ltinfo -lx])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-sco_sv*|*-SCO_SV*)
 	APR_ADDTO(CFLAGS, [-DSCO])
 	APR_ADDTO(LIBS, [-lPW -lsocket -lmalloc -lcrypt_i])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_REENTRANT])
 	;;
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CFLAGS, [-DSOLARIS2=$PLATOSVERS])
 	APR_ADDTO(LIBS, [-lsocket -lnsl])
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
 	;;
     *-sunos4*)
 	APR_ADDTO(CFLAGS, [-DSUNOS4 -DUSEBCOPY])
@@ -332,6 +345,9 @@ dnl	;;
 	APR_ADDTO(CFLAGS, [-DRISCIX])
 	APR_SETIFNULL(OPTIM, [-O])
 	APR_SETIFNULL(MAKE, [make])
+	;;
+    *-irix*)
+	APR_ADDTO(THREAD_CPPFLAGS, [-D_POSIX_THREAD_SAFE_FUNCTIONS])
 	;;
     *beos*)
         APR_ADDTO(CFLAGS, [-DBEOS])

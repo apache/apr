@@ -3,9 +3,9 @@ dnl apr_common.m4: APR's general-purpose autoconf macros
 dnl
 
 dnl
-dnl RUN_SUBDIR_CONFIG_NOW(dir [, sub-package-cmdline-args])
+dnl APR_SUBDIR_CONFIG(dir [, sub-package-cmdline-args])
 dnl
-AC_DEFUN(RUN_SUBDIR_CONFIG_NOW, [
+AC_DEFUN(APR_SUBDIR_CONFIG, [
   # save our work to this point; this allows the sub-package to use it
   AC_CACHE_SAVE
 
@@ -41,20 +41,8 @@ changequote([, ])dnl
 
   # grab any updates from the sub-package
   AC_CACHE_LOAD
-])
+])dnl
 
-
-AC_DEFUN(APR_PREPARE_MM_DIR,[
-dnl #----------------------------- Prepare mm directory for VPATH support
-if test -n "$USE_MM" && test -n "$USE_VPATH"; then
-  test -d $mm_dir || $MKDIR $mm_dir
-
-  for i in shtool config.guess config.sub fbtool ltconfig \
-           ltmain.sh mm_vers.c; do
-    test -r $mm_dir/$i || ln -s $abs_srcdir/$mm_dir/$i $mm_dir/$i
-  done
-fi
-])
 
 dnl
 dnl APR_DOEXTRA
@@ -86,6 +74,7 @@ AC_DEFUN(APR_DOEXTRA, [
   done
 ])
 
+
 dnl
 dnl APR_SETIFNULL(variable, value)
 dnl
@@ -98,6 +87,7 @@ AC_DEFUN(APR_SETIFNULL,[
   fi
 ])
 
+
 dnl
 dnl APR_SETVAR(variable, value)
 dnl
@@ -107,6 +97,7 @@ AC_DEFUN(APR_SETVAR,[
   echo "  Forcing $1 to \"$2\""
   $1="$2"; export $1
 ])
+
 
 dnl
 dnl APR_ADDTO(variable, value)
@@ -119,15 +110,10 @@ AC_DEFUN(APR_ADDTO,[
 ])
 
 
-define(AC_USE_FUNCTION,[dnl
-AC_CHECK_FUNCS($1)
-if test ".$ac_func_$1" = .yes; then 
-AC_DEFINE(USE_$2)
-fi
-])
-
-
-AC_DEFUN(AC_CHECK_DEFINE_FILES,[
+dnl
+dnl APR_CHECK_DEFINE_FILES( symbol, header_file [header_file ...] )
+dnl
+AC_DEFUN(APR_CHECK_DEFINE_FILES,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
     ac_cv_define_$1=no
     for curhdr in $2
@@ -146,7 +132,10 @@ AC_DEFUN(AC_CHECK_DEFINE_FILES,[
 ])
 
 
-AC_DEFUN(AC_CHECK_DEFINE,[
+dnl
+dnl APR_CHECK_DEFINE( symbol, header_file )
+dnl
+AC_DEFUN(APR_CHECK_DEFINE,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
     AC_EGREP_CPP(YES_IS_DEFINED, [
     #include <$2>
@@ -161,7 +150,7 @@ AC_DEFUN(AC_CHECK_DEFINE,[
 ])
 
 
-define(AC_IFALLYES,[dnl
+define(APR_IFALLYES,[dnl
 ac_rc=yes
 for ac_spec in $1; do
     ac_type=`echo "$ac_spec" | sed -e 's/:.*$//'`
@@ -195,14 +184,14 @@ fi
 ])
 
 
-define(AC_BEGIN_DECISION,[dnl
+define(APR_BEGIN_DECISION,[dnl
 ac_decision_item='$1'
 ac_decision_msg='FAILED'
 ac_decision=''
 ])
 
 
-define(AC_DECIDE,[dnl
+define(APR_DECIDE,[dnl
 ac_decision='$1'
 ac_decision_msg='$2'
 ac_decision_$1=yes
@@ -210,7 +199,7 @@ ac_decision_$1_msg='$2'
 ])
 
 
-define(AC_DECISION_OVERRIDE,[dnl
+define(APR_DECISION_OVERRIDE,[dnl
     ac_decision=''
     for ac_item in $1; do
          eval "ac_decision_this=\$ac_decision_${ac_item}"
@@ -222,13 +211,13 @@ define(AC_DECISION_OVERRIDE,[dnl
 ])
 
 
-define(AC_DECISION_FORCE,[dnl
+define(APR_DECISION_FORCE,[dnl
 ac_decision="$1"
 eval "ac_decision_msg=\"\$ac_decision_${ac_decision}_msg\""
 ])
 
 
-define(AC_END_DECISION,[dnl
+define(APR_END_DECISION,[dnl
 if test ".$ac_decision" = .; then
     echo "[$]0:Error: decision on $ac_decision_item failed" 1>&2
     exit 1
@@ -241,50 +230,14 @@ else
 fi
 ])
 
-dnl ### AC_TRY_RUN had some problems actually using a programs return code,
-dnl ### so I am re-working it here to be used in APR's configure script.
-dnl MY_TRY_RUN(PROGRAM, [ACTION-IF-TRUE [, ACTION-IF-FALSE
-dnl            [, ACTION-IF-CROSS-COMPILING]]])
-AC_DEFUN(MY_TRY_RUN,
-[if test "$cross_compiling" = yes; then
-  ifelse([$4], ,
-    [errprint(__file__:__line__: warning: [AC_TRY_RUN] called without default to allow cross compiling
-)dnl
-  AC_MSG_ERROR(can not run test program while cross compiling)],
-  [$4])
-else
-  MY_TRY_RUN_NATIVE([$1], [$2], [$3])
-fi
-])
 
-dnl Like AC_TRY_RUN but assumes a native-environment (non-cross) compiler.
-dnl MY_TRY_RUN_NATIVE(PROGRAM, [ACTION-IF-TRUE [, ACTION-IF-FALSE]])
-AC_DEFUN(MY_TRY_RUN_NATIVE,
-[cat > conftest.$ac_ext <<EOF
-[#]line __oline__ "configure"
-#include "confdefs.h"
-ifelse(AC_LANG, CPLUSPLUS, [#ifdef __cplusplus
-extern "C" void exit(int);
-#endif
-])dnl
-[$1]
-EOF
-if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
-then
-dnl Don't remove the temporary files here, so they can be examined.
-  ifelse([$2], , :, [$2])
-else
-ifelse([$3], , , [  $3 
-  rm -fr conftest*
-])dnl
-fi
-rm -fr conftest*])
-
-
+dnl
+dnl APR_CHECK_SIZEOF_EXTENDED(INCLUDES, TYPE [, CROSS_SIZE])
+dnl
 dnl A variant of AC_CHECK_SIZEOF which allows the checking of
 dnl sizes of non-builtin types
-dnl AC_CHECK_SIZEOF_EXTENDED(INCLUDES, TYPE [, CROSS_SIZE])
-AC_DEFUN(AC_CHECK_SIZEOF_EXTENDED,
+dnl
+AC_DEFUN(APR_CHECK_SIZEOF_EXTENDED,
 [changequote(<<,>>)dnl
 dnl The name to #define
 define(<<AC_TYPE_NAME>>, translit(sizeof_$2, [a-z *], [A-Z_P]))dnl
@@ -308,6 +261,7 @@ AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME)
 undefine([AC_TYPE_NAME])dnl
 undefine([AC_CV_NAME])dnl
 ])
+
 
 dnl
 dnl APR_TRY_COMPILE_NO_WARNING(INCLUDES, FUNCTION-BODY,
@@ -343,7 +297,9 @@ else
   ifelse([$4], , , [rm -rf conftest*
   $4])
 fi
-rm -f conftest*])
+rm -f conftest*
+])dnl
+
 
 dnl
 dnl APR_CHECK_ICONV_INBUF
@@ -374,5 +330,5 @@ else
     msg="char **"
 fi
 AC_MSG_RESULT([$msg])
-])
+])dnl
 

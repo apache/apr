@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Name protected the autoconf macros defined by APR.  Moved the
+     REENTRANCY_FLAGS settings into apr_hints.m4. Inlined the
+     APR_PREPARE_MM_DIR macro because it could only be used once.
+     Removed the unused macros MY_TRY_RUN, MY_TRY_RUN_NATIVE, and
+     AC_USE_FUNCTION.  Added some macro comments.  [Roy Fielding]
+
   *) Cope with BSDi installations where the default make has been
      replaced with GNU make.  [Joe Orton <joe@manyfish.co.uk>]
 
