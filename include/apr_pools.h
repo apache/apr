@@ -460,11 +460,12 @@ APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
  *
  *      Users of APR must take EXTREME care when choosing a key to
  *      use for their data.  It is possible to accidentally overwrite
- *      data by choosing a key that another part of the program is using
- *      It is advised that steps are taken to ensure that unique keys are
- *      used for all of the userdata objects in a given pool at all times.
- *      Careful namespace prefixing of key names typically helps to ensure this
- *      uniqueness.
+ *      data by choosing a key that another part of the program is using.
+ *      Therefore it is advised that steps are taken to ensure that unique
+ *      keys are used for all of the userdata objects in a particular pool
+ *      (the same key in two different pools or a pool and one of its
+ *      subpools is okay) at all times.  Careful namespace prefixing of
+ *      key names is a typical way to help ensure this uniqueness.
  *
  */
 APR_DECLARE(apr_status_t) apr_pool_userdata_set(
