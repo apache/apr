@@ -63,7 +63,9 @@ static void ssize_t_fmt(CuTest *tc)
     apr_ssize_t var = 0;
 
     sprintf(buf, "%" APR_SSIZE_T_FMT, var);
-    CuAssertStrEquals(tc, buf, "0");
+    CuAssertStrEquals(tc, "0", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_SSIZE_T_FMT, var);
+    CuAssertStrEquals(tc, "0", buf);
 }
 
 static void size_t_fmt(CuTest *tc)
@@ -72,7 +74,9 @@ static void size_t_fmt(CuTest *tc)
     apr_size_t var = 0;
 
     sprintf(buf, "%" APR_SIZE_T_FMT, var);
-    CuAssertStrEquals(tc, buf, "0");
+    CuAssertStrEquals(tc, "0", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_SIZE_T_FMT, var);
+    CuAssertStrEquals(tc, "0", buf);
 }
 
 static void off_t_fmt(CuTest *tc)
@@ -81,7 +85,9 @@ static void off_t_fmt(CuTest *tc)
     apr_off_t var = 0;
 
     sprintf(buf, "%" APR_OFF_T_FMT, var);
-    CuAssertStrEquals(tc, buf, "0");
+    CuAssertStrEquals(tc, "0", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_OFF_T_FMT, var);
+    CuAssertStrEquals(tc, "0", buf);
 }
 
 static void pid_t_fmt(CuTest *tc)
@@ -90,7 +96,9 @@ static void pid_t_fmt(CuTest *tc)
     pid_t var = 0;
 
     sprintf(buf, "%" APR_PID_T_FMT, var);
-    CuAssertStrEquals(tc, buf, "0");
+    CuAssertStrEquals(tc, "0", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_PID_T_FMT, var);
+    CuAssertStrEquals(tc, "0", buf);
 }
 
 static void int64_t_fmt(CuTest *tc)
@@ -99,7 +107,9 @@ static void int64_t_fmt(CuTest *tc)
     apr_int64_t var = 0;
 
     sprintf(buf, "%" APR_INT64_T_FMT, var);
-    CuAssertStrEquals(tc, buf, "0");
+    CuAssertStrEquals(tc, "0", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_INT64_T_FMT, var);
+    CuAssertStrEquals(tc, "0", buf);
 }
 
 static void uint64_t_fmt(CuTest *tc)
@@ -108,7 +118,9 @@ static void uint64_t_fmt(CuTest *tc)
     apr_uint64_t var = 14000000;
 
     sprintf(buf, "%" APR_UINT64_T_FMT, var);
-    CuAssertStrEquals(tc, buf, "14000000");
+    CuAssertStrEquals(tc, "14000000", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_UINT64_T_FMT, var);
+    CuAssertStrEquals(tc, "14000000", buf);
 }
 
 static void uint64_t_hex_fmt(CuTest *tc)
@@ -117,7 +129,9 @@ static void uint64_t_hex_fmt(CuTest *tc)
     apr_uint64_t var = 14000000;
 
     sprintf(buf, "%" APR_UINT64_T_HEX_FMT, var);
-    CuAssertStrEquals(tc, buf, "d59f80");
+    CuAssertStrEquals(tc, "d59f80", buf);
+    apr_snprintf(buf, sizeof(buf), "%" APR_UINT64_T_HEX_FMT, var);
+    CuAssertStrEquals(tc, "d59f80", buf);
 }
 
 CuSuite *testfmt(void)
