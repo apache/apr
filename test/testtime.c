@@ -87,7 +87,7 @@ int main(void)
     
     STD_TEST_NEQ("    apr_explode_localtime", apr_explode_localtime(&xt2, now))
 
-    STD_TEST_NEQ("    apr_implode_time (GMT)", apr_implode_time(&imp, &xt))
+    STD_TEST_NEQ("    apr_time_exp_get (GMT)", apr_time_exp_get(&imp, &xt))
 
     printf("%-60s", "    checking GMT explode == implode");
     if (imp != now) {
@@ -166,8 +166,8 @@ int main(void)
              strcmp(str, str2), 0, "OK", "Failed")
     printf("        ( %s != %s )\n", str, str2);
 
-    STD_TEST_NEQ("    apr_implode_time (offset)",
-                 apr_implode_time(&imp, &xt2))
+    STD_TEST_NEQ("    apr_time_exp_get (offset)",
+                 apr_time_exp_get(&imp, &xt2))
    
     hr_off_64 = (apr_int64_t) hr_off * APR_USEC_PER_SEC; /* microseconds */ 
     printf("%-60s","    Checking offset is correct");
