@@ -95,15 +95,13 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
-    (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
-    memset(*in, '\0', sizeof(ap_file_t));
+    (*in) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     (*in)->cntxt = cont;
     (*in)->pipe = 1;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
     (*in)->timeout = -1;
 
-    (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
-    memset(*out, '\0', sizeof(ap_file_t));
+    (*out) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
     (*out)->cntxt = cont;
     (*out)->pipe = 1;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
