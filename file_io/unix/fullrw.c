@@ -62,7 +62,7 @@ apr_status_t apr_full_read(apr_file_t *thefile, void *buf, apr_size_t nbytes,
     apr_size_t total_read = 0;
 
     do {
-	apr_ssize_t amt = (apr_ssize_t)nbytes;
+	apr_size_t amt = nbytes;
 
 	status = apr_read(thefile, buf, &amt);
 	buf = (char *)buf + amt;
@@ -83,7 +83,7 @@ apr_status_t apr_full_write(apr_file_t *thefile, const void *buf,
     apr_size_t total_written = 0;
 
     do {
-	apr_ssize_t amt = (apr_ssize_t)nbytes;
+	apr_size_t amt = nbytes;
 
 	status = apr_write(thefile, buf, &amt);
 	buf = (char *)buf + amt;
