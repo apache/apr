@@ -446,6 +446,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
             i = strlen(progname);
             if (i >= 11 && strcasecmp(progname + i - 11, "command.com") == 0) {
+                /* XXX: Still insecure - need doubled-quotes on each individual
+                 * arg of cmdline.  Suspect we need to postpone cmdline parsing
+                 * until this moment in all four code paths, with some flags
+                 * to toggle 'which flavor' is needed.
+                 */
                 cmdline = apr_pstrcat(pool, shellcmd, " /C ", argv0, cmdline, NULL);
             }
             else {
