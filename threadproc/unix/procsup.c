@@ -61,6 +61,7 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include <unistd.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_detach(ap_context_t *, ap_proc_t *)

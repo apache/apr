@@ -58,6 +58,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"

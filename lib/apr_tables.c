@@ -78,6 +78,9 @@
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 
 /*****************************************************************
  * This file contains array and ap_table_t functions only.

@@ -61,6 +61,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <unistd.h>
 
 ap_status_t file_cleanup(void *thefile)
 {

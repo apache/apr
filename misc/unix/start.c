@@ -217,6 +217,7 @@ ap_status_t ap_set_abort(int (*apr_abort)(int retcode), struct context_t *cont)
     }
     else {
         cont->apr_abort = apr_abort;
+        return APR_SUCCESS;
     }
 }
  
