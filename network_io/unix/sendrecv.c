@@ -463,8 +463,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     ap_status_t arv;
     struct sf_parms parms;
 
-    /* AIX can also send the headers/footers as part of the system call
-       ... badly.*/
+    /* AIX can also send the headers/footers as part of the system call */
     parms.header_length = 0;
     if (hdtr && hdtr->numheaders) {
         if (hdtr->numheaders == 1) {
@@ -475,8 +474,15 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             for (i = 0; i < hdtr->numheaders; i++) {
                 parms.header_length += hdtr->headers[i].iov_len;
             }
+#if 0
             /* Keepalives make ap_palloc a bad idea */
             hbuf = malloc(parms.header_length);
+#else
+            /* but headers are small, so maybe we can hold on to the
+             * memory for the life of the socket...
+             */
+            hbuf = ap_palloc(sock->cntxt, parms.header_length);
+#endif
             ptr = 0;
             for (i = 0; i < hdtr->numheaders; i++) {
                 memcpy(hbuf + ptr, hdtr->headers[i].iov_base,
@@ -497,8 +503,12 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             for (i = 0; i < hdtr->numtrailers; i++) {
                 parms.trailer_length += hdtr->trailers[i].iov_len;
             }
+#if 0
             /* Keepalives make ap_palloc a bad idea */
             tbuf = malloc(parms.trailer_length);
+#else
+            tbuf = ap_palloc(sock->cntxt, parms.trailer_length);
+#endif
             ptr = 0;
             for (i = 0; i < hdtr->numtrailers; i++) {
                 memcpy(tbuf + ptr, hdtr->trailers[i].iov_base,
@@ -521,8 +531,7 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     do {
         rv = send_file(&(sock->socketdes), /* socket */
                        &(parms),           /* all data */
-                       flags               /* flags */
-            );
+                       flags);             /* flags */
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 &&
@@ -537,22 +546,24 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
             do {
                 rv = send_file(&(sock->socketdes), /* socket */
                                &(parms),           /* all data */
-                               flags               /* flags */
-                    );
+                               flags);             /* flags */
             } while (rv == -1 && errno == EINTR);
         }
     }
 
     (*len) = parms.bytes_sent;
 
+#if 0
     /* Clean up after ourselves */
     if(hbuf) free(hbuf);
     if(tbuf) free(tbuf);
+#endif
 
     if (rv == -1) {
         return errno;
     }
     return APR_SUCCESS;
 }
+#else
 #endif /* __linux__, __FreeBSD__, __HPUX__, _AIX */
 #endif /* APR_HAS_SENDFILE */
