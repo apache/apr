@@ -31,9 +31,6 @@
  * SUCH DAMAGE.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "misc.h"
 
 int ap_opterr = 1,                      /* if error message should be printed */

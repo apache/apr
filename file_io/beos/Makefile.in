@@ -10,12 +10,12 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../inc
-INCDIR1=../../include -I../../file_io/unix
+INCDIR1=../../include -I../unix
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
-LIB=libmmap.a
+LIB=libfile.a
 
-OBJS=mmap.o mmap_common.o
+OBJS=file_io_common.o 	readwrite.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
@@ -50,16 +50,15 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-mmap.o: mmap.c mmap_h.h ../../include/apr_general.h \
+file_io_common.o: file_io_common.c ../unix/dir.c ../unix/fileio.h \
+ ../../include/apr_config.h ../../include/apr_general.h \
  ../../include/apr.h ../../include/apr_errno.h \
- ../../include/apr_mmap.h ../../include/apr_network_io.h \
- ../../include/apr_file_io.h ../../include/apr_portable.h \
- ../../include/apr_thread_proc.h ../../include/apr_lock.h \
- ../../include/apr_time.h ../../include/apr_lib.h \
- ../../file_io/unix/fileio.h ../../include/apr_config.h
-mmap_common.o: mmap_common.c ../unix/common.c ../unix/../beos/mmap_h.h \
- ../../include/apr_general.h ../../include/apr.h \
- ../../include/apr_errno.h ../../include/apr_mmap.h \
- ../../include/apr_network_io.h ../../include/apr_file_io.h \
+ ../../include/apr_file_io.h ../../include/apr_lib.h \
  ../../include/apr_portable.h ../../include/apr_thread_proc.h \
- ../../include/apr_lock.h ../../include/apr_time.h
+ ../../include/apr_network_io.h ../../include/apr_lock.h \
+ ../../include/apr_time.h ../unix/fileacc.c ../unix/filedup.c \
+ ../unix/filestat.c ../unix/open.c ../unix/pipe.c ../unix/seek.c
+readwrite.o: readwrite.c ../unix/fileio.h ../../include/apr_config.h \
+ ../../include/apr_general.h ../../include/apr.h \
+ ../../include/apr_errno.h ../../include/apr_file_io.h \
+ ../../include/apr_lib.h
