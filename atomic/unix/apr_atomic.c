@@ -56,6 +56,193 @@
 #include "apr_atomic.h"
 #include "apr_thread_mutex.h"
 
+#if defined(WIN32)
+
+#define apr_atomic_t LONG /* not used */
+
+APR_DECLARE(apr_status_t) apr_atomic_init(apr_pool_t *p)
+{
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(void *) apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
+{
+    return InterlockedCompareExchangePointer(mem, with, cmp);
+}
+
+/* 
+ * Remapping function pointer type to accept apr_uint32_t's type-safely
+ * as the arguments for as our apr_atomic_foo32 Functions
+ */
+typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_fn)
+                                           (apr_uint32_t volatile *);
+typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_fn)
+                                           (apr_uint32_t volatile *, 
+                                            apr_uint32_t);
+typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_val_fn)
+                                           (apr_uint32_t volatile *, 
+                                            apr_uint32_t, apr_uint32_t);
+
+APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, val);
+}
+#define APR_OVERRIDE_ATOMIC_ADD32
+
+APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, -val);
+}
+#define APR_OVERRIDE_ATOMIC_SUB32
+
+APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+{
+    ((apr_atomic_win32_ptr_fn)InterlockedIncrement)(mem);
+}
+#define APR_OVERRIDE_ATOMIC_INC32
+
+APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
+{
+    return ((apr_atomic_win32_ptr_fn)InterlockedDecrement)(mem);
+}
+#define APR_OVERRIDE_ATOMIC_DEC32
+
+APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    ((apr_atomic_win32_ptr_val_fn)InterlockedExchange)(mem, val);
+}
+#define APR_OVERRIDE_ATOMIC_SET32
+
+APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t with,
+                                           apr_uint32_t cmp)
+{
+    return ((apr_atomic_win32_ptr_val_val_fn)InterlockedCompareExchange)(mem, with, cmp);
+}
+#define APR_OVERRIDE_ATOMIC_CAS32
+
+APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    return ((apr_atomic_win32_ptr_val_fn)InterlockedExchange)(mem, val);
+}
+#define APR_OVERRIDE_ATOMIC_XCHG32
+
+#endif /* WIN32 */
+
+#if defined(__FreeBSD__) && !defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
+
+#include <machine/atomic.h>
+
+#define apr_atomic_t apr_uint32_t /* unused */
+
+APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    atomic_add_int(mem, val);
+}
+#define APR_OVERRIDE_ATOMIC_ADD32
+
+APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
+{
+    return atomic_subtract_int(mem, 1);
+}
+#define APR_OVERRIDE_ATOMIC_DEC32
+
+APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+{
+    atomic_add_int(mem, 1);
+}
+#define APR_OVERRIDE_ATOMIC_INC32
+
+APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    atomic_set_int(mem, val);
+}
+#define APR_OVERRIDE_ATOMIC_SET32
+
+#endif /* __FreeBSD__ && !__i386__ */
+
+#if (defined(__linux__) || defined(__EMX__) || defined(__FreeBSD__)) \
+        && defined(__i386__) && !APR_FORCE_ATOMIC_GENERIC
+
+/* #define apr_atomic_t apr_uint32_t UNUSED */
+
+APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, 
+                                           apr_uint32_t with,
+                                           apr_uint32_t cmp)
+{
+    apr_uint32_t prev;
+
+    asm volatile ("lock; cmpxchgl %1, %2"             
+                  : "=a" (prev)               
+                  : "r" (with), "m" (*(mem)), "0"(cmp) 
+                  : "memory");
+    return prev;
+}
+#define APR_OVERRIDE_ATOMIC_CAS32
+
+APR_DECLARE(void) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    asm volatile ("lock; addl %1, %0"                              
+                  :                                                           
+                  : "m" (*(mem)), "r" (val)                                   
+                  : "memory");
+}
+#define APR_OVERRIDE_ATOMIC_ADD32
+
+APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    asm volatile ("lock; subl %1, %0"
+                  :
+                  : "m" (*(mem)), "r" (val)
+                  : "memory");
+}
+#define APR_OVERRIDE_ATOMIC_SUB32
+
+APR_DECLARE(int) apr_atomic_dec32(volatile apr_uint32_t *mem)
+{
+    int prev;
+
+    asm volatile ("mov $0, %%eax;\n\t"
+                  "lock; decl %1;\n\t"
+                  "setnz %%al;\n\t"
+                  "mov %%eax, %0"
+                  : "=r" (prev)
+                  : "m" (*(mem))
+                  : "memory", "%eax");
+    return prev;
+}
+#define APR_OVERRIDE_ATOMIC_DEC32
+
+APR_DECLARE(void) apr_atomic_inc32(volatile apr_uint32_t *mem)
+{
+    asm volatile ("lock; incl %0"
+                  :
+                  : "m" (*(mem))
+                  : "memory");
+}
+#define APR_OVERRIDE_ATOMIC_INC32
+
+APR_DECLARE(void) apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    *mem = val;
+}
+#define APR_OVERRIDE_ATOMIC_SET32
+
+APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    apr_uint32_t prev = val;
+
+    asm volatile ("lock; xchgl %0, %1"
+                  : "=r" (prev)
+                  : "m" (*(mem)), "0"(prev)
+                  : "memory");
+    return prev;
+}
+#define APR_OVERRIDE_ATOMIC_XCHG32
+
+/*#define apr_atomic_init(pool)        APR_SUCCESS*/
+
+#endif /* (__linux__ || __EMX__ || __FreeBSD__) && __i386__ */
+
 #if !defined(apr_atomic_init) && !defined(APR_OVERRIDE_ATOMIC_INIT)
 
 #if APR_HAS_THREADS
@@ -242,3 +429,11 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp)
 #endif /* APR_HAS_THREADS */
 }
 #endif /*!defined(apr_atomic_casptr) && !defined(APR_OVERRIDE_ATOMIC_CASPTR) */
+
+#if !defined(APR_OVERRIDE_ATOMIC_READ32)
+APR_DECLARE(apr_uint32_t) apr_atomic_read32(volatile apr_uint32_t *mem)
+{
+    return *mem;
+}
+#endif
+

@@ -56,21 +56,56 @@
 #include "apr.h"
 #include "apr_atomic.h"
 
-#if APR_HAS_THREADS
+#include <stdlib.h>
 
-apr_int32_t apr_atomic_add32(volatile apr_atomic_t *mem, apr_int32_t val) 
+apr_status_t apr_atomic_init(apr_pool_t *p)
 {
-    apr_atomic_t old, new_val; 
+    return APR_SUCCESS;
+}
+
+void apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    apr_uint32_t old, new_val; 
 
     old = *mem;   /* old is automatically updated on cs failure */
     do {
         new_val = old + val;
     } while (__cs(&old, (cs_t *)mem, new_val)); 
-
-    return new_val;
 }
 
-apr_uint32_t apr_atomic_cas32(volatile apr_atomic_t *mem, apr_uint32_t swap, 
+void apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    apr_atomic_add32(mem, -val);
+}
+
+void apr_atomic_inc32(volatile apr_uint32_t *mem)
+{
+    apr_atomic_add32(mem, 1);
+}
+
+int apr_atomic_dec32(volatile apr_uint32_t *mem)
+{
+    apr_uint32_t old, new_val; 
+
+    old = *mem;   /* old is automatically updated on cs failure */
+    do {
+        new_val = old - 1;
+    } while (__cs(&old, (cs_t *)mem, new_val)); 
+
+    return new_val != 0;
+}
+
+apr_uint32_t apr_atomic_read32(volatile apr_uint32_t *mem)
+{
+    return *mem;
+}
+
+void apr_atomic_set32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    *mem = val;
+}
+
+apr_uint32_t apr_atomic_cas32(volatile apr_uint32_t *mem, apr_uint32_t swap, 
                               apr_uint32_t cmp)
 {
     apr_uint32_t old = cmp;
@@ -79,4 +114,15 @@ apr_uint32_t apr_atomic_cas32(volatile apr_atomic_t *mem, apr_uint32_t swap,
     return old; /* old is automatically updated from mem on cs failure */
 }
 
-#endif /* APR_HAS_THREADS */
+apr_uint32_t apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint32_t val)
+{
+    apr_uint32_t old, new_val; 
+
+    old = *mem;   /* old is automatically updated on cs failure */
+    do {
+        new_val = val;
+    } while (__cs(&old, (cs_t *)mem, new_val)); 
+
+    return old;
+}
+
