@@ -56,42 +56,128 @@
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_strings.h"
-#include "win32/proc_mutex.h"
 #include "apr_portable.h"
+#include "proc_mutex.h"
+#include "misc.h"
+
+static apr_status_t proc_mutex_cleanup(void *mutex_)
+{
+    apr_proc_mutex_t *mutex = mutex_;
+
+    if (CloseHandle(mutex->handle) == 0) {
+        return apr_get_os_error();
+    }
+    return APR_SUCCESS;
+}
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 const char *fname,
                                                 apr_lockmech_e mech,
                                                 apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    HANDLE hMutex;
+    SECURITY_ATTRIBUTES sec;
+    sec.nLength = sizeof(SECURITY_ATTRIBUTES);
+    sec.lpSecurityDescriptor = NULL;
+    sec.bInheritHandle = TRUE;
+
+    /* With Win2000 Terminal Services, the Mutex name can have a 
+     * "Global\" or "Local\" prefix to explicitly create the object 
+     * in the global or session name space.  Without Terminal Service
+     * running on Win2000, Global\ and Local\ are ignored.  These
+     * prefixes are only valid on Win2000+
+     */
+    if (apr_os_level >= APR_WIN_2000)
+        fname = apr_pstrcat(pool, "Global\\", fname, NULL);
+    else
+        fname = apr_pstrdup(pool, fname);
+
+    hMutex = CreateMutex(&sec, FALSE, fname);
+    if (!hMutex) {
+	return apr_get_os_error();
+    }
+
+    *mutex = (apr_proc_mutex_t *)apr_palloc(pool, sizeof(apr_proc_mutex_t));
+    (*mutex)->pool = pool;
+    (*mutex)->handle = hMutex;
+    (*mutex)->fname = fname;
+    apr_pool_cleanup_register((*mutex)->pool, *mutex, 
+                              proc_mutex_cleanup, apr_pool_cleanup_null);
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
                                                     const char *fname,
                                                     apr_pool_t *pool)
 {
-    return APR_ENOTIMPL;
+    HANDLE hMutex;
+
+    if (apr_os_level >= APR_WIN_2000)
+        fname = apr_pstrcat(pool, "Global\\", fname, NULL);
+    else
+        fname = apr_pstrdup(pool, fname);
+
+    hMutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
+    if (!hMutex) {
+	return apr_get_os_error();
+    }
+
+    *mutex = (apr_proc_mutex_t *)apr_palloc(pool, sizeof(apr_proc_mutex_t));
+    (*mutex)->pool = pool;
+    (*mutex)->handle = hMutex;
+    (*mutex)->fname = fname;
+    apr_pool_cleanup_register((*mutex)->pool, *mutex, 
+                              proc_mutex_cleanup, apr_pool_cleanup_null);
+    return APR_SUCCESS;
 }
     
 APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    DWORD rv;
+
+    rv = WaitForSingleObject(mutex->handle, INFINITE);
+
+    if (rv == WAIT_OBJECT_0) {
+        return APR_SUCCESS;
+    }
+    else if (rv == WAIT_ABANDONED) {
+        return APR_EBUSY;
+    }
+    return apr_get_os_error();
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    DWORD rv;
+
+    rv = WaitForSingleObject(mutex->handle, 0);
+
+    if (rv == WAIT_OBJECT_0) {
+        return APR_SUCCESS;
+    }
+    else if (rv == WAIT_ABANDONED) {
+        return APR_EBUSY;
+    }
+    return apr_get_os_error();
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    if (ReleaseMutex(mutex->handle) == 0) {
+        return apr_get_os_error();
+    }
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
-    return APR_ENOTIMPL;
+    apr_status_t stat;
+
+    stat = proc_mutex_cleanup(mutex);
+    if (stat == APR_SUCCESS) {
+        apr_pool_cleanup_kill(mutex->pool, mutex, proc_mutex_cleanup);
+    }
+    return stat;
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
@@ -99,9 +185,9 @@ APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
 /* Implement OS-specific accessors defined in apr_portable.h */
 
 APR_DECLARE(apr_status_t) apr_os_proc_mutex_get(apr_os_proc_mutex_t *ospmutex,
-                                                apr_proc_mutex_t *lock)
+                                                apr_proc_mutex_t *mutex)
 {
-    *ospmutex = pmutex->mutex;
+    *ospmutex = mutex->handle;
     return APR_SUCCESS;
 }
 
@@ -117,7 +203,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
                                                    sizeof(apr_proc_mutex_t));
         (*pmutex)->pool = pool;
     }
-    (*pmutex)->mutex = *ospmutex;
+    (*pmutex)->handle = *ospmutex;
     return APR_SUCCESS;
 }
 

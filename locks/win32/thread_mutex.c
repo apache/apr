@@ -59,6 +59,7 @@
 #include "thread_mutex.h"
 #include "apr_thread_mutex.h"
 #include "apr_portable.h"
+#include "misc.h"
 
 static apr_status_t thread_mutex_cleanup(void *data)
 {
@@ -91,10 +92,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
-    BOOL status;
-    /* XXX TryEnterCriticalSection is not available under Win9x */
-    status = TryEnterCriticalSection(&mutex->section);
-    if (status) {
+    if (apr_os_level < APR_WIN_NT) {
+        return APR_ENOTIMPL;
+    }
+    if (TryEnterCriticalSection(&mutex->section)) {
         return APR_SUCCESS;
     }
     return APR_EBUSY;
