@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/03/18 18:19:07 $]
+Last modified at [$Date: 2004/04/09 01:36:32 $]
 
 Release:
 
@@ -24,11 +24,6 @@ RELEASE 0.9 SHOWSTOPPERS:
 
 
 RELEASE 1.0 SHOWSTOPPERS:
-
-    * Timeout status codes aren't consistant across platforms.  Some use
-      APR_TIMEUP while others use APR_ETIMEDOUT.  These need to be combined into
-      one code (APR_TIMEUP), and APR_ETIMEDOUT needs to be removed and
-      deprecated.
 
     * apr_global_mutex_child_init and apr_proc_mutex_child_init aren't
       portable.  There are a variety of problems with the locking API when it
