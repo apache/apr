@@ -60,7 +60,7 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
-#ifdef BEOS
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
