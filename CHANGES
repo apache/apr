@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Add apr_proc_mutex_lockfile() for retrieving the name of the
+     file associated with a mutex.  [Jeff Trawick]
+
   *) Don't require the lock file name to be passed into 
      apr_proc_mutex_child_init() or apr_global_mutex_child_init().
      This allows child init to work when the lock file was a temp
