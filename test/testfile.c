@@ -592,6 +592,38 @@ static void test_truncate(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, APR_SUCCESS, rv);
 }
 
+static void test_bigfprintf(abts_case *tc, void *data)
+{
+    apr_file_t *f;
+    const char *fname = "data/testbigfprintf.dat";
+    char *to_write;
+    int i;
+
+    apr_file_remove(fname, p);
+
+    APR_ASSERT_SUCCESS(tc, "open test file",
+                       apr_file_open(&f, fname,
+                                     APR_CREATE|APR_WRITE,
+                                     APR_UREAD|APR_UWRITE, p));
+    
+
+    to_write = malloc(HUGE_STRING_LEN + 3);
+
+    for (i = 0; i < HUGE_STRING_LEN + 1; ++i)
+        to_write[i] = 'A' + i%26;
+
+    strcpy(to_write + HUGE_STRING_LEN, "42");
+
+    i = apr_file_printf(f, "%s", to_write);
+    ABTS_INT_EQUAL(tc, HUGE_STRING_LEN + 2, i);
+
+    apr_file_close(f);
+
+    file_contents_equal(tc, fname, to_write, HUGE_STRING_LEN + 2);
+
+    free(to_write);
+}
+
 abts_suite *testfile(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
@@ -619,6 +651,7 @@ abts_suite *testfile(abts_suite *suite)
     abts_run_test(suite, test_bigread, NULL);
     abts_run_test(suite, test_mod_neg, NULL);
     abts_run_test(suite, test_truncate, NULL);
+    abts_run_test(suite, test_bigfprintf, NULL);
 
     return suite;
 }
