@@ -611,17 +611,6 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
 
 
 
-APR_DECLARE(apr_status_t) apr_get_os_proc(apr_os_proc_t *theproc, apr_proc_t *proc)
-{
-    if (proc == NULL) {
-        return APR_ENOPROC;
-    }
-    *theproc = proc->pid;
-    return APR_SUCCESS;
-}
-
-
-
 APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
 {
     return APR_ENOTIMPL;
