@@ -143,6 +143,8 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
 
 #ifdef APR_APP
 
+extern int APR_DECLARE_DATA apr_app_init_complete;
+
 extern int main(int argc, char **argv, char **env);
 
 int wmain(int argc, wchar_t **wargv, wchar_t **wenv)
@@ -172,10 +174,14 @@ int wmain(int argc, wchar_t **wargv, wchar_t **wenv)
         free(wenv);
     }
 
+    apr_app_init_complete = 1;
+
     return main(argc, argv, env);
 }
 
 #else
+
+int APR_DECLARE_DATA apr_app_init_complete = 0;
 
 static int warrsztoastr(char ***retarr, wchar_t *arrsz, int args)
 {
@@ -238,6 +244,11 @@ APR_DECLARE(apr_status_t) apr_main(int *argc, char ***argv, char ***env)
         apr_wchar_t **wstrs;
         apr_wchar_t *sysstr;
         int wstrc;
+        int dupenv;
+
+        if (apr_app_init_complete) {
+            return APR_SUCCESS;
+        }
 
         sysstr = GetCommandLineW();
         if (sysstr) {
@@ -249,6 +260,26 @@ APR_DECLARE(apr_status_t) apr_main(int *argc, char ***argv, char ***env)
         }
 
         sysstr = GetEnvironmentStringsW();
+        dupenv = warrsztoastr(env, sysstr, -1);
+
+        _environ = _malloc_dbg((dupenv + 1) * sizeof (char *), 
+                               _CRT_BLOCK, __FILE__, __LINE__ );
+        memcpy(_environ, env, (dupenv + 1) * sizeof (char *));
+
+        /* MSVCRT will attempt to maintain the wide environment calls
+         * on _putenv(), which is bogus if we've passed a non-ascii
+         * string to _putenv(), since they use MultiByteToWideChar
+         * and breaking the implicit utf-8 assumption we've built.
+         *
+         * Reset _wenviron for good measure.
+         */
+        if (_wenviron) {
+            apr_wchar_t **wenv = _wenviron;
+            _wenviron = NULL;
+            free(wenv);
+        }
+
+        apr_app_init_complete = 1;
     }
 #endif
     return APR_SUCCESS;
