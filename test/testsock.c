@@ -13,162 +13,201 @@
  * limitations under the License.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
+#include "test_apr.h"
+#include "testsock.h"
 #include "apr_thread_proc.h"
+#include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
 
-#define STRLEN 15
-
-static int run_basic_test(apr_pool_t *context)
+static apr_proc_t launch_child(CuTest *tc, const char *arg1)
 {
-    apr_procattr_t *attr1 = NULL;
-    apr_procattr_t *attr2 = NULL;
-    apr_proc_t proc1;
-    apr_proc_t proc2;
-    apr_status_t s1;
-    apr_status_t s2;
+    apr_proc_t proc = {0};
+    apr_procattr_t *procattr;
     const char *args[2];
+    apr_status_t rv;
 
-    fprintf(stdout, "Creating children to run network tests.......\n");
-    s1 = apr_procattr_create(&attr1, context);
-    s2 = apr_procattr_create(&attr2, context);
+    rv = apr_procattr_create(&procattr, p);
+    apr_assert_success(tc, "Couldn't create procattr", rv);
 
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
-        fprintf(stderr, "Problem creating proc attrs\n");
-        exit(-1);
-    }
+    rv = apr_procattr_io_set(procattr, APR_NO_PIPE, APR_NO_PIPE,
+            APR_NO_PIPE);
+    apr_assert_success(tc, "Couldn't set io in procattr", rv);
 
-    args[0] = apr_pstrdup(context, "server");
-    args[1] = NULL; 
-    s1 = apr_proc_create(&proc1, "./server", args, NULL, attr1, context);
+    rv = apr_procattr_error_check_set(procattr, 1);
+    apr_assert_success(tc, "Couldn't set error check in procattr", rv);
 
-    /* Sleep for 5 seconds to ensure the server is setup before we begin */
-    apr_sleep(5000000);
-    args[0] = apr_pstrdup(context, "client");
-    s2 = apr_proc_create(&proc2, "./client", args, NULL, attr2, context);
-
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
-        fprintf(stderr, "Problem spawning new process\n");
-        exit(-1);
-    }
-
-    while ((s1 = apr_proc_wait(&proc1, NULL, NULL, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
-           (s2 = apr_proc_wait(&proc2, NULL, NULL, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
-        continue;
-    }
-
-    if (s1 == APR_SUCCESS) {
-        apr_proc_kill(&proc2, SIGTERM);
-        while (apr_proc_wait(&proc2, NULL, NULL, APR_WAIT) == APR_CHILD_NOTDONE);
-    }
-    else {
-        apr_proc_kill(&proc1, SIGTERM);
-        while (apr_proc_wait(&proc1, NULL, NULL, APR_WAIT) == APR_CHILD_NOTDONE);
-    }
-    fprintf(stdout, "Network test completed.\n");   
-
-    return 1;
+    args[0] = "sockchild" EXTENSION;
+    args[1] = arg1;
+    args[2] = NULL;
+    rv = apr_proc_create(&proc, "./sockchild" EXTENSION, args, NULL,
+                         procattr, p);
+    apr_assert_success(tc, "Couldn't launch program", rv);
+    return proc;
 }
 
-static int run_sendfile(apr_pool_t *context, int number)
+static int wait_child(CuTest *tc, apr_proc_t proc) 
 {
-    apr_procattr_t *attr1 = NULL;
-    apr_procattr_t *attr2 = NULL;
-    apr_proc_t proc1;
-    apr_proc_t proc2;
-    apr_status_t s1;
-    apr_status_t s2;
-    const char *args[4];
+    int exitcode;
+    apr_exit_why_e why;
 
-    fprintf(stdout, "Creating children to run network tests.......\n");
-    s1 = apr_procattr_create(&attr1, context);
-    s2 = apr_procattr_create(&attr2, context);
+    CuAssert(tc, "Error waiting for child process",
+            apr_proc_wait(&proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
 
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
-        fprintf(stderr, "Problem creating proc attrs\n");
-        exit(-1);
-    }
-
-    args[0] = apr_pstrdup(context, "sendfile");
-    args[1] = apr_pstrdup(context, "server");
-    args[2] = NULL; 
-    s1 = apr_proc_create(&proc1, "./sendfile", args, NULL, attr1, context);
-
-    /* Sleep for 5 seconds to ensure the server is setup before we begin */
-    apr_sleep(5000000);
-    args[1] = apr_pstrdup(context, "client");
-    switch (number) {
-        case 0: {
-            args[2] = apr_pstrdup(context, "blocking");
-            break;
-        }
-        case 1: {
-            args[2] = apr_pstrdup(context, "nonblocking");
-            break;
-        }
-        case 2: {
-            args[2] = apr_pstrdup(context, "timeout");
-            break;
-        }
-    }
-    args[3] = NULL;
-    s2 = apr_proc_create(&proc2, "./sendfile", args, NULL, attr2, context);
-
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
-        fprintf(stderr, "Problem spawning new process\n");
-        exit(-1);
-    }
-
-    while ((s1 = apr_proc_wait(&proc1, NULL, NULL, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
-           (s2 = apr_proc_wait(&proc2, NULL, NULL, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
-        continue;
-    }
-
-    if (s1 == APR_SUCCESS) {
-        apr_proc_kill(&proc2, SIGTERM);
-        while (apr_proc_wait(&proc2, NULL, NULL, APR_WAIT) == APR_CHILD_NOTDONE);
-    }
-    else {
-        apr_proc_kill(&proc1, SIGTERM);
-        while (apr_proc_wait(&proc1, NULL, NULL, APR_WAIT) == APR_CHILD_NOTDONE);
-    }
-    fprintf(stdout, "Network test completed.\n");   
-
-    return 1;
+    CuAssert(tc, "child terminated normally", why == APR_PROC_EXIT);
+    return exitcode;
 }
 
-int main(int argc, char *argv[])
+static void test_addr_info(CuTest *tc)
 {
-    apr_pool_t *context = NULL;
+    apr_status_t rv;
+    apr_sockaddr_t *sa;
 
-    fprintf(stdout, "Initializing.........");
-    if (apr_initialize() != APR_SUCCESS) {
-        fprintf(stderr, "Something went wrong\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
-    atexit(apr_terminate);
+    rv = apr_sockaddr_info_get(&sa, APR_LOCAL, APR_UNSPEC, 80, 0, p);
+    apr_assert_success(tc, "Problem generating sockaddr", rv);
 
-    fprintf(stdout, "Creating context.......");
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fprintf(stderr, "Could not create context\n");
-        exit(-1);
-    }
-    fprintf(stdout, "OK\n");
-
-    fprintf(stdout, "This test relies on the process test working.  Please\n");
-    fprintf(stdout, "run that test first, and only run this test when it\n");
-    fprintf(stdout, "completes successfully.  Alternatively, you could run\n");
-    fprintf(stdout, "server and client by yourself.\n");
-    run_basic_test(context);
-    run_sendfile(context, 0);
-    run_sendfile(context, 1);
-    run_sendfile(context, 2);
-
-    return 0;
+    rv = apr_sockaddr_info_get(&sa, "127.0.0.1", APR_UNSPEC, 80, 0, p);
+    apr_assert_success(tc, "Problem generating sockaddr", rv);
+    CuAssertStrEquals(tc, "127.0.0.1", sa->hostname);
 }
+
+static apr_socket_t *setup_socket(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_sockaddr_t *sa;
+    apr_socket_t *sock;
+
+    rv = apr_sockaddr_info_get(&sa, APR_LOCAL, APR_INET, 8021, 0, p);
+    apr_assert_success(tc, "Problem generating sockaddr", rv);
+
+    rv = apr_socket_create(&sock, sa->family, SOCK_STREAM, APR_PROTO_TCP, p);
+    apr_assert_success(tc, "Problem creating socket", rv);
+    
+    rv = apr_socket_bind(sock, sa);
+    apr_assert_success(tc, "Problem binding to port", rv);
+    
+    rv = apr_socket_listen(sock, 5);
+    apr_assert_success(tc, "Problem listening on socket", rv);
+
+    return sock;
+}
+
+static void test_create_bind_listen(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_socket_t *sock = setup_socket(tc);
+    
+    rv = apr_socket_close(sock);
+    apr_assert_success(tc, "Problem closing socket", rv);
+}
+
+static void test_send(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_socket_t *sock;
+    apr_socket_t *sock2;
+    apr_proc_t proc;
+    int protocol;
+    int length;
+    
+    sock = setup_socket(tc);
+
+    proc = launch_child(tc, "read");
+    
+    rv = apr_socket_accept(&sock2, sock, p);
+    apr_assert_success(tc, "Problem with receiving connection", rv);
+
+    apr_socket_protocol_get(sock2, &protocol);
+    CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
+    
+    length = strlen(DATASTR);
+    apr_socket_send(sock2, DATASTR, &length);
+
+    /* Make sure that the client received the data we sent */
+    CuAssertIntEquals(tc, strlen(DATASTR), wait_child(tc, proc));
+
+    rv = apr_socket_close(sock2);
+    apr_assert_success(tc, "Problem closing connected socket", rv);
+    rv = apr_socket_close(sock);
+    apr_assert_success(tc, "Problem closing socket", rv);
+}
+
+static void test_recv(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_socket_t *sock;
+    apr_socket_t *sock2;
+    apr_proc_t proc;
+    int protocol;
+    int length = STRLEN;
+    char datastr[STRLEN];
+    
+    sock = setup_socket(tc);
+
+    proc = launch_child(tc, "write");
+    
+    rv = apr_socket_accept(&sock2, sock, p);
+    apr_assert_success(tc, "Problem with receiving connection", rv);
+
+    apr_socket_protocol_get(sock2, &protocol);
+    CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
+    
+    length = strlen(DATASTR);
+    apr_socket_recv(sock2, datastr, &length);
+
+    /* Make sure that the server received the data we sent */
+    CuAssertStrEquals(tc, DATASTR, datastr);
+    CuAssertIntEquals(tc, strlen(datastr), wait_child(tc, proc));
+
+    rv = apr_socket_close(sock2);
+    apr_assert_success(tc, "Problem closing connected socket", rv);
+    rv = apr_socket_close(sock);
+    apr_assert_success(tc, "Problem closing socket", rv);
+}
+
+static void test_timeout(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_socket_t *sock;
+    apr_socket_t *sock2;
+    apr_proc_t proc;
+    int protocol;
+    int exit;
+    
+    sock = setup_socket(tc);
+
+    proc = launch_child(tc, "read");
+    
+    rv = apr_socket_accept(&sock2, sock, p);
+    apr_assert_success(tc, "Problem with receiving connection", rv);
+
+    apr_socket_protocol_get(sock2, &protocol);
+    CuAssertIntEquals(tc, APR_PROTO_TCP, protocol);
+    
+    exit = wait_child(tc, proc);    
+    CuAssertIntEquals(tc, SOCKET_TIMEOUT, exit);
+
+    /* We didn't write any data, so make sure the child program returns
+     * an error.
+     */
+    rv = apr_socket_close(sock2);
+    apr_assert_success(tc, "Problem closing connected socket", rv);
+    rv = apr_socket_close(sock);
+    apr_assert_success(tc, "Problem closing socket", rv);
+}
+
+CuSuite *testsock(void)
+{
+    CuSuite *suite = CuSuiteNew("Socket operations");
+
+    SUITE_ADD_TEST(suite, test_addr_info);
+    SUITE_ADD_TEST(suite, test_create_bind_listen);
+    SUITE_ADD_TEST(suite, test_send);
+    SUITE_ADD_TEST(suite, test_recv);
+    SUITE_ADD_TEST(suite, test_timeout);
+
+    return suite;
+}
+
