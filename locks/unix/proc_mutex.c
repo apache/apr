@@ -167,7 +167,7 @@ static apr_status_t proc_mutex_posix_child_init(apr_proc_mutex_t **mutex,
 
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods =
 {
-#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(POSIXSEM_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
 #else
     0,
@@ -282,7 +282,7 @@ static apr_status_t proc_mutex_sysv_child_init(apr_proc_mutex_t **mutex, apr_poo
 
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods =
 {
-#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(SYSVSEM_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
 #else
     0,
@@ -591,7 +591,7 @@ static apr_status_t proc_mutex_fcntl_child_init(apr_proc_mutex_t **mutex,
 
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods =
 {
-#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(FCNTL_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
 #else
     0,
@@ -720,7 +720,7 @@ static apr_status_t proc_mutex_flock_child_init(apr_proc_mutex_t **mutex,
 
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_methods =
 {
-#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(FLOCK_IS_GLOBAL)
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
 #else
     0,
