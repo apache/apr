@@ -206,9 +206,9 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 
 #elif defined(WIN32)
 
-static struct {
+static const struct {
     apr_status_t code;
-    char *msg;
+    const char *msg;
 } gaErrorList[] = {
     WSAEINTR,           "Interrupted system call",
     WSAEBADF,           "Bad file number",
