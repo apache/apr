@@ -75,6 +75,7 @@ EXPORTS
 	apr_set_socketdata
 	apr_get_polldata
 	apr_set_polldata
+	apr_make_os_sock
 	apr_put_os_sock
 	apr_get_os_sock
 	apr_remove_poll_socket

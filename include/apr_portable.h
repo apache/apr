@@ -185,6 +185,20 @@ typedef struct tm             apr_os_exp_time_t;
 #endif
 
 /**
+ * everything APR needs to know about an active socket to construct
+ * an APR socket from it; currently, this is platform-independent
+ */
+struct apr_os_sock_info_t {
+    apr_os_sock_t *os_sock; /* always required */
+    struct sockaddr *local; /* NULL if not yet bound */
+    struct sockaddr *remote; /* NULL if not connected */
+    int family;             /* always required (APR_INET, APR_INET6, etc. */
+    int type;               /* always required (SOCK_STREAM, SOCK_DGRAM, etc. */
+};
+
+typedef struct apr_os_sock_info_t apr_os_sock_info_t;
+
+/**
  * convert the file from apr type to os specific type.
  * @param thefile The os specific file we are converting to
  * @param file The apr file to convert.
@@ -273,6 +287,20 @@ apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir,
  */
 apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, 
                              apr_pool_t *cont);
+
+/**
+ * Create a socket from an existing descriptor and local and remote
+ * socket addresses.
+ * @param apr_sock The new socket that has been set up
+ * @param os_sock_info The os representation of the socket handle and
+ *        other characteristics of the socket
+ * @param cont The pool to use
+ * @tip If you only know the descriptor/handle or if it isn't really
+ *      a true socket, use apr_put_os_sock() instead.
+ */
+apr_status_t apr_make_os_sock(apr_socket_t **apr_sock, 
+                              apr_os_sock_info_t *os_sock_info, 
+                              apr_pool_t *cont);
 
 /**
  * Convert the lock from os specific type to apr type
