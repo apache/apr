@@ -60,6 +60,7 @@
 #include "apr_lib.h"
 #include <string.h>
 #include <process.h>
+#include <stdlib.h>
 
 ap_status_t clean_cont(void *data)
 {
@@ -226,6 +227,27 @@ ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
         return APR_SUCCESS;
     }
     return APR_ENOCONT;
+}
+
+/* This is the helper code to resolve late bound entry points 
+ * missing from one or more releases of the Win32 API
+ */
+
+static char *lateDllName[DLL_defined] = {
+    "kernel32", "advapi32", "mswsock",  "ws2_32"  };
+static HMODULE lateDllHandle[DLL_defined] = {
+    NULL,       NULL,       NULL,       NULL      };
+
+FARPROC LoadLateDllFunc(ap_dlltoken_e fnLib, char* fnName, int ordinal)
+{
+    if (!lateDllHandle[fnLib] && ordinal) 
+        lateDllHandle[fnLib] = LoadLibrary(lateDllName[fnLib]);
+    if (!lateDllHandle[fnLib])
+        return NULL;
+    if (ordinal)
+        return GetProcAddress(lateDllHandle[fnLib], (char *) ordinal);
+    else
+        return GetProcAddress(lateDllHandle[fnLib], fnName);
 }
 
 /* This puts one thread in a Listen for signals mode */
