@@ -1273,50 +1273,58 @@ dnl ----------------------------- Checking for DSO support
 echo "${nl}Checking for DSO..."
 AC_ARG_ENABLE(dso,
   [  --disable-dso           Disable DSO support ],
-  [ tempdso=$enableval],
-  [ 
-    AC_CHECK_FUNCS(NSLinkModule, [ tempdso="dyld" ], [ tempdso="no" ])
-    if test "$tempdso" = "no"; then
-      AC_CHECK_LIB(dld, shl_load, [ tempdso="shl" APR_ADDTO(LIBS,-ldld) ],
-                   tempdso="no")
+  [if test "x$enableval" = "xyes"; then
+      dsotype=any
+   else
+      dsotype=$enableval
+   fi
+  ], [dsotype=any])
+
+if test "$dsotype" = "any"; then
+    # Darwin:
+    AC_CHECK_FUNC(NSLinkModule, [dsotype=dyld])
+    if test "$dsotype" = "any"; then
+      # Original HP-UX:
+      AC_CHECK_LIB(dld, shl_load, [dsotype=shl; APR_ADDTO(LIBS,-ldld)])
     fi
-    if test "$tempdso" = "no"; then
-      AC_CHECK_FUNCS(dlopen, [ tempdso="dlfcn" ], [ tempdso="no" ])
+    # Normal POSIX:
+    if test "$dsotype" = "any"; then
+      AC_CHECK_FUNC(dlopen, [dsotype=dlfcn])
     fi
-    if test "$tempdso" = "no"; then
-      AC_CHECK_LIB(dl, dlopen, [ tempdso="dlfcn" APR_ADDTO(LIBS,-ldl) ], 
-                   tempdso="no")
+    if test "$dsotype" = "any"; then
+      AC_CHECK_LIB(dl, dlopen, [dsotype=dlfcn; APR_ADDTO(LIBS,-ldl)])
     fi
-    if test "$tempdso" = "dlfcn"; then
+    if test "$dsotype" = "dlfcn"; then
         # ReliantUnix has dlopen() in libc but dlsym() in libdl :(
-        AC_CHECK_FUNCS(dlsym, [ tempdso="dlfcn" ], [ tempdso="no" ])
-        if test "$tempdso" = "no"; then
-            AC_CHECK_LIB(dl, dlsym, [ tempdso="dlfcn" APR_ADDTO(LIBS, -ldl) ],
-                         tempdso="no")
-        fi
-        if test "$tempdso" = "no"; then
-            echo "Weird: dlopen() was found but dlsym() was not found!"
-        fi
+        AC_CHECK_FUNC(dlsym, [], 
+          [AC_CHECK_LIB(dl, dlsym, 
+             [APR_ADDTO(LIBS, -ldl)],
+             [dsotype=any
+              echo "Weird: dlopen() was found but dlsym() was not found!"])])
     fi
-    if test "$tempdso" = "no"; then
-      AC_CHECK_LIB(root, load_image, tempdso="yes", tempdso="no")
+    if test "$dsotype" = "any"; then
+      # BeOS:
+      AC_CHECK_LIB(root, load_image, [dsotype=other])
     fi
-    if test "$tempdso" = "no"; then
+    # Everything else:
+    if test "$dsotype" = "any"; then
         case $host in
-            *os390|*-os2*|*os400)
-                tempdso="yes"
-                ;;
+        *os390|*-os2*|*os400|*-aix*) dsotype=other ;;
         esac
     fi
- ] )
+fi
 
-if test "$tempdso" = "no"; then
+if test "$dsotype" = "any"; then
+    AC_MSG_ERROR([Could not detect suitable DSO implementation])
+elif test "$dsotype" = "no"; then
     aprdso="0"
 else
-    case "$tempdso" in
+    case "$dsotype" in
     dlfcn) AC_DEFINE(DSO_USE_DLFCN, 1, [Define if DSO support uses dlfcn.h]);;
     shl)   AC_DEFINE(DSO_USE_SHL, 1, [Define if DSO support uses shl_load]);;
     dyld)  AC_DEFINE(DSO_USE_DYLD, 1, [Define if DSO support uses dyld.h]);;
+    other) ;; # Use whatever is in dso/OSDIR
+    *) AC_MSG_ERROR([Unknown DSO implementation "$dsotype"]);;
     esac
     aprdso="1"
     apr_modules="$apr_modules dso"
