@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/06/15 10:27:58 $]
+Last modified at [$Date: 2004/06/15 10:32:16 $]
 
 Release:
 
@@ -192,12 +192,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
             Status: Sander Striker is looking into this (low priority)
 
         David says this is a 1.1 issue.
-
-    * Deal with largefiles properly on those platforms that support it.
-
-      Justin says: Linux refuses to have sendfile support and largefiles
-                   at the same time.  Largefile autoconf patch:
-                   http://www.apache.org/~jerenkrantz/apr_largefile.m4
 
     * Get OTHER_CHILD support into Win32
         Status: Bill S. is looking into this
