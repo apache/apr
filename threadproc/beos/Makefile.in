@@ -19,8 +19,8 @@ OBJS=proc.o \
 	threadcancel.o \
 	threadpriv.o \
 	signals.o \
-         procsup.o \
-         apr_proc_stub
+        procsup.o \
+        apr_proc_stub
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
@@ -60,32 +60,45 @@ depend:
 
 # DO NOT REMOVE
 apr_proc_stub.o: apr_proc_stub.c
-proc.o: proc.c threadproc.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_config.h ../../include/apr_errno.h \
- ../../include/apr_win.h ../../file_io/unix/fileio.h \
- ../../include/apr_portable.h ../../include/apr_network_io.h \
- ../../include/apr_lock.h ../../include/apr_time.h
-procsup.o: procsup.c threadproc.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_config.h ../../include/apr_errno.h \
- ../../include/apr_win.h ../../file_io/unix/fileio.h \
- ../../include/apr_lib.h
-signals.o: signals.c threadproc.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_config.h ../../include/apr_errno.h \
- ../../include/apr_win.h ../../file_io/unix/fileio.h
-thread.o: thread.c threadproc.h ../../include/apr_thread_proc.h \
- ../../include/apr_file_io.h ../../include/apr_general.h \
- ../../include/apr_config.h ../../include/apr_errno.h \
- ../../include/apr_win.h ../../file_io/unix/fileio.h
+proc.o: proc.c threadproc.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h ../../file_io/unix/fileio.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_lock.h
+procsup.o: procsup.c threadproc.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h ../../file_io/unix/fileio.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_lock.h
+signals.o: signals.c threadproc.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h ../../file_io/unix/fileio.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_lock.h
+thread.o: thread.c threadproc.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_time.h ../../file_io/unix/fileio.h \
+ $(INCDIR)/apr_config.h $(INCDIR)/apr_lib.h \
+ $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
+ $(INCDIR)/apr_lock.h
 threadcancel.o: threadcancel.c threadproc.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_general.h ../../include/apr_config.h \
- ../../include/apr_errno.h ../../include/apr_win.h \
- ../../file_io/unix/fileio.h
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
+ ../../file_io/unix/fileio.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_lock.h
 threadpriv.o: threadpriv.c threadproc.h \
- ../../include/apr_thread_proc.h ../../include/apr_file_io.h \
- ../../include/apr_general.h ../../include/apr_config.h \
- ../../include/apr_errno.h ../../include/apr_win.h \
- ../../file_io/unix/fileio.h
+ $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
+ ../../file_io/unix/fileio.h $(INCDIR)/apr_config.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_lock.h
