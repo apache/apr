@@ -141,7 +141,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
 
     if (retval == NULL) {
         handle->errormsg = dlerror();
-        return APR_EINIT;
+        return APR_ESYMNOTFOUND;
     }
 
     symbol = apr_pcalloc(handle->pool, sizeof(sym_list));

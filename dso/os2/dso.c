@@ -116,7 +116,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     int rc;
 
     if (symname == NULL || ressym == NULL)
-        return APR_EINIT;
+        return APR_ESYMNOTFOUND;
 
     if ((rc = DosQueryProcAddr(handle->handle, 0, symname, &func)) != 0) {
         handle->load_error = APR_FROM_OS_ERROR(rc);
