@@ -86,7 +86,8 @@ typedef enum {
     APR_BLK,            /**< a block device */
     APR_PIPE,           /**< a FIFO / pipe */
     APR_LNK,            /**< a symbolic link */
-    APR_SOCK            /**< a [unix domain] socket */
+    APR_SOCK,           /**< a [unix domain] socket */
+    APR_UNKFILE = 127   /**< a file of unknown type */
 } apr_filetype_e; 
 
 /**
