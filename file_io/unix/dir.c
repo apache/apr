@@ -109,7 +109,7 @@ apr_status_t apr_dir_close(apr_dir_t *thedir)
 apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                           apr_dir_t *thedir)
 {
-    apr_status_t ret;
+    apr_status_t ret = 0;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
     && !defined(READDIR_IS_THREAD_SAFE)
     dirent *retent;
@@ -146,15 +146,15 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     wanted &= ~(APR_FINFO_NAME);
     if (wanted)
     {
-        char fspec[_MAXPATH];
+        char fspec[PATH_MAX];
         int off;
-        apr_strcpyn(fspec, sizeof(fspec), thedir->dirname);
+        apr_cpystrn(fspec, thedir->dirname, sizeof(fspec));
         off = strlen(fspec);
         if (fspec[off - 1] != '/')
             fspec[off++] = '/';
-        apr_strcpyn(fspec + off, sizeof(fspec) - off, thedir->entry->d_name);
+        apr_cpystrn(fspec + off, thedir->entry->d_name, sizeof(fspec) - off);
         /* ??? Or lstat below?  What is it we really want? */
-        ret = apr_stat(finfo, wanted, fspec, thedir->cntxt);
+        ret = apr_stat(finfo, fspec, wanted, thedir->cntxt);
     }
     if (!wanted || ret) {
         finfo->cntxt = thedir->cntxt;
