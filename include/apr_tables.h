@@ -130,6 +130,9 @@ struct apr_table_entry_t {
                          */
     /** The value for the current table entry */
     char *val;
+
+    /** A checksum for the key, for use by the apr_table internals */
+    apr_uint32_t key_checksum;
 };
 
 /**
