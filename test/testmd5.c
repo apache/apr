@@ -95,31 +95,43 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
     apr_status_t rv;
     apr_md5_ctx_t context;
     unsigned char hash[MD5_DIGESTSIZE];
+    
+    printf("Trying a translation...\n");
 
-    rv = apr_md5_init(&context);
-    assert(!rv);
+    if ((rv = apr_md5_init(&context)) != APR_SUCCESS){
+        printf("Failed to init APR's md5 routines!\n");
+        exit(-1);
+    }
 
     if (xlate) {
 #if APR_HAS_XLATE
-        apr_md5_set_xlate(&context, xlate);
+        if ((rv = apr_md5_set_xlate(&context, xlate)) != APR_SUCCESS){
+            fprintf("Couldn't set the MD5 translation handle!\n");
+            exit(-1);
+        }
 #else
-        fprintf(stderr,
-                "A translation handle was unexpected.\n");
+        printf("\tDidn't expect a translation handle! Not fatal.\n");
 #endif
     }
     
-    rv = apr_md5_update(&context, buf, bufLen);
-    assert(!rv);
+    if ((rv = apr_md5_update(&context, buf, bufLen)) != APR_SUCCESS){
+        printf("The call to apr_md5_update failed!\n");
+        exit(-1);
+    }
 
-    rv = apr_md5_final(hash, &context);
-    assert(!rv);
+    if ((rv = apr_md5_final(hash, &context)) != APR_SUCCESS){
+        printf("The call to apr_md5_final failed!\n");
+        exit(-1);
+    }
 
+    printf("\t (MD5 hash : ");
     for (i = 0; i < MD5_DIGESTSIZE; i++) {
         printf("%02x",hash[i]);
     }
+    
+    printf(")\n");
 
-    printf("\n");
-
+    printf("\tChecking hash against expected....................");
     if (memcmp(hash, digest, MD5_DIGESTSIZE)) {
         fprintf(stderr,
                 "The digest is not as expected!\n");
@@ -131,6 +143,7 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
                 "being in ASCII.\n");
 #endif
     }
+    printf("OK\n");
 }
 
 int main(int argc, char **argv)
@@ -159,7 +172,14 @@ int main(int argc, char **argv)
     assert(!rv);
     atexit(closeapr);
 
-    rv = apr_pool_create(&pool, NULL);
+    printf("APR MD5 Test\n============\n\n");
+    printf("Creating pool.............................................");
+    if ((rv = apr_pool_create(&pool, NULL)) != APR_SUCCESS){
+        printf("Failed.\n");
+        exit(-1);
+    }
+    printf("OK\n");
+
 
     if (src) {
 #if APR_HAS_XLATE
@@ -182,6 +202,7 @@ int main(int argc, char **argv)
         try(testcases[cur].s, strlen(testcases[cur].s), xlate,
             testcases[cur].digest);
     }
-    
+
+    printf("\nMD5 Test passed.\n");    
     return 0;
 }
