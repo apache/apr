@@ -566,7 +566,8 @@ APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
  * @param ... The values to substitute in the format string
  * @return The number of bytes written
  */ 
-APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, const char *format, ...)
+APR_DECLARE_NONSTD(int) apr_file_printf(apr_file_t *fptr, 
+                                        const char *format, ...)
         __attribute__((format(printf,2,3)));
 
 /**
