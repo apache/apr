@@ -60,7 +60,7 @@ ap_status_t lock_inter_cleanup(void * data)
     ap_lock_t *lock = (ap_lock_t*)data;
     if (lock->curr_locked == 1) {
     	if (atomic_add(&lock->ben_interproc , -1) > 1){
-    		release_sem (lock->sem_interproc);
+            release_sem (lock->sem_interproc);
     	}
     }
     return APR_SUCCESS;
@@ -68,16 +68,18 @@ ap_status_t lock_inter_cleanup(void * data)
 
 ap_status_t create_inter_lock(ap_lock_t *new)
 {
+    int32 stat;
+    
     new->sem_interproc = (sem_id)ap_palloc(new->cntxt, sizeof(sem_id));
     new->ben_interproc = (int32)ap_palloc(new->cntxt, sizeof(int32));
 
-    new->ben_interproc = 0;
-    new->sem_interproc = create_sem(0, "ap_interproc");
-    if (new->sem_interproc < B_NO_ERROR){
-    	lock_inter_cleanup(new);
-        return errno;
+    if ((stat = create_sem(0, "ap_interproc")) < B_NO_ERROR) {
+        lock_inter_cleanup(new);
+        return stat;
     }
+    new->ben_interproc = 0;
     new->curr_locked = 0;
+    new->sem_interproc = stat;
     ap_register_cleanup(new->cntxt, (void *)new, lock_inter_cleanup,
                         ap_null_cleanup);
     return APR_SUCCESS;
@@ -85,10 +87,13 @@ ap_status_t create_inter_lock(ap_lock_t *new)
 
 ap_status_t lock_inter(ap_lock_t *lock)
 {
+    int32 stat;
+    
 	if (atomic_add(&lock->ben_interproc, 1) > 0){
-		acquire_sem(lock->sem_interproc);
-	} else {
-		return errno;
+		if ((stat = acquire_sem(lock->sem_interproc)) != B_NO_ERROR){
+		    atomic_add(&lock->ben_interproc, -1);
+		    return stat;
+		}
 	}
     lock->curr_locked = 1;
     return APR_SUCCESS;
@@ -96,12 +101,15 @@ ap_status_t lock_inter(ap_lock_t *lock)
 
 ap_status_t unlock_inter(ap_lock_t *lock)
 {
+    int32 stat;
+    
 	if (atomic_add(&lock->ben_interproc, -1) > 1){
-        release_sem(lock->sem_interproc);
-        lock->curr_locked = 0;
-    } else {
-    	return errno;
+        if ((stat = release_sem(lock->sem_interproc)) != B_NO_ERROR) {
+            atomic_add(&lock->ben_interproc, 1);
+            return stat;
+        }
     }
+    lock->curr_locked = 0;
     return APR_SUCCESS;
 }
 
