@@ -124,11 +124,6 @@ APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode
  * buffers, *don't* wait for subprocesses, and *don't* free any memory.
  */
 
-/* routines to allocate memory from an pool... */
-
-APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *, const char *fmt, ...)
-    __attribute__((format(printf,2,3)));
-
 /* array and alist management... keeping lists of things.
  * Common enough to want common support code ...
  */
@@ -263,22 +258,177 @@ B<report the number of bytes currently in the list of free blocks>
  */
 APR_EXPORT(long) ap_bytes_in_free_blocks(void);
 
+/*
+
+=head1 ap_pool_t *ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
+
+B<Determine if pool a is an ancestor of pool b>
+
+    arg 1) The pool to search 
+    arg 2) The pool to search for
+    return) True if a is an ancestor of b, NULL is considered an ancestor
+            of all pools.
+
+=cut
+ */
 APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b);
 
+/*
+
+=head1 void *ap_palloc(ap_pool_t *c, int reqsize)
+
+B<Allocate a block of memory from a pool>
+
+    arg 1) The pool to allocate out of 
+    arg 2) The amount of memory to allocate 
+    return) The allocated memory
+
+=cut
+ */
 APR_EXPORT(void *) ap_palloc(struct ap_pool_t *c, int reqsize);
+
+/*
+
+=head1 void *ap_pcalloc(ap_pool_t *c, int reqsize)
+
+B<Allocate a block of memory from a pool and set all of the memory to 0>
+
+    arg 1) The pool to allocate out of 
+    arg 2) The amount of memory to allocate 
+    return) The allocated memory
+
+=cut
+ */
 APR_EXPORT(void *) ap_pcalloc(struct ap_pool_t *p, int size);
+
+/*
+
+=head1 char *ap_pstrdup(ap_pool_t *c, const char *s)
+
+B<duplicate a string into memory allocated out of a pool>
+
+    arg 1) The pool to allocate out of 
+    arg 2) The string to allocate
+    return) The new string
+
+=cut
+ */
 APR_EXPORT(char *) ap_pstrdup(struct ap_pool_t *p, const char *s);
+
+/*
+
+=head1 char *ap_pstrndup(ap_pool_t *c, const char *s, int n)
+
+B<duplicate the first n characters ofa string into memory allocated out of a pool>
+
+    arg 1) The pool to allocate out of 
+    arg 2) The string to allocate
+    arg 3) The number of characters to duplicate
+    return) The new string
+
+=cut
+ */
 APR_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, int n);
+
+/*
+
+=head1 char *ap_pstrcat(ap_pool_t *c, ...)
+
+B<Concatenate multiple strings, allocating memory out a pool>
+
+    arg 1) The pool to allocate out of 
+    ...) The strings to concatenate.  The final string must be NULL
+    return) The new string
+
+=cut
+ */
 APR_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_pool_t *p, ...);
+
+/*
+
+=head1 char *ap_pvsprintf(ap_pool_t *c, const char *fmt, va_list ap)
+
+B<printf-style style printing routine.  The data is output to a string allocated from a pool>
+
+    arg 1) The pool to allocate out of 
+    arg 2) The format of the string
+    arg 3) The arguments to use while printing the data
+    return) The new string
+
+=cut
+ */
 APR_EXPORT(char *) ap_pvsprintf(struct ap_pool_t *p, const char *fmt, va_list ap);
+
+/*
+
+=head1 char *ap_psprintf(ap_pool_t *c, const char *fmt, ...)
+
+B<printf-style style printing routine.  The data is output to a string allocated from a pool>
+
+    arg 1) The pool to allocate out of 
+    arg 2) The format of the string
+    ...) The arguments to use while printing the data
+    return) The new string
+
+=cut
+ */
 APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *p, const char *fmt, ...);
+
+/*
+
+=head1 void ap_register_cleanup(ap_pool_t *p, void *data, ap_status_t (*plain_cleanup(void *), ap_status_t (*child_cleanup)(void *))
+
+B<Register a function to be called when a pool is cleared or destroyed>
+
+    arg 1) The pool register the cleanup with 
+    arg 2) The data to pass to the cleanup function.
+    arg 3) The function to call when the pool is cleared or destroyed
+    arg 4) The function to call when a child process is created 
+
+=cut
+ */
 APR_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
                                       ap_status_t (*plain_cleanup) (void *),
                                       ap_status_t (*child_cleanup) (void *));
+
+/*
+
+=head1 void ap_kill_cleanup(ap_pool_t *p, void *data, ap_status_t (*cleanup(void *))
+
+B<remove a previously registered cleanup function>
+
+    arg 1) The pool remove the cleanup from 
+    arg 2) The data to remove from cleanup
+    arg 3) The function to remove from cleanup
+
+=cut
+ */
 APR_EXPORT(void) ap_kill_cleanup(struct ap_pool_t *p, void *data,
                                   ap_status_t (*cleanup) (void *));
+
+/*
+
+=head1 ap_status_t ap_run_cleanup(ap_pool_t *p, void *data, ap_status_t (*cleanup(void *))
+
+B<Run the specified cleanup function immediately and unregister it>
+
+    arg 1) The pool remove the cleanup from 
+    arg 2) The data to remove from cleanup
+    arg 3) The function to remove from cleanup
+
+=cut
+ */
 APR_EXPORT(ap_status_t) ap_run_cleanup(struct ap_pool_t *p, void *data,
                                  ap_status_t (*cleanup) (void *));
+
+/*
+
+=head1 void ap_cleanup_for_exec(void)
+
+B<Run all of the child_cleanups, so that any unnecessary files are closed because we are about to exec a new program>
+
+=cut
+ */
 APR_EXPORT(void) ap_cleanup_for_exec(void);
 APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 APR_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
