@@ -54,25 +54,36 @@
 
 #include "fileio.h"
 
-static ap_status_t pipenonblock(ap_file_t *thefile)
+static ap_status_t pipenonblock(ap_file_t *thepipe)
 {
-#ifndef BEOS /* this code won't work on BeOS */
-    int fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
+#if !BEOS /* this code won't work on BeOS */
+      int fd_flags;
 
-#if defined(O_NONBLOCK)
-    fd_flags |= O_NONBLOCK;
-#elif defined(O_NDELAY)
-    fd_flags |= O_NDELAY;
-#elif defined(FNDELAY)
-    fd_flags |= O_FNDELAY;
-#else
-    /* XXXX: this breaks things, but an alternative isn't obvious...*/
-    return -1;
-#endif
-    if (fcntl(thefile->filedes, F_SETFL, fd_flags) == -1) {
+      int fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
+
+  #if defined(O_NONBLOCK)
+      fd_flags |= O_NONBLOCK;
+  #elif defined(O_NDELAY)
+      fd_flags |= O_NDELAY;
+  #elif defined(FNDELAY)
+      fd_flags |= O_FNDELAY;
+  #else
+      /* XXXX: this breaks things, but an alternative isn't obvious...*/
+      return -1;
+  #endif
+      if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
+          return errno;
+      }
+    
+#else /* !BEOS */
+
+#if BEOS_BONE /* This only works on BONE and later...*/
+    int on = 0;
+    if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0)
         return errno;
-    }
-#endif /* !BeOS */
+#endif /* BEOS_BONE */
+
+#endif /* !BEOS */
     return APR_SUCCESS;
 }
 
@@ -135,24 +146,33 @@ ap_status_t ap_create_namedpipe(char *filename,
 
 ap_status_t ap_block_pipe(ap_file_t *thepipe)
 {
-#ifndef BEOS /* this code won't work on BeOS */
-    int fd_flags;
+#if !BEOS /* this code won't work on BeOS */
+      int fd_flags;
 
-    fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
-#if defined(O_NONBLOCK)
-    fd_flags &= ~O_NONBLOCK;
-#elif defined(~O_NDELAY)
-    fd_flags &= ~O_NDELAY;
-#elif defined(FNDELAY)
-    fd_flags &= ~O_FNDELAY;
-#else 
-    /* XXXX: this breaks things, but an alternative isn't obvious...*/
-    return -1;
-#endif
+      fd_flags = fcntl(thepipe->filedes, F_GETFL, 0);
+  #if defined(O_NONBLOCK)
+      fd_flags &= ~O_NONBLOCK;
+  #elif defined(~O_NDELAY)
+      fd_flags &= ~O_NDELAY;
+  #elif defined(FNDELAY)
+      fd_flags &= ~O_FNDELAY;
+  #else 
+      /* XXXX: this breaks things, but an alternative isn't obvious...*/
+      return -1;
+  #endif
     if (fcntl(thepipe->filedes, F_SETFL, fd_flags) == -1) {
         return errno;
     }
-#endif /* !BeOS */
+
+#else
+
+#if BEOS_BONE /* This only works on BONE or beyond */
+    int on = 0;
+    if (ioctl(thepipe->filedes, FIONBIO, &on, sizeof(on)) < 0)
+        return errno;
+#endif /* BEOS_BONE */
+ 
+#endif /* !BEOS_R5 */
     return APR_SUCCESS;
 }
     
