@@ -192,6 +192,7 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 
 void apr_thread_yield()
 {
+    DosSleep(0);
 }
 
 
