@@ -144,8 +144,9 @@ APR_DECLARE(char *) apr_pstrndup(apr_pool_t *p, const char *s, apr_size_t n);
  * @param m The memory to duplicate
  * @param n The number of bytes to duplicate
  * @return The new block of memory
+ * @deffunc void *apr_pmemdup(apr_pool_t *p, const void *m, apr_size_t n)
  */
-APR_DECLARE(void *) apr_memdup(apr_pool_t *p, const void *m, apr_size_t n);
+APR_DECLARE(void *) apr_pmemdup(apr_pool_t *p, const void *m, apr_size_t n);
 
 /**
  * Concatenate multiple strings, allocating memory out a pool
