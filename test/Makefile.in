@@ -71,11 +71,7 @@ mod_test.slo: $(srcdir)/mod_test.c
 	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -c $(srcdir)/mod_test.c && touch $@
 
 mod_test.la: mod_test.slo $(LOCAL_LIBS)
-<<<<<<< Makefile.in
-	$(LIBTOOL) --mode=link $(COMPILE) -rpath $(srcdir) -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
-=======
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
->>>>>>> 1.159
 
 libmod_test.la: mod_test.slo $(LOCAL_LIBS)
 	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
