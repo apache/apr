@@ -176,6 +176,10 @@ SOURCE=.\i18n\unix\xlate.c
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\locks\win32\global_mutex.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\locks\win32\locks.c
 # End Source File
 # Begin Source File
@@ -521,6 +525,10 @@ SOURCE=.\include\apr_general.h
 # Begin Source File
 
 SOURCE=.\include\apr_getopt.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_global_mutex.h
 # End Source File
 # Begin Source File
 
