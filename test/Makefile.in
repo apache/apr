@@ -14,7 +14,6 @@ PROGRAMS = \
 	testdir@EXEEXT@ \
 	testnames@EXEEXT@ \
 	testflock@EXEEXT@ \
-	testfmt@EXEEXT@ \
 	testproc@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testthread@EXEEXT@ \
@@ -74,9 +73,6 @@ testnames@EXEEXT@: testnames.lo $(LOCAL_LIBS)
 
 testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 	$(LINK) testflock.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
-testfmt@EXEEXT@: testfmt.lo $(LOCAL_LIBS)
-	$(LINK) testfmt.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testdso@EXEEXT@: testdso.lo mod_test.la libmod_test.la $(LOCAL_LIBS)
 	$(LINK) testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -169,8 +165,8 @@ testrand@EXEEXT@: testrand.lo $(LOCAL_LIBS)
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo CuTest.lo $(LOCAL_LIBS)
-	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+testall: testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo testfmt.lo CuTest.lo $(LOCAL_LIBS)
+	$(LINK) testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo testfmt.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 
 # DO NOT REMOVE

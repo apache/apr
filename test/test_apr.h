@@ -75,6 +75,7 @@ CuSuite *testud(void);
 CuSuite *testtable(void);
 CuSuite *testsleep(void);
 CuSuite *testpool(void);
+CuSuite *testfmt(void);
 
 
 

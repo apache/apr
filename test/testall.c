@@ -73,6 +73,7 @@ testfunc *tests[NUM_TESTS] = {
     testtable,
     testsleep,
     testpool,
+    testfmt,
     NULL
 };
 
