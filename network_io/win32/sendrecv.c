@@ -330,10 +330,12 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             if (status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
 #ifdef WAIT_FOR_EVENT
                 rv = WaitForSingleObject(overlapped.hEvent, 
-                                         sock->timeout >= 0 ? sock->timeout : INFINITE);
+                                         (DWORD)(sock->timeout >= 0 
+                                            ? sock->timeout : INFINITE));
 #else
                 rv = WaitForSingleObject((HANDLE) sock->sock, 
-                                         sock->timeout >= 0 ? sock->timeout : INFINITE);
+                                         (DWORD)(sock->timeout >= 0 
+                                            ? sock->timeout : INFINITE));
 #endif
                 if (rv == WAIT_OBJECT_0)
                     status = APR_SUCCESS;
