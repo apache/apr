@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/07/16 08:06:14 $]
+Last modified at [$Date: 2001/07/17 05:43:53 $]
 
 Release:
 
@@ -177,6 +177,15 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
                 There are other possibilities.  Any of those probably 
                 work as well.  See the apr archives for more info.  
                 We're still debating this.
+
+    * Possible gmtime_r replacement in explode_time
+      On Solaris (and possibly others), the gmtime_r libc function obtains
+      a mutex.  We have seen 21/25 threads being blocked in this mutex on 
+      a threaded httpd MPM when requesting static pages.  It may be worth 
+      it to hand optimize this since there is no real need for a mutex at 
+      the system level (straight arithmetic from what I can tell).  If you 
+      have access to the Solaris source code:
+        osnet_volume/usr/src/lib/libc/port/gen/time_comm.c.
 
 Documentation that needs writing:
 
