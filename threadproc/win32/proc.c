@@ -116,7 +116,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
 }
 
 ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
-                                 char *dir) 
+                               const char *dir) 
 {
     attr->currdir = ap_pstrdup(attr->cntxt, dir);
     if (attr->currdir) {
@@ -139,14 +139,14 @@ ap_status_t ap_setprocattr_detach(struct procattr_t *attr,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_create_process(struct proc_t **new, char *progname, 
+ap_status_t ap_create_process(struct proc_t **new, const char *progname, 
                               char *const args[], char **env, 
                               struct procattr_t *attr, ap_context_t *cont)
 {
     int i, iEnvBlockLen;
-	char *cmdline;
-	HANDLE hCurrentProcess;
-	HANDLE hParentindup, hParentoutdup,hParenterrdup;
+    char *cmdline;
+    HANDLE hCurrentProcess;
+    HANDLE hParentindup, hParentoutdup,hParenterrdup;
     char ppid[20];
     char *envstr;
     char *pEnvBlock, *pNext;
@@ -348,7 +348,7 @@ ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
         return APR_ENOPROC;
     }
 }
-
+/*
 ap_status_t ap_set_procdata(void *data, char *key,
                             ap_status_t (*cleanup) (void *)
                             struct proc_t *proc)
@@ -361,7 +361,7 @@ ap_status_t ap_set_procdata(void *data, char *key,
         return APR_ENOPROC;
     }
 }
-
+*/
 ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
 {
     if (proc == NULL) {
