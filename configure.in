@@ -809,6 +809,7 @@ AC_CHECK_FUNCS(mkstemp)
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
 AC_SUBST(tcp_nodelay_inherited)
+AC_SUBST(o_nonblock_inherited)
 AC_SUBST(have_inet_network)
 AC_SUBST(have_sigaction)
 AC_SUBST(have_setrlimit)
@@ -1532,6 +1533,7 @@ if test "$ac_cv_func_gethostbyname_r" = "yes"; then
 fi
 
 APR_CHECK_TCP_NODELAY_INHERITED
+APR_CHECK_O_NONBLOCK_INHERITED
 
 dnl # Look for a way of corking TCP...
 APR_CHECK_DEFINE(TCP_CORK, netinet/tcp.h)
