@@ -55,7 +55,7 @@
 #include "mmap_h.h"
 #include "apr_portable.h"
 
-#if HAVE_MMAP
+#if HAVE_MMAP || defined(BEOS)
 
 static ap_status_t mmap_cleanup(void *themmap)
 {
