@@ -113,13 +113,14 @@ ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
 {
 #ifdef BEOS
     return shutdown(thesocket->socketdes, how);
-#endif
+#else
     if (shutdown(thesocket->socketdes, how) == 0) {
         return APR_SUCCESS;
     }
     else {
         return errno;
     }
+#endif
 }
 
 ap_status_t ap_close_socket(ap_socket_t *thesocket)
