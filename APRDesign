@@ -40,10 +40,9 @@ should evaluate to one, and the ap_mmap_* functions should map files into
 memory and return the appropriate status codes.
 
 If your OS of choice does not have mmap'ed files, APR_HAS_MMAP should evaluate 
-to zero, and all ap_mmap_* functions should automatically return APR_ENOTIMPL.
-The second step is a precaution.  We will not break at compile time, just
-because a programmer tried to write code that uses functions which may not be
-there, but we will make sure the programmer knows he isn't doing anything.
+to zero, and all ap_mmap_* functions should not be defined.  The second step 
+is a precaution that will allow us to break at compile time if a programmer 
+tries to use unsupported functions. 
 
 APR types
 
