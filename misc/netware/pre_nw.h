@@ -37,6 +37,17 @@ typedef unsigned long long uint64_t;
 #define __int64 long long
 #endif
 
+/* expat version */
+#define VERSION "expat_1.95.1"
+#define EXPAT_MAJOR_VERSION     1
+#define EXPAT_MINOR_VERSION     95
+#define EXPAT_EDIT              2
+
+#define XML_MAJOR_VERSION       EXPAT_MAJOR_VERSION
+#define XML_MINOR_VERSION       EXPAT_MINOR_VERSION
+#define XML_MICRO_VERSION       EXPAT_EDIT
+
+
 #endif
 
 
