@@ -4,7 +4,6 @@
 @TOP@
 
 /* Various #defines we need to know about */
-#undef DEV_RANDOM
 #undef EGD_DEFAULT_SOCKET
 #undef HAVE_isascii
 
