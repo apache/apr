@@ -717,8 +717,9 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
     }
 }
 
-APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
-					apr_status_t (*cleanup) (void *))
+APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
+                                   apr_status_t (*plain_cleanup) (void *))
+                                   apr_status_t (*plain_cleanup) (void *))
 {
     struct cleanup *c;
     struct cleanup **lastp;
@@ -738,8 +739,9 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
     }
 }
 
-APR_DECLARE(void) apr_pool_child_cleanup_kill(apr_pool_t *p, const void *data,
-				  	      apr_status_t (*cleanup) (void *))
+APR_DECLARE(void) apr_pool_child_cleanup_set(apr_pool_t *p, const void *data,
+                                       apr_status_t (*plain_cleanup) (void *),
+                                       apr_status_t (*child_cleanup) (void *))
 {
     struct cleanup *c;
     struct cleanup **lastp;
@@ -749,8 +751,8 @@ APR_DECLARE(void) apr_pool_child_cleanup_kill(apr_pool_t *p, const void *data,
     c = p->cleanups;
     lastp = &p->cleanups;
     while (c) {
-        if (c->data == data && c->child_cleanup == cleanup) {
-            *lastp = c->next;
+        if (c->data == data && c->plain_cleanup == plain_cleanup) {
+            c->child_cleanup = child_cleanup;
             break;
         }
 
