@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/06/15 10:32:16 $]
+Last modified at [$Date: 2004/06/15 10:41:19 $]
 
 Release:
 
@@ -62,6 +62,8 @@ RELEASE 1.0 SHOWSTOPPERS:
         apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD, 
                               _POSIX_THREAD_SAFE_FUNCTIONS (?))
 
+      Not a showstopper: Justin
+
 
     * Flush out the test suite and make sure it passes on all platforms.  
       We currently have about 450 functions in APR and 147 tests.  That 
@@ -70,10 +72,14 @@ RELEASE 1.0 SHOWSTOPPERS:
       unified test suite, and adding more tests to make the suite 
       comprehensive.
 
+      Not a showstopper: Justin
+
     * Eliminate the TODO's and XXX's by using the doxygen @bug feature
       to allow us to better track the open issues, and provide historical
       bug lists that help porters understand what was wrong in the old
       versions of APR that they would be upgrading from.
+
+      Not a showstopper: Justin
 
 
 CURRENT VOTES:
@@ -119,7 +125,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       as apr_thread_exit().
       See Message-Id: <E16JjZA-0007hg-00@zakath.apana.org.au> for thread
       discussing this.
-        +1: BrianH, Aaron, david
+        +1: BrianH, Aaron, david, jerenkrantz
 
     * Need some architecture/OS specific versions of the atomic operations.
 	progress: generic, solaris Sparc, FreeBSD5, linux, and OS/390 done
