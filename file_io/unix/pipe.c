@@ -93,7 +93,7 @@ static ap_status_t pipenonblock(struct file_t *thefile)
  */
 ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
 {
-    if (!strcmp(thepipe->fname, "PIPE")) {
+    if (thepipe->stated == -1) {
         thepipe->timeout = timeout;
         return APR_SUCCESS;
     }
@@ -122,6 +122,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*in)->filedes = filedes[0];
     (*in)->buffered = 0;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in)->stated = -1;
     (*in)->timeout = -1;
 
     (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
@@ -129,6 +130,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*out)->filedes = filedes[1];
     (*out)->buffered = 0;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out)->stated = -1;
     (*out)->timeout = -1;
 
     pipenonblock(*in);

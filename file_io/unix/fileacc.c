@@ -118,7 +118,7 @@ mode_t get_fileperms(ap_fileperms_t mode)
 ap_status_t ap_get_filesize(ap_ssize_t *size, struct file_t *file)
 {
     if (file != NULL) {
-        if (!file->stated) {
+        if (file->stated == 0) {
             ap_getfileinfo(file);
         }
         *size = file->size;
@@ -139,7 +139,7 @@ ap_status_t ap_get_filesize(ap_ssize_t *size, struct file_t *file)
 ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct file_t *file)
 {
     if (file != NULL) {
-        if (!file->stated) {
+        if (file->stated == 0) {
             ap_getfileinfo(file);
         }
         *perm = file->protection;
@@ -160,7 +160,7 @@ ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct file_t *file)
 ap_status_t ap_get_fileatime(time_t *atime, struct file_t *file)
 {    
     if (file != NULL) {
-        if (!file->stated) {
+        if (file->stated == 0) {
             ap_getfileinfo(file);
         }
         *atime = file->atime;
@@ -181,7 +181,7 @@ ap_status_t ap_get_fileatime(time_t *atime, struct file_t *file)
 ap_status_t ap_get_filectime(time_t *ptime, struct file_t *file)
 {    
     if (file != NULL) {
-        if (!file->stated) {
+        if (file->stated == 0) {
             ap_getfileinfo(file);
         }
         *ptime = file->ctime;
@@ -202,7 +202,7 @@ ap_status_t ap_get_filectime(time_t *ptime, struct file_t *file)
 ap_status_t ap_get_filemtime(time_t *mtime, struct file_t *file)
 {    
     if (file != NULL) {
-        if (!file->stated) {
+        if (file->stated == 0) {
             ap_getfileinfo(file);
         }
         *mtime = file->mtime;
@@ -223,7 +223,7 @@ ap_status_t ap_get_filemtime(time_t *mtime, struct file_t *file)
 ap_status_t ap_get_filetype(ap_filetype_e *type, struct file_t *file)
 {    
     if (file != NULL) {
-        if (!file->stated) {
+        if (file->stated == 0) {
             ap_getfileinfo(file);
         }
         if (S_ISREG(file->protection))
