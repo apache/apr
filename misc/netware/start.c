@@ -22,6 +22,86 @@
 #include "apr_arch_proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "apr_arch_internal_time.h"
 
+/*
+** Resource tag signatures for using NetWare WinSock 2. These will no longer
+** be needed by anyone once the new WSAStartupWithNlmHandle() is available
+** since WinSock will make the calls to AllocateResourceTag().
+*/
+#define WS_LOAD_ENTRY_SIGNATURE     (*(unsigned long *) "WLDE")
+#define WS_SKT_SIGNATURE            (*(unsigned long *) "WSKT")
+#define WS_LOOKUP_SERVICE_SIGNATURE (*(unsigned long *) "WLUP")
+#define WS_WSAEVENT_SIGNATURE       (*(unsigned long *) "WEVT")
+#define WS_CPORT_SIGNATURE          (*(unsigned long *) "WCPT")
+
+
+int (*WSAStartupWithNLMHandle)( WORD version, LPWSADATA data, void *handle ) = NULL;
+int (*WSACleanupWithNLMHandle)( void *handle ) = NULL;
+
+static int wsa_startup_with_handle (WORD wVersionRequested, LPWSADATA data, void *handle)
+{
+    APP_DATA *app_data;
+    
+    if (!(app_data = (APP_DATA*) get_app_data(gLibId)))
+        return APR_EGENERAL;
+
+    app_data->gs_startup_rtag = AllocateResourceTag(handle, "WinSock Start-up", WS_LOAD_ENTRY_SIGNATURE);
+    app_data->gs_socket_rtag  = AllocateResourceTag(handle, "WinSock socket()", WS_SKT_SIGNATURE);
+    app_data->gs_lookup_rtag  = AllocateResourceTag(handle, "WinSock Look-up", WS_LOOKUP_SERVICE_SIGNATURE);
+    app_data->gs_event_rtag   = AllocateResourceTag(handle, "WinSock Event", WS_WSAEVENT_SIGNATURE);
+    app_data->gs_pcp_rtag     = AllocateResourceTag(handle, "WinSock C-Port", WS_CPORT_SIGNATURE);
+
+    return WSAStartupRTags(wVersionRequested, data, 
+                           app_data->gs_startup_rtag, 
+                           app_data->gs_socket_rtag, 
+                           app_data->gs_lookup_rtag, 
+                           app_data->gs_event_rtag, 
+                           app_data->gs_pcp_rtag);
+}
+
+static int wsa_cleanup_with_handle (void *handle)
+{
+    APP_DATA *app_data;
+    
+    if (!(app_data = (APP_DATA*) get_app_data(gLibId)))
+        return APR_EGENERAL;
+
+    return WSACleanupRTag(app_data->gs_startup_rtag);
+}
+
+static int UnregisterAppWithWinSock (void *nlm_handle)
+{
+    if (!WSACleanupWithNLMHandle)
+    {
+        if (!(WSACleanupWithNLMHandle = ImportPublicObject(gLibHandle, "WSACleanupWithNLMHandle")))
+            WSACleanupWithNLMHandle = wsa_cleanup_with_handle;
+    }
+
+    return (*WSACleanupWithNLMHandle)(nlm_handle);
+}
+
+static int RegisterAppWithWinSock (void *nlm_handle)
+{
+    int err;
+    WSADATA wsaData;
+    WORD wVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
+
+    if (!WSAStartupWithNLMHandle)
+    {
+        if (!(WSAStartupWithNLMHandle = ImportPublicObject(gLibHandle, "WSAStartupWithNLMHandle")))
+            WSAStartupWithNLMHandle = wsa_startup_with_handle;
+    }
+
+    err = (*WSAStartupWithNLMHandle)(wVersionRequested, &wsaData, nlm_handle);
+
+    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
+        HIBYTE(wsaData.wVersion) != WSALowByte) {
+        
+        UnregisterAppWithWinSock (nlm_handle);
+        return APR_EEXIST;
+    }
+
+    return err;
+}
 
 APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 
                                              const char * const * *argv, 
@@ -38,14 +118,12 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc,
 APR_DECLARE(apr_status_t) apr_initialize(void)
 {
     apr_pool_t *pool;
-    apr_status_t status;
-    int iVersionRequested;
-    WSADATA wsaData;
     int err;
+    void *nlmhandle = getnlmhandle();
 
     /* Register the NLM as using APR. If it is already
         registered then just return. */
-    if (register_NLM(getnlmhandle()) != 0) {
+    if (register_NLM(nlmhandle) != 0) {
         return APR_SUCCESS;
     }
 
@@ -59,28 +137,28 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
 
     apr_pool_tag(pool, "apr_initilialize");
 
-    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
-    err = WSAStartup((WORD) iVersionRequested, &wsaData);
+    err = RegisterAppWithWinSock (nlmhandle);
+    
     if (err) {
         return err;
     }
-    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
-        HIBYTE(wsaData.wVersion) != WSALowByte) {
-        WSACleanup();
-        return APR_EEXIST;
-    }
-    
+
     apr_signal_init(pool);
-//    setGlobalPool((void*)pool);
 
     return APR_SUCCESS;
 }
 
 APR_DECLARE_NONSTD(void) apr_terminate(void)
 {
+    APP_DATA *app_data;
+
+    /* Get our instance data for shutting down. */
+    if (!(app_data = (APP_DATA*) get_app_data(gLibId)))
+        return;
+
     /* Unregister the NLM. If it is not registered
         then just return. */
-    if (unregister_NLM(getnlmhandle()) != 0) {
+    if (unregister_NLM(app_data->gs_nlmhandle) != 0) {
         return;
     }
 
@@ -91,7 +169,8 @@ APR_DECLARE_NONSTD(void) apr_terminate(void)
     /* Just clean up the memory for the app that is going
         away. */
     netware_pool_proc_cleanup ();
-    WSACleanup();
+
+    UnregisterAppWithWinSock (app_data->gs_nlmhandle);
 }
 
 APR_DECLARE(void) apr_terminate2(void)

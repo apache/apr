@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <library.h>
+#include <netware.h>
 
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
@@ -143,6 +144,12 @@ typedef struct app_data {
     void*   gs_aHooksToSort;
     void*   gs_phOptionalHooks;
     void*   gs_phOptionalFunctions;
+    void*   gs_nlmhandle;
+    rtag_t  gs_startup_rtag;
+    rtag_t  gs_socket_rtag;
+    rtag_t  gs_lookup_rtag;
+    rtag_t  gs_event_rtag;
+    rtag_t  gs_pcp_rtag;
 } APP_DATA;
 
 int setGlobalPool(void *data);

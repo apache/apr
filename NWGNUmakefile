@@ -221,6 +221,8 @@ FILES_nlm_Ximports = \
 	@libc.imp \
 	@ws2nlm.imp \
 	@netware.imp \
+	WSAStartupRTags \
+	WSACleanupRTag \
 	$(EOLIST)
  
 #   
