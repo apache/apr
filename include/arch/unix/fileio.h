@@ -98,6 +98,9 @@
 #ifdef BEOS
 #include <kernel/OS.h>
 #endif
+#if BEOS && HAVE_ARPA_INET_H
+#include <sys/socket.h> /* for fd_set definitions */
+#endif
 /* End System headers */
 
 #define APR_FILE_BUFSIZE 4096
