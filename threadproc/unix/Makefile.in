@@ -88,11 +88,6 @@ threadpriv.o: threadpriv.c threadproc.h $(INCDIR)/apr_private.h \
  $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
  $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
- ../../file_io/unix/fileio.h $(INCDIR)/apr_lib.h
-threadpriv.o: threadpriv.c threadproc.h $(INCDIR)/apr_config.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h \
  ../../file_io/unix/fileio.h $(INCDIR)/apr_lib.h \
  $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_lock.h
