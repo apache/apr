@@ -177,6 +177,44 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
     return res;
 }
 
+APR_DECLARE_NONSTD(char *) apr_pstrcatv(apr_pool_t *a, const struct iovec *vec,
+                                        apr_size_t nvec, apr_size_t *nbytes)
+{
+    apr_size_t i;
+    apr_size_t len;
+    const struct iovec *src;
+    char *res;
+    char *dst;
+
+    /* Pass one --- find length of required string */
+    len = 0;
+    src = vec;
+    for (i = nvec; i; i--) {
+        len += src->iov_len;
+        src++;
+    }
+    if (nbytes) {
+        *nbytes = len;
+    }
+
+    /* Allocate the required string */
+    res = (char *) apr_palloc(a, len + 1);
+    
+    /* Pass two --- copy the argument strings into the result space */
+    src = vec;
+    dst = res;
+    for (i = nvec; i; i--) {
+        memcpy(dst, src->iov_base, src->iov_len);
+        dst += src->iov_len;
+        src++;
+    }
+
+    /* Return the result string */
+    *dst = '\0';
+
+    return res;
+}
+
 #if (!APR_HAVE_MEMCHR)
 void *memchr(const void *s, int c, size_t n)
 {
