@@ -103,7 +103,9 @@ extern "C" {
 #define APR_SO_SNDBUF        64
 #define APR_SO_RCVBUF        128
 #define APR_SO_DISCONNECTED  256
-#define APR_TCP_NODELAY      512
+#define APR_TCP_NODELAY      512  /**< For SCTP sockets, this is mapped
+                                   * to STCP_NODELAY internally.
+                                   */
 #define APR_TCP_NOPUSH       1024
 #define APR_RESET_NODELAY    2048 /**< This flag is ONLY set internally
                                    * when we set APR_TCP_NOPUSH with

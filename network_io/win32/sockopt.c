@@ -194,7 +194,16 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
     }
     case APR_TCP_NODELAY:
         if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) != on) {
-            if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, 
+            int optlevel = IPPROTO_TCP;
+            int optname = TCP_NODELAY;
+
+#if APR_HAVE_SCTP
+            if (sock->protocol == IPPROTO_SCTP) {
+                optlevel = IPPROTO_SCTP;
+                optname = SCTP_NODELAY;
+            }
+#endif
+            if (setsockopt(sock->socketdes, optlevel, optname,
                            (void *)&on, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
