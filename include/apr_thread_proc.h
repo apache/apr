@@ -554,13 +554,6 @@ APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status)
  */
 APR_DECLARE(void) apr_proc_other_child_check(void); 
 
-/**
- * Ensure all the registered write_fds are still writable, otherwise 
- * invoke the maintenance functions as appropriate.
- * @deffunc void apr_proc_probe_writable_fds()
- */
-APR_DECLARE(void) apr_proc_probe_writable_fds(void);
-
 #endif /* APR_HAS_OTHER_CHILD */
 
 /** 

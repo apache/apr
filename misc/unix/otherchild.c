@@ -130,56 +130,6 @@ APR_DECLARE(void) apr_proc_other_child_unregister(void *data)
     other_child_cleanup(data);
 }
 
-/* test to ensure that the write_fds are all still writable, otherwise
- * invoke the maintenance functions as appropriate */
-void apr_proc_probe_writable_fds(void)
-{
-    fd_set writable_fds;
-    int fd_max;
-    apr_other_child_rec_t *ocr, *nocr; 
-    struct timeval tv; 
-    int rc;
-
-    if (other_children == NULL)
-        return;
-
-    fd_max = 0;
-    FD_ZERO(&writable_fds);
-    do {
-        for (ocr = other_children; ocr; ocr = ocr->next) {
-            if (ocr->write_fd == -1)
-                continue;
-            FD_SET(ocr->write_fd, &writable_fds);
-            if (ocr->write_fd > fd_max) {
-                fd_max = ocr->write_fd;
-            }
-        }
-        if (fd_max == 0)
-            return;
-
-        tv.tv_sec = 0;
-        tv.tv_usec = 0;
-        rc = select(fd_max + 1, NULL, &writable_fds, NULL, &tv);
-    } while (rc == -1 && errno == EINTR);
-
-    if (rc == -1) {
-        /* XXX: uhh this could be really bad, we could have a bad file
-         * descriptor due to a bug in one of the maintenance routines */
-        return;
-    }
-    if (rc == 0)
-        return;
-
-    for (ocr = other_children; ocr; ocr = nocr) {
-        nocr = ocr->next;
-        if (ocr->write_fd == -1)
-            continue;
-        if (FD_ISSET(ocr->write_fd, &writable_fds))
-            continue;
-        (*ocr->maintenance) (APR_OC_REASON_UNWRITABLE, ocr->data, -1);
-    }
-}
-
 APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status)
 {
     apr_other_child_rec_t *ocr, *nocr;
