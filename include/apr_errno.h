@@ -79,18 +79,77 @@ typedef int apr_status_t;
  * @param statcode The error code the get a string for.
  * @param buf A buffer to hold the error string.
  * @param bufsize Size of the buffer to hold the string.
+ * @deffunc char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize)
  */
-char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
+APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf, 
+                                 apr_size_t bufsize);
 
-/*
- * APR_OS_START_ERROR is where the APR specific error values should start.
- * APR_OS_START_STATUS is where the APR specific status codes should start.
+/**
+ * Fold a platform specific error into an apr_status_t code.
+ * @param syserr The platform os error code.
+ * @deffunc apr_status_t APR_FROM_OS_ERROR(os_err_type syserr)
+ * @tip Warning: macro implementation; the syserr argument may be evaluated
+ *      multiple times.
+ */
+
+/**
+ * Fold an apr_status_t code back to the native platform defined error.
+ * @param syserr The apr_status_t folded platform os error code.
+ * @deffunc os_err_type APR_TO_OS_ERROR(apr_status_t statcode)
+ * @tip Warning: macro implementation; the statcode argument may be evaluated
+ *      multiple times.  If the statcode was not created by apr_get_os_error 
+ *      or APR_FROM_OS_ERROR, the results are undefined.
+ */
+
+/**
+ * Return the last platform error, folded into apr_status_t, on some platforms
+ * @deffunc apr_status_t apr_get_os_error()
+ * @tip This retrieves errno, or calls a GetLastError() style function, and
+ *      folds it with APR_FROM_OS_ERROR.  Some platforms (such as OS2) have no
+ *      such mechanism, so this call may be unsupported.  Some platforms
+ *      require the alternate apr_get_netos_error() to retrieve the last
+ *      socket error.
+ */
+
+/**
+ * Return the last socket error, folded into apr_status_t, on some platforms
+ * @deffunc apr_status_t apr_get_netos_error()
+ * @tip This retrieves errno, h_errno, or calls a GetLastSocketError() style
+ *      function, and folds it with APR_FROM_OS_ERROR.  Some platforms (such
+ *      as OS2) have no such mechanism, so this call may be unsupported.
+ */
+
+/**
+ * Reset the last platform error, unfolded from an apr_status_t, on some platforms
+ * @param statcode The OS error folded in a prior call to APR_FROM_OS_ERROR()
+ * @deffunc void apr_set_os_error(apr_status_t statcode)
+ * @tip Warning: macro implementation; the statcode argument may be evaluated
+ *      multiple times.  If the statcode was not created by apr_get_os_error
+ *      or APR_FROM_OS_ERROR, the results are undefined.  This macro sets
+ *      errno, or calls a SetLastError() style function, unfolding statcode
+ *      with APR_TO_OS_ERROR.  Some platforms (such as OS2) have no such
+ *      mechanism, so this call may be unsupported.
+ */
+
+#define apr_set_os_error(e)  (SetLastError(APR_TO_OS_ERROR(e)))
+
+/**
+ * APR_OS_START_ERROR is where the APR specific error values start.
+ */
+/**
+ * APR_OS_START_STATUS is where the APR specific status codes start.
+ */
+/**
  * APR_OS_START_USEERR are reserved for applications that use APR that
  *     layer their own error codes along with APR's.
+ */
+/**
  * APR_OS_START_CANONERR is where APR versions of errno values are defined
  *     on systems which don't have the corresponding errno.
- * APR_OS_START_SYSERR should be used for system error values on 
- *     each platform.  
+ */
+/**
+ * APR_OS_START_SYSERR folds platform-specific system error values into 
+ *     apr_status_t values.
  */
 #define APR_OS_START_ERROR     20000
 #define APR_OS_START_STATUS    (APR_OS_START_ERROR + 500)
@@ -147,11 +206,15 @@ char *apr_strerror(apr_status_t statcode, char *buf, apr_size_t bufsize);
  *                    platform, either because nobody has gotten to it yet, 
  *                    or the function is impossible on this platform.
  * APR_EMISMATCH      Two passwords do not match.
- * 
- * @tip Error codes can be checked with APR_STATUS_IS_FOO, where foo is the
- *      error code.  For example, APR_EOF can be checked for with 
- *      APR_STATUS_IS_EOF.
  * </PRE>
+ * 
+ * @param status The APR_status code to check.
+ * @param statcode The apr status code to test.
+ * @deffunc int APR_STATUS_IS_status(apr_status_t statcode)
+ * @tip Warning: macro implementations; the statcode argument may be
+ *      evaluated multiple times.  To test for APR_ENOFILE, always test
+ *      APR_STATUS_IS_ENOFILE(statcode) because platform-specific codes are
+ *      not necessarily translated into the corresponding APR_Estatus code.
  */
 
 /* APR ERROR VALUES */
