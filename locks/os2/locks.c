@@ -208,6 +208,7 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
         if (lock->owner == CurrentTid) {
             while (lock->lock_count > 0 && stat == APR_SUCCESS)
                 stat = apr_lock_release(lock);
+        }
 
         if (stat != APR_SUCCESS)
             return stat;
