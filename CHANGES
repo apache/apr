@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Clean up Win32 locks when the pool goes away.
+     [Justin Erenkrantz, Jeff Trawick]
+
   *) Implement apr_get_home_directory for Win32.  [William Rowe]
 
   *) Complete the implementation of LARGEFILE support on Win32, although
