@@ -88,6 +88,37 @@ struct apr_sms_cleanup
     apr_status_t (*cleanup_fn)(void *);
 };
 
+#if APR_DEBUG_ALLOCATIONS
+FILE *alloc_file = NULL;
+
+static void _record_(apr_sms_t *sms, const char *what, apr_size_t size,
+                     void *ptr)
+{
+    if (!alloc_file)
+        return;
+
+    if (ptr) {
+#if APR_DEBUG_TAG_SMS
+        fprintf(alloc_file, "%10s %p '%9s' [%9s] @ %p\n",
+                what, sms, sms->tag, sms->identity, ptr);
+#else
+        fprintf(alloc_file, "%10s %p             [%9s] @ %p\n",
+                what, sms, sms->identity, ptr);
+#endif
+    } else {
+#if APR_DEBUG_TAG_SMS
+        fprintf(alloc_file, "%10s %p '%9s' [%9s] %6" APR_SIZE_T_FMT " bytes\n",
+                what, sms, sms->tag, sms->identity, size);
+#else
+        fprintf(alloc_file, "%10s %p             [%9s] %6" APR_SIZE_T_FMT " bytes\n",
+                what, sms, sms->identity, size);
+#endif
+    }
+    fflush(alloc_file);
+}
+#endif
+
+
 /* 
  * memory allocation functions
  */
@@ -98,6 +129,10 @@ APR_DECLARE(void *) apr_sms_malloc(apr_sms_t *sms,
     if (size == 0)
         return NULL;
 
+#if APR_DEBUG_ALLOCATIONS
+    _record_(sms, "MALLOC", size, NULL);
+#endif
+
     return sms->malloc_fn(sms, size);
 }
 
@@ -107,12 +142,20 @@ APR_DECLARE(void *) apr_sms_calloc(apr_sms_t *sms,
     if (size == 0)
         return NULL;
 
+#if APR_DEBUG_ALLOCATIONS
+    _record_(sms, "CALLOC", size, NULL);
+#endif
+
     return sms->calloc_fn(sms, size);
 }
 
 APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem,
                                     apr_size_t size)
 {
+#if APR_DEBUG_ALLOCATIONS
+    _record_(sms, "REALLOC", size, NULL);
+#endif
+
     if (!mem)
         return apr_sms_malloc(sms, size);
 
@@ -131,6 +174,11 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem,
 APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms,
                                        void *mem)
 {
+
+#if APR_DEBUG_ALLOCATIONS
+    _record_(sms, "FREE", 0, mem);
+#endif
+
     if (sms->free_fn)
         return sms->free_fn(sms, mem);  
 
@@ -180,6 +228,10 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
         dbg_file = fopen(APR_DEBUG_FILE, "w");
 #else
     dbg_file = stdout;
+#endif
+#if APR_DEBUG_ALLOCATIONS
+    if (!alloc_file)
+        alloc_file = fopen(APR_DEBUG_ALLOC_FILE, "w");
 #endif
 
     /* XXX - I've assumed that memory passed in will be zeroed,

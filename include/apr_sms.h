@@ -135,6 +135,19 @@ extern "C" {
  */
 #define APR_DEBUG_TAG_SMS             0
 
+/* APR_DEBUG_ALLOCATIONS
+ * This will record ALL calls made to
+ *     apr_sms_malloc
+ *     apr_sms_calloc
+ *     apr_sms_realloc
+ *     apr_sms_free
+ * Details are put into the file specified in the APR_DEBUG_ALLOC_FILE
+ * define
+ */
+#define APR_DEBUG_ALLOCATIONS         0
+#define APR_DEBUG_ALLOC_FILE "/tmp/sms_alloc"
+
+
 /**
  * @package APR memory system
  */
