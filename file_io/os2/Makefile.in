@@ -9,7 +9,8 @@ TARGETS = \
 	readwrite.lo \
 	seek.lo \
 	flock.lo \
-	maperrorcode.lo
+	maperrorcode.lo \
+	fullrw.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
