@@ -75,7 +75,5 @@ struct ap_mmap_t {
     size_t size;
 };
 
-ap_status_t mmap_cleanup(void *);
-
 #endif  /* ! FILE_IO_H */
 
