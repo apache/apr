@@ -58,9 +58,16 @@
 #else
 #include "networkio.h"
 
+int setnonblocking(int on, int sock)
+{
+    return setsockopt(sock, SOL_SOCKET, SO_NONBLOCK,
+        &on, sizeof(on));
+}
+
 ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 {
     int one;
+    int rv;
     if (on){
         one = 1;
     }else {
@@ -80,9 +87,25 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         }
     }
     if (opt & APR_SO_NONBLOCK) {
-    	if (setsockopt(sock->socketdes, SOL_SOCKET, SO_NONBLOCK, &one, sizeof(one)) == -1){
-    		return errno;
+    	if ((rv = setnonblocking (one, sock->socketdes)) < 0) {
+            return errno;
     	}
+    } 
+    if (opt & APR_SO_TIMEOUT) { 
+        if (on > 0 && sock->timeout < 0)
+            /* we should be in non-blocking mode right now... */
+            one = 1;
+        else if (on < 0 && sock->timeout >= 0)
+            /* they've set a timeout so we should be blocking... */
+            one = 0;
+        else if (on == 0)
+            /* we need to be in nonblocking or this will hang the server */
+            one = 1;
+            
+        if ((rv = setnonblocking (one, sock->socketdes)) < 0)
+            return rv; 
+         
+        sock->timeout = on; 
     } 
     return APR_SUCCESS;
 }         
