@@ -143,14 +143,14 @@ static void test_filename(CuTest *tc)
     
 static void test_fileclose(CuTest *tc)
 {
-    char *str;
+    char str;
     apr_status_t rv;
     apr_size_t one = 1;
 
     rv = apr_file_close(filetest);
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
     /* We just closed the file, so this should fail */
-    rv = apr_file_read(filetest, str, &one);
+    rv = apr_file_read(filetest, &str, &one);
     CuAssertIntEquals(tc, APR_EBADF, rv);
 }
 
