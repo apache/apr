@@ -137,6 +137,35 @@ typedef struct in_addr          apr_in_addr_t;
 /* use apr_uint16_t just in case some system has a short that isn't 16 bits... */
 typedef apr_uint16_t            apr_port_t;
 
+/* we're going to roll our own sockaddr type as we want to make sure
+ * we have protocol independance for APR...
+ *
+ * It's defined here as I think it should all be platform safe...
+ */
+typedef struct {
+    apr_pool_t *pool;              /* The pool to use... */
+    char *hostname;                /* The hostname */
+    char *servname;                /* This is either a string of the port number or
+                                    * the service name for the port
+                                    */
+    apr_port_t port;               /* The numeric port */
+    union {
+        struct sockaddr_in sin;    /* IPv4 sockaddr structure */
+#if APR_HAVE_IPV6
+        struct sockaddr_in6 sin6;  /* IPv6 sockaddr structure */
+#endif
+    } sa;
+    apr_socklen_t sa_len;          /* How big is the sockaddr we're using? */
+    int addr_str_len;              /* How big should the address buffer be?
+                                    * 16 for v4 or 46 for v6
+                                    * used in inet_ntop...
+                                    */
+    void *addr_ptr;                /* This should be set to point to the
+                                    * sockaddr structure address we're using...
+                                    * i.e. sa.sin.sin_addr or sa.sin6.sin6_addr
+                                    */
+} apr_sockaddr_t;
+
 #if APR_HAS_SENDFILE
 /* Define flags passed in on apr_sendfile() */
 #define APR_SENDFILE_DISCONNECT_SOCKET      1
