@@ -106,7 +106,7 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
     if (xlate) {
 #if APR_HAS_XLATE
         if ((rv = apr_md5_set_xlate(&context, xlate)) != APR_SUCCESS){
-            fprintf("Couldn't set the MD5 translation handle!\n");
+            fprintf(stderr, "Couldn't set the MD5 translation handle!\n");
             exit(-1);
         }
 #else

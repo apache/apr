@@ -63,7 +63,7 @@
 	{ apr_status_t rv; \
 	    if ((rv = func) == value){ \
 	        printf("%s\n", bad); \
-            printf("Error was %ld : %s\n", rv, strerror(rv)); \
+            printf("Error was %d : %s\n", rv, strerror(rv)); \
 	        exit(-1); \
 	    } \
 	    printf("%s\n", good); \
@@ -74,7 +74,7 @@
 	{ apr_status_t rv; \
 	    if ((rv = func) != value){ \
 	        printf("%s\n", bad); \
-            printf("Error was %ld : %s\n", rv, strerror(rv)); \
+            printf("Error was %d : %s\n", rv, strerror(rv)); \
 	        exit(-1); \
 	    } \
 	    printf("%s\n", good); \
