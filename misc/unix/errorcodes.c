@@ -374,6 +374,15 @@ static char *native_strerror(apr_status_t statcode, char *buf,
 }
 #elif defined(HAVE_STRERROR_R)
 /* glibc style */
+
+/* BeOS has the function available, but it doesn't provide
+ * the prototype publically (doh!), so to avoid a build warning
+ * we add a suitable prototype here.
+ */
+#if defined(BEOS)
+const char *strerror_r(apr_status_t, char *, apr_size_t);
+#endif
+
 static char *native_strerror(apr_status_t statcode, char *buf,
                              apr_size_t bufsize)
 {
