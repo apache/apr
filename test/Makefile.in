@@ -82,10 +82,10 @@ testsock@EXEEXT@: testsock.o client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@
 	$(CC) $(CFLAGS) -o testsock@EXEEXT@ testsock.o $(LDFLAGS)
 
 client@EXEEXT@: client.o
-	$(CC) $(CFLAGS) -o server@EXEEXT@ server.o $(LDFLAGS) 
+	$(CC) $(CFLAGS) -o client@EXEEXT@ client.o $(LDFLAGS)
 
 server@EXEEXT@: server.o sendfile.o
-	$(CC) $(CFLAGS) -o client@EXEEXT@ client.o $(LDFLAGS)
+	$(CC) $(CFLAGS) -o server@EXEEXT@ server.o $(LDFLAGS) 
 
 sendfile@EXEEXT@: sendfile.o
 	$(CC) $(CFLAGS) -o sendfile@EXEEXT@ sendfile.o $(LDFLAGS)
