@@ -276,12 +276,10 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
     FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
 
-    /* File size 
-     * Note: This cannot handle files greater than can be held by an int 
-     * XXX: Do we want to tag if nFileSizeHigh as -1 (or 0x7fffffff?)
+    /* Note: This cannot handle files greater than can be held by an int 
      */
     finfo->size = FileInformation.nFileSizeLow;
-    if (finfo->size < 0 || FileInformation.nFileSizeLow)
+    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
         finfo->size = 0x7fffffff;
 
     return APR_SUCCESS;
