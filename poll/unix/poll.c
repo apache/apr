@@ -217,6 +217,8 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     for (i = 0; i < num; i++) {
         apr_os_sock_t fd;
 
+        aprset[i].rtnevents = 0;
+
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
 #ifdef NETWARE
             if (HAS_PIPES(set_type)) {
@@ -274,10 +276,6 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
 #ifdef NETWARE
     }
 #endif
-
-    for (i = 0; i < num; i++) {
-        aprset[i].rtnevents = 0;
-    }
 
     (*nsds) = rv;
     if ((*nsds) == 0) {
