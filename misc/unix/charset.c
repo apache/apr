@@ -103,7 +103,7 @@ APR_DECLARE(const char*) apr_os_default_encoding (apr_pool_t *pool)
 
 APR_DECLARE(const char*) apr_os_locale_encoding (apr_pool_t *pool)
 {
-#if defined(HAVE_NL_LANGINFO) && defined(HAVE_CODESET)
+#if defined(HAVE_NL_LANGINFO) && defined(CODESET)
     const char *charset;
 
     charset = nl_langinfo(CODESET);
