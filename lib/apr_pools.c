@@ -1313,7 +1313,6 @@ static void free_proc_chain(struct process_chain *procs)
      */
     struct process_chain *p;
     int need_timeout = 0;
-    int status;
 
     if (procs == NULL) {
 	return;			/* No work.  Whew! */
@@ -1387,7 +1386,7 @@ static void free_proc_chain(struct process_chain *procs)
     /* Now wait for all the signaled processes to die */
     for (p = procs; p; p = p->next) {
 	if (p->kill_how != kill_never) {
-	    status = ap_wait_proc(p->pid, APR_WAIT);
+	    (void) ap_wait_proc(p->pid, APR_WAIT);
 	}
     }
 }
