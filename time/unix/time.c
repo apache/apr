@@ -168,7 +168,9 @@ apr_status_t apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input
 #else /* !APR_HAS_THREADS */
     struct tm *mangotm;
     mangotm=localtime(&mango);
+#ifdef HAVE_GMTOFF
     offs = mangotm->tm_gmtoff;
+#endif    
 #endif
     return apr_explode_time(result, input, offs);
 #endif /* __EMX__ */
