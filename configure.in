@@ -1835,9 +1835,8 @@ AC_SUBST(have_ipv6)
 
 dnl Check for langinfo support
 
-APR_FLAG_HEADERS(langinfo.h)
-APR_FLAG_FUNCS(nl_langinfo)
-APR_CHECK_DEFINE(CODESET, langinfo.h, [CODESET defined in langinfo.h])
+AC_CHECK_HEADERS(langinfo.h)
+AC_CHECK_FUNCS(nl_langinfo)
 
 dnl ----------------------------- Finalize the variables
 
