@@ -139,7 +139,7 @@ AC_ARG_ENABLE(experimental-libtool,[  --experimental-libtool Use experimental cu
   [experimental_libtool=$enableval],[experimental_libtool=no])
 
 case $host in
-*os2*)
+*-os2*)
     # Use a custom-made libtool replacement
     echo "using aplibtool"
     LIBTOOL="$srcdir/build/aplibtool"
@@ -1196,7 +1196,7 @@ case $host in
    s390*linux*)
        size_t_fmt='#define APR_SIZE_T_FMT "ld"'
        ;;
-   *os2_emx)
+   *-os2*)
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
        size_t_fmt='#define APR_SIZE_T_FMT "lu"'
        ;;

@@ -1095,7 +1095,7 @@ case $os in
 ########################
 # changes for Apache
 #
-	-os2_emx | -os400* )
+	-os400* )
         	;;
 #
 # end Apache changes

@@ -70,7 +70,7 @@ if test "x$apr_preload_done" != "xyes" ; then
     *-dg-dgux*)
 	APR_ADDTO(CPPFLAGS, [-DDGUX])
 	;;
-    *os2_emx*)
+    *-os2*)
 	APR_SETVAR(SHELL, [sh])
 	APR_SETIFNULL(apr_gethostbyname_is_thread_safe, [yes])
 	APR_SETIFNULL(apr_gethostbyaddr_is_thread_safe, [yes])
