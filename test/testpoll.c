@@ -72,7 +72,7 @@ static int make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, apr_port_t port
         printf("couldn't create control socket information, shutting down");
         return 1;
     }
-    if (apr_socket_create(sock, (*sa)->sa.sin.sin_family, SOCK_DGRAM, APR_NO_INHERIT, p)
+    if (apr_socket_create(sock, (*sa)->sa.sin.sin_family, SOCK_DGRAM, p)
         != APR_SUCCESS){
         printf("couldn't create UDP socket, shutting down");
         return 1;

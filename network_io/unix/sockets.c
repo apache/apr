@@ -127,7 +127,7 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
 }
 
 apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
-                               apr_int32_t inherit, apr_pool_t *cont)
+                               apr_pool_t *cont)
 {
     int family = ofamily;
 
@@ -160,10 +160,9 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
     set_socket_vars(*new, family, type);
 
     (*new)->timeout = -1;
-    (*new)->inherit = inherit;
+    (*new)->inherit = 0;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
-                              ((*new)->inherit & APR_INHERIT) 
-                                  ? apr_pool_cleanup_null : socket_cleanup);
+                              socket_cleanup);
     return APR_SUCCESS;
 } 
 
@@ -254,10 +253,9 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
         (*new)->local_interface_unknown = 1;
     }
 
-    (*new)->inherit = sock->inherit;
+    (*new)->inherit = 0;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
-                              ((*new)->inherit & APR_INHERIT) 
-                                  ? apr_pool_cleanup_null : socket_cleanup);
+                              socket_cleanup);
     return APR_SUCCESS;
 }
 
@@ -334,7 +332,6 @@ apr_status_t apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)
 
 apr_status_t apr_os_sock_make(apr_socket_t **apr_sock, 
                               apr_os_sock_info_t *os_sock_info, 
-                              apr_int32_t inherit,
                               apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
@@ -358,11 +355,9 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
                (*apr_sock)->remote_addr->salen);
     }
         
-    (*apr_sock)->inherit = inherit;
+    (*apr_sock)->inherit = 0;
     apr_pool_cleanup_register((*apr_sock)->cntxt, (void *)(*apr_sock), 
-                              socket_cleanup,
-                              ((*apr_sock)->inherit & APR_INHERIT)
-                                  ? apr_pool_cleanup_null : socket_cleanup);
+                              socket_cleanup, socket_cleanup);
     return APR_SUCCESS;
 }
 
