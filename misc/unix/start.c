@@ -203,6 +203,9 @@ ap_status_t ap_initialize(void)
     sigset_t sigset;
 
     sigfillset(&sigset);
+    /*@@@ FIXME: This should *NOT* be called for the prefork MPM,
+     * even if HAVE_PTHREAD_SIGMASK is defined!!!!       MnKr
+     */
     pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 #endif
     return APR_SUCCESS;
