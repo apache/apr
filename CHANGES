@@ -1,5 +1,12 @@
 Changes with APR b1
 
+  *) Keep apr_terminate from seg faulting on terminate.  This is
+     happening on systems that do not NULL out locks when they are
+     destroyed.  To keep this from happening, we set the locks to
+     NULL after destroying them in apr_terminate, and we have to 
+     check for NULL in free_blocks.  
+     [Allan Edwards and Gregory Nicholls <gnicholls@level8.com>]
+
   *) Remove the ability to allocate memory out of a NULL pool.
      [Ryan Bloom]
 

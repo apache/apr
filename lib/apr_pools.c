@@ -328,7 +328,9 @@ static void free_blocks(union block_hdr *blok)
     }
 
 #if APR_HAS_THREADS
-    apr_lock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_lock(alloc_mutex);
+    }
 #endif
     old_free_list = block_freelist;
     block_freelist = blok;
@@ -378,7 +380,9 @@ static void free_blocks(union block_hdr *blok)
 #endif /* ALLOC_STATS */
 
 #if APR_HAS_THREADS
-    apr_unlock(alloc_mutex);
+    if (alloc_mutex) {
+        apr_unlock(alloc_mutex);
+    }
 #endif /* APR_HAS_THREADS */
 #endif /* ALLOC_USE_MALLOC */
 }
@@ -702,6 +706,8 @@ void apr_term_alloc(apr_pool_t *globalp)
 #if APR_HAS_THREADS
     apr_destroy_lock(alloc_mutex);
     apr_destroy_lock(spawn_mutex);
+    alloc_mutex = NULL;
+    spawn_mutex = NULL;
 #endif
     apr_destroy_pool(globalp);
 }
