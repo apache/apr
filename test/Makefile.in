@@ -169,4 +169,7 @@ testdup@EXEEXT@: testdup.lo $(LOCAL_LIBS)
 testrand@EXEEXT@: testrand.lo $(LOCAL_LIBS)
 	$(LINK) testrand.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
+testshm@EXEEXT@: testshm.lo $(LOCAL_LIBS)
+	$(LINK) testshm.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
 # DO NOT REMOVE
