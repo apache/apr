@@ -1272,7 +1272,6 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
             continue;
         }
         if (cat_keys[i].merge_next) {
-            apr_table_entry_t *elt;
             char *new_val;
             char *val_next;
             overlap_key *next = cat_keys[i].merge_next;
