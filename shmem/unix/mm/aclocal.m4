@@ -249,6 +249,7 @@ OCFLAGS="$CFLAGS"
 case "$1" in
     MM_SHMT_MM*    ) CFLAGS="-DTEST_MMAP   $CFLAGS" ;;
     MM_SHMT_IPCSHM ) CFLAGS="-DTEST_SHMGET $CFLAGS" ;;
+    MM_SHMT_BEOS   ) CFLAGS="-DTEST_AREAS  $CFLAGS" ;;
 esac
 AC_TRY_RUN(
 changequote(<<, >>)dnl
@@ -288,6 +289,10 @@ changequote(<<, >>)dnl
 #if !defined(MAP_FAILED)
 #define MAP_FAILED ((void *)-1)
 #endif
+#ifdef MM_OS_BEOS
+#include <kernel/OS.h>
+#endif
+
 
 int testit(int size)
 {
@@ -319,6 +324,14 @@ int testit(int size)
     shmdt(segment);
     shmctl(fd, IPC_RMID, NULL);
 #endif
+#ifdef TEST_BEOS
+    area_id id;
+    id = create_area("mm_test", (void*)&segment, B_ANY_ADDRESS, size, 
+              B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA);
+    if (id < 0)
+        return 0;
+    delete_area(id);
+#endif
     return 1;
 }
 
@@ -343,7 +356,7 @@ int main(int argc, char *argv[])
         m = 1024*1024*32;
         b = 0;
         for (;;) {
-            /* fprintf(stderr, "t=%d, m=%d, b=%d\n", t, m, b); */
+            /* fprintf(stderr, "t=%d, m=%d, b=%d\n", t, m, b); */ 
             rc = testit(m);
             if (rc) {
                 d = ((t-m)/2);

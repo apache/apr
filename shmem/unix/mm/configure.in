@@ -89,6 +89,7 @@ dnl #   some special defines for brain dead platforms
 case $PLATFORM in
    *-*-sunos* ) AC_DEFINE(MM_OS_SUNOS)  ;;
    BS2000-*-* ) AC_DEFINE(MM_OS_BS2000) ;;
+   *-*-beos*  ) AC_DEFINE(MM_OS_BEOS) ;;
 esac
 
 dnl #
