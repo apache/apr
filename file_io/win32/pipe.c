@@ -63,7 +63,7 @@
 #include <sys/stat.h>
 #include "misc.h"
 
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
+ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
     DWORD dwMode;
     ap_oslevel_e oslevel;
