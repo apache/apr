@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Non-blocking connects shouldn't be calling connect a second
+     time.  According to Single Unix, a non-blocking connect has
+     succeeded when the select pops successfully.  It has failed
+     if the select failed.  The second connect was causing 502's
+     in the httpd-proxy.  [John Barbee barbee@veribox.net]
+
   *) Fix apr_dir_rewind() for Win32 to avoid returning a bogus error.
      [Jeff Trawick, William Rowe]
 
