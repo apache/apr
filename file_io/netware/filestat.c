@@ -27,7 +27,7 @@
 #include <utime.h>
 #endif
 
-/*#define APR_HAS_PSA*/
+#define APR_HAS_PSA
 
 static apr_filetype_e filetype_from_mode(mode_t mode)
 {
