@@ -50,7 +50,7 @@
 /*
  * Create a memory pool
  */
-MM *mm_create(size_t usize, const char *file)
+MM *mm_create(size_t usize, const char *file, int flag)
 {
     MM *mm = NULL;
     void *core;
@@ -65,6 +65,10 @@ MM *mm_create(size_t usize, const char *file)
         usize = maxsize;
     if (usize < MM_ALLOC_MINSIZE)
         usize = MM_ALLOC_MINSIZE;
+
+    if (flag & MM_ALLOCATE_ENOUGH) {
+        usize += sizeof(*mm);
+    }
 
     /* determine size */
     size = usize+SIZEOF_mem_pool;
