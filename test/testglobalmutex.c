@@ -36,7 +36,7 @@ static void launch_child(CuTest *tc, apr_proc_t *proc, apr_pool_t *p)
     apr_assert_success(tc, "Couldn't set error check in procattr", rv);
 
     args[0] = "globalmutexchild" EXTENSION;
-    args[2] = NULL;
+    args[1] = NULL;
     rv = apr_proc_create(proc, "./globalmutexchild" EXTENSION, args, NULL,
             procattr, p);
     apr_assert_success(tc, "Couldn't launch program", rv);
