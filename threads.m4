@@ -21,13 +21,14 @@ dnl AC_MSG_ERROR(host_alias is not set. Make sure to run config.guess)
     PTHREAD_FLAGS="-D_POSIX_THREAD_SAFE_FUNCTIONS";;
   *hpux*)
     PTHREAD_FLAGS="-D_REENTRANT";;
+  *sco*)
+    PTHREAD_FLAGS="-D_REENTRANT";;
+dnl Solves sigwait() problem, creates problems with u_long etc.
+dnl    PTHREAD_FLAGS="-D_REENTRANT -D_XOPEN_SOURCE=500 -D_POSIX_C_SOURCE=199506 -D_XOPEN_SOURCE_EXTENDED=1";;
   esac
 
-dnl These flags should go into CPPFLAGS. APR needs to be improved to use
-dnl the right names.
-
   if test -n "$PTHREAD_FLAGS"; then
-    CFLAGS="$CFLAGS $PTHREAD_FLAGS"
+    CPPFLAGS="$CPPFLAGS $PTHREAD_FLAGS"
   fi
 ])dnl
 dnl
