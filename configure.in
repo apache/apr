@@ -50,7 +50,7 @@ AC_CHECK_TYPE(ssize_t, int)
 AC_C_INLINE
 
 # Use /bin/sh if it exists, otherwise go looking for sh in the path
-if (test -z "$SH" -a -f /bin/sh); then
+if test ".$SH" = . -a -f /bin/sh; then
   SH="/bin/sh"
 fi
 AC_CHECK_PROG(SH, sh, sh)
@@ -97,7 +97,7 @@ AC_CHECK_LIB(pthread, pthread_mutex_init)
 AC_CHECK_LIB(socket,socket)
 AC_CHECK_LIB(ufc,crypt)
 
-if (test "$SYS_SW" = "AIX"); then
+if test ".$SYS_SW" = ".AIX"; then
     CFLAGS="$CFLAGS -U__STR__"
     case "$SYS_KV" in
 	[12]*)
@@ -110,10 +110,6 @@ if (test "$SYS_SW" = "AIX"); then
 	    AC_DEFINE(NEED_RLIM_T)
 	    ;;
     esac
-fi
-
-if (test "$SYS_SW" = "FreeBSD"); then
-    CFLAGS="$CFLAGS -pthread -U__STR__"
 fi
 
 dnl Checks for header files.
