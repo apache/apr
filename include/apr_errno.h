@@ -116,7 +116,7 @@ int ap_canonical_error(ap_status_t err);
 #define APR_CHILD_DONE     (APR_OS_START_STATUS + 5)
 #define APR_CHILD_NOTDONE  (APR_OS_START_STATUS + 6)
 #define APR_TIMEUP         (APR_OS_START_STATUS + 7)
-/* empty slot: +8 */
+#define APR_INCOMPLETE     (APR_OS_START_STATUS + 8)
 /* empty slot: +9 */
 /* empty slot: +10 */
 /* empty slot: +11 */
