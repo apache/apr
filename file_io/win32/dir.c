@@ -176,9 +176,7 @@ ap_status_t ap_dir_entry_mtime(time_t *time, struct dir_t *thedir)
     if (thedir == NULL || thedir->entry == NULL) {
         return APR_ENODIR;
     }
-    
-    *time = WinTimeToUnixTime(&thedir->entry->ftLastWriteTime);
- 
+    FileTimeToAprTime(time, &thedir->entry->ftLastWriteTime);
     return APR_SUCCESS;
 }
  

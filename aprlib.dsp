@@ -244,10 +244,6 @@ SOURCE=.\time\win32\time.c
 
 SOURCE=.\time\win32\timestr.c
 # End Source File
-# Begin Source File
-
-SOURCE=.\misc\win32\timetest.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
