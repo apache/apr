@@ -58,6 +58,11 @@
 
 int ap_canonical_error(ap_status_t errcode)
 {
+#if defined(EAGAIN) && defined(EWOULDBLOCK) && (EAGAIN != EWOULDBLOCK)
+    if (errcode == EWOULDBLOCK) {
+        errcode = EAGAIN;
+    }
+#endif
     return errcode;
 }
 
