@@ -89,6 +89,7 @@ typedef int apr_status_t;
 APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf, 
                                  apr_size_t bufsize);
 
+#if defined(DOXYGEN)
 /**
  * @def APR_FROM_OS_ERROR(os_err_type syserr)
  * Fold a platform specific error into an apr_status_t code.
@@ -97,6 +98,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * @warning  macro implementation; the syserr argument may be evaluated
  *      multiple times.
  */
+#define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
 
 /**
  * @def APR_TO_OS_ERROR(apr_status_t statcode)
@@ -107,6 +109,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *      multiple times.  If the statcode was not created by apr_get_os_error 
  *      or APR_FROM_OS_ERROR, the results are undefined.
  */
+#define APR_TO_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e - APR_OS_START_SYSERR)
 
 /**
  * @def apr_get_os_error()
@@ -117,6 +120,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *      require the alternate apr_get_netos_error() to retrieve the last
  *      socket error.
  */
+#define apr_get_os_error()   (APR_FROM_OS_ERROR(GetLastError()))
 
 /**
  * Return the last socket error, folded into apr_status_t, on some platforms
@@ -126,6 +130,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *      as OS2) have no such mechanism, so this call may be unsupported.
  */
 
+#define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
 /**
  * Reset the last platform error, unfolded from an apr_status_t, on some platforms
  * @param statcode The OS error folded in a prior call to APR_FROM_OS_ERROR()
@@ -137,39 +142,43 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *      with APR_TO_OS_ERROR.  Some platforms (such as OS2) have no such
  *      mechanism, so this call may be unsupported.
  */
-
+#define apr_set_os_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
+#endif
 /**
  * APR_OS_START_ERROR is where the APR specific error values start.
  */
+#define APR_OS_START_ERROR     20000
 /**
  * APR_OS_START_STATUS is where the APR specific status codes start.
  */
+#define APR_OS_START_STATUS    (APR_OS_START_ERROR + 500)
 /**
  * APR_OS_START_USEERR are reserved for applications that use APR that
  *     layer their own error codes along with APR's.
  */
+#define APR_OS_START_USEERR    (APR_OS_START_STATUS + 500)
 /**
  * APR_OS_START_CANONERR is where APR versions of errno values are defined
  *     on systems which don't have the corresponding errno.
  */
+#define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)
 /**
  * APR_OS_START_EAIERR folds EAI_ error codes from getaddrinfo() into 
  *     apr_status_t values.
  */
+#define APR_OS_START_EAIERR    (APR_OS_START_CANONERR + 500)
 /**
  * APR_OS_START_SYSERR folds platform-specific system error values into 
  *     apr_status_t values.
  */
-#define APR_OS_START_ERROR     20000
-#define APR_OS_START_STATUS    (APR_OS_START_ERROR + 500)
-#define APR_OS_START_USEERR    (APR_OS_START_STATUS + 500)
-#define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)
-#define APR_OS_START_EAIERR    (APR_OS_START_CANONERR + 500)
 #define APR_OS_START_SYSERR    (APR_OS_START_EAIERR + 500)
 
+/** no error */
 #define APR_SUCCESS 0
 
-/**
+/* APR ERROR VALUES */
+/** 
+ * @defgroup APRErrorValues Error Values
  * <PRE>
  * <b>APR ERROR VALUES</b>
  * APR_ENOSTAT      APR was unable to perform a stat on the file 
@@ -206,7 +215,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *                    of the input buffer.
  * APR_BADCH          Getopt found an option not in the option string
  * APR_BADARG         Getopt found an option that is missing an argument 
- *                    and and argument was specified in the option string
+ *                    and an argument was specified in the option string
  * APR_EOF            APR has encountered the end of the file
  * APR_NOTFOUND       APR was unable to find the socket in the poll structure
  * APR_ANONYMOUS      APR is using anonymous shared memory
@@ -224,194 +233,404 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_EABOVEROOT     The given path was above the root path.
  * APR_EBUSY          The given lock was busy.
  * </PRE>
- * 
+ * @{
+ */
+/** @see APR_STATUS_IS_ENOSTAT */
+#define APR_ENOSTAT        (APR_OS_START_ERROR + 1)
+/** @see APR_STATUS_IS_ENOPOOL */
+#define APR_ENOPOOL        (APR_OS_START_ERROR + 2)
+/* empty slot: +3 */
+/** @see APR_STATUS_IS_EBADDATE */
+#define APR_EBADDATE       (APR_OS_START_ERROR + 4)
+/** @see APR_STATUS_IS_EINVALSOCK */
+#define APR_EINVALSOCK     (APR_OS_START_ERROR + 5)
+/** @see APR_STATUS_IS_ENOPROC */
+#define APR_ENOPROC        (APR_OS_START_ERROR + 6)
+/** @see APR_STATUS_IS_ENOTIME */
+#define APR_ENOTIME        (APR_OS_START_ERROR + 7)
+/** @see APR_STATUS_IS_ENODIR */
+#define APR_ENODIR         (APR_OS_START_ERROR + 8)
+/** @see APR_STATUS_IS_ENOLOCK */
+#define APR_ENOLOCK        (APR_OS_START_ERROR + 9)
+/** @see APR_STATUS_IS_ENOPOLL */
+#define APR_ENOPOLL        (APR_OS_START_ERROR + 10)
+/** @see APR_STATUS_IS_ENOSOCKET */
+#define APR_ENOSOCKET      (APR_OS_START_ERROR + 11)
+/** @see APR_STATUS_IS_ENOTHREAD */
+#define APR_ENOTHREAD      (APR_OS_START_ERROR + 12)
+/** @see APR_STATUS_IS_ENOTHDKEY */
+#define APR_ENOTHDKEY      (APR_OS_START_ERROR + 13)
+/** @see APR_STATUS_IS_EGENERAL */
+#define APR_EGENERAL       (APR_OS_START_ERROR + 14)
+/** @see APR_STATUS_IS_ENOSHMAVAIL */
+#define APR_ENOSHMAVAIL    (APR_OS_START_ERROR + 15)
+/** @see APR_STATUS_IS_EBADIP */
+#define APR_EBADIP         (APR_OS_START_ERROR + 16)
+/** @see APR_STATUS_IS_EBADMASK */
+#define APR_EBADMASK       (APR_OS_START_ERROR + 17)
+/* empty slot: +18 */
+/** @see APR_STATUS_IS_EDSOPEN */
+#define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
+/** @see APR_STATUS_IS_EABSOLUTE */
+#define APR_EABSOLUTE      (APR_OS_START_ERROR + 20)
+/** @see APR_STATUS_IS_ERELATIVE */
+#define APR_ERELATIVE      (APR_OS_START_ERROR + 21)
+/** @see APR_STATUS_IS_EINCOMPLETE */
+#define APR_EINCOMPLETE    (APR_OS_START_ERROR + 22)
+/** @see APR_STATUS_IS_EABOVEROOT */
+#define APR_EABOVEROOT     (APR_OS_START_ERROR + 23)
+/** @see APR_STATUS_IS_EBADPATH */
+#define APR_EBADPATH       (APR_OS_START_ERROR + 24)
+
+/* APR ERROR VALUE TESTS */
+/** 
+ * APR was unable to perform a stat on the file 
+ * @warning always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
+#define APR_STATUS_IS_ENOSTAT(s)        ((s) == APR_ENOSTAT)
+/** 
+ * APR was not provided a pool with which to allocate memory 
+ * @warning always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
+#define APR_STATUS_IS_ENOPOOL(s)        ((s) == APR_ENOPOOL)
+/** APR was given an invalid date  */
+#define APR_STATUS_IS_EBADDATE(s)       ((s) == APR_EBADDATE)
+/** APR was given an invalid socket */
+#define APR_STATUS_IS_EINVALSOCK(s)     ((s) == APR_EINVALSOCK)
+/** APR was not given a process structure */
+#define APR_STATUS_IS_ENOPROC(s)        ((s) == APR_ENOPROC)
+/** APR was not given a time structure */
+#define APR_STATUS_IS_ENOTIME(s)        ((s) == APR_ENOTIME)
+/** APR was not given a directory structure */
+#define APR_STATUS_IS_ENODIR(s)         ((s) == APR_ENODIR)
+/** APR was not given a lock structure */
+#define APR_STATUS_IS_ENOLOCK(s)        ((s) == APR_ENOLOCK)
+/** APR was not given a poll structure */
+#define APR_STATUS_IS_ENOPOLL(s)        ((s) == APR_ENOPOLL)
+/** APR was not given a socket */
+#define APR_STATUS_IS_ENOSOCKET(s)      ((s) == APR_ENOSOCKET)
+/** APR was not given a thread structure */
+#define APR_STATUS_IS_ENOTHREAD(s)      ((s) == APR_ENOTHREAD)
+/** APR was not given a thread key structure */
+#define APR_STATUS_IS_ENOTHDKEY(s)      ((s) == APR_ENOTHDKEY)
+/** Generic Error which can not be put into another spot */
+#define APR_STATUS_IS_EGENERAL(s)       ((s) == APR_EGENERAL)
+/** There is no more shared memory available */
+#define APR_STATUS_IS_ENOSHMAVAIL(s)    ((s) == APR_ENOSHMAVAIL)
+/** The specified IP address is invalid */
+#define APR_STATUS_IS_EBADIP(s)         ((s) == APR_EBADIP)
+/** The specified netmask is invalid */
+#define APR_STATUS_IS_EBADMASK(s)       ((s) == APR_EBADMASK)
+/* empty slot: +18 */
+/** 
+ * APR was unable to open the dso object.  
+ * For more information call apr_dso_error().
+ */
+#define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN)
+/** The given path was absolute. */
+#define APR_STATUS_IS_EABSOLUTE(s)      ((s) == APR_EABSOLUTE)
+/** The given path was relative. */
+#define APR_STATUS_IS_ERELATIVE(s)      ((s) == APR_ERELATIVE)
+/** The given path was neither relative nor absolute. */
+#define APR_STATUS_IS_EINCOMPLETE(s)    ((s) == APR_EINCOMPLETE)
+/** The given path was above the root path. */
+#define APR_STATUS_IS_EABOVEROOT(s)     ((s) == APR_EABOVEROOT)
+/** The given path was bad. */
+#define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
+
+/* APR STATUS VALUES */
+/** @see APR_STATUS_IS_INCHILD */
+#define APR_INCHILD        (APR_OS_START_STATUS + 1)
+/** @see APR_STATUS_IS_INPARENT */
+#define APR_INPARENT       (APR_OS_START_STATUS + 2)
+/** @see APR_STATUS_IS_DETACH */
+#define APR_DETACH         (APR_OS_START_STATUS + 3)
+/** @see APR_STATUS_IS_NOTDETACH */
+#define APR_NOTDETACH      (APR_OS_START_STATUS + 4)
+/** @see APR_STATUS_IS_CHILD_DONE */
+#define APR_CHILD_DONE     (APR_OS_START_STATUS + 5)
+/** @see APR_STATUS_IS_CHILD_NOTDONE */
+#define APR_CHILD_NOTDONE  (APR_OS_START_STATUS + 6)
+/** @see APR_STATUS_IS_TIMEUP */
+#define APR_TIMEUP         (APR_OS_START_STATUS + 7)
+/** @see APR_STATUS_IS_INCOMPLETE */
+#define APR_INCOMPLETE     (APR_OS_START_STATUS + 8)
+/* empty slot: +9 */
+/* empty slot: +10 */
+/* empty slot: +11 */
+/** @see APR_STATUS_IS_BADCH */
+#define APR_BADCH          (APR_OS_START_STATUS + 12)
+/** @see APR_STATUS_IS_BADARG */
+#define APR_BADARG         (APR_OS_START_STATUS + 13)
+/** @see APR_STATUS_IS_EOF */
+#define APR_EOF            (APR_OS_START_STATUS + 14)
+/** @see APR_STATUS_IS_NOTFOUND */
+#define APR_NOTFOUND       (APR_OS_START_STATUS + 15)
+/* empty slot: +16 */
+/* empty slot: +17 */
+/* empty slot: +18 */
+/** @see APR_STATUS_IS_ANONYMOUS */
+#define APR_ANONYMOUS      (APR_OS_START_STATUS + 19)
+/** @see APR_STATUS_IS_FILEBASED */
+#define APR_FILEBASED      (APR_OS_START_STATUS + 20)
+/** @see APR_STATUS_IS_KEYBASED */
+#define APR_KEYBASED       (APR_OS_START_STATUS + 21)
+/** @see APR_STATUS_IS_EINIT */
+#define APR_EINIT          (APR_OS_START_STATUS + 22)  
+/** @see APR_STATUS_IS_ENOTIMPL */
+#define APR_ENOTIMPL       (APR_OS_START_STATUS + 23)
+/** @see APR_STATUS_IS_EMISMATCH */
+#define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
+/** @see APR_STATUS_IS_EBUSY */
+#define APR_EBUSY          (APR_OS_START_STATUS + 25)
+
+/**
+ * @defgroup aprerr_status Status Value Tests 
+ * @{
+ */ 
+/**
  * @param status The APR_status code to check.
  * @param statcode The apr status code to test.
- * @deffunc int APR_STATUS_IS_status(apr_status_t statcode)
  * @tip Warning: macro implementations; the statcode argument may be
  *      evaluated multiple times.  To test for APR_EOF, always test
  *      APR_STATUS_IS_EOF(statcode) because platform-specific codes are
  *      not necessarily translated into the corresponding APR_Estatus code.
  */
-
-/* APR ERROR VALUES */
-#define APR_ENOSTAT        (APR_OS_START_ERROR + 1)
-#define APR_ENOPOOL        (APR_OS_START_ERROR + 2)
-/* empty slot: +3 */
-#define APR_EBADDATE       (APR_OS_START_ERROR + 4)
-#define APR_EINVALSOCK     (APR_OS_START_ERROR + 5)
-#define APR_ENOPROC        (APR_OS_START_ERROR + 6)
-#define APR_ENOTIME        (APR_OS_START_ERROR + 7)
-#define APR_ENODIR         (APR_OS_START_ERROR + 8)
-#define APR_ENOLOCK        (APR_OS_START_ERROR + 9)
-#define APR_ENOPOLL        (APR_OS_START_ERROR + 10)
-#define APR_ENOSOCKET      (APR_OS_START_ERROR + 11)
-#define APR_ENOTHREAD      (APR_OS_START_ERROR + 12)
-#define APR_ENOTHDKEY      (APR_OS_START_ERROR + 13)
-#define APR_EGENERAL       (APR_OS_START_ERROR + 14)
-#define APR_ENOSHMAVAIL    (APR_OS_START_ERROR + 15)
-#define APR_EBADIP         (APR_OS_START_ERROR + 16)
-#define APR_EBADMASK       (APR_OS_START_ERROR + 17)
-/* empty slot: +18 */
-#define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
-#define APR_EABSOLUTE      (APR_OS_START_ERROR + 20)
-#define APR_ERELATIVE      (APR_OS_START_ERROR + 21)
-#define APR_EINCOMPLETE    (APR_OS_START_ERROR + 22)
-#define APR_EABOVEROOT     (APR_OS_START_ERROR + 23)
-#define APR_EBADPATH       (APR_OS_START_ERROR + 24)
-
-/* APR ERROR VALUE TESTS */
-#define APR_STATUS_IS_ENOSTAT(s)        ((s) == APR_ENOSTAT)
-#define APR_STATUS_IS_ENOPOOL(s)        ((s) == APR_ENOPOOL)
-#define APR_STATUS_IS_EBADDATE(s)       ((s) == APR_EBADDATE)
-#define APR_STATUS_IS_EINVALSOCK(s)     ((s) == APR_EINVALSOCK)
-#define APR_STATUS_IS_ENOPROC(s)        ((s) == APR_ENOPROC)
-#define APR_STATUS_IS_ENOTIME(s)        ((s) == APR_ENOTIME)
-#define APR_STATUS_IS_ENODIR(s)         ((s) == APR_ENODIR)
-#define APR_STATUS_IS_ENOLOCK(s)        ((s) == APR_ENOLOCK)
-#define APR_STATUS_IS_ENOPOLL(s)        ((s) == APR_ENOPOLL)
-#define APR_STATUS_IS_ENOSOCKET(s)      ((s) == APR_ENOSOCKET)
-#define APR_STATUS_IS_ENOTHREAD(s)      ((s) == APR_ENOTHREAD)
-#define APR_STATUS_IS_ENOTHDKEY(s)      ((s) == APR_ENOTHDKEY)
-#define APR_STATUS_IS_EGENERAL(s)       ((s) == APR_EGENERAL)
-#define APR_STATUS_IS_ENOSHMAVAIL(s)    ((s) == APR_ENOSHMAVAIL)
-#define APR_STATUS_IS_EBADIP(s)         ((s) == APR_EBADIP)
-#define APR_STATUS_IS_EBADMASK(s)       ((s) == APR_EBADMASK)
-/* empty slot: +18 */
-#define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN)
-#define APR_STATUS_IS_EABSOLUTE(s)      ((s) == APR_EABSOLUTE)
-#define APR_STATUS_IS_ERELATIVE(s)      ((s) == APR_ERELATIVE)
-#define APR_STATUS_IS_EINCOMPLETE(s)    ((s) == APR_EINCOMPLETE)
-#define APR_STATUS_IS_EABOVEROOT(s)     ((s) == APR_EABOVEROOT)
-#define APR_STATUS_IS_EBADPATH(s)       ((s) == APR_EBADPATH)
-
-/* APR STATUS VALUES */
-#define APR_INCHILD        (APR_OS_START_STATUS + 1)
-#define APR_INPARENT       (APR_OS_START_STATUS + 2)
-#define APR_DETACH         (APR_OS_START_STATUS + 3)
-#define APR_NOTDETACH      (APR_OS_START_STATUS + 4)
-#define APR_CHILD_DONE     (APR_OS_START_STATUS + 5)
-#define APR_CHILD_NOTDONE  (APR_OS_START_STATUS + 6)
-#define APR_TIMEUP         (APR_OS_START_STATUS + 7)
-#define APR_INCOMPLETE     (APR_OS_START_STATUS + 8)
-/* empty slot: +9 */
-/* empty slot: +10 */
-/* empty slot: +11 */
-#define APR_BADCH          (APR_OS_START_STATUS + 12)
-#define APR_BADARG         (APR_OS_START_STATUS + 13)
-#define APR_EOF            (APR_OS_START_STATUS + 14)
-#define APR_NOTFOUND       (APR_OS_START_STATUS + 15)
-/* empty slot: +16 */
-/* empty slot: +17 */
-/* empty slot: +18 */
-#define APR_ANONYMOUS      (APR_OS_START_STATUS + 19)
-#define APR_FILEBASED      (APR_OS_START_STATUS + 20)
-#define APR_KEYBASED       (APR_OS_START_STATUS + 21)
-#define APR_EINIT          (APR_OS_START_STATUS + 22)  
-#define APR_ENOTIMPL       (APR_OS_START_STATUS + 23)
-#define APR_EMISMATCH      (APR_OS_START_STATUS + 24)
-#define APR_EBUSY          (APR_OS_START_STATUS + 25)
-
-/* APR STATUS VALUE TESTS */
+/** 
+ * Program is currently executing in the child 
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code */
 #define APR_STATUS_IS_INCHILD(s)        ((s) == APR_INCHILD)
+/** 
+ * Program is currently executing in the parent 
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_INPARENT(s)       ((s) == APR_INPARENT)
+/** 
+ * The thread is detached 
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_DETACH(s)         ((s) == APR_DETACH)
+/** 
+ * The thread is not detached 
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_NOTDETACH(s)      ((s) == APR_NOTDETACH)
+/** 
+ * The child has finished executing
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_CHILD_DONE(s)     ((s) == APR_CHILD_DONE)
+/** 
+ * The child has not finished executing
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_CHILD_NOTDONE(s)  ((s) == APR_CHILD_NOTDONE)
+/** 
+ * The operation did not finish before the timeout
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_TIMEUP(s)         ((s) == APR_TIMEUP)
+/** 
+ * The character conversion stopped because of an incomplete character or 
+ * shift sequence at the end  of the input buffer.
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_INCOMPLETE(s)     ((s) == APR_INCOMPLETE)
 /* empty slot: +9 */
 /* empty slot: +10 */
 /* empty slot: +11 */
+/** 
+ * Getopt found an option not in the option string
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_BADCH(s)          ((s) == APR_BADCH)
+/** 
+ * Getopt found an option not in the option string and an argument was 
+ * specified in the option string
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_BADARG(s)         ((s) == APR_BADARG)
+/** 
+ * APR has encountered the end of the file
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_EOF(s)            ((s) == APR_EOF)
+/** 
+ * APR was unable to find the socket in the poll structure
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_NOTFOUND(s)       ((s) == APR_NOTFOUND)
 /* empty slot: +16 */
 /* empty slot: +17 */
 /* empty slot: +18 */
+/** 
+ * APR is using anonymous shared memory
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_ANONYMOUS(s)      ((s) == APR_ANONYMOUS)
+/** 
+ * APR is using a file name as the key to the shared memory
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_FILEBASED(s)      ((s) == APR_FILEBASED)
+/** 
+ * APR is using a shared key as the key to the shared memory
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_KEYBASED(s)       ((s) == APR_KEYBASED)
+/** 
+ * Ininitalizer value.  If no option has been found, but 
+ * the status variable requires a value, this should be used
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_EINIT(s)          ((s) == APR_EINIT)
+/** 
+ * The APR function has not been implemented on this 
+ * platform, either because nobody has gotten to it yet, 
+ * or the function is impossible on this platform.
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_ENOTIMPL(s)       ((s) == APR_ENOTIMPL)
+/** 
+ * Two passwords do not match.
+ * @warning
+ * always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_EMISMATCH(s)      ((s) == APR_EMISMATCH)
+/** 
+ * The given lock was busy
+ * @warning always use this test, as platform-specific variances may meet this
+ * more than one error code 
+ */
 #define APR_STATUS_IS_EBUSY(s)          ((s) == APR_EBUSY)
-
+/** @} */
+/**
+ * @defgroup aprerrcanonical APR Canonical Error Values
+ * @{
+ */
 /* APR CANONICAL ERROR VALUES */
+/** permission denied */
 #ifdef EACCES
 #define APR_EACCES EACCES
 #else
 #define APR_EACCES         (APR_OS_START_CANONERR + 1)
 #endif
 
+/** file exists */
 #ifdef EEXIST
 #define APR_EEXIST EEXIST
 #else
 #define APR_EEXIST         (APR_OS_START_CANONERR + 2)
 #endif
 
+/** path name is too long */
 #ifdef ENAMETOOLONG
 #define APR_ENAMETOOLONG ENAMETOOLONG
 #else
 #define APR_ENAMETOOLONG   (APR_OS_START_CANONERR + 3)
 #endif
 
+/** no such file or directory */
 #ifdef ENOENT
 #define APR_ENOENT ENOENT
 #else
 #define APR_ENOENT         (APR_OS_START_CANONERR + 4)
 #endif
 
+/** not a directory */
 #ifdef ENOTDIR
 #define APR_ENOTDIR ENOTDIR
 #else
 #define APR_ENOTDIR        (APR_OS_START_CANONERR + 5)
 #endif
 
+/** no space left on device */
 #ifdef ENOSPC
 #define APR_ENOSPC ENOSPC
 #else
 #define APR_ENOSPC         (APR_OS_START_CANONERR + 6)
 #endif
 
+/** not enough memory */
 #ifdef ENOMEM
 #define APR_ENOMEM ENOMEM
 #else
 #define APR_ENOMEM         (APR_OS_START_CANONERR + 7)
 #endif
 
+/** too many open files */
 #ifdef EMFILE
 #define APR_EMFILE EMFILE
 #else
 #define APR_EMFILE         (APR_OS_START_CANONERR + 8)
 #endif
 
+/** file table overflow */
 #ifdef ENFILE
 #define APR_ENFILE ENFILE
 #else
 #define APR_ENFILE         (APR_OS_START_CANONERR + 9)
 #endif
 
+/** bad file # */
 #ifdef EBADF
 #define APR_EBADF EBADF
 #else
 #define APR_EBADF          (APR_OS_START_CANONERR + 10)
 #endif
 
+/** invalid argument */
 #ifdef EINVAL
 #define APR_EINVAL EINVAL
 #else
 #define APR_EINVAL         (APR_OS_START_CANONERR + 11)
 #endif
 
+/** illegal seek */
 #ifdef ESPIPE
 #define APR_ESPIPE ESPIPE
 #else
 #define APR_ESPIPE         (APR_OS_START_CANONERR + 12)
 #endif
 
+/** operation would block */
 #ifdef EAGAIN
 #define APR_EAGAIN EAGAIN
 #elif defined(EWOULDBLOCK)
@@ -420,6 +639,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EAGAIN         (APR_OS_START_CANONERR + 13)
 #endif
 
+/** interrupted system call */
 #ifdef EINTR
 #define APR_EINTR EINTR
 #else
@@ -498,6 +718,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_ENOTEMPTY     (APR_OS_START_CANONERR + 26)
 #endif
 
+/** @} */
+/** @} */
 #if defined(OS2)
 
 #define APR_FROM_OS_ERROR(e) (e == 0 ? APR_SUCCESS : e + APR_OS_START_SYSERR)
