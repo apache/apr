@@ -239,10 +239,10 @@ apr_status_t ap_sendfile(apr_socket_t * sock, apr_file_t * file,
         if (lasterror == ERROR_IO_PENDING) {
 #ifdef WAIT_FOR_EVENT
             rv = WaitForSingleObject(overlapped.hEvent, 
-                                     sock->timeout >= 0 ? sock->timeout / 1000 : INFINITE);
+                                     sock->timeout >= 0 ? sock->timeout : INFINITE);
 #else
             rv = WaitForSingleObject((HANDLE) sock->sock, 
-                                     sock->timeout >= 0 ? sock->timeout / 1000 : INFINITE);
+                                     sock->timeout >= 0 ? sock->timeout : INFINITE);
 #endif
             if (rv == WAIT_OBJECT_0)
                 lasterror = APR_SUCCESS;
