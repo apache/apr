@@ -152,6 +152,13 @@ static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e mech)
         return APR_ENOTIMPL;
 #endif
         break;
+    case APR_LOCK_POSIXSEM:
+#if APR_HAS_POSIXSEM_SERIALIZE
+        new->inter_meth = &apr_unix_posix_methods;
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     case APR_LOCK_PROC_PTHREAD:
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
         new->inter_meth = &apr_unix_proc_pthread_methods;
@@ -162,6 +169,8 @@ static apr_status_t choose_method(apr_lock_t *new, apr_lockmech_e mech)
     case APR_LOCK_DEFAULT:
 #if APR_USE_FLOCK_SERIALIZE
         new->inter_meth = &apr_unix_flock_methods;
+#elif APR_USE_POSIXSEM_SERIALIZE
+        new->inter_meth = &apr_unix_posix_methods;
 #elif APR_USE_SYSVSEM_SERIALIZE
         new->inter_meth = &apr_unix_sysv_methods;
 #elif APR_USE_FCNTL_SERIALIZE
@@ -242,7 +251,7 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, apr_locktype_e type
     new->pool  = pool;
     new->type  = type;
     new->scope = scope;
-#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
     new->interproc = NULL;
 #endif
 
@@ -362,7 +371,7 @@ APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, void *data, const 
 
 APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
-#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
     oslock->crossproc = lock->interproc->filedes;
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
@@ -387,7 +396,7 @@ APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thel
         (*lock) = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
         (*lock)->pool = pool;
     }
-#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
+#if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE || APR_HAS_POSIXSEM_SERIALIZE
     apr_os_file_put(&(*lock)->interproc, &thelock->crossproc, 0, pool);
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE

@@ -45,6 +45,7 @@
 #define APR_HAVE_NETINET_IN_H    @netinet_inh@
 #define APR_HAVE_NETINET_TCP_H   @netinet_tcph@
 #define APR_HAVE_PTHREAD_H       @pthreadh@
+#define APR_HAVE_SEMAPHORE_H     @semaphoreh@
 #define APR_HAVE_SIGNAL_H        @signalh@
 #define APR_HAVE_STDARG_H        @stdargh@
 #define APR_HAVE_STDINT_H        @stdint@
@@ -82,12 +83,14 @@
 
 #define APR_USE_FLOCK_SERIALIZE           @flockser@ 
 #define APR_USE_SYSVSEM_SERIALIZE         @sysvser@
+#define APR_USE_POSIXSEM_SERIALIZE        @posixser@
 #define APR_USE_FCNTL_SERIALIZE           @fcntlser@
 #define APR_USE_PROC_PTHREAD_SERIALIZE    @procpthreadser@ 
 #define APR_USE_PTHREAD_SERIALIZE         @pthreadser@ 
 
 #define APR_HAS_FLOCK_SERIALIZE           @hasflockser@
 #define APR_HAS_SYSVSEM_SERIALIZE         @hassysvser@
+#define APR_HAS_POSIXSEM_SERIALIZE        @hasposixser@
 #define APR_HAS_FCNTL_SERIALIZE           @hasfcntlser@
 #define APR_HAS_PROC_PTHREAD_SERIALIZE    @hasprocpthreadser@
 #define APR_HAS_RWLOCK_SERIALIZE          @hasrwlockser@

@@ -58,6 +58,124 @@
 #include "locks.h"
 #include "fileio.h" /* for apr_mkstemp() */
 
+#if APR_HAS_POSIXSEM_SERIALIZE
+
+#ifndef SEM_FAILED
+#define SEM_FAILED (-1)
+#endif
+
+static void posix_setup(void)
+{
+}
+
+static apr_status_t posix_cleanup(void *lock_)
+{
+    apr_lock_t *lock=lock_;
+    apr_status_t stat = APR_SUCCESS;
+    
+    if (lock->interproc->filedes != -1) {
+        if (sem_close((sem_t *)lock->interproc->filedes) < 0) {
+            stat = errno;
+        }
+    }
+    return stat;
+}    
+
+static apr_status_t posix_create(apr_lock_t *new, const char *fname)
+{
+    sem_t *psem;
+    apr_status_t stat;
+    char semname[14];
+    unsigned long epoch;
+    
+    new->interproc = apr_palloc(new->pool, sizeof(*new->interproc));
+    /*
+     * This bogusness is to follow what appears to be the
+     * lowest common denominator in Posix semaphore naming:
+     *   - start with '/'
+     *   - be at most 14 chars
+     *   - be unique and not match anything on the filesystem
+     *
+     * Because of this, we ignore fname and craft our own.
+     *
+     * FIXME: if we try to create another semaphore within a second
+     * of creating this on, we won't get a new one but another
+     * reference to this one.
+     */
+    epoch = apr_time_now() / APR_USEC_PER_SEC;
+    apr_snprintf(semname, sizeof(semname), "/ApR.%lx", epoch);
+    psem = sem_open((const char *) semname, O_CREAT, 0644, 1);
+
+    if (psem == (sem_t *)SEM_FAILED) {
+        stat = errno;
+        posix_cleanup(new);
+        return stat;
+    }
+    /* Ahhh. The joys of Posix sems. Predelete it... */
+    sem_unlink((const char *) semname);
+    new->interproc->filedes = (int)psem;	/* Ugg */
+    apr_pool_cleanup_register(new->pool, (void *)new, posix_cleanup, 
+                              apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}
+
+static apr_status_t posix_acquire(apr_lock_t *lock)
+{
+    int rc;
+
+    if ((rc = sem_wait((sem_t *)lock->interproc->filedes)) < 0) {
+        return errno;
+    }
+    lock->curr_locked = 1;
+    return APR_SUCCESS;
+}
+
+static apr_status_t posix_release(apr_lock_t *lock)
+{
+    int rc;
+
+    if ((rc = sem_post((sem_t *)lock->interproc->filedes)) < 0) {
+        return errno;
+    }
+    lock->curr_locked = 0;
+    return APR_SUCCESS;
+}
+
+static apr_status_t posix_destroy(apr_lock_t *lock)
+{
+    apr_status_t stat;
+
+    if ((stat = posix_cleanup(lock)) == APR_SUCCESS) {
+        apr_pool_cleanup_kill(lock->pool, lock, posix_cleanup);
+        return APR_SUCCESS;
+    }
+    return stat;
+}
+
+static apr_status_t posix_child_init(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
+{
+    return APR_SUCCESS;
+}
+
+const apr_unix_lock_methods_t apr_unix_posix_methods =
+{
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+    APR_PROCESS_LOCK_MECH_IS_GLOBAL,
+#else
+    0,
+#endif
+    posix_create,
+    posix_acquire,
+    NULL, /* no tryacquire */
+    NULL, /* no rw lock */
+    NULL, /* no rw lock */
+    posix_release,
+    posix_destroy,
+    posix_child_init
+};
+
+#endif /* Posix sem implementation */
+
 #if APR_HAS_SYSVSEM_SERIALIZE
 
 static struct sembuf op_on;
@@ -598,6 +716,9 @@ const apr_unix_lock_methods_t apr_unix_flock_methods =
 
 void apr_unix_setup_lock(void)
 {
+#if APR_HAS_POSIXSEM_SERIALIZE
+    posix_setup();
+#endif
 #if APR_HAS_SYSVSEM_SERIALIZE
     sysv_setup();
 #endif

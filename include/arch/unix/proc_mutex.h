@@ -97,6 +97,9 @@
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
+#if APR_HAVE_SEMAPHORE_H
+#include <semaphore.h>
+#endif
 /* End System Headers */
 
 struct apr_proc_mutex_unix_lock_methods_t {
@@ -113,6 +116,9 @@ typedef struct apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_lock_metho
 /* bit values for flags field in apr_unix_lock_methods_t */
 #define APR_PROCESS_LOCK_MECH_IS_GLOBAL          1
 
+#if APR_HAS_POSIXSEM_SERIALIZE
+extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods;
+#endif
 #if APR_HAS_SYSVSEM_SERIALIZE
 extern const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods;
 #endif

@@ -97,6 +97,7 @@ typedef struct apr_global_mutex_t apr_global_mutex_t;
  *            APR_LOCK_FCNTL
  *            APR_LOCK_FLOCK
  *            APR_LOCK_SYSVSEM
+ *            APR_LOCK_POSIXSEM
  *            APR_LOCK_PROC_PTHREAD
  *            APR_LOCK_DEFAULT     pick the default mechanism for the platform
  * </PRE>
