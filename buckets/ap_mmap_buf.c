@@ -68,8 +68,21 @@ static const char * mmap_get_str(ap_bucket *e)
 static int mmap_get_len(ap_bucket *e)
 {
     ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
-    return b->data->size;
+    return b->len;
 }
+
+static ap_status_t mmap_bucket_insert(ap_bucket *e, const void *buf, 
+                                      ap_size_t nbytes, ap_ssize_t *w)
+{
+    ap_bucket_mmap *b = (ap_bucket_mmap *)e->data;
+    const ap_mmap_t *mm = buf;
+
+    b->data = mm;
+    b->len = nbytes;
+    *w = nbytes;
+    return APR_SUCCESS;
+}
+    
 
 APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void)
 {
@@ -80,18 +93,15 @@ APR_EXPORT(ap_bucket *) ap_mmap_bucket_create(void)
     b                 = malloc(sizeof(*b));
 
     b->data      = NULL;
+    b->len       = 0;
 
     newbuf->color     = AP_BUCKET_mmap;
     newbuf->getstr    = mmap_get_str;
     newbuf->getlen    = mmap_get_len;
+    newbuf->insert    = mmap_bucket_insert;
     newbuf->free      = NULL;
     newbuf->data      = b;
     
     return newbuf;
 }
 
-APR_EXPORT(void) ap_mmap_bucket_insert(ap_bucket_mmap *b, ap_mmap_t *mm)
-{
-    b->data = mm;
-}
-    
