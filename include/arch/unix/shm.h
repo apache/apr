@@ -97,12 +97,6 @@ struct apr_shm_t {
     apr_size_t reqsize;  /* requested segment size */
     apr_size_t realsize; /* actual segment size */
     const char *filename;      /* NULL if anonymous */
-#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
-    apr_file_t *file;
-#endif
-#if APR_USE_SHMEM_MMAP_ANON
-    /* Nothing else. */
-#endif
 #if APR_USE_SHMEM_SHMGET || APR_USE_SHMEM_SHMGET_ANON
     int shmid;          /* shmem ID returned from shmget() */
 #endif

@@ -66,7 +66,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 {
     apr_shm_t *new_m;
     apr_status_t status;
-#if APR_USE_SHMEM_SHMGET
+#if APR_USE_SHMEM_SHMGET || APR_USE_SHMEM_SHMGET_ANON
     struct shmid_ds shmbuf;
     apr_uid_t uid;
     apr_gid_t gid;
@@ -75,8 +75,12 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     APR_USE_SHMEM_MMAP_ZERO
     int tmpfd;
 #endif
-#if APR_USE_SHMEM_SHMGET || APR_USE_SHMEM_SHMGET_ANON
+#if APR_USE_SHMEM_SHMGET
     apr_size_t nbytes;
+    key_t shmkey;
+#endif
+#if APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_SHMGET || \
+    APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
     apr_file_t *file;   /* file where metadata is stored */
 #endif
 
@@ -96,12 +100,12 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         new_m->filename = NULL;
     
 #if APR_USE_SHMEM_MMAP_ZERO
-        status = apr_file_open(&new_m->file, "/dev/zero", APR_READ | APR_WRITE, 
+        status = apr_file_open(&file, "/dev/zero", APR_READ | APR_WRITE, 
                                APR_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
-        status = apr_os_file_get(&tmpfd, new_m->file);
+        status = apr_os_file_get(&tmpfd, file);
         if (status != APR_SUCCESS) {
             return status;
         }
@@ -112,8 +116,10 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
             return errno;
         }
 
-        /* No need to keep the file open after we map it. */
-        close(tmpfd);
+        status = apr_file_close(file);
+        if (status != APR_SUCCESS) {
+            return status;
+        }
 
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
@@ -159,7 +165,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         if ((new_m->base = shmat(new_m->shmid, NULL, 0)) == (void *)-1) {
             return errno;
         }
-
         new_m->usable = new_m->base;
 
         if (shmctl(new_m->shmid, IPC_STAT, &shmbuf) == -1) {
@@ -205,44 +210,66 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     
 #if APR_USE_SHMEM_MMAP_TMP
         /* FIXME: Is APR_OS_DEFAULT sufficient? */
-        status = apr_file_open(&new_m->file, filename, 
-                               APR_READ | APR_WRITE | APR_CREATE,
+        status = apr_file_open(&file, filename, 
+                               APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
                                APR_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
-        if ((status = apr_os_file_get(&tmpfd, new_m->file)) != APR_SUCCESS) {
-            return status;
-        }
-        status = apr_file_trunc(new_m->file, new_m->realsize);
+
+        status = apr_os_file_get(&tmpfd, file);
         if (status != APR_SUCCESS) {
-            /* FIXME: should we unlink the file here? */
-            /* FIXME: should we close the file here? */
+            apr_file_close(file); /* ignore errors, we're failing */
+            apr_file_remove(new_m->filename, new_m->pool);
             return status;
         }
-#elif APR_USE_SHMEM_MMAP_SHM
+
+        status = apr_file_trunc(file, new_m->realsize);
+        if (status != APR_SUCCESS) {
+            apr_file_close(file); /* ignore errors, we're failing */
+            apr_file_remove(new_m->filename, new_m->pool);
+            return status;
+        }
+
+        new_m->base = mmap(NULL, new_m->realsize, PROT_READ | PROT_WRITE,
+                           MAP_SHARED, tmpfd, 0);
+        /* FIXME: check for errors */
+
+        status = apr_file_close(file);
+        if (status != APR_SUCCESS) {
+            return status;
+        }
+#endif /* APR_USE_SHMEM_MMAP_TMP */
+#if APR_USE_SHMEM_MMAP_SHM
         /* FIXME: Is APR_OS_DEFAULT sufficient? */
-        tmpfd = shm_open(filename, O_RDWR | O_CREAT, APR_OS_DEFAULT);
+        tmpfd = shm_open(filename, O_RDWR | O_CREAT | O_EXCL, APR_OS_DEFAULT);
         if (tmpfd == -1) {
             return errno;
         }
 
-        apr_os_file_put(&new_m->file, &tmpfd, pool); 
-        /* FIXME: check for errors */
+        status = apr_os_file_put(&file, &tmpfd,
+                                 APR_READ | APR_WRITE | APR_CREATE | APR_EXCL,
+                                 pool); 
+        if (status != APR_SUCCESS) {
+            return status;
+        }
 
-        status = apr_file_trunc(new_m->file, new_m->realsize);
+        status = apr_file_trunc(file, new_m->realsize);
         if (status != APR_SUCCESS) {
             shm_unlink(filename); /* we're failing, remove the object */
             return status;
         }
-#endif /* APR_USE_SHMEM_MMAP_SHM */
-        new_m->base = mmap(NULL, reqsize, PROT_READ|PROT_WRITE,
+        new_m->base = mmap(NULL, reqsize, PROT_READ | PROT_WRITE,
                            MAP_SHARED, tmpfd, 0);
 
-        /* FIXME: check for error */
+        /* FIXME: check for errors */
 
-        /* FIXME: close the file (can we close the file if we're using
-         *        shm_open? */
+        /* FIXME: Is it ok to close this file when using shm_open?? */
+        status = apr_file_close(file);
+        if (status != APR_SUCCESS) {
+            return status;
+        }
+#endif /* APR_USE_SHMEM_MMAP_SHM */
 
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
@@ -257,13 +284,29 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_USE_SHMEM_SHMGET
         new_m->realsize = reqsize;
 
-        if ((new_m->shmid = shmget(ftok(filename, 1), new_m->realsize,
-                                   SHM_R | SHM_W | IPC_CREAT)) < 0) {
+        /* FIXME: APR_OS_DEFAULT is too permissive, switch to 600 I think. */
+        status = apr_file_open(&file, filename, 
+                               APR_WRITE | APR_CREATE | APR_EXCL,
+                               APR_OS_DEFAULT, pool);
+        if (status != APR_SUCCESS) {
+            return status;
+        }
+
+        /* ftok() (on solaris at least) requires that the file actually
+         * exist before calling ftok(). */
+        shmkey = ftok(filename, 1);
+        if (shmkey == (key_t)-1) {
             return errno;
         }
 
-        new_m->base = shmat(new_m->shmid, NULL, 0);
-        /* FIXME: Handle errors. */
+        if ((new_m->shmid = shmget(shmkey, new_m->realsize,
+                                   SHM_R | SHM_W | IPC_CREAT | IPC_EXCL)) < 0) {
+            return errno;
+        }
+
+        if ((new_m->base = shmat(new_m->shmid, NULL, 0)) == (void *)-1) {
+            return errno;
+        }
         new_m->usable = new_m->base;
 
         if (shmctl(new_m->shmid, IPC_STAT, &shmbuf) == -1) {
@@ -274,14 +317,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         shmbuf.shm_perm.gid = gid;
         if (shmctl(new_m->shmid, IPC_SET, &shmbuf) == -1) {
             return errno;
-        }
-
-        /* FIXME: APR_OS_DEFAULT is too permissive, switch to 600 I think. */
-        status = apr_file_open(&file, filename, 
-                               APR_WRITE | APR_CREATE,
-                               APR_OS_DEFAULT, pool);
-        if (status != APR_SUCCESS) {
-            return status;
         }
 
         nbytes = sizeof(reqsize);
@@ -306,35 +341,74 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 {
-    /* FIXME: do cleanups based on what was allocated, not what was
-     *        defined at runtime. */
-#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM || APR_USE_SHMEM_MMAP_ZERO
-    munmap(m->base, m->realsize);
-    apr_file_close(m->file);
-    /* FIXME: unlink the file */
-#elif APR_USE_SHMEM_MMAP_ANON
-    munmap(m->base, m->realsize);
-#elif APR_USE_SHMEM_SHMGET || APR_USE_SHMEM_SHMGET_ANON
-    /* Indicate that the segment is to be destroyed as soon
-     * as all processes have detached. This also disallows any
-     * new attachments to the segment. */
-    if (shmctl(m->shmid, IPC_RMID, NULL) == -1) {
-        return errno;
-    }
-    if (shmdt(m->base) == -1) {
-        return errno;
-    }
+    /* anonymous shared memory */
+    if (m->filename == NULL) {
+#if APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_MMAP_ANON
+        if (munmap(m->base, m->realsize) == -1) {
+            return errno;
+        }
+        return APR_SUCCESS;
 #endif
+#if APR_USE_SHMEM_SHMGET_ANON
+        if (shmdt(m->base) == -1) {
+            return errno;
+        }
+        /* This segment will automatically remove itself after all
+         * references have detached. */
+        return APR_SUCCESS;
+#endif
+    }
 
-    return APR_SUCCESS;
+    /* name-based shared memory */
+    else {
+#if APR_USE_SHMEM_MMAP_TMP
+        apr_status_t rv;
+
+        if (munmap(m->base, m->realsize) == -1) {
+            return errno;
+        }
+        rv = apr_file_remove(m->filename, m->pool);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+        return APR_SUCCESS;
+#endif
+#if APR_USE_SHMEM_MMAP_SHM
+        if (munmap(m->base, m->realsize) == -1) {
+            return errno;
+        }
+        if (shm_unlink(m->filename) == -1) {
+            return errno;
+        }
+        return APR_SUCCESS;
+#endif
+#if APR_USE_SHMEM_SHMGET
+        apr_status_t rv;
+
+        /* Indicate that the segment is to be destroyed as soon
+         * as all processes have detached. This also disallows any
+         * new attachments to the segment. */
+        if (shmctl(m->shmid, IPC_RMID, NULL) == -1) {
+            return errno;
+        }
+        if (shmdt(m->base) == -1) {
+            return errno;
+        }
+        rv = apr_file_remove(m->filename, m->pool);
+        if (rv != APR_SUCCESS) {
+            return rv;
+        }
+        return APR_SUCCESS;
+#endif
+    }
+
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
                                          const char *filename,
                                          apr_pool_t *pool)
 {
-    apr_status_t status;
-
     if (filename == NULL) {
         /* It doesn't make sense to attach to a segment if you don't know
          * the filename. */
@@ -342,38 +416,70 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     }
     else {
 #if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
-        int tmpfd;
-        struct stat buf;
         apr_shm_t *new_m;
+        apr_status_t status;
+        int tmpfd;
+        apr_file_t *file;   /* file where metadata is stored */
+        apr_size_t nbytes;
 
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
         if (!new_m) {
             return APR_ENOMEM;
         }
         new_m->pool = pool;
-        new_m->reqsize = reqsize;
-        new_m->realsize = reqsize + sizeof(apr_size_t); /* room for metadata */
         new_m->filename = apr_pstrdup(pool, filename);
 
         /* FIXME: open the file, read the length, mmap the segment,
          *        close the file, reconstruct the apr_shm_t. */
-        status = apr_file_open(&new_m->file, filename, 
-                               APR_READ | APR_WRITE | APR_CREATE,
+        status = apr_file_open(&file, filename, 
+                               APR_READ | APR_WRITE,
                                APR_OS_DEFAULT, pool);
         if (status != APR_SUCCESS) {
             return status;
         }
-        if ((status = apr_os_file_get(&tmpfd, new_m->file)) != APR_SUCCESS) {
+        status = apr_os_file_get(&tmpfd, file);
+        if (status != APR_SUCCESS) {
             return status;
         }
+
+        nbytes = sizeof(new_m->realsize);
+        status = apr_file_read(file, (void *)&(new_m->realsize),
+                               &nbytes);
+        if (status != APR_SUCCESS) {
+            return status;
+        }
+
+        status = apr_os_file_get(&tmpfd, file);
+        if (status != APR_SUCCESS) {
+            apr_file_close(file); /* ignore errors, we're failing */
+            apr_file_remove(new_m->filename, new_m->pool);
+            return status;
+        }
+
+        new_m->reqsize = new_m->realsize - sizeof(apr_size_t);
+
+        new_m->base = mmap(NULL, new_m->realsize, PROT_READ | PROT_WRITE,
+                           MAP_SHARED, tmpfd, 0);
+        /* FIXME: check for errors */
         
+        status = apr_file_close(file);
+        if (status != APR_SUCCESS) {
+            return status;
+        }
 
-        return APR_ENOTIMPL;
+        /* metadata isn't usable */
+        new_m->usable = new_m->base + sizeof(apr_size_t);
 
-#elif APR_USE_SHMEM_SHMGET
+        *m = new_m;
+        return APR_SUCCESS;
+
+#endif /* APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM */
+#if APR_USE_SHMEM_SHMGET
         apr_shm_t *new_m;
+        apr_status_t status;
         apr_file_t *file;   /* file where metadata is stored */
         apr_size_t nbytes;
+        key_t shmkey;
 
         new_m = apr_palloc(pool, sizeof(apr_shm_t));
         if (!new_m) {
@@ -398,38 +504,52 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
             return status;
         }
 
+        new_m->filename = apr_pstrdup(pool, filename);
         new_m->pool = pool;
-        if ((new_m->shmid = shmget(ftok(filename, 1), 0,
-                                   SHM_R | SHM_W)) < 0) {
+        shmkey = ftok(filename, 1);
+        if (shmkey == (key_t)-1) {
             return errno;
         }
-        new_m->base = shmat(new_m->shmid, NULL, 0);
-        /* FIXME: handle errors */
+        if ((new_m->shmid = shmget(shmkey, 0, SHM_R | SHM_W)) == -1) {
+            return errno;
+        }
+        if ((new_m->base = shmat(new_m->shmid, NULL, 0)) == (void *)-1) {
+            return errno;
+        }
         new_m->usable = new_m->base;
         new_m->realsize = new_m->reqsize;
 
         *m = new_m;
         return APR_SUCCESS;
 
-#else
-        return APR_ENOTIMPL;
-#endif
+#endif /* APR_USE_SHMEM_SHMGET */
     }
+
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
 {
-#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
-    /* FIXME: munmap the segment. */
-    return APR_ENOTIMPL;
-#elif APR_USE_SHMEM_SHMGET
-    if (shmdt(m->base) == -1) {
-        return errno;
+    if (m->filename == NULL) {
+        /* It doesn't make sense to detach from an anonymous memory segment. */
+        return APR_EINVAL;
     }
-    return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
+    else {
+#if APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM
+        if (munmap(m->base, m->realsize) == -1) {
+            return errno;
+        }
+        return APR_SUCCESS;
+#endif /* APR_USE_SHMEM_MMAP_TMP || APR_USE_SHMEM_MMAP_SHM */
+#if APR_USE_SHMEM_SHMGET
+        if (shmdt(m->base) == -1) {
+            return errno;
+        }
+        return APR_SUCCESS;
 #endif
+    }
+
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m)
