@@ -157,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         }
         break;
     case APR_SO_REUSEADDR:
-        if (on != apr_is_option_set(sock->netmask, APR_SO_REUSEADDR)){
+        if (on != apr_is_option_set(sock->netmask, APR_SO_REUSEADDR)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, 
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
@@ -166,7 +166,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         }
         break;
     case APR_SO_NONBLOCK:
-        if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != on){
+        if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != on) {
             if (on) {
                 if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) 
                     return stat;
@@ -180,7 +180,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         break;
     case APR_SO_LINGER:
     {
-        if (apr_is_option_set(sock->netmask, APR_SO_LINGER) != on){
+        if (apr_is_option_set(sock->netmask, APR_SO_LINGER) != on) {
             struct linger li;
             li.l_onoff = on;
             li.l_linger = MAX_SECS_TO_LINGER;
@@ -193,7 +193,7 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         break;
     }
     case APR_TCP_NODELAY:
-        if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) != on){
+        if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) != on) {
             if (setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, 
                            (void *)&on, sizeof(int)) == -1) {
                 return apr_get_netos_error();
