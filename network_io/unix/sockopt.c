@@ -290,7 +290,7 @@ apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
         return APR_SUCCESS;
 }
 
-#ifdef SO_ACCEPTFILTER
+#if APR_HAS_SO_ACCEPTFILTER
 apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name, 
                                       char *args)
 {

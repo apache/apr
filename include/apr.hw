@@ -208,6 +208,7 @@
 #define APR_HAS_XLATE             0
 #define APR_HAS_OTHER_CHILD       1
 #define APR_HAS_DSO               1
+#define APR_HAS_SO_ACCEPTFILTER   0
 #define APR_HAS_UNICODE_FS        1
 #define APR_HAS_USER              1
 #define APR_HAS_LARGE_FILES       1
