@@ -1,9 +1,3 @@
-# Generated automatically from Makefile.in by configure.
-#CFLAGS=$(OPTIM) $(CFLAGS1) $(EXTRA_CFLAGS)
-#LIBS=$(EXTRA_LIBS) $(LIBS1)
-#INCLUDES=$(INCLUDES1) $(INCLUDES0) $(EXTRA_INCLUDES)
-#LDFLAGS=$(LDFLAGS1) $(EXTRA_LDFLAGS)
-
 RM=@RM@
 CC=@CC@
 RANLIB=@RANLIB@
@@ -12,6 +6,7 @@ LIBS=../libapr.a @LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
+MKDEP=../helpers/mkdep.sh
 
 TARGETS= testmd5@EXEEXT@ \
 	testfile@EXEEXT@ \
@@ -111,71 +106,7 @@ clean:
 distclean: clean
 	-$(RM) -f Makefile
 
-
-#
-# We really don't expect end users to use this rule.  It works only with
-# gcc, and rebuilds Makefile.in.  You have to re-run configure after
-# using it.
-#
 depend:
-	cp Makefile.in Makefile.in.bak \
-	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
-	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
-	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
-		> Makefile.in \
-	    && rm Makefile.new
+	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE
-abc.o: abc.c $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h
-client.o: client.c $(INCDIR)/apr_network_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h
-mod_test.o: mod_test.c
-server.o: server.c $(INCDIR)/apr_network_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h
-testargs.o: testargs.c $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_getopt.h
-testcontext.o: testcontext.c $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_thread_proc.h
-testdso.o: testdso.c $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_pools.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_thread_proc.h $(INCDIR)/apr_dso.h
-testfile.o: testfile.c $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_thread_proc.h
-testmmap.o: testmmap.c $(INCDIR)/apr_mmap.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_network_io.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_portable.h $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_lock.h $(INCDIR)/apr_lib.h
-testoc.o: testoc.c $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h
-testpipe.o: testpipe.c $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_thread_proc.h
-testproc.o: testproc.c $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h
-testshmem.o: testshmem.c $(INCDIR)/apr_shmem.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_general.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_lock.h \
- $(INCDIR)/apr_lib.h $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
- $(INCDIR)/apr_thread_proc.h
-testsock.o: testsock.c $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lib.h
-testthread.o: testthread.c $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
- $(INCDIR)/apr_errno.h $(INCDIR)/apr_time.h $(INCDIR)/apr_lock.h
-testtime.o: testtime.c $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h
