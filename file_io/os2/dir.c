@@ -123,50 +123,33 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         rv = DosFindNext(thedir->handle, &thedir->entry, sizeof(thedir->entry), &entries);
     }
 
-    /* No valid bit flag to test here - do we want one? */
     finfo->cntxt = thedir->cntxt;
     finfo->fname = NULL;
+    finfo->valid = 0;
 
-    if (rv == 0 && entries == 1) 
-    {
-        /* XXX: Optimize the heck out of this case - whatever we know, report,
-         *      and then stat only if we must (e.g. wanted & APR_FINFO_TYPE)
-         */
+    if (rv == 0 && entries == 1) {
         thedir->validentry = TRUE;
 
-        wanted &= ~(APR_FINFO_NAME | APR_FINFO_MTIME | APR_FINFO_SIZE);
-
-        if (wanted == APR_FINFO_TYPE && thedir->entry.attrFile & FILE_DIRECTORY)
-            wanted = 0;
-        
-        if (wanted)
-        {
-            char fspec[_MAXPATH];
-            int off;
-            apr_strcpyn(fspec, sizeof(fspec), thedir->dirname);
-            off = strlen(fspec);
-            if (fspec[off - 1] != '/')
-                fspec[off++] = '/';
-            apr_strcpyn(fspec + off, sizeof(fspec) - off, thedir->entry->d_name);
-            /* ??? Or lstat below?, I know, OS2 doesn't do symlinks, yet */
-            ret = apr_stat(finfo, wanted, fspec, thedir->cntxt);
-        }
-        if (!wanted || ret) {
-            finfo->cntxt = thedir->cntxt;
-            finfo->valid = 0;
-        }
         /* We passed a name off the stack that has popped */
         finfo->fname = NULL;
-        finfo->valid |= APR_FINFO_NAME | APR_FINFO_MTIME | APR_FINFO_SIZE;
         finfo->size = thedir->entry.cbFile;
-        apr_os2_time_to_apr_time(finfo->mtime, thedir->entry.fdateLastWrite, 
+        finfo->csize = thedir->entry.cbFileAlloc;
+
+        /* Only directories & regular files show up in directory listings */
+        finfo->filetype = (thedir->entry.attrFile & FILE_DIRECTORY) ? APR_DIR : APR_REG;
+
+        apr_os2_time_to_apr_time(&finfo->mtime, thedir->entry.fdateLastWrite,
                                  thedir->entry.ftimeLastWrite);
+        apr_os2_time_to_apr_time(&finfo->atime, thedir->entry.fdateLastAccess,
+                                 thedir->entry.ftimeLastAccess);
+        apr_os2_time_to_apr_time(&finfo->ctime, thedir->entry.fdateCreation,
+                                 thedir->entry.ftimeCreation);
+
         finfo->name = thedir->entry.achName;
-        if (thedir->entry.attrFile & FILE_DIRECTORY) {
-            finfo->filetype = APR_DIR;
-            finfo->valid |= APR_FINFO_TYPE;
-        }
-        
+        finfo->valid = APR_FINFO_NAME | APR_FINFO_MTIME | APR_FINFO_ATIME |
+            APR_FINFO_CTIME | APR_FINFO_TYPE | APR_FINFO_SIZE |
+            APR_FINFO_CSIZE;
+
         return APR_SUCCESS;
     }
 
