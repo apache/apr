@@ -231,6 +231,7 @@ ALL : "$(OUTDIR)\libapr.dll"
 CLEAN :
 	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr.idb"
+	-@erase "$(INTDIR)\apr.pdb"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
 	-@erase "$(INTDIR)\apr_getpass.obj"
@@ -290,10 +291,10 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /GX /Od /I "./include" /I "./include/arch" /I\
+CPP_PROJ=/nologo /MDd /W3 /GX /Zi /Od /I "./include" /I "./include/arch" /I\
  "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D\
  "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\\"\
- /Fd"$(INTDIR)\apr" /FD /ZI /c 
+ /Fd"$(INTDIR)\apr" /FD /c 
 CPP_OBJS=.\Debug/
 CPP_SBRS=.
 
