@@ -70,6 +70,7 @@ int main(void)
     apr_pool_t *p;
     char *str;
     apr_size_t sz;
+    apr_interval_time_t hr_off = 5 * 3600; /* 5 hours in seconds */
 
     fprintf(stdout, "Testing Time functions.\n");
 
@@ -78,32 +79,32 @@ int main(void)
         exit (-1);
     }
 
-    fprintf(stdout, "\tapr_time_now..................");
+    fprintf(stdout, "\tapr_time_now..............................");
     now = apr_time_now();
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tapr_explode_localtime.........");
+    fprintf(stdout, "\tapr_explode_localtime.....................");
     if (apr_explode_localtime(&xt, now) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't explode the time\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
     
-    fprintf(stdout, "\tapr_explode_gmt...............");
+    fprintf(stdout, "\tapr_explode_gmt...........................");
     if (apr_explode_gmt(&xt, now) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't explode the time\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tapr_implode_time..............");
+   fprintf(stdout, "\tapr_implode_time..........................");
     if (apr_implode_time(&imp, &xt) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't implode the time\n");
         exit(-1);
     }
-    if (imp != now) {
+   if (imp != now) {
 	fprintf(stderr, "implode/explode mismatch\n"
-                "apr_explode of apr_now() %15I64d\n"
+                "apr_explode of apr_now() %lld\n"
                 "apr_implode() returned   %15I64d\n"
                 "error delta was          %15I64d\n",
                 now, imp, imp-now);
@@ -111,7 +112,7 @@ int main(void)
     }
     fprintf(stdout, "OK\n");
 
-    printf("\tapr_strftime..................");
+    printf("\tapr_strftime....................");
     str = (char*) apr_pcalloc(p, sizeof(char) * 30);
     if (str == NULL){
         printf("Couldn't allocate memory.\n");
@@ -120,9 +121,35 @@ int main(void)
     if (apr_strftime(str, &sz, 30, "%R %A %d %B %Y", &xt) !=
          APR_SUCCESS){
         printf("Failed!");
+        exit (-1); 
     }
     printf("%s\n", str);
- 
+
+    printf("\tTime Zone (???)...........................");
+    if (apr_strftime(str, &sz, 30, "%R %Z", &xt) != APR_SUCCESS){
+        printf("Failed!\n");
+        exit (-1);
+    }
+    printf ("%s\n", str);    
+
+    xt.tm_gmtoff = hr_off; /* 5 hour offset */
+    printf("\tOffset Time Zone -5 hours.................");
+    if (apr_strftime(str, &sz, 30, "%R %Z", &xt) != APR_SUCCESS){
+        printf("Failed!\n");
+        exit(-1);
+    }
+    printf("%s\n", str);
+
+    printf("\tChecking imploded time after offset.......");
+    apr_implode_time(&imp, &xt);
+    hr_off *= APR_USEC_PER_SEC; /* microseconds */ 
+    if (imp != now - hr_off){
+        printf("Failed! :(\n");
+        printf("Difference is %lld (should be %lld)\n", imp - now, hr_off);
+        exit(-1);
+    }
+    printf("OK\n");
+    
     return 1;
 }    
 
