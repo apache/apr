@@ -563,7 +563,6 @@ fi
 if test "$apr_cv_dirent_inode" != "no"; then
   AC_DEFINE_UNQUOTED(DIRENT_INODE, $apr_cv_dirent_inode)
 fi
-AC_MSG_RESULT($apr_cv_dirent_inode)
 ])
 
 dnl
@@ -587,7 +586,6 @@ struct dirent de; de.d_type = DT_REG;
 if test "$apr_cv_dirent_type" != "no"; then
   AC_DEFINE_UNQUOTED(DIRENT_TYPE, $apr_cv_dirent_type) 
 fi
-AC_MSG_RESULT($apr_cv_dirent_type)
 ])
 
 dnl the following is a newline, a space, a tab, and a backslash (the
