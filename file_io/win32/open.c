@@ -203,6 +203,7 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
             if (*ch == ':' || *ch == '/' || *ch == '\\')
                 *ch = '_';
         }
+        return wfile;
     }
     else
 #endif
@@ -244,6 +245,7 @@ void *res_name_from_filename(const char *file, int global, apr_pool_t *pool)
             if (*ch == ':' || *ch == '/' || *ch == '\\')
                 *ch = '_';
         }
+        return nfile;
     }
 }
 
