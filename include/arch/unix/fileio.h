@@ -104,11 +104,15 @@
 #ifdef BEOS
 #include <kernel/OS.h>
 #endif
-/* BeOS still defines fd_set in sys/socket.h so include it here.
- * I'm not just including it as most platforms won't need it...
- */
+
 #if BEOS_BONE
-#include <sys/socket.h> /* for fd_set definitions */
+ #ifndef BONE7
+  /* prior to BONE/7 fd_set & select were defined in sys/socket.h */
+  #include <sys/socket.h>
+ #else
+  /* Be moved the fd_set stuff and also the FIONBIO definition... */
+  #include <sys/ioctl.h>
+ #endif
 #endif
 /* End System headers */
 
