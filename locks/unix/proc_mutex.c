@@ -57,17 +57,17 @@
 #include "proc_mutex.h"
 #include "fileio.h" /* for apr_mkstemp() */
 
-#if APR_HAS_POSIXSEM_SERIALIZE
-
-#ifndef SEM_FAILED
-#define SEM_FAILED (-1)
-#endif
-
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 {
     return apr_pool_cleanup_run(mutex->pool, mutex, apr_proc_mutex_cleanup);
 }
 
+
+#if APR_HAS_POSIXSEM_SERIALIZE
+
+#ifndef SEM_FAILED
+#define SEM_FAILED (-1)
+#endif
 
 static void proc_mutex_posix_setup(void)
 {
