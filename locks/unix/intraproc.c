@@ -55,15 +55,17 @@
 
 #include "apr_lock.h"
 #include "apr_general.h"
+#include "apr_lib.h"
 #include "locks.h"
 
 #if defined (USE_PTHREAD_SERIALIZE)  
 
-ap_status_t lock_intra_cleanup(struct lock_t *lock)
+ap_status_t lock_intra_cleanup(void *data)
 {
     ap_status_t stat;
+    struct lock_t *lock = (struct lock_t *) data;
     if (lock->curr_locked == 1) {
-        if (stat = pthread_mutex_unlock(lock->intraproc)) {
+        if ((stat = pthread_mutex_unlock(lock->intraproc)) == 0) {
             return stat;
         } 
     }
@@ -95,7 +97,7 @@ ap_status_t create_intra_lock(struct lock_t *new)
         return stat;
     }
 
-    new->curr_locked == 0;
+    new->curr_locked = 0;
     ap_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup, NULL);
     return APR_SUCCESS;
 }
@@ -104,8 +106,8 @@ ap_status_t lock_intra(struct lock_t *lock)
 {
     ap_status_t stat;
 
-    lock->curr_locked == 1;
-    if (stat = pthread_mutex_lock(lock->intraproc)) {
+    lock->curr_locked = 1;
+    if ((stat = pthread_mutex_lock(lock->intraproc)) == 0) {
         return stat;
     }
     return APR_SUCCESS;
@@ -115,10 +117,10 @@ ap_status_t unlock_intra(struct lock_t *lock)
 {
     ap_status_t stat;
 
-    if (stat = pthread_mutex_unlock(lock->intraproc)) {
+    if ((stat = pthread_mutex_unlock(lock->intraproc)) == 0) {
         return stat;
     }
-    lock->curr_locked == 0;
+    lock->curr_locked = 0;
     return APR_SUCCESS;
 }
 
