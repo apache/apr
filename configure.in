@@ -1763,7 +1763,7 @@ do
     fi
 done
 
-if test -d ./test; then
+if test -d $srcdir/test; then
     MAKEFILE3="test/Makefile"
 fi
 AC_SUBST(SUBDIRS)
