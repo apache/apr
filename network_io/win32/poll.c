@@ -119,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
     }
 
     if (newread == NULL && newwrite == NULL && newexcept == NULL) {
-        Sleep(timeout / 1000); /* convert microseconds into milliseconds */
+        Sleep((DWORD)(timeout / 1000)); /* convert microseconds into milliseconds */
         return APR_TIMEUP; /* TODO - get everybody in synch with Win32 apr_status_t */
     }
     else {
