@@ -202,10 +202,6 @@ SOURCE=.\memory\unix\apr_pools.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\misc\win32\apr_app.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc\unix\errorcodes.c
 # End Source File
 # Begin Source File
@@ -215,6 +211,10 @@ SOURCE=.\misc\unix\getopt.c
 # Begin Source File
 
 SOURCE=.\misc\win32\getuuid.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\win32\internal.c
 # End Source File
 # Begin Source File
 
@@ -230,7 +230,7 @@ SOURCE=.\misc\win32\rand.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\misc\unix\start.c
+SOURCE=.\misc\win32\start.c
 # End Source File
 # Begin Source File
 
