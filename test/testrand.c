@@ -72,7 +72,7 @@ static void rand_exists(CuTest *tc)
      */
     for (i = 1; i <= 8; i++) {
         rv = apr_generate_random_bytes(c, i * 255);
-        CuAssertIntEquals(tc, APR_SUCCESS, rv);
+        CuAssertSuccess(tc, "apr_generate_random_bytes failed", rv);
     }
 #endif
 }    

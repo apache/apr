@@ -222,20 +222,20 @@ static void test_thread_rwlock(CuTest *tc)
     apr_status_t s1, s2, s3, s4;
 
     s1 = apr_thread_rwlock_create(&rwlock, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    CuAssertSuccess(tc, "rwlock_create", s1);
     CuAssertPtrNotNull(tc, rwlock);
 
     i = 0;
     x = 0;
 
     s1 = apr_thread_create(&t1, NULL, thread_rwlock_func, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s1);
+    CuAssertSuccess(tc, "create thread 1", s1);
     s2 = apr_thread_create(&t2, NULL, thread_rwlock_func, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s2);
+    CuAssertSuccess(tc, "create thread 2", s2);
     s3 = apr_thread_create(&t3, NULL, thread_rwlock_func, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s3);
+    CuAssertSuccess(tc, "create thread 3", s3);
     s4 = apr_thread_create(&t4, NULL, thread_rwlock_func, NULL, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, s4);
+    CuAssertSuccess(tc, "create thread 4", s4);
 
     apr_thread_join(&s1, t1);
     apr_thread_join(&s2, t2);
