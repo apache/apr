@@ -58,21 +58,17 @@
 
 #if APR_HAS_THREADS
 
+/* XXX: missing a cleanup, pthread_attr_destroy is never called! */
+
 #if APR_HAVE_PTHREAD_H
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
                                                 apr_pool_t *pool)
 {
     apr_status_t stat;
 
-    (*new) = (apr_threadattr_t *)apr_pcalloc(pool, sizeof(apr_threadattr_t));
-    (*new)->attr = (pthread_attr_t *)apr_pcalloc(pool, sizeof(pthread_attr_t));
-
-    if ((*new) == NULL || (*new)->attr == NULL) {
-        return APR_ENOMEM;
-    }
-
+    (*new) = apr_palloc(pool, sizeof(apr_threadattr_t));
     (*new)->pool = pool;
-    stat = pthread_attr_init((*new)->attr);
+    stat = pthread_attr_init(&(*new)->attr);
 
     if (stat == 0) {
         return APR_SUCCESS;
@@ -91,9 +87,9 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr,
 #ifdef PTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR
     int arg = on;
 
-    if ((stat = pthread_attr_setdetachstate(attr->attr, &arg)) == 0) {
+    if ((stat = pthread_attr_setdetachstate(&attr->attr, &arg)) == 0) {
 #else
-    if ((stat = pthread_attr_setdetachstate(attr->attr, on)) == 0) {
+    if ((stat = pthread_attr_setdetachstate(&attr->attr, on)) == 0) {
 #endif
 
         return APR_SUCCESS;
@@ -112,9 +108,9 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
     int state;
 
 #ifdef PTHREAD_ATTR_GETDETACHSTATE_TAKES_ONE_ARG
-    state = pthread_attr_getdetachstate(attr->attr);
+    state = pthread_attr_getdetachstate(&attr->attr);
 #else
-    pthread_attr_getdetachstate(attr->attr, &state);
+    pthread_attr_getdetachstate(&attr->attr, &state);
 #endif
     if (state == 1)
         return APR_DETACH;
@@ -153,7 +149,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     (*new)->func = func;
 
     if (attr)
-        temp = attr->attr;
+        temp = &attr->attr;
     else
         temp = NULL;
 
