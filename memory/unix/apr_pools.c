@@ -948,7 +948,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
             active->next = node;
             node->ref = &active->next;
         }
- 
+
         node = pool->active;
     }
     else {
@@ -957,7 +957,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 
         if (ps->got_a_new_node) {
             active->next = ps->free;
-            ps->free = node; 
+            ps->free = node;
         }
 
         ps->got_a_new_node = 1;
@@ -1385,7 +1385,7 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex = NULL;
 #endif
-    
+
     apr_pool_check_integrity(pool);
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE)
@@ -1394,17 +1394,17 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
 
 #if APR_HAS_THREADS
     if (pool->parent != NULL)
-	mutex = pool->parent->mutex;
-    
+        mutex = pool->parent->mutex;
+
     /* Lock the parent mutex before clearing so that if we have our
      * own mutex it won't be accessed by apr_pool_walk_tree after
      * it has been destroyed.
      */
     if (mutex != NULL && mutex != pool->mutex) {
-	apr_thread_mutex_lock(mutex);
+        apr_thread_mutex_lock(mutex);
     }
 #endif
-    
+
     pool_clear_debug(pool, file_line);
 
 #if APR_HAS_THREADS
@@ -1416,8 +1416,8 @@ APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool,
         (void)apr_thread_mutex_create(&pool->mutex,
                                       APR_THREAD_MUTEX_NESTED, pool);
 
-	if (mutex != NULL)
-	    (void)apr_thread_mutex_unlock(mutex);
+        if (mutex != NULL)
+            (void)apr_thread_mutex_unlock(mutex);
     }
 #endif /* APR_HAS_THREADS */
 }
