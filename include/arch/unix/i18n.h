@@ -60,7 +60,7 @@
 
 /* If we ever support anything more exciting than char... this could move.
  */
-typedef apr_int16_t apr_wchar_t;
+typedef apr_uint16_t apr_wchar_t;
 
 /**
  * An APR internal function for fast utf-8 octet-encoded Unicode conversion
