@@ -54,6 +54,7 @@
 
 #include "networkio.h"
 #include "apr_network_io.h"
+#include "apr_support.h"
 #include "apr_portable.h"
 #include "inherit.h"
 
@@ -260,7 +261,7 @@ apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
      * socket; if called again, we can see EALREADY
      */
     if (rc == -1 && (errno == EINPROGRESS || errno == EALREADY) && sock->timeout != 0) {
-        rc = apr_wait_for_io_or_timeout(sock, 0);
+        rc = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (rc != APR_SUCCESS) {
             return rc;
         }
