@@ -106,10 +106,32 @@
 #endif
 
 /* Details of the debugging options can now be found in the developer
- * section of the documentaion. */
+ * section of the documentaion.
+ * ### gjs: where the hell is that?
+ *
+ * DEBUG_WITH_MPROTECT:
+ *    This is known to work on Linux systems. It can only be used in
+ *    conjunction with ALLOC_USE_MALLOC (for now). ALLOC_USE_MALLOC will
+ *    use malloc() for *each* allocation, and then free it when the pool
+ *    is cleared. When DEBUG_WITH_MPROTECT is used, the allocation is
+ *    performed using an anonymous mmap() call to get page-aligned memory.
+ *    Rather than free'ing the memory, an mprotect() call is made to make
+ *    the memory non-accessible. Thus, if the memory is referred to *after*
+ *    the pool is cleared, an immediate segfault occurs. :-)
+ *
+ *    WARNING: Since every allocation creates a new mmap, aligned on a new
+ *             page, this debugging option chews memory. A **LOT** of
+ *             memory. Linux "recovered" the memory from my X Server process
+ *             the first time I ran a "largish" sequence of operations.
+ *
+ *    ### it should be possible to use this option without ALLOC_USE_MALLOC
+ *    ### and simply mprotect the blocks at clear time (rather than put them
+ *    ### into the free block list).
+ */
 /*
 #define ALLOC_DEBUG
 #define ALLOC_STATS
+#define DEBUG_WITH_MPROTECT
 */
 
 /* magic numbers --- min free bytes to consider a free apr_pool_t block useable,
@@ -141,8 +163,12 @@
 #define BLOCK_MINALLOC	0
 #endif /* ALLOC_USE_MALLOC */
 
-#define APR_SLACK_LOW    1
-#define APR_SLACK_HIGH   2
+#ifdef DEBUG_WITH_MPROTECT
+#ifndef ALLOC_USE_MALLOC
+#error "ALLOC_USE_MALLOC must be enabled to use DEBUG_WITH_MPROTECT"
+#endif
+#include <sys/mman.h>
+#endif
 
 
 /*****************************************************************
@@ -238,11 +264,62 @@ static APR_INLINE void debug_verify_filled(const char *ptr, const char *endp,
 #define debug_verify_filled(a,b,c)
 #endif /* ALLOC_DEBUG */
 
+#ifdef DEBUG_WITH_MPROTECT
+
+#define SIZEOF_BLOCK(p) (((union block_hdr *)(p) - 1)->a.l)
+
+static void *mprotect_malloc(apr_size_t size)
+{
+    union block_hdr * addr;
+
+    size += sizeof(union block_hdr);
+    addr = mmap(NULL, size + sizeof(union block_hdr),
+                PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS,
+                -1, 0);
+    if (addr == MAP_FAILED)
+        return NULL;
+    addr->a.l = size;
+    return addr + 1;
+}
+
+static void mprotect_free(void *addr)
+{
+    apr_size_t size = SIZEOF_BLOCK(addr);
+    int rv = mprotect((union block_hdr *)addr - 1, size, PROT_NONE);
+    if (rv != 0) {
+        fprintf(stderr, "could not protect. errno=%d\n", errno);
+        abort();
+    }
+}
+
+static void *mprotect_realloc(void *addr, apr_size_t size)
+{
+    void *new_addr = mprotect_malloc(size);
+    apr_size_t old_size = SIZEOF_BLOCK(addr);
+
+    if (size < old_size)
+        old_size = size;
+    memcpy(new_addr, addr, old_size);
+    mprotect_free(addr);
+    return new_addr;
+}
+
+#define DO_MALLOC(s) mprotect_malloc(s)
+#define DO_FREE(p) mprotect_free(p)
+#define DO_REALLOC(p,s) mprotect_realloc(p,s)
+
+#else /* DEBUG_WITH_MPROTECT */
+
+#define DO_MALLOC(s) malloc(s)
+#define DO_FREE(p) free(p)
+#define DO_REALLOC(p,s) realloc(p,s)
+
+#endif /* DEBUG_WITH_MPROTECT */
+    
 /*
  * Get a completely new block from the system pool. Note that we rely on
  * malloc() to provide aligned memory.
  */
-
 static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
 {
     union block_hdr *blok;
@@ -259,7 +336,7 @@ static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
     num_malloc_bytes += size + sizeof(union block_hdr);
 #endif /* ALLOC_STATS */
 
-    blok = (union block_hdr *) malloc(size + sizeof(union block_hdr));
+    blok = (union block_hdr *) DO_MALLOC(size + sizeof(union block_hdr));
     APR_ABORT(blok == NULL, APR_ENOMEM, apr_abort,
               "Ouch!  malloc failed in malloc_block()\n");
     debug_fill(blok, size + sizeof(union block_hdr));
@@ -311,7 +388,7 @@ static void free_blocks(union block_hdr *blok)
 
     for ( ; blok; blok = next) {
 	next = blok->h.next;
-	free(blok);
+	DO_FREE(blok);
     }
 #else /* ALLOC_USE_MALLOC */
 
@@ -395,7 +472,6 @@ static void free_blocks(union block_hdr *blok)
  * Get a new block, from our own free list if possible, from the system
  * if necessary.  Must be called with alarms blocked.
  */
-
 static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
 {
     union block_hdr **lastptr = &block_freelist;
@@ -766,7 +842,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *a)
 
 	for (c = a->allocation_list; c; c = n) {
 	    n = *(void **)c;
-	    free(c);
+	    DO_FREE(c);
 	}
 	a->allocation_list = NULL;
     }
@@ -947,7 +1023,7 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
     apr_size_t size = reqsize + CLICK_SZ;
     void *ptr;
 
-    ptr = malloc(size);
+    ptr = DO_MALLOC(size);
     if (ptr == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
 	exit(1);
@@ -1104,7 +1180,7 @@ static int psprintf_flush(apr_vformatter_buff_t *vbuff)
     char *ptr;
 
     size = (char *)ps->vbuff.curpos - ps->base;
-    ptr = realloc(ps->base, 2*size);
+    ptr = DO_REALLOC(ps->base, 2*size);
     if (ptr == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
 	exit(1);
@@ -1164,7 +1240,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap)
     struct psprintf_data ps;
     void *ptr;
 
-    ps.base = malloc(512);
+    ps.base = DO_MALLOC(512);
     if (ps.base == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
 	exit(1);
@@ -1176,7 +1252,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap)
     *ps.vbuff.curpos++ = '\0';
     ptr = ps.base;
     /* shrink */
-    ptr = realloc(ptr, (char *)ps.vbuff.curpos - (char *)ptr);
+    ptr = DO_REALLOC(ptr, (char *)ps.vbuff.curpos - (char *)ptr);
     if (ptr == NULL) {
 	fputs("Ouch!  Out of memory!\n", stderr);
 	exit(1);
