@@ -3,8 +3,11 @@
   | |\/| | |\/| |
   | |  | | |  | |
   |_|  |_|_|  |_|
-                 
+
   MM - Shared Memory Library
+
+  INSTALL
+  =======
 
   To install the MM library into /path/to/mm/{bin,lib,include,man}/ perform
   the following steps in your shell:

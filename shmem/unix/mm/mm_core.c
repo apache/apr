@@ -1,5 +1,5 @@
 /* ====================================================================
- * Copyright (c) 1999 Ralf S. Engelschall. All rights reserved.
+ * Copyright (c) 1999-2000 Ralf S. Engelschall. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -242,10 +242,11 @@ void *mm_core_create(size_t usersize, const char *file)
 #endif /* MM_SHMT_MMANON */
 
 #if defined(MM_SHMT_BEOS)
-    if ((temparea = create_area("mm",(void*)&area, B_ANY_ADDRESS,
-                        size, B_LAZY_LOCK, B_READ_AREA | B_WRITE_AREA)) < 0)
+    if ((temparea = create_area("mm", (void*)&area, B_ANY_ADDRESS,
+                                size, B_LAZY_LOCK, B_READ_AREA|B_WRITE_AREA)) < 0)
         FAIL(MM_ERR_CORE|MM_ERR_SYSTEM, "failed to create the memory area");
 #endif /* MM_SHMT_BEOS */
+
 #if defined(MM_SHMT_MMPOSX)
     shm_unlink(fnmem); /* Ok when it fails */
     if ((fdmem = shm_open(fnmem, O_RDWR|O_CREAT, MM_CORE_FILEMODE)) == -1)
@@ -343,18 +344,18 @@ void *mm_core_create(size_t usersize, const char *file)
     mc->mc_fdsem[1].pid = 0;
     mc->mc_fdsem[1].fd  = -1;
 #else
-    mc->mc_fdsem    = fdsem;
+    mc->mc_fdsem = fdsem;
 #endif
 #if defined(MM_SEMT_BEOS)
     mc->mc_semid = create_sem(0, "mm_semid");
-    mc->mc_ben=0;
+    mc->mc_ben = 0;
 #endif
 #if defined(MM_SHMT_BEOS)
     mc->mc_areaid = temparea;
 #endif
 #if defined(MM_SEMT_IPCSEM)
     mc->mc_fdsem_rd = fdsem_rd;
-    mc->mc_readers  = 0;
+    mc->mc_readers = 0;
 #endif
 #if defined(MM_SHMT_MMFILE)
     memcpy(mc->mc_fnmem, fnmem, MM_MAXPATH);
@@ -384,17 +385,16 @@ void *mm_core_create(size_t usersize, const char *file)
     if (fdmem != -1)
         close(fdmem);
 #endif
-#if defined(MM_SHMT_IPCSHM)
-    if (fdmem != -1)
-        shmctl(fdmem, IPC_RMID, NULL);
+#if defined(MM_SEMT_BEOS)
+    delete_sem(mc->mc_semid);
 #endif
 #if defined(MM_SHMT_BEOS)
     delete_area(mc->mc_areaid);
 #endif
-#if defined(MM_SEMT_BEOS)
-    delete_sem(mc->mc_semid);
+#if defined(MM_SHMT_IPCSHM)
+    if (fdmem != -1)
+        shmctl(fdmem, IPC_RMID, NULL);
 #endif
-
 #if defined(MM_SEMT_FLOCK) || defined(MM_SEMT_FCNTL)
     if (fdsem != -1)
         close(fdsem);
@@ -554,16 +554,16 @@ int mm_core_lock(const void *core, mm_lock_mode mode)
     mc->mc_lockmode = mode;
 #endif
 #if defined(MM_SEMT_BEOS)
-	rc=0;
-	if (atomic_add (&mc->mc_ben, 1) > 0){
-		/* someone already in lock..acquire sem and wait */
-		if (acquire_sem(mc->mc_semid) != B_NO_ERROR){
-			atomic_add(&mc->mc_ben,-1);
-	        rc = -1;
-    	}
+    rc = 0;
+    if (atomic_add(&mc->mc_ben, 1) > 0) {
+        /* someone already in lock... acquire sem and wait */
+        if (acquire_sem(mc->mc_semid) != B_NO_ERROR) {
+            atomic_add(&mc->mc_ben, -1);
+            rc = -1;
+        }
     }
 #endif
-
+ 
     if (rc < 0) {
         ERR(MM_ERR_CORE|MM_ERR_SYSTEM, "Failed to lock");
         rc = FALSE;
@@ -608,10 +608,9 @@ int mm_core_unlock(const void *core)
     }
 #endif
 #if defined(MM_SEMT_BEOS)
-    rc=0;
-	if (atomic_add(&mc->mc_ben, -1) > 1){
-		release_sem(mc->mc_semid);
-    }
+    rc = 0;
+    if (atomic_add(&mc->mc_ben, -1) > 1)
+        release_sem(mc->mc_semid);
 #endif
 
     if (rc < 0) {
