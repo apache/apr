@@ -451,6 +451,10 @@ APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile);
  * @param str The buffer to store the string in. 
  * @param len The length of the string
  * @param thefile The file descriptor to read from
+ * @remark APR_EOF will be returned if some characters are read but the end
+ * of file is reached before a newline is read.
+ * @remark The buffer will be '\0'-terminated if any characters are stored,
+ * even if something other than APR_SUCCESS is returned.
  */
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile);
 
