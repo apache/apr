@@ -195,25 +195,13 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
 
 ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, const char *key, void *data)
 {
-    if (pollfd != NULL) {
-        return ap_get_userdata(data, key, pollfd->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOFILE;
-    }
+    return ap_get_userdata(data, key, pollfd->cntxt);
 }
 
 ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, const char *key,
                             ap_status_t (*cleanup) (void *))
 {
-    if (pollfd != NULL) {
-        return ap_set_userdata(data, key, cleanup, pollfd->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOFILE;
-    }
+    return ap_set_userdata(data, key, cleanup, pollfd->cntxt);
 }
 
 ap_status_t ap_mask_poll_socket(ap_pollfd_t *aprset, 

@@ -156,32 +156,18 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
 
 ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data)
 {
-    if (lock != NULL) {
-        return ap_get_userdata(data, key, lock->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOLOCK;
-    }
+    return ap_get_userdata(data, key, lock->cntxt);
 }
 
 ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
                             ap_status_t (*cleanup) (void *))
 {
-    if (lock != NULL) {
-        return ap_set_userdata(data, key, cleanup, lock->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOLOCK;
-    }
+    return ap_set_userdata(data, key, cleanup, lock->cntxt);
 }
 
 ap_status_t ap_get_os_lock(ap_os_lock_t *thelock, ap_lock_t *lock)
 {
-    if (lock == NULL) {
-        return APR_ENOFILE;
-    }
+    /* ### this is broken. is the signature broken? */
     thelock = &(lock->mutex);
     return APR_SUCCESS;
 }
