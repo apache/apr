@@ -1,5 +1,8 @@
 Changes with APR 0.9.2
 
+  *) When generating a semaphore name for posixsem locking, try to
+     be a little more robust (and unique). [Jim Jagielski]
+
   *) Add functions apr_env_get, apr_env_set and apr_env_delete for
      manipulating the environment.  [Branko Cibej]
 
