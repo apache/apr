@@ -534,37 +534,6 @@ if test "$ac_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
 fi
 ])
 
-dnl
-dnl APR_CHECK_ICONV_INBUF
-dnl
-dnl  Decide whether or not the inbuf parameter to iconv() is const.
-dnl
-dnl  We try to compile something without const.  If it fails to 
-dnl  compile, we assume that the system's iconv() has const.  
-dnl  Unfortunately, we won't realize when there was a compile
-dnl  warning, so we allow a variable -- apr_iconv_inbuf_const -- to
-dnl  be set in hints.m4 to specify whether or not iconv() has const
-dnl  on this parameter.
-dnl
-AC_DEFUN(APR_CHECK_ICONV_INBUF,[
-AC_MSG_CHECKING(for type of inbuf parameter to iconv)
-if test "x$apr_iconv_inbuf_const" = "x"; then
-    APR_TRY_COMPILE_NO_WARNING([
-    #include <stddef.h>
-    #include <iconv.h>
-    ],[
-    iconv(0,(char **)0,(size_t *)0,(char **)0,(size_t *)0);
-    ], apr_iconv_inbuf_const="0", apr_iconv_inbuf_const="1")
-fi
-if test "$apr_iconv_inbuf_const" = "1"; then
-    AC_DEFINE(APR_ICONV_INBUF_CONST, 1, [Define if the inbuf parm to iconv() is const char **])
-    msg="const char **"
-else
-    msg="char **"
-fi
-AC_MSG_RESULT([$msg])
-])dnl
-
 
 dnl the following is a newline, a space, a tab, and a backslash (the
 dnl backslash is used by the shell to skip newlines, but m4 sees it;

@@ -456,7 +456,6 @@ AC_SEARCH_LIBS(gethostname, nsl)
 AC_CHECK_LIB(socket, socket)
 AC_SEARCH_LIBS(crypt, crypt ufc)
 AC_CHECK_LIB(truerand, main)
-AC_CHECK_LIB(iconv, iconv)
 AC_CHECK_LIB(m, modf)
 
 dnl #----------------------------- Checking for Threads
@@ -851,10 +850,6 @@ AC_CHECK_FUNCS(crypt_r, [ crypt_r="1" ], [ crypt_r="0" ])
 if test "$crypt_r" = "1"; then
   APR_CHECK_CRYPT_R_STYLE
 fi
-AC_CHECK_FUNCS(iconv, [ have_iconv="1" ], [ have_iconv="0" ])
-if test "$iconv" = "1"; then
-  APR_CHECK_ICONV_INBUF
-fi
 AC_CHECK_FUNCS(mmap, [ mmap="1" ], [ mmap="0" ])
 if test "$native_mmap_emul" = "1"; then
     mmap="1"
@@ -871,7 +866,6 @@ AC_SUBST(have_inet_network)
 AC_SUBST(have_sigaction)
 AC_SUBST(have_setrlimit)
 AC_SUBST(have_getrlimit)
-AC_SUBST(have_iconv)
 AC_SUBST(mmap)
 AC_SUBST(have_memmove)
 
@@ -892,7 +886,6 @@ APR_FLAG_HEADERS(
     errno.h		\
     fcntl.h		\
     grp.h		\
-    iconv.h		\
     io.h		\
     langinfo.h		\
     limits.h		\
