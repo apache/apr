@@ -14,7 +14,7 @@ apr_file_lstat                   from apr_lstat
 apr_file_attrs_t                 from apr_fileattrs_t
 apr_file_seek_where_t            from apr_seek_where_t
 
-apr_filepath_merge               from apr_file_path_merge
+apr_filepath_name_get            from apr_filename_of_pathname
  
 apr_fnmatch_test                 from apr_is_fnmatch
 
