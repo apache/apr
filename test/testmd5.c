@@ -54,9 +54,11 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "apr_md5.h"
 #include "apr_xlate.h"
+#include "apr_general.h"
 
 struct testcase {
     const char *s;
