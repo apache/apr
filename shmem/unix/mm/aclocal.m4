@@ -395,7 +395,7 @@ else
     ac_cv_maxsegsize=0
     msg=unknown
 fi
-MM_SHM_SEGSIZE=$ac_cv_maxsegsize
+MM_SHM_MAXSEGSIZE=$ac_cv_maxsegsize
 test ".$msg" = .unknown && AC_MSG_ERROR([Unable to determine maximum shared memory segment size])
 AC_MSG_RESULT([$msg])
 AC_DEFINE_UNQUOTED(MM_SHM_MAXSEGSIZE, $MM_SHM_MAXSEGSIZE)
