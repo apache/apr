@@ -67,9 +67,9 @@ extern "C" {
 #ifndef _POSIX_THREAD_SAFE_FUNCTIONS
 #define SAFETY_LOCK(funcname, namestr) \
     { \
-    if (lock_##func_name == NULL) \
-        if (ap_create_lock(&lock_##func_name, APR_MUTEX, APR_INTRAPROCESS, \
-        name_str, NULL) != APR_SUCCESS) \
+    if (lock_##funcname == NULL) \
+        if (ap_create_lock(&lock_##funcname, APR_MUTEX, APR_INTRAPROCESS, \
+        namestr, NULL) != APR_SUCCESS) \
             return APR_NOTTHREADSAFE; \
     if (ap_lock(lock_##funcname) != APR_SUCCESS) \
         return APR_NOTTHREADSAFE; \
@@ -88,52 +88,59 @@ extern "C" {
 #endif
 
 #ifdef HAVE_GMTIME_R
-#define GMTIME_R(x, y) gmtime_r(x, y);
+#define GMTIME_R(x, y) gmtime_r(x, y)
 #else
-#define GMTIME_R(x, y) memcpy(y, gmtime(x), sizeof(y));
+#define GMTIME_R(x, y) memcpy(y, gmtime(x), sizeof(y))
 #endif
 
 #ifdef HAVE_LOCALTIME_R
-#define LOCALTIME_R(x, y) localtime_r(x, y);
+#define LOCALTIME_R(x, y) localtime_r(x, y)
 #else
-#define LOCALTIME_R(x, y) memcpy(y, localtime(x), sizeof(y));
+#define LOCALTIME_R(x, y) memcpy(y, localtime(x), sizeof(y))
 #endif
 
 #ifdef _POSIX_THREAD_SAFE_FUNCTIONS 
-#define GETHOSTBYNAME(x, y, z) z = gethostbyname(x);
+#define GETHOSTBYNAME(x, y, z) z = gethostbyname(x)
 #else
 #define GETHOSTBYNAME(x, y, z) \
-            y = gethostbyname(x); \
-            z = ap_palloc(NULL, sizeof(struct hostent)); \
-            memcpy(z, y, sizeof(struct hostent));
+            if (1) { \
+                y = gethostbyname(x); \
+                z = ap_palloc(NULL, sizeof(struct hostent)); \
+                memcpy(z, y, sizeof(struct hostent)); \
+            }
 #endif
 
 #ifdef _POSIX_THREAD_SAFE_FUNCTIONS 
-#define GETHOSTBYADDR(x, y, z) z = gethostbyaddr(x, sizeof(struct in_addr), AF_INET);
+#define GETHOSTBYADDR(x, y, z) z = gethostbyaddr(x, sizeof(struct in_addr), AF_INET)
 #else
 #define GETHOSTBYADDR(x, y, z) \
-            y = gethostbyaddr(x, sizeof(struct in_addr), AF_INET); \
-            z = ap_palloc(NULL, sizeof(struct hostent)); \
-            memcpy(z, y, sizeof(struct hostent));
+            if (1) { \
+                y = gethostbyaddr(x, sizeof(struct in_addr), AF_INET); \
+                z = ap_palloc(NULL, sizeof(struct hostent)); \
+                memcpy(z, y, sizeof(struct hostent)); \
+            }
 #endif
 
 #ifdef _POSIX_THREAD_SAFE_FUNCTIONS 
-#define INET_NTOA(x, y, len) ap_cpystrn(y, inet_ntoa(x), len);
+#define INET_NTOA(x, y, len) ap_cpystrn(y, inet_ntoa(x), len)
 #else
-#define INET_NTOA(x, y, len) ap_cpystrn(y, inet_ntoa(x), len);
+#define INET_NTOA(x, y, len) ap_cpystrn(y, inet_ntoa(x), len)
 #endif
 
 #ifdef _POSIX_THREAD_SAFE_FUNCTIONS 
-#define READDIR(x, y, z)  y = readdir(x); \
+#define READDIR(x, y, z)  \
+                       if (1) { \
+                           y = readdir(x); \
                            if (y == NULL) { \
                                z = errno; \
                            } \
                            else { \
                                z = APR_SUCCESS; \
-                           }
+                           }\
+                       }
 #else
 #define READDIR(x, y, z) \
-                          { \
+                      if (1) { \
                           struct dirent *temp = readdir(x); \
                           if (temp == NULL) { \
                               z = errno; \
@@ -142,7 +149,7 @@ extern "C" {
                               memcpy(y, temp, sizeof(struct dirent)); \
                               z = APR_SUCCESS; \
                           } \
-                          }
+                      }
 #endif
 
 #ifdef __cplusplus
