@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 ..\network_io\win32\Debug\network_io.lib ..\lib\Debug\lib.lib ..\misc\win32\Debug\misc.lib ..\threadproc\win32\Debug\threadproc.lib ..\file_io\win32\Debug\file_io.lib ..\time\win32\Debug\time.lib ..\locks\win32\Debug\locks.lib ..\signal\win32\Debug\signal.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 ..\Release\aprlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"..\Release\testthread.exe"
 
 !ELSEIF  "$(CFG)" == "testthread - Win32 Debug"
 
@@ -76,7 +76,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 ..\lib\Debug\lib.lib ..\misc\win32\Debug\misc.lib ..\threadproc\win32\Debug\threadproc.lib ..\file_io\win32\Debug\file_io.lib ..\time\win32\Debug\time.lib ..\locks\win32\Debug\locks.lib ..\network_io\win32\Debug\network_io.lib ..\signal\win32\Debug\signal.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"ab.exe" /pdbtype:sept
+# ADD LINK32 ..\Debug\aprlib.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"..\Debug\testthread.exe" /pdbtype:sept
 
 !ENDIF 
 
