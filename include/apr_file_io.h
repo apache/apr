@@ -90,12 +90,6 @@ extern "C" {
 #define APR_SHARELOCK  1024        /* Platform dependent support for higher
                                       level locked read/write access to support
                                       writes across process/machines */
-#ifndef APR_INHERIT
-#define APR_INHERIT    (2^24)      /* Create the file inheritable by the child
-                                      process. fork()ed implementations 
-                                      automatically register a child cleanup
-                                      in the _absense_ of this flag. */
-#endif
 
 /* flags for apr_file_seek */
 #define APR_SET SEEK_SET
@@ -148,10 +142,6 @@ typedef struct apr_file_t         apr_file_t;
  *           APR_SHARELOCK        Platform dependent support for higher
  *                                level locked read/write access to support
  *                                writes across process/machines
- *           APR_INHERIT          Create the file inheritable by the child
- *                                processes.  fork()ed implementations 
- *                                automatically register a child cleanup
- *                                in the _absense_ of this flag.
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.
@@ -584,8 +574,6 @@ APR_POOL_DECLARE_ACCESSOR(file);
  * Set a file to be inherited by child processes.
  * @param file The file to enable inheritance.
  * @deffunc void apr_file_set_inherit(apr_file_t *file)
- * @tip Same effect as passing the APR_INHERIT flag to apr_file_open(),
- * but it is far more efficient to pass the correct value in the first place.
  */
 APR_DECLARE_SET_INHERIT(file);
 
@@ -593,8 +581,6 @@ APR_DECLARE_SET_INHERIT(file);
  * Unset a file from being inherited by child processes.
  * @param file The file to disable inheritance.
  * @deffunc void apr_file_unset_inherit(apr_file_t *file)
- * @tip Same effect as omiting the APR_INHERIT flag to apr_file_open(),
- * but it is far more efficient to pass the correct value in the first place.
  */
 APR_DECLARE_UNSET_INHERIT(file);
 
