@@ -66,6 +66,7 @@
 #define APR_USE_SHMEM_MMAP_SHM   @usemmapshm@
 #define APR_USE_SHMEM_MMAP_ZERO  @usemmapzero@
 #define APR_USE_SHMEM_SHMGET     @useshmget@
+#define APR_USE_SHMEM_MMAP_ANON  @usemmapanon@
 #define APR_USE_SHMEM_BEOS       @usebeosarea@
 
 #define APR_USE_FLOCK_SERIALIZE           @flockser@ 
