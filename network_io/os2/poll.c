@@ -62,7 +62,7 @@
 
 /*  OS/2 doesn't have a poll function, implement using OS/2 style select */
  
-apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
     *new = (apr_pollfd_t *)apr_palloc(cont, sizeof(apr_pollfd_t));
 
@@ -93,8 +93,8 @@ apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *con
 
 
 
-apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset, 
-			       apr_socket_t *sock, apr_int16_t events)
+APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
+			                                  apr_socket_t *sock, apr_int16_t events)
 {
     int i;
     
@@ -124,8 +124,8 @@ apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset,
 
 
 
-apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds, 
-                    apr_interval_time_t timeout)
+APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds, 
+                                   apr_interval_time_t timeout)
 {
     int i;
     int rv = 0;
@@ -158,7 +158,7 @@ apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
 
 
 
-apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
+APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
 {
     int i;
     
@@ -180,8 +180,8 @@ apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_po
 
 
 
-apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset, 
-                                apr_socket_t *sock, apr_int16_t events)
+APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset, 
+                                               apr_socket_t *sock, apr_int16_t events)
 {
     int start, *count, pos;
 
@@ -218,14 +218,14 @@ apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset,
 
 
 
-apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
+APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
     return apr_poll_socket_mask(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
 }
 
 
 
-apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
+APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
 {
     aprset->num_read = 0;
     aprset->num_write = 0;
@@ -235,15 +235,14 @@ apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
 }
 
 
-
-apr_status_t apr_poll_data_get(apr_pollfd_t *pollfd, const char *key, void *data)
+APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd, const char *key, void *data)
 {
     return apr_pool_userdata_get(data, key, pollfd->cntxt);
 }
 
 
 
-apr_status_t apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key,
                             apr_status_t (*cleanup) (void *))
 {
     return apr_pool_userdata_set(data, key, cleanup, pollfd->cntxt);

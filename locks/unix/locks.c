@@ -230,9 +230,9 @@ static apr_status_t create_lock(apr_lock_t *new, apr_lockmech_e_np mech, const c
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_create_np(apr_lock_t **lock, apr_locktype_e type, 
-                                apr_lockscope_e scope, apr_lockmech_e_np mech,
-                                const char *fname, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_lock_create_np(apr_lock_t **lock, apr_locktype_e type, 
+                                             apr_lockscope_e scope, apr_lockmech_e_np mech,
+                                             const char *fname, apr_pool_t *pool)
 {
     apr_lock_t *new;
     apr_status_t stat;
@@ -253,14 +253,14 @@ apr_status_t apr_lock_create_np(apr_lock_t **lock, apr_locktype_e type,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
-                             apr_lockscope_e scope, const char *fname, 
-                             apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
+                                          apr_lockscope_e scope, const char *fname, 
+                                          apr_pool_t *pool)
 {
     return apr_lock_create_np(lock, type, scope, APR_LOCK_DEFAULT, fname, pool);
 }
 
-apr_status_t apr_lock_acquire(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
 
@@ -283,7 +283,7 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_tryacquire(apr_lock_t *lock)
 {
     apr_status_t stat;
 
@@ -306,7 +306,8 @@ apr_status_t apr_lock_tryacquire(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
+APR_DECLARE(apr_status_t) apr_lock_acquire_rw(apr_lock_t *lock, 
+                                              apr_readerwriter_e e)
 {
     switch (e)
     {
@@ -318,7 +319,7 @@ apr_status_t apr_lock_acquire_rw(apr_lock_t *lock, apr_readerwriter_e e)
     return APR_ENOTIMPL;
 }
 
-apr_status_t apr_lock_release(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_release(apr_lock_t *lock)
 {
     apr_status_t stat;
 
@@ -342,12 +343,12 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_destroy(apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock)
 {
     return lock->meth->destroy(lock);
 }
 
-apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, 
+APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock, const char *fname, 
                                apr_pool_t *cont)
 {
     if ((*lock)->scope != APR_INTRAPROCESS)
@@ -355,18 +356,18 @@ apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_lock_data_get(apr_lock_t *lock, const char *key, void *data)
+APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, const char *key, void *data)
 {
     return apr_pool_userdata_get(data, key, lock->pool);
 }
 
-apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
                             apr_status_t (*cleanup) (void *))
 {
     return apr_pool_userdata_set(data, key, cleanup, lock->pool);
 }
 
-apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
+APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 {
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
     oslock->crossproc = lock->interproc;
@@ -383,8 +384,8 @@ apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
-                           apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
+                                          apr_pool_t *pool)
 {
     if (pool == NULL) {
         return APR_ENOPOOL;
@@ -406,4 +407,4 @@ apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock,
 #endif
     return APR_SUCCESS;
 }
-    
+ 

@@ -58,8 +58,8 @@ static struct beos_key key_table[BEOS_MAX_DATAKEYS];
 static struct beos_private_data *beos_data[BEOS_MAX_DATAKEYS];
 static sem_id lock;
 
-apr_status_t apr_threadkey_private_create(apr_threadkey_t **key,
-                                void (*dest)(void *), apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
+                                       void (*dest)(void *), apr_pool_t *cont)
 {
     (*key) = (apr_threadkey_t *)apr_palloc(cont, sizeof(apr_threadkey_t));
     if ((*key) == NULL) {
@@ -82,7 +82,7 @@ apr_status_t apr_threadkey_private_create(apr_threadkey_t **key,
     return APR_ENOMEM;
 }
 
-apr_status_t apr_threadkey_private_get(void **new, apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new, apr_threadkey_t *key)
 {
 	thread_id tid;
 	int i, index=0;
@@ -114,7 +114,7 @@ apr_status_t apr_threadkey_private_get(void **new, apr_threadkey_t *key)
 	return APR_SUCCESS;
 }
 
-apr_status_t apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
 {
 	thread_id tid;
 	int i,index = 0, ret;
@@ -169,7 +169,7 @@ apr_status_t apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
 	return APR_ENOMEM;
 }
 
-apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
 	if (key->key < BEOS_MAX_DATAKEYS){
 		acquire_sem(key_table[key->key].lock);
@@ -184,27 +184,27 @@ apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
 	return APR_SUCCESS;
 }
 
-apr_status_t apr_threadkey_data_get(void **data, const char *key,
-                                 apr_threadkey_t *threadkey)
+APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
+                                                 apr_threadkey_t *threadkey)
 {
     return apr_pool_userdata_get(data, key, threadkey->cntxt);
 }
 
-apr_status_t apr_threadkey_data_set(void *data, const char *key,
-                                 apr_status_t (*cleanup) (void *),
-                                 apr_threadkey_t *threadkey)
+APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
+                                                 apr_status_t (*cleanup) (void *),
+                                                 apr_threadkey_t *threadkey)
 {
     return apr_pool_userdata_set(data, key, cleanup, threadkey->cntxt);
 }
 
-apr_status_t apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
 {
     *thekey = key->key;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_os_threadkey_put(apr_threadkey_t **key, 
-                                apr_os_threadkey_t *thekey, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key, 
+                                               apr_os_threadkey_t *thekey, apr_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOPOOL;
@@ -215,4 +215,4 @@ apr_status_t apr_os_threadkey_put(apr_threadkey_t **key,
     }
     (*key)->key = *thekey;
     return APR_SUCCESS;
-}           
+}

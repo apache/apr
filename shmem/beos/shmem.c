@@ -205,8 +205,8 @@ static struct block_t *alloc_block(struct shmem_t *m, apr_size_t size)
     return b;
 }
 
-apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, 
-                          apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, 
+                                       apr_pool_t *p)
 {
     apr_size_t pagesize;
     area_id newid;
@@ -232,7 +232,7 @@ apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *fi
     return APR_SUCCESS;
 }
 
-apr_status_t apr_shm_destroy(struct shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_destroy(struct shmem_t *m)
 {
     delete_area(m->aid);
     m->avail = 0;
@@ -242,7 +242,7 @@ apr_status_t apr_shm_destroy(struct shmem_t *m)
     return APR_SUCCESS;
 }
 
-void *apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
+APR_DEClARE(void *) apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
 {
     struct block_t *b;
     if ((b = alloc_block(m, reqsize)) != NULL)
@@ -250,7 +250,7 @@ void *apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
     return NULL;
 }
 
-void *apr_shm_calloc(struct shmem_t *m, apr_size_t reqsize)
+APR_DECLARE(void *) apr_shm_calloc(struct shmem_t *m, apr_size_t reqsize)
 {
     struct block_t *b; 
     if ((b = alloc_block(m, reqsize)) != NULL){  
@@ -260,24 +260,24 @@ void *apr_shm_calloc(struct shmem_t *m, apr_size_t reqsize)
     return NULL;
 }
 
-apr_status_t apr_shm_free(struct shmem_t *m, void *entity)
+APR_DECLARE(apr_status_t) apr_shm_free(struct shmem_t *m, void *entity)
 {
     free_block(m, entity);   
     return APR_SUCCESS;
 }
 
-apr_status_t apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
+APR_DECLARE(apr_status_t) apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
 {
     *name = NULL;
     return APR_ANONYMOUS;
 }
 
-apr_status_t apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
+APR_DECLARE(apr_status_t) apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
 {
     return APR_ANONYMOUS;
 }
 
-apr_status_t apr_shm_open(struct shmem_t *m)
+APR_DECLARE(apr_status_t) apr_shm_open(struct shmem_t *m)
 {
     /* If we've forked we need a clone of the original area or we
      * will only have access to a one time copy of the data made when
@@ -311,7 +311,7 @@ apr_status_t apr_shm_open(struct shmem_t *m)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_shm_avail(struct shmem_t *m, apr_size_t *size)
+APR_DECLARE(apr_status_t) apr_shm_avail(struct shmem_t *m, apr_size_t *size)
 {
     *size = m->avail;
     if (m->avail == 0)

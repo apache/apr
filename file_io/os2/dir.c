@@ -67,7 +67,7 @@ static apr_status_t dir_cleanup(void *thedir)
 
 
 
-apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cntxt)
+APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cntxt)
 {
     apr_dir_t *thedir = (apr_dir_t *)apr_palloc(cntxt, sizeof(apr_dir_t));
     
@@ -89,7 +89,7 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cntx
 
 
 
-apr_status_t apr_dir_close(apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir)
 {
     int rv = 0;
     
@@ -106,8 +106,8 @@ apr_status_t apr_dir_close(apr_dir_t *thedir)
 
 
 
-apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
-                          apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
+                                       apr_dir_t *thedir)
 {
     int rv;
     ULONG entries = 1;
@@ -161,28 +161,28 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 
 
 
-apr_status_t apr_dir_rewind(apr_dir_t *thedir)
+APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir)
 {
     return apr_dir_close(thedir);
 }
 
 
 
-apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
     return APR_OS2_STATUS(DosCreateDir(path, NULL));
 }
 
 
 
-apr_status_t apr_dir_remove(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont)
 {
     return APR_OS2_STATUS(DosDeleteDir(path));
 }
 
 
 
-apr_status_t apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
+APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
@@ -193,8 +193,8 @@ apr_status_t apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
 
 
 
-apr_status_t apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir,
-                          apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir,
+                                         apr_pool_t *cont)
 {
     if ((*dir) == NULL) {
         (*dir) = (apr_dir_t *)apr_pcalloc(cont, sizeof(apr_dir_t));

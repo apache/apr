@@ -95,7 +95,7 @@ apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 
 #define SEND_WAIT APR_USEC_PER_SEC / 10
 
-apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
     ssize_t rv;
 	
@@ -128,7 +128,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 {
     apr_ssize_t rv;
    
@@ -160,15 +160,15 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 
 /* BeOS doesn't have writev for sockets so we use the following instead...
  */
-apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
-                     apr_int32_t nvec, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t * sock, const struct iovec *vec,
+                                    apr_int32_t nvec, apr_size_t *len)
 {
     *len = vec[0].iov_len;
     return apr_send(sock, vec[0].iov_base, len);
 }
 
-apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
-                        apr_int32_t flags, const char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
+                                     apr_int32_t flags, const char *buf, apr_size_t *len)
 {
     ssize_t rv;
 
@@ -200,9 +200,9 @@ apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
-                          apr_int32_t flags, char *buf,
-                          apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
+                                       apr_int32_t flags, char *buf,
+                                       apr_size_t *len)
 {
     ssize_t rv;
 

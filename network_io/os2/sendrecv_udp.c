@@ -81,8 +81,8 @@ apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 
 
 
-apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
-                        apr_int32_t flags, const char *buf, apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
+                                     apr_int32_t flags, const char *buf, apr_size_t *len)
 {
     ssize_t rv;
     int serrno;
@@ -119,9 +119,9 @@ apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
 
 
 
-apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
-                          apr_int32_t flags, char *buf, 
-                          apr_size_t *len)
+APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
+                                       apr_int32_t flags, char *buf, 
+                                       apr_size_t *len)
 {
     ssize_t rv;
     int serrno;
