@@ -186,6 +186,7 @@ typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
 /* dso types... */
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+#include <dl.h>
 typedef shl_t                 apr_os_dso_handle_t;
 #elif defined(DRAWIN)
 typedef NSModule              apr_os_dso_handle_t;
