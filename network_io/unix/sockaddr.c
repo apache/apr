@@ -136,22 +136,6 @@ static apr_status_t get_remote_addr(apr_socket_t *sock)
     }
 }
 
-APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
-                                       apr_port_t port)
-{
-    sockaddr->port = port;
-    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
-    sockaddr->sa.sin.sin_port = htons(port);
-    return APR_SUCCESS;
-}
-
-APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
-                                       apr_sockaddr_t *sockaddr)
-{
-    *port = sockaddr->port;
-    return APR_SUCCESS;
-}
-
 APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
                                          apr_sockaddr_t *sockaddr)
 {
