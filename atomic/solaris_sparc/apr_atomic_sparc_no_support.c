@@ -3,4 +3,3 @@
  * that haven't been redefined as Sparc-specific functions
  */
 #include "../unix/apr_atomic.c"
-#endif
