@@ -113,18 +113,20 @@ static apr_status_t sononblock(int sd)
 apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
 {
     int one;
-    struct linger li;
     apr_status_t stat;
 
     if (on)
         one = 1;
     else
         one = 0;
-
     if (opt & APR_SO_KEEPALIVE) {
+#ifdef SO_KEEPALIVE
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
             return errno;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
     if (opt & APR_SO_DEBUG) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
@@ -137,9 +139,13 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         }
     }
     if (opt & APR_SO_SNDBUF) {
+#ifdef SO_SNDBUF
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
             return errno;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
     if (opt & APR_SO_NONBLOCK) {
         if (on) {
@@ -152,11 +158,16 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         }
     }
     if (opt & APR_SO_LINGER) {
+#ifdef SO_LINGER
+        struct linger li;
         li.l_onoff = on;
         li.l_linger = MAX_SECS_TO_LINGER;
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
             return errno;
         }
+#else
+        return APR_ENOTIMPL;
+#endif
     }
     if (opt & APR_SO_TIMEOUT) { 
         /* don't do the fcntl foo more than needed */ 
@@ -176,6 +187,15 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
             return errno;
         }
 #else
+        /* BeOS pre-BONE has TCP_NODELAY set by default.
+         * As it can't be turned off we might as well check if they're asking
+         * for it to be turned on!
+         */
+#ifdef BEOS
+        if (on == 1)
+            return APR_SUCCESS;
+        else
+#endif
         return APR_ENOTIMPL;
 #endif
     }

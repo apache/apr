@@ -61,7 +61,11 @@ static apr_status_t socket_cleanup(void *sock)
 #ifndef BEOS
     if (close(thesocket->socketdes) == 0) {
 #else
+#ifndef BEOS_BONE
     if (closesocket(thesocket->socketdes) == 0) {
+#else
+    if (close(thesocket->socketdes) == 0) {
+#endif
 #endif
         thesocket->socketdes = -1;
         return APR_SUCCESS;
