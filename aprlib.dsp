@@ -68,7 +68,7 @@ LIB32=link.exe -lib
 RSC=rc.exe
 # ADD BASE RSC /l 0x409
 # ADD RSC /l 0x409
-# ADD BASE CPP /nologo /MTd /W3 /GX /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /ZI /c
+# ADD BASE CPP /nologo /MTd /W3 /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "./include" /I "./include/arch" /I "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /FD /c
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
@@ -552,7 +552,6 @@ SOURCE=.\include\apr_xlate.h
 # Begin Source File
 
 SOURCE=.\aprlib.def
-# PROP Exclude_From_Build 1
 # End Source File
 # End Target
 # End Project

@@ -56,6 +56,7 @@
 #include "apr_network_io.h"
 #include "apr_general.h"
 #include "apr_strings.h"
+#include "apr_lib.h"
 #include <string.h>
 
 static apr_status_t get_local_addr(apr_socket_t *sock)
