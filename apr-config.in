@@ -196,7 +196,9 @@ while test $# -gt 0; do
         flags="$flags $LA_FILE"
     elif test "$location" = "installed"; then
         ### avoid using -L if libdir is a "standard" location like /usr/lib
-        flags="$flags -L$libdir -l${APR_LIBNAME}"
+        # Since the user is specifying they are linking with libtool, we
+        # *know* that -R will be recognized by libtool.
+        flags="$flags -L$libdir -R$libdir -l${APR_LIBNAME}"
     else
         flags="$flags $LA_FILE"
     fi
