@@ -164,7 +164,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
             return APR_ENOENT;
     }
     else
-#endif APR_HAS_UNICODE_FS
+#endif /* APR_HAS_UNICODE_FS */
     {
         keylen = sizeof(regkey);
         rv = RegQueryValueEx(key, "ProfileImagePath", NULL, &type,
