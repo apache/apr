@@ -92,8 +92,8 @@
 #define _POSIX_THREAD_SAFE_FUNCTIONS    1
 #define READDIR_IS_THREAD_SAFE          1
 
-#define APR_INLINE __inline
-#define APR_HAS_INLINE		1
+#define APR_INLINE 
+#define APR_HAS_INLINE		0
 #define __attribute__(__x)
 #define ENUM_BITFIELD(e,n,w)  signed int n : w
 
