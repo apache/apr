@@ -4,7 +4,8 @@ CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../include
-INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch
+DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
+INCLUDES=-I$(INCDIR) -I$(INCDIR)/arch -I$(DEFOSDIR)
 MKDEP=../../helpers/mkdep.sh
 
 LIB=libdso.a
