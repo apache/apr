@@ -302,7 +302,7 @@ int testdirs(apr_pool_t *context)
 	apr_close(file);
 
     fprintf(stdout, "\tOpening Directory.......");
-    if (apr_opendir(&temp, "testdir", context) != APR_SUCCESS) {
+    if (apr_dir_open(&temp, "testdir", context) != APR_SUCCESS) {
         fprintf(stderr, "Could not open directory\n");
         return -1;
     }
