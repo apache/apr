@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#include "apr.h"
+#include "apr_poll.h"
+#include "apr_time.h"
+#include "apr_portable.h"
+#include "apr_arch_networkio.h"
+#include "apr_arch_file_io.h"
 #include "apr_arch_poll_private.h"
 
 #ifdef POLL_USES_SELECT
