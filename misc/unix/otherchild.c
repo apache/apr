@@ -57,6 +57,20 @@
 
 static ap_other_child_rec_t *other_children = NULL;
 
+/* ***APRDOC********************************************************
+ * void ap_register_other_child(ap_proc_t *pid, 
+ *                    void (*maintenance) (int reason, void *data),
+ *                    void *data, int write_fd, ap_context_t *p)
+ *    Register an other_child -- a child which must be kept track of so
+ *    that the program knows when it has dies or disappeared.
+ * arg 1)  pid is the pid of the child.
+ * arg 2)  maintenance is a function that is invoked with a reason and the
+ *         data pointer passed here.
+ * arg 3)  The data to pass to the maintenance function.
+ * arg 4)  An fd that is probed for writing.  If it is ever unwritable
+ *         then the maintenance is invoked with reason OC_REASON_UNWRITABLE.
+ * arg 5)  The context to use for allocating memory.
+ */
 API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
                      void (*maintenance) (int reason, void *),
                      void *data, int write_fd, ap_context_t *p)
@@ -72,9 +86,15 @@ API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
     other_children = ocr;
 }
 
-/* note that since this can be called by a maintenance function while we're
- * scanning the other_children list, all scanners should protect themself
- * by loading ocr->next before calling any maintenance function.
+/* ***APRDOC********************************************************
+ * void ap_unregister_other_child(void *data)
+ *    Stop watching the specified process.
+ * arg 1) The data to pass to the maintenance function.  This is
+ *        used to find the process to unregister.
+ * NOTE:  Since this can be called by a maintenance function while we're
+ *        scanning the other_children list, all scanners should protect 
+ *        themself by loading ocr->next before calling any maintenance 
+ *        function.
  */
 API_EXPORT(void) ap_unregister_other_child(void *data)
 {
@@ -141,7 +161,12 @@ static void probe_writable_fds(void)
     }
 }
 
-/* possibly reap an other_child, return 0 if yes, -1 if not */
+/* ***APRDOC********************************************************
+ * ap_status_t ap_reap_other_child(ap_proc_t *piod)
+ *    Check on the specified process.  If it is gone, call the
+ *    maintenance function.
+ * arg 1) The process to check.
+ */
 API_EXPORT(ap_status_t) reap_other_child(ap_proc_t *pid)
 {
     ap_other_child_rec_t *ocr, *nocr;
@@ -154,9 +179,14 @@ API_EXPORT(ap_status_t) reap_other_child(ap_proc_t *pid)
         (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data);
         return 0;
     }
-    return -1;
+    return APR_CHILD_NOTDONE;
 }
 
+/* ***APRDOC********************************************************
+ * void ap_check_other_child(void)
+ *    Loop through all registered other_children and call the
+ *    appropriate maintenance function when necessary.
+ */
 API_EXPORT(void) check_other_child(void)
 {
     ap_other_child_rec_t *ocr, *nocr;
