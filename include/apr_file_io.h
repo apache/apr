@@ -59,6 +59,7 @@
 #include "apr_pools.h"
 #include "apr_time.h"
 #include "apr_errno.h"
+#include "apr_file_info.h"
 
 #if APR_HAVE_STDIO_H
 #include <stdio.h>      /* for SEEK_* */
@@ -75,17 +76,6 @@ extern "C" {
 /**
  * @package APR File handling
  */
-
-typedef enum {
-    APR_NOFILE,         /* the file exists, but APR doesn't know its type */
-    APR_REG,            /* a regular file */
-    APR_DIR,            /* a directory */
-    APR_CHR,            /* a character device */
-    APR_BLK,            /* a block device */
-    APR_PIPE,           /* a FIFO / pipe */
-    APR_LNK,            /* a symbolic link */
-    APR_SOCK            /* a [unix domain] socket */
-} apr_filetype_e; 
 
 /* Flags for apr_open */
 #define APR_READ       1           /* Open the file for reading */
@@ -104,21 +94,6 @@ typedef enum {
 #define APR_CUR SEEK_CUR
 #define APR_END SEEK_END
 
-/* Permissions flags */
-#define APR_UREAD     0x400 
-#define APR_UWRITE    0x200
-#define APR_UEXECUTE  0x100
-
-#define APR_GREAD     0x040
-#define APR_GWRITE    0x020
-#define APR_GEXECUTE  0x010
-
-#define APR_WREAD     0x004
-#define APR_WWRITE    0x002
-#define APR_WEXECUTE  0x001
-
-#define APR_OS_DEFAULT 0xFFF
-
 /* should be same as whence type in lseek, POSIX defines this as int */
 typedef apr_int32_t       apr_seek_where_t;
 
@@ -127,73 +102,6 @@ typedef apr_int32_t       apr_seek_where_t;
  * @defvar apr_file_t
  */
 typedef struct apr_file_t         apr_file_t;
-typedef struct apr_finfo_t        apr_finfo_t;
-/**
- * Structure for referencing directories.
- * @defvar apr_dir_t
- */
-typedef struct apr_dir_t          apr_dir_t;
-/**
- * Structure for determining file permissions.
- * @defvar apr_fileperms_t
- */
-typedef apr_int32_t               apr_fileperms_t;
-/**
- * Structure for determining file owner.
- * @defvar apr_uid_t
- */
-typedef uid_t                     apr_uid_t;
-/**
- * Structure for determining the group that owns the file.
- * @defvar apr_gid_t
- */
-typedef gid_t                     apr_gid_t;
-#ifdef WIN32
-/**
- * Structure for determining the inode of the file.
- * @defvar apr_ino_t
- */
-typedef apr_uint64_t              apr_ino_t;
-/**
- * Structure for determining the device the file is on.
- * @defvar apr_dev_t
- */
-typedef apr_uint32_t              apr_dev_t;
-#else
-typedef ino_t                     apr_ino_t;
-typedef dev_t                     apr_dev_t;
-#endif
-
-/**
- * The file information structure.  This is analogous to the POSIX
- * stat structure.
- */
-struct apr_finfo_t {
-    /** The access permissions of the file.  Currently this mimics Unix
-     *  access rights.
-     */
-    apr_fileperms_t protection;
-    /** The type of file.  One of APR_NOFILE, APR_REG, APR_DIR, APR_CHR, 
-     *  APR_BLK, APR_PIPE, APR_LNK, APR_SOCK 
-     */
-    apr_filetype_e filetype;
-    /** The user id that owns the file */
-    apr_uid_t user;
-    /** The group id that owns the file */
-    apr_gid_t group;
-    /** The inode of the file.  (Not portable?) */
-    apr_ino_t inode;
-    /** The id of the device the file is on.  (Not portable?) */
-    apr_dev_t device;
-    /** The size of the file */
-    apr_off_t size;
-    /** The time the file was last accessed */
-    apr_time_t atime;
-    /** The time the file was last modified */
-    apr_time_t mtime;
-    /** The time the file was last changed */
-    apr_time_t ctime;
-};
 
 /* File lock types/flags */
 #define APR_FLOCK_SHARED        1       /* Shared lock. More than one process
@@ -457,54 +365,6 @@ APR_DECLARE(apr_status_t) apr_dupfile(apr_file_t **new_file,
                                       apr_pool_t *p);
 
 /**
- * get the specified file's stats.
- * @param finfo Where to store the information about the file.
- * @param thefile The file to get information about.
- * @deffunc apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
- */ 
-APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo,
-                                          apr_file_t *thefile);
-
-/**
- * set the specified file's permission bits.
- * @param fname The file (name) to apply the permissions to.
- * @param perms The permission bits to apply to the file.
- * @tip Some platforms may not be able to apply all of the available 
- *      permission bits; APR_INCOMPLETE will be returned if some permissions 
- *      are specified which could not be set.
- *
- *      Platforms which do not implement this feature will return APR_ENOTIMPL.
- * @deffunc apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
- */
-APR_DECLARE(apr_status_t) apr_setfileperms(const char *fname,
-                                           apr_fileperms_t perms);
-
-/**
- * get the specified file's stats.  The file is specified by filename, 
- * instead of using a pre-opened file.
- * @param finfo Where to store the information about the file, which is
- * never touched if the call fails.
- * @param fname The name of the file to stat.
- * @param cont the pool to use to allocate the new file. 
- * @deffunc apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
- */ 
-APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
-                                   apr_pool_t *cont);
-
-/**
- * get the specified file's stats.  The file is specified by filename, 
- * instead of using a pre-opened file.  If the file is a symlink, this function
- * will get the stats for the symlink not the file the symlink refers to.
- * @param finfo Where to store the information about the file, which is
- * never touched if the call fails.
- * @param fname The name of the file to stat.
- * @param cont the pool to use to allocate the new file. 
- * @deffunc apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
- */ 
-APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
-                                    apr_pool_t *cont);
-
-/**
  * Move the read/write file offset to a specified byte within a file.
  * @param thefile The file descriptor
  * @param where How to move the pointer, one of:
@@ -520,57 +380,6 @@ APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
 APR_DECLARE(apr_status_t) apr_seek(apr_file_t *thefile, 
                                    apr_seek_where_t where,
                                    apr_off_t *offset);
-
-/**
- * Open the specified directory.
- * @param new_dir The opened directory descriptor.
- * @param dirname The full path to the directory (use / on all systems)
- * @param cont The pool to use.
- * @deffunc apr_status_t apr_dir_open(apr_dir_t **new_dir, const char *dirname, apr_pool_t *cont)
- */                        
-APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new_dir, 
-                                       const char *dirname, 
-                                       apr_pool_t *cont);
-
-/**
- * close the specified directory. 
- * @param thedir the directory descriptor to close.
- * @deffunc apr_status_t apr_closedir(apr_dir_t *thedir)
- */                        
-APR_DECLARE(apr_status_t) apr_closedir(apr_dir_t *thedir);
-
-/**
- * Read the next entry from the specified directory. 
- * @param thedir the directory descriptor to read from, and fill out.
- * @tip All systems return . and .. as the first two files.
- * @deffunc apr_status_t apr_readdir(apr_dir_t *thedir)
- */                        
-APR_DECLARE(apr_status_t) apr_readdir(apr_dir_t *thedir);
-
-/**
- * Rewind the directory to the first entry.
- * @param thedir the directory descriptor to rewind.
- * @deffunc apr_status_t apr_rewinddir(apr_dir_t *thedir)
- */                        
-APR_DECLARE(apr_status_t) apr_rewinddir(apr_dir_t *thedir);
-
-/**
- * Create a new directory on the file system.
- * @param path the path for the directory to be created.  (use / on all systems)
- * @param perm Permissions for the new direcoty.
- * @param cont the pool to use.
- * @deffunc apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
- */                        
-APR_DECLARE(apr_status_t) apr_make_dir(const char *path, apr_fileperms_t perm, 
-                        apr_pool_t *cont);
-
-/**
- * Remove directory from the file system.
- * @param path the path for the directory to be removed.  (use / on all systems)
- * @param cont the pool to use.
- * @deffunc apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
- */                        
-APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont);
 
 /**
  * Create an anonymous pipe.
@@ -645,15 +454,6 @@ APR_DECLARE(apr_status_t) apr_get_filename(const char **new_path,
                                            apr_file_t *thefile);
 
 /**
- * Get the file name of the current directory entry.
- * @param new_path the file name of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_get_dir_filename(const char **new_path, apr_dir_t *thedir)
- */                        
-APR_DECLARE(apr_status_t) apr_get_dir_filename(const char **new_path, 
-                                               apr_dir_t *thedir);
-
-/**
  * Return the data associated with the current file.
  * @param data The user data associated with the file.  
  * @param key The key to use for retreiving data associated with this file.
@@ -676,33 +476,6 @@ APR_DECLARE(apr_status_t) apr_set_filedata(apr_file_t *file, void *data,
                                            apr_status_t (*cleanup)(void *));
 
 /**
- * Get the size of the current directory entry.
- * @param size the size of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_dir_entry_size(apr_size_t *size, apr_dir_t *thedir)
- */                        
-APR_DECLARE(apr_status_t) apr_dir_entry_size(apr_size_t *size, 
-                                             apr_dir_t *thedir);
-
-/**
- * Get the last modified time of the current directory entry.
- * @param mtime the last modified time of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_dir_entry_mtime(apr_time_t *mtime, apr_dir_t *thedir)
- */ 
-APR_DECLARE(apr_status_t) apr_dir_entry_mtime(apr_time_t *mtime, 
-                                              apr_dir_t *thedir);
-
-/**
- * Get the file type of the current directory entry.
- * @param type the file type of the directory entry. 
- * @param thedir the currently open directory.
- * @deffunc apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
- */
-APR_DECLARE(apr_status_t) apr_dir_entry_ftype(apr_filetype_e *type, 
-                                              apr_dir_t *thedir);
-
-/**
  * Write a string to a file using a printf format.
  * @param fptr The file to write to.
  * @param format The format string
@@ -712,6 +485,47 @@ APR_DECLARE(apr_status_t) apr_dir_entry_ftype(apr_filetype_e *type,
  */ 
 APR_DECLARE_NONSTD(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
+
+/**
+ * set the specified file's permission bits.
+ * @param fname The file (name) to apply the permissions to.
+ * @param perms The permission bits to apply to the file.
+ * @tip Some platforms may not be able to apply all of the available 
+ *      permission bits; APR_INCOMPLETE will be returned if some permissions 
+ *      are specified which could not be set.
+ *
+ *      Platforms which do not implement this feature will return APR_ENOTIMPL.
+ * @deffunc apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
+ */
+APR_DECLARE(apr_status_t) apr_setfileperms(const char *fname,
+                                           apr_fileperms_t perms);
+
+/**
+ * Create a new directory on the file system.
+ * @param path the path for the directory to be created.  (use / on all systems)
+ * @param perm Permissions for the new direcoty.
+ * @param cont the pool to use.
+ * @deffunc apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
+ */                        
+APR_DECLARE(apr_status_t) apr_make_dir(const char *path, apr_fileperms_t perm, 
+                        apr_pool_t *cont);
+
+/**
+ * Remove directory from the file system.
+ * @param path the path for the directory to be removed.  (use / on all systems)
+ * @param cont the pool to use.
+ * @deffunc apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
+ */                        
+APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont);
+
+/**
+ * get the specified file's stats.
+ * @param finfo Where to store the information about the file.
+ * @param thefile The file to get information about.
+ * @deffunc apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
+ */ 
+APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo,
+                                          apr_file_t *thefile);
 
 #ifdef __cplusplus
 }
