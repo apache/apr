@@ -1,8 +1,12 @@
 Changes with APR b1  
 
+  *) Fix some file cleanup problems in apr_proc_create() which could
+     result in the pipes for stdin/stdout/stderr being closed
+     immediately.  [Jeff Trawick]
+
   *) New functions apr_hash_[merge|copy], change to overlay fn
      so that it calls merge, which does a inline iteration instead
-     of calling the iterator function. [Brian Pan <bpane@pacbell.net]
+     of calling the iterator function. [Brian Pane <bpane@pacbell.net]
 
   *) Introduce the apr_pool_userdata_setn() variant that doesn't 
      strdup the key.  Allows both the _setn() and _set() variant to 
