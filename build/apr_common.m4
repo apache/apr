@@ -677,7 +677,7 @@ AC_DEFUN(APR_LAYOUT,[
   for var in prefix exec_prefix bindir sbindir libexecdir mandir \
              sysconfdir datadir  \
              includedir localstatedir runtimedir logfiledir libdir \
-             installbuilddir; do
+             installbuilddir libsuffix; do
     eval "val=\"\$$var\""
     case $val in
       *+)
