@@ -96,18 +96,18 @@ static int run_basic_test(apr_pool_t *context)
         exit(-1);
     }
 
-    while ((s1 = apr_wait_proc(&proc1, APR_NOWAIT)) != APR_CHILD_DONE || 
-           (s2 = apr_wait_proc(&proc2, APR_NOWAIT)) != APR_CHILD_DONE) {
+    while ((s1 = apr_wait_proc(&proc1, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
+           (s2 = apr_wait_proc(&proc2, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
         continue;
     }
 
     if (s1 == APR_SUCCESS) {
         apr_kill(&proc2, SIGTERM);
-        apr_wait_proc(&proc2, APR_WAIT);
+        while (apr_wait_proc(&proc2, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     else {
         apr_kill(&proc1, SIGTERM);
-        apr_wait_proc(&proc1, APR_WAIT);
+        while (apr_wait_proc(&proc1, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     fprintf(stdout, "Network test completed.\n");   
 
@@ -162,18 +162,18 @@ static int run_sendfile(apr_pool_t *context, int number)
         exit(-1);
     }
 
-    while ((s1 = apr_wait_proc(&proc1, APR_NOWAIT)) != APR_CHILD_DONE || 
-           (s2 = apr_wait_proc(&proc2, APR_NOWAIT)) != APR_CHILD_DONE) {
+    while ((s1 = apr_wait_proc(&proc1, APR_NOWAIT)) == APR_CHILD_NOTDONE && 
+           (s2 = apr_wait_proc(&proc2, APR_NOWAIT)) == APR_CHILD_NOTDONE) {
         continue;
     }
 
     if (s1 == APR_SUCCESS) {
         apr_kill(&proc2, SIGTERM);
-        apr_wait_proc(&proc2, APR_WAIT);
+        while (apr_wait_proc(&proc2, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     else {
         apr_kill(&proc1, SIGTERM);
-        apr_wait_proc(&proc1, APR_WAIT);
+        while (apr_wait_proc(&proc1, APR_WAIT) == APR_CHILD_NOTDONE);
     }
     fprintf(stdout, "Network test completed.\n");   
 
