@@ -55,6 +55,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 #include "locks.h"
 #include "fileio.h"
 #include <string.h>
@@ -186,4 +187,43 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
         lock->hMutex = 0;
         
     return APR_OS2_STATUS(rc);
+}
+
+
+
+apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
+{
+    *oslock = lock->hMutex;
+    return APR_SUCCESS;
+}
+
+
+
+apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
+                           apr_pool_t *cont)
+{
+    if (cont == NULL) {
+        return APR_ENOPOOL;
+    }
+    if ((*lock) == NULL) {
+        (*lock) = (apr_lock_t *)apr_pcalloc(cont, sizeof(apr_lock_t));
+        (*lock)->cntxt = cont;
+    }
+    (*lock)->hMutex = *thelock;
+    return APR_SUCCESS;
+}
+
+
+
+apr_status_t apr_lock_data_get(apr_lock_t *lock, const char *key, void *data)
+{
+    return apr_pool_userdata_get(data, key, lock->cntxt);
+}
+
+
+
+apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *))
+{
+    return apr_pool_userdata_set(data, key, cleanup, lock->cntxt);
 }
