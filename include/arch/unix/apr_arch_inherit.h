@@ -62,6 +62,8 @@
 #define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
 apr_status_t apr_##name##_inherit_set(apr_##name##_t *the##name)    \
 {                                                                   \
+    if (the##name->flag & APR_FILE_NOCLEANUP)                       \
+        return APR_EINVAL;                                          \
     if (!(the##name->flag & APR_INHERIT)) {                         \
         the##name->flag |= APR_INHERIT;                             \
         apr_pool_child_cleanup_set(the##name->pool,                 \
@@ -79,6 +81,8 @@ void apr_##name##_set_inherit(apr_##name##_t *the##name)            \
 #define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
 apr_status_t apr_##name##_inherit_unset(apr_##name##_t *the##name)  \
 {                                                                   \
+    if (the##name->flag & APR_FILE_NOCLEANUP)                       \
+        return APR_EINVAL;                                          \
     if (the##name->flag & APR_INHERIT) {                            \
         the##name->flag &= ~APR_INHERIT;                            \
         apr_pool_child_cleanup_set(the##name->pool,                 \
