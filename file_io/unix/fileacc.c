@@ -57,7 +57,7 @@
 
 /* A file to put ALL of the accessor functions for apr_file_t types. */
 
-apr_status_t apr_get_filename(const char **fname, apr_file_t *thefile)
+apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
 {
 #ifdef WIN32 /* this test is only good until some other platform trys wchar* */
 #if APR_HAS_UNICODE_FS
@@ -70,10 +70,10 @@ apr_status_t apr_get_filename(const char **fname, apr_file_t *thefile)
     }
     else
 #endif /* !APR_HAS_UNICODE_FS */
-        *fname = thefile->n.fname;
+        *fname = apr_pstrdup(thefile->cntxt, thefile->n.fname);
 
 #else /* !def Win32 */
-    *fname = thefile->fname;
+    *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
 #endif 
     return APR_SUCCESS;
 }
