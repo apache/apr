@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/03/15 15:51:23 $]
+Last modified at [$Date: 2002/03/15 20:13:34 $]
 
 Release:
 
@@ -20,6 +20,16 @@ RELEASE SHOWSTOPPERS:
         Message-ID: <20020128100116.A4288@covalent.net>
       (Those problems have been fixed, but it is a good example of
       what to look for.)
+      Some headers with issues: 
+        apr_fnmatch.h         (FNM_foo)
+        apr_general.h         (MAXIMUM_WAIT_OBJECTS)
+        apr_md5.h             (MD5_DIGESTSIZE)
+        apr_network_io.h      (MAX_SECONDS_TO_LINGER)
+        apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD, 
+                              _POSIX_THREAD_SAFE_FUNCTIONS (?),
+                              nuint8, nuint16, NGetLo8, NGetHi8,
+                              HIBYTE, LOBYTE)
+        apr.hw                (NO_USE_SIGACTION)
 
     * complete the efforts started by DougM for cleaner fn naming
       conventions: see proposed name changes in renames_pending
