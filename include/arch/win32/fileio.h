@@ -89,7 +89,7 @@
 #include "i18n.h"
 #include <wchar.h>
 
-typedef apr_int16_t apr_wchar_t;
+typedef apr_uint16_t apr_wchar_t;
 
 apr_status_t utf8_to_unicode_path(apr_wchar_t* dststr, apr_size_t dstchars, 
                                   const char* srcstr);
