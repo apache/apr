@@ -96,6 +96,7 @@
 typedef apr_int16_t apr_wchar_t;
 
 apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p);
+char *unicode_to_utf8_path(const apr_wchar_t* srcstr, apr_pool_t *p);
 #endif
 
 typedef enum apr_canon_case_e {
