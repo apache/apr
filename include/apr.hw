@@ -53,21 +53,34 @@
  */
 
 
-/**
- * @file include\apr.h
- * @brief Basic APR header for WIN32
- * @remark This is a Windows specific version of apr.h. It is copied as
- * apr.h at the start of a Windows build.
- */
-
-/**
- * @defgroup APR APR Functions (WIN32)
- * @{
- */
-
-#ifdef WIN32
 #ifndef APR_H
 #define APR_H
+
+/* GENERATED FILE WARNING!  DO NOT EDIT apr.h
+ *
+ * You must modify apr.hw instead.
+ *
+ * And please, make an effort to stub apr.hnw and apr.h.in in the process.
+ *
+ * This is the Win32 specific version of apr.h.  It is copied from
+ * apr.hw by the apr.dsp and libapr.dsp projects. 
+ */
+
+
+/**
+ * @file include/apr.h
+ * @brief Basic APR header for WIN32
+ * @remark This is a generated header generated from include/apr.h.in by
+ * ./configure, or copied from include/apr.hw or include/apr.hnw 
+ * for Win32 or Netware by those build environments, respectively.
+ */
+
+#if defined(WIN32) || defined(DOXYGEN)
+
+/**
+ * @defgroup APR APR Functions
+ * @{
+ */
 
 /* Ignore most warnings (back down to /W3) for poorly constructed headers
  */
@@ -492,7 +505,8 @@ struct iovec {
 #pragma warning(pop)
 #endif
 
-#endif /* APR_H */
+/** @} */
 
 #endif /* WIN32 */
-/** @} */
+
+#endif /* APR_H */
