@@ -61,6 +61,7 @@
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
+#include "apr_portable.h"
 
 struct send_pipe {
 	int in;
@@ -115,7 +116,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
 }
 
 ap_status_t ap_setprocattr_dir(struct procattr_t *attr, 
-                                 char *dir) 
+                                 const char *dir) 
 {
     char * cwd;
     if (strncmp("/",dir,1) != 0 ) {
@@ -166,7 +167,7 @@ ap_status_t ap_fork(struct proc_t **proc, ap_context_t *cont)
 }
 
 
-ap_status_t ap_create_process(struct proc_t **new, char *progname, 
+ap_status_t ap_create_process(struct proc_t **new, const char *progname, 
                               char *const args[], char **env, 
                               struct procattr_t *attr, ap_context_t *cont)
 {
@@ -276,3 +277,72 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
         }
         return errno;
 } 
+
+ap_status_t ap_setprocattr_childin(struct procattr_t *attr, ap_file_t *child_in,
+                                   ap_file_t *parent_in)
+{
+    if (attr->child_in == NULL && attr->parent_in == NULL)
+        ap_create_pipe(&attr->child_in, &attr->parent_in, attr->cntxt);
+
+    if (child_in != NULL)
+        ap_dupfile(&attr->child_in, child_in);
+
+    if (parent_in != NULL)
+        ap_dupfile(&attr->parent_in, parent_in);
+
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_setprocattr_childout(struct procattr_t *attr, ap_file_t *child_out,
+                                    ap_file_t *parent_out)
+{
+    if (attr->child_out == NULL && attr->parent_out == NULL)
+        ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
+
+    if (child_out != NULL)
+        ap_dupfile(&attr->child_out, child_out);
+
+    if (parent_out != NULL)
+        ap_dupfile(&attr->parent_out, parent_out);
+
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_setprocattr_childerr(struct procattr_t *attr, ap_file_t *child_err,
+                                   ap_file_t *parent_err)
+{
+    if (attr->child_err == NULL && attr->parent_err == NULL)
+        ap_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
+
+    if (child_err != NULL)
+        ap_dupfile(&attr->child_err, child_err);
+
+    if (parent_err != NULL)
+        ap_dupfile(&attr->parent_err, parent_err);
+
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
+{
+    if (proc == NULL) {
+        return APR_ENOPROC;
+    }
+    theproc = &(proc->pid);
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_put_os_proc(struct proc_t **proc, ap_os_proc_t *theproc, 
+                           ap_context_t *cont)
+{
+    if (cont == NULL) {
+        return APR_ENOCONT;
+    }
+    if ((*proc) == NULL) {
+        (*proc) = (struct proc_t *)ap_palloc(cont, sizeof(struct proc_t));
+        (*proc)->cntxt = cont;
+    }
+    (*proc)->pid = *theproc;
+    return APR_SUCCESS;
+}              
+
