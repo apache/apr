@@ -19,6 +19,8 @@
 
 #include "apr.h"
 
+#include "apr_release.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,39 +45,6 @@ extern "C" {
  *     http://apr.apache.org/versioning.html
  */
 
-/* The numeric compile-time version constants. These constants are the
- * authoritative version numbers for APR. 
- */
-
-/** major version 
- * Major API changes that could cause compatibility problems for older
- * programs such as structure size changes.  No binary compatibility is
- * possible across a change in the major version.
- */
-#define APR_MAJOR_VERSION       1
-
-/** 
- * Minor API changes that do not cause binary compatibility problems.
- * Should be reset to 0 when upgrading APR_MAJOR_VERSION
- */
-#define APR_MINOR_VERSION       2
-
-/** patch level */
-#define APR_PATCH_VERSION       0
-
-/**
- * This symbol is defined for internal, "development" copies of APR.
- * This symbol should be #undef'd for releases.
- */
-#define APR_IS_DEV_VERSION
-
-/** The formatted string of APR's version */
-#define APR_VERSION_STRING \
-     APR_STRINGIFY(APR_MAJOR_VERSION) "." \
-     APR_STRINGIFY(APR_MINOR_VERSION) "." \
-     APR_STRINGIFY(APR_PATCH_VERSION) \
-     APR_IS_DEV_STRING
-
 
 /** 
  * The numeric version information is broken out into fields within this 
@@ -99,13 +68,6 @@ APR_DECLARE(void) apr_version(apr_version_t *pvsn);
 /** Return APR's version information as a string. */
 APR_DECLARE(const char *) apr_version_string(void);
 
-
-/** Internal: string form of the "is dev" flag */
-#ifdef APR_IS_DEV_VERSION
-#define APR_IS_DEV_STRING "-dev"
-#else
-#define APR_IS_DEV_STRING ""
-#endif
 
 #ifdef __cplusplus
 }
