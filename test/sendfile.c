@@ -324,7 +324,7 @@ static int client(client_socket_mode_t socket_mode)
         printf("apr_sendfile() updated len with %ld\n",
                (long int)len);
         
-        printf("bytes really sent: %d\n",
+        printf("bytes really sent: %" APR_SIZE_T_FMT "\n",
                expected_len);
 
         if (len != expected_len) {
@@ -574,7 +574,7 @@ static int server(void)
     if (memcmp(buf, HDR1, strlen(HDR1))) {
         fprintf(stderr, "wrong data read (2)\n");
         fprintf(stderr, "received: `%.*s'\nexpected: `%s'\n",
-                bytes_read, buf, HDR1);
+                (int)bytes_read, buf, HDR1);
         exit(1);
     }
         
@@ -594,7 +594,7 @@ static int server(void)
     if (memcmp(buf, HDR2, strlen(HDR2))) {
         fprintf(stderr, "wrong data read (4)\n");
         fprintf(stderr, "received: `%.*s'\nexpected: `%s'\n",
-                bytes_read, buf, HDR2);
+                (int)bytes_read, buf, HDR2);
         exit(1);
     }
 
@@ -664,7 +664,7 @@ static int server(void)
     if (memcmp(buf, TRL1, strlen(TRL1))) {
         fprintf(stderr, "wrong data read (6)\n");
         fprintf(stderr, "received: `%.*s'\nexpected: `%s'\n",
-                bytes_read, buf, TRL1);
+                (int)bytes_read, buf, TRL1);
         exit(1);
     }
         
@@ -684,7 +684,7 @@ static int server(void)
     if (memcmp(buf, TRL2, strlen(TRL2))) {
         fprintf(stderr, "wrong data read (8)\n");
         fprintf(stderr, "received: `%.*s'\nexpected: `%s'\n",
-                bytes_read, buf, TRL2);
+                (int)bytes_read, buf, TRL2);
         exit(1);
     }
 
