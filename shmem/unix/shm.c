@@ -152,9 +152,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     apr_file_t *file;   /* file where metadata is stored */
 #endif
 
-    /* FIXME: associate this thing with a pool and set up a destructor
-     * to call detach. */
-
     /* Check if they want anonymous or name-based shared memory */
     if (filename == NULL) {
 #if APR_USE_SHMEM_MMAP_ZERO || APR_USE_SHMEM_MMAP_ANON
@@ -474,8 +471,6 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         new_m->pool = pool;
         new_m->filename = apr_pstrdup(pool, filename);
 
-        /* FIXME: open the file, read the length, mmap the segment,
-         *        close the file, reconstruct the apr_shm_t. */
         status = apr_file_open(&file, filename, 
                                APR_READ | APR_WRITE,
                                APR_OS_DEFAULT, pool);
@@ -512,7 +507,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
             return status;
         }
 
-        /* metadata isn't usable */
+        /* metadata isn't part of the usable segment */
         new_m->usable = new_m->base + sizeof(apr_size_t);
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_attach,
