@@ -100,7 +100,6 @@ void        ap_term_alloc(void);        /* Tear down everything */
  */
 #ifndef POOL_DEBUG
 APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
-#define ap_pool_join (a,b)
 #else
 APR_EXPORT(int) ap_pool_join(ap_pool_t *p, ap_pool_t *sub, int (apr_abort)(int retcode));
 APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts, int (apr_abort)(int retcode));
