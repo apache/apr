@@ -261,7 +261,8 @@ apr_status_t apr_initialize(void);
  * Tear down any APR internal data structures which aren't torn down 
  * automatically.
  * @tip An APR program must call this function at termination once it 
- *      has stopped using APR services.
+ *      has stopped using APR services.  The APR developers suggest using
+ *      atexit to ensure this is called.
  */
 void apr_terminate(void);
 
