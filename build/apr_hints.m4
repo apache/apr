@@ -198,6 +198,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-solaris2*)
     	PLATOSVERS=`echo $host | sed 's/^.*solaris2.//'`
 	APR_ADDTO(CPPFLAGS, [-DSOLARIS2=$PLATOSVERS -D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT])
+        APR_SETIFNULL(apr_lock_method, [USE_FCNTL_SERIALIZE])
 	;;
     *-sunos4*)
 	APR_ADDTO(CPPFLAGS, [-DSUNOS4])

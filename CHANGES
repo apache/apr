@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Change default inter-process locking mechanisms: POSIX semaphores
+     and pthread cross-process mutexes are not used by default; on 
+     Solaris, fcntl locks are used by default.  [Joe Orton]
+
   *) Don't try to enable run-time linking on AIX < 4.2, as this
      results in invalid linker options being used.  PR 29170.  
      [Jeff Trawick]
