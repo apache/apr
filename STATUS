@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/04/10 12:20:35 $]
+Last modified at [$Date: 2003/06/26 18:17:44 $]
 
 Release:
 
@@ -112,8 +112,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       Beos: apr_thread_rwlock_try*lock()
             apr_proc_mutex_trylock()
       Unix: apr_thread_rwlock_*() for platforms w/o rwlocks in pthread
-      Win32: apr_thread_rwlock_try*lock(), apr_thread_cond_timedwait(),
-             apr_proc_mutex_*() (Is proc_mutex unnecessary on Win32?)
+      Win32: apr_thread_cond_timedwait(), apr_proc_mutex_*() 
+             (Is proc_mutex unnecessary on Win32?)
 
     * Need to contemplate apr_strftime... platforms vary.  OtherBill
       suggested this solution (but has no time to implement):
