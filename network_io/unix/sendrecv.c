@@ -460,9 +460,9 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
                 nbytes = 0;
             }
         }
-    if (rv == -1 &&
-        errno == EAGAIN && 
-        sock->timeout > 0) {
+        if (rv == -1 &&
+            errno == EAGAIN && 
+            sock->timeout > 0) {
             apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
             if (arv != APR_SUCCESS) {
                 *len = 0;
