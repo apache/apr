@@ -292,6 +292,10 @@ typedef  int         gid_t;
 
 #define APR_OS_PROC_T_FMT        "d"
 
+#define APR_INT64_T_FMT          "I64d"
+
+#define APR_TIME_T_FMT		 APR_INT64_T_FMT
+
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "\r\n"
 
