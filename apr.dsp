@@ -309,6 +309,10 @@ SOURCE=.\include\apr_strnatcmp.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_tables.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_thread_proc.h
 # End Source File
 # Begin Source File

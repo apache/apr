@@ -115,11 +115,17 @@
 /* Use this section to define all of the HAVE_FOO_H
  * that are required to build properly.
  */
-#define HAVE_CONIO_H 1
+#define HAVE_CONIO_H  1
 #define HAVE_MALLOC_H 1
 #define HAVE_STDLIB_H 1
 #define HAVE_LIMITS_H 1
 #define HAVE_SIGNAL_H 1
+
+#define HAVE_STRICMP  1
+#define HAVE_STRNICMP 1
+#define HAVE_STRNICMP 1
+#define HAVE_STRDUP   1
+#define HAVE_STRSTR   1
 
 #define SIGHUP     1
 /* 2 is used for SIGINT on windows */

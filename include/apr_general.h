@@ -225,7 +225,7 @@ int strcasecmp(const char *a, const char *b);
 #endif
 
 #if (!APR_HAVE_STRNCASECMP) && (APR_HAVE_STRNICMP)
-#define strncasecmp(s1, s2) strnicmp(s1, s2)
+#define strncasecmp(s1, s2, n) strnicmp(s1, s2, n)
 #elif (!APR_HAVE_STRNCASECMP)
 int strncasecmp(const char *a, const char *b, size_t n);
 #endif
