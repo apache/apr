@@ -52,95 +52,74 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr.h"
 #include "apr_strings.h"
-#ifdef OS2
-#include "../os2/fileio.h"
-#elif defined(WIN32)
-#include "../win32/fileio.h"
-#endif
-#if defined(OS2) || defined(WIN32)
-#include "apr_file_io.h"
-#include "apr_general.h"
+#include "apr_private.h"
 #include "apr_lib.h"
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#else
-#include "fileio.h"
-#endif
-/* A file to put ALL of the accessor functions for ap_file_t types. */
 
-ap_status_t ap_get_filename(char **fname, ap_file_t *thefile)
+APR_EXPORT(char *) ap_pstrdup(ap_pool_t *a, const char *s)
 {
-    *fname = ap_pstrdup(thefile->cntxt, thefile->fname);
-    return APR_SUCCESS;
+    char *res;
+    size_t len;
+
+    if (s == NULL) {
+        return NULL;
+    }
+    len = strlen(s) + 1;
+    res = ap_palloc(a, len);
+    memcpy(res, s, len);
+    return res;
 }
 
-#if !defined(OS2) && !defined(WIN32)
-mode_t ap_unix_perms2mode(ap_fileperms_t perms)
+APR_EXPORT(char *) ap_pstrndup(ap_pool_t *a, const char *s, ap_size_t n)
 {
-    mode_t mode = 0;
+    char *res;
 
-    if (perms & APR_UREAD)
-        mode |= S_IRUSR;
-    if (perms & APR_UWRITE)
-        mode |= S_IWUSR;
-    if (perms & APR_UEXECUTE)
-        mode |= S_IXUSR;
-
-    if (perms & APR_GREAD)
-        mode |= S_IRGRP;
-    if (perms & APR_GWRITE)
-        mode |= S_IWGRP;
-    if (perms & APR_GEXECUTE)
-        mode |= S_IXGRP;
-
-    if (perms & APR_WREAD)
-        mode |= S_IROTH;
-    if (perms & APR_WWRITE)
-        mode |= S_IWOTH;
-    if (perms & APR_WEXECUTE)
-        mode |= S_IXOTH;
-
-    return mode;
+    if (s == NULL) {
+        return NULL;
+    }
+    res = ap_palloc(a, n + 1);
+    memcpy(res, s, n);
+    res[n] = '\0';
+    return res;
 }
 
-ap_fileperms_t ap_unix_mode2perms(mode_t mode)
+APR_EXPORT_NONSTD(char *) ap_pstrcat(ap_pool_t *a, ...)
 {
-    ap_fileperms_t perms = 0;
+    char *cp, *argp, *res;
 
-    if (mode & S_IRUSR)
-        perms |= APR_UREAD;
-    if (mode & S_IWUSR)
-        perms |= APR_UWRITE;
-    if (mode & S_IXUSR)
-        perms |= APR_UEXECUTE;
+    /* Pass one --- find length of required string */
 
-    if (mode & S_IRGRP)
-        perms |= APR_GREAD;
-    if (mode & S_IWGRP)
-        perms |= APR_GWRITE;
-    if (mode & S_IXGRP)
-        perms |= APR_GEXECUTE;
+    ap_size_t len = 0;
+    va_list adummy;
 
-    if (mode & S_IROTH)
-        perms |= APR_WREAD;
-    if (mode & S_IWOTH)
-        perms |= APR_WWRITE;
-    if (mode & S_IXOTH)
-        perms |= APR_WEXECUTE;
+    va_start(adummy, a);
 
-    return perms;
+    while ((cp = va_arg(adummy, char *)) != NULL) {
+        len += strlen(cp);
+    }
+
+    va_end(adummy);
+
+    /* Allocate the required string */
+
+    res = (char *) ap_palloc(a, len + 1);
+    cp = res;
+    *cp = '\0';
+
+    /* Pass two --- copy the argument strings into the result space */
+
+    va_start(adummy, a);
+
+    while ((argp = va_arg(adummy, char *)) != NULL) {
+        strcpy(cp, argp);
+        cp += strlen(argp);
+    }
+
+    va_end(adummy);
+
+    /* Return the result string */
+
+    return res;
 }
-#endif
 
-ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file)
-{    
-    return ap_get_userdata(data, key, file->cntxt);
-}
-
-ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key,
-                            ap_status_t (*cleanup) (void *))
-{    
-    return ap_set_userdata(data, key, cleanup, file->cntxt);
-}

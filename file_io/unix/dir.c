@@ -53,6 +53,7 @@
  */
 
 #include "fileio.h"
+#include "apr_strings.h"
 #include "apr_portable.h"
 
 static ap_status_t dir_cleanup(void *thedir)
