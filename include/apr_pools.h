@@ -488,8 +488,14 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(
  * @note same as apr_pool_userdata_set(), except that this version doesn't
  *       make a copy of the key (this function is useful, for example, when
  *       the key is a string literal)
- * @warning The key and the data to be attached to the pool should have
- *       a life span at least as long as the pool itself.
+ * @warning This should NOT be used if the key could change addresses by
+ *       any means between the apr_pool_userdata_setn() call and a
+ *       subsequent apr_pool_userdata_get() on that key, such as if a
+ *       static string is used as a userdata key in a DSO and the DSO could
+ *       be unloaded and reloaded between the _setn() and the _get().  You
+ *       MUST use apr_pool_userdata_set() in such cases.
+ * @warning More generally, the key and the data to be attached to the
+ *       pool should have a life span at least as long as the pool itself.
  *
  */
 APR_DECLARE(apr_status_t) apr_pool_userdata_setn(
