@@ -93,7 +93,7 @@ static int os2_fn_link()
         rc = DosLoadModule(errorstr, sizeof(errorstr), "SO32DLL", &hSO32DLL);
 
         if (rc)
-            return os2errno(rc);
+            return APR_OS2_STATUS(rc);
 
         rc = DosQueryProcAddr(hSO32DLL, 0, "SOCKET", &apr_os2_socket);
 
@@ -146,7 +146,7 @@ static int os2_fn_link()
             rc = DosQueryProcAddr(hSO32DLL, 0, "WRITEV", &apr_os2_writev);
 
         if (rc)
-            return os2errno(rc);
+            return APR_OS2_STATUS(rc);
     }
 
     DosExitCritSec();

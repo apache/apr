@@ -69,7 +69,7 @@ ap_status_t ap_create_thread_private(ap_threadkey_t **key,
     }
 
     (*key)->cntxt = cont;
-    return os2errno(DosAllocThreadLocalMemory(1, &((*key)->key)));
+    return APR_OS2_STATUS(DosAllocThreadLocalMemory(1, &((*key)->key)));
 }
 
 ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
@@ -86,6 +86,6 @@ ap_status_t ap_set_thread_private(void *priv, ap_threadkey_t *key)
 
 ap_status_t ap_delete_thread_private(ap_threadkey_t *key)
 {
-    return os2errno(DosFreeThreadLocalMemory(key->key));
+    return APR_OS2_STATUS(DosFreeThreadLocalMemory(key->key));
 }
 

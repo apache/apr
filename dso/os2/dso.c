@@ -81,7 +81,7 @@ ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, ap_conte
 
     if ((rc = DosLoadModule(failed_module, sizeof(failed_module), path, &handle)) != 0) {
         (*res_handle)->failed_module = ap_pstrdup(ctx, failed_module);
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
     }
 
     (*res_handle)->handle  = handle;
@@ -105,7 +105,7 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
     if (rc == 0)
         handle->handle = 0;
 
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 

@@ -159,7 +159,7 @@ ap_status_t ap_poll(ap_pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t timeout
     } while ( rv < 0 && sock_errno() == SOCEINTR );
 
     (*nsds) = rv;
-    return rv < 0 ? os2errno(sock_errno()) : APR_SUCCESS;
+    return rv < 0 ? APR_OS2_STATUS(sock_errno()) : APR_SUCCESS;
 }
 
 

@@ -21,8 +21,7 @@ OBJS=dir.o \
 	open.o \
 	pipe.o \
 	readwrite.o \
-	seek.o \
-	maperrorcode.o
+	seek.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<

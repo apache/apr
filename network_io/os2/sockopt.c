@@ -78,27 +78,27 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 
     if (opt & APR_SO_KEEPALIVE) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
-            return os2errno(sock_errno());
+            return APR_OS2_STATUS(sock_errno());
         }
     }
     if (opt & APR_SO_DEBUG) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
-            return os2errno(sock_errno());
+            return APR_OS2_STATUS(sock_errno());
         }
     }
     if (opt & APR_SO_REUSEADDR) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
-            return os2errno(sock_errno());
+            return APR_OS2_STATUS(sock_errno());
         }
     }
     if (opt & APR_SO_SNDBUF) {
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
-            return os2errno(sock_errno());
+            return APR_OS2_STATUS(sock_errno());
         }
     }
     if (opt & APR_SO_NONBLOCK) {
         if (ioctl(sock->socketdes, FIONBIO, (caddr_t)&one, sizeof(one)) == -1) {
-            return os2errno(sock_errno());
+            return APR_OS2_STATUS(sock_errno());
         } else {
             sock->nonblock = one;
         }
@@ -107,7 +107,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         li.l_onoff = on;
         li.l_linger = MAX_SECS_TO_LINGER;
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
-            return os2errno(sock_errno());
+            return APR_OS2_STATUS(sock_errno());
         }
     }
     if (opt & APR_SO_TIMEOUT) {
@@ -121,7 +121,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_context_t *cont)
 {
     if (gethostname(buf, len) == -1)
-        return os2errno(sock_errno());
+        return APR_OS2_STATUS(sock_errno());
     else
         return APR_SUCCESS;
 }

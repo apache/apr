@@ -79,7 +79,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
                 if (err == SOCEINTR)
                     continue;
 
-                return os2errno(err);
+                return APR_OS2_STATUS(err);
             }
         }
 
@@ -89,7 +89,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
 
     if (err) {
         *len = 0;
-        return os2errno(err);
+        return APR_OS2_STATUS(err);
     }
 
     (*len) = rv;
@@ -118,7 +118,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
                 if (err == SOCEINTR)
                     continue;
 
-                return os2errno(err);
+                return APR_OS2_STATUS(err);
             }
         }
 
@@ -128,7 +128,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 
     if (err) {
         *len = 0;
-        return os2errno(err);
+        return APR_OS2_STATUS(err);
     }
 
     (*len) = rv;
@@ -161,7 +161,7 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec
                 if (err == SOCEINTR)
                     continue;
 
-                return os2errno(err);
+                return APR_OS2_STATUS(err);
             }
         }
 
@@ -171,7 +171,7 @@ ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec
 
     if (err) {
         *len = 0;
-        return os2errno(err);
+        return APR_OS2_STATUS(err);
     }
 
     *len = rv;

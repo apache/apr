@@ -71,7 +71,7 @@ ap_status_t ap_kill(ap_proc_t *proc, int signal)
     ap_status_t rc;
     
     if ( signal == SIGTERM ) {
-        rc = os2errno(DosSendSignalException(proc->pid, XCPT_SIGNAL_BREAK));
+        rc = APR_OS2_STATUS(DosSendSignalException(proc->pid, XCPT_SIGNAL_BREAK));
     } else {
         rc = kill(proc->pid, signal) < 0 ? errno : APR_SUCCESS;
     }

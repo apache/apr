@@ -164,7 +164,7 @@ ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
 
     rc = DosWaitThread(&waittid, DCWW_WAIT);
     *retval = (ap_status_t)thd->rv;
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 

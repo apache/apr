@@ -81,7 +81,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
     rv = DosDupHandle(old_file->filedes, &dup_file->filedes);
 
     if (rv) {
-        return os2errno(rv);
+        return APR_OS2_STATUS(rv);
     }
 
     dup_file->fname = ap_pstrdup(dup_file->cntxt, old_file->fname);

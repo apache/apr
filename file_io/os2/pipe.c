@@ -66,7 +66,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
     rc = DosCreatePipe(filedes, filedes+1, 4096);
         
     if (rc) {
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
     }
     
     (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));

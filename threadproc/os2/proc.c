@@ -452,7 +452,7 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
         return APR_CHILD_NOTDONE;
     }
 
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 } 
 
 

@@ -59,8 +59,6 @@
 #include "apr_general.h"
 #include "os2calls.h"
 
-int os2errno( unsigned long oserror );
-
 struct ap_socket_t {
     ap_context_t *cntxt;
     int socketdes;

@@ -61,8 +61,6 @@
 #define INCL_DOS
 #include <os2.h>
 
-int os2errno( ULONG oserror );
-
 
 
 static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
@@ -86,7 +84,7 @@ static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
             thefile->bufpos = thefile->dataRead = 0;
     }
 
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 
@@ -134,6 +132,6 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, ap_off_t *offset)
             break;
         }
 
-        return os2errno(DosSetFilePtr(thefile->filedes, *offset, where, (ULONG *)&offset));
+        return APR_OS2_STATUS(DosSetFilePtr(thefile->filedes, *offset, where, (ULONG *)&offset));
     }
 }

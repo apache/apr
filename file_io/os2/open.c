@@ -127,7 +127,7 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     }
     
     if (rv != 0)
-        return os2errno(rv);
+        return APR_OS2_STATUS(rv);
     
     dafile->isopen = TRUE;
     dafile->fname = ap_pstrdup(cntxt, fname);
@@ -159,10 +159,10 @@ ap_status_t ap_close(ap_file_t *file)
             status = APR_SUCCESS;
 
             if (file->flags & APR_DELONCLOSE) {
-                status = os2errno(DosDelete(file->fname));
+                status = APR_OS2_STATUS(DosDelete(file->fname));
             }
         } else {
-            return os2errno(rc);
+            return APR_OS2_STATUS(rc);
         }
     }
 
@@ -174,7 +174,7 @@ ap_status_t ap_close(ap_file_t *file)
 ap_status_t ap_remove_file(char *path, ap_context_t *cntxt)
 {
     ULONG rc = DosDelete(path);
-    return os2errno(rc);
+    return APR_OS2_STATUS(rc);
 }
 
 

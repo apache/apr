@@ -61,8 +61,6 @@
 #define INCL_DOS
 #include <os2.h>
 
-int os2errno( unsigned long oserror );
-
 struct shmem_t {
     void *memblock;
     Heap_t heap;
@@ -82,7 +80,7 @@ ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file,
     rc = DosAllocSharedMem(&(newm->memblock), name, reqsize, PAG_COMMIT|OBJ_GETTABLE|PAG_READ|PAG_WRITE);
 
     if (rc)
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
 
     newm->heap = _ucreate(newm->memblock, reqsize, !_BLOCK_CLEAN, _HEAP_REGULAR|_HEAP_SHARED, NULL, NULL);
     _uopen(newm->heap);
@@ -145,7 +143,7 @@ ap_status_t ap_open_shmem(struct shmem_t *m)
     rc = DosGetSharedMem(m->memblock, PAG_READ|PAG_WRITE);
 
     if (rc)
-        return os2errno(rc);
+        return APR_OS2_STATUS(rc);
 
     _uopen(m->heap);
     return APR_SUCCESS;
