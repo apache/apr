@@ -57,6 +57,7 @@
 #include "apr_lock.h"
 #include "apr_thread_mutex.h"
 #include "apr_thread_rwlock.h"
+#include "apr_thread_cond.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_getopt.h"
@@ -75,14 +76,18 @@ int main(void)
 #else /* !APR_HAS_THREADS */
 
 #define MAX_ITER 40000
+#define MAX_COUNTER 100000
 
 void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_rwlock_func(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data);
 apr_status_t test_exclusive(void);
 apr_status_t test_rw(void);
 apr_status_t test_multiple_locking(const char *);
+apr_status_t test_cond(void);
 
 
 apr_file_t *in, *out, *err;
@@ -91,6 +96,19 @@ apr_thread_mutex_t *thread_mutex;
 apr_thread_rwlock_t *rwlock;
 apr_pool_t *pool;
 int i = 0, x = 0;
+
+int buff[MAX_COUNTER];
+struct {
+    apr_thread_mutex_t *mutex;
+    int                nput;
+    int                nval;
+} put;
+
+struct {
+    apr_thread_mutex_t *mutex;
+    apr_thread_cond_t  *cond;
+    int                nready;
+} nready;
 
 void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data)
 {
@@ -191,6 +209,49 @@ void * APR_THREAD_FUNC thread_mutex_function(apr_thread_t *thd, void *data)
     }
     return NULL;
 } 
+
+void * APR_THREAD_FUNC thread_cond_producer(apr_thread_t *thd, void *data)
+{
+    for (;;) {
+        apr_thread_mutex_lock(put.mutex);
+        if (put.nput >= MAX_COUNTER) {
+            apr_thread_mutex_unlock(put.mutex);
+            return NULL;
+        }
+        buff[put.nput] = put.nval;
+        put.nput++;
+        put.nval++;
+        apr_thread_mutex_unlock(put.mutex);
+
+        apr_thread_mutex_lock(nready.mutex);
+        if (nready.nready == 0)
+            apr_thread_cond_signal(nready.cond);
+        nready.nready++;
+        apr_thread_mutex_unlock(nready.mutex);
+
+        *((int *) data) += 1;
+    }
+
+    return NULL;
+}
+
+void * APR_THREAD_FUNC thread_cond_consumer(apr_thread_t *thd, void *data)
+{
+    int i;
+
+    for (i = 0; i < MAX_COUNTER; i++) {
+        apr_thread_mutex_lock(nready.mutex);
+        while (nready.nready == 0)
+            apr_thread_cond_wait(nready.cond, nready.mutex);
+        nready.nready--;
+        apr_thread_mutex_unlock(nready.mutex);
+
+        if (buff[i] != i)
+            printf("buff[%d] = %d\n", i, buff[i]);
+    }
+
+    return NULL;
+}
 
 int test_rw(void)
 {
@@ -334,7 +395,7 @@ apr_status_t test_multiple_locking(const char *lockfile)
     return APR_SUCCESS;
 }
 
-apr_status_t test_thread_mutex(void)
+static apr_status_t test_thread_mutex(void)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
@@ -382,7 +443,7 @@ apr_status_t test_thread_mutex(void)
     return APR_SUCCESS;
 }
 
-int test_thread_rwlock(void)
+static int test_thread_rwlock(void)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
     apr_status_t s1, s2, s3, s4;
@@ -421,6 +482,80 @@ int test_thread_rwlock(void)
     if (x != MAX_ITER) {
         fprintf(stderr, "thread_rwlock didn't work as expected. x = %d instead of %d\n",
                 x, MAX_ITER);
+    }
+    else {
+        printf("Test passed\n");
+    }
+    
+    return APR_SUCCESS;
+}
+
+apr_status_t test_cond(void)
+{
+    apr_thread_t *p1, *p2, *p3, *p4, *c1;
+    apr_status_t s0, s1, s2, s3, s4;
+    int count1, count2, count3, count4;
+    int sum;
+
+    printf("thread_cond Tests\n");
+    printf("%-60s", "    Initializing the first apr_thread_mutex_t");
+    s1 = apr_thread_mutex_create(&put.mutex, pool);
+    if (s1 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "    Initializing the second apr_thread_mutex_t");
+    s1 = apr_thread_mutex_create(&nready.mutex, pool);
+    if (s1 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "    Initializing the apr_thread_cond_t");
+    s1 = apr_thread_cond_create(&nready.cond, pool);
+    if (s1 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    count1 = count2 = count3 = count4 = 0;
+    put.nput = put.nval = 0;
+    nready.nready = 0;
+    i = 0;
+    x = 0;
+
+    printf("%-60s","    Starting all the threads"); 
+    s0 = apr_thread_create(&p1, NULL, thread_cond_producer, &count1, pool);
+    s1 = apr_thread_create(&p2, NULL, thread_cond_producer, &count2, pool);
+    s2 = apr_thread_create(&p3, NULL, thread_cond_producer, &count3, pool);
+    s3 = apr_thread_create(&p4, NULL, thread_cond_producer, &count4, pool);
+    s4 = apr_thread_create(&c1, NULL, thread_cond_consumer, NULL, pool);
+    if (s0 != APR_SUCCESS || s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
+        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    printf("%-60s", "    Waiting for threads to exit");
+    apr_thread_join(&s0, p1);
+    apr_thread_join(&s1, p2);
+    apr_thread_join(&s2, p3);
+    apr_thread_join(&s3, p4);
+    apr_thread_join(&s4, c1);
+    printf("OK\n");
+
+    sum = count1 + count2 + count3 + count4;
+    /*
+    printf("count1 = %d count2 = %d count3 = %d count4 = %d\n",
+            count1, count2, count3, count4);
+    */
+    if (sum != MAX_COUNTER) {
+        fprintf(stderr, "thread_cond didn't work as expected. sum = %d, instead of %d\n", sum, MAX_COUNTER);
     }
     else {
         printf("Test passed\n");
@@ -492,6 +627,12 @@ int main(int argc, const char * const *argv)
         fprintf(stderr,"thread_rwlock test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-6);
+    }
+
+    if ((rv = test_cond()) != APR_SUCCESS) {
+        fprintf(stderr,"thread_cond test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
+        exit(-7);
     }
 
     return 0;

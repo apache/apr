@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Add condition variables to the APR set of locking functions.
+     This does Unix, and provides stubs for all other platforms.
+     [Aaron Bannert <aaron@clove.org>]
+
   *) Don't search for IPv6 names in apr_sockaddr_info_get() if the 
      application doesn't specify the family (i.e., the application
      passes in AF_UNSPEC) and APR isn't built with IPv6 support.  
