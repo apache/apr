@@ -1,7 +1,7 @@
 Changes with APR b1  
 
   *) Introduce apr_get_userid to return a named user's apr_uid_t and
-     apr_gid_t across platforms [cliff Woolley, William Rowe]
+     apr_gid_t across platforms [Cliff Woolley, William Rowe]
 
   *) In apr_shm_init(), check the retcode from mm_malloc().  Previously,
      we segfaulted here if mm_malloc() failed to get a lock.  An example
