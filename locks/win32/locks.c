@@ -61,7 +61,7 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
                                           apr_locktype_e type, 
                                           apr_lockscope_e scope, 
                                           const char *fname,
-                                          apr_pool_t *cont)
+                                          apr_pool_t *pool)
 {
     apr_lock_t *newlock;
     SECURITY_ATTRIBUTES sec;
@@ -70,13 +70,13 @@ APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
     if (type == APR_READWRITE)
         return APR_ENOTIMPL;
 
-    newlock = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
+    newlock = (apr_lock_t *)apr_palloc(pool, sizeof(apr_lock_t));
 
-    newlock->cntxt = cont;
-    /* ToDo:  How to handle the case when no context is available? 
+    newlock->pool = pool;
+    /* ToDo:  How to handle the case when no pool is available? 
     *         How to cleanup the storage properly?
     */
-    newlock->fname = apr_pstrdup(cont, fname);
+    newlock->fname = apr_pstrdup(pool, fname);
     newlock->type = type;
     newlock->scope = scope;
     sec.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -112,7 +112,7 @@ APR_DECLARE(apr_status_t) apr_lock_sms_create(apr_lock_t **lock,
 
     newlock = (apr_lock_t *)apr_sms_malloc(mem_sys, sizeof(apr_lock_t));
 
-    newlock->cntxt = NULL;
+    newlock->pool = NULL;
     newlock->mem_sys = mem_sys;
 
     APR_MEM_PSTRDUP(newlock, newlock->fname, fname);
@@ -139,17 +139,17 @@ APR_DECLARE(apr_status_t) apr_lock_sms_create(apr_lock_t **lock,
 
 APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock, 
                                               const char *fname, 
-                                              apr_pool_t *cont)
+                                              apr_pool_t *pool)
 {
     /* This routine should not be called (and OpenMutex will fail if called) 
      * on a INTRAPROCESS lock
      */
-    (*lock) = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
+    (*lock) = (apr_lock_t *)apr_palloc(pool, sizeof(apr_lock_t));
 
     if ((*lock) == NULL) {
         return APR_ENOMEM;
     }
-    (*lock)->fname = apr_pstrdup(cont, fname);
+    (*lock)->fname = apr_pstrdup(pool, fname);
     (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
     
     if ((*lock)->mutex == NULL) {
@@ -248,14 +248,14 @@ APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock)
 APR_DECLARE(apr_status_t) apr_lock_data_get(apr_lock_t *lock, const char *key,
                                            void *data)
 {
-    return apr_pool_userdata_get(data, key, lock->cntxt);
+    return apr_pool_userdata_get(data, key, lock->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_lock_data_set(apr_lock_t *lock, void *data,
                                            const char *key,
                                            apr_status_t (*cleanup) (void *))
 {
-    return apr_pool_userdata_set(data, key, cleanup, lock->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, lock->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *thelock,
@@ -267,14 +267,14 @@ APR_DECLARE(apr_status_t) apr_os_lock_get(apr_os_lock_t *thelock,
 
 APR_DECLARE(apr_status_t) apr_os_lock_put(apr_lock_t **lock,
                                           apr_os_lock_t *thelock,
-                                          apr_pool_t *cont)
+                                          apr_pool_t *pool)
 {
-    if (cont == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     if ((*lock) == NULL) {
-        (*lock) = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
-        (*lock)->cntxt = cont;
+        (*lock) = (apr_lock_t *)apr_palloc(pool, sizeof(apr_lock_t));
+        (*lock)->pool = pool;
     }
     (*lock)->mutex = *thelock;
     return APR_SUCCESS;
