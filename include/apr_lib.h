@@ -55,6 +55,8 @@
 #ifndef APR_LIB_H
 #define APR_LIB_H
 
+#include "apr.h"
+#include "apr_pools.h"
 #include "apr_general.h"
 #include "apr_tables.h"
 #include "apr_file_io.h"
@@ -85,27 +87,81 @@ typedef struct ap_vformatter_buff_t {
     char *endpos;
 } ap_vformatter_buff_t;
 
-enum kill_conditions {
-    kill_never,			/* process is never sent any signals */
-    kill_always,		/* process is sent SIGKILL on ap_pool_t cleanup */
-    kill_after_timeout,		/* SIGTERM, wait 3 seconds, SIGKILL */
-    just_wait,			/* wait forever for the process to complete */
-    kill_only_once		/* send SIGTERM and then wait */
-};
-
 /*
- * Define the prototypes for the various APR GP routines.
+
+=head1 ap_status_t ap_tokenize_to_argv(const char **arg_str, char ***argv_out, ap_pool_t *token_context)
+
+B<Convert the arguments to a program from one string to an array of strings terminated by a NULL>
+
+    arg 1) The arguments to convert
+    arg 2) Output location.  This is a pointer to an array of strings.
+    arg 3) Pool to use.
+
+=cut
  */
-APR_EXPORT(char *) ap_cpystrn(char *d, const char *s, size_t l);
 APR_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str, 
                                             char ***argv_out,
                                             ap_pool_t *token_context);
+
+/*
+
+=head1 ap_status_t ap_filename_of_pathname(const char *pathname)
+
+B<return the final element of the pathname>
+
+    arg 1) The path to get the final element of
+
+B<NOTE>:  Examples:  "/foo/bar/gum"   -> "gum"
+                     "/foo/bar/gum/"  -> ""
+                     "gum"            -> "gum"
+                     "wi\\n32\\stuff" -> "stuff"
+
+=cut
+ */
 APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
+
+
+/*
+
+=head1 ap_status_t ap_collapse_spaces(char *dest, const char *src)
+
+B<Strip spaces from a string>
+
+    arg 1) The destination string.  It is okay to modify the string
+           in place.  Namely dest == src
+    arg 2) The string to rid the spaces from.
+
+=cut
+ */
 APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src);
 
-/*APR_EXPORT(ap_mutex_t *) ap_create_mutex(void *m);*/
-APR_EXPORT(int) ap_slack(int l, int h);
+/*
+
+=head1 ap_status_t ap_execle(const char *c, const char *a, ...)
+
+B<Replace the current process image with a new process>
+
+    arg 1) The path to the new program to run
+    arg 2) The first argument for the new program
+    ...)   The rest of the arguments for the new program. 
+
+=cut
+ */
 APR_EXPORT_NONSTD(ap_status_t) ap_execle(const char *c, const char *a, ...);
+
+/*
+
+=head1 ap_status_t ap_execve(const char *c, const char *aargv[], const char *envp[])
+
+B<Replace the current process image with a new process>
+
+    arg 1) The path to the new program to run
+    arg 2) The arguments for the new program in an array of char *.
+    arg 3) The environment for the new program in an array of char * of the 
+           form key=value 
+
+=cut
+ */
 APR_EXPORT_NONSTD(ap_status_t) ap_execve(const char *c, const char *argv[],
 				  const char *envp[]);
 
@@ -193,13 +249,38 @@ APR_EXPORT_NONSTD(ap_status_t) ap_execve(const char *c, const char *argv[],
  * or until ap_vformatter returns.
  */
 
+/*
+
+=head1 int ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b), ap_vformatter_buff_t *c, const char *fmt, va_list ap)
+
+B<a generic printf-style formatting routine with some extensions>
+
+    arg 1) The function to call when the buffer is full
+    arg 2) The buffer to write to
+    arg 3) The format string
+    arg 4) The arguments to use to fill out the format string.
+
+B<NOTE>:  The extensions are:
+    %pA		takes a struct in_addr *, and prints it as a.b.c.d
+    %pI		takes a struct sockaddr_in * and prints it as a.b.c.d:port
+    %pp  	takes a void * and outputs it in hex
+
+=cut
+ */
 APR_EXPORT(int) ap_vformatter(int (*flush_func)(ap_vformatter_buff_t *b),
 			       ap_vformatter_buff_t *c, const char *fmt,
 			       va_list ap);
 
+/*
 
-/* A small routine to validate a plain text password with a password
- * that has been encrypted using any algorithm APR knows about.
+=head1 ap_status_t ap_validate_password(const char *passwd, const char *hash)
+
+B<Validate any password encypted with any algorithm that APR understands>
+
+    arg 1) The password to validate
+    arg 2) The password to validate against
+
+=cut
  */
 APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash);
 
@@ -220,55 +301,93 @@ APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *has
  * to distinguish between an output which was truncated, and an output which
  * exactly filled the buffer.
  */
+
+/*
+
+=head1 int ap_snprintf(char *buf, size_t len, const char *format, ...)
+
+B<snprintf routine based on ap_vformatter.  This means it understands the same extensions.>
+
+    arg 1) The buffer to write to
+    arg 2) The size of the buffer
+    arg 3) The format string
+    arg 4) The arguments to use to fill out the format string.
+
+=cut
+ */
 APR_EXPORT(int) ap_snprintf(char *buf, size_t len, const char *format, ...)
 	__attribute__((format(printf,3,4)));
+
+/*
+
+=head1 int ap_vsnprintf(char *buf, size_t len, const char *format, va_list ap)
+
+B<vsnprintf routine based on ap_vformatter.  This means it understands the same extensions.>
+
+    arg 1) The buffer to write to
+    arg 2) The size of the buffer
+    arg 3) The format string
+    arg 4) The arguments to use to fill out the format string.
+
+=cut
+ */
 APR_EXPORT(int) ap_vsnprintf(char *buf, size_t len, const char *format,
 			      va_list ap);
 
 /*
- * APR memory structure manipulators (pools, tables, and arrays).
+
+=head1 ap_status_t ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
+
+B<Display a prompt and read in the password from stdin.>
+
+    arg 1) The prompt to display
+    arg 2) Where to store the password
+    arg 3) The length of the password string.
+
+=cut
  */
-APR_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode));
-APR_EXPORT(void) ap_clear_pool(struct ap_pool_t *p);
-APR_EXPORT(void) ap_destroy_pool(struct ap_pool_t *p);
-APR_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p);
-APR_EXPORT(long) ap_bytes_in_free_blocks(void);
-APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
-APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b);
-APR_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub);
-
-/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t will not be
- * destroyed before the parent pool
- */
-#ifndef POOL_DEBUG
-#ifdef ap_pool_join
-#undef ap_pool_join
-#endif /* ap_pool_join */
-#define ap_pool_join(a,b)
-#endif /* POOL_DEBUG */
-
-
-APR_EXPORT(void *) ap_palloc(struct ap_pool_t *c, int reqsize);
-APR_EXPORT(void *) ap_pcalloc(struct ap_pool_t *p, int size);
-APR_EXPORT(char *) ap_pstrdup(struct ap_pool_t *p, const char *s);
-APR_EXPORT(char *) ap_pstrndup(struct ap_pool_t *p, const char *s, int n);
-APR_EXPORT_NONSTD(char *) ap_pstrcat(struct ap_pool_t *p, ...);
-APR_EXPORT(char *) ap_pvsprintf(struct ap_pool_t *p, const char *fmt, va_list ap);
-APR_EXPORT_NONSTD(char *) ap_psprintf(struct ap_pool_t *p, const char *fmt, ...);
-APR_EXPORT(void) ap_register_cleanup(struct ap_pool_t *p, void *data,
-				      ap_status_t (*plain_cleanup) (void *),
-				      ap_status_t (*child_cleanup) (void *));
-APR_EXPORT(void) ap_kill_cleanup(struct ap_pool_t *p, void *data,
-				  ap_status_t (*cleanup) (void *));
-APR_EXPORT(ap_status_t) ap_run_cleanup(struct ap_pool_t *p, void *data,
-				 ap_status_t (*cleanup) (void *));
-APR_EXPORT(void) ap_cleanup_for_exec(void);
 APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
-APR_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
+/*
+
+=head1 ap_status_t ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid, enum kill_conditions how)
+
+B<Register a process to be killed when a pool dies.>
+
+    arg 1) The pool to use to define the processes lifetime 
+    arg 2) The process to register
+    arg 3) How to kill the process, one of:
+	kill_never   	   -- process is never sent any signals
+	kill_always 	   -- process is sent SIGKILL on ap_pool_t cleanup	
+	kill_after_timeout -- SIGTERM, wait 3 seconds, SIGKILL
+	just_wait          -- wait forever for the process to complete
+	kill_only_once     -- send SIGTERM and then wait
+
+=cut
+ */
 APR_EXPORT(void) ap_note_subprocess(struct ap_pool_t *a, ap_proc_t *pid,
 				     enum kill_conditions how);
 
+/*
+
+=head1 char *ap_cpystrn(char *dst, const char *src, size_t dst_size)
+
+B<copy n characters from src to dest>
+
+    arg 1) The destination string 
+    arg 2) The source string
+    arg 3) The number of characters to copy
+
+B<NOTE>:  We re-implement this function to implement these specific changes:
+	1) strncpy() doesn't always null terminate and we want it to.
+	2) strncpy() null fills, which is bogus, esp. when copy 8byte strings
+	   into 8k blocks.
+	3) Instead of returning the pointer to the beginning of the
+	   destination string, we return a pointer to the terminating '\0'
+	   to allow us to check for truncation.
+
+=cut
+ */
 APR_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
 
 #ifdef __cplusplus
