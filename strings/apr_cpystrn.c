@@ -244,11 +244,6 @@ char *strdup(const char *str)
     size_t len = strlen(str) + 1;
 
     if (!(sdup = (char *) malloc(len))) {
-        /* ### whoops! we can't call Apache logging routines here... */
-#if 0
-        apr_log_error(APLOG_MARK, APLOG_STARTUP | APLOG_NOERRNO, 0, NULL,
-                      "Ouch! Out of memory in our strdup()!");
-#endif
         return NULL;
     }
     memcpy(sdup, str, len);
