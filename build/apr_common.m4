@@ -332,6 +332,30 @@ fi
 AC_MSG_RESULT([$msg])
 ])dnl
 
+
+dnl the following is a newline, a space, and a tab. don't reindent!
+define([newline_space_tab],[
+ 	])
+
+dnl
+dnl APR_COMMA_ARGS(ARG1 ...)
+dnl  convert the whitespace-separated arguments into comman-separated
+dnl  arguments.
+dnl
+dnl APR_FOREACH(CODE-BLOCK, ARG1, ARG2, ...)
+dnl  subsitute CODE-BLOCK for each ARG[i]. "eachval" will be set to ARG[i]
+dnl  within each iteration.
+dnl
+changequote({,})
+define({APR_COMMA_ARGS},{patsubst([$}{1],[[}newline_space_tab{]+],[,])})
+define({APR_FOREACH},
+  {ifelse($}{2,,,
+          [define([eachval],
+                  $}{2)$}{1[]APR_FOREACH([$}{1],
+                                         builtin([shift],
+                                                 builtin([shift], $}{@)))])})
+changequote([,])
+
 dnl APR_FLAG_HEADERS(HEADER-FILE ... [, FLAG-TO-SET ] [, "yes" ])
 dnl  we set FLAG-TO-SET to 1 if we find HEADER-FILE, otherwise we set to 0
 dnl  if FLAG-TO-SET is null, we automagically determine it's name
@@ -341,21 +365,15 @@ dnl  setting to 1 or 0, we set FLAG-TO-SET to yes or no.
 dnl  
 AC_DEFUN(APR_FLAG_HEADERS,[
 AC_CHECK_HEADERS($1)
-for aprt_i in $1
-do
-    if test "x$2" = "x"; then
-        aprt_fts="`echo $aprt_i | sed -e 's%/%_%g' -e 's/\.//g'`"
-    else
-        aprt_fts="$2"
-    fi
-    safe_name=`echo "$aprt_i" | sed 'y%./+-%__p_%'`
-    eval "cache_value=\$ac_cv_header_$safe_name"
-    if test "$cache_value" = "yes"; then
-      eval $aprt_fts=ifelse($3,yes,yes,1)
-    else
-      eval $aprt_fts=ifelse($3,yes,no,0)
-    fi
-done
+APR_FOREACH([
+[if test "$ac_cv_header_]translit(eachval,[./+-],[__p_])" = "yes"; then
+dnl note: this translit() maps "/" to "_" and omits ".". the third arg
+dnl really *is* intended to be one shorter than the second arg.
+  ifelse($2,,translit(eachval,[/.],[_]),$2)=ifelse($3,yes,yes,1)
+else
+  ifelse($2,,translit(eachval,[/.],[_]),$2)=ifelse($3,yes,no,0)
+fi
+], APR_COMMA_ARGS($1))
 ])
 
 dnl APR_FLAG_FUNCS(FUNC ... [, FLAG-TO-SET] [, "yes" ])
