@@ -54,6 +54,7 @@
 
 #include "dso.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -135,6 +136,29 @@ APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr
     strcat(message, ")");
     apr_cpystrn(buffer, message, buflen);
     return buffer;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
+                                                apr_os_dso_handle_t *osdso,
+                                                apr_pool_t *pool)
+{
+    *aprdso = apr_pcalloc(pool, sizeof **aprdso);
+    (*aprdso)->handle = *osdso;
+    (*aprdso)->cont = pool;
+    (*aprdso)->load_error = APR_SUCCESS;
+    (*aprdso)->failed_module = NULL;
+    return APR_SUCCESS;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *osdso,
+                                                apr_dso_handle_t *aprdso)
+{
+    *osdso = aprdso->handle;
+    return APR_SUCCESS;
 }
 
 #endif
