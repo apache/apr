@@ -702,7 +702,6 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #else /* !def OS2 || WIN32 */
 
-
 /*
  *  os error codes are clib error codes
  */
@@ -711,6 +710,9 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
+#ifdef NETWARE
+#define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
+#endif
 
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
 
