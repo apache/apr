@@ -92,6 +92,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
     BOOL status;
+    /* XXX TryEnterCriticalSection is not available under Win9x */
     status = TryEnterCriticalSection(&mutex->section);
     if (status) {
         return APR_SUCCESS;
