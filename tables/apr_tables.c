@@ -996,334 +996,250 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
     return vdorv;
 }
 
-/* During apr_table_overlap(), we build an overlap key for
- * each element in the two tables.
- */
-#define RED 0
-#define BLACK 1
-typedef struct overlap_key {
-    /* The table element */
-    apr_table_entry_t *elt;
-
-    /* 0 if from table 'a', 1 if from table 'b' */
-    int level;
-
-    /* Whether to omit this element when building the result table */
-    int skip;
-
-    /* overlap_keys can be assembled into a red-black tree */
-    int black;
-    struct overlap_key *tree_parent;
-    struct overlap_key *tree_left;
-    struct overlap_key *tree_right;
-    int color;
-
-    /* List of multiple values for this key */
-    struct overlap_key *merge_next;
-    struct overlap_key *merge_last;
-} overlap_key;
-
-/* Rotate a subtree of a red-black tree */
-static void rotate_counterclockwise(overlap_key **root,
-                                    overlap_key *rotate_node)
+static apr_table_entry_t **table_mergesort(apr_pool_t *pool,
+                                           apr_table_entry_t **values, int n)
 {
-    overlap_key *child = rotate_node->tree_right;
-    rotate_node->tree_right = child->tree_left;
-    if (rotate_node->tree_right) {
-        rotate_node->tree_right->tree_parent = rotate_node;
-    }
-    child->tree_parent = rotate_node->tree_parent;
-    if (child->tree_parent == NULL) {
-        *root = child;
-    }
-    else {
-        if (rotate_node == rotate_node->tree_parent->tree_left) {
-            rotate_node->tree_parent->tree_left = child;
-        }
-        else {
-            rotate_node->tree_parent->tree_right = child;
-        }
-    }
-    child->tree_left = rotate_node;
-    rotate_node->tree_parent = child;
-}
-
-static void rotate_clockwise(overlap_key **root, overlap_key *rotate_node)
-{
-    overlap_key *child = rotate_node->tree_left;
-    rotate_node->tree_left = child->tree_right;
-    if (rotate_node->tree_left) {
-        rotate_node->tree_left->tree_parent = rotate_node;
-    }
-    child->tree_parent = rotate_node->tree_parent;
-    if (child->tree_parent == NULL) {
-        *root = child;
-    }
-    else {
-        if (rotate_node == rotate_node->tree_parent->tree_left) {
-            rotate_node->tree_parent->tree_left = child;
-        }
-        else {
-            rotate_node->tree_parent->tree_right = child;
-        }
-    }
-    child->tree_right = rotate_node;
-    rotate_node->tree_parent = child;
-}
-
-
-static void overlap_hash(overlap_key *elt,
-                         overlap_key **hash_table, int nhash,
-                         unsigned flags)
-{
-    /* Each bucket in the hash table holds a red-black tree
-     * containing the overlap_keys that hash into that bucket
+    /* Bottom-up mergesort, based on design in Sedgewick's "Algorithms
+     * in C," chapter 8
      */
-    overlap_key **child = &(hash_table[elt->elt->key_checksum & (nhash - 1)]);
-    overlap_key **root = child;
-    overlap_key *parent = NULL;
-    overlap_key *next;
+    apr_table_entry_t **values_tmp =
+        (apr_table_entry_t **)apr_palloc(pool, n * sizeof(apr_table_entry_t*));
+    int i;
+    int blocksize;
 
-    /* Look for the element in the tree */
-    while ((next = *child) != NULL) {
-        int direction = strcasecmp(elt->elt->key, next->elt->key);
-        if (direction < 0) {
-            parent = next;
-            child = &(next->tree_left);
-        }
-        else if (direction > 0) {
-            parent = next;
-            child = &(next->tree_right);
-        }
-        else {
-            /* This is the key we're looking for */
-            if (flags == APR_OVERLAP_TABLES_MERGE) {
-                /* Just link this node at the end of the list
-                 * of values for the key.  It doesn't need to
-                 * be linked into the tree, because the node at
-                 * the head of this key's value list is in the
-                 * tree already.
-                 */
-                elt->skip = 1;
-                elt->merge_next = NULL;
-                if (next->merge_last) {
-                    next->merge_last->merge_next = elt;
-                }
-                else {
-                    next->merge_next = elt;
-                }
-                next->merge_last = elt;
-            }
-            else {
-                /* In the "set" case, don't bother storing
-                 * this value in the tree if it's already
-                 * there, except if the previous value was
-                 * from table 'a' (level==0) and this value
-                 * is from table 'b' (level==1)
-                 */
-                if (elt->level > next->level) {
-                    elt->tree_left = next->tree_left;
-                    if (next->tree_left) {
-                        next->tree_left->tree_parent = elt;
-                    }
-                    elt->tree_right = next->tree_right;
-                    if (next->tree_right) {
-                        next->tree_right->tree_parent = elt;
-                    }
-                    elt->tree_parent = next->tree_parent;
-                    elt->color = next->color;
-                    (*child) = elt;
-                    elt->merge_next = NULL;
-                    elt->merge_last = NULL;
-                    elt->skip = 0;
-                    next->skip = 1;
-                }
-                else {
-                    elt->skip = 1;
-                }
-            }
-            return;
+    /* First pass: sort pairs of elements (blocksize=1) */
+    for (i = 0; i + 1 < n; i += 2) {
+        if (strcasecmp(values[i]->key, values[i + 1]->key) > 0) {
+            apr_table_entry_t *swap = values[i];
+            values[i] = values[i + 1];
+            values[i + 1] = swap;
         }
     }
 
-    /* The element wasn't in the tree, so add it */
-    elt->tree_left = NULL;
-    elt->tree_right = NULL;
-    elt->tree_parent = parent;
-    (*child) = elt;
-    elt->merge_next = NULL;
-    elt->merge_last = NULL;
-    elt->skip = 0;
-    elt->color = RED;
+    /* Merge successively larger blocks */
+    blocksize = 2;
+    while (blocksize < n) {
+        apr_table_entry_t **dst = values_tmp;
+        int next_start;
+        apr_table_entry_t **swap;
 
-    /* Shuffle the nodes to maintain the red-black tree's balanced
-     * shape property.  (This is what guarantees O(n*log(n)) worst-case
-     * performance for apr_table_overlap().)
-     */
-    next = elt;
-    while ((next->tree_parent) && (next->tree_parent->color == RED)) {
-        /* Note: Root is always black, and red and black nodes
-         * alternate on any path down the tree.  So if we're inside
-         * this block, the grandparent node is non-NULL.
+        /* Merge consecutive pairs blocks of the next blocksize.
+         * Within a block, elements are in sorted order due to
+         * the previous iteration.
          */
-        overlap_key *grandparent = next->tree_parent->tree_parent;
-        if (next->tree_parent == grandparent->tree_left) {
-            overlap_key *parent_sibling = grandparent->tree_right;
-            if (parent_sibling && (parent_sibling->color == RED)) {
-                next->tree_parent->color = BLACK;
-                parent_sibling->color = BLACK;
-                grandparent->color = RED;
-                next = grandparent;
+        for (next_start = 0; next_start + blocksize < n;
+             next_start += (blocksize + blocksize)) {
+
+            int block1_start = next_start;
+            int block2_start = block1_start + blocksize;
+            int block1_end = block2_start;
+            int block2_end = block2_start + blocksize;
+            if (block2_end > n) {
+                /* The last block may be smaller than blocksize */
+                block2_end = n;
             }
-            else {
-                if (next == next->tree_parent->tree_right) {
-                    next = next->tree_parent;
-                    rotate_counterclockwise(root, next);
+            for (;;) {
+
+                /* Merge the next two blocks:
+                 * Pick the smaller of the next element from
+                 * block 1 and the next element from block 2.
+                 * Once either of the blocks is emptied, copy
+                 * over all the remaining elements from the
+                 * other block
+                 */
+                apr_table_entry_t *lowest;
+                if (block1_start == block1_end) {
+                    for (; block2_start < block2_end; block2_start++) {
+                        *dst++ = values[block2_start];
+                    }
+                    break;
                 }
-                next->tree_parent->color = BLACK;
-                next->tree_parent->tree_parent->color = RED;
-                rotate_clockwise(root, next->tree_parent->tree_parent);
+                else if (block2_start == block2_end) {
+                    for (; block1_start < block1_end; block1_start++) {
+                        *dst++ = values[block1_start];
+                    }
+                    break;
+                }
+                if (strcasecmp(values[block1_start]->key,
+                               values[block2_start]->key) > 0) {
+                    *dst++ = values[block2_start++];
+                }
+                else {
+                    *dst++ = values[block1_start++];
+                }
             }
         }
-        else {
-            overlap_key *parent_sibling = grandparent->tree_left;
-            if (parent_sibling && (parent_sibling->color == RED)) {
-                next->tree_parent->color = BLACK;
-                parent_sibling->color = BLACK;
-                grandparent->color = RED;
-                next = grandparent;
+
+        /* If n is not a multiple of 2*blocksize, some elements
+         * will be left over at the end of the array.
+         */
+        for (i = dst - values_tmp; i < n; i++) {
+            values_tmp[i] = values[i];
+        }
+
+        /* The output array of this pass becomes the input
+         * array of the next pass, and vice versa
+         */
+        swap = values_tmp;
+        values_tmp = values;
+        values = swap;
+
+        blocksize += blocksize;
+    }
+
+    return values;
+}
+
+APR_DECLARE(void) apr_table_compress(apr_table_t *t, unsigned flags)
+{
+    apr_table_entry_t **sort_array;
+    apr_table_entry_t **sort_next;
+    apr_table_entry_t **sort_end;
+    apr_table_entry_t *table_next;
+    apr_table_entry_t **last;
+    int i;
+    int dups_found;
+
+    if (t->a.nelts <= 1) {
+        return;
+    }
+
+    /* Copy pointers to all the table elements into an
+     * array and sort to allow for easy detection of
+     * duplicate keys
+     */
+    sort_array = (apr_table_entry_t **)
+        apr_palloc(t->a.pool, t->a.nelts * sizeof(apr_table_entry_t*));
+    sort_next = sort_array;
+    table_next = (apr_table_entry_t *)t->a.elts;
+    i = t->a.nelts;
+    do {
+        *sort_next++ = table_next++;
+    } while (--i);
+
+    /* Note: the merge is done with mergesort instead of quicksort
+     * because mergesort is a stable sort and runs in n*log(n)
+     * time regardless of its inputs (quicksort is quadratic in
+     * the worst case)
+     */
+    sort_array = table_mergesort(t->a.pool, sort_array, t->a.nelts);
+
+    /* Process any duplicate keys */
+    dups_found = 0;
+    sort_next = sort_array;
+    sort_end = sort_array + t->a.nelts;
+    last = sort_next;
+    while (++sort_next < sort_end) {
+        if (((*sort_next)->key_checksum == (*last)->key_checksum) &&
+            !strcasecmp((*sort_next)->key, (*last)->key)) {
+            apr_table_entry_t **dup_last = sort_next + 1;
+            dups_found = 1;
+            while ((dup_last < sort_end) &&
+                   ((*dup_last)->key_checksum == (*last)->key_checksum) &&
+                   !strcasecmp((*dup_last)->key, (*last)->key)) {
+                dup_last++;
             }
-            else {
-                if (next == next->tree_parent->tree_left) {
-                    next = next->tree_parent;
-                    rotate_clockwise(root, next);
+            dup_last--; /* Elements from last through dup_last, inclusive,
+                         * all have the same key
+                         */
+            if (flags == APR_OVERLAP_TABLES_MERGE) {
+                apr_size_t len = 0;
+                apr_table_entry_t **next = last;
+                char *new_val;
+                char *val_dst;
+                do {
+                    len += strlen((*next)->val);
+                    len += 2; /* for ", " or trailing null */
+                } while (++next <= dup_last);
+                new_val = (char *)apr_palloc(t->a.pool, len);
+                val_dst = new_val;
+                next = last;
+                for (;;) {
+                    strcpy(val_dst, (*next)->val);
+                    val_dst += strlen((*next)->val);
+                    next++;
+                    if (next > dup_last) {
+                        *val_dst = 0;
+                        break;
+                    }
+                    else {
+                        *val_dst++ = ',';
+                        *val_dst++ = ' ';
+                    }
                 }
-                next->tree_parent->color = BLACK;
-                next->tree_parent->tree_parent->color = RED;
-                rotate_counterclockwise(root, next->tree_parent->tree_parent);
+                (*last)->val = new_val;
+            }
+            else { /* overwrite */
+                (*last)->val = (*dup_last)->val;
+            }
+            do {
+                (*sort_next)->key = NULL;
+            } while (++sort_next <= dup_last);
+        }
+        else {
+            last = sort_next;
+        }
+    }
+
+    /* Shift elements to the left to fill holes left by removing duplicates */
+    if (dups_found) {
+        apr_table_entry_t *src = (apr_table_entry_t *)t->a.elts;
+        apr_table_entry_t *dst = (apr_table_entry_t *)t->a.elts;
+        apr_table_entry_t *last_elt = src + t->a.nelts;
+        do {
+            if (src->key) {
+                *dst++ = *src;
+            }
+        } while (++src < last_elt);
+        t->a.nelts -= (last_elt - dst);
+    }
+
+    table_reindex(t);
+}
+
+APR_DECLARE(void) apr_table_cat(apr_table_t *t, const apr_table_t *s)
+{
+    const int n = t->a.nelts;
+    register int idx;
+
+    apr_array_cat(&t->a,&s->a);
+
+    if (n == 0) {
+        memcpy(t->index_first,s->index_first,sizeof(int) * TABLE_HASH_SIZE);
+        memcpy(t->index_last, s->index_last, sizeof(int) * TABLE_HASH_SIZE);
+        t->index_initialized = s->index_initialized;
+        return;
+    }
+
+    for (idx = 0; idx < TABLE_HASH_SIZE; ++idx) {
+        if (TABLE_INDEX_IS_INITIALIZED(s, idx)) {
+            t->index_last[idx] = s->index_last[idx] + n;
+            if (!TABLE_INDEX_IS_INITIALIZED(t, idx)) {
+                t->index_first[idx] = s->index_first[idx] + n;
             }
         }
     }
-    (*root)->color = BLACK;
-}
 
-/* Must be a power of 2 */
-#define DEFAULT_HASH_SIZE 16
+    t->index_initialized |= s->index_initialized;
+}
 
 APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags)
 {
-    int max_keys;
-    int nkeys;
-    overlap_key *cat_keys; /* concatenation of the keys of a and b */
-    overlap_key **hash_table;
-    int nhash;
-    int i;
-    apr_table_entry_t *elts;
-    apr_table_entry_t *dst_elt;
+    const int m = a->a.nelts;
+    const int n = b->a.nelts;
+    apr_pool_t *p = b->a.pool;
 
-    max_keys = a->a.nelts + b->a.nelts;
-    if (!max_keys) {
-        /* The following logic won't do anything harmful if we keep
-         * going in this situation, but
-         *
-         *    1) certain memory debuggers don't like an alloc size of 0
-         *       so we'd like to avoid that...
-         *    2) this isn't all that rare a call anyway, so it is useful
-         *       to skip the storage allocation and other checks in the
-         *       following logic
-         */
+    if (m + n == 0) {
         return;
     }
-    cat_keys = apr_palloc(b->a.pool, sizeof(overlap_key) * max_keys);
-    nhash = DEFAULT_HASH_SIZE;
-    while (nhash < max_keys) {
-        nhash <<= 1;
-    }
-    hash_table = (overlap_key **)apr_pcalloc(b->a.pool,
-                                             sizeof(overlap_key *) * nhash);
 
-    /* The cat_keys array contains an element for each entry in a,
-     * followed by one for each in b.  While populating this array,
-     * we also use it as:
-     *  1) a hash table, to detect matching keys, and
-     *  2) a linked list of multiple values for a given key (in the
-     *     APR_OVERLAP_TABLES_MERGE case)
-     */
-
-    /* First, the elements of a */
-    nkeys = 0;
-    elts = (apr_table_entry_t *)a->a.elts;
-    for (i = 0; i < a->a.nelts; i++, nkeys++) {
-        cat_keys[nkeys].elt = &(elts[i]);
-        cat_keys[nkeys].level = 0;
-        overlap_hash(&(cat_keys[nkeys]), hash_table, nhash, flags);
+    /* copy (extend) a using b's pool */
+    if (a->a.pool != p) {
+        make_array_core(&a->a, p, m+n, sizeof(apr_table_entry_t), 0);
     }
 
-    /* Then the elements of b */
-    elts = (apr_table_entry_t *)b->a.elts;
-    for (i = 0; i < b->a.nelts; i++, nkeys++) {
-        cat_keys[nkeys].elt = &(elts[i]);
-        cat_keys[nkeys].level = 1;
-        overlap_hash(&(cat_keys[nkeys]), hash_table, nhash, flags);
-    }
+    apr_table_cat(a, b);
 
-    /* Copy concatenated list of elements into table a to
-     * form the new table contents, but:
-     *   1) omit the ones marked "skip," and
-     *   2) merge values for the same key if needed
-     */
-    make_array_core(&a->a, b->a.pool, max_keys, sizeof(apr_table_entry_t), 0);
-    nkeys = 0;
-    dst_elt = (apr_table_entry_t *)a->a.elts;
-    for (i = 0; i < max_keys; i++) {
-        if (cat_keys[i].skip) {
-            continue;
-        }
-        if (cat_keys[i].merge_next) {
-            char *new_val;
-            char *val_next;
-            overlap_key *next = cat_keys[i].merge_next;
-            int len = (cat_keys[i].elt->val ?
-                       strlen(cat_keys[i].elt->val) : 0);
-            do {
-                len += 2;
-                if (next->elt->val) {
-                    len += strlen(next->elt->val);
-                }
-                next = next->merge_next;
-            } while (next);
-            len++;
-            new_val = (char *)apr_palloc(b->a.pool, len);
-            val_next = new_val;
-            if (cat_keys[i].elt->val) {
-                strcpy(val_next, cat_keys[i].elt->val);
-                val_next += strlen(cat_keys[i].elt->val);
-            }
-            next = cat_keys[i].merge_next;
-            do {
-                *val_next++ = ',';
-                *val_next++ = ' ';
-                if (next->elt->val) {
-                    strcpy(val_next, next->elt->val);
-                    val_next += strlen(next->elt->val);
-                }
-                next = next->merge_next;
-            } while (next);
-            *val_next = 0;
-            dst_elt->key = cat_keys[i].elt->key;
-            dst_elt->val = new_val;
-            dst_elt->key_checksum = cat_keys[i].elt->key_checksum;
-            dst_elt++;
-        }
-        else {
-            dst_elt->key = cat_keys[i].elt->key;
-            dst_elt->val = cat_keys[i].elt->val;
-            dst_elt->key_checksum = cat_keys[i].elt->key_checksum;
-            dst_elt++;
-        }
-    }
-    a->a.nelts = dst_elt - (apr_table_entry_t *)a->a.elts;
-    table_reindex(a);
+    apr_table_compress(a, flags);
 }
-
