@@ -71,8 +71,9 @@ static const char *mutexname(apr_lockmech_e mech)
     }
 }
 
-static void test_exclusive(abts_case *tc, void *data, apr_lockmech_e mech)
+static void test_exclusive(abts_case *tc, void *data)
 {
+    apr_lockmech_e mech = *(apr_lockmech_e *)data;
     apr_proc_t p1, p2, p3, p4;
     apr_status_t rv;
     apr_global_mutex_t *global_lock;
@@ -99,65 +100,33 @@ static void test_exclusive(abts_case *tc, void *data, apr_lockmech_e mech)
     }
 }
 
-static void test_exclusive_default(abts_case *tc, void *data)
-{
-    test_exclusive(tc, data, APR_LOCK_DEFAULT);
-}
-
-#if APR_HAS_POSIXSEM_SERIALIZE
-static void test_exclusive_posixsem(abts_case *tc, void *data)
-{
-    test_exclusive(tc, data, APR_LOCK_POSIXSEM);
-}
-#endif
-
-#if APR_HAS_SYSVSEM_SERIALIZE
-static void test_exclusive_sysvsem(abts_case *tc, void *data)
-{
-    test_exclusive(tc, data, APR_LOCK_SYSVSEM);
-}
-#endif
-
-#if APR_HAS_PROC_PTHREAD_SERIALIZE
-static void test_exclusive_proc_pthread(abts_case *tc, void *data)
-{
-    test_exclusive(tc, data, APR_LOCK_PROC_PTHREAD);
-}
-#endif
-
-#if APR_HAS_FCNTL_SERIALIZE
-static void test_exclusive_fcntl(abts_case *tc, void *data)
-{
-    test_exclusive(tc, data, APR_LOCK_FCNTL);
-}
-#endif
-
-#if APR_HAS_FLOCK_SERIALIZE
-static void test_exclusive_flock(abts_case *tc, void *data)
-{
-    test_exclusive(tc, data, APR_LOCK_FLOCK);
-}
-#endif
-
 abts_suite *testglobalmutex(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
 
-    abts_run_test(suite, test_exclusive_default, NULL);
+    apr_lockmech_e mech;
+
+    mech = APR_LOCK_DEFAULT;
+    abts_run_test(suite, test_exclusive, &mech);
 #if APR_HAS_POSIXSEM_SERIALIZE
-    abts_run_test(suite, test_exclusive_posixsem, NULL);
+    mech = APR_LOCK_POSIXSEM;
+    abts_run_test(suite, test_exclusive, &mech);
 #endif
 #if APR_HAS_SYSVSEM_SERIALIZE
-    abts_run_test(suite, test_exclusive_sysvsem, NULL);
+    mech = APR_LOCK_SYSVSEM;
+    abts_run_test(suite, test_exclusive, &mech);
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
-    abts_run_test(suite, test_exclusive_proc_pthread, NULL);
+    mech = APR_LOCK_PROC_PTHREAD;
+    abts_run_test(suite, test_exclusive, &mech);
 #endif
 #if APR_HAS_FCNTL_SERIALIZE
-    abts_run_test(suite, test_exclusive_fcntl, NULL);
+    mech = APR_LOCK_FCNTL;
+    abts_run_test(suite, test_exclusive, &mech);
 #endif
 #if APR_HAS_FLOCK_SERIALIZE
-    abts_run_test(suite, test_exclusive_flock, NULL);
+    mech = APR_LOCK_FLOCK;
+    abts_run_test(suite, test_exclusive, &mech);
 #endif
 
     return suite;
