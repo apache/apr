@@ -27,6 +27,7 @@
 struct apr_threadattr_t {
     apr_pool_t *pool;
     unsigned long attr;
+    apr_size_t stacksize;
 };
 
 struct apr_thread_t {

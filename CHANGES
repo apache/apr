@@ -7,6 +7,10 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Add apr_threadattr_stacksize_set() for overriding the default
+     stack size for threads created by apr_thread_create().
+     [Jeff Trawick]
+
   *) The whole codebase was relicensed and is now available under
      the Apache License, Version 2.0 (http://www.apache.org/licenses).
      [Apache Software Foundation]
