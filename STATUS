@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/09/20 15:28:17 $]
+Last modified at [$Date: 2001/09/20 16:26:07 $]
 
 Release:
 
@@ -181,6 +181,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * apr_xlate.h generates a bunch of compiler warnings.
       Jeff asks: which platform?
+      Justin says: Solaris with Forte 6.1.
 
     * fcntl() oddness on Solaris.  Under high loads, fcntl() decides to
       return error code 46 (ENOLCK).
