@@ -340,7 +340,9 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
             pNext = pNext + strlen(pNext) + 1;
             i++;
         }
-        strcpy(pNext, envstr);        
+        strcpy(pNext, envstr); 
+	pNext = pNext + strlen(pNext) + 1;
+	*pNext = '\0';
     }
     else {
         SetEnvironmentVariable("parentpid", ppid);
