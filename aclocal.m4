@@ -431,5 +431,56 @@ unsigned long foo = INADDR_NONE;
   fi
 ])
 
+dnl
+dnl APR_CHECK_H_ERRNO_FLAG
+dnl
+dnl checks which flags are necessary for <netdb.h> to define h_errno
+dnl
+AC_DEFUN(APR_H_ERRNO_COMPILE_CHECK,[
+  if test x$1 != x; then
+    CFLAGS="-D$1 $CFLAGS"
+  fi
+  AC_TRY_COMPILE([
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+],[
+int h_e = h_errno;
+],[
+  if test x$1 != x; then
+    ac_cv_h_errno_cflags="$1"
+  else
+    ac_cv_h_errno_cflags=yes
+  fi
+],[
+  ac_cv_h_errno_cflags=no
+])])
+AC_DEFUN(APR_CHECK_H_ERRNO_FLAG,[
+  AC_MSG_CHECKING([for h_errno in netdb.h])
+  AC_CACHE_VAL(ac_cv_h_errno_cflags,[
+    APR_H_ERRNO_COMPILE_CHECK
+    if test "$ac_cv_h_errno_cflags" = "no"; then
+      ac_save="$CFLAGS"
+      for flag in _XOPEN_SOURCE_EXTENDED; do
+        APR_H_ERRNO_COMPILE_CHECK($flag)
+        if test "$ac_cv_h_errno_cflags" != "no"; then
+          break
+        fi
+      done
+      CFLAGS="$ac_save"
+    fi
+  ])
+  if test "$ac_cv_h_errno_cflags" != "no"; then
+    if test "$ac_cv_h_errno_cflags" != "yes"; then
+      CFLAGS="-D$ac_cv_h_errno_cflags $CFLAGS"
+      AC_MSG_RESULT([yes, with -D$ac_cv_h_errno_cflags])
+    else
+      AC_MSG_RESULT([$ac_cv_h_errno_cflags])
+    fi
+  else
+    AC_MSG_RESULT([$ac_cv_h_errno_cflags])
+  fi
+])
+
 sinclude(apr_common.m4)
 sinclude(hints.m4)

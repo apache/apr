@@ -265,7 +265,7 @@ AC_CHECK_HEADERS(io.h)
 AC_CHECK_HEADERS(limits.h)
 AC_CHECK_HEADERS(malloc.h)
 AC_CHECK_HEADERS(memory.h)
-AC_CHECK_HEADERS(netdb.h)
+AC_CHECK_HEADERS(netdb.h, netdbh="1", netdbh="0")
 AC_CHECK_HEADERS(osreldate.h)
 AC_CHECK_HEADERS(process.h)
 AC_CHECK_HEADERS(pwd.h)
@@ -323,6 +323,14 @@ AC_SUBST(sys_uioh)
 AC_SUBST(signalh)
 AC_SUBST(sys_waith)
 AC_SUBST(pthreadh)
+
+dnl #----------------------------- Checking for h_errno in <netdb.h>
+if test "$netdbh" = "1"; then
+  APR_CHECK_H_ERRNO_FLAG
+  if test "$ac_cv_h_errno_cflags" = "no"; then
+    AC_MSG_ERROR([can not find h_errno in netdb.h])
+  fi
+fi
 
 dnl #----------------------------- Checks for standard typedefs
 AC_TYPE_OFF_T
