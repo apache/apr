@@ -52,7 +52,6 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_hash.obj"
 	-@erase "$(INTDIR)\apr_md5.obj"
 	-@erase "$(INTDIR)\apr_pools.obj"
-	-@erase "$(INTDIR)\apr_signal.obj"
 	-@erase "$(INTDIR)\apr_sms.obj"
 	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
@@ -169,7 +168,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_hash.obj" \
 	"$(INTDIR)\apr_md5.obj" \
 	"$(INTDIR)\apr_pools.obj" \
-	"$(INTDIR)\apr_signal.obj" \
 	"$(INTDIR)\apr_sms.obj" \
 	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
@@ -254,7 +252,6 @@ CLEAN :
 	-@erase "$(INTDIR)\apr_hash.obj"
 	-@erase "$(INTDIR)\apr_md5.obj"
 	-@erase "$(INTDIR)\apr_pools.obj"
-	-@erase "$(INTDIR)\apr_signal.obj"
 	-@erase "$(INTDIR)\apr_sms.obj"
 	-@erase "$(INTDIR)\apr_sms_blocks.obj"
 	-@erase "$(INTDIR)\apr_sms_std.obj"
@@ -372,7 +369,6 @@ LINK32_OBJS= \
 	"$(INTDIR)\apr_hash.obj" \
 	"$(INTDIR)\apr_md5.obj" \
 	"$(INTDIR)\apr_pools.obj" \
-	"$(INTDIR)\apr_signal.obj" \
 	"$(INTDIR)\apr_sms.obj" \
 	"$(INTDIR)\apr_sms_blocks.obj" \
 	"$(INTDIR)\apr_sms_std.obj" \
@@ -440,6 +436,7 @@ DEP_CPP_ACCES=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_time.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
@@ -458,6 +455,7 @@ DEP_CPP_TIME_=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -483,6 +481,7 @@ DEP_CPP_TIMES=\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -507,6 +506,7 @@ DEP_CPP_APR_C=\
 	".\include\apr_errno.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\arch\win32\apr_private.h"\
 	
@@ -536,9 +536,11 @@ DEP_CPP_APR_S=\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -558,6 +560,7 @@ DEP_CPP_APR_ST=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\arch\win32\apr_private.h"\
 	
@@ -573,6 +576,7 @@ DEP_CPP_APR_STR=\
 	".\include\apr_errno.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	
 
@@ -586,6 +590,7 @@ DEP_CPP_APR_STRT=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_want.h"\
 	
@@ -601,6 +606,7 @@ DEP_CPP_APR_G=\
 	".\include\apr_errno.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\arch\win32\apr_private.h"\
 	
@@ -617,6 +623,7 @@ DEP_CPP_APR_M=\
 	".\include\apr_lib.h"\
 	".\include\apr_md5.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\win32\apr_private.h"\
@@ -634,6 +641,7 @@ DEP_CPP_APR_H=\
 	".\include\apr_general.h"\
 	".\include\apr_hash.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\arch\win32\apr_private.h"\
 	
 
@@ -649,6 +657,7 @@ DEP_CPP_APR_T=\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\arch\win32\apr_private.h"\
@@ -668,6 +677,7 @@ DEP_CPP_ERROR=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -697,6 +707,7 @@ DEP_CPP_GETOP=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -737,6 +748,7 @@ DEP_CPP_MISC_=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -761,8 +773,10 @@ DEP_CPP_NAMES=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -784,6 +798,7 @@ DEP_CPP_OTHER=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -813,6 +828,7 @@ DEP_CPP_RAND_=\
 	".\include\apr_errno.h"\
 	".\include\apr_general.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\arch\win32\apr_private.h"\
 	
 
@@ -829,6 +845,7 @@ DEP_CPP_START=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -870,6 +887,7 @@ DEP_CPP_DIR_C=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -902,6 +920,7 @@ DEP_CPP_FILEA=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -934,6 +953,7 @@ DEP_CPP_FILED=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -947,6 +967,7 @@ DEP_CPP_FILED=\
 	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
+	".\include\arch\unix\inherit.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\fileio.h"\
@@ -966,6 +987,7 @@ DEP_CPP_FILEP=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -998,6 +1020,7 @@ DEP_CPP_FILES=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1031,6 +1054,7 @@ DEP_CPP_FLOCK=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1059,7 +1083,9 @@ DEP_CPP_FULLR=\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
@@ -1079,6 +1105,7 @@ DEP_CPP_OPEN_=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1110,6 +1137,7 @@ DEP_CPP_PIPE_=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1141,6 +1169,7 @@ DEP_CPP_READW=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -1175,6 +1204,7 @@ DEP_CPP_SEEK_=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1204,6 +1234,7 @@ DEP_CPP_LOCKS=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1230,8 +1261,10 @@ DEP_CPP_INET_=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -1252,8 +1285,10 @@ DEP_CPP_INET_P=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
@@ -1273,9 +1308,11 @@ DEP_CPP_POLL_=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
@@ -1296,6 +1333,7 @@ DEP_CPP_SENDR=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -1327,9 +1365,11 @@ DEP_CPP_SOCKA=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -1351,6 +1391,7 @@ DEP_CPP_SOCKE=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -1376,8 +1417,10 @@ DEP_CPP_SOCKO=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
@@ -1399,6 +1442,7 @@ DEP_CPP_PROC_=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1431,6 +1475,7 @@ DEP_CPP_SIGNA=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1462,6 +1507,7 @@ DEP_CPP_THREA=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -1489,6 +1535,7 @@ DEP_CPP_THREAD=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -1517,6 +1564,7 @@ DEP_CPP_DSO_C=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1540,24 +1588,12 @@ DEP_CPP_DSO_C=\
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\lib\apr_signal.c
-DEP_CPP_APR_SI=\
-	".\include\apr.h"\
-	".\include\apr_errno.h"\
-	".\include\apr_lib.h"\
-	".\include\arch\win32\apr_private.h"\
-	
-
-"$(INTDIR)\apr_signal.obj" : $(SOURCE) $(DEP_CPP_APR_SI) "$(INTDIR)"\
- ".\include\apr.h"
-	$(CPP) $(CPP_PROJ) $(SOURCE)
-
-
 SOURCE=.\i18n\unix\utf8_ucs2.c
 DEP_CPP_UTF8_=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	
@@ -1575,8 +1611,10 @@ DEP_CPP_COMMO=\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_mmap.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_sms.h"\
 	".\include\apr_time.h"\
 	".\include\apr_user.h"\
 	".\include\apr_want.h"\
@@ -1597,6 +1635,7 @@ DEP_CPP_MMAP_=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_mmap.h"\
 	".\include\apr_network_io.h"\
@@ -1626,6 +1665,7 @@ DEP_CPP_GROUP=\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1653,6 +1693,7 @@ DEP_CPP_USERI=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1685,6 +1726,7 @@ DEP_CPP_APR_P=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_hash.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -1713,6 +1755,7 @@ DEP_CPP_APR_SM=\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_hash.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1739,6 +1782,7 @@ DEP_CPP_APR_SMS=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1765,6 +1809,7 @@ DEP_CPP_APR_SMS_=\
 	".\include\apr_errno.h"\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1791,6 +1836,7 @@ DEP_CPP_APR_SMS_T=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
@@ -1818,6 +1864,7 @@ DEP_CPP_APR_SMS_TR=\
 	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
+	".\include\apr_inherit.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
