@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/01/14 10:05:15 $]
+Last modified at [$Date: 2002/01/14 13:45:19 $]
 
 Release:
 
@@ -46,13 +46,31 @@ RELEASE SHOWSTOPPERS:
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
-    * Implement apr_pool_join and apr_pool_lock.  Those functions
-      are noops at the moment.
+    * Pools debugging
+        - Find a way to do check if a pool is used in multiple
+          threads, while the creation flags say it isn't.  IOW,
+          when the pool was created with APR_POOL_FNEWALLOCATOR,
+          but without APR_POOL_FLOCK.
+          Currently, no matter what the creation flags say, we always
+          create a lock.  Without it integrity_check() and
+          apr_pool_num_bytes() blow up (because they traverse pools
+          child lists that possibly belong to another thread, in
+          combination with the pool having no lock).  However,
+          this might actually hide problems like creating a child pool
+          of a pool belonging to another thread.
+          Maybe a debug function apr_pool_set_owner(apr_thread_t *) in
+          combination with extra checks in integrity_check() will point
+          out these problems.  apr_pool_set_owner() would need to be called
+          everytime the owner(the thread the pool is being used in) of
+          the pool changes.
 
-    * Add stats to the pools code.  We already have basic stats
-      in debug mode.  Stats that tell us about wasted memory
-      in the production code require more thought.
-        Status: Sander Striker is looking into this (low priority)
+        - Implement apr_pool_join and apr_pool_lock.  Those functions
+          are noops at the moment.
+
+        - Add stats to the pools code.  We already have basic stats
+          in debug mode.  Stats that tell us about wasted memory
+          in the production code require more thought.
+            Status: Sander Striker is looking into this (low priority)
 
     * Deal with largefiles properly on those platforms that support it.
 
