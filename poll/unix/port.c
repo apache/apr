@@ -248,7 +248,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                            const apr_pollfd_t **descriptors)
 {
     apr_os_sock_t fd;
-    int ret, i, nget;
+    int ret, i;
+    unsigned int nget;
     pfd_elem_t *ep;
     struct timespec tv, *tvptr;
     apr_status_t rv = APR_SUCCESS;
@@ -303,6 +304,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     }
     else {
 
+        pollset_lock_rings();
+
         for (i = 0; i < nget; i++) {
             pollset->result_set[i] =
                 (((pfd_elem_t*)(pollset->port_set[i].portev_user))->pfd);
@@ -313,6 +316,8 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
                                  (pfd_elem_t*)pollset->port_set[i].portev_user,
                                  pfd_elem_t, link);
         }
+
+        pollset_unlock_rings();
 
         if (descriptors) {
             *descriptors = pollset->result_set;
