@@ -53,12 +53,13 @@
  *
  */
 
+#define INCL_DOSERRORS
+#include "fileio.h"
 #include "apr_file_io.h"
 #include <errno.h>
 #include <string.h>
-
-#define INCL_DOSERRORS
 #include <os2.h>
+
 
 int errormap[][2] = {
     { NO_ERROR,                   APR_SUCCESS      },
