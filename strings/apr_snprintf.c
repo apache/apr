@@ -838,17 +838,17 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                 adjust_precision = adjust_width = NO;
 
             /*
-             * Modifier check
+             * Modifier check.  Note that if APR_INT64_T_FMT is "d",
+             * the first if condition is never true.
              */
-#if defined(APR_INT64_T_FMT_LEN) && (APR_INT64_T_FMT_LEN == 3)
-            if ((*fmt == APR_INT64_T_FMT[0]) &&
-                (fmt[1] == APR_INT64_T_FMT[1])) {
-#elif defined(APR_INT64_T_FMT_LEN) && (APR_INT64_T_FMT_LEN == 2)
-            if (*fmt == APR_INT64_T_FMT[0]) {
-#else
-            if (strncmp(fmt, APR_INT64_T_FMT, 
-                             sizeof(APR_INT64_T_FMT) - 2) == 0) {
-#endif
+            if ((sizeof(APR_INT64_T_FMT) == 4 &&
+                 fmt[0] == APR_INT64_T_FMT[0] &&
+                 fmt[1] == APR_INT64_T_FMT[1]) ||
+                (sizeof(APR_INT64_T_FMT) == 3 &&
+                 fmt[0] == APR_INT64_T_FMT[0]) ||
+                (sizeof(APR_INT64_T_FMT) > 4 &&
+                 strncmp(fmt, APR_INT64_T_FMT, 
+                         sizeof(APR_INT64_T_FMT) - 2) == 0)) {
                 /* Need to account for trailing 'd' and null in sizeof() */
                 var_type = IS_QUAD;
                 fmt += (sizeof(APR_INT64_T_FMT) - 2);
