@@ -186,7 +186,7 @@ inet_ntop6(const unsigned char *src, char *dst, apr_size_t size)
 			tp += strlen(tp);
 			break;
 		}
-		tp += apr_snprintf(tp, sizeof tp, "%x", words[i]);
+		tp += apr_snprintf(tp, sizeof tmp - (tp - tmp), "%x", words[i]);
 	}
 	/* Was it a trailing run of 0x00's? */
 	if (best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
