@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2000/12/17 03:35:39 $]
+Last modified at [$Date: 2000/12/18 00:05:24 $]
 
 Release:
 
@@ -68,6 +68,11 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       - It ignores the "type" parameter, so toss it.
       - The fname param is allowed to be NULL on the Unix platform.
         Change it to always use the passed value, and check callers.
+
+    * configure.in does post-processing on the AC_OUTPUT files (for
+      VPATH support). This means that config.status doesn't do the
+      right thing when you re-run it. We ought to revamp the makefiles 
+      to do the right AC_SUBST stuff rather than depend upon rewriting.
 
 
 Documentation that needs writing:
