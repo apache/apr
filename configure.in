@@ -350,6 +350,13 @@ dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
 dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
 dnl systems if we are also using threads.
 
+AC_ARG_WITH(sendfile, [  --with-sendfile  Force sendfile to be on or off],
+  [ if test "$withval" = "yes"; then
+        sendfile="1"
+    else
+        sendfile="0"
+    fi ] )
+
 orig_sendfile=$sendfile
 case "$OS" in
     *freebsd*)
