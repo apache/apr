@@ -133,9 +133,7 @@ struct apr_pool_t {
     struct process_chain *subprocesses;
     apr_abortfunc_t       abort_fn;
     apr_hash_t           *user_data;
-#if defined(APR_POOL_DEBUG)
     const char           *tag;
-#endif
 };
 
 #define SIZEOF_NODE_T       APR_ALIGN_DEFAULT(sizeof(node_t))
@@ -569,9 +567,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->cleanups = NULL;
         pool->subprocesses = NULL;
         pool->user_data = NULL;
-#if defined(APR_POOL_DEBUG)
         pool->tag = NULL;
-#endif
 
 #if APR_HAS_THREADS
         if ((flags & APR_POOL_FLOCK) == APR_POOL_FLOCK) {
@@ -596,9 +592,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
         pool->cleanups = NULL;
         pool->subprocesses = NULL;
         pool->user_data = NULL;
-#if defined(APR_POOL_DEBUG)
         pool->tag = NULL;
-#endif
     }
 
     if ((pool->parent = parent) != NULL) {
@@ -830,12 +824,12 @@ APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data)
  * Debug functions
  */
 
-#if defined(APR_POOL_DEBUG)
 APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag)
 {
     pool->tag = tag;
 }
 
+#if defined(APR_POOL_DEBUG)
 APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse)
 {
     return 0;
