@@ -16,7 +16,7 @@
     }
     if ( match( $0, /^LOCAL_LIBS=/ ) ) {
         print "LOCAL_LIBS= ../LibD/apr.lib ";
-        print "ALL_LIBS= kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib ";
+        print "ALL_LIBS= kernel32\.lib user32\.lib advapi32\.lib Rpcrt4\.lib ws2_32\.lib wsock32\.lib ole32\.lib ";
 	$0 = ""
     }
     if ( match( $0, /\@CFLAGS\@/ ) ) {
