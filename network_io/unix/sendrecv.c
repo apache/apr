@@ -98,7 +98,7 @@ static ap_status_t wait_for_io_or_timeout(struct socket_t *sock, int for_read)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *, time_t)
+ * ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
  *    Send data over a network.
  * arg 1) The socket to send the data over.
  * arg 2) The buffer which contains the data to be sent. 
@@ -136,7 +136,7 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *, time_t)
+ * ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
  *    Read data from a network.
  * arg 1) The socket to read the data from.
  * arg 2) The buffer to store the data in. 
@@ -174,7 +174,8 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_sendv(ap_socket_t *, const struct iovec *, ap_int32_t, ap_int32_t *)
+ * ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, 
+                        ap_int32_t nvec, ap_int32_t *len)
  *    Send multiple packets of data over a network.
  * arg 1) The socket to send the data over.
  * arg 2) The array of iovec structs containing the data to send 
@@ -184,8 +185,8 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
  *        this behavior, use ap_setsocketopt with the APR_SO_TIMEOUT option.
  *        The number of bytes actually sent is stored in argument 3.
  */
-ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
-                     ap_int32_t nvec, ap_int32_t * len)
+ap_status_t ap_sendv(struct socket_t * sock, const struct iovec *vec,
+                     ap_int32_t nvec, ap_int32_t *len)
 {
     ssize_t rv;
 
@@ -215,8 +216,8 @@ ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
 
 #if defined(HAVE_SENDFILE)
 /* ***APRDOC********************************************************
- * ap_status_t ap_sendfile(ap_socket_t *, ap_file_t *, ap_hdtr_t *, 
- *                         ap_off_t *, ap_size_t *, ap_int32_t flags)
+ * ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file, ap_hdtr_t *hdtr, 
+ *                         ap_off_t *offset, ap_size_t *len, ap_int32_t flags)
  *    Send a file from an open file descriptor to a socket, along with 
  *    optional headers and trailers
  * arg 1) The socket to which we're writing
@@ -236,8 +237,8 @@ ap_status_t ap_sendv(struct socket_t * sock, const struct iovec * vec,
   */
 
 #if defined(__linux__) && defined(HAVE_WRITEV)
-ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
-        		ap_hdtr_t * hdtr, ap_off_t * offset, ap_size_t * len,
+ap_status_t ap_sendfile(ap_socket_t *sock, ap_file_t *file,
+        		ap_hdtr_t *hdtr, ap_off_t *offset, ap_size_t *len,
         		ap_int32_t flags)
 {
     off_t off = *offset;

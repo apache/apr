@@ -56,7 +56,7 @@
 #include "networkio.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_local_port(ap_socket_t *socket, ap_uint32_t port)
+ * ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
  *    Assocaite a local port with a socket.
  * arg 1) The socket to set
  * arg 2) The local port this socket will be dealing with.
@@ -73,7 +73,7 @@ ap_status_t ap_set_local_port(struct socket_t *sock, ap_uint32_t port)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_remote_port(ap_socket_t *socket, ap_uint32_t port)
+ * ap_status_t ap_set_remote_port(ap_socket_t *sock, ap_uint32_t port)
  *    Assocaite a remote port with a socket.
  * arg 1) The socket to enquire about.
  * arg 2) The local port this socket will be dealing with.
@@ -89,7 +89,7 @@ ap_status_t ap_set_remote_port(struct socket_t *sock, ap_uint32_t port)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *socket)
+ * ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *sock)
  *    Return the local port with a socket.
  * arg 1) The local port this socket is associated with.
  * arg 2) The socket to enquire about.
@@ -103,7 +103,7 @@ ap_status_t ap_get_local_port(ap_uint32_t *port, struct socket_t *sock)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *socket)
+ * ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *sock)
  *    Return the remote port associated with a socket.
  * arg 1) The remote port this socket is associated with.
  * arg 2) The socket to enquire about.
@@ -117,7 +117,7 @@ ap_status_t ap_get_remote_port(ap_uint32_t *port, struct socket_t *sock)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_local_ipaddr(ap_socket_t *socket, cont char *addr)
+ * ap_status_t ap_set_local_ipaddr(ap_socket_t *sock, cont char *addr)
  *    Assocaite a local socket addr with an apr socket.
  * arg 1) The socket to use 
  * arg 2) The IP address to attach to the socket.
@@ -147,7 +147,7 @@ ap_status_t ap_set_local_ipaddr(struct socket_t *sock, const char *addr)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_set_remote_ipaddr(ap_socket_t *socket, cont char *addr)
+ * ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, cont char *addr)
  *    Assocaite a remote socket addr with an apr socket.
  * arg 1) The socket to use 
  * arg 2) The IP address to attach to the socket.
@@ -176,7 +176,7 @@ ap_status_t ap_set_remote_ipaddr(struct socket_t *sock, const char *addr)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *socket)
+ * ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
  *    Return the local IP address associated with an apr socket.
  * arg 1) The local IP address associated with the socket.
  * arg 2) The socket to use 
@@ -190,7 +190,7 @@ ap_status_t ap_get_local_ipaddr(char **addr, const struct socket_t *sock)
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *socket)
+ * ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock)
  *    Return the remote IP address associated with an apr socket.
  * arg 1) The remote IP address associated with the socket.
  * arg 2) The socket to use 
@@ -205,7 +205,8 @@ ap_status_t ap_get_remote_ipaddr(char **addr, const struct socket_t *sock)
 
 #if HAVE_NETINET_IN_H
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *socket)
+ * ap_status_t ap_get_local_name(struct sockaddr_in **name, 
+ *                               const ap_socket_t *sock)
  *    Return the local socket name as a BSD style struct sockaddr_in.
  * arg 1) The local name associated with the socket.
  * arg 2) The socket to use 
@@ -219,7 +220,8 @@ ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct socket_t *
 
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *socket)
+ * ap_status_t ap_get_remote_name(struct sockaddr_in **name, 
+ *                                const ap_socket_t *sock)
  *    Return the remote socket name as a BSD style struct sockaddr_in.
  * arg 1) The remote name associated with the socket.
  * arg 2) The socket to use 
