@@ -135,18 +135,16 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
  * ap_status_t ap_create_namedpipe(ap_context_t *, char *, ap_fileperms_t, 
  *                                 char **)
  *    Create a named pipe.
- * arg 1) The context to operate on.
- * arg 2) The directory to create the pipe in.
- * arg 3) The permissions for the newly created pipe.
- * arg 4) The name of the new pipe. 
+ * arg 1) The filename of the named pipe
+ * arg 2) The permissions for the newly created pipe.
+ * arg 3) The context to operate on.
  */
-ap_status_t ap_create_namedpipe(char **new, char *dirpath, 
+ap_status_t ap_create_namedpipe(char *filename, 
                                 ap_fileperms_t perm, ap_context_t *cont)
 {
     mode_t mode = get_fileperms(perm);
 
-    *new = tempnam(dirpath, NULL);
-    if (mkfifo((*new), mode) == -1) {
+    if (mkfifo(filename, mode) == -1) {
         return errno;
     }
     return APR_SUCCESS;
