@@ -117,6 +117,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
         return errno;
     }
     (*len) = rv;
+
     return APR_SUCCESS;
 }
 
@@ -145,6 +146,8 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
         return errno;
     }
     (*len) = rv;
+    if (rv == 0)
+        return APR_EOF;
     return APR_SUCCESS;
 }
 
