@@ -108,7 +108,7 @@ NLM_NAME		= aprlib
 # This is used by the link '-desc ' directive. 
 # If left blank, NLM_NAME will be used.
 #
-NLM_DESCRIPTION	= Apache Portability Runtime Library
+NLM_DESCRIPTION	= Apache Portability Runtime Library $(VERSION_STR)
 
 #
 # This is used by the '-threadname' directive.  If left blank,
