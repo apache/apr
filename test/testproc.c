@@ -108,11 +108,11 @@ int main(int argc, char *argv[])
             fprintf(stderr, "%s", teststr);
         exit(1);
     }
-    teststr = apr_pstrdup(pool, "Whooo Hoooo\0");
+    teststr = apr_pstrdup(pool, "Whooo Hoooo\n");
     
     printf("APR Process Test\n================\n\n");
     
-    STD_TEST_NEQ("Creating directory for later use", 
+    STD_TEST_NEQ("Creating directory \"proctest\" for later use", 
                  apr_dir_make("proctest", APR_UREAD | APR_UWRITE | APR_UEXECUTE, pool))
 
     /* =================================================================== */
@@ -136,12 +136,15 @@ int main(int argc, char *argv[])
     testfile = newproc.in;
     printf("OK\n");
 
-    length = 256;
+    length = strlen(teststr);
     printf("%-60s", "Writing the data to child");
-    if (apr_file_write(testfile, teststr, &length) == APR_SUCCESS) {
+    if ((rv = apr_file_write(testfile, teststr, &length)) == APR_SUCCESS) {
         printf("OK\n");
     }
-    else printf("Write failed.\n");
+    else {
+        printf("Write failed: (%d) %s.\n",
+               rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
+    }
 
     printf("%-60s", "Grabbing child's stdout");
     testfile = newproc.out;
@@ -155,7 +158,7 @@ int main(int argc, char *argv[])
             printf("OK\n");
         else {
             printf( "Uh-Oh\n");
-            printf("  (I actually got %s_\n", buf);
+            printf("  (I actually got %s)\n", buf);
         }
     }
     else {
