@@ -241,7 +241,6 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_fnmatch.o \
 	$(OBJDIR)/apr_getpass.o \
 	$(OBJDIR)/apr_hash.o \
-	$(OBJDIR)/apr_md5.o \
 	$(OBJDIR)/apr_pools.o \
 	$(OBJDIR)/apr_snprintf.o \
 	$(OBJDIR)/apr_strings.o \
@@ -261,7 +260,6 @@ FILES_lib_objs = \
 	$(OBJDIR)/flock.o \
 	$(OBJDIR)/fullrw.o \
 	$(OBJDIR)/getopt.o \
-	$(OBJDIR)/getuuid.o \
 	$(OBJDIR)/groupinfo.o \
 	$(OBJDIR)/inet_pton.o \
 	$(OBJDIR)/inet_ntop.o \
@@ -293,11 +291,8 @@ FILES_lib_objs = \
 	$(OBJDIR)/time.o \
 	$(OBJDIR)/timestr.o \
 	$(OBJDIR)/userinfo.o \
-	$(OBJDIR)/utf8_ucs2.o \
-	$(OBJDIR)/uuid.o \
 	$(OBJDIR)/version.o \
 	$(OBJDIR)/waitio.o \
-	$(OBJDIR)/xlate.o \
 	$(EOLIST)
 
 
@@ -395,10 +390,6 @@ $(OBJDIR)/%.o: network_io/unix/%.c $(OBJDIR)\cc.opt
 $(OBJDIR)/%.o: poll/unix/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
 	$(CC) poll\unix\$(<F) -cwd source -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
-
-$(OBJDIR)/%.o: i18n/unix/%.c $(OBJDIR)\cc.opt
-	@echo Compiling $<
-	$(CC) i18n\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
 $(OBJDIR)/%.o: file_io/os2/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
