@@ -53,6 +53,9 @@
  */
 
 #include "apr.h"
+
+#if APR_HAS_OTHER_CHILD
+
 #include "misc.h"
 #include "threadproc.h"
 #include "fileio.h"
@@ -198,3 +201,5 @@ APR_DECLARE(void) apr_proc_other_child_check(void)
         }
     }
 }
+
+#endif /* APR_HAS_OTHER_CHILD */
