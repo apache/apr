@@ -55,17 +55,23 @@ subdirs:
 	    ( cd $$i && $(MAKE) $(MFLAGS_STATIC) SDP='$(SDP)' \
 		CC='$(CC)' AUX_CFLAGS='$(AUX_CFLAGS)' RANLIB='$(RANLIB)' ) \
 		|| exit 1; \
-	    echo "<== $$i"; \
+	    echo "<=== $$i"; \
 	done;
 
 subdirs_depend:
 	@for i in $(SUBDIRS); do \
+	    echo "===> $$i"; \
 	    ( cd $$i && $(MAKE) depend ) \
+		|| exit 1; \
+	    echo "<=== $$i"; \
 	done;
 
 subdirs_clean:
 	@for i in $(SUBDIRS); do \
+	    echo "===> $$i"; \
 	    ( cd $$i && $(MAKE) clean ) \
+		|| exit 1; \
+	    echo "<=== $$i"; \
 	done;
 
 # DO NOT REMOVE
