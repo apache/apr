@@ -62,34 +62,38 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+/**
+ * @file apr_hash.h
+ * @brief Hash Tables
+ */
 
 /**
- * @package Hash Tables
+ * @defgroup APR_Hash  Hash Tables
+ * @ingroup APR
+ * @{
  */
 
 #include "apr_pools.h"
 
-/*
+/**
  * When passing a key to apr_hash_set or apr_hash_get, this value can be
  * passed to indicate a string-valued key, and have apr_hash compute the
  * length automatically.
  *
- * Note: apr_hash will use strlen(key) for the length. The null-terminator
- *       is not included in the hash value (why throw a constant in?).
- *       Since the hash table merely references the provided key (rather
- *       than copying it), apr_hash_this() will return the null-term'd key.
+ * @remark apr_hash will use strlen(key) for the length. The null-terminator
+ *         is not included in the hash value (why throw a constant in?).
+ *         Since the hash table merely references the provided key (rather
+ *         than copying it), apr_hash_this() will return the null-term'd key.
  */
 #define APR_HASH_KEY_STRING     (-1)
 
 /**
  * Abstract type for hash tables.
- * @defvar apr_hash_t
  */
 typedef struct apr_hash_t apr_hash_t;
 
 /**
  * Abstract type for scanning hash tables.
- * @defvar apr_hash_index_t
  */
 typedef struct apr_hash_index_t apr_hash_index_t;
 
@@ -97,8 +101,7 @@ typedef struct apr_hash_index_t apr_hash_index_t;
  * Create a hash table.
  * @param pool The pool to allocate the hash table out of
  * @return The hash table just created
- * @deffunc apr_hash_t *apr_hash_make(apr_pool_t *pool)
- */
+  */
 APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
 
 /**
@@ -107,8 +110,7 @@ APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
  * @param key Pointer to the key
  * @param klen Length of the key. Can be APR_HASH_KEY_STRING to use the string length.
  * @param val Value to associate with the key
- * @tip If the value is NULL the hash entry is deleted.
- * @deffunc void apr_hash_set(apr_hash_t *ht, const void *key, apr_size_t klen, const void *val)
+ * @remark If the value is NULL the hash entry is deleted.
  */
 APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
                                apr_ssize_t klen, const void *val);
@@ -119,7 +121,6 @@ APR_DECLARE(void) apr_hash_set(apr_hash_t *ht, const void *key,
  * @param key Pointer to the key
  * @param klen Length of the key. Can be APR_HASH_KEY_STRING to use the string length.
  * @return Returns NULL if the key is not present.
- * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_ssize_t klen)
  */
 APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
                                  apr_ssize_t klen);
@@ -128,8 +129,9 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
  * Start iterating over the entries in a hash table.
  * @param p The pool to allocate the apr_hash_index_t iterator 
  * @param ht The hash table
- * @return a pointer to the iteration state, or NULL if there are no entries.
- * @tip Example:
+ * @example
+ */
+/**
  * <PRE>
  * 
  *     int sum_values(apr_pool_t *p, apr_hash_t *ht)
@@ -149,15 +151,14 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
  * is delete the current entry) and multiple iterations can be in
  * progress at the same time.
  * </PRE>
- * @deffunc apr_hash_index_t *apr_hash_first(apr_pool_t *p, apr_hash_t *ht)
- */
+  */
 APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht);
 
 /**
  * Continue iterating over the entries in a hash table.
  * @param hi The iteration state
- * @return a pointer to the updated iteration state.  NULL if there are no more  *         entries.
- * @deffunc apr_hash_index_t *apr_hash_next(apr_hash_index_t *hi)
+ * @return a pointer to the updated iteration state.  NULL if there are no more  
+ *         entries.
  */
 APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
 
@@ -167,9 +168,8 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
  * @param key Return pointer for the pointer to the key.
  * @param klen Return pointer for the key length.
  * @param val Return pointer for the associated value.
- * @tip The return pointers should point to a variable that will be set to the
- *      corresponding data, or they may be NULL if the data isn't interesting.
- * @deffunc void apr_hash_this(apr_hash_index_t *hi, const void **key, apr_ssize_t *klen, void **val);
+ * @remark The return pointers should point to a variable that will be set to the
+ *         corresponding data, or they may be NULL if the data isn't interesting.
  */
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
                                 apr_ssize_t *klen, void **val);
@@ -178,7 +178,6 @@ APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi, const void **key,
  * Get the number of key/value pairs in the hash table.
  * @param ht The hash table
  * @return The number of key/value pairs in the hash table.
- * @deffunc int apr_hash_count(apr_hash_t *ht);
  */
 APR_DECLARE(int) apr_hash_count(apr_hash_t *ht);
 
@@ -189,14 +188,18 @@ APR_DECLARE(int) apr_hash_count(apr_hash_t *ht);
  * @param overlay The table to add to the initial table
  * @param base The table that represents the initial values of the new table
  * @return A new hash table containing all of the data from the two passed in
- * @deffunc apr_hash_t *apr_hash_overlay(apr_pool_t *p, const apr_table_t *over
-lay, const apr_table_t *base);
  */
 APR_DECLARE(apr_hash_t *) apr_hash_overlay(apr_pool_t *p,
                                            const apr_hash_t *overlay, 
                                            const apr_hash_t *base);
 
+/**
+ * Get a pointer to the pool which the hash table 
+ * was created in
+ * @param hash the hash table in question
+ */
 APR_DECLARE(apr_pool_t *) apr_hash_pool_get(apr_hash_t *hash);
+/** @} */
 #ifdef __cplusplus
 }
 #endif
