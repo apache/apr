@@ -254,11 +254,11 @@ SOURCE=.\network_io\unix\inet_pton.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\poll\unix\pollacc.c
+SOURCE=.\poll\unix\poll.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\poll\unix\poll.c
+SOURCE=.\poll\unix\pollacc.c
 # End Source File
 # Begin Source File
 
@@ -387,10 +387,6 @@ SOURCE=.\user\win32\userinfo.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\include\arch\win32\apr_private.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\include\arch\win32\apr_arch_atime.h
 # End Source File
 # Begin Source File
@@ -429,6 +425,10 @@ SOURCE=.\include\arch\win32\apr_arch_threadproc.h
 
 SOURCE=.\include\arch\win32\apr_arch_utf8.h
 # End Source File
+# Begin Source File
+
+SOURCE=.\include\arch\win32\apr_private.h
+# End Source File
 # End Group
 # Begin Group "Public Header Files"
 
@@ -449,22 +449,22 @@ SOURCE=.\include\apr.hw
 
 !IF  "$(CFG)" == "apr - Win32 Release"
 
-# Begin Custom Build - Creating apr.h from apr.hw 
+# Begin Custom Build - Creating apr.h from apr.hw
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
-	
+
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "apr - Win32 Debug"
 
-# Begin Custom Build - Creating apr.h from apr.hw 
+# Begin Custom Build - Creating apr.h from apr.hw
 InputPath=.\include\apr.hw
 
 ".\include\apr.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	type .\include\apr.hw > .\include\apr.h
-	
+
 # End Custom Build
 
 !ENDIF 
