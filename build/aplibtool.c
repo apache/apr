@@ -59,18 +59,20 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-char silent = 0;
-char shared = 0;
-enum mode_t { mCompile, mLink };
-enum output_type_t { otGeneral, otObject, otProgram, otStaticLibrary, otDynamicLibrary };
-
 typedef char bool;
 #define false 0
 #define true (!false)
 
+bool silent = false;
+bool shared = false;
+bool export_all = false;
+enum mode_t { mCompile, mLink };
+enum output_type_t { otGeneral, otObject, otProgram, otStaticLibrary, otDynamicLibrary };
+
 #ifdef __EMX__
 #  define SHELL_CMD  "sh"
 #  define CC         "gcc"
+#  define GEN_EXPORTS "emxexp"
 #  define SHARE_SW   "-Zdll -Zmtd"
 #  define USE_OMF true
 #  define TRUNCATE_DLL_NAME
@@ -96,9 +98,12 @@ typedef struct {
     int num_args;
     enum mode_t mode;
     enum output_type_t output_type;
+    char *output_name;
     char *stub_name;
     char *tmp_dirs[1024];
     int num_tmp_dirs;
+    char *obj_files[1024];
+    int num_obj_files;
 } cmd_data_t;
 
 void parse_args(int argc, char *argv[], cmd_data_t *cmd_data);
@@ -111,6 +116,8 @@ bool explode_static_lib(char *lib, cmd_data_t *cmd_data);
 int execute_command(cmd_data_t *cmd_data);
 char *shell_esc(const char *str);
 void cleanup_tmp_dirs(cmd_data_t *cmd_data);
+void generate_def_file(cmd_data_t *cmd_data);
+char *nameof(char *fullpath);
 
 
 int main(int argc, char *argv[])
@@ -195,6 +202,8 @@ bool parse_long_opt(char *arg, cmd_data_t *cmd_data)
         }
     } else if (strcmp(var, "shared") == 0) {
         shared = true;
+    } else if (strcmp(var, "export-all") == 0) {
+        export_all = true;
     } else {
         return false;
     }
@@ -259,6 +268,7 @@ bool parse_input_file_name(char *arg, cmd_data_t *cmd_data)
         strcpy(newarg, arg);
         strcpy(newarg + (ext - arg), OBJECT_EXT);
         cmd_data->arglist[cmd_data->num_args++] = newarg;
+        cmd_data->obj_files[cmd_data->num_obj_files++] = newarg;
         return true;
     }
 
@@ -283,7 +293,7 @@ bool parse_input_file_name(char *arg, cmd_data_t *cmd_data)
         if (cmd_data->stub_name == NULL) {
             cmd_data->stub_name = (char *)malloc(strlen(arg) + 4);
             strcpy(cmd_data->stub_name, arg);
-            strcpy(strrchr(cmd_data->stub_name, '.') + 1, shared ? "slo" : "lo");
+            strcpy(strrchr(cmd_data->stub_name, '.') + 1, "lo");
         }
     }
 
@@ -324,6 +334,7 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
         strcpy(newarg, arg);
         strcat(newarg, EXE_EXT);
         cmd_data->arglist[cmd_data->num_args++] = newarg;
+        cmd_data->output_name = newarg;
         return true;
     }
 
@@ -363,6 +374,7 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
         }
 #endif
 
+        cmd_data->output_name = newarg;
         return true;
     }
 
@@ -374,6 +386,7 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
         ext = strrchr(newarg, '.') + 1;
         strcpy(ext, OBJECT_EXT);
         cmd_data->arglist[cmd_data->num_args++] = newarg;
+        cmd_data->output_name = newarg;
         return true;
     }
 
@@ -430,7 +443,7 @@ void post_parse_fixup(cmd_data_t *cmd_data)
 
                 if (ext) {
                     if (strcmp(ext, "h") == 0 || strcmp(ext, "c") == 0) {
-                      /* ignore source files, they don't belong in a library */
+                        /* ignore source files, they don't belong in a library */
                         cmd_data->arglist[a] = NULL;
                     }
 
@@ -453,6 +466,10 @@ void post_parse_fixup(cmd_data_t *cmd_data)
                     cmd_data->arglist[a+1] = NULL;
                 }
             }
+        }
+
+        if (export_all) {
+            generate_def_file(cmd_data);
         }
     }
 
@@ -617,4 +634,71 @@ void cleanup_tmp_dirs(cmd_data_t *cmd_data)
     for (d=0; d < cmd_data->num_tmp_dirs; d++) {
         cleanup_tmp_dir(cmd_data->tmp_dirs[d]);
     }
+}
+
+
+
+void generate_def_file(cmd_data_t *cmd_data)
+{
+    char def_file[1024];
+    FILE *hDef;
+    char *export_args[1024];
+    int num_export_args = 0;
+    char *cmd;
+    int cmd_size = 0;
+    int a;
+
+    if (cmd_data->output_name) {
+        strcpy(def_file, cmd_data->output_name);
+        strcat(def_file, ".def");
+        hDef = fopen(def_file, "w");
+
+        if (hDef != NULL) {
+            fprintf(hDef, "LIBRARY %s INITINSTANCE\n", nameof(cmd_data->output_name));
+            fprintf(hDef, "EXPORTS\n");
+            fclose(hDef);
+
+            for (a=0; a < cmd_data->num_obj_files; a++) {
+                cmd_size += strlen(cmd_data->obj_files[a]) + 1;
+            }
+
+            cmd_size += strlen(GEN_EXPORTS) + strlen(def_file) + 3;
+            cmd = (char *)malloc(cmd_size);
+            strcpy(cmd, GEN_EXPORTS);
+
+            for (a=0; a < cmd_data->num_obj_files; a++) {
+                strcat(cmd, " ");
+                strcat(cmd, cmd_data->obj_files[a] );
+            }
+
+            strcat(cmd, ">>");
+            strcat(cmd, def_file);
+            puts(cmd);
+            export_args[num_export_args++] = SHELL_CMD;
+            export_args[num_export_args++] = "-c";
+            export_args[num_export_args++] = cmd;
+            export_args[num_export_args++] = NULL;
+            spawnvp(P_WAIT, export_args[0], export_args);
+            cmd_data->arglist[cmd_data->num_args++] = strdup(def_file);
+        }
+    }
+}
+
+
+
+char *nameof(char *fullpath)
+{
+    char *name = strrchr(fullpath, '/');
+
+    if (name == NULL) {
+        name = strrchr(fullpath, '\\');
+    }
+
+    if (name == NULL) {
+        name = fullpath;
+    } else {
+        name++;
+    }
+
+    return name;
 }
