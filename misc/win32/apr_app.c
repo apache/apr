@@ -86,7 +86,7 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
             ;
     }
 
-    newarr = malloc(arg * sizeof(char *));
+    newarr = malloc(args * sizeof(char *));
 
     for (arg = 0; arg < args; ++arg) {
         newarr[arg] = (void*)(wcslen(arr[arg]) + 1);
