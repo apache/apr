@@ -53,7 +53,7 @@
  */
 
 #include "apr_strings.h"
-#include "os390/dso.h"
+#include "dso.h"
 #include <errno.h>
 #include <string.h>
 
