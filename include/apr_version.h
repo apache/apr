@@ -151,11 +151,6 @@ APR_DECLARE(void) apr_version(apr_version_t *pvsn);
 APR_DECLARE(const char *) apr_version_string(void);
 
 
-/** Internal: helper macro for stringifying the version numbers */
-#define APR_STRINGIFY(n) APR_STRINGIFY_HELPER(n)
-/** Internal: helper macro for stringifying the version numbers */
-#define APR_STRINGIFY_HELPER(n) #n
-
 /** Internal: string form of the "is dev" flag */
 #ifdef APR_IS_DEV_VERSION
 #define APR_IS_DEV_STRING "-dev"

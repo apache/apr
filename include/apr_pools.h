@@ -83,6 +83,7 @@ extern "C" {
  */
 #include "apr.h"
 #include "apr_errno.h"
+#include "apr_general.h" /* for APR_STRINGIFY */
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 
@@ -165,12 +166,8 @@ typedef struct apr_pool_t apr_pool_t;
 #define APR_POOL_DEBUG 0
 #endif
 
-/** String to number */
-#define APR_POOL_STRINGIZE(x) APR_POOL__STRINGIZE(x)
-/** String to number */
-#define APR_POOL__STRINGIZE(x) #x
 /** the place in the code where the particular function was called */
-#define APR_POOL__FILE_LINE__ __FILE__ ":" APR_POOL_STRINGIZE(__LINE__)
+#define APR_POOL__FILE_LINE__ __FILE__ ":" APR_POOL_STRINGIFY(__LINE__)
 
 
 

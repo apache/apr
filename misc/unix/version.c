@@ -53,6 +53,7 @@
  */
 
 #include "apr_version.h"
+#include "apr_general.h" /* for APR_STRINGIFY */
 
 APR_DECLARE(void) apr_version(apr_version_t *pvsn)
 {
