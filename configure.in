@@ -17,6 +17,10 @@ sinclude(build/apr_threads.m4)
 sinclude(build/apr_hints.m4)
 sinclude(build/libtool.m4)
 
+dnl Generate ./config.nice for reproducing runs of configure
+dnl
+APR_CONFIG_NICE(config.nice)
+
 AC_CANONICAL_SYSTEM
 echo "Configuring APR library"
 OS=$host

@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Generate config.nice for easy re-run of configure. [Roy Fielding]
+
   *) Define preprocessor flags in CPPFLAGS instead of CFLAGS and
      bring some sanity to the compiler command-lines. [Roy Fielding]
 
