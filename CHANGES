@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) AIX: Fix breakage with 64-bit builds on versions of AIX prior
+     to 5L.  PR 7957  [Jeff Trawick]
+
   *) On socket write functions (apr_sendfile, apr_send, apr_sendv),
      added a select to wait for writability on the socket if the
      previous write was incomplete.  [Jeff Trawick, Brian Pane]

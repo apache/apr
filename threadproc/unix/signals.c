@@ -347,21 +347,22 @@ APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
      * off manually.
      *
      * Note that the private fields differ between 32-bit and 64-bit
-     * and even between _ALL_SOURCE and !_ALL_SOURCE.
+     * and even between _ALL_SOURCE and !_ALL_SOURCE.  Except that on
+     * AIX 4.3 32-bit builds and 64-bit builds use the same definition.
      *
      * Applicable AIX fixes such that this is no longer needed:
      *
-     * APAR IY23096 for AIX 51B, fix  included in AIX 51C, and
+     * APAR IY23096 for AIX 51B, fix included in AIX 51C, and
      * APAR IY24162 for 43X.
      */
 #if defined(_AIX)
-#ifdef __64BIT__
+#if defined(__64BIT__) && defined(_AIXVERSION_510)
 #ifdef _ALL_SOURCE
         sig_mask.ss_set[3] &= 0x7FFFFFFF;
 #else /* not _ALL_SOURCE */
         sig_mask.__ss_set[3] &= 0x7FFFFFFF;
 #endif
-#else /* not 64-bit build */
+#else /* not 64-bit build, or 64-bit build on 4.3 */
 #ifdef _ALL_SOURCE
         sig_mask.hisigs &= 0x7FFFFFFF;
 #else /* not _ALL_SOURCE */
