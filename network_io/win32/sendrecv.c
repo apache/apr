@@ -179,22 +179,14 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from,
 {
     apr_ssize_t rv;
 
-    if (from == NULL){
-        return APR_ENOMEM;
-        /* Not sure if this is correct.  Maybe we should just allocate
-           the memory??
-         */
-    }
-
     rv = recvfrom(sock->sock, buf, (*len), flags, 
                   (struct sockaddr*)&from->sa, &from->salen);
     if (rv == SOCKET_ERROR) {
         (*len) = 0;
         return apr_get_netos_error();
     }
-
     (*len) = rv;
-    if (rv == 0)
+    if (rv == 0 && sock->type == SOCK_STREAM)
         return APR_EOF;
 
     return APR_SUCCESS;
