@@ -95,7 +95,7 @@ APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *groupid, const char *groupn
     struct group grp;
     char grbuf[512];
 
-    if (getgrnam_r(&grpname, &gr, grbuf, sizeof(grbuf))) {
+    if (getgrnam_r(groupname, &grp, grbuf, sizeof(grbuf), &gr)) {
 #else
     if ((gr = getgrnam(groupname)) == NULL) {
 #endif
