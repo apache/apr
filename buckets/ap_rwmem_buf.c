@@ -86,9 +86,10 @@ static ap_status_t rwmem_split(ap_bucket *e, ap_size_t nbyte)
     ap_bucket *newbuck;
     ap_bucket_rwmem *a = (ap_bucket_rwmem *)e;
     ap_bucket_rwmem *b;
+    ap_ssize_t dump; 
 
-    newbuck = ap_bucket_rwmem_create();
-    b = (ap_bucket_rwmem *)newbuck;
+    newbuck = ap_bucket_rwmem_create(a->alloc_addr, a->alloc_len, &dump);
+    b = (ap_bucket_rwmem *)newbuck->data;
 
     b->alloc_addr = a->alloc_addr;
     b->alloc_len = a->alloc_len;
@@ -141,7 +142,8 @@ static ap_status_t rwmem_insert(ap_bucket *e, const void *buf,
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(void)
+APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(const void *buf,
+                                ap_size_t nbyte, ap_ssize_t *w)
 {
     ap_bucket *newbuf;
     ap_bucket_rwmem *b;
@@ -154,13 +156,15 @@ APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(void)
     b->start      = b->alloc_addr;
     b->end        = b->alloc_addr;
 
+    newbuf->data       = b;
+    rwmem_insert(newbuf, buf, nbyte, w); 
+
     newbuf->color      = AP_BUCKET_rwmem;
     newbuf->read       = rwmem_get_str;
     newbuf->getlen     = rwmem_get_len;
     newbuf->write      = rwmem_insert;
     newbuf->split      = rwmem_split;
     newbuf->free       = rwmem_destroy;
-    newbuf->data       = b;
 
     return newbuf;
 }

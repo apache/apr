@@ -57,8 +57,8 @@
 
 #include "apr_mmap.h"
 #include "apr_errno.h"
-#include "../../../include/ap_iol.h"
 #include "apr_private.h"
+#include "../../../include/ap_iol.h"
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>	/* for struct iovec */
 #endif
@@ -249,13 +249,17 @@ APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b);
 /****** Functions to Create Buckets of varying type ******/
 
 /* Create a read/write memory bucket */
-APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(void);
+APR_EXPORT(ap_bucket *) ap_bucket_rwmem_create(const void *buf,
+                                ap_size_t nbyte, ap_ssize_t *w);
+
 
 /* Create a mmap memory bucket */
-APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(void);
+APR_EXPORT(ap_bucket *) ap_bucket_mmap_create(const void *buf,
+                                      ap_size_t nbytes, ap_ssize_t *w);
 
 /* Create a read only memory bucket. */
-APR_EXPORT(ap_bucket *) ap_bucket_rmem_create(void);
+APR_EXPORT(ap_bucket *) ap_bucket_rmem_create(const void *buf,
+                               ap_size_t nbyte, ap_ssize_t *w);
 
 /* Create an End of Stream bucket */
 APR_EXPORT(ap_bucket *) ap_bucket_eos_create(void);

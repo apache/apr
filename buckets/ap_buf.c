@@ -258,8 +258,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
             break;
         j = strlen(x);
        
-        r = ap_bucket_rwmem_create();
-        rv = r->write(r, x, j, &i);
+        r = ap_bucket_rwmem_create(x, j, &i);
         if (i != j) {
             /* Do we need better error reporting?  */
             return -1;
@@ -294,8 +293,7 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
 
     res = ap_vsnprintf(buf, 4096, fmt, va);
 
-    r = ap_bucket_rwmem_create();
-    res = r->write(r, buf, strlen(buf), &i);
+    r = ap_bucket_rwmem_create(buf, strlen(buf), &i);
     ap_bucket_brigade_append_buckets(b, r);
 
     return res;
