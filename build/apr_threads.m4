@@ -117,7 +117,7 @@ APR_PTHREADS_CHECK_COMPILE
 AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
 ac_cv_pthreads_cflags=""
 if test "$pthreads_working" != "yes"; then
-  for flag in -kthread -pthread -pthreads -mthreads -Kthread -threads -mt; do 
+  for flag in -kthread -pthread -pthreads -mthreads -Kthread -threads; do 
     ac_save="$CFLAGS"
     CFLAGS="$CFLAGS $flag"
     APR_PTHREADS_CHECK_COMPILE
