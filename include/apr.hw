@@ -157,6 +157,11 @@
 #define APR_USE_PROC_PTHREAD_SERIALIZE    0 
 #define APR_USE_PTHREAD_SERIALIZE         0 
 
+#define APR_HAS_FLOCK_SERIALIZE           0
+#define APR_HAS_SYSVSEM_SERIALIZE         0
+#define APR_HAS_FCNTL_SERIALIZE           0
+#define APR_HAS_PROC_PTHREAD_SERIALIZE    0
+
 #define APR_HAS_LOCK_CREATE_NP            0
 
 #define APR_PROCESS_LOCK_IS_GLOBAL        0
