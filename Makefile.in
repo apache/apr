@@ -1,6 +1,7 @@
 #
 # APR (Apache Portable Runtime) library Makefile.
 #
+CPP = @CPP@
 
 #
 # Macros for supporting directories
