@@ -71,18 +71,24 @@ extern "C" {
  */
 
 /**
- * @package APR Table library
+ * @file apr_tables.h
+ * @brief APR Table library
  */
-
-/*
+/**
+ * @defgroup APR_Table Table routines
+ * @ingroup APR
+ *
  * Memory allocation stuff, like pools, arrays, and tables.  Pools
  * and tables are opaque structures to applications, but arrays are
  * published.
+ * @{
  */
+/** the table abstract data type */
 typedef struct apr_table_t apr_table_t;
-typedef struct apr_array_header_t apr_array_header_t;
 
 /** An opaque array type */
+typedef struct apr_array_header_t apr_array_header_t;
+
 struct apr_array_header_t {
     /** The pool the array is allocated out of */
     apr_pool_t *pool;
@@ -130,7 +136,6 @@ struct apr_table_entry_t {
  * Get the elements from a table
  * @param t The table
  * @return An array containing the contents of the table
- * @deffunc apr_array_header_t *apr_table_elts(apr_table_t *t)
  */
 #define apr_table_elts(t) ((apr_array_header_t *)(t))
 
@@ -138,7 +143,6 @@ struct apr_table_entry_t {
  * Determine if the table is empty
  * @param t The table to check
  * @return True if empty, Falso otherwise
- * @deffunc int apr_is_empty_table(apr_table_t *t)
  */
 #define apr_is_empty_table(t) (((t) == NULL) \
                                || (((apr_array_header_t *)(t))->nelts == 0))
@@ -149,7 +153,6 @@ struct apr_table_entry_t {
  * @param nelts the number of elements in the initial array
  * @param elt_size The size of each element in the array.
  * @return The new array
- * @deffunc apr_array_header_t *apr_array_make(apr_pool_t *p, int nelts, int elt_size)
  */
 APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
                                                  int nelts, int elt_size);
@@ -158,9 +161,8 @@ APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
  * Add a new element to an array
  * @param arr The array to add an element to.
  * @return Location for the new element in the array.
- * @tip If there are no free spots in the array, then this function will
- *      allocate new space for the new element.
- * @deffunc void *apr_array_push(apr_array_header_t *arr)
+ * @remark If there are no free spots in the array, then this function will
+ *         allocate new space for the new element.
  */
 APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr);
 
@@ -169,7 +171,6 @@ APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr);
  * @param dst The destination array, and the one to go first in the combined 
  *            array
  * @param src The source array to add to the destination array
- * @deffunc void apr_array_cat(apr_array_header_t *dst, const apr_array_header_t *src)
  */
 APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
 			        const apr_array_header_t *src);
@@ -179,10 +180,9 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
- * @deffunc apr_array_header_t *apr_array_copy(apr_pool_t *p, const apr_array_header_t *arr)
- * @tip The alternate apr_array_copy_hdr copies only the header, and arranges 
- * for the elements to be copied if (and only if) the code subsequently does 
- * a push or arraycat.
+ * @remark The alternate apr_array_copy_hdr copies only the header, and arranges 
+ *         for the elements to be copied if (and only if) the code subsequently
+ *         does a push or arraycat.
  */
 APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
                                       const apr_array_header_t *arr);
@@ -192,8 +192,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
  * @param p The pool to allocate the copy of the array out of
  * @param arr The array to copy
  * @return An exact copy of the array passed in
- * @deffunc apr_array_header_t *apr_array_copy_hdr(apr_pool_t *p, const apr_array_header_t *arr)
- * @tip The alternate apr_array_copy copies the *entire* array.
+ * @remark The alternate apr_array_copy copies the *entire* array.
  */
 APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(apr_pool_t *p,
                                       const apr_array_header_t *arr);
@@ -204,7 +203,6 @@ APR_DECLARE(apr_array_header_t *) apr_array_copy_hdr(apr_pool_t *p,
  * @param first The array to put first in the new array.
  * @param second The array to put second in the new array.
  * @param return A new array containing the data from the two arrays passed in.
- * @deffunc apr_array_header_t *apr_array_append(apr_pool_t *p, const apr_array_header_t *first, const apr_array_header_t *second)
 */
 APR_DECLARE(apr_array_header_t *) apr_array_append(apr_pool_t *p,
                                       const apr_array_header_t *first,
@@ -220,7 +218,6 @@ APR_DECLARE(apr_array_header_t *) apr_array_append(apr_pool_t *p,
  * @param arr The array to generate the string from
  * @param sep The separator to use
  * @return A string containing all of the data in the array.
- * @deffunc char *apr_array_pstrcat(apr_pool_t *p, const apr_array_header_t *arr, const char sep)
  */
 APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
 				      const apr_array_header_t *arr,
@@ -232,7 +229,6 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
  * @param nelts The number of elements in the initial table.
  * @return The new table.
  * @warning This table can only store text data
- * @deffunc apr_table_t *apr_table_make(apr_pool_t *p, int nelts)
  */
 APR_DECLARE(apr_table_t *) apr_table_make(apr_pool_t *p, int nelts);
 
@@ -241,7 +237,6 @@ APR_DECLARE(apr_table_t *) apr_table_make(apr_pool_t *p, int nelts);
  * @param p The pool to allocate the new table out of
  * @param t The table to copy
  * @return A copy of the table passed in
- * @deffunc apr_table_t *apr_table_copy(apr_pool_t *p, const apr_table_t *t)
  */
 APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p,
                                           const apr_table_t *t);
@@ -249,7 +244,6 @@ APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p,
 /**
  * Delete all of the elements from a table
  * @param t The table to clear
- * @deffunc void apr_table_clear(apr_table_t *t)
  */
 APR_DECLARE(void) apr_table_clear(apr_table_t *t);
 
@@ -259,7 +253,6 @@ APR_DECLARE(void) apr_table_clear(apr_table_t *t);
  * @param t The table to search for the key
  * @param key The key to search for
  * @return The value associated with the key
- * @deffunc const char *apr_table_get(const apr_table_t *t, const char *key)
  */
 APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
 
@@ -269,9 +262,8 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key);
  * @param t The table to add the data to.
  * @param key The key fo use
  * @param val The value to add
- * @tip When adding data, this function makes a copy of both the key and the
- *      value.
- * @deffunc void apr_table_set(apr_table_t *t, const char *key, const char *val)
+ * @remark When adding data, this function makes a copy of both the key and the
+ *         value.
  */
 APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
                                 const char *val);
@@ -282,10 +274,9 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
  * @param t The table to add the data to.
  * @param key The key fo use
  * @param val The value to add
- * @tip When adding data, this function does not make a copy of the key or the
- *      value, so care should be taken to ensure that the values will not 
- *      change after they have been added..
- * @deffunc void apr_table_setn(apr_table_t *t, const char *key, const char *val)
+ * @warning When adding data, this function does not make a copy of the key or 
+ *          the value, so care should be taken to ensure that the values will 
+ *          not change after they have been added..
  */
 APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
                                  const char *val);
@@ -294,7 +285,6 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
  * Remove data from the table
  * @param t The table to remove data from
  * @param key The key of the data being removed
- * @deffunc void apr_table_unset(apr_table_t *t, const char *key)
  */
 APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
 
@@ -304,8 +294,7 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key);
  * @param t The table to search for the data
  * @param key The key to merge data for
  * @param val The data to add
- * @tip If the key is not found, then this function acts like apr_table_add
- * @deffunc void apr_table_merge(apr_table_t *t, const char *key, const char *val)
+ * @remark If the key is not found, then this function acts like apr_table_add
  */
 APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
                                   const char *val);
@@ -316,8 +305,7 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
  * @param t The table to search for the data
  * @param key The key to merge data for
  * @param val The data to add
- * @tip If the key is not found, then this function acts like apr_table_addn
- * @deffunc void apr_table_mergen(apr_table_t *t, const char *key, const char *val)
+ * @remark If the key is not found, then this function acts like apr_table_addn
  */
 APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
                                    const char *val);
@@ -328,9 +316,8 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
  * @param t The table to add to
  * @param key The key to use
  * @param val The value to add.
- * @tip When adding data, this function makes a copy of both the key and the
- *      value.
- * @deffunc void apr_table_add(apr_table_t *t, const char *key, const char *val)
+ * @remark When adding data, this function makes a copy of both the key and the
+ *         value.
  */
 APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
                                 const char *val);
@@ -341,10 +328,9 @@ APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
  * @param t The table to add to
  * @param key The key to use
  * @param val The value to add.
- * @tip When adding data, this function does not make a copy of the key or the
- *      value, so care should be taken to ensure that the values will not 
- *      change after they have been added..
- * @deffunc void apr_table_addn(apr_table_t *t, const char *key, const char *val)
+ * @remark When adding data, this function does not make a copy of the key or the
+ *         value, so care should be taken to ensure that the values will not 
+ *         change after they have been added..
  */
 APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
                                  const char *val);
@@ -355,7 +341,6 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
  * @param overlay The first table to put in the new table
  * @param base The table to add at the end of the new table
  * @return A new table containing all of the data from the two passed in
- * @deffunc apr_table_t *apr_table_overlay(apr_pool_t *p, const apr_table_t *overlay, const apr_table_t *base);
  */
 APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
                                              const apr_table_t *overlay,
@@ -373,7 +358,6 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
  * @param ... The vararg.  If this is NULL, then all elements in the table are
  *            run through the function, otherwise only those whose key matches
  *            are run.
- * @deffunc void apr_table_do(int (*comp) (void *, const char *, const char *), void *rec, const apr_table_t *t, ...)
  */
 APR_DECLARE_NONSTD(void) apr_table_do(int (*comp)(void *, const char *, const char *),
                              void *rec, const apr_table_t *t, ...);
@@ -390,12 +374,28 @@ APR_DECLARE_NONSTD(void) apr_table_do(int (*comp)(void *, const char *, const ch
  * @param vp The vararg table.  If this is NULL, then all elements in the 
  *                table are run through the function, otherwise only those 
  *                whose key matches are run.
- * @deffunc void apr_table_vdo(int (*comp) (void *, const char *, const char *), void *rec, const apr_table_t *t, va_list vp)
  */
 APR_DECLARE(void) apr_table_vdo(int (*comp)(void *, const char *, const char *),
                                 void *rec, const apr_table_t *t, va_list);
 
-/* Conceptually, apr_table_overlap does this:
+/** flag for overlap to use apr_table_setn */
+#define APR_OVERLAP_TABLES_SET   (0)
+/** flag for overlap to use apr_table_mergen */
+#define APR_OVERLAP_TABLES_MERGE (1)
+/**
+ * For each element in table b, either use setn or mergen to add the data
+ * to table a.  Which method is used is determined by the flags passed in.
+ * @param a The table to add the data to.
+ * @param b The table to iterate over, adding its data to table a
+ * @param flags How to add the table to table a.  One of:
+ *          APR_OVERLAP_TABLES_SET        Use apr_table_setn
+ *          APR_OVERLAP_TABLES_MERGE      Use apr_table_mergen
+ * @remark  This function is highly optimized, and uses less memory and CPU cycles
+ *          than a function that just loops through table b calling other functions.
+ */
+/**
+ *<PRE>
+ * Conceptually, apr_table_overlap does this:
  *
  *  apr_array_header_t *barr = apr_table_elts(b);
  *  apr_table_entry_t *belt = (apr_table_entry_t *)barr->elts;
@@ -416,24 +416,13 @@ APR_DECLARE(void) apr_table_vdo(int (*comp)(void *, const char *, const char *),
  *  Notice the assumptions on the keys and values in b -- they must be
  *  in an ancestor of a's pool.  In practice b and a are usually from
  *  the same pool.
+ * </PRE>
  */
-#define APR_OVERLAP_TABLES_SET   (0)
-#define APR_OVERLAP_TABLES_MERGE (1)
-/**
- * For each element in table b, either use setn or mergen to add the data
- * to table a.  Which method is used is determined by the flags passed in.
- * @param a The table to add the data to.
- * @param b The table to iterate over, adding its data to table a
- * @param flags How to add the table to table a.  One of:
- *          APR_OVERLAP_TABLES_SET        Use apr_table_setn
- *          APR_OVERLAP_TABLES_MERGE      Use apr_table_mergen
- * @tip This function is highly optimized, and uses less memory and CPU cycles
- *      than a function that just loops through table b calling other functions.
- * @deffunc void apr_table_overlap(apr_table_t *a, const apr_table_t *b, unsigned flags)
- */
+
 APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
                                      unsigned flags);
 
+/** @} */
 #ifdef __cplusplus
 }
 #endif

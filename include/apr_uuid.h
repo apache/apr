@@ -54,7 +54,7 @@
 
 /**
  * @file apr_uuid.h
- * @brief routines that maninpulate UUID's
+ * @brief APR UUID library
  */
 #ifndef APR_UUID_H
 #define APR_UUID_H

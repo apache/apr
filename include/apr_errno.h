@@ -67,7 +67,7 @@ extern "C" {
 
 /**
  * @file apr_errno.h
- * @brief Error Codes
+ * @brief APR Error Codes
  */
 /**
  * @defgroup APR_Error_Codes Error Codes
