@@ -222,6 +222,11 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
         apr_set_option(&(*new)->netmask, APR_TCP_NODELAY, 1);
     }
 #endif /* TCP_NODELAY_INHERITED */
+#if APR_O_NONBLOCK_INHERITED
+    if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) == 1) {
+        apr_set_option(&(*new)->netmask, APR_SO_NONBLOCK, 1);
+    }
+#endif /* APR_O_NONBLOCK_INHERITED */
 
     if (sock->local_interface_unknown ||
         !memcmp(sock->local_addr->ipaddr_ptr,
