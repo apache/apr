@@ -110,7 +110,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         used_unget = TRUE;
         *(char *)buf++ = (char)thefile->ungetchar;
         (*nbytes)--;
-        thefile->ungetchar == -1;
+        thefile->ungetchar = -1;
     }
 	  
     do {
