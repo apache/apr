@@ -1142,7 +1142,7 @@ if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
 elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
     off_t_fmt='#define APR_OFF_T_FMT "ld"'
 elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
-    off_t_fmt='#define APR_OFF_T_FMT "qd"'
+    off_t_fmt='#define APR_OFF_T_FMT $int64_t_fmt'
 else
     off_t_fmt='#error Can not determine the proper size for off_t'
 fi
@@ -1154,7 +1154,7 @@ if test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_int"; then
 elif test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_long"; then
     pid_t_fmt='#define APR_PID_T_FMT "ld"'
 elif test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_long_long"; then
-    pid_t_fmt='#define APR_PID_T_FMT "qd"'
+    pid_t_fmt='#define APR_PID_T_FMT $int64_t_fmt'
 else
     pid_t_fmt='#error Can not determine the proper size for pid_t'
 fi
@@ -1216,6 +1216,12 @@ AC_CHECK_FUNCS(strdup, have_strdup="1", have_strdup="0")
 AC_CHECK_FUNCS(strstr, have_strstr="1", have_strstr="0")
 AC_CHECK_FUNCS(memchr, have_memchr="1", have_memchr="0")
 AC_CHECK_FUNCS($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
+
+dnl #----------------------------- We have a fallback position
+if test ("$have_int64_strfn" = "0") -a ("int64_strfn" = "strtoll"); then
+    int64_strfn = "strtoq"
+    AC_CHECK_FUNCS($int64_strfn, have_int64_strfn="1", have_int64_strfn="0")
+fi
 
 AC_SUBST(have_strnicmp)
 AC_SUBST(have_strncasecmp)
