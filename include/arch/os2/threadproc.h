@@ -74,7 +74,7 @@ struct apr_thread_t {
     unsigned long tid;
     apr_thread_start_t func;
     void *data;
-    void *rv;
+    apr_status_t rv;
 };
 
 struct apr_threadkey_t {
