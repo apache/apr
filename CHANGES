@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Re-enable IPv6 on Darwin 6.6 (and higher) as getaddrinfo() looks to be
+     doing the right things with IPv4-mapped addresses.  [Justin Erenkrantz]
+
   *) Add apr_temp_dir_get() for getting the most suitable temp directory
      [CMike Pilato <cmpilato@collab.net>, Thom May]
 
