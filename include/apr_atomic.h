@@ -165,6 +165,7 @@ typedef LONG apr_atomic_t;
 #define apr_atomic_read(mem)         (*mem)
 #define apr_atomic_cas(mem,with,cmp) InterlockedCompareExchange(mem,with,cmp)
 #define apr_atomic_init(pool)        APR_SUCCESS
+#define apr_atomic_casptr(mem,with,cmp) InterlockedCompareExchangePointer(mem,with,cmp)
 
 #elif defined(NETWARE)
 
