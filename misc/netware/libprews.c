@@ -9,8 +9,23 @@
   provide.
 ------------------------------------------------------------------*/
 #include <netware.h>
-//#include "stddef.h"
+#include <library.h>
+#include <nks/synch.h>
 #include "ws2nlm.h"
+
+#include "apr_pools.h"
+
+typedef struct app_data {
+    int     initialized;
+} APP_DATA;
+
+/* library-private data...*/
+int          gLibId = -1;
+void         *gLibHandle = (void *) NULL;
+NXMutex_t    *gLibLock = (NXMutex_t *) NULL;
+
+/* internal library function prototypes...*/
+int DisposeLibraryData(void *);
 
 int _NonAppStart
 (
@@ -28,6 +43,8 @@ int _NonAppStart
     const char  **messages
 )
 {
+    NX_LOCK_INFO_ALLOC(liblock, "Per-Application Data Lock", 0);
+
 #pragma unused(cmdLine)
 #pragma unused(loadDirPath)
 #pragma unused(uninitializedDataLength)
@@ -39,16 +56,94 @@ int _NonAppStart
 #pragma unused(messages)
 
     WSADATA wsaData;
+    apr_status_t status;
     
+    gLibId = register_library(DisposeLibraryData);
+
+    if (gLibId < -1)
+    {
+        OutputToScreen(errorScreen, "Unable to register library with kernel.\n");
+        return -1;
+    }
+
+    gLibHandle = NLMHandle;
+
+    gLibLock = NXMutexAlloc(0, 0, &liblock);
+
+    if (!gLibLock)
+    {
+        OutputToScreen(errorScreen, "Unable to allocate library data lock.\n");
+        return -1;
+    }
+
+    apr_netware_setup_time();
+
+    if ((status = apr_pool_initialize()) != APR_SUCCESS)
+        return status;
+
     return WSAStartup((WORD) MAKEWORD(2, 0), &wsaData);
 }
 
 void _NonAppStop( void )
 {
+    apr_pool_terminate();
+
     WSACleanup();
+
+    unregister_library(gLibId);
+    NXMutexFree(gLibLock);
 }
 
 int  _NonAppCheckUnload( void )
 {
-	return 0;
+    return 0;
 }
+
+int register_NLM(void *NLMHandle)
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
+
+    NXLock(gLibLock);
+    if (!app_data) {
+        app_data = (APP_DATA*)library_malloc(gLibHandle, sizeof(APP_DATA));
+
+        if (app_data) {
+            memset (app_data, 0, sizeof(APP_DATA));
+            set_app_data(gLibId, app_data);
+        }
+    }
+
+    if (app_data && (!app_data->initialized)) {
+        app_data->initialized = 1;
+        NXUnlock(gLibLock);
+        return 0;
+    }
+
+    NXUnlock(gLibLock);
+    return 1;
+}
+
+int unregister_NLM(void *NLMHandle)
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
+
+    NXLock(gLibLock);
+    if (app_data) {
+        app_data->initialized = 0;
+        NXUnlock(gLibLock);
+        return 0;
+    }
+    NXUnlock(gLibLock);
+    return 1;
+}
+
+int DisposeLibraryData(void *data)
+{
+    if (data)
+    {
+        library_free(data);
+    }
+
+    return 0;
+}
+
