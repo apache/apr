@@ -62,6 +62,9 @@
 #include "apr_file_io.h"
 #include "apr_thread_proc.h"
 
+#if APR_HAVE_CTYPE_H
+#include <ctype.h>
+#endif
 #if APR_HAVE_STDARG_H
 #include <stdarg.h>
 #endif
@@ -117,6 +120,7 @@ APR_EXPORT(const char *) ap_filename_of_pathname(const char *pathname);
 #define ap_isdigit(c) (isdigit(((unsigned char)(c))))
 #define ap_isgraph(c) (isgraph(((unsigned char)(c))))
 #define ap_islower(c) (islower(((unsigned char)(c))))
+#define ap_isascii(c) (isascii(((unsigned char)(c))))
 #define ap_isprint(c) (isprint(((unsigned char)(c))))
 #define ap_ispunct(c) (ispunct(((unsigned char)(c))))
 #define ap_isspace(c) (isspace(((unsigned char)(c))))
