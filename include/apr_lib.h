@@ -212,9 +212,9 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *b),
  * Validate any password encypted with any algorithm that APR understands
  * @param passwd The password to validate
  * @param hash The password to validate against
- * @deffunc apr_status_t apr_validate_password(const char *passwd, const char *hash)
+ * @deffunc apr_status_t apr_password_validate(const char *passwd, const char *hash)
  */
-APR_DECLARE(apr_status_t) apr_validate_password(const char *passwd, 
+APR_DECLARE(apr_status_t) apr_password_validate(const char *passwd, 
                                                 const char *hash);
 
 /*
@@ -264,9 +264,9 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, size_t len, const char *format,
  * @param prompt The prompt to display
  * @param pwbuf Where to store the password
  * @param bufsize The length of the password string.
- * @deffunc apr_status_t apr_getpass(const char *prompt, char *pwbuf, size_t *bufsize)
+ * @deffunc apr_status_t apr_password_get(const char *prompt, char *pwbuf, size_t *bufsize)
  */
-APR_DECLARE(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, 
+APR_DECLARE(apr_status_t) apr_password_get(const char *prompt, char *pwbuf, 
                                       size_t *bufsize);
 
 #ifdef __cplusplus

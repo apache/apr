@@ -82,7 +82,7 @@ int main(void)
         exit(-1);
     }
     atexit(closeapr);
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -90,8 +90,8 @@ int main(void)
     fprintf(stdout, "Testing pipe functions.\n");
 
     fprintf(stdout, "\tCreating pipes.......");
-    if ((rv = apr_create_pipe(&readp, &writep, context)) != APR_SUCCESS) {
-        fprintf(stderr, "apr_create_pipe()->%d/%s\n",
+    if ((rv = apr_file_pipe_create(&readp, &writep, context)) != APR_SUCCESS) {
+        fprintf(stderr, "apr_file_pipe_create()->%d/%s\n",
                 rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
     }
@@ -100,8 +100,8 @@ int main(void)
     }
     
     fprintf(stdout, "\tSetting pipe timeout.......");
-    if ((rv = apr_set_pipe_timeout(readp, 1 * APR_USEC_PER_SEC)) != APR_SUCCESS) {
-        fprintf(stderr, "apr_set_pipe_timeout()->%d/%s\n",
+    if ((rv = apr_file_pipe_timeout_set(readp, 1 * APR_USEC_PER_SEC)) != APR_SUCCESS) {
+        fprintf(stderr, "apr_file_pipe_timeout_set()->%d/%s\n",
                 rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
     } else {
@@ -111,7 +111,7 @@ int main(void)
     fprintf(stdout, "\tReading from the pipe.......");
     nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(context, nbytes + 1);
-    if (apr_read(readp, buf, &nbytes) == APR_TIMEUP) {
+    if (apr_file_read(readp, buf, &nbytes) == APR_TIMEUP) {
         fprintf(stdout, "OK\n");
     }
     else {

@@ -58,7 +58,7 @@
 #include "apr_strings.h"
 #include <string.h>
 
-APR_DECLARE(apr_status_t) apr_dupfile(apr_file_t **new_file,
+APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                       apr_file_t *old_file, apr_pool_t *p)
 {
     BOOLEAN isStdHandle = FALSE;
@@ -109,8 +109,8 @@ APR_DECLARE(apr_status_t) apr_dupfile(apr_file_t **new_file,
     (*new_file)->buffered = FALSE;
 
     if (!isStdHandle) {
-        apr_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
-                            apr_null_cleanup);
+        apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
+                            apr_pool_cleanup_null);
     }
 
     return APR_SUCCESS;

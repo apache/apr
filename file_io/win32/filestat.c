@@ -154,28 +154,28 @@ static int resolve_ident(apr_finfo_t *finfo, const char *fname,
      * user, group or permissions.
      */
     
-    if ((rv = apr_open(&thefile, fname, 
+    if ((rv = apr_file_open(&thefile, fname, 
                        ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0)
                      | ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
                            ? APR_READCONTROL : 0),
                        APR_OS_DEFAULT, cont)) == APR_SUCCESS) {
-        rv = apr_getfileinfo(finfo, wanted, thefile);
+        rv = apr_file_info_get(finfo, wanted, thefile);
         finfo->filehand = NULL;
-        apr_close(thefile);
+        apr_file_close(thefile);
     }
     else if (APR_STATUS_IS_EACCES(rv) && (wanted & (APR_FINFO_PROT 
                                                   | APR_FINFO_OWNER))) {
         /* We have a backup plan.  Perhaps we couldn't grab READ_CONTROL?
          * proceed without asking for that permission...
          */
-        if ((rv = apr_open(&thefile, fname, 
+        if ((rv = apr_file_open(&thefile, fname, 
                            ((wanted & APR_FINFO_LINK) ? APR_OPENLINK : 0),
                            APR_OS_DEFAULT, cont)) == APR_SUCCESS) {
-            rv = apr_getfileinfo(finfo, wanted & ~(APR_FINFO_PROT 
+            rv = apr_file_info_get(finfo, wanted & ~(APR_FINFO_PROT 
                                                  | APR_FINFO_OWNER),
                                  thefile);
             finfo->filehand = NULL;
-            apr_close(thefile);
+            apr_file_close(thefile);
         }
     }
     if (rv != APR_SUCCESS && rv != APR_INCOMPLETE)
@@ -246,8 +246,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
         if (rv == ERROR_SUCCESS)
-            apr_register_cleanup(finfo->cntxt, pdesc, free_localheap, 
-                                 apr_null_cleanup);
+            apr_pool_cleanup_register(finfo->cntxt, pdesc, free_localheap, 
+                                 apr_pool_cleanup_null);
         else
             user = grp = dacl = NULL;
 
@@ -322,7 +322,7 @@ void fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo,
 }
 
 
-APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
+APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, apr_int32_t wanted,
                                           apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInfo;
@@ -374,7 +374,7 @@ APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_setfileperms(const char *fname,
+APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
                                            apr_fileperms_t perms)
 {
     return APR_ENOTIMPL;

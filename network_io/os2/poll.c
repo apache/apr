@@ -62,7 +62,7 @@
 
 /*  OS/2 doesn't have a poll function, implement using OS/2 style select */
  
-apr_status_t apr_setup_poll(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
+apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
     *new = (apr_pollfd_t *)apr_palloc(cont, sizeof(apr_pollfd_t));
 
@@ -93,7 +93,7 @@ apr_status_t apr_setup_poll(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *con
 
 
 
-apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset, 
+apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset, 
 			       apr_socket_t *sock, apr_int16_t events)
 {
     int i;
@@ -129,7 +129,7 @@ apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
 {
     int i;
     int rv = 0;
-    apr_time_t starttime = apr_now();
+    apr_time_t starttime = apr_time_now();
 
     do {
         for (i=0; i<pollfdset->num_total; i++) {
@@ -143,7 +143,7 @@ apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
                     timeout >= 0 ? timeout / 1000 : -1);
 
         if (rv < 0 && sock_errno() == SOCEINTR && timeout >= 0 ) {
-            apr_interval_time_t elapsed = apr_now() - starttime;
+            apr_interval_time_t elapsed = apr_time_now() - starttime;
 
             if (timeout <= elapsed)
                 break;
@@ -158,7 +158,7 @@ apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
 
 
 
-apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
+apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
 {
     int i;
     
@@ -180,7 +180,7 @@ apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_
 
 
 
-apr_status_t apr_mask_poll_socket(apr_pollfd_t *aprset, 
+apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset, 
                                 apr_socket_t *sock, apr_int16_t events)
 {
     int start, *count, pos;
@@ -218,7 +218,7 @@ apr_status_t apr_mask_poll_socket(apr_pollfd_t *aprset,
 
 
 
-apr_status_t apr_remove_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock)
+apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
-    return apr_mask_poll_socket(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
+    return apr_poll_socket_mask(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
 }

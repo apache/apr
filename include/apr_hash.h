@@ -97,9 +97,9 @@ typedef struct apr_hash_index_t apr_hash_index_t;
  * Create a hash table.
  * @param pool The pool to allocate the hash table out of
  * @return The hash table just created
- * @deffunc apr_hash_t *apr_make_hash(apr_pool_t *pool)
+ * @deffunc apr_hash_t *apr_hash_make(apr_pool_t *pool)
  */
-APR_DECLARE(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
+APR_DECLARE(apr_hash_t *) apr_hash_make(apr_pool_t *pool);
 
 /**
  * Associate a value with a key in a hash table.

@@ -61,7 +61,7 @@
 #include <sys/file.h>
 #endif
 
-apr_status_t apr_lock_file(apr_file_t *thefile, int type)
+apr_status_t apr_file_lock(apr_file_t *thefile, int type)
 {
     int rc;
 
@@ -112,7 +112,7 @@ apr_status_t apr_lock_file(apr_file_t *thefile, int type)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_unlock_file(apr_file_t *thefile)
+apr_status_t apr_file_unlock(apr_file_t *thefile)
 {
     int rc;
 

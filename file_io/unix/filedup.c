@@ -56,7 +56,7 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
+apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
     int have_file = 0;
 
@@ -80,14 +80,14 @@ apr_status_t apr_dupfile(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t
     (*new_file)->buffered = old_file->buffered;
     if ((*new_file)->buffered) {
 #if APR_HAS_THREADS
-        apr_create_lock(&((*new_file)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, 
+        apr_lock_create(&((*new_file)->thlock), APR_MUTEX, APR_INTRAPROCESS, NULL, 
                        p);
 #endif
         (*new_file)->buffer = apr_palloc(p, APR_FILE_BUFSIZE);
     }
     (*new_file)->blocking = old_file->blocking; /* this is the way dup() works */
-    apr_register_cleanup((*new_file)->cntxt, (void *)(*new_file), apr_unix_file_cleanup,
-                        apr_null_cleanup);
+    apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*new_file), apr_unix_file_cleanup,
+                        apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 

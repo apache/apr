@@ -63,7 +63,7 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
     DWORD rc;
 
     if (thefile->direction == 1) {
-        apr_flush(thefile);
+        apr_file_flush(thefile);
         thefile->bufpos = thefile->direction = thefile->dataRead = 0;
     }
 
@@ -86,7 +86,7 @@ static apr_status_t setptr(apr_file_t *thefile, unsigned long pos )
 
 
 
-APR_DECLARE(apr_status_t) apr_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
+APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t where, apr_off_t *offset)
 {
     DWORD howmove;
     DWORD rv;
@@ -105,7 +105,7 @@ APR_DECLARE(apr_status_t) apr_seek(apr_file_t *thefile, apr_seek_where_t where, 
             break;
 
         case APR_END:
-            rc = apr_getfileinfo(&finfo, APR_FINFO_SIZE, thefile);
+            rc = apr_file_info_get(&finfo, APR_FINFO_SIZE, thefile);
             if (rc == APR_SUCCESS && (finfo.valid & APR_FINFO_SIZE))
                 rc = setptr(thefile, finfo.size - *offset);
             break;

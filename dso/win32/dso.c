@@ -126,14 +126,14 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     (*res_handle)->cont = ctx;
     (*res_handle)->load_error = APR_SUCCESS;
 
-    apr_register_cleanup(ctx, *res_handle, dso_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register(ctx, *res_handle, dso_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
     
 APR_DECLARE(apr_status_t) apr_dso_unload(struct apr_dso_handle_t *handle)
 {
-    return apr_run_cleanup(handle->cont, handle, dso_cleanup);
+    return apr_pool_cleanup_run(handle->cont, handle, dso_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, 

@@ -71,7 +71,7 @@
 
 static apr_other_child_rec_t *other_children = NULL;
 
-APR_DECLARE(void) apr_register_other_child(apr_proc_t *pid,
+APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
                      void (*maintenance) (int reason, void *, int status),
                      void *data, apr_file_t *write_fd, apr_pool_t *p)
 {
@@ -91,7 +91,7 @@ APR_DECLARE(void) apr_register_other_child(apr_proc_t *pid,
     other_children = ocr;
 }
 
-APR_DECLARE(void) apr_unregister_other_child(void *data)
+APR_DECLARE(void) apr_proc_other_child_unregister(void *data)
 {
     apr_other_child_rec_t **pocr, *nocr;
 
@@ -108,7 +108,7 @@ APR_DECLARE(void) apr_unregister_other_child(void *data)
 
 /* test to ensure that the write_fds are all still writable, otherwise
  * invoke the maintenance functions as appropriate */
-void apr_probe_writable_fds(void)
+void apr_proc_probe_writable_fds(void)
 {
     fd_set writable_fds;
     int fd_max;
@@ -156,7 +156,7 @@ void apr_probe_writable_fds(void)
     }
 }
 
-APR_DECLARE(apr_status_t) apr_reap_other_child(apr_proc_t *pid, int status)
+APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status)
 {
     apr_other_child_rec_t *ocr, *nocr;
 
@@ -172,7 +172,7 @@ APR_DECLARE(apr_status_t) apr_reap_other_child(apr_proc_t *pid, int status)
     return APR_CHILD_NOTDONE;
 }
 
-APR_DECLARE(void) apr_check_other_child(void)
+APR_DECLARE(void) apr_proc_other_child_check(void)
 {
     apr_other_child_rec_t *ocr, *nocr;
     pid_t waitret; 

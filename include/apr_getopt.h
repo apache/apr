@@ -115,14 +115,14 @@ struct apr_getopt_option_t {
  * @param argc The number of arguments to parse
  * @param argv The array of arguments to parse
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
- * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
+ * @deffunc apr_status_t apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
  */
-APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
+APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
                                       int argc, const char * const *argv);
 
 /**
- * Parse the options initialized by apr_initopt().
- * @param os     The apr_opt_t structure returned by apr_initopt()
+ * Parse the options initialized by apr_getopt_init().
+ * @param os     The apr_opt_t structure returned by apr_getopt_init()
  * @param opts   A string of characters that are acceptable options to the 
  *               program.  Characters followed by ":" are required to have an 
  *               option associated
@@ -141,10 +141,10 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
                                      char *optch, const char **optarg);
 
 /**
- * Parse the options initialized by apr_initopt(), accepting long
+ * Parse the options initialized by apr_getopt_init(), accepting long
  * options beginning with "--" in addition to single-character
  * options beginning with "-".
- * @param os     The apr_getopt_t structure created by apr_initopt()
+ * @param os     The apr_getopt_t structure created by apr_getopt_init()
  * @param opts   A pointer to a list of apr_getopt_option_t structures, which
  *               can be initialized with { "name", optch, has_args }.  has_args
  *               is nonzero if the option requires an argument.  A structure

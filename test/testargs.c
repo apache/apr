@@ -87,9 +87,9 @@ int main(int argc, const char * const argv[])
 
     apr_initialize();
     atexit(closeapr);
-    apr_create_pool(&context, NULL);
+    apr_pool_create(&context, NULL);
 
-    if (apr_initopt(&opt, context, argc, argv))
+    if (apr_getopt_init(&opt, context, argc, argv))
     {
         printf("failed to initialize opts");
         exit(1);

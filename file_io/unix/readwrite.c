@@ -101,7 +101,7 @@ static apr_status_t wait_for_io_or_timeout(apr_file_t *file, int for_read)
 /* problems: 
  * 1) ungetchar not used for buffered files
  */
-apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
+apr_status_t apr_file_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
 {
     apr_ssize_t rv;
     apr_size_t bytes_read;
@@ -117,11 +117,11 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
         apr_uint64_t size = *nbytes;
 
 #if APR_HAS_THREADS
-        apr_lock(thefile->thlock);
+        apr_lock_aquire(thefile->thlock);
 #endif
 
         if (thefile->direction == 1) {
-            apr_flush(thefile);
+            apr_file_flush(thefile);
             thefile->bufpos = 0;
             thefile->direction = 0;
             thefile->dataRead = 0;
@@ -156,7 +156,7 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
             rv = 0;
         }
 #if APR_HAS_THREADS
-        apr_unlock(thefile->thlock);
+        apr_lock_release(thefile->thlock);
 #endif
         return rv;
     }
@@ -205,7 +205,7 @@ apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_size_t *nbytes)
     }
 }
 
-apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
+apr_status_t apr_file_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 {
     apr_size_t rv;
 
@@ -215,7 +215,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
         int size = *nbytes;
 
 #if APR_HAS_THREADS
-        apr_lock(thefile->thlock);
+        apr_lock_aquire(thefile->thlock);
 #endif
 
         if ( thefile->direction == 0 ) {
@@ -232,7 +232,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
 	rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
-                apr_flush(thefile);
+                apr_file_flush(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? 
                         APR_FILE_BUFSIZE - thefile->bufpos : size;
@@ -243,7 +243,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
         }
 
 #if APR_HAS_THREADS
-        apr_unlock(thefile->thlock);
+        apr_lock_release(thefile->thlock);
 #endif
         return rv;
     }
@@ -276,7 +276,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_size_t *nbytes)
     }
 }
 
-apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec,
+apr_status_t apr_file_writev(apr_file_t *thefile, const struct iovec *vec,
                       apr_size_t nvec, apr_size_t *nbytes)
 {
 #ifdef HAVE_WRITEV
@@ -292,38 +292,38 @@ apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec,
     }
 #else
     *nbytes = vec[0].iov_len;
-    return apr_write(thefile, vec[0].iov_base, nbytes);
+    return apr_file_write(thefile, vec[0].iov_base, nbytes);
 #endif
 }
 
-apr_status_t apr_putc(char ch, apr_file_t *thefile)
+apr_status_t apr_file_putc(char ch, apr_file_t *thefile)
 {
     apr_size_t nbytes = 1;
 
-    return apr_write(thefile, &ch, &nbytes);
+    return apr_file_write(thefile, &ch, &nbytes);
 }
 
-apr_status_t apr_ungetc(char ch, apr_file_t *thefile)
+apr_status_t apr_file_ungetc(char ch, apr_file_t *thefile)
 {
     thefile->ungetchar = (unsigned char)ch;
     return APR_SUCCESS; 
 }
 
-apr_status_t apr_getc(char *ch, apr_file_t *thefile)
+apr_status_t apr_file_getc(char *ch, apr_file_t *thefile)
 {
     apr_size_t nbytes = 1;
 
-    return apr_read(thefile, ch, &nbytes);
+    return apr_file_read(thefile, ch, &nbytes);
 }
 
-apr_status_t apr_puts(const char *str, apr_file_t *thefile)
+apr_status_t apr_file_puts(const char *str, apr_file_t *thefile)
 {
     apr_size_t nbytes = strlen(str);
 
-    return apr_write(thefile, str, &nbytes);
+    return apr_file_write(thefile, str, &nbytes);
 }
 
-apr_status_t apr_flush(apr_file_t *thefile)
+apr_status_t apr_file_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
         apr_int64_t written = 0;
@@ -345,7 +345,7 @@ apr_status_t apr_flush(apr_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
+apr_status_t apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
     apr_status_t rv = APR_SUCCESS; /* get rid of gcc warning */
     apr_size_t nbytes;
@@ -359,7 +359,7 @@ apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
 
     while (str < final) { /* leave room for trailing '\0' */
         nbytes = 1;
-        rv = apr_read(thefile, str, &nbytes);
+        rv = apr_file_read(thefile, str, &nbytes);
         if (rv != APR_SUCCESS) {
             break;
         }
@@ -376,7 +376,7 @@ apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
     return rv;
 }
 
-APR_DECLARE(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
+APR_DECLARE(int) apr_file_printf(apr_file_t *fptr, const char *format, ...)
 {
     apr_status_t cc;
     va_list ap;
@@ -389,7 +389,7 @@ APR_DECLARE(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
     }
     va_start(ap, format);
     len = apr_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
-    cc = apr_puts(buf, fptr);
+    cc = apr_file_puts(buf, fptr);
     va_end(ap);
     free(buf);
     return (cc == APR_SUCCESS) ? len : -1;

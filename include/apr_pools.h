@@ -215,9 +215,9 @@ APR_DECLARE(int) apr_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b);
  *               ever be used outside of APR.
  * @tip Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_initialize. 
- * @deffunc apr_status_t apr_init_alloc(apr_pool_t *globalp)
+ * @deffunc apr_status_t apr_pool_alloc_init(apr_pool_t *globalp)
  */
-APR_DECLARE(apr_status_t) apr_init_alloc(apr_pool_t *globalp);
+APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *globalp);
 
 /**
  * Tear down all of the internal structures required to use pools
@@ -226,9 +226,9 @@ APR_DECLARE(apr_status_t) apr_init_alloc(apr_pool_t *globalp);
  *               ever be used outside of APR.
  * @tip Programs do NOT need to call this directly.  APR will call this
  *      automatically from apr_terminate. 
- * @deffunc void apr_term_alloc(apr_pool_t *globalp)
+ * @deffunc void apr_pool_alloc_term(apr_pool_t *globalp)
  */
-APR_DECLARE(void) apr_term_alloc(apr_pool_t *globalp); 
+APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp); 
  
 /* pool functions */
 
@@ -239,9 +239,9 @@ APR_DECLARE(void) apr_term_alloc(apr_pool_t *globalp);
  *        pool.  If it is non-NULL, the new pool will inherit all
  *        of it's parent pool's attributes, except the apr_pool_t will 
  *        be a sub-pool.
- * @deffunc apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_pool_create(apr_pool_t **newcont, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont,
+APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont,
                                           apr_pool_t *cont);
 
 /**
@@ -258,9 +258,9 @@ APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont,
  *      data by choosing a key that another part of the program is using
  *      It is advised that steps are taken to ensure that a unique
  *      key is used at all times.
- * @deffunc apr_status_t apr_set_userdata(const void *data, const char *key, apr_status_t (*cleanup)(void *), apr_pool_t *cont)
+ * @deffunc apr_status_t apr_pool_userdata_set(const void *data, const char *key, apr_status_t (*cleanup)(void *), apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *key,
                                            apr_status_t (*cleanup)(void *),
                                            apr_pool_t *cont);
 
@@ -269,9 +269,9 @@ APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key,
  * @param data The key for the data to retrieve
  * @param key The user data associated with the pool.
  * @param cont The current pool.
- * @deffunc apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_pool_userdata_get(void **data, const char *key, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key,
+APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
                                            apr_pool_t *cont);
 
 /**
@@ -281,9 +281,9 @@ APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key,
  * @return The new sub-pool
  * @tip The apr_abort function provides a way to quit the program if the
  *      machine is out of memory.  By default, APR will return on error.
- * @deffunc apr_pool_t *apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode))
+ * @deffunc apr_pool_t *apr_pool_sub_make(apr_pool_t *p, int (*apr_abort)(int retcode))
  */
-APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p,
+APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
                                             int (*apr_abort)(int retcode));
 
 /**
@@ -299,24 +299,24 @@ APR_DECLARE(void) apr_clear_pool(apr_pool_t *p);
  * destroy the pool
  * @param p The pool to destroy
  * @tip This will actually free the memory
- * @deffunc void apr_destroy_pool(apr_pool_t *p)
+ * @deffunc void apr_pool_destroy(apr_pool_t *p)
  */
-APR_DECLARE(void) apr_destroy_pool(apr_pool_t *p);
+APR_DECLARE(void) apr_pool_destroy(apr_pool_t *p);
 
 /**
  * report the number of bytes currently in the pool
  * @param p The pool to inspect
  * @return The number of bytes
- * @deffunc apr_size_t apr_bytes_in_pool(apr_pool_t *p)
+ * @deffunc apr_size_t apr_pool_num_bytes(apr_pool_t *p)
  */
-APR_DECLARE(apr_size_t) apr_bytes_in_pool(apr_pool_t *p);
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p);
 
 /**
  * report the number of bytes currently in the list of free blocks
  * @return The number of bytes
- * @deffunc apr_size_t apr_bytes_in_free_blocks(void)
+ * @deffunc apr_size_t apr_pool_free_blocks_num_bytes(void)
  */
-APR_DECLARE(apr_size_t) apr_bytes_in_free_blocks(void);
+APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
 
 /**
  * Allocate a block of memory from a pool
@@ -343,9 +343,9 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
  * @param plain_cleanup The function to call when the pool is cleared 
  *                      or destroyed
  * @param child_cleanup The function to call when a child process is created 
- * @deffunc void apr_register_cleanup(apr_pool_t *p, const void *data, apr_status_t (*plain_cleanup)(void *), apr_status_t (*child_cleanup)(void *))
+ * @deffunc void apr_pool_cleanup_register(apr_pool_t *p, const void *data, apr_status_t (*plain_cleanup)(void *), apr_status_t (*child_cleanup)(void *))
  */
-APR_DECLARE(void) apr_register_cleanup(apr_pool_t *p, const void *data,
+APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
                                        apr_status_t (*plain_cleanup)(void *),
                                        apr_status_t (*child_cleanup)(void *));
 
@@ -354,9 +354,9 @@ APR_DECLARE(void) apr_register_cleanup(apr_pool_t *p, const void *data,
  * @param p The pool remove the cleanup from 
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
- * @deffunc void apr_kill_cleanup(apr_pool_t *p, const void *data, apr_status_t (*cleanup)(void *))
+ * @deffunc void apr_pool_cleanup_kill(apr_pool_t *p, const void *data, apr_status_t (*cleanup)(void *))
  */
-APR_DECLARE(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
+APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
                                    apr_status_t (*cleanup)(void *));
 
 /**
@@ -364,9 +364,9 @@ APR_DECLARE(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
  * @param p The pool remove the cleanup from 
  * @param data The data to remove from cleanup
  * @param cleanup The function to remove from cleanup
- * @deffunc apr_status_t apr_run_cleanup(apr_pool_t *p, void *data, apr_status_t (*cleanup)(void *))
+ * @deffunc apr_status_t apr_pool_cleanup_run(apr_pool_t *p, void *data, apr_status_t (*cleanup)(void *))
  */
-APR_DECLARE(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
+APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
                                           apr_status_t (*cleanup)(void *));
 
 /* Preparing for exec() --- close files, etc., but *don't* flush I/O
@@ -375,16 +375,16 @@ APR_DECLARE(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
 /**
  * Run all of the child_cleanups, so that any unnecessary files are 
  * closed because we are about to exec a new program
- * @deffunc void apr_cleanup_for_exec(void)
+ * @deffunc void apr_pool_cleanup_for_exec(void)
  */
-APR_DECLARE(void) apr_cleanup_for_exec(void);
+APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
 
 /**
  * An empty cleanup function 
  * @param data The data to cleanup
- * @deffunc apr_status_t apr_null_cleanup(void *data)
+ * @deffunc apr_status_t apr_pool_cleanup_null(void *data)
  */
-APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data);
+APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
 
 /*
  * Pool accessor functions.
@@ -397,7 +397,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data);
  *
  *    APR_POOL_DECLARE_ACCESSOR(file);
  * becomes:
- *    APR_DECLARE(apr_pool_t *) apr_get_file_pool(apr_file_t *ob);
+ *    APR_DECLARE(apr_pool_t *) apr_file_pool_get(apr_file_t *ob);
  *
  * In the implementation, the APR_POOL_IMPLEMENT_ACCESSOR() is used to
  * actually define the function. It assumes the field is named "pool". For
@@ -408,13 +408,13 @@ APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data);
  *       the macros to support other linkages.
  */
 #define APR_POOL_DECLARE_ACCESSOR(typename) \
-	APR_DECLARE(apr_pool_t *) apr_get_##typename##_pool \
+	APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
 		(apr_##typename##_t *ob)
 
 #define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
 	APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
 #define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
-	APR_DECLARE(apr_pool_t *) apr_get_##typename##_pool \
+	APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
 		(apr_##typename##_t *ob) { return ob->fieldname; }
 
 /* used to guarantee to the apr_pool_t debugging code that the sub apr_pool_t

@@ -147,8 +147,8 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     (*new)->cntxt = cont;
 
     /* register the cleanup... */
-    apr_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
-                         apr_null_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void*)(*new), mmap_cleanup,
+                         apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -157,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap)
     apr_status_t rv;
 
     if ((rv = mmap_cleanup(mmap)) == APR_SUCCESS) {
-        apr_kill_cleanup(mmap->cntxt, mmap, mmap_cleanup);
+        apr_pool_cleanup_kill(mmap->cntxt, mmap, mmap_cleanup);
         return APR_SUCCESS;
     }
     return rv;

@@ -48,7 +48,7 @@ static const char *pretty_path (const char *name)
         return p + 1;
 }
 
-APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
+APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
                                       int argc, const char *const *argv)
 {
     void *argv_buff;

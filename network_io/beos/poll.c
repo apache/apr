@@ -67,7 +67,7 @@
  *  select for R4.5 of BeOS.  So here we use code that uses the write
  *  bits.
  */
-apr_status_t apr_setup_poll(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
+apr_status_t apr_poll_setup(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *cont)
 {
     (*new) = (apr_pollfd_t *)apr_pcalloc(cont, sizeof(apr_pollfd_t) * num);
     if ((*new) == NULL) {
@@ -84,7 +84,7 @@ apr_status_t apr_setup_poll(apr_pollfd_t **new, apr_int32_t num, apr_pool_t *con
     return APR_SUCCESS;
 }
 
-apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset,
+apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset,
                                apr_socket_t *sock, apr_int16_t event)
 {
     if (event & APR_POLLIN) {
@@ -102,7 +102,7 @@ apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_mask_poll_socket(apr_pollfd_t *aprset, 
+apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset, 
                                   apr_socket_t *sock, 
                                   apr_int16_t events)
 {
@@ -146,7 +146,7 @@ apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
+apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
 {
     apr_int16_t revents = 0;
     char data[1];
@@ -190,7 +190,7 @@ apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_
     return APR_SUCCESS;
 }
 
-apr_status_t apr_remove_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock)
+apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
 {
     FD_CLR(sock->socketdes, aprset->read);
     FD_CLR(sock->socketdes, aprset->read);
@@ -198,7 +198,7 @@ apr_status_t apr_remove_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_clear_poll_sockets(apr_pollfd_t *aprset, apr_int16_t event)
+apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t event)
 {
     if (event & APR_POLLIN) {
         FD_ZERO(aprset->read);
@@ -213,15 +213,15 @@ apr_status_t apr_clear_poll_sockets(apr_pollfd_t *aprset, apr_int16_t event)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_polldata(apr_pollfd_t *pollfd, const char *key, void *data)
+apr_status_t apr_poll_data_get(apr_pollfd_t *pollfd, const char *key, void *data)
 {
-    return apr_get_userdata(data, key, pollfd->cntxt);
+    return apr_pool_userdata_get(data, key, pollfd->cntxt);
 }
 
-apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data, const char *key,
+apr_status_t apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key,
                             apr_status_t (*cleanup) (void *))
 {
-    return apr_set_userdata(data, key, cleanup, pollfd->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, pollfd->cntxt);
 }
 
 #endif /* BEOS_BONE */

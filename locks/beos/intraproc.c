@@ -76,8 +76,8 @@ apr_status_t create_intra_lock(apr_lock_t *new)
     }
     new->ben_intraproc = 0;
     new->sem_intraproc = stat;
-    apr_register_cleanup(new->cntxt, (void *)new, lock_intra_cleanup,
-                        apr_null_cleanup);
+    apr_pool_cleanup_register(new->cntxt, (void *)new, lock_intra_cleanup,
+                        apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -111,7 +111,7 @@ apr_status_t destroy_intra_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_intra_cleanup(lock)) == APR_SUCCESS) {
-        apr_kill_cleanup(lock->cntxt, lock, lock_intra_cleanup);
+        apr_pool_cleanup_kill(lock->cntxt, lock, lock_intra_cleanup);
         return APR_SUCCESS;
     }
     return stat;

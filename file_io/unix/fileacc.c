@@ -57,7 +57,7 @@
 
 /* A file to put ALL of the accessor functions for apr_file_t types. */
 
-APR_DECLARE(apr_status_t) apr_get_filename(const char **fname,
+APR_DECLARE(apr_status_t) apr_file_name_get(const char **fname,
                                            apr_file_t *thefile)
 {
     *fname = thefile->fname;
@@ -122,15 +122,15 @@ apr_fileperms_t apr_unix_mode2perms(mode_t mode)
 }
 #endif
 
-APR_DECLARE(apr_status_t) apr_get_filedata(void **data, const char *key,
+APR_DECLARE(apr_status_t) apr_file_data_get(void **data, const char *key,
                                            apr_file_t *file)
 {    
-    return apr_get_userdata(data, key, file->cntxt);
+    return apr_pool_userdata_get(data, key, file->cntxt);
 }
 
-APR_DECLARE(apr_status_t) apr_set_filedata(apr_file_t *file, void *data,
+APR_DECLARE(apr_status_t) apr_file_data_set(apr_file_t *file, void *data,
                                            const char *key,
                                            apr_status_t (*cleanup)(void *))
 {    
-    return apr_set_userdata(data, key, cleanup, file->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, file->cntxt);
 }

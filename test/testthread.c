@@ -77,9 +77,9 @@ void * APR_THREAD_FUNC thread_func1(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock(thread_lock);
+        apr_lock_aquire(thread_lock);
         x++;
-        apr_unlock(thread_lock);
+        apr_lock_release(thread_lock);
     }
     return NULL;
 } 
@@ -88,9 +88,9 @@ void * APR_THREAD_FUNC thread_func2(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock(thread_lock);
+        apr_lock_aquire(thread_lock);
         x++;
-        apr_unlock(thread_lock);
+        apr_lock_release(thread_lock);
     }
     return NULL;
 } 
@@ -99,9 +99,9 @@ void * APR_THREAD_FUNC thread_func3(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock(thread_lock);
+        apr_lock_aquire(thread_lock);
         x++;
-        apr_unlock(thread_lock);
+        apr_lock_release(thread_lock);
     }
     return NULL;
 } 
@@ -110,9 +110,9 @@ void * APR_THREAD_FUNC thread_func4(void *data)
 {
     int i;
     for (i = 0; i < 10000; i++) {
-        apr_lock(thread_lock);
+        apr_lock_aquire(thread_lock);
         x++;
-        apr_unlock(thread_lock);
+        apr_lock_release(thread_lock);
     }
     return NULL;
 } 
@@ -132,14 +132,14 @@ int main(void)
     apr_initialize();
 
     fprintf(stdout, "Initializing the context......."); 
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "could not initialize\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Initializing the lock......."); 
-    s1 = apr_create_lock(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
+    s1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
     if (s1 != APR_SUCCESS) {
         fprintf(stderr, "Could not create lock\n");
         exit(-1);
@@ -147,10 +147,10 @@ int main(void)
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Starting all the threads......."); 
-    s1 = apr_create_thread(&t1, NULL, thread_func1, NULL, context);
-    s2 = apr_create_thread(&t2, NULL, thread_func2, NULL, context);
-    s3 = apr_create_thread(&t3, NULL, thread_func3, NULL, context);
-    s4 = apr_create_thread(&t4, NULL, thread_func4, NULL, context);
+    s1 = apr_thread_create(&t1, NULL, thread_func1, NULL, context);
+    s2 = apr_thread_create(&t2, NULL, thread_func2, NULL, context);
+    s3 = apr_thread_create(&t3, NULL, thread_func3, NULL, context);
+    s4 = apr_thread_create(&t4, NULL, thread_func4, NULL, context);
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
         s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
         fprintf(stderr, "Error starting thread\n");

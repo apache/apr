@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
         exit(-1);
     }
     atexit(apr_terminate);
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -114,18 +114,18 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "[PARENT] Creating procattr.............");
     fflush(stdout);
-    if (apr_createprocattr_init(&procattr, context) != APR_SUCCESS) {
+    if (apr_procattr_create(&procattr, context) != APR_SUCCESS) {
         fprintf(stderr, "Could not create attr\n");
         exit(-1);;
     }
     else {
-        apr_setprocattr_io(procattr, APR_FULL_BLOCK, APR_NO_PIPE, APR_NO_PIPE);
+        apr_procattr_io_set(procattr, APR_FULL_BLOCK, APR_NO_PIPE, APR_NO_PIPE);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "[PARENT] Starting other child..........");
     fflush(stdout);
-    if (apr_create_process(&newproc, "./occhild", args, NULL, procattr, context) 
+    if (apr_proc_create(&newproc, "./occhild", args, NULL, procattr, context) 
                           != APR_SUCCESS) {
         fprintf(stderr, "error starting other child\n");
         exit(-1);
@@ -134,12 +134,12 @@ int main(int argc, char *argv[])
 
     std = newproc.in;
 
-    apr_register_other_child(&newproc, ocmaint, NULL, std, context);
+    apr_proc_other_child_register(&newproc, ocmaint, NULL, std, context);
 
     fprintf(stdout, "[PARENT] Sending SIGKILL to child......");
     fflush(stdout);
     apr_sleep(1 * APR_USEC_PER_SEC);
-    if (apr_kill(&newproc, SIGKILL) != APR_SUCCESS) {
+    if (apr_proc_kill(&newproc, SIGKILL) != APR_SUCCESS) {
         fprintf(stderr,"couldn't send the signal!\n");
         exit(-1);
     }
@@ -147,10 +147,10 @@ int main(int argc, char *argv[])
     
     /* allow time for things to settle... */
     apr_sleep(3 * APR_USEC_PER_SEC);
-    apr_probe_writable_fds();
+    apr_proc_probe_writable_fds();
     
     fprintf(stdout, "[PARENT] Checking on children..........\n");
-    apr_check_other_child();
+    apr_proc_other_child_check();
 #else
     fprintf(stdout, "OC failed!\n");
     fprintf(stdout, "Other_child is not supported on this platform\n");

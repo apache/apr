@@ -54,7 +54,7 @@
 
 #include "fileio.h"
 
-apr_status_t apr_lock_file(apr_file_t *thefile, int type)
+apr_status_t apr_file_lock(apr_file_t *thefile, int type)
 {
     FILELOCK lockrange = { 0, 0x7fffffff };
     ULONG rc;
@@ -65,7 +65,7 @@ apr_status_t apr_lock_file(apr_file_t *thefile, int type)
     return APR_FROM_OS_ERROR(rc);
 }
 
-apr_status_t apr_unlock_file(apr_file_t *thefile)
+apr_status_t apr_file_unlock(apr_file_t *thefile)
 {
     FILELOCK unlockrange = { 0, 0x7fffffff };
     ULONG rc;

@@ -120,7 +120,7 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     
 #ifdef BEOS
     /* XXX: mmap shouldn't really change the seek offset */
-    apr_seek(file, APR_SET, &offset);
+    apr_file_seek(file, APR_SET, &offset);
     if (flag & APR_MMAP_WRITE) {
         native_flags |= B_WRITE_AREA;
     }
@@ -166,8 +166,8 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     (*new)->cntxt = cont;
     
     /* register the cleanup... */
-    apr_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
-             apr_null_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void*)(*new), mmap_cleanup,
+             apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -179,7 +179,7 @@ apr_status_t apr_mmap_delete(apr_mmap_t *mmap)
         return APR_ENOENT;
       
     if ((rv = mmap_cleanup(mmap)) == APR_SUCCESS) {
-        apr_kill_cleanup(mmap->cntxt, mmap, mmap_cleanup);
+        apr_pool_cleanup_kill(mmap->cntxt, mmap, mmap_cleanup);
         return APR_SUCCESS;
     }
     return rv;

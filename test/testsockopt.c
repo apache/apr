@@ -66,14 +66,14 @@
 
 static void failure(apr_socket_t *sock)
 {
-    apr_close_socket(sock);
+    apr_socket_close(sock);
     printf("Failed!\n");
     exit(-1);
 }
 
 static void failureno(apr_socket_t *sock)
 {
-    apr_close_socket(sock);
+    apr_socket_close(sock);
     printf("No!\n");
     exit(-1);
 }
@@ -96,11 +96,11 @@ int main(void)
         exit(-1);
     }
     atexit(closeapr);
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
-    if (apr_create_pool(&cont2, context) != APR_SUCCESS) {
+    if (apr_pool_create(&cont2, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -108,7 +108,7 @@ int main(void)
     printf("Testing socket option functions.\n");
 
     printf("\tCreating socket..........................");
-    if ((stat = apr_create_socket(&sock, APR_INET, SOCK_STREAM, context))
+    if ((stat = apr_socket_create(&sock, APR_INET, SOCK_STREAM, context))
          != APR_SUCCESS){
         printf("Failed to create a socket!\n");
         exit(-1);
@@ -117,7 +117,7 @@ int main(void)
 
     printf ("\tTrying to set APR_SO_KEEPALIVE...........");
     if (apr_setsocketopt(sock, APR_SO_KEEPALIVE, 1) != APR_SUCCESS){
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         printf("Failed!\n");
         exit (-1);
     }
@@ -125,12 +125,12 @@ int main(void)
 
     printf("\tChecking if we recorded it...............");
     if (apr_getsocketopt(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr,"Failed\n");
         exit(-1);
     }
     if (ck != 1){ 
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         printf("No (%d)\n", ck);
         exit(-1);
     }
@@ -138,7 +138,7 @@ int main(void)
 
     printf("\tTrying to set APR_SO_DEBUG...............");
     if (apr_setsocketopt(sock, APR_SO_DEBUG, 1) != APR_SUCCESS){
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         printf("Failed\n");
         exit (-1);
     }
@@ -146,20 +146,20 @@ int main(void)
 
     printf("\tChecking if we recorded it...............");
     if (apr_getsocketopt(sock, APR_SO_DEBUG, &ck) != APR_SUCCESS){
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         printf("Failed!\n");
         exit (-1);
     }
     if (ck != 1){
         printf ("No (%d)\n", ck);
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         exit (-1);
     }
     printf ("Yes\n");
 
     printf ("\tTrying to remove APR_SO_KEEPALIVE........");
     if (apr_setsocketopt(sock, APR_SO_KEEPALIVE, 0) != APR_SUCCESS){
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         printf("Failed!\n");
         exit (-1);
     }
@@ -167,7 +167,7 @@ int main(void)
 
     printf ("\tDid we record the removal................");
     if (apr_getsocketopt(sock, APR_SO_KEEPALIVE, &ck) != APR_SUCCESS){
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         printf("Didn't get value!\n");
         exit(-1);
     }
@@ -215,7 +215,7 @@ int main(void)
 #endif
 
     printf("\tTrying to close the socket...............");
-    if ((stat = apr_close_socket(sock)) != APR_SUCCESS){
+    if ((stat = apr_socket_close(sock)) != APR_SUCCESS){
         printf("Failed to close the socket!\n");
         exit(-1);
     }

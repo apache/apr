@@ -59,7 +59,7 @@
 #include "apr_errno.h"
 #include "apr_portable.h"
 
-APR_DECLARE(apr_status_t) apr_create_thread_private(apr_threadkey_t **key,
+APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
                                                     void (*dest)(void *),
                                                     apr_pool_t *cont)
 {
@@ -69,7 +69,7 @@ APR_DECLARE(apr_status_t) apr_create_thread_private(apr_threadkey_t **key,
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_get_thread_private(void **new,
+APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new,
                                                  apr_threadkey_t *key)
 {
     if ((*new) = TlsGetValue(key->key)) {
@@ -78,7 +78,7 @@ APR_DECLARE(apr_status_t) apr_get_thread_private(void **new,
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_set_thread_private(void *priv,
+APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv,
                                                  apr_threadkey_t *key)
 {
     if (TlsSetValue(key->key, priv)) {
@@ -87,7 +87,7 @@ APR_DECLARE(apr_status_t) apr_set_thread_private(void *priv,
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_delete_thread_private(apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     if (TlsFree(key->key)) {
         return APR_SUCCESS; 
@@ -95,27 +95,27 @@ APR_DECLARE(apr_status_t) apr_delete_thread_private(apr_threadkey_t *key)
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_get_threadkeydata(void **data, const char *key,
+APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
                                                 apr_threadkey_t *threadkey)
 {
-    return apr_get_userdata(data, key, threadkey->cntxt);
+    return apr_pool_userdata_get(data, key, threadkey->cntxt);
 }
 
-APR_DECLARE(apr_status_t) apr_set_threadkeydata(void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
                                                 apr_status_t (*cleanup)(void *),
                                                 apr_threadkey_t *threadkey)
 {
-    return apr_set_userdata(data, key, cleanup, threadkey->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, threadkey->cntxt);
 }
 
-APR_DECLARE(apr_status_t) apr_get_os_threadkey(apr_os_threadkey_t *thekey,
+APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey,
                                                apr_threadkey_t *key)
 {
     *thekey = key->key;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_put_os_threadkey(apr_threadkey_t **key,
+APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
                                                apr_os_threadkey_t *thekey,
                                                apr_pool_t *cont)
 {

@@ -35,7 +35,7 @@ int main (int argc, char ** argv)
     apr_initialize();
     atexit(closeapr);
         
-    if (apr_create_pool(&cont, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&cont, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
