@@ -60,6 +60,7 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "apr_lib.h"
 #include <stdlib.h>
 #if APR_HAVE_SIGNAL_H
 #include <signal.h>
@@ -312,7 +313,7 @@ static const char* has_space(const char *str)
 {
     const char *ch;
     for (ch = str; *ch; ++ch) {
-        if (isspace(*ch)) {
+        if (apr_isspace(*ch)) {
             return ch;
         }
     }
