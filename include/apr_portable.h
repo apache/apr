@@ -78,6 +78,7 @@
 #include "apr_proc_mutex.h"
 #include "apr_time.h"
 #include "apr_dso.h"
+#include "apr_shm.h"
 
 #if APR_HAVE_DIRENT_H
 #include <dirent.h>
@@ -107,6 +108,7 @@ typedef DWORD                 apr_os_threadkey_t;
 typedef FILETIME              apr_os_imp_time_t;
 typedef SYSTEMTIME            apr_os_exp_time_t;
 typedef HANDLE                apr_os_dso_handle_t;
+typedef HANDLE                apr_os_shm_t;
 
 #elif defined(OS2)
 typedef HFILE                 apr_os_file_t;
@@ -121,6 +123,7 @@ typedef PULONG                apr_os_threadkey_t;
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
 typedef HMODULE               apr_os_dso_handle_t;
+typedef void*                 apr_os_shm_t;
 
 #elif defined(__BEOS__)
 #include <kernel/OS.h>
@@ -143,6 +146,7 @@ typedef int                   apr_os_threadkey_t;
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
 typedef image_id              apr_os_dso_handle_t;
+typedef void*                 apr_os_shm_t;
 
 #elif defined(NETWARE)
 typedef int                   apr_os_file_t;
@@ -157,6 +161,7 @@ typedef NXKey_t               apr_os_threadkey_t;
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
 typedef void *                apr_os_dso_handle_t;
+typedef void*                 apr_os_shm_t;
 
 #else
 /* Any other OS should go above this one.  This is the lowest common
@@ -201,6 +206,7 @@ typedef NSModule              apr_os_dso_handle_t;
 #else
 typedef void *                apr_os_dso_handle_t;
 #endif
+typedef void*                 apr_os_shm_t;
 
 #endif
 
@@ -279,6 +285,14 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime,
  */
 APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime, 
                                               apr_time_t *aprtime);
+
+/**
+ * convert the shm from apr type to os specific type.
+ * @param osshm The os specific shm representation
+ * @param shm The apr shm to convert.
+ */   
+APR_DECLARE(apr_status_t) apr_os_shm_get(apr_os_shm_t *osshm,
+                                         apr_shm_t *shm);
 
 #if APR_HAS_THREADS || defined(DOXYGEN)
 /** 
@@ -423,6 +437,19 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
                                               apr_os_exp_time_t **ostime,
                                               apr_pool_t *cont); 
 
+/**
+ * convert the shared memory from os specific type to apr type.
+ * @param shm The apr shm representation of osshm
+ * @param osshm The os specific shm identity
+ * @param cont The pool to use if it is needed.
+ * @remark On fork()ed architectures, this is typically nothing more than
+ * the memory block mapped.  On non-fork architectures, this is typically
+ * some internal handle to pass the mapping from process to process.
+ */
+APR_DECLARE(apr_status_t) apr_os_shm_put(apr_shm_t **shm,
+                                         apr_os_shm_t *osshm,
+                                         apr_pool_t *cont); 
+
 
 #if APR_HAS_DSO || defined(DOXYGEN)
 /** 
@@ -448,6 +475,7 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *dso,
                                                 apr_dso_handle_t *aprdso);
 /** @} */
 #endif /* APR_HAS_DSO */
+
 
 #ifdef __cplusplus
 }
