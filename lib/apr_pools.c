@@ -537,7 +537,7 @@ static void dump_stats(void)
 #endif
 
 /* ### why do we have this, in addition to apr_make_sub_pool? */
-apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
 {
     apr_pool_t *newpool;
 
@@ -667,7 +667,7 @@ APR_DECLARE_NONSTD(apr_status_t) apr_null_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_init_alloc(apr_pool_t *globalp)
+APR_DECLARE(apr_status_t) apr_init_alloc(apr_pool_t *globalp)
 {
 #if APR_HAS_THREADS
     apr_status_t status;
@@ -701,7 +701,7 @@ apr_status_t apr_init_alloc(apr_pool_t *globalp)
     return APR_SUCCESS;
 }
 
-void apr_term_alloc(apr_pool_t *globalp)
+APR_DECLARE(void) apr_term_alloc(apr_pool_t *globalp)
 {
 #if APR_HAS_THREADS
     apr_destroy_lock(alloc_mutex);
@@ -999,7 +999,7 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *a, apr_size_t size)
  * User data management functions
  */
 
-apr_status_t apr_set_userdata(const void *data, const char *key,
+APR_DECLARE(apr_status_t) apr_set_userdata(const void *data, const char *key,
 			      apr_status_t (*cleanup) (void *),
 			      apr_pool_t *cont)
 {
@@ -1020,7 +1020,7 @@ apr_status_t apr_set_userdata(const void *data, const char *key,
     return APR_SUCCESS;
 }
 
-apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
 {
     if (cont->prog_data == NULL)
         *data = NULL;
