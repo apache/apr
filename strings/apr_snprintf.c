@@ -294,14 +294,16 @@ static char *apr_gcvt(double number, int ndigit, char *buf, boolean_e altform)
  */
 #define INS_CHAR(c, sp, bep, cc)                    \
 {                                                   \
-    if (sp >= bep) {                                \
-        vbuff->curpos = sp;                         \
-        if (flush_func(vbuff))                      \
-            return -1;                              \
-        sp = vbuff->curpos;                         \
-        bep = vbuff->endpos;                        \
+    if (sp) {                                       \
+        if (sp >= bep) {                            \
+            vbuff->curpos = sp;                     \
+            if (flush_func(vbuff))                  \
+                return -1;                          \
+            sp = vbuff->curpos;                     \
+            bep = vbuff->endpos;                    \
+        }                                           \
+        *sp++ = (c);                                \
     }                                               \
-    *sp++ = (c);                                    \
     cc++;                                           \
 }
 
@@ -1247,16 +1249,15 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
     va_list ap;
     apr_vformatter_buff_t vbuff;
 
-    if (len == 0)
-        return 0;
-
     /* save one byte for nul terminator */
     vbuff.curpos = buf;
     vbuff.endpos = buf + len - 1;
     va_start(ap, format);
     cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
     va_end(ap);
-    *vbuff.curpos = '\0';
+    if (len != 0) {
+        *vbuff.curpos = '\0';
+    }
     return (cc == -1) ? (int)len : cc;
 }
 
@@ -1267,13 +1268,12 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
     int cc;
     apr_vformatter_buff_t vbuff;
 
-    if (len == 0)
-        return 0;
-
     /* save one byte for nul terminator */
     vbuff.curpos = buf;
     vbuff.endpos = buf + len - 1;
     cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
-    *vbuff.curpos = '\0';
+    if (len != 0) {
+        *vbuff.curpos = '\0';
+    }
     return (cc == -1) ? (int)len : cc;
 }

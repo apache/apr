@@ -124,6 +124,7 @@ void test_snprintf(apr_pool_t *p)
 {
     char buff[100];
     char *testing = apr_palloc(p, 10);
+    int rv;
 
     testing[0] = 't';
     testing[1] = 'e';
@@ -135,10 +136,19 @@ void test_snprintf(apr_pool_t *p)
     
     fprintf(stderr, "Testing precision  ........  ");
     apr_snprintf(buff, sizeof(buff), "%.*s", 7, testing);
+    /* If this test fails, we are going to seg fault, so there is no reason
+     * to print a failure message.  rbb
+     */
     if (!strncmp(buff, testing, 7)) {
         fprintf(stderr, "OK\n");
     }
 
+    fprintf(stderr, "Testing 0 length ..........  ");
+    rv = apr_snprintf(NULL, 0, "%sBAR", "FOO");
+    if (rv != 6) {
+        fprintf(stderr, "FAILED\n");
+    }
+    fprintf(stderr, "OK\n");
 }
 
 int main(int argc, const char * const argv[])
