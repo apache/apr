@@ -301,6 +301,9 @@ static void remove_sync_sigs(sigset_t *sig_mask)
 #ifdef SIGTRAP
     sigdelset(sig_mask, SIGTRAP);
 #endif
+#ifdef SIGUSR2
+    sigdelset(sig_mask, SIGUSR2);
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_signal_thread(int(*signal_handler)(int signum))
