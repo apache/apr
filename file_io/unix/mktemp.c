@@ -106,9 +106,15 @@
 #define seedrandom(a) srandom(a)
 #endif
 
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#if APR_HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#if APR_HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,7 +136,7 @@ static int gettemp(char *path, apr_file_t **doopen, apr_int32_t flags, apr_pool_
     apr_uint32_t randnum;
 
     if (randseed==0) {
-        randseed = time(NULL);
+        randseed = (int)apr_time_now();
         seedrandom(randseed);
     }
 
