@@ -69,8 +69,6 @@ dnl #----------------------------- Checks for compiler flags
 nl='
 '
 echo $ac_n "${nl}Check for compiler flags..."
-AC_ARG_WITH(optim,[  --with-optim="FLAGS"      compiler optimisation flags],
-        [OPTIM="$withval"])
 
 AC_ARG_WITH(debug,[  --with-debug            Turn on debugging and compile time warnings],
         [if test "$GCC" = "yes"; then CFLAGS="$CFLAGS -g -Wall"; else CFLAGS="$CFLAGS -g"; fi])
