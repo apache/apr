@@ -124,6 +124,12 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
         ptr = path;
     }
     *rootpath = apr_pstrdup(p, ptr);
+    if (!(flags & APR_FILEPATH_NATIVE)) {
+        for (ptr = *rootpath; *ptr; ++ptr) {
+            if (*ptr == '\\')
+                *ptr = '/';
+        }
+    }
     return APR_SUCCESS;
 }
 
