@@ -98,5 +98,8 @@ struct apr_pollfd_t {
 #define SOCEPIPE                (SOCBASEERR+32)            /* Broken pipe */
 #define SOCEOS2ERR              (SOCBASEERR+100)            /* OS/2 Error */
 
+const char *apr_inet_ntop(int af, const void *src, char *dst, apr_size_t size);
+int apr_inet_pton(int af, const char *src, void *dst);
+
 #endif  /* ! NETWORK_IO_H */
 
