@@ -329,14 +329,15 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
 #endif /* !APR_POOLS_ARE_SMS || DOXYGEN */
 
 /**
- * Make a sub pool from the current pool
- * @param p The pool to use as a parent pool
+ * @param p The new sub-pool
+ * @param parent The pool to use as a parent pool
  * @param apr_abort A function to use if the pool cannot allocate more memory.
- * @return The new sub-pool
+ * @deffunc void apr_pool_sub_make(apr_pool_t **p, apr_pool_t *parent, int (*apr_abort)(int retcode), const char *created)
  * @remark The @a apr_abort function provides a way to quit the program if the
  *      machine is out of memory.  By default, APR will return on error.
  */
-APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
+APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **p, 
+                                            apr_pool_t *pparent,
                                             int (*apr_abort)(int retcode));
 
 #if defined(APR_POOL_DEBUG) || defined(DOXYGEN) 

@@ -580,8 +580,9 @@ static apr_pool_t *permanent_pool;
 #define POOL_HDR_CLICKS (1 + ((sizeof(struct apr_pool_t) - 1) / CLICK_SZ))
 #define POOL_HDR_BYTES (POOL_HDR_CLICKS * CLICK_SZ)
 
-APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
-                                            apr_abortfunc_t abortfunc)
+APR_DECLARE(void) apr_pool_sub_make(apr_pool_t **p,
+                                    apr_pool_t *parent,
+                                    apr_abortfunc_t abortfunc)
 {
     union block_hdr *blok;
     apr_pool_t *new_pool;
@@ -604,13 +605,13 @@ APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
     new_pool->free_first_avail = blok->h.first_avail;
     new_pool->first = new_pool->last = blok;
 
-    if (p) {
-	new_pool->parent = p;
-	new_pool->sub_next = p->sub_pools;
+    if (parent) {
+	new_pool->parent = parent;
+	new_pool->sub_next = parent->sub_pools;
 	if (new_pool->sub_next) {
 	    new_pool->sub_next->sub_prev = new_pool;
 	}
-	p->sub_pools = new_pool;
+	parent->sub_pools = new_pool;
     }
 
 #if APR_HAS_THREADS
@@ -619,7 +620,7 @@ APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
     }
 #endif
 
-    return new_pool;
+    *p = new_pool;
 }
 
 #ifdef APR_POOL_DEBUG
@@ -653,23 +654,21 @@ static void dump_stats(void)
 #endif
 
 /* ### why do we have this, in addition to apr_pool_sub_make? */
-APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont,
+APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
                                           apr_pool_t *parent_pool)
 {
-    apr_pool_t *newpool;
     apr_abortfunc_t abortfunc;
 
     abortfunc = parent_pool ? parent_pool->apr_abort : NULL;
 
-    newpool = apr_pool_sub_make(parent_pool, abortfunc);
-    if (newpool == NULL) {
+    apr_pool_sub_make(newpool, parent_pool, abortfunc);
+    if (*newpool == NULL) {
         return APR_ENOPOOL;
     }   
 
-    newpool->prog_data = NULL;
-    newpool->apr_abort = abortfunc;
+    (*newpool)->prog_data = NULL;
+    (*newpool)->apr_abort = abortfunc;
 
-    *newcont = newpool;
     return APR_SUCCESS;
 }
 
@@ -837,7 +836,7 @@ APR_DECLARE(apr_status_t) apr_pool_alloc_init(apr_pool_t *globalp)
         return status;
     }
 #endif
-    permanent_pool = apr_pool_sub_make(globalp, NULL);
+    apr_pool_sub_make(&permanent_pool, globalp, NULL);
 
 #ifdef ALLOC_STATS
     atexit(dump_stats);
