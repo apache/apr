@@ -46,6 +46,7 @@ static const struct testlist {
     {"testdup", testdup},
     {"testenv", testenv},
     {"testfile", testfile},
+    {"testfilecopy", testfilecopy},
     {"testfileinfo", testfileinfo},
     {"testflock", testflock},
     {"testfmt", testfmt},
