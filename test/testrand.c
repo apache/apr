@@ -81,9 +81,13 @@ int main(void)
         printf("%-5d %-55s", i * 255, "bytes");
         rv = apr_generate_random_bytes(c, i * 255);
         if (rv != APR_SUCCESS) {
-            printf("Failed: %d\n", rv);
+            char msgbuf[120];
+
+            printf("Failed: %d %s\n", rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
         }
-        printf("OK\n");
+        else {
+            printf("OK\n");
+        }
     }
 
     return 0;
