@@ -91,8 +91,9 @@ LT_COMPILE   = @lt_compile@
 
 LINK         = @link@
 
-MKEXPORT     = $(AWK) -f $(apr_builders)/make_export.awk
-MKDEP        = @MKDEP@
+APR_MKEXPORT     = $(AWK) -f $(apr_builders)/make_exports.awk
+APR_MKVAREXPORT  = $(AWK) -f $(apr_builders)/make_var_export.awk
+MKDEP            = @MKDEP@
 
 #
 # Standard build rules
