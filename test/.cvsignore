@@ -1,1 +1,13 @@
 Makefile
+testmmap
+htdigest
+ab
+testcontext
+testargs
+testtime
+testthread
+client
+server
+testsock
+testproc
+testfile
