@@ -157,12 +157,12 @@ apr_status_t filepath_root_case(char **rootpath, char *root, apr_pool_t *p);
  * check to see of the path only contains a drive/volume specifier and
  * nothing else.
  */
-apr_status_t filepath_has_drive(char *rootpath, int only, apr_pool_t *p);
+apr_status_t filepath_has_drive(const char *rootpath, int only, apr_pool_t *p);
 
 /* This function compares the drive/volume specifiers for each given path.
  * It returns zero if they match or non-zero if not. 
  */
-apr_status_t filepath_compare_drive(char *path1, char *path2, apr_pool_t *p);
+apr_status_t filepath_compare_drive(const char *path1, const char *path2, apr_pool_t *p);
 
 apr_status_t apr_unix_file_cleanup(void *);
 
