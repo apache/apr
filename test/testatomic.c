@@ -69,6 +69,15 @@
 #include <pthread.h>
 #endif
 
+#if defined(__FreeBSD__) && (__FreeBSD__ < 4)
+
+int main(void)
+{
+    printf("atomic test skipped\n");
+}
+
+#else 
+
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
 
@@ -339,3 +348,4 @@ int main(int argc, char**argv)
 }
 
 #endif /* !APR_HAS_THREADS */
+#endif /* !(defined(__FreeBSD) && (__FreeBSD__ < 4)) */
