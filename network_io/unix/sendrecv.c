@@ -412,6 +412,21 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     headerstruct.trl_cnt = hdtr->numtrailers;
 
     /* FreeBSD can send the headers/footers as part of the system call */
+    if (sock->timeout > 0) {
+        /* On FreeBSD, it is possible for the first call to sendfile to
+         * get EAGAIN, but still send some data.  This means that we cannot
+         * call sendfile and then check for EAGAIN, and then wait and call
+         * sendfile again.  If we do that, then we are likely to send the
+         * first chunk of data twice, once in the first call and once in the
+         * second.  If we are using a timed write, then we check to make sure
+         * we can send data before trying to send it.
+         */
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
+    }
 
     do {
         if (bytes_to_send) {
@@ -442,28 +457,6 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
             }
         }
     } while (rv == -1 && errno == EINTR);
-
-    if (rv == -1 && 
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        sock->timeout > 0) {
-	apr_status_t arv = wait_for_io_or_timeout(sock, 0);
-	if (arv != APR_SUCCESS) {
-	    *len = 0;
-	    return arv;
-	}
-        else {
-            do {
-        	rv = sendfile(file->filedes,	/* open file descriptor of the file to be sent */
-        		      sock->socketdes,	/* socket */
-        		      *offset,	/* where in the file to start */
-        		      (size_t) * len,	/* number of bytes to send */
-        		      &headerstruct,	/* Headers/footers */
-        		      &nbytes,	/* number of bytes written */
-        		      flags	/* undefined, set to 0 */
-        	    );
-            } while (rv == -1 && errno == EINTR);
-        }
-    }
 
     (*len) = nbytes;
     if (rv == -1) {
