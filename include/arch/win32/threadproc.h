@@ -55,7 +55,6 @@
 #include "apr_private.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
-#include <windows.h>
 
 #ifndef THREAD_PROC_H
 #define THREAD_PROC_H

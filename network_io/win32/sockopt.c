@@ -57,7 +57,6 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include <string.h>
-#include <winsock2.h>
 
 ap_status_t soblock(SOCKET sd)
 {

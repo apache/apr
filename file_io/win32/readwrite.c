@@ -58,7 +58,6 @@
 #include "apr_lib.h"
 #include "apr_errno.h"
 #include <malloc.h>
-#include <windows.h>
 #include "atime.h"
 
 #define GetFilePointer(hfile) SetFilePointer(hfile,0,NULL, FILE_CURRENT)

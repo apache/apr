@@ -57,7 +57,6 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include <errno.h>
-#include <windows.h>
 #include <time.h>
 
 
