@@ -294,6 +294,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
                               		apr_pool_t *pool)
 {
 	wiring_t		wire;
+    int             addr_space;
 
     wire.infd  = attr->child_in ? attr->child_in->filedes : FD_UNUSED;
     wire.outfd = attr->child_out ? attr->child_out->filedes : FD_UNUSED;
@@ -303,9 +304,9 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
     newproc->out = attr->parent_out;
     newproc->err = attr->parent_err;
 
-    /* XXX Switch to spawning in separate address spaces once the address
-        space shutdown problem is fixed. */   
-    if ((newproc->pid = processve(progname, PROC_CURRENT_SPACE, (const char**)env, &wire, 
+    addr_space = attr->detached ? 0 : PROC_CURRENT_SPACE;
+
+    if ((newproc->pid = processve(progname, addr_space, (const char**)env, &wire, 
         NULL, NULL, (const char **)args)) == 0) {
         return errno;
     }
