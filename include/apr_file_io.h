@@ -595,6 +595,14 @@ apr_status_t apr_create_namedpipe(const char *filename, apr_fileperms_t perm,
                                 apr_pool_t *cont);
 
 /**
+ * Get the timeout value for a pipe or manipulate the blocking state.
+ * @param thepipe The pipe we are getting a timeout for.
+ * @param timeoutThe timeout value in microseconds.  Values < 0 mean wait 
+ *        forever, 0 means do not wait at all.
+ */
+apr_status_t apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t *timeout);
+
+/**
  * Set the timeout value for a pipe or manipulate the blocking state.
  * @param thepipe The pipe we are setting a timeout on.
  * @param timeoutThe timeout value in microseconds.  Values < 0 mean wait 
