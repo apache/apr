@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/08/07 17:30:10 $]
+Last modified at [$Date: 2001/08/07 19:57:44 $]
 
 Release:
 
@@ -25,9 +25,6 @@ RELEASE SHOWSTOPPERS:
       which won't accept Win32's canonical \\?\D:\foo long naming
       conventions.  Convert to _ByHandle or add an arg to our utf-8
       name converter so we can handle this.
-
-    * Jeff Trawick reports our pool cleanup on apr_dir_*() is horked
-      on Win32.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * Get OTHER_CHILD support into Win32
