@@ -341,7 +341,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
         char num[8];
 
         memset(&hints, 0, sizeof(hints));
-        hints.ai_flags = AI_CANONNAME;
+        hints.ai_flags = 0; /* XXX: might need a way to turn on AI_CANONNAME */
         hints.ai_family = family;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_protocol = 0;
