@@ -1,5 +1,9 @@
 Changes for APR 1.1.0
 
+  *) apr_file_writev will now at least try to write all iovecs on platforms
+     that do not support writev. 
+     [Paul Querna]
+
   *) Remove the runtime test for Sendfile versions on FreeBSD. PR 25718.
      [Mike Silbersack <silby silby.com>, Paul Querna]
 
