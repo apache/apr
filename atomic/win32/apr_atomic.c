@@ -40,7 +40,11 @@ typedef WINBASEAPI void * (WINAPI * apr_atomic_win32_ptr_ptr_ptr_fn)
 
 APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if (defined(_M_IA64) || defined(_M_AMD64))
+    return InterlockedExchangeAdd(mem, val);
+#else
     return ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, val);
+#endif
 }
 
 /* Of course we want the 2's compliment of the unsigned value, val */
@@ -48,7 +52,11 @@ APR_DECLARE(apr_uint32_t) apr_atomic_add32(volatile apr_uint32_t *mem, apr_uint3
 
 APR_DECLARE(void) apr_atomic_sub32(volatile apr_uint32_t *mem, apr_uint32_t val)
 {
+#if (defined(_M_IA64) || defined(_M_AMD64))
+    InterlockedExchangeAdd(mem, -val);
+#else
     ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem, -val);
+#endif
 }
 
 APR_DECLARE(apr_uint32_t) apr_atomic_inc32(volatile apr_uint32_t *mem)
