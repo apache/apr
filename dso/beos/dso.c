@@ -62,32 +62,32 @@ static apr_status_t dso_cleanup(void *thedso)
     apr_dso_handle_t *dso = thedso;
 
     if (dso->handle > 0 && unload_add_on(dso->handle) < B_NO_ERROR)
-      return APR_EINIT;
+        return APR_EINIT;
     dso->handle = -1;
 
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, const char *path,
-              apr_pool_t *ctx)
+APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle, 
+                                       const char *path, apr_pool_t *pool)
 {
     image_id newid;
 
     if((newid = load_add_on(path)) < B_NO_ERROR)
         return APR_EINIT;
 
-    *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
+    *res_handle = apr_pcalloc(pool, sizeof(*res_handle));
     (*res_handle)->handle = newid;
-    (*res_handle)->cont = ctx;
+    (*res_handle)->pool = pool;
 
-    apr_pool_cleanup_register(ctx, *res_handle, dso_cleanup, apr_pool_cleanup_null);
+    apr_pool_cleanup_register(pool, *res_handle, dso_cleanup, apr_pool_cleanup_null);
 
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_dso_unload(apr_dso_handle_t *handle)
 {
-    return apr_pool_cleanup_run(handle->cont, handle, dso_cleanup);
+    return apr_pool_cleanup_run(handle->pool, handle, dso_cleanup);
 }
 
 APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle,
@@ -119,7 +119,7 @@ APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
 {
     *aprdso = apr_pcalloc(pool, sizeof **aprdso);
     (*aprdso)->handle = osdso;
-    (*aprdso)->cont = pool;
+    (*aprdso)->pool = pool;
     return APR_SUCCESS;
 }
 
