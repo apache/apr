@@ -348,7 +348,11 @@ ap_status_t ap_create_process(ap_proc_t *new, const char *progname,
     if (CreateProcess(NULL, cmdline, NULL, NULL, TRUE, 0, pEnvBlock, attr->currdir, 
                       &attr->si, &pi)) {
 
-        new->pid = pi.hProcess;
+        // TODO: THIS IS BADNESS
+        // The completion of the ap_proc_t type leaves us ill equiped to track both 
+        // the pid (Process ID) and handle to the process, which are entirely
+        // different things and each useful in their own rights.
+        new->pid = (pid_t) pi.hProcess;
 
         if (attr->child_in) {
             ap_close(attr->child_in);
