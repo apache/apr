@@ -58,35 +58,61 @@
 #include <stdio.h>
 #include <string.h>
 
-ap_status_t ap_dso_init(void){
+ap_status_t ap_dso_init() 
+{
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dso_load(const char *path, ap_context_t *ctx,
-			ap_dso_handle_t **res_handle)
+
+static ap_status_t dso_cleanup(void *thedso)
 {
-    char somebuf[1024];
+    ap_dso_handle_t *dso = thedso;
+    return ap_dso_unload(dso);
+}
+
+
+ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, ap_context_t *ctx)
+{
+    char failed_module[1024];
     HMODULE handle;
     int rc;
 
-    if ((rc = DosLoadModule(somebuf, sizeof(somebuf), path, &handle)) != 0)
-      return APR_EINIT;
-
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
+
+    if ((rc = DosLoadModule(failed_module, sizeof(failed_module), path, &handle)) != 0) {
+        (*res_handle)->failed_module = ap_pstrdup(ctx, failed_module);
+        return os2errno(rc);
+    }
+
     (*res_handle)->handle  = handle;
     (*res_handle)->cont    = ctx;
+    (*res_handle)->failed_module = NULL;
+    ap_register_cleanup(ctx, *res_handle, dso_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
 }
+
 
 
 ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
 {
-    DosFreeModule(handle->handle);
-    return APR_SUCCESS;
+    int rc;
+
+    if (handle->handle == 0)
+        return APR_SUCCESS;
+       
+    rc = DosFreeModule(handle->handle);
+
+    if (rc == 0)
+        handle->handle = 0;
+
+    return os2errno(rc);
 }
 
-ap_status_t ap_dso_sym(ap_dso_handle_t *handle, const char *symname,
-		       ap_dso_handle_sym_t *ressym)
+
+
+ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
+                       ap_dso_handle_t *handle, 
+                       const char *symname)
 {
     PFN func;
     int rc;
@@ -94,8 +120,8 @@ ap_status_t ap_dso_sym(ap_dso_handle_t *handle, const char *symname,
     if (symname == NULL || ressym == NULL)
         return APR_EINIT;
 
-    if((rc = DosQueryProcAddr(handle->handle, 0, symname, &func)) != 0)
-      return APR_EINIT;
+    if ((rc = DosQueryProcAddr(handle->handle, 0, symname, &func)) != 0)
+        return APR_EINIT;
 
     *ressym = func;
     return APR_SUCCESS;

@@ -64,8 +64,9 @@
 #include "apr_dso.h"
 
 struct ap_dso_handle_t {
-    HMODULE       handle;     /* Handle to the DSO loaded            */
     ap_context_t  *cont;       /* Context for returning error strings */
+    HMODULE       handle;     /* Handle to the DSO loaded            */
+    char          *failed_module;
 };
 
 #endif
