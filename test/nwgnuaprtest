@@ -167,9 +167,9 @@ TARGET_lib = \
 # These are the OBJ files needed to create the NLM target above.
 # Paths must all use the '/' character
 #
+
 FILES_nlm_objs = \
-	$(OBJDIR)/cutest.o \
-	$(OBJDIR)/testall.o \
+	$(OBJDIR)/abts.o \
 	$(OBJDIR)/testargs.o \
 	$(OBJDIR)/testatomic.o \
 	$(OBJDIR)/testdir.o \
@@ -191,6 +191,7 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testnames.o \
 	$(OBJDIR)/testoc.o \
 	$(OBJDIR)/testpath.o \
+	$(OBJDIR)/testpipe.o \
 	$(OBJDIR)/testpoll.o \
 	$(OBJDIR)/testpools.o \
 	$(OBJDIR)/testproc.o \
@@ -204,15 +205,15 @@ FILES_nlm_objs = \
 	$(OBJDIR)/testsockopt.o \
 	$(OBJDIR)/teststr.o \
 	$(OBJDIR)/teststrnatcmp.o \
+	$(OBJDIR)/testtable.o \
 	$(OBJDIR)/testtemp.o \
 	$(OBJDIR)/testthread.o \
 	$(OBJDIR)/testtime.o \
-	$(OBJDIR)/testtable.o \
 	$(OBJDIR)/testud.o \
 	$(OBJDIR)/testuser.o \
+	$(OBJDIR)/testutil.o \
 	$(OBJDIR)/testvsn.o \
 	$(OBJDIR)/nw_misc.o \
-	$(OBJDIR)/testpipe.o \
 	$(EOLIST) 
 
 # Pending tests
