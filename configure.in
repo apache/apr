@@ -385,27 +385,26 @@ AC_ARG_WITH(sendfile, [  --with-sendfile  Force sendfile to be on or off],
         sendfile="1"
     else
         sendfile="0"
-    fi ] )
-
-orig_sendfile=$sendfile
-case "$OS" in
-    *freebsd*)
-        if test $os_version -le "410"; then
-            if test "$threads" = "1"; then
-                sendfile="0"
+    fi ], [
+    orig_sendfile=$sendfile
+    case "$OS" in
+        *freebsd*)
+            if test $os_version -le "410"; then
+                if test "$threads" = "1"; then
+                    sendfile="0"
+                fi
             fi
-        fi
-        ;;
-    *alpha*-dec-osf* )
-        sendfile="0"
-        ;;
-    s390-*-linux-gnu)
-        sendfile="0"
-        ;;
-esac       
-if test "$orig_sendfile" != "$sendfile"; then
-  echo "sendfile support disabled to avoid system problem"
-fi
+            ;;
+        *alpha*-dec-osf* )
+            sendfile="0"
+            ;;
+        s390-*-linux-gnu)
+            sendfile="0"
+            ;;
+    esac       
+    if test "$orig_sendfile" != "$sendfile"; then
+      echo "sendfile support disabled to avoid system problem"
+    fi ] )
 AC_SUBST(sendfile)
 
 AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ]) 
