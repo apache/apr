@@ -60,6 +60,7 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
+#include "apr_portable.h"
 #include <signal.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -327,3 +328,13 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
     return errno;
 } 
 
+
+
+ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
+{
+    if (proc == NULL) {
+        return APR_ENOPROC;
+    }
+    *theproc = proc->pid;
+    return APR_SUCCESS;
+}
