@@ -63,6 +63,8 @@
 #include "apr_file_io.h"
 #include "apr_errno.h"
 
+#define APR_FILE_BUFSIZE 4096
+
 struct file_t {
     ap_context_t *cntxt;
     HFILE filedes;
@@ -72,6 +74,13 @@ struct file_t {
     FILESTATUS3 status;
     int validstatus;
     int eof_hit;
+    
+    /* Stuff for buffered mode */
+    char *buffer;
+    int bufpos;               // Read/Write position in buffer
+    unsigned long dataRead;   // amount of valid data read into buffer
+    int direction;            // buffer being used for 0 = read, 1 = write
+    unsigned long filePtr;    // position in file of handle
 };
 
 struct dir_t {
