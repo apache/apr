@@ -83,7 +83,11 @@ static void create_filename(CuTest *tc)
     char *oldfileptr;
 
     apr_filepath_get(&file1, 0, p);
+#ifdef WIN32
+    CuAssertTrue(tc, file1[1] == ':');
+#else
     CuAssertTrue(tc, file1[0] == '/');
+#endif
     CuAssertTrue(tc, file1[strlen(file1) - 1] != '/');
 
     oldfileptr = file1;
