@@ -1,0 +1,10 @@
+config.log
+mm_conf.h
+libtool
+config.status
+.libs
+Makefile
+mm-config
+*.lo
+*.la
+mm_test
