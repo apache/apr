@@ -1,5 +1,10 @@
 Changes with APR b1  
-   
+
+  *) Don't search for IPv6 names in apr_sockaddr_info_get() if the 
+     application doesn't specify the family (i.e., the application
+     passes in AF_UNSPEC) and APR isn't built with IPv6 support.  
+     [Jeff Trawick]
+
   *) Fix the API for the apr_proc_create() call on Win32.  Several
      bad assumptions are gone, including a mismatch between unix and
      win32, where win32 was defaulting to create detached.  Also fixes
