@@ -309,6 +309,17 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         /* getaddrinfo according to RFC 2553 must have either hostname
          * or servname non-NULL.
          */
+#ifdef OSF1
+        /* The Tru64 5.0 getaddrinfo() can only resolve services given
+         * by the name listed in /etc/services; a numeric or unknown
+         * servname gets an EAI_SERVICE error.  So just resolve the
+         * appropriate anyaddr and fill in the port later. */
+        hostname = family == AF_INET6 ? "::" : "0.0.0.0";
+        servname = NULL;
+#ifdef AI_NUMERICHOST
+        hints.ai_flags |= AI_NUMERICHOST;
+#endif
+#else
 #ifdef _AIX
         /* But current AIX getaddrinfo() doesn't like servname = "0";
          * the "1" won't hurt since we use the port parameter to fill
@@ -318,8 +329,9 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
             servname = "1";
         }
         else
-#endif
+#endif /* _AIX */
         servname = apr_itoa(p, port);
+#endif /* OSF1 */
     }
     error = getaddrinfo(hostname, servname, &hints, &ai_list);
 #ifdef HAVE_GAI_ADDRCONFIG
