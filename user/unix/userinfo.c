@@ -144,22 +144,4 @@ APR_DECLARE(apr_status_t) apr_get_username(char **username, apr_uid_t userid, ap
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_user_passwd(char **passwd,
-                                         const char *username, apr_pool_t *p)
-{
-    struct passwd pw;
-    char pwbuf[PWBUF_SIZE];
-    apr_status_t rv;
-        
-    if ((rv = getpwnam_safe(username, &pw, pwbuf)) != APR_SUCCESS)
-        return rv;
-
-#if defined(__MVS__) /* silly hack, but this function will be replaced soon anyway */
-    *passwd = "x"; /* same as many Linux (and Solaris and more) boxes these days */
-#else
-    *passwd = apr_pstrdup(p, pw.pw_passwd);
-#endif
-
-    return APR_SUCCESS;
-}
   
