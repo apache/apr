@@ -163,6 +163,14 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex);
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex);
 
 /**
+ * Destroy the mutex and free the memory associated with the lock.
+ * @param mutex the mutex to destroy.
+ * @note This function is generally used to kill a cleanup on an already
+ *       created mutex
+ */
+APR_DECLARE(apr_status_t) apr_proc_mutex_cleanup(void *mutex);
+
+/**
  * Display the name of the mutex, as it relates to the actual method used.
  * This matches the valid options for Apache's AcceptMutex directive
  * @param mutex the name of the mutex
