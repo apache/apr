@@ -15,15 +15,13 @@ PROGRAMS = \
 	testmmap@EXEEXT@ \
 	testshmem@EXEEXT@ \
 	testpipe@EXEEXT@ \
-	testdso@EXEEXT@ \
 	testoc@EXEEXT@ \
 	testuuid@EXEEXT@ \
         testsockopt@EXEEXT@ \
         testipsub@EXEEXT@ \
         testmd5@EXEEXT@ \
         testpoll@EXEEXT@ \
-	occhild@EXEEXT@ \
-	mod_test.so
+	occhild@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -32,7 +30,7 @@ TARGETS = $(PROGRAMS)
 
 LOCAL_LIBS=../libapr.la ../shmem/unix/mm/libmm.la
 
-CLEAN_TARGETS = testfile.tmp
+CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.so
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
@@ -48,7 +46,7 @@ testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 	$(LINK) testflock.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 ### why the export-dynamic?
-testdso@EXEEXT@: testdso.lo $(LOCAL_LIBS)
+testdso@EXEEXT@: testdso.lo mod_test.so $(LOCAL_LIBS)
 	$(LINK) --export-dynamic testdso.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testoc@EXEEXT@: testoc.lo $(LOCAL_LIBS)
