@@ -77,5 +77,7 @@ struct pollfd_t {
     int numexcept;    
 };
 
+ap_status_t status_from_res_error(int);
+
 #endif  /* ! NETWORK_IO_H */
 

@@ -156,13 +156,29 @@ ap_status_t ap_get_remote_hostname(char **name, struct socket_t *sock)
         return APR_ENOMEM;
     }
 
-    /* XXX - I don't know what the correct way to deal with host resolution
-     * errors on Windows is. WSAGetLastError() seems to use a different set of
-     * error numbers than APR does. The previous code didn't deal with them at
-     * all.  - manoj
-     */
+    return status_from_res_error(WSAGetLastError());
+}
 
-    return h_errno;
+ap_status_t status_from_res_error(int reserr)
+{
+    ap_status_t status;
+    switch(reserr) {
+    case WSAHOST_NOT_FOUND:
+        status = APR_EHOSTNOTFOUND;
+        break;
+    case WSATRY_AGAIN:
+        status = APR_EAGAIN;
+        break;
+    case WSANO_RECOVERY:
+        status = APR_ENORECOVERY;
+        break;
+    case WSANO_DATA:
+        status = APR_ENODATA;
+        break;
+    default:
+        status = APR_ENORECOVERY;
+    }
+    return status;
 }
 
 
