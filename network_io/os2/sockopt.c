@@ -98,8 +98,10 @@ ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on
         }
     }
     if (opt & APR_SO_NONBLOCK) {
-        if (ioctl(sock->socketdes, FIONBIO, (caddr_t)&on, sizeof(on)) == -1) {
+        if (ioctl(sock->socketdes, FIONBIO, (caddr_t)&one, sizeof(one)) == -1) {
             return os2errno(sock_errno());
+        } else {
+            sock->nonblock = one;
         }
     }
     if (opt & APR_SO_LINGER) {

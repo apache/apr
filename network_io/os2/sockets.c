@@ -107,6 +107,7 @@ ap_status_t ap_create_tcp_socket(struct socket_t **new, ap_context_t *cont)
         return os2errno(sock_errno());
     }
     (*new)->timeout = -1;
+    (*new)->nonblock = FALSE;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
