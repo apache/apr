@@ -87,35 +87,7 @@
 
 #if HAVE_MMAP
 
-ap_int32_t ap_mmap_inode_compare(const void *m1, const void *m2)
-{
-    const ap_mmap_t *a = *(ap_mmap_t **)m1;
-    const ap_mmap_t *b = *(ap_mmap_t **)m2;
-    ap_int32_t c;
-
-    if (a->statted == 0 || b->statted == 0) {
-        /* we can't do this as we have no stat info... */
-        /* what do we return??? */
-        return (-1);
-    }
-    c = a->sinfo.st_ino - b->sinfo.st_ino;
-    if (c == 0) {
-	    return a->sinfo.st_dev - b->sinfo.st_dev;
-    }
-    return c;
-}
-
-ap_int32_t ap_mmap_filename_compare(const void *m1, const void *m2)
-{
-    const ap_mmap_t *a = m1;
-    const ap_mmap_t *b = m2;
-
-    return strcmp(a->filename, b->filename);
-}
-
-
-
-ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_size_t offset)
+ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset)
 {  
     if (offset < 0 || offset > mmap->size)
         return APR_EINVAL;

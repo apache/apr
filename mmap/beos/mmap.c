@@ -79,151 +79,38 @@ ap_status_t mmap_cleanup(void *themmap)
         return errno;
 }
 
-ap_status_t ap_mmap_create(struct mmap_t **new, const char *fname,
-     ap_context_t *cont)
+ap_status_t ap_mmap_create(struct mmap_t **new, ap_file_t *file, ap_off_t offset, ap_size_t size,
+                ap_context_t *cont)
 {
-    struct stat st;
-    int fd = -1;
     void *mm;
     area_id aid = -1;
     char *areaname = "apr_mmap\0";
-    uint32 size = 0;
+    uint32 pages = 0;
 
+    if (file == NULL || file->buffered || file->filedes == -1)
+        return APR_EBADF;
     (*new) = (struct mmap_t *)ap_palloc(cont, sizeof(struct mmap_t));
     
-    if (stat(fname, &st) == -1) { 
-        /* we couldn't stat the file...probably doesn't exist! */
-        return APR_ENOFILE;
-    }
-    if ((st.st_mode & S_IFMT) != S_IFREG) {
-        /* oh dear, we're only doing regular files at present... */
-        return APR_EBADF;
-    } 
-    size = ((st.st_size -1) / B_PAGE_SIZE) + 1;
+    pages = ((size -1) / B_PAGE_SIZE) + 1;
 
-    if ((fd = open(fname, O_RDONLY, 0)) == -1) {
-        return APR_EBADF;
-    }
-  
-    aid = create_area(areaname, &mm , B_ANY_ADDRESS, size * B_PAGE_SIZE, 
+    ap_seek(file, APR_SET, &offset);
+     
+    aid = create_area(areaname, &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE, 
         B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
 
-    if (aid >= B_NO_ERROR)
-        read(fd, mm, st.st_size);    
-    
-    close (fd);
     if (aid < B_NO_ERROR) {
         /* we failed to get an mmap'd file... */
         return APR_ENOMEM;
-    }  
-
-    (*new)->filename = ap_pstrdup(cont, fname);
-    (*new)->mm = mm;
-    (*new)->sinfo = st;
-    (*new)->size = st.st_size;
-    (*new)->area = aid;
-    (*new)->cntxt = cont;
-    (*new)->statted = 1;
-               
-    /* register the cleanup... */ 
-    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
-             ap_null_cleanup);
-
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file, 
-               ap_context_t *cont)
-{
-    char *mm;
-    area_id aid = -1;
-    char *areaname = "apr_mmap\0";
-    uint32 size;           
-    
-    if (file->buffered)
-        /* we don't yet mmap buffered files... */
-        return APR_EBADF;
-    if (file->filedes == -1)
-        /* there isn't a file handle so how can we mmap?? */
-        return APR_EBADF;
-    (*new) = (struct mmap_t*)ap_palloc(cont, sizeof(struct mmap_t));
-    
-    if (!file->stated) {
-        /* hmmmm... we need to stat the file now */
-        struct stat st;
-        if (stat(file->fname, &st) == -1) {
-            /* hmm, is this fatal?? */
-            return APR_EBADF;
-        }
-        file->stated = 1;
-        file->size = st.st_size;
-        file->atime = st.st_atime;
-        file->mtime = st.st_mtime;
-        file->ctime = st.st_ctime;
-        (*new)->sinfo = st;
     }
-    
-    size = ((file->size -1) / B_PAGE_SIZE) + 1;
-
-    aid = create_area(areaname, (void*)&mm, B_ANY_ADDRESS, size * B_PAGE_SIZE, 
-        B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
-    free(areaname);
-    
-    if (aid < B_OK) {
-        /* we failed to get an mmap'd file... */
-        return APR_ENOMEM;
-    }  
-    if (aid >= B_OK)
-        read(file->filedes, mm, file->size);    
-
-    (*new)->filename = ap_pstrdup(cont, file->fname);
-    (*new)->mm = mm;
-    (*new)->size = file->size;
-    (*new)->area = aid;
-    (*new)->cntxt = cont;
-    (*new)->statted = 1;
-    
-    /* register the cleanup... */ 
-    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
-             ap_null_cleanup);
-
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_mmap_size_create(ap_mmap_t **new, ap_file_t *file, ap_size_t mmapsize,
-                                ap_context_t *cont)
-{
-    char *mm;
-    area_id aid = -1;
-    char *areaname = "apr_mmap\0";
-    uint32 size;           
-    
-    if (file->buffered)
-        return APR_EBADF;
-    if (file->filedes == -1)
-        return APR_EBADF;
-    (*new) = (struct mmap_t*)ap_palloc(cont, sizeof(struct mmap_t));
       
-    size = ((mmapsize -1) / B_PAGE_SIZE) + 1;
+    if (aid >= B_NO_ERROR)
+        read(file->filedes, mm, size);    
 
-    aid = create_area(areaname, (void*)&mm, B_ANY_ADDRESS, size * B_PAGE_SIZE, 
-        B_FULL_LOCK, B_READ_AREA|B_WRITE_AREA);
-    free(areaname);
-    
-    if (aid < B_OK) {
-        /* we failed to get an mmap'd file... */
-        return APR_ENOMEM;
-    }  
-    if (aid >= B_OK)
-        read(file->filedes, mm, mmapsize);    
-
-    (*new)->filename = ap_pstrdup(cont, file->fname);
     (*new)->mm = mm;
-    (*new)->size = mmapsize;
+    (*new)->size = size;
     (*new)->area = aid;
     (*new)->cntxt = cont;
-    (*new)->statted = 0;
-
+               
     /* register the cleanup... */ 
     ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
              ap_null_cleanup);

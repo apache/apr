@@ -133,6 +133,32 @@ ifelse([$3], , , [  $3
 ])dnl
 fi
 rm -fr conftest*])
-
+dnl A variant of AC_CHECK_SIZEOF which allows the checking of
+dnl sizes of non-builtin types
+dnl AC_CHECK_SIZEOF_EXTENDED(INCLUDES, TYPE [, CROSS_SIZE])
+AC_DEFUN(AC_CHECK_SIZEOF_EXTENDED,
+[changequote(<<,>>)dnl
+dnl The name to #define
+define(<<AC_TYPE_NAME>>, translit(sizeof_$2, [a-z *], [A-Z_P]))dnl
+dnl The cache variable
+define(<<AC_CV_NAME>>, translit(ac_cv_sizeof_$2, [ *],[<p>]))dnl
+changequote([, ])dnl
+AC_MSG_CHECKING(size of $2)
+AC_CACHE_VAL(AC_CV_NAME,
+[AC_TRY_RUN([#include <stdio.h>
+$1
+main()
+{
+  FILE *f=fopen("conftestval","w");
+  if (!f) exit(1);
+  fprintf(f, "%d\n", sizeof($2));
+  exit(0);
+}], AC_CV_NAME=`cat conftestval`, AC_CV_NAME=0, ifelse([$3],,,
+AC_CV_NAME=$3))])dnl
+AC_MSG_RESULT($AC_CV_NAME)
+AC_DEFINE_UNQUOTED(AC_TYPE_NAME, $AC_CV_NAME)
+undefine([AC_TYPE_NAME])dnl
+undefine([AC_CV_NAME])dnl
+])
 
 

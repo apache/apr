@@ -71,19 +71,13 @@ typedef struct mmap_t            ap_mmap_t;
 /*   Function definitions */
 
 /* creation */
-ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, const char *fname, ap_context_t *cntxt);
-ap_status_t ap_mmap_open_create(ap_mmap_t **newmmap, ap_file_t *file, ap_context_t *cntxt);
-ap_status_t ap_mmap_size_create(ap_mmap_t **newmmap, ap_file_t *file, ap_size_t size,
-                                ap_context_t *cntxt);
+ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, ap_file_t *file, ap_off_t offset,
+                 ap_size_t size, ap_context_t *cntxt);
 
 /* destruction */
 ap_status_t ap_mmap_delete(ap_mmap_t *mmap);
 
-/* These are designed to be used in qsort, bsearch etc */
-ap_int32_t ap_mmap_inode_compare(const void *m1, const void *m2);
-ap_int32_t ap_mmap_filename_compare(const void *m1, const void *m2);
-
-ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_size_t offset);
+ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset);
 
 #ifdef __cplusplus
 }
