@@ -65,6 +65,7 @@
 !     %o1  [input]   - the increment delta value
 !     %o2  [local]   - work register (was %l0 in book)
 !     %o3  [local]   - work register (was %l1 in book)
+!     %o4  [local]   - work register
 !     %o0  [output]  - contains return value 
 !
 !
@@ -90,12 +91,13 @@ _apr_atomic_add_sparc_loop:
         ld 		[%o0], %o2
 _apr_atomic_sub_sparc_loop:
         sub 	%o2, %o1, %o3
+        mov	%o3, %o4
         cas 	[%o0], %o2, %o3
         cmp 	%o2, %o3
         bne,a 	_apr_atomic_sub_sparc_loop
-        ld 		[%o0], %o2
+        nop
         retl
-        mov 	%o3, %o0
+        mov 	%o4, %o0
 
         SET_SIZE(apr_atomic_sub_sparc)
 !
