@@ -267,7 +267,6 @@ FILES_lib_objs = \
 	$(OBJDIR)/inet_pton.o \
 	$(OBJDIR)/inet_ntop.o \
 	$(OBJDIR)/libprews.o \
-	$(OBJDIR)/locks.o \
 	$(OBJDIR)/mktemp.o \
 	$(OBJDIR)/open.o \
 	$(OBJDIR)/pipe.o \
