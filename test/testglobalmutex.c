@@ -13,141 +13,77 @@
  * limitations under the License.
  */
 
-#include "apr_shm.h"
+#include "testglobalmutex.h"
 #include "apr_thread_proc.h"
-#include "apr_file_io.h"
 #include "apr_global_mutex.h"
 #include "apr_errno.h"
-#include "apr_general.h"
-#include "apr_getopt.h"
-#include "errno.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include "test_apr.h"
 
-
-#define MAX_ITER 4000
-#define MAX_COUNTER (MAX_ITER * 4)
-
-apr_global_mutex_t *global_lock;
-apr_pool_t *pool;
-int *x;
-
-static int make_child(apr_proc_t **proc, apr_pool_t *p)
+static void launch_child(CuTest *tc, apr_proc_t *proc, apr_pool_t *p)
 {
-    int i = 0;
-    *proc = apr_pcalloc(p, sizeof(**proc));
-
-    /* slight delay to allow things to settle */
-    apr_sleep (1);
-
-    if (apr_proc_fork(*proc, p) == APR_INCHILD) {
-        while (1) {
-            apr_global_mutex_lock(global_lock); 
-            if (i == MAX_ITER) {
-                apr_global_mutex_unlock(global_lock); 
-                exit(1);
-            }
-            i++;
-            (*x)++;
-            apr_global_mutex_unlock(global_lock); 
-        }
-        exit(1);
-    }
-    return APR_SUCCESS;
-}
-
-static apr_status_t test_exclusive(const char *lockname)
-{
-    apr_proc_t *p1, *p2, *p3, *p4;
-    apr_status_t s1, s2, s3, s4;
- 
-    printf("Exclusive lock test\n");
-    printf("%-60s", "    Initializing the lock");
-    s1 = apr_global_mutex_create(&global_lock, lockname, APR_LOCK_DEFAULT, pool);
- 
-    if (s1 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
- 
-    printf("%-60s", "    Starting all of the processes");
-    fflush(stdout);
-    s1 = make_child(&p1, pool);
-    s2 = make_child(&p2, pool);
-    s3 = make_child(&p3, pool);
-    s4 = make_child(&p4, pool);
-    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS ||
-        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
-        printf("Failed!\n");
-        return s1;
-    }
-    printf("OK\n");
- 
-    printf("%-60s", "    Waiting for processes to exit");
-    s1 = apr_proc_wait(p1, NULL, NULL, APR_WAIT);
-    s2 = apr_proc_wait(p2, NULL, NULL, APR_WAIT);
-    s3 = apr_proc_wait(p3, NULL, NULL, APR_WAIT);
-    s4 = apr_proc_wait(p4, NULL, NULL, APR_WAIT);
-    printf("OK\n");
- 
-    if ((*x) != MAX_COUNTER) {
-        fprintf(stderr, "Locks don't appear to work!  x = %d instead of %d\n",
-                (*x), MAX_COUNTER);
-    }
-    else {
-        printf("Test passed\n");
-    }
-    return APR_SUCCESS;
-}
-
-int main(int argc, const char * const *argv)
-{
+    apr_procattr_t *procattr;
+    const char *args[2];
     apr_status_t rv;
-    char errmsg[200];
-    const char *lockname = NULL;
-    const char *shmname = "shm.file";
-    apr_getopt_t *opt;
-    char optchar;
-    const char *optarg;
-    apr_shm_t *shm;
 
-    printf("APR Proc Mutex Test\n==============\n\n");
-        
-    apr_initialize();
-    atexit(apr_terminate);
+    rv = apr_procattr_create(&procattr, p);
+    apr_assert_success(tc, "Couldn't create procattr", rv);
 
-    if (apr_pool_create(&pool, NULL) != APR_SUCCESS)
-        exit(-1);
+    rv = apr_procattr_io_set(procattr, APR_NO_PIPE, APR_NO_PIPE,
+            APR_NO_PIPE);
+    apr_assert_success(tc, "Couldn't set io in procattr", rv);
 
-    if ((rv = apr_getopt_init(&opt, pool, argc, argv)) != APR_SUCCESS) {
-        fprintf(stderr, "Could not set up to parse options: [%d] %s\n",
-                rv, apr_strerror(rv, errmsg, sizeof errmsg));
-        exit(-1);
-    }
-        
-    while ((rv = apr_getopt(opt, "f:", &optchar, &optarg)) == APR_SUCCESS) {
-        if (optchar == 'f') {
-            lockname = optarg;
-        }
-    }
+    rv = apr_procattr_error_check_set(procattr, 1);
+    apr_assert_success(tc, "Couldn't set error check in procattr", rv);
 
-    if (rv != APR_SUCCESS && rv != APR_EOF) {
-        fprintf(stderr, "Could not parse options: [%d] %s\n",
-                rv, apr_strerror(rv, errmsg, sizeof errmsg));
-        exit(-1);
-    }
+    args[0] = "globalmutexchild" EXTENSION;
+    args[2] = NULL;
+    rv = apr_proc_create(proc, "./globalmutexchild" EXTENSION, args, NULL,
+            procattr, p);
+    apr_assert_success(tc, "Couldn't launch program", rv);
+}
 
-    apr_shm_create(&shm, sizeof(int), shmname, pool);
-    x = apr_shm_baseaddr_get(shm);
+static int wait_child(CuTest *tc, apr_proc_t *proc)
+{
+    int exitcode;
+    apr_exit_why_e why;
 
-    if ((rv = test_exclusive(lockname)) != APR_SUCCESS) {
-        fprintf(stderr,"Exclusive Lock test failed : [%d] %s\n",
-                rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-2);
-    }
-    
-    return 0;
+    CuAssert(tc, "Error waiting for child process",
+            apr_proc_wait(proc, &exitcode, &why, APR_WAIT) == APR_CHILD_DONE);
+
+    CuAssert(tc, "child didn't terminate normally", why == APR_PROC_EXIT);
+    return exitcode;
+}
+
+static void test_exclusive(CuTest *tc)
+{
+    apr_proc_t p1, p2, p3, p4;
+    apr_status_t rv;
+    apr_global_mutex_t *global_lock;
+    int x = 0;
+ 
+    rv = apr_global_mutex_create(&global_lock, LOCKNAME, APR_LOCK_DEFAULT, p);
+    apr_assert_success(tc, "Error creating mutex", rv);
+
+
+    launch_child(tc, &p1, p);
+    launch_child(tc, &p2, p);
+    launch_child(tc, &p3, p);
+    launch_child(tc, &p4, p);
+ 
+    x += wait_child(tc, &p1);
+    x += wait_child(tc, &p2);
+    x += wait_child(tc, &p3);
+    x += wait_child(tc, &p4);
+
+    CuAssertIntEquals(tc, MAX_COUNTER, x);
+}
+
+CuSuite *testglobalmutex(void)
+{
+    CuSuite *suite = CuSuiteNew("Global Mutex");
+
+    SUITE_ADD_TEST(suite, test_exclusive);
+
+    return suite;
 }
 

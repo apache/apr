@@ -17,9 +17,6 @@ STDTEST_PORTABLE = \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
 
-STDTEST_NONPORTABLE = \
-	testglobalmutex@EXEEXT@
-
 OTHER_PROGRAMS = sendfile@EXEEXT@ 
 
 PROGRAMS = $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
@@ -60,6 +57,9 @@ sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
 readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) readchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
         
+globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
+	$(LINK_PROG) globalmutexchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
 tryread@EXEEXT@: tryread.lo $(LOCAL_LIBS)
 	$(LINK_PROG) tryread.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -91,9 +91,6 @@ testshmconsumer@EXEEXT@: testshmconsumer.lo $(LOCAL_LIBS)
 testprocmutex@EXEEXT@: testprocmutex.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testprocmutex.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testglobalmutex@EXEEXT@: testglobalmutex.lo $(LOCAL_LIBS)
-	$(LINK_PROG) testglobalmutex.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testmutexscope.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -104,11 +101,12 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
 	testhash.lo testargs.lo testnames.lo testuser.lo testpath.lo \
 	testenv.lo testprocmutex.lo testrand2.lo testfnmatch.lo \
-        testatomic.lo testflock.lo testshm.lo testsock.lo
+        testatomic.lo testflock.lo testshm.lo testsock.lo testglobalmutex.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 readchild@EXEEXT@ CuTest.lo proc_child@EXEEXT@ \
-         tryread@EXEEXT@ sockchild@EXEEXT@ $(LOCAL_LIBS)
+         tryread@EXEEXT@ sockchild@EXEEXT@ globalmutexchild@EXEEXT@ \
+         $(LOCAL_LIBS)
 	$(LINK_PROG) $(TESTS) CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 

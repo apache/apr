@@ -1,10 +1,8 @@
 
 LINK=link /nologo
 
-NONPORTABLE = \
-	testglobalmutex.exe
-
 PROGRAMS = \
+        globalmutexchild.exe \
 	sendfile.exe \
 	proc_child.exe \
         tryread.exe \
@@ -74,8 +72,8 @@ testshmconsumer.exe: testshmconsumer.obj $(LOCAL_LIBS)
 testprocmutex.exe: testprocmutex.obj $(LOCAL_LIBS)
 	$(LINK) testprocmutex.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
-testglobalmutex.exe: testglobalmutex.obj $(LOCAL_LIBS)
-	$(LINK) testglobalmutex.obj $(LOCAL_LIBS) $(ALL_LIBS)
+globalmutexchild.exe: globalmutexchild.obj $(LOCAL_LIBS)
+	$(LINK) globalmutexchild.obj $(LOCAL_LIBS) $(ALL_LIBS)
 
 testmutexscope.exe: testmutexscope.obj $(LOCAL_LIBS)
 	$(LINK) testmutexscope.obj $(LOCAL_LIBS) $(ALL_LIBS)
@@ -87,7 +85,8 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 	testpoll.obj testlock.obj testsockopt.obj testpipe.obj testthread.obj \
 	testhash.obj testargs.obj testnames.obj testuser.obj testpath.obj \
 	testenv.obj testprocmutex.obj testrand2.obj testfnmatch.obj \
-        testatomic.obj testflock.obj testshm.obj testsock.obj
+        testatomic.obj testflock.obj testshm.obj testsock.obj \
+        testglobalmutex.obj
 
 testall.exe: $(TESTS) CuTest.obj $(LOCAL_LIBS)
 	$(LINK) /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
