@@ -245,7 +245,7 @@ ap_status_t ap_set_wday(struct atime_t *time, ap_int32_t value)
 ap_status_t ap_get_timedata(struct atime_t *atime, char *key, void *data)
 {
     if (atime != NULL) {
-        return ap_get_userdata(&data, key, atime->cntxt);
+        return ap_get_userdata(data, key, atime->cntxt);
     }
     else {
         data = NULL;

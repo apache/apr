@@ -199,7 +199,7 @@ ap_status_t ap_get_revents(ap_int16_t *event, struct socket_t *sock, struct poll
 ap_status_t ap_get_polldata(struct pollfd_t *pollfd, char *key, void *data)
 {
     if (pollfd != NULL) {
-        return ap_get_userdata(&data, key, pollfd->cntxt);
+        return ap_get_userdata(data, key, pollfd->cntxt);
     }
     else {
         data = NULL;

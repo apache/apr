@@ -167,7 +167,7 @@ ap_status_t ap_destroy_lock(struct lock_t *lock)
 ap_status_t ap_get_lockdata(struct lock_t *lock, char *key, void *data)
 {
     if (lock != NULL) {
-        return ap_get_userdata(&data, key, lock->cntxt);
+        return ap_get_userdata(data, key, lock->cntxt);
     }
     else {
         data = NULL;

@@ -156,10 +156,10 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
     }
 }
 
-ap_status_t ap_get_threaddata(void *data, char *key, struct thread_t *thread)
+ap_status_t ap_get_threaddata(void **data, char *key, struct thread_t *thread)
 {
     if (thread != NULL) {
-        return ap_get_userdata(&data, key, thread->cntxt);
+        return ap_get_userdata(data, key, thread->cntxt);
     }
     else {
         data = NULL;

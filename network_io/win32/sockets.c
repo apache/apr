@@ -253,10 +253,10 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
     }
 }
 
-ap_status_t ap_get_socketdata(void *data, char *key, struct socket_t *socket)
+ap_status_t ap_get_socketdata(void **data, char *key, struct socket_t *socket)
 {
     if (socket != NULL) {
-        return ap_get_userdata(&data, key, socket->cntxt);
+        return ap_get_userdata(data, key, socket->cntxt);
     }
     else {
         data = NULL;

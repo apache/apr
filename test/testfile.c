@@ -71,12 +71,13 @@ int main()
     ap_file_t *thefile = NULL;
     ap_status_t status = 0;
     ap_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
-    ap_uint64_t rv = 0;
     ap_ssize_t nbytes = 0;
     ap_off_t zer = 0;
     char *buf;
     char *str;
     char *filename = "test.fil";
+    char *teststr;
+
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
@@ -151,6 +152,26 @@ int main()
         fprintf(stdout, "OK\n");
     }
 
+    fprintf(stdout, "\tAdding user data to the file.......");
+    status = ap_set_filedata(thefile, "This is a test", "test", ap_null_cleanup);
+    if (status  != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't add the data\n");
+        exit(-1); 
+    }
+    else {
+        fprintf(stdout, "OK\n");
+    }
+
+    fprintf(stdout, "\tGetting user data from the file.......");
+    status = ap_get_filedata((void **)&teststr, "test", thefile);
+    if (status  != APR_SUCCESS || strcmp(teststr, "This is a test")) {
+        fprintf(stderr, "Couldn't get the data\n");
+        exit(-1); 
+    }
+    else {
+        fprintf(stdout, "OK\n");
+    }
+
     fprintf(stdout, "\tClosing File.......");
     status = ap_close(thefile);
     if (status  != APR_SUCCESS) {
@@ -180,10 +201,10 @@ int main()
     else {
         fprintf(stdout, "OK\n");
     }
-    
+
     testdirs(context); 
     test_filedel(context);
- 
+
     return 1;
 }
 

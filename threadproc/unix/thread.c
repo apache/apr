@@ -219,15 +219,15 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(void *, char *, ap_thread_t *)
+ * ap_status_t ap_get_threaddata(void **, char *, ap_thread_t *)
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data associated with the thread.
  */
-ap_status_t ap_get_threaddata(void *data, char *key, struct thread_t *thread)
+ap_status_t ap_get_threaddata(void **data, char *key, struct thread_t *thread)
 {
     if (thread != NULL) {
-        return ap_get_userdata(&data, key, thread->cntxt);
+        return ap_get_userdata(data, key, thread->cntxt);
     }
     else {
         data = NULL;
@@ -332,12 +332,12 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(void *, char *, ap_thread_t *)
+ * ap_status_t ap_get_threaddata(void **, char *, ap_thread_t *)
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data associated with the thread.
  */
-ap_status_t ap_get_threaddata(void *data, char *key, struct thread_t *thread)
+ap_status_t ap_get_threaddata(void **data, char *key, struct thread_t *thread)
 {
     data = NULL;
     return APR_ENOTHREAD;

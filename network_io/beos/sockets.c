@@ -216,10 +216,10 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
     return APR_SUCCESS; 
 } 
 
-ap_status_t ap_get_socketdata(void *data, char *key, struct socket_t *sock)
+ap_status_t ap_get_socketdata(void **data, char *key, struct socket_t *sock)
 {
     if (socket != NULL) {
-        return ap_get_userdata(&data, key, sock->cntxt);
+        return ap_get_userdata(data, key, sock->cntxt);
     }
     else {
         data = NULL;

@@ -260,7 +260,7 @@ ap_status_t ap_setprocattr_detach(struct procattr_t *attr, ap_int32_t detach)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_fork_detach(ap_proc_t **, ap_context_t *) 
+ * ap_status_t ap_fork(ap_proc_t **, ap_context_t *) 
  *    This is currently the only non-portable call in APR.  This executes
  *    a standard unix fork.
  * arg 1) The context to use. 
