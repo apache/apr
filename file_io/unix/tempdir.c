@@ -160,8 +160,9 @@ APR_DECLARE(apr_status_t) apr_temp_dir_get(const char **temp_dir,
     /* Finally, try the current working directory. */
     if (APR_SUCCESS == apr_filepath_get(&cwd, APR_FILEPATH_NATIVE, p)) {
         if (test_tempdir(cwd, p)) {
-            memcpy(global_temp_dir, cwd, strlen(cwd) + 1);
-            goto end;
+            /* Don't cache if the selected temp dir is the cwd */
+            *temp_dir = apr_pstrdup(p, cwd);
+            return APR_SUCCESS;
         }
     }
 
