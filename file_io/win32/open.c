@@ -403,8 +403,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     (*new)->direction = 0;
     (*new)->filePtr = 0;
 
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), file_cleanup,
-                              apr_pool_cleanup_null);
+    if (!(flag & APR_FILE_NOCLEANUP)) {
+        apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), file_cleanup,
+                                  apr_pool_cleanup_null);
+    }
     return APR_SUCCESS;
 }
 
