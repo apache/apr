@@ -56,7 +56,6 @@
 #include "../../file_io/unix/fileio.h"
 #include "apr_file_io.h"
 #include "apr_thread_proc.h"
-#include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_portable.h"
 #include <kernel/OS.h>
