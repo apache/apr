@@ -96,6 +96,8 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
     apr_finfo_t finfo;
     apr_status_t rc = APR_SUCCESS;
 
+    thefile->eof_hit = 0;
+
     if (thefile->buffered) {
         switch (where) {
             case APR_SET:

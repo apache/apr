@@ -91,6 +91,8 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
         return APR_EBADF;
     }
 
+    thefile->eof_hit = 0;
+
     if (thefile->buffered) {
         int rc = EINVAL;
         apr_finfo_t finfo;
