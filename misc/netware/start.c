@@ -62,7 +62,9 @@
 #include "internal_time.h"
 
 
-APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, char ***argv, char ***env)
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 
+                                             const char * const * *argv, 
+                                             const char * const * *env)
 {
     /* An absolute noop.  At present, only Win32 requires this stub, but it's
      * required in order to move command arguments passed through the service

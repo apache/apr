@@ -103,7 +103,8 @@ struct apr_other_child_rec_t {
  */
 extern int APR_DECLARE_DATA apr_app_init_complete;
 
-int apr_wastrtoastr(char ***retarr, const wchar_t **arr, int args);
+int apr_wastrtoastr(char const * const * *retarr, 
+                    wchar_t const * const *arr, int args);
 
 /* Platform specific designation of run time os version.
  * Gaps allow for specific service pack levels that

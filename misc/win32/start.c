@@ -75,9 +75,10 @@ int APR_DECLARE_DATA apr_app_init_complete = 0;
  * as a list of strings.  These are allocated from the MSVCRT's 
  * _CRT_BLOCK to trick the system into trusting our store.
  */
-static int warrsztoastr(char ***retarr, wchar_t *arrsz, int args)
+static int warrsztoastr(const char * const * *retarr, 
+                        const wchar_t * arrsz, int args)
 {
-    apr_wchar_t *wch;
+    const apr_wchar_t *wch;
     size_t totlen;
     size_t newlen;
     size_t wsize;
@@ -128,7 +129,9 @@ static int warrsztoastr(char ***retarr, wchar_t *arrsz, int args)
 /* Reprocess the arguments to main() for a completely apr-ized application
  */
 
-APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, char ***argv, char ***env)
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 
+                                             const char * const * *argv, 
+                                             const char * const * *env)
 {
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
@@ -155,9 +158,9 @@ APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, char ***argv, char ***en
         dupenv = warrsztoastr(&_environ, sysstr, -1);
 
 	if (env) {
-            env = _malloc_dbg((dupenv + 1) * sizeof (char *), 
-                              _CRT_BLOCK, __FILE__, __LINE__ );
-            memcpy(*env, _environ, (dupenv + 1) * sizeof (char *));
+            *env = _malloc_dbg((dupenv + 1) * sizeof (char *), 
+                               _CRT_BLOCK, __FILE__, __LINE__ );
+            memcpy((void*)*env, _environ, (dupenv + 1) * sizeof (char *));
         }
         else {
         }
