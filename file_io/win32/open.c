@@ -153,7 +153,6 @@ ap_status_t ap_open(ap_file_t **dafile, const char *fname,
         SetFilePointer((*dafile)->filehand, 0, NULL, FILE_END);
     }
 
-//    (*dafile)->stated = 0;  /* we haven't called stat for this file yet. */
     (*dafile)->eof_hit = 0;
     ap_register_cleanup((*dafile)->cntxt, (void *)(*dafile), file_cleanup,
                         ap_null_cleanup);
@@ -224,7 +223,6 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
         return GetLastError();
     (*thefile)->cntxt = cont;
     (*thefile)->fname = "STD_ERROR_HANDLE";
-//    (*thefile)->stated = 0;
     (*thefile)->eof_hit = 0;
 
     return APR_SUCCESS;
