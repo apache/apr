@@ -111,10 +111,13 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
  * </PRE>
  * @param pool the pool from which to allocate the mutex.
  */
+#if APR_HAS_LOCK_CREATE_NP
 APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
                                                    const char *fname,
                                                    apr_lockmech_e_np mech,
                                                    apr_pool_t *pool);
+#endif
+
 /**
  * Re-open a mutex in a child process.
  * @param mutex The newly re-opened mutex structure.
