@@ -120,6 +120,7 @@ static void test_read(CuTest *tc)
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
 
+    apr_assert_success(tc, "Opening test file " FILENAME, rv);
     rv = apr_file_read(filetest, str, &nbytes);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertIntEquals(tc, strlen(TESTSTR), nbytes);
@@ -137,6 +138,7 @@ static void test_filename(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
+    apr_assert_success(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_name_get(&str, filetest);
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
@@ -155,7 +157,7 @@ static void test_fileclose(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
-
+    apr_assert_success(tc, "Opening test file " FILENAME, rv);
 
     rv = apr_file_close(filetest);
     CuAssertIntEquals(tc, rv, APR_SUCCESS);
@@ -247,6 +249,7 @@ static void test_seek(CuTest *tc)
     rv = apr_file_open(&filetest, FILENAME, 
                        APR_READ, 
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
+    apr_assert_success(tc, "Open test file " FILENAME, rv);
 
     rv = apr_file_read(filetest, str, &nbytes);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
