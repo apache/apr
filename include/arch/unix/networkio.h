@@ -69,11 +69,14 @@
 #if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
-#if APR_HAVE_SYS_POLL_H
+#ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
 #ifdef HAVE_POLL_H
 #include <poll.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
 #endif
 #if APR_HAVE_ERRNO_H
 #include <errno.h>
