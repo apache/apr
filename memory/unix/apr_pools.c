@@ -2213,6 +2213,7 @@ APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(
     return apr_allocator_owner_get(allocator);
 }
 
+#if APR_HAS_THREADS
 /* Deprecated */
 APR_DECLARE(apr_thread_mutex_t *) apr_allocator_get_mutex(
                                       apr_allocator_t *allocator)
@@ -2226,3 +2227,5 @@ APR_DECLARE(void) apr_allocator_set_mutex(apr_allocator_t *allocator,
 {
     apr_allocator_mutex_set(allocator, mutex);
 }
+#endif /* APR_HAS_THREADS */
+
