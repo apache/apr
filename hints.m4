@@ -5,11 +5,36 @@ dnl  on previously obtained platform knowledge.
 dnl  We allow all settings to be overridden from
 dnl  the command-line.
 dnl
+dnl  We maintain the "format" that we've used
+dnl  under 1.3.x, so we don't exactly follow
+dnl  what is "recommended" by autoconf.
+
+dnl
+dnl APR_DOEXTRA
+dnl
+dnl  Handle the use of EXTRA_* variables.
+dnl  Basically, EXTRA_* vars are added to the
+dnl  current settings of their "parents". We
+dnl  can expand as needed. This is ugly
+dnl
+AC_DEFUN(APR_DOEXTRA, [
+  for i in CFLAGS LDFLAGS LIBS
+  do
+    XYZ="APR_TMP=\$EXTRA_$i"; eval $XYZ
+    if test -n "$APR_TMP"; then
+      XYZ="$i=\"\$$i $APR_TMP\""
+      eval $XYZ
+      eval export $i
+      eval unset EXTRA_${i}
+      eval export EXTRA_${i}
+    fi
+  done
+])
 
 dnl
 dnl APR_SETIFNULL(variable, value)
 dnl
-dnl Set variable iff it's currently null
+dnl  Set variable iff it's currently null
 dnl
 AC_DEFUN(APR_SETIFNULL,[
   if test -z "$$1"; then
@@ -20,7 +45,7 @@ AC_DEFUN(APR_SETIFNULL,[
 dnl
 dnl APR_ADDTO(variable, value)
 dnl
-dnl Add value to variable
+dnl  Add value to variable
 dnl
 AC_DEFUN(APR_ADDTO,[
    $1="$$1 $2$3$4$5$6$7$8$9"; export $1
@@ -29,8 +54,9 @@ AC_DEFUN(APR_ADDTO,[
 dnl
 dnl APR_PRELOAD
 dnl
-dnl Preload various ENV/makefile paramsm such as CC, CFLAGS, etc
-dnl based on outside knowledge
+dnl  Preload various ENV/makefile paramsm such as CC, CFLAGS, etc
+dnl  based on outside knowledge
+dnl
 AC_DEFUN(APR_PRELOAD, [
 PLAT=`$ac_config_guess`
 PLAT=`$ac_config_sub $PLAT`
@@ -342,4 +368,5 @@ dnl	;;
        APR_ADDTO(CFLAGS, -U_NO_PROTO)
        ;;
 esac
+APR_DOEXTRA
 ])
