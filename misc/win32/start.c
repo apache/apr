@@ -78,13 +78,13 @@ ap_status_t ap_create_context(ap_context_t *cont, void *data, ap_context_t **new
     ap_pool_t *pool;
 
     if (cont) {
-        pool = ap_make_sub_pool(cont->pool);
+        ap_context_t = ap_make_sub_pool(cont->pool);
     }
     else {
-        pool = ap_init_alloc();;
+        ap_context_t = ap_init_alloc();;
     }
         
-    if (pool == NULL) {
+    if (ap_context_t == NULL) {
         return APR_ENOPOOL;
     }
     

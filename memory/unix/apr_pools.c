@@ -72,6 +72,11 @@
 #include "apr_pools.h"
 #include "apr_lib.h"
 #include "misc.h"
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <fcntl.h>
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
@@ -106,9 +111,9 @@
 
 /*
  * Pool debugging support:  This is intended to detect cases where the
- * wrong pool is used when assigning data to an object in another pool.
+ * wrong ap_context_t is used when assigning data to an object in another pool.
  * In particular, it causes the table_{set,add,merge}n routines to check
- * that their arguments are safe for the table they're being placed in.
+ * that their arguments are safe for the ap_table_t they're being placed in.
  * It currently only works with the unix multiprocess model, but could
  * be extended to others.
  */
@@ -119,10 +124,10 @@
  * possibly too small.  This requires a recent gcc which supports
  * __builtin_return_address().  The error_log output will be a
  * message such as:
- *    table_push: table created by 0x804d874 hit limit of 10
+ *    table_push: ap_table_t created by 0x804d874 hit limit of 10
  * Use "l *0x804d874" to find the source that corresponds to.  It
- * indicates that a table allocated by a call at that address has
- * possibly too small an initial table size guess.
+ * indicates that a ap_table_t allocated by a call at that address has
+ * possibly too small an initial ap_table_t size guess.
  */
 /* #define MAKE_TABLE_PROFILE */
 
@@ -149,6 +154,10 @@
 #define BLOCK_MINFREE	0
 #define BLOCK_MINALLOC	0
 #endif /* ALLOC_USE_MALLOC */
+
+#define AP_SLACK_LOW    1
+#define AP_SLACK_HIGH   2
+
 
 /*****************************************************************
  *
@@ -444,7 +453,7 @@ static void free_proc_chain(struct process_chain *p);
 
 static ap_pool_t *permanent_pool;
 
-/* Each pool structure is allocated in the start of its own first block,
+/* Each ap_context_t structure is allocated in the start of its own first block,
  * so we need to know how many bytes that is (once properly aligned...).
  * This also means that when a pool's sub-pool is destroyed, the storage
  * associated with it is *completely* gone, so we have to make sure it
@@ -536,66 +545,78 @@ ap_pool_t *ap_init_alloc(void)
     return permanent_pool;
 }
 
-API_EXPORT(void) ap_clear_pool(struct context_t *a)
+void ap_destroy_real_pool(ap_pool_t *);
+
+void ap_clear_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
 
     (void) ap_acquire_mutex(alloc_mutex);
-    while (a->pool->sub_pools) {
-	ap_destroy_pool(a);
+    while (a->sub_pools) {
+	ap_destroy_real_pool(a->sub_pools);
     }
     (void) ap_release_mutex(alloc_mutex);
     /*
      * Don't hold the mutex during cleanups.
      */
-    run_cleanups(a->pool->cleanups);
-    a->pool->cleanups = NULL;
-    free_proc_chain(a->pool->subprocesses);
-    a->pool->subprocesses = NULL;
-    free_blocks(a->pool->first->h.next);
-    a->pool->first->h.next = NULL;
+    run_cleanups(a->cleanups);
+    a->cleanups = NULL;
+    free_proc_chain(a->subprocesses);
+    a->subprocesses = NULL;
+    free_blocks(a->first->h.next);
+    a->first->h.next = NULL;
 
-    a->pool->last = a->pool->first;
-    a->pool->first->h.first_avail = a->pool->free_first_avail;
-    debug_fill(a->pool->first->h.first_avail,
-	       a->pool->first->h.endp - a->pool->first->h.first_avail);
+    a->last = a->first;
+    a->first->h.first_avail = a->free_first_avail;
+    debug_fill(a->first->h.first_avail,
+	       a->first->h.endp - a->first->h.first_avail);
 
 #ifdef ALLOC_USE_MALLOC
     {
 	void *c, *n;
 
-	for (c = a->pool->allocation_list; c; c = n) {
+	for (c = a->allocation_list; c; c = n) {
 	    n = *(void **)c;
 	    free(c);
 	}
-	a->pool->allocation_list = NULL;
+	a->allocation_list = NULL;
     }
 #endif
 
     ap_unblock_alarms();
 }
 
-API_EXPORT(void) ap_destroy_pool(struct context_t *a)
+API_EXPORT(void) ap_clear_pool(struct context_t *a)
+{
+    ap_clear_real_pool(a->pool);
+}
+
+API_EXPORT(void) ap_destroy_real_pool(ap_pool_t *a)
 {
     ap_block_alarms();
-    ap_clear_pool(a);
+    ap_clear_real_pool(a);
 
     (void) ap_acquire_mutex(alloc_mutex);
-    if (a->pool->parent) {
-	if (a->pool->parent->sub_pools == a->pool) {
-	    a->pool->parent->sub_pools = a->pool->sub_next;
+    if (a->parent) {
+	if (a->parent->sub_pools == a) {
+	    a->parent->sub_pools = a->sub_next;
 	}
-	if (a->pool->sub_prev) {
-	    a->pool->sub_prev->sub_next = a->pool->sub_next;
+	if (a->sub_prev) {
+	    a->sub_prev->sub_next = a->sub_next;
 	}
-	if (a->pool->sub_next) {
-	    a->pool->sub_next->sub_prev = a->pool->sub_prev;
+	if (a->sub_next) {
+	    a->sub_next->sub_prev = a->sub_prev;
 	}
     }
     (void) ap_release_mutex(alloc_mutex);
 
-    free_blocks(a->pool->first);
+    free_blocks(a->first);
     ap_unblock_alarms();
+}
+
+API_EXPORT(void) ap_destroy_pool(struct context_t *a)
+{
+    ap_destroy_real_pool(a->pool);
 }
 
 API_EXPORT(long) ap_bytes_in_pool(ap_pool_t *p)
@@ -622,7 +643,7 @@ extern char _end;
     (((unsigned long)(ptr) - (unsigned long)(lo)) \
      < (unsigned long)(hi) - (unsigned long)(lo))
 
-/* Find the pool that ts belongs to, return NULL if it doesn't
+/* Find the ap_context_t that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
 API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
@@ -882,7 +903,7 @@ API_EXPORT_NONSTD(char *) ap_pstrcat(struct context_t *a, ...)
  * until all the output is done.
  *
  * Note that this is completely safe because nothing else can
- * allocate in this pool while ap_psprintf is running.  alarms are
+ * allocate in this ap_context_t while ap_psprintf is running.  alarms are
  * blocked, and the only thing outside of alloc.c that's invoked
  * is ap_vformatter -- which was purposefully written to be
  * self-contained with no callouts.
@@ -945,7 +966,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
     ps->blok = nblok;
     ps->got_a_new_block = 1;
     /* note that we've deliberately not linked the new block onto
-     * the pool yet... because we may need to flush again later, and
+     * the ap_context_t yet... because we may need to flush again later, and
      * we'd have to spend more effort trying to unlink the block.
      */
     return 0;
@@ -1123,7 +1144,7 @@ API_EXPORT(void) ap_cleanup_for_exec(void)
 #endif /* ndef WIN32 */
 }
 
-API_EXPORT_NONSTD(void) ap_null_cleanup(void *data)
+API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
 {
     /* do nothing cleanup routine */
 }
@@ -1133,23 +1154,23 @@ API_EXPORT_NONSTD(void) ap_null_cleanup(void *data)
  * Files and file descriptors; these are just an application of the
  * generic cleanup interface.
  */
-#if 0 /*not really needed any more, apr takes care of this stuff */
-static void fd_cleanup(void *fdv)
+static ap_status_t fd_cleanup(void *fdv)
 {
     close((int) (long) fdv);
+    return APR_SUCCESS;
 }
 
-API_EXPORT(void) ap_note_cleanups_for_fd(ap_pool_t *p, int fd)
+API_EXPORT(void) ap_note_cleanups_for_fd(ap_context_t *p, int fd)
 {
     ap_register_cleanup(p, (void *) (long) fd, fd_cleanup, fd_cleanup);
 }
 
-API_EXPORT(void) ap_kill_cleanups_for_fd(ap_pool_t *p, int fd)
+API_EXPORT(void) ap_kill_cleanups_for_fd(ap_context_t *p, int fd)
 {
     ap_kill_cleanup(p, (void *) (long) fd, fd_cleanup);
 }
 
-API_EXPORT(int) ap_popenf(ap_pool_t *a, const char *name, int flg, int mode)
+API_EXPORT(int) ap_popenf(ap_context_t *a, const char *name, int flg, int mode)
 {
     int fd;
     int save_errno;
@@ -1158,7 +1179,7 @@ API_EXPORT(int) ap_popenf(ap_pool_t *a, const char *name, int flg, int mode)
     fd = open(name, flg, mode);
     save_errno = errno;
     if (fd >= 0) {
-	fd = ap_slack(fd, ap_SLACK_HIGH);
+	fd = ap_slack(fd, AP_SLACK_HIGH);
 	ap_note_cleanups_for_fd(a, fd);
     }
     ap_unblock_alarms();
@@ -1166,7 +1187,7 @@ API_EXPORT(int) ap_popenf(ap_pool_t *a, const char *name, int flg, int mode)
     return fd;
 }
 
-API_EXPORT(int) ap_pclosef(ap_pool_t *a, int fd)
+API_EXPORT(int) ap_pclosef(ap_context_t *a, int fd)
 {
     int res;
     int save_errno;
@@ -1186,12 +1207,12 @@ static void h_cleanup(void *fdv)
     CloseHandle((HANDLE) fdv);
 }
 
-API_EXPORT(void) ap_note_cleanups_for_h(ap_pool_t *p, HANDLE hDevice)
+API_EXPORT(void) ap_note_cleanups_for_h(ap_context_t *p, HANDLE hDevice)
 {
     ap_register_cleanup(p, (void *) hDevice, h_cleanup, h_cleanup);
 }
 
-API_EXPORT(int) ap_pcloseh(ap_pool_t *a, HANDLE hDevice)
+API_EXPORT(int) ap_pcloseh(ap_context_t *a, HANDLE hDevice)
 {
     int res=0;
     int save_errno;
@@ -1209,26 +1230,28 @@ API_EXPORT(int) ap_pcloseh(ap_pool_t *a, HANDLE hDevice)
     return res;
 }
 #endif
-*/
+
 /* Note that we have separate plain_ and child_ cleanups for FILE *s,
  * since fclose() would flush I/O buffers, which is extremely undesirable;
  * we just close the descriptor.
  */
-static void file_cleanup(void *fpv)
+static ap_status_t file_cleanup(void *fpv)
 {
     fclose((FILE *) fpv);
+    return APR_SUCCESS;
 }
-static void file_child_cleanup(void *fpv)
+static ap_status_t file_child_cleanup(void *fpv)
 {
     close(fileno((FILE *) fpv));
+    return APR_SUCCESS;
 }
 
-API_EXPORT(void) ap_note_cleanups_for_file(ap_pool_t *p, FILE *fp)
+API_EXPORT(void) ap_note_cleanups_for_file(ap_context_t *p, FILE *fp)
 {
     ap_register_cleanup(p, (void *) fp, file_cleanup, file_child_cleanup);
 }
 
-API_EXPORT(FILE *) ap_pfopen(ap_pool_t *a, const char *name,
+API_EXPORT(FILE *) ap_pfopen(ap_context_t *a, const char *name,
 			      const char *mode)
 {
     FILE *fd = NULL;
@@ -1250,7 +1273,7 @@ API_EXPORT(FILE *) ap_pfopen(ap_pool_t *a, const char *name,
 	desc = open(name, baseFlag | O_APPEND | O_CREAT,
 		    modeFlags);
 	if (desc >= 0) {
-	    desc = ap_slack(desc, ap_SLACK_LOW);
+	    desc = ap_slack(desc, AP_SLACK_LOW);
 	    fd = ap_fdopen(desc, mode);
 	}
     }
@@ -1266,7 +1289,7 @@ API_EXPORT(FILE *) ap_pfopen(ap_pool_t *a, const char *name,
     return fd;
 }
 
-API_EXPORT(FILE *) ap_pfdopen(ap_pool_t *a, int fd, const char *mode)
+API_EXPORT(FILE *) ap_pfdopen(ap_context_t *a, int fd, const char *mode)
 {
     FILE *f;
     int saved_errno;
@@ -1283,7 +1306,7 @@ API_EXPORT(FILE *) ap_pfdopen(ap_pool_t *a, int fd, const char *mode)
 }
 
 
-API_EXPORT(int) ap_pfclose(ap_pool_t *a, FILE *fd)
+API_EXPORT(int) ap_pfclose(ap_context_t *a, FILE *fd)
 {
     int res;
 
@@ -1298,12 +1321,13 @@ API_EXPORT(int) ap_pfclose(ap_pool_t *a, FILE *fd)
  * DIR * with cleanup
  */
 
-static void dir_cleanup(void *dv)
+static ap_status_t dir_cleanup(void *dv)
 {
     closedir((DIR *) dv);
+    return APR_SUCCESS;
 }
 
-API_EXPORT(DIR *) ap_popendir(ap_pool_t *p, const char *name)
+API_EXPORT(DIR *) ap_popendir(ap_context_t *p, const char *name)
 {
     DIR *d;
     int save_errno;
@@ -1321,7 +1345,7 @@ API_EXPORT(DIR *) ap_popendir(ap_pool_t *p, const char *name)
     return d;
 }
 
-API_EXPORT(void) ap_pclosedir(ap_pool_t *p, DIR * d)
+API_EXPORT(void) ap_pclosedir(ap_context_t *p, DIR * d)
 {
     ap_block_alarms();
     ap_kill_cleanup(p, (void *) d, dir_cleanup);
@@ -1335,23 +1359,24 @@ API_EXPORT(void) ap_pclosedir(ap_pool_t *p, DIR * d)
  * generic cleanup interface.
  */
 
-static void socket_cleanup(void *fdv)
+static ap_status_t socket_cleanup(void *fdv)
 {
     closesocket((int) (long) fdv);
+    return APR_SUCCESS;
 }
 
-API_EXPORT(void) ap_note_cleanups_for_socket(ap_pool_t *p, int fd)
+API_EXPORT(void) ap_note_cleanups_for_socket(ap_context_t *p, int fd)
 {
     ap_register_cleanup(p, (void *) (long) fd, socket_cleanup,
 			 socket_cleanup);
 }
 
-API_EXPORT(void) ap_kill_cleanups_for_socket(ap_pool_t *p, int sock)
+API_EXPORT(void) ap_kill_cleanups_for_socket(ap_context_t *p, int sock)
 {
     ap_kill_cleanup(p, (void *) (long) sock, socket_cleanup);
 }
 
-API_EXPORT(int) ap_psocket(ap_pool_t *p, int domain, int type, int protocol)
+API_EXPORT(int) ap_psocket(ap_context_t *p, int domain, int type, int protocol)
 {
     int fd;
 
@@ -1368,7 +1393,7 @@ API_EXPORT(int) ap_psocket(ap_pool_t *p, int domain, int type, int protocol)
     return fd;
 }
 
-API_EXPORT(int) ap_pclosesocket(ap_pool_t *a, int sock)
+API_EXPORT(int) ap_pclosesocket(ap_context_t *a, int sock)
 {
     int res;
     int save_errno;
@@ -1394,12 +1419,13 @@ API_EXPORT(int) ap_pclosesocket(ap_pool_t *a, int sock)
  * regfree() doesn't clear it. So we don't allow it.
  */
 
-static void regex_cleanup(void *preg)
+static ap_status_t regex_cleanup(void *preg)
 {
     regfree((regex_t *) preg);
+    return APR_SUCCESS;
 }
 
-API_EXPORT(regex_t *) ap_pregcomp(ap_pool_t *p, const char *pattern,
+API_EXPORT(regex_t *) ap_pregcomp(ap_context_t *p, const char *pattern,
 				   int cflags)
 {
     regex_t *preg = ap_palloc(p, sizeof(regex_t));
@@ -1408,20 +1434,21 @@ API_EXPORT(regex_t *) ap_pregcomp(ap_pool_t *p, const char *pattern,
 	return NULL;
     }
 
-    ap_register_cleanup(p, (void *) preg, regex_cleanup, regex_cleanup);
+/*    ap_register_cleanup(p, (void *) preg, regex_cleanup, regex_cleanup);*/
+    ap_register_cleanup(p, (void *) preg, ap_null_cleanup, ap_null_cleanup);
 
     return preg;
 }
 
 
-API_EXPORT(void) ap_pregfree(ap_pool_t *p, regex_t * reg)
+API_EXPORT(void) ap_pregfree(ap_context_t *p, regex_t * reg)
 {
     ap_block_alarms();
     regfree(reg);
     ap_kill_cleanup(p, (void *) reg, regex_cleanup);
     ap_unblock_alarms();
 }
-#endif /* if 0 not really needed anymore.  APR takes care of this. */
+
 /*****************************************************************
  *
  * More grotty system stuff... subprocesses.  Frump.  These don't use
@@ -1458,8 +1485,8 @@ API_EXPORT(void) ap_note_subprocess(struct context_t *a, pid_t pid,
 #define BINMODE
 #endif
 
-#if 0
-static pid_t spawn_child_core(ap_pool_t *p,
+
+static pid_t spawn_child_core(ap_context_t *p,
 			      int (*func) (void *, ap_child_info_t *),
 			      void *data,enum kill_conditions kill_how,
 			      int *pipe_in, int *pipe_out, int *pipe_err)
@@ -1716,7 +1743,7 @@ static pid_t spawn_child_core(ap_pool_t *p,
 }
 
 
-API_EXPORT(int) ap_spawn_child(ap_pool_t *p,
+API_EXPORT(int) ap_spawn_child(ap_context_t *p,
 				int (*func) (void *v, ap_child_info_t *c),
 				void *data, enum kill_conditions kill_how,
 				FILE **pipe_in, FILE **pipe_out,
@@ -1773,7 +1800,7 @@ API_EXPORT(int) ap_spawn_child(ap_pool_t *p,
     ap_unblock_alarms();
     return pid;
 }
-
+#if 0
 API_EXPORT(int) ap_bspawn_child(ap_pool_t *p,
 				 int (*func) (void *v, ap_child_info_t *c),
 				 void *data, enum kill_conditions kill_how,

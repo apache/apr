@@ -66,6 +66,7 @@
 
 #include "apr_general.h"
 #include "apr_file_io.h"
+#include <dirent.h>
 #ifndef WIN32
 #include "apr_config.h"
 #else
@@ -132,10 +133,10 @@ typedef struct ap_table_entry_t {
     char *val;
 } ap_table_entry_t;
 
-/* XXX: these know about the definition of struct table in alloc.c.  That
+/* XXX: these know about the definition of struct ap_table_t in alloc.c.  That
  * definition is not here because it is supposed to be private, and by not
  * placing it here we are able to get compile-time diagnostics from modules
- * written which assume that a table is the same as an ap_array_header_t. -djg
+ * written which assume that a ap_table_t is the same as an ap_array_header_t. -djg
  */
 #define ap_table_elts(t) ((ap_array_header_t *)(t))
 #define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
@@ -150,7 +151,7 @@ typedef struct ap_vformatter_buff_t {
 
 enum kill_conditions {
     kill_never,			/* process is never sent any signals */
-    kill_always,		/* process is sent SIGKILL on pool cleanup */
+    kill_always,		/* process is sent SIGKILL on ap_context_t cleanup */
     kill_after_timeout,		/* SIGTERM, wait 3 seconds, SIGKILL */
     just_wait,			/* wait forever for the process to complete */
     kill_only_once		/* send SIGTERM and then wait */
@@ -237,7 +238,7 @@ API_EXPORT_NONSTD(int) ap_execve(const char *c, const char *argv[],
  * can return -1 to indicate that no further output should be attempted,
  * and ap_vformatter will return immediately with -1.  Otherwise
  * the flush_func should flush the buffer in whatever manner is
- * appropriate, re-initialize curpos and endpos, and return 0.
+ * appropriate, re ap_context_t nitialize curpos and endpos, and return 0.
  *
  * Note that flush_func is only invoked as a result of attempting to
  * write another byte at curpos when curpos >= endpos.  So for
@@ -293,6 +294,18 @@ API_EXPORT(long) ap_bytes_in_free_blocks(void);
 API_EXPORT(ap_pool_t *) ap_find_pool(const void *ts);
 API_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b);
 API_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub);
+
+/* used to guarantee to the ap_context_t debugging code that the sub ap_context_t will not be
+ * destroyed before the parent pool
+ */
+#ifndef POOL_DEBUG
+#ifdef ap_pool_join
+#undef ap_pool_join
+#endif /* ap_pool_join */
+#define ap_pool_join(a,b)
+#endif /* POOL_DEBUG */
+
+
 API_EXPORT(void *) ap_palloc(struct context_t *c, int reqsize);
 API_EXPORT(void *) ap_pcalloc(struct context_t *p, int size);
 API_EXPORT(char *) ap_pstrdup(struct context_t *p, const char *s);
@@ -353,45 +366,45 @@ API_EXPORT(void) ap_run_cleanup(struct context_t *p, void *data,
 				 ap_status_t (*cleanup) (void *));
 API_EXPORT(void) ap_cleanup_for_exec(void);
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
-API_EXPORT_NONSTD(void) ap_null_cleanup(void *data);
-/*
-API_EXPORT(void) ap_note_cleanups_for_fd(ap_pool_t *p, int fd);
-API_EXPORT(void) ap_kill_cleanups_for_fd(ap_pool_t *p, int fd);
-API_EXPORT(int) ap_popenf(ap_pool_t *a, const char *name, int flg, int mode);
-API_EXPORT(int) ap_pclosef(ap_pool_t *a, int fd);
-API_EXPORT(void) ap_note_cleanups_for_file(ap_pool_t *p, FILE *fp);
-API_EXPORT(FILE *) ap_pfopen(ap_pool_t *a, const char *name,
+API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
+
+API_EXPORT(void) ap_note_cleanups_for_fd(ap_context_t *p, int fd);
+API_EXPORT(void) ap_kill_cleanups_for_fd(ap_context_t *p, int fd);
+API_EXPORT(int) ap_popenf(ap_context_t *a, const char *name, int flg, int mode);
+API_EXPORT(int) ap_pclosef(ap_context_t *a, int fd);
+API_EXPORT(void) ap_note_cleanups_for_file(ap_context_t *p, FILE *fp);
+API_EXPORT(FILE *) ap_pfopen(ap_context_t *a, const char *name,
 			      const char *mode);
-API_EXPORT(FILE *) ap_pfdopen(ap_pool_t *a, int fd, const char *mode);
-API_EXPORT(int) ap_pfclose(ap_pool_t *a, FILE *fd);
-API_EXPORT(DIR *) ap_popendir(ap_pool_t *p, const char *name);
-API_EXPORT(void) ap_pclosedir(ap_pool_t *p, DIR * d);
-API_EXPORT(void) ap_note_cleanups_for_socket(ap_pool_t *p, int fd);
-API_EXPORT(void) ap_kill_cleanups_for_socket(ap_pool_t *p, int sock);
-API_EXPORT(int) ap_psocket(ap_pool_t *p, int domain, int type, int protocol);
-API_EXPORT(int) ap_pclosesocket(ap_pool_t *a, int sock);
-*/
-API_EXPORT(regex_t *) ap_pregcomp(ap_pool_t *p, const char *pattern,
+API_EXPORT(FILE *) ap_pfdopen(ap_context_t *a, int fd, const char *mode);
+API_EXPORT(int) ap_pfclose(ap_context_t *a, FILE *fd);
+API_EXPORT(DIR *) ap_popendir(ap_context_t *p, const char *name);
+API_EXPORT(void) ap_pclosedir(ap_context_t *p, DIR * d);
+API_EXPORT(void) ap_note_cleanups_for_socket(ap_context_t *p, int fd);
+API_EXPORT(void) ap_kill_cleanups_for_socket(ap_context_t *p, int sock);
+API_EXPORT(int) ap_psocket(ap_context_t *p, int domain, int type, int protocol);
+API_EXPORT(int) ap_pclosesocket(ap_context_t *a, int sock);
+
+API_EXPORT(regex_t *) ap_pregcomp(ap_context_t *p, const char *pattern,
 				   int cflags);
-API_EXPORT(void) ap_pregfree(ap_pool_t *p, regex_t *reg);
+API_EXPORT(void) ap_pregfree(ap_context_t *p, regex_t *reg);
 /*API_EXPORT(void) ap_note_subprocess(ap_pool_t *a, pid_t pid,
 				     enum kill_conditions how);
 */
 API_EXPORT(int)
-	ap_spawn_child(ap_pool_t *p,
+	ap_spawn_child(ap_context_t *p,
 			int (*func) (void *a, ap_child_info_t *c),
 			void *data, enum kill_conditions kill_how,
 			FILE **pipe_in, FILE **pipe_out,
 			FILE **pipe_err);
 #if 0
 API_EXPORT(int)
-	ap_bspawn_child(ap_pool_t *p,
+	ap_bspawn_child(ap_context_t *p,
 			 int (*func) (void *v, ap_child_info_t *c),
 			 void *data, enum kill_conditions kill_how,
 			 BUFF **pipe_in, BUFF **pipe_out, BUFF **pipe_err);
 #endif /* 0 */
 
-API_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size);
+API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
 
 /*
  * Routine definitions that only work on Windows.

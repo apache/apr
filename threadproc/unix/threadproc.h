@@ -96,7 +96,7 @@ struct proc_t {
     struct procattr_t *attr;
 };
 
-/*This will move to apr_threadproc.h in time, but I need to figure it out
+/*This will move to ap_threadproc.h in time, but I need to figure it out
  * on windows first.  :)
  */
 ap_status_t ap_detach(ap_context_t *, struct proc_t **);

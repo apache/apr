@@ -67,7 +67,7 @@
  *    Create a new context.
  * arg 1) The parent context.  If this is NULL, the new context is a root
  *        context.  If it is non-NULL, the new context will inherit all
- *        of it's parent context's attributes, except the pool will be a
+ *        of it's parent context's attributes, except the ap_context_t will be a
  *        sub-pool.
  * arg 2) Any data to be assocaited with the context.  If this is a 
  *        sub-context, and this value is NULL, the new context will

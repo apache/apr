@@ -112,7 +112,7 @@ static const char **hashbang(const char *filename, char **argv);
  * local argv[] array. The va_arg logic makes sure we do the right thing.
  * XXX: malloc() is used because we expect to be overlaid soon.
  */
-int apr_execle(const char *filename, const char *argv0, ...)
+int ap_execle(const char *filename, const char *argv0, ...)
 {
     va_list adummy;
     char **envp;
@@ -127,7 +127,7 @@ int apr_execle(const char *filename, const char *argv0, ...)
     va_end(adummy);
 
     if ((argv = (char **) malloc((argc + 2) * sizeof(*argv))) == NULL) {
-	fprintf(stderr, "Ouch!  Out of memory in apr_execle()!\n");
+	fprintf(stderr, "Ouch!  Out of memory in ap_execle()!\n");
 	return -1;
     }
 
@@ -140,7 +140,7 @@ int apr_execle(const char *filename, const char *argv0, ...)
     envp = va_arg(adummy, char **);
     va_end(adummy);
 
-    ret = apr_execve(filename, argv, envp);
+    ret = ap_execve(filename, argv, envp);
     free(argv);
 
     return ret;
@@ -163,7 +163,7 @@ count_args(const char **args)
  * We have to fiddle with the argv array to make it work on platforms
  * which don't support the "hashbang" interpreter line by default.
  */
-int apr_execve(const char *filename, const char *argv[],
+int ap_execve(const char *filename, const char *argv[],
 	      const char *envp[])
 {
     const char **script_argv;
@@ -225,7 +225,7 @@ int apr_execve(const char *filename, const char *argv[],
 	    int i = count_args(argv) + 1;   /* +1 for leading SHELL_PATH */
 
 	    if ((script_argv = malloc(sizeof(*script_argv) * i)) == NULL) {
-		fprintf(stderr, "Ouch!  Out of memory in apr_execve()!\n");
+		fprintf(stderr, "Ouch!  Out of memory in ap_execve()!\n");
 		return -1;
 	    }
 
@@ -233,7 +233,7 @@ int apr_execve(const char *filename, const char *argv[],
 
 	    while (i > 0) {
 		script_argv[i] = argv[i-1];
-		--i;
+		- ap_context_t ;
 	    }
 
 	    execve(SHELL_PATH, script_argv, envp);
@@ -385,6 +385,6 @@ static const char **hashbang(const char *filename, char **argv)
     return NULL;
 }
 #else
-extern void apr_execve_is_not_here(void);
-void apr_execve_is_not_here(void) {}
+extern void ap_execve_is_not_here(void);
+void ap_execve_is_not_here(void) {}
 #endif /* NEED_HASHBANG_EMUL */

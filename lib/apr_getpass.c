@@ -155,7 +155,7 @@ static char *getpass(const char *prompt)
 #else
 
 /*
- * Windows lacks getpass().  So we'll re-implement it here.
+ * Windows lacks getpass().  So we'll re ap_context_t mplement it here.
  */
 
 static char *getpass(const char *prompt)
@@ -215,7 +215,7 @@ API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufs
 	*bufsiz = ERR_OVERFLOW;
         return APR_ENAMETOOLONG;
     }
-    apr_cpystrn(pwbuf, pw_got, *bufsiz);
+    ap_cpystrn(pwbuf, pw_got, *bufsiz);
     *bufsiz = result;
     return APR_SUCCESS; 
 }

@@ -80,7 +80,7 @@
 #endif
 
 /*****************************************************************
- * This file contains array and table functions only.
+ * This file contains array and ap_table_t functions only.
  */
 
 /*****************************************************************
@@ -210,7 +210,7 @@ API_EXPORT(ap_array_header_t *)
     return res;
 }
 
-/* ap_array_pstrcat generates a new string from the pool containing
+/* ap_array_pstrcat generates a new string from the ap_context_t containing
  * the concatenated sequence of substrings referenced as elements within
  * the array.  The string will be empty if all substrings are empty or null,
  * or if there are no elements in the array.
@@ -285,7 +285,7 @@ static ap_table_entry_t *table_push(ap_table_t *t)
 {
     if (t->a.nelts == t->a.nalloc) {
 	fprintf(stderr,
-		"table_push: table created by %p hit limit of %u\n",
+		"table_push: ap_table_t created by %p hit limit of %u\n",
 		t->creator, t->a.nalloc);
     }
     return (ap_table_entry_t *) ap_push_array(&t->a);
@@ -315,7 +315,7 @@ API_EXPORT(ap_table_t *) ap_copy_table(struct context_t *p, const ap_table_t *t)
      * have a life span at least as long as p
      */
     if (!ap_pool_is_ancestor(t->a.pool, p)) {
-	fprintf(stderr, "copy_table: t's pool is not an ancestor of p\n");
+	fprintf(stderr, "copy_table: t's ap_context_t is not an ancestor of p\n");
 	abort();
     }
 #endif
@@ -392,11 +392,11 @@ API_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
 #ifdef POOL_DEBUG
     {
 	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
 	    abort();
 	}
 	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: val not in ancestor pool of t\n");
+	    fprintf(stderr, "table_set: val not in ancestor ap_context_t of t\n");
 	    abort();
 	}
     }
@@ -481,11 +481,11 @@ API_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
 #ifdef POOL_DEBUG
     {
 	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
 	    abort();
 	}
 	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
 	    abort();
 	}
     }
@@ -521,11 +521,11 @@ API_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
 #ifdef POOL_DEBUG
     {
 	if (!ap_pool_is_ancestor(ap_find_pool(key), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
 	    abort();
 	}
 	if (!ap_pool_is_ancestor(ap_find_pool(val), t->a.pool)) {
-	    fprintf(stderr, "table_set: key not in ancestor pool of t\n");
+	    fprintf(stderr, "table_set: key not in ancestor ap_context_t of t\n");
 	    abort();
 	}
     }
@@ -549,12 +549,12 @@ API_EXPORT(ap_table_t *) ap_overlay_tables(struct context_t *p,
      */
     if (!ap_pool_is_ancestor(overlay->a.pool, p->pool)) {
 	fprintf(stderr,
-		"overlay_tables: overlay's pool is not an ancestor of p\n");
+		"overlay_tables: overlay's ap_context_t is not an ancestor of p\n");
 	abort();
     }
     if (!ap_pool_is_ancestor(base->a.pool, p->pool)) {
 	fprintf(stderr,
-		"overlay_tables: base's pool is not an ancestor of p\n");
+		"overlay_tables: base's ap_context_t is not an ancestor of p\n");
 	abort();
     }
 #endif
@@ -573,7 +573,7 @@ API_EXPORT(ap_table_t *) ap_overlay_tables(struct context_t *p,
  * For each key value given as a vararg:
  *   run the function pointed to as
  *     int comp(void *r, char *key, char *value);
- *   on each valid key-value pair in the table t that matches the vararg key,
+ *   on each valid key-value pair in the ap_table_t t that matches the vararg key,
  *   or once for every valid key-value pair if the vararg list is empty,
  *   until the function returns false (0) or we finish the table.
  *
@@ -583,7 +583,7 @@ API_EXPORT(ap_table_t *) ap_overlay_tables(struct context_t *p,
  * only one traversal will be made and will cut short if comp returns 0.
  *
  * Note that the table_get and table_merge functions assume that each key in
- * the table is unique (i.e., no multiple entries with the same key).  This
+ * the ap_table_t is unique (i.e., no multiple entries with the same key).  This
  * function does not make that assumption, since it (unfortunately) isn't
  * true for some of Apache's tables.
  *
@@ -662,7 +662,7 @@ API_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 	cat_keys = cat_keys_buf;
     }
     else {
-	/* XXX: could use scratch free space in a or b's pool instead...
+	/* XXX: could use scratch free space in a or b's ap_context_t instead...
 	 * which could save an allocation in b's pool.
 	 */
 	cat_keys = ap_palloc(b->a.cont, sizeof(overlap_key) * nkeys);

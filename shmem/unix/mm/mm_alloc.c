@@ -77,7 +77,7 @@ MM *mm_create(size_t usize, const char *file)
     if ((core = mm_core_create(size, file)) == NULL)
         return NULL;
 
-    /* fill in the memory pool structure */
+    /* fill in the memory ap_context_t structure */
     mm = (MM *)core;
     mm->mp_size    = size;
     mm->mp_offset  = SIZEOF_mem_pool;
@@ -115,7 +115,7 @@ void mm_destroy(MM *mm)
 }
 
 /*
- * Lock a memory pool 
+ * Lock a memory ap_context_t 
  */
 int mm_lock(MM *mm, mm_lock_mode mode)
 {
@@ -125,7 +125,7 @@ int mm_lock(MM *mm, mm_lock_mode mode)
 }
 
 /*
- * Unlock a memory pool 
+ * Unlock a memory ap_context_t 
  */
 int mm_unlock(MM *mm)
 {

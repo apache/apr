@@ -74,10 +74,10 @@
  *       the destination string, we return a pointer to the
  *       terminating '\0' to allow us to "check" for truncation
  *
- * apr_cpystrn() follows the same call structure as strncpy().
+ * ap_cpystrn() follows the same call structure as strncpy().
  */
 
-API_EXPORT(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size)
+API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
 {
 
     char *d, *end;
