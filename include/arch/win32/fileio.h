@@ -108,12 +108,9 @@ apr_status_t utf8_to_unicode_path(apr_wchar_t* dststr, apr_size_t dstchars,
 apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars, 
                                   const apr_wchar_t* srcstr);
 
-/* XXX: ONE OF THESE IS WRONG, WHO CHANGED IT?
- */
+#endif /* APR_HAS_UNICODE_FS */
+
 #define APR_FILE_MAX MAX_PATH
-#else /* !APR_HAS_UNICODE_FS */
-#define APR_FILE_MAX MAX_PATH
-#endif
 
 #define APR_FILE_BUFSIZE 4096
 
