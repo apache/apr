@@ -95,8 +95,9 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset,
         return APR_EBADF;
     (*new) = (ap_mmap_t *)ap_pcalloc(cont, sizeof(ap_mmap_t));
     
-    ap_seek(file, APR_SET, &offset);
 #ifdef BEOS
+    /* XXX: mmap shouldn't really change the seek offset */
+    ap_seek(file, APR_SET, &offset);
     pages = ((size -1) / B_PAGE_SIZE) + 1;
 
     aid = create_area(areaname, &mm , B_ANY_ADDRESS, pages * B_PAGE_SIZE,
@@ -112,7 +113,7 @@ ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset,
     (*new)->area = aid;
 #else
 
-    mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes ,0);
+    mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes, offset);
 
     if (mm == (caddr_t)-1) {
         /* we failed to get an mmap'd file... */
