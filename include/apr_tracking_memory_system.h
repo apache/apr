@@ -52,6 +52,14 @@
  * <http://www.apache.org/>.
  */
 
+/* This code kindly donated to APR by 
+ *    Elrond  <elrond@samba-tng.org>
+ *    Luke Kenneth Casson Leighton <lkcl@samba-tng.org>
+ *    Sander Striker <striker@samba-tng.org>
+ *
+ * May 2001
+ */
+
 #ifndef APR_TRACKING_MEMORY_SYSTEM_H
 #define APR_TRACKING_MEMORY_SYSTEM_H
 
@@ -68,10 +76,14 @@ extern "C" {
 
 /**
  * Create a standard malloc/realloc/free memory system
+ * @param mem_sys A pointer to the returned apr_sms_t*
+ * @param pms The parent memory system, used to allocate the memory
+ *            that we will be tracking.
+ * @deffunc apr_status_t apr_sms_tracking_create(apr_sms_t **mem_sys,
+ *                                               apr_sms_t *pms);
  */
-APR_DECLARE(apr_status_t)
-apr_tracking_memory_system_create(apr_memory_system_t **memory_system,
-				  apr_memory_system_t *parent_memory_system);
+APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys,
+                                                  apr_sms_t *pms);
 
 
 

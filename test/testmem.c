@@ -69,22 +69,55 @@
 #define LUMPS 10
 #define LUMP_SIZE 1024
 char *ptrs[LUMPS];
+int cntr;
 
-static void do_test(apr_memory_system_t *ams)
+static void malloc_mem(apr_sms_t *ams)
 {
-    int cntr,cntr2;
+    int cntr;
     
-    printf("\tCreating %d lumps of memory, each %d bytes........", 
+    printf("\tMalloc'ing %d lumps of memory, each %d bytes......", 
            LUMPS, LUMP_SIZE);
     for (cntr = 0;cntr < LUMPS;cntr ++){
-        ptrs[cntr] = apr_memory_system_malloc(ams, LUMP_SIZE);
+        ptrs[cntr] = apr_sms_malloc(ams, LUMP_SIZE);
         if (!ptrs[cntr]){
             printf("Failed @ lump %d of %d\n", cntr + 1, LUMPS);
             exit (-1);
         }
     }
     printf ("OK\n");
+}
 
+static void calloc_mem(apr_sms_t *ams)
+{
+    int cntr, cntr2;
+    
+    printf("\tCalloc'ing %d lumps of memory, each %d bytes......", 
+           LUMPS, LUMP_SIZE);
+    for (cntr = 0;cntr < LUMPS;cntr ++){
+        ptrs[cntr] = apr_sms_calloc(ams, LUMP_SIZE);
+        if (!ptrs[cntr]){
+            printf("Failed @ lump %d of %d\n", cntr + 1, LUMPS);
+            exit (-1);
+        }
+    }
+    printf ("OK\n");
+    printf("\t (checking that memory is zeroed..................");
+    for (cntr = 0;cntr < LUMPS;cntr++){
+        for (cntr2 = 0;cntr2 < LUMP_SIZE; cntr2 ++){
+            if (*(ptrs[cntr] + cntr2) != 0){
+                printf("Failed!\nGot %d instead of 0 at byte %d\n",
+                       *(ptrs[cntr] + cntr2), cntr2 + 1);
+                exit (-1);
+            }
+        }
+    } 
+    printf("OK)\n");
+}
+
+static void do_test(apr_sms_t *ams)
+{
+    int cntr,cntr2;
+    
     printf("\tWriting to the lumps of memory......................");
     for (cntr = 0;cntr < LUMPS;cntr ++){
         if (memset(ptrs[cntr], cntr, LUMP_SIZE) != ptrs[cntr]){
@@ -107,13 +140,13 @@ static void do_test(apr_memory_system_t *ams)
     printf("OK\n");   
 }
 
-static void do_free(apr_memory_system_t *ams)
+static void do_free(apr_sms_t *ams)
 {
     int cntr;
     
     printf("\tFreeing the memory we created.......................");
     for (cntr = 0;cntr < LUMPS;cntr ++){
-        if (apr_memory_system_free(ams, ptrs[cntr]) != APR_SUCCESS){
+        if (apr_sms_free(ams, ptrs[cntr]) != APR_SUCCESS){
             printf("Failed to free block %d\n", cntr + 1);
             exit (-1);
         }
@@ -123,7 +156,7 @@ static void do_free(apr_memory_system_t *ams)
 
 int main(void)
 {
-    apr_memory_system_t *ams, *ams2;
+    apr_sms_t *ams, *tms;
     apr_initialize();
     
     printf("APR Memory Test\n");
@@ -131,47 +164,53 @@ int main(void)
 
     printf("Standard Memory\n");
     printf("\tCreating the memory area............................");
-    if (apr_standard_memory_system_create(&ams) != APR_SUCCESS){
+    if (apr_sms_std_create(&ams) != APR_SUCCESS){
         printf("Failed.\n");
         exit(-1);
     }
     printf("OK\n");
 
+    malloc_mem(ams);
     do_test(ams);
+    do_free(ams);
+    calloc_mem(ams);
+    do_test(ams);    
     do_free(ams);
     
     printf("Tracking Memory\n");
     printf("\tCreating the memory area............................");
-    if (apr_tracking_memory_system_create(&ams2, ams) != APR_SUCCESS){
+    if (apr_sms_tracking_create(&tms, ams) != APR_SUCCESS){
         printf("Failed.\n");
         exit(-1);
     }
     printf("OK\n");
 
-    do_test(ams2);
+    malloc_mem(tms);
+    do_test(tms);
     printf("\tAbout to reset the tracking memory..................");
-    if (apr_memory_system_reset(ams2) != APR_SUCCESS){
+    if (apr_sms_reset(tms) != APR_SUCCESS){
         printf("Failed.\n");
         exit(-1);
     }
     printf("OK\n");
-    do_test(ams2);
-    do_free(ams2);
+    calloc_mem(tms);
+    do_test(tms);
+    do_free(tms);
     
     printf("Trying to destroy the tracking memory segment...............");
-    if (apr_memory_system_destroy(ams2) != APR_SUCCESS){
+    if (apr_sms_destroy(tms) != APR_SUCCESS){
         printf("Failed.\n");
         exit (-1);
     }
     printf("OK\n");
 
     printf("Trying to destroy the standard memory segment...............");
-    if (apr_memory_system_destroy(ams) != APR_SUCCESS){
+    if (apr_sms_destroy(ams) != APR_SUCCESS){
         printf("Failed.\n");
         exit (-1);
     }
     printf("OK\n\n");
 
-    printf("Memory test complete.\n");
+    printf("Memory test passed.\n");
     return (0);          
 }
