@@ -252,6 +252,9 @@ case $host in
         # 3.4-RELEASE: 340   4.1.1-RELEASE: 411
         os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/' | sed -e 's/\(.\)\.\(.\)\-.*/\1\20/'`
         ;;
+    *linux*)
+        os_version=`uname -r | sed -e 's/\(.\)\.\(.\)\.\(.\).*/\1\2\3/'`
+        ;;
      *)
         os_version=OS_VERSION_IS_NOT_SET
         ;;
@@ -405,26 +408,38 @@ AC_HAVE_HEADERS(os2.h)
 
 dnl Now we determine which one is our preference.
 APR_BEGIN_DECISION([shared memory allocation method])
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
-             APR_DECIDE(USE_SHMEM_MMAP_ANON, 
-             [4.4BSD-style mmap() via MAP_ANON]))
-APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
-             func:shmget func:shmat func:shmdt func:shmctl,
-             APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()]))
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap file:/dev/zero,
-             APR_DECIDE(USE_SHMEM_MMAP_ZERO, 
-             [SVR4-style mmap() on /dev/zero]))
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
+             APR_DECIDE(USE_SHMEM_MMAP_TMP, 
+             [Classical mmap() on temporary file]))
 APR_IFALLYES(header:sys/mman.h func:mmap func:munmap func:shm_open dnl
              func:shm_unlink,
              APR_DECIDE(USE_SHMEM_MMAP_SHM, 
              [mmap() via POSIX.1 shm_open() on temporary file]))
-APR_IFALLYES(header:sys/mman.h func:mmap func:munmap,
-             APR_DECIDE(USE_SHMEM_MMAP_TMP, 
-             [Classical mmap() on temporary file]))
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap file:/dev/zero,
+             APR_DECIDE(USE_SHMEM_MMAP_ZERO, 
+             [SVR4-style mmap() on /dev/zero]))
+APR_IFALLYES(header:sys/ipc.h header:sys/shm.h header:sys/file.h dnl
+             func:shmget func:shmat func:shmdt func:shmctl,
+             APR_DECIDE(USE_SHMEM_SHMGET, [SysV IPC shmget()]))
+APR_IFALLYES(header:sys/mman.h func:mmap func:munmap define:MAP_ANON,
+             APR_DECIDE(USE_SHMEM_MMAP_ANON, 
+             [4.4BSD-style mmap() via MAP_ANON]))
 APR_IFALLYES(header:kernel/OS.h func:create_area,
              APR_DECIDE(USE_SHMEM_BEOS, [BeOS areas]))
 APR_IFALLYES(header:os2.h,
              APR_DECIDE(USE_SHMEM_OS2, [OS/2 DosAllocSharedMem()]))
+case $host in
+    *linux* ) 
+        dnl Linux has problems with MM_SHMT_MMANON even though it reports
+        dnl that it has it.
+        dnl FIXME - find exact 2.3 version that MMANON was fixed in.  It is
+        dnl confirmed fixed in 2.4 series.
+        if test $os_version -le "240"; then
+            APR_DECISION_OVERRIDE(USE_SHMEM_MMAP_TMP USE_SHMEM_MMAP_SHM dnl
+                                  USE_SHMEM_MMAP_ZERO USE_SHMEM_SHMGET)
+        fi
+        ;;
+esac
 APR_END_DECISION
 AC_DEFINE_UNQUOTED($ac_decision)
 
