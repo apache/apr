@@ -85,10 +85,11 @@ case "$host_alias" in
     # Use a custom made libtool replacement
     echo "using aplibtool"
     LIBTOOL="$srcdir/build/aplibtool"
-    gcc -o $LIBTOOL.exe $LIBTOOL.c
+    AC_SUBST(LIBTOOL)dnl
+    gcc $CPPFLAGS $CFLAGS -o $LIBTOOL.exe $LIBTOOL.c
     ;;
-*)
-    AC_PROG_LIBTOOL
+*)  dnl libtool requires that the following not be indented
+AC_PROG_LIBTOOL
     ;;
 esac
 
