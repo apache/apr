@@ -65,25 +65,23 @@ apr_cpystrn.o: apr_cpystrn.c ../include/apr_config.h
 apr_execve.o: apr_execve.c ../include/apr_config.h
 apr_fnmatch.o: apr_fnmatch.c ../include/apr_config.h \
  $(INCDIR)/apr_fnmatch.h ../include/apr_lib.h ../include/apr_general.h \
- ../include/apr_errno.h ../include/apr_file_io.h ../include/hsregex.h
+ ../include/apr_errno.h ../include/apr_file_io.h
 apr_getpass.o: apr_getpass.c ../include/apr_config.h \
- ../include/apr_errno.h ../include/apr_lib.h ../include/apr_general.h \
- ../include/apr_file_io.h ../include/hsregex.h
+ ../include/apr_lib.h ../include/apr_general.h ../include/apr_errno.h \
+ ../include/apr_file_io.h
 apr_md5.o: apr_md5.c ../include/apr_config.h ../include/apr_md5.h \
  ../include/apr_lib.h ../include/apr_general.h ../include/apr_errno.h \
- ../include/apr_file_io.h ../include/hsregex.h
+ ../include/apr_file_io.h
 apr_pools.o: apr_pools.c ../include/apr_config.h \
  ../include/apr_general.h ../include/apr_errno.h $(INCDIR)/apr_pools.h \
- ../include/apr_lib.h ../include/apr_file_io.h ../include/hsregex.h \
- ../misc/unix/misc.h
+ ../include/apr_lib.h ../include/apr_file_io.h ../misc/unix/misc.h
 apr_signal.o: apr_signal.c ../include/apr_config.h \
  ../include/apr_lib.h ../include/apr_general.h ../include/apr_errno.h \
- ../include/apr_file_io.h ../include/hsregex.h
+ ../include/apr_file_io.h
 apr_slack.o: apr_slack.c ../include/apr_config.h
 apr_snprintf.o: apr_snprintf.c ../include/apr_config.h \
  ../include/apr_lib.h ../include/apr_general.h ../include/apr_errno.h \
- ../include/apr_file_io.h ../include/hsregex.h
+ ../include/apr_file_io.h
 apr_tables.o: apr_tables.c ../include/apr_config.h \
  ../include/apr_general.h ../include/apr_errno.h $(INCDIR)/apr_pools.h \
- ../include/apr_lib.h ../include/apr_file_io.h ../include/hsregex.h \
- ../misc/unix/misc.h
+ ../include/apr_lib.h ../include/apr_file_io.h ../misc/unix/misc.h
