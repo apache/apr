@@ -75,23 +75,4 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
 /* Include this here so we already have get_local_addr... */
 #include "../unix/sa_common.c"
 
-apr_status_t get_local_name(struct sockaddr_in **name, apr_socket_t *sock)
-{
-    if (!sock) {
-        return APR_EBADF;
-    }
-
-    *name = sock->local_addr;
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_remote_name(struct sockaddr_in **name, apr_socket_t *sock)
-{
-    if (!sock) {
-        return APR_EBADF;
-    }
-
-    *name = sock->remote_addr;
-    return APR_SUCCESS;
-}
 #endif
