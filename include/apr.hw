@@ -179,24 +179,34 @@ typedef  int         gid_t;
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "\r\n"
 
-#if !defined(WIN32) || defined(APR_STATIC)
-/* Default Non-WIN32 behavior removes all MSVCisms */
-#define APR_EXPORT(type)         type
-#define APR_EXPORT_NONSTD(type)  type
-#define APR_VAR_EXPORT
-#define APR_VAR_IMPORT           extern
-#elif defined(APR_EXPORT_SYMBOLS)
-#define APR_EXPORT(type)         __declspec(dllexport) type 
-#define APR_EXPORT_NONSTD(type)  __declspec(dllexport) type 
-#define APR_VAR_EXPORT           __declspec(dllexport)
-#define APR_VAR_IMPORT           extern __declspec(dllexport)
+/* Create a set of APR_DECLARE(type), APR_DECLARE_NONSTD(type) and 
+ * APR_DECLARE_DATA with appropriate export and import tags for the platform
+ */
+#if !defined(WIN32)
+#define APR_DECLARE(type)            type
+#define APR_DECLARE_NONSTD(type)     type
+#define APR_DECLARE_DATA
+#elif defined(APR_DECLARE_STATIC)
+#define APR_DECLARE(type)            type __stdcall
+#define APR_DECLARE_NONSTD(type)     type
+#define APR_DECLARE_DATA
+#elif defined(APR_DECLARE_EXPORT)
+#define APR_DECLARE(type)            __declspec(dllexport) type __stdcall
+#define APR_DECLARE_NONSTD(type)     __declspec(dllexport) type
+#define APR_DECLARE_DATA             __declspec(dllexport)
 #else
-/* Default WIN32 behavior is to import the shared .dll */
-#define APR_EXPORT(type)         __declspec(dllimport) type 
-#define APR_EXPORT_NONSTD(type)  __declspec(dllimport) type 
-#define APR_VAR_EXPORT           __declspec(dllimport)
-#define APR_VAR_IMPORT           extern __declspec(dllimport)
+#define APR_DECLARE(type)            __declspec(dllimport) type __stdcall
+#define APR_DECLARE_NONSTD(type)     __declspec(dllimport) type
+#define APR_DECLARE_DATA             __declspec(dllimport)
 #endif
+
+/* These need to move into apr_compat.h when the symbol rename is complete 
+ */
+#define APR_EXPORT(t)         APR_DECLARE(t)
+#define APR_EXPORT_NONSTD(t)  APR_DECLARE_NONSTD(t)
+#define APR_VAR_EXPORT        APR_DECLARE_DATA
+#define APR_VAR_IMPORT        APR_DECLARE_DATA
+
 
 #define apr_signal(a,b) signal(a,b)
 

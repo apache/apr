@@ -123,10 +123,21 @@ typedef  @socklen_t_value@       apr_socklen_t;
 /* Definitions that APR programs need to work properly. */
 
 #define APR_THREAD_FUNC
-#define APR_EXPORT(type)         type
-#define APR_EXPORT_NONSTD(type)  type
-#define APR_VAR_IMPORT           extern
-#define APR_VAR_EXPORT
+
+/* Create a set of APR_DECLARE(type), APR_DECLARE_NONSTD(type) and 
+ * APR_DECLARE_DATA with appropriate export and import tags for the platform.
+ * Simple case - see apr.hw for the complex example
+ */
+#define APR_DECLARE(type)            type
+#define APR_DECLARE_NONSTD(type)     type
+#define APR_DECLARE_DATA
+
+/* These need to move into apr_compat.h when the symbol rename is complete 
+ */
+#define APR_EXPORT(t)         APR_DECLARE(t)
+#define APR_EXPORT_NONSTD(t)  APR_DECLARE_NONSTD(t)
+#define APR_VAR_EXPORT        APR_DECLARE_DATA
+#define APR_VAR_IMPORT        APR_DECLARE_DATA
 
 /* Define APR_SSIZE_T_FMT.  
  * If ssize_t is an integer we define it to be "d",
