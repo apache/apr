@@ -111,6 +111,10 @@ static char *apr_error_string(apr_status_t statcode)
         return "DSO load failed";
 #endif /* HAVE_LIBDL */
 #endif /* APR_HAS_DSO */
+    case APR_EBADIP:
+        return "The specified IP address is invalid.";
+    case APR_EBADMASK:
+        return "The specified network mask is invalid.";
     case APR_INCHILD:
         return
 	    "Your code just forked, and you are currently executing in the "
