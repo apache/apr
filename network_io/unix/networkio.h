@@ -57,6 +57,7 @@
 
 #include "apr_config.h"
 #include "apr_network_io.h"
+#include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 
@@ -135,8 +136,6 @@ struct ap_pollfd_t {
 
 ap_int16_t get_event(ap_int16_t);
 ap_int16_t get_revent(ap_int16_t);
-
-ap_status_t status_from_res_error(int);
 
 #endif  /* ! NETWORK_IO_H */
 

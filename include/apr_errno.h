@@ -62,28 +62,23 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Define four layers of status code offsets so that we don't interfere
- * with the predefined errno codes on the operating system.  Codes beyond
+/* APR_OS_START_ERROR is where the APR specific error values should start.
+ * APR_OS_START_STATUS is where the APR specific status codes should start.
  * APR_OS_START_USEERR are reserved for applications that use APR that
- * layer their own error codes along with APR's.
+ *     layer their own error codes along with APR's.
+ * APR_OS_START_SYSERR should be used for system error values on 
+ *     each platform.  
  */
-#ifndef APR_OS_START_ERROR
-#define APR_OS_START_ERROR   4000
-#endif
-#ifndef APR_OS_START_STATUS
-#define APR_OS_START_STATUS  (APR_OS_START_ERROR + 500)
-#endif
-#ifndef APR_OS_START_SYSERR
-#define APR_OS_START_SYSERR  (APR_OS_START_STATUS + 500)
-#endif
-#ifndef APR_OS_START_USEERR
-#define APR_OS_START_USEERR  (APR_OS_START_SYSERR + 500)
-#endif
+#define APR_OS_START_ERROR     1000
+#define APR_OS_START_STATUS    (APR_OS_START_ERROR + 500)
+#define APR_OS_START_USEERR    (APR_OS_START_STATUS + 500)
+#define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)
+#define APR_OS_START_SYSERR    (APR_OS_START_CANONERR + 500)
 
-/* If this definition of APRStatus changes, then we can remove this, but right
- * now, the decision was to use an errno-like implementation.
- */
 typedef int ap_status_t;
+
+int ap_canonical_error(ap_status_t err);
+const char *ap_strerror(ap_status_t err);
 
 #define APR_SUCCESS 0
 
@@ -144,310 +139,106 @@ typedef int ap_status_t;
  */
 #define APR_EMISMATCH      (APR_OS_START_STATUS + 18)
 
-/*
- * APR equivalents to what should be standard errno codes.
- */
 #ifdef EACCES
 #define APR_EACCES EACCES
 #else
-#define APR_EACCES (APR_OS_START_SYSERR + 0)
+#define APR_EACCES         (APR_OS_START_CANONERR + 1)
 #endif
 
 #ifdef EEXIST
 #define APR_EEXIST EEXIST
 #else
-#define APR_EEXIST (APR_OS_START_SYSERR + 1)
-#endif
-
-#ifdef EISDIR
-#define APR_EISDIR EISDIR
-#else
-#define APR_EISDIR (APR_OS_START_SYSERR + 2)
+#define APR_EEXIST         (APR_OS_START_CANONERR + 12)
 #endif
 
 #ifdef ENAMETOOLONG
 #define APR_ENAMETOOLONG ENAMETOOLONG
 #else
-#define APR_ENAMETOOLONG (APR_OS_START_SYSERR + 3)
+#define APR_ENAMETOOLONG   (APR_OS_START_CANONERR + 13)
 #endif
 
 #ifdef ENOENT
 #define APR_ENOENT ENOENT
 #else
-#define APR_ENOENT (APR_OS_START_SYSERR + 4)
+#define APR_ENOENT         (APR_OS_START_CANONERR + 14)
 #endif
 
 #ifdef ENOTDIR
 #define APR_ENOTDIR ENOTDIR
 #else
-#define APR_ENOTDIR (APR_OS_START_SYSERR + 5)
-#endif
-
-#ifdef ENXIO
-#define APR_ENXIO ENXIO
-#else
-#define APR_ENXIO (APR_OS_START_SYSERR + 6)
-#endif
-
-#ifdef ENODEV
-#define APR_ENODEV ENODEV
-#else
-#define APR_ENODEV (APR_OS_START_SYSERR + 7)
-#endif
-
-#ifdef EROFS
-#define APR_EROFS EROFS
-#else
-#define APR_EROFS (APR_OS_START_SYSERR + 8)
-#endif
-
-#ifdef ETXTBSY
-#define APR_ETXTBSY ETXTBSY
-#else
-#define APR_ETXTBSY (APR_OS_START_SYSERR + 9)
-#endif
-
-#ifdef EFAULT
-#define APR_EFAULT EFAULT
-#else
-#define APR_EFAULT (APR_OS_START_SYSERR + 10)
-#endif
-
-#ifdef ELOOP
-#define APR_ELOOP ELOOP
-#else
-#define APR_ELOOP (APR_OS_START_SYSERR + 11)
+#define APR_ENOTDIR        (APR_OS_START_CANONERR + 15)
 #endif
 
 #ifdef ENOSPC
 #define APR_ENOSPC ENOSPC
 #else
-#define APR_ENOSPC (APR_OS_START_SYSERR + 12)
+#define APR_ENOSPC         (APR_OS_START_CANONERR + 16)
 #endif
 
 #ifdef ENONOMEM
 #define APR_ENOMEM ENOMEM
 #else
-#define APR_ENOMEM (APR_OS_START_SYSERR + 13)
+#define APR_ENOMEM         (APR_OS_START_CANONERR + 17)
 #endif
 
 #ifdef EMFILE
 #define APR_EMFILE EMFILE
 #else
-#define APR_EMFILE (APR_OS_START_SYSERR + 14)
+#define APR_EMFILE         (APR_OS_START_CANONERR + 18)
 #endif
 
 #ifdef ENFILE
 #define APR_ENFILE ENFILE
 #else
-#define APR_ENFILE (APR_OS_START_SYSERR + 15)
+#define APR_ENFILE         (APR_OS_START_CANONERR + 19)
 #endif
 
 #ifdef EBADF
 #define APR_EBADF EBADF
 #else
-#define APR_EBADF (APR_OS_START_SYSERR + 16)
-#endif
-
-#ifdef EPERM
-#define APR_EPERM EPERM
-#else
-#define APR_EPERM (APR_OS_START_SYSERR + 17)
-#endif
-
-#ifdef EIO
-#define APR_EIO EIO
-#else
-#define APR_EIO (APR_OS_START_SYSERR + 18)
+#define APR_EBADF          (APR_OS_START_CANONERR + 110)
 #endif
 
 #ifdef EINVAL
 #define APR_EINVAL EINVAL
 #else
-#define APR_EINVAL (APR_OS_START_SYSERR + 19)
-#endif
-
-#ifdef ENOEMPTY
-#define APR_ENOEMPTY ENOEMPTY
-#else
-#define APR_ENOEMPTY (APR_OS_START_SYSERR + 20)
-#endif
-
-#ifdef EBUSY
-#define APR_EBUSY EBUSY
-#else
-#define APR_EBUSY (APR_OS_START_SYSERR + 21)
+#define APR_EINVAL         (APR_OS_START_CANONERR + 111)
 #endif
 
 #ifdef ESPIPE
 #define APR_ESPIPE ESPIPE
 #else
-#define APR_ESPIPE (APR_OS_START_SYSERR + 22)
-#endif
-
-#ifdef EIDRM
-#define APR_EIDRM EIDRM
-#else
-#define APR_EIDRM (APR_OS_START_SYSERR + 23)
-#endif
-
-#ifdef ERANGE
-#define APR_ERANGE ERANGE
-#else
-#define APR_ERANGE (APR_OS_START_SYSERR + 24)
-#endif
-
-#ifdef E2BIG
-#define APR_E2BIG E2BIG
-#else
-#define APR_E2BIG (APR_OS_START_SYSERR + 25)
+#define APR_ESPIPE         (APR_OS_START_CANONERR + 112)
 #endif
 
 #ifdef EAGAIN
 #define APR_EAGAIN EAGAIN
 #else
-#define APR_EAGAIN (APR_OS_START_SYSERR + 26)
-#endif
-
-#ifdef EFBIG
-#define APR_EFBIG EFBIG
-#else
-#define APR_EFBIG (APR_OS_START_SYSERR + 27)
+#define APR_EAGAIN         (APR_OS_START_CANONERR + 13)
 #endif
 
 #ifdef EINTR
 #define APR_EINTR EINTR
 #else
-#define APR_EINTR (APR_OS_START_SYSERR + 28)
-#endif
-
-#ifdef EDEADLK
-#define APR_EDEADLK EDEADLK
-#else
-#define APR_EDEADLK (APR_OS_START_SYSERR + 29)
-#endif
-
-#ifdef ENOLCK
-#define APR_ENOLCK ENOLCK
-#else
-#define APR_ENOLCK (APR_OS_START_SYSERR + 30)
-#endif
-
-#ifdef EWOULDBLOCK
-#define APR_EWOULDBLOCK EWOULDBLOCK
-#else
-#define APR_EWOULDBLOCK (APR_OS_START_SYSERR + 31)
-#endif
-
-#ifdef EPROTONOSUPPORT
-#define APR_EPROTONOSUPPORT EPROTONOSUPPORT
-#else
-#define APR_EPROTONOSUPPORT (APR_OS_START_SYSERR + 32)
+#define APR_EINTR          (APR_OS_START_CANONERR + 14)
 #endif
 
 #ifdef ENOTSOCK
 #define APR_ENOTSOCK ENOTSOCK
 #else
-#define APR_ENOTSOCK (APR_OS_START_SYSERR + 33)
-#endif
-
-#ifdef ENOTCONN
-#define APR_ENOTCONN ENOTCONN
-#else
-#define APR_ENOTCONN (APR_OS_START_SYSERR + 34)
-#endif
-
-#ifdef EOPNOTSUPP
-#define APR_EOPNOTSUPP EOPNOTSUPP
-#else
-#define APR_EOPNOTSUPP (APR_OS_START_SYSERR + 35)
-#endif
-
-/* never use h_errno values as-is because doing so makes them 
- * indistinguishable from errno values
- * APR_EHOSTNOTFOUND corresponds to HOST_NOT_FOUND
- * APR_ENODATA corresponds to NO_DATA
- * APR_ENOADDRESS corresponds to NO_ADDRESS
- * APR_ENORECOVERY corresponds to NO_RECOVERY
- */
-#define APR_EHOSTNOTFOUND (APR_OS_START_SYSERR + 36)
-
-#define APR_ENODATA (APR_OS_START_SYSERR + 37)
-
-#define APR_ENOADDRESS (APR_OS_START_SYSERR + 38)
-
-#define APR_ENORECOVERY (APR_OS_START_SYSERR + 39)
-
-#ifdef EISCONN
-#define APR_EISCONN EISCONN
-#else
-#define APR_EISCONN (APR_OS_START_SYSERR + 40)
-#endif
-
-#ifdef ETIMEDOUT
-#define APR_ETIMEDOUT ETIMEDOUT
-#else
-#define APR_ETIMEDOUT (APR_OS_START_SYSERR + 41)
+#define APR_ENOTSOCK       (APR_OS_START_CANONERR + 15)
 #endif
 
 #ifdef ECONNREFUSED
 #define APR_ECONNREFUSED ECONNREFUSED
 #else
-#define APR_ECONNREFUSED (APR_OS_START_SYSERR + 42)
-#endif
-
-#ifdef ENETUNREACH
-#define APR_ENETUNREACH ENETUNREACH
-#else
-#define APR_ENETUNREACH (APR_OS_START_SYSERR + 43)
-#endif
-
-#ifdef EADDRINUSE
-#define APR_EADDRINUSE EADDRINUSE
-#else
-#define APR_EADDRINUSE (APR_OS_START_SYSERR + 44)
+#define APR_ECONNREFUSED   (APR_OS_START_CANONERR + 16)
 #endif
 
 #ifdef EINPROGRESS
 #define APR_EINPROGRESS EINPROGRESS
 #else
-#define APR_EINPROGRESS (APR_OS_START_SYSERR + 45)
-#endif
-
-#ifdef EALREADY
-#define APR_EALREADY EALREADY
-#else
-#define APR_EALREADY (APR_OS_START_SYSERR + 46)
-#endif
-
-#ifdef EAFNOSUPPORT
-#define APR_EAFNOSUPPORT EAFNOSUPPORT
-#else
-#define APR_EAFNOSUPPORT (APR_OS_START_SYSERR + 47)
-#endif
-
-#ifdef ENOPROTOOPT
-#define APR_ENOPROTOOPT ENOPROTOOPT
-#else
-#define APR_ENOPROTOOPT (APR_OS_START_SYSERR + 48)
-#endif
-
-#ifdef ENOCHILD
-#define APR_ENOCHILD ENOCHILD
-#else
-#define APR_ENOCHILD (APR_OS_START_SYSERR + 49)
-#endif
-
-#ifdef ESRCH
-#define APR_ESRCH ESRCH
-#else
-#define APR_ESRCH (APR_OS_START_SYSERR + 50)
-#endif
-
-#ifdef ENOTSUP
-#define APR_ENOTSUP ENOTSUP
-#else
-#define APR_ENOTSUP (APR_OS_START_SYSERR + 51)
+#define APR_EINPROGRESS    (APR_OS_START_CANONERR + 17)
 #endif
 
 #ifdef __cplusplus
