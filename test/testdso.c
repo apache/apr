@@ -60,7 +60,7 @@
 #include "apr_dso.h"
 #include "apr_strings.h"
 #include "apr.h"
-#ifdef APR_HAVE_UNISTD_H
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
