@@ -135,6 +135,13 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *486-*-bsdi*)
 	APR_ADDTO(CFLAGS, [-m486])
 	;;
+    *-*-bsdi*)
+        case $host in
+            *bsdi4.1)
+                APR_ADDTO(CFLAGS, [-D_REENTRANT])
+                ;;
+        esac
+        ;;
     *-openbsd*)
 	APR_ADDTO(CPPFLAGS, [-D_POSIX_THREADS])
 	;;
