@@ -224,7 +224,7 @@ static int os_cork(apr_socket_t *sock)
     /* Linux only for now */
 
     int nodelay_off = 0, corkflag = 1, rv, delayflag;
-    socklen_t delaylen = sizeof(delayflag);
+    apr_socklen_t delaylen = sizeof(delayflag);
 
     /* XXX it would be cheaper to use an apr_socket_t flag here */
     rv = getsockopt(sock->socketdes, SOL_TCP, TCP_NODELAY,
