@@ -126,13 +126,16 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
 
 
 
-ap_status_t ap_poll(ap_pollfd_t *pollfdset, ap_int32_t *nsds, ap_int32_t timeout)
+ap_status_t ap_poll(ap_pollfd_t *pollfdset, ap_int32_t *nsds, 
+                    ap_interval_time_t timeout)
 {
     int i;
     int rv = 0;
     time_t starttime;
     struct timeval tv;
-    
+
+    timeout /= AP_USEC_PER_SEC; /* TODO: rework for microseconds and axe this */
+
     tv.tv_sec = timeout;
     tv.tv_usec = 0;
     time(&starttime);

@@ -444,18 +444,19 @@ ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num,
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,
- *                     ap_int32_t timeout)
+ *                     ap_interval_time_t timeout)
  *    Poll the sockets in the poll structure.  This is a blocking call,
  *    and it will not return until either a socket has been signalled, or
  *    the timeout has expired. 
  * arg 1) The poll structure we will be using. 
  * arg 2) The number of sockets we are polling. 
- * arg 3) The amount of time in seconds to wait.  This is a maximum, not 
+ * arg 3) The amount of time in microseconds to wait.  This is a maximum, not 
  *        a minimum.  If a socket is signalled, we will wake up before this
  *        time.  A negative number means wait until a socket is signalled.
  * NOTE:  The number of sockets signalled is returned in the second argument. 
  */
-ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout);
+ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, 
+		    ap_interval_time_t timeout);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, ap_socket_t *sock, 

@@ -667,7 +667,7 @@ static void read_connection(struct connection *c)
 static void test(void)
 {
     ap_time_t now;
-    time_t timeout;
+    ap_interval_time_t timeout;
     ap_int16_t rv;
     int i;
 
@@ -742,7 +742,7 @@ static void test(void)
             requests = done;	/* so stats are correct */
         }
         /* Timeout of 30 seconds. */
-        timeout = 30;
+        timeout = 30 * AP_USEC_PER_SEC;
 
         n = concurrency;
         ap_poll(readbits, &n, timeout);

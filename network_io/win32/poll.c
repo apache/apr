@@ -98,23 +98,14 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
+ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, 
+                    ap_interval_time_t timeout)
 {
     int rv;
-    struct timeval *thetime;
+    struct timeval tv, *tvptr;
     fd_set *newread = NULL;
     fd_set *newwrite = NULL;
     fd_set *newexcept = NULL;
-
-    if (timeout == -1) {
-        thetime = NULL;
-    }
-    else {
-        /* Convert milli-seconds into seconds and micro-seconds. */
-        thetime = (struct timeval *)ap_palloc(aprset->cntxt, sizeof(struct timeval));
-        thetime->tv_sec = timeout;
-        thetime->tv_usec = 0;
-    }
 
     if (aprset->numread != 0) {
         newread = aprset->read;
@@ -127,17 +118,26 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
     }
 
     if (newread == NULL && newwrite == NULL && newexcept == NULL) {
-        Sleep(100); /* Should sleep  for timeout, but that will be fixed next */
-        return APR_TIMEUP;
+        Sleep(timeout / 1000); /* convert microseconds into milliseconds */
+        return APR_TIMEUP; /* TODO - get everybody in synch with Win32 ap_status_t */
     }
     else {
-        rv = select(500, newread, newwrite, newexcept, thetime);
+        if (timeout < 0) {
+            tvptr = NULL;
+        }
+        else {
+            tv.tv_sec = (long)(timeout / AP_USEC_PER_SEC);
+            tv.tv_usec = (long)(timeout % AP_USEC_PER_SEC);
+            tvptr = &tv;
+        }
+        rv = select(500, /* ignored on Windows */
+                    newread, newwrite, newexcept, tvptr);
     }
 
     (*nsds) = rv;    
     if ((*nsds) < 0) {
         rv = GetLastError();
-        return APR_EEXIST;
+        return APR_EEXIST;  /* TODO - get everybody in synch with Win32 ap_status_t */
     }
     return APR_SUCCESS;
 }

@@ -98,24 +98,23 @@ ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
+ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, 
+		    ap_interval_time_t timeout)
 {
     int rv;
-    struct timeval *thetime;
+    struct timeval tv, *tvptr;
 
-    if (timeout == -1) {
-        thetime = NULL;
+    if (timeout < 0) {
+        tvptr = NULL;
     }
     else {
-        /* Convert milli-seconds into seconds and micro-seconds. */
-        thetime = (struct timeval *)ap_palloc(aprset->cntxt, sizeof(struct timeval));
-        thetime->tv_sec = timeout / (1000);
-        timeout = timeout % 1000;
-        thetime->tv_usec = timeout * 1000;
+        tv.tv_sec = timeout / AP_USEC_PER_SEC;
+        tv.tv_usec = timeout % AP_USEC_PER_SEC;
+	tvptr = &tv;
     }
 
     rv = select(aprset->highsock + 1, aprset->read, aprset->write, 
-                    NULL, thetime);
+                    NULL, tvptr);
 
     (*nsds) = rv;
     if ((*nsds) == 0) {
