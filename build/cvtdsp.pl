@@ -13,9 +13,13 @@ elsif ($ARGV[0] == '-w3') {
 elsif ($ARGV[0] == '-w4') {
     find(\&tow4, '.');
 }
+elsif ($ARGV[0] == '-ia64') {
+    find(\&tovc64, '.');
+}
 else {
     print "Specify -5 or -6 for Visual Studio 5 or 6 (98) .dsp format\n";
     print "Specify -w3 or -w4 for .dsp build with warning level 3 or 4 (strict)\n\n";
+    print "Specify -ia64 for build targeted at Itanium (req's psdk tools)\n\n";
     die "Missing argument";
 }
 
@@ -157,3 +161,32 @@ sub tow4 {
     }
 }
 
+sub tovc64 { 
+
+    if (m|.dsp$| || m|.mak$|) {
+        $oname = $_;
+	$tname = '.#' . $_;
+	$verchg = 0;
+	$srcfl = new IO::File $_, "r" || die;
+	$dstfl = new IO::File $tname, "w" || die;
+	while ($src = <$srcfl>) {
+	    while ($src =~ m|\\\n$|) {
+		$src = $src . <$srcfl>
+            }
+	    if ($src =~ s|(\bCPP.*)/FD (.*)|$1$2|s) {
+		$verchg = -1;
+	    }
+            print $dstfl $src; 
+	}
+	undef $srcfl;
+	undef $dstfl;
+	if ($verchg) {
+	    unlink $oname || die;
+	    rename $tname, $oname || die;
+	    print "Converted build file " . $oname . " to Win64 in " . $File::Find::dir . "\n"; 
+	}
+	else {
+	    unlink $tname;
+	}
+    }
+}
