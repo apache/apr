@@ -64,7 +64,7 @@ static void create_socket(CuTest *tc)
 {
     apr_status_t rv;
 
-    rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, p);
+    rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, sock);
 }

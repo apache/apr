@@ -103,9 +103,9 @@ APR_DECLARE(apr_status_t) apr_socket_protocol_get(apr_socket_t *sock,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new, int family,
-                                               int type, int protocol, 
-                                               apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
+                                            int type, int protocol, 
+                                            apr_pool_t *cont)
 {
     int downgrade = (family == AF_UNSPEC);
 
@@ -179,12 +179,6 @@ APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new, int family,
 
     return APR_SUCCESS;
 } 
-
-APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
-                                            int type, apr_pool_t *cont)
-{
-    return apr_socket_create_ex(new, family, type, 0, cont);
-}
 
 APR_DECLARE(apr_status_t) apr_socket_shutdown(apr_socket_t *thesocket,
                                               apr_shutdown_how_e how)
@@ -531,34 +525,4 @@ APR_DECLARE(void) apr_socket_unset_inherit(apr_socket_t *socket)
 {    
     apr_socket_inherit_unset(socket);    
 }
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
-                                       apr_shutdown_how_e how)
-{
-    return apr_socket_shutdown(thesocket, how);
-}
 
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
-{
-    return apr_socket_bind(sock, sa);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
-{
-    return apr_socket_listen(sock, backlog);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
-                                     apr_pool_t *p)
-{
-    return apr_socket_accept(new, sock, p);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
-{
-    return apr_socket_connect(sock, sa);
-}

@@ -73,7 +73,7 @@ static void tcp_socket(CuTest *tc)
     apr_status_t rv;
     apr_socket_t *sock = NULL;
 
-    rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, p);
+    rv = apr_socket_create(&sock, APR_INET, SOCK_STREAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, sock);
     apr_socket_close(sock);
@@ -84,7 +84,7 @@ static void udp_socket(CuTest *tc)
     apr_status_t rv;
     apr_socket_t *sock = NULL;
 
-    rv = apr_socket_create(&sock, APR_INET, SOCK_DGRAM, p);
+    rv = apr_socket_create(&sock, APR_INET, SOCK_DGRAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, sock);
     apr_socket_close(sock);
@@ -96,7 +96,7 @@ static void tcp6_socket(CuTest *tc)
     apr_status_t rv;
     apr_socket_t *sock = NULL;
 
-    rv = apr_socket_create(&sock, APR_INET6, SOCK_STREAM, p);
+    rv = apr_socket_create(&sock, APR_INET6, SOCK_STREAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, sock);
     apr_socket_close(sock);
@@ -111,7 +111,7 @@ static void udp6_socket(CuTest *tc)
     apr_status_t rv;
     apr_socket_t *sock = NULL;
 
-    rv = apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, p);
+    rv = apr_socket_create(&sock, APR_INET6, SOCK_DGRAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     CuAssertPtrNotNull(tc, sock);
     apr_socket_close(sock);
@@ -133,9 +133,9 @@ static void sendto_receivefrom(CuTest *tc)
     apr_sockaddr_t *to;
     apr_size_t len = 30;
 
-    rv = apr_socket_create(&sock, FAMILY, SOCK_DGRAM, p);
+    rv = apr_socket_create(&sock, FAMILY, SOCK_DGRAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    rv = apr_socket_create(&sock2, FAMILY, SOCK_DGRAM, p);
+    rv = apr_socket_create(&sock2, FAMILY, SOCK_DGRAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     rv = apr_sockaddr_info_get(&to, US, APR_UNSPEC, 7772, 0, p);
@@ -175,9 +175,9 @@ static void socket_userdata(CuTest *tc)
     char *data;
     const char *key = "GENERICKEY";
 
-    rv = apr_socket_create(&sock1, AF_INET, SOCK_STREAM, p);
+    rv = apr_socket_create(&sock1, AF_INET, SOCK_STREAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    rv = apr_socket_create(&sock2, AF_INET, SOCK_STREAM, p);
+    rv = apr_socket_create(&sock2, AF_INET, SOCK_STREAM, 0, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     rv = apr_socket_data_set(sock1, "SOCK1", key, NULL);

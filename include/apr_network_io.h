@@ -84,11 +84,6 @@ extern "C" {
 #define APR_MAX_SECS_TO_LINGER 30
 #endif
 
-#ifndef MAX_SECS_TO_LINGER
-/** @deprecated @see APR_MAX_SECS_TO_LINGER */
-#define MAX_SECS_TO_LINGER APR_MAX_SECS_TO_LINGER
-#endif
-
 #ifndef APRMAXHOSTLEN
 /** Maximum hostname length */
 #define APRMAXHOSTLEN 256
@@ -293,31 +288,16 @@ struct apr_hdtr_t {
 
 /**
  * Create a socket.
- * @remark With APR 1.0, this function follows the prototype 
- * of apr_socket_create_ex.
- * @param new_sock The new socket that has been set up.
- * @param family The address family of the socket (e.g., APR_INET).
- * @param type The type of the socket (e.g., SOCK_STREAM).
- * @param cont The pool to use
- */
-APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
-                                            int family, int type,
-                                            apr_pool_t *cont);
-
-/**
- * Create a socket.
- * @remark With APR 1.0, this function is deprecated and apr_socket_create 
- * follows this prototype.
  * @param new_sock The new socket that has been set up.
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
  * @param protocol The protocol of the socket (e.g., APR_PROTO_TCP).
  * @param cont The pool to use
  */
-APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new_sock, 
-                                               int family, int type,
-                                               int protocol,
-                                               apr_pool_t *cont);
+APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
+                                            int family, int type,
+                                            int protocol,
+                                            apr_pool_t *cont);
 
 /**
  * Shutdown either reading, writing, or both sides of a socket.
@@ -335,10 +315,6 @@ APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new_sock,
 APR_DECLARE(apr_status_t) apr_socket_shutdown(apr_socket_t *thesocket,
                                               apr_shutdown_how_e how);
 
-/** @deprecated @see apr_socket_shutdown */
-APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
-                                       apr_shutdown_how_e how);
-
 /**
  * Close a socket.
  * @param thesocket The socket to close 
@@ -355,9 +331,6 @@ APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket);
 APR_DECLARE(apr_status_t) apr_socket_bind(apr_socket_t *sock, 
                                           apr_sockaddr_t *sa);
 
-/** @deprecated @see apr_socket_bind */
-APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
-
 /**
  * Listen to a bound socket for connections.
  * @param sock The socket to listen on 
@@ -367,9 +340,6 @@ APR_DECLARE(apr_status_t) apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa);
  */
 APR_DECLARE(apr_status_t) apr_socket_listen(apr_socket_t *sock, 
                                             apr_int32_t backlog);
-
-/** @deprecated @see apr_socket_listen */
-APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog);
 
 /**
  * Accept a new connection request
@@ -383,11 +353,6 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new_sock,
                                             apr_socket_t *sock,
                                             apr_pool_t *connection_pool);
 
-/** @deprecated @see apr_socket_accept */
-APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new_sock, 
-                                     apr_socket_t *sock,
-                                     apr_pool_t *connection_pool);
-
 /**
  * Issue a connection request to a socket either on the same machine 
  * or a different one.
@@ -398,9 +363,6 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new_sock,
  */
 APR_DECLARE(apr_status_t) apr_socket_connect(apr_socket_t *sock,
                                              apr_sockaddr_t *sa);
-
-/** @deprecated @see apr_socket_connect */
-APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
 
 /**
  * Create apr_sockaddr_t from hostname, address family, and port.

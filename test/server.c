@@ -114,7 +114,7 @@ int main(int argc, const char * const argv[])
     }
 
     APR_TEST_SUCCESS(rv, "Creating new socket", 
-        apr_socket_create_ex(&sock, family, SOCK_STREAM, APR_PROTO_TCP, context))
+        apr_socket_create(&sock, family, SOCK_STREAM, APR_PROTO_TCP, context))
 
     APR_TEST_SUCCESS(rv, "Setting option APR_SO_NONBLOCK",
         apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1))

@@ -111,8 +111,8 @@ apr_status_t apr_socket_protocol_get(apr_socket_t *sock, int *protocol)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_socket_create_ex(apr_socket_t **new, int ofamily, int type,
-                                  int protocol, apr_pool_t *cont)
+apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
+                               int protocol, apr_pool_t *cont)
 {
     int family = ofamily;
 
@@ -146,12 +146,6 @@ apr_status_t apr_socket_create_ex(apr_socket_t **new, int ofamily, int type,
                               socket_cleanup);
     return APR_SUCCESS;
 } 
-
-apr_status_t apr_socket_create(apr_socket_t **new, int family, int type,
-                               apr_pool_t *cont)
-{
-    return apr_socket_create_ex(new, family, type, 0, cont);
-}
 
 apr_status_t apr_socket_shutdown(apr_socket_t *thesocket, 
                                  apr_shutdown_how_e how)
@@ -420,34 +414,3 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
 APR_IMPLEMENT_INHERIT_SET(socket, inherit, cntxt, socket_cleanup)
 
 APR_IMPLEMENT_INHERIT_UNSET(socket, inherit, cntxt, socket_cleanup)
-
-/* deprecated */
-apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
-{
-    return apr_socket_shutdown(thesocket, how);
-}
-
-/* deprecated */
-apr_status_t apr_bind(apr_socket_t *sock, apr_sockaddr_t *sa)
-{
-    return apr_socket_bind(sock, sa);
-}
-
-/* deprecated */
-apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
-{
-    return apr_socket_listen(sock, backlog);
-}
-
-/* deprecated */
-apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock,
-                        apr_pool_t *connection_context)
-{
-    return apr_socket_accept(new, sock, connection_context);
-}
-
-/* deprecated */
-apr_status_t apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
-{
-    return apr_socket_connect(sock, sa);
-}
