@@ -107,10 +107,7 @@ case "$PLAT" in
     *-dg-dgux*)
 	APR_SETIFNULL(CFLAGS, [-DDGUX])
 	;;
-    *OS/2*)
-	APR_SETIFNULL(CFLAGS, [-DOS2 -DTCPIPV4 -g -Zmt])
-	APR_SETIFNULL(LDFLAGS, [-Zexe -Zmtd -Zsysv-signals -Zbin-files])
-	APR_SETIFNULL(LIBS, [-lsocket -lufc -lbsd])
+    *os2_emx*)
 	APR_SETIFNULL(SHELL, [sh])
         APR_SETIFNULL(file_as_socket, [0])
 	;;
