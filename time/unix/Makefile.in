@@ -49,15 +49,17 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-time.o: time.c $(INCDIR)/apr_private.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
- $(INCDIR)/apr_lock.h
-timestr.o: timestr.c $(INCDIR)/apr_private.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_lib.h \
- $(INCDIR)/apr_file_io.h $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_portable.h $(INCDIR)/apr_network_io.h \
- $(INCDIR)/apr_lock.h
+time.o: time.c $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_private.h
+timestr.o: timestr.c $(INCDIR)/apr_portable.h \
+ $(INCDIR)/apr_general.h $(INCDIR)/apr.h \
+ $(INCDIR)/apr_errno.h $(INCDIR)/apr_thread_proc.h \
+ $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h \
+ $(INCDIR)/apr_network_io.h $(INCDIR)/apr_lock.h \
+ $(INCDIR)/apr_lib.h $(INCDIR)/apr_tables.h \
+ $(INCDIR)/apr_private.h
