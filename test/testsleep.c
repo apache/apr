@@ -83,7 +83,7 @@ static void sleep_one(CuTest *tc)
 
 CuSuite *testsleep(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Sleep");
+    CuSuite *suite = CuSuiteNew("Sleep");
 
     SUITE_ADD_TEST(suite, sleep_one);
 

@@ -437,7 +437,7 @@ static void test_mod_neg(CuTest *tc)
 
 CuSuite *testfile(void)
 {
-    CuSuite *suite = CuSuiteNew("Test File I/O");
+    CuSuite *suite = CuSuiteNew("File I/O");
 
     SUITE_ADD_TEST(suite, test_open_noreadwrite);
     SUITE_ADD_TEST(suite, test_open_excl);

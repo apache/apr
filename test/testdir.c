@@ -298,7 +298,7 @@ static void test_uncleared_errno(CuTest *tc)
 
 CuSuite *testdir(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Directory");
+    CuSuite *suite = CuSuiteNew("Directory");
 
     SUITE_ADD_TEST(suite, test_mkdir);
     SUITE_ADD_TEST(suite, test_mkdir_recurs);

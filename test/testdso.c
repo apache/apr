@@ -278,7 +278,7 @@ CuSuite *testdso(void)
     filename2 = apr_pstrcat(p, filename2, "/", LIB_NAME2, NULL);
 
 
-    CuSuite *suite = CuSuiteNew("Test DSO");
+    CuSuite *suite = CuSuiteNew("DSO");
 
     SUITE_ADD_TEST(suite, test_load_module);
     SUITE_ADD_TEST(suite, test_dso_sym);

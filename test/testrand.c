@@ -79,7 +79,7 @@ static void rand_exists(CuTest *tc)
 
 CuSuite *testrand(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Random");
+    CuSuite *suite = CuSuiteNew("Random");
 
     SUITE_ADD_TEST(suite, rand_exists);
 
