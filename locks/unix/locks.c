@@ -234,12 +234,12 @@ ap_status_t ap_set_lockdata(struct lock_t *lock, void *data, char *key,
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_lock(ap_lock_t **, ap_os_lock_t *)
+ * ap_status_t ap_get_os_lock(ap_os_lock_t *, ap_lock_t **)
  *    onvert the lock from os specific type to apr type
  * arg 1) The apr lock to convert.
  * arg 2) The os specific lock we are converting to.
  */
-ap_status_t ap_get_os_lock(struct lock_t *lock, ap_os_lock_t *oslock)
+ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, struct lock_t *lock)
 {
     if (lock == NULL) {
         return APR_ENOLOCK;

@@ -60,8 +60,8 @@
 #include "apr_errno.h"
 #include "apr_portable.h"
 
-ap_status_t ap_create_thread_private(ap_context_t *cont, void (*dest)(void *),
-                                     struct threadkey_t **key)
+ap_status_t ap_create_thread_private(struct threadkey_t **key,
+                                     void (*dest)(void *), ap_context_t *cont)
 {
 	(*key)->key = TlsAlloc();
 	return APR_SUCCESS;
@@ -75,7 +75,7 @@ ap_status_t ap_get_thread_private(void **new, struct threadkey_t *key)
     return APR_EEXIST;
 }
 
-ap_status_t ap_set_thread_private(struct threadkey_t *key, void *priv)
+ap_status_t ap_set_thread_private(void *priv, struct threadkey_t *key)
 {
     if (TlsSetValue(key->key, priv)) {
         return APR_SUCCESS;
@@ -91,7 +91,7 @@ ap_status_t ap_delete_thread_private(struct threadkey_t *key)
     return APR_EEXIST;
 }
 
-ap_status_t ap_get_threadkeydata(struct threadkey_t *threadkey, char *key, void *data)
+ap_status_t ap_get_threadkeydata(void *data, char *key, struct threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
         return ap_get_userdata(&data, key, threadkey->cntxt);
@@ -114,7 +114,7 @@ ap_status_t ap_set_threadkeydata(struct threadkey_t *threadkey, void *data,
     }
 }
 
-ap_status_t ap_get_os_threadkey(struct threadkey_t *key, ap_os_threadkey_t *thekey)
+ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, struct threadkey_t *key)
 {
     if (key == NULL) {
         return APR_ENOFILE;

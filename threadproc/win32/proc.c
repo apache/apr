@@ -139,9 +139,9 @@ ap_status_t ap_setprocattr_detach(struct procattr_t *attr,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_create_process(ap_context_t *cont, char *progname, 
-                               char *const args[], char **env, 
-                               struct procattr_t *attr, struct proc_t **new)
+ap_status_t ap_create_process(struct proc_t **new, char *progname, 
+                              char *const args[], char **env, 
+                              struct procattr_t *attr, ap_context_t *cont)
 {
     int i, iEnvBlockLen;
 	char *cmdline;
@@ -338,7 +338,7 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
         return APR_EEXIST;
 } 
 
-ap_status_t ap_get_procdata(struct proc_t *proc, char *key, void *data)
+ap_status_t ap_get_procdata(char *key, void *data, struct proc_t *proc)
 {
     if (proc != NULL) {
         return ap_get_userdata(&data, key, proc->cntxt);
@@ -349,8 +349,9 @@ ap_status_t ap_get_procdata(struct proc_t *proc, char *key, void *data)
     }
 }
 
-ap_status_t ap_set_procdata(struct proc_t *proc, void *data, char *key,
-                            ap_status_t (*cleanup) (void *))
+ap_status_t ap_set_procdata(void *data, char *key,
+                            ap_status_t (*cleanup) (void *)
+                            struct proc_t *proc)
 {
     if (proc != NULL) {
         return ap_set_userdata(data, key, cleanup, proc->cntxt);
@@ -361,7 +362,7 @@ ap_status_t ap_set_procdata(struct proc_t *proc, void *data, char *key,
     }
 }
 
-ap_status_t ap_get_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc)
+ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
 {
     if (proc == NULL) {
         return APR_ENOPROC;

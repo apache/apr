@@ -99,9 +99,9 @@ static void ap_thread_begin(void *arg)
 
 
 
-ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr, 
+ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
-                             struct thread_t **new)
+                             ap_context_t *cont)
 {
     ap_status_t stat;
     ap_thread_t *thread;
@@ -154,7 +154,7 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
 
 
 
-ap_status_t ap_thread_join(struct thread_t *thd, ap_status_t *retval)
+ap_status_t ap_thread_join(ap_status_t *retval, struct thread_t *thd)
 {
     ULONG rc;
     TID waittid = thd->tid;

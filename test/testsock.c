@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
 
     args[0] = ap_pstrdup(context, "server");
     args[1] = NULL; 
-    s1 = ap_create_process(context, "./server", args, NULL, attr1, &proc1);
+    s1 = ap_create_process(&proc1, "./server", args, NULL, attr1, context);
 
     args[0] = ap_pstrdup(context, "client");
-    s2 = ap_create_process(context, "./client", args, NULL, attr2, &proc2);
+    s2 = ap_create_process(&proc2, "./client", args, NULL, attr2, context);
 
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS) {
         fprintf(stderr, "Problem spawning new process\n");

@@ -78,14 +78,14 @@ ap_status_t ap_cancel_thread(struct thread_t *thd)
 #endif
     
 /* ***APRDOC********************************************************
- * ap_status_t ap_setcanceltype(ap_context_t *, ap_int32_t)
+ * ap_status_t ap_setcanceltype(ap_int32_t, ap_context_t *)
  *    Determine how threads are cancelable.
  * arg 1) The context to operate on 
  * arg 2) how are threads cancelable.  One of:
  *            APR_CANCEL_ASYNCH  -- cancel it no matter where it is
  *            APR_CANCEL_DEFER   -- only cancel the thread if it is safe. 
  */
-ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 {
     ap_status_t stat;
     if ((stat = pthread_setcanceltype(type, NULL)) == 0) {
@@ -97,12 +97,12 @@ ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_setcancelstate(ap_context_t *, ap_int32_t)
+ * ap_status_t ap_setcancelstate(ap_int32_t, ap_context_t *)
  *    Determine if threads will be cancelable.
  * arg 1) The context to operate on 
  * arg 2) Are threads cancelable. 
  */
-ap_status_t ap_setcancelstate(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
 {
     ap_status_t stat;
     if ((stat = pthread_setcanceltype(type, NULL)) == 0) {
@@ -118,12 +118,12 @@ ap_status_t ap_cancel_thread(struct thread_t *thd)
     return APR_SUCCESS;
 }
     
-ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 {
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setcancelstate(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
 {
     return APR_SUCCESS;
 }

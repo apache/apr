@@ -144,10 +144,10 @@ int main()
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Starting all the threads......."); 
-    s1 = ap_create_thread(context, NULL, thread_func1, NULL, &t1);
-    s2 = ap_create_thread(context, NULL, thread_func2, NULL, &t2);
-    s3 = ap_create_thread(context, NULL, thread_func3, NULL, &t3);
-    s4 = ap_create_thread(context, NULL, thread_func4, NULL, &t4);
+    s1 = ap_create_thread(&t1, NULL, thread_func1, NULL, context);
+    s2 = ap_create_thread(&t2, NULL, thread_func2, NULL, context);
+    s3 = ap_create_thread(&t3, NULL, thread_func3, NULL, context);
+    s4 = ap_create_thread(&t4, NULL, thread_func4, NULL, context);
     if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
         s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
         fprintf(stderr, "Error starting thread\n");
@@ -156,10 +156,10 @@ int main()
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "Waiting for threads to exit.......");
-    ap_thread_join(t1, &s1);
-    ap_thread_join(t2, &s2);
-    ap_thread_join(t3, &s3);
-    ap_thread_join(t4, &s4);
+    ap_thread_join(&s1, t1);
+    ap_thread_join(&s2, t2);
+    ap_thread_join(&s3, t3);
+    ap_thread_join(&s4, t4);
     fprintf (stdout, "OK\n");   
 
     fprintf(stdout, "Checking if locks worked......."); 

@@ -95,9 +95,9 @@ ap_status_t ap_getthreadattr_detach(struct threadattr_t *attr)
 	return APR_NOTDETACH;
 }
 
-ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr,
-                                ap_thread_start_t func, void *data,
-                                struct thread_t **new)
+ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr,
+                             ap_thread_start_t func, void *data,
+                             ap_context_t *cont)
 {
     int32 temp;
     ap_status_t stat;
@@ -141,7 +141,7 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
 	exit_thread ((status_t)retval);
 }
 
-ap_status_t ap_thread_join(ap_thread_t *thd, ap_status_t *retval)
+ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
 {
     if (wait_for_thread(thd->td,(void *)&retval) == B_NO_ERROR) {
         return APR_SUCCESS;

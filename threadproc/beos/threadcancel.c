@@ -69,7 +69,7 @@ ap_status_t ap_cancel_thread(struct thread_t *thd)
 }
 
     
-ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 {
 /*    if (pthread_setcanceltype(type, NULL) == 0) {*/
         return APR_SUCCESS;
@@ -79,7 +79,7 @@ ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
     }*/
 }
 
-ap_status_t ap_setcancelstate(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
 {
 /*    if (pthread_setcanceltype(type, NULL) == 0) {*/
         return APR_SUCCESS;

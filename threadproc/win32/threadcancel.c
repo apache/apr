@@ -69,12 +69,12 @@ ap_status_t ap_cancel_thread(struct thread_t *thd)
 }
 
 /*  Not sure of the best way to do this just yet.
-ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 {
 	
 }
 
-ap_status_t ap_setcancelstate(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
 {
     ap_status_t stat;
     if ((stat = pthread_setcanceltype(type, NULL)) == 0) {

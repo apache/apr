@@ -65,7 +65,7 @@ ap_status_t ap_cancel_thread(struct thread_t *thd)
 
     
 
-ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_context_t *cont)
 {
     ULONG rc, nesting;
 
@@ -79,7 +79,7 @@ ap_status_t ap_setcanceltype(ap_context_t *cont, ap_int32_t type)
 
 
 
-ap_status_t ap_setcancelstate(ap_context_t *cont, ap_int32_t type)
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_context_t *cont)
 {
 /* There's no way to ignore thread kills altogether in OS/2 (that I know of) */
     return -1;

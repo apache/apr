@@ -131,9 +131,9 @@ ap_status_t ap_getthreadattr_detach(struct threadattr_t *attr)
  * arg 4) Any data to be passed to the starting function
  * arg 5) The newly created thread handle.
  */
-ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr, 
+ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
-                             struct thread_t **new)
+                             ap_context_t *cont)
 {
     ap_status_t stat;
     pthread_attr_t *temp;
@@ -184,12 +184,12 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_thread_join(ap_thread_t *, ap_status_t *)
+ * ap_status_t ap_thread_join(ap_status_t *, ap_thread_t *)
  *    block until the desired thread stops executing. 
  * arg 1) The thread to join
  * arg 2) The return value from the dead thread.
  */
-ap_status_t ap_thread_join(struct thread_t *thd, ap_status_t *retval)
+ap_status_t ap_thread_join(ap_status_t *retval, struct thread_t *thd)
 {
     ap_status_t stat;
 
@@ -219,12 +219,12 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(ap_thread_t *, char *, void *)
+ * ap_status_t ap_get_threaddata(void *, char *, ap_thread_t *)
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data associated with the thread.
  */
-ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
+ap_status_t ap_get_threaddata(void *data, char *key, struct thread_t *thread)
 {
     if (thread != NULL) {
         return ap_get_userdata(&data, key, thread->cntxt);
@@ -242,8 +242,9 @@ ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
  * arg 1) The currently open thread.
  * arg 2) The user data to associate with the thread.
  */
-ap_status_t ap_set_threaddata(struct thread_t *thread, void *data, char *key,
-                              ap_status_t (*cleanup) (void *))
+ap_status_t ap_set_threaddata(void *data, char *key,
+                              ap_status_t (*cleanup) (void *),
+                              struct thread_t *thread)
 {
     if (thread != NULL) {
         return ap_set_userdata(data, key, cleanup, thread->cntxt);
@@ -260,7 +261,7 @@ ap_status_t ap_set_threaddata(struct thread_t *thread, void *data, char *key,
  * arg 1) The apr thread to convert
  * arg 2) The os specific thread we are converting to
  */
-ap_status_t ap_get_os_thread(struct thread_t *thd, ap_os_thread_t *thethd)
+ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, struct thread_t *thd)
 {
     if (thd == NULL) {
         return APR_ENOTHREAD;
@@ -307,9 +308,9 @@ ap_status_t ap_getthreadattr_detach(struct threadattr_t *attr)
     return APR_NOTDETACH;
 }
 
-ap_status_t ap_create_thread(ap_context_t *cont, struct threadattr_t *attr, 
+ap_status_t ap_create_thread(struct thread_t **new, struct threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
-                             struct thread_t **new)
+                             ap_context_t *cont)
 {
     *new = NULL;
     return stat;
@@ -320,7 +321,7 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
     APR_SUCCESS;
 }
 
-ap_status_t ap_thread_join(struct thread_t *thd, ap_status_t *retval)
+ap_status_t ap_thread_join(ap_status_t *retval, struct thread_t *thd)
 {
     return APR_SUCCESS;
 }
@@ -331,12 +332,12 @@ ap_status_t ap_thread_detach(struct thread_t *thd)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_threaddata(ap_thread_t *, char *, void *)
+ * ap_status_t ap_get_threaddata(void *, char *, ap_thread_t *)
  *    Return the context associated with the current thread.
  * arg 1) The currently open thread.
  * arg 2) The user data associated with the thread.
  */
-ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
+ap_status_t ap_get_threaddata(void *data, char *key, struct thread_t *thread)
 {
     data = NULL;
     return APR_ENOTHREAD;
@@ -349,13 +350,14 @@ ap_status_t ap_get_threaddata(struct thread_t *thread, char *key, void *data)
  * arg 1) The currently open thread.
  * arg 2) The user data to associate with the thread.
  */
-ap_status_t ap_set_threaddata(struct thread_t *thread, void *data, char *key,
-                              ap_status_t (*cleanup) (void *))
+ap_status_t ap_set_threaddata(void *data, char *key,
+                              ap_status_t (*cleanup) (void *),
+                              struct thread_t *thread)
 {
     return APR_ENOTHREAD;
 }
 
-ap_status_t ap_get_os_thread(struct thread_t *thd, ap_os_thread_t *thethd)
+ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, struct thread_t *thd)
 {
     thethd = NULL;
     return APR_SUCCESS;
