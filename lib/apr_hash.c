@@ -272,7 +272,15 @@ APR_EXPORT(void) ap_hash_set(ap_hash_t *ht,
 {
     ap_hash_entry_t **hep;
     hep = find_entry(ht, key, klen, val);
-    if (*hep && !val)
-	/* delete entry */
-	*hep = (*hep)->next;
+    if (*hep) {
+        if (!val) {
+            /* delete entry */
+            *hep = (*hep)->next;
+        }
+        else {
+            /* replace entry */
+            (*hep)->val = val;
+        }
+    }
+    /* else key not present and val==NULL */
 }
