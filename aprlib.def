@@ -58,7 +58,7 @@ EXPORTS
 	apr_listen   @51
 	apr_accept   @52
 	apr_connect   @53
-	apr_get_remote_hostname   @54
+	apr_get_hostname   @54
 	apr_gethostname   @55
 	apr_send   @56
 	apr_recv   @57
@@ -83,6 +83,7 @@ EXPORTS
         apr_get_port @76
 	apr_set_port @77
         apr_get_inaddr @78
+        apr_get_socket_inaddr @79
 
 ;
 ;
