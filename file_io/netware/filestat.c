@@ -152,6 +152,11 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     apr_status_t status;
     apr_finfo_t finfo;
 
+    /* Don't do anything if we can't handle the requested attributes */
+    if (!(attr_mask & (APR_FILE_ATTR_READONLY
+                       | APR_FILE_ATTR_EXECUTABLE)))
+        return APR_SUCCESS;
+
     status = apr_stat(&finfo, fname, APR_FINFO_PROT, pool);
     if (!APR_STATUS_IS_SUCCESS(status))
         return status;

@@ -129,6 +129,7 @@ extern "C" {
 /* flags for apr_file_attrs_set */
 #define APR_FILE_ATTR_READONLY   0x01          /**< File is read-only */
 #define APR_FILE_ATTR_EXECUTABLE 0x02          /**< File is executable */
+#define APR_FILE_ATTR_HIDDEN     0x04          /**< File is hidden */
 /** @} */
 
 /** File attributes */
@@ -639,6 +640,7 @@ APR_DECLARE(apr_status_t) apr_file_perms_set(const char *fname,
  * <PRE>
  *            APR_FILE_ATTR_READONLY   - make the file readonly
  *            APR_FILE_ATTR_EXECUTABLE - make the file executable
+ *            APR_FILE_ATTR_HIDDEN     - make the file hidden
  * </PRE>
  * @param attr_mask Mask of valid bits in attributes.
  * @param cont the pool to use.
