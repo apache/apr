@@ -61,7 +61,8 @@ apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path
                         apr_pool_t *ctx)
 {
     HINSTANCE os_handle;
-    char fspec[MAX_PATH], *p;
+    char fspec[MAX_PATH], *p = fspec;
+    UINT em;
 
     /* Must convert path from / to \ notation.
      * Per PR2555, the LoadLibraryEx function is very picky about slashes.
@@ -70,11 +71,15 @@ apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path
      * that backslashes must be used for the LoadLibrary family of calls.
      */
     apr_cpystrn(fspec, path, MAX_PATH);
-    for (p = fspec; *p; ++p)
-        if (*p == '/')
-            *p = '\\';
+    while (p = strchr(p, '/'))
+        *p = '\\';
         
+    /* Prevent ugly popups from killing our app */
+    em = SetErrorMode(SEM_FAILCRITICALERRORS);
     os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    if (!os_handle)
+        os_handle = LoadLibraryEx(path, NULL, 0);
+    SetErrorMode(em);
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
 
     if(os_handle == NULL) {
