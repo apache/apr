@@ -12,6 +12,7 @@ int main (int argc, char ** argv)
     ap_dso_handle_t *h = NULL;
     ap_dso_handle_sym_t func1 = NULL;
     ap_dso_handle_sym_t func2 = NULL;
+    ap_status_t status;
     ap_pool_t *cont;
     void (*function)(void);
     void (*function1)(int);
@@ -38,8 +39,10 @@ int main (int argc, char ** argv)
     fprintf(stdout,"OK\n");
     fprintf(stdout,"Trying to load DSO now.....................");
     fflush(stdout);
-    if (ap_dso_load(&h, filename, cont) != APR_SUCCESS){
-        fprintf(stderr, "Failed to load %s!\n", filename);
+    if ((status = ap_dso_load(&h, filename, cont)) != APR_SUCCESS){
+        char my_error[256];
+        ap_strerror(status, my_error, sizeof(my_error));
+        fprintf(stderr, "%s!\n", my_error);
         exit (-1);
     }
     fprintf(stdout,"OK\n");
