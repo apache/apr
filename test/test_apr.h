@@ -80,6 +80,7 @@ CuSuite *testfile(void);
 CuSuite *testdir(void);
 CuSuite *testfileinfo(void);
 CuSuite *testrand(void);
+CuSuite *testdso(void);
 
 
 

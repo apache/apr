@@ -1,21 +1,13 @@
 #include <stdio.h>
 
-int goodbyes = 0;
-
-void print_hello(void);
-int print_goodbye(int reps);
-
-void print_hello(void)
+void print_hello(char str[256])
 {
-    fprintf(stdout,"Hello - I'm a DSO!\n");
+    apr_cpystrn(str, "Hello - I'm a DSO!\n", strlen("Hello - I'm a DSO!\n") + 1);
 }
 
-int print_goodbye(int reps)
+int count_reps(int reps)
 {
     int i = 0;
-    for (i = 0;i < reps; i++) {
-        fprintf (stdout, "Goodbye from the DSO! (%d of %d)\n", i+1, reps);
-    }
-    goodbyes = reps;
-    return 0;
+    for (i = 0;i < reps; i++);
+    return i;
 }
