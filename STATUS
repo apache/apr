@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/01 23:08:45 $]
+Last modified at [$Date: 2002/05/01 23:42:33 $]
 
 Release:
 
@@ -81,12 +81,22 @@ CURRENT VOTES:
                   in my opinion.  That said, I am not going to be the
                   one spending time on this, since asm on various
                   processors isn't really my game)
+      -1: IanH I don't agree. I think APR is the perfect place this kind of thing. 
+                  For platforms that support it is a big win, for ones which don't
+                  they are no worse off than the alternative.
+                  I can't maintain every asm implementation, but I am volunteering
+                  for sparc/x86.  (we could also grab the FreeBSD 
+                  implementations for HW they support)
+                  Unfortunatly I was out of action for a month when half the 
+                  hubub was going on. 
+                  The other alternative for non-native support is maybe to turn 
+                  it into a spin lock
 
     * Turn apr_pcalloc into a macro that does apr_palloc+memset, to take
       advantage of compiler optimizations when the size of the block being
       passed to memset is known at compile time.
 
-      +1: BrianP, Justin, Sander, Cliff
+      +1: BrianP, Justin, Sander, Cliff, Ian
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
