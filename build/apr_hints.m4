@@ -44,40 +44,18 @@ if test "x$apr_preload_done" != "xyes" ; then
 	APR_SETVAR(SHELL, [/bin/ksh])
 	;;
     *-ibm-aix*)
+	APR_ADDTO(CPPFLAGS, [-U__STR__])
+        dnl _USR_IRS gets us the hstrerror() proto in netdb.h
         case $host in
-        i386-ibm-aix*)
-	    APR_ADDTO(CPPFLAGS, [-U__STR__])
-	    ;;
-        *-ibm-aix[1-2].*)
-	    APR_ADDTO(CPPFLAGS, [-U__STR__])
-	    ;;
-        *-ibm-aix3.*)
-	    APR_ADDTO(CPPFLAGS, [-U__STR__])
-	    ;;
-        *-ibm-aix4.1)
-	    APR_ADDTO(CPPFLAGS, [-U__STR__])
-	    ;;
-        *-ibm-aix4.1.*)
-            APR_ADDTO(CPPFLAGS, [-U__STR__])
-            ;;
-        *-ibm-aix4.2)
-	    APR_ADDTO(CPPFLAGS, [-U__STR__])
-	    ;;
-        *-ibm-aix4.2.*)
-            APR_ADDTO(CPPFLAGS, [-U__STR__])
-            ;;
-        *-ibm-aix4.3)
-	    APR_ADDTO(CPPFLAGS, [-D_USE_IRS -U__STR__])
-	    ;;
-        *-ibm-aix5*)
-	    APR_ADDTO(CPPFLAGS, [-D_USE_IRS -U__STR__])
-	    ;;
-        *-ibm-aix4.3.*)
-            APR_ADDTO(CPPFLAGS, [-D_USE_IRS -U__STR__])
-            ;;
-        *-ibm-aix*)
-	    APR_ADDTO(CPPFLAGS, [-U__STR__])
-	    ;;
+            *-ibm-aix4.3)
+	        APR_ADDTO(CPPFLAGS, [-D_USE_IRS])
+	        ;;
+            *-ibm-aix5*)
+	        APR_ADDTO(CPPFLAGS, [-D_USE_IRS])
+	        ;;
+            *-ibm-aix4.3.*)
+                APR_ADDTO(CPPFLAGS, [-D_USE_IRS])
+                ;;
         esac
         dnl Must do a check for gcc or egcs here, to get the right options  
         dnl to the compiler.
