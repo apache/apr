@@ -1,5 +1,10 @@
 Changes with APR 0.9.3
 
+  *) Default hpux 10.x to disable threading, since if it exists at all
+     the pthread implementation should not be trusted, while hpux 10 
+     had its own threads implementation that is no longer supported.
+     PR 9457 [William Rowe]
+
   *) Fix error in apr-config when symlinks are involved.
      [Garrett Rooney <rooneg@electricjellyfish.net>]
 
