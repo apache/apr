@@ -66,6 +66,8 @@
 APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid, apr_pool_t *p)
 {
     struct group *gr;
+#ifndef BEOS
+
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRGID_R)
     struct group grp;
     char grbuf[512];
@@ -77,6 +79,7 @@ APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, apr_gid_t groupid,
         return errno;
     }
     *groupname = apr_pstrdup(p, gr->gr_name);
+#endif
     return APR_SUCCESS;
 }
   
