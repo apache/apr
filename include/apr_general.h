@@ -72,8 +72,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define TRUE 1
+#ifndef FALSE
 #define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE (!FALSE)
+#endif
 
 #define MAXIMUM_WAIT_OBJECTS 64
 
