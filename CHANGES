@@ -1,5 +1,8 @@
 Changes for APR 1.1.0
 
+  *) Emit the run-time link path option in apr-config after installation
+     if the user is linking with libtool.  [Justin Erenkrantz]
+
   *) Add apr_file_writev_full to ensure an entire iovec is writen to a file.
      [Paul Querna]
 
@@ -10,7 +13,7 @@ Changes for APR 1.1.0
   *) Remove the runtime test for Sendfile versions on FreeBSD. PR 25718.
      [Mike Silbersack <silby silby.com>, Paul Querna]
 
-  *( rename the fopen defines (APR_READ, APR_WRITE, etc.) to have
+  *) rename the fopen defines (APR_READ, APR_WRITE, etc.) to have
      prefix APR_FOPEN_ (keeping the old defines) [Stas]
 
   *) [NOT COMMITTED?] Add a new PRNG. Note that the implementation of SHA-256
