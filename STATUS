@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/12 00:01:08 $]
+Last modified at [$Date: 2002/07/12 00:07:15 $]
 
 Release:
 
@@ -88,6 +88,7 @@ CURRENT VOTES:
          +1: fielding
          +1: jwoolley
          +0.5: wrowe
+	 -0: striker
          -0.5: rbb
 
       [fielding: Is APR time guaranteed to be a scalar quantity?  If so,
