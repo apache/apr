@@ -1,65 +1,4 @@
 dnl
-dnl Apache and APR "hints" file
-dnl  We preload various configure settings depending
-dnl  on previously obtained platform knowledge.
-dnl  We allow all settings to be overridden from
-dnl  the command-line.
-dnl
-dnl  We maintain the "format" that we've used
-dnl  under 1.3.x, so we don't exactly follow
-dnl  what is "recommended" by autoconf.
-
-dnl
-dnl APR_DOEXTRA
-dnl
-dnl  Handle the use of EXTRA_* variables.
-dnl  Basically, EXTRA_* vars are added to the
-dnl  current settings of their "parents". We
-dnl  can expand as needed. This is ugly
-dnl
-AC_DEFUN(APR_DOEXTRA, [
-  for i in CFLAGS LDFLAGS LIBS
-  do
-    eval APR_TMP=\$EXTRA_$i
-    if test -n "$APR_TMP"; then
-      eval $i=\"\$$i $APR_TMP\"
-      eval export $i
-      eval unset EXTRA_${i}
-      eval export EXTRA_${i}
-    fi
-  done
-])
-
-dnl
-dnl APR_SETIFNULL(variable, value)
-dnl
-dnl  Set variable iff it's currently null
-dnl
-AC_DEFUN(APR_SETIFNULL,[
-  if test -z "$$1"; then
-    $1="$2"; export $1
-  fi
-])
-
-dnl
-dnl APR_SETVAR(variable, value)
-dnl
-dnl  Set variable no matter what
-dnl
-AC_DEFUN(APR_SETVAR,[
-  $1="$2"; export $1
-])
-
-dnl
-dnl APR_ADDTO(variable, value)
-dnl
-dnl  Add value to variable
-dnl
-AC_DEFUN(APR_ADDTO,[
-   $1="$$1 $2"; export $1
-])
-
-dnl
 dnl APR_PRELOAD
 dnl
 dnl  Preload various ENV/makefile paramsm such as CC, CFLAGS, etc
@@ -83,8 +22,6 @@ case "$host" in
 	APR_SETIFNULL(CFLAGS, [-DAUX3 -D_POSIX_SOURCE])
 	APR_SETIFNULL(LIBS, [-lposix -lbsd])
 	APR_SETIFNULL(LDFLAGS, [-s])
-	APR_SETVAR(APACHE_MPM, [prefork])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-ibm-aix*)
         case $host in
@@ -140,8 +77,6 @@ case "$host" in
     *os2_emx*)
 	APR_SETIFNULL(SHELL, [sh])
         APR_SETIFNULL(file_as_socket, [0])
-        APR_SETVAR(APACHE_MPM, [spmt_os2])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-hi-hiux)
 	APR_SETIFNULL(CFLAGS, [-DHIUX])
@@ -166,8 +101,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-linux-*)
         case `uname -r` in
-	    2.2* ) APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
-	           APR_SETIFNULL(CFLAGS, [-DLINUX=2])
+	    2.2* ) APR_SETIFNULL(CFLAGS, [-DLINUX=2])
 	           APR_SETIFNULL(LIBS, [-lm])
 	           ;;
 	    2.0* ) APR_SETIFNULL(CFLAGS, [-DLINUX=2])
@@ -189,12 +123,10 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *486-*-bsdi*)
 	APR_SETIFNULL(CFLAGS, [-m486])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-netbsd*)
 	APR_SETIFNULL(CFLAGS, [-DNETBSD])
 	APR_SETIFNULL(LIBS, [-lcrypt])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-freebsd*)
 	case $host in
@@ -203,7 +135,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 		;;
 	esac
 	APR_SETIFNULL(LIBS, [-lcrypt])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-next-nextstep*)
 	APR_SETIFNULL(OPTIM, [-O])
@@ -216,21 +147,17 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
 dnl    *-apple-rhapsody*)
 dnl	APR_SETIFNULL(CFLAGS, [-DDARWIN -DMAC_OS_X_SERVER])
-dnl     APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 dnl	;;
     *-apple-darwin*)
 	APR_SETIFNULL(CFLAGS, [-DDARWIN])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-dec-osf*)
 	APR_SETIFNULL(CFLAGS, [-DOSF1])
 	APR_SETIFNULL(LIBS, [-lm])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-qnx)
 	APR_SETIFNULL(CFLAGS, [-DQNX])
 	APR_SETIFNULL(LIBS, [-N128k -lsocket -lunix])
-        APR_SETVAR(SINGLE_LISTEN_UNSERIALIZED_ACCEPT, [1])
 	;;
     *-qnx32)
         APR_SETIFNULL(CC, [cc -F])
@@ -390,7 +317,6 @@ dnl	;;
 	;;
     *beos*)
         APR_SETIFNULL(CFLAGS, [-DBEOS])
-        APR_SETVAR(APACHE_MPM, [beos])
         PLATOSVERS=`uname -r`
         case $PLATOSVERS in
             5.1)
