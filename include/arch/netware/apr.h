@@ -159,7 +159,7 @@
 #define APR_HAS_SENDFILE          0
 #define APR_HAS_MMAP              0
 #define APR_HAS_FORK              0
-#define APR_HAS_RANDOM            1
+#define APR_HAS_RANDOM            0
 #define APR_HAS_XLATE             0
 #define APR_HAS_OTHER_CHILD       0
 #define APR_HAS_DSO               1
