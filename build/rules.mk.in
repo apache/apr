@@ -156,13 +156,15 @@ all-recursive depend-recursive clean-recursive distclean-recursive \
 	if test -z "$$made_local"; then \
 	    $(MAKE) "local-$$otarget" || exit 1; \
 	fi; \
-	if test -d "test"; then \
-	    echo "Making $$target in test"; \
-	    (cd test && $(MAKE) local-$$target) || exit 1; \
-	fi; \
+	case $$otarget in *clean) \
+	    if test -d "test"; then \
+	        echo "Making local-$$otarget in test"; \
+	        (cd test && $(MAKE) local-$$otarget) || exit 1; \
+	    fi ;; \
+	esac; \
 	if test -d "build"; then \
-	    echo "Making $$target in build"; \
-	    (cd build && $(MAKE) local-$$target) || exit 1; \
+	    echo "Making local-$$otarget in build"; \
+	    (cd build && $(MAKE) local-$$otarget) || exit 1; \
 	fi
 
 local-clean: x-local-clean
