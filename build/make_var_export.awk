@@ -1,4 +1,5 @@
-# Based on Ryan Bloom's make_export.pl
+# Based on apr's make_export.awk, which is
+# based on Ryan Bloom's make_export.pl
 
 /^#[ \t]*if(def)? (AP[RU]?_|!?defined).*/ {
 	if (old_filename != FILENAME) {
@@ -12,14 +13,14 @@
 	macro_stack[macro_no++] = macro
 	macro = substr($0, length($1)+2)
 	count++
-	line = line macro "\n"
+	line = line "#ifdef " macro "\n"
 	next
 }
 
 /^#[ \t]*endif/ {
 	if (count > 0) {
 		count--
-		line = line "/" macro "\n"
+		line = line "#endif /* " macro " */\n"
 		macro = macro_stack[--macro_no]
 	}
 	if (count == 0) {
@@ -46,18 +47,11 @@ function add_symbol (sym_name) {
 	}
 }
 
-/^[ \t]*(AP[RU]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?([A-Za-z0-9_]+)\(/ {
-	sub("^[ \t]*(AP[UR]?_DECLARE[^(]*[(])?(const[ \t])?[a-z_]+[ \t\*]*[)]?[ \t]+[*]?", "");
-	sub("[(].*", "");
-	add_symbol($0);
-	next
-}
-
-/^[ \t]*AP_DECLARE_HOOK[(][^,]+,[a-z_]+,.+[)]$/ {
-	split($0, args, ",");
-	add_symbol("ap_hook_" args[2]);
-	add_symbol("ap_hook_get_" args[2]);
-	add_symbol("ap_run_" args[2]);
+/^[ \t]*AP[RU]?_DECLARE_DATA .*;$/ {
+       varname = $NF;
+       gsub( /[*;]/, "", varname);
+       gsub( /\[.*\]/, "", varname);
+       add_symbol(varname);
 }
 
 END {

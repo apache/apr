@@ -12,7 +12,9 @@ Debug
 Release
 *.opt
 *.plg
-apr.exports
+apr.exp
+exports.c
+export_vars.h
 .libs
 *.la
 libapr.rc
