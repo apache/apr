@@ -63,7 +63,17 @@
 #include "internal_time.h"
 
 
-//static int initialized = 0;
+APR_DECLARE(apr_status_t) apr_app_main(int *argc, char ***argv, char ***env)
+{
+    /* An absolute noop.  At present, only Win32 requires this stub, but it's
+     * required in order to move command arguments passed through the service
+     * control manager into the process, and it's required to fix the char*
+     * data passed in from local/wide codepage into utf-8, our internal fmt.
+     *
+     * Win32 declares it's implementation in misc/win32/apr_app.c
+     */
+    return APR_SUCCESS;
+}
 
 APR_DECLARE(apr_status_t) apr_initialize(void)
 {
