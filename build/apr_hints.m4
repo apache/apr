@@ -137,7 +137,11 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-freebsd*)
         APR_SETIFNULL(apr_lock_method, [USE_FLOCK_SERIALIZE])
-        os_version=`sysctl -n kern.osreldate`
+        if test -x /sbin/sysctl; then
+            os_version=`sysctl -n kern.osreldate`
+        else
+            os_version=000000
+        fi
         # 502102 is when libc_r switched to libpthread (aka libkse).
         if test $os_version -ge "502102"; then
           apr_cv_pthreads_cflags="none"
