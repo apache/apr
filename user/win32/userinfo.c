@@ -186,6 +186,7 @@ APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *use
     for (fixch = *dirname; *fixch; ++fixch)
         if (*fixch == '\\')
             *fixch = '/';
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
