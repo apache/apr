@@ -61,7 +61,8 @@
 #include "apr_lib.h"
 #include "test_apr.h"
 
-#define FILENAME "data/file_datafile.txt"
+#define DIRNAME "data"
+#define FILENAME DIRNAME "/file_datafile.txt"
 #define TESTSTR  "This is the file data file."
 
 #define TESTREAD_BLKSIZE 1024
@@ -79,14 +80,26 @@ static void test_open_noreadwrite(CuTest *tc)
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
     CuAssertTrue(tc, rv != APR_SUCCESS);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
-#if 0
-    /* I consider this a bug, if we are going to return an error, we shouldn't
-     * allocate the file pointer.  But, this would make us fail the text, so
-     * I am commenting it out for now.
-     */
     CuAssertPtrEquals(tc, NULL, thefile); 
-#endif
-    apr_file_close(thefile);
+    if (thefile) {
+        apr_file_close(thefile);
+    }
+}
+
+static void test_open_dir_read(CuTest *tc)
+{
+    apr_status_t rv;
+    apr_file_t *thedir = NULL;
+
+    rv = apr_file_open(&thedir, DIRNAME, 
+                       APR_READ, 
+                       APR_UREAD | APR_UWRITE | APR_GREAD, p);
+    CuAssertTrue(tc, rv != APR_SUCCESS);
+    CuAssertIntEquals(tc, 1, APR_STATUS_IS_EACCES(rv));
+    CuAssertPtrEquals(tc, NULL, thedir);
+    if (thedir) {
+        apr_file_close(thedir);
+    }
 }
 
 static void test_open_excl(CuTest *tc)
@@ -99,17 +112,7 @@ static void test_open_excl(CuTest *tc)
                        APR_UREAD | APR_UWRITE | APR_GREAD, p);
     CuAssertTrue(tc, rv != APR_SUCCESS);
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EEXIST(rv));
-#if 0
-    /* I consider this a bug, if we are going to return an error, we shouldn't
-     * allocate the file pointer.  But, this would make us fail the text, so
-     * I am commenting it out for now.
-     */
     CuAssertPtrEquals(tc, NULL, thefile); 
-#endif
-    /* And this too is a bug... Win32 (correctly) does not allocate
-     * an apr_file_t, and (correctly) returns NULL.  Closing objects
-     * that failed to open is invalid.  Apparently someone is doing so.
-     */
     if (thefile) {
         apr_file_close(thefile);
     }
@@ -526,6 +529,7 @@ CuSuite *testfile(void)
     CuSuite *suite = CuSuiteNew("File I/O");
 
     SUITE_ADD_TEST(suite, test_open_noreadwrite);
+    SUITE_ADD_TEST(suite, test_open_dir_read);
     SUITE_ADD_TEST(suite, test_open_excl);
     SUITE_ADD_TEST(suite, test_open_read);
     SUITE_ADD_TEST(suite, test_open_readwrite);
