@@ -60,12 +60,13 @@
 /* man libtool(1) documents ranlib option of -c.  */
 #  define RANLIB "ranlib"
 #  define PIC_FLAG "-fPIC -fno-common"
-#  define RPATH "-rpath"
 #  define SHARED_OPTS "-dynamiclib"
 #  define MODULE_OPTS "-bundle"
 #  define DYNAMIC_LINK_OPTS "-flat_namespace -undefined suppress"
 #  define dynamic_link_version_func darwin_dynamic_link_function
 #  define DYNAMIC_INSTALL_NAME "-install_name"
+#  define DYNAMIC_LINK_NO_INSTALL "-dylib_file"
+#  define HAS_REALPATH
 /*-install_name  /Users/jerenk/apache-2.0-cvs/lib/libapr.0.dylib -compatibility_version 1 -current_version 1.0 */
 #  define LD_LIBRARY_PATH "DYLD_LIBRARY_PATH"
 #endif
@@ -86,6 +87,27 @@
 #  define DYNAMIC_LINK_OPTS "-export-dynamic"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #  define ADD_MINUS_L
+#  define LD_RUN_PATH "LD_RUN_PATH"
+#  define LD_LIBRARY_PATH "LD_LIBRARY_PATH"
+#endif
+
+#if defined(sun)
+#  define SHELL_CMD  "/bin/sh"
+#  define DYNAMIC_LIB_EXT "so"
+#  define MODULE_LIB_EXT  "so"
+#  define STATIC_LIB_EXT "a"
+#  define OBJECT_EXT     "o"
+#  define LIBRARIAN      "ar"
+#  define LIBRARIAN_OPTS "cr"
+#  define RANLIB "ranlib"
+#  define PIC_FLAG "-KPIC"
+#  define RPATH "-R"
+#  define SHARED_OPTS "-G"
+#  define MODULE_OPTS "-G"
+#  define DYNAMIC_LINK_OPTS ""
+#  define LINKER_FLAG_NO_EQUALS
+#  define ADD_MINUS_L
+#  define HAS_REALPATH
 #  define LD_RUN_PATH "LD_RUN_PATH"
 #  define LD_LIBRARY_PATH "LD_LIBRARY_PATH"
 #endif
@@ -196,6 +218,7 @@ typedef struct {
     int dry_run;
     enum pic_mode_e pic_mode;
     int export_dynamic;
+    int no_install;
 } options_t;
 
 typedef struct {
@@ -523,6 +546,10 @@ int parse_short_opt(char *arg, command_t *cmd_data)
     }
 
     if (cmd_data->mode == mLink) {
+        if (strcmp(arg, "no-install") == 0) {
+            cmd_data->options.no_install = 1;
+            return 1;
+        }
         if (arg[0] == 'L' || arg[0] == 'l') {
             /* Hack... */
             arg--;
@@ -786,30 +813,67 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
     return NULL;
 }
 
-/* Read the final install location and add it to runtime library search path. */
-#ifdef RPATH
-void add_rpath(count_chars *cc, const char *arg)
+char * load_install_path(const char *arg)
 {
     FILE *f;
-    char path[256];
-    char *tmp;
-    int size=0;
+    char *path;
+
+    path = malloc(PATH_MAX);
 
     f = fopen(arg,"r");
     if (f == NULL) {
-        return;
+        return NULL;
     }
-    fgets(path,sizeof(path), f);
+    fgets(path, PATH_MAX, f);
     fclose(f);
     if (path[strlen(path)-1] == '\n') {
         path[strlen(path)-1] = '\0';
     }
-    /* Check that we have an absolut path.
+    /* Check that we have an absolute path.
      * Otherwise the file could be a GNU libtool file.
      */
     if (path[0] != '/') {
-        return;
+        return NULL;
     }
+    return path;
+}
+
+char * load_noinstall_path(const char *arg, int pathlen)
+{
+    char *newarg, *expanded_path;
+    int newpathlen;
+
+    newarg = (char *)malloc(strlen(arg) + 10);
+    strcpy(newarg, arg);
+    newarg[pathlen] = 0;
+
+    newpathlen = pathlen;
+    strcat(newarg, ".libs");
+    newpathlen += sizeof(".libs") - 1;
+    newarg[newpathlen] = 0;
+
+#ifdef HAS_REALPATH
+    expanded_path = malloc(PATH_MAX);
+    expanded_path = realpath(newarg, expanded_path);
+    /* Uh, oh.  There was an error.  Fall back on our first guess. */
+    if (!expanded_path) {
+        expanded_path = newarg;
+    }
+#else
+    /* We might get ../ or something goofy.  Oh, well. */
+    expanded_path = newarg;
+#endif
+
+    return expanded_path;
+}
+
+/* Read the final install location and add it to runtime library search path. */
+#ifdef RPATH
+void add_rpath(count_chars *cc, const char *path)
+{
+    int size = 0;
+    char *tmp;
+
 #ifdef LINKER_FLAG_PREFIX
     size = strlen(LINKER_FLAG_PREFIX);
 #endif
@@ -819,17 +883,86 @@ void add_rpath(count_chars *cc, const char *arg)
         return;
     }
 #ifdef LINKER_FLAG_PREFIX
-    strcpy(tmp, LINKER_FLAG_PREFIX); 
+    strcpy(tmp, LINKER_FLAG_PREFIX);
     strcat(tmp, RPATH);
 #else
     strcpy(tmp, RPATH);
 #endif
+#ifndef LINKER_FLAG_NO_EQUALS
     strcat(tmp, "=");
+#endif
     strcat(tmp, path);
-    
+
     push_count_chars(cc, tmp);
 }
+
+void add_rpath_file(count_chars *cc, const char *arg)
+{
+    const char *path;
+
+    path = load_install_path(arg);
+    if (path) {
+        add_rpath(cc, path);
+    }
+}
+
+void add_rpath_noinstall(count_chars *cc, const char *arg, int pathlen)
+{
+    const char *path;
+
+    path = load_noinstall_path(arg, pathlen);
+    if (path) {
+        add_rpath(cc, path);
+    }
+}
 #endif
+
+void add_dylink_noinstall(count_chars *cc, const char *arg, int pathlen,
+                          int extlen)
+{
+    const char *install_path, *current_path, *name;
+    char *exp_argument;
+    int i_p_len, c_p_len, name_len, dyext_len, cur_len;
+
+    install_path = load_install_path(arg);
+    current_path = load_noinstall_path(arg, pathlen);
+
+    if (!install_path || !current_path) {
+        return;
+    }
+
+    push_count_chars(cc, DYNAMIC_LINK_NO_INSTALL);
+
+    i_p_len = strlen(install_path);
+    c_p_len = strlen(current_path);
+
+    name = arg+pathlen;
+    name_len = extlen-pathlen;
+    dyext_len = sizeof(DYNAMIC_LIB_EXT) - 1;
+
+    /* No, we need to replace the extension. */
+    exp_argument = (char *)malloc(i_p_len + c_p_len + (name_len*2) +
+                                  (dyext_len*2) + 2);
+
+    cur_len = 0;
+    strcpy(exp_argument, install_path);
+    cur_len += i_p_len;
+    exp_argument[cur_len++] = '/';
+    strncpy(exp_argument+cur_len, name, extlen-pathlen);
+    cur_len += name_len;
+    strcpy(exp_argument+cur_len, DYNAMIC_LIB_EXT);
+    cur_len += dyext_len;
+    exp_argument[cur_len++] = ':';
+    strcpy(exp_argument+cur_len, current_path);
+    cur_len += c_p_len;
+    exp_argument[cur_len++] = '/';
+    strncpy(exp_argument+cur_len, name, extlen-pathlen);
+    cur_len += name_len;
+    strcpy(exp_argument+cur_len, DYNAMIC_LIB_EXT);
+    cur_len += dyext_len;
+
+    push_count_chars(cc, exp_argument);
+}
 
 /* use -L -llibname to allow to use installed libraries */
 void add_minus_l(count_chars *cc, const char *arg)
@@ -935,11 +1068,30 @@ int parse_input_file_name(char *arg, command_t *cmd_data)
 #else
             push_count_chars(cmd_data->shared_opts.dependencies, newarg);
 #endif
-#ifdef RPATH
             if (libtype == type_DYNAMIC_LIB) {
-                 add_rpath(cmd_data->shared_opts.dependencies, arg);
-            }
+                if (cmd_data->options.no_install) {
+#ifdef RPATH
+                    add_rpath_noinstall(cmd_data->shared_opts.dependencies,
+                                        arg, pathlen);
 #endif
+#ifdef DYNAMIC_LINK_NO_INSTALL
+                    /*
+                     * This doesn't work as Darwin's linker has no way to
+                     * override at link-time the search paths for a
+                     * non-installed library.
+                     */
+                    /*
+                    add_dylink_noinstall(cmd_data->shared_opts.dependencies,
+                                         arg, pathlen, ext - arg);
+                    */
+#endif
+                }
+                else {
+#ifdef RPATH
+                    add_rpath_file(cmd_data->shared_opts.dependencies, arg);
+#endif
+                }
+            }
             break;
         case mInstall:
             /* If we've already recorded a library to install, we're most
@@ -1583,7 +1735,7 @@ int ensure_fake_uptodate(command_t *cmd_data)
     touch_args[2] = NULL;
     return external_spawn(cmd_data, "touch", touch_args);
 }
-#ifdef RPATH
+
 /* Store the install path in the *.la file */
 int add_for_runtime(command_t *cmd_data)
 {
@@ -1603,7 +1755,6 @@ int add_for_runtime(command_t *cmd_data)
         return(ensure_fake_uptodate(cmd_data));
     }
 }
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -1646,11 +1797,7 @@ int main(int argc, char *argv[])
     rc = run_mode(&cmd_data);
 
     if (!rc) {
-#ifdef RPATH
        add_for_runtime(&cmd_data); 
-#else
-       ensure_fake_uptodate(&cmd_data);
-#endif
     }
 
     cleanup_tmp_dirs(&cmd_data);
