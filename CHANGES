@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Fix bug in Darwin DSO code.  [Sander Temme <sctemme@covalent.net>]
+
   *) Fix apr_setup_signal_thread() to grab the right error code from
      a sigprocmask() failure.  This only affects platforms that use
      sigprocmask() in lieu of pthread_sigmask().  [Jeff Trawick]

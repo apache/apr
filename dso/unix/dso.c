@@ -209,6 +209,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
         handle->errormsg = "cannot resolve symbol";
 	return APR_EINIT;
     }
+    *ressym = retval;
     return APR_SUCCESS;
 #elif defined(DSO_USE_DLFCN)
 
