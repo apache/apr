@@ -35,6 +35,9 @@ fi
 AC_SUBST(top_builddir)
 
 dnl Directory containing apr build macros, helpers, and make rules
+dnl NOTE: make rules (rules.mk) will be in the builddir for vpath
+dnl
+apr_buildout=$abs_builddir/build
 apr_builders=$abs_srcdir/build
 AC_SUBST(apr_builders)
 
@@ -945,14 +948,14 @@ case "$host_alias" in
 *bsdi*)
     # Check whether they've installed GNU make
     if make --version > /dev/null 2>&1; then 
-	INCLUDE_RULES="include $apr_builders/rules.mk"
+	INCLUDE_RULES="include $apr_buildout/rules.mk"
     else
 	# BSDi make
-	INCLUDE_RULES=".include \"$apr_builders/rules.mk\""
+	INCLUDE_RULES=".include \"$apr_buildout/rules.mk\""
     fi
     ;;
 *)
-    INCLUDE_RULES="include $apr_builders/rules.mk"
+    INCLUDE_RULES="include $apr_buildout/rules.mk"
     ;;
 esac
 AC_SUBST(INCLUDE_RULES)
