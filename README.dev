@@ -1,13 +1,15 @@
 Apache Portable Runtime
 =======================
 
-Right now, if you are building APR, it means that you are probably a
-developer.  If you are building it as a standalone package, however,
-this means using a slightly non-standard build process.  
+If you are building APR from CVS, you need to use a slightly non-standard
+build process.  You must have autoconf and libtool installed for this to
+work.  There are three steps:
 
 1) ./buildconf
 2) ./configure
 3) make
 
-Currently, there is no make install step, as APR is not yet
-installable.
+If you are building APR from a distribution tarball, buildconf will have
+already been run for you, and you therefore do not need to have either
+autoconf or libtool installed, and you do not need to run buildconf.  Skip
+step one above and just run configure then make.
