@@ -63,6 +63,7 @@
 
 #include "apr_general.h"
 #include "apr_pools.h"
+#include "apr_tables.h"
 #include "apr_lib.h"
 #include "misc.h"
 #ifdef HAVE_STDLIB_H

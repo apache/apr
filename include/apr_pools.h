@@ -92,28 +92,6 @@ struct process_chain {
     struct process_chain *next;
 };
 
-struct ap_table_t {
-    /* This has to be first to promote backwards compatibility with
-     * older modules which cast a ap_table_t * to an ap_array_header_t *...
-     * they should use the table_elts() function for most of the
-     * cases they do this for.
-     */
-    ap_array_header_t a;
-#ifdef MAKE_TABLE_PROFILE
-    void *creator;
-#endif
-};
-
-/*
- * Tables.  Implemented alist style, for now, though we try to keep
- * it so that imposing a hash table structure on top in the future
- * wouldn't be *too* hard...
- *
- * Note that key comparisons for these are case-insensitive, largely
- * because that's what's appropriate and convenient everywhere they're
- * currently being used...
- */
-
 ap_status_t ap_init_alloc(void);	/* Set up everything */
 void        ap_term_alloc(void);        /* Tear down everything */
 
@@ -213,14 +191,6 @@ extern int raise_sigstop_flags;
 #endif
 
 
-
-/* XXX: these know about the definition of struct ap_table_t in alloc.c.  That
- * definition is not here because it is supposed to be private, and by not
- * placing it here we are able to get compile-time diagnostics from modules
- * written which assume that a ap_table_t is the same as an ap_array_header_t. -djg
- */
-#define ap_table_elts(t) ((ap_array_header_t *)(t))
-#define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
 
 /* magic numbers --- min free bytes to consider a free ap_pool_t block useable,
  * and the min amount to allocate if we have to go to malloc() */
