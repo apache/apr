@@ -126,6 +126,8 @@ typedef enum {
 #if APR_HAVE_INET_ADDR
 #define apr_inet_addr    inet_addr
 #elif APR_HAVE_INET_NETWORK        /* only DGUX, as far as I know */
+/* not generally safe... inet_network() and inet_addr() perform
+ * different functions */
 #define apr_inet_addr    inet_network
 #endif
 
@@ -138,7 +140,7 @@ typedef struct in_addr          apr_in_addr_t;
 typedef apr_uint16_t            apr_port_t;
 
 /* we're going to roll our own sockaddr type as we want to make sure
- * we have protocol independance for APR...
+ * we have protocol independence for APR...
  *
  * It's defined here as I think it should all be platform safe...
  */
