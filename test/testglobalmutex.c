@@ -19,10 +19,11 @@
 #include "apr_errno.h"
 #include "testutil.h"
 
-static void launch_child(abts_case *tc, apr_proc_t *proc, apr_pool_t *p)
+static void launch_child(abts_case *tc, apr_lockmech_e mech,
+                         apr_proc_t *proc, apr_pool_t *p)
 {
     apr_procattr_t *procattr;
-    const char *args[2];
+    const char *args[3];
     apr_status_t rv;
 
     rv = apr_procattr_create(&procattr, p);
@@ -36,7 +37,8 @@ static void launch_child(abts_case *tc, apr_proc_t *proc, apr_pool_t *p)
     apr_assert_success(tc, "Couldn't set error check in procattr", rv);
 
     args[0] = "globalmutexchild" EXTENSION;
-    args[1] = NULL;
+    args[1] = (const char*)apr_itoa(p, (int)mech);
+    args[2] = NULL;
     rv = apr_proc_create(proc, "./globalmutexchild" EXTENSION, args, NULL,
             procattr, p);
     apr_assert_success(tc, "Couldn't launch program", rv);
@@ -54,21 +56,20 @@ static int wait_child(abts_case *tc, apr_proc_t *proc)
     return exitcode;
 }
 
-static void test_exclusive(abts_case *tc, void *data)
+static void test_exclusive(abts_case *tc, void *data, apr_lockmech_e mech)
 {
     apr_proc_t p1, p2, p3, p4;
     apr_status_t rv;
     apr_global_mutex_t *global_lock;
     int x = 0;
  
-    rv = apr_global_mutex_create(&global_lock, LOCKNAME, APR_LOCK_DEFAULT, p);
+    rv = apr_global_mutex_create(&global_lock, LOCKNAME, mech, p);
     apr_assert_success(tc, "Error creating mutex", rv);
 
-
-    launch_child(tc, &p1, p);
-    launch_child(tc, &p2, p);
-    launch_child(tc, &p3, p);
-    launch_child(tc, &p4, p);
+    launch_child(tc, mech, &p1, p);
+    launch_child(tc, mech, &p2, p);
+    launch_child(tc, mech, &p3, p);
+    launch_child(tc, mech, &p4, p);
  
     x += wait_child(tc, &p1);
     x += wait_child(tc, &p2);
@@ -78,11 +79,56 @@ static void test_exclusive(abts_case *tc, void *data)
     ABTS_INT_EQUAL(tc, MAX_COUNTER, x);
 }
 
+static void test_exclusive_default(abts_case *tc, void *data)
+{
+    test_exclusive(tc, data, APR_LOCK_DEFAULT);
+}
+
+static void test_exclusive_posixsem(abts_case *tc, void *data)
+{
+    test_exclusive(tc, data, APR_LOCK_POSIXSEM);
+}
+
+static void test_exclusive_sysvsem(abts_case *tc, void *data)
+{
+    test_exclusive(tc, data, APR_LOCK_SYSVSEM);
+}
+
+static void test_exclusive_proc_pthread(abts_case *tc, void *data)
+{
+    test_exclusive(tc, data, APR_LOCK_PROC_PTHREAD);
+}
+
+static void test_exclusive_fcntl(abts_case *tc, void *data)
+{
+    test_exclusive(tc, data, APR_LOCK_FCNTL);
+}
+
+static void test_exclusive_flock(abts_case *tc, void *data)
+{
+    test_exclusive(tc, data, APR_LOCK_FLOCK);
+}
+
 abts_suite *testglobalmutex(abts_suite *suite)
 {
     suite = ADD_SUITE(suite)
 
-    abts_run_test(suite, test_exclusive, NULL);
+    abts_run_test(suite, test_exclusive_default, NULL);
+#if APR_HAS_POSIXSEM_SERIALIZE
+    abts_run_test(suite, test_exclusive_posixsem, NULL);
+#endif
+#if APR_HAS_SYSVSEM_SERIALIZE
+    abts_run_test(suite, test_exclusive_sysvsem, NULL);
+#endif
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
+    abts_run_test(suite, test_exclusive_proc_pthread, NULL);
+#endif
+#if APR_HAS_FCNTL_SERIALIZE
+    abts_run_test(suite, test_exclusive_fcntl, NULL);
+#endif
+#if APR_HAS_FLOCK_SERIALIZE
+    abts_run_test(suite, test_exclusive_flock, NULL);
+#endif
 
     return suite;
 }
