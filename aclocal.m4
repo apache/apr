@@ -183,7 +183,7 @@ socklen_t foo = (socklen_t) 0;
 ])
 ])
 
-if test "$ac_cv_socklen_t" = "no"; then
-  AC_DEFINE(socklen_t, unsigned int, [Whether you have socklen_t])
+if test "$ac_cv_socklen_t" = "yes"; then
+  AC_DEFINE(HAVE_SOCKLEN_T, 1, [Whether you have socklen_t])
 fi
 ])

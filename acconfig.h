@@ -78,4 +78,8 @@ Sigfunc *ap_signal(int signo, Sigfunc * func);
 #define strcasecmp(s1,s2) stricmp(s1,s2)
 #endif
 
+#if !defined(HAVE_SOCKLEN_T)
+typedef int socklen_t;
+#endif
+
 #endif /* APR_CONFIG_H */
