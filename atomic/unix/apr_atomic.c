@@ -175,6 +175,31 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 
 #endif /* (__linux__ || __EMX__ || __FreeBSD__) && __i386__ */
 
+#if defined(__PPC__) && defined(__GNUC__) && !APR_FORCE_ATOMIC_GENERIC
+APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
+                                           apr_uint32_t swap,
+                                           apr_uint32_t cmp)
+{
+    apr_uint32_t prev;
+                                                                                
+    asm volatile ("retry:\n\t"
+                  "lwarx  %0,0,%1\n\t"       /* load prev and reserve */
+                  "cmpw   %0,%3\n\t"         /* does it match cmp?    */
+                  "bne-   exit\n\t"          /* ...no, bail out       */
+                  "stwcx. %2,0,%1\n\t"       /* ...yes, conditionally
+                                                store swap            */
+                  "bne-  retry\n\t"          /* start over if we lost
+                                                the reservation       */
+                  "exit:"
+                  : "=&r"(prev)                        /* output      */
+                  : "r" (mem), "r" (swap), "r"(cmp)    /* inputs      */
+                  : "memory");                         /* clobbered   */
+    return prev;
+}
+#define APR_OVERRIDE_ATOMIC_CAS32
+
+#endif /* __PPC__ && __GNUC__ */
+
 #if !defined(apr_atomic_init) && !defined(APR_OVERRIDE_ATOMIC_INIT)
 
 #if APR_HAS_THREADS
