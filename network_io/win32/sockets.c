@@ -224,9 +224,9 @@ APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 }
 
 APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
-                                     apr_pool_t *connection_context)
+                                     apr_pool_t *p)
 {
-    alloc_socket(new, connection_context);
+    alloc_socket(new, p);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
 
     (*new)->timeout = -1;   
@@ -274,8 +274,7 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
 
 APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 {
-    apr_status_t lasterror;
-    fd_set temp;
+    apr_status_t rv;;
 
     if ((sock->sock == INVALID_SOCKET) || (!sock->local_addr)) {
         return APR_ENOTSOCK;
@@ -283,18 +282,35 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 
     if (connect(sock->sock, (const struct sockaddr *)&sa->sa.sin,
                 sa->salen) == SOCKET_ERROR) {
-        lasterror = apr_get_netos_error();
-        if (lasterror != APR_FROM_OS_ERROR(WSAEWOULDBLOCK)) {
-            return lasterror;
+        struct timeval tv, *tvptr;
+        fd_set fdset;
+
+        rv = apr_get_netos_error();
+        if (rv != APR_FROM_OS_ERROR(WSAEWOULDBLOCK)) {
+            return rv;
         }
-        /* wait for the connect to complete */
-        FD_ZERO(&temp);
-        FD_SET(sock->sock, &temp);
-        /* the select(nfds, ...) nfds arg is ignored 
-         * we don't have a bit table for fd_set on Win32,
-         * we have a messy dynamic crossref table.
-         */
-        if (select(FD_SETSIZE+1, NULL, &temp, NULL, NULL) == SOCKET_ERROR) {
+
+        if (sock->timeout == 0) {
+            /* Tell the app that the connect is in progress...
+             * Gotta play some games here.  connect on Unix will return 
+             * EINPROGRESS under the same circumstances that Windows 
+             * returns WSAEWOULDBLOCK. Do some adhoc canonicalization...
+             */
+            return APR_FROM_OS_ERROR(WSAEINPROGRESS);
+        }
+
+        /* wait for the connect to complete or timeout */
+        FD_ZERO(&fdset);
+        FD_SET(sock->sock, &fdset);
+        if (sock->timeout < 0) {
+            tvptr = NULL;
+        }
+        else {
+            tv.tv_sec = sock->timeout / APR_USEC_PER_SEC;
+            tv.tv_usec = sock->timeout % APR_USEC_PER_SEC;
+            tvptr = &tv;
+        }
+        if (select(FD_SETSIZE+1, NULL, &fdset, NULL, tvptr) == SOCKET_ERROR) {
             return apr_get_netos_error();
         }
     }
