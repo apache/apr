@@ -119,7 +119,7 @@ char *unicode_to_utf8_path(const apr_wchar_t* srcstr, apr_pool_t *p)
      * allows '/' path seperators, and APR always uses '/'s.
      */
     int srcremains = wcslen(srcstr) + 1;
-    int retremains = (srcremains - 5) * 3 + 1;
+    int retremains = (srcremains - 1) * 3 + 1;
     char *t, *retstr;
     if (srcstr[0] == L'\\' && srcstr[1] == L'\\' && 
         srcstr[2] == L'?'  && srcstr[3] == L'\\') {
