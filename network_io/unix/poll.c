@@ -180,8 +180,8 @@ apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset,
         return APR_NOTFOUND;
     } 
     newevents = get_event(events);
-    if (aprset->events[i] & newevents) {
-        aprset->events[i] ^= newevents;
+    if (aprset->pollset[i].events & newevents) {
+        aprset->pollset[i].events ^= newevents;
     }
 
     return APR_SUCCESS;
