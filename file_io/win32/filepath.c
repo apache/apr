@@ -706,8 +706,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 return APR_EBADPATH;
 #endif
 
-            /* backpath (../) */
-            if (pathlen <= rootlen) 
+            /* backpath (../) when an absolute path is given */
+            if (rootlen && (pathlen <= rootlen)) 
             {
                 /* Attempt to move above root.  Always die if the 
                  * APR_FILEPATH_SECUREROOTTEST flag is specified.
@@ -736,9 +736,14 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                  */
                 if (pathlen + 3 >= sizeof(path))
                     return APR_ENAMETOOLONG;
-                memcpy(path + pathlen, ((flags && APR_FILEPATH_NATIVE) 
+                memcpy(path + pathlen, ((flags & APR_FILEPATH_NATIVE) 
                                           ? "..\\" : "../"), 3);
                 pathlen += 3;
+                /* The 'root' part of this path now includes the ../ path,
+                 * because that backpath will not be parsed by the truename
+                 * code below.
+                 */
+                keptlen = pathlen;
             }
             else 
             {
@@ -748,16 +753,16 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                     --pathlen;
                 } while (pathlen && path[pathlen - 1] != '/'
                                  && path[pathlen - 1] != '\\');
-            }
 
-            /* Now test if we are above where we started and back up
-             * the keptlen offset to reflect the added/altered path.
-             */
-            if (pathlen < keptlen) 
-            {
-                if (flags & APR_FILEPATH_SECUREROOTTEST)
-                    return APR_EABOVEROOT;
-                keptlen = pathlen;
+                /* Now test if we are above where we started and back up
+                 * the keptlen offset to reflect the added/altered path.
+                 */
+                if (pathlen < keptlen) 
+                {
+                    if (flags & APR_FILEPATH_SECUREROOTTEST)
+                        return APR_EABOVEROOT;
+                    keptlen = pathlen;
+                }
             }
         }
         else /* not empty or dots */
