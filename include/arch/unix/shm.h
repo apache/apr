@@ -84,6 +84,12 @@
 #include <sys/file.h>
 #endif
 
+/* Not all systems seem to have MAP_FAILED defined, but it should always
+ * just be (void *)-1. */
+#ifndef MAP_FAILED
+#define MAP_FAILED ((void *)-1)
+#endif
+
 struct apr_shm_t {
     apr_pool_t *pool;
     void *base;          /* base real address */
