@@ -53,6 +53,7 @@
  */
 
 #include "beos/locks.h"
+#include "apr_strings.h"
 
 apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
                            apr_lockscope_e scope, const char *fname, 
