@@ -222,9 +222,6 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
     int hash;
     apr_ssize_t i;
 
-    if (klen == APR_HASH_KEY_STRING)
-	klen = strlen(key);
-
     /*
      * This is the popular `times 33' hash algorithm which is used by
      * perl and also appears in Berkeley DB. This is one of the best
@@ -263,8 +260,17 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
      *                  -- Ralf S. Engelschall <rse@engelschall.com>
      */
     hash = 0;
-    for (p = key, i = klen; i; i--, p++)
-	hash = hash * 33 + *p;
+    if (klen == APR_HASH_KEY_STRING) {
+        for (p = key; *p; p++) {
+            hash = hash * 33 + *p;
+        }
+        klen = p - (const unsigned char *)key;
+    }
+    else {
+        for (p = key, i = klen; i; i--, p++) {
+            hash = hash * 33 + *p;
+        }
+    }
     
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;

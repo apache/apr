@@ -1312,7 +1312,7 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key, ap
     if (cont->prog_data == NULL)
         *data = NULL;
     else
-        *data = apr_hash_get(cont->prog_data, key, strlen(key));
+        *data = apr_hash_get(cont->prog_data, key, APR_HASH_KEY_STRING);
     return APR_SUCCESS;
 }
 
