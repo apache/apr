@@ -117,6 +117,8 @@ ap_status_t ap_recv(ap_socket_t *, char *, ap_ssize_t *, time_t);
 
 ap_status_t ap_setsocketopt(ap_socket_t *, ap_int32_t, ap_int32_t);
 ap_status_t ap_setport(ap_socket_t *, ap_uint32_t);
+ap_status_t ap_setipaddr(ap_socket_t *, const char *);
+ap_status_t ap_getport(ap_socket_t *, ap_uint32_t *);
 
 ap_status_t ap_setup_poll(ap_context_t *, ap_int32_t, ap_pollfd_t **);
 ap_status_t ap_poll(ap_pollfd_t *, ap_int32_t *, ap_int32_t);

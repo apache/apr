@@ -68,10 +68,8 @@
  * arg 2) The buffer which contains the data to be sent. 
  * arg 3) The maximum number of bytes to send 
  * arg 4) The amount of time in seconds to try sending this data. 
- * NOTE: The number of bytes actually sent is stored in argument 3.  It is
- *       not currently possible to have this behave like a blocking write.  
- *       If the timeout is zero, it will try to send the data, and return
- *       immediately.
+ * NOTE: The number of bytes actually sent is stored in argument 3.  To have
+ *       this behave like a non-blocking write, us a timeout of -1. 
  */
 ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, time_t sec)
 {
@@ -82,17 +80,22 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sec > 0) {
-        struct timeval tv;
+        struct timeval *tv;
         fd_set fdset;
         int srv;
 
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            tv.tv_sec  = sec;
-            tv.tv_usec = 0;
-
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, &tv);
+            if (sec == -1) {
+                tv = NULL;
+            }
+            else {
+                tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
+                tv->tv_sec  = sec;
+                tv->tv_usec = 0;
+            }
+            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {
@@ -120,10 +123,8 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len, tim
  * arg 2) The buffer to store the data in. 
  * arg 3) The maximum number of bytes to read 
  * arg 4) The amount of time in seconds to try reading data. 
- * NOTE: The number of bytes actually read is stored in argument 3.  It is
- *       not currently possible to have this behave like a blocking read.  
- *       If the timeout is zero, it will try to read data, and return
- *       immediately.
+ * NOTE: The number of bytes actually sent is stored in argument 3.  To have
+ *       this behave like a non-blocking write, us a timeout of -1. 
  */
 ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t sec)
 {
@@ -134,17 +135,23 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len, time_t se
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EAGAIN && sec > 0) {
-        struct timeval tv;
+        struct timeval *tv;
         fd_set fdset;
         int srv;
 
         do {
             FD_ZERO(&fdset);
             FD_SET(sock->socketdes, &fdset);
-            tv.tv_sec  = sec;
-            tv.tv_usec = 0;
+            if (sec == -1) {
+                tv = NULL;
+            }
+            else {
+                tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
+                tv->tv_sec  = sec;
+                tv->tv_usec = 0;
+            }
 
-            srv = select(FD_SETSIZE, &fdset, NULL, NULL, &tv);
+            srv = select(FD_SETSIZE, &fdset, NULL, NULL, tv);
         } while (srv == -1 && errno == EINTR);
 
         if (srv == 0) {
