@@ -79,8 +79,11 @@
 #include "apr_private.h"
 #include "apr_pools.h"
 #include "apr_general.h"
+#include "apr_lock.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
+
+#define APR_FILE_BUFSIZE 4096
 
 /* quick run-down of fields in windows' ap_file_t structure that may have 
  * obvious uses.
@@ -114,6 +117,14 @@ struct ap_file_t {
     ap_time_t atime;
     ap_time_t mtime;
     ap_time_t ctime;
+
+    /* Stuff for buffered mode */
+    char *buffer;
+    int bufpos;               // Read/Write position in buffer
+    unsigned long dataRead;   // amount of valid data read into buffer
+    int direction;            // buffer being used for 0 = read, 1 = write
+    unsigned long filePtr;    // position in file of handle
+    ap_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
 };
 
 struct ap_dir_t {
