@@ -234,10 +234,15 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
 APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len,
                                           apr_pool_t *cont)
 {
-    if (gethostname(buf, len) == -1)
+    if (gethostname(buf, len) == -1) {
+        buf[0] = '\0';
         return apr_get_netos_error();
-    else
-        return APR_SUCCESS;
+    }
+    else if (!memchr(buf, '\0', len)) { /* buffer too small */
+        buf[0] = '\0';
+        return APR_ENAMETOOLONG;
+    }
+    return APR_SUCCESS;
 }
 
 
