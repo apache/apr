@@ -424,7 +424,10 @@ AC_ARG_ENABLE(other-child,
 AC_SUBST(oc) 
 
 AC_MSG_CHECKING(struct rlimit)
-AC_TRY_RUN([#include <sys/resource.h>
+AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 main()
 {
     struct rlimit limit;
