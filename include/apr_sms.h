@@ -60,8 +60,8 @@
  * May 2001
  */
  
-#ifndef APR_MEMORY_SYSTEM_H
-#define APR_MEMORY_SYSTEM_H
+#ifndef APR_SMS_H
+#define APR_SMS_H
 
 #include "apr.h"
 #include "apr_errno.h"
@@ -77,9 +77,13 @@ extern "C" {
 #define APR_CHILD_CLEANUP     0x0001
 #define APR_PARENT_CLEANUP    0x0002
 
-/* Alignment macro's */
+/* Alignment macro's
+ *
+ * APR_ALIGN is only to be used to align on a power
+ * of two boundary
+ */
 #define APR_ALIGN(size, boundary) \
-    ((size) + (((boundary) - ((size) & ((boundary) - 1))) & ((boundary) - 1)))
+    (((size) + ((boundary) - 1)) & ~((boundary) - 1))
 
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
@@ -162,8 +166,7 @@ APR_DECLARE(void *) apr_sms_realloc(apr_sms_t *sms, void *mem, apr_size_t size);
  * @param sms The memory system to use (should be the same as the
  *        one that returned the block)
  * @param mem The block of memory to be freed
- * @deffunc void apr_sms_free(apr_sms_t *sms,
- *					void *mem)
+ * @deffunc void apr_sms_free(apr_sms_t *sms, void *mem)
  */
 APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms, void *mem);
 
@@ -180,7 +183,7 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *sms, void *mem);
  * @param sms The memory system created
  * @param parent_sms The parent memory system
  * @deffunc apr_status_t apr_sms_init(apr_sms_t *sms,
- *				      apr_sms_t *parent_sms)
+ *                                    apr_sms_t *parent_sms)
  */
 APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms, 
                                        apr_sms_t *parent_sms);
@@ -247,7 +250,7 @@ APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *sms);
  * @param b The memory system to search for
  * @return APR_SUCCESS if a is an ancestor of b, 1 if it isn't
  * @deffunc apr_status_t apr_sms_is_ancestor(apr_sms_t *a,
- *						     apr_sms_t *b)
+ *                                           apr_sms_t *b)
  */
 APR_DECLARE(apr_status_t) apr_sms_is_ancestor(apr_sms_t *a, apr_sms_t *b);
 
@@ -276,7 +279,7 @@ APR_DECLARE(apr_sms_t *) apr_sms_get_parent(apr_sms_t *sms);
  * @param cleanup_fn The function to call when the memory system is reset or
  *        destroyed
  * @deffunc void apr_sms_cleanup_register(apr_sms_t *sms, apr_int32_t type,
- *		   void *data, apr_status_t (*cleanup_fn)(void *));
+ *                   void *data, apr_status_t (*cleanup_fn)(void *));
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms, apr_int32_t type,
                                                    void *data, 
@@ -290,7 +293,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_register(apr_sms_t *sms, apr_int32_t t
  * @param data The data associated with the cleanup function
  * @param cleanup_fn The registered cleanup function
  * @deffunc void apr_sms_cleanup_unregister(apr_sms_t *sms,
- *		   void *data, apr_status_t (*cleanup_fn)(void *));
+ *                   void *data, apr_status_t (*cleanup_fn)(void *));
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms, apr_int32_t type,
                                                      void *data,
@@ -328,7 +331,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms,
  * @param type The category of cleanup functions to run. Pass 0 to run all
  *        cleanup functions.
  * @deffunc apr_status_t apr_sms_cleanup_run_type(apr_sms_t *sms,
- *	           apr_int32_t type);
+ *                                                apr_int32_t type);
  */
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms, 
                                                    apr_int32_t type);
@@ -344,5 +347,5 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms);
 }
 #endif
 
-#endif /* !APR_MEMORY_SYSTEM_H */
+#endif /* !APR_SMS_H */
 
