@@ -59,6 +59,11 @@
 
 struct apr_thread_cond_t {
     apr_pool_t *pool;
+    HANDLE event;
+    HANDLE mutex;
+    int signal_all;
+    int num_waiting;
+    int signalled;
 };
 
 #endif  /* THREAD_COND_H */
