@@ -106,7 +106,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <process.h>
-#include <signal.h>
 #include <stdlib.h>
 
 #define apr_inline
@@ -153,22 +152,23 @@
 #define APR_FILE_BASED_SHM      0
 #define APR_MEM_BASED_SHM       0
 
+#define APR_HAVE_CORKABLE_TCP	0
+#define APR_HAVE_GETRLIMIT      0
 #define APR_HAVE_IN_ADDR        1
 #define APR_HAVE_INET_ADDR	1
 #define APR_HAVE_INET_NETWORK   0
-#define APR_HAVE_UNION_SEMUN    0
-#define APR_HAVE_STRUCT_RLIMIT  0
-#define APR_HAVE_SETRLIMIT      0
-#define APR_HAVE_GETRLIMIT      0
-#define APR_HAVE_STRICMP        1
-#define APR_HAVE_STRNICMP       1
-#define APR_HAVE_STRCASECMP     0
-#define APR_HAVE_STRNCASECMP    0
-#define APR_HAVE_STRDUP         1
-#define APR_HAVE_STRSTR         1
-#define APR_HAVE_MEMMOVE        1
-#define APR_HAVE_BZERO          0
 #define APR_HAVE_IPV6           0
+#define APR_HAVE_MEMMOVE        1
+#define APR_HAVE_SETRLIMIT      0
+#define APR_HAVE_SIGACTION      0
+#define APR_HAVE_STRCASECMP     0
+#define APR_HAVE_STRDUP         1
+#define APR_HAVE_STRICMP        1
+#define APR_HAVE_STRNCASECMP    0
+#define APR_HAVE_STRNICMP       1
+#define APR_HAVE_STRSTR         1
+#define APR_HAVE_STRUCT_RLIMIT  0
+#define APR_HAVE_UNION_SEMUN    0
 
 
 #if APR_HAVE_SYS_TYPES_H
@@ -283,8 +283,6 @@ typedef  int         gid_t;
 
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "\r\n"
-
-#define apr_signal(a,b) signal(a,b)
 
 typedef int apr_wait_t;
 
