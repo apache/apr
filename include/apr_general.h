@@ -195,12 +195,16 @@ APR_DECLARE(apr_status_t) apr_initialize(void);
  * order to deal with platform-specific oddities, such as Win32 services,
  * code pages and signals.  This must be the first function called for any
  * APR program.
- * @deffunc apr_status_t apr_app_initialize(int *argc, char ***argv, char ***env)
+ * @param argc Pointer to the argc that may be corrected
+ * @param argv Pointer to the argv that may be corrected
+ * @param env Pointer to the env that may be corrected, may be NULL
  * @remark See apr_initialize if this is a library consumer of apr.
  * Otherwise, this call is identical to apr_initialize, and must be closed
  * with a call to apr_terminate at the end of program execution.
  */
-APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, char ***argv, char ***env);
+APR_DECLARE(apr_status_t) apr_app_initialize(int *argc, 
+                                             char const * const * *argv, 
+                                             char const * const * *env);
 
 /**
  * Tear down any APR internal data structures which aren't torn down 

@@ -76,7 +76,8 @@
  * These are allocated from the MSVCRT's _CRT_BLOCK to trick the system
  * into trusting our store.
  */
-int apr_wastrtoastr(char ***retarr, const wchar_t **arr, int args)
+int apr_wastrtoastr(char const * const * *retarr, 
+                    wchar_t const * const *arr, int args)
 {
     size_t elesize = 0;
     char **newarr;
