@@ -1399,6 +1399,10 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
     run_cleanups(&pool->cleanups);
     pool->cleanups = NULL;
 
+    /* If new child pools showed up, this is a reason to raise a flag */
+    if (pool->child)
+        abort();
+
     /* Free subprocesses */
     free_proc_chain(pool->subprocesses);
     pool->subprocesses = NULL;
