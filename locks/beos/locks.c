@@ -54,6 +54,7 @@
 
 #include "beos/locks.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 
 apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
                            apr_lockscope_e scope, const char *fname, 
@@ -158,3 +159,30 @@ apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key,
     return apr_set_userdata(data, key, cleanup, lock->cntxt);
 }
 
+apr_status_t apr_get_os_lock(apr_os_lock_t *oslock, apr_lock_t *lock)
+{
+    oslock->sem_interproc = lock->sem_interproc;
+    oslock->sem_intraproc = lock->sem_intraproc;
+    oslock->ben_interproc = lock->ben_interproc;
+    oslock->ben_intraproc = lock->ben_intraproc;
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_put_os_lock(apr_lock_t **lock, apr_os_lock_t *thelock, 
+                           apr_pool_t *cont)
+{
+    if (cont == NULL) {
+        return APR_ENOPOOL;
+    }
+    if ((*lock) == NULL) {
+        (*lock) = (apr_lock_t *)apr_pcalloc(cont, sizeof(apr_lock_t));
+        (*lock)->cntxt = cont;
+    }
+    (*lock)->sem_interproc = thelock->sem_interproc;
+    (*lock)->ben_interproc = thelock->ben_interproc;
+
+    (*lock)->sem_intraproc = thelock->sem_intraproc;
+    (*lock)->ben_intraproc = thelock->ben_intraproc;
+    return APR_SUCCESS;
+}
+    

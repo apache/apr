@@ -53,6 +53,7 @@
  */
 
 #include "threadproc.h"
+#include "apr_strings.h"
 
 struct send_pipe {
 	int in;
@@ -365,3 +366,8 @@ apr_status_t apr_setprocattr_childerr(apr_procattr_t *attr, apr_file_t *child_er
     return APR_SUCCESS;
 }
 
+apr_status_t apr_setprocattr_limit(apr_procattr_t *attr, apr_int32_t what, 
+                          struct rlimit *limit)
+{
+    return APR_ENOTIMPL;
+}
