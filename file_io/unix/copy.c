@@ -74,7 +74,7 @@ static apr_status_t apr_file_transfer_contents(const char *from_path,
     /* Get its size. */
     if (to_perms == APR_FILE_SOURCE_PERMS) {
         status = apr_file_info_get(&finfo, APR_FINFO_PROT, s);
-        if (status) {
+        if (status != APR_SUCCESS && status != APR_INCOMPLETE) {
             apr_file_close(s);  /* toss any error */
             return status;
         }
