@@ -339,6 +339,14 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
 #define apr_atomic_set32(mem, val)        apr_atomic_set(mem, val)
 #define apr_atomic_read32(mem)            apr_atomic_read(mem)
 
+#define apr_atomic_xchg32(mem,val) \
+({ apr_uint32_t prev = val; \
+    asm volatile ("lock; xchgl %0, %1"              \
+         : "=r" (prev)               \
+         : "m" (*(mem)), "0"(prev) \
+         : "memory"); \
+    prev;})
+
 /*#define apr_atomic_init(pool)        APR_SUCCESS*/
 
 #elif defined(__MVS__) /* OS/390 */
