@@ -91,7 +91,8 @@ typedef HANDLE                ap_os_lock_t;
 typedef HANDLE                ap_os_thread_t;
 typedef PROCESS_INFORMATION   ap_os_proc_t;
 typedef DWORD                 ap_os_threadkey_t; 
-typedef SYSTEMTIME            ap_os_time_t;
+typedef FILETIME              ap_os_imp_time_t;
+typedef SYSTEMTIME            ap_os_exp_time_t;
 
 #elif defined(OS2)
 #define INCL_DOS
@@ -103,7 +104,8 @@ typedef HMTX                  ap_os_lock_t;
 typedef TID                   ap_os_thread_t;
 typedef PID                   ap_os_proc_t;
 typedef PULONG                ap_os_threadkey_t; 
-typedef struct timeval        ap_os_time_t;
+typedef struct timeval        ap_os_imp_time_t;
+typedef struct tm             ap_os_exp_time_t;
 
 #elif defined(BEOS)
 #include <kernel/OS.h>
@@ -124,7 +126,8 @@ typedef struct os_lock_t      ap_os_lock_t;
 typedef thread_id             ap_os_thread_t;
 typedef thread_id             ap_os_proc_t;
 typedef int                   ap_os_threadkey_t;
-typedef struct timeval        ap_os_time_t;
+typedef struct timeval        ap_os_imp_time_t;
+typedef struct tm             ap_os_exp_time_t;
 
 #else
 /* Any other OS should go above this one.  This is the lowest common
@@ -173,7 +176,8 @@ typedef pthread_t             ap_os_thread_t;
 typedef pthread_key_t         ap_os_threadkey_t;
 #endif
 typedef pid_t                 ap_os_proc_t;
-typedef struct timeval        ap_os_time_t;
+typedef struct timeval        ap_os_imp_time_t;
+typedef struct tm             ap_os_exp_time_t;
 #endif
 
 ap_status_t ap_get_os_file(ap_os_file_t *, ap_file_t *);     
@@ -181,7 +185,8 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **, ap_dir_t *);
 ap_status_t ap_get_os_sock(ap_os_sock_t *, ap_socket_t *);
 ap_status_t ap_get_os_lock(ap_os_lock_t *, ap_lock_t *);     
 ap_status_t ap_get_os_proc(ap_os_proc_t *, ap_proc_t *);     
-ap_status_t ap_get_os_time(ap_os_time_t **, ap_time_t *);     
+ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **, ap_exploded_time_t *);     
+ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *);     
 #if APR_HAS_THREADS
 ap_status_t ap_get_os_thread(ap_os_thread_t *, ap_thread_t *);
 ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *, ap_key_t *);
@@ -192,7 +197,8 @@ ap_status_t ap_put_os_dir(ap_dir_t **, ap_os_dir_t *, ap_context_t *);
 ap_status_t ap_put_os_sock(ap_socket_t **, ap_os_sock_t *, ap_context_t *);
 ap_status_t ap_put_os_lock(ap_lock_t **, ap_os_lock_t *, ap_context_t *); 
 ap_status_t ap_put_os_proc(ap_proc_t **, ap_os_proc_t *, ap_context_t *); 
-ap_status_t ap_put_os_time(ap_time_t **, ap_os_time_t *, ap_context_t *); 
+ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_context_t *); 
+ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_context_t *); 
 #if APR_HAS_THREADS
 ap_status_t ap_put_os_thread(ap_thread_t **, ap_os_thread_t *, ap_context_t *);
 ap_status_t ap_put_os_threadkey(ap_key_t **, ap_os_threadkey_t *, ap_context_t *);

@@ -223,3 +223,74 @@ ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
     *t = days * AP_USEC_PER_SEC + xt->tm_usec;
     return APR_SUCCESS;
 }
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *)
+ *    Get the imploded time in the platforms native format.
+ * arg 1) the native time format
+ * arg 2) the time to convert
+ */
+ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **ostime, ap_time_t *aprtime)
+{
+    (*ostime)->tv_usec = *aprtime % AP_USEC_PER_SEC;
+    (*ostime)->tv_sec = *aprtime / AP_USEC_PER_SEC;
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **, ap_exploded_time_t *)
+ *    Get the exploded time in the platforms native format.
+ * arg 1) the native time format
+ * arg 2) the time to convert
+ */
+ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
+{
+    (*ostime)->tm_sec  = aprtime->tm_sec;
+    (*ostime)->tm_min  = aprtime->tm_min;
+    (*ostime)->tm_hour = aprtime->tm_hour;
+    (*ostime)->tm_mday = aprtime->tm_mday;
+    (*ostime)->tm_mon  = aprtime->tm_mon;
+    (*ostime)->tm_year = aprtime->tm_year;
+    (*ostime)->tm_wday = aprtime->tm_wday;
+    (*ostime)->tm_yday = aprtime->tm_yday;
+    (*ostime)->tm_isdst = aprtime->tm_isdst;
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_context_t, *cont)
+ *    Put the imploded time in the APR format.
+ * arg 1) the APR time format
+ * arg 2) the time to convert
+ * arg 3) the context to use if necessary
+ */
+ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime,
+                               ap_context_t *cont)
+{
+    struct timeval tv;
+    *aprtime = (*ostime)->tv_sec * AP_USEC_PER_SEC + (*ostime)->tv_usec;
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_context_t, *cont)
+ *    Put the exploded time in the APR format.
+ * arg 1) the APR time format
+ * arg 2) the time to convert
+ * arg 3) the context to use if necessary
+ */
+ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
+                               ap_os_exp_time_t **ostime, ap_context_t *cont)
+{
+    aprtime->tm_sec = (*ostime)->tm_sec;
+    aprtime->tm_min = (*ostime)->tm_min;
+    aprtime->tm_hour = (*ostime)->tm_hour;
+    aprtime->tm_mday = (*ostime)->tm_mday;
+    aprtime->tm_mon = (*ostime)->tm_mon;
+    aprtime->tm_year = (*ostime)->tm_year;
+    aprtime->tm_wday = (*ostime)->tm_wday;
+    aprtime->tm_yday = (*ostime)->tm_yday;
+    aprtime->tm_isdst = (*ostime)->tm_isdst;
+    return APR_SUCCESS;
+}
+
