@@ -158,7 +158,7 @@ int apr_atomic_dec(volatile apr_atomic_t *mem)
 }
 #endif /*!defined(apr_atomic_dec) && !defined(APR_OVERRIDE_ATOMIC_DEC) */
 
-#if !defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CASE)
+#if !defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CAS)
 apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
 {
     long prev;
@@ -182,4 +182,4 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
     return prev;
 #endif /* APR_HAS_THREADS */
 }
-#endif /*!defined(apr_atomic_dec) && !defined(APR_OVERRIDE_ATOMIC_DEC) */
+#endif /*!defined(apr_atomic_cas) && !defined(APR_OVERRIDE_ATOMIC_CAS) */
