@@ -90,6 +90,16 @@ struct apr_mmap_t {
     /** An area ID.  Only valid on BeOS */
     area_id area;
 #endif
+#ifdef WIN32
+    /** The handle of the file mapping */
+    HANDLE mhandle;
+    /** The start of the real memory page area (mapped view) */
+    void *mv;
+    /** The physical start, size and offset */
+    size_t pstart;
+    size_t psize;
+    size_t poffset;
+#endif
     /** The start of the memory mapped area */
     void *mm;
     /** The amount of data in the mmap */

@@ -1,4 +1,7 @@
 Changes with APR a9
+
+  *) Add Win32 MMAP support [William Rowe]
+
   *) Allow the APR programmer to specify if the MMAP is read-only or
      write-able.
      [Ryan Bloom and Will Rowe]
