@@ -52,10 +52,15 @@
  * <http://www.apache.org/>.
  */
 
+#include <windows.h>
+#include <objbase.h>
+#include <wincrypt.h>
+#include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
+#include "apr_portable.h"
 #include "misc.h"
-#include <wincrypt.h>
+
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
                                                     int length)
@@ -77,4 +82,20 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
     }
     CryptReleaseContext(hProv, 0);
     return res;
+}
+
+
+APR_DECLARE(apr_status_t) apr_os_uuid_get(unsigned char *uuid_data)
+{
+    /* Note: this call doesn't actually require CoInitialize() first 
+     *
+     * XXX: we should scramble the bytes or some such to eliminate the
+     * possible misuse/abuse since uuid is based on the NIC address, and
+     * is therefore not only a uniqifier, but an identity (which might not
+     * be appropriate in all cases.
+     */
+    if (FAILED(CoCreateGuid((LPGUID)uuid_data))) {
+	return APR_EGENERAL;
+    }
+    return APR_SUCCESS;
 }
