@@ -65,9 +65,7 @@ struct apr_lock_t {
     apr_pool_t *cntxt;
     apr_locktype_e type;
     apr_lockscope_e scope;
-    int curr_locked;
-    char *fname;
-	/* Inter proc */
+    /* Inter proc */
     sem_id sem_interproc;
     int32  ben_interproc;
     /* Intra Proc */

@@ -71,7 +71,6 @@ apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type,
     new->cntxt = cont;
     new->type  = type;
     new->scope = scope;
-    new->fname = apr_pstrdup(cont, fname);
 
     if (scope != APR_CROSS_PROCESS) {
         if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
