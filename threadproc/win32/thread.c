@@ -138,6 +138,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 #endif
     if (attr && attr->detach) {
         CloseHandle((*new)->td);
+        (*new)->td = NULL;
     }
 
     return APR_SUCCESS;
@@ -149,6 +150,9 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
     thd->exitval = retval;
     apr_pool_destroy(thd->pool);
 #ifndef _WIN32_WCE
+    if (thd->td) {
+        CloseHandle(thd->td);
+    }
     _endthreadex(0);
 #else
     ExitThread(0);
@@ -172,7 +176,8 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
 
 APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 {
-    if (CloseHandle(thd->td)) {
+    if (thd->td && CloseHandle(thd->td)) {
+        thd->td = NULL;
         return APR_SUCCESS;
     }
     else {
