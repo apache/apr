@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tServer:  Accepting a connection.......");
-    if (ap_accept(&sock2, sock) != APR_SUCCESS) {
+    if (ap_accept(&sock2, sock, context) != APR_SUCCESS) {
         ap_close_socket(sock);
         fprintf(stderr, "Could not accept connection.\n");
         exit(-1);

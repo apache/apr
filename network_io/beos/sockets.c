@@ -140,11 +140,12 @@ ap_status_t ap_listen(struct socket_t *sock, ap_int32_t backlog)
         return APR_SUCCESS; 
 } 
 
-ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock) 
+ap_status_t ap_accept(struct socket_t **new, const struct socket_t *sock, struct context_t *connection_context) 
 { 
-	(*new) = (struct socket_t *)ap_palloc(sock->cntxt,
+	(*new) = (struct socket_t *)ap_palloc(connection_context,
 	                        sizeof(ap_socket_t)); 
 
+    (*new)->cntxt = connection_context;
     (*new)->cntxt = sock->cntxt;
     (*new)->local_addr = (struct sockaddr_in *)ap_palloc((*new)->cntxt, 
                  sizeof(struct sockaddr_in));
