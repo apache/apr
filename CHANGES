@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Add apr_sendto and apr_recvfrom for Unix.  Start of adding UDP
+     support.  [David Reid]
+
   *) Add a method to get the password from the system for a given
      user.  [John Barbee <jbarbee@covalent.net>]
 
