@@ -102,6 +102,9 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         thefile->eof_hit = 1;
     }
     *nbytes = rv;
+    if (rv == -1) {
+        return errno;
+    }
     return APR_SUCCESS;
 }
 
@@ -134,6 +137,9 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
     thefile->stated = 0;
     *nbytes = rv;
+    if (rv == -1) {
+        return errno;
+    }
     return APR_SUCCESS;
 }
 
