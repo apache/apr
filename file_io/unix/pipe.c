@@ -57,6 +57,7 @@
 
 static ap_status_t pipenonblock(struct file_t *thefile)
 {
+#ifndef BEOS /* this code won't work on BeOS */
     int fd_flags;
 
     fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
@@ -66,13 +67,14 @@ static ap_status_t pipenonblock(struct file_t *thefile)
     fd_flags |= O_NDELAY;
 #elif defined(FNDELAY)
     fd_flags |= O_FNDELAY;
-#else
+#else */
     /* XXXX: this breaks things, but an alternative isn't obvious...*/
     return -1;
 #endif
     if (fcntl(thefile->filedes, F_SETFL, fd_flags) == -1) {
         return errno;
     }
+#endif /* !BeOS */
     return APR_SUCCESS;
 }
 
@@ -153,6 +155,7 @@ ap_status_t ap_create_namedpipe(char **new, char *dirpath,
 
 ap_status_t ap_block_pipe(ap_file_t *thefile)
 {
+#ifndef BEOS /* this code won't work on BeOS */
     int fd_flags;
 
     fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
@@ -162,13 +165,14 @@ ap_status_t ap_block_pipe(ap_file_t *thefile)
     fd_flags &= ~O_NDELAY;
 #elif defined(FNDELAY)
     fd_flags &= ~O_FNDELAY;
-#else
+#else 
     /* XXXX: this breaks things, but an alternative isn't obvious...*/
     return -1;
 #endif
     if (fcntl(thefile->filedes, F_SETFL, fd_flags) == -1) {
         return errno;
     }
+#endif /* !BeOS */
     return APR_SUCCESS;
 }
     

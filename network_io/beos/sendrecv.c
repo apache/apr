@@ -55,14 +55,7 @@
  *
  */
 
-#include <sys/time.h>
-#include <socket.h>
-#include <netdb.h>
 #include "networkio.h"
-#include "fileio.h"
-#include "apr_errno.h"
-#include "apr_general.h"
-#include "apr_network_io.h"
 
 ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 {

@@ -54,14 +54,7 @@
  */
 
 
-#include <signal.h>
-#include <string.h>
-#include <sys/wait.h>
 #include "threadproc.h"
-#include "apr_thread_proc.h"
-#include "apr_file_io.h"
-#include "apr_general.h"
-#include "apr_portable.h"
 
 struct send_pipe {
 	int in;

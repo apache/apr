@@ -53,9 +53,6 @@
  *
  */
 
-#include "apr_lock.h"
-#include "apr_general.h"
-#include "apr_lib.h"
 #include "locks.h"
 
 ap_status_t lock_inter_cleanup(void * data)

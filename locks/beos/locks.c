@@ -53,11 +53,7 @@
  *
  */
 
-#include "apr_lock.h"
-#include "apr_general.h"
 #include "locks.h"
-#include <strings.h>
-#include <stdio.h>
 
 ap_status_t ap_create_lock(struct lock_t **lock, ap_locktype_e type, 
                            ap_lockscope_e scope, char *fname, 

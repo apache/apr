@@ -54,9 +54,6 @@
  */
 
 #include "threadproc.h"
-#include "apr_thread_proc.h"
-#include "apr_general.h"
-
 
 ap_status_t ap_create_threadattr(struct threadattr_t **new, ap_context_t *cont)
 {

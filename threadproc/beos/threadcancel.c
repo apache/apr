@@ -54,8 +54,6 @@
  */
 
 #include "threadproc.h"
-#include "apr_thread_proc.h"
-#include "apr_general.h"
 
 
 ap_status_t ap_cancel_thread(struct thread_t *thd)

@@ -53,16 +53,7 @@
  *
  */
 
-#include <errno.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <netdb.h>
 #include "networkio.h"
-#include "apr_network_io.h"
-#include "apr_general.h"
-#include "apr_lib.h"
 
 ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on)
 {

@@ -54,15 +54,6 @@
  */
 
 #include "mmap_h.h"
-#include "apr_mmap.h"
-#include "apr_general.h"
-#include "apr_portable.h"
-#include "apr_lib.h"
-#include "fileio.h"
-#include <kernel/OS.h>
-#include <errno.h>
-#include <string.h>
-#include <stdio.h>
 
 ap_status_t mmap_cleanup(void *themmap)
 {

@@ -58,6 +58,16 @@
 
 #include <socket.h>
 #include <netdb.h>
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include "apr_network_io.h"
+#include "apr_general.h"
+#include "apr_portable.h"
+#include "apr_lib.h"
+#include "fileio.h"
+#include "apr_errno.h"
 
 /* The definition of isascii was missed from the PowerPC ctype.h
  *

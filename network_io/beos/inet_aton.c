@@ -68,8 +68,6 @@
  * SOFTWARE.
  */
 
-#include <socket.h>
-#include <stdlib.h>
 #include "networkio.h"
 
 /* BeOS doesn't yet have it's own inet_aton and Bind won't be ported
