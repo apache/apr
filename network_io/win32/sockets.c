@@ -58,6 +58,7 @@
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include <string.h>
+#include "inherit.h"
 
 static char generic_inaddr_any[16] = {0}; /* big enough for IPv4 or IPv6 */
 
@@ -423,10 +424,6 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
     return APR_SUCCESS;
 }
 
-APR_DECLARE_SET_INHERIT(socket) {
-    return;
-}
+APR_IMPLEMENT_INHERIT_SET(socket, inherit, cntxt, socket_cleanup)
 
-APR_DECLARE_UNSET_INHERIT(socket) {
-    return;
-}
+APR_IMPLEMENT_INHERIT_UNSET(socket, inherit, cntxt, socket_cleanup)

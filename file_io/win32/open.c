@@ -68,6 +68,7 @@
 #include <sys/stat.h>
 #endif
 #include "misc.h"
+#include "inherit.h"
 
 #if APR_HAS_UNICODE_FS
 apr_status_t utf8_to_unicode_path(apr_wchar_t* retstr, apr_size_t retlen, 
@@ -605,10 +606,6 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
 
 APR_POOL_IMPLEMENT_ACCESSOR(file);
 
-APR_DECLARE_SET_INHERIT(file) {
-    return;
-}
-
-APR_DECLARE_UNSET_INHERIT(file) {
-    return;
-}
+APR_IMPLEMENT_INHERIT_SET(file, flags, pool, file_cleanup)
+ 
+APR_IMPLEMENT_INHERIT_UNSET(file, flags, pool, file_cleanup)

@@ -118,11 +118,11 @@ extern "C" {
 /** @} */
 
 /**
- * @defgroup APR_file_set_attributes File Attribute Flags
+ * @defgroup APR_file_attrs_set File Attribute Flags
  * @{
  */
 
-/* flags for apr_file_set_attributes */
+/* flags for apr_file_attrs_set */
 #define APR_FILE_ATTR_READONLY   0x01          /**< File is read-only */
 #define APR_FILE_ATTR_EXECUTABLE 0x02          /**< File is executable */
 /** @} */
@@ -666,12 +666,18 @@ APR_POOL_DECLARE_ACCESSOR(file);
  * @param file The file to enable inheritance.
  *
  */
-APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
+APR_DECLARE(void) apr_file_inherit_set(apr_file_t *file);
 
 /**
  * Unset a file from being inherited by child processes.
  * @param file The file to disable inheritance.
  */
+APR_DECLARE(void) apr_file_inherit_unset(apr_file_t *file);
+
+/** @deprecated @see apr_file_inherit_set */
+APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
+
+/** @deprecated @see apr_file_inherit_unset */
 APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 
 /**
