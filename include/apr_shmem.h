@@ -74,7 +74,7 @@ typedef   key_t          ap_shm_name_t;
 
 typedef   struct shmem_t ap_shmem_t;
 
-ap_status_t ap_shm_init(ap_shmem_t **m, ap_size_t reqsize, const char *file);
+ap_status_t ap_shm_init(ap_shmem_t **m, ap_size_t reqsize, const char *file, ap_context_t *cont);
 ap_status_t ap_shm_destroy(ap_shmem_t *m);
 void *ap_shm_malloc(ap_shmem_t *c, ap_size_t reqsize);
 void *ap_shm_calloc(ap_shmem_t *shared, ap_size_t size);

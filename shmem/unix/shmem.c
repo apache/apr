@@ -69,8 +69,9 @@ struct shmem_t {
  * arg 2) The size of the shared memory pool.
  * arg 3) The file to use for the shared memory on platforms that
  *        require it.
+ * arg 4) The context to use
  */
-ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file)
+ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file, ap_context_t *cont)
 {
     MM *newmm = mm_create(reqsize, file);
     if (newmm == NULL) {
