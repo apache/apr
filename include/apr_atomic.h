@@ -63,26 +63,40 @@
 extern "C" {
 #endif
 #ifdef WIN32
+#define apr_atomic_t LONG;
 
 #define apr_atomic_add(mem, val)     InterlockedExchangeAdd(mem,val)
 #define apr_atomic_dec(mem)          InterlockedDecrement(mem)
 #define apr_atomic_inc(mem)          InterlockedIncrement(mem)
 #define apr_atomic_set(mem, val)     InterlockedExchange(mem, val)
 #define apr_atomic_read(mem)         *mem
-#define apr_atomic_cas(mem,with,cmp) InterlockedCompareExchange(mem,with,cmp)
+/* #define apr_atomic_cas(mem,with,cmp) InterlockedCompareExchange(mem,with,cmp)*/
 #define apr_atomic_init(pool)        APR_SUCCESS
+
+#elif defined(__linux)
+#include <asm/atomic.h>
+#define apr_atomic_t atomic_t
+
+#define apr_atomic_add(mem, val)     atomic_add(val,mem)
+#define apr_atomic_dec(mem)          atomic_dec(mem)
+#define apr_atomic_inc(mem)          atomic_inc(mem)
+#define apr_atomic_set(mem, val)     atomic_set(mem, val)
+#define apr_atomic_read(mem)         atomic_read(mem)
+#define apr_atomic_init(pool)        APR_SUCCESS
+
 
 #else
 
 #if APR_HAS_THREADS
 
+#define apr_atomic_t apr_uint32_t
 #define apr_atomic_read(p)  *p
 apr_status_t apr_atomic_init(apr_pool_t *p);
-long apr_atomic_set(volatile long*mem, long val);
-long apr_atomic_add(volatile long*mem, long val);
-long apr_atomic_inc( volatile long *mem);
-long apr_atomic_dec(volatile long *mem);
-long apr_atomic_cas(volatile long *mem,long with,long cmp);
+apr_uint32_t apr_atomic_set(volatile apr_atomic_t *mem, long val);
+apr_uint32_t apr_atomic_add(volatile apr_atomic_t *mem, long val);
+apr_uint32_t apr_atomic_inc(volatile apr_atomic_t *mem);
+apr_uint32_t apr_atomic_dec(volatile apr_atomic_t *mem);
+/*long apr_atomic_cas(volatile apr_atomic_t *mem,long with,long cmp);*/
 
 #endif /* APR_HAS_THREADS */
 

@@ -78,27 +78,27 @@ int main(void)
 }
 #else /* !APR_HAS_THREADS */
 
-void * APR_THREAD_FUNC thread_func_traditional(apr_thread_t *thd, void *data);
+void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data);
 
 apr_lock_t *thread_lock;
 apr_pool_t *context;
 apr_thread_once_t *control = NULL;
-volatile long x = 0; /* traditional locks */
-volatile long y = 0; /* atomic locks */
+volatile long x = 0; /* mutex locks */
+apr_atomic_t y;      /* atomic locks */
 volatile long z = 0; /* no locks */
 int value = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
-#define NUM_THREADS 10
+#define NUM_THREADS 50
 #define NUM_ITERATIONS 20000
 static void init_func(void)
 {
     value++;
 }
 
-void * APR_THREAD_FUNC thread_func_traditional(apr_thread_t *thd, void *data)
+void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
 {
     int i;
 
@@ -112,6 +112,7 @@ void * APR_THREAD_FUNC thread_func_traditional(apr_thread_t *thd, void *data)
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
 } 
+
 void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
 {
     int i;
@@ -136,21 +137,22 @@ void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data)
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
 }
-int main(void)
+int main(int argc, char**argv)
 {
     apr_thread_t *t1[NUM_THREADS];
     apr_thread_t *t2[NUM_THREADS];
-    apr_thread_t *t3[NUM_THREADS];
     apr_status_t r1[NUM_THREADS]; 
     apr_status_t r2[NUM_THREADS]; 
-    apr_status_t r3[NUM_THREADS];
     apr_status_t s1[NUM_THREADS]; 
     apr_status_t s2[NUM_THREADS];
-    apr_status_t s3[NUM_THREADS];
     apr_status_t rv;
     int i;
+    int mutex=0;
 
     apr_initialize();
+
+    if (argc==2 && argv[1][0]=='m') 
+        mutex=1;
 
     printf("APR Simple Thread Test\n======================\n\n");
     
@@ -176,16 +178,18 @@ int main(void)
         exit(-1);
     }
     rv = apr_atomic_init( context);
+    apr_atomic_set(&y,0);
 
     printf("OK\n");
 
     printf("%-60s", "Starting all the threads"); 
     for (i=0;i<NUM_THREADS;i++) {
-        r1[i] = apr_thread_create(&t1[i], NULL, thread_func_traditional, NULL, context);
-        r2[i] = apr_thread_create(&t2[i], NULL, thread_func_atomic,      NULL, context);
-        r3[i] = apr_thread_create(&t3[i], NULL, thread_func_none,        NULL, context);
-        if (r1[i] != APR_SUCCESS || r2[i] != APR_SUCCESS || 
-            r3[i] != APR_SUCCESS ) {
+        if (mutex ==1) 
+            r1[i] = apr_thread_create(&t1[i], NULL, thread_func_mutex, NULL, context);
+        else
+            r1[i] = apr_thread_create(&t1[i], NULL, thread_func_atomic, NULL, context);
+        r2[i] = apr_thread_create(&t2[i], NULL, thread_func_none, NULL, context);
+        if (r1[i] != APR_SUCCESS || r2[i] != APR_SUCCESS ) {
             fflush(stdout);
             fprintf(stderr, "Failed\nError starting thread in group %d\n",i);
             exit(-1);
@@ -198,36 +202,45 @@ int main(void)
     for (i=0;i<NUM_THREADS;i++) {
         apr_thread_join(&s1[i], t1[i]);
         apr_thread_join(&s2[i], t2[i]);
-        apr_thread_join(&s3[i], t3[i]);
-        if (s1[i] != exit_ret_val || s2[i] != exit_ret_val ||
-            s3[i] != exit_ret_val ) {
+        if (s1[i] != exit_ret_val || s2[i] != exit_ret_val ) {
                 fprintf(stderr, 
-                        "Invalid return value\nGot %d/%d/%d, but expected %d for all \n",
-                        s1[i], s2[i], s3[i],  exit_ret_val);
-
+                        "Invalid return value\nGot %d/%d, but expected %d for all \n",
+                        s1[i], s2[i], exit_ret_val);
         }
-
     }
     printf("OK\n");
 
-    printf("%-60s", "Checking if locks worked"); 
-    if (x != NUM_THREADS*NUM_ITERATIONS) {
-        fflush(stdout);
-        fprintf(stderr, "No!\nThe locks didn't work????  x = %ld instead of %ld\n", x,NUM_THREADS*NUM_ITERATIONS);
+    if (mutex ==1) {
+        printf("%-60s", "Checking if mutex locks worked"); 
+        if (x != NUM_THREADS*NUM_ITERATIONS) {
+            fflush(stdout);
+            fprintf(stderr, 
+                    "No!\nThe locks didn't work?? x = %ld instead of %ld\n",
+                    x,
+                    (long)NUM_THREADS*NUM_ITERATIONS);
+        }
+        else
+            printf("OK\n");
     }
-    else
-        printf("OK\n");
-    printf("%-60s", "Checking if atomic worked"); 
-    if (apr_atomic_read(&y) != NUM_THREADS*NUM_ITERATIONS) {
-        fflush(stdout);
-        fprintf(stderr, "No!\nThe atomics didn't work????  y = %ld instead of %ld\n", y,NUM_THREADS*NUM_ITERATIONS);
+    else {
+        printf("%-60s", "Checking if atomic worked"); 
+        if (apr_atomic_read(&y) != NUM_THREADS*NUM_ITERATIONS) {
+            fflush(stdout);
+            fprintf(stderr, 
+                    "No!\nThe atomics didn't work?? y = %ld instead of %ld\n",
+                    apr_atomic_read(&y),
+                    (long)NUM_THREADS*NUM_ITERATIONS);
+        }
+        else
+            printf("OK\n");
     }
-    else
-        printf("OK\n");
     printf("%-60s", "Checking if nolock worked"); 
     if ( z != NUM_THREADS*NUM_ITERATIONS) {
         fflush(stdout);
-        fprintf(stderr, "no suprise\nThe no-locks didn't work????  z = %ld instead of %ld\n", z, NUM_THREADS*NUM_ITERATIONS);
+        fprintf(stderr, 
+                "no suprise\nThe no-locks didn't work. z = %ld instead of %ld\n", 
+                z, 
+                (long)NUM_THREADS*NUM_ITERATIONS);
     }
     else
         printf("OK\n");
