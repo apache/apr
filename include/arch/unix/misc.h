@@ -56,6 +56,7 @@
 #define MISC_H
 
 #include "apr.h"
+#include "apr_portable.h"
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_pools.h"
@@ -92,7 +93,7 @@ struct apr_other_child_rec_t {
     int id;  /* This is either a pid or tid depending on the platform */
     void (*maintenance) (int, void *, int);
     void *data;
-    int write_fd;
+    apr_os_file_t write_fd;
 };
 
 #ifdef WIN32
