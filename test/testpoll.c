@@ -85,13 +85,13 @@ static int make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, apr_port_t port
     return 0;
 }
 
-static int check_sockets(apr_pollfd_t *pollset, apr_socket_t **sockarray)
+static int check_sockets(apr_pollfd_t *pollarray, apr_socket_t **sockarray)
 {
     int i = 0;
     printf("\tSocket 0\tSocket 1\tSocket 2\n\t");
     for (i = 0;i < 3;i++){
         apr_int16_t event;
-        if (apr_poll_revents_get(&event, sockarray[i], pollset) != APR_SUCCESS){
+        if (apr_poll_revents_get(&event, sockarray[i], pollarray) != APR_SUCCESS){
             printf("Failed!\n");
             exit (-1);
         }
@@ -140,13 +140,16 @@ static void recv_msg(apr_socket_t **sockarray, int which, apr_pool_t *p)
     printf("OK\n");
 }
 
+#define SMALL_NUM_SOCKETS 3
+#define LARGE_NUM_SOCKETS 100
+
 int main(void)
 {
     apr_pool_t *context;
-    apr_socket_t *s[3];
-    apr_sockaddr_t *sa[3];
-    apr_pollfd_t *pollset;
-    int i = 0, srv = 3;
+    apr_socket_t *s[LARGE_NUM_SOCKETS];
+    apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
+    apr_pollfd_t *pollarray;
+    int i = 0, srv = SMALL_NUM_SOCKETS;
     
     fprintf (stdout,"APR Poll Test\n*************\n\n");
     
@@ -166,20 +169,20 @@ int main(void)
     printf("OK\n");
     
     printf("\tCreating the sockets I'll use..........");
-    for (i = 0; i < 3; i++){
+    for (i = 0; i < SMALL_NUM_SOCKETS; i++){
         if (make_socket(&s[i], &sa[i], 7777 + i, context) != 0){
             exit(-1);
         }
     }
     printf("OK\n");
        
-    printf ("\tSetting up the pollset I'll use........");
-    if (apr_poll_setup(&pollset, 3, context) != APR_SUCCESS){
-        printf("Couldn't create a pollset!\n");
+    printf ("\tSetting up the poll array I'll use........");
+    if (apr_poll_setup(&pollarray, SMALL_NUM_SOCKETS, context) != APR_SUCCESS){
+        printf("Couldn't create a poll array!\n");
         exit (-1);
     }
-    for (i = 0; i < 3;i++){
-        if (apr_poll_socket_add(pollset, s[i], APR_POLLIN) != APR_SUCCESS){
+    for (i = 0; i < SMALL_NUM_SOCKETS;i++){
+        if (apr_poll_socket_add(pollarray, s[i], APR_POLLIN) != APR_SUCCESS){
             printf("Failed to add socket %d\n", i);
             exit (-1);
         }
@@ -187,34 +190,34 @@ int main(void)
     printf("OK\n");
     printf("Starting Tests\n");
 
-    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC);
-    check_sockets(pollset, s);
+    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC);
+    check_sockets(pollarray, s);
     
     send_msg(s, sa, 2);
 
-    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollset, s);
+    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
+    check_sockets(pollarray, s);
 
     recv_msg(s, 2, context);
     send_msg(s, sa, 1);
 
-    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollset, s);
+    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
+    check_sockets(pollarray, s);
 
     send_msg(s, sa, 2);
 
-    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollset, s);
+    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
+    check_sockets(pollarray, s);
      
     recv_msg(s, 1, context);
     send_msg(s, sa, 0);
     
-    apr_poll(pollset, 3, &srv, 10 * APR_USEC_PER_SEC); 
-    check_sockets(pollset, s);
+    apr_poll(pollarray, SMALL_NUM_SOCKETS, &srv, 10 * APR_USEC_PER_SEC); 
+    check_sockets(pollarray, s);
         
     printf("Tests completed.\n");
     printf("\tClosing sockets........................");
-    for (i = 0; i < 3; i++){
+    for (i = 0; i < SMALL_NUM_SOCKETS; i++){
         if (apr_socket_close(s[i]) != APR_SUCCESS){
             printf("Failed!\n");
             exit(-1);
