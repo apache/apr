@@ -1962,6 +1962,7 @@ AC_OUTPUT([
 	$MAKEFILE1 $MAKEFILE2 $MAKEFILE3
 	include/apr.h
 	build/apr_rules.mk
+	build/pkg/pkginfo
 	apr-config
 ],[
 for i in $SAVE_FILES; do
