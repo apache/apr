@@ -148,8 +148,10 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 {
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 
-    if(os_handle == NULL)
+    if(os_handle == NULL) {
+        (*res_handle)->errormsg = dlerror();       
         return APR_EDSOOPEN;
+    }
 
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;
@@ -171,11 +173,22 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
 {
     void *retval = dlsym(handle->handle, symname);
 
-    if (retval == NULL)
+    if (retval == NULL) {
+        handle->errormsg = dlerror();
         return APR_EINIT;
-    
-    ressym = retval;   
+    }
+
+    *ressym = retval;
     return APR_SUCCESS;
+}
+
+APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
+{
+    if (dso->errormsg) {
+        apr_cpystrn(buffer, dso->errormsg, buflen);
+        return dso->errormsg;
+    }
+    return "No Error";
 }
 
 
@@ -282,7 +295,7 @@ void *dlopen(const char *path, int mode)
      * load should be declared load(const char *...). Thus we
      * cast the path to a normal char *. Ugly.
      */
-    if ((mp->entry = (void *) load((char *) path, L_NOAUTODEFER, NULL)) == NULL) {
+    if ((mp->entry = (void *) loadAndInit((char *) path, L_NOAUTODEFER, NULL)) == NULL) {
 	free(mp->name);
 	free(mp);
 	errvalid++;

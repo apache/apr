@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Use the dso/aix subdirectory for older versions of AIX and fix 
+     a number of bugs in the dso code in that directory.
+     [Victor Orlikowski]
+
   *) Allow libtool 1.3b to be used.  [Victor Orlikowski]
 
   *) Misc. Win32 fixes: Set the pool pointer in apr_sockaddr_t 

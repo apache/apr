@@ -71,6 +71,7 @@ int dlclose(void *handle);
 struct apr_dso_handle_t {
     apr_pool_t  *cont;
     void          *handle;
+    const char *errormsg;
 };
 
 #endif
