@@ -58,7 +58,9 @@
 #include "apr_network_io.h"
 #include "apr_lib.h"
 #include "fileio.h"
+#if APR_HAVE_TIME_H
 #include <time.h>
+#endif
 
 /* MAX_SEGMENT_SIZE is the maximum amount of data that will be sent to a client
  * in one call of TransmitFile. This number must be small enough to give the 
@@ -82,7 +84,12 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf,
     wsaData.len = *len;
     wsaData.buf = (char*) buf;
 
+#ifndef _WIN32_WCE
     rv = WSASend(sock->sock, &wsaData, 1, &dwBytes, 0, NULL, NULL);
+#else
+    rv = send(sock->sock, wsaData.buf, wsaData.len, 0);
+    dwBytes = rv;
+#endif
     if (rv == SOCKET_ERROR) {
         lasterror = apr_get_netos_error();
         return lasterror;
@@ -106,7 +113,12 @@ APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf,
     wsaData.len = *len;
     wsaData.buf = (char*) buf;
 
+#ifndef _WIN32_WCE
     rv = WSARecv(sock->sock, &wsaData, 1, &dwBytes, &flags, NULL, NULL);
+#else
+    rv = recv(sock->sock, wsaData.buf, wsaData.len, 0);
+    dwBytes = rv;
+#endif
     if (rv == SOCKET_ERROR) {
         lasterror = apr_get_netos_error();
         *len = 0;
@@ -138,12 +150,21 @@ APR_DECLARE(apr_status_t) apr_sendv(apr_socket_t *sock,
         pWsaBuf[i].buf = vec[i].iov_base;
         pWsaBuf[i].len = vec[i].iov_len;
     }
-
+#ifndef _WIN32_WCE
     rv = WSASend(sock->sock, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
     if (rv == SOCKET_ERROR) {
         rc = apr_get_netos_error();
     }
-
+#else
+    for (i = 0; i < nvec; i++) {
+        rv = send(sock->sock, pWsaBuf[i].buf, pWsaBuf[i].len, 0);
+        if (rv == SOCKET_ERROR) {
+            rc = apr_get_netos_error();
+            break;
+        }
+        dwBytes += rv;
+    }
+#endif
     if (nvec > WSABUF_ON_STACK) 
         free(pWsaBuf);
 
