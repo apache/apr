@@ -177,37 +177,40 @@ static int apr_sms_is_tracking(apr_sms_t *mem_sys)
     return mem_sys->reset_fn != NULL;
 }
 
-APR_DECLARE(apr_sms_t *) apr_sms_create(void *memory, 
-                                        apr_sms_t *parent_mem_sys)
+APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys, 
+                                       apr_sms_t *parent_mem_sys)
 {
-    apr_sms_t *mem_sys;
+    /* XXX - I've assumed that memory passed in will be zeroed,
+     * i.e. calloc'd instead of malloc'd...
+     * This may well be a bogus assumption, and if so we either need
+     * to memset or have a series of =NULL's at the end.
+     * This function is only called by modules, so this isn't as crazy
+     * an assumption to make as it sounds :)
+     */
 
-    if (!memory)
-        return NULL;
+    if (!mem_sys)
+        return APR_EINVAL;
 
-    /* Just typecast it, and clear it */
-    mem_sys = (apr_sms_t *)memory;
-    memset(mem_sys, '\0', sizeof(apr_sms_t));
-
-    /* Initialize the parent and accounting memory system pointers */
     mem_sys->parent_mem_sys = parent_mem_sys;
     mem_sys->accounting_mem_sys = mem_sys;
+    mem_sys->child_mem_sys = NULL;
 
-    if (parent_mem_sys != NULL) {
+    if (parent_mem_sys) {
         if ((mem_sys->sibling_mem_sys = parent_mem_sys->child_mem_sys) != NULL)
             mem_sys->sibling_mem_sys->ref_mem_sys = &mem_sys->sibling_mem_sys;
 
         mem_sys->ref_mem_sys = &parent_mem_sys->child_mem_sys;
+        /* This is probably not correct as we could have multiple children
+         * from a single parent...  We probably need a list...
+         */
         parent_mem_sys->child_mem_sys = mem_sys;
     }
-    /* This seems a bit redundant, but we're not taking chances */
     else {
         mem_sys->ref_mem_sys     = NULL;
         mem_sys->sibling_mem_sys = NULL;
-        mem_sys->child_mem_sys   = NULL;
     }
 
-    return mem_sys;
+    return APR_SUCCESS;
 }
 
 #ifdef APR_MEMORY_ASSERT

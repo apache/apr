@@ -108,22 +108,28 @@ static apr_status_t apr_sms_std_free(apr_sms_t *mem_sys,
 APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
 {
     apr_sms_t *new_mem_sys;
+    apr_status_t rv;
 
     assert(mem_sys);
 
     *mem_sys = NULL;
-    /* should we be using apr_sms_calloc now we have it??? */
-    new_mem_sys = apr_sms_create(malloc(sizeof(apr_sms_t)),
-                                 NULL);
+    /* We don't have a parent so we allocate the memory
+     * for the structure ourselves...
+     */
+    new_mem_sys = apr_sms_std_calloc(NULL, sizeof(apr_sms_t));
 
     if (!new_mem_sys)
         return APR_ENOMEM;
+
+    if ((rv = apr_sms_init(new_mem_sys, NULL)) != APR_SUCCESS)
+        return rv;
 
     new_mem_sys->malloc_fn  = apr_sms_std_malloc;
     new_mem_sys->calloc_fn  = apr_sms_std_calloc;
     new_mem_sys->realloc_fn = apr_sms_std_realloc;
     new_mem_sys->free_fn    = apr_sms_std_free;
     new_mem_sys->identity   = module_identity;
+
     /* as we're not a tracking memory module, i.e. we don't keep
      * track of our allocations, we don't have apr_sms_reset or
      * apr_sms_destroy functions.
@@ -134,3 +140,4 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
     *mem_sys = new_mem_sys;
     return APR_SUCCESS;
 }
+
