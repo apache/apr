@@ -79,9 +79,9 @@ static int warrsztoastr(const char * const * *retarr,
                         const wchar_t * arrsz, int args)
 {
     const apr_wchar_t *wch;
-    size_t totlen;
-    size_t newlen;
-    size_t wsize;
+    apr_size_t totlen;
+    apr_size_t newlen;
+    apr_size_t wsize;
     char **newarr;
     int arg;
 

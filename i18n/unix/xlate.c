@@ -191,9 +191,9 @@ static void check_sbcs(apr_xlate_t *convset)
     char inbuf[256], outbuf[256];
     char *inbufptr = inbuf;
     char *outbufptr = outbuf;
-    size_t inbytes_left, outbytes_left;
+    apr_size_t inbytes_left, outbytes_left;
     int i;
-    size_t translated;
+    apr_size_t translated;
 
     for (i = 0; i < sizeof(inbuf); i++) {
         inbuf[i] = i;
@@ -202,7 +202,7 @@ static void check_sbcs(apr_xlate_t *convset)
     inbytes_left = outbytes_left = sizeof(inbuf);
     translated = iconv(convset->ich, (ICONV_INBUF_TYPE)&inbufptr, 
                        &inbytes_left, &outbufptr, &outbytes_left);
-    if (translated != (size_t) -1 &&
+    if (translated != (apr_size_t) -1 &&
         inbytes_left == 0 &&
         outbytes_left == 0) {
         /* hurray... this is simple translation; save the table,
@@ -288,7 +288,7 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
 {
     apr_status_t status = APR_SUCCESS;
 #ifdef HAVE_ICONV
-    size_t translated;
+    apr_size_t translated;
 
     if (convset->ich != (iconv_t)-1) {
         const char *inbufptr = inbuf;
@@ -308,7 +308,7 @@ apr_status_t apr_xlate_conv_buffer(apr_xlate_t *convset, const char *inbuf,
          *    the last input character is incomplete)
          * c) the error condition where the input is invalid
          */
-        if (translated == (size_t)-1) {
+        if (translated == (apr_size_t)-1) {
             switch (errno) {
             case E2BIG:  /* out of space on output */
                 status = 0; /* change table lookup code below if you

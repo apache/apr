@@ -325,7 +325,7 @@ APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 {
-    size_t readlen;
+    apr_size_t readlen;
     apr_status_t rv = APR_SUCCESS;
     int i;    
 

@@ -61,7 +61,7 @@
 
 APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
     int fds, err = 0;
 
     do {
@@ -100,7 +100,7 @@ APR_DECLARE(apr_status_t) apr_send(apr_socket_t *sock, const char *buf, apr_size
 
 APR_DECLARE(apr_status_t) apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
 {
-    ssize_t rv;
+    apr_ssize_t rv;
     int fds, err = 0;
 
     do {
