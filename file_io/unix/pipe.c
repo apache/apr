@@ -81,11 +81,13 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*in) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
+    (*in)->buffered = 0;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
 
     (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
+    (*out)->buffered = 0;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
 
     return APR_SUCCESS;
