@@ -60,7 +60,7 @@
 #include <string.h>
 #include <sys/stat.h>
 
-/* Returns TRUE if the input string is a string
+/* Returns APR_TRUE if the input string is a string
  * of one or more '.' characters.
  */
 static BOOL OnlyDots(char *pString)
@@ -68,13 +68,13 @@ static BOOL OnlyDots(char *pString)
     char *c;
 
     if (*pString == '\0')
-        return FALSE;
+        return APR_FALSE;
 
     for (c = pString;*c;c++)
         if (*c != '.')
-            return FALSE;
+            return APR_FALSE;
 
-    return TRUE;
+    return APR_TRUE;
 }
 
 /* Accepts as input a pathname, and tries to match it to an 
@@ -88,8 +88,8 @@ API_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont,
     char buf[HUGE_STRING_LEN];
     char *pInputName;
     char *p, *q;
-    BOOL bDone = FALSE;
-    BOOL bFileExists = TRUE;
+    BOOL bDone = APR_FALSE;
+    BOOL bFileExists = APR_TRUE;
     HANDLE hFind;
     WIN32_FIND_DATA wfd;
 
@@ -114,7 +114,7 @@ API_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont,
 
         /* If all we have is a drive letter, then we are done */
         if (strlen(pInputName) == 2)
-            bDone = TRUE;
+            bDone = APR_TRUE;
     }
     
     q = p;
@@ -151,7 +151,7 @@ API_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont,
             *p = '\0';
 
         if (strchr(q, '*') || strchr(q, '?'))
-            bFileExists = FALSE;
+            bFileExists = APR_FALSE;
 
         /* If the path exists so far, call FindFirstFile
          * again.  However, if this portion of the path contains
@@ -164,7 +164,7 @@ API_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont,
             hFind = FindFirstFile(pInputName, &wfd);
             
             if (hFind == INVALID_HANDLE_VALUE) {
-                bFileExists = FALSE;
+                bFileExists = APR_FALSE;
             }
             else {
                 FindClose(hFind);
@@ -185,7 +185,7 @@ API_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont,
             p = strchr(p, '\\');
         }
         else {
-            bDone = TRUE;
+            bDone = APR_TRUE;
         }
     }
     

@@ -92,7 +92,7 @@
  *                    ugly way windows deals with case in the filesystem.
  * append -- Windows doesn't support the append concept when opening files.
  *           APR needs to keep track of this, and always make sure we append
- *           correctly when writing to a file with this flag set TRUE.
+ *           correctly when writing to a file with this flag set APR_TRUE.
  */
 
 struct ap_file_t {

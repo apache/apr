@@ -99,7 +99,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e 
     else
         semname = ap_pstrcat(cont, "/SEM32/", fname, NULL);
 
-    rc = DosCreateMutexSem(semname, &(new->hMutex), scope == APR_CROSS_PROCESS ? DC_SEM_SHARED : 0, FALSE);
+    rc = DosCreateMutexSem(semname, &(new->hMutex), scope == APR_CROSS_PROCESS ? DC_SEM_SHARED : 0, APR_FALSE);
     *lock = new;
 
     if (!rc)

@@ -91,7 +91,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     }
 
     (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
-    rc = DosCreateEventSem(NULL, &(*in)->pipeSem, DC_SEM_SHARED, FALSE);
+    rc = DosCreateEventSem(NULL, &(*in)->pipeSem, DC_SEM_SHARED, APR_FALSE);
 
     if (rc) {
         DosClose(filedes[0]);
@@ -111,8 +111,8 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
     (*in)->fname = ap_pstrdup(cont, pipename);
-    (*in)->isopen = TRUE;
-    (*in)->buffered = FALSE;
+    (*in)->isopen = APR_TRUE;
+    (*in)->buffered = APR_FALSE;
     (*in)->flags = 0;
     (*in)->pipe = 1;
     (*in)->timeout = -1;
@@ -122,8 +122,8 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->fname = ap_pstrdup(cont, pipename);
-    (*out)->isopen = TRUE;
-    (*out)->buffered = FALSE;
+    (*out)->isopen = APR_TRUE;
+    (*out)->buffered = APR_FALSE;
     (*out)->flags = 0;
     (*out)->pipe = 1;
     (*out)->timeout = -1;
