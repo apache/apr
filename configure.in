@@ -177,9 +177,7 @@ case "$OS" in
        OSDIR="beos"
        APR_ADDTO(CPPFLAGS,-DBEOS)
        enable_threads="system_threads"
-       config_subdirs="shmem/unix/mm"
        native_mmap_emul="1"
-       USE_MM=yes
        APR_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
        eolstr="\\n"
        file_as_socket="0"
