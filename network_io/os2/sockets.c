@@ -83,33 +83,63 @@ static apr_status_t socket_cleanup(void *sock)
     }
 }
 
+static void set_socket_vars(apr_socket_t *sock, int family)
+{
+    sock->local_addr->sa.sin.sin_family = family;
+    sock->remote_addr->sa.sin.sin_family = family;
+
+    if (family == AF_INET) {
+        sock->local_addr->sa_len = sizeof(struct sockaddr_in);
+        sock->local_addr->addr_str_len = 16;
+        sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin.sin_addr);
+        sock->local_addr->ipaddr_len = sizeof(struct in_addr);
+
+        sock->remote_addr->sa_len = sizeof(struct sockaddr_in);
+        sock->remote_addr->addr_str_len = 16;
+        sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin.sin_addr);
+        sock->remote_addr->ipaddr_len = sizeof(struct in_addr);
+    }
+#if APR_HAVE_IPV6
+    else if (family == AF_INET6) {
+        sock->local_addr->sa_len = sizeof(struct sockaddr_in6);
+        sock->local_addr->addr_str_len = 46;
+        sock->local_addr->ipaddr_ptr = &(sock->local_addr->sa.sin6.sin6_addr);
+        sock->local_addr->ipaddr_len = sizeof(struct in6_addr);
+
+        sock->remote_addr->sa_len = sizeof(struct sockaddr_in6);
+        sock->remote_addr->addr_str_len = 46;
+        sock->remote_addr->ipaddr_ptr = &(sock->remote_addr->sa.sin6.sin6_addr);
+        sock->remote_addr->ipaddr_len = sizeof(struct in6_addr);
+    }
+#endif
+}                                                                                                  
+static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
+{
+    *new = (apr_socket_t *)apr_pcalloc(p, sizeof(apr_socket_t));
+    (*new)->cntxt = p;
+    (*new)->local_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
+                                                       sizeof(apr_sockaddr_t));
+    (*new)->remote_addr = (apr_sockaddr_t *)apr_pcalloc((*new)->cntxt,
+                                                        sizeof(apr_sockaddr_t));
+}
+
 apr_status_t apr_create_tcp_socket(apr_socket_t **new, apr_pool_t *cont)
 {
-    (*new) = (apr_socket_t *)apr_palloc(cont, sizeof(apr_socket_t));
+    alloc_socket(new, cont);
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
-    (*new)->cntxt = cont; 
-    (*new)->local_addr = (struct sockaddr_in *)apr_palloc((*new)->cntxt,
-                         sizeof(struct sockaddr_in));
-    (*new)->remote_addr = (struct sockaddr_in *)apr_palloc((*new)->cntxt,
-                         sizeof(struct sockaddr_in));
-
     if ((*new)->local_addr == NULL || (*new)->remote_addr == NULL) {
         return APR_ENOMEM;
     }
  
     (*new)->socketdes = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-    (*new)->local_addr->sin_family = AF_INET;
-    (*new)->remote_addr->sin_family = AF_INET;
-
-    (*new)->addr_len = sizeof(*(*new)->local_addr);
-    
     if ((*new)->socketdes < 0) {
         return APR_OS2_STATUS(sock_errno());
     }
+    set_socket_vars(*new, AF_INET);
+
     (*new)->timeout = -1;
     (*new)->nonblock = FALSE;
     apr_register_cleanup((*new)->cntxt, (void *)(*new), 
@@ -138,7 +168,9 @@ apr_status_t apr_close_socket(apr_socket_t *thesocket)
 
 apr_status_t apr_bind(apr_socket_t *sock)
 {
-    if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1)
+    if (bind(sock->socketdes, 
+             (struct sockaddr *)sock->local_addr->sa, 
+             sock->local_addr->sa_len) == -1)
         return APR_OS2_STATUS(sock_errno());
     else
         return APR_SUCCESS;
@@ -154,19 +186,15 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 
 apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
-    (*new) = (apr_socket_t *)apr_palloc(connection_context, 
-                            sizeof(apr_socket_t));
+    alloc_socket(new, connection_context);
+    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family);
 
-    (*new)->cntxt = connection_context;
-    (*new)->remote_addr = (struct sockaddr_in *)apr_palloc((*new)->cntxt,
-                          sizeof(struct sockaddr_in));
-    (*new)->local_addr = sock->local_addr;
-    (*new)->addr_len = sizeof(struct sockaddr_in);
     (*new)->timeout = -1;
     (*new)->nonblock = FALSE;
 
-    (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
-                        &(*new)->addr_len);
+    (*new)->socketdes = accept(sock->socketdes, 
+                               (struct sockaddr *)&(*new)->remote_addr->sa,
+                               &(*new)->remote_addr->sa_len);
 
     if ((*new)->socketdes < 0) {
         return APR_OS2_STATUS(sock_errno());
@@ -194,17 +222,19 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
             return h_errno;
         }
     
-        memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
-        sock->addr_len = sizeof(*sock->remote_addr);
+        memcpy((char *)&sock->remote_addr->sa.sin.sin_addr, hp->h_addr_list[0], 
+               hp->h_length);
     }
 
-    if ((connect(sock->socketdes, (struct sockaddr *)sock->remote_addr, sock->addr_len) < 0) &&
+    if ((connect(sock->socketdes, (struct sockaddr *)&sock->remote_addr->sa.sin, 
+                 sock->remote_addr->sa_len) < 0) &&
         (sock_errno() != SOCEINPROGRESS)) {
         return APR_OS2_STATUS(sock_errno());
     }
     else {
-        int namelen = sizeof(*sock->local_addr);
-        getsockname(sock->socketdes, (struct sockaddr *)sock->local_addr, &namelen);
+        int namelen = sizeof(sock->local_addr->sa.sin);
+        getsockname(sock->socketdes, (struct sockaddr *)&sock->local_addr->sa.sin, 
+                    &namelen);
         return APR_SUCCESS;
     }
 }
@@ -239,8 +269,8 @@ apr_status_t apr_put_os_sock(apr_socket_t **sock, apr_os_sock_t *thesock, apr_po
         return APR_ENOPOOL;
     }
     if ((*sock) == NULL) {
-        (*sock) = (apr_socket_t *)apr_palloc(cont, sizeof(apr_socket_t));
-        (*sock)->cntxt = cont;
+        alloc_socket(sock, cont);
+        set_socket_vars(*sock, AF_INET);
     }
     (*sock)->socketdes = *thesock;
     return APR_SUCCESS;
