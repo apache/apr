@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Don't segfault trying to close a file in error paths of flock
+     and fcntl mutex creation.  PR 19036  [Jeff Trawick]
+
   *) Add %pT support to apr_snprintf() for printing an apr_os_thread_t.
      [Jeff Trawick]
 
