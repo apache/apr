@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/01 23:42:33 $]
+Last modified at [$Date: 2002/05/02 13:45:34 $]
 
 Release:
 
@@ -81,6 +81,13 @@ CURRENT VOTES:
                   in my opinion.  That said, I am not going to be the
                   one spending time on this, since asm on various
                   processors isn't really my game)
+          Jim     (who thinks we'll need to reformat this vote) Any time
+                  you make use of processor specific code for optimizations
+                  or capability, you run into portability concerns. The
+                  real option is to make atomics a compile-time option.
+                  YES means you use the atomics code, based on the *build*
+                  machine (and therefore carries some dependencies) or
+                  NO which maintains "universal" portabiity.
       -1: IanH I don't agree. I think APR is the perfect place this kind of thing. 
                   For platforms that support it is a big win, for ones which don't
                   they are no worse off than the alternative.
