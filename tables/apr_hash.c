@@ -344,12 +344,12 @@ APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
      * overlay->a.pool and base->a.pool have a life span at least
      * as long as p
      */
-    if (!apr_pool_is_ancestor(overlay->a.pool, p)) {
+    if (!apr_pool_is_ancestor(overlay->pool, p)) {
         fprintf(stderr, 
                 "apr_hash_overlay: overlay's pool is not an ancestor of p\n");
         abort();
     }
-    if (!apr_pool_is_ancestor(base->a.pool, p)) {
+    if (!apr_pool_is_ancestor(base->pool, p)) {
         fprintf(stderr, 
                 "apr_hash_overlay: base's pool is not an ancestor of p\n");
         abort();
