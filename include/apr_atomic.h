@@ -193,28 +193,28 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
  * Remapping function pointer type to accept apr_uint32_t's type-safely
  * as the arguments for as our apr_atomic_foo32 Functions
  */
-typedef WINBASEAPI apr_uint32_t (WINAPI apr_atomic_win32_ptr_fn)
+typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_fn)
                                            (apr_uint32_t volatile *);
-typedef WINBASEAPI apr_uint32_t (WINAPI apr_atomic_win32_ptr_val_fn)
+typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_fn)
                                            (apr_uint32_t volatile *, 
                                             apr_uint32_t);
-typedef WINBASEAPI apr_uint32_t (WINAPI apr_atomic_win32_ptr_val_val_fn)
+typedef WINBASEAPI apr_uint32_t (WINAPI * apr_atomic_win32_ptr_val_val_fn)
                                            (apr_uint32_t volatile *, 
                                             apr_uint32_t, apr_uint32_t);
 
 #define apr_atomic_add32(mem, val)      \
     ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem,val)
 #define apr_atomic_sub32(mem, val)      \
-    ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeSub)(mem,val)
+    ((apr_atomic_win32_ptr_val_fn)InterlockedExchangeAdd)(mem,-(val))
 #define apr_atomic_inc32(mem)           \
     ((apr_atomic_win32_ptr_fn)InterlockedIncrement)(mem)
 #define apr_atomic_dec32(mem)           \
     ((apr_atomic_win32_ptr_fn)InterlockedDecrement)(mem)
 #define apr_atomic_set32(mem, val)      \
     ((apr_atomic_win32_ptr_val_fn)InterlockedExchange)(mem,val)
-#define apr_atomic_read32(mem)          (*mem)
+#define apr_atomic_read32(mem)          (*(mem))
 #define apr_atomic_cas32(mem,with,cmp)  \
-    ((apr_atomic_win32_ptr_val_val_fn)InterlockedCompareExchange)(mem,val)
+    ((apr_atomic_win32_ptr_val_val_fn)InterlockedCompareExchange)(mem,with,cmp)
 #define apr_atomic_xchg32(mem,val)      \
     ((apr_atomic_win32_ptr_val_fn)InterlockedExchange)(mem,val)
 
