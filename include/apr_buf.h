@@ -197,11 +197,8 @@ struct ap_bucket_mmap {
     ap_mmap_t *data;
 };
 
-/* Create a read/write memory bucket */
+/* Create a mmap memory bucket */
 APR_EXPORT(ap_bucket_mmap *) ap_mmap_bucket_create(void);
-
-/* destroy a read/write memory bucket */
-APR_EXPORT(void) ap_mmap_bucket_destroy(void *e);
 
 /* Convert a mmap bucket into a char * */
 APR_EXPORT(char *) ap_mmap_get_char_str(ap_bucket_mmap *b);
