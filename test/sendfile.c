@@ -352,7 +352,6 @@ static int client(client_socket_mode_t socket_mode, char *host)
         pfd.client_data = NULL;
 
         rv = apr_pollset_add(pset, &pfd);        
-//       rv = apr_poll_socket_add(pfd, sock, APR_POLLOUT);
         assert(!rv);
 
         total_bytes_sent = 0;
