@@ -215,6 +215,22 @@ typedef int               ap_signum_t;
 #define XtOffsetOf(s_type,field) XtOffset(s_type*,field)
 #endif
 
+/* A couple of prototypes for functions in case some platform doesn't 
+ * have it
+ */
+#if (!APR_HAVE_STRCASECMP) && (APR_HAVE_STRICMP) 
+#define strcasecmp(s1, s2) stricmp(s1, s2)
+#elif (!APR_HAVE_STRCASECMP)
+int strcasecmp(const char *a, const char *b);
+#endif
+
+#if (!APR_HAVE_STRNCASECMP) && (APR_HAVE_STRNICMP)
+#define strncasecmp(s1, s2) strnicmp(s1, s2)
+#elif (!APR_HAVE_STRNCASECMP)
+int strncasecmp(const char *a, const char *b, size_t n);
+#endif
+
+
 #if APR_HAS_RANDOM
 /*
 
