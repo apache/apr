@@ -271,14 +271,7 @@ APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newpool,
 #endif
 #endif
 
-/**
- * This function is deprecated.  Use apr_pool_create_ex.
- * @param newpool The new sub-pool
- * @param parent The pool to use as a parent pool
- * @param apr_abort A function to use if the pool cannot allocate more memory.
- * @remark The @a apr_abort function provides a way to quit the program if the
- *      machine is out of memory.  By default, APR will return on error.
- */
+/** @deprecated @see apr_pool_create_ex */
 #if APR_POOL_DEBUG
 #define apr_pool_sub_make(newpool, parent, abort_fn) \
     (void)apr_pool_create_ex_debug(newpool, parent, abort_fn, \
@@ -425,6 +418,10 @@ APR_DECLARE(void *) apr_pcalloc_debug(apr_pool_t *p, apr_size_t size,
  *      then APR will return an error and expect the calling program to
  *      deal with the error accordingly.
  */
+APR_DECLARE(void) apr_pool_abort_set(apr_abortfunc_t abortfunc,
+                                     apr_pool_t *pool);
+
+/** @deprecated @see apr_pool_abort_set */
 APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
                                      apr_pool_t *pool);
 
@@ -433,6 +430,9 @@ APR_DECLARE(void) apr_pool_set_abort(apr_abortfunc_t abortfunc,
  * @param pool The pool for retrieving the abort function.
  * @return The abort function for the given pool.
  */
+APR_DECLARE(apr_abortfunc_t) apr_pool_abort_get(apr_pool_t *pool);
+
+/** @deprecated @see apr_pool_abort_get */
 APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
 
 /**
@@ -440,6 +440,9 @@ APR_DECLARE(apr_abortfunc_t) apr_pool_get_abort(apr_pool_t *pool);
  * @param pool The pool for retrieving the parent pool.
  * @return The parent of the given pool.
  */
+APR_DECLARE(apr_pool_t *) apr_pool_parent_get(apr_pool_t *pool);
+
+/** @deprecated @see apr_pool_parent_get */
 APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
 
 /**
