@@ -157,7 +157,7 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *mem_sys,
     if (!mem)
         return APR_EINVAL;
 
-    if (!mem_sys->free_fn)
+    if (mem_sys->free_fn)
         return mem_sys->free_fn(mem_sys, mem);  
 
     return APR_ENOTIMPL;
