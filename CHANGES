@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Fix apr_dir_rewind() for Win32 to avoid returning a bogus error.
+     [Jeff Trawick, William Rowe]
+
   *) Detect required libraries first.  This minimizes the libraries
      needed in apr_hints.m4.  [Justin Erenkrantz]
 
