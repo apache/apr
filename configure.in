@@ -585,6 +585,7 @@ dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
 dnl threaded poll() and we don't want to use sendfile on early FreeBSD 
 dnl systems if we are also using threads.
 
+orig_sendfile=$sendfile
 case "$OS" in
     *freebsd*)
         if test `echo "$OS" | sed -e 's/.*\(.\)\.\(.\)/\1\2/'` -le "41"; then
@@ -595,9 +596,11 @@ case "$OS" in
         ;;
     *alpha*-dec-osf* )
         sendfile="0"
-        echo "sendfile support disabled to avoid system problem"
         ;;
 esac       
+if test "$orig_sendfile" != "$sendfile"; then
+  echo "sendfile support disabled to avoid system problem"
+fi
 AC_SUBST(sendfile)
 
 
