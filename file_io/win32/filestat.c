@@ -197,78 +197,66 @@ apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
 
 apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
-    /* WIN32_FILE_ATTRIBUTE_DATA is an exact subset of the first 
-     * entries of WIN32_FIND_DATA
-     * We need to catch the case where fname length == MAX_PATH since for
+    /* Big enough for the Win9x FindFile, but actually the same
+     * initial fields as the GetFileAttributes return structure
+     */
+    WIN32_FIND_DATA FileInformation;
+    apr_oslevel_e os_level;
+
+    /* We need to catch the case where fname length == MAX_PATH since for
      * some strange reason GetFileAttributesEx fails with PATH_NOT_FOUND.
      * We would rather indicate length error than 'not found'
      * since in many cases the apr user is testing for 'not found' 
      * and this is not such a case.
-     */
+     */        
 #if APR_HAS_UNICODE_FS
-    WIN32_FIND_DATAW FileInformation;
-    apr_wchar_t wname[MAX_PATH];
-    int len = MAX_PATH;
-    int lremains = strlen(fname) + 1;
-    apr_oslevel_e os_level;
-    apr_status_t rv;
-    HANDLE hFind;
-    if ((rv = conv_utf8_to_ucs2(fname, &lremains, wname, &len)))
-        return rv;
-    if (lremains)
-        return APR_ENAMETOOLONG;
-    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
+    {
+        apr_wchar_t wname[MAX_PATH];
+        int len = MAX_PATH;
+        int lremains = strlen(fname) + 1;
+        apr_status_t rv;
+        if ((rv = conv_utf8_to_ucs2(fname, &lremains, wname, &len)))
+            return rv;
+        if (lremains)
+            return APR_ENAMETOOLONG;
         if (!GetFileAttributesExW(wname, GetFileExInfoStandard, 
-                                  (WIN32_FILE_ATTRIBUTE_DATA*) &FileInformation)) {
+                                  &FileInformation)) {
             return apr_get_os_error();
         }
     }
-    else {
-        /* What a waste of cpu cycles... but what else can we do?
-         */
-        if (strchr(fname, '*') || strchr(fname, '?'))
-            return APR_ENOENT;
-        hFind = FindFirstFileW(wname, &FileInformation);
-        if (hFind == INVALID_HANDLE_VALUE) {
-            return apr_get_os_error();
-    	} else {
-            FindClose(hFind);
-        }
-    }
+    else
 #else
-    int len = strlen(fname);
-    WIN32_FIND_DATA FileInformation;
-    HANDLE hFind;
-    apr_oslevel_e os_level;
-    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
-    (*new)->entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATA));
-    (*new)->dirname = apr_palloc(cont, len + 3);
-    memcpy((*new)->dirname, dirname, len);
-
-    if (len >= MAX_PATH) {
-        return APR_ENAMETOOLONG;
-    }
-    else if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
-        if (!GetFileAttributesEx(fname, GetFileExInfoStandard, 
-                                 (WIN32_FILE_ATTRIBUTE_DATA*) &FileInformation)) {
-            return apr_get_os_error();
-        }
-    }
-    else {
-        /* What a waste of cpu cycles... but what else can we do?
-         */
-        if (strchr(fname, '*') || strchr(fname, '?'))
-            return APR_ENOENT;
-        hFind = FindFirstFile(fname, &FileInformation);
-        if (hFind == INVALID_HANDLE_VALUE) {
-            return apr_get_os_error();
-    	} else {
-            FindClose(hFind);
-        }
-    }
+    apr_get_oslevel(cont, &os_level);
 #endif
+    {
+        if (strlen(fname) >= MAX_PATH) {
+            return APR_ENAMETOOLONG;
+        }
+        else if (os_level >= APR_WIN_98) 
+        {
+            if (!GetFileAttributesEx(fname, GetFileExInfoStandard, 
+                                     &FileInformation)) {
+                return apr_get_os_error();
+            }
+        }
+        else 
+        {
+            /* What a waste of cpu cycles... but what else can we do?
+             */
+            HANDLE hFind;
+            if (strchr(fname, '*') || strchr(fname, '?'))
+                return APR_ENOENT;
+            hFind = FindFirstFile(fname, &FileInformation);
+            if (hFind == INVALID_HANDLE_VALUE) {
+                return apr_get_os_error();
+    	    } else {
+                FindClose(hFind);
+            }
+        }
+    }
 
-    memset(finfo,'\0', sizeof(*finfo));
+    memset(finfo, '\0', sizeof(*finfo));
     /* Filetype - Directory or file?
      * Short of opening the handle to the file, the 'FileType' appears
      * to be unknowable (in any trustworthy or consistent sense), that
