@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Fix apr_setup_signal_thread() to grab the right error code from
+     a sigprocmask() failure.  This only affects platforms that use
+     sigprocmask() in lieu of pthread_sigmask().  [Jeff Trawick]
+
   *) Fix the Unix HAVE_POLL flavor of apr_poll_socket_mask() so that
      it doesn't segfault.  Avoid some wasted storage in a poll-related
      APR structure.  [INOUE Seiichiro <inoue@ariel-networks.com>]
