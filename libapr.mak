@@ -70,6 +70,7 @@ CLEAN :
 	-@erase "$(INTDIR)\getuuid.obj"
 	-@erase "$(INTDIR)\groupinfo.obj"
 	-@erase "$(INTDIR)\inet_ntop.obj"
+	-@erase "$(INTDIR)\inet_pton.obj"
 	-@erase "$(INTDIR)\locks.obj"
 	-@erase "$(INTDIR)\misc.obj"
 	-@erase "$(INTDIR)\mmap.obj"
@@ -178,6 +179,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\getuuid.obj" \
 	"$(INTDIR)\groupinfo.obj" \
 	"$(INTDIR)\inet_ntop.obj" \
+	"$(INTDIR)\inet_pton.obj" \
 	"$(INTDIR)\locks.obj" \
 	"$(INTDIR)\misc.obj" \
 	"$(INTDIR)\mmap.obj" \
@@ -229,7 +231,6 @@ ALL : "$(OUTDIR)\libapr.dll"
 CLEAN :
 	-@erase "$(INTDIR)\access.obj"
 	-@erase "$(INTDIR)\apr.idb"
-	-@erase "$(INTDIR)\apr.pdb"
 	-@erase "$(INTDIR)\apr_cpystrn.obj"
 	-@erase "$(INTDIR)\apr_fnmatch.obj"
 	-@erase "$(INTDIR)\apr_getpass.obj"
@@ -254,6 +255,7 @@ CLEAN :
 	-@erase "$(INTDIR)\getuuid.obj"
 	-@erase "$(INTDIR)\groupinfo.obj"
 	-@erase "$(INTDIR)\inet_ntop.obj"
+	-@erase "$(INTDIR)\inet_pton.obj"
 	-@erase "$(INTDIR)\locks.obj"
 	-@erase "$(INTDIR)\misc.obj"
 	-@erase "$(INTDIR)\mmap.obj"
@@ -288,10 +290,10 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 CPP=cl.exe
-CPP_PROJ=/nologo /MDd /W3 /GX /Zi /Od /I "./include" /I "./include/arch" /I\
+CPP_PROJ=/nologo /MDd /W3 /GX /Od /I "./include" /I "./include/arch" /I\
  "./include/arch/win32" /I "./include/arch/unix" /D "_DEBUG" /D\
  "APR_DECLARE_EXPORT" /D "WIN32" /D "_WINDOWS" /Fo"$(INTDIR)\\"\
- /Fd"$(INTDIR)\apr" /FD /c 
+ /Fd"$(INTDIR)\apr" /FD /ZI /c 
 CPP_OBJS=.\Debug/
 CPP_SBRS=.
 
@@ -363,6 +365,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\getuuid.obj" \
 	"$(INTDIR)\groupinfo.obj" \
 	"$(INTDIR)\inet_ntop.obj" \
+	"$(INTDIR)\inet_pton.obj" \
 	"$(INTDIR)\locks.obj" \
 	"$(INTDIR)\misc.obj" \
 	"$(INTDIR)\mmap.obj" \
@@ -758,7 +761,6 @@ DEP_CPP_UUID_=\
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
-SOURCE=.\file_io\win32\canonfile.c
 SOURCE=.\file_io\win32\dir.c
 DEP_CPP_DIR_C=\
 	".\include\apr.h"\
@@ -1075,6 +1077,27 @@ DEP_CPP_INET_=\
 	
 
 "$(INTDIR)\inet_ntop.obj" : $(SOURCE) $(DEP_CPP_INET_) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\network_io\unix\inet_pton.c
+DEP_CPP_INET_P=\
+	".\include\apr.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_general.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\include\arch\win32\networkio.h"\
+	
+
+"$(INTDIR)\inet_pton.obj" : $(SOURCE) $(DEP_CPP_INET_P) "$(INTDIR)"\
  ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
