@@ -685,6 +685,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
 #define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
                 || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
+#define APR_STATUS_IS_EFTYPE(s)         ((s) == APR_EFTYPE)
 #define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE \
                 || (s) == APR_OS_START_SYSERR + ERROR_BROKEN_PIPE)
 
@@ -750,6 +751,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EHOSTUNREACH(s)    ((s) == APR_EHOSTUNREACH)
 #define APR_STATUS_IS_ENETUNREACH(s)     ((s) == APR_ENETUNREACH)
 #define APR_STATUS_IS_EFTYPE(s)          ((s) == APR_EFTYPE)
+#define APR_STATUS_IS_EPIPE(s)           ((s) == APR_EPIPE)
 
 #endif /* !def OS2 || WIN32 */
 
