@@ -66,6 +66,7 @@ install: $(TARGET_LIB)
 	fi; \
 	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
 	$(LIBTOOL) --mode=install cp APRVARS $(libdir)
+	$(LIBTOOL) --mode=install cp apr.exp $(libdir)
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
 	        ( cd $$i ; $(MAKE) install ); \
