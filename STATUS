@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/02/24 23:21:11 $]
+Last modified at [$Date: 2003/03/07 21:38:40 $]
 
 Release:
 
@@ -25,7 +25,6 @@ RELEASE SHOWSTOPPERS:
       (Those problems have been fixed, but it is a good example of
       what to look for.)
       Some headers with issues: 
-        apr_md5.h             (MD5_DIGESTSIZE)
         apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD, 
                               _POSIX_THREAD_SAFE_FUNCTIONS (?))
         apr.hw                (NO_USE_SIGACTION)
