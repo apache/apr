@@ -1,8 +1,3 @@
-#CFLAGS=$(OPTIM) $(CFLAGS1) $(EXTRA_CFLAGS)
-#LIBS=$(EXTRA_LIBS) $(LIBS1)
-#INCLUDES=$(INCLUDES1) $(INCLUDES0) $(EXTRA_INCLUDES)
-#LDFLAGS=$(LDFLAGS1) $(EXTRA_LDFLAGS)
-
 RM=@RM@
 CC=@CC@
 AR=@AR@
@@ -13,6 +8,7 @@ LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../include
 INCDIR1=mm
 INCLUDES=-I$(INCDIR) -I$(INCDIR1)
+MKDEP=../../helpers/mkdep.sh
 
 LIB=libshmem.a
 
@@ -39,21 +35,7 @@ $(LIB): $(OBJS)
 	$(AR) cr $@ $(OBJS)
 	$(RANLIB) $@
 
-#
-# We really don't expect end users to use this rule.  It works only with
-# gcc, and rebuilds Makefile.in.  You have to re-run configure after
-# using it.
-#
 depend:
-	cp Makefile.in Makefile.in.bak \
-	    && sed -ne '1,/^# DO NOT REMOVE/p' Makefile.in > Makefile.new \
-	    && gcc -MM $(INCLUDES) $(CFLAGS) *.c >> Makefile.new \
-	    && sed -e '1,$$s: $(INCDIR)/: $$(INCDIR)/:g' \
-	           -e '1,$$s: $(OSDIR)/: $$(OSDIR)/:g' Makefile.new \
-		> Makefile.in \
-	    && rm Makefile.new
+	$(MKDEP) $(INCLUDES) $(CFLAGS) *.c
 
 # DO NOT REMOVE
-shmem.o: shmem.c mm/mm.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
- $(INCDIR)/apr_shmem.h
