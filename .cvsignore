@@ -15,7 +15,7 @@ Release
 *.plg
 apr.exp
 exports.c
-export_vars.h
+export_vars.[ch]
 .libs
 .deps
 *.la
