@@ -506,7 +506,7 @@ else
           threads="1"
           pthreadh="1"
           pthreadser="1"
-          AC_DEFINE(USE_THREADS) ], [
+          AC_DEFINE(USE_THREADS, 1, [Define if APR supports threads]) ], [
           threads="0"
           pthreadh="0"
           pthreadser="0"
@@ -567,18 +567,22 @@ ac_cv_define_GETHOSTBYNAME_IS_THREAD_SAFE=no
 ac_cv_define_GETHOSTBYADDR_IS_THREAD_SAFE=no
 if test "$threads" = "1"; then
     echo "APR will use threads"
-    AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
+    AC_CHECK_LIB(c_r, readdir,
+        AC_DEFINE(READDIR_IS_THREAD_SAFE, 1, 
+                  [Define if readdir is thread safe]))
     if test "x$apr_gethostbyname_is_thread_safe" = "x"; then
         AC_CHECK_LIB(c_r, gethostbyname, apr_gethostbyname_is_thread_safe=yes)
     fi
     if test "$apr_gethostbyname_is_thread_safe" = "yes"; then
-        AC_DEFINE(GETHOSTBYNAME_IS_THREAD_SAFE)
+        AC_DEFINE(GETHOSTBYNAME_IS_THREAD_SAFE, 1,
+                  [Define if gethostbyname is thread safe])
     fi
     if test "x$apr_gethostbyaddr_is_thread_safe" = "x"; then
         AC_CHECK_LIB(c_r, gethostbyaddr, apr_gethostbyaddr_is_thread_safe=yes)
     fi
     if test "$apr_gethostbyaddr_is_thread_safe" = "yes"; then
-        AC_DEFINE(GETHOSTBYADDR_IS_THREAD_SAFE)
+        AC_DEFINE(GETHOSTBYADDR_IS_THREAD_SAFE, 1, 
+                  [Define if gethostbyaddr is thread safe])
     fi
     AC_CHECK_FUNCS(gethostbyname_r gethostbyaddr_r)
 
@@ -1310,9 +1314,9 @@ if test "$tempdso" = "no"; then
     aprdso="0"
 else
     case "$tempdso" in
-	dlfcn) AC_DEFINE(DSO_USE_DLFCN);;
-	shl)   AC_DEFINE(DSO_USE_SHL);;
-	dyld)  AC_DEFINE(DSO_USE_DYLD);;
+    dlfcn) AC_DEFINE(DSO_USE_DLFCN, 1, [Define if DSO support uses dlfcn.h]);;
+    shl)   AC_DEFINE(DSO_USE_SHL, 1, [Define if DSO support uses shl_load]);;
+    dyld)  AC_DEFINE(DSO_USE_DYLD, 1, [Define if DSO support uses dyld.h]);;
     esac
     aprdso="1"
     apr_modules="$apr_modules dso"
@@ -1343,7 +1347,7 @@ APR_TRY_COMPILE_NO_WARNING([],
 ], vla_msg=yes, vla_msg=no )
 AC_MSG_RESULT([$vla_msg])
 if test "$vla_msg" = "yes"; then
-    AC_DEFINE(HAVE_VLA)
+    AC_DEFINE(HAVE_VLA, 1, [Define if C compiler supports VLA])
 fi
 
 AC_CACHE_CHECK(struct rlimit,ac_cv_struct_rlimit,[
@@ -1567,7 +1571,8 @@ AC_SUBST(proclockglobal)
 
 AC_MSG_CHECKING(if Posix sems affect threads in the same process)
 if test "x$apr_posixsem_is_global" = "xyes"; then
-  AC_DEFINE(POSIXSEM_IS_GLOBAL)
+  AC_DEFINE(POSIXSEM_IS_GLOBAL, 1, 
+            [Define if POSIX semaphores affect threads within the process])
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
@@ -1575,7 +1580,8 @@ fi
 
 AC_MSG_CHECKING(if SysV sems affect threads in the same process)
 if test "x$apr_sysvsem_is_global" = "xyes"; then
-  AC_DEFINE(SYSVSEM_IS_GLOBAL)
+  AC_DEFINE(SYSVSEM_IS_GLOBAL, 1,
+            [Define if SysV semaphores affect threads within the process])
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
@@ -1583,7 +1589,8 @@ fi
 
 AC_MSG_CHECKING(if fcntl locks affect threads in the same process)
 if test "x$apr_fcntl_is_global" = "xyes"; then
-  AC_DEFINE(FCNTL_IS_GLOBAL)
+  AC_DEFINE(FCNTL_IS_GLOBAL, 1,
+            [Define if fcntl locks affect threads within the process])
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
@@ -1591,7 +1598,8 @@ fi
 
 AC_MSG_CHECKING(if flock locks affect threads in the same process)
 if test "x$apr_flock_is_global" = "xyes"; then
-  AC_DEFINE(FLOCK_IS_GLOBAL)
+  AC_DEFINE(FLOCK_IS_GLOBAL, 1,
+            [Define if flock locks affect threads within the process])
   AC_MSG_RESULT(yes)
 else
   AC_MSG_RESULT(no)
@@ -1602,9 +1610,10 @@ AC_MSG_CHECKING(for entropy source)
 
 AC_ARG_WITH(egd, 
   [  --with-egd[[=<path>]]       use egd-compatible socket],
-  [ AC_DEFINE(HAVE_EGD)
+  [ AC_DEFINE(HAVE_EGD, 1, [Define if EGD is supported])
     if test "$withval" = "yes"; then
-        AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, ["/var/run/egd-pool","/dev/egd-pool","/etc/egd-pool","/etc/entropy"])
+        AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, ["/var/run/egd-pool","/dev/egd-pool","/etc/egd-pool","/etc/entropy"], 
+         [Define to list of paths to EGD sockets])
     else
         AC_DEFINE_UNQUOTED(EGD_DEFAULT_SOCKET, ["$withval"])
     fi
@@ -1619,7 +1628,7 @@ if test "$rand" != "1"; then
 
   if test "$apr_devrandom" = "yes"; then
     if test -r "/dev/random"; then
-      AC_DEFINE(DEV_RANDOM, [/dev/random])
+      AC_DEFINE(DEV_RANDOM, [/dev/random], [Define to path of random device])
       AC_MSG_RESULT(/dev/random)
       rand="1"
     elif test -r "/dev/arandom"; then
@@ -1652,7 +1661,7 @@ if test "$rand" != "1"; then
         *)
             if test "$rand" != "1"; then
               if test "$ac_cv_lib_truerand_main" = "yes"; then
-                AC_DEFINE(HAVE_TRUERAND)
+                AC_DEFINE(HAVE_TRUERAND, 1, [Define if truerand is supported])
                 AC_MSG_RESULT(truerand)
                 rand="1"
               else
@@ -1673,7 +1682,7 @@ AC_CACHE_CHECK([for tm_gmtoff in struct tm], ac_cv_struct_tm_gmtoff,
   ac_cv_struct_tm_gmtoff=yes, ac_cv_struct_tm_gmtoff=no)])
 
 if test "$ac_cv_struct_tm_gmtoff" = "yes"; then
-    AC_DEFINE(HAVE_GMTOFF)
+    AC_DEFINE(HAVE_GMTOFF, 1, [Define if struct tm has a tm_gmtoff field])
 fi
 
 dnl ----------------------------- Checking for Networking Support 
