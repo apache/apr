@@ -266,7 +266,7 @@ void apr_random_add_entropy(apr_random_t *g,const void *entropy_,
 	rekey(g);
 }
 
-// This will give g->B_size bytes of randomness
+/* This will give g->B_size bytes of randomness */
 static void apr_random_block(apr_random_t *g,unsigned char *random)
 {
     /* FIXME: in principle, these are different hashes */
