@@ -144,6 +144,54 @@ ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in,
     return APR_SUCCESS;
 }
 
+ap_status_t ap_setprocattr_childin(ap_procattr_t *attr, ap_file_t *child_in,
+                                   ap_file_t *parent_in)
+{
+    if (attr->child_in == NULL && attr->parent_in == NULL)
+        ap_create_pipe(&attr->child_in, &attr->parent_in, attr->cntxt);
+
+    if (child_in != NULL)
+        ap_dupfile(&attr->child_in, child_in, attr->cntxt);
+
+    if (parent_in != NULL)
+        ap_dupfile(&attr->parent_in, parent_in, attr->cntxt);
+
+    return APR_SUCCESS;
+}
+
+
+ap_status_t ap_setprocattr_childout(ap_procattr_t *attr, ap_file_t *child_out,
+                                    ap_file_t *parent_out)
+{
+    if (attr->child_out == NULL && attr->parent_out == NULL)
+        ap_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
+
+    if (child_out != NULL)
+        ap_dupfile(&attr->child_out, child_out, attr->cntxt);
+
+    if (parent_out != NULL)
+        ap_dupfile(&attr->parent_out, parent_out, attr->cntxt);
+
+    return APR_SUCCESS;
+}
+
+
+ap_status_t ap_setprocattr_childerr(ap_procattr_t *attr, ap_file_t *child_err,
+                                   ap_file_t *parent_err)
+{
+    if (attr->child_err == NULL && attr->parent_err == NULL)
+        ap_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
+
+    if (child_err != NULL)
+        ap_dupfile(&attr->child_err, child_err, attr->cntxt);
+
+    if (parent_err != NULL)
+        ap_dupfile(&attr->parent_err, parent_err, attr->cntxt);
+
+    return APR_SUCCESS;
+}
+
+
 ap_status_t ap_setprocattr_dir(ap_procattr_t *attr, const char *dir)
 {
     attr->currdir = ap_pstrdup(attr->cntxt, dir);
@@ -166,24 +214,24 @@ ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont)
+ap_status_t ap_fork(ap_proc_t *proc, ap_pool_t *cont)
 {
     int pid;
     
-    (*proc) = ap_palloc(cont, sizeof(ap_proc_t));
-
     if ((pid = fork()) < 0) {
         return errno;
-    } else if (pid == 0) {
-        (*proc)->pid = pid;
-        (*proc)->attr = NULL;
-        (*proc)->running = TRUE;
+    }
+    else if (pid == 0) {
+        proc->pid = pid;
+        proc->in = NULL; 
+        proc->out = NULL; 
+        proc->err = NULL; 
         return APR_INCHILD;
     }
-
-    (*proc)->pid = pid;
-    (*proc)->attr = NULL;
-    (*proc)->running = TRUE;
+    proc->pid = pid;
+    proc->in = NULL; 
+    proc->out = NULL; 
+    proc->err = NULL; 
     return APR_INPARENT;
 }
 
@@ -217,7 +265,7 @@ static char *double_quotes(ap_pool_t *cntxt, char *str)
 
 
 
-ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
+ap_status_t ap_create_process(ap_proc_t *proc, const char *progname,
                               char *const args[], char **env,
                               ap_procattr_t *attr, ap_pool_t *cont)
 {
@@ -234,15 +282,6 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     int env_len, e;
     char *env_block, *env_block_pos;
     RESULTCODES rescodes;
-
-    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->cntxt = cont;
-    (*new)->running = FALSE;
 
     /* Prevent other threads from running while these process-wide resources are modified */
     if (attr->child_in || attr->child_out || attr->child_err || attr->currdir) {
@@ -402,7 +441,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
                         attr->detached ? EXEC_BACKGROUND : EXEC_ASYNCRESULT,
                         cmdline, env_block, &rescodes, cmdline);
 
-    (*new)->pid = rescodes.codeTerminate;
+    proc->pid = rescodes.codeTerminate;
 
     if (attr->currdir != NULL) {
         chdir(savedir);
@@ -432,32 +471,15 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     if (criticalsection)
         DosExitCritSec();
 
-    (*new)->attr = attr;
-    (*new)->running = status == APR_SUCCESS;
+    proc->in = attr->parent_in;
+    proc->err = attr->parent_err;
+    proc->out = attr->parent_out;
     return status;
 }
 
 
 
-ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_in;
-    return APR_SUCCESS; 
-}
-
-ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_out; 
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_err; 
-    return APR_SUCCESS;
-}    
-
-ap_status_t ap_wait_proc(ap_proc_t *proc, 
+ap_status_t ap_wait_proc(ap_proc_t *proc,
                            ap_wait_how_e wait)
 {
     RESULTCODES codes;
@@ -467,13 +489,9 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
     if (!proc)
         return APR_ENOPROC;
 
-    if (!proc->running)
-        return APR_CHILD_DONE;
-
     rc = DosWaitChild(DCWA_PROCESS, wait == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, proc->pid);
 
     if (rc == 0) {
-        proc->running = 0;
         return APR_CHILD_DONE;
     } else if (rc == ERROR_CHILD_NOT_COMPLETE) {
         return APR_CHILD_NOTDONE;
