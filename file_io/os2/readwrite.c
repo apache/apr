@@ -1,4 +1,4 @@
-/* ====================================================================
+os2//* ====================================================================
  * The Apache Software License, Version 1.1
  *
  * Copyright (c) 2000 The Apache Software Foundation.  All rights
@@ -55,7 +55,7 @@
 #define INCL_DOS
 #define INCL_DOSERRORS
 
-#include "fileio.h"
+#include "os2/fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
 
