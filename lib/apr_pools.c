@@ -97,64 +97,9 @@
 #include <malloc.h>
 #endif
 
-/*
- * Debugging support: Define this to enable code which helps detect re-use
- * of freed memory and other such nonsense.
- *
- * The theory is simple.  The FILL_BYTE (0xa5) is written over all malloc'd
- * memory as we receive it, and is written over everything that we free up
- * during a clear_pool.  We check that blocks on the free list always
- * have the FILL_BYTE in them, and we check during palloc() that the bytes
- * still have FILL_BYTE in them.  If you ever see garbage URLs or whatnot
- * containing lots of 0xa5s then you know something used data that's been
- * freed or uninitialized.
- */
-/* #define ALLOC_DEBUG */
-
-/*
- * Debugging support: If defined all allocations will be done with
- * malloc and free()d appropriately at the end.  This is intended to be
- * used with something like Electric Fence or Purify to help detect
- * memory problems.  Note that if you're using efence then you should also
- * add in ALLOC_DEBUG.  But don't add in ALLOC_DEBUG if you're using Purify
- * because ALLOC_DEBUG would hide all the uninitialized read errors that
- * Purify can diagnose.
- */
-/* #define ALLOC_USE_MALLOC */
-
-/*
- * Pool debugging support:  This is intended to detect cases where the
- * wrong pool is used when assigning data to an object in another pool.
- * In particular, it causes the table_{set,add,merge}n routines to check
- * that their arguments are safe for the ap_table_t they're being placed in.
- * It currently only works with the unix multiprocess model, but could
- * be extended to others.
- */
-/* #define POOL_DEBUG */
-
-/*
- * Provide diagnostic information about make_table() calls which are
- * possibly too small.  This requires a recent gcc which supports
- * __builtin_return_address().  The error_log output will be a
- * message such as:
- *    table_push: ap_table_t created by 0x804d874 hit limit of 10
- * Use "l *0x804d874" to find the source that corresponds to.  It
- * indicates that a ap_table_t allocated by a call at that address has
- * possibly too small an initial ap_table_t size guess.
- */
-/* #define MAKE_TABLE_PROFILE */
-
-/*
- * Provide some statistics on the cost of allocations.  It requires a
- * bit of an understanding of how alloc.c works.
- */
-/* #define ALLOC_STATS */
-
-
-/* used to guarantee to the ap_pool_t debugging code that the sub ap_pool_t will not be
- * destroyed before the parent pool
- */
-
+/* Details of the debugging options can now be found in the developer
+ * section of the documentaion. */
+ 
 #ifdef POOL_DEBUG
 /* first do some option checking... */
 #ifdef ALLOC_USE_MALLOC
