@@ -100,7 +100,8 @@ static void *apr_sms_tracking_malloc(apr_sms_t *sms,
         return NULL;
 
     tms = (apr_sms_tracking_t *)sms;
-    apr_lock_acquire(tms->lock);
+    if (tms->lock)
+        apr_lock_acquire(tms->lock);
 
     node->next = tms->nodes;
     tms->nodes = node;
@@ -108,7 +109,8 @@ static void *apr_sms_tracking_malloc(apr_sms_t *sms,
     if (node->next)
         node->next->ref = &node->next;
 
-    apr_lock_release(tms->lock);
+    if (tms->lock)
+        apr_lock_release(tms->lock);
 
     node++;
 
@@ -127,7 +129,8 @@ static void *apr_sms_tracking_calloc(apr_sms_t *sms,
         return NULL;
 
     tms = (apr_sms_tracking_t *)sms;
-    apr_lock_acquire(tms->lock);
+    if (tms->lock)
+        apr_lock_acquire(tms->lock);
 
     node->next = tms->nodes;
     tms->nodes = node;
@@ -135,7 +138,8 @@ static void *apr_sms_tracking_calloc(apr_sms_t *sms,
     if (node->next)
         node->next->ref = &node->next;
 
-    apr_lock_release(tms->lock);
+    if (tms->lock)
+        apr_lock_release(tms->lock);
 
     node++;
 
@@ -149,19 +153,20 @@ static void *apr_sms_tracking_realloc(apr_sms_t *sms,
     apr_track_node_t *node;
 
     tms = (apr_sms_tracking_t *)sms;
-
-
     node = (apr_track_node_t *)mem;
 
     if (node) {
         node--;
-        apr_lock_acquire(tms->lock);
+
+        if (tms->lock)
+            apr_lock_acquire(tms->lock);
         
         *(node->ref) = node->next;
         if (node->next)
             node->next->ref = node->ref;
-        
-        apr_lock_release(tms->lock);
+
+        if (tms->lock)
+            apr_lock_release(tms->lock);
     }
 
     node = apr_sms_realloc(sms->parent,
@@ -169,7 +174,8 @@ static void *apr_sms_tracking_realloc(apr_sms_t *sms,
     if (!node)
         return NULL;
 
-    apr_lock_acquire(tms->lock);
+    if (tms->lock)
+        apr_lock_acquire(tms->lock);
     
     node->next = tms->nodes;
     tms->nodes = node;
@@ -177,7 +183,8 @@ static void *apr_sms_tracking_realloc(apr_sms_t *sms,
     if (node->next)
         node->next->ref = &node->next;
 
-    apr_lock_release(tms->lock);
+    if (tms->lock)
+        apr_lock_release(tms->lock);
     
     node++;
 
@@ -195,13 +202,15 @@ static apr_status_t apr_sms_tracking_free(apr_sms_t *sms,
 
     tms = (apr_sms_tracking_t *)sms;
  
-    apr_lock_acquire(tms->lock);
+    if (tms->lock)
+        apr_lock_acquire(tms->lock);
 
     *(node->ref) = node->next;
     if (node->next)
         node->next->ref = node->ref;
  
-    apr_lock_release(tms->lock);
+    if (tms->lock)
+        apr_lock_release(tms->lock);
          
     return apr_sms_free(sms->parent, node);
 }
@@ -214,7 +223,8 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *sms)
  
     tms = (apr_sms_tracking_t *)sms;
 
-    apr_lock_acquire(tms->lock);
+    if (tms->lock)
+        apr_lock_acquire(tms->lock);
     
     while (tms->nodes) {
         node = tms->nodes;
@@ -223,12 +233,15 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *sms)
             node->next->ref = node->ref;
         if ((rv = apr_sms_free(sms->parent, 
                                node)) != APR_SUCCESS) {
-            apr_lock_release(tms->lock);
+            if (tms->lock) {
+                apr_lock_release(tms->lock);
+            }
             return rv;
         }
     }
     
-    apr_lock_release(tms->lock);
+    if (tms->lock)
+        apr_lock_release(tms->lock);
 
     return APR_SUCCESS;
 }
@@ -244,9 +257,12 @@ static apr_status_t apr_sms_tracking_pre_destroy(apr_sms_t *sms)
     apr_sms_tracking_t *tms;
  
     tms = (apr_sms_tracking_t *)sms;
-    apr_lock_acquire(tms->lock);
-    apr_lock_destroy(tms->lock);
-    tms->lock = NULL;
+
+    if (tms->lock) {
+        apr_lock_acquire(tms->lock);
+        apr_lock_destroy(tms->lock);
+        tms->lock = NULL;
+    }
     
     return APR_SUCCESS;    
 }
@@ -254,26 +270,9 @@ static apr_status_t apr_sms_tracking_pre_destroy(apr_sms_t *sms)
 static apr_status_t apr_sms_tracking_destroy(apr_sms_t *sms)
 {
     apr_status_t rv;
-    apr_sms_tracking_t *tms;
-    apr_track_node_t *node;
-    
-    tms = (apr_sms_tracking_t *)sms;
- 
-    /* XXX - As we've already had the lock we've been using destroyed
-     * in the pre_destroy function we can't use it.  However, if we
-     * have threads trying to use the sms while another is trying to
-     * destroy it, then we have serious problems anyway.
-     */
-    while (tms->nodes) {
-        node = tms->nodes;
-        *(node->ref) = node->next;
-        if (node->next)
-            node->next->ref = node->ref;
-        if ((rv = apr_sms_free(sms->parent, node)) != APR_SUCCESS)
-            return rv;
-    }
-    
-    return apr_sms_free(sms->parent, sms);
+
+    if ((rv = apr_sms_reset(sms)) != APR_SUCCESS)
+        return rv;
 }
 
 
