@@ -63,12 +63,21 @@
 #define APR_HAVE_SYS_WAIT_H      @sys_waith@
 #define APR_HAVE_UNISTD_H        @unistdh@
 
-#define APR_USE_SHMEM_MMAP_TMP   @usemmaptmp@
-#define APR_USE_SHMEM_MMAP_SHM   @usemmapshm@
-#define APR_USE_SHMEM_MMAP_ZERO  @usemmapzero@
-#define APR_USE_SHMEM_SHMGET     @useshmget@
-#define APR_USE_SHMEM_MMAP_ANON  @usemmapanon@
-#define APR_USE_SHMEM_BEOS       @usebeosarea@
+#define APR_HAVE_SHMEM_MMAP_TMP     @havemmaptmp@
+#define APR_HAVE_SHMEM_MMAP_SHM     @havemmapshm@
+#define APR_HAVE_SHMEM_MMAP_ZERO    @havemmapzero@
+#define APR_HAVE_SHMEM_SHMGET_ANON  @haveshmgetanon@
+#define APR_HAVE_SHMEM_SHMGET       @haveshmget@
+#define APR_HAVE_SHMEM_MMAP_ANON    @havemmapanon@
+#define APR_HAVE_SHMEM_BEOS         @havebeosarea@
+
+#define APR_USE_SHMEM_MMAP_TMP     @usemmaptmp@
+#define APR_USE_SHMEM_MMAP_SHM     @usemmapshm@
+#define APR_USE_SHMEM_MMAP_ZERO    @usemmapzero@
+#define APR_USE_SHMEM_SHMGET_ANON  @useshmgetanon@
+#define APR_USE_SHMEM_SHMGET       @useshmget@
+#define APR_USE_SHMEM_MMAP_ANON    @usemmapanon@
+#define APR_USE_SHMEM_BEOS         @usebeosarea@
 
 #define APR_USE_FLOCK_SERIALIZE           @flockser@ 
 #define APR_USE_SYSVSEM_SERIALIZE         @sysvser@
@@ -83,21 +92,6 @@
 #define APR_HAS_RWLOCK_SERIALIZE          @hasrwlockser@
 
 #define APR_PROCESS_LOCK_IS_GLOBAL        @proclockglobal@
-
-#define APR_USES_ANONYMOUS_SHM            @anonymous_shm@
-#define APR_USES_FILEBASED_SHM            @filebased_shm@
-#define APR_USES_KEYBASED_SHM             @keybased_shm@
-
-/* These look VERY similar to the macro's above.  They aren't.  The
- * difference is in implementation.  The above macros describe how to
- * access the shared memory, either anonymously, through a key or through
- * a file.  The macros defined below describe actually how the shared
- * memory is actually implemented.  Is it actually a file that has been
- * opened by multiple processes, or it is stored in memory somehow.  This
- * is important for some optimizations in Apache.
- */ 
-#define APR_FILE_BASED_SHM      @file_based@
-#define APR_MEM_BASED_SHM       @mem_based@
 
 #define APR_HAVE_CORKABLE_TCP   @have_corkable_tcp@ 
 #define APR_HAVE_GETRLIMIT      @have_getrlimit@

@@ -65,9 +65,7 @@ struct apr_shmem_t {
     Heap_t heap;
 };
 
-
-
-APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, const char *filename, apr_pool_t *cont)
 {
     int rc;
     apr_shmem_t *newm = (apr_shmem_t *)apr_palloc(cont, sizeof(apr_shmem_t));
@@ -92,8 +90,6 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize, cons
     return APR_SUCCESS;
 }
 
-
-
 APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
 {
     _uclose(m->heap);
@@ -102,62 +98,24 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shmem_t *m)
     return APR_SUCCESS;
 }
 
-
-
-APR_DECLARE(void *) apr_shm_malloc(apr_shmem_t *m, apr_size_t reqsize)
+APR_DECLARE(apr_status_t) apr_shm_attach(apr_shmem_t **m,
+                                         const char *filename,
+                                         apr_pool_t *pool)
 {
-    return _umalloc(m->heap, reqsize);
-}
-
-
-
-APR_DECLARE(void *) apr_shm_calloc(apr_shmem_t *m, apr_size_t size)
-{
-    return _ucalloc(m->heap, size, 1);
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_shm_free(apr_shmem_t *m, void *entity)
-{
-    free(entity);
-    return APR_SUCCESS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
-{
-    *name = NULL;
-    return APR_ANONYMOUS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
-{
-    return APR_ANONYMOUS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_shm_open(apr_shmem_t *m)
-{
-    int rc;
-
-    rc = DosGetSharedMem(m->memblock, PAG_READ|PAG_WRITE);
-
-    if (rc)
-        return APR_OS2_STATUS(rc);
-
-    _uopen(m->heap);
-    return APR_SUCCESS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_shm_avail(apr_shmem_t *c, apr_size_t *size)
-{
-
     return APR_ENOTIMPL;
 }
+
+APR_DECLARE(apr_status_t) apr_shm_detach(apr_shmem_t *m)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
+{
+    return APR_ENOTIMPL;
+
