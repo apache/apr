@@ -22,15 +22,6 @@
 
 #if APR_HAS_OTHER_CHILD
 
-/* XXX I'm sure there has to be a better way to do this ... */
-#ifdef WIN32
-#define EXTENSION ".exe"
-#elif NETWARE
-#define EXTENSION ".nlm"
-#else
-#define EXTENSION
-#endif
-
 static char reasonstr[256];
 
 static void ocmaint(int reason, void *data, int status)
