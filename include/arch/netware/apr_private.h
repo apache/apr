@@ -174,6 +174,9 @@ void* getStatCache();
 #define APR_OFF_T_STRFN       strtol
 #endif
 
+/* used to check DWORD overflow for 64bit compiles */
+#define APR_DWORD_MAX 0xFFFFFFFFUL
+
 /*
  * Include common private declarations.
  */
