@@ -144,7 +144,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
     dafile->dataRead = 0;
     dafile->direction = 0;
     dafile->pipe = FALSE;
-    apr_pool_cleanup_register(dafile->cntxt, dafile, apr_file_cleanup, apr_file_cleanup);
+
+    if (!(flag & APR_FILE_NOCLEANUP)) { 
+        apr_pool_cleanup_register(dafile->cntxt, dafile, apr_file_cleanup, apr_file_cleanup);
+    }
     return APR_SUCCESS;
 }
 

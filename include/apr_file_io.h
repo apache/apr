@@ -101,6 +101,8 @@ extern "C" {
 #define APR_SHARELOCK  1024        /**< Platform dependent support for higher
                                         level locked read/write access to support
                                         writes across process/machines */
+#define APR_FILE_NOCLEANUP  2048   /**< Do not register a cleanup when the file
+                                        is opened */
  
 /** @} */
 
@@ -179,6 +181,10 @@ typedef struct apr_file_t         apr_file_t;
  *           APR_SHARELOCK        Platform dependent support for higher
  *                                level locked read/write access to support
  *                                writes across process/machines
+ *           APR_FILE_NOCLEANUP   Do not register a cleanup with the pool 
+ *                                passed in on the <EM>cont</EM> argument (see below).
+ *                                The apr_os_file_t handle in apr_file_t will not
+ &                                be closed when the pool is destroyed.
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.
