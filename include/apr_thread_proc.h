@@ -398,7 +398,7 @@ apr_status_t apr_fork(apr_proc_t *proc, apr_pool_t *cont);
  * @param progname The program to run 
  * @param const_args the arguments to pass to the new program.  The first 
  *                   one should be the program name.
- * @param env The new environment apr_table_t for the new process.  This 
+ * @param env The new environment table for the new process.  This 
  *            should be a list of NULL-terminated strings.
  * @param attr the procattr we should use to determine how to create the new
  *         process
