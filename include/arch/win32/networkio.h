@@ -61,6 +61,7 @@
 struct apr_socket_t {
     apr_pool_t *cntxt;
     SOCKET sock;
+    int type; /* SOCK_STREAM, SOCK_DGRAM */
     apr_sockaddr_t *local_addr;
     apr_sockaddr_t *remote_addr;
     apr_interval_time_t timeout;
