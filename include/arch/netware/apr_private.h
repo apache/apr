@@ -71,7 +71,9 @@
 #include <sys/types.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
+#include <library.h>
 
 //#include "memcheck.h"
 
@@ -155,8 +157,22 @@ typedef void (Sigfunc)(int);
 #define SIZEOF_CHAR            1
 #define SIZEOF_SSIZE_T         SIZEOF_INT
 
-//unsigned __stdcall SignalHandling(void *);
-//int thread_ready(void);
+void netware_pool_proc_cleanup ();
+
+// library-private data...
+extern int  gLibId;
+extern void *gLibHandle;
+
+/* NLM registration routines for managing which NLMs
+    are using the library. */
+int register_NLM(void *NLMHandle);
+int unregister_NLM(void *NLMHandle);
+
+/* Redefine malloc to use the library malloc call so 
+    that all of the memory resources will be owned
+    and can be shared by the library. */
+#undef malloc
+#define malloc(x) library_malloc(gLibHandle,x)
 
 #endif  /*APR_PRIVATE_H*/
 #endif  /*NETWARE*/
