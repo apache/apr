@@ -78,10 +78,10 @@ extern "C" {
 #define APR_PARENT_CLEANUP    0x0002
 
 /* Alignment macro's */
-#define ALIGN(size, boundary) \
+#define APR_ALIGN(size, boundary) \
     ((size) + (((boundary) - ((size) & ((boundary) - 1))) & ((boundary) - 1)))
 
-#define ALIGN_DEFAULT(size) ALIGN(size, 8)
+#define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
 
 /**
