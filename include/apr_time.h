@@ -95,6 +95,13 @@ typedef apr_int32_t apr_short_interval_time_t;
 /** number of microseconds per second */
 #define APR_USEC_PER_SEC APR_TIME_C(1000000)
 
+#define APR_TIME_USEC(time) ((apr_int32_t)(time) % APR_USEC_PER_SEC)
+
+#define APR_TIME_SEC(time) ((apr_int64_t)(time) / APR_USEC_PER_SEC)
+
+#define APR_TIME_FROM_SEC(sec) ((apr_time_t)(sec) * APR_USEC_PER_SEC)
+
+#define APR_TIME_MAKE(sec, usec) ((apr_time_t)(sec) * APR_USEC_PER_SEC + usec)
 
 /**
  * return the current time
