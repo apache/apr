@@ -476,7 +476,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     }
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) {
+    IF_WIN_OS_IS_UNICODE
+    {
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                             / sizeof(apr_wchar_t), fname))
             return rv;
@@ -505,8 +506,9 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
             filename = apr_pstrdup(cont, tmpname);
         }
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
       if ((apr_os_level >= APR_WIN_98) && (!(wanted & APR_FINFO_NAME) || isroot))
     {
         /* cannot use FindFile on a Win98 root, it returns \*
@@ -550,6 +552,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         FindClose(hFind);
         filename = apr_pstrdup(cont, FileInfo.n.cFileName);
     }
+#endif
 
     if (ident_rv != APR_INCOMPLETE) {
         if (fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 
@@ -559,7 +562,8 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
              * to reliably translate char devices to the path '\\.\device'
              * so go ask for the full path.
              */
-            if (apr_os_level >= APR_WIN_NT) {
+            IF_WIN_OS_IS_UNICODE
+            {
 #if APR_HAS_UNICODE_FS
                 apr_wchar_t tmpname[APR_FILE_MAX];
                 apr_wchar_t *tmpoff;

@@ -112,15 +112,22 @@ typedef enum {
         APR_WIN_98 =       14,
         APR_WIN_98_SE =    16,
         APR_WIN_ME =       18,
-        APR_WIN_NT =       30,
-        APR_WIN_NT_3_5 =   35,
+
+	APR_WIN_UNICODE =  20, /* Prior versions support only narrow chars */
+
+        APR_WIN_CE_3 =     23, /* CE is an odd beast, not supporting */
+                               /* some pre-NT features, such as the    */
+        APR_WIN_NT =       30, /* narrow charset APIs (fooA fns), while  */
+        APR_WIN_NT_3_5 =   35, /* not supporting some NT-family features.  */
         APR_WIN_NT_3_51 =  36,
+
         APR_WIN_NT_4 =     40,
         APR_WIN_NT_4_SP2 = 42,
         APR_WIN_NT_4_SP3 = 43,
         APR_WIN_NT_4_SP4 = 44,
         APR_WIN_NT_4_SP5 = 45,
         APR_WIN_NT_4_SP6 = 46,
+
         APR_WIN_2000 =     50,
         APR_WIN_2000_SP1 = 51,
         APR_WIN_2000_SP2 = 52,
@@ -128,6 +135,36 @@ typedef enum {
 } apr_oslevel_e;
 
 extern apr_oslevel_e apr_os_level;
+
+apr_status_t apr_get_oslevel(struct apr_pool_t *, apr_oslevel_e *);
+
+/* The APR_HAS_ANSI_FS symbol is PRIVATE, and internal to APR.
+ * APR only supports char data for filenames.  Like most applications,
+ * characters >127 are essentially undefined.  APR_HAS_UNICODE_FS lets
+ * the application know that utf-8 is the encoding method of APR, and
+ * only incidently hints that we have Wide OS calls.
+ *
+ * APR_HAS_ANSI_FS is simply an OS flag to tell us all calls must be
+ * the unicode eqivilant.
+ */
+
+#if defined(_WIN32_WCE) || defined(WINNT)
+#define APR_HAS_ANSI_FS           0
+#else
+#define APR_HAS_ANSI_FS           1
+#endif
+
+/* IF_WIN_OS_IS_UNICODE / ELSE_WIN_OS_IS_ANSI help us keep the code trivial
+ * where have runtime tests for unicode-ness, that aren't needed in any
+ * build which supports only WINNT or WCE.
+ */
+#if APR_HAS_ANSI_FS && APR_HAS_UNICODE_FS
+#define IF_WIN_OS_IS_UNICODE if (apr_os_level >= APR_WIN_UNICODE)
+#define ELSE_WIN_OS_IS_ANSI else
+#else APR_HAS_UNICODE_FS
+#define IF_WIN_OS_IS_UNICODE
+#define ELSE_WIN_OS_IS_ANSI
+#endif /* WINNT */
 
 typedef enum {
     DLL_WINBASEAPI = 0,    // kernel32 From WinBase.h
@@ -254,7 +291,6 @@ APR_DECLARE_LATE_DLL_FUNC(DLL_WINADVAPI, BOOL, WINAPI, GetSecurityInfo, 0, (
 	 ppDacl, ppSacl, ppSecurityDescriptor));
 #define GetSecurityInfo apr_winapi_GetSecurityInfo
 
-apr_status_t apr_get_oslevel(struct apr_pool_t *, apr_oslevel_e *);
 #endif /* WIN32 */
 
 #endif  /* ! MISC_H */

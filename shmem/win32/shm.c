@@ -144,15 +144,17 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     }
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) 
+    IF_WIN_OS_IS_UNICODE
     {
         hMap = CreateFileMappingW(hFile, psec, PAGE_READWRITE, 0, size, mapkey);
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         hMap = CreateFileMappingA(hFile, psec, PAGE_READWRITE, 0, size, mapkey);
     }
+#endif
     err = apr_get_os_error();
 
     if (file) {
@@ -214,15 +216,17 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     }
 
 #if APR_HAS_UNICODE_FS
-    if (apr_os_level >= APR_WIN_NT) 
+    IF_WIN_OS_IS_UNICODE
     {
         hMap = OpenFileMappingW(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, mapkey);
     }
-    else
 #endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
     {
         hMap = OpenFileMappingA(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, mapkey);
     }
+#endif
 
     if (!hMap) {
         return apr_get_os_error();
