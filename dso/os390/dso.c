@@ -52,12 +52,30 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_portable.h"
 #include "apr_strings.h"
 #include "dso.h"
 #include <errno.h>
 #include <string.h>
 
 #if APR_HAS_DSO
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_put(apr_dso_handle_t **aprdso,
+                                                apr_os_dso_handle_t osdso,
+                                                apr_pool_t *pool)
+{   
+    *aprdso = apr_pcalloc(pool, sizeof **aprdso);
+    (*aprdso)->handle = osdso;
+    (*aprdso)->pool = pool;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_dso_handle_get(apr_os_dso_handle_t *osdso,
+                                                apr_dso_handle_t *aprdso)
+{
+    *osdso = aprdso->handle;
+    return APR_SUCCESS;
+}
 
 static apr_status_t dso_cleanup(void *thedso)
 {
@@ -84,7 +102,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
     int rc;
 
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
-
+    (*res_handle)->pool = ctx;
     if ((handle = dllload(path)) != NULL) {
         (*res_handle)->handle  = handle;
         apr_pool_cleanup_register(ctx, *res_handle, dso_cleanup, apr_pool_cleanup_null);
