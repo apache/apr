@@ -52,13 +52,13 @@
  * <http://www.apache.org/>.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "apr_thread_proc.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_atomic.h"
 #include "errno.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include "apr_time.h"
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
