@@ -369,6 +369,7 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     struct addrinfo hints, *ai, *ai_list;
     apr_sockaddr_t *prev_sa;
     int error;
+    char *servname = NULL; 
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = family;
@@ -381,12 +382,23 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
         hints.ai_flags = AI_ADDRCONFIG;
     }
 #endif
-    error = getaddrinfo(hostname, NULL, &hints, &ai_list);
+    if(hostname == NULL) {
+#ifdef AI_PASSIVE 
+        /* If hostname is NULL, assume we are trying to bind to all
+         * interfaces. */
+        hints.ai_flags |= AI_PASSIVE;
+#endif
+        /* getaddrinfo according to RFC 2553 must have either hostname
+         * or servname non-NULL.
+         */
+        servname = apr_itoa(p, port);
+    }
+    error = getaddrinfo(hostname, servname, &hints, &ai_list);
 #ifdef AI_ADDRCONFIG
     if (error == EAI_BADFLAGS && family == AF_UNSPEC) {
         /* Retry with no flags if AI_ADDRCONFIG was rejected. */
         hints.ai_flags = 0;
-        error = getaddrinfo(hostname, NULL, &hints, &ai_list);
+        error = getaddrinfo(hostname, servname, &hints, &ai_list);
     }
 #endif
     if (error) {
@@ -490,6 +502,11 @@ static apr_status_t find_addresses(apr_sockaddr_t **sa,
     struct in_addr ipaddr;
     char *addr_list[2];
 
+    if (hostname == NULL) {
+        /* if we are given a NULL hostname, assume '0.0.0.0' */
+        hostname = "0.0.0.0";
+    }
+
     if (*hostname >= '0' && *hostname <= '9' &&
         strspn(hostname, "0123456789.") == strlen(hostname)) {
 
@@ -580,21 +597,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
 #endif
     }
     
-    if (hostname) {
-#if !APR_HAVE_IPV6
-        if (family == APR_UNSPEC) {
-            family = APR_INET;
-        }
-#endif
-        return find_addresses(sa, hostname, family, port, flags, p);
-    }
-
-    *sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
-    (*sa)->pool = p;
-    apr_sockaddr_vars_set(*sa, 
-                          family == APR_UNSPEC ? APR_INET : family,
-                          port);
-    return APR_SUCCESS;
+    return find_addresses(sa, hostname, family, port, flags, p);
 }
 
 APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
