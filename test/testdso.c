@@ -80,7 +80,6 @@
 #endif
 
 static char *modname;
-static char *libname;
 
 static void test_load_module(CuTest *tc)
 {
@@ -161,6 +160,9 @@ static void test_unload_module(CuTest *tc)
 }
 
 
+#ifdef LIB_NAME
+static char *libname;
+
 static void test_load_library(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
@@ -239,6 +241,8 @@ static void test_unload_library(CuTest *tc)
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_ESYMNOTFOUND(status));
 }
 
+#endif /* def(LIB_NAME) */
+
 static void test_load_notthere(CuTest *tc)
 {
     apr_dso_handle_t *h = NULL;
@@ -249,13 +253,6 @@ static void test_load_notthere(CuTest *tc)
     CuAssertIntEquals(tc, 1, APR_STATUS_IS_EDSOOPEN(status));
     CuAssertPtrNotNull(tc, h);
 }    
-
-#ifndef LIB_NAME
-static void library_not_impl(CuTest *tc)
-{
-    CuNotImpl(tc, "Loadable libraries and modules are equivilant on this platform");
-}
-#endif
 
 CuSuite *testdso(void)
 {
@@ -270,9 +267,7 @@ CuSuite *testdso(void)
     SUITE_ADD_TEST(suite, test_dso_sym_return_value);
     SUITE_ADD_TEST(suite, test_unload_module);
 
-#ifndef LIB_NAME
-    SUITE_ADD_TEST(suite, library_not_impl);
-#else
+#ifdef LIB_NAME
     libname = apr_pcalloc(p, 256);
     getcwd(libname, 256);
     libname = apr_pstrcat(p, libname, "/", LIB_NAME, NULL);
