@@ -52,6 +52,7 @@ $(NLM_NAME)_LINKOPT_DEPENDS	= \
 				NWGNUmakefile \
 				$(APR_WORK)\build\NWGNUtail.inc \
 				$(CUSTOM_INI) \
+				$(VERSION_INC) \
 				$(EOLIST)
 
 ifeq "$(words $(strip $(TARGET_lib)))" "1"
@@ -78,6 +79,20 @@ endif
 #
 # Generic compiler rules
 #
+
+$(APR_WORK)\build\NWGNUversion.inc : $(APR_WORK)\include\apr_version.h $(APR_WORK)\build\nw_ver.awk
+	@echo Generating $(subst /,\,$@)
+	awk -f $(APR_WORK)\build\nw_ver.awk $(APR_WORK)\include\apr_version.h > $(APR_WORK)\build\NWGNUversion.inc
+
+-include $(APR_WORK)\build\NWGNUversion.inc
+
+ifneq "$(strip $(VERSION_STR))" ""
+VERSION_INC = $(APR_WORK)\build\NWGNUversion.inc
+else
+VERSION		= 1,0,0
+VERSION_STR	= 1.0.0
+endif
+
 
 $(OBJDIR)/%.o: %.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
@@ -275,7 +290,7 @@ else # more than one target so look for individual makefiles.
 
 ifndef NO_LICENSE_FILE
 
-$(OBJDIR)/%.nlm: NWGNU% $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(APR_WORK)\build\NWGNUenvironment.inc $(CUSTOM_INI) FORCE
+$(OBJDIR)/%.nlm: NWGNU% $(APR_WORK)\build\NWGNUhead.inc $(APR_WORK)\build\NWGNUtail.inc $(APR_WORK)\build\NWGNUenvironment.inc $(CUSTOM_INI) $(VERSION_INC) FORCE
 	@echo Calling $<
 	$(MAKE) -f $< $(MAKECMDGOALS) RELEASE=$(RELEASE)
 	$(CMD) echo.
