@@ -4,13 +4,31 @@ dnl
 dnl Set some magic defines
 dnl
 AC_DEFUN(REENTRANCY_FLAGS,[
-  case "`uname -sr`" in
-  "SunOS 5"*)
-    CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS";;
+  if test -z "$host_alias"; then
+    host_alias=`$ac_config_guess`
+dnl AC_MSG_ERROR(host_alias is not set. Make sure to run config.guess)
+  fi
+  case "$host_alias" in
+  *solaris*)
+    PTHREAD_FLAGS="-D_POSIX_PTHREAD_SEMANTICS -D_REENTRANT";;
+  *freebsd*)
+    PTHREAD_FLAGS="-D_REENTRANT -D_THREAD_SAFE";;
+  *linux*)
+    PTHREAD_FLAGS="-D_REENTRANT";;
+  *aix*)
+    PTHREAD_FLAGS="-D_THREAD_SAFE";;
+  *irix*)
+    PTHREAD_FLAGS="-D_POSIX_THREAD_SAFE_FUNCTIONS";;
+  *hpux*)
+    PTHREAD_FLAGS="-D_REENTRANT";;
   esac
-  
-dnl This works for now..
-  CFLAGS="$CFLAGS -D_REENTRANT"
+
+dnl These flags should go into CPPFLAGS. APR needs to be improved to use
+dnl the right names.
+
+  if test -n "$PTHREAD_FLAGS"; then
+    CFLAGS="$CFLAGS $PTHREAD_FLAGS"
+  fi
 ])dnl
 dnl
 dnl PTHREADS_CHECK_COMPILE
@@ -56,10 +74,10 @@ PTHREADS_CHECK_COMPILE
 AC_CACHE_CHECK(for pthreads_cflags,ac_cv_pthreads_cflags,[
 ac_cv_pthreads_cflags=""
 if test "$pthreads_working" != "yes"; then
-  for flag in -pthreads -pthread -mthreads; do 
+  for flag in -pthreads -pthread -mthreads -Kthread; do 
     ac_save="$CFLAGS"
     CFLAGS="$CFLAGS $flag"
-	PTHREADS_CHECK_COMPILE
+    PTHREADS_CHECK_COMPILE
     if test "$pthreads_working" = "yes"; then
       ac_cv_pthreads_cflags="$flag"
       break
