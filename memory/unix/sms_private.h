@@ -68,6 +68,7 @@ extern "C" {
 /**
  * The memory system structure
  */
+
 struct apr_sms_t
 {
     apr_sms_t  *parent;
@@ -95,6 +96,10 @@ struct apr_sms_t
 
     apr_status_t (*apr_abort)(int retcode);
     struct apr_hash_t *prog_data;
+
+#ifdef APR_POOLS_ARE_SMS
+    struct process_chain *subprocesses;
+#endif
 
 #if APR_HAS_THREADS    
     apr_status_t (*thread_register_fn)   (apr_sms_t *sms, 

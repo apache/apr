@@ -55,6 +55,10 @@
 #ifndef APR_POOLS_H
 #define APR_POOLS_H
 
+#ifdef APR_POOLS_ARE_SMS
+#include "apr_sms.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -91,11 +95,13 @@ extern "C" {
 #define APR_POOL_DEBUG
 */
 
+#ifndef APR_POOLS_ARE_SMS
 /** The fundamental pool type */
 typedef struct apr_pool_t apr_pool_t;
 
 /** A function that is called when allocation fails. */
 typedef int (*apr_abortfunc_t)(int retcode);
+#endif /* !APR_POOLS_ARE_SMS */
 
 /**
  * @defgroup PoolDebug Pool Debugging functions.
@@ -228,6 +234,7 @@ APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp);
 APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont,
                                           apr_pool_t *cont);
 
+#if !defined(APR_POOLS_ARE_SMS) || defined(DOXYGEN)
 /**
  * Set the function to be called when an allocation failure occurs.
  * @tip If the program wants APR to exit on a memory allocation error,
@@ -287,17 +294,6 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
                                            apr_pool_t *cont);
 
 /**
- * Make a sub pool from the current pool
- * @param p The pool to use as a parent pool
- * @param apr_abort A function to use if the pool cannot allocate more memory.
- * @return The new sub-pool
- * @remark The @a apr_abort function provides a way to quit the program if the
- *      machine is out of memory.  By default, APR will return on error.
- */
-APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
-                                            int (*apr_abort)(int retcode));
-
-/**
  * Clear all memory in the pool and run all the cleanups. This also clears all
  * subpools.
  * @param p The pool to clear
@@ -330,6 +326,35 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *c, apr_size_t reqsize);
  */
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *p, apr_size_t size);
 
+#endif /* !APR_POOLS_ARE_SMS || DOXYGEN */
+
+/**
+ * Make a sub pool from the current pool
+ * @param p The pool to use as a parent pool
+ * @param apr_abort A function to use if the pool cannot allocate more memory.
+ * @return The new sub-pool
+ * @remark The @a apr_abort function provides a way to quit the program if the
+ *      machine is out of memory.  By default, APR will return on error.
+ */
+APR_DECLARE(apr_pool_t *) apr_pool_sub_make(apr_pool_t *p,
+                                            int (*apr_abort)(int retcode));
+
+#if defined(APR_POOL_DEBUG) || defined(DOXYGEN) 
+/**
+ * Report the number of bytes currently in the pool
+ * @param p The pool to inspect
+ * @param recurse Recurse/include the subpools' sizes
+ * @return The number of bytes
+ */
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
+
+/**
+ * Report the number of bytes currently in the list of free blocks
+ * @return The number of bytes
+ */
+APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
+#endif
+
 /**
  * Register a function to be called when a pool is cleared or destroyed
  * @param p The pool register the cleanup with 
@@ -343,6 +368,7 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
                                        apr_status_t (*plain_cleanup)(void *),
                                        apr_status_t (*child_cleanup)(void *));
 
+#if !defined(APR_POOLS_ARE_SMS) || defined(DOXYGEN)
 /**
  * Remove a previously registered cleanup function
  * @param p The pool remove the cleanup from 
@@ -364,6 +390,14 @@ APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
 APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
                                           apr_status_t (*cleanup)(void *));
 
+/**
+ * An empty cleanup function 
+ * @param data The data to cleanup
+ */
+APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
+
+#endif /* !APR_POOLS_ARE_SMS || DOXYGEN */
+
 /* Preparing for exec() --- close files, etc., but *don't* flush I/O
  * buffers, *don't* wait for subprocesses, and *don't* free any memory.
  */
@@ -372,12 +406,6 @@ APR_DECLARE(apr_status_t) apr_pool_cleanup_run(apr_pool_t *p, void *data,
  * closed because we are about to exec a new program
  */
 APR_DECLARE(void) apr_pool_cleanup_for_exec(void);
-
-/**
- * An empty cleanup function 
- * @param data The data to cleanup
- */
-APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
 
 /*
  * Pool accessor functions.
@@ -418,6 +446,37 @@ APR_DECLARE_NONSTD(apr_status_t) apr_pool_cleanup_null(void *data);
 # endif /* apr_pool_join */
 # define apr_pool_join(a,b)
 #endif /* APR_POOL_DEBUG */
+
+
+#ifdef APR_POOLS_ARE_SMS
+/* Add a number of defines where the sms equivalent is 1 to 1 */
+#define apr_pool_get_abort(p)                apr_sms_get_abort(p)
+#define apr_pool_set_abort(fn, p)            apr_sms_set_abort(fn, p)
+
+#define apr_pool_get_parent(p)               apr_sms_get_parent(p)
+
+#define apr_pool_userdata_set(d, k, c, p) \
+        apr_sms_userdata_set(d, k, c, p)
+#define apr_pool_userdata_get(d, k, p) \
+        apr_sms_userdata_get(d, k, p)
+
+#define apr_pool_cleanup_kill(p, d, c) \
+        apr_sms_cleanup_unregister(p, APR_ALL_CLEANUPS, d, c)
+#define apr_pool_cleanup_run(p, d, c) \
+        apr_sms_cleanup_run(p, APR_GENERAL_CLEANUP, d, c)
+
+/* we won't even bother to register these as they'll be ignored when
+ * we call the register fucntion
+ */
+#define apr_pool_cleanup_null                NULL
+
+/* The parameters match exactly for these, so just define them directly */
+#define apr_palloc       apr_sms_malloc
+#define apr_pcalloc      apr_sms_calloc
+#define apr_pool_clear   apr_sms_reset
+#define apr_pool_destroy apr_sms_destroy
+
+#endif /* APR_POOLS_ARE_SMS */
 
 #ifdef __cplusplus
 }

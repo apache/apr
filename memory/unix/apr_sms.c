@@ -295,8 +295,12 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
     sms->threads = 1;
 #endif /* APR_HAS_THREADS */
     
+#ifndef APR_POOLS_ARE_SMS
     /* XXX - This should eventually be removed */
     apr_pool_create(&sms->pool, pms ? pms->pool : NULL);
+#else
+    sms->pool = sms;
+#endif
 
     return APR_SUCCESS;
 }
@@ -610,8 +614,10 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *sms)
     if (sms->sms_lock)
         apr_lock_destroy(sms->sms_lock);
     
+#ifndef APR_POOLS_ARE_SMS
     /* XXX - This should eventually be removed */
     apr_pool_destroy(sms->pool);
+#endif
 
     /* 1 - If we have a self destruct, use it */
     if (sms->destroy_fn)
