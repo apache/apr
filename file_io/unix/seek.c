@@ -57,6 +57,7 @@
 #include "apr_file_io.h"
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_seek(ap_file_t *, ap_seek_where_t, ap_off_t *)

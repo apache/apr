@@ -61,6 +61,7 @@
 #include "apr_network_io.h"
 #include "apr_lib.h"
 #include <sys/time.h>
+#include <unistd.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_send(ap_socket_t *, const char *, ap_ssize_t *, time_t)

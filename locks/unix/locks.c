@@ -59,6 +59,7 @@
 #include "apr_lib.h"
 #include "locks.h"
 #include <string.h>
+#include <unistd.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_lock(ap_context_t *, ap_locktype_e, char *, 

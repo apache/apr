@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include <string.h>
+#include <unistd.h>
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_dupfile(ap_file_t **, ap_file_t *)

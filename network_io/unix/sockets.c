@@ -60,6 +60,7 @@
 #include "apr_lib.h"
 #include <errno.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <netinet/in.h>
