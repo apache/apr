@@ -144,17 +144,19 @@ int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
     apr_pool_destroy(thd->cntxt);
-	exit_thread ((status_t)retval);
+	exit_thread ((status_t)(*retval));
 	return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
 {
-    if (wait_for_thread(thd->td,(void *)&retval) == B_NO_ERROR) {
+    status_t rv = 0, ret;
+    if ((ret = wait_for_thread(thd->td,&rv)) == B_NO_ERROR) {
+        *retval = rv;
         return APR_SUCCESS;
     }
     else {
-        return errno;
+        return ret;
     }
 }
 
@@ -201,6 +203,46 @@ APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t 
         (*thd)->cntxt = cont;
     }
     (*thd)->td = *thethd;
+    return APR_SUCCESS;
+}
+
+static apr_status_t thread_once_cleanup(void *vcontrol)
+{
+    apr_thread_once_t *control = (apr_thread_once_t *)vcontrol;
+
+    if (control->sem) {
+        release_sem(control->sem);
+        delete_sem(control->sem);
+    }
+
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
+                                               apr_pool_t *p)
+{
+    int rc;
+    *control = (apr_thread_once_t *)apr_pcalloc(p, sizeof(apr_thread_once_t));
+    (*control)->hit = 0; /* we haven't done it yet... */
+    rc = ((*control)->sem = create_sem(1, "thread_once"));
+    if (rc != 0) {
+        return rc;
+    }
+    apr_pool_cleanup_register(p, control, thread_once_cleanup, apr_pool_cleanup_null);
+    return APR_SUCCESS;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control, 
+                                          void (*func)(void))
+{
+    if (!control->hit) {
+        if (acquire_sem(control->sem) == B_OK) {
+            control->hit = 1;
+            func();
+        }
+    }
     return APR_SUCCESS;
 }
 

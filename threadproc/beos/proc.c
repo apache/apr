@@ -256,6 +256,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new, const char *progname,
     if ( newproc < B_NO_ERROR) {
         return errno;
     }
+
     resume_thread(newproc);
 
     if (attr->child_in) {
