@@ -85,8 +85,6 @@ ap_status_t ap_dso_load(struct dso_handle_t **res_handle, const char *path,
     if(os_handle == NULL)
         return APR_EDSOOPEN;
 
-fprintf(stderr,"handle is %Lx\n",os_handle);
-
     *res_handle = ap_pcalloc(ctx, sizeof(*res_handle));
     (*res_handle)->handle = (void*)os_handle;
     (*res_handle)->cont = ctx;
@@ -101,9 +99,9 @@ fprintf(stderr,"handle is %Lx\n",os_handle);
 ap_status_t ap_dso_unload(struct dso_handle_t *handle)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
-    shl_unload((shl_t)handle);
+    shl_unload((shl_t)handle->handle);
 #else
-    if (dlclose(handle) != 0)
+    if (dlclose(handle->handle) != 0)
         return APR_EINIT;
 #endif
 
