@@ -1216,7 +1216,7 @@ API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
  * generic interface, but for now, it's a special case
  */
 
-API_EXPORT(void) ap_note_subprocess(struct context_t *a, pid_t pid,
+API_EXPORT(void) ap_note_subprocess(struct context_t *a, ap_proc_t *pid,
 				     enum kill_conditions how)
 {
     struct process_chain *new =
@@ -1304,7 +1304,7 @@ static void free_proc_chain(struct process_chain *procs)
 #ifndef NEED_WAITPID
     /* Pick up all defunct processes */
     for (p = procs; p; p = p->next) {
-	if (waitpid(p->pid, (int *) 0, WNOHANG) > 0) {
+	if (ap_wait_proc(p->pid, APR_NOWAIT) > 0) {
 	    p->kill_how = kill_never;
 	}
     }
@@ -1316,12 +1316,12 @@ static void free_proc_chain(struct process_chain *procs)
 	    /*
 	     * Subprocess may be dead already.  Only need the timeout if not.
 	     */
-	    if (kill(p->pid, SIGTERM) != -1) {
+	    if (ap_kill(p->pid, SIGTERM) != -1) {
 		need_timeout = 1;
 	    }
 	}
 	else if (p->kill_how == kill_always) {
-	    kill(p->pid, SIGKILL);
+	    ap_kill(p->pid, SIGKILL);
 	}
     }
 
@@ -1339,11 +1339,11 @@ static void free_proc_chain(struct process_chain *procs)
     for (p = procs; p; p = p->next) {
 
 	if (p->kill_how == kill_after_timeout) {
-	    kill(p->pid, SIGKILL);
+	    ap_kill(p->pid, SIGKILL);
 	}
 
 	if (p->kill_how != kill_never) {
-	    waitpid(p->pid, &status, 0);
+	    status = ap_wait_proc(p->pid, APR_WAIT);
 	}
     }
 #endif /* WIN32 */
