@@ -3,7 +3,7 @@
 #
 CPP = @CPP@
 
-# get get substituted into some targets
+# get substituted into some targets
 APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
 
 #
