@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Allow VPATH builds to properly build dependencies and switch to
+     a .deps dependency model to mimic httpd-2.0.  [Justin Erenkrantz]
+
   *) Tru64: Stop leaving zombies in APR apps like mod_cgid which
      tell APR to ignore SIGCHLD.  
      [Dave Hill <David.D.Hill@Compaq.com>]

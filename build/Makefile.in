@@ -1,3 +1,6 @@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
 TARGETS=
 INCLUDES=
 DISTCLEAN_TARGETS = rules.mk
