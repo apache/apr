@@ -78,7 +78,10 @@ static apr_status_t test_safe_name(const char *name)
     }
     while (*name) {
         if (!IS_FNCHAR(*name) && (*name != '\\') && (*name != '/')) {
-            return APR_EBADPATH;
+            if (*name == '?' || *name == '*')
+                return APR_EPATHWILD;
+            else
+                return APR_EBADPATH;
         }
         ++name;
     }
