@@ -71,7 +71,8 @@ static apr_status_t pipeblock(apr_file_t *thepipe)
 		fcntl(thepipe->filedes, F_SETFL, flags);
 	}
 #else
-		fcntl(thepipe->filedes, F_SETFL, FNDELAY);
+        errno = 0;
+		fcntl(thepipe->filedes, F_SETFL, 0);
 #endif
 
     if (errno)
@@ -94,7 +95,8 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
 		fcntl(thepipe->filedes, F_SETFL, flags);
 	}
 #else
-		fcntl(thepipe->filedes, F_SETFL, 0);
+        errno = 0;
+		fcntl(thepipe->filedes, F_SETFL, FNDELAY);
 #endif
 
     if (errno)
