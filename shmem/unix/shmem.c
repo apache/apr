@@ -151,7 +151,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     /* FIXME: Is APR_OS_DEFAULT sufficient? */
     tmpfd = shm_open(filename, O_RDWR | O_CREAT, APR_OS_DEFAULT);
     if (tmpfd == -1)
-        return errno + APR_OS_START_SYSERR;
+        return errno;
 
     apr_os_file_put(&new_m->file, &tmpfd, pool); 
     status = apr_file_trunc(new_m->file, reqsize);
@@ -175,7 +175,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
 #elif APR_USE_SHMEM_SHMGET
     tmpfd = shmget(IPC_PRIVATE, reqsize, (SHM_R|SHM_W|IPC_CREAT));
     if (tmpfd == -1)
-        return errno + APR_OS_START_SYSERR;
+        return errno;
 
     new_m->file = tmpfd;
 
@@ -183,14 +183,14 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
 
     /* FIXME: Handle errors. */
     if (shmctl(new_m->file, IPC_STAT, &shmbuf) == -1)
-        return errno + APR_OS_START_SYSERR;
+        return errno;
 
     apr_current_userid(&uid, &gid, pool);
     shmbuf.shm_perm.uid = uid;
     shmbuf.shm_perm.gid = gid;
 
     if (shmctl(new_m->file, IPC_SET, &shmbuf) == -1)
-        return errno + APR_OS_START_SYSERR;
+        return errno;
 
 #elif APR_USE_SHMEM_BEOS
     new_m->area_id = create_area("mm", (void*)&mem, B_ANY_ADDRESS, reqsize, 
