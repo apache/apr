@@ -212,7 +212,11 @@ APR_DECLARE(apr_status_t) apr_socket_accept(apr_socket_t **new,
                                             apr_socket_t *sock, apr_pool_t *p)
 {
     SOCKET s;
+#if APR_HAVE_IPV6
+    struct sockaddr_storage sa;
+#else
     struct sockaddr sa;
+#endif
     int salen = sizeof(sock->remote_addr->sa);
 
     /* Don't allocate the memory until after we call accept. This allows
