@@ -163,7 +163,7 @@ APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status)
 APR_DECLARE(void) apr_proc_other_child_check(void)
 {
     apr_other_child_rec_t *ocr, *nocr;
-    apr_status_t rv;
+    DWORD status;
 
     /* Todo: 
      * Implement code to detect if a pipe is still alive on Windows.
@@ -176,13 +176,27 @@ APR_DECLARE(void) apr_proc_other_child_check(void)
         if (ocr->proc == NULL)
             continue;
 
-        rv = WaitForSingleObject(ocr->proc->hproc, 0);
-        if (rv != WAIT_TIMEOUT) {
+        if (!ocr->proc->hproc) {
+            /* Already mopped up, perhaps we apr_proc_kill'ed it */
+            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, -1);
+        }
+        else if (!GetExitCodeProcess(ocr->proc->hproc, &status)) {
+            CloseHandle(ocr->proc->hproc);
+            ocr->proc = NULL;
             (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
+        }
+        else if (status == STILL_ACTIVE) {
+            (*ocr->maintenance) (APR_OC_REASON_RESTART, ocr->data, -1);
+        }
+        else {
+            CloseHandle(ocr->proc->hproc);
+            ocr->proc->hproc = NULL;
+            ocr->proc = NULL;
+            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
         }
     }
 }
-#else /* Win32 */
+#else /* ndef Win32 */
 APR_DECLARE(void) apr_proc_other_child_check(void)
 {
     apr_other_child_rec_t *ocr, *nocr;
