@@ -91,7 +91,7 @@
 extern "C" {
 #endif
 
-/* MD5.H - header file for MD5C.C */
+#define MD5_DIGESTSIZE 16
 
 /* UINT4 defines a four byte word */
 typedef unsigned int UINT4;
@@ -101,14 +101,14 @@ typedef struct {
     UINT4 state[4];		/* state (ABCD) */
     UINT4 count[2];		/* number of bits, modulo 2^64 (lsb first) */
     unsigned char buffer[64];	/* input buffer */
-} ap_MD5_ctx_t;
+} ap_md5_ctx_t;
 
-API_EXPORT(ap_status_t) ap_MD5Init(ap_MD5_ctx_t * context);
-API_EXPORT(ap_status_t) ap_MD5Update(ap_MD5_ctx_t *context,
+API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context);
+API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen);
-API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[16],
-                                    ap_MD5_ctx_t *context);
+API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
+                                    ap_md5_ctx_t *context);
 API_EXPORT(ap_status_t) ap_MD5Encode(const char *password, const char *salt,
                                      char *result, size_t nbytes);
 

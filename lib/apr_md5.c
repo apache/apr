@@ -181,7 +181,7 @@ static unsigned char PADDING[64] =
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-API_EXPORT(ap_status_t) ap_MD5Init(ap_MD5_ctx_t * context)
+API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
     /* Load magic initialization constants. */
@@ -196,8 +196,9 @@ API_EXPORT(ap_status_t) ap_MD5Init(ap_MD5_ctx_t * context)
    operation, processing another message block, and updating the
    context.
  */
-API_EXPORT(ap_status_t) ap_MD5Update(ap_MD5_ctx_t * context, const unsigned char *input,
-			   unsigned int inputLen)
+API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
+                                     const unsigned char *input,
+                                     unsigned int inputLen)
 {
     unsigned int i, idx, partLen;
 
@@ -252,7 +253,8 @@ API_EXPORT(ap_status_t) ap_MD5Update(ap_MD5_ctx_t * context, const unsigned char
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
-API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[16], ap_MD5_ctx_t * context)
+API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
+                                    ap_md5_ctx_t *context)
 {
     unsigned char bits[8];
     unsigned int idx, padLen;
@@ -285,7 +287,7 @@ API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[16], ap_MD5_ctx_t * con
     ap_MD5Update(context, bits, 8);
 
     /* Store state in digest */
-    Encode(digest, context->state, 16);
+    Encode(digest, context->state, MD5_DIGESTSIZE);
 
     /* Zeroize sensitive information. */
     memset(context, 0, sizeof(*context));
@@ -296,7 +298,8 @@ API_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[16], ap_MD5_ctx_t * con
 /* MD5 basic transformation. Transforms state based on block. */
 static void MD5Transform(UINT4 state[4], const unsigned char block[64])
 {
-    UINT4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
+    UINT4 a = state[0], b = state[1], c = state[2], d = state[3],
+          x[MD5_DIGESTSIZE];
 
     Decode(x, block, 64);
 
@@ -444,9 +447,9 @@ API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
 
     char passwd[120], *p;
     const char *sp, *ep;
-    unsigned char final[16];
+    unsigned char final[MD5_DIGESTSIZE];
     int sl, pl, i;
-    ap_MD5_ctx_t ctx, ctx1;
+    ap_md5_ctx_t ctx, ctx1;
     unsigned long l;
 
     /* 
@@ -503,8 +506,8 @@ API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
     ap_MD5Update(&ctx1, (unsigned char *)sp, sl);
     ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
     ap_MD5Final(final, &ctx1);
-    for(pl = strlen(pw); pl > 0; pl -= 16) {
-	ap_MD5Update(&ctx, final, (pl > 16) ? 16 : pl);
+    for (pl = strlen(pw); pl > 0; pl -= MD5_DIGESTSIZE) {
+	ap_MD5Update(&ctx, final, (pl > MD5_DIGESTSIZE) ? MD5_DIGESTSIZE : pl);
     }
 
     /*
@@ -545,7 +548,7 @@ API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
 	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
 	}
 	else {
-	    ap_MD5Update(&ctx1, final, 16);
+	    ap_MD5Update(&ctx1, final, MD5_DIGESTSIZE);
 	}
 	if (i % 3) {
 	    ap_MD5Update(&ctx1, (unsigned char *)sp, sl);
@@ -556,7 +559,7 @@ API_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
 	}
 
 	if (i & 1) {
-	    ap_MD5Update(&ctx1, final, 16);
+	    ap_MD5Update(&ctx1, final, MD5_DIGESTSIZE);
 	}
 	else {
 	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
