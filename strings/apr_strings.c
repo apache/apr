@@ -130,15 +130,16 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 
     res = (char *) apr_palloc(a, len + 1);
     cp = res;
-    *cp = '\0';
+    *(cp + len) = '\0';
 
     /* Pass two --- copy the argument strings into the result space */
 
     va_start(adummy, a);
 
     while ((argp = va_arg(adummy, char *)) != NULL) {
-        strcpy(cp, argp);
-        cp += strlen(argp);
+        len = strlen(argp);
+        memcpy(cp, argp, len);
+        cp += len;
     }
 
     va_end(adummy);
