@@ -129,12 +129,13 @@ static int gettemp(char *path, apr_file_t *doopen, int domkdir, int slen,
 		errno = 0;
 		if (doopen) {
 			if ((rv = apr_file_open(&doopen, path, APR_CREATE|APR_EXCL|APR_READ|APR_WRITE, 
-                                    0600, p)) == APR_SUCCESS)
+                                    APR_UREAD | APR_UWRITE, p)) == APR_SUCCESS)
 				return(1);
 			if (errno != EEXIST)
 				return(0);
 		} else if (domkdir) {
-			if (apr_dir_make(path, 0700, p) == 0)
+			if (apr_dir_make(path, 
+                                APR_UREAD | APR_UWRITE | APR_UEXECUTE, p) == 0)
 				return(1);
 			if (errno != EEXIST)
 				return(0);
