@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Change the prototype of apr_thread_exit() so that the apr_status_t
+     is no longer a pointer. It was difficult and sometimes hazardous
+     to return a apr_status_t* at times, and this allows us to return
+     the APR_* error codes directly.  [Aaron Bannert]
+
   *) Add apr_sockaddr_equal() for comparing APR sockaddrs.
      [Jeff Trawick]
 
