@@ -1,4 +1,6 @@
 Changes with APR 0.9.2
+  *) Namespace protect the header files in include/arch
+     [Thom May]
 
   *) Add function apr_filepath_encoding and associated constants.
      [Branko Cibej]
