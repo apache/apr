@@ -71,6 +71,7 @@ CuSuite *testsockopt(void);
 CuSuite *teststr(void);
 CuSuite *teststrnatcmp(void);
 CuSuite *testtable(void);
+CuSuite *testtemp(void);
 CuSuite *testthread(void);
 CuSuite *testtime(void);
 CuSuite *testud(void);
