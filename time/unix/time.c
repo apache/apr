@@ -100,7 +100,7 @@ static apr_int32_t get_offset(struct tm *tm)
 #endif
 }
 
-APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result, 
+APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result, 
                                                     time_t input)
 {
     *result = (apr_time_t)input * APR_USEC_PER_SEC;
@@ -115,7 +115,7 @@ APR_DECLARE(apr_time_t) apr_time_now(void)
     return tv.tv_sec * APR_USEC_PER_SEC + tv.tv_usec;
 }
 
-static void explode_time(apr_exploded_time_t *xt, apr_time_t t,
+static void explode_time(apr_time_exp_t *xt, apr_time_t t,
                          apr_int32_t offset, int use_localtime)
 {
     struct tm tm;
@@ -146,7 +146,7 @@ static void explode_time(apr_exploded_time_t *xt, apr_time_t t,
     xt->tm_gmtoff = get_offset(&tm);
 }
 
-APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result, apr_time_t input,
+APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result, apr_time_t input,
                               apr_int32_t offs)
 {
     explode_time(result, input, offs, 0);
@@ -154,12 +154,12 @@ APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result, apr_time
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result, apr_time_t input)
+APR_DECLARE(apr_status_t) apr_explode_gmt(apr_time_exp_t *result, apr_time_t input)
 {
     return apr_explode_time(result, input, 0);
 }
 
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result, apr_time_t input)
 {
 #if defined(__EMX__)
     /* EMX gcc (OS/2) has a timezone global we can use */
@@ -170,7 +170,7 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result, apr
 #endif /* __EMX__ */
 }
 
-APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t, apr_exploded_time_t *xt)
+APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t, apr_time_exp_t *xt)
 {
     int year;
     time_t days;
@@ -201,7 +201,7 @@ APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t, apr_exploded_time_t *x
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t, apr_exploded_time_t *xt)
+APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t, apr_time_exp_t *xt)
 {
     apr_status_t status = apr_implode_time(t, xt);
     if (status == APR_SUCCESS)
@@ -218,7 +218,7 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime,
 }
 
 APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime, 
-                                              apr_exploded_time_t *aprtime)
+                                              apr_time_exp_t *aprtime)
 {
     (*ostime)->tm_sec  = aprtime->tm_sec;
     (*ostime)->tm_min  = aprtime->tm_min;
@@ -244,7 +244,7 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime, apr_os_imp_ti
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
+APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
                                               apr_os_exp_time_t **ostime, apr_pool_t *cont)
 {
     aprtime->tm_sec = (*ostime)->tm_sec;

@@ -1,4 +1,8 @@
 Changes with APR b1
+  *) renames: apr_ansi_time_to_apr_time becomes apr_time_ansi_put
+     ap_exploded_time_t becomes apr_time_exp_t
+     [Thom May <thom@planetarytramp.net>]
+
   *) Add the APR_FILE_NOCLEANUP flag to apr_file_open().
      Adding the flag will prevent the file from being closed 
      when the pool passed in on apr_file_open() is destroyed.

@@ -60,8 +60,8 @@
 #define ap_day_snames apr_day_snames
 /** @deprecated @see apr_pool_destroy */
 #define ap_destroy_pool apr_pool_destroy
-/** @deprecated @see apr_exploded_time_t */
-#define ap_exploded_time_t apr_exploded_time_t
+/** @deprecated @see apr_time_exp_t */
+#define ap_exploded_time_t apr_time_exp_t
 /** @deprecated @see apr_fnmatch */
 #define ap_fnmatch apr_fnmatch
 /** @deprecated @see apr_getopt */
