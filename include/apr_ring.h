@@ -326,6 +326,21 @@
 	}								\
     } while (0)
 
+/**
+ * Prepend ring h2 onto the beginning of ring h1, leaving h2 empty.
+ * @param h1   Head of the ring to prepend onto
+ * @param h2   Head of the ring to prepend
+ * @param elem The name of the element struct
+ * @param link The name of the APR_RING_ENTRY in the element struct
+ */
+#define APR_RING_PREPEND(h1, h2, elem, link) do {			\
+	if (!APR_RING_EMPTY((h2), elem, link)) {			\
+	    APR_RING_SPLICE_AFTER(APR_RING_SENTINEL((h1), elem, link),	\
+				  APR_RING_FIRST((h2)),			\
+				  APR_RING_LAST((h2)), link);		\
+	    APR_RING_INIT((h2), elem, link);				\
+	}								\
+    } while (0)
 
 /**
  * Unsplice a sequence of elements from a ring
