@@ -95,7 +95,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
                                          apr_pool_t *pool)
 {
     static apr_size_t memblock = 0;
-    SECURITY_ATTRIBUTES sec, *psec;
     HANDLE hMap, hFile;
     apr_status_t rv;
     apr_size_t size;
@@ -117,15 +116,9 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     size = memblock * (1 + (reqsize - 1) / memblock);
 
     if (!file) {
-        /* Do Anonymous, which will be an inherited handle */
+        /* Do Anonymous, which must be passed as a duplicated handle */
 #ifndef _WIN32_WCE
         hFile = INVALID_HANDLE_VALUE;
-        sec.nLength = sizeof(SECURITY_ATTRIBUTES);
-        sec.lpSecurityDescriptor = NULL;
-        sec.bInheritHandle = TRUE;
-        psec = &sec;
-#else
-        psec = NULL;
 #endif
         mapkey = NULL;
     }
@@ -144,19 +137,18 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         }
         rv = apr_file_trunc(f, size);
         mapkey = res_name_from_filename(file, 1, pool);
-        psec = NULL;
     }
 
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
-        hMap = CreateFileMappingW(hFile, psec, PAGE_READWRITE, 0, size, mapkey);
+        hMap = CreateFileMappingW(hFile, NULL, PAGE_READWRITE, 0, size, mapkey);
     }
 #endif
 #if APR_HAS_ANSI_FS
     ELSE_WIN_OS_IS_ANSI
     {
-        hMap = CreateFileMappingA(hFile, psec, PAGE_READWRITE, 0, size, mapkey);
+        hMap = CreateFileMappingA(hFile, NULL, PAGE_READWRITE, 0, size, mapkey);
     }
 #endif
     err = apr_get_os_error();
