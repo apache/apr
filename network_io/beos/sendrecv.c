@@ -147,4 +147,14 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
     (*len) = rv;
     return APR_SUCCESS;
 }
+
+/* BeOS doesn't have writev for sockets so we use the following instead...
+ */
+apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
+                     apr_int32_t nvec, apr_ssize_t *len)
+{
+    *len = vec[0].iov_len;
+    return apr_send(sock, vec[0].iov_base, len);
+}
+
 #endif
