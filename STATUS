@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/02/17 20:51:58 $]
+Last modified at [$Date: 2002/02/18 01:41:10 $]
 
 Release:
 
@@ -35,6 +35,9 @@ RELEASE SHOWSTOPPERS:
     * The new lock API is a full replacement for the old API. Before
       we do a major APR release, we must deprecate the old locks API,
       lest we support 2 lock APIs in perpetuity.
+
+    * The new apr_global_mutex_t lock type must be implemented on
+      all platforms.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
