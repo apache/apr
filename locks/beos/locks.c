@@ -90,6 +90,41 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     return APR_SUCCESS;
 }
 
+apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type, 
+                                 apr_lockscope_e scope, const char *fname, 
+                                 apr_sms_t *mem_sys)
+{
+    apr_lock_t *new;
+    apr_status_t stat;
+  
+    /* FIXME: Remove when read write locks implemented. */ 
+    if (type == APR_READWRITE)
+        return APR_ENOTIMPL; 
+
+    new = (apr_lock_t *)apr_sms_malloc(mem_sys, sizeof(apr_lock_t));
+    if (new == NULL){
+        return APR_ENOMEM;
+    }
+    
+    new->mem_sys = mem_sys;
+    new->cntxt = NULL;
+    new->type  = type;
+    new->scope = scope;
+
+    if (scope != APR_CROSS_PROCESS) {
+        if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
+            return stat;
+        }
+    }
+    if (scope != APR_INTRAPROCESS) {
+        if ((stat = create_inter_lock(new)) != APR_SUCCESS) {
+            return stat;
+        }
+    }
+    (*lock) = new;
+    return APR_SUCCESS;
+}
+
 apr_status_t apr_lock_acquire(apr_lock_t *lock)
 {
     apr_status_t stat;
