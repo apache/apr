@@ -1041,7 +1041,7 @@ APR_IFALLYES(header:fcntl.h define:F_SETLK, hasfcntlser="1", hasfcntlser="0")
 # note: the current APR use of shared mutex requires /dev/zero
 APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
              func:pthread_mutexattr_setpshared dnl
-             func:pthread_mutexattr_setrobust_np file:/dev/zero,
+             file:/dev/zero,
              hasprocpthreadser="1", hasprocpthreadser="0")
 APR_IFALLYES(struct:pthread_rw, hasrwlockser="1", hasrwlockser="0")
 
@@ -1057,7 +1057,7 @@ APR_IFALLYES(header:fcntl.h define:F_SETLK,
 # note: the current APR use of shared mutex requires /dev/zero
 APR_IFALLYES(header:pthread.h define:PTHREAD_PROCESS_SHARED dnl
             func:pthread_mutexattr_setpshared dnl
-            func:pthread_mutexattr_setrobust_np file:/dev/zero,
+            file:/dev/zero,
             APR_DECIDE(USE_PROC_PTHREAD_SERIALIZE, [pthread mutex]))
 if test "x$apr_lock_method" != "x"; then
     APR_DECISION_FORCE($apr_lock_method)
