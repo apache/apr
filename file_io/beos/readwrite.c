@@ -127,7 +127,7 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_writev(ap_file_t *, ap_iovec_t *, ap_ssize_t *)
+ * ap_status_t ap_writev(ap_file_t *, iovec *, ap_ssize_t *)
  *    Write data from ap_iovec array to the specified file.
  * arg 1) The file descriptor to write to.
  * arg 2) The array from which to get the data to write to the file.
@@ -138,22 +138,10 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
  *        written on function exit. 
  */
 #ifdef HAVE_WRITEV
-
-ap_status_t ap_make_iov(struct iovec_t **new, struct iovec *iova, ap_context_t *cntxt)
-{
-    (*new) = ap_palloc(cntxt, sizeof(struct iovec_t));
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-    (*new)->cntxt = cntxt;
-    (*new)->theiov = iova;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssize_t *iocnt)
+ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec, ap_ssize_t *iocnt)
 {
     int bytes;
-    if ((bytes = writev(thefile->filedes, vec->theiov, *iocnt)) < 0) {
+    if ((bytes = writev(thefile->filedes, vec, *iocnt)) < 0) {
         *iocnt = bytes;
         return errno;
     }

@@ -20,7 +20,7 @@ EXPORTS
 ;	ap_get_filesize   @12
 ;	ap_get_fileatime   @13
 ;	ap_get_filectime   @14
-	ap_make_iov   @15
+;	ap_make_iov   @15
 	ap_dupfile   @16
 	ap_getfileinfo   @17
 	ap_open   @18

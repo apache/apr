@@ -120,11 +120,6 @@ struct dir_t {
     struct dirent *entry;
 };
 
-struct iovec_t {
-    ap_context_t *cntxt;
-    struct iovec *theiov;
-};
-
 ap_status_t file_cleanup(void *);
 mode_t get_fileperms(ap_fileperms_t);
 

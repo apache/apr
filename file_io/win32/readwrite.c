@@ -63,17 +63,6 @@
 
 #define GetFilePointer(hfile) SetFilePointer(hfile,0,NULL, FILE_CURRENT)
 
-ap_status_t ap_make_iov(struct iovec_t **new, const struct iovec *iova, ap_context_t *cntxt)
-{
-    (*new) = ap_palloc(cntxt, sizeof(struct iovec_t));
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-    (*new)->cntxt = cntxt;
-    (*new)->theiov = iova;
-    return APR_SUCCESS;
-}
-
 ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     DWORD bread;
@@ -128,17 +117,16 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 /*
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2) 
  */
-ap_status_t ap_writev(struct file_t *thefile, const ap_iovec_t *vec, ap_size_t nvec, 
+ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec, ap_size_t nvec, 
                       ap_ssize_t *nbytes)
 {
     int i;
     DWORD bwrote = 0;
-    struct iovec *iov = vec->theiov;
 
     *nbytes = 0;
     for (i = 0; i < nvec; i++) {
         if (!WriteFile(thefile->filehand,
-                       iov[i].iov_base, iov[i].iov_len, &bwrote, NULL)) {
+                       vec[i].iov_base, vec[i].iov_len, &bwrote, NULL)) {
             return GetLastError();
         }
         *nbytes += bwrote;
