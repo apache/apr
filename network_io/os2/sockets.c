@@ -196,9 +196,16 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock, apr
     if ((*new)->socketdes < 0) {
         return APR_OS2_STATUS(sock_errno());
     }
-    /* XXX fix up any pointers which are no longer valid (or just call
-     *     apr_sockaddr_vars_set() to do it */
+
+    *(*new)->local_addr = *sock->local_addr;
+    (*new)->local_addr->pool = connection_context;
     (*new)->remote_addr->port = ntohs((*new)->remote_addr->sa.sin.sin_port);
+
+    /* fix up any pointers which are no longer valid */
+    if (sock->local_addr->sa.sin.sin_family == AF_INET) {
+        (*new)->local_addr->ipaddr_ptr = &(*new)->local_addr->sa.sin.sin_addr;
+    }
+
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
