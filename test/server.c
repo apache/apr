@@ -132,7 +132,7 @@ int main(int argc, const char * const argv[])
     }
 
     fprintf(stdout, "\tServer:  Creating new socket.......");
-    if (apr_socket_create(&sock, family, SOCK_STREAM, APR_NO_INHERIT, context) != APR_SUCCESS) {
+    if (apr_socket_create(&sock, family, SOCK_STREAM, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
     }

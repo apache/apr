@@ -103,7 +103,7 @@ int main(void)
     printf("Testing socket option functions.\n");
 
     printf("\tCreating socket..........................");
-    if ((stat = apr_socket_create(&sock, APR_INET, SOCK_STREAM, APR_NO_INHERIT, context))
+    if ((stat = apr_socket_create(&sock, APR_INET, SOCK_STREAM, context))
          != APR_SUCCESS){
         printf("Failed to create a socket!\n");
         exit(-1);
