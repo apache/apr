@@ -76,7 +76,11 @@ APR_DECLARE(apr_status_t) apr_proc_detach(int daemonize)
 #endif
 
 #ifdef HAVE_SETSID
-    if (setsid() == -1) {
+    /* A setsid() failure is not fatal if we didn't just fork().
+     * The calling process may be the process group leader, in
+     * which case setsid() will fail with EPERM.
+     */
+    if (setsid() == -1 && daemonize) {
         return errno;
     }
 #elif defined(NEXT) || defined(NEWSOS)

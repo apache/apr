@@ -1,5 +1,10 @@
 Changes with APR 0.9.4
 
+  *) For apr_proc_detach(APR_PROC_DETACH_FOREGROUND), don't treat
+     a setsid() failure as fatal, as the usual cause is that the
+     caller is already a process group leader.  PR 18519
+     [Jeff Trawick]
+
   *) Fix some problems with non-blocking socket handling on unix
      that resulted in infinite timeouts being used for non-blocking
      sockets with apr_socket_connect() and some read/write calls.
