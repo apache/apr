@@ -590,7 +590,15 @@ echo "${nl}Checking for Shared Memory Support..."
 # be available if linking against librt.
 AC_SEARCH_LIBS(shm_open, rt)
 
-AC_CHECK_HEADERS([sys/mman.h sys/ipc.h sys/shm.h sys/file.h kernel/OS.h os2.h])
+case $host in
+ *-sysv*)
+   ac_includes_default="$ac_includes_default
+#if HAVE_SYS_MUTEX_H /* needed to define lock_t for sys/shm.h */
+# include <sys/mutex.h>
+#endif";;
+esac
+
+AC_CHECK_HEADERS([sys/mman.h sys/ipc.h sys/mutex.h sys/shm.h sys/file.h kernel/OS.h os2.h])
 AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
                 create_area])
 APR_CHECK_DEFINE(MAP_ANON, sys/mman.h)
@@ -1782,9 +1790,9 @@ case $host in
     broken_ipv6=0
 esac
 
-AC_SEARCH_LIBS(getaddrinfo, inet6)
-AC_SEARCH_LIBS(gai_strerror, inet6)
-AC_SEARCH_LIBS(getnameinfo, inet6)
+AC_SEARCH_LIBS(getaddrinfo, socket inet6)
+AC_SEARCH_LIBS(gai_strerror, socket inet6)
+AC_SEARCH_LIBS(getnameinfo, socket inet6)
 AC_CHECK_FUNCS(gai_strerror)
 APR_CHECK_WORKING_GETADDRINFO
 APR_CHECK_NEGATIVE_EAI
