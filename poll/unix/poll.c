@@ -65,6 +65,11 @@
 #include <sys/poll.h>
 #endif
 
+#ifdef NETWARE
+#define HAS_SOCKETS(dt) (dt == APR_POLL_SOCKET) ? 1 : 0
+#define HAS_PIPES(dt) (dt == APR_POLL_FILE) ? 1 : 0
+#endif
+
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
 static apr_int16_t get_event(apr_int16_t event)
@@ -186,7 +191,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     int maxfd = -1;
     struct timeval tv, *tvptr;
 #ifdef NETWARE
-    int is_pipe = 0;
+    apr_datatype_e set_type = APR_NO_DESC;
 #endif
 
     if (timeout < 0) {
@@ -206,16 +211,30 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
         apr_os_sock_t fd;
 
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
+#ifdef NETWARE
+            if (HAS_PIPES(set_type)) {
+                return APR_EBADF;
+            }
+            else {
+                set_type = APR_POLL_SOCKET;
+            }
+#endif
             fd = aprset[i].desc.s->socketdes;
         }
         else {
 #if !APR_FILES_AS_SOCKETS
             return APR_EBADF;
 #else
-            fd = aprset[i].desc.f->filedes;
 #ifdef NETWARE
-            is_pipe = aprset[i].desc.f->is_pipe;
+            if (aprset[i].desc.f->is_pipe && !HAS_SOCKETS(set_type)) {
+                set_type = APR_POLL_FILE;
+            }
+            else
+                return APR_EBADF;
 #endif /* NETWARE */
+
+            fd = aprset[i].desc.f->filedes;
+
 #endif /* APR_FILES_AS_SOCKETS */
         }
         if (aprset[i].reqevents & APR_POLLIN) {
@@ -234,7 +253,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     }
 
 #ifdef NETWARE
-    if (is_pipe) {
+    if (HAS_PIPES(set_type)) {
         rv = pipe_select(maxfd + 1, &readset, &writeset, &exceptset, tvptr);
     }
     else {
@@ -297,6 +316,9 @@ struct apr_pollset_t {
     apr_pollfd_t *query_set;
     apr_pollfd_t *result_set;
     apr_pool_t *pool;
+#ifdef NETWARE
+    int set_type;
+#endif
 };
 
 APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
@@ -313,6 +335,9 @@ APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
     FD_ZERO(&((*pollset)->writeset));
     FD_ZERO(&((*pollset)->exceptset));
     (*pollset)->maxfd = 0;
+#ifdef NETWARE
+    (*pollset)->set_type = APR_NO_DESC;
+#endif
 #endif
     (*pollset)->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
     (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
@@ -352,13 +377,33 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
     pollset->pollset[pollset->nelts].events = get_event(descriptor->reqevents);
 #else
     if (descriptor->desc_type == APR_POLL_SOCKET) {
+#ifdef NETWARE
+        /* NetWare can't handle mixed descriptor types in select() */
+        if (HAS_PIPES(pollset->set_type)) {
+            return APR_EBADF;
+        }
+        else {
+            pollset->set_type = APR_POLL_SOCKET;
+        }
+#endif
         fd = descriptor->desc.s->socketdes;
     }
     else {
 #if !APR_FILES_AS_SOCKETS
         return APR_EBADF;
 #else
+#ifdef NETWARE
+        /* NetWare can't handle mixed descriptor types in select() */
+        if (descriptor->desc.f->is_pipe && !HAS_SOCKETS(pollset->set_type)) {
+            pollset->set_type = APR_POLL_FILE;
+            fd = descriptor->desc.f->filedes;
+        }
+        else {
+            return APR_EBADF;
+        }
+#else
         fd = descriptor->desc.f->filedes;
+#endif
 #endif
     }
     if (descriptor->reqevents & APR_POLLIN) {
@@ -505,6 +550,12 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     memcpy(&writeset, &(pollset->writeset), sizeof(fd_set));
     memcpy(&exceptset, &(pollset->exceptset), sizeof(fd_set));
 
+#ifdef NETWARE
+    if (HAS_PIPES(pollset->set_type)) {
+        rv = pipe_select(pollset->maxfd + 1, &readset, &writeset, &exceptset, tvptr);
+    }
+    else
+#endif
     rv = select(pollset->maxfd + 1, &readset, &writeset, &exceptset, tvptr);
 
     (*num) = rv;
