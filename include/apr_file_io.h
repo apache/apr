@@ -117,7 +117,10 @@ ap_status_t ap_write(ap_file_t *, void *, ap_ssize_t *);
 ap_status_t ap_writev(ap_file_t *, const ap_iovec_t *, ap_ssize_t *);
 ap_status_t ap_putc(ap_file_t *, char);
 ap_status_t ap_getc(ap_file_t *, char *);
+ap_status_t ap_ungetc(ap_file_t *, char);
 ap_status_t ap_gets(ap_file_t *, char *, int);
+ap_status_t ap_puts(ap_file_t *, char *);
+ap_status_t ap_flush(ap_file_t *);
 API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         __attribute__((format(printf,2,3)));
 
