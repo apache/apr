@@ -177,6 +177,7 @@ APR_DECLARE(int) apr_atomic_dec(apr_atomic_t *mem);
 #define apr_atomic_inc(mem)          atomic_add_int(mem,1)
 #define apr_atomic_set(mem, val)     atomic_set_int(mem, val)
 #define apr_atomic_read(mem)         (*mem)
+#define apr_atomic_init(pool)        APR_SUCCESS
 
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 
