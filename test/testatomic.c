@@ -64,8 +64,11 @@
 #include <unistd.h>
 #endif
 
-#if !(defined BEOS) && !(defined WIN32) && !(defined NETWARE) && !(defined __MVS__) && !(defined DARWIN)
-/* ugh... */
+/* Use pthread_setconcurrency where it is available and not a nullop,
+ * i.e. platforms using M:N or M:1 thread models: */
+#if APR_HAS_THREADS && \
+   ((defined(SOLARIS2) && SOLARIS2 > 26) || defined(_AIX))
+/* also HP-UX, IRIX? ... */
 #define HAVE_PTHREAD_SETCONCURRENCY
 #endif
 
