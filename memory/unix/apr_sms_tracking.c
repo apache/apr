@@ -68,6 +68,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+static const char *module_identity = "TRACKING";
+
 /*
  * Simple tracking memory system
  */
@@ -253,6 +255,7 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys,
     new_mem_sys->free_fn    = apr_sms_tracking_free;
     new_mem_sys->reset_fn   = apr_sms_tracking_reset;
     new_mem_sys->destroy_fn = apr_sms_tracking_destroy;
+    new_mem_sys->identity   = module_identity;
 
     tms = (apr_sms_tracking_t *)new_mem_sys;
     tms->nodes = NULL;
