@@ -87,9 +87,6 @@ static apr_status_t _file_dup(apr_file_t **new_file,
     
     if (which_dup == 1) {
         (*new_file) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
-        if ((*new_file) == NULL) {
-            return APR_ENOMEM;
-        }
         (*new_file)->pool = p;
         (*new_file)->filedes = rv;
     }
