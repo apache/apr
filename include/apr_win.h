@@ -75,6 +75,12 @@
 #include <stdio.h>
 #include <time.h>
 
+/* struct iovec is needed to emulate Unix writev */
+struct iovec {
+    char* iov_base;
+    int   iov_len;
+};
+
 typedef enum {APR_WIN_NT, APR_WIN_95, APR_WIN_98} ap_oslevel_e;
 
 #define SIGHUP     1
