@@ -19,6 +19,10 @@ dnl Absolute source/build directory
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
 
+dnl Get location of helpers directory
+abs_helpersdir=$abs_srcdir/helpers
+MKDIR=$abs_helpersdir/mkdir.sh
+
 if test "$abs_builddir" != "$abs_srcdir"; then
   USE_VPATH=1
 fi
@@ -524,7 +528,7 @@ AC_SUBST(have_in_addr)
 
 dnl #----------------------------- Prepare mm directory for VPATH support
 if test -n "$USE_MM" && test -n "$USE_VPATH"; then
-  test -d $mm_dir || mkdir -p $mm_dir
+  test -d $mm_dir || $MKDIR -p $mm_dir
 
   for i in shtool config.guess config.sub fbtool ltconfig \
            ltmain.sh mm_vers.c; do
@@ -548,7 +552,7 @@ MAKEFILE1="Makefile lib/Makefile "
 SUBDIRS="lib "
 for dir in $MODULES
 do
-    test -d $dir || mkdir -p $dir
+    test -d $dir || $MKDIR -p $dir
     if test -f $srcdir/$dir/$OSDIR/Makefile.in; then
         MAKEFILE2="$MAKEFILE2 $dir/$OSDIR/Makefile "
         SUBDIRS="$SUBDIRS $dir/$OSDIR "
