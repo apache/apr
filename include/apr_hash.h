@@ -145,17 +145,17 @@ APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht, const void *key,
 /**
  * <PRE>
  * 
- *     int sum_values(apr_pool_t *p, apr_hash_t *ht)
- *     {
- *         apr_hash_index_t *hi;
- * 	   void *val;
- * 	   int sum = 0;
- * 	   for (hi = apr_hash_first(p, ht); hi; hi = apr_hash_next(hi)) {
- * 	       apr_hash_this(hi, NULL, NULL, &val);
- * 	       sum += *(int *)val;
- * 	   }
- * 	   return sum;
+ * int sum_values(apr_pool_t *p, apr_hash_t *ht)
+ * {
+ *     apr_hash_index_t *hi;
+ *     void *val;
+ *     int sum = 0;
+ *     for (hi = apr_hash_first(p, ht); hi; hi = apr_hash_next(hi)) {
+ *         apr_hash_this(hi, NULL, NULL, &val);
+ *         sum += *(int *)val;
  *     }
+ *     return sum;
+ * }
  * 
  * There is no restriction on adding or deleting hash entries during an
  * iteration (although the results may be unpredictable unless all you do
