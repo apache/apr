@@ -167,3 +167,10 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
     
     return APR_OS2_STATUS(rc);
 }
+
+
+
+apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
+{
+    return apr_stat(finfo, fname, cont);
+}
