@@ -71,6 +71,12 @@
 #include <stdlib.h>
 #endif
 
+#ifdef HAVE_SET_H_ERRNO
+#define SET_H_ERRNO(newval) set_h_errno(newval)
+#else
+#define SET_H_ERRNO(newval) h_errno = (newval)
+#endif
+
 APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
                                        apr_port_t port)
 {
@@ -441,7 +447,9 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
     char tmphostname[256];
 #endif
 
-    h_errno = 0; /* don't know if it is portable for getnameinfo() to set h_errno */
+    /* don't know if it is portable for getnameinfo() to set h_errno;
+     * clear it then see if it was set */
+    SET_H_ERRNO(0);
     /* default flags are NI_NAMREQD; otherwise, getnameinfo() will return
      * a numeric address string if it fails to resolve the host name;
      * that is *not* what we want here
