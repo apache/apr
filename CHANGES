@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Added flag APR_FILE_ATTR_HIDDEN for manipulating the "hidden"
+     file attribute on Windows and OS/2.  [Branko Cibej]
+
   *) SECURITY [CAN-2003-0245]: Fixed a bug that could be triggered
      remotely through mod_dav and possibly other mechanisms, causing
      an Apache child process to crash.  The crash was first reported
