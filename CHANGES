@@ -20,6 +20,12 @@ Changes with APR 1.0
      apr_allocator_set_max_free   -> apr_allocator_max_free_set
      apr_allocator_set_mutex      -> apr_allocator_mutex_set
      apr_allocator_set_owner      -> apr_allocator_owner_set
+     apr_atomic_add               -> apr_atomic_add32
+     apr_atomic_cas               -> apr_atomic_cas32
+     apr_atomic_dec               -> apr_atomic_dec32
+     apr_atomic_inc               -> apr_atomic_inc32
+     apr_atomic_read              -> apr_atomic_read32
+     apr_atomic_set               -> apr_atomic_set32
      apr_bind                     -> apr_socket_bind
      apr_compare_groups           -> apr_gid_compare
      apr_compare_users            -> apr_uid_compare
