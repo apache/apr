@@ -60,17 +60,12 @@
  */
 
 /*
- * stuffbuffer - Stuff contents of string 's' into buffer 'buf' 
- * w/o overflowing 'buf' then NULL terminate.
+ * stuffbuffer - like ap_cpystrn() but returns the address of the
+ * dest buffer instead of the address of the terminating '\0'
  */
 static char *stuffbuffer(char *buf, ap_size_t bufsize, const char *s)
 {
-    ap_size_t len = strlen(s);
-    if (len > bufsize)
-        len = bufsize;
-    memcpy(buf, s, len);
-    if (len)
-        buf[len-1] = '\0';
+    ap_cpystrn(buf,s,bufsize);
     return buf;
 }
 
@@ -154,8 +149,6 @@ static char *apr_os_strerror(char *buf, ap_size_t bufsize, ap_status_t errcode)
     DWORD len;
     DWORD i;
 
-    buf = "";
-
     len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
                         NULL,
                         errcode,
@@ -164,18 +157,27 @@ static char *apr_os_strerror(char *buf, ap_size_t bufsize, ap_status_t errcode)
                         bufsize,
                         NULL);
 
-    /* FormatMessage put the message in the buffer, but it may
-     * have embedded a newline (\r\n), and possible more than one.
-     * Remove the newlines replacing them with a space. This is not 
-     * as visually perfect as moving all the remaining message over, 
-     * but more efficient.
-     */
-    i = len;
-    while (i) {
-        i--;
-        if ((buf[i] == '\r') || (buf[i] == '\n'))
-            buf[i] = ' ';
+    if (len) {
+        /* FormatMessage put the message in the buffer, but it may
+         * have embedded a newline (\r\n), and possible more than one.
+         * Remove the newlines replacing them with a space. This is not 
+         * as visually perfect as moving all the remaining message over, 
+         * but more efficient.
+         */
+        i = len;
+        while (i) {
+            i--;
+            if ((buf[i] == '\r') || (buf[i] == '\n'))
+                buf[i] = ' ';
+        }
     }
+    else {
+        /* Windows didn't provide us with a message.  Even stuff like
+         * WSAECONNREFUSED won't get a message.
+         */
+        ap_cpystrn(buf, "Unrecognized error code", bufsize);
+    }
+
     return buf;
 }
 
