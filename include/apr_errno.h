@@ -711,7 +711,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define apr_get_os_error()    (errno)
 #define apr_set_os_error(e)   (errno = (e))
 #ifdef NETWARE
-#define apr_get_netos_error()   (APR_FROM_OS_ERROR(WSAGetLastError()))
+#define apr_get_netos_error()   (WSAGetLastError()+APR_OS_START_SYSERR)
 #endif
 
 #define APR_STATUS_IS_SUCCESS(s)           ((s) == APR_SUCCESS)
