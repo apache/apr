@@ -90,7 +90,7 @@ static apr_status_t other_child_cleanup(void *data)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
+APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *proc,
                      void (*maintenance) (int reason, void *, int status),
                      void *data, apr_file_t *write_fd, apr_pool_t *p)
 {
@@ -98,7 +98,7 @@ APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *pid,
 
     ocr = apr_palloc(p, sizeof(*ocr));
     ocr->p = p;
-    ocr->proc = pid;
+    ocr->proc = proc;
     ocr->maintenance = maintenance;
     ocr->data = data;
     if (write_fd == NULL) {
@@ -138,91 +138,143 @@ APR_DECLARE(void) apr_proc_other_child_unregister(void *data)
     other_child_cleanup(data);
 }
 
-APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *pid, int status)
+APR_DECLARE(apr_status_t) apr_proc_other_child_alert(apr_proc_t *proc,
+                                                     int reason,
+                                                     int status)
 {
     apr_other_child_rec_t *ocr, *nocr;
 
     for (ocr = other_children; ocr; ocr = nocr) {
         nocr = ocr->next;
-        if (ocr->proc->pid != pid->pid)
+        if (ocr->proc->pid != proc->pid)
             continue;
 
         ocr->proc = NULL;
-        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
-        return 0;
+        (*ocr->maintenance) (reason, ocr->data, status);
+        return APR_SUCCESS;
     }
-    return APR_CHILD_NOTDONE;
+    return APR_EPROC_UNKNOWN;
 }
-#ifdef WIN32
-/*
- * Run the list of Other Children and restart the ones that have died.
- * ToDo: APR'ize this function so it will serve Unix and Win32.
- * Not clear to me how to make the Win32 function behave exactly like
- * the non-win32 branch. wgs
- */
-APR_DECLARE(void) apr_proc_other_child_check(void)
+
+APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
+                                               int reason)
 {
-    apr_other_child_rec_t *ocr, *nocr;
+    /* Todo: 
+     * Implement code to detect if pipes are still alive.
+     */
+#ifdef WIN32
     DWORD status;
 
-    /* Todo: 
-     * Implement code to detect if a pipe is still alive on Windows.
-     */
-    if (other_children == NULL)
+    if (ocr->proc == NULL)
         return;
 
-    for (ocr = other_children; ocr; ocr = nocr) {
-        nocr = ocr->next;
-        if (ocr->proc == NULL)
-            continue;
-
-        if (!ocr->proc->hproc) {
-            /* Already mopped up, perhaps we apr_proc_kill'ed it */
-            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, -1);
-        }
-        else if (!GetExitCodeProcess(ocr->proc->hproc, &status)) {
-            CloseHandle(ocr->proc->hproc);
-            ocr->proc = NULL;
-            (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
-        }
-        else if (status == STILL_ACTIVE) {
-            (*ocr->maintenance) (APR_OC_REASON_RESTART, ocr->data, -1);
-        }
-        else {
-            CloseHandle(ocr->proc->hproc);
-            ocr->proc->hproc = NULL;
-            ocr->proc = NULL;
-            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
-        }
+    if (!ocr->proc->hproc) {
+        /* Already mopped up, perhaps we apr_proc_kill'ed it */
+        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, -1);
     }
-}
+    else if (!GetExitCodeProcess(ocr->proc->hproc, &status)) {
+        CloseHandle(ocr->proc->hproc);
+        ocr->proc = NULL;
+        (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
+    }
+    else if (status == STILL_ACTIVE) {
+        (*ocr->maintenance) (reason, ocr->data, -1);
+    }
+    else {
+        CloseHandle(ocr->proc->hproc);
+        ocr->proc->hproc = NULL;
+        ocr->proc = NULL;
+        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
+    }
+
 #else /* ndef Win32 */
-APR_DECLARE(void) apr_proc_other_child_check(void)
-{
-    apr_other_child_rec_t *ocr, *nocr;
     pid_t waitret; 
     int status;
 
-    for (ocr = other_children; ocr; ocr = nocr) {
-        nocr = ocr->next;
-        if (ocr->proc == NULL)
-            continue;
+    if (ocr->proc == NULL)
+        return;
 
-        waitret = waitpid(ocr->proc->pid, &status, WNOHANG);
-        if (waitret == ocr->proc->pid) {
-            ocr->proc = NULL;
-            (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
-        }
-        else if (waitret == 0) {
-            (*ocr->maintenance) (APR_OC_REASON_RESTART, ocr->data, -1);
-        }
-        else if (waitret == -1) {
-            /* uh what the heck? they didn't call unregister? */
-            ocr->proc = NULL;
-            (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
-        }
+    waitret = waitpid(ocr->proc->pid, &status, WNOHANG);
+    if (waitret == ocr->proc->pid) {
+        ocr->proc = NULL;
+        (*ocr->maintenance) (APR_OC_REASON_DEATH, ocr->data, status);
+    }
+    else if (waitret == 0) {
+        (*ocr->maintenance) (reason, ocr->data, -1);
+    }
+    else if (waitret == -1) {
+        /* uh what the heck? they didn't call unregister? */
+        ocr->proc = NULL;
+        (*ocr->maintenance) (APR_OC_REASON_LOST, ocr->data, -1);
+    }
+#endif
+}
+
+APR_DECLARE(void) apr_proc_other_child_refresh_all(int reason)
+{
+    apr_other_child_rec_t *ocr, *next_ocr;
+
+    for (ocr = other_children; ocr; ocr = next_ocr) {
+        next_ocr = ocr->next;
+        apr_proc_other_child_refresh(ocr, reason);
     }
 }
-#endif
+
+#else /* !APR_HAS_OTHER_CHILD */
+
+APR_DECLARE(void) apr_proc_other_child_register(apr_proc_t *proc,
+                     void (*maintenance) (int reason, void *, int status),
+                     void *data, apr_file_t *write_fd, apr_pool_t *p)
+{
+    return;
+}
+
+APR_DECLARE(void) apr_proc_other_child_unregister(void *data)
+{
+    return;
+}
+
+APR_DECLARE(apr_status_t) apr_proc_other_child_alert(apr_proc_t *proc,
+                                                     int reason,
+                                                     int status)
+{
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(void) apr_proc_other_child_refresh(apr_other_child_rec_t *ocr,
+                                               int reason)
+{
+    return;
+}
+
+APR_DECLARE(void) apr_proc_other_child_refresh_all(int reason)
+{
+    return;
+}
 
 #endif /* APR_HAS_OTHER_CHILD */
+
+
+/* XXX: deprecated for removal in 1.0
+ * The checks behaved differently between win32 and unix, while
+ * the old win32 code did a health check, the unix code called
+ * other_child_check only at restart.
+ */
+APR_DECLARE(void) apr_proc_other_child_check(void)
+{
+#ifdef WIN32
+    apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING);
+#else
+    apr_proc_other_child_refresh_all(APR_OC_REASON_RESTART);
+#endif
+}
+
+/* XXX: deprecated for removal in 1.0
+ * This really didn't test any sort of read - it simply notified
+ * the maintenance function that the process had died.
+ */
+APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *proc, int status)
+{
+    return apr_proc_other_child_alert(proc, APR_OC_REASON_DEATH, status);
+}
+
