@@ -124,8 +124,8 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interva
 }
 
 
-APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
-                                           apr_int32_t opt, apr_int32_t on)
+APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
+                                             apr_int32_t opt, apr_int32_t on)
 {
     int one;
     apr_status_t stat;
@@ -253,8 +253,8 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_get(apr_socket_t *sock, apr_interva
 }
 
 
-APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
-                                           apr_int32_t opt, apr_int32_t *on)
+APR_DECLARE(apr_status_t) apr_socket_opt_get(apr_socket_t *sock,
+                                             apr_int32_t opt, apr_int32_t *on)
 {
     switch (opt) {
     case APR_SO_TIMEOUT: 
@@ -275,6 +275,20 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
     return APR_SUCCESS;
 }
 
+
+/* deprecated */
+APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
+                                           apr_int32_t opt, apr_int32_t on)
+{
+    return apr_socket_opt_set(sock, opt, on);
+}
+
+APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
+                                           apr_int32_t opt, apr_int32_t *on)
+{
+    return apr_socket_opt_get(sock, opt, on)
+}
+                                           
 
 APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len,
                                           apr_pool_t *cont)
