@@ -365,8 +365,19 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
     else if (statcode < APR_OS_START_USEERR) {
         return stuffbuffer(buf, bufsize, apr_error_string(statcode));
     }
-    else if (statcode < APR_OS_START_SYSERR) {
+    else if (statcode < APR_OS_START_EAIERR) {
         return stuffbuffer(buf, bufsize, "APR does not understand this error code");
+    }
+    else if (statcode < APR_OS_START_SYSERR) {
+#if defined(HAVE_GETADDRINFO)
+        statcode -= APR_OS_START_EAIERR;
+#if defined(NEGATIVE_EAI)
+        statcode = -statcode;
+#endif
+        return stuffbuffer(buf, bufsize, gai_strerror(statcode));
+#else
+        return stuffbuffer(buf, bufsize, "APR does not understand this error code");
+#endif
     }
     else {
         return apr_os_strerror(buf, bufsize, statcode - APR_OS_START_SYSERR);

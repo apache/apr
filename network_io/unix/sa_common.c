@@ -355,14 +355,15 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                 return errno;
             }
             else {
-                /* XXX fixme!
-                 * no current way to represent this with APR's error
-                 * scheme... note that glibc uses negative values for these
-                 * numbers, perhaps so they don't conflict with h_errno
-                 * values...  Tru64 uses positive values which conflict
-                 * with h_errno values
+                /* issues with representing this with APR's error scheme:
+                 * glibc uses negative values for these numbers, perhaps so 
+                 * they don't conflict with h_errno values...  Tru64 uses 
+                 * positive values which conflict with h_errno values
                  */
-                return error + APR_OS_START_SYSERR;
+#if defined(NEGATIVE_EAI)
+                error = -error;
+#endif
+                return error + APR_OS_START_EAIERR;
             }
         }
         cursa = *sa;
