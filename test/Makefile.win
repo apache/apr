@@ -1,0 +1,101 @@
+
+
+NONPORTABLE = \
+	testshm.exe \
+	testprocmutex.exe \
+	testglobalmutex.exe
+
+PROGRAMS = \
+	testflock.exe \
+	testsock.exe \
+	testlockperf.exe \
+	testshmproducer.exe \
+	testshmconsumer.exe \
+	testatomic.exe \
+	testmutexscope.exe \
+	testall.exe
+
+
+TARGETS = $(PROGRAMS) $(NONPORTABLE) client.exe sendfile.exe \
+	server.exe 
+
+LOCAL_LIBS=..\LibD\apr.lib 
+
+CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child.exe occhild.exe \
+	        testprocmutex.exe testglobalmutex.exe testshm.exe
+
+INCDIR=../include
+INCLUDES=/I "$(INCDIR)"
+
+.c.obj:
+	cl /nologo /c /MDd /W3 /GX /Zi /Od /DWIN32 /D_DEBUG /D_WINDOWS /DAPR_DECLARE_STATIC $(INCLUDES) $<
+
+testflock.exe: testflock.obj $(LOCAL_LIBS)
+	$(LINK) testflock.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+occhild.exe: occhild.obj $(LOCAL_LIBS)
+	$(LINK) occhild.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+proc_child.exe: proc_child.obj $(LOCAL_LIBS)
+	$(LINK) proc_child.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+# FIXME: -prefer-pic is only supported with libtool-1.4+
+mod_test.so: $(srcdir)/mod_test.c
+	$(LIBTOOL) --mode=compile $(COMPILE) -prefer-pic -c $(srcdir)/mod_test.c && touch $@
+
+mod_test.la: mod_test.slo $(LOCAL_LIBS)
+	$(LINK) --mode=link $(COMPILE) -rpath `pwd` -avoid-version -module mod_test.obj $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
+
+libmod_test.la: mod_test.slo $(LOCAL_LIBS)
+	$(LINK) --mode=link $(COMPILE) -rpath `pwd` -avoid-version mod_test.obj $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
+
+testlockperf.exe: testlockperf.obj $(LOCAL_LIBS)
+	$(LINK) testlockperf.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testsock.exe: testsock.obj client.exe server.exe sendfile.exe $(LOCAL_LIBS)
+	$(LINK) testsock.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+client.exe: client.obj $(LOCAL_LIBS)
+	$(LINK) client.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+server.exe: server.obj $(LOCAL_LIBS)
+	$(LINK) server.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+sendfile.exe: sendfile.obj $(LOCAL_LIBS)
+	$(LINK) sendfile.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testshm.exe: testshm.obj $(LOCAL_LIBS) testshmproducer.exe testshmconsumer.exe
+	$(LINK) testshm.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testshmproducer.exe: testshmproducer.obj $(LOCAL_LIBS)
+	$(LINK) testshmproducer.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testshmconsumer.exe: testshmconsumer.obj $(LOCAL_LIBS)
+	$(LINK) testshmconsumer.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testprocmutex.exe: testprocmutex.obj $(LOCAL_LIBS)
+	$(LINK) testprocmutex.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testglobalmutex.exe: testglobalmutex.obj $(LOCAL_LIBS)
+	$(LINK) testglobalmutex.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testatomic.exe: testatomic.obj $(LOCAL_LIBS)
+	$(LINK) testatomic.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+testmutexscope.exe: testmutexscope.obj $(LOCAL_LIBS)
+	$(LINK) testmutexscope.obj $(LOCAL_LIBS) $(ALL_LIBS)
+
+TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
+	testmmap.obj testud.obj testtable.obj testsleep.obj testpools.obj \
+	testfmt.obj testfile.obj testdir.obj testfileinfo.obj testrand.obj \
+	testdso.obj testoc.obj testdup.obj testsockets.obj testproc.obj \
+	testpoll.obj testlock.obj testsockopt.obj testpipe.obj testthread.obj \
+	testhash.obj testargs.obj testnames.obj testuser.obj
+
+testall: $(TESTS) \
+	 CuTest.obj $(LOCAL_LIBS)
+	link /nologo /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
+	$(LOCAL_LIBS) kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib
+
+
+# DO NOT REMOVE
