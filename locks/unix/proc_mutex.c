@@ -28,15 +28,21 @@ static apr_status_t proc_mutex_no_tryacquire(apr_proc_mutex_t *new_mutex)
     return APR_ENOTIMPL;
 }
 
+#if APR_HAS_POSIXSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || \
+    APR_HAS_PROC_PTHREAD_SERIALIZE || APR_HAS_SYSVSEM_SERIALIZE
+static apr_status_t proc_mutex_no_child_init(apr_proc_mutex_t **mutex,
+                                             apr_pool_t *cont,
+                                             const char *fname)
+{
+    return APR_SUCCESS;
+}
+#endif    
+
 #if APR_HAS_POSIXSEM_SERIALIZE
 
 #ifndef SEM_FAILED
 #define SEM_FAILED (-1)
 #endif
-
-static void proc_mutex_posix_setup(void)
-{
-}
 
 static apr_status_t proc_mutex_posix_cleanup(void *mutex_)
 {
@@ -137,13 +143,6 @@ static apr_status_t proc_mutex_posix_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_posix_child_init(apr_proc_mutex_t **mutex,
-                                                apr_pool_t *cont,
-                                                const char *fname)
-{
-    return APR_SUCCESS;
-}
-
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(POSIXSEM_IS_GLOBAL)
@@ -156,7 +155,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_posix_methods =
     proc_mutex_no_tryacquire,
     proc_mutex_posix_release,
     proc_mutex_posix_cleanup,
-    proc_mutex_posix_child_init,
+    proc_mutex_no_child_init,
     "posixsem"
 };
 
@@ -244,11 +243,6 @@ static apr_status_t proc_mutex_sysv_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_sysv_child_init(apr_proc_mutex_t **mutex, apr_pool_t *cont, const char *fname)
-{
-    return APR_SUCCESS;
-}
-
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(SYSVSEM_IS_GLOBAL)
@@ -261,17 +255,13 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_sysv_methods =
     proc_mutex_no_tryacquire,
     proc_mutex_sysv_release,
     proc_mutex_sysv_cleanup,
-    proc_mutex_sysv_child_init,
+    proc_mutex_no_child_init,
     "sysvsem"
 };
 
 #endif /* SysV sem implementation */
 
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
-
-static void proc_mutex_proc_pthread_setup(void)
-{
-}
 
 static apr_status_t proc_mutex_proc_pthread_cleanup(void *mutex_)
 {
@@ -409,13 +399,6 @@ static apr_status_t proc_mutex_proc_pthread_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_proc_pthread_child_init(apr_proc_mutex_t **mutex,
-                                            apr_pool_t *cont, 
-                                            const char *fname)
-{
-    return APR_SUCCESS;
-}
-
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_proc_pthread_methods =
 {
     APR_PROCESS_LOCK_MECH_IS_GLOBAL,
@@ -424,7 +407,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_proc_pthread_method
     proc_mutex_no_tryacquire,
     proc_mutex_proc_pthread_release,
     proc_mutex_proc_pthread_cleanup,
-    proc_mutex_proc_pthread_child_init,
+    proc_mutex_no_child_init,
     "pthread"
 };
 
@@ -528,13 +511,6 @@ static apr_status_t proc_mutex_fcntl_release(apr_proc_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_fcntl_child_init(apr_proc_mutex_t **mutex,
-                                                apr_pool_t *pool, 
-                                                const char *fname)
-{
-    return APR_SUCCESS;
-}
-
 const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods =
 {
 #if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS || defined(FCNTL_IS_GLOBAL)
@@ -547,7 +523,7 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods =
     proc_mutex_no_tryacquire,
     proc_mutex_fcntl_release,
     proc_mutex_fcntl_cleanup,
-    proc_mutex_fcntl_child_init,
+    proc_mutex_no_child_init,
     "fcntl"
 };
 
@@ -556,10 +532,6 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_fcntl_methods =
 #if APR_HAS_FLOCK_SERIALIZE
 
 static apr_status_t proc_mutex_flock_release(apr_proc_mutex_t *);
-
-static void proc_mutex_flock_setup(void)
-{
-}
 
 static apr_status_t proc_mutex_flock_cleanup(void *mutex_)
 {
@@ -680,20 +652,12 @@ const apr_proc_mutex_unix_lock_methods_t apr_proc_mutex_unix_flock_methods =
 
 void apr_proc_mutex_unix_setup_lock(void)
 {
-#if APR_HAS_POSIXSEM_SERIALIZE
-    proc_mutex_posix_setup();
-#endif
+    /* setup only needed for sysvsem and fnctl */
 #if APR_HAS_SYSVSEM_SERIALIZE
     proc_mutex_sysv_setup();
 #endif
-#if APR_HAS_PROC_PTHREAD_SERIALIZE
-    proc_mutex_proc_pthread_setup();
-#endif
 #if APR_HAS_FCNTL_SERIALIZE
     proc_mutex_fcntl_setup();
-#endif
-#if APR_HAS_FLOCK_SERIALIZE
-    proc_mutex_flock_setup();
 #endif
 }
 
