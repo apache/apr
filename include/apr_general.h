@@ -249,7 +249,7 @@ ap_status_t ap_generate_random_bytes(unsigned char * buf, int length);
 
 /* Memory allocation/Pool debugging options... 
  *
- * Look in ap_pools.c for definitions of what these mean/do
+ * Look in the developer documentation for details of what these do.
  *
  * NB These should ALL normally be commented out unless you REALLY
  * need them!!
