@@ -930,6 +930,8 @@ APR_FLAG_HEADERS(
     kernel/OS.h		\
     net/errno.h		\
     netinet/in.h	\
+    netinet/sctp.h      \
+    netinet/sctp_uio.h  \
     sys/file.h		\
     sys/mman.h		\
     sys/poll.h		\
@@ -977,6 +979,8 @@ AC_SUBST(limitsh)
 AC_SUBST(netdbh)
 AC_SUBST(sys_syslimitsh)
 AC_SUBST(netinet_inh)
+AC_SUBST(netinet_sctph)
+AC_SUBST(netinet_sctp_uioh)
 AC_SUBST(netinet_tcph)
 AC_SUBST(stdargh)
 AC_SUBST(stdioh)
@@ -1733,9 +1737,12 @@ else
     acceptfilter="0"
 fi
 
+APR_CHECK_SCTP
+
 AC_SUBST(apr_tcp_nopush_flag)
 AC_SUBST(have_corkable_tcp)
 AC_SUBST(acceptfilter)
+AC_SUBST(have_sctp)
 
 AC_CHECK_FUNCS(set_h_errno)
 APR_CHECK_RESOLV_RETRANS
