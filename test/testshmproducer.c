@@ -118,7 +118,7 @@ int main(void)
     /* produce messages on all of the boxes, in descending order */
     for (i = N_BOXES - 1; i > 0; i--) {
         msgput(i, "Sending a message\n");
-        apr_sleep(1*APR_USEC_PER_SEC);
+        apr_sleep(apr_time_from_sec(1));
     }
 
     printf("Producer detaching from name-based shared memory....");
