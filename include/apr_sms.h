@@ -312,6 +312,8 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys,
  */
 APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys);
 
+APR_DECLARE(apr_status_t) apr_sms_threadsafe_lock(apr_sms_t *mem_sys);
+APR_DECLARE(apr_status_t) apr_sms_threadsafe_unlock(apr_sms_t *mem_sys);
 
 #ifdef __cplusplus
 }
