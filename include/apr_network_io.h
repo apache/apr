@@ -77,7 +77,7 @@ extern "C" {
 #endif
 
 #ifndef APR_ANYADDR
-#define APR_ANYADDR "ANY_IPADDR"
+#define APR_ANYADDR "0.0.0.0"
 #endif
 
 /* Socket option definitions */
