@@ -553,5 +553,5 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
                                     apr_int32_t wanted, apr_pool_t *cont)
 {
-    return apr_stat(finfo, fname, wanted & APR_FINFO_LINK, cont);
+    return apr_stat(finfo, fname, wanted | APR_FINFO_LINK, cont);
 }
