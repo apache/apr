@@ -140,10 +140,10 @@ int main(int argc, char *argv[])
 
     apr_socket_addr_get(&remote_sa, APR_REMOTE, sock);
     apr_sockaddr_ip_get(&remote_ipaddr, remote_sa);
-    apr_sockaddr_port_get(&remote_port, remote_sa);
+    remote_port = remote_sa->port;
     apr_socket_addr_get(&local_sa, APR_LOCAL, sock);
     apr_sockaddr_ip_get(&local_ipaddr, local_sa);
-    apr_sockaddr_port_get(&local_port, local_sa);
+    local_port = local_sa->port;
     fprintf(stdout, "\tClient socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
