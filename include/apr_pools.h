@@ -529,6 +529,9 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
 
 /*
  * Cleanup
+ *
+ * Cleanups are performed in the reverse order they were registered.  That is:
+ * Last In, First Out.
  */
 
 /**
