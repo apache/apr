@@ -55,6 +55,7 @@
 #include "fileio.h"
 #include "apr_lock.h"
 
+#ifndef BEOS
 static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
 {
     struct timeval tv, *tvptr;
@@ -89,6 +90,7 @@ static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
     }
     return APR_SUCCESS;
 }
+#endif
 
 ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
@@ -157,7 +159,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         do {
             rv = read(thefile->filedes, buf, *nbytes);
         } while (rv == -1 && errno == EINTR);
-
+#ifndef BEOS
         if (rv == -1 && 
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
@@ -172,7 +174,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
                 } while (rv == -1 && errno == EINTR);
             }
         }  
-
+#endif
         *nbytes = bytes_read;
         if (rv == 0) {
 	return     APR_EOF;
@@ -230,7 +232,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         do {
             rv = write(thefile->filedes, buf, *nbytes);
         } while (rv == (ap_size_t)-1 && errno == EINTR);
-
+#ifndef BEOS
         if (rv == (ap_size_t)-1 &&
             (errno == EAGAIN || errno == EWOULDBLOCK) && 
             thefile->timeout != 0) {
@@ -245,7 +247,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 	        } while (rv == (ap_size_t)-1 && errno == EINTR);
             }
         }  
-
+#endif
         if (rv == (ap_size_t)-1) {
             (*nbytes) = 0;
             return errno;
