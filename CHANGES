@@ -1,6 +1,6 @@
 Changes with APR b1  
 
-  *) Fixup the --with-libtool option.  This allows the test directory
+  *) Fixup the --enable-libtool option.  This allows the test directory
      to compile again.  The test directory still doesn't work when
      APR is configured without libtool.  [Ryan Bloom]
 
@@ -8,7 +8,7 @@ Changes with APR b1
      available, and use that instead. [Wilfredo Sanchez]
 
   *) Make libtool optional at configure time.  This is done with 
-     --without-libtool.  [Ryan Bloom]
+     --disable-libtool.  [Ryan Bloom]
 
   *) Recognize systems where the TCP_NODELAY setting is inherited from
      the listening socket, and optimize apr_setsockopt(APR_TCP_NODELAY)

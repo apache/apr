@@ -96,7 +96,7 @@ AC_PROG_LIBTOOL
     ;;
 esac
 
-AC_ARG_WITH(libtool, [--with-libtool   use libtool to link the library],
+AC_ARG_ENABLE(libtool, [--with-libtool   use libtool to link the library],
   [ use_libtool=$withval ], [ use_libtool="yes" ] )
 
 if test "x$use_libtool" = "xyes"; then
