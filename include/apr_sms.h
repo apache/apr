@@ -404,7 +404,7 @@ APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
  * @param tag The tag to give the sms
  * @param sms The sms to apply the tag to
  */
-APR_DECLARE(void) apr_sms_tag(const char *tag, apr_sms_t *sms);
+APR_DECLARE(void) apr_sms_tag(apr_sms_t *sms, const char *tag);
 #endif /* APR_DEBUG_TAG_SMS */
 
 #ifdef __cplusplus
