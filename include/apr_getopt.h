@@ -73,7 +73,7 @@ typedef struct apr_getopt_t {
  * @param argc The number of arguments to parse
  * @param argv The array of arguments to parse
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
- * @deffunc apr_status_t apr_initopt(apr_pool_t *cont, apr_getopt_t **os, int argc, char const* const* argv)
+ * @deffunc apr_status_t apr_initopt( apr_getopt_t **os, apr_pool_t *cont,int argc, char const* const* argv)
  */
 APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
                                      int argc, char const* const* argv);
@@ -93,7 +93,7 @@ APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
  *             APR_BADARG   --  No argument followed @parameter:
  *             APR_SUCCESS  --  The next option was found.
  * </PRE>
- * @deffunc apr_status_t apr_getopt(apr_getopt_t *os, const char *opts, char *optch, char **optarg)
+ * @deffunc apr_status_t apr_getopt(apr_getopt_t *os, const char *opts, char *optch, char const** optarg)
  */
 APR_EXPORT(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
                                     char *optch, char const** optarg);
