@@ -232,6 +232,15 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
         return apr_get_netos_error();
     }
     *(*new)->local_addr = *sock->local_addr;
+    /* fix up any pointers which are no longer valid */
+    if (sock->local_addr->sa.sin.sin_family == AF_INET) {
+        (*new)->local_addr->ipaddr_ptr = &(*new)->local_addr->sa.sin.sin_addr;
+    }
+#if APR_HAVE_IPV6
+    else if (sock->local_addr->sa.sin.sin_family == AF_INET6) {
+        (*new)->local_addr->ipaddr_ptr = &(*new)->local_addr->sa.sin6.sin6_addr;
+    }
+#endif
 
     if (sock->local_port_unknown) {
         /* not likely for a listening socket, but theoretically possible :) */
