@@ -83,6 +83,7 @@
 #  define SHARED_OPTS "-shared"
 #  define MODULE_OPTS "-shared"
 #  define LINKER_FLAG_PREFIX "-Wl,"
+#  define ADD_MINUS_L
 #endif
 
 #if defined(_OSD_POSIX)
@@ -140,6 +141,14 @@ enum pic_mode_e {
     pic_UNKNOWN,
     pic_PREFER,
     pic_AVOID,
+};
+
+enum lib_type {
+    type_UNKNOWN,
+    type_DYNAMIC_LIB,
+    type_STATIC_LIB,
+    type_MODULE_LIB,
+    type_OBJECT,
 };
 
 typedef struct {
@@ -653,7 +662,7 @@ char *check_object_exists(command_t *cmd, const char *arg, int arglen)
         } 
 
         if (!cmd->options.silent) {
-            printf("Checking: %s\n", newarg);
+            printf("Checking (obj): %s\n", newarg);
         }
         rv = stat(newarg, &sb);
     }
@@ -674,7 +683,7 @@ char *check_object_exists(command_t *cmd, const char *arg, int arglen)
  * 1 - .libs suffix
  */
 char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
-                           int libdircheck)
+                           int libdircheck, enum lib_type *libtype)
 {
     char *newarg, *ext;
     int pass, rv, newpathlen;
@@ -701,24 +710,29 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
         case 0:
             if (cmd->options.pic_mode != pic_AVOID || cmd->options.shared) {
                 strcpy(ext, DYNAMIC_LIB_EXT);
+                *libtype = type_DYNAMIC_LIB;
                 break;
             }
             pass = 1;
         case 1:
             strcpy(ext, STATIC_LIB_EXT);
+            *libtype = type_STATIC_LIB;
             break;
         case 2:
             strcpy(ext, MODULE_LIB_EXT);
+            *libtype = type_MODULE_LIB;
             break;
         case 3:
             strcpy(ext, OBJECT_EXT);
+            *libtype = type_OBJECT;
             break;
         default:
+            *libtype = type_UNKNOWN;
             break;
         } 
 
         if (!cmd->options.silent) {
-            printf("Checking: %s\n", newarg);
+            printf("Checking (lib): %s\n", newarg);
         }
         rv = stat(newarg, &sb);
     }
@@ -729,6 +743,27 @@ char *check_library_exists(command_t *cmd, const char *arg, int pathlen,
     }
 
     return NULL;
+}
+
+/* use -L -llibname to allow to use installed libraries */
+void add_minus_l(count_chars *cc, const char *arg)
+{
+    char *name = strrchr(arg, '/');
+    char *file = strrchr(arg, '.');
+    char *lib  = strstr(name, "lib");
+
+    if (name !=NULL && file != NULL && lib == name+1) {
+        *name = '\0';
+        *file = '\0';
+        file = name;
+        file = file+4;
+        push_count_chars(cc, "-L ");
+        push_count_chars(cc, arg);
+        push_count_chars(cc, "-l");
+        push_count_chars(cc, file);
+    } else {
+        push_count_chars(cc, arg);
+    }
 }
 
 void add_linker_flag_prefix(count_chars *cc, const char *arg)
@@ -749,6 +784,7 @@ int parse_input_file_name(char *arg, command_t *cmd_data)
     char *ext = strrchr(arg, '.');
     char *name = strrchr(arg, '/');
     int pathlen;
+    enum lib_type libtype;
     char *newarg;
 
     if (!ext) {
@@ -790,22 +826,29 @@ int parse_input_file_name(char *arg, command_t *cmd_data)
         switch (cmd_data->mode) {
         case mLink:
             /* Try the .libs dir first! */
-            newarg = check_library_exists(cmd_data, arg, pathlen, 1);
+            newarg = check_library_exists(cmd_data, arg, pathlen, 1, &libtype);
             if (!newarg) {
                 /* Try the normal dir next. */
-                newarg = check_library_exists(cmd_data, arg, pathlen, 0);
+                newarg = check_library_exists(cmd_data, arg, pathlen, 0, &libtype);
                 if (!newarg) {
                     printf("Can not find suitable library for %s\n", arg);
                     exit(1);
                 }
             }
 
-            if (cmd_data->mode != mLink) {
-                push_count_chars(cmd_data->arglist, newarg);
+            /* It is not ok to just add the file: a library may added with:
+               1 - -L path library_name. (For *.so in Linux).
+               2 - library_name.
+             */
+#ifdef ADD_MINUS_L
+            if (libtype == type_DYNAMIC_LIB) {
+                 add_minus_l(cmd_data->shared_opts.dependencies, newarg);
+            } else {
+                 push_count_chars(cmd_data->shared_opts.dependencies, newarg);
             }
-            else {
-                push_count_chars(cmd_data->shared_opts.dependencies, newarg);
-            }
+#else
+            push_count_chars(cmd_data->shared_opts.dependencies, newarg);
+#endif
             break;
         case mInstall:
             /* If we've already recorded a library to install, we're most
