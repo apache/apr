@@ -121,16 +121,20 @@ struct apr_mmap_t {
  * with systems where the expense of doing an mmap() and an munmap() outweighs
  * the benefit for small files.  It shouldn't be set lower than 1.
  */
-#ifndef MMAP_THRESHOLD
+#ifdef MMAP_THRESHOLD
+#  define APR_MMAP_THRESHOLD              MMAP_THRESHOLD
+#else
 #  ifdef SUNOS4
-#    define MMAP_THRESHOLD                (8*1024)
+#    define APR_MMAP_THRESHOLD            (8*1024)
 #  else
-#    define MMAP_THRESHOLD                1
+#    define APR_MMAP_THRESHOLD            1
 #  endif /* SUNOS4 */
 #endif /* MMAP_THRESHOLD */
 
-#ifndef MMAP_LIMIT
-#  define MMAP_LIMIT                      (4*1024*1024)
+#ifdef MMAP_LIMIT
+#  define APR_MMAP_LIMIT                  MMAP_LIMIT
+#else
+#  define APR_MMAP_LIMIT                  (4*1024*1024)
 #endif /* MMAP_LIMIT */
 
 /*   Function definitions */
