@@ -95,7 +95,6 @@ static void try(const void *buf, size_t bufLen, apr_xlate_t *xlate,
                 const void *digest)
 {
     int i;
-    apr_status_t rv;
     apr_md5_ctx_t context;
     unsigned char hash[MD5_DIGESTSIZE];
     
