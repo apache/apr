@@ -15,7 +15,7 @@ while ($t = <$srcfl>) {
     if ($t =~ m|^ALL_LIBS=|) {
         $t = "ALL_LIBS=../LibD/apr.lib kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib";
     }
-    if ($t =~ s|\@CFLAGS\@|\/nologo \/MDd \/W3 \/Gm \/GX \/Zi \/Od \/D "_DEBUG" \/D "WIN32" \/D APR_DECLARE_STATIC \/FD|) {
+    if ($t =~ s|\@CFLAGS\@|\/nologo \/c \/MDd \/W3 \/Gm \/GX \/Zi \/Od \/D "_DEBUG" \/D "WIN32" \/D APR_DECLARE_STATIC \/FD|) {
         $t =~ s|-g ||;
     }
     $t =~ s|\$\{LD_FLAGS\}||;
