@@ -481,6 +481,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new_proc,
 /**
  * Wait for a child process to die
  * @param proc The process handle that corresponds to the desired child process 
+ * @param exitcode The returned exit status of the child, if a child process
+ *                 dies. On platforms that don't support obtaining this
+ *                 information, the exitcode parameter will be returned as
+ *                 APR_ENOTIMPL. This parameter may be NULL if the exit code
+ *                 is not needed.
  * @param waithow How should we wait.  One of:
  * <PRE>
  *            APR_WAIT   -- block until the child process dies.
@@ -494,6 +499,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new_proc,
  * </PRE>
  */
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, 
+                                        apr_wait_t *exitcode,
                                         apr_wait_how_e waithow);
 
 /**

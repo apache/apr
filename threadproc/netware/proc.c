@@ -393,6 +393,7 @@ apr_status_t apr_proc_wait_all_procs(apr_proc_t *proc, apr_wait_t *status,
 } 
 
 apr_status_t apr_proc_wait(apr_proc_t *proc, 
+                           apr_wait_t *exitcode,
                            apr_wait_how_e waithow)
 {
 #if 0

@@ -540,27 +540,29 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, apr_wait_how_e wait)
+APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
+                                        apr_wait_t *exitcode, 
+                                        apr_wait_how_e wait)
 {
     DWORD stat;
+    DWORD time;
+
     if (!proc)
         return APR_ENOPROC;
-    if (wait == APR_WAIT) {
-        if ((stat = WaitForSingleObject(proc->hproc, 
-                                        INFINITE)) == WAIT_OBJECT_0) {
+
+    if (wait == APR_WAIT)
+        time = INFINITE;
+    else
+        time = 0;
+
+    if ((stat = WaitForSingleObject(proc->hproc, time)) == WAIT_OBJECT_0) {
+        if (GetExitCodeProcess((HANDLE)proc->pid, &stat)) {
+            if (exitcode)
+                *exitcode = (apr_wait_t)stat;
             CloseHandle(proc->hproc);
             proc->hproc = NULL;
             return APR_CHILD_DONE;
         }
-        else if (stat == WAIT_TIMEOUT) {
-            return APR_CHILD_NOTDONE;
-        }
-        return apr_get_os_error();
-    }
-    if ((stat = WaitForSingleObject((HANDLE)proc->hproc, 0)) == WAIT_OBJECT_0) {
-        CloseHandle(proc->hproc);
-        proc->hproc = NULL;
-        return APR_CHILD_DONE;
     }
     else if (stat == WAIT_TIMEOUT) {
         return APR_CHILD_NOTDONE;
