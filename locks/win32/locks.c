@@ -122,7 +122,7 @@ ap_status_t ap_child_init_lock(struct lock_t **lock, ap_context_t *cont, char *f
 ap_status_t ap_lock(struct lock_t *lock)
 {
     DWORD rv;
-    if (lock->type == APR_INTRAPROCESS) {
+    if (lock->scope == APR_INTRAPROCESS) {
         EnterCriticalSection(&lock->section);
         return APR_SUCCESS;
     } else {
@@ -140,7 +140,7 @@ ap_status_t ap_lock(struct lock_t *lock)
 
 ap_status_t ap_unlock(struct lock_t *lock)
 {
-    if (lock->type == APR_INTRAPROCESS) {
+    if (lock->scope == APR_INTRAPROCESS) {
         LeaveCriticalSection(&lock->section);
         return APR_SUCCESS;
     } else {
@@ -153,7 +153,7 @@ ap_status_t ap_unlock(struct lock_t *lock)
 
 ap_status_t ap_destroy_lock(struct lock_t *lock)
 {
-    if (lock->type == APR_INTRAPROCESS) {
+    if (lock->scope == APR_INTRAPROCESS) {
         DeleteCriticalSection(&lock->section);
         return APR_SUCCESS;
     } else {
