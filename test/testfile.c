@@ -76,13 +76,14 @@ int main(void)
     apr_file_t *thefile = NULL;
     apr_socket_t *testsock = NULL;
     apr_pollfd_t *sdset = NULL;
-    apr_status_t status = 0;
+    apr_status_t status;
     apr_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     apr_size_t nbytes = 0;
     apr_int32_t rv;
     apr_off_t zer = 0;
+    char errmsg[120];
     char *buf;
-    char *str;
+    const char *str;
     char *filename = "test.fil";
     char *teststr;
 
@@ -103,8 +104,10 @@ int main(void)
     fprintf(stdout, "Testing file functions.\n");
 
     fprintf(stdout, "\tOpening file.......");
-    if (apr_open(&thefile, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD, context) != APR_SUCCESS) {
-        perror("Didn't open file");
+    status = apr_open(&thefile, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
+    if (status != APR_SUCCESS) {
+        fprintf(stderr, "Didn't open file: %d/%s\n", status, 
+                apr_strerror(status, errmsg, sizeof errmsg));
         exit(-1);
     }
     else {
@@ -128,8 +131,10 @@ int main(void)
     fprintf(stdout, "\tWriting to file.......");
     
     nbytes = strlen("this is a test");
-    if (apr_write(thefile, "this is a test", &nbytes) != APR_SUCCESS) {
-        perror("something's wrong");
+    status = apr_write(thefile, "this is a test", &nbytes);
+    if (status != APR_SUCCESS) {
+        fprintf(stderr, "something's wrong; apr_write->%d/%s\n",
+                status, apr_strerror(status, errmsg, sizeof errmsg));
         exit(-1);
     }
     if (nbytes != strlen("this is a test")) {
@@ -142,8 +147,10 @@ int main(void)
 
     fprintf(stdout, "\tMoving to start of file.......");
     zer = 0;
-    if (apr_seek(thefile, SEEK_SET, &zer) != 0) {
-        perror("couldn't seek to beginning of file.");
+    status = apr_seek(thefile, SEEK_SET, &zer);
+    if (status != APR_SUCCESS) {
+        fprintf(stderr, "couldn't seek to beginning of file: %d/%s",
+                status, apr_strerror(status, errmsg, sizeof errmsg));
         exit(-1);
     }
     else {
@@ -153,8 +160,10 @@ int main(void)
 #if APR_FILES_AS_SOCKETS
     fprintf(stdout, "\tThis platform supports files_like_sockets\n");
     fprintf(stdout, "\t\tMaking file look like a socket.......");
-    if (apr_socket_from_file(&testsock, thefile) != APR_SUCCESS) {
-        perror("Something went wrong");
+    status = apr_socket_from_file(&testsock, thefile);
+    if (status != APR_SUCCESS) {
+        fprintf(stderr, "apr_socket_from_file()->%d/%s\n",
+                status, apr_strerror(status, errmsg, sizeof errmsg));
         exit(-1);
     }
     fprintf(stdout, "OK\n");
@@ -178,8 +187,10 @@ int main(void)
     fprintf(stdout, "\tReading from the file.......");
     nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(context, nbytes + 1);
-    if (apr_read(thefile, buf, &nbytes) != APR_SUCCESS) {
-        perror("something's wrong");
+    status = apr_read(thefile, buf, &nbytes);
+    if (status != APR_SUCCESS) {
+        fprintf(stderr, "apr_read()->%d/%s\n",
+                status, apr_strerror(status, errmsg, sizeof errmsg));
         exit(-1);
     }
     if (nbytes != strlen("this is a test")) {
