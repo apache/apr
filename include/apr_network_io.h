@@ -176,6 +176,8 @@ struct apr_sockaddr_t {
     char *servname;
     /** The numeric port */
     apr_port_t port;
+    /** The family */
+    apr_int32_t family;
     union {
         /** IPv4 sockaddr structure */
         struct sockaddr_in sin;

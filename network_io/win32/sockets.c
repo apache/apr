@@ -75,7 +75,9 @@ static apr_status_t socket_cleanup(void *sock)
 static void set_socket_vars(apr_socket_t *sock, int family, int type)
 {
     sock->type = type;
+    sock->local_addr->family = family;
     sock->local_addr->sa.sin.sin_family = family;
+    sock->remote_addr->family = family;
     sock->remote_addr->sa.sin.sin_family = family;
 
     if (family == AF_INET) {
@@ -248,7 +250,7 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
         (*new)->local_addr->ipaddr_ptr = &(*new)->local_addr->sa.sin6.sin6_addr;
     }
 #endif
-
+    (*new)->remote_addr->port = ntohs((*new)->remote_addr->sa.sin.sin_port);
     if (sock->local_port_unknown) {
         /* not likely for a listening socket, but theoretically possible :) */
         (*new)->local_port_unknown = 1;

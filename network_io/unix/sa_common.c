@@ -74,6 +74,7 @@
 APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
                                        apr_port_t port)
 {
+    sockaddr->port = port;
     /* XXX IPv6: assumes sin_port and sin6_port at same offset */
     sockaddr->sa.sin.sin_port = htons(port);
     return APR_SUCCESS;
@@ -137,6 +138,9 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
 
 static void set_sockaddr_vars(apr_sockaddr_t *addr, int family)
 {
+    addr->family = family;
+    /* XXX IPv6: assumes sin_port and sin6_port at same offset */
+    addr->port = ntohs(addr->sa.sin.sin_port);
     addr->sa.sin.sin_family = family;
 
     if (family == APR_INET) {

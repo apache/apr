@@ -85,7 +85,9 @@ static apr_status_t socket_cleanup(void *sock)
 
 static void set_socket_vars(apr_socket_t *sock, int family)
 {
+    sock->local_addr->family = family;
     sock->local_addr->sa.sin.sin_family = family;
+    sock->remote_addr->family = family;
     sock->remote_addr->sa.sin.sin_family = family;
 
     if (family == AF_INET) {
@@ -222,7 +224,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
     if ((*new)->socketdes < 0) {
         return APR_OS2_STATUS(sock_errno());
     }
-
+    (*new)->remote_addr->port = ntohs((*new)->remote_addr->sa.sin.sin_port);
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
                         socket_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
