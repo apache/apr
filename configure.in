@@ -1817,6 +1817,7 @@ else
             if test "x$ac_cv_working_getaddrinfo" = "xyes"; then
                 if test "x$ac_cv_working_getnameinfo" = "xyes"; then
                     APR_CHECK_GETNAMEINFO_IPV4_MAPPED
+                    APR_CHECK_GETADDRINFO_ADDRCONFIG
                     have_ipv6="1"
                     ipv6_result="yes"
                 else
