@@ -112,7 +112,7 @@ static void test_dso_sym(CuTest *tc)
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     CuAssertPtrNotNull(tc, func1);
 
-    function = (void *)func1;
+    function = (void (*)(char *))func1;
     (*function)(teststr);
     CuAssertStrEquals(tc, "Hello - I'm a DSO!\n", teststr);
 
@@ -135,7 +135,7 @@ static void test_dso_sym_return_value(CuTest *tc)
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     CuAssertPtrNotNull(tc, func1);
 
-    function = (void *)func1;
+    function = (int (*)(int))func1;
     status = (*function)(5);
     CuAssertIntEquals(tc, 5, status);
 
@@ -198,7 +198,7 @@ static void test_dso_sym_non_module(CuTest *tc)
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     CuAssertPtrNotNull(tc, func1);
 
-    function = (void *)func1;
+    function = (void (*)(char *))func1;
     (*function)(teststr);
     CuAssertStrEquals(tc, "Hello - I'm a DSO!\n", teststr);
 
@@ -225,7 +225,7 @@ static void test_dso_sym_return_value_non_mod(CuTest *tc)
     CuAssert(tc, apr_dso_error(h, errstr, 256), APR_SUCCESS == status);
     CuAssertPtrNotNull(tc, func1);
 
-    function = (void *)func1;
+    function = (int (*)(int))func1;
     status = (*function)(5);
     CuAssertIntEquals(tc, 5, status);
 
