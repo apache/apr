@@ -14,14 +14,7 @@ x-local-clean:
 x-local-distclean:
 	(cd mm && $(MAKE) distclean)
 
-# build the MM library, then copy the objects to this dir so our top-level
-# will find them and copy them to the (top)/objs directory
-MM_OBJS = \
-	mm/mm_global.lo mm/mm_alloc.lo mm/mm_core.lo mm/mm_lib.lo \
-	mm/mm_vers.lo
-
 build-mm:
 	(cd mm && $(MAKE) libmm.la)
-	cp $(MM_OBJS) .
 
 # DO NOT REMOVE
