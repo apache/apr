@@ -1,5 +1,7 @@
 Changes with APR 0.9.4
 
+  *) Add --cc and --cpp flags to apr-config.  [Jeff Trawick]
+
   *) Don't segfault trying to close a file in error paths of flock
      and fcntl mutex creation.  PR 19036  [Jeff Trawick]
 

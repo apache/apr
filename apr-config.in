@@ -89,6 +89,8 @@ Known values for OPTION are:
   --prefix[=DIR]    change prefix to DIR
   --bindir          print location where binaries are installed
   --includedir      print location where headers are installed
+  --cc              print C compiler name
+  --cpp             print C preprocessor name and any required options
   --cflags          print C compiler flags
   --cppflags        print cpp flags
   --includes        print include information
@@ -183,6 +185,14 @@ while test $# -gt 0; do
         flags="$thisdir/include $APR_SOURCE_DIR/include"
     fi
     echo $flags
+    exit 0
+    ;;
+    --cc)
+    echo $CC
+    exit 0
+    ;;
+    --cpp)
+    echo $CPP
     exit 0
     ;;
     --cflags)
