@@ -29,6 +29,7 @@
 #include "apr_time.h"
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
+#include "apr_env.h"
 
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>     /* for malloc, free and abort */
@@ -1198,6 +1199,9 @@ static void apr_pool_check_integrity(apr_pool_t *pool)
 APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 {
     apr_status_t rv;
+#if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
+    char* logpath;
+#endif
 
     if (apr_pools_initialized++)
         return APR_SUCCESS;
@@ -1224,7 +1228,16 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
     }
 
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
-    apr_file_open_stderr(&file_stderr, global_pool);
+    rv = apr_env_get(&logpath, "APR_POOL_DEBUG_LOG", global_pool);
+
+    if (rv == APR_SUCCESS) {
+        apr_file_open(&file_stderr, logpath, APR_APPEND|APR_WRITE|APR_CREATE,
+                      APR_OS_DEFAULT, global_pool);
+    }
+    else {
+        apr_file_open_stderr(&file_stderr, global_pool);
+    }
+
     if (file_stderr) {
         apr_file_printf(file_stderr,
             "POOL DEBUG: [PID"
