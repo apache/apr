@@ -380,7 +380,9 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
     remove_sync_sigs(&sig_mask);
 
 #if defined(SIGPROCMASK_SETS_THREAD_MASK)
-    rv = sigprocmask(SIG_SETMASK, &sig_mask, NULL);
+    if ((rv = sigprocmask(SIG_SETMASK, &sig_mask, NULL)) != 0) {
+        rv = errno;
+    }
 #else
     if ((rv = pthread_sigmask(SIG_SETMASK, &sig_mask, NULL)) != 0) {
 #ifdef PTHREAD_SETS_ERRNO
