@@ -28,6 +28,9 @@ AC_PROG_MAKE_SET
 AC_CHECK_PROG(RM, rm, rm)
 AC_CHECK_PROG(AR, ar, ar)
 
+AC_ARG_WITH(debug,[  --with-debug              Turn on debugging and compile time warnings],
+	[if test "$GCC" = "yes"; then CFLAGS="$CFLAGS -g -Wall"; else CFLAGS="$CFLAGS -g"; fi])
+
 dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
 case "$OS:$CC" in

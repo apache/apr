@@ -128,9 +128,12 @@ ap_status_t ap_setipaddr(ap_socket_t *, const char *);
 ap_status_t ap_getport(ap_socket_t *, ap_uint32_t *);
 ap_status_t ap_getipaddr(char *buf, ap_ssize_t len, const ap_socket_t *sock);
 
-ap_status_t ap_setup_poll(ap_pollfd_t **, ap_context_t *, ap_int32_t);
-ap_status_t ap_poll(ap_pollfd_t *, ap_int32_t *, ap_int32_t);
-ap_status_t ap_add_poll_socket(ap_pollfd_t *, ap_socket_t *, ap_int16_t);
+ap_status_t ap_setup_poll(ap_pollfd_t **pollset, ap_context_t *ctx,
+			  ap_int32_t nsocks);
+ap_status_t ap_poll(struct pollfd_t *pollset, ap_int32_t *nsocks, 
+		    ap_int32_t timeout);
+ap_status_t ap_add_poll_socket(ap_pollfd_t *pollset, ap_socket_t *sock,
+			       ap_int16_t events);
 ap_status_t ap_remove_poll_socket(ap_pollfd_t *, ap_socket_t *, ap_int16_t);
 ap_status_t ap_clear_poll_sockets(ap_pollfd_t *, ap_int16_t);
 ap_status_t ap_get_revents(ap_pollfd_t *, ap_socket_t *, ap_int16_t *);
