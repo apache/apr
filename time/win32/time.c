@@ -279,3 +279,18 @@ APR_DECLARE(void) apr_sleep(apr_interval_time_t t)
      */
     Sleep((DWORD)(t / 1000));
 }
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
+                                          apr_time_t input,
+                                          apr_int32_t offs)
+{
+    return apr_time_exp_tz(result, input, offs);
+}
+
+/* Deprecated */
+APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result, 
+                                                apr_time_t input)
+{
+    return apr_time_exp_lt(result, input);
+}
