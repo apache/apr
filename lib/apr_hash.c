@@ -219,13 +219,40 @@ static ap_hash_entry_t **find_entry(ap_hash_t *ht,
 	klen = strlen(key) + 1;
 
     /*
-     * This hash function is used by perl 5; RSE attributes it to DJB.
-     * (See Message-ID: <19991013131827.A17702@engelschall.com>
-     * in the new-httpd archive for October 1999.)
+     * This is Daniel J. Bernstein's popular `times 33' hash function
+     * as posted by him years ago on comp.lang.c. It basically uses a
+     * function like ``hash(i) = hash(i-1) * 33 + str[i]''. This is one
+     * of the best known hash functions for strings. Because it is both
+     * computed very fast and distributes very well.
+     *
+     * The magic of number 33, i.e. why it works better than many other
+     * constants, prime or not, has never been adequately explained by
+     * anyone. So I try an explanation: if one experimentally tests all
+     * multipliers between 1 and 256 (as I did while writing a low-level
+     * data structure library some time ago) one detects that even
+     * numbers are not useable at all. The remaining 128 odd numbers
+     * (except for the number 1) work more or less all equally well.
+     * They all distribute in an acceptable way and this way fill a hash
+     * table with an average percent of approx. 86%.
+     *
+     * If one compares the Chi/2 values of the variants (see
+     * Bob Jenkins ``Hashing Frequently Asked Questions'' at
+     * http://burtleburtle.net/bob/hash/hashfaq.html for a description
+     * of Chi/2), the number 33 not even has the best value. But the
+     * number 33 and a few other equally good numbers like 17, 31, 63,
+     * 127 and 129 have nevertheless a great advantage to the remaining
+     * numbers in the large set of possible multipliers: their multiply
+     * operation can be replaced by a faster operation based on just one
+     * shift plus either a single addition or subtraction operation. And
+     * because a hash function has to both distribute good _and_ has to
+     * be very fast to compute, those few numbers should be preferred
+     * and seems to be the reason why Daniel J. Bernstein also preferred
+     * it.
+     *                  -- Ralf S. Engelschall <rse@engelschall.com>
      */
     hash = 0;
     for (p = key, i = klen; i; i--, p++)
-	hash = hash * 33 + *p;
+	hash = ((hash << 5) + hash) + *p;
     
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;
