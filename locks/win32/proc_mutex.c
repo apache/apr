@@ -67,7 +67,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
 #endif
 
     if (!hMutex) {
-    return apr_get_os_error();
+        return apr_get_os_error();
     }
 
     *mutex = (apr_proc_mutex_t *)apr_palloc(pool, sizeof(apr_proc_mutex_t));
@@ -111,7 +111,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
 #endif
 
     if (!hMutex) {
-    return apr_get_os_error();
+        return apr_get_os_error();
     }
 
     *mutex = (apr_proc_mutex_t *)apr_palloc(pool, sizeof(apr_proc_mutex_t));
