@@ -142,10 +142,6 @@ ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 
 ap_status_t ap_initialize(void)
 {
-    sigset_t sigset;
-
-    sigfillset(&sigset);
-    sigprocmask(SIG_BLOCK, &sigset, NULL);
     return APR_SUCCESS;
 }
  
