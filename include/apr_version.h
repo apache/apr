@@ -63,12 +63,6 @@ extern "C" {
 #define APR_PATCH_VERSION       0
 
 
-/** 
- *  This symbol is defined for internal, "development" copies of APR. This
- *  symbol will be #undef'd for releases. 
- */
-#define APR_IS_DEV_VERSION
-
 /** The formatted string of APR's version */
 #define APR_VERSION_STRING \
      APR_STRINGIFY(APR_MAJOR_VERSION) "." \
