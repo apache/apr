@@ -58,6 +58,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include "apr_portable.h"
 #include <string.h>
 #include <process.h>
 
@@ -179,4 +180,21 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
         return APR_SUCCESS;
     }
     return APR_EINVAL;
+}
+
+
+
+APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *pool)
+{
+    (*file) = apr_pcalloc(pool, sizeof(apr_file_t));
+    (*file)->pool = pool;
+    (*file)->isopen = TRUE;
+    (*file)->pipe = 1;
+    (*file)->blocking = BLK_UNKNOWN; /* app needs to make a timeout call */
+    (*file)->timeout = -1;
+    (*file)->filedes = *thefile;
+
+    return APR_SUCCESS;
 }
