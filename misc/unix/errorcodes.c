@@ -164,6 +164,8 @@ static char *apr_error_string(apr_status_t statcode)
 #include <os2.h>
 #include <ctype.h>
 
+int apr_canonical_error(apr_status_t err);
+
 static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 {
   char result[200];

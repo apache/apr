@@ -230,7 +230,6 @@ EXPORTS
         apr_collapse_spaces
 	apr_month_snames
 	apr_day_snames
-	apr_canonical_error
 	apr_strerror
 	apr_generate_random_bytes
 	apr_strnatcmp

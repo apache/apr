@@ -45,7 +45,6 @@
 #define ap_os_dso_unload apr_dso_unload
 #define ap_os_dso_sym apr_dso_sym
 #define ap_os_dso_error apr_dso_error
-#define ap_os_error_message apr_canonical_error
 #define ap_os_kill apr_kill
 #define ap_overlap_tables apr_overlap_tables
 #define ap_overlay_tables apr_overlay_tables
