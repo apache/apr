@@ -65,6 +65,7 @@
 #include "apr_private.h"
 #include "apr_sms.h"
 #include "apr_sms_tracking.h"
+#include "apr_lock.h"
 #include <stdlib.h>
 
 static const char *module_identity = "TRACKING";
@@ -84,17 +85,8 @@ typedef struct apr_sms_tracking_t
 {
     apr_sms_t            header;
     apr_track_node_t    *nodes;
+    apr_lock_t          *lock;
 } apr_sms_tracking_t;
-
-static apr_status_t apr_sms_tracking_lock(apr_sms_t *mem_sys)
-{
-    return apr_lock_acquire(mem_sys->lock);
-}
-
-static apr_status_t apr_sms_tracking_unlock(apr_sms_t *mem_sys)
-{
-    return apr_lock_release(mem_sys->lock);
-}
 
 static void *apr_sms_tracking_malloc(apr_sms_t *mem_sys,
                                      apr_size_t size)
@@ -102,13 +94,13 @@ static void *apr_sms_tracking_malloc(apr_sms_t *mem_sys,
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
 
-    apr_sms_tracking_lock(mem_sys);
-  
-    tms = (apr_sms_tracking_t *)mem_sys;
     node = apr_sms_malloc(mem_sys->parent_mem_sys,
                           size + sizeof(apr_track_node_t));
     if (!node)
         return NULL;
+
+    tms = (apr_sms_tracking_t *)mem_sys;
+    apr_lock_acquire(tms->lock);
 
     node->next = tms->nodes;
     tms->nodes = node;
@@ -116,9 +108,9 @@ static void *apr_sms_tracking_malloc(apr_sms_t *mem_sys,
     if (node->next)
         node->next->ref = &node->next;
 
-    node++;
+    apr_lock_release(tms->lock);
 
-    apr_sms_tracking_unlock(mem_sys);
+    node++;
 
     return (void *)node;
 }
@@ -129,13 +121,13 @@ static void *apr_sms_tracking_calloc(apr_sms_t *mem_sys,
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
   
-    apr_sms_tracking_lock(mem_sys);
-
-    tms = (apr_sms_tracking_t *)mem_sys;
     node = apr_sms_calloc(mem_sys->parent_mem_sys,
                           size + sizeof(apr_track_node_t));
     if (!node)
         return NULL;
+
+    tms = (apr_sms_tracking_t *)mem_sys;
+    apr_lock_acquire(tms->lock);
 
     node->next = tms->nodes;
     tms->nodes = node;
@@ -143,9 +135,9 @@ static void *apr_sms_tracking_calloc(apr_sms_t *mem_sys,
     if (node->next)
         node->next->ref = &node->next;
 
-    node++;
+    apr_lock_release(tms->lock);
 
-    apr_sms_tracking_unlock(mem_sys);
+    node++;
 
     return (void *)node;
 }
@@ -156,14 +148,20 @@ static void *apr_sms_tracking_realloc(apr_sms_t *mem_sys,
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
 
-    apr_sms_tracking_lock(mem_sys);
-
     tms = (apr_sms_tracking_t *)mem_sys;
+
+
     node = (apr_track_node_t *)mem;
 
     if (node) {
         node--;
+        apr_lock_acquire(tms->lock);
+        
         *(node->ref) = node->next;
+        if (node->next)
+            node->next->ref = node->ref;
+        
+        apr_lock_release(tms->lock);
     }
 
     node = apr_sms_realloc(mem_sys->parent_mem_sys,
@@ -171,15 +169,17 @@ static void *apr_sms_tracking_realloc(apr_sms_t *mem_sys,
     if (!node)
         return NULL;
 
+    apr_lock_acquire(tms->lock);
+    
     node->next = tms->nodes;
     tms->nodes = node;
     node->ref = &tms->nodes;
     if (node->next)
         node->next->ref = &node->next;
 
+    apr_lock_release(tms->lock);
+    
     node++;
-
-    apr_sms_tracking_unlock(mem_sys);
 
     return (void *)node;
 }
@@ -188,17 +188,20 @@ static apr_status_t apr_sms_tracking_free(apr_sms_t *mem_sys,
                                           void *mem)
 {
     apr_track_node_t *node;
- 
-    apr_sms_tracking_lock(mem_sys);
+    apr_sms_tracking_t *tms;
    
     node = (apr_track_node_t *)mem;
     node--;
+
+    tms = (apr_sms_tracking_t *)mem_sys;
+ 
+    apr_lock_acquire(tms->lock);
 
     *(node->ref) = node->next;
     if (node->next)
         node->next->ref = node->ref;
  
-    apr_sms_tracking_unlock(mem_sys);
+    apr_lock_release(tms->lock);
          
     return apr_sms_free(mem_sys->parent_mem_sys, node);
 }
@@ -208,12 +211,11 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
     apr_sms_tracking_t *tms;
     apr_track_node_t *node;
     apr_status_t rv;
-
-    if ((rv = apr_sms_tracking_lock(mem_sys)) != APR_SUCCESS)
-        return rv;
  
     tms = (apr_sms_tracking_t *)mem_sys;
 
+    apr_lock_acquire(tms->lock);
+    
     while (tms->nodes) {
         node = tms->nodes;
         *(node->ref) = node->next;
@@ -221,31 +223,64 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
             node->next->ref = node->ref;
         if ((rv = apr_sms_free(mem_sys->parent_mem_sys, 
                                node)) != APR_SUCCESS) {
-            apr_sms_tracking_unlock(mem_sys);
+            apr_lock_release(tms->lock);
             return rv;
         }
     }
     
-    if ((rv = apr_sms_tracking_unlock(mem_sys)) != APR_SUCCESS)
-        return rv;
+    apr_lock_release(tms->lock);
 
     return APR_SUCCESS;
+}
+
+static apr_status_t apr_sms_tracking_pre_destroy(apr_sms_t *mem_sys)
+{
+    /* This function WILL alwways be called.  However, be aware that the
+     * main sms destroy function knows that it's not wise to try and destroy
+     * the same piece of memory twice, so the destroy function in a child won't
+     * neccesarily be called.  To guarantee we destroy the lock it's therefore
+     * destroyed here.
+     */
+    apr_sms_tracking_t *tms;
+ 
+    tms = (apr_sms_tracking_t *)mem_sys;
+    apr_lock_acquire(tms->lock);
+    apr_lock_destroy(tms->lock);
+    tms->lock = NULL;
+    
+    return APR_SUCCESS;    
 }
 
 static apr_status_t apr_sms_tracking_destroy(apr_sms_t *mem_sys)
 {
     apr_status_t rv;
+    apr_sms_tracking_t *tms;
+    apr_track_node_t *node;
     
-    if ((rv = apr_sms_tracking_reset(mem_sys)) != APR_SUCCESS)
-        return rv;
+    tms = (apr_sms_tracking_t *)mem_sys;
+ 
+    /* XXX - As we've already had the lock we've been using destroyed
+     * in the pre_destroy function we can't use it.  However, if we
+     * have threads trying to use the sms while another is trying to
+     * destroy it, then we have serious problems anyway.
+     */
+    while (tms->nodes) {
+        node = tms->nodes;
+        *(node->ref) = node->next;
+        if (node->next)
+            node->next->ref = node->ref;
+        if ((rv = apr_sms_free(mem_sys->parent_mem_sys, node)) != APR_SUCCESS)
+            return rv;
+    }
     
     return apr_sms_free(mem_sys->parent_mem_sys, mem_sys);
 }
 
+
 APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys, 
                                                   apr_sms_t *pms)
 {
-    apr_sms_t *new_mem_sys;
+    apr_sms_t *new_sms;
     apr_sms_tracking_t *tms;
     apr_status_t rv;
 
@@ -254,34 +289,31 @@ APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys,
      * we allocate the memory for the structure from our parent.
      * This is safe as we shouldn't outlive our parent...
      */
-    new_mem_sys = apr_sms_calloc(pms, sizeof(apr_sms_tracking_t));
+    new_sms = apr_sms_calloc(pms, sizeof(apr_sms_tracking_t));
 
-    if (!new_mem_sys)
+    if (!new_sms)
         return APR_ENOMEM;
 
-    if ((rv = apr_sms_init(new_mem_sys, pms)) != APR_SUCCESS)
+    if ((rv = apr_sms_init(new_sms, pms)) != APR_SUCCESS)
         return rv;
 
-    new_mem_sys->malloc_fn  = apr_sms_tracking_malloc;
-    new_mem_sys->calloc_fn  = apr_sms_tracking_calloc;
-    new_mem_sys->realloc_fn = apr_sms_tracking_realloc;
-    new_mem_sys->free_fn    = apr_sms_tracking_free;
-    new_mem_sys->reset_fn   = apr_sms_tracking_reset;
-    new_mem_sys->lock_fn    = apr_sms_tracking_lock;
-    new_mem_sys->unlock_fn  = apr_sms_tracking_unlock;
-    new_mem_sys->destroy_fn = apr_sms_tracking_destroy;
-    new_mem_sys->identity   = module_identity;
-
-    apr_pool_create(&(new_mem_sys->pool), pms->pool);
-    apr_lock_create(&(new_mem_sys->lock), APR_MUTEX, APR_LOCKALL, NULL,
-                    new_mem_sys->pool);
-
-    tms = (apr_sms_tracking_t *)new_mem_sys;
+    new_sms->malloc_fn      = apr_sms_tracking_malloc;
+    new_sms->calloc_fn      = apr_sms_tracking_calloc;
+    new_sms->realloc_fn     = apr_sms_tracking_realloc;
+    new_sms->free_fn        = apr_sms_tracking_free;
+    new_sms->reset_fn       = apr_sms_tracking_reset;
+    new_sms->destroy_fn     = apr_sms_tracking_destroy;
+    new_sms->identity       = module_identity;
+    new_sms->pre_destroy_fn = apr_sms_tracking_pre_destroy;
+    
+    tms = (apr_sms_tracking_t *)new_sms;
     tms->nodes = NULL;
+    apr_lock_create(&tms->lock, APR_MUTEX, APR_LOCKALL, NULL,
+                    new_sms->pool);
 
-    apr_sms_assert(new_mem_sys);
+    apr_sms_assert(new_sms);
 
-    *mem_sys = new_mem_sys;
+    *mem_sys = new_sms;
     return APR_SUCCESS;
 }
 

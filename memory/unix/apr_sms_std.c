@@ -127,9 +127,6 @@ APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys)
     new_mem_sys->free_fn    = apr_sms_std_free;
     new_mem_sys->identity   = module_identity;
 
-    /* If this fails, what should we do??? */
-    apr_pool_create(&(new_mem_sys->pool), NULL);
-     
     /* as we're not a tracking memory module, i.e. we don't keep
      * track of our allocations, we don't have apr_sms_reset or
      * apr_sms_destroy functions.
