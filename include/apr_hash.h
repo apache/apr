@@ -95,10 +95,10 @@ APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
  *             If the length is 0 it is assumed to be strlen(key)+1
  * @param val Value to associate with the key
  * @tip If the value is NULL the hash entry is deleted.
- * @deffunc void apr_hash_set(apr_hash_t *ht, const void *key, size_t klen, const void *val)
+ * @deffunc void apr_hash_set(apr_hash_t *ht, const void *key, apr_size_t klen, const void *val)
  */
-APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key, size_t klen, 
-                             const void *val);
+APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key,
+                              apr_size_t klen, const void *val);
 
 /**
  * Look up the value associated with a key in a hash table.
@@ -107,9 +107,10 @@ APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key, size_t klen,
  * @param klen Length of the key
  *         If the length is 0 it is assumed to be strlen(key)+1
  * @return Returns NULL if the key is not present.
- * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, size_t klen)
+ * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_size_t klen)
  */
-APR_EXPORT(void) *apr_hash_get(apr_hash_t *ht, const void *key, size_t klen);
+APR_EXPORT(void) *apr_hash_get(apr_hash_t *ht, const void *key,
+                               apr_size_t klen);
 
 /**
  * Start iterating over the entries in a hash table.
@@ -155,10 +156,10 @@ APR_EXPORT(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi);
  * @param val Return pointer for the associated value.
  * @tip The return pointers should point to a variable that will be set to the
  *      corresponding data, or they may be NULL if the data isn't interesting.
- * @deffunc void apr_hash_this(apr_hash_index_t *hi, const void **key, size_t *klen, void **val);
+ * @deffunc void apr_hash_this(apr_hash_index_t *hi, const void **key, apr_size_t *klen, void **val);
  */
 APR_EXPORT(void) apr_hash_this(apr_hash_index_t *hi, const void **key, 
-                              size_t *klen, void **val);
+                               apr_size_t *klen, void **val);
 
 #ifdef __cplusplus
 }
