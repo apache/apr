@@ -167,19 +167,30 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *mem_sys,
     mem_sys->accounting_mem_sys = mem_sys;
     mem_sys->child_mem_sys = NULL;
 
+    /*
+     * Child memory systems are always linked to their parents.  This works
+     * as follows...
+     *
+     *  parent
+     *    |
+     *    |
+     *  child  --- sibling --- sibling --- sibling
+     *
+     * To be able to remove a memory system from a list we also need to
+     * keep a ref pointer (a pointer to the pointer pointing to the memory
+     * system).  To remove a memory system, basically...
+     *
+     *  *ref = sibling;
+     *  if (sibling)
+     *      sibling->ref = ref;
+     */
+     
     if (parent_mem_sys) {
         if ((mem_sys->sibling_mem_sys = parent_mem_sys->child_mem_sys) != NULL)
             mem_sys->sibling_mem_sys->ref_mem_sys = &mem_sys->sibling_mem_sys;
 
         mem_sys->ref_mem_sys = &parent_mem_sys->child_mem_sys;
-        /* This is probably not correct as we could have multiple children
-         * from a single parent...  We probably need a list...
-         */
         parent_mem_sys->child_mem_sys = mem_sys;
-    }
-    else {
-        mem_sys->ref_mem_sys     = NULL;
-        mem_sys->sibling_mem_sys = NULL;
     }
 
     return APR_SUCCESS;
