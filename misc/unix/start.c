@@ -52,68 +52,16 @@
  * <http://www.apache.org/>.
  */
 
-#include "misc.h"
-#include "locks.h"
-#include "apr_strings.h"
-#include "apr_hash.h"
+#include "apr.h"
+#include "apr_general.h"
+#include "apr_pools.h"
 
-static int initialized=0;
+#include "misc.h"       /* for WSAHighByte / WSALowByte */
+#include "locks.h"      /* for apr_unix_setup_lock() */
 
-apr_status_t apr_create_pool(apr_pool_t **newcont, apr_pool_t *cont)
-{
-    apr_pool_t *newpool;
 
-    if (cont) {
-        newpool = apr_make_sub_pool(cont, cont->apr_abort);
-    }
-    else {
-        newpool = apr_make_sub_pool(NULL, NULL);
-    }
-        
-    if (newpool == NULL) {
-        return APR_ENOPOOL;
-    }   
+static int initialized = 0;
 
-    newpool->prog_data = NULL;
-    if (cont) {
-        newpool->apr_abort = cont->apr_abort;
-    }
-    else {
-        newpool->apr_abort = NULL;
-    }
-    *newcont = newpool;
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_set_userdata(const void *data, const char *key,
-			      apr_status_t (*cleanup) (void *),
-			      apr_pool_t *cont)
-{
-    int keylen = strlen(key);
-
-    if (cont->prog_data == NULL)
-        cont->prog_data = apr_make_hash(cont);
-
-    if (apr_hash_get(cont->prog_data, key, keylen) == NULL){
-        char *new_key = apr_pstrdup(cont, key);
-        apr_hash_set(cont->prog_data, new_key, keylen, data);
-    } 
-    else {
-        apr_hash_set(cont->prog_data, key, keylen, data);
-    }
-
-    apr_register_cleanup(cont, data, cleanup, cleanup);
-    return APR_SUCCESS;
-}
-
-apr_status_t apr_get_userdata(void **data, const char *key, apr_pool_t *cont)
-{
-    if (cont->prog_data == NULL)
-        *data = NULL;
-    else
-        *data = apr_hash_get(cont->prog_data, key, strlen(key));
-    return APR_SUCCESS;
-}
 
 apr_status_t apr_initialize(void)
 {
