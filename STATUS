@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/08/07 19:57:44 $]
+Last modified at [$Date: 2001/08/17 13:35:34 $]
 
 Release:
 
@@ -132,8 +132,6 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       pass to apr_dso_load()
       -- note on Win32 we distinguish 'apache module' names from other 
          'loadable module' names, so be careful with Apache's directive.
-
-    * may be good to have a --disable-ipv6 configure option
 
     * APR memory code - code has been added but we still need to
       - decide on a better name for the code
