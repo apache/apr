@@ -57,6 +57,7 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include <string.h>
+#include "inherit.h"
 
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
@@ -81,6 +82,8 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
         }
     } else {
         HANDLE hFile = (*new_file)->filehand;
+        /* XXX: need to dup the handle!!! 
+         */
         /* dup2 is not supported with native Windows handles. We 
          * can, however, emulate dup2 for the standard i/o handles.
          */
@@ -103,7 +106,7 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
             return APR_ENOTIMPL;
     }
 
-    (*new_file)->flags = old_file->flags;
+    (*new_file)->flags = old_file->flags & ~APR_INHERIT;
     (*new_file)->cntxt = old_file->cntxt;
     (*new_file)->fname = apr_pstrdup(old_file->cntxt, old_file->fname);
     (*new_file)->append = old_file->append;
