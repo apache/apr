@@ -77,8 +77,8 @@ ap_status_t file_cleanup(void *thefile)
     }
 }
 
-ap_status_t ap_open(struct file_t **dafile, ap_context_t *cont, const char *fname, 
-                    ap_int32_t flag, ap_fileperms_t perm)
+ap_status_t ap_open(struct file_t **dafile, const char *fname, 
+                    ap_int32_t flag, ap_fileperms_t perm, ap_context_t *cont)
 {
     DWORD oflags = 0;
     DWORD createflags = 0;

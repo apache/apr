@@ -103,7 +103,7 @@ ap_status_t file_cleanup(void *thefile)
  * NOTE:  If mode is APR_OS_DEFAULT, the system open command will be 
  *        called without any mode parameters.
  */
-ap_status_t ap_open(struct file_t **new, ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_fileperms_t perm)
+ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_context_t *cont)
 {
     int oflags = 0;
     mode_t mode = get_fileperms(perm);    
