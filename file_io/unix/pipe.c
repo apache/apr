@@ -63,6 +63,45 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+static ap_status_t pipenonblock(struct file_t *thefile)
+{
+    int fd_flags;
+
+    fd_flags = fcntl(thefile->filedes, F_GETFL, 0);
+#if defined(O_NONBLOCK)
+    fd_flags |= O_NONBLOCK;
+#elif defined(O_NDELAY)
+    fd_flags |= O_NDELAY;
+#elif defined(FNDELAY)
+    fd_flags |= O_FNDELAY;
+#else
+    /* XXXX: this breaks things, but an alternative isn't obvious...*/
+    return -1;
+#endif
+    if (fcntl(thefile->filedes, F_SETFL, fd_flags) == -1) {
+        return errno;
+    }
+    return APR_SUCCESS;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_set_pipe_timeout(ap_file_t *, ap_int32_t)
+ *    Set the timeout value for a pipe.
+ * arg 1) The pipe we are setting a timeout on.
+ * arg 3) The timeout value in seconds.  Values < 0 mean wait forever, 0
+ *        means do not wait at all.
+ */
+ap_status_t ap_set_pipe_timeout(struct file_t *thepipe, ap_int32_t timeout)
+{
+    if (!strcmp(thepipe->fname, "PIPE")) {
+        thepipe->timeout = timeout;
+        return APR_SUCCESS;
+    }
+    return APR_EINVAL;
+}
+
+
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_pipe(ap_file_t **, ap_context_t *, ap_file_t **)
  *    Create an anonymous pipe.
@@ -83,12 +122,17 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*in)->filedes = filedes[0];
     (*in)->buffered = 0;
     (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in)->timeout = -1;
 
     (*out) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->buffered = 0;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out)->timeout = -1;
+
+    pipenonblock(*in);
+    pipenonblock(*out);
 
     return APR_SUCCESS;
 }

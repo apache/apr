@@ -85,6 +85,7 @@ struct file_t {
     time_t atime;
     time_t mtime;
     time_t ctime;
+    int timeout;
 };
 
 struct dir_t {

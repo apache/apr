@@ -70,6 +70,9 @@
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_read(ap_file_t *, void *, ap_ssize_t *)
@@ -95,8 +98,45 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         rv = fread(buf, *nbytes, 1, thefile->filehand);
     }
     else {
-        rv = read(thefile->filedes, buf, *nbytes);
-    }
+        do {
+            rv = read(thefile->filedes, buf, *nbytes);
+        } while (rv == -1 && errno == EINTR);
+
+        if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
+            struct timeval *tv;
+            fd_set fdset;
+            int srv;
+
+            do {
+                FD_ZERO(&fdset);
+                FD_SET(thefile->filedes, &fdset);
+                if (thefile->timeout == -1) {
+                    tv = NULL;
+                }
+                else {
+                    tv = ap_palloc(thefile->cntxt, sizeof(struct timeval));
+                    tv->tv_sec  = thefile->timeout;
+                    tv->tv_usec = 0;
+                }
+
+                srv = select(FD_SETSIZE, &fdset, NULL, NULL, tv);
+            } while (srv == -1 && errno == EINTR);
+
+            if (srv == 0) {
+                (*nbytes) = -1;
+                return APR_TIMEUP;
+            }
+            else if (srv < 0) {
+                (*nbytes) = -1;
+                return errno;
+            }
+            else {
+                do {
+                    rv = read(thefile->filedes, buf, *nbytes);
+                } while (rv == -1 && errno == EINTR);
+            }
+        }  
+    }  /* buffered? */
 
     if ((*nbytes != rv) && (errno != EINTR) && !thefile->buffered) {
         thefile->eof_hit = 1;
@@ -132,8 +172,45 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         rv = fwrite(buf, *nbytes, 1, thefile->filehand);
     }
     else {
-        rv = write(thefile->filedes, buf, *nbytes);
-    }
+        do {
+            rv = write(thefile->filedes, buf, *nbytes);
+        } while (rv == -1 && errno == EINTR);
+
+        if (rv == -1 && errno == EAGAIN && thefile->timeout != 0) {
+            struct timeval *tv;
+            fd_set fdset;
+            int srv;
+
+            do {
+                FD_ZERO(&fdset);
+                FD_SET(thefile->filedes, &fdset);
+                if (thefile->timeout == -1) {
+                    tv = NULL;
+                }
+                else {
+                    tv = ap_palloc(thefile->cntxt, sizeof(struct timeval));
+                    tv->tv_sec  = thefile->timeout;
+                    tv->tv_usec = 0;
+                }
+
+                srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
+            } while (srv == -1 && errno == EINTR);
+
+            if (srv == 0) {
+                (*nbytes) = -1;
+                return APR_TIMEUP;
+            }
+            else if (srv < 0) {
+                (*nbytes) = -1;
+                return errno;
+            }
+            else {
+                do {
+                    rv = write(thefile->filedes, buf, *nbytes);
+                } while (rv == -1 && errno == EINTR);
+            }
+        }  
+    }   /* BUFFERED ?? */
 
     thefile->stated = 0;
     *nbytes = rv;

@@ -121,7 +121,9 @@ static ap_status_t sononblock(int sd)
  *                                  supplied to bind should allow reuse
  *                                  of local addresses.
  *            APR_SO_TIMEOUT    --  Set the timeout value in seconds.
- *            APR_SO_SNDBUF     -- Set the SendBufferSize
+ *                                  values < 0 mean wait forever.  0 means
+ *                                  don't wait at all.
+ *            APR_SO_SNDBUF     --  Set the SendBufferSize
  * arg 3) Are we turning the option on or off.
  */
 ap_status_t ap_setsocketopt(struct socket_t *sock, ap_int32_t opt, ap_int32_t on)
