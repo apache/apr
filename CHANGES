@@ -1,5 +1,7 @@
 Changes for APR 1.1.0
 
+  *) Add a build script to create a solaris package. [Graham Leggett]
+  
   *) Add support for APR_TCP_DEFER_ACCEPT.
      [Paul Querna]
 
