@@ -264,7 +264,7 @@ APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool);
  * Set the data associated with the current pool
  * @param data The user data associated with the pool.
  * @param key The key to use for association
- * @param cleanup The cleanup program to use to cleanup the data
+ * @param cleanup The cleanup program to use to cleanup the data (NULL if none)
  * @param cont The current pool
  * @warning The data to be attached to the pool should have a life span
  *          at least as long as the pool it is being attached to.
@@ -280,6 +280,24 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data,
 						const char *key,
 						apr_status_t (*cleanup)(void *),
 						apr_pool_t *cont);
+
+/**
+ * Set the data associated with the current pool
+ * @param data The user data associated with the pool.
+ * @param key The key to use for association
+ * @param cleanup The cleanup program to use to cleanup the data (NULL if none)
+ * @param cont The current pool
+ * @note same as apr_pool_userdata_set(), except that this version doesn't
+ *       make a copy of the key (this function is useful, for example, when
+ *       the key is a string literal)
+ * @warning The key and the data to be attached to the pool should have
+ *       a life span at least as long as the pool itself.
+ *
+ */
+APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data,
+                                                 const char *key,
+                                                 apr_status_t (*cleanup)(void *),
+                                                 apr_pool_t *cont);
 
 /**
  * Return the data associated with the current pool.
