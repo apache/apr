@@ -74,7 +74,7 @@ ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path,
     
 ap_status_t ap_dso_unload(struct ap_dso_handle_t *handle)
 {
-    if (!FreeLibrary(handle)) {
+    if (!FreeLibrary(handle->handle)) {
         return GetLastError();
     }
     return APR_SUCCESS;
@@ -84,12 +84,12 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
                        struct ap_dso_handle_t *handle, 
                        const char *symname)
 {
-    HINSTANCE retval = GetProcAddress(handle->handle, symname);
+    FARPROC retval = GetProcAddress(handle->handle, symname);
     if (!retval) {
         return GetLastError();
     }
     
-    ressym = retval;
+    *ressym = retval;
     
     return APR_SUCCESS;
 }
