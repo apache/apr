@@ -1188,8 +1188,13 @@ else
     pid_t_fmt='#error Can not determine the proper size for pid_t'
 fi
 
-dnl Checks for endianness
-AC_C_BIGENDIAN([bigendian=1],[bigendian=0])
+# Checks for endianness
+AC_C_BIGENDIAN
+if test $ac_cv_c_bigendian = yes; then
+    bigendian=1
+else
+    bigendian=0
+fi
 
 # Basically, we have tried to figure out the correct format strings
 # for APR types which vary between platforms, but we don't always get 
