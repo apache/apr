@@ -82,8 +82,8 @@ apr_atomic_t y;      /* atomic locks */
 
 static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
 {
-    apr_uint32_t oldval;
-    apr_uint32_t casval = 0;
+    apr_atomic_t oldval;
+    apr_atomic_t casval = 0;
     apr_atomic_set(&y, 2);
     printf("%-60s", "testing apr_atomic_dec");
     if (apr_atomic_dec(&y) == 0) {
