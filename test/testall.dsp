@@ -32,7 +32,7 @@ CFG=testall - Win32 Debug
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win testall.exe"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win all"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "testall.exe"
 # PROP BASE Bsc_Name "testall.bsc"
@@ -41,7 +41,7 @@ CFG=testall - Win32 Debug
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win testall.exe"
+# PROP Cmd_Line "NMAKE /f Makefile.win all"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "testall.exe"
 # PROP Bsc_Name ""
@@ -53,7 +53,7 @@ CFG=testall - Win32 Debug
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir ""
 # PROP BASE Intermediate_Dir ""
-# PROP BASE Cmd_Line "NMAKE /f Makefile.win testall.exe"
+# PROP BASE Cmd_Line "NMAKE /f Makefile.win all"
 # PROP BASE Rebuild_Opt "/a"
 # PROP BASE Target_File "testall.exe"
 # PROP BASE Bsc_Name "testall.bsc"
@@ -62,7 +62,7 @@ CFG=testall - Win32 Debug
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ""
 # PROP Intermediate_Dir ""
-# PROP Cmd_Line "NMAKE /f Makefile.win testall.exe"
+# PROP Cmd_Line "NMAKE /f Makefile.win all"
 # PROP Rebuild_Opt "/a"
 # PROP Target_File "testall.exe"
 # PROP Bsc_Name ""
