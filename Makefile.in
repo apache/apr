@@ -42,8 +42,12 @@ all: Makefile $(MODULES) subdirs
 	@rm -Rf objs
 	@mkdir objs
 	@rm -f @LIBPREFIX@apr.a
+	@echo "===> Copying object files to objs directory"
 	@for i in $(SUBDIRS); do cp $$i/*.o objs ; done;
+	@echo "<=== Done Copying files"
+	@echo "===> Creating unified library"
 	@$(AR) cr @LIBPREFIX@apr.a objs/*.o
+	@echo "<=== Library built"
 
 clean: subdirs_clean
 	$(RM) -f *.o *.a *.so objs/*.o
