@@ -167,7 +167,7 @@ typedef struct apr_pool_t apr_pool_t;
 #endif
 
 /** the place in the code where the particular function was called */
-#define APR_POOL__FILE_LINE__ __FILE__ ":" APR_POOL_STRINGIFY(__LINE__)
+#define APR_POOL__FILE_LINE__ __FILE__ ":" APR_STRINGIFY(__LINE__)
 
 
 
