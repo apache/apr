@@ -217,12 +217,16 @@ typedef int               ap_signum_t;
 
 #ifdef WIN32
 #define APR_INLINE __inline
+#elif defined(__GNUC__) && defined(__GNUC__) && \
+      __GNUC__ >= 2 && __GNUC_MINOR__ >= 7
+#define APR_INLINE __inline__
 #else
-#define APR_INLINE inline
+#define APR_INLINE /*nop*/
 #endif
 
 /* Context functions */
 ap_status_t ap_create_context(ap_context_t *, ap_context_t **);
+ap_status_t ap_destroy_context(struct context_t *cont);
 ap_status_t ap_exit(ap_context_t *);
 ap_status_t ap_set_userdata(ap_context_t *, void *, char *, 
                             ap_status_t (*cleanup) (void *));

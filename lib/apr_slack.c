@@ -73,6 +73,8 @@
 #include "http_log.h"
 #endif
 
+#include "apr_lib.h"
+
 #ifndef NO_SLACK
 int ap_slack(int fd, int line)
 {

@@ -65,7 +65,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-ap_status_t soblock(int sd)
+static ap_status_t soblock(int sd)
 {
     int fd_flags;
 
@@ -86,7 +86,7 @@ ap_status_t soblock(int sd)
     return APR_SUCCESS;
 }
 
-ap_status_t sononblock(int sd)
+static ap_status_t sononblock(int sd)
 {
     int fd_flags;
 
@@ -95,7 +95,7 @@ ap_status_t sononblock(int sd)
     fd_flags |= O_NONBLOCK;
 #elif defined(O_NDELAY)
     fd_flags |= O_NDELAY;
-#eli f defined(FNDELAY)
+#elif defined(FNDELAY)
     fd_flags |= O_FNDELAY;
 #else
     /* XXXX: this breaks things, but an alternative isn't obvious...*/

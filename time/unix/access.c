@@ -66,10 +66,10 @@
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_curtime(struct atime_t *time, ap_int64_t *rv)
+ap_status_t ap_get_curtime(struct atime_t *atime, ap_int64_t *rv)
 {
-    if (time) {
-        (*rv) = time->currtime->tv_sec;
+    if (atime) {
+        (*rv) = atime->currtime->tv_sec;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;    
@@ -81,10 +81,10 @@ ap_status_t ap_get_curtime(struct atime_t *time, ap_int64_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_sec(struct atime_t *time, ap_int32_t *rv)
+ap_status_t ap_get_sec(struct atime_t *atime, ap_int32_t *rv)
 {
-    if (time) {
-        (*rv) = time->explodedtime->tm_sec;
+    if (atime) {
+        (*rv) = atime->explodedtime->tm_sec;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;
@@ -96,10 +96,10 @@ ap_status_t ap_get_sec(struct atime_t *time, ap_int32_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_min(struct atime_t *time, ap_int32_t *rv)
+ap_status_t ap_get_min(struct atime_t *atime, ap_int32_t *rv)
 {
-    if (time) {
-        (*rv) = time->explodedtime->tm_min;
+    if (atime) {
+        (*rv) = atime->explodedtime->tm_min;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;
@@ -111,10 +111,10 @@ ap_status_t ap_get_min(struct atime_t *time, ap_int32_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_hour(struct atime_t *time, ap_int32_t *rv)
+ap_status_t ap_get_hour(struct atime_t *atime, ap_int32_t *rv)
 {
-    if (time) {
-        (*rv) = time->explodedtime->tm_hour;
+    if (atime) {
+        (*rv) = atime->explodedtime->tm_hour;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;
@@ -126,10 +126,10 @@ ap_status_t ap_get_hour(struct atime_t *time, ap_int32_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_mday(struct atime_t *time, ap_int32_t *rv)
+ap_status_t ap_get_mday(struct atime_t *atime, ap_int32_t *rv)
 {
-    if (time) {
-        (*rv) = time->explodedtime->tm_mday;
+    if (atime) {
+        (*rv) = atime->explodedtime->tm_mday;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;
@@ -141,10 +141,10 @@ ap_status_t ap_get_mday(struct atime_t *time, ap_int32_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_mon(struct atime_t *time, ap_int32_t *rv)
+ap_status_t ap_get_mon(struct atime_t *atime, ap_int32_t *rv)
 {
-    if (time) {
-        (*rv) = time->explodedtime->tm_mon;
+    if (atime) {
+        (*rv) = atime->explodedtime->tm_mon;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;
@@ -156,10 +156,10 @@ ap_status_t ap_get_mon(struct atime_t *time, ap_int32_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_year(struct atime_t *time, ap_int32_t *rv)
+ap_status_t ap_get_year(struct atime_t *atime, ap_int32_t *rv)
 {
-    if (time) {
-        (*rv) = time->explodedtime->tm_year;
+    if (atime) {
+        (*rv) = atime->explodedtime->tm_year;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;
@@ -171,10 +171,10 @@ ap_status_t ap_get_year(struct atime_t *time, ap_int32_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_get_wday(struct atime_t *time, ap_int32_t *rv)
+ap_status_t ap_get_wday(struct atime_t *atime, ap_int32_t *rv)
 {
-    if (time) {
-        (*rv) = time->explodedtime->tm_wday;
+    if (atime) {
+        (*rv) = atime->explodedtime->tm_wday;
         return APR_SUCCESS;
     }
     return APR_ENOTIME;
@@ -186,19 +186,19 @@ ap_status_t ap_get_wday(struct atime_t *time, ap_int32_t *rv)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_sec(struct atime_t *time, ap_int32_t value)
+ap_status_t ap_set_sec(struct atime_t *atime, ap_int32_t value)
 {
-    if (!time) {
+    if (!atime) {
         return APR_ENOTIME;
     }
-    if (time->explodedtime == NULL) {
-        time->explodedtime = (struct tm *)ap_palloc(time->cntxt, 
+    if (atime->explodedtime == NULL) {
+        atime->explodedtime = (struct tm *)ap_palloc(atime->cntxt, 
                               sizeof(struct tm));
     }
-    if (time->explodedtime == NULL) {
+    if (atime->explodedtime == NULL) {
         return APR_ENOMEM;
     }
-    time->explodedtime->tm_sec = value;
+    atime->explodedtime->tm_sec = value;
     return APR_SUCCESS;
 }
 
@@ -208,19 +208,19 @@ ap_status_t ap_set_sec(struct atime_t *time, ap_int32_t value)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_min(struct atime_t *time, ap_int32_t value)
+ap_status_t ap_set_min(struct atime_t *atime, ap_int32_t value)
 {
-    if (!time) {
+    if (!atime) {
         return APR_ENOTIME;
     }
-    if (time->explodedtime == NULL) {
-        time->explodedtime = (struct tm *)ap_palloc(time->cntxt, 
+    if (atime->explodedtime == NULL) {
+        atime->explodedtime = (struct tm *)ap_palloc(atime->cntxt, 
                               sizeof(struct tm));
     }
-    if (time->explodedtime == NULL) {
+    if (atime->explodedtime == NULL) {
         return APR_ENOMEM;
     }
-    time->explodedtime->tm_min = value;
+    atime->explodedtime->tm_min = value;
     return APR_SUCCESS;
 }
 
@@ -230,19 +230,19 @@ ap_status_t ap_set_min(struct atime_t *time, ap_int32_t value)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_hour(struct atime_t *time, ap_int32_t value)
+ap_status_t ap_set_hour(struct atime_t *atime, ap_int32_t value)
 {
-    if (!time) {
+    if (!atime) {
         return APR_ENOTIME;
     }
-    if (time->explodedtime == NULL) {
-        time->explodedtime = (struct tm *)ap_palloc(time->cntxt, 
+    if (atime->explodedtime == NULL) {
+        atime->explodedtime = (struct tm *)ap_palloc(atime->cntxt, 
                               sizeof(struct tm));
     }
-    if (time->explodedtime == NULL) {
+    if (atime->explodedtime == NULL) {
         return APR_ENOMEM;
     }
-    time->explodedtime->tm_hour = value;
+    atime->explodedtime->tm_hour = value;
     return APR_SUCCESS;
 }
 
@@ -252,19 +252,19 @@ ap_status_t ap_set_hour(struct atime_t *time, ap_int32_t value)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_mday(struct atime_t *time, ap_int32_t value)
+ap_status_t ap_set_mday(struct atime_t *atime, ap_int32_t value)
 {
-    if (!time) {
+    if (!atime) {
         return APR_ENOTIME;
     }
-    if (time->explodedtime == NULL) {
-        time->explodedtime = (struct tm *)ap_palloc(time->cntxt, 
+    if (atime->explodedtime == NULL) {
+        atime->explodedtime = (struct tm *)ap_palloc(atime->cntxt, 
                               sizeof(struct tm));
     }
-    if (time->explodedtime == NULL) {
+    if (atime->explodedtime == NULL) {
         return APR_ENOMEM;
     }
-    time->explodedtime->tm_mday = value;
+    atime->explodedtime->tm_mday = value;
     return APR_SUCCESS;
 }
 
@@ -274,19 +274,19 @@ ap_status_t ap_set_mday(struct atime_t *time, ap_int32_t value)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_mon(struct atime_t *time, ap_int32_t value)
+ap_status_t ap_set_mon(struct atime_t *atime, ap_int32_t value)
 {
-    if (!time) {
+    if (!atime) {
         return APR_ENOTIME;
     }
-    if (time->explodedtime == NULL) {
-        time->explodedtime = (struct tm *)ap_palloc(time->cntxt, 
+    if (atime->explodedtime == NULL) {
+        atime->explodedtime = (struct tm *)ap_palloc(atime->cntxt, 
                               sizeof(struct tm));
     }
-    if (time->explodedtime == NULL) {
+    if (atime->explodedtime == NULL) {
         return APR_ENOMEM;
     }
-    time->explodedtime->tm_mon = value;
+    atime->explodedtime->tm_mon = value;
     return APR_SUCCESS;
 }
 
@@ -296,19 +296,19 @@ ap_status_t ap_set_mon(struct atime_t *time, ap_int32_t value)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_year(struct atime_t *time, ap_int32_t value)
+ap_status_t ap_set_year(struct atime_t *atime, ap_int32_t value)
 {
-    if (!time) {
+    if (!atime) {
         return APR_ENOTIME;
     }
-    if (time->explodedtime == NULL) {
-        time->explodedtime = (struct tm *)ap_palloc(time->cntxt, 
+    if (atime->explodedtime == NULL) {
+        atime->explodedtime = (struct tm *)ap_palloc(atime->cntxt, 
                               sizeof(struct tm));
     }
-    if (time->explodedtime == NULL) {
+    if (atime->explodedtime == NULL) {
         return APR_ENOMEM;
     }
-    time->explodedtime->tm_year = value;
+    atime->explodedtime->tm_year = value;
     return APR_SUCCESS;
 }
 
@@ -318,19 +318,19 @@ ap_status_t ap_set_year(struct atime_t *time, ap_int32_t value)
  * arg 1) The time value we care about.
  * arg 2) Integer to store time value in
  */
-ap_status_t ap_set_wday(struct atime_t *time, ap_int32_t value)
+ap_status_t ap_set_wday(struct atime_t *atime, ap_int32_t value)
 {
-    if (!time) {
+    if (!atime) {
         return APR_ENOTIME;
     }
-    if (time->explodedtime == NULL) {
-        time->explodedtime = (struct tm *)ap_palloc(time->cntxt, 
+    if (atime->explodedtime == NULL) {
+        atime->explodedtime = (struct tm *)ap_palloc(atime->cntxt, 
                               sizeof(struct tm));
     }
-    if (time->explodedtime == NULL) {
+    if (atime->explodedtime == NULL) {
         return APR_ENOMEM;
     }
-    time->explodedtime->tm_wday = value;
+    atime->explodedtime->tm_wday = value;
     return APR_SUCCESS;
 }
 

@@ -476,25 +476,25 @@ API_EXPORT(void) ap_MD5Encode(const char *pw, const char *salt,
     /*
      * The password first, since that is what is most unknown
      */
-    ap_MD5Update(&ctx, pw, strlen(pw));
+    ap_MD5Update(&ctx, (unsigned char *)pw, strlen(pw));
 
     /*
      * Then our magic string
      */
-    ap_MD5Update(&ctx, apr1_id, strlen(apr1_id));
+    ap_MD5Update(&ctx, (unsigned char *)apr1_id, strlen(apr1_id));
 
     /*
      * Then the raw salt
      */
-    ap_MD5Update(&ctx, sp, sl);
+    ap_MD5Update(&ctx, (unsigned char *)sp, sl);
 
     /*
      * Then just as many characters of the MD5(pw, salt, pw)
      */
     ap_MD5Init(&ctx1);
-    ap_MD5Update(&ctx1, pw, strlen(pw));
-    ap_MD5Update(&ctx1, sp, sl);
-    ap_MD5Update(&ctx1, pw, strlen(pw));
+    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
+    ap_MD5Update(&ctx1, (unsigned char *)sp, sl);
+    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
     ap_MD5Final(final, &ctx1);
     for(pl = strlen(pw); pl > 0; pl -= 16) {
 	ap_MD5Update(&ctx, final, (pl > 16) ? 16 : pl);
@@ -513,7 +513,7 @@ API_EXPORT(void) ap_MD5Encode(const char *pw, const char *salt,
 	    ap_MD5Update(&ctx, final, 1);
 	}
 	else {
-	    ap_MD5Update(&ctx, pw, 1);
+	    ap_MD5Update(&ctx, (unsigned char *)pw, 1);
 	}
     }
 
@@ -535,24 +535,24 @@ API_EXPORT(void) ap_MD5Encode(const char *pw, const char *salt,
     for (i = 0; i < 1000; i++) {
 	ap_MD5Init(&ctx1);
 	if (i & 1) {
-	    ap_MD5Update(&ctx1, pw, strlen(pw));
+	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
 	}
 	else {
 	    ap_MD5Update(&ctx1, final, 16);
 	}
 	if (i % 3) {
-	    ap_MD5Update(&ctx1, sp, sl);
+	    ap_MD5Update(&ctx1, (unsigned char *)sp, sl);
 	}
 
 	if (i % 7) {
-	    ap_MD5Update(&ctx1, pw, strlen(pw));
+	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
 	}
 
 	if (i & 1) {
 	    ap_MD5Update(&ctx1, final, 16);
 	}
 	else {
-	    ap_MD5Update(&ctx1, pw, strlen(pw));
+	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
 	}
 	ap_MD5Final(final,&ctx1);
     }

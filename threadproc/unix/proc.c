@@ -105,23 +105,23 @@ ap_status_t ap_createprocattr_init(ap_context_t *cont, struct procattr_t **new)
 ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in, 
                                  ap_int32_t out, ap_int32_t err)
 {
-    ap_status_t stat;
+    ap_status_t status;
     if (in) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->child_in, 
+        if ((status = ap_create_pipe(attr->cntxt, &attr->child_in, 
                             &attr->parent_in)) != APR_SUCCESS) {
-            return stat;
+            return status;
         }
     } 
     if (out) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_out, 
+        if ((status = ap_create_pipe(attr->cntxt, &attr->parent_out, 
                             &attr->child_out)) != APR_SUCCESS) {
-            return stat;
+            return status;
         }
     } 
     if (err) {
-        if ((stat = ap_create_pipe(attr->cntxt, &attr->parent_err, 
+        if ((status = ap_create_pipe(attr->cntxt, &attr->parent_err, 
                             &attr->child_err)) != APR_SUCCESS) {
-            return stat;
+            return status;
         }
     } 
     return APR_SUCCESS;
@@ -349,24 +349,24 @@ ap_status_t ap_get_childerr(struct proc_t *proc, ap_file_t **new)
  *            APR_CHILD_NOTDONE  -- child is still running.
  */
 ap_status_t ap_wait_proc(struct proc_t *proc, 
-                           ap_wait_how_e wait)
+                           ap_wait_how_e waithow)
 {
-    pid_t stat;
+    pid_t status;
     if (!proc)
         return APR_ENOPROC;
-    if (wait == APR_WAIT) {
-        if ((stat = waitpid(proc->pid, NULL, WUNTRACED)) > 0) {
+    if (waithow == APR_WAIT) {
+        if ((status = waitpid(proc->pid, NULL, WUNTRACED)) > 0) {
             return APR_CHILD_DONE;
         }
-        else if (stat == 0) {
+        else if (status == 0) {
             return APR_CHILD_NOTDONE;
         }
         return errno;
     }
-    if ((stat = waitpid(proc->pid, NULL, WUNTRACED | WNOHANG)) > 0) {
+    if ((status = waitpid(proc->pid, NULL, WUNTRACED | WNOHANG)) > 0) {
             return APR_CHILD_DONE;
         }
-        else if (stat == 0) {
+        else if (status == 0) {
             return APR_CHILD_NOTDONE;
         }
         return errno;

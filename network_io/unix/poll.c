@@ -276,10 +276,9 @@ ap_status_t ap_clear_poll_sockets(struct pollfd_t *aprset, ap_int16_t events)
         if (aprset->events[i] & newevents) {
             aprset->events[i] ^= newevents;
         }
-
-        return APR_SUCCESS;
         i++;
     }
+    return APR_SUCCESS;
 }
 
 #else    /* Use select to mimic poll */

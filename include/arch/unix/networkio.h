@@ -88,6 +88,7 @@ struct pollfd_t {
 };
 
 ap_int16_t get_event(ap_int16_t);
+ap_int16_t get_revent(ap_int16_t);
 
 #endif  /* ! NETWORK_IO_H */
 
