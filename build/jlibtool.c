@@ -80,7 +80,7 @@
 #  define RANLIB "ranlib"
 #  define PIC_FLAG "-fPIC"
 #  define RPATH "-rpath"
-#  define DYNAMIC_LINK_OPTS "-shared"
+#  define SHARED_OPTS "-shared"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #endif
 
@@ -92,7 +92,7 @@
 #  define OBJECT_EXT     "o"
 #  define LIBRARIAN      "ar"
 #  define LIBRARIAN_OPTS "cr"
-#  define DYNAMIC_LINK_OPTS "-G"
+#  define SHARED_OPTS "-G"
 #  define LINKER_FLAG_PREFIX "-Wl,"
 #  define NEED_SNPRINTF
 #endif
