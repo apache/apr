@@ -90,9 +90,9 @@
 #endif
 
 struct apr_dso_handle_t {
-    apr_pool_t  *cont;
+    apr_pool_t    *pool;
     void          *handle;
-    const char *errormsg;
+    const char    *errormsg;
 };
 
 #endif
