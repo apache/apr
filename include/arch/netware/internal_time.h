@@ -57,10 +57,7 @@
 
 #include "apr.h"
 
-#ifdef WAITING_FOR_UPDATE
-#undef timezone
-# define timezone           (*___timezone())
-#endif
+#define TZONE           (*___timezone())
 
 void apr_netware_setup_time(void);
 
