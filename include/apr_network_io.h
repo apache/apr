@@ -94,6 +94,10 @@ extern "C" {
 #define APR_IPV6_V6ONLY     16384 /**< Don't accept IPv4 connections on an
                                    * IPv6 listening socket.
                                    */
+#define APR_TCP_DEFER_ACCEPT 32768 /**< Delay accepting of new connections 
+                                    * until data is available.
+                                    * @see apr_socket_accept_filter
+                                    */
 
 /** @} */
 
