@@ -127,6 +127,23 @@ APR, nor an APR build directory.])
     ])
   ])
 
+  dnl We attempt to guess what the data will be *after* configure is run.
+  dnl Note, if we don't see configure, but do have configure.in, it'd be
+  dnl nice to run buildconf, but that's for another day.
+  if test "$apr_found" = "no" && test -n "$1" && test -x "$1/configure"; then
+    apr_found="reconfig"
+    apr_srcdir="$1"
+    apr_libdir=""
+    apr_la_file="$apr_srcdir/libapr.la"
+    apr_vars="$apr_srcdir/APRVARS"
+    if test -f $apr_srcdir/apr-config.in; then
+      apr_config="$apr_srcdir/apr-config"
+    else
+      apr_config=""
+    fi
+    apr_includes="-I$apr_srcdir/include"
+  fi
+
   if test "$apr_found" != "no" && test "$apr_libdir" != ""; then
     if test "$apr_vars" = "" && test -f "$apr_libdir/APRVARS"; then
       apr_vars="$apr_libdir/APRVARS"
