@@ -1,5 +1,5 @@
 
-TARGETS = homedir.lo
+TARGETS = userinfo.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
