@@ -60,8 +60,7 @@ echo $ac_n "${nl}Check for compiler flags..."
 AC_ARG_WITH(optim,[  --with-optim="FLAGS"      compiler optimisation flags],
         [OPTIM="$withval"])
 
-AC_ARG_WITH(debug,[  --with-debug              Turn on debugging and compile tim
-e warnings],
+AC_ARG_WITH(debug,[  --with-debug            Turn on debugging and compile time warnings],
         [if test "$GCC" = "yes"; then CFLAGS="$CFLAGS -g -Wall"; else CFLAGS="$CFLAGS -g"; fi])
 
 dnl # this is the place to put specific options for platform/compiler
@@ -313,7 +312,7 @@ dnl #----------------------------- Checking for Threads
 echo $ac_n "${nl}Checking for Threads...${nl}"
 AC_CACHE_CHECK([for threads], ac_cv_enable_threads,
   [ AC_ARG_ENABLE(threads,
-    [  --enable-threads  Enable threading support in APR.],
+    [  --enable-threads        Enable threading support in APR.],
     [ ac_cv_enable_threads=$enableval] ,
     [ AC_CHECK_HEADERS(pthread.h,
                    [ ac_cv_enable_threads="pthread" ] ,
@@ -361,6 +360,19 @@ else
 fi
 
 AC_SUBST(threads)
+
+dnl #----------------------------- Checking for Processes
+echo $ac_n "${nl}Checking for Processes...${nl}"
+AC_ARG_ENABLE(other-child,
+  [  --enable-other-child    Enable reliable child processes ],
+  [ if test "$enableval" = "yes"; then
+        oc="1"
+    else
+        oc="0"
+    fi ],
+  [ oc=1 ] ) 
+  
+AC_SUBST(oc) 
 
 dnl #----------------------------- Checking for MMAP 
 echo $ac_n "${nl}Checking for MMAP...${nl}"
@@ -453,7 +465,7 @@ AC_CONFIG_SUBDIRS($config_subdirs)
 
 AC_MSG_CHECKING(Checking for Shared memory support)
 AC_ARG_ENABLE(shmem,
-  [ --enable-shmem  Enable shared memory support in APR. ],
+  [  --enable-shmem          Enable shared memory support in APR. ],
   [ ],
   ac_cv_enable_shmem="mm" )
 

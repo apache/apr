@@ -63,6 +63,7 @@
 #define APR_HAS_FORK              @fork@
 #define APR_HAS_RANDOM            @rand@
 #define APR_HAS_XLATE             @iconv@
+#define APR_HAS_OTHER_CHILD       @oc@
 
 /* Typedefs that APR needs. */
 
