@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fix misinterpretation of timeout for select() on Win32/Netware.
+     Identified by [TANAKA Koichi <tanaka@ariel-networks.com>]
+
   *) Re-write apr_poll() on Unix.  This improves the performance by
      giving the user back control over the memory in the pollset.
      [Ryan Bloom]
