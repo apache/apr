@@ -52,14 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-#include <windows.h>
-#include <objbase.h>
-#include <wincrypt.h>
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_portable.h"
 #include "misc.h"
+#include <wincrypt.h>
 
 
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
