@@ -827,7 +827,7 @@ APR_DECLARE(apr_status_t) apr_os_proc_mutex_put(apr_proc_mutex_t **pmutex,
         (*pmutex)->pool = pool;
     }
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
-    apr_os_file_put(&(*pmutex)->interproc, &ospmutex->crossproc, pool);
+    apr_os_file_put(&(*pmutex)->interproc, &ospmutex->crossproc, 0, pool);
 #endif
 #if APR_HAS_PROC_PTHREAD_SERIALIZE
     (*pmutex)->pthread_interproc = ospmutex->pthread_interproc;

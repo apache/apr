@@ -415,12 +415,14 @@ APR_DECLARE(apr_status_t) apr_os_file_get(apr_os_file_t *thefile,
 
 APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
                                           apr_os_file_t *thefile,
+					                      apr_int32_t flags,
                                           apr_pool_t *cont)
 {
     (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
     (*file)->cntxt = cont;
     (*file)->filehand = *thefile;
     (*file)->ungetchar = -1; /* no char avail */
+    (*file)->flags;
     return APR_SUCCESS;
 }    
 
@@ -440,7 +442,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile, apr_pool_t 
     if (file_handle == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
 
-    return apr_os_file_put(thefile, &file_handle, cont);
+    return apr_os_file_put(thefile, &file_handle, 0, cont);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
@@ -451,7 +453,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile, apr_pool_t 
     if (file_handle == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
 
-    return apr_os_file_put(thefile, &file_handle, cont);
+    return apr_os_file_put(thefile, &file_handle, 0, cont);
 }
 
 APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *cont)
@@ -462,7 +464,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdin(apr_file_t **thefile, apr_pool_t *
     if (file_handle == INVALID_HANDLE_VALUE)
         return apr_get_os_error();
 
-    return apr_os_file_put(thefile, &file_handle, cont);
+    return apr_os_file_put(thefile, &file_handle, 0, cont);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);

@@ -340,13 +340,14 @@ APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1,
  * convert the file from os specific type to apr type.
  * @param file The apr file we are converting to.
  * @param thefile The os specific file to convert
+ * @param flags The flags that were used to open this file.
  * @param cont The pool to use if it is needed.
  * @remark On Unix, it is only possible to put a file descriptor into
  *         an apr file type.
  */
 APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
                                           apr_os_file_t *thefile,
-                                          apr_pool_t *cont); 
+                                          apr_int32_t flags, apr_pool_t *cont); 
 
 /**
  * convert the dir from os specific type to apr type.

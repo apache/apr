@@ -153,7 +153,7 @@ APR_DECLARE(apr_status_t) apr_shm_init(apr_shmem_t **m, apr_size_t reqsize,
     if (tmpfd == -1)
         return errno;
 
-    apr_os_file_put(&new_m->file, &tmpfd, pool); 
+    apr_os_file_put(&new_m->file, &tmpfd, O_READ | O_WRITE | O_CREATE, pool); 
     status = apr_file_trunc(new_m->file, reqsize);
     if (status != APR_SUCCESS)
     {
