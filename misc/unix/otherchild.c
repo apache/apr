@@ -53,12 +53,12 @@
  */
 
 #include "apr.h"
-
-#if APR_HAS_OTHER_CHILD
-
 #include "apr_arch_misc.h"
 #include "apr_arch_threadproc.h"
 #include "apr_arch_file_io.h"
+
+#if APR_HAS_OTHER_CHILD
+
 #ifdef HAVE_TIME_H
 #include <sys/time.h>
 #endif
