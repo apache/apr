@@ -1,5 +1,7 @@
 Changes with APR b1  
 
+  *) Add process locking API to APR. [Aaron Bannert <aaron@clove.org>]
+
   *) Add condition variables for Windows.  [Ryan Bloom]
 
   *) Add condition variables to the APR set of locking functions.
