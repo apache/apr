@@ -65,6 +65,15 @@
 
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
+    
+    /* Our lock :) */
+    sem_id Lock;
+    int32  LockCount;
+
+    /* If we nest locks we need these... */
+    int nested;  
+    apr_os_thread_t owner;
+    int owner_ref;
 };
 
 #endif  /* THREAD_MUTEX_H */

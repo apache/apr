@@ -55,7 +55,6 @@
 #ifndef PROC_MUTEX_H
 #define PROC_MUTEX_H
 
-#include <kernel/OS.h>
 #include "apr_pools.h"
 #include "apr_proc_mutex.h"
 #include "apr_file_io.h"
@@ -65,6 +64,10 @@
 
 struct apr_proc_mutex_t {
     apr_pool_t *pool;
+    
+    /* Our lock :) */
+    sem_id Lock;
+    int32  LockCount;
 };
 
 #endif  /* PROC_MUTEX_H */
