@@ -179,7 +179,6 @@ APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex)
     return APR_SUCCESS;
 }
 
-#if !APR_PROCESS_LOCK_IS_GLOBAL
 APR_DECLARE(apr_status_t) apr_os_global_mutex_get(apr_os_global_mutex_t *ospmutex,
                                                 apr_global_mutex_t *pmutex)
 {
@@ -190,7 +189,6 @@ APR_DECLARE(apr_status_t) apr_os_global_mutex_get(apr_os_global_mutex_t *ospmute
 #endif
     return APR_SUCCESS;
 }
-#endif
 
 APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex)
 {
