@@ -56,6 +56,9 @@
 #include "apr_strings.h"
 #include "apr_private.h"
 #include "apr_lib.h"
+#ifdef HAVE_STDDEF_H
+#include <stddef.h> /* NULL */
+#endif
 
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 {
