@@ -57,7 +57,6 @@
 #include "apr_pools.h"
 #include "apr_signal.h"
 
-#include "locks.h"      /* for apr_unix_setup_lock() */
 #include "proc_mutex.h" /* for apr_proc_mutex_unix_setup_lock() */
 #include "internal_time.h"
 
@@ -84,7 +83,6 @@ APR_DECLARE(apr_status_t) apr_initialize(void)
     }
 
 #if !defined(BEOS) && !defined(OS2)
-    apr_unix_setup_lock();
     apr_proc_mutex_unix_setup_lock();
     apr_unix_setup_time();
 #endif

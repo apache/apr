@@ -56,7 +56,6 @@
 #define APR_PROC_MUTEX_H
 
 #include "apr.h"
-#include "apr_lock.h"    /* only for apr_lockmech_e_np */
 #include "apr_pools.h"
 #include "apr_errno.h"
 
@@ -74,6 +73,10 @@ extern "C" {
  * @ingroup APR
  * @{
  */
+
+typedef enum {APR_LOCK_FCNTL, APR_LOCK_FLOCK, APR_LOCK_SYSVSEM,
+              APR_LOCK_PROC_PTHREAD, APR_LOCK_POSIXSEM,
+              APR_LOCK_DEFAULT} apr_lockmech_e;
 
 typedef struct apr_proc_mutex_t apr_proc_mutex_t;
 

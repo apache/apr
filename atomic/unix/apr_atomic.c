@@ -54,9 +54,8 @@
 
 
 #include "apr.h"
-#include "apr_lock.h"
-#include "apr_thread_mutex.h"
 #include "apr_atomic.h"
+#include "apr_thread_mutex.h"
 
 #if APR_HAS_THREADS
 

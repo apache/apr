@@ -76,10 +76,6 @@ extern "C" {
 #define APR_WANT_MEMFUNC
 #include "apr_want.h"
 
-#include "apr_thread_mutex.h"
-#include "apr_pools.h"
-
-
 /** the allocator structure */
 typedef struct apr_allocator_t apr_allocator_t;
 /** the structure which holds information about the allocation */
@@ -132,6 +128,9 @@ APR_DECLARE(apr_memnode_t *) apr_allocator_alloc(apr_allocator_t *allocator,
 APR_DECLARE(void) apr_allocator_free(apr_allocator_t *allocator,
                                      apr_memnode_t *memnode);
 
+
+#include "apr_pools.h"
+
 /**
  * Set the owner of the allocator
  * @param allocator The allocator to set the owner for
@@ -151,6 +150,8 @@ APR_DECLARE(void) apr_allocator_set_owner(apr_allocator_t *allocator,
  * @param allocator The allocator to get the owner from
  */
 APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(apr_allocator_t *allocator);
+
+#include "apr_thread_mutex.h"
 
 #if APR_HAS_THREADS
 /**

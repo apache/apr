@@ -55,7 +55,7 @@
 #ifndef THREAD_MUTEX_H
 #define THREAD_MUTEX_H
 
-#include "apr_lock.h"
+#include "apr_pools.h"
 
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
