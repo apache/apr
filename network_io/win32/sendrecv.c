@@ -60,6 +60,16 @@
 #include "fileio.h"
 #include <time.h>
 
+/* MAX_SEGMENT_SIZE is the maximum amount of data that will be sent to a client
+ * in one call of TransmitFile. This number must be small enough to give the 
+ * slowest client time to receive the data before the socket timeout triggers.
+ * The same problem can exist with apr_send(). In that case, we rely on the
+ * application to adjust socket timeouts and max send segment sizes appropriately.
+ * For example, Apache will in most cases call apr_send() with less than 8193 
+ * bytes
+ * of data.
+ */
+#define MAX_SEGMENT_SIZE 65536
 apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
 {
     apr_ssize_t rv;
@@ -134,7 +144,39 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
     *nbytes = dwBytes;
     return APR_SUCCESS;
 }
+static void collapse_iovec(char **buf, int *len, struct iovec *iovec, int numvec, apr_pool_t *p)
+{
+    int ptr = 0;
+
+    if (numvec == 1) {
+        *buf = iovec[0].iov_base;
+        *len = iovec[0].iov_len;
+    }
+    else {
+        int i;
+        for (i = 0; i < numvec; i++) {
+            *len += iovec[i].iov_len;
+        }
+
+        *buf = apr_palloc(p, *len); /* Should this be a malloc? */
+
+        for (i = 0; i < numvec; i++) {
+            memcpy((char*)*buf + ptr, iovec[i].iov_base, iovec[i].iov_len);
+            ptr += iovec[i].iov_len;
+        }
+    }
+}
 #if APR_HAS_SENDFILE
+/*
+ *#define WAIT_FOR_EVENT
+ * Note: Waiting for the socket directly is much faster than creating a seperate
+ * wait event. There are a couple of dangerous aspects to waiting directly 
+ * for the socket. First, we should not wait on the socket if concurrent threads
+ * can wait-on/signal the same socket. This shouldn't be happening with Apache since 
+ * a socket is uniquely tied to a thread. This will change when we begin using 
+ * async I/O with completion ports on the socket. 
+ */
+
 /*
  * apr_status_t apr_sendfile(apr_socket_t *, apr_file_t *, apr_hdtr_t *, 
  *                         apr_off_t *, apr_size_t *, apr_int32_t flags)
@@ -144,80 +186,29 @@ apr_status_t apr_sendv(apr_socket_t *sock, const struct iovec *vec,
  * arg 2) The open file from which to read
  * arg 3) A structure containing the headers and trailers to send
  * arg 4) Offset into the file where we should begin writing
- * arg 5) Number of bytes to send 
+ * arg 5) Number of bytes to send out of the file
  * arg 6) APR flags that are mapped to OS specific flags
  */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
-        		apr_int32_t flags) 
+                          apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+                          apr_int32_t flags) 
 {
-/*
- *#define WAIT_FOR_EVENT
- * Note: Waiting for the socket directly is much faster than creating a seperate
- * wait event. There are a couple of dangerous aspects to waiting directly 
- * for the socket. First, we should not wait on the socket if concurrent threads
- * can wait-on/signal the same socket. This shouldn't be happening with Apache since 
- * a socket is uniquely tied to a thread. This will change when we begin using 
- * async I/O with completion ports on the socket. Second, I am not sure how the
- * socket timeout code will work. I am hoping the socket will be signaled if the
- * setsockopt timeout expires. Need to verify this...
- */
+    apr_status_t status = APR_SUCCESS;
     apr_ssize_t rv;
+    DWORD dwFlags = 0;
+    DWORD nbytes;
     OVERLAPPED overlapped;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
-    int i, ptr = 0;
-    int lasterror = APR_SUCCESS;
-    DWORD dwFlags = 0;
+    int bytes_to_send;
+    int ptr = 0;
 
-    /* Map APR flags to OS specific flags */
-    if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
-        dwFlags |= TF_REUSE_SOCKET;
-        dwFlags |= TF_DISCONNECT;
+    /* Must pass in a valid length */
+    if (len == 0) {
+        return APR_EINVAL;
     }
+    bytes_to_send = *len;
+    *len = 0;
 
-    /* TransmitFile can only send one header and one footer */
-    memset(&tfb, '\0', sizeof (tfb));
-    if (hdtr && hdtr->numheaders) {
-        ptfb = &tfb;
-        if (hdtr->numheaders == 1) {
-            ptfb->Head = hdtr->headers[0].iov_base;
-            ptfb->HeadLength = hdtr->headers[0].iov_len;
-        }
-        else {
-            /* Need to collapse all the header fragments into one buffer */
-            for (i = 0; i < hdtr->numheaders; i++) {
-                ptfb->HeadLength += hdtr->headers[i].iov_len;
-            }
-            ptfb->Head = apr_palloc(sock->cntxt, ptfb->HeadLength); /* Should this be a malloc? */
-
-            for (i = 0; i < hdtr->numheaders; i++) {
-                memcpy((char*)ptfb->Head + ptr, hdtr->headers[i].iov_base,
-                       hdtr->headers[i].iov_len);
-                ptr += hdtr->headers[i].iov_len;
-            }
-        }
-    }
-    if (hdtr && hdtr->numtrailers) {
-        ptfb = &tfb;
-        if (hdtr->numtrailers == 1) {
-            ptfb->Tail = hdtr->trailers[0].iov_base;
-            ptfb->TailLength = hdtr->trailers[0].iov_len;
-        }
-        else {
-            /* Need to collapse all the trailer fragments into one buffer */
-            for (i = 0; i < hdtr->numtrailers; i++) {
-                ptfb->TailLength += hdtr->headers[i].iov_len;
-            }
-
-            ptfb->Tail = apr_palloc(sock->cntxt, ptfb->TailLength); /* Should this be a malloc? */
-
-            for (i = 0; i < hdtr->numtrailers; i++) {
-                memcpy((char*)ptfb->Tail + ptr, hdtr->trailers[i].iov_base,
-                       hdtr->trailers[i].iov_len);
-                ptr += hdtr->trailers[i].iov_len;
-            }
-        }
-    }
     /* Initialize the overlapped structure */
     memset(&overlapped,'\0', sizeof(overlapped));
     if (offset && *offset) {
@@ -226,47 +217,107 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
 #ifdef WAIT_FOR_EVENT
     overlapped.hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 #endif
- 
-    rv = TransmitFile(sock->sock,     /* socket */
-                      file->filehand, /* open file descriptor of the file to be sent */
-                      *len,           /* number of bytes to send. 0=send all */
-                      0,              /* Number of bytes per send. 0=use default */
-                      &overlapped,    /* OVERLAPPED structure */
-                      ptfb,           /* header and trailer buffers */
-                      dwFlags);       /* flags to control various aspects of TransmitFile */
-    if (!rv) {
-        lasterror = WSAGetLastError();
-        if (lasterror == ERROR_IO_PENDING) {
-#ifdef WAIT_FOR_EVENT
-            rv = WaitForSingleObject(overlapped.hEvent, 
-                                     sock->timeout >= 0 ? sock->timeout : INFINITE);
-#else
-            rv = WaitForSingleObject((HANDLE) sock->sock, 
-                                     sock->timeout >= 0 ? sock->timeout : INFINITE);
-#endif
-            if (rv == WAIT_OBJECT_0)
-                lasterror = APR_SUCCESS;
-            else if (rv == WAIT_TIMEOUT)
-                lasterror = WAIT_TIMEOUT;
-            else if (rv == WAIT_ABANDONED)
-                lasterror = WAIT_ABANDONED;
-            else
-                lasterror = GetLastError();
+
+    /* TransmitFile can only send one header and one footer */
+    memset(&tfb, '\0', sizeof (tfb));
+    if (hdtr && hdtr->numheaders) {
+        ptfb = &tfb;
+        collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, hdtr->headers, hdtr->numheaders, sock->cntxt);
+    }
+
+    /* If we have more than MAX_SEGMENT_SIZE headers to send, send them
+     * in segments.
+     */
+    if (ptfb && ptfb->HeadLength) {
+        while (ptfb->HeadLength >= MAX_SEGMENT_SIZE) {
+            nbytes = MAX_SEGMENT_SIZE;
+            rv = apr_send(sock, ptfb->Head, &nbytes);
+            if (rv != APR_SUCCESS)
+                return rv;
+            (char*) ptfb->Head += nbytes;
+            ptfb->HeadLength -= nbytes;
+            *len += nbytes;
         }
     }
 
-    /* Mark the socket as disconnected, but do not close it.
-     * Note: The application must have stored the socket prior to making
-     * the call to apr_sendfile in order to either reuse it or close it.
-     */
-    if ((lasterror == APR_SUCCESS) && (flags & APR_SENDFILE_DISCONNECT_SOCKET)) {
-        sock->disconnected = 1;
-        sock->sock = INVALID_SOCKET;
+    while (bytes_to_send) {
+        if (bytes_to_send > MAX_SEGMENT_SIZE) {
+            nbytes = MAX_SEGMENT_SIZE;
+        }
+        else {
+            /* Last call to TransmitFile() */
+            nbytes = bytes_to_send;
+            /* Send trailers on the last packet, even if the total size 
+             * exceeds MAX_SEGMENT_SIZE...
+             */
+            if (hdtr && hdtr->numtrailers) {
+                ptfb = &tfb;
+                collapse_iovec((char**) &ptfb->Tail, &ptfb->TailLength, 
+                               hdtr->trailers, hdtr->numtrailers, sock->cntxt);
+            }
+            /* Disconnect the socket after last send */
+            if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
+                dwFlags |= TF_REUSE_SOCKET;
+                dwFlags |= TF_DISCONNECT;
+            }
+        }
+
+        rv = TransmitFile(sock->sock,     /* socket */
+                          file->filehand, /* open file descriptor of the file to be sent */
+                          nbytes,         /* number of bytes to send. 0=send all */
+                          0,              /* Number of bytes per send. 0=use default */
+                          &overlapped,    /* OVERLAPPED structure */
+                          ptfb,           /* header and trailer buffers */
+                          dwFlags);       /* flags to control various aspects of TransmitFile */
+        if (!rv) {
+            status = WSAGetLastError();
+            if (status == ERROR_IO_PENDING) {
+#ifdef WAIT_FOR_EVENT
+                rv = WaitForSingleObject(overlapped.hEvent, 
+                                         sock->timeout >= 0 ? sock->timeout : INFINITE);
+#else
+                rv = WaitForSingleObject((HANDLE) sock->sock, 
+                                         sock->timeout >= 0 ? sock->timeout : INFINITE);
+#endif
+                if (rv == WAIT_OBJECT_0)
+                    status = APR_SUCCESS;
+                else if (rv == WAIT_TIMEOUT)
+                    status = WAIT_TIMEOUT;
+                else if (rv == WAIT_ABANDONED)
+                    status = WAIT_ABANDONED;
+                else
+                    status = GetLastError();
+            }
+        }
+        if (status != APR_SUCCESS)
+            break;
+
+        /* Assume the headers have been sent */
+        ptfb->HeadLength = 0;
+        ptfb->Head = NULL;
+        bytes_to_send -= nbytes;
+        *len += nbytes;
+        overlapped.Offset += nbytes;
+    }
+
+
+    if (status == APR_SUCCESS) {
+        if (ptfb && ptfb->TailLength)
+            *len += ptfb->TailLength;
+
+        /* Mark the socket as disconnected, but do not close it.
+         * Note: The application must have stored the socket prior to making
+         * the call to apr_sendfile in order to either reuse it or close it.
+         */
+        if (flags & APR_SENDFILE_DISCONNECT_SOCKET) {
+            sock->disconnected = 1;
+            sock->sock = INVALID_SOCKET;
+        }
     }
 
 #ifdef WAIT_FOR_EVENT
     CloseHandle(overlapped.hEvent);
 #endif
-    return lasterror;
+    return status;
 }
 #endif
