@@ -8,7 +8,7 @@ RM=@RM@
 CC=@CC@
 RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@ 
-LIBS=-L../libs -lnetwork -lthreadproc -lfile -lmisc -lapr -ltime -llock -lsig @LIBS@ 
+LIBS=-L../libs -lnetwork -lthreadproc -lfile -lmisc -lapr -ltime -llock -lsig -lmmap @LIBS@ 
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../include
 INCDIR1=../../inc
@@ -23,7 +23,8 @@ TARGETS= testfile@EXEEXT@ \
 	testargs@EXEEXT@ \
 	testcontext@EXEEXT@ \
 	ab@EXEEXT@ \
-	htdigest@EXEEXT@ 
+	htdigest@EXEEXT@ \
+         testmmap@EXEEXT@
 
 OBJS= testfile.o \
 	testproc.o \
@@ -34,7 +35,8 @@ OBJS= testfile.o \
         testargs.o \
         testcontext.o \
 	ab_apr.o \
-	htdigest.o
+	htdigest.o \
+         testmmap.o
 
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $<
@@ -72,6 +74,9 @@ testtime@EXEEXT@: testtime.o
 
 testsig@EXEEXT@: testsig.o
 	$(CC) $(CFLAGS) testsig.o -o testsig@EXEEXT@ $(LDFLAGS) 
+
+testmmap@EXEEXT@: testmmap.o
+	$(CC) $(CFLAGS) testmmap.o -o testmmap@EXEEXT@ $(LDFLAGS)
 
 clean:
 	$(RM) -f *.o *.a *.so $(TARGETS)
