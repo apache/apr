@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Added apr_strtoll() and apr_atoll() to strings lib.
+     [Shantonu Sen <ssen@apple.com>, Wilfredo Sanchez]
+
   *) Added a lightweight internal index to apr_table_t to speed up
      table lookup operations  [Brian Pane]
 
