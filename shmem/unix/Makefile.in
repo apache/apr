@@ -10,11 +10,9 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../../inc
-INCDIR1=../../include
-INCDIR2=../../misc/@OSDIR@
-INCDIR3=mm
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I$(INCDIR3) -I.
+INCDIR=../../include
+INCDIR1=mm
+INCLUDES=-I$(INCDIR) -I$(INCDIR1)
 
 LIB=libshmem.a
 
@@ -56,6 +54,6 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
-shmem.o: shmem.c mm/mm.h ../../include/apr_general.h \
- ../../include/apr.h ../../include/apr_errno.h \
- ../../include/apr_shmem.h
+shmem.o: shmem.c mm/mm.h $(INCDIR)/apr_general.h \
+ $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
+ $(INCDIR)/apr_shmem.h
