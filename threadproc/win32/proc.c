@@ -420,14 +420,14 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     if (os_level >= APR_WIN_NT)
     {
         STARTUPINFOW si;
-        apr_size_t nprg = strlen(progname) + 1;
+        apr_wchar_t wprg[APR_PATH_MAX];
         apr_size_t ncmd = strlen(cmdline) + 1, nwcmd = ncmd;
         apr_size_t ncwd = strlen(attr->currdir) + 1, nwcwd = ncwd;
-        apr_wchar_t *wprg = apr_palloc(cont, nprg * 2);
         apr_wchar_t *wcmd = apr_palloc(cont, ncmd * 2);
         apr_wchar_t *wcwd = apr_palloc(cont, ncwd * 2);
 
-        if (((rv = utf8_to_unicode_path(wprg, &nprg, progname)) 
+        if (((rv = utf8_to_unicode_path(wprg, sizeof(wprg)/sizeof(wprg[0]),
+                                        progname))
                     != APR_SUCCESS)
          || ((rv = conv_utf8_to_ucs2(cmdline, &ncmd, wcmd, &nwcmd)) 
                     != APR_SUCCESS)
