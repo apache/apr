@@ -8,10 +8,9 @@ RANLIB=@RANLIB@
 CFLAGS=@CFLAGS@ @OPTIM@
 LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
-INCDIR=../../inc
-INCDIR1=../../include
-INCDIR2=../../file_io/unix
-INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
+INCDIR=../../include
+INCDIR1=../../file_io/unix
+INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libthreadproc.a
 

@@ -606,7 +606,7 @@ API_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *has
 	/*
 	 * It's not our algorithm, so feed it to crypt() if possible.
 	 */
-#ifdef WIN32
+#if defined(WIN32) || defined(BEOS)
 	ap_cpystrn(sample, passwd, sizeof(sample) - 1);
 #else
 	crypt_pw = crypt(passwd, hash);
