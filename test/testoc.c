@@ -84,7 +84,6 @@ static void ocmaint(int reason, void *data, int status)
         break;
     }
 }
-#endif
 
 #ifndef SIGKILL
 #define SIGKILL 1
@@ -132,8 +131,8 @@ static void test_child_kill(CuTest *tc)
     apr_proc_other_child_check();
     CuAssertStrEquals(tc, "APR_OC_REASON_DEATH", reasonstr);
 }    
+#else
 
-#if !APR_HAS_OTHER_CHILD
 static void oc_not_impl(CuTest *tc)
 {
     CuNotImpl(tc, "Other child logic not implemented on this platform");
