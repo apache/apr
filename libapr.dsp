@@ -540,7 +540,19 @@ SOURCE=.\include\apr_portable.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\include\apr_signal.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\include\apr_shmem.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_sms.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_sms_tracking.h
 # End Source File
 # Begin Source File
 
