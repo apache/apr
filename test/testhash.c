@@ -111,6 +111,33 @@ static void same_value(CuTest *tc)
     CuAssertStrEquals(tc, "same", result);
 }
 
+static unsigned int hash_custom( const char *key, apr_ssize_t *klen)
+{
+    unsigned int hash = 0;
+    while( *klen ) {
+        (*klen) --;
+        hash = hash * 33 + key[ *klen ];
+    }
+    return hash;
+}
+
+static void same_value_custom(CuTest *tc)
+{
+    apr_hash_t *h = NULL;
+    char *result = NULL;
+
+    h = apr_hash_make_custom(p, hash_custom);
+    CuAssertPtrNotNull(tc, h);
+
+    apr_hash_set(h, "same1", 5, "same");
+    result = apr_hash_get(h, "same1", 5);
+    CuAssertStrEquals(tc, "same", result);
+
+    apr_hash_set(h, "same2", 5, "same");
+    result = apr_hash_get(h, "same2", 5);
+    CuAssertStrEquals(tc, "same", result);
+}
+
 static void key_space(CuTest *tc)
 {
     apr_hash_t *h = NULL;
@@ -374,7 +401,7 @@ static void overlay_same(CuTest *tc)
                           "Key base4 (5) Value value4\n"
                           "#entries 5\n", str);
 }
-        
+
 CuSuite *testhash(void)
 {
     CuSuite *suite = CuSuiteNew("Hash");
@@ -383,6 +410,7 @@ CuSuite *testhash(void)
     SUITE_ADD_TEST(suite, hash_set);
     SUITE_ADD_TEST(suite, hash_reset);
     SUITE_ADD_TEST(suite, same_value);
+    SUITE_ADD_TEST(suite, same_value_custom);
     SUITE_ADD_TEST(suite, key_space);
     SUITE_ADD_TEST(suite, delete_key);
 
