@@ -200,12 +200,15 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         }
         finfo->name = thedir->n.entry->cFileName;
     }
-
-    finfo->valid = APR_FINFO_NAME | APR_FINFO_SIZE | APR_FINFO_MTIME;    
-    finfo->fname = NULL;
-    finfo->size = (thedir->n.entry->nFileSizeHigh * MAXDWORD) + 
-                  thedir->n.entry->nFileSizeLow;
-    FileTimeToAprTime(&finfo->mtime, &thedir->n.entry->ftLastWriteTime);
+    finfo->cntxt = thedir->cntxt;
+    finfo->valid = APR_FINFO_NAME | APR_FINFO_TYPE | APR_FINFO_CTIME
+                 | APR_FINFO_ATIME | APR_FINFO_MTIME | APR_FINFO_SIZE;
+    /* Do the best job we can determining the file type.
+     * Win32 only returns device names in a directory in response to a specific
+     * request (e.g. FindFirstFile("CON"), not to wildcards, so we will ignore
+     * the BLK, CHR, and other oddballs, since they should -not- occur in this
+     * context.
+     */.
     if (thedir->n.entry->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         finfo->filetype = APR_DIR;
         finfo->valid |= APR_FINFO_TYPE;
@@ -215,10 +218,15 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
         finfo->valid |= APR_FINFO_TYPE | APR_FINFO_LINK;
     }
     else {
-        /* XXX: Not good logic.  No devices here, but what might we find? */
         finfo->filetype = APR_REG;
         finfo->valid |= APR_FINFO_TYPE;
     }
+    FileTimeToAprTime(&finfo->ctime, &thedir->n.entry->ftCreationTime);
+    FileTimeToAprTime(&finfo->mtime, &thedir->n.entry->ftLastWriteTime);
+    FileTimeToAprTime(&finfo->atime, &thedir->n.entry->ftLastAccessTime);
+    finfo->size = (thedir->n.entry->nFileSizeHigh * MAXDWORD)
+                +  thedir->n.entry->nFileSizeLow;
+    finfo->fname = NULL;
     return APR_SUCCESS;
 }
 
