@@ -1214,7 +1214,6 @@ API_EXPORT(int) ap_pcloseh(ap_pool_t *a, HANDLE hDevice)
  * since fclose() would flush I/O buffers, which is extremely undesirable;
  * we just close the descriptor.
  */
-/*
 static void file_cleanup(void *fpv)
 {
     fclose((FILE *) fpv);
