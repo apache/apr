@@ -95,13 +95,8 @@ struct ap_bucket {
      * into the bucket.
      */ 
     int (*insert)(ap_bucket *e, const void *buf, ap_size_t nbytes, ap_ssize_t *w);
-};
-
-typedef struct ap_bucket_list ap_bucket_list;
-struct ap_bucket_list {
-    ap_bucket *bucket;                   /* The bucket */
-    ap_bucket_list *next;                /* The next node in the bucket list */
-    ap_bucket_list *prev;                /* The prev node in the bucket list */
+    ap_bucket *next;                     /* The next node in the bucket list */
+    ap_bucket *prev;                     /* The prev node in the bucket list */
 };
 
 typedef struct ap_bucket_brigade ap_bucket_brigade;
@@ -111,8 +106,8 @@ struct ap_bucket_brigade {
                                            but this lets me register a cleanup
                                            to put a limit on the brigade's 
                                            lifetime. */
-    ap_bucket_list *head;               /* The start of the brigade */
-    ap_bucket_list *tail;               /* The end of the brigade */
+    ap_bucket *head;                    /* The start of the brigade */
+    ap_bucket *tail;                    /* The end of the brigade */
 };
 
 /*    ******  Different bucket types   *****/
@@ -152,13 +147,9 @@ APR_EXPORT(ap_bucket_brigade *) ap_bucket_brigade_create(ap_pool_t *p);
 /* destroy an enitre bucket brigade */
 APR_EXPORT(ap_status_t) ap_bucket_brigade_destroy(void *b);
 
-/* append a bucket_list to a bucket_brigade */
-APR_EXPORT(void) ap_bucket_brigade_append_list(ap_bucket_brigade *b, 
-                                               ap_bucket_list *e);
-
-/* append a bucket to a bucket_brigade */
-APR_EXPORT(void) ap_bucket_brigade_append_bucket(ap_bucket_brigade *b,
-                                                 ap_bucket *r);
+/* append bucket(s) to a bucket_brigade */
+APR_EXPORT(void) ap_bucket_brigade_append_buckets(ap_bucket_brigade *b,
+                                                  ap_bucket *e);
 
 /* consume nbytes from beginning of b -- call ap_bucket_destroy as
     appropriate, and/or modify start on last element */
@@ -189,14 +180,6 @@ APR_EXPORT(int) ap_brigade_printf(ap_bucket_brigade *b, const char *fmt, ...);
 
 APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_list va);
 
-/*   ******  Bucket List Functions  *****  */
-
-/* create a new bucket_list */
-APR_EXPORT(ap_bucket_list *) ap_bucket_list_create(void);
-
-/* destroy an entire bucket_list */
-APR_EXPORT(ap_status_t) ap_destroy_bucket_list(ap_bucket_list *b);
-
 /*   ******  Bucket Functions  *****  */
 
 /* allocate a bucket of type color */
@@ -204,6 +187,9 @@ APR_EXPORT(ap_bucket *) ap_bucket_new(ap_bucket_color_e color);
 
 /* destroy a bucket */
 APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e);
+
+/* destroy an entire list of buckets */
+APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e);
 
 /* Convert a bucket to a char * */
 APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b);
