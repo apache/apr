@@ -113,7 +113,7 @@ typedef PID                   apr_os_proc_t;
 typedef PULONG                apr_os_threadkey_t; 
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
-/* insert dso typedef here */
+typedef HMODULE               apr_os_dso_handle_t;
 
 #elif defined(__BEOS__)
 #include <kernel/OS.h>
