@@ -65,6 +65,9 @@
 #include <stddef.h> /* NULL */
 #endif
 
+/** this is used to cache lengths in apr_pstrcat */
+#define MAX_SAVED_LENGTHS  6
+
 APR_DECLARE(char *) apr_pstrdup(apr_pool_t *a, const char *s)
 {
     char *res;
@@ -110,6 +113,8 @@ APR_DECLARE(void *) apr_pmemdup(apr_pool_t *a, const void *m, apr_size_t n)
 APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 {
     char *cp, *argp, *res;
+    apr_size_t saved_lengths[MAX_SAVED_LENGTHS];
+    int nargs = 0;
 
     /* Pass one --- find length of required string */
 
@@ -119,7 +124,11 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
     va_start(adummy, a);
 
     while ((cp = va_arg(adummy, char *)) != NULL) {
-        len += strlen(cp);
+        apr_size_t cplen = strlen(cp);
+        if (nargs < MAX_SAVED_LENGTHS) {
+            saved_lengths[nargs++] = cplen;
+        }
+        len += cplen;
     }
 
     va_end(adummy);
@@ -133,8 +142,16 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
 
     va_start(adummy, a);
 
+    nargs = 0;
     while ((argp = va_arg(adummy, char *)) != NULL) {
         len = strlen(argp);
+        if (nargs < MAX_SAVED_LENGTHS) {
+            len = saved_lengths[nargs++];
+        }
+        else {
+            len = strlen(argp);
+        }
+ 
         memcpy(cp, argp, len);
         cp += len;
     }

@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Optimize apr_pstrcat by caching lengths of first 6 strings
+     [Brian Pane <bpane@pacbell.net>]
+
   *) Add pool accessors to the apr_thread_mutex_t datatype.
      [Aaron Bannert <aaron@clove.org>]
 
