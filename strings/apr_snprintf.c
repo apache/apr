@@ -1249,9 +1249,21 @@ APR_DECLARE_NONSTD(int) apr_snprintf(char *buf, apr_size_t len,
     va_list ap;
     apr_vformatter_buff_t vbuff;
 
-    /* save one byte for nul terminator */
-    vbuff.curpos = buf;
-    vbuff.endpos = buf + len - 1;
+    if (len == 0) {
+        /* NOTE: This is a special case; we just want to return the number
+         * of chars that would be written (minus \0) if the buffer
+         * size was infinite. We leverage the fact that INS_CHAR
+         * just does actual inserts iff the buffer pointer is non-NULL.
+         * In this case, we don't care what buf is; it can be NULL, since
+         * we don't touch it at all.
+         * /
+        vbuff.curpos = NULL;
+        vbuff.endpos = NULL;
+    } else {
+        /* save one byte for nul terminator */
+        vbuff.curpos = buf;
+        vbuff.endpos = buf + len - 1;
+    }
     va_start(ap, format);
     cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
     va_end(ap);
@@ -1268,9 +1280,15 @@ APR_DECLARE(int) apr_vsnprintf(char *buf, apr_size_t len, const char *format,
     int cc;
     apr_vformatter_buff_t vbuff;
 
-    /* save one byte for nul terminator */
-    vbuff.curpos = buf;
-    vbuff.endpos = buf + len - 1;
+    if (len == 0) {
+        /* See above notee */
+        vbuff.curpos = NULL;
+        vbuff.endpos = NULL;
+    } else {
+        /* save one byte for nul terminator */
+        vbuff.curpos = buf;
+        vbuff.endpos = buf + len - 1;
+    }
     cc = apr_vformatter(snprintf_flush, &vbuff, format, ap);
     if (len != 0) {
         *vbuff.curpos = '\0';
