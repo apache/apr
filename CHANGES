@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) initalize handle members to invalid before calling createprocess
+     on win32 [Rob Saccoccio <robs@fastcgi.com>]
+
   *) Removed apr/i18n to apr-util/xlate for inclusion of apr-iconv
      as required by missing libiconv.  [William Rowe]
 

@@ -590,6 +590,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
         memset(&si, 0, sizeof(si));
         si.cb = sizeof(si);
+        si.hStdInput = INVALID_HANDLE_VALUE;
+        si.hStdOutput = INVALID_HANDLE_VALUE;
+        si.hStdError = INVALID_HANDLE_VALUE;
+
         if (attr->detached) {
             si.dwFlags |= STARTF_USESHOWWINDOW;
             si.wShowWindow = SW_HIDE;
