@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/01 19:06:23 $]
+Last modified at [$Date: 2002/05/01 19:22:23 $]
 
 Release:
 
@@ -81,7 +81,7 @@ CURRENT VOTES:
       advantage of compiler optimizations when the size of the block being
       passed to memset is known at compile time.
 
-      +1: BrianP
+      +1: BrianP, Justin
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
