@@ -463,6 +463,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                 else {
                     pollset->pollset[dst] = pollset->pollset[i];
                     pollset->query_set[dst] = pollset->query_set[i];
+                    dst++;
                 }
             }
             return APR_SUCCESS;
@@ -493,6 +494,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                 }
                 else {
                     pollset->query_set[dst] = pollset->query_set[i];
+                    dst++;
                 }
             }
             FD_CLR(fd, &(pollset->readset));
