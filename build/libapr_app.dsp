@@ -87,7 +87,7 @@ SOURCE=..\misc\win32\apr_app.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\misc\win32\misc.c
+SOURCE=..\misc\win32\internal.c
 # End Source File
 # Begin Source File
 
