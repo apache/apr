@@ -81,11 +81,18 @@ apr_wchar_t *utf8_to_unicode_path(const char* srcstr, apr_pool_t *p)
      */
     int srcremains = strlen(srcstr) + 1;
     int retremains = srcremains + 4;
-    apr_wchar_t *retstr = apr_palloc(p, retremains * 2), *t = retstr;
+    apr_wchar_t *retstr, *t;
     if (srcstr[1] == ':' && srcstr[2] == '/') {
+        retstr = apr_palloc(p, retremains * 2);
         wcscpy (retstr, L"\\\\?\\");
         retremains -= 4;
-        t += 4;
+        t = retstr + 4;
+    }
+    else /* Short path: count the trailing NULL */
+    {
+        if (retremains > MAX_PATH)
+            retremains = MAX_PATH;
+        t = retstr = apr_palloc(p, retremains * 2);
     }
     if (conv_utf8_to_ucs2(srcstr, &srcremains,
                           t, &retremains) || srcremains)
