@@ -1,4 +1,4 @@
-/* Copyright 2000-2004 The Apache Software Foundation
+/* Copyright 2000-2005 The Apache Software Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,12 @@
 #include <assert.h>
 #if APR_HAS_THREADS && APR_HAVE_PTHREAD_H
 #include <pthread.h>
+#endif
+
+#ifdef SIGWAIT_TAKES_ONE_ARG
+#define apr_sigwait(a,b) ((*(b)=sigwait((a)))<0?-1:0)
+#else
+#define apr_sigwait(a,b) sigwait((a),(b))
 #endif
 
 APR_DECLARE(apr_status_t) apr_proc_kill(apr_proc_t *proc, int signum)

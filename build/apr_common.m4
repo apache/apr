@@ -379,7 +379,9 @@ ac_decision=''
 ])
 
 
-define(APR_DECIDE,[dnl
+AC_DEFUN([APR_DECIDE],[dnl
+dnl Define the flag (or not) in apr_private.h via autoheader
+AH_TEMPLATE($1, [Define if $2 will be used])
 ac_decision='$1'
 ac_decision_msg='$2'
 ac_decision_$1=yes

@@ -20,6 +20,27 @@ sinclude(build/apr_hints.m4)
 sinclude(build/libtool.m4)
 sinclude(build/ltsugar.m4)
 
+dnl Hard-coded inclusion at the tail end of apr_private.h:
+AH_BOTTOM([
+/* switch this on if we have a BeOS version below BONE */
+#if BEOS && !HAVE_BONE_VERSION
+#define BEOS_R5 1
+#else
+#define BEOS_BONE 1
+#endif
+
+#ifdef SIGWAIT_TAKES_ONE_ARG
+#define apr_sigwait(a,b) ((*(b)=sigwait((a)))<0?-1:0)
+#else
+#define apr_sigwait(a,b) sigwait((a),(b))
+#endif
+
+/*
+ * Include common private declarations.
+ */
+#include "../apr_private_common.h"
+])
+
 dnl Save user-defined environment settings for later restoration
 dnl
 APR_SAVE_THE_ENVIRONMENT(CPPFLAGS)
