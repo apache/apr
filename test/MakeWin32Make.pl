@@ -13,11 +13,14 @@ while ($t = <$srcfl>) {
     $t =~ s|\@LDFLAGS\@|\/nologo \/debug \/machine:I386|;
 
     $t =~ s|\@RM\@|del|;
-    $t =~ s|(\$\(RM\)) -f|$1|;
+    if ($t =~ s|(\$\(RM\)) -f|$1|) {
+	$t =~ s|\*\.a|\*\.lib \*\.exp \*\.idb \*\.ilk \*\.pdb|;
+	$t =~ s|(Makefile)|$1 \*\.ncb \*\.opt|;
+    }
     $t =~ s|\@CC\@|cl|;
     $t =~ s|\@RANLIB\@||;
     $t =~ s|\@OPTIM\@||;
-    $t =~ s|\@LIBS\@|kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib|;
+    $t =~ s|\@LIBS\@|kernel32\.lib user32\.lib advapi32\.lib ws2_32\.lib wsock32\.lib ole32\.lib|;
     $t =~ s|-I\$\(INCDIR\)|\/I "\$\(INCDIR\)"|;
     $t =~ s|\.\.\/libapr\.a|\.\./LibD/apr\.lib|;
     if ($t =~ s|\@EXEEXT\@|\.exe|) {
