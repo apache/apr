@@ -56,7 +56,7 @@
 #include "misc.h"
 
 
-static const char *apr_error_string(ap_status_t statcode)
+static char *apr_error_string(ap_status_t statcode)
 {
     switch (statcode) {
     case APR_ENOPOOL:
@@ -162,11 +162,8 @@ static char *ap_os_format_message(ap_status_t errcode, char *buf, size_t bufsize
     return buf;
 }
 
-const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
+char *ap_strerror(ap_status_t statcode, char* buf, size_t bufsize)
 {
-    size_t bufsize = 100;
-    char *buf = ap_pcalloc(p, bufsize);
-
     if (statcode < APR_OS_START_ERROR) {
         return ap_os_format_message(statcode, buf, bufsize);
     }

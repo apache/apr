@@ -55,7 +55,7 @@
 #include "misc.h"
 
 
-static const char *apr_error_string(ap_status_t statcode)
+static char *apr_error_string(ap_status_t statcode)
 {
     switch (statcode) {
     case APR_ENOPOOL:
@@ -134,12 +134,12 @@ static const char *apr_error_string(ap_status_t statcode)
 #ifdef WIN32
 #error "not implemented yet"
 #elif OS2
-static const char *apr_os_strerror(int err, ap_pool_t *p);
+static char *apr_os_strerror(int err, char *buf, size_t bufsize);
 #else
-#define apr_os_strerror(err, p)		strerror(err)
+#define apr_os_strerror(err, buf, bufsize)	strerror(err)
 #endif
 
-const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
+char *ap_strerror(ap_status_t statcode, char *buf, size_t bufsize)
 {
     if (statcode < APR_OS_START_ERROR) {
         return strerror(statcode);
@@ -151,7 +151,7 @@ const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
         return "APR does not understand this error code";
     }
     else {
-	return apr_os_strerror(statcode - APR_OS_START_SYSERR, p);
+	return apr_os_strerror(statcode - APR_OS_START_SYSERR, buf, bufsize);
     }
 }
 
@@ -162,7 +162,7 @@ const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
 #include <os2.h>
 #include <ctype.h>
 
-static const char *apr_os_strerror(int err, ap_pool_t *p)
+static char *apr_os_strerror(int err, char* buf, size_t bufsize)
 {
   char result[200];
   unsigned char message[HUGE_STRING_LEN];
@@ -195,6 +195,11 @@ static const char *apr_os_strerror(int err, ap_pool_t *p)
       sprintf(result, "OS/2 error %d", err);
   }
   
-  return ap_pstrdup(p, result);
+  if (len > bufsize)
+      len = bufsize;
+
+  memcpy(buf, result, len);
+
+  return buf;
 }
 #endif
