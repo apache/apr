@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/02/18 01:41:10 $]
+Last modified at [$Date: 2002/02/18 06:25:59 $]
 
 Release:
 
@@ -51,7 +51,8 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
         +1: BrianH, Aaron
 
     * Need some architecture/OS specific versions of the atomic operations.
-        Ian Volunteers for the x86 & sparc versions
+	progress: generic, solaris Sparc, FreeBSD4, and linux done
+	need: AIX, AS400, HPUX, OS/390
 
     * The new lock API is a full replacement for the old API, but is
       not yet complete on all platforms. Components that are incomplete
