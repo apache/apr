@@ -186,17 +186,21 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                 finfo->valid |= APR_FINFO_NAME;
             }
         }
-
-        return APR_SUCCESS;
     } else if (rc == ERROR_INVALID_ACCESS) {
         memset(finfo, 0, sizeof(apr_finfo_t));
         finfo->valid = APR_FINFO_TYPE | APR_FINFO_PROT;
         finfo->protection = 0666;
         finfo->filetype = APR_CHR;
-        return APR_SUCCESS;
+
+        if (wanted & APR_FINFO_NAME) {
+            finfo->name = apr_pstrdup(cont, fname);
+            finfo->valid |= APR_FINFO_NAME;
+        }
+    } else {
+        return APR_FROM_OS_ERROR(rc);
     }
-    
-    return APR_FROM_OS_ERROR(rc);
+
+    return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
 }
 
 
