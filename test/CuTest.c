@@ -407,7 +407,7 @@ void CuSuiteListSummary(CuSuiteList* testSuite, CuString* summary)
 	CuStringAppend(summary, "\n");
 }
 
-void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details)
+int CuSuiteListDetails(CuSuiteList* testSuite, CuString* details)
 {
 	int i;
 	int failCount = 0;
@@ -453,5 +453,6 @@ void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details)
 			}
 		}
 	} 
+	return failCount;
 }
 

@@ -130,6 +130,8 @@ void CuSuiteListAdd(CuSuiteList* testSuite, CuSuite *testCase);
 void CuSuiteListRun(CuSuiteList* testSuite);
 void CuSuiteListRunWithSummary(CuSuiteList* testSuite);
 void CuSuiteListSummary(CuSuiteList* testSuite, CuString* summary);
-void CuSuiteListDetails(CuSuiteList* testSuite, CuString* details);
+/* Print details of test suite results; returns total number of
+ * tests which failed. */
+int CuSuiteListDetails(CuSuiteList* testSuite, CuString* details);
 #endif /* CU_TEST_H */
 
