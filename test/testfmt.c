@@ -77,8 +77,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        apr_os_proc_t var;
-        memset(&var, 0, sizeof var);
+        apr_os_proc_t var = 0;
         sprintf(buf, "%" APR_OS_PROC_T_FMT, var);
     }
 
