@@ -255,6 +255,10 @@ int parse_short_opt(char *arg, cmd_data_t *cmd_data)
         return 2;
     }
 
+    if (strcmp(arg, "no-install") == 0) {
+        return 1;
+    }
+
     return 0;
 }
 
