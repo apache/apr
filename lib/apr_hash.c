@@ -130,7 +130,7 @@ static ap_hash_entry_t **alloc_array(ap_hash_t *ht)
 API_EXPORT(ap_hash_t *) ap_make_hash(ap_pool_t *pool)
 {
     ap_hash_t *ht;
-    ht = ap_palloc(ht->pool, sizeof(*ht));
+    ht = ap_palloc(pool, sizeof(ap_hash_t));
     ht->pool = pool;
     ht->count = 0;
     ht->max = INITIAL_MAX;
