@@ -2203,12 +2203,12 @@ APR_DECLARE(apr_pool_t *) apr_pool_get_parent(apr_pool_t *pool)
 APR_DECLARE(void) apr_allocator_set_owner(apr_allocator_t *allocator,
                                           apr_pool_t *pool)
 {
-    apr_allocator_owner_set(allocator, *pool);
+    apr_allocator_owner_set(allocator, pool);
 }
 
 /* Deprecated */
-APR_DECLARE(apr_pool_t *pool) apr_allocator_get_owner(
-                                  apr_allocator_t *allocator);
+APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(
+                                  apr_allocator_t *allocator)
 {
     return apr_allocator_owner_get(allocator);
 }

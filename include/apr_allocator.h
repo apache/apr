@@ -158,7 +158,7 @@ APR_DECLARE(void) apr_allocator_set_owner(apr_allocator_t *allocator,
 APR_DECLARE(apr_pool_t *) apr_allocator_owner_get(apr_allocator_t *allocator);
 
 /** @deprecated @see apr_allocator_owner_get */
-APR_DECLARE(apr_pool_t *pool) apr_allocator_get_owner(
+APR_DECLARE(apr_pool_t *) apr_allocator_get_owner(
                                   apr_allocator_t *allocator);
 
 /**

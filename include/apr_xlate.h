@@ -132,7 +132,7 @@ APR_DECLARE(apr_status_t) apr_xlate_open(apr_xlate_t **convset,
 APR_DECLARE(apr_status_t) apr_xlate_sb_get(apr_xlate_t *convset, int *onoff);
 
 /** @deprecated @see apr_xlate_sb_get */
-APR_DECLARE(void) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
+APR_DECLARE(apr_status_t) apr_xlate_get_sb(apr_xlate_t *convset, int *onoff);
 
 /**
  * Convert a buffer of text from one codepage to another.
