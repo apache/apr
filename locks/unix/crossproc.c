@@ -55,6 +55,7 @@
 
 #include "apr_lock.h"
 #include "apr_general.h"
+#include "apr_lib.h"
 #include "locks.h"
 #include <unistd.h>
 #include <sys/mman.h>
@@ -229,13 +230,15 @@ ap_status_t child_init_lock(ap_context_t *cont, char *fname, struct lock_t **loc
 
 #elif defined (USE_FCNTL_SERIALIZE)  
 
-ap_status_t lock_cleanup(struct lock_t *lock)
+ap_status_t lock_cleanup(void *lock_)
 {
+    struct lock_t *lock=lock_;
+
     if (lock->curr_locked == 1) {
         if (fcntl(lock->interproc, F_SETLKW, &lock->unlock_it) < 0) {
             return errno;
         }
-        lock->curr_locked == 0;
+        lock->curr_locked=0;
     }
     return APR_SUCCESS;
 }    
@@ -260,15 +263,15 @@ ap_status_t create_inter_lock(struct lock_t *new)
     new->unlock_it.l_type = F_UNLCK;         /* set exclusive/write lock */
     new->unlock_it.l_pid = 0;                /* pid not actually interesting */
 
-    new->curr_locked == 0;
+    new->curr_locked=0;
     unlink(new->fname);
-    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, NULL);
+    ap_register_cleanup(new->cntxt, new, lock_cleanup, NULL);
     return APR_SUCCESS; 
 }
 
 ap_status_t lock_inter(struct lock_t *lock)
 {
-    lock->curr_locked == 1;
+    lock->curr_locked=1;
     if (fcntl(lock->interproc, F_SETLKW, &lock->lock_it) < 0) {
         return errno;
     }
@@ -280,7 +283,7 @@ ap_status_t unlock_inter(struct lock_t *lock)
     if (fcntl(lock->interproc, F_SETLKW, &lock->unlock_it) < 0) {
         return errno;
     }
-    lock->curr_locked == 0;
+    lock->curr_locked=0;
     return APR_SUCCESS;
 }
 
