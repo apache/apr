@@ -253,12 +253,12 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
     }
     
     for (k = 0;;) {
-        r = ap_bucket_rwmem_create();
         x = va_arg(va, const char *);
         if (x == NULL)
             break;
         j = strlen(x);
        
+        r = ap_bucket_rwmem_create();
         rv = r->insert(r, x, j, &i);
         if (i != j) {
             /* Do we need better error reporting?  */
