@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Rename apr_explode_time to apr_time_exp_tz.
+     [Thom May <thom@planetarytramp.net>]
+
   *) Set precompiler for Solaris atomics when using GNU binutils.
      PR 7876.  [solomon@conceptshopping.com (Marvin Solomon)]
 
