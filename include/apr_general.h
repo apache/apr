@@ -260,14 +260,19 @@ APR_DECLARE(void) apr_terminate2(void);
 
 #if APR_HAS_RANDOM
 
+#ifdef APR_ENABLE_FOR_1_0
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
+                                                    apr_size_t length);
+#else
 /* TODO: I'm not sure this is the best place to put this prototype...*/
 /**
  * Generate random bytes.
- * @param buf Random bytes go here
- * @param length number of bytes to read
+ * @param buf Buffer to fill with random bytes
+ * @param length Length of buffer in bytes (becomes apr_size_t in APR 1.0)
  */
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
-                                                    apr_size_t length);
+                                                    int length);
+#endif
 
 #endif
 /** @} */
