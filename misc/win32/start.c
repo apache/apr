@@ -119,28 +119,28 @@ ap_status_t ap_destroy_context(ap_context_t *cont)
 
 ap_status_t ap_get_oslevel(ap_context_t *cont, ap_oslevel_e *level)
 {
-	static OSVERSIONINFO oslev;
-	static BOOL first = TRUE;
+    static OSVERSIONINFO oslev;
+    static BOOL first = TRUE;
 
-	if (first) {
-		first = FALSE;
-		GetVersionEx(&oslev);
-	}
-	if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-		(*level) = APR_WIN_NT;
-		return APR_SUCCESS;
-	}
-	else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
-		if (oslev.dwMinorVersion == 0) {
-			(*level) = APR_WIN_95;
-			return APR_SUCCESS;
-		}
-		else if (oslev.dwMinorVersion > 0) {
-			(*level) = APR_WIN_98;
-			return APR_SUCCESS;
-		}
-	}
-	return APR_EEXIST;
+    if (first) {
+        first = FALSE;
+        GetVersionEx(&oslev);
+    }
+    if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+        (*level) = APR_WIN_NT;
+        return APR_SUCCESS;
+    }
+    else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
+        if (oslev.dwMinorVersion == 0) {
+            (*level) = APR_WIN_95;
+            return APR_SUCCESS;
+        }
+        else if (oslev.dwMinorVersion > 0) {
+            (*level) = APR_WIN_98;
+            return APR_SUCCESS;
+        }
+    }
+    return APR_EEXIST;
 }
 
 ap_status_t ap_set_userdata(void *data, char *key,
