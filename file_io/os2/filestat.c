@@ -58,6 +58,7 @@
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include <sys/time.h>
+#include "apr_strings.h"
 
 
 static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
@@ -159,10 +160,25 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
     
     finfo->protection = 0;
     finfo->filetype = APR_NOFILE;
+    finfo->name = NULL;
     rc = DosQueryPathInfo(fname, FIL_STANDARD, &fstatus, sizeof(fstatus));
     
     if (rc == 0) {
         FS3_to_finfo(finfo, &fstatus);
+
+        if (wanted & APR_FINFO_NAME) {
+            ULONG count = 1;
+            HDIR hDir = HDIR_SYSTEM;
+            FILEFINDBUF3 ffb;
+            rc = DosFindFirst(fname, &hDir,
+                              FILE_DIRECTORY|FILE_HIDDEN|FILE_SYSTEM|FILE_ARCHIVED,
+                              &ffb, sizeof(ffb), &count, FIL_STANDARD);
+            if (rc == 0 && count == 1) {
+                finfo->name = apr_pstrdup(cont, ffb.achName);
+                finfo->valid |= APR_FINFO_NAME;
+            }
+        }
+
         return APR_SUCCESS;
     } else if (rc == ERROR_INVALID_ACCESS) {
         memset(finfo, 0, sizeof(apr_finfo_t));
