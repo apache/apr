@@ -101,6 +101,8 @@ static void test_exclusive(abts_case *tc, const char *lockname,
  
     rv = apr_proc_mutex_create(&proc_lock, lockname, mech, p);
     APR_ASSERT_SUCCESS(tc, "create the mutex", rv);
+    if (rv != APR_SUCCESS)
+        return;
  
     for (n = 0; n < CHILDREN; n++)
         make_child(tc, &child[n], p);
@@ -128,9 +130,13 @@ static void proc_mutex(abts_case *tc, void *data)
     }
 
     APR_ASSERT_SUCCESS(tc, "create shm segment", rv);
+    if (rv != APR_SUCCESS)
+        return;
 
     x = apr_shm_baseaddr_get(shm);
     test_exclusive(tc, NULL, *mech);
+    rv = apr_shm_destroy(shm);
+    APR_ASSERT_SUCCESS(tc, "Error destroying shared memory block", rv);
 #else
     ABTS_NOT_IMPL(tc, "APR lacks fork() support");
 #endif
@@ -166,4 +172,3 @@ abts_suite *testprocmutex(abts_suite *suite)
 
     return suite;
 }
-
