@@ -52,6 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr_private.h"
+#ifdef HAVE_NETINET_TCP_H
+#include "../unix/sockopt.c"
+#else
 #include "networkio.h"
 
 ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
@@ -110,3 +114,4 @@ ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
     /* on BeOS h_errno is a global... */
     return h_errno;
 }
+#endif

@@ -68,6 +68,9 @@
  * SOFTWARE.
  */
 
+#include "apr_private.h"
+#ifndef HAVE_NETINET_TCP_H
+
 #include "networkio.h"
 
 /* BeOS doesn't yet have it's own inet_aton and Bind won't be ported
@@ -171,3 +174,4 @@ int inet_aton(const char *cp, struct in_addr *addr) {
 		addr->s_addr = htonl(val);
 	return (1);
 }
+#endif
