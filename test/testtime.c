@@ -73,6 +73,7 @@ int main(void)
     char *str, *str2;
     apr_size_t sz;
     apr_int32_t hr_off = -5 * 3600; /* 5 hours in seconds */
+    apr_int64_t hr_off_64;
 
     fprintf(stdout, "Testing Time functions.\n");
 
@@ -177,11 +178,11 @@ int main(void)
 
     printf("\tChecking imploded time after offset.............");
     apr_implode_time(&imp, &xt2);
-    hr_off *= APR_USEC_PER_SEC; /* microseconds */ 
-    if (imp != now + hr_off){
+    hr_off_64 = (apr_int64_t)hr_off * APR_USEC_PER_SEC; /* microseconds */ 
+    if (imp != now + hr_off_64){
         printf("Failed! :(\n");
         printf("Difference is %" APR_TIME_T_FMT " (should be %" 
-               APR_TIME_T_FMT ")\n", imp - now, hr_off);
+               APR_INT64_T_FMT ")\n", imp - now, hr_off_64);
         exit(-1);
     }
     printf("OK\n");
