@@ -136,7 +136,7 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont);
 
 ap_status_t ap_read(ap_file_t *, void *, ap_ssize_t *);
 ap_status_t ap_write(ap_file_t *, void *, ap_ssize_t *);
-ap_status_t ap_writev(ap_file_t *, const ap_iovec_t *, ap_ssize_t *);
+ap_status_t ap_writev(ap_file_t *, const ap_iovec_t *vec, ap_size_t nvec, ap_ssize_t *nbytes);
 ap_status_t ap_putc(char, ap_file_t *);
 ap_status_t ap_getc(char *, ap_file_t *);
 ap_status_t ap_ungetc(char, ap_file_t *);
