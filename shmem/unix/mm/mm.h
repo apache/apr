@@ -170,6 +170,12 @@ extern char *strerror(int);
 
 #if defined(MM_SHMT_IPCSHM)
 #include <sys/shm.h>
+#if !defined(SHM_R)
+#define SHM_R 0400
+#endif
+#if !defined(SHM_W)
+#define SHM_W 0200
+#endif    
 #endif
 
 #if defined(MM_SEMT_IPCSEM)

@@ -581,7 +581,7 @@ EOF
     *:FreeBSD:*:*)
 	# echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
         VERS=`echo ${UNAME_RELEASE} | sed -e 's/[-(].*//'`
-        MACH=`sysctl -n hw.model`
+        MACH=`/sbin/sysctl -n hw.model`
         ARCH='unknown'
         case ${MACH} in
            *386*       ) MACH="i386" ;;
