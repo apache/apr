@@ -57,17 +57,17 @@
 
 #include "apr_inherit.h"
 
-#define APR_INHERIT    (2^24)    /* Must not conflicts with other bits */
+#define APR_INHERIT (1 << 24)    /* Must not conflict with other bits */
 
 #define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
-APR_DECLARE(void) apr_##name##_inherit_set(apr_##name##_t *name)    \
+APR_DECLARE(apr_status_t) apr_##name##_inherit_set(apr_##name##_t *name) \
 {                                                                   \
     IF_WIN_OS_IS_UNICODE                                            \
     {                                                               \
         if (!SetHandleInformation(name->filehand,                   \
                                   HANDLE_FLAG_INHERIT,              \
                                   HANDLE_FLAG_INHERIT))             \
-            return /* apr_get_os_error() */;                        \
+            return apr_get_os_error();                              \
     }                                                               \
     ELSE_WIN_OS_IS_ANSI                                             \
     {                                                               \
@@ -75,26 +75,26 @@ APR_DECLARE(void) apr_##name##_inherit_set(apr_##name##_t *name)    \
         if (!DuplicateHandle(hproc, name->filehand,                 \
                              hproc, &temp, 0, TRUE,                 \
                              DUPLICATE_SAME_ACCESS))                \
-            return /* apr_get_os_error() */;                        \
+            return apr_get_os_error();                              \
         CloseHandle(name->filehand);                                \
         name->filehand = temp;                                      \
     }                                                               \
-    return /* APR_SUCCESS */;                                       \
+    return APR_SUCCESS;                                             \
 }                                                                   \
 /* Deprecated */                                                    \
 APR_DECLARE(void) apr_##name##_set_inherit(apr_##name##_t *name)    \
 {                                                                   \
-    /* return */ apr_##name##_inherit_set(name);                    \
+    apr_##name##_inherit_set(name);                                 \
 }
 
 #define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
-APR_DECLARE(void) apr_##name##_inherit_unset(apr_##name##_t *name)  \
+APR_DECLARE(apr_status_t) apr_##name##_inherit_unset(apr_##name##_t *name) \
 {                                                                   \
     IF_WIN_OS_IS_UNICODE                                            \
     {                                                               \
         if (!SetHandleInformation(name->filehand,                   \
                                   HANDLE_FLAG_INHERIT, 0))          \
-            return /* apr_get_os_error() */;                        \
+            return apr_get_os_error();                              \
     }                                                               \
     ELSE_WIN_OS_IS_ANSI                                             \
     {                                                               \
@@ -102,16 +102,16 @@ APR_DECLARE(void) apr_##name##_inherit_unset(apr_##name##_t *name)  \
         if (!DuplicateHandle(hproc, name->filehand,                 \
                              hproc, &temp, 0, FALSE,                \
                              DUPLICATE_SAME_ACCESS))                \
-            return /* apr_get_os_error() */;                        \
+            return apr_get_os_error();                              \
         CloseHandle(name->filehand);                                \
         name->filehand = temp;                                      \
     }                                                               \
-    return /* APR_SUCCESS */;                                       \
+    return APR_SUCCESS;                                             \
 }                                                                   \
 /* Deprecated */                                                    \
 APR_DECLARE(void) apr_##name##_unset_inherit(apr_##name##_t *name)  \
 {                                                                   \
-    /* return */ apr_##name##_inherit_unset(name);                  \
+    apr_##name##_inherit_unset(name);                               \
 }
 
 #endif	/* ! INHERIT_H */
