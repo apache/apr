@@ -114,7 +114,7 @@ ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
 /* Return micro-seconds since the Unix epoch (jan. 1, 1970) */
 ap_time_t ap_now(void)
 {
-    ULONGLONG aprtime = 0;
+    LONGLONG aprtime = 0;
     FILETIME time;
     GetSystemTimeAsFileTime(&time);
     FileTimeToAprTime(&aprtime, &time);
