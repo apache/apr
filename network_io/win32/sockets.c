@@ -226,20 +226,26 @@ APR_DECLARE(apr_status_t) apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
                                      apr_pool_t *p)
 {
+    SOCKET s;
+    struct sockaddr sa;
+    int salen = sizeof(sock->remote_addr->sa);
+
+    // Don't allocate the memory until after we call accept. This allows
+    //  us to work with nonblocking sockets.
+    s = accept(sock->sock, (struct sockaddr *)&sa, &salen);
+    if (s == INVALID_SOCKET) {
+        return apr_get_netos_error();
+    }
+
     alloc_socket(new, p);
     set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
 
     (*new)->timeout = -1;   
     (*new)->disconnected = 0;
 
+    (*new)->sock = s;
     (*new)->remote_addr->salen = sizeof((*new)->remote_addr->sa);
-    (*new)->sock = accept(sock->sock, 
-                          (struct sockaddr *)&(*new)->remote_addr->sa,
-                          &(*new)->remote_addr->salen);
-
-    if ((*new)->sock == INVALID_SOCKET) {
-        return apr_get_netos_error();
-    }
+    memcpy (&(*new)->remote_addr->sa, &sa, salen);
     *(*new)->local_addr = *sock->local_addr;
 
     /* The above assignment just overwrote the pool entry. Setting the local_addr 
