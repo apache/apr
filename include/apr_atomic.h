@@ -163,6 +163,23 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with,long cmp);
 #define APR_ATOMIC_NEED_CAS_DEFAULT 1
 #endif
 
+#elif defined(NETWARE)
+
+#include <stdlib.h>
+#define apr_atomic_t apr_uint32_t
+
+#define apr_atomic_add(mem, val)     atomic_add(mem,val)
+#define apr_atomic_dec(mem)          atomic_dec(mem)
+#define apr_atomic_inc(mem)          atomic_inc(mem)
+#define apr_atomic_set(mem, val)     (*mem = val)
+#define apr_atomic_read(mem)         (*mem)
+#if defined(cmpxchg)
+#define apr_atomic_init(pool)        APR_SUCCESS
+#define apr_atomic_cas(mem,with,cmp) cmpxchg(mem,cmp,with)
+#else
+#define APR_ATOMIC_NEED_CAS_DEFAULT 1
+#endif
+
 #elif defined(__FreeBSD__) && (__FreeBSD__ >= 4)
 #include <machine/atomic.h>
 
