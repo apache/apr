@@ -3,7 +3,7 @@ VPATH = @srcdir@
 
 TARGETS = \
 	start.lo getopt.lo otherchild.lo errorcodes.lo rand.lo version.lo \
-	charset.lo
+	charset.lo env.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
