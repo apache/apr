@@ -76,7 +76,6 @@
 #include <pthread.h>
 #endif
 
-/* ### create APR_HAVE_* macros for these? */
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
