@@ -96,7 +96,7 @@ apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_
      * unless you have dup2'ed fd 0-2 (stdin, stdout or stderr) which
      * should never, never, never close on fork()
      */
-    if (have_file && old_file->filedes >= 0 and old_file->filedes <= 2) {
+    if (have_file && ((*new_file)->filedes >= 0) && ((*new_file)->filedes <= 2)) {
         (*new_file)->flags = old_file->flags | APR_INHERIT;
         apr_pool_cleanup_register((*new_file)->cntxt, (void *)(*in), 
                                   apr_unix_file_cleanup, apr_pool_cleanup_null);
