@@ -66,7 +66,7 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
     return type;
 }
 
-static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
+static void fill_out_finfo(apr_finfo_t *finfo, struct_stat *info,
                            apr_int32_t wanted)
 { 
     finfo->valid = APR_FINFO_MIN | APR_FINFO_IDENT | APR_FINFO_NLINK
@@ -94,7 +94,7 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
                                             apr_int32_t wanted,
                                             apr_file_t *thefile)
 {
-    struct stat info;
+    struct_stat info;
 
     if (thefile->buffered) {
         apr_status_t rv = apr_file_flush(thefile);
@@ -227,7 +227,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
                                    const char *fname, 
                                    apr_int32_t wanted, apr_pool_t *pool)
 {
-    struct stat info;
+    struct_stat info;
     int srv;
 
     if (wanted & APR_FINFO_LINK)

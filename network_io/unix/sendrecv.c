@@ -243,9 +243,27 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                                  apr_hdtr_t *hdtr, apr_off_t *offset,
                                  apr_size_t *len, apr_int32_t flags)
 {
-    off_t off = *offset;
     int rv, nbytes = 0, total_hdrbytes, i;
     apr_status_t arv;
+
+#if APR_HAS_LARGE_FILES && defined(HAVE_SENDFILE64)
+    apr_off_t off = *offset;
+#define sendfile sendfile64
+
+#elif APR_HAS_LARGE_FILES && SIZEOF_OFF_T == 4
+    /* 64-bit apr_off_t but no sendfile64(): fail if trying to send
+     * past the 2Gb limit. */
+    off_t off;
+    
+    if ((apr_int64_t)*offset + *len > INT_MAX) {
+        return EINVAL;
+    }
+    
+    off = *offset;
+
+#else
+    off_t off = *offset;
+#endif
 
     if (!hdtr) {
         hdtr = &no_hdtr;
@@ -562,6 +580,24 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     struct iovec hdtrarray[2];
     char *headerbuf, *trailerbuf;
 
+#if APR_HAS_LARGE_FILES && defined(HAVE_SENDFILE64)
+    /* later HP-UXes have a sendfile64() */
+#define sendfile sendfile64
+    apr_off_t off = *offset;
+
+#elif APR_HAS_LARGE_FILES && SIZEOF_OFF_T == 4
+    /* HP-UX 11.00 doesn't have a sendfile64(): fail if trying to send
+     * past the 2Gb limit */
+    off_t off;
+
+    if ((apr_int64_t)*offset + *len > INT_MAX) {
+        return EINVAL;
+    }
+    off = *offset;
+#else
+    apr_off_t off = *offset;
+#endif
+
     if (!hdtr) {
         hdtr = &no_hdtr;
     }
@@ -627,7 +663,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
         if (nbytes) {       /* any bytes to send from the file? */
             rc = sendfile(sock->socketdes,      /* socket  */
                           file->filedes,        /* file descriptor to send */
-                          *offset,              /* where in the file to start */
+                          off,                  /* where in the file to start */
                           nbytes,               /* number of bytes to send from file */
                           hdtrarray,            /* Headers/footers */
                           flags);               /* undefined, set to 0 */
@@ -650,7 +686,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                 if (nbytes) {
                     rc = sendfile(sock->socketdes,    /* socket  */
                                   file->filedes,      /* file descriptor to send */
-                                  *offset,            /* where in the file to start */
+                                  off,                /* where in the file to start */
                                   nbytes,             /* number of bytes to send from file */
                                   hdtrarray,          /* Headers/footers */
                                   flags);             /* undefined, set to 0 */
@@ -838,6 +874,12 @@ do_select:
  * 111298-01, 108529-09, 109473-06, 109235-04, 108996-02, 111296-01, 109026-04,
  * 108992-13
  */
+
+#if APR_HAS_LARGE_FILES && defined(HAVE_SENDFILEV64)
+#define sendfilevec_t sendfilevec64_t
+#define sendfilev sendfilev64
+#endif
+
 apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
                                  apr_hdtr_t *hdtr, apr_off_t *offset,
                                  apr_size_t *len, apr_int32_t flags)
@@ -865,7 +907,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     for (i = 0; i < hdtr->numheaders; i++, curvec++) {
         sfv[curvec].sfv_fd = SFV_FD_SELF;
         sfv[curvec].sfv_flag = 0;
-        sfv[curvec].sfv_off = (off_t)hdtr->headers[i].iov_base;
+        sfv[curvec].sfv_off = (apr_off_t)hdtr->headers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->headers[i].iov_len;
         requested_len += sfv[curvec].sfv_len;
     }
@@ -889,7 +931,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
     for (i = 0; i < hdtr->numtrailers; i++, curvec++) {
         sfv[curvec].sfv_fd = SFV_FD_SELF;
         sfv[curvec].sfv_flag = 0;
-        sfv[curvec].sfv_off = (off_t)hdtr->trailers[i].iov_base;
+        sfv[curvec].sfv_off = (apr_off_t)hdtr->trailers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->trailers[i].iov_len;
         requested_len += sfv[curvec].sfv_len;
     }

@@ -52,6 +52,7 @@ CuSuite *testglobalmutex(void);
 CuSuite *testhash(void);
 CuSuite *testipsub(void);
 CuSuite *testlock(void);
+CuSuite *testlfs(void);
 CuSuite *testmmap(void);
 CuSuite *testnames(void);
 CuSuite *testoc(void);
