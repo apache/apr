@@ -64,6 +64,9 @@
 
 #if APR_HAS_XLATE
 
+#ifdef HAVE_STDDEF_H
+#include <stddef.h> /* for NULL */
+#endif
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif
