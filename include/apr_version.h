@@ -63,7 +63,7 @@ extern "C" {
 
 /**
  * @file apr_version.h
- * @brief 
+ * @brief APR Versioning Interface
  * 
  * APR's Version
  *

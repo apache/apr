@@ -55,6 +55,11 @@
 #ifndef APR_THREAD_RWLOCK_H
 #define APR_THREAD_RWLOCK_H
 
+/**
+ * @file apr_thread_rwlock.h
+ * @brief APR Reader/Writer Lock Routines
+ */
+
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -66,13 +71,8 @@ extern "C" {
 #if APR_HAS_THREADS
 
 /**
- * @file apr_thread_rwlock.h
- * @brief APR Thread RWLock Routines
- */
-
-/**
- * @defgroup APR_ThreadRWLock Thread RWLock Routines
- * @ingroup APR
+ * @defgroup apr_thread_rwlock Reader/Writer Lock Routines
+ * @ingroup APR 
  * @{
  */
 
@@ -148,6 +148,8 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
 APR_POOL_DECLARE_ACCESSOR(thread_rwlock);
 
 #endif  /* APR_HAS_THREADS */
+
+/** @} */
 
 #ifdef __cplusplus
 }

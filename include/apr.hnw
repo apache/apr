@@ -67,19 +67,14 @@
  */
 
 /**
- * @file include/apr.h
- * @brief APR APR Main Include
+ * @file apr.h
+ * @brief APR Platform Definitions
  * @remark This is a generated header generated from include/apr.h.in by
  * ./configure, or copied from include/apr.hw or include/apr.hnw 
  * for Win32 or Netware by those build environments, respectively.
  */
 
 #if defined(NETWARE) || defined(DOXYGEN)
-
-/**
- * @defgroup APR APR Functions
- * @{
- */
 
 #include <sys/types.h>
 #include <stddef.h>
@@ -93,12 +88,27 @@
 #include <nks/synch.h>
 #include <nks/time.h>
 #include <signal.h>
-
-
 #include <novsock2.h>
+#include <sys/types.h>
+
+#ifdef NW_BUILD_IPV6
+#include <novtcpip.h>
+#endif
 
 #define _POSIX_THREAD_SAFE_FUNCTIONS    1
 #define READDIR_IS_THREAD_SAFE          1
+
+/* Keep #include'd headers from within the __cplusplus or doxyblocks */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @defgroup apr_platform Platform Definitions
+ * @ingroup APR 
+ * @{
+ */
 
 #define APR_INLINE 
 #define APR_HAS_INLINE		0
@@ -201,14 +211,6 @@
 #define APR_HAVE_UNION_SEMUN    0
 #define APR_HAVE_SCTP           0
 
-#if APR_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#if APR_HAVE_IPV6
-#include <novtcpip.h>
-#endif
-
 /*  APR Feature Macros */
 #define APR_HAS_SHARED_MEMORY     0
 #define APR_HAS_THREADS           1
@@ -284,43 +286,58 @@ typedef  int               apr_socklen_t;
 
 /* Definitions that APR programs need to work properly. */
 
-#define APR_THREAD_FUNC
-
-/**
- * APR_DECLARE_EXPORT is defined when building the APR dynamic library,
- * so that all public symbols are exported.
- *
- * APR_DECLARE_STATIC is defined when including the APR public headers,
- * to provide static linkage when the dynamic library may be unavailable.
- *
- * APR_DECLARE_STATIC and APR_DECLARE_EXPORT are left undefined when
- * including the APR public headers, to import and link the symbols from the 
- * dynamic APR library and assure appropriate indirection and calling 
- * conventions at compile time.
+/** 
+ * Thread callbacks from APR functions must be declared with APR_THREAD_FUNC, 
+ * so that they follow the platform's calling convention.
+ * @example
  */
+/** void* APR_THREAD_FUNC my_thread_entry_fn(apr_thread_t *thd, void *data);
+ */
+#define APR_THREAD_FUNC
 
 /**
  * The public APR functions are declared with APR_DECLARE(), so they may
  * use the most appropriate calling convention.  Public APR functions with 
  * variable arguments must use APR_DECLARE_NONSTD().
  *
- * @deffunc APR_DECLARE(rettype) apr_func(args);
+ * @remark Both the declaration and implementations must use the same macro.
+ * @example
  */
-#define APR_DECLARE(type)            type
+/** APR_DECLARE(rettype) apr_func(args)
+ * @see APR_DECLARE_NONSTD @see APR_DECLARE_DATA
+ * @remark Note that when APR compiles the library itself, it passes the 
+ * symbol -DAPR_DECLARE_EXPORT to the compiler on some platforms (e.g. Win32) 
+ * to export public symbols from the dynamic library build.\n
+ * The user must define the APR_DECLARE_STATIC when compiling to target
+ * the static APR library on some platforms (e.g. Win32.)  The public symbols 
+ * are neither exported nor imported when APR_DECLARE_STATIC is defined.\n
+ * By default, compiling an application and including the APR public
+ * headers, without defining APR_DECLARE_STATIC, will prepare the code to be
+ * linked to the dynamic library.
+ */
+#define APR_DECLARE(type)            type 
+
 /**
  * The public APR functions using variable arguments are declared with 
- * AP_DECLARE(), as they must use the C language calling convention.
- *
- * @deffunc APR_DECLARE_NONSTD(rettype) apr_func(args, ...);
+ * APR_DECLARE_NONSTD(), as they must follow the C language calling convention.
+ * @see APR_DECLARE @see APR_DECLARE_DATA
+ * @remark Both the declaration and implementations must use the same macro.
+ * @example
+ */
+/** APR_DECLARE_NONSTD(rettype) apr_func(args, ...);
  */
 #define APR_DECLARE_NONSTD(type)     type
+
 /**
  * The public APR variables are declared with AP_MODULE_DECLARE_DATA.
  * This assures the appropriate indirection is invoked at compile time.
- *
- * @deffunc APR_DECLARE_DATA type apr_variable;
- * @tip extern APR_DECLARE_DATA type apr_variable; syntax is required for
- * declarations within headers to properly import the variable.
+ * @see APR_DECLARE @see APR_DECLARE_NONSTD
+ * @remark Note that the declaration and implementations use different forms,
+ * but both must include the macro.
+ * @example
+ */
+/** extern APR_DECLARE_DATA type apr_variable;\n
+ * APR_DECLARE_DATA type apr_variable = value;
  */
 #define APR_DECLARE_DATA
 
@@ -347,6 +364,10 @@ typedef int apr_wait_t;
 #define APR_INT64_STRFN	      strtoll
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* NETWARE */
 

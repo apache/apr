@@ -54,17 +54,11 @@
 
 #ifndef APR_FILE_IO_H
 #define APR_FILE_IO_H
+
 /**
  * @file apr_file_io.h
  * @brief APR File I/O Handling
  */
-/**
- * @defgroup APR_File_IO_Handle I/O Handling Functions
- * @ingroup APR_File_Handle
- * @{
- */
-
-
 
 #include "apr.h"
 #include "apr_pools.h"
@@ -73,8 +67,8 @@
 #include "apr_file_info.h"
 #include "apr_inherit.h"
 
-#define APR_WANT_STDIO          /* for SEEK_* */
-#define APR_WANT_IOVEC
+#define APR_WANT_STDIO          /**< for SEEK_* */
+#define APR_WANT_IOVEC          /**< for apr_file_writev */
 #include "apr_want.h"
 
 #ifdef __cplusplus
@@ -82,7 +76,13 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup apr_file_open File Open Flags/Routines
+ * @defgroup apr_file_io File I/O Handling Functions
+ * @ingroup APR 
+ * @{
+ */
+
+/**
+ * @defgroup apr_file_open_flags File Open Flags/Routines
  * @{
  */
 
@@ -108,7 +108,7 @@ extern "C" {
 /** @} */
 
 /**
- * @defgroup APR_file_seek_flags File Seek Flags
+ * @defgroup apr_file_seek_flags File Seek Flags
  * @{
  */
 
@@ -122,7 +122,7 @@ extern "C" {
 /** @} */
 
 /**
- * @defgroup APR_file_attrs_set File Attribute Flags
+ * @defgroup apr_file_attrs_set_flags File Attribute Flags
  * @{
  */
 
@@ -139,13 +139,12 @@ typedef int       apr_seek_where_t;
 
 /**
  * Structure for referencing files.
- * @defvar apr_file_t
  */
 typedef struct apr_file_t         apr_file_t;
 
 /* File lock types/flags */
 /**
- * @defgroup APR_file_lock_types File Lock Types
+ * @defgroup apr_file_lock_types File Lock Types
  * @{
  */
 
@@ -164,6 +163,7 @@ typedef struct apr_file_t         apr_file_t;
 #define APR_FLOCK_NONBLOCK      0x0010  /**< do not block while acquiring the
                                            file lock */
 /** @} */
+
 /**
  * Open the specified file.
  * @param new_file The opened file descriptor.
@@ -195,7 +195,6 @@ typedef struct apr_file_t         apr_file_t;
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.
- * @ingroup apr_file_open
  * @remark If perm is APR_OS_DEFAULT and the file is being created, appropriate 
  *      default permissions will be used.  *arg1 must point to a valid file_t, 
  *      or NULL (in which case it will be allocated)
@@ -274,7 +273,6 @@ APR_DECLARE(apr_status_t) apr_file_eof(apr_file_t *fptr);
  * open standard error as an apr file pointer.
  * @param thefile The apr file to use as stderr.
  * @param cont The pool to allocate the file out of.
- * @ingroup apr_file_open
  * 
  * @remark The only reason that the apr_file_open_std* functions exist
  * is that you may not always have a stderr/out/in on Windows.  This
@@ -293,7 +291,6 @@ APR_DECLARE(apr_status_t) apr_file_open_stderr(apr_file_t **thefile,
  * open standard output as an apr file pointer.
  * @param thefile The apr file to use as stdout.
  * @param cont The pool to allocate the file out of.
- * @ingroup apr_file_open
  * 
  * @remark The only reason that the apr_file_open_std* functions exist
  * is that you may not always have a stderr/out/in on Windows.  This
@@ -312,7 +309,6 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
  * open standard input as an apr file pointer.
  * @param thefile The apr file to use as stdin.
  * @param cont The pool to allocate the file out of.
- * @ingroup apr_file_open
  * 
  * @remark The only reason that the apr_file_open_std* functions exist
  * is that you may not always have a stderr/out/in on Windows.  This
@@ -711,13 +707,11 @@ APR_DECLARE(apr_int32_t) apr_file_flags_get(apr_file_t *f);
 
 /**
  * Get the pool used by the file.
- * @return apr_pool_t the pool
  */
 APR_POOL_DECLARE_ACCESSOR(file);
 
 /**
  * Set a file to be inherited by child processes.
- * @param file The file to enable inheritance.
  *
  */
 APR_DECLARE_INHERIT_SET(file);
@@ -727,7 +721,6 @@ APR_DECLARE(void) apr_file_set_inherit(apr_file_t *file);
 
 /**
  * Unset a file from being inherited by child processes.
- * @param file The file to disable inheritance.
  */
 APR_DECLARE_INHERIT_UNSET(file);
 
@@ -742,7 +735,6 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
  *              the file is opened with 
  *              APR_CREATE | APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE
  * @param p The pool to allocate the file out of.
- * @ingroup apr_file_open
  * @remark   
  * This function  generates  a unique temporary file name from template.  
  * The last six characters of template must be XXXXXX and these are replaced 
@@ -754,8 +746,10 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *templ,
                                           apr_int32_t flags, apr_pool_t *p);
 
+/** @} */
+
 #ifdef __cplusplus
 }
 #endif
-/** @} */
+
 #endif  /* ! APR_FILE_IO_H */

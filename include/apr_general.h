@@ -54,10 +54,15 @@
 
 #ifndef APR_GENERAL_H
 #define APR_GENERAL_H
+
 /**
  * @file apr_general.h
- * @brief APR Misc routines
+ * This is collection of oddballs that didn't fit anywhere else,
+ * and might move to more appropriate headers with the release
+ * of APR 1.0.
+ * @brief APR Miscellaneous library routines
  */
+
 #include "apr.h"
 #include "apr_pools.h"
 #include "apr_errno.h"
@@ -71,8 +76,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup APR_Misc Misc routines
- * @ingroup APR
+ * @defgroup apr_general Miscellaneous library routines
+ * @ingroup APR 
+ * This is collection of oddballs that didn't fit anywhere else,
+ * and might move to more appropriate headers with the release
+ * of APR 1.0.
  * @{
  */
 
@@ -145,9 +153,9 @@ typedef int               apr_signum_t;
 /** @deprecated @see APR_OFFSETOF */
 #define APR_XtOffsetOf APR_OFFSETOF
 
+#ifndef DOXYGEN
 
-/**
- * A couple of prototypes for functions in case some platform doesn't 
+/* A couple of prototypes for functions in case some platform doesn't 
  * have it
  */
 #if (!APR_HAVE_STRCASECMP) && (APR_HAVE_STRICMP) 
@@ -160,6 +168,8 @@ int strcasecmp(const char *a, const char *b);
 #define strncasecmp(s1, s2, n) strnicmp(s1, s2, n)
 #elif (!APR_HAVE_STRNCASECMP)
 int strncasecmp(const char *a, const char *b, size_t n);
+#endif
+
 #endif
 
 /**
@@ -191,10 +201,16 @@ int strncasecmp(const char *a, const char *b, size_t n);
 void *memchr(const void *s, int c, size_t n);
 #endif
 
+/** @} */
+
+/**
+ * @defgroup apr_library Library initialization and termination
+ * @{
+ */
+
 /**
  * Setup any APR internal data structures.  This MUST be the first function 
  * called for any APR library.
- * @deffunc apr_status_t apr_initialize(void)
  * @remark See apr_app_initialize if this is an application, rather than
  * a library consumer of apr.
  */
@@ -241,23 +257,22 @@ APR_DECLARE(void) apr_terminate2(void);
 /** @} */
 
 /**
- * @defgroup APR_Random Random Functions
- * @ingroup APR
+ * @defgroup apr_random Random Functions
  * @{
  */
 
-#if APR_HAS_RANDOM
+#if APR_HAS_RANDOM || defined(DOXYGEN)
 
-#ifdef APR_ENABLE_FOR_1_0
-APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
-                                                    apr_size_t length);
-#else
 /* TODO: I'm not sure this is the best place to put this prototype...*/
 /**
  * Generate random bytes.
  * @param buf Buffer to fill with random bytes
  * @param length Length of buffer in bytes (becomes apr_size_t in APR 1.0)
  */
+#ifdef APR_ENABLE_FOR_1_0
+APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
+                                                    apr_size_t length);
+#else
 APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf, 
                                                     int length);
 #endif

@@ -55,6 +55,11 @@
 #ifndef APR_USER_H
 #define APR_USER_H
 
+/**
+ * @file apr_user.h
+ * @brief APR User ID Services 
+ */
+
 #include "apr.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
@@ -64,12 +69,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @file apr_user.h
- * @brief APR User ID Services 
- */
-/**
- * @defgroup APR_User User id services
- * @ingroup APR
+ * @defgroup apr_user User and Group ID Services
+ * @ingroup APR 
  * @{
  */
 
@@ -224,6 +225,7 @@ APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right);
 #endif  /* ! APR_HAS_USER */
 
 /** @} */
+
 #ifdef __cplusplus
 }
 #endif

@@ -55,6 +55,11 @@
 #ifndef APR_FILE_INFO_H
 #define APR_FILE_INFO_H
 
+/**
+ * @file apr_file_info.h
+ * @brief APR File Information
+ */
+
 #include "apr.h"
 #include "apr_user.h"
 #include "apr_pools.h"
@@ -69,13 +74,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
 /**
- * @file apr_file_info.h
- * @brief APR File handling
- */
-/**
- * @defgroup APR_File_Handle File Handling Functions
- * @ingroup APR
+ * @defgroup apr_file_info File Information
+ * @ingroup APR 
  * @{
  */
 
@@ -108,7 +110,7 @@ typedef enum {
 } apr_filetype_e; 
 
 /**
- * @defgroup APR_file_handle_permission File Permissions flags 
+ * @defgroup apr_file_permissions File Permissions flags 
  * @{
  */
 
@@ -134,18 +136,15 @@ typedef enum {
 
 /**
  * Structure for referencing directories.
- * @defvar apr_dir_t
  */
 typedef struct apr_dir_t          apr_dir_t;
 /**
  * Structure for determining file permissions.
- * @defvar apr_fileperms_t
  */
 typedef apr_int32_t               apr_fileperms_t;
 #if (defined WIN32) || (defined NETWARE)
 /**
  * Structure for determining the inode of the file.
- * @defvar apr_ino_t
  */
 typedef apr_uint64_t              apr_ino_t;
 /**
@@ -162,7 +161,7 @@ typedef dev_t                     apr_dev_t;
 #endif
 
 /**
- * @defgroup APR_File_Info Stat Functions
+ * @defgroup apr_file_stat Stat Functions
  * @{
  */
 /** file info structure */
@@ -266,7 +265,7 @@ APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
                                     apr_int32_t wanted, apr_pool_t *cont);
 /** @} */
 /**
- * @defgroup APR_DIRECTORY Directory Manipulation Functions
+ * @defgroup apr_dir Directory Manipulation Functions
  * @{
  */
 
@@ -304,7 +303,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 /** @} */
 
 /**
- * @defgroup apr_filepath FilePath Manipulation operations 
+ * @defgroup apr_filepath Filepath Manipulation Functions
  * @{
  */
 
@@ -334,10 +333,9 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * trailing slash if a directory
  */
 #define APR_FILEPATH_TRUENAME       0x20
-/** @} */
+
 /**
  * Extract the rootpath from the given filepath
- * @ingroup apr_filepath
  * @param rootpath the root file path returned with APR_SUCCESS or APR_EINCOMPLETE
  * @param filepath the pathname to parse for its root component
  * @param flags the desired rules to apply, from
@@ -346,7 +344,6 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  *      APR_FILEPATH_TRUENAME  Tests that the root exists, and makes it proper
  * </PRE>
  * @param p the pool to allocate the new path string from
- * @deffunc apr_status_t apr_filepath_root(const char **rootpath, const char **inpath, apr_int32_t flags, apr_pool_t *p)
  * @remark on return, filepath points to the first non-root character in the
  * given filepath.  In the simplest example, given a filepath of "/foo", 
  * returns the rootpath of "/" and filepath points at "foo".  This is far 
@@ -367,13 +364,11 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
 /**
  * Merge additional file path onto the previously processed rootpath
- * @ingroup apr_filepath
  * @param newpath the merged paths returned
  * @param rootpath the root file path (NULL uses the current working path)
  * @param addpath the path to add to the root path
  * @param flags the desired APR_FILEPATH_ rules to apply when merging
  * @param p the pool to allocate the new path string from
- * @deffunc apr_status_t apr_filepath_merge(char **newpath, const char *rootpath, const char *addpath, apr_int32_t flags, apr_pool_t *p)
  * @remark if the flag APR_FILEPATH_TRUENAME is given, and the addpath 
  * contains wildcard characters ('*', '?') on platforms that don't support 
  * such characters within filenames, the paths will be merged, but the 
@@ -388,11 +383,9 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
 /**
  * Split a search path into separate components
- * @ingroup apr_filepath
  * @param pathelts the returned components of the search path
  * @param liststr the search path (e.g., <tt>getenv("PATH")</tt>)
  * @param p the pool to allocate the array and path components from
- * @deffunc apr_status_t apr_filepath_list_split(apr_array_header_t **pathelts, const char *liststr, apr_pool_t *p)
  * @remark empty path componenta do not become part of @a pathelts.
  * @remark the path separator in @a liststr is system specific;
  * e.g., ':' on Unix, ';' on Windows, etc.
@@ -403,11 +396,9 @@ APR_DECLARE(apr_status_t) apr_filepath_list_split(apr_array_header_t **pathelts,
 
 /**
  * Merge a list of search path components into a single search path
- * @ingroup apr_filepath
  * @param liststr the returned search path; may be NULL if @a pathelts is empty
  * @param pathelts the components of the search path
  * @param p the pool to allocate the search path from
- * @deffunc apr_status_t apr_filepath_list_merge(char **liststr, apr_array_header_t *pathelts, apr_pool_t *p)
  * @remark emtpy strings in the source array are ignored.
  * @remark the path separator in @a liststr is system specific;
  * e.g., ':' on Unix, ';' on Windows, etc.
@@ -418,29 +409,20 @@ APR_DECLARE(apr_status_t) apr_filepath_list_merge(char **liststr,
 
 /**
  * Return the default file path (for relative file names)
- * @ingroup apr_filepath
  * @param path the default path string returned
  * @param flags optional flag APR_FILEPATH_NATIVE to retrieve the
  *              default file path in os-native format.
  * @param p the pool to allocate the default path string from
- * @deffunc apr_status_t apr_filepath_get(char **path, apr_int32_t flags, apr_pool_t *p)
  */
 APR_DECLARE(apr_status_t) apr_filepath_get(char **path, apr_int32_t flags,
                                            apr_pool_t *p);
 
 /**
  * Set the default file path (for relative file names)
- * @ingroup apr_filepath
  * @param path the default path returned
  * @param p the pool to allocate any working storage
- * @deffunc apr_status_t apr_filepath_get(char **defpath, apr_pool_t *p)
  */
 APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p);
-
-/**
- * @defgroup apr_filepath_encoding FilePath Character encoding
- * @{
- */
 
 /** The FilePath character encoding is unknown */
 #define APR_FILEPATH_ENCODING_UNKNOWN  0
@@ -450,18 +432,16 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p);
 
 /** The FilePath character encoding is UTF-8 */
 #define APR_FILEPATH_ENCODING_UTF8     2
-/** @} */
+
 /**
  * Determine the encoding used internally by the FilePath functions
- * @ingroup apr_filepath_encoding
  * @param style points to a variable which receives the encoding style flag
  * @param p the pool to allocate any working storage
- * @deffunc apr_status_t apr_filepath_encoding(int *style, apr_pool_t *p)
  * @remark Use @c apr_os_locale_encoding and/or @c apr_os_default_encoding
  * to get the name of the path encoding if it's not UTF-8.
  */
 APR_DECLARE(apr_status_t) apr_filepath_encoding(int *style, apr_pool_t *p);
-
+/** @} */
 
 /** @} */
 
@@ -470,5 +450,3 @@ APR_DECLARE(apr_status_t) apr_filepath_encoding(int *style, apr_pool_t *p);
 #endif
 
 #endif  /* ! APR_FILE_INFO_H */
-
-
