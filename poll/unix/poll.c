@@ -203,7 +203,6 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
                                              const apr_pollfd_t *descriptor)
 {
     apr_uint32_t i;
-    apr_os_sock_t fd;
 
     for (i = 0; i < pollset->nelts; i++) {
         if (descriptor->desc.s == pollset->query_set[i].desc.s) {
