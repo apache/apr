@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/12/13 09:27:35 $]
+Last modified at [$Date: 2001/12/14 00:15:50 $]
 
 Release:
 
@@ -32,6 +32,8 @@ RELEASE SHOWSTOPPERS:
       not yet complete on all platforms. Components that are incomplete
       or missing include:
       Beos: apr_thread_cond_*()
+            Initial code committed. Aaron has some concerns, David agrees
+            and will find time to address the issues.
       Netware: apr_proc_mutex_*() (Is proc_mutex unnecessary on Netware?)
       OS/2: apr_thread_cond_*(), apr_proc_mutex_*()
 
@@ -277,6 +279,10 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
       partition when you call fcntl(F_SETLKW).  It may be good if we 
       can somehow detect this and error out when creating the lock
       rather than waiting for the error to occur when acquiring lock.
+
+    * Fix autoconf tests for strerror_r on BeOS and remove the hack in
+      misc/unix/errorcodes.c to get error reporting working.  Committed as
+      the solution is elusive at present.
 
 Documentation that needs writing:
 

@@ -357,7 +357,7 @@ static char *apr_os_strerror(char* buf, apr_size_t bufsize, int err)
 }
 #endif
 
-#if defined(HAVE_STRERROR_R) && defined(STRERROR_R_RC_INT)
+#if defined(HAVE_STRERROR_R) && defined(STRERROR_R_RC_INT) && !defined(BEOS)
 /* AIX and Tru64 style */
 static char *native_strerror(apr_status_t statcode, char *buf,
                              apr_size_t bufsize)
