@@ -53,6 +53,7 @@
  */
 
 #include "fileio.h"
+#include "apr_lock.h"
 
 static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
 {
@@ -118,6 +119,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             thefile->dataRead = 0;
         }
 
+	rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos >= thefile->dataRead) {
                 thefile->dataRead = read(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE);
@@ -213,6 +215,7 @@ ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
             thefile->direction = 1;
         }
 
+	rv = 0;
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   /* write buffer is full*/
                 ap_flush(thefile);
