@@ -532,6 +532,14 @@ APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo,
                                           apr_int32_t wanted,
                                           apr_file_t *thefile);
 
+
+/**
+ * Truncate the file's length to the specified offset
+ * @param fp The file to truncate
+ * @param offset The offset to truncate to.
+ */
+APR_DECLARE(apr_status_t) apr_file_trunc(apr_file_t *fp, apr_off_t offset);
+
 /**
  * Get the pool used by the file.
  * @return apr_pool_t the pool
