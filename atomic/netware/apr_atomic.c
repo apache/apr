@@ -83,7 +83,7 @@ apr_status_t apr_atomic_init(apr_pool_t *p )
 
 int apr_atomic_dec(apr_atomic_t *mem) 
 {
-    atomic_inc(mem);
+    atomic_dec(mem);
     return *mem; 
 }
 
