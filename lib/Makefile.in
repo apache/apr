@@ -24,7 +24,8 @@ OBJS=apr_cpystrn.o \
 	apr_signal.o \
 	apr_snprintf.o \
 	apr_tables.o \
-	apr_getpass.o
+	apr_getpass.o \
+	apr_strnatcmp.o
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
