@@ -118,7 +118,9 @@ all-recursive depend-recursive clean-recursive distclean-recursive \
 	    made_local=n/a; \
 	fi; \
 	if test -z "$$made_local"; then \
-	    $(MAKE) "local-$$otarget" || exit 1; \
+	    if test "$$otarget" != "depend" || test `pwd` != "$(top_builddir)"; then \
+	        $(MAKE) "local-$$otarget" || exit 1; \
+	    fi; \
 	fi
 
 local-clean: x-local-clean

@@ -1,5 +1,7 @@
 Changes with APR b1
 
+  *) Fix make depend.  [Ryan Bloom]
+
   *) All dso implementations now register a cleanup to unload the DSO
      when it is loaded.  If the pool is removed, we really do need to
      remove the DSO.  In the past, different platforms behaved differently
