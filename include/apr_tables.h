@@ -125,15 +125,14 @@ struct apr_table_entry_t {
  * @param t The table
  * @return An array containing the contents of the table
  */
-#define apr_table_elts(t) ((const apr_array_header_t *)(t))
+APR_DECLARE(const apr_array_header_t *) apr_table_elts(const apr_table_t *t);
 
 /**
  * Determine if the table is empty
  * @param t The table to check
  * @return True if empty, False otherwise
  */
-#define apr_is_empty_table(t) (((t) == NULL) \
-                               || (((apr_array_header_t *)(t))->nelts == 0))
+APR_DECLARE(int) apr_is_empty_table(const apr_table_t *t);
 
 /**
  * Create an array
