@@ -400,13 +400,8 @@ APR_DECLARE(apr_status_t) apr_put_os_file(apr_file_t **file,
                                           apr_os_file_t *thefile,
                                           apr_pool_t *cont)
 {
-    if ((*file) == NULL) {
-        if (cont == NULL) {
-            return APR_ENOPOOL;
-        }
-        (*file) = (apr_file_t *)apr_pcalloc(cont, sizeof(apr_file_t));
-        (*file)->cntxt = cont;
-    }
+    (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
+    (*file)->cntxt = cont;
     (*file)->filehand = *thefile;
     (*file)->ungetchar = -1; /* no char avail */
     return APR_SUCCESS;
@@ -422,6 +417,11 @@ APR_DECLARE(apr_status_t) apr_eof(apr_file_t *fptr)
 
 APR_DECLARE(apr_status_t) apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
+    /* ### should this be rebuilt in terms of apr_put_os_file()?? their
+       ### initializations are slightly different (maybe one or both are
+       ### not init'ing properly?)
+    */
+
     (*thefile) = apr_pcalloc(cont, sizeof(apr_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
