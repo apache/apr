@@ -115,7 +115,7 @@ typedef int bool_int;
 /*
  * NUM_BUF_SIZE is the size of the buffer used for arithmetic conversions
  *
- * XXX: this is a magic number; do not decrease it
+ * NOTICE: this is a magic number; do not decrease it
  */
 #define NUM_BUF_SIZE 512
 
