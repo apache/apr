@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/07 03:35:34 $]
+Last modified at [$Date: 2002/05/24 18:34:36 $]
 
 Release:
 
@@ -43,13 +43,6 @@ RELEASE SHOWSTOPPERS:
       up hproc after the process is dead.  Can't do a pool cleanup,
       since apr_proc_create didn't allocate the apr_proc_t storage.
       (Aren't transparent types swell?)  Suggestions?
-
-    * The new lock API is a full replacement for the old API. Before
-      we do a major APR release, we must deprecate the old locks API,
-      lest we support 2 lock APIs in perpetuity.
-
-    * The new apr_global_mutex_t lock type must be implemented on
-      all platforms.
 
     * Almost every API in APR depends on pools, but pool semantics
       aren't a good match for a lot of applications.  We need to find
