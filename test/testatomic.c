@@ -53,7 +53,6 @@
  */
 
 #include "apr_thread_proc.h"
-#include "apr_lock.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_atomic.h"
@@ -177,7 +176,7 @@ void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_func_none(apr_thread_t *thd, void *data);
 
-apr_lock_t *thread_lock;
+apr_thread_mutex_t *thread_lock;
 apr_thread_once_t *control = NULL;
 volatile long x = 0; /* mutex locks */
 volatile long z = 0; /* no locks */
@@ -198,9 +197,9 @@ void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
     apr_thread_once(control, init_func);
 
     for (i = 0; i < NUM_ITERATIONS; i++) {
-        apr_lock_acquire(thread_lock);
+        apr_thread_mutex_lock(thread_lock);
         x++;
-        apr_lock_release(thread_lock);
+        apr_thread_mutex_unlock(thread_lock);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
@@ -265,8 +264,8 @@ int main(int argc, char**argv)
 
     if (mutex==1) {
         printf("%-60s", "Initializing the lock"); 
-        rv = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
-                             APR_LOCK_DEFAULT, "lock.file", context); 
+        rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT,
+                                     context);
         if (rv != APR_SUCCESS) {
             fflush(stdout);
             fprintf(stderr, "Failed\nCould not create lock\n");
