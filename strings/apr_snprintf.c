@@ -550,7 +550,8 @@ static char *conv_fp(register char format, register double num,
      * Check for Infinity and NaN
      */
     if (apr_isalpha(*p)) {
-        *len = strlen(strcpy(buf, p));
+        *len = strlen(p);
+        memcpy(buf, p, *len + 1);
         *is_negative = FALSE;
         return (buf);
     }
