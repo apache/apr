@@ -276,7 +276,7 @@ apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in,
  * @param parent_in apr_file_t value to use as parent_in. Must be a valid file.
  * @tip  This is NOT a required initializer function. This is
  *       useful if you have already opened a pipe (or multiple files)
- *       that you wish to use, perhaps persistently across mutiple
+ *       that you wish to use, perhaps persistently across multiple
  *       process invocations - such as a log file. You can save some 
  *       extra function calls by not creating your own pipe since this
  *       creates one in the process space for you.
@@ -291,7 +291,7 @@ apr_status_t apr_setprocattr_childin(struct apr_procattr_t *attr, apr_file_t *ch
  * @param parent_out apr_file_t value to use as parent_out. Must be a valid file.
  * @tip This is NOT a required initializer function. This is
  *      useful if you have already opened a pipe (or multiple files)
- *      that you wish to use, perhaps persistently across mutiple
+ *      that you wish to use, perhaps persistently across multiple
  *      process invocations - such as a log file. 
  */
 apr_status_t apr_setprocattr_childout(struct apr_procattr_t *attr, 
@@ -305,7 +305,7 @@ apr_status_t apr_setprocattr_childout(struct apr_procattr_t *attr,
  * @param parent_err apr_file_t value to use as parent_err. Must be a valid file.
  * @tip This is NOT a required initializer function. This is
  *      useful if you have already opened a pipe (or multiple files)
- *      that you wish to use, perhaps persistently across mutiple
+ *      that you wish to use, perhaps persistently across multiple
  *      process invocations - such as a log file. 
  */
 apr_status_t apr_setprocattr_childerr(struct apr_procattr_t *attr, 
