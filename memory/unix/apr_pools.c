@@ -90,23 +90,6 @@
 
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
-#if APR_HAS_THREADS
-#define LOCK(mutex) \
-    do { \
-        if (mutex) \
-            apr_thread_mutex_lock(mutex); \
-    } while(0)
-
-#define UNLOCK(mutex) \
-    do { \
-        if (mutex) \
-            apr_thread_mutex_unlock(mutex); \
-    } while(0)
-#else
-#define LOCK(mutex)
-#define UNLOCK(mutex)
-#endif
-
 /*
  * Structures
  */
@@ -126,8 +109,6 @@ struct allocator_t {
     apr_uint32_t        max_index;
 #if APR_HAS_THREADS
     apr_thread_mutex_t *mutex;
-#else
-    void               *mutex;
 #endif
     apr_pool_t         *owner;
     node_t             *free[MAX_INDEX];
@@ -169,7 +150,9 @@ static apr_pool_t  *global_pool = NULL;
 static apr_byte_t   global_allocator_initialized = 0;
 static allocator_t  global_allocator = { 
     0,          /* max_index */
+#if APR_HAS_THREADS
     NULL,       /* mutex */
+#endif
     NULL,       /* owner */
     { NULL }    /* free[0] */
 };
@@ -199,8 +182,11 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
      * our node will fit into.
      */
     if (index <= allocator->max_index) {
-        LOCK(allocator->mutex);
-
+#if APR_HAS_THREADS
+        if (allocator->mutex)
+            apr_thread_mutex_lock(allocator->mutex);
+#endif
+        
         /* Walk the free list to see if there are
          * any nodes on it of the requested size
          *
@@ -237,19 +223,28 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
             
             node->next = NULL;
 
-            UNLOCK(allocator->mutex);
+#if APR_HAS_THREADS
+            if (allocator->mutex)
+                apr_thread_mutex_unlock(allocator->mutex);
+#endif
 
             return node;
         }
 
-        UNLOCK(allocator->mutex);
+#if APR_HAS_THREADS
+        if (allocator->mutex)
+            apr_thread_mutex_unlock(allocator->mutex);
+#endif
     }
 
     /* If we found nothing, seek the sink (at index 0), if
      * it is not empty.
      */
     else if (allocator->free[0]) {
-        LOCK(allocator->mutex);
+#if APR_HAS_THREADS
+        if (allocator->mutex)
+            apr_thread_mutex_lock(allocator->mutex);
+#endif
 
         /* Walk the free list to see if there are
          * any nodes on it of the requested size
@@ -262,12 +257,18 @@ static APR_INLINE node_t *node_malloc(allocator_t *allocator, apr_size_t size)
             *ref = node->next;
             node->next = NULL;
             
-            UNLOCK(allocator->mutex);
+#if APR_HAS_THREADS
+            if (allocator->mutex)
+                apr_thread_mutex_unlock(allocator->mutex);
+#endif
 
             return node;
         }
         
-        UNLOCK(allocator->mutex);
+#if APR_HAS_THREADS
+        if (allocator->mutex)
+            apr_thread_mutex_unlock(allocator->mutex);
+#endif
     }
     
     /* If we haven't got a suitable node, malloc a new one
@@ -289,7 +290,10 @@ static APR_INLINE void node_free(allocator_t *allocator, node_t *node)
     node_t *next;
     apr_uint32_t index, max_index;
 
-    LOCK(allocator->mutex);
+#if APR_HAS_THREADS
+    if (allocator->mutex)
+        apr_thread_mutex_lock(allocator->mutex);
+#endif
 
     max_index = allocator->max_index;
 
@@ -321,7 +325,10 @@ static APR_INLINE void node_free(allocator_t *allocator, node_t *node)
 
     allocator->max_index = max_index;
 
-    UNLOCK(allocator->mutex);
+#if APR_HAS_THREADS
+    if (allocator->mutex)
+        apr_thread_mutex_unlock(allocator->mutex);
+#endif
 }
 
 APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
@@ -453,11 +460,6 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 {
     node_t *node, *active, **ref;
     allocator_t *allocator;
-#if APR_HAS_THREADS
-    apr_thread_mutex_t *mutex;
-#else
-    void *mutex;
-#endif
     apr_uint32_t index;
 
     /* Destroy the subpools.  The subpools will detach themselve from 
@@ -474,14 +476,20 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 
     /* Remove the pool from the parents child list */
     if (pool->parent) {
-        mutex = pool->parent->allocator->mutex;
+#if APR_HAS_THREADS
+        apr_thread_mutex_t *mutex;
 
-        LOCK(mutex);
+        if ((mutex = pool->parent->allocator->mutex) != NULL)
+            apr_thread_mutex_lock(mutex);
+#endif
 
         if ((*pool->ref = pool->sibling) != NULL)
             pool->sibling->ref = pool->ref;
 
-        UNLOCK(mutex);
+#if APR_HAS_THREADS
+        if (mutex)
+            apr_thread_mutex_unlock(mutex);
+#endif
     }
     
     /* Reset the active block */
@@ -568,6 +576,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 #if APR_HAS_THREADS
         if ((flags & APR_POOL_FLOCK) == APR_POOL_FLOCK) {
             apr_status_t rv;
+
             if ((rv = apr_thread_mutex_create(&allocator->mutex, 
                     APR_THREAD_MUTEX_DEFAULT, pool)) != APR_SUCCESS) {
                 node_free(allocator, node);
@@ -593,15 +602,20 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
     }
 
     if ((pool->parent = parent) != NULL) {
-        LOCK(allocator->mutex);
-
+#if APR_HAS_THREADS
+        if (allocator->mutex)
+            apr_thread_mutex_lock(allocator->mutex);
+#endif
         if ((pool->sibling = parent->child) != NULL)
             pool->sibling->ref = &pool->sibling;
 
         parent->child = pool;
         pool->ref = &parent->child;
 
-        UNLOCK(allocator->mutex);
+#if APR_HAS_THREADS
+        if (allocator->mutex)
+            apr_thread_mutex_unlock(allocator->mutex);
+#endif
     }
     else {
         pool->sibling = NULL;
@@ -1099,4 +1113,3 @@ static void free_proc_chain(struct process_chain *procs)
 
 #endif /* WIN32 */
 }
-
