@@ -244,7 +244,7 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     }
 
 #if APR_HAS_THREADS
-    lock->owner = NULL;
+    lock->owner = 0;
     lock->owner_ref = 0;
 #endif
     
