@@ -191,7 +191,8 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new,
 
     if (!(flag & APR_FILE_NOCLEANUP)) {
         apr_pool_cleanup_register((*new)->pool, (void *)(*new), 
-                                  apr_unix_file_cleanup, apr_unix_file_cleanup);
+                                  apr_unix_file_cleanup, 
+                                  apr_unix_file_cleanup);
     }
     return APR_SUCCESS;
 }
@@ -241,7 +242,7 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
-    (*file)->flags = flags;
+    (*file)->flags = flags | APR_FILE_NOCLEANUP;
     (*file)->buffered = (flags & APR_BUFFERED) > 0;
 
     if ((*file)->buffered) {
