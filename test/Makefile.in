@@ -53,10 +53,10 @@ occhild@EXEEXT@: occhild.lo $(LOCAL_LIBS)
 
 sockchild@EXEEXT@: sockchild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) sockchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
-        
+
 readchild@EXEEXT@: readchild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) readchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
-        
+
 globalmutexchild@EXEEXT@: globalmutexchild.lo $(LOCAL_LIBS)
 	$(LINK_PROG) globalmutexchild.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -68,13 +68,13 @@ proc_child@EXEEXT@: proc_child.lo $(LOCAL_LIBS)
 
 # FIXME: -prefer-pic is only supported with libtool-1.4+
 mod_test.slo: $(srcdir)/mod_test.c
-	$(LIBTOOL) --mode=compile $(COMPILE) -prefer-pic -c $(srcdir)/mod_test.c && touch $@
+	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE) -prefer-pic -c $(srcdir)/mod_test.c && touch $@
 
 mod_test.la: mod_test.slo $(LOCAL_LIBS)
-	$(LIBTOOL) --mode=link $(COMPILE) -rpath `pwd` -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version -module mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
 
 libmod_test.la: mod_test.slo $(LOCAL_LIBS)
-	$(LIBTOOL) --mode=link $(COMPILE) -rpath `pwd` -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
+	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -rpath `pwd` -avoid-version mod_test.lo $(LT_LDFLAGS) $(ALL_LDFLAGS) -o $@
 
 testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
 	$(LINK_PROG) testlockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
