@@ -60,6 +60,7 @@
 
 ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
 {
+    BOOLEAN isStdHandle = FALSE;
     HANDLE hCurrentProcess = GetCurrentProcess();
 
     if ((*new_file) == NULL) {
@@ -84,14 +85,17 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
          * can, however, emulate dup2 for the standard i/o handles.
          */
         if (hFile == GetStdHandle(STD_ERROR_HANDLE)) {
+            isStdHandle = TRUE;
             if (!SetStdHandle(STD_ERROR_HANDLE, old_file->filehand))
                 return GetLastError();
         }
         else if (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) {
+            isStdHandle = TRUE;
             if (!SetStdHandle(STD_OUTPUT_HANDLE, old_file->filehand))
                 return GetLastError();
         }
         else if (hFile == GetStdHandle(STD_INPUT_HANDLE)) {
+            isStdHandle = TRUE;
             if (!SetStdHandle(STD_INPUT_HANDLE, old_file->filehand))
                 return GetLastError();
         }
@@ -111,8 +115,11 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
     (*new_file)->atime = old_file->atime;    
     (*new_file)->mtime = old_file->mtime;
     (*new_file)->ctime = old_file->ctime;
-    ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
-                        ap_null_cleanup);
+
+    if (!isStdHandle) {
+        ap_register_cleanup((*new_file)->cntxt, (void *)(*new_file), file_cleanup,
+                            ap_null_cleanup);
+    }
 
     return APR_SUCCESS;
 }
