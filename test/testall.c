@@ -76,6 +76,7 @@ static const struct testlist {
     {"testfmt", testfmt},
     {"testfile", testfile},
     {"testfileinfo", testfileinfo},
+    {"testpipe", testpipe},
     {"testdup", testdup},
     {"testdir", testdir},
     {"testrand", testrand},
