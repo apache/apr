@@ -50,6 +50,8 @@ AC_CHECK_PROG(AR, ar, ar)
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
 
+APR_EBCDIC
+ 
 # Use /bin/sh if it exists, otherwise go looking for sh in the path
 if test ".$SH" = . -a -f /bin/sh; then
   SH="/bin/sh"
@@ -353,6 +355,8 @@ else
     fi
 fi
 
+APR_CHECK_PTHREAD_GETSPECIFIC_TWO_ARGS
+
 ac_cv_define_READDIR_IS_THREAD_SAFE=no
 AC_CHECK_LIB(c_r, readdir, AC_DEFINE(READDIR_IS_THREAD_SAFE))
 
@@ -495,7 +499,7 @@ AC_SUBST(sharedmem)
 AC_SUBST(anonymous_shm)
 AC_SUBST(filebased_shm)
 AC_SUBST(keybased_shm)
- 
+
 dnl #----------------------------- Checking for /dev/random 
 AC_MSG_CHECKING(for /dev/random)
 
@@ -529,7 +533,7 @@ if test "$ac_cv_struct_tm_gmtoff" = "yes"; then
 fi
 
 dnl #----------------------------- Checking for Networking Support 
-echo $ac_n "${nl}Checking for Networking support..."
+echo $ac_n "${nl}Checking for Networking support...${nl}"
 AC_MSG_CHECKING(looking for in_addr in netinet/in.h)
 AC_TRY_COMPILE([
 #include <netinet/in.h>
@@ -542,6 +546,8 @@ msg=no ])
 AC_MSG_RESULT([$msg])
 
 AC_SUBST(have_in_addr)
+
+APR_CHECK_GETHOSTBYNAME_NAS
 
 dnl #----------------------------- Prepare mm directory for VPATH support
 if test -n "$USE_MM" && test -n "$USE_VPATH"; then
