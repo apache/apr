@@ -56,29 +56,35 @@
  * a bit more consistent...
  */
  
-#include <string.h>
+#include "apr_strings.h"
 
 #define TEST_EQ(str, func, value, good, bad) \
-	printf("%-60s", str); \
-	{ apr_status_t rv; \
-	    if ((rv = func) == value){ \
-	        printf("%s\n", bad); \
-            printf("Error was %d : %s\n", rv, strerror(rv)); \
-	        exit(-1); \
-	    } \
-	    printf("%s\n", good); \
-	}
+    printf("%-60s", str); \
+    { \
+    apr_status_t rv; \
+    if ((rv = func) == value){ \
+        char errmsg[200]; \
+        printf("%s\n", bad); \
+        fprintf(stderr, "Error was %d : %s\n", rv, \
+                apr_strerror(rv, (char*)&errmsg, 200)); \
+        exit(-1); \
+    } \
+    printf("%s\n", good); \
+    }
 
 #define TEST_NEQ(str, func, value, good, bad) \
-	printf("%-60s", str); \
-	{ apr_status_t rv; \
-	    if ((rv = func) != value){ \
-	        printf("%s\n", bad); \
-            printf("Error was %d : %s\n", rv, strerror(rv)); \
-	        exit(-1); \
-	    } \
-	    printf("%s\n", good); \
-	}
+printf("%-60s", str); \
+    { \
+    apr_status_t rv; \
+    if ((rv = func) != value){ \
+        char errmsg[200]; \
+        printf("%s\n", bad); \
+        fprintf(stderr, "Error was %d : %s\n", rv, \
+                apr_strerror(rv, (char*)&errmsg, 200)); \
+        exit(-1); \
+    } \
+    printf("%s\n", good); \
+    }
 
 #define STD_TEST_NEQ(str, func) \
 	TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
