@@ -62,6 +62,8 @@
 
 #if WIN32
 #define ABS_ROOT "C:/"
+#elif defined(NETWARE)
+#define ABS_ROOT "SYS:/"
 #else
 #define ABS_ROOT "/"
 #endif
