@@ -92,8 +92,10 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         if (on <= 0)
             new_timeout = on;
         else
-            new_timeout = on/1000;  /* Windows needs timeout in mSeconds */
-        
+            /* Convert from APR units (microseconds) to windows units 
+             * (milliseconds) */
+            new_timeout = on/1000;
+
         if (new_timeout == 0) {
             /* Set the socket non-blocking if it was previously blocking */
             if (sock->timeout != 0) {
@@ -170,9 +172,9 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *
 {
     switch (opt) {
     case APR_SO_TIMEOUT: 
-        /* Do we want to store sock->timeout in APR units or windows units? */
-        *on = sock->timeout * 1000; /* Convert from milliseconds (windows units) to microseconds 
-                                     * (APR units) */
+        /* Convert from milliseconds (windows units) to microseconds 
+         * (APR units) */
+        *on = sock->timeout * 1000;
         break;
     case APR_SO_DISCONNECTED:
         *on = sock->disconnected;
