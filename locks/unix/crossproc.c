@@ -100,7 +100,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
         return errno;
     }
     new->curr_locked = 0;
-    APR_REGISTER_CLEANUP(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
+    APR_CLEANUP_REGISTER(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -137,7 +137,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
     apr_status_t stat;
 
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_REMOVE_CLEANUP(lock, lock, lock_cleanup);
+        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
@@ -223,7 +223,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
     }
 
     new->curr_locked = 0;
-    APR_REGISTER_CLEANUP(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
+    APR_CLEANUP_REGISTER(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -259,7 +259,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_REMOVE_CLEANUP(lock, lock, lock_cleanup);
+        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
@@ -316,7 +316,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 
     new->curr_locked=0;
     unlink(new->fname);
-    APR_REGISTER_CLEANUP(new, new, lock_cleanup, apr_pool_cleanup_null);
+    APR_CLEANUP_REGISTER(new, new, lock_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS; 
 }
 
@@ -352,7 +352,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_REMOVE_CLEANUP(lock, lock, lock_cleanup);
+        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
@@ -397,7 +397,7 @@ apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
         return errno;
     }
     new->curr_locked = 0;
-    APR_REGISTER_CLEANUP(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
+    APR_CLEANUP_REGISTER(new, (void *)new, lock_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -433,7 +433,7 @@ apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        APR_REMOVE_CLEANUP(lock, lock, lock_cleanup);
+        APR_CLEANUP_REMOVE(lock, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;

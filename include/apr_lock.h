@@ -94,16 +94,16 @@ typedef enum {APR_READER, APR_WRITER} apr_readerwriter_e;
  * @param fname A file name to use if the lock mechanism requires one.  This
  *        argument should always be provided.  The lock code itself will
  *        determine if it should be used.
- * @param cont The pool to operate on.
+ * @param pool The pool to operate on.
  * @tip APR_CROSS_PROCESS may lock both processes and threads, but it is
  *      only guaranteed to lock processes.
- * @deffunc apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, const char *fname, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, const char *fname, apr_pool_t *pool)
  */
 APR_DECLARE(apr_status_t) apr_lock_create(apr_lock_t **lock,
                                           apr_locktype_e type,
                                           apr_lockscope_e scope,
                                           const char *fname,
-                                          apr_pool_t *cont);
+                                          apr_pool_t *pool);
 
 /**
  * Lock a protected region.
@@ -144,16 +144,16 @@ APR_DECLARE(apr_status_t) apr_lock_destroy(apr_lock_t *lock);
  *              argument should always be provided.  The lock code itself will
  *              determine if it should be used.  This filename should be the 
  *              same one that was passed to apr_lock_create
- * @param cont The pool to operate on.
+ * @param pool The pool to operate on.
  * @tip This function doesn't always do something, it depends on the
  *      locking mechanism chosen for the platform, but it is a good
  *      idea to call it regardless, because it makes the code more
  *      portable. 
- * @deffunc apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, apr_pool_t *pool)
  */
 APR_DECLARE(apr_status_t) apr_lock_child_init(apr_lock_t **lock,
                                               const char *fname,
-                                              apr_pool_t *cont);
+                                              apr_pool_t *pool);
 
 /**
  * Return the pool associated with the current lock.

@@ -82,7 +82,7 @@ apr_status_t create_inter_lock(apr_lock_t *new)
     }
     new->ben_interproc = 0;
     new->sem_interproc = stat;
-    APR_REGISTER_CLEANUP(new, (void *)new, lock_inter_cleanup,
+    APR_CLEANUP_REGISTER(new, (void *)new, lock_inter_cleanup,
                         apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
@@ -117,13 +117,13 @@ apr_status_t destroy_inter_lock(apr_lock_t *lock)
 {
     apr_status_t stat;
     if ((stat = lock_inter_cleanup(lock)) == APR_SUCCESS) {
-        APR_REMOVE_CLEANUP(lock, lock, lock_inter_cleanup);
+        APR_CLEANUP_REMOVE(lock, lock, lock_inter_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-apr_status_t child_init_lock(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
+apr_status_t child_init_lock(apr_lock_t **lock, apr_pool_t *pool, const char *fname)
 {
     return APR_SUCCESS;
 }

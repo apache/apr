@@ -58,7 +58,7 @@
 
 apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, 
                            apr_lockscope_e scope, const char *fname, 
-                           apr_pool_t *cont)
+                           apr_pool_t *pool)
 {
     apr_lock_t *new;
     apr_status_t stat;
@@ -67,12 +67,12 @@ apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type,
     if (type == APR_READWRITE)
         return APR_ENOTIMPL; 
 
-    new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
+    new = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
     if (new == NULL){
         return APR_ENOMEM;
     }
     
-    new->cntxt = cont;
+    new->pool  = pool;
     new->type  = type;
     new->scope = scope;
 
@@ -101,15 +101,14 @@ apr_status_t apr_lock_sms_create(apr_lock_t **lock, apr_locktype_e type,
     if (type == APR_READWRITE)
         return APR_ENOTIMPL; 
 
-    new = (apr_lock_t *)apr_sms_malloc(mem_sys, sizeof(apr_lock_t));
+    new = (apr_lock_t *)apr_sms_calloc(mem_sys, sizeof(apr_lock_t));
     if (new == NULL){
         return APR_ENOMEM;
     }
     
     new->mem_sys = mem_sys;
-    new->cntxt = NULL;
-    new->type  = type;
-    new->scope = scope;
+    new->type    = type;
+    new->scope   = scope;
 
     if (scope != APR_CROSS_PROCESS) {
         if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
@@ -221,11 +220,11 @@ apr_status_t apr_lock_destroy(apr_lock_t *lock)
 }
 
 apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, 
-			       apr_pool_t *cont)
+			       apr_pool_t *pool)
 {
     apr_status_t stat;
     if ((*lock)->scope != APR_CROSS_PROCESS) {
-        if ((stat = child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
+        if ((stat = child_init_lock(lock, pool, fname)) != APR_SUCCESS) {
             return stat;
         }
     }
@@ -234,13 +233,13 @@ apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname,
 
 apr_status_t apr_lock_data_get(apr_lock_t *lock, const char *key, void *data)
 {
-    return apr_pool_userdata_get(data, key, lock->cntxt);
+    return apr_pool_userdata_get(data, key, lock->pool);
 }
 
 apr_status_t apr_lock_data_set(apr_lock_t *lock, void *data, const char *key,
                             apr_status_t (*cleanup) (void *))
 {
-    return apr_pool_userdata_set(data, key, cleanup, lock->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, lock->pool);
 }
 
 apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
@@ -253,14 +252,14 @@ apr_status_t apr_os_lock_get(apr_os_lock_t *oslock, apr_lock_t *lock)
 }
 
 apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock, 
-                           apr_pool_t *cont)
+                             apr_pool_t *pool)
 {
-    if (cont == NULL) {
+    if (pool == NULL) {
         return APR_ENOPOOL;
     }
     if ((*lock) == NULL) {
-        (*lock) = (apr_lock_t *)apr_pcalloc(cont, sizeof(apr_lock_t));
-        (*lock)->cntxt = cont;
+        (*lock) = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
+        (*lock)->pool = pool;
     }
     (*lock)->sem_interproc = thelock->sem_interproc;
     (*lock)->ben_interproc = thelock->ben_interproc;
