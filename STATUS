@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2004/06/15 10:41:19 $]
+Last modified at [$Date: 2004/06/16 12:13:50 $]
 
 Release:
 
@@ -62,7 +62,7 @@ RELEASE 1.0 SHOWSTOPPERS:
         apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD, 
                               _POSIX_THREAD_SAFE_FUNCTIONS (?))
 
-      Not a showstopper: Justin
+      Not a showstopper: Justin, trawick
 
 
     * Flush out the test suite and make sure it passes on all platforms.  
@@ -72,14 +72,14 @@ RELEASE 1.0 SHOWSTOPPERS:
       unified test suite, and adding more tests to make the suite 
       comprehensive.
 
-      Not a showstopper: Justin
+      Not a showstopper: Justin, trawick
 
     * Eliminate the TODO's and XXX's by using the doxygen @bug feature
       to allow us to better track the open issues, and provide historical
       bug lists that help porters understand what was wrong in the old
       versions of APR that they would be upgrading from.
 
-      Not a showstopper: Justin
+      Not a showstopper: Justin, trawick
 
 
 CURRENT VOTES:
