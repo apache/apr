@@ -67,7 +67,7 @@
 #endif
 
 #if APR_HAS_THREADS
-#ifdef HAVE_PTHREAD_RWLOCK_INIT
+#ifdef HAVE_PTHREAD_RWLOCKS
 
 struct apr_thread_rwlock_t {
     apr_pool_t *pool;
