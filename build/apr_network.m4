@@ -640,6 +640,26 @@ else
 fi
 ])
 
+AC_DEFUN(APR_CHECK_SOCKADDR_STORAGE,[
+AC_CACHE_CHECK(for sockaddr_storage, apr_cv_define_sockaddr_storage,[
+AC_TRY_COMPILE([
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+],[struct sockaddr_storage sa;],
+[apr_cv_define_sockaddr_storage=yes],
+[apr_cv_define_sockaddr_storage=no])])
+
+if test "$apr_cv_define_sockaddr_storage" = "yes"; then
+  have_sa_storage=1
+else
+  have_sa_storage=0
+fi
+AC_SUBST(have_sa_storage)
+])
 
 AC_DEFUN(APR_CHECK_SOCKADDR_IN6,[
 AC_CACHE_CHECK(for sockaddr_in6, ac_cv_define_sockaddr_in6,[
