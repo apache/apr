@@ -390,6 +390,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
                os_sock_info->local, 
                (*apr_sock)->local_addr->salen);
         (*apr_sock)->local_addr->pool = cont;
+        (*apr_sock)->local_addr->port = ntohs((*apr_sock)->local_addr->sa.sin.sin_port);
     }
     else {
         (*apr_sock)->local_port_unknown = (*apr_sock)->local_interface_unknown = 1;
@@ -399,6 +400,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
                os_sock_info->remote,
                (*apr_sock)->remote_addr->salen);
         (*apr_sock)->remote_addr->pool = cont;
+        (*apr_sock)->remote_addr->port = ntohs((*apr_sock)->remote_addr->sa.sin.sin_port);
     }
         
     apr_pool_cleanup_register((*apr_sock)->cntxt, (void *)(*apr_sock), 
