@@ -324,7 +324,8 @@ APR_DECLARE(apr_status_t) apr_sendfile(apr_socket_t *sock, apr_file_t *file,
                           dwFlags);       /* flags to control various aspects of TransmitFile */
         if (!rv) {
             status = apr_get_netos_error();
-            if (status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
+            if ((status == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) ||
+                (status == APR_FROM_OS_ERROR(WSA_IO_PENDING))) {
                 HANDLE event;
 #ifdef WAIT_FOR_EVENT
                 event = overlapped.hEvent;
