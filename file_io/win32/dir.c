@@ -57,6 +57,9 @@
 #include "apr_file_io.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#if APR_HAS_UNICODE_FS
+#include "i18n.h"
+#endif
 #include "atime.h"
 
 #if APR_HAVE_ERRNO_H
@@ -75,70 +78,90 @@
 apr_status_t dir_cleanup(void *thedir)
 {
     apr_dir_t *dir = thedir;
-    if (!CloseHandle(dir->dirhand)) {
+    if (dir->dirhand != INVALID_HANDLE_VALUE && !FindClose(dir->dirhand)) {
         return apr_get_os_error();
     }
+    dir->dirhand = INVALID_HANDLE_VALUE;
     return APR_SUCCESS;
 } 
 
 apr_status_t apr_opendir(apr_dir_t **new, const char *dirname, apr_pool_t *cont)
 {
+    int len = strlen(dirname);
+#if APR_HAS_UNICODE_FS
+    apr_status_t rv;
+    int lremains = len;
+    int dremains = (len + 3) * 2;
     (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+    (*new)->entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATAW));
+    (*new)->dirname = apr_palloc(cont, dremains);
+    if ((rv = conv_utf8_to_ucs2(dirname, &lremains,
+                                 (*new)->dirname, &dremains)))
+        return rv;
+    if (lremains)
+        return APR_ENAMETOOLONG;
+    len = (len + 3) * 2 - dremains;
+#else
+    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+    (*new)->entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATA));
+    (*new)->dirname = apr_palloc(cont, len + 3);
+    memcpy((*new)->dirname, dirname, len);
+#endif
+    if (len && dirname[len - 1] != '/') {
+    	(*new)->dirname[len++] = '/';
+    }
+    (*new)->dirname[len++] = '*';
+    (*new)->dirname[len] = '\0';
     (*new)->cntxt = cont;
-    (*new)->entry = NULL;
-    if (dirname[strlen(dirname)] == '/') {
-    	(*new)->dirname = apr_pstrcat(cont, dirname, "*", NULL);
-    }
-    else {
-        (*new)->dirname = apr_pstrcat(cont, dirname, "/*", NULL);
-    }
     (*new)->dirhand = INVALID_HANDLE_VALUE;
     apr_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
                         apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_closedir(apr_dir_t *thedir)
+apr_status_t apr_closedir(apr_dir_t *dir)
 {
-    if (!FindClose(thedir->dirhand)) {
-        return apr_get_os_error();   
+    if (dir->dirhand != INVALID_HANDLE_VALUE && !FindClose(dir->dirhand)) {
+        return apr_get_os_error();
     }
-    apr_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
+    dir->dirhand = INVALID_HANDLE_VALUE;
     return APR_SUCCESS;
 }
 
 apr_status_t apr_readdir(apr_dir_t *thedir)
 {
+#if APR_HAS_UNICODE_FS
     if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-        thedir->entry = apr_pcalloc(thedir->cntxt, sizeof(WIN32_FIND_DATA));
+        thedir->dirhand = FindFirstFileW(thedir->dirname, thedir->entry);
+        if (thedir->dirhand == INVALID_HANDLE_VALUE) {
+            return apr_get_os_error();
+        }
+    }
+    else if (!FindNextFileW(thedir->dirhand, thedir->entry)) {
+        return apr_get_os_error();
+    }
+#else
+    if (thedir->dirhand == INVALID_HANDLE_VALUE) {
         thedir->dirhand = FindFirstFile(thedir->dirname, thedir->entry);
         if (thedir->dirhand == INVALID_HANDLE_VALUE) {
             return apr_get_os_error();
         }
-        return APR_SUCCESS;
     }
-    if (!FindNextFile(thedir->dirhand, thedir->entry)) {
+    else if (!FindNextFile(thedir->dirhand, thedir->entry)) {
         return apr_get_os_error();
     }
+#endif
     return APR_SUCCESS;
 }
 
-apr_status_t apr_rewinddir(apr_dir_t *thedir)
+apr_status_t apr_rewinddir(apr_dir_t *dir)
 {
-    apr_status_t stat;
-    apr_pool_t *cont = thedir->cntxt;
-    char *temp = apr_pstrdup(cont, thedir->dirname);
-    temp[strlen(temp) - 2] = '\0';   /*remove the \* at the end */
-    if (thedir->dirhand == INVALID_HANDLE_VALUE) {
-        return APR_SUCCESS;
-    }
-    if ((stat = apr_closedir(thedir)) == APR_SUCCESS) {
-        if ((stat = apr_opendir(&thedir, temp, cont)) == APR_SUCCESS) {
-            apr_readdir(thedir);
-            return APR_SUCCESS;
-        }
-    }
-    return stat;	
+    dir_cleanup(dir);
+    if (!FindClose(dir->dirhand)) {
+        return apr_get_os_error();
+    }    
+    dir->dirhand = INVALID_HANDLE_VALUE;
+    return APR_SUCCESS;
 }
 
 apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
@@ -196,7 +219,19 @@ apr_status_t apr_dir_entry_ftype(apr_filetype_e *type, apr_dir_t *thedir)
 
 apr_status_t apr_get_dir_filename(char **new, apr_dir_t *thedir)
 {
+#if APR_HAS_UNICODE_FS
+    apr_status_t rv;
+    int len = wcslen(thedir->entry->cFileName) + 1;
+    int dremains = MAX_PATH;
+    (*new) = apr_palloc(thedir->cntxt, len * 2);
+    if ((rv = conv_ucs2_to_utf8(thedir->entry->cFileName, &len,
+                                *new, &dremains)))
+        return rv;
+    if (len)
+        return APR_ENAMETOOLONG;
+#else
     (*new) = apr_pstrdup(thedir->cntxt, thedir->entry->cFileName);
+#endif
     return APR_SUCCESS;
 }
 

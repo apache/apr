@@ -58,6 +58,9 @@
 #include "apr_general.h"
 #include "apr_errno.h"
 #include "apr_time.h"
+#if APR_HAS_UNICODE_FS
+#include "i18n.h"
+#endif
 #include <sys/stat.h>
 #include "atime.h"
 #include "misc.h"
@@ -196,20 +199,53 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
     /* WIN32_FILE_ATTRIBUTE_DATA is an exact subset of the first 
      * entries of WIN32_FIND_DATA
+     * We need to catch the case where fname length == MAX_PATH since for
+     * some strange reason GetFileAttributesEx fails with PATH_NOT_FOUND.
+     * We would rather indicate length error than 'not found'
+     * since in many cases the apr user is testing for 'not found' 
+     * and this is not such a case.
      */
+#if APR_HAS_UNICODE_FS
+    WIN32_FIND_DATAW FileInformation;
+    apr_wchar_t wname[MAX_PATH];
+    int len = MAX_PATH;
+    int lremains = strlen(fname) + 1;
+    apr_oslevel_e os_level;
+    apr_status_t rv;
+    HANDLE hFind;
+    if ((rv = conv_utf8_to_ucs2(fname, &lremains, wname, &len)))
+        return rv;
+    if (lremains)
+        return APR_ENAMETOOLONG;
+    if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
+        if (!GetFileAttributesExW(wname, GetFileExInfoStandard, 
+                                  (WIN32_FILE_ATTRIBUTE_DATA*) &FileInformation)) {
+            return apr_get_os_error();
+        }
+    }
+    else {
+        /* What a waste of cpu cycles... but what else can we do?
+         */
+        if (strchr(fname, '*') || strchr(fname, '?'))
+            return APR_ENOENT;
+        hFind = FindFirstFileW(wname, &FileInformation);
+        if (hFind == INVALID_HANDLE_VALUE) {
+            return apr_get_os_error();
+    	} else {
+            FindClose(hFind);
+        }
+    }
+#else
+    int len = strlen(fname);
     WIN32_FIND_DATA FileInformation;
     HANDLE hFind;
     apr_oslevel_e os_level;
-    
-    memset(finfo,'\0', sizeof(*finfo));
+    (*new) = apr_pcalloc(cont, sizeof(apr_dir_t));
+    (*new)->entry = apr_pcalloc(cont, sizeof(WIN32_FIND_DATA));
+    (*new)->dirname = apr_palloc(cont, len + 3);
+    memcpy((*new)->dirname, dirname, len);
 
-	/* We need to catch the case where fname length == MAX_PATH since for
-	 * some strange reason GetFileAttributesEx fails with PATH_NOT_FOUND.
-	 * We would rather indicate length error than 'not found'
-	 * since in many cases the apr user is testing for 'not found' 
-	 * and this is not such a case.
-	 */
-    if (strlen(fname) >= MAX_PATH) {
+    if (len >= MAX_PATH) {
         return APR_ENAMETOOLONG;
     }
     else if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
@@ -230,7 +266,9 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
             FindClose(hFind);
         }
     }
+#endif
 
+    memset(finfo,'\0', sizeof(*finfo));
     /* Filetype - Directory or file?
      * Short of opening the handle to the file, the 'FileType' appears
      * to be unknowable (in any trustworthy or consistent sense), that

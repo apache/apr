@@ -147,12 +147,14 @@
 
 /*  APR Feature Macros */
 #define APR_HAS_THREADS        1
-#define APR_HAS_SENDFILE      1
+#define APR_HAS_SENDFILE       1
 #define APR_HAS_RANDOM         1
 #define APR_HAS_DSO            1
 
 #define APR_HAS_MMAP           0
 #define APR_HAS_XLATE          0
+
+#define APR_HAS_UNICODE_FS     1
 
 /* Typedefs that APR needs. */
 
