@@ -58,7 +58,7 @@ install: $(TARGET_LIB)
 	if [ ! -d $(libdir) ]; then \
 	    ./build/mkdir.sh $(libdir); \
 	fi; \
-	libtool --mode=install cp $(TARGET_LIB) $(libdir)
+	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
 
 $(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.lo"; done ; \
