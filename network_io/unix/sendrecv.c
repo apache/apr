@@ -994,25 +994,16 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 #error version of it for APR yet.  To get past this, either write apr_sendfile
 #error or change APR_HAS_SENDFILE in apr.h to 0. 
 #endif /* __linux__, __FreeBSD__, __HPUX__, _AIX, __MVS__, Tru64/OSF1 */
-#endif /* APR_HAS_SENDFILE */
 
-#if !APR_HAS_SENDFILE
-/* currently, exports.c includes a reference to apr_sendfile() even if 
- * apr_sendfile() doesn't work on the platform;
- * this dummy version is just to get exports.c to compile/link
- */
-apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
-                                 apr_hdtr_t *hdtr, apr_off_t *offset,
-                                 apr_size_t *len, apr_int32_t flags); 
-                                 /* avoid warning for no proto */
-
-apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
-                                 apr_hdtr_t *hdtr, apr_off_t *offset,
-                                 apr_size_t *len, apr_int32_t flags)
+/* deprecated */
+apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
+                          apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
+                          apr_int32_t flags)
 {
-    return APR_ENOTIMPL;
+    return apr_socket_sendfile(sock, file, hdtr, offset, len, flags);
 }
-#endif
+
+#endif /* APR_HAS_SENDFILE */
 
 /* deprecated */
 apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
@@ -1042,14 +1033,6 @@ apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                           apr_size_t *len)
 {
     return apr_socket_recvfrom(from, sock, flags, buf, len);
-}
-
-/* deprecated */
-apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
-                          apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
-                          apr_int32_t flags)
-{
-    return apr_socket_sendfile(sock, file, hdtr, offset, len, flags);
 }
 
 /* deprecated */
