@@ -76,8 +76,7 @@ static ap_status_t pipenonblock(ap_file_t *thefile)
     return APR_SUCCESS;
 }
 
-
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
+ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
     if(thepipe == NULL)
         return APR_EBADARG;

@@ -68,6 +68,9 @@ API_VAR_IMPORT const char ap_day_snames[7][4];
 /* number of microseconds since 00:00:00 january 1, 1970 UTC */
 typedef ap_int64_t ap_time_t;
 
+/* intervals for I/O timeouts, in microseconds */
+typedef ap_int32_t ap_interval_time_t;
+
 #ifdef WIN32
 #define AP_USEC_PER_SEC ((LONGLONG) 1000000)
 #else

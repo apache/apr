@@ -95,7 +95,7 @@ int main()
     }
     
     fprintf(stdout, "\tSetting pipe timeout.......");
-    if (ap_set_pipe_timeout(readp, 1) != APR_SUCCESS) {
+    if (ap_set_pipe_timeout(readp, 1 * AP_USEC_PER_SEC) != APR_SUCCESS) {
         perror("Couldn't set a timeout");
         exit(-1);
     } else {

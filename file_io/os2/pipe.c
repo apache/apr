@@ -100,7 +100,7 @@ ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, ap_pool_t *
 
  
 
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
+ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
     return APR_ENOTIMPL;
 }

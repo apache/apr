@@ -56,20 +56,28 @@
 
 static ap_status_t wait_for_io_or_timeout(ap_file_t *file, int for_read)
 {
-    struct timeval tv;
+    struct timeval tv, *tvptr;
     fd_set fdset;
     int srv;
+
+    /* TODO - timeout should be less each time through this loop */
 
     do {
         FD_ZERO(&fdset);
         FD_SET(file->filedes, &fdset);
-        tv.tv_sec = file->timeout;
-        tv.tv_usec = 0;
+        if (file->timeout >= 0) {
+            tv.tv_sec = file->timeout / AP_USEC_PER_SEC;
+            tv.tv_usec = file->timeout % AP_USEC_PER_SEC;
+            tvptr = &tv;
+        }
+        else {
+            tvptr = NULL;
+        }
         srv = select(FD_SETSIZE,
             for_read ? &fdset : NULL,
             for_read ? NULL : &fdset,
             NULL,
-            file->timeout < 0 ? NULL : &tv);
+            tvptr);
     } while (srv == -1 && errno == EINTR);
 
     if (srv == 0) {
