@@ -110,6 +110,8 @@ typedef struct {
 API_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context);
 #if APR_HAS_XLATE
 API_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate);
+#else
+#define ap_MD5SetXlate(context, xlate) APR_ENOTIMPL
 #endif
 API_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
                                      const unsigned char *input,
