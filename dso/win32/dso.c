@@ -53,15 +53,28 @@
  */
 
 #include "dso.h"
+#include "apr_strings.h"
 
 #if APR_HAS_DSO
 
 apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path, 
                         apr_pool_t *ctx)
 {
-    /* XXX: Must convert path from / to \ notation
+    HINSTANCE os_handle;
+    char fspec[MAX_PATH], *p;
+
+    /* Must convert path from / to \ notation.
+     * Per PR2555, the LoadLibraryEx function is very picky about slashes.
+     * Debugging on NT 4 SP 6a reveals First Chance Exception within NTDLL.
+     * LoadLibrary in the MS PSDK also reveals that it -explicitly- states
+     * that backslashes must be used for the LoadLibrary family of calls.
      */
-    HINSTANCE os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    apr_cpystrn(fspec, path, MAX_PATH);
+    for (p = fspec; *p; ++p)
+        if (*p == '/')
+            *p = '\\';
+        
+    os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
 
     if(os_handle == NULL) {

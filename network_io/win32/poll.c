@@ -157,6 +157,7 @@ apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_
         revents |= APR_POLLIN;
         if (WSARecv(sock->sock, &data, 1, &dummy, &flags, NULL, 
                     NULL) == SOCKET_ERROR) {
+            /* This is only legit since we don't return the error */
             dummy = WSAGetLastError();
             switch (dummy) {
                 case WSAECONNRESET:

@@ -218,9 +218,10 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
         }
     }
     else {
-        /*  XXX: The question remains, can we assume fname is not a wildcard?
-         *  Must we test it?  Absolutely YES.
+        /* What a waste of cpu cycles... but what else can we do?
          */
+        if (strchr(fname, '*') || strchr(fname, '?'))
+            return APR_ENOENT;
         hFind = FindFirstFile(fname, &FileInformation);
         if (hFind == INVALID_HANDLE_VALUE) {
             return apr_get_os_error();
@@ -280,6 +281,8 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
      * XXX: Do we want to tag if nFileSizeHigh as -1 (or 0x7fffffff?)
      */
     finfo->size = FileInformation.nFileSizeLow;
+    if (finfo->size < 0 || FileInformation.nFileSizeLow)
+        finfo->size = 0x7fffffff;
 
     return APR_SUCCESS;
 }
