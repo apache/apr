@@ -62,7 +62,7 @@ typedef struct apr_getopt_t {
     int opt;                 /* character checked for validity */
     int reset;               /* reset getopt */
     int argc;                /* count of arguments */
-    char const* const* argv; /* array of pointers to arguments */
+    char *const *argv;             /* array of pointers to arguments */
     char const* place;       /* argument associated with option */
 } apr_getopt_t;
 
@@ -73,10 +73,10 @@ typedef struct apr_getopt_t {
  * @param argc The number of arguments to parse
  * @param argv The array of arguments to parse
  * @tip Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
- * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont,int argc, char const* const* argv)
+ * @deffunc apr_status_t apr_initopt(apr_getopt_t **os, apr_pool_t *cont,int argc, char *const *argv)
  */
 APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
-                                     int argc, char const* const* argv);
+                                     int argc, char *const *argv);
 
 /**
  * Parse the options initialized by apr_initopt().
