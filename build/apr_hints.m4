@@ -131,7 +131,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-freebsd*)
 	case $host in
-	    *freebsd[2345]*)
+	    *freebsd[[2345]]*)
 		APR_ADDTO(CFLAGS, [-funsigned-char])
 		;;
 	esac
@@ -173,7 +173,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(LDFLAGS, [-posix])
 	APR_ADDTO(LIBS, [-linet])
 	;;
-    *-sco3.2v[234]*)
+    *-sco3.2v[[234]]*)
 	APR_ADDTO(CPPFLAGS, [-DSCO -D_REENTRANT])
 	if test "$GCC" = "no"; then
 	    APR_ADDTO(CFLAGS, [-Oacgiltz])
@@ -298,7 +298,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
 	APR_ADDTO(LIBS, [-linet -lc])
 	;;
-    *-sequent-ptx4.[123].*)
+    *-sequent-ptx4.[[123]].*)
 	APR_ADDTO(CPPFLAGS, [-DSEQUENT=41])
 	APR_ADDTO(CFLAGS, [-Wc,-pw])
 	APR_ADDTO(LIBS, [-lc])
