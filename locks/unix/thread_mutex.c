@@ -160,6 +160,8 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     return rv;
 }
 
+static apr_os_thread_t invalid_thread_id; /* all zeroes */
+
 APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
     apr_status_t status;
@@ -178,7 +180,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 
             if (apr_atomic_dec(&mutex->owner_ref) != 0)
                 return APR_SUCCESS;
-            mutex->owner = 0;
+            mutex->owner = invalid_thread_id;
         }
         /*
          * This should never occur, and indicates an application error
