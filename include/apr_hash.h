@@ -70,6 +70,16 @@ extern "C" {
 #include "apr_pools.h"
 
 /*
+ * When passing a key to apr_hash_set or apr_hash_get, this value can be
+ * passed to indicate a string-valued key, and have apr_hash compute the
+ * length automatically.
+ *
+ * Note: apr_hash will use strlen(key)+1 for the length. This allows
+ *   apr_hash_this() to return a null-terminated string as the key.
+ */
+#define APR_HASH_KEY_STRING     (-1)
+
+/*
  * Abstract type for hash tables.
  */
 typedef struct apr_hash_t apr_hash_t;
@@ -91,26 +101,24 @@ APR_EXPORT(apr_hash_t *) apr_make_hash(apr_pool_t *pool);
  * Associate a value with a key in a hash table.
  * @param ht The hash table
  * @param key Pointer to the key
- * @param klen Length of the key 
- *             If the length is 0 it is assumed to be strlen(key)+1
+ * @param klen Length of the key. Can be APR_HASH_KEY_STRING.
  * @param val Value to associate with the key
  * @tip If the value is NULL the hash entry is deleted.
  * @deffunc void apr_hash_set(apr_hash_t *ht, const void *key, apr_size_t klen, const void *val)
  */
 APR_EXPORT(void) apr_hash_set(apr_hash_t *ht, const void *key,
-                              apr_size_t klen, const void *val);
+                              apr_ssize_t klen, const void *val);
 
 /**
  * Look up the value associated with a key in a hash table.
  * @param ht The hash table
  * @param key Pointer to the key
- * @param klen Length of the key
- *         If the length is 0 it is assumed to be strlen(key)+1
+ * @param klen Length of the key. Can be APR_HASH_KEY_STRING.
  * @return Returns NULL if the key is not present.
  * @deffunc void *apr_hash_get(apr_hash_t *ht, const void *key, apr_size_t klen)
  */
 APR_EXPORT(void*) apr_hash_get(apr_hash_t *ht, const void *key,
-                               apr_size_t klen);
+                               apr_ssize_t klen);
 
 /**
  * Start iterating over the entries in a hash table.
