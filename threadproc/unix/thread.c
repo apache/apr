@@ -94,6 +94,25 @@ APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
     return stat;
 }
 
+APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
+                                                       apr_size_t size)
+{
+#ifdef HAVE_PTHREAD_ATTR_SETGUARDSIZE
+    apr_status_t rv;
+
+    rv = pthread_attr_setguardsize(&attr->attr, size);
+    if (rv == 0) {
+        return APR_SUCCESS;
+    }
+#ifdef PTHREAD_SETS_ERRNO
+    rv = errno;
+#endif
+    return rv;
+#else
+    return APR_ENOTIMPL;
+#endif
+}
+
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thread = (apr_thread_t*)opaque;

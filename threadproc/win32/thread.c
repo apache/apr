@@ -65,6 +65,12 @@ APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
+                                                       apr_size_t size)
+{
+    return APR_ENOTIMPL;
+}
+
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;

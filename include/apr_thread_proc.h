@@ -224,6 +224,19 @@ APR_DECLARE(apr_status_t) apr_threadattr_stacksize_set(apr_threadattr_t *attr,
                                                        apr_size_t stacksize);
 
 /**
+ * Set the stack guard area size of newly created threads.
+ * @param attr The threadattr to affect 
+ * @param guardsize The stack guard area size in bytes
+ * @note Thread library implementations commonly use a "guard area"
+ * after each thread's stack which is not readable or writable such that
+ * stack overflows cause a segfault; this consumes e.g. 4K of memory
+ * and increases memory management overhead.  Setting the guard area
+ * size to zero hence trades off reliable behaviour on stack overflow
+ * for performance. */
+APR_DECLARE(apr_status_t) apr_threadattr_guardsize_set(apr_threadattr_t *attr,
+                                                       apr_size_t guardsize);
+
+/**
  * Create a new thread of execution
  * @param new_thread The newly created thread handle.
  * @param attr The threadattr to use to determine how to create the thread
