@@ -7,6 +7,14 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Change default inter-process locking mechanisms: POSIX semaphores
+     and pthread cross-process mutexes are not used by default; on 
+     Solaris, fcntl locks are used by default.  [Joe Orton]
+
+  *) Add apr_threadattr_guardsize_set() for overriding the default stack
+     guard area size for created created by apr_thread_create().
+     [Joe Orton]
+
   *) Add apr_shm_remove() function for removing a named shared
      memory segment.  [Amit Athavale <amit_athavale persistent.co.in>]
 
