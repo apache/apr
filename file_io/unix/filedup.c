@@ -141,17 +141,12 @@ static apr_status_t _file_dup(apr_file_t **new_file,
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
 {
-    apr_status_t rv;
-
-    rv = _file_dup(new_file, old_file, p, 1);
-    return rv;
+    return _file_dup(new_file, old_file, p, 1);
 }
 
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
-    apr_status_t rv;
-
     /* an existing apr_file_t may already be closed, and therefore
      * have no cleanup remaining; but we don't want to double-register
      * the same cleanup in _file_dup.  Kill the existing cleanup before
