@@ -200,17 +200,19 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
         return APR_ENOTSOCK;
     }
 
-    if (*hostname >= '0' && *hostname <= '9' && 
-        strspn(hostname, "0123456789.") == strlen(hostname)) {
-        sock->remote_addr->sin_addr.s_addr = inet_addr(hostname);
-    }
-    else {
-        hp = gethostbyname(hostname);
-        if (!hp)  {
-            return WSAGetLastError();
+    if (hostname != NULL) {
+        if (*hostname >= '0' && *hostname <= '9' && 
+            strspn(hostname, "0123456789.") == strlen(hostname)) {
+            sock->remote_addr->sin_addr.s_addr = inet_addr(hostname);
         }
-        memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
-        sock->addr_len = sizeof(*sock->remote_addr);
+        else {
+            hp = gethostbyname(hostname);
+            if (!hp)  {
+                return WSAGetLastError();
+            }
+            memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr_list[0], hp->h_length);
+            sock->addr_len = sizeof(*sock->remote_addr);
+        }
     }
     
     sock->remote_addr->sin_family = AF_INET;
