@@ -7,10 +7,6 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
-  *) Add command type APR_SHELLCMD_ENV for creating a process
-     which is started by the shell and which inherits the parent's
-     environment variables.  [Jeff Trawick]
-
   *) Fix apr_threadattr_detach_set() on Mac OS X.  PR 28472.
      [INOUE Seiichiro <inoue ariel-networks.com>]
 
@@ -145,6 +141,10 @@ Changes with APR 1.0
      apr_compat.h
 
 Changes with APR 0.9.5
+
+  *) Add command type APR_SHELLCMD_ENV for creating a process
+     which is started by the shell and which inherits the parent's
+     environment variables.  [Jeff Trawick]
 
   *) Don't assume getnameinfo() can handle IPv4-mapped IPv6 addresses
      on any platforms.
