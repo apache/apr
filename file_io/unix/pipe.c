@@ -171,9 +171,10 @@ APR_DECLARE(apr_status_t) apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_int
     return APR_EINVAL;
 }
 
-APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
-                                          apr_os_file_t *thefile,
-                                          apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_os_pipe_put_ex(apr_file_t **file,
+                                             apr_os_file_t *thefile,
+                                             int register_cleanup,
+                                             apr_pool_t *pool)
 {
     int *dafile = thefile;
     
@@ -185,12 +186,26 @@ APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
     (*file)->timeout = -1;
     (*file)->ungetchar = -1; /* no char avail */
     (*file)->filedes = *dafile;
-    (*file)->flags = APR_FILE_NOCLEANUP;
+    if (!register_cleanup) {
+        (*file)->flags = APR_FILE_NOCLEANUP;
+    }
     (*file)->buffered = 0;
 #if APR_HAS_THREADS
     (*file)->thlock = NULL;
 #endif
+    if (register_cleanup) {
+        apr_pool_cleanup_register((*file)->pool, (void *)(*file),
+                                  apr_unix_file_cleanup,
+                                  apr_pool_cleanup_null);
+    }
     return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_os_pipe_put(apr_file_t **file,
+                                          apr_os_file_t *thefile,
+                                          apr_pool_t *pool)
+{
+    return apr_os_pipe_put_ex(file, thefile, 0, pool);
 }
 
 APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *pool)
