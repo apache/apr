@@ -216,7 +216,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
     struct iovec headers[3];
     struct iovec trailers[3];
     apr_size_t bytes_read;
-    apr_pollfd_t *pfd;
+    apr_pollset_t *pset;
     apr_int32_t nsocks;
     int i;
     int family;
@@ -339,11 +339,20 @@ static int client(client_socket_mode_t socket_mode, char *host)
     else {
         /* non-blocking... wooooooo */
         apr_size_t total_bytes_sent;
+        apr_pollfd_t pfd;
 
-        pfd = NULL;
-        rv = apr_poll_setup(&pfd, 1, p);
+        pset = NULL;
+        rv = apr_pollset_create(&pset, 1, p, 0);
         assert(!rv);
-        rv = apr_poll_socket_add(pfd, sock, APR_POLLOUT);
+        pfd.p = p;
+        pfd.desc_type = APR_POLL_SOCKET;
+        pfd.reqevents = APR_POLLOUT;
+        pfd.rtnevents = 0;
+        pfd.desc.s = sock;
+        pfd.client_data = NULL;
+
+        rv = apr_pollset_add(pset, &pfd);        
+//       rv = apr_poll_socket_add(pfd, sock, APR_POLLOUT);
         assert(!rv);
 
         total_bytes_sent = 0;
@@ -374,7 +383,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
                 if (APR_STATUS_IS_EAGAIN(rv)) {
                     assert(tmplen == 0);
                     nsocks = 1;
-                    tmprv = apr_poll(pfd, 1, &nsocks, -1);
+                    tmprv = apr_pollset_poll(pset, -1, &nsocks, NULL);
                     assert(!tmprv);
                     assert(nsocks == 1);
                     /* continue; */

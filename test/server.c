@@ -70,7 +70,8 @@ int main(int argc, const char * const argv[])
     apr_socket_t *sock2;
     apr_size_t length;
     apr_int32_t pollres;
-    apr_pollfd_t *sdset;
+    apr_pollset_t *sdset;
+    apr_pollfd_t fdsock;
     char datasend[STRLEN];
     char datarecv[STRLEN] = "Recv data test";
     const char *bind_to_ipaddr = NULL;
@@ -134,13 +135,22 @@ int main(int argc, const char * const argv[])
         apr_socket_listen(sock, 5))
     
     APR_TEST_BEGIN(rv, "Setting up for polling",
-        apr_poll_setup(&sdset, 1, context))
+          apr_pollset_create(&sdset, 1, context, 0))
+
+    /* Hmm, probably a better way of doing this - quick 'n' dirty :) */
+    fdsock.p = context;
+    fdsock.desc_type = APR_POLL_SOCKET;
+    fdsock.reqevents = APR_POLLIN;
+    fdsock.rtnevents = 0;
+    fdsock.desc.s = sock;
+    fdsock.client_data = NULL;
+
     APR_TEST_END(rv, 
-        apr_poll_socket_add(sdset, sock, APR_POLLIN))
+        apr_pollset_add(sdset, &fdsock))
     
     pollres = 1; 
     APR_TEST_BEGIN(rv, "Polling for socket",
-        apr_poll(sdset, 1, &pollres, -1))
+        apr_pollset_poll(sdset, -1, &pollres, NULL))
 
     if (pollres == 0) {
         fprintf(stdout, "Failed\n");
