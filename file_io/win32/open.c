@@ -339,21 +339,36 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     if (flag & APR_DELONCLOSE) {
         attributes |= FILE_FLAG_DELETE_ON_CLOSE;
     }
+
     if (flag & APR_OPENLINK) {
        attributes |= FILE_FLAG_OPEN_REPARSE_POINT;
     }
-    if (!(flag & (APR_READ | APR_WRITE)) && (apr_os_level >= APR_WIN_NT)) {
-        /* We once failed here, but this is how one opens 
-         * a directory as a file under winnt
-         */
-        attributes |= FILE_FLAG_BACKUP_SEMANTICS;
+
+    /* Without READ or WRITE, we fail unless apr called apr_file_open
+     * internally with the private APR_OPENINFO flag.
+     *
+     * With the APR_OPENINFO flag on NT, use the option flag
+     * FILE_FLAG_BACKUP_SEMANTICS to allow us to open directories.
+     * See the static resolve_ident() fn in file_io/win32/filestat.c
+     */
+    if (!(flag & (APR_READ | APR_WRITE))) {
+        if (flag & APR_OPENINFO) {
+            if (apr_os_level >= APR_WIN_NT) {
+                attributes |= FILE_FLAG_BACKUP_SEMANTICS;
+            }
+        }
+        else {
+            return APR_EACCES;
+        }
     }
+
     if (flag & APR_XTHREAD) {
         /* This win32 specific feature is required 
          * to allow multiple threads to work with the file.
          */
         attributes |= FILE_FLAG_OVERLAPPED;
     }
+
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
     {
