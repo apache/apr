@@ -64,12 +64,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifndef WIN32
-#include "apr_config.h"
-#else
-#include "apr_win.h"
-#endif
-
 #include "apr_general.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"

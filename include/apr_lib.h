@@ -71,7 +71,6 @@
 #endif
 
 #ifndef WIN32
-#include "apr_config.h"
 #else
 #include "../file_io/win32/readdir.h" /* definition of DIR for WIN32 */
 #include "apr_win.h"
