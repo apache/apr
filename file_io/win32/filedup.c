@@ -62,6 +62,9 @@
 APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                                        apr_file_t *old_file, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
 
@@ -83,12 +86,16 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
                         apr_pool_cleanup_null);
 
     return APR_SUCCESS;
+#endif /* !defined(_WIN32_WCE) */
 }
 
 
 APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                                         apr_file_t *old_file, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     DWORD stdhandle = -1;
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
@@ -99,13 +106,13 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
      * and close and replace other handles with duped handles.
      * The os_handle will change, however.
      */
-    if (old_file->filehand == GetStdHandle(STD_ERROR_HANDLE)) {
+    if (new_file->filehand == GetStdHandle(STD_ERROR_HANDLE)) {
         stdhandle = STD_ERROR_HANDLE;
     }
-    else if (old_file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
+    else if (new_file->filehand == GetStdHandle(STD_OUTPUT_HANDLE)) {
         stdhandle = STD_OUTPUT_HANDLE;
     }
-    else if (old_file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
+    else if (new_file->filehand == GetStdHandle(STD_INPUT_HANDLE)) {
         stdhandle = STD_INPUT_HANDLE;
     }
 
@@ -126,10 +133,11 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
                              FALSE, DUPLICATE_SAME_ACCESS)) {
             return apr_get_os_error();
         }
-        if (new_file->filehand) {
-            CloseHandle(new_file->filehand);
-        }
         newflags = old_file->flags & ~APR_INHERIT;
+    }
+
+    if (new_file->filehand && (new_file->filehand != INVALID_HANDLE_VALUE)) {
+        CloseHandle(new_file->filehand);
     }
 
     new_file->flags = newflags;
@@ -139,5 +147,6 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
     new_file->buffered = FALSE;
 
     return APR_SUCCESS;
+#endif /* !defined(_WIN32_WCE) */
 }
 

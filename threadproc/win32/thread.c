@@ -58,7 +58,9 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
+#if APR_HAVE_PROCESS_H
 #include <process.h>
+#endif
 #include "misc.h"   
 
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
@@ -121,12 +123,19 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
     /* Use 0 for Thread Stack Size, because that will default the stack to the
      * same size as the calling thread. 
      */
-    if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, 
+#ifndef _WIN32_WCE
+    if (((*new)->td = (HANDLE)_beginthreadex(NULL, 0, 
                         (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
                         (*new), 0, &temp)) == 0) {
         return APR_FROM_OS_ERROR(_doserrno);
     }
-
+#else
+   if (((*new)->td = CreateThread(NULL, 0, 
+                        (unsigned int (APR_THREAD_FUNC *)(void *))dummy_worker,
+                        (*new), 0, &temp)) == 0) {
+        return apr_get_os_error();
+    }
+#endif
     if (attr && attr->detach) {
         CloseHandle((*new)->td);
     }
@@ -139,8 +148,12 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
 {
     thd->exitval = retval;
     apr_pool_destroy(thd->cntxt);
+#ifndef _WIN32_WCE
     _endthreadex(0);
-	return APR_SUCCESS;
+#else
+    ExitThread(0);
+#endif
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
@@ -174,9 +187,11 @@ APR_DECLARE(void) apr_thread_yield()
      * providing more critical threads a bit larger timeslice)
      * we won't worry too much if it's not available.
      */
+#ifndef _WIN32_WCE
     if (apr_os_level >= APR_WIN_NT) {
         SwitchToThread();
     }
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,

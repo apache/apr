@@ -622,52 +622,5 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
                                              apr_fileattrs_t attributes,
                                              apr_pool_t *cont)
 {
-    DWORD flags;
-    apr_status_t rv;
-#if APR_HAS_UNICODE_FS
-    apr_wchar_t wfname[APR_PATH_MAX];
-#endif
-
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        if (rv = utf8_to_unicode_path(wfname,
-                                      sizeof(wfname) / sizeof(wfname[0]),
-                                      fname))
-            return rv;
-        flags = GetFileAttributesW(wfname);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        flags = GetFileAttributesA(fname);
-    }
-#endif
-
-    if (flags == 0xFFFFFFFF)
-        return apr_get_os_error();
-
-    if (attributes & APR_FILE_ATTR_READONLY)
-        flags |= FILE_ATTRIBUTE_READONLY;
-    else
-        flags &= !FILE_ATTRIBUTE_READONLY;
-
-#if APR_HAS_UNICODE_FS
-    IF_WIN_OS_IS_UNICODE
-    {
-        rv = SetFileAttributesW(wfname, flags);
-    }
-#endif
-#if APR_HAS_ANSI_FS
-    ELSE_WIN_OS_IS_ANSI
-    {
-        rv = SetFileAttributesA(fname, flags);
-    }
-#endif
-
-    if (rv == 0)
-        return apr_get_os_error();
-
-    return APR_SUCCESS;
+   return APR_ENOTIMPL;
 }
