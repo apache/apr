@@ -128,7 +128,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
     while (1) {
         res = WaitForSingleObject(cond->mutex, timeout_ms);
         if (res != WAIT_OBJECT_0) {
-            if (res == WAIT_ABANDONED) {
+            if (res == WAIT_TIMEOUT) {
                 return APR_TIMEUP;
             }
             return apr_get_os_error();
@@ -142,7 +142,7 @@ APR_DECLARE(apr_status_t) apr_thread_cond_timedwait(apr_thread_cond_t *cond,
         if (res != WAIT_OBJECT_0) {
             apr_status_t rv = apr_get_os_error();
             ReleaseMutex(cond->mutex);
-            if (res == WAIT_ABANDONED) {
+            if (res == WAIT_TIMEOUT) {
                 rv = APR_TIMEUP;
             }
             return rv;
