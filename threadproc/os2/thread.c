@@ -156,7 +156,7 @@ APR_DECLARE(apr_os_thread_t) apr_os_thread_current()
 
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
-    thd->rv = retval;
+    thd->rv = *retval;
     _endthread();
     return -1; /* If we get here something's wrong */
 }
