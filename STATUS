@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/04/12 15:30:46 $]
+Last modified at [$Date: 2001/04/27 20:01:34 $]
 
 Release:
 
@@ -28,6 +28,7 @@ RELEASE SHOWSTOPPERS:
       and offer up any additions/vetos/clarifications.
       DougM offered to complete the work with his nifty perl rename
       script at the hackathon. 
+
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
@@ -129,9 +130,19 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
     * may be good to have a --disable-ipv6 configure option
 
+    * add a pool argument to setaside() to tell a bucket "do whatever
+      you need to do, to ensure that you survive as long as this
+      pool." Immortal and heap buckets never have work. File, socket,
+      mmap, pipe, and pool buckets can do nothing if the given pool is
+      equal to, or a descendent of the pool they are using. Apache's
+      core_output_filter can then say "setside(conn->pool)" to ensure
+      that a saved brigade will last as long as the connection.
+
+
 Documentation that needs writing:
 
     * API documentation
+
 
 Stuff waiting for code thawing after Beta 1:
 
