@@ -108,9 +108,6 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     if (new == NULL)
         return APR_EBADARG;
 
-    if (cont == NULL)
-        return APR_ENOCONT;
-
     if ((*new) == NULL) {
         (*new) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     }
@@ -220,9 +217,6 @@ ap_status_t ap_close(ap_file_t *file)
  */
 ap_status_t ap_remove_file(char *path, ap_context_t *cont)
 {
-    if (cont == NULL)
-        return APR_ENOCONT;
-
     if (unlink(path) == 0) {
         return APR_SUCCESS;
     }
@@ -274,9 +268,6 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
     
     if (file == NULL || thefile == NULL)
         return APR_EBADARG;
-
-    if (cont == NULL)
-        return APR_ENOCONT;
 
     if ((*file) == NULL) {
         (*file) = ap_pcalloc(cont, sizeof(ap_file_t));

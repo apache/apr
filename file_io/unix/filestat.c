@@ -133,9 +133,6 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
     if(finfo == NULL || fname == NULL)
         return APR_EBADARG;
 
-    if(cont == NULL)
-        return APR_ENOCONT;
-
     if ((rv = stat(fname, &info)) == 0) {
         finfo->protection = info.st_mode;
         finfo->filetype = filetype_from_mode(info.st_mode);
