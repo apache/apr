@@ -362,6 +362,8 @@ typedef int apr_wait_t;
 #define APR_INT64_T_FMT_LEN      3
 #define APR_UINT64_T_FMT         "llu"
 #define APR_UINT64_T_FMT_LEN     3
+#define APR_UINT64_T_HEX_FMT     "llx"
+#define APR_UINT64_T_HEX_FMT_LEN (sizeof(APR_UINT64_T_HEX_FMT) - 1)
 #define APR_TIME_T_FMT APR_INT64_T_FMT
 
 /* Deal with atoi64 variables ... these should move to apr_private.h */

@@ -102,6 +102,24 @@ static void int64_t_fmt(CuTest *tc)
     CuAssertStrEquals(tc, buf, "0");
 }
 
+static void uint64_t_fmt(CuTest *tc)
+{
+    char buf[100];
+    apr_uint64_t var = 14000000;
+
+    sprintf(buf, "%" APR_UINT64_T_FMT, var);
+    CuAssertStrEquals(tc, buf, "14000000");
+}
+
+static void uint64_t_hex_fmt(CuTest *tc)
+{
+    char buf[100];
+    apr_uint64_t var = 14000000;
+
+    sprintf(buf, "%" APR_UINT64_T_HEX_FMT, var);
+    CuAssertStrEquals(tc, buf, "d59f80");
+}
+
 CuSuite *testfmt(void)
 {
     CuSuite *suite = CuSuiteNew("Formats");
@@ -111,6 +129,8 @@ CuSuite *testfmt(void)
     SUITE_ADD_TEST(suite, off_t_fmt);
     SUITE_ADD_TEST(suite, pid_t_fmt);
     SUITE_ADD_TEST(suite, int64_t_fmt);
+    SUITE_ADD_TEST(suite, uint64_t_fmt);
+    SUITE_ADD_TEST(suite, uint64_t_hex_fmt);
 
     return suite;
 }
