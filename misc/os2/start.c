@@ -97,7 +97,46 @@ ap_status_t ap_create_context(struct context_t *cont, void *data, ap_context_t *
 
 ap_status_t ap_destroy_context(struct context_t *cont)
 {
-    ap_destroy_pool(cont->pool);
+    ap_destroy_pool(cont);
     return APR_SUCCESS;
 }
 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_set_userdata(ap_context_t *, void *)
+ *    Set the data associated with the current context.
+ * arg 1) The current context.
+ * arg 2) The user data associated with the context.
+ */
+ap_status_t ap_set_userdata(struct context_t *cont, void *data)
+{
+    if (cont) {
+        cont->prog_data = data;
+        return APR_SUCCESS;
+    }
+    return APR_ENOCONT;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_get_userdata(ap_context_t *, void **)
+ *    Return the data associated with the current context.
+ * arg 1) The current context.
+ * arg 2) The user data associated with the context.
+ */
+ap_status_t ap_get_userdata(struct context_t *cont, void **data)
+{
+    if (cont) {
+        (*data) = cont->prog_data;
+        return APR_SUCCESS;
+    }
+    return APR_ENOCONT;
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_initialize()
+ *    Setup any APR internal data structures.  This MUST be the first
+ *    function called for any APR program.
+ */
+ap_status_t ap_initialize(void)
+{
+    return APR_SUCCESS;
+}
