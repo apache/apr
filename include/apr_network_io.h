@@ -422,6 +422,32 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on);
 
 /*
 
+=head1 ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t* on)
+
+B<Query socket options for the specified socket> 
+
+    arg 1) The socket to query
+    arg 2) The option we would like to query.  One of:
+              APR_SO_DEBUG      --  turn on debugging information 
+              APR_SO_KEEPALIVE  --  keep connections active
+              APR_SO_LINGER     --  lingers on close if data is present
+              APR_SO_NONBLOCK   --  Turns blocking on/off for socket
+              APR_SO_REUSEADDR  --  The rules used in validating addresses
+                                    supplied to bind should allow reuse
+                                    of local addresses.
+              APR_SO_TIMEOUT    --  Set the timeout value in microseconds.
+                                    values < 0 mean wait forever.  0 means
+                                    don't wait at all.
+              APR_SO_SNDBUF     --  Set the SendBufferSize
+              APR_SO_RCVBUF     --  Set the ReceiveBufferSize
+    arg 3) Socket option returned on the call.
+
+=cut
+ */
+ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t* on);
+
+/*
+
 =head1 ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
       Assocaite a local port with a socket.
 

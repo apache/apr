@@ -100,6 +100,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 
     *len = dwBytes;
     return APR_SUCCESS;
+
 }
 
 ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec,
