@@ -28,6 +28,7 @@ copy ..\include\apr.hnw ..\include\apr.h
 
 @echo Fixing up the APR-Util headers
 copy ..\..\apr-util\include\apu.hnw ..\..\apr-util\include\apu.h
+copy ..\..\apr-util\include\apu_want.hnw ..\..\apr-util\include\apu_want.h
 copy ..\..\apr-util\include\apr_ldap.hnw ..\..\apr-util\include\apr_ldap.h
 copy ..\..\apr-util\include\private\apu_config.hw ..\..\apr-util\include\private\apu_config.h
 copy ..\..\apr-util\xml\expat\lib\expat.h.in ..\..\apr-util\xml\expat\lib\expat.h
