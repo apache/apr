@@ -66,6 +66,14 @@
 #define APR_HAS_XLATE             @iconv@
 #define APR_HAS_OTHER_CHILD       @oc@
 
+/* Any time a file and socket are represented as the same type, this macro
+ * should be true.  I don't know of any platforms using Autoconf where this
+ * isn't true (OS/2? maybe), but I know it isn't true for Windows.  For right
+ * now, just define it as 1, and Windows will define it correctly, if this
+ * turns out to not work, we can devise an Autoconf test for it later.  rbb
+ */
+#define APR_FILES_AS_SOCKETS      1
+
 /* Typedefs that APR needs. */
 
 typedef  @short_value@           ap_int16_t;

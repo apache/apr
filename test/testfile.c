@@ -55,6 +55,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "apr_file_io.h"
+#include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_lib.h"
@@ -70,9 +71,12 @@ int main()
     ap_pool_t *context;
     ap_pool_t *cont2;
     ap_file_t *thefile = NULL;
+    ap_socket_t *testsock = NULL;
+    ap_pollfd_t *sdset = NULL;
     ap_status_t status = 0;
     ap_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     ap_ssize_t nbytes = 0;
+    ap_int32_t rv;
     ap_off_t zer = 0;
     char *buf;
     char *str;
@@ -142,6 +146,31 @@ int main()
     else {
         fprintf(stdout, "OK\n");
     }
+
+#if APR_FILES_AS_SOCKETS
+    fprintf(stdout, "\tThis platform supports files_like_sockets\n");
+    fprintf(stdout, "\t\tMaking file look like a socket.......");
+    if (ap_socket_from_file(&testsock, thefile) != APR_SUCCESS) {
+        perror("Something went wrong");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+
+    fprintf(stdout, "\t\tChecking for incoming data.......");
+    ap_setup_poll(&sdset, 1, context);
+    ap_add_poll_socket(sdset, testsock, APR_POLLIN);
+    rv = 1;
+    if (ap_poll(sdset, &rv, -1) != APR_SUCCESS) {
+        fprintf(stderr, "Select caused an error\n");
+        exit(-1);
+    }
+    else if (rv == 0) {
+        fprintf(stderr, "I should not return until rv == 1\n");
+        exit(-1);
+    }
+    fprintf(stdout, "OK\n");
+#endif
+
 
     fprintf(stdout, "\tReading from the file.......");
     nbytes = (ap_ssize_t)strlen("this is a test");

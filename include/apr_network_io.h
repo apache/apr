@@ -711,6 +711,24 @@ B<Return the pool associated with the current poll.>
 ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
                             ap_status_t (*cleanup) (void *));
 
+/*
+
+=head1 ap_status_t ap_socket_from_file(ap_socket_t **newsock, ap_file_t *file)
+
+B<Convert a File type to a socket so that it can be used in a poll operation.>
+
+    arg 1) the newly created socket which represents a file.
+    arg 2) the file to mask as a socket.
+
+B<NOTE>: This is not available on all platforms.  Platforms that have the
+         ability to poll files for data to be read/written/exceptions will
+         have the APR_FILES_AS_SOCKETS macro defined as true.
+
+=cut
+ */
+ap_status_t ap_socket_from_file(ap_socket_t **newsock, ap_file_t *file);
+
+
 /*  accessor functions   */
 
 #ifdef __cplusplus
