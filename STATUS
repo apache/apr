@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/06/26 18:17:44 $]
+Last modified at [$Date: 2003/11/15 20:08:21 $]
 
 Release:
 
@@ -47,14 +47,6 @@ RELEASE 1.0 SHOWSTOPPERS:
     * close out the XXX's already!  (wrowe: this is "production release" 
       quality code with that many unanswered questions?)  If they aren't
       showstoppers, deprecate them to TODO:s.
-
-    * complete the efforts started by DougM for cleaner fn naming
-      conventions: see proposed name changes in renames_pending
-      and offer up any additions/vetos/clarifications.
-      DougM offered to complete the work with his nifty perl rename
-      script at the hackathon. 
-      Thom says: I think this is close to done; does anyone want to add any
-      further renames?
 
 
 CURRENT VOTES:
