@@ -209,7 +209,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
 					  int *optch, const char **optarg)
 {
     const char *p;
-    int i, len;
+    int i;
 
     /* Let the calling program reset option processing. */
     if (os->reset) {
@@ -239,15 +239,17 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
 	p = os->argv[os->ind++] + 1;
 	if (*p == '-' && p[1] != '\0') {        /* Long option */
 	    /* Search for the long option name in the caller's table. */
+	    int len = 0;
+
 	    p++;
-	    for (i = 0; opts[i].optch != 0; i++) {
+	    for (i = 0; ; i++) {
+	        if (opts[i].optch == 0)             /* No match */
+		    return serr(os, "invalid option", p - 2, APR_BADCH);
 		len = strlen(opts[i].name);
 		if (strncmp(p, opts[i].name, len) == 0
 		    && (p[len] == '\0' || p[len] == '='))
 		    break;
 	    }
-	    if (opts[i].optch == 0)             /* No match */
-		return serr(os, "invalid option", p - 2, APR_BADCH);
 	    *optch = opts[i].optch;
 
 	    if (opts[i].has_arg) {
@@ -277,12 +279,12 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
      * Now we're in a run of short options, and *p is the next one.
      * Look for it in the caller's table.
      */
-    for (i = 0; opts[i].optch != 0; i++) {
+    for (i = 0; ; i++) {
+	if (opts[i].optch == 0)                     /* No match */
+	    return cerr(os, "invalid option character", *p, APR_BADCH);
 	if (*p == opts[i].optch)
 	    break;
     }
-    if (opts[i].optch == 0)                     /* No match */
-	return cerr(os, "invalid option character", *p, APR_BADCH);
     *optch = *p++;
 
     if (opts[i].has_arg) {
