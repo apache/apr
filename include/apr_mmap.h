@@ -96,9 +96,9 @@ struct apr_mmap_t {
     /** The start of the real memory page area (mapped view) */
     void *mv;
     /** The physical start, size and offset */
-    apr_off_t pstart;
-    apr_off_t psize;
-    apr_off_t poffset;
+    apr_off_t  pstart;
+    apr_size_t psize;
+    apr_off_t  poffset;
 #endif
     /** The start of the memory mapped area */
     void *mm;

@@ -161,7 +161,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
 
     (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*in)->cntxt = p;
-    (*in)->fname = "\0"; // What was this??? : apr_pstrdup(p, "PIPE"); */
+    (*in)->fname = ""; // What was this??? : apr_pstrdup(p, "PIPE"); */
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
@@ -174,7 +174,7 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
 
     (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->cntxt = p;
-    (*in)->fname = "\0"; // What was this??? : apr_pstrdup(p, "PIPE"); */
+    (*out)->fname = ""; // What was this??? : apr_pstrdup(p, "PIPE"); */
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
@@ -192,7 +192,6 @@ apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out,
             dwOpenMode |= FILE_FLAG_OVERLAPPED;
             (*in)->pOverlapped = (OVERLAPPED*) apr_pcalloc(p, sizeof(OVERLAPPED));
             (*in)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-            /* register a cleanup for the event handle... */
         }
 
         dwPipeMode = 0;
