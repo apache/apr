@@ -113,7 +113,7 @@ typedef PULONG                apr_os_threadkey_t;
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
 
-#elif defined(BEOS)
+#elif defined(__BEOS__)
 #include <kernel/OS.h>
 
 struct apr_os_lock_t {
