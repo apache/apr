@@ -55,6 +55,7 @@
 #include <stdio.h>
 
 #include "apr_version.h"
+#include "apr_general.h"
 
 
 int main(int argc, char **argv)
