@@ -1221,16 +1221,16 @@ if test "x$ac_cv_define_TCP_NOPUSH" = "xyes"; then
     have_corkable_tcp="1"
 fi
 
-APR_CHECK_DEFINE(SO_ACCEPT_FILTER, sys/socket.h)
-if test "x$ac_cv_define_SO_ACCEPT_FILTER" = "xyes"; then
-    accept_filter="1"
+APR_CHECK_DEFINE(SO_ACCEPTFILTER, sys/socket.h)
+if test "x$ac_cv_define_SO_ACCEPTFILTER" = "xyes"; then
+    acceptfilter="1"
 else
-    accept_filter="0"
+    acceptfilter="0"
 fi
 
 AC_SUBST(apr_tcp_nopush_flag)
 AC_SUBST(have_corkable_tcp)
-AC_SUBST(accept_filter)
+AC_SUBST(acceptfilter)
 
 AC_CHECK_FUNCS(set_h_errno)
 

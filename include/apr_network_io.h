@@ -790,7 +790,7 @@ APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char
  */
 APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa);
 
-#ifdef APR_OS_ACCEPT_FILTER
+#if APR_HAS_SO_ACCEPTFILTER
 /**
  * Set an OS level accept filter.
  * @param sock The socket to put the accept filter on.
@@ -798,8 +798,8 @@ APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa);
  * @param args Any extra args to the accept filter.  Passing NULL here removes
  *             the accept filter. 
  */
-apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char name[16],
-                                      char args[256 - 16]);
+apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name,
+                                      char *args);
 #endif
 
 /**
