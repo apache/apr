@@ -92,6 +92,7 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInformation;
     DWORD FileType;
+    apr_oslevel_e os_level;
 
     if (!GetFileInformationByHandle(thefile->filehand, &FileInformation)) {
         return apr_get_os_error();
@@ -103,13 +104,24 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
     }
 
     /* If my rudimentary knowledge of posix serves... inode is the absolute
-     * id of the file (uniquifier) that is returned by NT as follows:
-     *
-     *     dwVolumeSerialNumber
-     *     nFileIndexHigh
-     *     nFileIndexLow
-     *
-     * user and group could be returned as SID's, although this creates
+     * id of the file (uniquifier) that is returned by NT (not 9x) as follows:
+     */
+    if (apr_get_oslevel(thefile->cntxt, &os_level) || os_level >= APR_WIN_NT) 
+    {
+        finfo->inode = (apr_ino_t) FileInformation.nFileIndexHigh << 16
+                                 | FileInformation.nFileIndexLow;
+        finfo->device = FileInformation.dwVolumeSerialNumber;
+    }
+    else 
+    {
+        /* Since the apr_stat is not implemented with CreateFile(),
+         * (directories can't be opened with CreateFile() at all)
+         * the apr_stat always returns 0 - so must apr_getfileinfo().
+         */
+        finfo->inode = 0;
+        finfo->device = 0;
+    }
+    /* user and group could be returned as SID's, although this creates
      * it's own unique set of issues.  All three fields are significantly
      * longer than the posix compatible kernals would ever require.
      * TODO: Someday solve this, and fix the executable flag below the
@@ -117,12 +129,13 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
      */
     finfo->user = 0;
     finfo->group = 0;
-    finfo->inode = (apr_ino_t) FileInformation.nFileIndexHigh << 16
-                             | FileInformation.nFileIndexLow;
-    finfo->device = FileInformation.dwVolumeSerialNumber;
-
+    
     /* Filetype - Directory or file: this case _will_ never happen */
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+        finfo->protection = S_IFLNK;
+        finfo->filetype = APR_LNK;
+    }
+    else if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         finfo->protection = S_IFDIR;
         finfo->filetype = APR_DIR;
     }
@@ -135,12 +148,7 @@ apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
         finfo->filetype = APR_CHR;
     }
     else if (FileType == FILE_TYPE_PIPE) {
-        /* obscure ommission in msvc... missing declaration sans underscore */
-#ifdef _MSC_VER
-        finfo->protection = _S_IFIFO;
-#else
         finfo->protection = S_IFIFO;
-#endif
         finfo->filetype = APR_PIPE;
     }
     else {
@@ -179,35 +187,51 @@ apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
 
 apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
-    /* Big enough for the Win9x FindFile, but actually the same
-     * initial fields as the GetFileAttributes return structure
-     */
-    WIN32_FIND_DATA FileInformation;
     apr_oslevel_e os_level;
-
-    /* We need to catch the case where fname length == MAX_PATH since for
+    /*
+     * We need to catch the case where fname length == MAX_PATH since for
      * some strange reason GetFileAttributesEx fails with PATH_NOT_FOUND.
      * We would rather indicate length error than 'not found'
      * since in many cases the apr user is testing for 'not found' 
      * and this is not such a case.
      */        
-#if APR_HAS_UNICODE_FS
     if (!apr_get_oslevel(cont, &os_level) && os_level >= APR_WIN_NT)
     {
-        apr_wchar_t *wfname;
-        wfname = utf8_to_unicode_path(fname, cont);
-        if (!wfname)
-            return APR_ENAMETOOLONG;        
-        if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
-                                  &FileInformation)) {
+        apr_file_t thefile;
+        apr_status_t rv;
+        /* 
+         * NT5 (W2K) only supports symlinks in the same manner as mount points.
+         * This code should eventually take that into account, for now treat
+         * every reparse point as a symlink...
+         *
+         * We must open the file with READ_CONTROL if we plan to retrieve the
+         * user, group or permissions.
+         */
+        thefile.cntxt = cont;
+        thefile.w.fname = utf8_to_unicode_path(fname, cont);
+        if (!thefile.w.fname)
+            return APR_ENAMETOOLONG;
+        thefile.filehand = CreateFileW(thefile.w.fname, 
+                                       0 /* READ_CONTROL */, 
+                                       FILE_SHARE_READ | FILE_SHARE_WRITE
+                                     | FILE_SHARE_DELETE, NULL, 
+                                       OPEN_EXISTING, 
+                                       FILE_FLAG_BACKUP_SEMANTICS 
+                                     | FILE_FLAG_OPEN_NO_RECALL, NULL);
+        if (thefile.filehand == INVALID_HANDLE_VALUE)
             return apr_get_os_error();
-        }
+        rv = apr_getfileinfo(finfo, &thefile);
+        CloseHandle(thefile.filehand);
+        return rv;
     }
     else
-#else
-    apr_get_oslevel(cont, &os_level);
-#endif
     {
+        WIN32_FIND_DATA FileInformation;
+        /*
+         * Big enough for the Win95 FindFile, but actually the same
+         * initial fields as the GetFileAttributesEx return structure
+         * used for Win98
+         */
         if (strlen(fname) >= MAX_PATH) {
             return APR_ENAMETOOLONG;
         }
@@ -220,7 +244,7 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
         }
         else 
         {
-            /* What a waste of cpu cycles... but what else can we do?
+            /* What a waste of cpu cycles... but we don't have a choice
              */
             HANDLE hFind;
             if (strchr(fname, '*') || strchr(fname, '?'))
@@ -232,68 +256,101 @@ apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
                 FindClose(hFind);
             }
         }
-    }
 
-    memset(finfo, '\0', sizeof(*finfo));
-    /* Filetype - Directory or file?
-     * Short of opening the handle to the file, the 'FileType' appears
-     * to be unknowable (in any trustworthy or consistent sense), that
-     * is, as far as PIPE, CHR, etc.
-     */
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        finfo->protection = S_IFDIR;
-        finfo->filetype = APR_DIR;
-    }
-    else {
-        finfo->protection = S_IFREG;
-        finfo->filetype = APR_REG;
-    }
+        memset(finfo, '\0', sizeof(*finfo));
+        /* Filetype - Directory or file?
+         * Short of opening the handle to the file, the 'FileType' appears
+         * to be unknowable (in any trustworthy or consistent sense), that
+         * is, as far as PIPE, CHR, etc.
+         */
+        if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            finfo->protection = S_IFDIR;
+            finfo->filetype = APR_DIR;
+        }
+        else {
+            finfo->protection = S_IFREG;
+            finfo->filetype = APR_REG;
+        }
     
-    /* Read, write execute for owner
-     * In the Win32 environment, anything readable is executable
-     * (well, not entirely 100% true, but I'm looking for a way 
-     * to get at the acl permissions in simplified fashion.)
-     */
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
-        finfo->protection |= S_IREAD | S_IEXEC;
-    }
-    else {
-        finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
-    }
+        /* Read, write execute for owner
+         * In the Win32 environment, anything readable is executable
+         * (well, not entirely 100% true, but I'm looking for a way 
+         * to get at the acl permissions in simplified fashion.)
+         */
+        if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
+            finfo->protection |= S_IREAD | S_IEXEC;
+        }
+        else {
+            finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
+        }
 
-    /* Is this an executable? Guess based on the file extension. 
-     * This is a rather silly test, IMHO... we are looking to test
-     * if the user 'may' execute a file (permissions), 
-     * not if the filetype is executable.
-     * XXX: We need to find a solution, for real.  Or provide some
-     * new mechanism for control.  Note that the PATHEXT env var,
-     * in the format .ext[;.ext]... actually lists the 'executable'
-     * types (invoking without an extension.)  Perhaps a registry
-     * key test is even appropriate here.
+        /* Is this an executable? Guess based on the file extension. 
+         * This is a rather silly test, IMHO... we are looking to test
+         * if the user 'may' execute a file (permissions), 
+         * not if the filetype is executable.
+         * XXX: We need to find a solution, for real.  Or provide some
+         * new mechanism for control.  Note that the PATHEXT env var,
+         * in the format .ext[;.ext]... actually lists the 'executable'
+         * types (invoking without an extension.)  Perhaps a registry
+         * key test is even appropriate here.
+         */
+    /*  if (is_exe(fname, cont)) {
+     *       finfo->protection |= S_IEXEC;
+     *  }
      */
-/*  if (is_exe(fname, cont)) {
- *       finfo->protection |= S_IEXEC;
- *  }
- */
     
-    /* File times */
-    FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
-    FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
-    FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
+        /* File times */
+        FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
+        FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
+        FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
 
-    /* Note: This cannot handle files greater than can be held by an int 
-     */
-    finfo->size = FileInformation.nFileSizeLow;
-    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
-        finfo->size = 0x7fffffff;
-
+        /* Note: This cannot handle files greater than can be held by an int 
+         */
+        finfo->size = FileInformation.nFileSizeLow;
+        if (finfo->size < 0 || FileInformation.nFileSizeHigh)
+            finfo->size = 0x7fffffff;
+    }
     return APR_SUCCESS;
 }
 
 apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
-    /* TODO: determine if apr_lstat is a true NT symlink what the stats of the
-     * link are, rather than the target.  NT5 (W2K) only.
-     */
-    return apr_stat(finfo, fname, cont);
+    apr_oslevel_e os_level;
+    if (apr_get_oslevel(cont, &os_level) || os_level < APR_WIN_2000)
+    {
+        /* Windows 9x doesn't support links whatsoever, and NT 4.0 
+         * only supports hard links.  Just fall through
+         */
+        return apr_stat(finfo, fname, cont);
+    }
+    else
+    {
+        apr_file_t thefile;
+        apr_status_t rv;
+        /* 
+         * NT5 (W2K) only supports symlinks in the same manner as mount points.
+         * This code should eventually take that into account, for now treat
+         * every reparse point as a symlink...
+         *
+         * We must open the file with READ_CONTROL if we plan to retrieve the
+         * user, group or permissions.
+         */
+        thefile.cntxt = cont;
+        thefile.w.fname = utf8_to_unicode_path(fname, cont);
+        if (!thefile.w.fname)
+            return APR_ENAMETOOLONG;
+        thefile.filehand = CreateFileW(thefile.w.fname, 
+                                       0 /* READ_CONTROL */, 
+                                       FILE_SHARE_READ | FILE_SHARE_WRITE
+                                     | FILE_SHARE_DELETE, NULL, 
+                                       OPEN_EXISTING, 
+                                       FILE_FLAG_OPEN_REPARSE_POINT
+                                     | FILE_FLAG_BACKUP_SEMANTICS 
+                                     | FILE_FLAG_OPEN_NO_RECALL, NULL);
+        if (thefile.filehand == INVALID_HANDLE_VALUE)
+            return apr_get_os_error();
+        rv = apr_getfileinfo(finfo, &thefile);
+        CloseHandle(thefile.filehand);
+        return rv;
+    }
 }
