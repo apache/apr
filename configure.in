@@ -121,6 +121,10 @@ AC_PROG_LIBTOOL
     ;;
 esac
 
+AC_ARG_WITH(installbuilddir, [  --with-installbuilddir=<path> location to store APR build files (defaults to '${datadir}/build')],
+  [ installbuilddir=$withval ], [ installbuilddir="${datadir}/build" ] )
+AC_SUBST(installbuilddir)
+
 AC_ARG_WITH(libtool, [  --without-libtool       avoid using libtool to link the library],
   [ use_libtool=$withval ], [ use_libtool="yes" ] )
 
