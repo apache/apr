@@ -136,27 +136,3 @@ APR_DECLARE(apr_status_t) apr_gid_compare(apr_gid_t left, apr_gid_t right)
 #endif
     return APR_SUCCESS;
 }
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_get_groupname(char **groupname, 
-                                            apr_gid_t groupid, apr_pool_t *p)
-{
-    return apr_gid_name_get(groupname, groupid, p);
-}
-
-APR_DECLARE(apr_status_t) apr_group_name_get(char **groupname, 
-                                             apr_gid_t groupid, apr_pool_t *p)
-{
-    return apr_gid_name_get(groupname, groupid, p);
-}
-
-APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *gid, 
-                                         const char *groupname, apr_pool_t *p)
-{
-    return apr_gid_get(gid, groupname, p);
-}
-
-APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right)
-{
-    return apr_gid_compare(left, right);
-}

@@ -121,9 +121,6 @@ struct apr_vformatter_buff_t {
  */
 APR_DECLARE(const char *) apr_filepath_name_get(const char *pathname);
 
-/** @deprecated @see apr_filepath_name_get */
-APR_DECLARE(const char *) apr_filename_of_pathname(const char *pathname);
-
 /**
  * apr_killpg
  * Small utility macros to make things easier to read.  Not usually a

@@ -368,27 +368,3 @@ APR_DECLARE(void) apr_time_clock_hires(apr_pool_t *p)
                                   apr_pool_cleanup_null);
     }
 }
-
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_explode_time(apr_time_exp_t *result,
-                                          apr_time_t input,
-                                          apr_int32_t offs)
-{
-    return apr_time_exp_tz(result, input, offs);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result, 
-                                                apr_time_t input)
-{
-    return apr_time_exp_lt(result, input);
-}
-
-/* Deprecated */
-APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t,
-                                          apr_time_exp_t *xt)
-{
-    return apr_time_exp_gmt_get(t, xt);
-}
-
