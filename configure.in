@@ -296,7 +296,7 @@ AC_CHECK_HEADERS(sys/resource.h)
 AC_CHECK_HEADERS(sys/select.h)
 AC_CHECK_HEADERS(sys/sendfile.h)
 AC_CHECK_HEADERS(sys/signal.h)
-AC_CHECK_HEADERS(sys/socket.h)
+AC_CHECK_HEADERS(sys/socket.h, sys_socketh="1", sys_socketh="0")
 AC_CHECK_HEADERS(sys/stat.h)
 AC_CHECK_HEADERS(sys/types.h, sys_typesh="1", sys_typesh="0")
 AC_CHECK_HEADERS(sys/wait.h, sys_waith="1", sys_waith="0")
@@ -312,6 +312,7 @@ AC_SUBST(fcntlh)
 AC_SUBST(netinet_inh)
 AC_SUBST(stdargh)
 AC_SUBST(stdioh)
+AC_SUBST(sys_socketh)
 AC_SUBST(sys_typesh)
 AC_SUBST(sys_uioh)
 AC_SUBST(signalh)
@@ -377,6 +378,11 @@ if test "$ac_cv_type_ssize_t" = "yes"; then
 else
     ssize_t_value="apr_int32_t"
 fi
+if test "$ac_cv_socklen_t" = "yes"; then
+    socklen_t_value="socklen_t"
+else
+    socklen_t_value="int"
+fi
 
 AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
 
@@ -415,6 +421,7 @@ AC_SUBST(long_value)
 AC_SUBST(off_t_value)
 AC_SUBST(size_t_value)
 AC_SUBST(ssize_t_value)
+AC_SUBST(socklen_t_value)
 AC_SUBST(ssize_t_fmt) 
 AC_SUBST(off_t_fmt) 
 

@@ -32,6 +32,7 @@
 #define APR_HAVE_PTHREAD_H      @pthreadh@
 #define APR_HAVE_STDARG_H       @stdargh@
 #define APR_HAVE_STDIO_H        @stdioh@
+#define APR_HAVE_SYS_SOCKET_H   @sys_socketh@
 #define APR_HAVE_SYS_TYPES_H    @sys_typesh@
 #define APR_HAVE_SYS_UIO_H      @sys_uioh@
 #define APR_HAVE_SIGNAL_H       @signalh@
@@ -78,6 +79,10 @@
 #include <sys/types.h>
 #endif
 
+#if APR_HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
 /*  APR Feature Macros */
 #define APR_HAS_SHARED_MEMORY     @sharedmem@
 #define APR_HAS_THREADS           @threads@
@@ -113,6 +118,7 @@ typedef  unsigned @long_value@   apr_uint64_t;
 typedef  @size_t_value@          apr_size_t;
 typedef  @ssize_t_value@         apr_ssize_t;
 typedef  @off_t_value@           apr_off_t;
+typedef  @socklen_t_value@       apr_socklen_t;
 
 /* Definitions that APR programs need to work properly. */
 
