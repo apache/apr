@@ -157,10 +157,9 @@ int apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
     return (tid1 == tid2);
 }
 
-apr_status_t apr_thread_yield()
+void apr_thread_yield()
 {
     NXThreadYield();
-    return APR_SUCCESS;
 }
 
 apr_status_t apr_thread_exit(apr_thread_t *thd,
