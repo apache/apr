@@ -530,13 +530,13 @@ static void dump_stats(void)
  */
 
 struct cleanup {
-    void *data;
+    const void *data;
     ap_status_t (*plain_cleanup) (void *);
     ap_status_t (*child_cleanup) (void *);
     struct cleanup *next;
 };
 
-APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, void *data,
+APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, const void *data,
 				      ap_status_t (*plain_cleanup) (void *),
 				      ap_status_t (*child_cleanup) (void *))
 {
@@ -552,8 +552,8 @@ APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, void *data,
     }
 }
 
-APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, void *data,
-				  ap_status_t (*cleanup) (void *))
+APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, const void *data,
+                                 ap_status_t (*cleanup) (void *))
 {
     struct cleanup *c;
     struct cleanup **lastp;
@@ -574,7 +574,7 @@ APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, void *data,
 }
 
 APR_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
-				 ap_status_t (*cleanup) (void *))
+                                       ap_status_t (*cleanup) (void *))
 {
     ap_kill_cleanup(p, data, cleanup);
     return (*cleanup) (data);
@@ -583,7 +583,7 @@ APR_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
 static void run_cleanups(struct cleanup *c)
 {
     while (c) {
-	(*c->plain_cleanup) (c->data);
+	(*c->plain_cleanup) ((void *)c->data);
 	c = c->next;
     }
 }
@@ -591,7 +591,7 @@ static void run_cleanups(struct cleanup *c)
 static void run_child_cleanups(struct cleanup *c)
 {
     while (c) {
-	(*c->child_cleanup) (c->data);
+	(*c->child_cleanup) ((void *)c->data);
 	c = c->next;
     }
 }
