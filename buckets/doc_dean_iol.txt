@@ -1,0 +1,83 @@
+goals? we need an i/o abstraction which has these properties:
+
+- buffered and non-buffered modes
+
+    The buffered mode should look like FILE *.
+
+    The non-buffered mode should look more like read(2)/write(2).
+
+- blocking and non-blocking modes
+
+    The blocking mode is the "easy" mode -- it's what most module writers
+    will see.  The non-blocking mode is the "hard" mode, this is where
+    module writers wanting to squeeze out some speed will have to play.
+    In order to build async/sync hybrid models we need the
+    non-blocking i/o abstraction.
+
+- timed reads and writes (for blocking cases)
+
+    This is part of my jihad against asynchronous notification.
+
+- i/o filtering or layering
+
+    Yet another Holy Grail of computing.  But I digress.  These are
+    hard when you take into consideration non-blocking i/o -- you have
+    to keep lots of state.  I expect our core filters will all support
+    non-blocking i/o, well at least the ones I need to make sure we kick
+    ass on benchmarks.  A filter can deny a switch to non-blocking mode,
+    the server will have to recover gracefully (ha).
+
+- copy-avoidance
+
+    Hey what about zero copy a la IO-Lite?  After having experienced it
+    in a production setting I'm no longer convinced of its benefits.
+    There is an enormous amount of overhead keeping lists of buffers,
+    and reference counts, and cleanup functions, and such which requires
+    a lot of tuning to get right.  I think there may be something here,
+    but it's not a cakewalk.
+
+    What I do know is that the heuristics I put into apache-1.3 to choose
+    writev() at times are almost as good as what you can get from doing
+    full zero-copy in the cases we *currently* care about.  To put it
+    another way, let's wait another generation to deal with zero copy.
+
+    But sendfile/transmitfile/etc. those are still interesting.
+
+    So instead of listing "zero copy" as a property, I'll list
+    "copy-avoidance".
+
+So far?
+
+- ap_bungetc added
+- ap_blookc changed to return the character, rather than take a char *buff
+- in theory, errno is always useful on return from a BUFF routine
+- ap_bhalfduplex, B_SAFEREAD will be re-implemented using a layer I think
+- chunking gone for now, will return as a layer
+- ebcdic gone for now... it should be a layer
+
+- ap_iol.h defined, first crack at the layers...
+
+    Step back a second to think on it.  Much like we have fread(3)
+    and read(2), I've got a BUFF and an ap_iol abstraction.  An ap_iol
+    could use a BUFF if it requires some form of buffering, but many
+    won't require buffering... or can do a better job themselves.
+
+    Consider filters such as:
+	- ebcdic -> ascii
+	- encryption
+	- compression
+    These all share the property that no matter what, they're going to make
+    an extra copy of the data.  In some cases they can do it in place (read)
+    or into a fixed buffer... in most cases their buffering requirements
+    are different than what BUFF offers.
+
+    Consider a filter such as chunking.  This could actually use the writev
+    method to get its job done... depends on the chunks being used.  This
+    is where zero-copy would be really nice, but we can get by with a few
+    heuristics.
+
+    At any rate -- the NSPR folks didn't see any reason to included a
+    buffered i/o abstraction on top of their layered i/o abstraction... so
+    I feel like I'm not the only one who's thinking this way.
+
+- iol_unix.c implemented... should hold us for a bit
