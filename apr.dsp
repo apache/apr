@@ -132,6 +132,10 @@ SOURCE=.\lib\apr_tables.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\aprlib.def
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\win32\dir.c
 # End Source File
 # Begin Source File
