@@ -10,6 +10,7 @@ testud
 testargs
 testdir
 testdso
+testfmt
 testhash
 testoc
 testpipe
