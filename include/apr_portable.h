@@ -183,7 +183,15 @@ typedef pthread_key_t         apr_os_threadkey_t;
 typedef pid_t                 apr_os_proc_t;
 typedef struct timeval        apr_os_imp_time_t;
 typedef struct tm             apr_os_exp_time_t;
-/* insert dso typedef here */
+/* dso types... */
+#if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
+typedef shl_t                 apr_os_dso_handle_t;
+#elif defined(DRAWIN)
+typedef NSModule              apr_os_dso_handle_t;
+#else
+typedef void *                apr_os_dso_handle_t;
+#endif
+
 #endif
 
 /**
