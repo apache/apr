@@ -60,7 +60,7 @@
 
 apr_status_t soblock(SOCKET sd)
 {
-    int zero = 0;
+    u_long zero = 0;
 
     if (ioctlsocket(sd, FIONBIO, &zero) == SOCKET_ERROR) {
         return apr_get_netos_error();
@@ -70,7 +70,7 @@ apr_status_t soblock(SOCKET sd)
 
 apr_status_t sononblock(SOCKET sd)
 {
-    int one = 1;
+    u_long one = 1;
 
     if (ioctlsocket(sd, FIONBIO, &one) == SOCKET_ERROR) {
         return apr_get_netos_error();
