@@ -63,6 +63,9 @@
 APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *gid, 
                                          const char *groupname, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    return APR_ENOTIMPL;
+#else
     SID_NAME_USE sidtype;
     char anydomain[256];
     char *domain;
@@ -98,10 +101,14 @@ APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *gid,
         return apr_get_os_error();
     }
     return APR_SUCCESS;
+#endif
 }
 
 APR_DECLARE(apr_status_t) apr_group_name_get(char **groupname, apr_gid_t groupid, apr_pool_t *p)
 {
+#ifdef _WIN32_WCE
+    *groupname = apr_pstrdup(p, "Administrators");
+#else
     SID_NAME_USE type;
     char name[MAX_PATH], domain[MAX_PATH];
     DWORD cbname = sizeof(name), cbdomain = sizeof(domain);
@@ -113,6 +120,7 @@ APR_DECLARE(apr_status_t) apr_group_name_get(char **groupname, apr_gid_t groupid
                              && type != SidTypeAlias)
         return APR_EINVAL;
     *groupname = apr_pstrdup(p, name);
+#endif
     return APR_SUCCESS;
 }
   
@@ -120,9 +128,11 @@ APR_DECLARE(apr_status_t) apr_compare_groups(apr_gid_t left, apr_gid_t right)
 {
     if (!left || !right)
         return APR_EINVAL;
+#ifndef _WIN32_WCE
     if (!IsValidSid(left) || !IsValidSid(right))
         return APR_EINVAL;
     if (!EqualSid(left, right))
         return APR_EMISMATCH;
+#endif
     return APR_SUCCESS;
 }
