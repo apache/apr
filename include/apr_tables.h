@@ -364,7 +364,7 @@ APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
 /** 
  * Iterate over a table running the provided function once for every
  * element in the table.  If there is data passed in as a vararg, then the 
- * function is only run on those element's whose key matches something in 
+ * function is only run on those elements whose key matches something in 
  * the vararg.  If the vararg is NULL, then every element is run through the
  * function.  Iteration continues while the function returns non-zero.
  * @param comp The function to run
