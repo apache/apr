@@ -388,8 +388,8 @@ struct apr_table_t {
 };
 
 /*
- * XXX: if you tweak this you should look at is_empty_table() and table_elts()
- * in alloc.h
+ * NOTICE: if you tweak this you should look at is_empty_table() 
+ * and table_elts() in alloc.h
  */
 #ifdef MAKE_TABLE_PROFILE
 static apr_table_entry_t *table_push(apr_table_t *t)
