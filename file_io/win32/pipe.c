@@ -135,7 +135,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
 }
 
 /* apr_create_nt_pipe()
- * An internal (for now) APR function created for use by apr_proc_create() 
+ * An internal (for now) APR function used by apr_proc_create() 
  * when setting up pipes to communicate with the child process. 
  * apr_create_nt_pipe() allows setting the blocking mode of each end of 
  * the pipe when the pipe is created (rather than after the pipe is created). 
@@ -150,9 +150,7 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
  * non-blocking? On NT, even though you can set a pipe non-blocking, 
  * there is no clean way to set event driven non-zero timeouts (e.g select(),
  * WaitForSinglelObject, et. al. will not detect pipe i/o). On NT, you 
- * have to poll the pipe to detech i/o on a non-blocking pipe.
- *
- * wgs
+ * have to poll the pipe to detect i/o on a non-blocking pipe.
  */
 apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
                                 BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
