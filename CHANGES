@@ -4,7 +4,7 @@ Changes with APR b1
      sems are used for the crossprocess mutex.  [Jeff Trawick]
 
   *) Fix a problem with global mutexes on OS/390 when something other
-     than the default mechanism (fcntl) was used.  The mutexes didn't
+     than the default mechanism (SysV sem) was used.  The mutexes didn't
      necessarily block out other threads in the same process.
      [Jeff Trawick]
 
