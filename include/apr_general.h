@@ -228,6 +228,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
                             ap_context_t *cont);
 ap_status_t ap_get_userdata(void **, char *key, ap_context_t *cont);
 ap_status_t ap_initialize(void);
+void        ap_terminate(void);
 ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont);
 
 #ifdef __cplusplus

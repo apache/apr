@@ -81,7 +81,7 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
         pool = ap_make_sub_pool(cont->pool, cont->apr_abort);
     }
     else {
-        pool = ap_init_alloc();;
+        pool = ap_make_sub_pool(NULL, NULL);
     }
         
     if (pool == NULL) {
@@ -200,6 +200,7 @@ ap_status_t ap_get_userdata(void **data, char *key, struct context_t *cont)
 /* This puts one thread in a Listen for signals mode */
 ap_status_t ap_initialize(void)
 {
+    ap_status_t status;
 #if 0
     unsigned tid;
 
@@ -211,5 +212,11 @@ ap_status_t ap_initialize(void)
         sleep(1);
     }
 #endif
-    return APR_SUCCESS;
+    status = ap_init_alloc();
+    return status;
+}
+
+void ap_terminate(void)
+{
+    ap_term_alloc();
 }

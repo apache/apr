@@ -135,7 +135,8 @@ struct ap_table_t {
  * currently being used...
  */
 
-ap_pool_t *ap_init_alloc(void);		/* Set up everything */
+ap_status_t ap_init_alloc(void);	/* Set up everything */
+void        ap_term_alloc(void);        /* Tear down everything */
 
 /* used to guarantee to the pool debugging code that the sub pool will not be
  * destroyed before the parent pool
