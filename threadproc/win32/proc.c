@@ -295,6 +295,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     char *pEnvBlock;
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = 0;
+    char *ch;
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -336,7 +337,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     i = 1;
     while (args && args[i]) {
-        if (strchr(args[i], ' '))
+        for (ch = args[i]; *ch; ++ch) {
+            if (apr_iswhite(*ch)) {
+                break;
+        }
+        if (*ch)
             cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
         else
             cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
@@ -347,13 +352,31 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 
     if (attr->cmdtype == APR_SHELLCMD) {
         char *shellcmd = getenv("COMSPEC");
-        if (!shellcmd)
-            shellcmd = SHELL_PATH;
-        if (shellcmd[0] == '"')
-            progname = apr_pstrndup(pool, shellcmd + 1, strlen(shellcmd) - 1);
-        else if (strchr(shellcmd, ' '))
-            shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
-        cmdline = apr_pstrcat(pool, shellcmd, " /C \"", cmdline, "\"", NULL);
+        if (!shellcmd) {
+            return APR_EINVAL;
+        }
+        if (shellcmd[0] == '"') {
+            progname = apr_pstrndup(pool, shellcmd + 1, strlen(shellcmd) - 2);
+        }
+        else {
+            progname = shellcmd;
+            for (ch = shellcmd; *ch; ++ch) {
+                if (apr_iswhite(*ch)) {
+                    break;
+            }
+            if (*ch)
+                shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
+            }
+        }
+        /* Command.com does not support a quoted command, while cmd.exe demands one.
+         */
+        i = strlen(progname);
+        if (i >= 11 && strcasecmp(progname + i - 11, "command.com") == 0) {
+            cmdline = apr_pstrcat(pool, shellcmd, " /C ", cmdline, NULL);
+        }
+        else {
+            cmdline = apr_pstrcat(pool, shellcmd, " /C \"", cmdline, "\"", NULL);
+        }
     } 
     else {
         /* Win32 is _different_ than unix.  While unix will find the given
