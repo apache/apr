@@ -1,5 +1,9 @@
 Changes with APR 0.9.5
 
+  *) Various build fixes: thread_rwlock.c on some Solaris platforms
+     (PR 22990); filestat.c on ReliantUnix (PR 22990); config.status
+     on IRIX (PR 19251).  [Various]
+
   *) Use NI_NAMEREQD instead of NI_NUMERICHOST in
      APR_CHECK_GETNAMEINFO_IPV4_MAPPED.  PR 24469.  [Justin Erenkrantz]
 
@@ -13,10 +17,10 @@ Changes with APR 0.9.5
      the Apache License, Version 2.0 (http://www.apache.org/licenses).
      [Apache Software Foundation]
 
-  *) Define apr_off_t as apr_intX_t rather than as off_t to prevent
-     incompatibility with packages such as Perl which redefine the
-     size of off_t via _FILE_OFFSET_BITS on some platforms.
-     [Ben Reser <ben reser.org>]
+  *) Define apr_off_t as long rather than as off_t on platforms with a
+     32-bit off_t to prevent incompatibility with packages such as
+     Perl which redefine the size of off_t via _FILE_OFFSET_BITS on
+     some platforms.  [Ben Reser <ben reser.org>]
 
   *) apr_socket_connect(): allow app to make subsequent call on 
      non-blocking socket.  [Jeff Trawick]
