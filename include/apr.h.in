@@ -135,6 +135,8 @@
 
 /* Typedefs that APR needs. */
 
+typedef  unsigned char           apr_byte_t;
+
 typedef  @short_value@           apr_int16_t;
 typedef  unsigned @short_value@  apr_uint16_t;
                                                
