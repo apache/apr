@@ -792,6 +792,7 @@ dnl # Look for a way of corking TCP...
 AC_CHECK_DEFINE(TCP_CORK, netinet/tcp.h)
 AC_CHECK_DEFINE(TCP_NOPUSH, netinet/tcp.h)
 apr_tcp_nopush_flag="0"
+have_corkable_tcp="0"
 if test "x$ac_cv_define_TCP_CORK" = "xyes"; then
     apr_tcp_nopush_flag="TCP_CORK"
     have_corkable_tcp="1"
