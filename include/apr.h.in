@@ -134,7 +134,7 @@ typedef  @off_t_value@           ap_off_t;
 @off_t_fmt@
 
 /* Local machine definition for console and log output. */
-#define APR_EOL_STR              "\n"
+#define APR_EOL_STR              "@eolstr@"
 
 /* Define ap_signal and related necessary definitions.
  */
