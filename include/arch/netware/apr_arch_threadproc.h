@@ -55,12 +55,13 @@
 #include "apr.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
-//srj #include "apr_portable.h"
+
+#include <sys/wait.h>
 
 #ifndef THREAD_PROC_H
 #define THREAD_PROC_H
 
-#define SHELL_PATH "cmd.exe"
+#define SHELL_PATH ""
 #define APR_DEFAULT_STACK_SIZE 65536
 
 struct apr_thread_t {
