@@ -16,8 +16,7 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I../misc/unix
 
 #LIB=@LIBPREFIX@apr.a
 
-OBJS=apr_execve.o \
-	apr_md5.o \
+OBJS=apr_md5.o \
 	apr_pools.o \
 	apr_signal.o \
 	apr_tables.o \
