@@ -87,6 +87,7 @@ static const struct testlist {
     {"testproc", testproc},
     {"testpoll", testpoll},
     {"testlock", testlock},
+    {"testthread", testthread},
     {"LastTest", NULL}
 };
 

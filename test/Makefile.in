@@ -13,7 +13,6 @@ PROGRAMS = \
 	testnames@EXEEXT@ \
 	testflock@EXEEXT@ \
 	testsock@EXEEXT@ \
-	testthread@EXEEXT@ \
 	testlock@EXEEXT@ \
 	testlockperf@EXEEXT@ \
 	testargs@EXEEXT@ \
@@ -75,9 +74,6 @@ libmod_test.la: mod_test.slo $(LOCAL_LIBS)
 testargs@EXEEXT@: testargs.lo $(LOCAL_LIBS)
 	$(LINK) testargs.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testthread@EXEEXT@: testthread.lo $(LOCAL_LIBS)
-	$(LINK) testthread.lo $(LOCAL_LIBS) $(ALL_LIBS)
-
 testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
 	$(LINK) testlockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
@@ -124,7 +120,7 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testmmap.lo testud.lo testtable.lo testsleep.lo testpools.lo \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
-	testpoll.lo testlock.lo testsockopt.lo testpipe.lo
+	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 CuTest.lo proc_child@EXEEXT@ $(LOCAL_LIBS)
