@@ -49,8 +49,6 @@
 #define EAFNOSUPPORT WSAEAFNOSUPPORT
 #endif
 
-#define SPRINTF(x) ((apr_size_t)sprintf x)
-
 /*
  * WARNING: Don't even consider trying to compile this on a system where
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
@@ -106,7 +104,7 @@ inet_ntop4(src, dst, size)
 	static const char fmt[] = "%u.%u.%u.%u";
 	char tmp[sizeof "255.255.255.255"];
 
-	if (SPRINTF((tmp, fmt, src[0], src[1], src[2], src[3])) > size) {
+	if (apr_snprintf(tmp, sizeof tmp, fmt, src[0], src[1], src[2], src[3]) > size) {
 		errno = ENOSPC;
 		return (NULL);
 	}
@@ -193,7 +191,7 @@ inet_ntop6(src, dst, size)
 			tp += strlen(tp);
 			break;
 		}
-		tp += SPRINTF((tp, "%x", words[i]));
+		tp += apr_snprintf(tp, sizeof tp, "%x", words[i]);
 	}
 	/* Was it a trailing run of 0x00's? */
 	if (best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ))
