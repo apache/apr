@@ -63,7 +63,7 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
     (*new)->attr = NULL;
 
     chdir("/");
-#if !defined(MPE) && !defined(OS2) && !defined(TPF)
+#if !defined(MPE) && !defined(OS2) && !defined(TPF) && !defined(BEOS)
 /* Don't detach for MPE because child processes can't survive the death of
    the parent. */
     if ((x = fork()) > 0)
@@ -114,7 +114,6 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
     if (freopen("/dev/null", "w", stderr) == NULL) {
         return errno;
     }
-
     return APR_SUCCESS;
 }
 
