@@ -55,6 +55,7 @@
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 #include <string.h>
 
 #define INCL_DOS
