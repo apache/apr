@@ -57,6 +57,7 @@
 #include "apr_lock.h"
 #include "apr_errno.h"
 #include "apr_general.h"
+#include "apr_getopt.h"
 #include "errno.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -77,7 +78,7 @@ void * APR_THREAD_FUNC thread_rw_func(apr_thread_t *thd, void *data);
 void * APR_THREAD_FUNC thread_function(apr_thread_t *thd, void *data);
 apr_status_t test_exclusive(void);
 apr_status_t test_rw(void);
-apr_status_t test_multiple_locking(void);
+apr_status_t test_multiple_locking(const char *);
 
 
 apr_file_t *in, *out, *err;
@@ -231,7 +232,7 @@ apr_status_t test_exclusive(void)
     return APR_SUCCESS;
 }
 
-apr_status_t test_multiple_locking(void)
+apr_status_t test_multiple_locking(const char *lockfile)
 {
     apr_lock_t *multi;
     int try = 0;
@@ -239,7 +240,7 @@ apr_status_t test_multiple_locking(void)
  
     printf("Testing multiple locking\n");
     printf("%-60s","    Creating the lock we'll use");
-    if ((rv = apr_lock_create(&multi, APR_MUTEX, APR_LOCKALL,"multi.lock",
+    if ((rv = apr_lock_create(&multi, APR_MUTEX, APR_LOCKALL, lockfile,
                         pool)) != APR_SUCCESS) {
         printf("Failed!\n");
         return rv;
@@ -277,10 +278,14 @@ apr_status_t test_multiple_locking(void)
     return APR_SUCCESS;
 }
 
-int main(void)
+int main(int argc, const char * const *argv)
 {
     apr_status_t rv;
     char errmsg[200];
+    const char *lockname = "multi.lock";
+    apr_getopt_t *opt;
+    char optchar;
+    const char *optarg;
 
     printf("APR Locks Test\n==============\n\n");
         
@@ -290,13 +295,31 @@ int main(void)
     if (apr_pool_create(&pool, NULL) != APR_SUCCESS)
         exit(-1);
 
+    if ((rv = apr_getopt_init(&opt, pool, argc, argv)) != APR_SUCCESS) {
+        fprintf(stderr, "Could not set up to parse options: [%d] %s\n",
+                rv, apr_strerror(rv, errmsg, sizeof errmsg));
+        exit(-1);
+    }
+        
+    while ((rv = apr_getopt(opt, "f:", &optchar, &optarg)) == APR_SUCCESS) {
+        if (optchar == 'f') {
+            lockname = optarg;
+        }
+    }
+
+    if (rv != APR_SUCCESS && rv != APR_EOF) {
+        fprintf(stderr, "Could not parse options: [%d] %s\n",
+                rv, apr_strerror(rv, errmsg, sizeof errmsg));
+        exit(-1);
+    }
+
     if ((rv = test_exclusive()) != APR_SUCCESS) {
         fprintf(stderr,"Exclusive Lock test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-2);
     }
     
-    if ((rv = test_multiple_locking()) != APR_SUCCESS) {
+    if ((rv = test_multiple_locking(lockname)) != APR_SUCCESS) {
         fprintf(stderr,"Multiple Locking test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
         exit(-3);
