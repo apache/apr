@@ -77,6 +77,8 @@ Changes with APR 1.0
      apr_shutdown                 -> apr_socket_shutdown
      apr_signal_get_description   -> apr_signal_description_get
      apr_sockaddr_ip_set          -> apr_sockaddr_info_get
+     apr_sockaddr_port_get        -> (access directly)
+     apr_sockaddr_port_set        -> apr_sockaddr_info_get
      apr_socket_create_ex         -> apr_socket_create
      apr_socket_set_inherit       -> apr_socket_inherit_set
      apr_socket_unset_inherit     -> apr_socket_inherit_unset

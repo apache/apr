@@ -172,7 +172,7 @@ static void sendto_receivefrom(CuTest *tc)
     CuAssertStrEquals(tc, "APR_INET, SOCK_DGRAM", recvbuf);
 
     apr_sockaddr_ip_get(&ip_addr, from);
-    apr_sockaddr_port_get(&fromport, from);
+    fromport = from->port;
     CuAssertStrEquals(tc, US, ip_addr);
     CuAssertIntEquals(tc, 7771, fromport);
 

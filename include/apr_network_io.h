@@ -678,22 +678,6 @@ APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
                                               apr_socket_t *sock);
  
 /**
- * Set the port in an APR socket address.
- * @param sockaddr The socket address to set.
- * @param port The port to be stored in the socket address.
- */
-APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
-                                                apr_port_t port);
-
-/**
- * Return the port in an APR socket address.
- * @param port The port from the socket address.
- * @param sockaddr The socket address to reference.
- */
-APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
-                                                apr_sockaddr_t *sockaddr);
-
-/**
  * Return the IP address (in numeric address string format) in
  * an APR socket address.  APR will allocate storage for the IP address 
  * string from the pool of the apr_sockaddr_t.
