@@ -201,14 +201,31 @@ endif
 
 endif
 
+ifdef DEST
+INSTALLBASE := $(INSTALL)\Apache2
+
 INSTDEVDIRS := \
     $(INSTDIRS) \
-	$(INSTALL)\Apache2 \
-	$(INSTALL)\Apache2\include \
-	$(INSTALL)\Apache2\lib \
+	$(INSTALLBASE) \
+	$(INSTALLBASE)\include \
+	$(INSTALLBASE)\lib \
 
 INSTDIRS += \
-	$(INSTALL)\Apache2 \
+	$(INSTALLBASE) \
+	
+else
+INSTALLBASE := $(INSTALL)\apr
+
+INSTDEVDIRS := \
+    $(INSTDIRS) \
+	$(INSTALLBASE) \
+	$(INSTALLBASE)\include \
+	$(INSTALLBASE)\lib \
+
+INSTDIRS += \
+	$(INSTALLBASE) \
+	
+endif	
 
 #
 # Declare Command and tool macros here

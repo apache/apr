@@ -312,8 +312,32 @@ nlms :: libs $(TARGET_nlm)
 # Updated this target to create necessary directories and copy files to the 
 # correct place.  (See $(APR_WORK)\build\NWGNUhead.inc for examples)
 #
-install :: nlms FORCE
-	copy $(OBJDIR)\aprlib.nlm $(INSTALL)\Apache2\*.*
+install :: nlms $(INSTDIRS) FORCE
+	copy $(OBJDIR)\aprlib.nlm                          $(INSTALLBASE)\*.*
+ifndef DEST
+	-copy $(subst /,\,$(APR))\STATUS                   $(INSTALLBASE)\*.apr
+	-copy $(subst /,\,$(APR))\LICENSE                  $(INSTALLBASE)\*
+	-copy $(subst /,\,$(APR))\CHANGES                  $(INSTALLBASE)\*.apr
+	-copy $(subst /,\,$(APRUTIL))\STATUS               $(INSTALLBASE)\*.apu
+	-copy $(subst /,\,$(APRUTIL))\CHANGES              $(INSTALLBASE)\*.apu
+	@echo rem copying the docs directories > xc.bat
+	@echo xcopy docs $(INSTALLBASE)\docs\*.* /E /Y >> xc.bat
+	$(CMD) xc.bat
+endif	
+	
+$(INSTDIRS) ::
+	$(CHKNOT) $@\NUL mkdir $@
+
+ifndef DEST
+installdev :: $(INSTDEVDIRS) FORCE
+	-copy $(subst /,\,$(APR))\include\*.h               $(INSTALLBASE)\include\*.*
+	-copy $(subst /,\,$(APRUTIL))\include\*.h           $(INSTALLBASE)\include\*.*
+	-copy $(subst /,\,$(APR))\*.imp                     $(INSTALLBASE)\lib\*.*
+	-copy $(subst /,\,$(APR))\misc\netware\*.xdc        $(INSTALLBASE)\lib\*.*
+	
+$(INSTDEVDIRS) ::
+	$(CHKNOT) $@\NUL mkdir $@
+endif	
 
 #
 # Any specialized rules here
