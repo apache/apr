@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/08/23 04:03:37 $]
+Last modified at [$Date: 2001/08/24 18:04:24 $]
 
 Release:
 
@@ -188,6 +188,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 Documentation that needs writing:
 
     * API documentation
+        Ian Says: APR Stuff in now in Doxygen format, which is the first step.
 
 
 Stuff waiting for code thawing after Beta 1:
