@@ -276,6 +276,7 @@ APR_EXPORT(void) ap_hash_set(ap_hash_t *ht,
         if (!val) {
             /* delete entry */
             *hep = (*hep)->next;
+            --ht->count;
         }
         else {
             /* replace entry */
