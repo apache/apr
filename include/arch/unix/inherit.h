@@ -57,6 +57,8 @@
 
 #include "apr_inherit.h"
 
+#define APR_INHERIT    (2^24)    /* Must not conflicts with other bits */
+
 #define APR_IMPLEMENT_SET_INHERIT(name, flag, pool, cleanup)        \
 void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 {                                                                   \

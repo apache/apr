@@ -59,8 +59,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#define APR_INHERIT    (2^24)    /* Outside of conflicts with other bits */
-
 #define APR_DECLARE_SET_INHERIT(name) \
     APR_DECLARE(void) apr_##name##_set_inherit(apr_##name##_t *name)
 

@@ -57,6 +57,7 @@
 #include "apr_lib.h"
 #include "apr_strings.h"
 #include <string.h>
+#include "inherit.h"
 
 apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_t *p)
 {
@@ -85,7 +86,7 @@ apr_status_t apr_file_dup(apr_file_t **new_file, apr_file_t *old_file, apr_pool_
     dup_file->fname = apr_pstrdup(dup_file->cntxt, old_file->fname);
     dup_file->buffered = old_file->buffered;
     dup_file->isopen = old_file->isopen;
-    dup_file->flags = old_file->flags;
+    dup_file->flags = old_file->flags & ~APR_INHERIT;
     /* TODO - dup pipes correctly */
     dup_file->pipe = old_file->pipe;
 
