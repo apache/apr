@@ -871,7 +871,7 @@ case $host in
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
        os_proc_t_fmt='#define APR_OS_PROC_T_FMT "ld"'
        ;;
-   *aix4*)
+   *aix4*|*aix5*)
        ssize_t_fmt='#define APR_SSIZE_T_FMT "ld"'
        size_t_fmt='#define APR_SIZE_T_FMT "ld"'
        off_t_fmt='#define APR_OFF_T_FMT "ld"'
