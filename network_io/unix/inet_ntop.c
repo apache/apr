@@ -49,7 +49,7 @@
 #define EAFNOSUPPORT WSAEAFNOSUPPORT
 #endif
 
-#define SPRINTF(x) ((size_t)sprintf x)
+#define SPRINTF(x) ((apr_size_t)sprintf x)
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where
