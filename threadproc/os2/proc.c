@@ -53,9 +53,11 @@
  *
  */
 
+#define INCL_DOS
+#define INCL_DOSERRORS
+
 #include "threadproc.h"
 #include "fileio.h"
-
 #include "apr_config.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
@@ -68,7 +70,6 @@
 #include <unistd.h>
 #include <process.h>
 #include <stdlib.h>
-#define INCL_DOS
 #include <os2.h>
 
 ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
@@ -371,8 +372,8 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
     } else
         env_block = NULL;
 
-    status = DosExecPgm(error_object, sizeof(error_object), 
-                        attr->detached ? EXEC_BACKGROUND : EXEC_ASYNC, 
+    status = DosExecPgm(error_object, sizeof(error_object),
+                        attr->detached ? EXEC_BACKGROUND : EXEC_ASYNCRESULT,
                         cmdline, env_block, &rescodes, cmdline);
 
     (*new)->pid = rescodes.codeTerminate;
@@ -433,7 +434,9 @@ ap_status_t ap_get_childerr(ap_file_t **new, struct proc_t *proc)
 ap_status_t ap_wait_proc(struct proc_t *proc, 
                            ap_wait_how_e wait)
 {
-    pid_t stat;
+    RESULTCODES codes;
+    ULONG rc;
+    PID pid;
 
     if (!proc)
         return APR_ENOPROC;
@@ -441,24 +444,16 @@ ap_status_t ap_wait_proc(struct proc_t *proc,
     if (!proc->running)
         return APR_CHILD_DONE;
 
-    if (wait == APR_WAIT) {
-        if ((stat = waitpid(proc->pid, NULL, WUNTRACED)) > 0) {
-            proc->running = FALSE;
-            return APR_CHILD_DONE;
-        } else if (stat == 0) {
-            return APR_CHILD_NOTDONE;
-        }
-        return errno;
-    }
+    rc = DosWaitChild(DCWA_PROCESS, wait == APR_WAIT ? DCWW_WAIT : DCWW_NOWAIT, &codes, &pid, proc->pid);
 
-    if ((stat = waitpid(proc->pid, NULL, WUNTRACED | WNOHANG)) > 0) {
-        proc->running = FALSE;
+    if (rc == 0) {
+        proc->running = 0;
         return APR_CHILD_DONE;
-    } else if (stat == 0) {
+    } else if (rc == ERROR_CHILD_NOT_COMPLETE) {
         return APR_CHILD_NOTDONE;
     }
 
-    return errno;
+    return os2errno(rc);
 } 
 
 
