@@ -358,11 +358,16 @@ static void fcntl_setup(void)
 
 static apr_status_t fcntl_cleanup(void *lock_)
 {
+    apr_status_t status;
     apr_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        return fcntl_release(lock);
+        status = fcntl_release(lock);
+        if (status != APR_SUCCESS)
+            return status;
     }
+    close(lock->interproc);
+    
     return APR_SUCCESS;
 }    
 
@@ -462,11 +467,15 @@ static void flock_setup(void)
 
 static apr_status_t flock_cleanup(void *lock_)
 {
+    apr_status_t status;
     apr_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        return flock_release(lock);
+        status = flock_release(lock);
+        if (status != APR_SUCCESS)
+            return status;
     }
+    close(lock->interproc);
     unlink(lock->fname);
     return APR_SUCCESS;
 }    

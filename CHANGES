@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Close file descriptor when we are done with fcntl or flock-based
+     cross-process lock.  Otherwise, we leak descriptors.
+     [Justin Erenkrantz]
+ 
   *) Fix a possible data corruption problem with the use of getpwnam_r() on 
      all platforms where that function is used.
      Use getpwnam_r() and getgrgid_r() instead of getpwnam() and getgrgid()
