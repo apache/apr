@@ -72,19 +72,7 @@ APR_EXPORT(ap_status_t) ap_bucket_destroy(ap_bucket *e)
     return APR_SUCCESS;
 }
 
-APR_EXPORT(ap_status_t) ap_brigade_destroy(void *data)
-{
-    ap_bucket_brigade *b = data;
-
-    ap_bucket_list_destroy(b->head);
-    /* The brigade itself is allocated out of a pool, so we don't actually 
-     * want to free it.  If we did, we would do that free() here.
-     */
-
-    return APR_SUCCESS;
-}
-
-APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e)
+static ap_status_t ap_bucket_list_destroy(ap_bucket *e)
 {
     ap_bucket *cur = e;
     ap_bucket *next;
@@ -94,6 +82,18 @@ APR_EXPORT(ap_status_t) ap_bucket_list_destroy(ap_bucket *e)
         ap_bucket_destroy(cur);
         cur = next;
     }
+    return APR_SUCCESS;
+}
+
+APR_EXPORT(ap_status_t) ap_brigade_destroy(void *data)
+{
+    ap_bucket_brigade *b = data;
+
+    ap_bucket_list_destroy(b->head);
+    /* The brigade itself is allocated out of a pool, so we don't actually 
+     * want to free it.  If we did, we would do that free() here.
+     */
+
     return APR_SUCCESS;
 }
 
@@ -137,8 +137,8 @@ APR_EXPORT(int) ap_brigade_to_iovec(ap_bucket_brigade *b,
     orig = vec;
     e = b->head;
     while (e && nvec) {
-	vec->iov_base = (void *)ap_get_bucket_char_str(e);
 	vec->iov_len = ap_get_bucket_len(e);
+	vec->iov_base = (void *)e->read(e);
 	e = e->next;
 	--nvec;
 	++vec;
@@ -202,14 +202,6 @@ APR_EXPORT(ap_status_t) ap_brigade_to_iol(ap_ssize_t *total_bytes,
     } while (iov_used == 16);
     return APR_SUCCESS;
 }
-
-APR_EXPORT(const char *) ap_get_bucket_char_str(ap_bucket *b)
-{
-    if (b) {
-        return b->read(b);
-    }
-    return NULL;
-}    
 
 APR_EXPORT(int) ap_get_bucket_len(ap_bucket *b)
 {
