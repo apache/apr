@@ -56,10 +56,12 @@
 #include "apr_atomic.h"
 #include "apr_thread_mutex.h"
 
+#include "apr_private.h"
+
 #include <stdlib.h>
 
 #if (defined(__i386__) || defined(__x86_64__)) \
-    && defined(__GNUC__) && !APR_FORCE_ATOMIC_GENERIC
+    && defined(__GNUC__) && !defined(USE_GENERIC_ATOMICS)
 
 APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem, 
                                            apr_uint32_t with,
@@ -142,7 +144,9 @@ APR_DECLARE(apr_uint32_t) apr_atomic_xchg32(volatile apr_uint32_t *mem, apr_uint
 
 #endif /* (__linux__ || __EMX__ || __FreeBSD__) && __i386__ */
 
-#if (defined(__PPC__) || defined(__ppc__)) && defined(__GNUC__) && !APR_FORCE_ATOMIC_GENERIC
+#if (defined(__PPC__) || defined(__ppc__)) && defined(__GNUC__) \
+    && !defined(USE_GENERIC_ATOMICS)
+
 APR_DECLARE(apr_uint32_t) apr_atomic_cas32(volatile apr_uint32_t *mem,
                                            apr_uint32_t swap,
                                            apr_uint32_t cmp)
