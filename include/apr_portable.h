@@ -178,176 +178,260 @@ typedef struct timeval        ap_os_imp_time_t;
 typedef struct tm             ap_os_exp_time_t;
 #endif
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file) 
- *    convert the file from apr type to os specific type.
- * arg 1) The os specific file we are converting to
- * arg 2) The apr file to convert.
- * NOTE:  On Unix, it is only possible to get a file descriptor from 
- *        an apr file type.
+/*
+
+=head1 ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file) 
+
+B<convert the file from apr type to os specific type.>
+
+    arg 1) The os specific file we are converting to
+    arg 2) The apr file to convert.
+
+B<NOTE>:  On Unix, it is only possible to get a file descriptor from 
+          an apr file type.
+
+=cut
  */
 ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file);     
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
- *    convert the dir from apr type to os specific type.
- * arg 1) The os specific dir we are converting to
- * arg 2) The apr dir to convert.
+/*
+
+=head1 ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
+
+B<convert the dir from apr type to os specific type.>
+
+    arg 1) The os specific dir we are converting to
+    arg 2) The apr dir to convert.
+
+=cut
  */   
 ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir);      
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
- *    Convert the socket from an apr type to an OS specific socket
- * arg 1) The socket to convert.
- * arg 2) The os specifc equivelant of the apr socket..
+/*
+
+=head1 ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
+
+B<Convert the socket from an apr type to an OS specific socket>
+
+    arg 1) The socket to convert.
+    arg 2) The os specifc equivelant of the apr socket..
+
+=cut
  */
 ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
- *    onvert the lock from os specific type to apr type
- * arg 1) The os specific lock we are converting to.
- * arg 2) The apr lock to convert.
+/*
+
+=head1 ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock)
+
+B<Convert the lock from os specific type to apr type>
+
+    arg 1) The os specific lock we are converting to.
+    arg 2) The apr lock to convert.
+
+=cut
  */
 ap_status_t ap_get_os_lock(ap_os_lock_t *oslock, ap_lock_t *lock);     
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
- *    convert the proc from os specific type to apr type.
- * arg 1) The os specific proc we are converting to
- * arg 2) The apr proc we are converting
+/*
+
+=head1 ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
+
+B<convert the proc from os specific type to apr type.>
+
+    arg 1) The os specific proc we are converting to
+    arg 2) The apr proc we are converting
+
+=cut
  */
 ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc);     
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
- *    Get the exploded time in the platforms native format.
- * arg 1) the native time format
- * arg 2) the time to convert
+/*
+
+=head1 ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
+
+B<Get the exploded time in the platforms native format.>
+
+    arg 1) the native time format
+    arg 2) the time to convert
+
+=cut
  */
 ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **, ap_exploded_time_t *);     
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **ostime, ap_time_t *aprtime)
- *    Get the imploded time in the platforms native format.
- * arg 1) the native time format
- * arg 2) the time to convert
+/*
+
+=head1 ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **ostime, ap_time_t *aprtime)
+
+B<Get the imploded time in the platforms native format.>
+
+    arg 1) the native time format
+    arg 2) the time to convert
+
+=cut
  */
 ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **, ap_time_t *);     
 #if APR_HAS_THREADS
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_thread(ap_thread_t *thethd, ap_os_thread_t *thd)
- *    convert the thread to os specific type from apr type.
- * arg 1) The apr thread to convert
- * arg 2) The os specific thread we are converting to
+/*
+
+=head1 ap_status_t ap_get_os_thread(ap_thread_t *thethd, ap_os_thread_t *thd)
+
+B<convert the thread to os specific type from apr type.>
+
+    arg 1) The apr thread to convert
+    arg 2) The os specific thread we are converting to
+
+=cut
  */
 ap_status_t ap_get_os_thread(ap_os_thread_t *thethd, ap_thread_t *thd);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_threadkey(ap_threadkey_t *thekey, ap_os_threadkey_t *key)
- *    convert the thread private memory key to os specific type 
- *    from an apr type.
- * arg 1) The apr handle we are converting from.
- * arg 2) The os specific handle we are converting to.
+/*
+
+=head1 ap_status_t ap_get_os_threadkey(ap_threadkey_t *thekey, ap_os_threadkey_t *key)
+
+B<convert the thread private memory key to os specific type from an apr type.>
+
+    arg 1) The apr handle we are converting from.
+    arg 2) The os specific handle we are converting to.
+
+=cut
  */
 ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key);
 #endif
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile,
- *                            ap_context_t *cont) 
- *    convert the file from os specific type to apr type.
- * arg 1) The apr file we are converting to.
- * arg 2) The os specific file to convert
- * arg 3) The context to use if it is needed.
- * NOTE:  On Unix, it is only possible to put a file descriptor into
- *        an apr file type.
+/*
+
+=head1 ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, ap_pool_t *cont) 
+
+B<convert the file from os specific type to apr type.>
+
+    arg 1) The apr file we are converting to.
+    arg 2) The os specific file to convert
+    arg 3) The pool to use if it is needed.
+
+B<NOTE>:  On Unix, it is only possible to put a file descriptor into
+          an apr file type.
+
+=cut
  */
 ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, 
                            ap_pool_t *cont); 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, 
- *                           ap_context_t *cont)
- *    convert the dir from os specific type to apr type.
- * arg 1) The apr dir we are converting to.
- * arg 2) The os specific dir to convert
- * arg 3) The context to use when creating to apr directory.
+/*
+
+=head1 ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, ap_pool_t *cont)
+
+B<convert the dir from os specific type to apr type.>
+
+    arg 1) The apr dir we are converting to.
+    arg 2) The os specific dir to convert
+    arg 3) The pool to use when creating to apr directory.
+
+=cut
  */
 ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, 
                           ap_pool_t *cont); 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_socket_t *thesock, 
- *                            ap_context_t *cont)
- *    Convert a socket from the os specific type to the apr type
- * arg 1) The context to use.
- * arg 2) The socket to convert to.
- * arg 3) The socket we are converting to an apr type.
+/*
+
+=head1 ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_socket_t *thesock, ap_pool_t *cont)
+
+B<Convert a socket from the os specific type to the apr type>
+
+    arg 1) The pool to use.
+    arg 2) The socket to convert to.
+    arg 3) The socket we are converting to an apr type.
+
+=cut
  */
 ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, 
                            ap_pool_t *cont);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *,
- *                            ap_context_t *cont)
- *    onvert the lock from os specific type to apr type
- * arg 1) The apr lock we are converting to.
- * arg 2) The os specific lock to convert.
- * arg 3) The context to use if it is needed.
+/*
+
+=head1 ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *, ap_pool_t *cont)
+
+B<Convert the lock from os specific type to apr type>
+
+    arg 1) The apr lock we are converting to.
+    arg 2) The os specific lock to convert.
+    arg 3) The pool to use if it is needed.
+
+=cut
  */
 ap_status_t ap_put_os_lock(ap_lock_t **lock, ap_os_lock_t *thelock, 
                            ap_pool_t *cont); 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc,
- *                            ap_context_t *cont)
- *    convert the proc from os specific type to apr type.
- * arg 1) The apr proc we are converting to.
- * arg 2) The os specific proc to convert
- * arg 3) The context to use if it is needed.
+/*
+
+=head1 ap_status_t ap_put_os_proc(ap_proc_t *proc, ap_os_proc_t *theproc, ap_pool_t *cont)
+
+B<convert the proc from os specific type to apr type.>
+
+    arg 1) The apr proc we are converting to.
+    arg 2) The os specific proc to convert
+    arg 3) The pool to use if it is needed.
+
+=cut
  */
 ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
                            ap_pool_t *cont); 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime, ap_context_t, *cont)
- *    Put the imploded time in the APR format.
- * arg 1) the APR time format
- * arg 2) the time to convert
- * arg 3) the context to use if necessary
+/*
+
+=head1 ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime, ap_pool_t, *cont)
+
+B<Put the imploded time in the APR format.>
+
+    arg 1) the APR time format
+    arg 2) the time to convert
+    arg 3) the pool to use if necessary
+
+=cut
  */
 ap_status_t ap_put_os_imp_time(ap_time_t *, ap_os_imp_time_t **, ap_pool_t *); 
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime, ap_os_exp_time_t **ostime, ap_context_t, *cont)
- *    Put the exploded time in the APR format.
- * arg 1) the APR time format
- * arg 2) the time to convert
- * arg 3) the context to use if necessary
+/*
+
+=head1 ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime, ap_os_exp_time_t **ostime, ap_pool_t, *cont)
+
+B<Put the exploded time in the APR format.>
+
+    arg 1) the APR time format
+    arg 2) the time to convert
+    arg 3) the pool to use if necessary
+
+=cut
  */
 ap_status_t ap_put_os_exp_time(ap_exploded_time_t *, ap_os_exp_time_t **, ap_pool_t *); 
 
 #if APR_HAS_THREADS
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_thread(ap_thread_t *thd, ap_os_thread_t *thethd,
- *                              ap_context_t *cont)
- *    convert the thread from os specific type to apr type.
- * arg 1) The apr thread we are converting to.
- * arg 2) The os specific thread to convert
- * arg 3) The context to use if it is needed.
+/*
+
+=head1 ap_status_t ap_put_os_thread(ap_thread_t *thd, ap_os_thread_t *thethd, ap_pool_t *cont)
+
+B<convert the thread from os specific type to apr type.>
+
+    arg 1) The apr thread we are converting to.
+    arg 2) The os specific thread to convert
+    arg 3) The pool to use if it is needed.
+
+=cut
  */
 ap_status_t ap_put_os_thread(ap_thread_t **thd, ap_os_thread_t *thethd, 
                              ap_pool_t *cont);
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_threadkey(ap_threadkey_t *key, ap_os_threadkey_t *thekey, 
- *                                 ap_context_t *cont)
- *    convert the thread private memory key from os specific type to apr type.
- * arg 1) The apr handle we are converting to.
- * arg 2) The os specific handle to convert
- * arg 3) The context to use if it is needed.
+/*
+
+=head1 ap_status_t ap_put_os_threadkey(ap_threadkey_t *key, ap_os_threadkey_t *thekey, ap_pool_t *cont)
+
+B<convert the thread private memory key from os specific type to apr type.>
+
+    arg 1) The apr handle we are converting to.
+    arg 2) The os specific handle to convert
+    arg 3) The pool to use if it is needed.
+
+=cut
  */
 ap_status_t ap_put_os_threadkey(ap_threadkey_t **key, ap_os_threadkey_t *thekey, 
                                 ap_pool_t *cont);

@@ -168,15 +168,24 @@ above the prototypes to be checked into the unix tree.
 
 The format for the comment block is:
 
-/* ***APRDOC********************************************************
- * Function prototype with variable names
- *    A one or two line description of what the function does.
- * arg 1) A brief description of the first argument.
- * ...
- * arg N) A brief description of the Nth argument.
- * NOTE:  This is optional.  If there is anything programmers need to
- *        know about your function, add it here. 
+/*
+
+=head1 function prototype
+
+B<Brief description of function>
+
+    arg 1)  explanation of arg 1
+    arg 2)  explanation of arg 2
+    arg N)  explanation of arg N
+
+B<NOTE>:  Any extra information the programmer needs.
+
+=cut
  */                                                                             
+
+The spacing for the documentation is VERY important, because the docs are
+processed with perldoc, and this spacing is required for the perldoc scripts
+to work properly.
 
 For an actual example, look at any function in the fileio/unix directory.
 
