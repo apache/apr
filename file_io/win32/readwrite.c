@@ -223,40 +223,17 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
-    /* 
-     * Your application must provide its own serialization (locking) if
-     * it allows multiple threads to access the same file handle 
-     * concurrently.
-     *
-     * ToDo: This function does not use the char ch argument. Could add 
-     * gorpy code to read the file after the SetFilePointer() call to 
-     * make sure the character pushed back on the stream is the same as
-     * arg ch. Then, need to SetFilePointer() once more to reset the 
-     * file pointer to the point before the read. Yech... Just assume 
-     * the caller knows what he is doing.  There may be a nifty Win32 
-     * call for this I've not discovered....
-     */
-
-    /* SetFilePointer is only valid for a file device ...*/
-    if (GetFileType(thefile->filehand) != FILE_TYPE_DISK) {
-        return GetLastError();
-    }
-
+    /* ungetc only makes sense when using buffered i/o */
     if (thefile->buffered) {
-        ap_off_t offset = -1;
-        return ap_seek(thefile, APR_CUR, &offset);
-    }
-    else {
-        /* and the file pointer is not pointing to the start of the file. */
-        if (GetFilePointer(thefile->filehand)) {
-            if (SetFilePointer(thefile->filehand, -1, NULL, FILE_CURRENT)
-                == 0xFFFFFFFF) {
-                return GetLastError();
-            }
+        ap_lock(thefile->mutex);        
+        if (thefile->bufpos > 0){
+            thefile->bufpos--;
         }
+        ap_unlock(thefile->mutex);
+        return APR_SUCCESS;
     }
 
-    return APR_SUCCESS; 
+    return APR_ENOTIMPL;
 }
 
 ap_status_t ap_getc(char *ch, ap_file_t *thefile)
