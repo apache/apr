@@ -66,8 +66,9 @@
 
 #include "apr_general.h"
 #include "apr_file_io.h"
-#include <dirent.h>
+
 #ifndef WIN32
+#include <dirent.h>
 #include "apr_config.h"
 #else
 #include "apr_win.h"
