@@ -70,7 +70,6 @@
 #include <unistd.h>
 #include <process.h>
 #include <stdlib.h>
-#include <os2.h>
 
 apr_status_t apr_createprocattr_init(apr_procattr_t **new, apr_pool_t *cont)
 {

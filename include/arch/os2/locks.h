@@ -57,8 +57,6 @@
 
 #include "apr_lock.h"
 #include "apr_file_io.h"
-#define INCL_DOS
-#include <os2.h>
 
 struct apr_lock_t {
     apr_pool_t *cntxt;

@@ -59,8 +59,6 @@
 #include "apr_lib.h"
 #include <sys/time.h>
 #include <stdlib.h>
-#define INCL_DOS
-#include <os2.h>
 
 /*  OS/2 doesn't have a poll function, implement using OS/2 style select */
  

@@ -58,9 +58,6 @@
 #include "apr_strings.h"
 #include <string.h>
 
-#define INCL_DOS
-#include <os2.h>
-
 static apr_status_t dir_cleanup(void *thedir)
 {
     apr_dir_t *dir = thedir;

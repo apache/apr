@@ -68,6 +68,7 @@ CLEAN :
 	-@erase "$(INTDIR)\fullrw.obj"
 	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\getuuid.obj"
+	-@erase "$(INTDIR)\groupinfo.obj"
 	-@erase "$(INTDIR)\inet_ntop.obj"
 	-@erase "$(INTDIR)\locks.obj"
 	-@erase "$(INTDIR)\misc.obj"
@@ -90,6 +91,7 @@ CLEAN :
 	-@erase "$(INTDIR)\threadpriv.obj"
 	-@erase "$(INTDIR)\time.obj"
 	-@erase "$(INTDIR)\timestr.obj"
+	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8_ucs2.obj"
 	-@erase "$(INTDIR)\uuid.obj"
 	-@erase "$(OUTDIR)\apr.lib"
@@ -166,6 +168,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\fullrw.obj" \
 	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\getuuid.obj" \
+	"$(INTDIR)\groupinfo.obj" \
 	"$(INTDIR)\inet_ntop.obj" \
 	"$(INTDIR)\locks.obj" \
 	"$(INTDIR)\misc.obj" \
@@ -188,6 +191,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\threadpriv.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
+	"$(INTDIR)\userinfo.obj" \
 	"$(INTDIR)\utf8_ucs2.obj" \
 	"$(INTDIR)\uuid.obj"
 
@@ -240,6 +244,7 @@ CLEAN :
 	-@erase "$(INTDIR)\fullrw.obj"
 	-@erase "$(INTDIR)\getopt.obj"
 	-@erase "$(INTDIR)\getuuid.obj"
+	-@erase "$(INTDIR)\groupinfo.obj"
 	-@erase "$(INTDIR)\inet_ntop.obj"
 	-@erase "$(INTDIR)\locks.obj"
 	-@erase "$(INTDIR)\misc.obj"
@@ -262,6 +267,7 @@ CLEAN :
 	-@erase "$(INTDIR)\threadpriv.obj"
 	-@erase "$(INTDIR)\time.obj"
 	-@erase "$(INTDIR)\timestr.obj"
+	-@erase "$(INTDIR)\userinfo.obj"
 	-@erase "$(INTDIR)\utf8_ucs2.obj"
 	-@erase "$(INTDIR)\uuid.obj"
 	-@erase "$(OUTDIR)\apr.lib"
@@ -338,6 +344,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\fullrw.obj" \
 	"$(INTDIR)\getopt.obj" \
 	"$(INTDIR)\getuuid.obj" \
+	"$(INTDIR)\groupinfo.obj" \
 	"$(INTDIR)\inet_ntop.obj" \
 	"$(INTDIR)\locks.obj" \
 	"$(INTDIR)\misc.obj" \
@@ -360,6 +367,7 @@ LIB32_OBJS= \
 	"$(INTDIR)\threadpriv.obj" \
 	"$(INTDIR)\time.obj" \
 	"$(INTDIR)\timestr.obj" \
+	"$(INTDIR)\userinfo.obj" \
 	"$(INTDIR)\utf8_ucs2.obj" \
 	"$(INTDIR)\uuid.obj"
 
@@ -395,6 +403,7 @@ DEP_CPP_TIME_=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
@@ -404,6 +413,8 @@ DEP_CPP_TIME_=\
 	".\include\apr_portable.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -418,6 +429,7 @@ DEP_CPP_TIMES=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_network_io.h"\
@@ -425,6 +437,8 @@ DEP_CPP_TIMES=\
 	".\include\apr_portable.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\atime.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -470,11 +484,14 @@ SOURCE=.\strings\apr_snprintf.c
 DEP_CPP_APR_S=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -588,6 +605,7 @@ DEP_CPP_ERROR=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -596,6 +614,8 @@ DEP_CPP_ERROR=\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -610,6 +630,7 @@ SOURCE=.\misc\unix\getopt.c
 DEP_CPP_GETOP=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -617,6 +638,8 @@ DEP_CPP_GETOP=\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -644,12 +667,15 @@ SOURCE=.\misc\win32\misc.c
 DEP_CPP_MISC_=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -663,12 +689,15 @@ SOURCE=.\misc\win32\names.c
 DEP_CPP_NAMES=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -696,6 +725,7 @@ SOURCE=.\misc\unix\start.c
 DEP_CPP_START=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -703,6 +733,8 @@ DEP_CPP_START=\
 	".\include\apr_pools.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\unix\misc.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\locks.h"\
@@ -733,6 +765,7 @@ DEP_CPP_DIR_C=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -744,6 +777,8 @@ DEP_CPP_DIR_C=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -761,6 +796,7 @@ SOURCE=.\file_io\unix\fileacc.c
 DEP_CPP_FILEA=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -770,6 +806,8 @@ DEP_CPP_FILEA=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -787,6 +825,7 @@ SOURCE=.\file_io\win32\filedup.c
 DEP_CPP_FILED=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -796,6 +835,8 @@ DEP_CPP_FILED=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -813,14 +854,18 @@ SOURCE=.\file_io\win32\filestat.c
 DEP_CPP_FILES=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
 	".\include\apr_lock.h"\
 	".\include\apr_pools.h"\
+	".\include\apr_strings.h"\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -839,6 +884,7 @@ SOURCE=.\file_io\win32\flock.c
 DEP_CPP_FLOCK=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -847,6 +893,8 @@ DEP_CPP_FLOCK=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -864,9 +912,12 @@ SOURCE=.\file_io\unix\fullrw.c
 DEP_CPP_FULLR=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
 
@@ -880,6 +931,7 @@ DEP_CPP_OPEN_=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -891,6 +943,8 @@ DEP_CPP_OPEN_=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -907,6 +961,7 @@ SOURCE=.\file_io\win32\pipe.c
 DEP_CPP_PIPE_=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -916,6 +971,8 @@ DEP_CPP_PIPE_=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -932,6 +989,7 @@ SOURCE=.\file_io\win32\readwrite.c
 DEP_CPP_READW=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -941,6 +999,8 @@ DEP_CPP_READW=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -959,6 +1019,7 @@ SOURCE=.\file_io\win32\seek.c
 DEP_CPP_SEEK_=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -967,6 +1028,8 @@ DEP_CPP_SEEK_=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -984,6 +1047,7 @@ DEP_CPP_LOCKS=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lock.h"\
@@ -993,6 +1057,8 @@ DEP_CPP_LOCKS=\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\locks.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -1006,11 +1072,14 @@ SOURCE=.\network_io\unix\inet_ntop.c
 DEP_CPP_INET_=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\networkio.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -1025,12 +1094,15 @@ SOURCE=.\network_io\win32\poll.c
 DEP_CPP_POLL_=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -1044,6 +1116,7 @@ SOURCE=.\network_io\win32\sendrecv.c
 DEP_CPP_SENDR=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -1054,6 +1127,8 @@ DEP_CPP_SENDR=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -1072,6 +1147,7 @@ SOURCE=.\network_io\win32\sockaddr.c
 DEP_CPP_SOCKA=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
@@ -1079,6 +1155,8 @@ DEP_CPP_SOCKA=\
 	".\include\apr_pools.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
 	".\network_io\os2\os2nerrno.h"\
 	".\network_io\unix\sa_common.c"\
@@ -1094,6 +1172,7 @@ DEP_CPP_SOCKE=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
@@ -1103,6 +1182,8 @@ DEP_CPP_SOCKE=\
 	".\include\apr_portable.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -1116,12 +1197,15 @@ SOURCE=.\network_io\win32\sockopt.c
 DEP_CPP_SOCKO=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_network_io.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_strings.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\networkio.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -1136,6 +1220,7 @@ DEP_CPP_PROC_=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -1147,6 +1232,8 @@ DEP_CPP_PROC_=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -1164,6 +1251,7 @@ SOURCE=.\threadproc\win32\signals.c
 DEP_CPP_SIGNA=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -1172,6 +1260,8 @@ DEP_CPP_SIGNA=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -1191,6 +1281,7 @@ DEP_CPP_THREA=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
@@ -1200,6 +1291,8 @@ DEP_CPP_THREA=\
 	".\include\apr_portable.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\threadproc.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -1215,6 +1308,7 @@ DEP_CPP_THREAD=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_lib.h"\
@@ -1224,6 +1318,8 @@ DEP_CPP_THREAD=\
 	".\include\apr_portable.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\include\arch\win32\threadproc.h"\
 	".\network_io\os2\os2nerrno.h"\
@@ -1239,6 +1335,7 @@ DEP_CPP_DSO_C=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -1248,6 +1345,8 @@ DEP_CPP_DSO_C=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -1266,6 +1365,7 @@ DEP_CPP_APR_P=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_hash.h"\
@@ -1277,6 +1377,8 @@ DEP_CPP_APR_P=\
 	".\include\apr_strings.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -1321,10 +1423,13 @@ SOURCE=.\mmap\unix\common.c
 DEP_CPP_COMMO=\
 	".\include\apr.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_mmap.h"\
 	".\include\apr_pools.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\arch\win32\apr_private.h"\
 	".\network_io\os2\os2nerrno.h"\
 	
@@ -1339,6 +1444,7 @@ DEP_CPP_MMAP_=\
 	".\include\apr.h"\
 	".\include\apr_dso.h"\
 	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
 	".\include\apr_file_io.h"\
 	".\include\apr_general.h"\
 	".\include\apr_getopt.h"\
@@ -1350,6 +1456,8 @@ DEP_CPP_MMAP_=\
 	".\include\apr_tables.h"\
 	".\include\apr_thread_proc.h"\
 	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
 	".\include\apr_xlate.h"\
 	".\include\arch\unix\i18n.h"\
 	".\include\arch\unix\misc.h"\
@@ -1359,6 +1467,56 @@ DEP_CPP_MMAP_=\
 	
 
 "$(INTDIR)\mmap.obj" : $(SOURCE) $(DEP_CPP_MMAP_) "$(INTDIR)" ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\user\win32\groupinfo.c
+DEP_CPP_GROUP=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\network_io\os2\os2nerrno.h"\
+	
+
+"$(INTDIR)\groupinfo.obj" : $(SOURCE) $(DEP_CPP_GROUP) "$(INTDIR)"\
+ ".\include\apr.h"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=.\user\win32\userinfo.c
+DEP_CPP_USERI=\
+	".\include\apr.h"\
+	".\include\apr_dso.h"\
+	".\include\apr_errno.h"\
+	".\include\apr_file_info.h"\
+	".\include\apr_file_io.h"\
+	".\include\apr_lock.h"\
+	".\include\apr_network_io.h"\
+	".\include\apr_pools.h"\
+	".\include\apr_portable.h"\
+	".\include\apr_strings.h"\
+	".\include\apr_thread_proc.h"\
+	".\include\apr_time.h"\
+	".\include\apr_user.h"\
+	".\include\apr_want.h"\
+	".\include\arch\win32\apr_private.h"\
+	".\network_io\os2\os2nerrno.h"\
+	
+
+"$(INTDIR)\userinfo.obj" : $(SOURCE) $(DEP_CPP_USERI) "$(INTDIR)"\
+ ".\include\apr.h"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 
