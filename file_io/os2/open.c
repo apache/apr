@@ -112,7 +112,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
 
     if (flag & APR_TRUNCATE) {
         oflags |= OPEN_ACTION_REPLACE_IF_EXISTS;
-    } else {
+    } else if ((oflags & 0xF) == 0) {
         oflags |= OPEN_ACTION_OPEN_IF_EXISTS;
     }
     
