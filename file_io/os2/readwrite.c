@@ -183,15 +183,15 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 
 #ifdef HAVE_WRITEV
 
-ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec, ap_ssize_t *iocnt)
+ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec, ap_size_t nvec, ap_ssize_t *nbytes)
 {
     int bytes;
-    if ((bytes = writev(thefile->filedes, vec, *iocnt)) < 0) {
-        *iocnt = bytes;
+    if ((bytes = writev(thefile->filedes, vec, nvec)) < 0) {
+        *nbytes = 0;
         return errno;
     }
     else {
-        *iocnt = bytes;
+        *nbytes = bytes;
         return APR_SUCCESS;
     }
 }
