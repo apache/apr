@@ -1,5 +1,6 @@
 Makefile
 apr_proc_stub
 *.lo
+*.slo
 .libs
 .deps

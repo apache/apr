@@ -456,7 +456,8 @@ APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *sock, void *data,
  * @remark
  * <PRE>
  * This functions acts like a blocking write by default.  To change 
- * this behavior, use apr_socket_timeout_set().
+ * this behavior, use apr_socket_timeout_set() or the APR_SO_NONBLOCK
+ * socket option.
  *
  * It is possible for both bytes to be sent and an error to be returned.
  *
@@ -475,7 +476,8 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
  * @remark
  * <PRE>
  * This functions acts like a blocking write by default.  To change 
- * this behavior, use apr_socket_timeout_set().
+ * this behavior, use apr_socket_timeout_set() or the APR_SO_NONBLOCK
+ * socket option.
  * The number of bytes actually sent is stored in argument 3.
  *
  * It is possible for both bytes to be sent and an error to be returned.
@@ -526,7 +528,8 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
  *                       including headers, file, and trailers
  * @param flags APR flags that are mapped to OS specific flags
  * @remark This functions acts like a blocking write by default.  To change 
- *         this behavior, use apr_socket_timeout_set().
+ *         this behavior, use apr_socket_timeout_set() or the
+ *         APR_SO_NONBLOCK socket option.
  *         The number of bytes actually sent is stored in argument 5.
  */
 APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock, 
@@ -547,8 +550,9 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
  * @remark
  * <PRE>
  * This functions acts like a blocking read by default.  To change 
- * this behavior, use apr_socket_timeout_set().
- * The number of bytes actually sent is stored in argument 3.
+ * this behavior, use apr_socket_timeout_set() or the APR_SO_NONBLOCK
+ * socket option.
+ * The number of bytes actually received is stored in argument 3.
  *
  * It is possible for both bytes to be received and an APR_EOF or
  * other error to be returned.
@@ -568,6 +572,11 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock,
  *            APR_SO_KEEPALIVE  --  keep connections active
  *            APR_SO_LINGER     --  lingers on close if data is present
  *            APR_SO_NONBLOCK   --  Turns blocking on/off for socket
+ *                                  When this option is enabled, use
+ *                                  the APR_STATUS_IS_EAGAIN() macro to
+ *                                  see if a send or receive function
+ *                                  could not transfer data without
+ *                                  blocking.
  *            APR_SO_REUSEADDR  --  The rules used in validating addresses
  *                                  supplied to bind should allow reuse
  *                                  of local addresses.

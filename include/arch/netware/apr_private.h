@@ -63,6 +63,8 @@
 #define HAVE_SETENV     1
 #define HAVE_UNSETENV   1
 
+#define HAVE_WRITEV     1
+
 /* 64-bit integer conversion function */
 #define APR_INT64_STRFN	      strtoll
 
@@ -171,6 +173,9 @@ void* getStatCache();
 #else
 #define APR_OFF_T_STRFN       strtol
 #endif
+
+/* used to check DWORD overflow for 64bit compiles */
+#define APR_DWORD_MAX 0xFFFFFFFFUL
 
 /*
  * Include common private declarations.

@@ -43,7 +43,7 @@ APR_DECLARE(apr_status_t) apr_socket_send(apr_socket_t *sock, const char *buf,
     int lasterror;
     DWORD dwBytes = 0;
 
-    wsaData.len = *len;
+    wsaData.len = (u_long)*len;
     wsaData.buf = (char*) buf;
 
 #ifndef _WIN32_WCE
@@ -72,7 +72,7 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
     DWORD dwBytes = 0;
     DWORD flags = 0;
 
-    wsaData.len = *len;
+    wsaData.len = (u_long)*len;
     wsaData.buf = (char*) buf;
 
 #ifndef _WIN32_WCE
@@ -94,21 +94,49 @@ APR_DECLARE(apr_status_t) apr_socket_recv(apr_socket_t *sock, char *buf,
 
 APR_DECLARE(apr_status_t) apr_socket_sendv(apr_socket_t *sock,
                                            const struct iovec *vec,
-                                           apr_int32_t nvec, apr_size_t *nbytes)
+                                           apr_int32_t in_vec, apr_size_t *nbytes)
 {
     apr_status_t rc = APR_SUCCESS;
     apr_ssize_t rv;
-    int i;
+    apr_size_t cur_len;
+    apr_int32_t nvec = 0;
+    int i, j = 0;
     DWORD dwBytes = 0;
-    WSABUF *pWsaBuf = (nvec <= WSABUF_ON_STACK) ? _alloca(sizeof(WSABUF) * (nvec))
-                                                : malloc(sizeof(WSABUF) * (nvec));
+    WSABUF *pWsaBuf;
 
+    for (i = 0; i < in_vec; i++) {
+        cur_len = vec[i].iov_len;
+        nvec++;
+        while (cur_len > APR_DWORD_MAX) {
+            nvec++;
+            cur_len -= APR_DWORD_MAX;
+        } 
+    }
+
+    pWsaBuf = (nvec <= WSABUF_ON_STACK) ? _alloca(sizeof(WSABUF) * (nvec))
+                                         : malloc(sizeof(WSABUF) * (nvec));
     if (!pWsaBuf)
         return APR_ENOMEM;
 
-    for (i = 0; i < nvec; i++) {
-        pWsaBuf[i].buf = vec[i].iov_base;
-        pWsaBuf[i].len = vec[i].iov_len;
+    for (i = 0; i < in_vec; i++) {
+        char * base = vec[i].iov_base;
+        cur_len = vec[i].iov_len;
+        
+        do {
+            if (cur_len > APR_DWORD_MAX) {
+                pWsaBuf[j].buf = base;
+                pWsaBuf[j].len = APR_DWORD_MAX;
+                cur_len -= APR_DWORD_MAX;
+                base += APR_DWORD_MAX;
+            }
+            else {
+                pWsaBuf[j].buf = base;
+                pWsaBuf[j].len = (DWORD)cur_len;
+                cur_len = 0;
+            }
+            j++;
+
+        } while (cur_len > 0);
     }
 #ifndef _WIN32_WCE
     rv = WSASend(sock->socketdes, pWsaBuf, nvec, &dwBytes, 0, NULL, NULL);
@@ -140,7 +168,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendto(apr_socket_t *sock,
 {
     apr_ssize_t rv;
 
-    rv = sendto(sock->socketdes, buf, (*len), flags, 
+    rv = sendto(sock->socketdes, buf, (int)*len, flags, 
                 (const struct sockaddr*)&where->sa, 
                 where->salen);
     if (rv == SOCKET_ERROR) {
@@ -160,7 +188,7 @@ APR_DECLARE(apr_status_t) apr_socket_recvfrom(apr_sockaddr_t *from,
 {
     apr_ssize_t rv;
 
-    rv = recvfrom(sock->socketdes, buf, (*len), flags, 
+    rv = recvfrom(sock->socketdes, buf, (int)*len, flags, 
                   (struct sockaddr*)&from->sa, &from->salen);
     if (rv == SOCKET_ERROR) {
         (*len) = 0;
@@ -225,13 +253,13 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
                                               apr_int32_t flags) 
 {
     apr_status_t status = APR_SUCCESS;
-    apr_ssize_t rv;
+    apr_status_t rv;
     apr_off_t curoff = *offset;
     DWORD dwFlags = 0;
-    DWORD nbytes;
+    apr_size_t nbytes;
     TRANSMIT_FILE_BUFFERS tfb, *ptfb = NULL;
     int ptr = 0;
-    int bytes_to_send;   /* Bytes to send out of the file (not including headers) */
+    apr_size_t bytes_to_send;   /* Bytes to send out of the file (not including headers) */
     int disconnected = 0;
     int sendv_trailers = 0;
     char hdtrbuf[4096];
@@ -267,11 +295,15 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
 
     /* Collapse the headers into a single buffer */
     if (hdtr && hdtr->numheaders) {
+        apr_size_t head_length = tfb.HeadLength;
         ptfb = &tfb;
         nbytes = 0;
-        rv = collapse_iovec((char **)&ptfb->Head, &ptfb->HeadLength, 
+        rv = collapse_iovec((char **)&ptfb->Head, &head_length, 
                             hdtr->headers, hdtr->numheaders, 
                             hdtrbuf, sizeof(hdtrbuf));
+
+        tfb.HeadLength = (DWORD)head_length;
+
         /* If not enough buffer, punt to sendv */
         if (rv == APR_INCOMPLETE) {
             rv = apr_socket_sendv(sock, hdtr->headers, hdtr->numheaders, &nbytes);
@@ -289,19 +321,25 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
         sock->overlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
     }
     while (bytes_to_send) {
+        DWORD xmitbytes;
+
         if (bytes_to_send > MAX_SEGMENT_SIZE) {
-            nbytes = MAX_SEGMENT_SIZE;
+            xmitbytes = MAX_SEGMENT_SIZE;
         }
         else {
             /* Last call to TransmitFile() */
-            nbytes = bytes_to_send;
+            xmitbytes = (DWORD)bytes_to_send;
             /* Collapse the trailers into a single buffer */
             if (hdtr && hdtr->numtrailers) {
+                apr_size_t tail_length = tfb.TailLength;
                 ptfb = &tfb;
-                rv = collapse_iovec((char**) &ptfb->Tail, &ptfb->TailLength,
+                rv = collapse_iovec((char**) &ptfb->Tail, &tail_length,
                                     hdtr->trailers, hdtr->numtrailers,
                                     hdtrbuf + ptfb->HeadLength,
                                     sizeof(hdtrbuf) - ptfb->HeadLength);
+
+                tfb.TailLength = (DWORD)tail_length;
+
                 if (rv == APR_INCOMPLETE) {
                     /* If not enough buffer, punt to sendv, later */
                     sendv_trailers = 1;
@@ -323,7 +361,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
         /* XXX BoundsChecker claims dwFlags must not be zero. */
         rv = TransmitFile(sock->socketdes,  /* socket */
                           file->filehand, /* open file descriptor of the file to be sent */
-                          nbytes,         /* number of bytes to send. 0=send all */
+                          xmitbytes,      /* number of bytes to send. 0=send all */
                           0,              /* Number of bytes per send. 0=use default */
                           sock->overlapped,    /* OVERLAPPED structure */
                           ptfb,           /* header and trailer buffers */
@@ -341,7 +379,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
                     if (!disconnected) {
                         if (!WSAGetOverlappedResult(sock->socketdes,
                                                     sock->overlapped,
-                                                    &nbytes,
+                                                    &xmitbytes,
                                                     FALSE,
                                                     &dwFlags)) {
                             status = apr_get_netos_error();
@@ -351,7 +389,7 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
                          * tracks bytes sent out of the file.
                          */
                         else if (ptfb) {
-                            nbytes -= (ptfb->HeadLength + ptfb->TailLength);
+                            xmitbytes -= (ptfb->HeadLength + ptfb->TailLength);
                         }
                     }
                 }
@@ -374,9 +412,9 @@ APR_DECLARE(apr_status_t) apr_socket_sendfile(apr_socket_t *sock,
         if (status != APR_SUCCESS)
             break;
 
-        bytes_to_send -= nbytes;
-        curoff += nbytes;
-        *len += nbytes;
+        bytes_to_send -= xmitbytes;
+        curoff += xmitbytes;
+        *len += xmitbytes;
         /* Adjust len for any headers/trailers sent */
         if (ptfb) {
             *len += (ptfb->HeadLength + ptfb->TailLength);

@@ -27,9 +27,10 @@
  * read_with_timeout() 
  * Uses async i/o to emulate unix non-blocking i/o with timeouts.
  */
-static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len, apr_size_t *nbytes)
+static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t len_in, apr_size_t *nbytes)
 {
     apr_status_t rv;
+    DWORD len = (DWORD)len_in;
     *nbytes = 0;
 
     /* Handle the zero timeout non-blocking case */
@@ -68,7 +69,8 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
         file->pOverlapped->OffsetHigh = (DWORD)(file->filePtr >> 32);
     }
 
-    rv = ReadFile(file->filehand, buf, len, nbytes, file->pOverlapped);
+    *nbytes = 0;
+    rv = ReadFile(file->filehand, buf, len, (LPDWORD)nbytes, file->pOverlapped);
 
     if (!rv) {
         rv = apr_get_os_error();
@@ -85,7 +87,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_size_t le
             switch (rv) {
             case WAIT_OBJECT_0:
                 GetOverlappedResult(file->filehand, file->pOverlapped, 
-                                    nbytes, TRUE);
+                                    (LPDWORD)nbytes, TRUE);
                 rv = APR_SUCCESS;
                 break;
             case WAIT_TIMEOUT:
@@ -286,7 +288,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 thefile->pOverlapped->Offset     = (DWORD)thefile->filePtr;
                 thefile->pOverlapped->OffsetHigh = (DWORD)(thefile->filePtr >> 32);
             }
-            rv = WriteFile(thefile->filehand, buf, *nbytes, &bwrote,
+            rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
                            thefile->pOverlapped);
             if (thefile->append) {
                 apr_file_unlock(thefile);
@@ -294,7 +296,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
             }
         }
         else {
-            rv = WriteFile(thefile->filehand, buf, *nbytes, &bwrote,
+            rv = WriteFile(thefile->filehand, buf, (DWORD)*nbytes, &bwrote,
                            thefile->pOverlapped);
         }
         if (rv) {
@@ -309,7 +311,7 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
                 rv = WaitForSingleObject(thefile->pOverlapped->hEvent, INFINITE);
                 switch (rv) {
                     case WAIT_OBJECT_0:
-                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, nbytes, TRUE);
+                        GetOverlappedResult(thefile->filehand, thefile->pOverlapped, (LPDWORD)nbytes, TRUE);
                         rv = APR_SUCCESS;
                         break;
                     case WAIT_TIMEOUT:
@@ -343,7 +345,7 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
 {
     apr_status_t rv = APR_SUCCESS;
     apr_size_t i;
-    DWORD bwrote = 0;
+    apr_size_t bwrote = 0;
     char *buf;
 
     *nbytes = 0;
@@ -361,7 +363,7 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
 
 APR_DECLARE(apr_status_t) apr_file_putc(char ch, apr_file_t *thefile)
 {
-    DWORD len = 1;
+    apr_size_t len = 1;
 
     return apr_file_write(thefile, &ch, &len);
 }
@@ -375,7 +377,7 @@ APR_DECLARE(apr_status_t) apr_file_ungetc(char ch, apr_file_t *thefile)
 APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
 {
     apr_status_t rc;
-    int bread;
+    apr_size_t bread;
 
     bread = 1;
     rc = apr_file_read(thefile, ch, &bread);
@@ -393,7 +395,7 @@ APR_DECLARE(apr_status_t) apr_file_getc(char *ch, apr_file_t *thefile)
 
 APR_DECLARE(apr_status_t) apr_file_puts(const char *str, apr_file_t *thefile)
 {
-    DWORD len = strlen(str);
+    apr_size_t len = strlen(str);
 
     return apr_file_write(thefile, str, &len);
 }
@@ -431,13 +433,34 @@ APR_DECLARE(apr_status_t) apr_file_gets(char *str, int len, apr_file_t *thefile)
 APR_DECLARE(apr_status_t) apr_file_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
-        DWORD written = 0;
+        DWORD numbytes, written = 0;
         apr_status_t rc = 0;
+        char *buffer;
+        apr_size_t bytesleft;
 
         if (thefile->direction == 1 && thefile->bufpos) {
-            if (!WriteFile(thefile->filehand, thefile->buffer, thefile->bufpos, &written, NULL))
-                rc = apr_get_os_error();
-            thefile->filePtr += written;
+            buffer = thefile->buffer;
+            bytesleft = thefile->bufpos;           
+
+            do {
+                if (bytesleft > APR_DWORD_MAX) {
+                    numbytes = APR_DWORD_MAX;
+                }
+                else {
+                    numbytes = (DWORD)bytesleft;
+                }
+
+                if (!WriteFile(thefile->filehand, buffer, numbytes, &written, NULL)) {
+                    rc = apr_get_os_error();
+                    thefile->filePtr += written;
+                    break;
+                }
+
+                thefile->filePtr += written;
+                bytesleft -= written;
+                buffer += written;
+
+            } while (bytesleft > 0);
 
             if (rc == 0)
                 thefile->bufpos = 0;

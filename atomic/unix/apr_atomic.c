@@ -21,6 +21,12 @@
 
 #include <stdlib.h>
 
+#if defined(__GNUC__) && defined(__STRICT_ANSI__) && !defined(USE_GENERIC_ATOMICS)
+/* force use of generic atomics if building e.g. with -std=c89, which
+ * doesn't allow inline asm */
+#define USE_GENERIC_ATOMICS
+#endif
+
 #if (defined(__i386__) || defined(__x86_64__)) \
     && defined(__GNUC__) && !defined(USE_GENERIC_ATOMICS)
 
