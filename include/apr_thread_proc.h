@@ -67,6 +67,12 @@ extern "C" {
 typedef enum {APR_SHELLCMD, APR_PROGRAM} ap_cmdtype_e;
 typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 
+#define APR_NO_PIPE          0
+#define APR_FULL_BLOCK       1
+#define APR_FULL_NONBLOCK    2
+#define APR_PARENT_BLOCK     3
+#define APR_CHILD_BLOCK      4
+
 #define APR_CANCEL_ASYNCH      1
 #define APR_CANCEL_DEFER       2
 #define APR_CANCEL_ENABLE      3
