@@ -127,8 +127,6 @@ static const char *apr_error_string(ap_status_t statcode)
         return "This function has not been implemented on this platform";
     case APR_EMISMATCH:
         return "passwords do not match";
-/* EBADARG needs to be removed soon.  */
-    case APR_EBADARG:
     default:
         return "Error string not specified yet";
     }
