@@ -59,11 +59,13 @@
 apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path, 
                         apr_pool_t *ctx)
 {
+    /* XXX: Must convert path from / to \ notation
+     */
     HINSTANCE os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     *res_handle = apr_pcalloc(ctx, sizeof(*res_handle));
 
     if(os_handle == NULL) {
-        (*res_handle)->load_error = GetLastError();
+        (*res_handle)->load_error = apr_get_os_error();
         return (*res_handle)->load_error;
     }
 
@@ -76,18 +78,18 @@ apr_status_t apr_dso_load(struct apr_dso_handle_t **res_handle, const char *path
 apr_status_t apr_dso_unload(struct apr_dso_handle_t *handle)
 {
     if (!FreeLibrary(handle->handle)) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     return APR_SUCCESS;
 }
 
 apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, 
-                       struct apr_dso_handle_t *handle, 
-                       const char *symname)
+                         struct apr_dso_handle_t *handle, 
+                         const char *symname)
 {
     FARPROC retval = GetProcAddress(handle->handle, symname);
     if (!retval) {
-        return GetLastError();
+        return apr_get_os_error();
     }
     
     *ressym = retval;

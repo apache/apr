@@ -86,8 +86,8 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t l
                                &dwBytesRead,           // pointer to number of bytes read
                                &dwBytesAvail,          // pointer to total number of bytes available
                                &dwBytesLeftThisMsg)) { // pointer to unread bytes in this message
-                rv = GetLastError();
-                if (rv = ERROR_BROKEN_PIPE)
+                rv = apr_get_os_error();
+                if (rv = APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE))
                     return APR_SUCCESS;
             }
             else {
@@ -107,8 +107,8 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t l
     rv = ReadFile(file->filehand, buf, len, nbytes, file->pOverlapped);
 
     if (!rv) {
-        rv = GetLastError();
-        if (rv == ERROR_IO_PENDING) {
+        rv = apr_get_os_error();
+        if (rv == APR_FROM_OS_ERROR(ERROR_IO_PENDING)) {
             /* Wait for the pending i/o */
             if (file->timeout > 0) {
                 rv = WaitForSingleObject(file->pOverlapped->hEvent, file->timeout/1000); // timeout in milliseconds...
@@ -125,7 +125,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t l
                 rv = APR_TIMEUP;
                 break;
             case WAIT_FAILED:
-                rv = GetLastError();
+                rv = apr_get_os_error();
                 break;
             default:
                 break;
@@ -134,7 +134,7 @@ static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t l
                 CancelIo(file->filehand);
             }
         }
-        else if (rv == ERROR_BROKEN_PIPE) {
+        else if (rv == APR_FROM_OS_ERROR(ERROR_BROKEN_PIPE)) {
             /* Assume ERROR_BROKEN_PIPE signals an EOF reading from a pipe */
             rv = APR_SUCCESS; /* APR_EOF? */
         }
@@ -263,7 +263,7 @@ apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes
         }
         else {
             (*nbytes) = 0;
-            rv = GetLastError();
+            rv = apr_get_os_error();
         }
     }
 
@@ -365,7 +365,8 @@ apr_status_t apr_flush(apr_file_t *thefile)
         apr_status_t rc = 0;
 
         if (thefile->direction == 1 && thefile->bufpos) {
-            rc = WriteFile(thefile->filehand, thefile->buffer, thefile->bufpos, &written, NULL ) ? 0 : GetLastError();
+            if (!WriteFile(thefile->filehand, thefile->buffer, thefile->bufpos, &written, NULL))
+                rc = apr_get_os_error();
             thefile->filePtr += written;
 
             if (rc == 0)

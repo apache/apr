@@ -63,7 +63,7 @@ apr_status_t soblock(SOCKET sd)
     int zero = 0;
 
     if (ioctlsocket(sd, FIONBIO, &zero) == SOCKET_ERROR) {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
     return APR_SUCCESS;
 }
@@ -73,7 +73,7 @@ apr_status_t sononblock(SOCKET sd)
     int one = 1;
 
     if (ioctlsocket(sd, FIONBIO, &one) == SOCKET_ERROR) {
-        return WSAGetLastError();
+        return apr_get_netos_error();
     }
     return APR_SUCCESS;
 }
@@ -124,17 +124,17 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
     }
     case APR_SO_KEEPALIVE:
         if (setsockopt(sock->sock, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
-            return WSAGetLastError();
+            return apr_get_netos_error();
         }
         break;
     case APR_SO_DEBUG:
         if (setsockopt(sock->sock, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
-            return WSAGetLastError();
+            return apr_get_netos_error();
         }
         break;
     case APR_SO_REUSEADDR:
         if (setsockopt(sock->sock, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
-            return WSAGetLastError();
+            return apr_get_netos_error();
         }
         break;
     case APR_SO_NONBLOCK:
@@ -153,13 +153,13 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
         li.l_onoff = on;
         li.l_linger = MAX_SECS_TO_LINGER;
         if (setsockopt(sock->sock, SOL_SOCKET, SO_LINGER, (char *) &li, sizeof(struct linger)) == -1) {
-            return WSAGetLastError();
+            return apr_get_netos_error();
         }
         break;
     }
     case APR_TCP_NODELAY:
         if (setsockopt(sock->sock, IPPROTO_TCP, TCP_NODELAY, (void *)&on, sizeof(int)) == -1) {
-            return WSAGetLastError();
+            return apr_get_netos_error();
         }
         break;
     default:
@@ -196,7 +196,7 @@ apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *
 apr_status_t apr_gethostname(char *buf, int len, apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
-        return WSAGetLastError();
+        return apr_get_netos_error();
     else
         return APR_SUCCESS;
 }
@@ -216,7 +216,7 @@ apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
         return APR_ENOMEM;
     }
 
-    return WSAGetLastError();
+    return apr_get_netos_error();
 }
 
 

@@ -113,7 +113,7 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
      */
     if (((*new)->td = (HANDLE *)_beginthreadex(NULL, 0, (unsigned int (APR_THREAD_FUNC *)(void *))func,
                                                data, 0, &temp)) == 0) {
-        lasterror = GetLastError();
+        lasterror = apr_get_os_error();
         return APR_EEXIST; /* MSVC++ doc doesn't mention any additional error info */
     }
 
@@ -139,7 +139,7 @@ apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
         if (GetExitCodeThread(thd->td, retval) == 0) {
             return APR_SUCCESS;
         }
-        return GetLastError();
+        return apr_get_os_error();
     }
     else {
         return stat;
@@ -152,7 +152,7 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
         return APR_SUCCESS;
     }
     else {
-        return GetLastError();
+        return apr_get_os_error();
     }
 }
 
