@@ -808,3 +808,5 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
     return mutex->meth->destroy(mutex);
 }
 
+APR_POOL_IMPLEMENT_ACCESSOR(proc_mutex)
+

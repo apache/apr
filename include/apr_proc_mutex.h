@@ -161,6 +161,12 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex);
  */
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex);
 
+/**
+ * Get the pool used by this proc_mutex.
+ * @return apr_pool_t the pool
+ */
+APR_POOL_DECLARE_ACCESSOR(proc_mutex);
+
 #ifdef __cplusplus
 }
 #endif
