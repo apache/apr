@@ -140,12 +140,13 @@ static apr_int16_t get_revent(apr_int16_t event)
         rv |= APR_POLLNVAL;
 
     return rv;
-}        
+}
 
 #define SMALL_POLLSET_LIMIT  8
 
 APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t num,
-                      apr_int32_t *nsds, apr_interval_time_t timeout)
+                                   apr_int32_t *nsds, 
+                                   apr_interval_time_t timeout)
 {
     int i, num_to_poll;
 #ifdef HAVE_VLA
