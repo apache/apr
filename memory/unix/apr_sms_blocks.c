@@ -113,7 +113,7 @@ static void *apr_sms_blocks_malloc(apr_sms_t *sms,
     }
     
     mem = BLOCKS_T(sms)->ptr;
-    BLOCKS_T(sms)->ptr += BLOCKS_T(sms)->block_sz;
+    BLOCKS_T(sms)->ptr = (char *)(BLOCKS_T(sms)->ptr) + BLOCKS_T(sms)->block_sz;
 
     if (BLOCKS_T(sms)->ptr > BLOCKS_T(sms)->endp)
         return NULL;
@@ -135,7 +135,7 @@ static void *apr_sms_blocks_calloc(apr_sms_t *sms,
     }
     
     mem = BLOCKS_T(sms)->ptr;
-    BLOCKS_T(sms)->ptr += BLOCKS_T(sms)->block_sz;
+    BLOCKS_T(sms)->ptr = (char *)(BLOCKS_T(sms)->ptr) + BLOCKS_T(sms)->block_sz;
 
     if (BLOCKS_T(sms)->ptr > BLOCKS_T(sms)->endp)
         return NULL;
