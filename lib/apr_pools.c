@@ -1171,268 +1171,6 @@ API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
     /* do nothing cleanup routine */
 }
 
-/*****************************************************************
- *
- * Files and file descriptors; these are just an application of the
- * generic cleanup interface.
- */
-static ap_status_t fd_cleanup(void *fdv)
-{
-    close((int) (long) fdv);
-    return APR_SUCCESS;
-}
-
-API_EXPORT(void) ap_note_cleanups_for_fd(ap_context_t *p, int fd)
-{
-    ap_register_cleanup(p, (void *) (long) fd, fd_cleanup, fd_cleanup);
-}
-
-API_EXPORT(void) ap_kill_cleanups_for_fd(ap_context_t *p, int fd)
-{
-    ap_kill_cleanup(p, (void *) (long) fd, fd_cleanup);
-}
-
-API_EXPORT(int) ap_popenf(ap_context_t *a, const char *name, int flg, int mode)
-{
-    int fd;
-    int save_errno;
-
-    ap_block_alarms();
-    fd = open(name, flg, mode);
-    save_errno = errno;
-    if (fd >= 0) {
-	fd = ap_slack(fd, AP_SLACK_HIGH);
-	ap_note_cleanups_for_fd(a, fd);
-    }
-    ap_unblock_alarms();
-    errno = save_errno;
-    return fd;
-}
-
-API_EXPORT(int) ap_pclosef(ap_context_t *a, int fd)
-{
-    int res;
-    int save_errno;
-
-    ap_block_alarms();
-    res = close(fd);
-    save_errno = errno;
-    ap_kill_cleanup(a, (void *) (long) fd, fd_cleanup);
-    ap_unblock_alarms();
-    errno = save_errno;
-    return res;
-}
-
-#ifdef WIN32
-static void h_cleanup(void *fdv)
-{
-    CloseHandle((HANDLE) fdv);
-}
-
-API_EXPORT(void) ap_note_cleanups_for_h(ap_context_t *p, HANDLE hDevice)
-{
-    ap_register_cleanup(p, (void *) hDevice, h_cleanup, h_cleanup);
-}
-
-API_EXPORT(int) ap_pcloseh(ap_context_t *a, HANDLE hDevice)
-{
-    int res=0;
-    int save_errno;
-
-    ap_block_alarms();
-    
-    if (!CloseHandle(hDevice)) {
-        res = GetLastError();
-    }
-    
-    save_errno = errno;
-    ap_kill_cleanup(a, (void *) hDevice, h_cleanup);
-    ap_unblock_alarms();
-    errno = save_errno;
-    return res;
-}
-#endif
-
-/* Note that we have separate plain_ and child_ cleanups for FILE *s,
- * since fclose() would flush I/O buffers, which is extremely undesirable;
- * we just close the descriptor.
- */
-static ap_status_t file_cleanup(void *fpv)
-{
-    fclose((FILE *) fpv);
-    return APR_SUCCESS;
-}
-static ap_status_t file_child_cleanup(void *fpv)
-{
-    close(fileno((FILE *) fpv));
-    return APR_SUCCESS;
-}
-
-API_EXPORT(void) ap_note_cleanups_for_file(ap_context_t *p, FILE *fp)
-{
-    ap_register_cleanup(p, (void *) fp, file_cleanup, file_child_cleanup);
-}
-
-API_EXPORT(FILE *) ap_pfopen(ap_context_t *a, const char *name,
-			      const char *mode)
-{
-    FILE *fd = NULL;
-    int baseFlag, desc;
-    int modeFlags = 0;
-    int saved_errno;
-
-#ifdef WIN32
-    modeFlags = _S_IREAD | _S_IWRITE;
-#else 
-    modeFlags = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-#endif
-
-    ap_block_alarms();
-
-    if (*mode == 'a') {
-	/* Work around faulty implementations of fopen */ 
-	baseFlag = (*(mode + 1) == '+') ? O_RDWR : O_WRONLY;
-	desc = open(name, baseFlag | O_APPEND | O_CREAT,
-		    modeFlags);
-	if (desc >= 0) {
-	    desc = ap_slack(desc, AP_SLACK_LOW);
-	    fd = ap_fdopen(desc, mode);
-	}
-    }
-    else {
-	fd = fopen(name, mode);
-    }
-    saved_errno = errno;
-    if (fd != NULL) {
-	ap_note_cleanups_for_file(a, fd);
-    }
-    ap_unblock_alarms();
-    errno = saved_errno;
-    return fd;
-}
-
-API_EXPORT(FILE *) ap_pfdopen(ap_context_t *a, int fd, const char *mode)
-{
-    FILE *f;
-    int saved_errno;
-
-    ap_block_alarms();
-    f = ap_fdopen(fd, mode);
-    saved_errno = errno;
-    if (f != NULL) {
-	ap_note_cleanups_for_file(a, f);
-    }
-    ap_unblock_alarms();
-    errno = saved_errno;
-    return f;
-}
-
-
-API_EXPORT(int) ap_pfclose(ap_context_t *a, FILE *fd)
-{
-    int res;
-
-    ap_block_alarms();
-    res = fclose(fd);
-    ap_kill_cleanup(a, (void *) fd, file_cleanup);
-    ap_unblock_alarms();
-    return res;
-}
-
-/*
- * DIR * with cleanup
- */
-
-static ap_status_t dir_cleanup(void *dv)
-{
-    closedir((DIR *) dv);
-    return APR_SUCCESS;
-}
-
-API_EXPORT(DIR *) ap_popendir(ap_context_t *p, const char *name)
-{
-    DIR *d;
-    int save_errno;
-
-    ap_block_alarms();
-    d = opendir(name);
-    if (d == NULL) {
-	save_errno = errno;
-	ap_unblock_alarms();
-	errno = save_errno;
-	return NULL;
-    }
-    ap_register_cleanup(p, (void *) d, dir_cleanup, dir_cleanup);
-    ap_unblock_alarms();
-    return d;
-}
-
-API_EXPORT(void) ap_pclosedir(ap_context_t *p, DIR * d)
-{
-    ap_block_alarms();
-    ap_kill_cleanup(p, (void *) d, dir_cleanup);
-    closedir(d);
-    ap_unblock_alarms();
-}
-
-/*****************************************************************
- *
- * Files and file descriptors; these are just an application of the
- * generic cleanup interface.
- */
-
-static ap_status_t socket_cleanup(void *fdv)
-{
-    closesocket((int) (long) fdv);
-    return APR_SUCCESS;
-}
-
-API_EXPORT(void) ap_note_cleanups_for_socket(ap_context_t *p, int fd)
-{
-    ap_register_cleanup(p, (void *) (long) fd, socket_cleanup,
-			 socket_cleanup);
-}
-
-API_EXPORT(void) ap_kill_cleanups_for_socket(ap_context_t *p, int sock)
-{
-    ap_kill_cleanup(p, (void *) (long) sock, socket_cleanup);
-}
-
-API_EXPORT(int) ap_psocket(ap_context_t *p, int domain, int type, int protocol)
-{
-    int fd;
-
-    ap_block_alarms();
-    fd = socket(domain, type, protocol);
-    if (fd == -1) {
-	int save_errno = errno;
-	ap_unblock_alarms();
-	errno = save_errno;
-	return -1;
-    }
-    ap_note_cleanups_for_socket(p, fd);
-    ap_unblock_alarms();
-    return fd;
-}
-
-API_EXPORT(int) ap_pclosesocket(ap_context_t *a, int sock)
-{
-    int res;
-    int save_errno;
-
-    ap_block_alarms();
-    res = closesocket(sock);
-#ifdef WIN32
-    errno = WSAGetLastError();
-#endif 
-    save_errno = errno;
-    ap_kill_cleanup(a, (void *) (long) sock, socket_cleanup);
-    ap_unblock_alarms();
-    errno = save_errno;
-    return res;
-}
-
-
 /*
  * Here's a pool-based interface to POSIX regex's regcomp().
  * Note that we return regex_t instead of being passed one.
@@ -1792,7 +1530,10 @@ API_EXPORT(int) ap_spawn_child(ap_context_t *p,
     if (pipe_out) {
 	*pipe_out = ap_fdopen(fd_out, "r" BINMODE);
 	if (*pipe_out) {
-	    ap_note_cleanups_for_file(p, *pipe_out);
+	    /* remove for now.  These go away with the APR abstraction
+             * for process spawning.
+             * ap_note_cleanups_for_file(p, *pipe_out);
+             */
 	}
 	else {
 	    close(fd_out);
@@ -1802,7 +1543,10 @@ API_EXPORT(int) ap_spawn_child(ap_context_t *p,
     if (pipe_in) {
 	*pipe_in = ap_fdopen(fd_in, "w" BINMODE);
 	if (*pipe_in) {
-	    ap_note_cleanups_for_file(p, *pipe_in);
+	    /* remove for now.  These go away with the APR abstraction
+             * for process spawning.
+             * ap_note_cleanups_for_file(p, *pipe_in);
+             */
 	}
 	else {
 	    close(fd_in);
@@ -1812,7 +1556,10 @@ API_EXPORT(int) ap_spawn_child(ap_context_t *p,
     if (pipe_err) {
 	*pipe_err = ap_fdopen(fd_err, "r" BINMODE);
 	if (*pipe_err) {
-	    ap_note_cleanups_for_file(p, *pipe_err);
+	    /* remove for now.  These go away with the APR abstraction
+             * for process spawning.
+             * ap_note_cleanups_for_file(p, *pipe_err);
+             */
 	}
 	else {
 	    close(fd_err);

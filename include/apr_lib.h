@@ -372,22 +372,6 @@ API_EXPORT(void) ap_cleanup_for_exec(void);
 API_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsize);
 API_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data);
 
-API_EXPORT(void) ap_note_cleanups_for_fd(ap_context_t *p, int fd);
-API_EXPORT(void) ap_kill_cleanups_for_fd(ap_context_t *p, int fd);
-API_EXPORT(int) ap_popenf(ap_context_t *a, const char *name, int flg, int mode);
-API_EXPORT(int) ap_pclosef(ap_context_t *a, int fd);
-API_EXPORT(void) ap_note_cleanups_for_file(ap_context_t *p, FILE *fp);
-API_EXPORT(FILE *) ap_pfopen(ap_context_t *a, const char *name,
-			      const char *mode);
-API_EXPORT(FILE *) ap_pfdopen(ap_context_t *a, int fd, const char *mode);
-API_EXPORT(int) ap_pfclose(ap_context_t *a, FILE *fd);
-API_EXPORT(DIR *) ap_popendir(ap_context_t *p, const char *name);
-API_EXPORT(void) ap_pclosedir(ap_context_t *p, DIR * d);
-API_EXPORT(void) ap_note_cleanups_for_socket(ap_context_t *p, int fd);
-API_EXPORT(void) ap_kill_cleanups_for_socket(ap_context_t *p, int sock);
-API_EXPORT(int) ap_psocket(ap_context_t *p, int domain, int type, int protocol);
-API_EXPORT(int) ap_pclosesocket(ap_context_t *a, int sock);
-
 API_EXPORT(regex_t *) ap_pregcomp(ap_context_t *p, const char *pattern,
 				   int cflags);
 API_EXPORT(void) ap_pregfree(ap_context_t *p, regex_t *reg);
@@ -413,10 +397,6 @@ API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size);
 /*
  * Routine definitions that only work on Windows.
  */
-#ifdef WIN32
-API_EXPORT(void) ap_note_cleanups_for_h(ap_pool_t *p, HANDLE hDevice);
-API_EXPORT(int) ap_pcloseh(ap_pool_t *a, HANDLE hDevice);
-#endif /* WIN32 */
 
 /*#ifdef TPF*/
 #define ap_block_alarms() (0)

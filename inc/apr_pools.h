@@ -248,68 +248,6 @@ extern int raise_sigstop_flags;
 #define ap_table_elts(t) ((ap_array_header_t *)(t))
 #define ap_is_empty_table(t) (((t) == NULL)||(((ap_array_header_t *)(t))->nelts == 0))
 
-/* routines to remember allocation of other sorts of things...
- * generic interface first.  Note that we want to have two separate
- * cleanup functions in the general case, one for exec() preparation,
- * to keep CGI scripts and the like from inheriting access to things
- * they shouldn't be able to touch, and one for actually cleaning up,
- * when the actual server process wants to get rid of the thing,
- * whatever it is.  
- *
- * kill_cleanup disarms a cleanup, presumably because the resource in
- * question has been closed, freed, or whatever, and it's scarce
- * enough to want to reclaim (e.g., descriptors).  It arranges for the
- * resource not to be cleaned up a second time (it might have been
- * reallocated).  run_cleanup does the same, but runs it first.
- *
- * Cleanups are identified for purposes of finding & running them off by the
- * plain_cleanup and data, which should presumably be unique.
- *
- * NB any code which invokes register_cleanup or kill_cleanup directly
- * is a critical section which should be guarded by block_alarms() and
- * unblock_alarms() below...
- */
-
-/* A "do-nothing" cleanup, for register_cleanup; it's faster to do
- * things this way than to test for NULL. */
-
-/* The time between when a resource is actually allocated, and when
- * its cleanup is registered is a critical section, during which the
- * resource could leak if we got interrupted or timed out.  So, anything
- * which registers cleanups should bracket resource allocation and the
- * cleanup registry with these.  (This is done internally by run_cleanup).
- *
- * NB they are actually implemented in http_main.c, since they are bound
- * up with timeout handling in general...
- */
-
-/* Common cases which want utility support..
- * the note_cleanups_for_foo routines are for 
- */
-
-API_EXPORT(FILE *) ap_pfopen(ap_context_t *, const char *name, const char *fmode);
-API_EXPORT(FILE *) ap_pfdopen(ap_context_t *, int fd, const char *fmode);
-API_EXPORT(int) ap_popenf(ap_context_t *, const char *name, int flg, int mode);
-
-API_EXPORT(void) ap_note_cleanups_for_file(ap_context_t *, FILE *);
-API_EXPORT(void) ap_note_cleanups_for_fd(ap_context_t *, int);
-API_EXPORT(void) ap_kill_cleanups_for_fd(ap_context_t *p, int fd);
-API_EXPORT(void) ap_note_cleanups_for_socket(ap_context_t *, int);
-API_EXPORT(void) ap_kill_cleanups_for_socket(ap_context_t *p, int sock);
-API_EXPORT(int) ap_psocket(ap_context_t *p, int, int, int);
-API_EXPORT(int) ap_pclosesocket(ap_context_t *a, int sock);
-
-/* routines to note closes... file descriptors are constrained enough
- * on some systems that we want to support this.
- */
-
-API_EXPORT(int) ap_pfclose(ap_context_t *, FILE *);
-API_EXPORT(int) ap_pclosef(ap_context_t *, int fd);
-
-/* routines to deal with directories */
-/*API_EXPORT(DIR *) ap_popendir(ap_context_t *p, const char *name);
-API_EXPORT(void) ap_pclosedir(ap_context_t *p, DIR * d);
-*/
 /* ... even child processes (which we may want to wait for,
  * or to kill outright, on unexpected termination).
  *
