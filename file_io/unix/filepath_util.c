@@ -61,7 +61,7 @@
 #include "apr_pools.h"
 #include "apr_strings.h"
 #include "apr_tables.h"
-
+#include "apr_arch_file_io.h"
 
 apr_status_t apr_filepath_list_split_impl(apr_array_header_t **pathelts,
                                           const char *liststr,
