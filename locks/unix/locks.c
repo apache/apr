@@ -56,53 +56,134 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
+#if !APR_PROCESS_LOCK_IS_GLOBAL && APR_HAS_THREADS
+static apr_status_t lockall_create(apr_lock_t *new, const char *fname)
+{
+    apr_status_t rv;
+
+    if ((rv = new->inter_meth->create(new, fname)) != APR_SUCCESS) {
+        return rv;
+    }
+    if ((rv = new->intra_meth->create(new, fname)) != APR_SUCCESS) {
+        return rv;
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t lockall_acquire(apr_lock_t *lock)
+{
+    apr_status_t rv;
+
+    if ((rv = lock->intra_meth->acquire(lock)) != APR_SUCCESS) {
+        return rv;
+    }
+    if ((rv = lock->inter_meth->acquire(lock)) != APR_SUCCESS) {
+        return rv;
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t lockall_release(apr_lock_t *lock)
+{
+    apr_status_t rv;
+
+    if ((rv = lock->intra_meth->release(lock)) != APR_SUCCESS) {
+        return rv;
+    }
+    if ((rv = lock->inter_meth->release(lock)) != APR_SUCCESS) {
+        return rv;
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t lockall_destroy(apr_lock_t *lock)
+{
+    apr_status_t rv;
+
+    if ((rv = lock->intra_meth->destroy(lock)) != APR_SUCCESS) {
+        return rv;
+    }
+    if ((rv = lock->inter_meth->destroy(lock)) != APR_SUCCESS) {
+        return rv;
+    }
+    return APR_SUCCESS;
+}
+
+static apr_status_t lockall_child_init(apr_lock_t **lock, apr_pool_t *pool,
+                                       const char *fname)
+{
+    /* no child init for intra lock */
+    return (*lock)->inter_meth->child_init(lock, pool, fname);
+}
+
+static const struct apr_unix_lock_methods_t lockall_methods =
+{
+    lockall_create,
+    lockall_acquire,
+    lockall_release,
+    lockall_destroy,
+    lockall_child_init
+};
+#endif
+
 static apr_status_t create_lock(apr_lock_t *new, const char *fname)
 {
     apr_status_t stat;
 
-    switch (new->type)
-    {
-    case APR_MUTEX:
-#if (APR_USE_FCNTL_SERIALIZE) || (APR_USE_FLOCK_SERIALIZE)
-    /* file-based serialization primitives */
     if (new->scope != APR_INTRAPROCESS) {
-        if (fname != NULL) {
-            new->fname = apr_pstrdup(new->pool, fname);
-        }
-    }
-#endif
-
-#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
-    if (new->scope == APR_INTRAPROCESS) {
+#if APR_USE_FLOCK_SERIALIZE
+        new->inter_meth = &apr_unix_flock_methods;
+#elif APR_USE_SYSVSEM_SERIALIZE
+        new->inter_meth = &apr_unix_sysv_methods;
+#elif APR_USE_FCNTL_SERIALIZE
+        new->inter_meth = &apr_unix_fcntl_methods;
+#elif APR_USE_PROC_PTHREAD_SERIALIZE
+        new->inter_method = &apr_unix_proc_pthread_methods;
 #else
-    if (new->scope != APR_CROSS_PROCESS) {
-#endif
-#if APR_HAS_THREADS
-        if ((stat = apr_unix_create_intra_lock(new)) != APR_SUCCESS) {
-            return stat;
-        }
-#else
-        if (new->scope != APR_LOCKALL) {
-            return APR_ENOTIMPL;
-        }
-#endif
-    }
-    if (new->scope != APR_INTRAPROCESS) {
-        if ((stat = apr_unix_create_inter_lock(new)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
-    break;
-    case APR_READWRITE:
-#ifdef HAVE_PTHREAD_RWLOCK_INIT
-    if (new->scope != APR_INTRAPROCESS)
         return APR_ENOTIMPL;
-    pthread_rwlock_init(&new->rwlock, NULL);
-    break;
-#else
-    return APR_ENOTIMPL;
 #endif
     }
+
+    if (new->scope != APR_CROSS_PROCESS) {
+#if APR_HAS_THREADS
+        if (new->type == APR_READWRITE) {
+#if APR_HAS_RWLOCK_SERIALIZE
+            new->intra_meth = &apr_unix_rwlock_methods;
+#else
+            return APR_ENOTIMPL; /* 'cause we don't have rwlocks */
+#endif
+        }
+        else {
+            new->intra_meth = &apr_unix_intra_methods;
+        }
+#else
+        return APR_ENOTIMPL; /* 'cause we don't have threads */
+#endif
+    }
+
+    switch (new->scope) {
+    case APR_LOCKALL:
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+        /* XXX but how do we know that this particular mechanism has this
+         * property?  for now we assume all mechanisms on this system have
+         * the property
+         */
+        new->meth = new->inter_meth;
+#else
+        new->meth = &lockall_methods;
+#endif
+        break;
+    case APR_CROSS_PROCESS:
+        new->meth = new->inter_meth;
+        break;
+    case APR_INTRAPROCESS:
+        new->meth = new->intra_meth;
+    }
+
+    if ((stat = new->meth->create(new, fname)) != APR_SUCCESS) {
+        return stat;
+    }
+
     return APR_SUCCESS;
 }
 
@@ -137,30 +218,8 @@ apr_status_t apr_lock_acquire(apr_lock_t *lock)
     }
 #endif
 
-    switch (lock->type)
-    {
-    case APR_MUTEX:
-#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
-    if (lock->scope == APR_INTRAPROCESS) {
-#else
-    if (lock->scope != APR_CROSS_PROCESS) {
-#endif
-#if APR_HAS_THREADS
-        if ((stat = apr_unix_lock_intra(lock)) != APR_SUCCESS) {
-            return stat;
-        }
-#else
-        /* must be APR_LOCKALL */
-#endif
-    }
-    if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = apr_unix_lock_inter(lock)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
-    break;
-    case APR_READWRITE:
-        return APR_ENOTIMPL;
+    if ((stat = lock->meth->acquire(lock)) != APR_SUCCESS) {
+        return stat;
     }
 
 #if APR_HAS_THREADS
@@ -211,36 +270,8 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
     }
 #endif
 
-    switch (lock->type)
-    {
-    case APR_MUTEX:
-#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
-    if (lock->scope == APR_INTRAPROCESS) {
-#else
-    if (lock->scope != APR_CROSS_PROCESS) {
-#endif
-#if APR_HAS_THREADS
-        if ((stat = apr_unix_unlock_intra(lock)) != APR_SUCCESS) {
-            return stat;
-        }
-#else
-        /* must be APR_LOCKALL */
-#endif
-    }
-    if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = apr_unix_unlock_inter(lock)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
-    break;
-    case APR_READWRITE:
-#ifdef HAVE_PTHREAD_RWLOCK_INIT
-        if ((stat = pthread_rwlock_unlock(&lock->rwlock)) != 0)
-            return stat;
-        break;
-#else
-        return APR_ENOTIMPL;
-#endif
+    if ((stat = lock->meth->release(lock)) != APR_SUCCESS) {
+        return stat;
     }
 
 #if APR_HAS_THREADS
@@ -253,53 +284,14 @@ apr_status_t apr_lock_release(apr_lock_t *lock)
 
 apr_status_t apr_lock_destroy(apr_lock_t *lock)
 {
-    apr_status_t stat;
-
-    switch (lock->type)
-    {
-    case APR_MUTEX:
-#if APR_PROCESS_LOCK_IS_GLOBAL /* don't need intra lock for APR_LOCKALL */
-    if (lock->scope == APR_INTRAPROCESS) {
-#else
-    if (lock->scope != APR_CROSS_PROCESS) {
-#endif
-#if APR_HAS_THREADS
-        if ((stat = apr_unix_destroy_intra_lock(lock)) != APR_SUCCESS) {
-            return stat;
-        }
-#else
-        if (lock->scope != APR_LOCKALL) {
-            return APR_ENOTIMPL;
-        }
-#endif
-    }
-    if (lock->scope != APR_INTRAPROCESS) {
-        if ((stat = apr_unix_destroy_inter_lock(lock)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
-    break;
-    case APR_READWRITE:
-#ifdef HAVE_PTHREAD_RWLOCK_INIT
-    if ((stat = pthread_rwlock_destroy(&lock->rwlock)) != 0)
-        return stat;
-    break;
-#else
-    return APR_ENOTIMPL;
-#endif
-    }
-    return APR_SUCCESS;
+    return lock->meth->destroy(lock);
 }
 
 apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname, 
                                apr_pool_t *cont)
 {
-    apr_status_t stat;
-    if ((*lock)->scope != APR_INTRAPROCESS) {
-        if ((stat = apr_unix_child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
-            return stat;
-        }
-    }
+    if ((*lock)->scope != APR_INTRAPROCESS)
+        return (*lock)->meth->child_init(lock, cont, fname);
     return APR_SUCCESS;
 }
 
@@ -336,6 +328,7 @@ apr_status_t apr_os_lock_put(apr_lock_t **lock, apr_os_lock_t *thelock,
         (*lock) = (apr_lock_t *)apr_pcalloc(pool, sizeof(apr_lock_t));
         (*lock)->pool = pool;
     }
+    /* XXX handle setting of handle for PROC_PTHREAD_SERIALIZE here */
     (*lock)->interproc = thelock->crossproc;
 #if APR_HAS_THREADS
 #if (APR_USE_PTHREAD_SERIALIZE)
