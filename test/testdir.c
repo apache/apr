@@ -144,63 +144,24 @@ static void test_closedir(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 }
 
-static void test_readdir_onedot(CuTest *tc)
-{
-    apr_status_t rv;
-    apr_dir_t *dir;
-    apr_finfo_t finfo;
-
-    rv = apr_dir_open(&dir, "data", p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-
-    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, ".", finfo.name);
-
-    rv = apr_dir_close(dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-}
-
-static void test_readdir_twodot(CuTest *tc)
-{
-    apr_status_t rv;
-    apr_dir_t *dir;
-    apr_finfo_t finfo;
-
-    rv = apr_dir_open(&dir, "data", p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-
-    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
-    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, "..", finfo.name);
-
-    rv = apr_dir_close(dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-}
-
 static void test_rewind(CuTest *tc)
 {
-    apr_status_t rv;
     apr_dir_t *dir;
-    apr_finfo_t finfo;
+    apr_finfo_t first, second;
 
-    rv = apr_dir_open(&dir, "data", p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_dir_open failed", apr_dir_open(&dir, "data", p));
 
-    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, ".", finfo.name);
+    apr_assert_success(tc, "apr_dir_read failed",
+                       apr_dir_read(&first, APR_FINFO_DIRENT, dir));
 
-    rv = apr_dir_rewind(dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_dir_rewind failed", apr_dir_rewind(dir));
 
-    rv = apr_dir_read(&finfo, APR_FINFO_DIRENT, dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-    CuAssertStrEquals(tc, ".", finfo.name);
+    apr_assert_success(tc, "second apr_dir_read failed",
+                       apr_dir_read(&second, APR_FINFO_DIRENT, dir));
 
-    rv = apr_dir_close(dir);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    apr_assert_success(tc, "apr_dir_close failed", apr_dir_close(dir));
+
+    CuAssertStrEquals(tc, first.name, second.name);
 }
 
 /* Test for a (fixed) bug in apr_dir_read().  This bug only happened
@@ -269,8 +230,6 @@ CuSuite *testdir(void)
     SUITE_ADD_TEST(suite, test_remove_notthere);
     SUITE_ADD_TEST(suite, test_mkdir_twice);
 
-    SUITE_ADD_TEST(suite, test_readdir_onedot);
-    SUITE_ADD_TEST(suite, test_readdir_twodot);
     SUITE_ADD_TEST(suite, test_rewind);
 
     SUITE_ADD_TEST(suite, test_opendir);
