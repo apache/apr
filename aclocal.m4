@@ -321,7 +321,7 @@ int main(void) {
   ac_cv_ebcdic="no"
 ])])
   if test "$ac_cv_ebcdic" = "yes"; then
-    AC_DEFINE(CHARSET_EBCDIC,, [Define if system uses EBCDIC])
+    AC_DEFINE(AP_CHARSET_EBCDIC,, [Define if system uses EBCDIC])
   fi
 ])
 
