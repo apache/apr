@@ -285,7 +285,8 @@ struct apr_hdtr_t {
 
 /**
  * Create a socket.
- * @remark With APR 1.0, this function will pick up a new protocol parameter.
+ * @remark With APR 1.0, this function follows the prototype 
+ * of apr_socket_create_ex.
  * @param new_sock The new socket that has been set up.
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
@@ -297,7 +298,8 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock,
 
 /**
  * Create a socket.
- * @remark With APR 1.0, this function will be removed.
+ * @remark With APR 1.0, this function is deprecated and apr_socket_create 
+ * follows this prototype.
  * @param new_sock The new socket that has been set up.
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
