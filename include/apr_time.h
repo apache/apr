@@ -76,6 +76,7 @@ API_VAR_IMPORT const char ap_day_snames[7][4];
 
 /* Function Definitions */
 ap_status_t ap_make_time(ap_time_t **, ap_context_t *);
+ap_status_t ap_make_init_time(ap_time_t **, ap_context_t *);
 ap_status_t ap_current_time(ap_time_t *);
 ap_status_t ap_explode_time(ap_time_t *, ap_timetype_e);
 ap_status_t ap_implode_time(ap_time_t *);
