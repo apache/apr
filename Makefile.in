@@ -31,10 +31,10 @@ TARGETS = delete-lib $(TARGET_LIB) delete-exports export_vars.h apr.exp
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
-CLEAN_TARGETS = apr-config.out
+CLEAN_TARGETS = apr-config.out apr.exp exports.c export_vars.h
 DISTCLEAN_TARGETS = config.cache config.log config.status \
 	include/apr.h include/arch/unix/apr_private.h \
-	libtool apr.exp apr-config exports.c export_vars.h
+	libtool apr-config
 EXTRACLEAN_TARGETS = configure aclocal.m4 include/arch/unix/apr_private.h.in
 
 prefix=@prefix@
