@@ -1,5 +1,11 @@
 Changes with APR 0.9.2
 
+  *) Begin to rehash the test suite.  There is now a new test program called
+     testall.  This program currently runs testtime and teststr with the
+     CuTest framework.  The stand-alone programs for testtime and teststr
+     can be built, but only if a special flag is specified when building.
+     [Ryan Bloom]
+
   *) Fix a broken check for a failure to read from the random device file.
      PR 12615  [tenthumbs@cybernex.net]
 
