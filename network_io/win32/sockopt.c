@@ -201,29 +201,4 @@ apr_status_t apr_gethostname(char *buf, int len, apr_pool_t *cont)
         return APR_SUCCESS;
 }
 
-apr_status_t apr_get_hostname(char **name, apr_interface_e which, apr_socket_t *sock)
-{
-    struct hostent *hptr;
-    apr_in_addr_t sa_ptr;
-
-    if (which == APR_LOCAL)
-        sa_ptr = sock->local_addr->sa.sin.sin_addr;
-    else if (which == APR_REMOTE)
-        sa_ptr = sock->remote_addr->sa.sin.sin_addr;
-    else
-        return APR_EINVAL;
-
-    hptr = gethostbyaddr((char *)&sa_ptr, sizeof(struct in_addr), AF_INET);
-
-    if (hptr != NULL) {
-        *name = apr_pstrdup(sock->cntxt, hptr->h_name);
-        if (*name) {
-            return APR_SUCCESS;
-        }
-        return APR_ENOMEM;
-    }
-
-    return apr_get_netos_error();
-}
-
 

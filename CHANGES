@@ -16,7 +16,7 @@ Changes with APR b1
 
   *) Add apr_getnameinfo(), a replacement for apr_get_hostname() which
      supports IPv6 and will be friendlier for use with eventual 
-     SOCK_DGRAM support.  [Jeff Trawick]
+     SOCK_DGRAM support.  apr_get_hostname() is gone.  [Jeff Trawick]
 
 Changes with APR a9
 
