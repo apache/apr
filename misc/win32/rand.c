@@ -62,8 +62,10 @@ APR_DECLARE(apr_status_t) apr_generate_random_bytes(unsigned char * buf,
     HCRYPTPROV hProv;
     apr_status_t res = APR_SUCCESS;
 
+    /* 0x40 bit = CRYPT_SILENT, only introduced in more recent PSDKs 
+     */
     if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL,
-                             CRYPT_VERIFYCONTEXT | CRYPT_SILENT)) {
+                             CRYPT_VERIFYCONTEXT | 0x40)) {
 	return apr_get_os_error();
     }
     if (!CryptGenRandom(hProv, length, buf)) {
