@@ -58,6 +58,9 @@
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_errno.h"
+#if APR_HAVE_STRUCT_RLIMIT
+#include <sys/resource.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,6 +74,10 @@ typedef enum {APR_WAIT, APR_NOWAIT} ap_wait_how_e;
 #define APR_FULL_NONBLOCK    2
 #define APR_PARENT_BLOCK     3
 #define APR_CHILD_BLOCK      4
+
+#define APR_LIMIT_CPU        0
+#define APR_LIMIT_MEM        1
+#define APR_LIMIT_NPROC      2
 
 #if APR_HAS_OTHER_CHILD
 #define APR_OC_REASON_DEATH         0     /* child has died, caller must call
@@ -332,7 +339,7 @@ ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont);
 
 /*
 
-=head1 ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, ap_int32_t *out, ap_int32_t err)
+=head1 ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, ap_int32_t out, ap_int32_t err)
 
 B<Determine if any of stdin, stdout, or stderr should be linked to pipes when starting a child process.> 
 
@@ -452,6 +459,26 @@ B<Determine if the chlid should start in detached state.>
 =cut
  */
 ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach);
+
+#if APR_HAVE_STRUCT_RLIMIT
+/*
+
+=head1 ap_status_t ap_setprocattr_limit(ap_procattr_t *attr, ap_int32_t what, struct rlimit *limit)
+
+B<Set the Resource Utilization limits when starting a new process.> 
+
+    arg 1) The procattr we care about. 
+    arg 2) Which limit to set, one of:
+                   APR_LIMIT_CPU
+                   APR_LIMIT_MEM
+                   APR_LIMIT_NPROC
+    arg 3) Value to set the limit to.
+
+=cut
+ */
+ap_status_t ap_setprocattr_limit(ap_procattr_t *attr, ap_int32_t what, 
+                              struct rlimit *limit);
+#endif
 
 #if APR_HAS_FORK
 /*
