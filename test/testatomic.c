@@ -213,7 +213,10 @@ void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
     apr_thread_once(control, init_func);
 
     for (i = 0; i < NUM_ITERATIONS ; i++) {
-        apr_atomic_inc( &y );
+        apr_atomic_inc(&y);
+        apr_atomic_add(&y, 2);
+        apr_atomic_dec(&y);
+        apr_atomic_dec(&y);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
