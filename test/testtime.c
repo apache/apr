@@ -73,6 +73,8 @@ int main(void)
     apr_int32_t hr_off = -5 * 3600; /* 5 hours in seconds */
     apr_int64_t hr_off_64;
 
+    apr_initialize();
+
     printf("APR Time Functions\n==================\n\n");
 
     STD_TEST_NEQ("Creating a pool to use", apr_pool_create(&p, NULL))

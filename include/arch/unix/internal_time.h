@@ -1,7 +1,7 @@
 /* ====================================================================
  * The Apache Software License, Version 1.1
  *
- * Copyright (c) 2000-2001 The Apache Software Foundation.  All rights
+ * Copyright (c) 2001 The Apache Software Foundation.  All rights
  * reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,70 +52,11 @@
  * <http://www.apache.org/>.
  */
 
+#ifndef TIME_INTERNAL_H
+#define TIME_INTERNAL_H
+
 #include "apr.h"
-#include "apr_general.h"
-#include "apr_pools.h"
-#include "apr_signal.h"
 
-#include "misc.h"       /* for WSAHighByte / WSALowByte */
-#include "locks.h"      /* for apr_unix_setup_lock() */
-#include "internal_time.h"
+void apr_unix_setup_time(void);
 
-
-static int initialized = 0;
-static apr_pool_t *global_apr_pool;
-
-APR_DECLARE(apr_status_t) apr_initialize(void)
-{
-    apr_status_t status;
-#if defined WIN32 || defined(NETWARE)
-    int iVersionRequested;
-    WSADATA wsaData;
-    int err;
-#endif
-
-    if (initialized++) {
-        return APR_SUCCESS;
-    }
-
-    if (apr_pool_create(&global_apr_pool, NULL) != APR_SUCCESS) {
-        return APR_ENOPOOL;
-    }
-
-#if !defined(BEOS) && !defined(OS2) && !defined(WIN32) && !defined(NETWARE)
-    apr_unix_setup_lock();
-    apr_unix_setup_time();
-#elif defined WIN32 || defined(NETWARE)
-    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
-    err = WSAStartup((WORD) iVersionRequested, &wsaData);
-    if (err) {
-        return err;
-    }
-    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
-        HIBYTE(wsaData.wVersion) != WSALowByte) {
-        WSACleanup();
-        return APR_EEXIST;
-    }
-#endif
-
-    if ((status = apr_pool_alloc_init(global_apr_pool)) != APR_SUCCESS)
-        return status;
-
-    apr_signal_init(global_apr_pool);
-
-    return APR_SUCCESS;
-}
-
-APR_DECLARE_NONSTD(void) apr_terminate(void)
-{
-    initialized--;
-    if (initialized) {
-        return;
-    }
-    apr_pool_alloc_term(global_apr_pool);
-}
-
-APR_DECLARE(void) apr_terminate2(void)
-{
-    apr_terminate();
-}
+#endif  /* TIME_INTERNAL_H */
