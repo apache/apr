@@ -69,17 +69,19 @@ extern "C" {
 typedef struct mmap_t            ap_mmap_t;
 
 /*   Function definitions */
-ap_status_t ap_mmap_create(ap_mmap_t **, const char *, ap_context_t *);
-ap_status_t ap_mmap_open_create(ap_mmap_t **, ap_file_t *, ap_context_t *);
-ap_status_t ap_mmap_delete(ap_mmap_t *);
 
-ap_status_t ap_read_mmap(char *, ap_ssize_t *, ap_ssize_t *, 
-                    ap_ssize_t *, ap_mmap_t *, ap_context_t *);
-ap_status_t ap_send_mmap(ap_socket_t *, ap_ssize_t *, ap_ssize_t *, 
-                    ap_mmap_t *, ap_context_t *);
+/* creation */
+ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, const char *fname, ap_context_t *cntxt);
+ap_status_t ap_mmap_open_create(ap_mmap_t **newmmap, ap_file_t *file, ap_context_t *cntxt);
 
-ap_status_t ap_first_mmap(struct mmap_t *, ap_context_t *);
-ap_status_t ap_next_mmap(struct mmap_t *, struct mmap_t *, ap_context_t *);
+/* destruction */
+ap_status_t ap_mmap_delete(ap_mmap_t *mmap);
+
+/* These are designed to be used in qsort, bsearch etc */
+ap_int32_t ap_mmap_inode_compare(const void *m1, const void *m2);
+ap_int32_t ap_mmap_filename_compare(const void *m1, const void *m2);
+
+ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_size_t offset);
 
 #ifdef __cplusplus
 }
