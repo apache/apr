@@ -64,6 +64,7 @@
 #include <unistd.h>
 #endif
 
+#if APR_HAS_OTHER_CHILD
 static void ocmaint(int reason, void *data, int status)
 {
     fprintf(stdout,"[CHILD]  Maintenance routine called....");
@@ -82,9 +83,11 @@ static void ocmaint(int reason, void *data, int status)
         break;
     }
 }
+#endif
 
 int main(int argc, char *argv[])
 {
+#if APR_HAS_OTHER_CHILD
     apr_pool_t *context;
     apr_proc_t newproc;
     apr_procattr_t *procattr = NULL;
@@ -150,5 +153,9 @@ int main(int argc, char *argv[])
     apr_check_other_child();
     
     return 1;
+#else
+    fprintf(stdout, "OC failed!\n");
+    fprintf(stdout, "Other_child is not supported on this platform\n");
+#endif
 }    
 
