@@ -1,7 +1,7 @@
 # Based on apr's make_export.awk, which is
 # based on Ryan Bloom's make_export.pl
 
-/^#[ \t]*if(def)? (AP[RU]?_|!?defined).*/ {
+/^#[ \t]*if(def)? (AP[RUI]?_|!?defined).*/ {
 	if (old_filename != FILENAME) {
 		if (old_filename != "") printf("%s", line)
 		macro_no = 0
@@ -47,7 +47,7 @@ function add_symbol (sym_name) {
 	}
 }
 
-/^[ \t]*(extern[ \t]+)?AP[RU]?_DECLARE_DATA .*;$/ {
+/^[ \t]*(extern[ \t]+)?AP[RUI]?_DECLARE_DATA .*;$/ {
        varname = $NF;
        gsub( /[*;]/, "", varname);
        gsub( /\[.*\]/, "", varname);
