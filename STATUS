@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/11/21 10:42:03 $]
+Last modified at [$Date: 2004/03/16 02:23:33 $]
 
 Release:
 
@@ -24,6 +24,16 @@ RELEASE 0.9 SHOWSTOPPERS:
 
 
 RELEASE 1.0 SHOWSTOPPERS:
+
+    * apr_global_mutex_child_init and apr_proc_mutex_child_init aren't
+      portable.  There are a variety of problems with the locking API when it
+      is used with apr_create_proc instead of apr_fork.  First, _child_init
+      doesn't take a lockmech_e parameter so it causes a segfault after the
+      apr_proc_create, because the proc_mutex field hasn't been initialized.
+      When the lockmech_e parameter is added, it _still_ doesn't work, because
+      some lock mechanisms expect to inherit from the parent process.  For
+      example, sys V semaphores don't have a file to open, so the child process
+      can't reaquire the lock.
 
     * Must namespace protect all include/apr_foo.h headers.  Jon Travis
       has especially observed these including apr within Apache-1.3.
