@@ -75,8 +75,8 @@ static apr_status_t wait_for_io_or_timeout(apr_file_t *file, int for_read)
         FD_ZERO(&fdset);
         FD_SET(file->filedes, &fdset);
         if (file->timeout >= 0) {
-            tv.tv_sec = file->timeout / APR_USEC_PER_SEC;
-            tv.tv_usec = file->timeout % APR_USEC_PER_SEC;
+            tv.tv_sec = apr_time_sec(file->timeout);
+            tv.tv_usec = apr_time_usec(file->timeout);
             tvptr = &tv;
         }
         else {
