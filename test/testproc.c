@@ -62,6 +62,8 @@
 /* XXX I'm sure there has to be a better way to do this ... */
 #ifdef WIN32
 #define EXTENSION ".exe"
+#elif NETWARE
+#define EXTENSION ".nlm"
 #else
 #define EXTENSION
 #endif

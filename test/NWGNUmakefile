@@ -167,6 +167,7 @@ XDCDATA         =
 TARGET_nlm = \
 	$(OBJDIR)/aprtest.nlm \
 	$(OBJDIR)/mod_test.nlm \
+	$(OBJDIR)/proc_child.nlm \
 	$(EOLIST)
 #
 # If there is an LIB target, put it here
