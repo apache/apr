@@ -7,7 +7,7 @@
 
 #ifndef _MM_VERS_C
 #define _MM_VERS_C
-#define MM_VERSION 0x100208
+#define MM_VERSION 0x100211
 extern const int  MM_Version;
 extern const char MM_VersionStr[];
 extern const char MM_Hello[];
@@ -20,13 +20,13 @@ extern const char MM_PlainID[];
 
 #else
 
-const int  MM_Version      = 0x100208;
-const char MM_VersionStr[] = "1.0.8 (24-Jun-1999)";
-const char MM_Hello[]      = "This is MM, Version 1.0.8 (24-Jun-1999)";
-const char MM_GNUVersion[] = "MM Version 1.0.8";
-const char MM_WhatID[]     = "@(#)MM Version 1.0.8 (24-Jun-1999)";
-const char MM_RCSIdentID[] = "$Id: mm_vers.c,v 1.1 1999/08/17 15:59:45 rbb Exp $";
-const char MM_WebID[]      = "MM/1.0.8";
-const char MM_PlainID[]    = "1.0.8";
+const int  MM_Version      = 0x100211;
+const char MM_VersionStr[] = "1.0.11 (06-Sep-1999)";
+const char MM_Hello[]      = "This is MM, Version 1.0.11 (06-Sep-1999)";
+const char MM_GNUVersion[] = "MM Version 1.0.11";
+const char MM_WhatID[]     = "@(#)MM Version 1.0.11 (06-Sep-1999)";
+const char MM_RCSIdentID[] = "$Id: mm_vers.c,v 1.2 1999/09/27 07:42:10 rse Exp $";
+const char MM_WebID[]      = "MM/1.0.11";
+const char MM_PlainID[]    = "1.0.11";
 
 #endif

@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
         FAILED_IF(1);
     }
     else {
-        fprintf(stderr, "Fine, we've again %d bytes available\n", s2);
+        fprintf(stderr, "Fine, we have again %d bytes available\n", s2);
     }
     
     fprintf(stderr, "Destroying MM object\n");

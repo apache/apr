@@ -62,6 +62,10 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
 
+typedef enum { 
+    MM_LOCK_RD, MM_LOCK_RW
+} mm_lock_mode;
+
 /*
 **  ____ Private Part of the API ___________________________
 */
@@ -78,13 +82,14 @@ extern "C" {
 #include <sys/types.h>
 
 #ifdef MM_OS_SUNOS
+#define KERNEL 1
 #include <memory.h>
 /* SunOS lacks prototypes */
-extern int getpagesize(void);
-extern int munmap(caddr_t addr, int len);
-extern int ftruncate(int fd, off_t length);
-extern int flock(int fd, int operation);
-extern char *strerror (int err);
+extern int   getpagesize(void);
+extern int   munmap(caddr_t, int);
+extern int   ftruncate(int, off_t);
+extern int   flock(int, int);
+extern char *strerror(int);
 #endif
 
 #if !defined(FALSE)
@@ -288,10 +293,6 @@ typedef mem_pool MM;
 #else
 typedef void MM;
 #endif
-
-typedef enum { 
-    MM_LOCK_RD, MM_LOCK_RW
-} mm_lock_mode;
 
 /* Global Malloc-Replacement API */
 int     MM_create(size_t size, const char *file);

@@ -1,9 +1,9 @@
 .rn '' }`
-''' $RCSfile: mm.3,v $$Revision: 1.1 $$Date: 1999/08/17 15:59:45 $
+''' $RCSfile: mm.3,v $$Revision: 1.2 $$Date: 1999/09/27 07:42:07 $
 '''
 ''' $Log: mm.3,v $
-''' Revision 1.1  1999/08/17 15:59:45  rbb
-''' Initial revision
+''' Revision 1.2  1999/09/27 07:42:07  rse
+''' Update the MM version APR contains to a more recent one.
 '''
 '''
 .de Sh
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH mm 3 "24-Jun-1999" "MM 1.0.8" "Shared Memory Library"
+.TH mm 3 "06-Sep-1999" "MM 1.0.11" "Shared Memory Library"
 .UC
 .if n .hy 0
 .if n .na
@@ -193,7 +193,7 @@
 .SH "NAME"
 \fBMM \- Shared Memory Library\fR
 .SH "VERSION"
-MM 1.0.8 (24-Jun-1999)
+MM 1.0.11 (06-Sep-1999)
 .SH "SYNOPSIS"
 .PP
 .Vb 1
@@ -278,15 +278,15 @@ for the \s-1POSIX\s0.1 memory allocation \s-1API\s0 (\fImalloc\fR\|(2) and frien
 useful when converting \fIheap\fR based data structures to \fIshared memory\fR
 based data structures without the need to change the code dramatically.  All
 which is needed is to prefix the \s-1POSIX\s0.1 memory allocation functions with
-\f(CWMM_\fR, i.e. \f(CWmalloc\fR becomes \f(CWMM_malloc\fR, \f(CWstrdup\fR becomes \f(CWMM_strdup\fR,
-etc. This \s-1API\s0 internally uses just a global \f(CWMM*\fR pool for calling the
-corresponding functions (with prefix \f(CWmm_\fR) of the \fIStandard Malloc-Style
-\s-1API\s0\fR.
+`\f(CWMM_\fR\*(R', i.e. `\f(CWmalloc\fR\*(R' becomes `\f(CWMM_malloc\fR\*(R', `\f(CWstrdup\fR\*(R' becomes
+`\f(CWMM_strdup\fR\*(R', etc. This \s-1API\s0 internally uses just a global `\f(CWMM *\fR\*(R' pool for
+calling the corresponding functions (with prefix `\f(CWmm_\fR') of the \fIStandard
+Malloc-Style \s-1API\s0\fR.
 .Ip "\fBStandard Malloc-Style \s-1API\s0\fR" 4
-This is the standard high-level memory allocation \s-1API\s0. It's interface is
-similar to the \fIGlobal Malloc-Replacement \s-1API\s0\fR but it uses an explicit \f(CWMM*\fR
+This is the standard high-level memory allocation \s-1API\s0. Its interface is
+similar to the \fIGlobal Malloc-Replacement \s-1API\s0\fR but it uses an explicit `\f(CWMM *\fR\*(R'
 pool to operate on. That's why every function of this \s-1API\s0 has an argument of
-type \f(CWMM*\fR as the first argument.  This \s-1API\s0 provides a comfortable way to
+type `\f(CWMM *\fR\*(R' as the first argument.  This \s-1API\s0 provides a comfortable way to
 work with small dynamically allocated shared memory chunks inside large
 statically allocated shared memory segments. It's internally based on the
 \fILow-Level Shared Memory \s-1API\s0\fR for creating the underlaying shared memory
@@ -455,7 +455,7 @@ This locks the shared memory pool \fImm\fR for the current process in order to
 perform either shared/read-only (\fImode\fR is \f(CWMM_LOCK_RD\fR) or
 exclusive/read-write (\fImode\fR is \f(CWMM_LOCK_RW\fR) operations inside the global
 shared memory pool.
-.Ip "int \fBMM_unlock\fR(\s-1MM\s0 *\fImm\fR);" 4
+.Ip "int \fBmm_unlock\fR(\s-1MM\s0 *\fImm\fR);" 4
 This unlocks the shared memory pool \fImm\fR for the current process after mutual
 exclusion operations were performed inside the global shared memory pool.
 .Ip "void *\fBmm_malloc\fR(\s-1MM\s0 *\fImm\fR, size_t \fIsize\fR);" 4
@@ -597,7 +597,7 @@ This library was originally written in January 1999 by \fIRalf S. Engelschall\fR
 HTTP server project (see www.apache.org), which was originally invented for
 \fBmod_ssl\fR (see http://www.modssl.org/). 
 .PP
-It's base idea (a malloc-style API for handling shared memory) was originally
+Its base idea (a malloc-style API for handling shared memory) was originally
 derived from the non-publically available \fImm_malloc\fR library written in
 October 1997 by \fICharles Randall\fR <crandall@matchlogic.com> for MatchLogic,
 Inc.
@@ -697,7 +697,7 @@ Inc.
 
 .IX Item "int \fBmm_lock\fR(\s-1MM\s0 *\fImm\fR, mm_lock_mode \fImode\fR);"
 
-.IX Item "int \fBMM_unlock\fR(\s-1MM\s0 *\fImm\fR);"
+.IX Item "int \fBmm_unlock\fR(\s-1MM\s0 *\fImm\fR);"
 
 .IX Item "void *\fBmm_malloc\fR(\s-1MM\s0 *\fImm\fR, size_t \fIsize\fR);"
 

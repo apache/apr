@@ -137,17 +137,17 @@ for the POSIX.1 memory allocation API (malloc(2) and friends). This is
 useful when converting I<heap> based data structures to I<shared memory>
 based data structures without the need to change the code dramatically.  All
 which is needed is to prefix the POSIX.1 memory allocation functions with
-C<MM_>, i.e. C<malloc> becomes C<MM_malloc>, C<strdup> becomes C<MM_strdup>,
-etc. This API internally uses just a global C<MM*> pool for calling the
-corresponding functions (with prefix C<mm_>) of the I<Standard Malloc-Style
-API>.
+`C<MM_>', i.e. `C<malloc>' becomes `C<MM_malloc>', `C<strdup>' becomes
+`C<MM_strdup>', etc. This API internally uses just a global `C<MM *>' pool for
+calling the corresponding functions (with prefix `C<mm_>') of the I<Standard
+Malloc-Style API>.
 
 =item B<Standard Malloc-Style API>
 
-This is the standard high-level memory allocation API. It's interface is
-similar to the I<Global Malloc-Replacement API> but it uses an explicit C<MM*>
+This is the standard high-level memory allocation API. Its interface is
+similar to the I<Global Malloc-Replacement API> but it uses an explicit `C<MM *>'
 pool to operate on. That's why every function of this API has an argument of
-type C<MM*> as the first argument.  This API provides a comfortable way to
+type `C<MM *>' as the first argument.  This API provides a comfortable way to
 work with small dynamically allocated shared memory chunks inside large
 statically allocated shared memory segments. It's internally based on the
 I<Low-Level Shared Memory API> for creating the underlaying shared memory
@@ -405,7 +405,7 @@ perform either shared/read-only (I<mode> is C<MM_LOCK_RD>) or
 exclusive/read-write (I<mode> is C<MM_LOCK_RW>) operations inside the global
 shared memory pool.
 
-=item int B<MM_unlock>(MM *I<mm>);
+=item int B<mm_unlock>(MM *I<mm>);
 
 This unlocks the shared memory pool I<mm> for the current process after mutual
 exclusion operations were performed inside the global shared memory pool.
@@ -618,7 +618,7 @@ This library was originally written in January 1999 by I<Ralf S. Engelschall>
 HTTP server project (see www.apache.org), which was originally invented for
 B<mod_ssl> (see http://www.modssl.org/). 
 
-It's base idea (a malloc-style API for handling shared memory) was originally
+Its base idea (a malloc-style API for handling shared memory) was originally
 derived from the non-publically available I<mm_malloc> library written in
 October 1997 by I<Charles Randall> <crandall@matchlogic.com> for MatchLogic,
 Inc.

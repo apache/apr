@@ -2,6 +2,36 @@
  MM CHANGES
  ==========
 
+ Changes between 1.0.10 and 1.0.11 (27-Aug-1999 to 06-Sep-1999)
+
+  *) Cleaned up various file permission in source tree
+  *) Enhanced mm-config.in: new --all option and less newlines
+  *) Added support --silent to libtool glue code in aclocal.m4
+  *) Upgraded to GNU Pth's more recent config.{guess,sub}
+  *) Upgraded to GNU shtool 1.4.6
+  *) Fixed --section for mm-config in Makefile.in
+  *) Added `void *' casts to MAP_FAILED (= -1) values to avoid
+     warnings under some platforms.
+  *) Fixed a few typos in mm.pod
+
+ Changes between 1.0.9 and 1.0.10 (02-Jul-1999 to 27-Aug-1999)
+
+  *) Changed "make dist" and "make snap" to use "shtool tarball"
+  *) Added #define KERNEL for SunOS to get SHM_R und SHM_W values.
+  *) Upgraded to GNU libtool 1.3.3
+  *) Upgraded to GNU shtool 1.4.5
+  *) Downgraded required Autoconf version to 2.12
+  *) Added MM version number to test report
+  *) Added --enable-batch
+  *) Moved mm_lock_mode in mm.h to top to avoid warnings
+
+ Changes between 1.0.8 and 1.0.9 (24-Jun-1999 to 02-Jul-1999)
+
+  *) Fixed a nasty bug related to {MM,mm}_[un]lock():
+     an additional semicolon broke the semantics.
+  *) Upgraded to released shtool 1.4.0
+  *) Fixed `make test'
+
  Changes between 1.0.7 and 1.0.8 (22-Jun-1999 to 24-Jun-1999)
   
   *) Added important MAP_FAILED fallback also to Autoconf stuff

@@ -13,10 +13,11 @@ enable_shared="$enableval",
 enable_shared=yes
 )dnl
 libtool_flags=''
-test "$enable_static"     = no  && libtool_flags="$libtool_flags --disable-static"
-test "$enable_shared"     = no  && libtool_flags="$libtool_flags --disable-shared"
-test "$ac_cv_prog_gcc"    = yes && libtool_flags="$libtool_flags --with-gcc"
-test "$ac_cv_prog_gnu_ld" = yes && libtool_flags="$libtool_flags --with-gnu-ld"
+test ".$silent"            = .yes && libtool_flags="$libtool_flags --silent"
+test ".$enable_static"     = .no  && libtool_flags="$libtool_flags --disable-static"
+test ".$enable_shared"     = .no  && libtool_flags="$libtool_flags --disable-shared"
+test ".$ac_cv_prog_gcc"    = .yes && libtool_flags="$libtool_flags --with-gcc"
+test ".$ac_cv_prog_gnu_ld" = .yes && libtool_flags="$libtool_flags --with-gnu-ld"
 CC="$CC" CFLAGS="$CFLAGS" CPPFLAGS="$CPPFLAGS" LD="$LD" \
 ${CONFIG_SHELL-/bin/sh} ltconfig --no-reexec \
 $libtool_flags --no-verify ltmain.sh $PLATFORM ||\
@@ -30,7 +31,7 @@ dnl ##
 define(AC_CHECK_DEBUGGING,[dnl
 AC_MSG_CHECKING(for compilation debug mode)
 AC_ARG_ENABLE(debug,dnl
-[  --enable-debug          build for debugging],
+[  --enable-debug          build for debugging (default=no)],
 [dnl
 if test ".$ac_cv_prog_gcc" = ".yes"; then
     case "$CFLAGS" in

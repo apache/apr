@@ -579,7 +579,22 @@ EOF
 	echo ${UNAME_MACHINE}-unknown-bsdi${UNAME_RELEASE}
 	exit 0 ;;
     *:FreeBSD:*:*)
-	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
+	# echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
+        VERS=`echo ${UNAME_RELEASE} | sed -e 's/[-(].*//'`
+        MACH=`sysctl -n hw.model`
+        ARCH='unknown'
+        case ${MACH} in
+           *386*       ) MACH="i386" ;;
+           *486*       ) MACH="i486" ;;
+           Pentium\ II*) MACH="i686" ;;
+           Pentium*    ) MACH="i586" ;;
+           Alpha*      ) MACH="alpha" ;;
+           *           ) MACH="$UNAME_MACHINE" ;;
+        esac
+        case ${MACH} in
+           i[0-9]86 ) ARCH="pc" ;;
+        esac
+        echo "${MACH}-${ARCH}-freebsd${VERS}"
 	exit 0 ;;
     *:NetBSD:*:*)
 	echo ${UNAME_MACHINE}-unknown-netbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
@@ -783,6 +798,9 @@ EOF
     i?86:DYNIX/ptx:4*:*)
 	echo i386-sequent-sysv4
 	exit 0 ;;
+    i?86:UnixWare:*:* )
+        echo ${UNAME_MACHINE}-pc-sysv${UNAME_RELEASE}uw${UNAME_VERSION}
+        exit 0 ;;
     i?86:UNIX_SV:4.2MP:2.*)
         # Unixware is an offshoot of SVR4, but it has its own version
         # number series starting with 2...
@@ -876,6 +894,9 @@ EOF
 	exit 0 ;;
     SM[BE]S:UNIX_SV:*:*)
 	echo mips-dde-sysv${UNAME_RELEASE}
+	exit 0 ;;
+    BS2000:POSIX-BC:*:*)
+	echo BS2000-siemens-sysv4
 	exit 0 ;;
     RM*:ReliantUNIX-*:*:*)
 	echo mips-sni-sysv4
