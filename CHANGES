@@ -1,7 +1,10 @@
 Changes with APR b1
 
+  *) Cleanup to help Apache support programs build cleanly.
+     [Cliff Woolley <cliffwoolley@yahoo.com>]
+
   *) Cleanup some compiler warnings on Solaris
-     [Dale Ghent <daleg@elemental.org>
+     [Dale Ghent <daleg@elemental.org>]
 
   *) apr_getaddrinfo() can now return multiple addresses for a host
      via the next field in apr_sockaddr_t.  [Jeff Trawick]

@@ -115,16 +115,21 @@
 
 #define NO_USE_SIGACTION
 
+#define APR_HAVE_ARPA_INET_H    0
 #define APR_HAVE_CRYPT_H        0
 #define APR_HAVE_CTYPE_H        1
 #define APR_HAVE_DIRENT_H       0
 #define APR_HAVE_ERRNO_H        1
 #define APR_HAVE_FCNTL_H        1
 #define APR_HAVE_IO_H           1
+#define APR_HAVE_NETDB_H        0
 #define APR_HAVE_NETINET_IN_H   0
 #define APR_HAVE_PTHREAD_H      0
 #define APR_HAVE_STDARG_H       1
 #define APR_HAVE_STDIO_H        1
+#define APR_HAVE_STDLIB_H       1
+#define APR_HAVE_STRING_H       1
+#define APR_HAVE_SYS_SIGNAL_H   0
 #define APR_HAVE_SYS_SOCKET_H   0
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      0
