@@ -815,11 +815,10 @@ APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
 
 APR_DECLARE(const char *) apr_proc_mutex_lockfile(apr_proc_mutex_t *mutex)
 {
-    /* posix sems use the fname field but don't use a file,
-     * so be careful 
-     */
-    if (!strcmp(mutex->meth->name, "flock") ||
-        !strcmp(mutex->meth->name, "fcntl")) {
+    /* POSIX sems use the fname field but don't use a file,
+     * so be careful. */
+    if (mutex->meth == &mutex_flock_methods
+        || mutex->meth == &mutex_fcntl_methods) {
         return mutex->fname;
     }
     return NULL;
