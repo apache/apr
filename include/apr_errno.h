@@ -52,6 +52,59 @@
  * <http://www.apache.org/>.
  */
 
+/*
+
+=head1 APR ERROR CODES 
+
+    APR_ENOSTAT        APR was unable to perform a stat on the file 
+    APR_ENOPOOL        APR was not provided a pool with which to allocate memory
+    APR_EBADDATE       APR was given an invalid date 
+    APR_EINVALSOCK     APR was given an invalid socket
+    APR_ENOFILE        APR was not give a file structure
+    APR_ENOPROC        APR was not given a process structure
+    APR_ENOTIME        APR was not given a time structure
+    APR_ENODIR         APR was not given a directory structure
+    APR_ENOLOCK        APR was not given a lock structure
+    APR_ENOPOLL        APR was not given a poll structure
+    APR_ENOSOCKET      APR was not given a socket
+    APR_ENOTHREAD      APR was nto given a thread structure
+    APR_ENOTHDKEY      APR was not given a thread key structure
+    APR_ENOSHMAVAIL    There is no more shared memory available
+    APR_EDSOOPEN       APR was unable to open the dso object.  For more
+                       information consult ap_dso_error.
+
+=head1 APR STATUS CODES
+
+    APR_INCHILD        Program is currently executing in the child
+    APR_INPARENT       Program is currently executing in the parent
+    APR_DETACH         The thread is detached
+    APR_NOTDETACH      The thread is not detached
+    APR_CHILD_DONE     The child has finished executing
+    APR_CHILD_NOTDONE  The child has not finished executing
+    APR_TIMEUP         The operation did not finish before the timeout
+    APR_INCOMPLETE     The character conversion stopped because of an 
+                       incomplete character or shift sequence at the end of
+                       the input buffer.
+    APR_BADCH          Getopt found an option not in the option string
+    APR_BADARG         Getopt found an option that is missing an argument and
+                       and argument was specified in the option string
+    APR_EOF            APR has encountered the end of the file
+    APR_NOTFOUND       APR was unable to find the socket in the poll structure
+    APR_ANONYMOUS      APR is using anonymous shared memory
+    APR_FILEBASED      APR is using a file name as the key to the shared memory
+    APR_KEYBASED       APR is using a shared key as the key to the shared 
+                       memory
+    APR_EINIT          Ininitalizer value.  If no option has been found, but
+                       the status variable requires a value, this should be 
+                       used
+    APR_ENOTIMPL       The APR function has not been implemented on this 
+                       platform, either because nobody has gotten to it yet,
+                       or the function is impossible on this platform.
+    APR_EMISMATCH      Two passwords do not match.
+
+=cut
+ */
+
 #ifndef APR_ERRNO_H
 #define APR_ERRNO_H
 
