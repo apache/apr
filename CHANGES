@@ -1,7 +1,13 @@
 Changes with APR b1  
 
-  *) change the apr_table_elts macro so that it provides access via
-     a const pointer instead of a non-const pointer
+  *) Fix apr_setup_signal_thread() so that threads don't block
+     synchronous signals (e.g., SIGSEGV).  It is a programming error
+     to do so, and some platforms (e.g., Solaris, AIX) don't call any
+     registered signal handler when such signals are blocked.
+     [Jeff Trawick]
+
+  *) Change the apr_table_elts macro so that it provides access via
+     a const pointer instead of a non-const pointer.
      [Brian Pane <bpane@pacbell.net]
 
   *) Use strerror_r() where available, since strerror() isn't always
