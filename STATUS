@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/05/02 13:45:34 $]
+Last modified at [$Date: 2002/05/02 13:50:38 $]
 
 Release:
 
@@ -87,7 +87,8 @@ CURRENT VOTES:
                   real option is to make atomics a compile-time option.
                   YES means you use the atomics code, based on the *build*
                   machine (and therefore carries some dependencies) or
-                  NO which maintains "universal" portabiity.
+                  NO which maintains "universal" portabiity, which is
+                  what we have (but the default being NO atomics).
       -1: IanH I don't agree. I think APR is the perfect place this kind of thing. 
                   For platforms that support it is a big win, for ones which don't
                   they are no worse off than the alternative.
