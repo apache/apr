@@ -496,8 +496,9 @@ static apr_status_t proc_mutex_fcntl_cleanup(void *mutex_)
         if (status != APR_SUCCESS)
             return status;
     }
-    apr_file_close(mutex->interproc);
-    
+    if (mutex->interproc) { /* if it was opened successfully */
+        apr_file_close(mutex->interproc);
+    }
     return APR_SUCCESS;
 }    
 
@@ -609,7 +610,9 @@ static apr_status_t proc_mutex_flock_cleanup(void *mutex_)
         if (status != APR_SUCCESS)
             return status;
     }
-    apr_file_close(mutex->interproc);
+    if (mutex->interproc) { /* if it was opened properly */
+        apr_file_close(mutex->interproc);
+    }
     unlink(mutex->fname);
     return APR_SUCCESS;
 }    
