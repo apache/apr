@@ -74,6 +74,7 @@ testfunc *tests[NUM_TESTS] = {
     testsleep,
     testpool,
     testfmt,
+    testfile,
     NULL
 };
 
