@@ -70,6 +70,13 @@
 
 #define APR_FILE_BUFSIZE 4096
 
+#if APR_HAS_LARGE_FILES
+#define lseek(f,o,w) lseek64(f,o,w)
+#define ftruncate(f,l) ftruncate64(f,l)
+#endif
+
+typedef struct stat struct_stat;
+
 struct apr_file_t {
     apr_pool_t *pool;
     int filedes;

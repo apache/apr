@@ -416,6 +416,55 @@ esac
 
 AC_SUBST(OBJECTS_PLATFORM)
 
+# Check whether LFS has explicitly been disabled
+AC_ARG_ENABLE(lfs,[  --disable-lfs           Disable large file support on 32-bit platforms],
+[apr_lfs_choice=$enableval], [apr_lfs_choice=yes])
+
+if test "$apr_lfs_choice" = "yes"; then
+   # Check whether the transitional LFS API is sufficient
+   AC_CACHE_CHECK([whether to enable -D_LARGEFILE64_SOURCE], [apr_cv_use_lfs64], [
+   apr_save_CPPFLAGS=$CPPFLAGS
+   CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
+   AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+
+void main(void)
+{
+    int fd, ret = 0;
+    struct stat64 st;
+    off64_t off = 4242;
+
+    if (sizeof(off64_t) != 8 || sizeof(off_t) != 4)
+       exit(1);
+    if ((fd = open("conftest.lfs", O_LARGEFILE|O_CREAT|O_WRONLY)) < 0)
+       exit(2);
+    if (ftruncate64(fd, off) != 0)
+       ret = 3;
+    else if (fstat64(fd, &st) != 0 || st.st_size != off)
+       ret = 4;
+    else if (lseek64(fd, off, SEEK_SET) != off)
+       ret = 5;
+    else if (close(fd) != 0)
+       ret = 6;
+    else if (lstat64("conftest.lfs", &st) != 0 || st.st_size != off)
+       ret = 7;
+    else if (stat64("conftest.lfs", &st) != 0 || st.st_size != off)
+       ret = 8;
+    unlink("conftest.lfs");
+
+    exit(ret);
+}], [apr_cv_use_lfs64=yes], [apr_cv_use_lfs64=no], [apr_cv_use_lfs64=no])
+   CPPFLAGS=$apr_save_CPPFLAGS])
+   if test "$apr_cv_use_lfs64" = "yes"; then
+      APR_ADDTO(CPPFLAGS, [-D_LARGEFILE64_SOURCE])
+   fi
+fi
+
 AC_ARG_ENABLE(nonportable-atomics,
 [  --enable-nonportable-atomics  Use optimized atomic code which may produce nonportable binaries],
 [if test $enableval = yes; then
@@ -1104,11 +1153,6 @@ else
     stdint=0
 fi
 
-if test "$ac_cv_type_off_t" = "yes"; then
-    off_t_value="off_t"
-else
-    off_t_value="apr_int32_t"
-fi
 if test "$ac_cv_type_size_t" = "yes"; then
     size_t_value="size_t"
 else
@@ -1147,15 +1191,45 @@ fi
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], off_t, 8)
 
-if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
-    off_t_fmt='#define APR_OFF_T_FMT "d"'
-elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
-    off_t_fmt='#define APR_OFF_T_FMT "ld"'
-elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
-    off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
+    # Enable LFS
+    aprlfs=1
+    AC_CHECK_FUNCS([mmap64 sendfile64 sendfilev64 mkstemp64])
 else
-    off_t_fmt='#error Can not determine the proper size for off_t'
+    aprlfs=0     
 fi
+
+AC_MSG_CHECKING([which type to use for apr_off_t])
+if test "${ac_cv_sizeof_off_t}${apr_cv_use_lfs64}" = "4yes"; then
+    # LFS is go!
+    off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+    off_t_value='off64_t'
+elif test "${ac_cv_sizeof_off_t}x${ac_cv_sizeof_long}" = "4x4"; then
+    # Special case: off_t may change size with _FILE_OFFSET_BITS
+    # on 32-bit systems with LFS support.  To avoid compatibility
+    # with other software which may export _FILE_OFFSET_BITS,
+    # hard-code apr_off_t to long.
+    off_t_value=long
+    off_t_fmt='#define APR_OFF_T_FMT "ld"'
+elif test "$ac_cv_type_off_t" = "yes"; then
+    off_t_value=off_t
+    # off_t is more commonly a long than an int; prefer that case
+    # where int and long are the same size.
+    if test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long"; then
+        off_t_fmt='#define APR_OFF_T_FMT "ld"'
+    elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_int"; then
+        off_t_fmt='#define APR_OFF_T_FMT "d"'
+    elif test "$ac_cv_sizeof_off_t" = "$ac_cv_sizeof_long_long"; then
+        off_t_fmt='#define APR_OFF_T_FMT APR_INT64_T_FMT'
+    else
+        AC_ERROR([could not determine the size of off_t])
+    fi
+else
+   # Fallback on int
+   off_t_value=apr_int32_t
+   off_t_fmt=d
+fi
+AC_MSG_RESULT($off_t_value)
 
 APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], pid_t, 8)
 
@@ -1188,7 +1262,6 @@ case $host in
        size_t_fmt='#define APR_SIZE_T_FMT "ld"'
        ;;
    *-os2*)
-       off_t_fmt='#define APR_OFF_T_FMT "ld"'
        size_t_fmt='#define APR_SIZE_T_FMT "lu"'
        ;;
    *-solaris*)
@@ -1207,16 +1280,6 @@ case $host in
         size_t_fmt='#define APR_SIZE_T_FMT "lu"'
         ;;
 esac
-
-# Override format string for off_t more carefully: only use hard-coded
-# choice if using a 32-bit off_t on platforms which support LFS.
-if test "$ac_cv_sizeof_off_t" = "4"; then
-   case $host in 
-   *linux*|*-solaris*|*aix[[45]]*)
-        off_t_fmt='#define APR_OFF_T_FMT "ld"'
-        ;;
-   esac
-fi
 
 AC_SUBST(voidp_size)
 AC_SUBST(short_value)
@@ -1238,6 +1301,7 @@ AC_SUBST(int64_literal)
 AC_SUBST(uint64_literal) 
 AC_SUBST(stdint) 
 AC_SUBST(bigendian)
+AC_SUBST(aprlfs)
 
 dnl ----------------------------- Checking for string functions
 AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")

@@ -83,6 +83,14 @@ APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new,
     apr_int32_t native_flags = 0;
 #endif
 
+#if APR_HAS_LARGE_FILES && defined(HAVE_MMAP64)
+#define mmap mmap64
+#elif APR_HAS_LARGE_FILES && SIZEOF_OFF_T == 4
+    /* LFS but no mmap64: check for overflow */
+    if ((apr_int64_t)offset + size > INT_MAX)
+        return APR_EINVAL;
+#endif
+
     if (size == 0)
         return APR_EINVAL;
     

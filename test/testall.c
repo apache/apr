@@ -54,6 +54,7 @@ static const struct testlist {
     {"testglobalmutex", testglobalmutex},
     {"testhash", testhash},
     {"testipsub", testipsub},
+    {"testlfs", testlfs},
     {"testlock", testlock},
     {"testmmap", testmmap},
     {"testnames", testnames},

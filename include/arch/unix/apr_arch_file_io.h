@@ -109,6 +109,17 @@ struct apr_file_t {
 #endif
 };
 
+#if APR_HAS_LARGE_FILES && defined(_LARGEFILE64_SOURCE)
+#define stat(f,b) stat64(f,b)
+#define lstat(f,b) lstat64(f,b)
+#define fstat(f,b) fstat64(f,b)
+#define lseek(f,o,w) lseek64(f,o,w)
+#define ftruncate(f,l) ftruncate64(f,l)
+typedef struct stat64 struct_stat;
+#else
+typedef struct stat struct_stat;
+#endif
+
 struct apr_dir_t {
     apr_pool_t *pool;
     char *dirname;
