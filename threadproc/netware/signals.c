@@ -72,10 +72,10 @@ APR_DECLARE(apr_status_t) apr_setup_signal_thread(void)
 
 APR_DECLARE(apr_status_t) apr_signal_block(int signum)
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
 
 APR_DECLARE(apr_status_t) apr_signal_unblock(int signum)
 {
-    return APR_SUCCESS;
+    return APR_ENOTIMPL;
 }
