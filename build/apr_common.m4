@@ -49,6 +49,26 @@ EOF
   chmod +x $1
 ])dnl
 
+dnl APR_MKDIR_P_CHECK(fallback-mkdir-p)
+dnl checks whether mkdir -p works
+AC_DEFUN(APR_MKDIR_P_CHECK,[
+  AC_CACHE_CHECK(for working mkdir -p, ac_cv_mkdir_p,[
+    test -d conftestdir && rm -rf conftestdir
+    mkdir -p conftestdir/somedir >/dev/null 2>&1
+    if test -d conftestdir/somedir; then
+      ac_cv_mkdir_p=yes
+    else
+      ac_cv_mkdir_p=no
+    fi
+    rm -rf conftestdir
+  ])
+  if test "$ac_cv_mkdir_p" = "yes"; then
+      mkdir_p="mkdir -p"
+  else
+      mkdir_p="$1"
+  fi
+])
+
 dnl
 dnl APR_SUBDIR_CONFIG(dir [, sub-package-cmdline-args])
 dnl
