@@ -666,7 +666,7 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
 /**
  * Open a temporary file
  * @param fp The apr file to use as a temporary file.
- * @param template The template to use when creating a temp file.
+ * @param templ The template to use when creating a temp file.
  * @param flags The flags to open the file with. If this is zero,
  *              the file is opened with 
  *              APR_CREATE | APR_READ | APR_WRITE | APR_EXCL | APR_DELONCLOSE
@@ -680,7 +680,7 @@ APR_DECLARE(void) apr_file_unset_inherit(apr_file_t *file);
  * array.  
  *
  */
-APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *template,
+APR_DECLARE(apr_status_t) apr_file_mktemp(apr_file_t **fp, char *templ,
                                           apr_int32_t flags, apr_pool_t *p);
 
 #ifdef __cplusplus
