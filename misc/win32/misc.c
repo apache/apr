@@ -54,127 +54,84 @@
 
 #include "apr_private.h"
 #include "misc.h"
-#include "apr_general.h"
-#include "apr_errno.h"
-#include "apr_pools.h"
-#include "apr_lib.h"
-#include <string.h>
-#include <process.h>
-#include <stdlib.h>
 
-ap_status_t clean_cont(void *data)
+ap_status_t ap_get_oslevel(ap_pool_t *cont, ap_oslevel_e *level)
 {
-    return APR_SUCCESS;
-}
-    
+    static OSVERSIONINFO oslev;
+    static unsigned int servpack = 0;
+    static BOOL first = TRUE;
+    char *pservpack;
 
-ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
-{
-    ap_pool_t *new;
-
-    if (cont) {
-        new = ap_make_sub_pool(cont, cont->apr_abort);
-    }
-    else {
-        new = ap_make_sub_pool(NULL, NULL);
-    }
-        
-    if (new == NULL) {
-        return APR_ENOPOOL;
-    }
-    
-    new->prog_data = NULL;
-    new->apr_abort = NULL;
-
-    *newcont = new;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_destroy_context(ap_pool_t *cont)
-{
-    ap_destroy_pool(cont);
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_set_userdata(void *data, char *key,
-                            ap_status_t (*cleanup) (void *),
-                            ap_pool_t *cont)
-{
-    datastruct *dptr = NULL, *dptr2 = NULL;
-    if (cont) { 
-        dptr = cont->prog_data;
-        while (dptr) {
-            if (!strcmp(dptr->key, key))
-                break;
-            dptr2 = dptr;
-            dptr = dptr->next;
+    if (first) {
+        first = FALSE;
+        oslev.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+        GetVersionEx(&oslev);
+        if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+            for (pservpack = oslev.szCSDVersion; 
+                 *pservpack && !isdigit(*pservpack); pservpack++)
+                ;
+            if (*pservpack)
+                servpack = atoi(pservpack);
         }
-        if (dptr == NULL) {
-            dptr = ap_palloc(cont, sizeof(datastruct));
-            dptr->next = dptr->prev = NULL;
-            dptr->key = ap_pstrdup(cont, key);
-            if (dptr2) {
-                dptr2->next = dptr;
-                dptr->prev = dptr2;
+    }
+    if (oslev.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+        if (oslev.dwMajorVersion == 5) {
+            (*level) = APR_WIN_2000;
+        }
+        else if (oslev.dwMajorVersion == 4) {
+            if (servpack >= 6) {
+                (*level) = APR_WIN_NT_4_SP6;
+            }
+            else if (servpack >= 4) {
+                (*level) = APR_WIN_NT_4_SP4;
+            }
+            else if (servpack >= 3) {
+                (*level) = APR_WIN_NT_4_SP3;
+            }
+            else if (servpack >= 2) {
+                (*level) = APR_WIN_NT_4_SP2;
             }
             else {
-                cont->prog_data = dptr;
+                (*level) = APR_WIN_NT_4;
             }
-        }
-        dptr->data = data;
-        ap_register_cleanup(cont, dptr->data, cleanup, cleanup);
-        return APR_SUCCESS;
-    }
-    return APR_ENOPOOL;
-}
-
-ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
-{
-    datastruct *dptr = NULL;
-    if (cont) { 
-        dptr = cont->prog_data;
-        while (dptr) {
-            if (!strcmp(dptr->key, key)) {
-                break;
-            }
-            dptr = dptr->next;
-        }
-        if (dptr) {
-            (*data) = dptr->data;
         }
         else {
-            (*data) = NULL;
+            (*level) = APR_WIN_NT;
         }
         return APR_SUCCESS;
     }
-    return APR_ENOPOOL;
+    else if (oslev.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
+        if (oslev.dwMinorVersion == 0) {
+            (*level) = APR_WIN_95;
+            return APR_SUCCESS;
+        }
+        else if (oslev.dwMinorVersion > 0) {
+            (*level) = APR_WIN_98;
+            return APR_SUCCESS;
+        }
+    }
+    return APR_EEXIST;
 }
 
-/* This puts one thread in a Listen for signals mode */
-ap_status_t ap_initialize(void)
+
+/* This is the helper code to resolve late bound entry points 
+ * missing from one or more releases of the Win32 API
+ */
+
+static const char* const lateDllName[DLL_defined] = {
+    "kernel32", "advapi32", "mswsock",  "ws2_32"  };
+static HMODULE lateDllHandle[DLL_defined] = {
+    NULL,       NULL,       NULL,       NULL      };
+
+FARPROC ap_load_dll_func(ap_dlltoken_e fnLib, char* fnName, int ordinal)
 {
-    ap_status_t status;
-    int iVersionRequested;
-    WSADATA wsaData;
-    int err;
-
-    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
-    err = WSAStartup((WORD) iVersionRequested, &wsaData);
-    if (err) {
-        return err;
+    if (!lateDllHandle[fnLib]) { 
+        lateDllHandle[fnLib] = LoadLibrary(lateDllName[fnLib]);
+        if (!lateDllHandle[fnLib])
+            return NULL;
     }
-    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
-        HIBYTE(wsaData.wVersion) != WSALowByte) {
-        WSACleanup();
-        return APR_EEXIST;
-    }
-
-    status = ap_init_alloc();
-    return status;
-}
-
-void ap_terminate(void)
-{
-    WSACleanup();
-    ap_term_alloc();
+    if (ordinal)
+        return GetProcAddress(lateDllHandle[fnLib], (char *) ordinal);
+    else
+        return GetProcAddress(lateDllHandle[fnLib], fnName);
 }
