@@ -494,7 +494,7 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
                                        apr_int32_t flags, char *buf, 
                                        apr_size_t *len);
  
-#if APR_HAS_SENDFILE
+#if APR_HAS_SENDFILE || defined(DOXYGEN)
 
 /**
  * Send a file from an open file descriptor to a socket, along with 
@@ -761,7 +761,7 @@ APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data,
                                            const char *key,
                                            apr_status_t (*cleanup)(void *));
 
-#if APR_FILES_AS_SOCKETS
+#if APR_FILES_AS_SOCKETS || defined(DOXYGEN)
 
 /**
  * Convert a File type to a socket so that it can be used in a poll operation.
@@ -804,7 +804,7 @@ APR_DECLARE(apr_status_t) apr_ipsubnet_create(apr_ipsubnet_t **ipsub, const char
  */
 APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa);
 
-#if APR_HAS_SO_ACCEPTFILTER
+#if APR_HAS_SO_ACCEPTFILTER || defined(DOXYGEN)
 /**
  * Set an OS level accept filter.
  * @param sock The socket to put the accept filter on.
