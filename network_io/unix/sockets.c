@@ -77,9 +77,10 @@ static apr_status_t socket_cleanup(void *sock)
     }
 }
 
-static void set_socket_vars(apr_socket_t *sock, int family, int type)
+static void set_socket_vars(apr_socket_t *sock, int family, int type, int protocol)
 {
     sock->type = type;
+    sock->protocol = protocol;
     apr_sockaddr_vars_set(sock->local_addr, family, 0);
     apr_sockaddr_vars_set(sock->remote_addr, family, 0);
     sock->netmask = 0;
@@ -103,8 +104,14 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr->pool = p;
 }
 
-apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
-                               apr_pool_t *cont)
+apr_status_t apr_socket_protocol_get(apr_socket_t *sock, int *protocol)
+{
+    *protocol = sock->protocol;
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_socket_create_ex(apr_socket_t **new, int ofamily, int type,
+                                  int protocol, apr_pool_t *cont)
 {
     int family = ofamily;
 
@@ -118,19 +125,19 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
 
     alloc_socket(new, cont);
 
-    (*new)->socketdes = socket(family, type, 0);
+    (*new)->socketdes = socket(family, type, protocol);
 
 #if APR_HAVE_IPV6
     if ((*new)->socketdes < 0 && ofamily == APR_UNSPEC) {
         family = APR_INET;
-        (*new)->socketdes = socket(family, type, 0);
+        (*new)->socketdes = socket(family, type, protocol);
     }
 #endif
 
     if ((*new)->socketdes < 0) {
         return errno;
     }
-    set_socket_vars(*new, family, type);
+    set_socket_vars(*new, family, type, protocol);
 
     (*new)->timeout = -1;
     (*new)->inherit = 0;
@@ -138,6 +145,12 @@ apr_status_t apr_socket_create(apr_socket_t **new, int ofamily, int type,
                               socket_cleanup);
     return APR_SUCCESS;
 } 
+
+apr_status_t apr_socket_create(apr_socket_t **new, int family, int type,
+                               apr_pool_t *cont)
+{
+    return apr_socket_create_ex(new, family, type, 0, cont);
+}
 
 apr_status_t apr_shutdown(apr_socket_t *thesocket, apr_shutdown_how_e how)
 {
@@ -176,7 +189,7 @@ apr_status_t apr_listen(apr_socket_t *sock, apr_int32_t backlog)
 apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *connection_context)
 {
     alloc_socket(new, connection_context);
-    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
+    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM, sock->protocol);
 
 #ifndef HAVE_POLL
     (*new)->connected = 1;
@@ -322,7 +335,11 @@ apr_status_t apr_os_sock_make(apr_socket_t **apr_sock,
                               apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
-    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type);
+#ifdef APR_ENABLE_FOR_1_0 /* no protocol field yet */
+    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type, os_sock_info->protocol);
+#else
+    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type, 0);
+#endif
     (*apr_sock)->timeout = -1;
     (*apr_sock)->socketdes = *os_sock_info->os_sock;
     if (os_sock_info->local) {
@@ -360,7 +377,7 @@ apr_status_t apr_os_sock_put(apr_socket_t **sock, apr_os_sock_t *thesock,
         /* XXX IPv6 figure out the family here! */
         /* XXX figure out the actual socket type here */
         /* *or* just decide that apr_os_sock_put() has to be told the family and type */
-        set_socket_vars(*sock, APR_INET, SOCK_STREAM);
+        set_socket_vars(*sock, APR_INET, SOCK_STREAM, APR_PROTO_TCP);
         (*sock)->timeout = -1;
     }
     (*sock)->local_port_unknown = (*sock)->local_interface_unknown = 1;

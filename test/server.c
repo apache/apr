@@ -79,6 +79,7 @@ int main(int argc, const char * const argv[])
     apr_sockaddr_t *localsa = NULL, *remotesa;
     apr_status_t stat;
     int family = APR_UNSPEC;
+    int protocol;
     apr_getopt_t *opt;
     const char *optarg;
     char optchar;
@@ -113,7 +114,7 @@ int main(int argc, const char * const argv[])
     }
 
     APR_TEST_SUCCESS(rv, "Creating new socket", 
-        apr_socket_create(&sock, family, SOCK_STREAM, context))
+        apr_socket_create_ex(&sock, family, SOCK_STREAM, APR_PROTO_TCP, context))
 
     APR_TEST_SUCCESS(rv, "Setting option APR_SO_NONBLOCK",
         apr_socket_opt_set(sock, APR_SO_NONBLOCK, 1))
@@ -153,6 +154,12 @@ int main(int argc, const char * const argv[])
     APR_TEST_SUCCESS(rv, "Accepting a connection",
         apr_accept(&sock2, sock, context))
 
+    apr_socket_protocol_get(sock2, &protocol);
+    if (protocol != APR_PROTO_TCP) {
+        fprintf(stderr, "Error: protocol not conveyed from listening socket "
+                "to connected socket!\n");
+        exit(1);
+    }
     apr_socket_addr_get(&remotesa, APR_REMOTE, sock2);
     apr_sockaddr_ip_get(&remote_ipaddr, remotesa);
     apr_sockaddr_port_get(&remote_port, remotesa);

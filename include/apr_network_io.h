@@ -168,6 +168,16 @@ struct in_addr {
 #endif
 
 /**
+ * @defgroup IP_Proto IP Protocol Definitions for use when creating sockets
+ * @{
+ */
+#define APR_PROTO_TCP       6
+#define APR_PROTO_UDP      17
+#define APR_PROTO_SCTP    132
+/** @} */
+
+
+/**
  * Enum to tell us if we're interested in remote or local socket
  */
 typedef enum {
@@ -265,6 +275,7 @@ struct apr_hdtr_t {
 
 /**
  * Create a socket.
+ * @remark With APR 1.0, this function will pick up a new protocol parameter.
  * @param new_sock The new socket that has been set up.
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
@@ -273,6 +284,20 @@ struct apr_hdtr_t {
 APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
                                             int family, int type,
                                             apr_pool_t *cont);
+
+/**
+ * Create a socket.
+ * @remark With APR 1.0, this function will be removed.
+ * @param new_sock The new socket that has been set up.
+ * @param family The address family of the socket (e.g., APR_INET).
+ * @param type The type of the socket (e.g., SOCK_STREAM).
+ * @param protocol The protocol of the socket (e.g., APR_PROTO_TCP).
+ * @param cont The pool to use
+ */
+APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new_sock, 
+                                               int family, int type,
+                                               int protocol,
+                                               apr_pool_t *cont);
 
 /**
  * Shutdown either reading, writing, or both sides of a socket.
@@ -728,6 +753,14 @@ APR_DECLARE(int) apr_ipsubnet_test(apr_ipsubnet_t *ipsub, apr_sockaddr_t *sa);
 apr_status_t apr_socket_accept_filter(apr_socket_t *sock, char *name,
                                       char *args);
 #endif
+
+/**
+ * Return the protocol of the socket.
+ * @param sock The socket to query.
+ * @param protocol The returned protocol (e.g., APR_PROTO_TCP).
+ */
+APR_DECLARE(apr_status_t) apr_socket_protocol_get(apr_socket_t *sock,
+                                                  int *protocol);
 
 /**
  * Set a socket to be inherited by child processes.
