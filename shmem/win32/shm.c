@@ -83,6 +83,9 @@ static apr_status_t shm_cleanup(void* shm)
     if (CloseHandle(m->hMap)) {
         return (rv != APR_SUCCESS) ? rv : apr_get_os_error();
     }
+    /* ### Do we want to make a point of unlinking m->file here? 
+     * Need to add the fname to the apr_shm_t, in that case.
+     */
     return rv;
 }
 
@@ -140,6 +143,20 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         psec = NULL;
     }
 
+    /* XXX: I had nothing but utter failure on WinNT attempting to specify
+     * the size of the CreateFileMapping() calls below (given in DWORDs
+     * as hi-DWORD, lo-DWORD where you see the 0, 0 args.)  Consistently,
+     * Win2K reported insufficient disk space, when that is obviously not
+     * the case.  I'm suspecting size should have been in pages (???) but
+     * there was no docs in the PSDK that made that implication.
+     *
+     * The XXX above is due to the fact that anon allocation dies right now,
+     * since we can't create a filemapping with size zero, when we don't
+     * back it with a file.  Since I clearly don't understand what Win32
+     * has done with this size arg, I'm loath to make the obvious fix.
+     * Let it fail until I, or someone with time on their hands, wants to
+     * research, experiment and fix this for good.
+     */
 #if APR_HAS_UNICODE_FS
     if (apr_os_level >= APR_WIN_NT) 
     {
@@ -151,7 +168,11 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         hMap = CreateFileMappingA(hFile, psec, PAGE_READWRITE, 0, 0, mapkey);
     }
     err = apr_get_os_error();
-    apr_file_close(f);
+
+    if (file) {
+        apr_file_close(f);
+    }
+
     if (hMap && err == ERROR_ALREADY_EXISTS) {
         CloseHandle(hMap);
         return APR_EEXIST;
@@ -163,7 +184,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     base = MapViewOfFile(hMap, FILE_MAP_READ | FILE_MAP_WRITE,
                          0, 0, size);
     if (!base) {
-        apr_file_close(f);
         CloseHandle(hMap);
         return apr_get_os_error();
     }
