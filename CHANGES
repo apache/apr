@@ -1,5 +1,10 @@
 Changes with APR b1  
 
+  *) Make all APR pools be allocated out of the permanent pool.
+     This brings APR pools back to a tree structure.  There are
+     no longer any way to create a pool that is not a decendant
+     of the permanent_pool.  [Ryan Bloom]
+
   *) Wrap all functions in APR_DECLARE macro. 
      [Sterling Hughes <sterling@designmultimedia.com>]
 
