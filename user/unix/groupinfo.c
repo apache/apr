@@ -91,7 +91,7 @@ APR_DECLARE(apr_status_t) apr_get_groupid(apr_gid_t *groupid, const char *groupn
     struct group *gr;
 #ifndef BEOS
 
-#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRGID_R)
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETGRNAM_R)
     struct group grp;
     char grbuf[512];
 
