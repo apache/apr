@@ -132,7 +132,7 @@ static void *apr_sms_blocks_malloc(apr_sms_t *sms,
     BLOCK_T(mem)->nxt = (char*)SMS_BLOCKS_T(sms)->alloc_list;
     SMS_BLOCKS_T(sms)->alloc_list = mem;
     SMS_BLOCKS_T(sms)->endp = (char *)mem + SMS_BLOCKS_T(sms)->alloc_sz;
-    (char *)mem += SIZEOF_BLOCK_T;
+    mem = (char *)mem + SIZEOF_BLOCK_T;
     SMS_BLOCKS_T(sms)->ptr = (char *)mem + SMS_BLOCKS_T(sms)->block_sz;
 
     if (SMS_BLOCKS_T(sms)->alloc_list->nxt) {
@@ -180,7 +180,7 @@ static void *apr_sms_blocks_calloc(apr_sms_t *sms,
     BLOCK_T(mem)->nxt = (char*)SMS_BLOCKS_T(sms)->alloc_list;
     SMS_BLOCKS_T(sms)->alloc_list = mem;
     SMS_BLOCKS_T(sms)->endp = (char *)mem + SMS_BLOCKS_T(sms)->alloc_sz;
-    (char *)mem += SIZEOF_BLOCK_T;
+    mem = (char *)mem + SIZEOF_BLOCK_T;
     SMS_BLOCKS_T(sms)->ptr = (char *)mem + SMS_BLOCKS_T(sms)->block_sz;
 
     if (SMS_BLOCKS_T(sms)->alloc_list->nxt) {
