@@ -117,19 +117,20 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 /*
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2) 
  */
-ap_status_t ap_writev(struct file_t *thefile, const struct iovec_t *vec, ap_ssize_t *iocnt)
+ap_status_t ap_writev(struct file_t *thefile, const ap_iovec_t *vec, ap_size_t nvec, 
+                      ap_ssize_t *nbytes)
 {
     int i;
     DWORD bwrote = 0;
-    int numvec = *iocnt;
-    *iocnt = 0;
+    struct iovec *iov = vec->theiov;
 
-    for (i = 0; i < numvec; i++) {
+    *nbytes = 0;
+    for (i = 0; i < nvec; i++) {
         if (!WriteFile(thefile->filehand,
-                       vec->iov[i].iov_base, vec->iov[i].iov_len, &bwrote, NULL)) {
+                       iov[i].iov_base, iov[i].iov_len, &bwrote, NULL)) {
             return GetLastError();
         }
-        *iocnt += bwrote;
+        *nbytes += bwrote;
     }
     return APR_SUCCESS;
 }
