@@ -1130,7 +1130,12 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 /** not a directory */
 #define APR_STATUS_IS_ENOTDIR(s)        ((s) == APR_ENOTDIR)
 /** no space left on device */
+#ifdef EDQUOT
+#define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC \
+                                      || (s) == EDQUOT)
+#else
 #define APR_STATUS_IS_ENOSPC(s)         ((s) == APR_ENOSPC)
+#endif
 /** not enough memory */
 #define APR_STATUS_IS_ENOMEM(s)         ((s) == APR_ENOMEM)
 /** too many open files */
