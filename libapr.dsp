@@ -158,14 +158,6 @@ SOURCE=.\file_io\win32\readwrite.c
 SOURCE=.\file_io\win32\seek.c
 # End Source File
 # End Group
-# Begin Group "i18n"
-
-# PROP Default_Filter ""
-# Begin Source File
-
-SOURCE=.\i18n\unix\xlate.c
-# End Source File
-# End Group
 # Begin Group "locks"
 
 # PROP Default_Filter ""
@@ -600,10 +592,6 @@ SOURCE=.\include\apr_user.h
 # Begin Source File
 
 SOURCE=.\include\apr_want.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\include\apr_xlate.h
 # End Source File
 # End Group
 # Begin Source File
