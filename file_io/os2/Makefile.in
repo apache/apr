@@ -13,7 +13,8 @@ TARGETS = \
 	fullrw.lo \
 	filepath.lo \
 	filesys.lo \
-	mktemp.lo
+	mktemp.lo \
+	copy.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
