@@ -87,7 +87,7 @@ AC_CHECK_LIB(pthread, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
 
 case "$OS" in
    *-os2*)
-       CFLAGS="$CFLAGS -DOS2"
+       CFLAGS="$CFLAGS -DOS2 -Zmt"
        OSDIR="os2"
        LIBPREFIX=""
        ;;
