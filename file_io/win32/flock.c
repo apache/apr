@@ -56,13 +56,12 @@
 
 APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
 {
-    OVERLAPPED offset;
-    DWORD flags, len = 0xffffffff;
+    const DWORD len = 0xffffffff;
+    DWORD flags; 
 
     flags = ((type & APR_FLOCK_NONBLOCK) ? LOCKFILE_FAIL_IMMEDIATELY : 0)
           + (((type & APR_FLOCK_TYPEMASK) == APR_FLOCK_SHARED) 
                                        ? 0 : LOCKFILE_EXCLUSIVE_LOCK);
-    memset (&offset, 0, sizeof(offset));
     /* XXX on NT 4.0 we get ERROR_LOCK_VIOLATION when we specify
      *     LOCKFILE_FAIL_IMMEDIATELY and another process is holding
      *     the lock; something needs to be done so an APR app can
@@ -70,6 +69,8 @@ APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
      */
     if (apr_os_level >= APR_WIN_NT) {
         /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
+        OVERLAPPED offset;
+        memset (&offset, 0, sizeof(offset));
         if (!LockFileEx(thefile->filehand, flags, 0, len, len, &offset))
             return apr_get_os_error();
     }
@@ -83,13 +84,12 @@ APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
 
 APR_DECLARE(apr_status_t) apr_file_unlock(apr_file_t *thefile)
 {
-    OVERLAPPED offset;
     DWORD len = 0xffffffff;
-
-    memset (&offset, 0, sizeof(offset));
 
     if (apr_os_level >= APR_WIN_NT) {
         /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
+        OVERLAPPED offset;
+        memset (&offset, 0, sizeof(offset));
         if (!UnlockFileEx(thefile->filehand, 0, len, len, &offset))
             return apr_get_os_error();
     }
