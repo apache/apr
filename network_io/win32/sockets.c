@@ -292,7 +292,7 @@ ap_status_t ap_get_os_sock(struct socket_t *sock, ap_os_sock_t *thesock)
     if (sock == NULL) {
         return APR_ENOSOCKET;
     }
-    thesock = &(sock->sock);
+    *thesock = sock->sock;
     return APR_SUCCESS;
 }
 
