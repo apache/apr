@@ -58,6 +58,14 @@
 
 #include <socket.h>
 #include <netdb.h>
+
+/* The definition of isascii was missed from the PowerPC ctype.h
+ *
+ * It will be included in the next release, but until then... */
+#if __POWER_PC__
+#define iasascii(c) (((c) & ~0x7f)==0)
+#endif
+
 #include "apr_general.h"
 #include <ByteOrder.h> /* for the ntohs definition */
 
