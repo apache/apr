@@ -155,6 +155,8 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-dec-osf*)
 	APR_ADDTO(CPPFLAGS, [-DOSF1])
+        # process-shared mutexes don't seem to work in Tru64 5.0
+        APR_SETIFNULL(apr_cv_process_shared_works, [no])
 	;;
     *-nto-qnx*)
 	;;

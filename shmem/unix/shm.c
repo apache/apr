@@ -139,7 +139,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 
         new_m->base = mmap(NULL, new_m->realsize, PROT_READ|PROT_WRITE,
                            MAP_SHARED, tmpfd, 0);
-        if (new_m->base == MAP_FAILED) {
+        if (new_m->base == (void *)MAP_FAILED) {
             return errno;
         }
 
@@ -161,7 +161,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #elif APR_USE_SHMEM_MMAP_ANON
         new_m->base = mmap(NULL, new_m->realsize, PROT_READ|PROT_WRITE,
                            MAP_ANON|MAP_SHARED, -1, 0);
-        if (new_m->base == MAP_FAILED) {
+        if (new_m->base == (void *)MAP_FAILED) {
             return errno;
         }
 
