@@ -76,7 +76,8 @@
 
 apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
 {
-#if defined(WIN32) && APR_HAS_UNICODE_FS
+#ifdef WIN32 /* this test is only good until some other platform trys wchar* */
+#if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
     if (!apr_get_oslevel(thefile->cntxt, &os_level) && os_level >= APR_WIN_NT)
     {
@@ -91,10 +92,12 @@ apr_status_t apr_get_filename(char **fname, apr_file_t *thefile)
             return APR_ENAMETOOLONG;
     }
     else
+#else /* !APR_HAS_UNICODE_FS */
         *fname = apr_pstrdup(thefile->cntxt, thefile->n.fname);
-#else
-        *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
 #endif
+#else /* !def Win32 */
+        *fname = apr_pstrdup(thefile->cntxt, thefile->fname);
+#endif 
     return APR_SUCCESS;
 }
 
