@@ -121,7 +121,8 @@ APR_DECLARE(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts,
                 return (APR_BADARG);
             }
             if (os->errfn) {
-                (os->errfn)(os->errarg, "%s: option requires an argument -- %c\n",
+                (os->errfn)(os->errarg, 
+                            "%s: option requires an argument -- %c\n",
                             apr_filename_of_pathname(*os->argv), os->opt);
             }
             *optch = os->opt;
@@ -237,6 +238,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
             for (i = 0; ; i++) {
                 if (opts[i].optch == 0)             /* No match */
                     return serr(os, "invalid option", p - 2, APR_BADCH);
+
                 if (opts[i].name) {
                     len = strlen(opts[i].name);
                     if (strncmp(p, opts[i].name, len) == 0
@@ -247,26 +249,31 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
             *optch = opts[i].optch;
 
             if (opts[i].has_arg) {
-                if (p[len] == '=')              /* Argument inline */
+                if (p[len] == '=')             /* Argument inline */
                     *optarg = p + len + 1;
-                else if (os->ind >= os->argc)   /* Argument missing */
-                    return serr(os, "missing argument", p - 2, APR_BADARG);
-                else                            /* Argument in next arg */
-                    *optarg = os->argv[os->ind++];
+                else { 
+                    if (os->ind >= os->argc)   /* Argument missing */
+                        return serr(os, "missing argument", p - 2, APR_BADARG);
+                    else                       /* Argument in next arg */
+                        *optarg = os->argv[os->ind++];
+                }
             } else {
-            *optarg = NULL;
+                *optarg = NULL;
                 if (p[len] == '=')
                     return serr(os, "erroneous argument", p - 2, APR_BADARG);
             }
             permute(os);
             return APR_SUCCESS;
-        } else if (*p == '-') {                 /* Bare "--"; we're done */
-            permute(os);
-            os->ind = os->skip_start;
-            return APR_EOF;
+        } else {
+            if (*p == '-') {                 /* Bare "--"; we're done */
+                permute(os);
+                os->ind = os->skip_start;
+                return APR_EOF;
+            }
+            else 
+                if (*p == '\0')                    /* Bare "-" is illegal */
+                    return serr(os, "invalid option", p, APR_BADCH);
         }
-        else if (*p == '\0')                    /* Bare "-" is illegal */
-            return serr(os, "invalid option", p, APR_BADCH);
     }
 
     /*
@@ -276,6 +283,7 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
     for (i = 0; ; i++) {
         if (opts[i].optch == 0)                     /* No match */
             return cerr(os, "invalid option character", *p, APR_BADCH);
+
         if (*p == opts[i].optch)
             break;
     }
@@ -284,10 +292,12 @@ APR_DECLARE(apr_status_t) apr_getopt_long(apr_getopt_t *os,
     if (opts[i].has_arg) {
         if (*p != '\0')                         /* Argument inline */
             *optarg = p;
-        else if (os->ind >= os->argc)           /* Argument missing */
-            return cerr(os, "missing argument", *optch, APR_BADARG);
-        else                                    /* Argument in next arg */
-            *optarg = os->argv[os->ind++];
+        else { 
+            if (os->ind >= os->argc)           /* Argument missing */
+                return cerr(os, "missing argument", *optch, APR_BADARG);
+            else                               /* Argument in next arg */
+                *optarg = os->argv[os->ind++];
+        }
         os->place = EMSG;
     } else {
         *optarg = NULL;
