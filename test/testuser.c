@@ -88,7 +88,21 @@ static void username(CuTest *tc)
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
     CuAssertIntEquals(tc, APR_SUCCESS, apr_uid_compare(uid, retreived_uid));
-    CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
+    if (!gid || !retreived_gid) {
+        /* The function had no way to recover the gid (this would have been
+         * an ENOTIMPL if apr_uid_ functions didn't try to double-up and
+         * also return apr_gid_t values, which was bogus.
+         */
+        if (!gid) {
+            CuNotImpl(tc, "Groups from apr_uid_current");
+        }
+        else {
+            CuNotImpl(tc, "Groups from apr_uid_get");
+        }        
+    }
+    else {
+        CuAssertIntEquals(tc, APR_SUCCESS, apr_gid_compare(gid, retreived_gid));
+    }
 }
 
 static void groupname(CuTest *tc)
