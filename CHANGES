@@ -1,5 +1,9 @@
 Changes with APR 0.9.2
 
+  *) Fix APR_LAYOUT to work with layout files with no preceding blank lines
+     and emit errors when layout is not found.  PR 15679.
+     [Justin Erenkrantz]
+
   *) Add functions apr_filepath_list_split and apr_filepath_list_merge
      for managing search paths.  [Branko Cibej]
 
