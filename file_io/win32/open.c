@@ -153,7 +153,12 @@ apr_status_t unicode_to_utf8_path(char* retstr, apr_size_t retlen,
 apr_status_t file_cleanup(void *thefile)
 {
     apr_file_t *file = thefile;
+    apr_status_t flush_rv = APR_SUCCESS;
+
     if (file->filehand != INVALID_HANDLE_VALUE) {
+        if (file->buffered) {
+            flush_rv = apr_file_flush((apr_file_t *)thefile);
+        }
         CloseHandle(file->filehand);
         file->filehand = INVALID_HANDLE_VALUE;
     }
@@ -161,7 +166,7 @@ apr_status_t file_cleanup(void *thefile)
         CloseHandle(file->pOverlapped->hEvent);
         file->pOverlapped = NULL;
     }
-    return APR_SUCCESS;
+    return flush_rv;
 }
 
 APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
