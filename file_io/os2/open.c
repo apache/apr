@@ -246,7 +246,7 @@ apr_status_t apr_eof(apr_file_t *fptr)
 
 apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
-    int fd = 2;
+    apr_os_file_t fd = 2;
 
     return apr_put_os_file(thefile, &fd, cont);
 }
@@ -255,7 +255,7 @@ apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 
 apr_status_t apr_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
 {
-    int fd = 1; /* Is this correct? */
+    apr_os_file_t fd = 1;
 
     return apr_put_os_file(thefile, &fd, cont);
 }
