@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "atime.h"
+#include "win32/atime.h"
 #include "apr_portable.h"
 
 APR_DECLARE_DATA const char apr_month_snames[12][4] =
