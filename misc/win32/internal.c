@@ -55,7 +55,9 @@
 #include "apr_private.h"
 
 #include "misc.h"
-
+#include "fileio.h"
+#include <crtdbg.h>
+#include <assert.h>
 
 /* This module is the source of -static- helper functions that are
  * entirely internal to apr.  If the fn is exported - it does not

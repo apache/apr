@@ -201,9 +201,7 @@ FARPROC apr_load_dll_func(apr_dlltoken_e fnLib, char* fnName, int ordinal)
 }
 
 /* Declared in include/arch/win32/apr_dbg_win32_handles.h
- *
- * apr_dbg_log is a Win32 specific helper to debug handle activity, logging
- * either the HANDLE ha argument 
+ */
 APR_DECLARE_NONSTD(HANDLE) apr_dbg_log(char* fn, HANDLE ha, char* fl, int ln, 
                                        int nh, /* HANDLE hv, char *dsc */...)
 {
