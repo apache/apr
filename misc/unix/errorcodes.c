@@ -54,17 +54,6 @@
 
 #include "misc.h"
 
-#ifdef WIN32
-#error "not implemented yet"
-#elif OS2
-const char *ap_os_strerror(int err, ap_pool_t *p);
-#define SYS_ERR_STRING(code, p) { errstr = ap_os_strerror(code, p); }
-#elif BEOS    
-#error "not implemented yet"
-#else
-#define SYS_ERR_STRING(code, str, p) \
-    if (1) str = strerror(code); else
-#endif
 
 static const char *apr_error_string(ap_status_t statcode)
 {
@@ -144,6 +133,16 @@ static const char *apr_error_string(ap_status_t statcode)
     }
 }
 
+#ifdef WIN32
+#error "not implemented yet"
+#elif OS2
+static const char *apr_os_strerror(int err, ap_pool_t *p);
+#elif BEOS    
+#error "not implemented yet"
+#else
+#define apr_os_strerror(err, p)		strerror(err)
+#endif
+
 const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
 {
     if (statcode < APR_OS_START_ERROR) {
@@ -156,9 +155,7 @@ const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
         return "APR does not understand this error code";
     }
     else {
-        const char *errstr;
-        SYS_ERR_STRING(statcode - APR_OS_START_SYSERR, errstr, p);
-        return errstr;
+	return apr_os_strerror(statcode - APR_OS_START_SYSERR, p);
     }
 }
 
@@ -169,7 +166,7 @@ const char *ap_strerror(ap_status_t statcode, ap_pool_t *p)
 #include <os2.h>
 #include <ctype.h>
 
-const char *ap_os_strerror(int err, ap_pool_t *p)
+static const char *apr_os_strerror(int err, ap_pool_t *p)
 {
   char result[200];
   unsigned char message[HUGE_STRING_LEN];
@@ -180,7 +177,8 @@ const char *ap_os_strerror(int err, ap_pool_t *p)
   if (err >= 10000 && err < 12000) {  /* socket error codes */
       return strerror(ap_canonical_error(err+APR_OS_START_SYSERR));
   } 
-  else if (DosGetMessage(NULL, 0, message, HUGE_STRING_LEN, err, "OSO001.MSG", &len) == 0) {
+  else if (DosGetMessage(NULL, 0, message, HUGE_STRING_LEN, err,
+			 "OSO001.MSG", &len) == 0) {
       len--;
       message[len] = 0;
       pos = result;
@@ -189,7 +187,8 @@ const char *ap_os_strerror(int err, ap_pool_t *p)
         len = sizeof(result-1);
 
       for (c=0; c<len; c++) {
-          while (ap_isspace(message[c]) && ap_isspace(message[c+1])) /* skip multiple whitespace */
+	  /* skip multiple whitespace */
+          while (ap_isspace(message[c]) && ap_isspace(message[c+1]))
               c++;
           *(pos++) = ap_isspace(message[c]) ? ' ' : message[c];
       }
