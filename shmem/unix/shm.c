@@ -189,7 +189,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
         /* metadata isn't usable */
-        new_m->usable = new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_owner,
                                   apr_pool_cleanup_null);
@@ -345,7 +345,7 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         /* store the real size in the metadata */
         *(apr_size_t*)(new_m->base) = new_m->realsize;
         /* metadata isn't usable */
-        new_m->usable = new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_owner,
                                   apr_pool_cleanup_null);
@@ -508,7 +508,7 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
         }
 
         /* metadata isn't part of the usable segment */
-        new_m->usable = new_m->base + sizeof(apr_size_t);
+        new_m->usable = (char *)new_m->base + sizeof(apr_size_t);
 
         apr_pool_cleanup_register(new_m->pool, new_m, shm_cleanup_attach,
                                   apr_pool_cleanup_null);
