@@ -177,8 +177,8 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *a, ...)
     return res;
 }
 
-APR_DECLARE_NONSTD(char *) apr_pstrcatv(apr_pool_t *a, const struct iovec *vec,
-                                        apr_size_t nvec, apr_size_t *nbytes)
+APR_DECLARE(char *) apr_pstrcatv(apr_pool_t *a, const struct iovec *vec,
+                                 apr_size_t nvec, apr_size_t *nbytes)
 {
     apr_size_t i;
     apr_size_t len;

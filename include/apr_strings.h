@@ -179,8 +179,8 @@ APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
  * @param nbytes (output) strlen of new string (pass in NULL to omit)
  * @return The new string
  */
-APR_DECLARE_NONSTD(char *) apr_pstrcatv(apr_pool_t *p, const struct iovec *vec,
-                                        apr_size_t nvec, apr_size_t *nbytes);
+APR_DECLARE(char *) apr_pstrcatv(apr_pool_t *p, const struct iovec *vec,
+                                 apr_size_t nvec, apr_size_t *nbytes);
 
 /**
  * printf-style style printing routine.  The data is output to a string 
