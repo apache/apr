@@ -81,6 +81,8 @@
 #include "apr.h"
 #include "apr_errno.h"
 #include "apr_pools.h"
+#define APR_WANT_IOVEC
+#include "apr_want.h"
 
 #if APR_HAVE_STDARG_H
 #include <stdarg.h>
@@ -168,6 +170,17 @@ APR_DECLARE(void *) apr_pmemdup(apr_pool_t *p, const void *m, apr_size_t n);
  * @return The new string
  */
 APR_DECLARE_NONSTD(char *) apr_pstrcat(apr_pool_t *p, ...);
+
+/**
+ * Concatenate multiple strings specified in a writev-style vector
+ * @param p The pool from which to allocate
+ * @param vec The strings to concatenate
+ * @param nvec The number of strings to concatenate
+ * @param nbytes (output) strlen of new string (pass in NULL to omit)
+ * @return The new string
+ */
+APR_DECLARE_NONSTD(char *) apr_pstrcatv(apr_pool_t *p, const struct iovec *vec,
+                                        apr_size_t nvec, apr_size_t *nbytes);
 
 /**
  * printf-style style printing routine.  The data is output to a string 
