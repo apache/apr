@@ -130,3 +130,5 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_destroy(apr_thread_rwlock_t *rwlock)
     return apr_pool_cleanup_run(rwlock->pool, rwlock, thread_rwlock_cleanup);
 }
 
+APR_POOL_IMPLEMENT_ACCESSOR(thread_rwlock)
+
