@@ -230,7 +230,7 @@ AC_SUBST(have_sigaction)
 AC_SUBST(iconv)
 AC_SUBST(mmap)
 AC_SUBST(have_memmove)
-AC_SUBST(have_bcopy)
+AC_SUBST(have_bzero)
 
 dnl #----------------------------- Checks for Any required Headers
 AC_HEADER_STDC
