@@ -243,7 +243,7 @@ YES_IS_DEFINED
     done
   ])
   if test "$ac_cv_define_$1" = "yes"; then
-    AC_DEFINE(HAVE_$1)
+    AC_DEFINE(HAVE_$1, 1, [Define if $1 is defined])
   fi
 ])
 
@@ -469,7 +469,7 @@ main()
     ac_cv_strerror_r_rc_int=no ], [
     ac_cv_strerror_r_rc_int=no ] )
 if test "x$ac_cv_strerror_r_rc_int" = xyes; then
-  AC_DEFINE(STRERROR_R_RC_INT)
+  AC_DEFINE(STRERROR_R_RC_INT, 1, [Define if strerror returns int])
   msg="int"
 else
   msg="pointer"
