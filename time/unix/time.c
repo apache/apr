@@ -84,6 +84,15 @@ static apr_int32_t get_offset(struct tm *tm)
 #elif defined(HAVE___OFFSET)
     return tm->__tm_gmtoff;
 #else
+#ifdef NETWARE
+    /* Need to adjust the global variable each time otherwise
+        the web server would have to be restarted when daylight
+        savings changes.
+    */
+    if (daylightOnOff) {
+        return server_gmt_offset + daylightOffset;
+    }
+#endif
     return server_gmt_offset;
 #endif
 }
@@ -156,7 +165,7 @@ APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result, apr_time_
 
 APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result, apr_time_t input)
 {
-#if defined(__EMX__) || defined(NETWARE)
+#if defined(__EMX__)
     /* EMX gcc (OS/2) has a timezone global we can use */
     return apr_explode_time(result, input, -timezone);
 #else
@@ -342,3 +351,11 @@ APR_DECLARE(void) apr_unix_setup_time(void)
     server_gmt_offset = (apr_int32_t) difftime(t1, t2) + (was_dst ? 3600 : 0);
 #endif
 }
+
+#ifdef NETWARE
+APR_DECLARE(void) apr_netware_setup_time(void)
+{
+    tzset();
+    server_gmt_offset = -timezone;
+}
+#endif
