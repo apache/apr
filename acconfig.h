@@ -27,7 +27,6 @@
 @TOP@
 
 /* Various #defines we need to know about */
-#undef HAVE_STRUCT_UNION_SEMUN
 #undef HAVE_LOCK_EX
 #undef HAVE_F_SETLK
 #undef HAVE_PTHREAD_PROCESS_SHARED

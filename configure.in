@@ -221,6 +221,7 @@ AC_CHECK_HEADERS(netdb.h)
 AC_CHECK_HEADERS(osreldate.h)
 AC_CHECK_HEADERS(process.h)
 AC_CHECK_HEADERS(pwd.h)
+AC_CHECK_HEADERS(sys/sem.h)
 AC_CHECK_HEADERS(setjmp.h)
 AC_CHECK_HEADERS(signal.h)
 AC_CHECK_HEADERS(stdarg.h, stdargh="1", stdargh="0")
@@ -285,10 +286,12 @@ AC_TRY_COMPILE([
 ],[
 union semun arg;
 semctl(0, 0, 0, arg);
-], [AC_DEFINE(HAVE_STRUCT_UNION_SEMUN) union_semun=yes]
-msg=yes,dnl
-msg=no)
+], [have_union_semun="1" union_semun=yes ]
+msg=yes, [
+have_union_semun="0"
+msg=no ] )
 AC_MSG_RESULT([$msg])
+AC_SUBST(have_union_semun)
 
 AC_MSG_CHECKING(looking for in_addr in netinet/in.h)
 AC_TRY_COMPILE([
