@@ -1,6 +1,10 @@
 # Based on apr's make_export.awk, which is
 # based on Ryan Bloom's make_export.pl
 
+BEGIN {
+    printf(" (APRLIB)\n")
+}
+
 # List of functions that we don't support, yet??
 #/apr_##name##_set_inherit/{next}
 #/apr_##name##_unset_inherit/{next}
@@ -53,6 +57,7 @@ function add_symbol (sym_name) {
        gsub( /\[.*\]/, "", varname);
        add_symbol(varname);
 }
+
 
 #END {
 #	printf(" %s", line)
