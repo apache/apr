@@ -257,6 +257,22 @@ apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
+apr_status_t apr_mask_poll_socket(apr_pollfd_t *aprset, 
+                                  apr_socket_t *sock, 
+                                  apr_int16_t events)
+{
+    if (events & APR_POLLIN) {
+        FD_CLR(sock->socketdes, aprset->read);
+    }
+    if (events & APR_POLLPRI) {
+        FD_CLR(sock->socketdes, aprset->except);
+    }
+    if (events & APR_POLLOUT) {
+        FD_CLR(sock->socketdes, aprset->write);
+    }
+    return APR_SUCCESS;
+}
+
 apr_status_t apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds, 
 		    apr_interval_time_t timeout)
 {
