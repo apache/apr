@@ -1,5 +1,11 @@
 Changes with APR 0.9.5
 
+  *) Ensure that apr_sockaddr_info_get() does not return anything
+     other than AF_INET and AF_INET6 addresses.  [Joe Orton]
+
+  *) Clarify that apr_dir_read() does not guarantee order of returned
+     entries as previously claimed.  [Joe Orton]
+
   *) The whole codebase was relicensed and is now available under
      the Apache License, Version 2.0 (http://www.apache.org/licenses).
      [Apache Software Foundation]

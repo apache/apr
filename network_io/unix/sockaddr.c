@@ -380,7 +380,17 @@ static apr_status_t call_resolver(apr_sockaddr_t **sa,
     prev_sa = NULL;
     ai = ai_list;
     while (ai) { /* while more addresses to report */
-        apr_sockaddr_t *new_sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
+        apr_sockaddr_t *new_sa;
+
+        /* Ignore anything bogus: getaddrinfo in some old versions of
+         * glibc will return AF_UNIX entries for AF_UNSPEC+AI_PASSIVE
+         * lookups. */
+        if (ai->ai_family != AF_INET && ai->ai_family != AF_INET6) {
+            ai = ai->ai_next;
+            continue;
+        }
+
+        new_sa = apr_pcalloc(p, sizeof(apr_sockaddr_t));
 
         new_sa->pool = p;
         memcpy(&new_sa->sa, ai->ai_addr, ai->ai_addrlen);
