@@ -75,6 +75,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *ctx)
 {
     HINSTANCE os_handle;
+    apr_status_t rv;
     UINT em;
 
 #if APR_HAS_UNICODE_FS
@@ -82,16 +83,19 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
     if (!apr_get_oslevel(ctx, &os_level) && os_level >= APR_WIN_NT) 
     {
         apr_wchar_t wpath[APR_PATH_MAX];
-        apr_status_t rv;
-        if (rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
-                                              / sizeof(apr_wchar_t), path)) {
-            return rv;
+        if ((rv = utf8_to_unicode_path(wpath, sizeof(wpath) 
+                                            / sizeof(apr_wchar_t), path))
+                != APR_SUCCESS) {
+            *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
+            return ((*res_handle)->load_error = rv);
         }
         /* Prevent ugly popups from killing our app */
         em = SetErrorMode(SEM_FAILCRITICALERRORS);
         os_handle = LoadLibraryExW(wpath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
         if (!os_handle)
             os_handle = LoadLibraryExW(wpath, NULL, 0);
+        if (!os_handle)
+            rv = apr_get_os_error();
         SetErrorMode(em);
     }
     else
@@ -105,7 +109,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
          * that backslashes must be used for the LoadLibrary family of calls.
          */
         apr_cpystrn(fspec, path, sizeof(fspec));
-        while (p = strchr(p, '/'))
+        while ((p = strchr(p, '/')) != NULL)
             *p = '\\';
         
         /* Prevent ugly popups from killing our app */
@@ -113,13 +117,14 @@ APR_DECLARE(apr_status_t) apr_dso_load(struct apr_dso_handle_t **res_handle,
         os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
         if (!os_handle)
             os_handle = LoadLibraryEx(path, NULL, 0);
+        if (!os_handle)
+            rv = apr_get_os_error();
         SetErrorMode(em);
     }
     *res_handle = apr_pcalloc(ctx, sizeof(**res_handle));
 
-    if(os_handle == NULL) {
-        (*res_handle)->load_error = apr_get_os_error();
-        return (*res_handle)->load_error;
+    if (rv) {
+        return ((*res_handle)->load_error = rv);
     }
 
     (*res_handle)->handle = (void*)os_handle;
@@ -140,13 +145,11 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
                          struct apr_dso_handle_t *handle, 
                          const char *symname)
 {
-    FARPROC retval = GetProcAddress(handle->handle, symname);
-    if (!retval) {
+    *ressym = (apr_dso_handle_sym_t)GetProcAddress(handle->handle, symname);
+
+    if (!*ressym) {
         return apr_get_os_error();
     }
-    
-    *ressym = retval;
-    
     return APR_SUCCESS;
 }
 

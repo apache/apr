@@ -279,7 +279,8 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
     apr_size_t len=0, i;
 
 #ifndef NETWARE
-    len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+    len = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM 
+                      | FORMAT_MESSAGE_IGNORE_INSERTS,
                         NULL,
                         errcode,
                         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), /* Default language */
@@ -315,7 +316,7 @@ static char *apr_os_strerror(char *buf, apr_size_t bufsize, apr_status_t errcode
     else {
         /* Windows didn't provide us with a message.  Even stuff like                    * WSAECONNREFUSED won't get a message.
          */
-        apr_cpystrn(buf, "Unrecognized error code", bufsize);
+        apr_snprintf(buf, bufsize, "Unrecognized Win32 error code %d", errcode);
     }
 
     return buf;
