@@ -63,3 +63,4 @@ testglobalmutex
 testvsn
 testregex
 testmutexscope
+testtable
