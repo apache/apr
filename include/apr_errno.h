@@ -259,6 +259,7 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  * APR_EINCOMPLETE    The given path was neither relative nor absolute.
  * APR_EABOVEROOT     The given path was above the root path.
  * APR_EBUSY          The given lock was busy.
+ * APR_EPROC_UNKNOWN  The given process wasn't recognized by APR
  * </PRE>
  * @{
  */
@@ -312,6 +313,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EPATHWILD      (APR_OS_START_ERROR + 25)
 /** @see APR_STATUS_IS_ESYMNOTFOUND */
 #define APR_ESYMNOTFOUND   (APR_OS_START_ERROR + 26)
+/** @see APR_STATUS_IS_EPROC_UNKNOWN */
+#define APR_EPROC_UNKNOWN  (APR_OS_START_ERROR + 27)
 
 /* APR ERROR VALUE TESTS */
 /** 
@@ -396,6 +399,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #else
 #define APR_STATUS_IS_ESYMNOTFOUND(s)   ((s) == APR_ESYMNOTFOUND)
 #endif
+/** The given process was not recognized by APR. */
+#define APR_STATUS_IS_EPROC_UNKNOWN(s)  ((s) == APR_EPROC_UNKNOWN)
 
 /* APR STATUS VALUES */
 /** @see APR_STATUS_IS_INCHILD */
