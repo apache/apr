@@ -1,5 +1,29 @@
-Changes with APR b1
+Changes with APR b1  
 
+  *) Abstracted apr_get_username and apr_get_groupname for unix and win32.
+     Modified Win32 apr_uid_t and apr_gid_t to use PSIDs, and elimintated
+     the uid_t and gid_t definitions.
+
+  *) Radically refactored apr_stat/lstat/getfileinfo/dir_read for Win32
+     to assure we are retrieving what we expect to retrieve, and reporting
+     the correct result (APR_SUCCESS or APR_INCOMPLETE).  The potential
+     for a bit more optimization still remains.  [William Rowe]
+
+  *) While we have the future opportunity to cache the apr_stat'ed file
+     handle for a very fast open (dup handle) on Win32, patched to close
+     that file after a stat always.  Needs a new semantic before we leave
+     handles dangling when the user intends to rm.  [William Rowe]
+
+  *) Correct Win32 apr_stat/lstat/getfileinfo/dir_read to all zero out
+     the finfo buffer on success (or incomplete success).  [William Rowe]
+
+  *) Fix Win32/Unix apr_lstat to throw the .valid bit APR_FINFO_LINK to
+     indicate we attempted to open the link.  Only the .filetype APR_LNK
+     reflects if the file found was, in fact, a link.   [William Rowe]
+
+  *) Fixed apr_open and apr_rename to function on Win9x.
+     [Mike Pilato <cmpilato@collab.net>] 
+  
   *) Add apr_open_stdout.  This mirrors apr_open_stderr, except it works
      on stdout.  [cmpilato@collab.net]
 
