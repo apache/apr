@@ -76,9 +76,10 @@ static apr_status_t socket_cleanup(void *sock)
     return APR_SUCCESS;
 }
 
-static void set_socket_vars(apr_socket_t *sock, int family, int type)
+static void set_socket_vars(apr_socket_t *sock, int family, int type, int protocol)
 {
     sock->type = type;
+    sock->protocol = protocol;
     apr_sockaddr_vars_set(sock->local_addr, family, 0);
     apr_sockaddr_vars_set(sock->remote_addr, family, 0);
 }                                                                                                  
@@ -94,8 +95,16 @@ static void alloc_socket(apr_socket_t **new, apr_pool_t *p)
     (*new)->remote_addr->pool = p;
 }
 
-APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
-                                            int type, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_socket_protocol_get(apr_socket_t *sock,
+                                                  int *protocol)
+{
+    *protocol = sock->protocol;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_socket_create_ex(apr_socket_t **new, int family,
+                                               int type, int protocol, 
+                                               apr_pool_t *cont)
 {
     int downgrade = (family == AF_UNSPEC);
 
@@ -112,11 +121,11 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
     /* For right now, we are not using socket groups.  We may later.
      * No flags to use when creating a socket, so use 0 for that parameter as well.
      */
-    (*new)->socketdes = socket(family, type, 0);
+    (*new)->socketdes = socket(family, type, protocol);
 #if APR_HAVE_IPV6
     if ((*new)->socketdes == INVALID_SOCKET && downgrade) {
         family = AF_INET;
-        (*new)->socketdes = socket(family, type, 0);
+        (*new)->socketdes = socket(family, type, protocol);
     }
 #endif
 
@@ -159,7 +168,7 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
 
 #endif /* def WIN32 */
 
-    set_socket_vars(*new, family, type);
+    set_socket_vars(*new, family, type, protocol);
 
     (*new)->timeout = -1;
     (*new)->disconnected = 0;
@@ -169,6 +178,12 @@ APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
 
     return APR_SUCCESS;
 } 
+
+APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new, int family,
+                                            int type, apr_pool_t *cont)
+{
+    return apr_socket_create_ex(new, family, type, protocol, cont);
+}
 
 APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
                                        apr_shutdown_how_e how)
@@ -246,7 +261,8 @@ APR_DECLARE(apr_status_t) apr_accept(apr_socket_t **new, apr_socket_t *sock,
     }
 
     alloc_socket(new, p);
-    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM);
+    set_socket_vars(*new, sock->local_addr->sa.sin.sin_family, SOCK_STREAM, 
+                    sock->protocol);
 
     (*new)->timeout = -1;   
     (*new)->disconnected = 0;
@@ -408,7 +424,11 @@ APR_DECLARE(apr_status_t) apr_os_sock_make(apr_socket_t **apr_sock,
                                            apr_pool_t *cont)
 {
     alloc_socket(apr_sock, cont);
-    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type);
+#ifdef APR_ENABLE_FOR_1_0 /* no protocol field yet */
+    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type, 0);
+#else
+    set_socket_vars(*apr_sock, os_sock_info->family, os_sock_info->type, os_sock_info->protocol);
+#endif
     (*apr_sock)->timeout = -1;
     (*apr_sock)->disconnected = 0;
     (*apr_sock)->socketdes = *os_sock_info->os_sock;
@@ -446,7 +466,7 @@ APR_DECLARE(apr_status_t) apr_os_sock_put(apr_socket_t **sock,
         alloc_socket(sock, cont);
         /* XXX figure out the actual socket type here */
         /* *or* just decide that apr_os_sock_put() has to be told the family and type */
-        set_socket_vars(*sock, AF_INET, SOCK_STREAM);
+        set_socket_vars(*sock, AF_INET, SOCK_STREAM, APR_PROTO_TCP);
         (*sock)->timeout = -1;
         (*sock)->disconnected = 0;
     }

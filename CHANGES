@@ -1,5 +1,10 @@
 Changes with APR 0.9.2
 
+  *) Add apr_socket_create_ex() to allow protocol to be specified for the
+     socket.  With APR 1.0, this function will be removed and apr_socket_create()
+     will have the additional parameter.
+     [Randall Stewart <randall@stewart.chicago.il.us>]
+
   *) Fix the detection of INT64_C() when defined in <stdint.h>.
      [Joe Orton <joe@manyfish.co.uk>]
 

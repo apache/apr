@@ -62,6 +62,7 @@ struct apr_socket_t {
     apr_pool_t         *cntxt;
     SOCKET              socketdes;
     int                 type; /* SOCK_STREAM, SOCK_DGRAM */
+    int                 protocol;
     apr_sockaddr_t     *local_addr;
     apr_sockaddr_t     *remote_addr;
     int                 timeout_ms; /* MUST MATCH if timeout > 0 */
