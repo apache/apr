@@ -163,7 +163,8 @@ void ap_register_other_child(ap_proc_t *pid,
                              void (*maintenance) (int reason, void *),
                              void *data, int write_fd, ap_context_t *p);
 void ap_unregister_other_children(void *data);
-ap_status_t reap_other_child(ap_proc_t *pid); 
+ap_status_t ap_reap_other_child(ap_proc_t *pid); 
+void ap_check_other_child(void); 
 
 ap_status_t ap_kill(ap_proc_t *proc, int sig);
 #ifdef __cplusplus
