@@ -107,7 +107,7 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
                                        const char *path, apr_pool_t *pool)
 {
 
-    void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+    void *os_handle = dlopen(path, RTLD_NOW | RTLD_LOCAL);
 
     *res_handle = apr_pcalloc(pool, sizeof(**res_handle));
 
