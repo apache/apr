@@ -1218,6 +1218,7 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
                     s = "bogus %p";
                     s_len = 8;
                     prefix_char = NUL;
+                    (void)va_arg(ap, void *); /* skip the bogus argument on the stack */
                     break;
                 }
                 break;
