@@ -77,16 +77,16 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     sec.lpSecurityDescriptor = NULL;
 
     if (scope == APR_CROSS_PROCESS || scope == APR_LOCKALL) {
-        sec.bInheritHandle = TRUE;
+        sec.bInheritHandle = APR_TRUE;
     }
     else {
-        sec.bInheritHandle = FALSE;
+        sec.bInheritHandle = APR_FALSE;
     }
 
     if (scope == APR_INTRAPROCESS) {
         InitializeCriticalSection(&newlock->section);
     } else {
-        newlock->mutex = CreateMutex(&sec, FALSE, fname);
+        newlock->mutex = CreateMutex(&sec, APR_FALSE, fname);
     }
     *lock = newlock;
     return APR_SUCCESS;
@@ -104,7 +104,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
         return APR_ENOMEM;
     }
     (*lock)->fname = ap_pstrdup(cont, fname);
-    (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, TRUE, fname);
+    (*lock)->mutex = OpenMutex(MUTEX_ALL_ACCESS, APR_TRUE, fname);
     
     if ((*lock)->mutex == NULL) {
         return APR_EEXIST;

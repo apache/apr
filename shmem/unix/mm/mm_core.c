@@ -73,7 +73,7 @@ static size_t mm_core_mapoffset = 1024*1024*1; /* we share with other apps */
 
 static void mm_core_init(void)
 {
-    static int initialized = FALSE;
+    static int initialized = APR_FALSE;
     if (!initialized) {
 #if defined(MM_SEMT_FCNTL)
         mm_core_dolock_rd.l_whence   = SEEK_SET; /* from current point */
@@ -103,7 +103,7 @@ static void mm_core_init(void)
         mm_core_dounlock[0].sem_op  = -1;
         mm_core_dounlock[0].sem_flg = SEM_UNDO;
 #endif
-        initialized = TRUE;
+        initialized = APR_TRUE;
     }
     return;
 }
@@ -519,7 +519,7 @@ int mm_core_lock(const void *core, mm_lock_mode mode)
     int fdsem;
 
     if (core == NULL)
-        return FALSE;
+        return APR_FALSE;
     mc = (mem_core *)((char *)core-SIZEOF_mem_core);
 #if !defined(MM_SEMT_FLOCK)
     fdsem = mc->mc_fdsem;
@@ -566,10 +566,10 @@ int mm_core_lock(const void *core, mm_lock_mode mode)
 
     if (rc < 0) {
         ERR(MM_ERR_CORE|MM_ERR_SYSTEM, "Failed to lock");
-        rc = FALSE;
+        rc = APR_FALSE;
     }
     else
-        rc = TRUE;
+        rc = APR_TRUE;
     return rc;
 }
 
@@ -580,7 +580,7 @@ int mm_core_unlock(const void *core)
     int fdsem;
 
     if (core == NULL)
-        return FALSE;
+        return APR_FALSE;
     mc = (mem_core *)((char *)core-SIZEOF_mem_core);
 #if !defined(MM_SEMT_FLOCK)
     fdsem = mc->mc_fdsem;
@@ -616,10 +616,10 @@ int mm_core_unlock(const void *core)
 
     if (rc < 0) {
         ERR(MM_ERR_CORE|MM_ERR_SYSTEM, "Failed to unlock");
-        rc = FALSE;
+        rc = APR_FALSE;
     }
     else
-        rc = TRUE;
+        rc = APR_TRUE;
     return rc;
 }
 

@@ -74,7 +74,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file, ap_pool_t *p)
         }
         if (!DuplicateHandle(hCurrentProcess, old_file->filehand, 
                              hCurrentProcess,
-                             &(*new_file)->filehand, 0, FALSE, 
+                             &(*new_file)->filehand, 0, APR_FALSE, 
                              DUPLICATE_SAME_ACCESS)) {
             return GetLastError();
         }

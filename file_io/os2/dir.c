@@ -82,7 +82,7 @@ ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cntxt)
         return APR_ENOMEM;
 
     thedir->handle = 0;
-    thedir->validentry = FALSE;
+    thedir->validentry = APR_FALSE;
     *new = thedir;
     ap_register_cleanup(cntxt, thedir, dir_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
@@ -122,11 +122,11 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
     }
 
     if (rv == 0 && entries == 1) {
-        thedir->validentry = TRUE;
+        thedir->validentry = APR_TRUE;
         return APR_SUCCESS;
     }
         
-    thedir->validentry = FALSE;
+    thedir->validentry = APR_FALSE;
     
     if (rv)
         return APR_OS2_STATUS(rv);

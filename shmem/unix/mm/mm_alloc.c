@@ -120,7 +120,7 @@ void mm_destroy(MM *mm)
 int mm_lock(MM *mm, mm_lock_mode mode)
 {
     if (mm == NULL)
-        return FALSE;
+        return APR_FALSE;
     return mm_core_lock((void *)mm, mode);
 }
 
@@ -130,7 +130,7 @@ int mm_lock(MM *mm, mm_lock_mode mode)
 int mm_unlock(MM *mm)
 {
     if (mm == NULL)
-        return FALSE;
+        return APR_FALSE;
     return mm_core_unlock((void *)mm);
 }
 

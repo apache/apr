@@ -91,7 +91,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
                 rc = DosRead(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead );
                 if (thefile->dataRead == 0) {
                     if (rc == 0)
-                        thefile->eof_hit = TRUE;
+                        thefile->eof_hit = APR_TRUE;
                     break;
                 }
                 thefile->filePtr += thefile->dataRead;
@@ -129,7 +129,7 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
         *nbytes = bytesread;
         
         if (bytesread == 0) {
-            thefile->eof_hit = TRUE;
+            thefile->eof_hit = APR_TRUE;
         }
 
         return APR_SUCCESS;
@@ -255,7 +255,7 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
     }
     
     if (bytesread == 0) {
-        thefile->eof_hit = TRUE;
+        thefile->eof_hit = APR_TRUE;
         return APR_EOF;
     }
     

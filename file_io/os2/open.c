@@ -79,8 +79,8 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
 
     *new = dafile;
     dafile->cntxt = cntxt;
-    dafile->isopen = FALSE;
-    dafile->eof_hit = FALSE;
+    dafile->isopen = APR_FALSE;
+    dafile->eof_hit = APR_FALSE;
     dafile->buffer = NULL;
     dafile->flags = flag;
     
@@ -137,13 +137,13 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     if (rv != 0)
         return APR_OS2_STATUS(rv);
     
-    dafile->isopen = TRUE;
+    dafile->isopen = APR_TRUE;
     dafile->fname = ap_pstrdup(cntxt, fname);
     dafile->filePtr = 0;
     dafile->bufpos = 0;
     dafile->dataRead = 0;
     dafile->direction = 0;
-    dafile->pipe = FALSE;
+    dafile->pipe = APR_FALSE;
 
     ap_register_cleanup(dafile->cntxt, dafile, apr_file_cleanup, ap_null_cleanup);
     return APR_SUCCESS;
@@ -161,7 +161,7 @@ ap_status_t ap_close(ap_file_t *file)
         rc = DosClose(file->filedes);
     
         if (rc == 0) {
-            file->isopen = FALSE;
+            file->isopen = APR_FALSE;
             status = APR_SUCCESS;
 
             if (file->flags & APR_DELONCLOSE) {
@@ -208,11 +208,11 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, ap_pool_t *c
         (*file)->cntxt = cont;
     }
     (*file)->filedes = *dafile;
-    (*file)->isopen = TRUE;
-    (*file)->buffered = FALSE;
-    (*file)->eof_hit = FALSE;
+    (*file)->isopen = APR_TRUE;
+    (*file)->buffered = APR_FALSE;
+    (*file)->eof_hit = APR_FALSE;
     (*file)->flags = 0;
-    (*file)->pipe = FALSE;
+    (*file)->pipe = APR_FALSE;
     return APR_SUCCESS;
 }    
 
@@ -237,11 +237,11 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
     (*thefile)->cntxt = cont;
     (*thefile)->filedes = 2;
     (*thefile)->fname = NULL;
-    (*thefile)->isopen = TRUE;
-    (*thefile)->buffered = FALSE;
-    (*thefile)->eof_hit = FALSE;
+    (*thefile)->isopen = APR_TRUE;
+    (*thefile)->buffered = APR_FALSE;
+    (*thefile)->eof_hit = APR_FALSE;
     (*thefile)->flags = 0;
-    (*thefile)->pipe = FALSE;
+    (*thefile)->pipe = APR_FALSE;
 
     return APR_SUCCESS;
 }
