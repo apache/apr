@@ -57,7 +57,7 @@
 
 #include "test_apr.h"
 
-#define NUM_TESTS 3
+#define NUM_TESTS 4
 
 apr_pool_t *p;
 
@@ -66,7 +66,8 @@ typedef CuSuite *(testfunc)(void);
 testfunc *tests[NUM_TESTS] = {
     teststr,
     testtime,
-    testvsn
+    testvsn,
+    testipsub
 };
 
 int main(int argc, char *argv[])

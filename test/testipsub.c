@@ -52,14 +52,12 @@
  * <http://www.apache.org/>.
  */
 
-#include <assert.h>
-#include <stdlib.h>
-
+#include "test_apr.h"
 #include "apr_general.h"
 #include "apr_network_io.h"
 #include "apr_errno.h"
 
-static void test_bad_input(apr_pool_t *p)
+static void test_bad_input(CuTest *tc)
 {
     struct {
         const char *ipstr;
@@ -108,11 +106,11 @@ static void test_bad_input(apr_pool_t *p)
 
     for (i = 0; i < (sizeof testcases / sizeof testcases[0]); i++) {
         rv = apr_ipsubnet_create(&ipsub, testcases[i].ipstr, testcases[i].mask, p);
-        assert(rv == testcases[i].expected_rv);
+        CuAssertIntEquals(tc, rv, testcases[i].expected_rv);
     }
 }
 
-static void test_singleton_subnets(apr_pool_t *p)
+static void test_singleton_subnets(CuTest *tc)
 {
     const char *v4addrs[] = {
         "127.0.0.1", "129.42.18.99", "63.161.155.20", "207.46.230.229", "64.208.42.36",
@@ -126,16 +124,16 @@ static void test_singleton_subnets(apr_pool_t *p)
 
     for (i = 0; i < sizeof v4addrs / sizeof v4addrs[0]; i++) {
         rv = apr_ipsubnet_create(&ipsub, v4addrs[i], NULL, p);
-        assert(rv == APR_SUCCESS);
+        CuAssertTrue(tc, rv == APR_SUCCESS);
         for (j = 0; j < sizeof v4addrs / sizeof v4addrs[0]; j++) {
             rv = apr_sockaddr_info_get(&sa, v4addrs[j], APR_INET, 0, 0, p);
-            assert(rv == APR_SUCCESS);
+            CuAssertTrue(tc, rv == APR_SUCCESS);
             rc = apr_ipsubnet_test(ipsub, sa);
             if (!strcmp(v4addrs[i], v4addrs[j])) {
-                assert(rc != 0);
+                CuAssertTrue(tc, rc != 0);
             }
             else {
-                assert(rc == 0);
+                CuAssertTrue(tc, rc == 0);
             }
         }
     }
@@ -143,7 +141,7 @@ static void test_singleton_subnets(apr_pool_t *p)
     /* same for v6? */
 }
 
-static void test_interesting_subnets(apr_pool_t *p)
+static void test_interesting_subnets(CuTest *tc)
 {
     struct {
         const char *ipstr, *mask;
@@ -171,49 +169,50 @@ static void test_interesting_subnets(apr_pool_t *p)
 
     for (i = 0; i < sizeof testcases / sizeof testcases[0]; i++) {
         rv = apr_ipsubnet_create(&ipsub, testcases[i].ipstr, testcases[i].mask, p);
-        assert(rv == APR_SUCCESS);
+        CuAssertTrue(tc, rv == APR_SUCCESS);
         rv = apr_sockaddr_info_get(&sa, testcases[i].in_subnet, testcases[i].family, 0, 0, p);
-        assert(rv == APR_SUCCESS);
+        CuAssertTrue(tc, rv == APR_SUCCESS);
         rc = apr_ipsubnet_test(ipsub, sa);
-        assert(rc != 0);
+        CuAssertTrue(tc, rc != 0);
         rv = apr_sockaddr_info_get(&sa, testcases[i].not_in_subnet, testcases[i].family, 0, 0, p);
-        assert(rv == APR_SUCCESS);
+        CuAssertTrue(tc, rv == APR_SUCCESS);
         rc = apr_ipsubnet_test(ipsub, sa);
-        assert(rc == 0);
+        CuAssertTrue(tc, rc == 0);
     }
 }
 
-int main(void)
+static void test_badmask_str(CuTest *tc)
 {
-    apr_status_t rv;
-    apr_pool_t *p;
     char buf[128];
 
-    rv = apr_initialize();
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_initialize()->%d/%s\n",
-                rv,
-                apr_strerror(rv, buf, sizeof buf));
-        exit(1);
-    }
-
-    atexit(apr_terminate);
-
-    rv = apr_pool_create(&p, NULL);
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "apr_pool_create()->%d/%s\n",
-                rv,
-                apr_strerror(rv, buf, sizeof buf));
-        exit(1);
-    }
-
-    test_bad_input(p);
-    test_singleton_subnets(p);
-    test_interesting_subnets(p);
-
-    printf("error strings:\n");
-    printf("\tAPR_EBADIP\t`%s'\n", apr_strerror(APR_EBADIP, buf, sizeof buf));
-    printf("\tAPR_EBADMASK\t`%s'\n", apr_strerror(APR_EBADMASK, buf, sizeof buf));
-
-    return 0;
+    CuAssertStrEquals(tc, apr_strerror(APR_EBADMASK, buf, sizeof buf),
+                      "The specified network mask is invalid.");
 }
+
+static void test_badip_str(CuTest *tc)
+{
+    char buf[128];
+
+    CuAssertStrEquals(tc, apr_strerror(APR_EBADIP, buf, sizeof buf),
+                      "The specified IP address is invalid.");
+}
+
+CuSuite *testipsub(void)
+{
+    CuSuite *suite = CuSuiteNew("Test IP subnets");
+
+    SUITE_ADD_TEST(suite, test_bad_input);
+    SUITE_ADD_TEST(suite, test_singleton_subnets);
+    SUITE_ADD_TEST(suite, test_interesting_subnets);
+    SUITE_ADD_TEST(suite, test_badmask_str);
+    SUITE_ADD_TEST(suite, test_badip_str);
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return testipsub();
+}
+#endif
+
