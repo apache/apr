@@ -88,7 +88,7 @@ dnl # this is the place to put specific options for platform/compiler
 dnl # combinations
 case "$OS:$CC" in
     *-hp-hpux*:cc )
-	CFLAGS="$CFLAGS -Ae +DAportable"
+	CFLAGS="$CFLAGS -Ae +DAportable +Z"
 	;;
     powerpc-*-beos:mwcc* )
         CPP="mwcc -E"
