@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/11 23:58:44 $]
+Last modified at [$Date: 2002/07/12 00:01:08 $]
 
 Release:
 
@@ -136,11 +136,8 @@ CURRENT VOTES:
 
       [wrowe: 1. no, time_t is undefined.  Sometimes 32, sometimes 64 bits.
        2. no, on 64 bit WinNT time_t remains 32 bits, as do all ints.
-       3. correct on sec/msec, until apr is improved by platform, we default 
-          to posix values.
-       4. several apps include flood and ab require usec resolution.
-       5. Posix timeval structures use sec/usec resolution.
-       6. Already demonstrated, done shouting yet?]
+       3. several apps include flood and ab require usec resolution.
+       4. Posix timeval structures use sec/usec resolution.]
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
 
