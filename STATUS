@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/09/08 09:07:36 $]
+Last modified at [$Date: 2001/09/11 01:06:13 $]
 
 Release:
 
@@ -21,14 +21,23 @@ RELEASE SHOWSTOPPERS:
       DougM offered to complete the work with his nifty perl rename
       script at the hackathon. 
 
-    * Win32 utf-8 filenames are broken by GetSecurityInfoByNameW()
-      which won't accept Win32's canonical \\?\D:\foo long naming
-      conventions.  Convert to _ByHandle or add an arg to our utf-8
-      name converter so we can handle this.
+    * When Win32 apr_proc_create was fixed, the apr_proc_t hproc
+      member was added for that platform.  That's a problem (and
+      was when pid was abused as well) since nobody goes and cleans
+      up hproc after the process is dead.  Can't do a pool cleanup,
+      since apr_proc_create didn't allocate the apr_proc_t storage.
+      (Aren't transparent types swell?)  Suggestions?
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
     * Get OTHER_CHILD support into Win32
         Status: Bill S. is looking into this
+
+    * Win32 apr_proc_create fails to create 16 bit apps detached
+      (a win32 bug.)  The question - test in advance (slow) or
+      recover gracefully from failure and try again?  Only the test
+      method will work on Win9x, since it will appear to work, only
+      to encounter mangled pipes.  Win2K (NT?) simply fails.
 
     * SysV semaphore support isn't usable by Apache when started as
       root because we don't have a way to allow the semaphore to be
@@ -53,7 +62,7 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * FirstBill says we need a new procattr, APR_CREATE_SUSPENDED (or
       something similar) to direct ap_create_process to create the
       process suspended. We also need a call to wake up the suspended 
-      process This may not be able to be implemented everywhere though.
+      process.  This may not be able to be implemented everywhere though.
         Status: OtherBill asks, why?  What is the benefit, how is it
         portably implemented?  Unless this creates some tangible that
         mirrors another platform, then I'm -1.
