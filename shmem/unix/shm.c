@@ -484,11 +484,6 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
             return status;
         }
 
-/*
-         XXX use APR_ALIGN_DEFAULT() somewhere here?
-         XXX do we need to seek() prior to the mmap()?
-*/
-
         nbytes = sizeof(new_m->realsize);
         status = apr_file_read(file, (void *)&(new_m->realsize),
                                &nbytes);
