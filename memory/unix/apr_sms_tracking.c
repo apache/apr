@@ -252,6 +252,8 @@ static apr_status_t apr_sms_tracking_destroy(apr_sms_t *sms)
 
     if ((rv = apr_sms_reset(sms)) != APR_SUCCESS)
         return rv;
+    
+    return apr_sms_free(sms->parent, sms);
 }
 
 
