@@ -259,7 +259,7 @@ char *strdup(const char *str)
 #endif
 
 /* The following two routines were donated for SVR4 by Andreas Vogel */
-#ifndef HAVE_STRCASECMP
+#if !defined(HAVE_STRCASECMP) && !defined(HAVE_STRICMP)
 int strcasecmp(const char *a, const char *b)
 {
     const char *p = a;
@@ -278,7 +278,7 @@ int strcasecmp(const char *a, const char *b)
 
 #endif
 
-#ifndef HAVE_STRNCASECMP
+#if !defined(HAVE_STRNCASECMP) && !defined(HAVE_STRNICMP)
 int strncasecmp(const char *a, const char *b, size_t n)
 {
     const char *p = a;
