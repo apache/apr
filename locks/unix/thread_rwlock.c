@@ -220,11 +220,6 @@ APR_DECLARE(apr_status_t) apr_thread_rwlock_trywrlock(apr_thread_rwlock_t *rwloc
     return APR_ENOTIMPL;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_rwlock_lock(apr_thread_rwlock_t *rwlock)
-{
-    return APR_ENOTIMPL;
-}
-
 APR_DECLARE(apr_status_t) apr_thread_rwlock_unlock(apr_thread_rwlock_t *rwlock)
 {
     return APR_ENOTIMPL;
