@@ -1464,10 +1464,18 @@ static void free_proc_chain(struct process_chain *procs)
 	    apr_proc_kill(p->pid, SIGKILL);
 	}
     }
+    /* Now wait for all the signaled processes to die */
+    for (p = procs; p; p = p->next) {
+	if (p->kill_how != kill_never) {
+	    (void) apr_proc_wait(p->pid, APR_WAIT);
+	}
+    }
 #ifdef WIN32
     /* 
      * XXX: Do we need an APR function to clean-up a proc_t?
      * Well ... yeah ... but we can't since it's scope is ill defined.
+     * We can't dismiss the handle until the apr_proc_wait above is
+     * finished with the proc_t.
      */
     {
         for (p = procs; p; p = p->next) {
@@ -1479,11 +1487,5 @@ static void free_proc_chain(struct process_chain *procs)
     }
 #endif /* WIN32 */
 
-    /* Now wait for all the signaled processes to die */
-    for (p = procs; p; p = p->next) {
-	if (p->kill_how != kill_never) {
-	    (void) apr_proc_wait(p->pid, APR_WAIT);
-	}
-    }
 }
 
