@@ -45,11 +45,11 @@ compare_right(char const *a, char const *b)
 	both numbers to know that they have the same magnitude, so we
 	remember it in BIAS. */
      for (;; a++, b++) {
-	  if (!isdigit(*a)  &&  !isdigit(*b))
+	  if (!apr_isdigit(*a)  &&  !apr_isdigit(*b))
 	       return bias;
-	  else if (!isdigit(*a))
+	  else if (!apr_isdigit(*a))
 	       return -1;
-	  else if (!isdigit(*b))
+	  else if (!apr_isdigit(*b))
 	       return +1;
 	  else if (*a < *b) {
 	       if (!bias)
@@ -71,11 +71,11 @@ compare_left(char const *a, char const *b)
      /* Compare two left-aligned numbers: the first to have a
         different value wins. */
      for (;; a++, b++) {
-	  if (!isdigit(*a)  &&  !isdigit(*b))
+	  if (!apr_isdigit(*a)  &&  !apr_isdigit(*b))
 	       return 0;
-	  else if (!isdigit(*a))
+	  else if (!apr_isdigit(*a))
 	       return -1;
-	  else if (!isdigit(*b))
+	  else if (!apr_isdigit(*b))
 	       return +1;
 	  else if (*a < *b)
 	       return -1;
@@ -99,14 +99,14 @@ static int strnatcmp0(char const *a, char const *b, int fold_case)
 	  ca = a[ai]; cb = b[bi];
 
 	  /* skip over leading spaces or zeros */
-	  while (isspace(ca))
+	  while (apr_isspace(ca))
 	       ca = a[++ai];
 
-	  while (isspace(cb))
+	  while (apr_isspace(cb))
 	       cb = b[++bi];
 
 	  /* process run of digits */
-	  if (isdigit(ca)  &&  isdigit(cb)) {
+	  if (apr_isdigit(ca)  &&  apr_isdigit(cb)) {
 	       fractional = (ca == '0' || cb == '0');
 
 	       if (fractional) {
