@@ -1,5 +1,6 @@
 Makefile
 *.lo
+*.swp
 .libs
 testmd5
 testmmap
@@ -41,6 +42,7 @@ testnames
 *.dbg
 testmem
 testlock
+testlockperf
 *.core
 testsockets
 testuser
