@@ -591,6 +591,38 @@ AC_CHECK_HEADERS(kernel/OS.h)
 AC_CHECK_FUNCS(create_area)
 AC_CHECK_HEADERS(os2.h)
 
+dnl Not all systems can mmap /dev/zero (such as HP-UX).  Check for that.
+if test "$ac_cv_func_mmap" = "yes" &&
+   test "$ac_cv_file__dev_zero" = "yes"; then
+    AC_MSG_CHECKING(for mmap that can map /dev/zero)
+    AC_TRY_RUN([
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
+    int main()
+    {
+        int fd;
+        void *m;
+        fd = open("/dev/zero", O_RDWR);
+        if (fd < 0) {
+            return 1;
+        }
+        m = mmap(0, sizeof(void*), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+        if (m < 0) {  /* aka MAP_FAILED */
+            return 2;
+        }
+        if (munmap(m, sizeof(void*)) < 0) {
+            return 3;
+        }
+        return 0;
+    }], [], [ac_cv_file__dev_zero=no])
+
+    AC_MSG_RESULT($ac_cv_file__dev_zero)
+fi
+
 dnl Now we determine which one is our anonymous shmem preference.
 haveshmgetanon="0"
 havemmapzero="0"
@@ -1245,7 +1277,6 @@ dnl #----------------------------- Checking for Locking Characteristics
 echo $ac_n "${nl}Checking for Locking...${nl}"
 
 AC_CHECK_FUNCS(semget semctl flock)
-APR_CHECK_FILE(/dev/zero)
 AC_CHECK_HEADERS(semaphore.h)
 AC_CHECK_FUNCS(sem_close sem_unlink sem_post sem_wait)
 
