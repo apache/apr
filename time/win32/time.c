@@ -67,7 +67,7 @@
  */
 #define AP_DELTA_EPOCH_IN_USEC   11644473600000000;
 
-static void FileTimeToAprTime(ap_time_t *result, FILETIME *input)
+void FileTimeToAprTime(ap_time_t *result, FILETIME *input)
 {
     /* Convert FILETIME one 64 bit number so we can work with it. */
     *result = input->dwHighDateTime;
@@ -75,13 +75,11 @@ static void FileTimeToAprTime(ap_time_t *result, FILETIME *input)
     *result |= input->dwLowDateTime;
     *result /= 10;    /* Convert from 100 nano-sec periods to micro-seconds. */
     *result -= AP_DELTA_EPOCH_IN_USEC;  /* Convert from Windows epoch to Unix epoch */
-    //printf("FileTimeToAprTime: aprtime - %I64d\n", *result);
     return;
 }
-static void AprTimeToFileTime(LPFILETIME pft, ap_time_t t)
+void AprTimeToFileTime(LPFILETIME pft, ap_time_t t)
 {
     LONGLONG ll;
-    //printf("AprTimeToFileTime: aprtime - %I64d\n", t);
     t += AP_DELTA_EPOCH_IN_USEC;
     ll = t * 10;
     pft->dwLowDateTime = (DWORD)ll;
@@ -89,7 +87,7 @@ static void AprTimeToFileTime(LPFILETIME pft, ap_time_t t)
     return;
 }
 
-static void SystemTimeToAprExpTime(ap_exploded_time_t *xt, SYSTEMTIME *tm)
+void SystemTimeToAprExpTime(ap_exploded_time_t *xt, SYSTEMTIME *tm)
 {
     xt->tm_usec = tm->wMilliseconds * 1000;
     xt->tm_sec  = tm->wSecond;
