@@ -125,7 +125,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
     if (out) {
         if ((status = ap_create_pipe(&attr->parent_out, &attr->child_out, 
                                    attr->cntxt)) != APR_SUCCESS) {
-            switch (in) {
+            switch (out) {
             case APR_FULL_BLOCK:
                 ap_block_pipe(attr->child_out);
                 ap_block_pipe(attr->parent_out);
@@ -140,7 +140,7 @@ ap_status_t ap_setprocattr_io(struct procattr_t *attr, ap_int32_t in,
     if (err) {
         if ((status = ap_create_pipe(&attr->parent_err, &attr->child_err, 
                                    attr->cntxt)) != APR_SUCCESS) {
-            switch (in) {
+            switch (err) {
             case APR_FULL_BLOCK:
                 ap_block_pipe(attr->child_err);
                 ap_block_pipe(attr->parent_err);
