@@ -11,7 +11,7 @@ TARGET=ALL
 $(TARGET): Makefile
 	$(MAKE) /nologo /f Makefile $(TARGET)
 
-Makefile: Makefile.in MakeWin32Make.pl
+Makefile: Makefile.in MakeWin32Make.awk
 	awk -f MakeWin32Make.awk <Makefile.in >Makefile
 
 clean:

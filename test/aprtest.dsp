@@ -189,7 +189,7 @@ SOURCE=.\Makefile.in
 # End Source File
 # Begin Source File
 
-SOURCE=.\MakeWin32Make.pl
+SOURCE=.\MakeWin32Make.awk
 # End Source File
 # End Target
 # End Project
