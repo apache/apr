@@ -113,6 +113,12 @@ struct in_addr {
 }
 #endif
 
+/* Enum to tell us if we're interested in remote or local socket */
+typedef enum {
+    APR_LOCAL,
+    APR_REMOTE
+} apr_interface_e;
+
 /* I guess not everybody uses inet_addr.  This defines apr_inet_addr
  * appropriately.
  */
@@ -382,37 +388,23 @@ apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t o
 apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t* on);
 
 /**
- * Associate a local port with a socket.
+ * Associate a port with a socket.
  * @param sock The socket to set.
+ * @param which Which socket do we want to set the port for?
  * @param port The local port this socket will be dealing with.
  * @tip This does not bind the two together, it is just telling apr 
  *      that this socket is going to use this port if possible.  If
  *      the port is already used, we won't find out about it here.
  */
-apr_status_t apr_set_local_port(apr_socket_t *sock, apr_port_t port);
+apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, apr_port_t port);
 
 /**
- * Associate a remote port with a socket.
- * @param sock The socket to set.
- * @param port The local port this socket will be dealing with.
- * @tip This does not make a connection to the remote port, it is just 
- *      telling apr which port apr_connect() should attempt to connect to.
- */
-apr_status_t apr_set_remote_port(apr_socket_t *sock, apr_port_t port);
-
-/**
- * Return the local port with a socket.
+ * Return the port associated with a socket.
  * @param port The local port this socket is associated with.
+ * @param which Which interface are we getting the port for?
  * @param sock The socket to enquire about.
  */
-apr_status_t apr_get_local_port(apr_port_t *port, apr_socket_t *sock);
-
-/**
- * Return the remote port associated with a socket.
- * @param port The remote port this socket is associated with.
- * @param sock The socket to enquire about.
- */
-apr_status_t apr_get_remote_port(apr_port_t *port, apr_socket_t *sock);
+apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t *sock);
 
 /**
  * Associate a local socket addr with an apr socket.
