@@ -57,6 +57,7 @@
 #include "apr_general.h"
 #include "apr_lib.h"
 #include "apr_network_io.h"
+#include "apr_poll.h"
 #if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -145,7 +146,7 @@ int main(void)
     apr_socket_t *s[3];
     apr_sockaddr_t *sa[3];
     apr_pollfd_t *pollset;
-    int i = 0, srv = 0;
+    int i = 0, srv = 3;
     
     fprintf (stdout,"APR Poll Test\n*************\n\n");
     
@@ -186,29 +187,29 @@ int main(void)
     printf("OK\n");
     printf("Starting Tests\n");
 
-    apr_poll(pollset, &srv, 10);
+    apr_poll(pollset, 3, &srv, 10);
     check_sockets(pollset, s);
     
     send_msg(s, sa, 2);
 
-    apr_poll(pollset, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10); 
     check_sockets(pollset, s);
 
     recv_msg(s, 2, context);
     send_msg(s, sa, 1);
 
-    apr_poll(pollset, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10); 
     check_sockets(pollset, s);
 
     send_msg(s, sa, 2);
 
-    apr_poll(pollset, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10); 
     check_sockets(pollset, s);
      
     recv_msg(s, 1, context);
     send_msg(s, sa, 0);
     
-    apr_poll(pollset, &srv, 10); 
+    apr_poll(pollset, 3, &srv, 10); 
     check_sockets(pollset, s);
         
     printf("Tests completed.\n");

@@ -187,7 +187,6 @@ typedef enum {
 #endif
 
 typedef struct apr_socket_t     apr_socket_t;
-typedef struct apr_pollfd_t     apr_pollfd_t;
 /**
  * A structure to encapsulate headers and trailers for apr_sendfile
  */
@@ -634,123 +633,6 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
 APR_DECLARE(int) apr_sockaddr_equal(const apr_sockaddr_t *addr1,
                                     const apr_sockaddr_t *addr2);
 
-/**
- * Setup the memory required for poll to operate properly
- * @param new_poll The poll structure to be used. 
- * @param num The number of socket descriptors to be polled.
- * @param cont The pool to operate on.
- */
-APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll, 
-                                         apr_int32_t num,
-                                         apr_pool_t *cont);
-
-/**
- * Poll the sockets in the poll structure
- * @param aprset The poll structure we will be using. 
- * @param nsds The number of sockets we are polling. 
- * @param timeout The amount of time in microseconds to wait.  This is 
- *                a maximum, not a minimum.  If a socket is signalled, we 
- *                will wake up before this time.  A negative number means 
- *                wait until a socket is signalled.
- * @remark
- * <PRE>
- * The number of sockets signalled is returned in the second argument. 
- *
- *        This is a blocking call, and it will not return until either a 
- *        socket has been signalled, or the timeout has expired. 
- * </PRE>
- */
-APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds, 
-                                   apr_interval_time_t timeout);
-
-/**
- * Add a socket to the poll structure.
- * @param aprset The poll structure we will be using. 
- * @param socket The socket to add to the current poll structure. 
- * @param event The events to look for when we do the poll.  One of:
- * <PRE>
- *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if prioirty data is availble to be read
- *            APR_POLLOUT      signal if write will not block
- * </PRE>
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
-                                              apr_socket_t *sock,
-                                              apr_int16_t event);
-
-/**
- * Modify a socket in the poll structure with mask.
- * @param aprset The poll structure we will be using. 
- * @param sock The socket to modify in poll structure. 
- * @param events The events to stop looking for during the poll.  One of:
- * <PRE>
- *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if priority data is available to be read
- *            APR_POLLOUT      signal if write will not block
- * </PRE>
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
-                                               apr_socket_t *sock,
-                                               apr_int16_t events);
-/**
- * Remove a socket from the poll structure.
- * @param aprset The poll structure we will be using. 
- * @param sock The socket to remove from the current poll structure. 
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, 
-                                                 apr_socket_t *sock);
-
-/**
- * Remove all sockets from the poll structure.
- * @param aprset The poll structure we will be using. 
- * @param events The events to clear from all sockets.  One of:
- * <PRE>
- *            APR_POLLIN       signal if read will not block
- *            APR_POLLPRI      signal if priority data is available to be read
- *            APR_POLLOUT      signal if write will not block
- * </PRE>
- */
-APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, 
-                                                 apr_int16_t events);
-
-/**
- * Get the return events for the specified socket.
- * @param event The returned events for the socket.  One of:
- * <PRE>
- *            APR_POLLIN       Data is available to be read 
- *            APR_POLLPRI      Priority data is availble to be read
- *            APR_POLLOUT      Write will succeed
- *            APR_POLLERR      An error occurred on the socket
- *            APR_POLLHUP      The connection has been terminated
- *            APR_POLLNVAL     This is an invalid socket to poll on.
- *                             Socket not open.
- * </PRE>
- * @param sock The socket we wish to get information about. 
- * @param aprset The poll structure we will be using. 
- */
-APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, 
-                                          apr_socket_t *sock,
-                                          apr_pollfd_t *aprset);
-
-/**
- * Return the data associated with the current poll.
- * @param pollfd The currently open pollfd.
- * @param key The key to use for retrieving data associated with a poll struct.
- * @param data The user data associated with the pollfd.
- */
-APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd, 
-                                           const char *key, void *data);
-
-/**
- * Set the data associated with the current poll.
- * @param pollfd The currently open pollfd.
- * @param data The key to associate with the data.
- * @param key The user data to associate with the pollfd.
- * @param cleanup The cleanup function
- */
-APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data,
-                                           const char *key,
-                                           apr_status_t (*cleanup)(void *));
 
 #if APR_FILES_AS_SOCKETS || defined(DOXYGEN)
 
@@ -761,6 +643,8 @@ APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data,
  * @warning This is not available on all platforms.  Platforms that have the
  *      ability to poll files for data to be read/written/exceptions will
  *      have the APR_FILES_AS_SOCKETS macro defined as true.
+ * @deprecated This function has been deprecated, because of the new poll
+ *             implementation.
  */
 APR_DECLARE(apr_status_t) apr_socket_from_file(apr_socket_t **newsock,
                                                apr_file_t *file);

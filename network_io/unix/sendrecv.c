@@ -53,6 +53,7 @@
  */
 
 #include "networkio.h"
+#include "apr_support.h"
 
 #if APR_HAS_SENDFILE
 /* This file is needed to allow us access to the apr_file_t internals. */
@@ -62,40 +63,6 @@
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
-
-apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
-{
-    struct timeval tv, *tvptr;
-    fd_set fdset;
-    int srv;
-
-    do {
-        FD_ZERO(&fdset);
-        FD_SET(sock->socketdes, &fdset);
-        if (sock->timeout < 0) {
-            tvptr = NULL;
-        }
-        else {
-            tv.tv_sec = sock->timeout / APR_USEC_PER_SEC;
-            tv.tv_usec = sock->timeout % APR_USEC_PER_SEC;
-            tvptr = &tv;
-        }
-        srv = select(sock->socketdes + 1,
-            for_read ? &fdset : NULL,
-            for_read ? NULL : &fdset,
-            NULL,
-            tvptr);
-        /* TODO - timeout should be smaller on repeats of this loop */
-    } while (srv == -1 && errno == EINTR);
-
-    if (srv == 0) {
-        return APR_TIMEUP;
-    }
-    else if (srv < 0) {
-        return errno;
-    }
-    return APR_SUCCESS;
-}
 
 apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
 {
@@ -114,7 +81,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
       && sock->timeout != 0) {
         apr_status_t arv;
 do_select:
-        arv = apr_wait_for_io_or_timeout(sock, 0);
+        arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -153,7 +120,7 @@ apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_size_t *len)
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) && 
       sock->timeout != 0) {
 do_select:
-	arv = apr_wait_for_io_or_timeout(sock, 1);
+	arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -191,7 +158,7 @@ apr_status_t apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)
         && sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -224,7 +191,7 @@ apr_status_t apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
 
     if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) &&
         sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 1);
+        apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -272,7 +239,7 @@ apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
       sock->timeout != 0) {
         apr_status_t arv;
 do_select:
-        arv = apr_wait_for_io_or_timeout(sock, 0);
+        arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -370,7 +337,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
 do_select:
-	arv = apr_wait_for_io_or_timeout(sock, 0);
+	arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
 	if (arv != APR_SUCCESS) {
 	    *len = 0;
 	    return arv;
@@ -528,7 +495,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         if (sock->netmask & APR_INCOMPLETE_WRITE) {
             apr_status_t arv;
             sock->netmask &= ~APR_INCOMPLETE_WRITE;
-            arv = apr_wait_for_io_or_timeout(sock, 0);
+            arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
             if (arv != APR_SUCCESS) {
                 *len = 0;
                 return arv;
@@ -590,7 +557,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         if (rv == -1 &&
             errno == EAGAIN && 
             sock->timeout > 0) {
-            apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+            apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
             if (arv != APR_SUCCESS) {
                 *len = 0;
                 return arv;
@@ -708,7 +675,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     if (rc == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout > 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
 
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -847,7 +814,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
         (errno == EAGAIN || errno == EWOULDBLOCK) &&
         sock->timeout > 0) {
 do_select:
-        arv = apr_wait_for_io_or_timeout(sock, 0);
+        arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -957,7 +924,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
      */
     if (sock->netmask & APR_INCOMPLETE_WRITE) {
         sock->netmask &= ~APR_INCOMPLETE_WRITE;
-        arv = apr_wait_for_io_or_timeout(sock, 0);
+        arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -989,7 +956,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
             else if (!arv &&
                      apr_is_option_set(sock->netmask, APR_SO_TIMEOUT) == 1)
             {
-                apr_status_t t = apr_wait_for_io_or_timeout(sock, 0);
+                apr_status_t t = apr_wait_for_io_or_timeout(NULL, sock, 0);
 
                 if (t != APR_SUCCESS)
                 {

@@ -60,6 +60,7 @@
 #include "apr_network_io.h"
 #include "apr_errno.h"
 #include "apr_general.h"
+#include "apr_poll.h"
 
 #if !APR_HAS_SENDFILE
 int main(void)
@@ -373,7 +374,7 @@ static int client(client_socket_mode_t socket_mode, char *host)
                 if (APR_STATUS_IS_EAGAIN(rv)) {
                     assert(tmplen == 0);
                     nsocks = 1;
-                    tmprv = apr_poll(pfd, &nsocks, -1);
+                    tmprv = apr_poll(pfd, 1, &nsocks, -1);
                     assert(!tmprv);
                     assert(nsocks == 1);
                     /* continue; */
