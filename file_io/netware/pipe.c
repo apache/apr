@@ -204,6 +204,8 @@ APR_DECLARE(apr_status_t) apr_file_pipe_create(apr_file_t **in, apr_file_t **out
     (*in)->ungetchar = -1;
     (*in)->thlock    =
     (*out)->thlock   = NULL;
+    (void) apr_pollset_create(&(*in)->pollset, 1, pool, 0);
+    (void) apr_pollset_create(&(*out)->pollset, 1, pool, 0);
 
     apr_pool_cleanup_register((*in)->pool, (void *)(*in), apr_unix_file_cleanup,
                          apr_pool_cleanup_null);
