@@ -103,7 +103,7 @@ typedef  @off_t_value@           ap_off_t;
 /* We are checking for HAVE_SIGACTION, but autoconf is filling this in 
  * for us automatically.
  */
-#if @have_sigaction@
+#if @have_sigaction@ && !defined(NO_USE_SIGACTION)
 typedef void Sigfunc(int);
 Sigfunc *ap_signal(int signo, Sigfunc * func);
 
