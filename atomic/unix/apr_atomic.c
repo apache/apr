@@ -167,7 +167,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
 
     if (apr_thread_mutex_lock(lock) == APR_SUCCESS) {
         prev = *(long*)mem;
-        if ( prev == cmp) {
+        if (prev == cmp) {
             *(long*)mem = with;
         }
         apr_thread_mutex_unlock(lock);
@@ -176,7 +176,7 @@ apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem, long with, long cmp)
     return *(long*)mem;
 #else
     prev = *(long*)mem;
-    if ( prev == cmp) {
+    if (prev == cmp) {
         *(long*)mem = with;
     }
     return prev;
