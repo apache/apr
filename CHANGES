@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Fix the Unix HAVE_POLL flavor of apr_poll_socket_mask() so that
+     it doesn't segfault.  Avoid some wasted storage in a poll-related
+     APR structure.  [INOUE Seiichiro <inoue@ariel-networks.com>]
+
   *) Fix apr_setup_signal_thread() so that threads don't block
      synchronous signals (e.g., SIGSEGV).  It is a programming error
      to do so, and some platforms (e.g., Solaris, AIX) don't call any
@@ -8,7 +12,7 @@ Changes with APR b1
 
   *) Change the apr_table_elts macro so that it provides access via
      a const pointer instead of a non-const pointer.
-     [Brian Pane <bpane@pacbell.net]
+     [Brian Pane <bpane@pacbell.net>]
 
   *) Use strerror_r() where available, since strerror() isn't always
      thread-safe.  Example systems where strerror() isn't thread-safe:
@@ -20,11 +24,11 @@ Changes with APR b1
 
   *) New functions apr_hash_[merge|copy], change to overlay fn
      so that it calls merge, which does a inline iteration instead
-     of calling the iterator function. [Brian Pane <bpane@pacbell.net]
+     of calling the iterator function. [Brian Pane <bpane@pacbell.net>]
 
   *) Introduce the apr_pool_userdata_setn() variant that doesn't 
      strdup the key.  Allows both the _setn() and _set() variant to 
-     accept NULL for the cleanup.  [Brian Pane <bpane@pacbell.net]
+     accept NULL for the cleanup.  [Brian Pane <bpane@pacbell.net>]
 
   *) Re-vamp the apr_proc_wait and apr_proc_wait_all functions.  We
      now return the exit code from the program and a reason that the
