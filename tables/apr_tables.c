@@ -89,7 +89,7 @@
  */
 
 static void make_array_core(apr_array_header_t *res, apr_pool_t *p,
-			    int nelts, int elt_size)
+			    int nelts, int elt_size, int clear)
 {
     /*
      * Assure sanity if someone asks for
@@ -99,7 +99,12 @@ static void make_array_core(apr_array_header_t *res, apr_pool_t *p,
         nelts = 1;
     }
 
-    res->elts = apr_pcalloc(p, nelts * elt_size);
+    if (clear) {
+        res->elts = apr_pcalloc(p, nelts * elt_size);
+    }
+    else {
+        res->elts = apr_palloc(p, nelts * elt_size);
+    }
 
     res->pool = p;
     res->elt_size = elt_size;
@@ -113,7 +118,7 @@ APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
     apr_array_header_t *res;
 
     res = (apr_array_header_t *) apr_palloc(p, sizeof(apr_array_header_t));
-    make_array_core(res, p, nelts, elt_size);
+    make_array_core(res, p, nelts, elt_size, 1);
     return res;
 }
 
@@ -277,6 +282,41 @@ APR_DECLARE(char *) apr_array_pstrcat(apr_pool_t *p,
  * The "table" functions.
  */
 
+#if APR_CHARSET_EBCDIC
+#define CASE_MASK 0xbfbfbfbf
+#else
+#define CASE_MASK 0xdfdfdfdf
+#endif
+
+/* Compute the "checksum" for a key, consisting of the first
+ * 4 bytes, normalized for case-insensitivity and packed into
+ * an int...this checksum allows us to do a single integer
+ * comparison as a fast check to determine whether we can
+ * skip a strcasecmp
+ */
+#define COMPUTE_KEY_CHECKSUM(key, checksum)    \
+{                                              \
+    const char *k = (key);                     \
+    apr_uint32_t c = (apr_uint32_t)*k;         \
+    (checksum) = c;                            \
+    (checksum) <<= 8;                          \
+    if (c) {                                   \
+        c = (apr_uint32_t)*++k;                \
+        checksum |= c;                         \
+    }                                          \
+    (checksum) <<= 8;                          \
+    if (c) {                                   \
+        c = (apr_uint32_t)*++k;                \
+        checksum |= c;                         \
+    }                                          \
+    (checksum) <<= 8;                          \
+    if (c) {                                   \
+        c = (apr_uint32_t)*++k;                \
+        checksum |= c;                         \
+    }                                          \
+    checksum &= CASE_MASK;                     \
+}
+
 /*
  * XXX: if you tweak this you should look at is_empty_table() and table_elts()
  * in alloc.h
@@ -298,7 +338,7 @@ APR_DECLARE(apr_table_t *) apr_table_make(apr_pool_t *p, int nelts)
 {
     apr_table_t *t = apr_palloc(p, sizeof(apr_table_t));
 
-    make_array_core(&t->a, p, nelts, sizeof(apr_table_entry_t));
+    make_array_core(&t->a, p, nelts, sizeof(apr_table_entry_t), 0);
 #ifdef MAKE_TABLE_PROFILE
     t->creator = __builtin_return_address(0);
 #endif
@@ -318,7 +358,7 @@ APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p, const apr_table_t *t)
 	abort();
     }
 #endif
-    make_array_core(&new->a, p, t->a.nalloc, sizeof(apr_table_entry_t));
+    make_array_core(&new->a, p, t->a.nalloc, sizeof(apr_table_entry_t), 0);
     memcpy(new->a.elts, t->a.elts, t->a.nelts * sizeof(apr_table_entry_t));
     new->a.nelts = t->a.nelts;
     return new;
@@ -333,13 +373,15 @@ APR_DECLARE(const char *) apr_table_get(const apr_table_t *t, const char *key)
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int i;
+    apr_uint32_t checksum;
 
     if (key == NULL) {
 	return NULL;
     }
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     for (i = 0; i < t->a.nelts; ++i) {
-	if (!strcasecmp(elts[i].key, key)) {
+	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
 	    return elts[i].val;
 	}
     }
@@ -353,9 +395,11 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
     register int i, j, k;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int done = 0;
+    apr_uint32_t checksum;
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     for (i = 0; i < t->a.nelts; ) {
-	if (!strcasecmp(elts[i].key, key)) {
+	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
 	    if (!done) {
 		elts[i].val = apr_pstrdup(t->a.pool, val);
 		done = 1;
@@ -365,6 +409,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 		for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
 		    elts[j].key = elts[k].key;
 		    elts[j].val = elts[k].val;
+                    elts[j].key_checksum = elts[k].key_checksum;
 		}
 		--t->a.nelts;
 	    }
@@ -378,6 +423,7 @@ APR_DECLARE(void) apr_table_set(apr_table_t *t, const char *key,
 	elts = (apr_table_entry_t *) table_push(t);
 	elts->key = apr_pstrdup(t->a.pool, key);
 	elts->val = apr_pstrdup(t->a.pool, val);
+        elts->key_checksum = checksum;
     }
 }
 
@@ -387,6 +433,7 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
     register int i, j, k;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int done = 0;
+    apr_uint32_t checksum;
 
 #ifdef POOL_DEBUG
     {
@@ -401,8 +448,9 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
     }
 #endif
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     for (i = 0; i < t->a.nelts; ) {
-	if (!strcasecmp(elts[i].key, key)) {
+	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
 	    if (!done) {
 		elts[i].val = (char *)val;
 		done = 1;
@@ -412,6 +460,7 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 		for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
 		    elts[j].key = elts[k].key;
 		    elts[j].val = elts[k].val;
+		    elts[j].key_checksum = elts[k].key_checksum;
 		}
 		--t->a.nelts;
 	    }
@@ -425,6 +474,7 @@ APR_DECLARE(void) apr_table_setn(apr_table_t *t, const char *key,
 	elts = (apr_table_entry_t *) table_push(t);
 	elts->key = (char *)key;
 	elts->val = (char *)val;
+	elts->key_checksum = checksum;
     }
 }
 
@@ -432,9 +482,11 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 {
     register int i, j, k;
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
+    apr_uint32_t checksum;
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     for (i = 0; i < t->a.nelts; ) {
-	if (!strcasecmp(elts[i].key, key)) {
+	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
 
 	    /* found an element to skip over
 	     * there are any number of ways to remove an element from
@@ -444,6 +496,7 @@ APR_DECLARE(void) apr_table_unset(apr_table_t *t, const char *key)
 	    for (j = i, k = i + 1; k < t->a.nelts; ++j, ++k) {
 		elts[j].key = elts[k].key;
 		elts[j].val = elts[k].val;
+		elts[j].key_checksum = elts[k].key_checksum;
 	    }
 	    --t->a.nelts;
 	}
@@ -458,9 +511,11 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int i;
+    apr_uint32_t checksum;
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     for (i = 0; i < t->a.nelts; ++i) {
-	if (!strcasecmp(elts[i].key, key)) {
+	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
 	    elts[i].val = apr_pstrcat(t->a.pool, elts[i].val, ", ", val, NULL);
 	    return;
 	}
@@ -469,6 +524,7 @@ APR_DECLARE(void) apr_table_merge(apr_table_t *t, const char *key,
     elts = (apr_table_entry_t *) table_push(t);
     elts->key = apr_pstrdup(t->a.pool, key);
     elts->val = apr_pstrdup(t->a.pool, val);
+    elts->key_checksum = checksum;
 }
 
 APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
@@ -476,6 +532,7 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
 {
     apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int i;
+    apr_uint32_t checksum;
 
 #ifdef POOL_DEBUG
     {
@@ -490,8 +547,9 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
     }
 #endif
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     for (i = 0; i < t->a.nelts; ++i) {
-	if (!strcasecmp(elts[i].key, key)) {
+	if ((checksum == elts[i].key_checksum) && !strcasecmp(elts[i].key, key)) {
 	    elts[i].val = apr_pstrcat(t->a.pool, elts[i].val, ", ", val, NULL);
 	    return;
 	}
@@ -500,22 +558,27 @@ APR_DECLARE(void) apr_table_mergen(apr_table_t *t, const char *key,
     elts = (apr_table_entry_t *) table_push(t);
     elts->key = (char *)key;
     elts->val = (char *)val;
+    elts->key_checksum = checksum;
 }
 
 APR_DECLARE(void) apr_table_add(apr_table_t *t, const char *key,
 			       const char *val)
 {
-    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts;
+    apr_uint32_t checksum;
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     elts = (apr_table_entry_t *) table_push(t);
     elts->key = apr_pstrdup(t->a.pool, key);
     elts->val = apr_pstrdup(t->a.pool, val);
+    elts->key_checksum = checksum;
 }
 
 APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
 				const char *val)
 {
-    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts;
+    apr_uint32_t checksum;
 
 #ifdef POOL_DEBUG
     {
@@ -530,9 +593,11 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
     }
 #endif
 
+    COMPUTE_KEY_CHECKSUM(key, checksum);
     elts = (apr_table_entry_t *) table_push(t);
     elts->key = (char *)key;
     elts->val = (char *)val;
+    elts->key_checksum = checksum;
 }
 
 APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
@@ -626,171 +691,333 @@ APR_DECLARE(void) apr_table_vdo(int (*comp) (void *, const char *, const char *)
     int rv, i;
     argp = va_arg(vp, char *);
     do {
+        apr_uint32_t checksum = 0;
+        if (argp) {
+            COMPUTE_KEY_CHECKSUM(argp, checksum);
+        }
 	for (rv = 1, i = 0; rv && (i < t->a.nelts); ++i) {
-	    if (elts[i].key && (!argp || !strcasecmp(elts[i].key, argp))) {
+	    if (elts[i].key && (!argp ||
+                                ((checksum == elts[i].key_checksum) &&
+                                 !strcasecmp(elts[i].key, argp)))) {
 		rv = (*comp) (rec, elts[i].key, elts[i].val);
 	    }
 	}
     } while (argp && ((argp = va_arg(vp, char *)) != NULL));
 }
 
-/* Curse libc and the fact that it doesn't guarantee a stable sort.  We
- * have to enforce stability ourselves by using the order field.  If it
- * provided a stable sort then we wouldn't even need temporary storage to
- * do the work below. -djg
- *
- * ("stable sort" means that equal keys retain their original relative
- * ordering in the output.)
+/* During apr_table_overlap(), we build an overlap key for
+ * each element in the two tables.
  */
-typedef struct {
-    char *key;
-    char *val;
-    int order;
+#define RED 0
+#define BLACK 1
+typedef struct overlap_key {
+    /* The table element */
+    apr_table_entry_t *elt;
+
+    /* 0 if from table 'a', 1 if from table 'b' */
+    int level;
+
+    /* Whether to omit this element when building the result table */
+    int skip;
+
+    /* overlap_keys can be assembled into a red-black tree */
+    int black;
+    struct overlap_key *tree_parent;
+    struct overlap_key *tree_left;
+    struct overlap_key *tree_right;
+    int color;
+
+    /* List of multiple values for this key */
+    struct overlap_key *merge_next;
+    struct overlap_key *merge_last;
 } overlap_key;
 
-static int sort_overlap(const void *va, const void *vb)
+/* Rotate a subtree of a red-black tree */
+static void rotate_counterclockwise(overlap_key **root,
+                                    overlap_key *rotate_node)
 {
-    const overlap_key *a = va;
-    const overlap_key *b = vb;
-    int r;
-
-    r = strcasecmp(a->key, b->key);
-    if (r) {
-	return r;
+    overlap_key *child = rotate_node->tree_right;
+    rotate_node->tree_right = child->tree_left;
+    if (rotate_node->tree_right) {
+        rotate_node->tree_right->tree_parent = rotate_node;
     }
-    return a->order - b->order;
+    child->tree_parent = rotate_node->tree_parent;
+    if (child->tree_parent == NULL) {
+        *root = child;
+    }
+    else {
+        if (rotate_node == rotate_node->tree_parent->tree_left) {
+            rotate_node->tree_parent->tree_left = child;
+        }
+        else {
+            rotate_node->tree_parent->tree_right = child;
+        }
+    }
+    child->tree_left = rotate_node;
+    rotate_node->tree_parent = child;
 }
 
-/* prefer to use the stack for temp storage for overlaps smaller than this */
-#ifndef APR_OVERLAP_TABLES_ON_STACK
-#define APR_OVERLAP_TABLES_ON_STACK	(512)
-#endif
+static void rotate_clockwise(overlap_key **root, overlap_key *rotate_node)
+{
+    overlap_key *child = rotate_node->tree_left;
+    rotate_node->tree_left = child->tree_right;
+    if (rotate_node->tree_left) {
+        rotate_node->tree_left->tree_parent = rotate_node;
+    }
+    child->tree_parent = rotate_node->tree_parent;
+    if (child->tree_parent == NULL) {
+        *root = child;
+    }
+    else {
+        if (rotate_node == rotate_node->tree_parent->tree_left) {
+            rotate_node->tree_parent->tree_left = child;
+        }
+        else {
+            rotate_node->tree_parent->tree_right = child;
+        }
+    }
+    child->tree_right = rotate_node;
+    rotate_node->tree_parent = child;
+}
+
+
+static void overlap_hash(overlap_key *elt,
+                         overlap_key **hash_table, int nhash,
+                         unsigned flags)
+{
+    /* Each bucket in the hash table holds a red-black tree
+     * containing the overlap_keys that hash into that bucket
+     */
+    overlap_key **child = &(hash_table[elt->elt->key_checksum & (nhash - 1)]);
+    overlap_key **root = child;
+    overlap_key *parent = NULL;
+    overlap_key *next;
+
+    /* Look for the element in the tree */
+    while ((next = *child) != NULL) {
+        int direction = strcasecmp(elt->elt->key, next->elt->key);
+        if (direction < 0) {
+            parent = next;
+            child = &(next->tree_left);
+        }
+        else if (direction > 0) {
+            parent = next;
+            child = &(next->tree_right);
+        }
+        else {
+            /* This is the key we're looking for */
+            if (flags == APR_OVERLAP_TABLES_MERGE) {
+                /* Just link this node at the end of the list
+                 * of values for the key.  It doesn't need to
+                 * be linked into the tree, becaue the node at
+                 * the head of this key's value list is in the
+                 * tree already.
+                 */
+                elt->skip = 1;
+                elt->merge_next = NULL;
+                if (next->merge_last) {
+                    next->merge_last->merge_next = elt;
+                }
+                else {
+                    next->merge_next = elt;
+                }
+                next->merge_last = elt;
+            }
+            else {
+                /* In the "set" case, don't bother storing
+                 * this value in the tree if it's already
+                 * there, except if the previous value was
+                 * from table 'a' (level==0) and this value
+                 * is from table 'b' (level==1)
+                 */
+                if (elt->level > next->level) {
+                    elt->tree_left = next->tree_left;
+                    if (next->tree_left) {
+                        next->tree_left->tree_parent = elt;
+                    }
+                    elt->tree_right = next->tree_right;
+                    if (next->tree_right) {
+                        next->tree_right->tree_parent = elt;
+                    }
+                    elt->tree_parent = next->tree_parent;
+                    (*child) = elt;
+                    elt->merge_next = NULL;
+                    elt->merge_last = NULL;
+                    elt->skip = 0;
+                    next->skip = 1;
+                }
+                else {
+                    elt->skip = 1;
+                }
+            }
+            return;
+        }
+    }
+
+    /* The element wasn't in the tree, so add it */
+    elt->tree_left = NULL;
+    elt->tree_right = NULL;
+    elt->tree_parent = parent;
+    (*child) = elt;
+    elt->merge_next = NULL;
+    elt->merge_last = NULL;
+    elt->skip = 0;
+    elt->color = RED;
+
+    /* Shuffle the nodes to maintain the red-black tree's balanced
+     * shape property.  (This is what guarantees O(n*log(n)) worst-case
+     * performance for apr_table_overlap().)
+     */
+    next = elt;
+    while ((next->tree_parent) && (next->tree_parent->color == RED)) {
+        /* Note: Root is always black, and red and black nodes
+         * alternate on any path down the tree.  So if we're inside
+         * this block, the grandparent node is non-NULL.
+         */
+        overlap_key *grandparent = next->tree_parent->tree_parent;
+        if (next->tree_parent == grandparent->tree_left) {
+            overlap_key *parent_sibling = grandparent->tree_right;
+            if (parent_sibling && (parent_sibling->color == RED)) {
+                next->tree_parent->color = BLACK;
+                parent_sibling->color = BLACK;
+                grandparent->color = RED;
+                next = grandparent;
+            }
+            else {
+                if (next == next->tree_parent->tree_right) {
+                    next = next->tree_parent;
+                    rotate_counterclockwise(root, next);
+                }
+                next->tree_parent->color = BLACK;
+                next->tree_parent->tree_parent->color = RED;
+                rotate_clockwise(root, next->tree_parent->tree_parent);
+            }
+        }
+        else {
+            overlap_key *parent_sibling = grandparent->tree_left;
+            if (parent_sibling && (parent_sibling->color == RED)) {
+                next->tree_parent->color = BLACK;
+                parent_sibling->color = BLACK;
+                grandparent->color = RED;
+                next = grandparent;
+            }
+            else {
+                if (next == next->tree_parent->tree_left) {
+                    next = next->tree_parent;
+                    rotate_clockwise(root, next);
+                }
+                next->tree_parent->color = BLACK;
+                next->tree_parent->tree_parent->color = RED;
+                rotate_counterclockwise(root, next->tree_parent->tree_parent);
+            }
+        }
+    }
+    (*root)->color = BLACK;
+}
+
+/* Must be a power of 2 */
+#define DEFAULT_HASH_SIZE 16
 
 APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags)
 {
-    overlap_key cat_keys_buf[APR_OVERLAP_TABLES_ON_STACK];
-    overlap_key *cat_keys;
+    int max_keys;
     int nkeys;
-    apr_table_entry_t *e;
-    apr_table_entry_t *last_e;
-    overlap_key *left;
-    overlap_key *right;
-    overlap_key *last;
+    overlap_key *cat_keys; /* concatenation of the keys of a and b */
+    overlap_key *b_start;
+    overlap_key **hash_table;
+    int nhash;
+    int i;
+    apr_table_entry_t *elts;
 
-    nkeys = a->a.nelts + b->a.nelts;
-    if (nkeys < APR_OVERLAP_TABLES_ON_STACK) {
-	cat_keys = cat_keys_buf;
+    max_keys = a->a.nelts + b->a.nelts;
+    cat_keys = apr_palloc(b->a.pool, sizeof(overlap_key) * max_keys);
+    nhash = DEFAULT_HASH_SIZE;
+    while (nhash < max_keys) {
+        nhash <<= 1;
     }
-    else {
-	/* XXX: could use scratch free space in a or b's pool instead...
-	 * which could save an allocation in b's pool.
-	 */
-	cat_keys = apr_palloc(b->a.pool, sizeof(overlap_key) * nkeys);
-    }
+    hash_table = (overlap_key **)apr_pcalloc(b->a.pool,
+                                             sizeof(overlap_key *) * nhash);
 
+    /* The cat_keys array contains an element for each entry in a,
+     * followed by one for each in b.  While populating this array,
+     * we also use it as:
+     *  1) a hash table, to detect matching keys, and
+     *  2) a linked list of multiple values for a given key (in the
+     *     APR_OVERLAP_TABLES_MERGE case)
+     */
+
+    /* First, the elements of a */
     nkeys = 0;
+    elts = (apr_table_entry_t *)a->a.elts;
+    for (i = 0; i < a->a.nelts; i++, nkeys++) {
+        cat_keys[nkeys].elt = &(elts[i]);
+        cat_keys[nkeys].level = 0;
+        overlap_hash(&(cat_keys[nkeys]), hash_table, nhash, flags);
+    }
 
-    /* Create a list of the entries from a concatenated with the entries
-     * from b.
+    /* Then the elements of b */
+    elts = (apr_table_entry_t *)b->a.elts;
+    for (i = 0; i < b->a.nelts; i++, nkeys++) {
+        cat_keys[nkeys].elt = &(elts[i]);
+        cat_keys[nkeys].level = 1;
+        overlap_hash(&(cat_keys[nkeys]), hash_table, nhash, flags);
+    }
+
+    /* Copy concatenated list of elements into table a to
+     * form the new table contents, but:
+     *   1) omit the ones marked "skip," and
+     *   2) merge values for the same key if needed
      */
-    e = (apr_table_entry_t *)a->a.elts;
-    last_e = e + a->a.nelts;
-    while (e < last_e) {
-	cat_keys[nkeys].key = e->key;
-	cat_keys[nkeys].val = e->val;
-	cat_keys[nkeys].order = nkeys;
-	++nkeys;
-	++e;
-    }
-
-    e = (apr_table_entry_t *)b->a.elts;
-    last_e = e + b->a.nelts;
-    while (e < last_e) {
-	cat_keys[nkeys].key = e->key;
-	cat_keys[nkeys].val = e->val;
-	cat_keys[nkeys].order = nkeys;
-	++nkeys;
-	++e;
-    }
-
-    qsort(cat_keys, nkeys, sizeof(overlap_key), sort_overlap);
-
-    /* Now iterate over the sorted list and rebuild a.
-     * Start by making sure it has enough space.
-     */
-    a->a.nelts = 0;
-    if (a->a.nalloc < nkeys) {
-	a->a.elts = apr_palloc(a->a.pool, a->a.elt_size * nkeys * 2);
-	a->a.nalloc = nkeys * 2;
-    }
-
-    /*
-     * In both the merge and set cases we retain the invariant:
-     *
-     * left->key, (left+1)->key, (left+2)->key, ..., (right-1)->key
-     * are all equal keys.  (i.e. strcasecmp returns 0)
-     *
-     * We essentially need to find the maximal
-     * right for each key, then we can do a quick merge or set as
-     * appropriate.
-     */
-
-    if (flags & APR_OVERLAP_TABLES_MERGE) {
-	left = cat_keys;
-	last = left + nkeys;
-	while (left < last) {
-	    right = left + 1;
-	    if (right == last
-		|| strcasecmp(left->key, right->key)) {
-		apr_table_addn(a, left->key, left->val);
-		left = right;
-	    }
-	    else {
-		char *strp;
-		char *value;
-		size_t len;
-
-		/* Have to merge some headers.  Let's re-use the order field,
-		 * since it's handy... we'll store the length of val there.
-		 */
-		left->order = strlen(left->val);
-		len = left->order;
-		do {
-		    right->order = strlen(right->val);
-		    len += 2 + right->order;
-		    ++right;
-		} while (right < last
-			 && !strcasecmp(left->key, right->key));
-		/* right points one past the last header to merge */
-		value = apr_palloc(a->a.pool, len + 1);
-		strp = value;
-		for (;;) {
-		    memcpy(strp, left->val, left->order);
-		    strp += left->order;
-		    ++left;
-		    if (left == right) {
-			break;
-		    }
-		    *strp++ = ',';
-		    *strp++ = ' ';
-		}
-		*strp = 0;
-		apr_table_addn(a, (left-1)->key, value);
-	    }
-	}
-    }
-    else {
-	left = cat_keys;
-	last = left + nkeys;
-	while (left < last) {
-	    right = left + 1;
-	    while (right < last && !strcasecmp(left->key, right->key)) {
-		++right;
-	    }
-	    apr_table_addn(a, (right-1)->key, (right-1)->val);
-	    left = right;
-	}
+    make_array_core(&a->a, b->a.pool, max_keys, sizeof(apr_table_entry_t), 0);
+    nkeys = 0;
+    for (i = 0; i < max_keys; i++) {
+        if (cat_keys[i].skip) {
+            continue;
+        }
+        if (cat_keys[i].merge_next) {
+            apr_table_entry_t *elt;
+            char *new_val;
+            char *val_next;
+            overlap_key *next = cat_keys[i].merge_next;
+            int len = (cat_keys[i].elt->val ?
+                       strlen(cat_keys[i].elt->val) : 0);
+            do {
+                len += 2;
+                if (next->elt->val) {
+                    len += strlen(next->elt->val);
+                }
+                next = next->merge_next;
+            } while (next);
+            len++;
+            new_val = (char *)apr_palloc(b->a.pool, len);
+            val_next = new_val;
+            if (cat_keys[i].elt->val) {
+                strcpy(val_next, cat_keys[i].elt->val);
+                val_next += strlen(cat_keys[i].elt->val);
+            }
+            next = cat_keys[i].merge_next;
+            do {
+                *val_next++ = ',';
+                *val_next++ = ' ';
+                if (next->elt->val) {
+                    strcpy(val_next, next->elt->val);
+                    val_next += strlen(next->elt->val);
+                }
+                next = next->merge_next;
+            } while (next);
+            *val_next = 0;
+            elt = (apr_table_entry_t *)table_push(a);
+            elt->key = cat_keys[i].elt->key;
+            elt->val = new_val;
+            elt->key_checksum = cat_keys[i].elt->key_checksum;
+        }
+        else {
+            apr_table_entry_t *elt = (apr_table_entry_t *)table_push(a);
+            elt->key = cat_keys[i].elt->key;
+            elt->val = cat_keys[i].elt->val;
+            elt->key_checksum = cat_keys[i].elt->key_checksum;
+        }
     }
 }
 

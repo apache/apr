@@ -1,4 +1,8 @@
 Changes with APR b1  
+  *)  Speed up apr_table operations by using a cache/checksum and a
+      red-black tree in the overlay
+      [Brain Pane <bpane@pacbell.net>, Cliff Woolley]
+
   *)  Speed up apr_pool_userdata_set[n] by letting hash_set figure out
       the strings length
       [Brain Pane <bpane@pacbell.net>]
