@@ -118,7 +118,9 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
         apr_uint64_t size = *nbytes;
 
 #if APR_HAS_THREADS
-        apr_thread_mutex_lock(thefile->thlock);
+        if (thefile->thlock) {
+            apr_thread_mutex_lock(thefile->thlock);
+        }
 #endif
 
         if (thefile->direction == 1) {
@@ -164,7 +166,9 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
             rv = 0;
         }
 #if APR_HAS_THREADS
-        apr_thread_mutex_unlock(thefile->thlock);
+        if (thefile->thlock) {
+            apr_thread_mutex_unlock(thefile->thlock);
+        }
 #endif
         return rv;
     }
@@ -223,7 +227,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         int size = *nbytes;
 
 #if APR_HAS_THREADS
-        apr_thread_mutex_lock(thefile->thlock);
+        if (thefile->thlock) {
+            apr_thread_mutex_lock(thefile->thlock);
+        }
 #endif
 
         if ( thefile->direction == 0 ) {
@@ -251,7 +257,9 @@ APR_DECLARE(apr_status_t) apr_file_write(apr_file_t *thefile, const void *buf, a
         }
 
 #if APR_HAS_THREADS
-        apr_thread_mutex_unlock(thefile->thlock);
+        if (thefile->thlock) {
+            apr_thread_mutex_unlock(thefile->thlock);
+        }
 #endif
         return rv;
     }

@@ -94,7 +94,7 @@ static apr_status_t _file_dup(apr_file_t **new_file,
      * want to create it again as we could leak!
      */
 #if APR_HAS_THREADS
-    if ((*new_file)->buffered && !(*new_file)->thlock) {
+    if ((*new_file)->buffered && !(*new_file)->thlock && old_file->thlock) {
         apr_thread_mutex_create(&((*new_file)->thlock),
                                 APR_THREAD_MUTEX_DEFAULT, p);
     }
