@@ -109,7 +109,7 @@ APR_DECLARE(apr_status_t) apr_file_dup2(apr_file_t *new_file,
         stdhandle = STD_INPUT_HANDLE;
     }
 
-    if (stdhandle != INVALID_HANDLE_VALUE) {
+    if (stdhandle != -1) {
         if (!DuplicateHandle(hproc, old_file->filehand, 
                              hproc, &newhand, 0,
                              TRUE, DUPLICATE_SAME_ACCESS)) {
