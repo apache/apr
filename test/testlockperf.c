@@ -154,8 +154,8 @@ int test_inter_mutex(void)
 
     printf("apr_lock(INTRAPROCESS, MUTEX) Lock Tests\n");
     printf("%-60s", "    Initializing the apr_lock_t");
-    s1 = apr_lock_create(&inter_lock, APR_MUTEX, APR_INTRAPROCESS,
-                         "lock.file", pool);
+    s1 = apr_lock_create(&inter_lock, APR_MUTEX, APR_INTRAPROCESS, 
+                         APR_LOCK_DEFAULT, "lock.file", pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
         return s1;
@@ -305,7 +305,7 @@ int test_inter_rwlock(void)
     printf("apr_lock(INTRAPROCESS, READWRITE) Lock Tests\n");
     printf("%-60s", "    Initializing the apr_lock_t");
     s1 = apr_lock_create(&inter_rwlock, APR_READWRITE, APR_INTRAPROCESS,
-                         "lock.file", pool);
+                         APR_LOCK_DEFAULT, "lock.file", pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
         return s1;

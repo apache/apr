@@ -624,15 +624,7 @@ void apr_proc_mutex_unix_setup_lock(void)
 #endif
 }
 
-
-
-
-
-
-
-
-
-static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lockmech_e_np mech)
+static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lockmech_e mech)
 {
     switch (mech) {
     case APR_LOCK_FCNTL:
@@ -682,7 +674,7 @@ static apr_status_t proc_mutex_choose_method(apr_proc_mutex_t *new_mutex, apr_lo
     return APR_SUCCESS;
 }
 
-static apr_status_t proc_mutex_create(apr_proc_mutex_t *new_mutex, apr_lockmech_e_np mech, const char *fname)
+static apr_status_t proc_mutex_create(apr_proc_mutex_t *new_mutex, apr_lockmech_e mech, const char *fname)
 {
     apr_status_t rv;
 
@@ -703,15 +695,8 @@ static apr_status_t proc_mutex_create(apr_proc_mutex_t *new_mutex, apr_lockmech_
 
 APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 const char *fname,
+                                                apr_lockmech_e mech,
                                                 apr_pool_t *pool)
-{
-    return apr_proc_mutex_create_np(mutex, fname, APR_LOCK_DEFAULT, pool);
-}
-
-APR_DECLARE(apr_status_t) apr_proc_mutex_create_np(apr_proc_mutex_t **mutex,
-                                                   const char *fname,
-                                                   apr_lockmech_e_np mech,
-                                                   apr_pool_t *pool)
 {
     apr_proc_mutex_t *new_mutex;
     apr_status_t rv;

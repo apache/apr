@@ -129,7 +129,8 @@ int main(void)
     apr_thread_once_init(&control, context);
 
     printf("%-60s", "Initializing the lock"); 
-    r1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, "lock.file", context); 
+    r1 = apr_lock_create(&thread_lock, APR_MUTEX, APR_INTRAPROCESS, 
+                         APR_LOCK_DEFAULT, "lock.file", context); 
     if (r1 != APR_SUCCESS) {
         fflush(stdout);
         fprintf(stderr, "Failed\nCould not create lock\n");

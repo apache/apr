@@ -104,7 +104,7 @@ static apr_status_t test_exclusive(const char *lockname)
  
     printf("Exclusive lock test\n");
     printf("%-60s", "    Initializing the lock");
-    s1 = apr_proc_mutex_create(&proc_lock, lockname, pool);
+    s1 = apr_proc_mutex_create(&proc_lock, lockname, APR_LOCK_DEFAULT, pool);
  
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
