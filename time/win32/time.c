@@ -62,44 +62,20 @@
 #include <string.h>
 #include <winbase.h>
 
-/* Number of micro-seconds between the beginning of the Windows epoch
- * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970) 
- */
-#define APR_DELTA_EPOCH_IN_USEC   11644473600000000;
-
-void FileTimeToAprTime(apr_time_t *result, FILETIME *input)
-{
-    /* Convert FILETIME one 64 bit number so we can work with it. */
-    *result = input->dwHighDateTime;
-    *result = (*result) << 32;
-    *result |= input->dwLowDateTime;
-    *result /= 10;    /* Convert from 100 nano-sec periods to micro-seconds. */
-    *result -= APR_DELTA_EPOCH_IN_USEC;  /* Convert from Windows epoch to Unix epoch */
-    return;
-}
-
-void AprTimeToFileTime(LPFILETIME pft, apr_time_t t)
-{
-    LONGLONG ll;
-    t += APR_DELTA_EPOCH_IN_USEC;
-    ll = t * 10;
-    pft->dwLowDateTime = (DWORD)ll;
-    pft->dwHighDateTime = (DWORD) (ll >> 32);
-    return;
-}
-
 /* Leap year is any year divisible by four, but not by 100 unless also
  * divisible by 400
  */
 #define IsLeapYear(y) ((!(y % 4)) ? (((!(y % 400)) && (y % 100)) ? 1 : 0) : 0)
 
-void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm)
+static void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm, BOOL lt)
 {
     TIME_ZONE_INFORMATION tz;
     DWORD rc;
     static const int dayoffset[12] =
     {0, 31, 59, 90, 120, 151, 182, 212, 243, 273, 304, 334};
 
+    /* XXX: this is a looser - can't forefit precision like this
+     */
     xt->tm_usec = tm->wMilliseconds * 1000;
     xt->tm_sec  = tm->wSecond;
     xt->tm_min  = tm->wMinute;
@@ -115,6 +91,12 @@ void SystemTimeToAprExpTime(apr_exploded_time_t *xt, SYSTEMTIME *tm)
      */
     if (IsLeapYear(tm->wYear) && (xt->tm_yday > 58))
         xt->tm_yday++;
+
+    if (!lt) {
+        xt->tm_isdst = 0;
+        xt->tm_gmtoff = 0;
+        return;
+    }
 
     rc = GetTimeZoneInformation(&tz);
     switch (rc) {
@@ -161,7 +143,8 @@ APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result,
     SYSTEMTIME st;
     AprTimeToFileTime(&ft, input);
     FileTimeToSystemTime(&ft, &st);
-    SystemTimeToAprExpTime(result, &st);
+    SystemTimeToAprExpTime(result, &st, 0);
+    result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
     return APR_SUCCESS;
 }
 
@@ -174,7 +157,8 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
     AprTimeToFileTime(&ft, input);
     FileTimeToLocalFileTime(&ft, &localft);
     FileTimeToSystemTime(&localft, &st);
-    SystemTimeToAprExpTime(result, &st);
+    SystemTimeToAprExpTime(result, &st, 1);
+    result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
     return APR_SUCCESS;
 }
 
@@ -239,6 +223,8 @@ APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
                                               apr_os_imp_time_t **ostime,
                                               apr_pool_t *cont)
 {
+    /* XXX: sanity failure, what is file time, gmt or local ?
+     */
     FileTimeToAprTime(aprtime, *ostime);
     return APR_SUCCESS;
 }
@@ -247,7 +233,10 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_exploded_time_t *aprtime,
                                               apr_os_exp_time_t **ostime,
                                               apr_pool_t *cont)
 {
-    SystemTimeToAprExpTime(aprtime, *ostime);
+    /* XXX: sanity failure, what is system time, gmt or local ?
+     *      Assume local for this moment.
+     */
+    SystemTimeToAprExpTime(aprtime, *ostime, 1);
     return APR_SUCCESS;
 }
 
