@@ -144,7 +144,7 @@
 
 /*  APR Feature Macros */
 #define APR_HAS_THREADS        1
-#define APR_HAVE_SENDFILE      1
+#define APR_HAS_SENDFILE      1
 #define APR_HAS_RANDOM         1
 #define APR_HAS_DSO            1
 
