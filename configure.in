@@ -1252,7 +1252,7 @@ msg=no ])
 AC_MSG_RESULT([$msg])
 
 AC_MSG_CHECKING([if fd == socket on this platform])
-if test "x$file_as_socket" = "x" ; then
+if test "x$file_as_socket" = "x1" ; then
     file_as_socket="1";
     echo "yes"
 else
