@@ -92,6 +92,7 @@ CuSuite *testsockopt(void);
 CuSuite *testpipe(void);
 CuSuite *testthread(void);
 CuSuite *testgetopt(void);
+CuSuite *testnames(void);
 
 /* Assert that RV is an APR_SUCCESS value; else fail giving strerror
  * for RV and CONTEXT message. */

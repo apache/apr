@@ -10,7 +10,6 @@ PROGRAMS = \
 	client@EXEEXT@ \
 	sendfile@EXEEXT@ \
 	server@EXEEXT@ \
-	testnames@EXEEXT@ \
 	testflock@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testlockperf@EXEEXT@ \
@@ -45,9 +44,6 @@ check: $(PROGRAMS) $(NONPORTABLE)
 			break; \
 		fi \
 	done
-
-testnames@EXEEXT@: testnames.lo $(LOCAL_LIBS)
-	$(LINK) testnames.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testflock@EXEEXT@: testflock.lo $(LOCAL_LIBS)
 	$(LINK) testflock.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -112,7 +108,7 @@ TESTS = testall.lo testtime.lo teststr.lo testvsn.lo testipsub.lo \
 	testfmt.lo testfile.lo testdir.lo testfileinfo.lo testrand.lo \
 	testdso.lo testoc.lo testdup.lo testsockets.lo testproc.lo \
 	testpoll.lo testlock.lo testsockopt.lo testpipe.lo testthread.lo \
-	testhash.lo testargs.lo
+	testhash.lo testargs.lo testnames.lo
 
 testall: $(TESTS) mod_test.la libmod_test.la occhild@EXEEXT@ \
 	 CuTest.lo proc_child@EXEEXT@ $(LOCAL_LIBS)

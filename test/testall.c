@@ -100,6 +100,7 @@ static const struct testlist {
     {"testlock", testlock},
     {"testthread", testthread},
     {"testargs", testgetopt},
+    {"testnames", testnames},
     {"LastTest", NULL}
 };
 
