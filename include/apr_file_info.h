@@ -106,7 +106,7 @@ typedef enum {
 #define APR_WWRITE      0x0002 /**< Write by others */
 #define APR_WEXECUTE    0x0001 /**< Execute by others */
 
-#define APR_OS_DEFAULT  0x0FFF /**< use OS's default permissions */
+#define APR_OS_DEFAULT  0xFFFF /**< use OS's default permissions */
 
 /* additional permission flags for apr_file_copy  and apr_file_append */
 #define APR_FILE_SOURCE_PERMS 0x1000 /**< Copy source file's permissions */
