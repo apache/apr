@@ -65,38 +65,34 @@
 ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
-    
+    int fds, err = 0;
+
     do {
-        rv = send(sock->socketdes, buf, (*len), 0);
-    } while (rv == -1 && sock_errno() == SOCEINTR);
-
-    if (rv == -1 && sock_errno() == SOCEWOULDBLOCK && sock->timeout != 0) {
-        int fds;
-        int srv;
-
-        do {
+        if (!sock->nonblock || err == SOCEWOULDBLOCK) {
             fds = sock->socketdes;
-            srv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
-        } while (srv == -1 && sock_errno() == SOCEINTR);
+            rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
 
-        if (srv == 0) {
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-            (*len) = -1;
-            return os2errno(sock_errno());
-        }
-        else {
-            do {
-                rv = send(sock->socketdes, buf, (*len), 0);
-            } while (rv == -1 && sock_errno() == SOCEINTR);
-        }
-    }
+            if (rv != 1) {
+                *len = -1;
+                err = sock_errno();
 
-    if (rv < 0) {
-        *len = 0;
-        return os2errno(sock_errno());
+                if (rv == 0)
+                    return APR_TIMEUP;
+
+                if (err == SOCEINTR)
+                    continue;
+
+                return os2errno(err);
+            }
+        }
+
+        rv = send(sock->socketdes, buf, (*len), 0);
+        err = rv < 0 ? sock_errno() : 0;
+    } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
+
+    if (err) {
+        *len = -1;
+        return os2errno(err);
     }
 
     (*len) = rv;
@@ -108,38 +104,34 @@ ap_status_t ap_send(struct socket_t *sock, const char *buf, ap_ssize_t *len)
 ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
 {
     ssize_t rv;
-    
+    int fds, err = 0;
+
     do {
-        rv = recv(sock->socketdes, buf, (*len), 0);
-    } while (rv == -1 && sock_errno() == SOCEINTR);
-
-    if (rv == -1 && sock_errno() == SOCEWOULDBLOCK && sock->timeout != 0) {
-        int fds;
-        int srv;
-
-        do {
+        if (!sock->nonblock || err == SOCEWOULDBLOCK) {
             fds = sock->socketdes;
-            srv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
-        } while (srv == -1 && sock_errno() == SOCEINTR);
+            rv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
 
-        if (srv == 0) {
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-            (*len) = -1;
-            return os2errno(sock_errno());
-        }
-        else {
-            do {
-                rv = recv(sock->socketdes, buf, (*len), 0);
-            } while (rv == -1 && sock_errno() == SOCEINTR);
-        }
-    }
+            if (rv != 1) {
+                *len = -1;
+                err = sock_errno();
 
-    if (rv < 0) {
-        *len = 0;
-        return os2errno(sock_errno());
+                if (rv == 0)
+                    return APR_TIMEUP;
+
+                if (err == SOCEINTR)
+                    continue;
+
+                return os2errno(err);
+            }
+        }
+
+        rv = recv(sock->socketdes, buf, (*len), 0);
+        err = rv < 0 ? sock_errno() : 0;
+    } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
+
+    if (err) {
+        *len = -1;
+        return os2errno(err);
     }
 
     (*len) = rv;
@@ -148,45 +140,43 @@ ap_status_t ap_recv(struct socket_t *sock, char *buf, ap_ssize_t *len)
 
 
 
-ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *nbytes)
+ap_status_t ap_sendv(ap_socket_t *sock, const struct iovec *vec, ap_int32_t nvec, ap_int32_t *len)
 {
     ap_status_t rv;
     struct iovec *tmpvec;
+    int fds, err = 0;
 
     tmpvec = alloca(sizeof(struct iovec) * nvec);
     memcpy(tmpvec, vec, sizeof(struct iovec) * nvec);
 
     do {
-        rv = writev(sock->socketdes, tmpvec, nvec);
-    } while (rv == -1 && sock_errno() == SOCEINTR);
-
-    if (rv == -1 && sock_errno() == SOCEWOULDBLOCK && sock->timeout != 0) {
-        int fds;
-        int srv;
-
-        do {
+        if (!sock->nonblock || err == SOCEWOULDBLOCK) {
             fds = sock->socketdes;
-            srv = select(&fds, 1, 0, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
-        } while (srv == -1 && sock_errno() == SOCEINTR);
+            rv = select(&fds, 0, 1, 0, sock->timeout >= 0 ? sock->timeout*1000 : -1);
 
-        if (srv == 0) {
-            return APR_TIMEUP;
+            if (rv != 1) {
+                *len = -1;
+                err = sock_errno();
+
+                if (rv == 0)
+                    return APR_TIMEUP;
+
+                if (err == SOCEINTR)
+                    continue;
+
+                return os2errno(err);
+            }
         }
-        else if (srv < 0) {
-            return os2errno(sock_errno());
-        }
-        else {
-            do {
-                rv = writev(sock->socketdes, (struct iovec *)vec, nvec);
-            } while (rv == -1 && sock_errno() == SOCEINTR);
-        }
-    }
-    
-    if (rv < 0) {
-        *nbytes = 0;
-        return os2errno(sock_errno());
+
+        rv = writev(sock->socketdes, tmpvec, nvec);
+        err = rv < 0 ? sock_errno() : 0;
+    } while (err == SOCEINTR || err == SOCEWOULDBLOCK);
+
+    if (err) {
+        *len = -1;
+        return os2errno(err);
     }
 
-    *nbytes = rv;
+    *len = rv;
     return APR_SUCCESS;
 }
