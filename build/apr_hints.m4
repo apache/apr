@@ -37,7 +37,6 @@ if test "x$apr_preload_done" != "xyes" ; then
 	APR_ADDTO(LDFLAGS, [-Xlinker \"-WL,cap=ia,ba,ph;nmstack=1024000\"])
 	;;
     *-apple-aux3*)
-        APR_SETVAR(CC, [gcc])
 	APR_ADDTO(CPPFLAGS, [-DAUX3 -D_POSIX_SOURCE])
 	APR_ADDTO(LIBS, [-lposix -lbsd])
 	APR_ADDTO(LDFLAGS, [-s])
@@ -143,7 +142,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DNEXT])
 	;;
     *-next-openstep*)
-	APR_SETVAR(CC, [cc])
 	APR_SETIFNULL(CFLAGS, [-O])
 	APR_ADDTO(CPPFLAGS, [-DNEXT])
 	;;
@@ -163,13 +161,11 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(LIBS, [-N128k -lunix])
 	;;
     *-qnx32)
-        APR_SETVAR(CC, [cc -F])
 	APR_ADDTO(CPPFLAGS, [-DQNX])
 	APR_ADDTO(CFLAGS, [-mf -3])
 	APR_ADDTO(LIBS, [-N128k -lunix])
 	;;
     *-isc4*)
-	APR_SETVAR(CC, [gcc])
 	APR_ADDTO(CPPFLAGS, [-posix -DISC])
 	APR_ADDTO(LDFLAGS, [-posix])
 	APR_ADDTO(LIBS, [-linet])
@@ -223,11 +219,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(LIBS, [-lgen])
 	;;
     TPF)
-       APR_SETVAR(CC, [c89])
        APR_ADDTO(CPPFLAGS, [-DTPF -D_POSIX_SOURCE])
        ;;
     BS2000*-siemens-sysv4*)
-	APR_SETVAR(CC, [c89 -XLLML -XLLMK -XL -Kno_integer_overflow])
 	APR_ADDTO(CPPFLAGS, [-DSVR4 -D_XPG_IV])
 	;;
     *-siemens-sysv4*)
@@ -282,7 +276,6 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_ADDTO(CPPFLAGS, [-DCONVEXOS11])
 	APR_SETIFNULL(CFLAGS, [-O1])
 	APR_ADDTO(CFLAGS, [-ext])
-	APR_SETVAR(CC, [cc])
 	;;
     i860-intel-osf1)
 	APR_ADDTO(CPPFLAGS, [-DPARAGON])
@@ -354,11 +347,9 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     m88k-*-CX/SX|CYBER)
 	APR_ADDTO(CPPFLAGS, [-D_CX_SX])
 	APR_ADDTO(CFLAGS, [-Xa])
-	APR_SETVAR(CC, [cc])
 	;;
     *-tandem-oss)
 	APR_ADDTO(CPPFLAGS, [-D_TANDEM_SOURCE -D_XOPEN_SOURCE_EXTENDED=1])
-	APR_SETVAR(CC, [c89])
 	;;
     *-ibm-os390)
        APR_SETIFNULL(apr_lock_method, [USE_SYSVSEM_SERIALIZE])
@@ -389,11 +380,38 @@ dnl  Allows us to provide a default choice of compiler which
 dnl  the user can override.
 AC_DEFUN(APR_CC_HINTS, [
 case "$host" in
+  *-apple-aux3*)
+      APR_SETIFNULL(CC, [gcc])
+      ;;
+  BS2000*-siemens-sysv4*)
+      APR_SETIFNULL(CC, [c89 -XLLML -XLLMK -XL -Kno_integer_overflow])
+      ;;
+  *convex-v11*)
+      APR_SETIFNULL(CC, [cc])
+      ;;
   *-ibm-os390)
       APR_SETIFNULL(CC, [cc])
       ;;
   *-ibm-as400)
       APR_SETIFNULL(CC, [icc])
+      ;;
+  *-isc4*)
+      APR_SETIFNULL(CC, [gcc])
+      ;;
+  m88k-*-CX/SX|CYBER)
+      APR_SETIFNULL(CC, [cc])
+      ;;
+  *-next-openstep*)
+      APR_SETIFNULL(CC, [cc])
+      ;;
+  *-qnx32)
+      APR_SETIFNULL(CC, [cc -F])
+      ;;
+  *-tandem-oss)
+      APR_SETIFNULL(CC, [c89])
+      ;;
+  TPF)
+      APR_SETIFNULL(CC, [c89])
       ;;
 esac
 ])
