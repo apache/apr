@@ -1,0 +1,86 @@
+#!/bin/sh
+
+PREFIX="@prefix@"
+EXEC_PREFIX="@exec_prefix@"
+LIBDIR="@libdir@"
+INCLUDEDIR="@includedir@"
+CC="@CC@"
+CPP="@CPP@"
+SHELL="@SHELL@"
+CPPFLAGS="@EXTRA_CPPFLAGS@"
+CFLAGS="@EXTRA_CFLAGS@"
+LDFLAGS="@EXTRA_LDFLAGS@"
+LIBS="@EXTRA_LIBS@"
+INCLUDES="@EXTRA_INCLUDES@"
+LIBTOOL_LIBS="@LIBTOOL_LIBS@"
+SHLIBPATH_VAR="@shlibpath_var@"
+APR_SOURCE_DIR="@abs_srcdir@"
+APR_SO_EXT="@so_ext@"
+APR_LIB_TARGET="@export_lib_target@"
+
+show_usage()
+{
+    cat << EOF
+Usage: apr-config [OPTION]
+
+Known values for OPTION are:
+  --prefix=DIR      change prefix to DIR
+  --cflags          print C compiler flags
+  --cppflags        print cpp flags
+  --includes        print include information
+  --ldflags         print linker flags
+  --libs            print library information
+  --help            print this help
+EOF
+}
+
+if test $# -eq 0; then
+    show_usage
+    exit 1
+fi
+
+while test $# -gt 0; do
+    # Normalize the prefix.
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    # It is possible for the user to override our prefix.
+    --prefix=*)
+    prefix=$optarg
+    ;;
+    --prefix)
+    echo $PREFIX
+    ;;
+    --cflags)
+    echo $CFLAGS
+    ;;
+    --cppflags)
+    echo $CPPFLAGS
+    ;;
+    --libs)
+    echo $LIBS
+    ;;
+    --ldflags)
+    echo $LDFLAGS
+    ;;
+    --includes)
+    echo $INCLUDES
+    ;;
+    --help)
+    show_usage
+    exit 1
+    ;;
+    *)
+    show_usage
+    exit 1
+    ;;
+    esac
+
+    # Next please.
+    shift
+done
+
+exit 0
