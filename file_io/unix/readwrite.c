@@ -263,6 +263,7 @@ ap_status_t ap_puts(ap_file_t *thefile, char *str)
         if (rv != 1) {
             return errno;
         }
+        i++;
     }
     return APR_SUCCESS; 
 }
