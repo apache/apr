@@ -65,25 +65,23 @@
 struct thread_t {
     ap_context_t *cntxt;
     HANDLE td;
-	ap_int32_t cancel;
-	ap_int32_t cancel_how;
+    ap_int32_t cancel;
+    ap_int32_t cancel_how;
 };
 
 struct threadattr_t {
     ap_context_t *cntxt;
     ap_int32_t detach;
-
 };
 
 struct threadkey_t {
     ap_context_t *cntxt;
     DWORD key;
-
 };
 
 struct procattr_t {
     ap_context_t *cntxt;
-	STARTUPINFO si;
+    STARTUPINFO si;
     ap_file_t *parent_in;
     ap_file_t *child_in;
     ap_file_t *parent_out;
@@ -92,12 +90,12 @@ struct procattr_t {
     ap_file_t *child_err;
     char *currdir;
     ap_int32_t cmdtype;
-	ap_int32_t detached;
+    ap_int32_t detached;
 };
 
 struct proc_t {
     ap_context_t *cntxt;
-	PROCESS_INFORMATION pi;
+    PROCESS_INFORMATION pi;
     struct procattr_t *attr;
 };
 
