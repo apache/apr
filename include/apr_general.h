@@ -159,7 +159,7 @@ int strncasecmp(const char *a, const char *b, size_t n);
 #endif
 
 /**
- * Allignment macros
+ * Alignment macros
  */
 
 /* APR_ALIGN() is only to be used to align on a power of 2 boundary */
