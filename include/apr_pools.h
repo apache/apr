@@ -94,6 +94,7 @@ typedef struct apr_pool_t apr_pool_t;
 /**
  * Pool debug levels
  *
+ * <pre>
  * | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
  * ---------------------------------
  * |   |   |   |   |   |   |   | x |  General debug code enabled (usefull in
@@ -123,6 +124,7 @@ typedef struct apr_pool_t apr_pool_t;
  *
  * When no debug level was specified, assume general debug mode.
  * If level 0 was specified, debugging is switched off
+ * </pre>
  */
 #if defined(APR_POOL_DEBUG)
 #if (APR_POOL_DEBUG != 0) && (APR_POOL_DEBUG - 0 == 0)
