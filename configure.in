@@ -380,6 +380,15 @@ else
     off_t_fmt='#error Can not determine the proper size for off_t'
 fi
 
+# basically, we have tried to figure out the sizes of ap_ssize_t and
+# ap_off_t, but we don't always get it right.  If you find that we
+# don't get it right for your platform, you can override our decision
+# below.
+case "$OS" in
+   *linux*)
+       off_t_fmt='#define APR_OFF_T_FMT "ld"'
+esac
+
 AC_SUBST(short_value)
 AC_SUBST(int_value)
 AC_SUBST(long_value)
