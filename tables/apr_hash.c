@@ -83,11 +83,11 @@
 typedef struct apr_hash_entry_t apr_hash_entry_t;
 
 struct apr_hash_entry_t {
-    apr_hash_entry_t	*next;
-    int			 hash;
-    const void		*key;
-    apr_ssize_t		 klen;
-    const void		*val;
+    apr_hash_entry_t *next;
+    int               hash;
+    const void       *key;
+    apr_ssize_t       klen;
+    const void       *val;
 };
 
 /*
@@ -98,7 +98,7 @@ struct apr_hash_entry_t {
  * apr_hash_next().
  */
 struct apr_hash_index_t {
-    apr_hash_t	       *ht;
+    apr_hash_t         *ht;
     apr_hash_entry_t   *this, *next;
     int                 index;
 };
@@ -111,11 +111,12 @@ struct apr_hash_index_t {
  * collision rate.
  */
 struct apr_hash_t {
-    apr_pool_t		*pool;
+    apr_pool_t          *pool;
     apr_hash_entry_t   **array;
     apr_hash_index_t     iterator;  /* For apr_hash_first(NULL, ...) */
     int                  count, max;
 };
+
 #define INITIAL_MAX 15 /* tunable == 2^n - 1 */
 
 
@@ -148,9 +149,10 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
 {
     hi->this = hi->next;
     while (!hi->this) {
-	if (hi->index > hi->ht->max)
-	    return NULL;
-	hi->this = hi->ht->array[hi->index++];
+        if (hi->index > hi->ht->max)
+            return NULL;
+
+        hi->this = hi->ht->array[hi->index++];
     }
     hi->next = hi->this->next;
     return hi;
@@ -159,10 +161,11 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
 APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
-    if (p) 
+    if (p)
         hi = apr_palloc(p, sizeof(*hi));
     else
         hi = &ht->iterator;
+
     hi->ht = ht;
     hi->index = 0;
     hi->this = NULL;
@@ -171,9 +174,9 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht)
 }
 
 APR_DECLARE(void) apr_hash_this(apr_hash_index_t *hi,
-			       const void **key,
-			       apr_ssize_t *klen,
-			       void **val)
+                                const void **key,
+                                apr_ssize_t *klen,
+                                void **val)
 {
     if (key)  *key  = hi->this->key;
     if (klen) *klen = hi->this->klen;
@@ -195,10 +198,10 @@ static void expand_array(apr_hash_t *ht)
     new_max = ht->max * 2 + 1;
     new_array = alloc_array(ht, new_max);
     for (hi = apr_hash_first(NULL, ht); hi; hi = apr_hash_next(hi)) {
-	i = hi->this->hash & new_max;
-	hi->this->next = new_array[i];
-	new_array[i] = hi->this;
-    }	       
+        i = hi->this->hash & new_max;
+        hi->this->next = new_array[i];
+        new_array[i] = hi->this;
+    }
     ht->array = new_array;
     ht->max = new_max;
 }
@@ -213,9 +216,9 @@ static void expand_array(apr_hash_t *ht)
  */
 
 static apr_hash_entry_t **find_entry(apr_hash_t *ht,
-				     const void *key,
-				     apr_ssize_t klen,
-				     const void *val)
+                                     const void *key,
+                                     apr_ssize_t klen,
+                                     const void *val)
 {
     apr_hash_entry_t **hep, *he;
     const unsigned char *p;
@@ -271,18 +274,18 @@ static apr_hash_entry_t **find_entry(apr_hash_t *ht,
             hash = hash * 33 + *p;
         }
     }
-    
+
     /* scan linked list */
     for (hep = &ht->array[hash & ht->max], he = *hep;
-	 he;
-	 hep = &he->next, he = *hep) {
-	if (he->hash == hash &&
-	    he->klen == klen &&
-	    memcmp(he->key, key, klen) == 0)
-	    break;
+         he; hep = &he->next, he = *hep) {
+        if (he->hash == hash
+            && he->klen == klen
+            && memcmp(he->key, key, klen) == 0)
+            break;
     }
     if (he || !val)
-	return hep;
+        return hep;
+
     /* add a new entry for non-NULL values */
     he = apr_palloc(ht->pool, sizeof(*he));
     he->next = NULL;
@@ -331,21 +334,21 @@ APR_DECLARE(apr_hash_t *) apr_hash_copy(apr_pool_t *pool,
 }
 
 APR_DECLARE(void *) apr_hash_get(apr_hash_t *ht,
-			       const void *key,
-			       apr_ssize_t klen)
+                                 const void *key,
+                                 apr_ssize_t klen)
 {
     apr_hash_entry_t *he;
     he = *find_entry(ht, key, klen, NULL);
     if (he)
-	return (void *)he->val;
+        return (void *)he->val;
     else
-	return NULL;
+        return NULL;
 }
 
 APR_DECLARE(void) apr_hash_set(apr_hash_t *ht,
-			     const void *key,
-			     apr_ssize_t klen,
-			     const void *val)
+                               const void *key,
+                               apr_ssize_t klen,
+                               const void *val)
 {
     apr_hash_entry_t **hep;
     hep = find_entry(ht, key, klen, val);
@@ -372,15 +375,15 @@ APR_DECLARE(int) apr_hash_count(apr_hash_t *ht)
     return ht->count;
 }
 
-APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p, 
-                                          const apr_hash_t *overlay, 
+APR_DECLARE(apr_hash_t*) apr_hash_overlay(apr_pool_t *p,
+                                          const apr_hash_t *overlay,
                                           const apr_hash_t *base)
 {
     return apr_hash_merge(p, overlay, base, NULL, NULL);
 }
 
 APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
-                                         const apr_hash_t *overlay, 
+                                         const apr_hash_t *overlay,
                                          const apr_hash_t *base,
                                          void * (*merger)(apr_pool_t *p,
                                                      const void *key,
@@ -402,12 +405,12 @@ APR_DECLARE(apr_hash_t *) apr_hash_merge(apr_pool_t *p,
      * as long as p
      */
     if (!apr_pool_is_ancestor(overlay->pool, p)) {
-        fprintf(stderr, 
+        fprintf(stderr,
                 "apr_hash_overlay: overlay's pool is not an ancestor of p\n");
         abort();
     }
     if (!apr_pool_is_ancestor(base->pool, p)) {
-        fprintf(stderr, 
+        fprintf(stderr,
                 "apr_hash_overlay: base's pool is not an ancestor of p\n");
         abort();
     }
