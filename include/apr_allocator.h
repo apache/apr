@@ -80,7 +80,12 @@ typedef struct apr_allocator_t apr_allocator_t;
 /** the structure which holds information about the allocation */
 typedef struct apr_memnode_t apr_memnode_t;
 
-/** basic memory node structure */
+/** basic memory node structure
+ * @note The next, ref and first_avail fields are available for use by the
+ *       caller of apr_allocator_alloc(), the remaining fields are read-only.
+ *       The next, ref and first_avail fields will be properly restored by
+ *       apr_allocator_free().
+ */
 struct apr_memnode_t {
     apr_memnode_t *next;            /**< next memnode */
     apr_memnode_t **ref;            /**< reference to self */
