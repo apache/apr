@@ -74,7 +74,6 @@ typedef void *                        ap_dso_handle_sym_t;
  * @param res_handle Location to store new handle for the DSO.
  * @param path Path to the DSO library
  * @param ctx Pool to use. 
- * @keyword load DSO
  */
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
                         ap_pool_t *ctx);
