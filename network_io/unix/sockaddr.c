@@ -612,6 +612,9 @@ APR_DECLARE(apr_status_t) apr_getnameinfo(char **hostname,
         struct sockaddr_in tmpsa;
         tmpsa.sin_family = AF_INET;
         tmpsa.sin_addr.s_addr = ((apr_uint32_t *)sockaddr->ipaddr_ptr)[3];
+#ifdef SIN6_LEN
+        tmpsa.sin_len = sizeof(tmpsa);
+#endif
 
         rc = getnameinfo((const struct sockaddr *)&tmpsa, sizeof(tmpsa),
                          tmphostname, sizeof(tmphostname), NULL, 0,
