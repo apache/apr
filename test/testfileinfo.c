@@ -84,29 +84,59 @@ static const struct view_fileinfo
     {0,                NULL}
 }; 
 
-static int finfo_equal(apr_finfo_t f1, apr_finfo_t f2)
+static void finfo_equal(CuTest *tc, apr_finfo_t f1, apr_finfo_t f2)
 {
-    return (f1.valid == f2.valid &&
-            f1.protection == f2.protection &&
-            f1.filetype == f2.filetype &&
-            f1.user == f2.user &&
-            f1.group == f2.group &&
-            f1.inode == f2.inode &&
-            f1.device == f2.device &&
-            f1.nlink == f2.nlink &&
-            f1.size == f2.size &&
-/*  Can't check csize, we don't fill it out, which makes me wonder why it
- *  is still there.
- *          f1.csize == f2.csize &&
- */
-            f1.atime == f2.atime &&
-            f1.mtime == f2.mtime &&
-            f1.ctime == f2.ctime &&
-            !strcmp(f1.fname, f2.fname));
-/*  We also can't check name, because it is only ever set on Unix.  This 
- *  means that we have non-portable fields in a transparant structure.
-            !strcmp(f1.name, f2.name));
- */
+    /* Minimum supported flags across all platforms (APR_FINFO_MIN) */
+    CuAssert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_TYPE",
+             (f1.valid & f2.valid & APR_FINFO_TYPE));
+    CuAssert(tc, "apr_stat and apr_getfileinfo differ in filetype",
+             f1.filetype == f2.filetype);
+    CuAssert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_SIZE",
+             (f1.valid & f2.valid & APR_FINFO_SIZE));
+    CuAssert(tc, "apr_stat and apr_getfileinfo differ in size",
+             f1.size == f2.size);
+    CuAssert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_ATIME",
+             (f1.valid & f2.valid & APR_FINFO_ATIME));
+    CuAssert(tc, "apr_stat and apr_getfileinfo differ in atime",
+             f1.atime == f2.atime);
+    CuAssert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_MTIME",
+             (f1.valid & f2.valid & APR_FINFO_MTIME));
+    CuAssert(tc, "apr_stat and apr_getfileinfo differ in mtime",
+             f1.mtime == f2.mtime);
+    CuAssert(tc, "apr_stat and apr_getfileinfo must return APR_FINFO_CTIME",
+             (f1.valid & f2.valid & APR_FINFO_CTIME));
+    CuAssert(tc, "apr_stat and apr_getfileinfo differ in ctime",
+             f1.ctime == f2.ctime);
+
+    if (f1.valid & f2.valid & APR_FINFO_NAME)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in name",
+                 !strcmp(f1.name, f2.name));
+    if (f1.fname && f2.fname)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in fname",
+                 !strcmp(f1.fname, f2.fname));
+
+    /* Additional supported flags not supported on all platforms */
+    if (f1.valid & f2.valid & APR_FINFO_USER)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in user",
+                 !apr_uid_compare(f1.user, f2.user));
+    if (f1.valid & f2.valid & APR_FINFO_GROUP)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in group",
+                 !apr_gid_compare(f1.group, f2.group));
+    if (f1.valid & f2.valid & APR_FINFO_INODE)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in inode",
+                 f1.inode == f2.inode);
+    if (f1.valid & f2.valid & APR_FINFO_DEV)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in device",
+                 f1.device == f2.device);
+    if (f1.valid & f2.valid & APR_FINFO_NLINK)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in nlink",
+                 f1.nlink == f2.nlink);
+    if (f1.valid & f2.valid & APR_FINFO_CSIZE)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in csize",
+                 f1.csize == f2.csize);
+    if (f1.valid & f2.valid & APR_FINFO_PROT)
+        CuAssert(tc, "apr_stat and apr_getfileinfo differ in protection",
+                 f1.protection == f2.protection);
 }
 
 static void test_info_get(CuTest *tc)
@@ -161,16 +191,20 @@ static void test_stat_eq_finfo(CuTest *tc)
     apr_finfo_t stat_finfo;
     apr_status_t rv;
 
-    rv = apr_stat(&stat_finfo, FILENAME, APR_FINFO_NORM, p);
-    CuAssertIntEquals(tc, APR_SUCCESS, rv);
-
     rv = apr_file_open(&thefile, FILENAME, APR_READ, APR_OS_DEFAULT, p);
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
     rv = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
+
+    /* Opening the file may have toggled the atime member (time last
+     * accessed), so fetch our apr_stat() after getting the fileinfo 
+     * of the open file...
+     */
+    rv = apr_stat(&stat_finfo, FILENAME, APR_FINFO_NORM, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+
     apr_file_close(thefile);
 
-    CuAssert(tc, "results from apr_stat are not identical to results "
-                 "from apr_finfo", finfo_equal(stat_finfo, finfo));
+    finfo_equal(tc, stat_finfo, finfo);
 }
 
 CuSuite *testfileinfo(void)
