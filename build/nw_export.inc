@@ -68,3 +68,4 @@
 #include "apr_uri.h"
 #include "apr_xml.h"
 #include "apr_compat.h"
+#include "apr_strmatch.h"
