@@ -59,7 +59,7 @@
 
 #define APR_INHERIT (1 << 24)    /* Must not conflict with other bits */
 
-#define APR_IMPLEMENT_INHERIT_SET(name, flag, fd, pool, cleanup)    \
+#define APR_IMPLEMENT_INHERIT_SET(name, flag, pool, cleanup)        \
 apr_status_t apr_##name##_inherit_set(apr_##name##_t *the##name)    \
 {                                                                   \
     if (the##name->flag & APR_FILE_NOCLEANUP)                       \
@@ -71,9 +71,14 @@ apr_status_t apr_##name##_inherit_set(apr_##name##_t *the##name)    \
                                    cleanup, apr_pool_cleanup_null); \
     }                                                               \
     return APR_SUCCESS;                                             \
+}                                                                   \
+/* Deprecated */                                                    \
+void apr_##name##_set_inherit(apr_##name##_t *the##name)            \
+{                                                                   \
+    apr_##name##_inherit_set(the##name);                            \
 }
 
-#define APR_IMPLEMENT_INHERIT_UNSET(name, flag, fd, pool, cleanup)  \
+#define APR_IMPLEMENT_INHERIT_UNSET(name, flag, pool, cleanup)      \
 apr_status_t apr_##name##_inherit_unset(apr_##name##_t *the##name)  \
 {                                                                   \
     if (the##name->flag & APR_FILE_NOCLEANUP)                       \
@@ -85,14 +90,7 @@ apr_status_t apr_##name##_inherit_unset(apr_##name##_t *the##name)  \
                                    cleanup, cleanup);               \
     }                                                               \
     return APR_SUCCESS;                                             \
-}
-
-/* Deprecated */                                                    \
-void apr_##name##_set_inherit(apr_##name##_t *the##name)            \
-{                                                                   \
-    apr_##name##_inherit_set(the##name);                            \
-}
-
+}                                                                   \
 /* Deprecated */                                                    \
 void apr_##name##_unset_inherit(apr_##name##_t *the##name)          \
 {                                                                   \
