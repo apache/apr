@@ -4,7 +4,8 @@ TARGETS = \
 	apr_snprintf.lo \
 	apr_strnatcmp.lo \
 	apr_strings.lo \
-	apr_fnmatch.lo
+	apr_fnmatch.lo \
+	apr_strtok.lo
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@

@@ -127,6 +127,10 @@ SOURCE=.\strings\apr_strings.c
 
 SOURCE=.\strings\apr_strnatcmp.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\strings\apr_strtok.c
+# End Source File
 # End Group
 # Begin Group "passwd"
 

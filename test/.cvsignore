@@ -13,6 +13,7 @@ testoc
 testpipe
 testpoll
 testshmem
+teststr
 testtime
 testthread
 client

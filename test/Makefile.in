@@ -22,7 +22,8 @@ PROGRAMS = \
         testmd5@EXEEXT@ \
         testpoll@EXEEXT@ \
         testmem@EXEEXT@ \
-	occhild@EXEEXT@
+	occhild@EXEEXT@ \
+        teststr@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -113,5 +114,8 @@ testpoll@EXEEXT@: testpoll.lo $(LOCAL_LIBS)
 
 testmem@EXEEXT@: testmem.lo $(LOCAL_LIBS)
 	$(LINK) testmem.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+teststr@EXEEXT@: teststr.lo $(LOCAL_LIBS)
+	$(LINK) teststr.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 # DO NOT REMOVE
