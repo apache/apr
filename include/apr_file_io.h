@@ -214,7 +214,7 @@ APR_DECLARE(apr_status_t) apr_file_open_stdout(apr_file_t **thefile,
  *      reflect the number of bytes read.  If a char was put back into the 
  *      stream via ungetc, it will be the first character returned. 
  *
- *      It is possible for both bytes to be read and an APR_EOF or other 
+ *      It is not possible for both bytes to be read and an APR_EOF or other 
  *      error to be returned.
  *
  *      APR_EINTR is never returned.
@@ -275,7 +275,7 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile,
  *      is reached.  If a char was put back into the stream via ungetc, 
  *      it will be the first character returned. 
  *
- *      It is possible for both bytes to be read and an APR_EOF or other 
+ *      It is not possible for both bytes to be read and an APR_EOF or other 
  *      error to be returned.
  *
  *      APR_EINTR is never returned.

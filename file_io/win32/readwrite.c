@@ -209,7 +209,7 @@ APR_DECLARE(apr_status_t) apr_file_read(apr_file_t *thefile, void *buf, apr_size
 
         *len = pos - (char *)buf;
         if (*len) {
-            rv = 0;
+            rv = APR_SUCCESS;
         }
         apr_lock_release(thefile->mutex);
     } else {  
