@@ -65,11 +65,8 @@
 
 struct mmap_t {
     ap_context_t *cntxt;
-    char *filename;  /* the full path to the file */
-    struct stat sinfo;
     void *mm;
     size_t size;
-    ap_int32_t statted;
 };
 
 ap_status_t mmap_cleanup(void *);

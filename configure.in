@@ -57,18 +57,7 @@ AC_CHECK_SIZEOF(short, 2)
 AC_CHECK_SIZEOF(long double, 12)
 AC_CHECK_SIZEOF(long long, 8)
 
-MY_TRY_RUN([
-#include <sys/types.h> 
-#include <stdlib.h> 
-#include <stdio.h>
-
-int main() {
-    return(sizeof(ssize_t));
-} 
-],
-AC_DEFINE(SIZEOF_SSIZE_T, 4), 
-AC_DEFINE_UNQUOTED(SIZEOF_SSIZE_T, $?),
-AC_DEFINE(SIZEOF_SSIZE_T, 4))
+AC_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], ssize_t, 8)
 
 # Use /bin/sh if it exists, otherwise go looking for sh in the path
 if test ".$SH" = . -a -f /bin/sh; then

@@ -87,111 +87,28 @@ ap_status_t mmap_cleanup(void *themmap)
         return errno;
 }
 
-ap_status_t ap_mmap_create(ap_mmap_t **new, const char * fname,
-     ap_context_t *cont)
+ap_status_t ap_mmap_create(ap_mmap_t **new, ap_file_t *file, ap_off_t offset, 
+       ap_size_t size, ap_context_t *cont)
 {
-    struct stat st;
     int fd;
     caddr_t mm;
    
+    if (file == NULL || file->buffered || file->filedes == -1)
+        return APR_EBADF;
+
     (*new) = (struct mmap_t *)ap_palloc(cont, sizeof(struct mmap_t));
     
-    if (stat(fname, &st) == -1) {
-        /* we couldn't stat the file...probably doesn't exist! */
-        return APR_ENOFILE;
-    }
-    if ((st.st_mode & S_IFMT) != S_IFREG) {
-        /* oh dear, we're only doing regular files at present... */
-        return APR_EBADF;
-    } 
-    if ((fd = open(fname, O_RDONLY, 0)) == -1) {
-        return APR_EBADF;
-    }
-    mm = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd ,0);
-    close (fd);
+    ap_seek(file, APR_SET, &offset);
+    mm = mmap(NULL, size, PROT_READ, MAP_SHARED, file->filedes ,0);
+
     if (mm == (caddr_t)-1) {
         /* we failed to get an mmap'd file... */
         return APR_ENOMEM;
     }
-    (*new)->filename = ap_pstrdup(cont, fname);
     (*new)->mm = mm;
-    (*new)->sinfo = st;
-    (*new)->size = st.st_size;
+    (*new)->size = size;
     (*new)->cntxt = cont;
 
-    /* register the cleanup... */
-    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
-             ap_null_cleanup);
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_mmap_open_create(struct mmap_t **new, ap_file_t *file, 
-               ap_context_t *cont)
-{
-    caddr_t mm;
-
-    if (file->buffered)
-        /* we don't yet mmap buffered files... */
-        return APR_EBADF;
-    if (file->filedes == -1)
-        /* there isn't a file handle so how can we mmap?? */
-        return APR_EBADF;
-    (*new) = (struct mmap_t*)ap_palloc(cont, sizeof(struct mmap_t));
-    
-    if (!file->stated) {
-        /* hmmmm... we need to stat the file now */
-        struct stat st;
-        if (stat(file->fname, &st) == -1) {
-            /* hmm, is this fatal?? */
-            return APR_EBADF;
-        }
-        file->stated = 1;
-        file->size = st.st_size;
-        file->atime = st.st_atime;
-        file->mtime = st.st_mtime;
-        file->ctime = st.st_ctime;
-        (*new)->sinfo = st;
-    }
-
-    mm = mmap(NULL, file->size, PROT_READ, MAP_SHARED, file->filedes ,0);
-    if (mm == (caddr_t)-1) {
-        /* we failed to get an mmap'd file... */
-        return APR_ENOMEM;
-    }
-
-    (*new)->filename = ap_pstrdup(cont, file->fname);
-    (*new)->mm = mm;
-    (*new)->size = file->size;
-    (*new)->cntxt = cont;
-           
-    /* register the cleanup... */
-    ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
-             ap_null_cleanup);
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_mmap_size_create(ap_mmap_t **new, ap_file_t *file, ap_size_t mmapsize,
-                                ap_context_t *cont)
-{
-    caddr_t mm;
-
-    if (file->buffered)
-        return APR_EBADF;
-    if (file->filedes == -1)
-        return APR_EBADF;
-
-    (*new) = (struct mmap_t*)ap_palloc(cont, sizeof(struct mmap_t));
-    
-    mm = mmap(NULL, mmapsize, PROT_READ, MAP_SHARED, file->filedes ,0);
-    if (mm == (caddr_t)-1) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->filename = ap_pstrdup(cont, file->fname);
-    (*new)->mm = mm;
-    (*new)->size = mmapsize;
-    (*new)->cntxt = cont;
-           
     /* register the cleanup... */
     ap_register_cleanup((*new)->cntxt, (void*)(*new), mmap_cleanup,
              ap_null_cleanup);
