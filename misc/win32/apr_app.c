@@ -63,6 +63,12 @@
  *   This module is only compatible with Unicode-only executables.
  *   Mixed (Win9x backwards compatible) binaries should refer instead
  *   to the apr_startup.c module.
+ *
+ *   _dbg_malloc/realloc is used in place of the usual API, in order
+ *   to convince the MSVCRT that they created these entities.  If we
+ *   do not create them as _CRT_BLOCK entities, the crt will fault
+ *   on an assert.  We are not worrying about the crt's locks here, 
+ *   since we are single threaded [so far].
  */
 
 #include "apr_private.h"
@@ -70,6 +76,7 @@
 #include "wchar.h"
 #include "fileio.h"
 #include "assert.h"
+#include <crtdbg.h>
 
 extern int main(int argc, char **argv, char **env);
 
@@ -86,7 +93,8 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
             ;
     }
 
-    newarr = malloc(args * sizeof(char *));
+    newarr = _malloc_dbg(args * sizeof(char *),
+                         _CRT_BLOCK, __FILE__, __LINE__);
 
     for (arg = 0; arg < args; ++arg) {
         newarr[arg] = (void*)(wcslen(arr[arg]) + 1);
@@ -99,7 +107,8 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
      * 4 ucs bytes will hold a wchar_t pair value (20 bits)
      */
     elesize = elesize * 3 + 1;
-    ele = elements = malloc(elesize * sizeof(char));
+    ele = elements = _malloc_dbg(elesize * sizeof(char), 
+                                 _CRT_BLOCK, __FILE__, __LINE__);
 
     for (arg = 0; arg < args; ++arg) {
         size_t len = (size_t)newarr[arg];
@@ -119,7 +128,8 @@ static int wastrtoastr(char ***retarr, wchar_t **arr, int args)
 
     /* Return to the free store if the heap realloc is the least bit optimized
      */
-    ele = realloc(elements, ele - elements);
+    ele = _realloc_dbg(elements, ele - elements, 
+                       _CRT_BLOCK, __FILE__, __LINE__);
 
     if (ele != elements) {
         size_t diff = ele - elements;
@@ -140,11 +150,24 @@ int wmain(int argc, wchar_t **wargv, wchar_t **wenv)
 
     (void)wastrtoastr(&argv, wargv, argc);
 
-    _wenviron = wenv;
     dupenv = wastrtoastr(&env, wenv, -1);
 
-    _environ = malloc((dupenv + 1) * sizeof (char *));
+    _environ = _malloc_dbg((dupenv + 1) * sizeof (char *), 
+                           _CRT_BLOCK, __FILE__, __LINE__ );
     memcpy(_environ, env, (dupenv + 1) * sizeof (char *));
+
+    /* MSVCRT will attempt to maintain the wide environment calls
+     * on _putenv(), which is bogus if we've passed a non-ascii
+     * string to _putenv(), since they use MultiByteToWideChar
+     * and breaking the implicit utf-8 assumption we've built.
+     *
+     * Reset _wenviron for good measure.
+     */
+    if (_wenviron) {
+        wenv = _wenviron;
+        _wenviron = NULL;
+        free(wenv);
+    }
 
     return main(argc, argv, env);
 }
