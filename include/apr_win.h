@@ -89,6 +89,7 @@
 #define APR_HAVE_STDIO_H        1
 #define APR_HAVE_SYS_TYPES_H    1
 #define APR_HAVE_SYS_UIO_H      0
+#define APR_HAVE_IN_ADDR        1
 
 #define APR_USE_FLOCK_SERIALIZE           0 
 #define APR_USE_SYSVSEM_SERIALIZE         0
@@ -104,7 +105,6 @@
 #define APR_HAS_THREADS  1
 #define APR_HAS_SENDFILE 0
 #define APR_HAS_MMAP     0
-#define APR_HAVE_IN_ADDR
 
 /* Typedefs that APR needs. */
 
