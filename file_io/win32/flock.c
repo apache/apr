@@ -63,6 +63,11 @@ APR_DECLARE(apr_status_t) apr_file_lock(apr_file_t *thefile, int type)
           + (((type & APR_FLOCK_TYPEMASK) == APR_FLOCK_SHARED) 
                                        ? 0 : LOCKFILE_EXCLUSIVE_LOCK);
     memset (&offset, 0, sizeof(offset));
+    /* XXX on NT 4.0 we get ERROR_LOCK_VIOLATION when we specify
+     *     LOCKFILE_FAIL_IMMEDIATELY and another process is holding
+     *     the lock; something needs to be done so an APR app can
+     *     recognize this as a try-again situation
+     */
     /* Syntax is correct, len is passed for LengthLow and LengthHigh*/
     if (!LockFileEx(thefile->filehand, flags, 0, len, len, &offset))
         return apr_get_os_error();
