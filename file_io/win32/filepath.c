@@ -834,7 +834,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
      * is still within given basepath.  Note that the root path 
      * segment is thoroughly tested prior to path parsing.
      */
-    if (flags & APR_FILEPATH_NOTABOVEROOT && (keptlen - rootlen) < baselen) {
+    if (flags & APR_FILEPATH_NOTABOVEROOT) {
         if (memcmp(basepath, path + rootlen, baselen))
             return APR_EABOVEROOT;
 
