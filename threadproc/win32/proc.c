@@ -65,6 +65,12 @@
 #include <string.h>
 #include <process.h>
 
+/* 
+ * some of the ideas expressed herein are based off of Microsoft
+ * Knowledge Base article: Q190351
+ *
+ */
+
 apr_status_t apr_createprocattr_init(apr_procattr_t **new, apr_pool_t *cont)
 {
     (*new) = (apr_procattr_t *)apr_palloc(cont, sizeof(apr_procattr_t));
@@ -88,115 +94,182 @@ apr_status_t apr_createprocattr_init(apr_procattr_t **new, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in, 
-                              apr_int32_t out, apr_int32_t err)
+static apr_status_t open_nt_process_pipe(apr_file_t **read, apr_file_t **write,
+                                         apr_int32_t iBlockingMode,
+                                         apr_pool_t *cntxt)
 {
     apr_status_t stat;
     BOOLEAN bAsyncRead, bAsyncWrite;
+
+    switch (iBlockingMode) {
+    case APR_FULL_BLOCK:
+        bAsyncRead = bAsyncWrite = FALSE;
+        break;
+    case APR_PARENT_BLOCK:
+        bAsyncRead = FALSE;
+        bAsyncWrite = TRUE;
+        break;
+    case APR_CHILD_BLOCK:
+        bAsyncRead = TRUE;
+        bAsyncWrite = FALSE;
+        break;
+    default:
+        bAsyncRead = TRUE;
+        bAsyncWrite = TRUE;
+    }
+    if ((stat = apr_create_nt_pipe(read, write, bAsyncRead, bAsyncWrite,
+                                   cntxt)) != APR_SUCCESS)
+        return stat;
+
+    return APR_SUCCESS;
+}
+
+static apr_status_t make_handle_private(apr_file_t *file)
+{
+    HANDLE pid = GetCurrentProcess();
+    HANDLE filehand = file->filehand;
+
+    /* Create new non-inheritable versions of handles that
+     * the child process doesn't care about. Otherwise, the child
+     * inherits these handles; resulting in non-closeable handles
+     * to the respective pipes.
+     */
+    if (!DuplicateHandle(pid, filehand,
+                         pid, &file->filehand, 0,
+                         FALSE, DUPLICATE_SAME_ACCESS))
+        return apr_get_os_error();
+    /* 
+     * Close the inerhitable handle we don't need anymore.
+     */
+    CloseHandle(filehand);
+    return APR_SUCCESS;
+}
+
+static apr_status_t make_inheritable_duplicate(apr_file_t *original,
+                                               apr_file_t *duplicate)
+{
+    if (original == NULL)
+        return APR_SUCCESS;
+
+    /* Can't use apr_dupfile here because it creates a non-inhertible 
+     * handle, and apr_open_file'd apr_file_t's are non-inheritable,
+     * so we must assume we need to make an inheritable handle.
+     */
+    if (!CloseHandle(duplicate->filehand))
+        return apr_get_os_error();
+    else
+    {
+        HANDLE pid = GetCurrentProcess();
+        if (!DuplicateHandle(pid, original->filehand, 
+                             pid, &duplicate->filehand, 0,
+                             TRUE, DUPLICATE_SAME_ACCESS))
+            return apr_get_os_error();
+    }
+
+    return APR_SUCCESS;
+}
+
+apr_status_t apr_setprocattr_io(apr_procattr_t *attr, apr_int32_t in, 
+                                apr_int32_t out, apr_int32_t err)
+{
+    apr_status_t stat;
+
     if (in) {
-        switch (in) {
-        case APR_FULL_BLOCK:
-            bAsyncRead = bAsyncWrite = FALSE;
-            break;
-        case APR_PARENT_BLOCK:
-            bAsyncRead = FALSE;
-            bAsyncWrite = TRUE;
-            break;
-        case APR_CHILD_BLOCK:
-            bAsyncRead = TRUE;
-            bAsyncWrite = FALSE;
-            break;
-        default:
-            bAsyncRead = TRUE;
-            bAsyncWrite = TRUE;
-        }        
-        if ((stat = apr_create_nt_pipe(&attr->child_in, &attr->parent_in, 
-                                       bAsyncRead, bAsyncWrite,
-                                       attr->cntxt)) != APR_SUCCESS) {
+        stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in, in,
+                                    attr->cntxt);
+        if (stat == APR_SUCCESS)
+            stat = make_handle_private(attr->parent_in);
+        if (stat != APR_SUCCESS)
             return stat;
-        }
     }
     if (out) {
-        switch (out) {
-        case APR_FULL_BLOCK:
-            bAsyncRead = bAsyncWrite = FALSE;
-            break;
-        case APR_PARENT_BLOCK:
-            bAsyncRead = FALSE;
-            bAsyncWrite = TRUE;
-            break;
-        case APR_CHILD_BLOCK:
-            bAsyncRead = TRUE;
-            bAsyncWrite = FALSE;
-            break;
-        default:
-            bAsyncRead = TRUE;
-            bAsyncWrite = TRUE;
-        }        
-        if ((stat = apr_create_nt_pipe(&attr->parent_out, &attr->child_out,
-                                       bAsyncRead, bAsyncWrite,
-                                       attr->cntxt)) != APR_SUCCESS) {
+        stat = open_nt_process_pipe(&attr->parent_out, &attr->child_out, out,
+                                    attr->cntxt);
+        if (stat == APR_SUCCESS)
+            stat = make_handle_private(attr->parent_out);
+        if (stat != APR_SUCCESS)
             return stat;
-        }
     }
     if (err) {
-        switch (err) {
-        case APR_FULL_BLOCK:
-            bAsyncRead = bAsyncWrite = FALSE;
-            break;
-        case APR_PARENT_BLOCK:
-            bAsyncRead = FALSE;
-            bAsyncWrite = TRUE;
-            break;
-        case APR_CHILD_BLOCK:
-            bAsyncRead = TRUE;
-            bAsyncWrite = FALSE;
-            break;
-        default:
-            bAsyncRead = TRUE;
-            bAsyncWrite = TRUE;
-        }        
-        if ((stat = apr_create_nt_pipe(&attr->parent_err, &attr->child_err,
-                                       bAsyncRead, bAsyncWrite,
-                                       attr->cntxt)) != APR_SUCCESS) {
+        stat = open_nt_process_pipe(&attr->parent_err, &attr->child_err, err,
+                                    attr->cntxt);
+        if (stat == APR_SUCCESS)
+            stat = make_handle_private(attr->parent_err);
+        if (stat != APR_SUCCESS)
             return stat;
-        }
-    } 
+    }
     return APR_SUCCESS;
 }
-#if 0
-apr_status_t apr_setprocattr_childin(apr_procattr_t *attr, apr_file_t *child_in,
-                                   apr_file_t *parent_in)
+
+apr_status_t apr_setprocattr_childin(apr_procattr_t *attr, 
+                                     apr_file_t *child_in, 
+                                     apr_file_t *parent_in)
 {
+    apr_status_t stat;
+
+    if (attr->child_in == NULL && attr->parent_in == NULL) {
+        stat = open_nt_process_pipe(&attr->child_in, &attr->parent_in,
+                                    APR_FULL_BLOCK,
+                                    attr->cntxt);
+        if (stat == APR_SUCCESS)
+            stat = make_handle_private(attr->parent_in);
+        if (stat != APR_SUCCESS)
+            return stat;
+    }
+
+    stat = make_inheritable_duplicate (child_in, attr->child_in);
+    if (stat == APR_SUCCESS)
+        stat = make_inheritable_duplicate (parent_in, attr->parent_in);
+
+    return stat;
 }
-apr_status_t apr_setprocattr_childout(apr_procattr_t *attr, apr_file_t *child_out,
-                                    apr_file_t *parent_out)
+
+apr_status_t apr_setprocattr_childout(apr_procattr_t *attr,
+                                      apr_file_t *child_out,
+                                      apr_file_t *parent_out)
 {
-    if (attr->child_out == NULL && attr->parent_out == NULL)
-        apr_create_pipe(&attr->child_out, &attr->parent_out, attr->cntxt);
+    apr_status_t stat;
 
-    if (child_out != NULL)
-        apr_dupfile(&attr->child_out, child_out, attr->cntxt);
+    if (attr->child_out == NULL && attr->parent_out == NULL) {
+        stat = open_nt_process_pipe(&attr->child_out, &attr->parent_out,
+                                    APR_FULL_BLOCK,
+                                    attr->cntxt);
+        if (stat == APR_SUCCESS)
+            stat = make_handle_private(attr->parent_out);
+        if (stat != APR_SUCCESS)
+            return stat;
+    }        
+        
+    stat = make_inheritable_duplicate (child_out, attr->child_out);
+    if (stat == APR_SUCCESS)
+        stat = make_inheritable_duplicate (parent_out, attr->parent_out);
 
-    if (parent_out != NULL)
-        apr_dupfile(&attr->parent_out, parent_out, attr->cntxt);
-
-    return APR_SUCCESS;
+    return stat;
 }
-apr_status_t apr_setprocattr_childerr(apr_procattr_t *attr, apr_file_t *child_err,
-                                   apr_file_t *parent_err)
+
+apr_status_t apr_setprocattr_childerr(apr_procattr_t *attr,
+                                      apr_file_t *child_err,
+                                      apr_file_t *parent_err)
 {
-    if (attr->child_err == NULL && attr->parent_err == NULL)
-        apr_create_pipe(&attr->child_err, &attr->parent_err, attr->cntxt);
+    apr_status_t stat;
 
-    if (child_err != NULL)
-        apr_dupfile(&attr->child_err, child_err, attr->cntxt);
+    if (attr->child_err == NULL && attr->parent_err == NULL) {
+        stat = open_nt_process_pipe(&attr->child_err, &attr->parent_err,
+                                    APR_FULL_BLOCK,
+                                    attr->cntxt);
+        if (stat == APR_SUCCESS)
+            stat = make_handle_private(attr->parent_err);
+        if (stat != APR_SUCCESS)
+            return stat;
+    }        
+        
+    stat = make_inheritable_duplicate (child_err, attr->child_err);
+    if (stat == APR_SUCCESS)
+        stat = make_inheritable_duplicate (parent_err, attr->parent_err);
 
-    if (parent_err != NULL)
-        apr_dupfile(&attr->parent_err, parent_err, attr->cntxt);
-    return APR_SUCCESS;
+    return stat;
 }
-#endif
+
 apr_status_t apr_setprocattr_dir(apr_procattr_t *attr, 
                                const char *dir) 
 {
@@ -234,6 +307,11 @@ apr_status_t apr_setprocattr_detach(apr_procattr_t *attr, apr_int32_t det)
     return APR_SUCCESS;
 }
 
+/* TODO:  
+ *   apr_create_process with APR_SHELLCMD on Win9x won't work due to MS KB:
+ *   Q150956
+ */
+
 apr_status_t apr_create_process(apr_proc_t *new, const char *progname, 
                                 const char * const *args,
                                 const char * const *env, 
@@ -241,12 +319,9 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
 {
     int i, iEnvBlockLen;
     char *cmdline;
-    HANDLE hCurrentProcess;
-    HANDLE hParentindup, hParentoutdup,hParenterrdup;
     char ppid[20];
     char *envstr;
     char *pEnvBlock, *pNext;
-    apr_status_t rv;
     PROCESS_INFORMATION pi;
 
     new->in = attr->parent_in;
@@ -310,58 +385,6 @@ apr_status_t apr_create_process(apr_proc_t *new, const char *progname,
     while (args && args[i]) {
         cmdline = apr_pstrcat(cont, cmdline, " ", args[i], NULL);
         i++;
-    }
-    /*
-     * When the pipe handles are created, the security descriptor
-     * indicates that the handle can be inherited.  However, we do not
-     * want the server side handles to the pipe to be inherited by the
-     * child CGI process. If the child CGI does inherit the server
-     * side handles, then the child may be left around if the server
-     * closes its handles (e.g. if the http connection is aborted),
-     * because the child will have a valid copy of handles to both
-     * sides of the pipes, and no I/O error will occur.  Microsoft
-     * recommends using DuplicateHandle to turn off the inherit bit
-     * under NT and Win95.
-     */
-    hCurrentProcess = GetCurrentProcess();
-    if ((attr->child_in && !DuplicateHandle(hCurrentProcess, attr->parent_in->filehand, 
-                                            hCurrentProcess,
-                                            &hParentindup, 0, FALSE,
-                                            DUPLICATE_SAME_ACCESS))
-	|| (attr->child_out && !DuplicateHandle(hCurrentProcess, attr->parent_out->filehand,
-                                                hCurrentProcess, &hParentoutdup,
-                                                0, FALSE, DUPLICATE_SAME_ACCESS))
-	|| (attr->child_err && !DuplicateHandle(hCurrentProcess, attr->parent_err->filehand,
-                                                hCurrentProcess, &hParenterrdup,
-                                                0, FALSE, DUPLICATE_SAME_ACCESS))) {
-        rv = apr_get_os_error();
-        if (attr->child_in) {
-            apr_close(attr->child_in);
-            apr_close(attr->parent_in);
-        }
-        if (attr->child_out) {
-            apr_close(attr->child_out);
-            apr_close(attr->parent_out);
-        }
-        if (attr->child_err) {
-            apr_close(attr->child_err);
-            apr_close(attr->parent_err);
-        }
-        return rv;
-    }
-    else {
-        if (attr->child_in) {
-            CloseHandle(attr->parent_in->filehand);
-            attr->parent_in->filehand = hParentindup;
-        }
-        if (attr->child_out) {
-            CloseHandle(attr->parent_out->filehand);
-            attr->parent_out->filehand = hParentoutdup;
-        }
-        if (attr->child_err) {
-            CloseHandle(attr->parent_err->filehand);
-            attr->parent_err->filehand = hParenterrdup;
-        }
     }
 
     _itoa(_getpid(), ppid, 10);

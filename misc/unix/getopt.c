@@ -51,6 +51,8 @@ static const char *pretty_path (const char *name)
 APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
                                       int argc, const char *const *argv)
 {
+    void *argv_buff;
+
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
     (*os)->cont = cont;
     (*os)->err = 1;
@@ -61,8 +63,9 @@ APR_DECLARE(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
        that's the primary purpose of this function.  But people might
        want to use this function with arrays other than the main argv,
        and we shouldn't touch the caller's data.  So we copy. */
-    (*os)->argv = apr_palloc(cont, (argc + 1) * sizeof(const char *));
-    memcpy((*os)->argv, argv, argc * sizeof(const char *));
+    argv_buff = apr_palloc(cont, (argc + 1) * sizeof(const char *));
+    memcpy(argv_buff, argv, argc * sizeof(const char *));
+    (*os)->argv = argv_buff;
     (*os)->argv[argc] = NULL;
 
     (*os)->interleave = 0;
