@@ -221,14 +221,14 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        proc_pthread_cleanup(new_mutex);
+        proc_mutex_proc_pthread_cleanup(new_mutex);
         return stat;
     }
     if ((stat = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        proc_pthread_cleanup(new_mutex);
+        proc_mutex_proc_pthread_cleanup(new_mutex);
         return stat;
     }
 
@@ -238,14 +238,14 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        proc_pthread_cleanup(new_mutex);
+        proc_mutex_proc_pthread_cleanup(new_mutex);
         return stat;
     }
     if ((stat = pthread_mutexattr_setprotocol(&mattr, PTHREAD_PRIO_INHERIT))) {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        proc_pthread_cleanup(new_mutex);
+        proc_mutex_proc_pthread_cleanup(new_mutex);
         return stat;
     }
 #endif
@@ -254,7 +254,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        proc_pthread_cleanup(new_mutex);
+        proc_mutex_proc_pthread_cleanup(new_mutex);
         return stat;
     }
 
@@ -262,7 +262,7 @@ static apr_status_t proc_mutex_proc_pthread_create(apr_proc_mutex_t *new_mutex,
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
-        proc_pthread_cleanup(new_mutex);
+        proc_mutex_proc_pthread_cleanup(new_mutex);
         return stat;
     }
 
