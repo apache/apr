@@ -63,7 +63,7 @@
 
 #include "mmap_h.h"
 
-#if HAVE_MMAP
+#if HAVE_MMAP || defined(BEOS)
 
 ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset)
 {  
