@@ -60,7 +60,7 @@
 
 #define STRLEN 15
 
-int main(int argc, char * const argv[])
+int main(int argc, const char * const argv[])
 {
     apr_pool_t *context;
     apr_socket_t *sock;
