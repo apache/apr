@@ -12,12 +12,16 @@ dnl ##
 dnl ##
 AC_DEFUN(AC_CHECK_DEFINE_FILES,[
   AC_CACHE_CHECK([for $1 in $2],ac_cv_define_$1,[
-    AC_EGREP_CPP(YES_IS_DEFINED, [
-    $2
-    #ifdef $1
-    YES_IS_DEFINED
-    #endif
-    ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
+    ac_cv_define_$1=no
+    for curhdr in $2
+    do
+      AC_EGREP_CPP(YES_IS_DEFINED, [
+      #include <$curhdr>
+      #ifdef $1
+      YES_IS_DEFINED
+      #endif
+      ], ac_cv_define_$1=yes)
+    done
   ])
   if test "$ac_cv_define_$1" = "yes"; then
     AC_DEFINE(HAVE_$1)
