@@ -89,7 +89,7 @@ static apr_pool_t *pool = NULL;
 static void errmsg(const char *msg)
 {
     if (pool != NULL)
-        apr_destroy_pool(pool);
+        apr_pool_destroy(pool);
     fprintf(stderr, msg);
     exit(1);
 }
@@ -99,12 +99,12 @@ static void do_read(void)
     apr_file_t *file;
     apr_status_t status;
 
-    if (apr_open(&file, TESTFILE, APR_WRITE,
+    if (apr_file_open(&file, TESTFILE, APR_WRITE,
                  APR_OS_DEFAULT, pool) != APR_SUCCESS)
         errmsg("Could not open test file.\n");
     printf("Test file opened.\n");
 
-    status = apr_lock_file(file, APR_FLOCK_EXCLUSIVE | APR_FLOCK_NONBLOCK);
+    status = apr_file_lock(file, APR_FLOCK_EXCLUSIVE | APR_FLOCK_NONBLOCK);
     if (!APR_STATUS_IS_EAGAIN(status)) {
         char msg[200];
         errmsg(apr_psprintf(pool, "Expected EAGAIN. Got %d: %s.\n",
@@ -113,11 +113,11 @@ static void do_read(void)
     printf("First attempt: we were properly locked out.\nWaiting for lock...");
     fflush(stdout);
 
-    if (apr_lock_file(file, APR_FLOCK_EXCLUSIVE) != APR_SUCCESS)
+    if (apr_file_lock(file, APR_FLOCK_EXCLUSIVE) != APR_SUCCESS)
         errmsg("Could not establish lock on test file.");
     printf(" got it.\n");
 
-    (void) apr_close(file);
+    (void) apr_file_close(file);
     printf("Exiting.\n");
 }
 
@@ -125,19 +125,19 @@ static void do_write(void)
 {
     apr_file_t *file;
 
-    if (apr_open(&file, TESTFILE, APR_WRITE|APR_CREATE, APR_OS_DEFAULT,
+    if (apr_file_open(&file, TESTFILE, APR_WRITE|APR_CREATE, APR_OS_DEFAULT,
                  pool) != APR_SUCCESS)
         errmsg("Could not create file.\n");
     printf("Test file created.\n");
 
-    if (apr_lock_file(file, APR_FLOCK_EXCLUSIVE) != APR_SUCCESS)
+    if (apr_file_lock(file, APR_FLOCK_EXCLUSIVE) != APR_SUCCESS)
         errmsg("Could not lock the file.\n");
     printf("Lock created.\nSleeping...");
     fflush(stdout);
 
     apr_sleep(30000000);        /* 30 seconds */
 
-    (void) apr_close(file);
+    (void) apr_file_close(file);
     printf(" done.\nExiting.\n");
 }
 
@@ -158,10 +158,10 @@ int main(int argc, const char * const *argv)
         errmsg("Could not initialize APR.\n");
     atexit(closeapr);
 
-    if (apr_create_pool(&pool, NULL) != APR_SUCCESS)
+    if (apr_pool_create(&pool, NULL) != APR_SUCCESS)
         errmsg("Could not create global pool.\n");
 
-    if (apr_initopt(&opt, pool, argc, argv) != APR_SUCCESS)
+    if (apr_getopt_init(&opt, pool, argc, argv) != APR_SUCCESS)
         errmsg("Could not parse options.\n");
 
     while ((status = apr_getopt(opt, "r", &optchar, &optarg)) == APR_SUCCESS) {

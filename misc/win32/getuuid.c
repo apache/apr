@@ -62,7 +62,7 @@
 #include "apr.h"
 #include "apr_uuid.h"
 
-APR_DECLARE(void) apr_get_uuid(apr_uuid_t *uuid)
+APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid)
 {
     GUID guid;
 

@@ -71,7 +71,7 @@
  *
  */
 
-APR_DECLARE(apr_status_t) apr_createprocattr_init(apr_procattr_t **new,
+APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,
                                                   apr_pool_t *cont)
 {
     (*new) = (apr_procattr_t *)apr_palloc(cont, sizeof(apr_procattr_t));
@@ -152,7 +152,7 @@ static apr_status_t make_inheritable_duplicate(apr_file_t *original,
     if (original == NULL)
         return APR_SUCCESS;
 
-    /* Can't use apr_dupfile here because it creates a non-inhertible 
+    /* Can't use apr_file_dup here because it creates a non-inhertible 
      * handle, and apr_open_file'd apr_file_t's are non-inheritable,
      * so we must assume we need to make an inheritable handle.
      */
@@ -170,7 +170,7 @@ static apr_status_t make_inheritable_duplicate(apr_file_t *original,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_setprocattr_io(apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_io_set(apr_procattr_t *attr,
                                              apr_int32_t in, 
                                              apr_int32_t out,
                                              apr_int32_t err)
@@ -204,7 +204,7 @@ APR_DECLARE(apr_status_t) apr_setprocattr_io(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_setprocattr_childin(apr_procattr_t *attr, 
+APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, 
                                                   apr_file_t *child_in, 
                                                   apr_file_t *parent_in)
 {
@@ -227,7 +227,7 @@ APR_DECLARE(apr_status_t) apr_setprocattr_childin(apr_procattr_t *attr,
     return stat;
 }
 
-APR_DECLARE(apr_status_t) apr_setprocattr_childout(apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr,
                                                    apr_file_t *child_out,
                                                    apr_file_t *parent_out)
 {
@@ -250,7 +250,7 @@ APR_DECLARE(apr_status_t) apr_setprocattr_childout(apr_procattr_t *attr,
     return stat;
 }
 
-APR_DECLARE(apr_status_t) apr_setprocattr_childerr(apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr,
                                                    apr_file_t *child_err,
                                                    apr_file_t *parent_err)
 {
@@ -273,7 +273,7 @@ APR_DECLARE(apr_status_t) apr_setprocattr_childerr(apr_procattr_t *attr,
     return stat;
 }
 
-APR_DECLARE(apr_status_t) apr_setprocattr_dir(apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
                                               const char *dir) 
 {
     char path[MAX_PATH];
@@ -297,14 +297,14 @@ APR_DECLARE(apr_status_t) apr_setprocattr_dir(apr_procattr_t *attr,
     return APR_ENOMEM;
 }
 
-APR_DECLARE(apr_status_t) apr_setprocattr_cmdtype(apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
                                                   apr_cmdtype_e cmd) 
 {
     attr->cmdtype = cmd;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_setprocattr_detach(apr_procattr_t *attr,
+APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
                                                  apr_int32_t det) 
 {
     attr->detached = det;
@@ -312,11 +312,11 @@ APR_DECLARE(apr_status_t) apr_setprocattr_detach(apr_procattr_t *attr,
 }
 
 /* TODO:  
- *   apr_create_process with APR_SHELLCMD on Win9x won't work due to MS KB:
+ *   apr_proc_create with APR_SHELLCMD on Win9x won't work due to MS KB:
  *   Q150956
  */
 
-APR_DECLARE(apr_status_t) apr_create_process(apr_proc_t *new,
+APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                              const char *progname,
                                              const char * const *args,
                                              const char * const *env,
@@ -440,13 +440,13 @@ APR_DECLARE(apr_status_t) apr_create_process(apr_proc_t *new,
         new->pid = (pid_t) pi.hProcess;
 
         if (attr->child_in) {
-            apr_close(attr->child_in);
+            apr_file_close(attr->child_in);
         }
         if (attr->child_out) {
-            apr_close(attr->child_out);
+            apr_file_close(attr->child_out);
         }
         if (attr->child_err) {
-            apr_close(attr->child_err);
+            apr_file_close(attr->child_err);
         }
         CloseHandle(pi.hThread);
 
@@ -456,7 +456,7 @@ APR_DECLARE(apr_status_t) apr_create_process(apr_proc_t *new,
     return apr_get_os_error();
 }
 
-APR_DECLARE(apr_status_t) apr_wait_proc(apr_proc_t *proc, apr_wait_how_e wait)
+APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc, apr_wait_how_e wait)
 {
     DWORD stat;
     if (!proc)

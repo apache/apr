@@ -71,12 +71,12 @@ void setup_lock()
 static apr_status_t lock_cleanup(void *thelock)
 {
     apr_lock_t *lock = thelock;
-    return apr_destroy_lock(lock);
+    return apr_lock_destroy(lock);
 }
 
 
 
-apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, 
+apr_status_t apr_lock_create(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, 
 			   const char *fname, apr_pool_t *cont)
 {
     apr_lock_t *new;
@@ -102,14 +102,14 @@ apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, apr_locksco
     *lock = new;
 
     if (!rc)
-        apr_register_cleanup(cont, new, lock_cleanup, apr_null_cleanup);
+        apr_pool_cleanup_register(cont, new, lock_cleanup, apr_pool_cleanup_null);
 
     return APR_OS2_STATUS(rc);
 }
 
 
 
-apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname,
+apr_status_t apr_lock_child_init(apr_lock_t **lock, const char *fname,
 			       apr_pool_t *cont)
 {
     int rc;
@@ -126,14 +126,14 @@ apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname,
     rc = DosOpenMutexSem( (char *)fname, &(*lock)->hMutex );
 
     if (!rc)
-        apr_register_cleanup(cont, *lock, lock_cleanup, apr_null_cleanup);
+        apr_pool_cleanup_register(cont, *lock, lock_cleanup, apr_pool_cleanup_null);
 
     return APR_OS2_STATUS(rc);
 }
 
 
 
-apr_status_t apr_lock(apr_lock_t *lock)
+apr_status_t apr_lock_aquire(apr_lock_t *lock)
 {
     ULONG rc;
     
@@ -149,7 +149,7 @@ apr_status_t apr_lock(apr_lock_t *lock)
 
 
 
-apr_status_t apr_unlock(apr_lock_t *lock)
+apr_status_t apr_lock_release(apr_lock_t *lock)
 {
     ULONG rc;
     
@@ -164,14 +164,14 @@ apr_status_t apr_unlock(apr_lock_t *lock)
 
 
 
-apr_status_t apr_destroy_lock(apr_lock_t *lock)
+apr_status_t apr_lock_destroy(apr_lock_t *lock)
 {
     ULONG rc;
     apr_status_t stat = APR_SUCCESS;
 
     if (lock->owner == CurrentTid) {
         while (lock->lock_count > 0 && stat == APR_SUCCESS)
-            stat = apr_unlock(lock);
+            stat = apr_lock_release(lock);
     }
 
     if (stat != APR_SUCCESS)

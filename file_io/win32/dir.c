@@ -128,8 +128,8 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new, const char *dirname,
     (*new)->rootlen = len - 1;
     (*new)->cntxt = cont;
     (*new)->dirhand = INVALID_HANDLE_VALUE;
-    apr_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
-                        apr_null_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), dir_cleanup,
+                        apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
@@ -261,7 +261,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *dir)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_make_dir(const char *path, apr_fileperms_t perm,
+APR_DECLARE(apr_status_t) apr_dir_make(const char *path, apr_fileperms_t perm,
                                        apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
@@ -286,7 +286,7 @@ APR_DECLARE(apr_status_t) apr_make_dir(const char *path, apr_fileperms_t perm,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_dir_remove(const char *path, apr_pool_t *cont)
 {
 #if APR_HAS_UNICODE_FS
     apr_oslevel_e os_level;
@@ -310,7 +310,7 @@ APR_DECLARE(apr_status_t) apr_remove_dir(const char *path, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_os_dir(apr_os_dir_t **thedir,
+APR_DECLARE(apr_status_t) apr_os_dir_get(apr_os_dir_t **thedir,
                                          apr_dir_t *dir)
 {
     if (dir == NULL) {
@@ -320,7 +320,7 @@ APR_DECLARE(apr_status_t) apr_get_os_dir(apr_os_dir_t **thedir,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_put_os_dir(apr_dir_t **dir,
+APR_DECLARE(apr_status_t) apr_os_dir_put(apr_dir_t **dir,
                                          apr_os_dir_t *thedir,
                                          apr_pool_t *cont)
 {

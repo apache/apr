@@ -98,14 +98,14 @@ int main(int argc, char *argv[])
     atexit(closeapr);
 
     fprintf(stdout, "Creating context.......");
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Something went wrong\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout,"\tClient:  Making socket address...............");
-    if ((stat = apr_getaddrinfo(&remote_sa, dest, APR_UNSPEC, 8021, 0, context)) 
+    if ((stat = apr_sockaddr_info_get(&remote_sa, dest, APR_UNSPEC, 8021, 0, context)) 
         != APR_SUCCESS) {
         fprintf(stdout, "Failed!\n");
         fprintf(stdout, "Address resolution failed for %s: %s\n", 
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     fprintf(stdout,"OK\n");
 
     fprintf(stdout, "\tClient:  Creating new socket.......");
-    if (apr_create_socket(&sock, remote_sa->sa.sin.sin_family, SOCK_STREAM,
+    if (apr_socket_create(&sock, remote_sa->sa.sin.sin_family, SOCK_STREAM,
                           context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't create socket\n");
         exit(-1);
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     stat = apr_connect(sock, remote_sa);
 
     if (stat != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Could not connect: %s (%d)\n", 
 		apr_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
         fflush(stderr);
@@ -138,25 +138,25 @@ int main(int argc, char *argv[])
     if (read_timeout == -1) {
         fprintf(stdout, "\tClient:  Setting socket option NONBLOCK.......");
         if (apr_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
-            apr_close_socket(sock);
+            apr_socket_close(sock);
             fprintf(stderr, "Couldn't set socket option\n");
             exit(-1);
         }
         fprintf(stdout, "OK\n");
     }
 
-    apr_get_sockaddr(&remote_sa, APR_REMOTE, sock);
-    apr_get_ipaddr(&remote_ipaddr, remote_sa);
-    apr_get_port(&remote_port, remote_sa);
-    apr_get_sockaddr(&local_sa, APR_LOCAL, sock);
-    apr_get_ipaddr(&local_ipaddr, local_sa);
-    apr_get_port(&local_port, local_sa);
+    apr_socket_addr_get(&remote_sa, APR_REMOTE, sock);
+    apr_sockaddr_ip_get(&remote_ipaddr, remote_sa);
+    apr_sockaddr_port_get(&remote_port, remote_sa);
+    apr_socket_addr_get(&local_sa, APR_LOCAL, sock);
+    apr_sockaddr_ip_get(&local_ipaddr, local_sa);
+    apr_sockaddr_port_get(&local_port, local_sa);
     fprintf(stdout, "\tClient socket: %s:%u -> %s:%u\n", local_ipaddr, local_port, remote_ipaddr, remote_port);
 
     fprintf(stdout, "\tClient:  Trying to send data over socket.......");
     length = STRLEN;
     if (apr_send(sock, datasend, &length) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Problem sending data\n");
         exit(-1);
     }
@@ -176,13 +176,13 @@ int main(int argc, char *argv[])
     fprintf(stdout, "\tClient:  Trying to receive data over socket.......");
 
     if ((stat = apr_recv(sock, datarecv, &length)) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Problem receiving data: %s (%d)\n", 
 		apr_strerror(stat, msgbuf, sizeof(msgbuf)), stat);
         exit(-1);
     }
     if (strcmp(datarecv, "Recv data test")) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "I did not receive the correct data %s\n", datarecv);
         exit(-1);
     }
@@ -190,14 +190,14 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "\tClient:  Shutting down socket.......");
     if (apr_shutdown(sock, APR_SHUTDOWN_WRITE) != APR_SUCCESS) {
-        apr_close_socket(sock);
+        apr_socket_close(sock);
         fprintf(stderr, "Could not shutdown socket\n");
         exit(-1);
     }
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Closing down socket.......");
-    if (apr_close_socket(sock) != APR_SUCCESS) {
+    if (apr_socket_close(sock) != APR_SUCCESS) {
         fprintf(stderr, "Could not shutdown socket\n");
         exit(-1);
     }

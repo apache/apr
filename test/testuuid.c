@@ -64,11 +64,11 @@ int main(int argc, char **argv)
     char buf[APR_UUID_FORMATTED_LENGTH + 1];
     int retcode = 0;
 
-    apr_get_uuid(&uuid);
-    apr_format_uuid(buf, &uuid);
+    apr_uuid_get(&uuid);
+    apr_uuid_format(buf, &uuid);
     printf("UUID: %s\n", buf);
 
-    apr_parse_uuid(&uuid2, buf);
+    apr_uuid_parse(&uuid2, buf);
     if (memcmp(&uuid, &uuid2, sizeof(uuid)) == 0)
         printf("Parse appears to work.\n");
     else {
@@ -76,15 +76,15 @@ int main(int argc, char **argv)
         retcode = 1;
     }
 
-    apr_format_uuid(buf, &uuid2);
+    apr_uuid_format(buf, &uuid2);
     printf("parsed/reformatted UUID: %s\n", buf);
 
     /* generate two of them quickly */
-    apr_get_uuid(&uuid);
-    apr_get_uuid(&uuid2);
-    apr_format_uuid(buf, &uuid);
+    apr_uuid_get(&uuid);
+    apr_uuid_get(&uuid2);
+    apr_uuid_format(buf, &uuid);
     printf("UUID 1: %s\n", buf);
-    apr_format_uuid(buf, &uuid2);
+    apr_uuid_format(buf, &uuid2);
     printf("UUID 2: %s\n", buf);
 
     return retcode;

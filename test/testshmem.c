@@ -102,7 +102,7 @@ int main(void)
     apr_initialize();
 
     fprintf(stdout, "Initializing the context......."); 
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "could not initialize\n");
         exit(-1);
     }
@@ -128,7 +128,7 @@ int main(void)
     pid = fork();
     if (pid == 0) {
         apr_sleep(1);
-        if (apr_open_shmem(shm) == APR_SUCCESS) {
+        if (apr_shm_open(shm) == APR_SUCCESS) {
             msgwait(1);
             msgput(0, "Msg received\n");
         } else {

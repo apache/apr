@@ -105,12 +105,12 @@ static void get_random_info(unsigned char node[NODE_LENGTH])
 
     } r;
 
-    apr_MD5Init(&c);
+    apr_md5_init(&c);
     r.pid = getpid();
     gettimeofday(&r.t, (struct timezone *)0);
     gethostname(r.hostname, 256);
-    apr_MD5Update(&c, (const unsigned char *)&r, sizeof(r));
-    apr_MD5Final(seed, &c);
+    apr_md5_update(&c, (const unsigned char *)&r, sizeof(r));
+    apr_md5_final(seed, &c);
 
     memcpy(node, seed, NODE_LENGTH);    /* use a subset of the seed bytes */
 #endif
@@ -196,7 +196,7 @@ static void get_current_time(apr_uint64_t *timestamp)
     *timestamp = time_now + fudge;
 }
 
-void apr_get_uuid(apr_uuid_t *uuid)
+void apr_uuid_get(apr_uuid_t *uuid)
 {
     apr_uint64_t timestamp;
     unsigned char *d = uuid->data;

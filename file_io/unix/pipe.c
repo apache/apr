@@ -126,7 +126,7 @@ static apr_status_t pipenonblock(apr_file_t *thepipe)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout)
+apr_status_t apr_file_pipe_timeout_set(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
@@ -145,7 +145,7 @@ apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeo
     return APR_EINVAL;
 }
 
-apr_status_t apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t *timeout)
+apr_status_t apr_file_pipe_timeout_get(apr_file_t *thepipe, apr_interval_time_t *timeout)
 {
     if (thepipe->pipe == 1) {
         *timeout = thepipe->timeout;
@@ -154,7 +154,7 @@ apr_status_t apr_get_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t *time
     return APR_EINVAL;
 }
 
-apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
+apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
 {
     int filedes[2];
 
@@ -187,14 +187,14 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont
     (*in)->thlock = NULL;
 #endif
 
-    apr_register_cleanup((*in)->cntxt, (void *)(*in), apr_unix_file_cleanup,
-                         apr_null_cleanup);
-    apr_register_cleanup((*out)->cntxt, (void *)(*out), apr_unix_file_cleanup,
-                         apr_null_cleanup);
+    apr_pool_cleanup_register((*in)->cntxt, (void *)(*in), apr_unix_file_cleanup,
+                         apr_pool_cleanup_null);
+    apr_pool_cleanup_register((*out)->cntxt, (void *)(*out), apr_unix_file_cleanup,
+                         apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_create_namedpipe(const char *filename, 
+apr_status_t apr_file_namedpipe_create(const char *filename, 
                                 apr_fileperms_t perm, apr_pool_t *cont)
 {
     mode_t mode = apr_unix_perms2mode(perm);

@@ -124,11 +124,11 @@ int main(void)
         exit(-1);
     }
     atexit(closeapr);
-    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
-    if (apr_create_pool(&cont2, context) != APR_SUCCESS) {
+    if (apr_pool_create(&cont2, context) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -136,7 +136,7 @@ int main(void)
     fprintf(stdout, "Testing file functions.\n");
 
     fprintf(stdout, "\tOpening file.......");
-    status = apr_open(&thefile, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
+    status = apr_file_open(&thefile, filename, flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
     if (status != APR_SUCCESS) {
         fprintf(stderr, "Didn't open file: %d/%s\n", status, 
                 apr_strerror(status, errmsg, sizeof errmsg));
@@ -151,7 +151,7 @@ int main(void)
         fprintf(stderr, "Bad file des\n");
         exit(-1);
     }
-    apr_get_filename(&str, thefile);
+    apr_file_name_get(&str, thefile);
     if (strcmp(str, filename) != 0) {
         fprintf(stderr, "wrong filename\n");
         exit(-1);
@@ -163,9 +163,9 @@ int main(void)
     fprintf(stdout, "\tWriting to file.......");
     
     nbytes = strlen("this is a test");
-    status = apr_write(thefile, "this is a test", &nbytes);
+    status = apr_file_write(thefile, "this is a test", &nbytes);
     if (status != APR_SUCCESS) {
-        fprintf(stderr, "something's wrong; apr_write->%d/%s\n",
+        fprintf(stderr, "something's wrong; apr_file_write->%d/%s\n",
                 status, apr_strerror(status, errmsg, sizeof errmsg));
         exit(-1);
     }
@@ -179,7 +179,7 @@ int main(void)
 
     fprintf(stdout, "\tMoving to start of file.......");
     zer = 0;
-    status = apr_seek(thefile, SEEK_SET, &zer);
+    status = apr_file_seek(thefile, SEEK_SET, &zer);
     if (status != APR_SUCCESS) {
         fprintf(stderr, "couldn't seek to beginning of file: %d/%s",
                 status, apr_strerror(status, errmsg, sizeof errmsg));
@@ -201,8 +201,8 @@ int main(void)
     fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\t\tChecking for incoming data.......");
-    apr_setup_poll(&sdset, 1, context);
-    apr_add_poll_socket(sdset, testsock, APR_POLLIN);
+    apr_poll_setup(&sdset, 1, context);
+    apr_poll_socket_add(sdset, testsock, APR_POLLIN);
     num = 1;
     if (apr_poll(sdset, &num, -1) != APR_SUCCESS) {
         fprintf(stderr, "Select caused an error\n");
@@ -218,9 +218,9 @@ int main(void)
     fprintf(stdout, "\tReading from the file.......");
     nbytes = strlen("this is a test");
     buf = (char *)apr_palloc(context, nbytes + 1);
-    status = apr_read(thefile, buf, &nbytes);
+    status = apr_file_read(thefile, buf, &nbytes);
     if (status != APR_SUCCESS) {
-        fprintf(stderr, "apr_read()->%d/%s\n",
+        fprintf(stderr, "apr_file_read()->%d/%s\n",
                 status, apr_strerror(status, errmsg, sizeof errmsg));
         exit(-1);
     }
@@ -233,7 +233,7 @@ int main(void)
     }
 
     fprintf(stdout, "\tAdding user data to the file.......");
-    status = apr_set_filedata(thefile, "This is a test", "test", apr_null_cleanup);
+    status = apr_file_data_set(thefile, "This is a test", "test", apr_pool_cleanup_null);
     if (status  != APR_SUCCESS) {
         fprintf(stderr, "Couldn't add the data\n");
         exit(-1); 
@@ -243,7 +243,7 @@ int main(void)
     }
 
     fprintf(stdout, "\tGetting user data from the file.......");
-    status = apr_get_filedata((void **)&teststr, "test", thefile);
+    status = apr_file_data_get((void **)&teststr, "test", thefile);
     if (status  != APR_SUCCESS || strcmp(teststr, "This is a test")) {
         fprintf(stderr, "Couldn't get the data\n");
         exit(-1); 
@@ -253,7 +253,7 @@ int main(void)
     }
 
     fprintf(stdout, "\tGetting fileinfo.......");
-    status = apr_getfileinfo(&finfo, APR_FINFO_NORM, thefile);
+    status = apr_file_info_get(&finfo, APR_FINFO_NORM, thefile);
     if (status  == APR_INCOMPLETE) {
 	int i;
         fprintf(stdout, "INCOMPLETE\n");
@@ -272,7 +272,7 @@ int main(void)
     uid = finfo.user;
 
     fprintf(stdout, "\tClosing File.......");
-    status = apr_close(thefile);
+    status = apr_file_close(thefile);
     if (status  != APR_SUCCESS) {
         fprintf(stderr, "Couldn't close the file\n");
         exit(-1); 
@@ -329,7 +329,7 @@ int main(void)
     }
 
     fprintf(stdout, "\tDeleting file.......");
-    status = apr_remove_file(filename, context);
+    status = apr_file_remove(filename, context);
     if (status  != APR_SUCCESS) {
         fprintf(stderr, "Couldn't delete the file\n");
         exit(-1); 
@@ -339,7 +339,7 @@ int main(void)
     }
     
     fprintf(stdout, "\tMaking sure it's gone.......");
-    status = apr_open(&thefile, filename, APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
+    status = apr_file_open(&thefile, filename, APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
     if (status == APR_SUCCESS) {
         fprintf(stderr, "I could open the file for some reason?\n");
         exit(-1);
@@ -352,7 +352,7 @@ int main(void)
     test_filedel(context);
     test_read(context);
 
-    apr_destroy_pool(context);
+    apr_pool_destroy(context);
     return 1;
 }
 
@@ -362,20 +362,20 @@ int test_filedel(apr_pool_t *context)
     apr_int32_t flag = APR_READ | APR_WRITE | APR_CREATE;
     apr_status_t stat;
   
-    stat = apr_open(&thefile, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
+    stat = apr_file_open(&thefile, "testdel", flag, APR_UREAD | APR_UWRITE | APR_GREAD, context);
     if (stat != APR_SUCCESS) {
          return stat;
     }
 
-    if ((stat = apr_close(thefile))  != APR_SUCCESS) {
+    if ((stat = apr_file_close(thefile))  != APR_SUCCESS) {
         return stat;
     }
 
-    if ((stat = apr_remove_file("testdel", context))  != APR_SUCCESS) {
+    if ((stat = apr_file_remove("testdel", context))  != APR_SUCCESS) {
         return stat;
     }
 
-    stat = apr_open(&thefile, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
+    stat = apr_file_open(&thefile, "testdel", APR_READ, APR_UREAD | APR_UWRITE | APR_GREAD, context);
     if (stat == APR_SUCCESS) {
         return stat;
     }
@@ -393,7 +393,7 @@ int testdirs(apr_pool_t *context)
     fprintf(stdout, "Testing Directory functions.\n");
 
     fprintf(stdout, "\tMakeing Directory.......");
-    if (apr_make_dir("testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE | APR_GREAD | APR_GWRITE | APR_GEXECUTE | APR_WREAD | APR_WWRITE | APR_WEXECUTE, context)  != APR_SUCCESS) {
+    if (apr_dir_make("testdir", APR_UREAD | APR_UWRITE | APR_UEXECUTE | APR_GREAD | APR_GWRITE | APR_GEXECUTE | APR_WREAD | APR_WWRITE | APR_WEXECUTE, context)  != APR_SUCCESS) {
         fprintf(stderr, "Could not create directory\n");
         return -1;
     }
@@ -401,13 +401,13 @@ int testdirs(apr_pool_t *context)
         fprintf(stdout, "OK\n");
     }
 
-    if (apr_open(&file, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {;
+    if (apr_file_open(&file, "testdir/testfile", APR_READ | APR_WRITE | APR_CREATE, APR_UREAD | APR_UWRITE | APR_UEXECUTE, context) != APR_SUCCESS) {;
         return -1;
     }
 
     bytes = strlen("Another test!!!");
-    apr_write(file, "Another test!!", &bytes); 
-	apr_close(file);
+    apr_file_write(file, "Another test!!", &bytes); 
+	apr_file_close(file);
 
     fprintf(stdout, "\tOpening Directory.......");
     if (apr_dir_open(&temp, "testdir", context) != APR_SUCCESS) {
@@ -474,7 +474,7 @@ int testdirs(apr_pool_t *context)
     }
 
     fprintf(stdout, "\tRemoving file from directory.......");
-    if (apr_remove_file("testdir/testfile", context)  != APR_SUCCESS) {
+    if (apr_file_remove("testdir/testfile", context)  != APR_SUCCESS) {
         fprintf(stderr, "Could not remove file\n");
         return -1;
     }
@@ -483,7 +483,7 @@ int testdirs(apr_pool_t *context)
     }
 
     fprintf(stdout, "\tRemoving Directory.......");
-    if (apr_remove_dir("testdir", context)  != APR_SUCCESS) {
+    if (apr_dir_remove("testdir", context)  != APR_SUCCESS) {
         fprintf(stderr, "Could not remove directory\n");
         return -1;
     }
@@ -506,23 +506,23 @@ static void create_testread(apr_pool_t *p, const char *fname)
 
     /* Create a test file with known content.
      */
-    rv = apr_open(&f, fname, APR_CREATE | APR_WRITE | APR_TRUNCATE, APR_UREAD | APR_UWRITE, p);
+    rv = apr_file_open(&f, fname, APR_CREATE | APR_WRITE | APR_TRUNCATE, APR_UREAD | APR_UWRITE, p);
     if (rv) {
-        fprintf(stderr, "apr_open()->%d/%s\n",
+        fprintf(stderr, "apr_file_open()->%d/%s\n",
                 rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     nbytes = 4;
-    rv = apr_write(f, "abc\n", &nbytes);
+    rv = apr_file_write(f, "abc\n", &nbytes);
     assert(!rv && nbytes == 4);
     memset(buf, 'a', sizeof buf);
     nbytes = sizeof buf;
-    rv = apr_write(f, buf, &nbytes);
+    rv = apr_file_write(f, buf, &nbytes);
     assert(!rv && nbytes == sizeof buf);
     nbytes = 2;
-    rv = apr_write(f, "\n\n", &nbytes);
+    rv = apr_file_write(f, "\n\n", &nbytes);
     assert(!rv && nbytes == 2);
-    rv = apr_close(f);
+    rv = apr_file_close(f);
     assert(!rv);
 }
 
@@ -537,11 +537,11 @@ static char read_one(apr_file_t *f, int expected)
 
   bytes[0] = bytes[2] = 0x01;
   if (counter % 2) {
-      rv = apr_getc(bytes + 1, f);
+      rv = apr_file_getc(bytes + 1, f);
   }
   else {
       nbytes = 1;
-      rv = apr_read(f, bytes + 1, &nbytes);
+      rv = apr_file_read(f, bytes + 1, &nbytes);
       assert(nbytes == 1);
   }
   assert(!rv);
@@ -560,23 +560,23 @@ static void test_read_guts(apr_pool_t *p, const char *fname, apr_int32_t extra_f
     char buf[1024];
     int i;
 
-    rv = apr_open(&f, fname, APR_READ | extra_flags, 0, p);
+    rv = apr_file_open(&f, fname, APR_READ | extra_flags, 0, p);
     assert(!rv);
     read_one(f, 'a');
     read_one(f, 'b');
     if (extra_flags & APR_BUFFERED) {
         fprintf(stdout, 
-                "\n\t\tskipping apr_ungetc() for APR_BUFFERED... "
+                "\n\t\tskipping apr_file_ungetc() for APR_BUFFERED... "
                 "doesn't work yet...\n\t\t\t\t ");
     }
     else {
-        rv = apr_ungetc('b', f);
+        rv = apr_file_ungetc('b', f);
         assert(!rv);
         /* Note: some implementations move the file ptr back;
          *       others just save up to one char; it isn't 
          *       portable to unget more than once.
          */
-        /* Don't do this: rv = apr_ungetc('a', f); */
+        /* Don't do this: rv = apr_file_ungetc('a', f); */
         read_one(f, 'b');
     }
     read_one(f, 'c');
@@ -586,20 +586,20 @@ static void test_read_guts(apr_pool_t *p, const char *fname, apr_int32_t extra_f
     }
     read_one(f, '\n');
     read_one(f, '\n');
-    rv = apr_getc(buf, f);
+    rv = apr_file_getc(buf, f);
     assert(rv == APR_EOF);
-    rv = apr_close(f);
+    rv = apr_file_close(f);
     assert(!rv);
 
     f = NULL;
-    rv = apr_open(&f, fname, APR_READ | extra_flags, 0, p);
+    rv = apr_file_open(&f, fname, APR_READ | extra_flags, 0, p);
     assert(!rv);
-    rv = apr_fgets(buf, 10, f);
+    rv = apr_file_gets(buf, 10, f);
     assert(!rv);
     assert(!strcmp(buf, "abc\n"));
     /* read first 800 of TESTREAD_BLKSIZE 'a's 
      */
-    rv = apr_fgets(buf, 801, f);
+    rv = apr_file_gets(buf, 801, f);
     assert(!rv);
     assert(strlen(buf) == 800);
     for (i = 0; i < 800; i++) {
@@ -607,7 +607,7 @@ static void test_read_guts(apr_pool_t *p, const char *fname, apr_int32_t extra_f
     }
     /* read rest of the 'a's and the first newline
      */
-    rv = apr_fgets(buf, sizeof buf, f);
+    rv = apr_file_gets(buf, sizeof buf, f);
     assert(!rv);
     assert(strlen(buf) == TESTREAD_BLKSIZE - 800 + 1);
     for (i = 0; i < TESTREAD_BLKSIZE - 800; i++) {
@@ -616,23 +616,23 @@ static void test_read_guts(apr_pool_t *p, const char *fname, apr_int32_t extra_f
     assert(buf[TESTREAD_BLKSIZE - 800] == '\n');
     /* read the last newline
      */
-    rv = apr_fgets(buf, sizeof buf, f);
+    rv = apr_file_gets(buf, sizeof buf, f);
     assert(!rv);
     assert(!strcmp(buf, "\n"));
     /* get APR_EOF
      */
-    rv = apr_fgets(buf, sizeof buf, f);
+    rv = apr_file_gets(buf, sizeof buf, f);
     assert(rv == APR_EOF);
-    /* get APR_EOF with apr_getc
+    /* get APR_EOF with apr_file_getc
      */
-    rv = apr_getc(buf, f);
+    rv = apr_file_getc(buf, f);
     assert(rv == APR_EOF);
-    /* get APR_EOF with apr_read
+    /* get APR_EOF with apr_file_read
      */
     nbytes = sizeof buf;
-    rv = apr_read(f, buf, &nbytes);
+    rv = apr_file_read(f, buf, &nbytes);
     assert(rv == APR_EOF);
-    rv = apr_close(f);
+    rv = apr_file_close(f);
     assert(!rv);
 }
 
@@ -645,27 +645,27 @@ static void test_bigread(apr_pool_t *p, const char *fname, apr_int32_t extra_fla
 
     /* Create a test file with known content.
      */
-    rv = apr_open(&f, fname, APR_CREATE | APR_WRITE | APR_TRUNCATE, APR_UREAD | APR_UWRITE, p);
+    rv = apr_file_open(&f, fname, APR_CREATE | APR_WRITE | APR_TRUNCATE, APR_UREAD | APR_UWRITE, p);
     if (rv) {
-        fprintf(stderr, "apr_open()->%d/%s\n",
+        fprintf(stderr, "apr_file_open()->%d/%s\n",
                 rv, apr_strerror(rv, buf, sizeof buf));
         exit(1);
     }
     nbytes = APR_BUFFERSIZE;
     memset(buf, 0xFE, nbytes);
-    rv = apr_write(f, buf, &nbytes);
+    rv = apr_file_write(f, buf, &nbytes);
     assert(!rv && nbytes == APR_BUFFERSIZE);
-    rv = apr_close(f);
+    rv = apr_file_close(f);
     assert(!rv);
 
     f = NULL;
-    rv = apr_open(&f, fname, APR_READ | extra_flags, 0, p);
+    rv = apr_file_open(&f, fname, APR_READ | extra_flags, 0, p);
     assert(!rv);
     nbytes = sizeof buf;
-    rv = apr_read(f, buf, &nbytes);
+    rv = apr_file_read(f, buf, &nbytes);
     assert(!rv);
     assert(nbytes == APR_BUFFERSIZE);
-    rv = apr_close(f);
+    rv = apr_file_close(f);
     assert(!rv);
 }
 
@@ -689,7 +689,7 @@ static void test_read(apr_pool_t *p)
     fprintf(stdout, "\tMore unbuffered file tests......");
     test_bigread(p, fname, 0);
     fprintf(stdout, "OK\n");
-    rv = apr_remove_file(fname, p);
+    rv = apr_file_remove(fname, p);
     assert(!rv);
     fprintf(stdout, "\tAll read tests...........OK\n");
 }

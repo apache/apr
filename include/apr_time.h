@@ -90,9 +90,9 @@ typedef apr_int32_t apr_interval_time_t;
 
 /**
  * return the current time
- * @deffunc apr_time_t apr_now(void)
+ * @deffunc apr_time_t apr_time_now(void)
  */
-APR_DECLARE(apr_time_t) apr_now(void);
+APR_DECLARE(apr_time_t) apr_time_now(void);
 
 typedef struct apr_exploded_time_t apr_exploded_time_t;
 /**

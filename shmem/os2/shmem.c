@@ -121,7 +121,7 @@ apr_status_t apr_shm_free(struct shmem_t *m, void *entity)
 
 
 
-apr_status_t apr_get_shm_name(apr_shmem_t *c, apr_shm_name_t **name)
+apr_status_t apr_shm_name_get(apr_shmem_t *c, apr_shm_name_t **name)
 {
     *name = NULL;
     return APR_ANONYMOUS;
@@ -129,14 +129,14 @@ apr_status_t apr_get_shm_name(apr_shmem_t *c, apr_shm_name_t **name)
 
 
 
-apr_status_t apr_set_shm_name(apr_shmem_t *c, apr_shm_name_t *name)
+apr_status_t apr_shm_name_set(apr_shmem_t *c, apr_shm_name_t *name)
 {
     return APR_ANONYMOUS;
 }
 
 
 
-apr_status_t apr_open_shmem(struct shmem_t *m)
+apr_status_t apr_shm_open(struct shmem_t *m)
 {
     int rc;
 

@@ -95,8 +95,8 @@ apr_status_t apr_dir_open(apr_dir_t **new, const char *dirname, apr_pool_t *cont
         return errno;
     }    
     else {
-        apr_register_cleanup((*new)->cntxt, (void *)(*new), dir_cleanup,
-	                    apr_null_cleanup);
+        apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), dir_cleanup,
+	                    apr_pool_cleanup_null);
         return APR_SUCCESS;
     }
 }
@@ -106,7 +106,7 @@ apr_status_t apr_dir_close(apr_dir_t *thedir)
     apr_status_t rv;
 
     if ((rv = dir_cleanup(thedir)) == APR_SUCCESS) {
-        apr_kill_cleanup(thedir->cntxt, thedir, dir_cleanup);
+        apr_pool_cleanup_kill(thedir->cntxt, thedir, dir_cleanup);
         return APR_SUCCESS;
     }
     return rv;
@@ -195,7 +195,7 @@ apr_status_t apr_dir_rewind(apr_dir_t *thedir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
+apr_status_t apr_dir_make(const char *path, apr_fileperms_t perm, apr_pool_t *cont)
 {
     mode_t mode = apr_unix_perms2mode(perm);
 
@@ -207,7 +207,7 @@ apr_status_t apr_make_dir(const char *path, apr_fileperms_t perm, apr_pool_t *co
     }
 }
 
-apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
+apr_status_t apr_dir_remove(const char *path, apr_pool_t *cont)
 {
     if (rmdir(path) == 0) {
         return APR_SUCCESS;
@@ -217,7 +217,7 @@ apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
     }
 }
 
-apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)
+apr_status_t apr_os_dir_get(apr_os_dir_t **thedir, apr_dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;
@@ -226,7 +226,7 @@ apr_status_t apr_get_os_dir(apr_os_dir_t **thedir, apr_dir_t *dir)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_dir(apr_dir_t **dir, apr_os_dir_t *thedir,
+apr_status_t apr_os_dir_put(apr_dir_t **dir, apr_os_dir_t *thedir,
                           apr_pool_t *cont)
 {
     if ((*dir) == NULL) {

@@ -194,7 +194,7 @@ struct apr_sockaddr_t {
     /** This points to the IP address structure within the appropriate
      *  sockaddr structure.  */
     void *ipaddr_ptr;
-    /** If multiple addresses were found by apr_getaddrinfo(), this 
+    /** If multiple addresses were found by apr_sockaddr_info_get(), this 
      *  points to a representation of the next address. */
     apr_sockaddr_t *next;
 };
@@ -226,9 +226,9 @@ struct apr_hdtr_t {
  * @param family The address family of the socket (e.g., APR_INET).
  * @param type The type of the socket (e.g., SOCK_STREAM).
  * @param cont The pool to use
- * @deffunc apr_status_t apr_create_socket(apr_socket_t **new_sock, int family, int type, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_socket_create(apr_socket_t **new_sock, int family, int type, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_create_socket(apr_socket_t **new_sock, 
+APR_DECLARE(apr_status_t) apr_socket_create(apr_socket_t **new_sock, 
                                             int family, int type,
                                             apr_pool_t *cont);
 
@@ -251,9 +251,9 @@ APR_DECLARE(apr_status_t) apr_shutdown(apr_socket_t *thesocket,
 /**
  * Close a tcp socket.
  * @param thesocket The socket to close 
- * @deffunc apr_status_t apr_close_socket(apr_socket_t *thesocket)
+ * @deffunc apr_status_t apr_socket_close(apr_socket_t *thesocket)
  */
-APR_DECLARE(apr_status_t) apr_close_socket(apr_socket_t *thesocket);
+APR_DECLARE(apr_status_t) apr_socket_close(apr_socket_t *thesocket);
 
 /**
  * Bind the socket to its associated port
@@ -308,9 +308,9 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa);
  * @param port The port number.
  * @param flags Special processing flags.
  * @param p The pool for the apr_sockaddr_t and associated storage.
- * @deffunc apr_status_t apr_getaddrinfo(apr_sockaddr_t **sa, const char *hostname, apr_int32_t family, apr_port_t port, apr_int32_t flags, apr_pool_t *p)
+ * @deffunc apr_status_t apr_sockaddr_info_get(apr_sockaddr_t **sa, const char *hostname, apr_int32_t family, apr_port_t port, apr_int32_t flags, apr_pool_t *p)
  */
-APR_DECLARE(apr_status_t) apr_getaddrinfo(apr_sockaddr_t **sa,
+APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
                                           const char *hostname,
                                           apr_int32_t family,
                                           apr_port_t port,
@@ -377,9 +377,9 @@ APR_DECLARE(apr_status_t) apr_gethostname(char *buf, int len, apr_pool_t *cont);
  * @param data The user data associated with the socket.
  * @param key The key to associate with the user data.
  * @param sock The currently open socket.
- * @deffunc apr_status_t apr_get_socketdata(void **data, const char *key, apr_socket_t *sock)
+ * @deffunc apr_status_t apr_socket_data_get(void **data, const char *key, apr_socket_t *sock)
  */
-APR_DECLARE(apr_status_t) apr_get_socketdata(void **data, const char *key,
+APR_DECLARE(apr_status_t) apr_socket_data_get(void **data, const char *key,
                                              apr_socket_t *sock);
 
 /**
@@ -388,9 +388,9 @@ APR_DECLARE(apr_status_t) apr_get_socketdata(void **data, const char *key,
  * @param data The user data to associate with the socket.
  * @param key The key to associate with the data.
  * @param cleanup The cleanup to call when the socket is destroyed.
- * @deffunc apr_status_t apr_set_socketdata(apr_socket_t *sock, void *data, const char *key, apr_status_t (*cleanup)(void*))
+ * @deffunc apr_status_t apr_socket_data_set(apr_socket_t *sock, void *data, const char *key, apr_status_t (*cleanup)(void*))
  */
-APR_DECLARE(apr_status_t) apr_set_socketdata(apr_socket_t *sock, void *data,
+APR_DECLARE(apr_status_t) apr_socket_data_set(apr_socket_t *sock, void *data,
                                              const char *key,
                                              apr_status_t (*cleanup)(void*));
 
@@ -537,9 +537,9 @@ APR_DECLARE(apr_status_t) apr_getsocketopt(apr_socket_t *sock,
  * @param sa The returned apr_sockaddr_t.
  * @param which Which interface do we want the apr_sockaddr_t for?
  * @param sock The socket to use
- * @deffunc apr_status_t apr_get_sockaddr(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock)
+ * @deffunc apr_status_t apr_socket_addr_get(apr_sockaddr_t **sa, apr_interface_e which, apr_socket_t *sock)
  */
-APR_DECLARE(apr_status_t) apr_get_sockaddr(apr_sockaddr_t **sa,
+APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
                                            apr_interface_e which,
                                            apr_socket_t *sock);
  
@@ -547,18 +547,18 @@ APR_DECLARE(apr_status_t) apr_get_sockaddr(apr_sockaddr_t **sa,
  * Set the port in an APR socket address.
  * @param sockaddr The socket address to set.
  * @param port The port to be stored in the socket address.
- * @deffunc apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port)
+ * @deffunc apr_status_t apr_sockaddr_port_set(apr_sockaddr_t *sockaddr, apr_port_t port)
  */
-APR_DECLARE(apr_status_t) apr_set_port(apr_sockaddr_t *sockaddr,
+APR_DECLARE(apr_status_t) apr_sockaddr_port_set(apr_sockaddr_t *sockaddr,
                                        apr_port_t port);
 
 /**
  * Return the port in an APR socket address.
  * @param port The port from the socket address.
  * @param sockaddr The socket address to reference.
- * @deffunc apr_status_t apr_get_port(apr_port_t *port, apr_sockaddr_t *sockaddr)
+ * @deffunc apr_status_t apr_sockaddr_port_get(apr_port_t *port, apr_sockaddr_t *sockaddr)
  */
-APR_DECLARE(apr_status_t) apr_get_port(apr_port_t *port,
+APR_DECLARE(apr_status_t) apr_sockaddr_port_get(apr_port_t *port,
                                        apr_sockaddr_t *sockaddr);
 
 /**
@@ -566,9 +566,9 @@ APR_DECLARE(apr_status_t) apr_get_port(apr_port_t *port,
  * @param sockaddr The socket address to use 
  * @param addr The IP address to attach to the socket.
  *             Use APR_ANYADDR to use any IP addr on the machine.
- * @deffunc apr_status_t apr_set_ipaddr(apr_sockaddr_t *sockaddr, const char *addr)
+ * @deffunc apr_status_t apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr, const char *addr)
  */
-APR_DECLARE(apr_status_t) apr_set_ipaddr(apr_sockaddr_t *sockaddr,
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_set(apr_sockaddr_t *sockaddr,
                                          const char *addr);
 
 /**
@@ -576,9 +576,9 @@ APR_DECLARE(apr_status_t) apr_set_ipaddr(apr_sockaddr_t *sockaddr,
  * an APR socket address.
  * @param addr The IP address.
  * @param sockaddr The socket address to reference.
- * @deffunc apr_status_t apr_get_ipaddr(char **addr, apr_sockaddr_t *sockaddr)
+ * @deffunc apr_status_t apr_sockaddr_ip_get(char **addr, apr_sockaddr_t *sockaddr)
  */
-APR_DECLARE(apr_status_t) apr_get_ipaddr(char **addr, 
+APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr, 
                                          apr_sockaddr_t *sockaddr);
 
 /**
@@ -586,9 +586,9 @@ APR_DECLARE(apr_status_t) apr_get_ipaddr(char **addr,
  * @param new_poll The poll structure to be used. 
  * @param num The number of socket descriptors to be polled.
  * @param cont The pool to operate on.
- * @deffunc apr_status_t apr_setup_poll(apr_pollfd_t **new_poll, apr_int32_t num, apr_pool_t *cont)
+ * @deffunc apr_status_t apr_poll_setup(apr_pollfd_t **new_poll, apr_int32_t num, apr_pool_t *cont)
  */
-APR_DECLARE(apr_status_t) apr_setup_poll(apr_pollfd_t **new_poll, 
+APR_DECLARE(apr_status_t) apr_poll_setup(apr_pollfd_t **new_poll, 
                                          apr_int32_t num,
                                          apr_pool_t *cont);
 
@@ -622,9 +622,9 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, apr_int32_t *nsds,
  *            APR_POLLPRI      signal if prioirty data is availble to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
- * @deffunc apr_status_t apr_add_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock, apr_int16_t event)
+ * @deffunc apr_status_t apr_poll_socket_add(apr_pollfd_t *aprset, apr_socket_t *sock, apr_int16_t event)
  */
-APR_DECLARE(apr_status_t) apr_add_poll_socket(apr_pollfd_t *aprset, 
+APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset, 
                                               apr_socket_t *sock,
                                               apr_int16_t event);
 
@@ -638,18 +638,18 @@ APR_DECLARE(apr_status_t) apr_add_poll_socket(apr_pollfd_t *aprset,
  *            APR_POLLPRI      signal if prioirty data is availble to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
- * @deffunc apr_status_t apr_mask_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock, apr_int16_t events)
+ * @deffunc apr_status_t apr_poll_socket_mask(apr_pollfd_t *aprset, apr_socket_t *sock, apr_int16_t events)
  */
-APR_DECLARE(apr_status_t) apr_mask_poll_socket(apr_pollfd_t *aprset,
+APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset,
                                                apr_socket_t *sock,
                                                apr_int16_t events);
 /**
  * Remove a socket from the poll structure.
  * @param aprset The poll structure we will be using. 
  * @param sock The socket to remove from the current poll structure. 
- * @deffunc apr_status_t apr_remove_poll_socket(apr_pollfd_t *aprset, apr_socket_t *sock)
+ * @deffunc apr_status_t apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
  */
-APR_DECLARE(apr_status_t) apr_remove_poll_socket(apr_pollfd_t *aprset, 
+APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, 
                                                  apr_socket_t *sock);
 
 /**
@@ -661,9 +661,9 @@ APR_DECLARE(apr_status_t) apr_remove_poll_socket(apr_pollfd_t *aprset,
  *            APR_POLLPRI      signal if prioirty data is availble to be read
  *            APR_POLLOUT      signal if write will not block
  * </PRE>
- * @deffunc apr_status_t apr_clear_poll_sockets(apr_pollfd_t *aprset, apr_int16_t events)
+ * @deffunc apr_status_t apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
  */
-APR_DECLARE(apr_status_t) apr_clear_poll_sockets(apr_pollfd_t *aprset, 
+APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, 
                                                  apr_int16_t events);
 
 /**
@@ -680,9 +680,9 @@ APR_DECLARE(apr_status_t) apr_clear_poll_sockets(apr_pollfd_t *aprset,
  * </PRE>
  * @param sock The socket we wish to get information about. 
  * @param aprset The poll structure we will be using. 
- * @deffunc apr_status_t apr_get_revents(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
+ * @deffunc apr_status_t apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
  */
-APR_DECLARE(apr_status_t) apr_get_revents(apr_int16_t *event, 
+APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, 
                                           apr_socket_t *sock,
                                           apr_pollfd_t *aprset);
 
@@ -691,9 +691,9 @@ APR_DECLARE(apr_status_t) apr_get_revents(apr_int16_t *event,
  * @param pollfd The currently open pollfd.
  * @param key The key to use for retreiving data associated with a poll struct.
  * @param data The user data associated with the pollfd.
- * @deffunc apr_status_t apr_get_polldata(apr_pollfd_t *pollfd, const char *key, void *data)
+ * @deffunc apr_status_t apr_poll_data_get(apr_pollfd_t *pollfd, const char *key, void *data)
  */
-APR_DECLARE(apr_status_t) apr_get_polldata(apr_pollfd_t *pollfd, 
+APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd, 
                                            const char *key, void *data);
 
 /**
@@ -702,9 +702,9 @@ APR_DECLARE(apr_status_t) apr_get_polldata(apr_pollfd_t *pollfd,
  * @param data The key to associate with the data.
  * @param key The user data to associate with the pollfd.
  * @param cleanup The cleanup function
- * @deffunc apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data, const char *key, apr_status_t (*cleanup)(void *))
+ * @deffunc apr_status_t apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key, apr_status_t (*cleanup)(void *))
  */
-APR_DECLARE(apr_status_t) apr_set_polldata(apr_pollfd_t *pollfd, void *data,
+APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data,
                                            const char *key,
                                            apr_status_t (*cleanup)(void *));
 

@@ -145,7 +145,7 @@ APR_DECLARE(apr_status_t) apr_ansi_time_to_apr_time(apr_time_t *result,
 }
 
 /* Return micro-seconds since the Unix epoch (jan. 1, 1970) UTC */
-APR_DECLARE(apr_time_t) apr_now(void)
+APR_DECLARE(apr_time_t) apr_time_now(void)
 {
     LONGLONG aprtime = 0;
     FILETIME time;
@@ -213,7 +213,7 @@ APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_os_imp_time(apr_os_imp_time_t **ostime,
+APR_DECLARE(apr_status_t) apr_os_imp_time_get(apr_os_imp_time_t **ostime,
                                               apr_time_t *aprtime)
 {
     /* TODO: Consider not passing in pointer to apr_time_t (e.g., call by value) */
@@ -221,7 +221,7 @@ APR_DECLARE(apr_status_t) apr_get_os_imp_time(apr_os_imp_time_t **ostime,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_get_os_exp_time(apr_os_exp_time_t **ostime, 
+APR_DECLARE(apr_status_t) apr_os_exp_time_get(apr_os_exp_time_t **ostime, 
                                               apr_exploded_time_t *aprexptime)
 {
     (*ostime)->wYear = aprexptime->tm_year + 1900;
@@ -235,7 +235,7 @@ APR_DECLARE(apr_status_t) apr_get_os_exp_time(apr_os_exp_time_t **ostime,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_put_os_imp_time(apr_time_t *aprtime,
+APR_DECLARE(apr_status_t) apr_os_imp_time_put(apr_time_t *aprtime,
                                               apr_os_imp_time_t **ostime,
                                               apr_pool_t *cont)
 {
@@ -243,7 +243,7 @@ APR_DECLARE(apr_status_t) apr_put_os_imp_time(apr_time_t *aprtime,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_put_os_exp_time(apr_exploded_time_t *aprtime,
+APR_DECLARE(apr_status_t) apr_os_exp_time_pupt(apr_exploded_time_t *aprtime,
                                               apr_os_exp_time_t **ostime,
                                               apr_pool_t *cont)
 {

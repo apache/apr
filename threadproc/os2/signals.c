@@ -62,7 +62,7 @@
 #include <string.h>
 #include <sys/wait.h>
 
-apr_status_t apr_kill(apr_proc_t *proc, int signal)
+apr_status_t apr_proc_kill(apr_proc_t *proc, int signal)
 {
 /* SIGTERM's don't work too well in OS/2 (only affects other EMX programs).
    CGIs may not be, esp. REXX scripts, so use a native call instead */

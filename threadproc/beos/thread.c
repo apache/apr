@@ -54,7 +54,7 @@
 
 #include "threadproc.h"
 
-apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
+apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
 {
     (*new) = (apr_threadattr_t *)apr_palloc(cont, 
               sizeof(apr_threadattr_t));
@@ -69,7 +69,7 @@ apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
+apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
 {
 	if (on == 1){
 		attr->detached = 1;
@@ -79,7 +79,7 @@ apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
     return APR_SUCCESS;
 }
 
-apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
+apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
 {
 	if (attr->detached == 1){
 		return APR_DETACH;
@@ -87,7 +87,7 @@ apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
 	return APR_NOTDETACH;
 }
 
-apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
+apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr,
                              apr_thread_start_t func, void *data,
                              apr_pool_t *cont)
 {
@@ -107,7 +107,7 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
 	else
 	    temp = B_NORMAL_PRIORITY;
 
-    stat = apr_create_pool(&(*new)->cntxt, cont);
+    stat = apr_pool_create(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -124,7 +124,7 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
 
 apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
-    apr_destroy_pool(thd->cntxt);
+    apr_pool_destroy(thd->cntxt);
 	exit_thread ((status_t)retval);
 	return APR_SUCCESS;
 }
@@ -149,25 +149,25 @@ apr_status_t apr_thread_detach(apr_thread_t *thd)
     }
 }
 
-apr_status_t apr_get_threaddata(void **data, const char *key, apr_thread_t *thread)
+apr_status_t apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
 {
-    return apr_get_userdata(data, key, thread->cntxt);
+    return apr_pool_userdata_get(data, key, thread->cntxt);
 }
 
-apr_status_t apr_set_threaddata(void *data, const char *key,
+apr_status_t apr_thread_data_set(void *data, const char *key,
                               apr_status_t (*cleanup) (void *),
                               apr_thread_t *thread)
 {
-    return apr_set_userdata(data, key, cleanup, thread->cntxt);
+    return apr_pool_userdata_set(data, key, cleanup, thread->cntxt);
 }
 
-apr_status_t apr_get_os_thread(apr_os_thread_t **thethd, apr_thread_t *thd)
+apr_status_t apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
 {
     *thethd = &thd->td;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_put_os_thread(apr_thread_t **thd, apr_os_thread_t *thethd, 
+apr_status_t apr_os_thread_pupt(apr_thread_t **thd, apr_os_thread_t *thethd, 
                              apr_pool_t *cont)
 {
     if (cont == NULL) {

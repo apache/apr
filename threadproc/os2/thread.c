@@ -61,7 +61,7 @@
 #include "fileio.h"
 #include <stdlib.h>
 
-apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
+apr_status_t apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *cont)
 {
     (*new) = (apr_threadattr_t *)apr_palloc(cont, sizeof(apr_threadattr_t));
 
@@ -76,7 +76,7 @@ apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
 
 
 
-apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
+apr_status_t apr_threadattr_detach_get(apr_threadattr_t *attr, apr_int32_t on)
 {
     attr->attr |= APR_THREADATTR_DETACHED;
     return APR_SUCCESS;
@@ -84,7 +84,7 @@ apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
 
 
 
-apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
+apr_status_t apr_threadattr_detach_set(apr_threadattr_t *attr)
 {
     return (attr->attr & APR_THREADATTR_DETACHED) ? APR_DETACH : APR_NOTDETACH;
 }
@@ -99,7 +99,7 @@ static void apr_thread_begin(void *arg)
 
 
 
-apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr, 
+apr_status_t apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
                              apr_thread_start_t func, void *data, 
                              apr_pool_t *cont)
 {
@@ -117,14 +117,14 @@ apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
     thread->attr = attr;
     thread->func = func;
     thread->data = data;
-    stat = apr_create_pool(&thread->cntxt, cont);
+    stat = apr_pool_create(&thread->cntxt, cont);
     
     if (stat != APR_SUCCESS) {
         return stat;
     }
 
     if (attr == NULL) {
-        stat = apr_create_threadattr(&thread->attr, thread->cntxt);
+        stat = apr_threadattr_create(&thread->attr, thread->cntxt);
         
         if (stat != APR_SUCCESS) {
             return stat;

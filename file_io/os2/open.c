@@ -62,12 +62,12 @@
 apr_status_t apr_file_cleanup(void *thefile)
 {
     apr_file_t *file = thefile;
-    return apr_close(file);
+    return apr_file_close(file);
 }
 
 
 
-apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cntxt)
+apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cntxt)
 {
     int oflags = 0;
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;
@@ -98,7 +98,7 @@ apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  ap
 
     if (dafile->buffered) {
         dafile->buffer = apr_palloc(cntxt, APR_FILE_BUFSIZE);
-        rv = apr_create_lock(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cntxt);
+        rv = apr_lock_create(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cntxt);
 
         if (rv)
             return rv;
@@ -144,19 +144,19 @@ apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  ap
     dafile->direction = 0;
     dafile->pipe = FALSE;
 
-    apr_register_cleanup(dafile->cntxt, dafile, apr_file_cleanup, apr_null_cleanup);
+    apr_pool_cleanup_register(dafile->cntxt, dafile, apr_file_cleanup, apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
 
 
-apr_status_t apr_close(apr_file_t *file)
+apr_status_t apr_file_close(apr_file_t *file)
 {
     ULONG rc;
     apr_status_t status;
     
     if (file && file->isopen) {
-        apr_flush(file);
+        apr_file_flush(file);
         rc = DosClose(file->filedes);
     
         if (rc == 0) {
@@ -172,14 +172,14 @@ apr_status_t apr_close(apr_file_t *file)
     }
 
     if (file->buffered)
-        apr_destroy_lock(file->mutex);
+        apr_lock_destroy(file->mutex);
 
     return APR_SUCCESS;
 }
 
 
 
-apr_status_t apr_remove_file(const char *path, apr_pool_t *cntxt)
+apr_status_t apr_file_remove(const char *path, apr_pool_t *cntxt)
 {
     ULONG rc = DosDelete(path);
     return APR_OS2_STATUS(rc);
@@ -187,7 +187,7 @@ apr_status_t apr_remove_file(const char *path, apr_pool_t *cntxt)
 
 
 
-apr_status_t apr_rename_file(const char *from_path, const char *to_path,
+apr_status_t apr_file_rename(const char *from_path, const char *to_path,
                            apr_pool_t *p)
 {
     ULONG rc = DosMove(from_path, to_path);
@@ -205,7 +205,7 @@ apr_status_t apr_rename_file(const char *from_path, const char *to_path,
 
 
 
-apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
+apr_status_t apr_os_file_get(apr_os_file_t *thefile, apr_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -217,7 +217,7 @@ apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
 
 
 
-apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, apr_pool_t *cont)
+apr_status_t apr_os_file_put(apr_file_t **file, apr_os_file_t *thefile, apr_pool_t *cont)
 {
     apr_os_file_t *dafile = thefile;
 
@@ -234,7 +234,7 @@ apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, apr_pool
 
 
 
-apr_status_t apr_eof(apr_file_t *fptr)
+apr_status_t apr_file_eof(apr_file_t *fptr)
 {
     if (!fptr->isopen || fptr->eof_hit == 1) {
         return APR_EOF;
@@ -244,20 +244,20 @@ apr_status_t apr_eof(apr_file_t *fptr)
 
 
 
-apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
+apr_status_t apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
     apr_os_file_t fd = 2;
 
-    return apr_put_os_file(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, cont);
 }
 
 
 
-apr_status_t apr_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
+apr_status_t apr_file_open_stdout(apr_file_t **thefile, apr_pool_t *cont)
 {
     apr_os_file_t fd = 1;
 
-    return apr_put_os_file(thefile, &fd, cont);
+    return apr_os_file_put(thefile, &fd, cont);
 }
 
 

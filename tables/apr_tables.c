@@ -107,7 +107,7 @@ static void make_array_core(apr_array_header_t *res, apr_pool_t *c,
     res->nalloc = nelts;	/* ...but this many allocated */
 }
 
-APR_DECLARE(apr_array_header_t *) apr_make_array(apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_array_make(apr_pool_t *p,
 						int nelts, int elt_size)
 {
     apr_array_header_t *res;
@@ -117,7 +117,7 @@ APR_DECLARE(apr_array_header_t *) apr_make_array(apr_pool_t *p,
     return res;
 }
 
-APR_DECLARE(void *) apr_push_array(apr_array_header_t *arr)
+APR_DECLARE(void *) apr_array_push(apr_array_header_t *arr)
 {
     if (arr->nelts == arr->nalloc) {
 	int new_size = (arr->nalloc <= 0) ? 1 : arr->nalloc * 2;
@@ -159,10 +159,10 @@ APR_DECLARE(void) apr_array_cat(apr_array_header_t *dst,
     dst->nelts += src->nelts;
 }
 
-APR_DECLARE(apr_array_header_t *) apr_copy_array(apr_pool_t *p,
+APR_DECLARE(apr_array_header_t *) apr_array_copy(apr_pool_t *p,
 						const apr_array_header_t *arr)
 {
-    apr_array_header_t *res = apr_make_array(p, arr->nalloc, arr->elt_size);
+    apr_array_header_t *res = apr_array_make(p, arr->nalloc, arr->elt_size);
 
     memcpy(res->elts, arr->elts, arr->elt_size * arr->nelts);
     res->nelts = arr->nelts;
@@ -186,7 +186,7 @@ static APR_INLINE void copy_array_hdr_core(apr_array_header_t *res,
 }
 
 APR_DECLARE(apr_array_header_t *)
-    apr_copy_array_hdr(apr_pool_t *p,
+    apr_array_copy_hdr(apr_pool_t *p,
 		       const apr_array_header_t *arr)
 {
     apr_array_header_t *res;
@@ -200,11 +200,11 @@ APR_DECLARE(apr_array_header_t *)
 /* The above is used here to avoid consing multiple new array bodies... */
 
 APR_DECLARE(apr_array_header_t *)
-    apr_append_arrays(apr_pool_t *p,
+    apr_array_append(apr_pool_t *p,
 		      const apr_array_header_t *first,
 		      const apr_array_header_t *second)
 {
-    apr_array_header_t *res = apr_copy_array_hdr(p, first);
+    apr_array_header_t *res = apr_array_copy_hdr(p, first);
 
     apr_array_cat(res, second);
     return res;
@@ -286,14 +286,14 @@ static apr_table_entry_t *table_push(apr_table_t *t)
     if (t->a.nelts == t->a.nalloc) {
         return NULL;
     }
-    return (apr_table_entry_t *) apr_push_array(&t->a);
+    return (apr_table_entry_t *) apr_array_push(&t->a);
 }
 #else /* MAKE_TABLE_PROFILE */
-#define table_push(t)	((apr_table_entry_t *) apr_push_array(&(t)->a))
+#define table_push(t)	((apr_table_entry_t *) apr_array_push(&(t)->a))
 #endif /* MAKE_TABLE_PROFILE */
 
 
-APR_DECLARE(apr_table_t *) apr_make_table(apr_pool_t *p, int nelts)
+APR_DECLARE(apr_table_t *) apr_table_make(apr_pool_t *p, int nelts)
 {
     apr_table_t *t = apr_palloc(p, sizeof(apr_table_t));
 
@@ -304,7 +304,7 @@ APR_DECLARE(apr_table_t *) apr_make_table(apr_pool_t *p, int nelts)
     return t;
 }
 
-APR_DECLARE(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
+APR_DECLARE(apr_table_t *) apr_table_copy(apr_pool_t *p, const apr_table_t *t)
 {
     apr_table_t *new = apr_palloc(p, sizeof(apr_table_t));
 
@@ -323,7 +323,7 @@ APR_DECLARE(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
     return new;
 }
 
-APR_DECLARE(void) apr_clear_table(apr_table_t *t)
+APR_DECLARE(void) apr_table_clear(apr_table_t *t)
 {
     t->a.nelts = 0;
 }
@@ -534,7 +534,7 @@ APR_DECLARE(void) apr_table_addn(apr_table_t *t, const char *key,
     elts->val = (char *)val;
 }
 
-APR_DECLARE(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
+APR_DECLARE(apr_table_t *) apr_table_overlay(apr_pool_t *p,
 					     const apr_table_t *overlay,
 					     const apr_table_t *base)
 {
@@ -665,7 +665,7 @@ static int sort_overlap(const void *va, const void *vb)
 #define APR_OVERLAP_TABLES_ON_STACK	(512)
 #endif
 
-APR_DECLARE(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
+APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags)
 {
     overlap_key cat_keys_buf[APR_OVERLAP_TABLES_ON_STACK];

@@ -59,7 +59,7 @@
 #include "apr_lib.h"
 #include "fileio.h"
 
-apr_status_t apr_create_thread_private(apr_threadkey_t **key,
+apr_status_t apr_threadkey_private_create(apr_threadkey_t **key,
                                      void (*dest)(void *), apr_pool_t *cont)
 {
     (*key) = (apr_threadkey_t *)apr_palloc(cont, sizeof(apr_threadkey_t));
@@ -72,19 +72,19 @@ apr_status_t apr_create_thread_private(apr_threadkey_t **key,
     return APR_OS2_STATUS(DosAllocThreadLocalMemory(1, &((*key)->key)));
 }
 
-apr_status_t apr_get_thread_private(void **new, apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_get(void **new, apr_threadkey_t *key)
 {
     (*new) = (void *)*(key->key);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_set_thread_private(void *priv, apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
 {
     *(key->key) = (ULONG)priv;
     return APR_SUCCESS;
 }
 
-apr_status_t apr_delete_thread_private(apr_threadkey_t *key)
+apr_status_t apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     return APR_OS2_STATUS(DosFreeThreadLocalMemory(key->key));
 }
