@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2003/01/27 17:09:09 $]
+Last modified at [$Date: 2003/02/24 23:21:11 $]
 
 Release:
 
@@ -20,20 +20,18 @@ Release:
 RELEASE SHOWSTOPPERS:
 
     * Must namespace protect all include/apr_foo.h headers.  Jon Travis
-      has especially observed these including apr and Apache-1.3.
+      has especially observed these including apr within Apache-1.3.
         Message-ID: <20020128100116.A4288@covalent.net>
       (Those problems have been fixed, but it is a good example of
       what to look for.)
       Some headers with issues: 
-        apr_fnmatch.h         (FNM_foo)
-        apr_general.h         (MAXIMUM_WAIT_OBJECTS)
         apr_md5.h             (MD5_DIGESTSIZE)
-        apr_network_io.h      (MAX_SECONDS_TO_LINGER)
         apr.hnw               (READDIR_IS_THREAD_SAFE, ENUM_BITFIELD, 
                               _POSIX_THREAD_SAFE_FUNCTIONS (?))
         apr.hw                (NO_USE_SIGACTION)
 
-      1.0 showstopper (not 0.9.x): gstein
+      1.0 showstopper (not 0.9.x): gstein, wrowe 
+      [wrowe observed we have deprecated for now, not trashing old names.]
 
     * Flush out the test suite and make sure it passes on all platforms.  
       We currently have about 450 functions in APR and 147 tests.  That 
@@ -54,7 +52,7 @@ RELEASE SHOWSTOPPERS:
       Thom says: I think this is close to done; does anyone want to add any
       further renames?
 
-      1.0 showstopper (not 0.9.0): gstein
+      1.0 showstopper (not 0.9.x): gstein, wrowe
 
     * When Win32 apr_proc_create was fixed, the apr_proc_t hproc
       member was added for that platform.  That's a problem (and
@@ -63,14 +61,8 @@ RELEASE SHOWSTOPPERS:
       since apr_proc_create didn't allocate the apr_proc_t storage.
       (Aren't transparent types swell?)  Suggestions?
 
-      1.0 showstopper (not 0.9.0): gstein
+      1.0 showstopper (not 0.9.x): gstein
 
-    * For 1.0, clean up ability to specify protocol for a socket by
-      axing apr_socket_create_ex(), adding protocol parm to 
-      apr_socket_create(), and enabling protocol field in 
-      apr_os_sock_info_t.
-
-      1.0 showstopper (not 0.9.x): trawick
 
 CURRENT VOTES:
 
@@ -90,6 +82,7 @@ CURRENT test/testall -v EXCEPTIONS:
         rather than the filesystem objects' permissions.
 
     * Win32 Not Implemented tests 
+        Pipes: set_timeout/read_write; can't timeout blocking pipes
         Socket Creation: tcp6_socket and udp6_socket (at least by default)
         Socket Options: corkable: TCP isn't corkable
         Users: username: Groups from apr_uid_get not implemented
