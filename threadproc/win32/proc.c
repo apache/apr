@@ -692,15 +692,37 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
+                                                  int *exitcode,
+                                                  apr_exit_why_e *exitwhy,
+                                                  apr_wait_how_e waithow,
+                                                  apr_pool_t *p)
+{
+    /* Unix does apr_proc_wait(proc(-1), exitcode, exitwhy, waithow)
+     * but Win32's apr_proc_wait won't work that way.
+     */
+    return APR_ENOTIMPL;
+}
+
+static apr_exit_why_e why_from_exit_code(DWORD exit) {
+    /* See WinNT.h STATUS_ACCESS_VIOLATION and family for how
+     * this class of failures was determined
+     */
+    if (((exit & 0xC0000000) == 0xC0000000) 
+                    && !(exit & 0x3FFF0000))
+        return APR_PROC_SIGNAL;
+    else
+        return APR_PROC_EXIT;
+
+    /* ### No way to tell if Dr Watson grabbed a core, AFAICT. */
+}
+
 APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
                                         int *exitcode, apr_exit_why_e *exitwhy,
                                         apr_wait_how_e waithow)
 {
     DWORD stat;
     DWORD time;
-
-    if (!proc)
-        return APR_ENOPROC;
 
     if (waithow == APR_WAIT)
         time = INFINITE;
@@ -710,9 +732,9 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
     if ((stat = WaitForSingleObject(proc->hproc, time)) == WAIT_OBJECT_0) {
         if (GetExitCodeProcess(proc->hproc, &stat)) {
             if (exitcode)
-                *exitcode = (apr_wait_t)stat;
-            CloseHandle(proc->hproc);
-            proc->hproc = NULL;
+                *exitcode = stat;
+            if (exitwhy)
+                *exitwhy = why_from_exit_code(stat);
             return APR_CHILD_DONE;
         }
     }
