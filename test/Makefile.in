@@ -11,6 +11,7 @@ PROGRAMS = \
 	testsock@EXEEXT@ \
 	testthread@EXEEXT@ \
 	testlock@EXEEXT@ \
+	testlockperf@EXEEXT@ \
 	testtime@EXEEXT@ \
 	testargs@EXEEXT@ \
 	testud@EXEEXT@ \
@@ -82,6 +83,9 @@ testthread@EXEEXT@: testthread.lo $(LOCAL_LIBS)
 
 testlock@EXEEXT@: testlock.lo $(LOCAL_LIBS)
 	$(LINK) testlock.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testlockperf@EXEEXT@: testlockperf.lo $(LOCAL_LIBS)
+	$(LINK) testlockperf.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testsock@EXEEXT@: testsock.lo client@EXEEXT@ server@EXEEXT@ sendfile@EXEEXT@ $(LOCAL_LIBS)
 	$(LINK) testsock.lo $(LOCAL_LIBS) $(ALL_LIBS)
