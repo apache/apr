@@ -592,7 +592,7 @@ APR_DECLARE(void) apr_pool_cleanup_register(apr_pool_t *p, const void *data,
 }
 
 APR_DECLARE(void) apr_pool_cleanup_kill(apr_pool_t *p, const void *data,
-                                 apr_status_t (*cleanup) (void *))
+					apr_status_t (*cleanup) (void *))
 {
     struct cleanup *c;
     struct cleanup **lastp;
