@@ -72,14 +72,25 @@
  */
 #define IsLeapYear(y) ((!(y % 4)) ? (((!(y % 400)) && (y % 100)) ? 1 : 0) : 0)
 
-static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm, BOOL lt)
+static LPTIME_ZONE_INFORMATION GetLocalTimeZone()
 {
-    TIME_ZONE_INFORMATION tz;
-    DWORD rc;
+    static int init = 0;
+    static TIME_ZONE_INFORMATION tz;
+
+    if (!init) {
+        GetTimeZoneInformation(&tz);
+        init = 1;
+    }
+    return &tz;
+}
+
+static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm)
+{
     static const int dayoffset[12] =
     {0, 31, 59, 90, 120, 151, 182, 212, 243, 273, 304, 334};
 
-    /* XXX: this is a looser - can't forefit precision like this
+    /* Note; the caller is responsible for filling in detailed tm_usec,
+     * tm_gmtoff and tm_isdst data when applicable.
      */
     xt->tm_usec = tm->wMilliseconds * 1000;
     xt->tm_sec  = tm->wSecond;
@@ -90,41 +101,14 @@ static void SystemTimeToAprExpTime(apr_time_exp_t *xt, SYSTEMTIME *tm, BOOL lt)
     xt->tm_year = tm->wYear - 1900;
     xt->tm_wday = tm->wDayOfWeek;
     xt->tm_yday = dayoffset[xt->tm_mon] + (tm->wDay - 1);
+    xt->tm_isdst = 0;
+    xt->tm_gmtoff = 0;
 
     /* If this is a leap year, and we're past the 28th of Feb. (the
      * 58th day after Jan. 1), we'll increment our tm_yday by one.
      */
     if (IsLeapYear(tm->wYear) && (xt->tm_yday > 58))
         xt->tm_yday++;
-
-    if (!lt) {
-        xt->tm_isdst = 0;
-        xt->tm_gmtoff = 0;
-        return;
-    }
-
-    rc = GetTimeZoneInformation(&tz);
-    switch (rc) {
-    case TIME_ZONE_ID_UNKNOWN:
-        xt->tm_isdst = 0;
-        /* Bias = UTC - local time in minutes 
-         * tm_gmtoff is seconds east of UTC
-         */
-        xt->tm_gmtoff = tz.Bias * -60;
-        break;
-    case TIME_ZONE_ID_STANDARD:
-        xt->tm_isdst = 0;
-        xt->tm_gmtoff = (tz.Bias + tz.StandardBias) * -60;
-        break;
-    case TIME_ZONE_ID_DAYLIGHT:
-        xt->tm_isdst = 1;
-        xt->tm_gmtoff = (tz.Bias + tz.DaylightBias) * -60;
-        break;
-    default:
-        xt->tm_isdst = 0;
-        xt->tm_gmtoff = 0;
-    }
-    return;
 }
 
 APR_DECLARE(apr_status_t) apr_time_ansi_put(apr_time_t *result, 
@@ -157,35 +141,69 @@ APR_DECLARE(apr_status_t) apr_time_exp_gmt(apr_time_exp_t *result,
     SYSTEMTIME st;
     AprTimeToFileTime(&ft, input);
     FileTimeToSystemTime(&ft, &st);
-    SystemTimeToAprExpTime(result, &st, 0);
+    /* The Platform SDK documents that SYSTEMTIME/FILETIME are
+     * generally UTC, so no timezone info needed
+     */
+    SystemTimeToAprExpTime(result, &st);
     result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_time_exp_tz(apr_time_exp_t *result, 
-                                          apr_time_t input, apr_int32_t offs)
+                                          apr_time_t input, 
+                                          apr_int32_t offs)
 {
     FILETIME ft;
     SYSTEMTIME st;
     AprTimeToFileTime(&ft, input + (offs *  APR_USEC_PER_SEC));
     FileTimeToSystemTime(&ft, &st);
-    SystemTimeToAprExpTime(result, &st, 0);
+    /* The Platform SDK documents that SYSTEMTIME/FILETIME are
+     * generally UTC, so we will simply note the offs used.
+     */
+    SystemTimeToAprExpTime(result, &st);
     result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
     result->tm_gmtoff = offs;
     return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_time_exp_lt(apr_time_exp_t *result,
-                                                apr_time_t input)
+                                          apr_time_t input)
 {
-    SYSTEMTIME st;
+    SYSTEMTIME st, localst;
     FILETIME ft, localft;
+    TIME_ZONE_INFORMATION *tz;
+    apr_time_t localtime;
 
+    tz = GetLocalTimeZone();
     AprTimeToFileTime(&ft, input);
-    FileTimeToLocalFileTime(&ft, &localft);
-    FileTimeToSystemTime(&localft, &st);
-    SystemTimeToAprExpTime(result, &st, 1);
+    FileTimeToSystemTime(&ft, &st);
+
+    /* The Platform SDK documents that SYSTEMTIME/FILETIME are
+     * generally UTC.  We use SystemTimeToTzSpecificLocalTime
+     * because FileTimeToLocalFileFime is documented that the
+     * resulting time local file time would have DST relative
+     * to the *present* date, not the date converted.
+     */
+    SystemTimeToTzSpecificLocalTime(tz, &st, &localst);
+    SystemTimeToAprExpTime(result, &localst);
     result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
+
+    /* Recover the resulting time as an apr time and use the
+     * delta for gmtoff in seconds (and ignore msec rounding) 
+     */
+    SystemTimeToFileTime(&localst, &localft);
+    FileTimeToAprTime(&localtime, &localft);
+    result->tm_gmtoff = (int)apr_time_sec(localtime) 
+                      - (int)apr_time_sec(input);
+
+    /* To compute the dst flag, we compare the expected 
+     * local (standard) timezone bias to the delta.
+     * [Note, in war time or double daylight time the
+     * resulting tm_isdst is, desireably, 2 hours]
+     */
+    result->tm_isdst = (result->tm_gmtoff / 3600)
+                     - (-(tz->Bias + tz->StandardBias) / 60);
+
     return APR_SUCCESS;
 }
 
@@ -268,10 +286,10 @@ APR_DECLARE(apr_status_t) apr_os_exp_time_put(apr_time_exp_t *aprtime,
                                               apr_os_exp_time_t **ostime,
                                               apr_pool_t *cont)
 {
-    /* XXX: sanity failure, what is system time, gmt or local ?
-     *      Assume local for this moment.
+    /* The Platform SDK documents that SYSTEMTIME/FILETIME are
+     * generally UTC, so no timezone info needed
      */
-    SystemTimeToAprExpTime(aprtime, *ostime, 1);
+    SystemTimeToAprExpTime(aprtime, *ostime);
     return APR_SUCCESS;
 }
 
