@@ -64,6 +64,12 @@ extern "C" {
  * @brief APR memory allocation
  *
  */
+/**
+ * @defgroup APR_Pool_allocator Allocator
+ * @ingroup APR_Pool
+ * @{
+ */
+
 
 #include "apr.h"
 #include "apr_errno.h"
@@ -74,7 +80,9 @@ extern "C" {
 #include "apr_pools.h"
 
 
+/** the allocator structure */
 typedef struct apr_allocator_t apr_allocator_t;
+/** the structure which holds information about the allocation */
 typedef struct apr_memnode_t apr_memnode_t;
 
 /**
@@ -152,7 +160,7 @@ APR_DECLARE(apr_thread_mutex_t *) apr_allocator_get_mutex(
                                       apr_allocator_t *allocator);
 #endif /* APR_HAS_THREADS */
 
-
+/** @} */
 #ifdef __cplusplus
 }
 #endif

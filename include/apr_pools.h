@@ -77,7 +77,7 @@ extern "C" {
  * and without thinking too hard about it either.
  */
 /**
- * @defgroup APR_Pool Pool Allocation Functions
+ * @defgroup APR_Pool Memory Pool Functions
  * @ingroup APR
  * @{
  */
@@ -133,8 +133,11 @@ typedef struct apr_pool_t apr_pool_t;
 #define APR_POOL_DEBUG 0
 #endif
 
+/** String to number */
 #define APR_POOL_STRINGIZE(x) APR_POOL__STRINGIZE(x)
+/** String to number */
 #define APR_POOL__STRINGIZE(x) #x
+/** the place in the code where the particular function was called */
 #define APR_POOL__FILE_LINE__ __FILE__ ":" APR_POOL_STRINGIZE(__LINE__)
 
 
@@ -189,10 +192,10 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 
 /**
  * Debug version of apr_pool_create_ex.
- * @param newpool See: apr_pool_create.
- * @param parent See: apr_pool_create.
- * @param abort_fn See: apr_pool_create.
- * @param allocator See: apr_pool_create.
+ * @param newpool @see apr_pool_create.
+ * @param parent @see apr_pool_create.
+ * @param abort_fn @see apr_pool_create.
+ * @param allocator @see apr_pool_create.
  * @param file_line Where the function is called from.
  *        This is usually APR_POOL__FILE_LINE__.
  * @remark Only available when APR_POOL_DEBUG is defined.
@@ -632,7 +635,7 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 #endif /* APR_POOL_DEBUG or DOXYGEN */
 
 
-/*
+/**
  * Pool accessor functions.
  *
  * These standardized function are used by opaque (APR) data types to return
@@ -653,12 +656,16 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
  * Note: the linkage is specified for APR. It would be possible to expand
  *       the macros to support other linkages.
  */
+
 #define APR_POOL_DECLARE_ACCESSOR(typename) \
     APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
         (const apr_##typename##_t *ob)
 
+/** used to implement the pool accessor */
 #define APR_POOL_IMPLEMENT_ACCESSOR(typename) \
     APR_POOL_IMPLEMENT_ACCESSOR_X(typename, pool)
+
+/** used to implement the pool accessor */
 #define APR_POOL_IMPLEMENT_ACCESSOR_X(typename, fieldname) \
     APR_DECLARE(apr_pool_t *) apr_##typename##_pool_get \
         (const apr_##typename##_t *ob) { return ob->fieldname; }
