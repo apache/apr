@@ -1030,6 +1030,10 @@ case "$OS" in
         # but we don't want to use it when we have native locks
         lockcreatenp="0"
         ;;
+    *-beos*)
+        # This applies to beos as well
+        lockcreatenp="0"
+        ;;
 esac
 
 AC_SUBST(hasflockser)
