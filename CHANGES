@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Fix some daylight savings time breakage on (at least) AIX, 
+     Solaris, and HP-UX.  [Jeff Trawick]
+
   *) Added support for Posix semaphores (sem_open, et.al.) for mutex
      locking. We use named semaphores in this implementation. The
      default priority is between pthread and sysvsem.

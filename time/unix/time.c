@@ -356,7 +356,7 @@ APR_DECLARE(void) apr_unix_setup_time(void)
 #else
     t = *gmtime(&t1);
 #endif
-    t.tm_isdst = -1;
+    t.tm_isdst = 0; /* we know this GMT time isn't daylight-savings */
     t2 = mktime(&t);
     server_gmt_offset = (apr_int32_t) difftime(t1, t2);
 #endif
