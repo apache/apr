@@ -164,7 +164,7 @@ void *apr_atomic_casptr(volatile void **mem, void *with, const void *cmp);
 
 #if defined(WIN32)
 
-typedef LONG apr_atomic_t;
+#define apr_atomic_t LONG
 
 #define apr_atomic_add(mem, val)     InterlockedExchangeAdd(mem,val)
 #define apr_atomic_dec(mem)          InterlockedDecrement(mem)
