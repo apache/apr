@@ -417,54 +417,6 @@
 
 
 /**
- * Iterate through a ring
- * @param ep The current element
- * @param hp The ring to iterate over
- * @param elem The name of the element struct
- * @param link The name of the APR_RING_ENTRY in the element struct
- * @remark This is the same as either:
- * <pre>
- *	ep = APR_RING_FIRST(hp);
- * 	while (ep != APR_RING_SENTINEL(hp, elem, link)) {
- *	    ...
- * 	    ep = APR_RING_NEXT(ep, link);
- * 	}
- *   OR
- * 	for (ep = APR_RING_FIRST(hp);
- *           ep != APR_RING_SENTINEL(hp, elem, link);
- *           ep = APR_RING_NEXT(ep, link)) {
- *	    ...
- * 	}
- * </pre>
- * @warning Be aware that you cannot change the value of ep within
- * the foreach loop, nor can you destroy the ring element it points to.
- * Modifying the prev and next pointers of the element is dangerous
- * but can be done if you're careful.  If you change ep's value or
- * destroy the element it points to, then APR_RING_FOREACH
- * will have no way to find out what element to use for its next
- * iteration.  The reason for this can be seen by looking closely
- * at the equivalent loops given in the tip above.  So, for example,
- * if you are writing a loop that empties out a ring one element
- * at a time, APR_RING_FOREACH just won't work for you.  Do it
- * by hand, like so:
- * <pre>
- *      while (!APR_RING_EMPTY(hp, elem, link)) {
- *          ep = APR_RING_FIRST(hp);
- *          ...
- *          APR_RING_REMOVE(ep, link);
- *      }
- * </pre>
- * @deprecated This macro causes more headaches than it's worth.  Use
- * one of the alternatives documented here instead; the clarity gained
- * in what's really going on is well worth the extra line or two of code.
- * This macro will be removed at some point in the future.
- */
-#define APR_RING_FOREACH(ep, hp, elem, link)				\
-    for ((ep)  = APR_RING_FIRST((hp));					\
-	 (ep) != APR_RING_SENTINEL((hp), elem, link);			\
-	 (ep)  = APR_RING_NEXT((ep), link))
-
-/**
  * Iterate through a ring backwards
  * @param ep The current element
  * @param hp The ring to iterate over
