@@ -302,6 +302,13 @@ APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_procattr_error_check_set(apr_procattr_t *attr,
+                                                       apr_int32_t chk)
+{
+    attr->errchk = chk;
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
                                           const char * const *args,
@@ -315,6 +322,32 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     new->in = attr->parent_in;
     new->err = attr->parent_err;
     new->out = attr->parent_out;
+
+    if (attr->errchk) {
+        if (attr->currdir) {
+            if (access(attr->currdir, R_OK|X_OK) == -1) {
+                /* chdir() in child wouldn't have worked */
+                return errno;
+            }
+        }
+
+        if (attr->cmdtype == APR_PROGRAM ||
+            attr->cmdtype == APR_PROGRAM_ENV ||
+            *progname == '/') {
+            /* for both of these values of cmdtype, caller must pass
+             * full path, so it is easy to check;
+             * caller can choose to pass full path for other
+             * values of cmdtype
+             */
+            if (access(progname, R_OK|X_OK) == -1) {
+                /* exec*() in child wouldn't have worked */
+                return errno;
+            }
+        }
+        else {
+            /* todo: search PATH for progname then try to access it */
+        }
+    }
 
     if ((new->pid = fork()) < 0) {
         return errno;

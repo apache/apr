@@ -135,6 +135,7 @@ struct apr_procattr_t {
     struct rlimit *limit_nofile;
 #endif
     apr_child_errfn_t *errfn;
+    apr_int32_t errchk;
 };
 
 #endif  /* ! THREAD_PROC_H */

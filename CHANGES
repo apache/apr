@@ -8,11 +8,10 @@ Changes with APR 0.9.2
      .pdb symbol files.)  Documentation on how-to-use these symbol files
      will be forthcoming.  [Allen Edwards, William Rowe]
 
-  *) Allow apr_proc_create() to call an app-provided error reporting
-     function when apr_proc_create() fails in the new child process
-     after fork().  The app-provided error reporting function will only
-     be called on platforms where apr_proc_create() first calls
-     fork() to create the new process.  [Jeff Trawick]
+  *) Add two new proc attributes to improve diagnostics for 
+     apr_proc_create() failures on platforms where fork()+exec() is used.
+     See the doc for apr_procattr_child_errfn_set() and
+     apr_procattr_error_check_set().  [Jeff Trawick]
 
   *) Rename rules.mk to apr_rules.mk and make apr_rules.mk be installed.
      [Thom May]
