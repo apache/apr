@@ -435,6 +435,10 @@ void post_parse_fixup(cmd_data_t *cmd_data)
                         cmd_data->arglist[a+1] = NULL;
                     }
 
+                    if (strcmp(arg, "-Zstack") == 0 && a+1 < cmd_data->num_args) {
+                        cmd_data->arglist[a+1] = NULL;
+                    }
+
                     if (strcmp(arg, "-o") == 0) {
                         a++;
                     }
