@@ -111,10 +111,6 @@ SOURCE=.\file_io\unix\fileacc.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\file_io\unix\mktemp.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\file_io\win32\filedup.c
 # End Source File
 # Begin Source File
@@ -136,6 +132,10 @@ SOURCE=.\file_io\win32\flock.c
 # Begin Source File
 
 SOURCE=.\file_io\unix\fullrw.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\file_io\unix\mktemp.c
 # End Source File
 # Begin Source File
 
@@ -301,8 +301,7 @@ SOURCE=.\passwd\apr_md5.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\shmem\win32\shmem.c
-# PROP Exclude_From_Build 1
+SOURCE=.\shmem\win32\shm.c
 # End Source File
 # End Group
 # Begin Group "strings"
@@ -561,7 +560,7 @@ SOURCE=.\include\apr_ring.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\include\apr_shmem.h
+SOURCE=.\include\apr_shm.h
 # End Source File
 # Begin Source File
 
