@@ -217,10 +217,8 @@ apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile,
 {
     int *dafile = thefile;
     
-    if ((*file) == NULL) {
-        (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
-        (*file)->cntxt = cont;
-    }
+    (*file) = apr_pcalloc(cont, sizeof(apr_file_t));
+    (*file)->cntxt = cont;
     (*file)->eof_hit = 0;
     (*file)->buffered = 0;
     (*file)->blocking = BLK_UNKNOWN; /* in case it is a pipe */
@@ -249,23 +247,11 @@ apr_status_t apr_ferror(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-/* apr_open_stderr() could just call apr_put_os_file() with
- * STDERR_FILENO for the descriptor...
- */
 apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
-    (*thefile) = apr_pcalloc(cont, sizeof(apr_file_t));
-    if ((*thefile) == NULL) {
-        return APR_ENOMEM;
-    }
-    (*thefile)->filedes = STDERR_FILENO;
-    (*thefile)->cntxt = cont;
-    (*thefile)->buffered = 0;
-    (*thefile)->blocking = BLK_UNKNOWN;
-    (*thefile)->fname = NULL;
-    (*thefile)->eof_hit = 0;
+    int fd = STDERR_FILENO;
 
-    return APR_SUCCESS;
+    return apr_put_os_file(thefile, &fd, cont);
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR_X(file, cntxt);
