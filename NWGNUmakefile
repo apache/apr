@@ -199,6 +199,16 @@ FILES_nlm_modules = \
 	Libc \
 	ws2_32 \
 	$(EOLIST)
+	
+#If the LDAP support is defined then add the auto-load modules
+ifneq "$(LDAPSDK)" ""
+FILES_nlm_modules += \
+	lldapsdk \
+	lldapssl \
+	lldapx \
+	$(EOLIST)
+endif
+ 
 
 #
 # If the nlm has a msg file, put it's path here
