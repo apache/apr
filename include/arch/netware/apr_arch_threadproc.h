@@ -60,6 +60,7 @@ struct apr_procattr_t {
     char *currdir;
     apr_int32_t cmdtype;
     apr_int32_t detached;
+    apr_int32_t addrspace;
 };
 
 struct apr_thread_once_t {
