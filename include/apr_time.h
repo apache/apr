@@ -67,11 +67,17 @@ typedef enum {APR_LOCALTIME, APR_UTCTIME} ap_timetype_e;
 
 typedef struct atime_t       ap_time_t;
 
+API_VAR_IMPORT const char ap_month_snames[12][4];
+API_VAR_IMPORT const char ap_day_snames[7][4];
+
 /* Function Definitions */
 ap_status_t ap_make_time(ap_time_t **, ap_context_t *);
 ap_status_t ap_current_time(ap_time_t *);
 ap_status_t ap_explode_time(ap_time_t *, ap_timetype_e);
 ap_status_t ap_implode_time(ap_time_t *);
+
+ap_status_t ap_gm_timestr_822(char **date_str, struct atime_t *t, ap_context_t *p);
+ap_status_t ap_strftime(char *s, ap_size_t max, const char *format, ap_time_t *tm);
 
 /* accessor functions */
 ap_status_t ap_get_curtime(ap_time_t *, ap_int64_t *);
@@ -85,6 +91,7 @@ ap_status_t ap_get_mon(ap_time_t *, ap_int32_t *);
 ap_status_t ap_get_year(ap_time_t *, ap_int32_t *);
 ap_status_t ap_get_wday(ap_time_t *, ap_int32_t *);
 
+ap_status_t ap_set_curtime(ap_time_t *, ap_int64_t);
 ap_status_t ap_set_sec(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_min(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_hour(ap_time_t *, ap_int32_t);
@@ -92,6 +99,7 @@ ap_status_t ap_set_mday(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_mon(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_year(ap_time_t *, ap_int32_t);
 ap_status_t ap_set_wday(ap_time_t *, ap_int32_t);
+ap_status_t ap_timecmp(ap_time_t *a, ap_time_t *b);
 
 ap_status_t ap_get_timedata(ap_time_t *, char *, void *);
 ap_status_t ap_set_timedata(ap_time_t *, void *, char *,

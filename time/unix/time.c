@@ -72,6 +72,7 @@ ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
 
     (*new)->cntxt = cont;
     (*new)->explodedtime = ap_palloc(cont, sizeof(struct tm));
+    (*new)->time_ex = 0;
     (*new)->currtime = NULL;
     return APR_SUCCESS;
 }
@@ -85,6 +86,7 @@ ap_status_t ap_current_time(struct atime_t *new)
 {
     new->currtime = ap_palloc(new->cntxt, sizeof(struct timeval));
     gettimeofday(new->currtime, NULL);
+    new->time_ex = 0;
     return APR_SUCCESS; 
 }       
 
@@ -117,6 +119,7 @@ ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
         break;
     }
     }
+    atime->time_ex = 1;
     return APR_SUCCESS;
 }
 
@@ -160,6 +163,7 @@ ap_status_t ap_implode_time(struct atime_t *atime)
     atime->currtime = ap_palloc(atime->cntxt, sizeof(struct timeval));
     atime->currtime->tv_sec = days;            /* must be a valid time */
     atime->currtime->tv_usec = 0;
+    atime->time_ex = 1;
     return APR_SUCCESS;
 }
 
@@ -199,6 +203,7 @@ ap_status_t ap_put_os_time(struct atime_t **thetime, ap_os_time_t *atime,
         (*thetime)->cntxt = cont;
     }
     (*thetime)->currtime = atime;
+    (*thetime)->time_ex = 0;
     return APR_SUCCESS;
 }
 
@@ -220,4 +225,39 @@ ap_status_t ap_timediff(struct atime_t *a, struct atime_t *b, ap_int32_t *rv)
     *rv = s + us;
     return APR_SUCCESS;
 } 
+ 
+/* ***APRDOC********************************************************
+ * ap_status_t ap_timecmp(ap_time_t **, ap_time_t *, ap_time_t *)
+ *     Compare two time values. 
+ * arg 1)  The first time value
+ * arg 2)  The second time value.
+ * return) APR_LESS  -- arg 1 < arg 2
+ *         APR_MORE  -- arg 1 > arg 2
+ *         APR_EQUAL -- arg 1 = arg 2
+ */
+ap_status_t ap_timecmp(struct atime_t *a, struct atime_t *b)
+{
+    if (a == NULL) {
+        return APR_LESS;
+    }
+    else if (b == NULL) {
+        return APR_MORE;
+    }
+
+    if (a->currtime->tv_sec > b->currtime->tv_sec) {
+        return APR_MORE;
+    }
+    else if (a->currtime->tv_sec < b->currtime->tv_sec) {
+        return APR_LESS;
+    }
+    else {
+        if (a->currtime->tv_usec > b->currtime->tv_sec) {
+            return APR_MORE;
+        }
+        else {
+            return APR_LESS;
+        }
+    }
+    return APR_EQUAL;
+}
  
