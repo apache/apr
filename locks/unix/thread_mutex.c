@@ -128,25 +128,34 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
     apr_status_t rv;
 
 #if APR_HAS_THREADS
-    if (mutex->nested && apr_os_thread_equal(mutex->owner,
-                                             apr_os_thread_current())) {
-        mutex->owner_ref++;
-        return APR_SUCCESS;
-    }
-#endif
-
-    rv = pthread_mutex_lock(&mutex->mutex);
-    if (rv) {
-#ifdef PTHREAD_SETS_ERRNO
-        rv = errno;
-#endif
-        return rv;
-    }
-
-#if APR_HAS_THREADS
     if (mutex->nested) {
+        if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
+            mutex->owner_ref++;
+            return APR_SUCCESS;
+        }
+
+        rv = pthread_mutex_lock(&mutex->mutex);
+        if (rv) {
+#ifdef PTHREAD_SETS_ERRNO
+            rv = errno;
+#endif
+            return rv;
+        }
+
         mutex->owner = apr_os_thread_current();
         mutex->owner_ref = 1;
+    }
+    else {
+#endif
+        rv = pthread_mutex_lock(&mutex->mutex);
+        if (rv) {
+#ifdef PTHREAD_SETS_ERRNO
+            rv = errno;
+#endif
+            return rv;
+        }
+
+#if APR_HAS_THREADS
     }
 #endif
 
@@ -194,24 +203,29 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
             if (mutex->owner_ref > 0)
                 return APR_SUCCESS;
         }
-    }
-#endif
-
-    status = pthread_mutex_unlock(&mutex->mutex);
-    if (status) {
+        status = pthread_mutex_unlock(&mutex->mutex);
+        if (status) {
 #ifdef PTHREAD_SETS_ERRNO
-        status = errno;
+            status = errno;
 #endif
-        return status;
-    }
+            return status;
+        }
 
-#if APR_HAS_THREADS
-    if (mutex->nested) {
         memset(&mutex->owner, 0, sizeof mutex->owner);
         mutex->owner_ref = 0;
     }
+    else {
 #endif
-    
+        status = pthread_mutex_unlock(&mutex->mutex);
+        if (status) {
+#ifdef PTHREAD_SETS_ERRNO
+            status = errno;
+#endif
+            return status;
+        }
+#if APR_HAS_THREADS
+    }
+#endif
     return status;
 }
 
