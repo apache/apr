@@ -442,6 +442,7 @@ CuSuite *testfile(void)
     SUITE_ADD_TEST(suite, test_open_noreadwrite);
     SUITE_ADD_TEST(suite, test_open_excl);
     SUITE_ADD_TEST(suite, test_open_read);
+    SUITE_ADD_TEST(suite, test_open_readwrite);
     SUITE_ADD_TEST(suite, test_read); 
     SUITE_ADD_TEST(suite, test_seek);
     SUITE_ADD_TEST(suite, test_filename);
