@@ -251,7 +251,7 @@ static int os_uncork(apr_socket_t *sock, int delayflag)
 }
 
 apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
-        		apr_hdtr_t *hdtr, apr_off_t *offset, apr_size_t *len,
+        		apr_hdtr_t *hdtr, apr_off_t *offset, apr_ssize_t *len,
         		apr_int32_t flags)
 {
     off_t off = *offset;
@@ -382,7 +382,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
 /* Release 3.1 or greater */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
         		apr_int32_t flags)
 {
     off_t nbytes;
@@ -475,7 +475,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
 
 /* HP-UX Version 10.30 or greater */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+        		apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
         		apr_int32_t flags)
 {
     int i, ptr = 0;
@@ -582,7 +582,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
  * OS/390 - V2R7 and above
  */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
                         apr_int32_t flags)
 {
     int i, ptr, rv = 0;
@@ -711,7 +711,7 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
  * all cases of the headers and trailers seems to be a good idea.
  */
 apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
-                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_size_t * len,
+                        apr_hdtr_t * hdtr, apr_off_t * offset, apr_ssize_t * len,
                         apr_int32_t flags)
 {
     off_t nbytes = 0;
