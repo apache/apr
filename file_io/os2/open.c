@@ -211,3 +211,22 @@ ap_status_t ap_eof(ap_file_t *fptr)
     }
     return APR_SUCCESS;
 }   
+
+
+
+ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
+{
+    (*thefile) = ap_palloc(cont, sizeof(ap_file_t *));
+    if ((*thefile) == NULL) {
+        return APR_ENOMEM;
+    }
+    (*thefile)->cntxt = cont;
+    (*thefile)->filedes = 2;
+    (*thefile)->fname = NULL;
+    (*thefile)->isopen = TRUE;
+    (*thefile)->buffered = FALSE;
+    (*thefile)->validstatus = FALSE;
+    (*thefile)->eof_hit = FALSE;
+
+    return APR_SUCCESS;
+}
