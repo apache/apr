@@ -138,7 +138,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-freebsd*)
         APR_SETIFNULL(apr_lock_method, [USE_FLOCK_SERIALIZE])
         if test -x /sbin/sysctl; then
-            os_version=`sysctl -n kern.osreldate`
+            os_version=`/sbin/sysctl -n kern.osreldate`
         else
             os_version=000000
         fi
