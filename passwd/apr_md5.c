@@ -102,13 +102,13 @@
 #include "apr_md5.h"
 #include "apr_lib.h"
 
-#ifdef HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_CRYPT_H
+#if APR_HAVE_CRYPT_H
 #include <crypt.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 

@@ -70,13 +70,13 @@
 #include "apr_lock.h"
 #include "apr_hash.h"
 
-#ifdef HAVE_STDIO_H
+#if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef HAVE_SYS_SIGNAL_H
+#if APR_HAVE_SYS_SIGNAL_H
 #include <sys/signal.h>
 #endif
 #if APR_HAVE_SIGNAL_H
@@ -88,17 +88,17 @@
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef HAVE_UNISTD_H
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
-#ifdef HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
-#ifdef HAVE_STDLIB_H
+#if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #ifdef HAVE_MALLOC_H

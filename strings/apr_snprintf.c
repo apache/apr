@@ -63,22 +63,22 @@
 #include "apr_strings.h"
 #include "apr_network_io.h"
 #include <math.h>
-#ifdef HAVE_CTYPE_H
+#if APR_HAVE_CTYPE_H
 #include <ctype.h>
 #endif
 #if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
+#if APR_HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_ARPA_INET_H
+#if APR_HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_LIMITS_H
+#if APR_HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#ifdef HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 

@@ -62,7 +62,7 @@
 #if APR_HAVE_ERRNO_H
 #include <errno.h>
 #endif
-#ifdef HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 #if APR_HAVE_DIRENT_H

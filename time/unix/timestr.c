@@ -57,13 +57,13 @@
 #include "apr_lib.h"
 #include "apr_private.h"
 /* System Headers required for time library */
-#if HAVE_SYS_TIME_H
+#if APR_HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#if HAVE_TIME_H
+#ifdef HAVE_TIME_H
 #include <time.h>
 #endif
-#if HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 /* End System Headers */

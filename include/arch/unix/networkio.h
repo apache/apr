@@ -69,43 +69,43 @@
 #if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
-#if HAVE_SYS_POLL_H
+#if APR_HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
-#if HAVE_POLL_H
+#ifdef HAVE_POLL_H
 #include <poll.h>
 #endif
 #if APR_HAVE_ERRNO_H
 #include <errno.h>
 #endif
-#if HAVE_SYS_TIME_H
+#if APR_HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#if HAVE_UNISTD_H
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_NETINET_TCP_H
+#if APR_HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
-#if HAVE_NETINET_IN_H
+#if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#if HAVE_ARPA_INET_H
+#if APR_HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#if HAVE_SYS_SOCKET_H
+#if APR_HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#if HAVE_NETDB_H
+#if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_SYS_SENDFILE_H
+#if APR_HAVE_SYS_SENDFILE_H
 #include <sys/sendfile.h>
 #endif
 /* End System Headers */

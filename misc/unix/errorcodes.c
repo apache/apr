@@ -57,7 +57,7 @@
 #include "apr_lib.h"
 #include "apr_dso.h"
 
-#ifdef HAVE_NETDB_H
+#if APR_HAVE_NETDB_H
 #include <netdb.h>
 #endif
 #ifdef HAVE_DLFCN_H

@@ -54,7 +54,7 @@
 
 #include "fileio.h"
 
-#ifdef HAVE_FCNTL_H
+#if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #ifdef HAVE_SYS_FILE_H

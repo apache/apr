@@ -55,10 +55,10 @@
 #include "fileio.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
-#ifdef HAVE_SYS_SYSLIMITS_H
+#if APR_HAVE_SYS_SYSLIMITS_H
 #include <sys/syslimits.h>
 #endif
-#ifdef HAVE_LIMITS_H
+#if APR_HAVE_LIMITS_H
 #include <limits.h>
 #endif
 

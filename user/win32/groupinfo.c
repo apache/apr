@@ -56,9 +56,6 @@
 #include "apr_portable.h"
 #include "apr_user.h"
 #include "apr_private.h"
-#ifdef HAVE_GRP_H
-#include <grp.h>
-#endif
 #if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif

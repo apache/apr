@@ -64,13 +64,13 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#if HAVE_UNISTD_H
+#if APR_HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_CONIO_H
+#if APR_HAVE_CONIO_H
 #include <conio.h>
 #endif
-#if HAVE_STDLIB_H
+#if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #if APR_HAVE_STRING_H

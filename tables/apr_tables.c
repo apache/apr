@@ -66,13 +66,13 @@
 #include "apr_tables.h"
 #include "apr_strings.h"
 #include "apr_lib.h"
-#ifdef HAVE_STDLIB_H
+#if APR_HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
-#ifdef HAVE_STRING_H
+#if APR_HAVE_STRING_H
 #include <string.h>
 #endif
 #if APR_HAVE_STRINGS_H
