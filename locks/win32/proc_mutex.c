@@ -139,11 +139,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_lock(apr_proc_mutex_t *mutex)
 
     rv = WaitForSingleObject(mutex->handle, INFINITE);
 
-    if (rv == WAIT_OBJECT_0) {
+    if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
         return APR_SUCCESS;
-    }
-    else if (rv == WAIT_ABANDONED) {
-        return APR_EBUSY;
     }
     return apr_get_os_error();
 }
@@ -154,11 +151,8 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_trylock(apr_proc_mutex_t *mutex)
 
     rv = WaitForSingleObject(mutex->handle, 0);
 
-    if (rv == WAIT_OBJECT_0) {
+    if (rv == WAIT_OBJECT_0 || rv == WAIT_ABANDONED) {
         return APR_SUCCESS;
-    }
-    else if (rv == WAIT_ABANDONED) {
-        return APR_EBUSY;
     }
     return apr_get_os_error();
 }
