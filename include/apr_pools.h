@@ -181,13 +181,6 @@ APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *p, int recurse);
 APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void);
 
 /**
- * Tag a pool (give it a name)
- * @param pool The pool to tag
- * @param tag  The tag
- */
-APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
-
-/**
  * Lock a pool
  * @param pool The pool to lock
  * @param flag  The flag
@@ -202,16 +195,18 @@ APR_DECLARE(void) apr_pool_lock(apr_pool_t *pool, int flag);
 #    endif
 #    define apr_pool_join(a,b)
 
-#    ifdef apr_pool_tag
-#        undef apr_pool_tag
-#    endif
-#    define apr_pool_tag(pool, tag)
-
 #    ifdef apr_pool_lock
 #        undef apr_pool_lock
 #    endif
 #    define apr_pool_lock(pool, lock)
 #endif
+
+/**
+ * Tag a pool (give it a name)
+ * @param pool The pool to tag
+ * @param tag  The tag
+ */
+APR_DECLARE(void) apr_pool_tag(apr_pool_t *pool, const char *tag);
 
 /**
  * Determine if pool a is an ancestor of pool b
