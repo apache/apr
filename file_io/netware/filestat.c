@@ -111,7 +111,6 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
 char *case_filename(apr_pool_t *pPool, const char *szFile)
 {
     char *casedFileName = NULL;
-#ifdef WAIT_TO_IMPLEMENT
     char buf[1024];
     NXDirAttrWithName_t	*attrBuf;
     int rc;
@@ -122,7 +121,6 @@ char *case_filename(apr_pool_t *pPool, const char *szFile)
         casedFileName = apr_pstrdup(pPool, attrBuf->deName);
     }
     else
-#endif
     {
         char *s;
         s = strrchr(szFile, '/');
