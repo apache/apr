@@ -1388,23 +1388,60 @@ static apr_size_t pool_num_bytes(apr_pool_t *pool)
     return size;
 }
 
-APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *pool, int recurse)
+#if APR_HAS_THREADS
+static apr_size_t pool_num_bytes_recursive(apr_pool_t *pool, 
+                                           apr_thread_mutex_t *mutex)
+{
+    apr_size_t size;
+    apr_pool_t *child;
+
+    size = pool_num_bytes(pool);
+
+    if (pool->mutex && pool->mutex != mutex) {
+        apr_thread_mutex_lock(pool->mutex);
+    }
+
+    child = pool->child;
+    while (child) {
+        size += pool_num_bytes_recursive(child, pool->mutex);
+
+        child = child->sibling;
+    }
+
+    if (pool->mutex && pool->mutex != mutex) {
+        apr_thread_mutex_unlock(pool->mutex);
+    }
+
+    return size;
+}
+#else
+static apr_size_t pool_num_bytes_recursive(apr_pool_t *pool)
 {
     apr_size_t size;
 
     size = pool_num_bytes(pool);
 
-    if (recurse) {
-        pool = pool->child;
-        
-        while (pool) {
-            size += apr_pool_num_bytes(pool, 1);
+    pool = pool->child;
+    while (pool) {
+        size += pool_num_bytes_recursive(pool);
 
-            pool = pool->sibling;
-        }
+        pool = pool->sibling;
     }
 
     return size;
+} 
+#endif
+
+APR_DECLARE(apr_size_t) apr_pool_num_bytes(apr_pool_t *pool, int recurse)
+{
+    if (!recurse)
+        return pool_num_bytes(pool);
+
+#if APR_HAS_THREADS
+    return pool_num_bytes_recursive(pool, pool->mutex);
+#else
+    return pool_num_bytes_recursive(pool);
+#endif
 }
 
 APR_DECLARE(apr_size_t) apr_pool_free_blocks_num_bytes(void)
