@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/02/15 07:55:10 $]
+Last modified at [$Date: 2002/02/17 15:06:57 $]
 
 Release:
 
@@ -37,6 +37,17 @@ RELEASE SHOWSTOPPERS:
       lest we support 2 lock APIs in perpetuity.
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
+
+    * The return type of a thread function (void *) is inconsistent with
+      the type used in apr_thread_exit()/apr_thread_join() (apr_status_t).
+      The thread function's return type should be changed to apr_status_t
+      so that a return from the thread main function has the same effect
+      as apr_thread_exit().
+      See Message-Id: <E16JjZA-0007hg-00@zakath.apana.org.au> for thread
+      discussing this.
+        +1: BrianH
+        -0: Aaron
+
     * Need some architecture/OS specific versions of the atomic operations.
         Ian Volunteers for the x86 & sparc versions
 
