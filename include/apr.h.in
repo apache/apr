@@ -68,6 +68,7 @@
 #define APR_HAS_SYSVSEM_SERIALIZE         @hassysvser@
 #define APR_HAS_FCNTL_SERIALIZE           @hasfcntlser@
 #define APR_HAS_PROC_PTHREAD_SERIALIZE    @hasprocpthreadser@
+#define APR_HAS_RWLOCK_SERIALIZE          @hasrwlockser@
 
 #define APR_HAS_LOCK_CREATE_NP            @lockcreatenp@
 
