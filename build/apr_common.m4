@@ -387,8 +387,6 @@ dnl  we use what's provided as FLAG-TO-SET. If the 3rd parameter
 dnl  is "yes" then instead of setting to 1 or 0, we set FLAG-TO-SET
 dnl  to yes or no.
 dnl
-dnl  DON'T USE YET !!
-dnl
 AC_DEFUN(APR_FLAG_FUNCS,[
 AC_CHECK_FUNCS($1)
 for aprt_j in $1
