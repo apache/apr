@@ -248,7 +248,7 @@ struct apr_hdtr_t {
     struct iovec* headers;
     /** number of headers in the iovec */
     int numheaders;
-    /** An iovec to store the trailers sent before the file. 
+    /** An iovec to store the trailers sent after the file. 
      *  @defvar iovec *trailers */
     struct iovec* trailers;
     /** number of trailers in the iovec */
