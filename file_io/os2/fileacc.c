@@ -220,3 +220,30 @@ ap_status_t ap_get_filetype(ap_filetype_e *type, struct file_t *file)
     }
 }
 
+
+
+ap_status_t ap_get_filedata(void **data, char *key, struct file_t *file)
+{    
+    if (file != NULL) {
+        return ap_get_userdata(data, key, file->cntxt);
+    }
+    else {
+        data = NULL;
+        return APR_ENOFILE;
+    }
+}
+
+
+
+ap_status_t ap_set_filedata(struct file_t *file, void *data, char *key,
+                            ap_status_t (*cleanup) (void *))
+{    
+    if (file != NULL) {
+        return ap_set_userdata(data, key, cleanup, file->cntxt);
+    }
+    else {
+        data = NULL;
+        return APR_ENOFILE;
+    }
+}
+
