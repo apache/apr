@@ -52,6 +52,8 @@
  * <http://www.apache.org/>.
  */
 
+#define APR_TEST_PREFIX "server: "
+
 #include "aprtest.h"
 #include <stdlib.h>
 #include "apr_network_io.h"
