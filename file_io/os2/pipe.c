@@ -120,6 +120,7 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont
     (*in)->flags = 0;
     (*in)->pipe = 1;
     (*in)->timeout = -1;
+    (*in)->blocking = BLK_ON;
     apr_register_cleanup(cont, *in, apr_file_cleanup, apr_null_cleanup);
 
     (*out) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
@@ -131,6 +132,7 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont
     (*out)->flags = 0;
     (*out)->pipe = 1;
     (*out)->timeout = -1;
+    (*out)->blocking = BLK_ON;
     apr_register_cleanup(cont, *out, apr_file_cleanup, apr_null_cleanup);
 
     return APR_SUCCESS;
@@ -150,11 +152,18 @@ apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeo
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;
+
         if (thepipe->timeout >= 0) {
-            return APR_OS2_STATUS(DosSetNPHState (thepipe->filedes, NP_NOWAIT));
+            if (thepipe->blocking != BLK_OFF) {
+                thepipe->blocking = BLK_OFF;
+                return APR_OS2_STATUS(DosSetNPHState(thepipe->filedes, NP_NOWAIT));
+            }
         }
         else if (thepipe->timeout == -1) {
-            return APR_OS2_STATUS(DosSetNPHState (thepipe->filedes, NP_WAIT));
+            if (thepipe->blocking != BLK_ON) {
+                thepipe->blocking = BLK_ON;
+                return APR_OS2_STATUS(DosSetNPHState(thepipe->filedes, NP_WAIT));
+            }
         }
     }
     return APR_EINVAL;
