@@ -75,6 +75,7 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_int32_t flags,
                                            apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
+
     if (!getcwd(path, sizeof(path))) {
         if (errno == ERANGE)
             return APR_ENAMETOOLONG;
@@ -82,8 +83,9 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **defpath, apr_int32_t flags,
             return errno;
     }
     *defpath = apr_pstrdup(p, path);
+
     return APR_SUCCESS;
-}    
+}
 
 
 /* Any OS that requires/refuses trailing slashes should be dealt with here
@@ -92,29 +94,30 @@ APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p)
 {
     if (chdir(path) != 0)
         return errno;
-    return APR_SUCCESS;
-}    
 
-APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath, 
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
                                             const char **inpath,
                                             apr_int32_t flags,
                                             apr_pool_t *p)
 {
-    if (**inpath == '/') 
-    {
+    if (**inpath == '/') {
         *rootpath = apr_pstrdup(p, "/");
         do {
             ++(*inpath);
         } while (**inpath == '/');
+
         return APR_SUCCESS;
     }
 
     return APR_ERELATIVE;
 }
 
-APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath, 
-                                             const char *rootpath, 
-                                             const char *addpath, 
+APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
+                                             const char *rootpath,
+                                             const char *addpath,
                                              apr_int32_t flags,
                                              apr_pool_t *p)
 {
@@ -131,8 +134,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     if (!addpath)
         addpath = "";
 
-    if (addpath[0] == '/') 
-    {
+    if (addpath[0] == '/') {
         /* If addpath is rooted, then rootpath is unused.
          * Ths violates any APR_FILEPATH_SECUREROOTTEST and
          * APR_FILEPATH_NOTABSOLUTE flags specified.
@@ -149,15 +151,13 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         if (!rootpath && !(flags & APR_FILEPATH_NOTABOVEROOT))
             rootpath = "";
     }
-    else 
-    {
-        /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller 
+    else {
+        /* If APR_FILEPATH_NOTABSOLUTE is specified, the caller
          * requires a relative result.  If the rootpath is
          * ommitted, we do not retrieve the working path,
          * if rootpath was supplied as absolute then fail.
          */
-        if (flags & APR_FILEPATH_NOTABSOLUTE) 
-        {
+        if (flags & APR_FILEPATH_NOTABSOLUTE) {
             if (!rootpath)
                 rootpath = "";
             else if (rootpath[0] == '/')
@@ -165,8 +165,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         }
     }
 
-    if (!rootpath) 
-    {
+    if (!rootpath) {
         /* Start with the current working path.  This is bass akwards,
          * but required since the compiler (at least vc) doesn't like
          * passing the address of a char const* for a char** arg.
@@ -176,7 +175,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         rootpath = getpath;
         if (rv != APR_SUCCESS)
             return errno;
-    
+
         /* XXX: Any kernel subject to goofy, uncanonical results
          * must run the rootpath against the user's given flags.
          * Simplest would be a recursive call to apr_filepath_merge
@@ -193,9 +192,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
     }
     path = (char *)apr_palloc(p, maxlen);
 
-    if (addpath[0] == '/') 
-    {
-        /* Ignore the given root path, strip off leading 
+    if (addpath[0] == '/') {
+        /* Ignore the given root path, strip off leading
          * '/'s to a single leading '/' from the addpath,
          * and leave addpath at the first non-'/' character.
          */
@@ -205,18 +203,17 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         path[0] = '/';
         pathlen = 1;
     }
-    else
-    {
+    else {
         /* If both paths are relative, fail early
          */
         if (rootpath[0] != '/' && (flags & APR_FILEPATH_NOTRELATIVE))
-                return APR_ERELATIVE;
+            return APR_ERELATIVE;
 
         /* Base the result path on the rootpath
          */
         keptlen = rootlen;
         memcpy(path, rootpath, rootlen);
-        
+
         /* Always '/' terminate the given root path
          */
         if (keptlen && path[keptlen - 1] != '/') {
@@ -225,9 +222,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         pathlen = keptlen;
     }
 
-    while (*addpath) 
-    {
-        /* Parse each segment, find the closing '/' 
+    while (*addpath) {
+        /* Parse each segment, find the closing '/'
          */
         const char *next = addpath;
         while (*next && (*next != '/')) {
@@ -236,13 +232,13 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         seglen = next - addpath;
 
         if (seglen == 0 || (seglen == 1 && addpath[0] == '.')) {
-            /* noop segment (/ or ./) so skip it 
+            /* noop segment (/ or ./) so skip it
              */
         }
         else if (seglen == 2 && addpath[0] == '.' && addpath[1] == '.') {
             /* backpath (../) */
             if (pathlen == 1 && path[0] == '/') {
-                /* Attempt to move above root.  Always die if the 
+                /* Attempt to move above root.  Always die if the
                  * APR_FILEPATH_SECUREROOTTEST flag is specified.
                  */
                 if (flags & APR_FILEPATH_SECUREROOTTEST) {
@@ -254,9 +250,11 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                  */
                 keptlen = 0;
             }
-            else if (pathlen == 0 
-                  || (pathlen == 3 && !memcmp(path + pathlen - 3, "../", 3))
-                  || (pathlen  > 3 && !memcmp(path + pathlen - 4, "/../", 4))) {
+            else if (pathlen == 0
+                     || (pathlen == 3
+                         && !memcmp(path + pathlen - 3, "../", 3))
+                     || (pathlen  > 3
+                         && !memcmp(path + pathlen - 4, "/../", 4))) {
                 /* Path is already backpathed or empty, if the
                  * APR_FILEPATH_SECUREROOTTEST.was given die now.
                  */
@@ -269,9 +267,8 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                 memcpy(path + pathlen, "../", 3);
                 pathlen += 3;
             }
-            else 
-            {
-                /* otherwise crop the prior segment 
+            else {
+                /* otherwise crop the prior segment
                  */
                 do {
                     --pathlen;
@@ -281,16 +278,14 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             /* Now test if we are above where we started and back up
              * the keptlen offset to reflect the added/altered path.
              */
-            if (pathlen < keptlen) 
-            {
+            if (pathlen < keptlen) {
                 if (flags & APR_FILEPATH_SECUREROOTTEST) {
                     return APR_EABOVEROOT;
                 }
                 keptlen = pathlen;
             }
         }
-        else 
-        {
+        else {
             /* An actual segment, append it to the destination path
              */
             if (*next) {
@@ -309,7 +304,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         addpath = next;
     }
     path[pathlen] = '\0';
-    
+
     /* keptlen will be the rootlen unless the addpath contained
      * backpath elements.  If so, and APR_FILEPATH_NOTABOVEROOT
      * is specified (APR_FILEPATH_SECUREROOTTEST was caught above),
@@ -325,7 +320,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
             return APR_EABOVEROOT;
         }
     }
-    
+
     *newpath = path;
     return APR_SUCCESS;
 }
