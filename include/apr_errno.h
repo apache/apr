@@ -685,7 +685,14 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
                 || (s) == APR_OS_START_SYSERR + WSAEHOSTUNREACH)
 #define APR_STATUS_IS_ENETUNREACH(s)    ((s) == APR_ENETUNREACH \
                 || (s) == APR_OS_START_SYSERR + WSAENETUNREACH)
-#define APR_STATUS_IS_EFTYPE(s)         ((s) == APR_EFTYPE)
+#define APR_STATUS_IS_EFTYPE(s)         ((s) == APR_EFTYPE \
+                || (s) == APR_OS_START_SYSERR + ERROR_EXE_MACHINE_TYPE_MISMATCH \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_DLL \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_MODULETYPE \
+                || (s) == APR_OS_START_SYSERR + ERROR_BAD_EXE_FORMAT \
+                || (s) == APR_OS_START_SYSERR + ERROR_INVALID_EXE_SIGNATURE \
+                || (s) == APR_OS_START_SYSERR + ERROR_FILE_CORRUPT \
+                || (s) == APR_OS_START_SYSERR + ERROR_BAD_FORMAT)
 #define APR_STATUS_IS_EPIPE(s)          ((s) == APR_EPIPE \
                 || (s) == APR_OS_START_SYSERR + ERROR_BROKEN_PIPE)
 
