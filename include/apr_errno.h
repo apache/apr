@@ -66,7 +66,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @package Error Codes
+ * @file apr_errno.h
+ * @brief Error Codes
  */
 
 /**
