@@ -63,7 +63,7 @@
 #endif
 #include "misc.h"   
 
-/* Chosen for us in apr_initialize */
+/* Chosen for us by apr_initialize */
 DWORD tls_apr_thread = 0;
 
 APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
@@ -84,7 +84,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr,
                                                    apr_int32_t on)
 {
     attr->detach = on;
-	return APR_SUCCESS;
+    return APR_SUCCESS;
 }
 
 APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
@@ -97,7 +97,7 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_get(apr_threadattr_t *attr)
 static void *dummy_worker(void *opaque)
 {
     apr_thread_t *thd = (apr_thread_t *)opaque;
-    TlsSetValue(tls_apr_thread, thd);
+    TlsSetValue(tls_apr_thread, thd->td);
     return thd->func(thd, thd->data);
 }
 
@@ -216,10 +216,25 @@ APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
     return apr_pool_userdata_set(data, key, cleanup, thread->pool);
 }
 
+
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
 {
-    apr_thread_t *thd = (apr_thread_t *)TlsGetValue(tls_apr_thread);
-    return thd->td;
+    HANDLE hthread = (HANDLE)TlsGetValue(tls_apr_thread);
+    HANDLE hproc;
+
+    if (hthread) {
+        return hthread;
+    }
+    
+    hproc = GetCurrentProcess();
+    hthread = GetCurrentThread();
+    if (!DuplicateHandle(hproc, hthread, 
+                         hproc, &hthread, 0, FALSE, 
+                         DUPLICATE_SAME_ACCESS)) {
+        return NULL;
+    }
+    TlsSetValue(tls_apr_thread, hthread);
+    return hthread;
 }
 
 APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
