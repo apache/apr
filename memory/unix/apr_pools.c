@@ -203,12 +203,12 @@ union block_hdr {
 
 #define APR_ABORT(conditional, retcode, func, str) \
     if (conditional) { \
-        if (func == NULL) { \
+        if ((func) == NULL) { \
             return NULL; \
         } \
         else { \
-            fprintf(stderr, "%s", str);
-            func(retcode); \
+            fprintf(stderr, "%s", str); \
+            (*(func))(retcode); \
         } \
     }
 
@@ -278,7 +278,7 @@ static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
 #endif /* ALLOC_STATS */
 
     blok = (union block_hdr *) malloc(size + sizeof(union block_hdr));
-    APR_ABORT(blok == NULL, APR_ENOMEM, (*apr_abort)
+    APR_ABORT(blok == NULL, APR_ENOMEM, apr_abort,
               "Ouch!  malloc failed in malloc_block()\n");
     debug_fill(blok, size + sizeof(union block_hdr));
     blok->h.next = NULL;
