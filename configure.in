@@ -79,7 +79,9 @@ AC_CHECK_LIB(pthread, pthread_mutex_init, AC_DEFINE(USE_PTHREAD_SERIALIZE))
 
 case "$OS" in
    *-os2*)
+       CFLAGS="$CFLAGS -DOS2"
        OSDIR="os2"
+       LIBPREFIX=""
        ;;
    *beos*)
        OSDIR="beos"
@@ -91,6 +93,8 @@ esac
 
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(pthread, pthread_mutex_init)
+AC_CHECK_LIB(socket,socket)
+AC_CHECK_LIB(ufc,crypt)
 
 if (test "$SYS_SW" = "AIX"); then
     CFLAGS="$CFLAGS -U__STR__"
