@@ -525,14 +525,16 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont);
  *            of commands.
  * @param attr the procattr we should use to determine how to create the new
  *         process
- * @param cont The pool to use. 
+ * @param pool The pool to use.
+ * @note This function returns without waiting for the new process to terminate;
+ * use apr_proc_wait for that.
  */
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new_proc,
-                                             const char *progname,
-                                             const char * const *args,
-                                             const char * const *env, 
-                                             apr_procattr_t *attr, 
-                                             apr_pool_t *cont);
+                                          const char *progname,
+                                          const char * const *args,
+                                          const char * const *env, 
+                                          apr_procattr_t *attr, 
+                                          apr_pool_t *pool);
 
 /**
  * Wait for a child process to die
