@@ -6,10 +6,12 @@ dnl library. It provides a standardized mechanism for using APR. It supports
 dnl embedding APR into the application source, or locating an installed
 dnl copy of APR.
 dnl
-dnl APR_FIND_APR([srcdir])
+dnl APR_FIND_APR([srcdir, path])
 dnl
 dnl   where srcdir is the location of the bundled APR source directory, or
 dnl   empty if source is not bundled.
+dnl   where path is the prefix to the location where the bundled APR will
+dnl   will be built.
 dnl
 dnl
 dnl Sets the following variables on exit:
@@ -149,15 +151,20 @@ APR, nor an APR build directory.])
     if test "$apr_found" = "no" && test -n "$1" && test -x "$1/configure"; then
       apr_found="reconfig"
       apr_srcdir="$1"
+      if test -n "$2"; then
+        apr_builddir="$2/"
+      else
+        apr_builddir=""
+      fi
       apr_libdir=""
-      apr_la_file="$apr_srcdir/libapr.la"
-      apr_vars="$apr_srcdir/APRVARS"
-      if test -f "$apr_srcdir/apr-config.in"; then
-        apr_config="$apr_srcdir/apr-config"
+      apr_la_file="$apr_builddir$apr_srcdir/libapr.la"
+      apr_vars="$apr_builddir$apr_srcdir/APRVARS"
+      if test -f "$apr_builddir$apr_srcdir/apr-config.in"; then
+        apr_config="$apr_builddir$apr_srcdir/apr-config"
       else
         apr_config=""
       fi
-      apr_includes="-I$apr_srcdir/include"
+      apr_includes="-I$apr_builddir$apr_srcdir/include"
     fi
   ])
 
