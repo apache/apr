@@ -245,11 +245,26 @@ APR_POOL_IMPLEMENT_ACCESSOR_X(thread, cntxt)
 APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
                                                apr_pool_t *p)
 {
-    return APR_ENOTIMPL;
+    ULONG rc;
+    *control = (apr_thread_once_t *)apr_pcalloc(p, sizeof(apr_thread_once_t));
+    rc = DosCreateEventSem(NULL, &(*control)->sem, 0, TRUE);
+    return APR_FROM_OS_ERROR(rc);
 }
+
+
 
 APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control, 
                                           void (*func)(void))
 {
-    return APR_ENOTIMPL;
+    if (!control->hit) {
+        ULONG count, rc;
+        rc = DosResetEventSem(control->sem, &count);
+
+        if (rc == 0 && count) {
+            control->hit = 1;
+            func();
+        }
+    }
+
+    return APR_SUCCESS;
 }
