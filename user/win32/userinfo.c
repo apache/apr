@@ -60,8 +60,15 @@
 #include <sys/types.h>
 #endif
 
-APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *userid, apr_pool_t *p)
+APR_DECLARE(apr_status_t) apr_get_home_directory(char **dirname, const char *username, apr_pool_t *p)
 {
+    return APR_ENOTIMPL;
+}
+
+APR_DECLARE(apr_status_t) apr_get_userid(apr_uid_t *uid, apr_gid_t *gid,
+                                         const char *username)
+{
+    /* XXX: could someone please implement this for me? */
     return APR_ENOTIMPL;
 }
 
