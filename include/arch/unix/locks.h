@@ -109,32 +109,17 @@ struct apr_unix_lock_methods_t {
 };
 typedef struct apr_unix_lock_methods_t apr_unix_lock_methods_t;
 
-#if defined(HAVE_SEMCTL) && defined(HAVE_SEMGET)
-#define APR_HAS_SYSVSEM_SERIALIZE      1
+#if APR_HAS_SYSVSEM_SERIALIZE
 extern const apr_unix_lock_methods_t apr_unix_sysv_methods;
-#else
-#define APR_HAS_SYSVSEM_SERIALIZE      0
 #endif
-
-#if defined(HAVE_FCNTL_H) && defined(HAVE_F_SETLK)
-#define APR_HAS_FCNTL_SERIALIZE        1
+#if APR_HAS_FCNTL_SERIALIZE
 extern const apr_unix_lock_methods_t apr_unix_fcntl_methods;
-#else
-#define APR_HAS_FCNTL_SERIALIZE        0
 #endif
-
-#if defined(HAVE_FLOCK) && defined(HAVE_LOCK_EX)
-#define APR_HAS_FLOCK_SERIALIZE        1
+#if APR_HAS_FLOCK_SERIALIZE
 extern const apr_unix_lock_methods_t apr_unix_flock_methods;
-#else
-#define APR_HAS_FLOCK_SERIALIZE        0
 #endif
-
-#if defined(HAVE_PTHREAD_H) && defined(HAVE_PTHREAD_PROCESS_SHARED) && defined(HAVE_PTHREAD_MUTEXATTR_SETPSHARED)
-#define APR_HAS_PROC_PTHREAD_SERIALIZE 1
+#if APR_HAS_PROC_PTHREAD_SERIALIZE
 extern const apr_unix_lock_methods_t apr_unix_proc_pthread_methods;
-#else
-#define APR_HAS_PROC_PTHREAD_SERIALIZE 0
 #endif
 
 #if defined(HAVE_PTHREAD_RWLOCK_INIT)
