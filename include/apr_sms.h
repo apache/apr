@@ -224,7 +224,7 @@ APR_DECLARE(apr_status_t) apr_sms_lock(apr_sms_t *mem_sys);
  * @param mem_sys The memory system to be released from thread-safety
  * @deffunc void apr_sms_unlock(apr_sms_t *mem_sys)
  */
-APR_DECLARE(apr_status_t) apr_sms__unlock(apr_sms_t *mem_sys);
+APR_DECLARE(apr_status_t) apr_sms_unlock(apr_sms_t *mem_sys);
 
 /**
  * Determine if memory system a is an ancestor of memory system b
@@ -311,9 +311,6 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *mem_sys,
  * @deffunc apr_status_t apr_sms_std_create(apr_sms_t **mem_sys);
  */
 APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **mem_sys);
-
-APR_DECLARE(apr_status_t) apr_sms_threadsafe_lock(apr_sms_t *mem_sys);
-APR_DECLARE(apr_status_t) apr_sms_threadsafe_unlock(apr_sms_t *mem_sys);
 
 #ifdef __cplusplus
 }
