@@ -68,12 +68,21 @@ static ap_status_t dir_cleanup(void *thedir)
 
 ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
 {
+    /* On some platforms (e.g., Linux+GNU libc), d_name[] in struct 
+     * dirent is declared with enough storage for the name.  On other
+     * platforms (e.g., Solaris 8 for Intel), d_name is declared as a
+     * one-byte array.  Note: gcc evaluates this at compile time.
+     */
+    ap_size_t dirent_size = 
+        (sizeof((*new)->entry->d_name) > 1 ? 
+         sizeof(struct dirent) : sizeof (struct dirent) + 255);
+
     (*new) = (ap_dir_t *)ap_palloc(cont, sizeof(ap_dir_t));
 
     (*new)->cntxt = cont;
     (*new)->dirname = ap_pstrdup(cont, dirname);
     (*new)->dirstruct = opendir(dirname);
-    (*new)->entry = ap_pcalloc(cont, sizeof(struct dirent));
+    (*new)->entry = ap_pcalloc(cont, dirent_size);
 
     if ((*new)->dirstruct == NULL) {
         return errno;
