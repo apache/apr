@@ -94,13 +94,6 @@ static void msgwait(int sleep_sec, int first_box, int last_box)
     fprintf(stdout, "done waiting on mailboxes...\n");
 }
 
-static void msgput(int boxnum, char *msg)
-{
-    fprintf(stdout, "Sending message to box %d\n", boxnum);
-    apr_cpystrn(boxes[boxnum].msg, msg, strlen(msg));
-    boxes[boxnum].msgavail = 1;
-}
-
 int main(void)
 {
     apr_status_t rv;
