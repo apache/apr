@@ -54,6 +54,7 @@
 
 #include "misc.h"
 #include "threadproc.h"
+#include "../../file_io/unix/fileio.h"
 #ifdef HAVE_TIME_H
 #include <sys/time.h>
 #endif
@@ -68,7 +69,7 @@ static ap_other_child_rec_t *other_children = NULL;
 
 API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
                      void (*maintenance) (int reason, void *, int status),
-                     void *data, int write_fd, ap_pool_t *p)
+                     void *data, ap_file_t *write_fd, ap_pool_t *p)
 {
     ap_other_child_rec_t *ocr;
 
@@ -76,7 +77,12 @@ API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
     ocr->pid = pid->pid;
     ocr->maintenance = maintenance;
     ocr->data = data;
-    ocr->write_fd = write_fd;
+    if (write_fd == NULL) {
+        ocr->write_fd = -1;
+    }
+    else {
+        ocr->write_fd = write_fd->filedes;
+    }
     ocr->next = other_children;
     other_children = ocr;
 }
@@ -98,7 +104,7 @@ API_EXPORT(void) ap_unregister_other_child(void *data)
 
 /* test to ensure that the write_fds are all still writable, otherwise
  * invoke the maintenance functions as appropriate */
-static void probe_writable_fds(void)
+void ap_probe_writable_fds(void)
 {
     fd_set writable_fds;
     int fd_max;

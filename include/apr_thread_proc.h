@@ -574,6 +574,27 @@ B<NOTE>:  The childs status is in the return code to this process.  It is
  */
 ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e waithow);
 
+
+/*
+
+=head1 ap_status_t ap_wait_all_procs(ap_proc_t **proc, ap_wait_how waithow, ap_pool_t *p) 
+
+B<Wait for any current child process to die and return information about that child.>
+
+    arg 1) Pointer to NULL on entry, will be filled out with child's 
+           information 
+    arg 2) How should we wait.  One of:
+              APR_WAIT   -- block until the child process dies.
+              APR_NOWAIT -- return immediately regardless of if the 
+                            child is dead or not.
+    arg 3) Pool to allocate child information out of.
+
+=cut
+ */
+
+ap_status_t ap_wait_all_proc(ap_proc_t **proc, ap_wait_how_e waithow, 
+                             ap_pool_t *p);
+
 /*
 
 =head1 ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
@@ -590,7 +611,7 @@ ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont);
 #if APR_HAS_OTHER_CHILD
 /*
 
-=head1 void ap_register_other_child(ap_proc_t *pid, void (*maintenance) (int reason, void *data, int status), void *data, int write_fd, ap_pool_t *p)
+=head1 void ap_register_other_child(ap_proc_t *pid, void (*maintenance) (int reason, void *data, int status), void *data, ap_file_t *write_fd, ap_pool_t *p)
 
 B<Register an other_child -- a child which must be kept track of so that the program knows when it has dies or disappeared.>
 
@@ -609,7 +630,7 @@ B<Register an other_child -- a child which must be kept track of so that the pro
  */
 void ap_register_other_child(ap_proc_t *pid, 
                              void (*maintenance) (int reason, void *, int status),
-                             void *data, int write_fd, ap_pool_t *p);
+                             void *data, ap_file_t *write_fd, ap_pool_t *p);
 
 /*
 
@@ -650,6 +671,16 @@ B<Loop through all registered other_children and call the appropriate maintenanc
 =cut
  */
 void ap_check_other_child(void); 
+
+/*
+
+=head1 void ap_probe_writable_fds(void)
+
+B<Ensure all the registered write_fds are still writable, otherwise invoke the maintenance functions as appropriate.>
+
+=cut
+ */
+void ap_probe_writable_fds(void);
 #endif /* APR_HAS_OTHER_CHILD */
 
 /*
