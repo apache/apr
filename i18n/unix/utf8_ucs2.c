@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-#include "i18n.h"
+#include "unix/i18n.h"
 
 /* Implement the design principal specified by RFC 2718 2.2.5 
  * Guidelines for new URL Schemes - within the APR.
