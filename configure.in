@@ -41,14 +41,6 @@ esac
 # This macro needs to be here in case we are on an AIX box.
 AC_AIX
 
-dnl Checks for integer size
-AC_CHECK_SIZEOF(char, 1)
-AC_CHECK_SIZEOF(int, 4)
-AC_CHECK_SIZEOF(long, 4)
-AC_CHECK_SIZEOF(short, 2)
-AC_CHECK_SIZEOF(long double, 12)
-AC_CHECK_SIZEOF(long long, 8)
-
 dnl Checks for standard typedefs
 AC_TYPE_OFF_T
 AC_TYPE_PID_T
@@ -56,6 +48,15 @@ AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 AC_CHECK_TYPE(ssize_t, int)
 AC_C_INLINE
+
+dnl Checks for integer size
+AC_CHECK_SIZEOF(char, 1)
+AC_CHECK_SIZEOF(int, 4)
+AC_CHECK_SIZEOF(long, 4)
+AC_CHECK_SIZEOF(short, 2)
+AC_CHECK_SIZEOF(long double, 12)
+AC_CHECK_SIZEOF(long long, 8)
+AC_CHECK_SIZEOF(ssize_t, 4)
 
 # Use /bin/sh if it exists, otherwise go looking for sh in the path
 if test ".$SH" = . -a -f /bin/sh; then
