@@ -1,9 +1,5 @@
 prefix=@prefix@
-exec_prefix=@exec_prefix@
-bindir=@bindir@
 libdir=@libdir@
-datadir=@datadir@
-installbuilddir=@installbuilddir@
 APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
 includedir=@includedir@
 
