@@ -12,7 +12,7 @@ int main(void)
     
     bytes = read(STDIN_FILENO, buf, 256);
     if (bytes > 0)
-	write(STDOUT_FILENO, buf, bytes);
+        write(STDOUT_FILENO, buf, bytes);
 
     return 0; /* just to keep the compiler happy */
 }
