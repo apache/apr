@@ -21,6 +21,7 @@ PROGRAMS = \
         testipsub@EXEEXT@ \
         testmd5@EXEEXT@ \
         testpoll@EXEEXT@ \
+        testmem@EXEEXT@ \
 	occhild@EXEEXT@
 
 TARGETS = $(PROGRAMS)
