@@ -39,6 +39,7 @@
 #else
 #include "apr_win.h"
 #endif
+#include "apr_errno.h"
 
 #ifndef	_APR_FNMATCH_H_
 #define	_APR_FNMATCH_H_
@@ -55,7 +56,7 @@ extern "C" {
 /* This flag is an Apache addition */
 #define FNM_CASE_BLIND  0x08    /* Compare characters case ap_context_t nsensitively. */
 
-API_EXPORT(int) ap_fnmatch(const char *pattern, const char *strings,
+API_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
 			    int flags);
 
 /* this function is an Apache addition */

@@ -112,7 +112,7 @@ static const char **hashbang(const char *filename, char **argv);
  * local argv[] array. The va_arg logic makes sure we do the right thing.
  * XXX: malloc() is used because we expect to be overlaid soon.
  */
-int ap_execle(const char *filename, const char *argv0, ...)
+ap_status_t ap_execle(const char *filename, const char *argv0, ...)
 {
     va_list adummy;
     char **envp;
@@ -127,8 +127,7 @@ int ap_execle(const char *filename, const char *argv0, ...)
     va_end(adummy);
 
     if ((argv = (char **) malloc((argc + 2) * sizeof(*argv))) == NULL) {
-	fprintf(stderr, "Ouch!  Out of memory in ap_execle()!\n");
-	return -1;
+	return APR_ENOMEM;
     }
 
     /* Pass two --- copy the argument strings into the result space */
@@ -140,7 +139,8 @@ int ap_execle(const char *filename, const char *argv0, ...)
     envp = va_arg(adummy, char **);
     va_end(adummy);
 
-    ret = ap_execve(filename, argv, envp);
+    ap_execve(filename, argv, envp);
+    ret = errno;
     free(argv);
 
     return ret;
@@ -163,7 +163,7 @@ count_args(const char **args)
  * We have to fiddle with the argv array to make it work on platforms
  * which don't support the "hashbang" interpreter line by default.
  */
-int ap_execve(const char *filename, const char *argv[],
+ap_status_t ap_execve(const char *filename, const char *argv[],
 	      const char *envp[])
 {
     const char **script_argv;
@@ -225,8 +225,7 @@ int ap_execve(const char *filename, const char *argv[],
 	    int i = count_args(argv) + 1;   /* +1 for leading SHELL_PATH */
 
 	    if ((script_argv = malloc(sizeof(*script_argv) * i)) == NULL) {
-		fprintf(stderr, "Ouch!  Out of memory in ap_execve()!\n");
-		return -1;
+		return APR_ENOMEM;
 	    }
 
 	    script_argv[0] = SHELL_PATH;
@@ -241,7 +240,7 @@ int ap_execve(const char *filename, const char *argv[],
 	    free(script_argv);
 	}
     }
-    return -1;
+    return errno;
 }
 
 /*---------------------------------------------------------------*/

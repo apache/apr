@@ -128,6 +128,10 @@ typedef int ap_status_t;
  */
 #define APR_ENOTIMPL       (APR_OS_START_STATUS + 17)
 
+/* Passwords do not match.
+ */
+#define APR_EMISMATCH      (APR_OS_START_STATUS + 18)
+
 /*
  * APR equivalents to what should be standard errno codes.
  */
