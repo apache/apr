@@ -126,3 +126,11 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     *ressym = func;
     return APR_SUCCESS;
 }
+
+
+
+/* Just a stub, it will never be called because we never return APR_EDSOOPEN */
+char *ap_dso_error()
+{
+    return NULL;
+}
