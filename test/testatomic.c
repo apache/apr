@@ -65,7 +65,7 @@
 #include <unistd.h>
 #endif
 
-#ifndef WIN32
+#if !(defined WIN32) && !(defined NETWARE)
 #include <pthread.h>
 #endif
 
@@ -230,7 +230,7 @@ int main(int argc, char**argv)
 
     printf("APR Simple Thread Test\n======================\n\n");
     
-#ifndef WIN32
+#if !(defined WIN32) && !(defined NETWARE)
     pthread_setconcurrency(8);
 #endif
     printf("%-60s", "Initializing the context"); 
