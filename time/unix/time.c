@@ -305,6 +305,13 @@ APR_DECLARE(apr_status_t) apr_os2_time_to_apr_time(apr_time_t *result, FDATE os2
 }
 #endif
 
+#ifdef NETWARE
+APR_DECLARE(void) apr_netware_setup_time(void)
+{
+    tzset();
+    server_gmt_offset = -timezone;
+}
+#else
 APR_DECLARE(void) apr_unix_setup_time(void)
 {
 #if !defined(HAVE_GMTOFF) && !defined(HAVE___OFFSET)
@@ -352,10 +359,4 @@ APR_DECLARE(void) apr_unix_setup_time(void)
 #endif
 }
 
-#ifdef NETWARE
-APR_DECLARE(void) apr_netware_setup_time(void)
-{
-    tzset();
-    server_gmt_offset = -timezone;
-}
 #endif
