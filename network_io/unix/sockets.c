@@ -55,19 +55,10 @@
 #include "networkio.h"
 #include "apr_portable.h"
 
-/* BeOS uses closesocket instead of close to close their sockets and they
- * don't provide inet_aton.  This small ifndef takes care of both problems.
- */
-#ifndef BEOS
-#define closesocket  close
-#else
-#include "inet_aton.c"
-#endif
-
 static ap_status_t socket_cleanup(void *sock)
 {
     ap_socket_t *thesocket = sock;
-    if (closesocket(thesocket->socketdes) == 0) {
+    if (close(thesocket->socketdes) == 0) {
         thesocket->socketdes = -1;
         return APR_SUCCESS;
     }
@@ -111,9 +102,6 @@ ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
 
 ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
 {
-    /* BEOS internal documentation indicates that this system call
-     * may not work in 5.0, but we don't have any alternatives.
-     */
     return (shutdown(thesocket->socketdes, how) == -1) ? errno : APR_SUCCESS;
 }
 
@@ -155,7 +143,7 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *con
     (*new)->connected = 1;
 #endif
     (*new)->timeout = -1;
-
+    
     (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
                         &(*new)->addr_len);
 
