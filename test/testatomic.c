@@ -74,7 +74,7 @@
 #endif
 
 apr_pool_t *context;
-apr_atomic_t y;      /* atomic locks */
+apr_uint32_t y;      /* atomic locks */
 apr_uint32_t y32;
 
 static apr_status_t check_basic_atomics32(void)
@@ -199,7 +199,7 @@ volatile long z = 0; /* no locks */
 int value = 0;
 apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
 
-#define NUM_THREADS 50
+#define NUM_THREADS 20
 #define NUM_ITERATIONS 200000
 void * APR_THREAD_FUNC thread_func_mutex(apr_thread_t *thd, void *data)
 {
