@@ -87,7 +87,7 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
 }
 
 /*
-ap_status_t ap_create_namedpipe(char **new, ap_context_t *cont, char *dirpath, ap_fileperms_t perm)
+ap_status_t ap_create_namedpipe(char **new, char *dirpath, ap_fileperms_t perm, ap_context_t *cont)
 {
     mode_t mode = get_fileperms(perm);
 

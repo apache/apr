@@ -204,7 +204,7 @@ ap_status_t ap_close(struct file_t *file)
  * NOTE: If the file is open, it won't be removed until all instances are
  *       closed.
  */
-ap_status_t ap_remove_file(ap_context_t *cont, char *path)
+ap_status_t ap_remove_file(char *path, ap_context_t *cont)
 {
     if (unlink(path) == 0) {
         return APR_SUCCESS;
@@ -222,7 +222,7 @@ ap_status_t ap_remove_file(ap_context_t *cont, char *path)
  * NOTE:  On Unix, it is only possible to get a file descriptor from 
  *        an apr file type.
  */
-ap_status_t ap_get_os_file(struct file_t *file, ap_os_file_t *thefile)
+ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;

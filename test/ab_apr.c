@@ -866,7 +866,7 @@ static int open_postfile(char *pfile)
 
     /* No need to perform stat here, the ap_open will do it for us.  */  
 
-    ap_get_filesize(postfd, &postlen);
+    ap_get_filesize(&postlen, postfd);
     postdata = (char *)malloc(postlen);
     if (!postdata) {
         printf("Can\'t alloc postfile buffer\n");

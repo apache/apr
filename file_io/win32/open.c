@@ -151,7 +151,7 @@ ap_status_t ap_close(struct file_t *file)
     return stat;
 }
 
-ap_status_t ap_remove_file(ap_context_t *cont, char *path)
+ap_status_t ap_remove_file(char *path, ap_context_t *cont)
 {
     char *temp = canonical_filename(cont, path);
 
@@ -163,7 +163,7 @@ ap_status_t ap_remove_file(ap_context_t *cont, char *path)
     }
 }
 
-ap_status_t ap_get_os_file(struct file_t *file, ap_os_file_t *thefile)
+ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;

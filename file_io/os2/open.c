@@ -153,7 +153,7 @@ ap_status_t ap_close(ap_file_t *file)
 
 
 
-ap_status_t ap_remove_file(ap_context_t *cntxt, char *path)
+ap_status_t ap_remove_file(char *path, ap_context_t *cntxt)
 {
     ULONG rc = DosDelete(path);
     return os2errno(rc);

@@ -84,7 +84,7 @@ ap_status_t dir_cleanup(void *thedir)
     }
 } 
 
-ap_status_t ap_opendir(struct dir_t **new, ap_context_t *cont, const char *dirname)
+ap_status_t ap_opendir(struct dir_t **new, const char *dirname, ap_context_t *cont)
 {
 	char * temp;
 	(*new) = ap_palloc(cont, sizeof(struct dir_t));
@@ -137,7 +137,7 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 		return APR_SUCCESS;
 	}
     if ((stat = ap_closedir(thedir)) == APR_SUCCESS) {
-		if ((stat = ap_opendir(&thedir, cont, temp)) == APR_SUCCESS) {
+		if ((stat = ap_opendir(&thedir, temp, cont)) == APR_SUCCESS) {
 			ap_readdir(thedir);
 			return APR_SUCCESS;
 		}
@@ -145,7 +145,7 @@ ap_status_t ap_rewinddir(struct dir_t *thedir)
 	return stat;	
 }
 
-ap_status_t ap_make_dir(ap_context_t *cont, const char *path, ap_fileperms_t perm)
+ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
 {
     if (CreateDirectory(path, NULL)) {
 		return APR_SUCCESS;
@@ -153,7 +153,7 @@ ap_status_t ap_make_dir(ap_context_t *cont, const char *path, ap_fileperms_t per
     return APR_EEXIST;
 }
 
-ap_status_t ap_remove_dir(ap_context_t *cont, const char *path)
+ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 {
 DWORD huh;
     char *temp = canonical_filename(cont, path);
@@ -164,7 +164,7 @@ DWORD huh;
 	return APR_EEXIST;
 }
 
-ap_status_t ap_dir_entry_size(struct dir_t *thedir, ap_ssize_t *size)
+ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
 		return APR_ENODIR;
@@ -174,7 +174,7 @@ ap_status_t ap_dir_entry_size(struct dir_t *thedir, ap_ssize_t *size)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *time)
+ap_status_t ap_dir_entry_mtime(time_t *time, struct dir_t *thedir)
 {
     if (thedir == NULL || thedir->entry == NULL) {
 		return APR_ENODIR;
@@ -185,7 +185,7 @@ ap_status_t ap_dir_entry_mtime(struct dir_t *thedir, time_t *time)
     return APR_SUCCESS;
 }
  
-ap_status_t ap_dir_entry_ftype(struct dir_t *thedir, ap_filetype_e *type)
+ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct dir_t *thedir)
 {
 	switch(thedir->entry->dwFileAttributes) {
 	case FILE_ATTRIBUTE_DIRECTORY: {
@@ -209,7 +209,7 @@ ap_status_t ap_get_dir_filename(char **new, struct dir_t *thedir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_dir(struct dir_t *dir, ap_os_dir_t *thedir)
+ap_status_t ap_get_os_dir(ap_os_dir_t *thedir, struct dir_t *dir)
 {
     if (dir == NULL) {
         return APR_ENODIR;

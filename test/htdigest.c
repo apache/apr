@@ -113,11 +113,11 @@ static int getline(char *s, int n, ap_file_t *f)
     char ch;
 
     while (1) {
-	ap_getc(f, &ch);
+	ap_getc(&ch, f);
             s[i] = ch;
 
 	if (s[i] == CR)
-	    ap_getc(f, &ch);
+	    ap_getc(&ch, f);
             s[i] = ch;
 
 	if ((s[i] == 0x4) || (s[i] == LF) || (i == (n - 1))) {
@@ -136,8 +136,8 @@ static void putline(ap_file_t *f, char *l)
     int x;
 
     for (x = 0; l[x]; x++)
-	ap_putc(f, l[x]);
-    ap_putc(f, '\n');
+	ap_putc(l[x], f);
+    ap_putc('\n', f);
 }
 
 
@@ -161,7 +161,7 @@ static void add_password(char *user, char *realm, ap_file_t *f)
     if (strcmp(pwin, pwv) != 0) {
 	fprintf(stderr, "They don't match, sorry.\n");
 	if (tn) {
-	    ap_remove_file(cntxt, tn);
+	    ap_remove_file(tn, cntxt);
 	}
 	exit(1);
     }
@@ -192,7 +192,7 @@ static void interrupted(void)
 {
     fprintf(stderr, "Interrupted.\n");
     if (tn)
-	ap_remove_file(cntxt, tn);
+	ap_remove_file(tn, cntxt);
     exit(1);
 }
 
@@ -275,6 +275,6 @@ int main(int argc, char *argv[])
     sprintf(command, "cp %s %s", tn, argv[1]);
 #endif
     system(command);
-    ap_remove_file(cntxt, tn);
+    ap_remove_file(tn, cntxt);
     return 0;
 }

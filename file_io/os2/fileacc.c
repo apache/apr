@@ -76,7 +76,7 @@ ap_status_t ap_get_filename(char **new, struct file_t *thefile)
 
 
 
-ap_status_t ap_get_filesize(struct file_t *file, ap_ssize_t *size)
+ap_status_t ap_get_filesize(ap_ssize_t *size, struct file_t *file)
 {
     ap_status_t rv;
     
@@ -98,7 +98,7 @@ ap_status_t ap_get_filesize(struct file_t *file, ap_ssize_t *size)
 
 
 
-ap_status_t ap_get_fileperms(struct file_t *file, ap_fileperms_t *perm)
+ap_status_t ap_get_fileperms(ap_fileperms_t *perm, struct file_t *file)
 {
     ap_status_t rv;
   
@@ -120,7 +120,7 @@ ap_status_t ap_get_fileperms(struct file_t *file, ap_fileperms_t *perm)
 
 
 
-ap_status_t ap_get_fileatime(struct file_t *file, time_t *time)
+ap_status_t ap_get_fileatime(time_t *time, struct file_t *file)
 {    
     ap_status_t rv;
 
@@ -142,7 +142,7 @@ ap_status_t ap_get_fileatime(struct file_t *file, time_t *time)
 
 
 
-ap_status_t ap_get_filectime(struct file_t *file, time_t *time)
+ap_status_t ap_get_filectime(time_t *time, struct file_t *file)
 {    
     ap_status_t rv;
 
@@ -165,7 +165,7 @@ ap_status_t ap_get_filectime(struct file_t *file, time_t *time)
 
 
 
-ap_status_t ap_get_filemtime(struct file_t *file, time_t *time)
+ap_status_t ap_get_filemtime(time_t *time, struct file_t *file)
 {    
     ap_status_t rv;
 
