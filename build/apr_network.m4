@@ -104,6 +104,34 @@ fi
 ])
 
 dnl
+dnl check for negative error codes for getaddrinfo()
+dnl
+AC_DEFUN(APR_CHECK_NEGATIVE_EAI,[
+  AC_CACHE_CHECK(for negative error codes for getaddrinfo, ac_cv_negative_eai,[
+  AC_TRY_RUN( [
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
+void main(void) {
+    if (EAI_ADDRFAMILY < 0) {
+        exit(0);
+    }
+    exit(1);
+}
+],[
+  ac_cv_negative_eai="yes"
+],[
+  ac_cv_negative_eai="no"
+],[
+  ac_cv_negative_eai="no"
+])])
+if test "$ac_cv_negative_eai" = "yes"; then
+  AC_DEFINE(NEGATIVE_EAI, 1, [Define if EAI_ error codes from getaddrinfo are negative])
+fi
+])
+
+dnl
 dnl check for gethostbyname() which handles numeric address strings
 dnl
 AC_DEFUN(APR_CHECK_GETHOSTBYNAME_NAS,[

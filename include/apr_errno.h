@@ -153,6 +153,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *     on systems which don't have the corresponding errno.
  */
 /**
+ * APR_OS_START_EAIERR folds EAI_ error codes from getaddrinfo() into 
+ *     apr_status_t values.
+ */
+/**
  * APR_OS_START_SYSERR folds platform-specific system error values into 
  *     apr_status_t values.
  */
@@ -160,7 +164,8 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_OS_START_STATUS    (APR_OS_START_ERROR + 500)
 #define APR_OS_START_USEERR    (APR_OS_START_STATUS + 500)
 #define APR_OS_START_CANONERR  (APR_OS_START_USEERR + 500)
-#define APR_OS_START_SYSERR    (APR_OS_START_CANONERR + 500)
+#define APR_OS_START_EAIERR    (APR_OS_START_CANONERR + 500)
+#define APR_OS_START_SYSERR    (APR_OS_START_EAIERR + 500)
 
 #define APR_SUCCESS 0
 
