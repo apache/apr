@@ -535,13 +535,13 @@ static void read_connection(struct connection *c)
     r = sizeof(buffer);
     ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, aprtimeout);
     status = ap_recv(c->aprsock, buffer, &r);
-    if (r == 0 || (status != 0 && status != EAGAIN)) {
+    if (r == 0 || (status != 0 && ap_canonical_error(status) != EAGAIN)) {
         good++;
         close_connection(c);
         return;
     }
 
-    if (status == EAGAIN)
+    if (ap_canonical_error(status) == EAGAIN)
         return;
 
     c->read += r;
