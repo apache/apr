@@ -115,11 +115,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	;;
     *-linux-*)
         case `uname -r` in
-	    2.2* ) APR_ADDTO(CPPFLAGS, [-DLINUX=2 -D_XOPEN_SOURCE=500])
-	           APR_ADDTO(CPPFLAGS, [-D_BSD_SOURCE -D_SVID_SOURCE]) 
-	           ;;
-	    2.0* ) APR_ADDTO(CPPFLAGS, [-DLINUX=2 -D_XOPEN_SOURCE=500])
-	           APR_ADDTO(CPPFLAGS, [-D_BSD_SOURCE -D_SVID_SOURCE])
+	    2.* )  APR_ADDTO(CPPFLAGS, [-DLINUX=2])
 	           ;;
 	    1.* )  APR_ADDTO(CPPFLAGS, [-DLINUX=1])
 	           ;;
