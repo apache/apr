@@ -14,15 +14,28 @@ INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I.
 
 LIB=libfile.a
 
-OBJS=dir.o \
+# we're going to build the files form the unix directory as the BeOS file access is 
+# identical and this will save duplicating the effort.
+
+OBJS=../unix/dir.o \
+	../unix/fileacc.o \
+	../unix/filedup.o \
+	../unix/filestat.o \
+	../unix/open.o \
+	../unix/pipe.o \
+	../unix/readwrite.o \
+	../unix/seek.o \
+         ../unix/mmap_file.o
+
+OBJS2=dir.o \
 	fileacc.o \
 	filedup.o \
 	filestat.o \
 	open.o \
 	pipe.o \
 	readwrite.o \
-	seek.o
-
+	seek.o \
+         mmap_file.o
 .c.o:
 	$(CC) $(CFLAGS) -c $(INCLUDES) $<
 
@@ -38,7 +51,7 @@ $(OBJS): Makefile
 
 $(LIB): $(OBJS)
 	$(RM) -f $@
-	$(AR) cr $@ $(OBJS)
+	$(AR) cr $@ $(OBJS2)
 	$(RANLIB) $@
 
 #
@@ -56,3 +69,39 @@ depend:
 	    && rm Makefile.new
 
 # DO NOT REMOVE
+dir.o: ../unix/dir.c ../unix/fileio.h ../../include/apr_general.h \
+ ../../include/apr_config.h ../../include/apr_errno.h \
+ ../../include/apr_file_io.h ../../include/apr_lib.h \
+ ../../include/hsregex.h ../../include/apr_portable.h \
+ ../../include/apr_thread_proc.h ../../include/apr_win.h \
+ ../../include/apr_network_io.h ../../include/apr_lock.h \
+ ../../include/apr_time.h
+fileacc.o: ../unix/fileacc.c ../unix/fileio.h \
+ ../../include/apr_general.h ../../include/apr_config.h \
+ ../../include/apr_errno.h ../../include/apr_file_io.h \
+ ../../include/apr_lib.h ../../include/hsregex.h
+filedup.o: ../unix/filedup.c ../unix/fileio.h \
+ ../../include/apr_general.h ../../include/apr_config.h \
+ ../../include/apr_errno.h ../../include/apr_file_io.h \
+ ../../include/apr_lib.h ../../include/hsregex.h
+filestat.o: ../unix/filestat.c ../unix/fileio.h \
+ ../../include/apr_general.h ../../include/apr_config.h \
+ ../../include/apr_errno.h ../../include/apr_file_io.h
+open.o: ../unix/open.c ../unix/fileio.h ../../include/apr_general.h \
+ ../../include/apr_config.h ../../include/apr_errno.h \
+ ../../include/apr_file_io.h ../../include/apr_portable.h \
+ ../../include/apr_thread_proc.h ../../include/apr_win.h \
+ ../../include/apr_network_io.h ../../include/apr_lock.h \
+ ../../include/apr_time.h ../../include/apr_lib.h \
+ ../../include/hsregex.h
+pipe.o: ../unix/pipe.c ../unix/fileio.h ../../include/apr_general.h \
+ ../../include/apr_config.h ../../include/apr_errno.h \
+ ../../include/apr_file_io.h ../../include/apr_lib.h \
+ ../../include/hsregex.h
+readwrite.o: ../unix/readwrite.c ../unix/fileio.h \
+ ../../include/apr_general.h ../../include/apr_config.h \
+ ../../include/apr_errno.h ../../include/apr_file_io.h \
+ ../../include/apr_lib.h ../../include/hsregex.h
+seek.o: ../unix/seek.c ../unix/fileio.h ../../include/apr_general.h \
+ ../../include/apr_config.h ../../include/apr_errno.h \
+ ../../include/apr_file_io.h
