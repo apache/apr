@@ -71,7 +71,7 @@
 apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
 
-static apr_status_t check_basic_atomics(volatile apr_atomic_t*p)
+static apr_status_t check_basic_atomics()
 {
     apr_atomic_t oldval;
     apr_uint32_t casval = 0;
@@ -184,7 +184,7 @@ int main(void)
         fprintf(stderr, "Failed.\nCould not initialize atomics\n");
         exit(-1);
     }
-    rv = check_basic_atomics(&y);
+    rv = check_basic_atomics();
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
