@@ -614,7 +614,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms,
     cleanup = sms->cleanups;
     cleanup_ref = &sms->cleanups;
     while (cleanup) {
-        if ((type == 0 || cleanup->type == type) &&
+        if ((type == APR_ALL_CLEANUPS || cleanup->type == type) &&
             cleanup->data == data && cleanup->cleanup_fn == cleanup_fn) {
             *cleanup_ref = cleanup->next;
 
@@ -623,6 +623,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister(apr_sms_t *sms,
             if (sms->free_fn)
                 apr_sms_free(sms, cleanup);
 
+            cleanup = *cleanup_ref;
             rv = APR_SUCCESS;
         } else {
             cleanup_ref = &cleanup->next;
@@ -651,7 +652,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_unregister_type(apr_sms_t *sms,
     cleanup_ref = &sms->cleanups;
     sms = sms->accounting;
     while (cleanup) {
-        if (type == 0 || cleanup->type == type) {
+        if (type == APR_ALL_CLEANUPS || cleanup->type == type) {
             *cleanup_ref = cleanup->next;
 
             if (sms->free_fn)
@@ -702,7 +703,7 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms,
     cleanup_ref = &sms->cleanups;
     sms = sms->accounting;
     while (cleanup) {
-        if (type == 0 || cleanup->type == type) {
+        if (type == APR_ALL_CLEANUPS || cleanup->type == type) {
             *cleanup_ref = cleanup->next;
 
             cleanup->cleanup_fn(cleanup->data);
