@@ -134,13 +134,14 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
     WIN32_FIND_DATA FileInformation;
     HANDLE hFind;
     ap_oslevel_e os_level;
+    ap_status_t rv = APR_SUCCESS;
 
     memset(finfo,'\0', sizeof(*finfo));
 
     if (!ap_get_oslevel(cont, &os_level) && os_level >= APR_WIN_98) {
         if (!GetFileAttributesEx(fname, GetFileExInfoStandard, 
                                  (WIN32_FILE_ATTRIBUTE_DATA*) &FileInformation)) {
-            return GetLastError();
+            rv = GetLastError();
         }
     }
     else {
@@ -149,10 +150,21 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
          */
         hFind = FindFirstFile(fname, &FileInformation);
         if (hFind == INVALID_HANDLE_VALUE) {
-            return GetLastError();
-    	}
-        FindClose(hFind);
+            rv = GetLastError();
+    	} else {
+            FindClose(hFind);
+        }
     }
+
+    if (rv != APR_SUCCESS) {
+        /* a little ad-hoc canonicalization to the most common
+         * error conditions
+         */
+        if (rv == ERROR_FILE_NOT_FOUND || rv == ERROR_PATH_NOT_FOUND)
+            return APR_ENOENT;
+       return rv;
+    }
+
     /* Filetype - Directory or file? */
     if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
         finfo->protection |= S_IFDIR;
@@ -184,25 +196,5 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont)
     finfo->size = FileInformation.nFileSizeLow;
 
     return APR_SUCCESS;
-#if 0
-    /* ap_stat implemented using stat() */
-    struct stat info;
-    int rv = stat(fname, &info);
-    if (rv == 0) {
-        finfo->protection = info.st_mode;
-        finfo->filetype = filetype_from_mode(info.st_mode);
-        finfo->user = info.st_uid;
-        finfo->group = info.st_gid;
-        finfo->size = info.st_size;
-        finfo->inode = info.st_ino;
-        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
-        return APR_SUCCESS;
-    }
-    else {
-        return errno;
-    }
-#endif
 }
 
