@@ -63,8 +63,9 @@
 #include <errno.h>
 #include <string.h>
 
-static ap_lock_t *lock_gmtime = NULL;
-static ap_lock_t *lock_localtime = NULL;
+#ifndef _POSIX_THREAD_SAFE_FUNCTIONS
+static ap_lock_t *lock_time = NULL;
+#endif
 
 
 /* ***APRDOC********************************************************
@@ -112,13 +113,13 @@ ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
 {
     switch (type) {
     case APR_LOCALTIME: {
-        SAFETY_LOCK(localtime, "localtimefile");
+        SAFETY_LOCK(time, "timefile");
         LOCALTIME_R(&atime->currtime->tv_sec, atime->explodedtime);
         SAFETY_UNLOCK(localtime);
         break;
     }
     case APR_UTCTIME: {
-        SAFETY_LOCK(gmtime, "gmtimefile");
+        SAFETY_LOCK(time, "timefile");
         GMTIME_R(&atime->currtime->tv_sec, atime->explodedtime);
         SAFETY_UNLOCK(gmtime);
         break;
