@@ -185,7 +185,7 @@ APR_DECLARE(apr_status_t) apr_explode_localtime(apr_time_exp_t *result,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t,
+APR_DECLARE(apr_status_t) apr_time_exp_get(apr_time_t *t,
                                            apr_time_exp_t *xt)
 {
     int year;
@@ -223,7 +223,7 @@ APR_DECLARE(apr_status_t) apr_implode_time(apr_time_t *t,
 APR_DECLARE(apr_status_t) apr_implode_gmt(apr_time_t *t,
                                           apr_time_exp_t *xt)
 {
-    apr_status_t status = apr_implode_time(t, xt);
+    apr_status_t status = apr_time_exp_get(t, xt);
     if (status == APR_SUCCESS)
         *t -= (apr_time_t) xt->tm_gmtoff * APR_USEC_PER_SEC;
     return status;
