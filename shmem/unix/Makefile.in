@@ -25,17 +25,17 @@ all: $(LIB)
 
 clean:
 	$(RM) -f *.o *.a *.so
-	cd mm; make clean; cd ..
+	cd mm; $(MAKE) clean; cd ..
 
 distclean: clean
 	-$(RM) -f Makefile
-	cd mm; make distclean; cd ..
+	cd mm; $(MAKE) distclean; cd ..
 
 $(OBJS): Makefile
 
 $(LIB): $(OBJS)
 	$(RM) -f $@
-	cd mm; make; cd ..
+	cd mm; $(MAKE); cd ..
 	cp mm/mm_global.o mm/mm_alloc.o mm/mm_core.o mm/mm_lib.o mm/mm_vers.o .
 	$(AR) cr $@ $(OBJS)
 	$(RANLIB) $@
