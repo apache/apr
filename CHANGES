@@ -1,7 +1,7 @@
 Changes with APR b1
 
   *) Don't try to use /dev/zero and mmap on platforms that don't
-       support that (such as HP-UX).  PR 8537.  [Justin Erenkrantz]
+     support that (such as HP-UX).  PR 8537.  [Justin Erenkrantz]
 
   *) Reduce the number of apr_sendfile calls on AIX and OS/390 by
      remembering when the kernel tells us the next one will block.
