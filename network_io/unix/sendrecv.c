@@ -387,7 +387,7 @@ do_select:
     return rv < 0 ? errno : APR_SUCCESS;
 }
 
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
 
 /* Release 3.1 or greater */
 apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
@@ -406,7 +406,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
         hdtr = &no_hdtr;
     }
 
-#if __FreeBSD_version < 460001
+#if defined(__FreeBSD_version) && __FreeBSD_version < 460001
     else if (hdtr->numheaders) {
 
         /* On early versions of FreeBSD sendfile, the number of bytes to send 
@@ -953,6 +953,7 @@ apr_status_t apr_socket_sendfile(apr_socket_t *sock, apr_file_t *file,
 #error APR has detected sendfile on your system, but nobody has written a
 #error version of it for APR yet.  To get past this, either write 
 #error apr_socket_sendfile or change APR_HAS_SENDFILE in apr.h to 0.
-#endif /* __linux__, __FreeBSD__, __HPUX__, _AIX, __MVS__, Tru64/OSF1 */
+#endif /* __linux__, __FreeBSD__, __DragonFly__, __HPUX__, _AIX, __MVS__,
+	  Tru64/OSF1 */
 
 #endif /* APR_HAS_SENDFILE */

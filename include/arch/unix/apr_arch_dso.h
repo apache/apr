@@ -44,7 +44,8 @@
 #define RTLD_GLOBAL 0
 #endif
 
-#if (defined(__FreeBSD__) ||\
+#if (defined(__DragonFly__) ||\
+     defined(__FreeBSD__) ||\
      defined(__OpenBSD__) ||\
      defined(__NetBSD__)     ) && !defined(__ELF__)
 #define DLSYM_NEEDS_UNDERSCORE
