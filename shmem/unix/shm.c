@@ -78,7 +78,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_USE_SHMEM_SHMGET || APR_USE_SHMEM_SHMGET_ANON
     apr_size_t nbytes;
     apr_file_t *file;   /* file where metadata is stored */
-    int shmid;
 #endif
 
     /* FIXME: associate this thing with a pool and set up a destructor
@@ -152,31 +151,32 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         new_m->realsize = reqsize;
         new_m->filename = NULL;
 
-        if ((shmid = shmget(IPC_PRIVATE, new_m->realsize,
-                            SHM_R | SHM_W | IPC_CREAT)) < 0) {
+        if ((new_m->shmid = shmget(IPC_PRIVATE, new_m->realsize,
+                                   SHM_R | SHM_W | IPC_CREAT)) < 0) {
             return errno;
         }
 
-        if ((new_m->base = shmat(shmid, NULL, 0)) == (void *)-1) {
+        if ((new_m->base = shmat(new_m->shmid, NULL, 0)) == (void *)-1) {
             return errno;
         }
 
         new_m->usable = new_m->base;
 
-        if (shmctl(shmid, IPC_STAT, &shmbuf) == -1) {
+        if (shmctl(new_m->shmid, IPC_STAT, &shmbuf) == -1) {
             return errno;
         }
         apr_current_userid(&uid, &gid, pool);
         shmbuf.shm_perm.uid = uid;
         shmbuf.shm_perm.gid = gid;
-        if (shmctl(shmid, IPC_SET, &shmbuf) == -1) {
+        if (shmctl(new_m->shmid, IPC_SET, &shmbuf) == -1) {
             return errno;
         }
 
-        new_m->shmid = shmid;
-
-        /* Remove the segment once use count hits zero. */
-        if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+        /* Remove the segment once use count hits zero.
+         * We will not attach to this segment again, since it is
+         * anonymous memory, so it is ok to mark it for deletion.
+         */
+        if (shmctl(new_m->shmid, IPC_RMID, NULL) == -1) {
             return errno;
         }
 
@@ -257,26 +257,24 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
 #if APR_USE_SHMEM_SHMGET
         new_m->realsize = reqsize;
 
-        if ((shmid = shmget(ftok(filename, 1), new_m->realsize,
-                            SHM_R | SHM_W | IPC_CREAT)) < 0) {
+        if ((new_m->shmid = shmget(ftok(filename, 1), new_m->realsize,
+                                   SHM_R | SHM_W | IPC_CREAT)) < 0) {
             return errno;
         }
 
-        new_m->base = shmat(shmid, NULL, 0);
+        new_m->base = shmat(new_m->shmid, NULL, 0);
         /* FIXME: Handle errors. */
         new_m->usable = new_m->base;
 
-        if (shmctl(shmid, IPC_STAT, &shmbuf) == -1) {
+        if (shmctl(new_m->shmid, IPC_STAT, &shmbuf) == -1) {
             return errno;
         }
         apr_current_userid(&uid, &gid, pool);
         shmbuf.shm_perm.uid = uid;
         shmbuf.shm_perm.gid = gid;
-        if (shmctl(shmid, IPC_SET, &shmbuf) == -1) {
+        if (shmctl(new_m->shmid, IPC_SET, &shmbuf) == -1) {
             return errno;
         }
-
-        new_m->shmid = shmid;
 
         /* FIXME: APR_OS_DEFAULT is too permissive, switch to 600 I think. */
         status = apr_file_open(&file, filename, 
@@ -295,11 +293,6 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
         status = apr_file_close(file);
         if (status != APR_SUCCESS) {
             return status;
-        }
-
-        /* Remove the segment once use count hits zero. */
-        if (shmctl(shmid, IPC_RMID, NULL) == -1) {
-            return errno;
         }
 
         *m = new_m; 
@@ -321,6 +314,9 @@ APR_DECLARE(apr_status_t) apr_shm_destroy(apr_shm_t *m)
 #elif APR_USE_SHMEM_MMAP_ANON
     munmap(m->base, m->realsize);
 #elif APR_USE_SHMEM_SHMGET || APR_USE_SHMEM_SHMGET_ANON
+    if (shmctl(m->shmid, IPC_RMID, NULL) == -1) {
+        return errno;
+    }
     shmdt(m->base);
 #endif
 
