@@ -10,7 +10,7 @@ LIBS=@LIBS@
 LDFLAGS=@LDFLAGS@ $(LIBS)
 INCDIR=../../inc
 INCDIR1=../../include
-INCDIR2=../../file_io/@OSDIR@
+INCDIR2=../../file_io/unix
 INCLUDES=-I$(INCDIR) -I$(INCDIR1) -I$(INCDIR2) -I.
 
 LIB=libthreadproc.a
