@@ -259,3 +259,116 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
 }
 
 #endif 
+
+
+struct apr_pollset_t {
+    apr_uint32_t nelts;
+    apr_uint32_t nalloc;
+    struct pollfd *pollset;
+    apr_pollfd_t *query_set;
+    apr_pollfd_t *result_set;
+    apr_pool_t *pool;
+};
+
+APR_DECLARE(apr_status_t) apr_pollset_create(apr_pollset_t **pollset,
+                                             apr_uint32_t size,
+                                             apr_pool_t *p)
+{
+    *pollset = apr_palloc(p, sizeof(**pollset));
+    (*pollset)->nelts = 0;
+    (*pollset)->nalloc = size;
+    (*pollset)->pollset = apr_palloc(p, size * sizeof(struct pollfd));
+    (*pollset)->query_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
+    (*pollset)->result_set = apr_palloc(p, size * sizeof(apr_pollfd_t));
+    (*pollset)->pool = p;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollset_destroy(apr_pollset_t *pollset)
+{
+    /* A no-op function for now.  If we later implement /dev/poll
+     * support, we'll need to close the /dev/poll fd here
+     */
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
+                                          const apr_pollfd_t *descriptor)
+{
+    if (pollset->nelts == pollset->nalloc) {
+        return APR_ENOMEM;
+    }
+
+    pollset->query_set[pollset->nelts] = *descriptor;
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        pollset->pollset[pollset->nelts].fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        pollset->pollset[pollset->nelts].fd = descriptor->desc.f->filedes;
+    }
+    pollset->pollset[pollset->nelts].events = get_event(descriptor->reqevents);
+    pollset->nelts++;
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
+                                             const apr_pollfd_t *descriptor)
+{
+    apr_uint32_t i;
+    int fd;
+
+    if (descriptor->desc_type == APR_POLL_SOCKET) {
+        fd = descriptor->desc.s->socketdes;
+    }
+    else {
+        fd = descriptor->desc.f->filedes;
+    }
+
+    for (i = 0; i < pollset->nelts; i++) {
+        if (fd == pollset->pollset[i].fd) {
+            /* Found an instance of the fd: remove this and any other copies */
+            apr_uint32_t dst = i;
+            apr_uint32_t old_nelts = pollset->nelts;
+            pollset->nelts--;
+            for (i++; i < old_nelts; i++) {
+                if (fd == pollset->pollset[i].fd) {
+                    pollset->nelts--;
+                }
+                else {
+                    pollset->pollset[dst] = pollset->pollset[i];
+                }
+            }
+            return APR_SUCCESS;
+        }
+    }
+    return APR_NOTFOUND;
+}
+
+APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
+                                           apr_interval_time_t timeout,
+                                           apr_int32_t *num,
+                                           const apr_pollfd_t **descriptors)
+{
+    int rv;
+    apr_uint32_t i, j;
+
+    if (timeout > 0) {
+        timeout /= 1000;
+    }
+    rv = poll(pollset->pollset, pollset->nelts, timeout);
+    (*num) = rv;
+    if (rv < 0) {
+        return errno;
+    }
+    j = 0;
+    for (i = 0; i < pollset->nelts; i++) {
+        if (pollset->pollset[i].revents != 0) {
+            pollset->result_set[j] = pollset->query_set[i];
+            pollset->result_set[j].rtnevents =
+                get_revent(pollset->pollset[i].revents);
+            j++;
+        }
+    }
+    *descriptors = pollset->result_set;
+    return APR_SUCCESS;
+}
