@@ -140,8 +140,23 @@ ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
 ap_status_t ap_initialize(void)
 {
     ap_status_t status;
-#if !defined(BEOS) && !defined(OS2)
+#if !defined(BEOS) && !defined(OS2) && !defined(WIN32)
     ap_unix_setup_lock();
+#elif defined WIN32
+    int iVersionRequested;
+    WSADATA wsaData;
+    int err;
+
+    iVersionRequested = MAKEWORD(WSAHighByte, WSALowByte);
+    err = WSAStartup((WORD) iVersionRequested, &wsaData);
+    if (err) {
+        return err;
+    }
+    if (LOBYTE(wsaData.wVersion) != WSAHighByte ||
+        HIBYTE(wsaData.wVersion) != WSALowByte) {
+        WSACleanup();
+        return APR_EEXIST;
+    }
 #endif
     status = ap_init_alloc();
     return status;
