@@ -195,6 +195,17 @@ static void string_error(CuTest *tc)
      CuAssertStrEquals(tc, "The timeout specified has expired", buf);
 }
 
+#define SIZE 180000
+static void string_long(CuTest *tc)
+{
+    char s[SIZE + 1];
+
+    memset(s, 'A', SIZE);
+    s[SIZE] = '\0';
+
+    apr_psprintf(p, "%s", s);
+}
+
 CuSuite *teststr(void)
 {
     CuSuite *suite = CuSuiteNew("Strings");
@@ -205,6 +216,7 @@ CuSuite *teststr(void)
     SUITE_ADD_TEST(suite, snprintf_int64);
     SUITE_ADD_TEST(suite, test_strtok);
     SUITE_ADD_TEST(suite, string_error);
+    SUITE_ADD_TEST(suite, string_long);
 
     return suite;
 }
