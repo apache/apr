@@ -33,7 +33,7 @@ readchild@EXEEXT@ tryread@EXEEXT@ sockchid@EXEEXT@
 CLEAN_SUBDIRS = internal
 
 INCDIR=../include
-INCLUDES=-I$(INCDIR)
+INCLUDES=-I$(INCDIR) -I$(srcdir)/../include
 
 # link programs using -no-install to get real executables not
 # libtool wrapper scripts which link an executable when first run.
