@@ -91,8 +91,9 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         one = 0;
 
     if (opt & APR_SO_TIMEOUT) {
-        int timeout = on * 1000;  /* Windows needs timeout in mSeconds */
-        sock->timeout = timeout;
+        int timeout;
+        sock->timeout = on;
+        timeout = on / 1000; /* Windows needs timeout in mSeconds */
         if (setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, (char*) &timeout, 
                        sizeof(timeout)) == SOCKET_ERROR) {
             return WSAGetLastError();

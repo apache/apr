@@ -71,9 +71,15 @@ int main(int argc, char *argv[])
     char *local_ipaddr, *remote_ipaddr;
     char *dest = "127.0.0.1";
     ap_uint32_t local_port, remote_port;
+    ap_interval_time_t read_timeout = -1;
 
+    setbuf(stdout, NULL);
     if (argc > 1) {
         dest = argv[1];
+    }
+
+    if (argc > 2) {
+        read_timeout = AP_USEC_PER_SEC * atoi(argv[2]);
     }
 
     fprintf(stdout, "Initializing.........");
@@ -98,13 +104,15 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
 
-    fprintf(stdout, "\tClient:  Setting socket option NONBLOCK.......");
-    if (ap_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
-        ap_close_socket(sock);
-        fprintf(stderr, "Couldn't set socket option\n");
-        exit(-1);
+    if (read_timeout == -1) {
+        fprintf(stdout, "\tClient:  Setting socket option NONBLOCK.......");
+        if (ap_setsocketopt(sock, APR_SO_NONBLOCK, 1) != APR_SUCCESS) {
+            ap_close_socket(sock);
+            fprintf(stderr, "Couldn't set socket option\n");
+            exit(-1);
+        }
+        fprintf(stdout, "OK\n");
     }
-    fprintf(stdout, "OK\n");
 
     fprintf(stdout, "\tClient:  Setting port for socket.......");
     if (ap_set_remote_port(sock, 8021) != APR_SUCCESS) {
@@ -143,11 +151,22 @@ int main(int argc, char *argv[])
     }
     fprintf(stdout, "OK\n");
    
+    if (read_timeout != -1) {
+        fprintf(stdout, "\tClient:  Setting read timeout.......");
+        stat = ap_setsocketopt(sock, APR_SO_TIMEOUT, read_timeout);
+        if (stat) {
+            fprintf(stderr, "Problem setting timeout: %d\n", stat);
+            exit(-1);
+        }
+        fprintf(stdout, "OK\n");
+    }
+
     length = STRLEN; 
     fprintf(stdout, "\tClient:  Trying to receive data over socket.......");
-    if (ap_recv(sock, datarecv, &length) != APR_SUCCESS) {
+
+    if ((stat = ap_recv(sock, datarecv, &length)) != APR_SUCCESS) {
         ap_close_socket(sock);
-        fprintf(stderr, "Problem receiving data\n");
+        fprintf(stderr, "Problem receiving data: %d\n", stat);
         exit(-1);
     }
     if (strcmp(datarecv, "Recv data test")) {

@@ -69,20 +69,27 @@
 
 static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
 {
-    struct timeval tv;
+    struct timeval tv, *tvptr;
     fd_set fdset;
     int srv;
 
     do {
 	FD_ZERO(&fdset);
 	FD_SET(sock->socketdes, &fdset);
-	tv.tv_sec = sock->timeout;
-	tv.tv_usec = 0;
-	srv = select(FD_SETSIZE,
+        if (sock->timeout < 0) {
+            tvptr = NULL;
+        }
+        else {
+            tv.tv_sec = sock->timeout / AP_USEC_PER_SEC;
+            tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
+            tvptr = &tv;
+        }
+	srv = select(sock->socketdes + 1,
 	    for_read ? &fdset : NULL,
 	    for_read ? NULL : &fdset,
 	    NULL,
-	    sock->timeout < 0 ? NULL : &tv);
+	    tvptr);
+        /* TODO - timeout should be smaller on repeats of this loop */
     } while (srv == -1 && errno == EINTR);
 
     if (srv == 0) {
@@ -400,34 +407,12 @@ ap_status_t ap_sendfile(ap_socket_t * sock, ap_file_t * file,
     if (rv == -1 && 
         (errno == EAGAIN || errno == EWOULDBLOCK) && 
         sock->timeout != 0) {
-        struct timeval *tv;
-        fd_set fdset;
-        int srv;
+        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
 
-        do {
-            FD_ZERO(&fdset);
-            FD_SET(sock->socketdes, &fdset);
-            if (sock->timeout < 0) {
-        	tv = NULL;
-            }
-            else {
-		/* XXX:  BUHHH? wow, what a memory leak! */
-        	tv = ap_palloc(sock->cntxt, sizeof(struct timeval));
-        	tv->tv_sec = sock->timeout;
-        	tv->tv_usec = 0;
-            }
-            srv = select(FD_SETSIZE, NULL, &fdset, NULL, tv);
-        } while (srv == -1 && errno == EINTR);
-
-        if (srv == 0) {
-	    /* XXX: -1 is wrong */
-            (*len) = -1;
-            return APR_TIMEUP;
-        }
-        else if (srv < 0) {
-	    /* XXX: -1 is wrong */
-            (*len) = -1;
-            return errno;
+        if (arv != APR_SUCCESS) {
+            /* jlt: not tested, but this matches other sendfile logic */
+            (*len) = 0;
+            return arv;
         }
         else {
             do {
