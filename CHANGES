@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Ensure that apr_file_mktemp creates the temp file if it isn't there.
+     [John Sterling <sterling@covalent.net>]
+
   *) Make sure to pre-mark anon SysV shared memory segments as
      removed. [Jim Jagielski]
 
