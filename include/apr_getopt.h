@@ -71,6 +71,8 @@ extern "C" {
  * @{
  */
 
+typedef void (apr_getopt_err_fn_t)(void *arg, const char *err, ...);
+
 typedef struct apr_getopt_t apr_getopt_t;
 /**
  * Structure to store command line argument information.
@@ -78,8 +80,10 @@ typedef struct apr_getopt_t apr_getopt_t;
 struct apr_getopt_t {
     /** context for processing */
     apr_pool_t *cont;
-    /** if error message should be printed */
-    int err;
+    /** function to print error message (NULL == no messages) */
+    apr_getopt_err_fn_t *errfn;
+    /** user defined first arg to pass to error message  */
+    void *errarg;
     /** index into parent argv vector */
     int ind;
     /** character checked for validity */
@@ -121,6 +125,7 @@ struct apr_getopt_option_t {
  * @param argc The number of arguments to parse
  * @param argv The array of arguments to parse
  * @remark Arguments 2 and 3 are most commonly argc and argv from main(argc, argv)
+ * The errfn is initialized to fprintf(stderr... but may be overridden.
  */
 APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
                                       int argc, const char * const *argv);
