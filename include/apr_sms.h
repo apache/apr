@@ -72,21 +72,51 @@
 extern "C" {
 #endif
 
+
+/**********************************************************************
+ ** Defines 
+ **********************************************************************/
+
 /* The various types of cleanup's we can offer */
 #define APR_ALL_CLEANUPS      0x0000
 #define APR_CHILD_CLEANUP     0x0001
 #define APR_PARENT_CLEANUP    0x0002
 
-/* Alignment macro's
- *
- * APR_ALIGN is only to be used to align on a power
- * of two boundary
- */
+/* Alignment macro's */
 #define APR_ALIGN(size, boundary) \
-    (((size) + ((boundary) - 1)) & ~((boundary) - 1))
+    ((size) + (((boundary) - ((size) & ((boundary) - 1))) & ((boundary) - 1)))
 
 #define APR_ALIGN_DEFAULT(size) APR_ALIGN(size, 8)
 
+/**********************************************************************
+ ** Debug options
+ **********************************************************************/
+/* 
+ * One of the aims of SMS is to provide a large range of debugging
+ * options.
+ *
+ * The options are normally turned off by having the define commented out.
+ * To use, simply remove the define and rebuild!
+ *
+ * Function definitions are at the end of the file...
+ */
+
+/* DEBUG_SHOW_STRUCTURE
+ * This turns on a print of the ancestory of the SMS when
+ * creating/destroying an SMS so it's place in the world can be seen.
+ */
+/* #define DEBUG_SHOW_STRUCTURE      1 */
+
+/* DEBUG_SHOW_FUNCTIONS
+ * This turns on debug printing of every call to i
+ *    apr_sms_create
+ *    apr_sms_destroy
+ *    apr_sms_reset
+ *
+ * Format of output is
+ *    CREATE - sms 0x0000000 [STANDARD] has been created
+ */
+/* #define DEBUG_SHOW_FUNCTIONS     1 */
 
 /**
  * @package APR memory system
@@ -195,13 +225,14 @@ APR_DECLARE(apr_status_t) apr_sms_init(apr_sms_t *sms,
  */
 APR_DECLARE(apr_status_t) apr_sms_post_init(apr_sms_t *sms);
 
+#ifdef APR_ASSERT_MEMORY
+
 /**
  * Check if a memory system is obeying all rules. 
  * @caution Call this function as the last statement before returning a new
  *          memory system from your apr_xxx_sms_create.
  * @deffunc void apr_sms_validate(apr_sms_t *sms)
  */
-#ifdef APR_ASSERT_MEMORY
 APR_DECLARE(void) apr_sms_assert(apr_sms_t *sms);
 #else
 #ifdef apr_sms_assert
@@ -336,12 +367,33 @@ APR_DECLARE(apr_status_t) apr_sms_cleanup_run(apr_sms_t *sms,
 APR_DECLARE(apr_status_t) apr_sms_cleanup_run_type(apr_sms_t *sms, 
                                                    apr_int32_t type);
 
+/**********************************************************************
+ ** Standard SMS module
+ **********************************************************************/
+
 /**
  * Create a standard malloc/realloc/free memory system
  * @param sms A pointer to the created apr_sms_t*
  * @deffunc apr_status_t apr_sms_std_create(apr_sms_t **sms);
  */
 APR_DECLARE(apr_status_t) apr_sms_std_create(apr_sms_t **sms);
+
+
+/**********************************************************************
+ ** Debug routines
+ **********************************************************************/
+
+/* NB These are only available if the debugging option has been turned on. */
+
+#if DEBUG_SHOW_STRUCTURE
+/**
+ * Show the heirachy of the sms
+ * @param sms The sms to show the information for
+ * @param direction Do we show up (to parent) or down (to children)
+ */
+APR_DECLARE(void) apr_sms_show_structure(apr_sms_t *sms, int direction);
+#endif /* DEBUG_SHOW_STRUCTURE */
+
 
 #ifdef __cplusplus
 }
