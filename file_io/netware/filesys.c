@@ -106,16 +106,26 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **rootpath, apr_int32_t flags,
                                            apr_pool_t *p)
 {
     char path[APR_PATH_MAX];
-    if (!getcwd(path, sizeof(path))) {
+    char *ptr;
+
+    /* use getcwdpath to make sure that we get the volume name*/
+    if (!getcwdpath(path, NULL, 0)) {
         if (errno == ERANGE)
             return APR_ENAMETOOLONG;
         else
             return errno;
     }
-    *rootpath = apr_pstrdup(p, path);
+    /* Strip off the server name if there is one*/
+    ptr = strpbrk(path, "\\/:");
+    if (!ptr) {
+        return APR_ENOENT;
+    }
+    if (*ptr == ':') {
+        ptr = path;
+    }
+    *rootpath = apr_pstrdup(p, ptr);
     return APR_SUCCESS;
 }
-
 
 APR_DECLARE(apr_status_t) apr_filepath_set(const char *rootpath,
                                            apr_pool_t *p)
