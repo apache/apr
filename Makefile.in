@@ -59,37 +59,37 @@ delete-lib:
 	fi
 
 install: $(TARGET_LIB)
-	if [ ! -d $(includedir) ]; then \
-	    $(top_srcdir)/build/mkdir.sh $(includedir); \
+	if [ ! -d $(DESTDIR)$(includedir) ]; then \
+	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(includedir); \
 	fi;
-	cp -p $(top_srcdir)/include/*.h $(includedir);
+	cp -p $(top_srcdir)/include/*.h $(DESTDIR)$(includedir);
 
 	if test -n "$(top_blddir)"; then \
-	    cp -p $(top_blddir)/include/*.h $(includedir); \
+	    cp -p $(top_blddir)/include/*.h $(DESTDIR)$(includedir); \
 	fi;
-	if [ ! -d $(libdir) ]; then \
-	    $(top_srcdir)/build/mkdir.sh $(libdir); \
+	if [ ! -d $(DESTDIR)$(libdir) ]; then \
+	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(libdir); \
 	fi;
-	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(libdir)
-	$(LIBTOOL) --mode=install cp APRVARS $(libdir)
-	$(LIBTOOL) --mode=install cp apr.exp $(libdir)
-	if [ ! -d $(installbuilddir) ]; then \
-	   	$(top_srcdir)/build/mkdir.sh $(installbuilddir); \
+	$(LIBTOOL) --mode=install cp $(TARGET_LIB) $(DESTDIR)$(libdir)
+	$(LIBTOOL) --mode=install cp APRVARS $(DESTDIR)$(libdir)
+	$(LIBTOOL) --mode=install cp apr.exp $(DESTDIR)$(libdir)
+	if [ ! -d $(DESTDIR)$(installbuilddir) ]; then \
+	   	$(top_srcdir)/build/mkdir.sh $(DESTDIR)$(installbuilddir); \
 	fi; 
 	if [ -f libtool ]; then \
-		$(LIBTOOL) --mode=install cp libtool $(installbuilddir); \
+		$(LIBTOOL) --mode=install cp libtool $(DESTDIR)$(installbuilddir); \
 	fi;
 	if [ -f shlibtool ]; then \
-		$(LIBTOOL) --mode=install cp shlibtool $(installbuilddir); \
+		$(LIBTOOL) --mode=install cp shlibtool $(DESTDIR)$(installbuilddir); \
 	fi;
-	if [ ! -d $(bindir) ]; then \
-	    $(top_srcdir)/build/mkdir.sh $(bindir); \
+	if [ ! -d $(DESTDIR)$(bindir) ]; then \
+	    $(top_srcdir)/build/mkdir.sh $(DESTDIR)$(bindir); \
 	fi;
-	$(LIBTOOL) --mode=install cp apr-config $(bindir)
-	chmod 755 $(bindir)/apr-config
+	$(LIBTOOL) --mode=install cp apr-config $(DESTDIR)$(bindir)
+	chmod 755 $(DESTDIR)$(bindir)/apr-config
 	@if [ $(INSTALL_SUBDIRS) != "none" ]; then \
             for i in $(INSTALL_SUBDIRS); do \
-	        ( cd $$i ; $(MAKE) install ); \
+	        ( cd $$i ; $(MAKE) root=$(DESTDIR) install ); \
 	    done \
 	fi
 
