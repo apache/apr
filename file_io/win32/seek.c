@@ -115,7 +115,7 @@ APR_DECLARE(apr_status_t) apr_file_seek(apr_file_t *thefile, apr_seek_where_t wh
                 return APR_EINVAL;
         }
 
-        *offset = thefile->filePtr + thefile->bufpos;
+        *offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
         return rc;
     } 
     else if (thefile->pOverlapped) {
