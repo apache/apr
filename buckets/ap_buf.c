@@ -137,19 +137,42 @@ APR_EXPORT(ap_bucket_list *) ap_bucket_list_create(void)
     return b;
 }
 
-APR_EXPORT(void) ap_bucket_list_init(ap_bucket_list *b)
+APR_EXPORT(void) ap_bucket_brigade_append_list(ap_bucket_brigade *b, 
+                                               ap_bucket_list *e)
 {
-    b->bucket = NULL;
-    b->next = b->prev = NULL;
+    ap_bucket_list *cur = e;
+
+    if (b->tail) {
+        b->tail->next = e;
+        e->prev = b->tail;
+        while (cur->next) {
+           cur = cur->next;
+        }
+        b->tail = cur;
+    }
+    else {
+        b->head = b->tail = e;
+    }
 }
 
-APR_EXPORT(void) ap_bucket_brigade_append(ap_bucket_brigade *b, 
-                                          ap_bucket_list *e)
+APR_EXPORT(void) ap_bucket_brigade_append_bucket(ap_bucket_brigade *b,
+                                                 ap_bucket *r)
 {
-    e->next = b->tail;
-    b->tail->prev = e;
-    /* This doesn't actually work */
-    b->tail = e->next;
+    if (b->tail) {
+        if (b->tail->bucket == NULL) {
+            b->tail->bucket = r;
+        }
+        else {
+            b->tail->next = ap_bucket_list_create();
+            b->tail->next->prev = b->tail;
+            b->tail = b->tail->next;
+            b->tail->bucket = r;
+        }
+    }
+    else {
+        b->head = b->tail = ap_bucket_list_create();
+        b->tail->bucket = r;
+    }
 }
 
 APR_EXPORT(int) ap_bucket_brigade_to_iovec(ap_bucket_brigade *b, 
@@ -316,18 +339,7 @@ APR_EXPORT(int) ap_brigade_vputstrs(ap_bucket_brigade *b, va_list va)
         }
         k += i;
 
-        /* This really requires an API.  Basically we are just adding
-         * a bucket to a bucket list.
-         */
-        if (b->tail->bucket == NULL) {
-            b->tail->bucket = r;
-        }
-        else {
-            b->tail->next = ap_bucket_list_create();
-            b->tail->next->prev = b->tail;
-            b->tail = b->tail->next;
-            b->tail->bucket = r;
-        }
+        ap_bucket_brigade_append_bucket(b, r);
     }
 
     return k;
@@ -357,19 +369,8 @@ APR_EXPORT(int) ap_brigade_vprintf(ap_bucket_brigade *b, const char *fmt, va_lis
 
     r = ap_bucket_new(AP_BUCKET_rwmem);
     res = ap_rwmem_write(r->data, buf, strlen(buf), &i);
+    ap_bucket_brigade_append_bucket(b, r);
 
-    /* This really requires an API.  Basically we are just adding
-     * a bucket to a bucket list.
-     */
-    if (b->tail->bucket == NULL) {
-        b->tail->bucket = r;
-    }
-    else {
-        b->tail->next = ap_bucket_list_create();
-        b->tail->next->prev = b->tail;
-        b->tail = b->tail->next;
-        b->tail->bucket = r;
-    }
     return res;
 }
 
