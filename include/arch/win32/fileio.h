@@ -59,6 +59,7 @@
 #include "apr_private.h"
 #include "apr_pools.h"
 #include "apr_general.h"
+#include "apr_tables.h"
 #include "apr_lock.h"
 #include "apr_file_io.h"
 #include "apr_errno.h"
@@ -88,6 +89,34 @@
 
 #define APR_FILE_BUFSIZE 4096
 
+typedef enum apr_canon_case_e {
+    APR_CANON_CASE_GIVEN,
+    APR_CANON_CASE_LOWER,
+    APR_CANON_CASE_TRUE
+} apr_canon_case_e;
+
+/*
+ * Internal canonical filename elements for the apr_canon_t elems
+ *  ccase   tracks the mechanism used to resolve this element
+ *  pathlen is the full path length to the end of this element
+ *  name    slash is prefix, as appropriate 
+               
+ */
+typedef struct apr_canon_elem_t {
+    apr_canon_case_e ccase;
+    int pathlen;
+    char *name;
+} apr_canon_elem_t;
+
+/* warning: win32 canonical path "/" resolves to a
+ * zero'th element of the empty string for testing the
+ * psudo-root for the system
+ */
+struct apr_canon_t {
+    apr_pool_t *cntxt;
+    apr_array_header_t *elems;
+};
+
 /* quick run-down of fields in windows' apr_file_t structure that may have 
  * obvious uses.
  * fname --  the filename as passed to the open call.
@@ -110,8 +139,8 @@ struct apr_file_t {
 
     /* File specific info */
     char *fname;
-    char *demonfname; 
-    char *lowerdemonfname; 
+    apr_canon_t *canonname;
+    
     DWORD dwFileAttributes;
     int eof_hit;
     BOOLEAN buffered;          // Use buffered I/O?
@@ -142,12 +171,11 @@ struct apr_dir_t {
 };
 
 apr_status_t file_cleanup(void *);
-/*mode_t get_fileperms(apr_fileperms_t);
-*/
-APR_DECLARE(char *) apr_os_systemcase_filename(struct apr_pool_t *pCont, 
-                                              const char *szFile);
-char * canonical_filename(struct apr_pool_t *pCont, const char *szFile);
 
+/**
+ * Internal function to create a Win32/NT pipe that respects some async
+ * timeout options.
+ */
 apr_status_t apr_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
                                 BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
                                 apr_pool_t *p);

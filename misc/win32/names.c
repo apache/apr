@@ -82,8 +82,8 @@ static BOOL OnlyDots(char *pString)
  * is present on the existing path.  This routine also
  * converts alias names to long names.
  */
-APR_DECLARE(char *) apr_os_systemcase_filename(apr_pool_t *pCont, 
-                                             const char *szFile)
+static char * apr_os_systemcase_filename(apr_pool_t *pCont, 
+                                         const char *szFile)
 {
     char buf[HUGE_STRING_LEN];
     char *pInputName;

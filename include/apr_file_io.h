@@ -119,6 +119,7 @@ typedef apr_int32_t       apr_seek_where_t;
 typedef struct apr_file_t         apr_file_t;
 typedef struct apr_finfo_t        apr_finfo_t;
 typedef struct apr_dir_t          apr_dir_t;
+typedef struct apr_canon_t        apr_canon_t;
 typedef apr_int32_t               apr_fileperms_t;
 typedef uid_t                    apr_uid_t;
 typedef gid_t                    apr_gid_t;
@@ -156,7 +157,117 @@ struct apr_finfo_t {
     apr_time_t ctime;
 };
 
-/*   Function definitions */
+/*   Make and Merge Canonical Name Options */
+
+/**
+ * Require the trusted_name+child_name result is an absolute product 
+ * or fail with error for the make and merge canonical name functions.
+ */
+#define APR_CANON_ONLY_ABSOLUTE   0
+/**
+ * Allow that the trusted_name+child_name result may be a relative result
+ * for the make and merge canonical name functions.
+ */
+#define APR_CANON_ALLOW_RELATIVE  2
+
+/**
+ * Require the trusted_name+child_name result is not an absolute path
+ * or fail with error for the make and merge canonical name functions.
+ */
+#define APR_CANON_ONLY_RELATIVE   3
+
+/**
+ * Require the trusted_name+child_name result is a child of trusted_name 
+ * or fail with error for the make and merge canonical name functions.
+ */
+#define APR_CANON_CHILD_OF_TRUSTED  4
+
+/**
+ * If file path elements exist (can stat) then fold the element's name 
+ * to lowercase for the make and merge canonical name functions.
+ */
+#define APR_CANON_LOWERCASE 
+
+/**
+ * If file path elements exist (can readdir) then fold the element's name 
+ * to the true case lowercase for the make and merge canonical name functions.
+ */
+#define APR_CANON_TRUECASE 
+
+/**
+ * Canonicalize the path and name.
+ *
+ * @param new_name The newly allocated canonicalized trusted+child name
+ * @param trusted_name Already canonical parent path; may be NULL.
+ * @param child_name An absolute path or path relative to trusted_name.
+ * @param options See the APR_CANON_ bit flags documentation for options
+ * @param pool The context in which to allocate the new_name apr_canon_t
+ *
+ * @tip A canonical name is a name stipped of embedded backrefs "../", 
+ * thisrefs "./", successive slashes (//), or any other ambigious file
+ * name element.  Absolute canonical names referencing the same file must 
+ * strcmp() identically, excluding symlinks or inconsistent use of the
+ * APR_CANON_LOWERCASE or APR_CANON_TRUECASE options.
+ * 
+ * If the name does not exist, or resolves to a relative name the given case
+ * is preserved.  Insignificant elements are eliminated.  For example, on Win32 this 
+ * function removes trailing dots (which are allowed, but not stored in 
+ * the file system), and "/../" under Unix is resolved to "/".  The relative 
+ * canonical name may contain leading backrefs "../", but will never contain 
+ * any other prohibited element.
+ */
+
+/*
+ * @param trusted_name May be null
+ * @param child_name May be absolute, in which case trusted_name is ignored
+ * unless APR_CHILD_RELATIVE is tested.
+ */
+
+apr_status_t apr_make_canonical_name(apr_canon_t **new_name, 
+                                     const apr_canon_t *trusted_name, 
+                                     const char *child_name, 
+                                     int options,
+                                     apr_pool_t *pool);
+
+apr_status_t apr_merge_canonical_name(apr_canon_t **new_name,
+                                      const apr_canon_t *trusted_name,
+                                      const apr_canon_t *child_name,
+                                      int options,
+                                      apr_pool_t *pool);
+
+apr_status_t apr_get_canonical_name(char **path, 
+                                    const apr_canon_t *trusted_name, 
+                                    apr_pool_t *pool);
+
+int apr_count_canonical_elements(const apr_canon_t *trusted_name);
+
+int apr_get_canonical_elements_length(const apr_canon_t *trusted_name,
+                                      int firstelement, int lastelement);
+
+apr_status_t apr_get_canonical_elements(char **path_elements,
+                                        const apr_canon_t *trusted_name,
+                                        int firstelement, int lastelement,
+                                        apr_pool_t *pool);
+
+/**
+ *  Returns APR_SUCCESS if canon_name is absolute.  Do not trust
+ *  !apr_is_absolute to determine if the path is relative.  Also,
+ *  test apr_is_virtualroot to avoid non-filesystem pseudo roots.
+ */
+apr_status_t apr_is_absolute(apr_canon_t **path);
+
+/**
+ *  Returns APR_SUCCESS if canon_name is absolute.  Do not trust
+ *  !apr_is_relative to determine if the path is absolute.
+ */
+apr_status_t apr_is_relative(apr_canon_t **path);
+
+/**
+ *  Returns APR_SUCCESS if the elements 0..elements resolves to a
+ *  platform's non-physical root, e.g. the //machine/ name that 
+ *  isn't an adaquately complete root for UNC paths.
+ */
+apr_status_t apr_is_virtualroot(apr_canon_t **path, int elements);
 
 /**
  * Open the specified file.
@@ -207,7 +318,7 @@ apr_status_t apr_remove_file(const char *path, apr_pool_t *cont);
  *      Moving files or directories across devices may not be possible.
  */
 apr_status_t apr_rename_file(const char *from_path, const char *to_path,
-                           apr_pool_t *pool);
+                             apr_pool_t *pool);
 
 /**
  * Are we at the end of the file
