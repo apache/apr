@@ -180,6 +180,8 @@ if test "$pthreads_working" != "yes"; then
     PTHREADS_CHECK_COMPILE
     if test "$pthreads_working" = "yes"; then
       ac_cv_pthreads_cflags="$flag"
+      dnl this was already added to CFLAGS; add to THREAD_CFLAGS, too
+      THREAD_CFLAGS="$THREAD_CFLAGS $ac_cv_pthreads_cflags"
       break
     fi
     CFLAGS="$ac_save"
