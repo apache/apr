@@ -409,6 +409,9 @@ AC_SUBST(threads)
 
 dnl #----------------------------- Checking for Processes
 echo $ac_n "${nl}Checking for Processes...${nl}"
+
+AC_CHECK_FUNCS(waitpid)
+
 AC_ARG_ENABLE(other-child,
   [  --enable-other-child    Enable reliable child processes ],
   [ if test "$enableval" = "yes"; then
