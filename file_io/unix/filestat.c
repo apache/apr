@@ -96,7 +96,7 @@ static apr_filetype_e filetype_from_mode(mode_t mode)
             type = APR_SOCK;
 	} else
 #endif
-        type = APR_NOFILE;
+        type = APR_UNKFILE;
     }
     return type;
 }
