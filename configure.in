@@ -1546,9 +1546,8 @@ for i in $SAVE_FILES; do
   fi
   rm -f $i.save
 done
-])
-
 chmod +x apr-config
+])
 
 dnl #----------------------------- Fixup Makefiles for VPATH support
 
