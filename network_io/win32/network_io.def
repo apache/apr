@@ -26,6 +26,8 @@ EXPORTS
     ap_set_socketdata   @19
     ap_get_polldata   @20
     ap_set_polldata   @21
-    ap_get_os_sock   @22
-    ap_remove_poll_socket   @23
-    ap_clear_poll_sockets   @24
+    ap_put_os_sock @22
+    ap_get_os_sock   @23
+    ap_remove_poll_socket   @24
+    ap_clear_poll_sockets   @25
+
