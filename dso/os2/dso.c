@@ -130,7 +130,7 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
 
 
 /* Just a stub, it will never be called because we never return APR_EDSOOPEN */
-char *ap_dso_error()
+char *ap_dso_error(char *buf, int bufsize, ap_status_t errcode)
 {
     return NULL;
 }

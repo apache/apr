@@ -117,7 +117,7 @@ B<Load a symbol from a DSO handle.>
 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle, 
                        const char *symname);
 
-char *ap_dso_error(void);
+char *ap_dso_error(char *buf, int bufsize, ap_status_t errcode);
 
 #ifdef __cplusplus
 }
