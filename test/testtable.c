@@ -189,7 +189,7 @@ static void table_overlap(CuTest *tc)
 
 CuSuite *testtable(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Table");
+    CuSuite *suite = CuSuiteNew("Table");
 
     SUITE_ADD_TEST(suite, table_make);
     SUITE_ADD_TEST(suite, table_get);

@@ -199,7 +199,7 @@ static void test_badip_str(CuTest *tc)
 
 CuSuite *testipsub(void)
 {
-    CuSuite *suite = CuSuiteNew("Test IP subnets");
+    CuSuite *suite = CuSuiteNew("IP subnets");
 
     SUITE_ADD_TEST(suite, test_bad_input);
     SUITE_ADD_TEST(suite, test_singleton_subnets);

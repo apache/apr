@@ -175,7 +175,7 @@ static void test_stat_eq_finfo(CuTest *tc)
 
 CuSuite *testfileinfo(void)
 {
-    CuSuite *suite = CuSuiteNew("Test File Info");
+    CuSuite *suite = CuSuiteNew("File Info");
 
     SUITE_ADD_TEST(suite, test_info_get);
     SUITE_ADD_TEST(suite, test_stat);

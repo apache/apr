@@ -165,7 +165,7 @@ static void snprintf_0nonNULL(CuTest *tc)
 
 CuSuite *teststr(void)
 {
-    CuSuite *suite = CuSuiteNew("Test Strings");
+    CuSuite *suite = CuSuiteNew("Strings");
 
     SUITE_ADD_TEST(suite, snprintf_0NULL);
     SUITE_ADD_TEST(suite, snprintf_0nonNULL);

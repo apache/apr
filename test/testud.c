@@ -111,7 +111,7 @@ static void post_pool_clear(CuTest *tc)
 
 CuSuite *testud(void)
 {
-    CuSuite *suite = CuSuiteNew("Test User Data");
+    CuSuite *suite = CuSuiteNew("User Data");
 
     apr_pool_create(&pool, p);
     testdata = apr_pstrdup(pool, "This is a test\n");
