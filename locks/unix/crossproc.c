@@ -104,16 +104,26 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 
 ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
-    lock->curr_locked = 1;
-    if (semop(lock->interproc, &op_on, 1) < 0) {
+    int rc;
+
+    do {
+        rc = semop(lock->interproc, &op_on, 1);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
         return errno;
     }
+    lock->curr_locked = 1;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
-    if (semop(lock->interproc, &op_off, 1) < 0) {
+    int rc;
+
+    do {
+        rc = semop(lock->interproc, &op_off, 1);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
         return errno;
     }
     lock->curr_locked = 0;
@@ -260,10 +270,7 @@ static ap_status_t lock_cleanup(void *lock_)
     ap_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        if (fcntl(lock->interproc, F_SETLKW, &unlock_it) < 0) {
-            return errno;
-        }
-        lock->curr_locked=0;
+        return ap_unix_unlock_inter(lock);
     }
     return APR_SUCCESS;
 }    
@@ -291,16 +298,26 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 
 ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
-    lock->curr_locked=1;
-    if (fcntl(lock->interproc, F_SETLKW, &lock_it) < 0) {
+    int rc;
+
+    do {
+        rc = fcntl(lock->interproc, F_SETLKW, &lock_it);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
         return errno;
     }
+    lock->curr_locked=1;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
-    if (fcntl(lock->interproc, F_SETLKW, &unlock_it) < 0) {
+    int rc;
+
+    do {
+        rc = fcntl(lock->interproc, F_SETLKW, &unlock_it);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
         return errno;
     }
     lock->curr_locked=0;
@@ -334,10 +351,7 @@ static ap_status_t lock_cleanup(void *lock_)
     ap_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        if (flock(lock->interproc, LOCK_UN) < 0) {
-            return errno;
-        }
-        lock->curr_locked = 0;
+        return ap_unix_unlock_inter(lock);
     }
     unlink(lock->fname);
     return APR_SUCCESS;
@@ -364,16 +378,26 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 
 ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
 {
-    lock->curr_locked = 1;
-    if (flock(lock->interproc, LOCK_EX) < 0) {
+    int rc;
+
+    do {
+        rc = flock(lock->interproc, LOCK_EX);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
         return errno;
     }
+    lock->curr_locked = 1;
     return APR_SUCCESS;
 }
 
 ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
 {
-    if (flock(lock->interproc, LOCK_UN) < 0) {
+    int rc;
+
+    do {
+        rc = flock(lock->interproc, LOCK_UN);
+    } while (rc < 0 && errno == EINTR);
+    if (rc < 0) {
         return errno;
     }
     lock->curr_locked = 0;
