@@ -107,15 +107,23 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
 char *case_filename(apr_pool_t *pPool, const char *szFile)
 {
     char *casedFileName = NULL;
-    char buf[1024];
-    NXDirAttrWithName_t	*attrBuf;
+    char name[1024];
     int rc;
 
-    attrBuf = (NXDirAttrWithName_t *) &buf;
+#ifdef NEW_API
+    rc = realname(szFile, name);
+    if (rc == 0) {
+        casedFileName = apr_pstrdup(pPool, name);
+    }
+#else
+    NXDirAttrWithName_t	*attrBuf;
+
+    attrBuf = (NXDirAttrWithName_t *) &name;
     rc =NXGetAttr(NULL, szFile, NX_DELEVEL_NAME_ONLY, attrBuf, 1024, 0);
     if (rc == 0) {
         casedFileName = apr_pstrdup(pPool, attrBuf->deName);
     }
+#endif
     else
     {
         char *s;
