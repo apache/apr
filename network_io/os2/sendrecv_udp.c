@@ -56,29 +56,9 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "apr_network_io.h"
+#include "apr_support.h"
 #include "apr_lib.h"
 #include <sys/time.h>
-
-apr_status_t apr_wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
-{
-    int waitsock = sock->socketdes;
-    int srv;
-
-    do {
-      waitsock = sock->socketdes;
-      srv = select(&waitsock, for_read > 0, !for_read, 0, sock->timeout / 1000);
-    } while (srv < 0 && sock_errno() == SOCEINTR);
-  
-    if (srv == 0) {
-        return APR_TIMEUP;
-    }
-    else if (srv < 0) {
-        return APR_FROM_OS_ERROR(sock_errno());
-    }
-
-    return APR_SUCCESS;
-}
-
 
 
 APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
@@ -94,7 +74,7 @@ APR_DECLARE(apr_status_t) apr_sendto(apr_socket_t *sock, apr_sockaddr_t *where,
     } while (rv == -1 && (serrno = sock_errno()) == EINTR);
 
     if (rv == -1 && serrno == SOCEWOULDBLOCK && sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 0);
 
         if (arv != APR_SUCCESS) {
             *len = 0;
@@ -132,7 +112,7 @@ APR_DECLARE(apr_status_t) apr_recvfrom(apr_sockaddr_t *from, apr_socket_t *sock,
     } while (rv == -1 && (serrno = sock_errno()) == EINTR);
 
     if (rv == -1 && serrno == SOCEWOULDBLOCK && sock->timeout != 0) {
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 1);
+        apr_status_t arv = apr_wait_for_io_or_timeout(NULL, sock, 1);
 
         if (arv != APR_SUCCESS) {
             *len = 0;
