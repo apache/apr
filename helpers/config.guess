@@ -354,6 +354,9 @@ EOF
     *:IRIX*:*:*)
 	echo mips-sgi-irix`echo ${UNAME_RELEASE}|sed -e 's/-/_/g'`
 	exit 0 ;;
+    *:OS390:*:* | *:OS/390:*:*)
+	echo s390-ibm-os390
+	exit 0 ;; 
     ????????:AIX?:[12].1:2)   # AIX 2.2.1 or AIX 2.1.1 is RT/PC AIX.
 	echo romp-ibm-aix      # uname -m gives an 8 hex-code CPU id
 	exit 0 ;;              # Note that: echo "'`uname -s`'" gives 'AIX '
