@@ -139,34 +139,34 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
         return apr_socket_timeout_set(sock, on);
     }
     case APR_SO_KEEPALIVE:
-        if (on != apr_is_option_set(sock->netmask, APR_SO_KEEPALIVE)) {
+        if (on != apr_is_option_set(sock, APR_SO_KEEPALIVE)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, 
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
-            apr_set_option(&sock->netmask,APR_SO_KEEPALIVE, on);
+            apr_set_option(sock, APR_SO_KEEPALIVE, on);
         }
         break;
     case APR_SO_DEBUG:
-        if (on != apr_is_option_set(sock->netmask, APR_SO_DEBUG)) {
+        if (on != apr_is_option_set(sock, APR_SO_DEBUG)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, 
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
-            apr_set_option(&sock->netmask, APR_SO_DEBUG, on);
+            apr_set_option(sock, APR_SO_DEBUG, on);
         }
         break;
     case APR_SO_REUSEADDR:
-        if (on != apr_is_option_set(sock->netmask, APR_SO_REUSEADDR)) {
+        if (on != apr_is_option_set(sock, APR_SO_REUSEADDR)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, 
                            (void *)&one, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
-            apr_set_option(&sock->netmask, APR_SO_REUSEADDR, on);
+            apr_set_option(sock, APR_SO_REUSEADDR, on);
         }
         break;
     case APR_SO_NONBLOCK:
-        if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != on) {
+        if (apr_is_option_set(sock, APR_SO_NONBLOCK) != on) {
             if (on) {
                 if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) 
                     return stat;
@@ -175,12 +175,12 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
                 if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
                     return stat;
             }
-            apr_set_option(&sock->netmask, APR_SO_NONBLOCK, on);
+            apr_set_option(sock, APR_SO_NONBLOCK, on);
         }
         break;
     case APR_SO_LINGER:
     {
-        if (apr_is_option_set(sock->netmask, APR_SO_LINGER) != on) {
+        if (apr_is_option_set(sock, APR_SO_LINGER) != on) {
             struct linger li;
             li.l_onoff = on;
             li.l_linger = APR_MAX_SECS_TO_LINGER;
@@ -188,12 +188,12 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
                            (char *) &li, sizeof(struct linger)) == -1) {
                 return apr_get_netos_error();
             }
-            apr_set_option(&sock->netmask, APR_SO_LINGER, on);
+            apr_set_option(sock, APR_SO_LINGER, on);
         }
         break;
     }
     case APR_TCP_NODELAY:
-        if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) != on) {
+        if (apr_is_option_set(sock, APR_TCP_NODELAY) != on) {
             int optlevel = IPPROTO_TCP;
             int optname = TCP_NODELAY;
 
@@ -207,13 +207,13 @@ APR_DECLARE(apr_status_t) apr_socket_opt_set(apr_socket_t *sock,
                            (void *)&on, sizeof(int)) == -1) {
                 return apr_get_netos_error();
             }
-            apr_set_option(&sock->netmask, APR_TCP_NODELAY, on);
+            apr_set_option(sock, APR_TCP_NODELAY, on);
         }
         break;
     case APR_IPV6_V6ONLY:
 #if APR_HAVE_IPV6 && defined(IPV6_V6ONLY)
         /* we don't know the initial setting of this option,
-         * so don't check/set sock->netmask since that optimization
+         * so don't check/set sock->options since that optimization
          * won't work
          */
         if (setsockopt(sock->socketdes, IPPROTO_IPV6, IPV6_V6ONLY,
@@ -256,7 +256,8 @@ APR_DECLARE(apr_status_t) apr_socket_opt_get(apr_socket_t *sock,
     case APR_SO_NONBLOCK:
     case APR_SO_LINGER:
     default:
-        *on = apr_is_option_set(sock->netmask, opt);
+        *on = apr_is_option_set(sock, opt);
+        break;
     }
     return APR_SUCCESS;
 }
