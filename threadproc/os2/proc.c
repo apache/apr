@@ -71,7 +71,7 @@
 #include <stdlib.h>
 #include <os2.h>
 
-ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont)
+ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
 {
     (*new) = (ap_procattr_t *)ap_palloc(cont, 
               sizeof(ap_procattr_t));
@@ -139,7 +139,7 @@ ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t detach)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont)
+ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont)
 {
     int pid;
     
@@ -165,7 +165,7 @@ ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont)
 /* quotes in the string are doubled up.
  * Used to escape quotes in args passed to OS/2's cmd.exe
  */
-static char *double_quotes(ap_context_t *cntxt, char *str)
+static char *double_quotes(ap_pool_t *cntxt, char *str)
 {
     int num_quotes = 0;
     int len = 0;
@@ -192,7 +192,7 @@ static char *double_quotes(ap_context_t *cntxt, char *str)
 
 ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
                               char *const args[], char **env,
-                              ap_procattr_t *attr, ap_context_t *cont)
+                              ap_procattr_t *attr, ap_pool_t *cont)
 {
     int i, arg, numargs, cmdlen;
     ap_status_t status;

@@ -69,7 +69,7 @@ ap_status_t string_cleanup(void *data)
 
 int main()
 {
-    ap_context_t *context;
+    ap_pool_t *context;
     char *testdata;
     char *retdata;
 
@@ -79,7 +79,7 @@ int main()
     }
     atexit(ap_terminate);
 
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }

@@ -9,9 +9,9 @@ int main(int argc, char *argv[])
     ap_file_t *fd = NULL;
     char ch;
     int status = 0;
-    ap_context_t *context;
+    ap_pool_t *context;
 
-    ap_create_context(&context, NULL); 
+    ap_create_pool(&context, NULL); 
 
     ap_open(&fd, argv[1], APR_READ, -1, context);
     

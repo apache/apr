@@ -96,13 +96,14 @@ typedef struct ap_other_child_rec_t  ap_other_child_rec_t;
 typedef void *(API_THREAD_FUNC *ap_thread_start_t)(void *);
 
 /* Thread Function definitions */
+
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
  *    Create and initialize a new threadattr variable
  * arg 1) The newly created threadattr.
  * arg 2) The context to use
  */
-ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont);
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
@@ -132,7 +133,7 @@ ap_status_t ap_getthreadattr_detach(ap_threadattr_t *iattr);
  */
 ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
-                             ap_context_t *cont);
+                             ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
@@ -189,8 +190,8 @@ ap_status_t ap_set_threaddata(void *data, char *key,
  * arg 2) The destructor to use when freeing the private memory.
  * arg 3) The context to use
  */
-ap_status_t ap_create_thread_private(ap_threadkey_t **key, void (*dest)(void *), 
-                                     ap_context_t *cont);
+ap_status_t ap_create_thread_private(ap_threadkey_t **key, void (*dest)(void *),
+                                     ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_thread_private(void **new, ap_threadkey_t *key)
@@ -246,7 +247,7 @@ ap_status_t ap_set_threadkeydata(void *data, char *key,
  * arg 1) The newly created procattr. 
  * arg 2) The context to use
  */
-ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_context_t *cont);
+ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_setprocattr_io(ap_procattr_t *attr, ap_int32_t in, 
@@ -393,7 +394,7 @@ ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc);
  * arg 1) The resulting process handle. 
  * arg 2) The context to use. 
  */
-ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont);
+ap_status_t ap_fork(ap_proc_t **proc, ap_pool_t *cont);
 #endif
 
 /* ***APRDOC********************************************************
@@ -413,7 +414,7 @@ ap_status_t ap_fork(ap_proc_t **proc, ap_context_t *cont);
  */
 ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
                               char *const args[], char **env, 
-                              ap_procattr_t *attr, ap_context_t *cont);
+                              ap_procattr_t *attr, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how waithow) 
@@ -436,7 +437,7 @@ ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e waithow);
  * arg 1) The new process handler
  * arg 2) The context to use if it is needed.
  */
-ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont);
+ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * void ap_register_other_child(ap_proc_t *pid, 
@@ -457,7 +458,7 @@ ap_status_t ap_detach(ap_proc_t **new, ap_context_t *cont);
  */
 void ap_register_other_child(ap_proc_t *pid, 
                              void (*maintenance) (int reason, void *),
-                             void *data, int write_fd, ap_context_t *p);
+                             void *data, int write_fd, ap_pool_t *p);
 
 /* ***APRDOC********************************************************
  * void ap_unregister_other_child(void *data)
@@ -498,11 +499,4 @@ ap_status_t ap_kill(ap_proc_t *proc, int sig);
 #endif
 
 #endif  /* ! APR_FILE_IO_H */
-
-
-
-
-
-
-
 

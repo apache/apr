@@ -101,7 +101,7 @@
 /* End System headers */
 
 struct ap_file_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     int filedes;
     char * fname;
     int oflags;
@@ -112,7 +112,7 @@ struct ap_file_t {
 };
 
 struct ap_dir_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     char *dirname;
     DIR *dirstruct;
     struct dirent *entry;

@@ -61,7 +61,7 @@ struct shmem_t {
     MM *mm;
 };
 
-ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file, ap_context_t *cont)
+ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file, ap_pool_t *cont)
 {
     MM *newmm = mm_create(reqsize, file);
     if (newmm == NULL) {

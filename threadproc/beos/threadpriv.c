@@ -59,7 +59,7 @@ static struct beos_private_data *beos_data[BEOS_MAX_DATAKEYS];
 static sem_id lock;
 
 ap_status_t ap_create_thread_private(ap_threadkey_t **key,
-                                void (*dest)(void *), ap_context_t *cont)
+                                void (*dest)(void *), ap_pool_t *cont)
 {
     (*key) = (ap_threadkey_t *)ap_palloc(cont, sizeof(ap_threadkey_t));
     if ((*key) == NULL) {

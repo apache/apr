@@ -91,8 +91,8 @@ typedef struct ap_lock_t           ap_lock_t;
  *        only guaranteed to lock processes.
  */
 ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
-                           ap_lockscope_e scope, const char *fname, 
-                           ap_context_t *cont);
+                           ap_lockscope_e scope, char *fname, 
+                           ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_lock(ap_lock_t *lock)
@@ -133,7 +133,7 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock);
  *        portable. 
  */
 ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, 
-                               ap_context_t *cont);
+                               ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
@@ -146,7 +146,7 @@ ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
-                               ap_status_t (*cleanup) (void *))
+ *                              ap_status_t (*cleanup) (void *))
  *    Return the context associated with the current lock.
  * arg 1) The currently open lock.
  * arg 2) The user data to associate with the lock.

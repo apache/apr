@@ -60,7 +60,7 @@
 #include "os2calls.h"
 
 struct ap_socket_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
@@ -70,7 +70,7 @@ struct ap_socket_t {
 };
 
 struct ap_pollfd_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     int *socket_list;
     int *r_socket_list;
     int num_read;

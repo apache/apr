@@ -86,7 +86,7 @@
 #define POLLNVAL 32
 
 struct ap_socket_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
@@ -96,7 +96,7 @@ struct ap_socket_t {
 };
 
 struct ap_pollfd_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     struct ap_socket_t *sock;
     fd_set *read;
     fd_set *write;

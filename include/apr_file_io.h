@@ -147,7 +147,7 @@ struct ap_finfo_t {
  *        file_t, or NULL (in which case it will be allocated)
  */
 ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag, 
-                    ap_fileperms_t perm, ap_context_t *cont);
+                    ap_fileperms_t perm, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_close(ap_file_t *file)
@@ -164,7 +164,7 @@ ap_status_t ap_close(ap_file_t *file);
  * NOTE: If the file is open, it won't be removed until all instances are
  *       closed.
  */
-ap_status_t ap_remove_file(char *path, ap_context_t *cont);
+ap_status_t ap_remove_file(char *path, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_eof(ap_file_t *fptr) 
@@ -188,7 +188,7 @@ ap_status_t ap_ferror(ap_file_t *fptr);
  * arg 1) The apr file to use as stderr.
  * arg 2) The context to allocate the file out of.
  */
-ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont);
+ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
@@ -317,6 +317,7 @@ ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file);
  * arg 2) The file to get information about. 
  */ 
 ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
+ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_stat(ap_file_t **finfo, char *fname, ap_context_t *cont)
@@ -326,7 +327,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile);
  * arg 2) The name of the file to stat.
  * arg 3) the context to use to allocate the new file. 
  */ 
-ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_context_t *cont);
+ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where, 
@@ -350,7 +351,7 @@ ap_status_t ap_seek(ap_file_t *thefile, ap_seek_where_t where,ap_off_t *offset);
  * arg 2) The full path to the directory (use / on all systems)
  * arg 3) The context to use.
  */                        
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cont);
+ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_closedir(ap_dir_t *thedir)
@@ -383,7 +384,7 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir);
  * arg 3) the context to use.
  */                        
 ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, 
-                        ap_context_t *cont);
+                        ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
@@ -391,7 +392,7 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm,
  * arg 1) the path for the directory to be removed.  (use / on all systems)
  * arg 2) the context to use.
  */                        
-ap_status_t ap_remove_dir(const char *path, ap_context_t *cont);
+ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, 
@@ -401,7 +402,7 @@ ap_status_t ap_remove_dir(const char *path, ap_context_t *cont);
  * arg 2) The file descriptor to use as output from the pipe.
  * arg 3) The context to operate on.
  */
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont);
+ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, 
@@ -412,7 +413,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont);
  * arg 3) The context to operate on.
  */
 ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, 
-                                ap_context_t *cont);
+                                ap_pool_t *cont);
 
 /* ***APRDOC********************************************************
  * ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)

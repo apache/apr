@@ -83,7 +83,7 @@ API_VAR_IMPORT char *
  *        main(argc, argv)
  */
 ap_status_t ap_getopt(ap_int32_t nargc, char *const *nargv, const char *ostr,
-                      ap_int32_t *rv, ap_context_t *cont);
+                      ap_int32_t *rv, ap_pool_t *cont);
 
 #endif  /* ! APR_GETOPT_H */
 

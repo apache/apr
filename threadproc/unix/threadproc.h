@@ -83,23 +83,23 @@
 
 #if APR_HAS_THREADS
 struct ap_thread_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     pthread_t *td;
 };
 
 struct ap_threadattr_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     pthread_attr_t *attr;
 };
 
 struct ap_threadkey_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     pthread_key_t key;
 };
 #endif
 
 struct ap_procattr_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     ap_file_t *parent_in;
     ap_file_t *child_in;
     ap_file_t *parent_out;
@@ -112,7 +112,7 @@ struct ap_procattr_t {
 };
 
 struct ap_proc_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     pid_t pid;
     struct ap_procattr_t *attr;
 };
@@ -120,7 +120,7 @@ struct ap_proc_t {
 /*This will move to ap_threadproc.h in time, but I need to figure it out
  * on windows first.  :)
  */
-ap_status_t ap_detach(struct ap_proc_t **, ap_context_t *);
+ap_status_t ap_detach(struct ap_proc_t **, ap_pool_t *);
 
 #endif  /* ! THREAD_PROC_H */
 

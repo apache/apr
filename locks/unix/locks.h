@@ -109,7 +109,7 @@ union semun {
 #endif
 
 struct ap_lock_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     ap_locktype_e type;
     ap_lockscope_e scope;
     int curr_locked;
@@ -150,7 +150,7 @@ ap_status_t ap_unix_lock_inter(struct ap_lock_t *lock);
 ap_status_t ap_unix_unlock_inter(struct ap_lock_t *lock);
 ap_status_t ap_unix_destroy_inter_lock(struct ap_lock_t *lock);
 
-ap_status_t ap_unix_child_init_lock(struct ap_lock_t **lock, ap_context_t *cont, 
+ap_status_t ap_unix_child_init_lock(struct ap_lock_t **lock, ap_pool_t *cont, 
                             const char *fname);
 
 #endif  /* LOCKS_H */

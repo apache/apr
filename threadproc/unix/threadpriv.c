@@ -59,7 +59,7 @@
 
 #ifdef HAVE_PTHREAD_H
 ap_status_t ap_create_thread_private(ap_threadkey_t **key, 
-                                     void (*dest)(void *), ap_context_t *cont)
+                                     void (*dest)(void *), ap_pool_t *cont)
 {
     ap_status_t stat;
     (*key) = (ap_threadkey_t *)ap_palloc(cont, sizeof(ap_threadkey_t));
@@ -136,7 +136,7 @@ ap_status_t ap_get_os_threadkey(ap_os_threadkey_t *thekey, ap_threadkey_t *key)
 }
 
 ap_status_t ap_put_os_threadkey(ap_threadkey_t **key, 
-                                ap_os_threadkey_t *thekey, ap_context_t *cont)
+                                ap_os_threadkey_t *thekey, ap_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

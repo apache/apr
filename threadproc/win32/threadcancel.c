@@ -53,62 +53,34 @@
  */
 
 #include "threadproc.h"
+#include "apr_thread_proc.h"
+#include "apr_general.h"
 
-ap_status_t ap_detach(ap_proc_t **new, ap_pool_t *cont)
+
+ap_status_t ap_cancel_thread(ap_thread_t *thd)
 {
-    int x;
-
-    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-    (*new)->cntxt = cont;
-    (*new)->attr = NULL;
-
-    chdir("/");
-
-    if (((*new)->pid = setsid()) == -1) {
-        return errno;
-    }
-
-    /* close out the standard file descriptors */
-    if (freopen("/dev/null", "r", stdin) == NULL) {
-        return APR_ALLSTD;
-        /* continue anyhow -- note we can't close out descriptor 0 because we
-         * have nothing to replace it with, and if we didn't have a descriptor
-         * 0 the next file would be created with that value ... leading to
-         * havoc.
-         */
-    }
-    if (freopen("/dev/null", "w", stdout) == NULL) {
-        return APR_STDOUT;
-    }
-     /* We are going to reopen this again in a little while to the error
-      * log file, but better to do it twice and suffer a small performance
-      * hit for consistancy than not reopen it here.
-      */
-    if (freopen("/dev/null", "w", stderr) == NULL) {
-        return APR_STDERR;
-    }
-}
-
-ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
-{
-    if (proc != NULL) {
-        return ap_get_userdata(data, key, proc->cntxt);
+    if (TerminateThread(thd->td, APR_SUCCESS) == 0) {
+        return APR_EEXIST;
     }
     else {
-        data = NULL;
-        return APR_ENOPROC;
+        return APR_SUCCESS;
     }
 }
 
-ap_status_t ap_set_procdata(void *data, char *key, 
-                            ap_status_t (*cleanup) (void *), 
-                            ap_proc_t *proc)
+/*  Not sure of the best way to do this just yet.
+ap_status_t ap_setcanceltype(ap_int32_t type, ap_pool_t *cont)
 {
-    if (proc != NULL) {
-        return ap_set_userdata(data, key, cleanup, proc->cntxt);
+	
+}
+
+ap_status_t ap_setcancelstate(ap_int32_t type, ap_pool_t *cont)
+{
+    ap_status_t stat;
+    if ((stat = pthread_setcanceltype(type, NULL)) == 0) {
+        return APR_SUCCESS;
     }
     else {
-        data = NULL;
-        return APR_ENOPROC;
+        return stat;
     }
 }
+*/

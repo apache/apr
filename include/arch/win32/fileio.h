@@ -96,7 +96,7 @@
  */
 
 struct ap_file_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     HANDLE filehand;
     char *fname;
     DWORD dwFileAttributes;
@@ -114,7 +114,7 @@ struct ap_file_t {
 };
 
 struct ap_dir_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     char *dirname;
     HANDLE dirhand;
     WIN32_FIND_DATA *entry;
@@ -123,9 +123,9 @@ struct ap_dir_t {
 ap_status_t file_cleanup(void *);
 /*mode_t get_fileperms(ap_fileperms_t);
 */
-API_EXPORT(char *) ap_os_systemcase_filename(struct ap_context_t *pCont, 
+API_EXPORT(char *) ap_os_systemcase_filename(struct ap_pool_t *pCont, 
                                              const char *szFile);
-char * canonical_filename(struct ap_context_t *pCont, const char *szFile);
+char * canonical_filename(struct ap_pool_t *pCont, const char *szFile);
 
 #endif  /* ! FILE_IO_H */
 

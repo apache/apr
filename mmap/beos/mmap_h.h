@@ -69,7 +69,7 @@
 #include <stdio.h>
 
 struct ap_mmap_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     area_id area;
     void *mm;
     size_t size;

@@ -61,7 +61,7 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
 {
     (*new) = (ap_threadattr_t *)ap_palloc(cont, sizeof(ap_threadattr_t));
 
@@ -101,7 +101,7 @@ static void ap_thread_begin(void *arg)
 
 ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
-                             ap_context_t *cont)
+                             ap_pool_t *cont)
 {
     ap_status_t stat;
     ap_thread_t *thread;
@@ -117,7 +117,7 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
     thread->attr = attr;
     thread->func = func;
     thread->data = data;
-    stat = ap_create_context(&thread->cntxt, cont);
+    stat = ap_create_pool(&thread->cntxt, cont);
     
     if (stat != APR_SUCCESS) {
         return stat;

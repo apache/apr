@@ -54,9 +54,9 @@
 
 #include "misc.h"
 
-ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
+ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
 {
-    ap_context_t *new;
+    ap_pool_t *new;
     ap_pool_t *pool;
 
     if (cont) {
@@ -70,7 +70,7 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
         return APR_ENOPOOL;
     }
     
-    new = (ap_context_t *)ap_palloc(cont, sizeof(ap_context_t));
+    new = (ap_pool_t *)ap_palloc(cont, sizeof(ap_pool_t));
     
     new->pool = pool;
     new->prog_data = NULL;
@@ -79,7 +79,7 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_destroy_context(ap_context_t *cont)
+ap_status_t ap_destroy_context(ap_pool_t *cont)
 {
     ap_destroy_pool(cont);
     return APR_SUCCESS;
@@ -87,7 +87,7 @@ ap_status_t ap_destroy_context(ap_context_t *cont)
 
 ap_status_t ap_set_userdata(void *data, char *key,
                             ap_status_t (*cleanup) (void *),
-                            ap_context_t *cont)
+                            ap_pool_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
     if (cont) { 
@@ -117,7 +117,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
     return APR_ENOCONT;
 }
 
-ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
+ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
 {
     datastruct *dptr = NULL;
     if (cont) { 

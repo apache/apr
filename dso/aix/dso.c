@@ -135,7 +135,7 @@ ap_status_t ap_dso_init(void){
 }
 
 ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
-                        ap_context_t *ctx)
+                        ap_pool_t *ctx)
 {
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
 

@@ -74,7 +74,7 @@ ap_status_t file_cleanup(void *thefile)
 }
 
 ap_status_t ap_open(ap_file_t **dafile, const char *fname, 
-                    ap_int32_t flag, ap_fileperms_t perm, ap_context_t *cont)
+                    ap_int32_t flag, ap_fileperms_t perm, ap_pool_t *cont)
 {
     DWORD oflags = 0;
     DWORD createflags = 0;
@@ -173,7 +173,7 @@ ap_status_t ap_close(ap_file_t *file)
     return stat;
 }
 
-ap_status_t ap_remove_file(char *path, ap_context_t *cont)
+ap_status_t ap_remove_file(char *path, ap_pool_t *cont)
 {
     char *temp = canonical_filename(cont, path);
 
@@ -195,7 +195,7 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 }
 
 ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, 
-                           ap_context_t *cont)
+                           ap_pool_t *cont)
 {
     if ((*file) == NULL) {
         if (cont == NULL) {
@@ -216,7 +216,7 @@ ap_status_t ap_eof(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
+ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
 {
     (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
     if ((*thefile) == NULL) {

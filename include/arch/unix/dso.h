@@ -83,7 +83,7 @@
 #endif
 
 struct ap_dso_handle_t {
-    ap_context_t  *cont;
+    ap_pool_t  *cont;
     void          *handle;
 };
 

@@ -56,7 +56,7 @@
 
 #ifdef HAVE_POLL    /* We can just use poll to do our socket polling. */
 
-ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
+ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
     (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t));
     (*new)->sock = ap_palloc(cont, sizeof(ap_socket_t) * num);
@@ -211,7 +211,7 @@ ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
 
 #else    /* Use select to mimic poll */
 
-ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
+ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_pool_t *cont)
 {
     (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t) * num);
     if ((*new) == NULL) {

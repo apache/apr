@@ -59,25 +59,21 @@
 #include "../../locks/beos/locks.h"
 #endif
 
-ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
+ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
 {
-    ap_context_t *new;
-    ap_pool_t *pool;
+    ap_pool_t *new;
 
     if (cont) {
-        pool = ap_make_sub_pool(cont->pool, cont->apr_abort);
+        new = ap_make_sub_pool(cont, cont->apr_abort);
     }
     else {
-        pool = ap_make_sub_pool(NULL, NULL);
+        new = ap_make_sub_pool(NULL, NULL);
     }
         
-    if (pool == NULL) {
+    if (new == NULL) {
         return APR_ENOPOOL;
     }   
 
-    new = (ap_context_t *)ap_palloc(cont, sizeof(ap_context_t));
-
-    new->pool = pool;
     new->prog_data = NULL;
     new->apr_abort = NULL;
  
@@ -85,7 +81,7 @@ ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_destroy_context(ap_context_t *cont)
+ap_status_t ap_destroy_context(ap_pool_t *cont)
 {
     ap_destroy_pool(cont);
     return APR_SUCCESS;
@@ -93,7 +89,7 @@ ap_status_t ap_destroy_context(ap_context_t *cont)
 
 ap_status_t ap_set_userdata(void *data, char *key,
                             ap_status_t (*cleanup) (void *),
-                            ap_context_t *cont)
+                            ap_pool_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
     if (cont) { 
@@ -123,7 +119,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
     return APR_ENOCONT;
 }
 
-ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
+ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
 {
     datastruct *dptr = NULL;
     if (cont) { 
@@ -160,7 +156,7 @@ void ap_terminate(void)
     ap_term_alloc();
 }
 
-ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_context_t *cont)
+ap_status_t ap_set_abort(int (*apr_abort)(int retcode), ap_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

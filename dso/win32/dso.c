@@ -59,7 +59,7 @@ ap_status_t ap_dso_init(void){
 }
 
 ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path, 
-                        ap_context_t *ctx)
+                        ap_pool_t *ctx)
 {
     HINSTANCE os_handle = LoadLibraryEx(path, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
     if(os_handle == NULL) {

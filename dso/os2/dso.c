@@ -71,7 +71,7 @@ static ap_status_t dso_cleanup(void *thedso)
 }
 
 
-ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, ap_context_t *ctx)
+ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, ap_pool_t *ctx)
 {
     char failed_module[1024];
     HMODULE handle;

@@ -68,7 +68,7 @@ struct shmem_t {
 
 
 
-ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file, ap_context_t *cont)
+ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file, ap_pool_t *cont)
 {
     int rc;
     struct shmem_t *newm = (struct shmem_t *)ap_palloc(cont, sizeof(struct shmem_t));

@@ -79,7 +79,7 @@ ap_status_t dir_cleanup(void *thedir)
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cont)
+ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cont)
 {
     char * temp;
     (*new) = ap_palloc(cont, sizeof(ap_dir_t));
@@ -126,7 +126,7 @@ ap_status_t ap_readdir(ap_dir_t *thedir)
 ap_status_t ap_rewinddir(ap_dir_t *thedir)
 {
     ap_status_t stat;
-    ap_context_t *cont = thedir->cntxt;
+    ap_pool_t *cont = thedir->cntxt;
     char *temp = ap_pstrdup(cont, thedir->dirname);
     temp[strlen(temp) - 2] = '\0';   /*remove the \* at the end */
     if (thedir->dirhand == INVALID_HANDLE_VALUE) {
@@ -141,7 +141,7 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir)
     return stat;	
 }
 
-ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
+ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
 {
     if (!CreateDirectory(path, NULL)) {
         return GetLastError();
@@ -149,7 +149,7 @@ ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *con
     return APR_SUCCESS;
 }
 
-ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
+ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
 {
     char *temp = canonical_filename(cont, path);
     if (!RemoveDirectory(temp)) {
@@ -210,7 +210,7 @@ ap_status_t ap_get_os_dir(ap_os_dir_t **thedir, ap_dir_t *dir)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, ap_context_t *cont)
+ap_status_t ap_put_os_dir(ap_dir_t **dir, ap_os_dir_t *thedir, ap_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

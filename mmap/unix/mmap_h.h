@@ -85,7 +85,7 @@
 /* End System Headers */
 
 struct ap_mmap_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     void *mm;
     size_t size;
 };

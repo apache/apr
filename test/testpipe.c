@@ -62,12 +62,12 @@
 #include <unistd.h>
 #endif
 
-int test_filedel(ap_context_t *);
-int testdirs(ap_context_t *);
+int test_filedel(ap_pool_t *);
+int testdirs(ap_pool_t *);
 
 int main()
 {
-    ap_context_t *context;
+    ap_pool_t *context;
     ap_file_t *readp = NULL;
     ap_file_t *writep = NULL;
     ap_size_t nbytes;
@@ -78,7 +78,7 @@ int main()
         exit(-1);
     }
     atexit(ap_terminate);
-    if (ap_create_context(&context, NULL) != APR_SUCCESS) {
+    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }

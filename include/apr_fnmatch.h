@@ -49,7 +49,7 @@ extern "C" {
 #define	FNM_PATHNAME	0x02	/* Slash must be matched by slash. */
 #define	FNM_PERIOD	0x04	/* Period must be matched by period. */
 /* This flag is an Apache addition */
-#define FNM_CASE_BLIND  0x08    /* Compare characters case ap_context_t nsensitively. */
+#define FNM_CASE_BLIND  0x08    /* Compare characters case ap_pool_t nsensitively. */
 
 API_EXPORT(ap_status_t) ap_fnmatch(const char *pattern, const char *strings,
 			    int flags);

@@ -78,7 +78,7 @@ static ap_status_t socket_cleanup(void *sock)
     }
 }
 
-ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_context_t *cont)
+ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_pool_t *cont)
 {
     (*new) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
 
@@ -147,7 +147,7 @@ ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_context_t *connection_context)
+ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *connection_context)
 {
     (*new) = (ap_socket_t *)ap_palloc(connection_context, 
                             sizeof(ap_socket_t));
@@ -240,7 +240,7 @@ ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
 
 
 
-ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, ap_context_t *cont)
+ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, ap_pool_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;

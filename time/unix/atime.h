@@ -69,7 +69,7 @@
 /* End System Headers */
 
 struct atime_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     struct timeval *currtime;
     struct tm *explodedtime;
     int time_ex;    /* have we already exploded the time? */

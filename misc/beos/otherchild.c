@@ -59,7 +59,7 @@ static ap_other_child_rec_t *other_children = NULL;
 
 API_EXPORT(void) ap_register_other_child(ap_proc_t *pid,
                      void (*maintenance) (int reason, void *),
-                     void *data, int write_fd, ap_context_t *p)
+                     void *data, int write_fd, ap_pool_t *p)
 {
     ap_other_child_rec_t *ocr;
 

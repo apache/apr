@@ -59,7 +59,7 @@
 #include "apr_general.h"
 
 struct ap_socket_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     SOCKET sock;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
@@ -68,7 +68,7 @@ struct ap_socket_t {
 };
 
 struct ap_pollfd_t {
-    ap_context_t *cntxt;
+    ap_pool_t *cntxt;
     fd_set *read;
     int numread;
     fd_set *write;

@@ -68,7 +68,7 @@ static ap_status_t dir_cleanup(void *thedir)
 
 
 
-ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cntxt)
+ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_pool_t *cntxt)
 {
     ap_dir_t *thedir = (ap_dir_t *)ap_palloc(cntxt, sizeof(ap_dir_t));
     
@@ -143,14 +143,14 @@ ap_status_t ap_rewinddir(ap_dir_t *thedir)
 
 
 
-ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_context_t *cont)
+ap_status_t ap_make_dir(const char *path, ap_fileperms_t perm, ap_pool_t *cont)
 {
     return APR_OS2_STATUS(DosCreateDir(path, NULL));
 }
 
 
 
-ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
+ap_status_t ap_remove_dir(const char *path, ap_pool_t *cont)
 {
     return APR_OS2_STATUS(DosDeleteDir(path));
 }
