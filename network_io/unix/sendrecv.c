@@ -54,6 +54,17 @@
 
 #include "networkio.h"
 
+/* BeOS needs to use send/recv for socket I/O, this allows us to do that
+ * with minimal changes in the code.
+ */
+#ifdef BEOS
+#define WRITE(x,y,z)  send(x,y,z,0)
+#define READ(x,y,z)   recv(x,y,z,0)
+#else
+#define WRITE(x,y,z)  write(x,y,z)
+#define READ(x,y,z)   read(x,y,z)
+#endif
+
 #ifdef HAVE_SENDFILE
 /* This file is needed to allow us access to the ap_file_t internals. */
 #include "../../file_io/unix/fileio.h"
@@ -74,8 +85,8 @@ static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
     int srv;
 
     do {
-	FD_ZERO(&fdset);
-	FD_SET(sock->socketdes, &fdset);
+        FD_ZERO(&fdset);
+        FD_SET(sock->socketdes, &fdset);
         if (sock->timeout < 0) {
             tvptr = NULL;
         }
@@ -84,19 +95,19 @@ static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
             tv.tv_usec = sock->timeout % AP_USEC_PER_SEC;
             tvptr = &tv;
         }
-	srv = select(sock->socketdes + 1,
-	    for_read ? &fdset : NULL,
-	    for_read ? NULL : &fdset,
-	    NULL,
-	    tvptr);
+        srv = select(sock->socketdes + 1,
+            for_read ? &fdset : NULL,
+            for_read ? NULL : &fdset,
+            NULL,
+            tvptr);
         /* TODO - timeout should be smaller on repeats of this loop */
     } while (srv == -1 && errno == EINTR);
 
     if (srv == 0) {
-	return APR_TIMEUP;
+        return APR_TIMEUP;
     }
     else if (srv < 0) {
-	return errno;
+        return errno;
     }
     return APR_SUCCESS;
 }
@@ -106,20 +117,19 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     ssize_t rv;
     
     do {
-        rv = write(sock->socketdes, buf, (*len));
+        rv = WRITE(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
-    if (rv == -1 && 
-        (errno == EAGAIN || errno == EWOULDBLOCK) && 
-        sock->timeout != 0) {
-	ap_status_t arv = wait_for_io_or_timeout(sock, 0);
-	if (arv != APR_SUCCESS) {
-	    *len = 0;
-	    return arv;
-	}
+    if (rv == -1 && (errno == EAGAIN || errno == EWOULDBLOCK) 
+        && sock->timeout != 0) {
+        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
         else {
             do {
-                rv = write(sock->socketdes, buf, (*len));
+                rv = WRITE(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
         }
     }
@@ -136,7 +146,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     ssize_t rv;
     
     do {
-        rv = read(sock->socketdes, buf, (*len));
+        rv = READ(sock->socketdes, buf, (*len));
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && 
@@ -149,7 +159,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
 	}
         else {
             do {
-                rv = read(sock->socketdes, buf, (*len));
+                rv = READ(sock->socketdes, buf, (*len));
             } while (rv == -1 && errno == EINTR);
         }
     }
@@ -161,6 +171,7 @@ ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
+#ifdef HAVE_WRITEV
 ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
                      ap_int32_t nvec, ap_int32_t *len)
 {
@@ -191,6 +202,7 @@ ap_status_t ap_sendv(ap_socket_t * sock, const struct iovec *vec,
     (*len) = rv;
     return APR_SUCCESS;
 }
+#endif
 
 #if defined(HAVE_SENDFILE)
 

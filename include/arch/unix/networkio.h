@@ -104,7 +104,27 @@
 #if HAVE_SYS_SENDFILE_H
 #include <sys/sendfile.h>
 #endif
+#if HAVE_BYTEORDER_H
+#include <ByteOrder.h>  /* for ntohs on BeOS */
+#endif
 /* End System Headers */
+
+/* The definition of isascii was missed from the PowerPC ctype.h
+ *
+ * It will be included in the next release, but until then... 
+ */
+#if (HAVE_ISASCII == 0)
+#define isascii(c) (((c) & ~0x7f)==0)
+#endif
+
+#ifndef HAVE_POLLIN
+#define POLLIN   1
+#define POLLPRI  2
+#define POLLOUT  4
+#define POLLERR  8
+#define POLLHUP  16
+#define POLLNVAL 32
+#endif
 
 struct ap_socket_t {
     ap_pool_t *cntxt;
@@ -134,6 +154,10 @@ struct ap_pollfd_t {
     ap_int16_t *revents;
 
 };
+
+#if BEOS
+int inet_aton(const char *cp, struct in_addr *addr);
+#endif
 
 #endif  /* ! NETWORK_IO_H */
 

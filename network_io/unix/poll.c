@@ -272,7 +272,11 @@ ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds,
     }
 
     rv = select(aprset->highsock + 1, aprset->read, aprset->write, 
-                    aprset->except, tvptr);
+#ifdef BEOS
+                NULL, tvptr);
+#else
+                aprset->except, tvptr);
+#endif
     
     (*nsds) = rv;
     if ((*nsds) == 0) {
@@ -296,7 +300,14 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
     if (FD_ISSET(sock->socketdes, aprset->read)) {
         revents |= APR_POLLIN;
         if (sock->connected
+#ifdef BEOS
+            /* XXX I would really like to understand why this difference
+             * exists.  Can we get rid of it?  rbb
+             */
+	    && recv(sock->socketdes, data, 0, 0) == -1) {
+#else
 	    && recv(sock->socketdes, data, sizeof data, flags) == -1) {
+#endif
             switch (errno) {
                 case ECONNRESET:
                 case ECONNABORTED:
@@ -308,17 +319,22 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *ap
                 case ENOTSOCK:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLNVAL;
-		    break;
+                    break;
                 default:
                     revents ^= APR_POLLIN;
                     revents |= APR_POLLERR;
-		    break;
+                    break;
             }
         }
     }
+#ifndef BEOS
+    /* Still no support for execpt bits in BeOS R4.5 so for the time being */
+    /* we can't check this.  Hopefully the error checking above will allow */
+    /* sufficient errors to be recognised to cover this. */
     if (FD_ISSET(sock->socketdes, aprset->write)) {
         revents |= APR_POLLOUT;
     }
+#endif
     /* I am assuming that the except is for out of band data, not a failed
      * connection on a non-blocking socket.  Might be a bad assumption, but
      * it works for now. rbb.
