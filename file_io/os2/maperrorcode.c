@@ -77,6 +77,7 @@ static int errormap[][2] = {
     { ERROR_NEGATIVE_SEEK,        APR_ESPIPE       },
     { ERROR_NO_SIGNAL_SENT,       ESRCH            },
     { ERROR_NO_DATA,              APR_EAGAIN       },
+    { SOCEINTR,                 EINTR           },
     { SOCEWOULDBLOCK,           EWOULDBLOCK     },
     { SOCEINPROGRESS,           EINPROGRESS     },
     { SOCEALREADY,              EALREADY        },
