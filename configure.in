@@ -1885,7 +1885,6 @@ else
         if test "x$have_sockaddr_in6" = "x1"; then
             if test "x$ac_cv_working_getaddrinfo" = "xyes"; then
                 if test "x$ac_cv_working_getnameinfo" = "xyes"; then
-                    APR_CHECK_GETNAMEINFO_IPV4_MAPPED
                     APR_CHECK_GETADDRINFO_ADDRCONFIG
                     have_ipv6="1"
                     ipv6_result="yes"
