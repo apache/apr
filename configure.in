@@ -96,6 +96,26 @@ AC_PROG_LIBTOOL
     ;;
 esac
 
+AC_ARG_WITH(libtool, [--with-libtool   use libtool to link the library],
+  [ if test "$withval" = "yes"; then
+      lt_compile="\$(LIBTOOL) --mode=compile \$(LTFLAGS) \$(COMPILE) -c \$< && touch $@"
+      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@ -rpath \$(libdir) \$\$objects"
+      so_ext="lo"
+      lib_target="\$(libdir) \$\$objects"
+    else
+      lt_compile="\$(COMPILE) -c \$< && touch \$@"
+      link="ar cr \$(TARGET_LIB) \$\$objects; ranlib \$(TARGET_LIB)"
+      so_ext="o"
+    fi ], [
+      lt_compile="\$(LIBTOOL) --mode=compile \$(LTFLAGS) \$(COMPILE) -c \$< && touch $@"
+      link="\$(LIBTOOL) --mode=link \$(LTFLAGS) \$(COMPILE) \$(LDFLAGS) -o \$@"
+      so_ext="lo"
+    ] )
+AC_SUBST(lt_compile)
+AC_SUBST(link)
+AC_SUBST(so_ext)
+
+
 dnl #----------------------------- Checks for compiler flags
 nl='
 '
