@@ -177,6 +177,19 @@ struct apr_proc_t {
 #endif
 };
 
+/**
+ * The prototype for APR child errfn functions.  (See the description
+ * of apr_procattr_child_errfn_set() for more information.)
+ * It is passed the following parameters:
+ * @param pool Pool associated with the apr_proc_t.  If your child
+ *             error function needs user data, associate it with this
+ *             pool.
+ * @param err APR error code describing the error
+ * @param description Text description of type of processing which failed
+ */
+typedef void (apr_child_errfn_t)(apr_pool_t *proc, apr_status_t err,
+                                 const char *description);
+
 /** Opaque Thread structure. */
 typedef struct apr_thread_t           apr_thread_t;
 /** Opaque Thread attributes structure. */
@@ -486,6 +499,18 @@ APR_DECLARE(apr_status_t) apr_procattr_limit_set(apr_procattr_t *attr,
                                                 apr_int32_t what,
                                                 struct rlimit *limit);
 #endif
+
+/**
+ * Specify an error function to be called in the child process if APR
+ * encounters an error in the child prior to running the specified program.
+ * @param child_errfn The function to call in the child process.
+ * @param userdata Parameter to be passed to errfn.
+ * @remark At the present time, it will only be called from apr_proc_create()
+ *         on platforms where fork() is used.  It will never be called on other
+ *         platforms.
+ */
+APR_DECLARE(apr_status_t) apr_procattr_child_errfn_set(apr_procattr_t *attr,
+                                                       apr_child_errfn_t *errfn);
 
 #if APR_HAS_FORK
 /**
