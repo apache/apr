@@ -64,6 +64,10 @@
 apr_builddir=@apr_builddir@
 apr_builders=@apr_builders@
 
+# Some layouts require knowing what version we are at.
+APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
+APR_DOTTED_VERSION=@APR_DOTTED_VERSION@
+
 CC=@CC@
 RM=@RM@
 AWK=@AWK@

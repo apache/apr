@@ -1,5 +1,8 @@
 Changes with APR b1
 
+  *) Add parallel-apr layout which utilizes the major version number in
+     directories and library names.  [Justin Erenkrantz]
+
   *) Add a version number to the library name (e.g. libapr-1.so) so
      that apps can do things like: -lapr-1 or -lapr-2, depending on
      which version they want to use and link against.

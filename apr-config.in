@@ -55,6 +55,9 @@
 # APR script designed to allow easy command line access to APR configuration
 # parameters.
 
+APR_MAJOR_VERSION="@APR_MAJOR_VERSION@"
+APR_DOTTED_VERSION="@APR_DOTTED_VERSION@"
+
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 bindir="@bindir@"
@@ -75,7 +78,6 @@ SHLIBPATH_VAR="@shlibpath_var@"
 APR_SOURCE_DIR="@apr_srcdir@"
 APR_SO_EXT="@so_ext@"
 APR_LIB_TARGET="@export_lib_target@"
-APR_DOTTED_VERSION="@APR_DOTTED_VERSION@"
 APR_LIBNAME="@APR_LIBNAME@"
 
 show_usage()
