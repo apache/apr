@@ -95,9 +95,9 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
     finfo->inode = info->st_ino;
     finfo->device = info->st_dev;
     finfo->nlink = info->st_nlink;
-    apr_time_ansi_put(&finfo->atime, info->st_atime);
-    apr_time_ansi_put(&finfo->mtime, info->st_mtime);
-    apr_time_ansi_put(&finfo->ctime, info->st_ctime);
+    apr_time_ansi_put(&finfo->atime, info->st_atime.tv_sec);
+    apr_time_ansi_put(&finfo->mtime, info->st_mtime.tv_sec);
+    apr_time_ansi_put(&finfo->ctime, info->st_ctime.tv_sec);
     /* ### needs to be revisited  
      * if (wanted & APR_FINFO_CSIZE) {
      *   finfo->csize = info->st_blocks * 512;
@@ -105,6 +105,12 @@ static void fill_out_finfo(apr_finfo_t *finfo, struct stat *info,
      * }
      */
 }
+
+char *case_filename(apr_pool_t *pPool, const char *szFile)
+{
+    return (char*)szFile;
+}
+
 
 APR_DECLARE(apr_status_t) apr_file_info_get(apr_finfo_t *finfo, 
                                             apr_int32_t wanted,
@@ -286,6 +292,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
 {
     struct stat info;
     int srv;
+    char *s;
 
     srv = cstat(fname, &info);
 
@@ -296,8 +303,11 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
         if (wanted & APR_FINFO_LINK)
             wanted &= ~APR_FINFO_LINK;
         if (wanted & APR_FINFO_NAME) {
-            finfo->name = apr_pstrdup(cont, info.st_name);
-            finfo->valid |= APR_FINFO_NAME;
+            s = strrchr(case_filename(cont, fname), '/');
+            if (s) {
+                finfo->name = apr_pstrdup(cont, &s[1]);
+                finfo->valid |= APR_FINFO_NAME;
+            }
         }
         return (wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS;
     }
