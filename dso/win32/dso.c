@@ -99,7 +99,7 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym,
     return APR_SUCCESS;
 }
 
-char *ap_dso_error(ap_dso_handle_t *dso, char *buf, ap_size_t bufsize)
+const char *ap_dso_error(ap_dso_handle_t *dso, char *buf, ap_size_t bufsize)
 {
     return ap_strerror(dso->load_error, buf, bufsize);
 }
