@@ -34,7 +34,6 @@
 
 static int launch_reader(CuTest *tc)
 {
-    int i;
     apr_proc_t proc = {0};
     apr_procattr_t *procattr;
     const char *args[2];
@@ -87,8 +86,6 @@ static void test_withlock(CuTest *tc)
 
 static void test_withoutlock(CuTest *tc)
 {
-    apr_file_t *file;
-    apr_status_t rv;
     int code;
     
     code = launch_reader(tc);
