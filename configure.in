@@ -104,6 +104,8 @@ fi
 
 dnl #----------------------------- Checks for Any required Libraries
 AC_CHECK_LIB(dl, dlopen)
+AC_CHECK_LIB(nsl,gethostbyname)
+AC_CHECK_LIB(nsl,gethostname)
 AC_CHECK_LIB(socket,socket)
 AC_CHECK_LIB(crypt,crypt)
 AC_CHECK_LIB(ufc,crypt)
