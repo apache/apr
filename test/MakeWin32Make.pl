@@ -44,7 +44,6 @@ while ($t = <$srcfl>) {
     while ($t =~ s|\.a\b|\.lib|) {}
     while ($t =~ s|\.o\b|\.obj|) {}
     while ($t =~ s|\.lo\b|\.obj|) {}
-    while ($t =~ s|\.so\b|\.dll|) {}
 
     print $dstfl $t;
 
