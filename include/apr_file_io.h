@@ -120,9 +120,9 @@ struct ap_finfo_t {
     ap_gid_t group;
     ap_ino_t inode;
     ap_off_t size;
-    ap_time_t *atime;
-    ap_time_t *mtime;
-    ap_time_t *ctime;
+    ap_time_t atime;
+    ap_time_t mtime;
+    ap_time_t ctime;
 };
 
 /*   Function definitions */

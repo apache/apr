@@ -132,7 +132,7 @@ struct connection {
     int cbx;			/* offset in cbuffer */
     int keepalive;		/* non-zero if a keep-alive request */
     int gotheader;		/* non-zero if we have the entire header in cbuff */
-    ap_time_t *start, *connect, *done;
+    ap_time_t start, connect, done;
     int socknum;
 };
 
@@ -182,7 +182,7 @@ int good = 0, bad = 0;		/* number of good and bad requests */
 int err_length = 0, err_conn = 0, err_except = 0;
 int err_response = 0;
 
-ap_time_t *start, *endtime;
+ap_time_t start, endtime;
 
 /* global request (and its length) */
 char request[512];
@@ -220,7 +220,7 @@ static void err(char *s)
 static void write_request(struct connection *c)
 {
     ap_ssize_t len = reqlen;
-    ap_current_time(c->connect);
+    c->connect = ap_now();
     ap_setsocketopt(c->aprsock, APR_SO_TIMEOUT, 30);
     if (ap_send(c->aprsock, request, &reqlen) != APR_SUCCESS &&
         reqlen != len) {
@@ -244,8 +244,8 @@ static void output_results(void)
 {
     int timetaken;
 
-    ap_current_time(endtime);
-    ap_timediff(endtime, start, &timetaken);
+    endtime = ap_now();
+    timetaken = (endtime - start) / AP_USEC_PER_SEC;
 
     printf("\r                                                                           \r");
     printf("Server Software:        %s\n", servername);
@@ -319,8 +319,8 @@ static void output_html_results(void)
 {
     int timetaken;
 
-    ap_current_time(endtime);
-    ap_timediff(endtime, start, &timetaken);
+    endtime = ap_now();
+    timetaken = (endtime - start) / AP_USEC_PER_SEC;
 
     printf("\n\n<table %s>\n", tablestring);
     printf("<tr %s><th colspan=2 %s>Server Software:</th>"
@@ -451,7 +451,7 @@ static void start_connect(struct connection *c)
     if (ap_set_remote_port(c->aprsock, port) != APR_SUCCESS) {
         err("Port:");
     }
-    ap_current_time(c->start);
+    c->start = ap_now();
     if (ap_connect(c->aprsock, hostname) != APR_SUCCESS) {
         if (errno == APR_EINPROGRESS) {
             c->state = STATE_CONNECTING;
@@ -494,10 +494,10 @@ static void close_connection(struct connection *c)
         /* save out time */
         if (done < requests) {
             struct data s;
-            ap_current_time(c->done);
+	    c->done = ap_now();
             s.read = c->read;
-            ap_timediff(c->connect, c->start, &s.ctime);
-            ap_timediff(c->done, c->start, &s.time);
+	    s.ctime = (c->connect - c->start) / 1000;
+	    s.time = (c->done - c->start) / 1000;
             stats[done++] = s;
         }
     }
@@ -647,10 +647,10 @@ static void read_connection(struct connection *c)
         }
         if (done < requests) {
             struct data s;
-            ap_current_time(c->done);
+	    c->done = ap_now();
             s.read = c->read;
-            ap_timediff(c->connect, c->start, &s.ctime);
-            ap_timediff(c->done, c->start, &s.time);
+	    s.ctime = (c->connect - c->start) / 1000;
+	    s.time = (c->done - c->start) / 1000;
             stats[done++] = s;
         }
         c->keepalive = 0;
@@ -669,7 +669,7 @@ static void read_connection(struct connection *c)
 
 static void test(void)
 {
-    ap_time_t *now;
+    ap_time_t now;
     time_t timeout;
     ap_int16_t rv;
     int i;
@@ -679,19 +679,13 @@ static void test(void)
         fflush(stdout);
     }
 
-    ap_make_time(&now, cntxt);
+    now = ap_now();
 
     con = (struct connection *)malloc(concurrency * sizeof(struct connection));
     memset(con, 0, concurrency * sizeof(struct connection));
 
     stats = (struct data *)malloc(requests * sizeof(struct data));
     ap_setup_poll(&readbits, concurrency, cntxt);
-
-    for (i = 0; i < concurrency; i++) {
-        ap_make_time(&con[i].start, cntxt);
-        ap_make_time(&con[i].connect, cntxt);
-        ap_make_time(&con[i].done, cntxt); 
-    }
 
     /* setup request */
     if (!posting) {
@@ -732,7 +726,7 @@ static void test(void)
 #endif /*CHARSET_EBCDIC */
 
     /* ok - lets start */
-    ap_current_time(start);
+    start = ap_now();
 
     /* initialise lots of requests */
     for (i = 0; i < concurrency; i++) {
@@ -745,8 +739,8 @@ static void test(void)
         ap_int32_t timed;
 
         /* check for time limit expiry */
-        ap_current_time(now);
-        ap_timediff(now, start, &timed);
+        now = ap_now();
+	timed = (now - start) / AP_USEC_PER_SEC;
         if (tlimit && timed > (tlimit * 1000)) {
             requests = done;	/* so stats are correct */
         }
@@ -896,9 +890,6 @@ int main(int argc, char **argv)
     tdstring = "bgcolor=white";
 
     ap_create_context(&cntxt, NULL);
-
-    ap_make_time(&start, cntxt);
-    ap_make_time(&endtime, cntxt);
 
     ap_optind = 1;
     while (ap_getopt(cntxt, argc, argv, "n:c:t:T:p:v:kVhwx:y:z:", &c) == APR_SUCCESS) {

@@ -65,71 +65,110 @@ API_VAR_EXPORT const char ap_day_snames[7][4] =
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-ap_status_t ap_timestr(char **date_str, struct atime_t *t, ap_timetype_e type, ap_context_t *p)
+ap_status_t ap_rfc822_date(char *date_str, ap_time_t t)
 {
-    struct tm *tms;
-    char *date_str_ptr;
+    ap_exploded_time_t xt;
+    const char *s;
     int real_year;
 
-    (*date_str) = ap_palloc(p, 48 * sizeof(char));
-    date_str_ptr = (*date_str);
+    ap_explode_gmt(&xt, t);
 
-    ap_explode_time(t, type);
+    /* example: "Sat, 08 Jan 2000 18:31:41 GMT" */
+    /*           12345678901234567890123456789  */
 
-    /* Assumption: this is always 3 */
-    /* i = strlen(ap_day_snames[tms->tm_wday]); */
-    memcpy(date_str_ptr, ap_day_snames[t->explodedtime->tm_wday], 3);
-    date_str_ptr += 3;
-    *date_str_ptr++ = ',';
-    *date_str_ptr++ = ' ';
-    *date_str_ptr++ = t->explodedtime->tm_mday / 10 + '0';
-    *date_str_ptr++ = t->explodedtime->tm_mday % 10 + '0';
-    *date_str_ptr++ = ' ';
-    /* Assumption: this is also always 3 */
-    /* i = strlen(ap_month_snames[tms->tm_mon]); */
-    memcpy(date_str_ptr, ap_month_snames[t->explodedtime->tm_mon], 3);
-    date_str_ptr += 3;
-    *date_str_ptr++ = ' ';
-    real_year = 1900 + t->explodedtime->tm_year;
+    s = &ap_day_snames[xt.tm_wday][0];
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = ',';
+    *date_str++ = ' ';
+    *date_str++ = xt.tm_mday / 10 + '0';
+    *date_str++ = xt.tm_mday % 10 + '0';
+    *date_str++ = ' ';
+    s = &ap_month_snames[xt.tm_mon][0];
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = ' ';
+    real_year = 1900 + xt.tm_year;
     /* This routine isn't y10k ready. */
-    *date_str_ptr++ = real_year / 1000 + '0';
-    *date_str_ptr++ = real_year % 1000 / 100 + '0';
-    *date_str_ptr++ = real_year % 100 / 10 + '0';
-    *date_str_ptr++ = real_year % 10 + '0';
-    *date_str_ptr++ = ' ';
-    *date_str_ptr++ = t->explodedtime->tm_hour / 10 + '0';
-    *date_str_ptr++ = t->explodedtime->tm_hour % 10 + '0';
-    *date_str_ptr++ = ':';
-    *date_str_ptr++ = t->explodedtime->tm_min / 10 + '0';
-    *date_str_ptr++ = t->explodedtime->tm_min % 10 + '0';
-    *date_str_ptr++ = ':';
-    *date_str_ptr++ = t->explodedtime->tm_sec / 10 + '0';
-    *date_str_ptr++ = t->explodedtime->tm_sec % 10 + '0';
-    if (type == APR_UTCTIME) {
-        *date_str_ptr++ = ' ';
-        *date_str_ptr++ = 'G';
-        *date_str_ptr++ = 'M';
-        *date_str_ptr++ = 'T';
-    }
-    *date_str_ptr = '\0';
-                                                                                    return APR_SUCCESS;
-    /* RFC date format; as strftime '%a, %d %b %Y %T GMT' */
-
-    /* The equivalent using sprintf. Use this for more legible but slower code
-    return ap_psprintf(p,
-                "%s, %.2d %s %d %.2d:%.2d:%.2d GMT", 
-                ap_day_snames[t->explodedtime->tm_wday], 
-                t->explodedtime->tm_mday, 
-                ap_month_snames[t->explodedtime->tm_mon], 
-                t->explodedtime->tm_year + 1900, t->explodedtime->tm_hour, 
-                t->explodedtime->tm_min, t->explodedtime->tm_sec);
-    */
-}
-
-ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, 
-                        const char *format, struct atime_t *tm)
-{
-    (*retsize) = strftime(s, max, format, tm->explodedtime);
+    *date_str++ = real_year / 1000 + '0';
+    *date_str++ = real_year % 1000 / 100 + '0';
+    *date_str++ = real_year % 100 / 10 + '0';
+    *date_str++ = real_year % 10 + '0';
+    *date_str++ = ' ';
+    *date_str++ = xt.tm_hour / 10 + '0';
+    *date_str++ = xt.tm_hour % 10 + '0';
+    *date_str++ = ':';
+    *date_str++ = xt.tm_min / 10 + '0';
+    *date_str++ = xt.tm_min % 10 + '0';
+    *date_str++ = ':';
+    *date_str++ = xt.tm_sec / 10 + '0';
+    *date_str++ = xt.tm_sec % 10 + '0';
+    *date_str++ = ' ';
+    *date_str++ = 'G';
+    *date_str++ = 'M';
+    *date_str++ = 'T';
+    *date_str++ = 0;
     return APR_SUCCESS;
 }
 
+ap_status_t ap_ctime(char *date_str, ap_time_t t)
+{
+    ap_exploded_time_t xt;
+    const char *s;
+    int real_year;
+
+    /* example: "Wed Jun 30 21:49:08 1993" */
+    /*           123456789012345678901234  */
+
+    ap_explode_localtime(&xt, t);
+    s = &ap_day_snames[xt.tm_wday][0];
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = ' ';
+    s = &ap_month_snames[xt.tm_mon][0];
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = *s++;
+    *date_str++ = ' ';
+    *date_str++ = xt.tm_mday / 10 + '0';
+    *date_str++ = xt.tm_mday % 10 + '0';
+    *date_str++ = ' ';
+    *date_str++ = xt.tm_hour / 10 + '0';
+    *date_str++ = xt.tm_hour % 10 + '0';
+    *date_str++ = ':';
+    *date_str++ = xt.tm_min / 10 + '0';
+    *date_str++ = xt.tm_min % 10 + '0';
+    *date_str++ = ':';
+    *date_str++ = xt.tm_sec / 10 + '0';
+    *date_str++ = xt.tm_sec % 10 + '0';
+    *date_str++ = ' ';
+    real_year = 1900 + xt.tm_year;
+    *date_str++ = real_year / 1000 + '0';
+    *date_str++ = real_year % 1000 / 100 + '0';
+    *date_str++ = real_year % 100 / 10 + '0';
+    *date_str++ = real_year % 10 + '0';
+    *date_str++ = 0;
+
+    return APR_SUCCESS;
+}
+
+ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, 
+                        const char *format, ap_exploded_time_t *xt)
+{
+    struct tm tm;
+
+    tm.tm_sec  = xt->tm_sec;
+    tm.tm_min  = xt->tm_min;
+    tm.tm_hour = xt->tm_hour;
+    tm.tm_mday = xt->tm_mday;
+    tm.tm_mon  = xt->tm_mon;
+    tm.tm_year = xt->tm_year;
+    tm.tm_wday = xt->tm_wday;
+    tm.tm_yday = xt->tm_yday;
+    tm.tm_isdst = xt->tm_isdst;
+    (*retsize) = strftime(s, max, format, &tm);
+    return APR_SUCCESS;
+}

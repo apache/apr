@@ -57,107 +57,147 @@
 #include "apr_portable.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_make_time(ap_context_t *, ap_time_t *)
- *    Create an empty time entity.
- * arg 1) The context to operate on.
- * arg 2) The new time entity to create.
+ * ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
+ *    convert an ansi time_t to an ap_time_t
+ * arg 1) the resulting ap_time_t
+ * arg 2) the time_t to convert
  */
-ap_status_t ap_make_time(struct atime_t **new, ap_context_t *cont)
+ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
 {
-    (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->cntxt = cont;
-    (*new)->explodedtime = ap_palloc(cont, sizeof(struct tm));
-    (*new)->time_ex = 0;
-    (*new)->currtime = NULL;
+    *result = (ap_time_t)input * AP_USEC_PER_SEC;
     return APR_SUCCESS;
 }
 
+
 /* ***APRDOC********************************************************
- * ap_status_t ap_make_init_time(ap_context_t *, ap_time_t *)
- *    Create a time entity and fill it out with the current time.
- * arg 1) The context to operate on.
- * arg 2) The new time entity to create.
+ * ap_time_t ap_now(void)
+ *    return the current time
  */
-ap_status_t ap_make_init_time(struct atime_t **new, ap_context_t *cont)
+ap_time_t ap_now(void)
 {
-    (*new) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->cntxt = cont;
-    (*new)->explodedtime = ap_palloc(cont, sizeof(struct tm));
-    (*new)->time_ex = 0;
-    gettimeofday((*new)->currtime, NULL);
-    return APR_SUCCESS;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * AP_USEC_PER_SEC + tv.tv_usec;
 }
 
-/* ***APRDOC********************************************************
- * ap_status_t ap_current_time(ap_time_t *)
- *    Return the number of seconds since January 1, 1970. 
- * arg 1) The time entity to reference.
- */
-ap_status_t ap_current_time(struct atime_t *new)
+
+static void tm_to_exp(ap_exploded_time_t *xt, struct tm *tm)
 {
-    new->currtime = ap_palloc(new->cntxt, sizeof(struct timeval));
-    gettimeofday(new->currtime, NULL);
-    new->time_ex = 0;
-    return APR_SUCCESS; 
-}       
+    xt->tm_sec  = tm->tm_sec;
+    xt->tm_min  = tm->tm_min;
+    xt->tm_hour = tm->tm_hour;
+    xt->tm_mday = tm->tm_mday;
+    xt->tm_mon  = tm->tm_mon;
+    xt->tm_year = tm->tm_year;
+    xt->tm_wday = tm->tm_wday;
+    xt->tm_yday = tm->tm_yday;
+    xt->tm_isdst = tm->tm_isdst;
+}
+
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_explode_time(ap_time_t *, ap_timetype_e)
- *    Convert time value from number of seconds since epoch to a set
- *    of integers representing the time in a human readable form.
- * arg 1) The time entity to reference.
- * arg 2) How to explode the time.  One of:
- *            APR_LOCALTIME  -- Use local time
- *            APR_UTCTIME    -- Use UTC time
+ * ap_status_t ap_explode_gmt(ap_exploded_time_t *, ap_time_t)
+ *   convert a time to its human readable components in GMT timezone
+ * arg 1) the exploded time
+ * arg 2) the time to explode
  */
-ap_status_t ap_explode_time(struct atime_t *atime, ap_timetype_e type)
+ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
 {
-    switch (type) {
-    case APR_LOCALTIME: {
+    time_t t = input / AP_USEC_PER_SEC;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-        localtime_r(&atime->currtime->tv_sec, atime->explodedtime);
-#else
-        atime->explodedtime = localtime(&atime->currtime->tv_sec);
+    struct tm banana;
 #endif
-        break;
-    }
-    case APR_UTCTIME: {
+
+    result->tm_usec = input % AP_USEC_PER_SEC;
+
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
-        gmtime_r(&atime->currtime->tv_sec, atime->explodedtime);
+    gmtime_r(&t, &banana);
+    tm_to_exp(result, &banana);
 #else
-        atime->explodedtime = gmtime(&atime->currtime->tv_sec);
+    tm_to_exp(result, gmtime(&t));
 #endif
-        break;
-    }
-    }
-    atime->time_ex = 1;
+    result->tm_gmtoff = 0;
     return APR_SUCCESS;
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_implode_time(ap_time_t *)
+ * ap_status_t ap_explode_localtime(ap_exploded_time_t *, ap_time_t)
+ *   convert a time to its human readable components in local timezone
+ * arg 1) the exploded time
+ * arg 2) the time to explode
+ */
+ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
+{
+#if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
+    time_t t = input / AP_USEC_PER_SEC;
+    struct tm apricot;
+
+    result->tm_usec = input % AP_USEC_PER_SEC;
+
+    localtime_r(&t, &apricot);
+    tm_to_exp(result, &apricot);
+#if defined(HAVE_GMTOFF)
+    result->tm_gmtoff = apricot.tm_gmtoff;
+#elif defined(HAVE___GMTOFF)
+    result->tm_gmtoff = apricot.__tm_gmtoff;
+#else
+    /* solaris is backwards enough to have pthreads but no tm_gmtoff, feh */
+    {
+	int days, hours, minutes;
+
+	gmtime_r(&t, &apricot);
+	days = result->tm_yday - apricot.tm_yday;
+	hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24)
+		+ result->tm_hour - apricot.tm_hour);
+	minutes = hours * 60 + result->tm_min - apricot.tm_min;
+	result->tm_gmtoff = minutes * 60;
+    }
+#endif
+#else
+    time_t t = input / AP_USEC_PER_SEC;
+    struct tm *tmx;
+
+    result->tm_usec = input % AP_USEC_PER_SEC;
+
+    tmx = localtime(&t);
+    tm_to_exp(result, tmx);
+#if defined(HAVE_GMTOFF)
+    result->tm_gmtoff = tmx->tm_gmtoff;
+#elif defined(HAVE___GMTOFF)
+    result->tm_gmtoff = tmx->__tm_gmtoff;
+#else
+    /* need to create tm_gmtoff... assume we are never more than 24 hours away */
+    {
+	int days, hours, minutes;
+
+	tmx = gmtime(&t);
+	days = result->tm_yday - tmx->tm_yday;
+	hours = ((days < -1 ? 24 : 1 < days ? -24 : days * 24)
+		+ result->tm_hour - tmx->tm_hour);
+	minutes = hours * 60 + result->tm_min - tmx->tm_min;
+	result->tm_gmtoff = minutes * 60;
+    }
+#endif
+#endif
+    return APR_SUCCESS;
+}
+
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_implode_time(ap_time_t *, ap_exploded_time_t *)
  *    Convert time value from human readable format to number of seconds 
  *    since epoch
- * arg 1) The time entity to reference.
+ * arg 1) the resulting imploded time
+ * arg 2) the input exploded time
  */
-ap_status_t ap_implode_time(struct atime_t *atime)
+ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
 {
     int year;
     time_t days;
     static const int dayoffset[12] =
     {306, 337, 0, 31, 61, 92, 122, 153, 184, 214, 245, 275};
 
-    year = atime->explodedtime->tm_year;
+    year = xt->tm_year;
 
     if (year < 70 || ((sizeof(time_t) <= 4) && (year >= 138))) {
         return APR_EBADDATE;
@@ -165,120 +205,21 @@ ap_status_t ap_implode_time(struct atime_t *atime)
 
     /* shift new year to 1st March in order to make leap year calc easy */
 
-    if (atime->explodedtime->tm_mon < 2)
+    if (xt->tm_mon < 2)
         year--;
 
     /* Find number of days since 1st March 1900 (in the Gregorian calendar). */
 
     days = year * 365 + year / 4 - year / 100 + (year / 100 + 3) / 4;
-    days += dayoffset[atime->explodedtime->tm_mon] + 
-            atime->explodedtime->tm_mday - 1;
+    days += dayoffset[xt->tm_mon] + xt->tm_mday - 1;
     days -= 25508;              /* 1 jan 1970 is 25508 days since 1 mar 1900 */
 
-    days = ((days * 24 + atime->explodedtime->tm_hour) * 60 + 
-             atime->explodedtime->tm_min) * 60 + atime->explodedtime->tm_sec;
+    days = ((days * 24 + xt->tm_hour) * 60 + xt->tm_min) * 60 + xt->tm_sec;
 
     if (days < 0) {
         return APR_EBADDATE;
     }
-    atime->currtime = ap_palloc(atime->cntxt, sizeof(struct timeval));
-    atime->currtime->tv_sec = days;            /* must be a valid time */
-    atime->currtime->tv_usec = 0;
-    atime->time_ex = 1;
+    days -= xt->tm_gmtoff;
+    *t = days * AP_USEC_PER_SEC + xt->tm_usec;
     return APR_SUCCESS;
 }
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_get_os_time(ap_os_time_t **, ap_time_t *)
- *    Convert from apr time type to OS specific time value
- * arg 1) The time value to convert.
- * arg 2) The OS specific value to convert to.
- */
-ap_status_t ap_get_os_time(ap_os_time_t **atime, struct atime_t *thetime)
-{
-    if (thetime == NULL) {
-        return APR_ENOTIME;
-    }
-    if (thetime->currtime == NULL) {
-        ap_implode_time(thetime); 
-    }
-    atime = &(thetime->currtime);
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_put_os_time(ap_time_t **, ap_os_time_t *, ap_context_t *)
- *    Convert to apr time type from OS specific time value
- * arg 1) The context to use.
- * arg 2) The time value to convert to.
- * arg 3) The OS specific value to convert.
- */
-ap_status_t ap_put_os_time(struct atime_t **thetime, ap_os_time_t *atime, 
-                           ap_context_t *cont)
-{
-    if (cont == NULL) {
-        return APR_ENOCONT;
-    }
-    if (thetime == NULL) {
-        (*thetime) = (struct atime_t *)ap_palloc(cont, sizeof(struct atime_t));
-        (*thetime)->cntxt = cont;
-    }
-    (*thetime)->currtime = atime;
-    (*thetime)->time_ex = 0;
-    return APR_SUCCESS;
-}
-
-/* ***APRDOC********************************************************
- * ap_status_t ap_timediff(ap_time_t *, ap_time_t *, ap_int32_t *)
- *    Retrieve the difference between two time structures in milliseconds.
- * arg 1) The first time value
- * arg 2) The second timevalue
- * arg 3) The difference to return.
- */
-ap_status_t ap_timediff(struct atime_t *a, struct atime_t *b, ap_int32_t *rv)
-{
-    register int us, s;
-
-    us = a->currtime->tv_usec - b->currtime->tv_usec;
-    us /= 1000;
-    s = a->currtime->tv_sec - b->currtime->tv_sec;
-    s *= 1000;
-    *rv = s + us;
-    return APR_SUCCESS;
-} 
- 
-/* ***APRDOC********************************************************
- * ap_status_t ap_timecmp(ap_time_t **, ap_time_t *, ap_time_t *)
- *     Compare two time values. 
- * arg 1)  The first time value
- * arg 2)  The second time value.
- * return) APR_LESS  -- arg 1 < arg 2
- *         APR_MORE  -- arg 1 > arg 2
- *         APR_EQUAL -- arg 1 = arg 2
- */
-ap_status_t ap_timecmp(struct atime_t *a, struct atime_t *b)
-{
-    if (a == NULL || a->currtime == NULL) {
-        return APR_LESS;
-    }
-    else if (b == NULL || b->currtime == NULL) {
-        return APR_MORE;
-    }
-
-    if (a->currtime->tv_sec > b->currtime->tv_sec) {
-        return APR_MORE;
-    }
-    else if (a->currtime->tv_sec < b->currtime->tv_sec) {
-        return APR_LESS;
-    }
-    else {
-        if (a->currtime->tv_usec > b->currtime->tv_sec) {
-            return APR_MORE;
-        }
-        else {
-            return APR_LESS;
-        }
-    }
-    return APR_EQUAL;
-}
- 
