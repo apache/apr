@@ -7,9 +7,6 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
-  *) Support setuid, setgid and sticky file permissions bits on Unix.
-     [André Malo]
-
   *) Add new functions apr_signal_block, apr_signal_unblock to block/unblock
      the delivery of a particular signal.  [Madhusudan Mathihalli]
 
@@ -124,6 +121,9 @@ Changes with APR 1.0
      apr_compat.h
 
 Changes with APR 0.9.5
+
+  *) Support setuid, setgid and sticky file permissions bits on Unix.
+     [André Malo]
 
   *) Fix sign error in apr_file_seek(APR_END).
      [Greg Hudson <ghudson MIT.EDU>]
