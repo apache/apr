@@ -13,7 +13,7 @@ PROGRAMS = \
 	testlock@EXEEXT@ \
 	testtime@EXEEXT@ \
 	testargs@EXEEXT@ \
-	testcontext@EXEEXT@ \
+	testud@EXEEXT@ \
 	testmmap@EXEEXT@ \
 	testshmem@EXEEXT@ \
 	testpipe@EXEEXT@ \
@@ -69,8 +69,8 @@ mod_test.so: mod_test.lo $(LOCAL_LIBS)
 testargs@EXEEXT@: testargs.lo $(LOCAL_LIBS)
 	$(LINK) testargs.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testcontext@EXEEXT@: testcontext.lo $(LOCAL_LIBS)
-	$(LINK) testcontext.lo $(LOCAL_LIBS) $(ALL_LIBS)
+testud@EXEEXT@: testud.lo $(LOCAL_LIBS)
+	$(LINK) testud.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testproc@EXEEXT@: testproc.lo $(LOCAL_LIBS)
 	$(LINK) testproc.lo $(LOCAL_LIBS) $(ALL_LIBS)

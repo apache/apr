@@ -64,8 +64,11 @@
 #include "apr_general.h"
 #include "apr_sms.h"
 #include <stdlib.h>
-#include "sms_private.h"
+#include "apr_hash.h"
+#include "apr_strings.h"
 #include "apr_portable.h"
+
+#include "sms_private.h"
 
 #ifdef APR_ASSERT_MEMORY
 #include <assert.h>
@@ -920,6 +923,37 @@ APR_DECLARE(void) apr_sms_set_abort(apr_abortfunc_t abort, apr_sms_t *sms)
 APR_DECLARE(apr_abortfunc_t) apr_sms_get_abort(apr_sms_t *sms)
 {
     return sms->apr_abort;
+}
+
+APR_DECLARE(apr_status_t) apr_sms_userdata_set(const void *data,
+                                               const char *key,
+                                               apr_status_t (*cleanup)(void*),
+                                               apr_sms_t *sms)
+{
+    apr_size_t keylen = strlen(key);
+
+    if (sms->prog_data == NULL)
+        sms->prog_data = apr_hash_make(sms->pool);
+
+    if (apr_hash_get(sms->prog_data, key, keylen) == NULL) {
+        char *new_key = apr_pstrdup((apr_pool_t*)sms->pool, key);
+        apr_hash_set(sms->prog_data, new_key, keylen, data);
+    } else {
+        apr_hash_set(sms->prog_data, key, keylen, data);
+    }
+
+    apr_sms_cleanup_register(sms, APR_GENERAL_CLEANUP, data, cleanup);
+    return APR_SUCCESS;
+}
+
+APR_DECLARE(apr_status_t) apr_sms_userdata_get(void **data, const char *key,
+                                               apr_sms_t *sms)
+{
+    if (sms->prog_data == NULL)
+        *data = NULL;
+    else
+        *data = apr_hash_get(sms->prog_data, key, strlen(key));
+    return APR_SUCCESS;
 }
 
 #if APR_DEBUG_SHOW_STRUCTURE
