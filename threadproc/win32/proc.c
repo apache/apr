@@ -349,7 +349,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
     }
 
 #ifndef _WIN32_WCE
-    if (attr->cmdtype == APR_SHELLCMD) {
+    if (attr->cmdtype == APR_SHELLCMD || attr->cmdtype == APR_SHELLCMD_ENV) {
         char *shellcmd = getenv("COMSPEC");
         if (!shellcmd) {
             return APR_EINVAL;
@@ -445,8 +445,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
     }
 
-    if (!env || attr->cmdtype == APR_PROGRAM_ENV) 
+    if (!env || attr->cmdtype == APR_PROGRAM_ENV ||
+        attr->cmdtype == APR_SHELLCMD_ENV) {
         pEnvBlock = NULL;
+    }
     else {
         apr_size_t iEnvBlockLen;
         /*

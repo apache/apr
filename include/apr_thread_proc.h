@@ -45,7 +45,10 @@ typedef enum {
     APR_SHELLCMD,           /**< use the shell to invoke the program */
     APR_PROGRAM,            /**< invoke the program directly, no copied env */
     APR_PROGRAM_ENV,        /**< invoke the program, replicating our environment */
-    APR_PROGRAM_PATH        /**< find program on PATH, use our environment */
+    APR_PROGRAM_PATH,       /**< find program on PATH, use our environment */
+    APR_SHELLCMD_ENV,       /**< use the shell to invoke the program,
+                             *   replicating our environment
+                             */
 } apr_cmdtype_e;
 
 typedef enum {
@@ -546,8 +549,8 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont);
  *             one should be the program name.
  * @param env The new environment table for the new process.  This 
  *            should be a list of NULL-terminated strings. This argument
- *            is ignored for APR_PROGRAM_ENV and APR_PROGRAM_PATH types
- *            of commands.
+ *            is ignored for APR_PROGRAM_ENV, APR_PROGRAM_PATH, and
+ *            APR_SHELLCMD_ENV types of commands.
  * @param attr the procattr we should use to determine how to create the new
  *         process
  * @param pool The pool to use.
