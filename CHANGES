@@ -1,3 +1,5 @@
+Changes for APR 1.0.2
+
 Changes for APR 1.0.1
 
   *) Fix HUP return codes in pollset when using KQueue.
