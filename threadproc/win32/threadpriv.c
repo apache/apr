@@ -102,8 +102,8 @@ ap_status_t ap_get_threadkeydata(void *data, char *key, struct threadkey_t *thre
     }
 }
 
-ap_status_t ap_set_threadkeydata(struct threadkey_t *threadkey, void *data,
-                                 char *key, ap_status_t (*cleanup) (void *))
+ap_status_t ap_set_threadkeydata(void *data, char *key, ap_status_t (*cleanup) (void *), 
+                                 struct threadkey_t *threadkey)
 {
     if (threadkey != NULL) {
         return ap_set_userdata(data, key, cleanup, threadkey->cntxt);
