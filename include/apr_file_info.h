@@ -85,6 +85,7 @@ typedef enum {
 } apr_filetype_e; 
 
 /* Permissions flags */
+
 #define APR_UREAD     0x400 
 #define APR_UWRITE    0x200
 #define APR_UEXECUTE  0x100
@@ -177,7 +178,7 @@ struct apr_finfo_t {
     /** The id of the device the file is on. */
     apr_dev_t device;
     /** The number of hard links to the file. */
-    apr_int16_t nlink;
+    apr_int32_t nlink;
     /** The size of the file */
     apr_off_t size;
     /** The storage size consumed by the file */
