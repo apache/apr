@@ -52,39 +52,81 @@
  * <http://www.apache.org/>.
  */
 
+#define INCL_DOSERRORS
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
 #include "apr_lib.h"
 #include <string.h>
+#include <process.h>
 
 ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 {
     ULONG filedes[2];
-    ULONG rc;
+    ULONG rc, action;
+    static int id = 0;
+    char pipename[50];
 
-    rc = DosCreatePipe(filedes, filedes+1, 4096);
-        
-    if (rc) {
+    sprintf(pipename, "/pipe/%d.%d", getpid(), id++);
+    rc = DosCreateNPipe(pipename, filedes, NP_ACCESS_INBOUND, NP_NOWAIT|1, 4096, 4096, 0);
+
+    if (rc)
+        return APR_OS2_STATUS(rc);
+
+    rc = DosConnectNPipe(filedes[0]);
+
+    if (rc && rc != ERROR_PIPE_NOT_CONNECTED) {
+        DosClose(filedes[0]);
         return APR_OS2_STATUS(rc);
     }
-    
+
+    rc = DosOpen (pipename, filedes+1, &action, 0, FILE_NORMAL,
+                  OPEN_ACTION_OPEN_IF_EXISTS | OPEN_ACTION_FAIL_IF_NEW,
+                  OPEN_ACCESS_WRITEONLY | OPEN_SHARE_DENYREADWRITE,
+                  NULL);
+
+    if (rc) {
+        DosClose(filedes[0]);
+        return APR_OS2_STATUS(rc);
+    }
+
     (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+    rc = DosCreateEventSem(NULL, &(*in)->pipeSem, DC_SEM_SHARED, FALSE);
+
+    if (rc) {
+        DosClose(filedes[0]);
+        DosClose(filedes[1]);
+        return APR_OS2_STATUS(rc);
+    }
+
+    rc = DosSetNPipeSem(filedes[0], (HSEM)(*in)->pipeSem, 1);
+
+    if (rc) {
+        DosClose(filedes[0]);
+        DosClose(filedes[1]);
+        DosCloseEventSem((*in)->pipeSem);
+        return APR_OS2_STATUS(rc);
+    }
+
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
-    (*in)->fname = ap_pstrdup(cont, "PIPE");
+    (*in)->fname = ap_pstrdup(cont, pipename);
     (*in)->isopen = TRUE;
     (*in)->buffered = FALSE;
     (*in)->flags = 0;
+    (*in)->pipe = 1;
+    (*in)->timeout = -1;
     ap_register_cleanup(cont, *in, apr_file_cleanup, ap_null_cleanup);
 
     (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
-    (*out)->fname = ap_pstrdup(cont, "PIPE");
+    (*out)->fname = ap_pstrdup(cont, pipename);
     (*out)->isopen = TRUE;
     (*out)->buffered = FALSE;
     (*out)->flags = 0;
+    (*out)->pipe = 1;
+    (*out)->timeout = -1;
     ap_register_cleanup(cont, *out, apr_file_cleanup, ap_null_cleanup);
 
     return APR_SUCCESS;
@@ -102,5 +144,15 @@ ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, ap_pool_t *
 
 ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
 {
-    return APR_ENOTIMPL;
+    if (thepipe->pipe == 1) {
+        thepipe->timeout = timeout;
+        return APR_SUCCESS;
+    }
+    return APR_EINVAL;
+}
+
+
+ap_status_t ap_block_pipe(ap_file_t *thepipe)
+{
+    return APR_OS2_STATUS(DosSetNPHState (thepipe->filedes, NP_WAIT));
 }

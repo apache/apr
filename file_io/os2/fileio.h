@@ -74,7 +74,10 @@ struct ap_file_t {
     int buffered;
     int eof_hit;
     ap_int32_t flags;
-    
+    int timeout;
+    int pipe;
+    HEV pipeSem;
+
     /* Stuff for buffered mode */
     char *buffer;
     int bufpos;               // Read/Write position in buffer
