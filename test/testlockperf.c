@@ -205,7 +205,7 @@ int test_thread_mutex(void)
 
     printf("apr_thread_mutex_t Tests\n");
     printf("%-60s", "    Initializing the apr_thread_mutex_t");
-    s1 = apr_thread_mutex_create(&thread_lock, pool);
+    s1 = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, pool);
     if (s1 != APR_SUCCESS) {
         printf("Failed!\n");
         return s1;
@@ -245,6 +245,55 @@ int test_thread_mutex(void)
     return APR_SUCCESS;
 }
 
+int test_thread_mutex_nested(void)
+{
+    apr_thread_t *t1, *t2, *t3, *t4;
+    apr_status_t s1, s2, s3, s4;
+    apr_time_t time_start, time_stop;
+
+    mutex_counter = 0;
+
+    printf("apr_thread_mutex_t Tests\n");
+    printf("%-60s", "    Initializing the apr_thread_mutex_t (NESTED)");
+    s1 = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_NESTED, pool);
+    if (s1 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    apr_thread_mutex_lock(thread_lock);
+    /* set_concurrency(4)? -aaron */
+    printf("%-60s","    Starting all the threads"); 
+    s1 = apr_thread_create(&t1, NULL, thread_mutex_func, NULL, pool);
+    s2 = apr_thread_create(&t2, NULL, thread_mutex_func, NULL, pool);
+    s3 = apr_thread_create(&t3, NULL, thread_mutex_func, NULL, pool);
+    s4 = apr_thread_create(&t4, NULL, thread_mutex_func, NULL, pool);
+    if (s1 != APR_SUCCESS || s2 != APR_SUCCESS || 
+        s3 != APR_SUCCESS || s4 != APR_SUCCESS) {
+        printf("Failed!\n");
+        return s1;
+    }
+    printf("OK\n");
+
+    time_start = apr_time_now();
+    apr_thread_mutex_unlock(thread_lock);
+
+    /* printf("%-60s", "    Waiting for threads to exit"); */
+    apr_thread_join(&s1, t1);
+    apr_thread_join(&s2, t2);
+    apr_thread_join(&s3, t3);
+    apr_thread_join(&s4, t4);
+    /* printf("OK\n"); */
+
+    time_stop = apr_time_now();
+    printf("microseconds: %" APR_INT64_T_FMT " usec\n",
+           (time_stop - time_start));
+    if (mutex_counter != MAX_COUNTER * 4)
+        printf("error: counter = %ld\n", mutex_counter);
+
+    return APR_SUCCESS;
+}
 int test_inter_rwlock(void)
 {
     apr_thread_t *t1, *t2, *t3, *t4;
@@ -389,16 +438,22 @@ int main(int argc, const char * const *argv)
         exit(-3);
     }
 
+    if ((rv = test_thread_mutex_nested()) != APR_SUCCESS) {
+        fprintf(stderr,"thread_mutex (NESTED) test failed : [%d] %s\n",
+                rv, apr_strerror(rv, (char*)errmsg, 200));
+        exit(-4);
+    }
+
     if ((rv = test_inter_rwlock()) != APR_SUCCESS) {
         fprintf(stderr,"apr_lock(INTRAPROCESS, READWRITE) test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-2);
+        exit(-5);
     }
 
     if ((rv = test_thread_rwlock()) != APR_SUCCESS) {
         fprintf(stderr,"thread_rwlock test failed : [%d] %s\n",
                 rv, apr_strerror(rv, (char*)errmsg, 200));
-        exit(-3);
+        exit(-6);
     }
 
     return 0;

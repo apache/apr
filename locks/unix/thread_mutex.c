@@ -74,6 +74,7 @@ static apr_status_t thread_mutex_cleanup(void *data)
 } 
 
 APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
+                                                  unsigned int flags,
                                                   apr_pool_t *pool)
 {
     apr_thread_mutex_t *new_mutex;
@@ -88,6 +89,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_create(apr_thread_mutex_t **mutex,
     }
 
     new_mutex->pool = pool;
+    new_mutex->nested = flags & APR_THREAD_MUTEX_NESTED;
 
     if ((stat = pthread_mutexattr_init(&mattr))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -128,10 +130,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 #if APR_HAS_THREADS
     apr_os_thread_t my_thrid; /* save one call to apr_os_thread_current() */
 
-    if (apr_os_thread_equal(mutex->owner,
-                            (my_thrid = apr_os_thread_current()))) {
-        mutex->owner_ref++;
-        return APR_SUCCESS;
+    if (mutex->nested) {
+        if (apr_os_thread_equal(mutex->owner,
+                                (my_thrid = apr_os_thread_current()))) {
+            mutex->owner_ref++;
+                return APR_SUCCESS;
+        }
     }
 #endif
 
@@ -144,8 +148,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
     }
 
 #if APR_HAS_THREADS
-    mutex->owner = my_thrid;
-    mutex->owner_ref = 1;
+    if (mutex->nested) {
+        mutex->owner = my_thrid;
+        mutex->owner_ref = 1;
+    }
 #endif
 
     return stat;
@@ -158,10 +164,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 #if APR_HAS_THREADS
     apr_os_thread_t my_thrid; /* save one call to apr_os_thread_current() */
 
-    if (apr_os_thread_equal(mutex->owner,
-                            (my_thrid = apr_os_thread_current()))) {
-        mutex->owner_ref++;
-        return APR_SUCCESS;
+    if (mutex->nested) {
+        if (apr_os_thread_equal(mutex->owner,
+                                (my_thrid = apr_os_thread_current()))) {
+            mutex->owner_ref++;
+            return APR_SUCCESS;
+        }
     }
 #endif
 
@@ -178,8 +186,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
     }
 
 #if APR_HAS_THREADS
-    mutex->owner = my_thrid;
-    mutex->owner_ref = 1;
+    if (mutex->nested) {
+        mutex->owner = my_thrid;
+        mutex->owner_ref = 1;
+    }
 #endif
 
     return stat;
@@ -190,10 +200,12 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
     apr_status_t status;
 
 #if APR_HAS_THREADS
-    if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-        mutex->owner_ref--;
-        if (mutex->owner_ref > 0)
-            return APR_SUCCESS;
+    if (mutex->nested) {
+        if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
+            mutex->owner_ref--;
+            if (mutex->owner_ref > 0)
+                return APR_SUCCESS;
+        }
     }
 #endif
 
@@ -206,8 +218,10 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
     }
 
 #if APR_HAS_THREADS
-    memset(&mutex->owner, 0, sizeof mutex->owner);
-    mutex->owner_ref = 0;
+    if (mutex->nested) {
+        memset(&mutex->owner, 0, sizeof mutex->owner);
+        mutex->owner_ref = 0;
+    }
 #endif
     
     return status;
