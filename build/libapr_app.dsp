@@ -91,7 +91,7 @@ SOURCE=..\misc\win32\internal.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\i18n\unix\utf8_ucs2.c
+SOURCE=..\misc\win32\utf8.c
 # End Source File
 # End Target
 # End Project
