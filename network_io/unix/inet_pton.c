@@ -30,7 +30,9 @@
 #include <arpa/inet.h>
 #endif
 #include <string.h>
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
+#endif
 
 #ifndef IN6ADDRSZ
 #define IN6ADDRSZ   16
