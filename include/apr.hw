@@ -48,11 +48,12 @@
  *   C4075: slight indirection changes (unsigned short* vs short[])
  *   C4100: unreferenced formal parameter
  *   C4127: conditional expression is constant
+ *   C4163: '_rotl64' : not available as an intrinsic function
  *   C4201: nonstandard extension nameless struct/unions
  *   C4244: int to char/short - precision loss
  *   C4514: unreferenced inline function removed
  */
-#pragma warning(disable: 4100 4127 4201 4514; once: 4057 4075 4244)
+#pragma warning(disable: 4100 4127 4163 4201 4514; once: 4057 4075 4244)
 
 /* Has windows.h already been included?  If so, our preferences don't matter,
  * but we will still need the winsock things no matter what was included.
