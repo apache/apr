@@ -82,7 +82,7 @@ static BOOL OnlyDots(char *pString)
  * is present on the existing path.  This routine also
  * converts alias names to long names.
  */
-API_EXPORT(char *) ap_os_systemcase_filename(struct ap_context_t *pCont, 
+API_EXPORT(char *) ap_os_systemcase_filename(ap_context_t *pCont, 
                                              const char *szFile)
 {
     char buf[HUGE_STRING_LEN];
@@ -201,7 +201,7 @@ API_EXPORT(char *) ap_os_systemcase_filename(struct ap_context_t *pCont,
 /*  Perform canonicalization with the exception that the
  *  input case is preserved.
  */
-char * canonical_filename(struct ap_context_t *pCont, const char *szFile)
+char * canonical_filename(ap_context_t *pCont, const char *szFile)
 {
     char *pNewStr;
     char *s;

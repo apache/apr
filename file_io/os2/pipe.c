@@ -58,7 +58,7 @@
 #include "apr_lib.h"
 #include <string.h>
 
-ap_status_t ap_create_pipe(struct ap_file_t **in, struct ap_file_t **out, ap_context_t *cont)
+ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_context_t *cont)
 {
     ULONG filedes[2];
     ULONG rc;
@@ -69,7 +69,7 @@ ap_status_t ap_create_pipe(struct ap_file_t **in, struct ap_file_t **out, ap_con
         return os2errno(rc);
     }
     
-    (*in) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
+    (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
     (*in)->fname = ap_pstrdup(cont, "PIPE");
@@ -78,7 +78,7 @@ ap_status_t ap_create_pipe(struct ap_file_t **in, struct ap_file_t **out, ap_con
     (*in)->flags = 0;
     ap_register_cleanup(cont, *in, apr_file_cleanup, ap_null_cleanup);
 
-    (*out) = (struct ap_file_t *)ap_palloc(cont, sizeof(struct ap_file_t));
+    (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->fname = ap_pstrdup(cont, "PIPE");
@@ -100,7 +100,7 @@ ap_status_t ap_create_namedpipe(char *filename, ap_fileperms_t perm, ap_context_
 
  
 
-ap_status_t ap_set_pipe_timeout(struct ap_file_t *thepipe, ap_int32_t timeout)
+ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_int32_t timeout)
 {
     return APR_ENOTIMPL;
 }

@@ -63,7 +63,7 @@
  *    Asynchronously kill a thread
  * arg 1) The thread to kill.
  */
-ap_status_t ap_cancel_thread(struct ap_thread_t *thd)
+ap_status_t ap_cancel_thread(ap_thread_t *thd)
 {
     ap_status_t stat;
     if ((stat = pthread_cancel(*thd->td)) == 0) {

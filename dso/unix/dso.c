@@ -70,7 +70,7 @@ ap_status_t ap_dso_init(void){
  * arg 2) Path to the DSO library
  * arg 3) Context to use. 
  */
-ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path, 
+ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
                         ap_context_t *ctx)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
@@ -96,7 +96,7 @@ ap_status_t ap_dso_load(struct ap_dso_handle_t **res_handle, const char *path,
  *    Close a DSO library.
  * arg 1) handle to close.
  */
-ap_status_t ap_dso_unload(struct ap_dso_handle_t *handle)
+ap_status_t ap_dso_unload(ap_dso_handle_t *handle)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_unload((shl_t)handle->handle);
@@ -117,7 +117,7 @@ ap_status_t ap_dso_unload(struct ap_dso_handle_t *handle)
  * arg 3) Name of the symbol to load.
  */
 ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, 
-                       struct ap_dso_handle_t *handle, 
+                       ap_dso_handle_t *handle, 
                        const char *symname)
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)

@@ -109,7 +109,7 @@ static ap_status_t handle_type(ap_filetype_e *ftype, HFILE file)
 
 
 
-ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct ap_file_t *thefile)
+ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
 {
     ULONG rc;
     FILESTATUS3 fstatus;

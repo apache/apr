@@ -54,7 +54,7 @@
 
 #include "networkio.h"
 
-ap_status_t ap_setsocketopt(struct ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
+ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
 {
     int one;
     if (on){
@@ -92,7 +92,7 @@ ap_status_t ap_gethostname(char * buf, int len, ap_context_t *cont)
 	}
 }
 
-ap_status_t ap_get_remote_hostname(char **name, struct ap_socket_t *sock)
+ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
 {
     struct hostent *hptr;
     

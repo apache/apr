@@ -62,15 +62,15 @@
 
 static ap_status_t dir_cleanup(void *thedir)
 {
-    struct ap_dir_t *dir = thedir;
+    ap_dir_t *dir = thedir;
     return ap_closedir(dir);
 }
 
 
 
-ap_status_t ap_opendir(struct ap_dir_t **new, const char *dirname, ap_context_t *cntxt)
+ap_status_t ap_opendir(ap_dir_t **new, const char *dirname, ap_context_t *cntxt)
 {
-    struct ap_dir_t *thedir = (struct ap_dir_t *)ap_palloc(cntxt, sizeof(struct ap_dir_t));
+    ap_dir_t *thedir = (ap_dir_t *)ap_palloc(cntxt, sizeof(ap_dir_t));
     
     if (thedir == NULL)
         return APR_ENOMEM;
@@ -90,7 +90,7 @@ ap_status_t ap_opendir(struct ap_dir_t **new, const char *dirname, ap_context_t 
 
 
 
-ap_status_t ap_closedir(struct ap_dir_t *thedir)
+ap_status_t ap_closedir(ap_dir_t *thedir)
 {
     int rv = 0;
     
@@ -107,7 +107,7 @@ ap_status_t ap_closedir(struct ap_dir_t *thedir)
 
 
 
-ap_status_t ap_readdir(struct ap_dir_t *thedir)
+ap_status_t ap_readdir(ap_dir_t *thedir)
 {
     int rv;
     ULONG entries = 1;
@@ -136,7 +136,7 @@ ap_status_t ap_readdir(struct ap_dir_t *thedir)
 
 
 
-ap_status_t ap_rewinddir(struct ap_dir_t *thedir)
+ap_status_t ap_rewinddir(ap_dir_t *thedir)
 {
     return ap_closedir(thedir);
 }
@@ -157,7 +157,7 @@ ap_status_t ap_remove_dir(const char *path, ap_context_t *cont)
 
 
 
-ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct ap_dir_t *thedir)
+ap_status_t ap_dir_entry_size(ap_ssize_t *size, ap_dir_t *thedir)
 {
     if (thedir->validentry) {
         *size = thedir->entry.cbFile;
@@ -169,7 +169,7 @@ ap_status_t ap_dir_entry_size(ap_ssize_t *size, struct ap_dir_t *thedir)
 
 
 
-ap_status_t ap_dir_entry_mtime(ap_time_t *time, struct ap_dir_t *thedir)
+ap_status_t ap_dir_entry_mtime(ap_time_t *time, ap_dir_t *thedir)
 {
     if (thedir->validentry) {
         ap_os2_time_to_ap_time(time, thedir->entry.fdateLastWrite, thedir->entry.ftimeLastWrite);
@@ -181,7 +181,7 @@ ap_status_t ap_dir_entry_mtime(ap_time_t *time, struct ap_dir_t *thedir)
 
 
 
-ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct ap_dir_t *thedir)
+ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, ap_dir_t *thedir)
 {
     int rc;
     HFILE hFile;
@@ -216,7 +216,7 @@ ap_status_t ap_dir_entry_ftype(ap_filetype_e *type, struct ap_dir_t *thedir)
 
 
 
-ap_status_t ap_get_dir_filename(char **new, struct ap_dir_t *thedir)
+ap_status_t ap_get_dir_filename(char **new, ap_dir_t *thedir)
 {
     if (thedir->validentry) {
         *new = thedir->entry.achName;

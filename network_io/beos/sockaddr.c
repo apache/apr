@@ -54,7 +54,7 @@
 
 #include "networkio.h"
 
-ap_status_t ap_set_local_port(struct ap_socket_t *sock, ap_uint32_t port)
+ap_status_t ap_set_local_port(ap_socket_t *sock, ap_uint32_t port)
 {
     if (!sock) {
         return APR_EBADF;
@@ -63,7 +63,7 @@ ap_status_t ap_set_local_port(struct ap_socket_t *sock, ap_uint32_t port)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_remote_port(struct ap_socket_t *sock, ap_uint32_t port)
+ap_status_t ap_set_remote_port(ap_socket_t *sock, ap_uint32_t port)
 {
     if (!sock) {
         return APR_EBADF;
@@ -72,7 +72,7 @@ ap_status_t ap_set_remote_port(struct ap_socket_t *sock, ap_uint32_t port)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_local_port(ap_uint32_t *port, struct ap_socket_t *sock)
+ap_status_t ap_get_local_port(ap_uint32_t *port, ap_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;
@@ -81,7 +81,7 @@ ap_status_t ap_get_local_port(ap_uint32_t *port, struct ap_socket_t *sock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_remote_port(ap_uint32_t *port, struct ap_socket_t *sock)
+ap_status_t ap_get_remote_port(ap_uint32_t *port, ap_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;
@@ -90,7 +90,7 @@ ap_status_t ap_get_remote_port(ap_uint32_t *port, struct ap_socket_t *sock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_local_ipaddr(struct ap_socket_t *sock, const char *addr)
+ap_status_t ap_set_local_ipaddr(ap_socket_t *sock, const char *addr)
 {
     u_long ipaddr;
 
@@ -113,7 +113,7 @@ ap_status_t ap_set_local_ipaddr(struct ap_socket_t *sock, const char *addr)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_set_remote_ipaddr(struct ap_socket_t *sock, const char *addr)
+ap_status_t ap_set_remote_ipaddr(ap_socket_t *sock, const char *addr)
 {
     u_long ipaddr;
 
@@ -136,7 +136,7 @@ ap_status_t ap_set_remote_ipaddr(struct ap_socket_t *sock, const char *addr)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_local_ipaddr(char **addr, const struct ap_socket_t *sock)
+ap_status_t ap_get_local_ipaddr(char **addr, const ap_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;
@@ -146,7 +146,7 @@ ap_status_t ap_get_local_ipaddr(char **addr, const struct ap_socket_t *sock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_remote_ipaddr(char **addr, const struct ap_socket_t *sock)
+ap_status_t ap_get_remote_ipaddr(char **addr, const ap_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;
@@ -157,7 +157,7 @@ ap_status_t ap_get_remote_ipaddr(char **addr, const struct ap_socket_t *sock)
 }
 
 
-ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct ap_socket_t *sock)
+ap_status_t ap_get_local_name(struct sockaddr_in **name, const ap_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;
@@ -167,7 +167,7 @@ ap_status_t ap_get_local_name(struct sockaddr_in **name, const struct ap_socket_
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_remote_name(struct sockaddr_in **name, const struct ap_socket_t *sock)
+ap_status_t ap_get_remote_name(struct sockaddr_in **name, const ap_socket_t *sock)
 {
     if (!sock) {
         return APR_EBADF;

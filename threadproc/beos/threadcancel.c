@@ -55,7 +55,7 @@
 #include "threadproc.h"
 
 
-ap_status_t ap_cancel_thread(struct ap_thread_t *thd)
+ap_status_t ap_cancel_thread(ap_thread_t *thd)
 {
     if (kill_thread(thd->td) == 0) {
         return APR_SUCCESS;

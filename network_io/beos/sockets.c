@@ -56,7 +56,7 @@
 
 ap_status_t socket_cleanup(void *sock)
 {
-    struct ap_socket_t *thesocket = sock;
+    ap_socket_t *thesocket = sock;
     if (closesocket(thesocket->socketdes) == 0) {
         thesocket->socketdes = -1;
         return APR_SUCCESS;
@@ -66,9 +66,9 @@ ap_status_t socket_cleanup(void *sock)
     }
 }
 
-ap_status_t ap_create_tcp_socket(struct ap_socket_t **new, ap_context_t *cont)
+ap_status_t ap_create_tcp_socket(ap_socket_t **new, ap_context_t *cont)
 {
-    (*new) = (struct ap_socket_t *)ap_palloc(cont,sizeof(struct ap_socket_t));
+    (*new) = (ap_socket_t *)ap_palloc(cont,sizeof(ap_socket_t));
     
     if ((*new) == NULL){
         return APR_ENOMEM;
@@ -100,18 +100,18 @@ ap_status_t ap_create_tcp_socket(struct ap_socket_t **new, ap_context_t *cont)
     return APR_SUCCESS;
 } 
 
-ap_status_t ap_shutdown(struct ap_socket_t *thesocket, ap_shutdown_how_e how)
+ap_status_t ap_shutdown(ap_socket_t *thesocket, ap_shutdown_how_e how)
 {
     return APR_SUCCESS;
 }
 
-ap_status_t ap_close_socket(struct ap_socket_t *thesocket)
+ap_status_t ap_close_socket(ap_socket_t *thesocket)
 {
     ap_kill_cleanup(thesocket->cntxt,thesocket,socket_cleanup);
     return socket_cleanup(thesocket);
 }
 
-ap_status_t ap_bind(struct ap_socket_t *sock) 
+ap_status_t ap_bind(ap_socket_t *sock) 
 { 
     if (bind(sock->socketdes, (struct sockaddr *)sock->local_addr, sock->addr_len) == -1) 
         return errno; 
@@ -119,7 +119,7 @@ ap_status_t ap_bind(struct ap_socket_t *sock)
         return APR_SUCCESS; 
 } 
  
-ap_status_t ap_listen(struct ap_socket_t *sock, ap_int32_t backlog) 
+ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog) 
 { 
     if (listen(sock->socketdes, backlog) == -1) 
         return errno; 
@@ -127,9 +127,9 @@ ap_status_t ap_listen(struct ap_socket_t *sock, ap_int32_t backlog)
         return APR_SUCCESS; 
 } 
 
-ap_status_t ap_accept(struct ap_socket_t **new, const struct ap_socket_t *sock, struct ap_context_t *connection_context) 
+ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_context_t *connection_context) 
 { 
-	(*new) = (struct ap_socket_t *)ap_palloc(connection_context,
+	(*new) = (ap_socket_t *)ap_palloc(connection_context,
 	                        sizeof(ap_socket_t)); 
 
     (*new)->cntxt = connection_context;
@@ -157,7 +157,7 @@ ap_status_t ap_accept(struct ap_socket_t **new, const struct ap_socket_t *sock, 
     return APR_SUCCESS;
 } 
  
-ap_status_t ap_connect(struct ap_socket_t *sock, char *hostname) 
+ap_status_t ap_connect(ap_socket_t *sock, char *hostname) 
 { 
     struct hostent *hp; 
 
@@ -186,7 +186,7 @@ ap_status_t ap_connect(struct ap_socket_t *sock, char *hostname)
     return APR_SUCCESS; 
 } 
 
-ap_status_t ap_get_socketdata(void **data, char *key, struct ap_socket_t *sock)
+ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *sock)
 {
     if (socket != NULL) {
         return ap_get_userdata(data, key, sock->cntxt);
@@ -197,7 +197,7 @@ ap_status_t ap_get_socketdata(void **data, char *key, struct ap_socket_t *sock)
     }
 }
 
-ap_status_t ap_set_socketdata(struct ap_socket_t *sock, void *data, char *key,
+ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, char *key,
                               ap_status_t (*cleanup) (void *))
 {
     if (sock != NULL) {
@@ -209,7 +209,7 @@ ap_status_t ap_set_socketdata(struct ap_socket_t *sock, void *data, char *key,
     }
 }
 
-ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct ap_socket_t *sock)
+ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, ap_socket_t *sock)
 {
     if (sock == NULL) {
         return APR_ENOSOCKET;
@@ -218,14 +218,14 @@ ap_status_t ap_get_os_sock(ap_os_sock_t *thesock, struct ap_socket_t *sock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_sock(struct ap_socket_t **sock, ap_os_sock_t *thesock, 
+ap_status_t ap_put_os_sock(ap_socket_t **sock, ap_os_sock_t *thesock, 
                            ap_context_t *cont)
 {
     if (cont == NULL) {
         return APR_ENOCONT;
     }
     if ((*sock) == NULL) {
-        (*sock) = (struct ap_socket_t *)ap_palloc(cont, sizeof(struct ap_socket_t));
+        (*sock) = (ap_socket_t *)ap_palloc(cont, sizeof(ap_socket_t));
         (*sock)->cntxt = cont;
     }
     (*sock)->socketdes = *thesock;

@@ -61,9 +61,9 @@
 #define INCL_DOS
 #include <os2.h>
 
-ap_status_t ap_create_threadattr(struct ap_threadattr_t **new, ap_context_t *cont)
+ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_context_t *cont)
 {
-    (*new) = (struct ap_threadattr_t *)ap_palloc(cont, sizeof(struct ap_threadattr_t));
+    (*new) = (ap_threadattr_t *)ap_palloc(cont, sizeof(ap_threadattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -76,7 +76,7 @@ ap_status_t ap_create_threadattr(struct ap_threadattr_t **new, ap_context_t *con
 
 
 
-ap_status_t ap_setthreadattr_detach(struct ap_threadattr_t *attr, ap_int32_t on)
+ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
 {
     attr->attr |= APR_THREADATTR_DETACHED;
     return APR_SUCCESS;
@@ -84,7 +84,7 @@ ap_status_t ap_setthreadattr_detach(struct ap_threadattr_t *attr, ap_int32_t on)
 
 
 
-ap_status_t ap_getthreadattr_detach(struct ap_threadattr_t *attr)
+ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
 {
     return (attr->attr & APR_THREADATTR_DETACHED) ? APR_DETACH : APR_NOTDETACH;
 }
@@ -93,20 +93,20 @@ ap_status_t ap_getthreadattr_detach(struct ap_threadattr_t *attr)
 
 static void ap_thread_begin(void *arg)
 {
-  struct ap_thread_t *thread = (struct ap_thread_t *)arg;
+  ap_thread_t *thread = (ap_thread_t *)arg;
   thread->rv = thread->func(thread->data);
 }
 
 
 
-ap_status_t ap_create_thread(struct ap_thread_t **new, struct ap_threadattr_t *attr, 
+ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr, 
                              ap_thread_start_t func, void *data, 
                              ap_context_t *cont)
 {
     ap_status_t stat;
     ap_thread_t *thread;
  
-    thread = (struct ap_thread_t *)ap_palloc(cont, sizeof(struct ap_thread_t));
+    thread = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
     *new = thread;
 
     if (thread == NULL) {
@@ -154,7 +154,7 @@ ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
 
 
 
-ap_status_t ap_thread_join(ap_status_t *retval, struct ap_thread_t *thd)
+ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
 {
     ULONG rc;
     TID waittid = thd->tid;
@@ -169,7 +169,7 @@ ap_status_t ap_thread_join(ap_status_t *retval, struct ap_thread_t *thd)
 
 
 
-ap_status_t ap_thread_detach(struct ap_thread_t *thd)
+ap_status_t ap_thread_detach(ap_thread_t *thd)
 {
     thd->attr->attr |= APR_THREADATTR_DETACHED;
     return APR_SUCCESS;

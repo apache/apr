@@ -57,7 +57,7 @@
 #include "apr_general.h"
 
 
-ap_status_t ap_cancel_thread(struct ap_thread_t *thd)
+ap_status_t ap_cancel_thread(ap_thread_t *thd)
 {
     if (TerminateThread(thd->td, APR_SUCCESS) == 0) {
         return APR_EEXIST;

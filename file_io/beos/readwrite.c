@@ -54,7 +54,7 @@
 
 #include "../unix/fileio.h"
 
-ap_status_t ap_read(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_ssize_t rv;
 
@@ -81,7 +81,7 @@ ap_status_t ap_read(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_write(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
+ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
     ap_size_t rv;
 
@@ -105,7 +105,7 @@ ap_status_t ap_write(struct ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_writev(struct ap_file_t *thefile, const struct iovec *vec, 
+ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, 
                       ap_size_t nvec, ap_ssize_t *nbytes)
 {
     int bytes;
@@ -246,7 +246,7 @@ static int printf_flush(ap_vformatter_buff_t *vbuff)
 }
 #endif
 
-API_EXPORT(int) ap_fprintf(struct ap_file_t *fptr, const char *format, ...)
+API_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;

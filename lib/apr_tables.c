@@ -84,7 +84,7 @@
  * The 'array' functions...
  */
 
-static void make_array_core(ap_array_header_t *res, struct ap_context_t *c,
+static void make_array_core(ap_array_header_t *res, ap_context_t *c,
 			    int nelts, int elt_size)
 {
     /*
@@ -103,7 +103,7 @@ static void make_array_core(ap_array_header_t *res, struct ap_context_t *c,
     res->nalloc = nelts;	/* ...but this many allocated */
 }
 
-API_EXPORT(ap_array_header_t *) ap_make_array(struct ap_context_t *p,
+API_EXPORT(ap_array_header_t *) ap_make_array(ap_context_t *p,
 						int nelts, int elt_size)
 {
     ap_array_header_t *res;
@@ -155,7 +155,7 @@ API_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
     dst->nelts += src->nelts;
 }
 
-API_EXPORT(ap_array_header_t *) ap_copy_array(struct ap_context_t *p,
+API_EXPORT(ap_array_header_t *) ap_copy_array(ap_context_t *p,
 						const ap_array_header_t *arr)
 {
     ap_array_header_t *res = ap_make_array(p, arr->nalloc, arr->elt_size);
@@ -182,7 +182,7 @@ static APR_INLINE void copy_array_hdr_core(ap_array_header_t *res,
 }
 
 API_EXPORT(ap_array_header_t *)
-    ap_copy_array_hdr(struct ap_context_t *p,
+    ap_copy_array_hdr(ap_context_t *p,
 		       const ap_array_header_t *arr)
 {
     ap_array_header_t *res;
@@ -196,7 +196,7 @@ API_EXPORT(ap_array_header_t *)
 /* The above is used here to avoid consing multiple new array bodies... */
 
 API_EXPORT(ap_array_header_t *)
-    ap_append_arrays(struct ap_context_t *p,
+    ap_append_arrays(ap_context_t *p,
 		      const ap_array_header_t *first,
 		      const ap_array_header_t *second)
 {
@@ -212,7 +212,7 @@ API_EXPORT(ap_array_header_t *)
  * or if there are no elements in the array.
  * If sep is non-NUL, it will be inserted between elements as a separator.
  */
-API_EXPORT(char *) ap_array_pstrcat(struct ap_context_t *p,
+API_EXPORT(char *) ap_array_pstrcat(ap_context_t *p,
 				     const ap_array_header_t *arr,
 				     const char sep)
 {
@@ -289,7 +289,7 @@ static ap_table_entry_t *table_push(ap_table_t *t)
 #endif /* MAKE_TABLE_PROFILE */
 
 
-API_EXPORT(ap_table_t *) ap_make_table(struct ap_context_t *p, int nelts)
+API_EXPORT(ap_table_t *) ap_make_table(ap_context_t *p, int nelts)
 {
     ap_table_t *t = ap_palloc(p, sizeof(ap_table_t));
 
@@ -300,7 +300,7 @@ API_EXPORT(ap_table_t *) ap_make_table(struct ap_context_t *p, int nelts)
     return t;
 }
 
-API_EXPORT(ap_table_t *) ap_copy_table(struct ap_context_t *p, const ap_table_t *t)
+API_EXPORT(ap_table_t *) ap_copy_table(ap_context_t *p, const ap_table_t *t)
 {
     ap_table_t *new = ap_palloc(p, sizeof(ap_table_t));
 
@@ -530,7 +530,7 @@ API_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
     elts->val = (char *)val;
 }
 
-API_EXPORT(ap_table_t *) ap_overlay_tables(struct ap_context_t *p,
+API_EXPORT(ap_table_t *) ap_overlay_tables(ap_context_t *p,
 					     const ap_table_t *overlay,
 					     const ap_table_t *base)
 {

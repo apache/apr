@@ -54,7 +54,7 @@
 
 #include "misc.h"
 
-ap_status_t ap_create_context(struct ap_context_t **newcont, struct ap_context_t *cont)
+ap_status_t ap_create_context(ap_context_t **newcont, ap_context_t *cont)
 {
     ap_context_t *new;
     ap_pool_t *pool;
@@ -70,7 +70,7 @@ ap_status_t ap_create_context(struct ap_context_t **newcont, struct ap_context_t
         return APR_ENOPOOL;
     }
     
-    new = (struct ap_context_t *)ap_palloc(cont, sizeof(struct ap_context_t));
+    new = (ap_context_t *)ap_palloc(cont, sizeof(ap_context_t));
     
     new->pool = pool;
     new->prog_data = NULL;
@@ -87,7 +87,7 @@ ap_status_t ap_destroy_context(ap_context_t *cont)
 
 ap_status_t ap_set_userdata(void *data, char *key,
                             ap_status_t (*cleanup) (void *),
-                            struct ap_context_t *cont)
+                            ap_context_t *cont)
 {
     datastruct *dptr = NULL, *dptr2 = NULL;
     if (cont) { 
@@ -117,7 +117,7 @@ ap_status_t ap_set_userdata(void *data, char *key,
     return APR_ENOCONT;
 }
 
-ap_status_t ap_get_userdata(void **data, char *key, struct ap_context_t *cont)
+ap_status_t ap_get_userdata(void **data, char *key, ap_context_t *cont)
 {
     datastruct *dptr = NULL;
     if (cont) { 

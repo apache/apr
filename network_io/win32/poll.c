@@ -61,9 +61,9 @@
 #include <time.h>
 
 
-ap_status_t ap_setup_poll(struct ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
+ap_status_t ap_setup_poll(ap_pollfd_t **new, ap_int32_t num, ap_context_t *cont)
 {
-    (*new) = (struct ap_pollfd_t *)ap_palloc(cont, sizeof(struct ap_pollfd_t) * num);
+    (*new) = (ap_pollfd_t *)ap_palloc(cont, sizeof(ap_pollfd_t) * num);
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
@@ -80,8 +80,8 @@ ap_status_t ap_setup_poll(struct ap_pollfd_t **new, ap_int32_t num, ap_context_t
     return APR_SUCCESS;
 }
 
-ap_status_t ap_add_poll_socket(struct ap_pollfd_t *aprset, 
-			       struct ap_socket_t *sock, ap_int16_t event)
+ap_status_t ap_add_poll_socket(ap_pollfd_t *aprset, 
+			       ap_socket_t *sock, ap_int16_t event)
 {
     if (event & APR_POLLIN) {
         FD_SET(sock->sock, aprset->read);
@@ -98,7 +98,7 @@ ap_status_t ap_add_poll_socket(struct ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_poll(struct ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
+ap_status_t ap_poll(ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t timeout)
 {
     int rv;
     struct timeval *thetime;
@@ -142,7 +142,7 @@ ap_status_t ap_poll(struct ap_pollfd_t *aprset, ap_int32_t *nsds, ap_int32_t tim
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_revents(ap_int16_t *event, struct ap_socket_t *sock, struct ap_pollfd_t *aprset)
+ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock, ap_pollfd_t *aprset)
 {
     ap_int16_t revents = 0;
     WSABUF data;
@@ -195,7 +195,7 @@ ap_status_t ap_get_revents(ap_int16_t *event, struct ap_socket_t *sock, struct a
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_polldata(struct ap_pollfd_t *pollfd, char *key, void *data)
+ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, char *key, void *data)
 {
     if (pollfd != NULL) {
         return ap_get_userdata(data, key, pollfd->cntxt);
@@ -206,7 +206,7 @@ ap_status_t ap_get_polldata(struct ap_pollfd_t *pollfd, char *key, void *data)
     }
 }
 
-ap_status_t ap_set_polldata(struct ap_pollfd_t *pollfd, void *data, char *key,
+ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
                             ap_status_t (*cleanup) (void *))
 {
     if (pollfd != NULL) {
@@ -218,8 +218,8 @@ ap_status_t ap_set_polldata(struct ap_pollfd_t *pollfd, void *data, char *key,
     }
 }
 
-ap_status_t ap_remove_poll_socket(struct ap_pollfd_t *aprset, 
-                                  struct ap_socket_t *sock, ap_int16_t events)
+ap_status_t ap_remove_poll_socket(ap_pollfd_t *aprset, 
+                                  ap_socket_t *sock, ap_int16_t events)
 {
     if (events & APR_POLLIN) {
         FD_CLR(sock->sock, aprset->read);
@@ -236,7 +236,7 @@ ap_status_t ap_remove_poll_socket(struct ap_pollfd_t *aprset,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_clear_poll_sockets(struct ap_pollfd_t *aprset, ap_int16_t events)
+ap_status_t ap_clear_poll_sockets(ap_pollfd_t *aprset, ap_int16_t events)
 {
     if (events & APR_POLLIN) {
         FD_ZERO(aprset->read);
