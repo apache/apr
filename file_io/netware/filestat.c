@@ -184,14 +184,13 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     return apr_file_perms_set(fname, finfo.protection);
 }
 
-int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *pool)
+int cstat (NXPathCtx_t pathCtx, const char *path, struct stat *buf, char **casedName, apr_pool_t *pool)
 {
     apr_hash_t *statCache = (apr_hash_t *)getStatCache(CpuCurrentProcessor);
     apr_pool_t *gPool = (apr_pool_t *)getGlobalPool(CpuCurrentProcessor);
     apr_stat_entry_t *stat_entry;
     struct stat *info;
     apr_time_t now = apr_time_now();
-    NXPathCtx_t pathCtx = 0;
     char *key;
     int ret;
     int found = 0;
@@ -205,7 +204,6 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
         char poolname[50];
 
         if (apr_pool_create(&gPool, NULL) != APR_SUCCESS) {
-            getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD);
             ret = getstat(pathCtx, path, buf, ST_STAT_BITS|ST_NAME_BIT);
             if (ret == 0) {
                 *casedName = apr_pstrdup (pool, buf->st_name);
@@ -259,9 +257,7 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
                 char *dirPath = NULL, *fname = NULL;
                 char *ptr;
                 int err, len;
-                char pathbuf[256];
 
-                getcwdpath(pathbuf, &pathCtx, CTX_ACTUAL_CWD);
                 ret = getstat(pathCtx, path, buf, ST_STAT_BITS|ST_NAME_BIT);
 
                 if (ret) {
@@ -309,8 +305,6 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
                                   ST_MODE_BIT|ST_ATIME_BIT|ST_MTIME_BIT|ST_CTIME_BIT|ST_SIZE_BIT|ST_NAME_BIT);
                 }
                 else {
-                    char pathbuf[256];
-                    getcwdpath(pathbuf, &pathCtx, CTX_ACTUAL_CWD);
                     ret = getstat(pathCtx, path, buf, 
                                   ST_MODE_BIT|ST_ATIME_BIT|ST_MTIME_BIT|ST_CTIME_BIT|ST_SIZE_BIT|ST_NAME_BIT);
                 }
@@ -339,7 +333,6 @@ int cstat (const char *path, struct stat *buf, char **casedName, apr_pool_t *poo
         }
     }
     else {
-        getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD);
         ret = getstat(pathCtx, path, buf, ST_STAT_BITS|ST_NAME_BIT);
         if (ret == 0) {
             *casedName = apr_pstrdup(pool, buf->st_name);
@@ -359,8 +352,23 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
     struct stat info;
     int srv;
     char *casedName = NULL;
+    NXPathCtx_t pathCtx = 0;
+    int identity;
+    int ret;
 
-    srv = cstat(fname, &info, &casedName, pool);
+    getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD);
+    ret= get_identity (pathCtx, &identity);
+
+    if (ret || identity) {
+        srv = getstat(pathCtx, fname, &info, ST_STAT_BITS|ST_NAME_BIT);
+        if (srv == 0) {
+            casedName = apr_pstrdup(pool, info.st_name);
+        }
+        errno = srv;
+    }
+    else {
+        srv = cstat(pathCtx, fname, &info, &casedName, pool);
+    }
 
     if (srv == 0) {
         finfo->pool = pool;
