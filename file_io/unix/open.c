@@ -116,12 +116,15 @@ ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_
     (*new)->oflags = oflags;
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
+        buf_oflags = strdup("r+");
         oflags = O_RDWR;
     }
     else if (flag & APR_READ) {
+        buf_oflags = strdup("r");
         oflags = O_RDONLY;
     }
     else if (flag & APR_WRITE) {
+        buf_oflags = strdup("w");
         oflags = O_WRONLY;
     }
     else {
@@ -146,43 +149,31 @@ ap_status_t ap_open(ap_context_t *cont, const char *fname, ap_int32_t flag,  ap_
     }   
 
     if (flag & APR_APPEND) {
+        buf_oflags[0] = 'a';
         oflags |= O_APPEND;
     }
     if (flag & APR_TRUNCATE) {
         oflags |= O_TRUNC;
     }
- 
-    if (perm == APR_OS_DEFAULT) {
-        (*new)->filedes = open(fname, oflags);
-    }
-    else {
-        (*new)->filedes = open(fname, oflags, mode);
-    }    
     
-    if ((*new)->filedes < 0) {
+    if ((*new)->buffered) {
+        (*new)->filehand = fopen(fname, buf_oflags);
+    }
+    else { 
+        if (perm == APR_OS_DEFAULT) {
+            (*new)->filedes = open(fname, oflags);
+        }
+        else {
+            (*new)->filedes = open(fname, oflags, mode);
+        }    
+    }
+
+    if ((*new)->filedes < 0 || (*new)->filehand == NULL) {
        (*new)->filedes = -1;
        (*new)->eof_hit = 1;
         return errno;
     }
 
-    if ((*new)->buffered) {
-        switch (oflags) {
-            case O_RDONLY: 
-                buf_oflags = "r";
-                break;
-            case O_WRONLY:
-                buf_oflags = "w";
-                break;
-            case O_RDWR:
-                buf_oflags = "r+";
-                break;
-        }
-        (*new)->filehand = fdopen((*new)->filedes, buf_oflags);
-        if ((*new)->filehand == NULL) {
-            file_cleanup(*new);
-            return errno; 
-        }
-    }
     (*new)->stated = 0;  /* we haven't called stat for this file yet. */
     (*new)->eof_hit = 0;
     ap_register_cleanup((*new)->cntxt, (void *)(*new), file_cleanup, NULL);
@@ -228,13 +219,21 @@ ap_status_t ap_remove_file(ap_context_t *cont, char *path)
  *    convert the file from apr type to os specific type.
  * arg 1) The apr file to convert.
  * arg 2) The os specific file we are converting to
+ * NOTE:  On Unix, it is only possible to get a file descriptor from 
+ *        an apr file type.
  */
 ap_status_t ap_get_os_file(struct file_t *file, ap_os_file_t *thefile)
 {
     if (file == NULL) {
         return APR_ENOFILE;
     }
-    thefile = &(file->filedes);
+
+    if (file->buffered) {
+        *thefile = fileno(file->filehand);
+    }
+    else {
+        *thefile = file->filedes;
+    }
     return APR_SUCCESS;
 }
 
@@ -244,10 +243,13 @@ ap_status_t ap_get_os_file(struct file_t *file, ap_os_file_t *thefile)
  * arg 1) The context to use if it is needed.
  * arg 2) The apr file we are converting to.
  * arg 3) The os specific file to convert
+ * NOTE:  On Unix, it is only possible to put a file descriptor into
+ *        an apr file type.
  */
 ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file, 
                             ap_os_file_t *thefile)
 {
+    int *dafile = thefile;
     if (cont == NULL) {
         return APR_ENOCONT;
     }
@@ -255,7 +257,7 @@ ap_status_t ap_put_os_file(ap_context_t *cont, struct file_t **file,
         (*file) = (struct file_t *)ap_palloc(cont, sizeof(struct file_t));
         (*file)->cntxt = cont;
     }
-    (*file)->filedes = *thefile;
+    (*file)->filedes = *dafile;
     return APR_SUCCESS;
 }    
 

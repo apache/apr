@@ -192,8 +192,28 @@ ap_status_t ap_putc(ap_file_t *thefile, char ch)
 }
 
 /* ***APRDOC********************************************************
+ * ap_status_t ap_ungetc(ap_file_t *, char)
+ *    put a character back onto a specified stream.
+ * arg 1) The file descriptor to write to
+ * arg 2) The character to write.
+ */
+ap_status_t ap_ungetc(ap_file_t *thefile, char ch)
+{
+    ssize_t rv;
+    
+    if (thefile->buffered) {
+        if (ungetc(ch, thefile->filehand) == ch) {
+            return APR_SUCCESS;
+        }
+        return errno;
+    }
+    /* Not sure what to do in this case.  For now, return SUCCESS. */
+    return APR_SUCCESS; 
+}
+
+/* ***APRDOC********************************************************
  * ap_status_t ap_getc(ap_file_t *, char *)
- *    put a character into the specified file.
+ *    get a character from the specified file.
  * arg 1) The file descriptor to write to
  * arg 2) The character to write.
  */
@@ -218,6 +238,51 @@ ap_status_t ap_getc(ap_file_t *thefile, char *ch)
     else if (rv != 1) {
         return errno;
     }
+    return APR_SUCCESS; 
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_puts(ap_file_t *, char *)
+ *    Put the string into a specified file.
+ * arg 1) The file descriptor to write to from
+ * arg 2) The string to write. 
+ */
+ap_status_t ap_puts(ap_file_t *thefile, char *str)
+{
+    ssize_t rv;
+    int i = 0;    
+
+    if (thefile->buffered) {
+        if (fputs(str, thefile->filehand)) {
+            return APR_SUCCESS;
+        }
+        return errno;
+    }
+    while (str[i] != '\0') {
+        rv = write(thefile->filedes, &str[i], 1); 
+        if (rv != 1) {
+            return errno;
+        }
+    }
+    return APR_SUCCESS; 
+}
+
+/* ***APRDOC********************************************************
+ * ap_status_t ap_flush(ap_file_t *)
+ *    Flush the file's buffer.
+ * arg 1) The file descriptor to flush
+ */
+ap_status_t ap_flush(ap_file_t *thefile)
+{
+    if (thefile->buffered) {
+        if (!fflush(thefile->filehand)) {
+            return APR_SUCCESS;
+        }
+        return errno;
+    }
+    /* There isn't anything to do if we aren't buffering the output
+     * so just return success.
+     */
     return APR_SUCCESS; 
 }
 
