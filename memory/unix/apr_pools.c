@@ -161,8 +161,7 @@ struct apr_pool_t {
 
 #else /* !defined(APR_POOL_DEBUG) */
     debug_node_t         *nodes;
-    const char           *file;
-    int                   line;
+    const char           *file_line;
     unsigned int          stat_alloc;
     unsigned int          stat_total_alloc;
     unsigned int          stat_clear;
@@ -987,7 +986,7 @@ APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
  * Pool creation/destruction (debug)
  */
 
-static void pool_clear_debug(apr_pool_t *pool, const char *file, int line)
+static void pool_clear_debug(apr_pool_t *pool, const char *file_line)
 {
     debug_node_t *node;
     apr_uint32_t index;
@@ -996,7 +995,7 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file, int line)
      * this pool thus this loop is safe and easy.
      */
     while (pool->child)
-        apr_pool_destroy_debug(pool->child, file, line);
+        apr_pool_destroy_debug(pool->child, file_line);
 
     /* Run cleanups */
     run_cleanups(pool->cleanups);
@@ -1024,45 +1023,45 @@ static void pool_clear_debug(apr_pool_t *pool, const char *file, int line)
 }
 
 APR_DECLARE(void) apr_pool_clear_debug(apr_pool_t *pool, 
-                                       const char *file, int line)
+                                       const char *file_line)
 {
     check_integrity(pool);
     
 #if defined(APR_POOL_DEBUG_VERBOSE)
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: CLEAR  [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s:%d] (%u/%u/%u)\n",
+            "POOL DEBUG: CLEAR  [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s] (%u/%u/%u)\n",
             (unsigned long)apr_pool_num_bytes(pool, 0),
             (unsigned long)apr_pool_num_bytes(pool, 1),
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
             (unsigned int)pool, pool->tag,
-            file, line,
+            file_line,
             pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear);
     }
 #endif
 
-    pool_clear_debug(pool, file, line);
+    pool_clear_debug(pool, file_line);
 }
 
 APR_DECLARE(void) apr_pool_destroy_debug(apr_pool_t *pool, 
-                                         const char *file, int line)
+                                         const char *file_line)
 {
     check_integrity(pool);
     
 #if defined(APR_POOL_DEBUG_VERBOSE)
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: DESTROY [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s:%d] (%u/%u/%u)\n",
+            "POOL DEBUG: DESTROY [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s] (%u/%u/%u)\n",
             (unsigned long)apr_pool_num_bytes(pool, 0),
             (unsigned long)apr_pool_num_bytes(pool, 1),
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
             (unsigned int)pool, pool->tag,
-            file, line,
+            file_line,
             pool->stat_alloc, pool->stat_total_alloc, pool->stat_clear);
     }
 #endif
 
-    pool_clear_debug(pool, file, line);
+    pool_clear_debug(pool, file_line);
 
     /* Remove the pool from the parents child list */
     if (pool->parent) {
@@ -1090,8 +1089,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
                                                    apr_pool_t *parent,
                                                    apr_abortfunc_t abort_fn,
                                                    apr_uint32_t flags, 
-                                                   const char *file,
-                                                   int line)
+                                                   const char *file_line)
 {
     apr_pool_t *pool;
 
@@ -1115,9 +1113,8 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     memset(pool, 0, SIZEOF_POOL_T);
     
     pool->abort_fn = abort_fn;
-    pool->tag = "<untagged>";
-    pool->file = file;
-    pool->line = line;
+    pool->tag = file_line;
+    pool->file_line = file_line;
 
     if ((flags & APR_POOL_FNEW_ALLOCATOR) == APR_POOL_FNEW_ALLOCATOR) {
 #if APR_HAS_THREADS
@@ -1165,12 +1162,12 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
 #if defined(APR_POOL_DEBUG_VERBOSE)
     if (file_stderr) {
         apr_file_printf(file_stderr,
-            "POOL DEBUG: CREATE  [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s:%u] parent: 0x%08X \"%s\"\n",
+            "POOL DEBUG: CREATE  [%10lu/%10lu/%10lu] 0x%08X \"%s\" [%s] parent: 0x%08X \"%s\"\n",
             (unsigned long)0,
             (unsigned long)0,
             (unsigned long)apr_pool_num_bytes(global_pool, 1),
             (unsigned int)pool, pool->tag, 
-            file, line,
+            file_line,
             (unsigned int)parent, parent ? parent->tag : "<null>");
     }
 #endif
@@ -1190,7 +1187,7 @@ APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool);
 
 APR_DECLARE(void) apr_pool_clear(apr_pool_t *pool)
 {
-    apr_pool_clear_debug(pool, "<undefined>", 0);
+    apr_pool_clear_debug(pool, "<undefined>");
 }
 
 #undef apr_pool_destroy
@@ -1198,7 +1195,7 @@ APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool);
 
 APR_DECLARE(void) apr_pool_destroy(apr_pool_t *pool)
 {
-    apr_pool_destroy_debug(pool, "<undefined>", 0);
+    apr_pool_destroy_debug(pool, "<undefined>");
 }
 
 #undef apr_pool_create_ex
@@ -1214,7 +1211,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex(apr_pool_t **newpool,
 {
     return apr_pool_create_ex_debug(newpool, parent, 
                                     abort_fn, flags,
-                                    "<undefined>", 0);
+                                    "<undefined>");
 }
 
 
