@@ -87,6 +87,12 @@
 #if APR_HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
 #endif
+#if APR_HAVE_NETINET_SCTP_UIO_H
+#include <netinet/sctp_uio.h>
+#endif
+#if APR_HAVE_NETINET_SCTP_H
+#include <netinet/sctp.h>
+#endif
 #if APR_HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
