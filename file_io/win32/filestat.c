@@ -52,8 +52,8 @@
  * <http://www.apache.org/>.
  */
 
-#include <aclapi.h>
 #include "apr_private.h"
+#include <aclapi.h>
 #include "win32/fileio.h"
 #include "apr_file_io.h"
 #include "apr_general.h"
@@ -92,7 +92,7 @@ static apr_fileperms_t convert_prot(ACCESS_MASK acc, prot_scope_e scope)
      * the given behavior.  They are -not- recommended for any set protection
      * function, such a function should -set- use GENERIC_READ/WRITE/EXECUTE
      */
-    apr_fileperms_t prot;
+    apr_fileperms_t prot = 0;
     if (acc & FILE_EXECUTE)
         prot |= APR_WEXECUTE;
     if (acc & FILE_WRITE_DATA)
@@ -245,6 +245,8 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
                                  ((wanted & APR_FINFO_GROUP) ? &grp : NULL),
                                  ((wanted & APR_FINFO_PROT) ? &dacl : NULL),
                                  NULL, &pdesc);
+        else
+            return APR_INCOMPLETE;
         if (rv == ERROR_SUCCESS)
             apr_pool_cleanup_register(finfo->cntxt, pdesc, free_localheap, 
                                  apr_pool_cleanup_null);
