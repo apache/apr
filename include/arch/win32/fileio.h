@@ -89,6 +89,15 @@
 
 #define APR_FILE_BUFSIZE 4096
 
+/* obscure ommissions from msvc's sys/stat.h */
+#ifdef _MSC_VER
+#define S_IFIFO        _S_IFIFO /* pipe */
+#define S_IFBLK        0060000  /* Block Special */
+#define S_IFLNK        0120000  /* Symbolic Link */
+#define S_IFSOCK       0140000  /* Socket */
+#define S_IFWHT        0160000  /* Whiteout */
+#endif
+
 #if APR_HAS_UNICODE_FS
 #include "i18n.h"
 #include <wchar.h>
