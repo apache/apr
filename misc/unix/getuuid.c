@@ -59,7 +59,10 @@
 
 #include <unistd.h>     /* for getpid, gethostname */
 #include <stdlib.h>     /* for rand, srand */
+
+#ifndef NETWARE
 #include <sys/time.h>   /* for gettimeofday */
+#endif
 
 #include "apr.h"
 #include "apr_private.h"
