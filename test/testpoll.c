@@ -69,9 +69,15 @@
 
 static apr_socket_t *s[LARGE_NUM_SOCKETS];
 static apr_sockaddr_t *sa[LARGE_NUM_SOCKETS];
+static apr_pollset_t *pollset;
+
+/* ###: tests surrounded by ifdef OLD_POLL_INTERFACE either need to be
+ * converted to use the pollset interface or removed. */
+
+#ifdef OLD_POLL_INTERFACE
 static apr_pollfd_t *pollarray;
 static apr_pollfd_t *pollarray_large;
-static apr_pollset_t *pollset;
+#endif
 
 static void make_socket(apr_socket_t **sock, apr_sockaddr_t **sa, 
                         apr_port_t port, apr_pool_t *p, CuTest *tc)
@@ -88,6 +94,7 @@ static void make_socket(apr_socket_t **sock, apr_sockaddr_t **sa,
     CuAssertIntEquals(tc, APR_SUCCESS, rv);
 }
 
+#ifdef OLD_POLL_INTERFACE
 static void check_sockets(const apr_pollfd_t *pollarray, 
                           apr_socket_t **sockarray, int which, int pollin, 
                           CuTest *tc)
@@ -109,6 +116,7 @@ static void check_sockets(const apr_pollfd_t *pollarray,
         CuAssert(tc, str, !(event & APR_POLLIN));
     }
 }
+#endif
 
 static void send_msg(apr_socket_t **sockarray, apr_sockaddr_t **sas, int which,
                      CuTest *tc)
@@ -151,6 +159,7 @@ static void create_all_sockets(CuTest *tc)
     }
 }
        
+#ifdef OLD_POLL_INTERFACE
 static void setup_small_poll(CuTest *tc)
 {
     apr_status_t rv;
@@ -310,6 +319,7 @@ static void recv_large_pollarray(CuTest *tc)
         check_sockets(pollarray_large, s, i, 0, tc);
     }
 }
+#endif
 
 static void setup_pollset(CuTest *tc)
 {
@@ -534,6 +544,8 @@ CuSuite *testpoll(void)
     CuSuite *suite = CuSuiteNew("Poll");
 
     SUITE_ADD_TEST(suite, create_all_sockets);
+
+#ifdef OLD_POLL_INTERFACE
     SUITE_ADD_TEST(suite, setup_small_poll);
     SUITE_ADD_TEST(suite, setup_large_poll);
     SUITE_ADD_TEST(suite, nomessage);
@@ -544,6 +556,7 @@ CuSuite *testpoll(void)
     SUITE_ADD_TEST(suite, clear_all_signalled);
     SUITE_ADD_TEST(suite, send_large_pollarray);
     SUITE_ADD_TEST(suite, recv_large_pollarray);
+#endif
 
     SUITE_ADD_TEST(suite, setup_pollset);
     SUITE_ADD_TEST(suite, add_sockets_pollset);
