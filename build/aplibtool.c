@@ -119,6 +119,7 @@ char *shell_esc(const char *str);
 void cleanup_tmp_dirs(cmd_data_t *cmd_data);
 void generate_def_file(cmd_data_t *cmd_data);
 char *nameof(char *fullpath);
+char *truncate_dll_name(char *path);
 
 
 int main(int argc, char *argv[])
@@ -290,7 +291,14 @@ bool parse_input_file_name(char *arg, cmd_data_t *cmd_data)
 
         strcat(newarg, name);
         ext = strrchr(newarg, '.') + 1;
-        strcpy(ext, STATIC_LIB_EXT);
+
+        if (shared && cmd_data->mode == mInstall) {
+          strcpy(ext, DYNAMIC_LIB_EXT);
+          newarg = truncate_dll_name(newarg);
+        } else {
+          strcpy(ext, STATIC_LIB_EXT);
+        }
+
         cmd_data->arglist[cmd_data->num_args++] = newarg;
         return true;
     }
@@ -361,25 +369,14 @@ bool parse_output_file_name(char *arg, cmd_data_t *cmd_data)
         strcat(newarg, arg);
         newext = strrchr(newarg, '.') + 1;
         strcpy(newext, shared ? DYNAMIC_LIB_EXT : STATIC_LIB_EXT);
-        cmd_data->arglist[cmd_data->num_args++] = newarg;
 
 #ifdef TRUNCATE_DLL_NAME
         if (shared) {
-            /* Cut DLL name down to 8 characters after removing any mod_ prefix */
-            int len = ext - name - 1;
-            char *newname = strrchr(newarg, '/') + 1;
-
-            if (strncmp(newname, "mod_", 4) == 0) {
-                strcpy(newname, newname + 4);
-                len -= 4;
-            }
-
-            if (len > 8) {
-                strcpy(newname + 8, strchr(newname, '.'));
-            }
+          newarg = truncate_dll_name(newarg);
         }
 #endif
 
+        cmd_data->arglist[cmd_data->num_args++] = newarg;
         cmd_data->output_name = newarg;
         return true;
     }
@@ -487,7 +484,7 @@ void post_parse_fixup(cmd_data_t *cmd_data)
     }
 #endif
 
-    if (shared) {
+    if (shared && (cmd_data->output_type == otObject || cmd_data->output_type == otDynamicLibrary)) {
         cmd_data->arglist[cmd_data->num_args++] = SHARE_SW;
     }
 }
@@ -739,4 +736,31 @@ char *nameof(char *fullpath)
     }
 
     return name;
+}
+
+
+
+char *truncate_dll_name(char *path)
+{
+    /* Cut DLL name down to 8 characters after removing any mod_ prefix */
+    char *tmppath = strdup(path);
+    char *newname = strrchr(tmppath, '/') + 1;
+    char *ext = strrchr(tmppath, '.');
+    int len;
+
+    if (ext == NULL)
+        return tmppath;
+
+    len = ext - newname;
+
+    if (strncmp(newname, "mod_", 4) == 0) {
+        strcpy(newname, newname + 4);
+        len -= 4;
+    }
+
+    if (len > 8) {
+        strcpy(newname + 8, strchr(newname, '.'));
+    }
+
+    return tmppath;
 }
