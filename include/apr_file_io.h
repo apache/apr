@@ -103,7 +103,7 @@ extern "C" {
                                         writes across process/machines */
 #define APR_FILE_NOCLEANUP  2048   /**< Do not register a cleanup when the file
                                         is opened */
-#define APR_OPEN_FOR_SENDFILE 4096 /**< Open with appropriate semantics for
+#define APR_SENDFILE_ENABLED  4096 /**< Open with appropriate semantics for
                                         apr_sendfile operation */ 
 /** @} */
 
@@ -167,27 +167,27 @@ typedef struct apr_file_t         apr_file_t;
  * @param fname The full path to the file (using / on all systems)
  * @param flag Or'ed value of:
  * <PRE>
- *           APR_READ             open for reading
- *           APR_WRITE            open for writing
- *           APR_CREATE           create the file if not there
- *           APR_APPEND           file ptr is set to end prior to all writes
- *           APR_TRUNCATE         set length to zero if file exists
- *           APR_BINARY           not a text file (This flag is ignored on 
- *                                UNIX because it has no meaning)
- *           APR_BUFFERED         buffer the data.  Default is non-buffered
- *           APR_EXCL             return error if APR_CREATE and file exists
- *           APR_DELONCLOSE       delete the file after closing.
- *           APR_XTHREAD          Platform dependent tag to open the file
- *                                for use across multiple threads
- *           APR_SHARELOCK        Platform dependent support for higher
- *                                level locked read/write access to support
- *                                writes across process/machines
- *           APR_FILE_NOCLEANUP   Do not register a cleanup with the pool 
- *                                passed in on the <EM>cont</EM> argument (see below).
- *                                The apr_os_file_t handle in apr_file_t will not
- *                                be closed when the pool is destroyed.
- *           APR_OPEN_FOR_SENDFILE  Open with appropriate platform semantics
- *                                for sendfile operations.
+ *         APR_READ              open for reading
+ *         APR_WRITE             open for writing
+ *         APR_CREATE            create the file if not there
+ *         APR_APPEND            file ptr is set to end prior to all writes
+ *         APR_TRUNCATE          set length to zero if file exists
+ *         APR_BINARY            not a text file (This flag is ignored on 
+ *                               UNIX because it has no meaning)
+ *         APR_BUFFERED          buffer the data.  Default is non-buffered
+ *         APR_EXCL              return error if APR_CREATE and file exists
+ *         APR_DELONCLOSE        delete the file after closing.
+ *         APR_XTHREAD           Platform dependent tag to open the file
+ *                               for use across multiple threads
+ *         APR_SHARELOCK         Platform dependent support for higher
+ *                               level locked read/write access to support
+ *                               writes across process/machines
+ *         APR_FILE_NOCLEANUP    Do not register a cleanup with the pool 
+ *                               passed in on the <EM>cont</EM> argument (see below).
+ *                               The apr_os_file_t handle in apr_file_t will not
+ *                               be closed when the pool is destroyed.
+ *         APR_SENDFILE_ENABLED  Open with appropriate platform semantics
+ *                               for sendfile operations.
  * </PRE>
  * @param perm Access permissions for file.
  * @param cont The pool to use.

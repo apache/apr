@@ -344,7 +344,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     {
         apr_wchar_t wfname[APR_PATH_MAX];
 
-        if (flag & APR_OPEN_FOR_SENDFILE) {    
+        if (flag & APR_SENDFILE_ENABLED) {    
             /* This feature is required to enable sendfile operations
              * against the file on Win32. Also implies APR_XTHREAD.
              */
@@ -363,10 +363,10 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname,
     ELSE_WIN_OS_IS_ANSI {
         handle = CreateFileA(fname, oflags, sharemode,
                              NULL, createflags, attributes, 0);
-        if (flag & APR_OPEN_FOR_SENDFILE) {    
+        if (flag & APR_SENDFILE_ENABLED) {    
             /* This feature is not supported on this platform.
              */
-            flag &= ~APR_OPEN_FOR_SENDFILE;
+            flag &= ~APR_SENDFILE_ENABLED;
         }
 
     }
