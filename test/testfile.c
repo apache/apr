@@ -88,6 +88,7 @@ struct view_fileinfo
 void test_filedel(apr_pool_t *);
 void testdirs(apr_pool_t *);
 static void test_read(apr_pool_t *);
+static void test_read_seek(apr_int32_t, apr_pool_t *);
 
 int main(void)
 {
@@ -509,9 +510,96 @@ static void test_read(apr_pool_t *p)
     printf("%-60s", "    More unbuffered file tests");
     test_bigread(p, fname, 0);
     printf("OK\n");
+    printf("%-60s", "    Even more buffered file tests");
+    test_read_seek(APR_BUFFERED, p);
+    printf("OK\n");
+    printf("%-60s", "    Even more unbuffered file tests");
+    test_read_seek(0, p);
+    printf("OK\n");
     rv = apr_file_remove(fname, p);
     assert(!rv);
     printf("%-60s", "    All read tests");
     printf("OK\n");
 }
 
+static void test_read_seek(apr_int32_t moreflags, apr_pool_t *p)
+{
+    const char *fname = "readseek.dat";
+    apr_status_t rv;
+    apr_file_t *f;
+    apr_size_t nbytes;
+    const char *str1, *str2, *str3;
+    char buf[8192];
+    apr_off_t seek_amt;
+
+    /* create the content */
+
+    rv = apr_file_open(&f, fname, APR_CREATE | APR_WRITE, APR_UREAD | APR_UWRITE, p);
+    assert(!rv);
+
+    str1 = "abcdefghijklmnopqrstuvwxyz\n";
+    str2 = "1234567890\n";
+    str3 = "1234567890-=+_)(*&^%$#@!\n";
+
+    nbytes = strlen(str1);
+    rv = apr_file_write(f, str1, &nbytes);
+    assert(!rv && nbytes == strlen(str1));
+
+    nbytes = strlen(str2);
+    rv = apr_file_write(f, str2, &nbytes);
+    assert(!rv && nbytes == strlen(str2));
+
+    nbytes = strlen(str3);
+    rv = apr_file_write(f, str3, &nbytes);
+    assert(!rv && nbytes == strlen(str3));
+
+    nbytes = strlen(str1);
+    rv = apr_file_write(f, str1, &nbytes);
+    assert(!rv && nbytes == strlen(str1));
+
+    nbytes = strlen(str2);
+    rv = apr_file_write(f, str2, &nbytes);
+    assert(!rv && nbytes == strlen(str2));
+
+    nbytes = strlen(str3);
+    rv = apr_file_write(f, str3, &nbytes);
+    assert(!rv && nbytes == strlen(str3));
+
+    rv = apr_file_close(f);
+    assert(!rv);
+
+    rv = apr_file_open(&f, fname, APR_READ | moreflags, 0, p);
+    assert(!rv);
+
+    rv = apr_file_gets(buf, sizeof buf, f);
+    assert(!rv);
+    assert(!strcmp(buf, str1));
+
+    rv = apr_file_gets(buf, sizeof buf, f);
+    assert(!rv);
+    assert(!strcmp(buf, str2));
+
+    nbytes = sizeof buf;
+    rv = apr_file_read(f, buf, &nbytes);
+    assert(!rv);
+    assert(nbytes == strlen(str3) + strlen(str1) + strlen(str2) + strlen(str3));
+    assert(!memcmp(buf, str3, strlen(str3)));
+
+    seek_amt = -(apr_off_t)(nbytes - strlen(str3) - strlen(str1));
+    rv = apr_file_seek(f, APR_CUR, &seek_amt);
+    assert(!rv);
+
+    rv = apr_file_gets(buf, sizeof buf, f);
+    assert(!rv);
+    assert(!strcmp(buf, str2));
+
+    rv = apr_file_gets(buf, sizeof buf, f);
+    assert(!rv);
+    assert(!strcmp(buf, str3));
+
+    rv = apr_file_close(f);
+    assert(!rv);
+
+    rv = apr_file_remove(fname, p);
+    assert(!rv);
+}
