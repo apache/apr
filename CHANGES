@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Small table performance optimization: eliminate the
+     zero-fill of newly allocated elements when expanding
+     a table's size. [Brian Pane]
+
   *) Allow APR to install its generated libtool(s) via the 
      --with-installbuilddir option (defaults to ${datadir}/build).
      [Justin Erenkrantz]
