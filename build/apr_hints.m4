@@ -46,19 +46,19 @@ if test "x$apr_preload_done" != "xyes" ; then
     *-ibm-aix*)
         case $host in
         i386-ibm-aix*)
-	    APR_ADDTO(CPPFLAGS, [-U__STR__ -DUSEBCOPY])
+	    APR_ADDTO(CPPFLAGS, [-U__STR__])
 	    ;;
         *-ibm-aix[1-2].*)
-	    APR_ADDTO(CPPFLAGS, [-DNEED_RLIM_T -U__STR__])
+	    APR_ADDTO(CPPFLAGS, [-U__STR__])
 	    ;;
         *-ibm-aix3.*)
-	    APR_ADDTO(CPPFLAGS, [-DNEED_RLIM_T -U__STR__])
+	    APR_ADDTO(CPPFLAGS, [-U__STR__])
 	    ;;
         *-ibm-aix4.1)
-	    APR_ADDTO(CPPFLAGS, [-DNEED_RLIM_T -U__STR__])
+	    APR_ADDTO(CPPFLAGS, [-U__STR__])
 	    ;;
         *-ibm-aix4.1.*)
-            APR_ADDTO(CPPFLAGS, [-DNEED_RLIM_T -U__STR__])
+            APR_ADDTO(CPPFLAGS, [-U__STR__])
             ;;
         *-ibm-aix4.2)
 	    APR_ADDTO(CPPFLAGS, [-U__STR__])
@@ -215,7 +215,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
 	;;
     *-sunos4*)
-	APR_ADDTO(CPPFLAGS, [-DSUNOS4 -DUSEBCOPY])
+	APR_ADDTO(CPPFLAGS, [-DSUNOS4])
 	;;
     *-unixware1)
 	APR_ADDTO(CPPFLAGS, [-DUW=100])
@@ -281,7 +281,7 @@ dnl	       # Not a problem in 10.20.  Otherwise, who knows?
     *-uts*)
 	PLATOSVERS=`echo $host | sed 's/^.*,//'`
 	case $PLATOSVERS in
-	    2*) APR_ADDTO(CPPFLAGS, [-DUTS21 -DUSEBCOPY])
+	    2*) APR_ADDTO(CPPFLAGS, [-DUTS21])
 	        APR_ADDTO(CFLAGS, [-Xa -eft])
 	        APR_ADDTO(LIBS, [-lbsd -la])
 	        ;;
