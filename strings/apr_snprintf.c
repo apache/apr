@@ -60,6 +60,7 @@
 #include "apr_private.h"
 
 #include "apr_lib.h"
+#include "apr_network_io.h"
 #include <math.h>
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -488,15 +489,32 @@ static char *conv_in_addr(struct in_addr *ia, char *buf_end, int *len)
 
 
 
-static char *conv_sockaddr_in(struct sockaddr_in *si, char *buf_end, int *len)
+static char *conv_apr_sockaddr(apr_sockaddr_t *sa, char *buf_end, int *len)
 {
     char *p = buf_end;
     bool_int is_negative;
     int sub_len;
+    char *ipaddr_str;
 
-    p = conv_10(ntohs(si->sin_port), TRUE, &is_negative, p, &sub_len);
+    /* XXX IPv6: this assumes sin_port and sin6_port are at same offset */
+    p = conv_10(ntohs(sa->sa.sin.sin_port), TRUE, &is_negative, p, &sub_len);
     *--p = ':';
-    p = conv_in_addr(&si->sin_addr, p, &sub_len);
+    apr_get_ipaddr(&ipaddr_str, sa);
+    sub_len = strlen(ipaddr_str);
+#if APR_HAVE_IPV6
+    if (sa->sa.sin.sin_family == APR_INET6 &&
+        !IN6_IS_ADDR_V4MAPPED(&sa->sa.sin6.sin6_addr)) {
+        *(p - 1) = ']';
+        p -= sub_len + 2;
+        *p = '[';
+        memcpy(p + 1, ipaddr_str, sub_len);
+    }
+    else
+#endif
+    {
+        p -= sub_len;
+        memcpy(p, ipaddr_str, sub_len);
+    }
 
     *len = buf_end - p;
     return (p);
@@ -1038,14 +1056,14 @@ APR_DECLARE(int) apr_vformatter(int (*flush_func)(apr_vformatter_buff_t *),
 		    pad_char = ' ';
 		    break;
 
-		    /* print a struct sockaddr_in as a.b.c.d:port */
+		    /* print an apr_sockaddr_t as a.b.c.d:port */
 		case 'I':
 		    {
-			struct sockaddr_in *si;
+			apr_sockaddr_t *sa;
 
-			si = va_arg(ap, struct sockaddr_in *);
-			if (si != NULL) {
-			    s = conv_sockaddr_in(si, &num_buf[NUM_BUF_SIZE], &s_len);
+			sa = va_arg(ap, apr_sockaddr_t *);
+			if (sa != NULL) {
+			    s = conv_apr_sockaddr(sa, &num_buf[NUM_BUF_SIZE], &s_len);
 			    if (adjust_precision && precision < s_len)
 				s_len = precision;
 			}
