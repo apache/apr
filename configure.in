@@ -134,7 +134,7 @@ if test "$USE_MM" = "yes"; then
   RUN_SUBDIR_CONFIG_NOW($config_subdirs)
 fi
 
-AC_MSG_CHECKING(Checking for Shared memory support)
+AC_MSG_CHECKING(for Shared memory support)
 AC_ARG_ENABLE(shmem,
   [  --enable-shmem          Enable shared memory support in APR. ],
   [ ],
@@ -164,7 +164,6 @@ AC_SUBST(anonymous_shm)
 AC_SUBST(filebased_shm)
 AC_SUBST(keybased_shm)
 
-echo "$srcdir"
 AC_CHECK_DEFINE(MM_SHMT_MMFILE, $srcdir/shmem/unix/mm/mm_conf.h) 
 
 if test "ac_cv_define_MM_SHMT_MMFILE" = "yes"; then
@@ -576,10 +575,10 @@ test "x$ac_cv_struct_rlimit" = xyes && struct_rlimit=1
 AC_SUBST(struct_rlimit)
 
 dnl #----------------------------- Checking for Locking Characteristics 
-echo $ac_n "${nl}Checking for Locking..."
+echo $ac_n "${nl}Checking for Locking...${nl}"
 
 # It's stupid, but not all platforms have union semun, even those that need it.
-AC_MSG_CHECKING(looking for union semun in sys/sem.h)
+AC_MSG_CHECKING(for union semun in sys/sem.h)
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/ipc.h>
