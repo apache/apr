@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Tweak apr_gethostname() so that it detects truncation of the
+     name and returns an error.  [Jeff Trawick]
+
   *) Fix bug in Darwin DSO code.  [Sander Temme <sctemme@covalent.net>]
 
   *) Fix apr_setup_signal_thread() to grab the right error code from
