@@ -79,7 +79,7 @@ if test "x$apr_preload_done" != "xyes" ; then
         dnl Must do a check for gcc or egcs here, to get the right options  
         dnl to the compiler.
         if test "$GCC" != "yes"; then
-          APR_ADDTO(CFLAGS, [-qHALT=E -qLANGLVL=extended])
+          APR_ADDTO(CFLAGS, [-qHALT=E])
         fi
 	APR_SETIFNULL(apr_iconv_inbuf_const, [1])
 	APR_ADDTO(CPPFLAGS, [-D_THREAD_SAFE])
