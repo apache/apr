@@ -260,7 +260,9 @@ ap_status_t ap_put_os_file(struct file_t **file, ap_os_file_t *thefile,
     }
     /* if we are putting in a new file descriptor, then we don't really
      * have any of this information.
+     * We don't allow put'ing buffered files, so we can set that value.
      */
+    (*file)->buffered = 0;
     (*file)->eof_hit = 0;
     (*file)->timeout = -1;
     (*file)->stated = 0;
