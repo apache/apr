@@ -751,16 +751,16 @@ APR_DECLARE(int) apr_table_vdo(apr_table_do_callback_fn_t *comp,
         if (argp) {
             COMPUTE_KEY_CHECKSUM(argp, checksum);
         }
-	for (rv = 1, i = 0; rv && (i < t->a.nelts); ++i) {
-	    if (elts[i].key && (!argp ||
+        for (rv = 1, i = 0; rv && (i < t->a.nelts); ++i) {
+            if (elts[i].key && (!argp ||
                                 ((checksum == elts[i].key_checksum) &&
                                  !strcasecmp(elts[i].key, argp)))) {
-		rv = (*comp) (rec, elts[i].key, elts[i].val);
-	    }
-	}
-	if (rv == 0) {
-	    vdorv = 0;
-	}
+                rv = (*comp) (rec, elts[i].key, elts[i].val);
+            }
+        }
+        if (rv == 0) {
+            vdorv = 0;
+        }
     } while (argp && ((argp = va_arg(vp, char *)) != NULL));
 
     return vdorv;
