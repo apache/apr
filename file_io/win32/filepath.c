@@ -105,13 +105,8 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
         the path since we won't use the deconstructed information anyway.
     */
     if (volsep) {
-        /* Split the inpath into its separate parts. If it fails then
-            we know we have a bad path.
-        */
-        if (deconstruct(testpath, server, volume, path, file, NULL, &elements, PATH_UNDEF)) {
-            if (errno == EINVAL)
-                return APR_EBADPATH;
-        }
+        /* Split the inpath into its separate parts. */
+        deconstruct(testpath, server, volume, path, file, NULL, &elements, PATH_UNDEF);
     
         /* If we got a volume part then continue splitting out the root.
             Otherwise we either have an incomplete or relative path
