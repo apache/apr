@@ -443,6 +443,8 @@ case $host in
         ;;
 esac
 
+echo "${nl}Checking for libraries..."
+
 dnl ----------------------------- Checks for Any required Libraries
 dnl Note: Autoconf will always append LIBS with an extra " " in AC_CHECK_LIB.
 dnl It should check for LIBS being empty and set LIBS equal to the new value 
