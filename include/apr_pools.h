@@ -232,7 +232,7 @@ APR_DECLARE(void) apr_pool_alloc_term(apr_pool_t *globalp);
  * @param newcont The pool we have just created.
  * @param cont The parent pool.  If this is NULL, the new pool is a root
  *        pool.  If it is non-NULL, the new pool will inherit all
- *        of it's parent pool's attributes, except the apr_pool_t will 
+ *        of its parent pool's attributes, except the apr_pool_t will 
  *        be a sub-pool.
  */
 APR_DECLARE(apr_status_t) apr_pool_create(apr_pool_t **newcont,
