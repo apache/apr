@@ -122,11 +122,19 @@ SOURCE=.\aprlib.def
 # End Source File
 # Begin Source File
 
+SOURCE=.\misc\win32\canonerr.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\file_io\win32\dir.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\dso\win32\dso.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\misc\win32\errorcodes.c
 # End Source File
 # Begin Source File
 
