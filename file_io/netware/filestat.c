@@ -62,6 +62,8 @@
 #include "apr_hash.h"
 #include "apr_thread_rwlock.h"
 
+/*#define APR_HAS_PSA*/
+
 static apr_filetype_e filetype_from_mode(mode_t mode)
 {
     apr_filetype_e type = APR_NOFILE;
@@ -192,6 +194,7 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
     return apr_file_perms_set(fname, finfo.protection);
 }
 
+#ifndef APR_HAS_PSA
 static apr_status_t stat_cache_cleanup(void *data)
 {
     apr_pool_t *p = (apr_pool_t *)getGlobalPool();
@@ -270,7 +273,16 @@ int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestm
             if (ptr[1] != '\0') {
                 ptr++;
             }
-            pinfo = apr_pstrdup (p, ptr);
+            /* If the path ended in a trailing slash then our result path
+               will be a single slash. To avoid stat'ing the root with a
+               slash, we need to make sure we stat the current directory
+               with a dot */
+            if (((*ptr == '/') || (*ptr == '\\')) && (*(ptr+1) == '\0')) {
+                pinfo = apr_pstrdup (p, ".");
+            }
+            else {
+                pinfo = apr_pstrdup (p, ptr);
+            }
         }
     
         /* If we have a statCache then try to pull the information
@@ -297,7 +309,7 @@ int cstat (NXPathCtx_t ctx, char *path, struct stat *buf, unsigned long requestm
     }
     return getstat(ctx, path, buf, requestmap);
 }
-
+#endif
 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, 
                                    const char *fname, 
@@ -308,7 +320,11 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo,
     NXPathCtx_t pathCtx = 0;
 
     getcwdpath(NULL, &pathCtx, CTX_ACTUAL_CWD);
+#ifdef APR_HAS_PSA
+	srv = getstat(pathCtx, (char*)fname, &info, ST_STAT_BITS|ST_NAME_BIT);
+#else
     srv = cstat(pathCtx, (char*)fname, &info, ST_STAT_BITS|ST_NAME_BIT, pool);
+#endif
     errno = srv;
 
     if (srv == 0) {
