@@ -151,8 +151,15 @@ static apr_status_t sysv_child_init(apr_lock_t **lock, apr_pool_t *cont, const c
 
 const apr_unix_lock_methods_t apr_unix_sysv_methods =
 {
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+    APR_PROCESS_LOCK_MECH_IS_GLOBAL,
+#else
+    0,
+#endif
     sysv_create,
     sysv_acquire,
+    NULL, /* no rw lock */
+    NULL, /* no rw lock */
     sysv_release,
     sysv_destroy,
     sysv_child_init
@@ -285,8 +292,11 @@ static apr_status_t proc_pthread_child_init(apr_lock_t **lock, apr_pool_t *cont,
 
 const apr_unix_lock_methods_t apr_unix_proc_pthread_methods =
 {
+    APR_PROCESS_LOCK_MECH_IS_GLOBAL,
     proc_pthread_create,
     proc_pthread_acquire,
+    NULL, /* no rw lock */
+    NULL, /* no rw lock */
     proc_pthread_release,
     proc_pthread_destroy,
     proc_pthread_child_init
@@ -394,8 +404,15 @@ static apr_status_t fcntl_child_init(apr_lock_t **lock, apr_pool_t *cont,
 
 const apr_unix_lock_methods_t apr_unix_fcntl_methods =
 {
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+    APR_PROCESS_LOCK_MECH_IS_GLOBAL,
+#else
+    0,
+#endif
     fcntl_create,
     fcntl_acquire,
+    NULL, /* no rw lock */
+    NULL, /* no rw lock */
     fcntl_release,
     fcntl_destroy,
     fcntl_child_init
@@ -502,8 +519,15 @@ static apr_status_t flock_child_init(apr_lock_t **lock, apr_pool_t *cont,
 
 const apr_unix_lock_methods_t apr_unix_flock_methods =
 {
+#if APR_PROCESS_LOCK_IS_GLOBAL || !APR_HAS_THREADS
+    APR_PROCESS_LOCK_MECH_IS_GLOBAL,
+#else
+    0,
+#endif
     flock_create,
     flock_acquire,
+    NULL, /* no rw lock */
+    NULL, /* no rw lock */
     flock_release,
     flock_destroy,
     flock_child_init
