@@ -86,7 +86,7 @@
 #endif
 
 #if APR_HAS_UNICODE_FS
-#include "i18n.h"
+#include "arch/unix/i18n.h"
 #include <wchar.h>
 
 typedef apr_uint16_t apr_wchar_t;
