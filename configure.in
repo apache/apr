@@ -636,23 +636,7 @@ AC_SUBST(threads)
 AC_SUBST(have_sigsuspend)
 AC_SUBST(have_sigwait)
 
-AC_CHECK_FUNCS(poll kqueue)
-
-# Check for the Linux epoll interface; epoll* may be available in libc
-# but return ENOSYS on a pre-2.6 kernel, so do a run-time check.
-AC_CACHE_CHECK([for epoll support], [apr_cv_epoll],
-[AC_TRY_RUN([
-#include <sys/epoll.h>
-#include <unistd.h>
-
-int main()
-{
-    return epoll_create(5) == -1;
-}], [apr_cv_epoll=yes], [apr_cv_epoll=no], [apr_cv_epoll=no])])
-
-if test "$apr_cv_epoll" = "yes"; then
-   AC_DEFINE([HAVE_EPOLL], 1, [Define if the epoll interface is supported])
-fi
+AC_CHECK_FUNCS(poll)
 
 dnl ----------------------------- Checking for missing POSIX thread functions
 AC_CHECK_FUNCS([getpwnam_r getpwuid_r getgrnam_r getgrgid_r])
