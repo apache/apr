@@ -220,10 +220,8 @@ FILE_nlm_copyright =
 FILES_nlm_Ximports = \
 	@libc.imp \
 	@ws2nlm.imp \
-    @netware.imp \
-    NXGetRandom \
-    NXGetCtlInfo \
-    NXSetCtlInfo \
+	@netware.imp \
+	CpuCurrentProcessor \
 	$(EOLIST)
  
 #   

@@ -170,8 +170,8 @@ int unregister_NLM(void *NLMHandle);
 /* Application global data management */
 int setGlobalPool(void *data);
 void* getGlobalPool();
-int setStatCache(void *data);
-void* getStatCache();
+int setStatCache(void *data, int proc);
+void* getStatCache(int proc);
 
 /* Redefine malloc to use the library malloc call so 
     that all of the memory resources will be owned
