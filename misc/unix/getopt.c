@@ -55,6 +55,7 @@ APR_DECLARE(apr_status_t) apr_getopt_init(apr_getopt_t **os, apr_pool_t *cont,
 
     *os = apr_palloc(cont, sizeof(apr_getopt_t));
     (*os)->cont = cont;
+    (*os)->reset = 0;
     (*os)->err = 1;
     (*os)->place = EMSG;
     (*os)->argc = argc;
