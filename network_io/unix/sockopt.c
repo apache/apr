@@ -142,11 +142,11 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
     }
     if (opt & APR_SO_NONBLOCK) {
         if (on) {
-            if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) 
+            if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS) 
                 return stat;
         }
         else {
-            if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS)
+            if ((stat = soblock(sock->socketdes)) != APR_SUCCESS)
                 return stat;
         }
     }
