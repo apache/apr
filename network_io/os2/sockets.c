@@ -147,7 +147,7 @@ ap_status_t ap_listen(ap_socket_t *sock, ap_int32_t backlog)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *connection_context)
+ap_status_t ap_accept(ap_socket_t **new, ap_socket_t *sock, ap_pool_t *connection_context)
 {
     (*new) = (ap_socket_t *)ap_palloc(connection_context, 
                             sizeof(ap_socket_t));
