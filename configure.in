@@ -1283,6 +1283,17 @@ AC_ARG_ENABLE(dso,
       AC_CHECK_LIB(dl, dlopen, [ tempdso="dlfcn" APR_ADDTO(LIBS,-ldl) ], 
                    tempdso="no")
     fi
+    if test "$tempdso" = "dlfcn"; then
+        # ReliantUnix has dlopen() in libc but dlsym() in libdl :(
+        AC_CHECK_FUNCS(dlsym, [ tempdso="dlfcn" ], [ tempdso="no" ])
+        if test "$tempdso" = "no"; then
+            AC_CHECK_LIB(dl, dlsym, [ tempdso="dlfcn" APR_ADDTO(LIBS, -ldl) ],
+                         tempdso="no")
+        fi
+        if test "$tempdso" = "no"; then
+            echo "Weird: dlopen() was found but dlsym() was not found!"
+        fi
+    fi
     if test "$tempdso" = "no"; then
       AC_CHECK_LIB(root, load_image, tempdso="yes", tempdso="no")
     fi
