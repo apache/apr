@@ -115,7 +115,7 @@ apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
     apr_status_t ret = 0;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) \
     && !defined(READDIR_IS_THREAD_SAFE)
-    dirent *retent;
+    struct dirent *retent;
 
     ret = readdir_r(thedir->dirstruct, thedir->entry, &retent);
 
