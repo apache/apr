@@ -197,11 +197,12 @@ int main(void)
     if (x != 40000) {
         fflush(stdout);
         fprintf(stderr, "The locks didn't work????  %d\n", x);
+        exit(-1);
     }
     else {
         fprintf(stdout, "Everything is working!\n");
     }
-    return 1;
+    return 0;
 }
 
 #endif /* !APR_HAS_THREADS */
