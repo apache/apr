@@ -78,7 +78,7 @@ static apr_status_t get_local_addr(apr_socket_t *sock)
 apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const char *addr)
 {
     u_long ipaddr;
-    sockaddr_in *ptr;
+    struct sockaddr_in *ptr;
 
     if (which == APR_LOCAL)
         ptr = sock->local_addr;
