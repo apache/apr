@@ -72,6 +72,7 @@
 #include "apr_lock.h"
 #include "apr_time.h"
 #include "apr_dso.h"
+#include "apr_sms.h"
 
 #if APR_HAVE_DIRENT_H
 #include <dirent.h>
