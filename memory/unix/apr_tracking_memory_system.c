@@ -208,12 +208,22 @@ static apr_status_t apr_sms_tracking_reset(apr_sms_t *mem_sys)
     return APR_SUCCESS;
 }
 
-static void apr_sms_tracking_destroy(apr_sms_t *mem_sys)
+static apr_status_t apr_sms_tracking_destroy(apr_sms_t *mem_sys)
 {
-    assert (mem_sys != NULL);
+    apr_status_t rv;
+    /* If this is NULL we won't blow up as it should be caught at the
+     * next level down and then passed back to us...
+     */
+#ifdef APR_ASSERT_MEMORY
+    assert (mem_sys->parent_mem_sys != NULL);
+#endif
+    
+    if (!mem_sys)
+        return APR_EMEMSYS;
 
-    apr_sms_tracking_reset(mem_sys);
-    apr_sms_free(mem_sys->parent_mem_sys, mem_sys);
+    if ((rv = apr_sms_tracking_reset(mem_sys)) != APR_SUCCESS)
+        return rv;
+    return apr_sms_free(mem_sys->parent_mem_sys, mem_sys);
 }
 
 APR_DECLARE(apr_status_t) apr_sms_tracking_create(apr_sms_t **mem_sys, 

@@ -169,9 +169,6 @@ APR_DECLARE(apr_status_t) apr_sms_free(apr_sms_t *mem_sys,
 
 static int apr_sms_is_tracking(apr_sms_t *mem_sys)
 {
-#ifdef APR_ASSERT_MEMORY
-    assert(mem_sys->reset_fn);
-#endif
     /*
      * The presense of a reset function gives us the clue that this is a 
      * tracking memory system.
@@ -328,7 +325,7 @@ APR_DECLARE(apr_status_t) apr_sms_reset(apr_sms_t *mem_sys)
     if (!mem_sys)
         return APR_EMEMSYS;
     if (!mem_sys->reset_fn)
-        return APR_EMEMALLOCATOR;
+        return APR_EINVAL; /* Not sure if this is right... */
 
     /* 
      * Run the cleanups of all child memory systems _including_
@@ -467,15 +464,15 @@ APR_DECLARE(apr_status_t) apr_sms_destroy(apr_sms_t *mem_sys)
 
   /* 1 - If we have a self destruct, use it */
   if (mem_sys->destroy_fn != NULL)
-      mem_sys->destroy_fn(mem_sys);
+      return mem_sys->destroy_fn(mem_sys);
 
   /* 2 - If we don't have a parent, free using ourselves */
   else if (mem_sys->parent_mem_sys == NULL)
-      mem_sys->free_fn(mem_sys, mem_sys);
+      return mem_sys->free_fn(mem_sys, mem_sys);
 
   /* 3 - If we do have a parent and it has a free function, use it */
   else if (mem_sys->parent_mem_sys->free_fn != NULL)
-      apr_sms_free(mem_sys->parent_mem_sys, mem_sys);
+      return apr_sms_free(mem_sys->parent_mem_sys, mem_sys);
 
   /* 4 - Assume we are the child of a tracking memory system, and do nothing */
 #ifdef APR_ASSERT_MEMORY
