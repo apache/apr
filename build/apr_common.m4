@@ -74,7 +74,24 @@ AC_DEFUN(APR_MKDIR_P_CHECK,[
 ])
 
 dnl
-dnl APR_SUBDIR_CONFIG(dir [, sub-package-cmdline-args])
+dnl APR_SUBDIR_CONFIG(dir [, sub-package-cmdline-args, args-to-drop])
+dnl
+dnl dir: directory to find configure in
+dnl sub-package-cmdline-args: arguments to add to the invocation (optional)
+dnl args-to-drop: arguments to drop from the invocation (optional)
+dnl
+dnl Note: This macro relies on ac_configure_args being set properly.
+dnl
+dnl The args-to-drop argument is shoved into a case statement, so
+dnl multiple arguments can be separated with a |.
+dnl
+dnl Note: Older versions of autoconf do not single-quote args, while 2.54+
+dnl places quotes around every argument.  So, if you want to drop the
+dnl argument called --enable-layout, you must pass the third argument as:
+dnl [--enable-layout=*|\'--enable-layout=*]
+dnl
+dnl Trying to optimize this is left as an exercise to the reader who wants
+dnl to put up with more autoconf craziness.  I give up.
 dnl
 AC_DEFUN(APR_SUBDIR_CONFIG, [
   # save our work to this point; this allows the sub-package to use it
@@ -102,13 +119,27 @@ changequote([, ])dnl
     ac_sub_cache_file="$ac_popdir/$cache_file" ;;
   esac
 
+  ifelse($3, [], [apr_configure_args=$ac_configure_args],[
+  apr_configure_args=
+  apr_sep=
+  for apr_configure_arg in $ac_configure_args
+  do
+    case "$apr_configure_arg" in
+      $3)
+        continue ;;
+    esac
+    apr_configure_args="$apr_configure_args$apr_sep'$apr_configure_arg'"
+    apr_sep=" "
+  done
+  ])
+
   dnl The eval makes quoting arguments work - specifically $2 where the
   dnl quoting mechanisms used is "" rather than [].
   dnl
   dnl We need to execute another shell because some autoconf/shell combinations
   dnl will choke after doing repeated APR_SUBDIR_CONFIG()s.  (Namely Solaris
   dnl and autoconf-2.54+)
-  if eval $SHELL $ac_abs_srcdir/configure $ac_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir $2
+  if eval $SHELL $ac_abs_srcdir/configure $apr_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir $2
   then :
     echo "$1 configured properly"
   else

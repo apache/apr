@@ -1,5 +1,9 @@
 Changes with APR 0.9.4
 
+  *) Add parameter to APR_SUBDIR_CONFIG to drop options passed to configure
+     before the subdir's configure is invoked.
+     [Jeff Trawick, Justin Erenkrantz]
+
   *) Implement APR_SO_RCVBUF socket option on Unix.  
      [Adam Sussman <myddryn@vishnu.vidya.com>]
 
