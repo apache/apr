@@ -71,6 +71,7 @@ static const struct testlist {
     {"testpath", testpath},
     {"testenv", testenv},
     {"testfnmatch", testfnmatch},
+    {"testatomic", testatomic},
     {"LastTest", NULL}
 };
 
