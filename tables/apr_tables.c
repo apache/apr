@@ -935,6 +935,18 @@ APR_DECLARE(void) apr_table_overlap(apr_table_t *a, const apr_table_t *b,
     apr_table_entry_t *elts;
 
     max_keys = a->a.nelts + b->a.nelts;
+    if (!max_keys) {
+        /* The following logic won't do anything harmful if we keep
+         * going in this situation, but
+         *
+         *    1) certain memory debuggers don't like an alloc size of 0
+         *       so we'd like to avoid that...
+         *    2) this isn't all that rare a call anyway, so it is useful
+         *       to skip the storage allocation and other checks in the
+         *       following logic
+         */
+        return;
+    }
     cat_keys = apr_palloc(b->a.pool, sizeof(overlap_key) * max_keys);
     nhash = DEFAULT_HASH_SIZE;
     while (nhash < max_keys) {
