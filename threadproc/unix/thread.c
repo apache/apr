@@ -59,10 +59,11 @@
 #if APR_HAS_THREADS
 
 #if APR_HAVE_PTHREAD_H
-APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new,
+                                                apr_pool_t *pool)
 {
     apr_status_t stat;
-  
+
     (*new) = (apr_threadattr_t *)apr_pcalloc(pool, sizeof(apr_threadattr_t));
     (*new)->attr = (pthread_attr_t *)apr_pcalloc(pool, sizeof(pthread_attr_t));
 
@@ -79,10 +80,12 @@ APR_DECLARE(apr_status_t) apr_threadattr_create(apr_threadattr_t **new, apr_pool
 #ifdef PTHREAD_SETS_ERRNO
     stat = errno;
 #endif
+
     return stat;
 }
 
-APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, apr_int32_t on)
+APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr,
+                                                    apr_int32_t on)
 {
     apr_status_t stat;
 #ifdef PTHREAD_ATTR_SETDETACHSTATE_ARG2_ADDR
@@ -92,12 +95,14 @@ APR_DECLARE(apr_status_t) apr_threadattr_detach_set(apr_threadattr_t *attr, apr_
 #else
     if ((stat = pthread_attr_setdetachstate(attr->attr, on)) == 0) {
 #endif
+
         return APR_SUCCESS;
     }
     else {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
+
         return stat;
     }
 }
@@ -122,13 +127,15 @@ static void *dummy_worker(void *opaque)
     return thread->func(thread, thread->data);
 }
 
-APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t *attr, 
-                                            apr_thread_start_t func, void *data, 
+APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
+                                            apr_threadattr_t *attr,
+                                            apr_thread_start_t func,
+                                            void *data,
                                             apr_pool_t *pool)
 {
     apr_status_t stat;
     pthread_attr_t *temp;
- 
+
     (*new) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
 
     if ((*new) == NULL) {
@@ -144,7 +151,7 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
     (*new)->pool = pool;
     (*new)->data = data;
     (*new)->func = func;
-    
+
     if (attr)
         temp = attr->attr;
     else
@@ -162,8 +169,9 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new, apr_threadattr_t
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
+
         return stat;
-    } 
+    }
 }
 
 APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
@@ -171,12 +179,14 @@ APR_DECLARE(apr_os_thread_t) apr_os_thread_current(void)
     return pthread_self();
 }
 
-APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1, apr_os_thread_t tid2)
+APR_DECLARE(int) apr_os_thread_equal(apr_os_thread_t tid1,
+                                     apr_os_thread_t tid2)
 {
     return pthread_equal(tid1, tid2);
 }
 
-APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval)
+APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
+                                          apr_status_t retval)
 {
     thd->exitval = retval;
     apr_pool_destroy(thd->pool);
@@ -184,7 +194,8 @@ APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd, apr_status_t retval
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
+APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
+                                          apr_thread_t *thd)
 {
     apr_status_t stat;
     apr_status_t *thread_stat;
@@ -197,6 +208,7 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval, apr_thread_t *th
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
+
         return stat;
     }
 }
@@ -210,12 +222,14 @@ APR_DECLARE(apr_status_t) apr_thread_detach(apr_thread_t *thd)
 #else
     if ((stat = pthread_detach(*thd->td)) == 0) {
 #endif
+
         return APR_SUCCESS;
     }
     else {
 #ifdef PTHREAD_SETS_ERRNO
         stat = errno;
 #endif
+
         return stat;
     }
 }
@@ -224,34 +238,39 @@ void apr_thread_yield()
 {
 }
 
-APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key, apr_thread_t *thread)
+APR_DECLARE(apr_status_t) apr_thread_data_get(void **data, const char *key,
+                                              apr_thread_t *thread)
 {
     return apr_pool_userdata_get(data, key, thread->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_thread_data_set(void *data, const char *key,
-                              apr_status_t (*cleanup) (void *),
+                              apr_status_t (*cleanup)(void *),
                               apr_thread_t *thread)
 {
     return apr_pool_userdata_set(data, key, cleanup, thread->pool);
 }
 
-APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd, apr_thread_t *thd)
+APR_DECLARE(apr_status_t) apr_os_thread_get(apr_os_thread_t **thethd,
+                                            apr_thread_t *thd)
 {
     *thethd = thd->td;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd, apr_os_thread_t *thethd, 
-                             apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_os_thread_put(apr_thread_t **thd,
+                                            apr_os_thread_t *thethd,
+                                            apr_pool_t *pool)
 {
     if (pool == NULL) {
         return APR_ENOPOOL;
     }
+
     if ((*thd) == NULL) {
         (*thd) = (apr_thread_t *)apr_pcalloc(pool, sizeof(apr_thread_t));
         (*thd)->pool = pool;
     }
+
     (*thd)->td = thethd;
     return APR_SUCCESS;
 }
@@ -266,7 +285,7 @@ APR_DECLARE(apr_status_t) apr_thread_once_init(apr_thread_once_t **control,
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control, 
+APR_DECLARE(apr_status_t) apr_thread_once(apr_thread_once_t *control,
                                           void (*func)(void))
 {
     return pthread_once(&control->once, func);
@@ -279,9 +298,10 @@ APR_POOL_IMPLEMENT_ACCESSOR(thread)
 
 #if !APR_HAS_THREADS
 
-APR_DECLARE(apr_status_t) apr_os_thread_get(void); /* avoid warning for no prototype */
+/* avoid warning for no prototype */
+APR_DECLARE(apr_status_t) apr_os_thread_get(void);
 
-APR_DECLARE(apr_status_t) apr_os_thread_get(void) 
+APR_DECLARE(apr_status_t) apr_os_thread_get(void)
 {
     return APR_ENOTIMPL;
 }
