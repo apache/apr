@@ -124,124 +124,55 @@ APR_DECLARE(apr_status_t) apr_poll_socket_add(apr_pollfd_t *aprset,
 
 
 
-APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds, 
+APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *pollfdset, int num,
+                                   apr_int32_t *nsds, 
                                    apr_interval_time_t timeout)
 {
     int i;
     int rv = 0;
+    int num_read = 0, num_write = 0, num_except = 0;
+    int *socket_list;
+    
+    for (i = 0; i < num; i++) {
+        int events = pollfdset[i].events;
+        int fd;
 
-    for (i=0; i<pollfdset->num_total; i++) {
-        pollfdset->r_socket_list[i] = pollfdset->socket_list[i];
+        if (pollfdset[i].desc_type == APR_POLL_SOCKET) {
+            fd = pollfdset[i].desc.s->socketdes;
+        }
+        else if (pollfdset[i].desc_type == APR_POLL_FILE) {
+            fd = pollfdset[i].desc.f->filedes;
+        }
+
+        if (events & APR_POLLIN) {
+            socket_list[num_read] = fd;
+            num_read++;
+        }
+            
+        if (events & APR_POLLOUT) {
+            socket_list[num_write] = fd;
+            num_write++;
+        }            
+        
+        if (events &APR_POLLPRI) {
+            socket_list[num_except] = fd;
+            num_except++;
+        }
     }
 
-    rv = select(pollfdset->r_socket_list,
-                pollfdset->num_read,
-                pollfdset->num_write,
-                pollfdset->num_except,
+    rv = select(socket_list,
+                num_read,
+                num_write,
+                num_except,
                 timeout >= 0 ? timeout / 1000 : -1);
 
     /* select() doesn't wipe the socket list in the case of a timeout or
      * interrupt. This prevents false positives from revents_get
      */
     if (rv == 0) {
-        for (i=0; i<pollfdset->num_total; i++) {
-            pollfdset->r_socket_list[i] = -1;
-        }
         return timeout < 0 ? APR_EINTR : APR_TIMEUP;
     }
 
     (*nsds) = rv;
     return rv < 0 ? APR_OS2_STATUS(sock_errno()) : APR_SUCCESS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_poll_revents_get(apr_int16_t *event, apr_socket_t *sock, apr_pollfd_t *aprset)
-{
-    int i;
-    
-    *event = 0;
-    
-    for (i=0; i < aprset->num_total; i++) {
-        if (aprset->socket_list[i] == sock->socketdes && aprset->r_socket_list[i] > 0) {
-            if (i < aprset->num_read)
-                *event |= APR_POLLIN;
-            else if (i < aprset->num_read + aprset->num_write)
-                *event |= APR_POLLOUT;
-            else
-                *event |= APR_POLLPRI;
-        }
-    }
-
-    return APR_SUCCESS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_poll_socket_mask(apr_pollfd_t *aprset, 
-                                               apr_socket_t *sock, apr_int16_t events)
-{
-    int start, *count, pos;
-
-    while (events) {
-        if (events & APR_POLLIN) {
-            start = 0;
-            count = &aprset->num_read;
-            events -= APR_POLLIN;
-        } else if (events & APR_POLLOUT) {
-            start = aprset->num_read;
-            count = &aprset->num_write;
-            events -= APR_POLLOUT;
-        } else if (events & APR_POLLPRI) {
-            start = aprset->num_read + aprset->num_write;
-            count = &aprset->num_except;
-            events -= APR_POLLPRI;
-        } else
-            break;
-
-        for (pos=start; pos < start+(*count) && aprset->socket_list[pos] != sock->socketdes; pos++);
-
-        if (pos < start+(*count)) {
-            aprset->num_total--;
-            (*count)--;
-
-            for (;pos<aprset->num_total; pos++) {
-                aprset->socket_list[pos] = aprset->socket_list[pos+1];
-            }
-        }
-    }
-
-    return APR_SUCCESS;
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_poll_socket_remove(apr_pollfd_t *aprset, apr_socket_t *sock)
-{
-    return apr_poll_socket_mask(aprset, sock, APR_POLLIN|APR_POLLOUT|APR_POLLPRI);
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_poll_socket_clear(apr_pollfd_t *aprset, apr_int16_t events)
-{
-    aprset->num_read = 0;
-    aprset->num_write = 0;
-    aprset->num_except = 0;
-    aprset->num_total = 0;
-    return APR_SUCCESS;
-}
-
-
-APR_DECLARE(apr_status_t) apr_poll_data_get(apr_pollfd_t *pollfd, const char *key, void *data)
-{
-    return apr_pool_userdata_get(data, key, pollfd->cntxt);
-}
-
-
-
-APR_DECLARE(apr_status_t) apr_poll_data_set(apr_pollfd_t *pollfd, void *data, const char *key,
-                            apr_status_t (*cleanup) (void *))
-{
-    return apr_pool_userdata_set(data, key, cleanup, pollfd->cntxt);
 }

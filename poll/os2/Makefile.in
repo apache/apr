@@ -2,14 +2,7 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 TARGETS = \
-	sendrecv.lo \
-	sendrecv_udp.lo \
-	sockets.lo \
-	sockopt.lo \
-	sockaddr.lo \
-	inet_ntop.lo \
-	inet_pton.lo \
-	os2calls.lo
+	poll.lo 
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
