@@ -88,9 +88,6 @@
 #if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
-#if APR_HAVE_UNION_SEMUN
-#include <sys/sem.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -157,15 +154,6 @@ typedef void *                apr_os_dso_handle_t;
 /* Any other OS should go above this one.  This is the lowest common
  * denominator typedefs for  all UNIX-like systems.  :)
  */
-
-#ifdef NEED_UNION_SEMUN
-/* it makes no sense, but this isn't defined on solaris */
-union semun {
-    long val;
-    struct semid_ds *buf;
-    ushort *array;
-};
-#endif
 
 struct apr_os_lock_t {
 #if APR_HAS_SYSVSEM_SERIALIZE || APR_HAS_FCNTL_SERIALIZE || APR_HAS_FLOCK_SERIALIZE
