@@ -70,6 +70,9 @@
 #define INCL_DOS
 #include <os2.h>
 #endif
+#ifdef BEOS
+#include <sys/socket.h> /* for select */
+#endif
 /* End System Headers */
 
 
