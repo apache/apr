@@ -178,6 +178,10 @@ apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont
     (*in)->thlock = NULL;
 #endif
 
+    apr_register_cleanup((*in)->cntxt, (void *)(*in), apr_unix_file_cleanup,
+                         apr_null_cleanup);
+    apr_register_cleanup((*out)->cntxt, (void *)(*out), apr_unix_file_cleanup,
+                         apr_null_cleanup);
     return APR_SUCCESS;
 }
 
