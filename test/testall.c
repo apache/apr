@@ -50,6 +50,7 @@ static const struct testlist {
     {"testflock", testflock},
     {"testfmt", testfmt},
     {"testfnmatch", testfnmatch},
+    {"testglobalmutex", testglobalmutex},
     {"testhash", testhash},
     {"testipsub", testipsub},
     {"testlock", testlock},

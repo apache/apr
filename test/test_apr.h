@@ -47,6 +47,7 @@ CuSuite *testflock(void);
 CuSuite *testfmt(void);
 CuSuite *testfnmatch(void);
 CuSuite *testgetopt(void);
+CuSuite *testglobalmutex(void);
 CuSuite *testhash(void);
 CuSuite *testipsub(void);
 CuSuite *testlock(void);
