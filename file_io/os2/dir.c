@@ -158,7 +158,7 @@ apr_status_t apr_remove_dir(const char *path, apr_pool_t *cont)
 
 
 
-apr_status_t apr_dir_entry_size(apr_ssize_t *size, apr_dir_t *thedir)
+apr_status_t apr_dir_entry_size(apr_size_t *size, apr_dir_t *thedir)
 {
     if (thedir->validentry) {
         *size = thedir->entry.cbFile;
