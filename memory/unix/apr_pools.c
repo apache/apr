@@ -1316,7 +1316,7 @@ APR_DECLARE(apr_status_t) apr_pool_create_ex_debug(apr_pool_t **newpool,
     pool->owner = apr_os_thread_current();
 #endif /* APR_HAS_THREADS */
 
-    if (parent != NULL || parent->allocator != allocator) {
+    if (parent == NULL || parent->allocator != allocator) {
 #if APR_HAS_THREADS
         apr_status_t rv;
 
