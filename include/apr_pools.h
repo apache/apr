@@ -523,8 +523,8 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_get(void **data, const char *key,
  * @param data The data to pass to the cleanup function.
  * @param plain_cleanup The function to call when the pool is cleared
  *                      or destroyed
- * @param child_cleanup The function to call when a child process is being
- *                      shutdown - this function is called in the child, obviously!
+ * @param child_cleanup The function to call when a child process is about
+ *                      to exec - this function is called in the child, obviously!
  */
 APR_DECLARE(void) apr_pool_cleanup_register(
     apr_pool_t *p,
