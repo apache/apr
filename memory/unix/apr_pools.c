@@ -206,8 +206,8 @@ static union block_hdr *global_block_list;
 #endif /* APR_POOL_DEBUG */
 
 #ifdef ALLOC_STATS
-static unsigned long long num_free_blocks_calls;
-static unsigned long long num_blocks_freed;
+static apr_uint64_t num_free_blocks_calls;
+static apr_uint64_t num_blocks_freed;
 static unsigned max_blocks_in_one_free;
 static unsigned num_malloc_calls;
 static unsigned num_malloc_bytes;
@@ -525,8 +525,9 @@ static void stack_var_init(char *s)
 static void dump_stats(void)
 {
     fprintf(stderr,
-	    "alloc_stats: [%d] #free_blocks %llu #blocks %llu max "
-	    "%u #malloc %u #bytes %u\n",
+	    "alloc_stats: [%d] #free_blocks %" APR_INT64_T_FMT
+	    " #blocks %" APR_INT64_T_FMT
+	    " max %u #malloc %u #bytes %u\n",
 	(int) getpid(),
 	num_free_blocks_calls,
 	num_blocks_freed,
