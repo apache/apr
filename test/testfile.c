@@ -359,7 +359,7 @@ int testdirs(apr_pool_t *context)
     fprintf(stdout, "\t\tFile size.......");
     apr_dir_entry_size(&bytes, temp);
     if (bytes != strlen("Another test!!!")) {
-        fprintf(stderr, "Got wrong file size %d\n", bytes);
+        fprintf(stderr, "Got wrong file size %" APR_SIZE_T_FMT "\n", bytes);
         return -1;
     }
     fprintf(stdout, "OK\n");
