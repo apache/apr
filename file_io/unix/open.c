@@ -115,6 +115,7 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
     (*new)->cntxt = cont;
     (*new)->oflags = oflags;
     (*new)->filedes = -1;
+    (*new)->filehand = NULL;
 
     if ((flag & APR_READ) && (flag & APR_WRITE)) {
         buf_oflags = ap_pstrdup(cont, "r+");
@@ -129,7 +130,6 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
         oflags = O_WRONLY;
     }
     else {
-        (*new)->filedes = -1;
         return APR_EACCES; 
     }
 
@@ -148,7 +148,6 @@ ap_status_t ap_open(struct file_t **new, const char *fname, ap_int32_t flag,  ap
 	}
     }
     if ((flag & APR_EXCL) && !(flag & APR_CREATE)) {
-       (*new)->filedes = -1;
         return APR_EACCES;
     }   
 
