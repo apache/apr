@@ -58,7 +58,7 @@
 
 #if APR_HAS_THREADS
 
-apr_int32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_int32_t val) 
+apr_int32_t apr_atomic_add32(volatile apr_atomic_t *mem, apr_int32_t val) 
 {
     apr_atomic_t old, new_val; 
 
@@ -70,8 +70,8 @@ apr_int32_t apr_atomic_add(volatile apr_atomic_t *mem, apr_int32_t val)
     return new_val;
 }
 
-apr_uint32_t apr_atomic_cas(volatile apr_atomic_t *mem, apr_uint32_t swap, 
-                            apr_uint32_t cmp)
+apr_uint32_t apr_atomic_cas32(volatile apr_atomic_t *mem, apr_uint32_t swap, 
+                              apr_uint32_t cmp)
 {
     apr_uint32_t old = cmp;
     

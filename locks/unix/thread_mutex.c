@@ -114,7 +114,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
          * testing the mutex is owned by this thread, so a deadlock is expected.
          */
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-            apr_atomic_inc(&mutex->owner_ref);
+            apr_atomic_inc32(&mutex->owner_ref);
             return APR_SUCCESS;
         }
 
@@ -126,7 +126,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
             return rv;
         }
 
-        if (apr_atomic_cas(&mutex->owner_ref, 1, 0) != 0) {
+        if (apr_atomic_cas32(&mutex->owner_ref, 1, 0) != 0) {
             /* The owner_ref should be zero when the lock is not held,
              * if owner_ref was non-zero we have a mutex reference bug.
              * XXX: so now what?
@@ -162,7 +162,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
          * the trylock.
          */
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
-            apr_atomic_inc(&mutex->owner_ref);
+            apr_atomic_inc32(&mutex->owner_ref);
             return APR_SUCCESS;
         }
 
@@ -174,7 +174,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
             return (rv == EBUSY) ? APR_EBUSY : rv;
         }
 
-        if (apr_atomic_cas(&mutex->owner_ref, 1, 0) != 0) {
+        if (apr_atomic_cas32(&mutex->owner_ref, 1, 0) != 0) {
             /* The owner_ref should be zero when the lock is not held,
              * if owner_ref was non-zero we have a mutex reference bug.
              * XXX: so now what?
@@ -215,7 +215,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
                 return APR_EINVAL;
             }
 
-            if (apr_atomic_dec(&mutex->owner_ref) != 0)
+            if (apr_atomic_dec32(&mutex->owner_ref) != 0)
                 return APR_SUCCESS;
             mutex->owner = 0;
         }

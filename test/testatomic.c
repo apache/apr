@@ -72,99 +72,6 @@ apr_pool_t *context;
 apr_atomic_t y;      /* atomic locks */
 apr_uint32_t y32;
 
-static apr_status_t check_basic_atomics(void)
-{
-    apr_atomic_t oldval;
-    apr_uint32_t casval = 0;
-    float object1, object2;
-    void *casptr;
-    void *oldptr;
-
-    apr_atomic_set(&y, 2);
-    printf("%-60s", "testing apr_atomic_dec");
-    if (apr_atomic_dec(&y) == 0) {
-        fprintf(stderr, "Failed\noldval =%d should not be zero\n",
-                apr_atomic_read(&y));
-        return APR_EGENERAL;
-    }
-    if (apr_atomic_dec(&y) != 0) {
-        fprintf(stderr, "Failed\noldval =%d should be zero\n",
-                apr_atomic_read(&y));
-        return APR_EGENERAL;
-    }
-    printf("OK\n");
-
-    printf("%-60s", "testing CAS");
-    oldval = apr_atomic_cas(&casval, 12, 0);
-    if (oldval != 0) {
-        fprintf(stderr, "Failed\noldval =%d should be zero\n", oldval);
-        return APR_EGENERAL;
-    }
-    printf("OK\n");
-    printf("%-60s", "testing CAS - match non-null");
-    oldval = apr_atomic_cas(&casval, 23, 12);
-    if (oldval != 12) {
-        fprintf(stderr, "Failed\noldval =%d should be 12 y=%d\n",
-                oldval, casval);
-        return APR_EGENERAL;
-    }
-    printf("OK\n");
-    printf("%-60s", "testing CAS - no match");
-    oldval = apr_atomic_cas(&casval, 23, 12);
-    if (oldval != 23) {
-        fprintf(stderr, "Failed\noldval =%d should be 23 y=%d\n",
-                oldval, casval);
-        return APR_EGENERAL;
-    }
-    printf("OK\n");
-
-    printf("%-60s", "testing CAS for pointers");
-    casptr = NULL;
-    oldptr = apr_atomic_casptr(&casptr, &object1, 0);
-    if (oldptr != 0) {
-        fprintf(stderr, "Failed\noldval =%p should be zero\n", oldptr);
-        return APR_EGENERAL;
-    }
-    printf("OK\n");
-    printf("%-60s", "testing CAS for pointers - match non-null");
-    oldptr = apr_atomic_casptr(&casptr, &object2, &object1);
-    if (oldptr != &object1) {
-        fprintf(stderr, "Failed\noldval =%p should be %p\n", oldptr, &object1);
-        return APR_EGENERAL;
-    }
-    printf("OK\n");
-    printf("%-60s", "testing CAS for pointers - no match");
-    oldptr = apr_atomic_casptr(&casptr, &object2, &object1);
-    if (oldptr != &object2) {
-        fprintf(stderr, "Failed\noldval =%p should be %p\n", oldptr, &object2);
-        return APR_EGENERAL;
-    }
-    printf("OK\n");
-
-    printf("%-60s", "testing add");
-    apr_atomic_set(&y, 23);
-    apr_atomic_add(&y, 4);
-    if ((oldval = apr_atomic_read(&y)) != 27) {
-        fprintf(stderr,
-                "Failed\nAtomic Add doesn't add up ;( expected 27 got %d\n",
-                oldval);
-        return APR_EGENERAL;
-    }
- 
-    printf("OK\n");
-    printf("%-60s", "testing add/inc");
-    apr_atomic_set(&y, 0);
-    apr_atomic_add(&y, 20);
-    apr_atomic_inc(&y);
-    if (apr_atomic_read(&y) != 21) {
-        fprintf(stderr, "Failed.\natomics do not add up\n");
-        return APR_EGENERAL;
-    }
-    fprintf(stdout, "OK\n");
-
-    return APR_SUCCESS;
-}
-
 static apr_status_t check_basic_atomics32(void)
 {
     apr_uint32_t oldval;
@@ -267,11 +174,6 @@ int main(void)
         fprintf(stderr, "Failed.\nCould not initialize atomics\n");
         exit(-1);
     }
-    rv = check_basic_atomics();
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "Failed.\n");
-        exit(-1);
-    }
 
     rv = check_basic_atomics32();
     if (rv != APR_SUCCESS) {
@@ -312,10 +214,10 @@ void * APR_THREAD_FUNC thread_func_atomic(apr_thread_t *thd, void *data)
     int i;
 
     for (i = 0; i < NUM_ITERATIONS ; i++) {
-        apr_atomic_inc(&y);
-        apr_atomic_add(&y, 2);
-        apr_atomic_dec(&y);
-        apr_atomic_dec(&y);
+        apr_atomic_inc32(&y);
+        apr_atomic_add32(&y, 2);
+        apr_atomic_dec32(&y);
+        apr_atomic_dec32(&y);
     }
     apr_thread_exit(thd, exit_ret_val);
     return NULL;
@@ -384,13 +286,6 @@ int main(int argc, char**argv)
     }
     printf("OK\n");
 
-    rv = check_basic_atomics();
-    if (rv != APR_SUCCESS) {
-        fprintf(stderr, "Failed.\n");
-        exit(-1);
-    }
-    apr_atomic_set(&y, 0);
-
     rv = check_basic_atomics32();
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
@@ -444,11 +339,11 @@ int main(int argc, char**argv)
     }
     else {
         printf("%-60s", "Checking if atomic worked"); 
-        if (apr_atomic_read(&y) != NUM_THREADS * NUM_ITERATIONS) {
+        if (apr_atomic_read32(&y) != NUM_THREADS * NUM_ITERATIONS) {
             fflush(stdout);
             fprintf(stderr, 
                     "No!\nThe atomics didn't work?? y = %ld instead of %ld\n",
-                    (long)apr_atomic_read(&y),
+                    (long)apr_atomic_read32(&y),
                     (long)NUM_THREADS * NUM_ITERATIONS);
         }
         else {
