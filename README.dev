@@ -1,7 +1,7 @@
 Apache Portable Runtime
 =======================
 
-If you are building APR from CVS, you need to use a slightly non-standard
+If you are building APR from SVN, you need to use a slightly non-standard
 build process.  You must have autoconf and libtool installed for this to
 work.  There are three steps:
 
