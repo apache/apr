@@ -63,6 +63,9 @@
 extern "C" {
 #endif
 
+#include "apr_pools.h"
+
+
 /*
  * Abstract type for hash tables.
  */
