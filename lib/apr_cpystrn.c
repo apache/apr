@@ -118,10 +118,12 @@ API_EXPORT(char *) ap_cpystrn(char *dst, const char *src, size_t dst_size)
  *                   pool and filled in with copies of the tokens
  *                   found during parsing of the arg_str. 
  */
-API_EXPORT(ap_status_t) ap_tokenize_to_argv(char *arg_str, char ***argv_out,
+API_EXPORT(ap_status_t) ap_tokenize_to_argv(const char *arg_str, 
+                                            char ***argv_out,
                                             ap_pool_t *token_context)
 {
-    char *cp, *tmpCnt;
+    const char *cp;
+    const char *tmpCnt;
     int isquoted, numargs = 0, rc = APR_SUCCESS;
 
 #define SKIP_WHITESPACE(cp) \
@@ -186,8 +188,9 @@ API_EXPORT(ap_status_t) ap_tokenize_to_argv(char *arg_str, char ***argv_out,
             break;
         }
         else {
-            *cp++ = '\0';
-            (*argv_out)[numargs] = ap_pstrdup(token_context, tmpCnt);
+            cp++;
+            (*argv_out)[numargs] = ap_palloc(token_context, cp - tmpCnt);
+            ap_cpystrn((*argv_out)[numargs], tmpCnt, cp - tmpCnt);
             numargs++;
         }
         
