@@ -145,6 +145,15 @@ struct apr_hdtr_t {
     /** number of trailers in the iovec */
     int numtrailers;
 };
+#else
+/* 
+ * we need to define something for non-sendfile systems, since
+ * we don't abtract out function calls (eg: send_the_file in http_core.c))
+ * depending on sendfile existance
+ */
+struct apr_hdtr_t {
+    int dummy;
+};
 #endif
 
 /* function definitions */
