@@ -274,7 +274,7 @@ ap_status_t ap_gethostname(char *buf, int len, ap_pool_t *cont);
 
 /*
 
-=head1 ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *sock)
+=head1 ap_status_t ap_get_socketdata(void **data, const char *key, ap_socket_t *sock)
 
 B<Return the pool associated with the current socket.>
 
@@ -283,11 +283,11 @@ B<Return the pool associated with the current socket.>
 
 =cut
  */
-ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *sock);
+ap_status_t ap_get_socketdata(void **data, const char *key, ap_socket_t *sock);
 
 /*
 
-=head1 ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, char *key, ap_status_t (*cleanup) (void *))
+=head1 ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, const char *key, ap_status_t (*cleanup) (void *))
 
 B<Set the pool associated with the current socket.>
 
@@ -298,7 +298,7 @@ B<Set the pool associated with the current socket.>
 
 =cut
  */
-ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, char *key,
+ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, const char *key,
                               ap_status_t (*cleanup) (void*));
 
 /*
@@ -716,7 +716,7 @@ ap_status_t ap_get_revents(ap_int16_t *event, ap_socket_t *sock,
 
 /*
 
-=head1 ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, char *key, void *data)
+=head1 ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, const char *key, void *data)
 
 B<Return the pool associated with the current poll.>
 
@@ -726,11 +726,11 @@ B<Return the pool associated with the current poll.>
 
 =cut
  */
-ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, char *key, void *data);
+ap_status_t ap_get_polldata(ap_pollfd_t *pollfd, const char *key, void *data);
 
 /*
 
-=head1 ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key, ap_status_t (*cleanup) (void *))
+=head1 ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, const char *key, ap_status_t (*cleanup) (void *))
 
 B<Return the pool associated with the current poll.>
 
@@ -739,7 +739,7 @@ B<Return the pool associated with the current poll.>
 
 =cut
  */
-ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, char *key,
+ap_status_t ap_set_polldata(ap_pollfd_t *pollfd, void *data, const char *key,
                             ap_status_t (*cleanup) (void *));
 
 /*

@@ -184,7 +184,7 @@ ap_status_t ap_thread_detach(ap_thread_t *thd)
     }
 }
 
-ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread)
+ap_status_t ap_get_threaddata(void **data, const char *key, ap_thread_t *thread)
 {
     if (thread != NULL) {
         return ap_get_userdata(data, key, thread->cntxt);
@@ -195,7 +195,7 @@ ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread)
     }
 }
 
-ap_status_t ap_set_threaddata(void *data, char *key,
+ap_status_t ap_set_threaddata(void *data, const char *key,
                               ap_status_t (*cleanup) (void *),
                               ap_thread_t *thread)
 {

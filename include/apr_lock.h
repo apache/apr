@@ -162,7 +162,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
 
 /*
 
-=head1 ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
+=head1 ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data)
 
 B<Return the pool associated with the current lock.>
 
@@ -172,11 +172,11 @@ B<Return the pool associated with the current lock.>
 
 =cut
  */
-ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data);
+ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data);
 
 /*
 
-=head1 ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key, ap_status_t (*cleanup) (void *))
+=head1 ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key, ap_status_t (*cleanup) (void *))
 
 B<Return the pool associated with the current lock.>
 
@@ -187,7 +187,7 @@ B<Return the pool associated with the current lock.>
 
 =cut
  */
-ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
+ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
                             ap_status_t (*cleanup) (void *));
 
 #ifdef __cplusplus

@@ -232,12 +232,12 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
     }
 }
 
-ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *socket)
+ap_status_t ap_get_socketdata(void **data, const char *key, ap_socket_t *socket)
 {
     return ap_get_userdata(data, key, socket->cntxt);
 }
 
-ap_status_t ap_set_socketdata(ap_socket_t *socket, void *data, char *key, 
+ap_status_t ap_set_socketdata(ap_socket_t *socket, void *data, const char *key, 
                               ap_status_t (*cleanup) (void *))
 {
     return ap_set_userdata(data, key, cleanup, socket->cntxt);
