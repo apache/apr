@@ -157,6 +157,8 @@ ap_status_t ap_accept(ap_socket_t **new, const ap_socket_t *sock, ap_pool_t *con
                           sizeof(struct sockaddr_in));
     (*new)->local_addr = sock->local_addr;
     (*new)->addr_len = sizeof(struct sockaddr_in);
+    (*new)->timeout = -1;
+    (*new)->nonblock = FALSE;
 
     (*new)->socketdes = accept(sock->socketdes, (struct sockaddr *)(*new)->remote_addr,
                         &(*new)->addr_len);
