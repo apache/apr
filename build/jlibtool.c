@@ -917,6 +917,7 @@ void add_rpath_noinstall(count_chars *cc, const char *arg, int pathlen)
 }
 #endif
 
+#ifdef DYNAMIC_LINK_NO_INSTALL
 void add_dylink_noinstall(count_chars *cc, const char *arg, int pathlen,
                           int extlen)
 {
@@ -963,6 +964,7 @@ void add_dylink_noinstall(count_chars *cc, const char *arg, int pathlen,
 
     push_count_chars(cc, exp_argument);
 }
+#endif
 
 /* use -L -llibname to allow to use installed libraries */
 void add_minus_l(count_chars *cc, const char *arg)
