@@ -61,49 +61,66 @@
 extern "C" {
 #endif
 
-/*
-  APR's Version
-
-  There are several different mechanisms for accessing the version. There
-  is a string form, and a set of numbers; in addition, there are constants
-  which can be compiled into your application, and you can query the library
-  being used for its actual version.
-
-  Note that it is possible for an application to detect that it has been
-  compiled against a different version of APR by use of the compile-time
-  constants and the use of the run-time query function.
-
-  ### we have not defined source/binary compatibility guidelines yet and
-  ### how those map against these (release) version numbers. a strawman
-  ### would be the following text:
-
-  APR is binary-compatible (an app compiled against one version does not
-  need to be recompiled to work against another version) for the same
-  MAJOR and MINOR versions.
-
-  APR is source-compatible (an app needs to be recompiled, but will work
-  the same) for the same MAJOR version.
-
-  If the MAJOR version changes, then an application may need source changes.
-
-  Note that APR is defined to be forward compatible only, meaning that a
-  given application will be compatible with APR releases moving forward in
-  time. An application may not be compatible with earlier versions of an
-  APR library (even if the major and minor versions match). This restriction
-  is because a later version of APR can introduce new APIs.
-*/
+/**
+ * @file apr_version.h
+ * @brief 
+ * 
+ * APR's Version
+ *
+ * There are several different mechanisms for accessing the version. There
+ * is a string form, and a set of numbers; in addition, there are constants
+ * which can be compiled into your application, and you can query the library
+ * being used for its actual version.
+ *
+ * Note that it is possible for an application to detect that it has been
+ * compiled against a different version of APR by use of the compile-time
+ * constants and the use of the run-time query function.
+ *
+ * ### we have not defined source/binary compatibility guidelines yet and
+ * ### how those map against these (release) version numbers. a strawman
+ * ### would be the following text:
+ *
+ * APR is binary-compatible (an app compiled against one version does not
+ * need to be recompiled to work against another version) for the same
+ * MAJOR and MINOR versions.
+ *
+ * APR is source-compatible (an app needs to be recompiled, but will work
+ * the same) for the same MAJOR version.
+ *
+ * If the MAJOR version changes, then an application may need source changes.
+ *
+ * Note that APR is defined to be forward compatible only, meaning that a
+ * given application will be compatible with APR releases moving forward in
+ * time. An application may not be compatible with earlier versions of an
+ * APR library (even if the major and minor versions match). This restriction
+ * is because a later version of APR can introduce new APIs.
+ */
 
 /* The numeric compile-time version constants. These constants are the
-   authoritative version numbers for APR. */
+ * authoritative version numbers for APR. 
+ */
+/** major version 
+ * Major API changes that could cause compatibility problems for older programs 
+ * such as structure size changes.  No binary compatibility is possible across
+ * a change in the major version.
+ */
 #define APR_MAJOR_VERSION       0
+/** 
+ * Minor API changes that do not cause binary compatibility problems.
+ * Should be reset to 0 when upgrading APR_MAJOR_VERSION
+ */
 #define APR_MINOR_VERSION       9
+/** patch level */
 #define APR_PATCH_VERSION       0
 
-/* This symbol is defined for internal, "development" copies of APR. This
-   symbol will be #undef'd for releases. */
+
+/** 
+ *  This symbol is defined for internal, "development" copies of APR. This
+ *  symbol will be #undef'd for releases. 
+ */
 #define APR_IS_DEV_VERSION
 
-/* The formatted string of APR's version */
+/** The formatted string of APR's version */
 #define APR_VERSION_STRING \
      APR_STRINGIFY(APR_MAJOR_VERSION) "." \
      APR_STRINGIFY(APR_MINOR_VERSION) "." \
@@ -111,8 +128,10 @@ extern "C" {
      APR_IS_DEV_STRING
 
 
-/* The numeric version information is broken out into fields within this
-   structure. */
+/** 
+ * The numeric version information is broken out into fields within this 
+ * structure. 
+ */
 typedef struct {
     int major;
     int minor;
@@ -120,22 +139,24 @@ typedef struct {
     int is_dev;
 } apr_version_t;
 
-/* Return APR's version information information in a numeric form.
-
-   @param pvsn Pointer to a version structure for returning the version
-               information.
-*/
+/**
+ * Return APR's version information information in a numeric form.
+ *
+ *  @param pvsn Pointer to a version structure for returning the version
+ *              information.
+ */
 APR_DECLARE(void) apr_version(apr_version_t *pvsn);
 
-/* Return APR's version information as a string. */
+/** Return APR's version information as a string. */
 APR_DECLARE(const char *) apr_version_string(void);
 
 
-/* Internal: helper macros for stringifying the version numbers */
+/** Internal: helper macro for stringifying the version numbers */
 #define APR_STRINGIFY(n) APR_STRINGIFY_HELPER(n)
+/** Internal: helper macro for stringifying the version numbers */
 #define APR_STRINGIFY_HELPER(n) #n
 
-/* Internal: string form of the "is dev" flag */
+/** Internal: string form of the "is dev" flag */
 #ifdef APR_IS_DEV_VERSION
 #define APR_IS_DEV_STRING "-dev"
 #else
