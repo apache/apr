@@ -56,10 +56,10 @@
 #include "fileio.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dupfile(ap_file_t **, ap_file_t *)
+ * ap_status_t ap_dupfile(ap_file_t **new_file, ap_file_t *old_file)
  *    duplicate the specified file descriptor.
- * arg 1) The file to duplicate.
- * arg 2) The structure to duplicate into. 
+ * arg 1) The structure to duplicate into. 
+ * arg 2) The file to duplicate.
  */         
 ap_status_t ap_dupfile(struct file_t **new_file, struct file_t *old_file)
 {

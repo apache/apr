@@ -82,7 +82,7 @@ static ap_filetype_e filetype_from_mode(int mode)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_getfileinfo(ap_file_t *)
+ * ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
  *    get the specified file's stats..
  * arg 1) Where to store the information about the file.
  * arg 2) The file to get information about. 
@@ -111,7 +111,7 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, struct file_t *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_stat(ap_file_t **, char *, ap_context_t *)
+ * ap_status_t ap_stat(ap_file_t **finfo, char *fname, ap_context_t *cont)
  *    get the specified file's stats.  The file is specified by filename,
  *    instead of using a pre-opened file.
  * arg 1) Where to store the information about the file.

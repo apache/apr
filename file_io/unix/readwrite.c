@@ -56,7 +56,7 @@
 #include "fileio.h"
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_read(ap_file_t *, void *, ap_ssize_t *)
+ * ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
  *    Read data from the specified file.
  * arg 1) The file descriptor to read from.
  * arg 2) The buffer to store the data to.
@@ -135,7 +135,7 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_write(ap_file_t *, void *, ap_ssize_t *)
+ * ap_status_t ap_write(ap_file_t *thefile, void *buf, ap_ssize_t *nbytes)
  *    Write data to the specified file.
  * arg 1) The file descriptor to write to.
  * arg 2) The buffer which contains the data.
@@ -207,7 +207,8 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_writev(ap_file_t *, struct iovec *, ap_size_t, ap_ssize_t *)
+ * ap_status_t ap_writev(ap_file_t *thefile, struct iovec *vec, ap_size_t nvec,
+ *                       ap_ssize_t *nbytes)
  *    Write data from iovec array to the specified file.
  * arg 1) The file descriptor to write to.
  * arg 2) The array from which to get the data to write to the file.
@@ -233,10 +234,10 @@ ap_status_t ap_writev(struct file_t *thefile, const struct iovec *vec,
 #endif
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_putc(char, ap_file_t *)
+ * ap_status_t ap_putc(char ch, ap_file_t *thefile)
  *    put a character into the specified file.
- * arg 1) The file descriptor to write to
- * arg 2) The character to write.
+ * arg 1) The character to write.
+ * arg 2) The file descriptor to write to
  */
 ap_status_t ap_putc(char ch, ap_file_t *thefile)
 {
@@ -253,10 +254,10 @@ ap_status_t ap_putc(char ch, ap_file_t *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_ungetc(char, ap_file_t *)
+ * ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
  *    put a character back onto a specified stream.
- * arg 1) The file descriptor to write to
- * arg 2) The character to write.
+ * arg 1) The character to write.
+ * arg 2) The file descriptor to write to
  */
 ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 {
@@ -271,10 +272,10 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_getc(char *, ap_file_t *)
+ * ap_status_t ap_getc(char *ch, ap_file_t *thefil)
  *    get a character from the specified file.
- * arg 1) The file descriptor to write to
- * arg 2) The character to write.
+ * arg 1) The character to write.
+ * arg 2) The file descriptor to write to
  */
 ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
@@ -306,10 +307,10 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_puts(char *, ap_file_t *)
+ * ap_status_t ap_puts(char *str, ap_file_t *thefile)
  *    Put the string into a specified file.
- * arg 1) The file descriptor to write to from
- * arg 2) The string to write. 
+ * arg 1) The string to write. 
+ * arg 2) The file descriptor to write to from
  */
 ap_status_t ap_puts(char *str, ap_file_t *thefile)
 {
@@ -331,7 +332,7 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_flush(ap_file_t *)
+ * ap_status_t ap_flush(ap_file_t *thefile)
  *    Flush the file's buffer.
  * arg 1) The file descriptor to flush
  */
@@ -350,11 +351,11 @@ ap_status_t ap_flush(ap_file_t *thefile)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_fgets(char *, int, ap_file_t *)
+ * ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
  *    Get a string from a specified file.
- * arg 1) The file descriptor to read from
- * arg 2) The buffer to store the string in. 
- * arg 3) The length of the string
+ * arg 1) The buffer to store the string in. 
+ * arg 2) The length of the string
+ * arg 3) The file descriptor to read from
  */
 ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
 {
