@@ -92,9 +92,9 @@ EXPORTS
 	ap_setprocattr_cmdtype   @83
 	ap_setprocattr_detach   @84
 	ap_create_process   @85
-	ap_get_childin   @86
-	ap_get_childout   @87
-	ap_get_childerr   @88
+;	ap_get_childin   @86
+;	ap_get_childout   @87
+;	ap_get_childerr   @88
 	ap_wait_proc   @89
 	ap_kill   @90
 	ap_create_threadattr   @91
@@ -113,9 +113,9 @@ EXPORTS
 	ap_set_threaddata    @104
 	ap_get_threadkeydata    @105
 	ap_set_threadkeydata    @106
-	ap_get_procdata    @107
+;	ap_get_procdata    @107
 ;	ap_set_procdata    @108
-	ap_get_os_proc   @109
+;	ap_get_os_proc   @109
 	ap_get_os_thread   @110
 	ap_get_os_threadkey   @111
 	ap_os_systemcase_filename   @112

@@ -92,11 +92,5 @@ struct ap_procattr_t {
     ap_int32_t detached;
 };
 
-struct ap_proc_t {
-    ap_pool_t *cntxt;
-    PROCESS_INFORMATION pi;
-    struct ap_procattr_t *attr;
-};
-
 #endif  /* ! THREAD_PROC_H */
 

@@ -67,8 +67,7 @@
 
 ap_status_t ap_createprocattr_init(ap_procattr_t **new, ap_pool_t *cont)
 {
-    (*new) = (ap_procattr_t *)ap_palloc(cont, 
-              sizeof(ap_procattr_t));
+    (*new) = (ap_procattr_t *)ap_palloc(cont, sizeof(ap_procattr_t));
 
     if ((*new) == NULL) {
         return APR_ENOMEM;
@@ -183,7 +182,7 @@ ap_status_t ap_setprocattr_detach(ap_procattr_t *attr, ap_int32_t det)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_create_process(ap_proc_t **new, const char *progname, 
+ap_status_t ap_create_process(ap_proc_t *new, const char *progname, 
                               char *const args[], char **env, 
                               ap_procattr_t *attr, ap_pool_t *cont)
 {
@@ -195,15 +194,11 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     char *envstr;
     char *pEnvBlock, *pNext;
     ap_status_t rv;
+    PROCESS_INFORMATION pi;
 
-    (*new) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-
-    if ((*new) == NULL) {
-        return APR_ENOMEM;
-    }
-
-    (*new)->cntxt = cont;
-    (*new)->attr = attr;
+    new->in = attr->parent_in;
+    new->err = attr->parent_err;
+    new->out = attr->parent_out;
 
     attr->si.cb = sizeof(attr->si);
     if (attr->detached) {
@@ -246,7 +241,7 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
                 cmdline = ap_pstrcat(cont, attr->currdir, progname, NULL);
             }
             else {
-            cmdline = ap_pstrcat(cont, attr->currdir, "\\", progname, NULL);
+                cmdline = ap_pstrcat(cont, attr->currdir, "\\", progname, NULL);
             }
         }
     }
@@ -351,7 +346,10 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
     
 
     if (CreateProcess(NULL, cmdline, NULL, NULL, TRUE, 0, pEnvBlock, attr->currdir, 
-                      &attr->si, &(*new)->pi)) {
+                      &attr->si, &pi)) {
+
+        new->pid = pi.hProcess;
+
         if (attr->child_in) {
             ap_close(attr->child_in);
         }
@@ -361,39 +359,21 @@ ap_status_t ap_create_process(ap_proc_t **new, const char *progname,
         if (attr->child_err) {
             ap_close(attr->child_err);
         }
-        CloseHandle((*new)->pi.hThread);
+        CloseHandle(pi.hThread);
+
         return APR_SUCCESS;
     }
 
     return GetLastError();
 }
 
-ap_status_t ap_get_childin(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_in;
-    return APR_SUCCESS; 
-}
-
-ap_status_t ap_get_childout(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_out; 
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_get_childerr(ap_file_t **new, ap_proc_t *proc)
-{
-    (*new) = proc->attr->parent_err; 
-    return APR_SUCCESS;
-}    
-
-ap_status_t ap_wait_proc(ap_proc_t *proc, 
-                         ap_wait_how_e wait)
+ap_status_t ap_wait_proc(ap_proc_t *proc, ap_wait_how_e wait)
 {
     DWORD stat;
     if (!proc)
         return APR_ENOPROC;
     if (wait == APR_WAIT) {
-        if ((stat = WaitForSingleObject(proc->pi.hProcess, INFINITE)) == WAIT_OBJECT_0) {
+        if ((stat = WaitForSingleObject(proc->pid, INFINITE)) == WAIT_OBJECT_0) {
             return APR_CHILD_DONE;
         }
         else if (stat == WAIT_TIMEOUT) {
@@ -401,7 +381,7 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
         }
         return GetLastError();
     }
-    if ((stat = WaitForSingleObject(proc->pi.hProcess, 0)) == WAIT_OBJECT_0) {
+    if ((stat = WaitForSingleObject(proc->pid, 0)) == WAIT_OBJECT_0) {
         return APR_CHILD_DONE;
     }
     else if (stat == WAIT_TIMEOUT) {
@@ -410,49 +390,3 @@ ap_status_t ap_wait_proc(ap_proc_t *proc,
     return GetLastError();
 }
 
-ap_status_t ap_get_procdata(char *key, void *data, ap_proc_t *proc)
-{
-    if (proc != NULL) {
-        return ap_get_userdata(data, key, proc->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOPROC;
-    }
-}
-
-ap_status_t ap_set_procdata(void *data, char *key,
-                            ap_status_t (*cleanup) (void *),
-                            ap_proc_t *proc)
-{
-    if (proc != NULL) {
-        return ap_set_userdata(data, key, cleanup, proc->cntxt);
-    }
-    else {
-        data = NULL;
-        return APR_ENOPROC;
-    }
-}
-
-ap_status_t ap_get_os_proc(ap_os_proc_t *theproc, ap_proc_t *proc)
-{
-    if (proc == NULL) {
-        return APR_ENOPROC;
-    }
-    *theproc = proc->pi;
-    return APR_SUCCESS;
-}
-
-ap_status_t ap_put_os_proc(ap_proc_t **proc, ap_os_proc_t *theproc, 
-                           ap_pool_t *cont)
-{
-    if (cont == NULL) {
-        return APR_ENOPOOL;
-    }
-    if ((*proc) == NULL) {
-        (*proc) = (ap_proc_t *)ap_palloc(cont, sizeof(ap_proc_t));
-        (*proc)->cntxt = cont;
-    }
-    (*proc)->pi = *theproc;
-    return APR_SUCCESS;
-}              

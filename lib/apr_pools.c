@@ -1302,10 +1302,8 @@ static void free_proc_chain(struct process_chain *procs)
      * Do we need an APR function to clean-up a proc_t?
      */
     {
-        PROCESS_INFORMATION pi;
         for (p = procs; p; p = p->next) {
-            ap_get_os_proc(&pi, p->pid);
-            CloseHandle(pi.hProcess);
+            CloseHandle(p->pid->pid);
         }
     }
 #endif /* WIN32 */
