@@ -651,7 +651,7 @@ APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
 APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash)
 {
     char sample[120];
-#ifndef WIN32
+#if !defined(WIN32) && !defined(BEOS)
     char *crypt_pw;
 #endif
     if (!strncmp(hash, apr1_id, strlen(apr1_id))) {

@@ -68,15 +68,26 @@ struct ap_lock_t {
     int curr_locked;
     char *fname;
 	/* Inter proc */
-	sem_id sem_interproc;
-	int32  ben_interproc;
-	/* Intra Proc */
-	sem_id sem_intraproc;
-	int32  ben_intraproc;
-    /* At some point, we should do a scope for both inter and intra process
-     *  locking here.  Something like pthread_mutex with PTHREAD_PROCESS_SHARED
-     */    
+    sem_id sem_interproc;
+    int32  ben_interproc;
+    /* Intra Proc */
+    sem_id sem_intraproc;
+    int32  ben_intraproc;
 };
+
+ap_status_t create_intra_lock(struct ap_lock_t *new);
+ap_status_t lock_intra(struct ap_lock_t *lock);
+ap_status_t unlock_intra(struct ap_lock_t *lock);
+ap_status_t destroy_intra_lock(struct ap_lock_t *lock);
+
+ap_status_t create_inter_lock(struct ap_lock_t *new);
+ap_status_t lock_inter(struct ap_lock_t *lock);
+ap_status_t unlock_inter(struct ap_lock_t *lock);
+ap_status_t destroy_inter_lock(struct ap_lock_t *lock);
+
+ap_status_t child_init_lock(struct ap_lock_t **lock, ap_pool_t *cont, 
+                            const char *fname);
+
 
 #endif  /* LOCKS_H */
 

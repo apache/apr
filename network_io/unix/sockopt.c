@@ -76,7 +76,7 @@ static ap_status_t soblock(int sd)
     }
 #else
     int on = 0;
-    if (setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int)) < 0)
+    if (setsockopt(sd, SOL_SOCKET, SO_NONBLOCK, &on, sizeof(int)) < 0)
         return errno;
 #endif /* BEOS */
     return APR_SUCCESS;
@@ -103,7 +103,7 @@ static ap_status_t sononblock(int sd)
     }
 #else
     int on = 1;
-    if (setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int)) < 0)
+    if (setsockopt(sd, SOL_SOCKET, SO_NONBLOCK, &on, sizeof(int)) < 0)
         return errno;
 #endif /* BEOS */
     return APR_SUCCESS;

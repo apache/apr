@@ -62,6 +62,7 @@
 #include "apr_dso.h"
 #include "apr.h"
 #include <kernel/image.h>
+#include <string.h>
 
 #if APR_HAS_DSO
 
