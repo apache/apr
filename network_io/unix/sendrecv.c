@@ -410,26 +410,6 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
     headerstruct.trl_cnt = hdtr->numtrailers;
 
     /* FreeBSD can send the headers/footers as part of the system call */
-    if (sock->timeout >= 0) {
-        /* On FreeBSD, it is possible for the first call to sendfile to
-         * get EAGAIN, but still send some data.  This means that we cannot
-         * call sendfile and then check for EAGAIN, and then wait and call
-         * sendfile again.  If we do that, then we are likely to send the
-         * first chunk of data twice, once in the first call and once in the
-         * second.  If we are using a timed write, then we check to make sure
-         * we can send data before trying to send it.
-         *
-         * JLT: doing this first doesn't eliminate the possibility that
-         *      we get -1/EAGAIN/nbytes>0; AFAICT it just means extra syscalls
-         *      from time to time
-         */
-        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
-        if (arv != APR_SUCCESS) {
-            *len = 0;
-            return arv;
-        }
-    }
-
     do {
         if (bytes_to_send) {
             /* We won't dare call sendfile() if we don't have
@@ -466,6 +446,27 @@ apr_status_t apr_sendfile(apr_socket_t * sock, apr_file_t * file,
             }
         }
     } while (rv == -1 && errno == EINTR);
+
+    /* On FreeBSD, it is possible that sendfile will return EAGAIN, but 
+     * still send some data.  This means that we cannot call sendfile 
+     * and then check for EAGAIN, and then wait and call sendfile again.
+     * If we do that, then we are likely to send the first chunk of data 
+     * twice, once in the first call and once in the second.
+     *
+     * When we are dealing with a non-blocking or timeout socket, the
+     * caller must already be aware that we may not be able to write
+     * everything in one call.  Therefore, we should return back to
+     * the caller with how much we actually sent (as specified from EAGAIN).
+     *
+     * If we are using a timed write, we will now block until we are clear.
+     */
+    if (errno == EAGAIN && nbytes && sock->timeout >= 0) {
+        apr_status_t arv = apr_wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
+    }
 
     (*len) = nbytes;
     if (rv == -1) {
