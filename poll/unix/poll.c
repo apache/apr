@@ -55,6 +55,7 @@
 #include "apr.h"
 #include "apr_poll.h"
 #include "apr_time.h"
+#include "apr_portable.h"
 #include "networkio.h"
 #include "fileio.h"
 #if HAVE_POLL_H
@@ -194,16 +195,12 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     FD_ZERO(&exceptset);
 
     for (i = 0; i < num; i++) {
-#ifdef WIN32
-        SOCKET fd;
-#else
-        int fd;
-#endif
+        apr_os_sock_t fd;
 
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             fd = aprset[i].desc.s->socketdes;
         }
-        else if (aprset[i].desc_type == APR_POLL_FILE) {
+        else {
 #ifdef WIN32
             return APR_EBADF;
 #else
@@ -250,11 +247,7 @@ APR_DECLARE(apr_status_t) apr_poll(apr_pollfd_t *aprset, int num, apr_int32_t *n
     }
 
     for (i = 0; i < num; i++) {
-#ifdef WIN32
-        SOCKET fd;
-#else
-        int fd;
-#endif
+        apr_os_sock_t fd;
 
         if (aprset[i].desc_type == APR_POLL_SOCKET) {
             fd = aprset[i].desc.s->socketdes;
@@ -331,11 +324,7 @@ APR_DECLARE(apr_status_t) apr_pollset_add(apr_pollset_t *pollset,
                                           const apr_pollfd_t *descriptor)
 {
 #ifndef HAVE_POLL
-#ifdef WIN32
-    SOCKET fd;
-#else
-    int fd;
-#endif
+    apr_os_sock_t fd;
 #endif
 
     if (pollset->nelts == pollset->nalloc) {
@@ -387,11 +376,7 @@ APR_DECLARE(apr_status_t) apr_pollset_remove(apr_pollset_t *pollset,
 {
     apr_uint32_t i;
 #ifndef HAVE_POLL
-#ifdef WIN32
-    SOCKET fd;
-#else
-    int fd;
-#endif
+    apr_os_sock_t fd;
 #endif
 
 #ifdef HAVE_POLL
@@ -519,11 +504,7 @@ APR_DECLARE(apr_status_t) apr_pollset_poll(apr_pollset_t *pollset,
     }
     j = 0;
     for (i = 0; i < pollset->nelts; i++) {
-#ifdef WIN32
-        SOCKET fd;
-#else
-        int fd;
-#endif
+        apr_os_sock_t fd;
         if (pollset->query_set[i].desc_type == APR_POLL_SOCKET) {
             fd = pollset->query_set[i].desc.s->socketdes;
         }
