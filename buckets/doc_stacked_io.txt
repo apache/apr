@@ -552,3 +552,260 @@ a few bits of metadata to do HTTP: file size and last modified.  We
 need an etag generation function, it is specific to the filters in
 use.  You see, I'm envisioning a bottom layer which pulls data out of
 a database rather than reading from a file.]
+
+
+*************************************************************************
+Date: Sun, 27 Dec 1998 13:08:22 -0800 (PST)
+From: Ed Korthof <ed@bitmechanic.com>
+To: new-httpd@apache.org
+Subject: I/O filters & reference counts
+Message-ID: <Pine.LNX.3.96.981224163237.10687E-100000@crankshaft>
+
+Hi --
+
+A while back, I indicated I'd propose a way to do reference counts w/ the
+layered I/O I want to implement for 2.0 (assuming we don't use nspr)...
+for single-threaded Apache, this seems unnecessary (assuming you don't use
+shared memory in your filters to share data amoung the processes), but in
+other situations it does have advantages.
+
+Anyway, what I'd propose involves using a special syntax when you want to
+use reference counts.  This allows Apache to continue using the
+'pool'-based memory system (it may not be perfect, but imo it's reasonably
+good), without creating difficult when you wish to free memory.
+
+If you're creating memory which you'll want to share amoung multiple
+threads, you'll create it using a function more or less like: 
+
+    ap_palloc_share(pool *p, size_t size);
+
+you get back a void * pointer for use as normal. When you want to give
+someone else a reference to it, you do the following: 
+
+    ap_pshare_data(pool *p1, pool *p2, void * data);
+
+where data is the return from above (and it must be the same).  Then both
+pools have a reference to the data & to a counter; when each pool is
+cleaned up, it will automatically decrement the counter, and free the data
+if the counter is down to zero.
+
+In addition, a pool can decrement the counter with the following:
+
+    ap_pshare_free(pool * p1, void * data);
+
+after which the data may be freed.  There would also be a function,
+
+    ap_pshare_countrefs(pool * p1, void * data);
+
+which would return the number of pools holding a ref to 'data', or 1 if
+it's not a shared block.
+
+Internally, the pool might either keep a list of the shared blocks, or a
+balanced b-tree; if those are too slow, I'd look into passing back and
+forth a (pointer to an) int, and simply use an array.  The filter
+declaring the shared memory would need to keep track of such an int, but
+no one else would. 
+
+In the context of I/O filters, this would mean that each read function
+returns a const char *, which should not be cast to a non-const char * (at
+least, not without calling ap_pshare_countrefs()).  If a filter screwed
+this up, you'd have a problem -- but that's more or less unavoidable with
+sharing data amoung threads using reference counts. 
+
+It might make sense to build a more general reference counting system; if
+that's what people want, I'm also up for working on that.  But one of the
+advantages the pool system has is its simplicity, some of which would be
+lost.
+
+Anyway, how does this sound?  Reasonable or absurd?
+
+Thanks --
+
+Ed
+               ----------------------------------------
+History repeats itself, first as tragedy, second as farce. - Karl Marx
+
+*************************************************************************
+From: Ben Hyde <bhyde@pobox.com>
+Date: Tue, 29 Dec 1998 11:50:01 -0500 (EST)
+To: new-httpd@apache.org
+Subject: Re: I/O filters & reference counts
+In-Reply-To: <Pine.LNX.3.96.981227192210.10687H-100000@crankshaft>
+References: <Pine.GSO.3.96.981227185303.8793B-100000@elaine21.Stanford.EDU>
+	<Pine.LNX.3.96.981227192210.10687H-100000@crankshaft>
+Message-ID: <13960.60942.186393.799490@zap.ml.org>
+
+
+There are two problems that reference counts address that we have,
+but I still don't like them.
+
+These two are: pipeline memory management, and response paste up.  A
+good pipeline ought not _require_ memory proportional to the size of
+the response but only proportional to the diameter of the pipe.
+Response paste up is interesting because the library of clip art is
+longer lived than the response or connection pool.  There is a lot to
+be said for leveraging the configuration pool life cycle for this kind
+of thing.
+
+The pipeline design, and the handling of the memory it uses become
+very entangled after a while - I can't think about one without the
+other.  This is the right place to look at this problem.  I.e. this
+is a problem to be lead by buff.c rework, not alloc.c rework.
+
+Many pipeline operations require tight coupling to primitive
+operations that happen to be efficient.  Neat instructions, memory
+mapping, etc.  Extreme efficiency in this pipeline makes it desirable
+that the chunks in the pipeline be large.  I like the phrase "chunks
+and pumps" to summarize that there are two elements to design to get
+modularity right here.
+
+The pasteup problem - one yearns for a library of fragments (call it a
+cache, clip art, or templates if you like) which then readers in that
+library can assemble these into responses.  Some librarians like to
+discard stale bits and they need a scheme to know that the readers
+have all finished.  The library resides in a pool that lives longer
+than a single response connection.  If the librarian can be convinced
+that the server restart cycles are useful we get to a fall back to
+there.
+
+I can't smell yet where the paste up problem belong in the 2.0 design
+problem.  (a) in the core, (b) in a module, (c) as a subpart of the
+pipeline design, or (d) ostracized outside 2.0 to await a gift (XML?)
+we then fold into Apache.  I could probably argue any one of these.  A
+good coupling between this mechanism and the pipeline is good, limits
+on the pipeline design space are very good.
+
+   - ben
+
+
+*************************************************************************
+Date: Mon, 4 Jan 1999 18:26:36 -0800 (PST)
+From: Ed Korthof <ed@bitmechanic.com>
+To: new-httpd@apache.org
+Subject: Re: I/O filters & reference counts
+In-Reply-To: <13960.60942.186393.799490@zap.ml.org>
+Message-ID: <Pine.LNX.3.96.981231094653.486R-100000@crankshaft>
+
+On Tue, 29 Dec 1998, Ben Hyde wrote:
+
+> There are two problems that reference counts address that we have,
+> but I still don't like them.
+
+They certainly add some clutter.  But they offer a solution to the
+problems listed below... and specifically to an issue which you brought up
+a while back: avoiding a memcpy in each read layer which has a read
+function other than the default one.  Sometimes a memcpy is required,
+sometimes not; with "reference counts", you can go either way.
+
+> These two are: pipeline memory management, and response paste up.  A
+> good pipeline ought not _require_ memory proportional to the size of
+> the response but only proportional to the diameter of the pipe.
+> Response paste up is interesting because the library of clip art is
+> longer lived than the response or connection pool.  There is a lot to
+> be said for leveraging the configuration pool life cycle for this kind
+> of thing.
+
+I was indeed assuming that we would use pools which would last from one
+restart (and a run through of the configuration functions) to the next.
+
+So far as limiting the memory requirements of the pipeline -- this is
+primarily a function of the module programming.  Because the pipeline will
+generally live in a single thread (with the possible exception of the data
+source, which could be another processes), the thread will only be
+operating on a single filter at a time (unless you added custom code to
+create a new thread to handle one part of the pipeline -- ugg).
+
+For writing, the idea would be to print one or more blocks of text with
+each call; wait for the write function to return; and then recycle the
+buffers used.
+
+Reading has no writev equivalent, so you only be able to do it one block
+at a time, but this seems alright to me (reading data is actually a much
+less complicated procedure in practice -- at least, with the applications
+which I've seen).
+
+Recycling read buffers (so as to limit the size of the memory pipeline)
+is the hardest part, when we add in this 'reference count' scheme -- but
+it can be done, if the modules recieving the data are polite and indicate
+when they're done with the buffer.  Ie.:
+
+    module 1			module 2
+1.) reads from module 2:
+	char * ap_bread(BUFF *, pool *, int);
+
+2.)				returns a block of text w/ ref counts:
+					str= char* ap_pshare_alloc(size_t);
+					...
+					return str;
+				keeps a ref to str.
+		
+3.) handles the block of data
+    returned, and indicates it's
+    finished with:
+	void ap_pshare_free(char * block);
+    reads more data via
+	char * ap_bread(BUFF *, pool *, int);
+
+4.)				tries to recycle the buffer used:
+					if (ap_pshare_count_refs(str)==1)
+						reuse str
+					else
+						str = ap_pshare_alloc(...)
+					...
+	 				return str;
+
+5.) handles the block of data
+    returned...
+...
+
+One disadvantage is that if module 1 doesn't release its hold on a memory
+block it got from step 2 until step 5, then the memory block wouldn't be
+reused -- you'd pay w/ a free & a malloc (or with a significant increase
+in complexity -- I'd probably choose the free & malloc). And if the module
+failed to release the memory (via ap_pshare_free), then the memory
+requirements would be as large as the response (or request).
+
+I believe this is only relevant for clients PUTting large files onto their
+servers; but w/ files which are potentially many gigabytes, it is
+important that filters handling reading do this correctly.  Of course,
+that's currently the situation anyhow.
+
+> The pipeline design, and the handling of the memory it uses become
+> very entangled after a while - I can't think about one without the
+> other.  This is the right place to look at this problem.  I.e. this
+> is a problem to be lead by buff.c rework, not alloc.c rework.
+
+Yeah, after thinking about it a little bit I realized that no (or very
+little) alloc.c work would be needed to implement the system which I
+described.  Basically, you'd have an Apache API function which does malloc
+on its own, and other functions (also in the API) which register a cleanup
+function (for the malloc'ed memory) in appropriate pools. 
+
+IMO, the 'pipeline' is likely to be the easiest place to work with this,
+at least in terms of getting the most efficient & clean design which we
+can.
+
+[snip good comments]
+> I can't smell yet where the paste up problem belong in the 2.0 design
+> problem.  (a) in the core, (b) in a module, (c) as a subpart of the
+> pipeline design, or (d) ostracized outside 2.0 to await a gift (XML?)
+> we then fold into Apache.  I could probably argue any one of these.  A
+> good coupling between this mechanism and the pipeline is good, limits
+> on the pipeline design space are very good.
+
+An overdesigned pipeline system (or an overly large one) would definitely
+not be helpful.  If it would be useful, I'm happy to work on this (even if
+y'all aren't sure if you'd want to use it); if not, I'm sure I can find
+things to do with my time. <g>
+
+Anyway, I went to CPAN and got a copy of sfio... the latest version I
+found is from Oct, 1997.  I'd guess that using it (assuming this is
+possible) might give us slightly less efficency (simply because sfio
+wasn't built specifically for Apache, and customizing it is a much more
+involved processes), but possibly fewer bugs to work out & lots of
+interesting features.
+
+thanks --
+
+Ed, slowly reading through the sfio source code
+
