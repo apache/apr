@@ -81,8 +81,8 @@ ap_status_t ap_create_pipe(struct file_t **in, struct file_t **out, ap_context_t
     (*out)->cntxt = cont;
     (*out)->fname = ap_pstrdup(cont, "PIPE");
 
-    if (CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0) == -1) {
-        return errno;
+    if (!CreatePipe(&(*in)->filehand, &(*out)->filehand, &sa, 0)) {
+        return GetLastError();
     }
 
     return APR_SUCCESS;
