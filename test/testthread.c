@@ -56,41 +56,30 @@
 #include "apr_errno.h"
 #include "apr_general.h"
 #include "errno.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include "apr_time.h"
-#if APR_HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include "test_apr.h"
 
-#if !APR_HAS_THREADS
-int main(void)
-{
-    fprintf(stderr,
-            "This program won't work on this platform because there is no "
-            "support for threads.\n");
-    return 0;
-}
-#else /* !APR_HAS_THREADS */
+#if APR_HAS_THREADS
 
-void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_func2(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_func3(apr_thread_t *thd, void *data);
-void * APR_THREAD_FUNC thread_func4(apr_thread_t *thd, void *data);
+static apr_thread_mutex_t *thread_lock;
+static apr_thread_once_t *control = NULL;
+static int x = 0;
+static int value = 0;
 
-apr_thread_mutex_t *thread_lock;
-apr_pool_t *context;
-apr_thread_once_t *control = NULL;
-int x = 0;
-int value = 0;
-apr_status_t exit_ret_val = 123; /* just some made up number to check on later */
+static apr_thread_t *t1;
+static apr_thread_t *t2;
+static apr_thread_t *t3;
+static apr_thread_t *t4;
+
+/* just some made up number to check on later */
+static apr_status_t exit_ret_val = 123;
 
 static void init_func(void)
 {
     value++;
 }
 
-void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
+static void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
 {
     int i;
 
@@ -105,90 +94,78 @@ void * APR_THREAD_FUNC thread_func1(apr_thread_t *thd, void *data)
     return NULL;
 } 
 
-int main(void)
+static void thread_init(CuTest *tc)
 {
-    apr_thread_t *t1;
-    apr_thread_t *t2;
-    apr_thread_t *t3;
-    apr_thread_t *t4;
-    apr_status_t r1, r2, r3, r4;
-    apr_status_t s1, s2, s3, s4;
-    apr_initialize();
+    apr_status_t rv;
 
-    printf("APR Simple Thread Test\n======================\n\n");
-    
-    printf("%-60s", "Initializing the context"); 
-    if (apr_pool_create(&context, NULL) != APR_SUCCESS) {
-        fflush(stdout);
-        fprintf(stderr, "Failed.\nCould not initialize\n");
-        exit(-1);
-    }
-    printf("OK\n");
+    rv = apr_thread_once_init(&control, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 
-    apr_thread_once_init(&control, context);
-
-    printf("%-60s", "Initializing the lock"); 
-    r1 = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT,
-                                 context); 
-    if (r1 != APR_SUCCESS) {
-        fflush(stdout);
-        fprintf(stderr, "Failed\nCould not create lock\n");
-        exit(-1);
-    }
-    printf("OK\n");
-
-    printf("%-60s", "Starting all the threads"); 
-    r1 = apr_thread_create(&t1, NULL, thread_func1, NULL, context);
-    r2 = apr_thread_create(&t2, NULL, thread_func1, NULL, context);
-    r3 = apr_thread_create(&t3, NULL, thread_func1, NULL, context);
-    r4 = apr_thread_create(&t4, NULL, thread_func1, NULL, context);
-    if (r1 != APR_SUCCESS || r2 != APR_SUCCESS || 
-        r3 != APR_SUCCESS || r4 != APR_SUCCESS) {
-        fflush(stdout);
-        fprintf(stderr, "Failed\nError starting thread\n");
-        exit(-1);
-    }
-    printf("OK\n");
-
-    printf("%-60s", "Waiting for threads to exit");
-    fflush(stdout);
-    apr_thread_join(&s1, t1);
-    apr_thread_join(&s2, t2);
-    apr_thread_join(&s3, t3);
-    apr_thread_join(&s4, t4);
-    printf("OK\n");
-
-    printf("%-60s", "Checking thread's returned value");
-    if (s1 != exit_ret_val || s2 != exit_ret_val ||
-        s3 != exit_ret_val || s4 != exit_ret_val) {
-        fflush(stdout);
-        fprintf(stderr, 
-                "Invalid return value\nGot %d/%d/%d/%d, but expected %d for all 4\n",
-                s1, s2, s3, s4, exit_ret_val);
-        exit(-1);
-    }
-    printf("OK\n");
-
-    printf("%-60s", "Checking if locks worked"); 
-    if (x != 40000) {
-        fflush(stdout);
-        fprintf(stderr, "No!\nThe locks didn't work????  x = %d instead of 40,000\n", x);
-        exit(-1);
-    }
-    printf("OK\n");
-
-    printf("%-60s", "Checking if apr_thread_once worked");
-    if (value != 1) {
-        fflush(stdout);
-        fprintf(stderr, "Failed!\napr_thread_once must not have worked, "
-                "value is %d instead of 1\n", value);
-        exit(-1);
-    }
-    printf("OK\n");
-
-    apr_terminate();
-
-    return 0;
+    rv = apr_thread_mutex_create(&thread_lock, APR_THREAD_MUTEX_DEFAULT, p); 
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
 }
 
-#endif /* !APR_HAS_THREADS */
+static void create_threads(CuTest *tc)
+{
+    apr_status_t rv;
+
+    rv = apr_thread_create(&t1, NULL, thread_func1, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_thread_create(&t2, NULL, thread_func1, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_thread_create(&t3, NULL, thread_func1, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+    rv = apr_thread_create(&t4, NULL, thread_func1, NULL, p);
+    CuAssertIntEquals(tc, APR_SUCCESS, rv);
+}
+
+static void join_threads(CuTest *tc)
+{
+    apr_status_t s;
+
+    apr_thread_join(&s, t1);
+    CuAssertIntEquals(tc, exit_ret_val, s);
+    apr_thread_join(&s, t2);
+    CuAssertIntEquals(tc, exit_ret_val, s);
+    apr_thread_join(&s, t3);
+    CuAssertIntEquals(tc, exit_ret_val, s);
+    apr_thread_join(&s, t4);
+    CuAssertIntEquals(tc, exit_ret_val, s);
+}
+
+static void check_locks(CuTest *tc)
+{
+    CuAssertIntEquals(tc, 40000, x);
+}
+
+static void check_thread_once(CuTest *tc)
+{
+    CuAssertIntEquals(tc, 1, value);
+}
+
+#else
+
+static void threads_not_impl(CuTest *tc)
+{
+    CuNotImpl(tc, "Threads not implemented on this platform");
+}
+
+#endif
+
+CuSuite *testthread(void)
+{
+    CuSuite *suite = CuSuiteNew("Threads");
+
+#if !APR_HAS_THREADS
+    SUITE_ADD_TEST(suite, threads_not_impl);
+#else
+    SUITE_ADD_TEST(suite, thread_init);
+    SUITE_ADD_TEST(suite, create_threads);
+    SUITE_ADD_TEST(suite, join_threads);
+    SUITE_ADD_TEST(suite, check_locks);
+    SUITE_ADD_TEST(suite, check_thread_once);
+#endif
+
+    return suite;
+}
+
