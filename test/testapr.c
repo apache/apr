@@ -52,99 +52,34 @@
  * <http://www.apache.org/>.
  */
 
-/* Some simple functions to make the test apps easier to write and
- * a bit more consistent...
- */
+#include "test_apr.h"
 
-/* Things to bear in mind when using these...
- *
- * If you include '\t' within the string passed in it won't be included
- * in the spacing, so use spaces instead :)
- * 
- */ 
+apr_pool_t *p;
 
-#ifndef APR_TEST_INCLUDES
-#define APR_TEST_INCLUDES
+int main(int argc, char *argv[])
+{
+    CuSuite *suite;
+    CuString *output = CuStringNew();
 
-#include "CuTest.h"
-#include "apr_pools.h"
+    apr_initialize();
+    atexit(apr_terminate);
 
-extern apr_pool_t *p;
+    CuInit(argc, argv);
 
-CuSuite *getsuite(void);
+    apr_pool_create(&p, NULL);
 
-CuSuite *teststr(void);
-CuSuite *testtime(void);
+    suite = getsuite();
 
-
-
-#include "apr_strings.h"
-#include "apr_time.h"
-
-
-#define TEST_EQ(str, func, value, good, bad) \
-    printf("%-60s", str); \
-    { \
-    apr_status_t rv; \
-    if ((rv = func) == value){ \
-        char errmsg[200]; \
-        printf("%s\n", bad); \
-        fprintf(stderr, "Error was %d : %s\n", rv, \
-                apr_strerror(rv, (char*)&errmsg, 200)); \
-        exit(-1); \
-    } \
-    printf("%s\n", good); \
+    CuSuiteRun(suite);
+    CuSuiteSummary(suite, output);
+    CuStringAppend(output, "\n");
+    CuSuiteOverView(suite, output);
+    printf("%s", output->buffer);
+    CuStringInit(output);
+    CuSuiteDetails(suite, output);
+    if (strcmp(output->buffer, "")) {
+        printf("%s\n", output->buffer);
     }
+    return 0;
+}
 
-#define TEST_NEQ(str, func, value, good, bad) \
-    printf("%-60s", str); \
-    { \
-    apr_status_t rv; \
-    if ((rv = func) != value){ \
-        char errmsg[200]; \
-        printf("%s\n", bad); \
-        fprintf(stderr, "Error was %d : %s\n", rv, \
-                apr_strerror(rv, (char*)&errmsg, 200)); \
-        exit(-1); \
-    } \
-    printf("%s\n", good); \
-    }
-
-#define TEST_STATUS(str, func, testmacro, good, bad) \
-    printf("%-60s", str); \
-    { \
-        apr_status_t rv = func; \
-        if (!testmacro(rv)) { \
-            char errmsg[200]; \
-            printf("%s\n", bad); \
-            fprintf(stderr, "Error was %d : %s\n", rv, \
-                    apr_strerror(rv, (char*)&errmsg, 200)); \
-            exit(-1); \
-        } \
-        printf("%s\n", good); \
-    }
-
-#define STD_TEST_NEQ(str, func) \
-	TEST_NEQ(str, func, APR_SUCCESS, "OK", "Failed");
-
-#define PRINT_ERROR(rv) \
-    { \
-        char errmsg[200]; \
-        fprintf(stderr, "Error was %d : %s\n", rv, \
-                apr_strerror(rv, (char*)&errmsg, 200)); \
-        exit(-1); \
-    }
-
-#define MSG_AND_EXIT(msg) \
-    printf("%s\n", msg); \
-    exit (-1);
-
-#define TIME_FUNCTION(time, function) \
-    { \
-        apr_time_t tt = apr_time_now(); \
-        function; \
-        time = apr_time_now() - tt; \
-    }
-    
-    
-#endif /* APR_TEST_INCLUDES */

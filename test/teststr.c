@@ -52,6 +52,8 @@
  * <http://www.apache.org/>.
  */
 
+#include "test_apr.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -60,13 +62,17 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 
-static void test_strtok(apr_pool_t *p)
+/* I haven't bothered to check for APR_ENOTIMPL here, AFAIK, all string
+ * functions exist on all platforms.
+ */
+
+static void test_strtok(CuTest *tc)
 {
     struct {
         char *input;
         char *sep;
     }
-    tc[] = {
+    cases[] = {
         {
             "",
             "Z"
@@ -96,23 +102,24 @@ static void test_strtok(apr_pool_t *p)
     };
     int curtc;
 
-    for (curtc = 0; curtc < sizeof tc / sizeof tc[0]; curtc++) {
+    for (curtc = 0; curtc < sizeof cases / sizeof cases[0]; curtc++) {
         char *retval1, *retval2;
         char *str1, *str2;
         char *state;
 
-        str1 = apr_pstrdup(p, tc[curtc].input);
-        str2 = apr_pstrdup(p, tc[curtc].input);
+        str1 = apr_pstrdup(p, cases[curtc].input);
+        str2 = apr_pstrdup(p, cases[curtc].input);
 
         do {
-            retval1 = apr_strtok(str1, tc[curtc].sep, &state);
-            retval2 = strtok(str2, tc[curtc].sep);
+            retval1 = apr_strtok(str1, cases[curtc].sep, &state);
+            retval2 = strtok(str2, cases[curtc].sep);
 
-            if (!retval1)
-                assert(!retval2);
+            if (!retval1) {
+                CuAssertTrue(tc, retval2 == NULL);
+            }
             else {
-                assert(retval2);
-                assert(!strcmp(retval1, retval2));
+                CuAssertTrue(tc, retval2 != NULL);
+                CuAssertStrEquals(tc, retval2, retval1);
             }
 
             str1 = str2 = NULL; /* make sure we pass NULL on subsequent calls */
@@ -120,7 +127,7 @@ static void test_strtok(apr_pool_t *p)
     }
 }
 
-static void test_snprintf(apr_pool_t *p)
+static void snprintf_noNULL(CuTest *tc)
 {
     char buff[100];
     char *testing = apr_palloc(p, 10);
@@ -134,43 +141,44 @@ static void test_snprintf(apr_pool_t *p)
     testing[5] = 'n';
     testing[6] = 'g';
     
-    fprintf(stderr, "Testing precision  ........  ");
+    /* If this test fails, we are going to seg fault. */
     apr_snprintf(buff, sizeof(buff), "%.*s", 7, testing);
-    /* If this test fails, we are going to seg fault, so there is no reason
-     * to print a failure message.  rbb
-     */
-    if (!strncmp(buff, testing, 7)) {
-        fprintf(stderr, "OK\n");
-    }
-
-    fprintf(stderr, "Testing 0 length with NULL ..........  ");
-    rv = apr_snprintf(NULL, 0, "%sBAR", "FOO");
-    if (rv != 6) {
-        fprintf(stderr, "FAILED\n");
-    }
-    fprintf(stderr, "OK\n");
-
-    fprintf(stderr, "Testing 0 length with non-NULL ..........  ");
-    rv = apr_snprintf(buff, 0, "%sBAR", "FOO");
-    if (rv != 6) {
-        fprintf(stderr, "FAILED (return val)\n");
-    }
-    if (strcmp(buff, "FOOBAR") == 0) {
-        fprintf(stderr, "FAILED (mangled buff)\n");
-    }
-    fprintf(stderr, "OK\n");
+    CuAssertStrEquals(tc, buff, testing);
 }
 
-int main(int argc, const char * const argv[])
+static void snprintf_0NULL(CuTest *tc)
 {
-    apr_pool_t *p;
+    int rv;
 
-    apr_initialize();
-    atexit(apr_terminate);
-    apr_pool_create(&p, NULL);
-
-    test_strtok(p);
-    test_snprintf(p);
-
-    return 0;
+    rv = apr_snprintf(NULL, 0, "%sBAR", "FOO");
+    CuAssertIntEquals(tc, 6, rv);
 }
+
+static void snprintf_0nonNULL(CuTest *tc)
+{
+    int rv;
+    char *buff = "testing";
+
+    rv = apr_snprintf(buff, 0, "%sBAR", "FOO");
+    CuAssertIntEquals(tc, 6, rv);
+    CuAssert(tc, "buff unmangled", strcmp(buff, "FOOBAR") != 0);
+}
+
+CuSuite *teststr(void)
+{
+    CuSuite *suite = CuSuiteNew("Test Strings");
+
+    SUITE_ADD_TEST(suite, snprintf_0NULL);
+    SUITE_ADD_TEST(suite, snprintf_0nonNULL);
+    SUITE_ADD_TEST(suite, snprintf_noNULL);
+    SUITE_ADD_TEST(suite, test_strtok);
+
+    return suite;
+}
+
+#ifdef SINGLE_PROG
+CuSuite *getsuite(void)
+{
+    return teststr();
+}
+#endif

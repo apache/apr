@@ -44,7 +44,8 @@ PROGRAMS = \
 	testatomic@EXEEXT@ \
 	testpools@EXEEXT@ \
 	testmutexscope@EXEEXT@ \
-	testtable@EXEEXT@
+	testtable@EXEEXT@ \
+	testall@EXEEXT@
 
 
 TARGETS = $(PROGRAMS) $(NONPORTABLE)
@@ -58,6 +59,8 @@ CLEAN_TARGETS = testfile.tmp testdso@EXEEXT@ mod_test.slo
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
+
+CFLAGS=$(MY_CFLAGS)
 
 all: $(PROGRAMS) $(NONPORTABLE)
 
@@ -134,8 +137,8 @@ server@EXEEXT@: server.lo $(LOCAL_LIBS)
 sendfile@EXEEXT@: sendfile.lo $(LOCAL_LIBS)
 	$(LINK) sendfile.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-testtime@EXEEXT@: testtime.lo $(LOCAL_LIBS)
-	$(LINK) testtime.lo $(LOCAL_LIBS) $(ALL_LIBS)
+testtime@EXEEXT@: testtime.lo CuTest.lo testapr.lo $(LOCAL_LIBS)
+	$(LINK) testtime.lo CuTest.lo testapr.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testmmap@EXEEXT@: testmmap.lo $(LOCAL_LIBS)
 	$(LINK) testmmap.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -164,8 +167,8 @@ testpoll@EXEEXT@: testpoll.lo $(LOCAL_LIBS)
 testhash@EXEEXT@: testhash.lo $(LOCAL_LIBS)
 	$(LINK) testhash.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
-teststr@EXEEXT@: teststr.lo $(LOCAL_LIBS)
-	$(LINK) teststr.lo $(LOCAL_LIBS) $(ALL_LIBS)
+teststr@EXEEXT@: teststr.lo CuTest.lo testapr.lo $(LOCAL_LIBS)
+	$(LINK) teststr.lo CuTest.lo testapr.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testsockets@EXEEXT@: testsockets.lo $(LOCAL_LIBS)
 	$(LINK) testsockets.lo $(LOCAL_LIBS) $(ALL_LIBS)
@@ -205,5 +208,9 @@ testmutexscope@EXEEXT@: testmutexscope.lo $(LOCAL_LIBS)
 
 testtable@EXEEXT@: testtable.lo $(LOCAL_LIBS)
 	$(LINK) testtable.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testall: testall.lo testtime.lo teststr.lo CuTest.lo $(LOCAL_LIBS)
+	$(LINK) testall.lo testtime.lo teststr.lo CuTest.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
 
 # DO NOT REMOVE
