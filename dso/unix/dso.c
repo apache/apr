@@ -73,6 +73,8 @@ static apr_status_t dso_cleanup(void *thedso)
 
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_unload((shl_t)dso->handle);
+#elif defined(DARWIN)
+    NSUnLinkModule(dso->handle, FALSE);
 #else
     if (dlclose(dso->handle) != 0)
         return APR_EINIT;
@@ -87,9 +89,28 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 {
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
     shl_t os_handle = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|BIND_NOSTART, 0L);
+
+#elif defined(DARWIN)
+    NSObjectFileImage image;
+    NSModule os_handle;
+    char* err_msg = NULL;
+    if (NSCreateObjectFileImageFromFile(path, &image) != NSObjectFileImageSuccess) {
+	err_msg = "cannot create object file image";
+    }
+    else {
+#ifdef NSLINKMODULE_OPTION_PRIVATE
+      os_handle = NSLinkModule(image, path,
+			       NSLINKMODULE_OPTION_PRIVATE |
+			       NSLINKMODULE_OPTION_RETURN_ON_ERROR);
+#else
+      os_handle = NSLinkModule(image, path, TRUE);
+#endif
+    }
+
 #elif defined(OSF1) || defined(SEQUENT) || defined(SNI) ||\
     (defined(__FreeBSD_version) && (__FreeBSD_version >= 220000))
     void *os_handle = dlopen((char *)path, RTLD_NOW | RTLD_GLOBAL);
+
 #else
     void *os_handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL);
 #endif    
@@ -100,6 +121,9 @@ APR_DECLARE(apr_status_t) apr_dso_load(apr_dso_handle_t **res_handle,
 #if defined(HPUX) || defined(HPUX10) || defined(HPUX11)
         (*res_handle)->errormsg = strerror(errno);
         return errno;
+#elif defined(DARWIN)
+        (*res_handle)->errormsg = (err_msg) ? err_msg : "link failed";
+        return APR_EDSOOPEN;
 #else
         (*res_handle)->errormsg = dlerror();
         return APR_EDSOOPEN;
@@ -136,7 +160,29 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
         return APR_EINIT;
     *ressym = symaddr;
     return APR_SUCCESS;
-#else /* not HP-UX; use dlsym()/dlerror() */
+
+#elif defined(DARWIN)
+    void *retval = NULL;
+    NSSymbol symbol;
+    char *symname2 = (char*)malloc(sizeof(char)*(strlen(symname)+2));
+    sprintf(symname2, "_%s", symname);
+#ifdef NSLINKMODULE_OPTION_PRIVATE
+    symbol = NSLookupSymbolInModule((NSModule)handle->handle, symname2);
+#else
+    symbol = NSLookupAndBindSymbol(symname2);
+#endif
+    free(symname2);
+    if (symbol == NULL) {
+        handle->errormsg = "undefined symbol";
+	return APR_EINIT;
+    }
+    retval = NSAddressOfSymbol(symbol);
+    if (retval == NULL) {
+        handle->errormsg = "cannot resolve symbol";
+	return APR_EINIT;
+    }
+
+#else /* use dlsym()/dlerror() */
 
 #if defined(DLSYM_NEEDS_UNDERSCORE)
     void *retval;
@@ -159,7 +205,7 @@ APR_DECLARE(apr_status_t) apr_dso_sym(apr_dso_handle_sym_t *ressym,
     *ressym = retval;
     
     return APR_SUCCESS;
-#endif /* not HP-UX; use dlsym()/dlerror() */
+#endif /* use dlsym()/dlerror() */
 }
 
 APR_DECLARE(const char *) apr_dso_error(apr_dso_handle_t *dso, char *buffer, apr_size_t buflen)
