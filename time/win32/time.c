@@ -148,6 +148,19 @@ APR_DECLARE(apr_status_t) apr_explode_gmt(apr_exploded_time_t *result,
     return APR_SUCCESS;
 }
 
+APR_DECLARE(apr_status_t) apr_explode_time(apr_exploded_time_t *result, 
+                                           apr_time_t input, apr_int32_t offs)
+{
+    FILETIME ft;
+    SYSTEMTIME st;
+    AprTimeToFileTime(&ft, input + (offs *  APR_USEC_PER_SEC));
+    FileTimeToSystemTime(&ft, &st);
+    SystemTimeToAprExpTime(result, &st, 0);
+    result->tm_usec = (apr_int32_t) (input % APR_USEC_PER_SEC);
+    result->tm_gmtoff = offs;
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_explode_localtime(apr_exploded_time_t *result,
                                                 apr_time_t input)
 {
