@@ -608,10 +608,7 @@ AC_SUBST(have_sigwait)
 AC_CHECK_FUNCS(poll)
 
 dnl ----------------------------- Checking for missing POSIX thread functions
-AC_CHECK_FUNCS(getpwnam_r)
-AC_CHECK_FUNCS(getpwuid_r)
-AC_CHECK_FUNCS(getgrnam_r)
-AC_CHECK_FUNCS(getgrgid_r)
+AC_CHECK_FUNCS([getpwnam_r getpwuid_r getgrnam_r getgrgid_r])
 
 dnl ----------------------------- Checking for Shared Memory Support 
 echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
@@ -624,15 +621,11 @@ case $host in
        ;;
 esac
 
-AC_CHECK_HEADERS(sys/mman.h)
+AC_CHECK_HEADERS([sys/mman.h sys/ipc.h sys/shm.h sys/file.h kernel/OS.h os2.h])
+AC_CHECK_FUNCS([mmap munmap shm_open shm_unlink shmget shmat shmdt shmctl \
+                create_area])
 APR_CHECK_DEFINE(MAP_ANON, sys/mman.h)
-AC_CHECK_FUNCS(mmap munmap shm_open shm_unlink)
 APR_CHECK_FILE(/dev/zero)
-AC_CHECK_HEADERS(sys/ipc.h sys/shm.h sys/file.h)
-AC_CHECK_FUNCS(shmget shmat shmdt shmctl)
-AC_CHECK_HEADERS(kernel/OS.h)
-AC_CHECK_FUNCS(create_area)
-AC_CHECK_HEADERS(os2.h)
 
 # Not all systems can mmap /dev/zero (such as HP-UX).  Check for that.
 if test "$ac_cv_func_mmap" = "yes" &&
@@ -859,12 +852,10 @@ AC_CHECK_FUNCS(sigaction, [ have_sigaction="1" ], [ have_sigaction="0" ])
 AC_DECL_SYS_SIGLIST
 
 AC_CHECK_FUNCS(fork, [ fork="1" ], [ fork="0" ])
-AC_CHECK_FUNCS(getpass)
 APR_CHECK_INET_ADDR
 APR_CHECK_INET_NETWORK
 AC_SUBST(apr_inaddr_none)
 AC_CHECK_FUNC(_getch)
-AC_CHECK_FUNCS(gmtime_r localtime_r)
 AC_CHECK_FUNCS(strerror_r, [ strerror_r="1" ], [ strerror_r="0" ])
 if test "$strerror_r" = "1"; then
   APR_CHECK_STRERROR_R_RC
@@ -877,9 +868,8 @@ AC_CHECK_FUNCS(mmap, [ mmap="1" ], [ mmap="0" ])
 if test "$native_mmap_emul" = "1"; then
     mmap="1"
 fi
-AC_CHECK_FUNCS(hstrerror)
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
-AC_CHECK_FUNCS(mkstemp)
+AC_CHECK_FUNCS([getpass gmtime_r localtime_r hstrerror mkstemp])
 
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
