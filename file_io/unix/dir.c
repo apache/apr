@@ -132,7 +132,7 @@ ap_status_t ap_readdir(struct dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_readdir(ap_dir_t *)
+ * ap_status_t ap_rewinddir(ap_dir_t *)
  *    Rewind the directory to the first entry. 
  * arg 1) the directory descriptor to rewind.
  */                        
@@ -270,7 +270,7 @@ ap_status_t ap_dir_entry_ftype(struct dir_t *thedir, ap_filetype_e *type)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_dir_entry_filename(ap_dir_t *, char **) 
+ * ap_status_t ap_get_dir_filename(ap_dir_t *, char **) 
  *    Get the file name of the current directory entry. 
  * arg 1) the currently open directory.
  * arg 2) the file name of the directory entry. 
@@ -297,7 +297,7 @@ ap_status_t ap_get_os_dir(struct dir_t *dir, ap_os_dir_t *thedir)
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_get_os_dir(ap_dir_t *, ap_os_dir_t *)
+ * ap_status_t ap_put_os_dir(ap_dir_t *, ap_os_dir_t *)
  *    convert the dir from os specific type to apr type.
  * arg 1) The os specific dir to convert
  * arg 2) The apr dir we are converting to.
