@@ -239,14 +239,6 @@ apr_status_t apr_file_eof(apr_file_t *fptr)
     return APR_SUCCESS;
 }   
 
-apr_status_t apr_file_error(apr_file_t *fptr)
-{
-/* This function should be removed ASAP.  It is next on my list once
- * I am sure nobody is using it.
- */
-    return APR_SUCCESS;
-}   
-
 apr_status_t apr_file_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
     int fd = STDERR_FILENO;
