@@ -315,8 +315,9 @@ APR_DECLARE(apr_status_t) apr_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
             tvptr = NULL;
         }
         else {
-            tv.tv_sec =  apr_time_sec_get(sock->timeout);
-            tv.tv_usec = apr_time_usec_get(sock->timeout);
+            /* casts for winsock/timeval definition */
+            tv.tv_sec =  (long)apr_time_sec(sock->timeout);
+            tv.tv_usec = (int)apr_time_usec(sock->timeout);
             tvptr = &tv;
         }
         rc = select(FD_SETSIZE+1, NULL, &wfdset, &efdset, tvptr);

@@ -99,8 +99,8 @@ APR_DECLARE(apr_status_t) apr_socket_timeout_set(apr_socket_t *sock, apr_interva
         /* Reset socket timeouts if the new timeout differs from the old timeout */
         if (sock->timeout != t) 
         {
-            /* Win32 timeouts are in msec */
-            sock->timeout_ms = apr_time_as_msec(t);
+            /* Win32 timeouts are in msec, represented as int */
+            sock->timeout_ms = (int)apr_time_as_msec(t);
             setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, 
                        (char *) &sock->timeout_ms, 
                        sizeof(sock->timeout_ms));
@@ -153,7 +153,7 @@ APR_DECLARE(apr_status_t) apr_setsocketopt(apr_socket_t *sock,
             if (sock->timeout != on) 
             {
                 /* Win32 timeouts are in msec */
-                sock->timeout_ms = apr_time_to_msec(on);
+                sock->timeout_ms = apr_time_as_msec(on);
                 setsockopt(sock->sock, SOL_SOCKET, SO_RCVTIMEO, 
                            (char *) &sock->timeout_ms, 
                            sizeof(sock->timeout_ms));
