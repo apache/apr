@@ -282,6 +282,48 @@ APR_DECLARE(apr_status_t) apr_procattr_detach_set(apr_procattr_t *attr,
     return APR_SUCCESS;
 }
 
+static const char* has_space(const char *str)
+{
+    const char *ch;
+    for (ch = str; *ch; ++ch) {
+        if (isspace(*ch)) {
+            return ch;
+        }
+    }
+    return NULL;
+}
+
+static char *apr_caret_escape_args(apr_pool_t *p, const char *str)
+{
+    char *cmd;
+    unsigned char *d;
+    const unsigned char *s;
+
+    cmd = apr_palloc(p, 2 * strlen(str) + 1);	/* Be safe */
+    d = (unsigned char *)cmd;
+    s = (const unsigned char *)str;
+    for (; *s; ++s) {
+
+        /* 
+         * Newlines to Win32/OS2 CreateProcess() are ill advised.
+         * Convert them to spaces since they are effectively white
+         * space to most applications
+         */
+	if (*s == '\r' || *s == '\n') {
+	    *d++ = ' ';
+            continue;
+	}
+
+	if (IS_SHCHAR(*s)) {
+	    *d++ = '^';
+	}
+	*d++ = *s;
+    }
+    *d = '\0';
+
+    return cmd;
+}
+
 APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
                                           const char *progname,
                                           const char * const *args,
@@ -291,11 +333,11 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
 {
     apr_status_t rv;
     apr_size_t i;
+    const char *argv0;
     char *cmdline;
     char *pEnvBlock;
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = 0;
-    const char *ch;
 
     new->in = attr->parent_in;
     new->err = attr->parent_err;
@@ -318,37 +360,38 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
     }
 
-    /* progname must be the unquoted, actual name, or NULL if this is
-     * a 16 bit app running in the VDM or WOW context.
-     */
-    if (progname[0] == '\"') {
-        progname = apr_pstrndup(pool, progname + 1, strlen(progname) - 2);
-    }
-    
     /* progname must be unquoted, in native format, as there are all sorts 
      * of bugs in the NT library loader code that fault when parsing '/'.
      * We do not directly manipulate cmdline, and it will become a copy,
      * so we've casted past the constness issue.
+     * XXX progname must be NULL if this is a 16 bit app running in WOW
      */
-    if (strchr(progname, ' '))
-        cmdline = apr_pstrcat(pool, "\"", progname, "\"", NULL);
-    else
-        cmdline = (char*)progname;
+    if (progname[0] == '\"') {
+        progname = apr_pstrndup(pool, progname + 1, strlen(progname) - 2);
+    }
 
-    i = 1;
-    while (args && args[i]) {
-        for (ch = args[i]; *ch; ++ch) {
-            if (isspace(*ch)) {
-                break;
-            }
-        }
-        if (*ch) {
+    if ((rv = apr_filepath_merge(&cmdline, attr->currdir, progname, 
+                                 APR_FILEPATH_NATIVE, pool)) != APR_SUCCESS) {
+        return rv;
+    }
+    progname = cmdline;
+
+    if (has_space(progname)) {
+        argv0 = apr_pstrcat(pool, "\"", progname, "\"", NULL);
+    }
+    else {
+        argv0 = progname;
+    }
+
+    /* Handle the args, seperate from argv0 */
+    cmdline = "";
+    for (i = 1; args && args[i]; ++i) {
+        if (has_space(args[i])) {
             cmdline = apr_pstrcat(pool, cmdline, " \"", args[i], "\"", NULL);
         }
         else {
             cmdline = apr_pstrcat(pool, cmdline, " ", args[i], NULL);
         }
-        i++;
     }
 
     /* ### how to handle APR_PROGRAM_ENV and APR_PROGRAM_PATH? */
@@ -363,12 +406,7 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
         else {
             progname = shellcmd;
-            for (ch = shellcmd; *ch; ++ch) {
-                if (isspace(*ch)) {
-                    break;
-                }
-            }
-            if (*ch) {
+            if (has_space(shellcmd)) {
                 shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
             }
         }
@@ -376,10 +414,10 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          */
         i = strlen(progname);
         if (i >= 11 && strcasecmp(progname + i - 11, "command.com") == 0) {
-            cmdline = apr_pstrcat(pool, shellcmd, " /C ", cmdline, NULL);
+            cmdline = apr_pstrcat(pool, shellcmd, " /C ", argv0, cmdline, NULL);
         }
         else {
-            cmdline = apr_pstrcat(pool, shellcmd, " /C \"", cmdline, "\"", NULL);
+            cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
         }
     } 
     else {
@@ -389,12 +427,54 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
          * ###: This solution isn't much better - it may defeat path searching
          * when the path search was desired.  Open to further discussion.
          */
-        char *progpath;
-        apr_filepath_merge(&progpath, attr->currdir, progname, 
-                           APR_FILEPATH_NATIVE, pool);
-        progname = progpath;
+        i = strlen(progname);
+        if (i >= 4 && (strcasecmp(progname + i - 4, ".bat") == 0
+                    || strcasecmp(progname + i - 4, ".cmd") == 0))
+        {
+            char *shellcmd = getenv("COMSPEC");
+            if (!shellcmd) {
+                return APR_EINVAL;
+            }
+            if (shellcmd[0] == '"') {
+                progname = apr_pstrndup(pool, shellcmd + 1, strlen(shellcmd) - 2);
+            }
+            else {
+                progname = shellcmd;
+                if (has_space(shellcmd)) {
+                    shellcmd = apr_pstrcat(pool, "\"", shellcmd, "\"", NULL);
+                }
+            }
+            i = strlen(progname);
+            if (i >= 11 && strcasecmp(progname + i - 11, "command.com") == 0) {
+                cmdline = apr_pstrcat(pool, shellcmd, " /C ", argv0, cmdline, NULL);
+            }
+            else {
+                /* We must protect the cmdline args from any interpolation - this
+                 * is not a shellcmd, and the source of argv[] is untrusted.
+                 * Notice we escape ALL the cmdline args, including the quotes
+                 * around the individual args themselves.  No sense in allowing
+                 * the shift-state to be toggled, and the application will 
+                 * not see the caret escapes.
+                 */
+                cmdline = apr_caret_escape_args(pool, cmdline);
+                /*
+                 * Our app name must always be quoted so the quotes surrounding
+                 * the entire /c "command args" are unambigious.
+                 */
+                if (*argv0 != '"') {
+                    cmdline = apr_pstrcat(pool, shellcmd, " /C \"\"", argv0, "\"", cmdline, "\"", NULL);
+                }
+                else {
+                    cmdline = apr_pstrcat(pool, shellcmd, " /C \"", argv0, cmdline, "\"", NULL);
+                }
+            }
+        }
+        else {
+            /* A simple command we are directly invoking
+             */
+            cmdline = apr_pstrcat(pool, argv0, cmdline, NULL);
+        }
     }
-
 
     if (!env) 
         pEnvBlock = NULL;
@@ -457,6 +537,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         }
 #endif /* APR_HAS_ANSI_FS */
     } 
+
+    new->invoked = cmdline;
 
 #if APR_HAS_UNICODE_FS
     IF_WIN_OS_IS_UNICODE
