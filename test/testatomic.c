@@ -295,7 +295,7 @@ int main(int argc, char**argv)
     }
     printf("OK\n");
 
-    rv = check_basic_atomics(&y);
+    rv = check_basic_atomics();
     if (rv != APR_SUCCESS) {
         fprintf(stderr, "Failed.\n");
         exit(-1);
