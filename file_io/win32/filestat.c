@@ -195,16 +195,27 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
     PACL dacl = NULL;
     apr_status_t rv;
 
-    if (whatfile == MORE_OF_WFSPEC)
-        (apr_wchar_t*)ufile;
-    else if (whatfile == MORE_OF_FSPEC)
-        (char*)ufile;
-    else if (whatfile == MORE_OF_HANDLE)
-        (HANDLE)ufile;
-
-    if ((wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
-            && os_level >= APR_WIN_NT)
+    if (os_level < APR_WIN_NT) 
     {
+        /* Read, write execute for owner.  In the Win9x environment, any
+         * readable file is executable (well, not entirely 100% true, but
+         * still looking for some cheap logic that would help us here.)
+         */
+        if (finfo->protection & APR_FREADONLY) {
+            finfo->protection |= APR_WREAD | APR_WEXECUTE;
+        }
+        else {
+            finfo->protection |= APR_WREAD | APR_WEXECUTE | APR_WWRITE;
+        }
+        finfo->protection |= (finfo->protection << prot_scope_group) 
+                           | (finfo->protection << prot_scope_user);
+
+        finfo->valid |= APR_FINFO_UPROT | APR_FINFO_GPROT | APR_FINFO_WPROT;
+    }    
+    else if (wanted & (APR_FINFO_PROT | APR_FINFO_OWNER))
+    {
+        /* On NT this request is incredibly expensive, but accurate.
+         */
         SECURITY_INFORMATION sinf = 0;
         PSECURITY_DESCRIPTOR pdesc = NULL;
         if (wanted & (APR_FINFO_USER | APR_FINFO_UPROT))
@@ -256,91 +267,109 @@ apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, apr_int32_t wante
         }
     }
 
-    if (!(finfo->valid & APR_FINFO_UPROT)) {
-        /* Read, write execute for owner.  In the Win32 environment, 
-         * anything readable is executable (well, not entirely 100% true, 
-         * but I'm looking for some obvious logic that would help us here.)
-         */
-        if (finfo->protection & APR_FREADONLY) {
-            finfo->protection |= S_IREAD | S_IEXEC;
-        }
-        else {
-            finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
-        }
-        finfo->valid |= APR_FINFO_UPROT;
-    }    
-
     return ((wanted & ~finfo->valid) ? APR_INCOMPLETE : APR_SUCCESS);
+}
+
+
+/* This generic fillin depends upon byhandle to be passed as 0 when
+ * a WIN32_FILE_ATTRIBUTE_DATA or either WIN32_FIND_DATA [A or W] is
+ * passed for wininfo.  When the BY_HANDLE_FILE_INFORMATION structure
+ * is passed for wininfo, byhandle is passed as 1 to offset the one
+ * dword discrepancy in the High/Low size structure members.
+ */
+void fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
+                     int byhandle) 
+{
+    DWORD *sizes = &wininfo->nFileSizeHigh + byhandle;
+
+    memset(finfo, '\0', sizeof(*finfo));
+
+    FileTimeToAprTime(&finfo->atime, &wininfo->ftLastAccessTime);
+    FileTimeToAprTime(&finfo->ctime, &wininfo->ftCreationTime);
+    FileTimeToAprTime(&finfo->mtime, &wininfo->ftLastWriteTime);
+
+#if APR_HAS_LARGE_FILES
+    finfo->size =  (apr_off_t)sizes[1]
+                | ((apr_off_t)sizes[0] << 32);
+#else
+    finfo->size = (apr_off_t)sizes[1];
+    if (finfo->size < 0 || sizes[0])
+        finfo->size = 0x7fffffff;
+#endif
+
+    if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
+        finfo->filetype = APR_LNK;
+    }
+    else if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+        finfo->filetype = APR_DIR;
+    }
+    else {
+        /* XXX: Solve this:  Short of opening the handle to the file, the 
+         * 'FileType' appears to be unknowable (in any trustworthy or 
+         * consistent sense), that is, as far as PIPE, CHR, etc are concerned.
+         */
+        finfo->filetype = APR_REG;
+    }
+
+    /* The following flags are [for this moment] private to Win32.
+     * That's the only excuse for not toggling valid bits to reflect them.
+     */
+    if (wininfo->dwFileAttributes & FILE_ATTRIBUTE_READONLY)
+        finfo->protection = APR_FREADONLY;
+    
+    finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
+                 | APR_FINFO_SIZE  | APR_FINFO_TYPE;   /* == APR_FINFO_MIN */
 }
 
 
 APR_DECLARE(apr_status_t) apr_getfileinfo(apr_finfo_t *finfo, apr_int32_t wanted,
                                           apr_file_t *thefile)
 {
-    BY_HANDLE_FILE_INFORMATION FileInformation;
-    apr_oslevel_e os_level;
+    BY_HANDLE_FILE_INFORMATION FileInfo;
 
-    if (!GetFileInformationByHandle(thefile->filehand, &FileInformation)) {
+    if (!GetFileInformationByHandle(thefile->filehand, &FileInfo)) {
         return apr_get_os_error();
     }
 
-    memset(finfo, '\0', sizeof(*finfo));
+    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 1);
     finfo->cntxt = thefile->cntxt;
+ 
+    /* Extra goodies known only by GetFileInformationByHandle() */
+    finfo->inode  =  (apr_ino_t)FileInfo.nFileIndexLow
+                  | ((apr_ino_t)FileInfo.nFileIndexHigh << 32);
+    finfo->device = FileInfo.dwVolumeSerialNumber;
+    finfo->nlink  = FileInfo.nNumberOfLinks;
 
-    FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
-    FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
-    FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
+    finfo->valid |= APR_FINFO_IDENT | APR_FINFO_NLINK;
 
-    finfo->inode  =  (apr_ino_t)FileInformation.nFileIndexLow
-                  | ((apr_ino_t)FileInformation.nFileIndexHigh << 32);
-    finfo->device = FileInformation.dwVolumeSerialNumber;
-    finfo->nlink  = FileInformation.nNumberOfLinks;
-
-#if APR_HAS_LARGE_FILES
-    finfo->size =  (apr_off_t)FileInformation.nFileSizeLow
-                | ((apr_off_t)FileInformation.nFileSizeHigh << 32);
-#else
-    finfo->size = (apr_off_t)FileInformation.nFileSizeLow;
-    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
-        finfo->size = 0x7fffffff;
-#endif
-    
-    finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
-                 | APR_FINFO_IDENT | APR_FINFO_NLINK | APR_FINFO_SIZE;
-
-
-    if (wanted & APR_FINFO_TYPE) 
+    if ((wanted & APR_FINFO_TYPE) && (APR_FINFO_TYPE == APR_REG))
     {
+        /* Go the extra mile to be -certain- that we have a real, regular
+         * file, since the attribute bits aren't a certain thing.
+         */
         DWORD FileType;
-        if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-            finfo->filetype = APR_LNK;
-            finfo->valid |= APR_FINFO_TYPE;
-        }
-        else if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            finfo->filetype = APR_DIR;
-            finfo->valid |= APR_FINFO_TYPE;
-        }
-        else if (FileType = GetFileType(thefile->filehand)) {
+        if (FileType = GetFileType(thefile->filehand)) {
             if (FileType == FILE_TYPE_DISK) {
                 finfo->filetype = APR_REG;
-                finfo->valid |= APR_FINFO_TYPE;
             }
             else if (FileType == FILE_TYPE_CHAR) {
                 finfo->filetype = APR_CHR;
-                finfo->valid |= APR_FINFO_TYPE;
             }
             else if (FileType == FILE_TYPE_PIPE) {
                 finfo->filetype = APR_PIPE;
-                finfo->valid |= APR_FINFO_TYPE;
+            }
+            else {
+                finfo->filetype = APR_NOFILE;
             }
         }
     }
-    
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
-        finfo->protection = APR_FREADONLY;
 
-    if (wanted &= ~finfo->valid)
+    if (wanted &= ~finfo->valid) {
+        apr_oslevel_e os_level;
+        if (apr_get_oslevel(thefile->cntxt, &os_level))
+            os_level = APR_WIN_95;
         return more_finfo(finfo, thefile->filehand, wanted, MORE_OF_HANDLE, os_level);
+    }
 
     return APR_SUCCESS;
 }
@@ -357,12 +386,15 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
 #ifdef APR_HAS_UNICODE_FS
     apr_wchar_t wfname[APR_PATH_MAX];
 #endif
-    /*
-     * The WIN32_FILE_ATTRIBUTE_DATA is a subset of this structure
-     */
-    WIN32_FIND_DATA FileInformation;
     apr_oslevel_e os_level;
-
+    char *filename = NULL;
+    /* These all share a common subset of this structure */
+    union {
+        WIN32_FIND_DATAW w;
+        WIN32_FIND_DATAA n;
+        WIN32_FILE_ATTRIBUTE_DATA i;
+    } FileInfo;
+    
     if (apr_get_oslevel(cont, &os_level))
         os_level = APR_WIN_95;
     
@@ -380,85 +412,65 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
         if (rv = utf8_to_unicode_path(wfname, sizeof(wfname) 
                                             / sizeof(apr_wchar_t), fname))
             return rv;
-        if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
-                                  &FileInformation)) {
-            return apr_get_os_error();
+        if (!(wanted & APR_FINFO_NAME)) {
+            if (!GetFileAttributesExW(wfname, GetFileExInfoStandard, 
+                                      &FileInfo.i))
+                return apr_get_os_error();
+        }
+        else {
+            /* Guard against bogus wildcards and retrieve by name
+             * since we want the true name, and set aside a long
+             * enough string to handle the longest file name.
+             */
+            char tmpname[APR_FILE_MAX * 3 + 1];
+            HANDLE hFind;
+            if (strchr(fname, '*') || strchr(fname, '?'))
+                return APR_ENOENT;
+            hFind = FindFirstFileW(wfname, &FileInfo.w);
+            if (hFind == INVALID_HANDLE_VALUE)
+                return apr_get_os_error();
+            FindClose(hFind);
+            if (unicode_to_utf8_path(tmpname, sizeof(tmpname), 
+                                     FileInfo.w.cFileName)) {
+                return APR_ENAMETOOLONG;
+            }
+            filename = apr_pstrdup(cont, tmpname);
         }
     }
     else 
 #endif
-      if (os_level >= APR_WIN_98) {
+      if ((os_level >= APR_WIN_98) && !(wanted & APR_FINFO_NAME))
+    {
         if (!GetFileAttributesExA(fname, GetFileExInfoStandard, 
-                                 &FileInformation)) {
+                                 &FileInfo.i)) {
             return apr_get_os_error();
         }
     }
     else  {
-        /* What a waste of cpu cycles... but we don't have a choice
-         * Be sure we insulate ourselves against bogus wildcards
+        /* Guard against bogus wildcards and retrieve by name
+         * since we want the true name, or are stuck in Win95
          */
         HANDLE hFind;
         if (strchr(fname, '*') || strchr(fname, '?'))
             return APR_ENOENT;
-        hFind = FindFirstFile(fname, &FileInformation);
+        hFind = FindFirstFileA(fname, &FileInfo.n);
         if (hFind == INVALID_HANDLE_VALUE) {
             return apr_get_os_error();
     	} 
-        else {
-            FindClose(hFind);
-        }
+        FindClose(hFind);
+        filename = apr_pstrdup(cont, FileInfo.n.cFileName);
     }
 
-    memset(finfo, '\0', sizeof(*finfo));
+    fillin_fileinfo(finfo, (WIN32_FILE_ATTRIBUTE_DATA *) &FileInfo, 0);
     finfo->cntxt = cont;
-    finfo->valid = APR_FINFO_ATIME | APR_FINFO_CTIME | APR_FINFO_MTIME
-        | APR_FINFO_SIZE  | APR_FINFO_TYPE; /* I.e., APR_FINFO_MIN */
 
-    /* File times */
-    FileTimeToAprTime(&finfo->atime, &FileInformation.ftLastAccessTime);
-    FileTimeToAprTime(&finfo->ctime, &FileInformation.ftCreationTime);
-    FileTimeToAprTime(&finfo->mtime, &FileInformation.ftLastWriteTime);
-
-#if APR_HAS_LARGE_FILES
-    finfo->size =  (apr_off_t)FileInformation.nFileSizeLow
-                | ((apr_off_t)FileInformation.nFileSizeHigh << 32);
-#else
-    finfo->size = (apr_off_t)FileInformation.nFileSizeLow;
-    if (finfo->size < 0 || FileInformation.nFileSizeHigh)
-        finfo->size = 0x7fffffff;
-#endif
-
-    /* Filetype - Directory or file?
-     */
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) {
-        finfo->filetype = APR_LNK;
-    }
-    else if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-        finfo->filetype = APR_DIR;
-    }
-    else {
-        /* XXX: Solve this
-         * Short of opening the handle to the file, the 'FileType' appears
-         * to be unknowable (in any trustworthy or consistent sense), that
-         * is, as far as PIPE, CHR, etc.
-         */
-        finfo->filetype = APR_REG;
-    }
-
-    /* 
-     * Hummm, should we assume the file is always executable? Is there a way
-     * to know other than guess based on the file extension or make an 
-     * expensive system call?
-     */
-    if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
-        finfo->protection |= S_IREAD | S_IEXEC;
-    }
-    else {
-        finfo->protection |= S_IREAD | S_IWRITE | S_IEXEC;
+    if (filename) {
+        finfo->name = filename;
+        finfo->valid |= APR_FINFO_NAME;
     }
 
     if (wanted &= ~finfo->valid) {
-        /* Caller wants more than APR_FINFO_MIN */
+        /* Caller wants more than APR_FINFO_MIN | APR_FINFO_NAME */
 #ifdef APR_HAS_UNICODE_FS
         if (os_level >= APR_WIN_NT)
             return more_finfo(finfo, wfname, wanted, MORE_OF_WFSPEC, os_level);
