@@ -102,8 +102,13 @@ changequote([, ])dnl
     ac_sub_cache_file="$ac_popdir/$cache_file" ;;
   esac
 
-  # The eval makes quoting arguments work.
-  if eval $ac_abs_srcdir/configure $ac_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir $2
+  dnl The eval makes quoting arguments work - specifically $2 where the
+  dnl quoting mechanisms used is "" rather than [].
+  dnl
+  dnl We need to execute another shell because some autoconf/shell combinations
+  dnl will choke after doing repeated APR_SUBDIR_CONFIG()s.  (Namely Solaris
+  dnl and autoconf-2.54+)
+  if eval $SHELL $ac_abs_srcdir/configure $ac_configure_args --cache-file=$ac_sub_cache_file --srcdir=$ac_abs_srcdir $2
   then :
     echo "$1 configured properly"
   else
