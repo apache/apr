@@ -64,6 +64,14 @@ APR_DECLARE(apr_status_t) apr_file_dup(apr_file_t **new_file,
 {
     HANDLE hproc = GetCurrentProcess();
     HANDLE newhand = NULL;
+
+    /* XXX Dirty, ugly backward compatibility hack
+     * This is the reason that dup2 was introduced,
+     * need to remove this thunk on short order!
+     */
+    if (*new_file) {
+        return apr_file_dup2(new_file, old_file, p);
+    }
         
     if (!DuplicateHandle(hproc, old_file->filehand, 
                          hproc, &newhand, 0, FALSE, 
