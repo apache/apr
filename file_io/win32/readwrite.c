@@ -64,9 +64,9 @@
  * read_with_timeout() 
  * Uses async i/o to emulate unix non-blocking i/o with timeouts.
  */
-static ap_status_t read_with_timeout(ap_file_t *file, void *buf, ap_ssize_t len, ap_ssize_t *nbytes)
+static apr_status_t read_with_timeout(apr_file_t *file, void *buf, apr_ssize_t len, apr_ssize_t *nbytes)
 {
-    ap_status_t rv;
+    apr_status_t rv;
     *nbytes = 0;
 
     /* Handle the zero timeout non-blocking case */
@@ -143,9 +143,9 @@ static ap_status_t read_with_timeout(ap_file_t *file, void *buf, ap_ssize_t len,
     return rv;
 }
 
-ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *len)
+apr_status_t apr_read(apr_file_t *thefile, void *buf, apr_ssize_t *len)
 {
-    ap_ssize_t rv;
+    apr_ssize_t rv;
     DWORD bytes_read = 0;
 
     if (*len <= 0) {
@@ -167,13 +167,13 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *len)
     }
     if (thefile->buffered) {
         char *pos = (char *)buf;
-        ap_ssize_t blocksize;
-        ap_ssize_t size = *len;
+        apr_ssize_t blocksize;
+        apr_ssize_t size = *len;
 
-        ap_lock(thefile->mutex);
+        apr_lock(thefile->mutex);
 
         if (thefile->direction == 1) {
-            ap_flush(thefile);
+            apr_flush(thefile);
             thefile->bufpos = 0;
             thefile->direction = 0;
             thefile->dataRead = 0;
@@ -207,10 +207,10 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *len)
         if (*len) {
             rv = 0;
         }
-        ap_unlock(thefile->mutex);
+        apr_unlock(thefile->mutex);
     } else {  
         /* Unbuffered i/o */
-        ap_ssize_t nbytes;
+        apr_ssize_t nbytes;
         rv = read_with_timeout(thefile, buf, *len, &nbytes);
         *len = nbytes;
     }
@@ -218,9 +218,9 @@ ap_status_t ap_read(ap_file_t *thefile, void *buf, ap_ssize_t *len)
     return rv;
 }
 
-ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
+apr_status_t apr_write(apr_file_t *thefile, const void *buf, apr_ssize_t *nbytes)
 {
-    ap_status_t rv;
+    apr_status_t rv;
     DWORD bwrote;
 
     if (thefile->buffered) {
@@ -228,11 +228,11 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
         int blocksize;
         int size = *nbytes;
 
-        ap_lock(thefile->mutex);
+        apr_lock(thefile->mutex);
 
         if (thefile->direction == 0) {
             // Position file pointer for writing at the offset we are logically reading from
-            ap_ssize_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            apr_ssize_t offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
             if (offset != thefile->filePtr)
                 SetFilePointer(thefile->filehand, offset, NULL, FILE_BEGIN);
             thefile->bufpos = thefile->dataRead = 0;
@@ -241,7 +241,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 
         while (rv == 0 && size > 0) {
             if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
-                rv = ap_flush(thefile);
+                rv = apr_flush(thefile);
 
             blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? APR_FILE_BUFSIZE - thefile->bufpos : size;
             memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
@@ -250,7 +250,7 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
             size -= blocksize;
         }
 
-        ap_unlock(thefile->mutex);
+        apr_unlock(thefile->mutex);
         return rv;
     } else {
         if (!thefile->pipe && thefile->append) {
@@ -271,10 +271,10 @@ ap_status_t ap_write(ap_file_t *thefile, const void *buf, ap_ssize_t *nbytes)
 /*
  * Too bad WriteFileGather() is not supported on 95&98 (or NT prior to SP2)
  */
-ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nvec, 
-                      ap_ssize_t *nbytes)
+apr_status_t apr_writev(apr_file_t *thefile, const struct iovec *vec, apr_size_t nvec, 
+                      apr_ssize_t *nbytes)
 {
-    ap_status_t rv = APR_SUCCESS;
+    apr_status_t rv = APR_SUCCESS;
     int i;
     DWORD bwrote = 0;
     char *buf;
@@ -283,7 +283,7 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nve
     for (i = 0; i < nvec; i++) {
         buf = vec[i].iov_base;
         bwrote = vec[i].iov_len;
-        rv = ap_write(thefile, buf, &bwrote);
+        rv = apr_write(thefile, buf, &bwrote);
         *nbytes += bwrote;
         if (rv != APR_SUCCESS) {
             break;
@@ -292,26 +292,26 @@ ap_status_t ap_writev(ap_file_t *thefile, const struct iovec *vec, ap_size_t nve
     return rv;
 }
 
-ap_status_t ap_putc(char ch, ap_file_t *thefile)
+apr_status_t apr_putc(char ch, apr_file_t *thefile)
 {
     DWORD len = 1;
 
-    return ap_write(thefile, &ch, &len);
+    return apr_write(thefile, &ch, &len);
 }
 
-ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
+apr_status_t apr_ungetc(char ch, apr_file_t *thefile)
 {
     thefile->ungetchar = (unsigned char) ch;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_getc(char *ch, ap_file_t *thefile)
+apr_status_t apr_getc(char *ch, apr_file_t *thefile)
 {
-    ap_status_t rc;
+    apr_status_t rc;
     int bread;
 
     bread = 1;
-    rc = ap_read(thefile, ch, &bread);
+    rc = apr_read(thefile, ch, &bread);
 
     if (rc) {
         return rc;
@@ -324,22 +324,22 @@ ap_status_t ap_getc(char *ch, ap_file_t *thefile)
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_puts(const char *str, ap_file_t *thefile)
+apr_status_t apr_puts(const char *str, apr_file_t *thefile)
 {
     DWORD len = strlen(str);
 
-    return ap_write(thefile, str, &len);
+    return apr_write(thefile, str, &len);
 }
 
-ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
+apr_status_t apr_fgets(char *str, int len, apr_file_t *thefile)
 {
-    ap_ssize_t readlen;
-    ap_status_t rv = APR_SUCCESS;
+    apr_ssize_t readlen;
+    apr_status_t rv = APR_SUCCESS;
     int i;    
 
     for (i = 0; i < len-1; i++) {
         readlen = 1;
-        rv = ap_read(thefile, str+i, &readlen);
+        rv = apr_read(thefile, str+i, &readlen);
 
         if (readlen != 1) {
             rv = APR_EOF;
@@ -357,11 +357,11 @@ ap_status_t ap_fgets(char *str, int len, ap_file_t *thefile)
     return rv;
 }
 
-ap_status_t ap_flush(ap_file_t *thefile)
+apr_status_t apr_flush(apr_file_t *thefile)
 {
     if (thefile->buffered) {
         DWORD written = 0;
-        ap_status_t rc = 0;
+        apr_status_t rc = 0;
 
         if (thefile->direction == 1 && thefile->bufpos) {
             rc = WriteFile(thefile->filehand, thefile->buffer, thefile->bufpos, &written, NULL ) ? 0 : GetLastError();
@@ -378,7 +378,7 @@ ap_status_t ap_flush(ap_file_t *thefile)
     }
 }
 
-static int printf_flush(ap_vformatter_buff_t *vbuff)
+static int printf_flush(apr_vformatter_buff_t *vbuff)
 {
     /* I would love to print this stuff out to the file, but I will
      * get that working later.  :)  For now, just return.
@@ -386,7 +386,7 @@ static int printf_flush(ap_vformatter_buff_t *vbuff)
     return -1;
 }
 
-APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
+APR_EXPORT(int) apr_fprintf(apr_file_t *fptr, const char *format, ...)
 {
     int cc;
     va_list ap;
@@ -398,8 +398,8 @@ APR_EXPORT(int) ap_fprintf(ap_file_t *fptr, const char *format, ...)
         return 0;
     }
     va_start(ap, format);
-    len = ap_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
-    cc = ap_puts(buf, fptr);
+    len = apr_vsnprintf(buf, HUGE_STRING_LEN, format, ap);
+    cc = apr_puts(buf, fptr);
     va_end(ap);
     free(buf);
     return (cc == APR_SUCCESS) ? len : -1;

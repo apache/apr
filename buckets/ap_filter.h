@@ -123,11 +123,11 @@ extern "C" {
  */
 
 /* forward declare some types */
-typedef struct ap_filter_t ap_filter_t;
-typedef struct ap_bucket_t ap_bucket_t;
+typedef struct apr_filter_t apr_filter_t;
+typedef struct apr_bucket_t apr_bucket_t;
 
 /*
- * ap_filter_bucket_cb:
+ * apr_filter_bucket_cb:
  *
  * This function type is used for filter callbacks. It will be passed a
  * pointer to "this" filter, and a "bucket" containing the content to be
@@ -146,8 +146,8 @@ typedef struct ap_bucket_t ap_bucket_t;
  * next/prev to insert/remove/replace elements in the bucket list, but
  * the types and values of the individual buckets should not be altered.
  */
-typedef void (*ap_filter_bucket_cb)(ap_filter_t *filter,
-                                    ap_bucket_t *bucket);
+typedef void (*apr_filter_bucket_cb)(apr_filter_t *filter,
+                                    apr_bucket_t *bucket);
 
 /*
  * ap_filter_type:
@@ -179,7 +179,7 @@ typedef enum {
 } ap_filter_type;
 
 /*
- * ap_filter_t:
+ * apr_filter_t:
  *
  * This is the request-time context structure for an installed filter (in
  * the output filter chain). It provides the callback to use for filtering,
@@ -192,21 +192,21 @@ typedef enum {
  * the state directly with the request. A callback should not change any of
  * the other fields.
  */
-struct ap_filter_t {
-    ap_filter_bucket_cb bucket_cb;
+struct apr_filter_t {
+    apr_filter_bucket_cb bucket_cb;
     request_rec *r;
 
     void *ctx;
 
     ap_filter_type ftype;
-    ap_filter_t *next;
+    apr_filter_t *next;
 };
 
 /*
  * ap_bucket_type:
  *
  * This enumeration is used to specify what type of bucket is present when
- * an ap_bucket_t is provided.
+ * an apr_bucket_t is provided.
  *
  * AP_BUCKET_PTRLEN:
  *     This bucket type defines a simple pointer/length pair for the content.
@@ -245,7 +245,7 @@ struct ap_filter_t {
  *
  * AP_BUCKET_FILE:
  *     This bucket type refers to an open file, from the current position
- *     and extending for ->flen bytes. Since there are some ap_file_t
+ *     and extending for ->flen bytes. Since there are some apr_file_t
  *     implementations/types that are not seekable, it may be impossible to
  *     "rewind" the file's current position after reading the contenxt.
  *     Therefore, it is important to note that once the content has been
@@ -277,7 +277,7 @@ typedef enum {
 } ap_bucket_type;
 
 /*
- * ap_bucket_t:
+ * apr_bucket_t:
  *
  * The actual bucket definition. The type is determined by the ->type field.
  * Which fields are valid/useful in the bucket is determined by the type,
@@ -287,20 +287,20 @@ typedef enum {
  * remove, or replace elements in a list of buckets. Generally, a filter
  * should not change any bucket values other than these link pointers.
  */
-struct ap_bucket_t {
+struct apr_bucket_t {
     ap_bucket_type type;
 
     const char *buf;            /* AP_BUCKET_PTRLEN */
-    ap_size_t len;              /* AP_BUCKET_PTRLEN */
+    apr_size_t len;              /* AP_BUCKET_PTRLEN */
 
     const char *fmt;            /* AP_BUCKET_PRINTF */
     va_list va;                 /* AP_BUCKET_STRINGS, _PRINTF */
 
-    ap_file_t *file;            /* AP_BUCKET_FILE */
-    ap_ssize_t flen;            /* AP_BUCKET_FILE */
+    apr_file_t *file;            /* AP_BUCKET_FILE */
+    apr_ssize_t flen;            /* AP_BUCKET_FILE */
 
-    ap_bucket_t *next;          /* next bucket in list */
-    ap_bucket_t *prev;          /* previous bucket in list */
+    apr_bucket_t *next;          /* next bucket in list */
+    apr_bucket_t *prev;          /* previous bucket in list */
 };
 
 /*
@@ -323,25 +323,25 @@ struct ap_bucket_t {
  *                   used to send from current-position to the end-of-file.
  * ap_fc_putbucket(): write a bucket into the filter chain
  */
-API_EXPORT(void) ap_fc_write(ap_filter_t *filter, const char *buf,
-                             ap_size_t len);
-API_EXPORT(void) ap_fc_putc(ap_filter_t *filter, int c);
-API_EXPORT(void) ap_fc_puts(ap_filter_t *filter, const char *str);
+API_EXPORT(void) ap_fc_write(apr_filter_t *filter, const char *buf,
+                             apr_size_t len);
+API_EXPORT(void) ap_fc_putc(apr_filter_t *filter, int c);
+API_EXPORT(void) ap_fc_puts(apr_filter_t *filter, const char *str);
 
-API_EXPORT_NONSTD(void) ap_fc_putstrs(ap_filter_t *filter, ...);
-API_EXPORT(void) ap_fc_vputstrs(ap_filter_t *filter, va_list va);
+API_EXPORT_NONSTD(void) ap_fc_putstrs(apr_filter_t *filter, ...);
+API_EXPORT(void) ap_fc_vputstrs(apr_filter_t *filter, va_list va);
 
-API_EXPORT_NONSTD(void) ap_fc_printf(ap_filter_t *filter,
+API_EXPORT_NONSTD(void) ap_fc_printf(apr_filter_t *filter,
                                      const char *fmt, ...);
-API_EXPORT(void) ap_fc_vprintf(ap_filter_t *filter,
+API_EXPORT(void) ap_fc_vprintf(apr_filter_t *filter,
                                const char *fmt, va_list va);
 
-API_EXPORT(void) ap_fc_sendfile(ap_filter_t *filter, ap_file_t *file,
-                                ap_ssize_t flen);
-#define AP_FC_SENDFILE_ALL ((ap_ssize_t) -1)
+API_EXPORT(void) ap_fc_sendfile(apr_filter_t *filter, apr_file_t *file,
+                                apr_ssize_t flen);
+#define AP_FC_SENDFILE_ALL ((apr_ssize_t) -1)
 
 /* note: bucket->next and ->prev may be changed upon return from this */
-API_EXPORT(void) ap_fc_putbucket(ap_filter_t *filter, ap_bucket_t *bucket);
+API_EXPORT(void) ap_fc_putbucket(apr_filter_t *filter, apr_bucket_t *bucket);
 
 
 /*
@@ -354,7 +354,7 @@ API_EXPORT(void) ap_fc_putbucket(ap_filter_t *filter, ap_bucket_t *bucket);
  * The filter's callback and type should be passed.
  */
 API_EXPORT(void) ap_register_filter(const char *name,
-                                    ap_filter_bucket_cb bucket_cb,
+                                    apr_filter_bucket_cb bucket_cb,
                                     ap_filter_type ftype);
 
 /*

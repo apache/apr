@@ -76,14 +76,14 @@
 /* End System Headers */
 
 
-ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input)
+apr_status_t apr_ansi_time_to_ap_time(apr_time_t *result, time_t input)
 {
-    *result = (ap_time_t)input * AP_USEC_PER_SEC;
+    *result = (apr_time_t)input * AP_USEC_PER_SEC;
     return APR_SUCCESS;
 }
 
 
-ap_time_t ap_now(void)
+apr_time_t apr_now(void)
 {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -105,7 +105,7 @@ static void tm_to_exp(ap_exploded_time_t *xt, struct tm *tm)
 }
 
 
-ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
+apr_status_t apr_explode_gmt(ap_exploded_time_t *result, apr_time_t input)
 {
     time_t t = input / AP_USEC_PER_SEC;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
@@ -124,7 +124,7 @@ ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
+apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input)
 {
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS)
     time_t t = input / AP_USEC_PER_SEC;
@@ -181,7 +181,7 @@ ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input)
 }
 
 
-ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
+apr_status_t apr_implode_time(apr_time_t *t, ap_exploded_time_t *xt)
 {
     int year;
     time_t days;
@@ -215,14 +215,14 @@ ap_status_t ap_implode_time(ap_time_t *t, ap_exploded_time_t *xt)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_imp_time(ap_os_imp_time_t **ostime, ap_time_t *aprtime)
+apr_status_t apr_get_os_imp_time(apr_os_imp_time_t **ostime, apr_time_t *aprtime)
 {
     (*ostime)->tv_usec = *aprtime % AP_USEC_PER_SEC;
     (*ostime)->tv_sec = *aprtime / AP_USEC_PER_SEC;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
+apr_status_t apr_get_os_exp_time(apr_os_exp_time_t **ostime, ap_exploded_time_t *aprtime)
 {
     (*ostime)->tm_sec  = aprtime->tm_sec;
     (*ostime)->tm_min  = aprtime->tm_min;
@@ -236,15 +236,15 @@ ap_status_t ap_get_os_exp_time(ap_os_exp_time_t **ostime, ap_exploded_time_t *ap
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_imp_time(ap_time_t *aprtime, ap_os_imp_time_t **ostime,
-                               ap_pool_t *cont)
+apr_status_t apr_put_os_imp_time(apr_time_t *aprtime, apr_os_imp_time_t **ostime,
+                               apr_pool_t *cont)
 {
     *aprtime = (*ostime)->tv_sec * AP_USEC_PER_SEC + (*ostime)->tv_usec;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
-                               ap_os_exp_time_t **ostime, ap_pool_t *cont)
+apr_status_t apr_put_os_exp_time(ap_exploded_time_t *aprtime,
+                               apr_os_exp_time_t **ostime, apr_pool_t *cont)
 {
     aprtime->tm_sec = (*ostime)->tm_sec;
     aprtime->tm_min = (*ostime)->tm_min;
@@ -258,7 +258,7 @@ ap_status_t ap_put_os_exp_time(ap_exploded_time_t *aprtime,
     return APR_SUCCESS;
 }
 
-void ap_sleep(ap_interval_time_t t)
+void apr_sleep(apr_interval_time_t t)
 {
 #ifdef OS2
     DosSleep(t/1000);
@@ -271,7 +271,7 @@ void ap_sleep(ap_interval_time_t t)
 }
 
 #ifdef OS2
-ap_status_t ap_os2_time_to_ap_time(ap_time_t *result, FDATE os2date, FTIME os2time)
+apr_status_t ap_os2_time_to_ap_time(apr_time_t *result, FDATE os2date, FTIME os2time)
 {
   struct tm tmpdate;
 

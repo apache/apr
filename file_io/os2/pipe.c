@@ -60,7 +60,7 @@
 #include <string.h>
 #include <process.h>
 
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
+apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *cont)
 {
     ULONG filedes[2];
     ULONG rc, action;
@@ -90,7 +90,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
         return APR_OS2_STATUS(rc);
     }
 
-    (*in) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+    (*in) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
     rc = DosCreateEventSem(NULL, &(*in)->pipeSem, DC_SEM_SHARED, FALSE);
 
     if (rc) {
@@ -114,31 +114,31 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
 
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
-    (*in)->fname = ap_pstrdup(cont, pipename);
+    (*in)->fname = apr_pstrdup(cont, pipename);
     (*in)->isopen = TRUE;
     (*in)->buffered = FALSE;
     (*in)->flags = 0;
     (*in)->pipe = 1;
     (*in)->timeout = -1;
-    ap_register_cleanup(cont, *in, apr_file_cleanup, ap_null_cleanup);
+    apr_register_cleanup(cont, *in, apr_file_cleanup, apr_null_cleanup);
 
-    (*out) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+    (*out) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
-    (*out)->fname = ap_pstrdup(cont, pipename);
+    (*out)->fname = apr_pstrdup(cont, pipename);
     (*out)->isopen = TRUE;
     (*out)->buffered = FALSE;
     (*out)->flags = 0;
     (*out)->pipe = 1;
     (*out)->timeout = -1;
-    ap_register_cleanup(cont, *out, apr_file_cleanup, ap_null_cleanup);
+    apr_register_cleanup(cont, *out, apr_file_cleanup, apr_null_cleanup);
 
     return APR_SUCCESS;
 }
 
 
 
-ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, ap_pool_t *cont)
+apr_status_t apr_create_namedpipe(const char *filename, apr_fileperms_t perm, apr_pool_t *cont)
 {
     /* Not yet implemented, interface not suitable */
     return APR_ENOTIMPL;
@@ -146,7 +146,7 @@ ap_status_t ap_create_namedpipe(const char *filename, ap_fileperms_t perm, ap_po
 
  
 
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
+apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     if (thepipe->pipe == 1) {
         thepipe->timeout = timeout;

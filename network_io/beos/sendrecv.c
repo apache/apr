@@ -58,7 +58,7 @@
 #else
 #include "networkio.h"
 
-static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
+static apr_status_t wait_for_io_or_timeout(apr_socket_t *sock, int for_read)
 {
     struct timeval tv, *tvptr;
     fd_set fdset;
@@ -92,7 +92,7 @@ static ap_status_t wait_for_io_or_timeout(ap_socket_t *sock, int for_read)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
+apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_ssize_t *len)
 {
     ssize_t rv;
 	
@@ -101,7 +101,7 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EWOULDBLOCK && sock->timeout > 0) {
-        ap_status_t arv = wait_for_io_or_timeout(sock, 0);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 0);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;
@@ -120,16 +120,16 @@ ap_status_t ap_send(ap_socket_t *sock, const char *buf, ap_ssize_t *len)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_recv(ap_socket_t *sock, char *buf, ap_ssize_t *len)
+apr_status_t apr_recv(apr_socket_t *sock, char *buf, apr_ssize_t *len)
 {
-    ap_ssize_t rv;
+    apr_ssize_t rv;
    
     do {
         rv = recv(sock->socketdes, buf, (*len), 0);
     } while (rv == -1 && errno == EINTR);
 
     if (rv == -1 && errno == EWOULDBLOCK && sock->timeout > 0) {
-        ap_status_t arv = wait_for_io_or_timeout(sock, 1);
+        apr_status_t arv = wait_for_io_or_timeout(sock, 1);
         if (arv != APR_SUCCESS) {
             *len = 0;
             return arv;

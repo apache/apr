@@ -64,20 +64,20 @@
 
 int main(void)
 {
-    ap_pool_t *context;
-    ap_file_t *readp = NULL;
-    ap_file_t *writep = NULL;
-    ap_size_t nbytes;
-    ap_status_t rv;
+    apr_pool_t *context;
+    apr_file_t *readp = NULL;
+    apr_file_t *writep = NULL;
+    apr_size_t nbytes;
+    apr_status_t rv;
     char *buf;
     char msgbuf[120];
 
-    if (ap_initialize() != APR_SUCCESS) {
+    if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Couldn't initialize.");
         exit(-1);
     }
-    atexit(ap_terminate);
-    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
+    atexit(apr_terminate);
+    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
@@ -85,9 +85,9 @@ int main(void)
     fprintf(stdout, "Testing pipe functions.\n");
 
     fprintf(stdout, "\tCreating pipes.......");
-    if ((rv = ap_create_pipe(&readp, &writep, context)) != APR_SUCCESS) {
-        fprintf(stderr, "ap_create_pipe()->%d/%s\n",
-                rv, ap_strerror(rv, msgbuf, sizeof msgbuf));
+    if ((rv = apr_create_pipe(&readp, &writep, context)) != APR_SUCCESS) {
+        fprintf(stderr, "apr_create_pipe()->%d/%s\n",
+                rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
     }
     else {
@@ -95,18 +95,18 @@ int main(void)
     }
     
     fprintf(stdout, "\tSetting pipe timeout.......");
-    if ((rv = ap_set_pipe_timeout(readp, 1 * AP_USEC_PER_SEC)) != APR_SUCCESS) {
-        fprintf(stderr, "ap_set_pipe_timeout()->%d/%s\n",
-                rv, ap_strerror(rv, msgbuf, sizeof msgbuf));
+    if ((rv = apr_set_pipe_timeout(readp, 1 * AP_USEC_PER_SEC)) != APR_SUCCESS) {
+        fprintf(stderr, "apr_set_pipe_timeout()->%d/%s\n",
+                rv, apr_strerror(rv, msgbuf, sizeof msgbuf));
         exit(-1);
     } else {
         fprintf(stdout, "OK\n");
     }        
 
     fprintf(stdout, "\tReading from the pipe.......");
-    nbytes = (ap_ssize_t)strlen("this is a test");
-    buf = (char *)ap_palloc(context, nbytes + 1);
-    if (ap_read(readp, buf, &nbytes) == APR_TIMEUP) {
+    nbytes = (apr_ssize_t)strlen("this is a test");
+    buf = (char *)apr_palloc(context, nbytes + 1);
+    if (apr_read(readp, buf, &nbytes) == APR_TIMEUP) {
         fprintf(stdout, "OK\n");
     }
     else {

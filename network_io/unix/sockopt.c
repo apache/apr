@@ -55,7 +55,7 @@
 #include "networkio.h"
 #include "apr_strings.h"
 
-static ap_status_t soblock(int sd)
+static apr_status_t soblock(int sd)
 {
 /* BeOS uses setsockopt at present for non blocking... */
 #ifndef BEOS
@@ -83,7 +83,7 @@ static ap_status_t soblock(int sd)
     return APR_SUCCESS;
 }
 
-static ap_status_t sononblock(int sd)
+static apr_status_t sononblock(int sd)
 {
 #ifndef BEOS
     int fd_flags;
@@ -110,11 +110,11 @@ static ap_status_t sononblock(int sd)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
+apr_status_t apr_setsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t on)
 {
     int one;
     struct linger li;
-    ap_status_t stat;
+    apr_status_t stat;
 
     if (on)
         one = 1;
@@ -173,7 +173,7 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
     return APR_SUCCESS; 
 }         
 
-ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
+apr_status_t apr_getsocketopt(apr_socket_t *sock, apr_int32_t opt, apr_int32_t *on)
 {
     switch(opt) {
     case APR_SO_TIMEOUT:
@@ -185,7 +185,7 @@ ap_status_t ap_getsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t *on)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_pool_t *cont)
+apr_status_t apr_gethostname(char *buf, apr_int32_t len, apr_pool_t *cont)
 {
     if (gethostname(buf, len) == -1)
         return errno;
@@ -193,14 +193,14 @@ ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_pool_t *cont)
         return APR_SUCCESS;
 }
 
-ap_status_t ap_get_remote_hostname(char **name, ap_socket_t *sock)
+apr_status_t apr_get_remote_hostname(char **name, apr_socket_t *sock)
 {
     struct hostent *hptr;
     
     hptr = gethostbyaddr((char *)&(sock->remote_addr->sin_addr), 
                          sizeof(struct in_addr), AF_INET);
     if (hptr != NULL) {
-        *name = ap_pstrdup(sock->cntxt, hptr->h_name);
+        *name = apr_pstrdup(sock->cntxt, hptr->h_name);
         if (*name) {
             return APR_SUCCESS;
         }

@@ -102,7 +102,7 @@
 /* Details of the debugging options can now be found in the developer
  * section of the documentaion. */
 
-/* magic numbers --- min free bytes to consider a free ap_pool_t block useable,
+/* magic numbers --- min free bytes to consider a free apr_pool_t block useable,
  * and the min amount to allocate if we have to go to malloc() */
 
 #ifndef BLOCK_MINFREE
@@ -166,7 +166,7 @@ union block_hdr {
 	char *first_avail;
 #ifdef POOL_DEBUG
 	union block_hdr *global_next;
-	ap_pool_t *owning_pool;
+	apr_pool_t *owning_pool;
 #endif /* POOL_DEBUG */
     } h;
 };
@@ -188,15 +188,15 @@ union block_hdr {
 static union block_hdr *block_freelist = NULL;
 
 #if APR_HAS_THREADS
-static ap_lock_t *alloc_mutex;
-static ap_lock_t *spawn_mutex;
+static apr_lock_t *alloc_mutex;
+static apr_lock_t *spawn_mutex;
 #endif
 
 #ifdef POOL_DEBUG
 static char *known_stack_point;
 static int stack_direction;
 static union block_hdr *global_block_list;
-#define FREE_POOL	((ap_pool_t *)(-1))
+#define FREE_POOL	((apr_pool_t *)(-1))
 #endif /* POOL_DEBUG */
 
 #ifdef ALLOC_STATS
@@ -322,7 +322,7 @@ static void free_blocks(union block_hdr *blok)
     }
 
 #if APR_HAS_THREADS
-    ap_lock(alloc_mutex);
+    apr_lock(alloc_mutex);
 #endif
     old_free_list = block_freelist;
     block_freelist = blok;
@@ -372,7 +372,7 @@ static void free_blocks(union block_hdr *blok)
 #endif /* ALLOC_STATS */
 
 #if APR_HAS_THREADS
-    ap_unlock(alloc_mutex);
+    apr_unlock(alloc_mutex);
 #endif /* APR_HAS_THREADS */
 #endif /* ALLOC_USE_MALLOC */
 }
@@ -417,9 +417,9 @@ static union block_hdr *new_block(int min_size, int (*apr_abort)(int retcode))
 
 /* Accounting */
 
-static ap_size_t bytes_in_block_list(union block_hdr *blok)
+static apr_size_t bytes_in_block_list(union block_hdr *blok)
 {
-    ap_size_t size = 0;
+    apr_size_t size = 0;
 
     while (blok) {
 	size += blok->h.endp - (char *) (blok + 1);
@@ -444,7 +444,7 @@ struct cleanup;
 static void run_cleanups(struct cleanup *c);
 static void free_proc_chain(struct process_chain *p);
 
-static ap_pool_t *permanent_pool;
+static apr_pool_t *permanent_pool;
 
 /* Each pool structure is allocated in the start of its own first block,
  * so we need to know how many bytes that is (once properly aligned...).
@@ -453,27 +453,27 @@ static ap_pool_t *permanent_pool;
  * gets taken off the parent's sub-pool list...
  */
 
-#define POOL_HDR_CLICKS (1 + ((sizeof(struct ap_pool_t) - 1) / CLICK_SZ))
+#define POOL_HDR_CLICKS (1 + ((sizeof(struct apr_pool_t) - 1) / CLICK_SZ))
 #define POOL_HDR_BYTES (POOL_HDR_CLICKS * CLICK_SZ)
 
-APR_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retcode))
+APR_EXPORT(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int retcode))
 {
     union block_hdr *blok;
-    ap_pool_t *new_pool;
+    apr_pool_t *new_pool;
 
 
 #if APR_HAS_THREADS
-    ap_lock(alloc_mutex);
+    apr_lock(alloc_mutex);
 #endif
 
     blok = new_block(POOL_HDR_BYTES, apr_abort);
-    new_pool = (ap_pool_t *) blok->h.first_avail;
+    new_pool = (apr_pool_t *) blok->h.first_avail;
     blok->h.first_avail += POOL_HDR_BYTES;
 #ifdef POOL_DEBUG
     blok->h.owning_pool = new_pool;
 #endif
 
-    memset((char *) new_pool, '\0', sizeof(struct ap_pool_t));
+    memset((char *) new_pool, '\0', sizeof(struct apr_pool_t));
     new_pool->free_first_avail = blok->h.first_avail;
     new_pool->first = new_pool->last = blok;
 
@@ -490,7 +490,7 @@ APR_EXPORT(ap_pool_t *) ap_make_sub_pool(ap_pool_t *p, int (*apr_abort)(int retc
     }
 
 #if APR_HAS_THREADS
-    ap_unlock(alloc_mutex);
+    apr_unlock(alloc_mutex);
 #endif
 
     return new_pool;
@@ -532,19 +532,19 @@ static void dump_stats(void)
 
 struct cleanup {
     const void *data;
-    ap_status_t (*plain_cleanup) (void *);
-    ap_status_t (*child_cleanup) (void *);
+    apr_status_t (*plain_cleanup) (void *);
+    apr_status_t (*child_cleanup) (void *);
     struct cleanup *next;
 };
 
-APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, const void *data,
-				      ap_status_t (*plain_cleanup) (void *),
-				      ap_status_t (*child_cleanup) (void *))
+APR_EXPORT(void) apr_register_cleanup(apr_pool_t *p, const void *data,
+				      apr_status_t (*plain_cleanup) (void *),
+				      apr_status_t (*child_cleanup) (void *))
 {
     struct cleanup *c;
 
     if (p != NULL) {
-        c = (struct cleanup *) ap_palloc(p, sizeof(struct cleanup));
+        c = (struct cleanup *) apr_palloc(p, sizeof(struct cleanup));
         c->data = data;
         c->plain_cleanup = plain_cleanup;
         c->child_cleanup = child_cleanup;
@@ -553,8 +553,8 @@ APR_EXPORT(void) ap_register_cleanup(ap_pool_t *p, const void *data,
     }
 }
 
-APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, const void *data,
-                                 ap_status_t (*cleanup) (void *))
+APR_EXPORT(void) apr_kill_cleanup(apr_pool_t *p, const void *data,
+                                 apr_status_t (*cleanup) (void *))
 {
     struct cleanup *c;
     struct cleanup **lastp;
@@ -574,10 +574,10 @@ APR_EXPORT(void) ap_kill_cleanup(ap_pool_t *p, const void *data,
     }
 }
 
-APR_EXPORT(ap_status_t) ap_run_cleanup(ap_pool_t *p, void *data,
-                                       ap_status_t (*cleanup) (void *))
+APR_EXPORT(apr_status_t) apr_run_cleanup(apr_pool_t *p, void *data,
+                                       apr_status_t (*cleanup) (void *))
 {
-    ap_kill_cleanup(p, data, cleanup);
+    apr_kill_cleanup(p, data, cleanup);
     return (*cleanup) (data);
 }
 
@@ -597,7 +597,7 @@ static void run_child_cleanups(struct cleanup *c)
     }
 }
 
-static void cleanup_pool_for_exec(ap_pool_t *p)
+static void cleanup_pool_for_exec(apr_pool_t *p)
 {
     run_child_cleanups(p->cleanups);
     p->cleanups = NULL;
@@ -607,7 +607,7 @@ static void cleanup_pool_for_exec(ap_pool_t *p)
     }
 }
 
-APR_EXPORT(void) ap_cleanup_for_exec(void)
+APR_EXPORT(void) apr_cleanup_for_exec(void)
 {
 #if !defined(WIN32) && !defined(OS2)
     /*
@@ -623,16 +623,16 @@ APR_EXPORT(void) ap_cleanup_for_exec(void)
 #endif /* ndef WIN32 */
 }
 
-APR_EXPORT_NONSTD(ap_status_t) ap_null_cleanup(void *data)
+APR_EXPORT_NONSTD(apr_status_t) apr_null_cleanup(void *data)
 {
     /* do nothing cleanup routine */
     return APR_SUCCESS;
 }
 
-ap_status_t ap_init_alloc(void)
+apr_status_t apr_init_alloc(void)
 {
 #if APR_HAS_THREADS
-    ap_status_t status;
+    apr_status_t status;
 #endif
 #ifdef POOL_DEBUG
     char s;
@@ -641,16 +641,16 @@ ap_status_t ap_init_alloc(void)
     stack_var_init(&s);
 #endif
 #if APR_HAS_THREADS
-    status = ap_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    status = apr_create_lock(&alloc_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
     if (status != APR_SUCCESS) {
-        ap_destroy_lock(alloc_mutex); 
+        apr_destroy_lock(alloc_mutex); 
         return status;
     }
-    status = ap_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
+    status = apr_create_lock(&spawn_mutex, APR_MUTEX, APR_INTRAPROCESS,
                    NULL, NULL);
     if (status != APR_SUCCESS) {
-        ap_destroy_lock(spawn_mutex); 
+        apr_destroy_lock(spawn_mutex); 
         return status;
     }
 #endif
@@ -662,24 +662,24 @@ ap_status_t ap_init_alloc(void)
     return APR_SUCCESS;
 }
 
-void ap_term_alloc(void)
+void apr_term_alloc(void)
 {
 #if APR_HAS_THREADS
-    ap_destroy_lock(alloc_mutex);
-    ap_destroy_lock(spawn_mutex);
+    apr_destroy_lock(alloc_mutex);
+    apr_destroy_lock(spawn_mutex);
 #endif
 }
 
-/* We only want to lock the mutex if we are being called from ap_clear_pool.
+/* We only want to lock the mutex if we are being called from apr_clear_pool.
  * This is because if we also call this function from ap_destroy_real_pool,
  * which also locks the same mutex, and recursive locks aren't portable.  
  * This way, we are garaunteed that we only lock this mutex once when calling
  * either one of these functions.
  */
-APR_EXPORT(void) ap_clear_pool(ap_pool_t *a)
+APR_EXPORT(void) apr_clear_pool(apr_pool_t *a)
 {
     while (a->sub_pools) {
-	ap_destroy_pool(a->sub_pools);
+	apr_destroy_pool(a->sub_pools);
     }
     /*
      * Don't hold the mutex during cleanups.
@@ -711,11 +711,11 @@ APR_EXPORT(void) ap_clear_pool(ap_pool_t *a)
 #endif
 }
 
-APR_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
+APR_EXPORT(void) apr_destroy_pool(apr_pool_t *a)
 {
-    ap_clear_pool(a);
+    apr_clear_pool(a);
 #if APR_HAS_THREADS
-    ap_lock(alloc_mutex);
+    apr_lock(alloc_mutex);
 #endif
 
     if (a->parent) {
@@ -730,16 +730,16 @@ APR_EXPORT(void) ap_destroy_pool(ap_pool_t *a)
 	}
     }
 #if APR_HAS_THREADS
-    ap_unlock(alloc_mutex);
+    apr_unlock(alloc_mutex);
 #endif
     free_blocks(a->first);
 }
 
-APR_EXPORT(ap_size_t) ap_bytes_in_pool(ap_pool_t *p)
+APR_EXPORT(apr_size_t) apr_bytes_in_pool(apr_pool_t *p)
 {
     return bytes_in_block_list(p->first);
 }
-APR_EXPORT(ap_size_t) ap_bytes_in_free_blocks(void)
+APR_EXPORT(apr_size_t) apr_bytes_in_free_blocks(void)
 {
     return bytes_in_block_list(block_freelist);
 }
@@ -762,7 +762,7 @@ extern char _end;
 /* Find the pool that ts belongs to, return NULL if it doesn't
  * belong to any pool.
  */
-APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
+APR_EXPORT(apr_pool_t *) ap_find_pool(const void *ts)
 {
     const char *s = ts;
     union block_hdr **pb;
@@ -808,7 +808,7 @@ APR_EXPORT(ap_pool_t *) ap_find_pool(const void *ts)
 /* return TRUE iff a is an ancestor of b
  * NULL is considered an ancestor of all pools
  */
-APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
+APR_EXPORT(int) ap_pool_is_ancestor(apr_pool_t *a, apr_pool_t *b)
 {
     if (a == NULL) {
 	return 1;
@@ -830,7 +830,7 @@ APR_EXPORT(int) ap_pool_is_ancestor(ap_pool_t *a, ap_pool_t *b)
  * instead.  This is a guarantee by the caller that sub will not
  * be destroyed before p is.
  */
-APR_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub)
+APR_EXPORT(void) ap_pool_join(apr_pool_t *p, apr_pool_t *sub)
 {
     union block_hdr *b;
 
@@ -857,10 +857,10 @@ APR_EXPORT(void) ap_pool_join(ap_pool_t *p, ap_pool_t *sub)
  * Allocating stuff...
  */
 
-void * ap_palloc(ap_pool_t *a, ap_size_t reqsize)
+void * apr_palloc(apr_pool_t *a, apr_size_t reqsize)
 {
 #ifdef ALLOC_USE_MALLOC
-    ap_size_t size = reqsize + CLICK_SZ;
+    apr_size_t size = reqsize + CLICK_SZ;
     void *ptr;
 
     if (a == NULL) {
@@ -884,8 +884,8 @@ void * ap_palloc(ap_pool_t *a, ap_size_t reqsize)
      * Round up requested size to an even number of alignment units
      * (core clicks)
      */
-    ap_size_t nclicks;
-    ap_size_t size;
+    apr_size_t nclicks;
+    apr_size_t size;
 
     /* First, see if we have space in the block most recently
      * allocated to this pool
@@ -919,7 +919,7 @@ void * ap_palloc(ap_pool_t *a, ap_size_t reqsize)
 
     if (new_first_avail <= blok->h.endp) {
 	debug_verify_filled(first_avail, blok->h.endp,
-			    "[ap_palloc] Ouch!  Someone trounced past the end "
+			    "[apr_palloc] Ouch!  Someone trounced past the end "
 			    "of their allocation!\n");
 	blok->h.first_avail = new_first_avail;
 	return (void *) first_avail;
@@ -928,7 +928,7 @@ void * ap_palloc(ap_pool_t *a, ap_size_t reqsize)
     /* Nope --- get a new one that's guaranteed to be big enough */
 
 #if APR_HAS_THREADS
-    ap_lock(alloc_mutex);
+    apr_lock(alloc_mutex);
 #endif
 
     blok = new_block(size, a->apr_abort);
@@ -939,7 +939,7 @@ void * ap_palloc(ap_pool_t *a, ap_size_t reqsize)
 #endif
 
 #if APR_HAS_THREADS
-    ap_unlock(alloc_mutex);
+    apr_unlock(alloc_mutex);
 #endif
 
     first_avail = blok->h.first_avail;
@@ -949,29 +949,29 @@ void * ap_palloc(ap_pool_t *a, ap_size_t reqsize)
 #endif
 }
 
-APR_EXPORT(void *) ap_pcalloc(ap_pool_t *a, ap_size_t size)
+APR_EXPORT(void *) apr_pcalloc(apr_pool_t *a, apr_size_t size)
 {
-    void *res = ap_palloc(a, size);
+    void *res = apr_palloc(a, size);
     memset(res, '\0', size);
     return res;
 }
 
 /*
- * ap_psprintf is implemented by writing directly into the current
+ * apr_psprintf is implemented by writing directly into the current
  * block of the pool, starting right at first_avail.  If there's
  * insufficient room, then a new block is allocated and the earlier
  * output is copied over.  The new block isn't linked into the pool
  * until all the output is done.
  *
  * Note that this is completely safe because nothing else can
- * allocate in this ap_pool_t while ap_psprintf is running.  alarms are
+ * allocate in this apr_pool_t while apr_psprintf is running.  alarms are
  * blocked, and the only thing outside of alloc.c that's invoked
- * is ap_vformatter -- which was purposefully written to be
+ * is apr_vformatter -- which was purposefully written to be
  * self-contained with no callouts.
  */
 
 struct psprintf_data {
-    ap_vformatter_buff_t vbuff;
+    apr_vformatter_buff_t vbuff;
 #ifdef ALLOC_USE_MALLOC
     char *base;
 #else
@@ -980,11 +980,11 @@ struct psprintf_data {
 #endif
 };
 
-static int psprintf_flush(ap_vformatter_buff_t *vbuff)
+static int psprintf_flush(apr_vformatter_buff_t *vbuff)
 {
     struct psprintf_data *ps = (struct psprintf_data *)vbuff;
 #ifdef ALLOC_USE_MALLOC
-    ap_size_t size;
+    apr_size_t size;
     char *ptr;
 
     size = (char *)ps->vbuff.curpos - ps->base;
@@ -1000,7 +1000,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 #else
     union block_hdr *blok;
     union block_hdr *nblok;
-    ap_size_t cur_len;
+    apr_size_t cur_len;
     char *strp;
 
     blok = ps->blok;
@@ -1009,11 +1009,11 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 
     /* must try another blok */
 #if APR_HAS_THREADS
-    ap_lock(alloc_mutex);
+    apr_lock(alloc_mutex);
 #endif
     nblok = new_block(2 * cur_len, NULL);
 #if APR_HAS_THREADS
-    ap_unlock(alloc_mutex);
+    apr_unlock(alloc_mutex);
 #endif
     memcpy(nblok->h.first_avail, blok->h.first_avail, cur_len);
     ps->vbuff.curpos = nblok->h.first_avail + cur_len;
@@ -1024,12 +1024,12 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
     if (ps->got_a_new_block) {
 	debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
 #if APR_HAS_THREADS
-        ap_lock(alloc_mutex);
+        apr_lock(alloc_mutex);
 #endif
 	blok->h.next = block_freelist;
 	block_freelist = blok;
 #if APR_HAS_THREADS
-        ap_unlock(alloc_mutex);
+        apr_unlock(alloc_mutex);
 #endif
     }
     ps->blok = nblok;
@@ -1042,7 +1042,7 @@ static int psprintf_flush(ap_vformatter_buff_t *vbuff)
 #endif
 }
 
-APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
+APR_EXPORT(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap)
 {
 #ifdef ALLOC_USE_MALLOC
     struct psprintf_data ps;
@@ -1056,7 +1056,7 @@ APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
     /* need room at beginning for allocation_list */
     ps.vbuff.curpos = ps.base + CLICK_SZ;
     ps.vbuff.endpos = ps.base + 511;
-    ap_vformatter(psprintf_flush, &ps.vbuff, fmt, ap);
+    apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap);
     *ps.vbuff.curpos++ = '\0';
     ptr = ps.base;
     /* shrink */
@@ -1071,14 +1071,14 @@ APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
 #else
     struct psprintf_data ps;
     char *strp;
-    ap_size_t size;
+    apr_size_t size;
 
     ps.blok = p->last;
     ps.vbuff.curpos = ps.blok->h.first_avail;
     ps.vbuff.endpos = ps.blok->h.endp - 1;	/* save one for NUL */
     ps.got_a_new_block = 0;
 
-    ap_vformatter(psprintf_flush, &ps.vbuff, fmt, ap);
+    apr_vformatter(psprintf_flush, &ps.vbuff, fmt, ap);
 
     strp = ps.vbuff.curpos;
     *strp++ = '\0';
@@ -1101,13 +1101,13 @@ APR_EXPORT(char *) ap_pvsprintf(ap_pool_t *p, const char *fmt, va_list ap)
 #endif
 }
 
-APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...)
+APR_EXPORT_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
 {
     va_list ap;
     char *res;
 
     va_start(ap, fmt);
-    res = ap_pvsprintf(p, fmt, ap);
+    res = apr_pvsprintf(p, fmt, ap);
     va_end(ap);
     return res;
 }
@@ -1124,11 +1124,11 @@ APR_EXPORT_NONSTD(char *) ap_psprintf(ap_pool_t *p, const char *fmt, ...)
  * generic interface, but for now, it's a special case
  */
 
-APR_EXPORT(void) ap_note_subprocess(ap_pool_t *a, ap_proc_t *pid,
+APR_EXPORT(void) apr_note_subprocess(apr_pool_t *a, apr_proc_t *pid,
                                     enum kill_conditions how)
 {
     struct process_chain *new =
-    (struct process_chain *) ap_palloc(a, sizeof(struct process_chain));
+    (struct process_chain *) apr_palloc(a, sizeof(struct process_chain));
 
     new->pid = pid;
     new->kill_how = how;
@@ -1159,7 +1159,7 @@ static void free_proc_chain(struct process_chain *procs)
 #ifndef NEED_WAITPID
     /* Pick up all defunct processes */
     for (p = procs; p; p = p->next) {
-        if (ap_wait_proc(p->pid, APR_NOWAIT) == APR_CHILD_DONE) {
+        if (apr_wait_proc(p->pid, APR_NOWAIT) == APR_CHILD_DONE) {
             p->kill_how = kill_never;
         }
     }
@@ -1170,20 +1170,20 @@ static void free_proc_chain(struct process_chain *procs)
             || (p->kill_how == kill_only_once)) {
             /*
              * Subprocess may be dead already.  Only need the timeout if not.
-             * Note: ap_kill on Windows is TerminateProcess(), which is 
+             * Note: apr_kill on Windows is TerminateProcess(), which is 
              * similar to a SIGKILL, so always give the process a timeout
              * under Windows before killing it.
              */
 #ifdef WIN32
             need_timeout = 1;
 #else
-	    if (ap_kill(p->pid, APR_SIGTERM) == APR_SUCCESS) {
+	    if (apr_kill(p->pid, APR_SIGTERM) == APR_SUCCESS) {
 		need_timeout = 1;
 	    }
 #endif
 	}
 	else if (p->kill_how == kill_always) {
-	    ap_kill(p->pid, APR_SIGKILL);
+	    apr_kill(p->pid, APR_SIGKILL);
 	}
     }
 
@@ -1198,7 +1198,7 @@ static void free_proc_chain(struct process_chain *procs)
      */
     for (p = procs; p; p = p->next) {
 	if (p->kill_how == kill_after_timeout) {
-	    ap_kill(p->pid, APR_SIGKILL);
+	    apr_kill(p->pid, APR_SIGKILL);
 	}
     }
 #ifdef WIN32
@@ -1215,7 +1215,7 @@ static void free_proc_chain(struct process_chain *procs)
     /* Now wait for all the signaled processes to die */
     for (p = procs; p; p = p->next) {
 	if (p->kill_how != kill_never) {
-	    (void) ap_wait_proc(p->pid, APR_WAIT);
+	    (void) apr_wait_proc(p->pid, APR_WAIT);
 	}
     }
 }

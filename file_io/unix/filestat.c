@@ -80,21 +80,21 @@ static ap_filetype_e filetype_from_mode(int mode)
     return type;
 }
 
-ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
+apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
 {
     struct stat info;
 
     if (fstat(thefile->filedes, &info) == 0) {
-        finfo->protection = ap_unix_mode2perms(info.st_mode);
+        finfo->protection = apr_unix_mode2perms(info.st_mode);
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
         finfo->group = info.st_gid;
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        apr_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        apr_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        apr_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {
@@ -102,30 +102,30 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
     }
 }
 
-ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms)
+apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
 {
-    mode_t mode = ap_unix_perms2mode(perms);
+    mode_t mode = apr_unix_perms2mode(perms);
 
     if (chmod(fname, mode) == -1)
         return errno;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
+apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
     struct stat info;
 
     if (stat(fname, &info) == 0) {
-        finfo->protection = ap_unix_mode2perms(info.st_mode);
+        finfo->protection = apr_unix_mode2perms(info.st_mode);
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
         finfo->group = info.st_gid;
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        apr_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        apr_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        apr_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {
@@ -133,21 +133,21 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
     }
 }
 
-ap_status_t ap_lstat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
+apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
     struct stat info;
 
     if (lstat(fname, &info) == 0) {
-        finfo->protection = ap_unix_mode2perms(info.st_mode);
+        finfo->protection = apr_unix_mode2perms(info.st_mode);
         finfo->filetype = filetype_from_mode(info.st_mode);
         finfo->user = info.st_uid;
         finfo->group = info.st_gid;
         finfo->size = info.st_size;
         finfo->inode = info.st_ino;
         finfo->device = info.st_dev;
-        ap_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
-        ap_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
-        ap_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
+        apr_ansi_time_to_ap_time(&finfo->atime, info.st_atime);
+        apr_ansi_time_to_ap_time(&finfo->mtime, info.st_mtime);
+        apr_ansi_time_to_ap_time(&finfo->ctime, info.st_ctime);
         return APR_SUCCESS;
     }
     else {

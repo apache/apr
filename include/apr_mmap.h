@@ -68,15 +68,15 @@ extern "C" {
  * @package APR MMAP library
  */
 
-typedef struct ap_mmap_t            ap_mmap_t;
+typedef struct apr_mmap_t            apr_mmap_t;
 /* As far as I can tell the only really sane way to store an MMAP is as a
  * void * and a length.  BeOS requires this area_id, but that's just a little
  * something extra.  I am exposing this type, because it doesn't make much
  * sense to keep it private, and opening it up makes some stuff easier in
  * Apache.
  */
-struct ap_mmap_t {
-    ap_pool_t *cntxt;
+struct apr_mmap_t {
+    apr_pool_t *cntxt;
 #ifdef BEOS
     area_id area;
 #endif
@@ -94,14 +94,14 @@ struct ap_mmap_t {
  * @param size The size of the file
  * @param cntxt The pool to use when creating the mmap.
  */
-ap_status_t ap_mmap_create(ap_mmap_t ** newmmap, ap_file_t *file, ap_off_t offset,
-                 ap_size_t size, ap_pool_t *cntxt);
+apr_status_t apr_mmap_create(apr_mmap_t ** newmmap, apr_file_t *file, apr_off_t offset,
+                 apr_size_t size, apr_pool_t *cntxt);
 
 /**
  * Remove a mmap'ed.
  * @param mmap The mmap'ed file.
  */
-ap_status_t ap_mmap_delete(ap_mmap_t *mmap);
+apr_status_t apr_mmap_delete(apr_mmap_t *mmap);
 
 /** 
  * Move the pointer into the mmap'ed file to the specified offset.
@@ -109,7 +109,7 @@ ap_status_t ap_mmap_delete(ap_mmap_t *mmap);
  * @param mmap The mmap'ed file.
  * @param offset The offset to move to.
  */
-ap_status_t ap_mmap_offset(void **addr, ap_mmap_t *mmap, ap_off_t offset);
+apr_status_t apr_mmap_offset(void **addr, apr_mmap_t *mmap, apr_off_t offset);
 
 #ifdef __cplusplus
 }

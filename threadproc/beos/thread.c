@@ -54,11 +54,11 @@
 
 #include "threadproc.h"
 
-ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
+apr_status_t apr_create_threadattr(apr_threadattr_t **new, apr_pool_t *cont)
 {
-    (*new) = (ap_threadattr_t *)ap_palloc(cont, 
-              sizeof(ap_threadattr_t));
-    (*new)->attr = (int32)ap_palloc(cont, 
+    (*new) = (apr_threadattr_t *)apr_palloc(cont, 
+              sizeof(apr_threadattr_t));
+    (*new)->attr = (int32)apr_palloc(cont, 
                     sizeof(int32));
 
     if ((*new) == NULL) {
@@ -71,7 +71,7 @@ ap_status_t ap_create_threadattr(ap_threadattr_t **new, ap_pool_t *cont)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
+apr_status_t apr_setthreadattr_detach(apr_threadattr_t *attr, apr_int32_t on)
 {
 	if (on == 1){
 		attr->detached = 1;
@@ -81,7 +81,7 @@ ap_status_t ap_setthreadattr_detach(ap_threadattr_t *attr, ap_int32_t on)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
+apr_status_t apr_getthreadattr_detach(apr_threadattr_t *attr)
 {
 	if (attr->detached == 1){
 		return APR_DETACH;
@@ -89,19 +89,19 @@ ap_status_t ap_getthreadattr_detach(ap_threadattr_t *attr)
 	return APR_NOTDETACH;
 }
 
-ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
-                             ap_thread_start_t func, void *data,
-                             ap_pool_t *cont)
+apr_status_t apr_create_thread(apr_thread_t **new, apr_threadattr_t *attr,
+                             apr_thread_start_t func, void *data,
+                             apr_pool_t *cont)
 {
     int32 temp;
-    ap_status_t stat;
+    apr_status_t stat;
     
-    (*new) = (ap_thread_t *)ap_palloc(cont, sizeof(ap_thread_t));
+    (*new) = (apr_thread_t *)apr_palloc(cont, sizeof(apr_thread_t));
     if ((*new) == NULL) {
         return APR_ENOMEM;
     }
 
-	(*new)->td = (thread_id) ap_palloc(cont, sizeof(thread_id));
+	(*new)->td = (thread_id) apr_palloc(cont, sizeof(thread_id));
     if ((*new)->td == (thread_id)NULL) {
         return APR_ENOMEM;
     }
@@ -114,7 +114,7 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
 	else
 	    temp = B_NORMAL_PRIORITY;
 
-    stat = ap_create_pool(&(*new)->cntxt, cont);
+    stat = apr_create_pool(&(*new)->cntxt, cont);
     if (stat != APR_SUCCESS) {
         return stat;
     }
@@ -129,14 +129,14 @@ ap_status_t ap_create_thread(ap_thread_t **new, ap_threadattr_t *attr,
     } 
 }
 
-ap_status_t ap_thread_exit(ap_thread_t *thd, ap_status_t *retval)
+apr_status_t apr_thread_exit(apr_thread_t *thd, apr_status_t *retval)
 {
-    ap_destroy_pool(thd->cntxt);
+    apr_destroy_pool(thd->cntxt);
 	exit_thread ((status_t)retval);
 	return APR_SUCCESS;
 }
 
-ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
+apr_status_t apr_thread_join(apr_status_t *retval, apr_thread_t *thd)
 {
     if (wait_for_thread(thd->td,(void *)&retval) == B_NO_ERROR) {
         return APR_SUCCESS;
@@ -146,7 +146,7 @@ ap_status_t ap_thread_join(ap_status_t *retval, ap_thread_t *thd)
     }
 }
 
-ap_status_t ap_thread_detach(ap_thread_t *thd)
+apr_status_t apr_thread_detach(apr_thread_t *thd)
 {
 	if (suspend_thread(thd->td) == B_NO_ERROR){
         return APR_SUCCESS;

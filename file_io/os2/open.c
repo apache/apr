@@ -58,21 +58,21 @@
 #include "apr_portable.h"
 #include <string.h>
 
-ap_status_t apr_file_cleanup(void *thefile)
+apr_status_t apr_file_cleanup(void *thefile)
 {
-    ap_file_t *file = thefile;
-    return ap_close(file);
+    apr_file_t *file = thefile;
+    return apr_close(file);
 }
 
 
 
-ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fileperms_t perm, ap_pool_t *cntxt)
+apr_status_t apr_open(apr_file_t **new, const char *fname, apr_int32_t flag,  apr_fileperms_t perm, apr_pool_t *cntxt)
 {
     int oflags = 0;
     int mflags = OPEN_FLAGS_FAIL_ON_ERROR|OPEN_SHARE_DENYNONE;
     int rv;
     ULONG action;
-    ap_file_t *dafile = (ap_file_t *)ap_palloc(cntxt, sizeof(ap_file_t));
+    apr_file_t *dafile = (apr_file_t *)apr_palloc(cntxt, sizeof(apr_file_t));
 
     *new = dafile;
     dafile->cntxt = cntxt;
@@ -95,8 +95,8 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
     dafile->buffered = (flag & APR_BUFFERED) > 0;
 
     if (dafile->buffered) {
-        dafile->buffer = ap_palloc(cntxt, APR_FILE_BUFSIZE);
-        rv = ap_create_lock(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cntxt);
+        dafile->buffer = apr_palloc(cntxt, APR_FILE_BUFSIZE);
+        rv = apr_create_lock(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, NULL, cntxt);
 
         if (rv)
             return rv;
@@ -135,26 +135,26 @@ ap_status_t ap_open(ap_file_t **new, const char *fname, ap_int32_t flag,  ap_fil
         return APR_OS2_STATUS(rv);
     
     dafile->isopen = TRUE;
-    dafile->fname = ap_pstrdup(cntxt, fname);
+    dafile->fname = apr_pstrdup(cntxt, fname);
     dafile->filePtr = 0;
     dafile->bufpos = 0;
     dafile->dataRead = 0;
     dafile->direction = 0;
     dafile->pipe = FALSE;
 
-    ap_register_cleanup(dafile->cntxt, dafile, apr_file_cleanup, ap_null_cleanup);
+    apr_register_cleanup(dafile->cntxt, dafile, apr_file_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 }
 
 
 
-ap_status_t ap_close(ap_file_t *file)
+apr_status_t apr_close(apr_file_t *file)
 {
     ULONG rc;
-    ap_status_t status;
+    apr_status_t status;
     
     if (file && file->isopen) {
-        ap_flush(file);
+        apr_flush(file);
         rc = DosClose(file->filedes);
     
         if (rc == 0) {
@@ -170,14 +170,14 @@ ap_status_t ap_close(ap_file_t *file)
     }
 
     if (file->buffered)
-        ap_destroy_lock(file->mutex);
+        apr_destroy_lock(file->mutex);
 
     return APR_SUCCESS;
 }
 
 
 
-ap_status_t ap_remove_file(const char *path, ap_pool_t *cntxt)
+apr_status_t apr_remove_file(const char *path, apr_pool_t *cntxt)
 {
     ULONG rc = DosDelete(path);
     return APR_OS2_STATUS(rc);
@@ -185,8 +185,8 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cntxt)
 
 
 
-ap_status_t ap_rename_file(const char *from_path, const char *to_path,
-                           ap_pool_t *p)
+apr_status_t apr_rename_file(const char *from_path, const char *to_path,
+                           apr_pool_t *p)
 {
     ULONG rc = DosMove(from_path, to_path);
 
@@ -203,7 +203,7 @@ ap_status_t ap_rename_file(const char *from_path, const char *to_path,
 
 
 
-ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
+apr_status_t apr_get_os_file(apr_os_file_t *thefile, apr_file_t *file)
 {
     if (file == NULL) {
         return APR_ENOFILE;
@@ -215,11 +215,11 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, ap_file_t *file)
 
 
 
-ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, ap_pool_t *cont)
+apr_status_t apr_put_os_file(apr_file_t **file, apr_os_file_t *thefile, apr_pool_t *cont)
 {
-    ap_os_file_t *dafile = thefile;
+    apr_os_file_t *dafile = thefile;
     if ((*file) == NULL) {
-        (*file) = (ap_file_t *)ap_palloc(cont, sizeof(ap_file_t));
+        (*file) = (apr_file_t *)apr_palloc(cont, sizeof(apr_file_t));
         (*file)->cntxt = cont;
     }
     (*file)->filedes = *dafile;
@@ -233,7 +233,7 @@ ap_status_t ap_put_os_file(ap_file_t **file, ap_os_file_t *thefile, ap_pool_t *c
 
 
 
-ap_status_t ap_eof(ap_file_t *fptr)
+apr_status_t apr_eof(apr_file_t *fptr)
 {
     if (!fptr->isopen || fptr->eof_hit == 1) {
         return APR_EOF;
@@ -243,9 +243,9 @@ ap_status_t ap_eof(ap_file_t *fptr)
 
 
 
-ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
+apr_status_t apr_open_stderr(apr_file_t **thefile, apr_pool_t *cont)
 {
-    (*thefile) = ap_palloc(cont, sizeof(ap_file_t));
+    (*thefile) = apr_palloc(cont, sizeof(apr_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
     }

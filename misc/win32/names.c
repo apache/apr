@@ -82,7 +82,7 @@ static BOOL OnlyDots(char *pString)
  * is present on the existing path.  This routine also
  * converts alias names to long names.
  */
-APR_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont, 
+APR_EXPORT(char *) ap_os_systemcase_filename(apr_pool_t *pCont, 
                                              const char *szFile)
 {
     char buf[HUGE_STRING_LEN];
@@ -94,10 +94,10 @@ APR_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont,
     WIN32_FIND_DATA wfd;
 
     if (!szFile || strlen(szFile) == 0 || strlen(szFile) >= sizeof(buf))
-        return ap_pstrdup(pCont, "");
+        return apr_pstrdup(pCont, "");
 
     buf[0] = '\0';
-    pInputName = ap_pstrdup(pCont, szFile);
+    pInputName = apr_pstrdup(pCont, szFile);
 
     /* First convert all slashes to \ so Win32 calls work OK */
     for (p = pInputName; *p; p++) {
@@ -195,13 +195,13 @@ APR_EXPORT(char *) ap_os_systemcase_filename(ap_pool_t *pCont,
             *p = '/';
     }
 
-    return ap_pstrdup(pCont, buf);
+    return apr_pstrdup(pCont, buf);
 }
  
 /*  Perform canonicalization with the exception that the
  *  input case is preserved.
  */
-char * canonical_filename(ap_pool_t *pCont, const char *szFile)
+char * canonical_filename(apr_pool_t *pCont, const char *szFile)
 {
     char *pNewStr;
     char *s;
@@ -209,9 +209,9 @@ char * canonical_filename(ap_pool_t *pCont, const char *szFile)
     char *q;
 
     if (szFile == NULL || strlen(szFile) == 0)
-        return ap_pstrdup(pCont, "");
+        return apr_pstrdup(pCont, "");
 
-    pNewStr = ap_pstrdup(pCont, szFile);
+    pNewStr = apr_pstrdup(pCont, szFile);
 
     /*  Change all '\' characters to '/' characters.
      *  While doing this, remove any trailing '.'.
@@ -309,7 +309,7 @@ char * canonical_filename(ap_pool_t *pCont, const char *szFile)
 
             } while (p != NULL); 
 			
-            pNewStr = ap_pstrdup(pCont, buf);
+            pNewStr = apr_pstrdup(pCont, buf);
         }
     }
     return pNewStr;

@@ -87,7 +87,7 @@
 
 #define APR_FILE_BUFSIZE 4096
 
-/* quick run-down of fields in windows' ap_file_t structure that may have 
+/* quick run-down of fields in windows' apr_file_t structure that may have 
  * obvious uses.
  * fname --  the filename as passed to the open call.
  * dwFileAttricutes -- Attributes used to open the file.
@@ -100,12 +100,12 @@
  *           correctly when writing to a file with this flag set TRUE.
  */
 
-struct ap_file_t {
-    ap_pool_t *cntxt;
+struct apr_file_t {
+    apr_pool_t *cntxt;
     HANDLE filehand;
     BOOLEAN pipe;              // Is this a pipe of a file?
     OVERLAPPED *pOverlapped;
-    ap_interval_time_t timeout;
+    apr_interval_time_t timeout;
 
     /* File specific info */
     char *fname;
@@ -117,38 +117,38 @@ struct ap_file_t {
     int ungetchar;             // Last char provided by an unget op. (-1 = no char)
     int append; 
     off_t size;
-    ap_time_t atime;
-    ap_time_t mtime;
-    ap_time_t ctime;
+    apr_time_t atime;
+    apr_time_t mtime;
+    apr_time_t ctime;
 
     /* Stuff for buffered mode */
     char *buffer;
-    ap_ssize_t bufpos;        // Read/Write position in buffer
-    ap_ssize_t dataRead;      // amount of valid data read into buffer
+    apr_ssize_t bufpos;        // Read/Write position in buffer
+    apr_ssize_t dataRead;      // amount of valid data read into buffer
     int direction;            // buffer being used for 0 = read, 1 = write
-    ap_ssize_t filePtr;       // position in file of handle
-    ap_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
+    apr_ssize_t filePtr;       // position in file of handle
+    apr_lock_t *mutex;         // mutex semaphore, must be owned to access the above fields
 
     /* Pipe specific info */
     
 };
 
-struct ap_dir_t {
-    ap_pool_t *cntxt;
+struct apr_dir_t {
+    apr_pool_t *cntxt;
     char *dirname;
     HANDLE dirhand;
     WIN32_FIND_DATA *entry;
 };
 
-ap_status_t file_cleanup(void *);
-/*mode_t get_fileperms(ap_fileperms_t);
+apr_status_t file_cleanup(void *);
+/*mode_t get_fileperms(apr_fileperms_t);
 */
-APR_EXPORT(char *) ap_os_systemcase_filename(struct ap_pool_t *pCont, 
+APR_EXPORT(char *) ap_os_systemcase_filename(struct apr_pool_t *pCont, 
                                              const char *szFile);
-char * canonical_filename(struct ap_pool_t *pCont, const char *szFile);
+char * canonical_filename(struct apr_pool_t *pCont, const char *szFile);
 
-ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out, 
+apr_status_t ap_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
                               BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
-                              ap_pool_t *p);
+                              apr_pool_t *p);
 #endif  /* ! FILE_IO_H */
 

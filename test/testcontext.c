@@ -63,33 +63,33 @@
 #include <unistd.h>
 #endif
 
-ap_status_t string_cleanup(void *data)
+apr_status_t string_cleanup(void *data)
 {
     return APR_SUCCESS;
 }
 
 int main()
 {
-    ap_pool_t *context;
+    apr_pool_t *context;
     char *testdata;
     char *retdata;
 
-    if (ap_initialize() != APR_SUCCESS) {
+    if (apr_initialize() != APR_SUCCESS) {
         fprintf(stderr, "Couldn't initialize.");
         exit(-1);
     }
-    atexit(ap_terminate);
+    atexit(apr_terminate);
 
-    if (ap_create_pool(&context, NULL) != APR_SUCCESS) {
+    if (apr_create_pool(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
     }
 
-    testdata = ap_pstrdup(context, "This is a test\n");
+    testdata = apr_pstrdup(context, "This is a test\n");
 
-    ap_set_userdata(testdata, "TEST", string_cleanup, context);    
+    apr_set_userdata(testdata, "TEST", string_cleanup, context);    
 
-    ap_get_userdata((void **)&retdata, "TEST", context);
+    apr_get_userdata((void **)&retdata, "TEST", context);
 
     if (!strcmp(testdata, retdata)) {
         fprintf(stdout, "User data is working ok\n");

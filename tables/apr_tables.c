@@ -81,7 +81,7 @@
 #endif
 
 /*****************************************************************
- * This file contains array and ap_table_t functions only.
+ * This file contains array and apr_table_t functions only.
  */
 
 /*****************************************************************
@@ -89,7 +89,7 @@
  * The 'array' functions...
  */
 
-static void make_array_core(ap_array_header_t *res, ap_pool_t *c,
+static void make_array_core(apr_array_header_t *res, apr_pool_t *c,
 			    int nelts, int elt_size)
 {
     /*
@@ -100,7 +100,7 @@ static void make_array_core(ap_array_header_t *res, ap_pool_t *c,
 	nelts = 1;
     }
 
-    res->elts = ap_pcalloc(c, nelts * elt_size);
+    res->elts = apr_pcalloc(c, nelts * elt_size);
 
     res->cont = c;
     res->elt_size = elt_size;
@@ -108,23 +108,23 @@ static void make_array_core(ap_array_header_t *res, ap_pool_t *c,
     res->nalloc = nelts;	/* ...but this many allocated */
 }
 
-APR_EXPORT(ap_array_header_t *) ap_make_array(ap_pool_t *p,
+APR_EXPORT(apr_array_header_t *) apr_make_array(apr_pool_t *p,
 						int nelts, int elt_size)
 {
-    ap_array_header_t *res;
+    apr_array_header_t *res;
 
-    res = (ap_array_header_t *) ap_palloc(p, sizeof(ap_array_header_t));
+    res = (apr_array_header_t *) apr_palloc(p, sizeof(apr_array_header_t));
     make_array_core(res, p, nelts, elt_size);
     return res;
 }
 
-APR_EXPORT(void *) ap_push_array(ap_array_header_t *arr)
+APR_EXPORT(void *) apr_push_array(apr_array_header_t *arr)
 {
     if (arr->nelts == arr->nalloc) {
 	int new_size = (arr->nalloc <= 0) ? 1 : arr->nalloc * 2;
 	char *new_data;
 
-	new_data = ap_pcalloc(arr->cont, arr->elt_size * new_size);
+	new_data = apr_pcalloc(arr->cont, arr->elt_size * new_size);
 
 	memcpy(new_data, arr->elts, arr->nalloc * arr->elt_size);
 	arr->elts = new_data;
@@ -135,8 +135,8 @@ APR_EXPORT(void *) ap_push_array(ap_array_header_t *arr)
     return arr->elts + (arr->elt_size * (arr->nelts - 1));
 }
 
-APR_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
-			       const ap_array_header_t *src)
+APR_EXPORT(void) apr_array_cat(apr_array_header_t *dst,
+			       const apr_array_header_t *src)
 {
     int elt_size = dst->elt_size;
 
@@ -148,7 +148,7 @@ APR_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
 	    new_size *= 2;
 	}
 
-	new_data = ap_pcalloc(dst->cont, elt_size * new_size);
+	new_data = apr_pcalloc(dst->cont, elt_size * new_size);
 	memcpy(new_data, dst->elts, dst->nalloc * elt_size);
 
 	dst->elts = new_data;
@@ -160,10 +160,10 @@ APR_EXPORT(void) ap_array_cat(ap_array_header_t *dst,
     dst->nelts += src->nelts;
 }
 
-APR_EXPORT(ap_array_header_t *) ap_copy_array(ap_pool_t *p,
-						const ap_array_header_t *arr)
+APR_EXPORT(apr_array_header_t *) apr_copy_array(apr_pool_t *p,
+						const apr_array_header_t *arr)
 {
-    ap_array_header_t *res = ap_make_array(p, arr->nalloc, arr->elt_size);
+    apr_array_header_t *res = apr_make_array(p, arr->nalloc, arr->elt_size);
 
     memcpy(res->elts, arr->elts, arr->elt_size * arr->nelts);
     res->nelts = arr->nelts;
@@ -177,8 +177,8 @@ APR_EXPORT(ap_array_header_t *) ap_copy_array(ap_pool_t *p,
  * overhead of the full copy only where it is really needed.
  */
 
-static APR_INLINE void copy_array_hdr_core(ap_array_header_t *res,
-					   const ap_array_header_t *arr)
+static APR_INLINE void copy_array_hdr_core(apr_array_header_t *res,
+					   const apr_array_header_t *arr)
 {
     res->elts = arr->elts;
     res->elt_size = arr->elt_size;
@@ -186,13 +186,13 @@ static APR_INLINE void copy_array_hdr_core(ap_array_header_t *res,
     res->nalloc = arr->nelts;	/* Force overflow on push */
 }
 
-APR_EXPORT(ap_array_header_t *)
-    ap_copy_array_hdr(ap_pool_t *p,
-		       const ap_array_header_t *arr)
+APR_EXPORT(apr_array_header_t *)
+    apr_copy_array_hdr(apr_pool_t *p,
+		       const apr_array_header_t *arr)
 {
-    ap_array_header_t *res;
+    apr_array_header_t *res;
 
-    res = (ap_array_header_t *) ap_palloc(p, sizeof(ap_array_header_t));
+    res = (apr_array_header_t *) apr_palloc(p, sizeof(apr_array_header_t));
     res->cont = p;
     copy_array_hdr_core(res, arr);
     return res;
@@ -200,32 +200,32 @@ APR_EXPORT(ap_array_header_t *)
 
 /* The above is used here to avoid consing multiple new array bodies... */
 
-APR_EXPORT(ap_array_header_t *)
-    ap_append_arrays(ap_pool_t *p,
-		      const ap_array_header_t *first,
-		      const ap_array_header_t *second)
+APR_EXPORT(apr_array_header_t *)
+    apr_append_arrays(apr_pool_t *p,
+		      const apr_array_header_t *first,
+		      const apr_array_header_t *second)
 {
-    ap_array_header_t *res = ap_copy_array_hdr(p, first);
+    apr_array_header_t *res = apr_copy_array_hdr(p, first);
 
-    ap_array_cat(res, second);
+    apr_array_cat(res, second);
     return res;
 }
 
-/* ap_array_pstrcat generates a new string from the ap_pool_t containing
+/* apr_array_pstrcat generates a new string from the apr_pool_t containing
  * the concatenated sequence of substrings referenced as elements within
  * the array.  The string will be empty if all substrings are empty or null,
  * or if there are no elements in the array.
  * If sep is non-NUL, it will be inserted between elements as a separator.
  */
-APR_EXPORT(char *) ap_array_pstrcat(ap_pool_t *p,
-				     const ap_array_header_t *arr,
+APR_EXPORT(char *) apr_array_pstrcat(apr_pool_t *p,
+				     const apr_array_header_t *arr,
 				     const char sep)
 {
     char *cp, *res, **strpp;
     int i, len;
 
     if (arr->nelts <= 0 || arr->elts == NULL) {    /* Empty table? */
-        return (char *) ap_pcalloc(p, 1);
+        return (char *) apr_pcalloc(p, 1);
     }
 
     /* Pass one --- find length of required string */
@@ -245,7 +245,7 @@ APR_EXPORT(char *) ap_array_pstrcat(ap_pool_t *p,
 
     /* Allocate the required string */
 
-    res = (char *) ap_palloc(p, len + 1);
+    res = (char *) apr_palloc(p, len + 1);
     cp = res;
 
     /* Pass two --- copy the argument strings into the result space */
@@ -282,32 +282,32 @@ APR_EXPORT(char *) ap_array_pstrcat(ap_pool_t *p,
  * in alloc.h
  */
 #ifdef MAKE_TABLE_PROFILE
-static ap_table_entry_t *table_push(ap_table_t *t)
+static apr_table_entry_t *table_push(apr_table_t *t)
 {
     if (t->a.nelts == t->a.nalloc) {
         return NULL;
     }
-    return (ap_table_entry_t *) ap_push_array(&t->a);
+    return (apr_table_entry_t *) apr_push_array(&t->a);
 }
 #else /* MAKE_TABLE_PROFILE */
-#define table_push(t)	((ap_table_entry_t *) ap_push_array(&(t)->a))
+#define table_push(t)	((apr_table_entry_t *) apr_push_array(&(t)->a))
 #endif /* MAKE_TABLE_PROFILE */
 
 
-APR_EXPORT(ap_table_t *) ap_make_table(ap_pool_t *p, int nelts)
+APR_EXPORT(apr_table_t *) apr_make_table(apr_pool_t *p, int nelts)
 {
-    ap_table_t *t = ap_palloc(p, sizeof(ap_table_t));
+    apr_table_t *t = apr_palloc(p, sizeof(apr_table_t));
 
-    make_array_core(&t->a, p, nelts, sizeof(ap_table_entry_t));
+    make_array_core(&t->a, p, nelts, sizeof(apr_table_entry_t));
 #ifdef MAKE_TABLE_PROFILE
     t->creator = __builtin_return_address(0);
 #endif
     return t;
 }
 
-APR_EXPORT(ap_table_t *) ap_copy_table(ap_pool_t *p, const ap_table_t *t)
+APR_EXPORT(apr_table_t *) apr_copy_table(apr_pool_t *p, const apr_table_t *t)
 {
-    ap_table_t *new = ap_palloc(p, sizeof(ap_table_t));
+    apr_table_t *new = apr_palloc(p, sizeof(apr_table_t));
 
 #ifdef POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that t->a.pool
@@ -318,20 +318,20 @@ APR_EXPORT(ap_table_t *) ap_copy_table(ap_pool_t *p, const ap_table_t *t)
 	abort();
     }
 #endif
-    make_array_core(&new->a, p, t->a.nalloc, sizeof(ap_table_entry_t));
-    memcpy(new->a.elts, t->a.elts, t->a.nelts * sizeof(ap_table_entry_t));
+    make_array_core(&new->a, p, t->a.nalloc, sizeof(apr_table_entry_t));
+    memcpy(new->a.elts, t->a.elts, t->a.nelts * sizeof(apr_table_entry_t));
     new->a.nelts = t->a.nelts;
     return new;
 }
 
-APR_EXPORT(void) ap_clear_table(ap_table_t *t)
+APR_EXPORT(void) apr_clear_table(apr_table_t *t)
 {
     t->a.nelts = 0;
 }
 
-APR_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key)
+APR_EXPORT(const char *) apr_table_get(const apr_table_t *t, const char *key)
 {
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int i;
 
     if (key == NULL) {
@@ -347,17 +347,17 @@ APR_EXPORT(const char *) ap_table_get(const ap_table_t *t, const char *key)
     return NULL;
 }
 
-APR_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_set(apr_table_t *t, const char *key,
 			       const char *val)
 {
     register int i, j, k;
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int done = 0;
 
     for (i = 0; i < t->a.nelts; ) {
 	if (!strcasecmp(elts[i].key, key)) {
 	    if (!done) {
-		elts[i].val = ap_pstrdup(t->a.cont, val);
+		elts[i].val = apr_pstrdup(t->a.cont, val);
 		done = 1;
 		++i;
 	    }
@@ -375,17 +375,17 @@ APR_EXPORT(void) ap_table_set(ap_table_t *t, const char *key,
     }
 
     if (!done) {
-	elts = (ap_table_entry_t *) table_push(t);
-	elts->key = ap_pstrdup(t->a.cont, key);
-	elts->val = ap_pstrdup(t->a.cont, val);
+	elts = (apr_table_entry_t *) table_push(t);
+	elts->key = apr_pstrdup(t->a.cont, key);
+	elts->val = apr_pstrdup(t->a.cont, val);
     }
 }
 
-APR_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_setn(apr_table_t *t, const char *key,
 				const char *val)
 {
     register int i, j, k;
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int done = 0;
 
 #ifdef POOL_DEBUG
@@ -422,16 +422,16 @@ APR_EXPORT(void) ap_table_setn(ap_table_t *t, const char *key,
     }
 
     if (!done) {
-	elts = (ap_table_entry_t *) table_push(t);
+	elts = (apr_table_entry_t *) table_push(t);
 	elts->key = (char *)key;
 	elts->val = (char *)val;
     }
 }
 
-APR_EXPORT(void) ap_table_unset(ap_table_t *t, const char *key)
+APR_EXPORT(void) apr_table_unset(apr_table_t *t, const char *key)
 {
     register int i, j, k;
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
 
     for (i = 0; i < t->a.nelts; ) {
 	if (!strcasecmp(elts[i].key, key)) {
@@ -453,28 +453,28 @@ APR_EXPORT(void) ap_table_unset(ap_table_t *t, const char *key)
     }
 }
 
-APR_EXPORT(void) ap_table_merge(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_merge(apr_table_t *t, const char *key,
 				 const char *val)
 {
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int i;
 
     for (i = 0; i < t->a.nelts; ++i) {
 	if (!strcasecmp(elts[i].key, key)) {
-	    elts[i].val = ap_pstrcat(t->a.cont, elts[i].val, ", ", val, NULL);
+	    elts[i].val = apr_pstrcat(t->a.cont, elts[i].val, ", ", val, NULL);
 	    return;
 	}
     }
 
-    elts = (ap_table_entry_t *) table_push(t);
-    elts->key = ap_pstrdup(t->a.cont, key);
-    elts->val = ap_pstrdup(t->a.cont, val);
+    elts = (apr_table_entry_t *) table_push(t);
+    elts->key = apr_pstrdup(t->a.cont, key);
+    elts->val = apr_pstrdup(t->a.cont, val);
 }
 
-APR_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_mergen(apr_table_t *t, const char *key,
 				  const char *val)
 {
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int i;
 
 #ifdef POOL_DEBUG
@@ -492,30 +492,30 @@ APR_EXPORT(void) ap_table_mergen(ap_table_t *t, const char *key,
 
     for (i = 0; i < t->a.nelts; ++i) {
 	if (!strcasecmp(elts[i].key, key)) {
-	    elts[i].val = ap_pstrcat(t->a.cont, elts[i].val, ", ", val, NULL);
+	    elts[i].val = apr_pstrcat(t->a.cont, elts[i].val, ", ", val, NULL);
 	    return;
 	}
     }
 
-    elts = (ap_table_entry_t *) table_push(t);
+    elts = (apr_table_entry_t *) table_push(t);
     elts->key = (char *)key;
     elts->val = (char *)val;
 }
 
-APR_EXPORT(void) ap_table_add(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_add(apr_table_t *t, const char *key,
 			       const char *val)
 {
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
 
-    elts = (ap_table_entry_t *) table_push(t);
-    elts->key = ap_pstrdup(t->a.cont, key);
-    elts->val = ap_pstrdup(t->a.cont, val);
+    elts = (apr_table_entry_t *) table_push(t);
+    elts->key = apr_pstrdup(t->a.cont, key);
+    elts->val = apr_pstrdup(t->a.cont, val);
 }
 
-APR_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
+APR_EXPORT(void) apr_table_addn(apr_table_t *t, const char *key,
 				const char *val)
 {
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
 
 #ifdef POOL_DEBUG
     {
@@ -530,16 +530,16 @@ APR_EXPORT(void) ap_table_addn(ap_table_t *t, const char *key,
     }
 #endif
 
-    elts = (ap_table_entry_t *) table_push(t);
+    elts = (apr_table_entry_t *) table_push(t);
     elts->key = (char *)key;
     elts->val = (char *)val;
 }
 
-APR_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
-					     const ap_table_t *overlay,
-					     const ap_table_t *base)
+APR_EXPORT(apr_table_t *) apr_overlay_tables(apr_pool_t *p,
+					     const apr_table_t *overlay,
+					     const apr_table_t *base)
 {
-    ap_table_t *res;
+    apr_table_t *res;
 
 #ifdef POOL_DEBUG
     /* we don't copy keys and values, so it's necessary that
@@ -558,11 +558,11 @@ APR_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
     }
 #endif
 
-    res = ap_palloc(p, sizeof(ap_table_t));
+    res = apr_palloc(p, sizeof(apr_table_t));
     /* behave like append_arrays */
     res->a.cont = p;
     copy_array_hdr_core(&res->a, &overlay->a);
-    ap_array_cat(&res->a, &base->a);
+    apr_array_cat(&res->a, &base->a);
 
     return res;
 }
@@ -572,7 +572,7 @@ APR_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
  * For each key value given as a vararg:
  *   run the function pointed to as
  *     int comp(void *r, char *key, char *value);
- *   on each valid key-value pair in the ap_table_t t that matches the vararg key,
+ *   on each valid key-value pair in the apr_table_t t that matches the vararg key,
  *   or once for every valid key-value pair if the vararg list is empty,
  *   until the function returns false (0) or we finish the table.
  *
@@ -582,47 +582,47 @@ APR_EXPORT(ap_table_t *) ap_overlay_tables(ap_pool_t *p,
  * only one traversal will be made and will cut short if comp returns 0.
  *
  * Note that the table_get and table_merge functions assume that each key in
- * the ap_table_t is unique (i.e., no multiple entries with the same key).  This
+ * the apr_table_t is unique (i.e., no multiple entries with the same key).  This
  * function does not make that assumption, since it (unfortunately) isn't
  * true for some of Apache's tables.
  *
  * Note that rec is simply passed-on to the comp function, so that the
  * caller can pass additional info for the task.
  *
- * ADDENDUM for ap_table_vdo():
+ * ADDENDUM for apr_table_vdo():
  * 
  * The caching api will allow a user to walk the header values:
  *
- * ap_status_t ap_cache_el_header_walk(ap_cache_el *el, 
+ * apr_status_t ap_cache_el_header_walk(ap_cache_el *el, 
  *    int (*comp)(void *, const char *, const char *), void *rec, ...);
  *
  * So it can be ..., however from there I use a  callback that use a va_list:
  *
- * ap_status_t (*cache_el_header_walk)(ap_cache_el *el, 
+ * apr_status_t (*cache_el_header_walk)(ap_cache_el *el, 
  *    int (*comp)(void *, const char *, const char *), void *rec, va_list);
  *
  * To pass those ...'s on down to the actual module that will handle walking
  * their headers, in the file case this is actually just an ap_table - and
- * rather than reimplementing ap_table_do (which IMHO would be bad) I just
+ * rather than reimplementing apr_table_do (which IMHO would be bad) I just
  * called it with the va_list. For mod_shmem_cache I don't need it since I
  * can't use ap_table's, but mod_file_cache should (though a good hash would
  * be better, but that's a different issue :). 
  *
  * So to make mod_file_cache easier to maintain, it's a good thing
  */
-APR_EXPORT(void) ap_table_do(int (*comp) (void *, const char *, const char *),
-			      void *rec, const ap_table_t *t, ...)
+APR_EXPORT(void) apr_table_do(int (*comp) (void *, const char *, const char *),
+			      void *rec, const apr_table_t *t, ...)
 {
     va_list vp;
     va_start(vp, t);
-    ap_table_vdo(comp, rec, t, vp);
+    apr_table_vdo(comp, rec, t, vp);
     va_end(vp);  
 } 
-APR_EXPORT(void) ap_table_vdo(int (*comp) (void *, const char *, const char *),
-				void *rec, const ap_table_t *t, va_list vp)
+APR_EXPORT(void) apr_table_vdo(int (*comp) (void *, const char *, const char *),
+				void *rec, const apr_table_t *t, va_list vp)
 {
     char *argp;
-    ap_table_entry_t *elts = (ap_table_entry_t *) t->a.elts;
+    apr_table_entry_t *elts = (apr_table_entry_t *) t->a.elts;
     int rv, i;
     argp = va_arg(vp, char *);
     do {
@@ -666,14 +666,14 @@ static int sort_overlap(const void *va, const void *vb)
 #define ap_OVERLAP_TABLES_ON_STACK	(512)
 #endif
 
-APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
+APR_EXPORT(void) apr_overlap_tables(apr_table_t *a, const apr_table_t *b,
 				    unsigned flags)
 {
     overlap_key cat_keys_buf[ap_OVERLAP_TABLES_ON_STACK];
     overlap_key *cat_keys;
     int nkeys;
-    ap_table_entry_t *e;
-    ap_table_entry_t *last_e;
+    apr_table_entry_t *e;
+    apr_table_entry_t *last_e;
     overlap_key *left;
     overlap_key *right;
     overlap_key *last;
@@ -686,7 +686,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 	/* XXX: could use scratch free space in a or b's pool instead...
 	 * which could save an allocation in b's pool.
 	 */
-	cat_keys = ap_palloc(b->a.cont, sizeof(overlap_key) * nkeys);
+	cat_keys = apr_palloc(b->a.cont, sizeof(overlap_key) * nkeys);
     }
 
     nkeys = 0;
@@ -694,7 +694,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
     /* Create a list of the entries from a concatenated with the entries
      * from b.
      */
-    e = (ap_table_entry_t *)a->a.elts;
+    e = (apr_table_entry_t *)a->a.elts;
     last_e = e + a->a.nelts;
     while (e < last_e) {
 	cat_keys[nkeys].key = e->key;
@@ -704,7 +704,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 	++e;
     }
 
-    e = (ap_table_entry_t *)b->a.elts;
+    e = (apr_table_entry_t *)b->a.elts;
     last_e = e + b->a.nelts;
     while (e < last_e) {
 	cat_keys[nkeys].key = e->key;
@@ -721,7 +721,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
      */
     a->a.nelts = 0;
     if (a->a.nalloc < nkeys) {
-	a->a.elts = ap_palloc(a->a.cont, a->a.elt_size * nkeys * 2);
+	a->a.elts = apr_palloc(a->a.cont, a->a.elt_size * nkeys * 2);
 	a->a.nalloc = nkeys * 2;
     }
 
@@ -743,7 +743,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 	    right = left + 1;
 	    if (right == last
 		|| strcasecmp(left->key, right->key)) {
-		ap_table_addn(a, left->key, left->val);
+		apr_table_addn(a, left->key, left->val);
 		left = right;
 	    }
 	    else {
@@ -763,7 +763,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 		} while (right < last
 			 && !strcasecmp(left->key, right->key));
 		/* right points one past the last header to merge */
-		value = ap_palloc(a->a.cont, len + 1);
+		value = apr_palloc(a->a.cont, len + 1);
 		strp = value;
 		for (;;) {
 		    memcpy(strp, left->val, left->order);
@@ -776,7 +776,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 		    *strp++ = ' ';
 		}
 		*strp = 0;
-		ap_table_addn(a, (left-1)->key, value);
+		apr_table_addn(a, (left-1)->key, value);
 	    }
 	}
     }
@@ -788,7 +788,7 @@ APR_EXPORT(void) ap_overlap_tables(ap_table_t *a, const ap_table_t *b,
 	    while (right < last && !strcasecmp(left->key, right->key)) {
 		++right;
 	    }
-	    ap_table_addn(a, (right-1)->key, (right-1)->val);
+	    apr_table_addn(a, (right-1)->key, (right-1)->val);
 	    left = right;
 	}
     }

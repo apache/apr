@@ -65,25 +65,25 @@
 
 static const char * rmem_get_str(ap_bucket *e)
 {
-    ap_bucket_rmem *b = (ap_bucket_rmem *)e->data;
+    apr_bucket_rmem *b = (apr_bucket_rmem *)e->data;
     return b->start;
 }
 
 static int rmem_get_len(ap_bucket *e)
 {
-    ap_bucket_rmem *b = (ap_bucket_rmem *)e->data;
+    apr_bucket_rmem *b = (apr_bucket_rmem *)e->data;
     return (char *)b->end - (char *)b->start;
 }
 
-static ap_status_t rmem_split(ap_bucket *e, ap_size_t nbyte)
+static apr_status_t rmem_split(ap_bucket *e, apr_size_t nbyte)
 {
     ap_bucket *newbuck;
-    ap_bucket_rmem *a = (ap_bucket_rmem *)e->data; 
-    ap_bucket_rmem *b; 
-    ap_ssize_t dump;
+    apr_bucket_rmem *a = (apr_bucket_rmem *)e->data; 
+    apr_bucket_rmem *b; 
+    apr_ssize_t dump;
 
     newbuck = ap_bucket_rmem_create(a->start, a->alloc_len, &dump);
-    b = (ap_bucket_rmem *)newbuck->data;
+    b = (apr_bucket_rmem *)newbuck->data;
 
     b->alloc_len = a->alloc_len - nbyte;
     a->alloc_len = nbyte;
@@ -106,10 +106,10 @@ static ap_status_t rmem_split(ap_bucket *e, ap_size_t nbyte)
  * It is worth noting that if an error occurs, the buffer is in an unknown
  * state.
  */
-static ap_status_t rmem_insert(ap_bucket *e, const void *buf,
-                               ap_size_t nbyte, ap_ssize_t *w)
+static apr_status_t rmem_insert(ap_bucket *e, const void *buf,
+                               apr_size_t nbyte, apr_ssize_t *w)
 {
-    ap_bucket_rmem *b = (ap_bucket_rmem *)e->data;
+    apr_bucket_rmem *b = (apr_bucket_rmem *)e->data;
 
     if (nbyte == 0) {
         *w = 0;
@@ -126,10 +126,10 @@ static ap_status_t rmem_insert(ap_bucket *e, const void *buf,
 }
 
 APR_EXPORT(ap_bucket *) ap_bucket_rmem_create(const void *buf,
-                               ap_size_t nbyte, ap_ssize_t *w)
+                               apr_size_t nbyte, apr_ssize_t *w)
 {
     ap_bucket *newbuf;
-    ap_bucket_rmem *b;
+    apr_bucket_rmem *b;
 
     newbuf                = calloc(1, sizeof(*newbuf));
     b                     = malloc(sizeof(*b)); 

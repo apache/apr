@@ -69,54 +69,54 @@ void setup_lock()
 
 
 
-static ap_status_t lock_cleanup(void *thelock)
+static apr_status_t lock_cleanup(void *thelock)
 {
-    ap_lock_t *lock = thelock;
-    return ap_destroy_lock(lock);
+    apr_lock_t *lock = thelock;
+    return apr_destroy_lock(lock);
 }
 
 
 
-ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, ap_lockscope_e scope, 
-			   const char *fname, ap_pool_t *cont)
+apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, apr_lockscope_e scope, 
+			   const char *fname, apr_pool_t *cont)
 {
-    ap_lock_t *new;
+    apr_lock_t *new;
     ULONG rc;
     char *semname;
     PIB *ppib;
 
-    new = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+    new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
     new->cntxt = cont;
     new->type  = type;
     new->scope = scope;
     new->owner = 0;
     new->lock_count = 0;
-    new->fname = ap_pstrdup(cont, fname);
+    new->fname = apr_pstrdup(cont, fname);
     DosGetInfoBlocks(&(new->tib), &ppib);
 
     if (fname == NULL)
         semname = NULL;
     else
-        semname = ap_pstrcat(cont, "/SEM32/", fname, NULL);
+        semname = apr_pstrcat(cont, "/SEM32/", fname, NULL);
 
     rc = DosCreateMutexSem(semname, &(new->hMutex), scope == APR_CROSS_PROCESS ? DC_SEM_SHARED : 0, FALSE);
     *lock = new;
 
     if (!rc)
-        ap_register_cleanup(cont, new, lock_cleanup, ap_null_cleanup);
+        apr_register_cleanup(cont, new, lock_cleanup, apr_null_cleanup);
 
     return APR_OS2_STATUS(rc);
 }
 
 
 
-ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
-			       ap_pool_t *cont)
+apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname,
+			       apr_pool_t *cont)
 {
     int rc;
     PIB *ppib;
 
-    *lock = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+    *lock = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
 
     if (lock == NULL)
         return APR_ENOMEM;
@@ -127,14 +127,14 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
     rc = DosOpenMutexSem( (char *)fname, &(*lock)->hMutex );
 
     if (!rc)
-        ap_register_cleanup(cont, *lock, lock_cleanup, ap_null_cleanup);
+        apr_register_cleanup(cont, *lock, lock_cleanup, apr_null_cleanup);
 
     return APR_OS2_STATUS(rc);
 }
 
 
 
-ap_status_t ap_lock(ap_lock_t *lock)
+apr_status_t apr_lock(apr_lock_t *lock)
 {
     ULONG rc;
     
@@ -150,7 +150,7 @@ ap_status_t ap_lock(ap_lock_t *lock)
 
 
 
-ap_status_t ap_unlock(ap_lock_t *lock)
+apr_status_t apr_unlock(apr_lock_t *lock)
 {
     ULONG rc;
     
@@ -165,14 +165,14 @@ ap_status_t ap_unlock(ap_lock_t *lock)
 
 
 
-ap_status_t ap_destroy_lock(ap_lock_t *lock)
+apr_status_t apr_destroy_lock(apr_lock_t *lock)
 {
     ULONG rc;
-    ap_status_t stat = APR_SUCCESS;
+    apr_status_t stat = APR_SUCCESS;
 
     if (lock->owner == CurrentTid) {
         while (lock->lock_count > 0 && stat == APR_SUCCESS)
-            stat = ap_unlock(lock);
+            stat = apr_unlock(lock);
     }
 
     if (stat != APR_SUCCESS)

@@ -61,7 +61,7 @@
 #include <os2.h>
 
 
-static void FS3_to_finfo(ap_finfo_t *finfo, FILESTATUS3 *fstatus)
+static void FS3_to_finfo(apr_finfo_t *finfo, FILESTATUS3 *fstatus)
 {
     finfo->protection = (fstatus->attrFile & FILE_READONLY) ? 0555 : 0777;
 
@@ -82,7 +82,7 @@ static void FS3_to_finfo(ap_finfo_t *finfo, FILESTATUS3 *fstatus)
 
 
 
-static ap_status_t handle_type(ap_filetype_e *ftype, HFILE file)
+static apr_status_t handle_type(ap_filetype_e *ftype, HFILE file)
 {
     ULONG filetype, fileattr, rc;
 
@@ -110,7 +110,7 @@ static ap_status_t handle_type(ap_filetype_e *ftype, HFILE file)
 
 
 
-ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
+apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
 {
     ULONG rc;
     FILESTATUS3 fstatus;
@@ -137,13 +137,13 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
     return APR_OS2_STATUS(rc);
 }
 
-ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms)
+apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
 {
     return APR_ENOTIMPL;
 }
 
 
-ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
+apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
     ULONG rc;
     FILESTATUS3 fstatus;
@@ -156,7 +156,7 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
         FS3_to_finfo(finfo, &fstatus);
         return APR_SUCCESS;
     } else if (rc == ERROR_INVALID_ACCESS) {
-        memset(finfo, 0, sizeof(ap_finfo_t));
+        memset(finfo, 0, sizeof(apr_finfo_t));
         finfo->protection = 0444;
         finfo->filetype = APR_CHR;
         return APR_SUCCESS;

@@ -66,8 +66,8 @@
 extern "C" {
 #endif
 
-typedef struct ap_dso_handle_t        ap_dso_handle_t;
-typedef void *                        ap_dso_handle_sym_t;
+typedef struct apr_dso_handle_t        apr_dso_handle_t;
+typedef void *                        apr_dso_handle_sym_t;
 
 /**
  * Load a DSO library.
@@ -75,14 +75,14 @@ typedef void *                        ap_dso_handle_sym_t;
  * @param path Path to the DSO library
  * @param ctx Pool to use. 
  */
-ap_status_t ap_dso_load(ap_dso_handle_t **res_handle, const char *path, 
-                        ap_pool_t *ctx);
+apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, 
+                        apr_pool_t *ctx);
 
 /**
  * Close a DSO library.
  * @param handle handle to close.
  */
-ap_status_t ap_dso_unload(ap_dso_handle_t *handle);
+apr_status_t apr_dso_unload(apr_dso_handle_t *handle);
 
 /**
  * Load a symbol from a DSO handle.
@@ -90,7 +90,7 @@ ap_status_t ap_dso_unload(ap_dso_handle_t *handle);
  * @param handle handle to load from.
  * @param symname Name of the symbol to load.
  */
-ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle, 
+apr_status_t apr_dso_sym(apr_dso_handle_sym_t *ressym, apr_dso_handle_t *handle, 
                        const char *symname);
 
 /**
@@ -99,7 +99,7 @@ ap_status_t ap_dso_sym(ap_dso_handle_sym_t *ressym, ap_dso_handle_t *handle,
  * @param buf handle to load from.
  * @param bufsize Name of the symbol to load.
  */
-const char *ap_dso_error(ap_dso_handle_t *dso, char *buf, ap_size_t bufsize);
+const char *apr_dso_error(apr_dso_handle_t *dso, char *buf, apr_size_t bufsize);
 
 #ifdef __cplusplus
 }

@@ -112,10 +112,10 @@ union semun {
 };
 #endif
 
-struct ap_lock_t {
-    ap_pool_t *cntxt;
-    ap_locktype_e type;
-    ap_lockscope_e scope;
+struct apr_lock_t {
+    apr_pool_t *cntxt;
+    apr_locktype_e type;
+    apr_lockscope_e scope;
     int curr_locked;
     char *fname;
 #if APR_USE_SYSVSEM_SERIALIZE
@@ -142,19 +142,19 @@ struct ap_lock_t {
 };
 
 #if APR_HAS_THREADS
-ap_status_t ap_unix_create_intra_lock(struct ap_lock_t *new);
-ap_status_t ap_unix_lock_intra(struct ap_lock_t *lock);
-ap_status_t ap_unix_unlock_intra(struct ap_lock_t *lock);
-ap_status_t ap_unix_destroy_intra_lock(struct ap_lock_t *lock);
+apr_status_t apr_unix_create_intra_lock(struct apr_lock_t *new);
+apr_status_t apr_unix_lock_intra(struct apr_lock_t *lock);
+apr_status_t apr_unix_unlock_intra(struct apr_lock_t *lock);
+apr_status_t apr_unix_destroy_intra_lock(struct apr_lock_t *lock);
 #endif
 
-void ap_unix_setup_lock(void);
-ap_status_t ap_unix_create_inter_lock(struct ap_lock_t *new);
-ap_status_t ap_unix_lock_inter(struct ap_lock_t *lock);
-ap_status_t ap_unix_unlock_inter(struct ap_lock_t *lock);
-ap_status_t ap_unix_destroy_inter_lock(struct ap_lock_t *lock);
+void apr_unix_setup_lock(void);
+apr_status_t apr_unix_create_inter_lock(struct apr_lock_t *new);
+apr_status_t apr_unix_lock_inter(struct apr_lock_t *lock);
+apr_status_t apr_unix_unlock_inter(struct apr_lock_t *lock);
+apr_status_t apr_unix_destroy_inter_lock(struct apr_lock_t *lock);
 
-ap_status_t ap_unix_child_init_lock(struct ap_lock_t **lock, ap_pool_t *cont, 
+apr_status_t apr_unix_child_init_lock(struct apr_lock_t **lock, apr_pool_t *cont, 
                             const char *fname);
 
 #endif  /* LOCKS_H */

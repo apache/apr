@@ -66,7 +66,7 @@ extern "C" {
  * @package Error Codes
  */
 
-typedef int ap_status_t;
+typedef int apr_status_t;
 
 /**
  * Convert an APR error to a canonical error
@@ -74,7 +74,7 @@ typedef int ap_status_t;
  * @return The canonical error value
  * @tip see apr/APRDesgin for an explanation of why this is necessary.
  */
-int ap_canonical_error(ap_status_t err);
+int apr_canonical_error(apr_status_t err);
 
 
 /*
@@ -113,7 +113,7 @@ int ap_canonical_error(ap_status_t err);
  * APR_ENOTHDKEY    APR was not given a thread key structure
  * APR_ENOSHMAVAIL  There is no more shared memory available
  * APR_EDSOOPEN     APR was unable to open the dso object.  For more 
- *                  information call ap_dso_error().
+ *                  information call apr_dso_error().
  * </PRE>
  *
  * <PRE>

@@ -68,14 +68,14 @@ struct shmem_t {
 
 
 
-ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file, ap_pool_t *cont)
+apr_status_t apr_shm_init(struct shmem_t **m, apr_size_t reqsize, const char *file, apr_pool_t *cont)
 {
     int rc;
-    struct shmem_t *newm = (struct shmem_t *)ap_palloc(cont, sizeof(struct shmem_t));
+    struct shmem_t *newm = (struct shmem_t *)apr_palloc(cont, sizeof(struct shmem_t));
     char *name = NULL;
 
     if (file)
-        name = ap_pstrcat(cont, "\\SHAREMEM\\", file, NULL);
+        name = apr_pstrcat(cont, "\\SHAREMEM\\", file, NULL);
 
     rc = DosAllocSharedMem(&(newm->memblock), name, reqsize, PAG_COMMIT|OBJ_GETTABLE|PAG_READ|PAG_WRITE);
 
@@ -90,7 +90,7 @@ ap_status_t ap_shm_init(struct shmem_t **m, ap_size_t reqsize, const char *file,
 
 
 
-ap_status_t ap_shm_destroy(struct shmem_t *m)
+apr_status_t apr_shm_destroy(struct shmem_t *m)
 {
     _uclose(m->heap);
     _udestroy(m->heap, _FORCE);
@@ -100,21 +100,21 @@ ap_status_t ap_shm_destroy(struct shmem_t *m)
 
 
 
-void *ap_shm_malloc(struct shmem_t *m, ap_size_t reqsize)
+void *apr_shm_malloc(struct shmem_t *m, apr_size_t reqsize)
 {
     return _umalloc(m->heap, reqsize);
 }
 
 
 
-void *ap_shm_calloc(struct shmem_t *m, ap_size_t size)
+void *apr_shm_calloc(struct shmem_t *m, apr_size_t size)
 {
     return _ucalloc(m->heap, size, 1);
 }
 
 
 
-ap_status_t ap_shm_free(struct shmem_t *m, void *entity)
+apr_status_t apr_shm_free(struct shmem_t *m, void *entity)
 {
     free(entity);
     return APR_SUCCESS;
@@ -122,7 +122,7 @@ ap_status_t ap_shm_free(struct shmem_t *m, void *entity)
 
 
 
-ap_status_t ap_get_shm_name(ap_shmem_t *c, ap_shm_name_t **name)
+apr_status_t apr_get_shm_name(apr_shmem_t *c, apr_shm_name_t **name)
 {
     *name = NULL;
     return APR_ANONYMOUS;
@@ -130,14 +130,14 @@ ap_status_t ap_get_shm_name(ap_shmem_t *c, ap_shm_name_t **name)
 
 
 
-ap_status_t ap_set_shm_name(ap_shmem_t *c, ap_shm_name_t *name)
+apr_status_t apr_set_shm_name(apr_shmem_t *c, apr_shm_name_t *name)
 {
     return APR_ANONYMOUS;
 }
 
 
 
-ap_status_t ap_open_shmem(struct shmem_t *m)
+apr_status_t apr_open_shmem(struct shmem_t *m)
 {
     int rc;
 
@@ -152,7 +152,7 @@ ap_status_t ap_open_shmem(struct shmem_t *m)
 
 
 
-ap_status_t ap_shm_avail(struct shmem_t *c, ap_size_t *size)
+apr_status_t apr_shm_avail(struct shmem_t *c, apr_size_t *size)
 {
 
     return APR_ENOTIMPL;

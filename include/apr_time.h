@@ -70,10 +70,10 @@ APR_VAR_IMPORT const char ap_month_snames[12][4];
 APR_VAR_IMPORT const char ap_day_snames[7][4];
 
 /* number of microseconds since 00:00:00 january 1, 1970 UTC */
-typedef ap_int64_t ap_time_t;
+typedef apr_int64_t apr_time_t;
 
 /* intervals for I/O timeouts, in microseconds */
-typedef ap_int32_t ap_interval_time_t;
+typedef apr_int32_t apr_interval_time_t;
 
 #ifdef WIN32
 #define AP_USEC_PER_SEC ((LONGLONG) 1000000)
@@ -90,46 +90,46 @@ typedef ap_int32_t ap_interval_time_t;
 /**
  * return the current time
  */
-ap_time_t ap_now(void);
+apr_time_t apr_now(void);
 
 /* a structure similar to ANSI struct tm with the following differences:
    - tm_usec isn't an ANSI field
    - tm_gmtoff isn't an ANSI field (it's a bsdism)
 */
 typedef struct {
-    ap_int32_t tm_usec;	/* microseconds past tm_sec */
-    ap_int32_t tm_sec;	/* (0-61) seconds past tm_min */
-    ap_int32_t tm_min;  /* (0-59) minutes past tm_hour */
-    ap_int32_t tm_hour; /* (0-23) hours past midnight */
-    ap_int32_t tm_mday; /* (1-31) day of the month */
-    ap_int32_t tm_mon;  /* (0-11) month of the year */
-    ap_int32_t tm_year; /* year since 1900 */
-    ap_int32_t tm_wday; /* (0-6) days since sunday */
-    ap_int32_t tm_yday; /* (0-365) days since jan 1 */
-    ap_int32_t tm_isdst; /* daylight saving time */
-    ap_int32_t tm_gmtoff; /* seconds east of UTC */
+    apr_int32_t tm_usec;	/* microseconds past tm_sec */
+    apr_int32_t tm_sec;	/* (0-61) seconds past tm_min */
+    apr_int32_t tm_min;  /* (0-59) minutes past tm_hour */
+    apr_int32_t tm_hour; /* (0-23) hours past midnight */
+    apr_int32_t tm_mday; /* (1-31) day of the month */
+    apr_int32_t tm_mon;  /* (0-11) month of the year */
+    apr_int32_t tm_year; /* year since 1900 */
+    apr_int32_t tm_wday; /* (0-6) days since sunday */
+    apr_int32_t tm_yday; /* (0-365) days since jan 1 */
+    apr_int32_t tm_isdst; /* daylight saving time */
+    apr_int32_t tm_gmtoff; /* seconds east of UTC */
 } ap_exploded_time_t;
 
 /**
- * convert an ansi time_t to an ap_time_t
- * @param result the resulting ap_time_t
+ * convert an ansi time_t to an apr_time_t
+ * @param result the resulting apr_time_t
  * @param input the time_t to convert
  */
-ap_status_t ap_ansi_time_to_ap_time(ap_time_t *result, time_t input);
+apr_status_t apr_ansi_time_to_ap_time(apr_time_t *result, time_t input);
 
 /**
  * convert a time to its human readable components in GMT timezone
  * @param result the exploded time
  * @param input the time to explode
  */
-ap_status_t ap_explode_gmt(ap_exploded_time_t *result, ap_time_t input);
+apr_status_t apr_explode_gmt(ap_exploded_time_t *result, apr_time_t input);
 
 /**
  * convert a time to its human readable components in local timezone
  * @param result the exploded time
  * @param input the time to explode
  */
-ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input);
+apr_status_t apr_explode_localtime(ap_exploded_time_t *result, apr_time_t input);
 
 /**
  * Convert time value from human readable format to number of seconds 
@@ -137,36 +137,36 @@ ap_status_t ap_explode_localtime(ap_exploded_time_t *result, ap_time_t input);
  * @param result the resulting imploded time
  * @param input the input exploded time
  */
-ap_status_t ap_implode_time(ap_time_t *result, ap_exploded_time_t *input);
+apr_status_t apr_implode_time(apr_time_t *result, ap_exploded_time_t *input);
 
 /**
  * Sleep for the specified number of micro-seconds.
  * @param t desired amount of time to sleep.
  * @tip May sleep for longer than the specified time. 
  */
-void ap_sleep(ap_interval_time_t t);
+void apr_sleep(apr_interval_time_t t);
 
 #define AP_RFC822_DATE_LEN (30)
 /**
- * ap_rfc822_date formats dates in the RFC822
+ * apr_rfc822_date formats dates in the RFC822
  * format in an efficient manner.  it is a fixed length
  * format and requires the indicated amount of storage
  * including trailing \0
  * @param date_str String to write to.
  * @param t the time to convert 
  */
-ap_status_t ap_rfc822_date(char *date_str, ap_time_t t);
+apr_status_t apr_rfc822_date(char *date_str, apr_time_t t);
 
 #define AP_CTIME_LEN (25)
 /**
- * ap_ctime formats dates in the ctime() format
+ * apr_ctime formats dates in the ctime() format
  * in an efficient manner.  it is a fixed length format
  * and requires the indicated amount of storage
  * including trailing \0 
  * @param date_str String to write to.
  * @param t the time to convert 
  */
-ap_status_t ap_ctime(char *date_str, ap_time_t t);
+apr_status_t apr_ctime(char *date_str, apr_time_t t);
 
 /**
  * formats the exploded time according to the format specified
@@ -176,7 +176,7 @@ ap_status_t ap_ctime(char *date_str, ap_time_t t);
  * @param format The format for the time string
  * @param tm The time to convert
  */
-ap_status_t ap_strftime(char *s, ap_size_t *retsize, ap_size_t max, const char *format, ap_exploded_time_t *tm);
+apr_status_t apr_strftime(char *s, apr_size_t *retsize, apr_size_t max, const char *format, ap_exploded_time_t *tm);
 
 #ifdef __cplusplus
 }

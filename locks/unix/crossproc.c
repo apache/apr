@@ -61,7 +61,7 @@
 static struct sembuf op_on;
 static struct sembuf op_off;
 
-void ap_unix_setup_lock(void)
+void apr_unix_setup_lock(void)
 {
     op_on.sem_num = 0;
     op_on.sem_op = -1;
@@ -71,9 +71,9 @@ void ap_unix_setup_lock(void)
     op_off.sem_flg = SEM_UNDO;
 }
 
-static ap_status_t lock_cleanup(void *lock_)
+static apr_status_t lock_cleanup(void *lock_)
 {
-    ap_lock_t *lock=lock_;
+    apr_lock_t *lock=lock_;
     union semun ick;
     
     if (lock->interproc != -1) {
@@ -83,7 +83,7 @@ static ap_status_t lock_cleanup(void *lock_)
     return APR_SUCCESS;
 }    
 
-ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
+apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 {
     union semun ick;
     
@@ -99,11 +99,11 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
         return errno;
     }
     new->curr_locked = 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
+    apr_register_cleanup(new->cntxt, (void *)new, lock_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
 {
     int rc;
 
@@ -117,7 +117,7 @@ ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
 {
     int rc;
 
@@ -131,32 +131,32 @@ ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
+apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
 
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        ap_kill_cleanup(lock->cntxt, lock, lock_cleanup);
+        apr_kill_cleanup(lock->cntxt, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont, const char *fname)
+apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
 {
     return APR_SUCCESS;
 }
 
 #elif (APR_USE_PROC_PTHREAD_SERIALIZE)  
 
-void ap_unix_setup_lock(void)
+void apr_unix_setup_lock(void)
 {
 }
 
-static ap_status_t lock_cleanup(void *lock_)
+static apr_status_t lock_cleanup(void *lock_)
 {
-    ap_lock_t *lock=lock_;
-    ap_status_t stat;
+    apr_lock_t *lock=lock_;
+    apr_status_t stat;
 
     if (lock->curr_locked == 1) {
         if ((stat = pthread_mutex_unlock(lock->interproc))) {
@@ -172,9 +172,9 @@ static ap_status_t lock_cleanup(void *lock_)
     return APR_SUCCESS;
 }    
 
-ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
+apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     int fd;
     pthread_mutexattr_t mattr;
 
@@ -222,13 +222,13 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
     }
 
     new->curr_locked = 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
+    apr_register_cleanup(new->cntxt, (void *)new, lock_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
 
     if ((stat = pthread_mutex_lock(lock->interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -240,9 +240,9 @@ ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
 
     if ((stat = pthread_mutex_unlock(lock->interproc))) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -254,17 +254,17 @@ ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
+apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        ap_kill_cleanup(lock->cntxt, lock, lock_cleanup);
+        apr_kill_cleanup(lock->cntxt, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont, const char *fname)
+apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, const char *fname)
 {
     return APR_SUCCESS;
 }
@@ -274,7 +274,7 @@ ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont, const cha
 static struct flock lock_it;
 static struct flock unlock_it;
 
-void ap_unix_setup_lock(void)
+void apr_unix_setup_lock(void)
 {
     lock_it.l_whence = SEEK_SET;        /* from current point */
     lock_it.l_start = 0;                /* -"- */
@@ -288,23 +288,23 @@ void ap_unix_setup_lock(void)
     unlock_it.l_pid = 0;                /* pid not actually interesting */
 }
 
-static ap_status_t lock_cleanup(void *lock_)
+static apr_status_t lock_cleanup(void *lock_)
 {
-    ap_lock_t *lock=lock_;
+    apr_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        return ap_unix_unlock_inter(lock);
+        return apr_unix_unlock_inter(lock);
     }
     return APR_SUCCESS;
 }    
 
-ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
+apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 {
     if (new->fname) {
         new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0644);
     }
     else {
-        new->fname = ap_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
+        new->fname = apr_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
         new->interproc = mkstemp(new->fname);
     }
 
@@ -315,11 +315,11 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
 
     new->curr_locked=0;
     unlink(new->fname);
-    ap_register_cleanup(new->cntxt, new, lock_cleanup, ap_null_cleanup);
+    apr_register_cleanup(new->cntxt, new, lock_cleanup, apr_null_cleanup);
     return APR_SUCCESS; 
 }
 
-ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
 {
     int rc;
 
@@ -333,7 +333,7 @@ ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
 {
     int rc;
 
@@ -347,17 +347,17 @@ ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
+apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        ap_kill_cleanup(lock->cntxt, lock, lock_cleanup);
+        apr_kill_cleanup(lock->cntxt, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont, 
+apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, 
                                     const char *fname)
 {
     return APR_SUCCESS;
@@ -365,28 +365,28 @@ ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont,
 
 #elif (APR_USE_FLOCK_SERIALIZE)
 
-void ap_unix_setup_lock(void)
+void apr_unix_setup_lock(void)
 {
 }
 
-static ap_status_t lock_cleanup(void *lock_)
+static apr_status_t lock_cleanup(void *lock_)
 {
-    ap_lock_t *lock=lock_;
+    apr_lock_t *lock=lock_;
 
     if (lock->curr_locked == 1) {
-        return ap_unix_unlock_inter(lock);
+        return apr_unix_unlock_inter(lock);
     }
     unlink(lock->fname);
     return APR_SUCCESS;
 }    
 
-ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
+apr_status_t apr_unix_create_inter_lock(apr_lock_t *new)
 {
     if (new->fname) {
         new->interproc = open(new->fname, O_CREAT | O_WRONLY | O_EXCL, 0600);
     }
     else {
-        new->fname = ap_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
+        new->fname = apr_pstrdup(new->cntxt, "/tmp/aprXXXXXX"); 
         new->interproc = mkstemp(new->fname);
     }
 
@@ -395,11 +395,11 @@ ap_status_t ap_unix_create_inter_lock(ap_lock_t *new)
         return errno;
     }
     new->curr_locked = 0;
-    ap_register_cleanup(new->cntxt, (void *)new, lock_cleanup, ap_null_cleanup);
+    apr_register_cleanup(new->cntxt, (void *)new, lock_cleanup, apr_null_cleanup);
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_lock_inter(apr_lock_t *lock)
 {
     int rc;
 
@@ -413,7 +413,7 @@ ap_status_t ap_unix_lock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
+apr_status_t apr_unix_unlock_inter(apr_lock_t *lock)
 {
     int rc;
 
@@ -427,27 +427,27 @@ ap_status_t ap_unix_unlock_inter(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unix_destroy_inter_lock(ap_lock_t *lock)
+apr_status_t apr_unix_destroy_inter_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((stat = lock_cleanup(lock)) == APR_SUCCESS) {
-        ap_kill_cleanup(lock->cntxt, lock, lock_cleanup);
+        apr_kill_cleanup(lock->cntxt, lock, lock_cleanup);
         return APR_SUCCESS;
     }
     return stat;
 }
 
-ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont, 
+apr_status_t apr_unix_child_init_lock(apr_lock_t **lock, apr_pool_t *cont, 
                             const char *fname)
 {
-    ap_lock_t *new;
+    apr_lock_t *new;
 
-    new = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+    new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
 
-    new->fname = ap_pstrdup(cont, fname);
+    new->fname = apr_pstrdup(cont, fname);
     new->interproc = open(new->fname, O_WRONLY, 0600);
     if (new->interproc == -1) {
-        ap_unix_destroy_inter_lock(new);
+        apr_unix_destroy_inter_lock(new);
         return errno;
     }
     *lock = new;

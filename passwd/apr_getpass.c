@@ -52,7 +52,7 @@
  * <http://www.apache.org/>.
  */
 
-/* ap_getpass.c: abstraction to provide for obtaining a password from the
+/* apr_getpass.c: abstraction to provide for obtaining a password from the
  * command line in whatever way the OS supports.  In the best case, it's a
  * wrapper for the system library's getpass() routine; otherwise, we
  * use one we define ourselves.
@@ -204,7 +204,7 @@ static char *getpass(const char *prompt)
  * but the caller is *not* made aware of it.
  */
 
-APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufsiz)
+APR_EXPORT(apr_status_t) apr_getpass(const char *prompt, char *pwbuf, size_t *bufsiz)
 {
     char *pw_got = NULL;
     int result = 0;
@@ -214,7 +214,7 @@ APR_EXPORT(ap_status_t) ap_getpass(const char *prompt, char *pwbuf, size_t *bufs
 	*bufsiz = ERR_OVERFLOW;
         return APR_ENAMETOOLONG;
     }
-    ap_cpystrn(pwbuf, pw_got, *bufsiz);
+    apr_cpystrn(pwbuf, pw_got, *bufsiz);
     *bufsiz = result;
     return APR_SUCCESS; 
 }

@@ -63,13 +63,13 @@
 #include <sys/stat.h>
 #include "misc.h"
 
-ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
+apr_status_t apr_set_pipe_timeout(apr_file_t *thepipe, apr_interval_time_t timeout)
 {
     thepipe->timeout = timeout;
     return APR_SUCCESS;
 }
 
-ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *p)
+apr_status_t apr_create_pipe(apr_file_t **in, apr_file_t **out, apr_pool_t *p)
 {
     SECURITY_ATTRIBUTES sa;
 
@@ -77,9 +77,9 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *p)
     sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
-    (*in) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*in)->cntxt = p;
-    (*in)->fname = ap_pstrdup(p, "PIPE");
+    (*in)->fname = apr_pstrdup(p, "PIPE");
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
@@ -89,9 +89,9 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *p)
     (*in)->dataRead = 0;
     (*in)->direction = 0;
 
-    (*out) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->cntxt = p;
-    (*out)->fname = ap_pstrdup(p, "PIPE");
+    (*out)->fname = apr_pstrdup(p, "PIPE");
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
@@ -109,7 +109,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *p)
 }
 
 /* ap_create_nt_pipe()
- * An internal (for now) APR function created for use by ap_create_process() 
+ * An internal (for now) APR function created for use by apr_create_process() 
  * when setting up pipes to communicate with the child process. 
  * ap_create_nt_pipe() allows setting the blocking mode of each end of 
  * the pipe when the pipe is created (rather than after the pipe is created). 
@@ -118,7 +118,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *p)
  *
  * In general, we don't want to enable child side pipe handles for async i/o.
  * This prevents us from enabling both ends of the pipe for async i/o in 
- * ap_create_pipe.
+ * apr_create_pipe.
  *
  * Why not use NamedPipes on NT which support setting pipe state to
  * non-blocking? On NT, even though you can set a pipe non-blocking, 
@@ -128,9 +128,9 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *p)
  *
  * wgs
  */
-ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out, 
+apr_status_t ap_create_nt_pipe(apr_file_t **in, apr_file_t **out, 
                               BOOLEAN bAsyncRead, BOOLEAN bAsyncWrite, 
-                              ap_pool_t *p)
+                              apr_pool_t *p)
 {
     ap_oslevel_e level;
     SECURITY_ATTRIBUTES sa;
@@ -143,9 +143,9 @@ ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out,
     sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
-    (*in) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*in) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*in)->cntxt = p;
-    (*in)->fname = ap_pstrdup(p, "PIPE");
+    (*in)->fname = apr_pstrdup(p, "PIPE");
     (*in)->pipe = 1;
     (*in)->timeout = -1;
     (*in)->ungetchar = -1;
@@ -156,9 +156,9 @@ ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out,
     (*in)->direction = 0;
     (*in)->pOverlapped = NULL;
 
-    (*out) = (ap_file_t *)ap_pcalloc(p, sizeof(ap_file_t));
+    (*out) = (apr_file_t *)apr_pcalloc(p, sizeof(apr_file_t));
     (*out)->cntxt = p;
-    (*out)->fname = ap_pstrdup(p, "PIPE");
+    (*out)->fname = apr_pstrdup(p, "PIPE");
     (*out)->pipe = 1;
     (*out)->timeout = -1;
     (*out)->ungetchar = -1;
@@ -174,7 +174,7 @@ ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out,
         dwOpenMode = PIPE_ACCESS_INBOUND;
         if (bAsyncRead) {
             dwOpenMode |= FILE_FLAG_OVERLAPPED;
-            (*in)->pOverlapped = (OVERLAPPED*) ap_pcalloc(p, sizeof(OVERLAPPED));
+            (*in)->pOverlapped = (OVERLAPPED*) apr_pcalloc(p, sizeof(OVERLAPPED));
             (*in)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
             /* register a cleanup for the event handle... */
         }
@@ -196,7 +196,7 @@ ap_status_t ap_create_nt_pipe(ap_file_t **in, ap_file_t **out,
         dwOpenMode = FILE_ATTRIBUTE_NORMAL;
         if (bAsyncWrite) {
             dwOpenMode |= FILE_FLAG_OVERLAPPED;
-            (*out)->pOverlapped = (OVERLAPPED*) ap_pcalloc(p, sizeof(OVERLAPPED));
+            (*out)->pOverlapped = (OVERLAPPED*) apr_pcalloc(p, sizeof(OVERLAPPED));
             (*out)->pOverlapped->hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
         }
         

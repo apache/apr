@@ -64,7 +64,7 @@
  * from W. Richard Stevens' "Advanced Programming in the UNIX Environment"
  * (the version that does not automatically restart system calls).
  */
-Sigfunc *ap_signal(int signo, Sigfunc * func)
+Sigfunc *apr_signal(int signo, Sigfunc * func)
 {
     struct sigaction act, oact;
 

@@ -79,7 +79,7 @@ static ap_filetype_e filetype_from_mode(int mode)
 
     return type;
 }
-BOOLEAN is_exe(const char* fname, ap_pool_t *cont) {
+BOOLEAN is_exe(const char* fname, apr_pool_t *cont) {
     const char* exename;
     const char* ext;
     exename = strrchr(fname, '/');
@@ -101,7 +101,7 @@ BOOLEAN is_exe(const char* fname, ap_pool_t *cont) {
     return FALSE;
 }
 
-ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
+apr_status_t apr_getfileinfo(apr_finfo_t *finfo, apr_file_t *thefile)
 {
     BY_HANDLE_FILE_INFORMATION FileInformation;
     DWORD FileType;
@@ -182,12 +182,12 @@ ap_status_t ap_getfileinfo(ap_finfo_t *finfo, ap_file_t *thefile)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setfileperms(const char *fname, ap_fileperms_t perms)
+apr_status_t apr_setfileperms(const char *fname, apr_fileperms_t perms)
 {
     return APR_ENOTIMPL;
 }
 
-ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
+apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_pool_t *cont)
 {
     /* WIN32_FILE_ATTRIBUTE_DATA is an exact subset of the first 
      * entries of WIN32_FIND_DATA
@@ -195,7 +195,7 @@ ap_status_t ap_stat(ap_finfo_t *finfo, const char *fname, ap_pool_t *cont)
     WIN32_FIND_DATA FileInformation;
     HANDLE hFind;
     ap_oslevel_e os_level;
-    ap_status_t rv = APR_SUCCESS;
+    apr_status_t rv = APR_SUCCESS;
 
     memset(finfo,'\0', sizeof(*finfo));
 

@@ -54,14 +54,14 @@
 
 #include "locks.h"
 
-ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type, 
-                           ap_lockscope_e scope, const char *fname, 
-                           ap_pool_t *cont)
+apr_status_t apr_create_lock(apr_lock_t **lock, apr_locktype_e type, 
+                           apr_lockscope_e scope, const char *fname, 
+                           apr_pool_t *cont)
 {
-    ap_lock_t *new;
-    ap_status_t stat;
+    apr_lock_t *new;
+    apr_status_t stat;
     
-    new = (ap_lock_t *)ap_palloc(cont, sizeof(ap_lock_t));
+    new = (apr_lock_t *)apr_palloc(cont, sizeof(apr_lock_t));
     if (new == NULL){
         return APR_ENOMEM;
     }
@@ -69,7 +69,7 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     new->cntxt = cont;
     new->type  = type;
     new->scope = scope;
-    new->fname = ap_pstrdup(cont, fname);
+    new->fname = apr_pstrdup(cont, fname);
 
     if (scope != APR_CROSS_PROCESS) {
         if ((stat = create_intra_lock(new)) != APR_SUCCESS) {
@@ -85,9 +85,9 @@ ap_status_t ap_create_lock(ap_lock_t **lock, ap_locktype_e type,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_lock(ap_lock_t *lock)
+apr_status_t apr_lock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     
     if (lock->scope != APR_CROSS_PROCESS) {
         if ((stat = lock_intra(lock)) != APR_SUCCESS) {
@@ -102,9 +102,9 @@ ap_status_t ap_lock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_unlock(ap_lock_t *lock)
+apr_status_t apr_unlock(apr_lock_t *lock)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if (lock->scope != APR_CROSS_PROCESS) {
         if ((stat = unlock_intra(lock)) != APR_SUCCESS) {
             return stat;
@@ -118,9 +118,9 @@ ap_status_t ap_unlock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_destroy_lock(ap_lock_t *lock)
+apr_status_t apr_destroy_lock(apr_lock_t *lock)
 {
-    ap_status_t stat; 
+    apr_status_t stat; 
     if (lock->scope != APR_CROSS_PROCESS) {
         if ((stat = destroy_intra_lock(lock)) != APR_SUCCESS) {
             return stat;
@@ -134,10 +134,10 @@ ap_status_t ap_destroy_lock(ap_lock_t *lock)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname, 
-			       ap_pool_t *cont)
+apr_status_t apr_child_init_lock(apr_lock_t **lock, const char *fname, 
+			       apr_pool_t *cont)
 {
-    ap_status_t stat;
+    apr_status_t stat;
     if ((*lock)->scope != APR_CROSS_PROCESS) {
         if ((stat = child_init_lock(lock, cont, fname)) != APR_SUCCESS) {
             return stat;
@@ -146,14 +146,14 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data)
+apr_status_t apr_get_lockdata(apr_lock_t *lock, const char *key, void *data)
 {
-    return ap_get_userdata(data, key, lock->cntxt);
+    return apr_get_userdata(data, key, lock->cntxt);
 }
 
-ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
-                            ap_status_t (*cleanup) (void *))
+apr_status_t apr_set_lockdata(apr_lock_t *lock, void *data, const char *key,
+                            apr_status_t (*cleanup) (void *))
 {
-    return ap_set_userdata(data, key, cleanup, lock->cntxt);
+    return apr_set_userdata(data, key, cleanup, lock->cntxt);
 }
 

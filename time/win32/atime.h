@@ -60,13 +60,13 @@
 #include <time.h>
 
 struct atime_t {
-    ap_pool_t *cntxt;
-    ap_time_t currtime;
+    apr_pool_t *cntxt;
+    apr_time_t currtime;
     SYSTEMTIME *explodedtime;
 };
     
-void FileTimeToAprTime(ap_time_t *atime, FILETIME *ft);
-void AprTimeToFileTime(LPFILETIME pft, ap_time_t t);
+void FileTimeToAprTime(apr_time_t *atime, FILETIME *ft);
+void AprTimeToFileTime(LPFILETIME pft, apr_time_t t);
 
 #endif  /* ! ATIME_H */
 

@@ -91,26 +91,26 @@
 #define POLLHUP  16
 #define POLLNVAL 32
 
-struct ap_socket_t {
-    ap_pool_t *cntxt;
+struct apr_socket_t {
+    apr_pool_t *cntxt;
     int socketdes;
     struct sockaddr_in *local_addr;
     struct sockaddr_in *remote_addr;
     int addr_len;
-    ap_interval_time_t timeout;
+    apr_interval_time_t timeout;
     int connected;
 };
 
-struct ap_pollfd_t {
-    ap_pool_t *cntxt;
-    struct ap_socket_t *sock;
+struct apr_pollfd_t {
+    apr_pool_t *cntxt;
+    struct apr_socket_t *sock;
     fd_set *read;
     fd_set *write;
     fd_set *except;
     int highsock;
 };
 
-ap_int16_t get_event(ap_int16_t);
+apr_int16_t get_event(apr_int16_t);
 
 int inet_aton(const char *cp, struct in_addr *addr);
 #include <ByteOrder.h> /* for the ntohs definition */

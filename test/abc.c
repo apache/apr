@@ -6,17 +6,17 @@
 
 int main(int argc, char *argv[])
 {
-    ap_file_t *fd = NULL;
+    apr_file_t *fd = NULL;
     char ch;
     int status = 0;
-    ap_pool_t *context;
+    apr_pool_t *context;
 
-    ap_create_pool(&context, NULL); 
+    apr_create_pool(&context, NULL); 
 
-    ap_open(&fd, argv[1], APR_READ, -1, context);
+    apr_open(&fd, argv[1], APR_READ, -1, context);
     
     while (!status) {
-        status = ap_getc(&ch, fd);
+        status = apr_getc(&ch, fd);
         if (status == APR_EOF )
             fprintf(stdout, "EOF, YEAH!!!!!!!!!\n");
         else if (status == APR_SUCCESS)

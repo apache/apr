@@ -86,7 +86,7 @@
  */
 
 /*
- * The ap_MD5Encode() routine uses much code obtained from the FreeBSD 3.0
+ * The apr_MD5Encode() routine uses much code obtained from the FreeBSD 3.0
  * MD5 crypt() function, which is licenced as follows:
  * ----------------------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
@@ -146,7 +146,7 @@ static unsigned char PADDING[64] =
 };
 
 #ifdef CHARSET_EBCDIC
-static ap_xlate_t *xlate_ebcdic_to_ascii; /* used in ap_MD5Encode() */
+static apr_xlate_t *xlate_ebcdic_to_ascii; /* used in apr_MD5Encode() */
 #endif
 
 /* F, G, H and I are basic MD5 functions.
@@ -186,7 +186,7 @@ static ap_xlate_t *xlate_ebcdic_to_ascii; /* used in ap_MD5Encode() */
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-APR_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
+APR_EXPORT(apr_status_t) apr_MD5Init(ap_md5_ctx_t *context)
 {
     context->count[0] = context->count[1] = 0;
     /* Load magic initialization constants. */
@@ -205,9 +205,9 @@ APR_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context)
  * to be used for translating the content before calculating the
  * digest.
  */
-APR_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
+APR_EXPORT(apr_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, apr_xlate_t *xlate)
 {
-    ap_status_t rv;
+    apr_status_t rv;
     int is_sb;
 
     /* TODO: remove the single-byte-only restriction from this code
@@ -228,13 +228,13 @@ APR_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
    operation, processing another message block, and updating the
    context.
  */
-APR_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
+APR_EXPORT(apr_status_t) apr_MD5Update(ap_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen)
 {
     unsigned int i, idx, partLen;
 #if APR_HAS_XLATE
-    ap_size_t inbytes_left, outbytes_left;
+    apr_size_t inbytes_left, outbytes_left;
 #endif
 
     /* Compute number of bytes mod 64 */
@@ -309,7 +309,7 @@ APR_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
    the message digest and zeroizing the context.
  */
-APR_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
+APR_EXPORT(apr_status_t) apr_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
                                     ap_md5_ctx_t *context)
 {
     unsigned char bits[8];
@@ -319,17 +319,17 @@ APR_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
     Encode(bits, context->count, 8);
 
 #if APR_HAS_XLATE
-    /* ap_MD5Update() should not translate for this final round. */
+    /* apr_MD5Update() should not translate for this final round. */
     context->xlate = NULL;
 #endif /*APR_HAS_XLATE*/
 
     /* Pad out to 56 mod 64. */
     idx = (unsigned int) ((context->count[0] >> 3) & 0x3f);
     padLen = (idx < 56) ? (56 - idx) : (120 - idx);
-    ap_MD5Update(context, PADDING, padLen);
+    apr_MD5Update(context, PADDING, padLen);
 
     /* Append length (before padding) */
-    ap_MD5Update(context, bits, 8);
+    apr_MD5Update(context, bits, 8);
 
     /* Store state in digest */
     Encode(digest, context->state, MD5_DIGESTSIZE);
@@ -459,7 +459,7 @@ static void Decode(UINT4 *output, const unsigned char *input, unsigned int len)
 }
 
 #ifdef CHARSET_EBCDIC
-APR_EXPORT(ap_status_t) ap_MD5InitEBCDIC(ap_xlate_t *xlate)
+APR_EXPORT(apr_status_t) ap_MD5InitEBCDIC(apr_xlate_t *xlate)
 {
     xlate_ebcdic_to_ascii = xlate;
     return APR_SUCCESS;
@@ -489,7 +489,7 @@ static void to64(char *s, unsigned long v, int n)
     }
 }
 
-APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
+APR_EXPORT(apr_status_t) apr_MD5Encode(const char *pw, const char *salt,
                              char *result, size_t nbytes)
 {
     /*
@@ -534,7 +534,7 @@ APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
     /*
      * 'Time to make the doughnuts..'
      */
-    ap_MD5Init(&ctx);
+    apr_MD5Init(&ctx);
 #ifdef CHARSET_EBCDIC
     ap_MD5SetXlate(&ctx, xlate_ebcdic_to_ascii);
 #endif
@@ -542,28 +542,28 @@ APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
     /*
      * The password first, since that is what is most unknown
      */
-    ap_MD5Update(&ctx, (unsigned char *)pw, strlen(pw));
+    apr_MD5Update(&ctx, (unsigned char *)pw, strlen(pw));
 
     /*
      * Then our magic string
      */
-    ap_MD5Update(&ctx, (unsigned char *)apr1_id, strlen(apr1_id));
+    apr_MD5Update(&ctx, (unsigned char *)apr1_id, strlen(apr1_id));
 
     /*
      * Then the raw salt
      */
-    ap_MD5Update(&ctx, (unsigned char *)sp, sl);
+    apr_MD5Update(&ctx, (unsigned char *)sp, sl);
 
     /*
      * Then just as many characters of the MD5(pw, salt, pw)
      */
-    ap_MD5Init(&ctx1);
-    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
-    ap_MD5Update(&ctx1, (unsigned char *)sp, sl);
-    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
-    ap_MD5Final(final, &ctx1);
+    apr_MD5Init(&ctx1);
+    apr_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
+    apr_MD5Update(&ctx1, (unsigned char *)sp, sl);
+    apr_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
+    apr_MD5Final(final, &ctx1);
     for (pl = strlen(pw); pl > 0; pl -= MD5_DIGESTSIZE) {
-	ap_MD5Update(&ctx, final, (pl > MD5_DIGESTSIZE) ? MD5_DIGESTSIZE : pl);
+	apr_MD5Update(&ctx, final, (pl > MD5_DIGESTSIZE) ? MD5_DIGESTSIZE : pl);
     }
 
     /*
@@ -576,10 +576,10 @@ APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
      */
     for (i = strlen(pw); i != 0; i >>= 1) {
 	if (i & 1) {
-	    ap_MD5Update(&ctx, final, 1);
+	    apr_MD5Update(&ctx, final, 1);
 	}
 	else {
-	    ap_MD5Update(&ctx, (unsigned char *)pw, 1);
+	    apr_MD5Update(&ctx, (unsigned char *)pw, 1);
 	}
     }
 
@@ -591,7 +591,7 @@ APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
     strncat(passwd, sp, sl);
     strcat(passwd, "$");
 
-    ap_MD5Final(final, &ctx);
+    apr_MD5Final(final, &ctx);
 
     /*
      * And now, just to make sure things don't run too fast..
@@ -599,28 +599,28 @@ APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
      * need 30 seconds to build a 1000 entry dictionary...
      */
     for (i = 0; i < 1000; i++) {
-	ap_MD5Init(&ctx1);
+	apr_MD5Init(&ctx1);
 	if (i & 1) {
-	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
+	    apr_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
 	}
 	else {
-	    ap_MD5Update(&ctx1, final, MD5_DIGESTSIZE);
+	    apr_MD5Update(&ctx1, final, MD5_DIGESTSIZE);
 	}
 	if (i % 3) {
-	    ap_MD5Update(&ctx1, (unsigned char *)sp, sl);
+	    apr_MD5Update(&ctx1, (unsigned char *)sp, sl);
 	}
 
 	if (i % 7) {
-	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
+	    apr_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
 	}
 
 	if (i & 1) {
-	    ap_MD5Update(&ctx1, final, MD5_DIGESTSIZE);
+	    apr_MD5Update(&ctx1, final, MD5_DIGESTSIZE);
 	}
 	else {
-	    ap_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
+	    apr_MD5Update(&ctx1, (unsigned char *)pw, strlen(pw));
 	}
-	ap_MD5Final(final,&ctx1);
+	apr_MD5Final(final,&ctx1);
     }
 
     p = passwd + strlen(passwd);
@@ -638,18 +638,18 @@ APR_EXPORT(ap_status_t) ap_MD5Encode(const char *pw, const char *salt,
      */
     memset(final, 0, sizeof(final));
 
-    ap_cpystrn(result, passwd, nbytes - 1);
+    apr_cpystrn(result, passwd, nbytes - 1);
     return APR_SUCCESS;
 }
 
 /*
  * Validate a plaintext password against a smashed one.  Use either
- * crypt() (if available) or ap_MD5Encode(), depending upon the format
+ * crypt() (if available) or apr_MD5Encode(), depending upon the format
  * of the smashed input password.  Return APR_SUCCESS if they match, or
  * APR_EMISMATCH if they don't.
  */
 
-APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *hash)
+APR_EXPORT(apr_status_t) apr_validate_password(const char *passwd, const char *hash)
 {
     char sample[120];
 #if !defined(WIN32) && !defined(BEOS)
@@ -659,17 +659,17 @@ APR_EXPORT(ap_status_t) ap_validate_password(const char *passwd, const char *has
 	/*
 	 * The hash was created using our custom algorithm.
 	 */
-	ap_MD5Encode(passwd, hash, sample, sizeof(sample));
+	apr_MD5Encode(passwd, hash, sample, sizeof(sample));
     }
     else {
 	/*
 	 * It's not our algorithm, so feed it to crypt() if possible.
 	 */
 #if defined(WIN32) || defined(BEOS)
-	ap_cpystrn(sample, passwd, sizeof(sample) - 1);
+	apr_cpystrn(sample, passwd, sizeof(sample) - 1);
 #else
 	crypt_pw = crypt(passwd, hash);
-	ap_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
+	apr_cpystrn(sample, crypt_pw, sizeof(sample) - 1);
 #endif
     }
     return (strcmp(sample, hash) == 0) ? APR_SUCCESS : APR_EMISMATCH;
