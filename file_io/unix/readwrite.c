@@ -241,14 +241,14 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
         return APR_SUCCESS;
     }
 #else
-    int i, tbytes;
+    int i;
+    int tbytes;
     apr_status_t rv = APR_SUCCESS;
 
     *nbytes = 0;
 
-    for(i = 0; i < nvec; i++){
-         tbytes = vec[i].iov_len;
-         rv = apr_file_write(thefile, vec[i].iov_base, &tbytes);
+    for(i = 0; i < nvec; i++) {
+         rv = apr_file_write_full(thefile, vec[i].iov_base, vec[i].iov_len, &tbytes);
          *nbytes += tbytes;
          if(rv != APR_SUCCESS)
              break;
