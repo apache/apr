@@ -99,8 +99,7 @@ APR_DECLARE(apr_status_t) apr_file_open(apr_file_t **new, const char *fname, apr
 
     if (dafile->buffered) {
         dafile->buffer = apr_palloc(cntxt, APR_FILE_BUFSIZE);
-        rv = apr_lock_create(&dafile->mutex, APR_MUTEX, APR_INTRAPROCESS, 
-                             APR_LOCK_DEFAULT, NULL, cntxt);
+        rv = apr_thread_mutex_create(&dafile->mutex, 0, cntxt);
 
         if (rv)
             return rv;
@@ -173,7 +172,7 @@ APR_DECLARE(apr_status_t) apr_file_close(apr_file_t *file)
     }
 
     if (file->buffered)
-        apr_lock_destroy(file->mutex);
+        apr_thread_mutex_destroy(file->mutex);
 
     return APR_SUCCESS;
 }
