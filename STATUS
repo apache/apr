@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/07/11 23:00:17 $]
+Last modified at [$Date: 2002/07/11 23:00:54 $]
 
 Release:
 
@@ -78,55 +78,6 @@ CURRENT VOTES:
                        vetoed whatever that was]
          -0: wrowe, jerenkrantz, striker
          -0.5: rbb
-
-    * For the atomics code to be efficient it depends on instructions
-      in newer sparc models. Unfortunately this means that binaries
-      optimized at build-time for these architectures will not work
-      on older hardware, regardless of the version of Solaris running.
-      The same is likely happening on the various x86 implementations.
-      Although I had high hopes for the atomics code, I think we can
-      not support it in a way that is compatible with the portability
-      goals of APR, and I hereby propose that we remove it from APR.
-
-      +1: Aaron
-      -0: Justin (I think it's warranted and fits with our portability
-                  goals, but I'm not going to spend my time supporting it -
-                  although I have spent more time on this than I'd like.
-                  If someone wants to maintain it, more power to them.  If
-                  no one maintains it, this gets changed to a +1.),
-          BrianP,cliff,gregames:
-	  	  (All the reasons why we don't want the processor-specific
-                  code in APR are also reasons why I don't want to push
-                  that code up into the apps that use APR.  I'd rather
-                  spend some more time searching for a workable solution
-                  before we give up on atomics.  Perhaps we should let
-                  apps using the atomic API set a preprocessor flag to
-                  choose an "optimal" or "portable" version of the atomic
-                  ops?)
-          Sander (The positive sides of the atomics outweigh the negative
-                  in my opinion.  That said, I am not going to be the
-                  one spending time on this, since asm on various
-                  processors isn't really my game)
-          Jim,rbb:
-	  	  (who thinks we'll need to reformat this vote) Any time
-                  you make use of processor specific code for optimizations
-                  or capability, you run into portability concerns. The
-                  real option is to make atomics a compile-time option.
-                  YES means you use the atomics code, based on the *build*
-                  machine (and therefore carries some dependencies) or
-                  NO which maintains "universal" portabiity, which is
-                  what we have (but the default being NO atomics)
-      -1: IanH, BillS: 
-                  I don't agree. I think APR is the perfect place this kind of thing. 
-                  For platforms that support it is a big win, for ones which don't
-                  they are no worse off than the alternative.
-                  I can't maintain every asm implementation, but I am volunteering
-                  for sparc/x86.  (we could also grab the FreeBSD 
-                  implementations for HW they support)
-                  Unfortunatly I was out of action for a month when half the 
-                  hubub was going on. 
-                  The other alternative for non-native support is maybe to turn 
-                  it into a spin lock
 
 
 RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
