@@ -82,7 +82,7 @@ LTFLAGS = --silent
 #
 # Basic macro setup
 #
-COMPILE      = $(CC) $(CFLAGS) $(CPPFLAGS)
+COMPILE      = $(CC) $(CPPFLAGS) $(CFLAGS)
 LT_COMPILE   = $(LIBTOOL) --mode=compile $(LTFLAGS) $(COMPILE) -c $< && touch $@
 
 LINK         = $(LIBTOOL) --mode=link $(LTFLAGS) $(COMPILE) $(LDFLAGS) -o $@
