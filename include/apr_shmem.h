@@ -158,5 +158,5 @@ apr_status_t apr_shm_avail(apr_shmem_t *c, apr_size_t *avail);
 }
 #endif
 
-#endif  /* ! APR_FILE_IO_H */
+#endif  /* ! APR_SHMEM_H */
 
