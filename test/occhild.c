@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-int main()
+int main(void)
 {
     int rc=1;
     char buf[256];
