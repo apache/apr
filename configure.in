@@ -603,6 +603,18 @@ else
     off_t_fmt='#error Can not determine the proper size for off_t'
 fi
 
+APR_CHECK_SIZEOF_EXTENDED([#include <sys/types.h>], pid_t, 8)
+
+if test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_int"; then
+    os_proc_t_fmt='#define APR_OS_PROC_T_FMT "d"'
+elif test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_long"; then
+    os_proc_t_fmt='#define APR_OS_PROC_T_FMT "ld"'
+elif test "$ac_cv_sizeof_pid_t" = "$ac_cv_sizeof_long_long"; then
+    os_proc_t_fmt='#define APR_OS_PROC_T_FMT "qd"'
+else
+    os_proc_t_fmt='#error Can not determine the proper size for pid_t'
+fi
+
 # Basically, we have tried to figure out the correct format strings
 # for APR types which vary between platforms, but we don't always get 
 # it right.  If you find that we don't get it right for your platform, 
@@ -632,6 +644,7 @@ AC_SUBST(socklen_t_value)
 AC_SUBST(ssize_t_fmt) 
 AC_SUBST(size_t_fmt)
 AC_SUBST(off_t_fmt) 
+AC_SUBST(os_proc_t_fmt)
 
 dnl #----------------------------- Checking for string functions
 AC_CHECK_FUNCS(strnicmp, have_strnicmp="1", have_strnicmp="0")

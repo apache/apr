@@ -280,9 +280,11 @@ typedef  int         gid_t;
 
 #define APR_SSIZE_T_FMT          "d"
 
-#define APR_SIZE_T_FMT          "d"
+#define APR_SIZE_T_FMT           "d"
 
 #define APR_OFF_T_FMT            "ld"
+
+#define APR_OS_PROC_T_FMT        "d"
 
 /* Local machine definition for console and log output. */
 #define APR_EOL_STR              "\r\n"
