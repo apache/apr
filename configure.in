@@ -788,6 +788,7 @@ AC_CHECK_FUNCS(writev)
 sendfile="0"
 AC_CHECK_LIB(sendfile, sendfilev)
 AC_CHECK_FUNCS(sendfile send_file sendfilev, [ sendfile="1" ])
+AC_CHECK_FUNCS(utime utimes)
 
 dnl THIS MUST COME AFTER THE THREAD TESTS - FreeBSD doesn't always have a
 dnl threaded poll() and we don't want to use sendfile on early FreeBSD 

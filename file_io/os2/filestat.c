@@ -255,3 +255,12 @@ APR_DECLARE(apr_status_t) apr_file_attrs_set(const char *fname,
 
     return APR_FROM_OS_ERROR(rc);
 }
+
+
+/* ### Somebody please write this! */
+APR_DECLARE(apr_status_t) apr_file_mtime_set(const char *fname,
+                                              apr_time_t mtime,
+                                              apr_pool_t *pool)
+{
+  return APR_ENOTIMPL;
+}
