@@ -213,6 +213,10 @@ SOURCE=.\misc\win32\charset.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\misc\win32\env.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\misc\unix\errorcodes.c
 # End Source File
 # Begin Source File
@@ -448,6 +452,10 @@ SOURCE=.\include\arch\win32\apr_arch_utf8.h
 
 SOURCE=.\include\arch\win32\apr_private.h
 # End Source File
+# Begin Source File
+
+SOURCE=.\include\arch\apr_private_common.h
+# End Source File
 # End Group
 # Begin Group "Public Header Files"
 
@@ -500,6 +508,10 @@ SOURCE=.\include\apr_dso.h
 # Begin Source File
 
 SOURCE=.\include\apr_errno.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\include\apr_env.h
 # End Source File
 # Begin Source File
 

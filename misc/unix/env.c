@@ -52,54 +52,77 @@
  * <http://www.apache.org/>.
  */
 
-#ifndef APR_TEST_INCLUDES
-#define APR_TEST_INCLUDES
+#define APR_WANT_STRFUNC
+#include "apr_want.h"
+#include "apr.h"
+#include "apr_private.h"
+#include "apr_env.h"
 
-#include "CuTest.h"
-#include "apr_pools.h"
+#if APR_HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
-/* Some simple functions to make the test apps easier to write and
- * a bit more consistent...
- */
+APR_DECLARE(apr_status_t) apr_env_get(char **value,
+                                      const char *envvar,
+                                      apr_pool_t *pool)
+{
+#ifdef HAVE_GETENV
 
-extern apr_pool_t *p;
+    char *val = getenv(envvar);
+    if (!val)
+        return APR_ENOENT;
+    *value = val;
+    return APR_SUCCESS;
 
-CuSuite *getsuite(void);
-
-CuSuite *teststr(void);
-CuSuite *testtime(void);
-CuSuite *testvsn(void);
-CuSuite *testipsub(void);
-CuSuite *testmmap(void);
-CuSuite *testud(void);
-CuSuite *testtable(void);
-CuSuite *testhash(void);
-CuSuite *testsleep(void);
-CuSuite *testpool(void);
-CuSuite *testfmt(void);
-CuSuite *testfile(void);
-CuSuite *testdir(void);
-CuSuite *testfileinfo(void);
-CuSuite *testrand(void);
-CuSuite *testdso(void);
-CuSuite *testoc(void);
-CuSuite *testdup(void);
-CuSuite *testsockets(void);
-CuSuite *testproc(void);
-CuSuite *testpoll(void);
-CuSuite *testlock(void);
-CuSuite *testsockopt(void);
-CuSuite *testpipe(void);
-CuSuite *testthread(void);
-CuSuite *testgetopt(void);
-CuSuite *testnames(void);
-CuSuite *testuser(void);
-CuSuite *testpath(void);
-CuSuite *testenv(void);
-
-/* Assert that RV is an APR_SUCCESS value; else fail giving strerror
- * for RV and CONTEXT message. */
-void apr_assert_success(CuTest* tc, const char *context, apr_status_t rv);
+#else
+    return APR_ENOTIMPL;
+#endif
+}
 
 
-#endif /* APR_TEST_INCLUDES */
+APR_DECLARE(apr_status_t) apr_env_set(const char *envvar,
+                                      const char *value,
+                                      apr_pool_t *pool)
+{
+#if defined(HAVE_SETENV)
+
+    if (0 > setenv(envvar, value, 1))
+        return APR_ENOMEM;
+    return APR_SUCCESS;
+
+#elif defined(HAVE_PUTENV)
+
+    apr_size_t elen = strlen(envvar);
+    apr_size_t vlen = strlen(value);
+    char *env = apr_palloc(pool, elen + vlen + 2);
+    char *p = env + elen;
+
+    memcpy(env, envvar, elen);
+    *p++ = '=';
+    memcpy(p, value, vlen);
+    p[vlen] = '\0';
+
+    if (0 > putenv(env))
+        return APR_ENOMEM;
+    return APR_SUCCESS;
+
+#else
+    return APR_ENOTIMPL;
+#endif
+}
+
+
+APR_DECLARE(apr_status_t) apr_env_delete(const char *envvar, apr_pool_t *pool)
+{
+#ifdef HAVE_UNSETENV
+
+    unsetenv(envvar);
+    return APR_SUCCESS;
+
+#else
+    return APR_ENOTIMPL;
+#endif
+}
