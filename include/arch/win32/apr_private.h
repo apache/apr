@@ -217,7 +217,7 @@ DECLARE_LATE_DLL_FUNC(DLL_WINBASEAPI, BOOL, WINAPI, GetFileAttributesExA, 234, (
  * This section should define those functions which are
  * only found in the windows version of APR.
  */
-ap_status_t ap_get_oslevel(struct ap_context_t *, ap_oslevel_e *);
+ap_status_t ap_get_oslevel(struct ap_pool_t *, ap_oslevel_e *);
 unsigned __stdcall SignalHandling(void *);
 int thread_ready(void);
 

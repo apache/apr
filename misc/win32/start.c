@@ -75,22 +75,18 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
     WSADATA wsaData;
     int err;
     ap_pool_t *new;
-    ap_pool_t *pool;
 
     if (cont) {
-        pool = ap_make_sub_pool(cont->pool, cont->apr_abort);
+        new = ap_make_sub_pool(cont, cont->apr_abort);
     }
     else {
-        pool = ap_make_sub_pool(NULL, NULL);
+        new = ap_make_sub_pool(NULL, NULL);
     }
         
-    if (pool == NULL) {
+    if (new == NULL) {
         return APR_ENOPOOL;
     }
     
-    new = (ap_pool_t *)ap_palloc(cont, sizeof(ap_pool_t));
-
-    new->pool = pool;
     new->prog_data = NULL;
     new->apr_abort = NULL;
 
@@ -104,8 +100,6 @@ ap_status_t ap_create_pool(ap_pool_t **newcont, ap_pool_t *cont)
         WSACleanup();
         return APR_EEXIST;
     }
-
-    ap_register_cleanup(new, NULL, clean_cont, ap_null_cleanup);
 
     *newcont = new;
     return APR_SUCCESS;
