@@ -65,6 +65,8 @@
 #if APR_HAVE_UNISTD_H
 #include <unistd.h> /* for _POSIX_THREAD_SAFE_FUNCTIONS */
 #endif
+#define APR_WANT_MEMFUNC
+#include "apr_want.h"
 
 #define PWBUF_SIZE 512
 
