@@ -97,10 +97,10 @@ ap_status_t ap_detach(struct proc_t **new, ap_context_t *cont)
     }
 }
 
-ap_status_t ap_get_procdata(struct proc_t *proc, void *data)
+ap_status_t ap_get_procdata(struct proc_t *proc, char *key, void *data)
 {
     if (proc != NULL) {
-        return ap_get_userdata(proc->cntxt, &data);
+        return ap_get_userdata(&data, proc->cntxt, key);
     }
     else {
         data = NULL;
@@ -108,10 +108,11 @@ ap_status_t ap_get_procdata(struct proc_t *proc, void *data)
     }
 }
 
-ap_status_t ap_set_procdata(struct proc_t *proc, void *data)
+ap_status_t ap_set_procdata(struct proc_t *proc, void *data, char *key, 
+                            ap_status_t (*cleanup) (void *))
 {
     if (proc != NULL) {
-        return ap_set_userdata(proc->cntxt, data);
+        return ap_set_userdata(proc->cntxt, data, key, cleanup);
     }
     else {
         data = NULL;
