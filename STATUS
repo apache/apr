@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/12/10 20:08:42 $]
+Last modified at [$Date: 2002/12/10 20:32:40 $]
 
 Release:
 
@@ -36,6 +36,13 @@ RELEASE SHOWSTOPPERS:
         apr.hw                (NO_USE_SIGACTION)
 
       1.0 showstopper (not 0.9.x): gstein
+
+    * Flush out the test suite and make sure it passes on all platforms.  
+      We currently have about 450 functions in APR and 147 tests.  That 
+      means we have a large number of functions that we can't verify are
+      actually portable.  This TODO includes finishing the migration to the
+      unified test suite, and adding more tests to make the suite 
+      comprehensive.
 
     * close out the XXX's already!  (wrowe: this is "production release" 
       quality code with that many unanswered questions?)  If they aren't
