@@ -66,6 +66,8 @@ struct ap_socket_t {
     size_t addr_len;
     ap_interval_time_t timeout;
     ap_int32_t disconnected;
+    int local_port_unknown;
+    int local_interface_unknown;
 };
 
 struct ap_pollfd_t {
