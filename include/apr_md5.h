@@ -92,6 +92,10 @@
 extern "C" {
 #endif
 
+/**
+ * @package APR MD5 Library
+ */
+
 #define MD5_DIGESTSIZE 16
 
 /* UINT4 defines a four byte word */
@@ -107,28 +111,19 @@ typedef struct {
 #endif
 } ap_md5_ctx_t;
 
-/*
-
-=head1 ap_status_t ap_MD5Init(ap_md5_ctx_t *context)
-
-B<MD5 Initialize.  Begins an MD5 operation, writing a new context.>
-
-    arg 1) The MD5 context to initialize.
-
-=cut
+/**
+ * MD5 Initialize.  Begins an MD5 operation, writing a new context.
+ * @param context The MD5 context to initialize.
+ * @deffunc ap_status_t ap_MD5Init(ap_md5_ctx_t *context)
  */
 APR_EXPORT(ap_status_t) ap_MD5Init(ap_md5_ctx_t *context);
 
-/*
-
-=head1 ap_status_t ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
-
-B<MD5 translation setup.  Provides the APR translation handle to be used for translating the content before calculating the digest.>
-
-    arg 1) The MD5 content to set the translation for.
-    arg 2) The translation handle to use for this MD5 context 
-
-=cut
+/**
+ * MD5 translation setup.  Provides the APR translation handle to be used 
+ * for translating the content before calculating the digest.
+ * @param context The MD5 content to set the translation for.
+ * @param xlate The translation handle to use for this MD5 context 
+ * @deffunc ap_status_t ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
  */
 #if APR_HAS_XLATE
 APR_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate);
@@ -136,48 +131,35 @@ APR_EXPORT(ap_status_t) ap_MD5SetXlate(ap_md5_ctx_t *context, ap_xlate_t *xlate)
 #define ap_MD5SetXlate(context, xlate) APR_ENOTIMPL
 #endif
 
-/*
-
-=head1 ap_status_t ap_MD5Update(ap_md5_ctx_t *context, const unsigned char *input, unsigned int inputLen)
-
-B<MD5 block update operation.  Continue an MD5 message-digest operation, processing another message block, and updating the context.>
-
-    arg 1) The MD5 content to update.
-    arg 2) next message block to update
-    arg 3) The length of the next message block
-
-=cut
+/**
+ * MD5 block update operation.  Continue an MD5 message-digest operation, 
+ * processing another message block, and updating the context.
+ * @param context The MD5 content to update.
+ * @param input next message block to update
+ * @param inputLen The length of the next message block
+ * @deffunc ap_status_t ap_MD5Update(ap_md5_ctx_t *context, const unsigned char *input, unsigned int inputLen)
  */
 APR_EXPORT(ap_status_t) ap_MD5Update(ap_md5_ctx_t *context,
                                      const unsigned char *input,
                                      unsigned int inputLen);
 
-/*
-
-=head1 ap_status_t ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE, ap_md5_ctx_t *context)
-
-B<MD5 finalization.  Ends an MD5 message-digest operation, writing the message digest and zeroing the context>
-
-    arg 1) The final MD5 digest
-    arg 2) The MD5 content we are finalizing.
-
-=cut
+/**
+ * MD5 finalization.  Ends an MD5 message-digest operation, writing the 
+ * message digest and zeroing the context
+ * @param digest The final MD5 digest
+ * @param context The MD5 content we are finalizing.
+ * @deffunc ap_status_t ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE], ap_md5_ctx_t *context)
  */
 APR_EXPORT(ap_status_t) ap_MD5Final(unsigned char digest[MD5_DIGESTSIZE],
                                     ap_md5_ctx_t *context);
 
-/*
-
-=head1 ap_status_t ap_MD5Encode(unsigned char *passwd, const char *salt, char *result, size_t nbytes)
-
-B<Encode a password using an MD5 algorithm>
-
-    arg 1) The password to encode
-    arg 2) The salt to use for the encoding
-    arg 3) The string to store the encoded password in
-    arg 4) The length of the string
-
-=cut
+/**
+ * Encode a password using an MD5 algorithm
+ * @param password The password to encode
+ * @param salt The salt to use for the encoding
+ * @param result The string to store the encoded password in
+ * @param nbytes The length of the string
+ * @deffunc ap_status_t ap_MD5Encode(const char *password, const char *salt, char *result, size_t nbytes)
  */
 APR_EXPORT(ap_status_t) ap_MD5Encode(const char *password, const char *salt,
                                      char *result, size_t nbytes);
