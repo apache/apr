@@ -117,6 +117,7 @@ typedef HMODULE               apr_os_dso_handle_t;
 
 #elif defined(__BEOS__)
 #include <kernel/OS.h>
+#include <kernel/image.h>
 
 struct apr_os_lock_t {
 	/* Inter proc */
