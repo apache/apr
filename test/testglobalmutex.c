@@ -104,11 +104,9 @@ static void test_exclusive(abts_case *tc, void *data)
 
 abts_suite *testglobalmutex(abts_suite *suite)
 {
+    apr_lockmech_e mech = APR_LOCK_DEFAULT;
+
     suite = ADD_SUITE(suite)
-
-    apr_lockmech_e mech;
-
-    mech = APR_LOCK_DEFAULT;
     abts_run_test(suite, test_exclusive, &mech);
 #if APR_HAS_POSIXSEM_SERIALIZE
     mech = APR_LOCK_POSIXSEM;
