@@ -1,5 +1,8 @@
 Changes for APR 1.1.0
 
+  *( rename the fopen defines (APR_READ, APR_WRITE, etc.) to have
+     prefix APR_FOPEN_ (keeping the old defines) [Stas]
+
   *) [NOT COMMITTED?] Add a new PRNG. Note that the implementation of SHA-256
      is a stop-gap pending snarfing the SHA-1 implementation from apr-util
      and upgrading it to do SHA-256. Not yet ready for prime time.
