@@ -56,7 +56,7 @@ occhild@EXEEXT@: occhild.lo ../libapr.la
 	$(LINK) occhild.lo $(ALL_LIBS)
 
 mod_test.so: mod_test.lo ../libapr.la
-	$(LINK) --module mod_test.lo $(ALL_LIBS)
+	$(LINK) -o mod_test.so ${LD_FLAGS} -shared mod_test.o $(ALL_LIBS)
 
 testargs@EXEEXT@: testargs.lo ../libapr.la
 	$(LINK) testargs.lo $(ALL_LIBS)
