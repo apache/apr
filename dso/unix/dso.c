@@ -56,6 +56,10 @@
 
 #if APR_HAS_DSO
 
+#ifdef HAVE_STDDEF_H
+#include <stddef.h>
+#endif
+
 apr_status_t apr_dso_load(apr_dso_handle_t **res_handle, const char *path, 
                         apr_pool_t *ctx)
 {
