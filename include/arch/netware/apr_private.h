@@ -85,6 +85,8 @@
 /* #define HAVE_STDDEF_H 1 why not? */
 #define HAVE_STDLIB_H   1
 #define HAVE_SYS_STAT_H 1
+#define HAVE_FCNTL_H    1
+#define HAVE_MKSTEMP    1
 
 #define HAVE_STRICMP    1
 #define HAVE_STRNICMP   1
@@ -97,39 +99,42 @@
 #define DSO_USE_DLFCN
 
 
-#if 0
-#define SIGHUP     1
-/* 2 is used for SIGINT on windows */
-#define SIGQUIT    3
-/* 4 is used for SIGILL on windows */
-#define SIGTRAP    5
-#define SIGIOT     6
-#define SIGBUS     7
-/* 8 is used for SIGFPE on windows */
-#define SIGKILL    9
-#define SIGUSR1    10
-/* 11 is used for SIGSEGV on windows */
-#define SIGUSR2    12
-#define SIGPIPE    13
-#define SIGALRM    14
-/* 15 is used for SIGTERM on windows */
-#define SIGSTKFLT  16
-#define SIGCHLD    17 
-#define SIGCONT    18
-#define SIGSTOP    19
-#define SIGTSTP    20
-/* 21 is used for SIGBREAK on windows */
-/* 22 is used for SIGABRT on windows */
-#define SIGTTIN    23
-#define SIGTTOU    24
-#define SIGURG     25
-#define SIGXCPU    26
-#define SIGXFSZ    27
-#define SIGVTALRM  28
-#define SIGPROF    29
-#define SIGWINCH   30
-#define SIGIO      31
+/* 1 is used for SIGABRT on netware */
+/* 2 is used for SIGFPE on netware */
+/* 3 is used for SIGILL on netware */
+/* 4 is used for SIGINT on netware */
+/* 5 is used for SIGSEGV on netware */
+/* 6 is used for SIGTERM on netware */
+/* 7 is used for SIGPOLL on netware */
 
+#define SIGKILL         11
+#define SA_NOCLDSTOP    12
+#define SIGALRM         13
+#define SIGCHLD         14 
+#define SIGCONT         15
+#define SIGHUP          16
+#define SIGPIPE         17
+#define SIGQUIT         18
+#define SIGSTOP         19
+#define SIGTSTP         20
+#define SIGTTIN         21
+#define SIGTTOU         22
+#define SIGUSR1         23
+#define SIGUSR2         24
+    
+#define SIGTRAP         25
+#define SIGIOT          26
+#define SIGBUS          27
+#define SIGSTKFLT       28
+#define SIGURG          29
+#define SIGXCPU         30
+#define SIGXFSZ         31
+#define SIGVTALRM       32
+#define SIGPROF         33
+#define SIGWINCH        34
+#define SIGIO           35
+
+#if 0
 #define __attribute__(__x) 
 
 /* APR COMPATABILITY FUNCTIONS
