@@ -208,6 +208,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
  *                    platform, either because nobody has gotten to it yet, 
  *                    or the function is impossible on this platform.
  * APR_EMISMATCH      Two passwords do not match.
+ * APR_EABSOLUTE      The given path was absolute.
+ * APR_ERELATIVE      The given path was relative.
+ * APR_EINCOMPLETE    The given path was neither relative nor absolute.
+ * APR_EABOVEROOT     The given path was above the root path.
  * </PRE>
  * 
  * @param status The APR_status code to check.
@@ -239,6 +243,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_EBADMASK       (APR_OS_START_ERROR + 17)
 /* empty slot: +18 */
 #define APR_EDSOOPEN       (APR_OS_START_ERROR + 19)
+#define APR_EABSOLUTE      (APR_OS_START_ERROR + 20)
+#define APR_ERELATIVE      (APR_OS_START_ERROR + 21)
+#define APR_EINCOMPLETE    (APR_OS_START_ERROR + 22)
+#define APR_EABOVEROOT     (APR_OS_START_ERROR + 23)
 
 
 /* APR ERROR VALUE TESTS */
@@ -261,6 +269,10 @@ APR_DECLARE(char *) apr_strerror(apr_status_t statcode, char *buf,
 #define APR_STATUS_IS_EBADMASK(s)       ((s) == APR_EBADMASK)
 /* empty slot: +18 */
 #define APR_STATUS_IS_EDSOOPEN(s)       ((s) == APR_EDSOOPEN)
+#define APR_STATUS_IS_EABSOLUTE(s)      ((s) == APR_EABSOLUTE)
+#define APR_STATUS_IS_ERELATIVE(s)      ((s) == APR_ERELATIVE)
+#define APR_STATUS_IS_EINCOMPLETE(s)    ((s) == APR_EINCOMPLETE)
+#define APR_STATUS_IS_EABOVEROOT(s)     ((s) == APR_EABOVEROOT)
 
 
 /* APR STATUS VALUES */
