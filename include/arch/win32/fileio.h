@@ -143,6 +143,10 @@ apr_status_t unicode_to_utf8_path(char* dststr, apr_size_t dstchars,
 /* Sneak the Readonly bit through finfo->protection for internal use _only_ */
 #define APR_FREADONLY 0x10000000 
 
+/* Private function for apr_stat/lstat/getfileinfo/dir_read */
+void fillin_fileinfo(apr_finfo_t *finfo, WIN32_FILE_ATTRIBUTE_DATA *wininfo, 
+                     int byhandle);
+
 /* Private function that extends apr_stat/lstat/getfileinfo/dir_read */
 apr_status_t more_finfo(apr_finfo_t *finfo, const void *ufile, 
                         apr_int32_t wanted, int whatfile, 
