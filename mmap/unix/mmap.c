@@ -53,18 +53,25 @@
  *
  */
 
-#if HAVE_MMAP
-
 #include "mmap_h.h"
 #include "fileio.h"
 #include "apr_mmap.h"
 #include "apr_general.h"
 #include "apr_portable.h"
 #include "apr_lib.h"
+#include "apr_errno.h"
+#include "apr_config.h"
+#ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
-#include <errno.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
+
+#if HAVE_MMAP
 
 ap_status_t mmap_cleanup(void *themmap)
 {

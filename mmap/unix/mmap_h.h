@@ -56,10 +56,12 @@
 #ifndef MMAP_H_H
 #define MMAP_H_H
 
-#include <sys/stat.h>
 #include "apr_general.h"
 #include "apr_mmap.h"
 #include "apr_errno.h"
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 struct mmap_t {
     ap_context_t *cntxt;

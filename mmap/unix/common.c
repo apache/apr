@@ -61,26 +61,31 @@
  * care of those.
  *
  */
- 
-#if HAVE_MMAP
-
-#ifdef BEOS
-#include "../beos/mmap_h.h"
-#include <kernel/OS.h>
-#else
-#include "mmap_h.h"
-#include <sys/mman.h>
-#endif
 
 #include "fileio.h"
 #include "apr_mmap.h"
 #include "apr_general.h"
 #include "apr_portable.h"
 #include "apr_lib.h"
-#include <errno.h>
+#include "apr_errno.h"
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 
+#ifdef BEOS
+#include "../beos/mmap_h.h"
+#include <kernel/OS.h>
+#else
+#include "mmap_h.h"
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
+#endif
+
+#if HAVE_MMAP
 
 ap_int32_t ap_mmap_inode_compare(const void *m1, const void *m2)
 {
