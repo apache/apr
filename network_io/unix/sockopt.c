@@ -157,7 +157,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         one = 1;
     else
         one = 0;
-    if (opt & APR_SO_KEEPALIVE) {
+    switch(opt) {
+    case APR_SO_KEEPALIVE:
 #ifdef SO_KEEPALIVE
         if (on != apr_is_option_set(sock->netmask, APR_SO_KEEPALIVE)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_KEEPALIVE, (void *)&one, sizeof(int)) == -1) {
@@ -168,24 +169,24 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #else
         return APR_ENOTIMPL;
 #endif
-    }
-    if (opt & APR_SO_DEBUG) {
+        break;
+    case APR_SO_DEBUG:
         if (on != apr_is_option_set(sock->netmask, APR_SO_DEBUG)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_DEBUG, (void *)&one, sizeof(int)) == -1) {
                 return errno;
             }
             apr_set_option(&sock->netmask, APR_SO_DEBUG, on);
         }
-    }
-    if (opt & APR_SO_REUSEADDR) {
+        break;
+    case APR_SO_REUSEADDR:
         if (on != apr_is_option_set(sock->netmask, APR_SO_REUSEADDR)) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_REUSEADDR, (void *)&one, sizeof(int)) == -1) {
                 return errno;
             }
             apr_set_option(&sock->netmask, APR_SO_REUSEADDR, on);
         }
-    }
-    if (opt & APR_SO_SNDBUF) {
+        break;
+    case APR_SO_SNDBUF:
 #ifdef SO_SNDBUF
         if (apr_is_option_set(sock->netmask, APR_SO_SNDBUF) != on) {
             if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
@@ -196,8 +197,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #else
         return APR_ENOTIMPL;
 #endif
-    }
-    if (opt & APR_SO_NONBLOCK) {
+        break;
+    case APR_SO_NONBLOCK:
         if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != on) {
             if (on) {
                 if ((rv = sononblock(sock->socketdes)) != APR_SUCCESS) 
@@ -209,8 +210,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
             }
             apr_set_option(&sock->netmask, APR_SO_NONBLOCK, on);
         }
-    }
-    if (opt & APR_SO_LINGER) {
+        break;
+    case APR_SO_LINGER:
 #ifdef SO_LINGER
         if (apr_is_option_set(sock->netmask, APR_SO_LINGER) != on) {
             struct linger li;
@@ -224,12 +225,12 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #else
         return APR_ENOTIMPL;
 #endif
-    }
-    if (opt & APR_SO_TIMEOUT) { 
+        break;
+    case APR_SO_TIMEOUT:
         /* XXX: To be deprecated */
         return apr_socket_timeout_set(sock, on);
-    } 
-    if (opt & APR_TCP_NODELAY) {
+        break;
+    case APR_TCP_NODELAY:
 #if defined(TCP_NODELAY)
         if (apr_is_option_set(sock->netmask, APR_TCP_NODELAY) != on) {
             int optlevel = IPPROTO_TCP;
@@ -258,8 +259,8 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #endif
         return APR_ENOTIMPL;
 #endif
-    }
-    if (opt & APR_TCP_NOPUSH) {
+        break;
+    case APR_TCP_NOPUSH:
 #if APR_TCP_NOPUSH_FLAG
         if (apr_is_option_set(sock->netmask, APR_TCP_NOPUSH) != on) {
             int optlevel = IPPROTO_TCP;
@@ -306,11 +307,11 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #else
         return APR_ENOTIMPL;
 #endif
-    }
-    if (opt & APR_INCOMPLETE_READ) {
+        break;
+    case APR_INCOMPLETE_READ:
         apr_set_option(&sock->netmask, APR_INCOMPLETE_READ, on);
-    }
-    if (opt & APR_IPV6_V6ONLY) {
+        break;
+    case APR_IPV6_V6ONLY:
 #if APR_HAVE_IPV6 && defined(IPV6_V6ONLY)
         /* we don't know the initial setting of this option,
          * so don't check/set sock->netmask since that optimization
@@ -323,6 +324,9 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
 #else
         return APR_ENOTIMPL;
 #endif
+        break;
+    default:
+        return APR_EINVAL;
     }
 
     return APR_SUCCESS; 
