@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Added a new m4 function APR_EXPAND_VAR that will iteratively
+     interpolate the contents of a variable, such as $sysconfdir,
+     for use in a borne script.  [Aaron Bannert]
+
   *) apr-atomic support for old-sparc's and gas on solaris
      [Dale Ghent <daleg@elemental.org>,  jean-frederic clere, Ian Holsman]
 
