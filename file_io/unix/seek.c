@@ -74,7 +74,7 @@ static ap_status_t setptr(ap_file_t *thefile, unsigned long pos )
 
         if (rc != -1 ) {
             thefile->bufpos = thefile->dataRead = 0;
-            rc = errno;
+            rc = 0;
         }
     }
 
