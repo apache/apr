@@ -91,10 +91,10 @@ void apr_atomic_add(volatile apr_atomic_t *mem, apr_uint32_t val)
         prev = *mem;
         *mem += val;
         apr_thread_mutex_unlock(lock);
-        return prev;
+/*        return prev; */
     }
     printf("debug no workee\n");
-    return *mem;
+/*    return *mem; */
 }
 void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val) 
 {
@@ -105,9 +105,9 @@ void apr_atomic_set(volatile apr_atomic_t *mem, apr_uint32_t val)
         prev = *mem;
         *mem = val;
         apr_thread_mutex_unlock(lock);
-        return prev;
+/*        return prev; */
     }
-    return *mem;
+/*    return *mem; */
 }
 
 void apr_atomic_inc( volatile apr_uint32_t *mem) 
@@ -119,9 +119,9 @@ void apr_atomic_inc( volatile apr_uint32_t *mem)
         prev = *mem;
         (*mem)++;
         apr_thread_mutex_unlock(lock);
-        return prev;
+/*        return prev; */
     }
-    return *mem;
+/*    return *mem; */
 }
 void apr_atomic_dec(volatile apr_atomic_t *mem) 
 {
@@ -132,15 +132,15 @@ void apr_atomic_dec(volatile apr_atomic_t *mem)
         prev = *mem;
         (*mem)--;
         apr_thread_mutex_unlock(lock);
-        return prev;
+/*        return prev; */
     }
-    return *mem;
+/*    return *mem; */
 }
 
 #endif /* APR_ATOMIC_NEED_DEFAULT */
 #if defined(APR_ATOMIC_NEED_CAS_DEFAULT)
 
-long apr_atomic_cas(volatile void *mem,long with, long cmp)
+apr_uint32_t apr_atomic_cas(volatile apr_uint32_t *mem,long with, long cmp)
 {
     apr_thread_mutex_t *lock = hash_mutex[ATOMIC_HASH(mem)];
     long prev;
