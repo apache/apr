@@ -1,12 +1,16 @@
 srcdir = @srcdir@
 VPATH = @srcdir@
 
-NONPORTABLE = \
-	testshm@EXEEXT@ \
-	testprocmutex@EXEEXT@ \
-	testglobalmutex@EXEEXT@
+# PROGRAMS includes all test programs built on this platform.
+# STDTEST_PORTABLE
+#   test programs invoked via standard user interface, run on all platforms
+# STDTEST_NONPORTABLE
+#   test programs invoked via standard user interface, not portable
+# OTHER_PROGRAMS
+#   programs such as sendfile, that have to be invoked in a special sequence
+#   or with special parameters
 
-PROGRAMS = \
+STDTEST_PORTABLE = \
 	testflock@EXEEXT@ \
 	testsock@EXEEXT@ \
 	testlockperf@EXEEXT@ \
@@ -16,25 +20,32 @@ PROGRAMS = \
 	testmutexscope@EXEEXT@ \
 	testall@EXEEXT@
 
+STDTEST_NONPORTABLE = \
+	testshm@EXEEXT@ \
+	testprocmutex@EXEEXT@ \
+	testglobalmutex@EXEEXT@
 
-TARGETS = $(PROGRAMS) $(NONPORTABLE) client@EXEEXT@ sendfile@EXEEXT@ \
-	server@EXEEXT@ 
+OTHER_PROGRAMS = client@EXEEXT@ sendfile@EXEEXT@ \
+	server@EXEEXT@
+
+PROGRAMS = $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE) $(OTHER_PROGRAMS)
+
+TARGETS = $(PROGRAMS)
 
 # bring in rules.mk for standard functionality
 @INCLUDE_RULES@
 
 LOCAL_LIBS=../lib@APR_LIBNAME@.la
 
-CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@ \
-	        testprocmutex@EXEEXT@ testglobalmutex@EXEEXT@ testshm@EXEEXT@
+CLEAN_TARGETS = testfile.tmp mod_test.slo proc_child@EXEEXT@ occhild@EXEEXT@
 
 INCDIR=../include
 INCLUDES=-I$(INCDIR)
 
 CFLAGS=$(MY_CFLAGS)
 
-check: $(PROGRAMS) $(NONPORTABLE)
-	for prog in $(PROGRAMS) $(NONPORTABLE); do \
+check: $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE)
+	for prog in $(STDTEST_PORTABLE) $(STDTEST_NONPORTABLE); do \
 		./$$prog; \
 		if test $$? = 255; then \
 			echo "$$prog failed"; \
