@@ -188,6 +188,25 @@ ap_status_t ap_remove_file(const char *path, ap_pool_t *cont);
 
 /*
 
+=head1 ap_status_t ap_rename_file(const char *from_path, const char *to_path,
+                                  ap_pool_t *cont) 
+
+B<rename the specified file.>
+
+    arg 1) The full path to the original file (using / on all systems)
+    arg 2) The full path to the new file (using / on all systems)
+    arg 3) The pool to use.
+
+B<NOTE>: If a file exists at the new location, then it will be overwritten.
+    Moving files or directories across devices may not be possible.
+
+=cut
+ */
+ap_status_t ap_rename_file(const char *from_path, const char *to_path,
+                           ap_pool_t *pool);
+
+/*
+
 =head1 ap_status_t ap_eof(ap_file_t *fptr) 
 
 B<Are we at the end of the file>
