@@ -69,15 +69,9 @@
 #include "apr_lib.h"
 #include "apr_md5.h"
 #include <sys/types.h>
-#ifdef HAVE_SYS_SIGNAL_H
 #include <sys/signal.h>
-#else
 #include <signal.h>
-#endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #ifdef WIN32
 #include <conio.h>
