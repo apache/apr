@@ -59,8 +59,9 @@
 #if APR_HAS_THREADS
 
 #if APR_HAVE_PTHREAD_H
-APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key, 
-                                                void (*dest)(void *), apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
+                                                       void (*dest)(void *),
+                                                       apr_pool_t *pool)
 {
     (*key) = (apr_threadkey_t *)apr_pcalloc(pool, sizeof(apr_threadkey_t));
 
@@ -74,20 +75,23 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_create(apr_threadkey_t **key,
 
 }
 
-APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new, apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_threadkey_private_get(void **new,
+                                                    apr_threadkey_t *key)
 {
 #ifdef PTHREAD_GETSPECIFIC_TAKES_TWO_ARGS
     if (pthread_getspecific(key->key,new))
        *new = NULL;
-#else  
+#else
     (*new) = pthread_getspecific(key->key);
 #endif
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv,
+                                                    apr_threadkey_t *key)
 {
     apr_status_t stat;
+
     if ((stat = pthread_setspecific(key->key, priv)) == 0) {
         return APR_SUCCESS;
     }
@@ -100,53 +104,62 @@ APR_DECLARE(apr_status_t) apr_threadkey_private_set(void *priv, apr_threadkey_t 
 APR_DECLARE(apr_status_t) apr_threadkey_private_delete(apr_threadkey_t *key)
 {
     apr_status_t stat;
+
     if ((stat = pthread_key_delete(key->key)) == 0) {
-        return APR_SUCCESS; 
+        return APR_SUCCESS;
     }
+
     return stat;
 }
 #endif
 
 APR_DECLARE(apr_status_t) apr_threadkey_data_get(void **data, const char *key,
-                                 apr_threadkey_t *threadkey)
+                                                 apr_threadkey_t *threadkey)
 {
     return apr_pool_userdata_get(data, key, threadkey->pool);
 }
 
 APR_DECLARE(apr_status_t) apr_threadkey_data_set(void *data, const char *key,
-                                         apr_status_t (*cleanup) (void *),
-                                         apr_threadkey_t *threadkey)
+                              apr_status_t (*cleanup)(void *),
+                              apr_threadkey_t *threadkey)
 {
     return apr_pool_userdata_set(data, key, cleanup, threadkey->pool);
 }
 
-APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey, apr_threadkey_t *key)
+APR_DECLARE(apr_status_t) apr_os_threadkey_get(apr_os_threadkey_t *thekey,
+                                               apr_threadkey_t *key)
 {
     *thekey = key->key;
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key, 
-                                     apr_os_threadkey_t *thekey, apr_pool_t *pool)
+APR_DECLARE(apr_status_t) apr_os_threadkey_put(apr_threadkey_t **key,
+                                               apr_os_threadkey_t *thekey,
+                                               apr_pool_t *pool)
 {
     if (pool == NULL) {
         return APR_ENOPOOL;
     }
+
     if ((*key) == NULL) {
         (*key) = (apr_threadkey_t *)apr_pcalloc(pool, sizeof(apr_threadkey_t));
         (*key)->pool = pool;
     }
+
     (*key)->key = *thekey;
     return APR_SUCCESS;
-}           
+}
 #endif /* APR_HAVE_PTHREAD_H */
 #endif /* APR_HAS_THREADS */
 
 #if !APR_HAS_THREADS
-APR_DECLARE(apr_status_t) apr_os_threadkey_get(void); /* avoid warning for no prototype */
+
+/* avoid warning for no prototype */
+APR_DECLARE(apr_status_t) apr_os_threadkey_get(void);
 
 APR_DECLARE(apr_status_t) apr_os_threadkey_get(void)
 {
     return APR_ENOTIMPL;
 }
+
 #endif
