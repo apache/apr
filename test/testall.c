@@ -74,6 +74,7 @@ static const struct testlist {
     {"teststr", teststr},
     {"teststrnatcmp", teststrnatcmp},
     {"testtable", testtable},
+    {"testtemp", testtemp},
     {"testthread", testthread},
     {"testtime", testtime},
     {"testud", testud},
