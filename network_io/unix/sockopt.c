@@ -198,6 +198,18 @@ apr_status_t apr_socket_opt_set(apr_socket_t *sock,
         return APR_ENOTIMPL;
 #endif
         break;
+    case APR_SO_RCVBUF:
+#ifdef SO_RCVBUF
+        if (apr_is_option_set(sock->netmask, APR_SO_RCVBUF) != on) {
+            if (setsockopt(sock->socketdes, SOL_SOCKET, SO_RCVBUF, (void *)&on, sizeof(int)) == -1) {
+                return errno;
+            }
+            apr_set_option(&sock->netmask, APR_SO_RCVBUF, on);
+        }
+#else
+        return APR_ENOTIMPL;
+#endif
+        break;
     case APR_SO_NONBLOCK:
         if (apr_is_option_set(sock->netmask, APR_SO_NONBLOCK) != on) {
             if (on) {

@@ -1,5 +1,8 @@
 Changes with APR 0.9.4
 
+  *) Implement APR_SO_RCVBUF socket option on Unix.  
+     [Adam Sussman <myddryn@vishnu.vidya.com>]
+
   *) Don't add the math library (-lm) if the modf() function
      is already available via libc.  [Roy Fielding]
 
