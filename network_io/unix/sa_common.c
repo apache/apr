@@ -69,7 +69,6 @@ apr_status_t apr_set_port(apr_sockaddr_t *sockaddr, apr_port_t port)
 {
     /* XXX IPv6: assumes sin_port and sin6_port at same offset */
     sockaddr->sa.sin.sin_port = htons(port);
-    sockaddr->sa.sin.sin_port = htons(port);
     return APR_SUCCESS;
 }
 
