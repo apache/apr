@@ -1,4 +1,9 @@
 Changes with APR b1
+  *) Tighten up the check for getaddrinfo().  If it can't figure out
+     the appropriate address family for 127.0.0.1, it fails.  
+     Unfortunately, Tru64 fails this test so we won't do IPv6 on
+     Tru64.  [Jeff Trawick]
+
   *) Rename apr_opendir to apr_dir_open.  [Ryan Bloom]
 
   *) apr_snprintf()'s %pI format string now takes apr_sockaddr_t *
