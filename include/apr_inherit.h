@@ -65,12 +65,12 @@ extern "C" {
 #define APR_DECLARE_SET_INHERIT(name) \
     void apr_##name##_set_inherit(apr_##name##_t *name)
 
-#define APR_IMPLEMENT_SET_INHERIT(name, pool, cleanup)              \
+#define APR_IMPLEMENT_SET_INHERIT(name, flag, pool, cleanup)        \
 void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 {                                                                   \
-    if (!name->inherit) {                                           \
-        name->inherit = 1;                                          \
-        apr_pool_cleanup_register(name->pool, (void *)name,   \
+    if (!(name->flag & APR_INHERIT)) {                              \
+        name->flag |= APR_INHERIT;                                  \
+        apr_pool_cleanup_register(name->pool, (void *)name,         \
                                   NULL, cleanup);                   \
     }                                                               \
 }
@@ -78,12 +78,12 @@ void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 #define APR_DECLARE_UNSET_INHERIT(name) \
     void apr_##name##_unset_inherit(apr_##name##_t *name)
 
-#define APR_IMPLEMENT_UNSET_INHERIT(name, pool, cleanup)            \
+#define APR_IMPLEMENT_UNSET_INHERIT(name, flag, pool, cleanup)      \
 void apr_##name##_unset_inherit(apr_##name##_t *name)               \
 {                                                                   \
-    if (name->inherit) {                                            \
-        name->inherit = 0;                                          \
-        apr_pool_cleanup_kill(name->pool, (void *)name,       \
+    if (name->flag & APR_INHERIT) {                                 \
+        name->flag &= ~APR_INHERIT;                                 \
+        apr_pool_cleanup_kill(name->pool, (void *)name,             \
                               NULL, cleanup);                       \
     }                                                               \
 }
