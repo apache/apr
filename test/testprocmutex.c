@@ -67,7 +67,8 @@
 #if APR_HAS_FORK
 
 #define MAX_ITER 200
-#define MAX_COUNTER (MAX_ITER * 4)
+#define CHILDREN 6
+#define MAX_COUNTER (MAX_ITER * CHILDREN)
 
 static apr_proc_mutex_t *proc_lock;
 static volatile int *x;
@@ -79,15 +80,18 @@ static int increment(int n)
     return n+1;
 }
 
-static void make_child(apr_proc_t **proc, apr_pool_t *p)
+static void make_child(CuTest *tc, apr_proc_t **proc, apr_pool_t *p)
 {
-    int i = 0;
+    apr_status_t rv;
+
     *proc = apr_pcalloc(p, sizeof(**proc));
 
     /* slight delay to allow things to settle */
     apr_sleep (1);
 
-    if (apr_proc_fork(*proc, p) == APR_INCHILD) {
+    rv = apr_proc_fork(*proc, p);
+    if (rv == APR_INCHILD) {
+        int i = 0;
         /* The parent process has setup all processes to call apr_terminate
          * at exit.  But, that means that all processes must also call
          * apr_initialize at startup.  You cannot have an unequal number
@@ -98,33 +102,49 @@ static void make_child(apr_proc_t **proc, apr_pool_t *p)
          */
         apr_initialize();
 
+        if (apr_proc_mutex_child_init(&proc_lock, NULL, p))
+            exit(1);
+
         do {
-            apr_proc_mutex_lock(proc_lock); 
+            if (apr_proc_mutex_lock(proc_lock))
+                exit(1);
             i++;
             *x = increment(*x);
-            apr_proc_mutex_unlock(proc_lock); 
+            if (apr_proc_mutex_unlock(proc_lock))
+                exit(1);
         } while (i < MAX_ITER);
-        exit(1);
-    }
+        exit(0);
+    } 
+
+    CuAssert(tc, "fork failed", rv == APR_INPARENT);
+}
+
+/* Wait for a child process and check it terminated with success. */
+static void await_child(CuTest *tc, apr_proc_t *proc)
+{
+    int code;
+    apr_exit_why_e why;
+    apr_status_t rv;
+
+    rv = apr_proc_wait(proc, &code, &why, APR_WAIT);
+    CuAssert(tc, "child did not terminate with success",
+             rv == APR_CHILD_DONE && why == APR_PROC_EXIT && code == 0);
 }
 
 static void test_exclusive(CuTest *tc, const char *lockname)
 {
-    apr_proc_t *p1, *p2, *p3, *p4;
+    apr_proc_t *child[CHILDREN];
     apr_status_t rv;
+    int n;
  
     rv = apr_proc_mutex_create(&proc_lock, lockname, APR_LOCK_DEFAULT, p);
     apr_assert_success(tc, "create the mutex", rv);
  
-    make_child(&p1, p);
-    make_child(&p2, p);
-    make_child(&p3, p);
-    make_child(&p4, p);
- 
-    apr_proc_wait(p1, NULL, NULL, APR_WAIT);
-    apr_proc_wait(p2, NULL, NULL, APR_WAIT);
-    apr_proc_wait(p3, NULL, NULL, APR_WAIT);
-    apr_proc_wait(p4, NULL, NULL, APR_WAIT);
+    for (n = 0; n < CHILDREN; n++)
+        make_child(tc, &child[n], p);
+
+    for (n = 0; n < CHILDREN; n++)
+        await_child(tc, child[n]);
     
     CuAssert(tc, "Locks don't appear to work", *x == MAX_COUNTER);
 }
