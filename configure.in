@@ -634,7 +634,7 @@ if test "$ac_cv_func_mmap" = "yes" &&
             return 1;
         }
         m = mmap(0, sizeof(void*), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-        if (m < 0) {  /* aka MAP_FAILED */
+        if (m == (void *)-1) {  /* aka MAP_FAILED */
             return 2;
         }
         if (munmap(m, sizeof(void*)) < 0) {
