@@ -101,9 +101,10 @@ static apr_status_t mmap_cleanup(void *themmap)
     return errno;
 }
 
-apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file, 
-                             apr_off_t offset, apr_size_t size, 
-                             apr_int32_t flag, apr_pool_t *cont)
+APR_DECLARE(apr_status_t) apr_mmap_create(apr_mmap_t **new, 
+                                          apr_file_t *file, apr_off_t offset, 
+                                          apr_size_t size, apr_int32_t flag, 
+                                          apr_pool_t *cont)
 {
     void *mm;
 #ifdef BEOS
@@ -112,7 +113,7 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
 #else
     apr_int32_t native_flags = 0;
 #endif
-   
+
     if (file == NULL || file->filedes == -1 || file->buffered)
         return APR_EBADF;
     (*new) = (apr_mmap_t *)apr_pcalloc(cont, sizeof(apr_mmap_t));
@@ -158,14 +159,14 @@ apr_status_t apr_mmap_create(apr_mmap_t **new, apr_file_t *file,
     (*new)->mm = mm;
     (*new)->size = size;
     (*new)->cntxt = cont;
-    
+
     /* register the cleanup... */
     apr_pool_cleanup_register((*new)->cntxt, (void*)(*new), mmap_cleanup,
              apr_pool_cleanup_null);
     return APR_SUCCESS;
 }
 
-apr_status_t apr_mmap_delete(apr_mmap_t *mmap)
+APR_DECLARE(apr_status_t) apr_mmap_delete(apr_mmap_t *mmap)
 {
     apr_status_t rv;
 
