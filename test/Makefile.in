@@ -20,7 +20,6 @@ TARGETS= testfile@EXEEXT@ \
 	testtime@EXEEXT@ \
 	testargs@EXEEXT@ \
 	testcontext@EXEEXT@ \
-	htdigest@EXEEXT@ \
 	testmmap@EXEEXT@ \
 	testshmem@EXEEXT@ \
 	testpipe@EXEEXT@ \
@@ -35,7 +34,6 @@ OBJS= testfile.o \
 	testtime.o \
         testargs.o \
         testcontext.o \
-	htdigest.o \
 	testmmap.o \
 	testdso.o \
 	testoc.o \
@@ -63,9 +61,6 @@ testargs@EXEEXT@: testargs.o
 
 testcontext@EXEEXT@: testcontext.o
 	$(CC) $(CFLAGS) testcontext.o -o testcontext@EXEEXT@ $(LDFLAGS) 
-
-htdigest@EXEEXT@: htdigest.o
-	$(CC) $(CFLAGS) htdigest.o -o htdigest@EXEEXT@ $(LDFLAGS)
 
 testproc@EXEEXT@: testproc.o
 	$(CC) $(CFLAGS) testproc.o -o testproc@EXEEXT@ $(LDFLAGS)
@@ -118,10 +113,6 @@ abc.o: abc.c $(INCDIR)/apr_file_io.h $(INCDIR)/apr_general.h \
 client.o: client.c $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
  $(INCDIR)/apr_file_io.h $(INCDIR)/apr_time.h $(OSDIR)/usr/include/errno.h
-htdigest.o: htdigest.c $(INCDIR)/apr_lib.h $(INCDIR)/apr_general.h \
- $(INCDIR)/apr.h $(INCDIR)/apr_errno.h $(INCDIR)/apr_file_io.h \
- $(INCDIR)/apr_time.h $(INCDIR)/apr_thread_proc.h \
- $(INCDIR)/apr_md5.h $(INCDIR)/apr_private.h
 mod_test.o: mod_test.c
 server.o: server.c $(INCDIR)/apr_network_io.h \
  $(INCDIR)/apr_general.h $(INCDIR)/apr.h $(INCDIR)/apr_errno.h \
