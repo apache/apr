@@ -131,14 +131,7 @@ apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
 {
     int i;
     int rv = 0;
-    time_t starttime;
-    struct timeval tv;
-
-    timeout /= APR_USEC_PER_SEC; /* TODO: rework for microseconds and axe this */
-
-    tv.tv_sec = timeout;
-    tv.tv_usec = 0;
-    time(&starttime);
+    apr_time_t starttime = apr_now();
 
     do {
         for (i=0; i<pollfdset->num_total; i++) {
@@ -149,10 +142,10 @@ apr_status_t apr_poll(apr_pollfd_t *pollfdset, apr_int32_t *nsds,
                     pollfdset->num_read, 
                     pollfdset->num_write, 
                     pollfdset->num_except, 
-                    timeout >= 0 ? timeout * 1000 : -1);
+                    timeout >= 0 ? timeout / 1000 : -1);
 
         if (rv < 0 && sock_errno() == SOCEINTR && timeout >= 0 ) {
-            time_t elapsed = time(NULL) - starttime;
+            apr_interval_time_t elapsed = apr_now() - starttime;
 
             if (timeout <= elapsed)
                 break;
