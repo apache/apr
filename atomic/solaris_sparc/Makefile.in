@@ -1,0 +1,19 @@
+
+TARGETS =  apr_atomic_sparc.lo
+
+ASFLAGS += -K pic 
+ASFLAGS += -P -D_ASM -D__STDC__=0
+ASFLAGS += -xarch=v8plus
+
+apr_atomic_sparc.lo: apr_atomic_sparc.s
+	$(AS) -P -D_ASM -D__STDC__=0 -K PIC -q -o $@ $<
+
+
+# bring in rules.mk for standard functionality
+@INCLUDE_RULES@
+
+DEFOSDIR=$(INCDIR)/arch/@DEFAULT_OSDIR@
+INCDIR=../../include
+INCLUDES=-I$(INCDIR) -I$(DEFOSDIR)
+
+# DO NOT REMOVE
