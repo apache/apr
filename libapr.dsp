@@ -280,7 +280,7 @@ SOURCE=.\network_io\unix\inet_pton.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\poll\unix\poll.c
+SOURCE=.\poll\unix\select.c
 # End Source File
 # Begin Source File
 
