@@ -16,6 +16,7 @@ sinclude(build/apr_network.m4)
 sinclude(build/apr_threads.m4)
 sinclude(build/apr_hints.m4)
 sinclude(build/libtool.m4)
+sinclude(build/ltsugar.m4)
 
 dnl Save user-defined environment settings for later restoration
 dnl

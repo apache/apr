@@ -2,7 +2,7 @@
 # ====================================================================
 # The Apache Software License, Version 1.1
 #
-# Copyright (c) 2000-2003 The Apache Software Foundation.  All rights
+# Copyright (c) 2000-2004 The Apache Software Foundation.  All rights
 # reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -80,9 +80,13 @@ echo "Copying libtool helper files ..."
 
 $libtoolize --copy --automake
 
-ltpath=`dirname $libtoolize`
-ltfile=${LIBTOOL_M4-`cd $ltpath/../share/aclocal ; pwd`/libtool.m4}
-
+if [ -f libtool.m4 ]; then 
+   ltfile=`pwd`/libtool.m4
+else
+   ltpath=`dirname $libtoolize`
+   ltfile=${LIBTOOL_M4-`cd $ltpath/../share/aclocal ; pwd`/libtool.m4}
+fi
+  
 if [ ! -f $ltfile ]; then
     echo "$ltfile not found"
     exit 1
@@ -92,9 +96,14 @@ echo "buildconf: Using libtool.m4 at ${ltfile}."
 
 cat $ltfile | sed -e 's/LIBTOOL=\(.*\)top_build/LIBTOOL=\1apr_build/' > build/libtool.m4
 
-# This is just temporary until people's workspaces are cleared -- remove
-# any old aclocal.m4 left over from prior build so it doesn't cause errors.
-rm -f aclocal.m4
+# libtool.m4 from 1.6 requires ltsugar.m4
+if [ -f ltsugar.m4 ]; then
+   rm -f build/ltsugar.m4
+   mv ltsugar.m4 build/ltsugar.m4
+fi
+
+# Clean up any leftovers
+rm -f aclocal.m4 libtool.m4
 
 #
 # Generate the autoconf header and ./configure

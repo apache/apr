@@ -1,5 +1,6 @@
 Makefile
 libtool.m4
+ltsugar.m4
 ltconfig
 ltmain.sh
 ltcf-c.sh
