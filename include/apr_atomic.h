@@ -240,7 +240,7 @@ inline void *apr_atomic_casptr(void **mem, void *with, const void *cmp)
  asm volatile ("lock; incl %0"                                  \
     :                                                           \
     : "m" (*(mem))                                              \
-    : "memory");
+    : "memory")
 
 #define apr_atomic_set(mem, val)     (*(mem) = val)
 #define apr_atomic_read(mem)        (*(mem))
