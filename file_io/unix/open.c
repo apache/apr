@@ -345,9 +345,6 @@ ap_status_t ap_open_stderr(ap_file_t **thefile, ap_context_t *cont)
     if (thefile == NULL)
         return APR_EBADARG;
 
-    if (cont == NULL)
-        return APR_ENOCONT;
-
     (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
     if ((*thefile) == NULL) {
         return APR_ENOMEM;
