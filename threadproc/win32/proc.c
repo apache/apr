@@ -343,6 +343,8 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
         i++;
     }
 
+    /* ### how to handle APR_PROGRAM_ENV and APR_PROGRAM_PATH? */
+
     if (attr->cmdtype == APR_SHELLCMD) {
         char *shellcmd = getenv("COMSPEC");
         if (!shellcmd)

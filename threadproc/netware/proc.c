@@ -349,11 +349,24 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
             }
             execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
         }
-        else {
+        else if (attr->cmdtype == APR_PROGRAM) {
             if (attr->detached) {
                 apr_proc_detach();
             }
             execve(progname, (char * const *)args, (char * const *)env);
+        }
+        else if (attr->cmdtype == APR_PROGRAM_ENV) {
+            if (attr->detached) {
+                apr_proc_detach();
+            }
+            execv(progname, (char * const *)args);
+        }
+        else {
+            /* APR_PROGRAM_PATH */
+            if (attr->detached) {
+                apr_proc_detach();
+            }
+            execvp(progname, (char * const *)args);
         }
         exit(-1);  /* if we get here, there is a problem, so exit with an */ 
                    /* error code. */

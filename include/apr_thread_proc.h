@@ -71,7 +71,7 @@ extern "C" {
 #endif /* __cplusplus */
 /**
  * @file apr_thread_proc.h
- * @brief APR Thread Library
+ * @brief APR Thread and Process Library
  */
 /**
  * @defgroup APR_Thread Thread Library
@@ -79,15 +79,28 @@ extern "C" {
  * @{
  */
 
-typedef enum {APR_SHELLCMD, APR_PROGRAM} apr_cmdtype_e;
-typedef enum {APR_WAIT, APR_NOWAIT} apr_wait_how_e;
+typedef enum {
+    APR_SHELLCMD,       /**< use the shell to invoke the program */
+    APR_PROGRAM,        /**< invoke the program directly, no copied env */
+    APR_PROGRAM_ENV,    /**< invoke the program, replicating our environment */
+    APR_PROGRAM_PATH    /**< find program on PATH, use our environment */
+} apr_cmdtype_e;
+
+typedef enum {
+    APR_WAIT,           /**< wait for the specified process to finish */
+    APR_NOWAIT          /**< do not wait -- just see if it has finished */
+} apr_wait_how_e;
+
 /* I am specifically calling out the values so that the macros below make
  * more sense.  Yes, I know I don't need to, but I am hoping this makes what
  * I am doing more clear.  If you want to add more reasons to exit, continue
  * to use bitmasks.
  */
-typedef enum {APR_PROC_EXIT = 1, APR_PROC_SIGNAL = 2, 
-              APR_PROC_SIGNAL_CORE = 4} apr_exit_why_e;
+typedef enum {
+    APR_PROC_EXIT = 1,          /**< process exited normally */
+    APR_PROC_SIGNAL = 2,        /**< process exited due to a signal */
+    APR_PROC_SIGNAL_CORE = 4    /**< process exited and dumped a core file */
+} apr_exit_why_e;
 
 #define APR_PROC_CHECK_EXIT(x)        (x & APR_PROC_EXIT)
 #define APR_PROC_CHECK_SIGNALED(x)    (x & APR_PROC_SIGNAL)
@@ -428,8 +441,10 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
  * @param attr The procattr we care about. 
  * @param cmd The type of command.  One of:
  * <PRE>
- *            APR_SHELLCMD --  Shell script
- *            APR_PROGRAM  --  Executable program   (default) 
+ *            APR_SHELLCMD     --  Shell script
+ *            APR_PROGRAM      --  Executable program   (default) 
+ *            APR_PROGRAM_ENV  --  Executable program, copy environment
+ *            APR_PROGRAM_PATH --  Executable program on PATH, copy env
  * </PRE>
  */
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
@@ -477,7 +492,9 @@ APR_DECLARE(apr_status_t) apr_proc_fork(apr_proc_t *proc, apr_pool_t *cont);
  * @param const_args the arguments to pass to the new program.  The first 
  *                   one should be the program name.
  * @param env The new environment table for the new process.  This 
- *            should be a list of NULL-terminated strings.
+ *            should be a list of NULL-terminated strings. This argument
+ *            is ignored for APR_PROGRAM_ENV and APR_PROGRAM_PATH types
+ *            of commands.
  * @param attr the procattr we should use to determine how to create the new
  *         process
  * @param cont The pool to use. 
