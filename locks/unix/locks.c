@@ -167,7 +167,7 @@ ap_status_t ap_child_init_lock(ap_lock_t **lock, const char *fname,
     return APR_SUCCESS;
 }
 
-ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
+ap_status_t ap_get_lockdata(ap_lock_t *lock, const char *key, void *data)
 {
     if (lock != NULL) {
         return ap_get_userdata(data, key, lock->cntxt);
@@ -178,7 +178,7 @@ ap_status_t ap_get_lockdata(ap_lock_t *lock, char *key, void *data)
     }
 }
 
-ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, char *key,
+ap_status_t ap_set_lockdata(ap_lock_t *lock, void *data, const char *key,
                             ap_status_t (*cleanup) (void *))
 {
     if (lock != NULL) {

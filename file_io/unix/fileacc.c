@@ -139,7 +139,7 @@ ap_fileperms_t ap_unix_mode2perms(mode_t mode)
 }
 #endif
 
-ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
+ap_status_t ap_get_filedata(void **data, const char *key, ap_file_t *file)
 {    
     if (file != NULL) {
         return ap_get_userdata(data, key, file->cntxt);
@@ -150,7 +150,7 @@ ap_status_t ap_get_filedata(void **data, char *key, ap_file_t *file)
     }
 }
 
-ap_status_t ap_set_filedata(ap_file_t *file, void *data, char *key,
+ap_status_t ap_set_filedata(ap_file_t *file, void *data, const char *key,
                             ap_status_t (*cleanup) (void *))
 {    
     if (file != NULL) {

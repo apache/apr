@@ -211,7 +211,7 @@ ap_status_t ap_thread_detach(ap_thread_t *thd);
 
 /*
 
-=head1 ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread)
+=head1 ap_status_t ap_get_threaddata(void **data, const char *key, ap_thread_t *thread)
 
 B<Return the pool associated with the current thread.>
 
@@ -221,11 +221,11 @@ B<Return the pool associated with the current thread.>
 
 =cut
  */
-ap_status_t ap_get_threaddata(void **data, char *key, ap_thread_t *thread);
+ap_status_t ap_get_threaddata(void **data, const char *key, ap_thread_t *thread);
 
 /*
 
-=head1 ap_status_t ap_set_threaddata(void *data, char *key, ap_status_t (*cleanup) (void *), ap_thread_t *thread)
+=head1 ap_status_t ap_set_threaddata(void *data, const char *key, ap_status_t (*cleanup) (void *), ap_thread_t *thread)
 
 B<Return the pool associated with the current thread.>
 
@@ -236,7 +236,7 @@ B<Return the pool associated with the current thread.>
 
 =cut
  */
-ap_status_t ap_set_threaddata(void *data, char *key,
+ap_status_t ap_set_threaddata(void *data, const char *key,
                               ap_status_t (*cleanup) (void *), 
                               ap_thread_t *thread);
 
@@ -295,7 +295,7 @@ ap_status_t ap_delete_thread_private(ap_threadkey_t *key);
 
 /*
 
-=head1 ap_status_t ap_get_threadkeydata(void **data, char *key, ap_threadkey_t *threadkey)
+=head1 ap_status_t ap_get_threadkeydata(void **data, const char *key, ap_threadkey_t *threadkey)
 
 B<Return the pool associated with the current threadkey.>
 
@@ -305,11 +305,11 @@ B<Return the pool associated with the current threadkey.>
 
 =cut
  */
-ap_status_t ap_get_threadkeydata(void **data, char *key, ap_threadkey_t *threadkey);
+ap_status_t ap_get_threadkeydata(void **data, const char *key, ap_threadkey_t *threadkey);
 
 /*
 
-=head1 ap_status_t ap_set_threadkeydata(void *data, char *key, ap_status_t (*cleanup) (void *), ap_threadkey_t *threadkey)
+=head1 ap_status_t ap_set_threadkeydata(void *data, const char *key, ap_status_t (*cleanup) (void *), ap_threadkey_t *threadkey)
 
 B<Return the pool associated with the current threadkey.>
 
@@ -320,7 +320,7 @@ B<Return the pool associated with the current threadkey.>
 
 =cut
  */
-ap_status_t ap_set_threadkeydata(void *data, char *key,
+ap_status_t ap_set_threadkeydata(void *data, const char *key,
                                  ap_status_t (*cleanup) (void *), 
                                  ap_threadkey_t *threadkey);
 

@@ -326,7 +326,7 @@ ap_status_t ap_exit(ap_pool_t *);
 
 /*
 
-=head1 ap_status_t ap_set_userdata(void *data, char *key, ap_status_t (*cleanup) (void *), ap_pool_t *cont)
+=head1 ap_status_t ap_set_userdata(void *data, const char *key, ap_status_t (*cleanup) (void *), ap_pool_t *cont)
 
 B<Set the data associated with the current pool>.
 
@@ -346,13 +346,13 @@ B<NOTE>:  The data to be attached to the pool should have the same
 
 =cut
  */
-ap_status_t ap_set_userdata(void *data, char *key, 
+ap_status_t ap_set_userdata(void *data, const char *key, 
                             ap_status_t (*cleanup) (void *), 
                             ap_pool_t *cont);
 
 /*
 
-=head1 ap_status_t ap_get_userdata(void **data, char *key, ap_pool_t *cont)
+=head1 ap_status_t ap_get_userdata(void **data, const char *key, ap_pool_t *cont)
 
 B<Return the data associated with the current pool.>
 
@@ -362,7 +362,7 @@ B<Return the data associated with the current pool.>
 
 =cut
  */
-ap_status_t ap_get_userdata(void **, char *key, ap_pool_t *cont);
+ap_status_t ap_get_userdata(void **, const char *key, ap_pool_t *cont);
 
 /*
 

@@ -231,12 +231,12 @@ ap_status_t ap_connect(ap_socket_t *sock, char *hostname)
     }
 }
 
-ap_status_t ap_get_socketdata(void **data, char *key, ap_socket_t *sock)
+ap_status_t ap_get_socketdata(void **data, const char *key, ap_socket_t *sock)
 {
     return ap_get_userdata(data, key, sock->cntxt);
 }
 
-ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, char *key,
+ap_status_t ap_set_socketdata(ap_socket_t *sock, void *data, const char *key,
                               ap_status_t (*cleanup) (void *))
 {
     return ap_set_userdata(data, key, cleanup, sock->cntxt);
