@@ -100,7 +100,7 @@ install: $(TARGET_LIB)
 
 $(TARGET_LIB):
 	@for i in $(SUBDIRS); do objects="$$objects $$i/*.@so_ext@"; done ; \
-	    tmpcmd="$(LINK) @lib_target@ @lib_target_libs@"; \
+	    tmpcmd="$(LINK) @lib_target@ $(ALL_LIBS)"; \
 	    echo $$tmpcmd; \
 	    $$tmpcmd && touch $@
 

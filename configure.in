@@ -186,12 +186,7 @@ else
       export_lib_target=''
 fi
 
-# On AIX, libraries need to be specified on the link of lib_target
-lib_target_libs=""
 case $host in
-    *aix*)
-        lib_target_libs="\$(EXTRA_LIBS)";
-        ;;
     *-solaris2*)
         apr_platform_runtime_link_flag="-R"
         ;;
@@ -207,7 +202,6 @@ AC_SUBST(export_lib_target)
 AC_SUBST(shlibpath_var)
 AC_SUBST(LTFLAGS)
 AC_SUBST(LT_LDFLAGS)
-AC_SUBST(lib_target_libs)
 
 dnl ----------------------------- Checks for compiler flags
 nl='
