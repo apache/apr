@@ -76,7 +76,8 @@ static apr_status_t getpwnam_safe(const char *username,
 {
     struct passwd *pwptr;
 #if APR_HAS_THREADS && defined(_POSIX_THREAD_SAFE_FUNCTIONS) && defined(HAVE_GETPWNAM_R)
-    if (!getpwnam_r(username, pw, pwbuf, PWBUF_SIZE, &pwptr)) {
+    /* IRIX getpwnam_r() returns 0 and sets pwptr to NULL on failure */
+    if (!getpwnam_r(username, pw, pwbuf, PWBUF_SIZE, &pwptr) && pwptr) {
         /* nothing extra to do on success */
 #else
     if ((pwptr = getpwnam(username)) != NULL) {
