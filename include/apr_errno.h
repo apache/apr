@@ -128,7 +128,7 @@ int ap_canonical_error(ap_status_t err);
 #define APR_FILEBASED      (APR_OS_START_STATUS + 20)
 #define APR_KEYBASED       (APR_OS_START_STATUS + 21)
 
-/* A simple value to be used to initialze a status variable. */
+/* A simple value to be used to initialize a status variable. */
 #define APR_EINIT          (APR_OS_START_STATUS + 22)  
 
 /* Not implemented either because we haven't gotten to it yet, or 
