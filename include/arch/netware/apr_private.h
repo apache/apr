@@ -62,6 +62,9 @@
 #define HAVE_SETENV     1
 #define HAVE_UNSETENV   1
 
+/* 64-bit integer conversion function */
+#define APR_INT64_STRFN	      strtoll
+
 /*#define DSO_USE_DLFCN */
 
 #ifdef NW_BUILD_IPV6

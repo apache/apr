@@ -243,7 +243,7 @@ APR_DECLARE(apr_status_t) apr_strtoff(apr_off_t *offset, const char *nptr,
 
 APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 {
-#if (APR_HAVE_INT64_STRFN)
+#ifdef APR_INT64_STRFN
     return APR_INT64_STRFN(nptr, endptr, base);
 #else
     const char *s;

@@ -330,10 +330,6 @@ typedef int apr_wait_t;
 #define APR_UINT64_T_HEX_FMT     "llx"
 #define APR_TIME_T_FMT APR_INT64_T_FMT
 
-/* Deal with atoi64 variables ... these should move to apr_private.h */
-#define APR_HAVE_INT64_STRFN  1
-#define APR_INT64_STRFN	      strtoll
-
 /** @} */
 
 #ifdef __cplusplus
