@@ -143,10 +143,13 @@ int strncasecmp(const char *a, const char *b, size_t n);
  * String and memory functions
  */
 
+/* APR_STRINGIFY is defined here, and also in apr_release.h, so wrap it */
+#ifndef APR_STRINGIFY
 /** Properly quote a value as a string in the C preprocessor */
 #define APR_STRINGIFY(n) APR_STRINGIFY_HELPER(n)
 /** Helper macro for APR_STRINGIFY */
 #define APR_STRINGIFY_HELPER(n) #n
+#endif
 
 #if (!APR_HAVE_MEMMOVE)
 #define memmove(a,b,c) bcopy(b,a,c)
