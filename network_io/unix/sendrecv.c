@@ -98,6 +98,7 @@ apr_status_t apr_send(apr_socket_t *sock, const char *buf, apr_size_t *len)
     ssize_t rv;
     
     if (sock->netmask & APR_INCOMPLETE_WRITE) {
+        sock->netmask &= ~APR_INCOMPLETE_WRITE;
         goto do_select;
     }
 
@@ -255,6 +256,7 @@ apr_status_t apr_sendv(apr_socket_t * sock, const struct iovec *vec,
     }
 
     if (sock->netmask & APR_INCOMPLETE_WRITE) {
+        sock->netmask &= ~APR_INCOMPLETE_WRITE;
         goto do_select;
     }
 
@@ -799,6 +801,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
     size_t nbytes;
     sendfilevec_t *sfv;
     int vecs, curvec, i, repeat;
+    apr_size_t requested_len = 0;
 
     if (!hdtr) {
         hdtr = &no_hdtr;
@@ -819,6 +822,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         sfv[curvec].sfv_flag = 0;
         sfv[curvec].sfv_off = (off_t)hdtr->headers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->headers[i].iov_len;
+        requested_len += sfv[curvec].sfv_len;
     }
 
     /* If the len is 0, we skip the file. */
@@ -828,6 +832,7 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         sfv[curvec].sfv_flag = 0;
         sfv[curvec].sfv_off = *offset;
         sfv[curvec].sfv_len = *len; 
+        requested_len += sfv[curvec].sfv_len;
 
         curvec++;
     }
@@ -840,6 +845,19 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
         sfv[curvec].sfv_flag = 0;
         sfv[curvec].sfv_off = (off_t)hdtr->trailers[i].iov_base;
         sfv[curvec].sfv_len = hdtr->trailers[i].iov_len;
+        requested_len += sfv[curvec].sfv_len;
+    }
+
+    /* If the last write couldn't send all the requested data,
+     * wait for the socket to become writable before proceeding
+     */
+    if (sock->netmask & APR_INCOMPLETE_WRITE) {
+        sock->netmask &= ~APR_INCOMPLETE_WRITE;
+        arv = apr_wait_for_io_or_timeout(sock, 0);
+        if (arv != APR_SUCCESS) {
+            *len = 0;
+            return arv;
+        }
     }
  
     /* Actually do the sendfilev
@@ -889,6 +907,9 @@ apr_status_t apr_sendfile(apr_socket_t *sock, apr_file_t *file,
 
     /* Update how much we sent */
     *len = nbytes;
+    if (sock->timeout && (*len < requested_len)) {
+	sock->netmask |= APR_INCOMPLETE_WRITE;
+    }
     return APR_SUCCESS;
 }
 #else
