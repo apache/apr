@@ -1,5 +1,8 @@
 Changes with APR b1  
 
+  *) Add apr_open_stdin.  This mirrors apr_open_stderr, except it works
+     on stdin.  [Aaron Bannert <abannert@ebuilt.com>]
+
   *) Add apr_strtok(), a thread-safe flavor of strtok() which has the
      same interface as strtok_r().  [Jeff Trawick]
      
