@@ -211,7 +211,6 @@ ap_status_t ap_open_stderr(struct file_t **thefile, ap_context_t *cont)
     (*thefile)->filehand = GetStdHandle(STD_ERROR_HANDLE);
     (*thefile)->cntxt = cont;
     (*thefile)->fname = NULL;
-    (*thefile)->filehand = NULL;
     (*thefile)->stated = 0;
     (*thefile)->buffered = 0;
     (*thefile)->eof_hit = 0;
