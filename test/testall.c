@@ -57,18 +57,13 @@
 
 #include "test_apr.h"
 
-#define NUM_TESTS 255
-
 /* Top-level pool which can be used by tests. */
 apr_pool_t *p;
 
-struct testlist {
-    char *testname;
+static const struct testlist {
+    const char *testname;
     CuSuite *(*func)(void);
-};
-typedef struct testlist testlist;
-
-static testlist tests[NUM_TESTS] = {
+} tests[] = {
     {"teststr", teststr},
     {"testtime", testtime},
     {"testvsn", testvsn},
