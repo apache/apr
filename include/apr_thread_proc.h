@@ -102,18 +102,30 @@ typedef enum {
     APR_PROC_SIGNAL_CORE = 4    /**< process exited and dumped a core file */
 } apr_exit_why_e;
 
+/** did we exit the process */
 #define APR_PROC_CHECK_EXIT(x)        (x & APR_PROC_EXIT)
+/** did we get a signal */
 #define APR_PROC_CHECK_SIGNALED(x)    (x & APR_PROC_SIGNAL)
+/** did we get core */
 #define APR_PROC_CHECK_CORE_DUMP(x)   (x & APR_PROC_SIGNAL_CORE)
 
+/** @see apr_procattr_io_set */
 #define APR_NO_PIPE          0
+
+/** @see apr_procattr_io_set */
 #define APR_FULL_BLOCK       1
+/** @see apr_procattr_io_set */
 #define APR_FULL_NONBLOCK    2
+/** @see apr_procattr_io_set */
 #define APR_PARENT_BLOCK     3
+/** @see apr_procattr_io_set */
 #define APR_CHILD_BLOCK      4
 
+/** @see apr_procattr_limit_set */
 #define APR_LIMIT_CPU        0
+/** @see apr_procattr_limit_set */
 #define APR_LIMIT_MEM        1
+/** @see apr_procattr_limit_set */
 #define APR_LIMIT_NPROC      2
 
 #if APR_HAS_OTHER_CHILD || defined(DOXYGEN)

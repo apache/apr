@@ -150,11 +150,11 @@ typedef dev_t                     apr_dev_t;
 typedef struct apr_finfo_t        apr_finfo_t;
 
 #define APR_FINFO_LINK   0x00000001 /**< Stat the link not the file itself if it is a link */
-#define APR_FINFO_MTIME  0x00000010
-#define APR_FINFO_CTIME  0x00000020
-#define APR_FINFO_ATIME  0x00000040
-#define APR_FINFO_SIZE   0x00000100
-#define APR_FINFO_CSIZE  0x00000200
+#define APR_FINFO_MTIME  0x00000010 /**< Modification Time */
+#define APR_FINFO_CTIME  0x00000020 /**< Creation Time */
+#define APR_FINFO_ATIME  0x00000040 /**< Access Time */
+#define APR_FINFO_SIZE   0x00000100 /**< Size of the file */
+#define APR_FINFO_CSIZE  0x00000200 /**< Storage size consumed by the file */
 #define APR_FINFO_DEV    0x00001000
 #define APR_FINFO_INODE  0x00002000
 #define APR_FINFO_NLINK  0x00004000
