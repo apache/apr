@@ -570,14 +570,14 @@ dnl APR_EXPAND_VAR(fraz, $baz)
 dnl   $fraz is now "1/2/3"
 dnl 
 AC_DEFUN(APR_EXPAND_VAR,[
-last=
-cur=$2
-while test "x$cur" != "x$last";
+ap_last=
+ap_cur="$2"
+while test "x${ap_cur}" != "x${ap_last}";
 do
-  last=$cur
-  cur=`eval "echo $cur"`
+  ap_last="${ap_cur}"
+  ap_cur=`eval "echo ${ap_cur}"`
 done
-$1=$cur
+$1="${ap_cur}"
 ])
 
 dnl
@@ -589,14 +589,14 @@ dnl orig_path="${prefix}/bar"
 dnl APR_PATH_RELATIVE(final_path, $orig_path, $prefix)
 dnl    $final_path now contains "bar"
 AC_DEFUN(APR_PATH_RELATIVE,[
-stripped=`echo $2 | sed -e "s#^$3##"`
+ap_stripped="`echo $2 | sed -e "s#^$3##"`"
 # check if the stripping was successful
-if test "x$2" != "x$stripped"; then
+if test "x$2" != "x${ap_stripped}"; then
     # it was, so strip of any leading slashes
-    $1=`echo $stripped | sed -e 's#^/*##'`
+    $1="`echo ${ap_stripped} | sed -e 's#^/*##'`"
 else
     # it wasn't so return the original
-    $1=$2
+    $1="$2"
 fi
 ])
 
