@@ -68,37 +68,49 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
 /**
+ * @file apr_file_info.h
+ * @brief APR File handling
+ */
+/**
+ * @defgroup APR_File_Handle File Handling Functions
+ * @ingroup APR
+ * @{
+ */
+/*
  * @package APR File handling
  */
 
 typedef enum {
-    APR_NOFILE = 0,     /* the file exists, but APR doesn't know its type */
-    APR_REG,            /* a regular file */
-    APR_DIR,            /* a directory */
-    APR_CHR,            /* a character device */
-    APR_BLK,            /* a block device */
-    APR_PIPE,           /* a FIFO / pipe */
-    APR_LNK,            /* a symbolic link */
-    APR_SOCK            /* a [unix domain] socket */
+    APR_NOFILE = 0,     /**< the file exists, but APR doesn't know its type */
+    APR_REG,            /**< a regular file */
+    APR_DIR,            /**< a directory */
+    APR_CHR,            /**< a character device */
+    APR_BLK,            /**< a block device */
+    APR_PIPE,           /**< a FIFO / pipe */
+    APR_LNK,            /**< a symbolic link */
+    APR_SOCK            /**< a [unix domain] socket */
 } apr_filetype_e; 
 
-/* Permissions flags */
+/**
+ * @defgroup APR_file_handle_permission File Permissions flags 
+ * @{
+ */
 
-#define APR_UREAD     0x400 
-#define APR_UWRITE    0x200
-#define APR_UEXECUTE  0x100
+#define APR_UREAD     0x400 /**< Read by user */
+#define APR_UWRITE    0x200 /**< Write by user */
+#define APR_UEXECUTE  0x100 /**< Execute by user */
 
-#define APR_GREAD     0x040
-#define APR_GWRITE    0x020
-#define APR_GEXECUTE  0x010
+#define APR_GREAD     0x040 /**< Read by group */
+#define APR_GWRITE    0x020 /**< Write by group */
+#define APR_GEXECUTE  0x010 /**< Execute by group */
 
-#define APR_WREAD     0x004
-#define APR_WWRITE    0x002
-#define APR_WEXECUTE  0x001
+#define APR_WREAD     0x004 /**< Read by others */
+#define APR_WWRITE    0x002 /**< Write by others */
+#define APR_WEXECUTE  0x001 /**< Execute by others */
 
-#define APR_OS_DEFAULT 0xFFF
+#define APR_OS_DEFAULT 0xFFF /**< use default permissions of Underlying Operating System*/
+/** @} */
 
 /**
  * Structure for referencing directories.
@@ -126,9 +138,13 @@ typedef ino_t                     apr_ino_t;
 typedef dev_t                     apr_dev_t;
 #endif
 
+/**
+ * @defgroup APR_File_Info Stat Functions
+ * @{
+ */
 typedef struct apr_finfo_t        apr_finfo_t;
 
-#define APR_FINFO_LINK   0x00000001
+#define APR_FINFO_LINK   0x00000001 /**< Stat the link not the file itself if it is a link */
 #define APR_FINFO_MTIME  0x00000010
 #define APR_FINFO_CTIME  0x00000020
 #define APR_FINFO_ATIME  0x00000040
@@ -143,15 +159,15 @@ typedef struct apr_finfo_t        apr_finfo_t;
 #define APR_FINFO_UPROT  0x00100000 
 #define APR_FINFO_GPROT  0x00200000
 #define APR_FINFO_WPROT  0x00400000
-#define APR_FINFO_ICASE  0x01000000  /*  if dev is case insensitive */
-#define APR_FINFO_NAME   0x02000000  /*  ->name in proper case */
+#define APR_FINFO_ICASE  0x01000000  /**<  if dev is case insensitive */
+#define APR_FINFO_NAME   0x02000000  /**<  ->name in proper case */
 
-#define APR_FINFO_MIN    0x00008170  /*  type, mtime, ctime, atime, size */
-#define APR_FINFO_IDENT  0x00003000  /*  dev and inode */
-#define APR_FINFO_OWNER  0x00030000  /*  user and group */
-#define APR_FINFO_PROT   0x00700000  /*  all protections */
-#define APR_FINFO_NORM   0x0073b170  /*  an atomic unix apr_stat() */
-#define APR_FINFO_DIRENT 0x02000000  /*  an atomic unix apr_dir_read() */
+#define APR_FINFO_MIN    0x00008170  /**<  type, mtime, ctime, atime, size */
+#define APR_FINFO_IDENT  0x00003000  /**<  dev and inode */
+#define APR_FINFO_OWNER  0x00030000  /**<  user and group */
+#define APR_FINFO_PROT   0x00700000  /**<  all protections */
+#define APR_FINFO_NORM   0x0073b170  /**<  an atomic unix apr_stat() */
+#define APR_FINFO_DIRENT 0x02000000  /**<  an atomic unix apr_dir_read() */
 
 /**
  * The file information structure.  This is analogous to the POSIX
@@ -205,7 +221,6 @@ struct apr_finfo_t {
  * @param fname The name of the file to stat.
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param cont the pool to use to allocate the new file. 
- * @deffunc apr_status_t apr_stat(apr_finfo_t *finfo, const char *fname, apr_int32_t wanted, apr_pool_t *cont)
  */ 
 APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
                                    apr_int32_t wanted, apr_pool_t *cont);
@@ -219,19 +234,22 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
  * @param fname The name of the file to stat.
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param cont the pool to use to allocate the new file. 
- * @deffunc apr_status_t apr_lstat(apr_finfo_t *finfo, const char *fname, apr_int32_t wanted, apr_pool_t *cont)
- * @tip This function is depreciated, it's equivilant to calling apr_stat with 
+ * @deprecated This function is depreciated, it's equivilant to calling apr_stat with 
  * the wanted flag value APR_FINFO_LINK
  */ 
 APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
                                     apr_int32_t wanted, apr_pool_t *cont);
+/** @} */
+/**
+ * @defgroup APR_DIRECTORY Directory Manipulation Functions
+ * @{
+ */
 
 /**
  * Open the specified directory.
  * @param new_dir The opened directory descriptor.
  * @param dirname The full path to the directory (use / on all systems)
  * @param cont The pool to use.
- * @deffunc apr_status_t apr_dir_open(apr_dir_t **new_dir, const char *dirname, apr_pool_t *cont)
  */                        
 APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new_dir, 
                                        const char *dirname, 
@@ -240,7 +258,6 @@ APR_DECLARE(apr_status_t) apr_dir_open(apr_dir_t **new_dir,
 /**
  * close the specified directory. 
  * @param thedir the directory descriptor to close.
- * @deffunc apr_status_t apr_dir_close(apr_dir_t *thedir)
  */                        
 APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
 
@@ -249,8 +266,7 @@ APR_DECLARE(apr_status_t) apr_dir_close(apr_dir_t *thedir);
  * @param finfo the file info structure and filled in by apr_dir_read
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param thedir the directory descriptor returned from apr_dir_open
- * @tip All systems return . and .. as the first two files.
- * @deffunc apr_status_t apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted, apr_dir_t *thedir)
+ * @remark All systems return . and .. as the first two files.
  */                        
 APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
                                        apr_dir_t *thedir);
@@ -258,42 +274,45 @@ APR_DECLARE(apr_status_t) apr_dir_read(apr_finfo_t *finfo, apr_int32_t wanted,
 /**
  * Rewind the directory to the first entry.
  * @param thedir the directory descriptor to rewind.
- * @deffunc apr_status_t apr_dir_rewind(apr_dir_t *thedir)
  */                        
 APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
+/** @} */
 
-/* apr_filepath optional flags
+/**
+ * @defgroup apr_filepath FilePath Manipulation operations 
+ * @{
  */
 
-/* Cause apr_filepath_merge to fail if addpath is above rootpath */
+/** Cause apr_filepath_merge to fail if addpath is above rootpath */
 #define APR_FILEPATH_NOTABOVEROOT   0x01
 
-/* internal: Only meaningful with APR_FILEPATH_NOTABOVEROOT */
+/** internal: Only meaningful with APR_FILEPATH_NOTABOVEROOT */
 #define APR_FILEPATH_SECUREROOTTEST 0x02
 
-/* Cause apr_filepath_merge to fail if addpath is above rootpath,
+/** Cause apr_filepath_merge to fail if addpath is above rootpath,
  * even given a rootpath /foo/bar and an addpath ../bar/bash
  */
 #define APR_FILEPATH_SECUREROOT     0x03
 
-/* Fail apr_filepath_merge if the merged path is relative */
+/** Fail apr_filepath_merge if the merged path is relative */
 #define APR_FILEPATH_NOTRELATIVE    0x04
 
-/* Fail apr_filepath_merge if the merged path is absolute */
+/** Fail apr_filepath_merge if the merged path is absolute */
 #define APR_FILEPATH_NOTABSOLUTE    0x08
 
-/* Return the file system's native path format (e.g. path delimiters
+/** Return the file system's native path format (e.g. path delimiters
  * of ':' on MacOS9, '\' on Win32, etc.) */
 #define APR_FILEPATH_NATIVE         0x10
 
-/* Resolve the true case of existing directories and file elements
+/** Resolve the true case of existing directories and file elements
  * of addpath, (resolving any aliases on Win32) and append a proper 
  * trailing slash if a directory
  */
 #define APR_FILEPATH_TRUENAME       0x20
-
+/** @} */
 /**
  * Extract the rootpath from the given filepath
+ * @ingroup apr_filepath
  * @param rootpath the root file path returned with APR_SUCCESS or APR_EINCOMPLETE
  * @param filepath the pathname to parse for it's root component
  * @param flags the desired rules to apply, from
@@ -303,7 +322,7 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
  * </PRE>
  * @param p the pool to allocate the new path string from
  * @deffunc apr_status_t apr_filepath_root(const char **rootpath, const char **inpath, apr_int32_t flags, apr_pool_t *p)
- * @tip on return, filepath points to the first non-root character in the
+ * @remark on return, filepath points to the first non-root character in the
  * given filepath.  In the simplest example, given a filepath of "/foo", 
  * returns the rootpath of "/" and filepath points at "foo".  This is far 
  * more complex on other platforms, which will canonicalize the root form
@@ -323,6 +342,7 @@ APR_DECLARE(apr_status_t) apr_filepath_root(const char **rootpath,
 
 /**
  * Merge additional file path onto the previously processed rootpath
+ * @ingroup apr_filepath
  * @param newpath the merged paths returned
  * @param rootpath the root file path (NULL uses the current working path)
  * @param addpath the path to add to the root path
@@ -338,6 +358,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
 /**
  * Return the default file path (for relative file names)
+ * @ingroup apr_filepath
  * @param path the default path string returned
  * @param p the pool to allocate the default path string from
  * @deffunc apr_status_t apr_filepath_get(char **path, apr_pool_t *p)
@@ -346,12 +367,14 @@ APR_DECLARE(apr_status_t) apr_filepath_get(char **path, apr_pool_t *p);
 
 /**
  * Set the default file path (for relative file names)
+ * @ingroup apr_filepath
  * @param path the default path returned
  * @param p the pool to allocate any working storage
  * @deffunc apr_status_t apr_filepath_get(char **defpath, apr_pool_t *p)
  */
 APR_DECLARE(apr_status_t) apr_filepath_set(const char *path, apr_pool_t *p);
 
+/** @} */
 
 #ifdef __cplusplus
 }
