@@ -555,6 +555,9 @@ else
                APR_ADDTO(CPPFLAGS, [-D_XOPEN_SOURCE=500 -D_BSD_SOURCE -D_SVID_SOURCE])
             fi
         fi
+        # this might also require -DXOPEN_SOURCE=500, so leave after the
+        # rwlock check.
+        APR_CHECK_PTHREAD_RECURSIVE_MUTEX
     fi
 fi
 

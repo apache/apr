@@ -31,9 +31,6 @@
 struct apr_thread_mutex_t {
     apr_pool_t *pool;
     pthread_mutex_t mutex;
-    volatile apr_os_thread_t owner;
-    volatile apr_atomic_t owner_ref;
-    char nested; /* a boolean */
 };
 #endif
 
