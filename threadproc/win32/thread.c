@@ -140,10 +140,11 @@ APR_DECLARE(apr_status_t) apr_thread_create(apr_thread_t **new,
 }
 
 APR_DECLARE(apr_status_t) apr_thread_exit(apr_thread_t *thd,
-                                          apr_status_t *retval)
+                                          apr_status_t retval)
 {
+    thd->exitval = retval;
     apr_pool_destroy(thd->cntxt);
-    _endthreadex(*retval);
+    _endthreadex(0);
 	return APR_SUCCESS;
 }
 
@@ -153,10 +154,8 @@ APR_DECLARE(apr_status_t) apr_thread_join(apr_status_t *retval,
     apr_status_t stat;
 
     if ((stat = WaitForSingleObject(thd->td, INFINITE)) == WAIT_OBJECT_0) {
-        if (GetExitCodeThread(thd->td, retval) == 0) {
-            return APR_SUCCESS;
-        }
-        return apr_get_os_error();
+        *retval = thd->exitval;
+        return APR_SUCCESS;
     }
     else {
         return stat;

@@ -68,6 +68,7 @@ struct apr_thread_t {
     apr_int32_t cancel_how;
     void *data;
     apr_thread_start_t func;
+    apr_status_t exitval;
 };
 
 struct apr_threadattr_t {
