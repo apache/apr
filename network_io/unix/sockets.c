@@ -220,6 +220,13 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
         return errno;
     }
     *(*new)->local_addr = *sock->local_addr;
+
+    /* The above assignment just overwrote the pool entry. Setting the local_addr 
+       pool for the accepted socket back to what it should be.  Otherwise all 
+       allocations for this socket will come from a server pool that is not
+       freed until the process goes down.*/
+    (*new)->local_addr->pool = p;
+
     /* fix up any pointers which are no longer valid */
     if (sock->local_addr->sa.sin.sin_family == AF_INET) {
         (*new)->local_addr->ipaddr_ptr = &(*new)->local_addr->sa.sin.sin_addr;
