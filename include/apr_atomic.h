@@ -63,6 +63,8 @@
 extern "C" {
 #endif
 
+#include "apr_pools.h"
+
 /**
  * @file apr_atomic.h
  * @brief APR Atomic Operations
