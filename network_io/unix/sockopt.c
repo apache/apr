@@ -56,6 +56,8 @@
 
 static ap_status_t soblock(int sd)
 {
+/* BeOS uses setsockopt at present for non blocking... */
+#ifndef BEOS
     int fd_flags;
 
     fd_flags = fcntl(sd, F_GETFL, 0);
@@ -72,11 +74,17 @@ static ap_status_t soblock(int sd)
     if (fcntl(sd, F_SETFL, fd_flags) == -1) {
         return errno;
     }
+#else
+    int on = 0;
+    if (setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int)) < 0)
+        return errno;
+#endif /* BEOS */
     return APR_SUCCESS;
 }
 
 static ap_status_t sononblock(int sd)
 {
+#ifndef BEOS
     int fd_flags;
 
     fd_flags = fcntl(sd, F_GETFL, 0);
@@ -93,6 +101,11 @@ static ap_status_t sononblock(int sd)
     if (fcntl(sd, F_SETFL, fd_flags) == -1) {
         return errno;
     }
+#else
+    int on = 1;
+    if (setsockopt(sd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int)) < 0)
+        return errno;
+#endif /* BEOS */
     return APR_SUCCESS;
 }
 
@@ -123,16 +136,11 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
         }
     }
     if (opt & APR_SO_SNDBUF) {
-#ifdef BEOS
-        return APR_ENOTIMPLE;
-#else
         if (setsockopt(sock->socketdes, SOL_SOCKET, SO_SNDBUF, (void *)&on, sizeof(int)) == -1) {
             return errno;
         }
-#endif
     }
     if (opt & APR_SO_NONBLOCK) {
-#ifndef BEOS
         if (on) {
             if ((stat = soblock(sock->socketdes)) != APR_SUCCESS) 
                 return stat;
@@ -141,11 +149,6 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
             if ((stat = sononblock(sock->socketdes)) != APR_SUCCESS)
                 return stat;
         }
-#else
-        stat = setsockopt(sock->socketdes, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(int));
-        if (stat != 0)
-            return stat;
-#endif
     }
     if (opt & APR_SO_LINGER) {
         li.l_onoff = on;
@@ -154,19 +157,19 @@ ap_status_t ap_setsocketopt(ap_socket_t *sock, ap_int32_t opt, ap_int32_t on)
             return errno;
         }
     }
-    if (opt & APR_SO_TIMEOUT) {
-	/* don't do the fcntl foo more than needed */
-	if (on >= 0 && sock->timeout < 0
-		&& (stat = sononblock(sock->socketdes)) != APR_SUCCESS) {
-            return stat;
-        }
-	else if (on < 0 && sock->timeout >= 0
-		&& (stat = soblock(sock->socketdes)) != APR_SUCCESS) {
-	    return stat;
-	}
-        sock->timeout = on;
-    }
-    return APR_SUCCESS;
+    if (opt & APR_SO_TIMEOUT) { 
+        /* don't do the fcntl foo more than needed */ 
+        if (on >= 0 && sock->timeout < 0 
+                && (stat = sononblock(sock->socketdes)) != APR_SUCCESS) { 
+            return stat; 
+        } 
+        else if (on < 0 && sock->timeout >= 0 
+                && (stat = soblock(sock->socketdes)) != APR_SUCCESS) { 
+            return stat; 
+        } 
+        sock->timeout = on; 
+    } 
+    return APR_SUCCESS; 
 }         
 
 ap_status_t ap_gethostname(char *buf, ap_int32_t len, ap_pool_t *cont)
