@@ -55,6 +55,7 @@
 #ifndef LOCKS_H
 #define LOCKS_H
 
+#include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
 #include "apr_lib.h"
@@ -70,7 +71,7 @@
 #if HAVE_USLOCKS_H
 #include <uslocks.h>
 #endif
-#if HAVE_SYS_TYPES_H
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #if HAVE_SYS_IPC_H
@@ -82,13 +83,13 @@
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#if HAVE_STDIO_H
+#if APR_HAVE_STDIO_H
 #include <stdio.h>
 #endif
 #if HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
-#if HAVE_FCNTL_H
+#if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #if HAVE_SYS_MMAN_H
@@ -96,7 +97,7 @@
 #endif
 
 #if APR_HAS_THREADS
-#if HAVE_PTHREAD_H
+#if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
 #endif
@@ -117,13 +118,13 @@ struct ap_lock_t {
     ap_lockscope_e scope;
     int curr_locked;
     char *fname;
-#if USE_SYSVSEM_SERIALIZE
+#if APR_USE_SYSVSEM_SERIALIZE
     int interproc;
-#elif USE_FCNTL_SERIALIZE
+#elif APR_USE_FCNTL_SERIALIZE
     int interproc;
-#elif USE_PROC_PTHREAD_SERIALIZE
+#elif APR_USE_PROC_PTHREAD_SERIALIZE
     pthread_mutex_t *interproc;
-#elif USE_FLOCK_SERIALIZE
+#elif APR_USE_FLOCK_SERIALIZE
     int interproc;
 #else
     /* No Interprocess serialization.  Too bad. */
@@ -131,7 +132,7 @@ struct ap_lock_t {
 #if APR_HAS_THREADS
     /* APR doesn't have threads, no sense in having an thread lock mechanism.
      */
-#if USE_PTHREAD_SERIALIZE
+#if APR_USE_PTHREAD_SERIALIZE
     pthread_mutex_t *intraproc;
 #endif
 #endif

@@ -55,6 +55,7 @@
 #ifndef NETWORK_IO_H
 #define NETWORK_IO_H
 
+#include "apr.h"
 #include "apr_private.h"
 #include "apr_network_io.h"
 #include "apr_errno.h"
@@ -62,16 +63,16 @@
 #include "apr_lib.h"
 
 /* System headers the network I/O library needs */
-#if HAVE_SYS_TYPES_H
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#if HAVE_SYS_UIO_H
+#if APR_HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
 #if HAVE_POLL_H
 #include <poll.h>
 #endif
-#if HAVE_ERRNO_H
+#if APR_HAVE_ERRNO_H
 #include <errno.h>
 #endif
 #if HAVE_SYS_TIME_H
@@ -98,7 +99,7 @@
 #if HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#if HAVE_FCNTL_H
+#if APR_HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 #if HAVE_SYS_SENDFILE_H

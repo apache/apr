@@ -56,7 +56,7 @@
 
 #if APR_HAS_THREADS
 
-#if defined(USE_PTHREAD_SERIALIZE)  
+#if (APR_USE_PTHREAD_SERIALIZE)  
 
 static ap_status_t lock_intra_cleanup(void *data)
 {

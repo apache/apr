@@ -52,25 +52,26 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr.h"
 #include "apr_private.h"
 #include "apr_thread_proc.h"
 #include "apr_file_io.h"
 #include "fileio.h"
 
 /* System headers required for thread/process library */
-#if HAVE_PTHREAD_H
+#if APR_HAVE_PTHREAD_H
 #include <pthread.h>
 #endif
 #if HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
-#if HAVE_SIGNAL_H
+#if APR_HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 #if HAVE_STRING_H
 #include <string.h>
 #endif
-#if HAVE_SYS_WAIT_H
+#if APR_HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
 #if HAVE_STRING_H

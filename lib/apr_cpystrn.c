@@ -52,10 +52,11 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr.h"
 #include "apr_private.h"
 #include "apr_lib.h"
 
-#if HAVE_SYS_TYPES_H
+#if APR_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #if HAVE_STRING_H
@@ -243,7 +244,7 @@ APR_EXPORT(char *) ap_collapse_spaces(char *dest, const char *src)
     return (dest);
 }
 
-#ifndef HAVE_STRDUP
+#if !APR_HAVE_STRDUP
 char *strdup(const char *str)
 {
     char *sdup;
@@ -259,7 +260,7 @@ char *strdup(const char *str)
 #endif
 
 /* The following two routines were donated for SVR4 by Andreas Vogel */
-#if !defined(HAVE_STRCASECMP) && !defined(HAVE_STRICMP)
+#if (!APR_HAVE_STRCASECMP && !APR_HAVE_STRICMP)
 int strcasecmp(const char *a, const char *b)
 {
     const char *p = a;
@@ -278,7 +279,7 @@ int strcasecmp(const char *a, const char *b)
 
 #endif
 
-#if !defined(HAVE_STRNCASECMP) && !defined(HAVE_STRNICMP)
+#if (!APR_HAVE_STRNCASECMP && !APR_HAVE_STRNICMP)
 int strncasecmp(const char *a, const char *b, size_t n)
 {
     const char *p = a;
@@ -299,7 +300,7 @@ int strncasecmp(const char *a, const char *b, size_t n)
 #endif
 
 /* The following routine was donated for UTS21 by dwd@bell-labs.com */
-#ifndef HAVE_STRSTR
+#if (!APR_HAVE_STRSTR)
 char *strstr(char *s1, char *s2)
 {
     char *p1, *p2;

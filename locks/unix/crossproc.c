@@ -52,9 +52,10 @@
  * <http://www.apache.org/>.
  */
 
+#include "apr.h"
 #include "locks.h"
 
-#if defined (USE_SYSVSEM_SERIALIZE)  
+#if APR_USE_SYSVSEM_SERIALIZE  
 
 static struct sembuf op_on;
 static struct sembuf op_off;
@@ -135,7 +136,7 @@ ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont, const cha
     return APR_SUCCESS;
 }
 
-#elif defined (USE_PROC_PTHREAD_SERIALIZE)  
+#elif (APR_USE_PROC_PTHREAD_SERIALIZE)  
 
 void ap_unix_setup_lock(void)
 {
@@ -235,7 +236,7 @@ ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont, const cha
     return APR_SUCCESS;
 }
 
-#elif defined (USE_FCNTL_SERIALIZE)  
+#elif (APR_USE_FCNTL_SERIALIZE)  
 
 static struct flock lock_it;
 static struct flock unlock_it;
@@ -322,7 +323,7 @@ ap_status_t ap_unix_child_init_lock(ap_lock_t **lock, ap_pool_t *cont,
     return APR_SUCCESS;
 }
 
-#elif defined (USE_FLOCK_SERIALIZE)
+#elif (APR_USE_FLOCK_SERIALIZE)
 
 void ap_unix_setup_lock(void)
 {

@@ -52,23 +52,25 @@
  * <http://www.apache.org/>.
  */
 
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_DIRENT_H
-#include <dirent.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
+#include "apr.h"
 #include "fileio.h"
 #include "apr_file_io.h"
 #include "apr_lib.h"
 #include "apr_portable.h"
 #include "atime.h"
+
+#ifdef APR_HAVE_ERRNO_H
+#include <errno.h>
+#endif
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef APR_HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 ap_status_t dir_cleanup(void *thedir)
 {
