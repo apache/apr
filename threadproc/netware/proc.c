@@ -390,7 +390,7 @@ APR_DECLARE(apr_status_t) apr_proc_wait(apr_proc_t *proc,
         }
         else if (WIFSIGNALED(exit_int)) {
             *exitwhy = APR_PROC_SIGNAL;
-            *exitcode = WTERMSIG(exit_int);
+            *exitcode = WIFTERMSIG(exit_int);
         }
         else {
             /* unexpected condition */
