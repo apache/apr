@@ -127,7 +127,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
 {
     apr_status_t rv;
 
-#if APR_HAS_THREADS
     if (mutex->nested) {
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
             mutex->owner_ref++;
@@ -146,7 +145,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
         mutex->owner_ref = 1;
     }
     else {
-#endif
         rv = pthread_mutex_lock(&mutex->mutex);
         if (rv) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -155,9 +153,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_lock(apr_thread_mutex_t *mutex)
             return rv;
         }
 
-#if APR_HAS_THREADS
     }
-#endif
 
     return rv;
 }
@@ -166,7 +162,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 {
     apr_status_t rv;
 
-#if APR_HAS_THREADS
     if (mutex->nested) {
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
             mutex->owner_ref++;
@@ -185,7 +180,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
         mutex->owner_ref = 1;
     }
     else {
-#endif
         rv = pthread_mutex_trylock(&mutex->mutex);
         if (rv) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -193,9 +187,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_trylock(apr_thread_mutex_t *mutex)
 #endif
             return (rv == EBUSY) ? APR_EBUSY : rv;
         }
-#if APR_HAS_THREADS
     }
-#endif
 
     return rv;
 }
@@ -204,7 +196,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 {
     apr_status_t status;
 
-#if APR_HAS_THREADS
     if (mutex->nested) {
         if (apr_os_thread_equal(mutex->owner, apr_os_thread_current())) {
             mutex->owner_ref--;
@@ -223,7 +214,6 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
         mutex->owner_ref = 0;
     }
     else {
-#endif
         status = pthread_mutex_unlock(&mutex->mutex);
         if (status) {
 #ifdef PTHREAD_SETS_ERRNO
@@ -231,9 +221,7 @@ APR_DECLARE(apr_status_t) apr_thread_mutex_unlock(apr_thread_mutex_t *mutex)
 #endif
             return status;
         }
-#if APR_HAS_THREADS
     }
-#endif
     return status;
 }
 
