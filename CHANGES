@@ -7,6 +7,9 @@ Changes for APR 1.1 [Deferring these features when 1.0 is rolled out.]
 
 Changes with APR 1.0
 
+  *) Add an RPM spec file derived from Fedora Core.
+     [Graham Leggett, Joe Orton]
+
   *) Fix apr_threadattr_detach_set() on Mac OS X.  PR 28472.
      [INOUE Seiichiro <inoue ariel-networks.com>]
 
