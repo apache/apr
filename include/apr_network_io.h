@@ -407,37 +407,22 @@ apr_status_t apr_set_port(apr_socket_t *sock, apr_interface_e which, apr_port_t 
 apr_status_t apr_get_port(apr_port_t *port, apr_interface_e which, apr_socket_t *sock);
 
 /**
- * Associate a local socket addr with an apr socket.
+ * Associate a socket addr with an apr socket.
  * @param sock The socket to use 
+ * @param which Which interface should we set?
  * @param addr The IP address to attach to the socket.
  *             Use APR_ANYADDR to use any IP addr on the machine.
  * @tip This does not bind the two together, it is just telling apr 
  *      that this socket is going to use this address if possible. 
  */
-apr_status_t apr_set_local_ipaddr(apr_socket_t *sock, const char *addr);
+apr_status_t apr_set_ipaddr(apr_socket_t *sock, apr_interface_e which, const char *addr);
 
 /**
- * Associate a remote socket addr with an apr socket.
- * @param sock The socket to use 
- * @param addr The IP address to attach to the socket.
- * @tip This does not make a connection to the remote address, it is just
- *      telling apr which address apr_connect() should attempt to connect to.
- */
-apr_status_t apr_set_remote_ipaddr(apr_socket_t *sock, const char *addr);
-
-/**
- * Return the local IP address associated with an apr socket.
+ * Return the IP address associated with an apr socket.
  * @param addr The local IP address associated with the socket.
  * @param sock The socket to use 
  */
-apr_status_t apr_get_local_ipaddr(char **addr, apr_socket_t *sock);
-
-/**
- * Return the remote IP address associated with an apr socket.
- * @param addr The remote IP address associated with the socket.
- * @param sock The socket to use 
- */
-apr_status_t apr_get_remote_ipaddr(char **addr, apr_socket_t *sock);
+apr_status_t apr_get_ipaddr(char **addr, apr_interface_e which, apr_socket_t *sock);
 
 /**
  * Return the local socket name as a BSD style struct sockaddr_in.
@@ -571,6 +556,13 @@ apr_status_t apr_set_polldata(apr_pollfd_t *pollfd, void *data, const char *key,
  *      have the APR_FILES_AS_SOCKETS macro defined as true.
  */
 apr_status_t apr_socket_from_file(apr_socket_t **newsock, apr_file_t *file);
+
+/**
+ * Given a hostname and a port, create an apr_in_addr for it...
+ * @param addr The apr_in_addr structure to return.
+ * @param hostname The hostname to lookup.
+ */
+apr_status_t apr_get_inaddr(apr_in_addr *addr, char* hostname);
 
 #ifdef __cplusplus
 }
