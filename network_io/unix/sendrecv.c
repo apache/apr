@@ -741,6 +741,14 @@ apr_status_t apr_socket_sendfile(apr_socket_t * sock, apr_file_t * file,
     /* Ignore flags for now. */
     flags = 0;
 
+    /* word to the wise: by default, AIX stores files sent by send_file()
+     * in the network buffer cache...  there are supposedly scenarios
+     * where the most recent copy of the file won't be sent, but I can't
+     * recreate the potential problem, perhaps because of the way we
+     * use send_file()...  if you suspect such a problem, try turning
+     * on the SF_SYNC_CACHE flag
+     */
+
     /* AIX can also send the headers/footers as part of the system call */
     parms.header_length = 0;
     if (hdtr && hdtr->numheaders) {
