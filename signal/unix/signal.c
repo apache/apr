@@ -64,7 +64,7 @@
 #endif
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_create_signal(ap_context_t *, ap_signum_t)
+ * ap_status_t ap_create_signal(ap_signum_t, ap_context_t *)
  *    Create a signal for use later on. 
  * arg 1) The context to operate on.
  * arg 2) The signal we are creating.  One of:
@@ -73,13 +73,13 @@
  *       This is for Windows to be able to send signals, so your program
  *       won't be portable without it. 
  */                                                                             
-ap_status_t ap_create_signal(ap_context_t *cont, ap_signum_t signum)
+ap_status_t ap_create_signal(ap_signum_t signum, ap_context_t *cont)
 {
     return APR_SUCCESS;
 }
 
 /* ***APRDOC********************************************************
- * ap_status_t ap_send_signal(ap_context_t *, ap_signum_t)
+ * ap_status_t ap_send_signal(ap_signum_t, ap_context_t *)
  *    Send a signal to your process group 
  * arg 1) The context to operate on.
  * arg 2) The signal we are sending.  Same as above list
@@ -87,7 +87,7 @@ ap_status_t ap_create_signal(ap_context_t *cont, ap_signum_t signum)
  *        figured out how to send to individual children on Windows yet.  When
  *        that is solved, this will change here.
  */
-ap_status_t ap_send_signal(ap_context_t *cont, ap_signum_t signum)
+ap_status_t ap_send_signal(ap_signum_t signum, ap_context_t *cont)
 {
     killpg(0, signum);
     return APR_SUCCESS;
@@ -100,8 +100,8 @@ ap_status_t ap_send_signal(ap_context_t *cont, ap_signum_t signum)
  * arg 2) The signal we are expecting to receive.  Same as above list
  * arg 3) The function to execute when this signal is received.
  */
-ap_status_t ap_setup_signal(ap_context_t *cont, ap_signum_t signum,
-			    Sigfunc *func)
+ap_status_t ap_setup_signal(ap_signum_t signum, Sigfunc *func,
+                            ap_context_t *cont)
 {
     sigset_t newset;
 

@@ -64,7 +64,7 @@ static Sigfunc *sig_handler;
 
 volatile int ready = 0;
 
-ap_status_t ap_create_signal(ap_context_t *cont, ap_signum_t signum)
+ap_status_t ap_create_signal(ap_signum_t signum, ap_context_t *cont)
 {
     char *EventName;
     int ppid;
@@ -89,7 +89,7 @@ ap_status_t ap_create_signal(ap_context_t *cont, ap_signum_t signum)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_send_signal(ap_context_t *cont, ap_signum_t signum)
+ap_status_t ap_send_signal(ap_signum_t signum, ap_context_t *cont)
 {
     HANDLE event;
     char *EventName;
@@ -115,7 +115,7 @@ ap_status_t ap_send_signal(ap_context_t *cont, ap_signum_t signum)
     return APR_SUCCESS;
 }
 
-ap_status_t ap_setup_signal(ap_context_t *cont, ap_signum_t signum, Sigfunc *func)
+ap_status_t ap_setup_signal(ap_signum_t signum, Sigfunc *func, ap_context_t *cont)
 {
     HANDLE event;
     char ppid[20];
