@@ -9,13 +9,13 @@ EXPORTS
 	apr_open	@1
 	apr_close	@2
 	apr_remove_file	@3
-;	apr_rename_file @4
+	apr_rename_file @4
     	apr_eof		@5
 	apr_read	@6
 	apr_write	@7
 	apr_writev	@8
-;       apr_full_read	@9
-;       apr_full_write	@10
+        apr_full_read	@9
+        apr_full_write	@10
     	apr_putc	@11
     	apr_getc	@12
 	apr_ungetc	@13
@@ -24,9 +24,9 @@ EXPORTS
 	apr_flush	@16
 	apr_dupfile	@17
 	apr_getfileinfo	@18
-;       apr_setfileperms @19
+        apr_setfileperms @19
 	apr_stat	@20
-;       apr_lstat	@21
+        apr_lstat	@21
 	apr_seek	@22
 	apr_opendir	@23
 	apr_closedir	@24
@@ -126,12 +126,7 @@ EXPORTS
 	apr_get_userdata   @118
 	apr_set_userdata   @119
 	apr_initialize   @120
-	apr_getopt    @121
-	apr_opterr   @122 DATA
-	apr_optind   @123 DATA
-	apr_optopt   @124 DATA
-	apr_optreset   @125 DATA
-	apr_optarg   @126 DATA
+;	apr_make_time   @127
 	apr_ansi_time_to_apr_time @127
 	apr_now		  @128
 	apr_explode_gmt	  @129
@@ -261,3 +256,14 @@ EXPORTS
 	apr_get_lockdata  @245
 	apr_set_lockdata  @246
 	apr_get_os_lock   @247
+
+; Moved out of the way for Bill Stoddard's reorg
+;
+; apr_getopt.h
+	apr_getopt    @298
+	apr_initopt    @299
+;	apr_opterr   @122 DATA
+;	apr_optind   @123 DATA
+;	apr_optopt   @124 DATA
+;	apr_optreset   @125 DATA
+;	apr_optarg   @126 DATA
