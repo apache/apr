@@ -167,9 +167,11 @@ apr_status_t apr_file_open(apr_file_t **new, const char *fname, apr_int32_t flag
     (*new)->bufpos = 0;
     (*new)->dataRead = 0;
     (*new)->direction = 0;
-    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), apr_unix_file_cleanup,
-                              ((*new)->flag & APR_INHERIT) ? apr_pool_cleanup_null 
-                                                           : apr_unix_file_cleanup);
+    apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), 
+                              apr_unix_file_cleanup,
+                              ((*new)->flags & APR_INHERIT) 
+                                  ? apr_pool_cleanup_null 
+                                  : apr_unix_file_cleanup);
     return APR_SUCCESS;
 }
 
