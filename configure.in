@@ -873,7 +873,7 @@ if test "$native_mmap_emul" = "1"; then
     mmap="1"
 fi
 AC_CHECK_FUNCS(memmove, [ have_memmove="1" ], [have_memmove="0" ])
-AC_CHECK_FUNCS([getpass gmtime_r localtime_r hstrerror mkstemp])
+AC_CHECK_FUNCS([getpass getpassphrase gmtime_r localtime_r hstrerror mkstemp])
 
 AC_SUBST(fork)
 AC_SUBST(have_inet_addr)
