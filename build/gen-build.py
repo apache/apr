@@ -69,7 +69,7 @@ def main():
   keys.sort()
   f.write('BUILD_DIRS = %s\n\n' % string.join(keys))
 
-  f.write('.make.dirs: $(top_srcdir)/build-outputs.mk\n' \
+  f.write('.make.dirs: $(srcdir)/build-outputs.mk\n' \
           '\t@for d in $(BUILD_DIRS); do test -d $$d || mkdir $$d; done\n' \
           '\t@echo timestamp > $@\n')
 
