@@ -293,150 +293,43 @@ APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
                               		apr_procattr_t *attr, 
                               		apr_pool_t *pool)
 {
-    int i, envCount=0;
-    const char **newargs;
-    char **newenv;
-    NXVmId_t newVM;
-    unsigned long flags = NX_VM_SAME_ADDRSPACE;
-    char **sysenv = NULL;
+	wiring_t		wire;
 
-    NXNameSpec_t nameSpec;
-    NXExecEnvSpec_t envSpec;
+    wire.infd  = attr->child_in ? attr->child_in->filedes : FD_UNUSED;
+    wire.outfd = attr->child_out ? attr->child_out->filedes : FD_UNUSED;
+    wire.errfd = attr->child_err ? attr->child_err->filedes : FD_UNUSED;
 
-    /* Set up the info for the NLM to be started */
-    nameSpec.ssType = NX_OBJ_FILE;
-    nameSpec.ssPathCtx = NULL;
-    nameSpec.ssPath = (void*)progname;
-
-    /* Count how many arguments there are and assign them 
-        to the environent */
-    for (i=0;args && args[i];i++);
-    envSpec.esArgc = i;
-    envSpec.esArgv = (void**)args;
-
-    getenv("ENV"); /* just needs to be here for now */
-    sysenv = nxGetEnviron();
-    /* Count how many environment variables there are in the
-        system, add any new environment variables and place
-        them in the environment. */
-    for (i=0;env && env[i];i++);
-    for (envCount=0;sysenv && sysenv[envCount];envCount++);
-    if ((envCount + i) > 0) {
-        newenv = (char **) NXMemAlloc(sizeof(char *) * (envCount+i+1), 0);
-        if (!newenv)
-            return APR_ENOMEM;
-        for (i=0;sysenv && sysenv[i];i++) {
-            newenv[i] = (char*)sysenv[i];
-        }
-        for (i=0;env && env[i];i++) {
-            newenv[envCount+i-1] = (char*)env[i];
-        }
-        newenv[envCount+i] = NULL;
-
-        envSpec.esEnv = (void**)newenv;
-    }
-    else
-        envSpec.esEnv = NULL;
-
-    envSpec.esStdin.ssType = NX_OBJ_FIFO;
-    envSpec.esStdin.ssHandle = -1;
-    envSpec.esStdin.ssPathCtx = 0;
-    if (attr->child_in) {
-        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_in), 
-                              attr->child_in, apr_netware_pipe_cleanup);
-        envSpec.esStdin.ssPath = attr->child_in->fname;
-        apr_file_close(attr->child_in);
-        if (attr->parent_in) {
-            close(attr->parent_in->filedes);
-    	    attr->parent_in->filedes = pipe_open(attr->parent_in->fname, O_WRONLY);
-            /* XXX take this out when pipe blocking is fixed */
-    		fcntl(attr->parent_in->filedes, F_SETFL, 0);
-        }
-    }
-    else if (attr->parent_in) {
-        envSpec.esStdin.ssPath = attr->parent_in->fname;
-        close(attr->parent_in->filedes);
-    	attr->parent_in->filedes = pipe_open(attr->parent_in->fname, O_WRONLY);
-        /* XXX take this out when pipe blocking is fixed */
-  		fcntl(attr->parent_in->filedes, F_SETFL, 0);
-    }
-    else {
-        envSpec.esStdin.ssPath = NULL;
-    }
-
-    envSpec.esStdout.ssType = NX_OBJ_FIFO;
-    envSpec.esStdout.ssHandle = -1;
-    envSpec.esStdout.ssPathCtx = 0;
-    if (attr->child_out) {
-        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_out),
-                              attr->child_out, apr_netware_pipe_cleanup);
-        envSpec.esStdout.ssPath = attr->child_out->fname;
-        apr_file_close(attr->child_out);
-        if (attr->parent_out) {
-            close(attr->parent_out->filedes);
-    	    attr->parent_out->filedes = pipe_open(attr->parent_out->fname, O_RDONLY);
-            /* XXX take this out when pipe blocking is fixed */
-            fcntl(attr->parent_out->filedes, F_SETFL, 0);
-        }
-    }
-    else if (attr->parent_out) {
-        envSpec.esStdout.ssPath = attr->parent_out->fname;
-        close(attr->parent_out->filedes);
-    	attr->parent_out->filedes = pipe_open(attr->parent_out->fname, O_RDONLY);
-        /* XXX take this out when pipe blocking is fixed */
-        fcntl(attr->parent_out->filedes, F_SETFL, 0);
-    }
-    else {
-        envSpec.esStdout.ssPath = NULL;
-    }
-
-    envSpec.esStderr.ssType = NX_OBJ_FIFO;
-    envSpec.esStderr.ssHandle = -1;
-    envSpec.esStderr.ssPathCtx = 0;
-    if (attr->child_err) {
-        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_err),
-                              attr->child_err, apr_netware_pipe_cleanup);
-        envSpec.esStderr.ssPath = attr->child_err->fname;
-        apr_file_close(attr->child_err);
-        if (attr->parent_err) {
-            close(attr->parent_err->filedes);
-    	    attr->parent_err->filedes = pipe_open(attr->parent_err->fname, O_RDONLY);
-            /* XXX take this out when pipe blocking is fixed */
-            fcntl(attr->parent_err->filedes, F_SETFL, 0);
-        }
-    }
-    else if (attr->parent_err) {
-        envSpec.esStderr.ssPath = attr->parent_err->fname;
-        close(attr->parent_err->filedes);
-    	attr->parent_err->filedes = pipe_open(attr->parent_err->fname, O_RDONLY);
-        /* XXX take this out when pipe blocking is fixed */
-        fcntl(attr->parent_err->filedes, F_SETFL, 0);
-    }
-    else {
-        envSpec.esStderr.ssPath = NULL;
-    }
-
-    if (attr->detached) {
-        flags = NX_VM_CREATE_DETACHED;
-    }
-    
     newproc->in = attr->parent_in;
-    newproc->err = attr->parent_err;
     newproc->out = attr->parent_out;
-    if (NXVmSpawn(&nameSpec, &envSpec, flags, &newVM) != 0) {
-        apr_file_close(attr->parent_in);
-        apr_file_close(attr->parent_out);
-        apr_file_close(attr->parent_err);
+    newproc->err = attr->parent_err;
+
+    /* XXX Switch to spawning in separate address spaces once the address
+        space shutdown problem is fixed. */   
+    if ((newproc->pid = processve(progname, PROC_CURRENT_SPACE, (const char**)env, &wire, 
+        NULL, NULL, (const char **)args)) == 0) {
         return errno;
     }
-    else { 
-        newproc->pid = newVM;
-        apr_pool_cleanup_register(pool, (void *)newproc, apr_netware_proc_cleanup,
-                         apr_pool_cleanup_null);
+
+    if (attr->child_in) {
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_in), 
+                              attr->child_in, apr_unix_file_cleanup);
+        apr_file_close(attr->child_in);
     }
-    /*if (sysenv)
-        free(sysenv);
-    */
+    if (attr->child_out) {
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_out), 
+                              attr->child_out, apr_unix_file_cleanup);
+        apr_file_close(attr->child_out);
+    }
+    if (attr->child_err) {
+        apr_pool_cleanup_kill(apr_file_pool_get(attr->child_err), 
+                              attr->child_err, apr_unix_file_cleanup);
+        apr_file_close(attr->child_err);
+    }
+
+
+//    apr_pool_cleanup_register(pool, (void *)newproc, apr_netware_proc_cleanup,
+//        apr_pool_cleanup_null);
+
     return APR_SUCCESS;
 }
 
