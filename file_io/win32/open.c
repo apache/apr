@@ -173,7 +173,7 @@ ap_status_t ap_get_os_file(ap_os_file_t *thefile, struct file_t *file)
     if (file == NULL) {
         return APR_ENOFILE;
     }
-    thefile = &(file->filehand);
+    *thefile = file->filehand;
     return APR_SUCCESS;
 }
 
