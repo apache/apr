@@ -1,5 +1,11 @@
 Changes with APR b1  
 
+  *) Put new pools code in place which allows applications to
+     switch off locking on pools operations in case a pool is
+     guaranteed to never being used in more than one thread
+     at the same time.  We've seen a significant performance
+     improvement over the old code. [Sander Striker]
+
   *) Add apr-config - a shell script to allow third-party programs
      easy access to APR configuration parameters.  [Justin Erenkrantz]
 
