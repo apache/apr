@@ -580,6 +580,7 @@ APR_DECLARE(void *) apr_palloc(apr_pool_t *pool, apr_size_t size)
 #undef apr_pcalloc
 #endif
 
+APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size);
 APR_DECLARE(void *) apr_pcalloc(apr_pool_t *pool, apr_size_t size)
 {
     void *mem;
