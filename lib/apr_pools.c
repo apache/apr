@@ -117,17 +117,17 @@
 #define BLOCK_MINALLOC 8192
 #endif
  
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
 /* first do some option checking... */
 #ifdef ALLOC_USE_MALLOC
-#error "sorry, no support for ALLOC_USE_MALLOC and POOL_DEBUG at the same time"
+#error "sorry, no support for ALLOC_USE_MALLOC and APR_POOL_DEBUG at the same time"
 #endif /* ALLOC_USE_MALLOC */
 
 #ifdef MULTITHREAD
-# error "sorry, no support for MULTITHREAD and POOL_DEBUG at the same time"
+# error "sorry, no support for MULTITHREAD and APR_POOL_DEBUG at the same time"
 #endif /* MULTITHREAD */
 
-#endif /* POOL_DEBUG */
+#endif /* APR_POOL_DEBUG */
 
 #ifdef ALLOC_USE_MALLOC
 #undef BLOCK_MINFREE
@@ -169,10 +169,10 @@ union block_hdr {
 	char *endp;
 	union block_hdr *next;
 	char *first_avail;
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
 	union block_hdr *global_next;
 	apr_pool_t *owning_pool;
-#endif /* POOL_DEBUG */
+#endif /* APR_POOL_DEBUG */
     } h;
 };
 
@@ -197,12 +197,12 @@ static apr_lock_t *alloc_mutex;
 static apr_lock_t *spawn_mutex;
 #endif
 
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
 static char *known_stack_point;
 static int stack_direction;
 static union block_hdr *global_block_list;
 #define FREE_POOL	((apr_pool_t *)(-1))
-#endif /* POOL_DEBUG */
+#endif /* APR_POOL_DEBUG */
 
 #ifdef ALLOC_STATS
 static unsigned long long num_free_blocks_calls;
@@ -267,11 +267,11 @@ static union block_hdr *malloc_block(int size, int (*apr_abort)(int retcode))
     blok->h.endp -= CLICK_SZ;
 #endif /* ALLOC_DEBUG */
 
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
     blok->h.global_next = global_block_list;
     global_block_list = blok;
     blok->h.owning_pool = NULL;
-#endif /* POOL_DEBUG */
+#endif /* APR_POOL_DEBUG */
 
     return blok;
 }
@@ -351,18 +351,18 @@ static void free_blocks(union block_hdr *blok)
 	chk_on_blk_list(blok, old_free_list);
 	blok->h.first_avail = (char *) (blok + 1);
 	debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
-#ifdef POOL_DEBUG 
+#ifdef APR_POOL_DEBUG 
 	blok->h.owning_pool = FREE_POOL;
-#endif /* POOL_DEBUG */
+#endif /* APR_POOL_DEBUG */
 	blok = blok->h.next;
     }
 
     chk_on_blk_list(blok, old_free_list);
     blok->h.first_avail = (char *) (blok + 1);
     debug_fill(blok->h.first_avail, blok->h.endp - blok->h.first_avail);
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
     blok->h.owning_pool = FREE_POOL;
-#endif /* POOL_DEBUG */
+#endif /* APR_POOL_DEBUG */
 
     /* Finally, reset next pointer to get the old free blocks back */
 
@@ -474,7 +474,7 @@ APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int 
     blok = new_block(POOL_HDR_BYTES, apr_abort);
     new_pool = (apr_pool_t *) blok->h.first_avail;
     blok->h.first_avail += POOL_HDR_BYTES;
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
     blok->h.owning_pool = new_pool;
 #endif
 
@@ -501,7 +501,7 @@ APR_DECLARE(apr_pool_t *) apr_make_sub_pool(apr_pool_t *p, int (*apr_abort)(int 
     return new_pool;
 }
 
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
 static void stack_var_init(char *s)
 {
     char t;
@@ -639,7 +639,7 @@ apr_status_t apr_init_alloc(void)
 #if APR_HAS_THREADS
     apr_status_t status;
 #endif
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
     char s;
 
     known_stack_point = &s;
@@ -750,9 +750,9 @@ APR_DECLARE(apr_size_t) apr_bytes_in_free_blocks(void)
 }
 
 /*****************************************************************
- * POOL_DEBUG support
+ * APR_POOL_DEBUG support
  */
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
 
 /* the unix linker defines this symbol as the last byte + 1 of
  * the executable... so it includes TEXT, BSS, and DATA
@@ -939,7 +939,7 @@ APR_DECLARE(void*) apr_palloc(apr_pool_t *a, apr_size_t reqsize)
     blok = new_block(size, a->apr_abort);
     a->last->h.next = blok;
     a->last = blok;
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
     blok->h.owning_pool = a;
 #endif
 
@@ -1097,7 +1097,7 @@ APR_DECLARE(char *) apr_pvsprintf(apr_pool_t *p, const char *fmt, va_list ap)
     if (ps.got_a_new_block) {
 	p->last->h.next = ps.blok;
 	p->last = ps.blok;
-#ifdef POOL_DEBUG
+#ifdef APR_POOL_DEBUG
 	ps.blok->h.owning_pool = p;
 #endif
     }
