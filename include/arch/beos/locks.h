@@ -68,26 +68,10 @@ struct apr_lock_t {
     apr_lockscope_e scope;
     apr_os_thread_t owner;
     int owner_ref;
-    /* Inter proc */
-    sem_id sem_interproc;
-    int32  ben_interproc;
-    /* Intra Proc */
-    sem_id sem_intraproc;
-    int32  ben_intraproc;
+
+    sem_id sem;
+    int32  ben;
 };
-
-apr_status_t create_intra_lock(struct apr_lock_t *new);
-apr_status_t lock_intra(struct apr_lock_t *lock);
-apr_status_t unlock_intra(struct apr_lock_t *lock);
-apr_status_t destroy_intra_lock(struct apr_lock_t *lock);
-
-apr_status_t create_inter_lock(struct apr_lock_t *new);
-apr_status_t lock_inter(struct apr_lock_t *lock);
-apr_status_t unlock_inter(struct apr_lock_t *lock);
-apr_status_t destroy_inter_lock(struct apr_lock_t *lock);
-
-apr_status_t child_init_lock(struct apr_lock_t **lock, apr_pool_t *cont, 
-                            const char *fname);
 
 #endif  /* LOCKS_H */
 
