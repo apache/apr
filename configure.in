@@ -93,6 +93,7 @@ case "$OS" in
        OSDIR="os2"
        LIBPREFIX=""
        enable_apr_threads="system_threads"
+       eolstr="\\r\\n"
        ;;
    *beos*)
        OSDIR="beos"
@@ -102,13 +103,17 @@ case "$OS" in
        native_mmap_emul="1"
        USE_MM=yes
        AC_CHECK_DEFINE(BONE_VERSION, sys/socket.h)
+       eolstr="\\n"
        ;;
    *)
        OSDIR="unix"
        config_subdirs="shmem/unix/mm"
        USE_MM=yes
+       eolstr="\\n"
        ;;
 esac
+
+AC_SUBST(eolstr)
 
 if test "$enable_apr_threads" = "system_threads"; then
    ac_cv_enable_threads="yes"
