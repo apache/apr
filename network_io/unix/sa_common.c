@@ -164,7 +164,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_ip_get(char **addr,
     return APR_SUCCESS;
 }
 
-void apr_set_sockaddr_vars(apr_sockaddr_t *addr, int family, apr_port_t port)
+void apr_sockaddr_vars_set(apr_sockaddr_t *addr, int family, apr_port_t port)
 {
     addr->family = family;
     addr->sa.sin.sin_family = family;
@@ -322,7 +322,7 @@ static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
 {
     sa->pool = p;
     memcpy(&sa->sa, ai->ai_addr, ai->ai_addrlen);
-    apr_set_sockaddr_vars(sa, ai->ai_family, port);
+    apr_sockaddr_vars_set(sa, ai->ai_family, port);
 }
 #else
 static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
@@ -330,7 +330,7 @@ static void save_addrinfo(apr_pool_t *p, apr_sockaddr_t *sa,
 {
     sa->pool = p;
     sa->sa.sin.sin_addr = ipaddr;
-    apr_set_sockaddr_vars(sa, AF_INET, port);
+    apr_sockaddr_vars_set(sa, AF_INET, port);
 }
 #endif
 
@@ -393,7 +393,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
     }
     else {
         (*sa)->pool = p;
-        apr_set_sockaddr_vars(*sa, 
+        apr_sockaddr_vars_set(*sa, 
                               family == APR_UNSPEC ? APR_INET : family,
                               port);
     }
@@ -480,7 +480,7 @@ APR_DECLARE(apr_status_t) apr_sockaddr_info_get(apr_sockaddr_t **sa,
     }
     else {
         (*sa)->pool = p;
-        apr_set_sockaddr_vars(*sa, 
+        apr_sockaddr_vars_set(*sa, 
                               family == APR_UNSPEC ? APR_INET : family,
                               port);
     }
