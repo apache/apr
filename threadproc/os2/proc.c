@@ -363,7 +363,10 @@ ap_status_t ap_create_process(struct proc_t **new, const char *progname,
 
     *env_block_pos = 0; /* environment block is terminated by a double null */
 
-    status = DosExecPgm(error_object, sizeof(error_object), EXEC_ASYNC, cmdline, env_block, &rescodes, cmdline);
+    status = DosExecPgm(error_object, sizeof(error_object), 
+                        attr->detached ? EXEC_BACKGROUND : EXEC_ASYNC, 
+                        cmdline, env_block, &rescodes, cmdline);
+
     (*new)->pid = rescodes.codeTerminate;
 
     if (attr->currdir != NULL) {
