@@ -1200,7 +1200,7 @@ APR_DECLARE(apr_status_t) apr_pool_initialize(void)
 {
     apr_status_t rv;
 #if (APR_POOL_DEBUG & APR_POOL_DEBUG_VERBOSE_ALL)
-    char* logpath;
+    char *logpath;
 #endif
 
     if (apr_pools_initialized++)
