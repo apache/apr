@@ -256,7 +256,7 @@ apr_status_t apr_accept(apr_socket_t **new, apr_socket_t *sock, apr_pool_t *conn
 
     (*new)->inherit = sock->inherit;
     apr_pool_cleanup_register((*new)->cntxt, (void *)(*new), socket_cleanup,
-                              (inherit & APR_INHERIT) ? apr_pool_cleanup_null
+                              ((*new)->inherit & APR_INHERIT) ? apr_pool_cleanup_null
                                                       : socket_cleanup);
     return APR_SUCCESS;
 }
