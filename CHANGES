@@ -1,5 +1,9 @@
 Changes with APR b1  
 
+  *) Force FreeBSD to compile without threads by default.  To enable
+     threads, use --enable-threads on the configure line.
+     [Ryan Bloom]
+
   *) Purge system password buffer before returning from apr_password_get.
      No longer abuses bufsize argument on return.  [William Rowe]
 
