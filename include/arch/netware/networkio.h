@@ -59,7 +59,7 @@
     arch/netware and then arch/unix. But in this specific case we 
     want arch/win32.
 */
-#include <..\win32\networkio.h>
+#include <../win32/networkio.h>
 
 #endif  /* ! NETWORK_IO_H */
 

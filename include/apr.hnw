@@ -87,7 +87,7 @@
 #include <signal.h>
 
 
-#include <WS2NLM.h>
+#include <ws2nlm.h>
 
 #define _POSIX_THREAD_SAFE_FUNCTIONS    1
 #define READDIR_IS_THREAD_SAFE          1
@@ -221,7 +221,11 @@ typedef  int               apr_socklen_t;
 
 /* Mechanisms to properly type numeric literals */
 
+#ifdef __GNUC__
+#define APR_INT64_C(val) (val)
+#else
 #define APR_INT64_C(val) (val##i64)
+#endif
 
 //srj added in here, libc c no longer takes care of these
 

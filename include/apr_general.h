@@ -83,7 +83,9 @@ extern "C" {
 #define TRUE (!FALSE)
 #endif
 
+#ifndef MAXIMUM_WAIT_OBJECTS
 #define MAXIMUM_WAIT_OBJECTS 64
+#endif
 
 #define APR_ASCII_BLANK  '\040'
 #define APR_ASCII_CR     '\015'
