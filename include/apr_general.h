@@ -109,8 +109,8 @@ typedef unsigned long long     ap_uint64_t;
 typedef long double            ap_int64_t;
 typedef unsigned long double   ap_uint64_t;
 #elif (SIZEOF_LONGLONG == 8)
-typedef LONGLONG               ap_int64_t;
-typedef ULONGLONG              ap_uint64_t;
+typedef __int64                ap_int64_t;
+typedef unsigned __int64       ap_uint64_t;
 #endif
 
 typedef size_t                 ap_size_t;

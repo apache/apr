@@ -57,9 +57,19 @@
 
 #ifndef APR_WIN_H
 #define APR_WIN_H
-/*#define WIN32_LEAN_AND_MEAN*/
-#include <winsock2.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef _WIN32_WINNT
+/* 
+ * Compile the server including all the Windows NT 4.0 header files by 
+ * default.
+ */
+#define _WIN32_WINNT 0x0400
+#endif
 #include <windows.h>
+#include <winsock2.h>
+#include <mswsock.h>
 #include <sys\types.h>
 #include <stddef.h>
 #include <stdio.h>
