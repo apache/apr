@@ -52,6 +52,8 @@
  * <http://www.apache.org/>.
  */
 
+#include <nks/errno.h>
+
 #include "apr.h"
 #include "apr_private.h"
 #include "apr_general.h"
