@@ -39,12 +39,14 @@ SUBDIRS=@SUBDIRS@
 # building the entire package.
 #
 all: Makefile $(MODULES) subdirs
-	@rm -Rf libs
-	@mkdir libs
-	@for i in $(SUBDIRS); do cp $$i/*.a libs ; done;
+	@rm -Rf objs
+	@mkdir objs
+	@rm -f @LIBPREFIX@apr.a
+	@for i in $(SUBDIRS); do cp $$i/*.o objs ; done;
+	@$(AR) cr @LIBPREFIX@apr.a objs/*.o
 
 clean: subdirs_clean
-	$(RM) -f *.o *.a *.so
+	$(RM) -f *.o *.a *.so objs/*.o
 
 depend: subdirs_depend
 
@@ -52,7 +54,7 @@ distclean: subdirs_distclean
 	-$(RM) -f *.o *.a *.so
 	-$(RM) -f config.cache config.status config.log
 	-$(RM) -f Makefile
-	-$(RM) -Rf libs
+	-$(RM) -Rf objs
 
 subdirs:
 	@for i in $(SUBDIRS); do \
