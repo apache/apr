@@ -118,7 +118,6 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         
         if (bytesread == 0) {
             thefile->eof_hit = TRUE;
-            return APR_EOF;
         }
 
         return APR_SUCCESS;
