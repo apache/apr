@@ -94,7 +94,7 @@ TESTS = testall.obj testtime.obj teststr.obj testvsn.obj testipsub.obj \
 
 testall: $(TESTS) \
 	 CuTest.obj $(LOCAL_LIBS)
-	link /nologo /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
+	link /nologo /debug /subsystem:console /machine:I386 $(TESTS) CuTest.obj \
 	$(LOCAL_LIBS) kernel32.lib advapi32.lib ws2_32.lib mswsock.lib ole32.lib shell32.lib rpcrt4.lib
 
 
