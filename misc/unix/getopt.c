@@ -49,7 +49,7 @@ APR_EXPORT(apr_status_t) apr_initopt(apr_getopt_t **os, apr_pool_t *cont,
 }
 
 APR_EXPORT(apr_status_t) apr_getopt(apr_getopt_t *os, const char *opts, 
-                                    char *optch, char const** optarg)
+                                    char *optch, const char **optarg)
 {
     const char *p;
     const char *oli;  /* option letter list index */
