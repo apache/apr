@@ -93,7 +93,7 @@ ap_status_t ap_create_pipe(ap_file_t **in, ap_file_t **out, ap_pool_t *cont)
     SECURITY_ATTRIBUTES sa;
 
     sa.nLength = sizeof(sa);
-    sa.bInheritHandle = APR_TRUE;
+    sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
     (*in) = (ap_file_t *)ap_pcalloc(cont, sizeof(ap_file_t));
