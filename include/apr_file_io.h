@@ -738,7 +738,7 @@ apr_status_t apr_unlock_file(apr_file_t *thefile);
  * @param new_path The path of the file.  
  * @param thefile The currently open file.
  */                     
-apr_status_t apr_get_filename(char **new_path, apr_file_t *thefile);
+apr_status_t apr_get_filename(const char **new_path, apr_file_t *thefile);
 
 /**
  * Get the file name of the current directory entry.
