@@ -231,7 +231,7 @@ APR_DECLARE(apr_status_t) apr_md5_set_xlate(apr_md5_ctx_t *context,
  */
 APR_DECLARE(apr_status_t) apr_md5_update(apr_md5_ctx_t *context,
                                      const unsigned char *input,
-                                     unsigned int inputLen)
+                                     apr_size_t inputLen)
 {
     unsigned int i, idx, partLen;
 #if APR_HAS_XLATE
@@ -503,7 +503,7 @@ APR_DECLARE(apr_status_t) apr_md5_encode(const char *pw, const char *salt,
     char passwd[120], *p;
     const char *sp, *ep;
     unsigned char final[MD5_DIGESTSIZE];
-    int sl, pl, i;
+    apr_ssize_t sl, pl, i;
     apr_md5_ctx_t ctx, ctx1;
     unsigned long l;
 
