@@ -37,7 +37,8 @@ PROGRAMS = \
 	testprocmutex@EXEEXT@ \
 	testvsn@EXEEXT@ \
 	testsleep@EXEEXT@ \
-	testrand@EXEEXT@
+	testrand@EXEEXT@ \
+	testdup@EXEEXT@
 
 TARGETS = $(PROGRAMS)
 
@@ -169,6 +170,9 @@ testvsn@EXEEXT@: testvsn.lo $(LOCAL_LIBS)
 
 testsleep@EXEEXT@: testsleep.lo $(LOCAL_LIBS)
 	$(LINK) testsleep.lo $(LOCAL_LIBS) $(ALL_LIBS)
+
+testdup@EXEEXT@: testdup.lo $(LOCAL_LIBS)
+	$(LINK) testdup.lo $(LOCAL_LIBS) $(ALL_LIBS)
 
 testrand@EXEEXT@: testrand.lo $(LOCAL_LIBS)
 	$(LINK) testrand.lo $(LOCAL_LIBS) $(ALL_LIBS)
