@@ -73,6 +73,11 @@ int main()
     ap_size_t nbytes;
     char *buf;
 
+    if (ap_initialize() != APR_SUCCESS) {
+        fprintf(stderr, "Couldn't initialize.");
+        exit(-1);
+    }
+    atexit(ap_terminate);
     if (ap_create_context(&context, NULL) != APR_SUCCESS) {
         fprintf(stderr, "Couldn't allocate context.");
         exit(-1);
