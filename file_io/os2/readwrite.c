@@ -62,7 +62,7 @@
 
 ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
-    ULONG rc;
+    ULONG rc = 0;
     ULONG bytesread;
 
     if (!thefile->isopen) {
@@ -70,27 +70,69 @@ ap_status_t ap_read(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         return APR_EBADF;
     }
 
-    rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);
+    if (thefile->buffered) {
+        char *pos = (char *)buf;
+        ULONG blocksize;
+        ULONG size = *nbytes;
 
-    if (rc) {
-        *nbytes = 0;
+        if (thefile->direction == 1) {
+            ap_flush(thefile);
+            thefile->bufpos = 0;
+            thefile->direction = 0;
+            thefile->dataRead = 0;
+        }
+
+        while (rc == 0 && size > 0) {
+            if (thefile->bufpos >= thefile->dataRead) {
+                rc = DosRead(thefile->filedes, thefile->buffer, APR_FILE_BUFSIZE, &thefile->dataRead );
+                if (thefile->dataRead == 0)
+                    break;
+                thefile->filePtr += thefile->dataRead;
+                thefile->bufpos = 0;
+            }
+
+            blocksize = size > thefile->dataRead - thefile->bufpos ? thefile->dataRead - thefile->bufpos : size;
+            memcpy(pos, thefile->buffer + thefile->bufpos, blocksize);
+            thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
+        *nbytes = rc == 0 ? pos - (char *)buf : 0;
+        
+        // if an error occurred report it
+        // if we read some data but hit EOF before reading 'size' bytes, return Ok (0)
+        // if we hit EOF with no data read, return -1
+        if (size && rc == 0 && pos == (char *)buf) {
+            thefile->eof_hit = TRUE;
+            *_errno() = APR_EOF;
+            return APR_EOF;
+        }
         return os2errno(rc);
+    } else {
+        rc = DosRead(thefile->filedes, buf, *nbytes, &bytesread);
+
+        if (rc) {
+            *nbytes = 0;
+            return os2errno(rc);
+        }
+
+        *nbytes = bytesread;
+        
+        if (bytesread == 0) {
+            thefile->eof_hit = TRUE;
+            return APR_EOF;
+        }
+
+        return APR_SUCCESS;
     }
-    
-    if (bytesread == 0) {
-        thefile->eof_hit = TRUE;
-        return APR_EOF;
-    }
-    
-    *nbytes = bytesread;
-    return APR_SUCCESS;
 }
 
 
 
 ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
 {
-    ULONG rc;
+    ULONG rc = 0;
     ULONG byteswritten;
 
     if (!thefile->isopen) {
@@ -98,16 +140,44 @@ ap_status_t ap_write(struct file_t *thefile, void *buf, ap_ssize_t *nbytes)
         return APR_EBADF;
     }
 
-    rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
+    if (thefile->buffered) {
+        char *pos = (char *)buf;
+        int blocksize;
+        int size = *nbytes;
 
-    if (rc) {
-        *nbytes = 0;
+        if ( thefile->direction == 0 ) {
+            // Position file pointer for writing at the offset we are logically reading from
+            ULONG offset = thefile->filePtr - thefile->dataRead + thefile->bufpos;
+            if (offset != thefile->filePtr)
+                DosSetFilePtr(thefile->filedes, offset, FILE_BEGIN, &thefile->filePtr );
+            thefile->bufpos = thefile->dataRead = 0;
+            thefile->direction = 1;
+        }
+
+        while (rc == 0 && size > 0) {
+            if (thefile->bufpos == APR_FILE_BUFSIZE)   // write buffer is full
+                ap_flush(thefile);
+
+            blocksize = size > APR_FILE_BUFSIZE - thefile->bufpos ? APR_FILE_BUFSIZE - thefile->bufpos : size;
+            memcpy(thefile->buffer + thefile->bufpos, pos, blocksize);
+            thefile->bufpos += blocksize;
+            pos += blocksize;
+            size -= blocksize;
+        }
+
         return os2errno(rc);
+    } else {
+        rc = DosWrite(thefile->filedes, buf, *nbytes, &byteswritten);
+
+        if (rc) {
+            *nbytes = 0;
+            return os2errno(rc);
+        }
+
+        *nbytes = byteswritten;
+        thefile->validstatus = FALSE;
+        return APR_SUCCESS;
     }
-    
-    *nbytes = byteswritten;
-    thefile->validstatus = FALSE;
-    return APR_SUCCESS;
 }
 
 
@@ -176,16 +246,17 @@ ap_status_t ap_ungetc(char ch, ap_file_t *thefile)
 ap_status_t ap_getc(char *ch, ap_file_t *thefile)
 {
     ULONG rc;
-    ULONG bytesread;
+    int bytesread;
 
     if (!thefile->isopen) {
         return APR_EBADF;
     }
 
-    rc = DosRead(thefile->filedes, ch, 1, &bytesread);
+    bytesread = 1;
+    rc = ap_read(thefile, ch, &bytesread);
 
     if (rc) {
-        return os2errno(rc);
+        return rc;
     }
     
     if (bytesread == 0) {
@@ -210,10 +281,25 @@ ap_status_t ap_puts(char *str, ap_file_t *thefile)
 
 ap_status_t ap_flush(ap_file_t *thefile)
 {
-    /* There isn't anything to do if we aren't buffering the output
-     * so just return success.
-     */
-    return APR_SUCCESS; 
+    if (thefile->buffered) {
+        ULONG written = 0;
+        int rc = 0;
+
+        if (thefile->direction == 1 && thefile->bufpos) {
+            rc = DosWrite(thefile->filedes, thefile->buffer, thefile->bufpos, &written);
+            thefile->filePtr += written;
+
+            if (rc == 0)
+                thefile->bufpos = 0;
+        }
+
+        return os2errno(rc);
+    } else {
+        /* There isn't anything to do if we aren't buffering the output
+         * so just return success.
+         */
+        return APR_SUCCESS;
+    }
 }
 
 
