@@ -293,7 +293,7 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
 {
     struct hostent *hp;
 
-    if (hostname == NULL) {
+    if (hostname != NULL) {
         hp = gethostbyname(hostname);
 
         if ((sock->socketdes < 0) || (!sock->addr)) {
