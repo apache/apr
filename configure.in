@@ -487,15 +487,15 @@ AC_CHECK_FUNCS(getgrgid_r)
 dnl #----------------------------- Checking for Shared Memory Support 
 echo $ac_n "${nl}Checking for Shared Memory Support...${nl}"
 
-AC_HAVE_HEADERS(sys/mman.h)
+AC_CHECK_HEADERS(sys/mman.h)
 APR_CHECK_DEFINE(MAP_ANON, sys/mman.h)
-AC_HAVE_FUNCS(mmap munmap shm_open shm_unlink)
+AC_CHECK_FUNCS(mmap munmap shm_open shm_unlink)
 APR_CHECK_FILE(/dev/zero)
-AC_HAVE_HEADERS(sys/ipc.h sys/shm.h sys/file.h)
-AC_HAVE_FUNCS(shmget shmat shmdt shmctl)
-AC_HAVE_HEADERS(kernel/OS.h)
-AC_HAVE_FUNCS(create_area)
-AC_HAVE_HEADERS(os2.h)
+AC_CHECK_HEADERS(sys/ipc.h sys/shm.h sys/file.h)
+AC_CHECK_FUNCS(shmget shmat shmdt shmctl)
+AC_CHECK_HEADERS(kernel/OS.h)
+AC_CHECK_FUNCS(create_area)
+AC_CHECK_HEADERS(os2.h)
 
 dnl Now we determine which one is our anonymous shmem preference.
 haveshmgetanon="0"
