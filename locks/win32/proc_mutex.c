@@ -57,6 +57,7 @@
 #include "apr_general.h"
 #include "apr_strings.h"
 #include "apr_portable.h"
+#include "apr_arch_file_io.h"
 #include "apr_arch_proc_mutex.h"
 #include "apr_arch_misc.h"
 
@@ -64,8 +65,10 @@ static apr_status_t proc_mutex_cleanup(void *mutex_)
 {
     apr_proc_mutex_t *mutex = mutex_;
 
-    if (CloseHandle(mutex->handle) == 0) {
-        return apr_get_os_error();
+    if (mutex->handle) {
+        if (CloseHandle(mutex->handle) == 0) {
+            return apr_get_os_error();
+        }
     }
     return APR_SUCCESS;
 }
@@ -76,21 +79,32 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_create(apr_proc_mutex_t **mutex,
                                                 apr_pool_t *pool)
 {
     HANDLE hMutex;
+    void *mutexkey;
 
-    /* With Win2000 Terminal Services, the Mutex name can have a 
-     * "Global\" or "Local\" prefix to explicitly create the object 
-     * in the global or session name space.  Without Terminal Service
-     * running on Win2000, Global\ and Local\ are ignored.  These
-     * prefixes are only valid on Win2000+
+    /* res_name_from_filename turns fname into a pseduo-name
+     * without slashes or backslashes, and prepends the \global
+     * prefix on Win2K and later
      */
     if (fname) {
-        if (apr_os_level >= APR_WIN_2000)
-            fname = apr_pstrcat(pool, "Global\\", fname, NULL);
-        else
-            fname = apr_pstrdup(pool, fname);
+        mutexkey = res_name_from_filename(fname, 1, pool);
+    }
+    else {
+        mutexkey = NULL;
     }
 
-    hMutex = CreateMutex(NULL, FALSE, fname);
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+    {
+        hMutex = CreateMutexW(NULL, FALSE, mutexkey);
+    }
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
+    {
+        hMutex = CreateMutexA(NULL, FALSE, mutexkey);
+    }
+#endif
+
     if (!hMutex) {
 	return apr_get_os_error();
     }
@@ -109,13 +123,32 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_child_init(apr_proc_mutex_t **mutex,
                                                     apr_pool_t *pool)
 {
     HANDLE hMutex;
+    void *mutexkey;
 
-    if (apr_os_level >= APR_WIN_2000)
-        fname = apr_pstrcat(pool, "Global\\", fname, NULL);
-    else
-        fname = apr_pstrdup(pool, fname);
+    if (!fname) {
+        /* Reinitializing unnamed mutexes is a noop in the Unix code. */
+        return APR_SUCCESS;
+    }
 
-    hMutex = OpenMutex(MUTEX_ALL_ACCESS, FALSE, fname);
+    /* res_name_from_filename turns file into a pseudo-name
+     * without slashes or backslashes, and prepends the \global
+     * prefix on Win2K and later
+     */
+    mutexkey = res_name_from_filename(fname, 1, pool);
+
+#if APR_HAS_UNICODE_FS
+    IF_WIN_OS_IS_UNICODE
+    {
+        hMutex = OpenMutexW(MUTEX_ALL_ACCESS, FALSE, mutexkey);
+    }
+#endif
+#if APR_HAS_ANSI_FS
+    ELSE_WIN_OS_IS_ANSI
+    {
+        hMutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, mutexkey);
+    }
+#endif
+
     if (!hMutex) {
 	return apr_get_os_error();
     }
@@ -174,7 +207,7 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex)
 
 APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex)
 {
-    return "win32mutex";
+    return mutex->fname;
 }
 
 APR_DECLARE(const char *) apr_proc_mutex_defname(void)
