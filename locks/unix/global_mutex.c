@@ -58,18 +58,19 @@
 #include "apr_proc_mutex.h"
 #include "apr_thread_mutex.h"
 
-
 static apr_status_t global_mutex_cleanup(void *data)
 {
     apr_global_mutex_t *m = (apr_global_mutex_t *)data;
     apr_status_t rv;
 
+#if APR_HAS_THREADS
     if (m->thread_mutex) {
         rv = apr_thread_mutex_destroy(m->thread_mutex);
         if (rv != APR_SUCCESS) {
             return rv;
         }
     }
+#endif /* APR_HAS_THREADS */
     rv = apr_proc_mutex_destroy(m->proc_mutex);
     if (rv != APR_SUCCESS) {
        return rv;
@@ -93,6 +94,7 @@ APR_DECLARE(apr_status_t) apr_global_mutex_create(apr_global_mutex_t **mutex,
         return rv;
     }
 
+#if APR_HAS_THREADS
     if (m->proc_mutex->inter_meth->flags & APR_PROCESS_LOCK_MECH_IS_GLOBAL) {
         m->thread_mutex = NULL; /* We don't need a thread lock. */
     }
@@ -103,6 +105,7 @@ APR_DECLARE(apr_status_t) apr_global_mutex_create(apr_global_mutex_t **mutex,
             return rv;
         }
     }
+#endif /* APR_HAS_THREADS */
 
     apr_pool_cleanup_register(m->pool, (void *)m,
                               global_mutex_cleanup, apr_pool_cleanup_null);
@@ -122,12 +125,14 @@ APR_DECLARE(apr_status_t) apr_global_mutex_lock(apr_global_mutex_t *mutex)
 {
     apr_status_t rv;
 
+#if APR_HAS_THREADS
     if (mutex->thread_mutex) {
         rv = apr_thread_mutex_lock(mutex->thread_mutex);
         if (rv != APR_SUCCESS) {
             return rv;
         }
     }
+#endif /* APR_HAS_THREADS */
     rv = apr_proc_mutex_lock(mutex->proc_mutex);
     if (rv != APR_SUCCESS) {
         return rv;
@@ -139,12 +144,14 @@ APR_DECLARE(apr_status_t) apr_global_mutex_trylock(apr_global_mutex_t *mutex)
 {
     apr_status_t rv;
 
+#if APR_HAS_THREADS
     if (mutex->thread_mutex) {
         rv = apr_thread_mutex_trylock(mutex->thread_mutex);
         if (rv != APR_SUCCESS) {
             return rv;
         }
     }
+#endif /* APR_HAS_THREADS */
     rv = apr_proc_mutex_trylock(mutex->proc_mutex);
     if (rv != APR_SUCCESS) {
         return rv;
@@ -160,12 +167,14 @@ APR_DECLARE(apr_status_t) apr_global_mutex_unlock(apr_global_mutex_t *mutex)
     if (rv != APR_SUCCESS) {
         return rv;
     }
+#if APR_HAS_THREADS
     if (mutex->thread_mutex) {
         rv = apr_thread_mutex_unlock(mutex->thread_mutex);
         if (rv != APR_SUCCESS) {
             return rv;
         }
     }
+#endif /* APR_HAS_THREADS */
     return APR_SUCCESS;
 }
 
@@ -175,4 +184,3 @@ APR_DECLARE(apr_status_t) apr_global_mutex_destroy(apr_global_mutex_t *mutex)
 }
 
 APR_POOL_IMPLEMENT_ACCESSOR(global_mutex);
-
