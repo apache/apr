@@ -89,6 +89,7 @@ ap_status_t ap_createprocattr_init(struct procattr_t **new, ap_context_t *cont)
     (*new)->child_err = NULL;
     (*new)->currdir = NULL; 
     (*new)->cmdtype = APR_PROGRAM;
+    (*new)->detached = 0; 
     return APR_SUCCESS;
 }
 
