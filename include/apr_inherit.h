@@ -70,7 +70,7 @@ void apr_##name##_set_inherit(apr_##name##_t *name)                 \
 {                                                                   \
     if (!name->inherit) {                                           \
         name->inherit = 1;                                          \
-        apr_pool_cleanup_register(name->##pool, (void *)##name##,   \
+        apr_pool_cleanup_register(name->pool, (void *)name,   \
                                   NULL, cleanup);                   \
     }                                                               \
 }
@@ -83,7 +83,7 @@ void apr_##name##_unset_inherit(apr_##name##_t *name)               \
 {                                                                   \
     if (name->inherit) {                                            \
         name->inherit = 0;                                          \
-        apr_pool_cleanup_kill(name->##pool, (void *)##name##,       \
+        apr_pool_cleanup_kill(name->pool, (void *)name,       \
                               NULL, cleanup);                       \
     }                                                               \
 }
