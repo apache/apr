@@ -118,8 +118,28 @@ AC_DEFUN([APR_FIND_APR], [
       AC_MSG_ERROR([the --with-apr parameter is incorrect. It must specify an install prefix, a build directory, or an apr-config file.])
     fi
   ],[
-    dnl if we have a bundled source directory, use it
-    if test -d "$1"; then
+    dnl If we allow installed copies, check those before using bundled copy.
+    if test -n "$3" && test "$3" = "1"; then
+      for apr_temp_apr_config_file in $apr_temp_acceptable_apr_config
+      do
+        if $apr_temp_apr_config_file --help > /dev/null 2>&1 ; then
+          apr_found="yes"
+          apr_config="$apr_temp_apr_config_file"
+          break
+        else
+          dnl look in some standard places
+          for lookdir in /usr /usr/local /usr/local/apr /opt/apr /usr/local/apache2; do
+            if $TEST_X "$lookdir/bin/$apr_temp_apr_config_file"; then
+              apr_found="yes"
+              apr_config="$lookdir/bin/$apr_temp_apr_config_file"
+              break 2
+            fi
+          done
+        fi
+      done
+    fi
+    dnl if we have not found anything yet and have bundled source, use that
+    if test "$apr_found" = "no" && test -d "$1"; then
       apr_temp_abs_srcdir="`cd $1 && pwd`"
       apr_found="reconfig"
       apr_bundled_major="`sed -n '/#define.*APR_MAJOR_VERSION/s/^[^0-9]*\([0-9]*\).*$/\1/p' \"$1/include/apr_version.h\"`"
@@ -139,25 +159,6 @@ AC_DEFUN([APR_FIND_APR], [
       else
         apr_config="$1/$apr_temp_apr_config_file"
       fi
-    fi
-    if test "$apr_found" = "no" && test -n "$3" && test "$3" = "1"; then
-      for apr_temp_apr_config_file in $apr_temp_acceptable_apr_config
-      do
-        if $apr_temp_apr_config_file --help > /dev/null 2>&1 ; then
-          apr_found="yes"
-          apr_config="$apr_temp_apr_config_file"
-          break
-        else
-          dnl look in some standard places
-          for lookdir in /usr /usr/local /usr/local/apr /opt/apr /usr/local/apache2; do
-            if $TEST_X "$lookdir/bin/$apr_temp_apr_config_file"; then
-              apr_found="yes"
-              apr_config="$lookdir/bin/$apr_temp_apr_config_file"
-              break 2
-            fi
-          done
-        fi
-      done
     fi
   ])
 
