@@ -1,3 +1,4 @@
 MODULE  LIBC.NLM
 MODULE  WS2_32.NLM
 EXPORT	@aprlib.imp
+EXPORT	@aprutil.imp
