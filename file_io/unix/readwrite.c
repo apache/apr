@@ -241,21 +241,22 @@ APR_DECLARE(apr_status_t) apr_file_writev(apr_file_t *thefile, const struct iove
         return APR_SUCCESS;
     }
 #else
-    int i;
-    int tbytes;
-    apr_status_t rv = APR_SUCCESS;
+    /**
+     * The problem with trying to output the entire iovec is that we cannot
+     * maintain the behavoir that a real writev would have.  If we iterate
+     * over the iovec one at a time, we loose the atomic properties of 
+     * writev().  The other option is to combine the entire iovec into one
+     * buffer that we could then send in one call to write().  This is not 
+     * reasonable since we do not know how much data an iocev could contain.
+     *
+     * The only reasonable option, that maintains the semantics of a real 
+     * writev(), is to only write the first iovec.  Callers of file_writev()
+     * must deal with partial writes as they normally would. If you want to 
+     * ensure an entire iovec is written, use apr_file_writev_full().
+     */
 
-    *nbytes = 0;
-
-    for (i = 0; i < nvec; i++) {
-         tbytes = vec[i].iov_len;
-         rv = apr_file_write(thefile, vec[i].iov_base, &tbytes);
-         *nbytes += tbytes;
-         if (rv != APR_SUCCESS || tbytes < vec[i].iov_len) {
-             break;
-         }
-    }
-    return rv;
+    *nbytes = vec[0].iov_len;
+    return apr_file_write(thefile, vec[0].iov_base, nbytes);
 #endif
 }
 
