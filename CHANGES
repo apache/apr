@@ -1,5 +1,14 @@
 Changes with APR b1
 
+  *) Add a version number to the library name (e.g. libapr-1.so) so
+     that apps can do things like: -lapr-1 or -lapr-2, depending on
+     which version they want to use and link against.
+
+  *) Add --version to apr-config so that apps can retrieve the version
+     information of the (installed) APR. [Greg Stein]
+
+  *) Remove the APRVARS system; apps should use apr-config. [Greg Stein]
+
   *) EBCDIC: fix compile failure in strings/apr_strings.c in
      httpd-2.0.40 with the following error message:
      CANNOT COMPILE apr_strtoi64(), only ASCII and EBCDIC supported
