@@ -78,6 +78,7 @@ testall.ncb
 testall.opt
 testall.plg
 proc_child
+sockchild
 *.bb
 *.bbg
 *.da

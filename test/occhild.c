@@ -1,5 +1,10 @@
 #include "apr.h"
 #include "apr_file_io.h"
+#include "apr.h"
+
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 
 int main(void)
 {

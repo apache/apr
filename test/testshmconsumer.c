@@ -20,6 +20,12 @@
 #include "apr_strings.h"
 #include "apr_time.h"
 #include "testshm.h"
+#include "apr.h"
+
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 
 #if APR_HAS_SHARED_MEMORY
 

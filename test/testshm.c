@@ -22,14 +22,10 @@
 #include "apr_thread_proc.h"
 #include "apr_time.h"
 #include "testshm.h"
+#include "apr.h"
 
-/* XXX I'm sure there has to be a better way to do this ... */
-#ifdef WIN32
-#define EXTENSION ".exe"
-#elif NETWARE
-#define EXTENSION ".nlm"
-#else
-#define EXTENSION
+#if APR_HAVE_STDLIB_H
+#include <stdlib.h>
 #endif
 
 #if APR_HAS_SHARED_MEMORY
