@@ -209,6 +209,13 @@ APR_DECLARE(apr_status_t) apr_socket_addr_get(apr_sockaddr_t **sa,
         *sa = sock->local_addr;
     }
     else if (which == APR_REMOTE) {
+        if (sock->remote_addr_unknown) {
+            apr_status_t rv = get_remote_addr(sock);
+
+            if (rv != APR_SUCCESS) {
+                return rv;
+            }
+        }
         *sa = sock->remote_addr;
     }
     else {
