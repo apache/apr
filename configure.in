@@ -627,6 +627,7 @@ if test "$threads" = "1"; then
     AC_CHECK_DEFINE(PTHREAD_PROCESS_SHARED, pthread.h)
 fi
 
+# The last AC_DECIDE to execute sets the default
 AC_BEGIN_DECISION([apr_lock implementation method])
 AC_IFALLYES(func:semget func:semctl,
             AC_DECIDE(USE_SYSVSEM_SERIALIZE, [SysV IPC semget()]))
