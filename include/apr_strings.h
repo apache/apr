@@ -198,9 +198,10 @@ APR_DECLARE_NONSTD(char *) apr_psprintf(apr_pool_t *p, const char *fmt, ...)
  *          destination string, we return a pointer to the terminating '\0'
  *          to allow us to check for truncation.
  * </PRE>
- * @deffunc char *apr_cpystrn(char *dst, const char *src, size_t dst_size)
+ * @deffunc char *apr_cpystrn(char *dst, const char *src, apr_size_t dst_size)
  */
-APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size);
+APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src,
+                                apr_size_t dst_size);
 
 /**
  * Strip spaces from a string

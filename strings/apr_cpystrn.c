@@ -80,7 +80,7 @@
  * apr_cpystrn() follows the same call structure as strncpy().
  */
 
-APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, size_t dst_size)
+APR_DECLARE(char *) apr_cpystrn(char *dst, const char *src, apr_size_t dst_size)
 {
 
     char *d, *end;
