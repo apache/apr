@@ -907,7 +907,7 @@ AC_SUBST(struct_rlimit)
 dnl #----------------------------- Checking for Locking Characteristics 
 echo $ac_n "${nl}Checking for Locking...${nl}"
 
-AC_CHECK_FUNCS(semget semctl)
+AC_CHECK_FUNCS(semget semctl flock)
 
 # It's stupid, but not all platforms have union semun, even those that need it.
 AC_MSG_CHECKING(for union semun in sys/sem.h)

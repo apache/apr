@@ -123,7 +123,7 @@ extern const apr_unix_lock_methods_t apr_unix_fcntl_methods;
 #define APR_HAS_FCNTL_SERIALIZE        0
 #endif
 
-#if defined(HAVE_SYS_FILE_H) && defined(HAVE_LOCK_EX)
+#if defined(HAVE_FLOCK) && defined(HAVE_LOCK_EX)
 #define APR_HAS_FLOCK_SERIALIZE        1
 extern const apr_unix_lock_methods_t apr_unix_flock_methods;
 #else
