@@ -68,7 +68,9 @@
 #include <unistd.h>
 #endif
 #if APR_HAVE_CONIO_H
+#pragma warning(disable: 4032)
 #include <conio.h>
+#pragma warning(default: 4032)
 #endif
 #if APR_HAVE_STDLIB_H
 #include <stdlib.h>
