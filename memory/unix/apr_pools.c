@@ -1271,17 +1271,15 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_set(const void *data, const char *ke
 			      apr_status_t (*cleanup) (void *),
 			      apr_pool_t *cont)
 {
-    apr_size_t keylen = strlen(key);
-
     if (cont->prog_data == NULL)
         cont->prog_data = apr_hash_make(cont);
 
-    if (apr_hash_get(cont->prog_data, key, keylen) == NULL){
+    if (apr_hash_get(cont->prog_data, key, APR_HASH_KEY_STRING) == NULL){
         char *new_key = apr_pstrdup(cont, key);
-        apr_hash_set(cont->prog_data, new_key, keylen, data);
+        apr_hash_set(cont->prog_data, new_key, APR_HASH_KEY_STRING, data);
     } 
     else {
-        apr_hash_set(cont->prog_data, key, keylen, data);
+        apr_hash_set(cont->prog_data, key, APR_HASH_KEY_STRING, data);
     }
 
     if (cleanup) {
@@ -1294,12 +1292,10 @@ APR_DECLARE(apr_status_t) apr_pool_userdata_setn(const void *data, const char *k
        apr_status_t (*cleanup) (void *),
        apr_pool_t *cont)
 {
-    apr_size_t keylen = strlen(key);
-
     if (cont->prog_data == NULL)
         cont->prog_data = apr_hash_make(cont);
 
-    apr_hash_set(cont->prog_data, key, keylen, data);
+    apr_hash_set(cont->prog_data, key, APR_HASH_KEY_STRING, data);
 
     if (cleanup) {
         apr_pool_cleanup_register(cont, data, cleanup, cleanup);
