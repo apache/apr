@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     apr_proc_t proc2;
     apr_status_t s1;
     apr_status_t s2;
-    char *args[2];
+    const char *args[2];
 
     fprintf(stdout, "Initializing.........");
     if (apr_initialize() != APR_SUCCESS) {
