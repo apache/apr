@@ -1,5 +1,10 @@
 Changes with APR b1
 
+  *) Added support for Posix semaphores (sem_open, et.al.) for mutex
+     locking. We use named semaphores in this implementation. The
+     default priority is between pthread and sysvsem.
+     [Jim Jagielski]
+
   *) Get flock-based mutexes to work in apps like Apache.  Use the
      same permissions on flock- and fcntl-based mutexes as Apache
      1.3.  [Jeff Trawick]
