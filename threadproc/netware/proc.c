@@ -57,11 +57,16 @@
 #include "apr_strings.h"
 #include "apr_portable.h"
 
-/* 
- * some of the ideas expressed herein are based off of Microsoft
- * Knowledge Base article: Q190351
- *
- */
+#include <nks/vm.h>
+
+apr_status_t apr_netware_proc_cleanup(void *theproc)
+{
+    apr_proc_t *proc = theproc;
+
+	NXVmDestroy(proc->pid);
+    return APR_SUCCESS;
+}
+
 APR_DECLARE(apr_status_t) apr_procattr_create(apr_procattr_t **new,apr_pool_t *cont)
 {
     (*new) = (apr_procattr_t *)apr_pcalloc(cont, sizeof(apr_procattr_t));
@@ -147,10 +152,10 @@ APR_DECLARE(apr_status_t) apr_procattr_child_in_set(apr_procattr_t *attr, apr_fi
         apr_file_pipe_create(&attr->child_in, &attr->parent_in, attr->cntxt);
 
     if (child_in != NULL)
-        apr_file_dup(&attr->child_in, child_in, attr->cntxt);
+        apr_file_dup2(attr->child_in, child_in, attr->cntxt);
 
     if (parent_in != NULL)
-        apr_file_dup(&attr->parent_in, parent_in, attr->cntxt);
+        apr_file_dup2(attr->parent_in, parent_in, attr->cntxt);
 
     return APR_SUCCESS;
 }
@@ -163,10 +168,10 @@ APR_DECLARE(apr_status_t) apr_procattr_child_out_set(apr_procattr_t *attr, apr_f
         apr_file_pipe_create(&attr->child_out, &attr->parent_out, attr->cntxt);
 
     if (child_out != NULL)
-        apr_file_dup(&attr->child_out, child_out, attr->cntxt);
+        apr_file_dup2(attr->child_out, child_out, attr->cntxt);
 
     if (parent_out != NULL)
-        apr_file_dup(&attr->parent_out, parent_out, attr->cntxt);
+        apr_file_dup2(attr->parent_out, parent_out, attr->cntxt);
 
     return APR_SUCCESS;
 }
@@ -179,10 +184,10 @@ APR_DECLARE(apr_status_t) apr_procattr_child_err_set(apr_procattr_t *attr, apr_f
         apr_file_pipe_create(&attr->child_err, &attr->parent_err, attr->cntxt);
 
     if (child_err != NULL)
-        apr_file_dup(&attr->child_err, child_err, attr->cntxt);
+        apr_file_dup2(attr->child_err, child_err, attr->cntxt);
 
     if (parent_err != NULL)
-        apr_file_dup(&attr->parent_err, parent_err, attr->cntxt);
+        apr_file_dup2(attr->parent_err, parent_err, attr->cntxt);
 
     return APR_SUCCESS;
 }
@@ -201,6 +206,8 @@ APR_DECLARE(apr_status_t) apr_procattr_dir_set(apr_procattr_t *attr,
 APR_DECLARE(apr_status_t) apr_procattr_cmdtype_set(apr_procattr_t *attr,
                                      apr_cmdtype_e cmd) 
 {
+    if (cmd != APR_PROGRAM)
+        return APR_ENOTIMPL;
     attr->cmdtype = cmd;
     return APR_SUCCESS;
 }
@@ -279,112 +286,100 @@ static apr_status_t limit_proc(apr_procattr_t *attr)
     return APR_SUCCESS;
 }
 
-APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *new,
+APR_DECLARE(apr_status_t) apr_proc_create(apr_proc_t *newproc,
 									const char *progname, 
 									const char * const *args, 
 									const char * const *env,
                               		apr_procattr_t *attr, 
                               		apr_pool_t *cont)
 {
-#if 0
-    int i;
+    int i, envCount;
     const char **newargs;
+    char **newenv;
+    NXVmId_t newVM;
+    unsigned long flags = 0;
 
-    new->in = attr->parent_in;
-    new->err = attr->parent_err;
-    new->out = attr->parent_out;
-    if ((new->pid = fork()) < 0) {
+    NXNameSpec_t nameSpec;
+    NXExecEnvSpec_t envSpec;
+
+    /* Set up the info for the NLM to be started */
+    nameSpec.ssType = NX_OBJ_FILE;
+    nameSpec.ssPathCtx = NULL;
+    nameSpec.ssPath = (void*)progname;
+
+    /* Count how many arguments there are and assign them 
+        to the environent */
+    for (i=0;args && args[i];i++);
+    envSpec.esArgc = i;
+    envSpec.esArgv = (void**)args;
+
+    /* Count how many environment variables there are in the
+        system, add any new environment variables and place
+        them in the environment. */
+    for (i=0;env && env[i];i++);
+    envCount = NXGetEnvCount();
+    if ((envCount + i) > 0) {
+        newenv = (char **) NXMemAlloc(sizeof(char *) * (envCount+i+1), 0);
+        if (!newenv)
+            return APR_ENOMEM;
+        NXCopyEnv(newenv, envCount);
+        for (i=0;env && env[i];i++) {
+            newenv[envCount+i-1] = (char*)env[i];
+        }
+        newenv[envCount+i] = NULL;
+
+        envSpec.esEnv = (void**)newenv;
+    }
+    else
+        envSpec.esEnv = NULL;
+
+    if (attr->child_in) {
+        envSpec.esStdin.ssType = NX_OBJ_FIFO;
+        envSpec.esStdin.ssHandle = attr->child_in->filedes;
+    }
+    else {
+        envSpec.esStdin.ssType = NX_OBJ_DEFAULT;
+        envSpec.esStdin.ssHandle = -1;
+    }
+    envSpec.esStdin.ssPathCtx = NULL;
+    envSpec.esStdin.ssPath = NULL;
+    if (attr->child_out) {
+        envSpec.esStdout.ssType = NX_OBJ_FIFO;
+        envSpec.esStdout.ssHandle = attr->child_out->filedes;
+    }
+    else {
+        envSpec.esStdout.ssType = NX_OBJ_DEFAULT;
+        envSpec.esStdout.ssHandle = -1;
+    }
+    envSpec.esStdout.ssPathCtx = NULL;
+    envSpec.esStdout.ssPath = NULL;
+    if (attr->child_err) {
+        envSpec.esStderr.ssType = NX_OBJ_FIFO;
+        envSpec.esStderr.ssHandle = attr->child_err->filedes;
+    }
+    else {
+        envSpec.esStderr.ssType = NX_OBJ_DEFAULT;
+        envSpec.esStderr.ssHandle = -1;
+    }
+    envSpec.esStderr.ssPathCtx = NULL;
+    envSpec.esStderr.ssPath = NULL;
+
+    if (attr->detached) {
+        flags = NX_VM_CREATE_DETACHED;
+    }
+    
+    newproc->in = attr->parent_in;
+    newproc->err = attr->parent_err;
+    newproc->out = attr->parent_out;
+    if (NXVmSpawn(&nameSpec, &envSpec, flags, &newVM) != 0) {
         return errno;
     }
-    else if (new->pid == 0) { 
-        int status;
-        /* child process */
-        if (attr->child_in) {
-            apr_file_close(attr->parent_in);
-            dup2(attr->child_in->filedes, STDIN_FILENO);
-            apr_file_close(attr->child_in);
-        }
-        if (attr->child_out) {
-            apr_file_close(attr->parent_out);
-            dup2(attr->child_out->filedes, STDOUT_FILENO);
-            apr_file_close(attr->child_out);
-        }
-        if (attr->child_err) {
-            apr_file_close(attr->parent_err);
-            dup2(attr->child_err->filedes, STDERR_FILENO);
-            apr_file_close(attr->child_err);
-        }
-        
-        apr_signal(SIGCHLD, SIG_DFL); /*not sure if this is needed or not */
-
-        if (attr->currdir != NULL) {
-            if (chdir(attr->currdir) == -1) {
-                exit(-1);   /* We have big problems, the child should exit. */
-            }
-        }
-
-        apr_pool_cleanup_for_exec();
-
-        if ((status = limit_proc(attr)) != APR_SUCCESS) {
-            return status;
-        }
-
-        if (attr->cmdtype == APR_SHELLCMD) {
-            i = 0;
-            while (args[i]) {
-                i++;
-            }
-            newargs =
-               (const char **) apr_palloc(cont, sizeof (char *) * (i + 3));
-            newargs[0] = SHELL_PATH;
-            newargs[1] = "-c";
-            i = 0;
-            while (args[i]) {
-                newargs[i + 2] = args[i]; 
-                i++;
-            }
-            newargs[i + 2] = NULL;
-            if (attr->detached) {
-                apr_proc_detach();
-            }
-            execve(SHELL_PATH, (char * const *) newargs, (char * const *)env);
-        }
-        else if (attr->cmdtype == APR_PROGRAM) {
-            if (attr->detached) {
-                apr_proc_detach();
-            }
-            execve(progname, (char * const *)args, (char * const *)env);
-        }
-        else if (attr->cmdtype == APR_PROGRAM_ENV) {
-            if (attr->detached) {
-                apr_proc_detach();
-            }
-            execv(progname, (char * const *)args);
-        }
-        else {
-            /* APR_PROGRAM_PATH */
-            if (attr->detached) {
-                apr_proc_detach();
-            }
-            execvp(progname, (char * const *)args);
-        }
-        exit(-1);  /* if we get here, there is a problem, so exit with an */ 
-                   /* error code. */
-    }
-    /* Parent process */
-    if (attr->child_in) {
-        apr_file_close(attr->child_in);
-    }
-    if (attr->child_out) {
-        apr_file_close(attr->child_out);
-    }
-    if (attr->child_err) {
-        apr_file_close(attr->child_err);
+    else { 
+        newproc->pid = newVM;
+        apr_pool_cleanup_register(cont, (void *)newproc, apr_netware_proc_cleanup,
+                         apr_pool_cleanup_null);
     }
     return APR_SUCCESS;
-#else
-    return APR_ENOTIMPL;
-#endif
 }
 
 APR_DECLARE(apr_status_t) apr_proc_wait_all_procs(apr_proc_t *proc,
