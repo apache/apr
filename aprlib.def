@@ -28,7 +28,7 @@ EXPORTS
 	apr_stat
         apr_lstat
 	apr_seek
-	apr_opendir
+	apr_dir_open
 	apr_closedir
 	apr_readdir
 	apr_rewinddir
