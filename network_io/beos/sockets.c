@@ -165,12 +165,17 @@ apr_status_t apr_connect(apr_socket_t *sock, const char *hostname)
 { 
     struct hostent *hp; 
 
-    hp = gethostbyname(hostname); 
-    if ((sock->socketdes < 0) || (!sock->remote_addr)) { 
-        return APR_ENOTSOCK; 
-    } 
+    if ((sock->socketdes < 0) || (!sock->remote_addr)) {
+        return APR_ENOTSOCK;
+    }
+
+    if (hostname != NULL){
+        hp = gethostbyname(hostname); 
+        if (!hp)
+            return (h_errno + APR_OS_START_SYSERR);
 
 	memcpy((char *)&sock->remote_addr->sin_addr, hp->h_addr , hp->h_length);
+    }
 
     sock->remote_addr->sin_family = AF_INET;
      
