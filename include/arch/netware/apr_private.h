@@ -84,6 +84,7 @@
 #define HAVE_STDDEF_H   1
 #define HAVE_STDLIB_H   1
 #define HAVE_SYS_STAT_H 1
+#define HAVE_SYS_MMAN_H 1
 #define HAVE_FCNTL_H    1
 #define HAVE_ICONV_H    1
 
@@ -164,6 +165,23 @@ void netware_pool_proc_cleanup ();
     are using the library. */
 int register_NLM(void *NLMHandle);
 int unregister_NLM(void *NLMHandle);
+
+/* Application global data management */
+extern int  gLibId;
+extern void *gLibHandle;
+
+typedef struct app_data {
+    int     initialized;
+    void*   gPool;
+    void*   gs_aHooksToSort;
+    void*   gs_phOptionalHooks;
+    void*   gs_phOptionalFunctions;
+} APP_DATA;
+
+int setGlobalPool(void *data);
+void* getGlobalPool();
+int setStatCache(void *data);
+void* getStatCache();
 
 /* Redefine malloc to use the library malloc call so 
     that all of the memory resources will be owned

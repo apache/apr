@@ -14,6 +14,7 @@
 #include "novsock2.h"
 
 #include "apr_pools.h"
+#include "apr_private.h"
 
 
 /* library-private data...*/
@@ -144,6 +145,28 @@ int DisposeLibraryData(void *data)
     return 0;
 }
 
+int setGlobalPool(void *data)
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
 
+    NXLock(gLibLock);
 
+    if (app_data && !app_data->gPool) {
+        app_data->gPool = data;
+    }
+
+    NXUnlock(gLibLock);
+    return 1;
+}
+
+void* getGlobalPool()
+{
+    APP_DATA *app_data = (APP_DATA*) get_app_data(gLibId);
+
+    if (app_data) {
+        return app_data->gPool;
+    }
+
+    return NULL;
+}
 
