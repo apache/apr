@@ -106,7 +106,7 @@ struct beos_key {
 	int  count;
 	sem_id  lock;
 	int32  ben_lock;
-	void (* destructor) ();
+	void (* destructor) (void *);
 };
 
 struct ap_procattr_t {
