@@ -166,7 +166,7 @@ apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t 
     (*in)->cntxt = cont;
     (*in)->filedes = filedes[0];
     (*in)->pipe = 1;
-    (*in)->fname = apr_pstrdup(cont, "PIPE");
+    (*in)->fname = NULL;
     (*in)->buffered = 0;
     (*in)->blocking = BLK_ON;
     (*in)->timeout = -1;
@@ -179,7 +179,7 @@ apr_status_t apr_file_pipe_create(apr_file_t **in, apr_file_t **out, apr_pool_t 
     (*out)->cntxt = cont;
     (*out)->filedes = filedes[1];
     (*out)->pipe = 1;
-    (*out)->fname = apr_pstrdup(cont, "PIPE");
+    (*out)->fname = NULL;
     (*out)->buffered = 0;
     (*out)->blocking = BLK_ON;
     (*out)->timeout = -1;
