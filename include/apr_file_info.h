@@ -219,7 +219,7 @@ APR_DECLARE(apr_status_t) apr_stat(apr_finfo_t *finfo, const char *fname,
  * @param fname The name of the file to stat.
  * @param wanted The desired apr_finfo_t fields, as a bit flag of APR_FINFO_ values 
  * @param cont the pool to use to allocate the new file. 
- * @deprecated This function is depreciated, it's equivilant to calling apr_stat with 
+ * @deprecated This function is deprecated, it's equivalent to calling apr_stat with 
  * the wanted flag value APR_FINFO_LINK
  */ 
 APR_DECLARE(apr_status_t) apr_lstat(apr_finfo_t *finfo, const char *fname,
