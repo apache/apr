@@ -155,10 +155,10 @@ APR_DECLARE(apr_hash_index_t *) apr_hash_next(apr_hash_index_t *hi)
     return hi;
 }
 
-APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_hash_t *ht)
+APR_DECLARE(apr_hash_index_t *) apr_hash_first(apr_pool_t *p, apr_hash_t *ht)
 {
     apr_hash_index_t *hi;
-    hi = apr_palloc(ht->pool, sizeof(*hi));
+    hi = apr_palloc(p, sizeof(*hi));
     hi->ht = ht;
     hi->index = 0;
     hi->this = NULL;
