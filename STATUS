@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2002/12/10 20:32:40 $]
+Last modified at [$Date: 2003/01/22 17:50:29 $]
 
 Release:
 
@@ -57,7 +57,6 @@ RELEASE SHOWSTOPPERS:
       further renames?
 
       1.0 showstopper (not 0.9.0): gstein
-       
 
     * When Win32 apr_proc_create was fixed, the apr_proc_t hproc
       member was added for that platform.  That's a problem (and
@@ -67,21 +66,6 @@ RELEASE SHOWSTOPPERS:
       (Aren't transparent types swell?)  Suggestions?
 
       1.0 showstopper (not 0.9.0): gstein
-
-    * Change apr_initialize to take the expected version (in some form)
-      and return an error code if the requirement isn't satisfied.
-
-      gstein: -1
-
-      Justin says: "Relying solely on the run-time linker isn't enough
-                    to guarantee versioning."
-      Greg says: "yup. but now the libraries have different names.
-                  -lapr-1 and -lapr-2. further, we can always add a
-                  utility function to check (the minor rev), rather
-                  than monkey with the initialization itself. the
-		  runtime linker will catch new function requirements
-		  across minor rev upgrades, but will not catch new
-		  constants."
 
     * For 1.0, clean up ability to specify protocol for a socket by
       axing apr_socket_create_ex(), adding protocol parm to 
