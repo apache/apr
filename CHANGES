@@ -1,5 +1,9 @@
 Changes with APR b1
 
+  *) Add an APR_GET_POOL macro to get a pool from any APR type that has
+     a pool.  This requires that ALL apr types put the pool as the first
+     field in their structure. [Ryan Bloom]
+
   *) Begin to remove the ability to allocate out of NULL pools.  The first
      problem to solve, is that we need an apr_lock in order to allocate
      pools, so that we can lock things out when allocating.  So, how do we
