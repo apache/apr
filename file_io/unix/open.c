@@ -249,6 +249,12 @@ APR_DECLARE(apr_status_t) apr_os_file_put(apr_file_t **file,
     (*file)->flags = flags | APR_FILE_NOCLEANUP;
     (*file)->buffered = (flags & APR_BUFFERED) > 0;
 
+#ifndef WAITIO_USES_POLL
+    /* Create a pollset with room for one descriptor. */
+    /* ### check return codes */
+    (void) apr_pollset_create(&(*file)->pollset, 1, pool, 0);
+#endif
+
     if ((*file)->buffered) {
         (*file)->buffer = apr_palloc(pool, APR_FILE_BUFSIZE);
 #if APR_HAS_THREADS
