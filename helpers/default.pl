@@ -12,9 +12,9 @@
 ## For quick and superficial customization, 
 ## simply change these variables
 
-$project_name     = '[My Project]';
+$project_name     = '[Apache Portable RunTime]';
 $company_logo     = '<img src="../images/ScanDocBig.jpg">'; # change this to an image tag.
-$copyright        = '&copy 2000 [My Name]';
+$copyright        = '&copy 2000 [Apache Software Foundation]';
 $image_directory  = "../images/";
 $bullet1_image    = $image_directory . "ball1.gif";
 $bullet2_image    = $image_directory . "ball2.gif";
