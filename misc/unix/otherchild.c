@@ -257,28 +257,3 @@ APR_DECLARE(void) apr_proc_other_child_refresh_all(int reason)
 }
 
 #endif /* APR_HAS_OTHER_CHILD */
-
-
-/* XXX: deprecated for removal in 1.0
- * The checks behaved differently between win32 and unix, while
- * the old win32 code did a health check, the unix code called
- * other_child_check only at restart.
- */
-APR_DECLARE(void) apr_proc_other_child_check(void)
-{
-#ifdef WIN32
-    apr_proc_other_child_refresh_all(APR_OC_REASON_RUNNING);
-#else
-    apr_proc_other_child_refresh_all(APR_OC_REASON_RESTART);
-#endif
-}
-
-/* XXX: deprecated for removal in 1.0
- * This really didn't test any sort of read - it simply notified
- * the maintenance function that the process had died.
- */
-APR_DECLARE(apr_status_t) apr_proc_other_child_read(apr_proc_t *proc, int status)
-{
-    return apr_proc_other_child_alert(proc, APR_OC_REASON_DEATH, status);
-}
-
