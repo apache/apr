@@ -162,7 +162,6 @@ SOURCE=.\i18n\unix\utf8_ucs2.c
 # Begin Source File
 
 SOURCE=.\i18n\unix\xlate.c
-# PROP Exclude_From_Build 1
 # End Source File
 # End Group
 # Begin Group "locks"
