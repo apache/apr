@@ -82,6 +82,18 @@ ap_status_t ap_set_pipe_timeout(ap_file_t *thepipe, ap_interval_time_t timeout)
     if (thepipe->pipe == 1) {
         if (ap_get_oslevel(thepipe->cntxt, &oslevel) == APR_SUCCESS &&
             oslevel >= APR_WIN_NT) {
+            /* Temporary hack to make CGIs work in alpha5 
+             * NT doesn't support timing out non-blocking pipes. Specifically,
+             * NT has no event notification to tell you when data has arrived
+             * on a pipe. select, WaitForSingleObject or WSASelect, et. al.
+             * do not tell you when data is available. You have to poll the read
+             * which just sucks. I will implement this using async i/o later.
+             * For now, if ap_set_pipe_timeout is set with a timeout, just make
+             * the pipe full blocking...*/
+            if (timeout > 0) {
+                setpipeblockmode(thepipe, PIPE_WAIT);
+                return APR_SUCCESS;
+            }
             if (timeout >= 0) {
                 /* Set the pipe non-blocking if it was previously blocking */  
                 if (thepipe->timeout < 0) {
