@@ -355,9 +355,10 @@ APR_DECLARE(apr_int64_t) apr_strtoi64(const char *nptr, char **endptr, int base)
 	if (c >= base)
 	    break;
 	val *= base;
-        if ( (any < 0) || (neg && (val > acc || (val -= c) > acc))
-                 || (val < acc || (val += c) < acc)) {
-            any = -1;
+        if ( (any < 0)	/* already noted an over/under flow - short circuit */
+           || (neg && (val > acc || (val -= c) > acc)) /* underflow */
+           || (val < acc || (val += c) < acc)) {       /* overflow */
+            any = -1;	/* once noted, over/underflows never go away */
 #ifdef APR_STRTOI64_OVERFLOW_IS_BAD_CHAR
             break;
 #endif
