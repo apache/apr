@@ -1,5 +1,8 @@
 Changes with APR 0.9.5
 
+  *) Remove apr_file_copy()'s 2Gb file size limit on some platforms.
+     [Joe Orton]
+
   *) Don't assume getnameinfo() can handle IPv4-mapped IPv6 addresses
      on any platforms.
      [Jeff Trawick, Joe Orton, Colm MacCárthaigh <colm stdlib.net>]
