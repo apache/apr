@@ -151,6 +151,19 @@ APR_DECLARE(apr_status_t) apr_proc_mutex_unlock(apr_proc_mutex_t *mutex);
 APR_DECLARE(apr_status_t) apr_proc_mutex_destroy(apr_proc_mutex_t *mutex);
 
 /**
+ * Display the name of the mutex, as it relates to the actual method used.
+ * This matches the valid options for Apache's AcceptMutex directive
+ * @param mutex the name of the mutex
+ */
+APR_DECLARE(const char *) apr_proc_mutex_name(apr_proc_mutex_t *mutex);
+
+/**
+ * Display the name of the default mutex: APR_LOCK_DEFAULT
+ * @param mutex the name of the default mutex
+ */
+APR_DECLARE(const char *) apr_proc_mutex_defname(void);
+
+/**
  * Get the pool used by this proc_mutex.
  * @return apr_pool_t the pool
  */
