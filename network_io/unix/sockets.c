@@ -54,6 +54,7 @@
 
 #include "apr_arch_networkio.h"
 #include "apr_network_io.h"
+#include "apr_strings.h"
 #include "apr_support.h"
 #include "apr_portable.h"
 #include "apr_arch_inherit.h"
@@ -318,13 +319,36 @@ apr_status_t apr_socket_connect(apr_socket_t *sock, apr_sockaddr_t *sa)
 
 apr_status_t apr_socket_data_get(void **data, const char *key, apr_socket_t *sock)
 {
-    return apr_pool_userdata_get(data, key, sock->cntxt);
+    sock_userdata_t *cur = sock->userdata;
+
+    *data = NULL;
+
+    while (cur) {
+        if (!strcmp(cur->key, key)) {
+            *data = cur->data;
+            break;
+        }
+        cur = cur->next;
+    }
+
+    return APR_SUCCESS;
 }
 
 apr_status_t apr_socket_data_set(apr_socket_t *sock, void *data, const char *key,
-                              apr_status_t (*cleanup) (void *))
+                                 apr_status_t (*cleanup) (void *))
 {
-    return apr_pool_userdata_set(data, key, cleanup, sock->cntxt);
+    sock_userdata_t *new = apr_palloc(sock->cntxt, sizeof(sock_userdata_t));
+
+    new->key = apr_pstrdup(sock->cntxt, key);
+    new->data = data;
+    new->next = sock->userdata;
+    sock->userdata = new;
+
+    if (cleanup) {
+        apr_pool_cleanup_register(sock->cntxt, data, cleanup, cleanup);
+    }
+
+    return APR_SUCCESS;
 }
 
 apr_status_t apr_os_sock_get(apr_os_sock_t *thesock, apr_socket_t *sock)

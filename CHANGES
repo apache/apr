@@ -1,4 +1,8 @@
 Changes with APR 0.9.4
+
+  *) apr_socket_data_set(): allow the same key to be used for
+     multiple sockets in the same pool.  [Jeff Trawick]
+
   *) Add new table function apr_table_compress() and replace
      red-black trees with mergesort in apr_table_overlap()
      [Joe Schaefer <joe+gmane@sunstarsys.com>, Brian Pane]

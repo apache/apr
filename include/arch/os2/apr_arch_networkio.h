@@ -63,6 +63,13 @@
 #include <netdb.h>
 #endif
 
+typedef struct sock_userdata_t sock_userdata_t;
+struct sock_userdata_t {
+    sock_userdata_t *next;
+    const char *key;
+    void *data;
+};
+
 struct apr_socket_t {
     apr_pool_t *cntxt;
     int socketdes;
@@ -77,6 +84,7 @@ struct apr_socket_t {
     int remote_addr_unknown;
     apr_int32_t netmask;
     apr_int32_t inherit;
+    sock_userdata_t *userdata;
 };
 
 /* Error codes returned from sock_errno() */
