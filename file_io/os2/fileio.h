@@ -65,7 +65,7 @@
 
 struct file_t {
     ap_context_t *cntxt;
-    ULONG filedes;
+    HFILE filedes;
     char * fname;
     int isopen;
     int buffered;
