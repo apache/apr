@@ -282,9 +282,9 @@ APR_DECLARE(apr_status_t) apr_dir_rewind(apr_dir_t *thedir);
 /* Fail apr_filepath_merge if the merged path is absolute */
 #define APR_FILEPATH_NOTABSOLUTE    0x08
 
-/* Cleans all ambigious /./  or // segments 
- * if the target is a directory */
-#define APR_FILEPATH_CANONICAL      0x10
+/* Return the file system's native path format (e.g. path delimiters
+ * of ':' on MacOS9, '\' on Win32, etc.) */
+#define APR_FILEPATH_NATIVE         0x10
 
 /* Resolve the true case of existing directories and file elements
  * of addpath, and append a proper trailing slash if a directory
