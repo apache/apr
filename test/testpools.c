@@ -67,8 +67,8 @@
 
 #define ALLOC_BYTES 1024
 
-apr_pool_t *pmain = NULL;
-apr_pool_t *pchild = NULL;
+static apr_pool_t *pmain = NULL;
+static apr_pool_t *pchild = NULL;
 
 static void alloc_bytes(CuTest *tc)
 {

@@ -68,7 +68,7 @@
 #include <string.h>
 #endif
 
-apr_table_t *t1 = NULL;
+static apr_table_t *t1 = NULL;
 
 static void table_make(CuTest *tc)
 {
