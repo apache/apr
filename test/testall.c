@@ -62,31 +62,36 @@
 /* Top-level pool which can be used by tests. */
 apr_pool_t *p;
 
-typedef CuSuite *(testfunc)(void);
+struct testlist {
+    char *testname;
+    CuSuite *(*func)(void);
+};
+typedef struct testlist testlist;
 
-static testfunc *tests[NUM_TESTS] = {
-    teststr,
-    testtime,
-    testvsn,
-    testipsub,
-    testmmap,
-    testud,
-    testtable,
-    testsleep,
-    testpool,
-    testfmt,
-    testfile,
-    testdir,
-    testfileinfo,
-    testrand,
-    NULL
+static testlist tests[NUM_TESTS] = {
+    {"teststr", teststr},
+    {"testtime", testtime},
+    {"testvsn", testvsn},
+    {"testipsub", testipsub},
+    {"testmmap", testmmap},
+    {"testud", testud},
+    {"testtable", testtable},
+    {"testsleep", testsleep},
+    {"testpool", testpool},
+    {"testfmt", testfmt},
+    {"testfile", testfile},
+    {"testdir", testdir},
+    {"testfileinfo", testfileinfo},
+    {"testrand", testrand},
+    {"LastTest", NULL}
 };
 
 int main(int argc, char *argv[])
 {
-    CuSuiteList *alltests = CuSuiteListNew("All APR Tests");
+    CuSuiteList *alltests;
     CuString *output = CuStringNew();
     int i;
+    int partial = 0;
 
     apr_initialize();
     atexit(apr_terminate);
@@ -95,8 +100,29 @@ int main(int argc, char *argv[])
 
     apr_pool_create(&p, NULL);
 
-    for (i = 0; tests[i]; i++) {
-        CuSuiteListAdd(alltests, tests[i]());
+    /* build the list of tests to run */
+    for (i = 1; i < argc; i++) {
+        int j;
+        if (!strcmp(argv[i], "-v")) {
+            continue;
+        }
+        for (j = 0; tests[j].func != NULL; j++) {
+            if (!strcmp(argv[i], tests[j].testname)) {
+                if (!partial) {
+                    alltests = CuSuiteListNew("Partial APR Tests");
+                    partial = 1;
+                }
+
+                CuSuiteListAdd(alltests, tests[j].func());
+            }
+        }
+    }
+
+    if (!partial) {
+        alltests = CuSuiteListNew("All APR Tests");
+        for (i = 0; tests[i].func != NULL; i++) {
+            CuSuiteListAdd(alltests, tests[i].func());
+        }
     }
 
     CuSuiteListRunWithSummary(alltests);

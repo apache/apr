@@ -316,10 +316,3 @@ CuSuite *testdir(void)
     return suite;
 }
 
-#ifdef SINGLE_PROG
-CuSuite *getsuite(void)
-{
-    return testdir();
-}
-#endif
-

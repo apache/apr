@@ -59,43 +59,16 @@ To run it, run:
 
     ./testall
 
-Individual Program
-------------------
-
-The second way to run a test program is as an individual program.  This is
-done with another function, getsuite.  This function should always look like:
-
-#ifdef SINGLE_PROG
-CuSuite *getsuite(void)
-{
-    return testtime();
-}
-#endif
-
-Notice that all this function does is return the suite that is generated
-in the function used by the full driver.  This is very important.
-
-Also, notice that this function is protected by "#ifdef SINGLE_PROG".  All
-test programs should include this function.  The individual program will
-call this function to get the suite, and then it will run the suite and
-print the output.
-
-The reason that this function must be protected, is that all test programs
-have this function, and when they are linked into the full driver, they
-conflict with each other.  I hope to fix this problem soon.
-
-Building individual test programs
+Running individual tests
 ---------------------------------
 
-To build individual test programs, you must do the following (for example):
+It is not possible to build individual tests, however it is possible to
+run individual tests.  When running the test suite, specify the name of the
+tests that you want to run on the command line.  For example:
 
-    MY_CFLAGS=-DSINGLE_PROGRAM make testtime
+	./testall teststr testrand
 
-To run the test, run:
-
-    ./testtime
-
-Most people should just build the full test driver.
+Will run the Strings and Random generator tests.
 
 Reading the test suite output
 -----------------------------
@@ -165,7 +138,7 @@ Adding New test Suites to the full driver
 To add a new Suite to the full driver, you must make a couple of modifications.
 
 1)  Edit test_apr.h, and add the prototype for the function.
-2)  Edit testall.c, and add the function to the tests array.
+2)  Edit testall.c, and add the function and name to the tests array.
 3)  Edit Makefile.in, and add the .lo file to the testall target.
 
 Once those four things are done, your tests will automatically be added
