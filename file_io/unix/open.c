@@ -68,10 +68,8 @@ ap_status_t ap_unix_file_cleanup(void *thefile)
         if (file->thlock) {
             return ap_destroy_lock(file->thlock);
         }
-        return APR_SUCCESS;
-#else
-        return APR_SUCCESS;
 #endif
+        return APR_SUCCESS;
     }
     else {
         return errno;
@@ -237,6 +235,9 @@ ap_status_t ap_ferror(ap_file_t *fptr)
     return APR_SUCCESS;
 }   
 
+/* ap_open_stderr() could just call ap_put_os_file() with
+ * STDERR_FILENO for the descriptor...
+ */
 ap_status_t ap_open_stderr(ap_file_t **thefile, ap_pool_t *cont)
 {
     (*thefile) = ap_pcalloc(cont, sizeof(ap_file_t));
