@@ -73,7 +73,7 @@
 #define NODE_LENGTH 6
 
 static int uuid_state_seqnum;
-static char uuid_state_node[NODE_LENGTH] = { 0 };
+static unsigned char uuid_state_node[NODE_LENGTH] = { 0 };
 
 
 static void get_random_info(unsigned char node[NODE_LENGTH])
@@ -114,7 +114,7 @@ static void get_random_info(unsigned char node[NODE_LENGTH])
    system-dependent call to get IEEE node ID. This is also more secure:
    we aren't passing out our MAC address.
 */
-static void get_pseudo_node_identifier(char *node)
+static void get_pseudo_node_identifier(unsigned char *node)
 {
     get_random_info(node);
     node[0] |= 0x80;                    /* this designates a random node ID */
