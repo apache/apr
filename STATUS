@@ -1,5 +1,5 @@
 APACHE PORTABLE RUNTIME (APR) LIBRARY STATUS:			-*-text-*-
-Last modified at [$Date: 2001/06/05 07:56:08 $]
+Last modified at [$Date: 2001/06/28 04:03:19 $]
 
 Release:
 
@@ -40,6 +40,11 @@ RELEASE NON-SHOWSTOPPERS BUT WOULD BE REAL NICE TO WRAP THESE UP:
     * Build scripts do not recognise AIX 4.2.1 pthreads
 
     * Win32: Implement apr_shm_ functions 
+      Status: rbb insists he has thoughts about splitting apr_shm_*
+              mechanisms to support muliple models (some sort of 'keyed'
+              schema as well as anonymous inheritable shmem), and has a
+              possible solution to the 'ask for 1MB, then ask for 4x256kb
+              bogosity, so we are waiting on this.
 
     * FirstBill says we need a new procattr, APR_CREATE_SUSPENDED (or
       something similar) to direct ap_create_process to create the
@@ -148,13 +153,6 @@ Documentation that needs writing:
 
 
 Stuff waiting for code thawing after Beta 1:
-
-    * Implement APR_FINFO_ICASE/APR_FINFO_NAME for stat'ish calls.
-        Can wait till after b1, will be required to eliminate canonical
-        and add that functionallity in-line with directory_walk, which
-        is _not_ planned for 2.0b1, but immediately afterwards.  It's
-        required to complete Apache/WinNT's Unicode schema as well.
-        Note: Will doesn't like his original APR_FINFO_ICASE definition.
 
     * Identify and implement those protection bits that have general 
         usefulness, perhaps hidden, generic read-only [immutable],
