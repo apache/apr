@@ -251,6 +251,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/apr_strtok.o \
 	$(OBJDIR)/apr_tables.o \
 	$(OBJDIR)/copy.o \
+	$(OBJDIR)/common.o \
 	$(OBJDIR)/dir.o \
 	$(OBJDIR)/dso.o \
 	$(OBJDIR)/errorcodes.o \
@@ -268,6 +269,7 @@ FILES_lib_objs = \
 	$(OBJDIR)/inet_ntop.o \
 	$(OBJDIR)/libprews.o \
 	$(OBJDIR)/mktemp.o \
+	$(OBJDIR)/mmap.o \
 	$(OBJDIR)/open.o \
 	$(OBJDIR)/pipe.o \
 	$(OBJDIR)/poll.o \
@@ -373,6 +375,10 @@ $(OBJDIR)/%.o: dso/unix/%.c $(OBJDIR)\cc.opt
 $(OBJDIR)/%.o: memory/unix/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
 	$(CC) memory\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
+
+$(OBJDIR)/%.o: mmap/unix/%.c $(OBJDIR)\cc.opt
+	@echo Compiling $<
+	$(CC) mmap\unix\$(<F) -o=$(OBJDIR)\$(@F) @$(OBJDIR)\cc.opt
 
 $(OBJDIR)/%.o: user/netware/%.c $(OBJDIR)\cc.opt
 	@echo Compiling $<
