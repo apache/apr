@@ -57,16 +57,32 @@
  * located at http://www.webdav.org/specs/draft-leach-uuids-guids-01.txt
  */
 
-#include <objbase.h>
+#define _WINUSER_
 
 #include "apr.h"
 #include "apr_uuid.h"
+
+#ifdef NOUSER
+#undef NOUSER
+#endif
+#undef _WINUSER_
+#include <winuser.h>
+#include <objbase.h>
 
 APR_DECLARE(void) apr_uuid_get(apr_uuid_t *uuid)
 {
     GUID guid;
 
-    /* Note: this call doesn't actually require CoInitialize() first */
+    /* Note: this call doesn't actually require CoInitialize() first 
+     *
+     * XXX: This is wrong (two ways) ... one we need to test the HRESULT
+     * and if not S_OK (0) then we actually FAILED!
+     *
+     * Second, we should scramble the bytes or some such to eliminate the
+     * possible misuse/abuse since uuid is based on the NIC address, and
+     * is therefore not only a uniqifier, but an identity (which might not
+     * be appropriate in all cases.
+     */
     (void) CoCreateGuid(&guid);
     memcpy(uuid->data, &guid, sizeof(uuid->data));
 }
