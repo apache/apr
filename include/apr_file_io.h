@@ -70,8 +70,16 @@ extern "C" {
  * @package APR File handling
  */
 
-typedef enum {APR_NOFILE, APR_REG, APR_DIR, APR_CHR, APR_BLK, APR_PIPE, APR_LNK, 
-              APR_SOCK} apr_filetype_e; 
+typedef enum {
+    APR_NOFILE,         /* the file exists, but APR doesn't know its type */
+    APR_REG,            /* a regular file */
+    APR_DIR,            /* a directory */
+    APR_CHR,            /* a character device */
+    APR_BLK,            /* a block device */
+    APR_PIPE,           /* a FIFO / pipe */
+    APR_LNK,            /* a symbolic link */
+    APR_SOCK            /* a [unix domain] socket */
+} apr_filetype_e; 
 
 /* Flags for apr_open */
 #define APR_READ       1           /* Open the file for reading */
