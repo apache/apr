@@ -189,10 +189,7 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
                                              * root, and at end, plus trailing
                                              * null */
     if (maxlen > APR_PATH_MAX) {
-        if (rootlen >= APR_PATH_MAX) {
-            return APR_ENAMETOOLONG;
-        }
-        maxlen = APR_PATH_MAX;
+        return APR_ENAMETOOLONG;
     }
     path = (char *)apr_palloc(p, maxlen);
 
@@ -223,8 +220,6 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
         /* Always '/' terminate the given root path
          */
         if (keptlen && path[keptlen - 1] != '/') {
-            if (keptlen + 1 >= maxlen)
-                return APR_ENAMETOOLONG;
             path[keptlen++] = '/';
         }
         pathlen = keptlen;
@@ -271,9 +266,6 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
 
                 /* Otherwise append another backpath.
                  */
-                if (pathlen + 3 >= maxlen ) {
-                    return APR_ENAMETOOLONG;
-                }
                 memcpy(path + pathlen, "../", 3);
                 pathlen += 3;
             }
@@ -303,9 +295,6 @@ APR_DECLARE(apr_status_t) apr_filepath_merge(char **newpath,
              */
             if (*next) {
                 seglen++;
-            }
-            if (pathlen + seglen >= maxlen) {
-                return APR_ENAMETOOLONG;
             }
             memcpy(path + pathlen, addpath, seglen);
             pathlen += seglen;
