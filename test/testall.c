@@ -70,6 +70,7 @@ static const struct testlist {
     {"testuser", testuser},
     {"testpath", testpath},
     {"testenv", testenv},
+    {"testfnmatch", testfnmatch},
     {"LastTest", NULL}
 };
 

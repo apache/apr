@@ -43,6 +43,7 @@
  */
 
 #include "apr_errno.h"
+#include "apr_tables.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,6 +87,17 @@ APR_DECLARE(apr_status_t) apr_fnmatch(const char *pattern,
  * @return non-zero if pattern has any glob characters in it
  */
 APR_DECLARE(int) apr_fnmatch_test(const char *pattern);
+
+/**
+ * Find all files that match a specified pattern.
+ * @param pattern The pattern to use for finding files.
+ * @param result Array to use when storing the results
+ * @param p The pool to use.
+ * @return non-zero if pattern has any glob characters in it
+ */
+APR_DECLARE(apr_status_t) apr_match_glob(const char *pattern, 
+                                         apr_array_header_t **result,
+                                         apr_pool_t *p);
 
 /** @} */
 

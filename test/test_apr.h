@@ -59,6 +59,7 @@ CuSuite *testnames(void);
 CuSuite *testuser(void);
 CuSuite *testpath(void);
 CuSuite *testenv(void);
+CuSuite *testfnmatch(void);
 
 /* Assert that RV is an APR_SUCCESS value; else fail giving strerror
  * for RV and CONTEXT message. */
