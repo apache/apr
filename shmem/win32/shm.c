@@ -59,14 +59,17 @@
 #include "fileio.h"
 
 typedef struct memblock_t {
+    apr_size_t size;
     apr_size_t length;
 } memblock_t;
 
 struct apr_shm_t {
     apr_pool_t *pool;
-    memblock_t *mem;
-    apr_size_t size;
-    HANDLE hMap;
+    memblock_t *memblk;
+    void       *usrmem;
+    apr_size_t  size;
+    apr_size_t  length;
+    HANDLE      hMap;
 };
 
 static apr_status_t shm_cleanup(void* shm)
@@ -74,7 +77,7 @@ static apr_status_t shm_cleanup(void* shm)
     apr_status_t rv = APR_SUCCESS;
     apr_shm_t *m = shm;
     
-    if (UnmapViewOfFile(m->mem)) {
+    if (UnmapViewOfFile(m->memblk)) {
         rv = apr_get_os_error();
     }
     if (CloseHandle(m->hMap)) {
@@ -175,10 +178,13 @@ APR_DECLARE(apr_status_t) apr_shm_create(apr_shm_t **m,
     *m = (apr_shm_t *) apr_palloc(pool, sizeof(apr_shm_t));
     (*m)->pool = pool;
     (*m)->hMap = hMap;
-    (*m)->mem = base;
+    (*m)->memblk = base;
+    (*m)->usrmem = (char*)base + sizeof(memblock_t);
     (*m)->size = size;
+    (*m)->length = reqsize;
     
-    (*m)->mem->length = reqsize;
+    (*m)->memblk->length = reqsize;
+    (*m)->memblk->size = size;
 
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
@@ -232,9 +238,11 @@ APR_DECLARE(apr_status_t) apr_shm_attach(apr_shm_t **m,
     *m = (apr_shm_t *) apr_palloc(pool, sizeof(apr_shm_t));
     (*m)->pool = pool;
     (*m)->hMap = hMap;
-    (*m)->mem = base;
+    (*m)->memblk = base;
+    (*m)->usrmem = (char*)base + sizeof(memblock_t);
     /* Real (*m)->mem->size could be recovered with VirtualQuery */
-    (*m)->size = (*m)->mem->length;
+    (*m)->size = (*m)->memblk->size;
+    (*m)->length = (*m)->memblk->length;
 
     apr_pool_cleanup_register((*m)->pool, *m, 
                               shm_cleanup, apr_pool_cleanup_null);
@@ -250,10 +258,10 @@ APR_DECLARE(apr_status_t) apr_shm_detach(apr_shm_t *m)
 
 APR_DECLARE(void *) apr_shm_baseaddr_get(const apr_shm_t *m)
 {
-    return (char*)m->mem + sizeof(memblock_t);
+    return m->usrmem;
 }
 
 APR_DECLARE(apr_size_t) apr_shm_size_get(const apr_shm_t *m)
 {
-    return m->mem->length - sizeof(memblock_t);
+    return m->length;
 }
