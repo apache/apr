@@ -225,8 +225,8 @@ ap_status_t ap_connect(struct socket_t *sock, char *hostname)
             if (select(sock->sock+1, NULL, &temp, NULL, NULL) == 1) {
                 return APR_SUCCESS;
             }
-        return APR_EEXIST;
         }
+        return lasterror;
     }
 }
 
