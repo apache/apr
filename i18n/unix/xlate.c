@@ -185,7 +185,7 @@ ap_status_t ap_xlate_open(ap_xlate_t **convset, const char *topage,
         frompage = get_default_codepage();
     }
     
-    new = (ap_xlate_t *)ap_palloc(pool, sizeof(ap_xlate_t));
+    new = (ap_xlate_t *)ap_pcalloc(pool, sizeof(ap_xlate_t));
     if (!new) {
         return APR_ENOMEM;
     }
