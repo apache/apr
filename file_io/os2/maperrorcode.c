@@ -75,6 +75,8 @@ static int errormap[][2] = {
     { ERROR_INVALID_FUNCTION,     APR_EINVAL       },
     { ERROR_INVALID_HANDLE,       APR_EBADF        },
     { ERROR_NEGATIVE_SEEK,        APR_ESPIPE       },
+    { ERROR_NO_SIGNAL_SENT,       ESRCH            },
+    { ERROR_NO_DATA,              APR_EAGAIN       },
     { SOCEWOULDBLOCK,           EWOULDBLOCK     },
     { SOCEINPROGRESS,           EINPROGRESS     },
     { SOCEALREADY,              EALREADY        },
@@ -112,14 +114,21 @@ static int errormap[][2] = {
 
 #define MAPSIZE (sizeof(errormap)/sizeof(errormap[0]))
 
-int os2errno( ULONG oserror )
+int ap_canonical_error(ap_status_t err)
 {
     int rv = -1, index;
-    
-    for (index=0; index<MAPSIZE && errormap[index][0] != oserror; index++);
+
+    if (err < APR_OS_START_SYSERR)
+        return err;
+
+    err -= APR_OS_START_SYSERR;
+
+    for (index=0; index<MAPSIZE && errormap[index][0] != err; index++);
     
     if (index<MAPSIZE)
         rv = errormap[index][1];
+    else
+        fprintf(stderr, "ap_canonical_error: Unknown OS/2 error code %d\n", err );
         
     return rv;
 }
